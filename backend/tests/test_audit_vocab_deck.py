@@ -148,6 +148,14 @@ class CorpusMeasurementTests(unittest.TestCase):
         self.assertIsNone(self._kind_of("母"))
         self.assertIsNone(self._kind_of("父"))
 
+    def test_the_words_plan_152_put_right_are_no_longer_gaps(self) -> None:
+        """時 read じ, 件 read けん and 故 read ゆえ are cards now; 割 and 共
+        are read わり and とも, the words their cards always glossed; and
+        〜はおろか's おろか is the point's, IGNORED_LEMMAS like いかん."""
+        for lemma in ("時", "件", "故", "割", "共", "疎か"):
+            with self.subTest(lemma=lemma):
+                self.assertIsNone(self._kind_of(lemma))
+
     def test_ratchets_never_rise(self) -> None:
         # Raised once (2026-09-24), by what a lookup fix uncovered rather
         # than lost: a folded spelling now resolves only read as folded
@@ -181,6 +189,11 @@ class CorpusMeasurementTests(unittest.TestCase):
         # (study/reading_context.py) then took two back: 上手 is じょうず
         # again, and 米 before をはじめとする is read こめ (absent -2,
         # unmatched -2).
+        #
+        # Lowered by plan 152: 時 read じ, 件 read けん and 故 read ゆえ
+        # are cards; 割 and 共 are read わり and とも, as their cards
+        # always glossed them; 〜はおろか's おろか is IGNORED_LEMMAS'
+        # (absent -6, unmatched -6; 65 occurrences, 41 of them 時).
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 178)
-        self.assertLessEqual(c["unmatched_lemmas"], 192)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 172)
+        self.assertLessEqual(c["unmatched_lemmas"], 186)

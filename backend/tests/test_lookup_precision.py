@@ -177,6 +177,45 @@ class ReadOtherwiseTests(unittest.TestCase):
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class TheCardsPutRightTests(unittest.TestCase):
+    """Plan 152. What plan 151's word reviewers found wrong in the cards
+    themselves, pinned in a sentence that uses each word: a card read as
+    the page reads it, and the gloss the sentence means."""
+
+    def test_the_word_the_page_reads_has_its_card(self) -> None:
+        for sentence, word, raw_id in (
+            ("七時に学校へ行きます。", "時", "vocab_N5_時_じ"),
+            ("小さいとき、山によく行きました。", "とき", "vocab_N3_時_とき"),
+            ("その件については、お答えしかねます。", "件", "vocab_N3_件_けん"),
+            ("若さゆえに、彼は大きな失敗をした。", "ゆえ", "vocab_N1_故_ゆえ"),
+            ("この店は値段のわりに味がいい。", "わり", "vocab_N1_割_わり"),
+            ("家族とともに新しい町へ引っ越しました。", "とも", "vocab_N1_共_とも"),
+            ("銀行でお金を下ろした。", "下ろし", "vocab_N3_下ろす_おろす"),
+        ):
+            with self.subTest(word=word):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_a_reading_the_card_does_not_have_is_not_its_card(self) -> None:
+        # 下す is くだす, "to hand down (a verdict)", which the deck has no
+        # card for; 〜はおろか's おろか is the point's, never おろそか.
+        found = matches("裁判所が判決を下した。").get("下し")
+        self.assertTrue(found is None or found["raw_id"] != "vocab_N3_下ろす_おろす")
+        self.assertNotIn("おろか", matches("彼は漢字はおろか、ひらがなも書けない。"))
+
+    def test_the_gloss_is_the_senses_of_the_cards_own_reading(self) -> None:
+        for sentence, word, meaning in (
+            ("仕事は半分終わったといったところだ。", "半分", "half"),
+            ("彼女は歌が上手で、みんなに人気があります。", "人気", "popularity"),
+            ("相手がだれであれ、礼儀は忘れてはならない。", "相手", "the other party"),
+            ("財布に千円札が入っている。", "札", "banknote"),
+            ("鳥の羽が落ちていた。", "羽", "feather"),
+        ):
+            with self.subTest(word=word):
+                self.assertIn(meaning, matches(sentence)[word]["entry"]["meaning"])
+        self.assertNotIn("minute", matches("仕事は半分終わったといったところだ。")["半分"]["entry"]["meaning"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class AffixTests(unittest.TestCase):
     """Plan 151. A suffix read as the page reads it is no longer glossed
     as the noun it is spelled like: 者 read しゃ is not 者 read もの."""

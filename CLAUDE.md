@@ -828,7 +828,23 @@ runtime purpose. Two consequences worth knowing:
   `study/card_lookup.py`, `study/morphology.py`, `study/analysis.py`'s
   `LOCAL_REV` 5, `tests/test_grammar_precision.py`,
   `tests/test_lookup_precision.py` and `tests/test_analysis.py`).
-  When starting a new wave, begin at **152** or higher, and check
+  **152** is the cards plan 151's word reviewers found wrong, each
+  checked against JMdict and the JLPT lists: six glosses that were
+  another reading's (半分 "half minute" was はんぷん's, 盛り もり's,
+  目下 もっか's, 札 ふだ's, 人気 ひとけ's, 羽 わ's) and three that
+  misled (相手 one sense of three, 件 くだん a sense JMdict dropped,
+  疎か a noun for a na-adjective); nine readings through `MOVES` — five
+  no reading of the form (割 かつ → わり, 共 きょう → とも, 愛憎 あいにく
+  → あいぞう, 音色 おんいろ → ねいろ, 復旧 ふくきゅう → ふっきゅう; in
+  `NOT_FOLDED`), three rare ones on the everyday reading's gloss (地形
+  ちけい, 統治 とうち, 施行 しこう) and 下す read おろす, the irregular
+  okurigana of 下ろす; three words the sentences use and the deck
+  lacked (時 read じ at N5, 件 read けん at N3, 故 read ゆえ at N1); and
+  〜はおろか's おろか decided as grammar (`IGNORED_LEMMAS`) (cited in
+  `content/vocab_renames.py`, `scripts/audit_vocab_deck.py`,
+  `tests/test_audit_vocab_deck.py`, `tests/test_lookup_precision.py`
+  and `tests/test_onboarding_profile.py`; `docs/vocab-deck-review.md`).
+  When starting a new wave, begin at **153** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

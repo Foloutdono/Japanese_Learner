@@ -689,6 +689,37 @@ MOVES: dict[str, str] = {
     # gloss, "before", which is JMdict's own third and fourth sense
     # for 前::ぜん -- a dropped dakuten, not a different word.
     "vocab_N1_前_せん": "vocab_N1_前_ぜん",
+    # ── Plan 152: what plan 151's word reviewers found ───────────
+    # Readings JMdict does not give the form, each checked against the
+    # JMdict match the deck's senses were built from (term_only, not
+    # exact_reading, in vocab_meanings.json before plan 108) and the
+    # JLPT lists of datas/vocab/sources. 割 read かつ is the character's
+    # on-reading on 割る's senses: the list's word is 〜割 read わり,
+    # "rate, ten percent", the word 〜わりに is made of. 共 read きょう
+    # is the on-reading again, on 共【とも】's senses word for word.
+    # 愛憎 read あいにく is 生憎's reading (JMdict: 愛憎【あいぞう】, "love
+    # and hate"); 音色 read おんいろ and 復旧 read ふくきゅう are no
+    # readings at all (JMdict and the N1 list: ねいろ, ふっきゅう). No
+    # lower card is the word, so each card takes its reading, as 一筋
+    # did above.
+    "vocab_N1_割_かつ": "vocab_N1_割_わり",
+    "vocab_N1_共_きょう": "vocab_N1_共_とも",
+    "vocab_N1_愛憎_あいにく": "vocab_N1_愛憎_あいぞう",
+    "vocab_N1_音色_おんいろ": "vocab_N1_音色_ねいろ",
+    "vocab_N1_復旧_ふくきゅう": "vocab_N1_復旧_ふっきゅう",
+    # Real readings, JMdict's unmarked second ones, on the gloss of the
+    # everyday reading -- 天皇 すめらぎ's case: the N1 list, UniDic and
+    # JMdict's priority tags all give 地形 ちけい, 統治 とうち and 施行
+    # しこう. These stay in FOLDED_FORMS, as すめらぎ does.
+    "vocab_N1_地形_じぎょう": "vocab_N1_地形_ちけい",
+    "vocab_N1_統治_とうじ": "vocab_N1_統治_とうち",
+    "vocab_N1_施行_しぎょう": "vocab_N1_施行_しこう",
+    # 下す read おろす is the irregular okurigana (JMdict tags it so) of
+    # 下ろす, plan 112's 終る: 下す is くだす, "to hand down (a decision)",
+    # which is how UniDic reads it and how the reviewers' sentences used
+    # it. The card keeps its word and takes JMdict's spelling; 降ろす,
+    # the same reading in other kanji, stays a card of its own.
+    "vocab_N3_下す_おろす": "vocab_N3_下ろす_おろす",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries
@@ -705,6 +736,12 @@ NOT_FOLDED: frozenset[str] = frozenset({
     "vocab_N1_一筋_ひとすき",
     "vocab_N1_真実_さな",
     "vocab_N1_前_せん",
+    # Plan 152: あいにく is 生憎, and a fold would answer it with 愛憎.
+    "vocab_N1_割_かつ",
+    "vocab_N1_共_きょう",
+    "vocab_N1_愛憎_あいにく",
+    "vocab_N1_音色_おんいろ",
+    "vocab_N1_復旧_ふくきゅう",
 })
 
 # Ids that left the deck with nowhere to go. MOVES needs a card to carry

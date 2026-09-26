@@ -756,6 +756,57 @@ gone, and the placement lists come out unchanged. "、" leaves
 `test_the_reading_field_is_written_in_kana`'s alphabet with it.
 8,050 → 8,049 cards.
 
+### 152 — the cards plan 151's word reviewers found (2026-09-27)
+
+Plan 151's reviewers read the breakdown's cards against the sentences
+they stand in, and after its lookup fixes a list remained where the
+card itself was wrong. Each was checked the three ways above, against
+JMdict 2026-07-15 (the `f691b87a` match, and the pool for the pair's
+neighbours).
+
+| Card | Evidence | Decision |
+|---|---|---|
+| N5 半分 はんぶん "half minute" | `exact_reading`: *half*. The gloss is 半分【はんぷん】's | gloss **corrected** |
+| N3 盛り さかり "helping, serving" | `exact_reading`: *height, peak, full bloom, prime*; "serving" is もり's | gloss **corrected** |
+| N2 目下 めした "at present, now" | `exact_reading`: *subordinate, junior*; "at present" is もっか's, which the N1 list has | gloss **corrected** |
+| N3 札 さつ "token, label, ticket, charm" | `exact_reading`: *banknote*; the rest is ふだ's (N1 list) | gloss **corrected** |
+| N3 人気 にんき "sign of life" | `exact_reading`: *popularity*; "sign of life" is ひとけ's | gloss **corrected** |
+| N3 羽 はね "counter for birds, rabbits" | `exact_reading`: *feather, wing*; the counter is わ | gloss **corrected** |
+| N3 相手 あいて "companion, partner, company" | sense 1 of 3; the sentences use *the other party* and *opponent* | gloss takes all three |
+| N1 件 くだん "example, precedent, …" | JMdict no longer gives *example, precedent* | gloss **corrected** |
+| N1 疎か おろそか "neglect, negligence, …" | adj-na *negligent, careless*; its French said *négligence* twice | gloss **corrected** |
+| N1 割 かつ, 割る's senses | `term_only`; かつ is the on-reading; the N1 list's word is 〜割 わり | **corrected** to わり, "rate, ten percent". *No word* |
+| N1 共 きょう | `term_only`, on 共【とも】's senses word for word | **corrected** to とも. *No word* |
+| N1 愛憎 あいにく "likes and dislikes" | `term_only`; あいにく is 生憎; JMdict あいぞう *love and hate* | **corrected** to あいぞう. *No word* |
+| N1 音色 おんいろ | `term_only`; JMdict and the N1 list: ねいろ | **corrected**; "synthesizer patch" dropped with it. *No word* |
+| N1 復旧 ふくきゅう | `term_only`; JMdict and the N1 list: ふっきゅう | **corrected**. *No word* |
+| N1 地形 じぎょう, 統治 とうじ, 施行 しぎょう | `exact_reading` but unmarked; ⭐ and the N1 list give ちけい, とうち, しこう | **corrected**, and folded as すめらぎ is |
+| N3 下す おろす | JMdict tags 下す read おろす as irregular okurigana of 下ろす; 下す is くだす | **corrected** to 下ろす, 112's 終る rule; 降ろす stays its own card |
+| N3 時 とき, N1 故 こ, N1 件 くだん, N1 社 やしろ, N1 疎か おろそか | each is the word its reading says | **kept**; the sentences read another word |
+
+The other words were missing from the deck, not wrong in it. Decision
+1's rule (the app's sentences name a word, so it has a card or is
+grammar) settles them. **時 read じ** "o'clock" goes in at N5: 41 uses in
+N5–N3 sentences, and the N5 list's 〜時. **件 read けん** "matter" goes in at
+N3 (the N3 list), and **故 read ゆえ** "reason, because of" at N1 (the N1
+list). **〜はおろか's おろか** is the N1 point's own expression and in
+neither list. It is `IGNORED_LEMMAS`' now, as 〜いかんによらず's いかん is.
+**一社's 社** read しゃ is served by the pool's affix sense (plan 151). The
+N2 list's 〜社 is an affix pattern, which the placement report leaves
+out by design.
+
+11 pool rows came out (`pool_moves.json`). 割 read わり had none: the
+pool files the word under 割り. Its `curated_senses` row is therefore
+the old 割::かつ row, which the `term_only` match had filled with
+割【わり】's senses all along. 8,045 → 8,048 cards. The absent lemmas
+went 178 → 172 and the occurrences 419 → 354.
+
+Left: 年 read ねん and 月 read がつ at N5 are 時 read じ's case (the N5
+list's 〜年, 〜月, 16 and 6 uses). 下す read くだす is now a "frequent,
+no card" candidate. 目下 read もっか and 札 read ふだ are N1-list words
+with no card. And UniDic reads 桜は今が盛り's 盛り as もり, which is a
+tokenizer reading, not a card.
+
 ## Order and dependencies
 
 103 → 104 → 105 → (106, 107, 108 in any order) → 109 → 110. 103 and 104
