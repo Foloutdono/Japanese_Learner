@@ -6656,3 +6656,34 @@ edge (the tag met the ring); the passed stops stop being doors once the
 plan is built, as Back always did. Left for later: entering the station
 could narrow the column to the rail's width and hang the gates in it
 before the gate cutscene; the cutscene covers the change today.
+
+## Plan 142 — 改札鋏, the level-up clipped on the pass (2026-09-26)
+
+Numbered 142 because 139 went to Settings (PR #208), 140 to the desk's
+first contact (PR #209) and 141 to the refill (PR #210), merged to main
+while this was open under 139; renumbered in the merge, so no source
+cites 139 for it (its first two commits' messages still do). The owner's
+ask: improve the level-up's design and animation, options to choose
+from, then "D, adapted for the desktop too". Drawn on the canvas "Tsuji
+— the level-up" (the board as shipped, and four directions as looping
+phone boards with theme, speed and level tweaks: A the board retimed, B
+a hanging station plate, C the in-car route, D the pass clipped); the
+owner picked **D**.
+
+What the shipped board got wrong: its drums began turning on mount,
+while the board was still sliding in, so half the one moment it existed
+for happened in motion; nothing on it said the balance had filled and
+started again; at tablet widths its exit never reported its end (the
+handler matched `levelup-out`, the panel's animation was
+`levelup-out-panel`); and on the desk's three panels its fixed dock
+over the side no longer lined up with the column.
+
+| # | What | Status |
+|---|------|--------|
+| 142 | **The pass** (`XpToast`'s level scene): the 定期券 in its own material (`.pass`'s charcoal-into-sumi ground, hairline and sheen; no gold edge, which on the pass is the credit balance), `LEVEL` over the old figure beside the balance track and its figure. **The clock**, from `--levelup-cut` (550ms: the 320ms drop, matched to the stage's padding transition, and a beat): the bite (`mask-image` over `--levelup-bite`, a registered `<length>` grown 0 → `--sp-3`, at `--levelup-clip-x` 66% — at 40% it read as a phone's camera notch), a `--sp-1` jolt, the chip falling past the foot, the old figure struck, the new printed in `--accent2` (5.7:1 dark, 3.7:1 light on the card's tinted corner, a 40px bold figure), the balance emptied to `--levelup-to` (the new level's share, from the profile store; the old span from `xpThreshold`), its figure swapped. Leaves on `LEVEL_MS` as before; the exit is matched by name (`levelup-out*`). **Sound**: `pass-clip` replaces `flap-clatter` (punch, snip, gate press), played on the bite's own `animationstart`; trimmed 2.70 to 0.36 peak, measured against the coin's 0.26 and the stamp's 0.17. **Phone**: hung across the top inside the gutters, the stage stepping down by `--levelup-h` (now 84px) and `--sp-4`. **Wider**: floating at the right at `--desk-side-w`. **Desk**: `StudyStage` portals it (`dock`) into the run's left column on three panels, else the side (`RunSide`'s `ref`); there it is sticky, `order: -1`, unshadowed, out of the column's top edge, the column stepping down by the pass and its gap (`desk-levelup-in/out`); plan 123's fixed dock and the side's padding step retired. **Reduced motion**: the bite, the figures and the balance still change; nothing drops, jolts, scales or falls. `SplitFlap.jsx` and the `.split-flap`/`.flap` rules deleted. Tests: `runs.wide` (the pass in the side, and in the left column over this run's panel), `deskfree.phone` (inside the gutters, the stage stepped), `escape.desktop`, `voices.test` and the mocks moved to `playPassClip`; `design-system.browser`'s contract satisfied by the card declaring the bite's resting value | DONE (2026-09-26) |
+
+Deviations from the drawing: the gold edge down the pass's right is not
+drawn (it names the credit balance on the real pass); the bite moved
+from 40% to 66% of the width; the new figure stays gold rather than
+cooling to ink, measured above 3:1 in both themes. Left for later:
+`/dev/rewards` has no run column, so the desk's dock is seen on a run.

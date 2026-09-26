@@ -646,7 +646,26 @@ runtime purpose. Two consequences worth knowing:
   sheet, line and run-out sheet, `GateCard.jsx`, `DeskPass.jsx`,
   `PassStep.jsx`, `App.jsx`, `index.css`, `src/claim.desktop.test.jsx`
   and `docs/design/desk/README.md`).
-  When starting a new wave, begin at **142** or higher, and check
+  **142** is 改札鋏, the level-up clipped on the pass (numbered 142
+  because 139 went to Settings, 140 to the desk's first contact and 141
+  to the refill while it was open; the owner's pick D of four directions
+  drawn on the canvas "Tsuji — the level-up": the board retimed, a
+  station plate, the in-car route, the pass): the learner's 定期券 comes
+  down in its own material, the gate's punch bites its top edge (a mask
+  grown through a registered length, the chip falling away), the old
+  figure is struck and the new one printed in gold, and the balance
+  empties to the new level's start; on a phone it hangs across the top
+  and the stage steps down, wider it floats at the right, and on the
+  desk StudyStage portals it into the top of a run's column -- the left
+  one on three panels -- which steps down under it; the split-flap board
+  and `SplitFlap.jsx` retired, the board's clatter replaced by the
+  punch's voice (`pass-clip`) (cited in `components/rewards/XpToast.jsx`,
+  `components/study/StudyStage.jsx`, `domain/rewardTier.js`,
+  `hooks/useReviewGates.js`, `lib/audio/voices.js`, `lib/audio/chimes.js`,
+  `lib/audio/settings.js`, `screens/RewardsPreview.jsx`,
+  `src/runs.wide.test.jsx`, `src/deskfree.phone.test.jsx`, `index.css`
+  and its 机 section; DESIGN.md, "Rewards" and "The desk").
+  When starting a new wave, begin at **143** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

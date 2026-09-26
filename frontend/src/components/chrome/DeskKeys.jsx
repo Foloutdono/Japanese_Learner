@@ -66,7 +66,7 @@ export function LeaveKey({ onLeave }) {
     if (!desk || !onLeave) return undefined
     const onKey = e => {
       if (e.key !== 'Escape' || e.repeat || composing(e)) return
-      // Not under a dialog or the level board, and not while the 改札
+      // Not under a dialog or the level-up's pass, and not while the 改札
       // still plays over the first ride (guideHeld): its Esc skips the
       // cutscene, and used to decline the whole ride too (plan 123).
       if (dialogOpen() || guideHeld() || document.documentElement.hasAttribute('data-levelup')) return

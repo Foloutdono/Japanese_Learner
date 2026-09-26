@@ -38,7 +38,7 @@ describe('the voice registry', () => {
       'click-menu', 'click-close-menu', 'click-mode-selection', 'click-screen-selection',
       'correct', 'wrong', 'card-transition',
       'gate-chime', 'door-chime', 'door-slide', 'platform-chime', 'arrival',
-      'fare-tick', 'flap-clatter',
+      'fare-tick', 'pass-clip',
     ]
     for (const key of required) {
       expect(hasVoice(key), `missing event: ${key}`).toBe(true)
@@ -128,7 +128,7 @@ describe('levels', () => {
 
   it('lifts as well as cuts, up to a ceiling', () => {
     // Not clamp01: a synthesised sound has no reference level, and the
-    // clatter needs +3.6 to sit where a level-up belongs.
+    // board's clatter needed +3.6 to sit where a level-up belonged.
     const ui = BASE_GAIN.ui
     const saved = { ...ui }
     try {

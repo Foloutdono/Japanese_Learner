@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { StageHead } from '../chrome/StageHead'
 import { LevelBar } from '../chrome/LevelBar'
 import { XpToast } from '../rewards/XpToast'
@@ -60,12 +61,18 @@ export function StudyStage({
   const split = desk && side !== undefined
   const panels = split && records && side !== null
   const classes = ['container', 'stage', className].filter(Boolean).join(' ')
+  // 改札鋏 (plan 142): on the desk the level-up's pass docks at the top
+  // of a run's column rather than floating over it -- the left column
+  // on three panels, whose level bar row it just topped off, else the
+  // side. Held as state from the column's ref so the pass is portalled
+  // into the element that is actually standing.
+  const [dock, setDock] = useState(null)
   return (
     <RunPanelsContext.Provider value={panels}>
     <div className={split ? `screen desk-run${panels ? ' desk-run--panels' : ''}` : 'screen'}>
-      {toast !== undefined && <XpToast toast={toast} onDone={onToastDone} />}
+      {toast !== undefined && <XpToast toast={toast} onDone={onToastDone} dock={split ? dock : null} />}
       {panels && (
-        <aside className="desk-run__left" aria-label={t.deskRunLabel}>
+        <aside className="desk-run__left" aria-label={t.deskRunLabel} ref={setDock}>
           <RunPanel remaining={remaining} progress={progress} done={done} label={recordsLabel} />
           {panel}
         </aside>
@@ -87,7 +94,7 @@ export function StudyStage({
           screen and can pay nothing — the comprehension passage. On the
           desk's panels the session panel draws it instead. */}
       {levelBar && !panels && <LevelBar />}
-      {split && <RunSide label={sideLabel} color={color}>{side}</RunSide>}
+      {split && <RunSide label={sideLabel} color={color} ref={panels ? undefined : setDock}>{side}</RunSide>}
     </div>
     </RunPanelsContext.Provider>
   )
@@ -100,9 +107,10 @@ export function StudyStage({
 // every other line. It wears the run's colour itself; a docked
 // dictionary entry keeps the dictionary's gold (.desk-entry). Exported
 // for a run that is not a StudyStage — the exam runner draws its own.
-export function RunSide({ label, color, children }) {
+// `ref` is the column's, for the level-up's pass to dock in (plan 142).
+export function RunSide({ label, color, children, ref }) {
   return (
-    <aside className="desk-run__side" aria-label={label} style={color ? { '--line-color': color } : undefined} data-guide="run.side">
+    <aside ref={ref} className="desk-run__side" aria-label={label} style={color ? { '--line-color': color } : undefined} data-guide="run.side">
       {children}
     </aside>
   )

@@ -12,12 +12,13 @@ import './index.css'
 // up. Past --max-w of stage beside the side the two stand together as
 // one workspace, centred; the level bar spans the work only (owner's
 // call). Up to ~1460 nothing moves: the wide lane's own 1440 is held
-// here unchanged. The level board docks across the side's top rather
-// than over the column's entry.
+// here unchanged. The level-up's pass docks in the column's flow at its
+// top rather than over the column's entry (plan 142; plan 123 docked
+// the board it replaced across the side's top).
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
-  playUi: vi.fn(), playClick: vi.fn(), playFlapClatter: vi.fn(), playLevelUp: vi.fn(),
+  playUi: vi.fn(), playClick: vi.fn(), playPassClip: vi.fn(), playLevelUp: vi.fn(),
 }))
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -94,18 +95,56 @@ describe('a run\'s workspace', () => {
   })
 })
 
-describe('the level board on a run with a side', () => {
-  it('docks across the side\'s top, the column stepping down under it', async () => {
+describe('the level-up\'s pass on a run\'s desk column (plan 142)', () => {
+  // The column's first element other than the pass, and the pass: the
+  // pass is portalled in last and ordered first.
+  const firstOther = (col, pass) => [...col.children].find(c => c !== pass)
+
+  it('docks at the side\'s top, the column stepping down under it', async () => {
     await mountAt(1920, 1080, { id: 1, amount: 20, leveledUp: true, newLevel: 13 })
     await settle(400)
-    const side = box('.desk-run__side')
-    const board = box('.levelup')
-    expect(Math.round(board.top)).toBe(0)
-    expect(Math.round(board.left)).toBe(Math.round(side.left))
-    expect(Math.round(board.width)).toBe(Math.round(side.width))
-    const inner = $('.levelup__board')
-    expect(inner.scrollWidth).toBeLessThanOrEqual(inner.clientWidth)
-    expect(parseFloat(getComputedStyle($('.desk-run__side')).paddingTop))
-      .toBe(token('--levelup-h') + token('--sp-6'))
+    const col = $('.desk-run__side')
+    const pass = $('.levelup')
+    expect(pass.parentElement).toBe(col)
+    const cs = getComputedStyle(col)
+    const c = col.getBoundingClientRect()
+    const p = pass.getBoundingClientRect()
+    expect(Math.round(p.top)).toBe(Math.round(c.top + parseFloat(cs.paddingTop)))
+    expect(Math.round(p.left)).toBe(Math.round(c.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft)))
+    expect(Math.round(p.right)).toBe(Math.round(c.right - parseFloat(cs.paddingRight)))
+    expect(Math.round(p.height)).toBe(token('--levelup-h'))
+    expect(Math.round(firstOther(col, pass).getBoundingClientRect().top - p.bottom)).toBe(token('--sp-5'))
+    const card = $('.levelup__pass')
+    expect(card.scrollWidth).toBeLessThanOrEqual(card.clientWidth)
+  })
+
+  it('docks at the top of the left column on three panels, over this run\'s panel', async () => {
+    await page.viewport(1920, 1080)
+    document.documentElement.dataset.chrome = 'stage'
+    await render(
+      <LangProvider>
+        <MemoryRouter>
+          <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} records
+            toast={{ id: 2, amount: 20, leveledUp: true, newLevel: 13 }} onToastDone={() => {}}
+            side={<SessionPanel />} sideLabel="This run">
+            <div className="prompt-card"><span>駅</span></div>
+            <RatingBar active onRate={() => {}} />
+          </StudyStage>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(500)
+    const col = $('.desk-run__left')
+    const pass = $('.levelup')
+    expect(pass.parentElement).toBe(col)
+    const c = col.getBoundingClientRect()
+    const p = pass.getBoundingClientRect()
+    expect(Math.round(p.top)).toBe(Math.round(c.top))
+    expect(Math.round(p.left)).toBe(Math.round(c.left))
+    expect(Math.round(p.width)).toBe(Math.round(c.width))
+    const session = $('.desk-session').getBoundingClientRect()
+    expect(Math.round(session.top - p.bottom)).toBe(token('--sp-6'))
+    // Nothing of the pass is left over the card's details at the right.
+    expect($('.desk-run__side .levelup')).toBeNull()
   })
 })
