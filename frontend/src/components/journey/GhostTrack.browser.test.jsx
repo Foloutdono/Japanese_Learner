@@ -145,6 +145,18 @@ describe('GhostTrack the line', () => {
     // The siding holds the whole train.
     expect(siding.left).toBeLessThanOrEqual(you.left + 2.5)
   })
+
+  it('fills the siding with the run once the train has left 発', async () => {
+    const screen = await renderTrack({ youF: 0 })
+    const siding = () => getComputedStyle(q(screen, '.jour-track__siding')).backgroundColor
+    expect(siding()).toBe(getComputedStyle(q(screen, '.jour-track__leg')).backgroundColor)
+    await screen.rerender(
+      <div style={{ width: '640px' }}>
+        <GhostTrack stations={STATIONS} youF={5} />
+      </div>
+    )
+    expect(siding()).toBe(getComputedStyle(q(screen, '.jour-track__done')).backgroundColor)
+  })
 })
 
 describe('GhostTrack the stretch owed', () => {

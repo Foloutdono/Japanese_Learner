@@ -17418,6 +17418,9 @@ html { scrollbar-gutter: stable; }
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
 }
+/* Left behind once the train is under way: the run's pigment, as the
+   legs it has covered. */
+.jour-track__siding--done { background: var(--jour-st, var(--success)); }
 /* One leg per level, stop to stop, each stopping 2px short of the stop
    on either side (GhostTrack's CUT): the cut IS the stop. */
 .jour-track__leg {

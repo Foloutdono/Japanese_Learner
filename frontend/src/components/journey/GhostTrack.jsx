@@ -21,7 +21,8 @@ import { nextStop } from '../../domain/goalMath'
 //    which is why the inner span is inset by a train's length on the
 //    left.
 //  - The run behind you fills leg by leg and ends exactly at the nose;
-//    the leg being ridden is drawn a shade brighter than the ones ahead.
+//    once the train has left 発 the siding it waited on is behind it
+//    too and fills with the run; the leg being ridden is drawn a shade brighter than the ones ahead.
 //  - The promise is a dashed marker ACROSS the line, and the stretch
 //    you owe it (or it owes you) is hatched in the state's pigment.
 //  - Stop names: passed in the state's ink, the next one in full ink,
@@ -83,7 +84,7 @@ export function GhostTrack({ stations, youF, planF = null }) {
   return (
     <div className="jour-track" aria-hidden="true">
       <span className="jour-track__span">
-        <span className="jour-track__siding" />
+        <span className={`jour-track__siding${you > 0 ? ' jour-track__siding--done' : ''}`} />
         {legsOf(stations).map(({ a, b, last }) => {
           const cuts = CUT + (last ? 0 : CUT)
           const left = `calc(${a}% + ${CUT}px)`
