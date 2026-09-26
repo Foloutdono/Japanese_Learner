@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
 import { apiJson, ApiError } from '../../lib/api'
 import { playUi } from '../../lib/audio'
 import { useDialog } from '../../hooks/useDialog'
-import { Emphasized } from '../ui/Emphasized'
 import { ChevronIcon } from '../ui/Icons'
 import { ExampleSentence } from '../dictionary/ExampleSentence'
 import { StageMark } from './StageMark'
+import { inline, readUse, SHORT_RUN } from './lessonText'
 
 // ── 文法 — a grammar point, taught (plan 087) ───────────────────
 // One lesson, printed in three places: before a NEW card in a run
@@ -40,8 +40,13 @@ import { StageMark } from './StageMark'
 const STEP_KEY = { rule: 'glRule', use: 'glUse', careful: 'glCareful' }
 
 // A step's text: paragraphs, and a run of "- " lines as a list. One
-// delimiter (**…**) for emphasis, through Emphasized — the same, and
-// the only, markup the locale tables carry.
+// delimiter (**…**) for emphasis -- the same, and the only, markup the
+// locale tables carry -- and the Japanese in the prose set as Japanese
+// and never cut (lessonText.inline). A use that names its forms prints
+// them under it (plan 146): "Pour poser ce dont on parle : わたしは,
+// 今日は" is the description over the two forms, whole, in the lesson's
+// ink; a paradigm (Négatif : …. Passé : ….) is its labels beside its
+// forms. A line that reads neither way is printed as it came.
 export function StepText({ text }) {
   const lines = String(text ?? '').split('\n')
   const blocks = []
@@ -55,8 +60,69 @@ export function StepText({ text }) {
     }
   }
   return blocks.map((b, i) => b.kind === 'list'
-    ? <ul key={i} className="gl-step__list">{b.items.map((it, j) => <li key={j}><Emphasized text={it} /></li>)}</ul>
-    : <p key={i} className="gl-step__p"><Emphasized text={b.text} /></p>)
+    ? <ul key={i} className="gl-step__list">{b.items.map((it, j) => <UseItem key={j} text={it} />)}</ul>
+    : <p key={i} className="gl-step__p"><LessonInline text={b.text} /></p>)
+}
+
+// Prose with its Japanese marked: lang="ja" for the face and the
+// glyph forms, and .gl-ja so a run (or a formula, A は B です) is one
+// unbreakable unit on the line.
+export function LessonInline({ text }) {
+  return inline(text).map((piece, i) => {
+    const body = piece.ja
+      ? <span className={`gl-ja${piece.text.length <= SHORT_RUN ? ' gl-ja--word' : ''}`} lang="ja">{piece.text}</span>
+      : piece.text
+    return piece.strong ? <strong key={i}>{body}</strong> : <Fragment key={i}>{body}</Fragment>
+  })
+}
+
+function Forms({ forms }) {
+  return (
+    <span className="gl-forms">
+      {forms.map((form, i) => (
+        <span key={i} className="gl-form">
+          <span className={`gl-form__ja${form.ja.length <= SHORT_RUN ? ' gl-ja--word' : ''}`} lang="ja">{form.ja}</span>
+          {form.gloss && <span className="gl-form__gloss"><LessonInline text={form.gloss} /></span>}
+        </span>
+      ))}
+    </span>
+  )
+}
+
+function UseItem({ text }) {
+  const shape = readUse(text)
+  if (shape?.table) {
+    return (
+      <li className="gl-use">
+        <dl className="gl-paradigm">
+          {shape.table.map((row, i) => (
+            <div key={i} className="gl-paradigm__row">
+              <dt className="gl-paradigm__label"><LessonInline text={row.label} /></dt>
+              <dd className="gl-paradigm__forms"><Forms forms={row.forms} /></dd>
+            </div>
+          ))}
+        </dl>
+      </li>
+    )
+  }
+  if (shape) {
+    return (
+      <li className="gl-use">
+        <span className="gl-use__say"><LessonInline text={shape.say} /></span>
+        <Forms forms={shape.forms} />
+      </li>
+    )
+  }
+  return <li className="gl-use"><span className="gl-use__say"><LessonInline text={text} /></span></li>
+}
+
+// A sentence's register is worth a word only where the point has one
+// of its own and the sentence departs from it: この店はしずかだ under the
+// polite です／だ. Under a neutral point every sentence is polite or
+// casual by nature, and a tag on each would say nothing.
+function registerTag(point, ex, t) {
+  if (!point.register || point.register === 'neutral' || !ex.register || ex.register === point.register) return null
+  return t.glRegister?.[ex.register] ?? ex.register
 }
 
 export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, onClose, onBack }) {
@@ -118,7 +184,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
             grammar point (.dict-plate__caption--whole): a clamp defers
             to a fuller copy in the body, and there is no longer one. */}
         {steps.length > 0 && (
-          <section className="dict-block gl-block" aria-label={t.glLesson}>
+          <section className="dict-block gl-block gl-block--steps" aria-label={t.glLesson}>
             <ol className="gl-steps">
               {steps.map((step, i) => (
                 <li key={i} className={`gl-step gl-step--${step.kind}`}>
@@ -133,10 +199,11 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
         )}
 
         {examples.length > 0 && (
-          <section className="dict-block gl-block" aria-label={t.examples}>
+          <section className="dict-block gl-block gl-block--examples" aria-label={t.examples}>
             <div className="dict-examples">
               {examples.map((ex, i) => (
-                <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} showTr={showTr} />
+                <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} showTr={showTr}
+                                 senseNumber={i + 1} tag={registerTag(point, ex, t)} />
               ))}
             </div>
             <button type="button" onClick={() => setShowTr(v => !v)} className="gl-tr-toggle">
@@ -152,7 +219,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
             the thing this one is confused with, and it stood between a
             learner and the sentences they came for. Plan 089. */}
         {compare.length > 0 && (
-          <section className="dict-block gl-block" aria-label={t.glCompare}>
+          <section className="dict-block gl-block gl-block--compare" aria-label={t.glCompare}>
             <div className="gl-compare">
               {compare.map(rival => {
                 const body = (
@@ -161,9 +228,9 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
                       <span className="gl-door__head">
                         <span className="gl-door__pattern" lang="ja">{rival.pattern}</span>
                         {rival.level && <span className="gl-door__level">{rival.level}</span>}
-                        {rival.meaning && <span className="gl-door__gloss">{rival.meaning}</span>}
+                        {rival.meaning && <span className="gl-door__gloss"><LessonInline text={rival.meaning} /></span>}
                       </span>
-                      <span className="gl-door__note"><Emphasized text={rival.text} /></span>
+                      <span className="gl-door__note"><LessonInline text={rival.text} /></span>
                     </span>
                     {onCompare && <ChevronIcon direction="right" size={16} className="gl-door__chev" />}
                   </>

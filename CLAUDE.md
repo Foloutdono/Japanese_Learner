@@ -716,7 +716,27 @@ runtime purpose. Two consequences worth knowing:
   `ServicePage.jsx`, `src/settings.desktop.test.jsx`,
   `src/columns.wide.test.jsx` and the 机 section of `index.css`;
   DESIGN.md, "The desk").
-  When starting a new wave, begin at **146** or higher, and check
+  **146** is the grammar lesson made readable (numbered 146 because 144
+  went to the gate and door cutscenes, PR #213, and 145 to Settings'
+  pages on the desk, PR #214, while it was open):
+  first its two columns on the desk each its own (the dictionary's
+  grammar page set the lesson as one flow in CSS columns, balanced
+  wherever the heights fell, and now sets it as a grid — the rule, its
+  uses and its trap on the left, the sentences over the rivals on the
+  right, one column on the narrow desk), then the owner's pick B of three drawn directions, at every
+  width: the rule as the lead, a hairline between steps, the Japanese
+  in the prose set as Japanese and never cut, a use as its saying over
+  its forms and a paradigm as labels beside forms (read by
+  `components/study/lessonText.js`), the sentences numbered with a
+  register tag where one departs from its point, and furigana over the
+  word (cited in `components/study/GrammarLesson.jsx`,
+  `components/study/lessonText.js`, `components/dictionary/ExampleSentence.jsx`,
+  `index.css` and its 机 section, `src/components/study/lessonText.test.js`,
+  `GrammarLesson.browser.test.jsx`, `src/contrast.browser.test.jsx`,
+  `src/dictionary.wide.test.jsx` and `src/dictionary.desktop.test.jsx`;
+  DESIGN.md, "The entry plate, and a body that names itself" and "The
+  desk").
+  When starting a new wave, begin at **147** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
