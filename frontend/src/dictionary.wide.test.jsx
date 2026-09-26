@@ -8,12 +8,13 @@ import './index.css'
 
 // ── 机 — the grammar page on a laptop's width (plan 128) ─────────────
 // At 1440 the grammar page's entry has room for its lesson in two
-// columns, each at least a desk column's least width: the rule and its
-// uses on the left, the sentences and the rivals flowing on to the
-// right, never a sentence or a rival split between them. A typical
-// point (は: three steps, four sentences, two rivals) reads whole with
-// no scroll. On the narrow desk the lesson is one column
-// (dictionary.desktop).
+// columns, each at least a desk column's least width: the rule, its
+// uses and its trap down the left, the sentences over the rivals down
+// the right, each column opening under the stripe (plan 144; they were
+// one flow balanced across CSS columns, which opened the sentences at
+// the left column's foot). A typical point (は: three steps, four
+// sentences, two rivals) reads whole with no scroll. On the narrow desk
+// the lesson is one column (dictionary.desktop).
 
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -56,11 +57,19 @@ describe('the grammar page on a wide desk (plan 128)', () => {
     expect(Math.round(document.querySelector('.desk-dict__main').getBoundingClientRect().width)).toBe(side)
     const body = dock.querySelector('.gl-body').getBoundingClientRect()
     const middle = body.left + body.width / 2
-    const pieces = [...dock.querySelectorAll('.gl-step, .dict-ex, .gl-door')].map(p => p.getBoundingClientRect())
-    expect(pieces.some(p => p.right <= middle + 1)).toBe(true)
-    expect(pieces.some(p => p.left >= middle - 1)).toBe(true)
-    // None straddles the two.
-    expect(pieces.every(p => p.right <= middle + 1 || p.left >= middle - 1)).toBe(true)
+    const boxes = sel => [...dock.querySelectorAll(sel)].map(p => p.getBoundingClientRect())
+    const [steps, sentences, rivals] = ['.gl-step', '.dict-ex', '.gl-door'].map(boxes)
+    expect(steps.length * sentences.length * rivals.length).toBeGreaterThan(0)
+    expect(steps.every(p => p.right <= middle + 1)).toBe(true)
+    expect([...sentences, ...rivals].every(p => p.left >= middle - 1)).toBe(true)
+    // Each column opens under the stripe, the rivals under the sentences.
+    const [left, right] = ['.gl-block--steps', '.gl-block--examples'].map(s => dock.querySelector(s).getBoundingClientRect())
+    expect(Math.round(left.top)).toBe(Math.round(body.top))
+    expect(Math.abs(right.top - body.top)).toBeLessThanOrEqual(1)
+    expect(Math.min(...rivals.map(p => p.top))).toBeGreaterThan(Math.max(...sentences.map(p => p.bottom)))
+    // The hairline between them runs the body's height.
+    expect(getComputedStyle(dock.querySelector('.gl-block--steps')).borderInlineEndWidth).toBe('1px')
+    expect(Math.round(left.bottom)).toBe(Math.round(body.bottom))
     expect(dock.scrollHeight).toBeLessThanOrEqual(dock.clientHeight)
     expect(dock.getBoundingClientRect().bottom).toBeLessThanOrEqual(innerHeight)
   })

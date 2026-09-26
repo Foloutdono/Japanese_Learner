@@ -687,7 +687,15 @@ runtime purpose. Two consequences worth knowing:
   `backend/core/events.py`, `src/profileScreen.phone.test.jsx`,
   `src/profile.phone.test.jsx`, `src/profile.desktop.test.jsx` and
   `index.css`; DESIGN.md, Colour, Surfaces and "The desk").
-  When starting a new wave, begin at **144** or higher, and check
+  **144** is the grammar lesson's two columns on the desk each its own:
+  the dictionary's grammar page set the lesson as one flow in CSS
+  columns, balanced wherever the heights fell, and now sets it as a
+  grid — the rule, its uses and its trap on the left, the sentences
+  over the rivals on the right, one column on the narrow desk (cited in
+  `components/study/GrammarLesson.jsx`'s `gl-block--*`, the 机 section
+  of `index.css`, `src/dictionary.wide.test.jsx` and
+  `src/dictionary.desktop.test.jsx`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **145** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

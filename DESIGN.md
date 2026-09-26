@@ -1060,7 +1060,10 @@ as the rail it arrives at.
   `--desk-entry-w`, its plate laid left with the marks beside the pattern
   (over it, for a pattern of seven characters or more), the record flush
   under the stripe and the lesson in two columns where each holds
-  `--desk-run-col-min`. The kana charts show the whole syllabary at once:
+  `--desk-run-col-min`, each column its own (plan 144): the rule, its
+  uses and its trap down the left, the sentences over the rivals down
+  the right — never one flow balanced across the two, which opened the
+  sentences at the left column's foot. The kana charts show the whole syllabary at once:
   three columns of charts, unmarked (each grid keeps its name for a
   screen reader), every cell one width between `--sp-8` and `--sp-9` and
   its kana at the title rung, each cell marked with where the learner

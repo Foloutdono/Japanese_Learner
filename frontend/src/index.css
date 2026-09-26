@@ -25416,8 +25416,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   /* The learner's record under the stripe, four across (below), then
      the lesson in two columns where each holds a desk column's least
-     width, --desk-run-col-min, and one where the page is narrower. A
-     step, a sentence or a rival never breaks between the two. */
+     width, --desk-run-col-min, and one where the page is narrower. */
   .desk-dict--page .dict-entry__body > .dict-block:has(> .records) {
     order: -1;
     padding: 0;
@@ -25429,13 +25428,34 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     border-radius: 0;
   }
   .desk-dict--page .dict-block > .dict-due { margin: var(--sp-3) var(--sp-5) var(--sp-4); }
-  .desk-dict--page .gl-body {
-    display: block;
-    columns: var(--desk-run-col-min) 2;
-    column-gap: 0;
-    column-rule: 1px solid var(--surface-line);
+  /* Each column its own (plan 144): the rule, its uses and its trap
+     down the left, the sentences over the rivals down the right. The
+     two used to be one flow poured into CSS columns, which balanced it
+     wherever the heights fell -- the sentences' block opened at the
+     left column's foot with its hairline and its pad and went on at the
+     right, and a longer rule would have carried a step across. A grid
+     of at most two tracks, each at least --desk-run-col-min and never
+     under half the body, so two stand where two fit and one where they
+     do not; the right-hand blocks name the last track, which in one
+     column is the only one, and fall in under the steps. Two hairlines
+     are the columns' and not the stack's, so each is drawn a pixel past
+     its box and clipped there where the body is one column: the rule
+     between the columns, at the steps' end edge, and the sentences'
+     top rule, which in two columns would stand under the stripe. */
+  .desk-dict--page .gl-body:has(> .gl-block--steps) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(max(var(--desk-run-col-min), calc(50% - 1px)), 1fr));
+    grid-template-rows: auto 1fr;
+    overflow: clip;
   }
-  .desk-dict--page .gl-body :is(.gl-step, .dict-ex, .gl-door, .gl-tr-toggle) { break-inside: avoid; }
+  .desk-dict--page .gl-block--steps {
+    grid-column: 1;
+    grid-row: span 2;
+    margin-inline-end: -1px;
+    border-inline-end: 1px solid var(--surface-line);
+  }
+  .desk-dict--page .gl-block--steps ~ .gl-block { grid-column: -2; }
+  .desk-dict--page .gl-block--steps + .gl-block { margin-top: -1px; }
 
   /* ── 机 — the dictionary's entry in its column (plan 128) ──
      After the run's band (plan 126), whose plate rules these share

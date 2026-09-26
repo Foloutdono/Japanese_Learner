@@ -475,6 +475,27 @@ describe('the grammar page (plan 128)', () => {
     expect(record.bottom).toBeLessThanOrEqual(document.querySelector('.dict-dock .gl-body').getBoundingClientRect().top + 1)
     expect(getComputedStyle(document.querySelector('.dict-dock .records')).gridTemplateColumns.split(' ')).toHaveLength(4)
   })
+
+  // Plan 144: two columns where two fit (dictionary.wide), and here,
+  // where they do not, the one the phone reads -- the steps, then the
+  // sentences under their hairline, then the rivals, each the body's
+  // width. The rule that divides the two columns is clipped at the
+  // body's edge rather than drawn down the steps' right.
+  it('sets the lesson in one column on the narrow desk', async () => {
+    await serveGrammar()
+    await mount('/dictionary?category=grammar')
+    const body = box('.dict-dock .gl-body')
+    const [steps, sentences, rivals] = ['steps', 'examples', 'compare'].map(k => box(`.dict-dock .gl-block--${k}`))
+    expect(getComputedStyle(document.querySelector('.dict-dock .gl-body')).gridTemplateColumns.split(' ')).toHaveLength(1)
+    for (const b of [steps, sentences, rivals]) {
+      expect(Math.round(b.left)).toBe(Math.round(body.left))
+      expect(b.right).toBeGreaterThanOrEqual(body.right - 1)
+    }
+    expect(sentences.top).toBeGreaterThanOrEqual(steps.bottom - 1)
+    expect(sentences.top).toBeGreaterThan(body.top)
+    expect(rivals.top).toBeGreaterThanOrEqual(sentences.bottom - 1)
+    expect(getComputedStyle(document.querySelector('.dict-dock .gl-block--examples')).borderTopWidth).toBe('1px')
+  })
 })
 
 // ── plan 128 — the kana charts ──

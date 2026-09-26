@@ -118,7 +118,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
             grammar point (.dict-plate__caption--whole): a clamp defers
             to a fuller copy in the body, and there is no longer one. */}
         {steps.length > 0 && (
-          <section className="dict-block gl-block" aria-label={t.glLesson}>
+          <section className="dict-block gl-block gl-block--steps" aria-label={t.glLesson}>
             <ol className="gl-steps">
               {steps.map((step, i) => (
                 <li key={i} className={`gl-step gl-step--${step.kind}`}>
@@ -133,7 +133,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
         )}
 
         {examples.length > 0 && (
-          <section className="dict-block gl-block" aria-label={t.examples}>
+          <section className="dict-block gl-block gl-block--examples" aria-label={t.examples}>
             <div className="dict-examples">
               {examples.map((ex, i) => (
                 <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} showTr={showTr} />
@@ -152,7 +152,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
             the thing this one is confused with, and it stood between a
             learner and the sentences they came for. Plan 089. */}
         {compare.length > 0 && (
-          <section className="dict-block gl-block" aria-label={t.glCompare}>
+          <section className="dict-block gl-block gl-block--compare" aria-label={t.glCompare}>
             <div className="gl-compare">
               {compare.map(rival => {
                 const body = (
