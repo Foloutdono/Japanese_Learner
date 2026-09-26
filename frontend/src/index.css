@@ -17941,7 +17941,7 @@ form.stage__foot > .btn-primary {
   overflow-x: auto;
 }
 .rep-grid { border-collapse: collapse; }
-.rep-grid td { padding: 0; }
+.rep-grid td { padding: 0 var(--sp-1) 0 0; }
 .rep-grid__deck {
   padding: 0 var(--sp-1) var(--sp-1);
   text-align: left;
@@ -17951,10 +17951,11 @@ form.stage__foot > .btn-primary {
   color: var(--text-secondary);
 }
 .rep-grid__deck:lang(ja) { font-family: var(--font-jp); }
+/* An exercise's name keeps one line while the plate has the room, and
+   wraps before the grid would have to scroll (a 360px phone's kana). */
 .rep-grid__mode {
   padding-right: var(--sp-5);
   text-align: left;
-  white-space: nowrap;
   font-family: var(--font-display);
   font-size: var(--fs-sm);
   font-weight: 700;

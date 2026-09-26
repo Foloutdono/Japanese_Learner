@@ -95,4 +95,15 @@ describe('the statistics on a phone', () => {
       expect(r.width).toBeGreaterThanOrEqual(44)
     }
   })
+
+  it('wraps an exercise\'s name before a grid scrolls, on the narrowest phone', async () => {
+    await mount()
+    const screen = document.querySelector('.phone')
+    screen.style.width = '360px'
+    await settle(60)
+    for (const box of $$('.rep-grid-box')) {
+      expect(box.scrollWidth, box.closest('.rep-plate').getAttribute('aria-label')).toBeLessThanOrEqual(box.clientWidth + 1)
+    }
+    screen.style.width = ''
+  })
 })
