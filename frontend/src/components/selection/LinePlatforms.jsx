@@ -4,7 +4,7 @@ import { ModeFigures } from './ModeFigures'
 import { FAST_REVIEW } from '../../domain/studyModes'
 import { specimenFor } from '../../domain/specimen'
 
-// ── 机 — a line's platforms, filling the page (plan 136) ─────────────
+// ── 机 — a line's platforms, filling the page (plan 137) ─────────────
 // The owner's pick A of the station screens canvas: in a line's split
 // (a kana set, a JLPT level of vocab, kanji or grammar) the platforms
 // share the page's height with the stops beside them, and each earns

@@ -37,7 +37,12 @@ const typing = el => /^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName ?? '') || Bool
 // screenshot, and the only way in was to save one and find it again in a
 // file dialog. Both tiles stay: a tablet on its side reaches the desk,
 // and its Shoot is a camera.
-export function ImageInput({ t, session, onTextReady }) {
+//
+// `incoming` (plan 136) is a picture dropped elsewhere on the desk's page
+// -- on the shelf, or while another platform showed -- which the screen
+// hands here once it has boarded this platform: the cropper opens on it
+// as it would on a drop on the tiles.
+export function ImageInput({ t, session, onTextReady, incoming = null }) {
   const desk = useDesk()
   const [dragging, setDragging] = useState(false)
   const [pickedUrl, setPickedUrl] = useState(null)   // object URL of the picked file
@@ -75,6 +80,7 @@ export function ImageInput({ t, session, onTextReady }) {
 
   const pickedRef = useRef(handlePicked)
   useEffect(() => { pickedRef.current = handlePicked })
+  useEffect(() => { if (incoming) pickedRef.current(incoming) }, [incoming])
   useEffect(() => {
     if (!desk || pickedUrl) return undefined
     const onPaste = e => {

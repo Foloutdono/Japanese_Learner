@@ -199,7 +199,7 @@ def get_tiers(domain: str, tier_size: int = freq.DEFAULT_TIER_SIZE):
 def get_tiers_started(domain: str, tier_size: int = freq.DEFAULT_TIER_SIZE,
                       user_id: str = Depends(get_user_id)):
     """
-    How many of each tier's cards the learner has met (plan 136): the
+    How many of each tier's cards the learner has met (plan 137): the
     figure the desk's vocabulary sources print beside each tier, the
     same `started` /api/stats counts per JLPT level -- a card with a
     review behind it in any mode, counted once. /tiers stays the

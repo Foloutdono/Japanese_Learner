@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 
-// ── 見本 — what each stop of a line holds (plan 136) ────────────────
+// ── 見本 — what each stop of a line holds (plan 137) ────────────────
 // /api/station/{source}/samples: per stop, the first things it teaches
 // (printed under the stop's name in the desk's station split) and one
 // card (the platforms' specimens draw from it). Static content, the

@@ -63,7 +63,7 @@ import { playUi } from '../../lib/audio'
  *       the learner's own record on each platform there.
  *     specimen — optional node drawn between the body and the aside:
  *       the card the platform will ask, small (the desk's line split,
- *       plan 136; components/selection/LinePlatforms.jsx). Only the
+ *       plan 137; components/selection/LinePlatforms.jsx). Only the
  *       desk passes it.
  */
 export default function ModeSelector({ modes, onSelect }) {

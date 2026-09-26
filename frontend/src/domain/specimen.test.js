@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { firstSense, specimenFor } from './specimen'
 
-// ── 見本 — the card a platform asks, drawn small (plan 136) ─────────
+// ── 見本 — the card a platform asks, drawn small (plan 137) ─────────
 // Each mode maps onto the stop's one card by its shape in the registry;
 // what is worth pinning is that every platform the four lines offer
 // gets the specimen that is TRUE of it (the prompt first, the answer

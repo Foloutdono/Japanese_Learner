@@ -278,7 +278,7 @@ export default function KanjiScreen({ session }) {
   const modes = byLevel ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
 
-  // ── 机 — the line beside its platforms (plans 114, 136) ──
+  // ── 机 — the line beside its platforms (plans 114, 137) ──
   // See VocabScreen: on the desk a level's platforms stand beside the
   // JLPT line, both columns taking the window (LinePlatforms); the bar
   // prints no sub, and the way out is the sources.

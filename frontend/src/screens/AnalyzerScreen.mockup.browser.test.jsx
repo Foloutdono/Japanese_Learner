@@ -3,7 +3,6 @@ import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
-import { SOURCES, DEFAULT_SOURCE } from '../components/analysis/sources'
 // Every case here asserts COMPUTED style — the whole point is pinning
 // what ships, not what the JSX intends.
 import '../index.css'
@@ -104,12 +103,6 @@ async function renderScreen(entry = '/dictionary/analyzer') {
   )
   await settle(30)
   return screen
-}
-
-/** Which of the three platforms is lit on the intake's own control. */
-function platform(screen) {
-  const opts = [...screen.container.querySelectorAll('.anl-sources .seg__opt')]
-  return SOURCES[opts.findIndex(o => o.classList.contains('seg__opt--on'))]?.key
 }
 
 function typeInto(el, text) {
@@ -310,12 +303,20 @@ describe('the route line (the working rail, and the widths it answers for)', () 
     // head, at the size a thumb needs.
     const keep = screen.container.querySelector('.anl-head__keep')
     expect(keep).not.toBeNull()
-    expect(keep.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    // Its laid-out height, not its box on screen: the result is still
+    // sliding in (`arrive`, 0.28s) when this runs, and a box read
+    // mid-slide is 44 give or take a float's rounding (43.999996 on
+    // some frames).
+    expect(parseFloat(getComputedStyle(keep).height)).toBeGreaterThanOrEqual(44)
   })
 })
 
-describe('the history (canvas: a section head over a framed row list)', () => {
-  it('draws the head outside the list and pads every row', async () => {
+describe('the passages under the line (plan 136, the owner\'s pick C)', () => {
+  // A phone's page: the width leaks across files (page.viewport is the
+  // browser's), and the desk draws the passages as cards instead.
+  beforeEach(async () => { await page.viewport(414, 900) })
+
+  it('draws a row per passage, padded, a real target, the Kept stamp whole', async () => {
     // A row to measure: the history fetch must return one passage
     // (apiFetch, raw Response shape — see useAnalyzerSession.fetchHistory).
     apiFetch.mockImplementation(async path => ({
@@ -327,47 +328,53 @@ describe('the history (canvas: a section head over a framed row list)', () => {
     const screen = await renderScreen()
     await settle(120)
 
-    // The canvas's shape: the head is a sibling ABOVE the framed list,
-    // never inside it.
-    const history = screen.container.querySelector('.anl-history')
-    expect(history).not.toBeNull()
-    const list = history.querySelector('.anl-hist-list')
-    expect(list).not.toBeNull()
-    expect(list.querySelector('.head2')).toBeNull()
-    expect(history.querySelector('.head2')).not.toBeNull()
+    // The line to paste into stands over the passages, which carry no
+    // head of their own: the page is theirs.
+    const shelf = screen.container.querySelector('.anl-shelf')
+    expect(shelf).not.toBeNull()
+    expect(screen.container.querySelector('.anl-entry').compareDocumentPosition(shelf) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(shelf.querySelector('h2, .head2')).toBeNull()
+    const rows = shelf.querySelector('.anl-shelf__rows')
+    expect(getComputedStyle(rows).borderTopStyle).toBe('solid')
 
-    const cs = getComputedStyle(list)
-    expect(cs.borderTopStyle).toBe('solid')
-    expect(parseFloat(cs.borderTopLeftRadius)).toBeGreaterThan(0)
-
-    // The row carries the canvas's padding (sp-3 sp-4): nothing sits
-    // flush against the frame, and the row is a real target.
-    const row = list.querySelector('.anl-hist')
-    expect(row).not.toBeNull()
-    const rs = getComputedStyle(row)
-    expect(parseFloat(rs.paddingLeft), `row padding-left is ${rs.paddingLeft}`).toBeGreaterThanOrEqual(12)
-    expect(parseFloat(rs.paddingTop), `row padding-top is ${rs.paddingTop}`).toBeGreaterThanOrEqual(8)
+    // The row is a real target, its lead the platform's ring.
+    const row = rows.querySelector('.anl-row__open')
     expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    expect(row.querySelector('.anl-row__lead[role="img"]').getAttribute('aria-label')).toBe('Texte')
 
     // The Kept mark holds its word on one line inside its own frame.
     const kept = row.querySelector('.anl-kept')
     expect(kept).not.toBeNull()
     expect(kept.scrollWidth).toBeLessThanOrEqual(kept.clientWidth + 1)
     expect(kept.scrollHeight).toBeLessThanOrEqual(kept.clientHeight + 1)
+
+    // One kind and something kept: All and Kept are the chips.
+    const chips = [...shelf.querySelectorAll('.anl-shelf__chips .chip')].map(c => c.firstChild.textContent)
+    expect(chips).toEqual(['Tous', 'Gardés'])
   })
 
   // ── ?intake= — the door's deep link ──
   // The dictionary draws the three platforms on the analyzer's row, and
   // a tap on the camera there means "open standing on 写真", not "open
-  // on 文字 with the camera one tap further in". A platform is a mode of
-  // this one screen, so it travels as a query, read once on mount.
-  it('opens on the platform the door sent it to, and on 文字 without one', async () => {
-    const screen = await renderScreen('/dictionary/analyzer?intake=video')
-    expect(platform(screen)).toBe('video')
+  // on 文字 with the camera one tap further in". Under the desk the
+  // photo and video intakes are sheets over the passages (plan 136), so
+  // the door opens the sheet it names; the desk's own case stands the
+  // named platform in the column (analyzer.desktop).
+  it('opens the sheet the door sent it to, and the line without one', async () => {
+    let screen = await renderScreen('/dictionary/analyzer?intake=video')
+    expect(document.querySelector('[role="dialog"] #anl-panel-video')).not.toBeNull()
+    await screen.unmount()
+    screen = await renderScreen('/dictionary/analyzer?intake=photo')
+    expect(document.querySelector('[role="dialog"] #anl-panel-photo')).not.toBeNull()
+    await screen.unmount()
+    screen = await renderScreen('/dictionary/analyzer')
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    expect(screen.container.querySelector('.anl-entry textarea')).not.toBeNull()
   })
 
   it('ignores an intake that is not a platform', async () => {
     const screen = await renderScreen('/dictionary/analyzer?intake=hovercraft')
-    expect(platform(screen)).toBe(DEFAULT_SOURCE)
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    expect(screen.container.querySelector('.anl-entry textarea')).not.toBeNull()
   })
 })

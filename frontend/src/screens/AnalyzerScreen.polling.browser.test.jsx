@@ -363,8 +363,9 @@ describe('AnalyzerScreen polling', () => {
     expect(screen.container.textContent).toContain('No cue timestamps')
     // And the dock is still there to try again with, rather than a dead
     // end. Since plan 029 the intake is always mounted, so the check is
-    // that the failure did not replace it.
-    expect(screen.container.querySelector('.anl-drop')).not.toBeNull()
+    // that the failure did not replace it: its file is one press away
+    // (plan 136).
+    expect(screen.container.querySelector('#anl-panel-video .anl-file')).not.toBeNull()
   })
 
   // A Sentence CAN come back with no tokens -- an unavailable analysis,

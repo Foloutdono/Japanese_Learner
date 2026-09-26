@@ -70,7 +70,71 @@ describe('IntakeVideo — the link ingest is gated on the server', () => {
 
   it('keeps the two free ingests on screen even when the paid one is on', async () => {
     const { screen } = await setup({ linkFetch: true })
-    await expect.element(screen.getByText(en.dropSubtitles)).toBeInTheDocument()
-    await expect.element(screen.getByText(en.grabTitle)).toBeInTheDocument()
+    await expect.element(screen.getByRole('button', { name: en.chooseSubtitles })).toBeInTheDocument()
+    await expect.element(screen.getByRole('button', { name: en.grabInstallLink })).toBeInTheDocument()
+  })
+})
+
+// ── The one filled action (plan 136) ──────────────────────────
+// The column fills exactly one control, and which one says what to do:
+// the server's fetch where it can, the bookmark's setup until the
+// bookmark has been used, then the video's page where the bookmark is
+// tapped. Whichever it is, the file stays one press away.
+describe('IntakeVideo — one filled action', () => {
+  const filled = screen => [...screen.container.querySelectorAll('.btn-primary')]
+
+  it('sets the bookmark up first, the video one quiet link away', async () => {
+    const { screen } = await setup()
+    const [lead] = filled(screen)
+    expect(filled(screen)).toHaveLength(1)
+    expect(lead.textContent).toBe(en.grabInstall)
+    const open = screen.container.querySelector('.anl-vlinks .anl-grab__open')
+    expect(open.getAttribute('href')).toBe('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+    expect(open.getAttribute('target')).toBe('_blank')
+  })
+
+  it('opens the video on YouTube once the bookmark has been used', async () => {
+    const onTutorial = vi.fn()
+    const { screen } = await setup({ grabUsed: true, onTutorial })
+    const [lead] = filled(screen)
+    expect(filled(screen)).toHaveLength(1)
+    expect(lead.tagName).toBe('A')
+    expect(lead.getAttribute('href')).toBe('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+    expect(screen.container.querySelector('.anl-link__say').textContent).toBe(en.grabThenSay)
+    // The setup is a quiet door to the screen's walkthrough now.
+    await screen.getByRole('button', { name: en.grabInstallLink }).click()
+    expect(onTutorial).toHaveBeenCalledTimes(1)
+  })
+
+  it('opens YouTube itself before a link names a video', async () => {
+    const { screen } = await setup({ grabUsed: true, url: '' })
+    expect(filled(screen)[0].getAttribute('href')).toBe('https://www.youtube.com/')
+    expect(screen.container.querySelector('.anl-still')).toBeNull()
+  })
+
+  it('fetches where the server can, and nothing else is filled', async () => {
+    const { screen } = await setup({ linkFetch: true, grabUsed: true })
+    expect(filled(screen)).toHaveLength(1)
+    expect(filled(screen)[0].textContent).toContain(en.analyzeThisLink)
+  })
+
+  it('cuts a file to the section set under Section', async () => {
+    const onStartFromFile = vi.fn()
+    const { screen } = await setup({ onStartFromFile })
+    const toggle = screen.container.querySelector('.anl-window-toggle')
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(screen.container.querySelector('.anl-window')).toBeNull()
+    await screen.getByRole('button', { name: en.windowLabel }).click()
+    expect(toggle.getAttribute('aria-expanded')).toBe('true')
+    const [from] = screen.container.querySelectorAll('.anl-window input')
+    await screen.getByPlaceholder(en.windowWhole).first().fill('0:30')
+    expect(from.value).toBe('0:30')
+    const input = screen.container.querySelector('input[type="file"]')
+    const dt = new DataTransfer()
+    dt.items.add(new File(['x'], 'x.srt', { type: 'text/plain' }))
+    input.files = dt.files
+    input.dispatchEvent(new Event('change', { bubbles: true }))
+    expect(onStartFromFile).toHaveBeenCalledTimes(1)
+    expect(onStartFromFile.mock.calls[0][1]).toEqual({ url: YT, start: 30, end: null })
   })
 })

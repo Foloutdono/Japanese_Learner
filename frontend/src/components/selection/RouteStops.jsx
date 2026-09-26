@@ -40,7 +40,7 @@ import { SplitRow } from './SplitRow'
 //           called. Only the desk passes it; without it a stop is the
 //           button it always was.
 //
-//   figured — the desk's line split (plan 136): each stop also prints
+//   figured — the desk's line split (plan 137): each stop also prints
 //           its `sample` (the first things it teaches, joined) and a bar
 //           of its make-up — learned in the line's pigment, met but not
 //           learned in half of it, the Learn plate's own bar — so the

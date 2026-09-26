@@ -33,7 +33,7 @@ import { RouteStops } from './RouteStops'
  *   levels — array of level strings (default: N5…N1)
  *   selected, linkTo — the desk's split (plans 114, 117); passed to
  *            RouteStops, where a stop with `linkTo` is a link.
- *   figured — the desk's line split (plan 136): each stop prints its
+ *   figured — the desk's line split (plan 137): each stop prints its
  *            first few items (/api/station/{source}/samples) and its
  *            bar. Only the desk passes it, so a phone never asks.
  */

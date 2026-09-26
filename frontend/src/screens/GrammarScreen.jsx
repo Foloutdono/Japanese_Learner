@@ -144,7 +144,7 @@ export default function GrammarScreen({ session }) {
     )
   }
 
-  // Both columns take the window (plan 136, LinePlatforms): each level
+  // Both columns take the window (plan 137, LinePlatforms): each level
   // with its first points and its bar, each platform with the card it
   // asks, and the points' door at the foot beside the fast review —
   // both open something rather than board. The bar prints no sub: the

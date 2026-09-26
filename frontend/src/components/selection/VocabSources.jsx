@@ -11,7 +11,7 @@ import { themeLabelFor } from '../../domain/themes'
 import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 import { Seg, Console, ConsoleIndex } from '../chrome/Console'
 
-// ── 机 — the vocabulary's three sources as plates (plan 136) ─────────
+// ── 机 — the vocabulary's three sources as plates (plan 137) ─────────
 // The owner's pick S2 of the station screens canvas. On a phone
 // /learn/vocab is three cards — JLPT, frequency, theme — each opening a
 // list of its own, and on the desk that page was the three cards and

@@ -41,7 +41,7 @@ export function ScopeFigures({ url, session }) {
 }
 
 // With nothing due, the cards in progress say what the bar's red sliver
-// is (plan 136): a fortnight of first passes leaves "0 / 674" mastered
+// is (plan 137): a fortnight of first passes leaves "0 / 674" mastered
 // on every platform, and this is the figure that moves meanwhile.
 function Figures({ row }) {
   const { t } = useLang()

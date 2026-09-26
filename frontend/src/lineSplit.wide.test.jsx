@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a line's split, filled (plan 136) ─────────────────────────
+// ── 机 — a line's split, filled (plan 137) ─────────────────────────
 // The owner's pick A of the station screens canvas, at 1440×900. A
 // line's station — a kana set, a JLPT level of vocab, kanji or grammar
 // — stood a third of the way down the window. Now both columns take
@@ -92,7 +92,7 @@ const rect = el => el.getBoundingClientRect()
 // The page's own platforms, not the foot's door.
 const platforms = () => [...document.querySelectorAll('.desk-platforms > .platform-grid .platform-card')]
 
-describe('a line\'s split takes the window (plan 136)', () => {
+describe('a line\'s split takes the window (plan 137)', () => {
   it('stands the stops and the platforms to the window\'s foot, sharing it', async () => {
     await vocab()
     await settle()
@@ -171,7 +171,7 @@ describe('a line\'s split takes the window (plan 136)', () => {
   })
 })
 
-describe('the grammar and the kana lines (plan 136)', () => {
+describe('the grammar and the kana lines (plan 137)', () => {
   it('stands grammar\'s points door at the foot beside the fast review', async () => {
     await mount('/learn/grammar/N5', <Route path="/learn/grammar/:level" element={<GrammarScreen session={null} />} />)
     await settle()

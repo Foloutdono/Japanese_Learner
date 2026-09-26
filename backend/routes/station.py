@@ -16,9 +16,9 @@ from study.grammar_lesson import contrast_payload
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 
-# ── 見本 — what each stop of a line holds (plan 136) ──────────────
+# ── 見本 — what each stop of a line holds (plan 137) ──────────────
 # The desk's station split draws a line's stops beside the open stop's
-# platforms, and since plan 136 both columns take the window: each stop
+# platforms, and since plan 137 both columns take the window: each stop
 # prints a few of the things it teaches under its name, and each
 # platform prints the card it will ask, in a small well beside its
 # description (the owner's pick A of the station screens canvas). This

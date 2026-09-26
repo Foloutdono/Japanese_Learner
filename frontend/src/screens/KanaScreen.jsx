@@ -89,7 +89,7 @@ export default function KanaScreen() {
   // ── The platforms: the set's modes ──
   const run = m => navigate(`/learn/kana/${set}/${m}`)
 
-  // ── 机 — the sets beside a set's platforms (plans 114, 136) ──
+  // ── 机 — the sets beside a set's platforms (plans 114, 137) ──
   // Both columns take the window (LinePlatforms): each set with its
   // first kana and its bar, each platform with the card it asks. The
   // bar prints no sub: the open set names itself.

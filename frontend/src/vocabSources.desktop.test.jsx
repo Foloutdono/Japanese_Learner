@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the vocabulary's sources as three plates (plan 136) ─────────
+// ── 机 — the vocabulary's sources as three plates (plan 137) ─────────
 // The owner's pick S2 of the station screens canvas. /learn/vocab on
 // the desk was three cards across the top of an empty window, each
 // opening a list of its own; now each source hangs as a plate the
@@ -83,7 +83,7 @@ async function mount() {
 const plates = () => [...document.querySelectorAll('.desk-sources > .desk-source')]
 const rows = plate => [...plate.querySelectorAll('.desk-source__rows > a')]
 
-describe('the vocabulary\'s sources on the desk (plan 136)', () => {
+describe('the vocabulary\'s sources on the desk (plan 137)', () => {
   it('hangs three plates side by side, down to the window\'s foot and no further', async () => {
     await mount()
     const ps = plates().map(p => p.getBoundingClientRect())

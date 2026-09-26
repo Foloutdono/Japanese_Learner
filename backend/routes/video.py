@@ -28,7 +28,8 @@ from pydantic import BaseModel
 from core.db import db_conn
 from core.auth import get_user_id
 from core.srs_instance import srs
-from study.analysis import analyze_local, attach_user_state
+from study import morphology
+from study.analysis import LOCAL_REV, analyze_local, attach_user_state
 from study.captions import (
     parse_track, parse_pasted_transcript, parse_video_id, fetch_youtube_track,
     proxy_configured, CaptionParseError, CaptionFetchError,
@@ -283,6 +284,7 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
             }
         analysis["cue_start"] = s["cue_start"]
         analysis["cue_end"] = s["cue_end"]
+        analysis["local_rev"] = LOCAL_REV
         analyzed.append(analysis)
 
     conn = db_conn()
@@ -493,6 +495,45 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
     }
 
 
+def _current(session_id: int, sentences: list[dict]) -> list[dict]:
+    """The session's lines, each analysed by the local tier as it reads
+    today -- a line stored under another LOCAL_REV is analysed again,
+    and the session saved with it so that is paid once.
+
+    The local tier is pure and cheap (milliseconds a line), but a
+    session keeps what it was built with: before the tokenizer counted
+    the spaces between a subtitle's phrases, every particle after the
+    first space went unfound, and a session built then went on showing
+    those lines without them however the detector improved. Only the
+    analysis is remade: the cue times are the session's own and ride
+    across, and a line kept as not Japanese stays as it is. Without a
+    tokenizer nothing is remade -- "analysis unavailable" is no
+    improvement on an older analysis."""
+    if not morphology.MORPHOLOGY_AVAILABLE or all(s.get("local_rev") == LOCAL_REV for s in sentences):
+        return sentences
+    fresh = []
+    for s in sentences:
+        if s.get("local_rev") != LOCAL_REV and not s.get("foreign"):
+            s = {**analyze_local(s["text"]), "cue_start": s.get("cue_start"), "cue_end": s.get("cue_end")}
+        fresh.append({**s, "local_rev": LOCAL_REV})
+    # Best effort: a failed save costs the next opening the same few
+    # milliseconds a line, never the answer.
+    try:
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE video_sessions SET sentences = %s WHERE id = %s AND status = 'ready'",
+                    (json.dumps(fresh, ensure_ascii=False), session_id),
+                )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        logger.exception("Could not store the re-analysed lines of video session %s", session_id)
+    return fresh
+
+
 def _job_state(session_id: int) -> str:
     """'running' | 'stale' | 'missing' for a session's claim-lock row.
 
@@ -561,7 +602,7 @@ def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
         )
 
     states = srs.get_user_states(user_id)
-    sentences = [attach_user_state(s, states, user_id) for s in (session["sentences"] or [])]
+    sentences = [attach_user_state(s, states, user_id) for s in _current(session_id, session["sentences"] or [])]
     return {
         "status": "ready",
         "source": session["source"],
@@ -588,7 +629,10 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
     can run to hundreds of entries, and a listing that pulled it would
     ship the whole corpus of every session the learner has ever made to
     render twenty rows. The count comes from jsonb_array_length instead,
-    computed server-side over the stored value.
+    computed server-side over the stored value, and the card's line
+    (plan 136) from the first element's text the same way: a session
+    the grab made is named `<video id>.ja.vtt`, which says nothing, and
+    its first sentence says what the video is.
 
     Only `ready` sessions are listed. A 'generating' one has nothing to
     reopen yet and a 'failed' one has nothing to reopen at all; both are
@@ -600,7 +644,8 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
             cur.execute(
                 """
                 SELECT id, source, source_ref, video_id, truncated, created_at,
-                       COALESCE(jsonb_array_length(sentences), 0) AS sentence_count
+                       COALESCE(jsonb_array_length(sentences), 0) AS sentence_count,
+                       sentences->0->>'text' AS first_line
                   FROM video_sessions
                  WHERE user_id = %s AND status = 'ready'
                  ORDER BY created_at DESC
@@ -619,10 +664,11 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
             "sourceRef": source_ref,
             "videoId": video_id,
             "sentenceCount": sentence_count,
+            "firstLine": first_line,
             "truncated": truncated,
             "createdAt": created_at.isoformat(),
         }
-        for row_id, source, source_ref, video_id, truncated, created_at, sentence_count in rows
+        for row_id, source, source_ref, video_id, truncated, created_at, sentence_count, first_line in rows
     ]
 
 

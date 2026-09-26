@@ -1,6 +1,6 @@
 import { MODES } from './studyModes'
 
-// ── 見本 — the card a platform asks, drawn small (plan 136) ─────────
+// ── 見本 — the card a platform asks, drawn small (plan 137) ─────────
 // On the desk's station split every platform prints, in a well beside
 // its description, the card it will ask: 何 → quoi on Word → meaning,
 // quoi → 何 on Meaning → word. The description says it in a sentence;

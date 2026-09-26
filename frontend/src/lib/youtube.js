@@ -23,3 +23,11 @@ export function parseVideoId(url) {
   }
   return null
 }
+
+/** A video's still, from YouTube's own image host (plan 136): what a
+ *  video Passage wears on the analyser's shelf. The medium size is
+ *  320x180, a 16:9 frame at twice the card's width, and it is fetched
+ *  by the learner's browser, never by our servers (privacy.html). */
+export function thumbnailUrl(id) {
+  return id ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg` : null
+}

@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a line's split on the narrowest desk (plan 136) ─────────────
+// ── 机 — a line's split on the narrowest desk (plan 137) ─────────────
 // At 1100px the page beside the stops is under 720px, and a well
 // beside a description and the figures would squeeze the description
 // to a word a line. LinePlatforms measures its box and draws no wells
@@ -41,7 +41,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: VocabScreen } = await import('./screens/VocabScreen')
 const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
 
-describe('a line\'s split at 1100px (plan 136)', () => {
+describe('a line\'s split at 1100px (plan 137)', () => {
   it('draws no wells, and keeps each description at a readable measure', async () => {
     await render(
       <LangProvider>
