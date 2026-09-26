@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import '../../index.css'
 import { LangProvider } from '../../LangContext'
 import { RetentionLine } from './RetentionLine'
-import { weeklyRetention } from '../../domain/statsModel'
+import { weeklyRetention, retentionSeries } from '../../domain/statsModel'
 
 // ── The line leaves from the left, every stop can be asked ──
 // (plan 085, the owner's second look). The axis runs from the first
@@ -19,7 +19,7 @@ function draw(days, props = {}) {
   return render(
     <LangProvider>
       <div style={{ width: '326px' }}>
-        <RetentionLine weeks={r.weeks} currentIndex={r.currentIndex} firstIndex={r.firstIndex} {...props} />
+        <RetentionLine points={r.weeks} currentIndex={r.currentIndex} firstIndex={r.firstIndex} {...props} />
       </div>
     </LangProvider>
   )
@@ -85,5 +85,44 @@ describe('the retention line', () => {
     const ring = screen.container.querySelector('.rep-line__sel').getBoundingClientRect()
     expect(ring.right).toBeLessThanOrEqual(svg.right + 0.5)
     expect(ring.top).toBeGreaterThanOrEqual(svg.top - 0.5)
+  })
+
+  it('a week not ridden yet: the rail runs from last week\'s stop to this week\'s', async () => {
+    const screen = await draw([
+      { date: '2026-08-31', reviews: 10, good: 8 },
+      { date: '2026-09-08', reviews: 10, good: 9 },   // last week; this one empty
+    ])
+    const svg = screen.container.querySelector('.rep-line__svg').getBoundingClientRect()
+    const now = screen.container.querySelector('.rep-line__now').getBoundingClientRect()
+    const ahead = screen.container.querySelector('.rep-line__ahead').getBoundingClientRect()
+    expect(Math.abs(ahead.left - (now.left + now.width / 2))).toBeLessThan(2)
+    expect(svg.right - ahead.right).toBeLessThan(12)
+  })
+})
+
+// ── Plan 136: the days while the weeks are few ──
+describe('the retention line in days', () => {
+  it('draws a stop a day and the rest of the week ahead, without an axis', async () => {
+    const r = retentionSeries([
+      { date: '2026-09-14', reviews: 10, good: 9 },
+      { date: '2026-09-15', reviews: 20, good: 15 },
+    ], { today: TODAY })
+    const screen = await render(
+      <LangProvider>
+        <div style={{ width: '326px' }}>
+          <RetentionLine points={r.points} currentIndex={r.currentIndex} firstIndex={r.firstIndex} fit height={64} axis={false} describe={p => p.start} />
+        </div>
+      </LangProvider>
+    )
+    const svg = screen.container.querySelector('.rep-line__svg')
+    expect(svg.getAttribute('viewBox')).toBe('0 0 326 64')
+    expect(screen.container.querySelectorAll('.rep-line__stop, .rep-line__now')).toHaveLength(2)
+    const now = screen.container.querySelector('.rep-line__now').getBoundingClientRect()
+    // Tuesday is the second of seven days: a sixth of the way along.
+    const box = svg.getBoundingClientRect()
+    expect(now.left - box.left).toBeLessThan(box.width / 3)
+    expect(screen.container.querySelector('.rep-line__ahead')).not.toBeNull()
+    expect(screen.container.querySelector('.rep-axis')).toBeNull()
+    expect(svg.getAttribute('aria-valuetext')).toBe('2026-09-15')
   })
 })

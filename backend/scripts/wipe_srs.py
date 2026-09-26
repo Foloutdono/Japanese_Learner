@@ -12,7 +12,7 @@ Two independent reasons, either of which alone would force it:
 1. THE MODE KEYS CHANGED. card_modes.mode is a bare TEXT column with no
    CHECK and no FK, so rows under retired keys ("qcm-m-kj", "flashcard")
    do not error -- they linger. And get_mastered_count, get_due_forecast,
-   get_interval_histogram and get_weakest_cards all filter by card_id
+   get_interval_histogram and get_weakest_by_source all filter by card_id
    LIKE and never by mode, so those rows would inflate the mastery count
    and every forecast permanently.
 

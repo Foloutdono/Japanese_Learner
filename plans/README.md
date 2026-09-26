@@ -6521,3 +6521,32 @@ stepper, the volume dial, the ✕) is no longer drawn; its code and CSS
 are left for a cleanup task. Tests: the mockup and phone suites
 rewritten for the drawing, the polling, responsive, deskfree and
 sources suites moved to it.
+
+## Plan 136 — 路線別, the statistics as the four lines (2026-09-26)
+
+Numbered 136 after a grep of the source for `plan 13[6-9]` found
+nothing, 135 having gone to the fare gate. The owner's ask, with a
+screenshot of the desk's statistics: rework and rethink the screen on
+the desk and the phone, options first. Drawn on the canvas "Statistics
+rework — options" (the screenshot as the reference and four directions,
+each on a desk and a phone board: A the record repaired, B line by line,
+C leaks first, D the diagram); the owner picked B.
+
+What the screenshot showed wrong: the one chart was a dot (one ridden
+week drew one stop across a 300px card); each line row printed two
+numbers that disagreed (the bar the mastered share in drills, the figure
+the retention — kana 100% over a quarter bar, vocabulary 81% over an
+empty one); kana's four sets said the same thing four times; the twelve
+trouble cards were eight of one line's (Kanji N4) and none of others',
+their captions cut; and the desk left a third of the window empty.
+
+| # | What | Status |
+|---|------|--------|
+| 136 | **Backend**: `srs.get_weakest_by_source` ranks the missed cards per source (the raw id's first segment), lapses first then accuracy, only cards missed at least once, the servable filter kept; `/api/stats/report`'s `weakest` is up to `WEAKEST_PER_LINE` (8) per line, placed by `card_index.locate` (a card no deck holds is dropped), the lines in the screen's order; `get_weakest_cards` retired. **Model** (`domain/statsModel.js`): `retentionSeries` (days from the first ridden day to this week's Sunday while the line would draw three weeks or fewer, weeks after), `lineGrid`/`lineGrids` (retention by exercise × deck, lifetime, the one cell per line furthest under the learner's own average with `LEAK_MIN_REVIEWS` behind it marked `leak`), `weakestByLine`, `cardHeadword` (moved from `TroubleList`), `deckCode` (a kana set as its first glyph); `lineRows` and `categoryLabel` retired. **Screen**: `ReportStrip` (a lattice: retention with its line at `height` 64, `axis={false}`, the asked stop's reviews, the misses of 30 days, the ladder) over `LineReport` plates (roundel and name with the line's reviews, its retention; a `<table>` grid whose cells open `/learn/{line}/{deck}/{exercise}`; the weakest as tiles opening their run, or "Aucun raté" under the grid). `RetentionLine` takes `points`, `height`, `axis`, `describe`, and draws the rail ahead from the last stop whenever the axis runs past it. `StrengthLadder` is five steps, each never narrower than its caption. `LineRows` and `TroubleList` deleted; `Composition` moved to its own file for `ModeFigures`. **Desk**: the strip on one row (`3fr` line, figures at their captions, `2fr` ladder), the plates two by two, a row as tall as its taller plate — not the window's height: stretched, a plate held its grid over half a card of air (checked on screenshots at 1100 and 1440). **Phone**: the strip two across, the plates in one column, no sheet. Tests: `stats.desktop` rewritten, `stats.wide` and `stats.phone` new (the phone fixture in `profile.phone` retired for the real screen), `deskfree` P4, `contrast`, `RetentionLine` and `statsModel` moved to the new DOM and model; backend `test_stats_report` per line, `test_servable_modes` on the new query | DONE (2026-09-26) |
+
+Deviations from the drawing, each for a reason found in the build: the
+grid is turned round (a row per exercise, a column per deck — five kanji
+exercises would not fit as columns in a desk plate, and decks have short
+names); the plates do not stretch to the window (above); the retention
+cell names the asked stop and the reviews cell follows it, where the
+drawing had a fixed "7 j".

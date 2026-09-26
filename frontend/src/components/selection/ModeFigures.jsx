@@ -3,7 +3,7 @@ import { useLang } from '../../LangContext'
 import { useStats } from '../../stores/stats'
 import { apiFetch } from '../../lib/api'
 import { bucketRow, modeRow } from '../../domain/statsModel'
-import { Composition } from '../stats/LineRows'
+import { Composition } from '../stats/Composition'
 
 // ── 机 — a platform's own figures (plan 114) ────────────────────────
 // A platform card wider than ~440px must earn its width with a

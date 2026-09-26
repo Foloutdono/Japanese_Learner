@@ -1,49 +1,28 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 import { parkPointer } from './testing/parkPointer'
+import { STATS, REPORT, LONG_REPORT } from './testing/statsRecord'
 
-// ── 机 — the statistics as a dashboard (plan 114) ────────────────
-// On a phone the service record is one column read top to bottom, its
-// two drill-downs (a line's levels, the trouble cards past six) behind
-// sheets, and its chart a 326-unit drawing scaled to the card. On the
-// desk it is two columns — what holds beside where it leaks — with no
-// sheet at all: the chart drawn 1:1 at the card's own width, a line's
-// levels opened in place, every trouble card on the page. The phone's
-// side is deskfree.phone.
+// ── 路線別 — the statistics as the four lines (plan 136) ─────────
+// On the desk the record is a strip of four figures over the four
+// lines' plates, two by two, each row as tall as its taller plate and
+// no taller (a plate has no body to give the window's height to, and a
+// card stretched past its content holds air). Each plate carries its line's retention, its grid
+// of exercise by deck with the leak in red, and its most-missed cards;
+// every cell and every tile opens a run. No sheet. The phone's side is
+// stats.phone and deskfree.phone; the laptop's is stats.wide.
 
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
 
-const bucket = (total, mastered, learning) => ({ total, new: total - mastered - learning, learning, mastered, due_now: 3, reviews: mastered * 6 + learning * 3, correct: mastered * 5 + learning * 2 })
-const STATS = {
-  kana: {
-    hiragana_basic: { 'kana.flashcard.f2b': bucket(46, 40, 6) },
-    katakana_basic: { 'kana.flashcard.f2b': bucket(46, 10, 20) },
-  },
-  vocab: { N5: { 'vocab.flashcard.f2b': bucket(665, 120, 80) }, N4: { 'vocab.flashcard.f2b': bucket(632, 10, 20) } },
-  kanji: { N5: { 'kanji.flashcard.f2b': bucket(80, 30, 20) } },
-  grammar: {},
-}
-function iso(daysAgo) {
-  const d = new Date()
-  d.setDate(d.getDate() - daysAgo)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-const REPORT = {
-  days: Array.from({ length: 60 }, (_, i) => ({ date: iso(59 - i), reviews: 40, good: 30 + (i % 7) })),
-  strength: [{ days: 0, count: 120 }, { days: 3, count: 80 }, { days: 12, count: 140 }, { days: 45, count: 90 }],
-  weakest: Array.from({ length: 12 }, (_, i) => ({
-    card_id: `c${i}`, raw_id: `vocab_N5_語${i}_ご`, category: 'vocab', key: 'N5', mode: 'vocab.flashcard.f2b',
-    accuracy: 30 + i * 3, lapses: 6 - (i % 5),
-  })),
-}
+const payload = vi.hoisted(() => ({ report: null }))
 vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch: vi.fn(),
   apiJson: vi.fn(),
-  apiJsonWithTimeout: vi.fn(async path => (path === '/api/stats' ? STATS : REPORT)),
+  apiJsonWithTimeout: vi.fn(async path => (path === '/api/stats' ? STATS : payload.report)),
   apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
@@ -54,82 +33,130 @@ const settle = (ms = 250) => new Promise(r => setTimeout(r, ms))
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 
-async function mount() {
+function Where() {
+  return <output data-where>{useLocation().pathname}</output>
+}
+
+async function mount(report = REPORT) {
+  payload.report = report
   await render(
     <LangProvider>
       <MemoryRouter initialEntries={['/profile/stats']}>
         <div className="phone phone--desk">
           <div className="phone__content"><StatsScreen session={null} /></div>
         </div>
+        <Where />
       </MemoryRouter>
     </LangProvider>
   )
   await settle()
 }
 
+const plate = name => $$('.rep-plate').find(p => p.getAttribute('aria-label') === name)
+
 describe('the statistics on the desk', () => {
-  it('reads what holds beside where it leaks', async () => {
+  it('reads the strip on one row over the four plates, two by two', async () => {
     await mount()
-    const holds = $('.desk-stats__holds').getBoundingClientRect()
-    const leaks = $('.desk-stats__leaks').getBoundingClientRect()
-    expect(leaks.left).toBeGreaterThan(holds.right)
-    expect(Math.abs(leaks.top - holds.top)).toBeLessThan(2)
-    expect(leaks.width).toBe(360)
-    expect($('.desk-stats__holds .rep-line__svg')).not.toBeNull()
-    expect($('.desk-stats__leaks .trouble')).not.toBeNull()
+    const cells = $$('.rep-strip__cell').map(c => c.getBoundingClientRect())
+    expect(cells).toHaveLength(4)
+    for (const c of cells) expect(Math.abs(c.top - cells[0].top)).toBeLessThan(1)
+    // The line's cell and the ladder's are twice a figure's.
+    expect(cells[0].width).toBeGreaterThan(cells[1].width * 1.8)
+
+    const plates = $$('.rep-plate').map(p => p.getBoundingClientRect())
+    expect(plates).toHaveLength(4)
+    expect(Math.abs(plates[1].top - plates[0].top)).toBeLessThan(1)
+    expect(plates[1].left).toBeGreaterThan(plates[0].right)
+    expect(plates[2].top).toBeGreaterThan(plates[0].bottom)
+    expect(Math.abs(plates[2].left - plates[0].left)).toBeLessThan(1)
     expect(document.body.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    expect($('[role="dialog"]')).toBeNull()
   })
 
-  it('draws the retention line 1:1', async () => {
+  it('makes a row of plates as tall as its taller plate, and no taller', async () => {
+    await mount()
+    const [a, b] = $$('.rep-plate')
+    const ra = a.getBoundingClientRect()
+    expect(Math.abs(ra.height - b.getBoundingClientRect().height)).toBeLessThan(1)
+    const foot = Math.max(...[a, b].map(p => p.lastElementChild.getBoundingClientRect().bottom))
+    expect(ra.bottom - foot).toBeLessThan(28)
+  })
+
+  it('draws the line 1:1 at the strip\'s height, a stop a day in the first week', async () => {
     await mount()
     const svg = $('.rep-line__svg')
     const box = svg.getBoundingClientRect()
     const [, , w, h] = svg.getAttribute('viewBox').split(' ').map(Number)
-    expect(w).toBeGreaterThan(326)
     expect(Math.abs(w - box.width)).toBeLessThanOrEqual(1)
-    expect(h).toBe(160)
-    expect(Math.abs(box.height - 160)).toBeLessThanOrEqual(1)
+    expect(h).toBe(64)
+    const ridden = REPORT.days.length
+    expect($$('.rep-line__stop, .rep-line__now')).toHaveLength(ridden)
+    // The days left in the week are the rail ahead.
+    if (ridden < 7) expect($('.rep-line__ahead')).not.toBeNull()
+    expect($('.rep-axis')).toBeNull()
   })
 
-  it('opens a line\'s levels in place, one line at a time, bars aligned', async () => {
-    await mount()
-    const [kana, vocab] = $$('.desk-lines .rep-line-row[aria-expanded]')
-    expect(kana.getAttribute('aria-expanded')).toBe('true')
-    expect($$('.desk-lines__levels .rep-line-row--level')).toHaveLength(2)
-
-    vocab.click()
-    await settle(60)
-    expect(kana.getAttribute('aria-expanded')).toBe('false')
-    expect(vocab.getAttribute('aria-expanded')).toBe('true')
-    expect($$('.desk-lines__levels')).toHaveLength(1)
-    expect($('[role="dialog"]')).toBeNull()
-
-    // One table: every composition bar starts on the same line.
-    const lefts = $$('.desk-lines .composition').map(el => Math.round(el.getBoundingClientRect().left))
-    expect(new Set(lefts).size).toBe(1)
-
-    vocab.click()
-    await settle(60)
-    expect($('.desk-lines__levels')).toBeNull()
+  it('draws weeks once there are four of them', async () => {
+    await mount(LONG_REPORT)
+    const stops = $$('.rep-line__stop, .rep-line__now')
+    expect(stops.length).toBeGreaterThanOrEqual(4)
+    expect(stops.length).toBeLessThanOrEqual(12)
+    expect($('.rep-strip__when').textContent).toMatch(/sem\. du|week of/)
+    expect($('.rep-delta')).not.toBeNull()
   })
 
-  it('shows every trouble card, with no foot row and no sheet', async () => {
+  it('grids each line by exercise and deck, the leak in red, once a line', async () => {
     await mount()
-    expect($$('.trouble__row')).toHaveLength(12)
-    expect($('.trouble__more')).toBeNull()
+    const kanji = plate('Kanji')
+    expect([...kanji.querySelectorAll('.rep-grid__deck')].map(th => th.textContent)).toEqual(['N5', 'N4'])
+    expect(kanji.querySelectorAll('tbody tr')).toHaveLength(3)
+    const leaks = $$('.rep-cell--leak')
+    // Kanji's N4 drawing, vocabulary's N4 reading, grammar's one cell;
+    // kana holds everywhere.
+    expect(leaks).toHaveLength(3)
+    expect(plate('Kana').querySelector('.rep-cell--leak')).toBeNull()
+    expect(kanji.querySelector('.rep-cell--leak').getAttribute('aria-label')).toMatch(/N4/)
+    // A kana set's column is its first glyph.
+    expect([...plate('Kana').querySelectorAll('.rep-grid__deck')].map(th => th.textContent)).toEqual(['あ', 'きゃ', 'ア', 'キャ'])
+  })
+
+  it('opens the exercise\'s run from its cell, and a card\'s from its tile', async () => {
+    await mount()
+    plate('Kanji').querySelector('.rep-cell--leak').click()
+    await settle(60)
+    expect($('[data-where]').textContent).toBe('/learn/kanji/N4/kanji.write_kanji')
+  })
+
+  it('tiles each line\'s own weakest; a line with none says so', async () => {
+    await mount()
+    expect(plate('Kanji').querySelectorAll('.rep-tile')).toHaveLength(8)
+    expect(plate('Grammaire').querySelectorAll('.rep-tile')).toHaveLength(2)
+    expect(plate('Kana').querySelector('.rep-tile')).toBeNull()
+    expect(plate('Kana').querySelector('.rep-plate__none')).not.toBeNull()
+    const tile = plate('Kanji').querySelector('.rep-tile')
+    expect(tile.textContent).toContain('仕')
+    tile.click()
+    await settle(60)
+    expect($('[data-where]').textContent).toBe('/learn/kanji/N4/kanji.flashcard.f2b')
+  })
+
+  it('cuts no caption and squeezes no name', async () => {
+    await mount()
+    for (const el of $$('.rep-cap, .rep-plate__name, .rep-grid__mode, .rep-grid__deck')) {
+      expect(el.scrollWidth, el.textContent).toBeLessThanOrEqual(el.clientWidth + 1)
+    }
   })
 })
 
 // ── plan 123, P19 — the line asked by a mouse ──
-// The chart picked a week on a press, and on a move only while pressed:
-// a mouse over it -- the cursor a pointer -- was shown nothing. On the
-// desk the week under the mouse is asked as it passes, the pressed week
-// comes back when it leaves, and a click still pins one.
+// A mouse over the line asks the stop under it: the figures and the
+// caption follow it, the last stop comes back when it leaves, and a
+// click pins one.
 describe('the retention line under a mouse', () => {
-  it('previews the week under the pointer, and a click pins it', async () => {
+  it('previews the stop under the pointer, and a click pins it', async () => {
     const { userEvent } = await import('vitest/browser')
-    await mount()
-    const asked = () => $$('.rep-caps .rep-cap')[1]?.textContent
+    await mount(LONG_REPORT)
+    const asked = () => $('.rep-strip__when')?.textContent
     const ring = () => Number($('.rep-line__sel').getAttribute('cx'))
     const now = [asked(), ring()]
     await userEvent.hover($('.rep-line__svg'))
@@ -137,11 +164,11 @@ describe('the retention line under a mouse', () => {
     expect(asked()).not.toBe(now[0])
     expect(ring()).toBeLessThan(now[1])
     const middle = [asked(), ring()]
-    await userEvent.hover($('.rep-head'))
+    await userEvent.hover($('.rep-strip__figs'))
     await settle(60)
     expect([asked(), ring()]).toEqual(now)
     await userEvent.click($('.rep-line__svg'))
-    await userEvent.hover($('.rep-head'))
+    await userEvent.hover($('.rep-strip__figs'))
     await settle(60)
     expect([asked(), ring()]).toEqual(middle)
     // The lane's pointer is shared: parked, not over the next file's page.

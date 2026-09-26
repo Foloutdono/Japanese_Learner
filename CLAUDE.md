@@ -545,7 +545,20 @@ runtime purpose. Two consequences worth knowing:
   `splitTake`, `screens/TodayRun.jsx`, `src/today.wide.test.jsx`,
   `src/today.desktop.test.jsx`, `src/domain/lanes.test.js` and the 机
   section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **136** or higher, and check
+  **136** is 路線別, the statistics as the four lines (numbered 136
+  because 135 went to the fare gate), the owner's pick B of four drawn
+  directions: a strip of four figures — retention with its line, drawn
+  in days while there are three weeks or fewer (`retentionSeries`), the
+  reviews behind the asked stop, the misses, the ladder — over a plate
+  per line with its retention, its grid of exercise by deck with the
+  leak in red (`lineGrids`) and its most-missed cards, which
+  `/api/stats/report` now ranks per line (`srs.get_weakest_by_source`,
+  `WEAKEST_PER_LINE`) (cited in `routes/stats.py`, `srs/srs.py`,
+  `tests/test_stats_report.py`, `domain/statsModel.js`,
+  `components/stats/`, `screens/StatsScreen.jsx`,
+  `src/testing/statsRecord.js`, the `stats` desktop, wide and phone
+  tests and `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **137** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

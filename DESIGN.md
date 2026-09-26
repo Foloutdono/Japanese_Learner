@@ -1109,11 +1109,23 @@ plated gates take the window.
   radical swaps the page in place; the family's door no longer takes the
   lesson's place but swaps the index for the family, in the list, and
   back. The bare index opens on its page's biggest family.
-- **The statistics are one page.** What holds on the left — the retention
-  line drawn 1:1 at its card's own width (a 326-unit drawing magnified is
-  a phone's chart), the ladder, the lines with the open one's levels hung
-  under it on a shared column so every bar starts where the others do —
-  and where it leaks on the right, every trouble card. No sheet.
+- **The statistics are the four lines** (plan 136, the owner's pick B of
+  four drawn directions, the canvas "Statistics rework — options"). A
+  strip of four figures across the top — retention with its line beside
+  it, the reviews behind the stop the line is asked about, the misses of
+  the last thirty days, the strength ladder — over a plate per line,
+  two by two. A plate is its line's answer to the screen's one question:
+  its retention, a grid of retention by exercise and by deck (a row per
+  exercise ridden, a column per deck, the one cell furthest under the
+  learner's own average in the danger ink, every cell a door to that
+  run) and its most-missed cards as tiles, beside the grid while both
+  fit and under it when not. A row of plates is as tall as its taller
+  plate and no taller: a plate has no body to give the window's height
+  to the way a gate's upright line has, and a card stretched past its
+  grid holds air, so the page ends where the record does. The line is
+  drawn 1:1 at its cell's width, and in days while it would draw three
+  weeks or fewer. The phone stands the same plates in one column; there
+  is no sheet at either width.
 - **A run is a workspace.** The card is centred in what the run's side
   leaves; the side (StudyStage's `side`, fixed to the right edge, in the
   run's own pigment) is the entry's place: on a card run it holds **the

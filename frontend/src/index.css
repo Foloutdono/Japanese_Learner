@@ -11272,102 +11272,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-on-panel);
 }
 
-/* ── 弱点 — the trouble list (plan 085) ────────────────────
-   The card itself is the headline, because that's the thing you're
-   failing to recognise. Every row is a door into the drill it came
-   from; six on the screen, the rest behind one foot row, in a sheet. */
-.trouble {
-  display: flex;
-  flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  overflow: hidden;
-}
-.trouble--sheet { border: 0; border-radius: var(--r-flat); background: none; }
-.trouble__row {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  min-height: 44px;
-  padding: var(--sp-4) var(--sp-5);
-  border: 0;
-  border-top: 1px solid var(--surface-line);
-  border-radius: var(--r-flat);
-  background: none;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  transition: background 0.15s ease;
-}
-.trouble__row:first-child { border-top: 0; }
-.trouble__row--open { cursor: pointer; }
-.trouble__row--open:hover,
-.trouble__row--open:focus-visible { background: var(--overlay-hover); filter: none; }
-.trouble__glyph {
-  flex-shrink: 0;
-  min-width: 1.5em;
-  font-family: var(--font-jp);
-  font-size: var(--fs-title);
-  line-height: 1.1;
-  color: var(--text-primary);
-}
-.trouble__meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
-.trouble__where {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.trouble__accuracy-track {
-  height: 5px;
-  border-radius: var(--r-plate);
-  overflow: hidden;
-  background: color-mix(in srgb, var(--border) 70%, transparent);
-}
-.trouble__accuracy-fill { display: block; height: 100%; background: var(--danger); }
-.trouble__accuracy-value {
-  flex-shrink: 0;
-  min-width: var(--sp-8);
-  text-align: right;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-}
-.trouble__lapses {
-  flex-shrink: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-caption);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-.trouble__lapses-unit { font-size: var(--fs-caption-xs); margin-left: 1px; }
-.trouble__go { flex-shrink: 0; color: var(--text-secondary); opacity: 0.45; }
-.trouble__more {
-  min-height: 44px;
-  padding: 0 var(--sp-5);
-  border: 0;
-  border-top: 1px solid var(--surface-line);
-  border-radius: var(--r-flat);
-  background: none;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
-.trouble__more:hover,
-.trouble__more:focus-visible { color: var(--text-primary); background: var(--overlay-hover); filter: none; }
-@media (prefers-reduced-motion: reduce) {
-  .trouble__row { transition: none; }
-}
 /* A pass prints its holder on ONE line, because that is what a pass
    does: the field is a fixed slot, and a name too long for it is
    shortened, not run onto a second row. USERNAME_RE caps a name at 20
@@ -15045,7 +14949,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
      gap ABOVE stays large — that one separates two sections from each
      other and is doing real work. */
   .section-header { margin: 44px 0 12px; }
-  .trouble__row { padding: 12px; gap: 10px; }
   .profile-card { padding: 24px 20px; }
   .badges-grid { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
 }
@@ -17845,25 +17748,16 @@ form.stage__foot > .btn-primary {
 }
 .status-sheet__error { margin: 0; color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
 
-/* ── 運行実績 — the statistics, the service record (plan 085) ──
-   Four inserts and no heading: the retention line under its figure,
-   the strength ladder, the lines, the misses over the trouble list.
-   Study state wears state inks and ink; only a line's roundel wears a
+/* ── 路線別 — the statistics, line by line (plans 085, 136) ──
+   The strip — a hairline lattice of four figures, retention with its
+   line beside it — over a plate per line: its head, its grid of
+   exercise by deck, its most-missed cards as tiles. No block carries a
+   heading; each names itself with its mark. Study state wears state
+   inks and ink; only a line's roundel and its plate's stripe wear a
    line pigment, because a line is a place. */
-.rep-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-  padding: var(--sp-5);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-}
-.rep-card--rows { gap: var(--sp-2); padding: var(--sp-3) var(--sp-5); }
 .rep-head {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: var(--sp-3);
 }
 .rep-fig {
@@ -17877,7 +17771,7 @@ form.stage__foot > .btn-primary {
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
-.rep-fig--title { font-size: var(--fs-title); }
+.rep-fig--heading { font-size: var(--fs-heading); }
 .rep-fig__u { font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); }
 .rep-delta {
   font-family: var(--font-display);
@@ -17895,9 +17789,7 @@ form.stage__foot > .btn-primary {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.rep-cap { text-indent: var(--tr-caption); }
-.rep-caps { display: flex; justify-content: space-between; gap: var(--sp-3); }
-.rep-caps .rep-cap:last-child { text-indent: 0; text-align: right; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rep-cap { text-indent: var(--tr-caption); white-space: nowrap; }
 .rep-line { display: flex; flex-direction: column; gap: var(--sp-2); }
 /* The svg owns the horizontal gesture: a thumb sweeping along the line
    scrubs the weeks, and the page must not take that sweep as a scroll. */
@@ -17920,69 +17812,246 @@ form.stage__foot > .btn-primary {
 .rep-line__svg:focus-visible .rep-line__sel { stroke: var(--accent2); }
 .rep-axis { display: flex; justify-content: space-between; }
 
-.rep-ladder { display: flex; flex-direction: column; gap: var(--sp-3); }
-.rep-ladder__bar { display: flex; gap: var(--sp-1); height: var(--sp-6); }
-.rep-ladder__rung {
+/* A step is a rung over its count and its reach, as wide as its share
+   and never narrower than its caption or a thumb. */
+.rep-ladder { display: flex; gap: var(--sp-1); }
+.rep-ladder__step {
   flex: var(--n) 1 0;
-  min-width: var(--sp-8);
+  min-width: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  line-height: 1;
+}
+.rep-ladder__rung {
+  height: var(--sp-6);
   border-radius: var(--r-plate);
   background: color-mix(in srgb, var(--state-mastered) var(--tint), var(--surface));
 }
 /* A rung nobody's cards have reached is drawn, not painted: the reach
    stays on the axis so the wave has somewhere to go. */
 .rep-ladder__rung--empty { background: none; border: 1px dashed var(--surface-line); }
-.rep-ladder__caps { display: flex; gap: var(--sp-1); }
-.rep-ladder__cap {
-  flex: var(--n) 1 0;
+.rep-ladder__n { font-weight: 700; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.rep-ladder__reach {
   min-width: var(--sp-8);
+  font-weight: 700;
+  font-size: var(--fs-caption-xs);
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+/* The strip: two across on a phone, the line's cell and the ladder's
+   the row's whole width — four cells, no short row. */
+.rep-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  background: var(--surface-line);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.rep-strip__cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-3);
+  min-width: 0;
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--surface);
+}
+.rep-strip__cell--line,
+.rep-strip__cell--ladder { grid-column: 1 / -1; }
+.rep-strip__cell--line {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--sp-5);
+}
+.rep-strip__figs {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.rep-strip__cell--line > .rep-line { flex: 1; min-width: 0; }
+
+/* The plates: one column on a phone. */
+.rep-plates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.rep-plate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+  padding: var(--sp-4) var(--sp-5) var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-bottom: 3px solid var(--line-color);
+  border-radius: var(--r-card);
+}
+.rep-plate__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.rep-plate__names {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--sp-1);
-  font-family: var(--font-display);
-  line-height: 1;
 }
-.rep-ladder__cap b { font-weight: 700; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; color: var(--text-primary); }
-.rep-ladder__cap span { font-weight: 700; font-size: var(--fs-caption-xs); letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); white-space: nowrap; }
-
-.rep-lines { display: flex; flex-direction: column; }
-.rep-line-row {
+.rep-plate__name {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.rep-plate__fig { flex-shrink: 0; }
+.rep-plate__none {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+/* The grid takes the width its columns need and the tiles the rest;
+   when both will not fit on one row the tiles go under it. A grid
+   wider than a phone (five levels ridden) scrolls in its own box. */
+.rep-plate__body {
   display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  min-height: 44px;
-  padding: 0;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--sp-5) var(--sp-6);
+}
+.rep-grid-box {
+  flex: 0 1 auto;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.rep-grid { border-collapse: collapse; }
+.rep-grid td { padding: 0; }
+.rep-grid__deck {
+  padding: 0 var(--sp-1) var(--sp-1);
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.rep-grid__deck:lang(ja) { font-family: var(--font-jp); }
+.rep-grid__mode {
+  padding-right: var(--sp-5);
+  text-align: left;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.rep-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-1);
+  width: var(--sp-8);
+  min-height: var(--sp-8);
+  padding: 0 var(--sp-1);
   border: 0;
-  border-radius: var(--r-flat);
+  border-radius: var(--r-plate);
   background: none;
   font: inherit;
   color: inherit;
   text-align: left;
+  transition: background 0.15s ease;
 }
-.rep-line-row:hover,
-.rep-line-row:focus-visible { filter: none; }
-.rep-line-row:hover .pf-line__roundel,
-.rep-line-row:focus-visible .pf-line__roundel { background: color-mix(in srgb, var(--line-color, var(--accent2)) 18%, transparent); }
-.rep-line-row--level { cursor: default; }
-.rep-line-row__name {
-  flex: 0 0 auto;
-  min-width: var(--sp-9);
+.rep-cell:hover,
+.rep-cell:focus-visible { background: var(--overlay-hover); filter: none; }
+.rep-cell--none {
   font-family: var(--font-display);
-  font-weight: 700;
   font-size: var(--fs-sm);
-  color: var(--text-primary);
-}
-.rep-line-row__pct {
-  flex: 0 0 auto;
-  min-width: var(--sp-8);
-  text-align: right;
-  font-family: var(--font-display);
   font-weight: 700;
-  font-size: var(--fs-body);
+  color: var(--text-secondary);
+}
+.rep-cell--none:hover { background: none; }
+.rep-cell__pct {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
-.rep-line-row__pct--none { color: var(--text-secondary); }
-.rep-lines--sheet { padding: var(--sp-3) 0; }
+.rep-cell__track {
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, var(--state-new) 26%, transparent);
+}
+.rep-cell__fill { display: block; height: 100%; background: var(--text-primary); }
+.rep-cell--leak .rep-cell__fill { background: var(--danger); }
+.rep-plate__side {
+  flex: 1 1 calc(4 * var(--sp-8) + 3 * var(--sp-2));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: calc(4 * var(--sp-8) + 3 * var(--sp-2));
+}
+.rep-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.rep-tile {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-width: var(--sp-8);
+  min-height: var(--sp-8);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: none;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.rep-tile:hover,
+.rep-tile:focus-visible { border-color: var(--line-color); transform: translateY(-1px); filter: none; }
+.rep-tile__glyph {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: 1.1;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+.rep-tile__pct {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rep-cell,
+  .rep-tile { transition: none; }
+  .rep-tile:hover,
+  .rep-tile:focus-visible { transform: none; }
+}
 .composition {
   flex: 1;
   min-width: var(--sp-9);
@@ -22097,64 +22166,27 @@ a.slip__act { text-decoration: none; }
     color: var(--text-secondary);
   }
 
-  /* Statistics (plan 114): the sentence the screen reads, in two
-     columns (screens/StatsScreen.jsx). What holds on the left — the
-     retention line drawn 1:1 (RetentionLine's `fit`), the ladder, the
-     lines with the open one's levels hung under it — and where it leaks
-     on the right: the misses, and every trouble card at the phone's own
-     width. The bar, a wait and an empty state span both. */
-  .desk-stats {
+  /* Statistics (plan 136): the strip on one row — the line's cell
+     three times a figure's width and the ladder's twice, none of the
+     three narrower than its captions, the line giving way first on the
+     narrowest desk — and the four plates two by two, the two of a row
+     sharing its height. Not the window's: a plate has no body that can
+     take room the way a gate's upright line can (plan 130), and a plate
+     stretched past its grid is a card holding air (DESIGN.md, the
+     density contract), so the row is as tall as its taller plate and the
+     page ends where the record does. On a plate the tiles stand beside
+     the grid while both fit, and under it when the grid needs the
+     width. */
+  .desk-stats .rep-strip {
+    grid-template-columns:
+      minmax(0, 3fr) minmax(max-content, 1fr) minmax(max-content, 1fr) minmax(max-content, 2fr);
+  }
+  .desk-stats .rep-strip__cell--line,
+  .desk-stats .rep-strip__cell--ladder { grid-column: auto; }
+  .desk-stats > .rep-plates {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
-    align-items: start;
-    column-gap: var(--sp-6);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .desk-stats > * { grid-column: 1 / -1; }
-  .desk-stats__holds {
-    grid-column: 1;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-5);
-    min-width: 0;
-  }
-  .desk-stats__holds:last-child { grid-column: 1 / -1; }
-  .desk-stats__leaks {
-    grid-column: 2;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-5);
-  }
-  /* The lines and the open line's levels are one table: every name in
-     one column, so every composition bar starts where the others do and
-     two lines, or two levels, compare at a glance. The open line's
-     levels hang from its roundel on a drawn line in the line's pigment,
-     the way the rail's stations hang from the lit gate. */
-  .desk-lines {
-    display: grid;
-    grid-template-columns: auto max-content minmax(0, 1fr) auto;
-    column-gap: var(--sp-4);
-  }
-  .desk-lines__line { display: contents; }
-  .desk-lines__levels {
-    position: relative;
-    grid-column: 2 / -1;
-    display: grid;
-    grid-template-columns: subgrid;
-  }
-  .desk-lines__levels::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto var(--sp-5) calc(-1 * (var(--sp-4) + var(--sp-5)));
-    width: 2px;
-    background: var(--line-color);
-    opacity: 0.55;
-  }
-  .desk-lines .rep-line-row {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: subgrid;
-  }
-  .desk-lines__line--open .pf-line__roundel { background: color-mix(in srgb, var(--line-color) 18%, transparent); }
 
   /* Settings: the list and the open page side by side
      (screens/SettingsScreen.jsx). The list stays in view while the page

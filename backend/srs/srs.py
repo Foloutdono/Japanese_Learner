@@ -1342,22 +1342,48 @@ class SRSEngine:
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
-    def get_weakest_cards(self, user_id: str, limit: int = 10) -> list[dict[str, Any]]:
-        """Reviewed cards with the lowest accuracy (ties broken by most lapses)."""
+    def get_weakest_by_source(self, user_id: str, per_source: int = 8) -> list[dict[str, Any]]:
+        """The cards each line keeps missing (plan 136): up to
+        `per_source` per source -- the raw id's first segment, kana_,
+        vocab_, kanji_, grammar_ -- lapses first, then accuracy.
+
+        Ranked within each source rather than overall, because the
+        statistics draw a plate per line: twelve overall went eight to
+        kanji and none to a line whose cards are missed less often but
+        are missed all the same. And only a card that has been missed
+        at all: a line with nothing wrong has no weakest card, and a
+        card at 100% is not one to review.
+
+        Sorted by source, then rank; the caller places each card in its
+        deck and drops what it cannot place.
+        """
         pattern = self._user_prefix_pattern(user_id)
+        # 1-based: the character after "{user_id}:".
+        raw_from = len(user_id) + 2
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 mode_sql, mode_params = self._servable_filter()
                 sql = f"""
-                    SELECT card_id, mode, total_reviews, correct_reviews, lapses
-                    FROM card_modes
-                    WHERE card_id LIKE %s
-                      AND total_reviews > 0{mode_sql}
-                    ORDER BY (correct_reviews::float / total_reviews) ASC, lapses DESC
-                    LIMIT %s
+                    SELECT card_id, mode, total_reviews, correct_reviews, lapses FROM (
+                        SELECT card_id, mode, total_reviews, correct_reviews, lapses,
+                               split_part(substr(card_id, %s), '_', 1) AS source,
+                               ROW_NUMBER() OVER (
+                                   PARTITION BY split_part(substr(card_id, %s), '_', 1)
+                                   ORDER BY lapses DESC,
+                                            correct_reviews::float / total_reviews ASC,
+                                            card_id, mode
+                               ) AS rank
+                        FROM card_modes
+                        WHERE card_id LIKE %s
+                          AND total_reviews > 0
+                          AND correct_reviews < total_reviews{mode_sql}
+                    ) ranked
+                    WHERE rank <= %s
+                    ORDER BY source, rank
                 """
-                self._log_sql("get_weakest_cards", sql, (pattern,) + mode_params + (limit,))
-                cur.execute(sql, (pattern,) + mode_params + (limit,))
+                params = (raw_from, raw_from, pattern) + mode_params + (per_source,)
+                self._log_sql("get_weakest_by_source", sql, params)
+                cur.execute(sql, params)
                 rows = cur.fetchall()
         return [
             {
