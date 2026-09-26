@@ -1158,6 +1158,11 @@ const dictionary = {
   dictGrammar:       'Grammar',
   dictLevels:        'Levels',
   dictLevelAll:      'All',
+  // How the search reads the query: how strictly, and where.
+  dictMatch:         'Match',
+  dictMatchOptions:  { word: 'Whole word', start: 'Starts with', any: 'Anywhere' },
+  dictField:         'Search in',
+  dictFieldOptions:  { all: 'All', japanese: 'Japanese', meaning: 'Meaning' },
   // The search was retried against a word the catalogue holds, because
   // what was typed found nothing. A statement, not a question.
   dictCorrectedFor:  'Results for',

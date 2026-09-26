@@ -277,3 +277,75 @@ def test_browsing_is_what_it_was(client):
         assert body["results"], category
         assert body["corrected"] is None, category
         assert parse("").empty
+
+
+# ── How strictly, and where (match / field) ───────────────────
+#
+# Every term used to be matched as a SUBSTRING of everything: "sun"
+# found Sunday and misunderstanding in the glosses and 寸法 through the
+# romaji すん, a prefix of すんぽう; "fun" found funds, function and
+# 雰囲気 (ふんいき) ahead of anything fun.
+
+
+def test_a_gloss_matches_on_a_whole_word_by_default(client):
+    body = _page(client, category="vocab", q="sun", lang="fr", limit=200)
+    surfaces = _surfaces(body)
+    assert "太陽" in surfaces and "日" in surfaces
+    for not_sun in ("日曜日", "日曜", "誤解"):   # Sunday, misunderstanding
+        assert not_sun not in surfaces, not_sun
+
+
+def test_romaji_matches_a_whole_reading_by_default(client):
+    surfaces = _surfaces(_page(client, category="vocab", q="fun", lang="fr", limit=200))
+    for not_fun in ("雰囲気", "噴火", "噴水", "資本", "機能"):
+        assert not_fun not in surfaces, not_fun
+    assert "分" in surfaces          # ふん, the whole reading
+    assert "からかう" in surfaces     # "to make fun of"
+
+
+def test_what_the_query_names_exactly_comes_first(client):
+    body = _page(client, category="vocab", q="sun", lang="en", limit=5)
+    assert set(_surfaces(body)[:2]) == {"日", "太陽"}
+
+
+def test_japanese_typed_as_japanese_is_still_found_inside_a_word(client):
+    surfaces = _surfaces(_page(client, category="vocab", q="水", lang="fr", limit=50))
+    assert surfaces[0] == "水"
+    assert "水曜日" in surfaces
+
+
+def test_match_start_and_any_widen_the_net(client):
+    word = _page(client, category="vocab", q="sun", lang="fr", limit=200)
+    start = _page(client, category="vocab", q="sun", lang="fr", limit=200, match="start")
+    anywhere = _page(client, category="vocab", q="sun", lang="fr", limit=200, match="any")
+    assert word["total"] < start["total"] < anywhere["total"]
+    assert "日曜日" in _surfaces(start)        # Sunday starts with sun
+    assert "誤解" in _surfaces(anywhere)       # misunderSTANDing holds it
+    assert "誤解" not in _surfaces(start)
+    starts = _surfaces(_page(client, category="vocab", q="たべ", limit=50, match="start"))
+    assert "食べる" in starts and "食べ物" in starts
+
+
+def test_field_says_where_to_look(client):
+    japanese = _surfaces(_page(client, category="vocab", q="sun", limit=50, field="japanese"))
+    assert "寸" in japanese and "太陽" not in japanese
+    meaning = _surfaces(_page(client, category="vocab", q="mizu", limit=50, field="meaning"))
+    assert "水" not in meaning
+    kanji = _surfaces(_page(client, category="kanji", q="mizu", limit=50, field="japanese"))
+    assert kanji[0] == "水"
+
+
+def test_a_kun_reading_is_read_without_its_okurigana_dot(client):
+    # KANJIDIC files 食べる's reading as た.べる.
+    assert "食" in _surfaces(_page(client, category="kanji", q="taberu", limit=20))
+
+
+def test_an_unknown_match_or_field_is_the_default(client):
+    base = _page(client, category="vocab", q="sun", limit=5)["total"]
+    assert _page(client, category="vocab", q="sun", limit=5, match="nope", field="?")["total"] == base
+
+
+def test_a_correction_keeps_the_strictness(client):
+    typed = _page(client, category="vocab", q="watre", lang="en", limit=5, match="start")
+    assert typed["corrected"] == "water"
+    assert typed["total"] == _page(client, category="vocab", q="water", limit=5, match="start")["total"]

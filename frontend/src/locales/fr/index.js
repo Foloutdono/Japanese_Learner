@@ -1127,6 +1127,11 @@ const dictionary = {
   dictGrammar:       'Grammaire',
   dictLevels:        'Niveaux',
   dictLevelAll:      'Tous',
+  // Comment la recherche lit la requête : à quel point, et où.
+  dictMatch:         'Correspondance',
+  dictMatchOptions:  { word: 'Mot entier', start: 'Début', any: 'Partout' },
+  dictField:         'Chercher dans',
+  dictFieldOptions:  { all: 'Tout', japanese: 'Japonais', meaning: 'Sens' },
   // Voir en/index.js : une constatation, pas une question.
   dictCorrectedFor:  'Résultats pour',
   dictionaryPlaceholderGrammar: 'Rechercher un point, une structure ou un sens…',
