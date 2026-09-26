@@ -835,11 +835,13 @@ runtime purpose. Two consequences worth knowing:
   いますか stays "does anyone know"); polite hearsay (おいしいそうです),
   whose pattern is written with だ, by `_hearsay_spans` after a plain form;
   and a point in its other spelling (`_SPELLINGS`: に従って for
-  〜にしたがって, にくらべて for 〜に比べて, 事が出来る, 下さい, 時 and
-  所 held to their readings), each pair tested to read alike, with the
-  spellings that are other words left out (を持って, に取って, 物, 様) or
-  guarded (に渡って, に当たって, を巡って, に連れて行く) -- UniDic's lemma
-  was no way in, filing をもって under 持つ. And the verb of a compound
+  〜にしたがって, にくらべて for 〜に比べて, 事が出来る, 下さい, 時 held
+  to its reading), each pair tested to read alike, with the spellings
+  that are other words left out (を持って, に取って, 物, 様, and after
+  three reviewers' ~2,300 sentences に当たって, を巡って, と言っても, 所,
+  耐えない, the bare 事) or guarded (に渡って, 子供を公園に連れて, 体に
+  応える, 右に見える) -- UniDic's lemma was no way in, filing をもって
+  under 持つ. And the verb of a compound
   particle carries no card (について's つい is no 着く "to arrive"), its
   row opening the point (cited in `study/grammar_detect.py`'s
   `compound_particles`, `study/analysis.py`'s `LOCAL_REV` 7,
