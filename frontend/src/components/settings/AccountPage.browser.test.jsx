@@ -31,8 +31,10 @@ import '../../index.css'
 const auth = { signOut: vi.fn(), updateUser: vi.fn(), refreshSession: vi.fn(async () => ({})) }
 const connectProvider = vi.fn(async () => ({ ok: true }))
 vi.mock('../../lib/supabase', () => ({ supabase: { auth } }))
-vi.mock('../../lib/api', () => ({ apiFetch: vi.fn(async () => ({ ok: false })) }))
-vi.mock('../../lib/platform', () => ({ isNative: () => false, openExternal: vi.fn() }))
+// The page carries the data's slips since plan 139, which write through
+// apiJson and save through saveBlob; none of these cases presses them.
+vi.mock('../../lib/api', () => ({ apiFetch: vi.fn(async () => ({ ok: false })), apiJson: vi.fn(async () => ({})) }))
+vi.mock('../../lib/platform', () => ({ isNative: () => false, openExternal: vi.fn(), saveBlob: vi.fn() }))
 // Only the round trip is stubbed: hasProvider is the module's own
 // reading of a session shape and is exactly what this page branches
 // on, so it stays real.

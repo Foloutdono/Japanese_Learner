@@ -24,6 +24,30 @@
 // canvas's rule (plan 068): Japanese is content, and a pass's label is
 // chrome. The gear that used to sit beside the issuer went with the
 // records' door to Settings (ProfileBlocks.jsx).
+// The card's head: brand and issuer in its top corners. Its own
+// component since Settings prints the same card with its contract
+// (plan 139, components/settings/SettingsPass.jsx), under a heading of
+// its own — so there the label is a plain span.
+export function PassHead({ t, headingTag: Heading = 'h1' }) {
+  return (
+    <div className="pass__head">
+      <span className="pass__brand">
+        {/* The contactless mark every IC card in Japan is printed
+            with — three arcs thickening outward. */}
+        <span className="pass__wave" aria-hidden="true"><span /><span /><span /></span>
+        {/* The profile's own <h1>: the pass label is exactly that
+            screen's name. */}
+        <Heading className="pass__brand-sub">{t.passLabel}</Heading>
+      </span>
+
+      <span className="pass__head-right">
+        {/* The issuing station's mark — every card says who issued it. */}
+        <span className="pass__issuer" aria-hidden="true">JP</span>
+      </span>
+    </div>
+  )
+}
+
 export function CommuterPass({ profile, t, children, footer = null, headingTag: Heading = 'h1' }) {
   const span = Math.max(1, profile.xpForNext - profile.xpPrevLevel)
   const into = Math.min(span, Math.max(0, profile.xp - profile.xpPrevLevel))
@@ -35,21 +59,7 @@ export function CommuterPass({ profile, t, children, footer = null, headingTag: 
           printed — brand and issuer in the top corners, holder in the
           middle, the balance along the bottom with the class printed
           large beside it. */}
-      <div className="pass__head">
-        <span className="pass__brand">
-          {/* The contactless mark every IC card in Japan is printed
-              with — three arcs thickening outward. */}
-          <span className="pass__wave" aria-hidden="true"><span /><span /><span /></span>
-          {/* This screen's own <h1>: the pass label is exactly this
-              screen's name. */}
-          <Heading className="pass__brand-sub">{t.passLabel}</Heading>
-        </span>
-
-        <span className="pass__head-right">
-          {/* The issuing station's mark — every card says who issued it. */}
-          <span className="pass__issuer" aria-hidden="true">JP</span>
-        </span>
-      </div>
+      <PassHead t={t} headingTag={Heading} />
 
       <div className="pass__body">
         {children}

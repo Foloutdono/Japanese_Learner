@@ -3,6 +3,12 @@ import { useLang } from '../../LangContext'
 import { Bar, Leave } from '../chrome/Bar'
 import { GearIcon } from '../ui/Icons'
 import { SettingsPaneContext } from './pane'
+import { useBoxWidth } from '../../hooks/useBoxWidth'
+
+// Two columns of slips need room for two at a phone's content width
+// (plan 139): measured on the pane, not set at a window width, since the
+// column beside it takes what the window leaves.
+const TWO_COLUMNS = 620
 
 // ── A settings page (canvas Settings*, plan 074) ──────────────
 // The bar — the page's name and ‹ Settings — over the slips. It is the
@@ -11,17 +17,20 @@ import { SettingsPaneContext } from './pane'
 // when a page is reached from somewhere other than the list (the
 // status sheet lands on Destination).
 //
-// On the desk (plan 113) the page opens in a pane beside the list
-// (components/settings/pane.js): the list's bar is the screen's one
-// <h1>, so the page's own bar is an <h2>, and it prints no ‹ Settings —
-// the list is right there.
+// On the desk (plan 113) the page opens in a pane beside the column.
+// It prints no title there (plan 139, the owner's call): the door that
+// opened it is lit in the column beside it — the pass's field or the
+// list's row — so a heading over the page named it a second time. The
+// name stays as the pane's <h2>, clipped, for a screen reader; the
+// column's own <h1> is clipped the same way.
 export function SettingsPage({ title, children, back = '/profile/settings', backLabel = null }) {
   const { t } = useLang()
   const inPane = useContext(SettingsPaneContext)
+  const [paneRef, paneWidth] = useBoxWidth(inPane)
   if (inPane) {
     return (
-      <section className="desk-settings__page" aria-label={title}>
-        <Bar code={<GearIcon size={14} />} title={title} color="var(--pass-ink)" as="h2" />
+      <section ref={paneRef} className={`desk-settings__page${paneWidth >= TWO_COLUMNS ? ' desk-settings__page--two' : ''}`} aria-label={title}>
+        <h2 className="sr-only">{title}</h2>
         {children}
       </section>
     )
@@ -53,4 +62,16 @@ export function Slip({ label = null, cap = null, children, className = '' }) {
       {children}
     </div>
   )
+}
+
+// Two columns of slips (plan 139). A phone stacks them, first column
+// first; a desk page wide enough for two stands them side by side, so
+// a page with two halves (the account and its data, the presets and the
+// mixer) is read across rather than down a column 640px wide.
+export function SlipColumns({ children }) {
+  return <div className="stg-cols">{children}</div>
+}
+
+export function SlipColumn({ children }) {
+  return <div className="stg-col">{children}</div>
 }

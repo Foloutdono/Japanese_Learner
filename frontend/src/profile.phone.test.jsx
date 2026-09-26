@@ -162,7 +162,7 @@ describe('the profile at phone width', () => {
 })
 
 describe('the settings at phone width', () => {
-  it('the list rows are 60px targets divided by hairlines; the services three across, the stops five, the destinations four', async () => {
+  it('the list rows are 60px targets divided by hairlines; the services three across, the stops five, the destinations upright', async () => {
     const screen = await render(
       <main className="settings">
         <div className="bar" style={{ '--line-color': 'var(--pass-ink)' }}><div className="bar__row"><span className="bar__roundel" aria-hidden="true">SG</span><span className="bar__names"><h1 className="bar__title">Settings</h1></span><span className="bar__aside"><button type="button" className="stage__leave">‹ Profile</button></span></div><div className="bar__stripe" aria-hidden="true" /></div>
@@ -192,8 +192,11 @@ describe('the settings at phone width', () => {
           <button type="button" className="btn-secondary btn-secondary--danger slip__act">Delete</button>
         </div>
         <div className="slip">
-          <div className="dest-grid">
-            {['N4', 'N3', 'N2', 'N1'].map(l => <button key={l} type="button" className={`dest${l === 'N3' ? ' dest--on' : ''}`}><span className="dest__code">{l}</span><span className="dest__load">Elementary</span></button>)}
+          <div className="dest-stops">
+            <div className="dest-here dest-here--leaving"><span className="dest__dot" /><span className="dest__names"><span className="dest__code">N4</span><span className="dest__load">Elementary</span></span><span className="dest__when dest__when--here">You are here</span></div>
+            <div className="dest-grid">
+              {['N3', 'N2', 'N1'].map(l => <button key={l} type="button" className={`dest${l === 'N3' ? ' dest--on dest--ridden' : ''}`}><span className="dest__dot" /><span className="dest__names"><span className="dest__code">{l}</span><span className="dest__load">Intermediate</span></span><span className="dest__when">12 Mar 2027</span></button>)}
+            </div>
           </div>
           <div className="hour-grid">
             {['Morning', 'Noon', 'Evening', 'Flexible'].map(h => <button key={h} type="button" className="svc"><span className="svc__jp">{h}</span><span className="svc__pace">07:30</span></button>)}
@@ -227,11 +230,22 @@ describe('the settings at phone width', () => {
     for (const svc of screen.container.querySelectorAll('.svc')) {
       expect(svc.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     }
-    // The chosen service is the one with the pass ink on its edge.
+    // The chosen service is the one with the gold on its edge.
     const onSvc = screen.container.querySelector('.svc--on')
     const offSvc = screen.container.querySelector('.svc-grid .svc:not(.svc--on)')
     expect(getComputedStyle(onSvc).borderTopColor).not.toBe(getComputedStyle(offSvc).borderTopColor)
-    expect(columns(screen.container.querySelector('.dest-grid'))).toBe(4)
+    // The stops ahead stand upright (plan 139), a target each, and the
+    // line runs through every dot: each row draws its own halves of it.
+    const stops = [...screen.container.querySelectorAll('.dest-stops :is(.dest, .dest-here)')]
+    for (const stop of stops) expect(stop.getBoundingClientRect().height).toBeGreaterThanOrEqual(52)
+    for (let i = 1; i < stops.length; i++) expect(stops[i].getBoundingClientRect().top).toBeGreaterThan(stops[i - 1].getBoundingClientRect().top)
+    const cx = r => r.left + r.width / 2
+    for (const stop of stops) {
+      const dot = stop.querySelector('.dest__dot').getBoundingClientRect()
+      const half = getComputedStyle(stop, '::after')
+      const railCx = stop.getBoundingClientRect().left + parseFloat(getComputedStyle(stop).borderLeftWidth) + parseFloat(half.left) + parseFloat(half.width) / 2
+      expect(Math.abs(railCx - cx(dot))).toBeLessThan(1)
+    }
     expect(columns(screen.container.querySelector('.hour-grid'))).toBe(4)
   })
 })

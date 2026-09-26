@@ -1216,6 +1216,9 @@ describe('the places (plan 123, P16)', () => {
     const { default: SettingsScreen } = await import('./screens/SettingsScreen')
     const seen = await mount('/profile/settings', <SettingsScreen session={{ access_token: 't', user: { email: 'a@b.c' } }} />)
     const rows = buttons('.stg-row[data-page]')
+    // The pass's doors too (plan 139): a field keeps its ›.
+    buttons('.stg-pass .stg-door')
+    expect(document.querySelectorAll('.stg-pass__field .stg-pass__chev')).toHaveLength(3)
     expect(document.querySelector('main a')).toBeNull()
     expect(getComputedStyle(rows[0].querySelector('.stg-row__chev')).display).not.toBe('none')
     rows.find(r => r.dataset.page === 'display').click()

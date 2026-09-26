@@ -17612,9 +17612,8 @@ form.stage__foot > .btn-primary {
 .balance-line { justify-content: space-between; }
 .balance-line__reading { display: flex; align-items: baseline; gap: var(--sp-5); min-width: 0; }
 /* A cap is small print, and here it never was. `.jour-cap` carries no
-   rule of its own — it is dressed by context, and the two selectors
-   that do it (.jour-line__status .jour-cap, .dest-line .jour-cap) both
-   miss this line. So the unit and the refill fell through to the
+   rule of its own — it is dressed by context, and the selector that
+   does it (.jour-line__status .jour-cap) misses this line. So the unit and the refill fell through to the
    inherited body size: 15.2px at weight 400 in full pass ink, against
    the 13.1px gold figure they belong to. The caption was bigger than
    the number, and no alignment could make that read right — which is
@@ -18160,12 +18159,23 @@ form.stage__foot > .btn-primary {
 .stg-row:first-child { border-top: 0; }
 .stg-row__names { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .stg-row__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); line-height: 1.2; }
+/* The value: what the row is set to, drawn where it can be (plan 139,
+   components/settings/RowSpecimens.jsx) and said beside the drawing. The
+   words give way before the drawing does. */
 .stg-row__value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  max-width: 60%;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.stg-row__text {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
 }
 .stg-row__chev { flex: none; color: var(--text-secondary); }
 /* The pass row: the list's own furniture, with its value in the
@@ -18179,7 +18189,6 @@ form.stage__foot > .btn-primary {
 a.slip__act { text-decoration: none; }
 .stg-row__sub { font-size: var(--fs-caption); color: var(--text-secondary); line-height: 1.3; }
 .stg-row__ext { flex: none; font-family: var(--font-display); font-weight: 700; color: var(--text-secondary); }
-.stg-signout { align-self: stretch; }
 .slip { display: flex; flex-direction: column; gap: var(--sp-3); }
 .slip__label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
 .slip__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
@@ -18240,8 +18249,6 @@ a.slip__act { text-decoration: none; }
 .lvlstrip__code { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
 .lvlstrip__jp { font-family: var(--font-display); font-size: var(--fs-caption-xs); letter-spacing: var(--tr-term); text-transform: uppercase; }
 .svc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
-.svc-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.grades { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
 .hour-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); }
 .svc {
   display: flex;
@@ -18258,7 +18265,17 @@ a.slip__act { text-decoration: none; }
   font: inherit;
   text-align: center;
 }
-.svc--on { border-color: var(--pass-ink); background: color-mix(in srgb, var(--pass-ink) 14%, var(--surface)); }
+.svc:hover,
+.svc:focus-visible { filter: none; border-color: color-mix(in srgb, var(--accent2) 55%, var(--surface-line)); }
+/* A selection is a gold ring (DESIGN.md, The chrome): these are the
+   pass's own settings, and gold is its metal (plan 139). */
+.svc--on,
+.svc--on:hover,
+.svc--on:focus-visible {
+  border-color: var(--accent2);
+  box-shadow: inset 0 0 0 1px var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 12%, var(--surface));
+}
 .svc__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
 .svc__pace {
   font-family: var(--font-display);
@@ -18273,29 +18290,486 @@ a.slip__act { text-decoration: none; }
    in light theme (3.96:1 measured); its captions take the primary ink. */
 .svc--on .svc__pace,
 .svc--on .svc__words { color: var(--text-primary); }
-.dest-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); }
-.dest {
-  display: inline-flex;
+/* ── Destination: the line upright, a stop a row (plan 139) ──
+   The stop you stand at, then every stop ahead with the date the pass's
+   service reaches it. The rail is drawn a half at a time by each row --
+   the upper half from the row above, the lower half to the row below --
+   so it runs unbroken whatever each row's height, and the stretch to the
+   chosen stop is inked as ridden. */
+.dest-stops,
+.dest-grid { display: flex; flex-direction: column; }
+:is(.dest, .dest-here) {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--sp-8) minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--sp-3);
+  width: 100%;
+  min-height: var(--sp-9);
+  padding: 0 var(--sp-4) 0 0;
+  border: 1px solid transparent;
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+:is(.dest, .dest-here)::before,
+:is(.dest, .dest-here)::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--sp-8) / 2 - 1.5px);
+  width: 3px;
+  background: color-mix(in srgb, var(--pass-ink) 35%, var(--text-secondary));
+}
+:is(.dest, .dest-here)::before { top: 0; height: 50%; }
+:is(.dest, .dest-here)::after { top: 50%; bottom: 0; }
+.dest-here::before,
+.dest-grid > .dest:last-child::after,
+.dest-stops:not(:has(.dest)) .dest-here::after { display: none; }
+.dest--ridden::before,
+.dest--through::after,
+.dest-here--leaving::after { background: var(--text-primary); }
+.dest:hover,
+.dest:focus-visible { filter: none; border-color: var(--surface-line); }
+.dest--on,
+.dest--on:hover,
+.dest--on:focus-visible {
+  border-color: var(--accent2);
+  box-shadow: inset 0 0 0 1px var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 10%, transparent);
+}
+.dest__dot {
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  width: 13px;
+  height: 13px;
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  border: 2px solid var(--text-secondary);
+}
+.dest--ridden .dest__dot { border-color: var(--text-primary); }
+.dest-here .dest__dot,
+.dest--on .dest__dot { background: var(--text-primary); border-color: var(--text-primary); }
+.dest--on .dest__dot { box-shadow: 0 0 0 3px var(--bg-main), 0 0 0 4px var(--text-primary); }
+.dest__names { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.dest__code { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); line-height: 1; }
+.dest__load {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.dest__when {
+  display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dest__when--here { color: var(--text-secondary); }
+.dest__tag {
+  font-size: var(--fs-caption-xs);
+  letter-spacing: var(--tr-term);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* On the chosen stop's wash the secondary ink slips under the floor in
+   light theme, as it does on a chosen service card (below). */
+.dest--on :is(.dest__load, .dest__tag) { color: var(--text-primary); }
+.dest-line__date {
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* ── A page's foot: what the pass will print, and the one act ── */
+.stg-foot { display: flex; flex-direction: column; gap: var(--sp-4); }
+.stg-foot__line { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-2) var(--sp-3); }
+.stg-foot__was { font-size: var(--fs-caption); color: var(--text-secondary); }
+
+/* ── The column: the pass over the list (plan 139) ── */
+.stg-home { display: flex; flex-direction: column; gap: var(--sp-5); }
+
+/* The pass printed with its contract: the profile's card (.pass) with
+   its route and its fields where the holder and the balance go. Every
+   ink on it is a panel ink: the card is sumi in both themes. */
+.pass.stg-pass { gap: var(--sp-4); padding: var(--sp-5) var(--sp-5) var(--sp-2); }
+.stg-pass__route { display: flex; align-items: center; gap: var(--sp-4); }
+.stg-pass__stop {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-on-panel);
+  font: inherit;
+  text-align: left;
+}
+.stg-pass__stop:hover,
+.stg-pass__stop:focus-visible { filter: none; border-color: var(--accent2); }
+.stg-pass__code {
+  font-family: var(--font-display);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel);
+}
+.stg-pass__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+  white-space: nowrap;
+}
+/* The line between the two stops, and its arrow: the way the pass reads. */
+.stg-pass__rail { position: relative; flex: 1; min-width: var(--sp-6); height: var(--sp-4); }
+.stg-pass__rail::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: var(--sp-2);
+  top: calc(50% - 1px);
+  height: 2px;
+  background: var(--text-on-panel-soft);
+}
+.stg-pass__rail::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: calc(50% - 6px);
+  border-style: solid;
+  border-width: 6px 0 6px 8px;
+  border-color: transparent transparent transparent var(--text-on-panel-soft);
+}
+.stg-pass__fields { display: flex; flex-direction: column; margin-inline: calc(-1 * var(--sp-3)); }
+.stg-pass__field {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: var(--sp-8);
+  padding: var(--sp-2) var(--sp-3);
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-on-panel);
+  font: inherit;
+  text-align: left;
+}
+.stg-pass__field:is(a, button):hover,
+.stg-pass__field:is(a, button):focus-visible { filter: none; background: color-mix(in srgb, var(--accent2) 10%, transparent); }
+.stg-pass__key {
+  flex: 0 0 34%;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.stg-pass__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-on-panel);
+}
+/* The validity in the pass's metal, as the issuer's mark is. */
+.stg-pass__field--valid .stg-pass__value { color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel)); }
+.stg-pass__chev { flex: none; color: var(--text-on-panel-soft); }
+
+/* The rows' drawings (components/settings/RowSpecimens.jsx): the theme's
+   grounds, the mixer's levels, the rating bar's dots. */
+.stg-swatch {
+  flex: none;
+  width: var(--sp-5);
+  height: var(--sp-5);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--surface-line);
+}
+.stg-swatch--light { background: var(--paper); }
+.stg-swatch--dark { background: var(--bg-panel); }
+.stg-swatch--auto { background: linear-gradient(135deg, var(--paper) 50%, var(--bg-panel) 50%); }
+.stg-meter { flex: none; display: inline-flex; align-items: flex-end; gap: var(--sp-1); height: var(--sp-5); }
+.stg-meter__bar { width: 3px; border-radius: var(--r-plate); background: var(--accent2); }
+.stg-meter--muted .stg-meter__bar { background: var(--text-secondary); }
+.stg-dots { flex: none; display: inline-flex; align-items: center; gap: var(--sp-1); }
+.stg-dots__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--rating-color, var(--text-secondary)); }
+.stg-dots__dot--best { background: var(--accent2); }
+
+/* Two columns of slips (SettingsPage's SlipColumns): stacked here; the
+   desk stands them side by side where the page is wide enough. */
+.stg-cols,
+.stg-col { display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
+
+/* ── Service: each pace a line to the destination (plan 139) ──
+   One time axis for the three services and the learner's own pace, the
+   names in a column sized by the longest, every rail starting today.
+   The rows share the chart's two tracks (subgrid), so the axis over
+   them and the rails under it agree. */
+.svc-chart { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--sp-4); }
+.svc-chart__axis { grid-column: 2; position: relative; height: var(--sp-5); margin-right: var(--sp-3); }
+.svc-chart__tick {
+  position: absolute;
+  top: 0;
+  padding-left: var(--sp-1);
+  border-left: 1px solid var(--surface-line);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.svc-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: center;
+  width: 100%;
+  min-height: var(--sp-9);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid transparent;
+  border-top-color: var(--surface-line);
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+button.svc-row:hover,
+button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); }
+.svc-row--on,
+.svc-row--on:hover,
+.svc-row--on:focus-visible {
+  border-color: var(--accent2);
+  box-shadow: inset 0 0 0 1px var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 10%, transparent);
+}
+.svc-row--on + .svc-row { border-top-color: transparent; }
+.svc-row__names { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); min-width: 0; }
+.svc-row__name { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; white-space: nowrap; }
+.svc-row__pace {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.svc-row__tag {
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.svc-row--on :is(.svc-row__pace, .svc-row__tag) { color: var(--text-primary); }
+/* The date sits over the rail, the rail low in the track. */
+.svc-row__track { position: relative; height: var(--sp-9); min-width: 0; }
+.svc-row__track::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: calc(68% - 4px);
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--text-primary);
+}
+.svc-row__rail {
+  position: absolute;
+  left: 0;
+  top: calc(68% - 1.5px);
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--pass-ink) 60%, var(--text-secondary));
+}
+.svc-row--on .svc-row__rail { background: var(--text-primary); }
+.svc-row__rail--dashed { background: repeating-linear-gradient(90deg, var(--text-secondary) 0 6px, transparent 6px 11px); }
+.svc-row__end {
+  position: absolute;
+  top: calc(68% - var(--sp-6) / 2);
+  width: var(--sp-6);
+  height: var(--sp-6);
+  margin-left: calc(var(--sp-6) / -2);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--sp-1);
-  min-height: 48px;
+  border: 2px solid color-mix(in srgb, var(--pass-ink) 60%, var(--text-secondary));
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: normal;
+  color: var(--text-primary);
+}
+.svc-row--on .svc-row__end { border-color: var(--text-primary); }
+.svc-row__end--dashed { border-style: dashed; border-color: var(--text-secondary); }
+.svc-row__when {
+  position: absolute;
+  top: 0;
+  transform: translateX(calc(var(--sp-6) / -2));
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.svc-row__when--back { transform: translateX(calc(var(--sp-6) / 2 - 100%)); }
+.svc-row--yours .svc-row__when { color: var(--text-secondary); }
+
+/* ── Display: the themes drawn, the languages said (plan 139) ──
+   A theme is a screen at thumbnail size in its own materials, drawn
+   from the inks that do not flip (--paper, --bg-panel), so the light
+   one stays light under the dark theme; the device's is both, cut on
+   the diagonal. */
+.theme-picks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+.theme-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
   padding: var(--sp-2);
+  border: 1px solid transparent;
+  border-radius: var(--r-panel);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+}
+.theme-pick:hover,
+.theme-pick:focus-visible { filter: none; border-color: var(--surface-line); }
+.theme-pick--on,
+.theme-pick--on:hover,
+.theme-pick--on:focus-visible {
+  border-color: var(--accent2);
+  box-shadow: inset 0 0 0 1px var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 8%, transparent);
+  color: var(--text-primary);
+}
+.theme-pick__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
+.theme-mini {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  overflow: hidden;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.theme-mini__face { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.theme-mini__face--light { background: var(--paper); color: var(--text-on-fill); }
+.theme-mini__face--dark { background: color-mix(in srgb, var(--text-on-panel) 6%, var(--bg-panel)); color: var(--text-on-panel); }
+.theme-mini__face--cut { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.theme-mini__bar { flex: none; height: var(--sp-3); background: var(--bg-panel); }
+.theme-mini__bar--foot { margin-top: auto; }
+.theme-mini__card {
+  flex: 0 0 42%;
+  margin: var(--sp-3) var(--sp-3) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-plate);
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  line-height: 1;
+}
+.theme-mini__face--light .theme-mini__card {
+  background: color-mix(in srgb, var(--text-on-fill) 5%, var(--paper));
+  border: 1px solid color-mix(in srgb, var(--text-on-fill) 18%, var(--paper));
+}
+.theme-mini__face--dark .theme-mini__card {
+  background: color-mix(in srgb, var(--text-on-panel) 10%, var(--bg-panel));
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 20%, var(--bg-panel));
+}
+.theme-mini__line { height: var(--sp-1); margin: var(--sp-2) var(--sp-3) 0; border-radius: var(--r-pill); background: currentcolor; opacity: 0.2; }
+.theme-mini__line--short { width: 50%; }
+.lang-picks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.lang-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
   background: var(--surface);
   color: var(--text-primary);
   font: inherit;
+  text-align: left;
 }
-.dest--on { border-color: var(--pass-ink); background: color-mix(in srgb, var(--pass-ink) 14%, var(--surface)); }
-.dest__code { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
-.dest__load { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-term); color: var(--text-secondary); }
-.dest--on .dest__load { color: var(--text-primary); }
-.dest-line { color: var(--text-primary); }
-.dest-line .jour-cap { color: var(--text-secondary); }
-.dest-line .dest-line__date { color: var(--text-primary); }
-.dest-line__note { margin-left: auto; letter-spacing: var(--tr-term); text-transform: none; }
+.lang-pick:hover,
+.lang-pick:focus-visible { filter: none; border-color: color-mix(in srgb, var(--accent2) 55%, var(--surface-line)); }
+.lang-pick--on,
+.lang-pick--on:hover,
+.lang-pick--on:focus-visible {
+  border-color: var(--accent2);
+  box-shadow: inset 0 0 0 1px var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
+}
+.lang-pick__name { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
+.lang-pick__sample { font-size: var(--fs-caption); color: var(--text-secondary); }
+.lang-pick--on .lang-pick__sample { color: var(--text-primary); }
+
+/* ── Notation: the three bars themselves (plan 139) ──
+   Each scale is offered as the rating bar it is (RatingBar's specimen),
+   inside the radio that picks it. The specimen takes no pointer, so the
+   radio is what the hover and the press reach. */
+.grades { display: flex; flex-direction: column; gap: var(--sp-3); }
+.grade {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+.grade:hover,
+.grade:focus-visible { filter: none; border-color: color-mix(in srgb, var(--accent2) 55%, var(--surface-line)); }
+.grade--on,
+.grade--on:hover,
+.grade--on:focus-visible {
+  border-color: var(--accent2);
+  box-shadow: inset 0 0 0 1px var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
+}
+.grade__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
+.rating-bar.rating-bar--specimen { display: block; pointer-events: none; }
+.rating-bar--specimen .rating-bar__buttons { max-width: none; margin: 0; gap: var(--sp-2); }
+.rating-bar--specimen .rating-bar__btn { min-height: var(--sp-8); }
 .btn-depart--sheet { box-shadow: none; }
 .lvl-sheet__body { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); }
 .lvl-sheet__strong { color: var(--text-primary); }
@@ -22413,13 +22887,17 @@ a.slip__act { text-decoration: none; }
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  /* Settings: the list and the open page side by side
-     (screens/SettingsScreen.jsx). The list stays in view while the page
-     scrolls, and the open page's row is marked the way a selection is:
-     in gold, the pass's metal — these are the pass's own settings. */
+  /* Settings: the column and the open page side by side
+     (screens/SettingsScreen.jsx). The column -- the pass printed with its
+     contract over the list -- stays in view while the page scrolls, at
+     the entry's width, giving down to the side column's on the narrowest
+     desk; the open door is marked the way a selection is: in gold, the
+     pass's metal -- these are the pass's own settings. Neither the column
+     nor the page prints a title (plan 139, the owner's call): the rail's
+     lit station names the screen, the lit door the page. */
   .desk-settings {
     display: grid;
-    grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
+    grid-template-columns: min(var(--desk-entry-w), max(var(--desk-side-w), 40%)) minmax(0, 1fr);
     align-items: start;
     column-gap: var(--sp-6);
   }
@@ -22429,26 +22907,60 @@ a.slip__act { text-decoration: none; }
     flex-direction: column;
     gap: var(--sp-5);
     /* Bounded like every sticky column (plan 123), its top and height
-       the side's (above): on a 600px window Sign out sat under the
-       fold, beyond any scroll. */
+       the side's (above): on a 600px window the list's foot sat under
+       the fold, beyond any scroll. */
     overflow-y: auto;
   }
-  /* A page's controls at the card's width (plan 123): seven action
-     buttons -- Export, Delete account, Sign out -- ran ~770px wide for a
-     one-word label at 1440. */
+  /* The page takes the rest of the width (plan 139): it stopped at the
+     card's width, and a 1440 window held a 640px page beside a 360px
+     list with its right third empty. Its slips stand as cards, two
+     columns of them where the page holds two (below); a slip's action
+     still spans its own card, never the page. */
   .desk-settings__page {
     display: flex;
     flex-direction: column;
     gap: var(--sp-5);
     min-width: 0;
-    max-width: var(--card-w);
     animation: arrive-soft 0.2s linear;
   }
+  .desk-settings__page :is(.slip, .stg-foot) {
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  /* A card the page's own width stops at the card's (plan 123): an
+     action spans its card, and seven of them -- Export, Delete account,
+     Sign out -- ran ~770px wide for a one-word label. Two columns stand
+     under it already. */
+  .desk-settings__page > :is(.slip, .stg-foot) { max-width: var(--card-w); }
+  /* Two columns where the pane holds two at a phone's content width --
+     measured on the pane (components/settings/SettingsPage.jsx), since
+     the column beside it takes what the window leaves. */
+  .desk-settings__page--two .stg-cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  /* On a card the page's ground under a hollow stop is the card's. */
+  .desk-settings__page :is(.dest:not(.dest--on) .dest__dot, .svc-row__end) { background: var(--surface); }
+  .desk-settings__page .dest--on .dest__dot { box-shadow: 0 0 0 3px var(--surface), 0 0 0 4px var(--text-primary); }
   .desk-settings .stg-row--on,
   .desk-split .gl-index__row[aria-current="page"],
   .desk-split .exam-review-row[aria-current="page"] {
     background: color-mix(in srgb, var(--accent2) 8%, transparent);
     box-shadow: inset 3px 0 0 var(--accent2);
+  }
+  /* The pass's doors, lit the same way on the card's sumi: a wash of its
+     gold and its rail, or its ring for a stop. */
+  .desk-settings .stg-pass__field--on {
+    background: color-mix(in srgb, var(--accent2) 18%, transparent);
+    box-shadow: inset 3px 0 0 var(--accent2);
+  }
+  .desk-settings .stg-pass__stop--on {
+    border-color: var(--accent2);
+    box-shadow: inset 0 0 0 1px var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 16%, transparent);
   }
 
   /* ── the stations, laid out for the width (plan 114) ──
@@ -22658,10 +23170,10 @@ a.slip__act { text-decoration: none; }
   a:is(.deck-card, .radical-tile) { font-weight: 600; }
   a:is(.deck-card, .radical-tile, .chip) { line-height: normal; }
   a:is(.radical-tile, .chip, .stage__leave) { text-align: center; }
-  a:is(.deck-card, .radical-tile, .chip, .stage__leave, .record--door, .pf-line, .stg-row) { text-decoration: none; }
+  a:is(.deck-card, .radical-tile, .chip, .stage__leave, .record--door, .pf-line, .stg-row, .stg-pass__field, .stg-pass__stop) { text-decoration: none; }
   a.stg-row { transition: filter 0.15s; }
   a.stg-row:hover { filter: brightness(1.15); }
-  a:is(.deck-card, .radical-tile, .chip, .stage__leave, .record--door, .pf-line, .stg-row):focus-visible {
+  a:is(.deck-card, .radical-tile, .chip, .stage__leave, .record--door, .pf-line, .stg-row, .stg-pass__field, .stg-pass__stop):focus-visible {
     outline: 2px solid var(--accent2);
     outline-offset: 2px;
   }

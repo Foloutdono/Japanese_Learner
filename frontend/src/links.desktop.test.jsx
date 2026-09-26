@@ -132,49 +132,56 @@ function Page({ at, path = '*', children }) {
   )
 }
 
-describe('Settings\' rows on the desk', () => {
+describe('Settings\' doors on the desk', () => {
   it('are links that replace the page beside them, one tab stop, with no ›', async () => {
     await render(<Page at="/profile/settings/sound" path="/profile/settings/:page"><SettingsScreen session={{ access_token: 't', user: { email: 'a@b.c' } }} /></Page>)
     await settle()
     const rows = $$('.desk-settings__list .stg-row[data-page]:not([data-page="pass"])')
     expect(rows.every(r => r.tagName === 'A')).toBe(true)
     expect(rows.map(r => r.getAttribute('href'))).toContain('/profile/settings/display')
-    expect(rows.filter(r => r.tabIndex === 0).map(r => r.dataset.page)).toEqual(['sound'])
+    // The pass's fields are doors of the same column (plan 139).
+    const fields = $$('.desk-settings__list .stg-pass .stg-door')
+    expect(fields.map(f => f.getAttribute('href'))).toEqual(['level', 'destination', 'service', 'hour', 'lines'].map(p => `/profile/settings/${p}`))
+    expect($$('.desk-settings__list .stg-door').filter(r => r.tabIndex === 0).map(r => r.dataset.page)).toEqual(['sound'])
     expect(getComputedStyle($('.desk-settings__list .stg-row[data-page="sound"] .stg-row__chev')).display).toBe('none')
+    expect($('.desk-settings__list .stg-pass__chev')).toBeNull()
     await compare($('.desk-settings__list .stg-list'), '.stg-row[data-page]:not([data-page="pass"])')
+    await compare($('.desk-settings__list .stg-pass__fields'), '.stg-pass__field[data-page]')
+    await compare($('.desk-settings__list .stg-pass__route'), '.stg-pass__stop')
   })
 
-  it('opens three pages with no entry for Back, walked with ↑/↓, with the button\'s hover and ring', async () => {
+  it('opens three pages with no entry for Back, walked with ↑/↓ from the pass down, with the button\'s hover and ring', async () => {
     await render(<Page at="/profile/settings/sound" path="/profile/settings/:page"><SettingsScreen session={{ access_token: 't', user: { email: 'a@b.c' } }} /></Page>)
     await settle()
-    const row = page => $(`.desk-settings__list .stg-row[data-page="${page}"]`)
-    for (const page of ['display', 'data', 'account']) {
-      await userEvent.click(row(page))
+    const door = page => $(`.desk-settings__list .stg-door[data-page="${page}"]`)
+    for (const page of ['display', 'rating', 'account']) {
+      await userEvent.click(door(page))
       await settle(150)
       expect(here.path).toBe(`/profile/settings/${page}`)
       expect(here.type).toBe('REPLACE')
     }
-    expect(row('account').tabIndex).toBe(0)
-    expect(row('sound').tabIndex).toBe(-1)
-    row('account').focus()
+    expect(door('account').tabIndex).toBe(0)
+    expect(door('sound').tabIndex).toBe(-1)
+    door('account').focus()
     await userEvent.keyboard('{ArrowUp}')
-    expect(document.activeElement).toBe(row('data'))
+    expect(document.activeElement).toBe(door('help'))
+    // One walk for the column: Home is the pass's first door.
     await userEvent.keyboard('{Home}')
-    expect(document.activeElement).toBe(row('display'))
+    expect(document.activeElement).toBe(door('level'))
     // Moving is focus only; Space opens, as on a split's row.
     expect(here.path).toBe('/profile/settings/account')
     await userEvent.keyboard(' ')
     await settle(150)
-    expect(here.path).toBe('/profile/settings/display')
+    expect(here.path).toBe('/profile/settings/level')
     expect(here.type).toBe('REPLACE')
     // The ring a button draws, and the hover it keeps.
     await userEvent.keyboard('{ArrowDown}')
-    const ring = getComputedStyle(row('sound'))
-    expect(document.activeElement).toBe(row('sound'))
+    const ring = getComputedStyle(door('destination'))
+    expect(document.activeElement).toBe(door('destination'))
     expect([ring.outlineStyle, ring.outlineWidth]).toEqual(['solid', '2px'])
-    await userEvent.hover(row('learning'))
+    await userEvent.hover(door('rating'))
     await settle(250)
-    expect(getComputedStyle(row('learning')).filter).toBe('brightness(1.15)')
+    expect(getComputedStyle(door('rating')).filter).toBe('brightness(1.15)')
   })
 })
 

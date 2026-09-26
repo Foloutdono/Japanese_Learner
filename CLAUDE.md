@@ -123,7 +123,7 @@ runtime purpose. Two consequences worth knowing:
   `screens/RideRun.jsx`, `screens/RideReading.jsx`,
   `screens/RidePreview.jsx`, `components/guide/`, `hooks/useGuide.js`,
   `stores/guide.js`, `components/reading/ReadingPieces.jsx`,
-  `components/settings/LearningPage.jsx`, `components/study/Readings.jsx`,
+  `components/settings/HelpPage.jsx` (then `LearningPage.jsx`), `components/study/Readings.jsx`,
   `domain/paywall.js`, `lib/routePattern.js` and `index.css`; ADR 0017;
   DESIGN.md, "The spot and the note"; `docs/design/mobile/README.md`).
   **102–110** are wave 22, the vocab deck review — 102 (done) is 母 and
@@ -591,7 +591,24 @@ runtime purpose. Two consequences worth knowing:
   `components/stats/`, `screens/StatsScreen.jsx`,
   `src/testing/statsRecord.js`, the `stats` desktop, wide and phone
   tests and `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **139** or higher, and check
+  **139** is 設定, Settings as the pass's contract (the owner's pick of
+  B and C on the canvas "Settings rework — options", with the titles off
+  on the desk): Settings opens on the pass printed with its contract —
+  the level → the destination, the service, the daily ride, the lines,
+  the validity — each field a door to its page, the daily pace one field
+  where it was two pages' cards; under it a list whose rows draw what they
+  are set to; pages that draw what they set (each stop ahead dated, each
+  service a line on one time axis with the learner's own pace dashed, the
+  themes as screens, the three rating bars as the bar); Learning split
+  into Level, Lines, Rating and Help, Data folded into Account (the old
+  addresses land where their content went), Sign out once; on the desk
+  the column beside a page that takes the width in two columns of cards,
+  neither printing a title (cited in `screens/SettingsScreen.jsx`,
+  `components/settings/`, `components/study/RatingBar.jsx`'s `specimen`,
+  `components/profile/CommuterPass.jsx`'s `PassHead`,
+  `src/settings.phone.test.jsx`, `src/settings.desktop.test.jsx` and
+  `index.css`; DESIGN.md, "The desk" and Structure).
+  When starting a new wave, begin at **140** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

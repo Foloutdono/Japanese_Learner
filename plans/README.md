@@ -6590,3 +6590,34 @@ exercises would not fit as columns in a desk plate, and decks have short
 names); the plates do not stretch to the window (above); the retention
 cell names the asked stop and the reviews cell follows it, where the
 drawing had a fixed "7 j".
+
+## Plan 139 — 設定, Settings as the pass's contract (2026-09-26)
+
+Numbered 139 after a grep of main found nothing at 139 or above. The
+owner's ask: rework the settings screen on the phone and the desk,
+options first. Drawn on the canvas "Settings rework — options" (the
+screen as it rendered, and three directions, each on a desk and a phone
+board: A everything on one page, B the pass's contract, C the list
+repaired); the owner picked **B and C combined, with the screen titles
+removed on the desk**.
+
+What the screen got wrong: two taps and a Back to flip a theme or a
+language, four of seven doors opening a page of one to three controls;
+the daily pace on two pages (Learning's cards, saved on a tap, and
+Destination's, waiting for Reprint) over one number,
+`user_profiles.daily_new_target`; Sign out printed twice; two rows
+printing nothing at their right; a destination's or a pace's date shown
+only once chosen; and on the desk a 360px list over empty space beside a
+page stopped at 640px.
+
+| # | What | Status |
+|---|------|--------|
+| 139 | **From B**: Settings opens on the pass printed with its contract (`SettingsPass`, the profile's `.pass` with `PassHead` shared out of `CommuterPass`): the route (the level it boards at → the destination) and the fields (service, daily ride, lines, the validity in gold), each but the validity a `SettingsDoor` to its page. Learning split along those fields: `LevelPage` (the strip, the placement retake, the confirm sheet), `LinesPage`, the pace to `ServicePage` — one field where it was two pages' cards: with a destination each pace is a line to it on one time axis (`contract.timeAxis`: years past a year's span, months under it, thinned for a phone's track) with the date the pass would print and the learner's own pace of the last fortnight (`journeyModel`'s `actualPerDay`) dashed beside them, Reprint writing `POST /api/journey/reprint`; without one the three cards save on the spot and the way to a destination stands under them. `DestinationPage` stands the line upright, each stop dated at the pass's service (`goalDerived`), the printed one tagged, the rail inked to the stop chosen; `HourPage` the daily ride. **From C**: under the pass a list whose rows draw what they are set to (`RowSpecimens`: the theme's grounds, the mixer's levels, the rating bar's dots) — Display, Sound, Rating, Help, Account, Credits, the pass offer; Display draws the themes as screens (from `--paper` and `--bg-panel`, which do not flip) and says each language in itself; Rating offers the three scales as the bar itself (`RatingBar`'s new `specimen`, spans, no keys, hidden from a screen reader); Help holds the ride and the guide; the data's slips (`DataSlips`) are the account page's second half; Sign out is printed once, there. A selection is a gold ring throughout (`.svc--on` included). `/profile/settings/learning` lands on `level`, `data` on `account`. **Desk**: the column (pass over list) at `--desk-entry-w` giving down to `--desk-side-w`, the page the rest of the width, its slips cards in two columns (`SlipColumns`) where the pane, measured by `useBoxWidth` (the desk section nests no container query), holds two, a card of the page's own width stopping at `--card-w`; **no title on either** — the rail's station and the lit door name them, both headings clipped; the pass's fields and the list's rows are one walk. Tests: `SettingsScreen.browser` rewritten, `settings.desktop` (no titles, the lit field, two columns at 1440, Sign out once), `settings.phone` new (the doors as targets, the chart's dates and ticks inside a phone's track, the themes drawn), `links.desktop`, `radios.desktop`, `deskfree.phone`, `profile.phone`, `columns.wide`, `contrast` and `AccountPage.browser` moved to the new DOM | DONE (2026-09-26) |
+
+Deviations from the drawings, each for a reason found in the build: the
+dates sit over the service lines rather than beside them, which ran off a
+phone's track; the axis prints years once the span passes one (two
+"avr." read as one); the desk's Display page stands the themes beside the
+language, since three screens across a whole page drew them at a phone's
+height; the bare column opens on the destination rather than on the
+first row.
