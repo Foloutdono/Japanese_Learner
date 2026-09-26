@@ -93,6 +93,37 @@ describe('the door opens before it leaves (plan 144)', () => {
   })
 })
 
+// ── The gate stands whole on a phone (plan 144) ─────────────────────
+// Its motion kept, its look redrawn. Two of the fixes are faults
+// rather than taste, so they are held here: at 110vw the rig was
+// squeezed back to the screen's width and ran edge to edge, each
+// cabinet's outer side on the glass; and both lamps sat on their
+// pillars' OUTER edges, where the comment over them had always put
+// them inside, by the lane.
+describe('the gate stands whole on a phone (plan 144)', () => {
+  it('both cabinets stand clear of the edges of the screen', async () => {
+    await SCENES.gate()
+    await settle()
+    // Measured against the scene's own box, which is the screen less
+    // any scrollbar gutter the browser keeps (index.css reserves one).
+    const box = document.querySelector('.gate').getBoundingClientRect()
+    const rig = document.querySelector('.gate__rig').getBoundingClientRect()
+    expect(rig.left - box.left).toBeGreaterThanOrEqual(4)
+    expect(box.right - rig.right).toBeGreaterThanOrEqual(4)
+  })
+
+  it('each lamp runs down its pillar on the lane side', async () => {
+    await SCENES.gate()
+    await settle()
+    const lane = document.querySelector('.gate__lane').getBoundingClientRect()
+    const [left, right] = [...document.querySelectorAll('.gate__lamp')].map(l => l.getBoundingClientRect())
+    const [pl, pr] = [...document.querySelectorAll('.gate__pillar')].map(p => p.getBoundingClientRect())
+    // Each nearer the lane than its pillar's outer edge.
+    expect(lane.left - left.right).toBeLessThan(left.left - pl.left)
+    expect(right.left - lane.right).toBeLessThan(pr.right - right.right)
+  })
+})
+
 describe('a cutscene spends the key that skips it', () => {
   for (const [name, mount] of Object.entries(SCENES)) {
     it(`the ${name}: Space skips it and never reaches the screen under it`, async () => {
