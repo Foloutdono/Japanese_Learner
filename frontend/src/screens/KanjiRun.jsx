@@ -328,6 +328,7 @@ export default function KanjiRun({ session }) {
               contentKey={`${card.card_id}:${card.lang ?? ''}`}
               stamp={gates.stamp}
               stage={card.stage}
+              progress={card.progress ?? null}
               onStampDone={gates.stampDone}
             >
               {renderer === RENDER.TYPE ? (

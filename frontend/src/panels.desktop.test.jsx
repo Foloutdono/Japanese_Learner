@@ -66,7 +66,7 @@ const DAY = 86400
 // A learning card as a run serves it: its stage, and per rating when
 // the scheduler would bring it back (srs.py's preview_reviews_bulk).
 const CARD = {
-  card_id: 'kanji_N5_山', stage: 'learning',
+  card_id: 'kanji_N5_山', stage: 'learning', progress: 0.25,
   review_preview: {
     0: { due_in: 180 }, 1: { due_in: 180 }, 2: { due_in: 600 },
     3: { due_in: 3 * DAY }, 4: { due_in: 21 * DAY }, 5: { due_in: 40 * DAY },
@@ -226,6 +226,18 @@ describe('the card panel', () => {
     const labels = $$('.desk-stops__labels > span')
     expect(labels).toHaveLength(3)
     expect(labels[1].classList.contains('desk-stops__here')).toBe(true)
+    // The fare strip (plan 147): the stretch behind the card full, the
+    // one it is in filled to its progress, the one ahead empty -- each
+    // stretch on its label's column.
+    const legs = $$('.desk-stops__leg')
+    expect(legs).toHaveLength(3)
+    const fill = leg => leg.querySelector('.desk-stops__fill').getBoundingClientRect().width / leg.getBoundingClientRect().width
+    expect(legs.map(fill).map(f => Math.round(f * 100) / 100)).toEqual([1, 0.25, 0])
+    legs.forEach((leg, i) => {
+      const a = leg.getBoundingClientRect(), b = labels[i].getBoundingClientRect()
+      expect(Math.abs((a.left + a.right) / 2 - (b.left + b.right) / 2)).toBeLessThan(1)
+    })
+    expect($('.desk-stops').getAttribute('aria-label')).toContain('25 %')
     // Four verdicts, worst to best as the bar draws them, each with its digit.
     const tiles = $$('.desk-verdict')
     expect(tiles).toHaveLength(4)

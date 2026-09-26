@@ -173,6 +173,8 @@ def _select_cards(domain: str, tier: int, m: Mode, lang: str, count: int, exclud
         "frequency study request domain=%s tier=%d tier_size=%d mode=%s user_id=%s requested=%d due_count=%d picked=%d",
         domain, tier, tier_size, mode, user_id, count, len(due), len(cards),
     )
+    # Each card's bar, new to mastered (plan 147).
+    srs.attach_progress(cards, user_id)
     return pool, cards
 
 

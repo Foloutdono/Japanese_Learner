@@ -5,14 +5,16 @@ import { useRatingScale } from '../../stores/ratingScale'
 import { useRunTally } from '../../stores/runTally'
 import { dueFigure, dueText } from '../../domain/forecast'
 import { DeskFigure } from './RunRecords'
+import { STAGES, cardProgress, stripFills } from '../../domain/cardProgress'
 
 // ── 机 — the card panel, the second of a run's two left panels (plan 126) ──
 // The run's instrument panel, under the session panel: what the card
 // on the stage is and what each verdict would do to it, before the
 // learner presses one.
 //
-//   - The card's state on a line with stops -- new, learning, learned
-//     -- the train at the stage it is in (the card's `stage`).
+//   - The card's state on a fare strip -- new, learning, learned --
+//     filled to the stage it is in and how far through it (the card's
+//     `stage` and `progress`, plan 147).
 //   - The verdicts as tiles, two by two, in the learner's own scale
 //     (four or six, domain/ratingScales), worst to best as the rating
 //     bar draws them, each a figure: when the card comes back as the
@@ -37,7 +39,6 @@ import { DeskFigure } from './RunRecords'
 //
 // Rendered by a run as StudyStage's `panel`, which draws it only on the
 // desk's panels; a phone never mounts it.
-const STAGES = ['new', 'learning', 'mastered']
 
 function useClock(everyMs) {
   const [now, setNow] = useState(() => Date.now())
@@ -68,7 +69,7 @@ export function CardPanel({ card, remaining = null, keys = 'card' }) {
 
   return (
     <section className="desk-run__panel desk-card" aria-label={t.deskCardPanel}>
-      <StateLine stage={stage} t={t} />
+      <StateLine stage={stage} progress={card?.progress} t={t} />
       <div className="desk-verdicts" role="list" aria-label={t.deskCardPanel} data-guide="run.verdicts">
         {verdicts.map(({ q, label, digit }) => {
           const due = preview?.[String(q)]?.due_in
@@ -112,26 +113,29 @@ export function CardPanel({ card, remaining = null, keys = 'card' }) {
   )
 }
 
-// The card's line: three stops, the train above the one the card is
-// at, the rail filled up to it -- the app's own drawing of distance
-// (DESIGN.md, "A line with stops"), at the size of a caption. The
-// stops stand at the centres of three equal columns so the labels
-// under them line up without measuring.
-function StateLine({ stage, t }) {
+// The card's line as a fare strip (plan 147, the owner's pick D): three
+// stretches, one a stage, the stages behind the card full, the one it
+// stands at filled by how far it has come (domain/cardProgress's
+// stripFills) -- a new card its first stretch, a card in learning the
+// middle one to its progress, a mastered card the whole strip. Each
+// stretch in its stage's pigment, the labels under them on the same
+// three columns so they line up without measuring. Where plan 126's
+// line put a train above the stop, this says how far along it is.
+function StateLine({ stage, progress, t }) {
   const at = STAGES.indexOf(stage)
-  const xs = [1 / 6, 1 / 2, 5 / 6].map(f => f * 300)
   const labels = [t.progressNew, t.progressLearning, t.progressMastered]
+  const fills = stripFills(stage, progress)
+  const percent = Math.round((cardProgress(stage, progress) ?? 0) * 100)
+  const said = stage === 'learning' ? `${labels[at]} · ${percent} %` : labels[at]
   return (
-    <div className="desk-stops" role="img" aria-label={`${t.deskCardPanel} · ${labels[at]}`} data-guide="run.state">
-      <svg className="desk-stops__line" viewBox="0 0 300 30" preserveAspectRatio="none" aria-hidden="true">
-        <line x1={xs[0]} y1="21" x2={xs[2]} y2="21" stroke="currentColor" strokeOpacity=".25" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-        <line x1={xs[0]} y1="21" x2={xs[at]} y2="21" stroke="var(--accent2)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-        {xs.map((x, i) => (
-          <circle key={i} cx={x} cy="21" r="4" fill={i <= at ? 'var(--accent2)' : 'var(--bg-main)'} stroke="currentColor" strokeOpacity=".6" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+    <div className="desk-stops" role="img" aria-label={`${t.deskCardPanel} · ${said}`} data-guide="run.state">
+      <div className="desk-stops__strip" aria-hidden="true">
+        {STAGES.map((s, i) => (
+          <span key={s} className={`desk-stops__leg desk-stops__leg--${s}`}>
+            <span className="desk-stops__fill" style={{ '--leg': fills[i] }} />
+          </span>
         ))}
-        <rect x={xs[at] - 8} y="3" width="16" height="9" rx="2.5" fill="var(--accent2)" />
-        <line x1={xs[at]} y1="12" x2={xs[at]} y2="17" stroke="var(--accent2)" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-      </svg>
+      </div>
       <div className="desk-stops__labels" aria-hidden="true">
         {labels.map((l, i) => <span key={l} className={i === at ? 'desk-stops__here' : undefined}>{l}</span>)}
       </div>

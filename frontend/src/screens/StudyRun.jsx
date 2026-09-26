@@ -320,6 +320,7 @@ export default function StudyRun({ session }) {
               cardKey={`${nc.card_id}:${cardNonce}`}
               stamp={gates.stamp}
               stage={nc.stage}
+              progress={nc.progress ?? null}
               onStampDone={gates.stampDone}
             >
               <CardPrompt

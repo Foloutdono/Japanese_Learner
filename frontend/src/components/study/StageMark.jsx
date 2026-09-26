@@ -1,4 +1,5 @@
 import { useLang } from '../../LangContext'
+import { cardProgress } from '../../domain/cardProgress'
 
 // ── The stage, in a word ──────────────────────────────────────
 // Every study card says what it is to the schedule — new, in progress,
@@ -26,6 +27,33 @@ export function StageMark({ stage, pressed = false, inline = false }) {
   return (
     <span className={`stage-mark stage-mark--${stage}${pressed ? ' stage-mark--pressed' : ''}${inline ? ' stage-mark--inline' : ''}`}>
       {t[LABEL_KEY[stage]]}
+    </span>
+  )
+}
+
+// ── The card's bar (plan 147) ──────────────────────────────────
+// A band along the card's foot, filled from new to mastered
+// (domain/cardProgress): how far through learning a card in progress
+// is, which the word in the corner cannot say. In the stage's own
+// pigment, so a mastered card's full band is gold and a card still
+// learning is vermilion. Nothing at all where the progress is not
+// known -- a card from a source that tracks no stage, or one in
+// learning whose route sent no figure.
+export function CardBand({ stage, progress }) {
+  const { t } = useLang()
+  const value = cardProgress(stage, progress)
+  if (!LABEL_KEY[stage] || value == null) return null
+  const percent = Math.round(value * 100)
+  return (
+    <span
+      className={`card-band card-band--${stage}`}
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percent}
+      aria-label={t.cardProgress}
+    >
+      <span className="card-band__fill" style={{ '--card-band': value }} />
     </span>
   )
 }

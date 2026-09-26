@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import { CardStamp } from './CardStamp'
-import { StageMark } from './StageMark'
+import { CardBand, StageMark } from './StageMark'
 import { playSfx } from '../../lib/audio'
 
 // How long the outgoing card's own exit animation runs — must match
@@ -74,8 +74,16 @@ const OUTGOING_MS = 220
  * nothing in that case. While a press plays, the word steps aside for
  * the press's own caption, which lands in the same corner with the
  * new stage.
+ *
+ * `progress` — the live card's bar, 0 (new) to 1 (mastered), drawn as
+ * a band along the card's foot (CardBand, plan 147). While a press
+ * plays, the band moves to where that rating leaves the card (the
+ * stamp's own `progress`, off the rating's review_preview). The band
+ * is keyed on the card, so a new card's band appears where it is
+ * rather than sliding from the last card's. A screen that never passes
+ * `progress` (the browse, which rates nothing) draws no band.
  */
-export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage, className, guide, children }) {
+export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage, progress, className, guide, children }) {
   const effectiveContentKey = contentKey ?? cardKey
 
   const [liveKey, setLiveKey] = useState(cardKey)
@@ -203,6 +211,11 @@ export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage,
       </div>
       {showStamp && <CardStamp transition={stamp} onDone={onStampDone} />}
       <StageMark stage={stage} pressed={showStamp} />
+      {progress !== undefined && <CardBand
+        key={liveKey}
+        stage={showStamp && stamp.to ? stamp.to : stage}
+        progress={showStamp && typeof stamp.progress === 'number' ? stamp.progress : progress}
+      />}
     </div>
   )
 }
