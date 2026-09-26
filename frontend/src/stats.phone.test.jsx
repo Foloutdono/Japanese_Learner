@@ -25,7 +25,15 @@ vi.mock('./lib/api', () => ({
 
 const { default: StatsScreen } = await import('./screens/StatsScreen')
 
-const settle = (ms = 250) => new Promise(r => setTimeout(r, ms))
+// Past the timer, the screen's arrival itself (@keyframes arrive, a 10px
+// rise): measured mid-flight, a 44px target read 43.9999 on a loaded
+// runner. Settled as the stations' tests are (8226935).
+const settle = async (ms = 250) => {
+  await new Promise(r => setTimeout(r, ms))
+  await Promise.all(document.getAnimations()
+    .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+    .map(a => a.finished.catch(() => {})))
+}
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 
