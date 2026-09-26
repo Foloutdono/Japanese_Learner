@@ -113,4 +113,63 @@ describe('the guide on the desk', () => {
     }
     expect(walked).toEqual(['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.strip'])
   })
+
+  // The owner's report: the fare gate takes the window's height on the
+  // desk (plan 135), so neither over it nor under it has room, and the
+  // note was drawn under the window's floor with only its top showing.
+  it('stands the note inside a spot as tall as the window', async () => {
+    await render(
+      <LangProvider>
+        <div className="phone phone--desk">
+          <div className="phone__content">
+            <div data-guide="today.gate" style={{ position: 'fixed', top: 24, left: 200, width: 640, height: window.innerHeight - 48 }}>gate</div>
+          </div>
+        </div>
+        <Guide gate="today" onEnd={() => {}} />
+      </LangProvider>
+    )
+    await settle()
+    expect(stopOf()).toBe('today.gate')
+    const note = box($('.guide-callout--live'))
+    expect(note.top).toBeGreaterThanOrEqual(0)
+    expect(note.bottom).toBeLessThanOrEqual(window.innerHeight)
+    const gate = box($('[data-guide="today.gate"]'))
+    expect(note.top).toBeGreaterThan(gate.top)
+    expect(note.bottom).toBeLessThan(gate.bottom)
+    expect($('.guide-callout--live').dataset.place).toBe('over')
+  })
+
+  it('keeps a note beside a low side-column anchor inside the window', async () => {
+    await render(
+      <LangProvider>
+        <div className="phone phone--desk">
+          <div className="phone__content">
+            <div className="desk-side" style={{ position: 'fixed', right: 0, top: 0, width: 360, height: '100%' }}>
+              <div data-guide="today.strip" style={{ position: 'absolute', bottom: 8, left: 0, right: 0, height: 60 }}>strip</div>
+            </div>
+          </div>
+        </div>
+        <Guide gate="today" onEnd={() => {}} />
+      </LangProvider>
+    )
+    await settle()
+    expect(stopOf()).toBe('today.strip')
+    const note = box($('.guide-callout--live'))
+    expect(note.top).toBeGreaterThanOrEqual(0)
+    expect(note.bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect(note.right).toBeLessThanOrEqual(box($('[data-guide="today.strip"]')).left)
+  })
+
+  it('sets each key cap apart from its word', async () => {
+    await render(<Learn onEnd={() => {}} />)
+    await settle()
+    for (const action of ['guide-skip', 'guide-next']) {
+      const button = $(`[data-action="${action}"]`)
+      const cap = box(button.querySelector('.desk-kbd'))
+      const range = document.createRange()
+      range.selectNodeContents(button.firstChild)
+      expect(cap.left - range.getBoundingClientRect().right, action).toBeGreaterThanOrEqual(8)
+      expect(cap.right).toBeLessThanOrEqual(box(button).right)
+    }
+  })
 })
