@@ -33,6 +33,11 @@ _UNVERIFIABLE = {
     # お持ちします contains neither "お〜する" nor "する". Checking only the
     # tail would match any plain になる instead.
     "お〜になる／お〜する",
+    # A て-form or ないで that ENDS the sentence (plan 149): 待って is a
+    # request, while the same letters inside a sentence link two
+    # actions (待って、見る) or mean "without doing" (食べないで出る).
+    # Where it stands is the whole point, and a substring has no idea.
+    "〜て／〜ないで（依頼）",
 }
 
 # A pattern written as 〜形 names a CONJUGATION CLASS, not a fixed string,

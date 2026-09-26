@@ -546,9 +546,13 @@ class EveryKeyTests(unittest.TestCase):
     def test_a_word_s_letters_are_its_own(self) -> None:
         self.assertNotIn("か", found_in("何匹かの猫がいた。"))
         self.assertNotIn("か", found_in("何かを取り出した。"))
+        # A question word + でも is "any-" (plan 149), and its で is no
+        # particle of place, its も no "also".
         some = found_in("誰でも入れます。")
-        self.assertIn("〜でも", some)
+        self.assertEqual(some.get("何でも／誰でも／いつでも／どこでも"), "誰でも")
+        self.assertNotIn("〜でも", some)
         self.assertNotIn("で", some)
+        self.assertNotIn("も", some)
         self.assertNotIn("で", found_in("ところで、来週はどうしますか。"))
 
 
@@ -559,7 +563,7 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
     should find that point in it.
 
     A ratchet, not a target. The floors are below what the module scores
-    today (94.0% of sentences, 525 of 543 points, after plan 148) so
+    today (94.0% of sentences, 527 of 545 points, after plan 149) so
     that ordinary catalogue edits do not fail the build, and far above
     what the substring matcher scored (77.6%) so that a regression to it
     does.
@@ -636,7 +640,8 @@ class CanFindTests(unittest.TestCase):
             for points in GRAMMAR_POINTS_BY_LEVEL.values()
             for point in points
         )
-        # A ratchet: 517 of 541 when written, 524 of 543 after plan 148.
+        # A ratchet: 517 of 541 when written, 524 of 543 after plan 148,
+        # 526 of 545 after plan 149.
         # Lower it only when a plan lowers the figure, never to make a
         # build pass.
         self.assertGreaterEqual(trusted, 520, f"{trusted} points trusted")

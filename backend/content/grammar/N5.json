@@ -3666,6 +3666,11 @@
         "pattern": "〜か〜か",
         "en": "でも leaves the choice open; か〜か offers exactly two.",
         "fr": "でも laisse le choix ouvert ; か〜か en propose exactement deux."
+      },
+      {
+        "pattern": "何でも／誰でも／いつでも／どこでも",
+        "en": "After a noun, でも offers an example or means « even »; after a question word (何でも, 誰でも), it means « any ».",
+        "fr": "Après un nom, でも propose un exemple ou veut dire « même » ; après un mot interrogatif (何でも, 誰でも), il veut dire « n'importe »."
       }
     ],
     "examples": [

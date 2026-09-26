@@ -294,7 +294,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 3: the grammar detector reads what a point attaches to by kind of
 # word, the copula's and a pattern's final word's forms, and the plain
 # past and negative (plan 148).
-LOCAL_REV = 3
+# 4: no false key -- the particles the tokenizer cannot tell apart (でも,
+# とは, とか), a multi-part point's tightest reading, the plain 〜そうだ
+# of looks, 何でも／誰でも as its own point (plan 149).
+LOCAL_REV = 4
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:
