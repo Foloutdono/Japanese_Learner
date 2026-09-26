@@ -768,10 +768,13 @@ neighbours).
 |---|---|---|
 | N5 半分 はんぶん "half minute" | `exact_reading`: *half*. The gloss is 半分【はんぷん】's | gloss **corrected** |
 | N3 盛り さかり "helping, serving" | `exact_reading`: *height, peak, full bloom, prime*; "serving" is もり's | gloss **corrected** |
-| N2 目下 めした "at present, now" | `exact_reading`: *subordinate, junior*; "at present" is もっか's, which the N1 list has | gloss **corrected** |
-| N3 札 さつ "token, label, ticket, charm" | `exact_reading`: *banknote*; the rest is ふだ's (N1 list) | gloss **corrected** |
+| N2 目下 めした "at present, now" | `exact_reading`: *subordinate, junior*; "at present" is もっか's, which the N1 list has | gloss **corrected**; もっか a card of its own |
+| N3 札 さつ "token, label, ticket, charm" | `exact_reading`: *banknote*; the rest is ふだ's (N1 list) | gloss **corrected**; ふだ a card of its own |
 | N3 人気 にんき "sign of life" | `exact_reading`: *popularity*; "sign of life" is ひとけ's | gloss **corrected** |
 | N3 羽 はね "counter for birds, rabbits" | `exact_reading`: *feather, wing*; the counter is わ | gloss **corrected** |
+| N3 否 いや "no, the noes" | `exact_reading`: *no*; "the noes" is 否【ひ】's | gloss **corrected** |
+| N1 寒気 かんき "cold, frost, chill" | `exact_reading`: *cold, cold air*; "chill" is さむけ's | gloss **corrected**; さむけ a card of its own |
+| N1 杯 さかずき "wine cups" | `exact_reading`: *sake cup* | gloss **corrected** |
 | N3 相手 あいて "companion, partner, company" | sense 1 of 3; the sentences use *the other party* and *opponent* | gloss takes all three |
 | N1 件 くだん "example, precedent, …" | JMdict no longer gives *example, precedent* | gloss **corrected** |
 | N1 疎か おろそか "neglect, negligence, …" | adj-na *negligent, careless*; its French said *négligence* twice | gloss **corrected** |
@@ -782,30 +785,55 @@ neighbours).
 | N1 復旧 ふくきゅう | `term_only`; JMdict and the N1 list: ふっきゅう | **corrected**. *No word* |
 | N1 地形 じぎょう, 統治 とうじ, 施行 しぎょう | `exact_reading` but unmarked; ⭐ and the N1 list give ちけい, とうち, しこう | **corrected**, and folded as すめらぎ is |
 | N3 下す おろす | JMdict tags 下す read おろす as irregular okurigana of 下ろす; 下す is くだす | **corrected** to 下ろす, 112's 終る rule; 降ろす stays its own card |
+| N1 否 いいえ "no, nay, yes, well" | `term_only` (否 is いや, いな, ひ); 112's 此れ at N1 beside これ at N5 | **folded** into the N5 いいえ. *No word* |
 | N3 時 とき, N1 故 こ, N1 件 くだん, N1 社 やしろ, N1 疎か おろそか | each is the word its reading says | **kept**; the sentences read another word |
 
-The other words were missing from the deck, not wrong in it. Decision
-1's rule (the app's sentences name a word, so it has a card or is
-grammar) settles them. **時 read じ** "o'clock" goes in at N5: 41 uses in
-N5–N3 sentences, and the N5 list's 〜時. **件 read けん** "matter" goes in at
-N3 (the N3 list), and **故 read ゆえ** "reason, because of" at N1 (the N1
-list). **〜はおろか's おろか** is the N1 point's own expression and in
-neither list. It is `IGNORED_LEMMAS`' now, as 〜いかんによらず's いかん is.
-**一社's 社** read しゃ is served by the pool's affix sense (plan 151). The
-N2 list's 〜社 is an affix pattern, which the placement report leaves
-out by design.
+The rest were words the deck lacked, not wrong ones, and decision 1
+settles them: a word the app's sentences name has a card, or is grammar,
+or the sentence changes. Each card goes in at the lowest level a taught
+sentence or a JLPT list gives it:
 
-11 pool rows came out (`pool_moves.json`). 割 read わり had none: the
-pool files the word under 割り. Its `curated_senses` row is therefore
+- **N5**: 時 read じ "o'clock", 年 read ねん, 月 read がつ and 杯 read はい.
+  These are the N5 list's 〜時, 〜年, 〜月 and 〜杯; 時, 年 and 月 have 41,
+  16 and 6 uses.
+- **N4**: 寒気 read さむけ, "chill", for the N4 〜がする example (さむけが
+  する). The N1 list has it too.
+- **N3**: 件 read けん, "matter", from the N3 list.
+- **N2**: 下 read もと, from the five 〜のもとで sentences, and 社 read しゃ,
+  from the N2 list's 〜社.
+- **N1**: 故 read ゆえ, 目下 read もっか and 札 read ふだ, from the N1 list.
+
+**Grammar, not cards**: 〜はおろか's おろか and 〜や否や's いな, which
+are in neither list (`IGNORED_LEMMAS`, like いかん).
+
+**Not a deck word**: 下す read くだす is in no JLPT list and no taught
+sentence. Its rank 92 in the "frequent, no card" list was every ください:
+the subtitles cut it 下さ + い, and UniDic reads a lone 下さ as 下す.
+`placement_report.FRAGMENTS` now credits くださ, 下さ and もら to 下さる and
+もらう. くださる goes from 5,824th to 68th, もらう from 237th to 97th, and
+盛る, which もら had inflated, from 166th to 5,968th. 下す itself ranks
+16,408th, and the pool glosses it wherever a sentence has it.
+
+**In context**: UniDic reads a lone 盛り as もり, a serving, even in
+JMdict's own example on the さかり card, 桜の花は４月が盛りだ.
+`reading_context` now reads it さかり where the sentence says peak:
+〜が盛りだ, 今を盛りと, 盛りを過ぎる, 盛りがつく, and 花／夏／人生の盛り.
+ご飯の盛り and 盛りがいい stay もり.
+
+**Kana sentences the tokenizer cut into other words** (105 named two,
+as a finding for the audit). They were worse than unmatched:
+りゅうがく took the N1 流, "current"; しゅくだい took 対, "versus", or
+砕く, "to smash"; ほうがせが held がせ, "fake". 宿 and 留 are N3 kanji, so
+each sentence keeps its point and says it in words the tokenizer reads:
+来年、日本の大学で勉強することにしました, 今日は勉強しなくちゃいけない,
+しごとはまだおわっていません, and わたしよりあにのほうが、せが高いです.
+`check_grammar` is clean.
+
+19 pool rows came out (`pool_moves.json`). 割 read わり had none, because
+the pool files the word under 割り. Its `curated_senses` row is therefore
 the old 割::かつ row, which the `term_only` match had filled with
-割【わり】's senses all along. 8,045 → 8,048 cards. The absent lemmas
-went 178 → 172 and the occurrences 419 → 354.
-
-Left: 年 read ねん and 月 read がつ at N5 are 時 read じ's case (the N5
-list's 〜年, 〜月, 16 and 6 uses). 下す read くだす is now a "frequent,
-no card" candidate. 目下 read もっか and 札 read ふだ are N1-list words
-with no card. And UniDic reads 桜は今が盛り's 盛り as もり, which is a
-tokenizer reading, not a card.
+割【わり】's senses all along. 8,045 → 8,055 cards. The absent lemmas
+went 178 → 161 and the occurrences 419 → 315.
 
 ## Order and dependencies
 

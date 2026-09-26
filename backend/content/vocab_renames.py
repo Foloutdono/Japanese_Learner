@@ -720,6 +720,11 @@ MOVES: dict[str, str] = {
     # it. The card keeps its word and takes JMdict's spelling; 降ろす,
     # the same reading in other kanji, stays a card of its own.
     "vocab_N3_下す_おろす": "vocab_N3_下ろす_おろす",
+    # 否 read いいえ is plan 112's 此れ at N1 beside これ at N5: the old
+    # level-1 list writing an N5 kana word in kanji. JMdict gives 否 no
+    # reading いいえ (term_only; 否 is いや, いな and ひ), so the pair is
+    # no spelling to fold, and the rows go to the N5 いいえ.
+    "vocab_N1_否_いいえ": "vocab_N5__いいえ",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries
@@ -742,6 +747,7 @@ NOT_FOLDED: frozenset[str] = frozenset({
     "vocab_N1_愛憎_あいにく",
     "vocab_N1_音色_おんいろ",
     "vocab_N1_復旧_ふくきゅう",
+    "vocab_N1_否_いいえ",
 })
 
 # Ids that left the deck with nowhere to go. MOVES needs a card to carry

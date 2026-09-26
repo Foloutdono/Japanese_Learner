@@ -349,6 +349,11 @@ _JUU_AFTER = {
 # the figurative sense (心に描く), which is UniDic's default.
 _DRAWN = {"絵", "図", "漫画", "地図", "線", "円", "丸", "イラスト", "似顔絵", "顔"}
 
+# What has a peak: 盛り after one and の is さかり (花の盛り, 夏の盛り,
+# 人生の盛り); after anything else it may be a serving (ご飯の盛り).
+_PEAK_OF = {"花", "桜", "梅", "紅葉", "春", "夏", "秋", "冬", "暑さ", "寒さ",
+            "季節", "人生", "青春", "若さ"}
+
 # The periods and events 今 is the prefix こん before: 今世紀, 今学期.
 _KON_BEFORE = {
     "世紀", "学期", "年度", "大会", "回", "季", "期", "シーズン", "週末",
@@ -511,6 +516,22 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         # 実を結ぶ, 実がなる: the fruit, not じつ.
         if s == "実" and r == "じつ" and nxt(i) in ("を", "が"):
             out[i] = "み"
+            continue
+
+        # 盛り on its own is もり to UniDic, a serving (ご飯の盛り, 盛りが
+        # いい); it is さかり, the peak, where the sentence says so: 〜が
+        # 盛りだ, 今を盛りと, 盛りを過ぎる, 盛りがつく, and the season or the
+        # life before の. UniDic reads its compounds right itself (花盛り,
+        # 働き盛り, 真っ盛り, 大盛り). Plan 152.
+        if s == "盛り" and r == "もり":
+            after2 = surf[i + 2] if i + 2 < n else ""
+            before2 = surf[i - 2] if i > 1 else ""
+            if ((prev(i) == "が" and (nxt(i) in ("だ", "です", "だっ", "でし", "") or nxt(i) in _PUNCT))
+                    or (prev(i) == "を" and before2 == "今")
+                    or (nxt(i) == "を" and after2.startswith("過ぎ"))
+                    or (nxt(i) in ("が", "の") and after2.startswith(("つ", "付")))
+                    or (prev(i) == "の" and before2 in _PEAK_OF)):
+                out[i] = "さかり"
             continue
 
         # A kanji standing alone as a word, read as if it were part of

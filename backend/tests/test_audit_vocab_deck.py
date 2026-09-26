@@ -149,10 +149,14 @@ class CorpusMeasurementTests(unittest.TestCase):
         self.assertIsNone(self._kind_of("父"))
 
     def test_the_words_plan_152_put_right_are_no_longer_gaps(self) -> None:
-        """時 read じ, 件 read けん and 故 read ゆえ are cards now; 割 and 共
-        are read わり and とも, the words their cards always glossed; and
-        〜はおろか's おろか is the point's, IGNORED_LEMMAS like いかん."""
-        for lemma in ("時", "件", "故", "割", "共", "疎か"):
+        """時 read じ, 年 ねん, 月 がつ, 杯 はい, 件 けん, 故 ゆえ, 寒気 さむけ,
+        下 もと and 社 しゃ are cards now; 割 and 共 are read わり and とも,
+        the words their cards always glossed; 〜はおろか's おろか and
+        〜や否や's いな are the points', IGNORED_LEMMAS like いかん; and
+        the kana sentences the tokenizer cut into 顎 (りゅう|がく) and 宿
+        (しゅく|だい) say what they meant in words it reads."""
+        for lemma in ("時", "年", "月", "杯", "件", "故", "寒気", "下", "社",
+                      "割", "共", "疎か", "否", "顎", "宿", "がせ"):
             with self.subTest(lemma=lemma):
                 self.assertIsNone(self._kind_of(lemma))
 
@@ -190,10 +194,12 @@ class CorpusMeasurementTests(unittest.TestCase):
         # again, and 米 before をはじめとする is read こめ (absent -2,
         # unmatched -2).
         #
-        # Lowered by plan 152: 時 read じ, 件 read けん and 故 read ゆえ
-        # are cards; 割 and 共 are read わり and とも, as their cards
-        # always glossed them; 〜はおろか's おろか is IGNORED_LEMMAS'
-        # (absent -6, unmatched -6; 65 occurrences, 41 of them 時).
+        # Lowered by plan 152: 時 read じ, 年 ねん, 月 がつ, 杯 はい, 件
+        # けん, 故 ゆえ, 寒気 さむけ, 下 もと and 社 しゃ are cards; 割 and 共
+        # are read わり and とも, as their cards always glossed them;
+        # 〜はおろか's おろか and 〜や否や's いな are IGNORED_LEMMAS'; and
+        # four kana sentences the tokenizer cut into 顎, 宿 and がせ read
+        # right (absent -17, unmatched -17; 104 occurrences).
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 172)
-        self.assertLessEqual(c["unmatched_lemmas"], 186)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 161)
+        self.assertLessEqual(c["unmatched_lemmas"], 175)

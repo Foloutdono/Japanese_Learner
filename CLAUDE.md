@@ -829,21 +829,32 @@ runtime purpose. Two consequences worth knowing:
   `LOCAL_REV` 5, `tests/test_grammar_precision.py`,
   `tests/test_lookup_precision.py` and `tests/test_analysis.py`).
   **152** is the cards plan 151's word reviewers found wrong, each
-  checked against JMdict and the JLPT lists: six glosses that were
+  checked against JMdict and the JLPT lists: eight glosses that were
   another reading's (半分 "half minute" was はんぷん's, 盛り もり's,
-  目下 もっか's, 札 ふだ's, 人気 ひとけ's, 羽 わ's) and three that
-  misled (相手 one sense of three, 件 くだん a sense JMdict dropped,
-  疎か a noun for a na-adjective); nine readings through `MOVES` — five
+  目下 もっか's, 札 ふだ's, 人気 ひとけ's, 羽 わ's, 否 いや's "the noes"
+  ひ's, 寒気 かんき's "chill" さむけ's) and four that misled (相手 one
+  sense of three, 件 くだん a sense JMdict dropped, 疎か a noun for a
+  na-adjective, 杯 さかずき a wine cup); ten readings through `MOVES` — five
   no reading of the form (割 かつ → わり, 共 きょう → とも, 愛憎 あいにく
   → あいぞう, 音色 おんいろ → ねいろ, 復旧 ふくきゅう → ふっきゅう; in
   `NOT_FOLDED`), three rare ones on the everyday reading's gloss (地形
   ちけい, 統治 とうち, 施行 しこう) and 下す read おろす, the irregular
-  okurigana of 下ろす; three words the sentences use and the deck
-  lacked (時 read じ at N5, 件 read けん at N3, 故 read ゆえ at N1); and
-  〜はおろか's おろか decided as grammar (`IGNORED_LEMMAS`) (cited in
-  `content/vocab_renames.py`, `scripts/audit_vocab_deck.py`,
-  `tests/test_audit_vocab_deck.py`, `tests/test_lookup_precision.py`
-  and `tests/test_onboarding_profile.py`; `docs/vocab-deck-review.md`).
+  okurigana of 下ろす, and 否 read いいえ folded into the N5 いいえ;
+  eleven words the sentences or the JLPT lists name and the deck lacked
+  (時 じ, 年 ねん, 月 がつ, 杯 はい at N5; 寒気 さむけ at N4; 件 けん at
+  N3; 下 もと, 社 しゃ at N2; 故 ゆえ, 目下 もっか, 札 ふだ at N1);
+  〜はおろか's おろか and 〜や否や's いな decided as grammar
+  (`IGNORED_LEMMAS`); 下す read くだす left to the pool, its rank 92 an
+  artefact of the subtitles' 下さ(い) (`placement_report.FRAGMENTS`);
+  盛り read さかり in context (`reading_context`); and four kana
+  sentences the tokenizer cut into other words (りゅう|がく, しゅく|だい,
+  ほう|がせ) reworded (cited in `content/vocab_renames.py`,
+  `content/grammar/N4.json`, `content/grammar/N5.json`,
+  `study/reading_context.py`, `scripts/audit_vocab_deck.py`,
+  `scripts/placement_report.py`, `tests/test_audit_vocab_deck.py`,
+  `tests/test_lookup_precision.py`, `tests/test_furigana_context.py`,
+  `tests/test_placement_report.py` and `tests/test_onboarding_profile.py`;
+  `docs/vocab-deck-review.md`).
   When starting a new wave, begin at **153** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

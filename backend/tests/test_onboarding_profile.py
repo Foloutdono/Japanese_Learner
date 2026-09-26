@@ -236,7 +236,7 @@ def test_volumes_counts_items_not_cards(client):
     # move together with it (the endpoint computes from the same data).
     from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
     assert body["grammar"] == {lvl: len(GRAMMAR_POINTS_BY_LEVEL[lvl]) for lvl in ("N5", "N4", "N3", "N2", "N1")}
-    assert body["vocab"]["N5"] == 675  # plan 152: 時 read じ, "o'clock"
+    assert body["vocab"]["N5"] == 678  # plan 152: 時 じ, 年 ねん, 月 がつ, 杯 はい
     assert body["kanji"]["N1"] == 1232
     # 238: the gojūon and the yōon of both scripts, and the fourteen
     # long vowels the syllabary was missing (content/kana_data.py).

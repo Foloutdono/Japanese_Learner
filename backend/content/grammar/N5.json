@@ -2347,7 +2347,7 @@
         "contrast": true
       },
       {
-        "jp": "わたしよりあにのほうがせが高いです。",
+        "jp": "わたしよりあにのほうが、せが高いです。",
         "en": "My brother is taller than me.",
         "fr": "Mon frère est plus grand que moi.",
         "register": "polite"
@@ -3222,9 +3222,9 @@
         "contrast": true
       },
       {
-        "jp": "しゅくだいはまだおわっていません。",
-        "en": "The homework isn't finished yet.",
-        "fr": "Les devoirs ne sont pas encore finis.",
+        "jp": "しごとはまだおわっていません。",
+        "en": "The work isn't finished yet.",
+        "fr": "Le travail n'est pas encore fini.",
         "register": "polite"
       }
     ]

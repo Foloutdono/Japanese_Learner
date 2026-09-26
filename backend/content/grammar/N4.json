@@ -1017,9 +1017,9 @@
         "contrast": true
       },
       {
-        "jp": "来年、日本へりゅうがくすることにしました。",
-        "en": "I've decided to study in Japan next year.",
-        "fr": "J'ai décidé d'aller étudier au Japon l'an prochain.",
+        "jp": "来年、日本の大学で勉強することにしました。",
+        "en": "I've decided to study at a university in Japan next year.",
+        "fr": "J'ai décidé d'étudier dans une université au Japon l'an prochain.",
         "register": "polite",
         "contrast": true
       },
@@ -3208,9 +3208,9 @@
         "contrast": true
       },
       {
-        "jp": "しゅくだいをしなくちゃいけない。",
-        "en": "I've got to do my homework.",
-        "fr": "Je dois faire mes devoirs.",
+        "jp": "今日は勉強しなくちゃいけない。",
+        "en": "I've got to study today.",
+        "fr": "Il faut que j'étudie aujourd'hui.",
         "register": "casual"
       }
     ]

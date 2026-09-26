@@ -47,7 +47,11 @@ among the unranked. Two limits worth knowing: a bare stem the
 subtitles count as a token (言, 知) cannot be lemmatised out of context
 and ranks as the noun it also is; and UniDic files spelling variants
 under one lemma (診る, 観る under 見る; 帰る under 返る), so a variant
-card the subtitles never write carries its group's rank.
+card the subtitles never write carries its group's rank. The one stem
+put right is the one that cost a card: the subtitles cut ください and
+もらう before their endings, and くださ, 下さ and もら alone are 下す and
+盛る to UniDic, so every "please" ranked 下す "to hand down" 92nd
+(FRAGMENTS, plan 152).
 """
 import argparse
 import collections
@@ -94,6 +98,15 @@ def _key(e: dict) -> str:
 
 # ── the ranking ────────────────────────────────────────────────
 
+# Surfaces the subtitles cut before an inflecting word's ending, which
+# alone lemmatise to another verb: (lemma, reading) of the word they are.
+FRAGMENTS = {
+    "くださ": ("下さる", "くださる"),
+    "下さ": ("下さる", "くださる"),
+    "もら": ("貰う", "もらう"),
+}
+
+
 def ranking() -> dict[tuple[str, str], int]:
     """(lemma, reading) -> rank, from the subtitle surfaces summed per
     word. Needs the tokenizer; raises when it is missing, since a
@@ -109,6 +122,9 @@ def ranking() -> dict[tuple[str, str], int]:
             if len(parts) != 2:
                 continue
             surface, count = parts[0], int(parts[1])
+            if surface in FRAGMENTS:
+                counts[FRAGMENTS[surface]] += count
+                continue
             morphemes = morphology.tokenize(surface)
             if not morphemes or len(morphemes) != 1:
                 continue

@@ -191,16 +191,50 @@ class TheCardsPutRightTests(unittest.TestCase):
             ("この店は値段のわりに味がいい。", "わり", "vocab_N1_割_わり"),
             ("家族とともに新しい町へ引っ越しました。", "とも", "vocab_N1_共_とも"),
             ("銀行でお金を下ろした。", "下ろし", "vocab_N3_下ろす_おろす"),
+            ("日本に来てから、三年になります。", "年", "vocab_N5_年_ねん"),
+            ("四月ごろ、日本へ行きます。", "月", "vocab_N5_月_がつ"),
+            ("その料理の辛いのなんのって、水を三杯も飲んだ。", "杯", "vocab_N5_杯_はい"),
+            ("今日は少しさむけがする。", "さむけ", "vocab_N4_寒気_さむけ"),
+            ("先生のもとで、三年間研究を続けた。", "もと", "vocab_N2_下_もと"),
+            ("問題は一社にとどまらず、業界全体のものだ。", "社", "vocab_N2_社_しゃ"),
+            ("目下、調査中です。", "目下", "vocab_N1_目下_もっか"),
+            # UniDic reads a lone 盛り as もり, a serving; the peak is put
+            # right in context (study/reading_context.py).
+            ("桜の花は４月が盛りだ。", "盛り", "vocab_N3_盛り_さかり"),
         ):
             with self.subTest(word=word):
                 self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
 
     def test_a_reading_the_card_does_not_have_is_not_its_card(self) -> None:
-        # 下す is くだす, "to hand down (a verdict)", which the deck has no
-        # card for; 〜はおろか's おろか is the point's, never おろそか.
+        # 下す is くだす, "to hand down (a verdict)", which no JLPT list
+        # has and the pool glosses; 〜はおろか's おろか and 〜や否や's いな
+        # are the points'; ご飯の盛り is a serving, もり, never the peak.
         found = matches("裁判所が判決を下した。").get("下し")
         self.assertTrue(found is None or found["raw_id"] != "vocab_N3_下ろす_おろす")
+        self.assertIn("decision", found["entry"]["meaning"])
         self.assertNotIn("おろか", matches("彼は漢字はおろか、ひらがなも書けない。"))
+        found = matches("彼は席に着くや否や、話し始めた。").get("否")
+        self.assertTrue(found is None or found["raw_id"] != "vocab_N3_否_いや")
+        found = matches("ご飯の盛りが少ない。").get("盛り")
+        self.assertTrue(found is None or found["raw_id"] != "vocab_N3_盛り_さかり")
+
+    def test_a_kana_sentence_is_cut_into_the_words_it_says(self) -> None:
+        """りゅうがく took 流, "current", and がく nothing; しゅくだい took
+        対 "versus" or 砕く "to smash"; ほうがせが held がせ, "fake". The
+        sentences now say what they meant in words the tokenizer reads,
+        at their level's kanji."""
+        for sentence, false_ids in (
+            ("来年、日本の大学で勉強することにしました。", {"vocab_N1_流_りゅう"}),
+            ("今日は勉強しなくちゃいけない。", {"vocab_N3_対_たい"}),
+            ("しごとはまだおわっていません。", {"vocab_N2_砕く_くだく"}),
+            ("わたしよりあにのほうが、せが高いです。", set()),
+        ):
+            with self.subTest(sentence=sentence):
+                found = matches(sentence)
+                self.assertFalse({m["raw_id"] for m in found.values()} & false_ids)
+                self.assertNotIn("がせ", found)
+        self.assertEqual(matches("しごとはまだおわっていません。")["しごと"]["raw_id"], "vocab_N5_仕事_しごと")
+        self.assertEqual(matches("わたしよりあにのほうが、せが高いです。")["せ"]["raw_id"], "vocab_N5_背_せ")
 
     def test_the_gloss_is_the_senses_of_the_cards_own_reading(self) -> None:
         for sentence, word, meaning in (
