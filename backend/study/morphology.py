@@ -191,6 +191,10 @@ class Morpheme:
     cform: str = ""  # UniDic's cForm, the conjugation form: 連用形-一般,
     # 意志推量形 (帰ろう), 命令形 (起きろ). Both "" for a word that does
     # not conjugate, where UniDic writes "*".
+    goshu: str = ""  # UniDic's 語種, where the word comes from: 和 (native),
+    # 漢 (Sino-Japanese), 外 (a loanword), 混 (mixed). センス is 外 and
+    # 扇子 is 漢: a reading alone joins them, the origin does not (plan
+    # 149). ダメ and キレイ, native words written in katakana, stay 混／漢.
 
 
 def _conjugation(raw) -> str:
@@ -252,6 +256,7 @@ def tokenize(text: str) -> list[Morpheme] | None:
                 conjunctive=(pos2 == "接続助詞"),
                 ctype=_conjugation(getattr(feat, "cType", None)),
                 cform=_conjugation(getattr(feat, "cForm", None)),
+                goshu=_conjugation(getattr(feat, "goshu", None)),
             ))
         return morphemes
     except Exception:  # pragma: no cover - defensive only

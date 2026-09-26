@@ -156,6 +156,16 @@ class CorpusMeasurementTests(unittest.TestCase):
         # real gap, no card teaches "what time" (absent +1); 二十 read
         # にじゅう had badged はたち and is a numeral (unmatched +1); 如何
         # read いかん had badged いかが and is IGNORED_LEMMAS' now.
+        #
+        # Raised again (plan 149), the same way: a reading no longer joins
+        # a token written in kanji to a card spelled with other kanji, nor
+        # a loanword to a native card, so nine homophones stopped counting
+        # as matches and are the gaps they always were -- 前回 had badged
+        # 全快 ("complete recovery"), 開店 回転 ("rotation"), 館長 官庁,
+        # 公言 高原 ("plateau"), 生き甲斐 域外, 思い 重い ("heavy"), 降り 不利,
+        # ジム 事務 ("office work"). The ninth, 日差し, had reached 陽射 --
+        # the same word spelled otherwise, which the pool now glosses
+        # (absent +9, unmatched +9).
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 154)
-        self.assertLessEqual(c["unmatched_lemmas"], 168)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 163)
+        self.assertLessEqual(c["unmatched_lemmas"], 177)

@@ -294,9 +294,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 3: the grammar detector reads what a point attaches to by kind of
 # word, the copula's and a pattern's final word's forms, and the plain
 # past and negative (plan 148).
-# 4: no false key -- the particles the tokenizer cannot tell apart (でも,
-# とは, とか), a multi-part point's tightest reading, the plain 〜そうだ
-# of looks, 何でも／誰でも as its own point (plan 149).
+# 4: no false key and no false meaning (plan 149) -- the particles the
+# tokenizer cannot tell apart (でも, とは, とか), a multi-part point's
+# tightest reading, 何でも／誰でも as its own point; and no card for a
+# word that only sounds like the token (郷 is not 号, センス not 扇子),
+# the N5 する／なる／いい over their N3 and N1 twins.
 LOCAL_REV = 4
 
 
