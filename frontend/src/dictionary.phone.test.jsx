@@ -162,7 +162,9 @@ describe('the dictionary at phone width', () => {
       probe.remove()
       return colour
     }
-    const edge = el => getComputedStyle(el, '::after').backgroundColor
+    // The edge is a gauge now (plan 147): the stage's ink from its start,
+    // filled as far as the card has come. Its ink is the gradient's first.
+    const edge = el => getComputedStyle(el, '::after').backgroundImage.match(/(?:rgba?|color)\([^)]*\)/)?.[0]
     expect(edge(cards[0])).toBe(ink('var(--state-mastered)'))
     expect(edge(cards[1])).toBe(ink('var(--state-learning)'))
     expect(edge(cards[2])).toBe(ink('var(--surface-line)'))
@@ -239,6 +241,35 @@ describe('the dictionary at phone width', () => {
     const records = screen.container.querySelector('.records')
     expect(getComputedStyle(records).gridTemplateColumns.split(' ').length).toBe(2)
     expect(getComputedStyle(records).columnGap).toBe('1px')
+  })
+})
+
+describe('the catalogue tile\'s edge (plan 147)', () => {
+  it('fills the stage\'s ink as far as the card has come, the hairline the rest', async () => {
+    const screen = await render(
+      <div className="dict-grid">
+        {[['電車', 'learning', 0.4], ['駅', 'mastered', 1], ['車', 'learning', undefined]].map(([c, stage, band]) => (
+          <button
+            key={c}
+            type="button"
+            className={`dict-entry-card dict-entry-card--${stage}`}
+            style={{ '--level-color': 'var(--line-kanji)', '--len': 1, ...(band == null ? {} : { '--card-band': band }) }}
+          >
+            <span className="dict-entry-card__char">{c}</span>
+            <span className="dict-entry-card__meaning">train</span>
+          </button>
+        ))}
+      </div>
+    )
+    const resolve = resolver()
+    const edge = el => getComputedStyle(el, '::after').backgroundImage
+    const [learning, mastered, unknown] = screen.container.querySelectorAll('.dict-entry-card')
+    const ink = token => resolve('color', `var(${token})`)
+    expect(edge(learning)).toContain(`${ink('--state-learning')} 40%`)
+    expect(edge(learning)).toContain(ink('--surface-line'))
+    expect(edge(mastered)).toContain(`${ink('--state-mastered')} 100%`)
+    // A card in progress whose route sent no figure keeps its whole edge.
+    expect(edge(unknown)).toContain(`${ink('--state-learning')} 100%`)
   })
 })
 

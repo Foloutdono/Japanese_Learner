@@ -1018,6 +1018,10 @@ class SRSEngine:
                 # halfway up the ladder from one never touched.
                 "is_learning": is_learning,
                 "learning_step": learning_step,
+                # The card's bar, new to mastered (plan 147), for the
+                # dictionary's catalogue tiles.
+                "progress": self._progress(total_reviews, interval_days or 0,
+                                           bool(is_learning), learning_step or 0),
                 "next_review": next_review.isoformat() if next_review else None,
             }
 
