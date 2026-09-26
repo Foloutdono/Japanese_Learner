@@ -85,7 +85,7 @@ export const BASE_GAIN = {
     // hotter than any chime, while both still *read* quiet. Matched
     // instead to the tonal peak range, with the level above the
     // tick so a level still lands bigger than a fare. The level's
-    // voice is the pass's punch now (plan 139), not the board's
+    // voice is the pass's punch now (plan 142), not the board's
     // clatter: measured at 0.36 peak after this trim, over the coin's
     // 0.26 and the stamp's 0.17, under the clatter's 0.47 -- one cut is
     // a shorter sound than eight drums, and needs less to be heard.
@@ -170,7 +170,7 @@ export function setVolume(category, value) {
 // is no such reference: a recipe's absolute output is an accident of
 // how many oscillators it happens to stack and how hard its filter
 // bites, so the level has to be free to move in both directions. The
-// split-flap clatter the level-up played until plan 139 needed +3.5 to
+// split-flap clatter the level-up played until plan 142 needed +3.5 to
 // sit where a level-up belongs, and under clamp01 the only way to grant
 // it was to pull the whole app down to meet it.
 //

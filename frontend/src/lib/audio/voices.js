@@ -350,7 +350,7 @@ const EVENTS = [
       // not an oscillator — so it does not collide with the chimes.
       // It stepped away from the level's clatter, which is the one
       // relationship this sound used to carry: a fare and a level are
-      // two objects (a coin, and since plan 139 the pass's punch)
+      // two objects (a coin, and since plan 142 the pass's punch)
       // rather than one machine at two sizes. Deliberate, not an
       // oversight.
       // The peaks look wrong and are not. `peak` in noiseTicks is the
@@ -373,7 +373,7 @@ const EVENTS = [
     ],
   },
   {
-    // Plan 139: the level is clipped on the pass rather than turned
+    // Plan 142: the level is clipped on the pass rather than turned
     // over on a board, so its voice is the gate's punch (改札鋏), not
     // the board's drums. Played on the cut itself -- XpToast starts it
     // from the bite's own animationstart -- so it lands on the frame

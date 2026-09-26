@@ -155,7 +155,7 @@ export function useReviewGates({ advance, sessionKey }) {
           // answered earlier in that same batch.
           const { leveledUp, newLevel } = applyXpGain({ amount })
           // No reward holds the queue. The fare rides the level HUD and
-          // a level is clipped on the pass (plan 139; a board on the
+          // a level is clipped on the pass (plan 142; a board on the
           // in-car display before it): both play over the next card,
           // because a learner who has just rated one card is already
           // looking for the next, and the redesign's whole point is

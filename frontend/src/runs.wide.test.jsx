@@ -13,7 +13,7 @@ import './index.css'
 // one workspace, centred; the level bar spans the work only (owner's
 // call). Up to ~1460 nothing moves: the wide lane's own 1440 is held
 // here unchanged. The level-up's pass docks in the column's flow at its
-// top rather than over the column's entry (plan 139; plan 123 docked
+// top rather than over the column's entry (plan 142; plan 123 docked
 // the board it replaced across the side's top).
 
 vi.mock('./lib/audio', async o => ({
@@ -95,7 +95,7 @@ describe('a run\'s workspace', () => {
   })
 })
 
-describe('the level-up\'s pass on a run\'s desk column (plan 139)', () => {
+describe('the level-up\'s pass on a run\'s desk column (plan 142)', () => {
   // The column's first element other than the pass, and the pass: the
   // pass is portalled in last and ordered first.
   const firstOther = (col, pass) => [...col.children].find(c => c !== pass)

@@ -1926,8 +1926,8 @@ def _pool_add(user_id: str, level: str, lang: str, data: dict) -> None:
 # average), and the cap counts the generation, not the calls: a retry
 # is the system failing its own checks, not something the learner did.
 #
-# Counted the learner's day, like the OCR cap (routes/ocr.py) and the
-# credit refill (core/credits.py); claimed BEFORE the model call for the
+# Counted the learner's day, like the OCR cap (routes/ocr.py), the day
+# ending at core/credits.resets_at; claimed BEFORE the model call for the
 # same reason as OCR, which is that a client retrying a failure is
 # exactly what a cap exists to stop.
 _DAILY_GENERATION_LIMIT = int(os.environ.get("COMPREHENSION_DAILY_LIMIT", "10"))

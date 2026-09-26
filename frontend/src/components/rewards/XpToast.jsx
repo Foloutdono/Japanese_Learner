@@ -18,7 +18,7 @@ import { isDesk } from '../../hooks/useDesk'
 //          figure rising off the object it was paid into (see
 //          components/ui/TopBar.jsx). This component only sounds the
 //          tick and announces the amount to assistive tech.
-//   level  The level turned over. 改札鋏 (plan 139): the learner's pass
+//   level  The level turned over. 改札鋏 (plan 142): the learner's pass
 //          comes down, the gate's punch clips a bite out of its top
 //          edge, the old figure is struck and the new one printed, and
 //          the balance empties to the new level's start. Gone on its

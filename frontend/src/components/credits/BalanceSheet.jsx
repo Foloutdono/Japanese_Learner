@@ -1,14 +1,15 @@
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { useCredits, useBalanceOpen, closeBalance } from '../../stores/credits'
-import { DAILY_REFILL, CAP, refillClock } from '../../domain/credits'
+import { CAP, refillMinutes, nextCreditClock } from '../../domain/credits'
 import { SOURCES } from '../../domain/paywall'
 import { OfferButton } from './OfferButton'
 
 // ── 残高 — the balance sheet (plan 069) ───────────────────────
-// Off the HUD's pass: the balance as a figure over its track, the two
-// facts of a free pass — the daily refill and the cap — and the one
-// line that is never charged against either. The canvas draws an offer
+// Off the HUD's pass: the balance as a figure over its track, with the
+// hour its next credit lands beside it, the two facts of a free pass —
+// the refill's rhythm (one every 48 minutes, plan 141) and the cap —
+// and the one line that is never charged against either. The canvas draws an offer
 // block under them, and it is now drawn: the pass is SHOWN but not yet
 // sold (domain/paywall.js's HAS_PAYWALL, which is deliberately not
 // HAS_STORE). It sits under the free line, so what a learner already
@@ -19,10 +20,10 @@ export function BalanceSheet() {
   const open = useBalanceOpen()
   const credits = useCredits()
   const cap = credits?.cap ?? CAP
-  const refill = credits?.dailyRefill ?? DAILY_REFILL
   const balance = credits?.unlimited ? null : credits?.balance
   const pct = balance == null ? 100 : Math.round((Math.min(balance, cap) / cap) * 100)
-  const at = refillClock(credits?.refillAt, lang)
+  // Null on a full tank: no hour is printed that is not true.
+  const next = nextCreditClock(credits, lang)
 
   return (
     <Sheet open={open} onClose={closeBalance} jp={t.balanceTitle} cap={t.passLabel} label={t.balanceTitle} initialFocus=".btn-secondary">
@@ -34,6 +35,7 @@ export function BalanceSheet() {
         {balance != null && (
           <span className="balance__of">
             <span>{t.balanceOf(cap)}</span>
+            {next && <span className="balance__of-wait">{t.balanceNext(next)}</span>}
           </span>
         )}
       </div>
@@ -43,8 +45,8 @@ export function BalanceSheet() {
       {balance != null && (
         <div className="balance__rows">
           <div className="balance__cell">
-            <b>+{refill}</b>
-            <span className="balance__cap">{t.balanceRefillAt(at)}</span>
+            <b>+1</b>
+            <span className="balance__cap">{t.balanceRefillEvery(refillMinutes(credits))}</span>
           </div>
           <div className="balance__cell">
             <b>{cap}</b>

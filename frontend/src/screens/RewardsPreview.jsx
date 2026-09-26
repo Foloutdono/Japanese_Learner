@@ -131,7 +131,7 @@ export default function RewardsPreview() {
         <SectionHeader jp="進級" title="Level up" />
         <p className="preview-note">
           The level number turned over, clipped on the pass (改札鋏,
-          plan 139): the pass comes down, the gate&apos;s punch bites its top
+          plan 142): the pass comes down, the gate&apos;s punch bites its top
           edge, the old figure is struck and the new one printed in gold,
           and the balance empties to the new level&apos;s start. Hung at
           the top of a phone, floating at the right of a wider screen; on

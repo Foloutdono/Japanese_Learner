@@ -22,7 +22,7 @@ import '../index.css'
 const apiJson = vi.fn()
 const apiJsonWithTimeout = vi.fn()
 const patchResponse = { current: null }
-const CREDITS = { balance: 30, cap: 50, dailyRefill: 30, refillAt: '2026-09-08T00:00:00+09:00', plan: 'free', unlimited: false }
+const CREDITS = { balance: 30, cap: 50, dailyRefill: 30, nextCreditAt: '2026-09-08T00:00:00+09:00', plan: 'free', unlimited: false }
 const apiFetch = vi.fn(async (path, _session, opts) => {
   if (path === '/api/credits') return { ok: true, status: 200, json: async () => CREDITS }
   if (path === '/api/profile' && opts?.method === 'PATCH') {

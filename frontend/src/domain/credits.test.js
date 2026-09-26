@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import {
   DAILY_REFILL, CAP, SIGNUP_BONUS, COST_PER_REVIEW, FREE_SOURCES,
-  FREE_DECKS, FREE_CARDS, PASS_DECKS, PASS_CARDS,
-  showsCap, fareFor, runFit, isFreeMode, isFreeLane,
+  FREE_DECKS, FREE_CARDS, PASS_DECKS, PASS_CARDS, REFILL_EVERY_MIN,
+  showsCap, fareFor, runFit, isFreeMode, isFreeLane, refillMinutes, nextCreditClock,
 } from './credits'
 
 // ── 回数券 — the economy as the client states it ──────────────────
@@ -47,6 +47,34 @@ describe('the free lines mirror the backend', () => {
     if (!m) throw new Error('core/credits.py declares no FREE_SOURCES')
     const there = m[1].split(',').map(x => x.trim().replace(/^["']|["']$/g, '')).filter(Boolean)
     expect([...FREE_SOURCES].sort()).toEqual(there.sort())
+  })
+})
+
+// 補充 — the refill's rhythm (plan 141). The server derives it from the
+// daily figure rather than writing it down, and so does the client; what
+// is pinned is that both derive it the same way.
+describe('the refill fills through the day', () => {
+  it('lands the day\'s thirty one every 48 minutes, as the backend does', () => {
+    expect(BACKEND).toMatch(/^REFILL_EVERY = timedelta\(days=1\) \/ DAILY_REFILL$/m)
+    expect(REFILL_EVERY_MIN).toBe(48)
+    expect(REFILL_EVERY_MIN * DAILY_REFILL).toBe(24 * 60)
+  })
+
+  it('takes the server\'s rhythm when it has one', () => {
+    expect(refillMinutes({ refillEvery: 2880 })).toBe(48)
+    expect(refillMinutes({ refillEvery: 1800 })).toBe(30)
+    expect(refillMinutes(null)).toBe(48)
+    expect(refillMinutes({})).toBe(48)
+  })
+
+  it('names the next credit\'s hour, and none when nothing is coming', () => {
+    const at = '2026-09-07T14:48:00+00:00'
+    const clock = new Intl.DateTimeFormat('en', { hour: '2-digit', minute: '2-digit' }).format(new Date(at))
+    expect(nextCreditClock({ balance: 10, nextCreditAt: at, unlimited: false }, 'en')).toBe(clock)
+    // A full tank, a welcome over the cap, a pass, no answer yet.
+    expect(nextCreditClock({ balance: 50, nextCreditAt: null, unlimited: false }, 'en')).toBe(null)
+    expect(nextCreditClock({ balance: null, nextCreditAt: at, unlimited: true }, 'en')).toBe(null)
+    expect(nextCreditClock(null, 'en')).toBe(null)
   })
 })
 

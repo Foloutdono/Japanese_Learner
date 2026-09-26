@@ -1,16 +1,17 @@
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
-import { useRunOut, clearRunOut } from '../../stores/credits'
+import { useRunOut, clearRunOut, useCredits } from '../../stores/credits'
 import { useTodaySummary } from '../../stores/today'
-import { DAILY_REFILL } from '../../domain/credits'
+import { refillMinutes } from '../../domain/credits'
 import { SOURCES } from '../../domain/paywall'
 import { OfferButton } from './OfferButton'
 
 // ── The run stops at the balance (plan 069) ───────────────────
 // Raised by lib/reviews.js on a 402 out_of_credits — only ever under
 // enforcement. The balance at zero in the danger ink, what this run
-// cleared, what waits for tomorrow's refill, and the way out: back to
+// cleared, what waits for the refill -- a credit every 48 minutes
+// (plan 141), no longer tomorrow's lump -- and the way out: back to
 // the station, which KEEPS the primary button. The offer sits above it
 // as a secondary control — a balance at zero is the one moment the
 // pass answers a question the learner is actually asking, but the way
@@ -19,6 +20,7 @@ export function RunOutSheet() {
   const { t } = useLang()
   const navigate = useNavigate()
   const runOut = useRunOut()
+  const credits = useCredits()
   const today = useTodaySummary().data
   if (!runOut) return null
   const cleared = runOut.cleared ?? 0
@@ -45,12 +47,12 @@ export function RunOutSheet() {
       </div>
       <div className="balance__rows">
         <div className="balance__cell">
-          <b>+{DAILY_REFILL}</b>
-          <span className="balance__cap">{t.runOutRefill}</span>
+          <b>+1</b>
+          <span className="balance__cap">{t.balanceRefillEvery(refillMinutes(credits))}</span>
         </div>
         <div className="balance__cell">
           <b>{waiting}</b>
-          <span className="balance__cap">{t.runOutTomorrow}</span>
+          <span className="balance__cap">{t.runOutWaits}</span>
         </div>
       </div>
       <OfferButton source={SOURCES.RUNOUT} className="btn-secondary pw-open--wide" />

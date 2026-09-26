@@ -3,6 +3,7 @@ import { Emphasized } from '../ui/Emphasized'
 import { CHART_US, CHART_THEM, LINES, approx, axisLabel } from '../../domain/boarding'
 import { BoardQuestion, Continue } from './BoardFrame'
 import { CheckMark } from './icons'
+import { PassError } from './PassStep'
 
 // ── The plan (plan 075) ──────────────────────────────────────────
 // The one screen that compares: the chart draws spaced reviews against
@@ -70,7 +71,12 @@ function Chart({ top, label, aria, from, to, minutes, lang, t }) {
   )
 }
 
-export default function PlanStep({ name, motive, rhythm, goal, lines = LINES, figures, now, onContinue }) {
+// `last` is the desk's (plan 140): there the pass is issued at the
+// column's foot while the plan is read, so the pass's own screen folds
+// away and the plan carries its button -- "Enter the station", with
+// the office's answer over it (PassError) and no second press while it
+// is being asked. On a phone the plan goes on to the pass, as it did.
+export default function PlanStep({ name, motive, rhythm, goal, lines = LINES, figures, now, onContinue, last = false, busy = false, error = null }) {
   const { t, lang } = useLang()
   const dateLabel = new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(figures.date)
   const toNovice = goal === 'novice'
@@ -134,7 +140,14 @@ export default function PlanStep({ name, motive, rhythm, goal, lines = LINES, fi
         </div>
       </div>
       <div className="brd__foot">
-        <Continue keys label={t.onbContinue} onClick={onContinue} data-action="continue" />
+        {last && <PassError error={error} />}
+        <Continue
+          keys
+          label={last ? t.brdEnter : t.onbContinue}
+          onClick={onContinue}
+          disabled={last && busy}
+          data-action={last ? 'enter' : 'continue'}
+        />
       </div>
     </>
   )

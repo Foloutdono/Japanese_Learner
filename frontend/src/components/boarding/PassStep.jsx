@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { Emphasized } from '../ui/Emphasized'
 import { CommuterPass } from '../profile/CommuterPass'
 import { useCredits } from '../../stores/credits'
-import { DAILY_REFILL, CAP, SIGNUP_BONUS, showsCap } from '../../domain/credits'
+import { CAP, SIGNUP_BONUS, showsCap, refillMinutes } from '../../domain/credits'
 import { BoardAir, Continue } from './BoardFrame'
 import { SOURCES } from '../../domain/paywall'
 import { OfferButton } from '../credits/OfferButton'
+import { useCountUp, stillPreferred } from './countUp'
 
 // ── The pass, issued (plan 075) ──────────────────────────────────
 // The last arrival screen: the printed commuter pass slides up and the
@@ -41,49 +41,6 @@ function PrintedHolder({ name }) {
   )
 }
 
-// ── The welcome, counted onto the pass ───────────────────────────
-// The balance a fresh account is given is the one number on this
-// screen the learner did not work for, and it printed like every other
-// figure: already there, in the same grey as the refill line under it.
-// It counts up now, from nothing to what the account holds, while a
-// gold note rises off the pass saying what it is — the pass's own
-// metal, the same the XP fare uses, for about a second (owner's call:
-// "transmitting the feeling that you are lucky to receive this").
-//
-// The count is the figure the store answers with, so a learner whose
-// account already holds something else sees THAT number climbed to,
-// never a promised one.
-const COUNT_MS = 900
-const COUNT_FROM_MS = 520
-
-function useCountUp(to, enabled) {
-  const [n, setN] = useState(0)
-
-  useEffect(() => {
-    if (!enabled || to == null) return undefined
-    let raf = 0
-    const start = performance.now() + COUNT_FROM_MS
-    const step = now => {
-      const p = Math.min(1, Math.max(0, (now - start) / COUNT_MS))
-      // Out-cubic: the figure sprints and lands rather than crawling in.
-      setN(Math.round(to * (1 - Math.pow(1 - p, 3))))
-      if (p < 1) raf = requestAnimationFrame(step)
-    }
-    raf = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf)
-  }, [to, enabled])
-
-  // Not counting — reduced motion, or no figure to count — is the
-  // figure itself, derived rather than written into state: an effect
-  // that sets state on the frame it runs is a cascading render.
-  return enabled && to != null ? n : to
-}
-
-function stillPreferred() {
-  return typeof window !== 'undefined'
-    && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
-}
-
 // The balance line as the boarding prints it: the store's answer when
 // it has one, and the welcome -- what a fresh account holds -- until
 // then. Same classes as components/credits/BalanceLine.jsx, so
@@ -92,7 +49,6 @@ function PrintedBalance() {
   const { t } = useLang()
   const credits = useCredits()
   const cap = credits?.cap ?? CAP
-  const refill = credits?.dailyRefill ?? DAILY_REFILL
   const balance = credits?.unlimited ? null : (credits?.balance ?? SIGNUP_BONUS)
   const counting = balance != null && !stillPreferred()
   const shown = useCountUp(balance, counting)
@@ -117,9 +73,29 @@ function PrintedBalance() {
           )}
         </span>
       </span>
-      {balance != null && <span className="jour-cap balance-line__refill">{t.balanceRefillLine(refill, '00:00')}</span>}
+      {/* The rhythm rather than an hour: a welcome over the cap has no
+          next credit to name yet, and the rhythm is what it will be
+          (plan 141). */}
+      {balance != null && <span className="jour-cap balance-line__refill">{t.balanceRefillRate(refillMinutes(credits))}</span>}
       {gift && <span className="brd-gift" aria-live="polite">{t.brdCreditsGift(balance)}</span>}
     </div>
+  )
+}
+
+// Why "Enter the station" did not go through, over the button that
+// posts the contract: here, and on the desk wherever that button went
+// once this screen folded away (the plan, the account; plan 140).
+// 'refused' is the office answering and turning the contract down -- a
+// wrong thing to blame on the connection, and the one case where trying
+// again unchanged earns the same answer. 'network' is the line the app
+// never got down.
+export function PassError({ error }) {
+  const { t } = useLang()
+  if (!error) return null
+  return (
+    <p className="brd__error" role="alert" data-error={error}>
+      {error === 'refused' ? t.brdPassRefused : t.onbPassError}
+    </p>
   )
 }
 
@@ -146,15 +122,7 @@ export default function PassStep({ name, profile, onEnter, busy = false, error =
       </div>
       <div className="brd__foot">
         <OfferButton source={SOURCES.ONBOARDING} className="pw-open--quiet" />
-        {error && (
-          // 'refused' is the office answering and turning the contract
-          // down -- a wrong thing to blame on the connection, and the
-          // one case where trying again unchanged earns the same
-          // answer. 'network' is the line the app never got down.
-          <p className="brd__error" role="alert" data-error={error}>
-            {error === 'refused' ? t.brdPassRefused : t.onbPassError}
-          </p>
-        )}
+        <PassError error={error} />
         <Continue keys label={t.brdEnter} onClick={onEnter} disabled={busy} data-action="enter" />
       </div>
     </>

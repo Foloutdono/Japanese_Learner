@@ -123,7 +123,7 @@ runtime purpose. Two consequences worth knowing:
   `screens/RideRun.jsx`, `screens/RideReading.jsx`,
   `screens/RidePreview.jsx`, `components/guide/`, `hooks/useGuide.js`,
   `stores/guide.js`, `components/reading/ReadingPieces.jsx`,
-  `components/settings/LearningPage.jsx`, `components/study/Readings.jsx`,
+  `components/settings/HelpPage.jsx` (then `LearningPage.jsx`), `components/study/Readings.jsx`,
   `domain/paywall.js`, `lib/routePattern.js` and `index.css`; ADR 0017;
   DESIGN.md, "The spot and the note"; `docs/design/mobile/README.md`).
   **102–110** are wave 22, the vocab deck review — 102 (done) is 母 and
@@ -591,24 +591,81 @@ runtime purpose. Two consequences worth knowing:
   `components/stats/`, `screens/StatsScreen.jsx`,
   `src/testing/statsRecord.js`, the `stats` desktop, wide and phone
   tests and `index.css`; DESIGN.md, "The desk").
-  **139** is 改札鋏, the level-up clipped on the pass (the owner's pick D
-  of four directions drawn on the canvas "Tsuji — the level-up": the
-  board retimed, a station plate, the in-car route, the pass): the
-  learner's 定期券 comes down in its own material, the gate's punch bites
-  its top edge (a mask grown through a registered length, the chip
-  falling away), the old figure is struck and the new one printed in
-  gold, and the balance empties to the new level's start; on a phone it
-  hangs across the top and the stage steps down, wider it floats at the
-  right, and on the desk StudyStage portals it into the top of a run's
-  column -- the left one on three panels -- which steps down under it;
-  the split-flap board and `SplitFlap.jsx` retired, the board's clatter
-  replaced by the punch's voice (`pass-clip`) (cited in
-  `components/rewards/XpToast.jsx`, `components/study/StudyStage.jsx`,
-  `domain/rewardTier.js`, `hooks/useReviewGates.js`, `lib/audio/voices.js`,
-  `lib/audio/chimes.js`, `lib/audio/settings.js`, `screens/RewardsPreview.jsx`,
+  **139** is 設定, Settings as the pass's contract (the owner's pick of
+  B and C on the canvas "Settings rework — options", with the titles off
+  on the desk): Settings opens on the pass printed with its contract —
+  the level → the destination, the service, the daily ride, the lines,
+  the validity — each field a door to its page, the daily pace one field
+  where it was two pages' cards; under it a list whose rows draw what they
+  are set to; pages that draw what they set (each stop ahead dated, each
+  service a line on one time axis with the learner's own pace dashed, the
+  themes as screens, the three rating bars as the bar); Learning split
+  into Level, Lines, Rating and Help, Data folded into Account (the old
+  addresses land where their content went), Sign out once; on the desk
+  the column beside a page that takes the width in two columns of cards,
+  neither printing a title (cited in `screens/SettingsScreen.jsx`,
+  `components/settings/`, `components/study/RatingBar.jsx`'s `specimen`,
+  `components/profile/CommuterPass.jsx`'s `PassHead`,
+  `src/settings.phone.test.jsx`, `src/settings.desktop.test.jsx` and
+  `index.css`; DESIGN.md, "The desk" and Structure).
+  **140** is 路線, first contact on the desk as the rail being laid
+  (numbered 140 because 139 went to Settings while it was open; the
+  owner's pick A of three directions drawn on the canvas "Desktop
+  onboarding — options"): a sumi column on the left with the rail's
+  masthead, the sign-in in it on the Welcome and, through the boarding,
+  the line itself — a named stop per question printing its answer, the
+  one asked lit with the pick as it stands, a stop behind a door back to
+  its question, the projection at its foot and then the pass; the head's
+  track and the right-hand journey retired; Back on the floor beside
+  Continue; the answers laid for the width (the reasons three across,
+  the kana and the rhythm four, the level and the goal as a line of
+  stations with the ride lit to the pick); and the pass's screen folded
+  into the plan, which enters the station (cited in
+  `components/boarding/DeskLine.jsx`, `boardBack.js`, `BoardFrame.jsx`,
+  `LevelStep.jsx`, `KanaStep.jsx`, `PlanStep.jsx`, `AccountStep.jsx`,
+  `PassStep.jsx`, `countUp.js`, `Welcome.jsx`, `screens/BoardingFlow.jsx`,
+  `src/frontdoor.desktop.test.jsx`, `src/frontdoor.wide.test.jsx` and the
+  机 section of `index.css`; DESIGN.md, "The desk").
+  **141** is 補充, the refill filling through the day (numbered 141
+  because 139 went to Settings and 140 to the desk's first contact while
+  it was open): the free pass's thirty credits a day no longer land in
+  one go at the learner's midnight but one every 48 minutes (`REFILL_EVERY`), counted from
+  `user_profiles.credits_accrued_at`, never past the cap, a full tank
+  banking nothing; what has landed is `pending` until claimed (`POST
+  /api/credits/claim`, one `refill` row), and a fare claims it first so
+  it is never a refusal; the app opens a "while you were away" sheet on
+  arrival -- boot, or back in front after `AWAY_MS` out of sight -- with
+  the credits, the 回数券 book (the cap as a stub a credit: held, landed,
+  room; the owner's pick C of four drawn directions) and a Claim
+  button, centred on the desk at a column's width rather than at the
+  rail's foot, and claims quietly as each credit lands while it is
+  open (cited in `core/credits.py`,
+  `routes/credits.py`, `routes/profile.py`, `srs/data_structure.sql`,
+  `tests/test_credits.py`, `stores/credits.js`, `hooks/useRefill.js`,
+  `components/credits/ClaimSheet.jsx`, `domain/credits.js`, the balance
+  sheet, line and run-out sheet, `GateCard.jsx`, `DeskPass.jsx`,
+  `PassStep.jsx`, `App.jsx`, `index.css`, `src/claim.desktop.test.jsx`
+  and `docs/design/desk/README.md`).
+  **142** is 改札鋏, the level-up clipped on the pass (numbered 142
+  because 139 went to Settings, 140 to the desk's first contact and 141
+  to the refill while it was open; the owner's pick D of four directions
+  drawn on the canvas "Tsuji — the level-up": the board retimed, a
+  station plate, the in-car route, the pass): the learner's 定期券 comes
+  down in its own material, the gate's punch bites its top edge (a mask
+  grown through a registered length, the chip falling away), the old
+  figure is struck and the new one printed in gold, and the balance
+  empties to the new level's start; on a phone it hangs across the top
+  and the stage steps down, wider it floats at the right, and on the
+  desk StudyStage portals it into the top of a run's column -- the left
+  one on three panels -- which steps down under it; the split-flap board
+  and `SplitFlap.jsx` retired, the board's clatter replaced by the
+  punch's voice (`pass-clip`) (cited in `components/rewards/XpToast.jsx`,
+  `components/study/StudyStage.jsx`, `domain/rewardTier.js`,
+  `hooks/useReviewGates.js`, `lib/audio/voices.js`, `lib/audio/chimes.js`,
+  `lib/audio/settings.js`, `screens/RewardsPreview.jsx`,
   `src/runs.wide.test.jsx`, `src/deskfree.phone.test.jsx`, `index.css`
   and its 机 section; DESIGN.md, "Rewards" and "The desk").
-  When starting a new wave, begin at **140** or higher, and check
+  When starting a new wave, begin at **143** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

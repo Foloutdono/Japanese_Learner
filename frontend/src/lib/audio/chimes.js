@@ -47,7 +47,7 @@ export function playToggle() { playVoice('toggle') }
  */
 export function playFareTick() { playVoice('fare-tick') }
 
-/** 改札鋏 — the gate's punch clipping the pass as the level turns over (plan 139). */
+/** 改札鋏 — the gate's punch clipping the pass as the level turns over (plan 142). */
 export function playPassClip() { playVoice('pass-clip') }
 
 /** 押印 — a card's seal pressed into its corner as it climbs a stage. */

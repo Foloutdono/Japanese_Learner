@@ -61,7 +61,7 @@ export function StudyStage({
   const split = desk && side !== undefined
   const panels = split && records && side !== null
   const classes = ['container', 'stage', className].filter(Boolean).join(' ')
-  // 改札鋏 (plan 139): on the desk the level-up's pass docks at the top
+  // 改札鋏 (plan 142): on the desk the level-up's pass docks at the top
   // of a run's column rather than floating over it -- the left column
   // on three panels, whose level bar row it just topped off, else the
   // side. Held as state from the column's ref so the pass is portalled
@@ -107,7 +107,7 @@ export function StudyStage({
 // every other line. It wears the run's colour itself; a docked
 // dictionary entry keeps the dictionary's gold (.desk-entry). Exported
 // for a run that is not a StudyStage — the exam runner draws its own.
-// `ref` is the column's, for the level-up's pass to dock in (plan 139).
+// `ref` is the column's, for the level-up's pass to dock in (plan 142).
 export function RunSide({ label, color, children, ref }) {
   return (
     <aside ref={ref} className="desk-run__side" aria-label={label} style={color ? { '--line-color': color } : undefined} data-guide="run.side">

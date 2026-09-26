@@ -1,6 +1,8 @@
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { CardTransition } from '../study/CardTransition'
 import PromptCard from '../study/PromptCard'
-import { EyeOffIcon } from '../ui/Icons'
+import { EyeOffIcon, PlayIcon } from '../ui/Icons'
+import { runKey } from '../../lib/keyGuards'
 
 // ── 読書 — the reading stage's pieces (plan 099) ─────────────────
 // The reading run (screens/ReadingRun.jsx) and the reading ride
@@ -29,16 +31,60 @@ export function ReadingTimer({ timeLeft, total, covered, t }) {
 }
 
 /** The sentence on its card, covered when the clock runs out so
- *  recall keeps mattering for anyone still writing. */
-export function ReadingPrompt({ cardKey, foot, phrase, covered, guide }) {
+ *  recall keeps mattering for anyone still writing.
+ *
+ *  With `onPlay`, the sentence is not on the card yet: the card holds
+ *  the play button instead, and the run shows the sentence and starts
+ *  its clock when it is pressed, so the learner decides when the
+ *  reading begins. */
+export function ReadingPrompt({ cardKey, foot, phrase, covered, guide, onPlay, playLabel, keyHint = false }) {
   return (
     <CardTransition cardKey={cardKey} guide={guide}>
       <PromptCard foot={foot}>
-        <span className={`sentence${covered ? ' sentence--covered' : ''}`} lang="ja">
-          {covered ? <EyeOffIcon size={34} /> : phrase}
-        </span>
+        {onPlay ? <PlayButton onPlay={onPlay} label={playLabel} keyHint={keyHint} /> : (
+          <span className={`sentence${covered ? ' sentence--covered' : ''}`} lang="ja">
+            {covered ? <EyeOffIcon size={34} /> : phrase}
+          </span>
+        )}
       </PromptCard>
     </CardTransition>
+  )
+}
+
+/** The play button: 書取's ring (.clip-player__play) in its frame
+ *  (.clip-player, which centres it in the card), playing the line there
+ *  and showing the sentence here. It takes the focus when the sentence
+ *  arrives, so Enter presses it; on the desk (`keyHint`) Space does
+ *  too, from anywhere but a field or another control, as Space plays
+ *  dictation's clip. */
+function PlayButton({ onPlay, label, keyHint }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    if (!keyHint) return undefined
+    const onKey = e => {
+      if (e.key !== ' ' || !runKey(e)) return
+      // A focused button's Space is its own, and presses it on keyup.
+      if (/^(BUTTON|A)$/.test(e.target?.tagName ?? '')) return
+      e.preventDefault()
+      ref.current?.click()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [keyHint])
+  return (
+    <div className="clip-player">
+      <button
+        ref={ref}
+        type="button"
+        className="clip-player__play"
+        onClick={onPlay}
+        aria-label={label}
+        aria-keyshortcuts={keyHint ? 'Space' : undefined}
+        autoFocus
+      >
+        <PlayIcon size={26} />
+      </button>
+    </div>
   )
 }
 
@@ -49,11 +95,20 @@ export function ReadingPrompt({ cardKey, foot, phrase, covered, guide }) {
  *  substitutes the nearest real word — and this stage is self-graded:
  *  a silently rewritten answer is a wrong verdict on the learner's own
  *  recall, not a cosmetic annoyance. */
-export function AnswerForm({ answer, setAnswer, onSubmit, t, guide }) {
+export function AnswerForm({ answer, setAnswer, onSubmit, t, guide, disabled = false }) {
+  // The field takes the focus when it opens: on arrival, or -- shut
+  // while the run's play button still holds the sentence back -- the
+  // moment the button is pressed. A layout effect, so the focus lands
+  // inside the press, which is what lets a phone raise its keyboard.
+  const field = useRef(null)
+  useLayoutEffect(() => {
+    if (!disabled) field.current?.focus()
+  }, [disabled])
   return (
     <form className="stage__foot" data-guide={guide} onSubmit={e => { e.preventDefault(); onSubmit() }}>
       <input
-        autoFocus
+        ref={field}
+        disabled={disabled}
         value={answer}
         onChange={e => setAnswer(e.target.value)}
         placeholder={t.romajiPlaceholder}
@@ -65,7 +120,7 @@ export function AnswerForm({ answer, setAnswer, onSubmit, t, guide }) {
         spellCheck={false}
         enterKeyHint="done"
       />
-      <button type="submit" className="btn-primary" disabled={!answer.trim()}>
+      <button type="submit" className="btn-primary" disabled={disabled || !answer.trim()}>
         {t.submit}
       </button>
     </form>

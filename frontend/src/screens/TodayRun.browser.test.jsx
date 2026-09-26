@@ -27,7 +27,7 @@ vi.mock('../stores/today', () => ({
 }))
 vi.mock('../stores/credits', async (o) => ({
   ...(await o()),
-  useCredits: () => ({ balance: 24, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: false }),
+  useCredits: () => ({ balance: 24, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: false }),
 }))
 vi.mock('../lib/audio', async (o) => ({
   ...(await o()), playKana: vi.fn(), playCorrect: vi.fn(), playWrong: vi.fn(),

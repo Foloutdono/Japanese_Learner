@@ -1,6 +1,8 @@
+import { useContext } from 'react'
 import { useLang } from '../../LangContext'
 import { useDesk } from '../../hooks/useDesk'
 import { BackChevron } from './icons'
+import { BoardBack } from './boardBack'
 
 // ── The frame every boarding screen stands in (plan 075) ─────────
 // The canvas's `.brd`: a head with the back button and the track (the
@@ -75,13 +77,48 @@ export function BoardAir() {
 export function Continue({ label, onClick, disabled = false, keys = false, ...rest }) {
   const { t } = useLang()
   const desk = useDesk()
+  const back = useContext(BoardBack)
   const printed = keys && desk
-  return (
+  const button = (
     <button type="button" className="btn-depart" onClick={onClick} disabled={disabled} aria-keyshortcuts={printed ? 'Enter' : undefined} {...rest}>
       <span className="btn-depart__jp">{label}</span>
       {printed && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
       <span className="btn-depart__go" aria-hidden="true">▶</span>
     </button>
+  )
+  if (!printed || !back) return button
+  return (
+    <div className="desk-brd__floor">
+      <FloorBackButton onClick={back} label={t.back} />
+      {button}
+    </div>
+  )
+}
+
+function FloorBackButton({ onClick, label }) {
+  return (
+    <button type="button" className="desk-brd__back" onClick={onClick} data-action="back">
+      <BackChevron />
+      {label}
+    </button>
+  )
+}
+
+/** A floor with the way back alone, for the one question with no
+    Continue -- the kana's, whose answers go on by themselves. On the
+    desk, where the head's ‹ is not drawn (plan 140); nothing on a
+    phone, which keeps its head. */
+export function FloorBack() {
+  const { t } = useLang()
+  const desk = useDesk()
+  const back = useContext(BoardBack)
+  if (!desk || !back) return null
+  return (
+    <div className="brd__foot">
+      <div className="desk-brd__floor">
+        <FloorBackButton onClick={back} label={t.back} />
+      </div>
+    </div>
   )
 }
 
