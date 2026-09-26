@@ -24,7 +24,9 @@ import LinesStep from '../components/boarding/LinesStep'
 import RhythmStep from '../components/boarding/RhythmStep'
 import TimeStep from '../components/boarding/TimeStep'
 import NudgeStep from '../components/boarding/NudgeStep'
-import Building, { BuildSteps } from '../components/boarding/Building'
+import Building from '../components/boarding/Building'
+import { DeskLine } from '../components/boarding/DeskLine'
+import { BoardBack } from '../components/boarding/boardBack'
 import PlanStep from '../components/boarding/PlanStep'
 import PassStep from '../components/boarding/PassStep'
 import AccountStep from '../components/boarding/AccountStep'
@@ -164,9 +166,13 @@ export default function BoardingFlow({
   // resumed step is honoured only while there is still something to
   // offer; the same predicate the forward path uses (`plan` → account
   // or pass).
+  //
+  // On the desk the pass's screen folds into the plan (plan 139), so the
+  // same return lands on the plan, which then carries Enter the station.
   const [step, setStep] = useState(() => {
     const at = resumed?.step ?? 'name'
-    return at === 'account' && !guest ? 'pass' : at
+    if (at === 'account' && !guest) return desk ? 'plan' : 'pass'
+    return at
   })
   const [history, setHistory] = useState([])
   const [leaving, setLeaving] = useState(null)   // { step, dir } during a pull
@@ -267,6 +273,18 @@ export default function BoardingFlow({
     setHistory(h => h.slice(0, -1))
     if (!REDUCED) setLeaving({ step, dir: 'back' })
     setStep(prev)
+  }
+
+  // 机 (plan 139): a stop already passed on the column's line is a door
+  // straight back to its question -- Back pressed as many times as it
+  // takes, in one pull. Every answer is kept, as Back keeps them.
+  function jumpTo(target) {
+    const at = history.lastIndexOf(target)
+    if (at < 0) return
+    mark(step, target, 'back')
+    setHistory(h => h.slice(0, at))
+    if (!REDUCED) setLeaving({ step, dir: 'back' })
+    setStep(target)
   }
 
   // ── The browser's Back (plan 123) ────────────────────────────
@@ -379,8 +397,9 @@ export default function BoardingFlow({
 
   // 机 (plan 122, owner's call): no Building on the desk. Its one job --
   // gathering the answers into the journey -- was done beside every
-  // question, in the side (below); the plan arrives straight after the
-  // hour, under the same signboard. The funnel reads time → plan there.
+  // question, on the column's line (below); the plan arrives straight
+  // after the hour, under the same signboard. The funnel reads time →
+  // plan there.
   function toBuilding() {
     if (!desk) { go('building'); return }
     mark(step, 'plan', 'fwd')
@@ -543,6 +562,11 @@ export default function BoardingFlow({
           />
         )
       case 'plan':
+        // 机 (plan 139): on the desk the pass is issued at the column's
+        // foot while the plan is read, so the plan is the last screen
+        // and enters the station -- unless there is an account to offer
+        // first. The funnel reads plan → boarding_done there. The car
+        // names its step (`data-car`) for the width it stands at.
         return (
           <PlanStep
             name={displayName}
@@ -552,16 +576,22 @@ export default function BoardingFlow({
             lines={answers.lines}
             figures={figures}
             now={now}
-            onContinue={() => go(guest ? 'account' : 'pass')}
+            onContinue={desk && !guest ? complete : () => go(guest ? 'account' : 'pass')}
+            last={desk && !guest}
+            busy={busy}
+            error={saveError}
           />
         )
       case 'account':
+        // And the account, when it is offered, is the desk's last screen:
+        // keeping the progress, or riding on without it, enters.
         return (
           <AccountStep
-            onCreated={() => go('pass')}
-            onSkip={() => go('pass')}
+            onCreated={() => (desk ? complete() : go('pass'))}
+            onSkip={() => (desk ? complete() : go('pass'))}
             onSignIn={onSignIn}
             onLeaveForAuth={() => stash({ answers, step, savedName })}
+            error={desk ? saveError : null}
           />
         )
       case 'pass':
@@ -571,58 +601,76 @@ export default function BoardingFlow({
     }
   }
 
-  // ── 机 — the journey beside the questions (plan 122) ──────────
-  // On the desk the frame is a run's: the question centred, and a
-  // column on the right edge holding the journey the answers build --
-  // Building's four rows, filled as each is answered instead of ticked
-  // off on a screen of their own. A row is 'next' until its question is
-  // reached and prints its value live while it is 'now'; the projection
-  // is never answered, only priced, once a level and the volumes are
-  // both in -- and a level picked but not yet continued is priced too
-  // (boardingDraft), the way Continue will commit it.
+  // ── 机 — the line down the column (plans 122, 139) ────────────
+  // On the desk the questions stand beside the line they lay: a stop per
+  // question (the reveal is the kana's own, not a stop), each named and
+  // printing its answer once given, the one being asked lit and printing
+  // the pick as it stands -- a level picked but not yet continued is
+  // already a goal, priced the way Continue will commit it
+  // (boardingDraft). A stop behind is a door back to its question while
+  // there is a way back (the history). The foot is the projection,
+  // priced on every answer, until the plan is built; then it is the pass.
   const draft = boardingDraft(answers, step)
-  const draftJlpt = draft.jlpt ?? 'N5'
   const draftLevel = draft.levelChoice === 'novice' ? t.brdNovice : draft.jlpt
   const draftGoal = draft.levelChoice == null ? null
     : draft.goal === 'novice' ? t.brdNovice
       : draft.goal ? `${draftLevel} → ${draft.goal}` : draftLevel
-  const draftFigures = planFigures(volumes, draftJlpt, draft.goal, perDay, draft.kana, now, draft.lines)
-  const at = keys => keys.includes(step)
-  const journey = [
-    { key: 'goal', label: t.brdBuildGoal, value: draftGoal,
-      state: at(['kana', 'reveal', 'level', 'goal']) ? 'now' : at(['lines', 'rhythm', 'time', 'nudge']) ? 'done' : 'next' },
-    { key: 'lines', label: t.brdBuildLines, value: [t.kanaTitle, ...draft.lines.map(line => t.brdLine[line])].join(' · '),
-      state: step === 'lines' ? 'now' : at(['rhythm', 'time', 'nudge']) ? 'done' : 'next' },
-    { key: 'ride', label: t.brdBuildRide, value: at(['time', 'nudge']) ? `${answers.rhythm} min · ${time}` : `${answers.rhythm} min`,
-      state: at(['rhythm', 'time', 'nudge']) ? 'now' : 'next' },
-    { key: 'projection', label: t.brdBuildProjection, state: 'next',
-      value: volumes && draft.levelChoice != null
-        ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(draftFigures.date)
-        : null },
-  ].map(row => ({ ...row, always: row.state === 'now' || row.key === 'projection' }))
-  const side = desk && onTrack
+  const draftFigures = planFigures(volumes, draft.jlpt ?? 'N5', draft.goal, perDay, draft.kana, now, draft.lines)
+  const stopValue = {
+    name: displayName,
+    why: answers.motive ? t.brdMotive[answers.motive] : null,
+    kana: answers.kana ? t.brdKana[answers.kana] : null,
+    level: answers.levelChoice == null ? null : answers.levelChoice === 'novice' ? t.brdNovice : answers.levelChoice,
+    goal: draftGoal,
+    lines: [t.kanaTitle, ...draft.lines.map(line => t.brdLine[line])].join(' · '),
+    rhythm: `${answers.rhythm} ${t.brdMinADay}`,
+    time,
+    nudge: answers.notifications ? time : t.brdNotNow,
+  }
+  const lineStops = stops.filter(key => key !== 'reveal')
+  const atStop = lineStops.indexOf(step === 'reveal' ? 'kana' : step)
+  const deskStops = lineStops.map((key, i) => {
+    const state = atStop < 0 || i < atStop ? 'done' : i === atStop ? 'now' : 'next'
+    return {
+      key,
+      label: t.brdStop[key],
+      value: stopValue[key],
+      state,
+      onOpen: state === 'done' && history.includes(key) ? () => jumpTo(key) : undefined,
+    }
+  })
+  const projection = {
+    label: t.brdBuildProjection,
+    value: volumes && draft.levelChoice != null
+      ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(draftFigures.date)
+      : null,
+  }
+  // The way back the floor draws beside Continue (BoardBack): the
+  // question before, or out of the flow from the first -- the head's ‹,
+  // which the desk no longer draws.
+  const floorBack = desk && onTrack ? (history.length > 0 ? back : onExit) : null
 
   return (
-    <main
-      className={desk ? `brd desk-brd${side ? ' desk-brd--side' : ''}` : 'brd'}
-      id="main-content" data-step={step} ref={frameRef}
-    >
-      {onTrack && <BoardHead index={index} total={total} onBack={history.length > 0 ? back : onExit} />}
-      <div className="brd__cars">
-        {leaving && (
-          <div className="brd__car brd__car--out" data-dir={leaving.dir} aria-hidden="true" inert>
-            {renderStep(leaving.step)}
+    <main className={desk ? 'brd desk-brd' : 'brd'} id="main-content" data-step={step} ref={frameRef}>
+      {onTrack && !desk && <BoardHead index={index} total={total} onBack={history.length > 0 ? back : onExit} />}
+      <BoardBack.Provider value={floorBack}>
+        <div className="brd__cars">
+          {leaving && (
+            <div className="brd__car brd__car--out" data-dir={leaving.dir} data-car={desk ? leaving.step : undefined} aria-hidden="true" inert>
+              {renderStep(leaving.step)}
+            </div>
+          )}
+          <div key={step} className={`brd__car${leaving ? ' brd__car--in' : ''}`} data-dir={leaving?.dir ?? 'none'} data-car={desk ? step : undefined}>
+            {renderStep(step)}
           </div>
-        )}
-        <div key={step} className={`brd__car${leaving ? ' brd__car--in' : ''}`} data-dir={leaving?.dir ?? 'none'}>
-          {renderStep(step)}
         </div>
-      </div>
-      {side && (
-        <aside className="desk-brd__side" aria-labelledby="desk-brd-journey">
-          <h2 className="desk-deck__cap" id="desk-brd-journey">{t.brdBuildingAria}</h2>
-          <BuildSteps steps={journey} />
-        </aside>
+      </BoardBack.Provider>
+      {desk && (
+        <DeskLine
+          stops={deskStops}
+          projection={onTrack ? projection : null}
+          pass={onTrack ? null : { name: displayName, profile }}
+        />
       )}
       {/* 到着: the plan arrives under the signboard, once; skippable,
           absent under reduced motion (TrainArrival's own rules). */}

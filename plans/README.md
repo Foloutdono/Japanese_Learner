@@ -6590,3 +6590,36 @@ exercises would not fit as columns in a desk plate, and decks have short
 names); the plates do not stretch to the window (above); the retention
 cell names the asked stop and the reviews cell follows it, where the
 drawing had a fixed "7 j".
+
+## Plan 139 — 路線, first contact as the rail being laid (2026-09-26)
+
+The owner's ask: rework the design and layout of the onboarding for the
+desktop, with options to choose from. Drawn on the canvas "Desktop
+onboarding — options" (the flow as it rendered at 1440×900, and three
+directions, each as a Welcome, the goal question and the end: A the
+line laid down the left, B the pass issued as you answer, C the whole
+boarding on one sheet); the owner picked A.
+
+What the screenshots showed wrong: each question was a 360px phone
+column in the middle of the window (a third of it at 1440, under a
+quarter at 1920), six answers stacked as full-width rows; the journey
+hung at the window's right edge, ~700px from the answer that filled it,
+four grey rows centred in empty sumi; the track at the head and the
+journey at the side were the same thing drawn twice, the track's eight
+stops unnamed; Back was a circle in the top-left corner, away from
+Continue; on the Welcome, Board stood on the window's floor ~640px under
+the heading it answers; the plan and the pass were two more centred
+phone screens, the journey gone just as its projection was priced, and
+Continue under the plan's right half.
+
+| # | What | Status |
+|---|------|--------|
+| 139 | **Welcome** (`DeskWelcome`): the sign-in in a sumi column at `--desk-side-w` on the LEFT, the rail's masthead (`.desk-rail__mast`) at its head, the paper card in the sumi; the paper holds the heading at the display rung, the tagline and Board as one block over the roll, run across the paper. **The line** (`components/boarding/DeskLine.jsx`): the same column through the boarding, a stop per question from `trackStops` (the reveal is the kana's stop), each named (`brdStop`, both locales), printing its answer once given, the one asked lit and printing the pick as it stands (the goal from `boardingDraft`), a stop behind a door back to its question while there is history (`jumpTo`, one pull, answers kept, the browser guard and the funnel's `boarding_step` as Back's); the projection at its foot, then the pass (`ColumnPass`: the holder, level and climb, the balance counted up with the gift note, `countUp.js` lifted out of `PassStep`). `BoardHead` and the right-hand `BuildSteps` are no longer drawn on the desk. **The floor**: Back beside Continue through `BoardBack` (`boardBack.js`), which `Continue` reads; `FloorBack` for the kana, which has no Continue. **Widths**: `--desk-brd-w` set per car (`data-car`), so a leaving car keeps its own: the card's for the name, the kana, the reveal and the rhythm (four tiles a row), three run columns for the reasons (three across where they fit, two under), the canvas for the level and the goal, two columns for the plan (its action at a ticket's width). **Stations** (`LevelStep.jsx`'s `StationLine`, desk only): the level and goal lists as a line, each stop a ring on the rail over its card (what it is over what it holds, a line each), the ride in gold up to the pick, one row where each holds half a run's column (read off `--desk-run-col-min`) else two, a row's ends drawing no rail past them; the rows' contract kept (data attributes, `aria-pressed`, the digit). **The end**: the pass's screen folds away on the desk — the plan is the last screen and enters the station (`PlanStep`'s `last`, the office's refusal said over its button through `PassError`), or, for a guest, the account step, whose keep and skip enter; a return from Google lands on the plan. Also fixed on the way: the kana question sat on the window's floor on the desk (its body's lent rung beat the auto margin). Tests: `frontdoor.desktop` P9 and P10 rewritten (the column, the stops' states, values and doors, the projection, the pass, the floor, the widths, the stations, the plan and the account entering, the refusal), `frontdoor.wide` (the paper's centre, the reasons in two rows, six stations in one, the plan at two columns); the phone lanes unchanged | DONE (2026-09-26) |
+
+Deviations from the drawing: the question stays centred over its
+answers, as every first-contact screen was since plan 122, rather than
+set left; a station's card holds its tag in its flow rather than on its
+edge (the tag met the ring); the passed stops stop being doors once the
+plan is built, as Back always did. Left for later: entering the station
+could narrow the column to the rail's width and hang the gates in it
+before the gate cutscene; the cutscene covers the change today.

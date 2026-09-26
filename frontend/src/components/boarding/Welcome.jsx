@@ -92,18 +92,18 @@ function Lane({ cards, back = false, copies = 2, t }) {
 }
 
 // 机 (plan 122): on the desk the sign-in stands beside Board, in a
-// column on the right edge, so a returning learner signs in with no
-// second screen. `authMode` is App's: null draws the column signing in
-// only; 'login' (back from the boarding, a refused Google return)
-// focuses its email; 'signup' (Board could not issue a guest pass)
-// opens it on Sign up with both sides named. On a phone it is unused:
-// App swaps to AuthScreen instead.
+// column of its own, so a returning learner signs in with no second
+// screen. `authMode` is App's: null draws the column signing in only;
+// 'login' (back from the boarding, a refused Google return) focuses its
+// email; 'signup' (Board could not issue a guest pass) opens it on Sign
+// up with both sides named. On a phone it is unused: App swaps to
+// AuthScreen instead.
 export default function Welcome({ onBoard, onSignIn, boarding = false, authMode = null }) {
   const { t } = useLang()
   const desk = useDesk()
-  const copies = desk ? 4 : 2
+  if (desk) return <DeskWelcome onBoard={onBoard} boarding={boarding} authMode={authMode} t={t} />
   return (
-    <main className={desk ? 'brd brd--welcome desk-door' : 'brd brd--welcome'} id="main-content">
+    <main className="brd brd--welcome" id="main-content">
       <div className="brd__body brd__body--top">
         <div className="brd-hero">
           <span className="auth-header__glyph" lang="ja">{t.appTitle}</span>
@@ -111,19 +111,56 @@ export default function Welcome({ onBoard, onSignIn, boarding = false, authMode 
         </div>
         {/* Decoration: the cards say nothing the tagline does not. */}
         <div className="brd-roll" aria-hidden="true">
-          <Lane cards={FRONT_LANE} copies={copies} t={t} />
-          <Lane cards={BACK_LANE} back copies={copies} t={t} />
+          <Lane cards={FRONT_LANE} t={t} />
+          <Lane cards={BACK_LANE} back t={t} />
         </div>
         <p className="brd-tagline">{t.brdTagline}</p>
       </div>
       <div className="brd__foot">
         <Continue keys label={t.brdBoard} onClick={onBoard} disabled={boarding} data-action="board" />
-        {/* 机 (plan 122): Enter boards. */}
-        <EnterKey onEnter={onBoard} disabled={boarding} />
-        {!desk && <BoardLink onClick={onSignIn} data-action="sign-in">{t.brdHaveAccount}</BoardLink>}
+        <BoardLink onClick={onSignIn} data-action="sign-in">{t.brdHaveAccount}</BoardLink>
       </div>
-      {desk && (
-        <aside className="desk-door__side" aria-label={t.brdHaveAccount}>
+    </main>
+  )
+}
+
+// ── 路線 — the front door on the desk (plan 139) ─────────────────
+// The owner's pick A of three drawn directions (the canvas "Desktop
+// onboarding — options"): the rail is the desk's chrome, so first
+// contact lays it before it has any gates. A sumi column at
+// --desk-side-w down the left edge, the rail's own masthead at its head
+// (辻 over TSUJI -- the mark leaves the paper for it), and the sign-in
+// in it: the paper card, where the pass will hang once there is one.
+// The paper holds the promise and its action as one block -- the
+// heading, the tagline, Board under them rather than on the window's
+// floor -- over the rolling stock, run across the whole width.
+// Enter boards (plan 122).
+function DeskWelcome({ onBoard, boarding, authMode, t }) {
+  return (
+    <main className="brd brd--welcome desk-door" id="main-content">
+      <div className="desk-door__work">
+        <div className="brd-hero">
+          <h1 className="brd__q">{t.learnJapanese}</h1>
+          <p className="brd-tagline">{t.brdTagline}</p>
+        </div>
+        <div className="brd__foot">
+          <Continue keys label={t.brdBoard} onClick={onBoard} disabled={boarding} data-action="board" />
+          <EnterKey onEnter={onBoard} disabled={boarding} />
+        </div>
+        {/* Decoration: the cards say nothing the tagline does not.
+            Four copies a lane: one run of six is ~1000px, and the loop
+            moves a lane by half across a band up to the canvas wide. */}
+        <div className="brd-roll" aria-hidden="true">
+          <Lane cards={FRONT_LANE} copies={4} t={t} />
+          <Lane cards={BACK_LANE} back copies={4} t={t} />
+        </div>
+      </div>
+      <aside className="desk-door__side" aria-label={t.brdHaveAccount}>
+        <div className="desk-rail__mast">
+          <span className="desk-rail__glyph" lang="ja">{t.appTitle}</span>
+          <span className="desk-rail__name">{t.brdAppName}</span>
+        </div>
+        <div className="desk-door__auth">
           {authMode !== 'signup' && <h2 className="desk-deck__cap">{t.brdHaveAccount}</h2>}
           <AuthCard
             key={authMode ?? 'none'}
@@ -132,8 +169,8 @@ export default function Welcome({ onBoard, onSignIn, boarding = false, authMode 
             autoFocus={authMode != null}
           />
           {authMode === 'signup' && <p className="auth-foot">{t.authFoot}</p>}
-        </aside>
-      )}
+        </div>
+      </aside>
     </main>
   )
 }

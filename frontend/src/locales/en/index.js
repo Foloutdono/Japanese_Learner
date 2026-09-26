@@ -1894,6 +1894,9 @@ const boarding = {
   brdBuildLines: 'Your lines',
   brdBuildRide: 'Your daily ride',
   brdBuildProjection: 'Your projection',
+  // 机 (plan 139): the stops on the desk's column, one per question --
+  // the part of the boarding each answers, as the line prints it.
+  brdStop: { name: 'Name', why: 'Why', kana: 'Kana', level: 'Level', goal: 'Goal', lines: 'Lines', rhythm: 'Rhythm', time: 'Departure', nudge: 'Reminder' },
   brdArrivalTitle: 'Your plan',
   brdPlanQ: (name) => `Your plan is ready, **${name}**.`,
   brdChartTitle: 'Your projection',

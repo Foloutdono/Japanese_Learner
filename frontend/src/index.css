@@ -23208,9 +23208,7 @@ a.slip__act { text-decoration: none; }
     left: var(--desk-run-inset);
     right: calc(var(--desk-side-w) + var(--desk-run-inset));
   }
-  .desk-run__side,
-  .desk-brd__side,
-  .desk-door__side {
+  .desk-run__side {
     position: fixed;
     inset: 0 var(--desk-run-inset) 0 auto;
     width: var(--desk-side-w);
@@ -23513,66 +23511,269 @@ a.slip__act { text-decoration: none; }
     right: var(--sp-2);
   }
 
-  /* ── 正面口 — first contact (plan 122) ──
+  /* ── 路線 — first contact as the rail being laid (plans 122, 139) ──
      From the Welcome to the first card a computer drew a phone: a 640px
-     column in an empty window, its answers a card wide, Continue on the
-     window's floor. On the desk the boarding draws a run's frame: the
-     questions centred in what a column on the right edge leaves, the
-     column holding the journey the answers build (screens/BoardingFlow,
-     BuildSteps). The arrival screens -- the plan, the account, the pass
-     -- have the window to themselves at their own widths. No rail
-     until Today. Every rule here is scoped under .desk-brd, and writes
-     no (element, property) pair the boarding's short step writes
-     (@container brd (max-height: 739px); held by src/desk.css.test.js),
-     so a laptop's short window still gets the short step. */
+     column in an empty window. Plan 122 drew a run's frame, the journey
+     in a column at the window's right edge; plan 139 is the owner's pick
+     A of three directions drawn after it (the canvas "Desktop onboarding
+     — options"). The desk's chrome is the rail, so first contact lays it
+     before it has any gates: a sumi column at --desk-side-w down the
+     LEFT edge, the rail's masthead at its head (.desk-rail__mast, the
+     same markup), and under it the sign-in on the Welcome, then the
+     boarding's line -- a named stop per question, its answer printed
+     once given (components/boarding/DeskLine). The head's track and the
+     right-hand journey were the same line drawn twice; the column is
+     the one. The paper holds the question, its answers laid for the
+     width, and the floor: Back beside Continue (BoardFrame's
+     BoardBack). No rail until Today. Every rule here is scoped under
+     .desk-brd or .desk-door, and writes no (element, property) pair the
+     boarding's short step writes (@container brd (max-height: 739px);
+     held by src/desk.css.test.js), so a laptop's short window still
+     gets the short step. */
   .desk-brd {
     --fs-display-fluid: var(--fs-display);
-  }
-  /* The side is a run's (above), on the right edge whatever the width:
-     the questions are centred in what it leaves, not in a workspace. */
-  .desk-brd__side,
-  .desk-door__side { inset: 0 0 0 auto; }
-  .desk-brd--side {
     max-width: none;
-    padding-inline:
-      max(var(--sp-5), calc((100% - var(--desk-side-w) - var(--card-w)) / 2 + var(--sp-5)))
-      calc(var(--desk-side-w) + max(var(--sp-5), calc((100% - var(--desk-side-w) - var(--card-w)) / 2 + var(--sp-5))));
+    padding-inline: calc(var(--desk-side-w) + var(--sp-7)) var(--sp-7);
   }
-  /* What the column holds, on its centre line, between grow-only air. */
-  .desk-brd__side::before,
-  .desk-brd__side::after,
-  .desk-door__side::before,
-  .desk-door__side::after {
+  /* The column: the rail's material -- its sumi, its lit edge and the
+     shadow it throws, turned to face the screen (.desk-rail) -- at a
+     second column's width, so the phone-born sign-in stands in it at
+     the width it was drawn at. It scrolls on its own on a short window;
+     its foot stays under what it holds. */
+  .desk-brd__side,
+  .desk-door__side {
+    --chrome-edge: color-mix(in srgb, var(--text-on-panel) 22%, var(--burger-menu-border));
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    width: var(--desk-side-w);
+    padding-top: calc(var(--safe-top) + var(--sp-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    border-right: 1px solid var(--chrome-edge);
+    box-shadow: 10px 0 24px -12px rgba(0, 0, 0, 0.75);
+  }
+  /* The line: a stop per question, each a row of the column -- its dot
+     on the line down the dots' column, its name over its answer. The
+     line is drawn a half a row at a time (above the dot, below it), so
+     the stretch already ridden is lit to the stop being asked and a row
+     that wraps two lines keeps its dot on the line. */
+  .desk-brd__stops {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    margin: 0;
+    padding: 0 var(--sp-4);
+    list-style: none;
+  }
+  .desk-brd__stop { position: relative; }
+  .desk-brd__stop::before,
+  .desk-brd__stop::after {
     content: "";
-    flex: 1 0 0;
+    position: absolute;
+    left: calc(var(--sp-3) + var(--sp-6) / 2);
+    width: 2px;
+    margin-left: -1px;
+    background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
   }
-  /* A row in two registers: the mark, then the label over its value. A
-     side is too narrow for the phone's label | value on one line --
-     "Kana · Vocabulaire · Kanji · Grammaire" needs ~285px of its 256. */
-  .desk-brd__side .brd-step {
+  .desk-brd__stop::before { top: calc(-1 * var(--sp-1)); bottom: 50%; }
+  .desk-brd__stop::after { top: 50%; bottom: 0; }
+  .desk-brd__stop:first-child::before,
+  .desk-brd__stop:last-child::after { content: none; }
+  .desk-brd__stop--done::before,
+  .desk-brd__stop--done::after,
+  .desk-brd__stop--now::before { background: var(--text-on-panel-soft); }
+  .desk-brd__door {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--sp-1) var(--sp-4);
-    align-content: center;
+    grid-template-columns: var(--sp-6) minmax(0, 1fr) auto;
     align-items: center;
-    padding-block: var(--sp-3);
+    column-gap: var(--sp-4);
+    width: 100%;
+    min-height: var(--sp-9);
+    padding: var(--sp-2) var(--sp-3);
+    background: none;
+    border: 0;
+    border-radius: var(--r-panel);
+    color: inherit;
+    font: inherit;
+    text-align: start;
   }
-  .desk-brd__side .brd-step__mark { grid-row: span 2; }
-  .desk-brd__side .brd-step__val {
-    margin-left: 0;
-    text-align: left;
+  button.desk-brd__door { cursor: pointer; }
+  .desk-brd__door > .svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-on-panel-soft);
   }
-  /* The projection is priced, never answered: full ink, mark empty. */
-  .desk-brd__side .brd-step--next:has(> .brd-step__val) { opacity: 1; }
-  /* The answers and the way on at a column's width, centred under the
-     question, which keeps the car's: the width a desk run's choices
-     stand at. The name's field keeps the car's, for a name at the
-     display size. */
+  .desk-brd__dot {
+    position: relative;
+    z-index: 1;
+    justify-self: center;
+    width: 12px;
+    height: 12px;
+    border: 2px solid color-mix(in srgb, var(--text-on-panel) 40%, transparent);
+    border-radius: var(--r-pill);
+    background: var(--bg-panel);
+  }
+  .desk-brd__txt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-width: 0;
+  }
+  .desk-brd__lab {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-on-panel-soft);
+  }
+  .desk-brd__val {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-on-panel);
+    overflow-wrap: anywhere;
+  }
+  .desk-brd__stop--done .desk-brd__dot {
+    border-color: var(--text-on-panel-soft);
+    background: var(--text-on-panel-soft);
+  }
+  /* The stop being asked: the lit gate's wash, a ring in the pass's
+     gold (the ring alone -- colour is an edge, a ring or a numeral),
+     its name in full ink and the pick as it stands in gold, mixed
+     toward the panel's ink as the fare is. */
+  .desk-brd__stop--now .desk-brd__door { background: color-mix(in srgb, var(--text-on-panel) 12%, transparent); }
+  .desk-brd__stop--now .desk-brd__dot {
+    width: 18px;
+    height: 18px;
+    border: 3px solid var(--accent2);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent2) 25%, transparent);
+  }
+  .desk-brd__stop--now .desk-brd__lab { color: var(--text-on-panel); }
+  .desk-brd__stop--now .desk-brd__val { color: color-mix(in srgb, var(--accent2) 70%, var(--text-on-panel)); }
+  /* The foot, where the rail's will be: the projection while the
+     questions run, the pass once the plan is built. */
+  .desk-brd__foot {
+    margin-top: auto;
+    padding: 0 var(--sp-4);
+    padding-bottom: calc(var(--sp-4) + var(--safe-bottom));
+  }
+  .desk-brd__proj {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    padding: var(--sp-4) var(--sp-5);
+    border: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
+    border-radius: var(--r-identity);
+  }
+  .desk-brd__fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-on-panel);
+  }
+  /* The pass, issued: the rail's pocket pass (.desk-pass) in its
+     material, with nothing on it to press yet. It rises into the foot
+     as the pass step's pass rose onto its screen. */
+  .desk-brd__pass {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--pass-ink) 70%, transparent);
+    border-radius: var(--r-identity);
+    background:
+      linear-gradient(155deg,
+        color-mix(in srgb, var(--pass-ink) 38%, var(--bg-panel)) 0%,
+        var(--bg-panel) 62%);
+    animation: desk-brd-issue 480ms cubic-bezier(0.22, 0.68, 0.32, 1) 200ms backwards;
+  }
+  .desk-brd__holder {
+    font-family: var(--font-serif);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    color: var(--text-on-panel);
+  }
+  .desk-brd__face {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .desk-brd__lvl {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 2px solid color-mix(in srgb, var(--pass-ink) 70%, var(--text-on-panel));
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    /* A roundel centres its line box, not its ink (.hud__level). */
+    line-height: normal;
+  }
+  .desk-brd__climb {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--sp-2);
+    min-width: 0;
+  }
+  .desk-brd__purse {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--sp-1);
+  }
+  .desk-brd__bal {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-brd__gift {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--accent2) 70%, var(--text-on-panel));
+  }
+  @keyframes desk-brd-issue {
+    from { opacity: 0; transform: translateY(var(--sp-5)); }
+  }
+  /* A step's width, set on its car so a leaving car keeps its own while
+     it pulls away: a column's for most questions, the card's for the
+     name, the kana and the rhythm (four tiles to a row), three of a
+     run's columns for the six reasons, the canvas for the line of
+     stations, and two columns for the plan. The answers and the floor
+     stand at it, centred under the question, which keeps the car's. */
+  .desk-brd .brd__car { --desk-brd-w: var(--desk-side-w); }
+  .desk-brd .brd__car:is([data-car="name"], [data-car="kana"], [data-car="reveal"], [data-car="rhythm"]) { --desk-brd-w: var(--card-w); }
+  .desk-brd .brd__car[data-car="why"] { --desk-brd-w: calc(3 * var(--desk-run-col-min) + 2 * var(--sp-3)); }
+  .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
+  .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: calc(2 * var(--desk-side-w) + var(--sp-6)); }
   .desk-brd .brd__stage,
   .desk-brd .brd__foot,
   .desk-door .brd__foot {
     width: 100%;
-    max-width: var(--desk-side-w);
+    max-width: var(--desk-brd-w, var(--desk-side-w));
     margin-inline: auto;
   }
   /* The question, its answers and the way on stand as one block on the
@@ -23582,68 +23783,264 @@ a.slip__act { text-decoration: none; }
      top and the body scrolls. */
   .desk-brd .brd__car > :last-child { margin-bottom: auto; }
   .desk-brd .brd__foot { margin-top: var(--sp-7); }
+  /* The plan's one action stands under it at a ticket's width. */
+  .desk-brd .brd__car[data-car="plan"] .brd__foot { max-width: var(--desk-side-w); }
   .desk-brd .brd__car > .brd__body:not(.brd__body--center) {
     flex: 0 1 auto;
     margin-top: auto;
     /* Sized to what it holds, the body scrolls with no room under its
        last answer, and every step's last thing arrives rising -- an
-       answer 6px (brd-in), the kana's readings 8px, the pass 40px
-       (brd-up): while it was still low it hung past the body's foot and
-       printed a scrollbar at every step. The room is kept inside the
-       box and given back outside, so the answers and Continue stand
-       where they did. It is the rung Continue keeps under the last
-       answer, the car's gap and the foot's margin (--sp-8), so the clip
-       stops on the foot's edge; on a frame under 740px, where the gap
-       narrows a rung, it reaches 4px under the foot, which is drawn
-       after the body and covers it. */
+       answer 6px (brd-in), the kana's readings 8px: while it was still
+       low it hung past the body's foot and printed a scrollbar at every
+       step. The room is kept inside the box and given back outside, so
+       the answers and Continue stand where they did. It is the rung
+       Continue keeps under the last answer, the car's gap and the
+       foot's margin (--sp-8), so the clip stops on the foot's edge; on
+       a frame under 740px, where the gap narrows a rung, it reaches 4px
+       under the foot, which is drawn after the body and covers it. */
     padding-bottom: var(--sp-8);
     margin-bottom: calc(-1 * var(--sp-8));
   }
-  .desk-brd .brd__stage:has(> .brd-field) { max-width: none; }
+  /* A question with no floor -- the kana's, whose answers go on by
+     themselves, when there is no way back to stand there either --
+     stands on the centre line too: the room given back above is the
+     auto margin under it, not the rung it lent the foot (the kana's
+     four answers sat on the window's floor). */
+  .desk-brd .brd__car > .brd__body:not(.brd__body--center):last-child { margin-bottom: auto; }
+  /* The floor: the way back beside the way on, the two ways off a
+     question (plan 139). Back keeps its label's width and the ghost's
+     clothes; Continue keeps a ticket's width at the floor's far end,
+     sharing the room on a question a column wide. */
+  .desk-brd__floor {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+  .desk-brd__floor > .btn-depart:last-child { flex: 0 1 var(--desk-side-w); }
+  .desk-brd__back {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--sp-2);
+    /* Beside Continue it is stretched to its height; alone (the kana's
+       floor) it keeps a floor's own, the short step's Continue. */
+    min-height: var(--sp-9);
+    padding: 0 var(--sp-5) 0 var(--sp-4);
+    background: none;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--fs-body);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .desk-brd__back > .svg { width: 18px; height: 18px; }
+  /* The six reasons, three to a row where three run columns fit (two
+     under that): a stack of six full-width rows is a phone's list. */
+  .desk-brd .brd__car[data-car="why"] .brd__opts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--desk-run-col-min)), 1fr));
+  }
+  /* The kana's four answers and the four rhythms, one row of tiles. */
+  .desk-brd .brd__car:is([data-car="kana"], [data-car="rhythm"]) .brd-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* ── the stops as a line of stations (components/boarding/LevelStep)
+     The level and the goal lists drawn as what they name: a station per
+     stop on a rail, its code in its ring and the stop's card under it,
+     every stop in one row where each holds half a run's column, two
+     rows under that (StationLine counts). The rail is drawn a half a
+     station at a time, each half reaching half the gap, and lit in the
+     pass's gold up to the pick -- the ride. */
+  .desk-brd__line {
+    display: grid;
+    grid-template-columns: repeat(var(--stations, 6), minmax(0, var(--desk-run-col-min)));
+    justify-content: center;
+    gap: var(--sp-6) var(--sp-3);
+  }
+  .desk-brd__stn {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+    min-width: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    color: var(--text-primary);
+    text-align: center;
+    cursor: pointer;
+  }
+  .desk-brd__stn::before,
+  .desk-brd__stn::after {
+    content: "";
+    position: absolute;
+    top: calc(var(--sp-8) / 2);
+    height: 3px;
+    margin-top: -1.5px;
+    background: color-mix(in srgb, var(--text-secondary) 40%, transparent);
+  }
+  .desk-brd__stn::before { left: calc(-1 * var(--sp-3) / 2); right: 50%; }
+  .desk-brd__stn::after { left: 50%; right: calc(-1 * var(--sp-3) / 2); }
+  .desk-brd__stn--head::before,
+  .desk-brd__stn--tail::after { content: none; }
+  .desk-brd__stn--ride::before,
+  .desk-brd__stn--ride::after,
+  .desk-brd__stn--on::before { background: var(--accent2); }
+  .desk-brd__rnd {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-8);
+    height: var(--sp-8);
+    border: 2px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: var(--tr-term);
+    text-indent: var(--tr-term);
+    /* Centred on its line box, not on its ink (.brd-opt__code). */
+    line-height: normal;
+    color: var(--text-secondary);
+  }
+  .desk-brd__stn--ride .desk-brd__rnd {
+    border-color: var(--accent2);
+    color: var(--text-primary);
+  }
+  .desk-brd__stn--on .desk-brd__rnd {
+    border: 3px solid var(--accent2);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent2) 22%, transparent);
+  }
+  .desk-brd__tile {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    align-self: stretch;
+    gap: var(--sp-1);
+    padding: var(--sp-4) var(--sp-3) var(--sp-3);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  .desk-brd__stn--on .desk-brd__tile {
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 14%, var(--surface));
+  }
+  .desk-brd__tile > .brd-tag { margin-bottom: var(--sp-1); }
+  .desk-brd__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .desk-brd__desc {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+    text-wrap: balance;
+    color: var(--text-secondary);
+  }
+  /* On the gold wash the soft ink drops under the floor (.brd-opt--on). */
+  .desk-brd__stn--on .desk-brd__desc { color: var(--text-primary); }
+  .desk-brd__stn .desk-brd__tile > .desk-kbd {
+    margin-top: auto;
+    opacity: 0.7;
+  }
+  .desk-brd__chk {
+    position: absolute;
+    top: calc(var(--sp-8) + var(--sp-3) + var(--sp-2));
+    right: var(--sp-2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-6);
+    height: var(--sp-6);
+    border: 1.5px solid var(--accent2);
+    border-radius: var(--r-pill);
+    color: var(--accent2);
+  }
+  .desk-brd__chk > .svg { width: 12px; height: 12px; stroke-width: 3; }
   /* The plan: the chart 1:1 in a column of its own, the lead and the
      promises beside it, the way on under them -- the chart was drawn
      at 1.76x, and the promise ran past the fold at 1100x800. */
-  .desk-brd[data-step="plan"] { max-width: var(--board-w); }
   .desk-brd .brd__stage:has(> .brd-chart) {
-    max-width: none;
     display: grid;
     grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     align-items: start;
   }
   .desk-brd .brd__stage:has(> .brd-chart) > .brd-chart { grid-row: span 2; }
-  .desk-brd[data-step="plan"] .brd__foot { margin-inline: calc(var(--desk-side-w) + var(--sp-6)) auto; }
-  /* The Welcome (components/boarding/Welcome): the sign and the rolling
-     stock across what the sign-in's column leaves, Board at a ticket's
-     width, the sign-in beside it (App no longer swaps to a second
-     screen on the desk). The heading steps down to the section rung
-     under the 辻, which is the mark. The column's Log in wears the
+  /* The Welcome (components/boarding/Welcome's DeskWelcome): the
+     column's masthead is the mark, so the paper's heading takes the
+     display rung; the heading, the tagline and Board as one block over
+     the rolling stock, run across the paper, the whole centred between
+     grow-only air (the density contract). The column's Log in wears the
      provider button's ghost clothes, so Board is the page's one filled
-     action. */
+     action; the sign-in card is the paper's own, set in the sumi. */
   .desk-door {
-    --fs-display-fluid: var(--fs-heading);
+    --fs-display-fluid: var(--fs-display);
     max-width: none;
-    padding-inline-end: calc(var(--desk-side-w) + var(--sp-5));
+    padding-inline: var(--desk-side-w) 0;
   }
+  .desk-door__work {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-8);
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .desk-door__work::before,
+  .desk-door__work::after {
+    content: "";
+    flex: 1 0 0;
+  }
+  .desk-door__work::before { margin-bottom: calc(-1 * var(--sp-8)); }
+  .desk-door__work::after { margin-top: calc(-1 * var(--sp-8)); }
+  .desk-door__auth {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    margin-block: auto;
+    padding: 0 var(--sp-5);
+    padding-bottom: calc(var(--sp-6) + var(--safe-bottom));
+  }
+  .desk-door__side .desk-deck__cap,
+  .desk-door__side .auth-foot { color: var(--text-on-panel-soft); }
   .desk-door__side .auth-submit {
     background: transparent;
     border: 1px solid var(--surface-line);
     color: var(--text-primary);
   }
-  /* The band runs across the area, capped at the canvas and faded at
+  /* The band runs across the paper, capped at the canvas and faded at
      its ends -- a clip mid-window read as a broken card, not a train
      leaving. Four copies a lane (Welcome's Lane) move twice as far per
      loop, so the loop takes twice as long: the cards pass at a phone's
      speed. A pointer resting on the band stops it. */
   .desk-door .brd-roll {
-    width: calc(100% + 2 * var(--sp-5));
+    flex: none;
+    width: 100%;
     max-width: var(--desk-board-w);
     margin-inline: 0;
-    align-self: center;
     mask-image: linear-gradient(to right, transparent, currentcolor var(--sp-9), currentcolor calc(100% - var(--sp-9)), transparent);
   }
   .desk-door .brd-roll__lane { animation-duration: 52s; }
   .desk-door .brd-roll__lane--back { animation-duration: 68s; }
+  @media (prefers-reduced-motion: reduce) {
+    .desk-brd__pass { animation: none; }
+  }
   /* A pointer's answer to "is this one I can pick": the edge warms
      toward the gold a pick fills, with no lift; the focus ring's twin. */
   @media (pointer: fine) {
@@ -23652,12 +24049,28 @@ a.slip__act { text-decoration: none; }
     .desk-brd .brd-kopt:not(.brd-kopt--on):hover,
     .desk-brd .brd-kopt:not(.brd-kopt--on):focus-visible,
     .desk-brd .brd-cell:not(.brd-cell--on):hover,
-    .desk-brd .brd-cell:not(.brd-cell--on):focus-visible {
+    .desk-brd .brd-cell:not(.brd-cell--on):focus-visible,
+    .desk-brd__stn:not(.desk-brd__stn--on):hover > .desk-brd__tile,
+    .desk-brd__stn:not(.desk-brd__stn--on):focus-visible > .desk-brd__tile {
       border-color: color-mix(in srgb, var(--accent2) 45%, var(--surface-line));
     }
-    .desk-brd .brd__back:hover { color: var(--text-primary); }
+    .desk-brd__back:hover,
+    .desk-brd__back:focus-visible {
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+    }
+    button.desk-brd__door:hover,
+    button.desk-brd__door:focus-visible { background: color-mix(in srgb, var(--text-on-panel) 6%, transparent); }
+    button.desk-brd__door:hover > .svg,
+    button.desk-brd__door:focus-visible > .svg { color: var(--text-on-panel); }
     .desk-brd .brd-day { cursor: pointer; }
     .desk-door .brd-roll:hover .brd-roll__lane { animation-play-state: paused; }
+  }
+  /* A door on the line takes the rail's ring when a key reaches it: the
+     column is sumi, and the paper's ring would not read on it. */
+  button.desk-brd__door:focus-visible {
+    outline: 2px solid var(--text-on-panel);
+    outline-offset: -2px;
   }
 
   /* ── copied, focused (plan 123) ──

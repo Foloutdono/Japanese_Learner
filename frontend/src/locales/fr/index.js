@@ -1827,6 +1827,8 @@ const boarding = {
   brdBuildLines: 'Tes lignes',
   brdBuildRide: 'Ton trajet quotidien',
   brdBuildProjection: 'Ta projection',
+  // 机 (plan 139) : les arrêts de la colonne du bureau, un par question.
+  brdStop: { name: 'Nom', why: 'Pourquoi', kana: 'Kana', level: 'Niveau', goal: 'Objectif', lines: 'Lignes', rhythm: 'Rythme', time: 'Départ', nudge: 'Rappel' },
   brdArrivalTitle: 'Ton plan',
   brdPlanQ: (name) => `Ton plan est prêt, **${name}**.`,
   brdChartTitle: 'Ta projection',
