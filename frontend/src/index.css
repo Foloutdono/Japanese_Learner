@@ -16353,9 +16353,19 @@ html { scrollbar-gutter: stable; }
    components/station/TrainDoor for the timeline.
 
    Same discipline as the gate: transform and opacity only for
-   anything that moves, and every duration multiplied by --door-x so
-   the JS timers and these animations cannot drift apart. Base figures
-   unscaled — chime 120ms, commit 190ms, open 250ms, done 780ms.
+   anything that moves, and every duration and delay multiplied by
+   --door-x so the JS timers and these animations cannot drift apart.
+   Base figures, as they play since plan 144 — commit 200ms, chime and
+   lamp 260ms, the leaves unlock at 300ms and are open at 880ms, the
+   frame leaves from 720ms, done 920ms.
+
+   Nothing here fades out. The shipped door faded the whole scene from
+   882ms with its leaves still 85% of the way across, so the doors
+   dissolved rather than opened; now the leaves finish their travel,
+   the frame steps off the screen after them, and the scene unmounts
+   with nothing of it left on screen. The one fade is the way in: the
+   door arrives over 110ms rather than on the tap's own frame, while
+   the view settles onto it from a hair closer.
 
    The leaves take --surface rather than a literal steel grey so the
    door is the same material as every other object in the app, in both
@@ -16365,13 +16375,18 @@ html { scrollbar-gutter: stable; }
    opening as it goes. */
 .door {
   --door-x: 1;
+  /* The header's height, which the lamp on it is centred by. */
+  --door-head: clamp(26px, 5vh, 44px);
   position: fixed;
   inset: 0;
   z-index: 300;
   overflow: hidden;
-  animation: door-leave calc(150ms * var(--door-x)) linear calc(630ms * var(--door-x)) backwards;
+  animation:
+    door-in calc(110ms * var(--door-x)) ease-out backwards,
+    door-settle calc(280ms * var(--door-x)) cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
 }
-@keyframes door-leave { to { opacity: 0; } }
+@keyframes door-in { from { opacity: 0; } }
+@keyframes door-settle { from { transform: scale(1.045); } }
 
 .door__leaf {
   position: absolute;
@@ -16397,7 +16412,7 @@ html { scrollbar-gutter: stable; }
       var(--surface) 16%,
       var(--surface) 68%,
       color-mix(in srgb, var(--surface) 84%, var(--text-primary)) 100%);
-  transition: transform calc(560ms * var(--door-x)) cubic-bezier(0.36, 0.02, 0.16, 1);
+  animation: calc(580ms * var(--door-x)) linear calc(300ms * var(--door-x)) forwards;
   will-change: transform;
 }
 /* Mirror images of each other, deliberately: the inner edge is lit and
@@ -16406,13 +16421,20 @@ html { scrollbar-gutter: stable; }
    The borders that used to sit here are gone — an overlapping border
    is exactly what made one leaf look stacked on the other. The seal
    (::after, further down) draws the join instead, half on each leaf,
-   so it splits down the middle as they part. */
+   so it splits down the middle as they part.
+
+   Each leaf unlocks, then parts. A train door does not simply slide:
+   it is released first, and the two leaves stand a finger apart for a
+   beat before they run. The crack is --sp-1 each way, a slit of the
+   destination down the seam, then the travel on its own ease, the
+   crack's width past the edge so no sliver of a leaf is left on it. */
 .door__leaf--l {
   left: 0;
   box-shadow:
     inset -2px 0 0 color-mix(in srgb, var(--bg-main) 55%, transparent),
     inset -3px 0 10px -4px rgba(0, 0, 0, 0.5),
     14px 0 40px rgba(0, 0, 0, 0.32);
+  animation-name: door-part-l;
 }
 .door__leaf--r {
   right: 0;
@@ -16420,9 +16442,18 @@ html { scrollbar-gutter: stable; }
     inset 2px 0 0 color-mix(in srgb, var(--bg-main) 55%, transparent),
     inset 3px 0 10px -4px rgba(0, 0, 0, 0.5),
     -14px 0 40px rgba(0, 0, 0, 0.32);
+  animation-name: door-part-r;
 }
-.door--open .door__leaf--l { transform: translateX(-100%); }
-.door--open .door__leaf--r { transform: translateX(100%); }
+@keyframes door-part-l {
+  0%   { transform: none; animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1); }
+  14%  { transform: translateX(calc(-1 * var(--sp-1))); animation-timing-function: cubic-bezier(0.55, 0, 0.18, 1); }
+  100% { transform: translateX(calc(-100% - var(--sp-1))); }
+}
+@keyframes door-part-r {
+  0%   { transform: none; animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1); }
+  14%  { transform: translateX(var(--sp-1)); animation-timing-function: cubic-bezier(0.55, 0, 0.18, 1); }
+  100% { transform: translateX(calc(100% + var(--sp-1))); }
+}
 
 /* The window, genuinely cut out — the screen behind shows through it,
    so the destination is visible before the doors move. Set into the
@@ -16468,7 +16499,7 @@ html { scrollbar-gutter: stable; }
     color-mix(in srgb, var(--bg-main) 22%, transparent) 62%,
     transparent 100%);
   transform: skewX(-14deg);
-  animation: door-sheen calc(1150ms * var(--door-x)) cubic-bezier(0.4, 0, 0.3, 1) backwards;
+  animation: door-sheen calc(820ms * var(--door-x)) cubic-bezier(0.4, 0, 0.3, 1) calc(240ms * var(--door-x)) backwards;
 }
 @keyframes door-sheen {
   0%        { left: -55%; opacity: 0; }
@@ -16531,11 +16562,12 @@ html { scrollbar-gutter: stable; }
    along stay put while the leaves travel, which is the cue that says
    they are moving and the frame is not.
 
-   Both are on .door itself, above the leaves, so they are never
-   dragged along by the transform. */
-.door::before,
+   Both sit on .door itself, above the leaves and never inside them, so
+   they are never dragged along by the leaves' transform. They leave
+   once the leaves have gone (plan 144): the header up and the sill
+   down, each off its own edge of the screen, from 720ms. */
+.door__head,
 .door::after {
-  content: '';
   position: absolute;
   left: 0;
   right: 0;
@@ -16543,20 +16575,58 @@ html { scrollbar-gutter: stable; }
   pointer-events: none;
 }
 /* The header: the rail the leaves hang from, with the car body above
-   it catching light. */
-.door::before {
+   it catching light. An element rather than ::before, since the lamp
+   rides it out. */
+.door__head {
   top: 0;
-  height: clamp(26px, 5vh, 44px);
+  height: var(--door-head);
   background:
     linear-gradient(180deg,
       color-mix(in srgb, var(--surface) 72%, var(--text-primary)) 0%,
       color-mix(in srgb, var(--surface) 86%, var(--text-primary)) 62%,
       color-mix(in srgb, var(--text-primary) 34%, transparent) 100%);
   box-shadow: 0 3px 10px -2px rgba(0, 0, 0, 0.45);
+  animation: door-head-out calc(200ms * var(--door-x)) cubic-bezier(0.5, 0, 0.8, 0.4) calc(720ms * var(--door-x)) forwards;
+}
+@keyframes door-head-out { to { transform: translateY(-110%); } }
+/* The lamp over the seam. Dark while the door is shut, it lights in
+   the line's pigment with the chime and blinks while the leaves run —
+   the one sign a door gives that it is about to move, and the line's
+   colour on a lamp rather than a fill. */
+.door__lamp {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 8px;
+  margin: -4px 0 0 -20px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  animation: door-lamp calc(560ms * var(--door-x)) linear calc(260ms * var(--door-x)) forwards;
+}
+@keyframes door-lamp {
+  0%, 30% {
+    background: var(--line-color, var(--accent));
+    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
+  }
+  31%, 45% {
+    background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+  46%, 90% {
+    background: var(--line-color, var(--accent));
+    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
+  }
+  100% {
+    background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
 }
 /* The threshold: the sill plate, with the tactile warning strip a
    real platform edge carries in the line's own colour. */
 .door::after {
+  content: '';
   bottom: 0;
   height: clamp(20px, 3.6vh, 32px);
   background:
@@ -16571,7 +16641,9 @@ html { scrollbar-gutter: stable; }
   background-position: top, bottom;
   background-repeat: no-repeat, repeat-x;
   box-shadow: 0 -3px 10px -2px rgba(0, 0, 0, 0.45);
+  animation: door-sill-out calc(200ms * var(--door-x)) cubic-bezier(0.5, 0, 0.8, 0.4) calc(720ms * var(--door-x)) forwards;
 }
+@keyframes door-sill-out { to { transform: translateY(110%); } }
 
 /* The pressure seal. Two rubber lips meeting under load: a hard dark
    line where they touch, and a thin lit edge on each side of it where
