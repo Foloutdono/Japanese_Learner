@@ -578,8 +578,9 @@ them:
   words' side by side (the parts carry the `word` they came from), so
   毎年軽井沢 reads まいとし and かるいざわ, with a space between them.
   A reading may overhang the kana on either side by half a reading
-  character only where there is kana on both sides: never over a
-  kanji or another reading, so two readings never meet. Closing
+  character only where there is kana on both sides, and a lone kana
+  for one reading only: never over a kanji or another reading, so two
+  readings never meet, whatever width the face sets a kana. Closing
   punctuation rides on the part before it, so no line opens on 。.
   This is `ExampleSentence`, so it holds wherever an example sentence
   is printed.

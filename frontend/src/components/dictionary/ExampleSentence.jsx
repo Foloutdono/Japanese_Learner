@@ -28,9 +28,10 @@
 //
 // A reading may overhang the kana either side (index.css,
 // .dict-ex__ruby--over), as a printed book sets it -- only where there
-// IS kana on both sides (`over`): overhanging a kanji, or another
-// word's reading, is two readings colliding, and overhanging one side
-// only would pull the reading off its word's centre.
+// IS kana on both sides (`over`), and a lone kana for one reading only:
+// overhanging a kanji, or another word's reading, is two readings
+// colliding, and overhanging one side only would pull the reading off
+// its word's centre.
 //
 // Two words' rubies side by side (`abuts`) keep a space between their
 // readings (.dict-ex__ruby--abuts), so まいとし and かるいざわ read as
@@ -61,9 +62,17 @@ function wordRuby(segments) {
       out.push(seg)
     }
   }
-  return out.map((seg, i) => (seg.reading
-    ? { ...seg, over: overhangs(out[i - 1], seg, out[i + 1]), abuts: abuts(seg, out[i + 1]) }
-    : seg))
+  // A lone kana between two rubies is overhung by the first only: two
+  // half-readings into one kana fit only when the font sets that kana a
+  // full em wide, and a proportional or fallback face sets it narrower
+  // (the で of 喫茶店で新聞, where きっさてん met しんぶん).
+  let claimed = -1
+  return out.map((seg, i) => {
+    if (!seg.reading) return seg
+    const over = overhangs(out[i - 1], seg, out[i + 1]) && claimed !== i - 1
+    if (over && !seg.tail && [...out[i + 1].text].length === 1) claimed = i + 1
+    return { ...seg, over, abuts: abuts(seg, out[i + 1]) }
+  })
 }
 
 // Whether the ruby `seg` is followed straight away by another word's

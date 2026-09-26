@@ -65,10 +65,16 @@ const SENTENCES = {
 
 afterEach(() => cleanup())
 
-async function lay(segments, width) {
+// CI's fallback face sets kana at roughly 0.6em, where a Japanese face
+// sets them a full em: the narrow lane squeezes every plain kana that
+// much, so an overhang that only fits a full-em kana shows up here too.
+const NARROW_KANA = '.dict-ex__jp .dict-ex__seg:not(:has(ruby)) { letter-spacing: -0.4em }'
+
+async function lay(segments, width, { narrow = false } = {}) {
   await page.viewport(width, 900)
   const screen = await render(
     <div style={{ width: `${width - 32}px`, margin: '0 16px' }}>
+      {narrow && <style>{NARROW_KANA}</style>}
       <ExampleSentence ex={{ jp: segments.map(s => s.text).join(''), segments }} showTr={false} />
     </div>,
   )
@@ -127,10 +133,10 @@ function expectNoCollision(root) {
 }
 
 describe('ExampleSentence furigana', () => {
-  for (const width of [1300, 390, 320]) {
+  for (const [width, narrow] of [[1300, false], [390, false], [320, false], [1300, true], [390, true]]) {
     for (const [name, segments] of Object.entries(SENTENCES)) {
-      it(`sets ${name} with no reading over another at ${width}px`, async () => {
-        const root = await lay(segments, width)
+      it(`sets ${name} with no reading over another at ${width}px${narrow ? ', narrow kana' : ''}`, async () => {
+        const root = await lay(segments, width, { narrow })
         expectNoCollision(root)
         // The sentence reads whole, readings aside.
         expect(baseText(root)).toBe(segments.map(s => s.text).join(''))
@@ -160,6 +166,14 @@ describe('ExampleSentence furigana', () => {
         expect(gb.left - ga.right, `${name}: ${rubies[i].textContent} | ${rubies[i + 1].textContent}`).toBeGreaterThanOrEqual(3)
       }
     }
+  })
+
+  it('lets a lone kana between two readings be overhung by one only', async () => {
+    const root = await lay(SENTENCES.long, 1300)
+    const kissaten = [...root.querySelectorAll('ruby')].find(r => r.firstChild.nodeValue === '喫茶店')
+    const shinbun = [...root.querySelectorAll('ruby')].find(r => r.firstChild.nodeValue === '新聞')
+    expect(kissaten.classList.contains('dict-ex__ruby--over')).toBe(true)
+    expect(shinbun.classList.contains('dict-ex__ruby--over')).toBe(false)
   })
 
   it('keeps parts that do not name their word apart', async () => {
