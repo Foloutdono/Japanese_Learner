@@ -25401,6 +25401,22 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     --card-pad-top: var(--sp-5);
   }
   .desk-run--panels > .stage:has(> .readings-input) > .quiz-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
+  /* Nor over the choices: four glosses of a kanji, each a list of
+     synonyms, stood the tiles 58px under a 800px window's floor. The
+     card gives down to what the choices and the tiles leave (it still
+     fills that room, so it keeps one height through the answer), and
+     the rows come in to the phone's rhythm: 8px over and under, 8px
+     between. */
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage,
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .card-transition,
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .card-transition-live,
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .prompt-card { min-height: 0; }
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
+  .desk-run--panels > .stage > .mcq-list { flex: none; }
+  .desk-run--panels > .stage > .mcq-list .mcq-row,
+  .desk-run--panels > .stage > .mcq-list .mcq-row.mcq-row--filler { padding-block: var(--sp-3); }
+  .desk-run--panels > .stage > .mcq-list .mcq-row + .mcq-row,
+  .desk-run--panels > .stage > .mcq-list .mcq-row + .mcq-row.mcq-row--filler { margin-top: var(--sp-3); }
   /* The tiles framed in a surface row under the card, and before the
      reveal drawn unlit and inert -- the console's buttons are there,
      dark, until there is something to press -- rather than unseen.

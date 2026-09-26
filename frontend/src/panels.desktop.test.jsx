@@ -60,6 +60,7 @@ function probe(prop, expr) {
   el.remove()
   return v
 }
+const LONG = ['Fabriquer · produire · construire · préparer', 'Exercice', 'Test · essai · tentative · expérience · épreuve', 'Résider · vivre · habiter']
 const CHOICES = ['gare', 'électricité', 'voiture', 'montagne']
 const DAY = 86400
 
@@ -433,6 +434,26 @@ describe('the card\'s details', () => {
 })
 
 describe('the choices beside the card', () => {
+  // The owner's report: a kanji's four glosses, each a list of
+  // synonyms, with the choices shown, stood the tiles under a laptop's
+  // floor and the middle column scrolled.
+  it('fit the column with the card and the tiles, with no scroll', async () => {
+    await render(
+      <Stage>
+        <HintBar available={['indice_1']} active={['indice_1']} onToggle={() => {}} />
+        <Card />
+        <MCQGrid choices={LONG} correct="Exercice" selected={null} answered={false} onAnswer={() => {}} />
+        <RatingBar active={false} onRate={() => {}} />
+      </Stage>
+    )
+    await settle(400)
+    const stage = $('.stage')
+    expect(stage.scrollHeight).toBeLessThanOrEqual(stage.clientHeight + 1)
+    expect(rect('.rating-bar').bottom).toBeLessThanOrEqual(window.innerHeight)
+    // The kanji still reads as a specimen on the card.
+    expect(rect('.probe-kanji').bottom).toBeLessThanOrEqual(rect('.prompt-card').bottom)
+    expect(rect('.prompt-card').height).toBeGreaterThan(140)
+  })
   it('stack under it in the middle column', async () => {
     await render(
       <Stage>
