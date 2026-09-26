@@ -71,6 +71,10 @@ async function graded() {
     </LangProvider>
   )
   await settle(150)
+  // The sentence arrives behind its play button; the press shows it
+  // and opens the field.
+  $('.clip-player__play').click()
+  await settle(20)
   setValue.call($('form input'), 'gakkou wa kuji desu')
   $('form input').dispatchEvent(new Event('input', { bubbles: true }))
   await settle(20)

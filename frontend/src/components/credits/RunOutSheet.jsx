@@ -11,7 +11,7 @@ import { OfferButton } from './OfferButton'
 // Raised by lib/reviews.js on a 402 out_of_credits — only ever under
 // enforcement. The balance at zero in the danger ink, what this run
 // cleared, what waits for the refill -- a credit every 48 minutes
-// (plan 139), no longer tomorrow's lump -- and the way out: back to
+// (plan 141), no longer tomorrow's lump -- and the way out: back to
 // the station, which KEEPS the primary button. The offer sits above it
 // as a secondary control — a balance at zero is the one moment the
 // pass answers a question the learner is actually asking, but the way

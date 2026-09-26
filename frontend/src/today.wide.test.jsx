@@ -207,7 +207,7 @@ describe('the fare beside Depart', () => {
     const parts = $$('.gate-card__part').map(p => [...p.children].map(text).join(' '))
     // 27 kana ride free; 30 of the 74 paid ride on the balance.
     expect(parts[0]).toBe('57 embarquent')
-    // Waiting for the refill's next credit, a credit at a time (plan 139).
+    // Waiting for the refill's next credit, a credit at a time (plan 141).
     expect(parts[1]).toMatch(/^44 attendent · \+1 à /)
     expect(parts[2]).toBe('30 / 50 crédits')
     expect($$('.lane--waits')).toHaveLength(0)

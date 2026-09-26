@@ -3,7 +3,7 @@
 // before the API has answered ("+1 every 48 min", "7 decks"); the
 // server is the truth for the balance itself.
 export const DAILY_REFILL = 30
-// 補充 — the refill fills through the day (plan 139): one credit every
+// 補充 — the refill fills through the day (plan 141): one credit every
 // 48 minutes, the day's thirty spread over it, up to CAP. What has
 // landed waits to be claimed (`pending`); see stores/credits.js and
 // components/credits/ClaimSheet.jsx.

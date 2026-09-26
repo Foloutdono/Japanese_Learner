@@ -50,7 +50,7 @@ describe('the free lines mirror the backend', () => {
   })
 })
 
-// 補充 — the refill's rhythm (plan 139). The server derives it from the
+// 補充 — the refill's rhythm (plan 141). The server derives it from the
 // daily figure rather than writing it down, and so does the client; what
 // is pinned is that both derive it the same way.
 describe('the refill fills through the day', () => {

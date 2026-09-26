@@ -4,12 +4,14 @@ import { userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — first contact on a wide window (plan 122) ─────────────────
+// ── 机 — first contact on a wide window (plans 122, 140) ───────────
 // At 1440 the Welcome's band ran four cards a lane and was clipped mid
 // window; the boarding's column stood in the middle of an empty one.
-// The band now spans the area the sign-in's column leaves, faded at its
-// ends, and its loop never shows a seam; the questions are centred in
-// that area, and the plan stands at the board's width.
+// The band spans the paper the sign-in's column leaves, faded at its
+// ends, and its loop never shows a seam. Since plan 140 that column is
+// on the left and holds the boarding's line; the questions are centred
+// in the paper beside it, the level list is one line of six stations,
+// and the plan stands at two columns' width.
 
 const apiJson = vi.hoisted(() => vi.fn())
 const apiJsonWithTimeout = vi.hoisted(() => vi.fn())
@@ -111,14 +113,37 @@ describe('first contact at 1440 (P10)', () => {
     }
   })
 
-  it('centres the questions in the area the journey leaves', async () => {
+  it('centres the questions in the paper the line leaves', async () => {
     await board()
     await pastName()
-    expect(Math.abs(mid(box(inCar('.brd__q'))) - (bodyW() - 360) / 2)).toBeLessThan(1.5)
-    expect(Math.round(box($('.desk-brd__side')).right)).toBe(Math.round(bodyW()))
+    expect(Math.abs(mid(box(inCar('.brd__q'))) - (360 + (bodyW() - 360) / 2))).toBeLessThan(1.5)
+    expect(Math.round(box($('.desk-brd__side')).left)).toBe(0)
+    expect(Math.round(box($('.desk-brd__side')).right)).toBe(360)
+    // The six reasons three to a row: two rows.
+    inCar('[data-motive="trip"]').click()
+    await settle(900)
+    expect(new Set([...inCar('.brd__opts').children].map(o => Math.round(box(o).top / 4))).size).toBe(2)
   })
 
-  it('stands the plan at the board\'s width, centred in the window', async () => {
+  it('draws the level list as one line of six stations', async () => {
+    await board()
+    await pastName()
+    inCar('[data-motive="trip"]').click()
+    await settle(40)
+    inCar('[data-action="continue"]').click()
+    await settle()
+    inCar('[data-kana="both"]').click()
+    await settle(900)
+    expect(stepOf()).toBe('level')
+    const stations = [...inCar('.desk-brd__line').children]
+    expect(stations).toHaveLength(6)
+    expect(new Set(stations.map(s => Math.round(box(s).top / 4))).size).toBe(1)
+    expect(stations[0].classList.contains('desk-brd__stn--head')).toBe(true)
+    expect(stations[5].classList.contains('desk-brd__stn--tail')).toBe(true)
+    expect(stations.slice(1, 5).some(s => s.className.match(/--(head|tail)/))).toBe(false)
+  })
+
+  it('stands the plan at two columns\' width, centred in the paper', async () => {
     await board()
     await pastName()
     inCar('[data-motive="trip"]').click()
@@ -131,8 +156,8 @@ describe('first contact at 1440 (P10)', () => {
     await settle(40)
     for (let i = 0; i < 4; i++) { inCar('[data-action="continue"]').click(); await settle() }
     expect(stepOf()).toBe('plan')
-    const plan = box($('main.brd'))
-    expect(Math.round(plan.width)).toBe(1040)
-    expect(Math.abs(mid(plan) - bodyW() / 2)).toBeLessThan(1.5)
+    const plan = box(inCar('.brd__stage'))
+    expect(Math.round(plan.width)).toBe(2 * 360 + 22)
+    expect(Math.abs(mid(plan) - (360 + (bodyW() - 360) / 2))).toBeLessThan(1.5)
   })
 })

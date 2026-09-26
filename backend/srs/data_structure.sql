@@ -198,7 +198,7 @@ CREATE TABLE user_profiles (
     rating_scale TEXT,
     -- The credits (plan 069, core/credits.py): the local day the last
     -- lump refill or the seed was taken under the midnight rule (read
-    -- only to start a clock that has never run, plan 139), the
+    -- only to start a clock that has never run, plan 141), the
     -- refill's clock -- the instant the next credit is counted from,
     -- and the lock on paying it out --, the entitlement ('free' |
     -- 'pass', with an optional expiry -- set by hand until a purchase

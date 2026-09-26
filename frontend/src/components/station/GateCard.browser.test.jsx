@@ -77,7 +77,7 @@ describe('GateCard — the fare', () => {
 
   // One render per test: vitest-browser-react cleans up between
   // tests, and a manual unmount() mid-test detaches the next render.
-  // The refill lands a credit at a time now (plan 139): the notice
+  // The refill lands a credit at a time now (plan 141): the notice
   // names the next one, not a lump at midnight.
   it('at zero names the next credit and keeps the gate open in shadow mode', async () => {
     creditsRef.current = { ...FREE, balance: 0 }

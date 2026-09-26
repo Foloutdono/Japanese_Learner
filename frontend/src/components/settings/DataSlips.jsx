@@ -8,9 +8,12 @@ import { refreshSummary } from '../../stores/profileSummary'
 import { useOptedOut, setOptedOut } from '../../stores/analyticsOptOut'
 import { forgetOnboarded } from '../../stores/onboarded'
 import { Seg } from '../chrome/Console'
-import { SettingsPage, Slip } from './SettingsPage'
+import { Slip } from './SettingsPage'
 
 // ── Data — the learner's data, theirs to take or erase ────────
+// The account page's second half since plan 139 (AccountPage.jsx): it
+// was a page of its own, a row under the account's, and the two are one
+// thing — whose card this is, and what it holds.
 // Export streams GET /api/profile/export (one CSV row per card and
 // mode, the scheduler's own granularity). Reset fronts DELETE
 // /api/stats/reset behind a two-step confirm, with the consequences
@@ -19,7 +22,7 @@ import { SettingsPage, Slip } from './SettingsPage'
 // /api/account removes every row and then the sign-in; on success
 // this device's session is signed out locally, because a server-side
 // sign-out would be for a user that no longer exists.
-export function DataPage({ session }) {
+export function DataSlips({ session }) {
   const { t } = useLang()
   const optedOut = useOptedOut()
   const [exporting, setExporting] = useState(false)
@@ -73,7 +76,7 @@ export function DataPage({ session }) {
   }
 
   return (
-    <SettingsPage title={t.settingsData}>
+    <>
       {/* 足跡 — the trail, and the way out of it. First in the list
           because it is the only thing on this page the learner did not
           already choose: the export and the reset are theirs to run,
@@ -148,6 +151,6 @@ export function DataPage({ session }) {
         )}
         {deleteFailed && <span className="hint" role="alert">{t.settingsDeleteAccountFailed}</span>}
       </Slip>
-    </SettingsPage>
+    </>
   )
 }

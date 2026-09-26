@@ -11,7 +11,7 @@ import { apiFetch } from '../lib/api'
 // arrives. Shape: { balance, pending, cap, dailyRefill, refillEvery,
 // nextCreditAt, fullAt, plan, unlimited, enforced } — `balance` null
 // on a pass, never "zero"; `pending` what the refill has landed and
-// nobody has claimed yet (plan 139, below).
+// nobody has claimed yet (plan 141, below).
 //
 // A review moves it twice: an optimistic decrement the moment the
 // rating lands (the HUD figure must not lag the tap), then the
@@ -171,7 +171,7 @@ export function useRunOut() {
   return useSyncExternalStore(subscribe, () => runOut, () => null)
 }
 
-// ── 補充 — the refill, claimed (plan 139) ────────────────────
+// ── 補充 — the refill, claimed (plan 141) ────────────────────
 // The refill lands a credit every 48 minutes and the server keeps what
 // has landed as `pending` until it is claimed (core/credits.py). Two
 // ways it is: the "while you were away" sheet the app opens on arrival

@@ -4,7 +4,7 @@ import { CAP, showsCap, nextCreditClock } from '../../domain/credits'
 
 // ── The balance, printed on the pass (canvas Profile, plan 074) ───
 // The commuter pass's footer line: the word, the figure over its cap,
-// and the hour the refill lands its next credit (plan 139) — the three
+// and the hour the refill lands its next credit (plan 141) — the three
 // facts of a free pass, on the pass itself. A full tank prints no hour,
 // having none coming; a subscription prints ∞ and no refill. The same
 // store the HUD's pocket pass reads, so the two never disagree.

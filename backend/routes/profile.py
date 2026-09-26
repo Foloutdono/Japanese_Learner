@@ -78,7 +78,7 @@ def _init_db() -> None:
             # switch without their own history changing meaning.
             #
             # The credits columns (plan 069, core/credits.py):
-            # credits_accrued_at is the refill's clock (plan 139) — the
+            # credits_accrued_at is the refill's clock (plan 141) — the
             # instant the next credit is counted from, moved on by each
             # claim and doubling as the lock that keeps two workers from
             # paying the same credits out twice; credits_refilled_on is

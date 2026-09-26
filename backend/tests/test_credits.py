@@ -6,7 +6,7 @@ its own and are erased on the way out (delete_user_rows, the account
 route's own plan). The economy's rules, one each: a new account is
 welcomed with the signup bonus, which sits above the cap and is spent
 down before the refill has anything to do; the refill lands one credit
-every REFILL_EVERY through the day and waits to be claimed (plan 139),
+every REFILL_EVERY through the day and waits to be claimed (plan 141),
 never past the cap, and a full tank banks nothing; a claim is paid out
 once; a fare claims what has landed before it charges, and is charged
 only after the scheduler accepted the review; the kana line is charged

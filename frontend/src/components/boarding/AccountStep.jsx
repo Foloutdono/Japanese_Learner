@@ -4,6 +4,7 @@ import { useClaim } from '../../hooks/useClaim'
 import { ClaimFields } from '../account/ClaimAccount'
 import { ProviderButton } from '../account/ProviderButton'
 import { authRedirectError, authRedirectMessage, isAlreadyLinked } from '../../lib/authRedirect'
+import { PassError } from './PassStep'
 
 // ── 本乗車券 — the last stop before the pass ─────────────────────
 // The boarding runs on a guest pass (lib/guest.js), so by the time
@@ -19,7 +20,11 @@ import { authRedirectError, authRedirectMessage, isAlreadyLinked } from '../../l
 // without either. The skip is the point of the screen — an account
 // asked for at the end and refusable is a different promise from one
 // demanded at the door.
-export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAuth = null }) {
+// `error` is the desk's (plan 140): there the pass is already at the
+// column's foot, so keeping the progress, or riding on without an
+// account, enters the station from here -- and the office's answer to
+// that is said here, over the button.
+export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAuth = null, error = null }) {
   const { t } = useLang()
   // The pass is the next screen and the account is on it, so a claim
   // that succeeded moves on by itself — the same as Google's onDone
@@ -78,6 +83,7 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
         </div>
       </div>
       <div className="brd__foot">
+        <PassError error={error} />
         <Continue
           keys
           label={t.brdAccountCreate}

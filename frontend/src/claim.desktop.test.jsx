@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 補充 — while you were away, on the desk (plan 139) ─────────────
+// ── 補充 — while you were away, on the desk (plan 141) ─────────────
 // The balance sheet is one of the pass's doors: the rail's pass opens
 // it, so it stands beside the rail's foot (plan 127). The claim sheet
 // shows the balance too, but nothing on the rail opened it -- it

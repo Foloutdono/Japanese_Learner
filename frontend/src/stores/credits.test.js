@@ -50,7 +50,7 @@ describe('the credits store', () => {
   })
 })
 
-// ── 補充 — the claim (plan 139) ────────────────────────────────
+// ── 補充 — the claim (plan 141) ────────────────────────────────
 // The sheet's figure is what it moves: the store takes it into the
 // balance the moment the sheet closes, and the server's answer wins
 // when it arrives -- or puts the store back on a failure.

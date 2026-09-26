@@ -952,7 +952,8 @@ into the page and gave a session its keys; plan 120 went through every
 dialog left and moved the ones that do not interrupt into their columns;
 plan 122 drew first contact for a desk, and plan 123 made the workspace
 answer a keyboard and a pointer one way everywhere. Plan 130 had the two
-plated gates take the window.
+plated gates take the window; plan 140 laid first contact down the left
+as the rail it arrives at.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
@@ -990,8 +991,8 @@ plated gates take the window.
   decoration found to fill it. The plates go two by two with the odd fifth
   across the row (a lattice with no short last row); the profile opens the
   holder flat, the pass and its stamps at the side column's width beside the
-  record, both rankings at once; Settings sets the list beside the open page,
-  under the list's one `<h1>`.
+  record, both rankings at once; Settings sets its column (the pass and the
+  list, plan 139) beside the open page, neither printing a title.
 - **The canvas is `--desk-board-w` (1240px)**, the width a plated screen
   was always allowed, and a second column is **`--desk-side-w` (360px)** —
   a phone's content width, so a phone-born component set in it (the pass's
@@ -1159,6 +1160,19 @@ plated gates take the window.
   drawn 1:1 at its cell's width, and in days while it would draw three
   weeks or fewer. The phone stands the same plates in one column; there
   is no sheet at either width.
+- **Settings is the pass's contract, beside the page it opens** (plan
+  139, the owner's pick of B and C on the canvas "Settings rework —
+  options", with the titles off on the desk). The column is the pass at
+  `--desk-entry-w` (giving down to `--desk-side-w`) over the list, sticky
+  and bounded; the open page takes the rest of the width, its slips
+  cards, two columns of them where the page holds two at 310px each
+  (measured on the page, not set at a window width), a card of the
+  page's own width stopping at `--card-w` so an action never runs past
+  it. **No title on
+  either**: the rail's lit station names the screen and the lit door --
+  a field of the pass in its gold wash and rail, a stop in its gold ring,
+  a row in the list's gold rail -- names the page; both headings stay,
+  clipped. The bare column opens on the destination.
 - **A run is a workspace.** The card is centred in what the run's side
   leaves; the side (StudyStage's `side`, fixed to the right edge, in the
   run's own pigment) is the entry's place: on a card run it holds **the
@@ -1374,7 +1388,7 @@ plated gates take the window.
   dictionary's grid is one stop walked in two dimensions, ↓ from the
   search entering it. Everything that is a place is a link wearing its
   button's face: Settings' pages (replacing, so seven pages looked at cost
-  one Back), the shelf's decks, a radical page's tiles, a bar's way up,
+  one Back; the pass's fields and the list's rows are one walk), the shelf's decks, a radical page's tiles, a bar's way up,
   the profile's halls and lines. A radio group is one stop whose arrows
   move and check — or move alone where a choice is a save or a question
   (the level, the pace, the hour, the rating scale), Space choosing — and
@@ -1389,17 +1403,35 @@ plated gates take the window.
   notes that teach a key or point at something say so on the desk (the
   `…Desk` copy — no "tap" is printed there). → and Enter go on; Today's
   stops walk down the rail first (plan 123).
-- **First contact is a run's frame** (plan 122). From the Welcome to the
-  first card there is no rail yet: the work is centred and a column at
-  `--desk-side-w` stands at the right edge, its job changing — on the
-  Welcome the sign-in, standing beside Board as its ghost twin (no second
-  screen); beside the boarding's questions the journey being built, priced
-  on every answer; on the first ride the card's entry, docked by the flip.
-  Building, a phone's pause for effect, is skipped. The plan's chart is
-  drawn 1:1. Every answer has a key: Enter goes on from any step, the
-  digits pick (a level answers to its own number, N5 to 5 and the kana stop
-  to 0), and Esc does nothing — the way out of the boarding signs the guest
-  out.
+- **First contact lays the rail** (plans 122, 140; the owner's pick A of
+  three directions drawn on the canvas "Desktop onboarding — options").
+  The desk's chrome is the rail, so from the Welcome to the plan a sumi
+  column at `--desk-side-w` stands on the LEFT edge in the rail's own
+  material, the rail's masthead at its head (辻 over TSUJI — the paper
+  keeps no second mark) — the rail before it has any gates. Its job
+  changes: on the Welcome the sign-in (the paper card, standing in the
+  sumi; no second screen), with the heading, the tagline and Board as
+  one block on the paper over the rolling stock; during the boarding the
+  line itself, a stop per question (the kana's reveal is the kana's own
+  stop), each named and printing its answer once given, the one being
+  asked lit with the pick as it stands, and a stop behind a door back to
+  its question until the plan is built; at its foot the projection,
+  priced on every answer, then the learner's pass. The head's track and
+  the right-hand journey were that line drawn twice, so neither is drawn.
+  The answers are laid for the width: the name, the kana and the rhythm
+  at the card's width (four tiles to a row), the six reasons three to a
+  row where three run columns fit, the level and the goal as a line of
+  stations — the ride lit in gold up to the pick, one row where each
+  holds half a run's column and two rows under that, a row's ends drawing
+  no rail past them. Back stands on the floor beside Continue (the kana,
+  with no Continue, has a floor of Back alone). Building is skipped, and
+  the pass's own screen folds away: the plan is the last screen and
+  enters the station, unless a guest is offered the account first, which
+  then enters. The plan's chart is drawn 1:1. Every answer has a key:
+  Enter goes on from any step, the digits pick (a level answers to its
+  own number, N5 to 5 and the kana stop to 0), and Esc does nothing — the
+  way out of the boarding signs the guest out. On the first ride the
+  column is the card's entry, docked by the flip (plan 122).
 - **Every desk rule is in one place.** The last section of `index.css`,
   one media block, names written nowhere else; `src/desk.css.test.js`
   holds it. Never write a desk rule anywhere else, and never let a phone
@@ -1419,6 +1451,26 @@ plated gates take the window.
   the layout already explains. **A block that needs a heading to be legible is
   not finished** — give it the mark that names it, the way each ledger cell
   carries its own roundel and 線 name instead of sitting under a "Lines" title.
+- **Settings opens on the pass, printed with its contract** (plan 139). The
+  profile's card (`.pass`) with the route where the holder goes — the
+  level it boards at → the destination — and the fields a 定期券 prints
+  where the balance goes: service, daily ride, lines, and the validity in
+  the pass's gold. Every printed field is the door to the page that
+  changes it; the validity opens nothing, being what the rest add up to.
+  The daily pace is one field: it was on two pages over one number. Under
+  the card the rest is a list whose rows **draw what they are set to**
+  beside their words (`RowSpecimens`: the theme's grounds, the mixer's
+  levels, the rating bar's dots), and every page draws what it sets:
+  each stop ahead with the date the service reaches it, each service as
+  a line to the destination on one time axis with the learner's own pace
+  of the last fortnight dashed beside them, the themes as screens at
+  thumbnail size (drawn from the inks that do not flip, so the light one
+  stays light under the dark theme), a language saying the gates' names
+  in itself, and the three rating bars as the bar itself (`RatingBar`'s
+  `specimen`). A choice's consequence is printed beside it before it is
+  made, never only once it is chosen. A selection in Settings is a gold
+  ring, the pass's metal. Sign out is printed once, on the account page,
+  whose second half is the learner's data.
 - **The two gates hang one plate per line** (plan 094, `LinePlate`): the
   roundel, the name in the learner's language and nothing under it, the
   section's aside at the trailing edge (a due count), a foot, and the

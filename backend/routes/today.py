@@ -406,7 +406,7 @@ def get_today(user_id: str = Depends(get_user_id)):
         # one credit a paid review, and the balance rides beside it.
         # It used to be `total` outright, back when every review cost
         # the same. Reading it counts what the refill has landed
-        # (`pending`, plan 139) without claiming it.
+        # (`pending`, plan 141) without claiming it.
         "fare": fare,
         "credits": credits.summary(user_id),
         # Counted from the lanes rather than from len(due_rows): rows

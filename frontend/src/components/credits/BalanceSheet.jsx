@@ -8,7 +8,7 @@ import { OfferButton } from './OfferButton'
 // ── 残高 — the balance sheet (plan 069) ───────────────────────
 // Off the HUD's pass: the balance as a figure over its track, with the
 // hour its next credit lands beside it, the two facts of a free pass —
-// the refill's rhythm (one every 48 minutes, plan 139) and the cap —
+// the refill's rhythm (one every 48 minutes, plan 141) and the cap —
 // and the one line that is never charged against either. The canvas draws an offer
 // block under them, and it is now drawn: the pass is SHOWN but not yet
 // sold (domain/paywall.js's HAS_PAYWALL, which is deliberately not

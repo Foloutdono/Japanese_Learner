@@ -4,7 +4,7 @@
 1 credit = 1 review, except on a line that rides free -- see
 FREE_SOURCES below, which today is 仮名 and nothing else. A new account
 is welcomed with SIGNUP_BONUS. After that a free pass fills itself
-through the day (plan 139): DAILY_REFILL a day, one credit every
+through the day (plan 141): DAILY_REFILL a day, one credit every
 REFILL_EVERY, up to at most CAP -- a balance still above CAP (a fresh
 welcome is) simply takes nothing until it has been spent down; the
 subscription pass is unlimited. The fare gate prices a run against the
@@ -20,7 +20,7 @@ history is exactly the bug a ledger exists to make impossible. The sum
 is cached per worker for a minute (the HUD asks often) and evicted on
 every write from this process.
 
--- 補充 — the refill fills, and waits to be claimed (plan 139) ----
+-- 補充 — the refill fills, and waits to be claimed (plan 141) ----
 It used to land in one go, DAILY_REFILL at the learner's local
 midnight. It lands as the day goes now: one credit every REFILL_EVERY
 (48 minutes, the day's thirty spread over it), counted from
@@ -172,7 +172,7 @@ def resets_at(user_id: str) -> datetime:
     daily cap somewhere else in the app (the OCR limit, the
     comprehension ceiling) needs in order to say WHEN an allowance
     comes back. The credits' own refill used to land on the same
-    boundary and no longer does (plan 139), but the offset and the day
+    boundary and no longer does (plan 141), but the offset and the day
     rule are still this module's business, and every one of those caps
     would otherwise carry the same four lines.
 
@@ -193,7 +193,7 @@ def resets_at(user_id: str) -> datetime:
         conn.close()
 
 
-# ── 補充 — the refill's clock (plan 139) ───────────────────────
+# ── 補充 — the refill's clock (plan 141) ───────────────────────
 # Pure arithmetic, apart from the rows: what has landed by `now` on a
 # clock, and when the next credit and a full tank come. Kept free of
 # the database so the rule the module docstring states is the whole of
@@ -466,7 +466,7 @@ def _summary_of(s: dict) -> dict:
     return {
         "balance": None if s["unlimited"] else s["balance"],
         # 補充 — landed since the last claim and not yet in the balance
-        # (plan 139): what the "while you were away" sheet offers.
+        # (plan 141): what the "while you were away" sheet offers.
         "pending": 0 if s["unlimited"] else s["pending"],
         "cap": CAP,
         "dailyRefill": DAILY_REFILL,

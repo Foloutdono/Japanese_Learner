@@ -3,7 +3,7 @@ Reading it settles the account (a new one is seeded, a clock that has
 never run is started) and counts what the refill has landed without
 claiming it: POST /api/credits/claim is what writes that to the ledger
 -- the "while you were away" sheet's button, and the app's quiet claim
-as each credit lands while it is open (plan 139). See core/credits.py."""
+as each credit lands while it is open (plan 141). See core/credits.py."""
 from fastapi import APIRouter, Depends
 
 from core import credits

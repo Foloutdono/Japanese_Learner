@@ -75,7 +75,7 @@ const nav = {
   runOutCleared:     (n) => `${n} révisées`,
   runOutWaiting:     (n) => `${n} attendent la recharge`,
   runOutWaits:       'en attente',
-  // 補充 — ce que la recharge a versé, app fermée (plan 139)
+  // 補充 — ce que la recharge a versé, app fermée (plan 141)
   claimTitle:        'Pendant ton absence',
   claimButton:       'Récupérer',
   claimBookLabel:    (n, cap) => `${n} crédits sur ${cap}`,
@@ -318,6 +318,7 @@ const quiz = {
   deskKeyCheckNext:   'valide, puis suivante',
   deskKeyRate:        'note ta réponse',
   deskKeyListen:      'écoute la phrase',
+  deskKeyReveal:      'affiche la phrase',
   deskKeyPick:        'choisit une réponse',
   deskKeyNext:        'question suivante',
   deskKeyWalk:        'parcourt les questions',
@@ -967,6 +968,8 @@ const reading = {
   readingFetchError:    "Impossible de charger une phrase. Réessaie.",
   writeWhatYouSaw:      'Écris ce que tu as vu, en romaji',
   romajiPlaceholder:    'ex. konnichiwa',
+  // Le bouton lecture derrière lequel arrive une phrase (PlayButton de ReadingPieces).
+  readingPlay:          'Afficher la phrase et lancer le chrono',
   correct:              'Correct !',
   incorrect:            'Pas tout à fait',
   correctRomaji:        'Romaji attendu',
@@ -1832,6 +1835,8 @@ const boarding = {
   brdBuildLines: 'Tes lignes',
   brdBuildRide: 'Ton trajet quotidien',
   brdBuildProjection: 'Ta projection',
+  // 机 (plan 140) : les arrêts de la colonne du bureau, un par question.
+  brdStop: { name: 'Nom', why: 'Pourquoi', kana: 'Kana', level: 'Niveau', goal: 'Objectif', lines: 'Lignes', rhythm: 'Rythme', time: 'Départ', nudge: 'Rappel' },
   brdArrivalTitle: 'Ton plan',
   brdPlanQ: (name) => `Ton plan est prêt, **${name}**.`,
   brdChartTitle: 'Ta projection',
@@ -2056,6 +2061,17 @@ const onboarding = {
   settingsData: 'Données',
   settingsRedo: 'Test de placement',
   settingsCredits: 'Crédits',
+  // The pass's contract and the rows under it (plan 140).
+  passFieldHour: 'Trajet',
+  passFieldLines: 'Lignes',
+  settingsRatingShort: 'Notation',
+  settingsHelp: 'Aide',
+  settingsHelpValue: 'Essai · Guide',
+  settingsCreditsCount: n => `${n} sources`,
+  settingsPaceMinutes: m => `≈ ${m} min`,
+  settingsYourPace: 'Ton rythme',
+  settingsYourPaceSub: n => `${n} / jour · 14 derniers jours`,
+  settingsInsteadOf: d => `au lieu du ${d}`,
   creditsWhat: { dictionary: 'Dictionnaire', kanji: 'Kanji', strokes: 'Ordre des traits', sentences: 'Phrases d’exemple', voice: 'Voix des gares', speech: 'Voix japonaise', kana: 'Voix des kana', type: 'Polices' },
   themeDark: 'Sombre',
   themeLight: 'Clair',

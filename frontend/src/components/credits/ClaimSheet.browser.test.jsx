@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 import '../../index.css'
 
-// ── 補充 — while you were away (plan 139) ─────────────────────
+// ── 補充 — while you were away (plan 141) ─────────────────────
 // The refill lands a credit every 48 minutes, open app or not, and the
 // server holds what landed as `pending`. On arrival the sheet offers it
 // -- the figure, the balance it takes them from and to, one button --

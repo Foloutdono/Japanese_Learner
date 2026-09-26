@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useCredits, peekCredits, refreshCredits, peekClaimOffer, offerClaim, claimCredits } from '../stores/credits'
 
-// ── 補充 — when the refill is claimed (plan 139) ──────────────
+// ── 補充 — when the refill is claimed (plan 141) ──────────────
 // The server lands a credit every 48 minutes and holds what has landed
 // as `pending` (core/credits.py). This decides which of the two ways it
 // reaches the balance:

@@ -120,11 +120,37 @@ async function oneSentence(answer) {
 }
 
 describe('a sentence run on the desk', () => {
-  it('reads with no pointer: type, Enter, a digit, Enter', async () => {
+  it('reads with no pointer: Enter, type, Enter, a digit, Enter', async () => {
     await render(<Run at="/practice/reading/level/N5" path="/practice/reading/level/:level" element={<ReadingRun session={null} />} />)
     await settle(300)
+    // The sentence arrives behind its play button, which holds the
+    // focus; the field is shut and the clock still until it is pressed.
+    const play = () => $('.clip-player__play')
+    expect(document.activeElement).toBe(play())
+    expect(field().disabled).toBe(true)
+    expect($('.sentence')).toBeNull()
+    expect($('.timer__label').textContent).toBe('30.0s')
+    await settle(300)
+    expect($('.timer__label').textContent).toBe('30.0s')
+    // The run's lines list Space for it, first.
+    expect($$('.desk-sentences .desk-keys .desk-kbd').map(k => k.textContent)).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
+
+    await userEvent.keyboard('{Enter}')
+    await settle()
+    expect(play()).toBeNull()
+    expect($('.sentence').textContent).toBe(PHRASE.phrase)
     expect(document.activeElement).toBe(field())
+    await settle(300)
+    expect(parseFloat($('.timer__label').textContent)).toBeLessThan(30)
+
     await oneSentence('gakkou wa kuji desu')
+    // The next one arrives behind its button too; Space shows it from
+    // anywhere that is not a field or another control.
+    expect(document.activeElement).toBe(play())
+    document.activeElement.blur()
+    await userEvent.keyboard(' ')
+    await settle()
+    expect(play()).toBeNull()
     expect(document.activeElement).toBe(field())
   })
 

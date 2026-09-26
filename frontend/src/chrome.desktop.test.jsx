@@ -357,7 +357,7 @@ describe('the rail', () => {
   })
 
   // Spent, it names the hour the refill lands its next credit (plan
-  // 139) -- on the learner's clock, so the expectation is read off it.
+  // 141) -- on the learner's clock, so the expectation is read off it.
   it('says when a spent balance comes back, edge and figure in the danger\'s ink', async () => {
     const at = '2026-09-07T14:48:00+00:00'
     await purseAt(0, at)

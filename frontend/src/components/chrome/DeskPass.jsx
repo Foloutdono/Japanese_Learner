@@ -54,7 +54,7 @@ export function DeskPass() {
   const cap = credits?.cap ?? CAP
   const low = balance != null && balance > 0 && balance <= 5
   const out = balance === 0
-  // Spent, it says when the refill lands the next credit (plan 139).
+  // Spent, it says when the refill lands the next credit (plan 141).
   const next = out ? nextCreditClock(credits, lang) : null
   const note = next ? t.balanceRefillLine(next) : balance != null ? t.creditsUnit : null
   const figure = credits?.unlimited ? '∞'

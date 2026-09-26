@@ -6,7 +6,7 @@ import { CAP } from '../../domain/credits'
 import { useRefill } from '../../hooks/useRefill'
 import { playFareTick } from '../../lib/audio'
 
-// ── 補充 — while you were away (plan 139) ─────────────────────
+// ── 補充 — while you were away (plan 141) ─────────────────────
 // The refill lands a credit every 48 minutes whether the app is open or
 // not; what landed while it was not waits here, on arrival. The figure
 // in the pass's gold, the balance it takes them from and to, the 回数券

@@ -14,9 +14,17 @@ import { RunPanelsContext } from './runPanels'
 const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '-': 5, '§': 5 }
 
 /**
- * `scale` overrides the learner's own choice — only tests pass it.
- * Everything else takes the setting, the test ride included (plan
- * 098): the first bar a learner rates on is the one they will keep.
+ * `scale` overrides the learner's own choice — tests pass it, and the
+ * specimen. Everything else takes the setting, the test ride included
+ * (plan 098): the first bar a learner rates on is the one they will
+ * keep.
+ *
+ * `specimen` (plan 139) draws the bar and nothing more: Settings'
+ * Notation page offers the three scales as the bar each one is, so the
+ * choice is made by looking at the instrument rather than at a list of
+ * its words. Its tiles are not buttons (it sits inside the radio that
+ * picks it), it hears no key and it is hidden from a screen reader,
+ * the radio naming the words instead.
  */
 // How long the pressed segment stays lit after the rating is taken.
 // The bar goes idle the instant a rating lands (see each screen's
@@ -26,7 +34,7 @@ const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '-': 5, '§': 5 
 // the ring closing, not a toast. Matched to the idle fade in index.css.
 const PRESSED_MS = 420
 
-export default function RatingBar({ onRate, active, scale, guide }) {
+export default function RatingBar({ onRate, active, scale, guide, specimen = false }) {
   const { t } = useLang()
   const preferred = useRatingScale()
   const desk = useDesk()
@@ -51,6 +59,8 @@ export default function RatingBar({ onRate, active, scale, guide }) {
   // the same 0..5 quality, so "1" is the best answer either way and the
   // digits keep their meaning across a switch. See domain/ratingScales.
   const QUALITY_BTNS = ratingButtons(scale ?? preferred, t)
+  // A specimen stands inside a button, where only phrasing content goes.
+  const Box = specimen ? 'span' : 'div'
 
   // Shared by the on-screen buttons and the keyboard shortcuts below,
   // so a rating fired either way gets the same tap feedback.
@@ -93,7 +103,7 @@ export default function RatingBar({ onRate, active, scale, guide }) {
   // so nothing is reachable before there is a card to rate. The
   // keyboard handler above is separately gated on `active`.
   return (
-    <div className={`rating-bar${active ? '' : (panels ? ' rating-bar--unlit' : ' rating-bar--idle')}`} aria-hidden={!active} data-guide={guide}>
+    <Box className={`rating-bar${specimen ? ' rating-bar--specimen' : active ? '' : (panels ? ' rating-bar--unlit' : ' rating-bar--idle')}`} aria-hidden={specimen || !active} data-guide={guide}>
       {/* One continuous instrument, worst to best -- see index.css for
           why. `.map()` already returns a new array, so the `.reverse()`
           below sorts that copy and never QUALITY_BTNS itself; DOM order
@@ -106,8 +116,14 @@ export default function RatingBar({ onRate, active, scale, guide }) {
           depends on it: six segments wrap to two rows of three, four to
           two of two, and the hairlines between them have to be redrawn
           for whichever grid that is. */}
-      <div className={`rating-bar__buttons rating-bar__buttons--${QUALITY_BTNS.length}`}>
-        {QUALITY_BTNS.map((b, i) => ({ ...b, digit: i + 1 })).reverse().map(({ q, label, digit }) => (
+      <Box className={`rating-bar__buttons rating-bar__buttons--${QUALITY_BTNS.length}`}>
+        {specimen && QUALITY_BTNS.slice().reverse().map(({ q, label }) => (
+          <span key={q} className={`rating-bar__btn rating-bar__btn--q${q}${q === QUALITY_BTNS[0].q ? ' rating-bar__btn--best' : ''}`}>
+            {q !== QUALITY_BTNS[0].q && <span className="rating-bar__btn-ring" />}
+            <span className="rating-bar__btn-label">{label}</span>
+          </span>
+        ))}
+        {!specimen && QUALITY_BTNS.map((b, i) => ({ ...b, digit: i + 1 })).reverse().map(({ q, label, digit }) => (
           <button
             key={q}
             type="button"
@@ -140,7 +156,7 @@ export default function RatingBar({ onRate, active, scale, guide }) {
             <span className="rating-bar__btn-label">{label}</span>
           </button>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }

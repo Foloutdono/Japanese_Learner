@@ -344,7 +344,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
   const { rides, waits } = runFit(taken, balance, free)
   // Nothing paid rides: every paid lane waits for the refill, and says so.
   const paidWait = metered && waits > 0 && rides <= free
-  // When the refill lands its next credit (plan 139) -- what a paid
+  // When the refill lands its next credit (plan 141) -- what a paid
   // lane that cannot board is waiting for.
   const clock = nextCreditClock(credits, lang)
   const cap = credits?.cap ?? CAP

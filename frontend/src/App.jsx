@@ -710,7 +710,7 @@ export default function App() {
         <RunOutSheet />
         <PaywallSheet />
         {/* 補充 — what the refill landed while the app was closed, on
-            arrival (plan 139). Held through the 改札 cutscene and the
+            arrival (plan 141). Held through the 改札 cutscene and the
             first ride, which have the learner's whole attention, and
             opened once either lets go. */}
         <ClaimSheet hold={onboarding === 'finishing'} />
