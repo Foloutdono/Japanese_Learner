@@ -11694,14 +11694,18 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    The pigment arrives as --line-color from the shell (.dict-dock,
    .dict-sheet — see the catalogue block near the end of this file)
    and is spent as an edge and as numerals, never as a fill. */
-.dict-entry {
-  /* 山吹 as an ink. Raw, the gold reads 6.4:1 on dark paper and 2.9:1
-     on light; mixed 60% toward the ambient ink it clears the floor in
-     both (5.2:1 light, 8.6:1 dark — Guard 4 measures it). Named once
-     here so the sense numerals and the highlighted headword in an
-     example read the same pair; the stripe, the rail and the hover
-     rings stay raw, because an edge is not text. */
+/* 山吹 as an ink. Raw, the gold reads 6.4:1 on dark paper and 2.9:1
+   on light; mixed 60% toward the ambient ink it clears the floor in
+   both (5.2:1 light, 8.6:1 dark — Guard 4 measures it). Named once
+   here so the sense numerals and the highlighted headword in an
+   example read the same pair; the stripe, the rail and the hover
+   rings stay raw, because an edge is not text. A grammar lesson names
+   it too (plan 144): the sheet and the gate are not an entry, and
+   their numerals, forms and picked-out pattern had no ink to read. */
+:is(.dict-entry, .gl) {
   --dict-ink: color-mix(in srgb, var(--line-color, var(--accent2)) 60%, var(--text-primary));
+}
+.dict-entry {
   display: flex;
   flex-direction: column;
   min-height: 100%;
@@ -12184,7 +12188,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: inline-block;
   white-space: nowrap;
 }
-.dict-ex__jp ruby { white-space: nowrap; }
+/* A word's reading over the word, centred, and free to overhang the
+   kana either side by half a reading character, as a printed book sets
+   it (plan 144): the reading's own width no longer sets the ruby's, so
+   学生 under がくせい stays one word rather than 学 生. ExampleSentence
+   joins a word's kanji into one ruby, so a reading never meets another
+   one at the side. */
+.dict-ex__jp ruby { white-space: nowrap; ruby-align: center; }
 /* One rung up from --fs-caption-xs, and medium: at 9.9px ご's dakuten
    were one smudge, and ご read as こ (see .dict-plate__word rt). The
    rung and weight 書取's line already sets over the same --fs-lead
@@ -12192,6 +12202,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    cannot afford it. A two-kana reading at this rung (23px) already
    widens the 18px kanji under it by a few pixels. */
 .dict-ex__jp rt {
+  margin-inline: -0.5em;
   font-size: var(--fs-caption);
   font-weight: 500;
   color: var(--text-secondary);
@@ -20270,21 +20281,26 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-/* ── The steps ──
-   RULE, USE, CAREFUL: each opens with the mark the radical index puts
-   over a level (.dict-mark), and the text under it is body prose at
-   the reading leading. An ordered list, because the order IS the
-   lesson; the numerals are the marks, so the list's own are off. */
+/* ── The steps ── (plan 144, the owner's pick B of three)
+   RULE, USE, CAREFUL: each opens on its mark at the caption rung, and
+   one hairline divides a step from the next -- the rule under every
+   mark drew three lines where two divide. An ordered list, because the
+   order IS the lesson; the numerals are the marks, so the list's own
+   are off. The rule is the lead, a rung up: it is the one sentence
+   every other block explains. */
 .gl-steps {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.gl-step { display: flex; flex-direction: column; gap: var(--sp-3); }
-.gl-step__mark { padding-left: 0; }
+.gl-step { display: flex; flex-direction: column; gap: var(--sp-3); padding-block: var(--sp-4); }
+.gl-step:first-child { padding-top: 0; }
+.gl-step:last-child { padding-bottom: 0; }
+.gl-step + .gl-step { border-top: 1px solid var(--surface-line); }
+.gl-step__mark { padding: 0; border-bottom: 0; }
+.gl-step__mark .dict-mark__name { font-size: var(--fs-caption); }
 .gl-step__body {
   display: flex;
   flex-direction: column;
@@ -20294,17 +20310,68 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   color: var(--text-primary);
   text-wrap: pretty;
 }
+.gl-step--rule .gl-step__body { font-size: var(--fs-lead); }
 .gl-step__p { margin: 0; }
+/* The Japanese in the prose, set as Japanese (lessonText.inline): its
+   own face, whole on its line -- ではありませんで | した no longer --
+   and in the lesson's ink, so the forms stand out of the sentence that
+   explains them. The last-resort break is for a run wider than the
+   column, which the catalogue does not have. */
+.gl-ja {
+  font-family: var(--font-jp);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+/* A word or a short form (lessonText.SHORT_RUN) whole on its line:
+   keep-all still let あります／います break after its slash. */
+.gl-ja--word { white-space: nowrap; }
+:is(.gl-step__body, .gl-door__note, .gl-door__gloss) .gl-ja { color: var(--dict-ink); }
+/* ── A use ──
+   A row each, divided by a dotted hairline (the step's own is solid).
+   Nine in ten say what the form is for and then give it: the saying
+   over the forms, each form whole at the sentences' rung in the ink,
+   its gloss beside it in the secondary register. A paradigm is its
+   labels beside its forms. */
 .gl-step__list {
-  margin: 0;
-  padding-left: var(--sp-5);
   display: flex;
   flex-direction: column;
-  gap: var(--sp-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
+.gl-use { display: flex; flex-direction: column; gap: var(--sp-1); padding-block: var(--sp-3); }
+.gl-use:first-child { padding-top: 0; }
+.gl-use:last-child { padding-bottom: 0; }
+.gl-use + .gl-use { border-top: 1px dashed var(--surface-line); }
+.gl-forms {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-5);
+}
+.gl-form { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--sp-2); min-width: 0; }
+.gl-form__ja {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  color: var(--dict-ink);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.gl-form__gloss { font-size: var(--fs-sm); color: var(--text-secondary); }
+.gl-paradigm {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-5);
+  margin: 0;
+}
+.gl-paradigm__row { display: contents; }
+.gl-paradigm__label { color: var(--text-secondary); }
+.gl-paradigm__forms { margin: 0; }
 /* A trap is a state of the step, not a louder step: the mark takes
-   the due ink as an edge, the way the study card's stage word does. */
-.gl-step--careful .gl-step__mark { border-bottom-color: var(--state-due); }
+   the due ink, and its text stands on a rail of it -- an edge, the way
+   the study card's stage word does. */
+.gl-step--careful .gl-step__body { padding-left: var(--sp-4); border-left: 2px solid var(--state-due); }
 .gl-step--careful .dict-mark__name { color: color-mix(in srgb, var(--state-due) 72%, var(--text-primary)); }
 /* ── The neighbours ──
    One row per rival, the radical family's door: the pattern, its
@@ -20394,6 +20461,41 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .grammar-contrast .dict-ex { align-items: center; }
 .grammar-contrast .dict-ex__jp { justify-content: center; font-size: inherit; }
 .grammar-contrast .dict-ex__tr { font-family: var(--font-display); font-size: var(--fs-caption); }
+/* ── The sentences ── (plan 144)
+   A row each, numbered in the ink at the gutter and hairline-divided,
+   the translation under the sentence. A sentence in another register
+   than its point says so at the right (GrammarLesson's registerTag):
+   a ring in the ink, as a chip is drawn, never a fill. */
+.gl-block--examples .dict-examples { gap: 0; }
+.gl-block--examples .dict-ex {
+  display: grid;
+  grid-template-columns: var(--sp-5) minmax(0, 1fr) auto;
+  grid-template-areas:
+    "n jp tag"
+    ". tr tr";
+  align-items: baseline;
+  column-gap: var(--sp-3);
+  padding-block: var(--sp-3);
+}
+.gl-block--examples .dict-ex:first-child { padding-top: 0; }
+.gl-block--examples .dict-ex + .dict-ex { border-top: 1px solid var(--surface-line); }
+.gl-block--examples .dict-ex__n { grid-area: n; justify-self: end; }
+.gl-block--examples .dict-ex__jp { grid-area: jp; }
+.gl-block--examples .dict-ex__tr { grid-area: tr; }
+.dict-ex__tag {
+  grid-area: tag;
+  padding: var(--sp-1) var(--sp-3);
+  padding-inline-end: calc(var(--sp-3) - var(--tr-caption));
+  border: 1px solid color-mix(in srgb, var(--line-color, var(--accent2)) 45%, var(--surface-line));
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--dict-ink);
+}
 /* ── The station's index ──
    The level's points as rows: the pattern, its gloss, the stage
    word, hairline-divided at the flat radius — a ledger, read top to

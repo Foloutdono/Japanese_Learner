@@ -542,6 +542,43 @@ where the door leads. Each block carries its name as an
 row, a ring on hover, and the sense numerals — mixed 60% toward the ambient
 ink, because raw 山吹 reads 2.9:1 on light paper.
 
+**A grammar lesson reads for its shape** (plan 144, the owner's pick B
+of three drawn directions). The lesson prints in four places (the
+dictionary's plate body, the sheet behind a card, the gate before a new
+card, the grammar station on the desk) and is one component in all of
+them:
+
+- **The steps divide by one hairline each**, the mark (RULE, USE,
+  CAREFUL) at the caption rung with no rule under it: a rule under every
+  mark drew three lines where two divide. The rule is the lead, a rung
+  up, because it is the sentence every other block explains. The trap
+  stands on a 2px rail of the due ink, an edge.
+- **The Japanese in the prose is set as Japanese**: `lang="ja"` for the
+  face and the glyph forms, in the entry's ink (`--dict-ink`, which the
+  lesson names for itself where it is not inside an entry), and never
+  cut. A run of up to twelve characters does not break at all; a
+  sentence-length run breaks at its 、 first. A formula keeps its
+  placeholders (A は B です is one unit), a term that opens a sentence
+  keeps the word after it, and French punctuation is welded as the
+  string tables are.
+- **A use is its saying over its forms.** Nine use lines in ten are "what
+  it is for : the forms". The colon goes; the forms print on their own
+  line at the sentences' rung, each whole, its gloss beside it in the
+  secondary register. A paradigm (Négatif : …. Passé : ….) is its labels
+  beside its forms. A line that reads neither way prints as prose, and
+  the parser (`components/study/lessonText.js`) is held to losing no
+  character of Japanese over the whole catalogue.
+- **The sentences are numbered rows**, hairline-divided, the translation
+  under each. A sentence in another register than a register-bound point
+  carries its register as a ring-drawn tag (この店はしずかだ, FAMILIER,
+  under the polite です／だ). Under a neutral point nothing is tagged:
+  every sentence is polite or casual by nature there.
+- **Furigana sit over the word.** A word's kanji share one reading,
+  centred and free to overhang the kana either side by half a reading
+  character, so 学生 is not printed 学 生; closing punctuation rides on
+  the part before it, so no line opens on 。. This is `ExampleSentence`,
+  so it holds wherever an example sentence is printed.
+
 ### The console, one everywhere
 
 Decks, Dictionary, Today and the Library share **one console pattern**: a

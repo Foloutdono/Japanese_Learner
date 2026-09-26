@@ -135,6 +135,79 @@ describe('the grammar lesson', () => {
     expect(plate.querySelector('[aria-label="Close"]')).toBeTruthy()
   })
 
+  // Plan 144, the owner's pick B: the lesson read for its shape
+  // (lessonText). A use that names its forms prints them under it, in
+  // Japanese and whole; a paradigm is its labels beside its forms; the
+  // sentences are numbered, and one in another register than a
+  // register-bound point says so.
+  const SHAPED = {
+    ...RICH, pattern: 'です／だ', register: 'polite',
+    steps: [
+      { kind: 'rule', text: '**です** links a noun to what it is: A は B です. **だ** is the same word in plain speech.' },
+      { kind: 'use', text: '- To say what something is: 学生です, しずかです.\n- Negative: ではありません (spoken: じゃありません). Past: でした.\n- Speeches.' },
+      { kind: 'careful', text: 'Never « to exist ».' },
+    ],
+    examples: [
+      { jp: 'わたしは学生です。', tr: 'I am a student.', register: 'polite',
+        furigana: [{ text: 'わたしは' }, { text: '学', reading: 'がく' }, { text: '生', reading: 'せい' }, { text: 'です', highlight: true }, { text: '。' }] },
+      { jp: 'この店はしずかだ。', tr: 'This shop is quiet.', register: 'casual',
+        furigana: [{ text: 'この' }, { text: '店', reading: 'みせ' }, { text: 'はしずかだ。' }] },
+    ],
+  }
+
+  it('prints a use as its saying over its forms, a paradigm as labels beside forms, the rest as prose', async () => {
+    const screen = await mount(<GrammarLesson point={SHAPED} variant="sheet" />)
+    const uses = [...screen.container.querySelectorAll('.gl-use')]
+    expect(uses).toHaveLength(3)
+    expect(uses[0].querySelector('.gl-use__say').textContent).toBe('To say what something is')
+    expect([...uses[0].querySelectorAll('.gl-form__ja')].map(f => [f.textContent, f.lang])).toEqual([['学生です', 'ja'], ['しずかです', 'ja']])
+    const labels = [...uses[1].querySelectorAll('dt')].map(d => d.textContent)
+    expect(labels).toEqual(['Negative', 'Past'])
+    expect(uses[1].querySelector('dd .gl-form__gloss').textContent).toBe('spoken: じゃありません')
+    expect(uses[2].textContent).toBe('Speeches.')
+    expect(uses[2].querySelector('.gl-forms, dl')).toBeNull()
+  })
+
+  it('sets the Japanese in the prose as Japanese, a formula whole', async () => {
+    const screen = await mount(<GrammarLesson point={SHAPED} variant="sheet" />)
+    const rule = screen.container.querySelector('.gl-step--rule')
+    const runs = [...rule.querySelectorAll('.gl-ja')]
+    expect(runs.map(r => r.textContent)).toEqual(['です', 'A\u00A0は\u00A0B\u00A0です', 'だ'])
+    expect(runs.every(r => r.lang === 'ja' && r.classList.contains('gl-ja--word'))).toBe(true)
+    expect(rule.querySelector('strong .gl-ja').textContent).toBe('です')
+  })
+
+  it('numbers the sentences and tags the one in another register', async () => {
+    const screen = await mount(<GrammarLesson point={SHAPED} variant="sheet" />)
+    const exs = [...screen.container.querySelectorAll('.gl-block--examples .dict-ex')]
+    expect(exs.map(ex => ex.querySelector('.dict-ex__n').textContent)).toEqual(['1', '2'])
+    expect(exs.map(ex => ex.querySelector('.dict-ex__tag')?.textContent ?? null)).toEqual([null, 'Casual'])
+    // Under a neutral point every sentence is polite or casual by
+    // nature; nothing is tagged.
+    const neutral = await mount(<GrammarLesson point={{ ...SHAPED, register: 'neutral' }} variant="sheet" />)
+    expect(neutral.container.querySelector('.dict-ex__tag')).toBeNull()
+  })
+
+  it('sets a word\'s kanji under one reading, never across a highlight', async () => {
+    const screen = await mount(<GrammarLesson point={SHAPED} variant="sheet" />)
+    const first = screen.container.querySelector('.gl-block--examples .dict-ex')
+    expect([...first.querySelectorAll('rt')].map(rt => rt.textContent)).toEqual(['がくせい'])
+    expect(first.querySelector('ruby').firstChild.nodeValue).toBe('学生')
+    expect(first.querySelector('.dict-ex__hl').textContent).toBe('です')
+    // The full stop the highlight cut off rides on it: a line never
+    // opens on 。.
+    const segs = [...first.querySelector('.dict-ex__jp').children]
+    expect(segs.at(-1).textContent).toBe('です。')
+    expect(segs.at(-1).querySelector('.dict-ex__hl').textContent).toBe('です')
+  })
+
+  it('keeps a use that is prose on its line', async () => {
+    const screen = await mount(<GrammarLesson point={{ ...SHAPED, steps: [{ kind: 'use', text: '- Written は, read « wa » here.' }] }} variant="sheet" />)
+    const use = screen.container.querySelector('.gl-use')
+    expect(use.children).toHaveLength(1)
+    expect(use.textContent).toBe('Written は, read «\u00A0wa\u00A0» here.')
+  })
+
   it('ends the gate on one primary button that boards', async () => {
     const onBoard = vi.fn()
     const screen = await mount(<GrammarLesson point={RICH} variant="gate" onBoard={onBoard} />)
