@@ -896,7 +896,10 @@ runtime purpose. Two consequences worth knowing:
   cards as a table and the way to all of them, and at the foot Add cards
   beside the one filled action -- the deck's lanes of the day's queue,
   the run's way out coming back to the deck, or its first mode; the
-  form, Browse or More taking the modes' place;
+  form, Browse or More taking the modes' place; both columns held to
+  the window, only the rows and the cards scrolling, and on a page too
+  narrow or short the modes as chips (`hooks/useBoxWidth.js`'s
+  `useBoxSize`, `src/deckFit.desktop.test.jsx`, `src/deckFit.wide.test.jsx`);
   `components/decks/DeckPlatforms.jsx` retired (cited in
   `routes/decks.py`, `srs/srs.py`, `tests/test_deck_card_states.py`,
   `screens/DecksScreen.jsx`, `screens/DeckDetailScreen.jsx`,

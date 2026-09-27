@@ -196,8 +196,8 @@ describe('a deck on the desk', () => {
     await settle()
     expect($('.desk-side')).toBeNull()
     expect($('.deck-identity')).toBeNull()
-    const slot = $('.desk-deck > .desk-deck__slot').getBoundingClientRect()
-    const list = $('.desk-deck > .dk-cards').getBoundingClientRect()
+    const slot = $('.dk-scroll > .desk-deck__slot').getBoundingClientRect()
+    const list = $('.dk-scroll > .dk-cards').getBoundingClientRect()
     expect(slot.bottom).toBeLessThanOrEqual(list.top)
     const modes = $$('.dk-modes .dk-mode')
     expect(modes.map(m => m.querySelector('.dk-mode__name').textContent)).toEqual(['Mot → sens', 'Sens → mot'])
@@ -233,7 +233,7 @@ describe('a deck on the desk', () => {
     expect(add.getAttribute('aria-pressed')).toBe('true')
     expect($('.desk-deck__slot .deckdetail-form')).not.toBeNull()
     expect($('.dk-modes')).toBeNull()
-    expect($('.desk-deck > .dk-cards')).not.toBeNull()
+    expect($('.dk-scroll > .dk-cards')).not.toBeNull()
   })
 
   it('rides its lanes of the day\'s queue from its foot, and comes back to it', async () => {
@@ -246,8 +246,10 @@ describe('a deck on the desk', () => {
     try {
       await mount('/learn/decks/1', shelf)
       await settle(400)
-      // Each mode card with what the queue holds for it.
-      expect($$('.dk-mode').map(m => m.querySelector('.dk-mode__due')?.textContent ?? null)).toEqual(['3', '1'])
+      // Each mode with what the queue holds for it: a chip each on a page
+      // this narrow (the wide lane holds the cards).
+      expect($('.dk-modes')).toBeNull()
+      expect($$('.dk-modeline .chip').map(m => m.querySelector('.dk-modeline__n')?.textContent ?? null)).toEqual(['3', '1'])
       const ride = $('.dk-foot .btn-primary')
       expect(ride.textContent).toBe('Réviser 4 cartes ▶')
       expect($$('.btn-primary').filter(b => b.closest('main'))).toHaveLength(1)

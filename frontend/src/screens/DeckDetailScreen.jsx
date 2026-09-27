@@ -8,6 +8,7 @@ import { track } from '../lib/track'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { DeskDock } from '../components/chrome/DeskDock'
 import { useDeckModes } from '../hooks/useDeckModes'
+import { useBoxSize } from '../hooks/useBoxWidth'
 import { useDesk } from '../hooks/useDesk'
 import { Chip } from '../components/chrome/Console'
 import { Sheet } from '../components/chrome/Sheet'
@@ -22,7 +23,7 @@ import { pairRows } from '../components/decks/importCards'
 import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
 import { StrokeRail } from '../components/dictionary/RadicalIndex'
-import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PlusIcon, SearchIcon, BooksIcon } from '../components/ui/Icons'
+import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PencilIcon, PlusIcon, SearchIcon, BooksIcon } from '../components/ui/Icons'
 import { composing } from '../lib/keyGuards'
 
 // The name the export endpoint chose, out of its Content-Disposition.
@@ -252,6 +253,14 @@ function ReadingsField({ label, value, onChange }) {
 // its cards it lists before the way to all of them.
 const FIG_KEYS = ['due', 'new', 'learning', 'mastered']
 const PREVIEW_CARDS = 6
+// Below these the page is too short or too narrow for the mode cards:
+// they give way to a row of chips so the cards keep their room and the
+// foot's button stays on the window. The width is three cards across
+// (index.css's .dk-modes: three half side columns and their two gaps);
+// the height, the head, the figures, the cards of the modes, four rows
+// of the table and the foot, with the page's gaps between them.
+const COMPACT_BELOW_W = 564
+const COMPACT_BELOW_H = 720
 
 export default function DeckDetailScreen({ session, deckId, pane = false, onCount, onGone, onChanged }) {
   const navigate        = useNavigate()
@@ -972,6 +981,14 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   // first mode. The card form, Browse and More open in the modes'
   // place, over the cards they act on.
   const modes = useDeckModes(desk && !loading ? deck_id : null, session, cards.length > 0)
+  const [deckBox, deckSize] = useBoxSize(desk)
+  // Narrow: the head's Edit is its pencil, the foot's Add its short
+  // word and a card's reading goes under its word. Compact (narrow, or
+  // short): the modes are chips.
+  const narrow = deckSize != null && deckSize.width < COMPACT_BELOW_W
+  // Its height means the window's only beside the shelf (`pane`), where
+  // the page is held to it; on its own the page is as tall as it is.
+  const compact = narrow || (pane && deckSize != null && deckSize.height < COMPACT_BELOW_H)
   const laneFor = mode => deckLanes.filter(l => l.mode === mode).reduce((n, l) => n + laneCount(l), 0)
   const figs = { due: 0, new: 0, learning: 0, mastered: 0 }
   for (const card of cards) figs[FIG_KEYS.includes(card.state) ? card.state : 'new'] += 1
@@ -1026,7 +1043,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           </button>
         </DeskDock>
       )
-      : modes?.length > 0 ? (
+      : modes?.length > 0 && !compact ? (
         <div className="dk-modes" role="group" aria-label={t.study}>
           {modes.map(m => {
             const n = laneFor(m.key)
@@ -1058,8 +1075,9 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           <h2 className="dk-head__name">{deck?.name ?? t.deckFallbackTitle}</h2>
         </span>
         {!isFollower && cards.length > 0 && (
-          <Chip on={selectMode} onClick={() => { playUi('click-mode-selection'); if (selectMode) exitSelectMode(); else setSelectMode(true) }}>
-            {t.deckEdit}
+          <Chip on={selectMode} onClick={() => { playUi('click-mode-selection'); if (selectMode) exitSelectMode(); else setSelectMode(true) }}
+            aria-label={narrow ? t.deckEdit : undefined} title={narrow ? t.deckEdit : undefined}>
+            <PencilIcon size={14} />{!narrow && t.deckEdit}
           </Chip>
         )}
         {!isFollower && (
@@ -1092,55 +1110,75 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       {selectMode && selectConsole}
       {banners}
 
-      {(deskSlot || adding) && <div className="desk-deck__slot">{deskSlot}</div>}
+      {/* The one part of the page that scrolls, so the head over it and
+          the foot under it never leave the window. */}
+      <div className="dk-scroll">
+        {(deskSlot || adding) && <div className="desk-deck__slot">{deskSlot}</div>}
 
-      {loading && <Loading />}
+        {loading && <Loading />}
 
-      {!loading && cards.length === 0 && !adding && (
-        <Empty icon={<CardIcon size={40} />} message={t.noCards} hint={t.addFirstCard} className="deckdetail-empty" />
-      )}
+        {!loading && cards.length === 0 && !adding && (
+          <Empty icon={<CardIcon size={40} />} message={t.noCards} hint={t.addFirstCard} className="deckdetail-empty" />
+        )}
 
-      {!loading && cards.length > 0 && (
-        <div className="dk-cards">
-          {listedCards.map(card => {
-            const key = cardKey(card)
-            const isSel = selected.has(key)
-            const opens = !isFollower && (selectMode || card.origin === 'custom')
-            const Body = opens ? 'button' : 'div'
-            const bodyProps = opens
-              ? {
-                type: 'button',
-                onClick: selectMode ? () => toggleSelect(key) : () => startEdit(card),
-                'aria-pressed': selectMode ? isSel : undefined,
-              }
-              : {}
-            const state = FIG_KEYS.includes(card.state) ? card.state : 'new'
+        {!loading && cards.length > 0 && (
+          <div className={`dk-cards${narrow ? ' dk-cards--stacked' : ''}`}>
+            {listedCards.map(card => {
+              const key = cardKey(card)
+              const isSel = selected.has(key)
+              const opens = !isFollower && (selectMode || card.origin === 'custom')
+              const Body = opens ? 'button' : 'div'
+              const bodyProps = opens
+                ? {
+                  type: 'button',
+                  onClick: selectMode ? () => toggleSelect(key) : () => startEdit(card),
+                  'aria-pressed': selectMode ? isSel : undefined,
+                }
+                : {}
+              const state = FIG_KEYS.includes(card.state) ? card.state : 'new'
+              return (
+                <Body key={key} className={`dk-card${isSel ? ' dk-card--selected' : ''}`} {...bodyProps}>
+                  {selectMode && (
+                    <span className={`card-row__tick${isSel ? ' card-row__tick--on' : ''}`} aria-hidden="true">
+                      {isSel && <CheckIcon size={11} />}
+                    </span>
+                  )}
+                  <span className="dk-card__jp" lang="ja">{card.front}</span>
+                  <span className="dk-card__kana" lang="ja">{card.kana}</span>
+                  <span className="dk-card__gloss">{card.back}</span>
+                  <span className={`dk-card__state dk-card__state--${state}`}>{t.deckCardState[state]}</span>
+                </Body>
+              )
+            })}
+          </div>
+        )}
+        {!loading && !selectMode && !showAll && cards.length > PREVIEW_CARDS && (
+          <button type="button" className="dk-all" onClick={() => { playUi('click-mode-selection'); setShowAll(true) }}>
+            {t.deckAllCards(cards.length)} ▶
+          </button>
+        )}
+      </div>
+
+      {/* A page too short or too narrow for the mode cards picks a mode
+          from a row of chips instead, over the foot. */}
+      {compact && modes?.length > 0 && !(adding || showBrowse || moreOpen) && (
+        <div className="dk-modeline" role="group" aria-label={t.study}>
+          {modes.map(m => {
+            const n = laneFor(m.key)
             return (
-              <Body key={key} className={`dk-card${isSel ? ' dk-card--selected' : ''}`} {...bodyProps}>
-                {selectMode && (
-                  <span className={`card-row__tick${isSel ? ' card-row__tick--on' : ''}`} aria-hidden="true">
-                    {isSel && <CheckIcon size={11} />}
-                  </span>
-                )}
-                <span className="dk-card__jp" lang="ja">{card.front}</span>
-                <span className="dk-card__kana" lang="ja">{card.kana}</span>
-                <span className="dk-card__gloss">{card.back}</span>
-                <span className={`dk-card__state dk-card__state--${state}`}>{t.deckCardState[state]}</span>
-              </Body>
+              <Chip key={m.key} aria-pressed={undefined} title={m.desc} onClick={() => boardMode(m.key)}>
+                {m.label}
+                {n > 0 && <span className="dk-modeline__n">{n}</span>}
+              </Chip>
             )
           })}
         </div>
-      )}
-      {!loading && !selectMode && !showAll && cards.length > PREVIEW_CARDS && (
-        <button type="button" className="dk-all" onClick={() => { playUi('click-mode-selection'); setShowAll(true) }}>
-          {t.deckAllCards(cards.length)} ▶
-        </button>
       )}
 
       {(canAdd || rideCount > 0 || modes?.length > 0) && (
         <div className="dk-foot">
           {canAdd && (
-            <Chip on={addOpen} onClick={openAdd}><PlusIcon size={14} />{t.deckAddCards}</Chip>
+            <Chip on={addOpen} onClick={openAdd}><PlusIcon size={14} />{narrow ? addLabel : t.deckAddCards}</Chip>
           )}
           {rideCount > 0 ? (
             <button type="button" className="btn-primary dk-foot__go" onClick={ride}>{t.deckRide(rideCount)} ▶</button>
@@ -1328,7 +1366,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   const Frame = pane ? PaneFrame : ScreenFrame
   return (
     <Frame t={t}>
-      {desk ? <div className="desk-deck">{deskBody}</div> : body}
+      {desk ? <div className="desk-deck" ref={deckBox}>{deskBody}</div> : body}
 
       {/* The More sheet: what the shelf's card used to carry. */}
       <Sheet open={confirmingMine} onClose={() => setConfirmingMine(false)}

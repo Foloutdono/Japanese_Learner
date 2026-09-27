@@ -23461,11 +23461,20 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     letter-spacing: 0;
     opacity: 0.7;
   }
+  /* The list takes the window's height and only its rows scroll, so
+     the console over them and the two doors under them stay on it. The
+     rows keep the column's gutter inside their own clip edge ("what a
+     scrolling column must not cut", above). */
   .shelf-rows {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: var(--sp-1);
-    margin-block-start: var(--sp-5);
+    min-height: 0;
+    margin: var(--sp-5) calc(-1 * var(--sp-2)) 0;
+    padding: var(--sp-2);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
   }
   .shelf-row {
     display: flex;
@@ -23541,7 +23550,24 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     display: flex;
     flex-direction: column;
     gap: var(--sp-6);
+    height: 100%;
     min-width: 0;
+  }
+  .desk-deck > :not(.dk-scroll) { flex: none; }
+  /* The page's one scroller: the modes (or the form, Browse or More)
+     and the cards. It takes no more than its content, so a short deck's
+     foot sits under its cards, and no more than the window leaves, so a
+     long one's foot is still on it. The gutter is the list's. */
+  .dk-scroll {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+    gap: var(--sp-6);
+    min-height: 0;
+    margin: calc(-1 * var(--sp-2));
+    padding: var(--sp-2);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
   }
   .dk-head {
     display: flex;
@@ -23676,10 +23702,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      up down the table and a word or a reading is never broken. */
   .dk-cards {
     display: grid;
-    grid-template-columns: minmax(max-content, 1fr) minmax(max-content, 1fr) minmax(0, 2fr) max-content;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) max-content;
     border-block: 1px solid var(--surface-line);
   }
-  .dk-cards:has(.card-row__tick) { grid-template-columns: auto minmax(max-content, 1fr) minmax(max-content, 1fr) minmax(0, 2fr) max-content; }
+  .dk-cards:has(.card-row__tick) { grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) max-content; }
   .dk-card {
     display: grid;
     grid-column: 1 / -1;
@@ -23702,16 +23728,22 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     background: color-mix(in srgb, var(--surface) 60%, transparent);
   }
   .dk-card--selected { background: color-mix(in srgb, var(--accent2) 8%, transparent); }
+  /* A word or a reading is never broken over two lines; one too long
+     for its column ends in an ellipsis rather than leave the page. */
+  .dk-card__jp,
+  .dk-card__kana {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .dk-card__jp {
     font-family: var(--font-serif);
     font-size: var(--fs-lead);
-    white-space: nowrap;
   }
   .dk-card__kana {
     font-family: var(--font-jp);
     font-size: var(--fs-sm);
     color: var(--text-secondary);
-    white-space: nowrap;
   }
   .dk-card__gloss {
     font-size: var(--fs-body);
@@ -23721,6 +23753,18 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .dk-card__state--due { color: var(--state-due); }
   .dk-card__state--learning { color: var(--state-learning); }
   .dk-card__state--mastered { color: var(--state-mastered); }
+  /* On a narrow page a card's reading goes under its word, and its
+     meaning and state span the two lines (DeckDetailScreen's `narrow`).
+     Columns are counted from the end, so a selection's tick column
+     ahead of them moves nothing. */
+  .dk-cards--stacked { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) max-content; }
+  .dk-cards--stacked:has(.card-row__tick) { grid-template-columns: auto minmax(0, 1fr) minmax(0, 2fr) max-content; }
+  .dk-cards--stacked .dk-card { row-gap: var(--sp-1); }
+  .dk-cards--stacked .card-row__tick { grid-row: span 2; }
+  .dk-cards--stacked .dk-card__jp { grid-area: 1 / -4; }
+  .dk-cards--stacked .dk-card__kana { grid-area: 2 / -4; }
+  .dk-cards--stacked .dk-card__gloss { grid-area: 1 / -3 / span 2; }
+  .dk-cards--stacked .dk-card__state { grid-area: 1 / -2 / span 2; }
   .dk-all {
     align-self: flex-start;
     margin-block-start: calc(var(--sp-3) - var(--sp-6));
@@ -23730,8 +23774,21 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     border: 0;
     cursor: pointer;
   }
+  /* The modes as a row of chips, where the page has no room for their
+     cards (DeckDetailScreen's `compact`). */
+  .dk-modeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+  .dk-modeline__n {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    color: var(--state-due);
+  }
   .dk-foot {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
     gap: var(--sp-3);
@@ -24132,8 +24189,19 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-split--shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* The learner's own shelf beside the open deck (plan 154): the page
      past a hairline the height of the split. */
+  .desk-split--decks > .desk-split__list {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 2 * var(--sp-6) + var(--sp-2) + var(--sp-4));
+    overflow: hidden;
+  }
+  .desk-split--decks > .desk-split__list > :not(.shelf-rows) { flex: none; }
+  /* The page, too, is the window's height and stays in it: its head and
+     its foot never scroll away, only what is between them (.dk-scroll). */
   .desk-split--decks > .desk-split__page {
-    align-self: stretch;
+    position: sticky;
+    top: var(--sp-6);
+    height: calc(100dvh - 2 * var(--sp-6));
     border-inline-start: 1px solid var(--surface-line);
     padding-inline-start: var(--sp-7);
   }

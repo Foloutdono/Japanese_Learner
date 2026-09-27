@@ -241,7 +241,7 @@ describe('a deck\'s Browse on the desk', () => {
     const meaning = dock.querySelector('.browse-result-row__meaning').getBoundingClientRect()
     expect(meaning.top).toBeGreaterThanOrEqual(entry.bottom - 1)
     // Over the cards it adds to, in the page's one column.
-    expect(dock.getBoundingClientRect().bottom).toBeLessThanOrEqual($('.desk-deck > .dk-cards').getBoundingClientRect().top)
+    expect(dock.getBoundingClientRect().bottom).toBeLessThanOrEqual($('.dk-scroll > .dk-cards').getBoundingClientRect().top)
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settle()
@@ -254,7 +254,7 @@ describe('a deck\'s Browse on the desk', () => {
     await mountDeck()
     await settle(400)
     expect($$('.empty')).toHaveLength(1)
-    expect($('.desk-deck > .empty')).not.toBeNull()
+    expect($('.dk-scroll > .empty')).not.toBeNull()
   })
 })
 
@@ -290,7 +290,7 @@ describe('a deck\'s More on the desk', () => {
     expect(dock.querySelectorAll('.btn-secondary')).toHaveLength(3)
     expect(dock.querySelector('.btn-primary--danger')).not.toBeNull()
     expect($('.desk-deck__study')).toBeNull()
-    expect($('.desk-deck > .dk-cards')).not.toBeNull()
+    expect($('.dk-scroll > .dk-cards')).not.toBeNull()
 
     dock.querySelector('.desk-dock__head .dict-plate__btn').focus()
     escape()

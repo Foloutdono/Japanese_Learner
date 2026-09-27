@@ -1448,8 +1448,15 @@ as the rail it arrives at.
   deck's lanes of the day's queue ("Réviser 12 cartes"), or, with nothing
   due, its first mode. The card form, Browse and More take the modes'
   place (it was the page's second column until the shelf stood beside
-  it). A new deck is a dialog over the shelf that ends on the new deck's
-  page, its first card's form open (plan 123).
+  it). Both columns are the window's height and nothing leaves it: the
+  list's rows scroll between its console and its doors, the page's
+  cards between its head and its foot, so the ride is always on the
+  screen. A page too narrow or too short for the mode cards (measured,
+  `useBoxSize`, since the desk's sheet answers one query) sets its modes
+  as a row of chips over the foot; a narrow one also sets Edit as its
+  pencil, Add as its short word and a card's reading under its word. A
+  new deck is a dialog over the shelf that ends on the new deck's page,
+  its first card's form open (plan 123).
 - **A sheet is a dialog.** The bottom edge is where a thumb is; on a
   computer it is a long way from the pointer. The same panel is set in
   the middle of the screen — every corner, no handle, a fade. Only the
