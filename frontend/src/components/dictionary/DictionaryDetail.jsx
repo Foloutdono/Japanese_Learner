@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { LEVEL_COLORS } from './levelColors'
 import { shortDate } from '../../lib/formatDate'
 import { useLang } from '../../LangContext'
-import { apiFetch } from '../../lib/api'
+import { cachedLookup, fetchLookup, pickEntry } from '../../lib/dictionaryLookup'
 import { api } from '../../lib/origin'
 import { FuriganaParts, splitReadingTokens } from '../study/Readings'
 import { joinRuns } from '../../domain/rubyRuns'
@@ -1379,27 +1379,36 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 // unrelated entry printed as the answer. The sheets, opened on a
 // learner's own tap, keep the nearest match.
 function useDictionaryLookup(session, term, category, lang, active, kana, id, exact = false) {
-  const [state, setState] = useState({ entry: null, loading: false, error: false })
+  // An entry already in hand (lib/dictionaryLookup: asked for ahead, or
+  // opened a moment ago) is drawn on the first frame, with no loading
+  // line between one word and the next.
+  const inHand = () => {
+    if (!active || !category || (!term && !id)) return null
+    const data = cachedLookup(session, { term, kana, category, id, lang })
+    if (!data) return null
+    const match = pickEntry(data, { term, kana, id, exact })
+    return { entry: match, loading: false, error: !match }
+  }
+  const [state, setState] = useState(() => inHand() ?? { entry: null, loading: false, error: false })
 
   useEffect(() => {
     if (!active || !category || (!term && !id)) return
     let cancelled = false
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- this setState is the "start of the fetch" reset (clears any previous term's stale result and flips on the loading spinner) that has to happen synchronously with kicking off the fetch below; it's inseparable from the network call, not a standalone "reset on id change" this could be replaced by a key-remount for.
+    const params = { term, kana, category, id, lang }
+    const data = cachedLookup(session, params)
+    if (data) {
+      const match = pickEntry(data, { term, kana, id, exact })
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the entry in hand for new params, set with them; same shape as the fetch's own reset below.
+      setState(s => (s.entry === match && !s.loading ? s : { entry: match, loading: false, error: !match }))
+      return
+    }
+    // This setState is the "start of the fetch" reset (clears any previous term's stale result and flips on the loading spinner) that has to happen synchronously with kicking off the fetch below; it's inseparable from the network call, not a standalone "reset on id change" this could be replaced by a key-remount for.
     setState({ entry: null, loading: true, error: false })
 
-    const params = new URLSearchParams({ q: term ?? '', page: 0, limit: 10, lang: lang ?? '', category })
-    if (kana) params.set('kana', kana)
-    if (id) params.set('id', id)
-    apiFetch(`/api/dictionary?${params.toString()}`, session)
-      .then(r => r.json())
-      .then(data => {
+    fetchLookup(session, params)
+      .then(result => {
         if (cancelled) return
-        const results = data.results || []
-        const match = id
-          ? (results.find(e => e.raw_id === id) ?? null)
-          : (kana && results.find(e => e.kanji === term && e.kana === kana))
-            ?? results.find(e => e.kanji === term || e.kana === term)
-            ?? (exact ? null : results[0] ?? null)
+        const match = pickEntry(result, { term, kana, id, exact })
         setState({ entry: match, loading: false, error: !match })
       })
       .catch(() => { if (!cancelled) setState({ entry: null, loading: false, error: true }) })

@@ -640,6 +640,10 @@ def _exact_vocab(q: str, kana: str, lang: str, states: dict, user_id: str) -> di
     The caller sends `dictTerm` = kanji || kana, so for a kana-only word
     both `q` and `kana` are the reading and the true pair is ("", kana);
     that is the second candidate below.
+
+    `states` None asks for this one card's rows alone (get_states_for)
+    rather than every row the learner holds: the lone-entry lookup
+    (`one`, below) has no page to share a bulk fetch with.
     """
     if not kana:
         return None
@@ -647,23 +651,30 @@ def _exact_vocab(q: str, kana: str, lang: str, states: dict, user_id: str) -> di
     if q == kana:
         pairs.append(("", kana))
 
+    def own(raw_id):
+        if states is not None:
+            return states
+        return srs.get_states_for([f"{user_id}:{raw_id}"], VOCAB_STATUS_MODES)
+
     deck = _vocab_by_pair()
     for kanji, reading in pairs:
         hit = deck.get((kanji, reading))
         if hit is not None:
             level, w = hit
+            raw_id = vocab_to_id(w, level)
             return _vocab_result(w, level, get_meaning(w, lang, VOCAB_FR_MAP),
-                                 lang, states, user_id, vocab_to_id(w, level))
+                                 lang, own(raw_id), user_id, raw_id)
     for kanji, reading in pairs:
         entry = jmdict_db.get_by_key(kanji, reading)
         if entry is not None:
-            return _vocab_result(entry, None, entry.get("meaning", ""), lang, states,
-                                 user_id, vocab_jmdict_to_id(entry))
+            raw_id = vocab_jmdict_to_id(entry)
+            return _vocab_result(entry, None, entry.get("meaning", ""), lang, own(raw_id),
+                                 user_id, raw_id)
     return None
 
 
 def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
-                      kana: str = "", level: str | None = None) -> dict:
+                      kana: str = "", level: str | None = None, one: bool = False) -> dict:
     """One page of the merged vocabulary collection.
 
     Paginated at its two sources rather than by building one combined
@@ -680,6 +691,19 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
     badge. A levelled request is a deck request, and the pool is not
     asked at all. See _kanji_collection, which says the same of its own.
     """
+    # `one`: the caller holds the word's (kanji, kana) pair and wants
+    # that entry alone -- a breakdown's word docked beside the analyser,
+    # opened on a tap. The page around it (the pool's count over 212k
+    # rows, every row's senses and kanji, the learner's whole SRS record)
+    # is what made the entry take a second to arrive, and the caller
+    # throws all of it away. A miss falls through to the page, so the
+    # nearest-match fallback is unchanged.
+    if one and kana and page == 0:
+        exact = _exact_vocab(query.raw, kana, lang, None, user_id)
+        if exact is not None:
+            return {"results": [exact], "total": 1, "page": 0, "limit": limit,
+                    "has_more": False, "corrected": None, "exact": True}
+
     levelled = level in VOCAB_BY_LEVEL
 
     def found(cand):
@@ -929,7 +953,7 @@ def _kana_result(kind: str, entry: dict, meaning: str, lang: str,
 def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=200), lang: str = "fr",
                     category: str = "all", radical: int | None = None, kana: str = "",
                     level: str | None = None, id: str = "",
-                    match: str = "word", field: str = "all",
+                    match: str = "word", field: str = "all", one: bool = False,
                     user_id: str = Depends(get_user_id)):
     """
     category: "all" | "kanji" | "vocab" | "grammar" | "hiragana" | "katakana"
@@ -998,6 +1022,11 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
     a kanji or a kana character has no second key to disambiguate with.
     See _exact_vocab for what it fixes.
 
+    one: with `kana`, answer with the exact (kanji, kana) entry alone
+    when there is one -- `total` 1, no page around it -- which is all a
+    caller opening one word's entry reads. Without an exact entry the
+    ordinary page is served. Vocabulary only.
+
     radical: classical (Kangxi) radical number. When given, restricts
     results to kanji filed under that radical — vocab and kana don't
     participate in radical browsing (a word can span several kanji, and
@@ -1021,7 +1050,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
     # every matching JMdict row in Python first. Radical browsing is
     # kanji only, so a radical request never lands here.
     if category in ("vocab", "jmdict") and radical is None:
-        return _vocab_collection(query, page, limit, lang, user_id, kana, level)
+        return _vocab_collection(query, page, limit, lang, user_id, kana, level, one)
 
     # Grammar has one pool and it is in memory; its branch exists so the
     # `level` / `id` parameters have somewhere to go, not for paging.
