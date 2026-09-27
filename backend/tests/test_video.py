@@ -111,6 +111,48 @@ def test_upload_produces_a_ready_transcript(client):
     assert body["truncated"] == 0
 
 
+def test_a_timing_track_gives_the_lines_their_word_times(client):
+    """The grab sends the recognised track beside the hand-written one
+    (plan: the words lit as they are said): the lines are the file's,
+    and the words' times come from the other."""
+    from study import morphology
+    if not morphology.MORPHOLOGY_AVAILABLE:
+        return
+    timing = (
+        "WEBVTT\n\n"
+        "00:00:01.200 --> 00:00:04.000\nわたしは<00:00:01.900>学生<00:00:02.600>です\n"
+    )
+    post_resp = client.post(
+        "/api/video/session",
+        files={
+            "file": ("test.srt", _SRT, "text/plain"),
+            "timing": ("timing.vtt", timing, "text/vtt"),
+        },
+    )
+    assert post_resp.status_code == 202
+    body = _poll_until_settled(client, post_resp.json()["sessionId"]).json()
+    first = body["sentences"][0]
+    assert first["text"] == "私は学生です。"
+    times = dict((o, t) for o, t in first["word_times"])
+    assert times[0] == 1.2          # 私 (わたし)
+    assert times[2] == 1.9          # 学生
+    # A line the timing track never heard carries none.
+    assert "word_times" not in body["sentences"][1]
+
+
+def test_an_unreadable_timing_track_costs_the_times_not_the_session(client):
+    post_resp = client.post(
+        "/api/video/session",
+        files={
+            "file": ("test.srt", _SRT, "text/plain"),
+            "timing": ("timing.vtt", "not a subtitle file", "text/vtt"),
+        },
+    )
+    body = _poll_until_settled(client, post_resp.json()["sessionId"]).json()
+    assert body["status"] == "ready"
+    assert all("word_times" not in s for s in body["sentences"])
+
+
 def test_oversized_upload_returns_413(client):
     huge = b"1\n00:00:01,000 --> 00:00:02,000\nx\n" * 100_000  # well over 1MB
     response = client.post(

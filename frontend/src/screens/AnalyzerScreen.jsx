@@ -212,6 +212,28 @@ export default function AnalyzerScreen({ session }) {
   // stale (the Space handler, the bar's play) without re-binding a
   // listener four times a second.
   const playTimeRef = useRef(0)
+  // 字幕の流れ -- the words lit as they are said. The poll comes four
+  // times a second and a word can be said in a tenth of one, so the
+  // subtitle reads a clock carried forward from the last poll at the
+  // playing speed, and set right by the next.
+  const pollAtRef = useRef(0)
+  const playingRef = useRef(false)
+  const rateRef = useRef(1)
+  const shownRef = useRef(0)
+  const clock = useCallback(() => {
+    const polled = playTimeRef.current
+    if (!playingRef.current) {
+      shownRef.current = polled
+      return polled
+    }
+    const ahead = Math.min(0.5, (performance.now() - pollAtRef.current) / 1000)
+    const now = polled + ahead * rateRef.current
+    // A poll a little behind the clock carried forward does not send
+    // the sweep back over a word; a seek does.
+    const shown = shownRef.current
+    shownRef.current = now < shown && shown - now < 0.3 ? shown : now
+    return shownRef.current
+  }, [])
 
   // ── The working rail (the mockup's 司令室 half) ──────────
   // Which stops the route map shows. 'all' | 'kept' | 'i1' | 'new',
@@ -293,6 +315,13 @@ export default function AnalyzerScreen({ session }) {
     holdTimerRef.current = null
   }, [])
   useEffect(() => clearHoldTimer, [clearHoldTimer])
+  // The clock's two inputs besides the poll. A play starts the carry
+  // from now, not from a poll taken before the pause.
+  useEffect(() => {
+    playingRef.current = playing
+    pollAtRef.current = performance.now()
+  }, [playing])
+  useEffect(() => { rateRef.current = rate }, [rate])
   // Paused by hand, or the stop turned off: no stop is owed.
   useEffect(() => { if (!playing) clearHoldTimer() }, [playing, clearHoldTimer])
   useEffect(() => {
@@ -358,12 +387,20 @@ export default function AnalyzerScreen({ session }) {
     decodeGrabHash(window.location.hash).then(grab => {
       if (!grab || cancelled) return
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      // The lines studied are the hand-written track's where there is
+      // one; the recognised track then goes up beside it only as the
+      // clock its words are read out on. Alone, the recognised track is
+      // both, its words already timed.
       let vtt
+      let timing = null
       try {
-        vtt = transcriptXmlToVtt(grab.xml)
+        vtt = transcriptXmlToVtt(grab.manual ?? grab.asr)
       } catch {
         analyzer.fail(t.grabEmpty)
         return
+      }
+      if (grab.manual && grab.asr) {
+        try { timing = transcriptXmlToVtt(grab.asr) } catch { /* the words go estimated */ }
       }
       const url = `https://youtu.be/${grab.videoId}`
       rememberGrabUsed()
@@ -373,7 +410,7 @@ export default function AnalyzerScreen({ session }) {
       clearFocus()
       analyzer.startVideoFromFile(
         new File([vtt], `${grab.videoId}.ja.vtt`, { type: 'text/vtt' }),
-        { url },
+        { url, timing: timing && new File([timing], `${grab.videoId}.ja-asr.vtt`, { type: 'text/vtt' }) },
       )
     })
     return () => { cancelled = true }
@@ -667,6 +704,7 @@ export default function AnalyzerScreen({ session }) {
     const last = lastPollRef.current
     lastPollRef.current = seconds
     playTimeRef.current = seconds
+    pollAtRef.current = performance.now()
     setPlayTime(seconds)
     const played = seconds >= last && seconds - last < PLAYBACK_STEP
     // 反復 (plan 134): on a loop, the focused sentence's end sends the
@@ -1229,7 +1267,16 @@ export default function AnalyzerScreen({ session }) {
             ) : focused.available === false ? (
               <p className="anl-subs__note">{t.sentenceAnalysisUnavailable}</p>
             ) : (
-              <SubtitleLine analysis={focused} index={tokenIndex} setIndex={walkTo} lit={light.lit} t={t} />
+              <SubtitleLine
+                analysis={focused}
+                index={tokenIndex}
+                setIndex={walkTo}
+                lit={light.lit}
+                t={t}
+                clock={playerVideoId ? clock : null}
+                playing={playing}
+                tick={playTime}
+              />
             )}
             {!playerVideoId && nextArrow}
           </div>
@@ -1434,7 +1481,16 @@ export default function AnalyzerScreen({ session }) {
         ) : focused.available === false ? (
           <p className="anl-m__note">{t.sentenceAnalysisUnavailable}</p>
         ) : (
-          <SubtitleLine analysis={focused} index={-1} setIndex={openTokenAt} lit={light.lit} t={t} />
+          <SubtitleLine
+            analysis={focused}
+            index={-1}
+            setIndex={openTokenAt}
+            lit={light.lit}
+            t={t}
+            clock={playerVideoId ? clock : null}
+            playing={playing}
+            tick={playTime}
+          />
         )}
         {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1))}
       </section>

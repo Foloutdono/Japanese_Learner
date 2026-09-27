@@ -371,3 +371,30 @@ Note also that the residential pool is itself a third party in the path — exit
 nodes are strangers' devices, typically sourced from consumer SDK installs. The
 traffic is a public watch-page fetch, so the stakes are low, but "no third party
 involved" is not a claim this ingest can make either.
+
+---
+
+## Amendment, 2026-09-27 — the grab brings both tracks, for the words' times
+
+The analyser now lights a subtitle's words as they are said. A hand-written
+track, the one worth studying, says only when a line starts and ends; the
+video's recognised (auto-generated) track says when every word starts, in
+YouTube's srv3 format (`<s t="…">` per word), in words that are often wrong.
+
+- **The grab (v2) fetches both Japanese tracks, in srv3**, instead of the
+  hand-written one alone in the legacy format. Same standing as before: the
+  same page, the same IP, two requests instead of one. A v1 hash still reads.
+- **The lines studied are unchanged**: the hand-written track where there is
+  one. The recognised track goes up beside it as a second, optional file
+  (`timing`) and is never studied; `study/word_timing.py` lends its times to
+  the hand-written lines it agrees with, compared as kana, each line only
+  against what was recognised around it. Alone, the recognised track is
+  both, its words timed by its own stamps.
+- **Nothing downstream of Cue changes shape**: a Cue may now carry `words`,
+  `[offset, seconds]` anchors, which a file can supply too (VTT karaoke
+  stamps, ASS `\k` tags). Where there are none the frontend spreads a line's
+  words over its time by their morae; a file without word times loses
+  nothing.
+- **The server-side fetch** (the 2026-09-10 amendment) still takes one track
+  through `youtube-transcript-api`, which returns no word times; its lines
+  are read out on the estimate.

@@ -289,6 +289,53 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     expect(document.scrollingElement.scrollTop).toBe(0)
   })
 
+  // 字幕の流れ: the subtitle's words read out as they are said -- the
+  // ones said whole, the one being said filling, the ones to come faded.
+  // 雨を見ている, 36s to 40s, no times of its own: its eight beats (雨 2,
+  // を 1, 見 2, て 1, いる 2) spread half a second a beat.
+  it('lights the subtitle\'s words as they are said', async () => {
+    await openVideo()
+    const toks = () => $$('.anl-subs__line .tok')
+    expect($('.tok-line--sung')).toBeNull()
+    player.last.onTimeUpdate(37.1)
+    await settle(60)
+    expect($('.anl-subs__line.tok-line--sung')).not.toBeNull()
+    expect(toks()[0].classList.contains('tok--said')).toBe(true)
+    expect(toks()[1].classList.contains('tok--saying')).toBe(true)
+    expect(toks()[1].style.getPropertyValue('--said')).toBe('20%')
+    expect(toks()[2].className).not.toMatch(/tok--sa(id|ying)/)
+    // The words to come are faded by the mask; the rule under each
+    // word, the SRS's, is not.
+    expect(getComputedStyle(toks()[2].querySelector('.tok__word')).maskImage).toContain('gradient')
+    expect(getComputedStyle(toks()[2]).borderBottomStyle).toBe('solid')
+    // The next line is read out in its turn...
+    player.last.onTimeUpdate(40.5)
+    await settle(60)
+    expect($('.anl-subs__count').textContent).toContain('2 / 2')
+    expect($('.anl-subs__line .tok--saying')).not.toBeNull()
+    // ...and past the last one's end, the line reads plain again.
+    player.last.onTimeUpdate(44.5)
+    await settle(60)
+    expect($('.tok-line--sung')).toBeNull()
+    expect($$('.anl-subs__line .tok[style]').length).toBe(0)
+  })
+
+  it('reads the words out on the times the line carries', async () => {
+    session = {
+      ...SESSION,
+      sentences: [{ ...SESSION.sentences[0], word_times: [[0, 37], [2, 38]] }, SESSION.sentences[1]],
+    }
+    await openVideo()
+    player.last.onTimeUpdate(36.5)
+    await settle(60)
+    // Before its first word the line waits, every word to come.
+    expect($('.tok-line--sung')).not.toBeNull()
+    expect($$('.anl-subs__line .tok--said, .anl-subs__line .tok--saying').length).toBe(0)
+    player.last.onTimeUpdate(38.1)
+    await settle(60)
+    expect($$('.anl-subs__line .tok')[2].classList.contains('tok--saying')).toBe(true)
+  })
+
   it('walks the speed and folds the video away without unmounting it', async () => {
     await openVideo()
     const rate = $('.anl-pbar__rate')

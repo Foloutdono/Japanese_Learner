@@ -56,11 +56,96 @@ _ASS_POSITION_TAG_RE = re.compile(r"\{\\an?\d+\}")
 _ASS_OVERRIDE_RE = re.compile(r"\{\\[^}]*\}")
 
 
-def _strip_markup(text: str) -> str:
+# VTT's karaoke timestamps, <00:00:01.200> between the words of a cue
+# (yt-dlp's auto-captions, and the grab's own srv3 conversion). Not a
+# tag to _HTML_TAG_RE, which wants a letter after the <, so until
+# 2026-09-27 they reached the sentence's text as written.
+_VTT_STAMP_RE = re.compile(r"<((?:\d+:)?\d{1,2}:\d{2}\.\d{3})>")
+
+
+def _strip_tags(text: str) -> str:
+    text = _VTT_STAMP_RE.sub("", text)
     text = _HTML_TAG_RE.sub("", text)
     text = _ASS_POSITION_TAG_RE.sub("", text)
-    text = _ASS_OVERRIDE_RE.sub("", text)
-    return text.strip()
+    return _ASS_OVERRIDE_RE.sub("", text)
+
+
+def _strip_markup(text: str) -> str:
+    return _strip_tags(text).strip()
+
+
+# ── Word times ────────────────────────────────────────────────────
+# A cue's `words`, where its file says when each word is said: a list
+# of [offset, seconds], the offset a character offset into the cue's
+# clean text (code points, as the tokenizer counts them) and the time
+# absolute. Sparse and in order; the frontend spreads the words between
+# two anchors by their morae (components/analysis/wordTimes.js), and a
+# cue without any is spread over its own start and end. Keyed by the
+# offset, not by a token's index, so a line analysed again under a new
+# tokenizer keeps its times.
+def _tidy_anchors(text: str, anchors: list[tuple[int, float]], lead: int) -> list[list]:
+    """Anchors taken on the raw text, moved onto the stripped one: shifted
+    by what the strip took off the front, stepped past the whitespace a
+    stamp stands before (yt-dlp writes `<t><c> word</c>`), and kept only
+    while both the offset and the time go forward."""
+    out: list[list] = []
+    for offset, seconds in anchors:
+        o = max(0, offset - lead)
+        while o < len(text) and text[o].isspace():
+            o += 1
+        if o >= len(text):
+            continue
+        if out and o == out[-1][0]:
+            # Two marks on one place: the words start at the later one
+            # (an ASS {\k50} of silence before the first syllable).
+            if seconds > (out[-2][1] if len(out) > 1 else float("-inf")):
+                out[-1][1] = round(seconds, 3)
+            continue
+        if out and seconds <= out[-1][1]:
+            continue
+        out.append([o, round(seconds, 3)])
+    return out
+
+
+def _vtt_timed_text(raw: str) -> tuple[str, list[list]]:
+    """A VTT cue's text with its karaoke stamps taken out as anchors."""
+    pieces = _VTT_STAMP_RE.split(raw)
+    text, anchors = "", []
+    for i, piece in enumerate(pieces):
+        if i % 2:
+            h, m, s = (["0"] + piece.split(":"))[-3:]
+            anchors.append((len(text), int(h) * 3600 + int(m) * 60 + float(s)))
+        else:
+            text += _strip_tags(piece)
+    stripped = text.strip()
+    lead = len(text) - len(text.lstrip())
+    return stripped, _tidy_anchors(stripped, anchors, lead)
+
+
+# ASS karaoke: {\k20} (and \kf, \ko, \K) before a syllable, its
+# length in centiseconds, the syllables in order from the line's start.
+_ASS_KARAOKE_RE = re.compile(r"\\(?:k[fo]?|K)(\d+)")
+
+
+def _ass_timed_text(raw: str, start: float) -> tuple[str, list[list]]:
+    text, anchors, elapsed, cursor = "", [], 0.0, 0
+    for block in _ASS_OVERRIDE_RE.finditer(raw):
+        text += _strip_tags(raw[cursor:block.start()])
+        cursor = block.end()
+        for cs in _ASS_KARAOKE_RE.findall(block.group(0)):
+            anchors.append((len(text), start + elapsed))
+            elapsed += int(cs) / 100
+    text += _strip_tags(raw[cursor:])
+    stripped = text.strip()
+    lead = len(text) - len(text.lstrip())
+    return stripped, _tidy_anchors(stripped, anchors, lead)
+
+
+def _cue(start: float, end: float, text: str, words: list[list] | None = None) -> dict:
+    cue = {"start": start, "end": end, "text": text}
+    if words:
+        cue["words"] = words
+    return cue
 
 
 def _merge_duplicate_consecutive(cues: list[dict]) -> list[dict]:
@@ -76,7 +161,7 @@ def _merge_duplicate_consecutive(cues: list[dict]) -> list[dict]:
     tuning this against real videos."""
     if not cues:
         return cues
-    merged = [cues[0]]
+    merged = [dict(cues[0])]
     for cue in cues[1:]:
         prev = merged[-1]
         if cue["text"] == prev["text"] or cue["text"] in prev["text"]:
@@ -87,11 +172,23 @@ def _merge_duplicate_consecutive(cues: list[dict]) -> list[dict]:
             continue
         if prev["text"] and prev["text"] in cue["text"]:
             # The rolling window grew: this Cue's text is the previous
-            # one PLUS new words. Replace rather than duplicate.
+            # one PLUS new words. Replace rather than duplicate -- and
+            # the word times with it: the previous Cue's, moved to where
+            # its text sits in this one, then this one's for the rest.
+            at = cue["text"].index(prev["text"])
+            kept = [[o + at, t] for o, t in prev.get("words") or []]
+            fresh = [[o, t] for o, t in cue.get("words") or []
+                     if not at <= o < at + len(prev["text"])]
+            words = sorted(kept + fresh)
             prev["text"] = cue["text"]
             prev["end"] = max(prev["end"], cue["end"])
+            words = _tidy_anchors(prev["text"], [tuple(w) for w in words], 0)
+            if words:
+                prev["words"] = words
+            else:
+                prev.pop("words", None)
             continue
-        merged.append(cue)
+        merged.append(dict(cue))
     return merged
 
 
@@ -153,9 +250,9 @@ def _parse_vtt(content: str) -> list[dict]:
         match = _VTT_ARROW_RE.search(lines[arrow_line_idx])
         start = _vtt_time_to_seconds(*match.groups()[0:4])
         end = _vtt_time_to_seconds(*match.groups()[4:8])
-        text = _strip_markup(" ".join(lines[arrow_line_idx + 1:]))
+        text, words = _vtt_timed_text(" ".join(lines[arrow_line_idx + 1:]))
         if text:
-            cues.append({"start": start, "end": end, "text": text})
+            cues.append(_cue(start, end, text, words))
     if not cues and "-->" not in content:
         raise CaptionParseError("No cue timestamps found in VTT content")
     return cues
@@ -201,9 +298,9 @@ def _parse_ass(content: str) -> list[dict]:
             raise CaptionParseError(f"Malformed timestamp in Dialogue line: {stripped[:80]!r}")
         start = _ass_time_to_seconds(*match.groups())
         end = _ass_time_to_seconds(*match_end.groups())
-        text = _strip_markup(row.get("text", "").replace("\\N", " ").replace("\\n", " "))
+        text, words = _ass_timed_text(row.get("text", "").replace("\\N", " ").replace("\\n", " "), start)
         if text:
-            cues.append({"start": start, "end": end, "text": text})
+            cues.append(_cue(start, end, text, words))
     return cues
 
 
