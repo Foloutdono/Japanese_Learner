@@ -22000,11 +22000,16 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     padding: var(--sp-4);
     padding-bottom: calc(var(--sp-4) + var(--safe-bottom));
   }
+  /* `clip` rather than `hidden`: hidden makes the card a scroll
+     container, and its sheen (::after) reaches 40% under its floor, so
+     the guide centring the stub (Guide.jsx's scrollIntoView) scrolled
+     the card inside itself -- the roundel cut at the top, the balance
+     gone, an empty band under the stub. */
   .desk-pass {
     position: relative;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: clip;
     border: 1px solid color-mix(in srgb, var(--pass-ink) 70%, transparent);
     border-radius: var(--r-identity);
     background:
