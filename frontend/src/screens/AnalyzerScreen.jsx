@@ -71,6 +71,19 @@ const RATES = [1, 0.75, 0.5]
 // click far down the track is never dragged back or paused under the
 // learner.
 const PLAYBACK_STEP = 1.5
+// The stop at each sentence's end (plan 134) is timed, not polled: the
+// player reports its clock four times a second, and a stop made on the
+// poll that finds the end already crossed let up to a quarter second of
+// the NEXT sentence play -- and 追従 moved the line on to it, so the
+// replay and the words were the next sentence's, not the one just
+// heard. Within this much of the end (wall-clock seconds, more than one
+// poll) a timer is set for the end itself...
+const HOLD_LOOKAHEAD = 0.4
+// ...which fires this early, the player's own pause taking a beat...
+const HOLD_LEAD_MS = 80
+// ...and a clock found past the end is set back this far inside it, so
+// the sentence held is the one the subtitle, the words and Rejouer show.
+const HOLD_INSET = 0.05
 // The furigana dial's three settings, in the order the desk's one
 // quiet button walks them.
 const FURIGANA = ['all', 'unknown', 'none']
@@ -199,6 +212,28 @@ export default function AnalyzerScreen({ session }) {
   // stale (the Space handler, the bar's play) without re-binding a
   // listener four times a second.
   const playTimeRef = useRef(0)
+  // 字幕の流れ -- the words lit as they are said. The poll comes four
+  // times a second and a word can be said in a tenth of one, so the
+  // subtitle reads a clock carried forward from the last poll at the
+  // playing speed, and set right by the next.
+  const pollAtRef = useRef(0)
+  const playingRef = useRef(false)
+  const rateRef = useRef(1)
+  const shownRef = useRef(0)
+  const clock = useCallback(() => {
+    const polled = playTimeRef.current
+    if (!playingRef.current) {
+      shownRef.current = polled
+      return polled
+    }
+    const ahead = Math.min(0.5, (performance.now() - pollAtRef.current) / 1000)
+    const now = polled + ahead * rateRef.current
+    // A poll a little behind the clock carried forward does not send
+    // the sweep back over a word; a seek does.
+    const shown = shownRef.current
+    shownRef.current = now < shown && shown - now < 0.3 ? shown : now
+    return shownRef.current
+  }, [])
 
   // ── The working rail (the mockup's 司令室 half) ──────────
   // Which stops the route map shows. 'all' | 'kept' | 'i1' | 'new',
@@ -270,6 +305,30 @@ export default function AnalyzerScreen({ session }) {
   const [videoFolded, setVideoFolded] = useState(false)
   // The previous poll, which tells playback (a small step) from a seek.
   const lastPollRef = useRef(0)
+  // The sentence the stop at each sentence's end is holding at (its
+  // index), so Play goes on past it rather than stopping there again;
+  // and the timer set for the end of the one playing.
+  const heldRef = useRef(null)
+  const holdTimerRef = useRef(null)
+  const clearHoldTimer = useCallback(() => {
+    clearTimeout(holdTimerRef.current)
+    holdTimerRef.current = null
+  }, [])
+  useEffect(() => clearHoldTimer, [clearHoldTimer])
+  // The clock's two inputs besides the poll. A play starts the carry
+  // from now, not from a poll taken before the pause.
+  useEffect(() => {
+    playingRef.current = playing
+    pollAtRef.current = performance.now()
+  }, [playing])
+  useEffect(() => { rateRef.current = rate }, [rate])
+  // Paused by hand, or the stop turned off: no stop is owed.
+  useEffect(() => { if (!playing) clearHoldTimer() }, [playing, clearHoldTimer])
+  useEffect(() => {
+    if (pauseEach) return
+    clearHoldTimer()
+    heldRef.current = null
+  }, [pauseEach, clearHoldTimer])
 
   // Focus lands here when a Passage arrives. It has to be a real focus
   // move, not just a scroll: the Analyze button lives INSIDE the panel
@@ -328,12 +387,20 @@ export default function AnalyzerScreen({ session }) {
     decodeGrabHash(window.location.hash).then(grab => {
       if (!grab || cancelled) return
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      // The lines studied are the hand-written track's where there is
+      // one; the recognised track then goes up beside it only as the
+      // clock its words are read out on. Alone, the recognised track is
+      // both, its words already timed.
       let vtt
+      let timing = null
       try {
-        vtt = transcriptXmlToVtt(grab.xml)
+        vtt = transcriptXmlToVtt(grab.manual ?? grab.asr)
       } catch {
         analyzer.fail(t.grabEmpty)
         return
+      }
+      if (grab.manual && grab.asr) {
+        try { timing = transcriptXmlToVtt(grab.asr) } catch { /* the words go estimated */ }
       }
       const url = `https://youtu.be/${grab.videoId}`
       rememberGrabUsed()
@@ -343,7 +410,7 @@ export default function AnalyzerScreen({ session }) {
       clearFocus()
       analyzer.startVideoFromFile(
         new File([vtt], `${grab.videoId}.ja.vtt`, { type: 'text/vtt' }),
-        { url },
+        { url, timing: timing && new File([timing], `${grab.videoId}.ja-asr.vtt`, { type: 'text/vtt' }) },
       )
     })
     return () => { cancelled = true }
@@ -637,6 +704,7 @@ export default function AnalyzerScreen({ session }) {
     const last = lastPollRef.current
     lastPollRef.current = seconds
     playTimeRef.current = seconds
+    pollAtRef.current = performance.now()
     setPlayTime(seconds)
     const played = seconds >= last && seconds - last < PLAYBACK_STEP
     // 反復 (plan 134): on a loop, the focused sentence's end sends the
@@ -649,10 +717,47 @@ export default function AnalyzerScreen({ session }) {
       return
     }
     // 一時停止 (plan 134): stop where the sentence that was playing ends,
-    // the time it takes to read its breakdown; Play goes on to the next.
-    if (pauseEach && played) {
-      const was = sentences.find(s => s.cue_end != null && last >= (s.cue_start ?? 0) && last < s.cue_end)
-      if (was && seconds >= was.cue_end) playerRef.current?.pause()
+    // BEFORE the next one starts -- the line stays on it, so the learner
+    // can replay it and read its breakdown; Play goes on to the next.
+    if (!played) clearHoldTimer()
+    if (pauseEach) {
+      const held = heldRef.current
+      const inside = at => sentences.findIndex(s => s.cue_end != null && at >= (s.cue_start ?? 0) && at < s.cue_end)
+      // Loop owns the focused sentence's end.
+      const stops = i => i !== -1 && i !== held && !(loop && i === focusIndex)
+      const hold = i => {
+        const s = sentences[i]
+        clearHoldTimer()
+        heldRef.current = i
+        const player = playerRef.current
+        player?.pause()
+        const at = player?.currentTime?.() ?? playTimeRef.current
+        if (at >= s.cue_end - HOLD_INSET) player?.seekTo(Math.max(s.cue_start ?? 0, s.cue_end - HOLD_INSET))
+        if (followPlayback) analyzer.setFocusIndex(i)
+      }
+      // The end crossed between two polls with no timer set (a clock
+      // that jumped, a first poll): stop, and step back inside.
+      const was = played ? inside(last) : -1
+      if (stops(was) && seconds >= sentences[was].cue_end) {
+        hold(was)
+        return
+      }
+      // The end is close: a timer for it.
+      const now = inside(seconds)
+      if (seconds > last && stops(now) && !holdTimerRef.current) {
+        const left = (sentences[now].cue_end - seconds) / rate
+        if (left <= HOLD_LOOKAHEAD) {
+          const s = sentences[now]
+          holdTimerRef.current = setTimeout(() => {
+            holdTimerRef.current = null
+            // Unless the learner seeked away in the meantime.
+            const at = playTimeRef.current
+            if (at >= (s.cue_start ?? 0) && at < s.cue_end + PLAYBACK_STEP) hold(now)
+          }, Math.max(0, left * 1000 - HOLD_LEAD_MS))
+        }
+      }
+      // Out of the sentence held: its end stops the clock again next time.
+      if (held !== null && now !== held) heldRef.current = null
     }
     if (!followPlayback) return
     analyzer.setFocusIndex(prev => {
@@ -661,7 +766,7 @@ export default function AnalyzerScreen({ session }) {
       // rather than snapping back to the first one.
       return idx === -1 ? prev : idx
     })
-  }, [sentences, analyzer, followPlayback, loop, pauseEach, focusIndex])
+  }, [sentences, analyzer, followPlayback, loop, pauseEach, focusIndex, rate, clearHoldTimer])
 
   // The transport spans the PASSAGE's window, not the whole video: the
   // learner is studying these cues, and a bar scaled to a 2-hour VOD
@@ -695,6 +800,8 @@ export default function AnalyzerScreen({ session }) {
   function replaySentence() {
     const here = sentences[focusIndex]
     if (here?.cue_start == null) return
+    // Heard again, stopped again at its end.
+    heldRef.current = null
     playerRef.current?.seekTo(here.cue_start)
     playerRef.current?.play()
   }
@@ -748,6 +855,8 @@ export default function AnalyzerScreen({ session }) {
     if (wide) setLookup(null)
     // Choosing by hand means the learner has taken the wheel.
     setFollowPlayback(false)
+    heldRef.current = null
+    clearHoldTimer()
     const target = sentences[index]
     if (target?.cue_start != null && playerRef.current) {
       playerRef.current.seekTo(target.cue_start)
@@ -1079,11 +1188,10 @@ export default function AnalyzerScreen({ session }) {
             // current marker -- the stage still shows it.
             activeIndex={visibleStops.findIndex(v => v.i === focusIndex)}
             onSelect={vi => goToStop(visibleStops[vi].i)}
-            // Only auto-scroll when something OTHER than the learner
-            // is moving the marker. A stop they just clicked is
-            // already under their pointer; scrolling it "into view"
-            // moves the list out from under them.
-            scrollOnChange={playerVideoId ? followPlayback : false}
+            // The current stop is kept in the rail's middle, whoever
+            // moved it -- the clock, the arrows, the keys -- except a
+            // stop the pointer pressed, already under the pointer
+            // (PassageLine holds that one where it is).
             t={t}
             kept={analyzer.kept}
             onKeep={vi => analyzer.keepSentence(visibleStops[vi].i)}
@@ -1159,7 +1267,16 @@ export default function AnalyzerScreen({ session }) {
             ) : focused.available === false ? (
               <p className="anl-subs__note">{t.sentenceAnalysisUnavailable}</p>
             ) : (
-              <SubtitleLine analysis={focused} index={tokenIndex} setIndex={walkTo} lit={light.lit} t={t} />
+              <SubtitleLine
+                analysis={focused}
+                index={tokenIndex}
+                setIndex={walkTo}
+                lit={light.lit}
+                t={t}
+                clock={playerVideoId ? clock : null}
+                playing={playing}
+                tick={playTime}
+              />
             )}
             {!playerVideoId && nextArrow}
           </div>
@@ -1364,7 +1481,16 @@ export default function AnalyzerScreen({ session }) {
         ) : focused.available === false ? (
           <p className="anl-m__note">{t.sentenceAnalysisUnavailable}</p>
         ) : (
-          <SubtitleLine analysis={focused} index={-1} setIndex={openTokenAt} lit={light.lit} t={t} />
+          <SubtitleLine
+            analysis={focused}
+            index={-1}
+            setIndex={openTokenAt}
+            lit={light.lit}
+            t={t}
+            clock={playerVideoId ? clock : null}
+            playing={playing}
+            tick={playTime}
+          />
         )}
         {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1))}
       </section>

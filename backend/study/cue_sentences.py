@@ -69,6 +69,9 @@ def sentences_from_cues(cues: list[dict], start: float | None,
             "cue_start": cue["start"],
             "cue_end": cue["end"],
             "japanese": is_japanese(cue["text"]),
+            # When each word is said, where the file or the aligner knew
+            # (study/captions.py, study/word_timing.py); absent otherwise.
+            **({"word_times": cue["words"]} if cue.get("words") else {}),
         }
         for cue in cues
         if (start is None or cue["end"] > start) and (end is None or cue["start"] < end)
