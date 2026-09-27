@@ -19,36 +19,22 @@
 // A module of its own rather than an export of SentenceBreakdown.jsx:
 // a component file exports components only (react-refresh), and the
 // tests read this directly.
+import { coversToken, isEnding } from './grammarSpans'
+import { lineState } from './tokens'
+
 const SKIP_POS = new Set(['symbol', 'punctuation', 'filler'])
 const FOLDS_AUXILIARY = new Set(['verb', 'adjective', 'auxiliary'])
 // A particle, and the copula, always stand on a row of their own
 // (plan 095, owner-directed): は is not the tail of 今日, and です is
 // not the tail of いい, whatever run the model bound them into. Each
-// is a grammar point with a card, and the row is where it opens. The
-// past-tense た／だ and the polite ます are inflection and stay with
-// their verb: 休んだ is one word to a learner.
+// is a grammar point with a card, and a part of its own in the parts a
+// rule is made of (partsOf); the words list leaves it to its numbered
+// card (plan 159). The past-tense た／だ and the polite ます are
+// inflection and stay with their verb: 休んだ is one word to a learner.
 const COPULA = new Set(['だ', 'です'])
 function standsAlone(tok) {
   if (tok.pos === 'particle') return true
   return tok.pos === 'auxiliary' && COPULA.has(tok.lemma || tok.surface)
-}
-
-// The grammar points a row's own morphemes are an instance of, kept to
-// the MARKERS -- the points that are one grammatical word rather than a
-// construction around one (study/grammar_detect's `kind`). A marker is
-// the particle on the row itself, so the row is where it opens. The
-// constructions are listed under the rows (GrammarPoints), each with
-// the words it is made of.
-function markersOf(group) {
-  const out = []
-  for (const token of group) {
-    for (const point of token.grammar ?? []) {
-      if (point.kind !== 'marker') continue
-      if (out.some(p => p.raw_id === point.raw_id)) continue
-      out.push(point)
-    }
-  }
-  return out
 }
 
 export function rowsOf(tokens) {
@@ -75,9 +61,42 @@ export function rowsOf(tokens) {
       tokens: group,
       surface: group.map(t => t.surface).join(''),
       reading: group.map(t => t.reading || t.surface).join(''),
-      markers: markersOf(group),
     })
     i = end + 1
   }
   return rows
+}
+
+// ── The words a sentence is built from (plan 159) ───────────────
+// The rows the words list draws: a word with a card (the deck's or the
+// pool's), or a content word the course has no card for (a name) --
+// never a particle, a copula, or a word a construction is written on
+// with no card of its own (〜てはいけません's いけません, which read
+// "to go"): those are the rule's, and its numbered card says what they
+// do. Each carries the endings written on it (isEnding: 作ります is 作る
+// + ます), which ride it as tags rather than taking a number.
+export function wordRowsOf(analysis) {
+  const tokens = analysis?.tokens ?? analysis?.words ?? []
+  const grammar = analysis?.grammar ?? []
+  const endings = grammar.filter(isEnding)
+  return rowsOf(tokens)
+    .filter(row => row.head.vocab_match || lineState(row.head, grammar) !== 'particle')
+    .map(row => ({
+      ...row,
+      endings: endings.filter(p => row.tokens.some(tok => coversToken(p, tok))),
+    }))
+}
+
+// The words a point is made of (plan 159), as a learner reads them
+// rather than as the tokenizer cut them: the rows it is written on
+// (て + は + いけません, not て + は + いけ + ませ + ん), after the word it
+// attaches to when a word stands just before it (話し + て + は +
+// いけません, ここ + で). `in` is false for that word alone.
+export function partsOf(point, analysis) {
+  const rows = rowsOf(analysis?.tokens ?? analysis?.words ?? [])
+  const covered = rows.filter(row => row.tokens.some(tok => coversToken(point, tok)))
+  if (!covered.length) return []
+  const before = rows[rows.indexOf(covered[0]) - 1]
+  const parts = covered.map(row => ({ surface: row.surface, in: true }))
+  return before?.head.vocab_match ? [{ surface: before.surface, in: false }, ...parts] : parts
 }

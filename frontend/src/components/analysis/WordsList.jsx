@@ -1,5 +1,6 @@
-import { rowsOf } from './rows'
-import { tokState } from './tokens'
+import { useLang } from '../../LangContext'
+import { wordRowsOf } from './rows'
+import { tokState, wordGloss } from './tokens'
 
 // ── 語 — the sentence's words, on the desk (plan 134) ─────────────
 // The list under the video in the owner's drawing: one row per word the
@@ -8,16 +9,23 @@ import { tokState } from './tokens'
 // its level. A row puts its word in focus (the card beside the list and
 // the entry in the right column follow it); the word in focus is the
 // row drawn on the ground with its edge.
+//
+// The rows are the practice breakdown's (rows.js's wordRowsOf, plan
+// 159): no word a construction is written on with no card of its own
+// (〜てはいけません's いけません read "to go"), each word named as the
+// dictionary names it -- 話す beside its reading はなす, where the list
+// printed 話し beside はなす -- and glossed in the learner's language.
 export function WordsList({ analysis, current, onSelect, t }) {
-  const rows = rowsOf(analysis?.tokens ?? analysis?.words ?? [])
-    .filter(row => tokState(row.head) !== 'particle')
+  const lang = useLang()?.lang
+  const rows = wordRowsOf(analysis)
   return (
     <div className="anl-words">
       {rows.map((row, i) => {
         const head = row.head
         const entry = head.vocab_match?.entry
-        const reading = entry?.kana && entry.kana !== row.surface ? entry.kana : ''
-        const meaning = head.meaning ?? entry?.meaning ?? ''
+        const name = entry ? (entry.kanji || entry.kana || row.surface) : row.surface
+        const reading = entry?.kana && entry.kana !== name ? entry.kana : ''
+        const meaning = wordGloss(head, lang)
         const level = head.vocab_match?.level ?? null
         const on = Boolean(current) && row.tokens.includes(current)
         return (
@@ -32,7 +40,7 @@ export function WordsList({ analysis, current, onSelect, t }) {
             {/* The column's width is the cell's; the rule under the word
                 is the word's own width, as on the subtitle. */}
             <span className="anl-words__cell">
-              <span className={`anl-words__word anl-words__word--${tokState(head)}`} lang="ja">{row.surface}</span>
+              <span className={`anl-words__word anl-words__word--${tokState(head)}`} lang="ja">{name}</span>
             </span>
             <span className="anl-words__reading" lang="ja">{reading}</span>
             <span className="anl-words__gloss">{meaning}</span>

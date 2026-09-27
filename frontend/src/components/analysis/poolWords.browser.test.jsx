@@ -35,7 +35,7 @@ describe('a word past the course in the analyser', () => {
     const screen = await render(<WordsList analysis={ANALYSIS} current={null} onSelect={() => {}} t={T} />)
     const rows = [...screen.container.querySelectorAll('.anl-words__row')]
     expect(rows.map(r => r.querySelector('.anl-words__word').textContent))
-      .toEqual(['さらば', '桃源郷', '真っさら', 'なった'])
+      .toEqual(['さらば', '桃源郷', '真っさら', 'なる'])
     const byWord = Object.fromEntries(rows.map(r => [r.querySelector('.anl-words__word').textContent, r]))
     expect(byWord['真っさら'].querySelector('.anl-words__gloss').textContent).toBe('brand new')
     expect(byWord['桃源郷'].querySelector('.anl-words__reading').textContent).toBe('とうげんきょう')
@@ -43,7 +43,8 @@ describe('a word past the course in the analyser', () => {
     // Off-deck until taken up: the same rule a word the course lacks
     // has always had under it.
     expect(byWord['真っさら'].querySelector('.anl-words__word--offdeck')).toBeTruthy()
-    expect(byWord['なった'].querySelector('.anl-words__lvl').textContent).toBe('N5')
+    // なった is named as the dictionary names it (plan 159).
+    expect(byWord['なる'].querySelector('.anl-words__lvl').textContent).toBe('N5')
   })
 
   it('goes into a vocab deck from the card in focus', async () => {

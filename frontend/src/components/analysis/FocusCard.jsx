@@ -3,6 +3,7 @@ import { MineButton } from './MineButton'
 import { grammarGloss } from './grammarGloss'
 import { coversToken } from './grammarSpans'
 import { rowsOf } from './rows'
+import { wordGloss } from './tokens'
 
 // ── 焦点 — the card in focus, under the video (plan 134) ────────────
 // The owner's drawing puts a small card beside the words list: the word
@@ -38,7 +39,7 @@ export function FocusCard({ analysis, token, point, number, mining, t }) {
   const entry = token.vocab_match?.entry
   const name = entry?.kanji || entry?.kana || token.surface
   const reading = entry?.kana && entry.kana !== name ? entry.kana : ''
-  const gloss = token.meaning ?? entry?.meaning ?? ''
+  const gloss = wordGloss(token, lang)
   const row = rowsOf(analysis?.tokens ?? analysis?.words ?? []).find(r => r.tokens.includes(token))
   const written = row && row.surface !== name ? row.surface : ''
   return (

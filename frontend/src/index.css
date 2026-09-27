@@ -9699,6 +9699,51 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   color: var(--text-secondary);
 }
+/* The numbered line (plan 159): each rule framed on its words, as the
+   analyser's subtitle frames them (.anl-subs__pt), set on the ground in
+   a well of its own. The number heads its frame, inside it: at the
+   frame's corner, as the subtitle has it, it stood on the next word's
+   reading (持っ's も, 話し's はな), which the subtitle -- every word
+   holding a reading's row -- never has to fear. */
+.bkd-line--numbered {
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  line-height: 1.6;
+}
+/* A mark with the item before it, so a line never starts on 。 or 、. */
+.bkd-keep {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+}
+.bkd-frame {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  padding: 0 var(--sp-2) 0 var(--sp-1);
+  border-radius: var(--r-card);
+  box-shadow: inset 0 0 0 2px var(--line-grammar);
+}
+.bkd-frame__n {
+  display: inline-flex;
+  flex: none;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--sp-5);
+  height: var(--sp-5);
+  padding: 0 var(--sp-1);
+  background: var(--line-grammar);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--bg-main);
+}
 .bkd__en {
   font-family: var(--font-display);
   font-size: var(--fs-body);
@@ -9790,6 +9835,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
+/* An ending the word was written with (ます, た; plan 159): a quiet
+   tag after its meaning, the rule's name as the sentence wrote it. */
+.bkd-row__ending {
+  margin-left: var(--sp-3);
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
 .bkd-row__lvl {
   grid-area: lvl;
   align-self: center;
@@ -9800,88 +9854,83 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     grid-template-areas: "word reading meaning lvl";
   }
 }
-/* The constructions (GrammarPoints, plan 095): one row per rule under
-   the word rows, ruled apart from them by the grammar line's ink on
-   the left edge -- the rows above are words, these are the rules
-   built over them. Each row: the pattern, its gloss and its level on
-   one line; the words it is made of, in the reading register, under
-   it; the bought line on what it does here last. A row whose point is
-   lit on the line takes the grammar ink on its pattern, as the words
-   it lights take the tint. */
+/* The rules (GrammarPoints, plans 095, 134 and 159): a numbered card
+   per point under the word rows, the analyser's G2 at every width --
+   the number, the pattern and the level on one line, what it does under
+   them, then the words it is made of as chips and the bought line on
+   what it does here. A card whose point is lit on the line takes the
+   grammar ink on its edge, as the words it lights take the tint.
+
+   A card that opens its lesson is a <button> (plan 096), and resets the
+   bare-button box as .bkd-row does: its padding, its --r-panel corner,
+   its blanket hover filter and its 600 weight. */
 .bkd-points {
   display: flex;
   flex-direction: column;
-  margin-top: var(--sp-2);
-  padding-left: var(--sp-1);
-  border-left: 2px solid var(--line-grammar);
+  gap: var(--sp-3);
 }
-/* A point row that opens its lesson is a <button> too (plan 096), and
-   resets the same bare-button box .bkd-row does. The rail keeps
-   --sp-1 of the indent and the row takes the rest as its own padding,
-   so the press surface starts where the rail ends instead of a rung
-   in from it. */
 .bkd-point {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--sp-1);
+  gap: var(--sp-2);
   width: auto;
   min-height: 44px; /* a hit target, not a spacing rung */
-  margin-inline-end: calc(-1 * var(--sp-2));
-  padding: var(--sp-3) var(--sp-2);
-  border: 0;
-  border-top: 1px solid var(--surface-line);
-  border-radius: var(--r-flat);
-  background: none;
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
   font-weight: 400;
   color: inherit;
   text-align: left;
 }
-.bkd-point:first-child { border-top: 0; }
 .bkd-point--door { cursor: pointer; }
 .bkd-point--door:hover {
   filter: none;
-  background: var(--overlay-hover);
+  border-color: var(--line-grammar);
 }
 .bkd-point--door:active { background: var(--chip-bg); }
 .bkd-point--door:focus-visible {
   outline: 2px solid var(--accent2);
   outline-offset: -2px;
 }
+.bkd-point--lit {
+  border-color: var(--line-grammar);
+  box-shadow: inset 0 -3px 0 var(--line-grammar);
+}
 .bkd-point__head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--sp-1) var(--sp-3);
+  align-items: center;
+  gap: var(--sp-4);
 }
 .bkd-point__pattern {
-  font-family: var(--font-jp);
+  font-family: var(--font-serif);
   font-size: var(--fs-lead);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.5;
   color: var(--text-primary);
 }
-.bkd-point__door { text-decoration: underline dotted; }
-.bkd-point--door:hover .bkd-point__door,
-.bkd-point--door:focus-visible .bkd-point__door,
-.bkd-point--lit .bkd-point__pattern { color: var(--line-grammar); }
+.bkd-point__lvl { margin-left: auto; }
+/* Indented off the number, so the pattern heads its own column. */
+.bkd-point__gloss,
+.bkd-point__parts,
+.bkd-point__note { padding-left: var(--sp-7); }
 .bkd-point__gloss {
   min-width: 0;
   font-size: var(--fs-sm);
   line-height: 1.4;
-  color: var(--text-secondary);
   overflow-wrap: anywhere;
 }
-.bkd-point__lvl { margin-left: auto; }
 .bkd-point__parts {
-  font-family: var(--font-jp);
-  font-size: var(--fs-sm);
-  letter-spacing: var(--tr-reading);
-  color: var(--text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1);
 }
 .bkd-point__note {
   font-size: var(--fs-sm);
   line-height: 1.4;
+  color: var(--text-secondary);
   overflow-wrap: anywhere;
 }
 /* The explanation as an option (plan 095): the button under the rows
@@ -21475,49 +21524,6 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
    column both draw: the numbered grammar cards (G2), a construction's
    frame and number on its words, the player's bar, Explain and the
    explanation. The desk adds its layout and the sumi's inks. */
-.anl-points .bkd-points {
-  gap: var(--sp-3);
-  margin-top: 0;
-  padding-left: 0;
-  border-left: 0;
-}
-.anl-points .bkd-point {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-  margin-inline-end: 0;
-  padding: var(--sp-4) var(--sp-5);
-  background: var(--bg-main);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-}
-.anl-points .bkd-point--lit {
-  border-color: var(--line-grammar);
-  box-shadow: inset 0 -3px 0 var(--line-grammar);
-}
-.anl-points .bkd-point__head {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-}
-.anl-points .bkd-point__pattern {
-  font-family: var(--font-serif);
-  font-size: var(--fs-lead);
-  font-weight: 700;
-  color: var(--text-primary);
-  border: 0;
-}
-.anl-points .bkd-point__lvl { margin-left: auto; }
-.anl-points .bkd-point__gloss,
-.anl-points .bkd-point__parts,
-.anl-points .bkd-point__note { padding-left: var(--sp-7); }
-.anl-points .bkd-point__gloss { font-size: var(--fs-sm); color: var(--text-primary); }
-.anl-points .bkd-point__parts {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--sp-1);
-}
 .bkd-point__partwrap {
   display: inline-flex;
   align-items: center;
@@ -21555,7 +21561,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   background: color-mix(in srgb, var(--line-grammar) 16%, transparent);
   border-color: var(--line-grammar);
 }
-.anl-points .anl-part { border: 0; }
+.bkd-points .anl-part { border: 0; }
 .anl-subs__note {
   display: flex;
   flex-direction: column;
@@ -25043,6 +25049,19 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      plan 115): the wrapper adds no box, so the breakdown, the sentence
      line and the entry stand in the side's own column rhythm. */
   .desk-lookup { display: contents; }
+  /* The breakdown down the panel's height (plan 159): the rows and the
+     cards at its head, the button that buys the explanation on its
+     floor, where the column had stood empty under a small button. The
+     wrapper SideLookup hides while an entry is open stays hidden. */
+  .desk-pane > .desk-lookup > div:not([hidden]) {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+  }
+  .desk-pane .bkd { flex: 1 0 auto; }
+  .desk-pane .bkd__foot { margin-top: auto; }
+  .desk-pane .bkd__explain { align-items: stretch; }
+  .desk-pane .bkd__explain-btn { width: 100%; }
   /* ── 改札鋏 — the level-up in a run's column (plans 123, 142) ──
      Above a phone's width the pass floats at the screen's right -- and
      on a run with a column, that is over the column: its entry, its

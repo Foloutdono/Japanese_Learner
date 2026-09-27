@@ -1,3 +1,5 @@
+import { coversToken } from './grammarSpans'
+
 // The token's state and reading on a sentence line, shared by the
 // breakdown's layouts and the desk's subtitle line (plan 134). A module
 // of its own, like rows.js: a component file exports components only.
@@ -50,4 +52,26 @@ export function tokState(tok) {
 export function tokFurigana(tok) {
   if (!tok.reading || !HAS_KANJI.test(tok.surface ?? '')) return ''
   return tok.reading
+}
+
+// The state on a line that knows the sentence's grammar (plan 159): a
+// word a construction is written on, with no card of its own, is the
+// construction's -- 〜てはいけません's いけ, について's つい -- and reads
+// as the rule's scaffolding, not as a word the course does not teach
+// (the dashed off-deck rule it wore).
+export function lineState(tok, grammar) {
+  if (!tok.vocab_match && (grammar ?? []).some(p => p.kind !== 'marker' && coversToken(p, tok))) return 'particle'
+  return tokState(tok)
+}
+
+// What a word means, in the learner's language (plan 159): the model's
+// contextual gloss where it was bought (already in that language), else
+// the card's own -- its French beside its English since the analysis
+// carries both (study/analysis._deck_match) -- else nothing. A pool word
+// has only its English.
+export function wordGloss(tok, lang) {
+  if (tok?.meaning) return tok.meaning
+  const entry = tok?.vocab_match?.entry
+  if (!entry) return ''
+  return (lang === 'fr' && entry.meaning_fr) || entry.meaning || ''
 }
