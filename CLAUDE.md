@@ -954,7 +954,25 @@ runtime purpose. Two consequences worth knowing:
   `src/notifications.phone.test.jsx`, `android/.../TrainWidget.java`,
   `TsujiWidgetPlugin.java`, `ios/App/TsujiWidget/`, `ios/App/App/
   TsujiWidgetPlugin.swift`, the fastlane lane and `docs/release.md`).
-  When starting a new wave, begin at **157** or higher, and check
+  **157** is the fields as one well (numbered 157 because 156 went to
+  the day ahead while it was open, and its first commit's message says
+  156; the owner's pick A of three drawn on the canvas "Tsuji — input
+  fields"): every field is drawn from the
+  question field's well (問); a search is that well holding its mark,
+  the clear and the count (`.field--search`: every console's row 2, the
+  Learn shelf's search, the analyser rail's), a key that acts on a
+  field stands beside it at its 44px (the console's search options and
+  部, square at `--r-card`), a run's entry stands beside Check on the
+  desk's floor, and `.field--page` steps down where the desk stands it
+  on a surface — the entry's floor, a settings slip, the import dialog —
+  which had drawn the reading run's "ex. konnichiwa" and the guest's
+  "E-mail" as placeholders with no field round them (cited in
+  `components/chrome/Console.jsx`, `components/decks/GateShelf.jsx`,
+  `screens/AnalyzerScreen.jsx`, `src/testing/wells.js`,
+  `src/fields.browser.test.jsx`, `src/fields.desktop.test.jsx`,
+  `src/dictionary.phone.test.jsx` and `index.css` and its 机 section;
+  DESIGN.md, "The field, one well").
+  When starting a new wave, begin at **158** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

@@ -3790,7 +3790,11 @@ textarea:focus-visible {
    custom separator, the browse dialog's search, the analyzer's rail
    head and its video URL. A field on a card, a sheet, a form, a
    console or a notice keeps the base well and must NOT take this --
-   --surface on --surface is the same defect written the other way. */
+   --surface on --surface is the same defect written the other way.
+   The desk wrote it that way three times (plan 157): the entry's
+   framed floor, a settings slip and the import dialog stand these
+   fields on a surface, and step them back down in the 机 section; the
+   rail's search, which only the desk builds, is the base well. */
 .field--page {
   --field-well: var(--surface);
 }
@@ -3819,6 +3823,43 @@ textarea:focus-visible {
   resize: vertical;
   line-height: 1.5;
 }
+
+/* ── The search well (plan 157) ──
+   The owner's pick A of three drawn on the canvas "Tsuji — input
+   fields": every field is the question field's well (問, AskPanel) and
+   a key that acts on it stands beside it, as 問's send does. Before it
+   the app had four field objects -- this well, a page well painted on a
+   card (no field at all), a bare line in the console's row, and the
+   shelf's hairline box whose focus drew a line's pigment -- and the four
+   searches among them looked like three different controls.
+   The wrapper IS the .field, so its grounds (.field--page, .field--panel)
+   carry over unchanged: it holds the search mark, the bare input and
+   whatever the search carries at its trailing edge -- the clear and the
+   count. The input draws nothing and types at the well's size; its
+   focus rings the well, flush, as a .field's own does. */
+.field--search {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding-block: 0;
+  color: var(--field-dim);
+}
+.field--search:has(> input:focus-visible) {
+  outline: 2px solid var(--accent2);
+  outline-offset: 0;
+}
+.field--search > input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font: inherit;
+  color: var(--field-ink);
+}
+.field--search > input:focus-visible { outline: none; }
+.field--search > input::placeholder { color: var(--field-dim); opacity: 1; }
 
 /* ── Utility classes ── */
 
@@ -5375,27 +5416,19 @@ textarea:focus-visible {
   padding-top: var(--sp-3);
   border-top: 1px solid var(--surface-line);
 }
+/* Row 2: the search well (.field--search, plan 157) and, beside it, the
+   keys that act on it. The row's inset is row 1's, so the well's edge
+   stands under the chips'. */
 .console__index {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--sp-2);
   min-height: 44px;
-  padding: var(--sp-2) var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
   color: var(--text-secondary);
 }
-.console__field {
-  flex: 1;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: 1rem;
-  color: var(--text-primary);
-}
-.console__field:focus { outline: none; }
-/* Chromium's fixed grey placeholder fails both themes; the dim ink. */
-.console__field::placeholder { color: var(--text-secondary); opacity: 1; }
+.console__well { flex: 1 1 0; }
+.console__well > .console__field { font-size: 1rem; }
 .console__clear {
   position: relative;
   display: inline-flex;
@@ -5422,31 +5455,30 @@ textarea:focus-visible {
 }
 /* A control that belongs to the FIELD rather than to the set above it:
    the dictionary's 部 index, which is a second way of reading the kanji
-   collection and not a sixth collection to browse. A .chip, at the
-   chips' own height, wearing the chips' own on state — but square, and
-   so round at --r-pill: it carries the glyph and no label, and 部 set
-   in a pill the width of a word would be a badge with the word cut off
-   rather than a key.
-   One ring, not two: the label's chip prints its glyph in the 20px
-   roundel (.chip__glyph), and a roundel inside a 36px pill is a target
-   drawn twice. The button IS the roundel here, so the glyph is set
-   bare — which is what the three rules under the size are for, the
-   Japanese face and the two things .chip does to a tracked Latin
-   caption that a lone CJK glyph must not inherit.
+   collection and not a sixth collection to browse, and its search
+   options. A .chip wearing the chips' own on state, but a KEY beside
+   the well (plan 157): the field's 44px, square at --r-card, as 問's
+   send stands beside its well. It carries the glyph and no label, and
+   部 set in a pill the width of a word would be a badge with the word
+   cut off rather than a key; so the glyph is set bare — which is what
+   the three rules under the size are for, the Japanese face and the two
+   things .chip does to a tracked Latin caption that a lone CJK glyph
+   must not inherit.
    The auto margin carries it to the trailing edge of a row that has
    NOTHING to type into — the radical index (.console__index--bare),
    where the toggle is the only way back to the field — the way a lone
    action rides row 1's edge. In the full row it absorbs nothing: the
-   field has already grown into every pixel of free space. */
+   well has already grown into every pixel of free space. */
 .console__toggle {
-  width: 36px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   margin-inline-start: auto;
   justify-content: center;
+  border-radius: var(--r-card);
   font-family: var(--font-jp);
-  /* Half the key, which is where .chip__glyph sets its own (11 in 20).
-     A rung down and 部 — eleven strokes — is a smudge in a ring of air;
-     a rung up and it touches the ring. */
+  /* A rung down and 部 — eleven strokes — is a smudge in the key; a
+     rung up and it crowds the edge. */
   font-size: var(--fs-lead);
   letter-spacing: 0;
   /* A CJK glyph fills its em square, so the em box IS the ink box and
@@ -22000,11 +22032,16 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     padding: var(--sp-4);
     padding-bottom: calc(var(--sp-4) + var(--safe-bottom));
   }
+  /* `clip` rather than `hidden`: hidden makes the card a scroll
+     container, and its sheen (::after) reaches 40% under its floor, so
+     the guide centring the stub (Guide.jsx's scrollIntoView) scrolled
+     the card inside itself -- the roundel cut at the top, the balance
+     gone, an empty band under the stub. */
   .desk-pass {
     position: relative;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: clip;
     border: 1px solid color-mix(in srgb, var(--pass-ink) 70%, transparent);
     border-radius: var(--r-identity);
     background:
@@ -22909,28 +22946,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   .gate-panel--library > .gate-panel__head > .plate__names { flex: 1 0 auto; }
   .gate-panel--library > .gate-panel__head > .gate-seg { margin-left: auto; }
+  /* The search well (.field--search, plan 157), where a hairline box
+     stood whose focus drew the line's pigment: a line's colour is a
+     place, and focus is the ring. */
   .gate-field {
     flex: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
     min-width: 0;
-    min-height: var(--sp-8);
-    padding: 0 var(--sp-4);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-plate);
-    color: var(--text-secondary);
-  }
-  .gate-field:focus-within { border-color: var(--line-color); }
-  .gate-field > input {
-    flex: 1;
-    min-width: 0;
-    border: 0;
-    background: none;
-    color: var(--text-primary);
-    font: inherit;
-    font-size: var(--fs-sm);
-    outline: none;
   }
 
   /* One published deck at a glance (DeckPreview): the gate's library
@@ -27174,6 +27195,28 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
+  /* An entry's floor is one row (plan 157): the answer typed beside the
+     key that hands it in, as 問's well stands beside its send -- the
+     field at Check's 56px, Check at its word's width. */
+  .desk-run--panels > .stage > form.stage__foot:has(> .field) {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .desk-run--panels > .stage > form.stage__foot > .field {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 56px;
+  }
+  /* The page's well on a desk surface (plan 157). .field--page steps UP
+     to --surface because a field on the page has nothing below it to
+     show; three of its mounts stand on a surface on the desk where the
+     phone stands them on the page -- the entry's framed floor (above),
+     a settings page's slips and the import dialog -- and there it was
+     --surface on --surface, a placeholder and no field. On the desk
+     they step down, as .field's own well does on anything raised. */
+  .import-modal .field--page,
+  .desk-settings__page .slip .field--page,
+  .desk-run--panels > .stage > .stage__foot .field--page { --field-well: var(--bg-main); }
 
   /* The run's lines: the list takes the panel's height and scrolls in
      it, newest at its foot; the keys and the rhythm keep the panel's

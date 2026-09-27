@@ -137,23 +137,29 @@ export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inp
   if (!field) {
     return toggle ? <div className="console__index console__index--bare">{toggle}</div> : null
   }
+  // The search well (plan 157): what belongs to the field -- the mark,
+  // the input, the clear, the count -- inside it; a key that acts on it
+  // beside it. A div and not a label: the clear is a button, which a
+  // label may not hold.
   return (
     <div className="console__index">
-      <SearchIcon className="svg" />
-      <input
-        ref={inputRef}
-        className={`console__field${value ? ' console__field--filled' : ''}`}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        {...rest}
-      />
-      {value && onClear && (
-        <button type="button" className="console__clear" onClick={onClear} aria-label={clearLabel} title={desk ? clearLabel : undefined}>
-          <CrossIcon size={14} />
-        </button>
-      )}
-      {count != null && <span className="console__count">{count}</span>}
+      <div className="field field--search console__well">
+        <SearchIcon className="svg" />
+        <input
+          ref={inputRef}
+          className={`console__field${value ? ' console__field--filled' : ''}`}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          {...rest}
+        />
+        {value && onClear && (
+          <button type="button" className="console__clear" onClick={onClear} aria-label={clearLabel} title={desk ? clearLabel : undefined}>
+            <CrossIcon size={14} />
+          </button>
+        )}
+        {count != null && <span className="console__count">{count}</span>}
+      </div>
       {toggle}
     </div>
   )

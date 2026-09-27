@@ -430,9 +430,11 @@ describe('the dictionary field at phone width', () => {
           </div>
           {extra ?? (
             <div className="console__index">
-              <svg className="svg" width="16" height="16" />
-              <input className="console__field" placeholder="Rechercher un kanji, un kana ou un sens…" readOnly value="" />
-              <span className="console__count">13 131 RÉSULTATS</span>
+              <div className="field field--search console__well">
+                <svg className="svg" width="16" height="16" />
+                <input className="console__field" placeholder="Rechercher un kanji, un kana ou un sens…" readOnly value="" />
+                <span className="console__count">13 131 RÉSULTATS</span>
+              </div>
               <button type="button" className="chip console__toggle" aria-pressed="false" aria-label="Radical">
                 <span lang="ja" aria-hidden="true">部</span>
               </button>
@@ -461,11 +463,13 @@ describe('the dictionary field at phone width', () => {
     expect(g.right).toBeLessThanOrEqual(row.getBoundingClientRect().right + 1)
     // The field keeps enough room to read what is typed into it.
     expect(f.width).toBeGreaterThan(150)
-    // The toggle is the chips' own object, at the chips' own height —
-    // but a key and not a pill: square, and so round at --r-pill, with
-    // the glyph as the whole of what it prints.
-    expect(g.height).toBe(screen.container.querySelector('.console__chips .chip').getBoundingClientRect().height)
+    // The toggle is a key beside the well (plan 157), as 問's send is
+    // beside its own: the well's height, square at --r-card, with the
+    // glyph as the whole of what it prints.
+    const resolve = resolver()
+    expect(g.height).toBe(row.querySelector('.console__well').getBoundingClientRect().height)
     expect(g.width).toBe(g.height)
+    expect(getComputedStyle(toggle).borderTopLeftRadius).toBe(resolve('borderTopLeftRadius', 'var(--r-card)'))
     expect(toggle.textContent.trim()).toBe('部')
   })
 

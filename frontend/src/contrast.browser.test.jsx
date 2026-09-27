@@ -142,7 +142,9 @@ function contractPairs() {
 const Fixture = () => (
   <div className="container">
     {/* DecksScreen.jsx -- the shared console (components/chrome/Console),
-        on --surface: a chip, the index field, the count */}
+        on --surface: a chip, then the index field and the count in the
+        search well (plan 157), on the well's ground and not the
+        console's */}
     <div className="console">
       <div className="console__top">
         <div className="console__chips">
@@ -150,8 +152,10 @@ const Fixture = () => (
         </div>
       </div>
       <div className="console__index">
-        <input className="console__field dk-field" placeholder="search" />
-        <span className="console__count dk-count">12 DECKS</span>
+        <div className="field field--search console__well">
+          <input className="console__field dk-field" placeholder="search" />
+          <span className="console__count dk-count">12 DECKS</span>
+        </div>
       </div>
     </div>
 

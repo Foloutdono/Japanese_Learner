@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it } from 'vitest'
 import { render } from 'vitest-browser-react'
 // Guard: no field is painted in its own ground.
 //
@@ -19,10 +19,13 @@ import { render } from 'vitest-browser-react'
 // contrast.browser.test.jsx uses. A case's chain only needs the
 // ancestors that PAINT: those are what a ground is made of.
 import './index.css'
+import { expectVisibleWell, wellOf } from './testing/wells'
 
 // Every ancestor chain in the app that ends in a .field/.textarea, with
 // the file it was copied from. Add a case when a screen grows a field;
-// that is the whole point of the file.
+// that is the whole point of the file. A chain the desk draws on its
+// own grounds -- and the analyser rail's search, which only the desk
+// builds -- is fields.desktop.test.jsx's (plan 157).
 const CASES = [
   ['ReadingRun / TranslationRun — the run\'s entry',
     <main className="container stage"><form className="stage__foot">
@@ -77,11 +80,6 @@ const CASES = [
   ['DeckPicker — a new deck, from the analyzer',
     <div className="surface"><input className="field" placeholder="deck" /></div>],
 
-  ['AnalyzerScreen — the working rail search',
-    <div className="anl-results"><div className="anl-railcol"><div className="anl-railhead">
-      <input type="search" className="field field--page anl-railhead__search" placeholder="search" />
-    </div></div></div>],
-
   ['IntakeVideo — the video URL',
     <div className="anl-panel"><label className="anl-field-row">
       <input className="field field--page anl-field" placeholder="https://youtu.be/" />
@@ -111,99 +109,9 @@ const CASES = [
     <div className="brd__stage"><input className="brd-field brd-field--empty" placeholder="name" /></div>],
 ]
 
-const canvas = document.createElement('canvas')
-canvas.width = canvas.height = 4
-const ctx = canvas.getContext('2d', { willReadFrequently: true })
-const readPixel = () => Array.from(ctx.getImageData(0, 0, 1, 1).data).slice(0, 3)
-
-function paint(colours) {
-  ctx.clearRect(0, 0, 4, 4)
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, 4, 4)
-  for (const c of colours) {
-    if (!c || c === 'rgba(0, 0, 0, 0)' || c === 'transparent') continue
-    ctx.fillStyle = c
-    ctx.fillRect(0, 0, 4, 4)
-  }
-  return readPixel()
-}
-
-// The ground is everything painted BENEATH the field -- the element's
-// own background deliberately excluded, since that is the other half of
-// the comparison.
-function groundUnder(el) {
-  const stack = []
-  for (let n = el.parentElement; n; n = n.parentElement) {
-    const s = getComputedStyle(n)
-    // A gradient lives in background-image and never in
-    // backgroundColor, so an ancestor carrying one (the pass) would
-    // otherwise read as transparent and the ground would be wrong. No
-    // case here has one; assert rather than guess if that changes.
-    expect(s.backgroundImage, `${n.className} paints a gradient — this composite reads solid colours only`).toBe('none')
-    stack.push(s.backgroundColor)
-  }
-  return paint(stack.reverse())
-}
-
-const luminance = ([r, g, b]) => {
-  const f = (v) => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4 }
-  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
-}
-const contrast = (a, b) => {
-  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
-  return (hi + 0.05) / (lo + 0.05)
-}
-
-// The page cross-fades between themes: html and body carry `transition:
-// background 0.2s` and .field its own 0.15s, so a read straight after a
-// switch is a frame of the fade and not the theme. At t=0 that frame is
-// the OLD theme -- the light pass here was measuring every .field's dark
-// well -- and partway through it is neither: the sheet's own first paint
-// fades body from the UA's transparent to --bg-main as this file imports
-// it, and a case that sits on the page (the account page's claim fields)
-// read ~90-100ms into that fade found its well matching the ground.
-// Finish every fade the switch started, in passes -- finishing html's
-// can restart body's -- and read the colours the theme settles on.
-function setTheme(t) {
-  document.documentElement.setAttribute('data-theme', t)
-  for (let pass = 0; ; pass++) {
-    const fades = document.getAnimations().filter(a => a instanceof CSSTransition)
-    if (!fades.length) return
-    if (pass === 5) throw new Error(`the ${t} theme never settled: its fades keep restarting`)
-    fades.forEach(a => a.finish())
-  }
-}
-
 describe('every field is visible on the ground it is mounted on', () => {
   it.each(CASES)('%s', async (label, markup) => {
     const screen = await render(markup)
-    // The element that paints the well: the field itself, or the box
-    // a bare one sits in (the readings quiz's chips share its well).
-    const el = screen.container.querySelector('.field:not(.field--bare), input, textarea')
-    expect(el, 'the fixture has no field in it').toBeTruthy()
-
-    for (const theme of ['dark', 'light']) {
-      setTheme(theme)
-      const style = getComputedStyle(el)
-      const well = paint([style.backgroundColor])
-      const ground = groundUnder(el)
-      const step = contrast(well, ground)
-
-      // A field may separate from its ground by WELL or by EDGE — the
-      // filled well is the app's idiom and .textarea/.brd-field are the
-      // two that draw a resting hairline instead. What none of them may
-      // do is neither.
-      const edge = parseFloat(style.borderTopWidth) > 0
-        && style.borderTopColor !== 'rgba(0, 0, 0, 0)'
-        && contrast(paint([style.borderTopColor]), ground) > 1.06
-
-      expect(
-        step > 1.03 || edge,
-        `${label} (${theme}): the well is its own ground and no edge is drawn — `
-        + 'there is no field on the screen. Give it .field--page if it sits on '
-        + 'the page, or the variant that matches whatever it does sit on.',
-      ).toBe(true)
-    }
-    setTheme('dark')
+    expectVisibleWell(wellOf(screen.container), label)
   })
 })

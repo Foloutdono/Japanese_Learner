@@ -36,7 +36,7 @@ import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { formatTimecode } from '../lib/timecode'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
-import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon } from '../components/ui/Icons'
+import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon } from '../components/ui/Icons'
 import { readVideoSound, saveVideoSound, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
 
 const KAISEKI = 'var(--line-kaiseki)'
@@ -1129,17 +1129,22 @@ export default function AnalyzerScreen({ session }) {
               Search and filters over the stops, with the count
               always visible so a filter that hides everything
               says so ("0 / 47") instead of looking like a lost
-              Passage. Client-side: the Passage is in hand. */}
+              Passage. Client-side: the Passage is in hand. The
+              search well (plan 157) steps down from the rail's
+              surface, so it is the base well and never the page's. */}
           <div className="anl-railhead">
-            <input
-              type="search"
-              className="field field--page anl-railhead__search"
-              value={stopQuery}
-              onChange={e => setStopQuery(e.target.value)}
-              placeholder={t.searchPassage}
-              aria-label={t.searchPassage}
-              lang="ja"
-            />
+            <label className="field field--search anl-railhead__well">
+              <SearchIcon />
+              <input
+                type="search"
+                className="anl-railhead__search"
+                value={stopQuery}
+                onChange={e => setStopQuery(e.target.value)}
+                placeholder={t.searchPassage}
+                aria-label={t.searchPassage}
+                lang="ja"
+              />
+            </label>
             <div className="chip-row anl-chips" role="group" aria-label={t.filterStops}>
               {[
                 ['all', t.filterAll],

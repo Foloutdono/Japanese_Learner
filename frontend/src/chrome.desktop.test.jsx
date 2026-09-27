@@ -331,6 +331,30 @@ describe('the rail', () => {
     expect(Math.round(window.innerHeight - card.bottom)).toBe(12)
   })
 
+  // The guide centres each stop's anchor in view (Guide.jsx), and the
+  // stub is Today's third on the desk. A card clipped with `hidden` is
+  // a scroll container, and the pass's sheen reaches 40% under its
+  // floor, so centring the stub scrolled the card inside itself: the
+  // roundel cut at the top, the balance gone, an empty band under the
+  // stub -- and left so once the guide was skipped there.
+  it('keeps the pass\'s face in place when the guide centres its stub', async () => {
+    journeyRef.current = {
+      goalLevel: 'N4', goalTargetDate: '2027-03-14', goalSetAt: '2026-09-01T00:00:00Z',
+      plannedPerDay: 10, itemsTotal: 1000, itemsDone: 100, actual14: 14, days14: 14,
+    }
+    creditsRef.current = { balance: 34, cap: 50, dailyRefill: 30, nextCreditAt: null, unlimited: false }
+    await mountShell()
+    await settle()
+    const pass = rail().querySelector('.desk-pass')
+    const level = pass.querySelector('[data-guide="hud.level"]')
+    const stub = pass.querySelector('[data-guide="hud.status"]')
+    const face = level.getBoundingClientRect().top
+    stub.scrollIntoView({ block: 'center', inline: 'nearest' })
+    expect(pass.scrollTop).toBe(0)
+    expect(level.getBoundingClientRect().top).toBe(face)
+    expect(Math.round(stub.getBoundingClientRect().bottom)).toBe(Math.round(pass.getBoundingClientRect().bottom) - 1)
+  })
+
   // The purse, at a balance, at five or fewer and spent. The edge is the
   // balance's, as the pocket pass's was; spent, the caption says when
   // it comes back rather than what it counts.
