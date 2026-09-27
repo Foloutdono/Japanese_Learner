@@ -425,15 +425,148 @@ class WithoutMorphologyTests(unittest.TestCase):
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class EveryKeyTests(unittest.TestCase):
+    """Plan 149: the keys a real sentence holds. On JMdict's example
+    sentences 71% of the particles and auxiliaries were covered by a
+    point; 96% now. Each case pairs a key with the sentence that must
+    NOT have it, since a false key is a lesson about something absent."""
+
+    def test_a_point_attaches_to_a_kind_of_word(self) -> None:
+        # A pronoun, a suffix and a particle phrase are nouns to は.
+        for sentence, particle in (("彼は学生です。", "は"), ("私たちは行きます。", "は"),
+                                   ("学校では話しません。", "は"), ("それを買いました。", "を")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get(particle), particle)
+        # ...but a particle phrase is a noun to a particle alone, and an
+        # adjective is not a verb: 次第に is an adverb, 近いところ a place.
+        self.assertNotIn("〜次第だ", found_in("天気は次第に悪くなった。"))
+        self.assertNotIn("〜ところだ", found_in("駅に近いところに住んでいます。"))
+        # A lesson that shows an auxiliary does not admit a verb.
+        self.assertNotIn("〜ことがある", found_in("友だちと助けあうことが大切だ。"))
+
+    def test_a_conjugated_tail_is_found_in_every_form(self) -> None:
+        for sentence in ("子どもは大きくなった。", "先生になって、うれしい。", "しずかになった。",
+                         "さらば桃源郷真っさらになったんだ"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜くなる／〜になる", found_in(sentence))
+        self.assertIn("〜気がする", found_in("だれかに見られている気がした。"))
+        self.assertIn("〜はずがない", found_in("彼が間違えるはずがありません。"))
+        self.assertIn("〜なくてはいけない", found_in("今日は早く帰らなくてはいけません。"))
+
+    def test_a_cut_never_drops_the_word_a_pattern_means(self) -> None:
+        self.assertNotIn("〜ことはない", found_in("私の言いたいことはもっと広い。"))
+        self.assertNotIn("〜気がする", found_in("気がついたら、朝だった。"))
+        self.assertNotIn("〜ことになる", found_in("残念なことに、試合は中止になった。"))
+
+    def test_the_copula_in_the_forms_its_lesson_teaches(self) -> None:
+        for sentence, written in (("学生だった。", "だった"), ("学生でした。", "でした"),
+                                  ("学生ではありません。", "ではあり"), ("学生じゃない。", "じゃ"),
+                                  ("この本は高いです。", "です"), ("学生である。", "である")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get("です／だ"), written)
+                self.assertEqual(kinds(sentence).get("です／だ"), "marker")
+        # The forms other points own.
+        self.assertNotIn("です／だ", found_in("明日は雨だろう。"))
+        self.assertNotIn("です／だ", found_in("しずかな店です。".replace("です。", "。")))
+        # The で of ではない is the copula, not the particle of place.
+        self.assertNotIn("で", found_in("学生ではない。"))
+
+    def test_the_explanatory_no_in_every_register(self) -> None:
+        for sentence, written in (("どうしたんだ？", "んだ"), ("行くのです。", "のです"),
+                                  ("あなたの安全なのです。", "なのです"), ("神髄なのである。", "なのである"),
+                                  ("行くんでしょう。", "んでしょう")):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(found_in(sentence).get("〜んです／〜のです"), written)
+        # ので, "because", is cut の + で by the tokenizer.
+        because = found_in("電車が遅れたので遅刻した。")
+        self.assertIn("〜ので", because)
+        self.assertNotIn("〜んです／〜のです", because)
+
+    def test_going_to_do_with_the_verbs_its_lesson_names(self) -> None:
+        self.assertEqual(found_in("足跡を辿って会いにきて")["〜に行きます"], "にき")
+        self.assertIn("〜に行きます", found_in("パンを買いに行った。"))
+        self.assertNotIn("〜に行きます", found_in("学校に行った。"))
+
+    def test_a_lone_te_links_two_clauses(self) -> None:
+        self.assertEqual(found_in("雨がふって、行けません。")["〜て、〜て"], "て")
+        self.assertIn("〜て、〜て", found_in("手をあらって、ごはんを食べました。"))
+        self.assertNotIn("〜て、〜て", found_in("ちょっと待って！"))
+        self.assertNotIn("〜て、〜て", found_in("雨がふっている。"))
+
+    def test_a_sense_the_lessons_show_apart_is_taught(self) -> None:
+        self.assertEqual(found_in("しずかに話してください。")["〜く／〜に（副詞形）"], "に")
+        self.assertEqual(found_in("雨だが、行く。")["〜が（逆接）"], "が")
+        self.assertNotIn("〜が（逆接）", found_in("ねこがいます。"))
+        # Written alike and shown alike: the plain point keeps it.
+        self.assertNotIn("〜で（理由）", found_in("病気で休みました。"))
+        self.assertNotIn("〜て（理由）", found_in("足跡を辿って会いにきて"))
+
+    def test_the_adjectives_where_their_forms_are_written(self) -> None:
+        self.assertEqual(found_in("しずかな町に住んでいる。")["い形容詞／な形容詞"], "な")
+        self.assertEqual(found_in("この本は高かった。")["い形容詞／な形容詞"], "高かった")
+        self.assertEqual(found_in("高くないです。")["い形容詞／な形容詞"], "高くない")
+        self.assertNotIn("い形容詞／な形容詞", found_in("高い山が見えます。"))
+        self.assertNotIn("い形容詞／な形容詞", found_in("しずかなのだ。"))
+
+    def test_from_and_until_alone(self) -> None:
+        self.assertEqual(found_in("東京から来ました。")["から〜まで"], "から")
+        self.assertEqual(found_in("五時まで働く。")["から〜まで"], "まで")
+        self.assertNotIn("から〜まで", found_in("雨だから、行かない。"))
+
+    def test_the_plain_past_and_the_plain_negative(self) -> None:
+        self.assertEqual(found_in("きのう、えいがを見た。")["た形 〜た"], "た")
+        self.assertEqual(found_in("本を読んだ。")["た形 〜た"], "だ")
+        self.assertNotIn("た形 〜た", found_in("えいがを見ました。"))
+        self.assertNotIn("た形 〜た", found_in("雨がふったら、行かない。"))
+        self.assertEqual(found_in("今日は学校に行かない。")["ない形 〜ない"], "ない")
+        self.assertEqual(found_in("あの人はお金がない。")["ない形 〜ない"], "ない")
+        self.assertEqual(found_in("できなかった。")["ない形 〜ない"], "なかっ")
+        self.assertNotIn("ない形 〜ない", found_in("学生ではない。"))
+        self.assertNotIn("ない形 〜ない", found_in("行かなければならない。"))
+        self.assertNotIn("ない形 〜ない", found_in("水しか飲みません。"))
+
+    def test_the_spoken_short_forms(self) -> None:
+        self.assertEqual(found_in("何してるの？")["〜ています"], "てる")
+        self.assertEqual(found_in("食べちゃった。")["〜てしまう"], "ちゃっ")
+        self.assertEqual(found_in("買っとく。")["〜ておく"], "とく")
+
+    def test_a_dictionary_form_tail_told_or_proposed(self) -> None:
+        self.assertIn("〜てあげる／てくれる／てもらう", found_in("もう、やめてくれ。"))
+        self.assertIn("〜てみる", found_in("ちょっと見てみよう。"))
+
+    def test_a_final_particle_after_a_plain_form(self) -> None:
+        self.assertEqual(found_in("それでいいよ。").get("よ"), "よ")
+        self.assertEqual(found_in("やめたほうがいいね。").get("ね"), "ね")
+
+    def test_a_multi_part_point_stays_in_one_clause(self) -> None:
+        self.assertNotIn("もう〜ない", found_in("もう始まっている。前半は見られない。"))
+        # Particles alone may stand across a comma.
+        self.assertIn("〜は〜が", found_in("弟は今、漢字が読めます。"))
+
+    def test_a_word_s_letters_are_its_own(self) -> None:
+        self.assertNotIn("か", found_in("何匹かの猫がいた。"))
+        self.assertNotIn("か", found_in("何かを取り出した。"))
+        # A question word + でも is "any-" (plan 150), and its で is no
+        # particle of place, its も no "also".
+        some = found_in("誰でも入れます。")
+        self.assertEqual(some.get("何でも／誰でも／いつでも／どこでも"), "誰でも")
+        self.assertNotIn("〜でも", some)
+        self.assertNotIn("で", some)
+        self.assertNotIn("も", some)
+        self.assertNotIn("で", found_in("ところで、来週はどうしますか。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheCatalogueIsTheMeasureTests(unittest.TestCase):
     """The 2,169 hand-written example sentences are ground truth: each
     one was written to demonstrate exactly one point, and detection
     should find that point in it.
 
     A ratchet, not a target. The floors are below what the module scores
-    today (90.4% of sentences, 510 of 541 points) so that ordinary
-    catalogue edits do not fail the build, and far above what the
-    substring matcher scored (77.6%) so that a regression to it does.
+    today (94.0% of sentences, 527 of 545 points, after plan 150) so
+    that ordinary catalogue edits do not fail the build, and far above
+    what the substring matcher scored (77.6%) so that a regression to it
+    does.
     """
 
     @classmethod
@@ -462,7 +595,7 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
     def test_a_lesson_sentence_shows_its_own_point(self) -> None:
         share = self.found / self.sentences
         self.assertGreaterEqual(
-            share, 0.90,
+            share, 0.93,
             f"detection found the point its own example was written for in "
             f"{self.found}/{self.sentences} sentences ({share:.1%})",
         )
@@ -470,7 +603,7 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
     def test_nearly_every_point_is_visible_somewhere_in_its_own_lesson(self) -> None:
         share = self.points_found / self.points
         self.assertGreaterEqual(
-            share, 0.94,
+            share, 0.96,
             f"{self.points_found}/{self.points} points were found in at least "
             f"one of their own examples ({share:.1%}) -- see the module "
             f"docstring for the four kinds that are refusals, not misses",
@@ -488,8 +621,15 @@ class CanFindTests(unittest.TestCase):
         self.assertTrue(grammar_detect.can_find("〜ながら"))
 
     def test_a_point_no_rule_reads_is_not(self) -> None:
-        for pattern in ("い形容詞／な形容詞", "〜しか〜ない", "〜上に"):
+        for pattern in ("自動詞／他動詞", "〜上に"):
             self.assertFalse(grammar_detect.can_find(pattern), pattern)
+
+    def test_a_point_read_only_in_part_is_not(self) -> None:
+        """い形容詞／な形容詞 is lit where its lesson's forms are written
+        (plan 149), not on 大きいです, which uses the point all the same:
+        作文 must not hear "not found" from it."""
+        self.assertIn("い形容詞／な形容詞", found_in("しずかな店です。"))
+        self.assertFalse(grammar_detect.can_find("い形容詞／な形容詞"))
 
     def test_an_unknown_pattern_is_not(self) -> None:
         self.assertFalse(grammar_detect.can_find("〜not a point"))
@@ -500,6 +640,8 @@ class CanFindTests(unittest.TestCase):
             for points in GRAMMAR_POINTS_BY_LEVEL.values()
             for point in points
         )
-        # A ratchet: 517 of 541 when written. Lower it only when a plan
-        # lowers the figure, never to make a build pass.
-        self.assertGreaterEqual(trusted, 505, f"{trusted} points trusted")
+        # A ratchet: 517 of 541 when written, 524 of 543 after plan 149,
+        # 526 of 545 after plan 150.
+        # Lower it only when a plan lowers the figure, never to make a
+        # build pass.
+        self.assertGreaterEqual(trusted, 520, f"{trusted} points trusted")

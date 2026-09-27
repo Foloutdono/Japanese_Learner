@@ -163,6 +163,20 @@ class ContextRuleTests(unittest.TestCase):
         self.assertEqual(_read(_tok("実", "じつ"), _particle("の"))[0], "じつ")
         self.assertEqual(_read(_tok("実", "じつ"), _particle("は"))[0], "じつ")
 
+    def test_sakari_the_peak(self) -> None:
+        """盛り alone is もり to UniDic, a serving; the peak where the
+        sentence says so (plan 153)."""
+        mori = lambda: _tok("盛り", "もり")
+        cop = _tok("だ", "だ", "助動詞", "*", "*", "auxiliary")
+        self.assertEqual(_read(_particle("が"), mori(), cop)[1], "さかり")
+        self.assertEqual(_read(_tok("今", "いま"), _particle("を"), mori(), _particle("と"))[2], "さかり")
+        self.assertEqual(_read(mori(), _particle("を"), _tok("過ぎ", "すぎ", "動詞"))[0], "さかり")
+        self.assertEqual(_read(mori(), _particle("の"), _tok("つい", "つい", "動詞"))[0], "さかり")
+        self.assertEqual(_read(_tok("夏", "なつ"), _particle("の"), mori())[2], "さかり")
+        # A serving: ご飯の盛り, 盛りがいい -- untouched.
+        self.assertEqual(_read(_tok("ご飯", "ごはん"), _particle("の"), mori())[2], "もり")
+        self.assertEqual(_read(mori(), _particle("が"), _tok("いい", "いい", "形容詞"))[0], "もり")
+
     def test_a_suffix_with_nothing_to_attach_to(self) -> None:
         taught = {"酒": ["さけ"], "国": ["くに"], "形": ["かたち"], "的": ["まと"]}.get
         # 以来|酒を: 以来 is adverbial, so 酒 is a word, さけ.
@@ -394,6 +408,9 @@ class SentenceReadingTests(unittest.TestCase):
         "私たちは学生です。": "私[わたし] 学[がく]生[せい]",
         "絵を描くのが好きです。": "絵[え] 描[か] 好[す]",
         "努力が実を結んだ。": "努[ど]力[りょく] 実[み] 結[むす]",
+        "桜の花は４月が盛りだ。": "桜[さくら] 花[はな] 月[がつ] 盛[さか]",
+        "彼はもう盛りを過ぎた。": "彼[かれ] 盛[さか] 過[す]",
+        "ご飯の盛りが少ない。": "飯[はん] 盛[も] 少[すく]",
         "言うまでもない。": "言[い]",
     }
 

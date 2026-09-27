@@ -78,7 +78,8 @@ from routes.kana import _build_kana_card              # noqa: E402
 from routes.kanji import _build_kanji_card            # noqa: E402
 from routes.vocab import _build_vocab_card            # noqa: E402
 from routes.grammar import _build_grammar_card        # noqa: E402
-from routes.decks import build_personal_card, VISIBLE_DECKS_CTE   # noqa: E402
+from routes.decks import build_personal_card, build_pool_card, VISIBLE_DECKS_CTE   # noqa: E402
+from content.vocab_jmdict_data import POOL_ID_PREFIX                # noqa: E402
 from routes.profile import _profile_row                # noqa: E402
 
 
@@ -244,13 +245,37 @@ def _personal_rows(user_id: str) -> dict:
                 {"me": user_id},
             )
             rows = [dict(r) for r in cur.fetchall()]
+            # A JMdict pool word linked into a deck (plan 148) comes back
+            # in that deck's lane too: the course's cards have their JLPT
+            # stop's lane (card_index.locate), and a pool word has none,
+            # so without this it would be learnt in a deck and never
+            # asked again. Only the deck is looked up here; the word is
+            # the pool's (build_pool_card).
+            cur.execute(
+                f"""
+                WITH visible AS ({VISIBLE_DECKS_CTE})
+                SELECT dk.raw_id, dk.deck_id, d.name AS deck_name
+                FROM visible v
+                JOIN decks d       ON d.id = v.deck_id
+                JOIN deck_cards dk ON dk.deck_id = d.id AND dk.user_id = d.user_id
+                WHERE dk.source = 'vocab' AND left(dk.raw_id, %(plen)s) = %(prefix)s
+                ORDER BY dk.added_at
+                """,
+                {"me": user_id, "plen": len(POOL_ID_PREFIX), "prefix": POOL_ID_PREFIX},
+            )
+            pooled = [dict(r) for r in cur.fetchall()]
     finally:
         conn.close()
 
-    return {
+    out = {
         f"custom_{r['deck_id']}_{r['id']}": r
         for r in rows
     }
+    for r in pooled:
+        # A word in two decks is asked once, in the deck it went into
+        # first.
+        out.setdefault(r["raw_id"], {**r, "pool": True})
+    return out
 
 
 def _hold_line(user_id: str, level: str) -> str:
@@ -533,7 +558,11 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
             card = _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview)
         else:
             _, deck_id, deck_name, _ = key
-            card = build_personal_card(personal[raw_id], raw_id, mode, stage, preview)
+            row = personal[raw_id]
+            if row.get("pool"):
+                card = build_pool_card(raw_id, mode, lang, stage, preview)
+            else:
+                card = build_personal_card(row, raw_id, mode, stage, preview)
             if card is not None:
                 # `source` stays "custom", as decks.py set it: the
                 # frontend's structureKeyOf reads that exact string to

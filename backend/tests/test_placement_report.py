@@ -60,6 +60,16 @@ class RankingTests(unittest.TestCase):
             with self.subTest(key=key):
                 self.assertIn(key, self.rank)
 
+    def test_a_stem_the_subtitles_cut_off_credits_its_own_word(self) -> None:
+        """Plan 153: the subtitles cut ください and もらう before their
+        endings, and くださ, 下さ and もら alone are 下す and 盛る to
+        UniDic -- every "please" ranked 下す "to hand down a verdict"
+        92nd, and a frequent word the deck lacked. FRAGMENTS credits
+        them to the words they are."""
+        self.assertLess(self.rank[("下さる", "くださる")], 200)
+        self.assertLess(self.rank[("貰う", "もらう")], 200)
+        self.assertGreater(self.rank.get(("下す", "くだす"), 10**6), report.FREQUENT_BAND)
+
     def test_the_common_words_rank_where_a_learner_would_expect(self) -> None:
         self.assertLess(self._rank("事", "こと"), 20)
         self.assertLess(self._rank("見る", "みる"), 100)

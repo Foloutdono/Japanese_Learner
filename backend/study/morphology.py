@@ -194,6 +194,10 @@ class Morpheme:
     cform: str = ""  # UniDic's cForm, the conjugation form: 連用形-一般,
     # 意志推量形 (帰ろう), 命令形 (起きろ). Both "" for a word that does
     # not conjugate, where UniDic writes "*".
+    goshu: str = ""  # UniDic's 語種, where the word comes from: 和 (native),
+    # 漢 (Sino-Japanese), 外 (a loanword), 混 (mixed). センス is 外 and
+    # 扇子 is 漢: a reading alone joins them, the origin does not (plan
+    # 149). ダメ and キレイ, native words written in katakana, stay 混／漢.
 
 
 def _conjugation(raw) -> str:
@@ -211,6 +215,21 @@ def _clean_lemma(raw: str, fallback: str) -> str:
     if not raw:
         return fallback
     return raw.split("-", 1)[0] or fallback
+
+
+_DEMONSTRATIVES = frozenset({"この", "その", "あの", "どの"})
+
+
+def _demonstratives(morphemes: list[Morpheme]) -> None:
+    """UniDic tags a sentence's first あの as the interjection "um"
+    even before a noun: あの店に行った, あの人はだれですか, あの高い山.
+    Before a noun, or an adjective on one, it is the demonstrative,
+    whatever opens the sentence -- the "um" is set off (あの、すみません)
+    or goes before a verb (あのすみません) (plan 151)."""
+    for m, nxt in zip(morphemes, morphemes[1:]):
+        if (m.pos == "interjection" and m.surface in _DEMONSTRATIVES
+                and nxt.pos in ("noun", "pronoun", "prefix", "suffix", "other", "adjective", "adnominal")):
+            m.pos = "adnominal"
 
 
 def _is_kanji(c: str) -> bool:
@@ -316,7 +335,9 @@ def tokenize(text: str) -> list[Morpheme] | None:
                 conjunctive=(pos2 == "接続助詞"),
                 ctype=_conjugation(getattr(feat, "cType", None)),
                 cform=_conjugation(getattr(feat, "cForm", None)),
+                goshu=_conjugation(getattr(feat, "goshu", None)),
             ))
+        _demonstratives(morphemes)
         return _in_context(morphemes, tags)
     except Exception:  # pragma: no cover - defensive only
         logger.warning("morphology.tokenize failed on input; caller should fall back", exc_info=True)

@@ -104,6 +104,8 @@ class GrammarPointsShapeTests(unittest.TestCase):
             "可能形 〜(ら)れる", "意向形 〜(よ)う", "受身形 〜られる", "使役形 〜させる",
             "使役受身形 〜させられる", "お〜になる／お〜する", "〜があります／います",
             "〜そうだ（伝聞）", "〜そうです",
+            # A form defined by where it stands: the end of the sentence.
+            "〜て／〜ないで（依頼）",
         }
         for level, entry in _all_entries():
             pattern, structure = entry["pattern"], entry["structure"]

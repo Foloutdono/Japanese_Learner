@@ -1017,9 +1017,9 @@
         "contrast": true
       },
       {
-        "jp": "来年、日本へりゅうがくすることにしました。",
-        "en": "I've decided to study in Japan next year.",
-        "fr": "J'ai décidé d'aller étudier au Japon l'an prochain.",
+        "jp": "来年、日本の大学で勉強することにしました。",
+        "en": "I've decided to study at a university in Japan next year.",
+        "fr": "J'ai décidé d'étudier dans une université au Japon l'an prochain.",
         "register": "polite",
         "contrast": true
       },
@@ -3208,9 +3208,9 @@
         "contrast": true
       },
       {
-        "jp": "しゅくだいをしなくちゃいけない。",
-        "en": "I've got to do my homework.",
-        "fr": "Je dois faire mes devoirs.",
+        "jp": "今日は勉強しなくちゃいけない。",
+        "en": "I've got to study today.",
+        "fr": "Il faut que j'étudie aujourd'hui.",
         "register": "casual"
       }
     ]
@@ -4297,6 +4297,75 @@
         "en": "Write the answer here.",
         "fr": "Écrivez la réponse ici.",
         "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "〜て／〜ないで（依頼）",
+    "structure": "verb て-form ／ ない-form + で, ending the sentence",
+    "meaning": {
+      "en": "a casual request: do this, don't do that",
+      "fr": "une demande familière : fais ceci, ne fais pas cela"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "A **て-form that ends the sentence** is a casual request, ください left off: 待って (wait), ちょっと来て (come here). The negative request is the **ない-form + で**: 行かないで (don't go).",
+        "fr": "Une **forme en て qui termine la phrase** est une demande familière, sans ください : 待って (attends), ちょっと来て (viens). La demande négative est la **forme en ない + で** : 行かないで (ne pars pas)."
+      },
+      {
+        "kind": "use",
+        "en": "- Friends and family: ちょっと待って.\n- Softer with ね or よ after it: 見てね, わすれないでね.\n- Pleading: 行かないで.",
+        "fr": "- Entre amis et en famille : ちょっと待って.\n- Plus doux avec ね ou よ derrière : 見てね, わすれないでね.\n- Pour supplier : 行かないで."
+      },
+      {
+        "kind": "careful",
+        "en": "It is casual: to a teacher or a stranger, say てください or ないでください. Inside a sentence the same forms are something else: a て-form links two actions and ないで means « without doing ».",
+        "fr": "C'est familier : à un professeur ou à un inconnu, on dit てください ou ないでください. Au milieu d'une phrase, les mêmes formes changent de sens : la forme en て relie deux actions et ないで veut dire « sans faire »."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜てください",
+        "en": "て alone is the casual request; てください is the same request, polite.",
+        "fr": "て seul est la demande familière ; てください est la même demande, polie."
+      },
+      {
+        "pattern": "〜ないでください",
+        "en": "ないで alone is the casual « don't »; ないでください is the polite one.",
+        "fr": "ないで seul est le « ne fais pas » familier ; ないでください est la forme polie."
+      },
+      {
+        "pattern": "〜ないで",
+        "en": "At the end of a sentence, ないで asks someone not to; inside one, it means « without doing ».",
+        "fr": "En fin de phrase, ないで demande de ne pas faire ; au milieu d'une phrase, il veut dire « sans faire »."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "ごめん、もういちど言って。",
+        "en": "Sorry, say it again.",
+        "fr": "Pardon, redis-le.",
+        "register": "casual"
+      },
+      {
+        "jp": "明日、駅まで車で送って。",
+        "en": "Drive me to the station tomorrow.",
+        "fr": "Demain, emmène-moi à la gare en voiture.",
+        "register": "casual"
+      },
+      {
+        "jp": "ここはあぶないから、入らないで。",
+        "en": "It's dangerous here, so don't come in.",
+        "fr": "C'est dangereux ici, alors n'entre pas.",
+        "register": "casual"
+      },
+      {
+        "jp": "わたしのこと、わすれないでね。",
+        "en": "Don't forget me, okay?",
+        "fr": "Ne m'oublie pas, d'accord ?",
+        "register": "casual"
       }
     ]
   },
@@ -6530,6 +6599,77 @@
         "en": "Do you know who painted this picture?",
         "fr": "Savez-vous qui a peint ce tableau ?",
         "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "何でも／誰でも／いつでも／どこでも",
+    "structure": "何でも／誰でも／いつでも／どこでも (question word + でも) + predicate",
+    "meaning": {
+      "en": "anything, anyone, any time, anywhere: whichever it is",
+      "fr": "n'importe quoi, n'importe qui, n'importe quand, n'importe où"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**question word + でも** means « any one at all »: 何でも (anything), 誰でも (anyone), いつでも (any time), どこでも (anywhere), どれでも (whichever).",
+        "fr": "**mot interrogatif + でも** veut dire « n'importe lequel » : 何でも (n'importe quoi), 誰でも (n'importe qui), いつでも (n'importe quand), どこでも (n'importe où), どれでも (n'importe lequel)."
+      },
+      {
+        "kind": "use",
+        "en": "- Openness: 何でも食べます.\n- Invitations: いつでも来てください.\n- With a particle in between: 誰にでも, どこにでも.",
+        "fr": "- L'ouverture : 何でも食べます.\n- Les invitations : いつでも来てください.\n- Avec une particule au milieu : 誰にでも, どこにでも."
+      },
+      {
+        "kind": "careful",
+        "en": "The predicate is affirmative: 何でも食べます (I eat anything). With a negative, use も: 何も食べません (I eat nothing). 何でもない is a set phrase, « it's nothing ». After a noun, でも is another point: お茶でも (tea or something).",
+        "fr": "Le prédicat est affirmatif : 何でも食べます (je mange de tout). Avec une négation, on emploie も : 何も食べません (je ne mange rien). 何でもない est une expression figée, « ce n'est rien ». Après un nom, でも est un autre point : お茶でも (du thé ou autre chose)."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "何も／誰も〜ない",
+        "en": "何でも + affirmative: anything; 何も + negative: nothing.",
+        "fr": "何でも + affirmatif : n'importe quoi ; 何も + négatif : rien."
+      },
+      {
+        "pattern": "何か／誰か／どこか",
+        "en": "何か is some one thing; 何でも is any thing at all.",
+        "fr": "何か est une chose, laquelle on ne sait pas ; 何でも est n'importe laquelle."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "兄は何でも食べます。",
+        "en": "My older brother eats anything.",
+        "fr": "Mon grand frère mange de tout.",
+        "register": "polite"
+      },
+      {
+        "jp": "いつでも電話してください。",
+        "en": "Call me any time.",
+        "fr": "Appelle-moi quand tu veux.",
+        "register": "polite"
+      },
+      {
+        "jp": "この店は誰でも入れます。",
+        "en": "Anyone can go into this shop.",
+        "fr": "Tout le monde peut entrer dans ce magasin.",
+        "register": "polite"
+      },
+      {
+        "jp": "この犬はどこでもねます。",
+        "en": "This dog sleeps anywhere.",
+        "fr": "Ce chien dort n'importe où.",
+        "register": "polite"
+      },
+      {
+        "jp": "飲みものは何でもいいですよ。",
+        "en": "Any drink is fine.",
+        "fr": "N'importe quelle boisson me va.",
+        "register": "polite",
+        "contrast": true
       }
     ]
   },

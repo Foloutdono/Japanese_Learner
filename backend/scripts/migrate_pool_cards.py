@@ -34,8 +34,12 @@ carry one (cards, card_modes, review_log, card_first_review):
 Then, once per moved key: frequency_overrides rows pinned under
 domain='vocab_jmdict' with the pool key move to domain='vocab' under the
 deck's key; a learner who already pinned the deck key keeps that pin.
-deck_cards never links a pool card (routes/decks resolves vocab, kanji,
-grammar and kana sources only), so it has nothing to move.
+
+And the deck links (plan 148): a vocab deck takes a pool word since the
+analyser and the dictionary offer every word the app holds, so a
+deck_cards row can name `vocab_jmdict_{id}` under routes/decks.POOL_LEVEL.
+It moves to the deck card and the level that card's id carries; a deck
+that already holds the deck card keeps that row, and the pool one goes.
 
 Idempotent: a renamed id is no longer a `vocab_jmdict_%` id, so a second
 run finds nothing. Without --yes nothing is written.
@@ -164,6 +168,50 @@ def count_pins(cur, moves: dict[str, dict], user: str | None = None) -> int:
     return cur.fetchone()[0]
 
 
+def _deck_level(deck_raw_id: str) -> str:
+    """'vocab_N5_顔_かお' -> 'N5': a deck card's id carries its level."""
+    return deck_raw_id.split("_", 2)[1]
+
+
+def _linked_pool_ids(cur, moves: dict[str, dict], user: str | None = None) -> list[str]:
+    """The moved pool ids some deck links, as `vocab_jmdict_{id}`."""
+    scope = " AND user_id = %(user)s" if user else ""
+    cur.execute(
+        f"SELECT DISTINCT raw_id FROM deck_cards WHERE source = 'vocab' "
+        f"AND raw_id = ANY(%(ids)s){scope}",
+        {"ids": [f"vocab_jmdict_{pool_id}" for pool_id in moves], "user": user},
+    )
+    return sorted(row[0] for row in cur.fetchall())
+
+
+def rename_deck_links(cur, moves: dict[str, dict], user: str | None = None) -> tuple[int, int]:
+    """A deck's link to a pruned pool word moves onto the deck card
+    (plan 148); a deck already holding the deck card keeps that link and
+    the pool one is dropped. `user` scopes to the decks one account
+    owns -- deck_cards.user_id is the owner, and a follower reads the
+    owner's rows. Returns (moved, dropped as duplicates)."""
+    moved = dropped = 0
+    scope = " AND user_id = %(user)s" if user else ""
+    for raw_id in _linked_pool_ids(cur, moves, user):
+        target = moves[pool_id_of(raw_id)]["card"]
+        params = {"old": raw_id, "new": target, "level": _deck_level(target), "user": user}
+        cur.execute(
+            f"""
+            UPDATE deck_cards SET raw_id = %(new)s, level = %(level)s
+            WHERE source = 'vocab' AND raw_id = %(old)s{scope}
+              AND NOT EXISTS (
+                SELECT 1 FROM deck_cards d2
+                WHERE d2.deck_id = deck_cards.deck_id AND d2.source = 'vocab' AND d2.raw_id = %(new)s
+              )
+            """,
+            params,
+        )
+        moved += cur.rowcount
+        cur.execute(f"DELETE FROM deck_cards WHERE source = 'vocab' AND raw_id = %(old)s{scope}", params)
+        dropped += cur.rowcount
+    return moved, dropped
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     parser.add_argument("--yes", action="store_true", help="apply the renames; without it, report only")
@@ -178,6 +226,7 @@ def main(argv=None) -> int:
         with conn.cursor() as cur:
             fates = classify(find_card_ids(cur, args.user), moves)
             pins = count_pins(cur, moves, args.user)
+            links = _linked_pool_ids(cur, moves, args.user)
         conn.commit()
 
         logger.info("pool card ids: %d to move, %d still in the pool, %d unknown (left)",
@@ -187,6 +236,7 @@ def main(argv=None) -> int:
         for card_id in fates["moved"]:
             logger.info("  %s -> %s", card_id, moves[pool_id_of(_split(card_id)[1])]["card"])
         logger.info("frequency_overrides rows to move: %d", pins)
+        logger.info("pool words linked from a deck, to move: %d", len(links))
 
         if not args.yes:
             logger.info("dry run -- nothing written. Re-run with --yes to apply.")
@@ -201,10 +251,12 @@ def main(argv=None) -> int:
                 logger.exception("failed renaming %s; rolled back, continuing", card_id)
         with conn.cursor() as cur:
             pins_moved, pins_dropped = rename_frequency_overrides(cur, moves, args.user)
+            links_moved, links_dropped = rename_deck_links(cur, moves, args.user)
         conn.commit()
         logger.info("moved %d card id(s) (%d card_modes rows merged into an existing track); "
-                    "frequency_overrides: %d moved, %d dropped as duplicates",
-                    len(fates["moved"]), merged, pins_moved, pins_dropped)
+                    "frequency_overrides: %d moved, %d dropped as duplicates; "
+                    "deck links: %d moved, %d dropped as duplicates",
+                    len(fates["moved"]), merged, pins_moved, pins_dropped, links_moved, links_dropped)
         return 0
     finally:
         conn.close()

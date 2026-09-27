@@ -148,6 +148,18 @@ class CorpusMeasurementTests(unittest.TestCase):
         self.assertIsNone(self._kind_of("母"))
         self.assertIsNone(self._kind_of("父"))
 
+    def test_the_words_plan_153_put_right_are_no_longer_gaps(self) -> None:
+        """時 read じ, 年 ねん, 月 がつ, 杯 はい, 件 けん, 故 ゆえ, 寒気 さむけ,
+        下 もと and 社 しゃ are cards now; 割 and 共 are read わり and とも,
+        the words their cards always glossed; 〜はおろか's おろか and
+        〜や否や's いな are the points', IGNORED_LEMMAS like いかん; and
+        the kana sentences the tokenizer cut into 顎 (りゅう|がく) and 宿
+        (しゅく|だい) say what they meant in words it reads."""
+        for lemma in ("時", "年", "月", "杯", "件", "故", "寒気", "下", "社",
+                      "割", "共", "疎か", "否", "顎", "宿", "がせ"):
+            with self.subTest(lemma=lemma):
+                self.assertIsNone(self._kind_of(lemma))
+
     def test_ratchets_never_rise(self) -> None:
         # Raised once (2026-09-24), by what a lookup fix uncovered rather
         # than lost: a folded spelling now resolves only read as folded
@@ -156,6 +168,38 @@ class CorpusMeasurementTests(unittest.TestCase):
         # real gap, no card teaches "what time" (absent +1); 二十 read
         # にじゅう had badged はたち and is a numeral (unmatched +1); 如何
         # read いかん had badged いかが and is IGNORED_LEMMAS' now.
+        #
+        # Raised again (plan 150), the same way: a reading no longer joins
+        # a token written in kanji to a card spelled with other kanji, nor
+        # a loanword to a native card, so nine homophones stopped counting
+        # as matches and are the gaps they always were -- 前回 had badged
+        # 全快 ("complete recovery"), 開店 回転 ("rotation"), 館長 官庁,
+        # 公言 高原 ("plateau"), 生き甲斐 域外, 思い 重い ("heavy"), 降り 不利,
+        # ジム 事務 ("office work"). The ninth, 日差し, had reached 陽射 --
+        # the same word spelled otherwise, which the pool now glosses
+        # (absent +9, unmatched +9).
+        #
+        # And again (plan 151): a card read otherwise than the token no
+        # longer counts, and seventeen words the cards had hidden are the
+        # gaps they were -- 時 read じ ("o'clock") had badged 時 read とき,
+        # 年 read ねん とし, 月 read がつ つき, 件 read けん くだん, 社 read
+        # しゃ やしろ ("Shinto shrine"), 米 read べい ("America") こめ
+        # ("rice"), 割 read わり かつ, 共 read とも きょう, 下 read もと した,
+        # 故 read ゆえ こ ("the late"), 否 read いな いや, 疎か read おろか
+        # おろそか, 寒気 read さむけ かんき, 杯 read はい さかずき; three are
+        # the tokenizer's slips the card had papered over (りゅうがく cut
+        # into 顎, しゅくだい into 宿, 上手 read かみて) (absent +17,
+        # unmatched +17). The readings put right in context on main
+        # (study/reading_context.py) then took two back: 上手 is じょうず
+        # again, and 米 before をはじめとする is read こめ (absent -2,
+        # unmatched -2).
+        #
+        # Lowered by plan 153: 時 read じ, 年 ねん, 月 がつ, 杯 はい, 件
+        # けん, 故 ゆえ, 寒気 さむけ, 下 もと and 社 しゃ are cards; 割 and 共
+        # are read わり and とも, as their cards always glossed them;
+        # 〜はおろか's おろか and 〜や否や's いな are IGNORED_LEMMAS'; and
+        # four kana sentences the tokenizer cut into 顎, 宿 and がせ read
+        # right (absent -17, unmatched -17; 104 occurrences).
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 154)
-        self.assertLessEqual(c["unmatched_lemmas"], 168)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 161)
+        self.assertLessEqual(c["unmatched_lemmas"], 175)

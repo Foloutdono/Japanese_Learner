@@ -763,6 +763,134 @@
     ]
   },
   {
+    "pattern": "ない形 〜ない",
+    "structure": "う-verb あ-row ・ る-verb stem + ない",
+    "meaning": {
+      "en": "the plain negative: don't, doesn't",
+      "fr": "la négation neutre : ne… pas"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "The **ない-form** is the plain negative: う-verbs take the あ-row + ない (行く→行かない, 買う→買わない), る-verbs drop る (食べない), する→しない, 来る→来ない (こない). ある becomes ない alone.",
+        "fr": "La **forme en ない** est la négation neutre : les verbes en う prennent le son en あ + ない (行く→行かない, 買う→買わない), les verbes en る perdent る (食べない), する→しない, 来る→来ない (こない). ある devient simplement ない."
+      },
+      {
+        "kind": "use",
+        "en": "- Among friends and family: 今日は行かない.\n- Inside longer patterns built on it: 〜ないでください, 〜なくてもいいです, 〜なければなりません.\n- Its past is なかった: 食べなかった.",
+        "fr": "- Entre amis et en famille : 今日は行かない.\n- Dans les structures plus longues bâties sur elle : 〜ないでください, 〜なくてもいいです, 〜なければなりません.\n- Son passé est なかった : 食べなかった."
+      },
+      {
+        "kind": "careful",
+        "en": "At the end of a sentence it is casual: the polite negative is ません. After a verb, ない changes like an い-adjective (なかった, なくて); after a noun, the plain negative is じゃない.",
+        "fr": "En fin de phrase, c'est familier : la négation polie est ません. Après un verbe, ない se conjugue comme un adjectif en い (なかった, なくて) ; après un nom, la négation neutre est じゃない."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜ます／〜ません",
+        "en": "ない is the plain negative; ません is the same negative, polite.",
+        "fr": "ない est la négation neutre ; ません est la même négation, polie."
+      },
+      {
+        "pattern": "〜ないでください",
+        "en": "The ない-form alone says you do not; with でください it asks someone not to.",
+        "fr": "Seule, la forme en ない dit qu'on ne fait pas ; avec でください, elle demande à quelqu'un de ne pas faire."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "今日は学校に行かない。",
+        "en": "I'm not going to school today.",
+        "fr": "Aujourd'hui, je ne vais pas à l'école.",
+        "register": "casual"
+      },
+      {
+        "jp": "わたしはさかなを食べない。",
+        "en": "I don't eat fish.",
+        "fr": "Je ne mange pas de poisson.",
+        "register": "casual"
+      },
+      {
+        "jp": "ねる前にコーヒーは飲まない。",
+        "en": "I don't drink coffee before bed.",
+        "fr": "Je ne bois pas de café avant de dormir.",
+        "register": "neutral"
+      },
+      {
+        "jp": "あの人はお金がない。",
+        "en": "That person has no money.",
+        "fr": "Cette personne n'a pas d'argent.",
+        "register": "casual"
+      }
+    ]
+  },
+  {
+    "pattern": "た形 〜た",
+    "structure": "verb て-form with た for て (…た・だ)",
+    "meaning": {
+      "en": "the plain past: did",
+      "fr": "le passé neutre : j'ai fait"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "The **た-form** is the plain past: take the て-form and change て to た, で to だ (書いて→書いた, 読んで→読んだ). する→した, 来る→来た.",
+        "fr": "La **forme en た** est le passé neutre : on prend la forme en て et on change て en た, で en だ (書いて→書いた, 読んで→読んだ). する→した, 来る→来た."
+      },
+      {
+        "kind": "use",
+        "en": "- Among friends and family: きのう、えいがを見た.\n- In diaries, stories and articles, which are written in the plain style.\n- Inside a sentence, before a noun or another pattern: 読んだ本, 行ったことがある.",
+        "fr": "- Entre amis et en famille : きのう、えいがを見た.\n- Dans un journal intime, un récit ou un article, écrits en style neutre.\n- À l'intérieur d'une phrase, devant un nom ou une autre structure : 読んだ本, 行ったことがある."
+      },
+      {
+        "kind": "careful",
+        "en": "At the end of a sentence it is casual: to a teacher or a stranger, say ました. A noun or a な-adjective takes だった, an い-adjective かった (高かった).",
+        "fr": "En fin de phrase, c'est familier : à un professeur ou à un inconnu, on dit ました. Un nom ou un adjectif en な prend だった, un adjectif en い かった (高かった)."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜ました／〜ませんでした",
+        "en": "た is the plain past; ました is the same past, polite.",
+        "fr": "た est le passé neutre ; ました est le même passé, poli."
+      },
+      {
+        "pattern": "〜ことがある",
+        "en": "The た-form alone says it happened; with ことがある it says you have done it at least once.",
+        "fr": "Seule, la forme en た dit que c'est arrivé ; avec ことがある, elle dit qu'on l'a déjà fait au moins une fois."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "きのう、友だちとえいがを見た。",
+        "en": "Yesterday I saw a film with a friend.",
+        "fr": "Hier, j'ai vu un film avec un ami.",
+        "register": "casual"
+      },
+      {
+        "jp": "あさごはんはもう食べた。",
+        "en": "I've already had breakfast.",
+        "fr": "J'ai déjà pris mon petit déjeuner.",
+        "register": "casual"
+      },
+      {
+        "jp": "日よう日に新しいくつを買った。",
+        "en": "I bought new shoes on Sunday.",
+        "fr": "Dimanche, j'ai acheté de nouvelles chaussures.",
+        "register": "casual"
+      },
+      {
+        "jp": "雨がふったので、うちにいた。",
+        "en": "It rained, so I stayed home.",
+        "fr": "Il a plu, alors je suis resté à la maison.",
+        "register": "written"
+      }
+    ]
+  },
+  {
     "pattern": "〜たいです",
     "structure": "verb stem + たいです",
     "meaning": {
@@ -2219,7 +2347,7 @@
         "contrast": true
       },
       {
-        "jp": "わたしよりあにのほうがせが高いです。",
+        "jp": "わたしよりあにのほうが、せが高いです。",
         "en": "My brother is taller than me.",
         "fr": "Mon frère est plus grand que moi.",
         "register": "polite"
@@ -3094,9 +3222,9 @@
         "contrast": true
       },
       {
-        "jp": "しゅくだいはまだおわっていません。",
-        "en": "The homework isn't finished yet.",
-        "fr": "Les devoirs ne sont pas encore finis.",
+        "jp": "しごとはまだおわっていません。",
+        "en": "The work isn't finished yet.",
+        "fr": "Le travail n'est pas encore fini.",
         "register": "polite"
       }
     ]
@@ -3538,6 +3666,11 @@
         "pattern": "〜か〜か",
         "en": "でも leaves the choice open; か〜か offers exactly two.",
         "fr": "でも laisse le choix ouvert ; か〜か en propose exactement deux."
+      },
+      {
+        "pattern": "何でも／誰でも／いつでも／どこでも",
+        "en": "After a noun, でも offers an example or means « even »; after a question word (何でも, 誰でも), it means « any ».",
+        "fr": "Après un nom, でも propose un exemple ou veut dire « même » ; après un mot interrogatif (何でも, 誰でも), il veut dire « n'importe »."
       }
     ],
     "examples": [

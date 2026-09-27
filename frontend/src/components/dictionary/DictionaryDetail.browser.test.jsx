@@ -158,9 +158,9 @@ const KANA = {
 // A JMdict-pool word: no level, kana-only headword, no alignment.
 const JMDICT = {
   type: 'vocab', kanji: '', kana: 'お疲れ様でした', meaning: 'thank you for your hard work', level: null,
-  // A pool row has a raw id and no app card: nothing to add to a deck
-  // and nothing to board.
-  app_card: null, kanji_parts: [],
+  // A pool row's card (plan 148): a vocab deck takes it, with no level,
+  // and `pool` keeps "review this card" off it.
+  app_card: { source: 'vocab', level: null, raw_id: 'vocab_jmdict_4242', pool: true }, kanji_parts: [],
   furigana: [], senses: [{ number: 1, glossary: 'thank you for your hard work', tags: [{ code: 'exp', label: 'exp', tooltip: 'expression' }] }],
   examples: [],
   status: { status: 'not_started', total_reviews: 0, correct_reviews: 0, accuracy: null, interval_days: null, next_review: null, due: false },
@@ -671,10 +671,27 @@ describe('the ＋ — this entry into one of your decks', () => {
     await screen.unmount()
   })
 
-  it('offers nothing to add for a pool entry, which has a stage and no card', async () => {
-    const { root } = await renderEntry(JMDICT, { ...NAV(), mining: MINE() })
+  it('adds a pool word to a vocab deck, with no level (plan 148)', async () => {
+    const mining = MINE()
+    const { root, screen } = await renderEntry(JMDICT, { ...NAV(), mining })
     const actions = [...root.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
-    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Close'])
+    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Add', 'Close'])
+    actions[1].click()
+    await settle(30)
+    root.querySelector('.dict-add-menu__row').click()
+    await settle(60)
+    expect(mining.mineApp).toHaveBeenCalledWith({
+      deckId: 7, source: 'vocab', level: null, rawId: 'vocab_jmdict_4242', kind: 'vocab',
+    })
+    await screen.unmount()
+  })
+
+  it('never offers to review a pool word, which the queue asks only through a deck', async () => {
+    const due = { ...JMDICT, status: { ...JMDICT.status, status: 'learning', total_reviews: 3, correct_reviews: 3, due: true } }
+    const { root, screen } = await renderEntry(due)
+    expect(root.querySelector('.records')).toBeTruthy()
+    expect(root.querySelector('.dict-due')).toBeNull()
+    await screen.unmount()
   })
 
   it('offers nothing where the screen has no decks to write to', async () => {
@@ -709,11 +726,18 @@ describe('the shelf row — this entry on your shelf', () => {
     expect(root.querySelector('.dict-plate__add-btn')).toBeNull()
   })
 
-  it('offers the shelf alone for a pool entry, which has no card to add', async () => {
-    const { root } = await renderEntry(JMDICT, { ...NAV(), favorites: SHELF(false), mining: { targetFor: () => null, decksFor: () => [], ensureDeck: vi.fn(), mineApp: vi.fn() } })
+  it('offers the shelf alone where the entry has no card to add', async () => {
+    const { root } = await renderEntry(POOL_KANJI, { ...NAV(), favorites: SHELF(false), mining: { targetFor: () => null, decksFor: () => [], ensureDeck: vi.fn(), mineApp: vi.fn() } })
     plus(root).click()
     await settle(30)
     expect(rows(root).map(r => r.textContent)).toEqual(['Keep in favourites'])
+  })
+
+  it('offers both rows for a pool word, which a vocab deck takes (plan 148)', async () => {
+    const { root } = await renderEntry(JMDICT, { ...NAV(), favorites: SHELF(false), mining: { targetFor: () => null, decksFor: () => [], ensureDeck: vi.fn(), mineApp: vi.fn() } })
+    plus(root).click()
+    await settle(30)
+    expect(rows(root).map(r => r.textContent)).toEqual(['Keep in favourites', 'Add to a deck'])
   })
 
   it('opens both rows under the ＋, keeps from the shelf row, and lights the ring once kept', async () => {

@@ -142,11 +142,14 @@ def test_every_kind_round_trips_as_the_catalogue_row(client):
         assert got["meaning"] == row["meaning"]
         assert (got["app_card"] is None) == (row["app_card"] is None)
 
-    # The pool halves are served as the catalogue serves them: a raw id
-    # and a stage for a word, no card behind either.
-    pool_rows = [r for r in body["results"] if r["level"] is None]
-    assert len(pool_rows) == 2
-    assert all(r["app_card"] is None for r in pool_rows)
+    # The pool halves are served as the catalogue serves them: a pool
+    # character has no card behind it, and a pool word has the one a
+    # vocab deck takes since plan 148 -- its id, no level, `pool`.
+    pool_rows = {r["type"]: r for r in body["results"] if r["level"] is None}
+    assert set(pool_rows) == {"kanji", "vocab"}
+    assert pool_rows["kanji"]["app_card"] is None
+    assert pool_rows["vocab"]["app_card"]["pool"] is True
+    assert pool_rows["vocab"]["app_card"]["level"] is None
 
 
 def test_a_packed_deck_reading_still_resolves(client):

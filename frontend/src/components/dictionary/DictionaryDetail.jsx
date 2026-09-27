@@ -672,8 +672,10 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 
   // The app card behind this entry, or null: what the ＋ writes and
   // what "review this card" boards. Served whole rather than assembled
-  // here, because a pool entry carries a raw id and no card and only
-  // the server knows the difference (routes/dictionary.py's _app_card).
+  // here, because only the server knows which entries have one
+  // (routes/dictionary.py's _app_card). A JMdict pool word's carries
+  // `pool` (plan 148): a deck takes it, but the day's queue asks it only
+  // through a deck it is in, so "review this card" is not offered on it.
   const appCard = entry.app_card ?? null
 
   // The kanji this word is written with, each as a ledger row — the
@@ -931,7 +933,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                 "the primary button"). It boards the one card this entry
                 is — /today/run?only=… — in every mode it owes, which is
                 what clearing it means. */}
-            {status.due && onReview && appCard && (
+            {status.due && onReview && appCard && !appCard.pool && (
               <button
                 type="button"
                 onClick={() => onReview(appCard.raw_id)}
@@ -1004,10 +1006,9 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 
                 The deck row exists where the server says there is a
                 card: `entry.app_card` is its answer to "is there a card
-                behind this entry", so a JMdict pool word — a raw id and
-                no card — gets no deck row rather than one that adds
-                nothing. The shelf row exists where the screen holds a
-                shelf; a sheet over a quiz holds none. */}
+                behind this entry" — a JMdict pool word too since plan
+                144, which a vocab deck takes. The shelf row exists where
+                the screen holds a shelf; a sheet over a quiz holds none. */}
             {(favorites || canMine) && (
               <span className="dict-plate__add" ref={addRef}>
                 <button

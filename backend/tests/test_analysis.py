@@ -134,6 +134,82 @@ class AnalyzeLocalTests(unittest.TestCase):
         self.assertEqual(by_surface["パン"]["vocab_match"]["raw_id"], "vocab_N5__パン")
         self.assertEqual(by_surface["でき"]["vocab_match"]["raw_id"], "vocab_N5__できる")
 
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_a_word_past_the_course_carries_its_pool_card(self) -> None:
+        """Plan 148. A subtitle's words the deck does not teach: さらば
+        (an interjection), 真っさら (a 形状詞) and 桃源郷, which UniDic
+        cuts into 桃源 + 郷 and the pool holds as one word. Each carries
+        its meaning and its pool card, with no level, and the deck still
+        answers first (なる is the deck's)."""
+        r = analyze_local("さらば桃源郷真っさらになったんだ")
+        by_surface = {t["surface"]: t for t in r["tokens"]}
+        self.assertNotIn("桃源", by_surface)
+        for surface, meaning in (("さらば", "farewell"), ("桃源郷", "earthly paradise"),
+                                 ("真っさら", "brand new")):
+            with self.subTest(surface=surface):
+                match = by_surface[surface]["vocab_match"]
+                self.assertTrue(match["pool"])
+                self.assertIsNone(match["level"])
+                self.assertTrue(match["raw_id"].startswith("vocab_jmdict_"))
+                # (the first gloss of each of its first senses, plan 151)
+                self.assertEqual(match["entry"]["meaning"].split("; ")[0], meaning)
+        self.assertEqual(by_surface["桃源郷"]["reading"], "とうげんきょう")
+        self.assertFalse(by_surface["なっ"]["vocab_match"].get("pool"))
+        self.assertEqual("".join(t["surface"] for t in r["tokens"]), r["text"])
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_every_grammatical_word_of_a_subtitle_has_its_key(self) -> None:
+        """Plan 149, on the two lines the owner showed: the に of 真っさらに
+        and the なっ of なった are 〜になる, the た the plain past, the ん
+        and だ the explanatory のだ; 会いにきて is 〜に行きます (its lesson
+        names 来ます), and the て of 辿って links the two clauses."""
+        r = analyze_local("さらば桃源郷真っさらになったんだ")
+        by_pattern = {g["pattern"]: r["text"][g["start"]:g["end"]] for g in r["grammar"]}
+        self.assertEqual(by_pattern["〜くなる／〜になる"], "になっ")
+        self.assertEqual(by_pattern["た形 〜た"], "た")
+        self.assertEqual(by_pattern["〜んです／〜のです"], "んだ")
+        r = analyze_local("足跡を辿って会いにきて")
+        by_pattern = {g["pattern"]: r["text"][g["start"]:g["end"]] for g in r["grammar"]}
+        self.assertEqual(by_pattern["〜に行きます"], "にき")
+        self.assertIn("〜て、〜て", by_pattern)
+        ni = next(t for t in r["tokens"] if t["surface"] == "に")
+        self.assertIn("〜に行きます", [g["pattern"] for g in ni["grammar"]])
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_the_pool_is_never_asked_for_a_word_a_point_is_written_on(self) -> None:
+        # The しれ of かもしれません is 知れる in the pool; a row with no
+        # word in it opens its grammar point, and a gloss would take that
+        # door away.
+        r = analyze_local("雨がふるかもしれません。")
+        shire = next(t for t in r["tokens"] if t["surface"] == "しれ")
+        self.assertTrue(shire["grammar"])
+        self.assertIsNone(shire["vocab_match"])
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_a_word_written_in_kana_is_never_matched_to_a_homophone(self) -> None:
+        # The pool is JMdict less the deck: its one row read その is 苑,
+        # "garden", and its one row read あんな the Anna era. まじか is
+        # slang UniDic reads as 間近 (まぢか), "near".
+        for sentence, surface in (("その本をください。", "その"), ("あんな人はいない。", "あんな"),
+                                  ("まじかよ", None)):
+            with self.subTest(sentence=sentence):
+                r = analyze_local(sentence)
+                pooled = [t["surface"] for t in r["tokens"] if (t["vocab_match"] or {}).get("pool")]
+                self.assertEqual(pooled, [])
+                if surface:
+                    self.assertIn(surface, [t["surface"] for t in r["tokens"]])
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_deck_words_are_never_folded_into_a_pool_compound(self) -> None:
+        # 電話 + 番号 are two N5 cards; the pool's 電話番号 does not take
+        # them. A number is the deck's to read, never the pool's: 二十
+        # read にじゅう shares a kanji and a reading with 二重, "double".
+        r = analyze_local("電話番号と三千円と二十人")
+        surfaces = [t["surface"] for t in r["tokens"]]
+        self.assertEqual(surfaces[:2], ["電話", "番号"])
+        for t in r["tokens"]:
+            self.assertFalse((t["vocab_match"] or {}).get("pool"), t["surface"])
+
     def test_distinctive_grammar_point_produces_a_grammar_card_id(self) -> None:
         r = analyze_local("食べようとしました")
         patterns = [g["pattern"] for g in r["grammar"]]
@@ -285,16 +361,37 @@ class AttachUserStateTests(unittest.TestCase):
         self.assertFalse(out["available"])
 
     def test_off_deck_content_word_counts_as_off_deck_not_unknown(self) -> None:
-        # ピカチュウ is a noun with no vocab_match and no kanji_matches --
-        # not something the app's deck can teach, so it must never
-        # inflate unknown_count.
+        # ピカチュウ is a noun no deck card and no kanji card is behind --
+        # not something the course teaches, so it must never inflate
+        # unknown_count. JMdict has it (plan 148), so it carries the pool
+        # card a learner may take up; untaken, it is off-deck as before.
         r = analyze_local("ピカチュウがいます。")
         pikachu = next(t for t in r["tokens"] if t["surface"] == "ピカチュウ")
-        self.assertIsNone(pikachu["vocab_match"])
+        self.assertTrue(pikachu["vocab_match"]["pool"])
         self.assertEqual(pikachu["kanji_matches"], [])
 
         out = attach_user_state(r, {}, "u")
         self.assertEqual(out["off_deck_count"], 1)
+        # いる is the one unknown: an N5 card, not started.
+        self.assertEqual(out["unknown_count"], 1)
+
+    def test_a_pool_word_the_learner_took_up_counts_as_theirs(self) -> None:
+        # In the learner's SRS, a pool word is a word of theirs: new is
+        # unknown, like a deck word's; learning counts in neither bucket.
+        r = analyze_local("ピカチュウがいます。")
+        raw_id = next(t for t in r["tokens"] if t["surface"] == "ピカチュウ")["vocab_match"]["raw_id"]
+
+        def states(state):
+            return {("u:" + raw_id, "vocab.flashcard.f2b"): {
+                "state": state, "total_reviews": 0, "correct_reviews": 0,
+                "due": False, "interval_days": None, "next_review": None,
+            }}
+
+        # Against いる, the sentence's one unknown deck word.
+        out = attach_user_state(r, states("new"), "u")
+        self.assertEqual((out["unknown_count"], out["off_deck_count"]), (2, 0))
+        out = attach_user_state(r, states("learning"), "u")
+        self.assertEqual((out["unknown_count"], out["off_deck_count"]), (1, 0))
 
     def test_unlearned_deck_word_counts_as_unknown(self) -> None:
         # "大学に行きます。" carries two content words with a vocab_match

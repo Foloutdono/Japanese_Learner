@@ -755,7 +755,134 @@ runtime purpose. Two consequences worth knowing:
   `CardPanel.jsx`, `hooks/useReviewGates.js`, `hooks/useCardSession.js`'s
   v8, `src/cardBand.phone.test.jsx`, `src/panels.desktop.test.jsx` and
   `index.css`).
-  When starting a new wave, begin at **148** or higher, and check
+  **148** is 全語, every word the app holds a card for (numbered 148
+  because 144–147 went to the cutscenes, Settings' pages, the grammar
+  lesson and the card's progress while it was open; its first commit's
+  message says 144, and a later one 147): the breakdown
+  asks the JMdict pool after the deck (a noun run as one word, 桃源 + 郷
+  as 桃源郷, then each word the deck has no card for), so a word past the
+  course carries its meaning and its `vocab_jmdict_<id>` card; a vocab
+  deck links one under `POOL_LEVEL`, studies it with its frequency
+  neighbours as distractors, and Today asks it in the deck's lane; the
+  dictionary's ＋ adds one (cited in `study/analysis.py`,
+  `study/card_lookup.py`, `content/vocab_jmdict_data.py`,
+  `routes/decks.py`, `routes/today.py`, `routes/dictionary.py`,
+  `scripts/migrate_pool_cards.py`, `components/analysis/tokens.js`,
+  `components/dictionary/DictionaryDetail.jsx`,
+  `tests/test_deck_pool_cards.py` and `tests/test_analysis.py`).
+  **149** is every key a sentence holds (its first commit's message
+  says 145, a later one 148), the grammar detector made
+  robust against real text (measured on 4,000 of JMdict's example
+  sentences: 71% of the particles and auxiliaries covered by a point,
+  96% now; the catalogue's own examples 83% to 98%, lesson recall 92%
+  to 94%): what a point attaches to read by kind of word, a pattern's
+  final word conjugated instead of cut (〜になる in なった, no more
+  ことは for 〜ことはない), rules by what the tokenizer names (the
+  copula's forms, 〜んだ, 〜に行きます with 来る, a lone linking て,
+  から and まで alone, な-adjectives, the spoken short forms), senses
+  the lessons show apart taught (しずかに, 雨だが), and two N5 form
+  points added to the catalogue, た形 〜た and ない形 〜ない (cited in
+  `study/grammar_detect.py`, `study/analysis.py`,
+  `content/grammar/N5.json`, `tests/test_grammar_detect.py`'s
+  `EveryKeyTests` and `tests/test_analysis.py`).
+  **150** is no false key and no false meaning (its first two commits'
+  messages say 149): every key and card the breakdown hands out held to the word
+  the sentence uses, read one by one over 6,900 sentences -- 355 false
+  grammar hits removed and 121 spans moved with coverage unchanged, and
+  hundreds of homophone cards gone. The detector: a hit that stops
+  inside a word ends on the kind of word its lessons end on (the でも of
+  学校でもらった); でも, とは and とか held to the shapes their lessons
+  teach (`_REFUSALS`: 誰でも is the new N4 point 何でも／誰でも／いつでも
+  ／どこでも, 彼とは is "with him", 何とか a word); the casual request
+  〜て／〜ないで（依頼） added to N4; a multi-part point on its tightest
+  parts, each a word of its own; the plain 〜そうだ of looks told from
+  hearsay by the stem; a construction takes in its own ない. The lookups:
+  a reading never joins a kanji spelling to a card of other kanji or a
+  katakana card, nor a loanword (UniDic's 語種, now `Morpheme.goshu`) to a
+  native card; a spelling UniDic files under another word's kanji (推す
+  under 押す) is looked up as the page writes it; the N5 する, なる and いい
+  and 68 other kana cards stand beside their higher-level twins, the
+  lowest level winning (cited in `study/grammar_detect.py`,
+  `study/grammar_match.py`, `study/card_lookup.py`, `study/morphology.py`,
+  `study/analysis.py`'s `LOCAL_REV` 4, `content/grammar/N4.json`,
+  `content/grammar/N5.json`, `tests/test_grammar_precision.py`,
+  `tests/test_lookup_precision.py`, `tests/test_grammar_detect.py`,
+  `tests/test_audit_vocab_deck.py` and `tests/test_deck_pool_cards.py`).
+  **151** is what eight reviewers found: 1,837 of the detector's hits,
+  sampled over every point it lights, read against each point's own
+  lesson, and 213 flagged; every class they found refused by what stands
+  around it and pinned with its counter-case (`ReviewedTests`), and the
+  lookups read the same way. The detector: a voiced ending only after a
+  verb, a noun + だ point with its copula, a hit ending where its
+  lessons end, a part another construction owns (the さえ of 〜さえ〜ば);
+  obligation told from prohibition (なくてはならない is no 〜てはならない),
+  the volitional of 〜ようとする, a concession or 〜ようものなら no
+  "let's", a compound particle's に no moment, 二度と's と no "and", a
+  refused reading taking its shorter ones with it (てはならな); 〜も（強調）
+  found at last (十時間も), the "must" halves the lesson names
+  (なくてはならない, なければいけない, after a passive or the copula),
+  the counters the lesson names after a number (三本's 本 is no "book"),
+  a point that opens a sentence opening a clause after a comma, and the
+  tagger's あの before a noun read as the demonstrative. The lookups: no
+  card read otherwise than the token (彼ら's ら is not 等 "et cetera",
+  入るなり's なり not 哉), a suffix with no card folded into its word
+  (参加 + 者 is 参加者, "participant") or given its affix sense
+  (副社長's 副, "assistant"), and a pool word's line the first gloss of
+  its first senses (cited in `study/grammar_detect.py`,
+  `study/card_lookup.py`, `study/morphology.py`, `study/analysis.py`'s
+  `LOCAL_REV` 5, `tests/test_grammar_precision.py`,
+  `tests/test_lookup_precision.py` and `tests/test_analysis.py`).
+  **152** is what the detector could not see: the embedded question
+  〜か（間接疑問）, written as one か and never trusted by its letters, read
+  by words (a question word in the clause, a plain predicate, か, then a
+  verb that takes the question in -- `_embedded_question_at`; 誰か知って
+  いますか stays "does anyone know"); polite hearsay (おいしいそうです),
+  whose pattern is written with だ, by `_hearsay_spans` after a plain form;
+  and a point in its other spelling (`_SPELLINGS`: に従って for
+  〜にしたがって, にくらべて for 〜に比べて, 事が出来る, 下さい, 時 held
+  to its reading), each pair tested to read alike, with the spellings
+  that are other words left out (を持って, に取って, 物, 様, and after
+  three reviewers' ~2,300 sentences に当たって, を巡って, と言っても, 所,
+  耐えない, the bare 事) or guarded (に渡って, 子供を公園に連れて, 体に
+  応える, 右に見える) -- UniDic's lemma was no way in, filing をもって
+  under 持つ. And the verb of a compound
+  particle carries no card (について's つい is no 着く "to arrive"), its
+  row opening the point (cited in `study/grammar_detect.py`'s
+  `compound_particles`, `study/analysis.py`'s `LOCAL_REV` 7,
+  `tests/test_grammar_precision.py`'s `UnseenTests` and
+  `tests/test_lookup_precision.py`'s `CompoundParticleTests`).
+  **153** is the cards plan 151's word reviewers found wrong (numbered
+  153 because 152 went to what the detector could not see while it was
+  open), each
+  checked against JMdict and the JLPT lists: eight glosses that were
+  another reading's (半分 "half minute" was はんぷん's, 盛り もり's,
+  目下 もっか's, 札 ふだ's, 人気 ひとけ's, 羽 わ's, 否 いや's "the noes"
+  ひ's, 寒気 かんき's "chill" さむけ's) and four that misled (相手 one
+  sense of three, 件 くだん a sense JMdict dropped, 疎か a noun for a
+  na-adjective, 杯 さかずき a wine cup); ten readings put right, the old
+  ids deleted rather than moved (`RETIRED`, the owner's call: the
+  corrected card starts new) — five no reading of the form (割 かつ →
+  わり, 共 きょう → とも, 愛憎 あいにく → あいぞう, 音色 おんいろ → ねいろ,
+  復旧 ふくきゅう → ふっきゅう), three rare ones on the everyday reading's
+  gloss (地形 ちけい, 統治 とうち, 施行 しこう), 下す read おろす, the
+  irregular okurigana of 下ろす (still its spelling, `FOLDED_ONLY`), and
+  否 read いいえ, whose word is the N5 いいえ;
+  eleven words the sentences or the JLPT lists name and the deck lacked
+  (時 じ, 年 ねん, 月 がつ, 杯 はい at N5; 寒気 さむけ at N4; 件 けん at
+  N3; 下 もと, 社 しゃ at N2; 故 ゆえ, 目下 もっか, 札 ふだ at N1);
+  〜はおろか's おろか and 〜や否や's いな decided as grammar
+  (`IGNORED_LEMMAS`); 下す read くだす left to the pool, its rank 92 an
+  artefact of the subtitles' 下さ(い) (`placement_report.FRAGMENTS`);
+  盛り read さかり in context (`reading_context`); and four kana
+  sentences the tokenizer cut into other words (りゅう|がく, しゅく|だい,
+  ほう|がせ) reworded (cited in `content/vocab_renames.py`,
+  `content/grammar/N4.json`, `content/grammar/N5.json`,
+  `study/reading_context.py`, `scripts/audit_vocab_deck.py`,
+  `scripts/placement_report.py`, `tests/test_audit_vocab_deck.py`,
+  `tests/test_lookup_precision.py`, `tests/test_furigana_context.py`,
+  `tests/test_placement_report.py` and `tests/test_onboarding_profile.py`;
+  `docs/vocab-deck-review.md`).
+  When starting a new wave, begin at **154** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

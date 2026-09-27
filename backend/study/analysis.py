@@ -20,8 +20,11 @@ import logging
 
 from content.grammar_points_data import find, grammar_to_id
 from study import morphology
+from study.grammar_detect import compound_particles
+from content.vocab_jmdict_data import vocab_jmdict_to_id
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, compound_reading,
+    resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
     find_kanji_matches, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
@@ -131,13 +134,33 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
         ]
 
 
-def _token_dict(m: morphology.Morpheme, hit) -> dict:
+def _pool_match(entry: dict) -> dict:
+    """A JMdict pool word as a token's vocab_match (plan 148): the same
+    shape as a deck word's, so every screen that glosses a word, opens
+    its entry or adds it to a deck reads it where it already reads one,
+    with `level` null -- the pool has no JLPT level, and a null level is
+    what draws no badge -- and `pool` saying so outright. The entry is
+    cut to the three fields a screen reads: a video session stores the
+    analysis of every line it holds (routes/video.py)."""
+    return {
+        "level": None,
+        "raw_id": vocab_jmdict_to_id(entry),
+        "entry": {"kanji": entry.get("kanji", ""), "kana": entry.get("kana", ""),
+                  "meaning": pool_gloss(entry)},
+        "pool": True,
+    }
+
+
+def _token_dict(m: morphology.Morpheme, hit, pool=None) -> dict:
     """`hit` is card_lookup.resolve_morpheme's answer for `m`, resolved
-    by the caller, which has the neighbours the resolver reads."""
+    by the caller, which has the neighbours the resolver reads; `pool`
+    is resolve_pool_morpheme's, asked only where `hit` is None."""
     vocab_match = None
     if hit:
         level, entry, raw_id = hit
         vocab_match = {"level": level, "raw_id": raw_id, "entry": serializable_entry(entry)}
+    elif pool:
+        vocab_match = _pool_match(pool)
 
     kanji_matches = [
         {"kanji": char, "level": level, "raw_id": raw_id, "entry": serializable_entry(entry)}
@@ -181,7 +204,36 @@ def _compound_dict(run: list, level: str, entry: dict, raw_id: str) -> dict:
     }
 
 
-def _tokens(morphemes: list) -> list[dict]:
+def _pool_compound_dict(run: list, entry: dict) -> dict:
+    """_compound_dict for a run the JMdict pool holds as one word
+    (card_lookup.resolve_pool_compound, plan 148): 桃源 + 郷 as 桃源郷."""
+    surface = "".join(m.surface for m in run)
+    reading = entry.get("kana") or "".join(m.reading for m in run)
+    return {
+        "surface": surface, "start": run[0].start, "end": run[-1].end,
+        "lemma": entry.get("kanji") or surface, "reading": reading, "pos": "noun",
+        "furigana": align_deck(surface, reading),
+        "vocab_match": _pool_match(entry),
+        "kanji_matches": [
+            {"kanji": char, "level": lvl, "raw_id": rid, "entry": serializable_entry(e)}
+            for char, lvl, e, rid in find_kanji_matches(surface)
+        ],
+    }
+
+
+def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
+    """The indices of the morphemes a grammar point is written on (its
+    `segments`, as _attach_grammar reads them)."""
+    return {
+        j for j, m in enumerate(morphemes)
+        if any(s < m.end and m.start < e for g in grammar for s, e in g["segments"])
+    }
+
+
+_COUNTERS = "助数詞 〜つ／〜人／〜枚"
+
+
+def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     """The morphemes as tokens, a deck compound folded into one.
 
     UniDic's short unit cuts 日曜日 into 日曜 + 日, and per-morpheme
@@ -190,7 +242,40 @@ def _tokens(morphemes: list) -> list[dict]:
     reading-badge scanner (card_lookup._find_segments_morphological)
     has merged such runs since it was written; the breakdown never
     did. Longest run first, so お母さん is one word and not お + 母さん.
+
+    The deck answers first, the JMdict pool after (plan 148): a run the
+    pool holds as one word where the deck has no card for one of its
+    nouns (桃源 + 郷), then each word the deck has no card for, looked
+    up alone. So every word the app holds a card for -- in the course or
+    past it -- carries its meaning and can be put in a deck.
+
+    Never a word a grammar point is written on (`grammar`, the
+    sentence's detected points): the しれ of かもしれない is 知れる in the
+    pool, ござい is 御座い, 際し is 際する, and a row with no deck word
+    in it opens its point (frontend rows) -- a pool gloss there would
+    trade the lesson for a dictionary line about one of its letters.
     """
+    deck_hits = [resolve_morpheme(morphemes, j) for j in range(len(morphemes))]
+    ruled = _in_grammar(morphemes, grammar or [])
+    # A counter the counters' point lights is that point's to explain:
+    # 三本's 本 is no "book" (plan 151). A card that is itself the
+    # counter (冊, 匹) stays, and so does a word (二人, "two people").
+    counted = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") == _COUNTERS])
+    deck_hits = [None if (j in counted and hit and morphemes[j].pos == "suffix"
+                          and "counter" not in (hit[1].get("meaning") or "")) else hit
+                 for j, hit in enumerate(deck_hits)]
+    # The verb of a compound particle is the point's, not a word of its
+    # own: について's つい is no 着く "to arrive", において's おい no 置く
+    # "to put", にたいして no 大して "not very" (plan 152). Its row opens
+    # the point.
+    compounds = compound_particles()
+    bound = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") in compounds])
+    deck_hits = [None if j in bound and morphemes[j].pos in ("verb", "adverb") else hit
+                 for j, hit in enumerate(deck_hits)]
+    # A pool run may not take in a morpheme a point is written on; a
+    # deck hit stands in for "has a card" there, which is all
+    # resolve_pool_compound asks of it.
+    pool_hits = [hit or (j in ruled) for j, hit in enumerate(deck_hits)]
     tokens = []
     i = 0
     while i < len(morphemes):
@@ -200,7 +285,15 @@ def _tokens(morphemes: list) -> list[dict]:
             tokens.append(_compound_dict(morphemes[i:i + n], level, entry, raw_id))
             i += n
             continue
-        tokens.append(_token_dict(morphemes[i], resolve_morpheme(morphemes, i)))
+        pooled = None if i in ruled else resolve_pool_compound(morphemes, i, pool_hits)
+        if pooled and not any(j in ruled for j in range(i, i + pooled[1])):
+            entry, n = pooled
+            tokens.append(_pool_compound_dict(morphemes[i:i + n], entry))
+            i += n
+            continue
+        deck = deck_hits[i]
+        pool = None if deck or i in ruled else resolve_pool_morpheme(morphemes, i)
+        tokens.append(_token_dict(morphemes[i], deck, pool))
         i += 1
     return tokens
 
@@ -215,10 +308,31 @@ def _tokens(morphemes: list) -> list[dict]:
 # revision (or before there was one) is analysed again when next opened.
 # 1: offsets past a space (every particle after a subtitle's first
 # space was lost) and the plain copula after a noun (2026-09-25).
-# 2: readings spelled rather than pronounced (大きい おおきい, not
+# 2: the JMdict pool after the deck -- a word the course does not teach
+# carries its meaning and its card (plan 148).
+# 3: the grammar detector reads what a point attaches to by kind of
+# word, the copula's and a pattern's final word's forms, and the plain
+# past and negative (plan 149).
+# 4: no false key and no false meaning (plan 150) -- the particles the
+# tokenizer cannot tell apart (でも, とは, とか), a multi-part point's
+# tightest reading, 何でも／誰でも as its own point; and no card for a
+# word that only sounds like the token (郷 is not 号, センス not 扇子),
+# the N5 する／なる／いい over their N3 and N1 twins.
+# 5: what eight reviewers found (plan 151) -- each point's homographs
+# refused (obligation is no prohibition, the volitional of 〜ようとする
+# no "let's", a compound particle's に no moment), 〜も（強調） and the
+# mixed "must" halves found, a counter after a number; no card read
+# otherwise than the token (彼ら's ら is not 等), a suffix folded into
+# its word (参加者) or given its affix sense, a pool word's first senses.
+# 6: readings spelled rather than pronounced (大きい おおきい, not
 # おうきい) and put right in context (お母さん's 母 かあ, 一本 いっぽん;
-# study/reading_context.py), which is every row's reading and furigana.
-LOCAL_REV = 2
+# study/reading_context.py), which is every row's reading and furigana
+# -- 2 on main while plans 148-151 were open on their branch.
+# 7: what the detector could not see (plan 152) -- the embedded
+# question, polite hearsay, a point in its other spelling (に従って,
+# 事が出来る, 時 read とき); and no card for the verb of a compound
+# particle (について's つい is no 着く).
+LOCAL_REV = 7
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:
@@ -240,8 +354,8 @@ def analyze_local(text: str, level: str | None = None) -> dict:
             "level": None, "grade": None, "available": False,
         }
 
-    tokens = _tokens(morphemes)
     grammar = _grammar_entries(text, morphemes)
+    tokens = _tokens(morphemes, grammar)
     _attach_grammar(tokens, grammar)
     estimated = difficulty.estimate_level(text)
     grade_level = level or estimated or "N5"
@@ -292,9 +406,15 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
         # every video caption -- look impossible, and would make the
         # i+1 signal (exactly one unknown word) permanently false on
         # exactly the input this feature exists to handle.
+        #
+        # A JMdict pool word (plan 148) the learner has never taken up
+        # is still off-deck in that sense -- the course does not teach
+        # it, the learner simply CAN now -- so it counts where it always
+        # did. Once it is in the learner's SRS it is a word of theirs
+        # like any other and counts the way a deck word does.
         if is_content_word:
-            if vocab_match:
-                status = new_tok["vocab_match"]["stats"]["status"]
+            status = new_tok["vocab_match"]["stats"]["status"] if vocab_match else None
+            if vocab_match and not (vocab_match.get("pool") and status == "not_started"):
                 if status in ("not_started", "new"):
                     unknown_count += 1
             elif not kanji_matches:
