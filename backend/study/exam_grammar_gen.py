@@ -418,6 +418,15 @@ def _build_cloze_mondai(spec: dict, level: str, rng: random.Random) -> dict:
 
 # ── Section orchestrator ─────────────────────────────────────────
 _MAX_GENERATION_ATTEMPTS = 3
+_MINUTES_PER_ITEM = 1.5  # a grammar item is one sentence to read, or four pieces to order
+
+
+def time_limit_min(level: str, items: int) -> int:
+    """The paper's time limit, ten minutes at the least. Public so the
+    catalogue (routes/exams.list_exams, plan 158) can say how long a
+    paper not yet generated will take by the same rule; `level` is
+    taken for the vocabulary generator's signature and not needed."""
+    return max(10, round(_MINUTES_PER_ITEM * items))
 
 
 def _grammar_specs_for_level(level: str) -> list[dict]:
@@ -494,7 +503,7 @@ def _generate_grammar_paper_once(level: str, seed: int) -> dict:
             "id": "grammar",
             "label": "Grammar",
             "labelJp": "文法",
-            "timeLimitMin": max(10, round(1.5 * included_items)),
+            "timeLimitMin": time_limit_min(level, included_items),
             "mondai": mondai,
         }],
     }

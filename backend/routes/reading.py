@@ -545,12 +545,26 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
     return phrase
 
 
-def _source_label(source: str, level: str | None, domain: str | None, tier: int | None) -> str:
+def _source_label(
+    source: str, level: str | None, domain: str | None, tier: int | None,
+    tier_size: int = freq.DEFAULT_TIER_SIZE,
+) -> str:
     """Compact string stored in reading_log.phase (column kept as-is —
-    see get_reading_batch's docstring — only what it *means* changed)."""
+    see get_reading_batch's docstring — only what it *means* changed).
+
+    A tier's label carries its size when the size is not the default
+    (plan 158): tier 3 is words 401-600 at 200 a tier but 1001-1500 at
+    500, and the desk's grade page (/api/practice/stop) reads a tier's
+    record by this label, so two different ranges must not share one.
+    The default size stays unwritten -- "freq:vocab:3" -- which is
+    exactly what every row logged before the size was written meant.
+    The runs build the same label on the client (ReadingRun's and
+    TranslationRun's sourceLabel()); this is its reference."""
     if source == "level":
         return f"level:{level}"
     if source == "frequency":
+        if tier_size != freq.DEFAULT_TIER_SIZE:
+            return f"freq:{domain}:{tier}:{tier_size}"
         return f"freq:{domain}:{tier}"
     return "mastery"
 
@@ -585,7 +599,8 @@ def get_reading_batch(
 
     NOTE on reading_log.phase: not renamed at the DB column level (no
     migration tooling available here) — it now stores a compact label
-    from _source_label() ("level:N3" / "freq:vocab:1" / "mastery")
+    from _source_label() ("level:N3" / "freq:vocab:1" /
+    "freq:vocab:1:500" off the default tier size, plan 158 / "mastery")
     instead of the old "hiragana"/"katakana"/"mixed". Rename the column
     yourself with `ALTER TABLE reading_log RENAME COLUMN phase TO source;`
     if you'd rather it matched the new field name everywhere.
@@ -752,9 +767,11 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
     # payload.level is only ever set for source="level" — frequency and
     # mastery sessions have no single JLPT level. Falls back to '' rather
     # than crashing the insert; the compact `phase` label already carries
-    # the real source info ("freq:vocab:1" / "mastery") for anything that
-    # needs it. Consider `ALTER TABLE reading_log ALTER COLUMN level DROP
-    # NOT NULL;` if you'd rather this be a real NULL.
+    # the real source info ("freq:vocab:1" / "freq:vocab:1:500" /
+    # "mastery", see _source_label) for anything that needs it -- the
+    # desk's grade page (/api/practice/stop, plan 158) reads a tier's and
+    # mastery's rows by it. Consider `ALTER TABLE reading_log ALTER
+    # COLUMN level DROP NOT NULL;` if you'd rather this be a real NULL.
     level_for_log = payload.level or ""
     conn = db_conn()
     try:

@@ -1245,6 +1245,35 @@ as the rail it arrives at.
   themes under their filter — and every row is a link that pushes to
   its stop's platforms. The lists scroll inside their plates, never the
   page. The phone keeps its three cards.
+- **A practice station takes the window** (plan 158, the owner's picks A
+  and S1 of the canvas "Practice screens — layout options"). Reading and
+  translation opened on three source cards across the top of an empty
+  window, the one-axis platforms on their five grades in one short row,
+  the mock exam on four paper names. Each is now a line's split filled
+  as plan 137 fills the Learn stations. The **list**: reading's and
+  translation's source is a switch at its head (JLPT · Fréquence · Mes
+  cartes), so the page that only chose a source is gone on the desk;
+  under it the grades share the column's height, each with a sentence
+  (or the texts, the points, the papers) of its own bank, the bar of the
+  grade's words (the exam's: the papers sat) and the learner's record at
+  the foot ("24 phrases · 83 % justes"), "you are here" beside the name;
+  or the tiers; or the learner's own cards. The **page** is the open
+  stop's, the window's height beside the list: the stop's name and what
+  the run asks over Board (the one filled action, and Enter), the
+  exercise as the run will ask it in a well at the run's own size (the
+  bank's sentence under the clock over the rōmaji field; the English to
+  say in Japanese; a text beside its question; a clip; a point), four
+  figures in the profile's lattice (done, right, the grade's words, the
+  last ride), then two panels sharing what is left — the newest misses
+  (comprehension: the texts read, with their score) and the grade's
+  grammar points, those studied at Learn ringed and dotted, or a tier's
+  words — each scrolling inside itself. The mock exam's page is its
+  papers, a row each: the name with the JLPT's (語彙), the kinds of
+  question it holds, a question of the kind drawn from the grade's own
+  content, the questions and minutes, the last score and "Different
+  paper"; Board is the next paper not sat. Under 600px (measured) the
+  page stacks and scrolls; under 720px the papers draw no well. The
+  phone keeps its screens.
 - **The statistics are the four lines** (plan 138, the owner's pick B of
   four drawn directions, the canvas "Statistics rework — options"). A
   strip of four figures across the top — retention with its line beside

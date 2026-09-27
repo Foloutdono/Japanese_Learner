@@ -70,3 +70,22 @@ export function runSource({ base, level, tier, search = '', levelsOnly = false }
     backKey: 'leaveSources',
   }
 }
+
+// ── The label a run's log rows carry, and a station stop's key ──────
+// reading_log.phase and translation_log.phase record where a sentence
+// came from ("level:N5", "freq:vocab:3", "mastery"; routes/reading.py's
+// _source_label), and the desk's practice station asks for a stop's
+// record by the same string (/api/practice/stop, plan 158). A tier
+// number alone names a different stretch of the list at another size,
+// so since plan 158 the size rides along whenever it is not the
+// default: freq:vocab:3 is tier 3 of 200 (every row written before this
+// was), freq:vocab:3:500 tier 3 of 500.
+export function tierStop(domain, tier, size = DEFAULT_TIER_SIZE) {
+  return `freq:${domain}:${tier}${size !== DEFAULT_TIER_SIZE ? `:${size}` : ''}`
+}
+
+export function logLabel({ source, level, domain, tier, tierSize }) {
+  if (source === 'level') return `level:${level}`
+  if (source === 'frequency') return tierStop(domain, tier, tierSize)
+  return 'mastery'
+}

@@ -7,6 +7,11 @@
 // an exam titled "Vocabulary".
 export const KIND_ORDER = ['vocab', 'grammar', 'reading', 'listening']
 
+// The paper's own name, as the JLPT prints it: the desk's grade list
+// counts a grade's papers by it (語彙 18 · 文法 9 …) and each paper's row
+// carries it beside the reader's word (plan 158).
+export const KIND_JP = { vocab: '語彙', grammar: '文法', reading: '読解', listening: '聴解' }
+
 export function kindMeta(t) {
   return {
     vocab:     { label: t.examKindVocab },

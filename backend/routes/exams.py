@@ -17,6 +17,7 @@ from study.exam_scoring import flatten_questions, score_attempt
 from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_gen_utils import GenerationFailed
 from study.llm_shared import LLMUnavailable
+from study import exam_grammar_gen, exam_listening_gen, exam_reading_gen, exam_vocab_gen
 from study.exam_vocab_gen import generate_vocabulary_paper
 from study.exam_reading_gen import generate_reading_paper
 from study.exam_grammar_gen import generate_grammar_paper
@@ -108,6 +109,16 @@ EXAM_GENERATORS = {
 
 ensure_exam_schema()
 
+# kind -> the generator's own time rule, (level, items) -> minutes: the
+# catalogue's estimate for a paper not yet generated is the limit the
+# generator would print on it (plan 158).
+_TIME_LIMIT = {
+    "vocab": exam_vocab_gen.time_limit_min,
+    "reading": exam_reading_gen.time_limit_min,
+    "grammar": exam_grammar_gen.time_limit_min,
+    "listening": exam_listening_gen.time_limit_min,
+}
+
 
 def _expected_question_count(level: str, kind: str) -> int:
     """Target item count for a not-yet-materialized paper, straight from
@@ -122,6 +133,55 @@ def _expected_question_count(level: str, kind: str) -> int:
         for m in section["mondai"]
         if m["type"] in types
     )
+
+
+def _mondai_names(level: str, kind: str) -> list[str]:
+    """The blueprint's mondai this kind's paper is made of at `level`,
+    by their Japanese names and in the blueprint's order (漢字読み, 表記,
+    …) -- what the desk's exam grade prints under the paper (plan 158).
+    The same type set _expected_question_count counts."""
+    types = _KIND_META[kind][2]
+    return [
+        m["name_jp"]
+        for section in LEVEL_BLUEPRINT[level]["sections"]
+        for m in section["mondai"]
+        if m["type"] in types
+    ]
+
+
+def _paper_minutes(paper: dict | None, level: str, kind: str, items: int) -> int:
+    """The time limit a paper prints (its section's timeLimitMin), or,
+    for one not generated yet or stored without it, the generator's own
+    rule applied to the items it is expected to carry."""
+    sections = (paper or {}).get("sections") or []
+    minutes = sections[0].get("timeLimitMin") if sections and isinstance(sections[0], dict) else None
+    if isinstance(minutes, (int, float)) and minutes > 0:
+        return int(minutes)
+    return _TIME_LIMIT[kind](level, items)
+
+
+def _last_attempts(user_id: str) -> dict[str, dict]:
+    """exam_id -> this learner's newest sitting of it, at any revision,
+    as {correct, total, at}: the catalogue's "last: 32/40". One query
+    for the whole catalogue rather than one per exam id."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT DISTINCT ON (exam_id) exam_id, correct, total, finished_at
+                  FROM exam_attempts
+                 WHERE user_id = %s
+                 ORDER BY exam_id, finished_at DESC, id DESC
+                """,
+                (user_id,),
+            )
+            return {
+                exam_id: {"correct": int(correct), "total": int(total), "at": at.isoformat()}
+                for exam_id, correct, total, at in cur.fetchall()
+            }
+    finally:
+        conn.close()
 
 
 def _select_paper(exam_id: str, user_id: str, exclude: tuple[int, ...] = ()) -> tuple[int, dict] | None:
@@ -438,6 +498,13 @@ def list_exams(user_id: str = Depends(get_user_id)):
     # exact counts; anything not yet generated reports the blueprint's
     # target counts instead, and generation only actually happens when a
     # user opens that specific exam (GET /api/exams/{exam_id} below).
+    #
+    # Three more fields per entry since plan 158, for the exam station
+    # filled on the desk: `minutes` (the paper's printed time limit, or
+    # the generator's rule over the expected items), `mondai` (the
+    # blueprint's names for what the paper holds) and `last` (this
+    # learner's newest sitting, or null).
+    last_attempts = _last_attempts(user_id)
     out = []
     for exam_id, (_generator_version, kind, level, _generate) in EXAM_GENERATORS.items():
         label, label_jp, _types = _KIND_META[kind]
@@ -472,6 +539,11 @@ def list_exams(user_id: str = Depends(get_user_id)):
                 "generated": False,
                 "revision": None,
             }
+        entry["minutes"] = _paper_minutes(
+            selected[1] if selected is not None else None, entry["level"], kind, entry["questionCount"],
+        )
+        entry["mondai"] = _mondai_names(level, kind)
+        entry["last"] = last_attempts.get(exam_id)
         # `kind` travels explicitly so the client can group/label by it
         # without parsing exam_id -- the "{level}-{kind}-01" id scheme is
         # this module's business, not the frontend's.

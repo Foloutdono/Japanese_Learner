@@ -260,6 +260,14 @@ _MAX_GENERATION_ATTEMPTS = 2
 _SECONDS_PER_ITEM = 45  # listening items run slower than any text mondai: dialogue + narration + question, all read aloud
 
 
+def time_limit_min(level: str, items: int) -> int:
+    """The paper's time limit, ten minutes at the least. Public so the
+    catalogue (routes/exams.list_exams, plan 158) can say how long a
+    paper not yet generated will take by the same rule; `level` is
+    taken for the vocabulary generator's signature and not needed."""
+    return max(10, round(_SECONDS_PER_ITEM * items / 60))
+
+
 def _listening_specs_for_level(level: str) -> list[dict]:
     specs = []
     for section in LEVEL_BLUEPRINT[level]["sections"]:
@@ -322,7 +330,7 @@ def _generate_listening_paper_once(level: str, seed: int) -> dict:
             "id": "listening",
             "label": "Listening",
             "labelJp": "聴解",
-            "timeLimitMin": max(10, round(_SECONDS_PER_ITEM * included_items / 60)),
+            "timeLimitMin": time_limit_min(level, included_items),
             "mondai": mondai,
         }],
     }

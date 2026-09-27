@@ -3,10 +3,12 @@
 Each platform's figure is read from its own log, and the tests below
 write rows into all six and read them back: what counts as one done,
 what counts as right, and what is left out (another learner's rows, a
-run with no grade, a grade never practised).
+run with no grade, a grade never practised) -- and, since plan 158,
+`last`, when the newest of them was done.
 """
 import json
 import unittest
+from datetime import datetime, timezone
 
 from fastapi.testclient import TestClient
 
@@ -95,6 +97,15 @@ def _seed() -> None:
         conn.close()
 
 
+def _figures(grades: dict) -> dict:
+    """A platform's record without its dates, for the figures' asserts."""
+    return {level: {k: v for k, v in row.items() if k != "last"} for level, row in grades.items()}
+
+
+def _at(iso: str) -> datetime:
+    return datetime.fromisoformat(iso)
+
+
 class PracticeRecordTests(unittest.TestCase):
     def setUp(self) -> None:
         _wipe()
@@ -112,6 +123,11 @@ class PracticeRecordTests(unittest.TestCase):
     def test_each_platform_counts_its_own_log_by_grade(self) -> None:
         _seed()
         record = self.client.get("/api/practice/record").json()
+        # Every grade with a row carries the date of its newest (plan 158).
+        for platform in record.values():
+            for row in platform.values():
+                self.assertIsNotNone(_at(row["last"]).tzinfo)
+        record = {platform: _figures(grades) for platform, grades in record.items()}
         # Sentences: one row is one done, `right` the rows passed.
         self.assertEqual(record["reading"], {
             "N5": {"done": 3, "right": 2, "of": 3},
@@ -130,3 +146,42 @@ class PracticeRecordTests(unittest.TestCase):
         reading = self.client.get("/api/practice/record").json()["reading"]
         self.assertEqual(set(reading), {"N5", "N4"})
         self.assertEqual(reading["N5"]["done"], 3)
+
+    def test_last_is_the_newest_row_s_time(self) -> None:
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                for day, level in ((3, "N5"), (9, "N5"), (5, "N5"), (1, "N4")):
+                    cur.execute(
+                        "INSERT INTO reading_log (user_id, level, phase, phrase, romaji, answer, correct, created_at)"
+                        " VALUES (%s, %s, %s, '学校', 'gakkou', 'gakkou', TRUE, %s)",
+                        (DEV_USER_ID, level, f"level:{level}", datetime(2026, 9, day, 8, tzinfo=timezone.utc)),
+                    )
+                # Another learner's later sentence is not this learner's last.
+                cur.execute(
+                    "INSERT INTO reading_log (user_id, level, phase, phrase, romaji, answer, correct, created_at)"
+                    " VALUES (%s, 'N5', 'level:N5', '学校', 'gakkou', 'gakkou', TRUE, %s)",
+                    (OTHER, datetime(2026, 9, 20, 8, tzinfo=timezone.utc)),
+                )
+                # A paper is dated by when it was handed in.
+                cur.execute(
+                    "INSERT INTO exam_papers (exam_id, revision, level, seed, generator_version, paper, section_count, question_count)"
+                    " VALUES (%s, 1, 'N4', 1, 'test', %s, 1, 40)",
+                    (PAPER, json.dumps({"level": "N4", "sections": []})),
+                )
+                for day in (12, 4):
+                    cur.execute(
+                        "INSERT INTO exam_attempts (user_id, exam_id, revision, section_id, answers, review, per_section,"
+                        " correct, total, started_at, finished_at)"
+                        " VALUES (%s, %s, 1, 'all', '{}', '{}', '{}', 30, 40, %s, %s)",
+                        (DEV_USER_ID, PAPER, datetime(2026, 9, day, 8, tzinfo=timezone.utc),
+                         datetime(2026, 9, day, 9, tzinfo=timezone.utc)),
+                    )
+            conn.commit()
+        finally:
+            conn.close()
+
+        record = self.client.get("/api/practice/record").json()
+        self.assertEqual(_at(record["reading"]["N5"]["last"]), datetime(2026, 9, 9, 8, tzinfo=timezone.utc))
+        self.assertEqual(_at(record["reading"]["N4"]["last"]), datetime(2026, 9, 1, 8, tzinfo=timezone.utc))
+        self.assertEqual(_at(record["exam"]["N4"]["last"]), datetime(2026, 9, 12, 9, tzinfo=timezone.utc))

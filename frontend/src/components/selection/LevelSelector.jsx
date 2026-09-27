@@ -36,14 +36,23 @@ import { RouteStops } from './RouteStops'
  *   figured — the desk's line split (plan 137): each stop prints its
  *            first few items (/api/station/{source}/samples) and its
  *            bar. Only the desk passes it, so a phone never asks.
+ *   sampleSource — whose samples the stops print, where it is not the
+ *            line whose figures they print (plan 158): a practice
+ *            station prints the level's VOCABULARY figures under a
+ *            sentence of its own bank. `false` asks for none (the mock
+ *            exam's samples are its catalogue's, passed in `extra`).
+ *   extra(level) — fields laid over each stop (plan 158): a practice
+ *            station's `note` (the learner's record at the grade, which
+ *            takes the "started" note's place), or the exam's own
+ *            sample and figures.
  */
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVELS, selected = null, linkTo = null, figured = false }) {
+export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVELS, selected = null, linkTo = null, figured = false, sampleSource = null, extra = null }) {
   const { t } = useLang()
   const stats = useStats().data
-  const samples = useStationSamples(source, figured)
+  const samples = useStationSamples(sampleSource || source, figured && sampleSource !== false)
   const here = useProfileSummary()?.jlptLevel ?? null
   const HINTS = { N5: t.levelHintN5, N4: t.levelHintN4, N3: t.levelHintN3, N2: t.levelHintN2, N1: t.levelHintN1 }
 
@@ -51,6 +60,7 @@ export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVEL
     // A missing `source` is a level list with no figures to print
     // (deckItems answers zeros, and a stop with no total prints none).
     const { learned, total, started } = deckItems(stats, source, level)
+    const over = extra?.(level) ?? {}
     return {
       key: level,
       code: level,
@@ -59,8 +69,11 @@ export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVEL
       learned,
       total,
       started,
-      startedLabel: t.startedNote(started),
+      // A stop that carries a note of its own (a practice record) says
+      // that instead: the met words are the page's figure there.
+      startedLabel: 'note' in over ? null : t.startedNote(started),
       sample: samples?.[level]?.sample?.join(' '),
+      ...over,
     }
   })
 

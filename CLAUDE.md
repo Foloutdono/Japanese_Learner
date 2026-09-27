@@ -972,7 +972,30 @@ runtime purpose. Two consequences worth knowing:
   `src/fields.browser.test.jsx`, `src/fields.desktop.test.jsx`,
   `src/dictionary.phone.test.jsx` and `index.css` and its 机 section;
   DESIGN.md, "The field, one well").
-  When starting a new wave, begin at **158** or higher, and check
+  **158** is the practice stations filled on the desk (the owner's
+  picks A and S1 of the canvas "Practice screens — layout options"):
+  reading, translation, comprehension, dictation, composition and the
+  mock exam as a line's split taking the window, as plan 137 filled the
+  Learn stations -- reading's and translation's source a switch at the
+  list's head (JLPT · Fréquence · Mes cartes, the learner's own cards a
+  page of the desk's, `/cards`), the grades with a sentence of their
+  bank, the bar of the grade's words and the record, and the open
+  stop's page: Board and Enter, the run's exercise in a well, four
+  figures, the newest misses and the grade's points studied at Learn;
+  the exam's papers a row each with a specimen, minutes, mondai and the
+  last score, Board the next paper not sat; a tier's run logged with its
+  size off the default (`freq:vocab:3:500`) (cited in
+  `routes/station.py`, `routes/practice.py`'s `/api/practice/stop`,
+  `routes/exams.py`, `routes/reading.py`'s `_source_label`, the four
+  `study/exam_*_gen.py`'s `time_limit_min`, `tests/test_practice_stop.py`,
+  `tests/test_exam_catalogue.py`, `components/practice/`,
+  `screens/SentenceStation.jsx`, `screens/ExamScreen.jsx`,
+  `stores/practiceStop.js`, `domain/sentenceSource.js`'s `logLabel`,
+  `components/selection/LevelSelector.jsx`, `RouteStops.jsx`,
+  `src/practiceStation.wide.test.jsx`,
+  `src/practiceStation.desktop.test.jsx`, `src/deskfree.phone.test.jsx`
+  and the 机 section of `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **159** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

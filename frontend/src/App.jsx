@@ -637,7 +637,7 @@ export default function App() {
                 chrome, and only the session itself is on the stage
                 frame below (screens/SentenceStation.jsx). */}
             {SENTENCE_SECTIONS.flatMap(({ base, levelsOnly = false }) =>
-              (levelsOnly ? [base] : [base, `${base}/levels`, `${base}/tiers`]).map(path => (
+              (levelsOnly ? [base] : [base, `${base}/levels`, `${base}/tiers`, `${base}/cards`]).map(path => (
                 <Route
                   key={path}
                   path={path}
