@@ -21,8 +21,9 @@ export default function StudyScreen(props) {
   const desk = useDesk()
   const { deck_id } = useParams()
   const { state } = useLocation()
-  // On the desk the deck's page stands its platforms beside its cards
-  // (components/decks/DeckPlatforms, plan 114), so this screen has
+  // On the desk the deck's page stands its platforms with its cards
+  // (beside them since plan 114, over them in the page since plan 154,
+  // screens/DeckDetailScreen's modes), so this screen has
   // nothing of its own to show: every way here — a deck run's ‹, its
   // finish, an old link — lands on the deck page instead (plan 115).
   // Decided before any fetch, so the desk never asks for these modes.

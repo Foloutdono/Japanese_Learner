@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { StudyStage } from '../components/study/StudyStage'
@@ -87,7 +87,9 @@ function writeTaken(key, taken) {
 
 export default function TodayRun({ session }) {
   const navigate = useNavigate()
-  const leaveToGate = useRunExit('/today')
+  // A deck's page boards its own lanes (plan 154, the desk's shelf) and
+  // names itself as the way back; the gate is everyone else's.
+  const leaveToGate = useRunExit(useLocation().state?.from ?? '/today')
   const { t, lang } = useLang()
   const [params] = useSearchParams()
   // The gate's choice. Sorted so the same selection always produces

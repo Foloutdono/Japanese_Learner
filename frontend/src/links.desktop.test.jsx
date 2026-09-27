@@ -186,18 +186,22 @@ describe('Settings\' doors on the desk', () => {
 })
 
 describe('the shelf\'s decks and its library door on the desk', () => {
-  it('are links that look like the buttons they were', async () => {
-    await render(<Page at="/learn/decks"><DecksScreen session={{}} /></Page>)
+  it('are links, the library\'s looking like the button it was', async () => {
+    await render(<Page at="/learn/decks/1" path="/learn/decks/:deck_id"><DecksScreen session={{}} /></Page>)
     await settle(400)
-    const cards = $$('.platform-grid > .deck-card')
-    expect(cards.map(c => c.getAttribute('href'))).toEqual(['/learn/decks/1', '/learn/decks/2'])
-    await compare($('.platform-grid'), '.deck-card')
-    expect($('.decks-doors > a.chip').getAttribute('href')).toBe('/learn/decks/library')
-    await compare($('.decks-doors'), 'a.chip, button.chip')
-    // A deck is left for, not opened beside the shelf: Back comes back.
-    await userEvent.click(cards[1])
+    const list = $('.desk-split__list')
+    // The rows are the desk's own (plan 154): a list beside the page,
+    // with no phone button they stand in for.
+    const rows = [...list.querySelectorAll('.shelf-rows > .shelf-row')]
+    expect(rows.map(c => [c.tagName, c.getAttribute('href')])).toEqual([['A', '/learn/decks/1'], ['A', '/learn/decks/2']])
+    expect(list.querySelector('.decks-doors > a.chip').getAttribute('href')).toBe('/learn/decks/library')
+    // The library's door (the new deck's is a button: it opens a dialog).
+    await compare(list.querySelector('.decks-doors'), '.chip:last-child')
+    // A deck opens beside the shelf, as a split's row does: the link
+    // replaces, so Back leaves the shelf rather than walk it.
+    await userEvent.click(rows[1])
     await settle(150)
-    expect([here.path, here.type]).toEqual(['/learn/decks/2', 'PUSH'])
+    expect([here.path, here.type]).toEqual(['/learn/decks/2', 'REPLACE'])
   })
 })
 

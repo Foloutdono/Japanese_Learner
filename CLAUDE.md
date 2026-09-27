@@ -208,7 +208,7 @@ runtime purpose. Two consequences worth knowing:
   or a graded sentence's breakdown (`components/analysis/BreakdownSide.jsx`);
   the way up and the `/` key (`components/chrome/Bar.jsx`'s `Leave to`,
   `config/tabs.js`'s `onDeskRail`, `components/chrome/DeskRail.jsx`); a deck
-  beside its platforms (`components/decks/DeckPlatforms.jsx`,
+  beside its platforms (`components/decks/DeckPlatforms.jsx`, retired by plan 154,
   `hooks/useDeckModes.js`) — every rule in the 机 section of `index.css`,
   and the phone's side held by `src/deskfree.phone.test.jsx` (DESIGN.md,
   "The desk"; `docs/design/desk/README.md`).
@@ -882,7 +882,33 @@ runtime purpose. Two consequences worth knowing:
   `tests/test_lookup_precision.py`, `tests/test_furigana_context.py`,
   `tests/test_placement_report.py` and `tests/test_onboarding_profile.py`;
   `docs/vocab-deck-review.md`).
-  When starting a new wave, begin at **154** or higher, and check
+  **154** is the shelf beside the open deck on the desk (the owner's
+  pick B of four layouts drawn on the canvas "Tsuji — the shelf (教材)
+  layout", built as drawn): /learn/decks and /learn/decks/:deck_id are
+  one screen on the desk, the learner's decks a list (the index field
+  over the types as glyph chips with their counts, a row per deck as a
+  link that replaces, the two doors at its foot) beside the open deck's
+  page, the bare shelf opening on its first deck; the page one column --
+  the head with Edit and More, the four figures by state (each listed
+  card's `state`, due/new/learning/mastered, merged over the deck's
+  modes: `routes/decks.py`'s `_with_states`, `srs.get_states_for`), the
+  modes as cards with what the day's queue holds for each, the first six
+  cards as a table and the way to all of them, and at the foot Add cards
+  beside the one filled action -- the deck's lanes of the day's queue,
+  the run's way out coming back to the deck, or its first mode; the
+  form, Browse or More taking the modes' place; both columns held to
+  the window, only the rows and the cards scrolling, and on a page too
+  narrow or short the modes as chips (`hooks/useBoxWidth.js`'s
+  `useBoxSize`, `src/deckFit.desktop.test.jsx`, `src/deckFit.wide.test.jsx`);
+  `components/decks/DeckPlatforms.jsx` retired (cited in
+  `routes/decks.py`, `srs/srs.py`, `tests/test_deck_card_states.py`,
+  `screens/DecksScreen.jsx`, `screens/DeckDetailScreen.jsx`,
+  `screens/TodayRun.jsx`, `screens/StudyScreen.jsx`,
+  `hooks/useDeckModes.js`, `App.jsx`, `src/decks.desktop.test.jsx`,
+  `src/shelf.desktop.test.jsx`, `src/links.desktop.test.jsx` and the 机
+  section of `index.css`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`).
+  When starting a new wave, begin at **155** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

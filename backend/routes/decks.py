@@ -26,6 +26,7 @@ from content.kanji_meanings import KANJI_FR
 from content.radical_data import RADICAL_BY_NUMBER, siblings_by_stroke
 from content.kanji_readings import display_reading
 from study import card_index
+from study.card_lookup import card_stats
 from study.furigana import align_deck as align_furigana, align_sentence
 
 # Reuse the exact same MCQ/choice-building + review-preview logic the
@@ -1841,9 +1842,35 @@ def get_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user_id
     """
     conn = db_conn()
     try:
-        return {"cards": _listed_cards(conn, deck_access(conn, deck_id, user_id), lang)}
+        access = deck_access(conn, deck_id, user_id)
+        cards = _listed_cards(conn, access, lang)
     finally:
         conn.close()
+    return {"cards": _with_states(cards, access, user_id)}
+
+
+# A card's standing on its deck's page (plan 154): due if any of the
+# deck's modes wants it now, else the furthest stage it has reached in
+# any of them -- the merge card_lookup.card_stats makes for the
+# dictionary. The four partition the deck, which is what the page's
+# figures count.
+_CARD_STATE = {"not_started": "new", "new": "new", "learning": "learning", "mastered": "mastered"}
+
+
+def _with_states(cards: list[dict], access: DeckAccess, viewer_id: str) -> list[dict]:
+    """Set `state` -- due, new, learning or mastered -- on each listed
+    card, for the VIEWER: a follower's schedule is their own, under the
+    ids _build_pool studies the cards by."""
+    modes = GRADED_ORDER_FOR_SOURCE[_registry_source(access.type)]
+    raw = [
+        f"custom_{access.deck_id}_{c['id']}" if c["origin"] == "custom" else c["raw_id"]
+        for c in cards
+    ]
+    states = srs.get_states_for(prefixed(raw, viewer_id), modes)
+    for card, raw_id in zip(cards, raw):
+        stats = card_stats(states, viewer_id, raw_id, modes)
+        card["state"] = "due" if stats["due"] else _CARD_STATE.get(stats["status"], "new")
+    return cards
 
 
 @router.post("/api/decks/{deck_id}/cards")

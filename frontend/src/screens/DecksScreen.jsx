@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { SplitRow } from '../components/selection/SplitRow'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -16,6 +16,9 @@ import { dueByDeck } from '../domain/lanes'
 import { BooksIcon, CrossIcon, PlusIcon } from '../components/ui/Icons'
 import { composing } from '../lib/keyGuards'
 import { useRadioWalk, radioTab } from '../hooks/useRadioWalk'
+import { useListWalk, useFollowFocus, WALK_KEYS } from '../hooks/useListWalk'
+import { StationSplit } from '../components/selection/StationSplit'
+import DeckDetailScreen from './DeckDetailScreen'
 
 // ── 教材 — the shelf (plan 071) ───────────────────────────────
 // /learn/decks on the canvas: the bar, the shelf's two doors under
@@ -38,8 +41,24 @@ import { useRadioWalk, radioTab } from '../hooks/useRadioWalk'
 // whole shelf in one request (one row per deck, not per card), so a
 // search endpoint would be a round trip to re-sort a list already in
 // hand. The due counts are the shared today store's personal lanes.
-
+//
+// ── 机 — the shelf beside the open deck (plan 154) ──
+// The owner's pick B of four drawn layouts (the canvas "Tsuji — the
+// shelf (教材) layout"): on the desk the shelf is a list and the open
+// deck's page stands beside it, so a deck is opened in place rather than
+// left for. Both routes land here (App.jsx), as the library's do: one
+// route component for /learn/decks and /learn/decks/:deck_id is what
+// keeps the shelf's search, its chip and its focus while the deck beside
+// it changes. The bare shelf opens on its first deck. On a phone a deck
+// is a screen of its own, as it always was.
 export default function DecksScreen({ session }) {
+  const { deck_id } = useParams()
+  const desk = useDesk()
+  if (deck_id && !desk) return <DeckDetailScreen session={session} />
+  return <DecksShelf session={session} open={desk ? deck_id ?? null : null} />
+}
+
+function DecksShelf({ session, open }) {
   const navigate = useNavigate()
   const { t } = useLang()
   const desk = useDesk()
@@ -63,9 +82,16 @@ export default function DecksScreen({ session }) {
   // The deck's type, one tab stop walked with the arrows on the desk
   // (plan 123), where the form is a dialog.
   const onWalkTypes = useRadioWalk(desk)
+  // The shelf beside the open deck is one tab stop, walked with ↑/↓,
+  // as the library's is (plan 123).
+  const onShelfWalk = useListWalk(desk)
+  const shelfRef = useRef(null)
+  useFollowFocus(shelfRef, open, desk)
 
-  function fetchDecks() {
-    setLoading(true)
+  // `quiet` asks again without the wait: the shelf beside an open deck
+  // (plan 154) refreshes under it rather than blanking to a loader.
+  function fetchDecks({ quiet = false } = {}) {
+    if (!quiet) setLoading(true)
     apiFetch('/api/decks', session)
       .then(r => r.json())
       .then(data => { setDecks(data.decks || []); setLoading(false) })
@@ -90,12 +116,17 @@ export default function DecksScreen({ session }) {
       .then(deck => {
         if (deck?.error || deck?.detail) return
         // 机 (plan 123): the desk keeps the new deck's dialog because
-        // it ends by leaving the shelf for the deck it made -- so it
-        // does: the deck's page, its card form open in the side.
+        // it ends on the deck it made: its page, its first card's form
+        // open. Beside the shelf since plan 154, so the shelf takes the
+        // deck in first, clear of anything that would filter it out.
         if (desk) {
+          const made = { ...deck, card_count: 0, role: deck.role ?? 'owner' }
+          setDecks(prev => [made, ...prev])
           setCreating(false)
           setNewName('')
-          navigate(`/learn/decks/${deck.id}`, { state: { deck: { ...deck, card_count: 0, role: deck.role ?? 'owner' }, add: true } })
+          setQuery('')
+          setTypeFilter('all')
+          navigate(`/learn/decks/${deck.id}`, { state: { deck: made, add: true } })
           return
         }
         setDecks(prev => [{ ...deck, card_count: 0 }, ...prev])
@@ -129,6 +160,21 @@ export default function DecksScreen({ session }) {
   }, [decks, query, typeFilter, t])
 
   const due = dueByDeck(today)
+
+  // What the open deck tells the shelf beside it (plan 154): its card
+  // count as cards come and go, and that it has left the shelf --
+  // deleted, unfollowed -- or brought a copy onto it. A deck that went
+  // is dropped at once, before the bare shelf's redirect (below) can
+  // land on it again, and the shelf is asked again under the page.
+  const onCount = useCallback((id, n) => {
+    setDecks(prev => prev.map(d => (String(d.id) === String(id) && d.card_count !== n ? { ...d, card_count: n } : d)))
+  }, [])
+  const onGone = useCallback(id => {
+    setDecks(prev => prev.filter(d => String(d.id) !== String(id)))
+    fetchDecks({ quiet: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const onChanged = useCallback(() => fetchDecks({ quiet: true }), [])  // eslint-disable-line react-hooks/exhaustive-deps
 
   function clearFilters() {
     playUi('click-mode-selection')
@@ -181,6 +227,198 @@ export default function DecksScreen({ session }) {
     </div>
   )
 
+  // The console: the type chips, the index field, the count. The same
+  // object on a phone's page and at the head of the desk's list.
+  const console_ = (
+    <Console>
+      <ConsoleTop>
+        <Chips label={t.decksAllTypes}>
+          <Chip on={typeFilter === 'all'} color="var(--line-decks)" onClick={() => { playUi('click-mode-selection'); setTypeFilter('all') }}>
+            {t.decksAllTypes}
+          </Chip>
+          {presentTypes.map(dt => (
+            <Chip key={dt.value} on={typeFilter === dt.value} glyph={dt.glyph} color={dt.color}
+              onClick={() => { playUi('click-mode-selection'); setTypeFilter(dt.value) }}>
+              {dt.label}
+            </Chip>
+          ))}
+        </Chips>
+      </ConsoleTop>
+      <ConsoleIndex
+        inputRef={searchRef}
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        onClear={() => { setQuery(''); searchRef.current?.focus() }}
+        placeholder={t.decksSearchPlaceholder}
+        clearLabel={t.cancel}
+        count={loading ? undefined : countLabel}
+      />
+    </Console>
+  )
+
+  const noMatch = (
+    <Empty
+      icon={<BooksIcon size={40} />}
+      message={t.decksNoMatch}
+      hint={t.decksNoMatchHint}
+      action={{ label: t.decksClearFilters, onClick: clearFilters }}
+    />
+  )
+
+  // A deck on the shelf: the type's glyph in the roundel, the name, the
+  // type and today's due count, the card count in the aside. On a phone
+  // one tap into the deck's own page; on the desk (plan 154) a link that
+  // opens the deck beside the list, replacing the page as a split's row
+  // does, the open one marked the way a split marks it.
+  function deckRow(deck, { isOpen = false, tabIndex } = {}) {
+    const dt = deckTypeOf(deck.type, t)
+    const n = due.get(String(deck.id)) ?? 0
+    return (
+      <SplitRow
+        key={deck.id}
+        to={desk ? `/learn/decks/${deck.id}` : undefined}
+        state={{ deck }}
+        className={`platform-card deck-card${isOpen ? ' desk-stop--open' : ''}`}
+        aria-current={isOpen ? 'page' : undefined}
+        tabIndex={tabIndex}
+        style={{ '--rail': dt.color, '--line-color': dt.color }}
+        onClick={() => { playUi('click-mode-selection'); if (!desk) navigate(`/learn/decks/${deck.id}`, { state: { deck } }) }}
+      >
+        <span className="platform-card__lead deck-card__lead">
+          <span className="wmap-roundel deck-card__glyph" lang="ja" aria-hidden="true">{dt.glyph}</span>
+        </span>
+        <span className="platform-card__body">
+          <span className="platform-card__title">{deck.name}</span>
+          <span className="platform-card__desc">
+            {dt.label}
+            {/* A followed deck looks exactly like one of your
+                own on this shelf otherwise, and the difference
+                matters: you cannot edit it, and its cards can
+                change under you. */}
+            {deck.author && <> · <span className="lib-card__author">{t.libraryBy(deck.author)}</span></>}
+            {n > 0 && <> · <span className="deck-card__due">{t.todayDue(n)}</span></>}
+          </span>
+        </span>
+        <span className="platform-card__aside deck-card__aside">
+          <span className="deck-card__count"><b className="deck-card__fig">{deck.card_count ?? 0}</b><span className="deck-card__unit">{t.cards}</span></span>
+        </span>
+        <span className="platform-card__go" aria-hidden="true">▶</span>
+      </SplitRow>
+    )
+  }
+
+  const browseDoor = (
+    <Chip
+      aria-pressed={undefined}
+      to={desk ? '/learn/decks/library' : undefined}
+      onClick={() => { playUi('click-mode-selection'); if (!desk) navigate('/learn/decks/library') }}
+    >
+      <BooksIcon size={14} />{t.libraryBrowse}
+    </Chip>
+  )
+
+  const createSheet = desk && (
+    <Sheet open={creating} onClose={() => setCreating(false)} jp="教材" cap={t.createDeck} label={t.createDeck} dismiss>
+      {createForm}
+    </Sheet>
+  )
+
+  // 机 (plan 154): the shelf as a list and the open deck as the page
+  // beside it, drawn as the owner's pick B: the index field over the
+  // types as glyph chips with their counts, a row per deck -- its glyph,
+  // its name, its cards (and whose it is), what it is due -- and the
+  // two doors at the list's foot. The bare shelf opens on its first
+  // deck. A shelf still loading, or with no deck on it, keeps the
+  // one-column page below: there is nothing to stand beside it.
+  if (desk && !loading && decks.length > 0) {
+    if (!open) return <Navigate replace to={`/learn/decks/${decks[0].id}`} />
+    const listed = shown.some(d => String(d.id) === String(open))
+    const typeCount = type => decks.filter(d => d.type === type).length
+    return (
+      <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
+        <Bar code="KZ" color="var(--line-decks)" title={t.decks} />
+        <StationSplit
+          className="desk-split--decks"
+          label={t.decks}
+          list={(
+            <>
+              <Console className="shelf-console">
+                <ConsoleIndex
+                  inputRef={searchRef}
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  onClear={() => { setQuery(''); searchRef.current?.focus() }}
+                  placeholder={t.decksSearchPlaceholder}
+                  clearLabel={t.cancel}
+                  aria-label={t.decksSearchPlaceholder}
+                  count={String(shown.length)}
+                />
+                <ConsoleTop>
+                  <Chips label={t.decksAllTypes}>
+                    <Chip on={typeFilter === 'all'} color="var(--line-decks)" onClick={() => { playUi('click-mode-selection'); setTypeFilter('all') }}>
+                      {t.decksAllTypes}
+                    </Chip>
+                    {presentTypes.map(dt => (
+                      <Chip key={dt.value} on={typeFilter === dt.value} glyph={dt.glyph} color={dt.color}
+                        aria-label={`${dt.label} · ${typeCount(dt.value)}`} title={dt.label}
+                        onClick={() => { playUi('click-mode-selection'); setTypeFilter(dt.value) }}>
+                        <span className="shelf-console__n">{typeCount(dt.value)}</span>
+                      </Chip>
+                    ))}
+                  </Chips>
+                </ConsoleTop>
+              </Console>
+              {shown.length === 0 && noMatch}
+              {shown.length > 0 && (
+                <div className="shelf-rows" ref={shelfRef} onKeyDown={onShelfWalk} aria-keyshortcuts={WALK_KEYS}>
+                  {shown.map((deck, i) => {
+                    const isOpen = String(deck.id) === String(open)
+                    const dt = deckTypeOf(deck.type, t)
+                    const n = due.get(String(deck.id)) ?? 0
+                    return (
+                      <SplitRow
+                        key={deck.id}
+                        to={`/learn/decks/${deck.id}`}
+                        state={{ deck }}
+                        className={`shelf-row${isOpen ? ' shelf-row--open' : ''}`}
+                        aria-current={isOpen ? 'page' : undefined}
+                        tabIndex={(listed ? isOpen : i === 0) ? 0 : -1}
+                        style={{ '--line-color': dt.color }}
+                        onClick={() => playUi('click-mode-selection')}
+                      >
+                        <span className="wmap-roundel shelf-row__roundel" lang="ja" aria-hidden="true">{dt.glyph}</span>
+                        <span className="shelf-row__names">
+                          <span className="shelf-row__name">{deck.name}</span>
+                          <span className="shelf-row__sub">
+                            {t.cardsCount(deck.card_count ?? 0)}
+                            {deck.author && <> · {t.libraryBy(deck.author)}</>}
+                          </span>
+                        </span>
+                        {n > 0 && <span className="shelf-row__due" title={t.todayDue(n)}>{n}<span className="sr-only"> {t.todayDue(n)}</span></span>}
+                      </SplitRow>
+                    )
+                  })}
+                </div>
+              )}
+              {/* The shelf's two doors at its foot: the page beside it
+                  holds the screen's one filled action, so a new deck is
+                  a ghost here. */}
+              <div className="decks-doors">
+                <Chip className="decks-doors__create" onClick={() => { playUi('click-mode-selection'); setCreating(true) }}>
+                  <PlusIcon size={14} />{t.createDeck}
+                </Chip>
+                {browseDoor}
+              </div>
+            </>
+          )}
+        >
+          <DeckDetailScreen session={session} deckId={open} pane onCount={onCount} onGone={onGone} onChanged={onChanged} />
+        </StationSplit>
+        {createSheet}
+      </main>
+    )
+  }
+
   return (
     <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
       <Bar code="KZ" color="var(--line-decks)" title={t.decks} />
@@ -192,13 +430,7 @@ export default function DecksScreen({ session }) {
           pressed state for the Chip to report: the same note
           PracticeScreen's level chips carry. */}
       <div className="decks-doors">
-        <Chip
-          aria-pressed={undefined}
-          to={desk ? '/learn/decks/library' : undefined}
-          onClick={() => { playUi('click-mode-selection'); if (!desk) navigate('/learn/decks/library') }}
-        >
-          <BooksIcon size={14} />{t.libraryBrowse}
-        </Chip>
+        {browseDoor}
         {/* On the desk the form is a dialog (below), which closes
             itself: the door stays "+ New deck". */}
         {creating && !desk ? (
@@ -212,30 +444,7 @@ export default function DecksScreen({ session }) {
         )}
       </div>
 
-      <Console>
-        <ConsoleTop>
-          <Chips label={t.decksAllTypes}>
-            <Chip on={typeFilter === 'all'} color="var(--line-decks)" onClick={() => { playUi('click-mode-selection'); setTypeFilter('all') }}>
-              {t.decksAllTypes}
-            </Chip>
-            {presentTypes.map(dt => (
-              <Chip key={dt.value} on={typeFilter === dt.value} glyph={dt.glyph} color={dt.color}
-                onClick={() => { playUi('click-mode-selection'); setTypeFilter(dt.value) }}>
-                {dt.label}
-              </Chip>
-            ))}
-          </Chips>
-        </ConsoleTop>
-        <ConsoleIndex
-          inputRef={searchRef}
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onClear={() => { setQuery(''); searchRef.current?.focus() }}
-          placeholder={t.decksSearchPlaceholder}
-          clearLabel={t.cancel}
-          count={loading ? undefined : countLabel}
-        />
-      </Console>
+      {console_}
 
       {creating && !desk && createForm}
 
@@ -245,62 +454,14 @@ export default function DecksScreen({ session }) {
         <Empty icon={<BooksIcon size={40} />} message={t.noDecks} hint={t.createFirstDeck} />
       )}
 
-      {!loading && decks.length > 0 && shown.length === 0 && (
-        <Empty
-          icon={<BooksIcon size={40} />}
-          message={t.decksNoMatch}
-          hint={t.decksNoMatchHint}
-          action={{ label: t.decksClearFilters, onClick: clearFilters }}
-        />
-      )}
+      {!loading && decks.length > 0 && shown.length === 0 && noMatch}
 
       {!loading && shown.length > 0 && (
         <div className="platform-grid">
-          {shown.map(deck => {
-            const dt = deckTypeOf(deck.type, t)
-            const n = due.get(String(deck.id)) ?? 0
-            return (
-              <SplitRow
-                key={deck.id}
-                // 机 (plan 123): a deck is a place, so on the desk it is
-                // a link -- the middle click and "open in a new tab" work,
-                // the page rebuilds from its id. Pushed: the shelf is left.
-                to={desk ? `/learn/decks/${deck.id}` : undefined}
-                push
-                state={{ deck }}
-                className="platform-card deck-card"
-                style={{ '--rail': dt.color, '--line-color': dt.color }}
-                onClick={() => { playUi('click-mode-selection'); if (!desk) navigate(`/learn/decks/${deck.id}`, { state: { deck } }) }}
-              >
-                <span className="platform-card__lead deck-card__lead">
-                  <span className="wmap-roundel deck-card__glyph" lang="ja" aria-hidden="true">{dt.glyph}</span>
-                </span>
-                <span className="platform-card__body">
-                  <span className="platform-card__title">{deck.name}</span>
-                  <span className="platform-card__desc">
-                    {dt.label}
-                    {/* A followed deck looks exactly like one of your
-                        own on this shelf otherwise, and the difference
-                        matters: you cannot edit it, and its cards can
-                        change under you. */}
-                    {deck.author && <> · <span className="lib-card__author">{t.libraryBy(deck.author)}</span></>}
-                    {n > 0 && <> · <span className="deck-card__due">{t.todayDue(n)}</span></>}
-                  </span>
-                </span>
-                <span className="platform-card__aside deck-card__aside">
-                  <span className="deck-card__count"><b className="deck-card__fig">{deck.card_count ?? 0}</b><span className="deck-card__unit">{t.cards}</span></span>
-                </span>
-                <span className="platform-card__go" aria-hidden="true">▶</span>
-              </SplitRow>
-            )
-          })}
+          {shown.map(deck => deckRow(deck))}
         </div>
       )}
-      {desk && (
-        <Sheet open={creating} onClose={() => setCreating(false)} jp="教材" cap={t.createDeck} label={t.createDeck} dismiss>
-          {createForm}
-        </Sheet>
-      )}
+      {createSheet}
     </main>
   )
 }
