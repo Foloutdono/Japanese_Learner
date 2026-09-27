@@ -137,6 +137,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # The kind of entry and the direction, never the key: a key names
     # the word a learner looked up, which is theirs.
     "favorite_toggle": frozenset({"kind", "on"}),
+    # ── 発車案内 — the app opened from outside it (plan 155) ──────
+    # `via` is `notification` (the daily nudge) or `widget` (a home or
+    # lock screen widget). Whether either brings anyone back is the one
+    # question they have to answer.
+    "nudge_opened":   frozenset({"via"}),
 
     # ── Friction ─────────────────────────────────────────────────
     # `path` is a route pattern, never a URL with ids in it, and no

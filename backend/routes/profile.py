@@ -292,6 +292,9 @@ class LearningPayload(BaseModel):
     # The lines to ride from now on (core/lines.py): a non-empty subset
     # of vocab / kanji / grammar. Settings › Learning's toggles.
     lines: list[str] | None = None
+    # The daily nudge on or off, from Settings › Notifications (plan
+    # 155). The boarding asked once; this is where the answer changes.
+    notifications: bool | None = None
 
     @field_validator("lines")
     @classmethod
@@ -573,6 +576,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.lines is not None:
         sets.append("lines = %s")
         args.append(payload.lines)
+    if payload.notifications is not None:
+        sets.append("notifications = %s")
+        args.append(payload.notifications)
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -603,6 +609,7 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         "ratingScale": payload.ratingScale,
         "tzOffsetMin": payload.tzOffsetMin,
         "lines": payload.lines,
+        "notifications": payload.notifications,
         "levelRule": level_rule_result,
     }
 

@@ -61,6 +61,8 @@ export const EVENTS = {
   // The dictionary's shelf (plan 093): the kind of entry kept or let
   // go, never its key — a key names the word a learner looked up.
   favorite_toggle: ['kind', 'on'],
+  // The app opened from its notification or its widget (plan 155).
+  nudge_opened: ['via'],
   api_error: ['path', 'status'],
   install_prompt: ['outcome'],
 }
