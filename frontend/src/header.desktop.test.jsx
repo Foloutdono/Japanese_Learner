@@ -84,11 +84,8 @@ describe('the way up', () => {
     expect(up.textContent).toBe('Paliers')
     expect(up.getAttribute('href')).toBe('/learn/kanji/tiers')
     expect($('.bar__aside')).toBeNull()
-    // Above the title, not beside it, and no pill.
-    expect(up.getBoundingClientRect().bottom).toBeLessThanOrEqual($('.bar__title').getBoundingClientRect().top + 1)
+    // No pill.
     expect(getComputedStyle(up).borderTopWidth).toBe('0px')
-    // The caption back under the title once the corner is free.
-    expect($('.bar__names--stacked')).toBeNull()
 
     up.click()
     await settle()
@@ -108,6 +105,19 @@ describe('the way up', () => {
     await settle()
     expect($('.bar__aside .probe-new')).not.toBeNull()
     expect($('.desk-crumb')).toBeNull()
+  })
+})
+
+describe('the title', () => {
+  it('prints none on the desk, keeping the name for a screen reader', async () => {
+    await mountBar(undefined)
+    await settle()
+    expect($('.bar')).toBeNull()
+    expect($('.bar__roundel')).toBeNull()
+    expect($('.bar__stripe')).toBeNull()
+    const h1 = $('h1')
+    expect(h1.textContent).toBe('Kanji')
+    expect(h1.classList.contains('sr-only')).toBe(true)
   })
 })
 

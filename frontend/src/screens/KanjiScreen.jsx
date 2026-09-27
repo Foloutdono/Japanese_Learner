@@ -13,6 +13,7 @@ import { useStationSamples } from '../stores/stationSamples'
 import TierSelector from '../components/selection/TierSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import RadicalSelector, { RadicalRedirect } from '../components/selection/RadicalSelector'
+import KanjiSources from '../components/selection/KanjiSources'
 import RadicalLesson, { RadicalFamilyList } from '../components/selection/RadicalLesson'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
 import { tierLabelFor, tierAtSize } from '../domain/tiers'
@@ -101,6 +102,15 @@ export default function KanjiScreen({ session }) {
     const qMode = sp.get('mode')
     if (qLevel && qMode && LEVELS.includes(qLevel) && validMode(qMode)) {
       return <Navigate replace to={`${BASE}/${qLevel}/${qMode}`} />
+    }
+    // 机: the three sources as plates, each with its whole list, as the
+    // vocabulary's are (components/selection/KanjiSources.jsx).
+    if (desk) {
+      return (
+        <SelectionScreen title={t.kanjiTitle} aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}>
+          <KanjiSources session={session} />
+        </SelectionScreen>
+      )
     }
     const SOURCES = [
       { key: 'levels', label: t.byLevel,          desc: t.byLevelDesc },

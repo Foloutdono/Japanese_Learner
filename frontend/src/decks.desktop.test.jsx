@@ -34,6 +34,9 @@ vi.mock('./lib/api', () => ({
     if (path === '/api/decks/1') return json(DECK)
     if (path === '/api/decks/1/cards') return json({ cards: CARDS })
     if (path === '/api/decks/1/modes') return json({ modes: ['vocab.flashcard.f2b', 'vocab.flashcard.b2f'] })
+    if (path === '/api/decks/2') return json({ ...DECK, id: 2, card_count: 0 })
+    if (path === '/api/decks/2/cards') return json({ cards: [] })
+    if (path === '/api/decks/2/modes') return json({ modes: [] })
     return json({})
   }),
   apiJson: vi.fn(async () => ({})),
@@ -70,6 +73,15 @@ function mount(entry, element) {
 }
 
 describe('a deck on the desk', () => {
+  it("draws an empty deck's note at the chips' width", async () => {
+    await mount('/learn/decks/2', <Routes><Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={{}} />} /></Routes>)
+    await settle()
+    const empty = $('.deckdetail-empty').getBoundingClientRect()
+    const chips = $('.chip-row').getBoundingClientRect()
+    expect(Math.round(empty.width)).toBe(Math.round(chips.width))
+    expect(Math.round(empty.left)).toBe(Math.round(chips.left))
+  })
+
   it('stands its platforms beside its cards, and boards from them', async () => {
     await mount('/learn/decks/1', <Routes><Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={{}} />} /></Routes>)
     await settle()

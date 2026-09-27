@@ -202,6 +202,19 @@ describe('the rail', () => {
     expect(stations().filter(s => s.getAttribute('aria-current'))).toHaveLength(0)
   })
 
+  it("draws the stations' line from the first stop to the last and no further", async () => {
+    await mountShell('/learn')
+    await settle()
+    const rows = [...document.querySelectorAll('.desk-rail__stations > li')]
+    const line = li => getComputedStyle(li, '::before')
+    const half = li => li.getBoundingClientRect().height / 2
+    expect(parseFloat(line(rows[0]).top)).toBeCloseTo(half(rows[0]), 0)
+    expect(parseFloat(line(rows.at(-1)).bottom)).toBeCloseTo(half(rows.at(-1)), 0)
+    // In between, each row's segment meets the next.
+    expect(line(rows[1]).top).toBe('0px')
+    expect(line(rows[1]).bottom).toBe('0px')
+  })
+
   it('lights the station a nested screen stands in, and says the gate is where it is', async () => {
     await mountShell('/learn/decks/abc')
     await settle()

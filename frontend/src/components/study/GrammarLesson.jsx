@@ -232,10 +232,12 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
                       </span>
                       <span className="gl-door__note"><LessonInline text={rival.text} /></span>
                     </span>
-                    {onCompare && <ChevronIcon direction="right" size={16} className="gl-door__chev" />}
+                    {onCompare && rival.raw_id && <ChevronIcon direction="right" size={16} className="gl-door__chev" />}
                   </>
                 )
-                return onCompare
+                // A written card's rival names no catalogue point
+                // (structures.grammar_lesson): no id, so no door.
+                return onCompare && rival.raw_id
                   ? (
                     <button key={rival.raw_id ?? rival.pattern} type="button" className="gl-door"
                             onClick={() => { playUi('click-screen-selection'); onCompare(rival.raw_id) }}>

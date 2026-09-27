@@ -34,7 +34,9 @@ const KANJI_RANGE = /[㐀-鿿]/
  */
 export function structureKeyOf(card) {
   if (!card) return null
-  return card.source === 'custom' ? card.structure : card.source?.replace('builtin_', '')
+  // A grammar card, once projected, carries its formation in `structure`
+  // (normalizeCard) and the deck's key in `deckStructure`.
+  return card.source === 'custom' ? (card.deckStructure ?? card.structure) : card.source?.replace('builtin_', '')
 }
 
 /**
@@ -77,10 +79,13 @@ export function normalizeCard(card) {
   }
   if (card.structure === 'grammar') {
     // `structure` on the raw payload is the DECK's structure key
-    // ('grammar') — GrammarAnswer wants the explanation TEXT there
-    // instead (a personal card has none to give), so it is overwritten
-    // rather than read.
-    return { ...card, grammar: f.rule ?? '', structure: '', meaning: f.meaning ?? '' }
+    // ('grammar') — GrammarAnswer wants the formation TEXT there
+    // instead, which is the card's own `structure` field when it was
+    // written with one. The key moves to `deckStructure`, which
+    // structureKeyOf reads: overwritten and nowhere else, it left the
+    // projected card with no structure at all, and CardPrompt drew every
+    // written grammar card through the bare front/back branch.
+    return { ...card, deckStructure: card.structure, grammar: f.rule ?? '', structure: f.structure ?? '', meaning: f.meaning ?? '' }
   }
   return card // 'standard' needs no projection — front/back already are its own fields
 }

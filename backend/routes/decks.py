@@ -46,8 +46,10 @@ from study.structures import (
     ALL_KEYS as STRUCTURE_KEYS,
     decode_readings,
     describe as describe_structures,
+    grammar_lesson,
     missing_required,
     normalise as normalise_fields,
+    sentence_pairs,
     structure_for,
     usable_sentences,
 )
@@ -758,6 +760,18 @@ class CardPayload(BaseModel):
         if self.fields:
             return self.fields
         return {"front": self.front or "", "back": self.back or ""}
+
+
+class CardBatchPayload(BaseModel):
+    # The import dialog's rows, each already in the deck's own fields
+    # (components/decks/importCards.js reads the columns). One request for
+    # the lot rather than one per card: an import of two hundred rows was
+    # two hundred round trips, and a refused row went unreported.
+    cards: list[CardPayload]
+
+
+# One paste, one request. The dialog sends larger pastes in slices.
+MAX_BATCH = 500
 
 
 class ReviewPayload(BaseModel):
@@ -1816,6 +1830,50 @@ def add_card(deck_id: str, payload: CardPayload, user_id: str = Depends(get_user
         conn.close()
 
 
+@router.post("/api/decks/{deck_id}/cards/batch")
+def add_cards(deck_id: str, payload: CardBatchPayload, user_id: str = Depends(get_user_id)):
+    """
+    Several written cards at once -- the import dialog's.
+
+    Each row is held to exactly what add_card holds one card to: the
+    deck's structure, normalised, its required fields present, the card
+    limit. A row that fails is reported by its index and the others land,
+    so a paste with one bad line is not lost whole.
+    """
+    if len(payload.cards) > MAX_BATCH:
+        raise HTTPException(status_code=400, detail=f"At most {MAX_BATCH} cards at a time")
+    conn = db_conn()
+    try:
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
+        if not _allows_custom(access.type):
+            raise HTTPException(status_code=400, detail="This deck does not accept written cards")
+        structure = access.type if access.type in STRUCTURE_KEYS else "standard"
+        inserted, errors = [], []
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            for i, card in enumerate(payload.cards):
+                fields = normalise_fields(structure, card.resolved())
+                missing = missing_required(structure, fields)
+                if missing:
+                    errors.append({"index": i, "missing": missing})
+                    continue
+                try:
+                    credits.check_card_limit(cur, user_id)
+                except credits.LimitReached as e:
+                    errors.append({"index": i, "limit": e.limit})
+                    continue
+                cur.execute("""
+                    INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
+                    VALUES (%s, %s, %s, %s, %s)
+                    RETURNING id, structure, fields, notes, created_at
+                """, (access.deck_id, access.owner_id, structure,
+                      json.dumps(fields, ensure_ascii=False), card.notes.strip()))
+                inserted.append({**_with_display(dict(cur.fetchone())), "origin": "custom"})
+        conn.commit()
+        return {"inserted": len(inserted), "cards": inserted, "errors": errors}
+    finally:
+        conn.close()
+
+
 @router.delete("/api/decks/{deck_id}/cards/app")
 def remove_app_card(deck_id: str, source: str, raw_id: str, user_id: str = Depends(get_user_id)):
     # raw_id (not level) is enough to identify the row — it's the
@@ -2128,6 +2186,9 @@ def build_personal_card(row: dict, raw_id: str, mode: str,
         "hints": {},
         "stage": stage,
         "review_preview": _build_review_preview(stage, preview),
+        # The lesson behind a written grammar card's door, in the shape
+        # the catalogue's points are drawn in (structures.grammar_lesson).
+        **({"lesson": grammar_lesson(fields)} if spec.key == "grammar" else {}),
         **extras,
     }
 
@@ -2261,16 +2322,19 @@ def _custom_card_extras(spec, fields: dict, mode) -> dict:
         # _eligible already required at least one usable sentence before
         # a personal card reaches fill_in at all (see _card_answers) — a
         # random pick among them, same as _build_grammar_card's own.
-        sentences = usable_sentences(fields)
-        if sentences:
+        usable = set(usable_sentences(fields))
+        pairs = [p for p in sentence_pairs(fields) if p["jp"] in usable]
+        if pairs:
             # Furigana for the same reason the app's own grammar cards
             # carry it (routes/grammar.py): the question is which rule is
             # at work, and a kanji the learner cannot read turns it into a
-            # different question. A personal sentence has no translation
-            # to pair with it -- the learner wrote the sentence, not a
-            # gloss for it -- so the client simply renders none.
-            jp = random.choice(sentences)
-            out["fill_sentence"] = {"jp": jp, "furigana": align_sentence(jp)}
+            # different question. The translation is the one the learner
+            # wrote beside it, if any; a sentence written without one (and
+            # every card from before sentences carried one) shows none.
+            pick = random.choice(pairs)
+            out["fill_sentence"] = {"jp": pick["jp"], "furigana": align_sentence(pick["jp"])}
+            if pick["tr"]:
+                out["fill_sentence"]["tr"] = pick["tr"]
 
     return out
 
@@ -2283,6 +2347,13 @@ def _card_answers(entry: dict, m) -> bool:
         # rule is at work, so a sentence that does not contain its own rule
         # makes the question unanswerable. Verified, not assumed.
         return bool(usable_sentences(fields))
+    if m.base == "contrast":
+        # The contrast drill asks which of a point and its rivals a
+        # marked sentence uses (card_index.contrast_ok); a written card
+        # names no catalogue rival to set against it, so it has no such
+        # question to be served. It used to fall through to the default
+        # below, all(()) -- True -- and be served a blank card.
+        return False
     if m.base == "word_reading":
         # Stricter than "has a reading": the prompt shows `word`, so a
         # kana-only word (no kanji at all) would print its own answer —

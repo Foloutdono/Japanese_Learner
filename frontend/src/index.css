@@ -6057,11 +6057,15 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: var(--fs-lead);
 }
+/* Square-cornered, at the plate's radius, as the library's order switch
+   (.gate-seg) is: the owner's call of 2026-09-26, over the pill it was --
+   a switch is one instrument, and its ends read as a box's, not a
+   capsule's. */
 .seg {
   margin-left: auto;
   display: inline-flex;
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-plate);
   overflow: hidden;
 }
 .seg__opt {
@@ -6078,7 +6082,7 @@ textarea:focus-visible {
      selected one printed as a rounded rectangle inside the pill, and
      what should read as a straight division read as a pair of curves
      turning away from each other on either side of the hairline. The
-     ends are the container's own: `.seg` is the pill, and it clips. */
+     ends are the container's own: `.seg` is the box, and it clips. */
   border-radius: 0;
   color: var(--text-secondary);
   font: inherit;
@@ -8181,6 +8185,27 @@ textarea:focus-visible {
   margin-bottom: 6px;
 }
 .readings-field__row .deckdetail-form__input { flex: 1; margin: 0; }
+
+/* ── A written grammar card's lesson fields ─────────────────
+   The paragraphs (the rule explained, its uses, its trap), the register
+   as chips, and a sentence over its translation as one row with its
+   remove button beside the pair (components/decks/CardFormFields.jsx). */
+.deckdetail-form__long { min-height: 5rem; }
+.deckdetail-form__choice { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.pairs-field__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.pairs-field__parts {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.pairs-field__second { color: var(--text-secondary); }
+.pairs-field__row + .pairs-field__row { margin-top: var(--sp-2); }
 /* 44px, not 30px -- it is a destructive button in a form, and it was
    the smallest tap target on the screen. */
 .readings-field__remove {
@@ -8996,6 +9021,42 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    say, so neither of these selectors descends below one it follows. */
 .chip-row > .chip:not(:only-child),
 .chip-row > .btn-primary { flex: 1 1 auto; justify-content: center; }
+
+/* A deck's actions (Add · Browse · Select · More) as one joined control,
+   the library's order switch at the row's width (2026-09-26, the owner's
+   call): one box at the plate's radius, the actions divided by
+   hairlines, the lit one washed -- rather than a row of pills. One line,
+   always: the actions share it, and a long label is cut, never wrapped
+   into a second row of a box that is one object. */
+.chip-row.deckdetail-acts {
+  flex-wrap: nowrap;
+  gap: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  overflow: hidden;
+}
+.chip-row.deckdetail-acts > .chip {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--r-flat);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chip-row.deckdetail-acts > .chip + .chip { border-left: 1px solid var(--surface-line); }
+/* On a phone the four words take the row's width between them, so the
+   glyphs in front of them go: the words are the actions, and with the
+   glyphs Sélectionner was cut. */
+@media (max-width: 560px) {
+  .chip-row.deckdetail-acts > .chip { padding-inline: var(--sp-2); }
+  .chip-row.deckdetail-acts > .chip > :is(svg, .chip__dots) { display: none; }
+}
+.chip-row.deckdetail-acts > .chip:not(.chip--on):hover,
+.chip-row.deckdetail-acts > .chip:not(.chip--on):focus-visible {
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
 
 /* The stage's foot (canvas): the column's last row, pushed to the
    bottom edge of the stage. The stage's own inset pads under it. */
@@ -14470,6 +14531,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   padding: 8px 14px;
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
   font-size: 13px;
 }
 .import-preview-row__front { color: var(--text-primary); min-width: 100px; }
@@ -14491,6 +14553,21 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   vertical-align: -1px;
 }
 .import-preview__more { color: var(--text-secondary); font-size: 12px; padding: 4px 14px; }
+
+/* The deck's columns, named over the paste box, with the example that
+   fills it; and what the preview read (headers, columns it left out). */
+.import-columns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+  font-size: var(--fs-sm);
+}
+.import-columns__label { font-weight: 700; margin-inline-end: var(--sp-2); }
+.import-columns__hint { color: var(--text-secondary); font-size: var(--fs-caption); }
+.import-preview__note { color: var(--text-secondary); font-size: var(--fs-caption); margin-bottom: var(--sp-2); }
+.import-preview-row__meta { color: var(--text-secondary); font-size: var(--fs-caption); margin-inline-start: auto; }
+.import-preview-row--skipped { opacity: 0.6; }
 
 .import-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 .import-footer__cancel { background: var(--bg-panel); color: var(--text-on-panel-soft); font-size: 14px; }
@@ -21609,6 +21686,11 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     max-width: var(--card-w);
     margin-inline: auto;
   }
+  /* ... except an empty deck's (2026-09-26, the owner's call): it
+     stands where the deck's card list will, under the identity and the
+     three chips, and is drawn at their width rather than centred
+     narrower between them. */
+  .empty.deckdetail-empty { max-width: none; }
   /* The sentence stations' tier page keeps its two toggles at a
      column's width, as Learn's tiers do in their list (plan 123): two
      options of ~575px each across the canvas at 1440. */
@@ -21732,15 +21814,23 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     flex-direction: column;
     padding: var(--sp-1) 0 var(--sp-2);
   }
-  .desk-rail__stations::before {
+  /* The line, drawn per station and capped at the first and the last
+     stop's centre -- as .route-stop__rail is -- rather than one line
+     inset by a guess at the rows' height, which ran past the last stop
+     (and the first) by the difference. */
+  .desk-rail__stations > li { position: relative; }
+  .desk-rail__stations > li::before {
     content: '';
     position: absolute;
-    inset-block: var(--sp-3) calc(var(--sp-2) + var(--sp-4));
+    inset-block: 0;
     left: calc(var(--sp-3) + var(--sp-6) / 2);
     width: 2px;
     margin-left: -1px;
     background: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
   }
+  .desk-rail__stations > li:first-child::before { top: 50%; }
+  .desk-rail__stations > li:last-child::before { bottom: 50%; }
+  .desk-rail__stations > li:only-child::before { display: none; }
   .desk-sec {
     position: relative;
     display: flex;
@@ -23647,6 +23737,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  /* A stop with no code (a kana set, whose sample under it says it):
+     the name takes the code's column too. */
+  .desk-split--line .route-stop:not(:has(> .route-stop__code)) .route-stop__jp { grid-column: 1 / -1; }
   .desk-split--line .route-stop__caption { grid-area: caption; }
   .desk-split--line .route-stop__fig {
     grid-area: fig;
@@ -24071,6 +24164,24 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     min-height: calc(8 * var(--sp-8));
   }
   .desk-source { min-height: 0; }
+  /* The kanji's (the owner's pick B): the two lines in one column, JLPT
+     at its own height over the tiers, which take the rest; the radicals'
+     tiles on the wider plate beside them, scrolling in it. */
+  .desk-sources--kanji { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+  .desk-sources__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    min-height: 0;
+  }
+  .desk-sources__col > .desk-source { flex: 1 1 0; }
+  .desk-sources__col > .desk-source--compact { flex: none; }
+  .desk-source__tiles {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--sp-4) var(--sp-6);
+  }
   .desk-source__head {
     display: flex;
     align-items: baseline;
@@ -24108,6 +24219,13 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     flex-direction: column;
     gap: var(--sp-3);
     padding: 0 var(--sp-6) var(--sp-4);
+  }
+  /* Named over the switch rather than beside it: a third of the window
+     holds the four sizes or their name, not both on one line. */
+  .desk-source__size {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
   }
   .desk-source__stripe {
     flex: none;
@@ -24518,6 +24636,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      register, where a computer's eye looks for what a page sits under.
      One that the rail already opens is not drawn at all. */
   .desk-crumb { display: flex; }
+  /* The desk's bar prints no title (Bar.jsx): what stays is the crumb
+     and an aside that is not a way out, which keeps the row's far end. */
+  .bar--desk .bar__row { justify-content: flex-end; }
   .desk-crumb__up {
     height: auto;
     padding: var(--sp-1) 0;
