@@ -764,7 +764,10 @@ describe('the shelf row — this entry on your shelf', () => {
     await settle(60)
     expect(shelf.toggle).toHaveBeenCalledWith(KANJI)
     // The choice closes the menu; the ＋ wears the ring for a kept entry.
+    // A choice hands the focus back to the ＋ (AddMenu), and its focus
+    // ring is the same pigment: read the kept ring with the focus away.
     expect(document.querySelector('.dict-add-menu')).toBeNull()
+    plus(root).blur()
     expect(getComputedStyle(plus(root)).borderColor).toBe(ring)
     expect(root.querySelector('.dict-plate__actions .analysis-mine-status')).toBeNull()
 
@@ -809,6 +812,8 @@ describe('the shelf row — this entry on your shelf', () => {
     await settle(30)
     rows(root)[0].click()
     await settle(60)
+    // The focus handed back to the ＋ rings it in the same pigment.
+    plus(root).blur()
     expect(getComputedStyle(plus(root)).borderColor).not.toBe(probe('borderColor', 'var(--line-color)', root.querySelector('.dict-dock')))
     expect(root.querySelector('.dict-plate__actions .analysis-mine-status').textContent)
       .toBe('Favourites are full — remove one first.')
