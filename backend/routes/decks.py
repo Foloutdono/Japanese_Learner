@@ -2683,6 +2683,17 @@ def _csv_unlead(value: str) -> str:
     return value[1:] if value[:1] == "'" and value[1:2] in _FORMULA_LEAD else value
 
 
+# A CSV of front/back pairs has no legitimate reason to be huge — the
+# JSON batch endpoint this shares a dialog with caps at MAX_BATCH (500)
+# rows per request. Read bounded rather than `await file.read()`, the
+# same defence routes/ocr.py and routes/video.py already give their own
+# uploads: without it, an authenticated caller could hand this endpoint
+# an arbitrarily large body and have it read whole into memory (twice,
+# once as bytes and again as the decoded str) before any row is looked
+# at, on a backend sized for 512 MB.
+_MAX_IMPORT_BYTES = 5 * 1024 * 1024
+
+
 @router.post("/api/decks/{deck_id}/import")
 async def import_cards(deck_id: str, file: UploadFile = File(...),
                        user_id: str = Depends(get_user_id)):
@@ -2693,7 +2704,9 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
             detail=f"This deck only accepts {access.type} cards — browse and add some instead",
         )
 
-    content = await file.read()
+    content = await file.read(_MAX_IMPORT_BYTES + 1)
+    if len(content) > _MAX_IMPORT_BYTES:
+        raise HTTPException(status_code=413, detail="CSV file is too large")
     try:
         text = content.decode('utf-8-sig')
     except UnicodeDecodeError:
