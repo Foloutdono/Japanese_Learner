@@ -1554,6 +1554,17 @@ as the rail it arrives at.
     scrim over the paper alone, the line left in view.
   - *The account is a form*, at a column's width with the sign-in's field
     size, not two answers at the name's display size.
+  - *The Welcome is simpler* (the owner's second round): the sign-in is
+    drawn in the column's own material — sumi fields, the panel's
+    hairlines, no pale card set in the sumi — under a plain "Log in"
+    right below the masthead, where the boarding's line then starts; one
+    lane of cards (both lanes' cards in turn) passes under the promise,
+    and the tagline is its quiet second line.
+  - *A hover is the edge and nothing else*: an answer's border warms
+    toward the gold a pick fills, with the faintest wash; the sheet's
+    bare `button:hover` brightness, which lit a paper tile cream and a
+    picked one yellow, is cancelled on the boarding and the Welcome's
+    sign-in.
 - **Every desk rule is in one place.** The last section of `index.css`,
   one media block, names written nowhere else; `src/desk.css.test.js`
   holds it. Never write a desk rule anywhere else, and never let a phone

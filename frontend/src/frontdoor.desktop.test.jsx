@@ -554,7 +554,14 @@ describe('the front door on the desk (P10, plan 140)', () => {
     // The rail's masthead at its head; the paper keeps no second mark.
     expect(inSide('.desk-rail__glyph').textContent).toBe('辻')
     expect($('.brd-hero .auth-header__glyph')).toBeNull()
-    expect([en.brdHaveAccount, fr.brdHaveAccount]).toContain(inSide('.desk-deck__cap').textContent)
+    // Named plainly (plan 154): "Log in", not the link's own sentence.
+    expect([en.login, fr.login]).toContain(inSide('.desk-deck__cap').textContent)
+    // Drawn in the column's material: no card of the paper's in the sumi,
+    // and the sign-in under the masthead, where the boarding's line starts.
+    expect(getComputedStyle(inSide('.auth-card')).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(box(inSide('.desk-door__auth')).top).toBeLessThan(box(inSide('.desk-rail__mast')).bottom + 40)
+    // One lane of cards passes under the promise.
+    expect(document.querySelectorAll('.brd-roll__lane')).toHaveLength(1)
     // Signing in only: no Login / Sign up control, no foot.
     expect(inSide('.seg')).toBeNull()
     expect(inSide('.auth-foot')).toBeNull()
@@ -919,5 +926,20 @@ describe('first contact, finished (P13, plan 154)', () => {
     await settle(40)
     expect(live().dataset.dir).toBe('back')
     expect($('.brd__car--out').dataset.dir).toBe('back')
+  })
+})
+
+describe('the hover, simpler (P14, plan 154)', () => {
+  it('warms an answer\'s edge and does not brighten it', async () => {
+    await board()
+    await pastName()
+    await landed()
+    const row = inCar('[data-motive="fun"]')
+    await userEvent.hover(row)
+    await settle(250)
+    expect(getComputedStyle(row).filter).toBe('none')
+    await userEvent.hover(inCar('[data-action="back"]'))
+    await settle(250)
+    expect(getComputedStyle(inCar('[data-action="back"]')).filter).toBe('none')
   })
 })

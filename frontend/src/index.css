@@ -25513,7 +25513,16 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      the rolling stock, run across the paper, the whole centred between
      grow-only air (the density contract). The column's Log in wears the
      provider button's ghost clothes, so Board is the page's one filled
-     action; the sign-in card is the paper's own, set in the sumi. */
+     action.
+
+     Plan 154's second round (owner: "the entry looks bad, make it
+     simpler"): the sign-in was the paper's card set in the sumi -- a
+     pale slab floating mid-column under a caption that repeated the
+     link's own words -- beside two lanes of twenty-four cards. Now the
+     sign-in is drawn in the column's own material (the sumi field, the
+     panel's hairlines, no card), under a plain "Log in" where the
+     boarding's first stop will stand; one lane of cards passes under the
+     promise; the tagline is its quiet second line. */
   .desk-door {
     --fs-display-fluid: var(--fs-display);
     max-width: none;
@@ -25537,27 +25546,50 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-door__work::before { margin-bottom: calc(-1 * var(--sp-8)); }
   .desk-door__work::after { margin-top: calc(-1 * var(--sp-8)); }
   .desk-door__auth {
+    --door-line: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
-    margin-block: auto;
-    padding: 0 var(--sp-5);
+    padding: 0 var(--sp-6);
     padding-bottom: calc(var(--sp-6) + var(--safe-bottom));
     animation: desk-brd-show 480ms ease-out 200ms backwards;
     transition: opacity 240ms ease;
   }
   .desk-door__side .desk-deck__cap,
   .desk-door__side .auth-foot { color: var(--text-on-panel-soft); }
+  /* The card's own ground and edge go: the column is the ground. */
+  .desk-door__auth .auth-card {
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+  }
+  .desk-door__auth .field {
+    --field-ink: var(--text-on-panel);
+    --field-dim: var(--text-on-panel-soft);
+    --field-well: rgba(0, 0, 0, 0.28);
+    border-color: var(--door-line);
+  }
+  .desk-door__auth .auth-provider,
   .desk-door__side .auth-submit {
     background: transparent;
-    border: 1px solid var(--surface-line);
-    color: var(--text-primary);
+    border: 1px solid var(--door-line);
+    color: var(--text-on-panel);
+  }
+  .desk-door__auth .auth-or { color: var(--text-on-panel-soft); }
+  .desk-door__auth .auth-or::before,
+  .desk-door__auth .auth-or::after { background: var(--door-line); }
+  .desk-door__auth .auth-message--error { color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
+  /* The promise's second line, in the paper's second ink. */
+  .desk-door .brd-tagline {
+    font-weight: 400;
+    color: var(--text-secondary);
   }
   /* The band runs across the paper, capped at the canvas and faded at
      its ends -- a clip mid-window read as a broken card, not a train
-     leaving. Four copies a lane (Welcome's Lane) move twice as far per
-     loop, so the loop takes twice as long: the cards pass at a phone's
-     speed. A pointer resting on the band stops it. */
+     leaving. The desk's one lane is four of a phone lane's runs long, so
+     it moves twice as far per loop and the loop takes twice as long: the
+     cards pass at a phone's speed. A pointer resting on the band stops it. */
   .desk-door .brd-roll {
     flex: none;
     width: 100%;
@@ -25567,7 +25599,6 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     animation: desk-brd-show 900ms ease-out 260ms backwards;
   }
   .desk-door .brd-roll__lane { animation-duration: 52s; }
-  .desk-door .brd-roll__lane--back { animation-duration: 68s; }
   /* ── first contact handed on (plan 154) ──
      The Welcome's paper arrives in reading order -- the promise, Board,
      then the band -- and the column's sign-in a beat after its
@@ -25631,8 +25662,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd__val { transition: none; }
   }
   /* A pointer's answer to "is this one I can pick": the edge warms
-     toward the gold a pick fills, with no lift; the focus ring's twin. */
+     toward the gold a pick fills, with no lift; the focus ring's twin.
+     And nothing else (plan 154, the owner: the hover "looks bad, make
+     it simpler"): the sheet's bare button:hover brightened a paper tile
+     to a glaring cream and a picked one to yellow, on top of the edge.
+     The boarding's answers, its doors and its way back keep the edge
+     alone; the Welcome's sign-in keeps its hairline. */
   @media (pointer: fine) {
+    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn, .desk-brd__back, .desk-brd__door):hover,
+    .desk-door__auth button:hover { filter: none; }
     .desk-brd .brd-opt:not(.brd-opt--on):hover,
     .desk-brd .brd-opt:not(.brd-opt--on):focus-visible,
     .desk-brd .brd-kopt:not(.brd-kopt--on):hover,
@@ -25642,6 +25680,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd__stn:not(.desk-brd__stn--on):hover > .desk-brd__tile,
     .desk-brd__stn:not(.desk-brd__stn--on):focus-visible > .desk-brd__tile {
       border-color: color-mix(in srgb, var(--accent2) 45%, var(--surface-line));
+      background-color: color-mix(in srgb, var(--accent2) 5%, var(--surface));
     }
     .desk-brd__back:hover,
     .desk-brd__back:focus-visible {
@@ -25665,6 +25704,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     }
     .desk-brd .brd-day { cursor: pointer; }
     .desk-door .brd-roll:hover .brd-roll__lane { animation-play-state: paused; }
+    .desk-door__auth :is(.auth-provider, .auth-submit):hover,
+    .desk-door__auth :is(.auth-provider, .auth-submit):focus-visible { border-color: var(--text-on-panel-soft); }
   }
   /* A door on the line takes the rail's ring when a key reaches it: the
      column is sumi, and the paper's ring would not read on it. */

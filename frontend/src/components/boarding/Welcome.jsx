@@ -5,7 +5,7 @@ import { AuthCard } from '../account/AuthCard'
 import { useDesk } from '../../hooks/useDesk'
 import { DeskMast } from '../chrome/DeskMast'
 import { PaperWait } from '../../screens/AppLoading'
-import { FRONT_LANE, BACK_LANE } from './demoCards'
+import { FRONT_LANE, BACK_LANE, DESK_LANE } from './demoCards'
 
 // ── Welcome — the sign, the rolling stock, the promise (plan 075) ─
 // The first screen a stranger sees and the boarding's step zero: the
@@ -160,17 +160,20 @@ function DeskWelcome({ onBoard, boarding, authMode, t }) {
           <EnterKey onEnter={onBoard} disabled={boarding} />
         </div>
         {/* Decoration: the cards say nothing the tagline does not.
-            Four copies a lane: one run of six is ~1000px, and the loop
-            moves a lane by half across a band up to the canvas wide. */}
+            One lane on the desk (plan 154): two were a wall of
+            twenty-four cards under a two-line promise. It takes both
+            lanes' cards in turn, so every line still passes; two
+            copies of its twelve (~2000px) are what the loop needs, as
+            it moves the lane by half across a band up to the canvas
+            wide. */}
         <div className="brd-roll" aria-hidden="true">
-          <Lane cards={FRONT_LANE} copies={4} t={t} />
-          <Lane cards={BACK_LANE} back copies={4} t={t} />
+          <Lane cards={DESK_LANE} copies={2} t={t} />
         </div>
       </div>
       <aside className="desk-door__side" aria-label={t.brdHaveAccount}>
         <DeskMast />
         <div className="desk-door__auth">
-          {authMode !== 'signup' && <h2 className="desk-deck__cap">{t.brdHaveAccount}</h2>}
+          {authMode !== 'signup' && <h2 className="desk-deck__cap">{t.login}</h2>}
           <AuthCard
             key={authMode ?? 'none'}
             initialMode={authMode === 'signup' ? 'signup' : 'login'}
