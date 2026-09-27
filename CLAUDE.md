@@ -955,7 +955,6 @@ runtime purpose. Two consequences worth knowing:
   `TsujiWidgetPlugin.java`, `ios/App/TsujiWidget/`, `ios/App/App/
   TsujiWidgetPlugin.swift`, the fastlane lane and `docs/release.md`).
   When starting a new wave, begin at **157** or higher, and check
-  When starting a new wave, begin at **156** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
