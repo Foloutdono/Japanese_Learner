@@ -89,3 +89,13 @@ def test_the_batch_carries_progress_on_every_card(client, clean):
             app.dependency_overrides.pop(get_user_id, None)
         else:
             app.dependency_overrides[get_user_id] = previous
+
+
+def test_the_dictionary_reads_the_same_bar(clean):
+    # get_user_states feeds the dictionary's catalogue (card_lookup's
+    # card_stats); its per-mode progress is the one the runs serve.
+    for _ in range(2):
+        srs.review(CARD, MODE, 4)
+    state = srs.get_user_states(USER)[(CARD, MODE)]
+    assert state["progress"] == srs.get_bulk_progress([CARD], MODE)[CARD]
+    assert 0.0 < state["progress"] < 0.5

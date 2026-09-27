@@ -287,6 +287,16 @@ class CardStatsMergeTests(unittest.TestCase):
         self.assertEqual(got["next_review"], "2026-01-05")
         self.assertEqual(got["interval_days"], 30)
 
+    def test_progress_is_the_furthest_across_modes(self) -> None:
+        # Plan 147: the catalogue tile fills its foot as far as the card
+        # has come, the furthest mode like `status`; nothing studied is 0.
+        f2b = dict(self._item("learning", 3, 2, False, 1, "2026-01-02"), progress=0.25)
+        b2f = dict(self._item("learning", 5, 4, False, 6, "2026-01-08"), progress=0.79)
+        got = card_stats(self._states(**{"vocab.flashcard.f2b": f2b, "vocab.flashcard.b2f": b2f}),
+                         self.USER, self.RAW, ("vocab.flashcard.f2b", "vocab.flashcard.b2f"))
+        self.assertEqual(got["progress"], 0.79)
+        self.assertEqual(card_stats({}, self.USER, self.RAW, "vocab.flashcard.f2b")["progress"], 0.0)
+
     def test_a_bare_string_is_still_accepted(self) -> None:
         states = self._states(
             **{"vocab.flashcard.f2b": self._item("learning", 3, 2, False, 1, "2026-01-02")}

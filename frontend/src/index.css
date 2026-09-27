@@ -5345,7 +5345,19 @@ textarea:focus-visible {
    level): the rows already stack — each Chips takes the full width —
    so this is the hairline between them, and the air the hairline
    needs. */
-.console__top > .dict-levels {
+/* The search's two option groups (how strictly, where) share one row:
+   each takes what it needs and they wrap onto two lines when the
+   console is too narrow to hold six chips. */
+.dict-search-opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  flex: 1 1 100%;
+  min-width: 0;
+}
+.dict-search-opts > .console__chips { flex: 1 1 auto; }
+.console__top > .dict-levels,
+.console__top > .dict-search-opts {
   padding-top: var(--sp-3);
   border-top: 1px solid var(--surface-line);
 }
@@ -5427,6 +5439,9 @@ textarea:focus-visible {
      the line box must be the em (see .chip__glyph). */
   line-height: 1;
 }
+/* Two toggles (the search options, then 部): the first rides the
+   trailing edge, the second sits beside it. */
+.console__toggle + .console__toggle { margin-inline-start: 0; }
 /* A narrow row gives up the figure before it gives up the control. The
    count is meta and the toggle is a way through, and the two of them
    either side of a 390px field left it about a word wide — the
@@ -15537,8 +15552,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   bottom: 0;
   height: 3px;
   /* No stage known (a word the schedule has never seen) reads as the
-     card's own hairline, thickened: an empty gauge, not a state. */
-  background: var(--stage-edge, var(--surface-line));
+     card's own hairline, thickened: an empty gauge, not a state. The
+     stage's ink fills as far as the card has come from new to mastered
+     (--card-band, plan 147, the study card's band), the hairline the
+     rest; a card with no figure keeps its whole edge. */
+  background: linear-gradient(
+    to right,
+    var(--stage-edge, var(--surface-line)) calc(var(--card-band, 1) * 100%),
+    var(--surface-line) 0
+  );
   opacity: 0.85;
 }
 /* --state-new is the wash a not-started token wears (#1a1812 in the
@@ -25827,6 +25849,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     inset: 0 auto 0 0;
     width: 3px;
     height: auto;
+    /* The edge stands upright on a row: it fills from the foot up. */
+    background: linear-gradient(
+      to top,
+      var(--stage-edge, var(--surface-line)) calc(var(--card-band, 1) * 100%),
+      var(--surface-line) 0
+    );
   }
   .desk-dict--page .dict-entry-card__char {
     display: block;
@@ -26104,7 +26132,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     position: absolute;
     inset: auto 0 0;
     height: 3px;
-    background: var(--stage-edge, transparent);
+    /* Filled as far as the kana has come (plan 147), the rest bare. */
+    background: linear-gradient(
+      to right,
+      var(--stage-edge, transparent) calc(var(--card-band, 1) * 100%),
+      transparent 0
+    );
   }
   .desk-dict--chart .syllabary-cell--learning { --stage-edge: var(--state-learning); }
   .desk-dict--chart .syllabary-cell--mastered { --stage-edge: var(--state-mastered); }

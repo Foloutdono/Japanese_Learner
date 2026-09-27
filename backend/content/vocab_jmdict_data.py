@@ -56,6 +56,8 @@ import os
 import sqlite3
 import threading
 
+from study import search_match
+
 # One level up: this module now lives in a package, and datas/
 # is still at the backend root.
 _BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -80,6 +82,7 @@ def _conn() -> sqlite3.Connection:
     if conn is None:
         # uri=True + mode=ro: never accidentally write to the shipped DB.
         conn = sqlite3.connect(f"file:{_DB_PATH}?mode=ro", uri=True)
+        search_match.register_sql(conn)
         _local.conn = conn
     return conn
 
@@ -256,30 +259,72 @@ def count() -> int:
 # English one does and costing three times as much.
 
 
-def _match(q: str, kana_forms: tuple[str, ...]) -> tuple[str, tuple]:
-    """(SQL predicate, parameters) for one query in all its forms."""
+def _match(q: str, kana_forms: tuple[str, ...], match: str = "any",
+           field: str = "all") -> tuple[str, tuple]:
+    """(SQL predicate, parameters) for one query in all its forms.
+
+    `match` and `field` are study/search_match's: how strictly, and
+    where. "any" is plain `%…%`; "word" and "start" keep that LIKE as a
+    prefilter and ask search_match (registered on the connection) the
+    real question of the rows it finds — or, for a reading, ask it in
+    SQL outright, `kana = ?` / `kana LIKE 'form%'`. The default here is
+    "any" so a caller that never heard of strictness gets what it got.
+
+    "" is the browse (no query at all); "0" a query that has nowhere to
+    look — letters that are not romaji, with the glosses turned off.
+    """
     clauses, params = [], []
     if q:
         if q.isascii():
-            clauses.append("meaning LIKE ?")
-            params.append(f"%{q}%")
-        else:
+            if field != "japanese":
+                if match == "any":
+                    clauses.append("meaning LIKE ?")
+                    params.append(f"%{q}%")
+                else:
+                    clauses.append("(meaning LIKE ? AND sm_text(meaning, ?, ?))")
+                    params += [f"%{q}%", q, match]
+        elif field != "meaning":
+            like = f"{q}%" if match == "start" else f"%{q}%"
             clauses.append("(kanji LIKE ? OR kana LIKE ?)")
-            params += [f"%{q}%", f"%{q}%"]
-    for form in kana_forms:
-        # The READING column alone. A kana form is a reading, and the
-        # kana column carries every entry's in full — a word written
-        # with kanji has its reading here too, so matching the kanji
-        # column as well finds nothing the kana column has not already
-        # found, at the price of a second scan of 212k rows. That is the
-        # whole difference between a romaji search costing what an
-        # English one does and costing half again.
-        clauses.append("kana LIKE ?")
-        params.append(f"%{form}%")
+            params += [like, like]
+    if field != "meaning":
+        for form in kana_forms:
+            # The READING column alone. A kana form is a reading, and the
+            # kana column carries every entry's in full — a word written
+            # with kanji has its reading here too, so matching the kanji
+            # column as well finds nothing the kana column has not already
+            # found, at the price of a second scan of 212k rows.
+            if match == "word":
+                clauses.append("kana = ?")
+                params.append(form)
+            else:
+                clauses.append("kana LIKE ?")
+                params.append(f"{form}%" if match == "start" else f"%{form}%")
+    if not clauses:
+        return ("0" if q else ""), ()
     return " OR ".join(clauses), tuple(params)
 
 
-def count_matching(q: str, kana_forms: tuple[str, ...] = ()) -> int:
+def _order(q: str, kana_forms: tuple[str, ...]) -> tuple[str, tuple]:
+    """The ORDER BY for a query: what it names exactly first, then the
+    rest, each by frequency. Plain SQL — no callback — because in "any"
+    it runs over every row the query matched, which can be most of the
+    table."""
+    if not q:
+        return "freq_rank", ()
+    exact = ["kanji = ?", "kana = ?"]
+    params = [q, q]
+    for form in kana_forms:
+        exact.append("kana = ?")
+        params.append(form)
+    if q.isascii():
+        exact += ["meaning = ?", "meaning LIKE ?", "meaning LIKE ?", "meaning LIKE ?"]
+        params += [q, f"{q};%", f"{q},%", f"{q} (%"]
+    return f"CASE WHEN {' OR '.join(exact)} THEN 0 ELSE 1 END, freq_rank", tuple(params)
+
+
+def count_matching(q: str, kana_forms: tuple[str, ...] = (),
+                   match: str = "any", field: str = "all") -> int:
     """How many pool entries match — the same predicate search() pages
     through, without paying for a page of rows.
 
@@ -287,7 +332,7 @@ def count_matching(q: str, kana_forms: tuple[str, ...] = ()) -> int:
     on every request (it is half the collection's count) but only needs
     pool ROWS once a page runs past the curated deck.
     """
-    where, params = _match(q, kana_forms)
+    where, params = _match(q, kana_forms, match, field)
     if not where:
         return count()
     return _conn().execute(
@@ -296,7 +341,8 @@ def count_matching(q: str, kana_forms: tuple[str, ...] = ()) -> int:
 
 
 def search(q: str, limit: int, offset: int,
-           kana_forms: tuple[str, ...] = ()) -> tuple[list[dict], int]:
+           kana_forms: tuple[str, ...] = (), match: str = "any",
+           field: str = "all") -> tuple[list[dict], int]:
     """Substring search over kanji/kana/meaning, same semantics as the
     old `for w in VOCAB_JMDICT: if q in ... ` loop in dictionary.py, but
     as an indexed-where-possible SQL query instead of a 292k-row Python
@@ -310,11 +356,13 @@ def search(q: str, limit: int, offset: int,
     query matches is the one the reader almost certainly means.
     idx_entries_freq_rank covers the ORDER BY, so paging never sorts.
     """
-    return page(q, limit, offset, kana_forms), count_matching(q, kana_forms)
+    return (page(q, limit, offset, kana_forms, match, field),
+            count_matching(q, kana_forms, match, field))
 
 
 def page(q: str, limit: int, offset: int,
-         kana_forms: tuple[str, ...] = ()) -> list[dict]:
+         kana_forms: tuple[str, ...] = (), match: str = "any",
+         field: str = "all") -> list[dict]:
     """search()'s rows without its count.
 
     A `%…%` LIKE over 212k rows is a full scan, and the count is one of
@@ -323,14 +371,13 @@ def page(q: str, limit: int, offset: int,
     so the two halves are separable and the caller that needs one should
     not pay for both.
     """
-    where, params = _match(q, kana_forms)
+    where, params = _match(q, kana_forms, match, field)
+    order, order_params = _order(q if where else "", kana_forms)
     sql = "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
     if where:
         sql += f"WHERE {where} "
-        args: tuple = (*params, limit, offset)
-    else:
-        args = (limit, offset)
-    rows = _conn().execute(sql + "ORDER BY freq_rank LIMIT ? OFFSET ?", args).fetchall()
+    args = (*params, *order_params, limit, offset)
+    rows = _conn().execute(sql + f"ORDER BY {order} LIMIT ? OFFSET ?", args).fetchall()
     return [_row_to_entry(r) for r in rows]
 
 

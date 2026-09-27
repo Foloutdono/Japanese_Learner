@@ -304,6 +304,113 @@ def corrections(word: str, lexicon, limit: int = 4) -> list[str]:
     return [c for _, _, c in scored[:limit]]
 
 
+# ── 5. How strictly ───────────────────────────────────────────
+# Leniency 1–4 made the search find what a beginner means; matching
+# everything as a SUBSTRING made it find a great deal they did not.
+# "sun" found Sunday, sunlight and misunderstanding in the glosses and
+# 寸法 through the romaji すん — a prefix of すんぽう — and "fun" found
+# funds, function and 雰囲気 (ふんいき), ahead of anything fun. A Latin
+# query is ambiguous (English, French or romaji), so a substring of any
+# of the three is a very wide net.
+#
+# So a query now says how strictly it means itself (`match`) and where
+# to look (`field`), and the default is the strict reading:
+#
+#   match "word"  (default) a gloss matches on a WHOLE word ("sun", not
+#                 "Sunday"; a plural s/es/x is allowed, "eau" finds
+#                 "eaux"), romaji on a WHOLE reading (すん, not すんぽう),
+#                 and Japanese typed as Japanese anywhere in the word —
+#                 水 is still in 水曜日, which is what looking up a
+#                 character is for.
+#   match "start" a gloss word, a reading or a written form that STARTS
+#                 with the query: "sun" finds sunset, "tabe" たべもの.
+#   match "any"   every substring, the old behaviour.
+#
+#   field "all"      (default) glosses, and readings/written forms.
+#   field "japanese" the written forms and readings only — "sun" is
+#                    read as すん and nothing else.
+#   field "meaning"  the glosses only — "sun" is English/French, never
+#                    romaji.
+#
+# And whatever matches is RANKED: an entry the query names exactly (a
+# reading that is the whole romaji, a sense that is the whole word)
+# comes before one that starts with it, before one that only contains
+# it. Within a rank the collection's own order holds (the deck N5 → N1,
+# the pools by frequency).
+MATCHES = ("word", "start", "any")
+FIELDS = ("all", "japanese", "meaning")
+
+# What separates two readings (or two spellings) in one field: the
+# decks pack them with ・ and /, KANJIDIC with ・, and the written form
+# of a word is one token.
+_READING_SEP = re.compile(r"[・/、,;\s]+")
+# KANJIDIC's okurigana dot and affix marks, dropped so a kun reading
+# reads as the word it is: た.べる is たべる, みず- is みず.
+_READING_MARKS = str.maketrans("", "", ".-~〜")
+# A sense boundary in a gloss, and the parenthetical a gloss hangs off a
+# sense ("sun (star)"), for the exact rank.
+_SENSE_SEP = re.compile(r"[;,/]")
+_PAREN = re.compile(r"\([^)]*\)")
+
+
+@lru_cache(maxsize=65536)
+def reading_tokens(field: str) -> tuple[str, ...]:
+    """The readings (or spellings) one Japanese field holds, marks off."""
+    return tuple(t for t in (x.translate(_READING_MARKS)
+                             for x in _READING_SEP.split(field)) if t)
+
+
+@lru_cache(maxsize=65536)
+def _senses(text: str) -> tuple[str, ...]:
+    return tuple(s for s in (_PAREN.sub("", x).strip()
+                             for x in _SENSE_SEP.split(fold(text))) if s)
+
+
+@lru_cache(maxsize=1024)
+def _latin_pattern(needle: str, match: str):
+    # A word character is a letter or digit in any script (folding has
+    # already taken the accents off); an apostrophe is a boundary, so
+    # "eau" is a word in "l'eau".
+    body = re.escape(needle)
+    if match == "word":
+        return re.compile(rf"(?<![^\W_]){body}(?:s|es|x)?(?![^\W_])")
+    return re.compile(rf"(?<![^\W_]){body}")
+
+
+def text_matches(text: str | None, needle: str, match: str) -> bool:
+    """Does a gloss hold `needle` (already folded) as `match` says?"""
+    if not text or not needle:
+        return False
+    hay = fold(text)
+    if match == "any" or match not in MATCHES:
+        return needle in hay
+    return _latin_pattern(needle, match).search(hay) is not None
+
+
+def reading_matches(field: str | None, form: str, match: str) -> bool:
+    """Does a Japanese field hold the reading `form` as `match` says?
+    Token by token: "word" is a whole reading, "start" the start of one."""
+    if not field or not form:
+        return False
+    if match == "any" or match not in MATCHES:
+        return form in field
+    tokens = reading_tokens(field)
+    if match == "word":
+        return form in tokens
+    return any(t.startswith(form) for t in tokens)
+
+
+def sense_is(text: str | None, needle: str) -> bool:
+    """Is one of a gloss's senses exactly `needle` (folded), bar the
+    parenthetical? What ranks 太陽 "sun, solar" above 朝日 "morning sun"."""
+    return bool(text and needle) and needle in _senses(text)
+
+
+def sense_starts(text: str | None, needle: str) -> bool:
+    return bool(text and needle) and any(
+        s.startswith(needle) for s in _senses(text))
+
+
 # ── The query ─────────────────────────────────────────────────
 class Query:
     """One search term, in every form the catalogue might hold it.
@@ -318,11 +425,16 @@ class Query:
     short-circuits on it rather than asking this object anything.
     """
 
-    __slots__ = ("raw", "latin", "jp", "original")
+    __slots__ = ("raw", "latin", "jp", "original", "match", "field")
 
-    def __init__(self, raw: str, original: str | None = None):
+    def __init__(self, raw: str, original: str | None = None,
+                 match: str = "word", field: str = "all"):
         self.raw = raw
         self.latin = fold(raw)
+        # Anything unrecognised is the default: the client narrowed, it
+        # did not ask a trick question (the level's rule too).
+        self.match = match if match in MATCHES else "word"
+        self.field = field if field in FIELDS else "all"
         # What the learner actually typed, when this query is a
         # correction of it — so the answer can say so. None otherwise,
         # which is also what stops a correction being corrected again.
@@ -334,6 +446,19 @@ class Query:
     @property
     def empty(self) -> bool:
         return self.raw == ""
+
+    def respelled(self, alt: str) -> "Query":
+        """The same question, asked of a corrected spelling — which keeps
+        its strictness and its field, and remembers what was typed."""
+        return Query(alt, original=self.raw, match=self.match, field=self.field)
+
+    @property
+    def wants_japanese(self) -> bool:
+        return self.field != "meaning"
+
+    @property
+    def wants_meaning(self) -> bool:
+        return self.field != "japanese"
 
     # ── The two pools' halves of the same question ──
     # The pools take the query as typed and route it by SCRIPT (see each
@@ -384,21 +509,84 @@ class Query:
             and self.latin.isalpha()
         )
 
+    def _jp_hit(self, field: str, form: str, spelled: bool) -> bool:
+        # Japanese typed AS Japanese is found anywhere in a word at the
+        # default strictness — 水 in 水曜日 — while the kana romaji
+        # spells must be the whole reading, since the letters were just
+        # as likely a gloss (see 5. above).
+        if self.match == "word" and not spelled:
+            return form in field
+        if self.match == "start" and not spelled and field.startswith(form):
+            return True
+        return reading_matches(field, form, self.match)
+
+    def score(self, jp_fields=(), latin_fields=()) -> int | None:
+        """None when the row does not match; else its rank — 0 the query
+        names it exactly, 1 a field starts with it, 2 it is only in one.
+        The in-memory half of every collection asks this; the SQLite
+        halves ask the same question in SQL, built from `sql_text`,
+        `sql_kana`, `match` and `field` (see the two pool modules'
+        `_match`)."""
+        best = None
+        if self.wants_japanese:
+            for i, form in enumerate(self.jp):
+                spelled = i > 0
+                for field in jp_fields:
+                    if not field or not self._jp_hit(field, form, spelled):
+                        continue
+                    tokens = reading_tokens(field)
+                    if field == form or form in tokens:
+                        return 0
+                    rank = 1 if (field.startswith(form)
+                                 or any(t.startswith(form) for t in tokens)) else 2
+                    best = rank if best is None else min(best, rank)
+        if self.latin and self.wants_meaning:
+            for field in latin_fields:
+                if not text_matches(field, self.latin, self.match):
+                    continue
+                if sense_is(field, self.latin):
+                    return 0
+                rank = 1 if sense_starts(field, self.latin) else 2
+                best = rank if best is None else min(best, rank)
+        return best
+
     def hits(self, jp_fields=(), latin_fields=()) -> bool:
         """Does this query match a row, given its Japanese columns and
-        its glosses? The in-memory half of every collection asks exactly
-        this; the SQLite halves ask the same question in SQL, built from
-        `jp` and `latin` (see the two pool modules' `_match`)."""
-        for form in self.jp:
-            for field in jp_fields:
-                if field and form in field:
-                    return True
-        if self.latin:
-            for field in latin_fields:
-                if field and self.latin in fold(field):
-                    return True
-        return False
+        its glosses? `score`, without the rank."""
+        return self.score(jp_fields, latin_fields) is not None
 
 
-def parse(q: str) -> Query:
-    return Query(q.strip())
+def register_sql(conn) -> None:
+    """The matchers above as SQLite functions, for the two pools'
+    predicates. Each is only ever the second half of an AND after a
+    LIKE on the same column, so SQLite calls back into Python for the
+    rows the LIKE already found and never for the whole table."""
+    conn.create_function(
+        "sm_text", 3, lambda text, needle, match: int(text_matches(text, fold(needle or ""), match)),
+        deterministic=True)
+    conn.create_function(
+        "sm_read", 3, lambda field, form, match: int(reading_matches(field, form, match)),
+        deterministic=True)
+    conn.create_function(
+        "sm_sense", 2, lambda text, needle: int(sense_is(text, fold(needle or ""))),
+        deterministic=True)
+
+
+def parse(q: str, match: str = "word", field: str = "all") -> Query:
+    return Query(q.strip(), match=match, field=field)
+
+
+def ranked(query: Query, rows, fields):
+    """`rows` that match, best rank first, the rows' own order within a
+    rank. `fields(row)` is (jp_fields, latin_fields). The empty query is
+    the browse, every row in its order."""
+    if query.empty:
+        return list(rows)
+    scored = []
+    for row in rows:
+        jp, latin = fields(row)
+        rank = query.score(jp, latin)
+        if rank is not None:
+            scored.append((rank, row))
+    scored.sort(key=lambda pair: pair[0])
+    return [row for _, row in scored]

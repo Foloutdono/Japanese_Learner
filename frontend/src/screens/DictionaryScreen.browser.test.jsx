@@ -298,7 +298,7 @@ describe('the dictionary screen', () => {
     // it is off on arrival. 部 is the whole of what it prints — the name
     // is there for a pointer and for a reader, which are the two the
     // glyph does not serve.
-    const toggle = screen.container.querySelector('.console__index .console__toggle')
+    const toggle = screen.container.querySelector('.console__index .dict-radical-toggle')
     expect(toggle).not.toBeNull()
     expect(toggle.textContent).toBe('部')
     expect(toggle.getAttribute('aria-label')).toBe(T.dictModeRadical)
@@ -322,7 +322,7 @@ describe('the dictionary screen', () => {
     expect(chips()[0].classList.contains('chip--on')).toBe(false)
     // A word spans several radicals, so the toggle goes with the
     // collection it reads — the field under the vocabulary carries none.
-    expect(screen.container.querySelector('.console__toggle')).toBeNull()
+    expect(screen.container.querySelector('.dict-radical-toggle')).toBeNull()
   })
 
   // ── 文法 — the grammar collection ──
@@ -341,7 +341,7 @@ describe('the dictionary screen', () => {
     const levels = [...screen.container.querySelectorAll('.dict-levels .chip')]
     expect(levels.map(c => c.textContent)).toEqual([T.dictLevelAll, 'N5', 'N4', 'N3', 'N2', 'N1'])
     expect(levels[0].classList.contains('chip--on')).toBe(true)
-    expect(screen.container.querySelector('.console__toggle')).toBeNull()
+    expect(screen.container.querySelector('.dict-radical-toggle')).toBeNull()
     // The field stays — grammar is searched, not charted — with its own
     // placeholder.
     expect(screen.container.querySelector('.console__field').placeholder).toBe(T.dictionaryPlaceholderGrammar)
@@ -400,7 +400,7 @@ describe('the dictionary screen', () => {
 
     // 部 — the radical index is served whole, deck and pool in stroke
     // order, so a level cannot cut it. The row goes with the mode.
-    const radical = () => screen.container.querySelector('.console__toggle')
+    const radical = () => screen.container.querySelector('.dict-radical-toggle')
     radical().click()
     await settle(80)
     expect(screen.container.querySelector('.dict-levels')).toBeNull()
@@ -434,7 +434,7 @@ describe('the dictionary screen', () => {
   // switch off.
   it('keeps the toggle in the field\'s row while the index has nothing to type into', async () => {
     const screen = await renderScreen()
-    const toggle = () => screen.container.querySelector('.console__toggle')
+    const toggle = () => screen.container.querySelector('.dict-radical-toggle')
     const row = () => screen.container.querySelector('.console__index')
 
     toggle().click()
