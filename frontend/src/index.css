@@ -25520,9 +25520,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      pale slab floating mid-column under a caption that repeated the
      link's own words -- beside two lanes of twenty-four cards. Now the
      sign-in is drawn in the column's own material (the sumi field, the
-     panel's hairlines, no card), under a plain "Log in" where the
-     boarding's first stop will stand; one lane of cards passes under the
-     promise; the tagline is its quiet second line. */
+     panel's hairlines, no card), under a plain "Log in", and stands
+     where it stood, on the column's middle (the owner's call); one lane
+     of cards passes under the promise; the tagline is its quiet second
+     line. */
   .desk-door {
     --fs-display-fluid: var(--fs-display);
     max-width: none;
@@ -25550,6 +25551,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
+    margin-block: auto;
     padding: 0 var(--sp-6);
     padding-bottom: calc(var(--sp-6) + var(--safe-bottom));
     animation: desk-brd-show 480ms ease-out 200ms backwards;
@@ -25661,13 +25663,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd__lab,
     .desk-brd__val { transition: none; }
   }
-  /* A pointer's answer to "is this one I can pick": the edge warms
-     toward the gold a pick fills, with no lift; the focus ring's twin.
-     And nothing else (plan 154, the owner: the hover "looks bad, make
-     it simpler"): the sheet's bare button:hover brightened a paper tile
-     to a glaring cream and a picked one to yellow, on top of the edge.
-     The boarding's answers, its doors and its way back keep the edge
-     alone; the Welcome's sign-in keeps its hairline. */
+  /* A pointer's answer to "is this one I can pick": the name field's
+     edge (.brd-field, 1.5px of the pass's gold on the answer's own
+     ground) and nothing else -- no wash, no lift, no brightness (plan
+     154, the owner: make the answers' hover like the name's, simpler).
+     A pick keeps its wash and its check, so the two never read alike;
+     the focus ring's twin. The sheet's bare button:hover brightened a
+     paper tile to a glaring cream and a picked one to yellow; the
+     boarding's answers, its doors and its way back, and the Welcome's
+     sign-in, are spared it. */
   @media (pointer: fine) {
     .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn, .desk-brd__back, .desk-brd__door):hover,
     .desk-door__auth button:hover { filter: none; }
@@ -25679,8 +25683,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd .brd-cell:not(.brd-cell--on):focus-visible,
     .desk-brd__stn:not(.desk-brd__stn--on):hover > .desk-brd__tile,
     .desk-brd__stn:not(.desk-brd__stn--on):focus-visible > .desk-brd__tile {
-      border-color: color-mix(in srgb, var(--accent2) 45%, var(--surface-line));
-      background-color: color-mix(in srgb, var(--accent2) 5%, var(--surface));
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 0.5px var(--accent2);
     }
     .desk-brd__back:hover,
     .desk-brd__back:focus-visible {

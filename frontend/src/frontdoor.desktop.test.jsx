@@ -538,6 +538,7 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
 // column on the left under the rail's masthead, and the paper holds the
 // heading, the tagline and Board as one block over the band, which runs
 // across the paper faded at its ends.
+const centreOf = r => (r.top + r.bottom) / 2
 function Door({ authMode = null, onBoard = () => {}, boarding = false }) {
   return <LangProvider><Welcome onBoard={onBoard} onSignIn={() => {}} boarding={boarding} authMode={authMode} /></LangProvider>
 }
@@ -557,9 +558,10 @@ describe('the front door on the desk (P10, plan 140)', () => {
     // Named plainly (plan 154): "Log in", not the link's own sentence.
     expect([en.login, fr.login]).toContain(inSide('.desk-deck__cap').textContent)
     // Drawn in the column's material: no card of the paper's in the sumi,
-    // and the sign-in under the masthead, where the boarding's line starts.
+    // on the column's middle, where it always stood (the owner's call).
     expect(getComputedStyle(inSide('.auth-card')).backgroundColor).toBe('rgba(0, 0, 0, 0)')
-    expect(box(inSide('.desk-door__auth')).top).toBeLessThan(box(inSide('.desk-rail__mast')).bottom + 40)
+    const auth = box(inSide('.auth-card'))
+    expect(Math.abs(centreOf(auth) - window.innerHeight / 2)).toBeLessThan(40)
     // One lane of cards passes under the promise.
     expect(document.querySelectorAll('.brd-roll__lane')).toHaveLength(1)
     // Signing in only: no Login / Sign up control, no foot.
@@ -930,14 +932,19 @@ describe('first contact, finished (P13, plan 154)', () => {
 })
 
 describe('the hover, simpler (P14, plan 154)', () => {
-  it('warms an answer\'s edge and does not brighten it', async () => {
+  it('draws the name field\'s gold edge on an answer, and nothing else', async () => {
     await board()
+    const gold = getComputedStyle(inCar('.brd-field')).borderTopColor
     await pastName()
     await landed()
     const row = inCar('[data-motive="fun"]')
+    const ground = getComputedStyle(row).backgroundColor
     await userEvent.hover(row)
     await settle(250)
     expect(getComputedStyle(row).filter).toBe('none')
+    expect(getComputedStyle(row).borderTopColor).toBe(gold)
+    // No wash: the ground it had at rest.
+    expect(getComputedStyle(row).backgroundColor).toBe(ground)
     await userEvent.hover(inCar('[data-action="back"]'))
     await settle(250)
     expect(getComputedStyle(inCar('[data-action="back"]')).filter).toBe('none')

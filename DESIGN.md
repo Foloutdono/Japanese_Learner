@@ -1556,12 +1556,14 @@ as the rail it arrives at.
     size, not two answers at the name's display size.
   - *The Welcome is simpler* (the owner's second round): the sign-in is
     drawn in the column's own material — sumi fields, the panel's
-    hairlines, no pale card set in the sumi — under a plain "Log in"
-    right below the masthead, where the boarding's line then starts; one
+    hairlines, no pale card set in the sumi — under a plain "Log in",
+    on the column's middle where it always stood (the owner's call); one
     lane of cards (both lanes' cards in turn) passes under the promise,
     and the tagline is its quiet second line.
-  - *A hover is the edge and nothing else*: an answer's border warms
-    toward the gold a pick fills, with the faintest wash; the sheet's
+  - *A hover is the name field's edge and nothing else*: an answer
+    under the pointer takes the name field's 1.5px of gold on its own
+    ground — no wash, no lift — while a pick keeps its wash and its
+    check, so the two never read alike; the sheet's
     bare `button:hover` brightness, which lit a paper tile cream and a
     picked one yellow, is cancelled on the boarding and the Welcome's
     sign-in.
