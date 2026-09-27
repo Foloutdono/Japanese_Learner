@@ -882,7 +882,26 @@ runtime purpose. Two consequences worth knowing:
   `tests/test_lookup_precision.py`, `tests/test_furigana_context.py`,
   `tests/test_placement_report.py` and `tests/test_onboarding_profile.py`;
   `docs/vocab-deck-review.md`).
-  When starting a new wave, begin at **154** or higher, and check
+  **154** is 仕上げ, first contact finished on the desk (owner-directed:
+  keep plan 140's drawing and improve it, transitions included): the
+  floor at the card's width on every question so the way on stands in
+  one place (`--desk-floor-w`), the lines and the hour at the card's
+  width; the column's line as one rail with the lit stop a train
+  running on it, measured off the rows (`DeskLine`'s `useRoute`), the
+  line laid on its first frame and the projection's date dropping in;
+  each answer's key and check in one slot (`BoardOption`'s `PickMark`),
+  the recommended rhythm's tag on its tile's edge; the desk's short pull
+  and the leaving car kept until the arriving one lands (`BoardingFlow`'s
+  `DESK_PULL_MS`); the Welcome handed to the wait and the wait to the
+  boarding in one column (`Welcome`'s `leaving`, `AppLoading`'s `frame`,
+  `App.jsx`'s `boardedHere`, `components/chrome/DeskMast.jsx`); the
+  plan's arrival on the paper; and the account as a form (cited in
+  `components/boarding/DeskLine.jsx`, `BoardOption.jsx`,
+  `AccountStep.jsx`, `Welcome.jsx`, `screens/BoardingFlow.jsx`,
+  `screens/AppLoading.jsx`, `App.jsx`, `src/frontdoor.desktop.test.jsx`'s
+  P13 and the 机 section of `index.css`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`).
+  When starting a new wave, begin at **155** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

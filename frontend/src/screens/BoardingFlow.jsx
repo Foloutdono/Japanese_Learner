@@ -114,6 +114,13 @@ function clearStash() {
 }
 
 const PULL_MS = 260
+// 机 (plan 154): the desk's pull is a short one -- a rung sideways and a
+// fade, not the paper's whole width -- and the arriving car's answers
+// follow it in a beat apart (the 机 section of index.css, "the pull on
+// the desk"). The leaving car is kept until all of that has landed:
+// dropping it at the phone's 260 ms took the arriving car's `--in` with
+// it, and the answers still on their way snapped the rest of it.
+const DESK_PULL_MS = 820
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
 
@@ -222,9 +229,9 @@ export default function BoardingFlow({
   // The pull: the leaving car is dropped once it has left.
   useEffect(() => {
     if (!leaving) return
-    const id = setTimeout(() => setLeaving(null), PULL_MS)
+    const id = setTimeout(() => setLeaving(null), desk ? DESK_PULL_MS : PULL_MS)
     return () => clearTimeout(id)
-  }, [leaving])
+  }, [leaving, desk])
 
   // Focus lands on the new screen's question -- except on the name,
   // whose field is already focused and must keep the keyboard.
@@ -656,7 +663,7 @@ export default function BoardingFlow({
       <BoardBack.Provider value={floorBack}>
         <div className="brd__cars">
           {leaving && (
-            <div className="brd__car brd__car--out" data-dir={leaving.dir} data-car={desk ? leaving.step : undefined} aria-hidden="true" inert>
+            <div key={`out:${leaving.step}`} className="brd__car brd__car--out" data-dir={leaving.dir} data-car={desk ? leaving.step : undefined} aria-hidden="true" inert>
               {renderStep(leaving.step)}
             </div>
           )}

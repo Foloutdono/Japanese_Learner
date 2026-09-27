@@ -3,6 +3,8 @@ import { Continue, BoardLink } from './BoardFrame'
 import { EnterKey } from '../chrome/DeskKeys'
 import { AuthCard } from '../account/AuthCard'
 import { useDesk } from '../../hooks/useDesk'
+import { DeskMast } from '../chrome/DeskMast'
+import { PaperWait } from '../../screens/AppLoading'
 import { FRONT_LANE, BACK_LANE } from './demoCards'
 
 // ── Welcome — the sign, the rolling stock, the promise (plan 075) ─
@@ -135,9 +137,19 @@ export default function Welcome({ onBoard, onSignIn, boarding = false, authMode 
 // heading, the tagline, Board under them rather than on the window's
 // floor -- over the rolling stock, run across the whole width.
 // Enter boards (plan 122).
+//
+// Board pressed, the paper pulls away the way the boarding's cars do --
+// the promise, Board and the band a rung to the left and fading, a beat
+// apart -- and the sign-in steps out of the column, which stays: the
+// masthead stands on the same pixel through the wait (AppLoading's
+// `frame`) and the boarding's line is laid in the same sumi (plan 154).
+// A pass the office could not issue brings it all back, on Sign up.
 function DeskWelcome({ onBoard, boarding, authMode, t }) {
   return (
-    <main className="brd brd--welcome desk-door" id="main-content">
+    <main className={`brd brd--welcome desk-door${boarding ? ' desk-door--leaving' : ''}`} id="main-content">
+      {/* The pass being issued is a round trip: its wait is drawn where
+          the next screen's will stand, timed from this, the press. */}
+      {boarding && <PaperWait />}
       <div className="desk-door__work">
         <div className="brd-hero">
           <h1 className="brd__q">{t.learnJapanese}</h1>
@@ -156,10 +168,7 @@ function DeskWelcome({ onBoard, boarding, authMode, t }) {
         </div>
       </div>
       <aside className="desk-door__side" aria-label={t.brdHaveAccount}>
-        <div className="desk-rail__mast">
-          <span className="desk-rail__glyph" lang="ja">{t.appTitle}</span>
-          <span className="desk-rail__name">{t.brdAppName}</span>
-        </div>
+        <DeskMast />
         <div className="desk-door__auth">
           {authMode !== 'signup' && <h2 className="desk-deck__cap">{t.brdHaveAccount}</h2>}
           <AuthCard

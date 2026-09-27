@@ -280,17 +280,38 @@ export default function App() {
   // flag is only the button's own "working on it" — the session
   // arrives through the auth listener like any other.
   const [boarding, setBoarding] = useState(false)
+  // 机 (plan 154): the learner who pressed Board on this load is on the
+  // way into the boarding, so the wait before its first question keeps
+  // the column the Welcome and the boarding both stand in
+  // (AppLoading's `frame`) rather than dropping to the boot screen and
+  // back. A returning learner's wait at the same gate goes on to the
+  // rail, which is another width, and keeps the boot screen.
+  // When Board was pressed (a performance.now() reading), or null: the
+  // wait's dots are drawn a beat after the press, whichever screen is up.
+  const [boardedHere, setBoardedHere] = useState(null)
 
   // Anonymous sign-ins are a project setting, so this can legitimately
   // be unavailable. It is not something the learner can act on, so the
   // fall-back is silent and is simply the flow this replaced: ask for
   // the account up front.
+  //
+  // A pass that was issued leaves `boarding` on: the Welcome is on its
+  // way out (on the desk it is already pulling away, Welcome's
+  // `leaving`), and the session that replaces it arrives through the
+  // auth listener, which may land after this resolves -- turning the
+  // flag off first put the Welcome back for a frame. Signing out is
+  // what turns it off again (the listener below).
   async function board() {
     if (boarding) return
+    const pressedAt = performance.now()
     setBoarding(true)
     const r = await startGuest()
-    if (!r.ok) setAuthMode('signup')
-    setBoarding(false)
+    if (!r.ok) {
+      setAuthMode('signup')
+      setBoarding(false)
+      return
+    }
+    setBoardedHere(pressedAt)
   }
 
   // The two ways out of the boarding, both of which end at Welcome:
@@ -438,6 +459,8 @@ export default function App() {
       // last one's screen. A token refresh carries a session and moves
       // nothing.
       if (!next) {
+        setBoarding(false)
+        setBoardedHere(null)
         returnToFrontDoor()
         // And the last account's cached answers with it: the HUD, the
         // pass, the day's queue and — the one that costs a lesson —
@@ -506,7 +529,7 @@ export default function App() {
   if (onboarding === undefined) {
     return (
       <LangProvider>
-        <AppLoading wakesServer />
+        <AppLoading wakesServer frame={desk && boardedHere != null} since={boardedHere} />
       </LangProvider>
     )
   }
