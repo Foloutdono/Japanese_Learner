@@ -111,6 +111,23 @@ def test_upload_produces_a_ready_transcript(client):
     assert body["truncated"] == 0
 
 
+def test_a_track_past_fifty_lines_is_analysed_whole(client):
+    """The cap was 50 until 2026-09-27: the 51st line of a long song
+    and everything after it were dropped (owner-directed: remove it)."""
+    srt = "".join(
+        f"{i + 1}\n00:{i // 60:02d}:{i % 60:02d},000 --> 00:{i // 60:02d}:{i % 60:02d},900\n{i}番目の文です。\n\n"
+        for i in range(120)
+    ).encode("utf-8")
+    post_resp = client.post("/api/video/session", files={"file": ("long.srt", srt, "text/plain")})
+    assert post_resp.status_code == 202
+    final = _poll_until_settled(client, post_resp.json()["sessionId"])
+    body = final.json()
+    assert body["status"] == "ready"
+    assert len(body["sentences"]) == 120
+    assert body["sentences"][-1]["text"] == "119番目の文です。"
+    assert body["truncated"] == 0
+
+
 def test_a_timing_track_gives_the_lines_their_word_times(client):
     """The grab sends the recognised track beside the hand-written one
     (plan: the words lit as they are said): the lines are the file's,

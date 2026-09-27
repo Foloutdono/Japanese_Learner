@@ -149,6 +149,53 @@ def test_multi_sentence_passage_returns_one_entry_per_sentence(client):
     assert body["truncated"] == 0
 
 
+def test_a_passage_past_fifty_sentences_is_analysed_whole(client):
+    """The cap was 50 until 2026-09-27, and cut a long song, an episode
+    or an article short (owner-directed: remove it)."""
+    response = client.post(
+        "/api/phrase/analyze",
+        json={"phrase": "".join(f"{i}番目の文です。" for i in range(80)), "save": False},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body["sentences"]) == 80
+    assert body["sentences"][-1]["text"] == "79番目の文です。"
+    assert body["truncated"] == 0
+
+
+def test_a_passage_past_the_ceiling_says_how_many_were_left(client, monkeypatch):
+    monkeypatch.setattr(phrase_module, "MAX_SENTENCES", 3)
+    response = client.post(
+        "/api/phrase/analyze",
+        json={"phrase": "一。二。三。四。五。", "save": False},
+    )
+    body = response.json()
+    assert [s["text"] for s in body["sentences"]] == ["一。", "二。", "三。"]
+    assert body["truncated"] == 2
+
+
+def test_deep_buys_a_model_call_for_the_first_sentences_only(client, monkeypatch):
+    """The ceiling on Sentences went from 50 to a thousand; the model
+    calls one deep request can buy did not."""
+    calls = []
+
+    def _fake_chat(messages, **_kwargs):
+        calls.append(messages[1]["content"])
+        return '{"words": [], "explanation": "Explained."}'
+
+    monkeypatch.setattr(phrase_module, "chat", _fake_chat)
+    monkeypatch.setattr(phrase_module, "MAX_DEEP_SENTENCES", 2)
+    # Text no cache row can hold yet: the model is asked, not the cache.
+    tag = uuid.uuid4().hex[:8]
+    phrase = "".join(f"{tag}の{i}番目です。" for i in range(4))
+    response = client.post("/api/phrase/analyze", json={"phrase": phrase, "deep": True, "save": False})
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body["sentences"]) == 4
+    assert len(calls) == 2
+    assert [s.get("explanation", "") for s in body["sentences"]] == ["Explained.", "Explained.", "", ""]
+
+
 def test_history_round_trip_reflects_live_srs_state_not_anything_stored(client, monkeypatch):
     # The defect docs/adr/0002 exists to fix: phrase_history no longer
     # stores stats at all (only `phrase` + provenance), so the only way

@@ -21,7 +21,15 @@ _TERMINATORS = frozenset("。！？!?")
 # thought), but the newline itself carries no meaning worth keeping.
 _OPENERS = {"「": "」", "『": "』", "（": "）"}
 
-MAX_SENTENCES = 50
+# The most Sentences one Passage is analysed into. 50 until 2026-09-27,
+# which cut a song with a long chorus, an episode or an article short
+# (owner-directed: remove it). Raised rather than removed because it is
+# still what bounds the work and the payload: each analysed Sentence is
+# ~7 KB of JSON, so a thousand is ~5 MB stored and sent in one go and
+# ~40 MB held while it is built, which a 512 MB instance can take; a
+# film's whole subtitles (1,500 lines and more) or a pasted book is
+# where it starts to cut, with the learner told how many were kept.
+MAX_SENTENCES = 1000
 
 
 def split_sentences(text: str) -> list[dict]:

@@ -410,6 +410,15 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
     return attach_user_state(analysis, states, user_id)
 
 
+# The most model calls one `deep` request can buy: the first this many
+# Sentences of its Passage; the rest come back local, with any deep tier
+# already cached merged in. Every caller asks for one Sentence at a time
+# (docs/adr/0001), so this binds nothing the app does -- it keeps a
+# Passage's cost where it was when MAX_SENTENCES was 50, now that it is
+# far longer.
+MAX_DEEP_SENTENCES = 50
+
+
 def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
                       allow_llm_call: bool = True) -> dict:
     """A Passage split into Sentences and each analyzed independently.
@@ -420,8 +429,9 @@ def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
 
     states = srs.get_user_states(user_id)
     sentences = [
-        _analyze_sentence(s["text"], deep, lang, states, user_id, allow_llm_call)
-        for s in kept
+        _analyze_sentence(s["text"], deep, lang, states, user_id,
+                          allow_llm_call and i < MAX_DEEP_SENTENCES)
+        for i, s in enumerate(kept)
     ]
 
     result = {"passage": passage, "sentences": sentences, "truncated": truncated}
