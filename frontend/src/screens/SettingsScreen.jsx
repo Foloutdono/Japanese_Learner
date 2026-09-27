@@ -27,6 +27,9 @@ import { RatingPage } from '../components/settings/RatingPage'
 import { HelpPage } from '../components/settings/HelpPage'
 import { AccountPage } from '../components/settings/AccountPage'
 import { CreditsPage } from '../components/settings/CreditsPage'
+import { NotificationsPage } from '../components/settings/NotificationsPage'
+import { canNudge } from '../lib/platform'
+import { useProfileSummaryState } from '../stores/profileSummary'
 import { SettingsPaneContext } from '../components/settings/pane'
 import { useDesk } from '../hooks/useDesk'
 
@@ -38,9 +41,9 @@ import { useDesk } from '../hooks/useDesk'
 // and the lines, each a door to the page that changes it — and under it
 // the rest as a list whose rows draw what they are set to. Every page
 // lives at /profile/settings/<page>; the phone pushes it, the desk sets
-// it beside the column. Deliberately NOT here: a notifications page — it
-// needs a preferences endpoint that does not exist, and a settings
-// screen above all must be exactly what it says (no dead controls).
+// it beside the column. Notifications (plan 155) is a shell's page
+// only: the web has nothing to schedule, and a settings screen above
+// all must be exactly what it says (no dead controls).
 const PAGES = {
   level: LevelPage,
   destination: DestinationPage,
@@ -49,6 +52,7 @@ const PAGES = {
   lines: LinesPage,
   display: DisplayPage,
   sound: SoundPage,
+  notifications: NotificationsPage,
   rating: RatingPage,
   help: HelpPage,
   account: AccountPage,
@@ -76,6 +80,7 @@ export default function SettingsScreen({ session }) {
   const desk = useDesk()
   if (page && MOVED[page]) return <Navigate to={`/profile/settings/${MOVED[page]}`} replace />
   if (page && !PAGES[page]) return <Navigate to="/profile/settings" replace />
+  if (page === 'notifications' && !canNudge()) return <Navigate to="/profile/settings" replace />
 
   // ── 机 — the column and the page side by side (plan 113) ──
   // A computer has the room to show the pass and the list while you
@@ -121,6 +126,7 @@ function SettingsHome({ session, current = null }) {
   const volumes = useVolumes()
   const muted = useMuted()
   const offerable = useOfferable()
+  const { summary } = useProfileSummaryState()
 
   const langLabel = LANGUAGES.find(l => l.code === lang)?.label ?? lang
   const quiet = THEATRE.every(k => volumes[k] === 0)
@@ -132,6 +138,11 @@ function SettingsHome({ session, current = null }) {
   const ROWS = [
     { id: 'display', label: t.settingsEnvShort, value: langLabel, spec: <ThemeSwatch theme={theme} /> },
     { id: 'sound', label: t.sound, value: soundValue, spec: <SoundMeter volumes={volumes} muted={muted} /> },
+    ...(canNudge() ? [{
+      id: 'notifications',
+      label: t.settingsNotif,
+      value: summary?.notifications && summary?.reminderTime ? summary.reminderTime : t.notifOff,
+    }] : []),
     { id: 'rating', label: t.settingsRatingShort, value: t.settingsRatingScaleOption[scale] ?? '', spec: <RatingDots scale={scale} /> },
     { id: 'help', label: t.settingsHelp, value: t.settingsHelpValue },
     { id: 'account', label: t.account, value: accountValue },
