@@ -13,7 +13,7 @@ import logging
 import random
 
 from content.grammar_points_data import find, gloss, grammar_to_id, localise
-from study.grammar_examples import blanked_payload, example_payload
+from study.grammar_examples import blanked_payload, example_payload, pattern_furigana
 from study.grammar_match import contains_pattern, verifiable
 from study.mcq import pick_distractors
 
@@ -25,8 +25,12 @@ CONTRAST_CHOICES = 4
 
 def lesson_payload(level: str, entry: dict, lang: str) -> dict:
     """
-    {register, steps: [{kind, text}], compare: [{pattern, raw_id, level,
-    meaning, text}], examples: [example_payload...]}
+    {pattern_furigana, register, steps: [{kind, text}], compare: [{pattern,
+    raw_id, level, meaning, text}], examples: [example_payload...]}
+
+    `pattern_furigana` is the plate's headword as ruby (the catalogue's
+    own reading, study/grammar_examples.pattern_furigana); every caller
+    already puts the pattern beside the lesson.
 
     A rival the catalogue no longer holds is dropped with a warning
     rather than shipped as a door onto nothing. The gate makes that
@@ -49,6 +53,7 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
             "text": localise({"en": rival["en"], "fr": rival["fr"]}, lang),
         })
     return {
+        "pattern_furigana": pattern_furigana(pattern, entry.get("reading")),
         "register": entry.get("register"),
         "steps": [
             {"kind": step["kind"], "text": localise({"en": step["en"], "fr": step["fr"]}, lang)}

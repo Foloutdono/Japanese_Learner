@@ -269,6 +269,7 @@
   },
   {
     "pattern": "〜極まりない",
+    "reading": "〜きわまりない",
     "structure": "な-adjective stem + 極まりない",
     "meaning": {
       "en": "extremely, in the extreme",
@@ -1140,6 +1141,7 @@
   },
   {
     "pattern": "〜が早いか",
+    "reading": "〜がはやいか",
     "structure": "verb dictionary form + が早いか",
     "meaning": {
       "en": "no sooner than, the instant",
@@ -1207,6 +1209,7 @@
   },
   {
     "pattern": "〜や否や",
+    "reading": "〜やいなや",
     "structure": "verb dictionary form + や否や",
     "meaning": {
       "en": "as soon as, hardly ... when",
@@ -2011,6 +2014,7 @@
   },
   {
     "pattern": "〜ならいざ知らず",
+    "reading": "〜ならいざしらず",
     "structure": "noun / plain form + ならいざ知らず",
     "meaning": {
       "en": "I couldn't say about that, but ...",
@@ -2346,6 +2350,7 @@
   },
   {
     "pattern": "〜を余儀なくされる",
+    "reading": "〜をよぎなくされる",
     "structure": "noun + を余儀なくされる",
     "meaning": {
       "en": "be forced into, left with no other choice",
@@ -2413,6 +2418,7 @@
   },
   {
     "pattern": "〜を皮切りに",
+    "reading": "〜をかわきりに",
     "structure": "noun + を皮切りに",
     "meaning": {
       "en": "starting from, with ... as the opening",
@@ -2480,6 +2486,7 @@
   },
   {
     "pattern": "〜に至る",
+    "reading": "〜にいたる",
     "structure": "verb dictionary form / noun + に至る",
     "meaning": {
       "en": "reach the point of, culminate in",
@@ -2547,6 +2554,7 @@
   },
   {
     "pattern": "〜の極み",
+    "reading": "〜のきわみ",
     "structure": "noun + の極み",
     "meaning": {
       "en": "the height of, the utmost",
@@ -4549,6 +4557,7 @@
   },
   {
     "pattern": "〜を禁じ得ない",
+    "reading": "〜をきんじえない",
     "structure": "emotion noun + を禁じ得ない",
     "meaning": {
       "en": "one cannot hold the feeling back",
@@ -5286,6 +5295,7 @@
   },
   {
     "pattern": "〜に即して",
+    "reading": "〜にそくして",
     "structure": "noun + に即して／に即した",
     "meaning": {
       "en": "in line with, in accordance with (facts, rules)",
@@ -5353,6 +5363,7 @@
   },
   {
     "pattern": "〜に足る",
+    "reading": "〜にたる",
     "structure": "verb dictionary form / noun + に足る",
     "meaning": {
       "en": "worthy of, enough to",
@@ -5487,6 +5498,7 @@
   },
   {
     "pattern": "〜の至り",
+    "reading": "〜のいたり",
     "structure": "noun + の至り",
     "meaning": {
       "en": "the height of (a feeling), utterly (formal)",
@@ -5621,6 +5633,7 @@
   },
   {
     "pattern": "〜一つ〜ない",
+    "reading": "〜ひとつ〜ない",
     "structure": "noun + 一つ + verb ない-form",
     "meaning": {
       "en": "not even a single",
@@ -5822,6 +5835,7 @@
   },
   {
     "pattern": "〜を限りに",
+    "reading": "〜をかぎりに",
     "structure": "noun (a time) + を限りに",
     "meaning": {
       "en": "as of, from... on (the last time)",
@@ -5889,6 +5903,7 @@
   },
   {
     "pattern": "〜を踏まえて",
+    "reading": "〜をふまえて",
     "structure": "noun + を踏まえて",
     "meaning": {
       "en": "on the basis of, taking into account",
@@ -6090,6 +6105,7 @@
   },
   {
     "pattern": "〜といっても過言ではない",
+    "reading": "〜といってもかごんではない",
     "structure": "plain form + といっても過言ではない",
     "meaning": {
       "en": "it is no exaggeration to say",
@@ -6291,6 +6307,7 @@
   },
   {
     "pattern": "〜と思いきや",
+    "reading": "〜とおもいきや",
     "structure": "plain form + と思いきや",
     "meaning": {
       "en": "I thought..., but contrary to expectation",
@@ -6693,6 +6710,7 @@
   },
   {
     "pattern": "〜と相まって",
+    "reading": "〜とあいまって",
     "structure": "noun + と相まって",
     "meaning": {
       "en": "combined with, coupled with",
@@ -6961,6 +6979,7 @@
   },
   {
     "pattern": "〜たが最後",
+    "reading": "〜たがさいご",
     "structure": "verb た-form + が最後／ら最後 (〜たが最後／〜たら最後)",
     "meaning": {
       "en": "once (something happens), there's no going back",
@@ -7028,6 +7047,7 @@
   },
   {
     "pattern": "〜手前",
+    "reading": "〜てまえ",
     "structure": "verb た-form / noun + の + 手前",
     "meaning": {
       "en": "given one's position (I can't back out)",
@@ -7095,6 +7115,7 @@
   },
   {
     "pattern": "〜に越したことはない",
+    "reading": "〜にこしたことはない",
     "structure": "plain form / noun + に越したことはない",
     "meaning": {
       "en": "nothing beats, it's best to",
@@ -7162,6 +7183,7 @@
   },
   {
     "pattern": "〜ないとも限らない",
+    "reading": "〜ないともかぎらない",
     "structure": "verb ない-form + とも限らない",
     "meaning": {
       "en": "it's not impossible that, might just",
@@ -7296,6 +7318,7 @@
   },
   {
     "pattern": "〜には及ばない",
+    "reading": "〜にはおよばない",
     "structure": "verb dictionary form / noun + には及ばない",
     "meaning": {
       "en": "no need to; not as good as",
@@ -7698,6 +7721,7 @@
   },
   {
     "pattern": "〜に限ったことではない",
+    "reading": "〜にかぎったことではない",
     "structure": "noun + に限ったことではない",
     "meaning": {
       "en": "not limited to, not just",

@@ -9,6 +9,7 @@ import unittest
 from content.grammar_points_data import RICH_LEVELS
 from study import grammar_check
 from study.grammar_check import check_entry, problems, report
+from study.grammar_examples import pattern_furigana
 
 
 def _good(**over) -> dict:
@@ -86,6 +87,19 @@ class GateRuleTests(unittest.TestCase):
         self.assertTrue(any("is empty" in p for p in self._problems(structure="  ")))
         doubled = {**CATALOGUE, "N4": [_good()]}
         self.assertTrue(any("also filed under" in p for p in check_entry("N5", _good(), doubled)))
+
+    def test_a_pattern_with_kanji_carries_a_reading_that_spells_it(self) -> None:
+        def reading_problems(**over):
+            return [p for p in self._problems(**over) if "reading" in p]
+        # the one a card prints over 中
+        self.assertEqual(reading_problems(pattern="〜の中で", reading="〜のなかで"), [])
+        self.assertTrue(any("carries its reading" in p for p in reading_problems(pattern="〜の中で")))
+        self.assertTrue(any("no kanji" in p for p in reading_problems(reading="〜てください")))
+        # a reading that is not the pattern with its kanji in kana
+        self.assertTrue(any("does not spell" in p for p in reading_problems(pattern="〜の中で", reading="〜のなかに")))
+        self.assertTrue(any("does not spell" in p for p in reading_problems(pattern="〜の中で", reading="〜の中で")))
+        self.assertTrue(any("not kana" in p for p in reading_problems(pattern="〜の中で", reading="〜のnakaで")))
+        self.assertTrue(any("whitespace" in p for p in reading_problems(pattern="〜の中で", reading=" 〜のなかで")))
 
     def test_meaning_needs_both_languages(self) -> None:
         self.assertTrue(any("meaning.fr is empty" in p for p in self._problems(meaning={"en": "x y z", "fr": ""})))
@@ -176,3 +190,31 @@ class CatalogueTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PatternFuriganaTests(unittest.TestCase):
+    """What a grammar card prints over its pattern
+    (study/grammar_examples.pattern_furigana)."""
+
+    def test_the_reading_goes_over_the_kanji_and_nothing_else(self) -> None:
+        self.assertEqual(pattern_furigana("〜の中で", "〜のなかで"),
+                         [{"text": "〜の"}, {"text": "中", "reading": "なか"}, {"text": "で"}])
+        # per kanji where the run divides; brackets and 〜 as written
+        self.assertEqual(pattern_furigana("〜が（逆接）", "〜が（ぎゃくせつ）"), [
+            {"text": "〜が（"}, {"text": "逆", "reading": "ぎゃく"}, {"text": "接", "reading": "せつ"}, {"text": "）"},
+        ])
+
+    def test_no_reading_is_the_pattern_as_text(self) -> None:
+        self.assertEqual(pattern_furigana("〜てから", None), [{"text": "〜てから"}])
+        # a written card's own rule: kanji, but nothing to read it by
+        self.assertEqual(pattern_furigana("〜の中で", None), [{"text": "〜の中で"}])
+        # a reading that does not spell the pattern puts nothing over 〜
+        self.assertEqual(pattern_furigana("〜の中で", "〜のなかに"), [{"text": "〜の中で"}])
+
+    def test_every_catalogue_pattern_with_kanji_is_read(self) -> None:
+        for level, entries in grammar_check.GRAMMAR_POINTS_BY_LEVEL.items():
+            for entry in entries:
+                parts = pattern_furigana(entry["pattern"], entry.get("reading"))
+                with self.subTest(level=level, pattern=entry["pattern"]):
+                    self.assertEqual("".join(p["text"] for p in parts), entry["pattern"])
+                    self.assertEqual(any(p.get("reading") for p in parts), "reading" in entry)

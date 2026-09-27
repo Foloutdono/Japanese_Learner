@@ -764,6 +764,7 @@
   },
   {
     "pattern": "ない形 〜ない",
+    "reading": "ないけい 〜ない",
     "structure": "う-verb あ-row ・ る-verb stem + ない",
     "meaning": {
       "en": "the plain negative: don't, doesn't",
@@ -828,6 +829,7 @@
   },
   {
     "pattern": "た形 〜た",
+    "reading": "たけい 〜た",
     "structure": "verb て-form with た for て (…た・だ)",
     "meaning": {
       "en": "the plain past: did",
@@ -2089,6 +2091,7 @@
   },
   {
     "pattern": "い形容詞／な形容詞",
+    "reading": "いけいようし／なけいようし",
     "structure": "い-adj + noun / な-adj + な + noun",
     "meaning": {
       "en": "the two adjective classes, and how each attaches to a noun",
@@ -2824,6 +2827,7 @@
   },
   {
     "pattern": "〜が好きです",
+    "reading": "〜がすきです",
     "structure": "Noun + が好きです",
     "meaning": {
       "en": "like something",
@@ -2958,6 +2962,7 @@
   },
   {
     "pattern": "〜が上手です／下手です",
+    "reading": "〜がじょうずです／へたです",
     "structure": "Noun + が上手です・が下手です",
     "meaning": {
       "en": "be skilled at / poor at",
@@ -3705,6 +3710,7 @@
   },
   {
     "pattern": "〜と思います",
+    "reading": "〜とおもいます",
     "structure": "plain form + と思います",
     "meaning": {
       "en": "I think that",
@@ -3772,6 +3778,7 @@
   },
   {
     "pattern": "〜と言います",
+    "reading": "〜といいます",
     "structure": "quoted words + と言います",
     "meaning": {
       "en": "says that",
@@ -3839,6 +3846,7 @@
   },
   {
     "pattern": "〜のが好きです",
+    "reading": "〜のがすきです",
     "structure": "verb dictionary form + のが好きです",
     "meaning": {
       "en": "enjoy doing something",
@@ -4040,6 +4048,7 @@
   },
   {
     "pattern": "〜が分かります",
+    "reading": "〜がわかります",
     "structure": "Noun + が分かります",
     "meaning": {
       "en": "grasp or understand something",
@@ -4241,6 +4250,7 @@
   },
   {
     "pattern": "〜の中で",
+    "reading": "〜のなかで",
     "structure": "group + の中で",
     "meaning": {
       "en": "within a given set",
@@ -4513,6 +4523,7 @@
   },
   {
     "pattern": "〜に行きます",
+    "reading": "〜にいきます",
     "structure": "verb stem + に行きます",
     "meaning": {
       "en": "go somewhere in order to do",
@@ -4580,6 +4591,7 @@
   },
   {
     "pattern": "〜が（逆接）",
+    "reading": "〜が（ぎゃくせつ）",
     "structure": "clause + が（逆接） + clause",
     "meaning": {
       "en": "but; and yet (joins two clauses)",
@@ -4721,6 +4733,7 @@
   },
   {
     "pattern": "〜て（理由）",
+    "reading": "〜て（りゆう）",
     "structure": "cause as て（理由）: verb て-form ／ い-adj + くて ／ noun + で, then the result",
     "meaning": {
       "en": "because …, and so (the て-form giving a reason)",
@@ -5055,6 +5068,7 @@
   },
   {
     "pattern": "〜と同じ",
+    "reading": "〜とおなじ",
     "structure": "noun + と同じ (+ noun／です)",
     "meaning": {
       "en": "the same as",
@@ -5122,6 +5136,7 @@
   },
   {
     "pattern": "〜に〜回",
+    "reading": "〜に〜かい",
     "structure": "period + に + number + 回 (how often)",
     "meaning": {
       "en": "N times per (day, week…)",
@@ -5186,6 +5201,7 @@
   },
   {
     "pattern": "〜く／〜に（副詞形）",
+    "reading": "〜く／〜に（ふくしけい）",
     "structure": "い-adj (drop い) + く ／ な-adj + に（副詞形） + verb",
     "meaning": {
       "en": "turning an adjective into an adverb",
@@ -5381,6 +5397,7 @@
   },
   {
     "pattern": "〜を（移動）",
+    "reading": "〜を（いどう）",
     "structure": "place + を（移動） + verb of movement",
     "meaning": {
       "en": "the space passed through or left (walk along, leave)",
@@ -5574,6 +5591,7 @@
   },
   {
     "pattern": "助数詞 〜つ／〜人／〜枚",
+    "reading": "じょすうし 〜つ／〜にん／〜まい",
     "structure": "number + つ／人／枚 (a counter per kind of thing)",
     "meaning": {
       "en": "counters: general things, people, flat things",
@@ -5705,6 +5723,7 @@
   },
   {
     "pattern": "〜で（理由）",
+    "reading": "〜で（りゆう）",
     "structure": "noun + で（理由） + result",
     "meaning": {
       "en": "because of (a cause stated as a noun)",
@@ -5774,6 +5793,7 @@
   },
   {
     "pattern": "何か／誰か／どこか",
+    "reading": "なにか／だれか／どこか",
     "structure": "何か／誰か／どこか (+ particle) + predicate",
     "meaning": {
       "en": "something, someone, somewhere",
@@ -5841,6 +5861,7 @@
   },
   {
     "pattern": "何も／誰も〜ない",
+    "reading": "なにも／だれも〜ない",
     "structure": "何も／誰も + negative predicate (〜ない)",
     "meaning": {
       "en": "nothing, nobody (with a negative)",

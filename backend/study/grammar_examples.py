@@ -14,11 +14,17 @@ The span is a surface-form match, the same one study/grammar_match uses
 to decide a sentence contains its pattern at all: the first hit of the
 longest stem. A bare particle has no verifiable stem, so it gets no span
 -- shown whole, never blanked (grammar_match.verifiable says why).
+
+The pattern itself is drawn the same way, as furigana parts
+(pattern_furigana): 〜の中で is 〜の, 中 read なか, で. Its reading is
+the catalogue's own `reading`, written by hand, never the tokenizer's:
+a pattern is a fragment, and a fragment is exactly where the tokenizer
+guesses -- 〜中 alone is なか to it, 〜気味 きみ, 〜得る える.
 """
 from functools import lru_cache
 
 from content.grammar_sentences_data import translation
-from study.furigana import align_sentence, mark_spans
+from study.furigana import align_deck, align_sentence, is_kanji, mark_spans
 from study.grammar_match import stems, verifiable
 
 BLANK = "＿＿＿"
@@ -100,3 +106,30 @@ def blanked_payload(example: dict, pattern: str, lang: str) -> dict:
         example["jp"], example.get("en", ""), example.get("fr", ""),
         example.get("register"), bool(example.get("contrast")), pattern, lang, True,
     ))
+
+
+def _kanji(c: str) -> bool:
+    return is_kanji(c) or c == "々"
+
+
+@lru_cache(maxsize=1024)
+def _pattern_parts(pattern: str, reading: str | None) -> tuple[tuple[tuple[str, str], ...], ...]:
+    if not reading or not any(_kanji(c) for c in pattern):
+        return ((("text", pattern),),)
+    parts = align_deck(pattern, reading)
+    # A reading that does not spell the pattern comes back from align as
+    # one part carrying all of it -- the whole reading over 〜, the
+    # particles and the brackets. No furigana is better than that; the
+    # gate (grammar_check) keeps the catalogue from ever getting here.
+    if any(p.get("reading") and not all(_kanji(c) for c in p["text"]) for p in parts):
+        return ((("text", pattern),),)
+    return tuple(tuple(p.items()) for p in parts)
+
+
+def pattern_furigana(pattern: str, reading: str | None) -> list[dict]:
+    """[{text, reading?}] for a pattern: a reading over each kanji run
+    (per kanji where align divides it), the kana, 〜 and brackets as
+    they are written. One unreadinged part when there is no kanji, no
+    reading (a written card's own rule) or a reading that does not
+    spell the pattern."""
+    return [dict(p) for p in _pattern_parts(pattern, reading)]

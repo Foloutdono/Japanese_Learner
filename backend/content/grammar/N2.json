@@ -73,6 +73,7 @@
   },
   {
     "pattern": "〜ざるを得ない",
+    "reading": "〜ざるをえない",
     "structure": "verb ない-stem + ざるを得ない",
     "meaning": {
       "en": "have no choice but to",
@@ -279,6 +280,7 @@
   },
   {
     "pattern": "〜に伴って",
+    "reading": "〜にともなって",
     "structure": "noun/verb dictionary form + に伴って",
     "meaning": {
       "en": "as, along with (a change)",
@@ -351,6 +353,7 @@
   },
   {
     "pattern": "〜に基づいて",
+    "reading": "〜にもとづいて",
     "structure": "noun + に基づいて",
     "meaning": {
       "en": "based on",
@@ -639,6 +642,7 @@
   },
   {
     "pattern": "〜を問わず",
+    "reading": "〜をとわず",
     "structure": "noun + を問わず",
     "meaning": {
       "en": "regardless of",
@@ -1570,6 +1574,7 @@
   },
   {
     "pattern": "〜に応じて",
+    "reading": "〜におうじて",
     "structure": "noun + に応じて",
     "meaning": {
       "en": "in response to, varying with",
@@ -1709,6 +1714,7 @@
   },
   {
     "pattern": "〜に限らず",
+    "reading": "〜にかぎらず",
     "structure": "noun + に限らず",
     "meaning": {
       "en": "not limited to, and not only",
@@ -1848,6 +1854,7 @@
   },
   {
     "pattern": "〜に加えて",
+    "reading": "〜にくわえて",
     "structure": "noun + に加えて",
     "meaning": {
       "en": "in addition to, on top of",
@@ -1920,6 +1927,7 @@
   },
   {
     "pattern": "〜に先立って",
+    "reading": "〜にさきだって",
     "structure": "noun / verb dictionary form + に先立って",
     "meaning": {
       "en": "prior to, ahead of",
@@ -1992,6 +2000,7 @@
   },
   {
     "pattern": "〜に反して",
+    "reading": "〜にはんして",
     "structure": "noun + に反して",
     "meaning": {
       "en": "contrary to, against",
@@ -2203,6 +2212,7 @@
   },
   {
     "pattern": "〜を通じて",
+    "reading": "〜をつうじて",
     "structure": "noun + を通じて",
     "meaning": {
       "en": "through, by way of; also: throughout",
@@ -2419,6 +2429,7 @@
   },
   {
     "pattern": "〜得る／〜得ない",
+    "reading": "〜うる／〜えない",
     "structure": "verb stem + 得る・得ない",
     "meaning": {
       "en": "can possibly / cannot possibly (formal)",
@@ -2913,6 +2924,7 @@
   },
   {
     "pattern": "〜に際して",
+    "reading": "〜にさいして",
     "structure": "noun / verb dictionary form + に際して",
     "meaning": {
       "en": "at the moment of undertaking",
@@ -3196,6 +3208,7 @@
   },
   {
     "pattern": "〜に沿って",
+    "reading": "〜にそって",
     "structure": "noun + に沿って",
     "meaning": {
       "en": "keeping to a line or a policy",
@@ -3340,6 +3353,7 @@
   },
   {
     "pattern": "〜を契機に",
+    "reading": "〜をけいきに",
     "structure": "noun + を契機に",
     "meaning": {
       "en": "taking that as the turning point",
@@ -3412,6 +3426,7 @@
   },
   {
     "pattern": "〜反面",
+    "reading": "〜はんめん",
     "structure": "plain form + 反面",
     "meaning": {
       "en": "while the opposite is also true",
@@ -3484,6 +3499,7 @@
   },
   {
     "pattern": "〜一方だ",
+    "reading": "〜いっぽうだ",
     "structure": "verb dictionary form + 一方だ",
     "meaning": {
       "en": "the trend only continues in one direction",
@@ -4405,6 +4421,7 @@
   },
   {
     "pattern": "〜同然",
+    "reading": "〜どうぜん",
     "structure": "noun / verb た-form + も + 同然",
     "meaning": {
       "en": "as good as, in all but name",
@@ -4472,6 +4489,7 @@
   },
   {
     "pattern": "〜に相違ない",
+    "reading": "〜にそういない",
     "structure": "plain form + に相違ない",
     "meaning": {
       "en": "there can be no doubt of it",
@@ -4539,6 +4557,7 @@
   },
   {
     "pattern": "〜に決まっている",
+    "reading": "〜にきまっている",
     "structure": "plain form + に決まっている",
     "meaning": {
       "en": "it is bound to turn out that way",
@@ -5008,6 +5027,7 @@
   },
   {
     "pattern": "〜末に",
+    "reading": "〜すえに",
     "structure": "verb た-form/noun + の + 末に",
     "meaning": {
       "en": "after ..., in the end (following a process)",
@@ -5075,6 +5095,7 @@
   },
   {
     "pattern": "〜次第だ",
+    "reading": "〜しだいだ",
     "structure": "verb た-form + 次第だ",
     "meaning": {
       "en": "as soon as; also: it depends on",
@@ -5474,6 +5495,7 @@
   },
   {
     "pattern": "〜以来",
+    "reading": "〜いらい",
     "structure": "verb て-form / noun + 以来",
     "meaning": {
       "en": "ever since",
@@ -5541,6 +5563,7 @@
   },
   {
     "pattern": "〜かと思うと",
+    "reading": "〜かとおもうと",
     "structure": "verb た-form + かと思うと／かと思ったら",
     "meaning": {
       "en": "no sooner had... than",
@@ -5675,6 +5698,7 @@
   },
   {
     "pattern": "〜上は",
+    "reading": "〜うえは",
     "structure": "verb plain form + 上は",
     "meaning": {
       "en": "now that, since (a decision is made)",
@@ -6015,6 +6039,7 @@
   },
   {
     "pattern": "〜から見ると",
+    "reading": "〜からみると",
     "structure": "noun + から見ると／から見れば",
     "meaning": {
       "en": "judging from, from the point of view of",
@@ -6216,6 +6241,7 @@
   },
   {
     "pattern": "〜を中心に",
+    "reading": "〜をちゅうしんに",
     "structure": "noun + を中心に（して）",
     "meaning": {
       "en": "centred on, focusing on",
@@ -6417,6 +6443,7 @@
   },
   {
     "pattern": "〜向け",
+    "reading": "〜むけ",
     "structure": "noun + 向け（の／に）",
     "meaning": {
       "en": "intended for, aimed at",
@@ -7151,6 +7178,7 @@
   },
   {
     "pattern": "〜ずに済む",
+    "reading": "〜ずにすむ",
     "structure": "verb ない-stem + ずに済む／ないで済む",
     "meaning": {
       "en": "get by without, manage without having to",
@@ -7352,6 +7380,7 @@
   },
   {
     "pattern": "〜に限って",
+    "reading": "〜にかぎって",
     "structure": "noun + に限って",
     "meaning": {
       "en": "only when, of all (things, times, people)",
@@ -7553,6 +7582,7 @@
   },
   {
     "pattern": "〜と同時に",
+    "reading": "〜とどうじに",
     "structure": "verb dictionary form / noun + と同時に",
     "meaning": {
       "en": "at the same time as; as well as",

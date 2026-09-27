@@ -12,7 +12,7 @@ from content.grammar_points_data import (
 from content.grammar_sentences_data import get_sentences
 from study import card_index
 from study.card_lookup import GRAMMAR_STATUS_MODES, card_stats
-from study.grammar_examples import example_payload
+from study.grammar_examples import example_payload, pattern_furigana
 from study.grammar_lesson import contrast_payload, lesson_payload
 from study.modes import (
     CONTRAST, GRAMMAR, GRADED_FOR_SOURCE, GRADED_ORDER_FOR_SOURCE, INDICE_CHOICES,
@@ -143,6 +143,11 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         # b2f: the meaning is shown, recall the pattern.
         "direction": m.direction,
         "grammar":   pattern,
+        # The pattern's furigana, printed on every face that shows it:
+        # a reading names no rule, so it gives nothing away -- the same
+        # call fill_in's sentence makes below -- and without it 〜の中で
+        # asks a learner who cannot read 中 a kanji question.
+        "grammar_furigana": pattern_furigana(pattern, entry.get("reading")),
         "structure": entry["structure"],
         "meaning":   gloss(entry, lang),
         "register":  entry.get("register"),
@@ -371,6 +376,7 @@ def get_grammar_review_cards(level: str, lang: str = "fr", user_id: str = Depend
             "card_id":   raw_id,
             "raw_id":    raw_id,
             "grammar":   entry["pattern"],
+            "grammar_furigana": pattern_furigana(entry["pattern"], entry.get("reading")),
             "structure": entry["structure"],
             "meaning":   gloss(entry, lang),
             "stage":     stage,

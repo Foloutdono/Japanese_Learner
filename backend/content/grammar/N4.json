@@ -565,6 +565,7 @@
   },
   {
     "pattern": "使役形 〜させる",
+    "reading": "しえきけい 〜させる",
     "structure": "verb causative stem + させる",
     "meaning": {
       "en": "make or let someone do",
@@ -634,6 +635,7 @@
   },
   {
     "pattern": "受身形 〜られる",
+    "reading": "うけみけい 〜られる",
     "structure": "verb passive stem + られる",
     "meaning": {
       "en": "be done to, have something done to oneself",
@@ -1378,6 +1380,7 @@
   },
   {
     "pattern": "可能形 〜(ら)れる",
+    "reading": "かのうけい 〜(ら)れる",
     "structure": "verb potential stem + る・られる",
     "meaning": {
       "en": "can do, be able to — the conjugated potential",
@@ -1447,6 +1450,7 @@
   },
   {
     "pattern": "意向形 〜(よ)う",
+    "reading": "いこうけい 〜(よ)う",
     "structure": "verb volitional form",
     "meaning": {
       "en": "let's, I think I'll — the plain counterpart of ましょう",
@@ -1511,6 +1515,7 @@
   },
   {
     "pattern": "〜ようと思う",
+    "reading": "〜ようとおもう",
     "structure": "verb volitional form + と思う",
     "meaning": {
       "en": "be thinking of doing, plan to",
@@ -2332,6 +2337,7 @@
   },
   {
     "pattern": "自動詞／他動詞",
+    "reading": "じどうし／たどうし",
     "structure": "intransitive: noun + が + verb / transitive: noun + を + verb",
     "meaning": {
       "en": "paired verbs: one thing happens, the other is done to something",
@@ -4302,6 +4308,7 @@
   },
   {
     "pattern": "〜て／〜ないで（依頼）",
+    "reading": "〜て／〜ないで（いらい）",
     "structure": "verb て-form ／ ない-form + で, ending the sentence",
     "meaning": {
       "en": "a casual request: do this, don't do that",
@@ -4505,6 +4512,7 @@
   },
   {
     "pattern": "〜方",
+    "reading": "〜かた",
     "structure": "verb stem + 方",
     "meaning": {
       "en": "the way of doing something",
@@ -4569,6 +4577,7 @@
   },
   {
     "pattern": "〜出す",
+    "reading": "〜だす",
     "structure": "verb stem + 出す",
     "meaning": {
       "en": "break into an action abruptly",
@@ -4636,6 +4645,7 @@
   },
   {
     "pattern": "〜直す",
+    "reading": "〜なおす",
     "structure": "verb stem + 直す",
     "meaning": {
       "en": "do it over again",
@@ -4904,6 +4914,7 @@
   },
   {
     "pattern": "〜そうだ（伝聞）",
+    "reading": "〜そうだ（でんぶん）",
     "structure": "plain form + そうだ",
     "meaning": {
       "en": "I hear that, they say that",
@@ -4976,6 +4987,7 @@
   },
   {
     "pattern": "〜場合",
+    "reading": "〜ばあい",
     "structure": "verb plain form ／ noun + の + 場合 (+ は)",
     "meaning": {
       "en": "in the case that, if it happens that",
@@ -5043,6 +5055,7 @@
   },
   {
     "pattern": "〜必要がある",
+    "reading": "〜ひつようがある",
     "structure": "verb dictionary form + 必要がある",
     "meaning": {
       "en": "it is necessary to, need to",
@@ -5718,6 +5731,7 @@
   },
   {
     "pattern": "〜ように言う",
+    "reading": "〜ようにいう",
     "structure": "verb dictionary form／ない-form + ように言う（頼む・伝える）",
     "meaning": {
       "en": "tell someone to do (reporting an instruction)",
@@ -5924,6 +5938,7 @@
   },
   {
     "pattern": "〜な（禁止）",
+    "reading": "〜な（きんし）",
     "structure": "verb dictionary form + な（禁止）",
     "meaning": {
       "en": "don't! (a blunt prohibition)",
@@ -5993,6 +6008,7 @@
   },
   {
     "pattern": "命令形 〜ろ／〜え",
+    "reading": "めいれいけい 〜ろ／〜え",
     "structure": "verb imperative: る-verb stem + ろ ／ う-verb final え-row (書け, 待て)",
     "meaning": {
       "en": "the plain command form",
@@ -6265,6 +6281,7 @@
   },
   {
     "pattern": "〜中",
+    "reading": "〜ちゅう・じゅう",
     "structure": "noun + 中（ちゅう：during ／ じゅう：throughout）",
     "meaning": {
       "en": "during (〜ちゅう) or all through (〜じゅう)",
@@ -6540,6 +6557,7 @@
   },
   {
     "pattern": "〜か（間接疑問）",
+    "reading": "〜か（かんせつぎもん）",
     "structure": "question word + plain clause + か（間接疑問） + 知っている／分かる／教える",
     "meaning": {
       "en": "an embedded question: I know where… / do you know when…",
@@ -6604,6 +6622,7 @@
   },
   {
     "pattern": "何でも／誰でも／いつでも／どこでも",
+    "reading": "なんでも／だれでも／いつでも／どこでも",
     "structure": "何でも／誰でも／いつでも／どこでも (question word + でも) + predicate",
     "meaning": {
       "en": "anything, anyone, any time, anywhere: whichever it is",
@@ -6742,6 +6761,7 @@
   },
   {
     "pattern": "〜も（強調）",
+    "reading": "〜も（きょうちょう）",
     "structure": "number + counter + も（強調） + predicate",
     "meaning": {
       "en": "as much as, as many as (stressing a large amount)",
@@ -7223,6 +7243,7 @@
   },
   {
     "pattern": "〜予定だ",
+    "reading": "〜よていだ",
     "structure": "verb dictionary form ／ noun + の + 予定だ",
     "meaning": {
       "en": "it is planned that, I am due to",
@@ -7367,6 +7388,7 @@
   },
   {
     "pattern": "〜が見える／〜が聞こえる",
+    "reading": "〜がみえる／〜がきこえる",
     "structure": "noun + が見える ／ が聞こえる",
     "meaning": {
       "en": "can be seen / can be heard (of itself, no effort)",
@@ -7439,6 +7461,7 @@
   },
   {
     "pattern": "〜に見える",
+    "reading": "〜にみえる",
     "structure": "noun／な-adj + に見える ／ い-adj + く見える",
     "meaning": {
       "en": "looks (like), appears",
