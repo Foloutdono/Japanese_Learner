@@ -157,6 +157,12 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
     play() {
       playerRef.current?.playVideo()
     },
+    // The clock now, not at the last poll: the stop at a sentence's end
+    // (AnalyzerScreen) reads it to land inside the sentence it stopped.
+    currentTime() {
+      const player = playerRef.current
+      return typeof player?.getCurrentTime === 'function' ? player.getCurrentTime() : null
+    },
   }), [])
 
   return <div className="video-player__frame"><div ref={containerRef} /></div>

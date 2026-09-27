@@ -227,6 +227,68 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     expect(spies.pause).toHaveBeenCalled()
   })
 
+  // The stop comes BEFORE the next sentence starts, not on the poll that
+  // finds it already playing: the line stays on the sentence just heard,
+  // so Rejouer replays it and its words are the ones beside the card.
+  it('stops at a sentence\'s end before the next one, and Play goes on past it', async () => {
+    await openVideo()
+    $('button[aria-label="Pause à la fin de chaque phrase"]').click()
+    await settle(30)
+    // A timer for the end, set a poll ahead of it.
+    player.last.onTimeUpdate(39.5)
+    player.last.onTimeUpdate(39.75)
+    expect(spies.pause).not.toHaveBeenCalled()
+    await settle(300)
+    expect(spies.pause).toHaveBeenCalledTimes(1)
+    expect($('.anl-subs__count').textContent).toContain('1 / 2')
+    // Played on: no second stop at the same end, the line moves on.
+    player.last.onTimeUpdate(39.8)
+    player.last.onTimeUpdate(40.1)
+    player.last.onTimeUpdate(40.35)
+    await settle(60)
+    expect(spies.pause).toHaveBeenCalledTimes(1)
+    expect($('.anl-subs__count').textContent).toContain('2 / 2')
+  })
+
+  it('steps back inside a sentence whose end the clock crossed between two polls', async () => {
+    await openVideo()
+    $('button[aria-label="Pause à la fin de chaque phrase"]').click()
+    await settle(30)
+    player.last.onTimeUpdate(39.9)
+    player.last.onTimeUpdate(40.2)
+    await settle(60)
+    expect(spies.pause).toHaveBeenCalled()
+    expect(spies.seekTo).toHaveBeenLastCalledWith(39.95)
+    expect($('.anl-subs__count').textContent).toContain('1 / 2')
+  })
+
+  // The current sentence in the middle of the rail, and still there when
+  // the grammar's box under the rail comes or goes with the sentence.
+  it('keeps the current sentence in the middle of the rail', async () => {
+    // Every third line with a construction: the rail's height changes
+    // as the clock moves from one to the next.
+    session = {
+      ...LONG,
+      sentences: LONG.sentences.map((s, i) => (i % 3 ? s : { ...s, grammar: SESSION.sentences[0].grammar })),
+    }
+    await openVideo()
+    const line = $('.anl-desk__rail .anl-line')
+    const centred = () => {
+      const stop = $('.anl-desk__rail .anl-stop[aria-current="true"]').getBoundingClientRect()
+      const rail = line.getBoundingClientRect()
+      return Math.abs((stop.top + stop.height / 2) - (rail.top + rail.height / 2))
+    }
+    // Line 20 (no grammar: the rail has the column), then 21 (grammar:
+    // the rail gives half of it back).
+    for (const [at, index] of [[121.5, 20], [125.5, 21], [129.5, 22]]) {
+      player.last.onTimeUpdate(at)
+      await settle(700)
+      expect($('.anl-subs__count').textContent).toContain(`${index + 1} / 36`)
+      expect(centred()).toBeLessThan(4)
+    }
+    expect(document.scrollingElement.scrollTop).toBe(0)
+  })
+
   it('walks the speed and folds the video away without unmounting it', async () => {
     await openVideo()
     const rate = $('.anl-pbar__rate')
