@@ -9220,22 +9220,25 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    The chip adds no height: the comprehension card under the clock is
    measured to hold the longest text on a 667px phone
    (ComprehensionRun.touch.test.jsx) and has no line to spare. So it
-   stands out of the flow, at --sp-6, and what it overhangs goes to
-   the stage's gap under the clock; its target is grown back to a
-   chip's under a thumb. */
+   stands out of the flow at --sp-7, the most the stage's gap under the
+   clock takes before the card would have to move, its figures a size
+   up from a chip's, and its target grown to a thumb's 44px over the
+   bar's end and the gap, neither of which takes a press. */
 .timer--aside { position: relative; }
-.timer--aside > .timer__label { padding-inline: var(--sp-9); }
+.timer--aside > .timer__label { padding-inline: calc(var(--sp-9) + var(--sp-3)); }
 .timer--aside > .pace-chip {
   position: absolute;
   inset-inline-end: 0;
   top: calc(var(--sp-1) + var(--sp-2));
-  height: var(--sp-6);
-  padding-inline: var(--sp-3);
+  justify-content: center;
+  min-width: var(--sp-9);
+  height: var(--sp-7);
+  font-size: var(--fs-sm);
 }
 .timer--aside > .pace-chip::after {
   content: '';
   position: absolute;
-  inset: calc(-1 * var(--sp-2)) 0;
+  inset: calc(-1 * var(--sp-3)) calc(-1 * var(--sp-2));
 }
 /* The sentence: the card's one line, Japanese as content. */
 .sentence {

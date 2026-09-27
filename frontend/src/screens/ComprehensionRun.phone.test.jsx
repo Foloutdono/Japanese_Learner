@@ -192,6 +192,16 @@ describe('the pace chip on the clock at 390×844', () => {
     expect(chip.top).toBeGreaterThan(bar.bottom)
     expect(Math.round(chip.right)).toBe(Math.round(bar.right))
 
+    // Big enough to press: drawn at --sp-7, its target grown over the
+    // bar's end and into the gap under it (the card, beyond, keeps its
+    // own presses) -- a press just over it or just under it is still
+    // the chip's.
+    expect(Math.round(chip.height)).toBeGreaterThanOrEqual(28)
+    const chipEl = root.querySelector('.timer .pace-chip')
+    const x = chip.left + chip.width / 2
+    expect(document.elementFromPoint(x, chip.top - 6)).toBe(chipEl)
+    expect(document.elementFromPoint(x, chip.bottom + 3)).toBe(chipEl)
+
     // The time's own ink, not its padded box, ends before the chip.
     const range = document.createRange()
     range.selectNodeContents(time)
