@@ -176,3 +176,29 @@ describe('the comprehension passage at 390×844', () => {
       .toBeGreaterThanOrEqual(card.getBoundingClientRect().bottom - 0.5)
   })
 })
+
+// The reading pace's chip at the clock's end (ReadingPieces' PaceChip):
+// on the label's line, under the hairline -- which keeps the whole
+// width, as every clock's does -- and clear of the time it sits beside.
+describe('the pace chip on the clock at 390×844', () => {
+  it('leaves the bar its whole width and stands under it, clear of the time', async () => {
+    const root = await reading(IN_BAND)
+    const timer = root.querySelector('.timer').getBoundingClientRect()
+    const bar = root.querySelector('.timer__bar').getBoundingClientRect()
+    const chip = root.querySelector('.timer .pace-chip').getBoundingClientRect()
+    const time = root.querySelector('.timer__label')
+
+    expect(Math.round(bar.width)).toBe(Math.round(timer.width))
+    expect(chip.top).toBeGreaterThan(bar.bottom)
+    expect(Math.round(chip.right)).toBe(Math.round(bar.right))
+
+    // The time's own ink, not its padded box, ends before the chip.
+    const range = document.createRange()
+    range.selectNodeContents(time)
+    expect(range.getBoundingClientRect().right).toBeLessThan(chip.left)
+
+    // And the clock is no taller than a clock without it: the card
+    // under it keeps every line it was measured for.
+    expect(Math.round(timer.height)).toBe(Math.round(bar.height + time.getBoundingClientRect().height + (time.getBoundingClientRect().top - bar.bottom)))
+  })
+})

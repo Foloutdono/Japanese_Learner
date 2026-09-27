@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider, useLang } from '../LangContext'
@@ -126,6 +126,11 @@ function mount(path = '/profile/settings') {
 
 let journey = NO_GOAL
 let profile = PROFILE
+
+// A pace picked here is mirrored into this browser's localStorage
+// (stores/readingPace), which every later file in the lane shares: the
+// first ride's test would read the untimed pace chosen below.
+afterEach(() => { window.localStorage.removeItem('jl.readingPace') })
 
 beforeEach(async () => {
   journey = NO_GOAL

@@ -9213,21 +9213,30 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* The reading pace's chip keeps its figures one width as it turns. */
 .pace-chip { font-variant-numeric: tabular-nums; }
 /* A clock carrying a control at its end (the reading pace's chip,
-   ReadingPieces' PaceChip): the hairline and the label in the first
-   column, the chip beside both. The clock keeps its own height: the
-   chip gives the 4px it is taller than the bar, the gap and the label
-   to the stage's gap on either side, because the comprehension card
-   under it is measured to hold the longest text on a 667px phone
-   (ComprehensionRun.touch.test.jsx) and has no line to spare. */
-.timer--aside {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--sp-2) var(--sp-4);
-  align-items: center;
+   ReadingPieces' PaceChip): the hairline across the whole width, as on
+   every clock, and the chip on the label's line at its end, level with
+   the label under the bar's gap -- never beside the bar, which it
+   would shorten. The label keeps the centre, held clear of the chip.
+   The chip adds no height: the comprehension card under the clock is
+   measured to hold the longest text on a 667px phone
+   (ComprehensionRun.touch.test.jsx) and has no line to spare. So it
+   stands out of the flow, at --sp-6, and what it overhangs goes to
+   the stage's gap under the clock; its target is grown back to a
+   chip's under a thumb. */
+.timer--aside { position: relative; }
+.timer--aside > .timer__label { padding-inline: var(--sp-9); }
+.timer--aside > .pace-chip {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(var(--sp-1) + var(--sp-2));
+  height: var(--sp-6);
+  padding-inline: var(--sp-3);
 }
-.timer--aside > .timer__bar { grid-area: 1 / 1; }
-.timer--aside > .timer__label { grid-area: 2 / 1; }
-.timer--aside > .pace-chip { grid-area: 1 / 2 / 3 / 3; margin-block: calc(-1 * var(--sp-1)); }
+.timer--aside > .pace-chip::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--sp-2)) 0;
+}
 /* The sentence: the card's one line, Japanese as content. */
 .sentence {
   display: block;

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterAll } from 'vitest'
 import { render } from 'vitest-browser-react'
 
 // ── The reading pace's store (stores/readingPace.js) ─────────────
@@ -19,6 +19,8 @@ vi.mock('../lib/api', () => ({
 
 window.localStorage.removeItem('jl.readingPace')
 const { useReadingPace, setReadingPace } = await import('./readingPace')
+// The mirror is this browser's, shared with every later file in the lane.
+afterAll(() => { window.localStorage.removeItem('jl.readingPace') })
 
 const settle = (ms = 20) => new Promise(r => setTimeout(r, ms))
 

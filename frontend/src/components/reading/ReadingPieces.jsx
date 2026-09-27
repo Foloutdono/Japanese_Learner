@@ -21,9 +21,9 @@ import { useReadingPace, setReadingPace } from '../../stores/readingPace'
 
 /** A clock's drawing: the hairline, `fill` of it left, over its label.
  *  `running` says whether the label is a countdown (role="timer");
- *  `aside` is a control standing at the clock's end, beside the
- *  hairline and the label both -- the reading pace's chip (PaceChip).
- *  Comprehension draws its window with it too. */
+ *  `aside` is a control at the end of the label's line, under the
+ *  hairline, which keeps the whole width -- the reading pace's chip
+ *  (PaceChip). Comprehension draws its window with it too. */
 export function Clock({ fill, label, low = false, running = true, aside = null }) {
   return (
     <div className={`timer${aside ? ' timer--aside' : ''}`}>
