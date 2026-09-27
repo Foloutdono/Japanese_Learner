@@ -459,6 +459,15 @@ describe('SentenceBreakdown', () => {
     expect(line.querySelector('.bkd-frame .bkd-tok--door')).toBeNull()
   })
 
+  it('a mark never starts a line: it stands with the word before it', async () => {
+    const analysis = { available: true, tokens: [tokenFixture(), particleFixture(), symbolFixture()], grammar: [] }
+    await render(withLang(<SentenceBreakdown analysis={analysis} t={T} layout="rows" onTokenClick={vi.fn()} />))
+    const keep = document.querySelector('.bkd-line .bkd-keep')
+    expect(keep).not.toBeNull()
+    expect(keep.textContent).toBe('は。')
+    expect(keep.parentElement.classList.contains('bkd-line')).toBe(true)
+  })
+
   it('an ending rides its word as a tag and takes no number (plan 158)', async () => {
     const MASHITA = { pattern: '〜ました／〜ませんでした', level: 'N5', raw_id: 'grammar_N5_〜ました', kind: 'pattern',
       start: 5, end: 8, segments: [[5, 8]], meaning: { en: 'polite past', fr: 'passé poli' } }

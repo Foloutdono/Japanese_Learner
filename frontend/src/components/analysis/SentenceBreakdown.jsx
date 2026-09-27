@@ -80,6 +80,15 @@ export function SentenceLine({ analysis, text, t, onTokenClick, lit = null, numb
   let i = 0
   while (i < tokens.length) {
     const p = owner[i]
+    // A mark never starts a line (the 禁則 a page keeps): 。 and 、
+    // stand with what comes before them, so the line cannot wrap
+    // between the two -- it had left a 。 alone on a line of its own.
+    if (p === -1 && out.length && isMark(tokens[i])) {
+      const prev = out.pop()
+      out.push(<span key={`mk-${i}`} className="bkd-keep">{prev}{word(tokens[i], i)}</span>)
+      i += 1
+      continue
+    }
     if (p === -1) {
       out.push(word(tokens[i], i))
       i += 1
@@ -111,6 +120,9 @@ export function SentenceLine({ analysis, text, t, onTokenClick, lit = null, numb
     </div>
   )
 }
+
+const MARK_POS = new Set(['symbol', 'punctuation'])
+const isMark = tok => MARK_POS.has(tok.pos)
 
 // One row per word (rows.js's wordRowsOf): the particles, the copula
 // and the words a construction is written on are its numbered card's,
@@ -242,12 +254,12 @@ export function SentenceBreakdown({
         {available && (
           <GrammarPoints analysis={analysis} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openGrammar} />
         )}
-        {/* The foot of the column (plan 158): the explanation where it
-            was bought, else the button that buys it -- the one thing
-            left to do, so on the desk it stands on the panel's floor
-            rather than under the last card (.bkd__foot). */}
+        {/* The explanation where it was bought, under the cards it
+            follows; else the button that buys it -- the one thing left
+            to do, so on the desk it stands on the panel's floor rather
+            than under the last card (.bkd__foot, plan 158). */}
         {noteText
-          ? <span className="prose__ai bkd__foot">{noteText}</span>
+          ? <span className="prose__ai">{noteText}</span>
           : onExplain && available && (
             <div className="bkd__explain bkd__foot">
               {explainError && <span className="hint bkd__explain-hint">{explainError}</span>}

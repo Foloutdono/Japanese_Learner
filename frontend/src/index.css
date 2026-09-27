@@ -9666,6 +9666,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   border-radius: var(--r-card);
   line-height: 1.6;
 }
+/* A mark with the item before it, so a line never starts on 。 or 、. */
+.bkd-keep {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+}
 .bkd-frame {
   display: inline-flex;
   align-items: baseline;
@@ -24970,10 +24976,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      line and the entry stand in the side's own column rhythm. */
   .desk-lookup { display: contents; }
   /* The breakdown down the panel's height (plan 158): the rows and the
-     cards at its head, the explanation -- or the button that buys it --
-     on its floor, where the column had stood empty under a small
-     button. The wrapper SideLookup hides while an entry is open stays
-     hidden. */
+     cards at its head, the button that buys the explanation on its
+     floor, where the column had stood empty under a small button. The
+     wrapper SideLookup hides while an entry is open stays hidden. */
   .desk-pane > .desk-lookup > div:not([hidden]) {
     display: flex;
     flex: 1 0 auto;
