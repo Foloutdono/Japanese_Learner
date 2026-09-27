@@ -309,7 +309,7 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     // The words to come are faded by the mask; the rule under each
     // word, the SRS's, is not.
     const toks = $$('.anl-subs__line .tok')
-    expect(getComputedStyle(toks[2].querySelector('.tok__word')).maskImage).toContain('gradient')
+    expect(getComputedStyle(toks[2].querySelector('.tok__word')).maskImage).toMatch(/0\.4\)/)
     expect(getComputedStyle(toks[2]).borderBottomStyle).toBe('solid')
     // The next line is read out in its turn: 駅 two beats of 6.5 over
     // four seconds (待つ, read by its letters, is three, and held half
@@ -321,6 +321,12 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     player.last.onTimeUpdate(44.5)
     expect($('.anl-subs__line[data-sung]')).toBeNull()
     expect($$('.anl-subs__line .tok[style]').length).toBe(0)
+    // Still under a mask, an opaque one: a masked glyph is smoothed in
+    // greyscale and a plain one in subpixel, so dropping the mask when
+    // the line ends made every word twitch just after it was lit whole.
+    const plain = getComputedStyle($('.anl-subs__line .tok__word')).maskImage
+    expect(plain).toContain('gradient')
+    expect(plain).not.toMatch(/0\.4\)/)
   })
 
   // The analyser's screen does not render on the poll: the bar and the

@@ -1934,7 +1934,18 @@
    theme (3.97:1 measured by the contrast guard); the focused word's
    reading takes the primary ink, which the tint already raises. */
 .tok--on .tok__furi { color: var(--text-primary); }
-/* 字幕の流れ — the words lit as they are said (SubtitleLine). While the
+/* 字幕の流れ — the subtitle's words sit under a mask at all times,
+   an opaque one while the video is outside the line, which takes
+   nothing away. A masked glyph is drawn in a layer of its own, and a
+   browser smooths a layer's text in greyscale where the plain line has
+   subpixel (ClearType on Windows): the line lit whole and the line
+   after its cue ended were two renderings, and every word twitched as
+   the sweep let go of it. */
+.anl-subs__line .tok__word,
+.anl-subs__line .tok__furi {
+  mask-image: linear-gradient(#000, #000);
+}
+/* The words lit as they are said (SubtitleLine). While the
    video is inside the line (data-sung), the words to come are faded,
    the word being said fills from its first letter to its last, and the
    words said stand whole: every word's --said, written each frame
