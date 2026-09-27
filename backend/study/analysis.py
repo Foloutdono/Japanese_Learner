@@ -25,7 +25,7 @@ from content.vocab_jmdict_data import vocab_jmdict_to_id
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, compound_reading,
     resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
-    find_kanji_matches, card_stats, serializable_entry,
+    find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
 from study.furigana import align_deck
@@ -155,7 +155,7 @@ def _pool_match(entry: dict) -> dict:
 
 def _deck_match(level: str, entry: dict, raw_id: str) -> dict:
     """A deck card as a token's vocab_match, its French gloss beside its
-    English one (plan 158). The analysis is pure and shared across
+    English one (plan 159). The analysis is pure and shared across
     learners, so it cannot know the reader's language, and carries both,
     as a grammar point carries its {en, fr}; the screen reads its own
     (frontend tokens.js's wordGloss). The French is the card's own line
@@ -291,7 +291,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
                  for j, hit in enumerate(deck_hits)]
     # So is the negated verb of a "must" or a "must not": 〜てはいけません's
     # いけ is no 行く "to go", 〜なければならない's なら no 成る "to become"
-    # (plan 158). Its row is the point's.
+    # (plan 159). Its row is the point's.
     held = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") in no_good_points()])
     deck_hits = [None if j in held and morphemes[j].pos == "verb" and morphemes[j].lemma in NO_GOOD_VERBS else hit
                  for j, hit in enumerate(deck_hits)]
@@ -356,7 +356,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 事が出来る, 時 read とき); and no card for the verb of a compound
 # particle (について's つい is no 着く).
 # 8: no card for the negated verb of a "must" or a "must not" (plan
-# 158: 〜てはいけません's いけ is no 行く "to go"), a word a point is
+# 159: 〜てはいけません's いけ is no 行く "to go"), a word a point is
 # written on and has no card not counted off-deck, and every deck
 # card's French gloss beside its English one (`meaning_fr`).
 LOCAL_REV = 8
@@ -384,7 +384,10 @@ def analyze_local(text: str, level: str | None = None) -> dict:
     grammar = _grammar_entries(text, morphemes)
     tokens = _tokens(morphemes, grammar)
     _attach_grammar(tokens, grammar)
-    estimated = difficulty.estimate_level(text)
+    # Segmented once for both: left to them, estimate_level and report
+    # each segment the sentence again for every level they try.
+    segments = find_segments_in_text(text)
+    estimated = difficulty.estimate_level(text, segments)
     grade_level = level or estimated or "N5"
 
     return {
@@ -392,7 +395,7 @@ def analyze_local(text: str, level: str | None = None) -> dict:
         "tokens": tokens,
         "grammar": grammar,
         "level": estimated,
-        "grade": difficulty.report(text, grade_level),
+        "grade": difficulty.report(text, grade_level, segments),
         "available": True,
     }
 
@@ -441,7 +444,7 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
         # like any other and counts the way a deck word does.
         # A word a construction is written on, with no card of its own,
         # is the construction's (〜てはいけません's いけ, について's つい;
-        # plans 152 and 158): no word the app cannot teach.
+        # plans 152 and 159): no word the app cannot teach.
         ruled = not vocab_match and any(g.get("kind") != "marker" for g in tok.get("grammar") or [])
         if is_content_word and not ruled:
             status = new_tok["vocab_match"]["stats"]["status"] if vocab_match else None

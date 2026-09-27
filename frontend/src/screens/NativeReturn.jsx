@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { LangProvider, useLang } from '../LangContext'
 import { hideSplash } from '../lib/platform'
+import { Mark } from '../components/ui/Mark'
 import { nativeReturnUrl } from '../lib/nativeReturn'
 
 // ── 改札の戻り — the shell's callback, passing through the web ───
@@ -29,7 +30,7 @@ function Return() {
 
   return (
     <div className="app-loading native-return">
-      <div className="app-loading__sign" lang="ja" aria-hidden="true">{t.appTitle}</div>
+      <div className="app-loading__sign" aria-hidden="true"><Mark /></div>
       <p className="app-loading__note" role="status" aria-live="polite">{t.nativeReturnNote}</p>
       <a className="btn-primary native-return__open" href={target} data-action="native-return">
         {t.nativeReturnOpen}

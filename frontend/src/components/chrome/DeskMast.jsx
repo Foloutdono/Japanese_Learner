@@ -1,4 +1,5 @@
 import { useLang } from '../../LangContext'
+import { Mark } from '../ui/Mark'
 
 // ── 辻 over TSUJI — the desk's masthead (plans 113, 140) ─────────
 // The head of every sumi column the desk draws down its left edge: the
@@ -12,7 +13,7 @@ export function DeskMast() {
   const { t } = useLang()
   return (
     <div className="desk-rail__mast">
-      <span className="desk-rail__glyph" lang="ja">{t.appTitle}</span>
+      <span className="desk-rail__glyph" lang="ja"><Mark label={t.appTitle} /></span>
       <span className="desk-rail__name">{t.brdAppName}</span>
     </div>
   )

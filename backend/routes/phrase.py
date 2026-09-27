@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from core.db import db_conn
 from core.auth import get_user_id
 from core.srs_instance import srs
+from core.history import trim_history
 from study.llm_shared import chat, LLMUnavailable
 from content.grammar_points_data import localise
 from study.analysis import analyze_local, attach_user_state, merge_deep
@@ -410,6 +411,15 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
     return attach_user_state(analysis, states, user_id)
 
 
+# The most model calls one `deep` request can buy: the first this many
+# Sentences of its Passage; the rest come back local, with any deep tier
+# already cached merged in. Every caller asks for one Sentence at a time
+# (docs/adr/0001), so this binds nothing the app does -- it keeps a
+# Passage's cost where it was when MAX_SENTENCES was 50, now that it is
+# far longer.
+MAX_DEEP_SENTENCES = 50
+
+
 def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
                       allow_llm_call: bool = True) -> dict:
     """A Passage split into Sentences and each analyzed independently.
@@ -420,8 +430,9 @@ def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
 
     states = srs.get_user_states(user_id)
     sentences = [
-        _analyze_sentence(s["text"], deep, lang, states, user_id, allow_llm_call)
-        for s in kept
+        _analyze_sentence(s["text"], deep, lang, states, user_id,
+                          allow_llm_call and i < MAX_DEEP_SENTENCES)
+        for i, s in enumerate(kept)
     ]
 
     result = {"passage": passage, "sentences": sentences, "truncated": truncated}
@@ -479,6 +490,8 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
                 (user_id, phrase, payload.source),
             )
             row_id, created_at = cur.fetchone()
+            # The oldest past the history's limit leaves the shelf.
+            trim_history(cur, user_id)
         conn.commit()
     finally:
         conn.close()
@@ -491,9 +504,14 @@ def get_phrase_history(user_id: str = Depends(get_user_id), limit: int = Query(5
     conn = db_conn()
     try:
         with conn.cursor() as cur:
+            # A video line explained before 2026-09-27 was written here
+            # too (source 'video', never kept), and drew a text card of
+            # its own: not listed, and erased on the learner's next
+            # write (core/history.py).
             cur.execute(
                 "SELECT id, phrase, source, kept, created_at FROM phrase_history "
-                "WHERE user_id = %s ORDER BY kept DESC, created_at DESC LIMIT %s",
+                "WHERE user_id = %s AND (kept OR source <> 'video') "
+                "ORDER BY kept DESC, created_at DESC LIMIT %s",
                 (user_id, limit),
             )
             rows = cur.fetchall()

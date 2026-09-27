@@ -29,7 +29,7 @@ const FOLDS_AUXILIARY = new Set(['verb', 'adjective', 'auxiliary'])
 // not the tail of いい, whatever run the model bound them into. Each
 // is a grammar point with a card, and a part of its own in the parts a
 // rule is made of (partsOf); the words list leaves it to its numbered
-// card (plan 158). The past-tense た／だ and the polite ます are
+// card (plan 159). The past-tense た／だ and the polite ます are
 // inflection and stay with their verb: 休んだ is one word to a learner.
 const COPULA = new Set(['だ', 'です'])
 function standsAlone(tok) {
@@ -67,7 +67,7 @@ export function rowsOf(tokens) {
   return rows
 }
 
-// ── The words a sentence is built from (plan 158) ───────────────
+// ── The words a sentence is built from (plan 159) ───────────────
 // The rows the words list draws: a word with a card (the deck's or the
 // pool's), or a content word the course has no card for (a name) --
 // never a particle, a copula, or a word a construction is written on
@@ -87,7 +87,7 @@ export function wordRowsOf(analysis) {
     }))
 }
 
-// The words a point is made of (plan 158), as a learner reads them
+// The words a point is made of (plan 159), as a learner reads them
 // rather than as the tokenizer cut them: the rows it is written on
 // (て + は + いけません, not て + は + いけ + ませ + ん), after the word it
 // attaches to when a word stands just before it (話し + て + は +

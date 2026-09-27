@@ -32,13 +32,14 @@ vi.mock('./components/analysis/useMining', async o => ({
 vi.mock('./components/video/VideoPlayer', async () => {
   const { forwardRef, useImperativeHandle } = await import('react')
   const spies = { play: vi.fn(), pause: vi.fn(), seekTo: vi.fn() }
-  const props = { last: null }
+  const props = { last: null, renders: 0 }
   return {
     __playerSpies: spies,
     __playerProps: props,
     VideoPlayer: forwardRef(function MockVideoPlayer(p, ref) {
       useImperativeHandle(ref, () => spies)
       props.last = p
+      props.renders += 1
       return <div className="video-player__frame" data-testid="player" />
     }),
   }
@@ -106,6 +107,8 @@ const settle = (ms = 150) => new Promise(r => setTimeout(r, ms))
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 const box = s => $(s).getBoundingClientRect()
+// How far each word of the subtitle has been said, as written onto it.
+const saidOf = () => $$('.anl-subs__line .tok').map(el => el.style.getPropertyValue('--said'))
 
 async function openVideo() {
   await render(
@@ -292,29 +295,77 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
   // 字幕の流れ: the subtitle's words read out as they are said -- the
   // ones said whole, the one being said filling, the ones to come faded.
   // 雨を見ている, 36s to 40s, no times of its own: its eight beats (雨 2,
-  // を 1, 見 2, て 1, いる 2) spread half a second a beat.
+  // を 1, 見 2, て 1, いる 2) and its last held half a beat longer, 8.5
+  // over four seconds. Each word's fill is written straight onto it,
+  // every word in the same frame, so the one just said never reads faded
+  // while the next one starts.
   it('lights the subtitle\'s words as they are said', async () => {
     await openVideo()
-    const toks = () => $$('.anl-subs__line .tok')
-    expect($('.tok-line--sung')).toBeNull()
+    expect($('.anl-subs__line[data-sung]')).toBeNull()
     player.last.onTimeUpdate(37.1)
-    await expect.poll(() => $('.anl-subs__line.tok-line--sung')).not.toBeNull()
-    expect(toks()[0].classList.contains('tok--said')).toBe(true)
-    expect(toks()[1].classList.contains('tok--saying')).toBe(true)
-    expect(toks()[1].style.getPropertyValue('--said')).toBe('20%')
-    expect(toks()[2].className).not.toMatch(/tok--sa(id|ying)/)
+    // Read on the poll itself, paused: no frame is waited for.
+    expect($('.anl-subs__line[data-sung]')).not.toBeNull()
+    expect(saidOf()).toEqual(['100%', '34%', '0%', '0%', '0%'])
     // The words to come are faded by the mask; the rule under each
     // word, the SRS's, is not.
-    expect(getComputedStyle(toks()[2].querySelector('.tok__word')).maskImage).toContain('gradient')
-    expect(getComputedStyle(toks()[2]).borderBottomStyle).toBe('solid')
-    // The next line is read out in its turn...
-    player.last.onTimeUpdate(40.5)
-    await expect.poll(() => $('.anl-subs__line .tok--saying')?.textContent).toContain('駅')
-    expect($('.anl-subs__count').textContent).toContain('2 / 2')
+    const toks = $$('.anl-subs__line .tok')
+    expect(getComputedStyle(toks[2].querySelector('.tok__word')).maskImage).toContain('gradient')
+    expect(getComputedStyle(toks[2]).borderBottomStyle).toBe('solid')
+    // The next line is read out in its turn: 駅 two beats of 6.5 over
+    // four seconds (待つ, read by its letters, is three, and held half
+    // a beat more), 0.3s into its 1.23.
+    player.last.onTimeUpdate(40.3)
+    await expect.poll(() => $('.anl-subs__count').textContent).toContain('2 / 2')
+    expect(saidOf()).toEqual(['24%', '0%', '0%'])
     // ...and past the last one's end, the line reads plain again.
     player.last.onTimeUpdate(44.5)
-    await expect.poll(() => $('.tok-line--sung')).toBeNull()
+    expect($('.anl-subs__line[data-sung]')).toBeNull()
     expect($$('.anl-subs__line .tok[style]').length).toBe(0)
+  })
+
+  // The analyser's screen does not render on the poll: the bar and the
+  // subtitle read the playhead themselves. The bar's clock is the
+  // video's, 0 to its length, the figures YouTube's own bar prints.
+  it('prints the video\'s own clock, to its length', async () => {
+    await openVideo()
+    const time = () => $('.anl-pbar .anl-player__time').textContent
+    const knob = () => parseFloat($('.anl-pbar__knob').style.left)
+    // Before the player knows the length, the last cue's end stands in.
+    player.last.onTimeUpdate(37)
+    await expect.poll(time).toBe('0:37 / 0:44')
+    player.last.onDurationChange(247)
+    await expect.poll(time).toBe('0:37 / 4:07')
+    expect(knob()).toBeCloseTo((100 * 37) / 247, 3)
+    // Past the Passage's last line the clock goes on with the video.
+    player.last.onTimeUpdate(228)
+    await expect.poll(time).toBe('3:48 / 4:07')
+    // The poll renders the bar and the subtitle, not the screen (the
+    // player, a child of it, is drawn again only when the screen is).
+    const renders = player.renders
+    for (const at of [228.25, 228.5, 228.75, 229]) player.last.onTimeUpdate(at)
+    await expect.poll(time).toBe('3:49 / 4:07')
+    expect(player.renders).toBe(renders)
+    // The track seeks the video, not the window: its middle is the
+    // video's (a whole pixel's worth off, the click's x being one).
+    const track = $('.anl-pbar__track').getBoundingClientRect()
+    $('.anl-pbar__track').dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: track.left + track.width / 2, clientY: track.top + 1 }))
+    const [seek] = spies.seekTo.mock.lastCall
+    expect(Math.abs(seek - 247 / 2)).toBeLessThanOrEqual(247 / track.width)
+  })
+
+  // 追従 on time: while the video plays, the next line comes in focus at
+  // its cue, on the clock carried from the last poll -- not on the poll
+  // after it, up to a quarter second late -- and a poll a little behind
+  // the clock does not send it back.
+  it('moves the line on at the next line\'s cue, not on the next poll', async () => {
+    await openVideo()
+    player.last.onPlayingChange(true)
+    player.last.onTimeUpdate(39.8)
+    expect($('.anl-subs__count').textContent).toContain('1 / 2')
+    await expect.poll(() => $('.anl-subs__count').textContent, { timeout: 1500 }).toContain('2 / 2')
+    player.last.onTimeUpdate(39.9)
+    await settle(60)
+    expect($('.anl-subs__count').textContent).toContain('2 / 2')
   })
 
   it('reads the words out on the times the line carries', async () => {
@@ -325,10 +376,12 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     await openVideo()
     player.last.onTimeUpdate(36.5)
     // Before its first word the line waits, every word to come.
-    await expect.poll(() => $('.tok-line--sung')).not.toBeNull()
-    expect($$('.anl-subs__line .tok--said, .anl-subs__line .tok--saying').length).toBe(0)
+    expect($('.anl-subs__line[data-sung]')).not.toBeNull()
+    expect(saidOf()).toEqual(['0%', '0%', '0%', '0%', '0%'])
+    // 見 from 38s: 見, て, いる share 38s to 40s by their beats (2, 1,
+    // 2 and the last held half a beat more).
     player.last.onTimeUpdate(38.1)
-    await expect.poll(() => $$('.anl-subs__line .tok')[2].classList.contains('tok--saying')).toBe(true)
+    expect(saidOf()).toEqual(['100%', '100%', '14%', '0%', '0%'])
   })
 
   it('walks the speed and folds the video away without unmounting it', async () => {

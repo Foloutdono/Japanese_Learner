@@ -493,14 +493,42 @@ describe('the passages first on the desk (plan 136)', () => {
     expect(video.querySelector('.anl-card__jp').textContent).toBe('駅の前で雨を眺めていた')
     expect(video.querySelector('.anl-card__img').getAttribute('src')).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg')
     expect(video.querySelector('.anl-card__count').textContent).toBe('36 phrases')
-    expect(video.querySelector('.anl-card__delete')).toBeNull()
-    // A passage names its platform and can be deleted.
+    // Every card can be deleted, a video as a passage.
+    expect(video.querySelector('.anl-card__delete')).not.toBeNull()
     expect(cards()[1].querySelector('.anl-card__src').textContent).toBe('Photo')
     expect(cards()[1].querySelector('.anl-card__delete')).not.toBeNull()
     // The cards stand side by side, a row sharing its height.
     const [a, b] = cards().map(c => c.getBoundingClientRect())
     expect(b.left).toBeGreaterThan(a.right)
     expect(Math.round(b.height)).toBe(Math.round(a.height))
+  })
+
+  // A video's ✕ marks the session removed on the server, and Undo takes
+  // the mark off: its track is not kept, so it cannot be analysed again
+  // the way a passage's text is.
+  it('removes a video from the shelf and brings it back on Undo', async () => {
+    // The server, as far as the shelf can see it: a removed session is
+    // not listed until it is restored.
+    let removed = false
+    apiFetch.mockImplementation(async (url, _session, opts) => {
+      const u = String(url)
+      if (u === '/api/video/session/7' && opts?.method === 'DELETE') removed = true
+      if (u === '/api/video/session/7/restore') removed = false
+      if (u.startsWith('/api/phrase/history')) return ok(PASSAGES)
+      if (u.startsWith('/api/video/sessions')) return ok(removed ? [] : SESSIONS)
+      return ok([])
+    })
+    await mount()
+    await settle(150)
+    cards()[0].querySelector('.anl-card__delete').click()
+    await settle(60)
+    expect(apiFetch).toHaveBeenCalledWith('/api/video/session/7', expect.anything(), { method: 'DELETE' })
+    expect(cards()).toHaveLength(3)
+    expect(cards().some(c => c.classList.contains('anl-card--video'))).toBe(false)
+    $('.anl-shelf .anl-undo__btn').click()
+    await settle(60)
+    expect(apiFetch).toHaveBeenCalledWith('/api/video/session/7/restore', expect.anything(), { method: 'POST' })
+    expect(cards()).toHaveLength(4)
   })
 
   it('narrows the shelf by its chips and its search', async () => {

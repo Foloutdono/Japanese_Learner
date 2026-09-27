@@ -2157,11 +2157,14 @@ def post_comprehension_result(payload: ComprehensionAnswersPayload, user_id: str
 
     if len(answers) != len(questions):
         raise HTTPException(status_code=400, detail="Answer count does not match question count")
+    # Checked before anything is written: the results below read these
+    # three keys, and a question without one was a 500 after the log row
+    # was committed and the fare paid.
+    if any(not all(k in q for k in ("question", "options", "correct")) for q in questions):
+        raise HTTPException(status_code=400, detail="Each question needs question, options and correct")
 
-    score = sum(
-        1 for i, q in enumerate(questions)
-        if i < len(answers) and answers[i] == q.get("correct")
-    )
+    right = [a == q.get("correct") for q, a in zip(questions, answers)]
+    score = sum(right)
     total = len(questions)
     grammar = json.dumps(payload.grammar_points) if payload.grammar_points is not None else None
 
@@ -2188,9 +2191,18 @@ def post_comprehension_result(payload: ComprehensionAnswersPayload, user_id: str
     # The fare for the exercise: one ledger row for the submission, a
     # correct question at a card's correct rate and a wrong one at its
     # wrong rate (srs.award_practice), keyed on the log row.
+    #
+    # Paid on no more questions than the level's exercise holds. The
+    # questions, and which option is right, come back from the client
+    # (the served order is re-rolled per serving and stored nowhere), so
+    # the list is the client's to lengthen: a thousand self-answered
+    # questions paid 7,000 XP in one request. Like every practice grade
+    # the answer is still the client's word (ADR 0013); this bounds a
+    # request to what a real paper at the level can pay.
+    paid = COMPREHENSION_SPECS.get(payload.level, DEFAULT_COMPREHENSION_SPEC)["questions"]
     fare = srs.award_practice(
         user_id, "comprehension", str(row_id),
-        [4 if i < len(answers) and answers[i] == q.get("correct") else 1 for i, q in enumerate(questions)],
+        [4 if ok else 1 for ok in right[:paid]],
     )
 
     return {
@@ -2205,9 +2217,9 @@ def post_comprehension_result(payload: ComprehensionAnswersPayload, user_id: str
                 "question": q["question"],
                 "options": q["options"],
                 "correct": q["correct"],
-                "user_answer": answers[i] if i < len(answers) else None,
-                "is_correct": i < len(answers) and answers[i] == q["correct"],
+                "user_answer": a,
+                "is_correct": ok,
             }
-            for i, q in enumerate(questions)
+            for q, a, ok in zip(questions, answers, right)
         ],
     }

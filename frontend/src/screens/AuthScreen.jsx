@@ -1,6 +1,7 @@
 import { useLang } from '../LangContext'
 import { BackChevron } from '../components/boarding/icons'
 import { AuthCard } from '../components/account/AuthCard'
+import { Mark } from '../components/ui/Mark'
 
 // ── Sign in (plan 075, canvas SignIn) ────────────────────────────
 // The sign over one card: Login / Sign up as a segmented control, the
@@ -26,7 +27,7 @@ export default function AuthScreen({ mode: initialMode = 'login', onBack } = {})
         </div>
       )}
       <div className="auth-header">
-        <span className="auth-header__glyph" lang="ja">{t.appTitle}</span>
+        <span className="auth-header__glyph" lang="ja"><Mark label={t.appTitle} /></span>
         <h1 className="auth-header__title">{t.learnJapanese}</h1>
       </div>
 

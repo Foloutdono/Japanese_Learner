@@ -13,6 +13,13 @@ const listeners = new Set()
 
 function emit() { listeners.forEach(fn => fn()) }
 
+// Module scope, so React sees one subscribe function and does not
+// unsubscribe and resubscribe on every render.
+function subscribe(cb) {
+  listeners.add(cb)
+  return () => listeners.delete(cb)
+}
+
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault()
@@ -27,7 +34,7 @@ if (typeof window !== 'undefined') {
 
 export function useInstallPrompt() {
   return useSyncExternalStore(
-    cb => { listeners.add(cb); return () => listeners.delete(cb) },
+    subscribe,
     () => deferred !== null,
     () => false,
   )
@@ -37,11 +44,13 @@ export async function promptInstall() {
   const e = deferred
   if (!e) return null
   e.prompt()
+  // An event prompts once, whatever the answer: prompt() on it again
+  // rejects, and the row would be a button that does nothing. Dropped
+  // on either outcome, so the row hides until the browser hands over a
+  // new one.
+  deferred = null
+  emit()
   const { outcome } = await e.userChoice
-  if (outcome === 'accepted') {
-    deferred = null
-    emit()
-  }
   return outcome
 }
 

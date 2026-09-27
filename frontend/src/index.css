@@ -1622,7 +1622,7 @@
    The history is the page now: under the desk a row of chips (the kinds
    the shelf holds, and Kept) over a row per passage, its lead the
    video's still or the platform's glyph in a ring; on the desk the
-   console over cards (the 机 section). A session has no ✕. */
+   console over cards (the 机 section). Each has its ✕. */
 .anl-shelf {
   display: flex;
   flex-direction: column;
@@ -1935,18 +1935,17 @@
    reading takes the primary ink, which the tint already raises. */
 .tok--on .tok__furi { color: var(--text-primary); }
 /* 字幕の流れ — the words lit as they are said (SubtitleLine). While the
-   video is inside the line, the words to come are faded, the word being
-   said fills from its first letter to its last (--said, written each
-   frame), and the words said stand whole. A mask, not an ink: the tint
-   is the focused word's and a rule's, the rule under the word is the
-   SRS's, and every word keeps its own colour -- the mask only takes
-   some of it away. The rule under the word is the border, outside the
-   masked children, so the state reads at every moment. */
-.tok-line--sung .tok { --said: 0%; }
-.tok-line--sung .tok--said { --said: 100%; }
-.tok-line--sung .tok__word,
-.tok-line--sung .tok__furi {
-  mask-image: linear-gradient(to right, #000 var(--said), rgb(0 0 0 / 40%) var(--said));
+   video is inside the line (data-sung), the words to come are faded,
+   the word being said fills from its first letter to its last, and the
+   words said stand whole: every word's --said, written each frame
+   straight onto it. A mask, not an ink: the tint is the focused word's
+   and a rule's, the rule under the word is the SRS's, and every word
+   keeps its own colour -- the mask only takes some of it away. The rule
+   under the word is the border, outside the masked children, so the
+   state reads at every moment. */
+.tok-line[data-sung] .tok__word,
+.tok-line[data-sung] .tok__furi {
+  mask-image: linear-gradient(to right, #000 var(--said, 0%), rgb(0 0 0 / 40%) var(--said, 0%));
 }
 /* The furigana dial: readings over everything, only over the words
    the SRS has not mastered, or none. */
@@ -8602,6 +8601,24 @@ textarea:focus-visible {
 /* Inside a card (the gate, waiting), at the card's rhythm. */
 .loading--tight { padding: var(--sp-4); }
 
+/* ── 辻 — the mark (plan 158) ─────────────────────────────────
+   components/ui/Mark.jsx: the icon's drawing wherever the app names
+   itself. It takes the text glyph's box -- 1em square, its foot at the
+   em box's, 0.12em under the baseline -- so the caller's font-size
+   still sizes it and its line still places it. The ink is the
+   caller's; the road is the pass's metal in every theme and on every
+   ground, the sumi chrome's too: it is the mark's own material, not a
+   line's pigment (DESIGN.md, Colour). */
+.mark {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.12em;
+  overflow: visible;
+}
+.mark__ink { fill: currentcolor; }
+.mark__road { fill: var(--accent2); }
+
 /* Plan 049 -- tracks the same column as the card below it (--card-w,
    defined on :root, see its own comment there) rather than its own
    480px literal. Before this the screen stacked three different
@@ -9652,7 +9669,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   color: var(--text-secondary);
 }
-/* The numbered line (plan 158): each rule framed on its words, as the
+/* The numbered line (plan 159): each rule framed on its words, as the
    analyser's subtitle frames them (.anl-subs__pt), set on the ground in
    a well of its own. The number heads its frame, inside it: at the
    frame's corner, as the subtitle has it, it stood on the next word's
@@ -9788,7 +9805,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
-/* An ending the word was written with (ます, た; plan 158): a quiet
+/* An ending the word was written with (ます, た; plan 159): a quiet
    tag after its meaning, the rule's name as the sentence wrote it. */
 .bkd-row__ending {
   margin-left: var(--sp-3);
@@ -9807,7 +9824,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     grid-template-areas: "word reading meaning lvl";
   }
 }
-/* The rules (GrammarPoints, plans 095, 134 and 158): a numbered card
+/* The rules (GrammarPoints, plans 095, 134 and 159): a numbered card
    per point under the word rows, the analyser's G2 at every width --
    the number, the pattern and the level on one line, what it does under
    them, then the words it is made of as chips and the bought line on
@@ -11267,10 +11284,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   .rating-bar__buttons--2 .rating-bar__btn { flex: 1 1 0; }
 }
 
+/* The mark (plan 158), in the page's ink: it wore --accent here, which
+   is 仮名's pigment, on a screen that is no section. */
 .app-loading__sign {
-  font-family: var(--font-jp);
   font-size: 4rem;
-  color: var(--accent);
+  color: var(--text-primary);
   line-height: 1;
 }
 
@@ -19525,12 +19543,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   height: 44px;
 }
 .auth-header { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+/* The mark (plan 158) at the name rung. No tracking: it was the
+   glyph's, and on a drawing text-indent only pushes it off centre. */
 .auth-header__glyph {
   font-family: var(--font-serif);
   font-weight: 700;
   font-size: var(--fs-display);
-  letter-spacing: var(--tr-name);
-  text-indent: var(--tr-name);
   line-height: 1.1;
 }
 .auth-header__title {
@@ -20182,7 +20200,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 
 /* ── the notification, as the app would send it ── */
 .brd-notif { display: flex; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-5); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); box-shadow: var(--elev-hang); animation: brd-drop 700ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
-.brd-notif__app { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; border-radius: var(--r-card); background: var(--bg-panel); color: var(--accent2); font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); }
+/* The app's icon as a notification prints it: the mark (plan 158) on the sumi, in the icon's own inks. */
+.brd-notif__app { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; border-radius: var(--r-card); background: var(--bg-panel); color: var(--text-on-panel); font-size: var(--fs-title); }
 .brd-notif__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
 .brd-notif__head { display: flex; justify-content: space-between; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .brd-notif__title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }
@@ -22438,7 +22457,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     font-size: var(--fs-caption);
     color: var(--text-secondary);
   }
-  /* The ✕ in the card's corner (a passage's; a session has none). */
+  /* The ✕ in the card's corner -- over a video's still, on its own
+     paper. */
   .anl-card__delete {
     position: absolute;
     top: var(--sp-2);
@@ -24975,7 +24995,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      plan 115): the wrapper adds no box, so the breakdown, the sentence
      line and the entry stand in the side's own column rhythm. */
   .desk-lookup { display: contents; }
-  /* The breakdown down the panel's height (plan 158): the rows and the
+  /* The breakdown down the panel's height (plan 159): the rows and the
      cards at its head, the button that buys the explanation on its
      floor, where the column had stood empty under a small button. The
      wrapper SideLookup hides while an entry is open stays hidden. */

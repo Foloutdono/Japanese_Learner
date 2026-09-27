@@ -92,11 +92,14 @@ describe('PassageShelf, under the desk', () => {
     expect(leads).toEqual(['Photo', 'Video'])
   })
 
-  it('prints a session\'s first sentence and its count, and offers no delete', async () => {
-    const screen = await shelf([session({ firstLine: '駅の前で', label: 'dQw4w9WgXcQ.ja.vtt', sentenceCount: 36 })])
+  it('prints a session\'s first sentence and its count, and hands it to onDelete too', async () => {
+    const onDelete = vi.fn()
+    const entry = session({ firstLine: '駅の前で', label: 'dQw4w9WgXcQ.ja.vtt', sentenceCount: 36 })
+    const screen = await shelf([entry], { onDelete })
     expect(screen.container.querySelector('.anl-row__jp').textContent).toBe('駅の前で')
     expect(screen.container.querySelector('.anl-row__meta').textContent).toContain('36 sentences')
-    expect(screen.container.querySelector('.anl-row__delete')).toBeNull()
+    screen.container.querySelector('.anl-row__delete').click()
+    expect(onDelete).toHaveBeenCalledWith(entry)
   })
 
   it('lists a session with no video by its label', async () => {

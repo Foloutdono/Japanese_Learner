@@ -111,6 +111,23 @@ def test_upload_produces_a_ready_transcript(client):
     assert body["truncated"] == 0
 
 
+def test_a_track_past_fifty_lines_is_analysed_whole(client):
+    """The cap was 50 until 2026-09-27: the 51st line of a long song
+    and everything after it were dropped (owner-directed: remove it)."""
+    srt = "".join(
+        f"{i + 1}\n00:{i // 60:02d}:{i % 60:02d},000 --> 00:{i // 60:02d}:{i % 60:02d},900\n{i}番目の文です。\n\n"
+        for i in range(120)
+    ).encode("utf-8")
+    post_resp = client.post("/api/video/session", files={"file": ("long.srt", srt, "text/plain")})
+    assert post_resp.status_code == 202
+    final = _poll_until_settled(client, post_resp.json()["sessionId"])
+    body = final.json()
+    assert body["status"] == "ready"
+    assert len(body["sentences"]) == 120
+    assert body["sentences"][-1]["text"] == "119番目の文です。"
+    assert body["truncated"] == 0
+
+
 def test_a_timing_track_gives_the_lines_their_word_times(client):
     """The grab sends the recognised track beside the hand-written one
     (plan: the words lit as they are said): the lines are the file's,
@@ -336,7 +353,7 @@ def test_get_unknown_session_returns_404(client):
     assert response.status_code == 404
 
 
-def test_explain_endpoint_buys_deep_tier_and_records_video_provenance(client, monkeypatch):
+def test_explain_endpoint_buys_deep_tier_and_adds_nothing_to_the_shelf(client, monkeypatch):
     # A sentence unique to THIS test: phrase_analysis_cache has no
     # expiry and is keyed only by (phrase, lang) -- reusing a phrase
     # another test already bought the deep tier for (e.g.
@@ -363,24 +380,22 @@ def test_explain_endpoint_buys_deep_tier_and_records_video_provenance(client, mo
 
     monkeypatch.setattr("routes.phrase.chat", _fake_chat)
 
+    shelf_before = client.get("/api/phrase/history").json()
     response = client.post(f"/api/video/session/{session_id}/sentence/0/explain", json={"lang": "en"})
     assert response.status_code == 200
     assert response.json()["explanation"] == "An introduction."
 
+    # The line explained is no card of its own beside its video: it
+    # used to be written to phrase_history, which the shelf lists.
+    assert client.get("/api/phrase/history").json() == shelf_before
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute(
-                "SELECT source, source_ref FROM phrase_history WHERE phrase = %s ORDER BY id DESC LIMIT 1",
-                ("猫は可愛い動物です。",),
-            )
-            row = cur.fetchone()
+            cur.execute("SELECT COUNT(*) FROM phrase_history WHERE phrase = %s", ("猫は可愛い動物です。",))
+            (count,) = cur.fetchone()
     finally:
         conn.close()
-    assert row is not None
-    source, source_ref = row
-    assert source == "video"
-    assert source_ref.startswith("prov.srt@")
+    assert count == 0
 
 
 def test_explain_keeps_cue_times(client, monkeypatch):

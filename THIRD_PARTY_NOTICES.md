@@ -170,6 +170,10 @@ Noto Sans JP and Noto Serif JP (Google) and Space Grotesk (Florian
 Karsten), bundled through `@fontsource/*`, are used under the SIL Open
 Font License 1.1. https://openfontlicense.org/
 
+The app's mark, 辻 (`frontend/brand/`, `frontend/src/components/ui/markPaths.js`
+and the icons made from them), is drawn from Noto Serif JP's outlines: the
+licence allows its glyphs in artwork, and the mark is artwork, not a font.
+
 ---
 
 Because JMdict and KANJIDIC2 are share-alike (CC BY-SA 4.0), any content

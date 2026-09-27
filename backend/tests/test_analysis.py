@@ -415,7 +415,7 @@ class AttachUserStateTests(unittest.TestCase):
 
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
     def test_a_word_a_construction_owns_is_not_off_deck(self) -> None:
-        # Plan 158: 〜てはいけません's いけ has no card (it is no 行く), and
+        # Plan 159: 〜てはいけません's いけ has no card (it is no 行く), and
         # it is the construction's, not a word the app cannot teach. 話し
         # is the sentence's one unknown content word (ここ is a pronoun).
         out = attach_user_state(analyze_local("ここで話してはいけません。"), {}, "u")
@@ -424,7 +424,7 @@ class AttachUserStateTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class FrenchGlossTests(unittest.TestCase):
-    """Plan 158: a deck card carries its French gloss beside its English
+    """Plan 159: a deck card carries its French gloss beside its English
     one, so the breakdown reads in one language -- the particle's line
     was French (the grammar catalogue) and every word's English."""
 

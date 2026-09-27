@@ -20,7 +20,7 @@ kanji     every kanji in the sentence is in the level's cumulative set
           (N3 means N5 + N4 + N3). Unchanged from what reading.py had.
 
 grammar   no grammar point ABOVE the level appears. The catalogue
-          (content/grammar_points.json, 205 points across five levels)
+          (content/grammar/N5.json … N1.json, one list per level)
           already carries the level of each point, and study/grammar_match
           already knows how to spot one in a sentence -- this is those two
           facts put together.
@@ -231,7 +231,7 @@ def vocab_over_level(sentence: str, level: str, segments=None) -> list[tuple[str
 
 # ── Grammar ───────────────────────────────────────────────────
 # Constructions the catalogue does not list, mapped to the level that
-# first teaches them. 205 points is a syllabus, not an inventory of the
+# first teaches them. The catalogue is a syllabus, not an inventory of the
 # language, and the gaps are not obscure -- they are some of the most
 # common things a real sentence does. Measured on the N5 corpus fallback,
 # these five families accounted for most of what still got through:
@@ -455,6 +455,10 @@ def estimate_level(sentence: str, segments=None) -> str | None:
     says "ok" for. Does not re-derive the ordering -- LEVELS is already
     easiest-first, so the first match is the lowest by construction.
     """
+    if segments is None:
+        # Once here rather than once per level in vocab_over_level.
+        from study.card_lookup import find_segments_in_text
+        segments = find_segments_in_text(sentence)
     for level in LEVELS:
         if report(sentence, level, segments)["ok"]:
             return level

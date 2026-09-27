@@ -27,6 +27,7 @@
 import logging
 import os
 import re
+import unicodedata
 
 
 logger = logging.getLogger(__name__)
@@ -63,10 +64,25 @@ _ASS_OVERRIDE_RE = re.compile(r"\{\\[^}]*\}")
 _VTT_STAMP_RE = re.compile(r"<((?:\d+:)?\d{1,2}:\d{2}\.\d{3})>")
 
 
+# Kanji written as the look-alike of another block: a Kangxi radical (⾃
+# for 自, in a lyric track seen on YouTube), a CJK radical, a
+# compatibility ideograph. The tokenizer reads none of them, so the word
+# had no reading, no card and no time; each is folded to the one
+# ideograph it stands for, a code point for a code point, so no offset
+# into the text moves.
+_LOOKALIKE_RE = re.compile("[\u2e80-\u2eff\u2f00-\u2fdf\uf900-\ufaff\U0002f800-\U0002fa1f]")
+
+
+def _fold_lookalike(m: re.Match) -> str:
+    folded = unicodedata.normalize("NFKC", m.group(0))
+    return folded if len(folded) == 1 else m.group(0)
+
+
 def _strip_tags(text: str) -> str:
     text = _VTT_STAMP_RE.sub("", text)
     text = _HTML_TAG_RE.sub("", text)
     text = _ASS_POSITION_TAG_RE.sub("", text)
+    text = _LOOKALIKE_RE.sub(_fold_lookalike, text)
     return _ASS_OVERRIDE_RE.sub("", text)
 
 
@@ -107,10 +123,15 @@ def _tidy_anchors(text: str, anchors: list[tuple[int, float]], lead: int) -> lis
     return out
 
 
-def _vtt_timed_text(raw: str) -> tuple[str, list[list]]:
-    """A VTT cue's text with its karaoke stamps taken out as anchors."""
+def _vtt_timed_text(raw: str, start: float = 0.0) -> tuple[str, list[list]]:
+    """A VTT cue's text with its karaoke stamps taken out as anchors. The
+    words before the first stamp are said from the cue's start, which is
+    an anchor of its own where there are stamps at all: a recognised
+    line starts at its first word, where a hand-written one may come up
+    before it (components/analysis/wordTimes.js tells the two apart by
+    this anchor)."""
     pieces = _VTT_STAMP_RE.split(raw)
-    text, anchors = "", []
+    text, anchors = "", [(0, start)] if len(pieces) > 1 else []
     for i, piece in enumerate(pieces):
         if i % 2:
             h, m, s = (["0"] + piece.split(":"))[-3:]
@@ -250,7 +271,7 @@ def _parse_vtt(content: str) -> list[dict]:
         match = _VTT_ARROW_RE.search(lines[arrow_line_idx])
         start = _vtt_time_to_seconds(*match.groups()[0:4])
         end = _vtt_time_to_seconds(*match.groups()[4:8])
-        text, words = _vtt_timed_text(" ".join(lines[arrow_line_idx + 1:]))
+        text, words = _vtt_timed_text(" ".join(lines[arrow_line_idx + 1:]), start)
         if text:
             cues.append(_cue(start, end, text, words))
     if not cues and "-->" not in content:
