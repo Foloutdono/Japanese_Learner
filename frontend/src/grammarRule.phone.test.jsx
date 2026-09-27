@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render } from 'vitest-browser-react'
 import CardPrompt from './components/study/CardPrompt'
 import { MCQGrid } from './components/study/QuizComponents'
-import { GrammarChoice } from './components/study/GrammarPieces'
+import { GrammarChoice, GrammarRule, GrammarStructure } from './components/study/GrammarPieces'
 import './index.css'
 
 // ── A grammar card's furigana, on a phone ──────────────────────
@@ -38,6 +38,9 @@ const LONG = {
 }
 
 const settle = (ms = 50) => new Promise(r => setTimeout(r, ms))
+
+// Wide enough that nothing wraps before it is measured.
+const WIDE = 2000
 
 // Every character of an element's base text (never its readings), as a
 // rect: what a reading must not be printed over.
@@ -102,23 +105,56 @@ describe('the grammar rule’s furigana', () => {
 
   it('keeps a wrapped line’s readings off the line above', async () => {
     const screen = await render(
-      <div style={{ width: 240 }}><CardPrompt card={card(LONG)} t={t} session={{}} /></div>,
+      <div className="wrap-probe" style={{ width: WIDE }}><GrammarRule text={LONG.grammar} parts={LONG.grammar_furigana} size={52} /></div>,
     )
-    expectReadingsClearOfLineAbove(screen.container.querySelector('.grammar-rule'))
+    // Where a line breaks is the font's business, and CI's fonts are not
+    // this machine's: the width is set from the rule's own, so 過言 lands
+    // on the second of two lines whatever the glyphs measure.
+    const rule = screen.container.querySelector('.grammar-rule')
+    narrowTo(screen.container.querySelector('.wrap-probe'), naturalWidth(rule) * 0.55)
+    expectReadingsClearOfLineAbove(rule)
   })
 })
 
-// Two lines, a reading on the second, and each such reading under every
-// character of the first line.
+// The width `el`'s content takes on one line.
+function naturalWidth(el) {
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  return range.getBoundingClientRect().width
+}
+
+function narrowTo(el, width) {
+  el.style.width = `${Math.round(width)}px`
+}
+
+// The lines `rects` stand on, top to bottom: a rect starting above the
+// middle of the line before it is on that line. Tolerant, because a
+// Latin and a Japanese glyph on one line do not share a top.
+function linesOf(rects) {
+  const out = []
+  for (const r of [...rects].sort((a, b) => a.top - b.top)) {
+    const last = out[out.length - 1]
+    if (last && r.top < (last.top + last.bottom) / 2) last.bottom = Math.max(last.bottom, r.bottom)
+    else out.push({ top: r.top, bottom: r.bottom })
+  }
+  return out
+}
+
+// More than one line, a reading on a line after the first, and every
+// such reading under every character of the line above its own.
 function expectReadingsClearOfLineAbove(el) {
-  const bases = baseRects(el)
-  const lines = [...new Set(bases.map(r => Math.round(r.top)))].sort((a, b) => a - b)
-  // It wraps, with a reading on the second line, or this proves nothing.
-  expect(lines).toHaveLength(2)
-  const below = [...el.querySelectorAll('rt')].map(rt => rt.getBoundingClientRect()).filter(r => r.top > lines[0])
-  expect(below.length).toBeGreaterThan(0)
-  const above = Math.max(...bases.filter(r => Math.round(r.top) === lines[0]).map(r => r.bottom))
-  for (const reading of below) expect(reading.top).toBeGreaterThanOrEqual(above - 1)
+  const lines = linesOf(baseRects(el))
+  expect(lines.length).toBeGreaterThan(1)
+  let checked = 0
+  for (const ruby of el.querySelectorAll('ruby')) {
+    const own = baseRects(ruby)[0].top
+    const i = lines.findLastIndex(line => line.top <= own + 1)
+    if (i <= 0) continue
+    expect(ruby.querySelector('rt').getBoundingClientRect().top).toBeGreaterThanOrEqual(lines[i - 1].bottom - 1)
+    checked += 1
+  }
+  // It wraps with a reading past the first line, or this proves nothing.
+  expect(checked).toBeGreaterThan(0)
 }
 
 describe('the formation line’s furigana', () => {
@@ -155,19 +191,19 @@ describe('the formation line’s furigana', () => {
   it('keeps a wrapped formation’s readings off the line above', async () => {
     const structure = 'verb dictionary form ／ noun + の + 予定だ'
     const screen = await render(
-      <div style={{ width: 240 }}>
-        <CardPrompt
-          card={card({
-            structure,
-            structure_furigana: [
-              { text: 'verb dictionary form ／ noun + の + ' }, { text: '予', reading: 'よ' }, { text: '定', reading: 'てい' }, { text: 'だ' },
-            ],
-          })}
-          t={t} session={{}}
+      <div className="wrap-probe" style={{ width: WIDE }}>
+        <GrammarStructure
+          text={structure}
+          parts={[
+            { text: 'verb dictionary form ／ noun + の + ' }, { text: '予', reading: 'よ' }, { text: '定', reading: 'てい' }, { text: 'だ' },
+          ]}
         />
       </div>,
     )
-    expectReadingsClearOfLineAbove(screen.container.querySelector('.grammar-structure'))
+    // 予定 closes the line, so at 60% of its width it is on the second.
+    const line = screen.container.querySelector('.grammar-structure')
+    narrowTo(screen.container.querySelector('.wrap-probe'), naturalWidth(line) * 0.6)
+    expectReadingsClearOfLineAbove(line)
   })
 })
 
@@ -200,7 +236,7 @@ describe('an option that is a pattern', () => {
   it('keeps a wrapped option whole, and a filler still collapses', async () => {
     const long = '何でも／誰でも／いつでも／どこでも'
     const screen = await render(
-      <div style={{ width: 300 }}>
+      <div className="wrap-probe" style={{ width: WIDE }}>
         <MCQGrid
           choices={[long, '〜で']} correct="〜で" answered={false} onAnswer={() => {}}
           formatChoice={c => <GrammarChoice text={c} readings={{
@@ -212,12 +248,18 @@ describe('an option that is a pattern', () => {
         />
       </div>,
     )
+    // Two lines whatever the font: the row's text given 70% of the
+    // width the option takes on one line.
+    const probe = screen.container.querySelector('.wrap-probe')
     const row = screen.container.querySelector('.mcq-row')
+    const text = row.querySelector('.grammar-choice')
+    // (The list stops at its own max-width, so the row, not the probe,
+    // says how much of it is the row's chrome.)
+    const chrome = row.getBoundingClientRect().width - row.querySelector('.mcq-row__text').getBoundingClientRect().width
+    narrowTo(probe, chrome + naturalWidth(text) * 0.7)
+    expect(linesOf(baseRects(text))).toHaveLength(2)
     // nothing cut by the row's ceiling
     expect(row.scrollHeight).toBeLessThanOrEqual(row.clientHeight)
-    const text = row.querySelector('.grammar-choice')
-    const lines = new Set(baseRects(text).map(r => Math.round(r.top)))
-    expect(lines.size).toBe(2)
     // and a filler still collapses once the question is answered
     const done = await render(
       <MCQGrid choices={choices} correct="〜の中で" selected="〜で" answered onAnswer={() => {}}
