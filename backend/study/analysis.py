@@ -25,7 +25,7 @@ from content.vocab_jmdict_data import vocab_jmdict_to_id
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, compound_reading,
     resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
-    find_kanji_matches, card_stats, serializable_entry,
+    find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
 from study.furigana import align_deck
@@ -357,7 +357,10 @@ def analyze_local(text: str, level: str | None = None) -> dict:
     grammar = _grammar_entries(text, morphemes)
     tokens = _tokens(morphemes, grammar)
     _attach_grammar(tokens, grammar)
-    estimated = difficulty.estimate_level(text)
+    # Segmented once for both: left to them, estimate_level and report
+    # each segment the sentence again for every level they try.
+    segments = find_segments_in_text(text)
+    estimated = difficulty.estimate_level(text, segments)
     grade_level = level or estimated or "N5"
 
     return {
@@ -365,7 +368,7 @@ def analyze_local(text: str, level: str | None = None) -> dict:
         "tokens": tokens,
         "grammar": grammar,
         "level": estimated,
-        "grade": difficulty.report(text, grade_level),
+        "grade": difficulty.report(text, grade_level, segments),
         "available": True,
     }
 
