@@ -107,10 +107,15 @@ def _tidy_anchors(text: str, anchors: list[tuple[int, float]], lead: int) -> lis
     return out
 
 
-def _vtt_timed_text(raw: str) -> tuple[str, list[list]]:
-    """A VTT cue's text with its karaoke stamps taken out as anchors."""
+def _vtt_timed_text(raw: str, start: float = 0.0) -> tuple[str, list[list]]:
+    """A VTT cue's text with its karaoke stamps taken out as anchors. The
+    words before the first stamp are said from the cue's start, which is
+    an anchor of its own where there are stamps at all: a recognised
+    line starts at its first word, where a hand-written one may come up
+    before it (components/analysis/wordTimes.js tells the two apart by
+    this anchor)."""
     pieces = _VTT_STAMP_RE.split(raw)
-    text, anchors = "", []
+    text, anchors = "", [(0, start)] if len(pieces) > 1 else []
     for i, piece in enumerate(pieces):
         if i % 2:
             h, m, s = (["0"] + piece.split(":"))[-3:]
@@ -250,7 +255,7 @@ def _parse_vtt(content: str) -> list[dict]:
         match = _VTT_ARROW_RE.search(lines[arrow_line_idx])
         start = _vtt_time_to_seconds(*match.groups()[0:4])
         end = _vtt_time_to_seconds(*match.groups()[4:8])
-        text, words = _vtt_timed_text(" ".join(lines[arrow_line_idx + 1:]))
+        text, words = _vtt_timed_text(" ".join(lines[arrow_line_idx + 1:]), start)
         if text:
             cues.append(_cue(start, end, text, words))
     if not cues and "-->" not in content:

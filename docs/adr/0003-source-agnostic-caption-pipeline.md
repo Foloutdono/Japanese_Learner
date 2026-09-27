@@ -398,3 +398,23 @@ YouTube's srv3 format (`<s t="…">` per word), in words that are often wrong.
 - **The server-side fetch** (the 2026-09-10 amendment) still takes one track
   through `youtube-transcript-api`, which returns no word times; its lines
   are read out on the estimate.
+- **Where a line was not timed word by word, the track times it** (later the
+  same day). The frontend reads what the whole track says — its pace, the
+  median seconds a beat between two words its source measured, or read off its
+  fullest cues where none were; and its lead, how early its subtitles come up
+  before their first word — and carries a line's unmeasured words at that pace
+  (`components/analysis/wordTimes.js`'s `passageTiming`). A line held on screen
+  through a pause is no longer spread over the pause. A karaoke-stamped cue's
+  first word is anchored at the cue's start, so a recognised line, which
+  starts on its first word, is told from a hand-written one that may come up
+  early. The aligner spaces a recognised word's kana at the track's pace
+  rather than up to the next word, and times a word misheard kana for kana;
+  and the line in focus moves on at the next line's cue, not on the next poll.
+  Measured on simulated songs and speech run through the whole pipeline (the
+  real grab conversion, parser, aligner and word timing, against known word
+  times; no real track could be fetched where this was built), the share of
+  time the word lit is the word being said rose in every case: 69→74% for a
+  song with both tracks, 46→58% for one with the hand-written track alone,
+  78→83% for one with only the recognised track, and 75→76%, 46→58% and
+  75→81% for speech. The simulation is an argument, not a measurement of real
+  tracks; a real track's errors should be checked against it.

@@ -25,14 +25,16 @@ import { tokenTimes, sungAt } from './wordTimes'
 // is the SRS's, and each word keeps its own colour. `playhead` is the
 // player's clock (components/analysis/playhead.js): read every frame
 // while the video plays, and on each poll while it does not, since a
-// paused clock moves only by a seek.
-export function SubtitleLine({ analysis, index, setIndex, lit = null, t, playhead = null, playing = false }) {
+// paused clock moves only by a seek. `timing` is what the whole track
+// says about its words (wordTimes.js's passageTiming), for a line it
+// did not time word by word.
+export function SubtitleLine({ analysis, index, setIndex, lit = null, t, playhead = null, playing = false, timing = null }) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
   const points = numberedPointsOf(analysis)
   const owner = tokens.map(w => points.findIndex(p => coversToken(p, w)))
   const firstOf = points.map(p => tokens.findIndex(w => coversToken(p, w)))
   const lineRef = useRef(null)
-  useSung(analysis, playhead, playing, lineRef)
+  useSung(analysis, playhead, playing, lineRef, timing)
 
   const word = i => {
     const w = tokens[i]
@@ -98,8 +100,8 @@ export function SubtitleLine({ analysis, index, setIndex, lit = null, t, playhea
 // flicking back to faded at every change of word, and the line re-rendered
 // with it. Written in the same frame for every word, only where a value
 // moved, the line reads whole at every moment.
-function useSung(analysis, playhead, playing, lineRef) {
-  const times = useMemo(() => (playhead ? tokenTimes(analysis) : null), [analysis, playhead])
+function useSung(analysis, playhead, playing, lineRef, timing) {
+  const times = useMemo(() => (playhead ? tokenTimes(analysis, timing) : null), [analysis, playhead, timing])
   // A layout effect, so a new line is drawn sung, or plain, on its first
   // frame -- and without asking the browser for a frame at all, which it
   // gives no page it is not drawing (a paused clock is read on the poll).
@@ -114,11 +116,13 @@ function useSung(analysis, playhead, playing, lineRef) {
     const read = () => paintSung(line, sungAt(times, playhead.at()), reduced)
     read()
     if (!playing) return playhead.subscribe(read)
-    let frame = requestAnimationFrame(function sweep() {
+    const raf = { frame: 0 }
+    const sweep = () => {
       read()
-      frame = requestAnimationFrame(sweep)
-    })
-    return () => cancelAnimationFrame(frame)
+      raf.frame = requestAnimationFrame(sweep)
+    }
+    raf.frame = requestAnimationFrame(sweep)
+    return () => cancelAnimationFrame(raf.frame)
   }, [times, playhead, playing, lineRef])
 }
 

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useDesk } from '../hooks/useDesk'
@@ -13,6 +13,7 @@ import { FocusCard } from '../components/analysis/FocusCard'
 import { SubtitleLine } from '../components/analysis/SubtitleLine'
 import { PlayerBar } from '../components/analysis/PlayerBar'
 import { createPlayhead } from '../components/analysis/playhead'
+import { passageTiming } from '../components/analysis/wordTimes'
 import { ExplainPanel, ExplainSheet } from '../components/analysis/ExplainPanel'
 import { GrammarPoints } from '../components/analysis/GrammarPoints'
 import { coversToken, numberedPointsOf } from '../components/analysis/grammarSpans'
@@ -343,6 +344,10 @@ export default function AnalyzerScreen({ session }) {
   // has typed right now, fall back to whatever the session was created
   // with. This is what makes a link pasted AFTER an upload work.
   const playerVideoId = parseVideoId(videoUrl) ?? passage?.videoId ?? null
+  // 字幕の流れ: what the whole track says about when its words are said
+  // (its pace, how early its subtitles come up), for the lines it did
+  // not time word by word. Read once a Passage, not once a line.
+  const timing = useMemo(() => passageTiming(sentences), [sentences])
   // The platform standing on. Everything about it -- its name, its
   // panel's opening line, whether 運行履歴 applies -- comes from the one
   // registry, so a fourth source is one entry there rather than five
@@ -735,14 +740,48 @@ export default function AnalyzerScreen({ session }) {
       // Out of the sentence held: its end stops the clock again next time.
       if (held !== null && now !== held) heldRef.current = null
     }
-    if (!followPlayback) return
+    // While it plays, the follow runs on time (below); a poll reads a
+    // clock up to a quarter second old, and would send the line back.
+    if (!followPlayback || (playing && !loop && !pauseEach)) return
     analyzer.setFocusIndex(prev => {
       const idx = sentences.findIndex(s => seconds >= s.cue_start && seconds < s.cue_end)
       // -1 during the silence between cues: hold the current stop
       // rather than snapping back to the first one.
       return idx === -1 ? prev : idx
     })
-  }, [sentences, analyzer, followPlayback, loop, pauseEach, focusIndex, rate, clearHoldTimer, playhead])
+  }, [sentences, analyzer, followPlayback, loop, pauseEach, focusIndex, rate, clearHoldTimer, playhead, playing])
+
+  // 追従 on time (2026-09-27): while the video plays, the line in focus
+  // moves on at the moment the clock reaches the next line's cue, on a
+  // timer set for it from the playhead and set again on every poll (a
+  // seek moves the moment). It moved on the next poll, up to a quarter
+  // second late -- and the new line's first word with it, where a
+  // recognised line's cue starts on that word. The loop and the stop at
+  // each sentence's end own the line's end, so they keep the poll.
+  const setFocusIndex = analyzer.setFocusIndex
+  useEffect(() => {
+    if (!playing || !followPlayback || loop || pauseEach || !playerVideoId) return undefined
+    const timer = { id: 0 }
+    const step = () => {
+      clearTimeout(timer.id)
+      const t = playhead.at()
+      const idx = sentences.findIndex(s => t >= s.cue_start && t < s.cue_end)
+      // A new focus runs this effect again, from there.
+      if (idx !== -1 && idx !== focusIndex) {
+        setFocusIndex(idx)
+        return
+      }
+      let next = Infinity
+      for (const s of sentences) if (s.cue_start > t && s.cue_start < next) next = s.cue_start
+      if (next !== Infinity) timer.id = setTimeout(step, ((next - t) / rate) * 1000)
+    }
+    step()
+    const off = playhead.subscribe(step)
+    return () => {
+      off()
+      clearTimeout(timer.id)
+    }
+  }, [playing, followPlayback, loop, pauseEach, playerVideoId, sentences, focusIndex, playhead, setFocusIndex, rate])
 
   // The Passage's window, the first cue to the last: where Play starts.
   const cued = sentences.filter(s => s.cue_end != null)
@@ -1252,6 +1291,7 @@ export default function AnalyzerScreen({ session }) {
                 t={t}
                 playhead={playerVideoId ? playhead : null}
                 playing={playing}
+                timing={timing}
               />
             )}
             {!playerVideoId && nextArrow}
@@ -1465,6 +1505,7 @@ export default function AnalyzerScreen({ session }) {
             t={t}
             playhead={playerVideoId ? playhead : null}
             playing={playing}
+            timing={timing}
           />
         )}
         {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1))}

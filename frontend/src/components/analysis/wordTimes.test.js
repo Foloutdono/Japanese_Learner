@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { morae, beatsOf, tokenTimes, sungAt } from './wordTimes'
+import { morae, beatsOf, passageTiming, tokenTimes, sungAt } from './wordTimes'
 
 const tok = (surface, reading, start) => ({ surface, reading, start, end: start + Array.from(surface).length })
-// 今日は いい天気: 2 + 1 beats, a breath, 2 + 3 beats.
+// 今日は いい天気: 2 + 1 beats, a half-beat breath, 2 + 3 beats, and the
+// last of them held a beat longer -- 9.5 beats over 9.5 seconds.
 const LINE = {
   text: '今日は いい天気',
   cue_start: 10,
-  cue_end: 18.5,
+  cue_end: 19.5,
   tokens: [tok('今日', 'きょう', 0), tok('は', 'は', 2), tok('いい', 'いい', 4), tok('天気', 'てんき', 6)],
 }
 
@@ -28,9 +29,25 @@ describe('morae', () => {
 describe('tokenTimes', () => {
   it('spreads the words over the line by their beats when nothing else is known', () => {
     const times = tokenTimes(LINE)
-    // 8 beats and a half-beat breath over 8.5 seconds: a beat a second.
+    // A beat a second, the last one held: 天気 ends with the cue.
     expect(times.tokens.map(w => w.start)).toEqual([10, 12, 13.5, 15.5])
-    expect(times.tokens[3].end).toBe(18.5)
+    expect(times.tokens[3].end).toBe(19.5)
+  })
+
+  it('breathes at a mark the tokenizer made a word of', () => {
+    // そう、雨だ: 2 beats, a breath at the 、 (a token of its own), 2, 1 + 1.
+    const line = {
+      text: 'そう、雨だ', cue_start: 0, cue_end: 6.5,
+      tokens: [tok('そう', 'そう', 0), tok('、', '、', 2), tok('雨', 'あめ', 3), tok('だ', 'だ', 4)],
+    }
+    expect(tokenTimes(line).tokens.map(w => w.start)).toEqual([0, 2, 2.5, 4.5])
+  })
+
+  it('counts nothing for the marks before the first word and after the last', () => {
+    const line = { text: '「雨」', cue_start: 0, cue_end: 3, tokens: [tok('「', '「', 0), tok('雨', 'あめ', 1), tok('」', '」', 2)] }
+    const times = tokenTimes(line)
+    expect(times.tokens[1].start).toBe(0)
+    expect(times.tokens[1].end).toBe(3)
   })
 
   it('puts a word where its anchor says, and spreads the rest around it', () => {
@@ -63,16 +80,83 @@ describe('sungAt', () => {
 
   it('names the word being said and how far through it', () => {
     expect(sungAt(times, 12.5)).toEqual({ index: 1, progress: 0.5 })
-    expect(sungAt(times, 17)).toEqual({ index: 3, progress: 0.5 })
+    expect(sungAt(times, 17.5)).toEqual({ index: 3, progress: 0.5 })
   })
 
   it('is nothing outside the line', () => {
     expect(sungAt(times, 9.9)).toBeNull()
-    expect(sungAt(times, 18.5)).toBeNull()
+    expect(sungAt(times, 19.5)).toBeNull()
   })
 
   it('is before the first word while the line waits for its speech', () => {
     const late = tokenTimes({ ...LINE, word_times: [[0, 11]] })
     expect(sungAt(late, 10.5)).toEqual({ index: -1, progress: 0 })
+  })
+})
+
+// What a whole track says about its lines: its pace, measured between
+// the words it timed, and how early its subtitles come up.
+describe('passageTiming', () => {
+  // LINE's four words timed at half a second a beat, the first 0.3 s
+  // after the subtitle comes up.
+  const timedLine = at => ({
+    ...LINE, cue_start: at - 0.3, cue_end: at + 6,
+    word_times: [[0, at], [2, at + 1], [4, at + 1.75], [6, at + 2.75]],
+  })
+
+  it('reads the pace between the words measured, and the lead before the first', () => {
+    const timing = passageTiming([0, 10, 20, 30, 40, 50, 60, 70].map(timedLine))
+    expect(timing.secondsPerBeat).toBeCloseTo(0.5)
+    expect(timing.lead).toBeCloseTo(0.3)
+  })
+
+  it('reads the pace off the fullest cues when no word was measured', () => {
+    // 9.5 beats a line; cues of 9.5 to 18.5 seconds, the fullest near a
+    // beat a second and the rest held through a pause.
+    const lines = Array.from({ length: 10 }, (_, i) => ({ ...LINE, cue_start: 100 * i, cue_end: 100 * i + 9.5 + i }))
+    const timing = passageTiming(lines)
+    expect(timing.secondsPerBeat).toBeCloseTo(13.5 / 9.5)
+    expect(timing.lead).toBe(0)
+  })
+
+  it('says nothing about a track too short to measure, or a Passage with no cues', () => {
+    expect(passageTiming([timedLine(0)])).toBeNull()
+    expect(passageTiming([{ ...LINE, cue_start: null }])).toBeNull()
+    expect(passageTiming([])).toBeNull()
+  })
+})
+
+describe('tokenTimes on the track\'s timing', () => {
+  const held = { ...LINE, cue_end: 40 }
+
+  it('says a line\'s words at the track\'s pace and holds the rest of its cue', () => {
+    const times = tokenTimes(held, { secondsPerBeat: 1, lead: 0 })
+    expect(times.tokens.map(w => w.start)).toEqual([10, 12, 13.5, 15.5])
+    expect(times.tokens[3].end).toBe(19.5)
+    // Said, and the line still up: its last word stays lit.
+    expect(sungAt(times, 30)).toEqual({ index: 3, progress: 1 })
+  })
+
+  it('never runs a line past its cue', () => {
+    expect(tokenTimes(LINE, { secondsPerBeat: 2, lead: 0 }).tokens[3].end).toBe(19.5)
+  })
+
+  it('carries a line on at the track\'s pace after its last word measured', () => {
+    const times = tokenTimes({ ...held, word_times: [[0, 10], [4, 14]] }, { secondsPerBeat: 1, lead: 0 })
+    expect(times.tokens[2].start).toBe(14)
+    expect(times.tokens[3].start).toBe(16)
+    expect(times.tokens[3].end).toBe(20)
+  })
+
+  it('starts a line with no word measured after the track\'s lead', () => {
+    expect(tokenTimes(held, { secondsPerBeat: 1, lead: 0.5 }).tokens[0].start).toBe(10.5)
+  })
+
+  it('starts a line at the track\'s pace before its first word measured, where its subtitles come up early', () => {
+    const line = { ...held, word_times: [[4, 14]] }
+    expect(tokenTimes(line, { secondsPerBeat: 1, lead: 0.3 }).tokens[0].start).toBe(10.5)
+    // A track that is not early -- a recognised one, whose line starts on
+    // its first word -- starts it with the cue.
+    expect(tokenTimes(line, { secondsPerBeat: 1, lead: 0 }).tokens[0].start).toBe(10)
   })
 })

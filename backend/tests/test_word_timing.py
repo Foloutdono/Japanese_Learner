@@ -54,6 +54,37 @@ class AlignCuesTests(unittest.TestCase):
         [cue] = align_cues([own], self.RECOGNISED)
         self.assertEqual(cue["words"], [[2, 12.0]])
 
+    def test_a_word_misheard_kana_for_kana_keeps_the_time_it_was_said(self) -> None:
+        # 天気 (てんき) recognised as 電気 (でんき): the two lines agree on
+        # either side of it, and on its length.
+        recognised = [{"start": 10.0, "end": 13.0, "text": "今日はいい電気ですね",
+                       "words": [[0, 10.0], [3, 10.5], [5, 11.2], [7, 11.9]]}]
+        [cue] = align_cues([{"start": 9.8, "end": 13.5, "text": "今日はいい天気ですね"}], recognised)
+        self.assertEqual(_times(cue)[5], 11.2)
+
+    def test_a_word_the_recogniser_missed_is_left_to_the_estimate(self) -> None:
+        # いい not heard at all: its kana are not crowded into the time of
+        # the words around it.
+        recognised = [{"start": 10.0, "end": 13.0, "text": "今日は天気ですね",
+                       "words": [[0, 10.0], [3, 10.6], [5, 11.4]]}]
+        [cue] = align_cues([{"start": 9.8, "end": 13.5, "text": "今日はいい天気ですね"}], recognised)
+        times = _times(cue)
+        self.assertNotIn(3, times)
+        self.assertEqual(times[5], 10.6)
+
+    def test_a_pause_after_the_last_word_is_not_the_line_s_speech(self) -> None:
+        # The recognised line's last word, then eight seconds before the
+        # next: its kana are said at the track's pace, not spread over
+        # the pause, and so is where the hand-written line's speech ends.
+        recognised = [
+            {"start": 10.0, "end": 20.0, "text": "夢を見ていた",
+             "words": [[0, 10.0], [1, 10.4], [2, 10.6], [3, 10.8], [4, 11.2]]},
+            {"start": 20.0, "end": 22.0, "text": "朝が来た", "words": [[0, 20.0], [1, 20.4], [2, 20.6]]},
+        ]
+        [cue] = align_cues([{"start": 9.9, "end": 19.9, "text": "夢を見ていた"}], recognised)
+        end = _times(cue)[len("夢を見ていた")]
+        self.assertLess(end, 12.5)
+
     def test_every_time_stays_inside_the_line(self) -> None:
         early = [{"start": 9.0, "end": 12.0, "text": "今日はいい天気ですね"}]
         [cue] = align_cues([{"start": 10.0, "end": 11.0, "text": "今日はいい天気ですね"}], early)
