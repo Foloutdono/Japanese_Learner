@@ -7,6 +7,7 @@ import {
 } from '../../domain/boarding'
 import { BoardQuestion, Continue } from './BoardFrame'
 import { useDesk } from '../../hooks/useDesk'
+import { PickMark } from './BoardOption'
 
 // ── 7 · the hour (plan 075) ──────────────────────────────────────
 // The departure board prints the hour on split flaps; the three cells
@@ -155,7 +156,7 @@ export default function TimeStep({ minute, onChange, onContinue }) {
                 aria-keyshortcuts={desk ? String(i + 1) : undefined}
                 data-hour={id}
               >
-                {desk && <kbd className="desk-kbd" aria-hidden="true">{i + 1}</kbd>}
+                {desk && <PickMark digit={i + 1} corner />}
                 <span className="brd-cell__label">{t.destHour[id]}</span>
                 <span className="brd-cell__time">{DEPART_TIMES[id]}</span>
               </button>

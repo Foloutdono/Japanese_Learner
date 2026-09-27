@@ -998,7 +998,9 @@ a learner who has just rated one card is already looking for the next.
   thing and the one thing to do about it (`components/ui/Empty.jsx`).
 - **Between boarding screens the train pulls**: the leaving screen slides
   left as the next arrives from the right, 260ms ease-out; never a
-  cross-fade. Under reduced motion only the rest state is drawn.
+  cross-fade. Under reduced motion only the rest state is drawn. (The
+  desk pulls a shorter way; see *The desk*, "First contact lays the
+  rail".)
 - The chrome's tokens: `--hud-h` (48px), `--tabbar-h` (50px),
   `--dock-bottom`, and the desk's `--desk-rail-w` (256px). The class map
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
@@ -1535,6 +1537,64 @@ as the rail it arrives at.
   own number, N5 to 5 and the kana stop to 0), and Esc does nothing — the
   way out of the boarding signs the guest out. On the first ride the
   column is the card's entry, docked by the flip (plan 122).
+- **First contact is finished, not redrawn** (plan 155, owner-directed:
+  "keep this idea, improve it the most you can, and don't forget the
+  transitions"). The drawing above stands; what changed is that it holds
+  still where it should and moves where it should:
+  - *The way on stands in one place.* The floor is the card's width on
+    every question, Back at its left end and Continue — a ticket wide —
+    at its right, whatever the answers' width; it followed the step and
+    put Continue somewhere new on each (360, 640, 1174px). The lines and
+    the hour went up to the card's width with it; the plan's and the
+    account's lone action keep a ticket's width.
+  - *The lit stop is a train.* The line is one rail with the ridden
+    stretch over it, and the lit stop's wash and gold ring are one
+    object that runs down the rail to the stop being asked — and back up
+    it for a door or Back — on the pull's own time; the plan built, it
+    runs to the last stop and steps off. A stop being asked is an open
+    ring under the train, a stop ridden a filled dot. The line is laid on
+    its first frame (the rail drawn down, the stops in order), an answer
+    arrives on its stop, a new projection date drops in as a board's
+    figure turns, and a stop behind shows its ‹ to a pointer only.
+  - *One slot for the key and the pick.* Each answer's digit stands where
+    its check is read — a row's trailing slot, a tile's or a station's
+    top right corner — and turns over to the gold check once picked; the
+    recommended rhythm's tag rides its tile's edge and the next stop's
+    sits at its tile's foot, so every figure and name starts on one line.
+  - *The desk's pull is a short one*: the leaving car a rung (`--sp-9`)
+    the way it goes, fading, in 180ms; the arriving car the same rung
+    from the other side once it has all but gone — never two questions
+    read over each other — settling in 520ms, its answers a beat apart
+    behind it; Back runs both the other way. A full-width pull across
+    1,200px of paper was a smear, not a train. The leaving car is kept
+    until the arriving one's answers have landed.
+  - *The column is handed on.* Board pulls the Welcome's paper away and
+    steps the sign-in out of the column, which stays: the wait for the
+    boarding — the boot screen's dots alone, on the paper's middle, a
+    beat after the press, first on the Welcome while the pass is issued
+    and then carried on by the wait after it — is drawn in the same
+    column, the masthead on the same pixel, and the boarding lays its
+    line there. A pass that could not be issued brings the Welcome back.
+    The plan's arrival signboard stands on the paper's middle with its
+    scrim over the paper alone, the line left in view.
+  - *The account is a form*, at a column's width with the sign-in's field
+    size, not two answers at the name's display size.
+  - *The Welcome is simpler* (the owner's second round): the sign-in is
+    drawn in the column's own material — sumi fields, the panel's
+    hairlines, no pale card set in the sumi — under a plain "Log in",
+    on the column's middle where it always stood (the owner's call); one
+    lane of cards (both lanes' cards in turn) passes under the promise,
+    and the tagline is its quiet second line.
+  - *A field's focus is one edge*: the name (and the account's two
+    fields) take 1.5px of the pass's gold when typed in, with no second
+    ring outside it, and rest on the answers' hairline, filled or not.
+  - *A hover is the name field's edge and nothing else*: an answer
+    under the pointer takes the name field's 1.5px of gold on its own
+    ground — no wash, no lift — while a pick keeps its wash and its
+    check, so the two never read alike; the sheet's
+    bare `button:hover` brightness, which lit a paper tile cream and a
+    picked one yellow, is cancelled on the boarding and the Welcome's
+    sign-in.
 - **Every desk rule is in one place.** The last section of `index.css`,
   one media block, names written nowhere else; `src/desk.css.test.js`
   holds it. Never write a desk rule anywhere else, and never let a phone

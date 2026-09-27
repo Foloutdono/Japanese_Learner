@@ -116,6 +116,8 @@ describe('first contact at 1440 (P10)', () => {
   it('centres the questions in the paper the line leaves', async () => {
     await board()
     await pastName()
+    // Once the question's car has landed (the desk's pull, plan 155).
+    await settle(600)
     expect(Math.abs(mid(box(inCar('.brd__q'))) - (360 + (bodyW() - 360) / 2))).toBeLessThan(1.5)
     expect(Math.round(box($('.desk-brd__side')).left)).toBe(0)
     expect(Math.round(box($('.desk-brd__side')).right)).toBe(360)
@@ -156,6 +158,7 @@ describe('first contact at 1440 (P10)', () => {
     await settle(40)
     for (let i = 0; i < 4; i++) { inCar('[data-action="continue"]').click(); await settle() }
     expect(stepOf()).toBe('plan')
+    await settle(600)
     const plan = box(inCar('.brd__stage'))
     expect(Math.round(plan.width)).toBe(2 * 360 + 22)
     expect(Math.abs(mid(plan) - (360 + (bodyW() - 360) / 2))).toBeLessThan(1.5)

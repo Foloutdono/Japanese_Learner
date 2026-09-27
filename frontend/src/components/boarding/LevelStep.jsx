@@ -2,8 +2,7 @@ import { useLayoutEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { LEVELS, approx, goalStops, kanjiThrough } from '../../domain/boarding'
 import { BoardQuestion, Continue } from './BoardFrame'
-import { BoardOption } from './BoardOption'
-import { CheckMark } from './icons'
+import { BoardOption, PickMark } from './BoardOption'
 import { useDesk } from '../../hooks/useDesk'
 
 // ── 4 · the level, and 5 · the goal (plan 075) ───────────────────
@@ -95,9 +94,8 @@ function StationLine({ stops, value, onChange, label, attr }) {
             <span className="desk-brd__desc">
               {stop.desc.split(' · ').map(part => <span key={part}>{part}</span>)}
             </span>
-            <kbd className="desk-kbd" aria-hidden="true">{stop.digit}</kbd>
+            <PickMark digit={stop.digit} corner />
           </span>
-          {i === at && <span className="desk-brd__chk"><CheckMark /></span>}
         </button>
       ))}
     </div>

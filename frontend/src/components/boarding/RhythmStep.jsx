@@ -2,6 +2,7 @@ import { useLang } from '../../LangContext'
 import { RHYTHMS, RECOMMENDED_RHYTHM, itemsForRhythm } from '../../domain/boarding'
 import { BoardQuestion, Continue } from './BoardFrame'
 import { useDesk } from '../../hooks/useDesk'
+import { PickMark } from './BoardOption'
 
 // ── 6 · the rhythm (plan 075) ────────────────────────────────────
 // Four cards in a lattice: minutes a day, and the new items that fit
@@ -27,7 +28,7 @@ export default function RhythmStep({ value, onChange, onContinue }) {
                 aria-keyshortcuts={desk ? String(i + 1) : undefined}
                 data-rhythm={min}
               >
-                {desk && <kbd className="desk-kbd" aria-hidden="true">{i + 1}</kbd>}
+                {desk && <PickMark digit={i + 1} corner />}
                 {min === RECOMMENDED_RHYTHM && <span className="brd-tag">{t.onbPaceRecommended}</span>}
                 <span className="brd-cell__n">{min}</span>
                 <span className="brd-cell__u">{t.brdMinADay}</span>
