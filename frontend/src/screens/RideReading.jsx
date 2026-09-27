@@ -24,6 +24,8 @@ import { useCredits } from '../stores/credits'
 import { startTally, countReview } from '../stores/runTally'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { useDesk } from '../hooks/useDesk'
+import { paceFactor } from '../domain/readingPace'
+import { useReadingPace } from '../stores/readingPace'
 
 // ── 試乗 — the reading ride (plan 099) ───────────────────────────
 // The second half of the lesson, on the reading stage: one curated N5
@@ -72,6 +74,10 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   // null until the sentence is up: a clock that starts at zero would
   // read as already run out, and cover the sentence before it showed.
   const [timeLeft, setTimeLeft] = useState(null)
+  // The learner's reading pace, as the reading run keeps it: timeLeft in
+  // the server's seconds, the clock run 1/factor as fast, and no clock
+  // at all for a null factor (a ride taken again from Settings › Help).
+  const factor = paceFactor(useReadingPace())
   const [answer, setAnswer] = useState('')
   const [accuracy, setAccuracy] = useState(null)
   const [correct, setCorrect] = useState(null)
@@ -114,13 +120,15 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     if (!sentence || step !== 'read' && step !== 'type') return undefined
     if (timer.current) return undefined
     setTimeLeft(sentence.display_seconds)
+    if (factor == null) return undefined
+    const tick = 0.1 / factor
     timer.current = setInterval(() => {
-      setTimeLeft(prev => (prev - 0.1 <= 0 ? 0 : prev - 0.1))
+      setTimeLeft(prev => (prev - tick <= 0 ? 0 : prev - tick))
     }, 100)
     return undefined
-  }, [sentence, step])
+  }, [sentence, step, factor])
   useEffect(() => () => clearInterval(timer.current), [])
-  const covered = (step === 'read' || step === 'type') && sentence != null && timeLeft !== null && timeLeft <= 0
+  const covered = (step === 'read' || step === 'type') && sentence != null && factor != null && timeLeft !== null && timeLeft <= 0
   // The clock running out is the step turning from reading to writing.
   useEffect(() => {
     if (covered && step === 'read') go('type')
@@ -210,7 +218,8 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   const foot = { left: t.rideJp, right: t.readingTitle }
   const platforms = getAllSections(t).filter(s => Object.values(PASS_PLATFORMS).includes(s.path))
   const callouts = {
-    read:    { anchor: 'ride.sentence', place: 'top',   text: t.rideReadFront },
+    // Untimed, nothing hides: the one callout says both halves.
+    read:    { anchor: 'ride.sentence', place: 'top',   text: factor == null ? t.rideReadFrontUntimed : t.rideReadFront },
     type:    { anchor: 'ride.answer',   place: 'above', text: t.rideReadType },
     measure: { anchor: 'ride.rate',     place: 'above', text: (desk && t.rideReadMeasureDesk) || t.rideReadMeasure },
   }
@@ -259,7 +268,13 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
 
       {sentence && writing && (
         <>
-          <ReadingTimer timeLeft={timeLeft ?? sentence.display_seconds} total={sentence.display_seconds} covered={covered} t={t} />
+          <ReadingTimer
+            timeLeft={(timeLeft ?? sentence.display_seconds) * (factor ?? 1)}
+            total={sentence.display_seconds * (factor ?? 1)}
+            covered={covered}
+            untimed={factor == null}
+            t={t}
+          />
           {/* Covered while the walk is open: its clock has not started,
               and a sentence left showing under it is free time. */}
           <ReadingPrompt cardKey="ride" foot={foot} phrase={sentence.phrase} covered={covered || step === 'intro'} guide="ride.sentence" />

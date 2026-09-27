@@ -35,7 +35,7 @@ import PracticeStation from '../components/practice/PracticeStation'
 //   /practice/reading/levels     the JLPT grades
 //   /practice/reading/tiers      the word list and its tiers
 //   /practice/reading/cards      the learner's own cards (the desk's
-//                                page, plan 158; a phone goes back to
+//                                page, plan 159; a phone goes back to
 //                                the sources)
 //   → /practice/reading/level/N4, /tier/3?size=200&domain=jmdict,
 //     /mastery — the run, on the stage (screens/ReadingRun.jsx)
@@ -54,7 +54,7 @@ export default function SentenceStation({ session, base, levelsOnly = false }) {
 
   const desk = useDesk()
 
-  // ── 机 — the station as a line's split, filled (plan 158) ──
+  // ── 机 — the station as a line's split, filled (plan 159) ──
   // On the desk the sources, the grades and the tiers stand in one
   // column beside the open stop's page (components/practice/
   // PracticeStation.jsx); what follows is the phone's.

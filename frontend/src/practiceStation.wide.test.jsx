@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the practice stations, filled (plan 158) ────────────────────
+// ── 机 — the practice stations, filled (plan 159) ────────────────────
 // The owner's picks A and S1 of the canvas "Practice screens — layout
 // options", at 1440×900. Reading's station was three source cards
 // across the top of an empty window, its grades a short row, the mock
@@ -188,7 +188,7 @@ function expectHeld() {
   expect(go.bottom).toBeLessThanOrEqual(bottom)
 }
 
-describe('a practice station on the desk (plan 158)', () => {
+describe('a practice station on the desk (plan 159)', () => {
   it('opens the bare station on the learner\'s own grade, replacing it', async () => {
     await mount('/practice/reading')
     await settle()
@@ -318,7 +318,7 @@ describe('a practice station on the desk (plan 158)', () => {
   })
 })
 
-describe('the mock exam on the desk, filled (plan 158)', () => {
+describe('the mock exam on the desk, filled (plan 159)', () => {
   it('counts each grade\'s papers on its stop, with the papers sat and the record', async () => {
     await mount('/practice/exam?level=N5')
     await settle()

@@ -81,8 +81,9 @@ this repository (`frontend/.gitignore` refuses `.jks`, `.keystore`, `.p8`,
   Configuration) before a shell build can finish a Google sign-in, and
   the old `com.japaneselearner.app://` entry can come out at the same
   time. See `docs/oauth.md`.
-- The **icon** (`frontend/brand/icon.html` → `npm run icons` for the web
-  set, `npm run assets:native` for the shells).
+- The **icon** (`frontend/brand/icon.svg`, drawn with the mark by
+  `python3 scripts/build-mark.py` → `npm run icons` for the web set,
+  `npm run assets:native` for the shells, from the PNGs in `frontend/assets/`).
 - The **privacy policy** text (`frontend/public/privacy.html`, plan 066);
   its URL, `https://<web origin>/privacy.html`, goes in both listings.
 - Play: **Data safety** (email, user content, usage data; account deletion

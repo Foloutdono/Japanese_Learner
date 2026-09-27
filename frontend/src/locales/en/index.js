@@ -1024,6 +1024,8 @@ const reading = {
   readingGrammarPoint: 'Grammar point',
   readingFetchError:    "Couldn't load a phrase. Try again.",
   writeWhatYouSaw:      'Write what you saw, in romaji',
+  // The clock at the "No limit" pace (Settings › Reading pace).
+  readingUntimed:       'No time limit',
   romajiPlaceholder:    'e.g. konnichiwa',
   // The play button a phrase arrives behind (ReadingPieces' PlayButton).
   readingPlay:          'Show the sentence and start the timer',
@@ -2047,6 +2049,7 @@ const ride = {
   // The reading ride (plan 099): the sentence, the field, the measure,
   // then the plate that says which platforms ride on the pass.
   rideReadFront: 'Read it. It hides in a moment.',
+  rideReadFrontUntimed: 'Read it, then write what you read, in romaji or kana.',
   rideReadType: 'Write what you read, in romaji or kana.',
   rideReadMeasure: 'The figure is how much you caught. The grade is yours.',
   rideReadMeasureDesk: 'The figure is how much you caught. The grade is yours: on the bar, or with its number keys.',
@@ -2192,7 +2195,7 @@ const onboarding = {
   },
   practiceRight: pct => `${pct}% right`,
   practiceNotYet: 'Not yet',
-  // ── A practice station, on the desk (plan 158) ────────────────
+  // ── A practice station, on the desk (plan 159) ────────────────
   // The source as a switch at the list's head (the JLPT grades, word
   // frequency, your own cards), then the open stop's page: what the
   // exercise asks, its shape, four figures, your latest misses and the
@@ -2244,7 +2247,7 @@ const onboarding = {
   practiceTierSeen: (n, of) => `${n} / ${of} met`,
   practiceMineDesc: 'Sentences in which every word is one you have already met.',
   practiceMineNote: 'Only words you have already seen',
-  // The mock exam on the desk: each paper a row (plan 158).
+  // The mock exam on the desk: each paper a row (plan 159).
   examGradeDesc: 'Four papers in the JLPT format, timed and scored — unofficial scoring.',
   examNext: label => `Next · ${label}`,
   examLastScore: 'Your last score',
@@ -2274,6 +2277,23 @@ const onboarding = {
   passFieldHour: 'Daily ride',
   passFieldLines: 'Lines',
   settingsRatingShort: 'Rating',
+  // ── The reading pace ────────────────────────────────────────
+  // How long Reading leaves a sentence up and Comprehension a text:
+  // for a slow reader, a dyslexic one, anyone the clock gets in the
+  // way of rather than helps.
+  settingsReadingPace: 'Reading pace',
+  settingsReadingPaceHint: 'How long a sentence in Reading and a text in Comprehension stay up before they hide. Take more time if you read slowly or have dyslexia.',
+  readingPaceOption: { standard: 'Standard', relaxed: 'Relaxed', slow: 'Slow', untimed: 'No limit' },
+  // The chip at the clock's end, in Reading and Comprehension: each
+  // press moves to the next pace.
+  readingPaceShort: { standard: '×1', relaxed: '×1.5', slow: '×2', untimed: '∞' },
+  readingPaceChip: name => `Reading pace: ${name}. Press to change`,
+  readingPaceDesc: {
+    standard: 'The usual time',
+    relaxed: 'Half as long again',
+    slow: 'Twice as long',
+    untimed: 'Nothing hides before you answer',
+  },
   settingsHelp: 'Help',
   settingsHelpValue: 'Ride · Guide',
   settingsCreditsCount: n => `${n} sources`,

@@ -3,7 +3,7 @@
 Each platform's figure is read from its own log, and the tests below
 write rows into all six and read them back: what counts as one done,
 what counts as right, and what is left out (another learner's rows, a
-run with no grade, a grade never practised) -- and, since plan 158,
+run with no grade, a grade never practised) -- and, since plan 159,
 `last`, when the newest of them was done.
 """
 import json
@@ -123,7 +123,7 @@ class PracticeRecordTests(unittest.TestCase):
     def test_each_platform_counts_its_own_log_by_grade(self) -> None:
         _seed()
         record = self.client.get("/api/practice/record").json()
-        # Every grade with a row carries the date of its newest (plan 158).
+        # Every grade with a row carries the date of its newest (plan 159).
         for platform in record.values():
             for row in platform.values():
                 self.assertIsNotNone(_at(row["last"]).tzinfo)

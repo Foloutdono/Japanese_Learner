@@ -2,7 +2,7 @@ import { useEffect, useSyncExternalStore } from 'react'
 import { supabase } from '../lib/supabase'
 import { apiFetch } from '../lib/api'
 
-// ── 実践の停車駅 — one stop of a practice platform, for its page (plan 158) ──
+// ── 実践の停車駅 — one stop of a practice platform, for its page (plan 159) ──
 // /api/practice/stop/{platform}?stop=: what the learner has done at one
 // stop of a practice platform -- a grade, a frequency tier, their own
 // cards -- for the page the desk's practice station stands beside its

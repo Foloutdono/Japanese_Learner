@@ -52,6 +52,17 @@ class ParseTrackTests(unittest.TestCase):
         result = parse_track(ass, "t.ass")
         self.assertEqual(result[0]["text"], "私は学生です。")
 
+    def test_a_kangxi_radical_is_read_as_the_kanji_it_looks_like(self) -> None:
+        # A lyric track seen on YouTube writes 自分 with ⾃ (U+2F83), which
+        # the tokenizer cannot read: the word had no reading and no time.
+        vtt = "WEBVTT\n\n00:00:01.000 --> 00:00:03.000\n\u2f83分<00:00:02.000>を信じて\n"
+        [cue] = parse_track(vtt, "a.vtt")
+        self.assertEqual(cue["text"], "自分を信じて")
+        self.assertEqual(cue["words"], [[0, 1.0], [2, 2.0]])
+        # A compatibility ideograph likewise; plain kanji are left alone.
+        [cue] = parse_track("WEBVTT\n\n00:00:01.000 --> 00:00:02.000\n\uf9dc年と龍\n", "a.vtt")
+        self.assertEqual(cue["text"], "\u9686年と龍")
+
     def test_duplicate_consecutive_rolling_window_cues_are_merged(self) -> None:
         # The exact shape YouTube auto-captions produce: each Cue is the
         # previous one plus a few more words.
@@ -98,7 +109,8 @@ class WordTimeTests(unittest.TestCase):
         )
         [cue] = parse_track(vtt, "a.vtt")
         self.assertEqual(cue["text"], "今日はいい天気")
-        self.assertEqual(cue["words"], [[2, 1.5], [3, 2.0], [5, 2.6]])
+        # The words before the first stamp are said from the cue's start.
+        self.assertEqual(cue["words"], [[0, 1.0], [2, 1.5], [3, 2.0], [5, 2.6]])
 
     def test_a_stamp_before_a_spaced_word_anchors_the_word_not_the_space(self) -> None:
         # yt-dlp's auto-captions: <t><c> word</c>
@@ -109,7 +121,7 @@ class WordTimeTests(unittest.TestCase):
         )
         [cue] = parse_track(vtt, "a.vtt")
         self.assertEqual(cue["text"], "雨 が 降る")
-        self.assertEqual(cue["words"], [[2, 5.4], [4, 5.9]])
+        self.assertEqual(cue["words"], [[0, 5.0], [2, 5.4], [4, 5.9]])
 
     def test_a_cue_without_stamps_has_no_words(self) -> None:
         [cue] = parse_track("WEBVTT\n\n00:00:01.000 --> 00:00:02.000\n雨\n", "a.vtt")
@@ -140,7 +152,14 @@ class WordTimeTests(unittest.TestCase):
         )
         [cue] = parse_track(vtt, "a.vtt")
         self.assertEqual(cue["text"], "今日は いい天気")
-        self.assertEqual(cue["words"], [[2, 1.5], [6, 2.5]])
+        # The grown window's own start is when it appeared, not when 今日
+        # was said: the first cue's times stand for the first half.
+        self.assertEqual(cue["words"], [[0, 1.0], [2, 1.5], [6, 2.5]])
+
+    def test_a_stamp_at_the_cue_s_first_word_wins_over_its_start(self) -> None:
+        vtt = "WEBVTT\n\n00:00:01.000 --> 00:00:03.000\n<00:00:01.300>雨<00:00:01.800>が\n"
+        [cue] = parse_track(vtt, "a.vtt")
+        self.assertEqual(cue["words"], [[0, 1.3], [1, 1.8]])
 
 
 class ParseVideoIdTests(unittest.TestCase):

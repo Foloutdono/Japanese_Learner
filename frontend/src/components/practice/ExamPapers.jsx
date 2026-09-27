@@ -4,7 +4,7 @@ import { kindMeta, KIND_JP } from '../../exam/examKinds'
 import { PracticePage } from './PracticePage'
 import { Audio } from './PracticeSpecimen'
 
-// ── 模試 — a grade's papers, each a row that fills the page (plan 158) ──
+// ── 模試 — a grade's papers, each a row that fills the page (plan 159) ──
 // The owner's pick A of the canvas "Practice screens — layout options",
 // for the mock exam: a grade's four papers were four name cards at the
 // top of the page (Vocabulaire, 18 questions) with half the window

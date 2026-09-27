@@ -986,6 +986,8 @@ const reading = {
   readingGrammarPoint: 'Point de grammaire',
   readingFetchError:    "Impossible de charger une phrase. Réessaie.",
   writeWhatYouSaw:      'Écris ce que tu as vu, en romaji',
+  // Le chrono au rythme « Sans limite » (Réglages › Rythme de lecture).
+  readingUntimed:       'Sans limite de temps',
   romajiPlaceholder:    'ex. konnichiwa',
   // Le bouton lecture derrière lequel arrive une phrase (PlayButton de ReadingPieces).
   readingPlay:          'Afficher la phrase et lancer le chrono',
@@ -1979,6 +1981,7 @@ const ride = {
   // L'essai de lecture (plan 099) : la phrase, le champ, la mesure,
   // puis la plaque qui dit quels quais sont sur l'abonnement.
   rideReadFront: 'Lisez-la. Elle se cache dans un instant.',
+  rideReadFrontUntimed: 'Lisez-la, puis écrivez ce que vous avez lu, en romaji ou en kana.',
   rideReadType: 'Écrivez ce que vous avez lu, en romaji ou en kana.',
   rideReadMeasure: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre.',
   rideReadMeasureDesk: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre : sur la barre, ou avec ses touches chiffrées.',
@@ -2121,7 +2124,7 @@ const onboarding = {
   },
   practiceRight: pct => `${pct}\u00a0% justes`,
   practiceNotYet: 'Pas encore',
-  // ── La station de pratique, au bureau (plan 158) ─────────────
+  // ── La station de pratique, au bureau (plan 159) ─────────────
   // La source en interrupteur en tête de la liste (les grades JLPT, la
   // fréquence, tes cartes), puis la page de l'arrêt ouvert : ce que
   // l'exercice demande, sa forme, quatre chiffres, tes derniers ratés
@@ -2173,7 +2176,7 @@ const onboarding = {
   practiceTierSeen: (n, of) => `${n} / ${of} vus`,
   practiceMineDesc: 'Des phrases dont chaque mot est l’un de ceux que tu as déjà rencontrés.',
   practiceMineNote: 'Rien que des mots que tu as déjà vus',
-  // L'examen blanc au bureau : chaque épreuve en rangée (plan 158).
+  // L'examen blanc au bureau : chaque épreuve en rangée (plan 159).
   examGradeDesc: 'Quatre épreuves au format JLPT, chronométrées et notées — notation non officielle.',
   examNext: label => `Suivante · ${label}`,
   examLastScore: 'Ton dernier score',
@@ -2204,6 +2207,23 @@ const onboarding = {
   passFieldHour: 'Trajet',
   passFieldLines: 'Lignes',
   settingsRatingShort: 'Notation',
+  // ── Le rythme de lecture ────────────────────────────────────
+  // Combien de temps Lecture laisse une phrase affichée et
+  // Compréhension un texte : pour qui lit lentement, pour les
+  // lecteurs dyslexiques, pour qui le chrono gêne plus qu'il n'aide.
+  settingsReadingPace: 'Rythme de lecture',
+  settingsReadingPaceHint: 'Le temps pour lire une phrase en Lecture et un texte en Compréhension avant qu’ils ne se cachent. Prends-en plus si tu lis lentement ou si tu es dyslexique.',
+  readingPaceOption: { standard: 'Standard', relaxed: 'Posé', slow: 'Lent', untimed: 'Sans limite' },
+  // La puce au bout du chrono, en Lecture et en Compréhension : chaque
+  // appui passe au rythme suivant.
+  readingPaceShort: { standard: '×1', relaxed: '×1,5', slow: '×2', untimed: '∞' },
+  readingPaceChip: name => `Rythme de lecture : ${name}. Appuie pour changer`,
+  readingPaceDesc: {
+    standard: 'Le temps prévu',
+    relaxed: 'Moitié plus de temps',
+    slow: 'Deux fois plus de temps',
+    untimed: 'Rien ne se cache avant ta réponse',
+  },
   settingsHelp: 'Aide',
   settingsHelpValue: 'Essai · Guide',
   settingsCreditsCount: n => `${n} sources`,

@@ -169,7 +169,7 @@ def test_a_learner_with_nothing_met_answers_an_empty_map(client):
         assert client.get("/api/frequency/kanji/tiers/started").json()["started"] == {}
 
 
-# ── The practice platforms' samples (plan 158) ──
+# ── The practice platforms' samples (plan 159) ──
 # The practice stations filled on the desk print, per grade, the bank's
 # first item as the platform's specimen, the grammar the bank is written
 # around and the bank's size. What is pinned is what would print

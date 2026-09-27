@@ -40,7 +40,7 @@ import { SplitRow } from './SplitRow'
 //           called. Only the desk passes it; without it a stop is the
 //           button it always was.
 //
-//   stop.note — a line of the stop's own for its caption (plan 158): a
+//   stop.note — a line of the stop's own for its caption (plan 159): a
 //           practice station's record at the grade ("24 phrases · 83 %
 //           justes"), after "you are here" where the stop is the
 //           learner's. The caller formats it, as it does the labels.

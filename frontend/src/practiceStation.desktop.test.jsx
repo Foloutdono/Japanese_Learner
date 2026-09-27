@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a practice station on the narrowest desk (plan 158) ─────────
+// ── 机 — a practice station on the narrowest desk (plan 159) ─────────
 // At 1100px the page beside the list is under 400px, and four figures
 // across and two panels side by side came out a word wide. PracticePage
 // measures its box: under 600px the head stacks, the figures go two by
@@ -173,7 +173,7 @@ function mount(entry) {
   )
 }
 
-describe('a practice station at 1100px (plan 158)', () => {
+describe('a practice station at 1100px (plan 159)', () => {
   it('stacks the narrow page: the head, the figures two by two, the panels one under the other', async () => {
     await mount('/practice/reading/levels?level=N5')
     await settle()

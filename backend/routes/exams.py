@@ -111,7 +111,7 @@ ensure_exam_schema()
 
 # kind -> the generator's own time rule, (level, items) -> minutes: the
 # catalogue's estimate for a paper not yet generated is the limit the
-# generator would print on it (plan 158).
+# generator would print on it (plan 159).
 _TIME_LIMIT = {
     "vocab": exam_vocab_gen.time_limit_min,
     "reading": exam_reading_gen.time_limit_min,
@@ -138,7 +138,7 @@ def _expected_question_count(level: str, kind: str) -> int:
 def _mondai_names(level: str, kind: str) -> list[str]:
     """The blueprint's mondai this kind's paper is made of at `level`,
     by their Japanese names and in the blueprint's order (漢字読み, 表記,
-    …) -- what the desk's exam grade prints under the paper (plan 158).
+    …) -- what the desk's exam grade prints under the paper (plan 159).
     The same type set _expected_question_count counts."""
     types = _KIND_META[kind][2]
     return [
@@ -499,7 +499,7 @@ def list_exams(user_id: str = Depends(get_user_id)):
     # target counts instead, and generation only actually happens when a
     # user opens that specific exam (GET /api/exams/{exam_id} below).
     #
-    # Three more fields per entry since plan 158, for the exam station
+    # Three more fields per entry since plan 159, for the exam station
     # filled on the desk: `minutes` (the paper's printed time limit, or
     # the generator's rule over the expected items), `mondai` (the
     # blueprint's names for what the paper holds) and `last` (this

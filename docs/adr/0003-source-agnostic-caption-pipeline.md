@@ -398,3 +398,79 @@ YouTube's srv3 format (`<s t="…">` per word), in words that are often wrong.
 - **The server-side fetch** (the 2026-09-10 amendment) still takes one track
   through `youtube-transcript-api`, which returns no word times; its lines
   are read out on the estimate.
+- **Where a line was not timed word by word, the track times it** (later the
+  same day). The frontend reads what the whole track says — its pace, the
+  median seconds a beat between two words its source measured, or read off its
+  fullest cues where none were; and its lead, how early its subtitles come up
+  before their first word — and carries a line's unmeasured words at that pace
+  (`components/analysis/wordTimes.js`'s `passageTiming`). A line held on screen
+  through a pause is no longer spread over the pause. A karaoke-stamped cue's
+  first word is anchored at the cue's start, so a recognised line, which
+  starts on its first word, is told from a hand-written one that may come up
+  early. The aligner spaces a recognised word's kana at the track's pace
+  rather than up to the next word, and times a word misheard kana for kana;
+  and the line in focus moves on at the next line's cue, not on the next poll.
+  Measured on simulated songs and speech run through the whole pipeline (the
+  real grab conversion, parser, aligner and word timing, against known word
+  times; no real track could be fetched where this was built), the share of
+  time the word lit is the word being said rose in every case: 69→74% for a
+  song with both tracks, 46→58% for one with the hand-written track alone,
+  78→83% for one with only the recognised track, and 75→76%, 46→58% and
+  75→81% for speech. The simulation is an argument, not a measurement of real
+  tracks; a real track's errors should be checked against it.
+- **The beat model, set on real timing** (the same day). YouTube refuses caption
+  requests from a cloud machine (bot checks, region locks), so no real track
+  could be fetched to check the above against; but two public corpora time
+  every sound of real Japanese: JSUT's 4,400 read sentences
+  (sarulab-speech/jsut-label) and the Kiritan database's 50 sung songs
+  (r9y9/kiritan_singing). Measured on them, a pause between two words lasts
+  about two beats rather than half of one (it also carries the lengthening of
+  the mora before it), and a line's last mora half a beat more rather than one.
+  With a line's first and last sound known, the word lit is the word said 78%
+  of the time in speech and 49% in song, from 68% and 46%; carried at the
+  track's pace through a subtitle held after its speech, 62% and 37%, from 53%
+  and 34% (and 12% and 19% before the pace, spread over the held cue). Weighting
+  ん, っ and long vowels short, as both corpora time them, gained nothing
+  further and was left out.
+- **Checked on YouTube's own tracks, and the pace taken back** (the same day).
+  With the host allowed, 30 videos' hand-written and recognised tracks were
+  fetched (yt-dlp, whose other clients get past the bot check for most
+  videos; many music videos are region-locked from a cloud machine): 18
+  songs (米津玄師, YOASOBI, Official髭男dism, Ado, あいみょん) and 12 spoken
+  (podcasts, vlogs, talks, anime). The recognised words the aligner lends
+  the hand-written lines are the reference. Real lyric cues hug their
+  singing — a cue lasts 1.03 to 1.25 times its sung line — so carrying an
+  unmeasured line at the track's pace said its words early: over a whole
+  track with nothing measured, the word lit was the word said 39% of the
+  time against 56% spread over the cue. The rule now: a line's cue is its
+  speech, read as far as the track's cues run past their speech where its
+  measured lines show that (spoken tracks only: a singer holds a line's last
+  note past the last word the recogniser times), and the pace only for a
+  cue held more than four times what its words take; the lead is dropped
+  (it cost on every set). Against the code before this amendment, on the 22
+  videos the rule was chosen on and the 8 it was checked on: a third of a
+  song's lines hidden 53→55%, of a spoken track's 44→49% and 36→40%; a
+  spoken track with nothing measured 36→38% held out, the rest level; the
+  recogniser's own lines' 90th-percentile error a fifth lower.
+- **What the aligner could not read, and 16 more videos** (the same day). Read
+  word by word, the recogniser's words the aligner left unmatched were, on a
+  track that stamps its words, almost all misheard: their kana are nowhere
+  near the line (a song's 17–28% of its words, a spoken track's 1–7%). Two
+  were not. A lyric track wrote 自分 with the Kangxi radical ⾃ (U+2F83),
+  which the tokenizer reads as nothing, so the word had no reading, no card
+  and no time; every radical and compatibility ideograph is now folded to the
+  one kanji it stands for when a caption is parsed (`study/captions.py`,
+  a code point for a code point, so no word time moves). And the recogniser
+  writes numbers in digits (2人 for 二人); the aligner compares a digit as the
+  kanji numeral, which the tokenizer reads as the word (ふたり), for matching
+  only. A spoken track's words anchored 91→92%, 95→97% and 92→94% over the
+  three sets, a song's 69%, 75% and 62→63%. Checked on 16 videos fetched
+  after the rule was chosen (14 spoken, 2 songs, only the tracks that stamp
+  their words), the rule held: a third of a spoken track's lines hidden
+  36→41%, nothing measured 36→38%; a song's 71→74% and 58→64%. A lead
+  measured per track, taken at its first quartile, was tried again and was
+  within the noise (+0.3 to +0.7 points for speech, −1.3 for song): still
+  dropped. Some recognised tracks stamp few of their words (an interview
+  and an anime run 6–13% of their lines stamped); the aligner spreads their
+  kana over their lines' times, which would be measured against itself, so
+  every track with fewer than 60% of its lines stamped was left out.

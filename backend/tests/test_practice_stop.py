@@ -1,4 +1,4 @@
-"""駅の頁 — one stop of one practice platform (plan 158).
+"""駅の頁 — one stop of one practice platform (plan 159).
 
 /api/practice/stop/{platform}?stop=<key> is the grade page of the
 Practice stations filled on the desk: the stop's record in /record's

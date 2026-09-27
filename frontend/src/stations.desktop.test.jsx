@@ -191,7 +191,7 @@ describe('the other stations on the desk', () => {
     await mount('/practice/exam', <Route path="/practice/exam" element={<ExamScreen session={null} />} />)
     await settle()
     expect(where.search).toBe('?level=N4')
-    // The grade's papers, a row each since plan 158 (practiceStation.wide).
+    // The grade's papers, a row each since plan 159 (practiceStation.wide).
     expect(document.querySelector('.desk-split__page .prc-paper__title')).not.toBeNull()
     const n3 = [...document.querySelectorAll('.desk-split__list .route-stop')].find(s => s.textContent.includes('N3'))
     expect(n3.tagName).toBe('A')

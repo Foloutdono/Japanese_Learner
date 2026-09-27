@@ -364,7 +364,7 @@ _MINUTES_PER_QUESTION = 2  # reading items run slower than vocab/kanji ones; a s
 
 def time_limit_min(level: str, items: int) -> int:
     """The paper's time limit, ten minutes at the least. Public so the
-    catalogue (routes/exams.list_exams, plan 158) can say how long a
+    catalogue (routes/exams.list_exams, plan 159) can say how long a
     paper not yet generated will take by the same rule; `level` is
     taken for the vocabulary generator's signature and not needed."""
     return max(10, round(_MINUTES_PER_QUESTION * items))

@@ -9,6 +9,7 @@ import { refreshSummary, useProfileSummaryState } from '../../stores/profileSumm
 import { useAheadPlan } from '../../stores/ahead'
 import { Seg } from '../chrome/Console'
 import { ChevronIcon } from '../ui/Icons'
+import { Mark } from '../ui/Mark'
 import { SettingsPage, Slip } from './SettingsPage'
 
 // ── 通知 — Settings › Notifications (plan 156) ──────────────────
@@ -89,7 +90,7 @@ export function NotificationsPage() {
 
         {next && (
           <div className="brd-notif" role="img" aria-label={`${t.notifNextAria}: ${next.title} — ${next.summary}`} data-next>
-            <span className="brd-notif__app" aria-hidden="true">辻</span>
+            <span className="brd-notif__app" aria-hidden="true"><Mark /></span>
             <div className="brd-notif__body" aria-hidden="true">
               <div className="brd-notif__head">
                 <span>{t.brdAppName}</span>

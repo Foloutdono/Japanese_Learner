@@ -1,5 +1,6 @@
 import { useLang } from '../../LangContext'
 import { Emphasized } from '../ui/Emphasized'
+import { Mark } from '../ui/Mark'
 import { BoardQuestion, Continue, BoardLink } from './BoardFrame'
 
 // ── 8 · the nudge (plan 075) ─────────────────────────────────────
@@ -19,7 +20,7 @@ export default function NudgeStep({ time, onAllow, onSkip }) {
         </BoardQuestion>
         <div className="brd__stage">
           <div className="brd-notif" role="img" aria-label={`${t.brdNotifTitle(time)} — ${t.brdNotifText}`}>
-            <span className="brd-notif__app" aria-hidden="true">辻</span>
+            <span className="brd-notif__app" aria-hidden="true"><Mark /></span>
             <div className="brd-notif__body" aria-hidden="true">
               <div className="brd-notif__head"><span>{t.brdAppName}</span><span>{t.brdNotifNow}</span></div>
               <span className="brd-notif__title">{t.brdNotifTitle(time)}</span>

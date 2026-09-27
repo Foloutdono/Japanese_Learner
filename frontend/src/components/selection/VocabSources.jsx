@@ -179,11 +179,11 @@ export function FrequencyPlate({ t, session, source = 'vocab', base = BASE, pool
               ]}
             />
           )}
-          {/* The size under the pool, at its width and height and named,
-              as the tiers' own page draws it (TierSelector), rather than
-              a small pill tucked in the plate's corner. */}
+          {/* The size under the pool, at its width and height, as the
+              tiers' own page draws it (TierSelector), rather than a small
+              pill tucked in the plate's corner. No caption: the figures
+              say what it is, and the name is the switch's label. */}
           <div className="desk-source__size">
-            <span className="cap" aria-hidden="true">{t.tierSizeLabel}</span>
             <Seg
               full
               label={t.tierSizeLabel}

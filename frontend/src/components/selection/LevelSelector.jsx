@@ -37,11 +37,11 @@ import { RouteStops } from './RouteStops'
  *            first few items (/api/station/{source}/samples) and its
  *            bar. Only the desk passes it, so a phone never asks.
  *   sampleSource — whose samples the stops print, where it is not the
- *            line whose figures they print (plan 158): a practice
+ *            line whose figures they print (plan 159): a practice
  *            station prints the level's VOCABULARY figures under a
  *            sentence of its own bank. `false` asks for none (the mock
  *            exam's samples are its catalogue's, passed in `extra`).
- *   extra(level) — fields laid over each stop (plan 158): a practice
+ *   extra(level) — fields laid over each stop (plan 159): a practice
  *            station's `note` (the learner's record at the grade, which
  *            takes the "started" note's place), or the exam's own
  *            sample and figures.

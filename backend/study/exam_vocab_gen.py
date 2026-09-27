@@ -524,7 +524,7 @@ def _vocab_section(level: str) -> dict:
 def time_limit_min(level: str, items: int) -> int:
     """The paper's time limit: the real section's minutes scaled to the
     share of its items this paper carries, five at the least. Public
-    so the catalogue (routes/exams.list_exams, plan 158) can say how
+    so the catalogue (routes/exams.list_exams, plan 159) can say how
     long a paper not yet generated will take by the same rule."""
     section = _vocab_section(level)
     total_section_items = sum(m["count"] for m in section["mondai"])

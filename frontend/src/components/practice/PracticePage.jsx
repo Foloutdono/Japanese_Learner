@@ -3,7 +3,7 @@ import { useLang } from '../../LangContext'
 import { EnterKey, KeyCap } from '../chrome/DeskKeys'
 import { useBoxWidth } from '../../hooks/useBoxWidth'
 
-// ── 実践 — a practice stop's page, beside the station's list (plan 158) ──
+// ── 実践 — a practice stop's page, beside the station's list (plan 159) ──
 // The owner's pick A of the canvas "Practice screens — layout options":
 // the practice stations were five grades in a row across the top of an
 // empty window (or three source cards, or four paper names), so on the

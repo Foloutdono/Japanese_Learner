@@ -135,6 +135,17 @@ def _init_db() -> None:
                 # that boarded before it existed.
                 ("tutorial_at", "TIMESTAMPTZ"),
                 ("guided", "JSONB NOT NULL DEFAULT '{}'::jsonb"),
+                # How long a sentence stays up in 読解 and the first
+                # ride, and how long a comprehension text is read before
+                # its questions: 'standard', 'relaxed' (x1.5), 'slow'
+                # (x2) or 'untimed' -- for a slow reader, a dyslexic
+                # one, anyone the clock is the obstacle for rather than
+                # the exercise. NULL reads as standard; see READING_PACES
+                # below and frontend/src/domain/readingPace.js, which
+                # owns the factors. The server's own figures
+                # (display_seconds, read_seconds) stay the standard
+                # pace's: the client scales them.
+                ("reading_pace", "TEXT"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -209,10 +220,10 @@ def ensure_profile_row(user_id: str) -> str:
 def _profile_row(user_id: str) -> tuple:
     """(username, jlpt_level, daily_new_target, onboarded_at,
     rating_scale, motive, kana_known, reminder_time, notifications,
-    lines, tutorial_at, guided) —
+    lines, tutorial_at, guided, reading_pace) —
     seeding the row lazily like _get_or_create_username, whose creation
     path it reuses. The onboarding fields are NULL until the flow runs,
-    and rating_scale until the learner changes it."""
+    and rating_scale and reading_pace until the learner changes them."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
@@ -220,7 +231,8 @@ def _profile_row(user_id: str) -> tuple:
                 """
                 SELECT username, jlpt_level, daily_new_target, onboarded_at,
                        rating_scale, motive, kana_known, reminder_time,
-                       notifications, lines, tutorial_at, guided
+                       notifications, lines, tutorial_at, guided,
+                       reading_pace
                 FROM user_profiles WHERE user_id = %s
                 """,
                 (user_id,),
@@ -230,7 +242,7 @@ def _profile_row(user_id: str) -> tuple:
                 return row
     finally:
         conn.close()
-    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {})
+    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {}, None)
 
 
 def usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -276,6 +288,14 @@ class UsernamePayload(BaseModel):
 RATING_SCALES = ("binary", "simple", "full")
 DEFAULT_RATING_SCALE = "simple"
 
+# How long the reading exercises leave the text up. The factors live in
+# frontend/src/domain/readingPace.js; the backend only stores the
+# choice, because the clock runs in the browser and every figure the
+# server hands out (display_seconds, read_seconds) is the standard
+# pace's, scaled there.
+READING_PACES = ("standard", "relaxed", "slow", "untimed")
+DEFAULT_READING_PACE = "standard"
+
 
 class LearningPayload(BaseModel):
     """Settings' partial update of the onboarding fields. All optional;
@@ -285,6 +305,8 @@ class LearningPayload(BaseModel):
     jlptLevel: str | None = None
     dailyNewTarget: int | None = None
     ratingScale: str | None = None
+    # How long the reading exercises leave the text up (READING_PACES).
+    readingPace: str | None = None
     # The device's UTC offset in minutes, east positive (the app sends
     # -Date.getTimezoneOffset()), so the daily allowances reset at the
     # learner's midnight (core/credits.resets_at). Sent on every boot.
@@ -314,6 +336,13 @@ class LearningPayload(BaseModel):
     def valid_rating_scale(cls, v: str | None) -> str | None:
         if v is not None and v not in RATING_SCALES:
             raise ValueError(f"ratingScale must be one of {RATING_SCALES}")
+        return v
+
+    @field_validator("readingPace")
+    @classmethod
+    def valid_reading_pace(cls, v: str | None) -> str | None:
+        if v is not None and v not in READING_PACES:
+            raise ValueError(f"readingPace must be one of {READING_PACES}")
         return v
 
     @field_validator("jlptLevel")
@@ -416,7 +445,7 @@ CALENDAR_DAYS = 35
 def get_profile(user_id: str = Depends(get_user_id)):
     (username, jlpt_level, daily_new_target, onboarded_at, rating_scale,
      motive, kana_known, reminder_time, notifications, lines,
-     tutorial_at, guided) = _profile_row(user_id)
+     tutorial_at, guided, reading_pace) = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     streak = srs.get_streak(user_id)
@@ -442,6 +471,9 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # client so a learner who has never opened settings still gets a
         # named scale instead of a null the bar has to guess at.
         "ratingScale": rating_scale or DEFAULT_RATING_SCALE,
+        # How long the reading exercises leave the text up, resolved
+        # the same way: never chosen reads as the standard pace.
+        "readingPace": reading_pace or DEFAULT_READING_PACE,
         # The boarding's answers (plan 075): what the plan screen and the
         # native shell's daily reminder read back. All NULL/false until
         # the boarding runs; an account boarded before plan 075 simply
@@ -570,6 +602,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.ratingScale is not None:
         sets.append("rating_scale = %s")
         args.append(payload.ratingScale)
+    if payload.readingPace is not None:
+        sets.append("reading_pace = %s")
+        args.append(payload.readingPace)
     if payload.tzOffsetMin is not None:
         sets.append("tz_offset_min = %s")
         args.append(payload.tzOffsetMin)
@@ -607,6 +642,7 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         "jlptLevel": payload.jlptLevel,
         "dailyNewTarget": payload.dailyNewTarget,
         "ratingScale": payload.ratingScale,
+        "readingPace": payload.readingPace,
         "tzOffsetMin": payload.tzOffsetMin,
         "lines": payload.lines,
         "notifications": payload.notifications,

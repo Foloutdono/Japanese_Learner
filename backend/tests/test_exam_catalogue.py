@@ -1,4 +1,4 @@
-# 模試の目録 -- the three fields GET /api/exams carries since plan 158,
+# 模試の目録 -- the three fields GET /api/exams carries since plan 159,
 # for the exam station filled on the desk: `minutes` (the paper's
 # printed time limit, or the generator's own rule over the items a paper
 # not yet generated is expected to hold), `mondai` (the blueprint's

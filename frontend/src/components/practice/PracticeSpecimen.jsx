@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
 
-// ── 見本 — the exercise as the run will ask it, drawn in the page (plan 158) ──
+// ── 見本 — the exercise as the run will ask it, drawn in the page (plan 159) ──
 // The Learn stations print, in a small well on each platform, the card
 // it will ask (plan 137, LinePlatforms' Specimen). A practice station
 // has one platform a stop, so its page gives the well the room a card

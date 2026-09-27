@@ -1622,7 +1622,7 @@
    The history is the page now: under the desk a row of chips (the kinds
    the shelf holds, and Kept) over a row per passage, its lead the
    video's still or the platform's glyph in a ring; on the desk the
-   console over cards (the 机 section). A session has no ✕. */
+   console over cards (the 机 section). Each has its ✕. */
 .anl-shelf {
   display: flex;
   flex-direction: column;
@@ -1935,18 +1935,17 @@
    reading takes the primary ink, which the tint already raises. */
 .tok--on .tok__furi { color: var(--text-primary); }
 /* 字幕の流れ — the words lit as they are said (SubtitleLine). While the
-   video is inside the line, the words to come are faded, the word being
-   said fills from its first letter to its last (--said, written each
-   frame), and the words said stand whole. A mask, not an ink: the tint
-   is the focused word's and a rule's, the rule under the word is the
-   SRS's, and every word keeps its own colour -- the mask only takes
-   some of it away. The rule under the word is the border, outside the
-   masked children, so the state reads at every moment. */
-.tok-line--sung .tok { --said: 0%; }
-.tok-line--sung .tok--said { --said: 100%; }
-.tok-line--sung .tok__word,
-.tok-line--sung .tok__furi {
-  mask-image: linear-gradient(to right, #000 var(--said), rgb(0 0 0 / 40%) var(--said));
+   video is inside the line (data-sung), the words to come are faded,
+   the word being said fills from its first letter to its last, and the
+   words said stand whole: every word's --said, written each frame
+   straight onto it. A mask, not an ink: the tint is the focused word's
+   and a rule's, the rule under the word is the SRS's, and every word
+   keeps its own colour -- the mask only takes some of it away. The rule
+   under the word is the border, outside the masked children, so the
+   state reads at every moment. */
+.tok-line[data-sung] .tok__word,
+.tok-line[data-sung] .tok__furi {
+  mask-image: linear-gradient(to right, #000 var(--said, 0%), rgb(0 0 0 / 40%) var(--said, 0%));
 }
 /* The furigana dial: readings over everything, only over the words
    the SRS has not mastered, or none. */
@@ -4196,7 +4195,6 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.tier-picker__size .cap { flex: none; }
 /* The gates' pages: the canvas's gutter, the bar first. The block
    rhythm is the page gutter turned on its side — the bar's rule to the
    first panel measures what the panel measures to the screen's edge —
@@ -8603,6 +8601,24 @@ textarea:focus-visible {
 /* Inside a card (the gate, waiting), at the card's rhythm. */
 .loading--tight { padding: var(--sp-4); }
 
+/* ── 辻 — the mark (plan 158) ─────────────────────────────────
+   components/ui/Mark.jsx: the icon's drawing wherever the app names
+   itself. It takes the text glyph's box -- 1em square, its foot at the
+   em box's, 0.12em under the baseline -- so the caller's font-size
+   still sizes it and its line still places it. The ink is the
+   caller's; the road is the pass's metal in every theme and on every
+   ground, the sumi chrome's too: it is the mark's own material, not a
+   line's pigment (DESIGN.md, Colour). */
+.mark {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.12em;
+  overflow: visible;
+}
+.mark__ink { fill: currentcolor; }
+.mark__road { fill: var(--accent2); }
+
 /* Plan 049 -- tracks the same column as the card below it (--card-w,
    defined on :root, see its own comment there) rather than its own
    480px literal. Before this the screen stacked three different
@@ -9211,6 +9227,36 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   text-align: center;
+}
+/* The reading pace's chip keeps its figures one width as it turns. */
+.pace-chip { font-variant-numeric: tabular-nums; }
+/* A clock carrying a control at its end (the reading pace's chip,
+   ReadingPieces' PaceChip): the hairline across the whole width, as on
+   every clock, and the chip on the label's line at its end, level with
+   the label under the bar's gap -- never beside the bar, which it
+   would shorten. The label keeps the centre, held clear of the chip.
+   The chip adds no height: the comprehension card under the clock is
+   measured to hold the longest text on a 667px phone
+   (ComprehensionRun.touch.test.jsx) and has no line to spare. So it
+   stands out of the flow at --sp-7, the most the stage's gap under the
+   clock takes before the card would have to move, its figures a size
+   up from a chip's, and its target grown to a thumb's 44px over the
+   bar's end and the gap, neither of which takes a press. */
+.timer--aside { position: relative; }
+.timer--aside > .timer__label { padding-inline: calc(var(--sp-9) + var(--sp-3)); }
+.timer--aside > .pace-chip {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(var(--sp-1) + var(--sp-2));
+  justify-content: center;
+  min-width: var(--sp-9);
+  height: var(--sp-7);
+  font-size: var(--fs-sm);
+}
+.timer--aside > .pace-chip::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--sp-3)) calc(-1 * var(--sp-2));
 }
 /* The sentence: the card's one line, Japanese as content. */
 .sentence {
@@ -11219,10 +11265,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   .rating-bar__buttons--2 .rating-bar__btn { flex: 1 1 0; }
 }
 
+/* The mark (plan 158), in the page's ink: it wore --accent here, which
+   is 仮名's pigment, on a screen that is no section. */
 .app-loading__sign {
-  font-family: var(--font-jp);
   font-size: 4rem;
-  color: var(--accent);
+  color: var(--text-primary);
   line-height: 1;
 }
 
@@ -19155,6 +19202,18 @@ a.slip__act { text-decoration: none; }
 .stg-dots { flex: none; display: inline-flex; align-items: center; gap: var(--sp-1); }
 .stg-dots__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--rating-color, var(--text-secondary)); }
 .stg-dots__dot--best { background: var(--accent2); }
+/* The reading pace: the run's hairline at the pace's length, whole
+   when nothing is timed. */
+.stg-pace {
+  flex: none;
+  display: inline-flex;
+  width: var(--sp-7);
+  height: var(--sp-1);
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+  overflow: hidden;
+}
+.stg-pace__fill { display: block; height: 100%; background: var(--warning); }
 
 /* A row of slips (SettingsPage's SlipRow): stacked here, at the page's
    own gap; the desk stands a row's two side by side where the page is
@@ -19380,9 +19439,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 /* ── Notation: the three bars themselves (plan 139) ──
    Each scale is offered as the rating bar it is (RatingBar's specimen),
    inside the radio that picks it. The specimen takes no pointer, so the
-   radio is what the hover and the press reach. */
-.grades { display: flex; flex-direction: column; gap: var(--sp-3); }
-.grade {
+   radio is what the hover and the press reach. The reading pace's four
+   clocks (ReadingPacePage) stand in the same cards. */
+.grades,
+.paces { display: flex; flex-direction: column; gap: var(--sp-3); }
+.grade,
+.pace {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
@@ -19396,15 +19458,27 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   text-align: left;
 }
 .grade:hover,
-.grade:focus-visible { filter: none; border-color: color-mix(in srgb, var(--accent2) 55%, var(--surface-line)); }
+.grade:focus-visible,
+.pace:hover,
+.pace:focus-visible { filter: none; border-color: color-mix(in srgb, var(--accent2) 55%, var(--surface-line)); }
 .grade--on,
 .grade--on:hover,
-.grade--on:focus-visible {
+.grade--on:focus-visible,
+.pace--on,
+.pace--on:hover,
+.pace--on:focus-visible {
   border-color: var(--accent2);
   box-shadow: inset 0 0 0 1px var(--accent2);
   background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
 }
-.grade__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
+.grade__name,
+.pace__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
+/* A pace's name over the run's own clock (.timer) at the length it
+   gives a short sentence; the clock takes no pointer, like the bars. */
+.pace__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.pace__desc { font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; }
+.pace__timer { display: block; pointer-events: none; }
+.pace__timer .timer__fill { transition: none; }
 .rating-bar.rating-bar--specimen { display: block; pointer-events: none; }
 .rating-bar--specimen .rating-bar__buttons { max-width: none; margin: 0; gap: var(--sp-2); }
 .rating-bar--specimen .rating-bar__btn { min-height: var(--sp-8); }
@@ -19477,12 +19551,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   height: 44px;
 }
 .auth-header { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+/* The mark (plan 158) at the name rung. No tracking: it was the
+   glyph's, and on a drawing text-indent only pushes it off centre. */
 .auth-header__glyph {
   font-family: var(--font-serif);
   font-weight: 700;
   font-size: var(--fs-display);
-  letter-spacing: var(--tr-name);
-  text-indent: var(--tr-name);
   line-height: 1.1;
 }
 .auth-header__title {
@@ -20134,7 +20208,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 
 /* ── the notification, as the app would send it ── */
 .brd-notif { display: flex; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-5); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); box-shadow: var(--elev-hang); animation: brd-drop 700ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
-.brd-notif__app { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; border-radius: var(--r-card); background: var(--bg-panel); color: var(--accent2); font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); }
+/* The app's icon as a notification prints it: the mark (plan 158) on the sumi, in the icon's own inks. */
+.brd-notif__app { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; border-radius: var(--r-card); background: var(--bg-panel); color: var(--text-on-panel); font-size: var(--fs-title); }
 .brd-notif__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
 .brd-notif__head { display: flex; justify-content: space-between; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .brd-notif__title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }
@@ -22433,7 +22508,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     font-size: var(--fs-caption);
     color: var(--text-secondary);
   }
-  /* The ✕ in the card's corner (a passage's; a session has none). */
+  /* The ✕ in the card's corner -- over a video's still, on its own
+     paper. */
   .anl-card__delete {
     position: absolute;
     top: var(--sp-2);
@@ -24712,12 +24788,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     gap: var(--sp-3);
     padding: 0 var(--sp-6) var(--sp-4);
   }
-  /* Named over the switch rather than beside it: a third of the window
-     holds the four sizes or their name, not both on one line. */
   .desk-source__size {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
   }
   .desk-source__stripe {
     flex: none;
@@ -27790,7 +27863,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .anl-swap:hover,
   .anl-swap:focus-visible { border-color: var(--line-kaiseki); }
 
-  /* ── 机 — the practice stations, filled (plan 158) ──
+  /* ── 机 — the practice stations, filled (plan 159) ──
      The owner's picks A and S1 of the canvas "Practice screens — layout
      options". Reading, translation, comprehension, dictation,
      composition and the mock exam stood at the top of an empty window:

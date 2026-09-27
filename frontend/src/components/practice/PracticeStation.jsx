@@ -22,7 +22,7 @@ import { StationSplit, LevelRedirect } from '../selection/StationSplit'
 import { PracticePage, PracticeLines, PracticeChips } from './PracticePage'
 import { PracticeSpecimen } from './PracticeSpecimen'
 
-// ── 実践 — a practice station on the desk, filled (plan 158) ─────────
+// ── 実践 — a practice station on the desk, filled (plan 159) ─────────
 // The owner's picks A and S1 of the canvas "Practice screens — layout
 // options". Reading, translation, comprehension, dictation and
 // composition were, on the desk, the phone's pages at a desk's width:

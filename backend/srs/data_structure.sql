@@ -233,7 +233,14 @@ CREATE TABLE user_profiles (
     -- the time its guide ended ({} = none seen). Accounts that boarded
     -- before the ride existed are stamped by scripts/backfill_first_ride.py.
     tutorial_at TIMESTAMPTZ,
-    guided JSONB NOT NULL DEFAULT '{}'::jsonb
+    guided JSONB NOT NULL DEFAULT '{}'::jsonb,
+    -- How long the reading exercises leave the text up: 'standard',
+    -- 'relaxed' (x1.5), 'slow' (x2) or 'untimed' -- for a slow or a
+    -- dyslexic reader. NULL = never chosen, which reads as standard.
+    -- The clock runs in the browser, which scales the server's
+    -- standard figures; see routes/profile.py's READING_PACES and
+    -- frontend/src/domain/readingPace.js.
+    reading_pace TEXT
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came
@@ -496,7 +503,11 @@ CREATE TABLE video_sessions (
     -- of `source`: an uploaded .srt can name a video to play too. NULL
     -- means transcript-only, with no player.
     video_id      TEXT,
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- Removed from the analyser's shelf, by the learner's ✕ or past the
+    -- history's limit, and erased a day later (core/history.py). NULL is
+    -- a session on the shelf.
+    deleted_at    TIMESTAMPTZ
 );
 
 CREATE INDEX idx_video_sessions_user

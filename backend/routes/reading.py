@@ -553,7 +553,7 @@ def _source_label(
     see get_reading_batch's docstring — only what it *means* changed).
 
     A tier's label carries its size when the size is not the default
-    (plan 158): tier 3 is words 401-600 at 200 a tier but 1001-1500 at
+    (plan 159): tier 3 is words 401-600 at 200 a tier but 1001-1500 at
     500, and the desk's grade page (/api/practice/stop) reads a tier's
     record by this label, so two different ranges must not share one.
     The default size stays unwritten -- "freq:vocab:3" -- which is
@@ -600,7 +600,7 @@ def get_reading_batch(
     NOTE on reading_log.phase: not renamed at the DB column level (no
     migration tooling available here) — it now stores a compact label
     from _source_label() ("level:N3" / "freq:vocab:1" /
-    "freq:vocab:1:500" off the default tier size, plan 158 / "mastery")
+    "freq:vocab:1:500" off the default tier size, plan 159 / "mastery")
     instead of the old "hiragana"/"katakana"/"mixed". Rename the column
     yourself with `ALTER TABLE reading_log RENAME COLUMN phase TO source;`
     if you'd rather it matched the new field name everywhere.
@@ -769,7 +769,7 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
     # than crashing the insert; the compact `phase` label already carries
     # the real source info ("freq:vocab:1" / "freq:vocab:1:500" /
     # "mastery", see _source_label) for anything that needs it -- the
-    # desk's grade page (/api/practice/stop, plan 158) reads a tier's and
+    # desk's grade page (/api/practice/stop, plan 159) reads a tier's and
     # mastery's rows by it. Consider `ALTER TABLE reading_log ALTER
     # COLUMN level DROP NOT NULL;` if you'd rather this be a real NULL.
     level_for_log = payload.level or ""

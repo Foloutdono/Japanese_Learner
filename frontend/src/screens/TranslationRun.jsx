@@ -124,7 +124,7 @@ export default function TranslationRun({ session }) {
 
   // Compact label matching reading.py's _source_label() (same values,
   // same meaning — translation_log.phase mirrors reading_log.phase).
-  // The tier's size rides in the label since plan 158 (sentenceSource's
+  // The tier's size rides in the label since plan 159 (sentenceSource's
   // logLabel): the desk's practice station reads a tier's record by it.
   function sourceLabel() {
     return logLabel({ source, level, domain, tier, tierSize })

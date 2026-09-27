@@ -423,7 +423,7 @@ _MINUTES_PER_ITEM = 1.5  # a grammar item is one sentence to read, or four piece
 
 def time_limit_min(level: str, items: int) -> int:
     """The paper's time limit, ten minutes at the least. Public so the
-    catalogue (routes/exams.list_exams, plan 158) can say how long a
+    catalogue (routes/exams.list_exams, plan 159) can say how long a
     paper not yet generated will take by the same rule; `level` is
     taken for the vocabulary generator's signature and not needed."""
     return max(10, round(_MINUTES_PER_ITEM * items))

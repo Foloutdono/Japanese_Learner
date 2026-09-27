@@ -6,6 +6,8 @@ import { useVolumes, useMuted, DEFAULT_VOLUMES } from '../lib/audio'
 import { isGuest } from '../lib/guest'
 import { useThemeChoice } from '../stores/theme'
 import { useRatingScale } from '../stores/ratingScale'
+import { useReadingPace } from '../stores/readingPace'
+import { paceFactor } from '../domain/readingPace'
 import { ATTRIBUTIONS } from '../domain/attributions'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { useListWalk, WALK_KEYS } from '../hooks/useListWalk'
@@ -15,7 +17,7 @@ import { openPaywall } from '../stores/credits'
 import { SOURCES } from '../domain/paywall'
 import { SettingsPass } from '../components/settings/SettingsPass'
 import { SettingsDoor } from '../components/settings/SettingsDoor'
-import { ThemeSwatch, SoundMeter, RatingDots } from '../components/settings/RowSpecimens'
+import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from '../components/settings/RowSpecimens'
 import { LevelPage } from '../components/settings/LevelPage'
 import { DestinationPage } from '../components/settings/DestinationPage'
 import { ServicePage } from '../components/settings/ServicePage'
@@ -24,6 +26,7 @@ import { LinesPage } from '../components/settings/LinesPage'
 import { DisplayPage } from '../components/settings/DisplayPage'
 import { SoundPage } from '../components/settings/SoundPage'
 import { RatingPage } from '../components/settings/RatingPage'
+import { ReadingPacePage } from '../components/settings/ReadingPacePage'
 import { HelpPage } from '../components/settings/HelpPage'
 import { AccountPage } from '../components/settings/AccountPage'
 import { CreditsPage } from '../components/settings/CreditsPage'
@@ -54,6 +57,7 @@ const PAGES = {
   sound: SoundPage,
   notifications: NotificationsPage,
   rating: RatingPage,
+  reading: ReadingPacePage,
   help: HelpPage,
   account: AccountPage,
   credits: CreditsPage,
@@ -123,6 +127,7 @@ function SettingsHome({ session, current = null }) {
   const onWalk = useListWalk(desk, { items: DOORS })
   const [theme] = useThemeChoice()
   const scale = useRatingScale()
+  const pace = useReadingPace()
   const volumes = useVolumes()
   const muted = useMuted()
   const offerable = useOfferable()
@@ -144,6 +149,7 @@ function SettingsHome({ session, current = null }) {
       value: summary?.notifications && summary?.reminderTime ? summary.reminderTime : t.notifOff,
     }] : []),
     { id: 'rating', label: t.settingsRatingShort, value: t.settingsRatingScaleOption[scale] ?? '', spec: <RatingDots scale={scale} /> },
+    { id: 'reading', label: t.settingsReadingPace, value: t.readingPaceOption[pace], spec: <PaceLine factor={paceFactor(pace)} /> },
     { id: 'help', label: t.settingsHelp, value: t.settingsHelpValue },
     { id: 'account', label: t.account, value: accountValue },
     { id: 'credits', label: t.settingsCredits, value: t.settingsCreditsCount(ATTRIBUTIONS.length) },

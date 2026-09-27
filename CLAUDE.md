@@ -972,7 +972,23 @@ runtime purpose. Two consequences worth knowing:
   `src/fields.browser.test.jsx`, `src/fields.desktop.test.jsx`,
   `src/dictionary.phone.test.jsx` and `index.css` and its 机 section;
   DESIGN.md, "The field, one well").
-  **158** is the practice stations filled on the desk (the owner's
+  **158** is 道, the mark redrawn (the owner's pick B1 of the canvas
+  "Tsuji — the mark": five directions, then seven variants of the
+  second): 辻 in Noto Serif JP Black with one dot on 辶 — five strokes,
+  a form the font cannot set, so cut from its outlines (the 十 of 辻,
+  the 辶 of 込) by `scripts/build-mark.py` — and 辶's sweep, the road,
+  in `--accent2`, the gold underline it replaced become the character's
+  own stroke; drawn by one component wherever the app names itself (the
+  rail's masthead, the Welcome and the sign-in, the boot screen, a
+  notification's icon), and every icon and splash regenerated from it,
+  the native shells' included, which had still shipped 日本語 (cited in
+  `frontend/scripts/build-mark.py`, `scripts/render-icon.mjs`,
+  `frontend/brand/`, `frontend/assets/`, `components/ui/Mark.jsx`,
+  `components/ui/markPaths.js`, `index.css`, `src/chrome.desktop.test.jsx`,
+  `src/frontdoor.desktop.test.jsx` and `src/states.phone.test.jsx`;
+  DESIGN.md, "The idea" and Colour).
+  **159** is the practice stations filled on the desk (numbered 159
+  because 158 went to 道, the mark, while it was open; the owner's
   picks A and S1 of the canvas "Practice screens — layout options"):
   reading, translation, comprehension, dictation, composition and the
   mock exam as a line's split taking the window, as plan 137 filled the
@@ -995,7 +1011,7 @@ runtime purpose. Two consequences worth knowing:
   `src/practiceStation.wide.test.jsx`,
   `src/practiceStation.desktop.test.jsx`, `src/deskfree.phone.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **159** or higher, and check
+  When starting a new wave, begin at **160** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -1352,7 +1368,7 @@ npm run build
 npm run lint
 npm test          # vitest: node, browser, phone, tablet, touch, desktop and wide lanes (see vite.config.js)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
-npm run icons     # re-render brand/icon.html and regenerate the icon set in public/
+npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 ```
 
 `npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,

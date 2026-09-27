@@ -46,7 +46,7 @@ router = APIRouter()
 
 SOURCES = (
     "kana", "kanji", "vocab", "grammar",
-    # The practice platforms (plan 158), below the Learn lines.
+    # The practice platforms (plan 159), below the Learn lines.
     "reading", "translation", "comprehension", "dictation", "composition", "exam",
 )
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
@@ -178,8 +178,8 @@ def _grammar_line(lang: str) -> dict:
     return stops
 
 
-# ── 実践の見本 — what each grade of a practice platform holds (plan 158) ──
-# Plan 137 filled the Learn stations; plan 158 fills the Practice ones
+# ── 実践の見本 — what each grade of a practice platform holds (plan 159) ──
+# Plan 137 filled the Learn stations; plan 159 fills the Practice ones
 # the same way (the owner's pick A of the practice stations canvas: a
 # platform's grades as a line's split, filled), with reading's and
 # translation's sources folded into the station as a switch (S1). A

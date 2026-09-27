@@ -1733,7 +1733,7 @@ describe('the stations filled (plan 137)', () => {
   })
 })
 
-// ── plan 158 — the practice stations a phone keeps ──
+// ── plan 159 — the practice stations a phone keeps ──
 // On the desk a practice station is a line's split filled: the source a
 // switch at the list's head, the stops with a sentence and a record,
 // the open stop's page, and the mock exam's papers as rows with a
@@ -1741,7 +1741,7 @@ describe('the stations filled (plan 137)', () => {
 // cards, the grades across, the papers as cards -- and asks for none of
 // what only the desk prints; the learner's own cards, a page of the
 // desk's, send a phone back to the sources.
-describe('the practice stations filled (plan 158)', () => {
+describe('the practice stations filled (plan 159)', () => {
   const practiceRoutes = async () => {
     const { Routes, Route } = await import('react-router-dom')
     const { default: SentenceStation } = await import('./screens/SentenceStation')

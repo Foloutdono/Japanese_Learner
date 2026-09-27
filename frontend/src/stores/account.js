@@ -27,7 +27,7 @@ import { forgetToday } from './today'
 //                 TTL, the longest of them)
 //   the record    what was done at each grade of each practice
 //                 platform (the desk's Practice gate, plan 130), and
-//                 at each stop of a practice station (plan 158)
+//                 at each stop of a practice station (plan 159)
 //   the guide     which gates opened their lesson THIS page load
 //   the day ahead the reminders scheduled on this phone and the
 //                 widget's figures (plan 156): both name the leaving

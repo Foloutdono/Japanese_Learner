@@ -1,6 +1,6 @@
 """
 実践の記録 — what a learner has done on each practice platform, by grade
-(plan 130), and at one stop of one platform (plan 158).
+(plan 130), and at one stop of one platform (plan 159).
 
 The Practice gate on the desk hangs each platform's five grades as rows,
 and a row says what the learner has done there: how many sentences,
@@ -23,7 +23,7 @@ a comprehension text carries several questions, a paper dozens. For the
 four sentence platforms a row is one sentence, so `of` is `done` and
 `right` counts the rows marked correct -- the learner's own rating
 passed (q > 2, the rule every practice log derives `correct` by).
-`last` is when the newest of them was done (plan 158: the grade rows
+`last` is when the newest of them was done (plan 159: the grade rows
 of a filled station say "3 days ago") -- the row's created_at, or a
 paper's finished_at.
 
@@ -35,7 +35,7 @@ own-cards run, which has no grade and is behind no grade's row.
     GET /api/practice/stop/{platform}?stop=N4
 
 One stop of one platform, for the grade page the desk's filled station
-opens beside its line (plan 158, the owner's pick A): the stop's record
+opens beside its line (plan 159, the owner's pick A): the stop's record
 in the same figures, the sentences the learner last missed there, and
 the grade's grammar they have studied at Learn. See practice_stop.
 """
@@ -110,7 +110,7 @@ def practice_record(user_id: str = Depends(get_user_id)):
     return record
 
 
-# ── 駅の頁 — one stop of one platform (plan 158) ──────────────────────
+# ── 駅の頁 — one stop of one platform (plan 159) ──────────────────────
 #
 #     GET /api/practice/stop/{platform}?stop=<key>
 #

@@ -125,7 +125,8 @@ describe('the boot screen', () => {
   it('stands with no session: the sign over the dots, on the page ground', async () => {
     const screen = await mount(<AppLoading />)
     const root = screen.container.querySelector('.app-loading')
-    expect(root.querySelector('.app-loading__sign').textContent).toBe('辻')
+    // The mark (plan 158): the icon's own drawing, not the text glyph.
+    expect(root.querySelector('.app-loading__sign svg.mark')).not.toBeNull()
     expect(root.querySelectorAll('.loading__dot')).toHaveLength(3)
     expect(getComputedStyle(root).minHeight).toBe(`${window.innerHeight}px`)
     // The note is in the tree from the first paint — a live region
