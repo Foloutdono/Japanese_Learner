@@ -37,6 +37,22 @@
             </intent-filter>
         </activity>
 
+        <!-- 発車案内 — the day's train on the home screen (plan 155,
+             TrainWidget.java). The system alone sends it updates, so it
+             is not exported; its Depart opens MainActivity explicitly
+             with app.tsuji://open/today, which needs no intent filter. -->
+        <receiver
+            android:name=".TrainWidget"
+            android:exported="false"
+            android:label="@string/widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_train_info" />
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

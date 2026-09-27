@@ -4,4 +4,8 @@
     <string name="title_activity_main">Tsuji</string>
     <string name="package_name">app.tsuji</string>
     <string name="custom_url_scheme">app.tsuji</string>
+    <!-- 発車案内 — the widget as the picker lists it (plan 155). Its own
+         words come from the app, in the learner's language. -->
+    <string name="widget_label">Today’s train</string>
+    <string name="widget_description">The day’s cards, what they take, and a word you know.</string>
 </resources>
