@@ -934,6 +934,7 @@ describe('first contact, finished (P13, plan 154)', () => {
 describe('the hover, simpler (P14, plan 154)', () => {
   it('draws the name field\'s gold edge on an answer, and nothing else', async () => {
     await board()
+    await settle(300)
     const gold = getComputedStyle(inCar('.brd-field')).borderTopColor
     await pastName()
     await landed()
@@ -948,5 +949,20 @@ describe('the hover, simpler (P14, plan 154)', () => {
     await userEvent.hover(inCar('[data-action="back"]'))
     await settle(250)
     expect(getComputedStyle(inCar('[data-action="back"]')).filter).toBe('none')
+  })
+
+  it('focuses the name with one gold edge, no second ring', async () => {
+    await board()
+    const field = inCar('.brd-field')
+    expect(document.activeElement).toBe(field)
+    await settle(300)
+    const focused = getComputedStyle(field)
+    expect(focused.outlineStyle).toBe('none')
+    const gold = focused.borderTopColor
+    field.blur()
+    await settle(200)
+    // At rest, filled, the answers' hairline: the gold is the focus alone.
+    expect(field.value).toBe('Tester')
+    expect(getComputedStyle(field).borderTopColor).not.toBe(gold)
   })
 })

@@ -1560,6 +1560,9 @@ as the rail it arrives at.
     on the column's middle where it always stood (the owner's call); one
     lane of cards (both lanes' cards in turn) passes under the promise,
     and the tagline is its quiet second line.
+  - *A field's focus is one edge*: the name (and the account's two
+    fields) take 1.5px of the pass's gold when typed in, with no second
+    ring outside it, and rest on the answers' hairline, filled or not.
   - *A hover is the name field's edge and nothing else*: an answer
     under the pointer takes the name field's 1.5px of gold on its own
     ground — no wash, no lift — while a pick keeps its wash and its

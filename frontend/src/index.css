@@ -25375,6 +25375,18 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     font-size: var(--fs-lead);
     font-weight: 500;
   }
+  /* A field's focus is one edge (the owner: "make the name focus
+     simpler"): the pass's gold, as thick as the name field's own 1.5px,
+     where the frame's ring drew a second line 2px outside it. At rest
+     the edge is the answers' hairline, filled or not, so the gold says
+     "you are typing here" and nothing else; an answer under the pointer
+     takes the same edge. */
+  .desk-brd .brd-field { border-color: var(--surface-line); }
+  .desk-brd .brd-field:focus-visible {
+    border-color: var(--accent2);
+    outline: none;
+    box-shadow: 0 0 0 0.5px var(--accent2);
+  }
   /* ── the stops as a line of stations (components/boarding/LevelStep)
      The level and the goal lists drawn as what they name: a station per
      stop on a rail, its code in its ring and the stop's card under it,
