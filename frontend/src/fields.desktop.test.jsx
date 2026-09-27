@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import './index.css'
 import { expectVisibleWell, wellOf } from './testing/wells'
 
-// ── 机 — no field is painted in its own ground, on the desk (plan 156) ──
+// ── 机 — no field is painted in its own ground, on the desk (plan 157) ──
 // fields.browser.test.jsx asks this at a phone's width, where the desk's
 // rules never apply -- and on the desk three of .field--page's mounts
 // stand on a surface the phone does not draw: the run's entry on its
@@ -71,7 +71,7 @@ describe('every field is visible on the desk ground it is mounted on', () => {
   })
 })
 
-// The entry's floor is one row (plan 156): the answer beside Check, as
+// The entry's floor is one row (plan 157): the answer beside Check, as
 // 問's well stands beside its send, the field at Check's height.
 describe('the entry\'s floor on the desk', () => {
   it('stands the field beside Check, at its height, taking the rest of the row', async () => {

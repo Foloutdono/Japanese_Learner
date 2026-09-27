@@ -929,8 +929,35 @@ runtime purpose. Two consequences worth knowing:
   `screens/AppLoading.jsx`, `App.jsx`, `src/frontdoor.desktop.test.jsx`'s
   P13 and the 机 section of `index.css`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  **156** is the fields as one well (the owner's pick A of three drawn
-  on the canvas "Tsuji — input fields"): every field is drawn from the
+  **156** is 発車案内, the day's queue on the phone while the app is shut
+  (numbered 156 because 155 went to first contact finished while it
+  was open, and its commits' messages say 155; the owner's picks A, D
+  and E of the canvas "Tsuji — notifications from the day's queue"):
+  the daily nudge planned from what the gate will
+  hold -- a dated notification for each of the next seven days at the
+  learner's hour with the real count, minutes, new cards and lanes, none
+  on a day with nothing due, none once the learner has ridden that day,
+  replacing plan 076's repeating one (`GET /api/today/ahead`, counting
+  the gate at instants the device names, `srs.get_due_rows`' `until`,
+  `reviewed_since`); a widget -- the lock screen on iPhone (a WidgetKit
+  extension, `TsujiWidget`, reading an App Group `group.app.tsuji`), the
+  home screen on Android (`TrainWidget.java`) -- with the count, the
+  lines' stripe, Depart and a word the learner knows that is not due
+  this week (`srs.get_settled_cards`), handed its figures by the app's
+  own `TsujiWidget` plugin; a tap on either opening the gate through
+  `app.tsuji://open/today` (`nudge_opened`); and Settings › Notifications
+  on the shells only (cited in `routes/today.py`, `routes/profile.py`,
+  `srs/srs.py`, `core/events.py`, `tests/test_today_ahead.py`,
+  `lib/ahead.js`, `lib/native.js`, `lib/platform.js`, `stores/ahead.js`,
+  `stores/account.js`, `components/chrome/NativeBridge.jsx`,
+  `components/settings/NotificationsPage.jsx`, `screens/SettingsScreen.jsx`,
+  `src/notifications.phone.test.jsx`, `android/.../TrainWidget.java`,
+  `TsujiWidgetPlugin.java`, `ios/App/TsujiWidget/`, `ios/App/App/
+  TsujiWidgetPlugin.swift`, the fastlane lane and `docs/release.md`).
+  **157** is the fields as one well (numbered 157 because 156 went to
+  the day ahead while it was open, and its first commit's message says
+  156; the owner's pick A of three drawn on the canvas "Tsuji — input
+  fields"): every field is drawn from the
   question field's well (問); a search is that well holding its mark,
   the clear and the count (`.field--search`: every console's row 2, the
   Learn shelf's search, the analyser rail's), a key that acts on a
@@ -945,7 +972,7 @@ runtime purpose. Two consequences worth knowing:
   `src/fields.browser.test.jsx`, `src/fields.desktop.test.jsx`,
   `src/dictionary.phone.test.jsx` and `index.css` and its 机 section;
   DESIGN.md, "The field, one well").
-  When starting a new wave, begin at **157** or higher, and check
+  When starting a new wave, begin at **158** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

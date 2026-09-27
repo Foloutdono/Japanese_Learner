@@ -1258,10 +1258,15 @@ class SRSEngine:
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
-    def get_due_rows(self, user_id: str, limit: int | None = None) -> list[dict[str, Any]]:
+    def get_due_rows(self, user_id: str, limit: int | None = None,
+                     until: datetime | None = None) -> list[dict[str, Any]]:
         """
         Every (card, mode) this user owes a review on right now, most
         overdue first, across every section at once.
+
+        `until` moves "now" forward: the rows that WILL be owed by then
+        if nothing is reviewed in between -- what the day ahead reads to
+        say what a notification at 19:00 will find (plan 156).
 
         get_due_cards answers the same question one mode and one deck at
         a time, which is what a section session needs and what made a
@@ -1275,7 +1280,7 @@ class SRSEngine:
         reason "today" is a finite number rather than the deck size.
         """
         pattern = self._user_prefix_pattern(user_id)
-        now = datetime.now(timezone.utc)
+        now = until or datetime.now(timezone.utc)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 mode_sql, mode_params = self._servable_filter()
@@ -1361,6 +1366,64 @@ class SRSEngine:
                 cur.execute(sql, (pattern, now) + mode_params)
                 row = cur.fetchone()
         return row[0] if row else None
+
+    def reviewed_since(self, user_id: str, since: datetime) -> bool:
+        """Whether this learner has answered anything since `since` --
+        the learner's own midnight, which the device knows and the
+        server does not. The daily nudge stays silent on a day already
+        ridden (plan 156)."""
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT EXISTS (
+                        SELECT 1 FROM review_log
+                        WHERE card_id LIKE %s AND reviewed_at >= %s
+                    )
+                """
+                self._log_sql("reviewed_since", sql, (pattern, since))
+                cur.execute(sql, (pattern, since))
+                row = cur.fetchone()
+        return bool(row and row[0])
+
+    def get_settled_cards(self, user_id: str, after: datetime, salt: str,
+                          limit: int, kinds: tuple[str, ...] = ()) -> list[tuple[str, str]]:
+        """(card_id, one of its modes) for cards the learner knows and
+        will not be asked for before `after` in ANY mode -- the words a
+        widget may print with their answer (plan 156). A card due
+        sooner is left out, because seeing its answer on the lock
+        screen is a free pass on the review that tests it.
+
+        Ordered by a hash of the id and `salt` (the day), so the choice
+        holds still for a day and moves on the next, with no state kept.
+
+        `kinds` narrows to raw ids starting with one of these prefixes
+        ("vocab_", "kanji_"): the kana a boarding marks known are
+        hundreds of rows, and a limit spent on them finds no word.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        patterns = [
+            pattern[:-1] + kind.replace("\\", "\\\\").replace("%", r"\%").replace("_", r"\_") + "%"
+            for kind in kinds
+        ] or [pattern]
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                mode_sql, mode_params = self._servable_filter()
+                sql = f"""
+                    SELECT card_id, MIN(mode)
+                    FROM card_modes
+                    WHERE card_id LIKE ANY(%s)
+                      AND total_reviews > 0{mode_sql}
+                    GROUP BY card_id
+                    HAVING MIN(next_review) > %s
+                    ORDER BY md5(card_id || %s)
+                    LIMIT %s
+                """
+                params = (patterns, *mode_params, after, salt, limit)
+                self._log_sql("get_settled_cards", sql, params)
+                cur.execute(sql, params)
+                rows = cur.fetchall()
+        return [(card_id, mode) for card_id, mode in rows]
 
     def get_mastered_count(self, user_id: str) -> int:
         """Mastered (card, mode) pairs across every category — a

@@ -49,6 +49,7 @@ Two things have to be right that a single-section session gets for free:
 """
 import logging
 from collections import OrderedDict, defaultdict
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -75,8 +76,9 @@ MAX_BATCH = 25
 # daily queue must be indistinguishable from the same card met in its own
 # section, or the queue becomes a second, subtly different app.
 from routes.kana import _build_kana_card              # noqa: E402
-from routes.kanji import _build_kanji_card            # noqa: E402
-from routes.vocab import _build_vocab_card            # noqa: E402
+from routes.kanji import _build_kanji_card, FR_MAP as KANJI_FR_MAP     # noqa: E402
+from routes.vocab import _build_vocab_card, FR_MAP as VOCAB_FR_MAP     # noqa: E402
+from translations import get_meaning                  # noqa: E402
 from routes.grammar import _build_grammar_card        # noqa: E402
 from routes.decks import build_personal_card, build_pool_card, VISIBLE_DECKS_CTE   # noqa: E402
 from content.vocab_jmdict_data import POOL_ID_PREFIX                # noqa: E402
@@ -307,12 +309,21 @@ def _new_lanes(user_id: str, level: str):
     pace = resolve_pace(user_id)
     if pace is None or pace.remaining <= 0:
         return OrderedDict()
-    budget = pace.remaining
+    pools = _new_pools(user_id, level, pace.remaining)
+    if pools is None:
+        return OrderedDict()
+    return daily_queue.ration(*pools, pace.remaining)
+
+
+def _new_pools(user_id: str, level: str, budget: int):
+    """(kana lanes, line lanes) of never-met cards, at most `budget` a
+    lane -- what daily_queue.ration spends. None when the profile
+    cannot be read."""
     try:
         row = _profile_row(user_id)
     except Exception:
         logger.exception("profile lookup for the ration failed")
-        return OrderedDict()
+        return None
     kana_known, lines = row[6], lines_or_all(row[9])
 
     def fresh(source: str, deck_key: str, mode: str) -> list[str]:
@@ -341,7 +352,7 @@ def _new_lanes(user_id: str, level: str):
         if ids:
             line_lanes[(daily_queue.SECTION, source, level, mode)] = ids
 
-    return daily_queue.ration(kana_lanes, line_lanes, budget)
+    return kana_lanes, line_lanes
 
 
 @router.get("/api/today")
@@ -462,6 +473,175 @@ def get_today_forecast(user_id: str = Depends(get_user_id)):
     gate counts the lanes the queue can serve, this counts rows.
     """
     return {"days": srs.get_due_forecast(user_id, 7)}
+
+
+# ── 発車案内 — the day ahead, for what the app says while closed (plan 156) ──
+# The native shells schedule the daily nudge as dated notifications, one
+# a day at the learner's hour, and hand a home or lock screen widget the
+# figures it prints. Both are decided while the app is open and shown
+# while it is not, so both need what the gate WILL hold at a time to
+# come, not what it holds now. The device names the instants -- it
+# alone knows its own time zone and the hour's daylight saving -- and
+# this counts each the way /api/today counts now: the same lanes, the
+# same level hold, the same ration of new cards.
+#
+# A count for tomorrow assumes nothing is reviewed in between. That is
+# the one case in which it is ever read: any opening of the app plans
+# again from the state it finds.
+AHEAD_MAX_POINTS = 8
+AHEAD_MAX_DAYS = 8
+# A word the widget prints with its answer is one the learner will not
+# be asked for sooner than this, in any mode.
+SETTLED_DAYS = 7
+AHEAD_WORDS = 8
+
+
+def _instants(raw: str) -> list[datetime]:
+    now = datetime.now(timezone.utc)
+    out = []
+    for part in raw.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            t = datetime.fromisoformat(part.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(status_code=422, detail=f"not an instant: {part}")
+        if t.tzinfo is None:
+            raise HTTPException(status_code=422, detail=f"an instant needs its offset: {part}")
+        if not (now - timedelta(days=1) <= t <= now + timedelta(days=AHEAD_MAX_DAYS)):
+            raise HTTPException(status_code=422, detail=f"out of range: {part}")
+        out.append(t.astimezone(timezone.utc))
+    if not out or len(out) > AHEAD_MAX_POINTS:
+        raise HTTPException(status_code=422, detail=f"between 1 and {AHEAD_MAX_POINTS} instants")
+    return out
+
+
+def _short_gloss(text: str) -> str:
+    """The first sense or two of a gloss, short enough for a widget's
+    one line: "soil; earth; ground" -> "soil; earth"."""
+    parts = [p.strip() for p in (text or "").split(";") if p.strip()]
+    gloss = "; ".join(parts[:2])
+    return gloss if len(gloss) <= 32 or len(parts) < 2 else parts[0]
+
+
+def _settled_word(source: str, raw_id: str, lang: str) -> dict | None:
+    entry = card_index.entry_for(source, raw_id)
+    if entry is None:
+        return None
+    if source == VOCAB:
+        kanji = entry.get("kanji") or ""
+        kana = (entry.get("kana") or "").split("/")[0].strip()
+        jp, reading = (kanji, kana) if kanji else (kana, "")
+        meaning = get_meaning(entry, lang, VOCAB_FR_MAP)
+    elif source == KANJI:
+        jp = entry.get("kanji") or ""
+        # "ド・ト・つち": the character's readings, the first three.
+        reading = "・".join((entry.get("kana") or "").split("・")[:3])
+        meaning = get_meaning(entry, lang, KANJI_FR_MAP)
+    else:
+        return None
+    if not jp or not meaning:
+        return None
+    return {"jp": jp, "reading": reading, "meaning": _short_gloss(meaning), "source": source}
+
+
+def _settled_words(user_id: str, lang: str) -> list[dict]:
+    now = datetime.now(timezone.utc)
+    rows = srs.get_settled_cards(
+        user_id, now + timedelta(days=SETTLED_DAYS), now.date().isoformat(), AHEAD_WORDS * 4,
+        kinds=("vocab_", "kanji_"),
+    )
+    words = []
+    for card_id, mode in rows:
+        raw_id = unprefixed(card_id, user_id)
+        loc = card_index.locate(raw_id, mode)
+        if loc is None or loc[0] not in (VOCAB, KANJI):
+            continue
+        word = _settled_word(loc[0], raw_id, lang)
+        if word:
+            words.append(word)
+        if len(words) >= AHEAD_WORDS:
+            break
+    return words
+
+
+@router.get("/api/today/ahead")
+def get_today_ahead(at: str = Query(..., description="comma-separated ISO instants, offset included"),
+                    since: str | None = None, lang: str = "fr",
+                    user_id: str = Depends(get_user_id)):
+    """
+    For each instant in `at`: what the gate will hold then -- the total,
+    the new cards among it and the lanes, busiest first. With `since`
+    (the learner's midnight, from the device), whether anything has
+    been answered today. And the words a widget may print with their
+    answer: known, and not asked for again this week.
+    """
+    instants = _instants(at)
+    started = None
+    if since:
+        try:
+            started = datetime.fromisoformat(since.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(status_code=422, detail="since is not an instant")
+        if started.tzinfo is None:
+            raise HTTPException(status_code=422, detail="since needs its offset")
+
+    due_rows = srs.get_due_rows(user_id, until=max(instants))
+    personal = _personal_rows(user_id)
+    level = resolve_level(user_id)
+    line = _hold_line(user_id, level)
+
+    # The ration: what is left of today's pace for an instant today (the
+    # pace's day is UTC, core/pace.py), a whole day's for any later one.
+    # Drawn once at the larger budget and spent twice.
+    pace = resolve_pace(user_id)
+    today_new = later_new = OrderedDict()
+    if pace is not None:
+        pools = _new_pools(user_id, level, pace.target)
+        if pools is not None:
+            today_new = daily_queue.ration(*pools, pace.remaining)
+            later_new = daily_queue.ration(*pools, pace.target)
+    today_utc = datetime.now(timezone.utc).date()
+
+    points = []
+    for t in instants:
+        rows = [r for r in due_rows if r["next_review"] <= t]
+        lanes, fresh = daily_queue.merge_new(
+            daily_queue.hold_above(daily_queue.lanes(user_id, rows, personal), line),
+            today_new if t.date() == today_utc else later_new,
+        )
+        breakdown = []
+        for key, ids in lanes.items():
+            lane = daily_queue.label(key)
+            lane["count"] = len(ids)
+            lane["new"] = fresh.get(key, 0)
+            breakdown.append(lane)
+        breakdown.sort(key=lambda lane: -lane["count"])
+        points.append({
+            "at": t.isoformat(),
+            "total": sum(len(ids) for ids in lanes.values()),
+            "new": sum(fresh.values()),
+            "lanes": breakdown,
+        })
+
+    try:
+        spr = srs.get_review_pace(user_id)
+    except Exception:
+        logger.exception("review pace failed")
+        spr = None
+    try:
+        words = _settled_words(user_id, lang)
+    except Exception:
+        # A widget without its word is a smaller widget, not a broken one.
+        logger.exception("settled words failed")
+        words = []
+    return {
+        "points": points,
+        "seconds_per_review": spr,
+        "rode_today": srs.reviewed_since(user_id, started) if started else None,
+        "words": words,
+    }
 
 
 @router.get("/api/today/cards")

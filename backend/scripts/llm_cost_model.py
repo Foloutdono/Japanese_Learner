@@ -82,14 +82,16 @@ FEATURES = {
         "30/day, which bounds the abuse row.",
     ),
     "practice_ask": (
-        40, 700, 120,
+        40, 1400, 120,
         "Two questions a session, 20 sessions (plan 131): a desk-only panel "
         "in the practice runs, opened after the grade. One short call each: "
-        "a stable system block (~450 tokens, cached) and the exercise in "
+        "a stable system block (~1,100 tokens since the 2026-09-27 rework, "
+        "around the ~1,024 a provider caches from) and the exercise in "
         "the user block -- the sentence, its translation, the answer, the "
         "breakdown's words. max_tokens 400, answered in three sentences, "
-        "reasoning off. ASK_DAILY_LIMIT caps it at 40/day, which bounds "
-        "the abuse row.",
+        "reasoning off; an answer in the wrong language is asked for once "
+        "more, which is rare enough to leave out of the count. "
+        "ASK_DAILY_LIMIT caps it at 40/day, which bounds the abuse row.",
     ),
     "phrase_analysis": (
         50, 400, 500,

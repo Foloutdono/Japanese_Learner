@@ -463,7 +463,7 @@ describe('the dictionary field at phone width', () => {
     expect(g.right).toBeLessThanOrEqual(row.getBoundingClientRect().right + 1)
     // The field keeps enough room to read what is typed into it.
     expect(f.width).toBeGreaterThan(150)
-    // The toggle is a key beside the well (plan 156), as 問's send is
+    // The toggle is a key beside the well (plan 157), as 問's send is
     // beside its own: the well's height, square at --r-card, with the
     // glyph as the whole of what it prints.
     const resolve = resolver()

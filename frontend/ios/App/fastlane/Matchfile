@@ -6,5 +6,7 @@
 git_url(ENV["MATCH_GIT_URL"])
 storage_mode("git")
 type("appstore")
-app_identifier(["app.tsuji"])
+# The app and its widget extension (plan 156): each is signed with its
+# own App Store profile, both carrying the group.app.tsuji App Group.
+app_identifier(["app.tsuji", "app.tsuji.widget"])
 readonly(false)

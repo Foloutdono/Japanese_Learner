@@ -164,11 +164,18 @@ depended on the model.
 The fourth is the asking (問, plan 131): `ASK_DAILY_LIMIT`, 40 short
 questions a day about an exercise the learner has just graded, in the
 desk's practice runs, counted in the same `daily_usage` table (feature
-`ask`). The cheapest call the app makes -- a cached system block, the
+`ask`). The cheapest call the app makes -- a stable system block, the
 exercise in the user block, `max_tokens` 400 with reasoning off, three
 sentences at most -- and the one most likely to be leaned on, which is
 why it has a number from the first day. A question off the exercise is
-declined by the model (`OFF_TOPIC`) and still costs its slot.
+declined by the model (`OFF_TOPIC`) and still costs its slot. Since the
+2026-09-27 rework the system block is ~1,100 tokens (it was ~600, under
+the caching floor), and an answer in another language than the
+learner's is asked for once more inside the same slot -- a second call
+on the rare question, never a second slot. `python -m scripts.check_ask`
+puts a dozen real questions to the configured model and checks the
+answers against the prompt's rules; run it after any edit to the prompt
+or change of model.
 
 What remains uncapped is translation review (~600 calls a month at the
 ceiling) and the phrase analyzer, which are an order of magnitude

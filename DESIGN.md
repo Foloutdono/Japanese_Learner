@@ -604,7 +604,7 @@ its trailing edge, past the count — the dictionary's 部 index is the one that
 does (`.console__toggle`): it is a second way of reading the kanji collection,
 not a sixth collection, and as a chip in row 1 it read as the latter. Same
 object either way: a `.chip`, saying whether it is chosen — but in row 2 a
-**key beside the field** (plan 156), the field's 44px and square at
+**key beside the field** (plan 157), the field's 44px and square at
 `--r-card`, as the question field's send stands beside its well, **carrying
 its glyph alone**. A label in row 2 is paid for out of the field, and 部 over
 a kanji dictionary is a body that names itself; the word stays in the `title`
@@ -650,7 +650,7 @@ with it.
 A field is **a well**: a step through whatever it sits on to the page
 beneath (`.field`, `--bg-main`, no border at rest, `--r-card`, 44px). The
 question field of a practice run (問) is the one the owner pointed at, and
-every other field is drawn from it (plan 156, the owner's pick A of three on
+every other field is drawn from it (plan 157, the owner's pick A of three on
 the canvas "Tsuji — input fields"). On the page itself there is nothing
 beneath to show, so the well steps **up** to `--surface` (`.field--page`);
 on sumi it is `.field--panel`. The well is always **one step away from its

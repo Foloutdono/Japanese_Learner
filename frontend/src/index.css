@@ -3791,7 +3791,7 @@ textarea:focus-visible {
    head and its video URL. A field on a card, a sheet, a form, a
    console or a notice keeps the base well and must NOT take this --
    --surface on --surface is the same defect written the other way.
-   The desk wrote it that way three times (plan 156): the entry's
+   The desk wrote it that way three times (plan 157): the entry's
    framed floor, a settings slip and the import dialog stand these
    fields on a surface, and step them back down in the 机 section; the
    rail's search, which only the desk builds, is the base well. */
@@ -3824,7 +3824,7 @@ textarea:focus-visible {
   line-height: 1.5;
 }
 
-/* ── The search well (plan 156) ──
+/* ── The search well (plan 157) ──
    The owner's pick A of three drawn on the canvas "Tsuji — input
    fields": every field is the question field's well (問, AskPanel) and
    a key that acts on it stands beside it, as 問's send does. Before it
@@ -5416,7 +5416,7 @@ textarea:focus-visible {
   padding-top: var(--sp-3);
   border-top: 1px solid var(--surface-line);
 }
-/* Row 2: the search well (.field--search, plan 156) and, beside it, the
+/* Row 2: the search well (.field--search, plan 157) and, beside it, the
    keys that act on it. The row's inset is row 1's, so the well's edge
    stands under the chips'. */
 .console__index {
@@ -5457,7 +5457,7 @@ textarea:focus-visible {
    the dictionary's 部 index, which is a second way of reading the kanji
    collection and not a sixth collection to browse, and its search
    options. A .chip wearing the chips' own on state, but a KEY beside
-   the well (plan 156): the field's 44px, square at --r-card, as 問's
+   the well (plan 157): the field's 44px, square at --r-card, as 問's
    send stands beside its well. It carries the glyph and no label, and
    部 set in a pill the width of a word would be a badge with the word
    cut off rather than a key; so the glyph is set bare — which is what
@@ -22946,7 +22946,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   .gate-panel--library > .gate-panel__head > .plate__names { flex: 1 0 auto; }
   .gate-panel--library > .gate-panel__head > .gate-seg { margin-left: auto; }
-  /* The search well (.field--search, plan 156), where a hairline box
+  /* The search well (.field--search, plan 157), where a hairline box
      stood whose focus drew the line's pigment: a line's colour is a
      place, and focus is the ring. */
   .gate-field {
@@ -27195,7 +27195,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
-  /* An entry's floor is one row (plan 156): the answer typed beside the
+  /* An entry's floor is one row (plan 157): the answer typed beside the
      key that hands it in, as 問's well stands beside its send -- the
      field at Check's 56px, Check at its word's width. */
   .desk-run--panels > .stage > form.stage__foot:has(> .field) {
@@ -27207,7 +27207,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     min-width: 0;
     min-height: 56px;
   }
-  /* The page's well on a desk surface (plan 156). .field--page steps UP
+  /* The page's well on a desk surface (plan 157). .field--page steps UP
      to --surface because a field on the page has nothing below it to
      show; three of its mounts stand on a surface on the desk where the
      phone stands them on the page -- the entry's framed floor (above),

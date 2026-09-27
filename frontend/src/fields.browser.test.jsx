@@ -25,7 +25,7 @@ import { expectVisibleWell, wellOf } from './testing/wells'
 // the file it was copied from. Add a case when a screen grows a field;
 // that is the whole point of the file. A chain the desk draws on its
 // own grounds -- and the analyser rail's search, which only the desk
-// builds -- is fields.desktop.test.jsx's (plan 156).
+// builds -- is fields.desktop.test.jsx's (plan 157).
 const CASES = [
   ['ReadingRun / TranslationRun — the run\'s entry',
     <main className="container stage"><form className="stage__foot">

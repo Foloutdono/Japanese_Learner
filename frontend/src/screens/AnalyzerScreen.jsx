@@ -1130,7 +1130,7 @@ export default function AnalyzerScreen({ session }) {
               always visible so a filter that hides everything
               says so ("0 / 47") instead of looking like a lost
               Passage. Client-side: the Passage is in hand. The
-              search well (plan 156) steps down from the rail's
+              search well (plan 157) steps down from the rail's
               surface, so it is the base well and never the page's. */}
           <div className="anl-railhead">
             <label className="field field--search anl-railhead__well">

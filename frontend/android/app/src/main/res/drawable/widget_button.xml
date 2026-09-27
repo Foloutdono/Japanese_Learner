@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Depart: the gate's primary button, filled with its pigment
+     (accent2, the Today gate's gold) at r-panel. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#c99a3e" />
+    <corners android:radius="8dp" />
+</shape>

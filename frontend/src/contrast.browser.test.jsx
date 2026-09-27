@@ -143,7 +143,7 @@ const Fixture = () => (
   <div className="container">
     {/* DecksScreen.jsx -- the shared console (components/chrome/Console),
         on --surface: a chip, then the index field and the count in the
-        search well (plan 156), on the well's ground and not the
+        search well (plan 157), on the well's ground and not the
         console's */}
     <div className="console">
       <div className="console__top">
