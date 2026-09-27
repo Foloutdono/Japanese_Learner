@@ -908,7 +908,30 @@ runtime purpose. Two consequences worth knowing:
   `src/shelf.desktop.test.jsx`, `src/links.desktop.test.jsx` and the 机
   section of `index.css`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  When starting a new wave, begin at **155** or higher, and check
+  **155** is 発車案内, the day's queue on the phone while the app is shut
+  (the owner's picks A, D and E of the canvas "Tsuji — notifications from
+  the day's queue"): the daily nudge planned from what the gate will
+  hold -- a dated notification for each of the next seven days at the
+  learner's hour with the real count, minutes, new cards and lanes, none
+  on a day with nothing due, none once the learner has ridden that day,
+  replacing plan 076's repeating one (`GET /api/today/ahead`, counting
+  the gate at instants the device names, `srs.get_due_rows`' `until`,
+  `reviewed_since`); a widget -- the lock screen on iPhone (a WidgetKit
+  extension, `TsujiWidget`, reading an App Group `group.app.tsuji`), the
+  home screen on Android (`TrainWidget.java`) -- with the count, the
+  lines' stripe, Depart and a word the learner knows that is not due
+  this week (`srs.get_settled_cards`), handed its figures by the app's
+  own `TsujiWidget` plugin; a tap on either opening the gate through
+  `app.tsuji://open/today` (`nudge_opened`); and Settings › Notifications
+  on the shells only (cited in `routes/today.py`, `routes/profile.py`,
+  `srs/srs.py`, `core/events.py`, `tests/test_today_ahead.py`,
+  `lib/ahead.js`, `lib/native.js`, `lib/platform.js`, `stores/ahead.js`,
+  `stores/account.js`, `components/chrome/NativeBridge.jsx`,
+  `components/settings/NotificationsPage.jsx`, `screens/SettingsScreen.jsx`,
+  `src/notifications.phone.test.jsx`, `android/.../TrainWidget.java`,
+  `TsujiWidgetPlugin.java`, `ios/App/TsujiWidget/`, `ios/App/App/
+  TsujiWidgetPlugin.swift`, the fastlane lane and `docs/release.md`).
+  When starting a new wave, begin at **156** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
