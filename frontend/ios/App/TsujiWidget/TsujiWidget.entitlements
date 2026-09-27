@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- The App Group the app writes the day's figures into (plan 155). -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.app.tsuji</string>
+	</array>
+</dict>
+</plist>
