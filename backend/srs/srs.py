@@ -992,40 +992,61 @@ class SRSEngine:
 
                 rows = cur.fetchall()
 
-        result = {}
+        return {(row[0], row[1]): self._state_row(*row[2:]) for row in rows}
 
-        for (card_id, mode, total_reviews, interval_days, next_review,
-             correct_reviews, is_learning, learning_step) in rows:
+    def get_states_for(self, card_ids: list[str], modes) -> dict[tuple[str, str], dict]:
+        """get_user_states' rows for `card_ids` in `modes` alone -- a
+        deck's cards on its page (plan 154) -- rather than every row the
+        learner has. A card with no row in a mode is simply absent, as
+        there."""
+        if not card_ids or not modes:
+            return {}
+        with self.storage.cursor() as cur:
+            sql = """
+                SELECT card_id, mode, total_reviews, interval_days, next_review,
+                       correct_reviews, is_learning, learning_step
+                FROM card_modes
+                WHERE card_id = ANY(%s) AND mode = ANY(%s)
+            """
+            self._log_sql("get_states_for", sql, (card_ids, list(modes)))
+            cur.execute(sql, (card_ids, list(modes)))
+            rows = cur.fetchall()
+        return {
+            (row['card_id'], row['mode']): self._state_row(
+                row['total_reviews'], row['interval_days'], row['next_review'],
+                row['correct_reviews'], row['is_learning'], row['learning_step'],
+            )
+            for row in rows
+        }
 
-            if total_reviews == 0:
-                state = "new"
+    def _state_row(self, total_reviews, interval_days, next_review,
+                   correct_reviews, is_learning, learning_step) -> dict:
+        """One (card, mode) row as get_user_states serves it."""
+        if total_reviews == 0:
+            state = "new"
+        elif interval_days >= 21:
+            state = "mastered"
+        else:
+            state = "learning"
 
-            elif interval_days >= 21:
-                state = "mastered"
-
-            else:
-                state = "learning"
-
-            result[(card_id, mode)] = {
-                "state": state,
-                "due": total_reviews > 0 and next_review is not None and next_review <= datetime.now(timezone.utc),
-                "total_reviews": total_reviews,
-                "correct_reviews": correct_reviews,
-                "interval_days": interval_days,
-                # interval_days is 0 for the whole of the learning
-                # steps — it is only written on graduation — so a
-                # caller scoring progress needs the step to tell a card
-                # halfway up the ladder from one never touched.
-                "is_learning": is_learning,
-                "learning_step": learning_step,
-                # The card's bar, new to mastered (plan 147), for the
-                # dictionary's catalogue tiles.
-                "progress": self._progress(total_reviews, interval_days or 0,
-                                           bool(is_learning), learning_step or 0),
-                "next_review": next_review.isoformat() if next_review else None,
-            }
-
-        return result
+        return {
+            "state": state,
+            "due": total_reviews > 0 and next_review is not None and next_review <= datetime.now(timezone.utc),
+            "total_reviews": total_reviews,
+            "correct_reviews": correct_reviews,
+            "interval_days": interval_days,
+            # interval_days is 0 for the whole of the learning
+            # steps — it is only written on graduation — so a
+            # caller scoring progress needs the step to tell a card
+            # halfway up the ladder from one never touched.
+            "is_learning": is_learning,
+            "learning_step": learning_step,
+            # The card's bar, new to mastered (plan 147), for the
+            # dictionary's catalogue tiles.
+            "progress": self._progress(total_reviews, interval_days or 0,
+                                       bool(is_learning), learning_step or 0),
+            "next_review": next_review.isoformat() if next_review else None,
+        }
 
     def get_daily_review_counts(self, user_id: str, days: int = 30) -> list[dict[str, Any]]:
         """Reviews per day for the last `days` days (oldest first), for streak/trend charts."""

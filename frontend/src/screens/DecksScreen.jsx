@@ -324,12 +324,16 @@ function DecksShelf({ session, open }) {
   )
 
   // 机 (plan 154): the shelf as a list and the open deck as the page
-  // beside it. The bare shelf opens on its first deck. A shelf still
-  // loading, or with no deck on it, keeps the one-column page below:
-  // there is nothing to stand beside it.
+  // beside it, drawn as the owner's pick B: the index field over the
+  // types as glyph chips with their counts, a row per deck -- its glyph,
+  // its name, its cards (and whose it is), what it is due -- and the
+  // two doors at the list's foot. The bare shelf opens on its first
+  // deck. A shelf still loading, or with no deck on it, keeps the
+  // one-column page below: there is nothing to stand beside it.
   if (desk && !loading && decks.length > 0) {
     if (!open) return <Navigate replace to={`/learn/decks/${decks[0].id}`} />
     const listed = shown.some(d => String(d.id) === String(open))
+    const typeCount = type => decks.filter(d => d.type === type).length
     return (
       <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
         <Bar code="KZ" color="var(--line-decks)" title={t.decks} />
@@ -338,24 +342,72 @@ function DecksShelf({ session, open }) {
           label={t.decks}
           list={(
             <>
-              {console_}
+              <Console className="shelf-console">
+                <ConsoleIndex
+                  inputRef={searchRef}
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  onClear={() => { setQuery(''); searchRef.current?.focus() }}
+                  placeholder={t.decksSearchPlaceholder}
+                  clearLabel={t.cancel}
+                  aria-label={t.decksSearchPlaceholder}
+                  count={String(shown.length)}
+                />
+                <ConsoleTop>
+                  <Chips label={t.decksAllTypes}>
+                    <Chip on={typeFilter === 'all'} color="var(--line-decks)" onClick={() => { playUi('click-mode-selection'); setTypeFilter('all') }}>
+                      {t.decksAllTypes}
+                    </Chip>
+                    {presentTypes.map(dt => (
+                      <Chip key={dt.value} on={typeFilter === dt.value} glyph={dt.glyph} color={dt.color}
+                        aria-label={`${dt.label} · ${typeCount(dt.value)}`} title={dt.label}
+                        onClick={() => { playUi('click-mode-selection'); setTypeFilter(dt.value) }}>
+                        <span className="shelf-console__n">{typeCount(dt.value)}</span>
+                      </Chip>
+                    ))}
+                  </Chips>
+                </ConsoleTop>
+              </Console>
               {shown.length === 0 && noMatch}
               {shown.length > 0 && (
-                <div className="platform-grid" ref={shelfRef} onKeyDown={onShelfWalk} aria-keyshortcuts={WALK_KEYS}>
+                <div className="shelf-rows" ref={shelfRef} onKeyDown={onShelfWalk} aria-keyshortcuts={WALK_KEYS}>
                   {shown.map((deck, i) => {
                     const isOpen = String(deck.id) === String(open)
-                    return deckRow(deck, { isOpen, tabIndex: (listed ? isOpen : i === 0) ? 0 : -1 })
+                    const dt = deckTypeOf(deck.type, t)
+                    const n = due.get(String(deck.id)) ?? 0
+                    return (
+                      <SplitRow
+                        key={deck.id}
+                        to={`/learn/decks/${deck.id}`}
+                        state={{ deck }}
+                        className={`shelf-row${isOpen ? ' shelf-row--open' : ''}`}
+                        aria-current={isOpen ? 'page' : undefined}
+                        tabIndex={(listed ? isOpen : i === 0) ? 0 : -1}
+                        style={{ '--line-color': dt.color }}
+                        onClick={() => playUi('click-mode-selection')}
+                      >
+                        <span className="wmap-roundel shelf-row__roundel" lang="ja" aria-hidden="true">{dt.glyph}</span>
+                        <span className="shelf-row__names">
+                          <span className="shelf-row__name">{deck.name}</span>
+                          <span className="shelf-row__sub">
+                            {t.cardsCount(deck.card_count ?? 0)}
+                            {deck.author && <> · {t.libraryBy(deck.author)}</>}
+                          </span>
+                        </span>
+                        {n > 0 && <span className="shelf-row__due" title={t.todayDue(n)}>{n}<span className="sr-only"> {t.todayDue(n)}</span></span>}
+                      </SplitRow>
+                    )
                   })}
                 </div>
               )}
               {/* The shelf's two doors at its foot: the page beside it
                   holds the screen's one filled action, so a new deck is
-                  a ghost here, as the phone's Cancel is. */}
+                  a ghost here. */}
               <div className="decks-doors">
-                {browseDoor}
-                <Chip onClick={() => { playUi('click-mode-selection'); setCreating(true) }}>
+                <Chip className="decks-doors__create" onClick={() => { playUi('click-mode-selection'); setCreating(true) }}>
                   <PlusIcon size={14} />{t.createDeck}
                 </Chip>
+                {browseDoor}
               </div>
             </>
           )}

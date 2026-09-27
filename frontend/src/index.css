@@ -23444,20 +23444,174 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     color: var(--text-secondary);
   }
 
-  /* A deck's page (screens/DeckDetailScreen.jsx), beside the shelf's
-     list since plan 154 (the owner's pick B, screens/DecksScreen): one
-     column -- the head with Add and the ride, the chips, the slot, and
-     the cards. The slot holds the deck's platforms
-     (components/decks/DeckPlatforms), boarding directly, or while one
-     is open the card form, Browse or More, over the cards they add to.
-     It was the page's second column (plans 114-123) until a list and a
-     page left no room for a third. */
+  /* ── 教材 on the desk: the shelf beside the open deck (plan 154) ──
+     The owner's pick B of four layouts drawn on the canvas "Tsuji — the
+     shelf (教材) layout" (screens/DecksScreen.jsx,
+     screens/DeckDetailScreen.jsx). The list: the index field over the
+     types as glyph chips with their counts, a row per deck, the two
+     doors at its foot. The page, past a hairline: the deck's head, its
+     four figures, its modes as cards, its first cards as a table, and
+     at its foot the way to add cards beside the one filled action. */
+  .shelf-console > .console__top {
+    border-bottom: 0;
+    border-top: 1px solid var(--surface-line);
+  }
+  .shelf-console__n {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    opacity: 0.7;
+  }
+  .shelf-rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    margin-block-start: var(--sp-5);
+  }
+  .shelf-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-card);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .shelf-row:hover { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+  .shelf-row:focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
+  /* The open deck: the card's surface, its hairline, and its type's
+     rail down the left edge. */
+  .shelf-row--open,
+  .shelf-row--open:hover {
+    background: var(--surface);
+    box-shadow: inset 3px 0 0 var(--line-color), inset 0 0 0 1px var(--surface-line);
+  }
+  .shelf-row__roundel,
+  .dk-head__roundel {
+    font-family: var(--font-jp);
+    line-height: 1;
+    color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  }
+  .shelf-row__roundel { font-size: var(--fs-caption); }
+  .shelf-row__names {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-width: 0;
+  }
+  .shelf-row__name,
+  .shelf-row__sub {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .shelf-row__name {
+    font-family: var(--font-serif);
+    font-size: var(--fs-body);
+    font-weight: 500;
+  }
+  .shelf-row--open .shelf-row__name { font-weight: 600; }
+  .shelf-row__sub {
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .shelf-row__due,
+  .dk-mode__due,
+  .dk-fig__n {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .shelf-row__due,
+  .dk-mode__due {
+    font-size: var(--fs-body);
+    color: var(--state-due);
+  }
+  /* The shelf's two doors at the list's foot, sharing its width. */
+  .desk-split__list > .decks-doors { margin-block-start: var(--sp-5); }
+  .desk-split__list > .decks-doors > * { flex: 1 1 0; }
+
   .desk-deck {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-5);
+    gap: var(--sp-6);
     min-width: 0;
   }
+  .dk-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+  }
+  .dk-head__roundel {
+    width: var(--sp-9);
+    height: var(--sp-9);
+    border-width: 2.5px;
+    font-size: var(--fs-title);
+  }
+  .dk-head__names {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--sp-2);
+    min-width: 0;
+  }
+  .dk-head__cap,
+  .dk-fig__cap,
+  .dk-card__state,
+  .dk-all {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .dk-head__cap {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dk-head__name {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: var(--fs-heading);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .dk-head > .chip { flex: none; }
+  /* The four figures: a hairline lattice of four, the deck's cards
+     partitioned by their state, each numeral in the state's ink. */
+  /* Four across, or two by two where four would crush their captions
+     -- never three and one: each cell's basis is a quarter of the row
+     until the row is narrower than a column and a half, then a half
+     (the flexbox switch, so no width is written here). */
+  .dk-figs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    background: var(--surface-line);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .dk-fig {
+    display: flex;
+    flex: 1 1 clamp(calc(25% - 1px), calc((var(--desk-side-w) * 1.5 - 100%) * 999), calc(50% - 1px));
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+    background: var(--surface);
+  }
+  .dk-fig__n { font-size: var(--fs-heading); }
+  .dk-fig--due .dk-fig__n { color: var(--state-due); }
+  .dk-fig--learning .dk-fig__n { color: var(--state-learning); }
+  .dk-fig--mastered .dk-fig__n { color: var(--state-mastered); }
   .desk-deck__slot {
     display: flex;
     flex-direction: column;
@@ -23466,27 +23620,136 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   /* The phone's form spaces itself from the list under it; in the slot
      the page's own gap does. */
   .desk-deck__slot .deckdetail-form { margin-bottom: 0; }
-  /* Add and the ride in the head, where the phone's ▶ Study stands;
-     on the narrow desk's page they take a line of their own under the
-     name rather than crush it, still at the head's right. */
-  .desk-deck > .deck-identity { flex-wrap: wrap; }
-  .desk-deck .deck-identity__names { min-width: calc(var(--desk-side-w) / 2); }
-  .deck-identity__acts {
+  .dk-ways {
     display: flex;
-    flex: none;
-    align-items: center;
     gap: var(--sp-3);
-    margin-inline-start: auto;
+    margin-block-end: var(--sp-4);
   }
-  /* The shelf's two doors at the foot of its list (plan 154): a set
-     sharing the column's width, as the phone's pair shares the page. */
-  .desk-split__list > .decks-doors { margin-block-start: var(--sp-5); }
-  .desk-split__list > .decks-doors > * { flex: 1 1 0; }
-  .desk-deck__study {
-    display: flex;
-    flex-direction: column;
+  /* The deck's modes as cards, as many across as fit: three on a
+     window's width, two on the narrow desk. */
+  .dk-modes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(calc(var(--desk-side-w) / 2), 1fr));
     gap: var(--sp-4);
   }
+  .dk-mode {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+    font: inherit;
+    text-align: start;
+    color: var(--text-primary);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+  .dk-mode:hover,
+  .dk-mode:focus-visible {
+    filter: none;
+    box-shadow: inset 3px 0 0 var(--line-color);
+  }
+  .dk-mode:focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
+  .dk-mode__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .dk-mode__name {
+    font-family: var(--font-serif);
+    font-size: var(--fs-lead);
+  }
+  .dk-mode__desc {
+    font-size: var(--fs-sm);
+    line-height: 1.45;
+    color: var(--text-secondary);
+  }
+  /* The cards as a table on the page's own ground, a hairline between
+     rows: the word, its reading, its meaning, its state. */
+  /* One grid for the table, each row its subgrid, so the columns line
+     up down the table and a word or a reading is never broken. */
+  .dk-cards {
+    display: grid;
+    grid-template-columns: minmax(max-content, 1fr) minmax(max-content, 1fr) minmax(0, 2fr) max-content;
+    border-block: 1px solid var(--surface-line);
+  }
+  .dk-cards:has(.card-row__tick) { grid-template-columns: auto minmax(max-content, 1fr) minmax(max-content, 1fr) minmax(0, 2fr) max-content; }
+  .dk-card {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: center;
+    column-gap: var(--sp-5);
+    width: 100%;
+    padding: var(--sp-3) var(--sp-1);
+    font: inherit;
+    text-align: start;
+    color: var(--text-primary);
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-flat);
+  }
+  .dk-card + .dk-card { border-top: 1px solid var(--surface-line); }
+  button.dk-card { cursor: pointer; }
+  button.dk-card:hover {
+    filter: none;
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+  }
+  .dk-card--selected { background: color-mix(in srgb, var(--accent2) 8%, transparent); }
+  .dk-card__jp {
+    font-family: var(--font-serif);
+    font-size: var(--fs-lead);
+    white-space: nowrap;
+  }
+  .dk-card__kana {
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .dk-card__gloss {
+    font-size: var(--fs-body);
+    overflow-wrap: anywhere;
+  }
+  .dk-card__state { text-align: end; }
+  .dk-card__state--due { color: var(--state-due); }
+  .dk-card__state--learning { color: var(--state-learning); }
+  .dk-card__state--mastered { color: var(--state-mastered); }
+  .dk-all {
+    align-self: flex-start;
+    margin-block-start: calc(var(--sp-3) - var(--sp-6));
+    padding: var(--sp-4) var(--sp-1);
+    color: var(--line-color);
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .dk-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--sp-3);
+  }
+  .dk-foot > .chip { flex: none; }
+  /* The ride set as the chip beside it is, in tracked capitals. */
+  .dk-foot__go {
+    flex: none;
+    width: auto;
+    padding-inline: var(--sp-6);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+  }
+  /* The types' chips keep their own width, not the console's share. */
+  .shelf-console .console__chips .chip { flex: none; }
   /* A door opened in a column (components/chrome/DeskDock, plan 120):
      its cap and ✕ over the phone's own body — a deck's Browse and More,
      the analyser's grab tutorial — standing where the column's tenant
@@ -23709,9 +23972,6 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      list: one to a row, the whole page wide, their figures at the
      row's end. */
   .desk-split__page > .platform-grid { grid-template-columns: minmax(0, 1fr); }
-  /* A deck's platforms across its page (plan 154), as many as a run's
-     column fits: one on the narrow desk, two or three wider. */
-  .desk-deck__study > .platform-grid { grid-template-columns: repeat(auto-fill, minmax(var(--desk-run-col-min), 1fr)); }
   .tier-picker > .platform-grid,
   .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   /* A line's split, filled (plan 137): the page's grid shares the
@@ -23855,9 +24115,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      wall: the phone's thumb-sized vertical padding comes in a rung. */
   .desk-split__page .platform-card__lead,
   .desk-split__page .platform-card__body,
-  .desk-split__page .platform-card__aside,
-  .desk-deck__study .platform-card__lead,
-  .desk-deck__study .platform-card__body { padding-block: var(--sp-5); }
+  .desk-split__page .platform-card__aside { padding-block: var(--sp-5); }
   /* The open radical in the index beside its lesson, and the family's
      door while the family stands in the list (plan 118): the same ring,
      each being a card with its own edge. */
@@ -23872,6 +24130,13 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      its author, its followers — so the shelf takes half the width, not
      a list's column, and the page the other half. */
   .desk-split--shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* The learner's own shelf beside the open deck (plan 154): the page
+     past a hairline the height of the split. */
+  .desk-split--decks > .desk-split__page {
+    align-self: stretch;
+    border-inline-start: 1px solid var(--surface-line);
+    padding-inline-start: var(--sp-7);
+  }
   /* A shelf with nothing to open -- empty, or failed -- stands its one
      card across, not beside a blank half (plan 123). */
   .desk-split--shelf:has(> .desk-split__list > .empty):not(:has(> .desk-split__page > *)) { grid-template-columns: minmax(0, 1fr); }

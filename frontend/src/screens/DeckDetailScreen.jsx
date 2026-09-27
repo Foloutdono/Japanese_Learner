@@ -7,7 +7,7 @@ import { playUi } from '../lib/audio'
 import { track } from '../lib/track'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { DeskDock } from '../components/chrome/DeskDock'
-import { DeckPlatforms } from '../components/decks/DeckPlatforms'
+import { useDeckModes } from '../hooks/useDeckModes'
 import { useDesk } from '../hooks/useDesk'
 import { Chip } from '../components/chrome/Console'
 import { Sheet } from '../components/chrome/Sheet'
@@ -248,6 +248,11 @@ function ReadingsField({ label, value, onChange }) {
 // a copy taken). The page itself is one column on the desk, the
 // platforms (or the card form, Browse or More in their place) over the
 // cards -- there is no second column left beside a list and a page.
+// The desk's page (plan 154): its cards' four states, and how many of
+// its cards it lists before the way to all of them.
+const FIG_KEYS = ['due', 'new', 'learning', 'mastered']
+const PREVIEW_CARDS = 6
+
 export default function DeckDetailScreen({ session, deckId, pane = false, onCount, onGone, onChanged }) {
   const navigate        = useNavigate()
   const params          = useParams()
@@ -322,6 +327,8 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   const [selectMode, setSelectMode] = useState(false)
   const [selected, setSelected]     = useState(new Set())
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  // The desk's card table past its first rows (plan 154).
+  const [showAll, setShowAll] = useState(false)
   // The More sheet (plan 071): import, export and the deck's own
   // deletion, which used to sit on the shelf's card.
   const [moreOpen, setMoreOpen] = useState(false)
@@ -425,6 +432,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     // next one's name while its own load.
     setCards([])
     setLoading(true)
+    setShowAll(false)
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [deck_id])
 
@@ -868,183 +876,62 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     </>
   )
 
-  // 机: what stands in the page's slot (plan 154; the side column's
-  // tenants since plans 114-123) -- the form, Browse or More while one is
-  // open, else the platforms once the cards are in: a deck's modes turn
-  // on whether it has a card, and asking before the list has loaded
-  // asked twice.
-  const deskSlot = !desk ? null
-    : adding ? (
-      <DeskDock title={editing ? t.editCard : t.newCard} className="desk-cardform" onClose={closeForm} initialFocus="input, textarea">
-        {cardForm}
-      </DeskDock>
-    )
-      : showBrowse ? <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
-      // More is a list of what can be done to the deck, not a question:
-      // it opens in the slot (plan 120), and only its deletion asks, in
-      // a dialog of its own (below).
-      : moreOpen ? (
-        <DeskDock title={t.deckMore} className="desk-more" onClose={closeMore}>
-          {moreActions}
-          <button type="button" className="btn-primary btn-primary--danger" onClick={() => setConfirmingDeck(true)}>
-            <TrashIcon size={14} /> {t.deleteDeck}
-          </button>
-        </DeskDock>
-      )
-      : loading ? null
-      : <DeckPlatforms deckId={deck_id} deck={deck} session={session} cardCount={cards.length} />
+  // What both layouts draw: a follower's doors, the selection's
+  // console and the import/export banners.
+  const followerActs = (
+    <div className="chip-row deckdetail-acts">
+      <Chip onClick={() => { playUi('click-mode-selection'); setConfirmingMine(true) }}
+        aria-haspopup="dialog" disabled={busy}>
+        <PlusIcon size={14} />{t.libraryMakeMine}
+      </Chip>
+      <Chip onClick={() => { playUi('click-mode-selection'); setConfirmingUnfollow(true) }}
+        aria-haspopup="dialog" disabled={busy}>
+        <CrossIcon size={14} />{withdrawn ? t.libraryRemove : t.libraryUnfollow}
+      </Chip>
+      {cards.length > 0 && (
+        <Chip onClick={() => { playUi('click-mode-selection'); exportDeck() }} disabled={exporting}>
+          <ExportIcon size={14} />{t.export}
+        </Chip>
+      )}
+    </div>
+  )
 
-  // The page under the bar: one column on a phone and on the desk.
-  const body = (
-    <>
-      {/* The deck, named on its own page: the same roundel, glyph and
-          pigment as its card on the shelf, the figures, and the one
-          filled action. */}
-      <div className="deck-identity" style={{ '--rail': dt.color }}>
-        <span className="wmap-roundel deck-identity__roundel" lang="ja" aria-hidden="true" style={{ '--line-color': dt.color }}>{dt.glyph}</span>
-        <span className="deck-identity__names">
-          <h2 className="deck-identity__name">{deck?.name ?? t.deckFallbackTitle}</h2>
-          <span className="deck-identity__meta">
-            {dt.label} · {t.cardsCount(cards.length)}
-            {/* Whose deck this is, on the page you study it from and not
-                only on the card you found it by. A followed deck's
-                content is someone else's, and that is worth saying
-                where its cards are. */}
-            {deck?.author && <> · <span className="lib-card__author">{t.libraryBy(deck.author)}</span></>}
-            {/* On the desk the filled button says it, counted. */}
-            {dueToday > 0 && !(desk && rideCount > 0) && <> · <span className="deck-identity__due">{t.todayDue(dueToday)}</span></>}
+  const selectConsole = (
+    <div className="select-console" role="group" aria-label={t.select}>
+      <div className="select-console__top">
+        <button
+          type="button"
+          className="select-console__all"
+          aria-pressed={allSelected}
+          onClick={() => { playUi('click-mode-selection'); toggleSelectAll() }}
+        >
+          <span className={`card-row__tick${allSelected ? ' card-row__tick--on' : ''}`} aria-hidden="true">
+            {allSelected && <CheckIcon size={11} />}
           </span>
+          {allSelected ? t.deselectAll : t.selectAll}
+        </button>
+        <span className="select-console__count">
+          <span className="select-console__fig">{selected.size}</span>
+          <span className="select-console__total">/ {cards.length}</span>
         </span>
-        {/* On the desk the platforms stand in the page (DeckPlatforms),
-            so there is no second screen to open: the head holds the way
-            to add a card and, when the deck has cards in today's queue,
-            the one filled action -- ride them (plan 154). */}
-        {desk ? (
-          <span className="deck-identity__acts">
-            {allowCustom && !selectMode && (
-              <Chip on={adding && !editing} onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
-            )}
-            {rideCount > 0 && (
-              <button type="button" className="btn-primary deck-identity__ride" onClick={ride}>
-                {t.deckRide(rideCount)} ▶
-              </button>
-            )}
-          </span>
-        ) : (
-          <button
-            type="button"
-            className="btn-primary deck-identity__study"
-            onClick={() => { playUi('click-screen-selection'); navigate(`/learn/decks/${deck_id}/study`, { state: { deck } }) }}
-          >
-            ▶ {t.study}
-          </button>
-        )}
       </div>
+      <div className="select-console__acts">
+        <Chip
+          className="chip--danger"
+          disabled={selected.size === 0}
+          onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(true) }}
+        >
+          <TrashIcon size={14} />{t.delete}
+        </Chip>
+        <Chip onClick={() => { playUi('click-mode-selection'); exitSelectMode() }}>
+          <CrossIcon size={14} />{t.cancel}
+        </Chip>
+      </div>
+    </div>
+  )
 
-      {/* Warn, then vanish. The author has deleted this deck; it is
-          still here only so the people following it can take a copy
-          before it is collected. Study still works — that is the whole
-          point of the grace period. */}
-      {withdrawn && (
-        <p className="lib-warning" role="status">
-          <span className="lib-warning__lead">{t.libraryWithdrawn}</span>
-          {t.libraryWithdrawnHint}
-        </p>
-      )}
-
-      {/* The chip row: what you can do to the deck. Select swaps it
-          for the selection's own console (below). */}
-      {!selectMode && isFollower && (
-        <div className="chip-row deckdetail-acts">
-          <Chip onClick={() => { playUi('click-mode-selection'); setConfirmingMine(true) }}
-            aria-haspopup="dialog" disabled={busy}>
-            <PlusIcon size={14} />{t.libraryMakeMine}
-          </Chip>
-          <Chip onClick={() => { playUi('click-mode-selection'); setConfirmingUnfollow(true) }}
-            aria-haspopup="dialog" disabled={busy}>
-            <CrossIcon size={14} />{withdrawn ? t.libraryRemove : t.libraryUnfollow}
-          </Chip>
-          {cards.length > 0 && (
-            <Chip onClick={() => { playUi('click-mode-selection'); exportDeck() }} disabled={exporting}>
-              <ExportIcon size={14} />{t.export}
-            </Chip>
-          )}
-        </div>
-      )}
-
-      {!selectMode && !isFollower && (
-        <div className="chip-row deckdetail-acts">
-          {/* On the desk Browse is pressed while its panel holds the
-              page's slot; Add stands in the head (plan 154). */}
-          {allowCustom && !desk && (
-            <Chip onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
-          )}
-          {allowedSources.length > 0 && (
-            <Chip on={desk && showBrowse && !adding} onClick={openBrowse}><SearchIcon size={14} />{t.browseBtn}</Chip>
-          )}
-          {cards.length > 0 && (
-            <Chip onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }}><CheckIcon size={14} />{t.select}</Chip>
-          )}
-          {/* A sheet on a phone; on the desk, the side's (plan 120). */}
-          <Chip on={desk && moreOpen} onClick={openMore} aria-haspopup={desk ? undefined : 'dialog'}>
-            <span className="chip__dots" aria-hidden="true">···</span>{t.deckMore}
-          </Chip>
-        </div>
-      )}
-
-      {/* ── The selection console ──────────────────────────────
-          The four controls used to be a bare .chip-row: a caption, a
-          chip, a filled Delete and a Cancel, all four different
-          shapes, wrapping into a ragged two lines on a phone with the
-          destructive one the largest object on the screen — and a
-          second FILLED button on a screen that already has ▶ Study,
-          which DESIGN.md allows exactly one of.
-
-          It is the console's own grammar instead (Decks, Dictionary,
-          Today): one panel, two rows on a hairline. Row 1 is the
-          choice — the tick that takes all of them, and how many are
-          held, pinned right as a figure. Row 2 is what you can do
-          with them, two chips sharing the width. The tick is the same
-          mark the rows below carry, so "all of them" and "this one"
-          are visibly the same act.
-
-          Delete is a ghost here and fills only in the sheet that asks
-          — the same escalation the deck's own deletion uses, and now
-          the same sheet-shaped question for all three of them. */}
-      {selectMode && (
-        <div className="select-console" role="group" aria-label={t.select}>
-          <div className="select-console__top">
-            <button
-              type="button"
-              className="select-console__all"
-              aria-pressed={allSelected}
-              onClick={() => { playUi('click-mode-selection'); toggleSelectAll() }}
-            >
-              <span className={`card-row__tick${allSelected ? ' card-row__tick--on' : ''}`} aria-hidden="true">
-                {allSelected && <CheckIcon size={11} />}
-              </span>
-              {allSelected ? t.deselectAll : t.selectAll}
-            </button>
-            <span className="select-console__count">
-              <span className="select-console__fig">{selected.size}</span>
-              <span className="select-console__total">/ {cards.length}</span>
-            </span>
-          </div>
-          <div className="select-console__acts">
-            <Chip
-              className="chip--danger"
-              disabled={selected.size === 0}
-              onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(true) }}
-            >
-              <TrashIcon size={14} />{t.delete}
-            </Chip>
-            <Chip onClick={() => { playUi('click-mode-selection'); exitSelectMode() }}>
-              <CrossIcon size={14} />{t.cancel}
-            </Chip>
-          </div>
-        </div>
-      )}
-
+  const banners = (
+    <>
       {/* Import success banner */}
       {importResult && (
         <div className="deckdetail-import-banner">
@@ -1070,15 +957,289 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           </button>
         </div>
       )}
+    </>
+  )
+
+  // ── 机 — the deck's page beside the shelf (plan 154) ──────────
+  // The owner's pick B, drawn on the canvas "Tsuji — the shelf (教材)
+  // layout": the deck named in its head with Edit (the selection) and
+  // More; its cards counted as four figures -- due, new, learning,
+  // mastered, each card's `state` from the server; its modes as cards,
+  // each with what today's queue holds for it; its first cards in a
+  // table, each with its state, and the way to all of them; and at the
+  // foot the way to add cards and the one filled action -- ride the
+  // deck's lanes of the day's queue, or, with nothing due, board its
+  // first mode. The card form, Browse and More open in the modes'
+  // place, over the cards they act on.
+  const modes = useDeckModes(desk && !loading ? deck_id : null, session, cards.length > 0)
+  const laneFor = mode => deckLanes.filter(l => l.mode === mode).reduce((n, l) => n + laneCount(l), 0)
+  const figs = { due: 0, new: 0, learning: 0, mastered: 0 }
+  for (const card of cards) figs[FIG_KEYS.includes(card.state) ? card.state : 'new'] += 1
+  const canBrowse = allowedSources.length > 0
+  const canAdd = !isFollower && (allowCustom || canBrowse)
+  const addOpen = (adding && !editing) || (showBrowse && !adding)
+
+  function boardMode(mode) {
+    playUi('click-screen-selection')
+    board(() => navigate(`/learn/decks/${deck_id}/study/${mode}`, { state: { deck } }))
+  }
+
+  // Add cards: the catalogue where the deck browses one, else the form;
+  // pressed again, the slot goes back to the modes.
+  function openAdd() {
+    if (adding && !editing) { playUi('click-mode-selection'); closeForm(); return }
+    if (showBrowse) { openBrowse(); return }
+    if (canBrowse) openBrowse()
+    else { playUi('click-mode-selection'); startAdd() }
+  }
+
+  const addWays = canBrowse && allowCustom && !editing && (
+    <div className="dk-ways" role="group" aria-label={t.deckAddCards}>
+      <Chip on={showBrowse && !adding} onClick={() => { if (!showBrowse || adding) openBrowse() }}><SearchIcon size={14} />{t.browseBtn}</Chip>
+      <Chip on={adding} onClick={() => { if (!adding) { playUi('click-mode-selection'); startAdd() } }}><PlusIcon size={14} />{t.deckWriteCard}</Chip>
+    </div>
+  )
+
+  const deskSlot = !desk ? null
+    : adding ? (
+      <>
+        {addWays}
+        <DeskDock title={editing ? t.editCard : t.newCard} className="desk-cardform" onClose={closeForm} initialFocus="input, textarea">
+          {cardForm}
+        </DeskDock>
+      </>
+    )
+      : showBrowse ? (
+        <>
+          {addWays}
+          <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
+        </>
+      )
+      // More is a list of what can be done to the deck, not a question:
+      // it opens in the page (plan 120), and only its deletion asks, in
+      // a dialog of its own (below).
+      : moreOpen ? (
+        <DeskDock title={t.deckMore} className="desk-more" onClose={closeMore}>
+          {moreActions}
+          <button type="button" className="btn-primary btn-primary--danger" onClick={() => setConfirmingDeck(true)}>
+            <TrashIcon size={14} /> {t.deleteDeck}
+          </button>
+        </DeskDock>
+      )
+      : modes?.length > 0 ? (
+        <div className="dk-modes" role="group" aria-label={t.study}>
+          {modes.map(m => {
+            const n = laneFor(m.key)
+            return (
+              <button key={m.key} type="button" className="dk-mode" style={{ '--line-color': dt.color }} onClick={() => boardMode(m.key)}>
+                <span className="dk-mode__top">
+                  <span className="dk-mode__name">{m.label}</span>
+                  {n > 0 && <span className="dk-mode__due" title={t.todayDue(n)}>{n}</span>}
+                </span>
+                <span className="dk-mode__desc">{m.desc}</span>
+              </button>
+            )
+          })}
+        </div>
+      )
+      : null
+
+  const listedCards = selectMode || showAll ? cards : cards.slice(0, PREVIEW_CARDS)
+
+  const deskBody = desk && (
+    <>
+      <header className="dk-head" style={{ '--line-color': dt.color }}>
+        <span className="wmap-roundel dk-head__roundel" lang="ja" aria-hidden="true">{dt.glyph}</span>
+        <span className="dk-head__names">
+          <span className="dk-head__cap">
+            {dt.label} · {t.cardsCount(cards.length)}
+            {deck?.author && <> · {t.libraryBy(deck.author)}</>}
+          </span>
+          <h2 className="dk-head__name">{deck?.name ?? t.deckFallbackTitle}</h2>
+        </span>
+        {!isFollower && cards.length > 0 && (
+          <Chip on={selectMode} onClick={() => { playUi('click-mode-selection'); if (selectMode) exitSelectMode(); else setSelectMode(true) }}>
+            {t.deckEdit}
+          </Chip>
+        )}
+        {!isFollower && (
+          <Chip on={moreOpen} onClick={openMore} aria-label={t.deckMore} title={t.deckMore} className="dk-head__more">
+            <span className="chip__dots" aria-hidden="true">···</span>
+          </Chip>
+        )}
+      </header>
+
+      {withdrawn && (
+        <p className="lib-warning" role="status">
+          <span className="lib-warning__lead">{t.libraryWithdrawn}</span>
+          {t.libraryWithdrawnHint}
+        </p>
+      )}
+
+      {isFollower && followerActs}
+
+      {!loading && cards.length > 0 && (
+        <div className="dk-figs">
+          {FIG_KEYS.map(k => (
+            <div key={k} className={`dk-fig dk-fig--${k}`}>
+              <b className="dk-fig__n">{figs[k]}</b>
+              <span className="dk-fig__cap">{t.deckFigs[k]}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {selectMode && selectConsole}
+      {banners}
+
+      {(deskSlot || adding) && <div className="desk-deck__slot">{deskSlot}</div>}
+
+      {loading && <Loading />}
+
+      {!loading && cards.length === 0 && !adding && (
+        <Empty icon={<CardIcon size={40} />} message={t.noCards} hint={t.addFirstCard} className="deckdetail-empty" />
+      )}
+
+      {!loading && cards.length > 0 && (
+        <div className="dk-cards">
+          {listedCards.map(card => {
+            const key = cardKey(card)
+            const isSel = selected.has(key)
+            const opens = !isFollower && (selectMode || card.origin === 'custom')
+            const Body = opens ? 'button' : 'div'
+            const bodyProps = opens
+              ? {
+                type: 'button',
+                onClick: selectMode ? () => toggleSelect(key) : () => startEdit(card),
+                'aria-pressed': selectMode ? isSel : undefined,
+              }
+              : {}
+            const state = FIG_KEYS.includes(card.state) ? card.state : 'new'
+            return (
+              <Body key={key} className={`dk-card${isSel ? ' dk-card--selected' : ''}`} {...bodyProps}>
+                {selectMode && (
+                  <span className={`card-row__tick${isSel ? ' card-row__tick--on' : ''}`} aria-hidden="true">
+                    {isSel && <CheckIcon size={11} />}
+                  </span>
+                )}
+                <span className="dk-card__jp" lang="ja">{card.front}</span>
+                <span className="dk-card__kana" lang="ja">{card.kana}</span>
+                <span className="dk-card__gloss">{card.back}</span>
+                <span className={`dk-card__state dk-card__state--${state}`}>{t.deckCardState[state]}</span>
+              </Body>
+            )
+          })}
+        </div>
+      )}
+      {!loading && !selectMode && !showAll && cards.length > PREVIEW_CARDS && (
+        <button type="button" className="dk-all" onClick={() => { playUi('click-mode-selection'); setShowAll(true) }}>
+          {t.deckAllCards(cards.length)} ▶
+        </button>
+      )}
+
+      {(canAdd || rideCount > 0 || modes?.length > 0) && (
+        <div className="dk-foot">
+          {canAdd && (
+            <Chip on={addOpen} onClick={openAdd}><PlusIcon size={14} />{t.deckAddCards}</Chip>
+          )}
+          {rideCount > 0 ? (
+            <button type="button" className="btn-primary dk-foot__go" onClick={ride}>{t.deckRide(rideCount)} ▶</button>
+          ) : modes?.length > 0 && (
+            <button type="button" className="btn-primary dk-foot__go" onClick={() => boardMode(modes[0].key)}>{t.study} ▶</button>
+          )}
+        </div>
+      )}
+    </>
+  )
+
+  // The page under the bar: one column on a phone and on the desk.
+  const body = (
+    <>
+      {/* The deck, named on its own page: the same roundel, glyph and
+          pigment as its card on the shelf, the figures, and the one
+          filled action. */}
+      <div className="deck-identity" style={{ '--rail': dt.color }}>
+        <span className="wmap-roundel deck-identity__roundel" lang="ja" aria-hidden="true" style={{ '--line-color': dt.color }}>{dt.glyph}</span>
+        <span className="deck-identity__names">
+          <h2 className="deck-identity__name">{deck?.name ?? t.deckFallbackTitle}</h2>
+          <span className="deck-identity__meta">
+            {dt.label} · {t.cardsCount(cards.length)}
+            {/* Whose deck this is, on the page you study it from and not
+                only on the card you found it by. A followed deck's
+                content is someone else's, and that is worth saying
+                where its cards are. */}
+            {deck?.author && <> · <span className="lib-card__author">{t.libraryBy(deck.author)}</span></>}
+            {dueToday > 0 && <> · <span className="deck-identity__due">{t.todayDue(dueToday)}</span></>}
+          </span>
+        </span>
+        <button
+          type="button"
+          className="btn-primary deck-identity__study"
+          onClick={() => { playUi('click-screen-selection'); navigate(`/learn/decks/${deck_id}/study`, { state: { deck } }) }}
+        >
+          ▶ {t.study}
+        </button>
+      </div>
+
+      {/* Warn, then vanish. The author has deleted this deck; it is
+          still here only so the people following it can take a copy
+          before it is collected. Study still works — that is the whole
+          point of the grace period. */}
+      {withdrawn && (
+        <p className="lib-warning" role="status">
+          <span className="lib-warning__lead">{t.libraryWithdrawn}</span>
+          {t.libraryWithdrawnHint}
+        </p>
+      )}
+
+      {/* The chip row: what you can do to the deck. Select swaps it
+          for the selection's own console (below). */}
+      {!selectMode && isFollower && followerActs}
+
+      {!selectMode && !isFollower && (
+        <div className="chip-row deckdetail-acts">
+          {allowCustom && (
+            <Chip onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
+          )}
+          {allowedSources.length > 0 && (
+            <Chip onClick={openBrowse}><SearchIcon size={14} />{t.browseBtn}</Chip>
+          )}
+          {cards.length > 0 && (
+            <Chip onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }}><CheckIcon size={14} />{t.select}</Chip>
+          )}
+          {/* A sheet on a phone; on the desk, the page's (plans 120, 154). */}
+          <Chip onClick={openMore} aria-haspopup="dialog">
+            <span className="chip__dots" aria-hidden="true">···</span>{t.deckMore}
+          </Chip>
+        </div>
+      )}
+
+      {/* ── The selection console ──────────────────────────────
+          The four controls used to be a bare .chip-row: a caption, a
+          chip, a filled Delete and a Cancel, all four different
+          shapes, wrapping into a ragged two lines on a phone with the
+          destructive one the largest object on the screen — and a
+          second FILLED button on a screen that already has ▶ Study,
+          which DESIGN.md allows exactly one of.
+
+          It is the console's own grammar instead (Decks, Dictionary,
+          Today): one panel, two rows on a hairline. Row 1 is the
+          choice — the tick that takes all of them, and how many are
+          held, pinned right as a figure. Row 2 is what you can do
+          with them, two chips sharing the width. The tick is the same
+          mark the rows below carry, so "all of them" and "this one"
+          are visibly the same act.
+
+          Delete is a ghost here and fills only in the sheet that asks
+          — the same escalation the deck's own deletion uses, and now
+          the same sheet-shaped question for all three of them. */}
+      {selectMode && selectConsole}
+
+      {banners}
 
         {/* Add / Edit form — one input per field the structure
             declares (GET /api/decks/structures), on the canvas's form. */}
         {adding && !desk && cardForm}
-
-        {/* 机 (plan 154): the slot the deck's side column was -- the
-            platforms, or the form, Browse or More in their place --
-            over the cards they board from or add to. */}
-        {desk && <div className="desk-deck__slot">{deskSlot}</div>}
 
         {loading && <Loading />}
 
@@ -1167,7 +1328,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   const Frame = pane ? PaneFrame : ScreenFrame
   return (
     <Frame t={t}>
-      {desk ? <div className="desk-deck">{body}</div> : body}
+      {desk ? <div className="desk-deck">{deskBody}</div> : body}
 
       {/* The More sheet: what the shelf's card used to carry. */}
       <Sheet open={confirmingMine} onClose={() => setConfirmingMine(false)}

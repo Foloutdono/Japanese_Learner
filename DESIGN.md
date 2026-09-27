@@ -1433,14 +1433,23 @@ as the rail it arrives at.
   to>` when it is a place, which is how the bar can tell. A run keeps its
   pill: it has no rail.
 - **`/` is the dictionary's search from anywhere the rail is**, and the
-  Dictionary gate prints the key. A deck's page, beside the shelf's list
-  (plan 154), is one column: its head holds Add and the one filled
-  action — the deck's lanes of the day's queue, ridden and counted
-  ("Réviser 12 cartes"), there only when something is due — then its
-  platforms in a slot over its cards, the slot taken by the form while a
-  card is written, or by Browse or More (it was the page's second column
-  until the shelf stood beside it). A new deck is a dialog over the shelf
-  that ends on the new deck's page, its first card's form open (plan 123).
+  Dictionary gate prints the key. The shelf's list (plan 154) is the
+  index field over the types as glyph chips with their counts, a row per
+  deck (its glyph, its name, its cards and whose it is, what it is due),
+  the open one on the card's surface with its type's rail, and the two
+  doors at its foot. The deck's page, past a hairline, is one column: its
+  head (the roundel, the type and the count as a caption, the name, Edit
+  — the selection — and More); its cards as four figures in a hairline
+  lattice, due, new, learning and mastered, each card's `state` from the
+  server, four across or two by two, never three and one; its modes as
+  cards, each with what the day's queue holds for it; its first six cards
+  as a table on the page's ground, each with its state, and the way to all
+  of them; and at the foot Add cards beside the one filled action — the
+  deck's lanes of the day's queue ("Réviser 12 cartes"), or, with nothing
+  due, its first mode. The card form, Browse and More take the modes'
+  place (it was the page's second column until the shelf stood beside
+  it). A new deck is a dialog over the shelf that ends on the new deck's
+  page, its first card's form open (plan 123).
 - **A sheet is a dialog.** The bottom edge is where a thumb is; on a
   computer it is a long way from the pointer. The same panel is set in
   the middle of the screen — every corner, no handle, a fade. Only the

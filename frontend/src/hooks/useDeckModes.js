@@ -16,7 +16,10 @@ import { modeLabel, modeDesc } from '../domain/studyModes'
 // opens its modes.
 export function useDeckModes(deckId, session, refresh) {
   const { t } = useLang()
-  const [modes, setModes] = useState(null)
+  // Kept with the deck they were asked for: the shelf beside the page
+  // (plan 154) swaps decks under one mounted page, and the last deck's
+  // modes must not stand under the next one's name while its own load.
+  const [held, setHeld] = useState({ deckId: null, modes: null })
   useEffect(() => {
     if (!deckId) return undefined
     let live = true
@@ -25,11 +28,11 @@ export function useDeckModes(deckId, session, refresh) {
       .then(data => {
         if (!live) return
         const keys = data.modes?.length ? data.modes : []
-        setModes(keys.map(key => ({ key, label: modeLabel(t, key), desc: modeDesc(t, key) })))
+        setHeld({ deckId, modes: keys.map(key => ({ key, label: modeLabel(t, key), desc: modeDesc(t, key) })) })
       })
-      .catch(() => { if (live) setModes([]) })
+      .catch(() => { if (live) setHeld({ deckId, modes: [] }) })
     return () => { live = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deckId, session, refresh])
-  return modes
+  return held.deckId === deckId ? held.modes : null
 }

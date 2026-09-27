@@ -5,15 +5,18 @@ import { LangProvider } from './LangContext'
 import './index.css'
 
 // ── 机 — the shelf beside the open deck (plan 154) ─────────────────
-// The owner's pick B of four drawn layouts. On a phone the shelf is a
-// page of decks and a deck is a screen of its own, whose ▶ Study opens a
-// second screen of platforms. On the desk the shelf is a list and the
-// open deck stands beside it: the bare shelf opens on its first deck,
-// another row swaps the page in place, and the page is one column -- the
-// head with Add and the ride (the deck's lanes of the day's queue, the
-// one filled action), the platforms in a slot over the cards, the card
-// form taking the slot while a card is written. The shelf's "new deck"
-// form is a dialog. The phone's side is deskfree.phone.
+// The owner's pick B of four drawn layouts, as drawn. On a phone the
+// shelf is a page of decks and a deck is a screen of its own, whose
+// ▶ Study opens a second screen of platforms. On the desk the shelf is a
+// list -- the index field over glyph chips, a row per deck, the two doors
+// at its foot -- and the open deck stands beside it: the bare shelf opens
+// on its first deck, another row swaps the page in place. The page: the
+// head with Edit and More, the four figures, the modes as cards, the
+// first six cards as a table with their states and the way to all of
+// them, and at the foot Add cards beside the one filled action (the
+// deck's lanes of the day's queue, or its first mode). The card form
+// takes the modes' place while a card is written; the shelf's "new
+// deck" form is a dialog. The phone's side is deskfree.phone.
 
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
 vi.mock('./stores/boarding', () => ({ board: commit => commit() }))
@@ -22,11 +25,16 @@ vi.mock('./stores/today', () => ({
   useTodaySummary: () => ({ data: { total: 0, by_source: {}, lanes: today.lanes, next_due: null }, failed: false }),
   refreshToday: vi.fn(), seedTodaySummary: vi.fn(),
 }))
-const DECK = { id: 1, name: 'Voyage', type: 'standard', role: 'owner', card_count: 2 }
+const DECK = { id: 1, name: 'Voyage', type: 'standard', role: 'owner', card_count: 7 }
 const METRO = { id: 2, name: 'Métro', type: 'standard', role: 'owner', card_count: 0 }
 const CARDS = [
-  { id: 11, origin: 'custom', front: '駅', kana: 'えき', back: 'gare', fields: { front: '駅', back: 'gare' } },
-  { id: 12, origin: 'custom', front: '切符', kana: 'きっぷ', back: 'billet', fields: { front: '切符', back: 'billet' } },
+  { id: 11, origin: 'custom', front: '駅', kana: 'えき', back: 'gare', state: 'due', fields: { front: '駅', back: 'gare' } },
+  { id: 12, origin: 'custom', front: '切符', kana: 'きっぷ', back: 'billet', state: 'new', fields: { front: '切符', back: 'billet' } },
+  { id: 13, origin: 'custom', front: '電車', kana: 'でんしゃ', back: 'train', state: 'learning', fields: { front: '電車', back: 'train' } },
+  { id: 14, origin: 'custom', front: '改札', kana: 'かいさつ', back: 'portillon', state: 'mastered', fields: { front: '改札', back: 'portillon' } },
+  { id: 15, origin: 'custom', front: '地下鉄', kana: 'ちかてつ', back: 'métro', state: 'new', fields: { front: '地下鉄', back: 'métro' } },
+  { id: 16, origin: 'custom', front: '乗る', kana: 'のる', back: 'monter', state: 'learning', fields: { front: '乗る', back: 'monter' } },
+  { id: 17, origin: 'custom', front: '降りる', kana: 'おりる', back: 'descendre', state: 'new', fields: { front: '降りる', back: 'descendre' } },
 ]
 const STRUCTURES = [{ key: 'standard', fields: [{ key: 'front', required: true }, { key: 'back', required: true }] }]
 const json = body => ({ ok: true, status: 200, json: async () => body })
@@ -97,15 +105,22 @@ describe('the shelf on the desk', () => {
     const list = $('.desk-split--decks > .desk-split__list')
     const page = $('.desk-split--decks > .desk-split__page')
     expect(list.getBoundingClientRect().right).toBeLessThanOrEqual(page.getBoundingClientRect().left)
-    const rows = [...list.querySelectorAll('.deck-card')]
+    // The index field over the types as glyph chips, each with its count.
+    const console_ = list.querySelector('.shelf-console')
+    expect(console_.firstElementChild.classList.contains('console__index')).toBe(true)
+    expect(console_.querySelector('.console__count').textContent).toBe('2')
+    expect(console_.querySelector('.console__chips .chip:not(:first-child)').textContent).toBe('札2')
+    // A row per deck: its name and cards, the open one marked.
+    const rows = [...list.querySelectorAll('.shelf-row')]
     expect(rows.map(r => r.getAttribute('aria-current'))).toEqual(['page', null])
-    expect(page.querySelector('.deck-identity__name').textContent).toBe('Voyage')
-    // The page is the shelf's: one bar, one <main>, no way up to a
-    // shelf already on the screen.
+    expect(rows[0].querySelector('.shelf-row__name').textContent).toBe('Voyage')
+    expect(rows[0].querySelector('.shelf-row__sub').textContent).toBe('7 cartes')
+    expect(page.querySelector('.dk-head__name').textContent).toBe('Voyage')
+    // The page is the shelf's: one bar, one <main>.
     expect($$('main')).toHaveLength(1)
-    expect($('.bar__aside .stage__leave, .desk-split__page .bar')).toBeNull()
-    // The doors at the list's foot.
+    // The doors at the list's foot, New deck first.
     expect(list.lastElementChild.classList.contains('decks-doors')).toBe(true)
+    expect(list.lastElementChild.firstElementChild.classList.contains('decks-doors__create')).toBe(true)
   })
 
   it('swaps the deck in place, the shelf asked for once and its search kept', async () => {
@@ -116,13 +131,14 @@ describe('the shelf on the desk', () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(field, 'r')
     field.dispatchEvent(new Event('input', { bubbles: true }))
     await settle(60)
-    const metro = $$('.desk-split__list .deck-card').find(r => /Métro/.test(r.textContent))
+    const metro = $$('.desk-split__list .shelf-row').find(r => /Métro/.test(r.textContent))
     metro.click()
     await settle(400)
     expect(here.path).toBe('/learn/decks/2')
-    expect($('.desk-split__page .deck-identity__name').textContent).toBe('Métro')
-    // The last deck's cards are gone with it.
-    expect($('.desk-split__page .card-list')).toBeNull()
+    expect($('.desk-split__page .dk-head__name').textContent).toBe('Métro')
+    // The last deck's cards and modes are gone with it.
+    expect($('.desk-split__page .dk-cards')).toBeNull()
+    expect($('.desk-split__page .dk-modes')).toBeNull()
     expect(metro.getAttribute('aria-current')).toBe('page')
     expect($('.desk-split__list input').value).toBe('r')
     expect(shelfCalls()).toBe(1)
@@ -131,59 +147,96 @@ describe('the shelf on the desk', () => {
   it('opens "new deck" as a dialog from the list\'s foot', async () => {
     await mount('/learn/decks/1', shelf)
     await settle(400)
-    const door = $('.desk-split__list .decks-doors > :last-child')
-    door.click()
+    $('.decks-doors__create').click()
     await settle(60)
     expect($('[role="dialog"] .form input')).not.toBeNull()
     expect(document.activeElement).toBe($('[role="dialog"] .form input'))
     expect($('main .form')).toBeNull()
-    // The page beside the list holds the one filled action, so the
-    // shelf's own door is a ghost.
-    expect(door.classList.contains('chip')).toBe(true)
   })
 })
 
 describe('a deck on the desk', () => {
-  it("draws an empty deck's note at the chips' width", async () => {
+  it("draws an empty deck's note across the page", async () => {
     await mount('/learn/decks/2', deckAlone)
     await settle()
     const empty = $('.deckdetail-empty').getBoundingClientRect()
-    const chips = $('.chip-row').getBoundingClientRect()
-    expect(Math.round(empty.width)).toBe(Math.round(chips.width))
-    expect(Math.round(empty.left)).toBe(Math.round(chips.left))
+    const head = $('.dk-head').getBoundingClientRect()
+    expect(Math.round(empty.width)).toBe(Math.round(head.width))
+    expect($('.dk-figs')).toBeNull()
   })
 
-  it('stands its platforms over its cards, and boards from them', async () => {
+  it('names itself in its head, with Edit and More', async () => {
+    await mount('/learn/decks/1', deckAlone)
+    await settle()
+    expect($('.dk-head__cap').textContent).toBe('Standard · 7 cartes')
+    const [edit, more] = $$('.dk-head > .chip')
+    expect(edit.textContent).toBe('Modifier')
+    expect(more.getAttribute('aria-label')).toBe('Plus')
+    edit.click()
+    await settle(60)
+    // Edit is the selection: every card, each with its tick.
+    expect(edit.getAttribute('aria-pressed')).toBe('true')
+    expect($('.select-console')).not.toBeNull()
+    expect($$('.dk-card .card-row__tick')).toHaveLength(7)
+  })
+
+  it('counts its cards as four figures, by state', async () => {
+    await mount('/learn/decks/1', deckAlone)
+    await settle()
+    const figs = $$('.dk-fig').map(f => [f.querySelector('.dk-fig__cap').textContent, f.querySelector('.dk-fig__n').textContent])
+    expect(figs).toEqual([['À réviser', '1'], ['Nouvelles', '3'], ['En cours', '2'], ['Maîtrisées', '1']])
+    // Four across on a page this wide, or two by two: never three and one.
+    const tops = new Set($$('.dk-fig').map(f => Math.round(f.getBoundingClientRect().top)))
+    expect([1, 2]).toContain(tops.size)
+    if (tops.size === 2) expect($$('.dk-fig').filter(f => Math.round(f.getBoundingClientRect().top) === [...tops][0])).toHaveLength(2)
+  })
+
+  it('stands its modes as cards over its cards, and boards from them', async () => {
     await mount('/learn/decks/1', deckAlone)
     await settle()
     expect($('.desk-side')).toBeNull()
-    expect($('.deck-identity__study')).toBeNull()
+    expect($('.deck-identity')).toBeNull()
     const slot = $('.desk-deck > .desk-deck__slot').getBoundingClientRect()
-    const list = $('.desk-deck > .card-list').getBoundingClientRect()
+    const list = $('.desk-deck > .dk-cards').getBoundingClientRect()
     expect(slot.bottom).toBeLessThanOrEqual(list.top)
-    expect(Math.round(slot.width)).toBe(Math.round(list.width))
-
-    const platforms = $$('.desk-deck__study .platform-card')
-    expect(platforms).toHaveLength(2)
-    platforms[0].click()
+    const modes = $$('.dk-modes .dk-mode')
+    expect(modes.map(m => m.querySelector('.dk-mode__name').textContent)).toEqual(['Mot → sens', 'Sens → mot'])
+    modes[0].click()
     await settle(60)
     expect(here.path).toBe('/learn/decks/1/study/vocab.flashcard.f2b')
   })
 
-  it('writes a card in the slot, over the list, from Add in its head', async () => {
+  it('lists its first six cards with their states, then all of them', async () => {
     await mount('/learn/decks/1', deckAlone)
     await settle()
-    const add = $('.deck-identity__acts .chip')
-    expect($$('.chip-row .chip').some(c => c.textContent === add.textContent)).toBe(false)
+    const rows = () => $$('.dk-cards > .dk-card')
+    expect(rows()).toHaveLength(6)
+    expect([...rows()[0].children].map(c => c.textContent)).toEqual(['駅', 'えき', 'gare', 'À réviser'])
+    // One grid for the table: the columns line up down it.
+    const lefts = rows().map(r => Math.round(r.querySelector('.dk-card__gloss').getBoundingClientRect().left))
+    expect(new Set(lefts).size).toBe(1)
+    const all = $('.dk-all')
+    expect(all.textContent).toBe('Les 7 cartes ▶')
+    all.click()
+    await settle(60)
+    expect(rows()).toHaveLength(7)
+    expect($('.dk-all')).toBeNull()
+  })
+
+  it('writes a card in the modes\' place, from Add cards at its foot', async () => {
+    await mount('/learn/decks/1', deckAlone)
+    await settle()
+    const add = $('.dk-foot .chip')
+    expect(add.textContent).toBe('Ajouter des cartes')
     add.click()
     await settle(60)
     expect(add.getAttribute('aria-pressed')).toBe('true')
     expect($('.desk-deck__slot .deckdetail-form')).not.toBeNull()
-    expect($('.desk-deck__study')).toBeNull()
-    expect($('.desk-deck > .card-list')).not.toBeNull()
+    expect($('.dk-modes')).toBeNull()
+    expect($('.desk-deck > .dk-cards')).not.toBeNull()
   })
 
-  it('rides its lanes of the day\'s queue from its head, and comes back to it', async () => {
+  it('rides its lanes of the day\'s queue from its foot, and comes back to it', async () => {
     today.lanes = [
       { id: 'p|1|vocab.flashcard.f2b', kind: 'personal', deck_id: 1, deck_name: 'Voyage', mode: 'vocab.flashcard.f2b', due: 2, new: 1 },
       { id: 'p|1|vocab.flashcard.b2f', kind: 'personal', deck_id: 1, deck_name: 'Voyage', mode: 'vocab.flashcard.b2f', due: 1, new: 0 },
@@ -193,11 +246,13 @@ describe('a deck on the desk', () => {
     try {
       await mount('/learn/decks/1', shelf)
       await settle(400)
-      const ride = $('.deck-identity__acts .btn-primary')
+      // Each mode card with what the queue holds for it.
+      expect($$('.dk-mode').map(m => m.querySelector('.dk-mode__due')?.textContent ?? null)).toEqual(['3', '1'])
+      const ride = $('.dk-foot .btn-primary')
       expect(ride.textContent).toBe('Réviser 4 cartes ▶')
       expect($$('.btn-primary').filter(b => b.closest('main'))).toHaveLength(1)
-      // The button says the figure the meta used to.
-      expect($('.deck-identity__due')).toBeNull()
+      // The shelf's row says it too.
+      expect($('.shelf-row[aria-current="page"] .shelf-row__due').firstChild.textContent).toBe('3')
       ride.click()
       await settle(60)
       expect(here.path).toBe('/today/run')
@@ -208,10 +263,14 @@ describe('a deck on the desk', () => {
     }
   })
 
-  it('has no ride when nothing of it is due today', async () => {
+  it('boards its first mode when nothing of it is due today', async () => {
     await mount('/learn/decks/1', deckAlone)
     await settle()
-    expect($('.deck-identity__acts .btn-primary')).toBeNull()
+    const go = $('.dk-foot .btn-primary')
+    expect(go.textContent).toBe('Étudier ▶')
+    go.click()
+    await settle(60)
+    expect(here.path).toBe('/learn/decks/1/study/vocab.flashcard.f2b')
   })
 })
 
@@ -221,7 +280,7 @@ describe('a deck on the desk', () => {
 // the shelf lists the new deck, open. The flag is spent on arrival, so
 // Back and Forward onto the page do not open the form again.
 describe('a new deck on the desk', () => {
-  it('opens its page beside the shelf with the first card\'s form in the slot', async () => {
+  it('opens its page beside the shelf with the first card\'s form in the modes\' place', async () => {
     const base = api.apiFetch.getMockImplementation()
     const NEW = { id: 3, name: 'Kanji du métro', type: 'standard' }
     api.apiFetch.mockImplementation(async (path, session, opts) => {
@@ -234,7 +293,7 @@ describe('a new deck on the desk', () => {
     try {
       await mount('/learn/decks', shelf)
       await settle(400)
-      $('.desk-split__list .decks-doors > :last-child').click()
+      $('.decks-doors__create').click()
       await settle(60)
       const field = $('[role="dialog"] .form input')
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(field, NEW.name)
@@ -245,7 +304,7 @@ describe('a new deck on the desk', () => {
       expect($('[role="dialog"]')).toBeNull()
       expect($('.desk-deck__slot .deckdetail-form')).not.toBeNull()
       expect(here.state?.add).toBeUndefined()
-      const open = $('.desk-split__list .deck-card[aria-current="page"]')
+      const open = $('.desk-split__list .shelf-row[aria-current="page"]')
       expect(open.textContent).toMatch(NEW.name)
     } finally {
       api.apiFetch.mockImplementation(base)
