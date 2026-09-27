@@ -353,7 +353,7 @@ def test_get_unknown_session_returns_404(client):
     assert response.status_code == 404
 
 
-def test_explain_endpoint_buys_deep_tier_and_records_video_provenance(client, monkeypatch):
+def test_explain_endpoint_buys_deep_tier_and_adds_nothing_to_the_shelf(client, monkeypatch):
     # A sentence unique to THIS test: phrase_analysis_cache has no
     # expiry and is keyed only by (phrase, lang) -- reusing a phrase
     # another test already bought the deep tier for (e.g.
@@ -380,24 +380,22 @@ def test_explain_endpoint_buys_deep_tier_and_records_video_provenance(client, mo
 
     monkeypatch.setattr("routes.phrase.chat", _fake_chat)
 
+    shelf_before = client.get("/api/phrase/history").json()
     response = client.post(f"/api/video/session/{session_id}/sentence/0/explain", json={"lang": "en"})
     assert response.status_code == 200
     assert response.json()["explanation"] == "An introduction."
 
+    # The line explained is no card of its own beside its video: it
+    # used to be written to phrase_history, which the shelf lists.
+    assert client.get("/api/phrase/history").json() == shelf_before
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            cur.execute(
-                "SELECT source, source_ref FROM phrase_history WHERE phrase = %s ORDER BY id DESC LIMIT 1",
-                ("猫は可愛い動物です。",),
-            )
-            row = cur.fetchone()
+            cur.execute("SELECT COUNT(*) FROM phrase_history WHERE phrase = %s", ("猫は可愛い動物です。",))
+            (count,) = cur.fetchone()
     finally:
         conn.close()
-    assert row is not None
-    source, source_ref = row
-    assert source == "video"
-    assert source_ref.startswith("prov.srt@")
+    assert count == 0
 
 
 def test_explain_keeps_cue_times(client, monkeypatch):

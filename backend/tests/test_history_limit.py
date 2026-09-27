@@ -138,6 +138,24 @@ def test_a_removed_video_is_erased_a_day_later(learner):
     assert ids == {fresh}
 
 
+def test_a_line_explain_wrote_before_is_not_listed_and_goes_on_the_next_write(client, learner):
+    """Until 2026-09-27 Explain on a video line wrote the line here
+    (source 'video'), and the shelf drew it as a text card beside its
+    video. A line the learner kept is theirs and stays."""
+    _run(
+        "INSERT INTO phrase_history(user_id, phrase, source, source_ref) "
+        "VALUES (%s, '溶けないで', 'video', 'clip.srt@12.0')",
+        (learner,),
+    )
+    _passage(learner, "保存した行", 30, kept=True)
+    _run("UPDATE phrase_history SET source = 'video' WHERE user_id = %s AND kept", (learner,))
+    with acting_as(learner):
+        assert [r["phrase"] for r in client.get("/api/phrase/history").json()] == ["保存した行"]
+        assert client.post("/api/phrase/analyze", json={"phrase": "新しい文です。"}).status_code == 200
+    rows = _run("SELECT phrase FROM phrase_history WHERE user_id = %s ORDER BY phrase", (learner,))
+    assert sorted(r[0] for r in rows) == sorted(["保存した行", "新しい文です。"])
+
+
 def test_one_learner_cannot_remove_another_s_video(client, learner):
     sid = _session(learner, "mine.srt", 5)
     with acting_as(f"{learner}-other"):

@@ -31,7 +31,7 @@ def trim_history(cur, user_id: str, keep: int | None = None) -> None:
         WITH shelf AS (
             SELECT 'passage' AS kind, id, created_at
               FROM phrase_history
-             WHERE user_id = %(user)s AND NOT kept
+             WHERE user_id = %(user)s AND NOT kept AND source <> 'video'
             UNION ALL
             SELECT 'session', id, created_at
               FROM video_sessions
@@ -53,5 +53,12 @@ def trim_history(cur, user_id: str, keep: int | None = None) -> None:
     )
     cur.execute(
         "DELETE FROM video_sessions WHERE user_id = %s AND deleted_at < NOW() - INTERVAL '1 day'",
+        (user_id,),
+    )
+    # The video lines Explain wrote here before 2026-09-27, one text card
+    # each beside their video (routes/video.py's explain): never listed
+    # now, erased on the learner's next write.
+    cur.execute(
+        "DELETE FROM phrase_history WHERE user_id = %s AND source = 'video' AND NOT kept",
         (user_id,),
     )

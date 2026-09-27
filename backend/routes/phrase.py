@@ -504,9 +504,14 @@ def get_phrase_history(user_id: str = Depends(get_user_id), limit: int = Query(5
     conn = db_conn()
     try:
         with conn.cursor() as cur:
+            # A video line explained before 2026-09-27 was written here
+            # too (source 'video', never kept), and drew a text card of
+            # its own: not listed, and erased on the learner's next
+            # write (core/history.py).
             cur.execute(
                 "SELECT id, phrase, source, kept, created_at FROM phrase_history "
-                "WHERE user_id = %s ORDER BY kept DESC, created_at DESC LIMIT %s",
+                "WHERE user_id = %s AND (kept OR source <> 'video') "
+                "ORDER BY kept DESC, created_at DESC LIMIT %s",
                 (user_id, limit),
             )
             rows = cur.fetchall()

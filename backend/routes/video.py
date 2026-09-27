@@ -763,10 +763,14 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
                            user_id: str = Depends(get_user_id)):
     """Buys the deep tier for ONE Sentence -- never the whole session
     (see study/analysis and docs/adr/0001). Shares phrase_analysis_cache
-    with /api/phrase/analyze via _analyze_sentence. Also keeps the
-    Sentence in the bank with video provenance (plan 016's
-    phrase_history.source/source_ref), the same way /api/phrase/analyze
-    does for typed/image Passages."""
+    with /api/phrase/analyze via _analyze_sentence.
+
+    It used to write the Sentence to phrase_history as well (source
+    'video'), and the analyser's shelf, which lists that table, drew
+    every line explained as a text card of its own beside the video it
+    came from (removed 2026-09-27, owner-directed). The session is the
+    shelf's entry; a line the learner wants to keep is kept through
+    /api/phrase/keep, with its cue as provenance."""
     session = _load_session(session_id, user_id)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -780,20 +784,6 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
     text = sentences[index]["text"]
     states = srs.get_user_states(user_id)
     explained = _analyze_sentence(text, deep=True, lang=payload.lang, states=states, user_id=user_id)
-
-    cue_start = sentences[index].get("cue_start")
-    source_ref = f"{session['source_ref']}@{cue_start}" if cue_start is not None else session["source_ref"]
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO phrase_history(user_id, phrase, source, source_ref) VALUES (%s, %s, %s, %s)",
-                (user_id, text, "video", source_ref),
-            )
-            trim_history(cur, user_id)
-        conn.commit()
-    finally:
-        conn.close()
 
     # A Cue is a Sentence, and a Sentence's cue times are part of it.
     # _analyze_sentence builds from TEXT alone -- analyze_local is pure
