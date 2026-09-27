@@ -1046,7 +1046,26 @@ runtime purpose. Two consequences worth knowing:
   `tests/test_analysis.py`, `screens/AnalyzerScreen.jsx`,
   `components/analysis/WordsList.jsx`, `src/analyzer.desktop.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **162** or higher, and check
+  **162** is 仏訳, the pool's words in the learner's language: a word
+  past the deck is a JMdict pool word, and the pool is English, so the
+  analyser's words list read "ticket barrier" under 改札口 in French.
+  Two sources, the owner's pick of both: JMdict's own French, written
+  beside the pool's rows as `fr_glosses` (joined on `seq`) by
+  `scripts/build_pool_fr.py` from the full release and carried as the
+  entry's `meaning_fr`, as a deck word's; and for the rest a translation
+  of the English line bought once and kept for everyone in
+  `pool_gloss_cache` (`POST /api/phrase/glosses`, the server's own data
+  to the model, `POOL_GLOSS_DAILY_LIMIT` through `daily_usage`), asked
+  for by the words list for the sentence in focus and the next (cited
+  in `content/vocab_jmdict_data.py`, `study/analysis.py`,
+  `study/pool_glosses.py`, `routes/phrase.py`, `routes/account.py`,
+  `srs/data_structure.sql`, `scripts/build_pool_fr.py`,
+  `scripts/llm_cost_model.py`, `backend/.env.example`,
+  `tests/test_pool_glosses.py`, `tests/test_build_pool_fr.py`,
+  `components/analysis/poolGlosses.js`, `tokens.js`'s `wordGloss`,
+  `WordsList.jsx`, `FocusCard.jsx`, `screens/AnalyzerScreen.jsx` and
+  `src/analyzer.desktop.test.jsx`).
+  When starting a new wave, begin at **163** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -1253,6 +1272,19 @@ the export) and commit `datas/vocab/vocab_served.json`,
 `vocab_frequency.json` and `vocab_jmdict.sqlite3` with it: `tests/test_vocab_deck.py` fails
 on an id that left the deck without a `MOVES` line, and on a served id
 the snapshot has not seen.
+
+JMdict's French for the pool (plan 162) is a table beside its rows,
+`fr_glosses`, joined on `seq`, and written from the **full** release
+(`JMdict.gz`, not `JMdict_e.gz`, which is English only). It changes no
+pool row or id, so it is safe to run again on a newer release; run it
+after `prune_pool_overlap` and commit the sqlite. Until it has run, every
+pool word goes through the bought translation (`study/pool_glosses.py`).
+
+```bash
+cd backend
+python -m scripts.build_pool_fr ~/Downloads/JMdict.gz        # report
+python -m scripts.build_pool_fr ~/Downloads/JMdict.gz --yes  # write fr_glosses
+```
 
 Two things are worth knowing before reaching for any of them:
 

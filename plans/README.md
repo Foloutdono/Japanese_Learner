@@ -6972,3 +6972,49 @@ name in the seven languages `LANG_NAMES` offers before any other extra
 string is read as the explanation. `phrase_analysis_cache` goes to v5, as
 plan 095 did for the notes: a sentence explained before is bought once
 more on its next Explain.
+
+
+## Plan 162 — 仏訳, the pool's words in the learner's language (2026-09-27)
+
+The owner: "fix the English glosses in the words list". The deck's words
+already read in French (plan 160's `meaning_fr`); what was left was a word
+past the deck -- a JMdict pool word (plan 148), and the pool was built from
+JMdict's English export, so 改札口 read "ticket barrier" and 閑静 "quiet
+(e.g. neighbourhood)" in a French list. Of the pool's top 20,000 by
+frequency, `VOCAB_FR` knew 84 by form: no fix. Asked how to fill them, the
+owner picked **both** sources:
+
+**JMdict's own French** (`scripts/build_pool_fr.py`): the full release
+(`JMdict.gz`, EDRDG, CC BY-SA -- the credit JMdict already has) carries
+French glosses in senses of their own. The script reads it with
+`iterparse`, takes each entry's first French gloss per French sense,
+de-duplicated, the line cut at `card_lookup._POOL_GLOSS_MAX` as the
+English line is, and writes `fr_glosses(seq, gloss)` beside the pool's
+rows for the pool's seqs only -- joined on `seq`, which an entry keeps
+between editions, so no row and no card id moves and a run on a newer
+release is safe. `vocab_jmdict_data.fr_gloss(seq)` reads it (None while the
+table is absent); `analysis._pool_match` sets the entry's `meaning_fr`, so
+the list reads it where it reads a deck word's. edrdg.org was unreachable
+from the session that wrote it: the owner runs it once with `--yes` and
+commits the sqlite.
+
+**A translation bought once** (`study/pool_glosses.py`, `POST
+/api/phrase/glosses`): for a pool word with no French line, and for every
+other language, the English line is translated by one model call per
+sentence and kept for everyone in `pool_gloss_cache(raw_id, lang)`. The
+request names card ids only; the form, reading and English line sent to
+the model are looked up from them, so nothing a client types reaches the
+shared cache. JMdict's French first, then the cache, then a call -- a
+call taking one of the learner's `POOL_GLOSS_DAILY_LIMIT` (60) slots in
+`daily_usage` (feature `pool-glosses`); past it, or on a failed or
+malformed answer, the English stays. The local tier stays free (ADR 0001):
+the analysis never calls it; the words list asks
+(`components/analysis/poolGlosses.js`'s `usePoolGlosses`) for the sentence
+in focus and the next together, once a word for the page's life.
+`wordGloss` reads the model's contextual gloss, then the card's French,
+then the bought line, then the English. The cost row is
+`llm_cost_model`'s `pool_glosses`.
+
+Left as it was: the practice runs' breakdown rows (`SentenceBreakdown`)
+read JMdict's French once the table exists, but do not buy a line -- their
+sentences are the deck's, and a pool word there is rare.

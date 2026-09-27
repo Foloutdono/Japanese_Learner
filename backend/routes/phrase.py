@@ -16,6 +16,7 @@ from core.history import trim_history
 from study.llm_shared import chat, LLMUnavailable
 from content.grammar_points_data import localise
 from study.analysis import analyze_local, attach_user_state, merge_deep
+from study import pool_glosses
 from study.sentences import split_sentences, MAX_SENTENCES
 from routes.reading import LANG_NAMES
 
@@ -483,6 +484,23 @@ def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
             result["deep_dropped"] = only["deep_dropped"]
 
     return result
+
+
+class GlossesRequest(BaseModel):
+    # Pool card ids (vocab_jmdict_<id>); anything else is ignored, and
+    # past study/pool_glosses.MAX_IDS the rest are.
+    ids: list[str] = []
+    lang: str = "en"
+
+
+# 仏訳 (plan 162): the words list's line for the pool words it shows, in
+# the learner's language -- JMdict's own, else one bought once for
+# everyone. See study/pool_glosses.py.
+@router.post("/api/phrase/glosses")
+def phrase_glosses(payload: GlossesRequest, user_id: str = Depends(get_user_id)):
+    lang = payload.lang if payload.lang in LANG_NAMES else "en"
+    found, limited = pool_glosses.glosses(payload.ids, lang, LANG_NAMES[lang], user_id)
+    return {"glosses": found, "limited": limited}
 
 
 @router.post("/api/phrase/analyze")

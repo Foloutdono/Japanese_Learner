@@ -118,6 +118,29 @@ def has_form(text: str) -> bool:
     )
 
 
+def fr_gloss(seq: int | None) -> str | None:
+    """JMdict's own French line for the entry `seq`, or None (plan 162).
+
+    The fr_glosses table is filled by scripts/build_pool_fr.py from
+    JMdict's multilingual release, joined on `seq`, beside the rows it
+    never touches. Until that script has run the table is not there,
+    and every pool word answers None -- the words list then asks
+    study/pool_glosses for a translation instead."""
+    if seq is None:
+        return None
+    conn = _conn()
+    has = getattr(_local, "has_fr", None)
+    if has is None:
+        has = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'fr_glosses'"
+        ).fetchone() is not None
+        _local.has_fr = has
+    if not has:
+        return None
+    row = conn.execute("SELECT gloss FROM fr_glosses WHERE seq = ?", (seq,)).fetchone()
+    return row[0] if row else None
+
+
 def get_by_id(entry_id: int) -> dict | None:
     row = _conn().execute(
         "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries WHERE id = ?",

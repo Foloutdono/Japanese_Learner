@@ -67,11 +67,16 @@ export function lineState(tok, grammar) {
 // What a word means, in the learner's language (plan 160): the model's
 // contextual gloss where it was bought (already in that language), else
 // the card's own -- its French beside its English since the analysis
-// carries both (study/analysis._deck_match) -- else nothing. A pool word
-// has only its English.
-export function wordGloss(tok, lang) {
+// carries both (study/analysis._deck_match), a pool word's where JMdict
+// has one (plan 162) -- else the line the words list asked for
+// (`glosses`, poolGlosses.js: a pool word's, by card id), else its
+// English.
+export function wordGloss(tok, lang, glosses = null) {
   if (tok?.meaning) return tok.meaning
-  const entry = tok?.vocab_match?.entry
+  const match = tok?.vocab_match
+  const entry = match?.entry
   if (!entry) return ''
-  return (lang === 'fr' && entry.meaning_fr) || entry.meaning || ''
+  return (lang === 'fr' && entry.meaning_fr)
+    || (lang !== 'en' && glosses?.[match.raw_id])
+    || entry.meaning || ''
 }

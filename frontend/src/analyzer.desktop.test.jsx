@@ -44,6 +44,15 @@ const GRAMMAR = [{
     { ...tok('いる'), start: 4, end: 6 },
   ],
 }]
+// A word past the deck (plan 162): a JMdict pool word, its line English.
+const POOL = [{
+  text: '改札口で待つ', grammar: [], unknown_count: 0, available: true, level: 'N5', off_deck_count: 0,
+  tokens: [
+    { surface: '改札口', pos: 'noun', furigana: [{ text: '改札口' }], kanji_matches: [],
+      vocab_match: { pool: true, level: null, raw_id: 'vocab_jmdict_17216', entry: { kanji: '改札口', kana: 'かいさつぐち', meaning: 'ticket barrier' } } },
+    tok('で'), tok('待つ', '待つ', 'まつ', 'to wait'),
+  ],
+}]
 const EXPLANATION = 'Devant la gare, j’attends.'
 const TRANSLATION = 'J’attends à la gare.'
 const TEIRU_ENTRY = { type: 'grammar', raw_id: 'grammar_N5_teiru', pattern: '〜ている', level: 'N5', meaning: 'ongoing', status: { status: 'new' } }
@@ -72,8 +81,11 @@ const ok = body => ({ ok: true, status: 200, json: async () => body })
 beforeEach(() => {
   passage = ONE
   clearLookupCache()
+  clearPoolGlosses()
   apiJson.mockReset()
-  apiJson.mockImplementation(async (url, session, init) => (String(init?.body).includes('"deep":true')
+  apiJson.mockImplementation(async (url, session, init) => (url === '/api/phrase/glosses'
+    ? { glosses: { vocab_jmdict_17216: 'portillon' }, limited: false }
+    : String(init?.body).includes('"deep":true')
     ? { sentences: [{ ...passage[0], explanation: EXPLANATION, translation: TRANSLATION }] }
     : { sentences: passage, truncated: 0 }))
   apiFetch.mockReset()
@@ -92,6 +104,7 @@ beforeEach(() => {
 
 const { default: AnalyzerScreen } = await import('./screens/AnalyzerScreen')
 const { clearLookupCache } = await import('./lib/dictionaryLookup')
+const { clearPoolGlosses } = await import('./components/analysis/poolGlosses')
 const { default: DictionaryScreen } = await import('./screens/DictionaryScreen')
 
 const settle = (ms = 150) => new Promise(r => setTimeout(r, ms))
@@ -282,6 +295,19 @@ describe('the analyser on the desk (plan 134)', () => {
     expect(box('.anl-desk__entry .dict-entry__body').bottom).toBeLessThan(desk.bottom - 100)
     expect($('.anl-focus')).toBeNull()
     expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
+  })
+
+  // Plan 162: a word past the deck reads in the learner's language, its
+  // line asked for once as the sentence comes into focus.
+  it('glosses a word past the deck in French, asked for once', async () => {
+    passage = POOL
+    await mount()
+    await analyze('改札口で待つ')
+    const row = () => $$('.anl-words__row').find(r => r.textContent.includes('改札口'))
+    await expect.poll(() => row()?.querySelector('.anl-words__gloss').textContent).toBe('portillon')
+    const asked = apiJson.mock.calls.filter(([u]) => u === '/api/phrase/glosses')
+    expect(asked).toHaveLength(1)
+    expect(JSON.parse(asked[0][2].body)).toEqual({ ids: ['vocab_jmdict_17216'], lang: 'fr' })
   })
 
   it('lists the sentence\'s words, and puts one in focus from the list', async () => {

@@ -93,6 +93,15 @@ FEATURES = {
         "more, which is rare enough to leave out of the count. "
         "ASK_DAILY_LIMIT caps it at 40/day, which bounds the abuse row.",
     ),
+    "pool_glosses": (
+        15, 400, 250,
+        "The words list's lines for words past the deck (plan 162): one "
+        "call per sentence with unseen ones, ~8 words in, ~8 short lines "
+        "out. Shared across learners (pool_gloss_cache) and skipped where "
+        "JMdict has its own French, so the count falls as the cache fills; "
+        "15 is a new learner's first month of videos and photos. "
+        "POOL_GLOSS_DAILY_LIMIT caps it at 60/day, which bounds the abuse row.",
+    ),
     "phrase_analysis": (
         50, 400, 500,
         "200 breakdowns/mo, ~75% served from phrase_analysis_cache (reading "

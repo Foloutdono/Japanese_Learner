@@ -667,6 +667,17 @@ CREATE TABLE phrase_analysis_cache (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Owned by study/pool_glosses.py -- a JMdict pool word's line in a
+-- learner's language, translated once from its English and kept for
+-- every caller (plan 162). No expiry, like the analysis cache above.
+CREATE TABLE pool_gloss_cache (
+    raw_id     TEXT NOT NULL,
+    lang       TEXT NOT NULL,
+    gloss      TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (raw_id, lang)
+);
+
 -- Owned by srs/srs.py -- xp_ledger is the append-only source of truth
 -- for XP awarded outside a review (source/ref identify what earned it).
 CREATE TABLE xp_ledger (

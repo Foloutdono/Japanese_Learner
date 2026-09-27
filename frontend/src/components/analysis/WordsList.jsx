@@ -21,7 +21,11 @@ import { tokState, wordGloss } from './tokens'
 // focus beside the list, so the deck's one filled action rides the row.
 // The row stays the one button; the action is its neighbour, on the
 // same ground, and falls under it where the column is narrow.
-export function WordsList({ analysis, current, onSelect, t, action = null }) {
+//
+// `glosses` (plan 162): the lines the screen asked for its pool words,
+// by card id (poolGlosses.js), for a word past the deck the analysis
+// has no line for in the learner's language.
+export function WordsList({ analysis, current, onSelect, t, action = null, glosses = null }) {
   const lang = useLang()?.lang
   const rows = wordRowsOf(analysis)
   return (
@@ -31,7 +35,7 @@ export function WordsList({ analysis, current, onSelect, t, action = null }) {
         const entry = head.vocab_match?.entry
         const name = entry ? (entry.kanji || entry.kana || row.surface) : row.surface
         const reading = entry?.kana && entry.kana !== name ? entry.kana : ''
-        const meaning = wordGloss(head, lang)
+        const meaning = wordGloss(head, lang, glosses)
         const level = head.vocab_match?.level ?? null
         const on = Boolean(current) && row.tokens.includes(current)
         const button = (

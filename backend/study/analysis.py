@@ -21,7 +21,7 @@ import logging
 from content.grammar_points_data import find, grammar_to_id
 from study import morphology
 from study.grammar_detect import NO_GOOD_VERBS, compound_particles, no_good_points
-from content.vocab_jmdict_data import vocab_jmdict_to_id
+from content.vocab_jmdict_data import fr_gloss as jmdict_fr_gloss, vocab_jmdict_to_id
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, compound_reading,
     resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
@@ -142,15 +142,29 @@ def _pool_match(entry: dict) -> dict:
     its entry or adds it to a deck reads it where it already reads one,
     with `level` null -- the pool has no JLPT level, and a null level is
     what draws no badge -- and `pool` saying so outright. The entry is
-    cut to the three fields a screen reads: a video session stores the
-    analysis of every line it holds (routes/video.py)."""
-    return {
+    cut to the fields a screen reads: a video session stores the
+    analysis of every line it holds (routes/video.py).
+
+    Its French beside its English, as a deck word's (plan 162): JMdict's
+    own French line where the edition has one (content/vocab_jmdict_data's
+    fr_gloss), else none, and the words list asks study/pool_glosses. An
+    affix row is one sense chosen by position (plan 151), and the
+    entry's French line is not that sense: it keeps its English, and
+    says it is an affix so no screen asks for another."""
+    match = {
         "level": None,
         "raw_id": vocab_jmdict_to_id(entry),
         "entry": {"kanji": entry.get("kanji", ""), "kana": entry.get("kana", ""),
                   "meaning": pool_gloss(entry)},
         "pool": True,
     }
+    if entry.get("affix"):
+        match["affix"] = True
+    else:
+        french = jmdict_fr_gloss(entry.get("seq"))
+        if french:
+            match["entry"]["meaning_fr"] = french
+    return match
 
 
 def _deck_match(level: str, entry: dict, raw_id: str) -> dict:

@@ -26,6 +26,7 @@ import { prefetchLookup } from '../lib/dictionaryLookup'
 import { useMining } from '../components/analysis/useMining'
 import { useFavorites } from '../hooks/useFavorites'
 import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
+import { usePoolGlosses } from '../components/analysis/poolGlosses'
 import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
 import { IntakeVideo } from '../components/analysis/IntakeVideo'
@@ -961,6 +962,10 @@ export default function AnalyzerScreen({ session }) {
   }
 
   const focused = analyzer.focused
+  // 仏訳 (plan 162): the words list's lines, in the learner's language,
+  // for the pool words of the sentence in focus and the next one. The
+  // list is the desk's.
+  const poolLines = usePoolGlosses(session, lang, wide ? [focused, sentences[focusIndex + 1]] : [])
   // A token picked on the stage; on the desk the dock follows it, so a
   // door pressed before stops being what the dock shows.
   function walkTo(i) {
@@ -1265,7 +1270,7 @@ export default function AnalyzerScreen({ session }) {
   )
   const wordsPanel = readable && (
     <section className="anl-desk__words" aria-label={t.wordsInSentence}>
-      <WordsList analysis={focused} current={pointAt === -1 ? stageToken : null} onSelect={selectRow} t={t} action={wordAction} />
+      <WordsList analysis={focused} current={pointAt === -1 ? stageToken : null} onSelect={selectRow} t={t} action={wordAction} glosses={poolLines} />
     </section>
   )
   const explainButton = (
@@ -1432,6 +1437,7 @@ export default function AnalyzerScreen({ session }) {
               number={pointAt + 1}
               mining={mining}
               t={t}
+              glosses={poolLines}
             />
             {explainButton}
           </div>

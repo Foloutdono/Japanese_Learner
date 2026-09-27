@@ -177,6 +177,15 @@ puts a dozen real questions to the configured model and checks the
 answers against the prompt's rules; run it after any edit to the prompt
 or change of model.
 
+The fifth is the pool's translations (仏訳, plan 162):
+`POOL_GLOSS_DAILY_LIMIT`, 60 calls a day (feature `pool-glosses`), each
+translating the English lines of one sentence's words past the deck into
+the learner's language. It is the one call whose answer is shared by
+everyone: `pool_gloss_cache` keeps a line per (word, language), so the
+cost falls with use rather than with learners, and a French word JMdict
+itself translates (`scripts/build_pool_fr.py`) is never bought at all.
+Only a call that buys something takes a slot.
+
 What remains uncapped is translation review (~600 calls a month at the
 ceiling) and the phrase analyzer, which are an order of magnitude
 cheaper per call and have no equivalent of the pool to fall back on.

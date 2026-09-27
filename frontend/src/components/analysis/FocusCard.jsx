@@ -13,7 +13,7 @@ import { wordGloss } from './tokens'
 // point is in focus (its numbered card pressed), the card is the point's:
 // its number, its pattern, what it does, and the words of the sentence it
 // is written on, its own parts lit.
-export function FocusCard({ analysis, token, point, number, mining, t }) {
+export function FocusCard({ analysis, token, point, number, mining, t, glosses = null }) {
   const lang = useLang()?.lang
   if (point) {
     const tokens = analysis?.tokens ?? analysis?.words ?? []
@@ -39,7 +39,7 @@ export function FocusCard({ analysis, token, point, number, mining, t }) {
   const entry = token.vocab_match?.entry
   const name = entry?.kanji || entry?.kana || token.surface
   const reading = entry?.kana && entry.kana !== name ? entry.kana : ''
-  const gloss = wordGloss(token, lang)
+  const gloss = wordGloss(token, lang, glosses)
   const row = rowsOf(analysis?.tokens ?? analysis?.words ?? []).find(r => r.tokens.includes(token))
   const written = row && row.surface !== name ? row.surface : ''
   return (
