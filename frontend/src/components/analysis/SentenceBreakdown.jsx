@@ -26,7 +26,7 @@ export function Legend({ t }) {
   )
 }
 
-// ── The rows (plan 084; numbered since plan 159) ─────────────
+// ── The rows (plan 084; numbered since plan 160) ─────────────
 // The word-by-word breakdown as the practice modes show it, laid out as
 // the analyser's (plan 134, the owner's pick A of five drawn on the
 // canvas "Tsuji Breakdown Panel"): the sentence as a ruby line with
@@ -44,7 +44,7 @@ export function Legend({ t }) {
 // `lit` is the grammar point whose words are lit (useLight): a token
 // one of its segments is written on wears the grammar line's tint.
 //
-// `numbered` (plan 159): each point of numberedPointsOf is framed on
+// `numbered` (plan 160): each point of numberedPointsOf is framed on
 // the run of words it sits on, its number at the frame's head -- the
 // number its card under the words carries -- as the analyser's
 // subtitle frames them (SubtitleLine). A word two points cover is
@@ -126,7 +126,7 @@ const isMark = tok => MARK_POS.has(tok.pos)
 
 // One row per word (rows.js's wordRowsOf): the particles, the copula
 // and the words a construction is written on are its numbered card's,
-// not rows of their own (plan 159; a row with no meaning and nothing to
+// not rows of their own (plan 160; a row with no meaning and nothing to
 // open was what 〜てはいけません's て and は drew). The word is named as
 // the dictionary names it -- 話す and its reading はなす, where the
 // sentence wrote 話し -- and means what it means in the learner's
@@ -214,7 +214,7 @@ export function WordRows({ analysis, t, onTokenClick }) {
 //               084), which retired the one-card-at-a-time 'stepper'
 //               the practice modes used to share.
 //   'rows'    — the practice modes' shape (plan 084, numbered as the
-//               analyser's since plan 159): the ruby line with each
+//               analyser's since plan 160): the ruby line with each
 //               rule framed and numbered on its words, the sentence's
 //               `translation`, one row per word, a numbered card per
 //               rule (and, once bought, what each does here -- plan
@@ -257,7 +257,7 @@ export function SentenceBreakdown({
         {/* The explanation where it was bought, under the cards it
             follows; else the button that buys it -- the one thing left
             to do, so on the desk it stands on the panel's floor rather
-            than under the last card (.bkd__foot, plan 159). */}
+            than under the last card (.bkd__foot, plan 160). */}
         {noteText
           ? <span className="prose__ai">{noteText}</span>
           : onExplain && available && (

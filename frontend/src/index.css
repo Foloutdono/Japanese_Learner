@@ -9699,7 +9699,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   color: var(--text-secondary);
 }
-/* The numbered line (plan 159): each rule framed on its words, as the
+/* The numbered line (plan 160): each rule framed on its words, as the
    analyser's subtitle frames them (.anl-subs__pt), set on the ground in
    a well of its own. The number heads its frame, inside it: at the
    frame's corner, as the subtitle has it, it stood on the next word's
@@ -9835,7 +9835,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
-/* An ending the word was written with (ます, た; plan 159): a quiet
+/* An ending the word was written with (ます, た; plan 160): a quiet
    tag after its meaning, the rule's name as the sentence wrote it. */
 .bkd-row__ending {
   margin-left: var(--sp-3);
@@ -9854,7 +9854,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     grid-template-areas: "word reading meaning lvl";
   }
 }
-/* The rules (GrammarPoints, plans 095, 134 and 159): a numbered card
+/* The rules (GrammarPoints, plans 095, 134 and 160): a numbered card
    per point under the word rows, the analyser's G2 at every width --
    the number, the pattern and the level on one line, what it does under
    them, then the words it is made of as chips and the bought line on
@@ -25049,7 +25049,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      plan 115): the wrapper adds no box, so the breakdown, the sentence
      line and the entry stand in the side's own column rhythm. */
   .desk-lookup { display: contents; }
-  /* The breakdown down the panel's height (plan 159): the rows and the
+  /* The breakdown down the panel's height (plan 160): the rows and the
      cards at its head, the button that buys the explanation on its
      floor, where the column had stood empty under a small button. The
      wrapper SideLookup hides while an entry is open stays hidden. */

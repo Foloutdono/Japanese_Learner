@@ -1448,7 +1448,7 @@ as the rail it arrives at.
   field to be left. The send is an arrow, named for a screen reader and
   on hover, because a laptop's column needs the room for the field.
   Nothing the learner typed is kept, and the mock exam never asks.
-- **A graded sentence's breakdown is the analyser's, numbered** (plan 159,
+- **A graded sentence's breakdown is the analyser's, numbered** (plan 160,
   the owner's pick A of five drawn on the canvas "Tsuji Breakdown Panel";
   every width, the phone's behind its toggle). The sentence line frames
   each rule on its words under its number, in a well of its own; under

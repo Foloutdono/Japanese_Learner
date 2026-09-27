@@ -3,11 +3,11 @@ import { grammarGloss } from './grammarGloss'
 import { numberedPointsOf, pointKey } from './grammarSpans'
 import { partsOf } from './rows'
 
-// ── The rules a sentence is built with (plan 095; numbered, 134 and 159) ──
+// ── The rules a sentence is built with (plan 095; numbered, 134 and 160) ──
 // One card per point the sentence reads by (numberedPointsOf: the
 // particles' markers with the constructions, in the sentence's order;
 // the verb's endings ride their words), the owner's G2 of the analyser
-// and, since plan 159, the practice breakdown's too: its number -- the
+// and, since plan 160, the practice breakdown's too: its number -- the
 // one the sentence line prints on the words the point sits on, so a
 // card and its place are found from either -- its pattern and level on
 // one line, what it does (the catalogue's gloss, in the learner's

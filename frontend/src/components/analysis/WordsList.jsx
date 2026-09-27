@@ -11,7 +11,7 @@ import { tokState, wordGloss } from './tokens'
 // row drawn on the ground with its edge.
 //
 // The rows are the practice breakdown's (rows.js's wordRowsOf, plan
-// 159): no word a construction is written on with no card of its own
+// 160): no word a construction is written on with no card of its own
 // (〜てはいけません's いけません read "to go"), each word named as the
 // dictionary names it -- 話す beside its reading はなす, where the list
 // printed 話し beside はなす -- and glossed in the learner's language.
