@@ -33,6 +33,9 @@ vi.mock('../lib/audio', async importOriginal => ({
   stopAmbiance: () => {},
 }))
 vi.mock('../stores/stats', () => ({ useStats: () => ({ data: null, failed: false }), refreshStats: vi.fn(), seedStats: vi.fn() }))
+// The learner's reading pace, set per test (stores/readingPace).
+const paced = vi.hoisted(() => ({ pace: 'standard' }))
+vi.mock('../stores/readingPace', () => ({ useReadingPace: () => paced.pace }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: ComprehensionRun } = await import('./ComprehensionRun')
@@ -118,6 +121,7 @@ async function through() {
 }
 
 beforeEach(() => {
+  paced.pace = 'standard'
   apiFetch.mockReset()
   apiFetch.mockImplementation(async url => {
     if (String(url).startsWith('/api/reading/comprehension/result')) return ok(RESULT)
@@ -399,5 +403,51 @@ describe('ComprehensionRun', () => {
 
     expect(root.textContent).toContain(fr.comprehensionFetchError)
     expect(root.querySelector('.empty__action')).toBeTruthy()
+  })
+})
+
+// ── The reading pace (Settings › Reading pace) ─────────────────
+// The text's reading window is the server's read_seconds at the
+// standard pace, lengthened in the browser; with no clock the text
+// stays until Done reading, which Enter still presses.
+describe('ComprehensionRun — the reading pace', () => {
+  async function reading() {
+    const screen = await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/comprehension/N5']}>
+          <Routes>
+            <Route path="/practice/comprehension/:level" element={<ComprehensionRun session={{ access_token: 'tok' }} />} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(150)
+    return screen.container
+  }
+  const label = root => root.querySelector('.timer__label').textContent
+
+  it('gives a relaxed reader half as long again', async () => {
+    paced.pace = 'relaxed'
+    const root = await reading()
+    // 60 s at the standard pace, 90 s here.
+    expect(label(root)).toBe(`${fr.timeRemaining} · 1:30`)
+  })
+
+  it('leaves the text up, with no clock, until the reader is done', async () => {
+    paced.pace = 'untimed'
+    // A window the standard clock would close within its first tick.
+    apiFetch.mockImplementation(async url => (
+      String(url).startsWith('/api/reading/comprehension') ? ok({ ...EXERCISE, read_seconds: 1 }) : ok({})
+    ))
+    const root = await reading()
+    expect(label(root)).toBe(fr.readingUntimed)
+    await settle(1300)
+    expect(root.textContent).toContain(fr.doneReading)
+    expect(root.querySelector('.mcq-list')).toBeNull()
+
+    // Enter ends the reading, once it has run a second.
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    await settle()
+    expect(root.querySelector('.mcq-list')).not.toBeNull()
   })
 })

@@ -1651,14 +1651,16 @@ as the rail it arrives at.
   The daily pace is one field: it was on two pages over one number. Under
   the card the rest is a list whose rows **draw what they are set to**
   beside their words (`RowSpecimens`: the theme's grounds, the mixer's
-  levels, the rating bar's dots), and every page draws what it sets:
+  levels, the rating bar's dots, the reading pace's clock), and every
+  page draws what it sets:
   each stop ahead with the date the service reaches it, each service as
   a line to the destination on one time axis with the learner's own pace
   of the last fortnight dashed beside them, the themes as screens at
   thumbnail size (drawn from the inks that do not flip, so the light one
   stays light under the dark theme), a language saying the gates' names
-  in itself, and the three rating bars as the bar itself (`RatingBar`'s
-  `specimen`). A choice's consequence is printed beside it before it is
+  in itself, the three rating bars as the bar itself (`RatingBar`'s
+  `specimen`), and each reading pace as the reading run's clock at the
+  length it gives a short sentence (`ReadingTimer`). A choice's consequence is printed beside it before it is
   made, never only once it is chosen. A selection in Settings is a gold
   ring, the pass's metal. Sign out is printed once, on the account page,
   whose second half is the learner's data.

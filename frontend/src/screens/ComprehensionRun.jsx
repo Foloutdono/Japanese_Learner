@@ -28,6 +28,9 @@ import { CHOICE_KEY_INDEX, LETTER_KEY_INDEX } from '../domain/choiceKeys'
 import { quotedFragments, sentenceFor } from '../domain/quotedFragments'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
+import { paceFactor } from '../domain/readingPace'
+import { useReadingPace } from '../stores/readingPace'
+import { ReadingTimer } from '../components/reading/ReadingPieces'
 import { CheckIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
 
 const RIKAI_COLOR = 'var(--line-rikai)'
@@ -85,7 +88,14 @@ export default function ComprehensionRun({ session }) {
 
   const [stage, setStage]       = useState('loading')
   const [exercise, setExercise] = useState(null)   // { text, breakdown, questions, read_seconds }
+  // Counted in the server's seconds (read_seconds, the standard pace's):
+  // the learner's reading pace (domain/readingPace.js) runs the clock
+  // 1/factor as fast and scales what the timer prints. A null factor is
+  // no clock: the text stays until Done reading.
   const [timeLeft, setTimeLeft] = useState(0)
+  const factor = paceFactor(useReadingPace())
+  // When this reading began, for the Enter key's guard below.
+  const readFrom = useRef(0)
   // Re-reading the text from the questions pauses the clock: the
   // reading window was for the first read, and coming back to check
   // a detail is what the paper allows.
@@ -170,20 +180,23 @@ export default function ComprehensionRun({ session }) {
   // Reading countdown — the first read only.
   useEffect(() => {
     if (stage !== 'reading' || rereading) return
+    readFrom.current = Date.now()
+    if (factor == null) return
 
+    const tick = 1 / factor
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 0.1) {
+        if (prev <= tick / 10) {
           clearTimer()
           setStage('questions')
           return 0
         }
-        return prev - 1
+        return prev - tick
       })
     }, 1000)
 
     return clearTimer
-  }, [stage, rereading])
+  }, [stage, rereading, factor])
 
   function clearTimer() {
     if (timerRef.current) {
@@ -307,11 +320,12 @@ export default function ComprehensionRun({ session }) {
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName) || target?.isContentEditable) return
       const button = target?.closest?.('button')
       if (stage === 'reading') {
-        // Only once the clock has run a tick: the train door's any-key
-        // skip (components/station/TrainDoor) must not also end the
-        // reading. A focused button answers Enter itself.
+        // Only once the reading has run a second (a tick of the clock,
+        // when there is one): the train door's any-key skip
+        // (components/station/TrainDoor) must not also end the reading.
+        // A focused button answers Enter itself.
         if (e.key !== 'Enter' || button) return
-        if (!rereading && timeLeft >= exercise?.read_seconds) return
+        if (!rereading && Date.now() - readFrom.current < 1000) return
         e.preventDefault()
         finishReading()
         return
@@ -526,15 +540,17 @@ export default function ComprehensionRun({ session }) {
 
       {stage === 'reading' && exercise && (
         <>
-          {!rereading && (
+          {/* No clock: the reading run's own word for it, in its place. */}
+          {!rereading && factor == null && <ReadingTimer untimed t={t} />}
+          {!rereading && factor != null && (
             <div className="timer">
               <div className="timer__bar" aria-hidden="true">
                 <span
-                  className={`timer__fill${timeLeft < 60 ? ' timer__fill--low' : ''}`}
+                  className={`timer__fill${timeLeft * factor < 60 ? ' timer__fill--low' : ''}`}
                   style={{ width: `${(timeLeft / exercise.read_seconds) * 100}%` }}
                 />
               </div>
-              <span className="timer__label" role="timer">{t.timeRemaining} · {formatTime(timeLeft)}</span>
+              <span className="timer__label" role="timer">{t.timeRemaining} · {formatTime(timeLeft * factor)}</span>
             </div>
           )}
 

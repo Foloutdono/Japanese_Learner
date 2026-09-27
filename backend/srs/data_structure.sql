@@ -233,7 +233,14 @@ CREATE TABLE user_profiles (
     -- the time its guide ended ({} = none seen). Accounts that boarded
     -- before the ride existed are stamped by scripts/backfill_first_ride.py.
     tutorial_at TIMESTAMPTZ,
-    guided JSONB NOT NULL DEFAULT '{}'::jsonb
+    guided JSONB NOT NULL DEFAULT '{}'::jsonb,
+    -- How long the reading exercises leave the text up: 'standard',
+    -- 'relaxed' (x1.5), 'slow' (x2) or 'untimed' -- for a slow or a
+    -- dyslexic reader. NULL = never chosen, which reads as standard.
+    -- The clock runs in the browser, which scales the server's
+    -- standard figures; see routes/profile.py's READING_PACES and
+    -- frontend/src/domain/readingPace.js.
+    reading_pace TEXT
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came

@@ -19153,6 +19153,18 @@ a.slip__act { text-decoration: none; }
 .stg-dots { flex: none; display: inline-flex; align-items: center; gap: var(--sp-1); }
 .stg-dots__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--rating-color, var(--text-secondary)); }
 .stg-dots__dot--best { background: var(--accent2); }
+/* The reading pace: the run's hairline at the pace's length, whole
+   when nothing is timed. */
+.stg-pace {
+  flex: none;
+  display: inline-flex;
+  width: var(--sp-7);
+  height: var(--sp-1);
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+  overflow: hidden;
+}
+.stg-pace__fill { display: block; height: 100%; background: var(--warning); }
 
 /* A row of slips (SettingsPage's SlipRow): stacked here, at the page's
    own gap; the desk stands a row's two side by side where the page is
@@ -19378,9 +19390,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 /* ── Notation: the three bars themselves (plan 139) ──
    Each scale is offered as the rating bar it is (RatingBar's specimen),
    inside the radio that picks it. The specimen takes no pointer, so the
-   radio is what the hover and the press reach. */
-.grades { display: flex; flex-direction: column; gap: var(--sp-3); }
-.grade {
+   radio is what the hover and the press reach. The reading pace's four
+   clocks (ReadingPacePage) stand in the same cards. */
+.grades,
+.paces { display: flex; flex-direction: column; gap: var(--sp-3); }
+.grade,
+.pace {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
@@ -19394,15 +19409,27 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   text-align: left;
 }
 .grade:hover,
-.grade:focus-visible { filter: none; border-color: color-mix(in srgb, var(--accent2) 55%, var(--surface-line)); }
+.grade:focus-visible,
+.pace:hover,
+.pace:focus-visible { filter: none; border-color: color-mix(in srgb, var(--accent2) 55%, var(--surface-line)); }
 .grade--on,
 .grade--on:hover,
-.grade--on:focus-visible {
+.grade--on:focus-visible,
+.pace--on,
+.pace--on:hover,
+.pace--on:focus-visible {
   border-color: var(--accent2);
   box-shadow: inset 0 0 0 1px var(--accent2);
   background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
 }
-.grade__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
+.grade__name,
+.pace__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
+/* A pace's name over the run's own clock (.timer) at the length it
+   gives a short sentence; the clock takes no pointer, like the bars. */
+.pace__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.pace__desc { font-size: var(--fs-caption); color: var(--text-secondary); text-align: right; }
+.pace__timer { display: block; pointer-events: none; }
+.pace__timer .timer__fill { transition: none; }
 .rating-bar.rating-bar--specimen { display: block; pointer-events: none; }
 .rating-bar--specimen .rating-bar__buttons { max-width: none; margin: 0; gap: var(--sp-2); }
 .rating-bar--specimen .rating-bar__btn { min-height: var(--sp-8); }

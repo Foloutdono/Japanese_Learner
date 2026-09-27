@@ -16,8 +16,21 @@ import { runKey } from '../../lib/keyGuards'
 // with the run; these are the drawing.
 
 /** The clock: a hairline that empties, and the seconds — or, once the
- *  sentence is covered, the instruction to write from memory. */
-export function ReadingTimer({ timeLeft, total, covered, t }) {
+ *  sentence is covered, the instruction to write from memory. At the
+ *  untimed reading pace (domain/readingPace.js) there is no clock: the
+ *  hairline stays full and says so, in the clock's place, so the card
+ *  under it stands where it always does. */
+export function ReadingTimer({ timeLeft, total, covered, t, untimed = false }) {
+  if (untimed) {
+    return (
+      <div className="timer">
+        <div className="timer__bar" aria-hidden="true">
+          <span className="timer__fill" style={{ width: '100%' }} />
+        </div>
+        <span className="timer__label">{t.readingUntimed}</span>
+      </div>
+    )
+  }
   return (
     <div className="timer">
       <div className="timer__bar" aria-hidden="true">
