@@ -8601,6 +8601,24 @@ textarea:focus-visible {
 /* Inside a card (the gate, waiting), at the card's rhythm. */
 .loading--tight { padding: var(--sp-4); }
 
+/* ── 辻 — the mark (plan 158) ─────────────────────────────────
+   components/ui/Mark.jsx: the icon's drawing wherever the app names
+   itself. It takes the text glyph's box -- 1em square, its foot at the
+   em box's, 0.12em under the baseline -- so the caller's font-size
+   still sizes it and its line still places it. The ink is the
+   caller's; the road is the pass's metal in every theme and on every
+   ground, the sumi chrome's too: it is the mark's own material, not a
+   line's pigment (DESIGN.md, Colour). */
+.mark {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.12em;
+  overflow: visible;
+}
+.mark__ink { fill: currentcolor; }
+.mark__road { fill: var(--accent2); }
+
 /* Plan 049 -- tracks the same column as the card below it (--card-w,
    defined on :root, see its own comment there) rather than its own
    480px literal. Before this the screen stacked three different
@@ -11217,10 +11235,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   .rating-bar__buttons--2 .rating-bar__btn { flex: 1 1 0; }
 }
 
+/* The mark (plan 158), in the page's ink: it wore --accent here, which
+   is 仮名's pigment, on a screen that is no section. */
 .app-loading__sign {
-  font-family: var(--font-jp);
   font-size: 4rem;
-  color: var(--accent);
+  color: var(--text-primary);
   line-height: 1;
 }
 
@@ -19475,12 +19494,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   height: 44px;
 }
 .auth-header { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+/* The mark (plan 158) at the name rung. No tracking: it was the
+   glyph's, and on a drawing text-indent only pushes it off centre. */
 .auth-header__glyph {
   font-family: var(--font-serif);
   font-weight: 700;
   font-size: var(--fs-display);
-  letter-spacing: var(--tr-name);
-  text-indent: var(--tr-name);
   line-height: 1.1;
 }
 .auth-header__title {
@@ -20132,7 +20151,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 
 /* ── the notification, as the app would send it ── */
 .brd-notif { display: flex; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-5); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); box-shadow: var(--elev-hang); animation: brd-drop 700ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
-.brd-notif__app { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; border-radius: var(--r-card); background: var(--bg-panel); color: var(--accent2); font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); }
+/* The app's icon as a notification prints it: the mark (plan 158) on the sumi, in the icon's own inks. */
+.brd-notif__app { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; border-radius: var(--r-card); background: var(--bg-panel); color: var(--text-on-panel); font-size: var(--fs-title); }
 .brd-notif__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
 .brd-notif__head { display: flex; justify-content: space-between; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .brd-notif__title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }

@@ -23,13 +23,26 @@ that screen.
 **The app is called 辻 — Tsuji.** A 辻 is a crossroads, which is exactly what
 the gate hall is: the point the five 改札口 meet. The name is also the mark —
 one glyph, five strokes, a 十 inside 辶 drawing the intersection it names — so
-the icon (`frontend/brand/icon.html`), the masthead (`appTitle`) and the plate
-at the origin station (辻駅, TJ, つじ) are one thing rather than three. It is a
-国字, a character invented in Japan and absent from Chinese dictionaries, with
-no on'yomi at all — a fair thing for an app about Japanese writing to be
-called. `Tsuji` is the Latin half, and it carries the places the OS and the
+the icon, the masthead and the plate at the origin station (辻駅, TJ, つじ) are
+one thing rather than three. It is a 国字, a character invented in Japan and
+absent from Chinese dictionaries, with no on'yomi at all — a fair thing for an
+app about Japanese writing to be called. `Tsuji` is the Latin half, and it carries the places the OS and the
 stores print a name: the PWA `short_name`, the store listing, the bundle id
 `app.tsuji`, the notification header.
+
+**The mark is drawn, not set** (plan 158). It is 辻 in Noto Serif JP Black
+with one dot on 辶 — the five strokes above, a form the font cannot set (it
+draws the two-dot 辻 of JIS2004), so the mark is cut from the font's own
+outlines, the 十 of 辻 and the 辶 of 込 (`frontend/scripts/build-mark.py`).
+辶's sweep — the road the radical stands for — is in the pass's metal
+(`--accent2`); the rest is the ground's ink, paper on the icon's sumi. It
+replaced a serif 辻 over a gold underline: the underline became the
+character's own stroke. One drawing, `components/ui/Mark.jsx`, wherever the
+app names itself — the icon and the splash (`frontend/brand/`), the rail's
+masthead, the Welcome and the sign-in, the boot screen, a notification's
+icon — set at 1em where the text glyph stood. Where 辻 is a *name* rather than
+the mark (the document title, 辻駅's plate, the dictionary's entry for 辻,
+which teaches its six strokes) it stays type, in the font's two-dot form.
 
 The app is a Japanese railway station. Learning is a journey: sections are
 **lines** (路線), screens are **stations**, choices are **platforms** (のりば),
@@ -201,6 +214,11 @@ The pigment appears as:
 It is never a card background, and it is **never on chrome**. The top bar
 carries no line colour at all: it is sumi ink and two registers of text. The
 frame stays quiet so the content can speak.
+
+**The mark carries its own metal.** The road in the rail's masthead is gold on
+the chrome, and it is not a line's pigment there: it is the mark's material,
+the pass's `--accent2`, drawn the same on every ground (plan 158). It licenses
+nothing else — any other part of the chrome stays sumi and its two inks.
 
 **One standing exception, decided deliberately**: the **primary button** is a
 filled use of a line pigment — see *The primary button* under Surfaces. It

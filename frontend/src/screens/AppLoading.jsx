@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLang } from '../LangContext'
 import { Loading } from '../components/ui/Loading'
+import { Mark } from '../components/ui/Mark'
 import { hideSplash } from '../lib/platform'
 import { DeskMast } from '../components/chrome/DeskMast'
 import { PaperWait } from '../components/boarding/PaperWait'
@@ -63,7 +64,7 @@ export default function AppLoading({ wakesServer = false, wakeAfterMs = WAKE_AFT
 
   return (
     <div className="app-loading">
-      <div className="app-loading__sign" lang="ja" aria-hidden="true">{t.appTitle}</div>
+      <div className="app-loading__sign" aria-hidden="true"><Mark /></div>
       <Loading />
       {/* Always in the tree, so the line lands in a live region that
           existed before it had anything to say, and the dots do not
