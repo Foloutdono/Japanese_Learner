@@ -58,7 +58,7 @@ vi.mock('./lib/api', () => ({
 }))
 vi.mock('./components/analysis/useMining', async o => ({
   ...(await o()),
-  useMining: () => ({ decks: [], mineApp: vi.fn(), mineCloze: vi.fn() }),
+  useMining: () => ({ decks: [], mineApp: vi.fn(), mineCloze: vi.fn(), targetFor: () => null, decksFor: () => [], ensureDeck: vi.fn() }),
 }))
 vi.mock('./components/video/VideoPlayer', () => ({ VideoPlayer: () => <div /> }))
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn(), speakJapanese: vi.fn() }))
@@ -189,6 +189,53 @@ describe('the analyser on the desk (plan 134)', () => {
     press('ArrowRight')
     await settle()
     expect(shown()).toBe('待つ')
+  })
+
+  // The entry's ＋ opened its menu inside the band's top panel, whose
+  // overflow rounds the stripe into its corners: the menu was cut to
+  // its top edge, a sliver under the plate with no row to press. And
+  // the analyser held no shelf, so the menu offered the deck alone.
+  it('hangs the entry\'s ＋ menu whole under the band, the favourites beside the deck', async () => {
+    ENTRIES.駅 = { ...entry('駅', 'えき', 'station'), app_card: { source: 'vocab', level: 'N5', raw_id: 'vocab_N5_駅_えき' } }
+    try {
+      await mount()
+      await analyze()
+      await expect.poll(shown).toBe('駅')
+      const plus = $('.anl-desk__entry .dict-plate__add-btn')
+      plus.click()
+      await settle(30)
+      const rows = $$('.dict-add-menu__row')
+      expect(rows.map(r => r.getAttribute('role'))).toEqual(['menuitemcheckbox', 'menuitem'])
+      // Every row stands where it is drawn and takes the press, past the
+      // top panel's foot.
+      for (const row of rows) {
+        const r = row.getBoundingClientRect()
+        expect(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest('.dict-add-menu__row')).toBe(row)
+      }
+      const top = $('.anl-desk__entry .dict-entry__top').getBoundingClientRect()
+      expect(rows.at(-1).getBoundingClientRect().bottom).toBeGreaterThan(top.bottom)
+      // Hung from the ＋, flush with its trailing edge.
+      const p = plus.getBoundingClientRect()
+      const menu = $('.dict-add-menu').getBoundingClientRect()
+      expect(Math.abs(menu.right - p.right)).toBeLessThan(1)
+      expect(menu.top).toBeGreaterThanOrEqual(p.bottom)
+
+      // Kept: the shelf's one write, and the ＋ wears the ring.
+      rows[0].click()
+      await expect.poll(() => apiJson.mock.calls.some(([u, , init]) => u === '/api/dictionary/favorites' && init?.method === 'PUT')).toBe(true)
+      await expect.poll(() => plus.classList.contains('dict-plate__add-btn--kept')).toBe(true)
+
+      // The deck's row: no deck is remembered, so the picker.
+      await expect.poll(() => plus.disabled).toBe(false)
+      plus.click()
+      await settle(30)
+      $$('.dict-add-menu__row')[1].click()
+      await settle(60)
+      expect($('.dict-add-menu')).toBeNull()
+      expect($('[role="dialog"] .picker')).not.toBeNull()
+    } finally {
+      ENTRIES.駅 = entry('駅', 'えき', 'station')
+    }
   })
 
   it('lists the sentence\'s words, and puts one in focus from the list', async () => {

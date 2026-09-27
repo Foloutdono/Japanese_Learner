@@ -892,7 +892,9 @@ describe('the shelf', () => {
   const openMenu = async screen => {
     await expect.poll(() => plusOf(screen).disabled).toBe(false)
     plusOf(screen).click()
-    const row = () => screen.container.querySelector('.dict-dock .dict-add-menu__row[role="menuitemcheckbox"]')
+    // The menu is portaled out of the plate (AddMenu): it is found in
+    // the document, not under the dock.
+    const row = () => document.querySelector('.dict-add-menu__row[role="menuitemcheckbox"]')
     await expect.poll(row).not.toBeNull()
     return row()
   }

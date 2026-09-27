@@ -22,6 +22,7 @@ import { Dots } from '../components/ui/Loading'
 import { DictionaryLookupSheet, DictionaryLookupBody } from '../components/dictionary/DictionaryDetail'
 import { grammarLookup, lookupKey, tokenLookup } from '../components/analysis/lookup'
 import { useMining } from '../components/analysis/useMining'
+import { useFavorites } from '../hooks/useFavorites'
 import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
 import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
@@ -110,6 +111,10 @@ const FURIGANA_LABEL = { all: 'furiganaAll', unknown: 'furiganaUnknown', none: '
 export default function AnalyzerScreen({ session }) {
   const { t } = useLang()
   const mining = useMining(session)
+  // The dictionary's shelf (plan 093), so the entry a word or a point
+  // opens here can be kept as it can in the dictionary: its ＋ offers
+  // the favourites beside the deck.
+  const favorites = useFavorites(session)
   const analyzer = useAnalyzerSession(session)
   const playerRef = useRef(null)
 
@@ -1369,6 +1374,7 @@ export default function AnalyzerScreen({ session }) {
             exact={!lookup}
             session={session}
             mining={mining}
+            favorites={favorites}
             onExit={lookup ? closeLookup : undefined}
             band
           />
@@ -1646,6 +1652,7 @@ export default function AnalyzerScreen({ session }) {
           {...lookup}
           session={session}
           mining={mining}
+          favorites={favorites}
           onClose={closeLookup}
         />
       )}

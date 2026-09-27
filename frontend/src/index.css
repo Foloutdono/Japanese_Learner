@@ -21203,16 +21203,19 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
    star in the menu row is the learner's mark, so it wears no line
    pigment (DESIGN.md, "Three families"): the ambient ink, outlined
    until kept and filled once it is. */
-.dict-plate__add { position: relative; display: inline-flex; }
+.dict-plate__add { display: inline-flex; }
 .dict-plate__add-btn--kept { border-color: var(--line-color, var(--accent2)); }
 /* The menu hangs under the ＋, flush with its trailing edge, on the
-   app's one card surface; it sits inside the sticky plate, which is
-   already above the body it hangs over. */
+   app's one card surface. It is portaled out of the plate and placed
+   from the ＋'s box (DictionaryDetail's AddMenu), because a panel the
+   plate stands in may clip -- the desk analyser's band cut it to a
+   sliver. Above every dictionary shell (200-220) it may be opened
+   from, under a sheet's scrim (230): the deck picker a row opens
+   covers it. Over the ＋ where the window's foot is too near. */
 .dict-add-menu {
-  position: absolute;
-  top: calc(100% + var(--sp-2));
-  right: 0;
-  z-index: 1;
+  position: fixed;
+  z-index: 225;
+  margin-top: var(--sp-2);
   display: flex;
   flex-direction: column;
   min-width: max-content;
@@ -21221,6 +21224,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
 }
+.dict-add-menu[data-placement="above"] { margin-top: calc(-1 * var(--sp-2)); }
 .dict-add-menu__row {
   display: flex;
   align-items: center;

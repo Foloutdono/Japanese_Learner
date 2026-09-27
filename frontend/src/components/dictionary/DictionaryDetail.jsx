@@ -259,6 +259,101 @@ export function TagChip({ tag }) {
   )
 }
 
+// ── The ＋'s menu, out of the plate's panel ──
+// Portaled to document.body at fixed coordinates taken from the ＋, as
+// TagChip's tooltip is and for the same reason: a plate stands in
+// panels that clip. The desk analyser's band (plan 134) sets it in a
+// top panel whose `overflow: hidden` rounds the stripe and the record
+// into its corners, and the menu that hung under the ＋ inside it was
+// cut to its top edge -- a sliver under the plate, with no row to
+// press. Out here it hangs whole wherever the plate stands, under the
+// ＋ with their trailing edges flush (over it where the window's foot
+// is too near), and follows it while anything under it scrolls.
+//
+// Out of the plate's DOM it is also out of its Tab order and out of a
+// lookup sheet's trap, so it takes the keyboard itself, as a menu
+// does: the focus on its first row when it opens, ↑/↓/Home/End between
+// the rows, and Escape or Tab closing it with the focus back on the ＋.
+// Its keys are taken in the capture phase and kept, so an Escape here
+// closes the menu alone -- not the sheet, nor the docked entry's doors
+// -- and the analyser's ↑/↓ do not walk the passage behind it. A press
+// anywhere but the menu or the ＋ closes it; the ＋ toggles it itself.
+function AddMenu({ anchor, label, onClose, children }) {
+  const ref = useRef(null)
+  const onCloseRef = useRef(onClose)
+  useLayoutEffect(() => { onCloseRef.current = onClose })
+
+  // Placed on the node itself, before the first paint and on every
+  // scroll, rather than through state: a render per scroll event is
+  // not what a menu hanging still needs, and the focus below must find
+  // it where it will be seen. From the top-left corner only: the
+  // viewport's far edges move with a scrollbar, which the measure of
+  // them does not always count the way the fixed box does.
+  useLayoutEffect(() => {
+    function place() {
+      const menu = ref.current
+      const box = anchor.current?.getBoundingClientRect()
+      if (!menu || !box) return
+      const tall = menu.offsetHeight
+      const above = box.bottom + tall > window.innerHeight && box.top > tall
+      menu.dataset.placement = above ? 'above' : 'below'
+      menu.style.top = `${above ? box.top - tall : box.bottom}px`
+      menu.style.left = `${box.right - menu.offsetWidth}px`
+    }
+    place()
+    window.addEventListener('resize', place)
+    window.addEventListener('scroll', place, true)
+    return () => {
+      window.removeEventListener('resize', place)
+      window.removeEventListener('scroll', place, true)
+    }
+  }, [anchor])
+
+  useEffect(() => {
+    const rows = () => [...(ref.current?.querySelectorAll('[role^="menuitem"]') ?? [])]
+    rows()[0]?.focus({ preventScroll: true })
+    function back() {
+      onCloseRef.current()
+      anchor.current?.querySelector('button')?.focus({ preventScroll: true })
+    }
+    function onKey(e) {
+      if (e.key === 'Escape' || e.key === 'Tab') {
+        e.preventDefault()
+        e.stopPropagation()
+        back()
+        return
+      }
+      const list = rows()
+      const i = list.indexOf(document.activeElement)
+      const to = e.key === 'ArrowDown' ? (i + 1) % list.length
+        : e.key === 'ArrowUp' ? (i <= 0 ? list.length - 1 : i - 1)
+          : e.key === 'Home' ? 0
+            : e.key === 'End' ? list.length - 1
+              : null
+      if (to === null || list.length === 0) return
+      e.preventDefault()
+      e.stopPropagation()
+      list[to].focus()
+    }
+    function onDown(e) {
+      if (!ref.current?.contains(e.target) && !anchor.current?.contains(e.target)) onCloseRef.current()
+    }
+    window.addEventListener('keydown', onKey, true)
+    document.addEventListener('pointerdown', onDown)
+    return () => {
+      window.removeEventListener('keydown', onKey, true)
+      document.removeEventListener('pointerdown', onDown)
+    }
+  }, [anchor])
+
+  return createPortal(
+    <div ref={ref} className="dict-add-menu" role="menu" aria-label={label}>
+      {children}
+    </div>,
+    document.body,
+  )
+}
+
 // The stroke-order drawing on its sheet of washi, plus its own failure
 // fallback. Owns `failed` itself and is remounted (via the
 // `key={entry.svg_url}` its caller passes) whenever the entry changes,
@@ -855,22 +950,19 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
       kind: appCard.source,
     }),
   })
-  // The menu: open under the ＋, closed by a choice, a press outside or
-  // Escape. Keyed to the entry so it never survives onto the next.
+  // The menu: open under the ＋ (AddMenu), closed by a choice, a press
+  // outside or Escape. Keyed to the entry so it never survives onto the
+  // next. A choice hands the focus back to the ＋ before it acts, so
+  // the deck picker it may open returns it there when it closes.
   const [menuFor, setMenuFor] = useState(null)
   const menuOpen = menuFor === entryKey(entry)
   const addRef = useRef(null)
-  useEffect(() => {
-    if (!menuOpen) return
-    function onDown(e) { if (!addRef.current?.contains(e.target)) setMenuFor(null) }
-    function onKey(e) { if (e.key === 'Escape') { e.stopPropagation(); setMenuFor(null) } }
-    document.addEventListener('pointerdown', onDown)
-    window.addEventListener('keydown', onKey, true)
-    return () => {
-      document.removeEventListener('pointerdown', onDown)
-      window.removeEventListener('keydown', onKey, true)
-    }
-  }, [menuOpen])
+  const closeMenu = useCallback(() => setMenuFor(null), [])
+  function choose(e, act) {
+    addRef.current?.querySelector('button')?.focus({ preventScroll: true })
+    setMenuFor(null)
+    act(e)
+  }
   async function toggleFavorite() {
     setFavRefusal(null)
     setFavPending(true)
@@ -1029,14 +1121,14 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                   <PlusIcon size={16} />
                 </button>
                 {menuOpen && (
-                  <div className="dict-add-menu" role="menu" aria-label={t.dictAdd}>
+                  <AddMenu anchor={addRef} label={t.dictAdd} onClose={closeMenu}>
                     {favorites && (
                       <button
                         type="button"
                         role="menuitemcheckbox"
                         aria-checked={kept}
                         className="dict-add-menu__row"
-                        onClick={() => { setMenuFor(null); toggleFavorite() }}
+                        onClick={e => choose(e, toggleFavorite)}
                       >
                         <StarIcon size={14} filled={kept} />
                         {kept ? t.dictFavoriteRemove : t.dictFavoriteAdd}
@@ -1047,13 +1139,13 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                         type="button"
                         role="menuitem"
                         className="dict-add-menu__row"
-                        onClick={e => { setMenuFor(null); mine.press(e) }}
+                        onClick={e => choose(e, mine.press)}
                       >
                         <PlusIcon size={14} />
                         {mine.addedOnce ? t.addToAnotherDeck : t.dictAddToDeck}
                       </button>
                     )}
-                  </div>
+                  </AddMenu>
                 )}
               </span>
             )}
