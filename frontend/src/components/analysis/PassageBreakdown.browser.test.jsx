@@ -67,7 +67,8 @@ describe('PassageBreakdown', () => {
     // The ruby line replaces the plain sentence rather than repeating it.
     expect(first.querySelector('.bkd-line')).toBeTruthy()
     expect(first.querySelector('.bkd-passage__text .prose__jp')).toBeNull()
-    expect(first.querySelectorAll('.bkd-row')).toHaveLength(3)
+    // A row per word: 駅 and 会いました; で is its card's (plan 159).
+    expect(first.querySelectorAll('.bkd-row')).toHaveLength(2)
     expect(first.querySelector('.bkd__en').textContent).toBe('I met at the station.')
     expect(first.querySelector('.prose__ai').textContent).toBe('で marks the place.')
     expect(first.querySelector('.bkd-passage__chev').getAttribute('aria-expanded')).toBe('true')
@@ -88,10 +89,10 @@ describe('PassageBreakdown', () => {
     expect(items()[1].classList.contains('bkd-passage__item--open')).toBe(true)
     expect(items()[0].querySelector('.bkd-rows')).toBeNull()
     expect(items()[0].querySelector('.prose__jp').textContent).toBe('駅で会いました。')
-    // 新しい + です is one word to a learner (rows.js folds the polite
-    // ending onto the adjective), so three rows, not four.
+    // A row per word: the particle and the copula are no words of
+    // their own (plan 159).
     expect([...items()[1].querySelectorAll('.bkd-row__word')].map(el => el.textContent))
-      .toEqual(['電車', 'は', '新しい', 'です']) // the copula is a row of its own (plan 095)
+      .toEqual(['電車', '新しい'])
     // A sentence with nothing worth noting prints no note line.
     expect(items()[1].querySelector('.prose__ai')).toBeNull()
   })
@@ -136,11 +137,11 @@ describe('PassageBreakdown', () => {
   it("a construction's door opens the point and does not close the sentence", async () => {
     const onGrammarOpen = vi.fn()
     await render(<Host sentences={WITH_GRAMMAR} onGrammarOpen={onGrammarOpen} />)
-    // Plan 096: the row is the door. Pressed here on the pattern,
-    // which is a span inside it -- the click reaches the row.
+    // Plan 096: the card is the door. Pressed here on the pattern,
+    // which is a span inside it -- the click reaches the card.
     const door = items()[0].querySelector('.bkd-passage__body .bkd-point')
     expect(door.tagName).toBe('BUTTON')
-    door.querySelector('.bkd-point__door').click()
+    door.querySelector('.bkd-point__pattern').click()
     await settle()
     expect(onGrammarOpen).toHaveBeenCalledTimes(1)
     expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_〜ました')
@@ -165,7 +166,7 @@ describe('PassageBreakdown', () => {
     chip.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
     await settle()
     expect(lit()).toEqual(['会いました'])
-    chip.querySelector('.bkd-point__door').click()
+    chip.querySelector('.bkd-point__pattern').click()
     chip.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))
     await settle()
     expect(onGrammarOpen).toHaveBeenCalledTimes(1)
@@ -183,10 +184,8 @@ describe('PassageBreakdown', () => {
   it('with nowhere to open, the construction is a row and not a control', async () => {
     await render(<Host sentences={WITH_GRAMMAR} />)
     const chip = items()[0].querySelector('.bkd-passage__body .bkd-point')
-    // Plan 096: the row is the door, so with no door it is a <div>
-    // and the pattern wears no dotted rule.
+    // Plan 096: the card is the door, so with no door it is a <div>.
     expect(chip.tagName).toBe('DIV')
-    expect(chip.querySelector('.bkd-point__door')).toBeNull()
     expect(chip.querySelector('button')).toBeNull()
   })
 

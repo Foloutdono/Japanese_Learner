@@ -6896,3 +6896,46 @@ pushed while this was open.
 | # | What | Status |
 |---|---|---|
 | 153 | **The deck's own cards**, each candidate plan 151's word reviewers raised checked against JMdict 2026-07-15 (the `exact_reading`/`term_only` match in `vocab_meanings.json` at f691b87a, and the pool) and the two JLPT lists of `datas/vocab/sources`. **Another reading's gloss**, put right in place (a gloss is not in the id): 半分 "half minute" → *half* (はんぷん's), 盛り さかり "helping, serving" → *peak, full bloom, prime* (もり's), 目下 めした "at present" → *subordinate* (もっか's), 札 さつ "token, label, ticket, charm" → *banknote* (ふだ's), 人気 にんき "sign of life" → *popularity* (ひとけ's), 羽 はね "counter for birds" → *feather, wing* (わ's), 否 いや "no, the noes" → *no, nay* ("the noes" is 否【ひ】's), 寒気 かんき "cold, frost, chill" → *cold, cold air* ("chill" is さむけ's). **Misleading**: 相手 gave sense 1 of 3 where the sentences use *the other party, opponent*; 件 くだん led with *example, precedent*, which JMdict no longer lists; 疎か おろそか was glossed as a noun and is a na-adjective (its French said *négligence* twice); 杯 さかずき was a *wine cup*, and is a sake cup. **Readings put right, the old ids deleted rather than moved** (`RETIRED`, the owner's call: the corrected card starts new for every learner; `migrate_vocab_ids --yes` drops the old schedules, deck rows, pins and favourites and keeps `review_log`): no reading of the form, the card taking the reading of the word its gloss always was — 割 かつ → わり (the N1 list's 〜割, "rate, ten percent"; the gloss was 割る's), 共 きょう → とも (the gloss was 共【とも】's word for word), 愛憎 あいにく → あいぞう (あいにく is 生憎), 音色 おんいろ → ねいろ, 復旧 ふくきゅう → ふっきゅう; a rare JMdict reading on the everyday one's gloss — 地形 じぎょう → ちけい, 統治 とうじ → とうち, 施行 しぎょう → しこう; 下す おろす → 下ろす, JMdict's irregular okurigana (plan 112's 終る), since 下す is くだす, and still 下ろす's spelling (`FOLDED_ONLY`, the fold with no rows behind it, so the N3 list's 下す finds its card); 否 いいえ (N1), whose word is the N5 いいえ, plan 112's 此れ beside これ (JMdict gives 否 no reading いいえ). **Words the deck lacked**, each placed by the lowest level a taught sentence or a JLPT list gives it: 時 じ "o'clock", 年 ねん, 月 がつ and 杯 はい at N5 (the N5 list's 〜時, 〜年, 〜月, 〜杯; 41, 16 and 6 uses for the first three), 寒気 さむけ "chill" at N4 (the N4 〜がする example; the N1 list), 件 けん "matter" at N3 (N3 list), 下 もと "under (guidance)" at N2 (the five 〜のもとで sentences), 社 しゃ at N2 (the N2 list's 〜社; 一社 at N1), 故 ゆえ, 目下 もっか and 札 ふだ at N1 (N1 list). **Grammar, not a card**: 〜はおろか's おろか and 〜や否や's いな, in neither list (`IGNORED_LEMMAS`). **Not a deck word**: 下す read くだす, in no JLPT list and no taught sentence; its "frequent, no card" rank 92 was every ください, which the subtitles cut 下さ + い and UniDic reads 下す alone. `placement_report.FRAGMENTS` credits くださ, 下さ and もら to 下さる and もらう (くださる 5,824th → 68th, もらう 237th → 97th, 盛る 166th → 5,968th), and 下す ranks 16,408th; the pool glosses it (*to make a decision; to hand down a verdict*) wherever a sentence has it. **In context**: `reading_context` reads a lone 盛り さかり where the sentence says peak (〜が盛りだ, 今を盛りと, 盛りを過ぎる, 盛りがつく, 花／夏／人生の盛り), so JMdict's own example on the card, 桜の花は４月が盛りだ, no longer reads もり; ご飯の盛り and 盛りがいい stay もり. **Kana sentences the tokenizer cut into other words** (plan 105 named two): りゅうがく took 流 "current", しゅくだい 対 "versus" or 砕く "to smash", ほうがせが held がせ "fake"; 宿 and 留 are N3 kanji, so each sentence keeps its point and says it in words the tokenizer reads (来年、日本の大学で勉強することにしました, 今日は勉強しなくちゃいけない, しごとはまだおわっていません, わたしよりあにのほうが、せが高いです); `check_grammar` clean. **Scripts**: `prune_pool_overlap --yes` (19 rows; 割 read わり has none, JMdict files it under 割り, so its `curated_senses` row is the 割::かつ row's, which held 割【わり】's senses all along), `audit_vocab_deck --write-snapshot`, `placement_report --rebuild-order` and `--write-lists`. **Measured**: 8,045 → 8,055 cards; absent lemmas 178 → 161, occurrences 419 → 315 (ratchets lowered) | DONE (2026-09-27) |
+
+## Plan 159 — 番号, the breakdown numbered as the analyser's (2026-09-27)
+
+Numbered 159 because 158 went to the mark redrawn (PR #235) while it
+was open; its first commits' messages say 158.
+
+The owner's screenshot of a reading run's breakdown on the desk
+(ここで話してはいけません。) and "improve the layout and improve the analysis
+like the analyser do", five directions drawn on the canvas "Tsuji
+Breakdown Panel" (A numbered, B in order, C interlinear, D focus, E the
+line), on the local tier's real analysis of three reading-bank
+sentences. The owner's pick: **A, with the analysis fixes**.
+
+What the screenshot showed, each traced in the analysis: て and は as
+rows with no meaning and no door (every particle a row since plan 095;
+these two are 〜てはいけません's); は reading わ; いけません reading "to go"
+(the いけ matched to 行く); the words English and で's gloss French; the
+construction's parts as morphemes (て + は + いけ + ませ + ん); nothing on
+the sentence saying where the rule sits; N5 on every row; the column
+two-thirds empty under a small Explain.
+
+**Analysis** (`LOCAL_REV` 8): the negated verb of a "must" or a "must
+not" carries no card, as plan 152's compound particles do --
+`grammar_detect.no_good_points()` reads them off the catalogue (a verb
+lemma 行く／行ける／成る followed by a negation in the pattern): 〜てはいけ
+ません, 〜なくてはいけない, 〜ないといけない, 〜ちゃいけない, 〜なければなり
+ません, 〜てはならない, 〜てならない, 〜にほかならない, 〜わけにはいかない;
+行っ and なっ as verbs keep theirs. A content word a construction owns
+with no card is not counted off-deck. Every deck card's French gloss
+rides beside its English (`entry.meaning_fr`, plan 107's per-card line).
+
+**Layout A, at every width**: the line framed and numbered
+(`SentenceLine`'s `numbered`, in a well); a row per word (`wordRowsOf`),
+named as the dictionary names it with the card's reading, glossed in the
+learner's language (`wordGloss`), its endings a tag; a numbered card per
+rule (`GrammarPoints`, now the one shape, shared with the analyser), the
+parts read as words after the word they attach to (`partsOf`); Explain
+on the desk panel's floor. The verb's endings (〜ます／〜ません,
+〜ました／〜ませんでした, た形, ない形) ride their word and take no number
+anywhere, the analyser's subtitle included. The analyser's words list
+takes the same rows, names and glosses. The comprehension passage
+(`PassageBreakdown`) draws the same pieces.
+

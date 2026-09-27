@@ -1419,6 +1419,20 @@ as the rail it arrives at.
   field to be left. The send is an arrow, named for a screen reader and
   on hover, because a laptop's column needs the room for the field.
   Nothing the learner typed is kept, and the mock exam never asks.
+- **A graded sentence's breakdown is the analyser's, numbered** (plan 159,
+  the owner's pick A of five drawn on the canvas "Tsuji Breakdown Panel";
+  every width, the phone's behind its toggle). The sentence line frames
+  each rule on its words under its number, in a well of its own; under
+  the translation the words, one row each, named as the dictionary names
+  them (話す はなす where the sentence wrote 話し), glossed in the
+  learner's language, the endings they were written with (ます, た) a
+  quiet tag after the meaning; then a numbered card per rule — the
+  particles' markers and the constructions, in the sentence's order —
+  with the words it is made of as chips, the word it attaches to unlit.
+  A particle, the copula and a word a construction is written on with no
+  card of its own are no rows: they are the rule's, and a row with no
+  meaning was what 〜てはいけません's て and は drew. On the desk the
+  explanation, or the Explain that buys it, stands on the panel's floor.
 - **A door opens in the column, never over it.** A word, a kanji or a rule
   pressed in a docked breakdown opens its entry in that column
   (`SideLookup`), the sentence's line kept above it so the next word is one

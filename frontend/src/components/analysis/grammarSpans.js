@@ -26,21 +26,28 @@ export function coversToken(point, token) {
   return spansOf(point).some(([s, e]) => s < token.end && token.start < e)
 }
 
-// The constructions a sentence is built with, in the order the local
-// tier found them: every point but the markers (は, を), which ride the
-// word rows. The phone's stage and the practice rows list these; the
-// desk numbers numberedPointsOf below.
-export function constructionsOf(analysis) {
-  return (analysis?.grammar ?? []).filter(g => g.kind !== 'marker')
+// The verb's own endings (plan 159): the polite and the plain forms,
+// present and past, affirmative and negative. Each is a point with a
+// card, but not a rule a learner reads a sentence by -- 作ります is 作る
+// made polite -- so it rides its word as a tag (the words list's
+// `endings`, rows.js) rather than taking a number beside 〜てはいけません.
+// The N4 forms (the passive, the potential, the causative) are rules,
+// and keep theirs.
+const ENDINGS = new Set(['〜ます／〜ません', '〜ました／〜ませんでした', 'た形 〜た', 'ない形 〜ない'])
+export function isEnding(point) {
+  return ENDINGS.has(point?.pattern)
 }
 
-// The desk's grammar box (plan 134, owner-directed): every point the
-// sentence uses -- the particles' markers (を, で, は) with the
-// constructions -- in the order they stand in the sentence, so the
-// numbers on the cards and on the subtitle read left to right. One list
-// for GrammarPoints' `numbered`, SubtitleLine and the card in focus.
+// Every point the sentence reads by -- the particles' markers (を, で,
+// は) with the constructions, the endings left to their words -- in the
+// order they stand in the sentence, so the numbers on the cards and on
+// the line read left to right (plan 134, owner-directed; the practice
+// breakdown's too since plan 159). One list for GrammarPoints, the
+// line's frames (SentenceLine, SubtitleLine) and the card in focus.
 export function numberedPointsOf(analysis) {
-  return [...(analysis?.grammar ?? [])].sort((a, b) => (a.start ?? 0) - (b.start ?? 0))
+  return [...(analysis?.grammar ?? [])]
+    .filter(g => !isEnding(g))
+    .sort((a, b) => (a.start ?? 0) - (b.start ?? 0))
 }
 
 // One point twice in a sentence (〜し、〜し) is two chips and two
