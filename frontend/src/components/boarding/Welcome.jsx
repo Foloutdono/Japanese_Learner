@@ -4,7 +4,7 @@ import { EnterKey } from '../chrome/DeskKeys'
 import { AuthCard } from '../account/AuthCard'
 import { useDesk } from '../../hooks/useDesk'
 import { DeskMast } from '../chrome/DeskMast'
-import { PaperWait } from '../../screens/AppLoading'
+import { PaperWait } from './PaperWait'
 import { FRONT_LANE, BACK_LANE, DESK_LANE } from './demoCards'
 
 // ── Welcome — the sign, the rolling stock, the promise (plan 075) ─
