@@ -36,6 +36,10 @@ function applySound(player, { volume, muted }) {
 // especially) hands playback volume to the hardware buttons alone and
 // ignores setVolume; mute still lands there, which is why the two are
 // separate controls rather than one slider whose zero means silence.
+//
+// `onDurationChange` (optional) reports the video's length, in whole
+// seconds, once the player knows it: the analyser's bar runs from 0 to
+// it, so its clock reads the figures YouTube's own bar does.
 export const VideoPlayer = forwardRef(function VideoPlayer({
   videoId,
   volume = 100,
@@ -46,6 +50,7 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
   onTimeUpdate,
   onPlayingChange,
   onVolumeChange,
+  onDurationChange,
 }, ref) {
   const containerRef = useRef(null)
   const playerRef = useRef(null)
@@ -68,11 +73,11 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
   // following the clock after the learner had taken the wheel. Read
   // through a ref refreshed every render, the poll always calls the
   // current one.
-  const handlersRef = useRef({ onTimeUpdate, onPlayingChange, onVolumeChange })
+  const handlersRef = useRef({ onTimeUpdate, onPlayingChange, onVolumeChange, onDurationChange })
   // Refreshed in an effect rather than during render: a render React
   // throws away must not be able to leave its callbacks behind.
   useEffect(() => {
-    handlersRef.current = { onTimeUpdate, onPlayingChange, onVolumeChange }
+    handlersRef.current = { onTimeUpdate, onPlayingChange, onVolumeChange, onDurationChange }
   })
 
   useEffect(() => {
@@ -102,6 +107,17 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
       report(live)
     }
 
+    // The length is 0 until the player has the video's metadata, and a
+    // live stream's grows: read on every poll, told when it changes.
+    let length = 0
+    function readDuration(player) {
+      if (typeof player.getDuration !== 'function') return
+      const seconds = Math.floor(player.getDuration() || 0)
+      if (seconds <= 0 || seconds === length) return
+      length = seconds
+      handlersRef.current.onDurationChange?.(seconds)
+    }
+
     loadYouTubeIframeAPI().then(YT => {
       if (cancelled || !containerRef.current) return
       playerRef.current = new YT.Player(containerRef.current, {
@@ -118,6 +134,7 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
               if (!player || typeof player.getCurrentTime !== 'function') return
               handlersRef.current.onTimeUpdate(player.getCurrentTime())
               readSound(player)
+              readDuration(player)
             }, POLL_MS)
           },
           // YT.PlayerState.PLAYING is 1; everything else (paused,

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useDesk } from '../hooks/useDesk'
@@ -12,6 +12,8 @@ import { WordsList } from '../components/analysis/WordsList'
 import { FocusCard } from '../components/analysis/FocusCard'
 import { SubtitleLine } from '../components/analysis/SubtitleLine'
 import { PlayerBar } from '../components/analysis/PlayerBar'
+import { createPlayhead } from '../components/analysis/playhead'
+import { passageTiming } from '../components/analysis/wordTimes'
 import { ExplainPanel, ExplainSheet } from '../components/analysis/ExplainPanel'
 import { GrammarPoints } from '../components/analysis/GrammarPoints'
 import { coversToken, numberedPointsOf } from '../components/analysis/grammarSpans'
@@ -34,7 +36,6 @@ import { sourceFor, SOURCES, DEFAULT_SOURCE } from '../components/analysis/sourc
 import { parseVideoId } from '../lib/youtube'
 import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
-import { formatTimecode } from '../lib/timecode'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
 import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon, SearchIcon } from '../components/ui/Icons'
 import { readVideoSound, saveVideoSound, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
@@ -196,44 +197,22 @@ export default function AnalyzerScreen({ session }) {
   // mid-sentence is the defect this closes.
   const [followPlayback, setFollowPlayback] = useState(true)
 
-  // The transport bar's two readouts. `playing` is the iframe's own
-  // truth (VideoPlayer's onPlayingChange), never a boolean kept beside
-  // it; `playTime` is the poll the follow logic already rides, kept in
-  // state so the playhead can draw. React bails out of the setState
-  // while paused (same float every poll), so the 4Hz poll only
-  // re-renders while the video actually moves.
+  // The transport bar's readouts. `playing` is the iframe's own truth
+  // (VideoPlayer's onPlayingChange), never a boolean kept beside it;
+  // `duration` is the video's length, which the bar runs to.
   const [playing, setPlaying] = useState(false)
-  const [playTime, setPlayTime] = useState(0)
+  const [duration, setDuration] = useState(0)
   // 音量 — the player's sound. Read from storage on the first render
   // rather than defaulted and corrected, so a learner who turned a
   // loud track down never meets the next one at full (lib/videoVolume).
   const [sound, setSound] = useState(readVideoSound)
-  // The same clock as playTime, readable from closures that must not go
-  // stale (the Space handler, the bar's play) without re-binding a
-  // listener four times a second.
-  const playTimeRef = useRef(0)
-  // 字幕の流れ -- the words lit as they are said. The poll comes four
-  // times a second and a word can be said in a tenth of one, so the
-  // subtitle reads a clock carried forward from the last poll at the
-  // playing speed, and set right by the next.
-  const pollAtRef = useRef(0)
-  const playingRef = useRef(false)
-  const rateRef = useRef(1)
-  const shownRef = useRef(0)
-  const clock = useCallback(() => {
-    const polled = playTimeRef.current
-    if (!playingRef.current) {
-      shownRef.current = polled
-      return polled
-    }
-    const ahead = Math.min(0.5, (performance.now() - pollAtRef.current) / 1000)
-    const now = polled + ahead * rateRef.current
-    // A poll a little behind the clock carried forward does not send
-    // the sweep back over a word; a seek does.
-    const shown = shownRef.current
-    shownRef.current = now < shown && shown - now < 0.3 ? shown : now
-    return shownRef.current
-  }, [])
+  // The player's clock (components/analysis/playhead): the poll the
+  // follow logic rides, readable from closures that must not go stale
+  // (the Space handler, the bar's play), and, carried between polls, the
+  // clock the subtitle's words are lit on (字幕の流れ). Not state: the
+  // bar and the subtitle subscribe to it, so the 4Hz poll renders them
+  // and not this screen.
+  const [playhead] = useState(() => createPlayhead({ read: () => playerRef.current?.currentTime?.() }))
 
   // ── The working rail (the mockup's 司令室 half) ──────────
   // Which stops the route map shows. 'all' | 'kept' | 'i1' | 'new',
@@ -315,13 +294,14 @@ export default function AnalyzerScreen({ session }) {
     holdTimerRef.current = null
   }, [])
   useEffect(() => clearHoldTimer, [clearHoldTimer])
-  // The clock's two inputs besides the poll. A play starts the carry
-  // from now, not from a poll taken before the pause.
-  useEffect(() => {
-    playingRef.current = playing
-    pollAtRef.current = performance.now()
-  }, [playing])
-  useEffect(() => { rateRef.current = rate }, [rate])
+  // The clock's two inputs besides the poll. Play and pause reach the
+  // playhead before the render that tells the subtitle, which reads it
+  // in its layout effect.
+  const changePlaying = useCallback(value => {
+    playhead.setPlaying(value)
+    setPlaying(value)
+  }, [playhead])
+  useEffect(() => { playhead.setRate(rate) }, [playhead, rate])
   // Paused by hand, or the stop turned off: no stop is owed.
   useEffect(() => { if (!playing) clearHoldTimer() }, [playing, clearHoldTimer])
   useEffect(() => {
@@ -364,6 +344,10 @@ export default function AnalyzerScreen({ session }) {
   // has typed right now, fall back to whatever the session was created
   // with. This is what makes a link pasted AFTER an upload work.
   const playerVideoId = parseVideoId(videoUrl) ?? passage?.videoId ?? null
+  // 字幕の流れ: what the whole track says about when its words are said
+  // (its pace, how early its subtitles come up), for the lines it did
+  // not time word by word. Read once a Passage, not once a line.
+  const timing = useMemo(() => passageTiming(sentences), [sentences])
   // The platform standing on. Everything about it -- its name, its
   // panel's opening line, whether 運行履歴 applies -- comes from the one
   // registry, so a fourth source is one entry there rather than five
@@ -458,9 +442,9 @@ export default function AnalyzerScreen({ session }) {
     // clip would draw a full bar on a player that hasn't started.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- id-keyed reset, keyed off the player's identity.
     setPlaying(false)
-    setPlayTime(0)
-    playTimeRef.current = 0
-  }, [playerVideoId])
+    setDuration(0)
+    playhead.reset()
+  }, [playerVideoId, playhead])
 
   useEffect(() => {
     if (status !== 'ready') return
@@ -686,8 +670,7 @@ export default function AnalyzerScreen({ session }) {
       setDraft('')
       setFromImage(false)
       setVideoUrl('')
-      setPlayTime(0)
-      playTimeRef.current = 0
+      playhead.reset()
     }
     lastBoardedRef.current = key
     setSource(key)
@@ -696,16 +679,14 @@ export default function AnalyzerScreen({ session }) {
     setIntakeOpen(true)
     // A fresh player mounts paused; the destroyed one can no longer
     // report its own state, so this is the one boolean reset by hand.
-    setPlaying(false)
+    changePlaying(false)
   }
 
   // ── Playback sync ─────────────────────────────────────────
   const handleTimeUpdate = useCallback(seconds => {
     const last = lastPollRef.current
     lastPollRef.current = seconds
-    playTimeRef.current = seconds
-    pollAtRef.current = performance.now()
-    setPlayTime(seconds)
+    playhead.poll(seconds)
     const played = seconds >= last && seconds - last < PLAYBACK_STEP
     // 反復 (plan 134): on a loop, the focused sentence's end sends the
     // clock back to its start -- the line does not move on, whatever
@@ -731,7 +712,7 @@ export default function AnalyzerScreen({ session }) {
         heldRef.current = i
         const player = playerRef.current
         player?.pause()
-        const at = player?.currentTime?.() ?? playTimeRef.current
+        const at = player?.currentTime?.() ?? playhead.polled()
         if (at >= s.cue_end - HOLD_INSET) player?.seekTo(Math.max(s.cue_start ?? 0, s.cue_end - HOLD_INSET))
         if (followPlayback) analyzer.setFocusIndex(i)
       }
@@ -751,7 +732,7 @@ export default function AnalyzerScreen({ session }) {
           holdTimerRef.current = setTimeout(() => {
             holdTimerRef.current = null
             // Unless the learner seeked away in the meantime.
-            const at = playTimeRef.current
+            const at = playhead.polled()
             if (at >= (s.cue_start ?? 0) && at < s.cue_end + PLAYBACK_STEP) hold(now)
           }, Math.max(0, left * 1000 - HOLD_LEAD_MS))
         }
@@ -759,38 +740,72 @@ export default function AnalyzerScreen({ session }) {
       // Out of the sentence held: its end stops the clock again next time.
       if (held !== null && now !== held) heldRef.current = null
     }
-    if (!followPlayback) return
+    // While it plays, the follow runs on time (below); a poll reads a
+    // clock up to a quarter second old, and would send the line back.
+    if (!followPlayback || (playing && !loop && !pauseEach)) return
     analyzer.setFocusIndex(prev => {
       const idx = sentences.findIndex(s => seconds >= s.cue_start && seconds < s.cue_end)
       // -1 during the silence between cues: hold the current stop
       // rather than snapping back to the first one.
       return idx === -1 ? prev : idx
     })
-  }, [sentences, analyzer, followPlayback, loop, pauseEach, focusIndex, rate, clearHoldTimer])
+  }, [sentences, analyzer, followPlayback, loop, pauseEach, focusIndex, rate, clearHoldTimer, playhead, playing])
 
-  // The transport spans the PASSAGE's window, not the whole video: the
-  // learner is studying these cues, and a bar scaled to a 2-hour VOD
-  // would make a 5-minute window an unusable sliver at its left edge.
+  // 追従 on time (2026-09-27): while the video plays, the line in focus
+  // moves on at the moment the clock reaches the next line's cue, on a
+  // timer set for it from the playhead and set again on every poll (a
+  // seek moves the moment). It moved on the next poll, up to a quarter
+  // second late -- and the new line's first word with it, where a
+  // recognised line's cue starts on that word. The loop and the stop at
+  // each sentence's end own the line's end, so they keep the poll.
+  const setFocusIndex = analyzer.setFocusIndex
+  useEffect(() => {
+    if (!playing || !followPlayback || loop || pauseEach || !playerVideoId) return undefined
+    const timer = { id: 0 }
+    const step = () => {
+      clearTimeout(timer.id)
+      const t = playhead.at()
+      const idx = sentences.findIndex(s => t >= s.cue_start && t < s.cue_end)
+      // A new focus runs this effect again, from there.
+      if (idx !== -1 && idx !== focusIndex) {
+        setFocusIndex(idx)
+        return
+      }
+      let next = Infinity
+      for (const s of sentences) if (s.cue_start > t && s.cue_start < next) next = s.cue_start
+      if (next !== Infinity) timer.id = setTimeout(step, ((next - t) / rate) * 1000)
+    }
+    step()
+    const off = playhead.subscribe(step)
+    return () => {
+      off()
+      clearTimeout(timer.id)
+    }
+  }, [playing, followPlayback, loop, pauseEach, playerVideoId, sentences, focusIndex, playhead, setFocusIndex, rate])
+
+  // The Passage's window, the first cue to the last: where Play starts.
   const cued = sentences.filter(s => s.cue_end != null)
   const windowStart = cued.length ? Math.min(...cued.map(s => s.cue_start ?? 0)) : null
   const windowEnd = cued.length ? Math.max(...cued.map(s => s.cue_end)) : null
   const hasWindow = windowStart != null && windowEnd != null && windowEnd > windowStart
-  const trackPct = hasWindow
-    ? Math.max(0, Math.min(100, (100 * (playTime - windowStart)) / (windowEnd - windowStart)))
-    : 0
+  // The transport spans the VIDEO, 0 to its length, so its clock reads
+  // what YouTube's own bar does (owner-directed, 2026-09-27: the window's
+  // clock read 3:32 / 2:56 beside YouTube's 3:48 / 4:07). The last cue's
+  // end stands in until the player knows the length.
+  const span = Math.max(duration, hasWindow ? windowEnd : 0)
 
   // Play means "play the PASSAGE". A window opening at 0:36 on a track
   // that starts at 0:00 left the bar clamped at 0:00 for thirty-six
   // silent seconds — a player that looks dead while doing exactly what
   // it was told. From before the window, seek to its start first; from
-  // inside (or past) it, plain play/pause. Reads the ref, not playTime
+  // inside (or past) it, plain play/pause. Reads the playhead, not
   // state, so the Space handler's closure can never act on a stale poll.
   function togglePassagePlayback() {
     if (playing) {
       playerRef.current?.pause()
       return
     }
-    if (hasWindow && playTimeRef.current < windowStart) {
+    if (hasWindow && playhead.polled() < windowStart) {
       playerRef.current?.seekTo(windowStart)
     }
     playerRef.current?.play()
@@ -835,10 +850,10 @@ export default function AnalyzerScreen({ session }) {
   // Mouse convenience only (aria-hidden on the track): the route line
   // IS the accessible seek control, stop by stop, with real names.
   function seekFromTrack(e) {
-    if (!hasWindow) return
+    if (!(span > 0)) return
     const r = e.currentTarget.getBoundingClientRect()
     const frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))
-    playerRef.current?.seekTo(windowStart + frac * (windowEnd - windowStart))
+    playerRef.current?.seekTo(frac * span)
   }
 
   // The line, the stage, and the player are three views of ONE
@@ -1236,8 +1251,9 @@ export default function AnalyzerScreen({ session }) {
                 muted={sound.muted}
                 rate={rate}
                 onTimeUpdate={handleTimeUpdate}
-                onPlayingChange={setPlaying}
+                onPlayingChange={changePlaying}
                 onVolumeChange={changeSound}
+                onDurationChange={setDuration}
               />
             </div>
             {nextArrow}
@@ -1278,9 +1294,9 @@ export default function AnalyzerScreen({ session }) {
                 setIndex={walkTo}
                 lit={light.lit}
                 t={t}
-                clock={playerVideoId ? clock : null}
+                playhead={playerVideoId ? playhead : null}
                 playing={playing}
-                tick={playTime}
+                timing={timing}
               />
             )}
             {!playerVideoId && nextArrow}
@@ -1301,10 +1317,9 @@ export default function AnalyzerScreen({ session }) {
             onLoop={() => setLoop(v => !v)}
             pauseEach={pauseEach}
             onPauseEach={() => setPauseEach(v => !v)}
-            hasWindow={hasWindow}
-            trackPct={trackPct}
+            playhead={playhead}
+            span={span}
             onSeek={seekFromTrack}
-            timeLabel={hasWindow ? `${formatTimecode(Math.max(0, playTime - windowStart))} / ${formatTimecode(windowEnd - windowStart)}` : ''}
             rate={rate}
             onRate={nextRate}
             silent={silent}
@@ -1449,8 +1464,9 @@ export default function AnalyzerScreen({ session }) {
               volume={sound.volume}
               muted={sound.muted}
               onTimeUpdate={handleTimeUpdate}
-              onPlayingChange={setPlaying}
+              onPlayingChange={changePlaying}
               onVolumeChange={changeSound}
+              onDurationChange={setDuration}
             />
           </div>
           <PlayerBar
@@ -1469,8 +1485,8 @@ export default function AnalyzerScreen({ session }) {
             canReplay={focused.cue_start != null}
             loop={loop}
             onLoop={() => setLoop(v => !v)}
-            hasWindow={hasWindow}
-            trackPct={trackPct}
+            playhead={playhead}
+            span={span}
             onSeek={seekFromTrack}
           />
         </div>
@@ -1492,9 +1508,9 @@ export default function AnalyzerScreen({ session }) {
             setIndex={openTokenAt}
             lit={light.lit}
             t={t}
-            clock={playerVideoId ? clock : null}
+            playhead={playerVideoId ? playhead : null}
             playing={playing}
-            tick={playTime}
+            timing={timing}
           />
         )}
         {sideLine(prevText, t.prevSentence, () => goToStop(focusIndex - 1))}

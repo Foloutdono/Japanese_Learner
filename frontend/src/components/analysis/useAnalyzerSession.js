@@ -457,15 +457,18 @@ export function useAnalyzerSession(session) {
   // Optimistic, with the row kept in hand. Deleting is frequent and
   // low-stakes, so a confirmation dialog is friction; an undo is not.
   //
-  // The restore goes through the ordinary analyze-and-save path because
-  // the DELETE is a hard delete -- there is no soft-delete column and
-  // this is a frontend plan. So what comes back is the Passage with its
-  // provenance, at a NEW id and a new timestamp. The copy says "Undo",
-  // not "Restore", for exactly that reason.
+  // A passage's DELETE is a hard delete, so its restore goes through the
+  // ordinary analyze-and-save path: what comes back is the Passage with
+  // its provenance, at a NEW id and a new timestamp. The copy says
+  // "Undo", not "Restore", for exactly that reason. A video session
+  // cannot be analysed again from here -- its track is not kept -- so
+  // the server marks it removed instead, and Undo takes the mark off
+  // (backend core/history.py): it comes back as it was, where it was.
   function deleteHistoryEntry(entry) {
     setLastDeleted(entry)
     setHistory(prev => prev.filter(h => !(h.kind === entry.kind && h.id === entry.id)))
-    return apiFetch(`/api/phrase/history/${entry.id}`, session, { method: 'DELETE' })
+    const path = entry.kind === 'session' ? `/api/video/session/${entry.id}` : `/api/phrase/history/${entry.id}`
+    return apiFetch(path, session, { method: 'DELETE' })
       .then(fetchHistory)
       .catch(() => { setLastDeleted(null); fetchHistory() })
   }
@@ -475,10 +478,14 @@ export function useAnalyzerSession(session) {
     if (!entry) return
     setLastDeleted(null)
     try {
-      await apiJson('/api/phrase/analyze', session, {
-        method: 'POST',
-        body: JSON.stringify({ phrase: entry.label, lang, source: entry.source ?? 'typed' }),
-      })
+      if (entry.kind === 'session') {
+        await apiFetch(`/api/video/session/${entry.id}/restore`, session, { method: 'POST' })
+      } else {
+        await apiJson('/api/phrase/analyze', session, {
+          method: 'POST',
+          body: JSON.stringify({ phrase: entry.label, lang, source: entry.source ?? 'typed' }),
+        })
+      }
     } finally {
       fetchHistory()
     }

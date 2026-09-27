@@ -23,8 +23,9 @@ import { VideoStill } from './VideoStill'
 //
 // Each entry carries `kind: 'passage' | 'session'` (useAnalyzerSession
 // merges two endpoints); a session is the video platform, a passage a
-// text or, by its `source`, a photo. A session has no ✕: DELETE
-// /api/video/session/{id} does not exist (plan 040's scope notes).
+// text or, by its `source`, a photo. Each has its ✕ and its Undo
+// (useAnalyzerSession's deleteHistoryEntry). The shelf holds the newest
+// thirty of them, kept sentences aside (backend core/history.py).
 
 const GLYPH = { text: TextLinesIcon, photo: CameraIcon, video: VideoIcon }
 const NAME = { text: 'sourceText', photo: 'sourcePhoto', video: 'sourceVideo' }
@@ -66,11 +67,11 @@ export function PassageShelf({ t, entries, onOpen, onDelete, lastDeleted, onUndo
 
   const when = h => (h.createdAt ? relativeDate(h.createdAt, lang, t) : null)
   const count = h => (h.kind === 'session' && typeof h.sentenceCount === 'number' ? t.sessionSentenceCount(h.sentenceCount) : null)
-  const del = (h, tab) => (h.kind === 'passage' ? (
+  const del = (h, tab) => (
     <button type="button" className={desk ? 'anl-card__delete' : 'anl-row__delete'} onClick={() => onDelete(h)} aria-label={t.delete} title={desk ? t.delete : undefined} tabIndex={tab}>
       <CrossIcon size={13} />
     </button>
-  ) : null)
+  )
 
   if (desk) {
     return (

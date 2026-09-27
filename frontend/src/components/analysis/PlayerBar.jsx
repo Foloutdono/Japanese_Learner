@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from 'react'
+import { formatTimecode } from '../../lib/timecode'
 import {
   FoldVideoIcon, FollowIcon, LoopIcon, PauseEachIcon, PauseIcon, PlayIcon, ReplayIcon,
   SkipIcon, SpeakerIcon, SpeakerOffIcon,
@@ -11,6 +13,14 @@ import {
 // the sound, the line following the clock, and the video folded away.
 // The keys stay live and are not printed (owner-directed).
 //
+// The track and its clock are the video's own, 0 to its length (`span`,
+// VideoPlayer's onDurationChange), the figures YouTube's bar prints
+// beside the picture (owner-directed, 2026-09-27). They were the
+// Passage's window, the first cue to the last, and read 3:32 / 2:56 on
+// a song the video's own bar had at 3:48 / 4:07. They read the
+// playhead's poll themselves, so the poll renders this bar and not the
+// screen around it.
+//
 // `compact` is the phone's bar (plan 134, the owner's "keep just the most
 // useful"): the sentence before, play, the sentence after, the track, the
 // sentence again and on a loop. The speed, the stop at each sentence's
@@ -21,12 +31,14 @@ import {
 // presses, nothing more.
 export function PlayerBar({
   compact = false, t, playing, onToggle, onPrev, onNext, canPrev, canNext, onReplay, canReplay,
-  loop, onLoop, pauseEach, onPauseEach, hasWindow, trackPct, onSeek, timeLabel,
+  loop, onLoop, pauseEach, onPauseEach, playhead, span, onSeek,
   rate, onRate, silent, onMute, follow, onFollow, folded, onFold,
 }) {
+  const at = usePolled(playhead)
+  const trackPct = span > 0 ? Math.max(0, Math.min(100, (100 * at) / span)) : 0
   const btn = (extra = '') => `anl-player__btn${extra}`
   const track = (
-    <div className="anl-pbar__track" onClick={hasWindow ? onSeek : undefined} aria-hidden="true">
+    <div className="anl-pbar__track" onClick={span > 0 ? onSeek : undefined} aria-hidden="true">
       <span className="anl-pbar__fill" style={{ width: `${trackPct}%` }} />
       <span className="anl-pbar__knob" style={{ left: `${trackPct}%` }} />
     </div>
@@ -84,7 +96,7 @@ export function PlayerBar({
       {/* A mouse convenience only, as on the phone: the route line is the
           accessible seek, stop by named stop. */}
       {track}
-      {hasWindow && <span className="anl-player__time">{timeLabel}</span>}
+      {span > 0 && <span className="anl-player__time">{`${formatTimecode(Math.min(at, span))} / ${formatTimecode(span)}`}</span>}
       <span className="anl-pbar__sep" aria-hidden="true" />
       <button type="button" className="anl-pbar__rate" onClick={onRate} aria-label={t.playbackSpeed(rate)} title={t.playbackSpeed(rate)}>
         {t.playbackRate(rate)}
@@ -114,4 +126,10 @@ export function PlayerBar({
       </button>
     </div>
   )
+}
+
+// The player's last poll (components/analysis/playhead), 0 with no player.
+const NO_SUBSCRIBE = () => () => {}
+function usePolled(playhead) {
+  return useSyncExternalStore(playhead ? playhead.subscribe : NO_SUBSCRIBE, playhead ? playhead.polled : () => 0)
 }

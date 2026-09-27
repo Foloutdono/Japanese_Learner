@@ -1622,7 +1622,7 @@
    The history is the page now: under the desk a row of chips (the kinds
    the shelf holds, and Kept) over a row per passage, its lead the
    video's still or the platform's glyph in a ring; on the desk the
-   console over cards (the 机 section). A session has no ✕. */
+   console over cards (the 机 section). Each has its ✕. */
 .anl-shelf {
   display: flex;
   flex-direction: column;
@@ -1935,18 +1935,17 @@
    reading takes the primary ink, which the tint already raises. */
 .tok--on .tok__furi { color: var(--text-primary); }
 /* 字幕の流れ — the words lit as they are said (SubtitleLine). While the
-   video is inside the line, the words to come are faded, the word being
-   said fills from its first letter to its last (--said, written each
-   frame), and the words said stand whole. A mask, not an ink: the tint
-   is the focused word's and a rule's, the rule under the word is the
-   SRS's, and every word keeps its own colour -- the mask only takes
-   some of it away. The rule under the word is the border, outside the
-   masked children, so the state reads at every moment. */
-.tok-line--sung .tok { --said: 0%; }
-.tok-line--sung .tok--said { --said: 100%; }
-.tok-line--sung .tok__word,
-.tok-line--sung .tok__furi {
-  mask-image: linear-gradient(to right, #000 var(--said), rgb(0 0 0 / 40%) var(--said));
+   video is inside the line (data-sung), the words to come are faded,
+   the word being said fills from its first letter to its last, and the
+   words said stand whole: every word's --said, written each frame
+   straight onto it. A mask, not an ink: the tint is the focused word's
+   and a rule's, the rule under the word is the SRS's, and every word
+   keeps its own colour -- the mask only takes some of it away. The rule
+   under the word is the border, outside the masked children, so the
+   state reads at every moment. */
+.tok-line[data-sung] .tok__word,
+.tok-line[data-sung] .tok__furi {
+  mask-image: linear-gradient(to right, #000 var(--said, 0%), rgb(0 0 0 / 40%) var(--said, 0%));
 }
 /* The furigana dial: readings over everything, only over the words
    the SRS has not mastered, or none. */
@@ -22432,7 +22431,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     font-size: var(--fs-caption);
     color: var(--text-secondary);
   }
-  /* The ✕ in the card's corner (a passage's; a session has none). */
+  /* The ✕ in the card's corner -- over a video's still, on its own
+     paper. */
   .anl-card__delete {
     position: absolute;
     top: var(--sp-2);

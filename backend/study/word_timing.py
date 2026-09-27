@@ -17,6 +17,18 @@
 # within PAD seconds of it. A song's chorus comes back five times with
 # the same words; matched globally, a line would take the times of
 # whichever chorus the matcher met first.
+#
+# Two things since the first version (2026-09-27, measured on simulated
+# songs and speech run through the whole pipeline):
+#
+#   - a recognised word's kana are spaced at the track's own pace, not
+#     spread to the next word: the last word before a pause had its kana
+#     stretched across the pause, and the line's end with them;
+#   - a stretch the recogniser misheard between two it heard right, kana
+#     for kana as long as the written one, is still timed by it: a word
+#     misheard keeps the time it was said. A stretch of another length
+#     is most often words the recogniser missed, which its kana would
+#     crowd into their neighbours' time -- the frontend spreads those.
 from difflib import SequenceMatcher
 
 from study import morphology
@@ -24,19 +36,28 @@ from study import morphology
 # How far outside a hand-written line's own times its words are looked
 # for: authored subtitles are routinely a beat early or late.
 PAD = 1.5
-# The longest a line's last word is taken to last when nothing
-# recognised follows it.
-LAST_WORD = 0.6
+# A recognised kana lasts the track's median kana (the spacing of its
+# words' starts, per kana) at the most this many times over.
+KANA_SPREAD = 2.0
+# ...and the median itself is held between these (seconds): a track
+# with too few words to measure takes a pace people speak and sing at.
+KANA_FLOOR, KANA_CEILING, KANA_DEFAULT = 0.08, 0.5, 0.2
 
 
 def _is_kana(c: str) -> bool:
     return "ぁ" <= c <= "ゖ" or c == "ー"
 
 
+# Digits read as the kanji numerals, one for one so no offset moves: the
+# recogniser writes 二人 as 2人, whose kana (に, にん) never met ふたり.
+_DIGITS = str.maketrans("0123456789０１２３４５６７８９", "〇一二三四五六七八九" * 2)
+
+
 def _readings(text: str) -> list[tuple[int, int, str]]:
     """(start, end, hiragana) per word. The tokenizer's reading where
     there is one; without a tokenizer, each character as itself, which
     still matches kana to kana and a kanji to the same kanji."""
+    text = text.translate(_DIGITS)
     morphemes = morphology.tokenize(text)
     if morphemes is None:
         return [(i, i + 1, morphology.kata_to_hira(c)) for i, c in enumerate(text)]
@@ -47,43 +68,51 @@ def _readings(text: str) -> list[tuple[int, int, str]]:
     return out
 
 
-def _clock(cue: dict) -> list[float]:
-    """The time at every character offset of a cue, 0 to len inclusive,
-    linear between its anchors -- a recognised segment's letters are
-    spread over the segment."""
-    text = cue["text"]
-    n = len(text)
-    anchors = [(0, cue["start"])]
+def _segments(cue: dict) -> list[tuple[int, float, float]]:
+    """A recognised cue as its stamped words: (offset, start, next start),
+    the last running to the cue's end."""
+    n = len(cue["text"])
+    marks = [(0, cue["start"])]
     for o, t in cue.get("words") or []:
-        if 0 < o < n and t > anchors[-1][1]:
-            anchors.append((o, t))
-        elif o == 0 and t >= cue["start"]:
-            anchors[0] = (0, t)
-    anchors.append((n, max(cue["end"], anchors[-1][1])))
-    times = []
-    for (o0, t0), (o1, t1) in zip(anchors, anchors[1:]):
-        span = max(1, o1 - o0)
-        for o in range(o0, o1):
-            times.append(t0 + (t1 - t0) * (o - o0) / span)
-    times.append(anchors[-1][1])
-    return times
+        if 0 < o < n and t > marks[-1][1]:
+            marks.append((o, t))
+        elif o == 0 and t >= cue["start"] and len(marks) == 1:
+            marks[0] = (0, t)
+    ends = [t for _, t in marks[1:]] + [max(cue["end"], marks[-1][1])]
+    return [(o, t, e) for (o, t), e in zip(marks, ends)]
 
 
-def _heard(timing_cues: list[dict]) -> list[tuple[str, float]]:
-    """Every kana the recogniser wrote, with the time it is said."""
-    out = []
-    for cue in timing_cues:
-        clock = _clock(cue)
-        for start, end, reading in _readings(cue["text"]):
-            kana = [c for c in reading if _is_kana(c)]
-            t0, t1 = clock[start], clock[end]
-            for k, c in enumerate(kana):
-                out.append((c, t0 + (t1 - t0) * k / len(kana)))
-    out.sort(key=lambda kt: kt[1])
+def _kana_by_segment(cue: dict) -> list[tuple[float, float, list[str]]]:
+    """Each stamped word's start, the next one's, and its kana."""
+    segs = _segments(cue)
+    out = [(t, e, []) for _, t, e in segs]
+    offsets = [o for o, _, _ in segs]
+    for start, _end, reading in _readings(cue["text"]):
+        k = max(i for i, o in enumerate(offsets) if o <= start)
+        out[k][2].extend(c for c in reading if _is_kana(c))
     return out
 
 
-def _align_one(cue: dict, heard: list[tuple[str, float]]) -> list[list]:
+def _heard(timing_cues: list[dict]) -> tuple[list[tuple[str, float]], float]:
+    """Every kana the recogniser wrote with the time it is said, and how
+    long a kana of this track lasts. A word's kana are spaced evenly
+    from its start, at most KANA_SPREAD kana-lengths each: the time up
+    to the next word is the word and whatever pause follows it."""
+    words = [w for cue in timing_cues for w in _kana_by_segment(cue)]
+    per_kana = sorted((e - t) / len(k) for t, e, k in words if k and e > t)
+    kana = per_kana[len(per_kana) // 2] if per_kana else KANA_DEFAULT
+    kana = min(KANA_CEILING, max(KANA_FLOOR, kana))
+    out = []
+    for t, e, k in words:
+        if not k:
+            continue
+        step = min((e - t) / len(k), kana * KANA_SPREAD) if e > t else kana
+        out.extend((c, t + step * i) for i, c in enumerate(k))
+    out.sort(key=lambda kt: kt[1])
+    return out, kana
+
+
+def _align_one(cue: dict, heard: list[tuple[str, float]], kana: float = KANA_DEFAULT) -> list[list]:
     words = _readings(cue["text"])
     written = []          # (kana, index of its word, position in the word)
     for w, (_, _, reading) in enumerate(words):
@@ -100,11 +129,18 @@ def _align_one(cue: dict, heard: list[tuple[str, float]]) -> list[list]:
     b = "".join(c for c, _ in window)
     at = {}               # index into `written` -> index into `window`
     shortest = 1 if len(a) <= 3 else 2
-    for block in SequenceMatcher(None, a, b, autojunk=False).get_matching_blocks():
-        if block.size < shortest:
-            continue
+    blocks = [blk for blk in SequenceMatcher(None, a, b, autojunk=False).get_matching_blocks()
+              if blk.size >= shortest]
+    for block in blocks:
         for k in range(block.size):
             at[block.a + k] = block.b + k
+    # Between two stretches heard right, one misheard kana for kana.
+    for left, right in zip(blocks, blocks[1:]):
+        i0, i1 = left.a + left.size, right.a
+        j0, j1 = left.b + left.size, right.b
+        if i1 > i0 and i1 - i0 == j1 - j0:
+            for k in range(i1 - i0):
+                at[i0 + k] = j0 + k
 
     anchors = []
     for i, (_, w, k) in enumerate(written):
@@ -116,8 +152,8 @@ def _align_one(cue: dict, heard: list[tuple[str, float]]) -> list[list]:
     if last in at:
         j = at[last]
         t = window[j][1]
-        after = window[j + 1][1] - t if j + 1 < len(window) else LAST_WORD
-        anchors.append((len(cue["text"]), t + max(0.15, min(LAST_WORD, after))))
+        after = window[j + 1][1] - t if j + 1 < len(window) else kana
+        anchors.append((len(cue["text"]), t + max(0.15, min(kana * KANA_SPREAD, after))))
 
     out: list[list] = []
     for o, t in anchors:
@@ -133,7 +169,7 @@ def align_cues(cues: list[dict], timing_cues: list[dict]) -> list[dict]:
     """The hand-written cues, each given `words` from the recognised
     track where the two agree. A cue that already has its own (a file
     that said when each word is sung) keeps them."""
-    heard = _heard(timing_cues)
+    heard, kana = _heard(timing_cues)
     if not heard:
         return cues
     out = []
@@ -141,6 +177,6 @@ def align_cues(cues: list[dict], timing_cues: list[dict]) -> list[dict]:
         if cue.get("words"):
             out.append(cue)
             continue
-        words = _align_one(cue, heard)
+        words = _align_one(cue, heard, kana)
         out.append({**cue, "words": words} if words else cue)
     return out
