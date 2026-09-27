@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider, useLang } from '../LangContext'
@@ -73,6 +73,7 @@ const PROFILE = {
   // Served, so the grade cards are deterministic here rather than
   // reading whatever this browser's localStorage mirror happens to hold.
   ratingScale: 'simple',
+  readingPace: 'standard',
   // This learner reads both syllabaries, so the kana stop is behind
   // them and the counter offers the JLPT stops alone (the case where it
   // is still ahead has its own test below).
@@ -126,6 +127,11 @@ function mount(path = '/profile/settings') {
 let journey = NO_GOAL
 let profile = PROFILE
 
+// A pace picked here is mirrored into this browser's localStorage
+// (stores/readingPace), which every later file in the lane shares: the
+// first ride's test would read the untimed pace chosen below.
+afterEach(() => { window.localStorage.removeItem('jl.readingPace') })
+
 beforeEach(async () => {
   journey = NO_GOAL
   profile = PROFILE
@@ -148,7 +154,7 @@ beforeEach(async () => {
 })
 
 describe('SettingsScreen — the pass and the list', () => {
-  it('prints the pass\'s contract and six rows plus the pass, each printing its value', async () => {
+  it('prints the pass\'s contract and seven rows plus the pass, each printing its value', async () => {
     const screen = await mount()
     await settle()
     const root = screen.container
@@ -164,28 +170,31 @@ describe('SettingsScreen — the pass and the list', () => {
     // No destination, so no date to be valid until.
     expect(root.querySelector('.stg-pass__field--valid')).toBeNull()
 
-    // Six doors to pages, then the pass — which opens the offer sheet
+    // Seven doors to pages, then the pass — which opens the offer sheet
     // rather than navigating, so it is last and is not one of PAGES.
     const rows = [...root.querySelectorAll('.stg-row')]
-    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'rating', 'help', 'account', 'credits', 'pass'])
+    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'rating', 'reading', 'help', 'account', 'credits', 'pass'])
     const value = i => rows[i].querySelector('.stg-row__value').textContent
     expect(value(2)).toBe(T.settingsRatingScaleOption.simple)
-    expect(value(4)).toBe('dev@…')
-    expect(value(5)).toBe(T.settingsCreditsCount(ATTRIBUTIONS.length))
-    // What can be seen is drawn beside the words: the served bar's dots.
+    expect(value(3)).toBe(T.readingPaceOption.standard)
+    expect(value(5)).toBe('dev@…')
+    expect(value(6)).toBe(T.settingsCreditsCount(ATTRIBUTIONS.length))
+    // What can be seen is drawn beside the words: the served bar's dots,
+    // and the standard pace's clock, half the slowest one's.
     expect(rows[2].querySelectorAll('.stg-dots__dot')).toHaveLength(4)
     expect(rows[0].querySelector('.stg-swatch')).not.toBeNull()
+    expect(rows[3].querySelector('.stg-pace__fill').style.width).toBe('50%')
 
     // A door navigates, and React Router renders a navigation as a
     // transition: the page arrives when React gets to it, not after a
     // fixed pause, so each arrival is waited for rather than timed (a
     // 30ms settle lost that race on a loaded CI runner).
     const title = () => screen.container.querySelector('h1.bar__title')?.textContent
-    rows[4].click()
+    rows[5].click()
     await vi.waitFor(() => expect(title()).toBe(T.account))
     // ‹ Settings brings the column back.
     screen.container.querySelector('.stage__leave').click()
-    await vi.waitFor(() => expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7))
+    await vi.waitFor(() => expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(8))
 
     screen.container.querySelector('.stg-pass .stg-door[data-page="service"]').click()
     await vi.waitFor(() => expect(title()).toBe(T.destService))
@@ -205,7 +214,7 @@ describe('SettingsScreen — the pass and the list', () => {
   it('an unknown page falls back to the list', async () => {
     const screen = await mount('/profile/settings/nothing')
     await settle()
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(8)
   })
 
   // Learning went to the pass's fields and Data into the account page
@@ -246,7 +255,7 @@ describe('SettingsScreen — the pass and the list', () => {
     const screen = await mount()
     await settle()
     expect(screen.container.querySelector('.stg-row[data-page="pass"]')).toBeNull()
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(6)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
 
     // The credits store is module state: leave it as the rest of this
     // file expects to find it, or the pass row vanishes from every
@@ -346,6 +355,33 @@ describe('SettingsScreen — the level, the bar and the service', () => {
     await settle()
     const cards = [...screen.container.querySelectorAll('.grades .grade')]
     expect(cards[0].getAttribute('aria-checked')).toBe('true')
+  })
+
+  // ── The reading pace ──────────────────────────────────────────
+  it('offers each reading pace as the run\'s clock at that pace, and writes the pick', async () => {
+    const screen = await mount('/profile/settings/reading')
+    await settle()
+    const cards = [...screen.container.querySelectorAll('.paces .pace')]
+    expect(cards.map(c => c.dataset.pace)).toEqual(['standard', 'relaxed', 'slow', 'untimed'])
+    expect(cards.map(c => c.getAttribute('aria-checked'))).toEqual(['true', 'false', 'false', 'false'])
+
+    // The consequence before the choice: the seconds a short sentence
+    // stays up at each pace, on the run's own clock, the slowest timed
+    // one filling it -- and no clock at all for the last.
+    const label = c => c.querySelector('.timer__label').textContent
+    expect(cards.slice(0, 3).map(label)).toEqual(['10.0s', '15.0s', '20.0s'])
+    expect(label(cards[3])).toBe(T.readingUntimed)
+    expect(cards.map(c => c.querySelector('.timer__fill').style.width)).toEqual(['50%', '75%', '100%', '100%'])
+    // Named in words on the radio, since the clock is hidden from a
+    // screen reader.
+    expect(cards[3].getAttribute('aria-label')).toContain(T.readingPaceOption.untimed)
+
+    cards[3].click()
+    await settle(30)
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')
+    expect(call, 'picking a pace must PATCH the learning profile').toBeTruthy()
+    expect(call[2].method).toBe('PATCH')
+    expect(JSON.parse(call[2].body)).toEqual({ readingPace: 'untimed' })
   })
 
   it('without a destination, a service is saved on the spot', async () => {

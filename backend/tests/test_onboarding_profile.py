@@ -34,7 +34,8 @@ def _clean_onboarding_state(user_id: str):
                         goal_target_date = NULL, goal_set_at = NULL,
                         daily_departure = NULL, rating_scale = NULL,
                         motive = NULL, kana_known = NULL, reminder_time = NULL,
-                        notifications = FALSE, lines = NULL
+                        notifications = FALSE, lines = NULL,
+                        reading_pace = NULL
                     WHERE user_id = %s
                     """,
                     (user_id,),
@@ -279,6 +280,37 @@ def test_setting_the_scale_leaves_the_other_learning_fields_alone(client):
         assert after["ratingScale"] == "full"
         assert after["jlptLevel"] == "N3"
         assert after["dailyNewTarget"] == 10
+
+
+# ── How long the reading exercises leave the text up ──────────────
+# The same shape as the rating bar: stored beside the learning choices,
+# served on the profile, so the first sentence of a run is timed at the
+# learner's pace rather than at the standard one and then corrected.
+def test_reading_pace_defaults_and_round_trips(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        assert client.get("/api/profile").json()["readingPace"] == "standard"
+
+        for pace in ("relaxed", "slow", "untimed", "standard"):
+            assert client.patch("/api/profile/learning",
+                                json={"readingPace": pace}).status_code == 200
+            assert client.get("/api/profile").json()["readingPace"] == pace
+
+
+def test_an_unknown_reading_pace_is_refused(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        assert client.patch("/api/profile/learning",
+                            json={"readingPace": "glacial"}).status_code == 422
+        assert client.get("/api/profile").json()["readingPace"] == "standard"
+
+
+def test_setting_the_pace_leaves_the_rating_scale_alone(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        client.patch("/api/profile/learning", json={"ratingScale": "full"})
+        client.patch("/api/profile/learning", json={"readingPace": "slow"})
+
+        after = client.get("/api/profile").json()
+        assert after["readingPace"] == "slow"
+        assert after["ratingScale"] == "full"
 
 
 def test_a_patch_with_nothing_in_it_is_still_a_caller_bug(client):

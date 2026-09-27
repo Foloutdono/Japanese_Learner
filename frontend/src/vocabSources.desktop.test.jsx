@@ -153,10 +153,12 @@ describe('the vocabulary\'s sources on the desk (plan 137)', () => {
     expect(where.search).toBe('?domain=jmdict')
     expect(rows(plates()[1])).toHaveLength(60)
     expect(rows(plates()[1])[0].getAttribute('href')).toBe('/learn/vocab/tier/1?size=200&domain=jmdict')
-    // The size under the pool, named and as wide as it (square since
-    // 2026-09-26, like every switch).
+    // The size under the pool, as wide as it (square since 2026-09-26,
+    // like every switch), with no caption over it: its name is the
+    // switch's label.
     const sizeRow = plates()[1].querySelector('.desk-source__size')
-    expect(sizeRow.querySelector('.cap').textContent).toBeTruthy()
+    expect(sizeRow.querySelector('.cap')).toBeNull()
+    expect(sizeRow.querySelector('.seg').getAttribute('aria-label')).toBeTruthy()
     expect(Math.round(sizeRow.querySelector('.seg').getBoundingClientRect().width))
       .toBe(Math.round(plates()[1].querySelector('.desk-source__tools > .seg').getBoundingClientRect().width))
     const size = [...sizeRow.querySelectorAll('.seg [role="radio"]')].find(r => r.textContent === '500')

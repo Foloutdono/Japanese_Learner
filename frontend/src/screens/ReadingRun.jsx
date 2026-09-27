@@ -7,7 +7,7 @@ import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
 import { usePracticeXp } from '../hooks/usePracticeXp'
 import PromptCard from '../components/study/PromptCard'
-import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters } from '../components/reading/ReadingPieces'
+import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters, PaceChip } from '../components/reading/ReadingPieces'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import RatingBar from '../components/study/RatingBar'
@@ -26,6 +26,8 @@ import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
+import { paceFactor } from '../domain/readingPace'
+import { useReadingPace } from '../stores/readingPace'
 
 const READING_COLOR = 'var(--line-reading)'
 
@@ -63,7 +65,14 @@ export default function ReadingRun({ session }) {
   // submitAnswer below.
   const [stage, setStage]   = useState('loading')
   const [data, setData]     = useState(null)   // current phrase item from the batch
+  // Counted in the server's seconds (display_seconds, the standard
+  // pace's); the learner's reading pace (domain/readingPace.js) runs the
+  // clock 1/factor as fast and scales what the timer prints, so a pace
+  // that arrives with the profile after the first sentence still applies
+  // to it. A null factor is no clock: the sentence is never covered, or
+  // stays covered if the clock ran out before the pace was changed.
   const [timeLeft, setTimeLeft] = useState(0)
+  const factor = paceFactor(useReadingPace())
   // Whether the learner has pressed play on the phrase. Each phrase
   // arrives with the sentence held back behind the play button, the
   // clock still and the field shut; the press shows the sentence and
@@ -322,17 +331,18 @@ export default function ReadingRun({ session }) {
   // — it just covers the phrase text so recall keeps mattering for
   // anyone who didn't finish writing before the timer ran out.
   useEffect(() => {
-    if (stage !== 'reading' || !started) return
+    if (stage !== 'reading' || !started || factor == null) return
 
+    const tick = 0.1 / factor
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
-        const next = prev - 0.1
+        const next = prev - tick
         return next <= 0 ? 0 : next
       })
     }, 100)
 
     return clearTimer
-  }, [stage, started])
+  }, [stage, started, factor])
 
   function clearTimer() {
     if (timerRef.current) {
@@ -470,6 +480,7 @@ export default function ReadingRun({ session }) {
       stage={stage}
       data={data}
       timeLeft={timeLeft}
+      factor={factor}
       started={started}
       onPlay={startReading}
       answer={answer}
@@ -520,7 +531,7 @@ function Streak({ streak, t }) {
 // IS the start: the run above it is the route, and the route is what
 // decides there is a session to start at all.
 function SessionView({
-  t, source, level, domain, tier, tierSize, stage, data, timeLeft, started, onPlay, answer, setAnswer,
+  t, source, level, domain, tier, tierSize, stage, data, timeLeft, factor, started, onPlay, answer, setAnswer,
   feedback, score, streak, fare, error, lookup, setLookup, closeLookup, lines, asking, askBase,
   analysis, analysisLoading, backLabel,
   onExplain, explaining, explainError, showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
@@ -541,6 +552,7 @@ function SessionView({
     source === 'frequency' ? `${domain === 'vocab_jmdict' ? t.freqDomainJmdict : t.freqDomainDeck} · ${tierLabelFor(tier, tierSize)}` :
     t.byMastery
 
+  // Only a clock that ran can reach zero: an untimed one never ticks.
   const phraseCovered = stage === 'reading' && timeLeft <= 0
   const keys = useSentenceKeys({ reveal: true })
   // The asking's thread: a reopened line's, else the sentence on the
@@ -614,7 +626,14 @@ function SessionView({
               field is available the whole time the phrase is on
               screen, not only after the timer runs out — the reader
               can start writing as soon as they're ready. */}
-          <ReadingTimer timeLeft={timeLeft} total={data.display_seconds} covered={phraseCovered} t={t} />
+          <ReadingTimer
+            timeLeft={timeLeft * (factor ?? 1)}
+            total={data.display_seconds * (factor ?? 1)}
+            covered={phraseCovered}
+            untimed={factor == null}
+            t={t}
+            aside={<PaceChip session={session} />}
+          />
           <ReadingPrompt
             cardKey={data._uiKey}
             foot={{ left: where, right: t.readingTitle }}

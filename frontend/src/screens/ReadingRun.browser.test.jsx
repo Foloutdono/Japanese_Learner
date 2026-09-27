@@ -40,6 +40,19 @@ vi.mock('../lib/audio', async importOriginal => ({
   startAmbiance: () => {},
   stopAmbiance: () => {},
 }))
+// The learner's reading pace, set per test (stores/readingPace); a
+// press of the clock's chip sets it and re-renders its readers.
+const paced = vi.hoisted(() => {
+  const listeners = new Set()
+  return { pace: 'standard', listeners, set(p) { this.pace = p; listeners.forEach(l => l()) } }
+})
+vi.mock('../stores/readingPace', async () => {
+  const { useSyncExternalStore } = await import('react')
+  return {
+    useReadingPace: () => useSyncExternalStore(l => { paced.listeners.add(l); return () => paced.listeners.delete(l) }, () => paced.pace),
+    setReadingPace: vi.fn(async id => { paced.set(id) }),
+  }
+})
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: ReadingRun } = await import('./ReadingRun')
@@ -144,6 +157,7 @@ function registersShowing(root) {
 }
 
 beforeEach(() => {
+  paced.pace = 'standard'
   apiFetch.mockReset()
   analysisReply = Promise.resolve(res(ANALYSIS))
   apiFetch.mockImplementation((path, _session, init) => {
@@ -417,5 +431,88 @@ describe('ReadingRun — the play button', () => {
     expect(root.querySelector('.sentence')).toBeNull()
     expect(root.querySelector('input').disabled).toBe(true)
     expect(clock(root)).toBe('30.0s')
+  })
+})
+
+// ── The reading pace (Settings › Reading pace) ─────────────────
+// The clock runs in the browser: the server's display_seconds are the
+// standard pace's, and a slower pace is the same clock run slower, so
+// what it prints is still the seconds left.
+describe('ReadingRun — the reading pace', () => {
+  const clock = root => root.querySelector('.timer__label').textContent
+
+  it('gives a slow reader twice the time, counted down in real seconds', async () => {
+    paced.pace = 'slow'
+    const root = await run()
+    expect(clock(root)).toBe('60.0s')
+
+    await play(root)
+    await settle(500)
+    const left = parseFloat(clock(root))
+    expect(left).toBeLessThan(60)
+    // Half a second gone, not a whole one: the clock is the reader's.
+    expect(left).toBeGreaterThan(59)
+  })
+
+  it('never covers the sentence when nothing is timed', async () => {
+    paced.pace = 'untimed'
+    // A sentence the standard clock would cover in a fifth of a second.
+    apiFetch.mockImplementation(path => {
+      if (path.startsWith('/api/reading/batch')) return Promise.resolve(res({ phrases: [{ ...PHRASE, display_seconds: 0.2 }] }))
+      return Promise.resolve(res(ANALYSIS))
+    })
+    const root = await run()
+    expect(clock(root)).toBe(translations.fr.readingUntimed)
+    // No countdown to announce.
+    expect(root.querySelector('[role="timer"]')).toBeNull()
+
+    await play(root)
+    await settle(500)
+    expect(root.querySelector('.sentence').textContent).toBe(PHRASE.phrase)
+    expect(root.querySelector('.sentence--covered')).toBeNull()
+    expect(clock(root)).toBe(translations.fr.readingUntimed)
+  })
+
+  // The chip at the clock's end (the owner's pick B): each press the
+  // next pace, the clock answering at once, before play and during it.
+  it('turns the pace from the chip on the clock, the time following', async () => {
+    const root = await run()
+    const chip = () => root.querySelector('.timer .pace-chip')
+    expect(chip().textContent).toBe('×1')
+    expect(chip().getAttribute('aria-label')).toBe(translations.fr.readingPaceChip(translations.fr.readingPaceOption.standard))
+    expect(clock(root)).toBe('30.0s')
+
+    const seen = []
+    for (let i = 0; i < 4; i++) {
+      chip().click()
+      await settle(20)
+      seen.push([chip().textContent, clock(root)])
+    }
+    expect(seen).toEqual([
+      ['×1,5', '45.0s'],
+      ['×2', '60.0s'],
+      ['∞', translations.fr.readingUntimed],
+      ['×1', '30.0s'],
+    ])
+  })
+
+  it('keeps a covered sentence covered when the pace goes untimed', async () => {
+    apiFetch.mockImplementation(path => {
+      if (path.startsWith('/api/reading/batch')) return Promise.resolve(res({ phrases: [{ ...PHRASE, display_seconds: 0.2 }] }))
+      return Promise.resolve(res(ANALYSIS))
+    })
+    const root = await run()
+    await play(root)
+    await settle(400)
+    expect(root.querySelector('.sentence--covered')).not.toBeNull()
+
+    // Standard to untimed is three presses; none of them uncovers it.
+    for (let i = 0; i < 3; i++) {
+      root.querySelector('.timer .pace-chip').click()
+      await settle(20)
+    }
+    expect(root.querySelector('.pace-chip').textContent).toBe('∞')
+    expect(root.querySelector('.sentence--covered')).not.toBeNull()
+    expect(clock(root)).toBe(translations.fr.writeWhatYouSaw)
   })
 })
