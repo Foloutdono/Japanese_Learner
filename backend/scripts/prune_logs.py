@@ -30,7 +30,14 @@ from a guess about what looks old:
                      transcript in JSONB), and the cap is set at the
                      ceiling so the list view stays exactly as full as
                      it can be. Fetching one OLDER than the cap by id
-                     is the one thing this gives up.
+                     is the one thing this gives up. Since 2026-09-27
+                     both are held far tighter on every write, together,
+                     by core/history.py's HISTORY_LIMIT; these caps are
+                     the backstop behind it.
+  video_sessions     (by age) a session removed from the shelf is marked
+                     `deleted_at` and erased a day later -- on the
+                     learner's next write, or here for one who does not
+                     come back.
   ocr_usage          a per-(learner, day) counter, and routes/ocr.py
                      only ever touches CURRENT_DATE's row. Past days
                      are read by nothing.
@@ -83,6 +90,8 @@ BY_AGE = [
      "a claim lock still standing a week after its last update is a dead run"),
     ("video_session_jobs", "updated_at", 7,
      "same, for transcript generation"),
+    ("video_sessions", "deleted_at", 1,
+     "removed from the shelf a day ago, past its Undo (core/history.py)"),
     # The outer bound only. compact_events.py is what actually keeps
     # event_log small -- it folds rows into event_daily BEFORE deleting
     # them, and spares the once-per-learner families. This cut is a year
@@ -93,6 +102,10 @@ BY_AGE = [
     ("event_log", "at", 365,
      "足跡 past a year; scripts/compact_events.py is the real retention"),
 ]
+
+
+# The age policies a --user scope can narrow: the ones with a user_id.
+_USER_SCOPED = {"ocr_usage", "video_sessions"}
 
 
 def _user_clause(user_id: str | None, column: str = "user_id") -> tuple[str, dict]:
@@ -176,10 +189,10 @@ def main() -> int:
                 # These two carry no user_id column; a --user scope
                 # cannot narrow them, so it leaves them alone entirely
                 # rather than pruning another learner's rows under it.
-                if args.user and table != "ocr_usage":
+                if args.user and table not in _USER_SCOPED:
                     logger.info("  %-22s %6s (no user column; skipped when scoped)", table, "-")
                     continue
-                job_scope, job_params = _user_clause(args.user) if table == "ocr_usage" else ("", {})
+                job_scope, job_params = _user_clause(args.user) if table in _USER_SCOPED else ("", {})
                 n = _older_than(cur, table, column, days, job_scope, job_params, count_only=True)
                 logger.info("  %-22s %6d older than %d days   %s", table, n, days, why)
                 if n:
@@ -199,7 +212,7 @@ def main() -> int:
                     total += _trim(cur, table, a, b, scope, params)
                 else:
                     job_scope, job_params = (
-                        _user_clause(args.user) if table == "ocr_usage" else ("", {})
+                        _user_clause(args.user) if table in _USER_SCOPED else ("", {})
                     )
                     total += _older_than(cur, table, a, b, job_scope, job_params,
                                          count_only=False)

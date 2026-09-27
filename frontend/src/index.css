@@ -1622,7 +1622,7 @@
    The history is the page now: under the desk a row of chips (the kinds
    the shelf holds, and Kept) over a row per passage, its lead the
    video's still or the platform's glyph in a ring; on the desk the
-   console over cards (the 机 section). A session has no ✕. */
+   console over cards (the 机 section). Each has its ✕. */
 .anl-shelf {
   display: flex;
   flex-direction: column;
@@ -22394,7 +22394,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     font-size: var(--fs-caption);
     color: var(--text-secondary);
   }
-  /* The ✕ in the card's corner (a passage's; a session has none). */
+  /* The ✕ in the card's corner -- over a video's still, on its own
+     paper. */
   .anl-card__delete {
     position: absolute;
     top: var(--sp-2);

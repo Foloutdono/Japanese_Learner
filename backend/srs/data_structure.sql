@@ -496,7 +496,11 @@ CREATE TABLE video_sessions (
     -- of `source`: an uploaded .srt can name a video to play too. NULL
     -- means transcript-only, with no player.
     video_id      TEXT,
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- Removed from the analyser's shelf, by the learner's ✕ or past the
+    -- history's limit, and erased a day later (core/history.py). NULL is
+    -- a session on the shelf.
+    deleted_at    TIMESTAMPTZ
 );
 
 CREATE INDEX idx_video_sessions_user

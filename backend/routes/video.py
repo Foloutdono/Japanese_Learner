@@ -27,6 +27,7 @@ from pydantic import BaseModel
 
 from core.db import db_conn
 from core.auth import get_user_id
+from core.history import HISTORY_LIMIT, trim_history
 from core.srs_instance import srs
 from study import morphology
 from study.analysis import LOCAL_REV, analyze_local, attach_user_state
@@ -137,6 +138,10 @@ def _ensure_video_schema() -> None:
             # like video_id above.
             cur.execute("ALTER TABLE video_sessions ALTER COLUMN window_start DROP NOT NULL")
             cur.execute("ALTER TABLE video_sessions ALTER COLUMN window_end DROP NOT NULL")
+            # Removed from the shelf -- by the learner's ✕ or past the
+            # history's limit -- and erased a day later (core/history.py).
+            # NULL is a session on the shelf. Additive and idempotent.
+            cur.execute("ALTER TABLE video_sessions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ")
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_video_sessions_user
                 ON video_sessions(user_id, created_at DESC)
@@ -309,10 +314,15 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
                 UPDATE video_sessions
                    SET status = 'ready', sentences = %s, truncated = %s
                  WHERE id = %s
+             RETURNING user_id
                 """,
                 (json.dumps(analyzed, ensure_ascii=False), truncated, session_id),
             )
+            row = cur.fetchone()
             cur.execute("DELETE FROM video_session_jobs WHERE session_id = %s", (session_id,))
+            # On the shelf now: the oldest past the history's limit leaves it.
+            if row:
+                trim_history(cur, row[0])
         conn.commit()
         logger.info("Video session %s ready: %d sentences (%d truncated)",
                     session_id, len(analyzed), truncated)
@@ -503,7 +513,8 @@ def _load_session(session_id: int, user_id: str) -> dict | None:
                 """
                 SELECT source, source_ref, window_start, window_end, window_capped,
                        status, error, sentences, truncated, created_at, video_id
-                  FROM video_sessions WHERE id = %s AND user_id = %s
+                  FROM video_sessions
+                 WHERE id = %s AND user_id = %s AND deleted_at IS NULL
                 """,
                 (session_id, user_id),
             )
@@ -648,7 +659,7 @@ def get_video_session(session_id: int, user_id: str = Depends(get_user_id)):
 
 @router.get("/api/video/sessions")
 def list_video_sessions(user_id: str = Depends(get_user_id),
-                         limit: int = Query(20, ge=1, le=100)):
+                         limit: int = Query(HISTORY_LIMIT, ge=1, le=100)):
     """運行履歴 for 動画. The one thing missing that kept video out of the
     analyser's history panel entirely -- a session was reachable by id
     and by nothing else, so closing the tab lost it.
@@ -664,7 +675,8 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
 
     Only `ready` sessions are listed. A 'generating' one has nothing to
     reopen yet and a 'failed' one has nothing to reopen at all; both are
-    transient states the poll already surfaces where they happen.
+    transient states the poll already surfaces where they happen. Nor
+    is a removed one (`deleted_at`, core/history.py).
     """
     conn = db_conn()
     try:
@@ -675,7 +687,7 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
                        COALESCE(jsonb_array_length(sentences), 0) AS sentence_count,
                        sentences->0->>'text' AS first_line
                   FROM video_sessions
-                 WHERE user_id = %s AND status = 'ready'
+                 WHERE user_id = %s AND status = 'ready' AND deleted_at IS NULL
                  ORDER BY created_at DESC
                  LIMIT %s
                 """,
@@ -698,6 +710,48 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
         }
         for row_id, source, source_ref, video_id, truncated, created_at, sentence_count, first_line in rows
     ]
+
+
+@router.delete("/api/video/session/{session_id}")
+def delete_video_session(session_id: int, user_id: str = Depends(get_user_id)):
+    """The shelf's ✕ on a video. Marked, not deleted (core/history.py):
+    the shelf's Undo brings it back through /restore until it is erased
+    a day later. Idempotent, like the passage's DELETE."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE video_sessions SET deleted_at = NOW() "
+                "WHERE id = %s AND user_id = %s AND deleted_at IS NULL",
+                (session_id, user_id),
+            )
+            trim_history(cur, user_id)
+        conn.commit()
+    finally:
+        conn.close()
+    return {"ok": True}
+
+
+@router.post("/api/video/session/{session_id}/restore")
+def restore_video_session(session_id: int, user_id: str = Depends(get_user_id)):
+    """The shelf's Undo after a video's ✕: back on the shelf where it
+    stood, at its own date. Not trimmed here -- an Undo that the limit
+    took straight back would be no Undo; the next write trims."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE video_sessions SET deleted_at = NULL "
+                "WHERE id = %s AND user_id = %s AND deleted_at IS NOT NULL RETURNING id",
+                (session_id, user_id),
+            )
+            restored = cur.fetchone()
+        conn.commit()
+    finally:
+        conn.close()
+    if restored is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return {"ok": True}
 
 
 class ExplainPayload(BaseModel):
@@ -736,6 +790,7 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
                 "INSERT INTO phrase_history(user_id, phrase, source, source_ref) VALUES (%s, %s, %s, %s)",
                 (user_id, text, "video", source_ref),
             )
+            trim_history(cur, user_id)
         conn.commit()
     finally:
         conn.close()

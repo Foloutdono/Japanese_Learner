@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from core.db import db_conn
 from core.auth import get_user_id
 from core.srs_instance import srs
+from core.history import trim_history
 from study.llm_shared import chat, LLMUnavailable
 from content.grammar_points_data import localise
 from study.analysis import analyze_local, attach_user_state, merge_deep
@@ -489,6 +490,8 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
                 (user_id, phrase, payload.source),
             )
             row_id, created_at = cur.fetchone()
+            # The oldest past the history's limit leaves the shelf.
+            trim_history(cur, user_id)
         conn.commit()
     finally:
         conn.close()
