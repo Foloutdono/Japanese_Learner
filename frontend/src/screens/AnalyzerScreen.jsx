@@ -21,6 +21,7 @@ import { useLight } from '../components/analysis/useLight'
 import { Dots } from '../components/ui/Loading'
 import { DictionaryLookupSheet, DictionaryLookupBody } from '../components/dictionary/DictionaryDetail'
 import { grammarLookup, lookupKey, tokenLookup } from '../components/analysis/lookup'
+import { prefetchLookup } from '../lib/dictionaryLookup'
 import { useMining } from '../components/analysis/useMining'
 import { useFavorites } from '../hooks/useFavorites'
 import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
@@ -109,7 +110,7 @@ const FURIGANA_LABEL = { all: 'furiganaAll', unknown: 'furiganaUnknown', none: '
 // bench and the subtitle dock -- and exactly one of them is ever
 // mounted: the platform the segmented control over the page selects.
 export default function AnalyzerScreen({ session }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const mining = useMining(session)
   // The dictionary's shelf (plan 093), so the entry a word or a point
   // opens here can be kept as it can in the dictionary: its ＋ offers
@@ -430,6 +431,21 @@ export default function AnalyzerScreen({ session }) {
     // its card (plan 134).
     setSide('card')
   }, [focusIndex, passageKey])
+
+  // 机: the right column follows the word in focus, and each word's
+  // entry was a round trip of its own, fetched only once it was shown.
+  // The focused sentence's words, and the next one's, are asked for as
+  // the sentence comes into focus, so walking them draws each entry at
+  // once (lib/dictionaryLookup).
+  useEffect(() => {
+    if (!wide) return
+    for (const sentence of [sentences[focusIndex], sentences[focusIndex + 1]]) {
+      for (const tok of sentence?.tokens ?? sentence?.words ?? []) {
+        const target = tokenLookup(tok)
+        if (target) prefetchLookup(session, { ...target, lang })
+      }
+    }
+  }, [wide, sentences, focusIndex, session, lang])
 
   useEffect(() => {
     // A NEW Passage starts with the whole line visible. A filter or a
@@ -1377,6 +1393,7 @@ export default function AnalyzerScreen({ session }) {
             favorites={favorites}
             onExit={lookup ? closeLookup : undefined}
             band
+            cached
           />
         ) : (
           <p className="anl-desk__none">{t.dockNoEntry}</p>

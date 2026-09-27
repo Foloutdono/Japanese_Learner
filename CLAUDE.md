@@ -1011,7 +1011,9 @@ runtime purpose. Two consequences worth knowing:
   `src/practiceStation.wide.test.jsx`,
   `src/practiceStation.desktop.test.jsx`, `src/deskfree.phone.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  **160** is 番号, a graded
+  **160** is 番号 (numbered 160 because 158 went to the mark redrawn
+  and 159 to the practice stations while it was open; its commits'
+  messages say 158 and 159), a graded
   sentence's breakdown numbered as the
   analyser's (the owner's pick A of five drawn on the canvas "Tsuji
   Breakdown Panel"): the line framing each rule under its number, a row

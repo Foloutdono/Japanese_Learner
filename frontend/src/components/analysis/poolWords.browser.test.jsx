@@ -43,7 +43,7 @@ describe('a word past the course in the analyser', () => {
     // Off-deck until taken up: the same rule a word the course lacks
     // has always had under it.
     expect(byWord['真っさら'].querySelector('.anl-words__word--offdeck')).toBeTruthy()
-    // なった is named as the dictionary names it (plan 159).
+    // なった is named as the dictionary names it (plan 160).
     expect(byWord['なる'].querySelector('.anl-words__lvl').textContent).toBe('N5')
   })
 

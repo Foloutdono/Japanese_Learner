@@ -1934,7 +1934,18 @@
    theme (3.97:1 measured by the contrast guard); the focused word's
    reading takes the primary ink, which the tint already raises. */
 .tok--on .tok__furi { color: var(--text-primary); }
-/* 字幕の流れ — the words lit as they are said (SubtitleLine). While the
+/* 字幕の流れ — the subtitle's words sit under a mask at all times,
+   an opaque one while the video is outside the line, which takes
+   nothing away. A masked glyph is drawn in a layer of its own, and a
+   browser smooths a layer's text in greyscale where the plain line has
+   subpixel (ClearType on Windows): the line lit whole and the line
+   after its cue ended were two renderings, and every word twitched as
+   the sweep let go of it. */
+.anl-subs__line .tok__word,
+.anl-subs__line .tok__furi {
+  mask-image: linear-gradient(#000, #000);
+}
+/* The words lit as they are said (SubtitleLine). While the
    video is inside the line (data-sung), the words to come are faded,
    the word being said fills from its first letter to its last, and the
    words said stand whole: every word's --said, written each frame
@@ -9699,7 +9710,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   color: var(--text-secondary);
 }
-/* The numbered line (plan 159): each rule framed on its words, as the
+/* The numbered line (plan 160): each rule framed on its words, as the
    analyser's subtitle frames them (.anl-subs__pt), set on the ground in
    a well of its own. The number heads its frame, inside it: at the
    frame's corner, as the subtitle has it, it stood on the next word's
@@ -9835,7 +9846,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
-/* An ending the word was written with (ます, た; plan 159): a quiet
+/* An ending the word was written with (ます, た; plan 160): a quiet
    tag after its meaning, the rule's name as the sentence wrote it. */
 .bkd-row__ending {
   margin-left: var(--sp-3);
@@ -9854,7 +9865,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     grid-template-areas: "word reading meaning lvl";
   }
 }
-/* The rules (GrammarPoints, plans 095, 134 and 159): a numbered card
+/* The rules (GrammarPoints, plans 095, 134 and 160): a numbered card
    per point under the word rows, the analyser's G2 at every width --
    the number, the pattern and the level on one line, what it does under
    them, then the words it is made of as chips and the bought line on
@@ -25053,7 +25064,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      plan 115): the wrapper adds no box, so the breakdown, the sentence
      line and the entry stand in the side's own column rhythm. */
   .desk-lookup { display: contents; }
-  /* The breakdown down the panel's height (plan 159): the rows and the
+  /* The breakdown down the panel's height (plan 160): the rows and the
      cards at its head, the button that buys the explanation on its
      floor, where the column had stood empty under a small button. The
      wrapper SideLookup hides while an entry is open stays hidden. */

@@ -67,7 +67,7 @@ describe('PassageBreakdown', () => {
     // The ruby line replaces the plain sentence rather than repeating it.
     expect(first.querySelector('.bkd-line')).toBeTruthy()
     expect(first.querySelector('.bkd-passage__text .prose__jp')).toBeNull()
-    // A row per word: 駅 and 会いました; で is its card's (plan 159).
+    // A row per word: 駅 and 会いました; で is its card's (plan 160).
     expect(first.querySelectorAll('.bkd-row')).toHaveLength(2)
     expect(first.querySelector('.bkd__en').textContent).toBe('I met at the station.')
     expect(first.querySelector('.prose__ai').textContent).toBe('で marks the place.')
@@ -90,7 +90,7 @@ describe('PassageBreakdown', () => {
     expect(items()[0].querySelector('.bkd-rows')).toBeNull()
     expect(items()[0].querySelector('.prose__jp').textContent).toBe('駅で会いました。')
     // A row per word: the particle and the copula are no words of
-    // their own (plan 159).
+    // their own (plan 160).
     expect([...items()[1].querySelectorAll('.bkd-row__word')].map(el => el.textContent))
       .toEqual(['電車', '新しい'])
     // A sentence with nothing worth noting prints no note line.

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { LEVEL_COLORS } from './levelColors'
 import { shortDate } from '../../lib/formatDate'
 import { useLang } from '../../LangContext'
-import { apiFetch } from '../../lib/api'
+import { cachedLookup, fetchLookup, pickEntry } from '../../lib/dictionaryLookup'
 import { api } from '../../lib/origin'
 import { FuriganaParts, splitReadingTokens } from '../study/Readings'
 import { joinRuns } from '../../domain/rubyRuns'
@@ -1470,34 +1470,45 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 // otherwise dock whatever word the search happened to rank first — an
 // unrelated entry printed as the answer. The sheets, opened on a
 // learner's own tap, keep the nearest match.
-function useDictionaryLookup(session, term, category, lang, active, kana, id, exact = false) {
-  const [state, setState] = useState({ entry: null, loading: false, error: false })
+function useDictionaryLookup(session, term, category, lang, active, kana, id, exact = false, cached = false) {
+  // `cached`: an entry already in hand (lib/dictionaryLookup: asked for
+  // ahead, or opened a moment ago) is drawn on the first frame, with no
+  // loading line between one word and the next. Only the analyser asks:
+  // elsewhere a card may have been reviewed since, and its record must
+  // be read again.
+  const inHand = () => {
+    if (!cached || !active || !category || (!term && !id)) return null
+    const data = cachedLookup(session, { term, kana, category, id, lang })
+    if (!data) return null
+    const match = pickEntry(data, { term, kana, id, exact })
+    return { entry: match, loading: false, error: !match }
+  }
+  const [state, setState] = useState(() => inHand() ?? { entry: null, loading: false, error: false })
 
   useEffect(() => {
     if (!active || !category || (!term && !id)) return
     let cancelled = false
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- this setState is the "start of the fetch" reset (clears any previous term's stale result and flips on the loading spinner) that has to happen synchronously with kicking off the fetch below; it's inseparable from the network call, not a standalone "reset on id change" this could be replaced by a key-remount for.
+    const params = { term, kana, category, id, lang }
+    const data = cached ? cachedLookup(session, params) : undefined
+    if (data) {
+      const match = pickEntry(data, { term, kana, id, exact })
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the entry in hand for new params, set with them; same shape as the fetch's own reset below.
+      setState(s => (s.entry === match && !s.loading ? s : { entry: match, loading: false, error: !match }))
+      return
+    }
+    // This setState is the "start of the fetch" reset (clears any previous term's stale result and flips on the loading spinner) that has to happen synchronously with kicking off the fetch below; it's inseparable from the network call, not a standalone "reset on id change" this could be replaced by a key-remount for.
     setState({ entry: null, loading: true, error: false })
 
-    const params = new URLSearchParams({ q: term ?? '', page: 0, limit: 10, lang: lang ?? '', category })
-    if (kana) params.set('kana', kana)
-    if (id) params.set('id', id)
-    apiFetch(`/api/dictionary?${params.toString()}`, session)
-      .then(r => r.json())
-      .then(data => {
+    fetchLookup(session, params, { keep: cached })
+      .then(result => {
         if (cancelled) return
-        const results = data.results || []
-        const match = id
-          ? (results.find(e => e.raw_id === id) ?? null)
-          : (kana && results.find(e => e.kanji === term && e.kana === kana))
-            ?? results.find(e => e.kanji === term || e.kana === term)
-            ?? (exact ? null : results[0] ?? null)
+        const match = pickEntry(result, { term, kana, id, exact })
         setState({ entry: match, loading: false, error: !match })
       })
       .catch(() => { if (!cancelled) setState({ entry: null, loading: false, error: true }) })
 
     return () => { cancelled = true }
-  }, [active, term, category, session, lang, kana, id, exact])
+  }, [active, term, category, session, lang, kana, id, exact, cached])
 
   return state
 }
@@ -1536,7 +1547,7 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id, ex
 // entry at its head. Shared by the sheet (a portal over a quiz or the
 // catalogue) and the body the desk docks beside the catalogue (plan
 // 114), so the two walk their doors the same way.
-function useLookupStack(session, { term, kana, category, id }, exact = false) {
+function useLookupStack(session, { term, kana, category, id }, exact = false, cached = false) {
   const { lang } = useLang()
   // Reset by the caller remounting on a new term (the key it is opened
   // with is the term itself).
@@ -1544,7 +1555,7 @@ function useLookupStack(session, { term, kana, category, id }, exact = false) {
   const here = stack[stack.length - 1]
   // Only the first lookup is the unasked one: a door opened from it is
   // the learner's own tap and keeps the nearest match.
-  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id, exact && stack.length === 1)
+  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id, exact && stack.length === 1, cached)
 
   const open = (nextTerm, nextCategory, nextKana) => {
     if (!nextTerm) return
@@ -1644,8 +1655,8 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
 // way. No portal, no scrim, no dialog: it is a column's content.
 // `band` (plan 126): the entry in the desk run's band layout -- the plate
 // and the learner's record in a top panel, the dictionary under it.
-export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false, band = false }) {
-  const look = useLookupStack(session, { term, kana, category, id }, exact)
+export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false, band = false, cached = false }) {
+  const look = useLookupStack(session, { term, kana, category, id }, exact, cached)
   // `escBack` (plan 123): a host with no way out of its own -- the run's
   // session panel, docked beside the card -- lets Escape step back out
   // of the doors opened in it, to the entry it was opened on. The key
