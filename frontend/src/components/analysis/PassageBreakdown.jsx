@@ -66,7 +66,7 @@ export function PassageBreakdown({ sentences, t, openIndex, setOpenIndex, onToke
             >
               <div className="bkd-passage__text">
                 {open
-                  ? <SentenceLine analysis={sentence.analysis} text={sentence.jp} t={t} onTokenClick={onTokenClick} lit={lit} />
+                  ? <SentenceLine analysis={sentence.analysis} text={sentence.jp} t={t} onTokenClick={onTokenClick} lit={lit} numbered />
                   : <span className="prose__jp" lang="ja">{sentence.jp}</span>}
                 {sentence.translation && <span className="bkd__en">{sentence.translation}</span>}
               </div>
@@ -86,10 +86,7 @@ export function PassageBreakdown({ sentences, t, openIndex, setOpenIndex, onToke
               <div id={bodyId} className="bkd-passage__body">
                 {sentence.analysis?.available && (
                   <>
-                    <WordRows
-                      analysis={sentence.analysis} t={t} onTokenClick={onTokenClick} onGrammarOpen={openGrammar}
-                      lit={lit} onLight={light}
-                    />
+                    <WordRows analysis={sentence.analysis} t={t} onTokenClick={onTokenClick} />
                     <GrammarPoints analysis={sentence.analysis} t={t} lit={litKey} onLight={light} onOpen={openGrammar} />
                   </>
                 )}

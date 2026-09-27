@@ -323,6 +323,40 @@ class CompoundParticleTests(unittest.TestCase):
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class NoGoodVerbTests(unittest.TestCase):
+    """Plan 158. The negated verb of a "must" or a "must not" is the
+    point's: 〜てはいけません's いけ took 行く, so いけません read "to go"
+    under a sentence that forbids talking. No card, so the row is the
+    point's."""
+
+    def test_no_card_for_the_verb_of_a_must_or_a_must_not(self) -> None:
+        for sentence, word in (
+            ("ここで話してはいけません。", "いけ"),
+            ("早く寝なくてはいけない。", "いけ"),
+            ("宿題をしなければなりません。", "なり"),
+            ("明日までに行かなければならない。", "なら"),
+            ("そういうわけにはいかない。", "いか"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertNotIn(word, matches(sentence))
+
+    def test_the_same_verbs_as_verbs_keep_their_cards(self) -> None:
+        # 行く going and なる becoming, beside the very points that take
+        # the card off their negated twins.
+        self.assertEqual(matches("学校に行ってはいけない。")["行っ"]["raw_id"], "vocab_N5_行く_いく")
+        self.assertEqual(matches("明日までに行かなければならない。")["行か"]["raw_id"], "vocab_N5_行く_いく")
+        self.assertEqual(matches("先生になってはいけない。")["なっ"]["raw_id"], "vocab_N5__なる")
+
+    def test_the_points_are_read_off_the_catalogue(self) -> None:
+        from study.grammar_detect import no_good_points
+        points = no_good_points()
+        for pattern in ("〜てはいけません", "〜ないといけない", "〜なければなりません", "〜てはならない"):
+            self.assertIn(pattern, points)
+        # なる that means "to become" is never one of them.
+        self.assertNotIn("〜くなる／〜になる", points)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheLowerTwinTests(unittest.TestCase):
 
     def test_suru_naru_ii_are_the_n5_cards_in_every_form(self) -> None:

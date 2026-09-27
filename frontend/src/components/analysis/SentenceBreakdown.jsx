@@ -7,10 +7,10 @@ import { GrammarChips } from './GrammarChips'
 import { GrammarPoints } from './GrammarPoints'
 import { LevelBadge } from './LevelBadge'
 import { SpeakButton } from './SpeakButton'
-import { rowsOf } from './rows'
+import { wordRowsOf } from './rows'
 import { grammarGloss } from './grammarGloss'
-import { coversToken, pointKey } from './grammarSpans'
-import { isUnknownToken, tokState } from './tokens'
+import { coversToken, numberedPointsOf } from './grammarSpans'
+import { isUnknownToken, lineState, tokState, wordGloss } from './tokens'
 import { useLight } from './useLight'
 
 export function Legend({ t }) {
@@ -26,125 +26,147 @@ export function Legend({ t }) {
   )
 }
 
-// ── The rows (plan 084) ───────────────────────────────────────
-// The word-by-word breakdown as the practice modes show it: the
-// sentence as a ruby line, its translation, then one row per WORD --
-// surface, reading, what it does here, its level -- and the note last.
-// The grouping of morphemes into words is rows.js's rowsOf.
+// ── The rows (plan 084; numbered since plan 158) ─────────────
+// The word-by-word breakdown as the practice modes show it, laid out as
+// the analyser's (plan 134, the owner's pick A of five drawn on the
+// canvas "Tsuji Breakdown Panel"): the sentence as a ruby line with
+// each rule framed on its words under its number, its translation, one
+// row per WORD -- its dictionary form, reading, meaning, level -- then
+// a numbered card per rule, and Explain at the foot. The grouping of
+// morphemes into words is rows.js's.
 
 // The sentence as its tokens, the reading over each kanji, the SRS
-// speaking through the 2px rule under a word (tokState's classes, the
+// speaking through the 2px rule under a word (lineState's classes, the
 // analyzer's own convention). A deck word is a door to its entry; a
 // particle is text. Without an analysis the sentence prints plain,
 // exactly as the card would have printed it -- never a blank.
 //
 // `lit` is the grammar point whose words are lit (useLight): a token
 // one of its segments is written on wears the grammar line's tint.
-export function SentenceLine({ analysis, text, t, onTokenClick, lit = null }) {
+//
+// `numbered` (plan 158): each point of numberedPointsOf is framed on
+// the run of words it sits on, its number at the frame's head -- the
+// number its card under the words carries -- as the analyser's
+// subtitle frames them (SubtitleLine). A word two points cover is
+// framed once, by the first; the frame then carries every number whose
+// point begins in it.
+export function SentenceLine({ analysis, text, t, onTokenClick, lit = null, numbered = false }) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
   if (analysis?.available === false || !tokens.length) {
     return <span className="prose__jp" lang="ja">{text ?? analysis?.text ?? ''}</span>
   }
+  const grammar = analysis?.grammar ?? []
+  const word = (w, i) => {
+    const cls = `bkd-tok bkd-tok--${lineState(w, grammar)}${lit && coversToken(lit, w) ? ' bkd-tok--lit' : ''}`
+    const parts = w.furigana ?? [{ text: w.surface }]
+    return w.vocab_match && onTokenClick ? (
+      <button
+        key={i}
+        type="button"
+        className={`${cls} bkd-tok--door`}
+        onClick={() => onTokenClick(w)}
+        aria-label={t.detailsForToken(w.surface)}
+      >
+        <FuriganaParts parts={parts} />
+      </button>
+    ) : (
+      <span key={i} className={cls}><FuriganaParts parts={parts} /></span>
+    )
+  }
+  const points = numbered ? numberedPointsOf(analysis) : []
+  const owner = tokens.map(w => points.findIndex(p => coversToken(p, w)))
+  const firstOf = points.map(p => tokens.findIndex(w => coversToken(p, w)))
+  const out = []
+  let i = 0
+  while (i < tokens.length) {
+    const p = owner[i]
+    if (p === -1) {
+      out.push(word(tokens[i], i))
+      i += 1
+      continue
+    }
+    let j = i
+    while (j + 1 < tokens.length && owner[j + 1] === p) j += 1
+    const numbers = firstOf
+      .map((first, q) => (first >= i && first <= j ? q + 1 : null))
+      .filter(Boolean)
+    const run = []
+    for (let k = i; k <= j; k += 1) run.push(word(tokens[k], k))
+    out.push(
+      <span key={`pt-${i}`} className="bkd-frame">
+        {numbers.length > 0 && <span className="bkd-frame__n" aria-hidden="true">{numbers.join('·')}</span>}
+        {run}
+      </span>,
+    )
+    i = j + 1
+  }
   return (
-    <div className="bkd-line" lang="ja" role="group" aria-label={analysis.text ?? text}>
-      {tokens.map((w, i) => {
-        const cls = `bkd-tok bkd-tok--${tokState(w)}${lit && coversToken(lit, w) ? ' bkd-tok--lit' : ''}`
-        const parts = w.furigana ?? [{ text: w.surface }]
-        return w.vocab_match && onTokenClick ? (
-          <button
-            key={i}
-            type="button"
-            className={`${cls} bkd-tok--door`}
-            onClick={() => onTokenClick(w)}
-            aria-label={t.detailsForToken(w.surface)}
-          >
-            <FuriganaParts parts={parts} />
-          </button>
-        ) : (
-          <span key={i} className={cls}><FuriganaParts parts={parts} /></span>
-        )
-      })}
+    <div
+      className={`bkd-line${numbered ? ' bkd-line--numbered' : ''}`}
+      lang="ja"
+      role="group"
+      aria-label={analysis.text ?? text}
+    >
+      {out}
     </div>
   )
 }
 
-// One row per word. The reading is the run's own kana and is left out
-// when it would only repeat the word (は, ともだち); the gloss is the
-// model's contextual one where it was bought or came with the text,
-// else the deck's own -- a learner should not need a model to know
-// what 電車 means. The level is the deck's, as a plain badge.
-//
-// `lit`/`onLight` (plan 095): the row that opens a marker, and the
-// marker chip beside a word row, light the particle in the line above
-// while hovered or focused, exactly as a chip does -- see useLight.
+// One row per word (rows.js's wordRowsOf): the particles, the copula
+// and the words a construction is written on are its numbered card's,
+// not rows of their own (plan 158; a row with no meaning and nothing to
+// open was what 〜てはいけません's て and は drew). The word is named as
+// the dictionary names it -- 話す and its reading はなす, where the
+// sentence wrote 話し -- and means what it means in the learner's
+// language (wordGloss): the model's contextual gloss where it was
+// bought, else the card's own. The endings written on it (ます, た)
+// ride it as quiet tags; the level is the card's, as a plain badge.
 //
 // The whole row is the door (plan 096): a row that opens something is
 // a <button> laid out as the same grid, with the word, the reading,
 // the gloss and the level as plain spans inside it. A row that opens
 // nothing stays a <div>.
-export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null, onLight }) {
-  // Guarded like GrammarChips': the rows are drawn under a bare render
+export function WordRows({ analysis, t, onTokenClick }) {
+  // Guarded like GrammarPoints': the rows are drawn under a bare render
   // in the tests, with no provider above them.
   const lang = useLang()?.lang
-  const light = point => (onLight ? {
-    onMouseEnter: () => onLight(point),
-    onMouseLeave: () => onLight(null),
-    onFocus: () => onLight(point),
-    onBlur: () => onLight(null),
-  } : {})
-  const rows = rowsOf(analysis?.tokens ?? analysis?.words ?? [])
+  const rows = wordRowsOf(analysis)
   if (!rows.length) return null
   return (
     <div className="bkd-rows">
       {rows.map((row, i) => {
         const head = row.head
-        const state = tokState(head)
-        const reading = row.reading !== row.surface ? row.reading : ''
-        const markers = (onGrammarOpen ? row.markers : null) ?? []
-        // A row with no deck entry behind it used to be the one row
-        // that went nowhere -- 「へ」 is not a word anyone mines, so
-        // pressing it did nothing while the rule it IS sat in a chip
-        // below, unattached to the particle demonstrating it. When the
-        // row is a marker and nothing else, the marker is what the row
-        // opens, in the same place and with the same affordance a word
-        // opens its entry. A particle never folds into the word before
-        // it (rows.js), so a marker is a row of its own and no chip
-        // rides beside a word any more.
-        const door = !head.vocab_match && markers.length === 1 ? markers[0] : null
-        // The meaning: the model's contextual gloss where it was
-        // bought, else the deck's own, else -- for the row that is a
-        // marker and nothing else -- the marker's gloss (plan 095).
-        // 「は」 used to be the one row with an empty meaning cell,
-        // and "marks the sentence topic" is precisely what a learner
-        // looking at that row wants to read there.
-        const meaning = head.meaning ?? head.vocab_match?.entry?.meaning ?? (door ? grammarGloss(door, lang) : '')
-        const level = head.vocab_match?.level ?? door?.level ?? null
-        // The DOOR IS THE ROW, not the word in it (plan 096). The word
-        // was a 30x24px target on a 65px-tall row, with the reading,
-        // the gloss and the level beside it all dead to the touch --
-        // three quarters of what a learner is looking at when they
-        // reach for it. The word keeps the affordance it always had
-        // (the rule under it, the pigment on hover) and is now drawn
-        // by the row's own state; the row carries the press.
-        const opens = head.vocab_match && onTokenClick
-          ? () => onTokenClick(head)
-          : door
-            ? () => onGrammarOpen(door)
-            : null
-        // A marker's row lights the particle in the line above while
-        // it is hovered or focused -- on the row now, so the whole
-        // row lights it (see useLight).
-        const doorLit = door && lit && pointKey(lit) === pointKey(door)
+        const entry = head.vocab_match?.entry
+        const name = entry ? (entry.kanji || entry.kana || row.surface) : row.surface
+        // The card's reading beside the card's name; the sentence's own
+        // where the card names none (a name the course has no card for).
+        const reading = entry?.kana
+          ? (entry.kana !== name ? entry.kana : '')
+          : (row.reading !== row.surface ? row.reading : '')
+        const meaning = wordGloss(head, lang)
+        const level = head.vocab_match?.level ?? null
+        // The ending as the sentence wrote it (ます, ませんでした), its
+        // rule's gloss said to a screen reader in the row's name.
+        const endings = row.endings.map(p => ({
+          text: row.tokens.filter(tok => coversToken(p, tok)).map(tok => tok.surface).join(''),
+          gloss: grammarGloss(p, lang),
+        }))
+        const opens = head.vocab_match && onTokenClick ? () => onTokenClick(head) : null
         const body = (
           <>
             <span
-              className={`bkd-row__word bkd-tok bkd-tok--${state}${opens ? ' bkd-tok--door' : ''}${doorLit ? ' bkd-tok--lit' : ''}`}
+              className={`bkd-row__word bkd-tok bkd-tok--${tokState(head)}${opens ? ' bkd-tok--door' : ''}`}
               lang="ja"
             >
-              {row.surface}
+              {name}
             </span>
             {reading && <span className="bkd-row__reading" lang="ja">{reading}</span>}
-            <span className="bkd-row__meaning">{meaning}</span>
+            <span className="bkd-row__meaning">
+              {meaning}
+              {endings.map((e, k) => (
+                <span key={k} className="bkd-row__ending" lang="ja">＋{e.text}</span>
+              ))}
+            </span>
             {level && <span className="type-badge bkd-row__lvl">{level}</span>}
           </>
         )
@@ -154,17 +176,12 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null,
         // so the reading and the gloss -- which were plain text beside
         // the old word button and read as such -- have to be said here
         // or they are lost to a screen reader entirely.
-        const label = [t.detailsForToken(row.surface), reading, meaning, level]
-          .filter(Boolean).join(' — ')
+        const label = [
+          t.detailsForToken(row.surface), reading, meaning,
+          ...endings.map(e => [e.text, e.gloss].filter(Boolean).join(' : ')), level,
+        ].filter(Boolean).join(' — ')
         return (
-          <button
-            key={i}
-            type="button"
-            className="bkd-row bkd-row--door"
-            onClick={opens}
-            aria-label={label}
-            {...(door ? light(door) : {})}
-          >
+          <button key={i} type="button" className="bkd-row bkd-row--door" onClick={opens} aria-label={label}>
             {body}
           </button>
         )
@@ -184,17 +201,18 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null,
 //               FocusCard) and the practice modes to 'rows' (plan
 //               084), which retired the one-card-at-a-time 'stepper'
 //               the practice modes used to share.
-//   'rows'    — the practice modes' shape (plan 084): the ruby line,
-//               the sentence's `translation`, one row per word, the
-//               grammar spotted (and, once bought, what each rule does
-//               here -- GrammarNotes, plan 095), and the `note` (else
-//               the deep tier's explanation) last and quiet.
-//               `sentenceText` is what prints when there is no
-//               analysis to draw from.
+//   'rows'    — the practice modes' shape (plan 084, numbered as the
+//               analyser's since plan 158): the ruby line with each
+//               rule framed and numbered on its words, the sentence's
+//               `translation`, one row per word, a numbered card per
+//               rule (and, once bought, what each does here -- plan
+//               095), and the `note` (else the deep tier's
+//               explanation) last and quiet. `sentenceText` is what
+//               prints when there is no analysis to draw from.
 //
-// `onGrammarOpen(point)` makes each grammar chip a door to the point's
-// dictionary entry (GrammarChips' onOpen); the screen decides what
-// opens — a DictionaryLookupSheet on the point's raw_id.
+// `onGrammarOpen(point)` makes each grammar card a door to the point's
+// dictionary entry; the screen decides what opens — a
+// DictionaryLookupSheet on the point's raw_id.
 //
 // `onExplain` (plan 095, owner-directed) makes the explanation an
 // option in the rows: the practice modes fetch the local tier only,
@@ -218,21 +236,20 @@ export function SentenceBreakdown({
     const noteText = note ?? analysis?.explanation ?? ''
     return (
       <div className="bkd">
-        <SentenceLine analysis={analysis} text={sentenceText} t={t} onTokenClick={onTokenClick} lit={light.lit} />
+        <SentenceLine analysis={analysis} text={sentenceText} t={t} onTokenClick={onTokenClick} lit={light.lit} numbered />
         {translation && <span className="bkd__en">{translation}</span>}
-        {available && (
-          <WordRows
-            analysis={analysis} t={t} onTokenClick={onTokenClick} onGrammarOpen={openGrammar}
-            lit={light.lit} onLight={light.onLight}
-          />
-        )}
+        {available && <WordRows analysis={analysis} t={t} onTokenClick={onTokenClick} />}
         {available && (
           <GrammarPoints analysis={analysis} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openGrammar} />
         )}
+        {/* The foot of the column (plan 158): the explanation where it
+            was bought, else the button that buys it -- the one thing
+            left to do, so on the desk it stands on the panel's floor
+            rather than under the last card (.bkd__foot). */}
         {noteText
-          ? <span className="prose__ai">{noteText}</span>
+          ? <span className="prose__ai bkd__foot">{noteText}</span>
           : onExplain && available && (
-            <div className="bkd__explain">
+            <div className="bkd__explain bkd__foot">
               {explainError && <span className="hint bkd__explain-hint">{explainError}</span>}
               {/* Full width on a phone, shrink-wrapped from the tablet
                   rung up (plan 096, see .bkd__explain): a 128px box

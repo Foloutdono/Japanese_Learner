@@ -3511,6 +3511,41 @@ def compound_particles() -> frozenset[str]:
     return frozenset(out)
 
 
+# The verbs a "must" or a "must not" is built on, negated: いけない is
+# "no good", not 行く "to go" unable; ならない is "must", not 成る "to
+# become" (plan 158). UniDic files the いけ of いけません under 行く, and
+# a fuller dictionary under 行ける; both are here.
+NO_GOOD_VERBS = frozenset({"行く", "行ける", "成る"})
+_NEGATIONS = frozenset({"ない", "ず", "ぬ"})
+
+
+@lru_cache(maxsize=1)
+def no_good_points() -> frozenset[str]:
+    """The points written with a negated いける or なる that no longer
+    means itself: 〜てはいけません, 〜ないといけない, 〜なければなりません,
+    〜てはならない, 〜にほかならない (plan 158). The verb's card is not the
+    word's meaning there -- いけません read "to go" under a sentence
+    that forbids talking -- so the breakdown gives it none, as it gives
+    none to について's つい (compound_particles), and its row is the
+    point's. Read off each pattern as the tokenizer cuts it, never listed
+    by hand: a point added to the catalogue joins by being written so.
+    Not 〜くなる, whose なる is "to become"."""
+    if not morphology.MORPHOLOGY_AVAILABLE:
+        return frozenset()
+    out = set()
+    for level in LEVELS:
+        for point in GRAMMAR_POINTS_BY_LEVEL.get(level, []):
+            pattern = point.get("pattern", "")
+            for alt in alternatives(pattern):
+                for piece in (p.strip(_TRIM) for p in alt.split("〜")):
+                    tokens = morphology.tokenize(piece) if piece else None
+                    for k, tok in enumerate(tokens or []):
+                        if (tok.pos == "verb" and tok.lemma in NO_GOOD_VERBS
+                                and any(t.lemma in _NEGATIONS for t in tokens[k + 1:])):
+                            out.add(pattern)
+    return frozenset(out)
+
+
 @lru_cache(maxsize=None)
 def can_find(pattern: str) -> bool:
     """Whether the detector may say a sentence does NOT use `pattern`

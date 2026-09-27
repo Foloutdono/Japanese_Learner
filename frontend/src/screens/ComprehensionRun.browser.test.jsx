@@ -238,8 +238,10 @@ describe('ComprehensionRun', () => {
     // one row), the translation and the note.
     expect(items[0].classList.contains('bkd-passage__item--open')).toBe(true)
     expect(items[0].querySelector('.bkd-line').textContent).toContain('駅')
+    // A row per word, named as the dictionary names it; the particles
+    // are their numbered cards' (plan 158).
     expect([...items[0].querySelectorAll('.bkd-row__word')].map(el => el.textContent))
-      .toEqual(['駅', 'で', '友達', 'を', '待ちました'])
+      .toEqual(['駅', '友達', '待つ'])
     expect(items[0].querySelector('.bkd__en').textContent).toBe(EXERCISE.breakdown[0].translation)
     expect(items[0].querySelector('.prose__ai').textContent).toBe(EXERCISE.breakdown[0].note)
     // The second is closed -- its sentence over its translation -- and

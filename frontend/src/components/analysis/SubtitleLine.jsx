@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { tokState, tokFurigana } from './tokens'
+import { lineState, tokFurigana } from './tokens'
 import { coversToken, numberedPointsOf } from './grammarSpans'
 import { tokenTimes, sungAt } from './wordTimes'
 
@@ -7,7 +7,7 @@ import { tokenTimes, sungAt } from './wordTimes'
 // The desk's analyser draws the focused Sentence where a subtitle
 // stands: on the player's sumi, under the video, the reading over each
 // word that needs one and the SRS speaking through the rule under it,
-// as the stage's line does (tokState). Each word is a button that puts
+// as the stage's line does (lineState). Each word is a button that puts
 // it in focus -- the card beside the words list and the entry in the
 // right column follow it.
 //
@@ -40,7 +40,7 @@ export function SubtitleLine({ analysis, index, setIndex, lit = null, t, clock =
         key={i}
         type="button"
         onClick={() => setIndex(i)}
-        className={`tok tok--${tokState(w)}${i === index ? ' tok--on' : ''}${lit && coversToken(lit, w) ? ' tok--lit' : ''}${sungClass(sung, i)}`}
+        className={`tok tok--${lineState(w, analysis?.grammar)}${i === index ? ' tok--on' : ''}${lit && coversToken(lit, w) ? ' tok--lit' : ''}${sungClass(sung, i)}`}
         aria-label={t.jumpToTokenNamed(w.surface)}
         aria-pressed={i === index}
         lang="ja"

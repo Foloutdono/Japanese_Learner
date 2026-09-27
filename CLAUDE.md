@@ -972,7 +972,25 @@ runtime purpose. Two consequences worth knowing:
   `src/fields.browser.test.jsx`, `src/fields.desktop.test.jsx`,
   `src/dictionary.phone.test.jsx` and `index.css` and its 机 section;
   DESIGN.md, "The field, one well").
-  When starting a new wave, begin at **158** or higher, and check
+  **158** is 番号, a graded sentence's breakdown numbered as the
+  analyser's (the owner's pick A of five drawn on the canvas "Tsuji
+  Breakdown Panel"): the line framing each rule under its number, a row
+  per word -- its dictionary form and the card's reading, glossed in the
+  learner's language (`vocab_match.entry.meaning_fr`, `tokens.js`'s
+  `wordGloss`), the verb's endings a tag (`grammarSpans.js`'s
+  `isEnding`) -- and a numbered card per rule with its words
+  (`rows.js`'s `wordRowsOf`, `partsOf`); a particle, the copula and a
+  word a construction owns with no card are no rows; and the negated
+  verb of a "must" or a "must not" carries no card (〜てはいけません's いけ
+  read "to go"; `grammar_detect.no_good_points`, `analysis.py`'s
+  `LOCAL_REV` 8), nor counts off-deck (cited in `study/analysis.py`,
+  `study/grammar_detect.py`, `tests/test_analysis.py`,
+  `tests/test_lookup_precision.py`, `components/analysis/SentenceBreakdown.jsx`,
+  `GrammarPoints.jsx`, `rows.js`, `tokens.js`, `grammarSpans.js`,
+  `WordsList.jsx`, `FocusCard.jsx`, `SubtitleLine.jsx`,
+  `PassageBreakdown.jsx`, `SentenceBreakdown.browser.test.jsx` and
+  `index.css` and its 机 section; DESIGN.md, "The desk").
+  When starting a new wave, begin at **159** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

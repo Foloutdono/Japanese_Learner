@@ -1205,7 +1205,7 @@ export default function AnalyzerScreen({ session }) {
       )}
       {points.length > 0 && (
         <section className="anl-desk__points anl-points" aria-label={t.grammarSpotted}>
-          <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openPoint} numbered />
+          <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openPoint} />
         </section>
       )}
 
@@ -1502,7 +1502,7 @@ export default function AnalyzerScreen({ session }) {
 
       {points.length > 0 && (
         <section className="anl-m__points anl-points" aria-label={t.grammarSpotted}>
-          <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openPoint} numbered />
+          <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openPoint} />
         </section>
       )}
 

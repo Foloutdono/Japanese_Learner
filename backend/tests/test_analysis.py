@@ -413,6 +413,31 @@ class AttachUserStateTests(unittest.TestCase):
         # Only ピカチュウ should have contributed to off_deck_count.
         self.assertEqual(out["off_deck_count"], 1)
 
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_a_word_a_construction_owns_is_not_off_deck(self) -> None:
+        # Plan 158: 〜てはいけません's いけ has no card (it is no 行く), and
+        # it is the construction's, not a word the app cannot teach. 話し
+        # is the sentence's one unknown content word (ここ is a pronoun).
+        out = attach_user_state(analyze_local("ここで話してはいけません。"), {}, "u")
+        self.assertEqual((out["unknown_count"], out["off_deck_count"]), (1, 0))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class FrenchGlossTests(unittest.TestCase):
+    """Plan 158: a deck card carries its French gloss beside its English
+    one, so the breakdown reads in one language -- the particle's line
+    was French (the grammar catalogue) and every word's English."""
+
+    def test_a_deck_card_carries_its_french(self) -> None:
+        entries = {t["surface"]: t["vocab_match"]["entry"]
+                   for t in analyze_local("ここで話してはいけません。")["tokens"] if t.get("vocab_match")}
+        self.assertEqual((entries["ここ"]["meaning"], entries["ここ"]["meaning_fr"]), ("here", "ici"))
+        self.assertEqual(entries["話し"]["meaning_fr"], "parler")
+
+    def test_a_pool_word_has_no_french_to_carry(self) -> None:
+        pikachu = next(t for t in analyze_local("ピカチュウがいます。")["tokens"] if t["surface"] == "ピカチュウ")
+        self.assertNotIn("meaning_fr", pikachu["vocab_match"]["entry"])
+
 
 class MergeDeepTests(unittest.TestCase):
     """merge_deep folds a model's per-word glosses onto the local tier's

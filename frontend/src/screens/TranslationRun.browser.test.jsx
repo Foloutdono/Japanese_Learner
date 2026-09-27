@@ -213,7 +213,8 @@ describe('TranslationRun', () => {
     expect(root.querySelector('.bkd')).toBeTruthy()
     expect(root.querySelector('.bkd-line').textContent).toContain('学校')
     expect(root.querySelector('.bkd__en').textContent).toBe(PHRASES[0].translation)
-    expect(root.querySelectorAll('.bkd-row')).toHaveLength(4)
+    // A row per word; the particles are their cards' (plan 158).
+    expect(root.querySelectorAll('.bkd-row')).toHaveLength(2)
     // The reference's romaji register is put away; the sentence is the
     // breakdown's own line now.
     expect(root.querySelector('.prose__romaji')).toBeNull()

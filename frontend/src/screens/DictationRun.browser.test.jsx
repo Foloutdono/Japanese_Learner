@@ -375,7 +375,9 @@ describe('DictationRun', () => {
     expect(root.textContent).not.toContain(LINE.romaji)
     expect(root.querySelector('.bkd-line').textContent).toContain('学校')
     expect(root.querySelector('.bkd__en').textContent).toBe(LINE.en)
-    expect(root.querySelectorAll('.bkd-row')).toHaveLength(ANALYSIS.tokens.length)
+    // A row per word: 学校 and 九時, the particle and the expression
+    // being no words of their own (plan 158).
+    expect(root.querySelectorAll('.bkd-row')).toHaveLength(2)
     // No explanation yet: it is an option under the rows.
     expect(root.querySelector('.bkd .prose__ai')).toBeNull()
     expect(root.querySelector('.bkd__explain button')).toBeTruthy()
