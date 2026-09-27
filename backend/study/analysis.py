@@ -20,6 +20,7 @@ import logging
 
 from content.grammar_points_data import find, grammar_to_id
 from study import morphology
+from study.grammar_detect import compound_particles
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, compound_reading,
@@ -263,6 +264,14 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     deck_hits = [None if (j in counted and hit and morphemes[j].pos == "suffix"
                           and "counter" not in (hit[1].get("meaning") or "")) else hit
                  for j, hit in enumerate(deck_hits)]
+    # The verb of a compound particle is the point's, not a word of its
+    # own: について's つい is no 着く "to arrive", において's おい no 置く
+    # "to put", にたいして no 大して "not very" (plan 152). Its row opens
+    # the point.
+    compounds = compound_particles()
+    bound = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") in compounds])
+    deck_hits = [None if j in bound and morphemes[j].pos in ("verb", "adverb") else hit
+                 for j, hit in enumerate(deck_hits)]
     # A pool run may not take in a morpheme a point is written on; a
     # deck hit stands in for "has a card" there, which is all
     # resolve_pool_compound asks of it.
@@ -319,7 +328,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # おうきい) and put right in context (お母さん's 母 かあ, 一本 いっぽん;
 # study/reading_context.py), which is every row's reading and furigana
 # -- 2 on main while plans 148-151 were open on their branch.
-LOCAL_REV = 6
+# 7: what the detector could not see (plan 152) -- the embedded
+# question, polite hearsay, a point in its other spelling (に従って,
+# 事が出来る, 時 read とき); and no card for the verb of a compound
+# particle (について's つい is no 着く).
+LOCAL_REV = 7
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

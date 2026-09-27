@@ -828,6 +828,25 @@ runtime purpose. Two consequences worth knowing:
   `study/card_lookup.py`, `study/morphology.py`, `study/analysis.py`'s
   `LOCAL_REV` 5, `tests/test_grammar_precision.py`,
   `tests/test_lookup_precision.py` and `tests/test_analysis.py`).
+  **152** is what the detector could not see: the embedded question
+  〜か（間接疑問）, written as one か and never trusted by its letters, read
+  by words (a question word in the clause, a plain predicate, か, then a
+  verb that takes the question in -- `_embedded_question_at`; 誰か知って
+  いますか stays "does anyone know"); polite hearsay (おいしいそうです),
+  whose pattern is written with だ, by `_hearsay_spans` after a plain form;
+  and a point in its other spelling (`_SPELLINGS`: に従って for
+  〜にしたがって, にくらべて for 〜に比べて, 事が出来る, 下さい, 時 held
+  to its reading), each pair tested to read alike, with the spellings
+  that are other words left out (を持って, に取って, 物, 様, and after
+  three reviewers' ~2,300 sentences に当たって, を巡って, と言っても, 所,
+  耐えない, the bare 事) or guarded (に渡って, 子供を公園に連れて, 体に
+  応える, 右に見える) -- UniDic's lemma was no way in, filing をもって
+  under 持つ. And the verb of a compound
+  particle carries no card (について's つい is no 着く "to arrive"), its
+  row opening the point (cited in `study/grammar_detect.py`'s
+  `compound_particles`, `study/analysis.py`'s `LOCAL_REV` 7,
+  `tests/test_grammar_precision.py`'s `UnseenTests` and
+  `tests/test_lookup_precision.py`'s `CompoundParticleTests`).
   **153** is the cards plan 151's word reviewers found wrong (numbered
   153 because 152 went to what the detector could not see while it was
   open), each
