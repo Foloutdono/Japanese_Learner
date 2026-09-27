@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { backAction, isNative, nudgeAt, TAB_ROOTS } from './platform'
+import { backAction, isNative, nudgeAt, openPath, TAB_ROOTS } from './platform'
 
 // ── Where the app is running (plan 076) ───────────────────────
 // The seams themselves are thin calls into plugins a browser does not
@@ -42,5 +42,17 @@ describe('nudgeAt', () => {
     expect(nudgeAt('7:30')).toBeNull()
     expect(nudgeAt(null)).toBeNull()
     expect(nudgeAt('')).toBeNull()
+  })
+})
+
+describe('openPath', () => {
+  it('opens the gate from the widget’s link and nothing else', () => {
+    expect(openPath('app.tsuji://open/today')).toBe('/today')
+    expect(openPath('app.tsuji://open/today/')).toBe('/today')
+    expect(openPath('app.tsuji://open/profile')).toBeNull()
+    expect(openPath('app.tsuji://open/../settings')).toBeNull()
+    expect(openPath('app.tsuji://auth-callback#access_token=x')).toBeNull()
+    expect(openPath('https://example.com/open/today')).toBeNull()
+    expect(openPath(null)).toBeNull()
   })
 })

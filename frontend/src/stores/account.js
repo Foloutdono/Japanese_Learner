@@ -1,3 +1,5 @@
+import { clearAhead } from '../lib/platform'
+import { forgetAheadPlan } from './ahead'
 import { forgetCredits } from './credits'
 import { forgetForecast } from './forecast'
 import { forgetShown } from './guide'
@@ -25,6 +27,9 @@ import { forgetToday } from './today'
 //   the record    what was done at each grade of each practice
 //                 platform (the desk's Practice gate, plan 130)
 //   the guide     which gates opened their lesson THIS page load
+//   the day ahead the reminders scheduled on this phone and the
+//                 widget's figures (plan 155): both name the leaving
+//                 learner's cards, so both are cleared on the device
 //
 // A learner who signs out of one account and boards a new one in the
 // same visit — which is exactly what the settings screen's Sign out
@@ -45,4 +50,6 @@ export function forgetAccount() {
   forgetPracticeRecord()
   forgetForecast()
   forgetShown()
+  forgetAheadPlan()
+  clearAhead()
 }
