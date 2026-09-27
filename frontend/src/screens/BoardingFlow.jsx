@@ -16,6 +16,7 @@ import {
 import { BoardHead } from '../components/boarding/BoardFrame'
 import { useBoardKeys } from '../hooks/useBoardKeys'
 import { useDesk } from '../hooks/useDesk'
+import { useBoxWidth } from '../hooks/useBoxWidth'
 import NameStep from '../components/boarding/NameStep'
 import WhyStep from '../components/boarding/WhyStep'
 import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
@@ -25,7 +26,7 @@ import RhythmStep from '../components/boarding/RhythmStep'
 import TimeStep from '../components/boarding/TimeStep'
 import NudgeStep from '../components/boarding/NudgeStep'
 import Building from '../components/boarding/Building'
-import { DeskLine } from '../components/boarding/DeskLine'
+import { DeskStrip } from '../components/boarding/DeskStrip'
 import { BoardBack } from '../components/boarding/boardBack'
 import PlanStep from '../components/boarding/PlanStep'
 import PassStep from '../components/boarding/PassStep'
@@ -192,6 +193,9 @@ export default function BoardingFlow({
   const [arrival, setArrival] = useState(false)
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
+  // 辻 (plan 161): the strip at the floor's left end, measured so the
+  // floor gives way before it (--desk-strip-w).
+  const [stripRef, stripW] = useBoxWidth(desk)
   const arrivalPlayed = useRef(REDUCED)
   // Two stopwatches counting only time the tab was actually looked at
   // (lib/dwell.js): one lapped at every question, one for the whole
@@ -282,9 +286,10 @@ export default function BoardingFlow({
     setStep(prev)
   }
 
-  // 机 (plan 140): a stop already passed on the column's line is a door
-  // straight back to its question -- Back pressed as many times as it
-  // takes, in one pull. Every answer is kept, as Back keeps them.
+  // 机 (plan 140): a stop already passed on the line is a door straight
+  // back to its question -- Back pressed as many times as it takes, in
+  // one pull. Every answer is kept, as Back keeps them. Since plan 161
+  // the line is the strip at the floor's left end.
   function jumpTo(target) {
     const at = history.lastIndexOf(target)
     if (at < 0) return
@@ -403,10 +408,10 @@ export default function BoardingFlow({
   }
 
   // 机 (plan 122, owner's call): no Building on the desk. Its one job --
-  // gathering the answers into the journey -- was done beside every
-  // question, on the column's line (below); the plan arrives straight
-  // after the hour, under the same signboard. The funnel reads time →
-  // plan there.
+  // gathering the answers into the journey -- is done by every question
+  // as it is answered, and the strip (below) holds them; the plan arrives
+  // straight after the hour, under the same signboard. The funnel reads
+  // time → plan there.
   function toBuilding() {
     if (!desk) { go('building'); return }
     mark(step, 'plan', 'fwd')
@@ -569,11 +574,11 @@ export default function BoardingFlow({
           />
         )
       case 'plan':
-        // 机 (plan 140): on the desk the pass is issued at the column's
-        // foot while the plan is read, so the plan is the last screen
-        // and enters the station -- unless there is an account to offer
-        // first. The funnel reads plan → boarding_done there. The car
-        // names its step (`data-car`) for the width it stands at.
+        // 机 (plan 140): on the desk the pass's own screen folds away, so
+        // the plan is the last screen and enters the station -- unless
+        // there is an account to offer first. The funnel reads plan →
+        // boarding_done there. The car names its step (`data-car`) for
+        // the width it stands at.
         return (
           <PlanStep
             name={displayName}
@@ -608,21 +613,18 @@ export default function BoardingFlow({
     }
   }
 
-  // ── 机 — the line down the column (plans 122, 140) ────────────
-  // On the desk the questions stand beside the line they lay: a stop per
-  // question (the reveal is the kana's own, not a stop), each named and
-  // printing its answer once given, the one being asked lit and printing
-  // the pick as it stands -- a level picked but not yet continued is
-  // already a goal, priced the way Continue will commit it
-  // (boardingDraft). A stop behind is a door back to its question while
-  // there is a way back (the history). The foot is the projection,
-  // priced on every answer, until the plan is built; then it is the pass.
+  // ── 辻 — the strip at the floor's left end (plans 140, 161) ──────
+  // A stop per question (the reveal is the kana's own, not a stop), each
+  // named, the ones ridden filled and the one being asked lit. The
+  // answer given is said on its stop -- a level picked but not yet
+  // continued is already a goal, priced the way Continue will commit it
+  // (boardingDraft) -- and a stop behind is a door back to its question
+  // while there is a way back (the history).
   const draft = boardingDraft(answers, step)
   const draftLevel = draft.levelChoice === 'novice' ? t.brdNovice : draft.jlpt
   const draftGoal = draft.levelChoice == null ? null
     : draft.goal === 'novice' ? t.brdNovice
       : draft.goal ? `${draftLevel} → ${draft.goal}` : draftLevel
-  const draftFigures = planFigures(volumes, draft.jlpt ?? 'N5', draft.goal, perDay, draft.kana, now, draft.lines)
   const stopValue = {
     name: displayName,
     why: answers.motive ? t.brdMotive[answers.motive] : null,
@@ -646,19 +648,21 @@ export default function BoardingFlow({
       onOpen: state === 'done' && history.includes(key) ? () => jumpTo(key) : undefined,
     }
   })
-  const projection = {
-    label: t.brdBuildProjection,
-    value: volumes && draft.levelChoice != null
-      ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(draftFigures.date)
-      : null,
-  }
   // The way back the floor draws beside Continue (BoardBack): the
   // question before, or out of the flow from the first -- the head's ‹,
   // which the desk no longer draws.
   const floorBack = desk && onTrack ? (history.length > 0 ? back : onExit) : null
 
   return (
-    <main className={desk ? 'brd desk-brd' : 'brd'} id="main-content" data-step={step} ref={frameRef}>
+    <main
+      className={desk ? 'brd desk-brd' : 'brd'}
+      id="main-content"
+      data-step={step}
+      ref={frameRef}
+      // A plain number, read as pixels by the sheet: a measured length,
+      // not one chosen from the scale.
+      style={desk && stripW ? { '--desk-strip-w': stripW } : undefined}
+    >
       {onTrack && !desk && <BoardHead index={index} total={total} onBack={history.length > 0 ? back : onExit} />}
       <BoardBack.Provider value={floorBack}>
         <div className="brd__cars">
@@ -672,13 +676,7 @@ export default function BoardingFlow({
           </div>
         </div>
       </BoardBack.Provider>
-      {desk && (
-        <DeskLine
-          stops={deskStops}
-          projection={onTrack ? projection : null}
-          pass={onTrack ? null : { name: displayName, profile }}
-        />
-      )}
+      {desk && <DeskStrip stops={deskStops} stripRef={stripRef} />}
       {/* 到着: the plan arrives under the signboard, once; skippable,
           absent under reduced motion (TrainArrival's own rules). */}
       {arrival && <TrainArrival jp="案内" title={t.brdArrivalTitle} onDone={() => setArrival(false)} />}

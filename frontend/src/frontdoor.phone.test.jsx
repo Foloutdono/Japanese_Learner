@@ -118,6 +118,7 @@ describe('the boarding frame on a phone (P9)', () => {
     await board()
     expect($('main.brd').className).toBe('brd')
     expect($('.desk-brd__side')).toBeNull()
+    expect($('.desk-brd__strip')).toBeNull()
     await pastName()
     const next = async () => { inCar('[data-action="continue"]').click(); await settle() }
     inCar('[data-motive="trip"]').click()

@@ -25416,29 +25416,34 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     transform: none;
   }
 
-  /* ── 路線 — first contact as the rail being laid (plans 122, 140) ──
+  /* ── 辻 — first contact as the crossroads (plans 122, 140, 161) ──
      From the Welcome to the first card a computer drew a phone: a 640px
-     column in an empty window. Plan 122 drew a run's frame, the journey
-     in a column at the window's right edge; plan 140 is the owner's pick
-     A of three directions drawn after it (the canvas "Desktop onboarding
-     — options"). The desk's chrome is the rail, so first contact lays it
-     before it has any gates: a sumi column at --desk-side-w down the
-     LEFT edge, the rail's masthead at its head (.desk-rail__mast, the
-     same markup), and under it the sign-in on the Welcome, then the
-     boarding's line -- a named stop per question, its answer printed
-     once given (components/boarding/DeskLine). The head's track and the
-     right-hand journey were the same line drawn twice; the column is
-     the one. The paper holds the question, its answers laid for the
-     width, and the floor: Back beside Continue (BoardFrame's
-     BoardBack). No rail until Today. Every rule here is scoped under
+     column in an empty window. Plan 122 drew a run's frame, plan 140 laid
+     the rail down the left edge as a sumi column with a stop per
+     question, and plan 161 is the owner's pick D of the canvas "Tsuji —
+     onboarding, new directions": the column goes, and three places never
+     move. The question keeps the paper's top-left corner at the display
+     rung; the journey is a strip at the floor's left end, a named stop
+     per question (components/boarding/DeskStrip); the floor is the
+     bottom-right corner, Back beside Continue (BoardFrame's BoardBack).
+     Between them each question draws its answers in the paper that is
+     left. The Welcome and the wait after it keep plan 140's column until
+     the front door is drawn (161e). Every rule here is scoped under
      .desk-brd or .desk-door, and writes no (element, property) pair the
      boarding's short step writes (@container brd (max-height: 739px);
-     held by src/desk.css.test.js), so a laptop's short window still
-     gets the short step. */
+     held by src/desk.css.test.js), so a laptop's short window still gets
+     the short step. */
   .desk-brd {
     --fs-display-fluid: var(--fs-display);
+    --desk-brd-pad: max(var(--sp-8), calc((100% - var(--desk-board-w)) / 2));
     max-width: none;
-    padding-inline: calc(var(--desk-side-w) + var(--sp-7)) var(--sp-7);
+    padding-inline: var(--desk-brd-pad);
+    /* The frame's own height is the short step's measure (the brd
+       container), so its padding stays a rung each way: a laptop's
+       1100x800 keeps the tall step. The question's room over it is the
+       body's (below). */
+    padding-top: calc(var(--safe-top) + var(--sp-7));
+    padding-bottom: calc(var(--safe-bottom) + var(--sp-7));
   }
   /* The column: the rail's material -- its sumi, its lit edge and the
      shadow it throws, turned to face the screen (.desk-rail) -- at a
@@ -25463,328 +25468,13 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     border-right: 1px solid var(--chrome-edge);
     box-shadow: 10px 0 24px -12px rgba(0, 0, 0, 0.75);
   }
-  /* The line: a stop per question, each a row of the column -- its dot
-     on the rail down the dots' column, its name over its answer. Since
-     plan 155 the rail is one line and the lit stop one object running on
-     it (components/boarding/DeskLine's useRoute, which measures the rows
-     and hands the route its five lengths): the rail from the first dot
-     to the last, the stretch ridden over it, the wash under the lit row
-     and the train -- the gold ring -- over its dot. The wash and the
-     train move together, on the pull's own curve, so a Continue reads as
-     the train leaving one stop for the next beside the paper pulling;
-     the plan built, both run to the last stop and fade, the line ridden
-     whole. The five lengths are the rows' own, handed over as plain
-     numbers; until they are, the rail is nothing and the wash and the
-     train are not drawn. */
-  .desk-brd__route {
-    --dot-x: calc(var(--sp-4) + var(--sp-3) + var(--sp-6) / 2);
-    --ride-ease: cubic-bezier(0.65, 0, 0.35, 1);
-    position: relative;
-    isolation: isolate;
-  }
-  .desk-brd__rail,
-  .desk-brd__ridden {
-    position: absolute;
-    left: var(--dot-x);
-    top: calc(var(--rail-top, 0) * 1px);
-    width: 2px;
-    margin-left: -1px;
-    border-radius: var(--r-pill);
-    transform-origin: top;
-  }
-  .desk-brd__rail {
-    height: calc(var(--rail-h, 0) * 1px);
-    background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
-    /* Laid, the first time the line is drawn: down from the head. */
-    animation: desk-brd-lay 720ms cubic-bezier(0.3, 0.7, 0.2, 1) 120ms backwards;
-  }
-  .desk-brd__ridden {
-    height: calc(var(--ride-h, 0) * 1px);
-    background: var(--text-on-panel-soft);
-  }
-  .desk-brd__here {
-    position: absolute;
-    left: var(--sp-4);
-    right: var(--sp-4);
-    top: 0;
-    height: calc(var(--here-h, 0) * 1px);
-    border-radius: var(--r-panel);
-    background: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-    transform: translateY(calc(var(--here-y, 0) * 1px));
-    animation: desk-brd-show 320ms ease-out 360ms backwards;
-  }
-  .desk-brd__train {
-    position: absolute;
-    z-index: 2;
-    left: var(--dot-x);
-    top: 0;
-    width: 18px;
-    height: 18px;
-    margin: -9px 0 0 -9px;
-    box-sizing: border-box;
-    border: 3px solid var(--accent2);
-    border-radius: var(--r-pill);
-    background: var(--bg-panel);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent2) 25%, transparent);
-    transform: translateY(calc((var(--here-y, 0) + var(--here-h, 0) / 2) * 1px));
-    pointer-events: none;
-    animation: desk-brd-show 320ms ease-out 360ms backwards;
-  }
-  /* Measured, the train runs: the wash and the ring on one curve, the
-     ridden stretch filling behind them. Not before -- the first reading
-     would slide them down from the column's top. */
-  .desk-brd__route--ready .desk-brd__ridden { transition: height 560ms var(--ride-ease); }
-  .desk-brd__route--ready .desk-brd__here { transition: transform 560ms var(--ride-ease), height 560ms var(--ride-ease), opacity 240ms ease-out; }
-  .desk-brd__route--ready .desk-brd__train { transition: transform 560ms var(--ride-ease), opacity 240ms ease-out; }
-  /* The plan built: no stop is asked, so the train runs to the last and
-     steps off once it has got there. */
-  .desk-brd__route--ridden .desk-brd__here { opacity: 0; transition-delay: 0s, 0s, 420ms; }
-  .desk-brd__route--ridden .desk-brd__train { opacity: 0; transition-delay: 0s, 420ms; }
-  .desk-brd__stops {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    margin: 0;
-    padding: 0 var(--sp-4);
-    list-style: none;
-  }
-  /* The stops arrive in the order the line is laid, the first as the
-     rail passes it (DESIGN.md, Motion: ~40ms apart, and no list here is
-     past the eighth). A stop that joins the line later -- the level,
-     once both scripts are read -- arrives the same way where it joins. */
-  .desk-brd__stop {
-    position: relative;
-    animation: desk-brd-stop 420ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(160ms + var(--i, 0) * 45ms) backwards;
-  }
-  .desk-brd__door {
-    display: grid;
-    grid-template-columns: var(--sp-6) minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: var(--sp-4);
-    width: 100%;
-    min-height: var(--sp-9);
-    padding: var(--sp-2) var(--sp-3);
-    background: none;
-    border: 0;
-    border-radius: var(--r-panel);
-    color: inherit;
-    font: inherit;
-    text-align: start;
-    transition: background-color 160ms ease;
-  }
-  button.desk-brd__door { cursor: pointer; }
-  .desk-brd__door > .svg {
-    width: 16px;
-    height: 16px;
-    color: var(--text-on-panel-soft);
-    transition: opacity 160ms ease, transform 160ms ease, color 160ms ease;
-  }
-  .desk-brd__dot {
-    position: relative;
-    z-index: 1;
-    justify-self: center;
-    width: 12px;
-    height: 12px;
-    box-sizing: border-box;
-    border: 2px solid color-mix(in srgb, var(--text-on-panel) 40%, transparent);
-    border-radius: var(--r-pill);
-    background: var(--bg-panel);
-    transition: background-color 240ms ease, border-color 240ms ease;
-  }
-  .desk-brd__txt {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-    min-width: 0;
-  }
-  .desk-brd__lab {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--text-on-panel-soft);
-    transition: color 240ms ease;
-  }
-  .desk-brd__val {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: 700;
-    line-height: 1.3;
-    color: var(--text-on-panel);
-    overflow-wrap: anywhere;
-    animation: desk-brd-val 300ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-    transition: color 240ms ease;
-  }
-  /* A stop ridden is filled; the one being asked keeps its open ring
-     under the train, so the train pulls into a station rather than onto
-     a filled dot showing past its edge. */
-  .desk-brd__stop--done .desk-brd__dot {
-    border-color: var(--text-on-panel-soft);
-    background: var(--text-on-panel-soft);
-  }
-  /* The stop being asked: the train's ring over its dot and the wash
-     under its row (above), its name in full ink and the pick as it
-     stands in gold, mixed toward the panel's ink as the fare is -- lit
-     as the train pulls in rather than as it leaves the stop before. */
-  .desk-brd__stop--now .desk-brd__lab { color: var(--text-on-panel); transition-delay: 220ms; }
-  .desk-brd__stop--now .desk-brd__val { color: color-mix(in srgb, var(--accent2) 70%, var(--text-on-panel)); transition-delay: 220ms; }
-  @keyframes desk-brd-lay { from { transform: scaleY(0); } }
-  @keyframes desk-brd-show { from { opacity: 0; } }
-  @keyframes desk-brd-stop { from { opacity: 0; transform: translateX(calc(-1 * var(--sp-3))); } }
-  @keyframes desk-brd-val { from { opacity: 0; transform: translateY(var(--sp-1)); } }
-  /* The foot, where the rail's will be: the projection while the
-     questions run, the pass once the plan is built. */
-  .desk-brd__foot {
-    margin-top: auto;
-    padding: 0 var(--sp-4);
-    padding-bottom: calc(var(--sp-4) + var(--safe-bottom));
-  }
-  /* The projection arrives last, once the line is laid, and a new date
-     drops into it as a board's figure turns over (keyed on the date,
-     DeskLine): a figure that changed without moving was a figure nobody
-     saw change. Unpriced, the dash is the panel's soft ink -- a blank on
-     the board, not a figure. */
-  .desk-brd__proj {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    padding: var(--sp-4) var(--sp-5);
-    overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
-    border-radius: var(--r-identity);
-    animation: desk-brd-issue 480ms cubic-bezier(0.22, 0.68, 0.32, 1) 520ms backwards;
-  }
-  .desk-brd__fig {
-    font-family: var(--font-display);
-    font-size: var(--fs-heading);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-on-panel);
-    animation: desk-brd-turn 420ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-  }
-  .desk-brd__proj--blank .desk-brd__fig { color: var(--text-on-panel-soft); animation: none; }
-  @keyframes desk-brd-turn {
-    from { opacity: 0; transform: translateY(-60%); }
-  }
-  /* The pass, issued: the rail's pocket pass (.desk-pass) in its
-     material, with nothing on it to press yet. It rises into the foot
-     as the pass step's pass rose onto its screen. */
-  .desk-brd__pass {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-    padding: var(--sp-4);
-    overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--pass-ink) 70%, transparent);
-    border-radius: var(--r-identity);
-    background:
-      linear-gradient(155deg,
-        color-mix(in srgb, var(--pass-ink) 38%, var(--bg-panel)) 0%,
-        var(--bg-panel) 62%);
-    animation: desk-brd-issue 480ms cubic-bezier(0.22, 0.68, 0.32, 1) 200ms backwards;
-  }
-  .desk-brd__holder {
-    font-family: var(--font-serif);
-    font-size: var(--fs-lead);
-    font-weight: 700;
-    color: var(--text-on-panel);
-  }
-  .desk-brd__face {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-  }
-  .desk-brd__lvl {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 2px solid color-mix(in srgb, var(--pass-ink) 70%, var(--text-on-panel));
-    border-radius: var(--r-pill);
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    /* A roundel centres its line box, not its ink (.hud__level). */
-    line-height: normal;
-  }
-  .desk-brd__climb {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: var(--sp-2);
-    min-width: 0;
-  }
-  .desk-brd__purse {
-    display: flex;
-    flex: none;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--sp-1);
-  }
-  .desk-brd__bal {
-    font-family: var(--font-display);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .desk-brd__gift {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--accent2) 70%, var(--text-on-panel));
-  }
-  @keyframes desk-brd-issue {
-    from { opacity: 0; transform: translateY(var(--sp-5)); }
-  }
-  /* One pass of light across the pass as its balance counts up, the
-     pass step's shine (.brd-issue__shine) at the column's foot. */
-  .desk-brd__sheen {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    border-radius: inherit;
-    pointer-events: none;
-  }
-  .desk-brd__sheen::before {
-    content: "";
-    position: absolute;
-    top: -20%;
-    bottom: -20%;
-    width: 40%;
-    background: linear-gradient(100deg, transparent, color-mix(in srgb, var(--accent2) 22%, transparent), transparent);
-    animation: brd-shine 1100ms cubic-bezier(0.3, 0, 0.2, 1) 760ms both;
-  }
-  /* A step's width, set on its car so a leaving car keeps its own while
-     it pulls away: the card's for most questions (plan 155 widened the
-     lines and the hour from a column's, which left their floor a
-     different width from every other), three of a run's columns for the
-     six reasons, the canvas for the line of stations, two columns for
-     the plan, and a column's for the account's form. The answers stand
-     at it, centred under the question, which keeps the car's.
-
-     The floor does not follow it. It was the step's width too, so the
-     way on moved from question to question -- 360px wide under the
-     lines, 640 under the name, 1174 under the level list, where Back and
-     Continue stood at the canvas's two ends -- and the one action a
-     learner presses on every screen was somewhere new on each. It is the
-     card's width on every question now, Back at its left end and
-     Continue at its right, so the way on stands where it stood; the
-     plan and the account, whose one action stands alone, keep it at a
-     ticket's width. */
+  /* A step's answers stand at the width that serves them, set on its
+     car so a leaving car keeps its own while it pulls away: the card's
+     for most questions, three of a run's columns for the six reasons,
+     the canvas for the line of stations, two columns for the plan and a
+     column's for the account's form. */
   .desk-brd .brd__car {
     --desk-brd-w: var(--card-w);
-    --desk-floor-w: var(--card-w);
     --pull: 1;
     animation: desk-brd-pull-in 520ms cubic-bezier(0.16, 1, 0.3, 1) 140ms backwards;
   }
@@ -25792,72 +25482,60 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-brd .brd__car--out { animation: desk-brd-pull-out 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
   .desk-brd .brd__car[data-car="why"] { --desk-brd-w: calc(3 * var(--desk-run-col-min) + 2 * var(--sp-3)); }
   .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
-  .desk-brd .brd__car[data-car="plan"] {
-    --desk-brd-w: calc(2 * var(--desk-side-w) + var(--sp-6));
-    --desk-floor-w: var(--desk-side-w);
-  }
-  .desk-brd .brd__car[data-car="account"] {
-    --desk-brd-w: var(--desk-side-w);
-    --desk-floor-w: var(--desk-side-w);
-  }
+  .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: calc(2 * var(--desk-side-w) + var(--sp-6)); }
+  .desk-brd .brd__car[data-car="account"] { --desk-brd-w: var(--desk-side-w); }
   .desk-brd .brd__stage,
-  .desk-brd .brd__foot,
   .desk-door .brd__foot {
     width: 100%;
     max-width: var(--desk-at, var(--desk-side-w));
     margin-inline: auto;
   }
   .desk-brd .brd__stage { --desk-at: var(--desk-brd-w); }
-  /* A hint is read, not scanned: held to the card's measure under a
-     question that may run the paper's width. */
+  /* The question at the paper's top-left corner, its hint under it, and
+     the answers standing in the middle of the paper that is left: the
+     body's spacers and the air under the question are the phone's way of
+     centring the whole block, and here only the answers are centred.
+     Auto margins, not justify-content: a block taller than the car keeps
+     its top and the body scrolls. */
+  .desk-brd .brd__car > .brd__body {
+    flex: 1 1 auto;
+    padding-top: var(--sp-6);
+  }
+  .desk-brd .brd__body::before,
+  .desk-brd .brd__body::after { content: none; }
+  .desk-brd .brd__body > .brd__air { display: none; }
+  .desk-brd .brd__body > .brd__stage { margin-block: auto; }
+  .desk-brd .brd__q { text-align: start; }
   .desk-brd .brd__hint {
-    max-width: var(--card-w);
-    margin-inline: auto;
+    margin-top: calc(-1 * var(--sp-2));
+    font-size: var(--fs-lead);
+    font-weight: 500;
+    text-align: start;
     text-wrap: pretty;
   }
-  /* The question, its answers and the way on stand as one block on the
-     car's centre line, Continue --sp-8 under the last answer, instead
-     of the answers centred and Continue on the window's floor. Auto
-     margins, not justify-content: a block taller than the car keeps its
-     top and the body scrolls. */
-  .desk-brd .brd__car > :last-child { margin-bottom: auto; }
+  /* The floor: the bottom-right corner, where the way on stands on every
+     question (plan 155's ask kept). The strip holds the corner's left
+     end, so the floor starts past it -- measured, --desk-strip-w -- and
+     Continue, at a ticket's width, gives way before it meets the strip
+     on a window too narrow for both. */
   .desk-brd .brd__foot {
-    --desk-at: var(--desk-floor-w, var(--card-w));
-    margin-top: var(--sp-7);
+    align-items: flex-end;
+    margin-top: var(--sp-6);
+    padding-left: calc(var(--desk-strip-w, 0) * 1px + var(--sp-6));
   }
-  .desk-brd .brd__car > .brd__body:not(.brd__body--center) {
-    flex: 0 1 auto;
-    margin-top: auto;
-    /* Sized to what it holds, the body scrolls with no room under its
-       last answer, and every step's last thing arrives rising -- an
-       answer 6px (brd-in), the kana's readings 8px: while it was still
-       low it hung past the body's foot and printed a scrollbar at every
-       step. The room is kept inside the box and given back outside, so
-       the answers and Continue stand where they did. It is the rung
-       Continue keeps under the last answer, the car's gap and the
-       foot's margin (--sp-8), so the clip stops on the foot's edge; on
-       a frame under 740px, where the gap narrows a rung, it reaches 4px
-       under the foot, which is drawn after the body and covers it. */
-    padding-bottom: var(--sp-8);
-    margin-bottom: calc(-1 * var(--sp-8));
-  }
-  /* A question with no floor -- the kana's, whose answers go on by
-     themselves, when there is no way back to stand there either --
-     stands on the centre line too: the room given back above is the
-     auto margin under it, not the rung it lent the foot (the kana's
-     four answers sat on the window's floor). */
-  .desk-brd .brd__car > .brd__body:not(.brd__body--center):last-child { margin-bottom: auto; }
-  /* The floor: the way back beside the way on, the two ways off a
-     question (plan 140). Back keeps its label's width and the ghost's
-     clothes; Continue keeps a ticket's width at the floor's far end,
-     sharing the room on a question a column wide. */
+  .desk-brd .brd__foot > .btn-depart { width: var(--desk-side-w); max-width: 100%; }
   .desk-brd__floor {
     display: flex;
     align-items: stretch;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: var(--sp-4);
+    width: 100%;
   }
-  .desk-brd__floor > .btn-depart:last-child { flex: 0 1 var(--desk-side-w); }
+  .desk-brd__floor > .btn-depart:last-child {
+    flex: 0 1 var(--desk-side-w);
+    min-width: calc(var(--desk-side-w) * 2 / 3);
+    white-space: nowrap;
+  }
   .desk-brd__back {
     display: inline-flex;
     flex: none;
@@ -25877,6 +25555,78 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     cursor: pointer;
   }
   .desk-brd__back > .svg { width: 18px; height: 18px; }
+  /* The strip: the line on its side at the floor's left end, as tall as
+     the floor (.brd .btn-depart's 56px) so its stops stand on the floor's
+     middle. A stop is a dot and its name, joined to the one before; the
+     ridden ones filled in the second ink, the one asked lit -- the gold
+     ring the phone's track draws for "here" -- and the ones ahead open. */
+  .desk-brd__strip {
+    position: absolute;
+    left: var(--desk-brd-pad);
+    bottom: calc(var(--safe-bottom) + var(--sp-7));
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    animation: desk-brd-show 320ms ease-out 200ms backwards;
+  }
+  .desk-brd__sps {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .desk-brd__sp {
+    display: flex;
+    align-items: center;
+  }
+  .desk-brd__sp + .desk-brd__sp::before {
+    content: "";
+    width: var(--sp-2);
+    height: 2px;
+    margin-inline: var(--sp-1);
+    border-radius: var(--r-pill);
+    background: var(--surface-line);
+    transition: background-color 240ms ease;
+  }
+  .desk-brd__sp--done + .desk-brd__sp::before { background: var(--text-secondary); }
+  .desk-brd__sp-door {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    padding: var(--sp-2) 0;
+    background: none;
+    border: 0;
+    color: var(--text-secondary);
+    font: inherit;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-name);
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: color 240ms ease;
+  }
+  button.desk-brd__sp-door { cursor: pointer; }
+  .desk-brd__sp-dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    box-sizing: border-box;
+    border: 2px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    transition: background-color 240ms ease, border-color 240ms ease;
+  }
+  .desk-brd__sp--done .desk-brd__sp-dot {
+    background: var(--text-secondary);
+    border-color: var(--text-secondary);
+  }
+  .desk-brd__sp--now .desk-brd__sp-door { color: var(--text-primary); }
+  .desk-brd__sp--now .desk-brd__sp-dot {
+    width: 16px;
+    height: 16px;
+    border: 3px solid var(--accent2);
+  }
   /* ── the pull on the desk (plan 155) ──
      The phone's pull carries a car the frame's whole width in 260ms. On
      the desk that is some 1,200px of paper in a quarter of a second -- a
@@ -25900,6 +25650,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   @keyframes desk-brd-pull-out {
     to { opacity: 0; transform: translateX(calc(var(--pull) * -1 * var(--sp-9))); }
   }
+  /* A thing drawn once it has somewhere to stand: the strip, the Welcome's
+     sign-in and band, the wait's dots. */
+  @keyframes desk-brd-show { from { opacity: 0; } }
   .desk-brd .brd__car .brd__q { animation: none; }
   .desk-brd .brd__car :is(.brd-kana, .brd-board, .brd-chart, .brd-notif, .brd-issue) { animation-delay: 160ms; }
   .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn) { animation-delay: 200ms; }
@@ -26231,33 +25984,17 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     pointer-events: none;
     animation: desk-brd-show 320ms ease-out var(--wait-in, 480ms) backwards;
   }
-  /* The plan's arrival (TrainArrival, 到着) boards the paper, not the
-     window: its signboard centred on the paper's middle, where the plan
-     is about to stand, and its scrim over the paper alone -- the column
-     is the line the plan was built from, and it stays in view while the
-     plan arrives beside it. */
-  body:has(.desk-brd) .onb-arrival { padding-left: calc(var(--desk-side-w) + var(--sp-6)); }
-  body:has(.desk-brd) .onb-arrival__scrim { left: var(--desk-side-w); }
   @media (prefers-reduced-motion: reduce) {
-    .desk-brd__pass,
-    .desk-brd__proj,
-    .desk-brd__fig,
-    .desk-brd__rail,
-    .desk-brd__here,
-    .desk-brd__train,
-    .desk-brd__stop,
-    .desk-brd__val { animation: none; }
-    .desk-brd__sheen { display: none; }
+    .desk-brd__strip,
     .desk-brd .brd__car,
     .desk-door .brd__foot,
     .desk-door .brd-roll,
     .desk-door__auth,
     .desk-wait { animation: none; }
     .desk-door--leaving .desk-door__work > :is(.brd-hero, .brd__foot, .brd-roll) { transform: none; }
-    .desk-brd__route--ready :is(.desk-brd__ridden, .desk-brd__here, .desk-brd__train),
-    .desk-brd__dot,
-    .desk-brd__lab,
-    .desk-brd__val { transition: none; }
+    .desk-brd__sp + .desk-brd__sp::before,
+    .desk-brd__sp-door,
+    .desk-brd__sp-dot { transition: none; }
   }
   /* A pointer's answer to "is this one I can pick": the name field's
      edge (.brd-field, 1.5px of the pass's gold on the answer's own
@@ -26269,7 +26006,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      boarding's answers, its doors and its way back, and the Welcome's
      sign-in, are spared it. */
   @media (pointer: fine) {
-    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn, .desk-brd__back, .desk-brd__door):hover,
+    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn, .desk-brd__back, .desk-brd__sp-door):hover,
     .desk-door__auth button:hover { filter: none; }
     .desk-brd .brd-opt:not(.brd-opt--on):hover,
     .desk-brd .brd-opt:not(.brd-opt--on):focus-visible,
@@ -26287,31 +26024,14 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
       color: var(--text-primary);
       border-color: var(--text-secondary);
     }
-    button.desk-brd__door:hover,
-    button.desk-brd__door:focus-visible { background: color-mix(in srgb, var(--text-on-panel) 6%, transparent); }
-    /* A stop behind is a door, and says so where a pointer is: the ‹
-       slides in as the hover's ▶ does (DESIGN.md, Motion), rather than
-       five of them standing down the line at rest. */
-    button.desk-brd__door > .svg {
-      opacity: 0;
-      transform: translateX(var(--sp-1));
-    }
-    button.desk-brd__door:hover > .svg,
-    button.desk-brd__door:focus-visible > .svg {
-      opacity: 1;
-      transform: none;
-      color: var(--text-on-panel);
-    }
+    /* A stop behind is a door, and says so where a pointer is: its name
+       takes the full ink. */
+    button.desk-brd__sp-door:hover,
+    button.desk-brd__sp-door:focus-visible { color: var(--text-primary); }
     .desk-brd .brd-day { cursor: pointer; }
     .desk-door .brd-roll:hover .brd-roll__lane { animation-play-state: paused; }
     .desk-door__auth :is(.auth-provider, .auth-submit):hover,
     .desk-door__auth :is(.auth-provider, .auth-submit):focus-visible { border-color: var(--text-on-panel-soft); }
-  }
-  /* A door on the line takes the rail's ring when a key reaches it: the
-     column is sumi, and the paper's ring would not read on it. */
-  button.desk-brd__door:focus-visible {
-    outline: 2px solid var(--text-on-panel);
-    outline-offset: -2px;
   }
 
   /* ── copied, focused (plan 123) ──

@@ -1030,7 +1030,17 @@ runtime purpose. Two consequences worth knowing:
   `WordsList.jsx`, `FocusCard.jsx`, `SubtitleLine.jsx`,
   `PassageBreakdown.jsx`, `SentenceBreakdown.browser.test.jsx` and
   `index.css` and its 机 section; DESIGN.md, "The desk").
-  When starting a new wave, begin at **161** or higher, and check
+  **161** is 辻, first contact redrawn as the crossroads (the owner's
+  pick D of the canvas "Tsuji — onboarding, new directions", with option
+  3, 空の弧, for the hour): on the desk no column -- the question at the
+  paper's top-left corner, the journey a strip of named stops at the
+  floor's left end (plan 140's line on its side, its doors kept), the
+  floor in the bottom-right corner -- and each question drawing its
+  answers between them (cited in `screens/BoardingFlow.jsx`,
+  `components/boarding/DeskStrip.jsx`, `src/frontdoor.desktop.test.jsx`,
+  `src/frontdoor.wide.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk"; `docs/design/desk/README.md`).
+  When starting a new wave, begin at **162** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

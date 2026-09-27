@@ -6939,3 +6939,35 @@ anywhere, the analyser's subtitle included. The analyser's words list
 takes the same rows, names and glosses. The comprehension passage
 (`PassageBreakdown`) draws the same pieces.
 
+
+## Plan 161 — 辻, first contact as the crossroads (2026-09-27)
+
+The owner, of the desk's first contact after plans 140 and 155: "still
+not satisfied by how the onboarding process is laid out and designed.
+We need to be more catchy, bigger icons, clearer steps, elements placed
+with more care". Four directions drawn on the canvas "Tsuji —
+onboarding, new directions" (A 駅名標, B 車窓, C 大判, D 辻), each on the
+Welcome, Why and Goal; C and D then drawn whole, thirteen screens each
+and played through; a second round on the boards the owner named
+(C06–09, D03, D03a, D05–09: "simpler, easier to understand at a
+glance"); five options for D07 alone. The owner's pick: **D**, with
+**option 3 (空の弧, the day as the sun's arc) for the hour**.
+
+D is a desk design; the phone draws exactly what it drew. Three places
+never move: the question top-left at the display rung, the journey
+strip bottom-left (a named stop per question -- plan 140's line turned on
+its side, a stop behind still a door back to its question), the floor
+bottom-right (Back beside Continue). Between them each question draws
+its answers as the thing they are, in the app's own figures:
+
+| # | What | Status |
+|---|------|--------|
+| 161a | **The frame**: no sumi column (`DeskLine` retired for `DeskStrip`); the question and its hint top-left; the stage centred in the paper that is left; the floor bottom-right, Continue at a ticket's width and giving way before it meets the strip (measured, `--desk-strip-w`); the strip on the floor's line, bottom-left, the answer given on a stop said in its name (a door's label and title) | DONE (2026-09-27) |
+| 161b | **The answers as maps**: Why as six roads out of the junction (the motive icons in 96px rings); Kana as the two words and four answers that draw them (read lit, not read dashed); the reveal as each word read sign by sign; Lines as three cards in their pigments with what each holds at N5, the kana on every ticket, the arrival under them | TODO |
+| 161c | **The lines drawn to time**: Level and Goal as one climbing line, the pick called out (you are here, or the arrival); Rhythm as four roads from today, each as long as the ride, on a month axis; the hour as the day's arc (sunrise left, noon at the top, night right), 朝 昼 夜 on it, the train riding it as the fine control, the board in its bowl | TODO |
+| 161d | **The ends**: the plan as the ride to scale (today, the kana, two halts counting the words, N5) and what the terminus holds; the account as its form beside a paper ticket with that route printed on it; the name as the first station's plate | TODO |
+| 161e | **The front door**: the Welcome as the crossroads (辻 the hub, the app's lines leaving it, the gold line running from Board into it); the sign-in taking the promise's place, the hub kept | TODO |
+
+Held by `frontdoor.desktop` and `frontdoor.wide` (rewritten per phase),
+the phone lanes unchanged, and `desk.css.test.js` (every rule in the 机
+section, none of the short step's pairs).

@@ -113,14 +113,20 @@ describe('first contact at 1440 (P10)', () => {
     }
   })
 
-  it('centres the questions in the paper the line leaves', async () => {
+  it('stands the question in the canvas\'s top-left corner, the answers centred under it', async () => {
     await board()
     await pastName()
     // Once the question's car has landed (the desk's pull, plan 155).
     await settle(600)
-    expect(Math.abs(mid(box(inCar('.brd__q'))) - (360 + (bodyW() - 360) / 2))).toBeLessThan(1.5)
-    expect(Math.round(box($('.desk-brd__side')).left)).toBe(0)
-    expect(Math.round(box($('.desk-brd__side')).right)).toBe(360)
+    // No column (plan 161): the paper is the window's, and the canvas
+    // (--desk-board-w) centred in it sets the corner.
+    expect($('.desk-brd__side')).toBeNull()
+    const gutter = (bodyW() - 1240) / 2
+    expect(Math.round(box(inCar('.brd__q')).left)).toBe(Math.round(gutter))
+    expect(Math.round(box($('.desk-brd__strip')).left)).toBe(Math.round(gutter))
+    expect(Math.round(bodyW() - box(inCar('[data-action="continue"]')).right)).toBe(Math.round(gutter))
+    // A ticket's width here: the floor has the room the strip leaves.
+    expect(Math.round(box(inCar('[data-action="continue"]')).width)).toBe(360)
     // The six reasons three to a row: two rows.
     inCar('[data-motive="trip"]').click()
     await settle(900)
@@ -145,7 +151,7 @@ describe('first contact at 1440 (P10)', () => {
     expect(stations.slice(1, 5).some(s => s.className.match(/--(head|tail)/))).toBe(false)
   })
 
-  it('stands the plan at two columns\' width, centred in the paper', async () => {
+  it('stands the plan at two columns\' width, centred in the window', async () => {
     await board()
     await pastName()
     inCar('[data-motive="trip"]').click()
@@ -161,6 +167,6 @@ describe('first contact at 1440 (P10)', () => {
     await settle(600)
     const plan = box(inCar('.brd__stage'))
     expect(Math.round(plan.width)).toBe(2 * 360 + 22)
-    expect(Math.abs(mid(plan) - (360 + (bodyW() - 360) / 2))).toBeLessThan(1.5)
+    expect(Math.abs(mid(plan) - bodyW() / 2)).toBeLessThan(1.5)
   })
 })

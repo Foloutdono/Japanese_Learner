@@ -204,25 +204,27 @@ describe('the Welcome\'s Enter (P8)', () => {
   })
 })
 
-// ── P9 — the boarding frame (plans 122, 140) ──
-// Plan 140, the owner's pick A of three drawn directions: the line laid
-// down the left. A sumi column at the side's width on the LEFT edge,
-// the rail's masthead at its head and a named stop per question under
-// it, each printing its answer once given and the one being asked lit
-// with the pick as it stands; the projection at its foot while the
-// questions run, the pass once the plan is built. No head: Back stands
-// on the floor beside Continue. The answers laid for the width, no
-// Building, and the plan the last screen -- it enters the station.
+// ── P9 — the boarding frame (plans 122, 140, 161) ──
+// Plan 161, the owner's pick D of the canvas "Tsuji — onboarding, new
+// directions": the sumi column goes, and three places never move. The
+// question at the paper's top-left corner; the journey as a strip at the
+// floor's left end, a named stop per question, the answer given said on
+// its stop and a stop behind a door back to its question (plan 140's
+// rules); the floor in the bottom-right corner, Back beside Continue.
+// The answers laid for the width, no Building, and the plan the last
+// screen -- it enters the station.
 const box = el => el.getBoundingClientRect()
 const mid = r => (r.left + r.right) / 2
+const cy = r => (r.top + r.bottom) / 2
 const bodyW = () => document.body.getBoundingClientRect().width
 const side = () => $('.desk-brd__side')
-const stop = key => side()?.querySelector(`[data-stop="${key}"]`)
-const stops = () => [...side().querySelectorAll('.desk-brd__stop')].map(r => r.dataset.stop)
-const stateOf = key => stop(key)?.className.match(/desk-brd__stop--(\w+)/)?.[1]
-const valueOf = key => stop(key)?.querySelector('.desk-brd__val')?.textContent ?? null
-const priced = () => stop('projection')?.querySelector('.desk-brd__fig')?.textContent ?? null
-const doorOf = key => stop(key)?.querySelector('button.desk-brd__door') ?? null
+const strip = () => $('.desk-brd__strip')
+const stop = key => strip()?.querySelector(`[data-stop="${key}"]`)
+const stops = () => [...strip().querySelectorAll('.desk-brd__sp')].map(r => r.dataset.stop)
+const stateOf = key => stop(key)?.className.match(/desk-brd__sp--(\w+)/)?.[1]
+// The answer said on a stop: read out beside its name, not printed.
+const valueOf = key => stop(key)?.querySelector('.sr-only')?.textContent.replace(/^ · /, '') ?? null
+const doorOf = key => stop(key)?.querySelector('button.desk-brd__sp-door') ?? null
 async function pick(sel) { inCar(sel).click(); await settle(40) }
 async function next() { inCar('[data-action="continue"]').click(); await settle() }
 // The plan's arrival plays out on its own; waited out rather than
@@ -251,22 +253,23 @@ async function toTime() {
 }
 const fits = el => el.scrollHeight <= el.clientHeight + 1
 
-describe('the boarding frame on the desk (P9, plan 140)', () => {
-  it('lays the line in a column on the left edge, a stop per question, and keeps it to the plan', async () => {
+describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
+  it('draws the journey as a strip at the floor\'s left end, a stop per question, and keeps it to the plan', async () => {
     const onComplete = vi.fn()
     await board({ onComplete })
     expect($('main.brd').className).toBe('brd desk-brd')
-    // One drawing of the line: no head, no track.
+    // One drawing of the line: no head, no track, and no column.
     expect($('.brd__head')).toBeNull()
     expect($('.brd__track')).toBeNull()
-    const col = side()
-    expect(Math.round(box(col).width)).toBe(360)
-    expect(Math.round(box(col).left)).toBe(0)
-    expect(Math.round(box(col).height)).toBe(window.innerHeight)
-    expect(col.querySelector('.desk-rail__glyph .mark').getAttribute('aria-label')).toBe('辻')
+    expect(side()).toBeNull()
+    await settle(600)
+    // On the floor's line, at its left end, clear of the way back.
+    const at = box(strip())
+    expect(Math.abs(cy(at) - cy(box(inCar('[data-action="continue"]'))))).toBeLessThan(1.5)
+    expect(Math.round(at.left)).toBe(Math.round(box(inCar('.brd__q')).left))
+    expect(at.right).toBeLessThan(box(inCar('[data-action="back"]')).left)
     // The reveal is the kana's own stop; the level joins once both are read.
     expect(stops()).toEqual(['name', 'why', 'kana', 'goal', 'lines', 'rhythm', 'time'])
-    expect(stop('projection')).not.toBeNull()
     await toLevel()
     expect(stops()).toEqual(['name', 'why', 'kana', 'level', 'goal', 'lines', 'rhythm', 'time'])
     await toTime()
@@ -274,13 +277,10 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     // No Building: the hour goes straight to the plan, under the arrival.
     expect(stepOf()).toBe('plan')
     expect($('.brd-build__track')).toBeNull()
-    // The column stays, every stop ridden and none a door any more; the
-    // pass stands where the projection stood.
-    expect(side()).not.toBeNull()
+    // The strip stays, every stop ridden and none a door any more.
     expect(stops().map(stateOf).every(s => s === 'done')).toBe(true)
-    expect(side().querySelector('button.desk-brd__door')).toBeNull()
-    expect(stop('projection')).toBeNull()
-    expect(stop('pass').querySelector('.desk-brd__holder').textContent).toBe('Tester')
+    expect(strip().querySelector('button.desk-brd__sp-door')).toBeNull()
+    expect(strip().querySelector('[aria-current]')).toBeNull()
     expect($('.onb-arrival')).not.toBeNull()
     // The key that skips the arrival is the arrival's alone.
     await enter()
@@ -298,18 +298,19 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(stepOf()).toBe('plan')
   })
 
-  it('prints each answer on its stop, the pick as it stands, and prices a level before Continue', async () => {
+  it('says each answer on its stop, the pick as it stands, and lights the one asked', async () => {
     await board()
     expect(stops().map(stateOf)).toEqual(['now', 'next', 'next', 'next', 'next', 'next', 'next'])
     expect(stop('name').getAttribute('aria-current')).toBe('step')
     expect(valueOf('name')).toBe('Tester')
-    expect(priced()).toBe('—')
+    // Said, not printed: a pointer's title and the stop's read-out name.
+    expect(stop('name').querySelector('.desk-brd__sp-door').title).toMatch(/· Tester$/)
     await pastName()
     expect(stateOf('name')).toBe('done')
     expect(stateOf('why')).toBe('now')
     expect(valueOf('why')).toBeNull()
     await pick('[data-motive="trip"]')
-    // Printed before Continue: the answer's stop reads it at once.
+    // Said before Continue: the answer's stop reads it at once.
     expect([en.brdMotive.trip, fr.brdMotive.trip]).toContain(valueOf('why'))
     await next()
     await pick('[data-kana="both"]')
@@ -318,47 +319,26 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(stateOf('level')).toBe('now')
     await pick('[data-level="N3"]')
     expect(valueOf('level')).toBe('N3')
-    // A stop ahead prints nothing, even one the draft already prices.
+    // A stop ahead says nothing, even one the draft already prices.
     expect(stateOf('goal')).toBe('next')
     expect(valueOf('goal')).toBeNull()
-    const first = priced()
-    expect(first).toMatch(/\d{4}/)
     await next()
     expect(stepOf()).toBe('goal')
-    // Continue committed what the column priced.
+    // Continue committed what the draft priced.
     expect(inCar('[data-goal="N2"]').getAttribute('aria-pressed')).toBe('true')
     expect(valueOf('goal')).toBe('N3 → N2')
-    expect(priced()).toBe(first)
     await pick('[data-goal="N1"]')
     expect(valueOf('goal')).toBe('N3 → N1')
-    expect(priced()).not.toBe(first)
     await next()
     expect(stateOf('goal')).toBe('done')
     expect(stateOf('lines')).toBe('now')
     expect(valueOf('lines')).toMatch(/·/)
     await next()
     expect(stateOf('rhythm')).toBe('now')
-    const before = priced()
     await pick('[data-rhythm="20"]')
     expect(valueOf('rhythm')).toMatch(/^20 /)
-    expect(priced()).not.toBe(before)
     await next()
     expect(valueOf('time')).toMatch(/^\d\d:\d\d$/)
-  })
-
-  it('prices nothing until the volumes answer', async () => {
-    let release
-    apiJson.mockImplementation(path => (path === '/api/onboarding/volumes'
-      ? new Promise(r => { release = () => r(VOLUMES) })
-      : Promise.resolve({})))
-    await board()
-    await toLevel()
-    await pick('[data-level="N3"]')
-    expect(valueOf('level')).toBe('N3')
-    expect(priced()).toBe('—')
-    release()
-    await settle(100)
-    expect(priced()).toMatch(/\d{4}/)
   })
 
   it('opens a passed stop\'s question in one pull, every answer kept', async () => {
@@ -385,21 +365,24 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(stepOf()).toBe('why')
   })
 
-  it('stands Back beside Continue on the floor, and leaves from the first question', async () => {
+  it('stands Back beside Continue in the bottom-right corner, and leaves from the first question', async () => {
     const onExit = vi.fn()
     await board({ onExit })
+    await settle(600)
     const floor = inCar('.desk-brd__floor')
     const back = floor.querySelector('[data-action="back"]')
     const go = floor.querySelector('[data-action="continue"]')
     expect(box(back).right).toBeLessThan(box(go).left)
     expect(Math.abs(box(back).top - box(go).top)).toBeLessThan(1)
-    expect(Math.round(box(go).right)).toBe(Math.round(box(floor).right))
+    // The corner: the canvas's right edge, --sp-7 over the window's floor.
+    expect(Math.round(bodyW() - box(go).right)).toBe(Math.round(box(strip()).left))
+    expect(Math.round(window.innerHeight - box(go).bottom)).toBe(28)
     expect([en.back, fr.back]).toContain(back.textContent)
     back.click()
     expect(onExit).toHaveBeenCalledTimes(1)
   })
 
-  it('sets the answers at the width that serves them, one block with the question', async () => {
+  it('sets the question in the top-left corner and its answers in the paper under it', async () => {
     await board()
     // The name at the card's width, for a name at the display size.
     expect(Math.round(box(inCar('.brd-field')).width)).toBe(640)
@@ -410,18 +393,18 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     const q = box(inCar('.brd__q'))
     const stage = box(inCar('.brd__stage'))
     const foot = box(inCar('.brd__foot'))
-    // Six reasons two to a row at 1100 -- three rows, not six.
-    expect(rowsOf([...inCar('.brd__opts').children]).size).toBe(3)
-    expect(Math.abs(mid(stage) - mid(q))).toBeLessThan(1.5)
-    // The floor at the card's width whatever the answers' (plan 155),
-    // on the question's middle.
-    expect(Math.round(foot.width)).toBe(640)
-    expect(Math.abs(mid(foot) - mid(q))).toBeLessThan(1.5)
-    // Continue --sp-8 under the last answer, not on the window's floor.
-    const last = box([...inCar('.brd__opts').children].at(-1))
-    expect(Math.round(foot.top - last.bottom)).toBe(44)
-    // Centred in the paper the column leaves.
-    expect(Math.abs(mid(q) - (360 + (bodyW() - 360) / 2))).toBeLessThan(12)
+    // The question at the corner, --sp-7 and --sp-6 under the window's
+    // top, set left -- and at the display rung: 1100x800 is no short step.
+    expect(Math.round(q.left)).toBe(Math.round(box(strip()).left))
+    expect(Math.round(q.top)).toBe(50)
+    expect(getComputedStyle(inCar('.brd__q')).fontSize).toBe('40px')
+    expect(getComputedStyle(inCar('.brd__q')).textAlign).toBe('start')
+    // The answers centred across the paper, between the question and the floor.
+    expect(Math.abs(mid(stage) - bodyW() / 2)).toBeLessThan(1.5)
+    expect(stage.top).toBeGreaterThan(q.bottom + 22)
+    expect(stage.bottom).toBeLessThan(foot.top)
+    // Six reasons three to a row at 1100 -- two rows, not six.
+    expect(rowsOf([...inCar('.brd__opts').children]).size).toBe(2)
     await next()
     await settle(900)
     // The kana's four answers on one row, under the card, and the way
@@ -437,10 +420,11 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     await settle(900)
     const stations = () => [...inCar('.desk-brd__line').children]
     expect(stations().map(s => s.dataset.level)).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
-    // Six do not hold half a run's column each at 1100: two rows of three.
-    expect(rowsOf(stations()).size).toBe(2)
+    // Six hold half a run's column each at 1100 now the paper is the
+    // window's: one row.
+    expect(rowsOf(stations()).size).toBe(1)
     const ends = stations().map(s => [s.classList.contains('desk-brd__stn--head'), s.classList.contains('desk-brd__stn--tail')])
-    expect(ends).toEqual([[true, false], [false, false], [false, true], [true, false], [false, false], [false, true]])
+    expect(ends).toEqual([[true, false], [false, false], [false, false], [false, false], [false, false], [false, true]])
     await pick('[data-level="N4"]')
     expect(stations().map(s => s.classList.contains('desk-brd__stn--ride'))).toEqual([true, true, false, false, false, false])
     expect(inCar('[data-level="N4"]').getAttribute('aria-pressed')).toBe('true')
@@ -458,8 +442,10 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
       expect(fits(inCar('.brd__body')), stepOf()).toBe(true)
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
       expect(box(inCar('.brd__foot')).bottom).toBeLessThanOrEqual(window.innerHeight)
-      expect(fits(side()), `${stepOf()}: the column`).toBe(true)
-      for (const r of document.querySelectorAll('.desk-brd__door')) expect(r.scrollWidth).toBeLessThanOrEqual(r.clientWidth)
+      // The strip and the floor share their line and never meet.
+      expect(box(strip()).right, `${stepOf()}: the strip`).toBeLessThan(box(inCar('.brd__foot button')).left)
+      const go = inCar('.brd__foot .btn-depart')
+      if (go) expect(go.scrollWidth, `${stepOf()}: Continue`).toBeLessThanOrEqual(go.clientWidth)
     }
     await check()
     await next()
@@ -490,11 +476,10 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(box(inCar('.brd-chart')).right).toBeLessThan(box(inCar('.brd-lead')).left)
     expect(fits(inCar('.brd__body'))).toBe(true)
     expect(box(inCar('.brd__foot')).bottom).toBeLessThanOrEqual(window.innerHeight)
-    // Its one action at a ticket's width, under the plan's middle.
+    // Its one action at a ticket's width, in the floor's corner.
     const go = box(inCar('[data-action="enter"]'))
     expect(Math.round(go.width)).toBe(360)
-    expect(Math.abs(mid(go) - mid(box(inCar('.brd__stage'))))).toBeLessThan(1.5)
-    expect(fits(side())).toBe(true)
+    expect(Math.round(bodyW() - go.right)).toBe(Math.round(box(strip()).left))
   })
 
   it('says on the plan why the office refused the contract, and stays', async () => {
@@ -523,7 +508,7 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(inCar('[data-action="enter"]')).toBeNull()
     await next()
     expect(stepOf()).toBe('account')
-    expect(stop('pass')).not.toBeNull()
+    expect(stops().map(stateOf).every(s => s === 'done')).toBe(true)
     inCar('[data-action="account-skip"]').click()
     await settle()
     expect(apiJsonWithTimeout).toHaveBeenCalledWith('/api/onboarding/complete', expect.anything(), expect.anything())
@@ -700,14 +685,14 @@ describe('the digits at first contact (P12)', () => {
   })
 })
 
-// ── P13 — first contact, finished (plan 155) ──
+// ── P13 — first contact, finished (plans 155, 161) ──
 // The owner's ask: keep the drawing and make it smooth. The way on
-// stands in one place on every question; the lit stop is a train that
-// runs down the line; each answer's key turns over to its check in one
-// slot; the Welcome hands its column to the wait and the wait to the
-// boarding with the masthead on one pixel; the plan's arrival boards
-// the paper; and a car is not dropped before the one after it has
-// landed.
+// stands in one place on every question -- since plan 161 the paper's
+// bottom-right corner; the stop being asked is lit on the strip and the
+// light moves with the question; each answer's key turns over to its
+// check in one slot; the Welcome hands its column to the wait with the
+// masthead on one pixel; the plan's arrival boards the paper; and a car
+// is not dropped before the one after it has landed.
 const { default: AppLoading } = await import('./screens/AppLoading')
 const landed = () => settle(900)
 const centreY = r => (r.top + r.bottom) / 2
@@ -721,7 +706,7 @@ describe('first contact, finished (P13, plan 155)', () => {
       await landed()
       const go = box(inCar('[data-action="continue"]'))
       const back = box(inCar('[data-action="back"]'))
-      floors.push({ step: stepOf(), go: [Math.round(go.left), Math.round(go.width)], back: Math.round(back.left) })
+      floors.push({ step: stepOf(), go: [Math.round(go.right), Math.round(go.top)], width: Math.round(go.width), gap: Math.round(go.left - back.right) })
     }
     await read()                          // name
     await pastName()
@@ -741,54 +726,41 @@ describe('first contact, finished (P13, plan 155)', () => {
     await next()
     await read()                          // time
     expect(floors.map(f => f.step)).toEqual(['name', 'why', 'level', 'goal', 'lines', 'rhythm', 'time'])
+    // Continue's end and its top in the corner on every question, Back a
+    // rung before it. At 1100 the ticket gives some of its width to the
+    // strip, and a little more once both scripts are read and the level
+    // joins it -- never so much that its label wraps.
     for (const f of floors) {
       expect(f.go, f.step).toEqual(floors[0].go)
-      expect(f.back, f.step).toBe(floors[0].back)
+      expect(f.gap, f.step).toBe(12)
+      expect(f.width, f.step).toBeGreaterThanOrEqual(240)
+      expect(f.width, f.step).toBeLessThanOrEqual(360)
     }
-    // A ticket's width at the card's right end.
-    expect(floors[0].go[1]).toBe(360)
   })
 
-  it('runs the train down the line to the stop being asked, and back up it', async () => {
+  it('lights the stop being asked, and moves the light with the question', async () => {
     await board()
-    const train = () => side().querySelector('.desk-brd__train')
-    const dotOf = key => stop(key).querySelector('.desk-brd__dot')
-    const onDot = key => expect(Math.abs(centreY(box(train())) - centreY(box(dotOf(key)))), key).toBeLessThan(1.5)
+    const lit = () => strip().querySelector('[aria-current="step"]')?.dataset.stop
+    const ring = key => box(stop(key).querySelector('.desk-brd__sp-dot'))
     await landed()
-    onDot('name')
-    const wash = side().querySelector('.desk-brd__here')
-    expect(Math.abs(box(wash).top - box(stop('name')).top)).toBeLessThan(1.5)
+    expect(lit()).toBe('name')
+    // The lit stop's ring is the phone track's "here", larger than a dot.
+    expect(Math.round(ring('name').width)).toBe(16)
+    expect(Math.round(ring('why').width)).toBe(10)
     await pastName()
     await landed()
-    onDot('why')
-    expect(Math.abs(box(wash).top - box(stop('why')).top)).toBeLessThan(1.5)
-    // The ridden stretch ends on the lit stop.
-    const ridden = box(side().querySelector('.desk-brd__ridden'))
-    expect(Math.abs(ridden.bottom - centreY(box(dotOf('why'))))).toBeLessThan(1.5)
+    expect(lit()).toBe('why')
+    expect(Math.round(ring('name').width)).toBe(10)
     await pick('[data-motive="trip"]')
     await next()
     await landed()
-    onDot('kana')
+    expect(lit()).toBe('kana')
     doorOf('name').click()
     await landed()
-    onDot('name')
+    expect(lit()).toBe('name')
     await next()
     await landed()
-    onDot('why')
-  })
-
-  it('lets the train off at the last stop once the plan is built', async () => {
-    await board()
-    await toLevel()
-    await toTime()
-    await next()
-    await arrived()
-    await landed()
-    const route = side().querySelector('.desk-brd__route')
-    expect(route.classList.contains('desk-brd__route--ridden')).toBe(true)
-    expect(opacityOf(side().querySelector('.desk-brd__train'))).toBe(0)
-    const last = stop('time').querySelector('.desk-brd__dot')
-    expect(Math.abs(box(side().querySelector('.desk-brd__ridden')).bottom - centreY(box(last)))).toBeLessThan(1.5)
+    expect(lit()).toBe('why')
   })
 
   it('turns an answer\'s key over to its check, in one slot', async () => {
@@ -841,7 +813,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     expect(Math.abs(centreY(box(tag)) - box(inCar('[data-rhythm="10"]')).top)).toBeLessThan(1.5)
   })
 
-  it('hands the Welcome\'s column to the wait, and the wait\'s to the boarding', async () => {
+  it('hands the Welcome\'s column to the wait', async () => {
     const mastAt = () => {
       const r = box($('.desk-rail__glyph'))
       return [Math.round(r.left), Math.round(r.top)]
@@ -884,8 +856,6 @@ describe('first contact, finished (P13, plan 155)', () => {
     await landed()
     expect(opacityOf($('.desk-wait'))).toBe(1)
     await cold.unmount()
-    await board()
-    expect(mastAt()).toEqual(at)
   })
 
   it('brings the Welcome back when no pass could be issued', async () => {
@@ -898,7 +868,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     expect(opacityOf($('.desk-door__auth'))).toBe(1)
   })
 
-  it('boards the plan\'s arrival on the paper, the line left in view', async () => {
+  it('boards the plan\'s arrival on the whole paper, no column beside it', async () => {
     await board()
     await toLevel()
     await toTime()
@@ -906,8 +876,8 @@ describe('first contact, finished (P13, plan 155)', () => {
     await settle(200)
     const sign = $('.onb-arrival__board')
     expect(sign).not.toBeNull()
-    expect(Math.abs(mid(box(sign)) - (360 + (bodyW() - 360) / 2))).toBeLessThan(2)
-    expect(Math.round(box($('.onb-arrival__scrim')).left)).toBe(360)
+    expect(Math.abs(mid(box(sign)) - bodyW() / 2)).toBeLessThan(2)
+    expect(Math.round(box($('.onb-arrival__scrim')).left)).toBe(0)
   })
 
   it('keeps the leaving car until the arriving one has landed, and runs Back the other way', async () => {

@@ -1063,7 +1063,10 @@ dialog left and moved the ones that do not interrupt into their columns;
 plan 122 drew first contact for a desk, and plan 123 made the workspace
 answer a keyboard and a pointer one way everywhere. Plan 130 had the two
 plated gates take the window; plan 140 laid first contact down the left
-as the rail it arrives at.
+as the rail it arrives at, and plan 161 drew it again as the crossroads:
+the question at the paper's top-left corner, the journey a strip of named
+stops at the floor's left end, the floor in the bottom-right corner, and
+each question drawing its answers between them.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
