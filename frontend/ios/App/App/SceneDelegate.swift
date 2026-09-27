@@ -8,7 +8,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = CAPBridgeViewController()
+        // The bridge with the app's own plugin on it (plan 156).
+        window?.rootViewController = TsujiBridgeViewController()
         window?.makeKeyAndVisible()
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)

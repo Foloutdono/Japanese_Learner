@@ -38,15 +38,24 @@ platform :ios do
       xcodeproj: "App.xcodeproj"
     )
 
-    # match wrote the profile's name into the environment as
-    # sigh_<bundle id>_appstore_profile-name; the archive signs with it.
-    update_code_signing_settings(
-      use_automatic_signing: false,
-      path: "App.xcodeproj",
-      team_id: ENV.fetch("APPLE_TEAM_ID"),
-      code_sign_identity: "Apple Distribution",
-      profile_name: ENV.fetch("sigh_app.tsuji_appstore_profile-name")
-    )
+    # match wrote each profile's name into the environment as
+    # sigh_<bundle id>_appstore_profile-name; each target signs with its
+    # own -- the app, and the widget extension it embeds (plan 156).
+    profiles = {
+      "App" => ["app.tsuji", ENV.fetch("sigh_app.tsuji_appstore_profile-name")],
+      "TsujiWidget" => ["app.tsuji.widget", ENV.fetch("sigh_app.tsuji.widget_appstore_profile-name")]
+    }
+    profiles.each do |target, (bundle_id, profile)|
+      update_code_signing_settings(
+        use_automatic_signing: false,
+        path: "App.xcodeproj",
+        targets: [target],
+        team_id: ENV.fetch("APPLE_TEAM_ID"),
+        code_sign_identity: "Apple Distribution",
+        bundle_identifier: bundle_id,
+        profile_name: profile
+      )
+    end
 
     # Capacitor 8 wires its plugins through Swift Package Manager
     # (ios/App/CapApp-SPM), so there is no CocoaPods workspace: the
@@ -56,6 +65,9 @@ platform :ios do
       scheme: "App",
       configuration: "Release",
       export_method: "app-store",
+      export_options: {
+        provisioningProfiles: profiles.values.to_h
+      },
       output_directory: "output",
       clean: true
     )

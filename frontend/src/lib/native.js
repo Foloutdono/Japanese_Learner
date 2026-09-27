@@ -6,6 +6,7 @@
 // thin, forgiving call -- a plugin that is missing or refuses (an old
 // OS, a denied permission) degrades to the web behaviour, never to a
 // crash. The web halves of the same seams live in lib/platform.js.
+import { registerPlugin } from '@capacitor/core'
 import { App } from '@capacitor/app'
 import { Browser } from '@capacitor/browser'
 import { Filesystem, Directory } from '@capacitor/filesystem'
@@ -13,10 +14,13 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Share } from '@capacitor/share'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { StatusBar, Style } from '@capacitor/status-bar'
-import { nudgeAt } from './platform'
+import { openPath } from './platform'
+import { LEGACY_NUDGE_ID, NUDGE_IDS } from './ahead'
 
-// One daily reminder, one id: rescheduling replaces it, never stacks.
-const NUDGE_ID = 1
+// 発車案内 — the shells' own plugin (plan 156): it hands the widget its
+// figures (android/.../TsujiWidgetPlugin.java, ios/App/App/
+// TsujiWidgetPlugin.swift) and asks the OS to redraw it.
+const TsujiWidget = registerPlugin('TsujiWidget')
 
 // --bg-panel / --bg-main per theme, for the system bars (stores/theme.js
 // carries the same pair for the web's theme-color meta).
@@ -113,27 +117,91 @@ export async function requestNudgePermission() {
   }
 }
 
-/** The daily reminder at the learner's hour, replacing whatever was
- *  scheduled; false when the OS has not allowed notifications. */
-export async function scheduleNudge({ time, title, body }) {
-  const at = nudgeAt(time)
-  if (!at) return false
-  await cancelNudge()
-  const { display } = await LocalNotifications.checkPermissions()
-  if (display !== 'granted') return false
-  await LocalNotifications.schedule({
-    notifications: [{
-      id: NUDGE_ID,
-      title,
-      body,
-      schedule: { on: { hour: at.hour, minute: at.minute }, allowWhileIdle: true },
-    }],
-  })
-  return true
+/** 'granted', 'denied' or 'prompt' (not asked yet). */
+export async function nudgePermission() {
+  try {
+    const { display } = await LocalNotifications.checkPermissions()
+    return display === 'granted' || display === 'denied' ? display : 'prompt'
+  } catch {
+    return 'denied'
+  }
 }
 
-export async function cancelNudge() {
-  try { await LocalNotifications.cancel({ notifications: [{ id: NUDGE_ID }] }) } catch { /* nothing scheduled */ }
+/** Every reminder this app has ever scheduled, the repeating one of
+ *  plan 076 included, cancelled. */
+async function cancelNudges() {
+  try {
+    await LocalNotifications.cancel({
+      notifications: [LEGACY_NUDGE_ID, ...NUDGE_IDS].map(id => ({ id })),
+    })
+  } catch { /* nothing scheduled */ }
+}
+
+/** The day's notifications (lib/ahead.js), replacing whatever was
+ *  scheduled; nothing when the OS has not allowed them. Android lists
+ *  the lanes in the expanded notification (its inbox style); iOS has
+ *  them in the body already. */
+export async function scheduleNudges(nudges) {
+  await cancelNudges()
+  if (!nudges.length) return []
+  const { display } = await LocalNotifications.checkPermissions()
+  if (display !== 'granted') return []
+  await LocalNotifications.schedule({
+    notifications: nudges.map(n => ({
+      id: n.id,
+      title: n.title,
+      body: n.body,
+      ...(n.lines.length ? { inboxList: n.lines } : {}),
+      schedule: { at: n.at, allowWhileIdle: true },
+      extra: n.extra,
+    })),
+  })
+  return nudges
+}
+
+/** The widget's figures, and the OS asked to redraw it. A shell built
+ *  before the widget has no plugin to answer: the call fails quietly. */
+export async function updateWidget(payload) {
+  try {
+    // null is a signed-out device: the widget empties.
+    await TsujiWidget.update({ data: payload ? JSON.stringify(payload) : '' })
+  } catch { /* no widget in this build */ }
+}
+
+/** A tap on a nudge, and a link from the widget -- while the app runs,
+ *  or the one it was started with. The same link can arrive both ways
+ *  on a cold start; it is taken once. */
+export function onOpenings(handler) {
+  let last = null
+  const take = (to, via, key) => {
+    const now = Date.now()
+    if (last && last.key === key && now - last.at < 3000) return
+    last = { key, at: now }
+    handler({ to, via })
+  }
+  const pending = [
+    LocalNotifications.addListener('localNotificationActionPerformed', ({ notification }) => {
+      const to = notification?.extra?.to
+      if (to === '/today') take(to, 'notification', `n${notification.id}`)
+    }),
+    App.addListener('appUrlOpen', ({ url }) => {
+      const to = openPath(url)
+      if (to) take(to, 'widget', url)
+    }),
+  ]
+  App.getLaunchUrl()
+    .then(launch => {
+      const to = openPath(launch?.url)
+      if (to) take(to, 'widget', launch.url)
+    })
+    .catch(() => {})
+  return () => { for (const p of pending) p.then(h => h.remove()).catch(() => {}) }
+}
+
+/** The app back in front. */
+export function onResume(handler) {
+  const pending = App.addListener('appStateChange', ({ isActive }) => { if (isActive) handler() })
+  return () => { pending.then(h => h.remove()).catch(() => {}) }
 }
 
 /** Android's back button. The handler receives { canGoBack }; the

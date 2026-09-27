@@ -23,6 +23,17 @@ export function canNudge() {
   return isNative()
 }
 
+/** 'ios', 'android' or 'web' -- where a shell's own words differ (the
+ *  widget lives on the lock screen on one and the home screen on the
+ *  other). */
+export function nativePlatform() {
+  try {
+    return window.Capacitor?.getPlatform?.() ?? 'web'
+  } catch {
+    return 'web'
+  }
+}
+
 const native = () => import('./native')
 
 // ── The seams ─────────────────────────────────────────────────
@@ -74,13 +85,55 @@ export async function requestNudgePermission() {
   return n.requestNudgePermission()
 }
 
-/** The daily nudge follows the profile: scheduled at the hour when the
- *  learner said yes, cancelled otherwise. A no-op on the web. */
-export async function syncNudge({ enabled, time, title, body }) {
+/** Whether the OS lets the app notify: 'granted', 'denied' or
+ *  'prompt' (never asked). 'denied' on the web, which has nothing to
+ *  schedule. */
+export async function nudgePermission() {
+  if (!isNative()) return 'denied'
+  const n = await native()
+  return n.nudgePermission()
+}
+
+/** 発車案内 (plan 156): the day's notifications, as lib/ahead.js planned
+ *  them, replacing every one scheduled before -- an empty list cancels
+ *  the lot. Resolves to what was scheduled. A no-op on the web. */
+export async function syncNudges(nudges) {
+  if (!isNative()) return []
+  const n = await native()
+  return n.scheduleNudges(nudges)
+}
+
+/** The widget's figures (lib/ahead.js's widgetPayload), handed to the
+ *  shell's own plugin. A no-op on the web, and on a shell built before
+ *  the widget existed. */
+export async function updateWidget(payload) {
   if (!isNative()) return
   const n = await native()
-  if (enabled && nudgeAt(time)) await n.scheduleNudge({ time, title, body })
-  else await n.cancelNudge()
+  await n.updateWidget(payload)
+}
+
+/** The learner has signed out: no reminder of their cards, and a
+ *  widget with nothing of theirs on it. Never throws (stores/account). */
+export function clearAhead() {
+  syncNudges([]).catch(() => {})
+  updateWidget(null).catch(() => {})
+}
+
+/** Where a notification or the widget opened the app for: the handler
+ *  receives { to, via } -- a path in the app, and 'notification' or
+ *  'widget'. Resolves to the unbind function. */
+export async function bindOpenings(handler) {
+  if (!isNative()) return () => {}
+  const n = await native()
+  return n.onOpenings(handler)
+}
+
+/** The app back in front after being out of sight. Resolves to the
+ *  unbind function. */
+export async function bindResume(handler) {
+  if (!isNative()) return () => {}
+  const n = await native()
+  return n.onResume(handler)
 }
 
 /** Android's back button; resolves to the unbind function. */
@@ -111,6 +164,18 @@ export function backAction({ hasDialog, pathname, canGoBack = true }) {
   if (hasDialog) return 'close'
   if (TAB_ROOTS.includes(pathname) || !canGoBack) return 'exit'
   return 'back'
+}
+
+// The places a link from outside the app may open. Any app can fire
+// the scheme, so it names a door, never an arbitrary path.
+const OPEN_PATHS = { today: '/today' }
+
+/** A deep link the widget opens the app with -- app.tsuji://open/today
+ *  -- as the path it names, or null for any other link (the OAuth
+ *  callback shares the scheme). */
+export function openPath(url) {
+  const m = /^app\.tsuji:\/\/open\/([a-z]+)\/?$/.exec(String(url ?? ''))
+  return (m && OPEN_PATHS[m[1]]) || null
 }
 
 /** 'HH:MM' → { hour, minute }, or null for anything that is not a clock. */

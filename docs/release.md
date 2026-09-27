@@ -94,11 +94,40 @@ this repository (`frontend/.gitignore` refuses `.jks`, `.keystore`, `.p8`,
   the reviewer (Settings › Data), a **test account**, the support and
   privacy URLs, 6.7" and 6.1" screenshots, an external TestFlight group.
 
+## The widget and its App Group (plan 156)
+
+The iPhone widget is an app extension, `TsujiWidget` (bundle id
+`app.tsuji.widget`, `frontend/ios/App/TsujiWidget/`), embedded in the
+app. The app hands it the day's figures through an **App Group**,
+`group.app.tsuji`, which both targets' entitlements name. Apple signs
+nothing that names a group it does not know, so **before the first tag
+that carries the widget**, in the Apple Developer account
+(Certificates, Identifiers & Profiles):
+
+1. **Identifiers → App Groups**: register `group.app.tsuji`.
+2. **Identifiers → App IDs → `app.tsuji`**: enable App Groups and
+   assign `group.app.tsuji`. This invalidates its App Store profile,
+   which `match` renews on the next run (`readonly: false`).
+3. **Identifiers → App IDs → +**: register `app.tsuji.widget`, with
+   App Groups enabled and the same group assigned.
+
+`match` then makes the second profile (the Matchfile names both ids)
+and the lane signs each target with its own. Without these three steps
+the tag's `ios` job fails at signing; the Android job does not care.
+If it still reports an entitlements mismatch, delete the old
+`app.tsuji` App Store profile in the portal and run the tag again.
+
+Android needs nothing: its widget is a receiver in the app itself
+(`TrainWidget.java`).
+
 ## Verifying a build on a device
 
 From Linux, Android: `npm run cap:android` with a phone on USB debugging
 (or install the workflow's APK). iOS: the TestFlight build. Walk plan 076's
 list — the boarding end to end, a run with the docked rating bar, a draw
 card, the dictionary sheets, an exam with audio, a deck's CSV share, the
-nudge firing at its hour, sign-out, account deletion on a throwaway
+nudge firing at its hour with the day's count (Settings ›
+Notifications prints the next one), the widget added to the home
+screen (Android) or lock screen (iPhone) and its Depart opening the
+gate, sign-out emptying the widget, account deletion on a throwaway
 account — and watch the first `/api` call and a `kanjivg` fetch for CORS.
