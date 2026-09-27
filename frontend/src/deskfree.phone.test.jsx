@@ -1732,3 +1732,80 @@ describe('the stations filled (plan 137)', () => {
     expect(document.querySelectorAll('.route-stop')).toHaveLength(2)
   })
 })
+
+// ── plan 159 — the practice stations a phone keeps ──
+// On the desk a practice station is a line's split filled: the source a
+// switch at the list's head, the stops with a sentence and a record,
+// the open stop's page, and the mock exam's papers as rows with a
+// specimen each. A phone keeps its screens -- reading's three source
+// cards, the grades across, the papers as cards -- and asks for none of
+// what only the desk prints; the learner's own cards, a page of the
+// desk's, send a phone back to the sources.
+describe('the practice stations filled (plan 159)', () => {
+  const practiceRoutes = async () => {
+    const { Routes, Route } = await import('react-router-dom')
+    const { default: SentenceStation } = await import('./screens/SentenceStation')
+    const { default: ExamScreen } = await import('./screens/ExamScreen')
+    return (
+      <Routes>
+        {['/practice/reading', '/practice/reading/levels', '/practice/reading/cards'].map(path => (
+          <Route key={path} path={path} element={<SentenceStation session={{}} base="/practice/reading" />} />
+        ))}
+        <Route path="/practice/exam" element={<ExamScreen session={{}} />} />
+      </Routes>
+    )
+  }
+  const asked = part => apiFetch.mock.calls.some(([path]) => String(path).includes(part))
+
+  it('keeps reading\'s three source cards, and asks for no stop and no samples', async () => {
+    apiFetch.mockReset()
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const routes = await practiceRoutes()
+    await render(<LangProvider><MemoryRouter initialEntries={['/practice/reading']}>{routes}</MemoryRouter></LangProvider>)
+    await settle(250)
+    expect(document.querySelectorAll('.learn > .platform-grid .platform-card')).toHaveLength(3)
+    expect(document.querySelector('.desk-split, .prc-page, .prc-sources')).toBeNull()
+    expect(asked('/api/practice/stop')).toBe(false)
+    expect(asked('/api/station/reading')).toBe(false)
+  })
+
+  it('keeps the grades as they were: no sample, no record, no page', async () => {
+    const { MemoryRouter } = await import('react-router-dom')
+    const routes = await practiceRoutes()
+    await render(<LangProvider><MemoryRouter initialEntries={['/practice/reading/levels']}>{routes}</MemoryRouter></LangProvider>)
+    await settle(250)
+    expect(document.querySelectorAll('.learn > .route .route-stop')).toHaveLength(5)
+    expect(document.querySelector('.desk-stop__sample, .route-stop__note, .prc-page')).toBeNull()
+  })
+
+  it('sends the desk\'s own-cards page back to the sources', async () => {
+    const { MemoryRouter, useLocation } = await import('react-router-dom')
+    const routes = await practiceRoutes()
+    const at = { path: null }
+    function Where() { at.path = useLocation().pathname; return null }
+    await render(<LangProvider><MemoryRouter initialEntries={['/practice/reading/cards']}>{routes}<Where /></MemoryRouter></LangProvider>)
+    await settle(250)
+    expect(at.path).toBe('/practice/reading')
+    expect(document.querySelectorAll('.learn > .platform-grid .platform-card')).toHaveLength(3)
+  })
+
+  it('keeps the exam\'s papers as cards, and asks for no record and no specimen', async () => {
+    apiFetch.mockReset()
+    apiFetch.mockImplementation(async path => ({
+      ok: true,
+      status: 200,
+      json: async () => (String(path).startsWith('/api/exams')
+        ? [{ id: 'n5-vocab-01', level: 'N5', kind: 'vocab', title: 'N5 語彙', questionCount: 18, generated: true, revision: 1, minutes: 17, mondai: ['漢字読み'], last: null }]
+        : {}),
+    }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const routes = await practiceRoutes()
+    await render(<LangProvider><MemoryRouter initialEntries={['/practice/exam?level=N5']}>{routes}</MemoryRouter></LangProvider>)
+    await settle(250)
+    expect(document.querySelectorAll('.learn > .platform-grid .platform-card')).toHaveLength(1)
+    expect(document.querySelector('.prc-paper, .prc-papers, .desk-split')).toBeNull()
+    expect(asked('/api/practice/record')).toBe(false)
+    expect(asked('/api/station/exam')).toBe(false)
+  })
+})

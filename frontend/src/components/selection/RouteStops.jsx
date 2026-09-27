@@ -40,6 +40,11 @@ import { SplitRow } from './SplitRow'
 //           called. Only the desk passes it; without it a stop is the
 //           button it always was.
 //
+//   stop.note — a line of the stop's own for its caption (plan 159): a
+//           practice station's record at the grade ("24 phrases · 83 %
+//           justes"), after "you are here" where the stop is the
+//           learner's. The caller formats it, as it does the labels.
+//
 //   figured — the desk's line split (plan 137): each stop also prints
 //           its `sample` (the first things it teaches, joined) and a bar
 //           of its make-up — learned in the line's pigment, met but not
@@ -91,9 +96,10 @@ export function RouteStops({ stops, here = null, selected = null, onSelect, link
             {stop.code && <span className="route-stop__code" lang={stop.codeLang}>{stop.code}</span>}
             <span className="route-stop__names">
               <span className="route-stop__jp">{stop.name}</span>
-              {(caption || started) && (
+              {(caption || started || stop.note) && (
                 <span className="route-stop__caption">
                   {caption}
+                  {stop.note && <span className="route-stop__note">{stop.note}</span>}
                   {/* Mastery takes three weeks to show, so the figure
                       at the end of the row reads 0 / 665 through a
                       fortnight of real work. This is what moves in the

@@ -5,6 +5,7 @@ import { forgetForecast } from './forecast'
 import { forgetShown } from './guide'
 import { forgetJourney } from './journey'
 import { forgetPracticeRecord } from './practiceRecord'
+import { forgetPracticeStops } from './practiceStop'
 import { forgetSummary } from './profileSummary'
 import { forgetStats } from './stats'
 import { forgetToday } from './today'
@@ -25,7 +26,8 @@ import { forgetToday } from './today'
 //   the journey   the standing the pass's back judges (five minutes'
 //                 TTL, the longest of them)
 //   the record    what was done at each grade of each practice
-//                 platform (the desk's Practice gate, plan 130)
+//                 platform (the desk's Practice gate, plan 130), and
+//                 at each stop of a practice station (plan 159)
 //   the guide     which gates opened their lesson THIS page load
 //   the day ahead the reminders scheduled on this phone and the
 //                 widget's figures (plan 156): both name the leaving
@@ -48,6 +50,7 @@ export function forgetAccount() {
   forgetStats()
   forgetJourney()
   forgetPracticeRecord()
+  forgetPracticeStops()
   forgetForecast()
   forgetShown()
   forgetAheadPlan()

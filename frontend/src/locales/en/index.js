@@ -2195,6 +2195,63 @@ const onboarding = {
   },
   practiceRight: pct => `${pct}% right`,
   practiceNotYet: 'Not yet',
+  // ── A practice station, on the desk (plan 159) ────────────────
+  // The source as a switch at the list's head (the JLPT grades, word
+  // frequency, your own cards), then the open stop's page: what the
+  // exercise asks, its shape, four figures, your latest misses and the
+  // grade's points.
+  practiceSourceFrequency: 'Frequency',
+  practiceHow: {
+    reading: 'Read the sentence before the clock covers it, then write its reading in rōmaji.',
+    translation: 'A sentence to say in Japanese, then a reference answer and the tutor’s view of yours.',
+    comprehension: 'A short text, then its questions — the exam’s reading section, rehearsed.',
+    dictation: 'Two listens, no more: write in rōmaji what you hear.',
+    composition: 'You are given a grammar point: write a sentence that uses it, and a tutor reads it.',
+  },
+  practiceBank: {
+    sentences: n => `${n} sentences written for the grade.`,
+    texts: n => `${n} questions a text.`,
+    clips: n => `${n} sentences recorded for the grade.`,
+    points: n => `${n} points to use.`,
+  },
+  practiceSpecTag: {
+    sentence: 'A sentence of the grade',
+    text: 'A text of the grade',
+    clip: 'A sentence of the grade, by ear',
+    point: 'A point of the grade',
+    tier: 'Words of the tier',
+    mine: 'Your words',
+  },
+  practiceFig: {
+    sentences: 'Sentences',
+    texts: 'Texts',
+    right: 'Right',
+    questions: 'Questions right',
+    words: 'Words of the grade',
+    tierWords: 'Words of the tier met',
+    met: 'Words met',
+    last: 'Last ride',
+  },
+  practiceMisses: 'Your missed sentences',
+  practiceMissedPoints: 'Your missed points',
+  practiceTexts: 'Your texts',
+  practiceNoMisses: 'No missed sentence yet.',
+  practiceNoTexts: 'No text read yet.',
+  practicePoints: 'The grade’s points',
+  practiceTextPoints: 'The texts’ points',
+  practicePointsStudied: (n, of) => `${n} / ${of} studied`,
+  practicePointStudied: 'studied',
+  practiceTierTitle: (tier, from, to) => `Tier ${tier} · words ${from} to ${to}`,
+  practiceTierDesc: list => `Sentences around this tier’s words (${list}), ranked by how often they are written.`,
+  practiceTierWords: 'The tier’s words',
+  practiceTierSeen: (n, of) => `${n} / ${of} met`,
+  practiceMineDesc: 'Sentences in which every word is one you have already met.',
+  practiceMineNote: 'Only words you have already seen',
+  // The mock exam on the desk: each paper a row (plan 159).
+  examGradeDesc: 'Four papers in the JLPT format, timed and scored — unofficial scoring.',
+  examNext: label => `Next · ${label}`,
+  examLastScore: 'Your last score',
+  examMinutes: n => `≈\u00a0${n}\u00a0min`,
   settingsRedoDesc: 'Take it again once you’ve progressed — your level moves with you.',
   // ── Which rating bar to grade with ──────────────────────────
   // Two buttons, four or six. All three send the same rating to the

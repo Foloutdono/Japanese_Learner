@@ -72,16 +72,19 @@ export const ROUTES = [
   '/practice/exam/:examId/results',
   // The five sentence sections are generated from SENTENCE_SECTIONS in
   // App.jsx rather than written out, which is why the test allows these
-  // nine to have no literal `path="…"` of their own.
+  // eleven to have no literal `path="…"` of their own (the two /cards
+  // pages since plan 159).
   '/practice/reading',
   '/practice/reading/levels',
   '/practice/reading/tiers',
+  '/practice/reading/cards',
   '/practice/reading/level/:level',
   '/practice/reading/tier/:tier',
   '/practice/reading/mastery',
   '/practice/translation',
   '/practice/translation/levels',
   '/practice/translation/tiers',
+  '/practice/translation/cards',
   '/practice/translation/level/:level',
   '/practice/translation/tier/:tier',
   '/practice/translation/mastery',

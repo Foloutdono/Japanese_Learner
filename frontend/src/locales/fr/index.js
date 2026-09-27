@@ -2124,6 +2124,63 @@ const onboarding = {
   },
   practiceRight: pct => `${pct}\u00a0% justes`,
   practiceNotYet: 'Pas encore',
+  // ── La station de pratique, au bureau (plan 159) ─────────────
+  // La source en interrupteur en tête de la liste (les grades JLPT, la
+  // fréquence, tes cartes), puis la page de l'arrêt ouvert : ce que
+  // l'exercice demande, sa forme, quatre chiffres, tes derniers ratés
+  // et les points du grade.
+  practiceSourceFrequency: 'Fréquence',
+  practiceHow: {
+    reading: 'Lis la phrase avant que le chrono ne la couvre, puis écris sa lecture en rōmaji.',
+    translation: 'Une phrase à dire en japonais, puis une réponse de référence et l’avis du tuteur.',
+    comprehension: 'Un texte court, puis ses questions — l’épreuve de lecture de l’examen, en répétition.',
+    dictation: 'Deux écoutes, pas une de plus : écris en rōmaji ce que tu entends.',
+    composition: 'Un point de grammaire est donné : écris une phrase qui l’emploie, un tuteur la relit.',
+  },
+  practiceBank: {
+    sentences: n => `${n} phrases écrites pour le grade.`,
+    texts: n => `${n} questions par texte.`,
+    clips: n => `${n} phrases enregistrées pour le grade.`,
+    points: n => `${n} points à employer.`,
+  },
+  practiceSpecTag: {
+    sentence: 'Une phrase du grade',
+    text: 'Un texte du grade',
+    clip: 'Une phrase du grade, à l’oreille',
+    point: 'Un point du grade',
+    tier: 'Des mots du palier',
+    mine: 'Tes mots',
+  },
+  practiceFig: {
+    sentences: 'Phrases',
+    texts: 'Textes',
+    right: 'Justes',
+    questions: 'Questions justes',
+    words: 'Mots du grade',
+    tierWords: 'Mots vus du palier',
+    met: 'Mots rencontrés',
+    last: 'Dernier trajet',
+  },
+  practiceMisses: 'Tes phrases manquées',
+  practiceMissedPoints: 'Tes points manqués',
+  practiceTexts: 'Tes textes',
+  practiceNoMisses: 'Aucune phrase manquée pour l’instant.',
+  practiceNoTexts: 'Aucun texte lu pour l’instant.',
+  practicePoints: 'Les points du grade',
+  practiceTextPoints: 'Les points des textes',
+  practicePointsStudied: (n, of) => `${n} / ${of} étudiés`,
+  practicePointStudied: 'étudié',
+  practiceTierTitle: (tier, from, to) => `Palier ${tier} · mots ${from} à ${to}`,
+  practiceTierDesc: list => `Des phrases autour des mots de ce palier (${list}), classés par fréquence réelle à l’écrit.`,
+  practiceTierWords: 'Les mots du palier',
+  practiceTierSeen: (n, of) => `${n} / ${of} vus`,
+  practiceMineDesc: 'Des phrases dont chaque mot est l’un de ceux que tu as déjà rencontrés.',
+  practiceMineNote: 'Rien que des mots que tu as déjà vus',
+  // L'examen blanc au bureau : chaque épreuve en rangée (plan 159).
+  examGradeDesc: 'Quatre épreuves au format JLPT, chronométrées et notées — notation non officielle.',
+  examNext: label => `Suivante · ${label}`,
+  examLastScore: 'Ton dernier score',
+  examMinutes: n => `≈\u00a0${n}\u00a0min`,
   settingsRedoDesc: 'Repasse-le une fois que tu as progressé — ton niveau suit.',
   // ── Quelle barre de notation ────────────────────────────────
   // Deux boutons, quatre ou six. Les trois envoient la même note au

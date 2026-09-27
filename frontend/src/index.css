@@ -7012,7 +7012,8 @@ textarea:focus-visible {
   content: '·';
   margin-inline-end: var(--sp-2);
 }
-.route-stop__started {
+.route-stop__started,
+.route-stop__note {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
@@ -27880,5 +27881,715 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   .anl-swap:hover,
   .anl-swap:focus-visible { border-color: var(--line-kaiseki); }
+
+  /* ── 机 — the practice stations, filled (plan 159) ──
+     The owner's picks A and S1 of the canvas "Practice screens — layout
+     options". Reading, translation, comprehension, dictation,
+     composition and the mock exam stood at the top of an empty window:
+     three source cards, a row of five grades, four paper names. Each is
+     now a line's split filled the way plan 137 filled the Learn
+     stations (components/practice/):
+
+     - the list: reading's and translation's source as a switch at its
+       head (S1), then the stops sharing the column's height -- the
+       grades with a sentence (or the texts, the points, the papers) of
+       their own bank, the bar of the grade's words or of the papers sat,
+       and the learner's record in the caption; or the tiers, or the
+       learner's own cards;
+     - the page: the window's height beside it, sticky, as a deck's is
+       (plan 154) -- the head with Board, the exercise as the run will
+       ask it in a well, four figures in the profile's lattice, and two
+       panels (the newest misses, the grade's points or the tier's
+       words) sharing what is left, each scrolling inside itself. The
+       exam's page is its papers instead, each a row sharing the height. */
+  .desk-split--practice > .desk-split__list { gap: var(--sp-4); }
+  .desk-split--practice > .desk-split__list > .seg { flex: none; }
+  /* Three sources, and two word lists, in a column's width: each word
+     whole on its line. */
+  .desk-split--practice .seg--full .seg__opt {
+    padding-inline: var(--sp-2);
+    white-space: nowrap;
+  }
+  /* The tier size's control under its caption, the column being the
+     width of the four sizes and not of the caption beside them too. */
+  .desk-split--practice .tier-picker > .tier-picker__size {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-2);
+  }
+  /* A practice stop says two things a Learn stop does not have to: where
+     the learner is, and what they have done there. The landmark moves up
+     beside the name, as the canvas draws it, so the record has the
+     foot's line to itself beside the figure; a stop's description (the
+     learner's own cards) takes the sample's row. */
+  .desk-split--practice .route > .route-stop {
+    grid-template-areas:
+      "code name here"
+      "sample sample sample"
+      "bar bar bar"
+      "note note fig";
+  }
+  .desk-split--practice .route-stop__caption { display: contents; }
+  .desk-split--practice .route-stop__caption > * + *::before { content: none; }
+  .desk-split--practice .route-stop__here {
+    grid-area: here;
+    justify-self: end;
+  }
+  .desk-split--practice .route-stop__note { grid-area: note; }
+  .desk-split--practice .route-stop__hint { grid-area: sample; }
+  .prc-tiers {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .desk-split--practice > .desk-split__page {
+    position: sticky;
+    top: var(--sp-6);
+    height: calc(100dvh - 2 * var(--sp-6));
+  }
+  .prc-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-height: 0;
+  }
+  .prc-head {
+    flex: none;
+    display: flex;
+    align-items: flex-end;
+    gap: var(--sp-6);
+  }
+  .prc-head__names {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    min-width: 0;
+  }
+  .prc-title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1.15;
+  }
+  .prc-desc {
+    max-width: 68ch;
+    margin: 0;
+    font-size: var(--fs-body);
+    color: var(--text-secondary);
+  }
+  .prc-go {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+
+  /* The well: the paper the run's card lies on, as plan 137's specimen
+     draws it, at the run's own size. */
+  .prc-spec {
+    position: relative;
+    flex: 1.25 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-5);
+    min-height: calc(3 * var(--sp-8));
+    padding: var(--sp-8) var(--sp-7) var(--sp-6);
+    overflow: hidden;
+    background: var(--bg-main);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  .prc-spec__tag {
+    position: absolute;
+    top: var(--sp-4);
+    left: var(--sp-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .prc-spec__clock {
+    width: 46%;
+    height: 4px;
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--line-color) 16%, transparent);
+    overflow: hidden;
+  }
+  .prc-spec__clock > i {
+    display: block;
+    width: 62%;
+    height: 100%;
+    background: var(--line-color);
+  }
+  .prc-spec__jp,
+  .prc-spec__words {
+    max-width: 100%;
+    margin: 0;
+    font-family: var(--font-jp);
+    font-size: var(--fs-display);
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: center;
+  }
+  .prc-spec__words { font-size: var(--fs-heading); }
+  .prc-spec__prompt,
+  .prc-spec__note {
+    max-width: 100%;
+    margin: 0;
+    font-size: var(--fs-title);
+    font-weight: 700;
+    text-align: center;
+  }
+  .prc-spec__note { font-size: var(--fs-lead); }
+  .prc-spec__gloss {
+    margin: 0;
+    font-size: var(--fs-body);
+    color: var(--text-secondary);
+    text-align: center;
+  }
+  .prc-spec__to { color: color-mix(in srgb, var(--text-secondary) 60%, transparent); }
+  .prc-spec__field {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    width: min(100%, var(--desk-entry-w));
+    min-height: 44px;
+    padding: 0 var(--sp-4);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    color: var(--text-secondary);
+  }
+  .prc-spec__ghost {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--fs-body);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .prc-spec__audio {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+  }
+  .prc-spec__play {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-9);
+    height: var(--sp-9);
+    border: 2px solid var(--line-color);
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
+  }
+  .prc-spec__play > svg {
+    width: var(--sp-6);
+    height: var(--sp-6);
+  }
+  .prc-spec__wave {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+    height: var(--sp-8);
+  }
+  .prc-spec__wave > i {
+    width: var(--sp-1);
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--line-color) 55%, transparent);
+  }
+  .prc-spec__listens {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  /* A text and its question side by side (comprehension). */
+  .prc-spec--two {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: var(--sp-7);
+  }
+  .prc-spec__text {
+    flex: 1.1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    min-width: 0;
+    overflow: hidden;
+    mask-image: linear-gradient(#000 70%, transparent);
+  }
+  .prc-spec__title {
+    font-family: var(--font-jp);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+  }
+  .prc-spec__body {
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    line-height: 1.95;
+  }
+  .prc-spec__ask {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--sp-4);
+    min-width: 0;
+  }
+  .prc-spec__q {
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .prc-spec__opts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .prc-spec__opt {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-2) var(--sp-4);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    font-size: var(--fs-body);
+  }
+  .prc-spec__opt > b {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-6);
+    height: var(--sp-6);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+
+  /* The figures: the profile's lattice, four across, each figure over
+     the bar it is a share of. */
+  .prc-figs {
+    flex: none;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .prc-fig {
+    gap: var(--sp-2);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .prc-fig__bar { margin-block-start: var(--sp-1); }
+  .prc-fig__note {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  /* The two panels: the lists share what the head, the well and the
+     figures leave, side by side, and scroll inside themselves. */
+  .prc-lower {
+    flex: 1 1 0;
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: var(--sp-5);
+    min-height: calc(4 * var(--sp-8));
+  }
+  .prc-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  .prc-panel__head {
+    flex: none;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: var(--sp-4) var(--sp-5);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .prc-panel__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+  }
+  .prc-panel__fig {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--text-secondary);
+  }
+  .prc-panel__empty {
+    margin: 0;
+    padding: var(--sp-5);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .prc-lines {
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+  .prc-line {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--sp-4);
+    padding: var(--sp-3) var(--sp-5);
+    border-bottom: 1px solid color-mix(in srgb, var(--surface-line) 50%, transparent);
+  }
+  .prc-line__mark {
+    width: var(--sp-3);
+    height: var(--sp-3);
+    border-radius: var(--r-pill);
+    border: 1.5px solid color-mix(in srgb, var(--text-secondary) 45%, transparent);
+  }
+  .prc-line__mark--miss {
+    background: var(--danger);
+    border-color: var(--danger);
+  }
+  .prc-line__mark--hit {
+    background: var(--line-color);
+    border-color: var(--line-color);
+  }
+  .prc-line__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-width: 0;
+  }
+  .prc-line__jp,
+  .prc-line__sub {
+    overflow: hidden;
+    font-family: var(--font-jp);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .prc-line__jp { font-size: var(--fs-lead); }
+  .prc-line__sub {
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .prc-line__end {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--sp-1);
+  }
+  .prc-line__fig {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .prc-line__when {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--text-secondary);
+  }
+  .prc-chips {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: var(--sp-2);
+    min-height: 0;
+    margin: 0;
+    padding: var(--sp-4) var(--sp-5);
+    overflow-y: auto;
+    list-style: none;
+  }
+  .prc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-1) var(--sp-4);
+    background: var(--bg-main);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  /* A point studied at Learn: its ring in the pigment and a dot, not the
+     colour alone. */
+  .prc-chip--known {
+    border-color: color-mix(in srgb, var(--line-color) 55%, transparent);
+    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
+  }
+  .prc-chip--known::before {
+    content: '';
+    width: var(--sp-2);
+    height: var(--sp-2);
+    border-radius: var(--r-pill);
+    background: var(--line-color);
+  }
+
+  /* ── the mock exam's papers, a row each ── */
+  .prc-papers {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-height: 0;
+  }
+  .prc-paper {
+    position: relative;
+    flex: 1 1 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    min-height: calc(2 * var(--sp-8));
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    transition: background 0.15s ease;
+  }
+  .prc-papers--wells .prc-paper { grid-template-columns: minmax(0, 12fr) minmax(0, 22fr) minmax(0, 13fr); }
+  .prc-paper:hover { background: var(--bg-card-hover); }
+  .prc-paper--next { border-color: color-mix(in srgb, var(--line-color) 60%, transparent); }
+  .prc-paper:has(> .prc-paper__door:focus-visible) {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
+  .prc-paper__door {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--sp-2);
+    min-width: 0;
+    padding: var(--sp-4) var(--sp-5) var(--sp-4) var(--sp-6);
+    background: none;
+    border: 0;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+  }
+  /* The whole row is the paper's door; "Different paper" stands over it. */
+  .prc-paper__door::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .prc-paper__door:focus-visible { outline: none; }
+  .prc-paper__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: var(--sp-3);
+    font-size: var(--fs-title);
+    font-weight: 700;
+  }
+  .prc-paper__jp {
+    white-space: nowrap;
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    font-weight: 500;
+    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
+  }
+  .prc-paper__mondai {
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption);
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .prc-paper__spec {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    padding: var(--sp-4) 0;
+  }
+  .prc-paper__well {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    min-width: 0;
+    padding: var(--sp-3) var(--sp-5);
+    overflow: hidden;
+    background: var(--bg-main);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-plate);
+    text-align: center;
+  }
+  .prc-paper__sentence {
+    max-width: 100%;
+    overflow: hidden;
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    line-height: 1.5;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .prc-paper__mark {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--line-color);
+    text-underline-offset: var(--sp-2);
+  }
+  .prc-paper__answer {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    font-family: var(--font-jp);
+    font-size: var(--fs-lead);
+    color: var(--text-secondary);
+  }
+  .prc-paper__point {
+    padding: 0 var(--sp-3);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    font-size: var(--fs-sm);
+  }
+  .prc-paper__heading {
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    font-weight: 700;
+  }
+  .prc-paper__passage {
+    display: -webkit-box;
+    overflow: hidden;
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    line-height: 1.8;
+    text-align: left;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .prc-paper__figs {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--sp-3);
+    min-width: 0;
+    padding: var(--sp-4) var(--sp-5);
+    border-inline-start: 1px solid var(--surface-line);
+  }
+  .prc-papers--wells .prc-paper__figs { margin-inline-start: var(--sp-5); }
+  .prc-paper__count {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+  }
+  .prc-paper__score {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .prc-paper__fig {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-1);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+  }
+  .prc-paper__fig > b {
+    font-size: var(--fs-title);
+    color: var(--text-primary);
+  }
+  .prc-paper__none {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .prc-paper__fresh {
+    position: relative;
+    z-index: 1;
+    align-self: flex-start;
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .prc-paper__fresh:hover,
+  .prc-paper__fresh:focus-visible { color: var(--text-primary); }
+  .prc-paper__note {
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+
+  /* The narrow page (PracticePage's NARROW, measured): the head
+     stacked, the figures two by two, the panels one under the other, the
+     page its own height in the window rather than the window's. */
+  .desk-split--practice > .desk-split__page:has(> .prc-page--narrow) {
+    position: static;
+    height: auto;
+  }
+  .prc-page--narrow .prc-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-4);
+  }
+  .prc-page--narrow .prc-title { font-size: var(--fs-title); }
+  .prc-page--narrow .prc-spec {
+    flex: none;
+    padding: var(--sp-8) var(--sp-5) var(--sp-5);
+  }
+  .prc-page--narrow .prc-spec__jp { font-size: var(--fs-heading); }
+  .prc-page--narrow .prc-spec--two { flex-direction: column; }
+  .prc-page--narrow .prc-figs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .prc-page--narrow .prc-lower {
+    flex: none;
+    grid-auto-flow: row;
+  }
+  .prc-page--narrow .prc-panel { max-height: calc(8 * var(--sp-8)); }
+  .prc-page--narrow .prc-papers { flex: none; }
+  .prc-page--narrow .prc-papers > .prc-paper {
+    flex: none;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .prc-page--narrow .prc-paper__figs {
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-items: baseline;
+    column-gap: var(--sp-5);
+    border-inline-start: 0;
+    border-top: 1px solid var(--surface-line);
+  }
+  .prc-page--narrow .prc-paper__score { flex-direction: row; align-items: baseline; gap: var(--sp-3); }
+  .prc-page--narrow .prc-paper__figs > .desk-line__bar { display: none; }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

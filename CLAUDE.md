@@ -987,8 +987,31 @@ runtime purpose. Two consequences worth knowing:
   `components/ui/markPaths.js`, `index.css`, `src/chrome.desktop.test.jsx`,
   `src/frontdoor.desktop.test.jsx` and `src/states.phone.test.jsx`;
   DESIGN.md, "The idea" and Colour).
-  **159** is 番号 (numbered 159 because 158 went to the mark redrawn
-  while it was open; its first commits' messages say 158), a graded
+  **159** is the practice stations filled on the desk (numbered 159
+  because 158 went to 道, the mark, while it was open; the owner's
+  picks A and S1 of the canvas "Practice screens — layout options"):
+  reading, translation, comprehension, dictation, composition and the
+  mock exam as a line's split taking the window, as plan 137 filled the
+  Learn stations -- reading's and translation's source a switch at the
+  list's head (JLPT · Fréquence · Mes cartes, the learner's own cards a
+  page of the desk's, `/cards`), the grades with a sentence of their
+  bank, the bar of the grade's words and the record, and the open
+  stop's page: Board and Enter, the run's exercise in a well, four
+  figures, the newest misses and the grade's points studied at Learn;
+  the exam's papers a row each with a specimen, minutes, mondai and the
+  last score, Board the next paper not sat; a tier's run logged with its
+  size off the default (`freq:vocab:3:500`) (cited in
+  `routes/station.py`, `routes/practice.py`'s `/api/practice/stop`,
+  `routes/exams.py`, `routes/reading.py`'s `_source_label`, the four
+  `study/exam_*_gen.py`'s `time_limit_min`, `tests/test_practice_stop.py`,
+  `tests/test_exam_catalogue.py`, `components/practice/`,
+  `screens/SentenceStation.jsx`, `screens/ExamScreen.jsx`,
+  `stores/practiceStop.js`, `domain/sentenceSource.js`'s `logLabel`,
+  `components/selection/LevelSelector.jsx`, `RouteStops.jsx`,
+  `src/practiceStation.wide.test.jsx`,
+  `src/practiceStation.desktop.test.jsx`, `src/deskfree.phone.test.jsx`
+  and the 机 section of `index.css`; DESIGN.md, "The desk").
+  **160** is 番号, a graded
   sentence's breakdown numbered as the
   analyser's (the owner's pick A of five drawn on the canvas "Tsuji
   Breakdown Panel"): the line framing each rule under its number, a row
@@ -1007,7 +1030,7 @@ runtime purpose. Two consequences worth knowing:
   `WordsList.jsx`, `FocusCard.jsx`, `SubtitleLine.jsx`,
   `PassageBreakdown.jsx`, `SentenceBreakdown.browser.test.jsx` and
   `index.css` and its 机 section; DESIGN.md, "The desk").
-  When starting a new wave, begin at **160** or higher, and check
+  When starting a new wave, begin at **161** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

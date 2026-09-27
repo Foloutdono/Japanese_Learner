@@ -1,4 +1,4 @@
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
+import { Navigate, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { Leave } from '../components/chrome/Bar'
@@ -9,6 +9,8 @@ import ModeSelector from '../components/selection/ModeSelector'
 import TierSelector from '../components/selection/TierSelector'
 import { DEFAULT_TIER_SIZE } from '../domain/tiers'
 import { sourcePaths } from '../domain/sentenceSource'
+import { useDesk } from '../hooks/useDesk'
+import PracticeStation from '../components/practice/PracticeStation'
 
 // ── 実践 — the station for the sentence platforms ─────────────
 // Reading, comprehension and translation were each ONE route that
@@ -32,6 +34,9 @@ import { sourcePaths } from '../domain/sentenceSource'
 //   /practice/reading            the sources
 //   /practice/reading/levels     the JLPT grades
 //   /practice/reading/tiers      the word list and its tiers
+//   /practice/reading/cards      the learner's own cards (the desk's
+//                                page, plan 159; a phone goes back to
+//                                the sources)
 //   → /practice/reading/level/N4, /tier/3?size=200&domain=jmdict,
 //     /mastery — the run, on the stage (screens/ReadingRun.jsx)
 //
@@ -46,6 +51,18 @@ export default function SentenceStation({ session, base, levelsOnly = false }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const [sp, setSp] = useSearchParams()
+
+  const desk = useDesk()
+
+  // ── 机 — the station as a line's split, filled (plan 159) ──
+  // On the desk the sources, the grades and the tiers stand in one
+  // column beside the open stop's page (components/practice/
+  // PracticeStation.jsx); what follows is the phone's.
+  if (desk) return <PracticeStation session={session} base={base} levelsOnly={levelsOnly} />
+  // The learner's own cards are a page of the desk's alone: the phone
+  // boards them from the sources, one tap, so their address sends it
+  // there.
+  if (pathname.endsWith('/cards')) return <Navigate replace to={base} />
 
   const tierSize = Number(sp.get('size')) || DEFAULT_TIER_SIZE
   const jmdict = sp.get('domain') === 'jmdict'

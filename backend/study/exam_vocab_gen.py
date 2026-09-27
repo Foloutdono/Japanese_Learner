@@ -512,10 +512,28 @@ def _build_vocab_usage_mondai(spec: dict, pool: list[dict], used_words: set, use
 _MAX_GENERATION_ATTEMPTS = 5
 
 
+def _vocab_section(level: str) -> dict:
+    """The blueprint section the vocabulary mondai sit in: its own at
+    N5-N3, the combined 言語知識・読解 booklet at N2/N1."""
+    return next(
+        s for s in LEVEL_BLUEPRINT[level]["sections"]
+        if s["id"] in ("vocabulary", "vocabulary_grammar_reading")
+    )
+
+
+def time_limit_min(level: str, items: int) -> int:
+    """The paper's time limit: the real section's minutes scaled to the
+    share of its items this paper carries, five at the least. Public
+    so the catalogue (routes/exams.list_exams, plan 159) can say how
+    long a paper not yet generated will take by the same rule."""
+    section = _vocab_section(level)
+    total_section_items = sum(m["count"] for m in section["mondai"])
+    return max(5, round(section["timeLimitMin"] * items / max(1, total_section_items)))
+
+
 def _generate_vocabulary_paper_once(level: str, seed: int) -> dict:
     rng = random.Random(seed)
-    blueprint = LEVEL_BLUEPRINT[level]
-    vocab_section = next(s for s in blueprint["sections"] if s["id"] in ("vocabulary", "vocabulary_grammar_reading"))
+    vocab_section = _vocab_section(level)
 
     # A handful of deck entries (8 across the whole deck, e.g. 丸い/円い)
     # record more than one accepted kanji spelling in the same "kanji"
@@ -581,9 +599,6 @@ def _generate_vocabulary_paper_once(level: str, seed: int) -> dict:
     if not mondai:
         raise GenerationFailed(f"{level}: no vocabulary mondai could be generated at all")
 
-    total_section_items = sum(m["count"] for m in vocab_section["mondai"])
-    scaled_time_limit = max(5, round(vocab_section["timeLimitMin"] * included_items / max(1, total_section_items)))
-
     return {
         "level": level,
         "title": f"{level} Vocabulary Practice",
@@ -592,7 +607,7 @@ def _generate_vocabulary_paper_once(level: str, seed: int) -> dict:
             "id": "vocabulary",
             "label": "Vocabulary",
             "labelJp": "語彙",
-            "timeLimitMin": scaled_time_limit,
+            "timeLimitMin": time_limit_min(level, included_items),
             "mondai": mondai,
         }],
     }

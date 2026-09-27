@@ -3,7 +3,7 @@ import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { explainSentence } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
-import { runSource } from '../domain/sentenceSource'
+import { runSource, logLabel } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
 import { usePracticeXp } from '../hooks/usePracticeXp'
 import PromptCard from '../components/study/PromptCard'
@@ -142,10 +142,10 @@ export default function ReadingRun({ session }) {
   // Compact label matching reading.py's _source_label() — sent back on
   // /api/reading/result so history stays informative without a DB
   // migration (see reading.py's get_reading_batch docstring).
+  // The tier's size rides in the label since plan 159 (sentenceSource's
+  // logLabel): the desk's practice station reads a tier's record by it.
   function sourceLabel() {
-    if (source === 'level') return `level:${level}`
-    if (source === 'frequency') return `freq:${domain}:${tier}`
-    return 'mastery'
+    return logLabel({ source, level, domain, tier, tierSize })
   }
 
   // Every sentence this session has already served, so the backend can

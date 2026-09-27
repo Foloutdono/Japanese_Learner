@@ -125,8 +125,8 @@ describe('ROUTES against App.jsx', () => {
     // with .flatMap() rather than written as literal path="…", so they
     // have to be named here.
     const generated = new Set([
-      '/practice/reading', '/practice/reading/levels', '/practice/reading/tiers',
-      '/practice/translation', '/practice/translation/levels', '/practice/translation/tiers',
+      '/practice/reading', '/practice/reading/levels', '/practice/reading/tiers', '/practice/reading/cards',
+      '/practice/translation', '/practice/translation/levels', '/practice/translation/tiers', '/practice/translation/cards',
       '/practice/comprehension', '/practice/dictation', '/practice/composition',
     ])
     const stale = ROUTES.filter(p => !declared.includes(p) && !generated.has(p))

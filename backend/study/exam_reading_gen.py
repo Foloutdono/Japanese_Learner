@@ -362,6 +362,14 @@ _MAX_GENERATION_ATTEMPTS = 3  # one LLM call per passage; a full retry re-author
 _MINUTES_PER_QUESTION = 2  # reading items run slower than vocab/kanji ones; a simple, honest per-item estimate
 
 
+def time_limit_min(level: str, items: int) -> int:
+    """The paper's time limit, ten minutes at the least. Public so the
+    catalogue (routes/exams.list_exams, plan 159) can say how long a
+    paper not yet generated will take by the same rule; `level` is
+    taken for the vocabulary generator's signature and not needed."""
+    return max(10, round(_MINUTES_PER_QUESTION * items))
+
+
 def _reading_specs_for_level(level: str) -> list[dict]:
     specs = []
     for section in LEVEL_BLUEPRINT[level]["sections"]:
@@ -411,7 +419,7 @@ def _generate_reading_paper_once(level: str, seed: int) -> dict:
             "id": "reading",
             "label": "Reading",
             "labelJp": "読解",
-            "timeLimitMin": max(10, round(_MINUTES_PER_QUESTION * included_items)),
+            "timeLimitMin": time_limit_min(level, included_items),
             "mondai": mondai,
         }],
     }
