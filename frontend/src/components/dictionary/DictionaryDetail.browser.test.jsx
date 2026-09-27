@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, cleanup } from 'vitest-browser-react'
-import { page } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 import { LangProvider } from '../../LangContext'
 // The rules asserted below only exist once the real sheet is loaded —
 // same explicit import every style-asserting browser test carries.
@@ -660,11 +660,11 @@ describe('the ＋ — this entry into one of your decks', () => {
     expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Add', 'Close'])
     actions[1].click()
     await settle(30)
-    const rows = [...root.querySelectorAll('.dict-add-menu__row')]
+    const rows = [...document.querySelectorAll('.dict-add-menu__row')]
     expect(rows.map(r => r.textContent)).toEqual(['Add to a deck'])
     rows[0].click()
     await settle(60)
-    expect(root.querySelector('.dict-add-menu')).toBeNull()
+    expect(document.querySelector('.dict-add-menu')).toBeNull()
     expect(mining.mineApp).toHaveBeenCalledWith({
       deckId: 7, source: card.source, level: card.level, rawId: card.raw_id, kind: card.source,
     })
@@ -678,7 +678,7 @@ describe('the ＋ — this entry into one of your decks', () => {
     expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Add', 'Close'])
     actions[1].click()
     await settle(30)
-    root.querySelector('.dict-add-menu__row').click()
+    document.querySelector('.dict-add-menu__row').click()
     await settle(60)
     expect(mining.mineApp).toHaveBeenCalledWith({
       deckId: 7, source: 'vocab', level: null, rawId: 'vocab_jmdict_4242', kind: 'vocab',
@@ -719,7 +719,9 @@ describe('the shelf row — this entry on your shelf', () => {
     return shelf
   }
   const plus = root => root.querySelector('.dict-plate__add-btn')
-  const rows = root => [...root.querySelectorAll('.dict-add-menu__row')]
+  // The menu is portaled out of the plate (AddMenu), so it is found in
+  // the document rather than under the entry.
+  const rows = () => [...document.querySelectorAll('.dict-add-menu__row')]
 
   it('prints no ＋ where there is neither a shelf nor a deck to add to', async () => {
     const { root } = await renderEntry(JMDICT)
@@ -762,7 +764,10 @@ describe('the shelf row — this entry on your shelf', () => {
     await settle(60)
     expect(shelf.toggle).toHaveBeenCalledWith(KANJI)
     // The choice closes the menu; the ＋ wears the ring for a kept entry.
-    expect(root.querySelector('.dict-add-menu')).toBeNull()
+    // A choice hands the focus back to the ＋ (AddMenu), and its focus
+    // ring is the same pigment: read the kept ring with the focus away.
+    expect(document.querySelector('.dict-add-menu')).toBeNull()
+    plus(root).blur()
     expect(getComputedStyle(plus(root)).borderColor).toBe(ring)
     expect(root.querySelector('.dict-plate__actions .analysis-mine-status')).toBeNull()
 
@@ -788,15 +793,15 @@ describe('the shelf row — this entry on your shelf', () => {
     const { root } = await renderEntry(KANJI, { ...NAV(), favorites: shelf })
     plus(root).click()
     await settle(30)
-    expect(root.querySelector('.dict-add-menu')).not.toBeNull()
+    expect(document.querySelector('.dict-add-menu')).not.toBeNull()
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settle(30)
-    expect(root.querySelector('.dict-add-menu')).toBeNull()
+    expect(document.querySelector('.dict-add-menu')).toBeNull()
     plus(root).click()
     await settle(30)
     root.querySelector('.dict-plate__word').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
     await settle(30)
-    expect(root.querySelector('.dict-add-menu')).toBeNull()
+    expect(document.querySelector('.dict-add-menu')).toBeNull()
     expect(shelf.toggle).not.toHaveBeenCalled()
   })
 
@@ -807,9 +812,58 @@ describe('the shelf row — this entry on your shelf', () => {
     await settle(30)
     rows(root)[0].click()
     await settle(60)
+    // The focus handed back to the ＋ rings it in the same pigment.
+    plus(root).blur()
     expect(getComputedStyle(plus(root)).borderColor).not.toBe(probe('borderColor', 'var(--line-color)', root.querySelector('.dict-dock')))
     expect(root.querySelector('.dict-plate__actions .analysis-mine-status').textContent)
       .toBe('Favourites are full — remove one first.')
+  })
+
+  // Portaled out of the plate (AddMenu), the menu is out of its Tab
+  // order, so it takes the keyboard itself.
+  it('takes the keyboard as a menu: the first row focused, ↑/↓ between rows, Escape and Tab back to the ＋', async () => {
+    const shelf = SHELF(false)
+    // No deck remembered: the deck row opens the picker.
+    const mining = { targetFor: () => null, decksFor: () => [], ensureDeck: vi.fn(), mineApp: vi.fn(async () => 1) }
+    const { root } = await renderEntry(KANJI, { ...NAV(), favorites: shelf, mining })
+    plus(root).focus()
+    await userEvent.keyboard('{Enter}')
+    await settle(30)
+    expect(document.activeElement).toBe(rows()[0])
+    await userEvent.keyboard('{ArrowDown}')
+    expect(document.activeElement).toBe(rows()[1])
+    await userEvent.keyboard('{ArrowDown}')
+    expect(document.activeElement).toBe(rows()[0])
+    await userEvent.keyboard('{ArrowUp}')
+    expect(document.activeElement).toBe(rows()[1])
+    await userEvent.keyboard('{Home}')
+    expect(document.activeElement).toBe(rows()[0])
+    await userEvent.keyboard('{Escape}')
+    await settle(30)
+    expect(document.querySelector('.dict-add-menu')).toBeNull()
+    expect(document.activeElement).toBe(plus(root))
+
+    await userEvent.keyboard('{Enter}')
+    await settle(30)
+    expect(document.activeElement).toBe(rows()[0])
+    await userEvent.keyboard('{Tab}')
+    await settle(30)
+    expect(document.querySelector('.dict-add-menu')).toBeNull()
+    expect(document.activeElement).toBe(plus(root))
+
+    // A choice hands the focus back to the ＋ before it acts, so the
+    // deck picker it opens gives it back there on closing.
+    await userEvent.keyboard('{Enter}')
+    await settle(30)
+    await userEvent.keyboard('{End}{Enter}')
+    await settle(60)
+    expect(document.querySelector('.dict-add-menu')).toBeNull()
+    expect(document.querySelector('[role="dialog"] .picker')).not.toBeNull()
+    await userEvent.keyboard('{Escape}')
+    await settle(60)
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    expect(document.activeElement).toBe(plus(root))
+    expect(shelf.toggle).not.toHaveBeenCalled()
   })
 })
 
@@ -1500,7 +1554,7 @@ describe('the plate — a grammar point', () => {
     // deck row is the whole of it, and it is the analyzer's press.
     add.click()
     await settle(30)
-    const row = () => plate.querySelector('.dict-add-menu__row')
+    const row = () => document.querySelector('.dict-add-menu__row')
     expect(row().textContent).toBe('Add to a deck')
     row().click()
     await settle(60)

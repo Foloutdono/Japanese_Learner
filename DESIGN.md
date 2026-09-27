@@ -1476,6 +1476,14 @@ as the rail it arrives at.
   column's edge. The desk's rail steps aside for this one screen, so the
   three columns have the window at the drawing's shares (410 | 830 | 541);
   under the desk the same result is one column, drawn by the owner too.
+  A typed or photographed Passage has no video, and its sentence takes the
+  video's place (plan 161, the owner's picks B and B′): the sumi object to
+  the middle column's foot, the sentence at `--fs-display-fluid`, its
+  translation under it once Explain has bought it, Explain under that; no
+  card beside the words, the entry being that card and its deck action on
+  the word's row; one sentence's words over its grammar on the left,
+  several sentences' words under the sentence; every panel as tall as it
+  holds.
   Before a Passage, the analyser is the learner's passages (plan 136, the
   owner's pick C of three drawn directions): the one console over a card
   each, and the intake the column beside them at a phone's width -- the

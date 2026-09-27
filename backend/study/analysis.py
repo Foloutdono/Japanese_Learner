@@ -481,10 +481,11 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
 
 
 def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
-               llm_grammar: list[dict] | None = None) -> dict:
+               llm_grammar: list[dict] | None = None, translation: str = "") -> dict:
     """Fold the deep tier's per-word glosses and prose explanation onto
     Tokens the local tier already verified -- and its per-point notes
-    onto the grammar the local tier found (plan 095).
+    onto the grammar the local tier found (plan 095), and the sentence's
+    translation beside the explanation (plan 161).
 
     The tokenizer is the authority on segmentation: only `meaning` is
     copied from an LLM word onto its matched Token. Everything else --
@@ -567,6 +568,7 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
         "tokens": tokens,
         "grammar": grammar,
         "explanation": explanation,
+        "translation": translation.strip() if isinstance(translation, str) else "",
         "deep_dropped": dropped,
     }
 
