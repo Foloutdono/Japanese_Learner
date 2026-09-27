@@ -309,6 +309,13 @@ class PhraseRequest(BaseModel):
     # input) sends 'image'; plan 019 (video) will send 'video'. Anything
     # else is a 422, not a row the history shelf cannot classify.
     source: Literal["typed", "image", "video"] = "typed"
+    # True for the practice runs, which hand over one exercise and draw
+    # one breakdown of it: the text is analysed as ONE Sentence, never
+    # split. Split, a bank item written as two (「雨がふりました。しかし、
+    # 学校へ行きました。」, nine of the reading bank's) came back as a
+    # Passage of two with no top-level tokens, and the run drew the bare
+    # sentence where its breakdown should have been.
+    whole: bool = False
 
 
 def _call_llm(phrase: str, lang: str, points: list[dict] | None = None) -> dict:
@@ -442,10 +449,11 @@ MAX_DEEP_SENTENCES = 50
 
 
 def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
-                      allow_llm_call: bool = True) -> dict:
-    """A Passage split into Sentences and each analyzed independently.
-    No LLM call happens here unless `deep` is set -- see _analyze_sentence."""
-    all_sentences = split_sentences(passage)
+                      allow_llm_call: bool = True, whole: bool = False) -> dict:
+    """A Passage split into Sentences and each analyzed independently --
+    or, `whole`, taken as one Sentence (see PhraseRequest.whole). No LLM
+    call happens here unless `deep` is set -- see _analyze_sentence."""
+    all_sentences = [{"text": passage}] if whole else split_sentences(passage)
     truncated = max(0, len(all_sentences) - MAX_SENTENCES)
     kept = all_sentences[:MAX_SENTENCES]
 
@@ -496,7 +504,7 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
     # configured at all -- this is the whole point of the two-tier split,
     # see docs/adr/0001-two-tier-sentence-analysis.md. llm_configured()
     # is deliberately never checked here.
-    result = _analyze_passage(phrase, payload.deep, payload.lang, user_id)
+    result = _analyze_passage(phrase, payload.deep, payload.lang, user_id, whole=payload.whole)
 
     if not payload.save:
         return {**result, "id": None, "created_at": None}
