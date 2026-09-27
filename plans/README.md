@@ -6940,3 +6940,35 @@ anywhere, the analyser's subtitle included. The analyser's words list
 takes the same rows, names and glosses. The comprehension passage
 (`PassageBreakdown`) draws the same pieces.
 
+
+## Plan 161 — 字幕, the typed sentence in the video's place (2026-09-27)
+
+The owner's screenshot of a typed sentence (どこにいるの) on the desk and
+"there is too much empty space": the analyser's three columns were drawn
+for a video (plan 134), and a typed or photographed Passage gave the
+player's place to panels with little to hold -- the word in focus printed
+three times (the words list, the card beside it, the entry's plate), and
+every panel stretched to the window's foot. Three directions drawn on the
+canvas "Tsuji analyser — text & photo layout" (A, the page; B, the
+sentence in the video's place; C, the table), then B′ (B with the words
+on the left) at the owner's request; the owner's picks: **B′ for one
+sentence, B for several, both with the translation under the sentence**.
+
+**Layout** (the 机 section of `index.css`, `.anl-desk--text`): no video,
+the sumi object takes the middle column to its foot -- the sentence at
+`--fs-display-fluid`, its translation under it (`.anl-subs__tr`) once
+Explain has bought it, Explain under that. The card in focus beside the
+words goes: the entry on the right is that card, and the deck's filled
+action rides the word's row (`WordsList`'s `action`). One sentence: the
+words over the grammar in the left column (`.anl-desk__side`). Several:
+the Passage's line over the grammar on the left, the words under the
+sentence. Every panel as tall as it holds, the entry's body and the
+explanation included. The video's layout is unchanged.
+
+**Translation**: the deep tier's prompt asks for `translation` beside the
+explanation, `merge_deep` carries it onto the sentence and the
+single-sentence mirror, and `_normalize_explanation_key` takes it by its
+name in the seven languages `LANG_NAMES` offers before any other extra
+string is read as the explanation. `phrase_analysis_cache` goes to v5, as
+plan 095 did for the notes: a sentence explained before is bought once
+more on its next Explain.

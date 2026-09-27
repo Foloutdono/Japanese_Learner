@@ -1032,7 +1032,21 @@ runtime purpose. Two consequences worth knowing:
   `WordsList.jsx`, `FocusCard.jsx`, `SubtitleLine.jsx`,
   `PassageBreakdown.jsx`, `SentenceBreakdown.browser.test.jsx` and
   `index.css` and its 机 section; DESIGN.md, "The desk").
-  When starting a new wave, begin at **161** or higher, and check
+  **161** is 字幕, a typed or photographed Passage on the desk with its
+  sentence in the video's place (the owner's picks B and B′ of the
+  canvas "Tsuji analyser — text & photo layout"): the sumi object to the
+  middle column's foot, the sentence at display size, its translation
+  under it and Explain under that; the card in focus beside the words
+  gone, its deck action riding the word's row (`WordsList`'s `action`);
+  one sentence's words over its grammar on the left, several's under the
+  sentence; every panel as tall as it holds. The deep tier now returns
+  the sentence's `translation` beside its explanation
+  (`phrase_analysis_cache` v5; `merge_deep`'s `translation`) (cited in
+  `routes/phrase.py`, `study/analysis.py`, `tests/test_phrase_api.py`,
+  `tests/test_analysis.py`, `screens/AnalyzerScreen.jsx`,
+  `components/analysis/WordsList.jsx`, `src/analyzer.desktop.test.jsx`
+  and the 机 section of `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **162** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

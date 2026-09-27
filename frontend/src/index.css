@@ -27897,6 +27897,125 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .anl-swap:hover,
   .anl-swap:focus-visible { border-color: var(--line-kaiseki); }
 
+  /* ── 字幕 — a typed or photographed Passage: the sentence in the
+     video's place (plan 161) ──
+     The owner's picks B and B′ of the canvas "Tsuji analyser — text &
+     photo layout". With no video the drawing above gave the player's
+     place to panels with little to hold. Here the sumi object takes the
+     middle column to its foot: the sentence at display size, its
+     translation under it once Explain has bought it, Explain under that.
+     The left column is one column of panels -- the words over the
+     grammar for one sentence, the Passage's line over the grammar for
+     several, whose words stand under the sentence -- and every panel is
+     as tall as what it holds, the entry's too.
+
+       side  head  entry          side  head  entry
+       side  slab  entry          side  slab  entry
+                                  side  work  entry
+          one sentence                 several          */
+  .anl-desk--text {
+    grid-template:
+      "side head entry" auto
+      "side slab entry" minmax(0, 1fr)
+      "side work entry" auto
+      / minmax(0, 410fr) minmax(0, 830fr) minmax(0, 541fr);
+  }
+  .anl-desk--text.anl-desk--one {
+    grid-template:
+      "side head entry" auto
+      "side slab entry" minmax(0, 1fr)
+      / minmax(0, 410fr) minmax(0, 830fr) minmax(0, 541fr);
+  }
+  /* Contained, as the rail is in the video's grid: what the column
+     holds never sizes the rows beside it. Each panel takes its height
+     and gives it back, scrolling in itself, when the column is short. */
+  .anl-desk__side {
+    display: flex;
+    grid-area: side;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-height: 0;
+    contain: size;
+  }
+  .anl-desk__side > .anl-desk__rail,
+  .anl-desk__side > .anl-desk__words,
+  .anl-desk__side > .anl-desk__points { flex: 0 1 auto; min-height: 0; }
+  .anl-desk--text .anl-desk__rail { contain: none; }
+  .anl-desk--text .anl-desk__points { align-self: stretch; max-height: none; }
+  /* Several sentences' words under the sentence, never more than a
+     share of the window: the sentence keeps the rest. */
+  .anl-desk--text > .anl-desk__words { grid-area: work; max-height: 40dvh; }
+  /* One typed sentence is printed at display size under the head, so
+     its title is for a screen reader alone and Keep holds the corner. */
+  .anl-desk--text .anl-desk__head > .anl-head__keep { margin-left: auto; }
+  .anl-desk--text .anl-subs {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-bottom: var(--sp-7);
+  }
+  .anl-subs__stage {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-6);
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .anl-subs__stage > .anl-subs__body { align-self: stretch; }
+  .anl-desk--text .anl-subs__line .tok { font-size: var(--fs-display-fluid); }
+  .anl-desk--text .anl-subs__line .tok__furi { font-size: var(--fs-body); }
+  /* The translation as the sentence's subtitle, in the learner's
+     language: a rung under the Japanese, in the panel's soft ink. */
+  .anl-subs__tr {
+    max-width: 100%;
+    margin: 0;
+    font-size: var(--fs-heading);
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--text-on-panel-soft);
+    text-align: center;
+    text-wrap: balance;
+  }
+  /* Explain on the sumi, in the panel's inks, as the arrows beside it. */
+  .anl-slab .anl-explainbtn {
+    border-color: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+    color: var(--text-on-panel);
+  }
+  .anl-slab .anl-explainbtn--on { border-color: var(--text-on-panel-soft); }
+  .anl-slab .anl-explainbtn:hover,
+  .anl-slab .anl-explainbtn:focus-visible { background: color-mix(in srgb, var(--text-on-panel) 10%, transparent); }
+  /* The entry and the explanation as tall as what they hold. */
+  .anl-desk--text .anl-desk__entry .dict-entry--band > .dict-entry__body,
+  .anl-desk--text .anl-explainpanel { flex: 0 1 auto; }
+  /* The word in focus and its deck action on one ground, the action
+     beside the row where the column has room and under it where not. */
+  .anl-words__item {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2);
+    background: var(--bg-main);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  .anl-words__item > .anl-words__row { flex: 1 1 16rem; width: auto; }
+  .anl-words__item > .anl-words__row--on,
+  .anl-words__item > .anl-words__row--on:hover {
+    background: transparent;
+    border-color: transparent;
+  }
+  .anl-words__act {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-left: auto;
+  }
+
   /* ── 机 — the practice stations, filled (plan 159) ──
      The owner's picks A and S1 of the canvas "Practice screens — layout
      options". Reading, translation, comprehension, dictation,

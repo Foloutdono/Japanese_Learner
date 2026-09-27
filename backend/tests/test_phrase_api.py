@@ -74,6 +74,40 @@ def test_deep_tier_merges_explanation_and_word_meaning(client, monkeypatch):
     assert any(t.get("meaning") == "I" for t in body["tokens"])
 
 
+def test_deep_tier_carries_the_sentence_s_translation(client, monkeypatch):
+    """Plan 161: the model is asked for the phrase's translation, which
+    rides on the sentence and on the single-sentence mirror beside the
+    explanation. The phrase's cache row is cleared first, as the notes' test
+    below does: the cache never expires, and a second run would never
+    reach the model."""
+    phrase = "図書館で静かに本を読みます。"
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM phrase_analysis_cache WHERE phrase = %s", (phrase,))
+        conn.commit()
+    finally:
+        conn.close()
+    seen = {}
+
+    def _fake_chat(messages, **_kwargs):
+        seen["system"] = messages[0]["content"]
+        return ('{"words": [], "translation": "Je lis en silence à la bibliothèque.", '
+                '"explanation": "Le lieu, puis l\'action."}')
+
+    monkeypatch.setattr(phrase_module, "chat", _fake_chat)
+    response = client.post(
+        "/api/phrase/analyze",
+        json={"phrase": phrase, "deep": True, "lang": "fr", "save": False},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert '"translation"' in seen["system"]
+    assert body["translation"] == "Je lis en silence à la bibliothèque."
+    assert body["sentences"][0]["translation"] == "Je lis en silence à la bibliothèque."
+    assert body["explanation"] == "Le lieu, puis l'action."
+
+
 def test_deep_tier_names_the_points_found_and_keeps_the_model_s_notes(client, monkeypatch):
     """Plan 095: the local tier finds the grammar, the model is told
     which points and asked what each does in this sentence, and its
@@ -263,9 +297,10 @@ def test_history_get_makes_no_llm_call(client, monkeypatch):
 # "explication" for French) despite SYSTEM_PROMPT_TEMPLATE pinning key
 # names to English -- silently dropping the prose explanation, since
 # llm_result.get("explanation", "") found nothing. _normalize_explanation_key
-# is the defensive fallback: the schema has exactly one other top-level
-# key ("words"), so any other non-empty string value is unambiguously
-# the mistranslated explanation.
+# is the defensive fallback: beside "words" and "grammar", which hold
+# lists, the schema's one other string since plan 161 is the translation,
+# taken by its name in the languages the app offers; any other non-empty
+# string value is the mistranslated explanation.
 def test_normalize_explanation_key_recovers_a_translated_key():
     parsed = {"words": [{"surface": "猫"}], "explication": "Une phrase à propos d'un chat."}
     normalized = phrase_module._normalize_explanation_key(parsed)
@@ -281,6 +316,20 @@ def test_normalize_explanation_key_leaves_a_correct_key_alone():
 def test_normalize_explanation_key_is_a_noop_without_words():
     parsed = {"something": "else"}
     assert phrase_module._normalize_explanation_key(parsed) == parsed
+
+
+def test_normalize_explanation_key_tells_the_translation_from_the_explanation():
+    parsed = {"words": [], "traduction": "Où es-tu ?", "explication": "Une question familière."}
+    normalized = phrase_module._normalize_explanation_key(parsed)
+    assert normalized["translation"] == "Où es-tu ?"
+    assert normalized["explanation"] == "Une question familière."
+
+
+def test_normalize_explanation_key_never_takes_the_translation_for_the_explanation():
+    parsed = {"words": [], "translation": "Where are you?"}
+    normalized = phrase_module._normalize_explanation_key(parsed)
+    assert normalized["translation"] == "Where are you?"
+    assert "explanation" not in normalized
 
 
 def test_keep_creates_a_kept_row(client):
