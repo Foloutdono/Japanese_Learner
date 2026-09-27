@@ -2227,6 +2227,10 @@ const onboarding = {
   settingsReadingPace: 'Reading pace',
   settingsReadingPaceHint: 'How long a sentence in Reading and a text in Comprehension stay up before they hide. Take more time if you read slowly or have dyslexia.',
   readingPaceOption: { standard: 'Standard', relaxed: 'Relaxed', slow: 'Slow', untimed: 'No limit' },
+  // The chip at the clock's end, in Reading and Comprehension: each
+  // press moves to the next pace.
+  readingPaceShort: { standard: '×1', relaxed: '×1.5', slow: '×2', untimed: '∞' },
+  readingPaceChip: name => `Reading pace: ${name}. Press to change`,
   readingPaceDesc: {
     standard: 'The usual time',
     relaxed: 'Half as long again',

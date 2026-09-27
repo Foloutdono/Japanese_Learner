@@ -40,9 +40,19 @@ vi.mock('../lib/audio', async importOriginal => ({
   startAmbiance: () => {},
   stopAmbiance: () => {},
 }))
-// The learner's reading pace, set per test (stores/readingPace).
-const paced = vi.hoisted(() => ({ pace: 'standard' }))
-vi.mock('../stores/readingPace', () => ({ useReadingPace: () => paced.pace }))
+// The learner's reading pace, set per test (stores/readingPace); a
+// press of the clock's chip sets it and re-renders its readers.
+const paced = vi.hoisted(() => {
+  const listeners = new Set()
+  return { pace: 'standard', listeners, set(p) { this.pace = p; listeners.forEach(l => l()) } }
+})
+vi.mock('../stores/readingPace', async () => {
+  const { useSyncExternalStore } = await import('react')
+  return {
+    useReadingPace: () => useSyncExternalStore(l => { paced.listeners.add(l); return () => paced.listeners.delete(l) }, () => paced.pace),
+    setReadingPace: vi.fn(async id => { paced.set(id) }),
+  }
+})
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: ReadingRun } = await import('./ReadingRun')
@@ -461,5 +471,48 @@ describe('ReadingRun — the reading pace', () => {
     expect(root.querySelector('.sentence').textContent).toBe(PHRASE.phrase)
     expect(root.querySelector('.sentence--covered')).toBeNull()
     expect(clock(root)).toBe(translations.fr.readingUntimed)
+  })
+
+  // The chip at the clock's end (the owner's pick B): each press the
+  // next pace, the clock answering at once, before play and during it.
+  it('turns the pace from the chip on the clock, the time following', async () => {
+    const root = await run()
+    const chip = () => root.querySelector('.timer .pace-chip')
+    expect(chip().textContent).toBe('×1')
+    expect(chip().getAttribute('aria-label')).toBe(translations.fr.readingPaceChip(translations.fr.readingPaceOption.standard))
+    expect(clock(root)).toBe('30.0s')
+
+    const seen = []
+    for (let i = 0; i < 4; i++) {
+      chip().click()
+      await settle(20)
+      seen.push([chip().textContent, clock(root)])
+    }
+    expect(seen).toEqual([
+      ['×1,5', '45.0s'],
+      ['×2', '60.0s'],
+      ['∞', translations.fr.readingUntimed],
+      ['×1', '30.0s'],
+    ])
+  })
+
+  it('keeps a covered sentence covered when the pace goes untimed', async () => {
+    apiFetch.mockImplementation(path => {
+      if (path.startsWith('/api/reading/batch')) return Promise.resolve(res({ phrases: [{ ...PHRASE, display_seconds: 0.2 }] }))
+      return Promise.resolve(res(ANALYSIS))
+    })
+    const root = await run()
+    await play(root)
+    await settle(400)
+    expect(root.querySelector('.sentence--covered')).not.toBeNull()
+
+    // Standard to untimed is three presses; none of them uncovers it.
+    for (let i = 0; i < 3; i++) {
+      root.querySelector('.timer .pace-chip').click()
+      await settle(20)
+    }
+    expect(root.querySelector('.pace-chip').textContent).toBe('∞')
+    expect(root.querySelector('.sentence--covered')).not.toBeNull()
+    expect(clock(root)).toBe(translations.fr.writeWhatYouSaw)
   })
 })

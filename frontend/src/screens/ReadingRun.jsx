@@ -7,7 +7,7 @@ import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
 import { usePracticeXp } from '../hooks/usePracticeXp'
 import PromptCard from '../components/study/PromptCard'
-import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters } from '../components/reading/ReadingPieces'
+import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters, PaceChip } from '../components/reading/ReadingPieces'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import RatingBar from '../components/study/RatingBar'
@@ -69,7 +69,8 @@ export default function ReadingRun({ session }) {
   // pace's); the learner's reading pace (domain/readingPace.js) runs the
   // clock 1/factor as fast and scales what the timer prints, so a pace
   // that arrives with the profile after the first sentence still applies
-  // to it. A null factor is no clock: the sentence is never covered.
+  // to it. A null factor is no clock: the sentence is never covered, or
+  // stays covered if the clock ran out before the pace was changed.
   const [timeLeft, setTimeLeft] = useState(0)
   const factor = paceFactor(useReadingPace())
   // Whether the learner has pressed play on the phrase. Each phrase
@@ -551,7 +552,8 @@ function SessionView({
     source === 'frequency' ? `${domain === 'vocab_jmdict' ? t.freqDomainJmdict : t.freqDomainDeck} · ${tierLabelFor(tier, tierSize)}` :
     t.byMastery
 
-  const phraseCovered = stage === 'reading' && factor != null && timeLeft <= 0
+  // Only a clock that ran can reach zero: an untimed one never ticks.
+  const phraseCovered = stage === 'reading' && timeLeft <= 0
   const keys = useSentenceKeys({ reveal: true })
   // The asking's thread: a reopened line's, else the sentence on the
   // stage's, open once it is graded (plan 131).
@@ -630,6 +632,7 @@ function SessionView({
             covered={phraseCovered}
             untimed={factor == null}
             t={t}
+            aside={<PaceChip session={session} />}
           />
           <ReadingPrompt
             cardKey={data._uiKey}

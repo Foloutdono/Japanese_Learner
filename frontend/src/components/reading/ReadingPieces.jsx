@@ -3,6 +3,10 @@ import { CardTransition } from '../study/CardTransition'
 import PromptCard from '../study/PromptCard'
 import { EyeOffIcon, PlayIcon } from '../ui/Icons'
 import { runKey } from '../../lib/keyGuards'
+import { useLang } from '../../LangContext'
+import { useDesk } from '../../hooks/useDesk'
+import { READING_PACE_IDS } from '../../domain/readingPace'
+import { useReadingPace, setReadingPace } from '../../stores/readingPace'
 
 // ── 読書 — the reading stage's pieces (plan 099) ─────────────────
 // The reading run (screens/ReadingRun.jsx) and the reading ride
@@ -15,31 +19,61 @@ import { runKey } from '../../lib/keyGuards'
 // logic -- batches, history, the result post, the breakdown -- stays
 // with the run; these are the drawing.
 
+/** A clock's drawing: the hairline, `fill` of it left, over its label.
+ *  `running` says whether the label is a countdown (role="timer");
+ *  `aside` is a control standing at the clock's end, beside the
+ *  hairline and the label both -- the reading pace's chip (PaceChip).
+ *  Comprehension draws its window with it too. */
+export function Clock({ fill, label, low = false, running = true, aside = null }) {
+  return (
+    <div className={`timer${aside ? ' timer--aside' : ''}`}>
+      <div className="timer__bar" aria-hidden="true">
+        <span className={`timer__fill${low ? ' timer__fill--low' : ''}`} style={{ width: `${fill * 100}%` }} />
+      </div>
+      <span className="timer__label" role={running ? 'timer' : undefined}>{label}</span>
+      {aside}
+    </div>
+  )
+}
+
 /** The clock: a hairline that empties, and the seconds — or, once the
  *  sentence is covered, the instruction to write from memory. At the
  *  untimed reading pace (domain/readingPace.js) there is no clock: the
  *  hairline stays full and says so, in the clock's place, so the card
- *  under it stands where it always does. */
-export function ReadingTimer({ timeLeft, total, covered, t, untimed = false }) {
-  if (untimed) {
-    return (
-      <div className="timer">
-        <div className="timer__bar" aria-hidden="true">
-          <span className="timer__fill" style={{ width: '100%' }} />
-        </div>
-        <span className="timer__label">{t.readingUntimed}</span>
-      </div>
-    )
-  }
+ *  under it stands where it always does. A sentence the clock already
+ *  covered stays covered when the pace is changed to untimed. */
+export function ReadingTimer({ timeLeft, total, covered, t, untimed = false, aside = null }) {
+  if (covered) return <Clock fill={0} label={t.writeWhatYouSaw} aside={aside} />
+  if (untimed) return <Clock fill={1} label={t.readingUntimed} running={false} aside={aside} />
+  return <Clock fill={total > 0 ? timeLeft / total : 0} label={`${timeLeft.toFixed(1)}s`} aside={aside} />
+}
+
+/** The reading pace, on the clock (the owner's pick B of four drawn
+ *  options): the pace's factor in a chip at the clock's end, each press
+ *  the next pace, standard → relaxed → slow → untimed and round again.
+ *  The time beside it answers at once, so the press is read off the
+ *  clock rather than off a list. The same choice as Settings › Reading
+ *  pace, saved to the profile; a pace changed with a text up rescales
+ *  what is left of it. */
+export function PaceChip({ session }) {
+  const { t } = useLang()
+  const desk = useDesk()
+  const pace = useReadingPace()
+  const next = READING_PACE_IDS[(READING_PACE_IDS.indexOf(pace) + 1) % READING_PACE_IDS.length]
+  const label = t.readingPaceChip(t.readingPaceOption[pace])
   return (
-    <div className="timer">
-      <div className="timer__bar" aria-hidden="true">
-        <span className="timer__fill" style={{ width: `${total > 0 ? (timeLeft / total) * 100 : 0}%` }} />
-      </div>
-      <span className="timer__label" role="timer">
-        {covered ? t.writeWhatYouSaw : `${timeLeft.toFixed(1)}s`}
-      </span>
-    </div>
+    // A chip in the on look, not the Chip component: that one is a
+    // filter, pressed or not (aria-pressed), and this is a dial.
+    <button
+      type="button"
+      className="chip chip--on pace-chip"
+      data-pace={pace}
+      aria-label={label}
+      title={desk ? label : undefined}
+      onClick={() => setReadingPace(next, session).catch(() => {})}
+    >
+      {t.readingPaceShort[pace]}
+    </button>
   )
 }
 

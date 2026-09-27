@@ -30,7 +30,7 @@ import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
-import { ReadingTimer } from '../components/reading/ReadingPieces'
+import { Clock, ReadingTimer, PaceChip } from '../components/reading/ReadingPieces'
 import { CheckIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
 
 const RIKAI_COLOR = 'var(--line-rikai)'
@@ -540,18 +540,16 @@ export default function ComprehensionRun({ session }) {
 
       {stage === 'reading' && exercise && (
         <>
-          {/* No clock: the reading run's own word for it, in its place. */}
-          {!rereading && factor == null && <ReadingTimer untimed t={t} />}
+          {/* The window, and the pace's chip at its end (PaceChip). No
+              clock: the reading run's own word for it, in its place. */}
+          {!rereading && factor == null && <ReadingTimer untimed t={t} aside={<PaceChip session={session} />} />}
           {!rereading && factor != null && (
-            <div className="timer">
-              <div className="timer__bar" aria-hidden="true">
-                <span
-                  className={`timer__fill${timeLeft * factor < 60 ? ' timer__fill--low' : ''}`}
-                  style={{ width: `${(timeLeft / exercise.read_seconds) * 100}%` }}
-                />
-              </div>
-              <span className="timer__label" role="timer">{t.timeRemaining} · {formatTime(timeLeft * factor)}</span>
-            </div>
+            <Clock
+              fill={timeLeft / exercise.read_seconds}
+              low={timeLeft * factor < 60}
+              label={`${t.timeRemaining} · ${formatTime(timeLeft * factor)}`}
+              aside={<PaceChip session={session} />}
+            />
           )}
 
           {/* The text, and nothing else to do with it. The translation

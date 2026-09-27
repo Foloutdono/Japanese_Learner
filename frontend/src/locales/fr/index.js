@@ -2157,6 +2157,10 @@ const onboarding = {
   settingsReadingPace: 'Rythme de lecture',
   settingsReadingPaceHint: 'Le temps pour lire une phrase en Lecture et un texte en Compréhension avant qu’ils ne se cachent. Prends-en plus si tu lis lentement ou si tu es dyslexique.',
   readingPaceOption: { standard: 'Standard', relaxed: 'Posé', slow: 'Lent', untimed: 'Sans limite' },
+  // La puce au bout du chrono, en Lecture et en Compréhension : chaque
+  // appui passe au rythme suivant.
+  readingPaceShort: { standard: '×1', relaxed: '×1,5', slow: '×2', untimed: '∞' },
+  readingPaceChip: name => `Rythme de lecture : ${name}. Appuie pour changer`,
   readingPaceDesc: {
     standard: 'Le temps prévu',
     relaxed: 'Moitié plus de temps',

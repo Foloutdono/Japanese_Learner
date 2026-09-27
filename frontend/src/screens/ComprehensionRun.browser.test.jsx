@@ -33,9 +33,19 @@ vi.mock('../lib/audio', async importOriginal => ({
   stopAmbiance: () => {},
 }))
 vi.mock('../stores/stats', () => ({ useStats: () => ({ data: null, failed: false }), refreshStats: vi.fn(), seedStats: vi.fn() }))
-// The learner's reading pace, set per test (stores/readingPace).
-const paced = vi.hoisted(() => ({ pace: 'standard' }))
-vi.mock('../stores/readingPace', () => ({ useReadingPace: () => paced.pace }))
+// The learner's reading pace, set per test (stores/readingPace); a
+// press of the clock's chip sets it and re-renders its readers.
+const paced = vi.hoisted(() => {
+  const listeners = new Set()
+  return { pace: 'standard', listeners, set(p) { this.pace = p; listeners.forEach(l => l()) } }
+})
+vi.mock('../stores/readingPace', async () => {
+  const { useSyncExternalStore } = await import('react')
+  return {
+    useReadingPace: () => useSyncExternalStore(l => { paced.listeners.add(l); return () => paced.listeners.delete(l) }, () => paced.pace),
+    setReadingPace: vi.fn(async id => { paced.set(id) }),
+  }
+})
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: ComprehensionRun } = await import('./ComprehensionRun')
@@ -449,5 +459,22 @@ describe('ComprehensionRun — the reading pace', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
     await settle()
     expect(root.querySelector('.mcq-list')).not.toBeNull()
+  })
+
+  it('turns the pace from the chip on the clock, rescaling what is left', async () => {
+    paced.pace = 'relaxed'
+    const root = await reading()
+    const chip = root.querySelector('.timer .pace-chip')
+    expect(chip.textContent).toBe('×1,5')
+    chip.click()
+    await settle(20)
+    expect(root.querySelector('.timer .pace-chip').textContent).toBe('×2')
+    // Twice the standard minute, less the fraction of a second gone.
+    expect(label(root)).toMatch(new RegExp(`^${fr.timeRemaining} · (2:00|1:59)$`))
+
+    root.querySelector('.timer .pace-chip').click()
+    await settle(20)
+    expect(label(root)).toBe(fr.readingUntimed)
+    expect(root.querySelector('.mcq-list')).toBeNull()
   })
 })
