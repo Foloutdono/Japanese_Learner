@@ -48,10 +48,16 @@ def _is_kana(c: str) -> bool:
     return "ぁ" <= c <= "ゖ" or c == "ー"
 
 
+# Digits read as the kanji numerals, one for one so no offset moves: the
+# recogniser writes 二人 as 2人, whose kana (に, にん) never met ふたり.
+_DIGITS = str.maketrans("0123456789０１２３４５６７８９", "〇一二三四五六七八九" * 2)
+
+
 def _readings(text: str) -> list[tuple[int, int, str]]:
     """(start, end, hiragana) per word. The tokenizer's reading where
     there is one; without a tokenizer, each character as itself, which
     still matches kana to kana and a kanji to the same kanji."""
+    text = text.translate(_DIGITS)
     morphemes = morphology.tokenize(text)
     if morphemes is None:
         return [(i, i + 1, morphology.kata_to_hira(c)) for i, c in enumerate(text)]

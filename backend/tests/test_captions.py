@@ -52,6 +52,17 @@ class ParseTrackTests(unittest.TestCase):
         result = parse_track(ass, "t.ass")
         self.assertEqual(result[0]["text"], "私は学生です。")
 
+    def test_a_kangxi_radical_is_read_as_the_kanji_it_looks_like(self) -> None:
+        # A lyric track seen on YouTube writes 自分 with ⾃ (U+2F83), which
+        # the tokenizer cannot read: the word had no reading and no time.
+        vtt = "WEBVTT\n\n00:00:01.000 --> 00:00:03.000\n\u2f83分<00:00:02.000>を信じて\n"
+        [cue] = parse_track(vtt, "a.vtt")
+        self.assertEqual(cue["text"], "自分を信じて")
+        self.assertEqual(cue["words"], [[0, 1.0], [2, 2.0]])
+        # A compatibility ideograph likewise; plain kanji are left alone.
+        [cue] = parse_track("WEBVTT\n\n00:00:01.000 --> 00:00:02.000\n\uf9dc年と龍\n", "a.vtt")
+        self.assertEqual(cue["text"], "\u9686年と龍")
+
     def test_duplicate_consecutive_rolling_window_cues_are_merged(self) -> None:
         # The exact shape YouTube auto-captions produce: each Cue is the
         # previous one plus a few more words.

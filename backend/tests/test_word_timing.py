@@ -62,6 +62,16 @@ class AlignCuesTests(unittest.TestCase):
         [cue] = align_cues([{"start": 9.8, "end": 13.5, "text": "今日はいい天気ですね"}], recognised)
         self.assertEqual(_times(cue)[5], 11.2)
 
+    def test_a_number_in_digits_meets_the_same_number_in_kanji(self) -> None:
+        # The recogniser writes 二人 as 2人: read as に and にん, it never
+        # met ふたり, and the word went without its time.
+        recognised = [{"start": 10.0, "end": 13.0, "text": "2人だけの世界",
+                       "words": [[0, 10.0], [2, 10.6], [4, 11.0], [5, 11.2]]}]
+        [cue] = align_cues([{"start": 9.8, "end": 13.5, "text": "二人だけの世界"}], recognised)
+        times = _times(cue)
+        self.assertEqual(times[0], 10.0)
+        self.assertEqual(times[2], 10.6)
+
     def test_a_word_the_recogniser_missed_is_left_to_the_estimate(self) -> None:
         # いい not heard at all: its kana are not crowded into the time of
         # the words around it.

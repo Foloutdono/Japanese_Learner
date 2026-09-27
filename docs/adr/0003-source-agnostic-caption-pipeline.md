@@ -452,3 +452,25 @@ YouTube's srv3 format (`<s t="…">` per word), in words that are often wrong.
   song's lines hidden 53→55%, of a spoken track's 44→49% and 36→40%; a
   spoken track with nothing measured 36→38% held out, the rest level; the
   recogniser's own lines' 90th-percentile error a fifth lower.
+- **What the aligner could not read, and 16 more videos** (the same day). Read
+  word by word, the recogniser's words the aligner left unmatched were, on a
+  track that stamps its words, almost all misheard: their kana are nowhere
+  near the line (a song's 17–28% of its words, a spoken track's 1–7%). Two
+  were not. A lyric track wrote 自分 with the Kangxi radical ⾃ (U+2F83),
+  which the tokenizer reads as nothing, so the word had no reading, no card
+  and no time; every radical and compatibility ideograph is now folded to the
+  one kanji it stands for when a caption is parsed (`study/captions.py`,
+  a code point for a code point, so no word time moves). And the recogniser
+  writes numbers in digits (2人 for 二人); the aligner compares a digit as the
+  kanji numeral, which the tokenizer reads as the word (ふたり), for matching
+  only. A spoken track's words anchored 91→92%, 95→97% and 92→94% over the
+  three sets, a song's 69%, 75% and 62→63%. Checked on 16 videos fetched
+  after the rule was chosen (14 spoken, 2 songs, only the tracks that stamp
+  their words), the rule held: a third of a spoken track's lines hidden
+  36→41%, nothing measured 36→38%; a song's 71→74% and 58→64%. A lead
+  measured per track, taken at its first quartile, was tried again and was
+  within the noise (+0.3 to +0.7 points for speech, −1.3 for song): still
+  dropped. Some recognised tracks stamp few of their words (an interview
+  and an anime run 6–13% of their lines stamped); the aligner spreads their
+  kana over their lines' times, which would be measured against itself, so
+  every track with fewer than 60% of its lines stamped was left out.
