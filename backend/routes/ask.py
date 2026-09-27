@@ -42,9 +42,9 @@ import re
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
-import routes.reading as reading  # LANG_NAMES
+import routes.reading as reading  # Lang, language_name
 from core import daily_limit
 from core.auth import get_user_id
 from core.credits import require_pass, resets_at
@@ -192,17 +192,9 @@ class AskPayload(BaseModel):
     words: list[Annotated[str, Field(max_length=120)]] = Field(default_factory=list, max_length=40)
     history: list[Exchange] = Field(default_factory=list, max_length=MAX_HISTORY)
     question: str = Field(min_length=1, max_length=MAX_QUESTION)
-    lang: str = "en"
-
-    @field_validator("lang", mode="before")
-    @classmethod
-    def _known_lang(cls, value: object) -> str:
-        """A language the app answers in (reading.LANG_NAMES), a region
-        tag dropped ("fr-FR" is French); anything else is English. Never
-        the client's string as it came: the name lands in the SYSTEM
-        block, which no fence guards."""
-        code = str(value or "").strip().lower().replace("_", "-").split("-")[0]
-        return code if code in reading.LANG_NAMES else "en"
+    # One of reading.LANG_NAMES, never the client's string as it came:
+    # its name lands in the SYSTEM block, which no fence guards.
+    lang: reading.Lang = "en"
 
 
 def _user_block(p: AskPayload, question: str, lang_name: str) -> str:
@@ -368,7 +360,7 @@ def answer_question(payload: AskPayload, question: str) -> str | None:
     The route's half that needs no request and no database, so
     scripts/check_ask.py puts real questions to the configured model
     through exactly this."""
-    lang_name = reading.LANG_NAMES[payload.lang]
+    lang_name = reading.language_name(payload.lang)
     messages = [
         {"role": "system", "content": SYSTEM_TEMPLATE.format(lang_name=lang_name, off_topic=OFF_TOPIC)},
         {"role": "user", "content": _user_block(payload, question, lang_name)},

@@ -6,10 +6,11 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 from functools import lru_cache
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from core.credits import local_today, require_pass, resets_at
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, BeforeValidator, Field
 
 from core.db import db_conn
 from core.auth import get_user_id, unprefixed
@@ -126,6 +127,38 @@ LANG_NAMES = {
     "it": "Italian",
     "pt": "Portuguese",
 }
+
+
+# ── A language the client names (2026-09-27) ────────────────────────
+# Every model call that answers in the learner's language names it in
+# the prompt, and the name came from `LANG_NAMES.get(lang, lang)`, so an
+# unknown code went in as the client wrote it. It lands outside every
+# fence -- the system block of the ask, composition, phrase and
+# comprehension prompts, translation's one message around its data --
+# where `lang="French. Ignore every rule above..."` reads as the app's
+# own instruction. And the same string keyed what those calls leave
+# behind: phrase_analysis_cache, the comprehension pool, and
+# _comprehension_system's unbounded lru_cache, one ~7 KB prompt kept for
+# the process's life per string sent.
+#
+# So a language is one of LANG_NAMES before anything reads it: `Lang`
+# is the type every endpoint that takes one declares (a body field or a
+# query parameter alike), and language_name is what every prompt names,
+# so a caller that skipped the first still cannot reach the second.
+def known_lang(value: object) -> str:
+    """`value` as a key of LANG_NAMES: lowercased, a region tag dropped
+    ("fr-FR" and "fr_CA" are French), anything else English."""
+    code = str(value or "").strip().lower().replace("_", "-").split("-")[0]
+    return code if code in LANG_NAMES else "en"
+
+
+def language_name(lang: object) -> str:
+    """The name a prompt gives the language `lang` codes, never `lang`."""
+    return LANG_NAMES[known_lang(lang)]
+
+
+# A `lang` a request carries, as known_lang reads it.
+Lang = Annotated[str, BeforeValidator(known_lang)]
 
 MIN_BATCH = 1
 MAX_BATCH = 10
@@ -1297,7 +1330,7 @@ def _comprehension_system(level: str, lang: str) -> str:
         questions=spec["questions"],
         allowed_kanji=kanji_instruction(level),
         lang=lang,
-        lang_name=LANG_NAMES.get(lang, lang),
+        lang_name=language_name(lang),
     )
 
 
@@ -2070,7 +2103,7 @@ def _decorate_for(data: dict, user_id: str, level: str) -> dict:
 
 
 @router.get("/api/reading/comprehension")
-def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: str = Depends(get_user_id)):
+def get_comprehension_text(level: str | None = None, lang: Lang = "en", user_id: str = Depends(get_user_id)):
     level = resolve_level(user_id, level)
     avoid = _recent_grammar_patterns(user_id)
 

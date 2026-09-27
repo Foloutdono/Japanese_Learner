@@ -47,7 +47,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 import routes.grammar as grammar
-import routes.reading as reading  # _chat (LLMUnavailable -> 503) and LANG_NAMES, as translation does
+import routes.reading as reading  # _chat (LLMUnavailable -> 503) and the language, as translation does
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, entry_by_id, gloss, grammar_to_id
 from core import daily_limit
 from core.auth import get_user_id
@@ -288,7 +288,7 @@ def _user_block(level: str, entry: dict, sentence: str, lang: str) -> str:
 class ReviewPayload(BaseModel):
     raw_id: str = Field(min_length=1, max_length=200)
     sentence: str = Field(min_length=1, max_length=MAX_SENTENCE)
-    lang: str = "en"
+    lang: reading.Lang = "en"
 
 
 @router.post("/api/composition/review")
@@ -318,7 +318,7 @@ def post_composition_review(payload: ReviewPayload, user_id: str = Depends(get_u
             ),
         )
 
-    lang_name = reading.LANG_NAMES.get(payload.lang, payload.lang)
+    lang_name = reading.language_name(payload.lang)
     content = reading._chat(
         [
             {"role": "system", "content": SYSTEM_TEMPLATE.format(lang_name=lang_name, max_items=tutor_review.MAX_ITEMS)},

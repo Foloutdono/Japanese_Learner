@@ -16,7 +16,7 @@ from study.llm_shared import chat, LLMUnavailable
 from content.grammar_points_data import localise
 from study.analysis import analyze_local, attach_user_state, merge_deep
 from study.sentences import split_sentences, MAX_SENTENCES
-from routes.reading import LANG_NAMES
+from routes.reading import Lang, language_name
 
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
@@ -293,7 +293,7 @@ class PhraseRequest(BaseModel):
     # The deep tier's language. Absent before 2026-08, which meant every
     # learner got whatever language the model defaulted to (in practice
     # English) regardless of their UI language.
-    lang: str = "en"
+    lang: Lang = "en"
     # Provenance for the Sentence bank (docs/adr/0002) -- 'typed' is the
     # default and matches phrase_history.source's own column default, so
     # a caller that never mentions this (ReadingScreen.jsx, most direct
@@ -316,7 +316,7 @@ def _call_llm(phrase: str, lang: str, points: list[dict] | None = None) -> dict:
     caller already has, not one that benefits from a thinking pass --
     and llm_shared documents the reasoning budget crowding out the
     answer when the answer is long."""
-    lang_name = LANG_NAMES.get(lang, lang)
+    lang_name = language_name(lang)
     try:
         content = chat(
             [
@@ -513,7 +513,7 @@ def get_phrase_history(user_id: str = Depends(get_user_id), limit: int = Query(5
 
 
 @router.get("/api/phrase/history/{entry_id}")
-def get_phrase_history_entry(entry_id: int, lang: str = "en", user_id: str = Depends(get_user_id)):
+def get_phrase_history_entry(entry_id: int, lang: Lang = "en", user_id: str = Depends(get_user_id)):
     # Re-derives the analysis from the stored `phrase` text every time --
     # see the _migrate_history_schema note above (docs/adr/0002). This is
     # a local-tier operation: allow_llm_call=False means a Sentence whose

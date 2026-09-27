@@ -42,6 +42,7 @@ from study.sentences import MAX_SENTENCES
 # reused wholesale rather than reimplemented, the same pattern
 # routes/translation.py uses for routes/reading.py's _chat.
 from routes.phrase import _analyze_sentence
+from routes.reading import Lang
 
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
@@ -701,7 +702,7 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
 
 
 class ExplainPayload(BaseModel):
-    lang: str = "en"
+    lang: Lang = "en"
 
 
 @router.post("/api/video/session/{session_id}/sentence/{index}/explain")

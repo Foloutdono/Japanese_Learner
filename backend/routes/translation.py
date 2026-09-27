@@ -143,7 +143,7 @@ class AnalyzePayload(BaseModel):
     target_phrase: str        # reference Japanese translation, from the batch data
     target_romaji: str
     user_answer: str          # the learner's own Japanese attempt
-    lang: str = "en"
+    lang: reading.Lang = "en"
     # The grammar point the reference sentence was written to
     # demonstrate, when it has one -- every curated sentence carries it
     # (see content/reading_sentences.py) and a corpus-sourced one does
@@ -217,7 +217,7 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
     if not payload.user_answer.strip():
         raise HTTPException(status_code=400, detail="user_answer is required")
 
-    lang_name = reading.LANG_NAMES.get(payload.lang, payload.lang)
+    lang_name = reading.language_name(payload.lang)
     # The one thing this endpoint knows that the learner does not, and
     # that the reference sentence alone does not say: WHY this sentence
     # was chosen. A curated sentence exists to demonstrate one grammar
