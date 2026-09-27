@@ -164,7 +164,13 @@ describe('the rail', () => {
     await mountShell()
     await settle()
     const glyph = rail().querySelector('.desk-rail__glyph')
-    expect(glyph.textContent).toBe('辻')
+    // The mark (plan 158), named as the text was, in the text's box:
+    // 1em square at the glyph's rung.
+    const mark = glyph.querySelector('svg.mark')
+    expect(mark.getAttribute('aria-label')).toBe('辻')
+    const em = parseFloat(getComputedStyle(glyph).fontSize)
+    expect(mark.getBoundingClientRect().width).toBeCloseTo(em, 1)
+    expect(mark.getBoundingClientRect().height).toBeCloseTo(em, 1)
     expect(glyph.getAttribute('lang')).toBe('ja')
     expect(rail().querySelector('.desk-rail__name').textContent).toBe('Tsuji')
   })

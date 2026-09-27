@@ -144,7 +144,7 @@ export default defineConfig(({ mode }) => {
         // the brdAppName locale key. Latin here on purpose: this is the
         // label the OS prints under the icon and the string a learner
         // searches for — the 辻 glyph is the masthead, and it is what
-        // the icon itself carries (brand/icon.html).
+        // the icon itself carries (brand/icon.svg, the mark: plan 158).
         name: 'Tsuji — Apprendre le japonais',
         short_name: 'Tsuji',
         lang: 'fr',

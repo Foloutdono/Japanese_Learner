@@ -263,7 +263,7 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(Math.round(box(col).width)).toBe(360)
     expect(Math.round(box(col).left)).toBe(0)
     expect(Math.round(box(col).height)).toBe(window.innerHeight)
-    expect(col.querySelector('.desk-rail__glyph').textContent).toBe('辻')
+    expect(col.querySelector('.desk-rail__glyph .mark').getAttribute('aria-label')).toBe('辻')
     // The reveal is the kana's own stop; the level joins once both are read.
     expect(stops()).toEqual(['name', 'why', 'kana', 'goal', 'lines', 'rhythm', 'time'])
     expect(stop('projection')).not.toBeNull()
@@ -553,7 +553,7 @@ describe('the front door on the desk (P10, plan 140)', () => {
     expect(Math.round(box(col).left)).toBe(0)
     expect(Math.round(box(col).height)).toBe(window.innerHeight)
     // The rail's masthead at its head; the paper keeps no second mark.
-    expect(inSide('.desk-rail__glyph').textContent).toBe('辻')
+    expect(inSide('.desk-rail__glyph .mark').getAttribute('aria-label')).toBe('辻')
     expect($('.brd-hero .auth-header__glyph')).toBeNull()
     // Named plainly (plan 155): "Log in", not the link's own sentence.
     expect([en.login, fr.login]).toContain(inSide('.desk-deck__cap').textContent)

@@ -5,6 +5,7 @@ import { AuthCard } from '../account/AuthCard'
 import { useDesk } from '../../hooks/useDesk'
 import { DeskMast } from '../chrome/DeskMast'
 import { PaperWait } from './PaperWait'
+import { Mark } from '../ui/Mark'
 import { FRONT_LANE, BACK_LANE, DESK_LANE } from './demoCards'
 
 // ── Welcome — the sign, the rolling stock, the promise (plan 075) ─
@@ -108,7 +109,7 @@ export default function Welcome({ onBoard, onSignIn, boarding = false, authMode 
     <main className="brd brd--welcome" id="main-content">
       <div className="brd__body brd__body--top">
         <div className="brd-hero">
-          <span className="auth-header__glyph" lang="ja">{t.appTitle}</span>
+          <span className="auth-header__glyph" lang="ja"><Mark label={t.appTitle} /></span>
           <h1 className="brd__q">{t.learnJapanese}</h1>
         </div>
         {/* Decoration: the cards say nothing the tagline does not. */}

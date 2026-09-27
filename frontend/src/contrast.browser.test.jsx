@@ -1019,7 +1019,7 @@ const SITES = [
   ['.ob-flap', 'departure board flap (panel ink on flap face)'],
   ['.ob-colon', 'departure board colon (soft panel ink on sumi)'],
   ['.ob-tick', 'day track tick (soft ink on page)'],
-  ['.ob-notif-app', 'notification app mark (gold on sumi)'],
+  ['.ob-notif-app', 'notification app mark (the mark\'s ink on sumi, plan 158)'],
   ['.ob-notif-head', 'notification head (soft ink on surface)'],
   ['.ob-notif-text', 'notification text (soft ink on surface)'],
   ['.ob-step-val', 'build step value (soft ink on surface)'],
