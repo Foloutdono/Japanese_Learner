@@ -97,67 +97,81 @@ describe('sungAt', () => {
 // What a whole track says about its lines: its pace, measured between
 // the words it timed, and how early its subtitles come up.
 describe('passageTiming', () => {
-  // LINE's four words timed at half a second a beat, the first 0.3 s
-  // after the subtitle comes up.
-  const timedLine = at => ({
-    ...LINE, cue_start: at - 0.3, cue_end: at + 7,
-    word_times: [[0, at], [2, at + 1], [4, at + 2.5], [6, at + 3.5]],
+  // LINE's four words and its speech's end timed at `pace` a beat, the
+  // first as the subtitle comes up, the subtitle up a third longer.
+  const timedLine = (at, pace) => {
+    const t = beats => at + beats * pace
+    return {
+      ...LINE, cue_start: at, cue_end: at + (4 / 3) * 10.5 * pace,
+      word_times: [[0, t(0)], [2, t(2)], [4, t(5)], [6, t(7)], [8, t(10.5)]],
+    }
+  }
+  const track = pace => Array.from({ length: 8 }, (_, i) => timedLine(20 * i, pace))
+
+  it('reads the pace between the words measured, and how far past their speech a spoken track runs', () => {
+    const timing = passageTiming(track(0.1))
+    expect(timing.secondsPerBeat).toBeCloseTo(0.1)
+    expect(timing.overrun).toBeCloseTo(4 / 3)
   })
 
-  it('reads the pace between the words measured, and the lead before the first', () => {
-    const timing = passageTiming([0, 10, 20, 30, 40, 50, 60, 70].map(timedLine))
+  it('reads no overrun off a sung track, whose measured end falls before its held last note', () => {
+    const timing = passageTiming(track(0.5))
     expect(timing.secondsPerBeat).toBeCloseTo(0.5)
-    expect(timing.lead).toBeCloseTo(0.3)
+    expect(timing.overrun).toBeNull()
   })
 
-  it('reads the pace off the fullest cues when no word was measured', () => {
-    // 10.5 beats a line; cues of 10.5 to 19.5 seconds, the fullest near a
-    // beat a second and the rest held through a pause.
+  it('reads the pace off the median line\'s cue when no word was measured', () => {
+    // 10.5 beats a line, cues of 10.5 to 19.5 seconds.
     const lines = Array.from({ length: 10 }, (_, i) => ({ ...LINE, cue_start: 100 * i, cue_end: 100 * i + 10.5 + i }))
     const timing = passageTiming(lines)
-    expect(timing.secondsPerBeat).toBeCloseTo(12.5 / 10.5)
-    expect(timing.lead).toBe(0)
+    expect(timing.secondsPerBeat).toBeCloseTo(15.5 / 10.5)
+    expect(timing.overrun).toBeNull()
   })
 
   it('says nothing about a track too short to measure, or a Passage with no cues', () => {
-    expect(passageTiming([timedLine(0)])).toBeNull()
+    expect(passageTiming([timedLine(0, 0.1)])).toBeNull()
     expect(passageTiming([{ ...LINE, cue_start: null }])).toBeNull()
     expect(passageTiming([])).toBeNull()
   })
 })
 
 describe('tokenTimes on the track\'s timing', () => {
-  const held = { ...LINE, cue_end: 40 }
+  // 50 seconds for 10.5 beats: more than four times what they take.
+  const held = { ...LINE, cue_end: 60 }
 
-  it('says a line\'s words at the track\'s pace and holds the rest of its cue', () => {
-    const times = tokenTimes(held, { secondsPerBeat: 1, lead: 0 })
+  it('says a line\'s words at the track\'s pace when its cue is held far past them', () => {
+    const times = tokenTimes(held, { secondsPerBeat: 1 })
     expect(times.tokens.map(w => w.start)).toEqual([10, 12, 15, 17])
     expect(times.tokens[3].end).toBe(20.5)
     // Said, and the line still up: its last word stays lit.
     expect(sungAt(times, 30)).toEqual({ index: 3, progress: 1 })
   })
 
-  it('never runs a line past its cue', () => {
-    expect(tokenTimes(LINE, { secondsPerBeat: 2, lead: 0 }).tokens[3].end).toBe(20.5)
+  it('takes a cue that runs on less than that for the speech: lyric cues hug their singing', () => {
+    const times = tokenTimes({ ...LINE, cue_end: 40 }, { secondsPerBeat: 1 })
+    expect(times.tokens[3].end).toBe(40)
+    expect(times.tokens[1].start).toBeCloseTo(10 + (2 * 30) / 10.5)
   })
 
-  it('carries a line on at the track\'s pace after its last word measured', () => {
-    const times = tokenTimes({ ...held, word_times: [[0, 10], [4, 14]] }, { secondsPerBeat: 1, lead: 0 })
+  it('never runs a line past its cue', () => {
+    expect(tokenTimes(LINE, { secondsPerBeat: 2 }).tokens[3].end).toBe(20.5)
+  })
+
+  it('carries a held line on at the track\'s pace after its last word measured', () => {
+    const times = tokenTimes({ ...held, word_times: [[0, 10], [4, 14]] }, { secondsPerBeat: 1 })
     expect(times.tokens[2].start).toBe(14)
     expect(times.tokens[3].start).toBe(16)
     expect(times.tokens[3].end).toBe(19.5)
   })
 
-  it('starts a line with no word measured after the track\'s lead', () => {
-    expect(tokenTimes(held, { secondsPerBeat: 1, lead: 0.5 }).tokens[0].start).toBe(10.5)
+  it('reads a cue as far as the track\'s cues run past their speech', () => {
+    // Up a third longer than its 10.5 beats at a beat a second.
+    const times = tokenTimes({ ...LINE, cue_end: 24 }, { secondsPerBeat: 1, overrun: 4 / 3 })
+    expect(times.tokens.map(w => w.start)).toEqual([10, 12, 15, 17])
+    expect(times.tokens[3].end).toBe(20.5)
   })
 
-  it('starts a line at the track\'s pace before its first word measured, where its subtitles come up early', () => {
-    // いい measured at 16, five beats (今日, は, the breath) after 今日.
-    const line = { ...held, word_times: [[4, 16]] }
-    expect(tokenTimes(line, { secondsPerBeat: 1, lead: 0.3 }).tokens[0].start).toBe(11)
-    // A track that is not early -- a recognised one, whose line starts on
-    // its first word -- starts it with the cue.
-    expect(tokenTimes(line, { secondsPerBeat: 1, lead: 0 }).tokens[0].start).toBe(10)
+  it('starts a line with its cue where its first word was not measured', () => {
+    expect(tokenTimes({ ...held, word_times: [[4, 16]] }, { secondsPerBeat: 1 }).tokens[0].start).toBe(10)
   })
 })

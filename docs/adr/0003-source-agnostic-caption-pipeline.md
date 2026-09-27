@@ -432,3 +432,23 @@ YouTube's srv3 format (`<s t="…">` per word), in words that are often wrong.
   and 34% (and 12% and 19% before the pace, spread over the held cue). Weighting
   ん, っ and long vowels short, as both corpora time them, gained nothing
   further and was left out.
+- **Checked on YouTube's own tracks, and the pace taken back** (the same day).
+  With the host allowed, 30 videos' hand-written and recognised tracks were
+  fetched (yt-dlp, whose other clients get past the bot check for most
+  videos; many music videos are region-locked from a cloud machine): 18
+  songs (米津玄師, YOASOBI, Official髭男dism, Ado, あいみょん) and 12 spoken
+  (podcasts, vlogs, talks, anime). The recognised words the aligner lends
+  the hand-written lines are the reference. Real lyric cues hug their
+  singing — a cue lasts 1.03 to 1.25 times its sung line — so carrying an
+  unmeasured line at the track's pace said its words early: over a whole
+  track with nothing measured, the word lit was the word said 39% of the
+  time against 56% spread over the cue. The rule now: a line's cue is its
+  speech, read as far as the track's cues run past their speech where its
+  measured lines show that (spoken tracks only: a singer holds a line's last
+  note past the last word the recogniser times), and the pace only for a
+  cue held more than four times what its words take; the lead is dropped
+  (it cost on every set). Against the code before this amendment, on the 22
+  videos the rule was chosen on and the 8 it was checked on: a third of a
+  song's lines hidden 53→55%, of a spoken track's 44→49% and 36→40%; a
+  spoken track with nothing measured 36→38% held out, the rest level; the
+  recogniser's own lines' 90th-percentile error a fifth lower.

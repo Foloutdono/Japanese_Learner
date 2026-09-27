@@ -58,12 +58,15 @@ export function beatsOf(tok) {
 // a beat more: the word lit is the word said 78% of the time in speech
 // and 49% in song, from 68% and 46% with half a beat and one.
 const FINAL = 0.5
-// How many measurements a track's pace or lead is read from, at least.
+// How many measurements a track's pace or habit is read from, at least.
 const ENOUGH = 8
-// The share of a track's unmeasured lines at or under which its pace is
-// read off their cues: a line's cue is its speech and some slack, never
-// less, so the fullest lines are the closest to the speech's own pace.
-const FULLEST = 0.2
+// A line's cue is taken for its speech unless it runs more than this
+// many times what its words take at the track's pace: then it is held
+// through a pause its words do not fill.
+const HELD = 4
+// A track slower than this a beat is sung (speech runs 0.09 to 0.15 s a
+// beat on YouTube's tracks, songs 0.17 to 0.36).
+const SUNG = 0.16
 
 // The beats before each code point of a line: cum[o], cum[0] = 0. A mark
 // between two said words is a breath, whether or not the tokenizer made
@@ -117,15 +120,22 @@ function median(xs) {
 }
 
 // What a whole track says about its lines' timing, for the lines it did
-// not measure: {secondsPerBeat, lead}, or null. The pace is the median
-// of what its measured lines took a beat between two words measured;
-// with too few of those, it is read off the cues of the lines with no
-// measurement at all, the fullest of them. The lead is how long the
-// track's subtitles come up before their first word is said, the median
-// over the lines whose first word was measured, and never less than 0.
+// not measure: {secondsPerBeat, overrun}, or null.
+//
+// The pace is the median of what its measured lines took a beat between
+// two words measured; with too few of those, what its lines' cues give a
+// beat, the median line's.
+//
+// The overrun is how far past its speech the track's cues run, as a
+// share of the speech: the median over the lines measured from their
+// first word to their speech's end, and never less than 1 -- a
+// transcript's cues run on. Not for a sung track: a singer holds a
+// line's last note past the last word the recogniser times, so its end
+// is measured early and its cue, which does hug the singing, would read
+// as running on.
 export function passageTiming(sentences) {
   const paces = []
-  const leads = []
+  const overruns = []
   const loose = []
   for (const s of sentences ?? []) {
     if (!timed(s)) continue
@@ -136,7 +146,10 @@ export function passageTiming(sentences) {
       loose.push((s.cue_end - s.cue_start) / cum[n])
       continue
     }
-    if (cum[known[0][0]] === 0) leads.push(known[0][1] - s.cue_start)
+    const [first, last] = [known[0], known[known.length - 1]]
+    if (cum[first[0]] === 0 && last[0] >= n && last[1] > first[1]) {
+      overruns.push((s.cue_end - first[1]) / (last[1] - first[1]))
+    }
     for (let k = 1; k < known.length; k += 1) {
       const [oa, ta] = known[k - 1]
       const [ob, tb] = known[k]
@@ -149,26 +162,24 @@ export function passageTiming(sentences) {
   }
   let secondsPerBeat = null
   if (paces.length >= ENOUGH) secondsPerBeat = median(paces)
-  else if (loose.length >= ENOUGH) {
-    const a = [...loose].sort((x, y) => x - y)
-    secondsPerBeat = a[Math.floor(a.length * FULLEST)]
-  }
-  const lead = leads.length >= ENOUGH ? Math.max(0, median(leads)) : 0
-  return secondsPerBeat || lead ? { secondsPerBeat, lead } : null
+  else if (loose.length >= ENOUGH) secondsPerBeat = median(loose)
+  const spoken = secondsPerBeat !== null && secondsPerBeat < SUNG
+  const overrun = spoken && overruns.length >= ENOUGH ? Math.max(1, median(overruns)) : null
+  return secondsPerBeat || overrun ? { secondsPerBeat, overrun } : null
 }
 
 // {start, end, tokens: [{start, end, said}]} -- when the line and each
 // of its words start and end -- or null for a Sentence with no cue
 // times (a typed or photographed Passage) or no words.
 //
-// Between two anchors the words are spread by their beats. Before the
-// first and after the last, `timing` (passageTiming, the whole track's)
-// carries them at the track's own pace: a line whose first word was not
-// measured starts that many beats before the first one that was, or
-// after the track's lead where none was; a line whose end was not
-// measured ends when its beats have been said, and the subtitle is held
-// after -- where it used to be spread over the whole cue, the hold and
-// the pause after it too. Without `timing`, the cue's own start and end.
+// Between two anchors the words are spread by their beats, from the
+// cue's start where the first word was not measured. Where the end was
+// not, the cue says it, as far as the whole track's cues run past their
+// speech (`timing`, passageTiming); unless its words would take a
+// quarter of that at the track's pace, and it is held through a pause:
+// then they are said at the pace, and the subtitle held after. Set on
+// YouTube's own tracks, 2026-09-27: lyric cues hug their singing, and a
+// pace carried over a line said it early.
 export function tokenTimes(sentence, timing = null) {
   if (!timed(sentence)) return null
   const start = sentence.cue_start
@@ -176,20 +187,12 @@ export function tokenTimes(sentence, timing = null) {
   const tokens = sentence.tokens
   const { n, cum } = beatLine(sentence)
   const pace = timing?.secondsPerBeat > 0 ? timing.secondsPerBeat : null
+  const overrun = timing?.overrun > 1 ? timing.overrun : 1
   const known = measured(sentence, n)
 
   const anchors = []
   const head = known[0]
-  if (!head || cum[head[0]] > 0) {
-    // A track whose subtitles are not known to come up early (a lead
-    // of 0: none measured, or measured on time) starts the words with
-    // the cue -- a recognised track's line starts at its first word.
-    let t0 = start
-    const lead = timing?.lead > 0 ? timing.lead : 0
-    if (head && pace && lead) t0 = Math.max(start, head[1] - cum[head[0]] * pace)
-    else if (!head && lead) t0 = start + Math.min(lead, (end - start) / 2)
-    anchors.push([0, t0])
-  }
+  if (!head || cum[head[0]] > 0) anchors.push([0, start])
   for (const [o, t] of known) {
     const prev = anchors[anchors.length - 1]
     if (prev && (o <= prev[0] || t <= prev[1])) continue
@@ -197,8 +200,9 @@ export function tokenTimes(sentence, timing = null) {
   }
   const tail = anchors[anchors.length - 1]
   if (tail[0] < n) {
-    let said = end
-    if (pace) said = Math.min(end, tail[1] + (cum[n] - cum[tail[0]]) * pace)
+    let said = tail[1] + (end - tail[1]) / overrun
+    const paced = pace ? tail[1] + (cum[n] - cum[tail[0]]) * pace : Infinity
+    if (said - tail[1] > HELD * (paced - tail[1])) said = paced
     if (said > tail[1]) anchors.push([n, said])
   }
 
