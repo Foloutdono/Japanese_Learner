@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { saveBlob } from '../lib/platform'
@@ -6,14 +6,14 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { track } from '../lib/track'
 import { Bar, Leave } from '../components/chrome/Bar'
-import { DeskSide } from '../components/chrome/DeskSide'
 import { DeskDock } from '../components/chrome/DeskDock'
 import { DeckPlatforms } from '../components/decks/DeckPlatforms'
 import { useDesk } from '../hooks/useDesk'
 import { Chip } from '../components/chrome/Console'
 import { Sheet } from '../components/chrome/Sheet'
 import { useTodaySummary } from '../stores/today'
-import { dueByDeck } from '../domain/lanes'
+import { dueByDeck, laneCount } from '../domain/lanes'
+import { board } from '../stores/boarding'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
@@ -238,10 +238,21 @@ function ReadingsField({ label, value, onChange }) {
   )
 }
 
-export default function DeckDetailScreen({ session }) {
+// ── 机 — the page beside the shelf (plan 154) ──
+// On the desk a deck is opened beside the shelf's list
+// (screens/DecksScreen.jsx), which renders this as its page: `pane`
+// drops the screen's own <main> and bar, and `deckId` names the deck
+// the shelf has open. The three callbacks tell the shelf what it lists:
+// the card count as it changes (`onCount`), a deck that left it
+// (`onGone`, deleted or unfollowed) and one that joined it (`onChanged`,
+// a copy taken). The page itself is one column on the desk, the
+// platforms (or the card form, Browse or More in their place) over the
+// cards -- there is no second column left beside a list and a page.
+export default function DeckDetailScreen({ session, deckId, pane = false, onCount, onGone, onChanged }) {
   const navigate        = useNavigate()
-  const { deck_id }     = useParams()
-  const { state }       = useLocation()
+  const params          = useParams()
+  const deck_id         = deckId ?? params.deck_id
+  const { state, pathname } = useLocation()
   const { t, lang }     = useLang()
   const desk            = useDesk()
 
@@ -320,11 +331,22 @@ export default function DeckDetailScreen({ session }) {
   const [confirmingMine, setConfirmingMine] = useState(false)
   const today = useTodaySummary().data
   const dueToday = dueByDeck(today).get(String(deck_id)) ?? 0
+  // 机 (plan 154): the deck's own lanes of the day's queue, which its
+  // filled button rides -- the Today run narrowed to them, every card
+  // it will serve (due and new) counted on the button.
+  const deckLanes = (today?.lanes ?? []).filter(l => l.kind === 'personal' && String(l.deck_id) === String(deck_id))
+  const rideCount = deckLanes.reduce((n, l) => n + laneCount(l), 0)
+
+  function ride() {
+    playUi('click-screen-selection')
+    const lanes = deckLanes.map(l => l.id).join(',')
+    board(() => navigate(`/today/run?lanes=${encodeURIComponent(lanes)}`, { state: { from: pathname } }))
+  }
 
   function deleteDeck() {
     playUi('click-screen-selection')
     apiFetch(`/api/decks/${deck_id}`, session, { method: 'DELETE' })
-      .then(() => navigate('/learn/decks'))
+      .then(() => { onGone?.(deck_id); navigate('/learn/decks') })
       .catch(() => setConfirmingDeck(false))
   }
 
@@ -353,7 +375,7 @@ export default function DeckDetailScreen({ session }) {
     setBusy(true)
     playUi('click-screen-selection')
     apiFetch(`/api/decks/${deck_id}/subscribe`, session, { method: 'DELETE' })
-      .then(() => navigate('/learn/decks'))
+      .then(() => { onGone?.(deck_id); navigate('/learn/decks') })
       .catch(() => { setBusy(false); setConfirmingUnfollow(false) })
   }
 
@@ -368,6 +390,7 @@ export default function DeckDetailScreen({ session }) {
         track('deck_detach', {
           structure: deck?.type, cards: cards.length, withdrawn,
         })
+        onChanged?.()
         navigate(`/learn/decks/${copy.id}`, { replace: true, state: { deck: copy } })
       })
       .catch(() => { setBusy(false); setConfirmingMine(false) })
@@ -397,6 +420,11 @@ export default function DeckDetailScreen({ session }) {
     setEditing(null)
     setImportResult(null)
     setExportError(false)
+    // The shelf beside the page (plan 154) swaps one deck for another
+    // on every click, so the last deck's cards must not stand under the
+    // next one's name while its own load.
+    setCards([])
+    setLoading(true)
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [deck_id])
 
@@ -405,6 +433,11 @@ export default function DeckDetailScreen({ session }) {
   // a deck id, and this screen outlives a change of one.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchCards() }, [deck_id])
+
+  // The shelf's row counts what the page lists, as cards come and go.
+  useEffect(() => {
+    if (cardsOf.current === String(deck_id)) onCount?.(deck_id, cards.length)
+  }, [cards, deck_id, onCount])
 
   // Stable identities so ImportCardsMenu/BrowseCardsMenu's useDialog
   // doesn't re-run its focus-on-open effect (and steal focus) on every
@@ -444,10 +477,22 @@ export default function DeckDetailScreen({ session }) {
     }
   }
 
+  // The deck the listed cards belong to, and the deck open now: an
+  // answer for a deck already swapped out (plan 154) is dropped.
+  const openDeck = useRef(deck_id)
+  openDeck.current = deck_id
+  const cardsOf = useRef(null)
+
   function fetchCards() {
-    apiFetch(`/api/decks/${deck_id}/cards`, session)
+    const id = deck_id
+    apiFetch(`/api/decks/${id}/cards`, session)
       .then(r => r.json())
-      .then(data => { setCards(data.cards || []); setLoading(false) })
+      .then(data => {
+        if (String(openDeck.current) !== String(id)) return
+        cardsOf.current = String(id)
+        setCards(data.cards || [])
+        setLoading(false)
+      })
       // Same fix as DecksScreen's fetchDecks — a failed request used
       // to leave `loading` true forever instead of settling into the
       // (empty) card list / Empty.
@@ -552,14 +597,17 @@ export default function DeckDetailScreen({ session }) {
   // 机 (plan 123): a deck just made on the desk arrives with `add`, and
   // its first card's form stands open in the side. The flag is spent at
   // once, so Back and Forward onto this entry do not open it again.
+  // Beside the shelf (plan 154) the page arrives from another deck, whose
+  // cards stand until this one's land: it waits for this deck's own.
   const arrivedToAdd = desk && Boolean(state?.add)
+  const cardsHere = cardsOf.current === String(deck_id)
   useEffect(() => {
-    if (!arrivedToAdd || loading || isFollower || cards.length > 0) return
+    if (!arrivedToAdd || loading || !cardsHere || isFollower || cards.length > 0) return
     // eslint-disable-next-line react-hooks/set-state-in-effect -- opening the form is the arrival's one instruction, carried in router state and read once the cards have loaded.
     startAdd()
     navigate(`/learn/decks/${deck_id}`, { replace: true, state: { deck: state.deck } })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrivedToAdd, loading])
+  }, [arrivedToAdd, loading, cardsHere])
 
   function startEdit(card) {
     const fields = { ...(card.fields ?? {}) }
@@ -820,8 +868,33 @@ export default function DeckDetailScreen({ session }) {
     </>
   )
 
-  // The page under the bar. On the desk it is the first of two
-  // columns, the deck's platforms (or the form) the second.
+  // 机: what stands in the page's slot (plan 154; the side column's
+  // tenants since plans 114-123) -- the form, Browse or More while one is
+  // open, else the platforms once the cards are in: a deck's modes turn
+  // on whether it has a card, and asking before the list has loaded
+  // asked twice.
+  const deskSlot = !desk ? null
+    : adding ? (
+      <DeskDock title={editing ? t.editCard : t.newCard} className="desk-cardform" onClose={closeForm} initialFocus="input, textarea">
+        {cardForm}
+      </DeskDock>
+    )
+      : showBrowse ? <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
+      // More is a list of what can be done to the deck, not a question:
+      // it opens in the slot (plan 120), and only its deletion asks, in
+      // a dialog of its own (below).
+      : moreOpen ? (
+        <DeskDock title={t.deckMore} className="desk-more" onClose={closeMore}>
+          {moreActions}
+          <button type="button" className="btn-primary btn-primary--danger" onClick={() => setConfirmingDeck(true)}>
+            <TrashIcon size={14} /> {t.deleteDeck}
+          </button>
+        </DeskDock>
+      )
+      : loading ? null
+      : <DeckPlatforms deckId={deck_id} deck={deck} session={session} cardCount={cards.length} />
+
+  // The page under the bar: one column on a phone and on the desk.
   const body = (
     <>
       {/* The deck, named on its own page: the same roundel, glyph and
@@ -838,12 +911,26 @@ export default function DeckDetailScreen({ session }) {
                 content is someone else's, and that is worth saying
                 where its cards are. */}
             {deck?.author && <> · <span className="lib-card__author">{t.libraryBy(deck.author)}</span></>}
-            {dueToday > 0 && <> · <span className="deck-identity__due">{t.todayDue(dueToday)}</span></>}
+            {/* On the desk the filled button says it, counted. */}
+            {dueToday > 0 && !(desk && rideCount > 0) && <> · <span className="deck-identity__due">{t.todayDue(dueToday)}</span></>}
           </span>
         </span>
-        {/* On the desk the platforms stand beside the cards
-            (DeckPlatforms), so there is no second screen to open. */}
-        {!desk && (
+        {/* On the desk the platforms stand in the page (DeckPlatforms),
+            so there is no second screen to open: the head holds the way
+            to add a card and, when the deck has cards in today's queue,
+            the one filled action -- ride them (plan 154). */}
+        {desk ? (
+          <span className="deck-identity__acts">
+            {allowCustom && !selectMode && (
+              <Chip on={adding && !editing} onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
+            )}
+            {rideCount > 0 && (
+              <button type="button" className="btn-primary deck-identity__ride" onClick={ride}>
+                {t.deckRide(rideCount)} ▶
+              </button>
+            )}
+          </span>
+        ) : (
           <button
             type="button"
             className="btn-primary deck-identity__study"
@@ -887,10 +974,10 @@ export default function DeckDetailScreen({ session }) {
 
       {!selectMode && !isFollower && (
         <div className="chip-row deckdetail-acts">
-          {/* On the desk Add and Browse are each pressed while their
-              panel holds the page's side. */}
-          {allowCustom && (
-            <Chip on={desk && adding && !editing} onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
+          {/* On the desk Browse is pressed while its panel holds the
+              page's slot; Add stands in the head (plan 154). */}
+          {allowCustom && !desk && (
+            <Chip onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
           )}
           {allowedSources.length > 0 && (
             <Chip on={desk && showBrowse && !adding} onClick={openBrowse}><SearchIcon size={14} />{t.browseBtn}</Chip>
@@ -988,6 +1075,11 @@ export default function DeckDetailScreen({ session }) {
             declares (GET /api/decks/structures), on the canvas's form. */}
         {adding && !desk && cardForm}
 
+        {/* 机 (plan 154): the slot the deck's side column was -- the
+            platforms, or the form, Browse or More in their place --
+            over the cards they board from or add to. */}
+        {desk && <div className="desk-deck__slot">{deskSlot}</div>}
+
         {loading && <Loading />}
 
         {!loading && cards.length === 0 && !adding && (
@@ -1070,44 +1162,12 @@ export default function DeckDetailScreen({ session }) {
     </>
   )
 
+  // Beside the shelf (plan 154) the page is the shelf's: its <main>, its
+  // bar, and no way up to a shelf that is already on the screen.
+  const Frame = pane ? PaneFrame : ScreenFrame
   return (
-    <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
-      <Bar
-        code="KZ"
-        color="var(--line-decks)"
-        title={t.decks}
-        aside={<Leave to={'/learn/decks'}>{t.leaveDecks}</Leave>}
-      />
-
-      {desk ? (
-        <div className="desk-deck">
-          <div className="desk-deck__main">{body}</div>
-          <DeskSide label={adding ? (editing ? t.editCard : t.newCard) : showBrowse ? t.browseTitle : moreOpen ? t.deckMore : t.study}>
-            {adding ? (
-              <DeskDock title={editing ? t.editCard : t.newCard} className="desk-cardform" onClose={closeForm} initialFocus="input, textarea">
-                {cardForm}
-              </DeskDock>
-            )
-              : showBrowse ? <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
-              // More is a list of what can be done to the deck, not a
-              // question: it opens in the column (plan 120), and only its
-              // deletion asks, in a dialog of its own (below).
-              : moreOpen ? (
-                <DeskDock title={t.deckMore} className="desk-more" onClose={closeMore}>
-                  {moreActions}
-                  <button type="button" className="btn-primary btn-primary--danger" onClick={() => setConfirmingDeck(true)}>
-                    <TrashIcon size={14} /> {t.deleteDeck}
-                  </button>
-                </DeskDock>
-              )
-              // The platforms once the cards are in: a deck's modes turn
-              // on whether it has a card, and asking before the list has
-              // loaded asked twice.
-              : loading ? <Loading />
-              : <DeckPlatforms deckId={deck_id} deck={deck} session={session} cardCount={cards.length} />}
-          </DeskSide>
-        </div>
-      ) : body}
+    <Frame t={t}>
+      {desk ? <div className="desk-deck">{body}</div> : body}
 
       {/* The More sheet: what the shelf's card used to carry. */}
       <Sheet open={confirmingMine} onClose={() => setConfirmingMine(false)}
@@ -1210,6 +1270,23 @@ export default function DeckDetailScreen({ session }) {
           onClose={closeBrowse}
         />
       )}
+    </Frame>
+  )
+}
+function ScreenFrame({ t, children }) {
+  return (
+    <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
+      <Bar
+        code="KZ"
+        color="var(--line-decks)"
+        title={t.decks}
+        aside={<Leave to={'/learn/decks'}>{t.leaveDecks}</Leave>}
+      />
+      {children}
     </main>
   )
+}
+
+function PaneFrame({ children }) {
+  return <>{children}</>
 }

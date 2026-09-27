@@ -1442,6 +1442,7 @@ const decks = {
   deleteDeckConfirm: 'Supprimer ce deck ?',
   deleteCardsConfirm: 'Supprimer la sélection ?',
   study:             'Étudier',
+  deckRide:          n => `Réviser ${n} carte${n === 1 ? '' : 's'}`,
   addCard:           '+ Ajouter',
   newCard:           'Nouvelle carte',
   editCard:          'Modifier la carte',

@@ -1498,6 +1498,7 @@ const decks = {
   deleteDeckConfirm: 'Delete this deck?',
   deleteCardsConfirm: 'Delete selected?',
   study:             'Study',
+  deckRide:          n => `Review ${n} card${n === 1 ? '' : 's'}`,
   addCard:           '+ Add card',
   newCard:           'New card',
   editCard:          'Edit card',

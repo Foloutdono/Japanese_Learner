@@ -187,17 +187,20 @@ describe('Settings\' doors on the desk', () => {
 
 describe('the shelf\'s decks and its library door on the desk', () => {
   it('are links that look like the buttons they were', async () => {
-    await render(<Page at="/learn/decks"><DecksScreen session={{}} /></Page>)
+    await render(<Page at="/learn/decks/1" path="/learn/decks/:deck_id"><DecksScreen session={{}} /></Page>)
     await settle(400)
-    const cards = $$('.platform-grid > .deck-card')
+    const list = $('.desk-split__list')
+    const cards = [...list.querySelectorAll('.platform-grid > .deck-card')]
     expect(cards.map(c => c.getAttribute('href'))).toEqual(['/learn/decks/1', '/learn/decks/2'])
-    await compare($('.platform-grid'), '.deck-card')
-    expect($('.decks-doors > a.chip').getAttribute('href')).toBe('/learn/decks/library')
-    await compare($('.decks-doors'), 'a.chip, button.chip')
-    // A deck is left for, not opened beside the shelf: Back comes back.
+    await compare(list.querySelector('.platform-grid'), '.deck-card')
+    expect(list.querySelector('.decks-doors > a.chip').getAttribute('href')).toBe('/learn/decks/library')
+    // The library's door (the new deck's is a button: it opens a dialog).
+    await compare(list.querySelector('.decks-doors'), '.chip:first-child')
+    // A deck opens beside the shelf (plan 154), as a split's row does:
+    // the link replaces, so Back leaves the shelf rather than walk it.
     await userEvent.click(cards[1])
     await settle(150)
-    expect([here.path, here.type]).toEqual(['/learn/decks/2', 'PUSH'])
+    expect([here.path, here.type]).toEqual(['/learn/decks/2', 'REPLACE'])
   })
 })
 

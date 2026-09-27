@@ -10,7 +10,8 @@ import './index.css'
 // the shelf is gone while it is read; on the desk the shelf stays — its
 // search, its narrowing, its paging — and the open deck stands beside
 // it, drawn from its shelf row at once. A deck's Browse opens in the
-// deck page's own second column rather than over the page, the deck's
+// deck page's slot rather than over the page -- its second column until
+// plan 154 stood the page itself beside the shelf -- the deck's
 // platforms are asked for once, and an empty deck says so once. The
 // phone's side is deskfree.phone.
 
@@ -222,7 +223,7 @@ function mountDeck() {
 const modeCalls = () => apiFetch.mock.calls.filter(([p]) => p === '/api/decks/5/modes').length
 
 describe('a deck\'s Browse on the desk', () => {
-  it('opens in the side, beside the cards it adds to, and gives the side back', async () => {
+  it('opens in the slot, over the cards it adds to, and gives the slot back (plan 154)', async () => {
     deckApi(CARDS)
     await mountDeck()
     await settle(400)
@@ -231,7 +232,7 @@ describe('a deck\'s Browse on the desk', () => {
     browse.click()
     await settle(400)
     expect($('[role="dialog"]')).toBeNull()
-    const dock = $('.desk-deck > .desk-side .desk-browse')
+    const dock = $('.desk-deck__slot .desk-browse')
     expect(dock).not.toBeNull()
     expect(document.activeElement).toBe(dock.querySelector('.browse-search-input'))
     expect(dock.querySelector('.browse-result-row__front').textContent).toBe('水')
@@ -239,7 +240,8 @@ describe('a deck\'s Browse on the desk', () => {
     const entry = dock.querySelector('.browse-result-row__entry').getBoundingClientRect()
     const meaning = dock.querySelector('.browse-result-row__meaning').getBoundingClientRect()
     expect(meaning.top).toBeGreaterThanOrEqual(entry.bottom - 1)
-    expect($('.desk-deck__main .card-list')).not.toBeNull()
+    // Over the cards it adds to, in the page's one column.
+    expect(dock.getBoundingClientRect().bottom).toBeLessThanOrEqual($('.desk-deck > .card-list').getBoundingClientRect().top)
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settle()
@@ -252,21 +254,22 @@ describe('a deck\'s Browse on the desk', () => {
     await mountDeck()
     await settle(400)
     expect($$('.empty')).toHaveLength(1)
-    expect($('.desk-deck__main .empty')).not.toBeNull()
+    expect($('.desk-deck > .empty')).not.toBeNull()
   })
 })
 
-// ── plan 120 — More opens in the side; only its deletion asks ──
+// ── plan 120 — More opens in the page; only its deletion asks ──
 // More is a list of what can be done to the deck (import, export, the
 // library), not a question, so on the desk it takes the deck page's
-// column the way Browse does, taking turns with it. Deleting the deck is
+// slot (its column until plan 154) the way Browse does, taking turns
+// with it. Deleting the deck is
 // still asked, in a dialog of its own, as the follower's two
 // irreversibles are. The phone's side is deskfree.phone.
 const moreChip = () => $$('.chip-row button').find(b => b.querySelector('.chip__dots'))
 const escape = () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
 
 describe('a deck\'s More on the desk', () => {
-  it('opens in the side, pressed while it holds it, and gives the side back', async () => {
+  it('opens in the slot, pressed while it holds it, and gives the slot back', async () => {
     deckApi(CARDS)
     await mountDeck()
     await settle(400)
@@ -276,16 +279,15 @@ describe('a deck\'s More on the desk', () => {
     more.click()
     await settle()
     expect($('[role="dialog"]')).toBeNull()
-    const dock = $('.desk-deck > .desk-side .desk-more')
+    const dock = $('.desk-deck__slot .desk-more')
     expect(dock).not.toBeNull()
     expect(more.getAttribute('aria-pressed')).toBe('true')
-    expect($('.desk-deck > .desk-side').getAttribute('aria-label')).toBe(dock.querySelector('h2').textContent)
     // Import, Export and Publish, as the phone's sheet lists them, and
     // the deletion under them.
     expect(dock.querySelectorAll('.btn-secondary')).toHaveLength(3)
     expect(dock.querySelector('.btn-primary--danger')).not.toBeNull()
     expect($('.desk-deck__study')).toBeNull()
-    expect($('.desk-deck__main .card-list')).not.toBeNull()
+    expect($('.desk-deck > .card-list')).not.toBeNull()
 
     dock.querySelector('.desk-dock__head .dict-plate__btn').focus()
     escape()
@@ -296,7 +298,7 @@ describe('a deck\'s More on the desk', () => {
     expect(document.activeElement).toBe(more)
   })
 
-  it('takes turns with Browse in the one column', async () => {
+  it('takes turns with Browse in the one slot', async () => {
     deckApi(CARDS)
     await mountDeck()
     await settle(400)
@@ -305,11 +307,11 @@ describe('a deck\'s More on the desk', () => {
     $$('.chip-row button').find(b => /browse|parcourir/i.test(b.textContent)).click()
     await settle(400)
     expect($('.desk-more')).toBeNull()
-    expect($('.desk-deck > .desk-side .desk-browse')).not.toBeNull()
+    expect($('.desk-deck__slot .desk-browse')).not.toBeNull()
     moreChip().click()
     await settle()
     expect($('.desk-browse')).toBeNull()
-    expect($('.desk-deck > .desk-side .desk-more')).not.toBeNull()
+    expect($('.desk-deck__slot .desk-more')).not.toBeNull()
   })
 
   it('asks before deleting the deck, in a dialog over the dock', async () => {
@@ -344,7 +346,7 @@ describe('a deck\'s More on the desk', () => {
     $$('.chip-row button')[0].click()
     await settle()
     expect($('[role="dialog"] .sheet__q')).not.toBeNull()
-    expect($('.desk-side [class*="desk-more"]')).toBeNull()
+    expect($('.desk-deck__slot [class*="desk-more"]')).toBeNull()
   })
 })
 
@@ -373,7 +375,7 @@ describe('the library\'s shelf walked by key (plan 123)', () => {
 // column's roundel; a lit chip pressed again gives the column back; the
 // card form stands in a dock of its own and keeps a new card's draft;
 // Browse's results are one tab stop walked with ↑/↓ and ticked on Space.
-const chip = re => $$('.chip-row button').find(b => re.test(b.textContent))
+const chip = re => $$('.chip-row button, .deck-identity__acts button').find(b => re.test(b.textContent))
 function formApi() {
   deckApi(CARDS)
   const answer = apiFetch.getMockImplementation()
@@ -443,7 +445,7 @@ describe('the column\'s doors (plan 123, P18)', () => {
     const add = () => chip(/ajouter|add/i)
     await userEvent.click(add())
     await settle(300)
-    const dock = $('.desk-deck > .desk-side .desk-cardform')
+    const dock = $('.desk-deck__slot .desk-cardform')
     expect(dock).not.toBeNull()
     expect(dock.querySelector('h2').textContent).toMatch(/nouvelle carte|new card/i)
     expect(dock.querySelector('.form__label')).toBeNull()

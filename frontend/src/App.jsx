@@ -54,7 +54,6 @@ import KanjiScreen from './screens/KanjiScreen'
 import StatsScreen from './screens/StatsScreen'
 import DictionaryScreen from './screens/DictionaryScreen'
 import DecksScreen      from './screens/DecksScreen'
-import DeckDetailScreen from './screens/DeckDetailScreen'
 import LibraryScreen    from './screens/LibraryScreen'
 import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
@@ -597,7 +596,11 @@ export default function App() {
                 the deck stands beside it; on a phone it is PublicDeckScreen
                 (screens/LibraryScreen.jsx decides). */}
             <Route path="/learn/decks/library/:deck_id" element={<LibraryScreen session={session} />} />
-            <Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={session} />} />
+            {/* The shelf's screen for both, as the library's: on the desk
+                the shelf stays and the deck stands beside it (plan 154);
+                on a phone it is DeckDetailScreen (screens/DecksScreen.jsx
+                decides). */}
+            <Route path="/learn/decks/:deck_id" element={<DecksScreen session={session} />} />
             <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
             <Route path="/practice"             element={<PracticeScreen />} />
             {/* No /:sectionId segment: every generated paper has exactly

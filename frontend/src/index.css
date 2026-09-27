@@ -23444,22 +23444,44 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     color: var(--text-secondary);
   }
 
-  /* A deck's page (screens/DeckDetailScreen.jsx): its cards, and beside
-     them the deck's platforms (components/decks/DeckPlatforms), boarding
-     directly — or, while a card is being written, the form, beside the
-     list it adds to. */
+  /* A deck's page (screens/DeckDetailScreen.jsx), beside the shelf's
+     list since plan 154 (the owner's pick B, screens/DecksScreen): one
+     column -- the head with Add and the ride, the chips, the slot, and
+     the cards. The slot holds the deck's platforms
+     (components/decks/DeckPlatforms), boarding directly, or while one
+     is open the card form, Browse or More, over the cards they add to.
+     It was the page's second column (plans 114-123) until a list and a
+     page left no room for a third. */
   .desk-deck {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
-    align-items: start;
-    column-gap: var(--sp-6);
-  }
-  .desk-deck__main {
     display: flex;
     flex-direction: column;
     gap: var(--sp-5);
     min-width: 0;
   }
+  .desk-deck__slot {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  /* The phone's form spaces itself from the list under it; in the slot
+     the page's own gap does. */
+  .desk-deck__slot .deckdetail-form { margin-bottom: 0; }
+  /* Add and the ride in the head, where the phone's ▶ Study stands;
+     on the narrow desk's page they take a line of their own under the
+     name rather than crush it, still at the head's right. */
+  .desk-deck > .deck-identity { flex-wrap: wrap; }
+  .desk-deck .deck-identity__names { min-width: calc(var(--desk-side-w) / 2); }
+  .deck-identity__acts {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-inline-start: auto;
+  }
+  /* The shelf's two doors at the foot of its list (plan 154): a set
+     sharing the column's width, as the phone's pair shares the page. */
+  .desk-split__list > .decks-doors { margin-block-start: var(--sp-5); }
+  .desk-split__list > .decks-doors > * { flex: 1 1 0; }
   .desk-deck__study {
     display: flex;
     flex-direction: column;
@@ -23485,19 +23507,20 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      type in (plan 123): a place to start from, not a control, so no
      ring -- the next Tab rings the ✕. */
   .desk-dock__head > h2:focus-visible { outline: none; }
-  /* Browse in the deck's side (plan 115, BrowseCardsDock): the result
-     row stacks the way it does on a phone — 13.5rem of headword and a
-     meaning do not share 360px beside a checkbox. */
-  .desk-side .browse-result-row {
+  /* Browse in the deck's slot (plan 115, BrowseCardsDock; in the page
+     beside the shelf since plan 154): the result row stacks the way it
+     does on a phone — 13.5rem of headword and a meaning do not share a
+     narrow desk's page beside a checkbox. */
+  .desk-deck__slot .browse-result-row {
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: start;
   }
-  .desk-side .browse-result-row__level {
+  .desk-deck__slot .browse-result-row__level {
     grid-column: 3;
     grid-row: 1;
   }
-  .desk-side .browse-result-row__meaning,
-  .desk-side .browse-result-row__tag { grid-column: 2 / -1; }
+  .desk-deck__slot .browse-result-row__meaning,
+  .desk-deck__slot .browse-result-row__tag { grid-column: 2 / -1; }
   .desk-deck__cap {
     margin: 0;
     font-family: var(--font-display);
@@ -23685,8 +23708,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   /* In a station's split (below) the platforms are a list beside a
      list: one to a row, the whole page wide, their figures at the
      row's end. */
-  .desk-split__page > .platform-grid,
-  .desk-deck__study > .platform-grid { grid-template-columns: minmax(0, 1fr); }
+  .desk-split__page > .platform-grid { grid-template-columns: minmax(0, 1fr); }
+  /* A deck's platforms across its page (plan 154), as many as a run's
+     column fits: one on the narrow desk, two or three wider. */
+  .desk-deck__study > .platform-grid { grid-template-columns: repeat(auto-fill, minmax(var(--desk-run-col-min), 1fr)); }
   .tier-picker > .platform-grid,
   .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   /* A line's split, filled (plan 137): the page's grid shares the

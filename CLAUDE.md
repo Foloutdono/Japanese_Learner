@@ -882,7 +882,21 @@ runtime purpose. Two consequences worth knowing:
   `tests/test_lookup_precision.py`, `tests/test_furigana_context.py`,
   `tests/test_placement_report.py` and `tests/test_onboarding_profile.py`;
   `docs/vocab-deck-review.md`).
-  When starting a new wave, begin at **154** or higher, and check
+  **154** is the shelf beside the open deck on the desk (the owner's
+  pick B of four layouts drawn on the canvas "Tsuji — the shelf (教材)
+  layout"): /learn/decks and /learn/decks/:deck_id are one screen on the
+  desk, the learner's decks a list (the console, the rows as links that
+  replace, the two doors at its foot) beside the open deck's page, the
+  bare shelf opening on its first deck; the deck's page one column, Add
+  and the ride in its head -- the deck's lanes of the day's queue as
+  the one filled action, the run's way out coming back to the deck --
+  and its platforms in a slot over its cards, the form, Browse or More
+  taking the slot (cited in `screens/DecksScreen.jsx`,
+  `screens/DeckDetailScreen.jsx`, `screens/TodayRun.jsx`, `App.jsx`,
+  `src/decks.desktop.test.jsx`, `src/shelf.desktop.test.jsx`,
+  `src/links.desktop.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk"; `docs/design/desk/README.md`).
+  When starting a new wave, begin at **155** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
