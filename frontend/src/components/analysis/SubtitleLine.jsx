@@ -115,6 +115,7 @@ function useSung(analysis, clock, playing, tick, lineRef) {
     }
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     let frame = 0
+    let first = 0
     const read = () => {
       const at = sungAt(times, clock())
       setIndex(at ? at.index : null)
@@ -126,8 +127,14 @@ function useSung(analysis, clock, playing, tick, lineRef) {
       }
       if (playing) frame = requestAnimationFrame(read)
     }
-    frame = requestAnimationFrame(read)
-    return () => cancelAnimationFrame(frame)
+    // The first read on a timer, not a frame: a browser gives no frames
+    // to a page it is not drawing, and a paused clock moved by a seek
+    // must still be read. Frames carry the sweep only while it plays.
+    first = setTimeout(read, 0)
+    return () => {
+      clearTimeout(first)
+      cancelAnimationFrame(frame)
+    }
   }, [times, clock, playing, tick, lineRef])
   // A line with no clock (a typed Passage, the video gone) is never sung.
   return times ? index : null

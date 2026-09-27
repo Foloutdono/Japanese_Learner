@@ -298,8 +298,7 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     const toks = () => $$('.anl-subs__line .tok')
     expect($('.tok-line--sung')).toBeNull()
     player.last.onTimeUpdate(37.1)
-    await settle(60)
-    expect($('.anl-subs__line.tok-line--sung')).not.toBeNull()
+    await expect.poll(() => $('.anl-subs__line.tok-line--sung')).not.toBeNull()
     expect(toks()[0].classList.contains('tok--said')).toBe(true)
     expect(toks()[1].classList.contains('tok--saying')).toBe(true)
     expect(toks()[1].style.getPropertyValue('--said')).toBe('20%')
@@ -310,13 +309,11 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     expect(getComputedStyle(toks()[2]).borderBottomStyle).toBe('solid')
     // The next line is read out in its turn...
     player.last.onTimeUpdate(40.5)
-    await settle(60)
+    await expect.poll(() => $('.anl-subs__line .tok--saying')?.textContent).toContain('駅')
     expect($('.anl-subs__count').textContent).toContain('2 / 2')
-    expect($('.anl-subs__line .tok--saying')).not.toBeNull()
     // ...and past the last one's end, the line reads plain again.
     player.last.onTimeUpdate(44.5)
-    await settle(60)
-    expect($('.tok-line--sung')).toBeNull()
+    await expect.poll(() => $('.tok-line--sung')).toBeNull()
     expect($$('.anl-subs__line .tok[style]').length).toBe(0)
   })
 
@@ -327,13 +324,11 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     }
     await openVideo()
     player.last.onTimeUpdate(36.5)
-    await settle(60)
     // Before its first word the line waits, every word to come.
-    expect($('.tok-line--sung')).not.toBeNull()
+    await expect.poll(() => $('.tok-line--sung')).not.toBeNull()
     expect($$('.anl-subs__line .tok--said, .anl-subs__line .tok--saying').length).toBe(0)
     player.last.onTimeUpdate(38.1)
-    await settle(60)
-    expect($$('.anl-subs__line .tok')[2].classList.contains('tok--saying')).toBe(true)
+    await expect.poll(() => $$('.anl-subs__line .tok')[2].classList.contains('tok--saying')).toBe(true)
   })
 
   it('walks the speed and folds the video away without unmounting it', async () => {
