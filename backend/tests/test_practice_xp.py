@@ -15,6 +15,7 @@ from core.auth import DEV_USER_ID
 from core.db import db_conn
 from core.srs_instance import srs
 from routes import dictation as dictation_route
+from routes import reading
 from tests.test_comprehension import _reply, MASHITA
 
 
@@ -131,3 +132,50 @@ def test_a_submitted_comprehension_exercise_pays_per_question(client, clean_ledg
     assert body["score"] == len(questions) - 1
     assert body["xp_earned"] == 7 * (len(questions) - 1) + 1
     assert _lifetime(client) == before + body["xp_earned"]
+
+
+def _paper(n: int, level: str = "N5") -> dict:
+    return {
+        "level": level, "text": "駅で会いました。", "translation": "x",
+        "questions": [{"question": "q", "options": ["a", "b", "c", "d"], "correct": 0}] * n,
+        "answers": [0] * n,
+    }
+
+
+def test_a_padded_comprehension_paper_pays_no_more_than_its_level_asks(client, clean_ledger):
+    """The questions come back from the client, so the list is the
+    client's to lengthen: a thousand self-answered questions scored a
+    thousand correct answers and paid 7,000 XP in one request. The
+    score still counts every question sent; the fare stops at the number
+    the level's exercise holds."""
+    before = _lifetime(client)
+    r = client.post("/api/reading/comprehension/result", json=_paper(1000))
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["score"] == 1000
+    assert body["xp_earned"] == 7 * reading.COMPREHENSION_SPECS["N5"]["questions"]
+    assert _lifetime(client) == before + body["xp_earned"]
+
+
+def test_a_comprehension_level_it_does_not_know_pays_the_default_paper(client, clean_ledger):
+    r = client.post("/api/reading/comprehension/result", json=_paper(50, level="N0"))
+    assert r.status_code == 200, r.text
+    assert r.json()["xp_earned"] == 7 * reading.DEFAULT_COMPREHENSION_SPEC["questions"]
+
+
+def test_a_malformed_comprehension_question_is_refused_before_anything_is_written(client, clean_ledger):
+    """It used to be a KeyError building the response -- a 500 after the
+    log row was committed and the fare paid."""
+    paper = _paper(2)
+    paper["questions"] = [paper["questions"][0], {"options": ["a", "b", "c", "d"], "correct": 0}]
+    before = _lifetime(client)
+    r = client.post("/api/reading/comprehension/result", json=paper)
+    assert r.status_code == 400, r.text
+    assert _lifetime(client) == before
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM comprehension_log WHERE user_id = %s", (DEV_USER_ID,))
+            assert cur.fetchone()[0] == 0
+    finally:
+        conn.close()
