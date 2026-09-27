@@ -101,9 +101,10 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
 
   return (
     <div className="tier-picker">
-      {/* Tier size — the canvas's segmented control, full width. */}
+      {/* Tier size — the canvas's segmented control, full width. Its
+          figures say what it is, so it prints no caption; the name is
+          the switch's label for a screen reader. */}
       <div className="tier-picker__size">
-        <span className="cap">{t.tierSizeLabel ?? 'Tier size'}</span>
         <Seg
           full
           label={t.tierSizeLabel ?? 'Tier size'}
