@@ -21,7 +21,7 @@ vi.mock('../../lib/youtubePlayer', () => ({
 const { VideoPlayer } = await import('./VideoPlayer')
 
 function makePlayer() {
-  const live = { volume: 100, muted: false, time: 0 }
+  const live = { volume: 100, muted: false, time: 0, duration: 0 }
   return {
     live,
     setVolume: vi.fn(v => { live.volume = v }),
@@ -30,6 +30,7 @@ function makePlayer() {
     unMute: vi.fn(() => { live.muted = false }),
     isMuted: () => live.muted,
     getCurrentTime: () => live.time,
+    getDuration: () => live.duration,
     seekTo: vi.fn(),
     playVideo: vi.fn(),
     pauseVideo: vi.fn(),
@@ -130,5 +131,23 @@ describe('VideoPlayer sound', () => {
 
     expect(second).toHaveBeenCalledWith(12)
     expect(first).not.toHaveBeenCalled()
+  })
+})
+
+describe('VideoPlayer length', () => {
+  // The analyser's bar runs from 0 to the video's length, so its clock
+  // prints what YouTube's own bar does. The player knows it only once
+  // it has the video's metadata: nothing is told before that, and each
+  // whole second of it is told once.
+  it('reports the video’s length once the player knows it', async () => {
+    const onDurationChange = vi.fn()
+    await mount({ onDurationChange })
+    await tick()
+    expect(onDurationChange).not.toHaveBeenCalled()
+    fake.player.live.duration = 247.35
+    await tick()
+    await tick()
+    expect(onDurationChange).toHaveBeenCalledTimes(1)
+    expect(onDurationChange).toHaveBeenCalledWith(247)
   })
 })
