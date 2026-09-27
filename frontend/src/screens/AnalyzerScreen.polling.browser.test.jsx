@@ -298,7 +298,8 @@ describe('AnalyzerScreen polling', () => {
     apiJson.mockResolvedValue({ status: 'generating' })
     const { encodeGrabPayload } = await import('../lib/captionGrab')
     const xml = '<transcript><text start="1.5" dur="2">猫が好き</text></transcript>'
-    window.location.hash = '#grab=' + await encodeGrabPayload('dQw4w9WgXcQ', xml)
+    const asr = '<timedtext format="3"><body><p t="1500" d="2000"><s>ねこ</s><s t="400">が</s><s t="700">好き</s></p></body></timedtext>'
+    window.location.hash = '#grab=' + await encodeGrabPayload('dQw4w9WgXcQ', { manual: xml, asr })
     try {
       const screen = await render(
         <LangProvider>
@@ -316,6 +317,8 @@ describe('AnalyzerScreen polling', () => {
       expect(sent).toContain('WEBVTT')
       expect(sent).toContain('猫が好き')
       expect(formData.get('url')).toContain('dQw4w9WgXcQ')
+      // The recognised track rides beside it, its words timed.
+      expect(await formData.get('timing').text()).toContain('ねこ<00:00:01.900>が<00:00:02.200>好き')
 
       // Boarded onto the video platform with no card click…
       expect(screen.container.querySelector('#anl-panel-video')).not.toBeNull()

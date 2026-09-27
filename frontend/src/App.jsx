@@ -54,7 +54,6 @@ import KanjiScreen from './screens/KanjiScreen'
 import StatsScreen from './screens/StatsScreen'
 import DictionaryScreen from './screens/DictionaryScreen'
 import DecksScreen      from './screens/DecksScreen'
-import DeckDetailScreen from './screens/DeckDetailScreen'
 import LibraryScreen    from './screens/LibraryScreen'
 import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
@@ -280,7 +279,7 @@ export default function App() {
   // flag is only the button's own "working on it" — the session
   // arrives through the auth listener like any other.
   const [boarding, setBoarding] = useState(false)
-  // 机 (plan 154): the learner who pressed Board on this load is on the
+  // 机 (plan 155): the learner who pressed Board on this load is on the
   // way into the boarding, so the wait before its first question keeps
   // the column the Welcome and the boarding both stand in
   // (AppLoading's `frame`) rather than dropping to the boot screen and
@@ -620,7 +619,11 @@ export default function App() {
                 the deck stands beside it; on a phone it is PublicDeckScreen
                 (screens/LibraryScreen.jsx decides). */}
             <Route path="/learn/decks/library/:deck_id" element={<LibraryScreen session={session} />} />
-            <Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={session} />} />
+            {/* The shelf's screen for both, as the library's: on the desk
+                the shelf stays and the deck stands beside it (plan 154);
+                on a phone it is DeckDetailScreen (screens/DecksScreen.jsx
+                decides). */}
+            <Route path="/learn/decks/:deck_id" element={<DecksScreen session={session} />} />
             <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
             <Route path="/practice"             element={<PracticeScreen />} />
             {/* No /:sectionId segment: every generated paper has exactly

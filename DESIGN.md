@@ -1169,7 +1169,12 @@ as the rail it arrives at.
   frequency tiers beside the open one's platforms, figured from the stats
   route each run opens on, the library's shelf beside the open deck's page
   (the shelf keeping its search and its place), and a deck's platform screen
-  gives way to the deck's page. A long list scrolls in its own column; the
+  gives way to the deck's page. Since plan 154 (the owner's pick B of four
+  drawn layouts, the canvas "Tsuji — the shelf (教材) layout") the
+  learner's own shelf does the same: its decks a list beside the open
+  deck's page, the bare shelf opening on its first deck, another deck
+  swapping the page in place, the shelf's two doors at the list's foot.
+  A long list scrolls in its own column; the
   stops are one tab stop, walked with ↑/↓. Every row of the lists above is
   a link to what it opens (plan 117), the exam review's question included,
   so it opens in a new tab as well as beside the list — and it wears the
@@ -1391,7 +1396,7 @@ as the rail it arrives at.
   on the page is taken by the intake that reads it. Under the desk it is
   one line to paste into over a row per passage, the video and photo
   intakes opening as sheets.
-  A deck's Browse and More open in the deck page's side, a
+  A deck's Browse and More open in the deck page's slot, a
   gate lesson's rival in the run's side, the grab's walkthrough in the
   intake's place, a kanji's readings in the entry's own place, the iOS install
   steps in the settings page (plan 120). A panel that takes a column's
@@ -1430,10 +1435,30 @@ as the rail it arrives at.
   to>` when it is a place, which is how the bar can tell. A run keeps its
   pill: it has no rail.
 - **`/` is the dictionary's search from anywhere the rail is**, and the
-  Dictionary gate prints the key. A deck's page is its cards beside its
-  platforms (or the form, while a card is written), and a new deck is a
-  dialog over the shelf that ends on the new deck's page, its first card's
-  form open (plan 123).
+  Dictionary gate prints the key. The shelf's list (plan 154) is the
+  index field over the types as glyph chips with their counts, a row per
+  deck (its glyph, its name, its cards and whose it is, what it is due),
+  the open one on the card's surface with its type's rail, and the two
+  doors at its foot. The deck's page, past a hairline, is one column: its
+  head (the roundel, the type and the count as a caption, the name, Edit
+  — the selection — and More); its cards as four figures in a hairline
+  lattice, due, new, learning and mastered, each card's `state` from the
+  server, four across or two by two, never three and one; its modes as
+  cards, each with what the day's queue holds for it; its first six cards
+  as a table on the page's ground, each with its state, and the way to all
+  of them; and at the foot Add cards beside the one filled action — the
+  deck's lanes of the day's queue ("Réviser 12 cartes"), or, with nothing
+  due, its first mode. The card form, Browse and More take the modes'
+  place (it was the page's second column until the shelf stood beside
+  it). Both columns are the window's height and nothing leaves it: the
+  list's rows scroll between its console and its doors, the page's
+  cards between its head and its foot, so the ride is always on the
+  screen. A page too narrow or too short for the mode cards (measured,
+  `useBoxSize`, since the desk's sheet answers one query) sets its modes
+  as a row of chips over the foot; a narrow one also sets Edit as its
+  pencil, Add as its short word and a card's reading under its word. A
+  new deck is a dialog over the shelf that ends on the new deck's page,
+  its first card's form open (plan 123).
 - **A sheet is a dialog.** The bottom edge is where a thumb is; on a
   computer it is a long way from the pointer. The same panel is set in
   the middle of the screen — every corner, no handle, a fade. Only the
@@ -1512,7 +1537,7 @@ as the rail it arrives at.
   own number, N5 to 5 and the kana stop to 0), and Esc does nothing — the
   way out of the boarding signs the guest out. On the first ride the
   column is the card's entry, docked by the flip (plan 122).
-- **First contact is finished, not redrawn** (plan 154, owner-directed:
+- **First contact is finished, not redrawn** (plan 155, owner-directed:
   "keep this idea, improve it the most you can, and don't forget the
   transitions"). The drawing above stands; what changed is that it holds
   still where it should and moves where it should:

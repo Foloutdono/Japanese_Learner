@@ -293,12 +293,15 @@ export function useAnalyzerSession(session) {
     }
   }
 
-  async function startVideoFromFile(file, { url, start, end }) {
+  async function startVideoFromFile(file, { url, start, end, timing }) {
     if (!file) return
     const run = beginRun()
     try {
       const formData = new FormData()
       formData.append('file', file)
+      // The grab's recognised track, the clock the lines' words are
+      // read out on (backend/study/word_timing.py). Never the lines.
+      if (timing) formData.append('timing', timing)
       // Same rule as the JSON ingest: an absent bound is absent, not 0.
       if (start != null) formData.append('start', String(start))
       if (end != null) formData.append('end', String(end))

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { formatTimecode } from '../../lib/timecode'
 import { PlusIcon, CheckIcon } from '../ui/Icons'
 
@@ -30,42 +30,64 @@ import { PlusIcon, CheckIcon } from '../ui/Icons'
 
 export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChange = true, kept, onKeep }) {
   const lineRef = useRef(null)
-  const activeRef = useRef(null)
   const stopRefs = useRef({})
 
-  // Playback moves the active stop without a click, so the line has to
-  // follow -- INSIDE ITS OWN BOX, and nowhere else.
+  // A stop the pointer just pressed is under the pointer already: the
+  // line does not move it out from under the learner.
+  const pressedRef = useRef(false)
+
+  // The current stop sits in the middle of the rail (2026-09-27, the
+  // owner's ask): the sentences before it and after it both in view, as
+  // far as the line's two ends allow -- the browser clamps the scroll,
+  // so the first stops and the last sit where they fall.
   //
-  // This used to be one `el.scrollIntoView({ block: 'nearest' })`, and
-  // 'nearest' is honest about the AXIS but not about the SCROLLER:
-  // the call walks every scrollable ancestor up to the document, so
-  // after scrolling the rail it also scrolled the PAGE to bring the
-  // stop into the viewport. Below the 1100px split the rail stacks
-  // under the stage, which put the video at the top of what the page
-  // scrolled away -- every new cue took the thing being watched out of
-  // frame, four times a minute, for the whole track.
-  //
-  // So the 'nearest' adjustment is computed here and applied to the
-  // rail's own scroller (.anl-line carries overflow-y: auto at every
-  // width). If it does not overflow there is nothing to do, and the
-  // window is left exactly where the learner put it -- which is the
-  // whole point: the line follows the clock, the page follows nobody.
-  useEffect(() => {
-    if (!scrollOnChange) return
-    const el = activeRef.current
+  // INSIDE ITS OWN BOX, and nowhere else. This used to be one
+  // `el.scrollIntoView({ block: 'nearest' })`, and that call walks
+  // every scrollable ancestor up to the document: after scrolling the
+  // rail it also scrolled the PAGE to bring the stop into the viewport,
+  // taking the video being watched out of frame four times a minute.
+  // So the offset is computed here and applied to the rail's own
+  // scroller (.anl-line carries overflow-y: auto); the window is left
+  // exactly where the learner put it.
+  const center = useCallback((behavior) => {
     const box = lineRef.current
-    if (!el || !box) return
+    const el = box?.querySelector('.anl-stop[aria-current="true"]')
+    if (!el) return
     const stop = el.getBoundingClientRect()
     const rail = box.getBoundingClientRect()
-    // Above the top edge scrolls up, below the bottom edge scrolls
-    // down, and a stop already inside the box does not move at all.
-    const delta = stop.top < rail.top
-      ? stop.top - rail.top
-      : (stop.bottom > rail.bottom ? stop.bottom - rail.bottom : 0)
-    if (!delta) return
-    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    box.scrollTo({ top: box.scrollTop + delta, behavior: reduced ? 'auto' : 'smooth' })
-  }, [activeIndex, scrollOnChange])
+    const delta = (stop.top + stop.height / 2) - (rail.top + rail.height / 2)
+    if (Math.abs(delta) < 1) return
+    box.scrollTo({ top: box.scrollTop + delta, behavior })
+  }, [])
+  const smooth = () =>
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+
+  useEffect(() => {
+    if (activeIndex < 0) return
+    if (pressedRef.current) {
+      pressedRef.current = false
+      return
+    }
+    if (scrollOnChange) center(smooth())
+  }, [activeIndex, scrollOnChange, center])
+
+  // The rail's height is not its own: on the desk the grammar's box
+  // under it comes and goes with the sentence (none for a sentence with
+  // no construction), and the rail takes the column or gives half of it
+  // back. A stop centred in the old height sat at the new one's edge,
+  // or past it. So a new height centres the stop again.
+  useEffect(() => {
+    const box = lineRef.current
+    if (!box || typeof ResizeObserver === 'undefined') return
+    let height = box.clientHeight
+    const observer = new ResizeObserver(() => {
+      if (box.clientHeight === height) return
+      height = box.clientHeight
+      if (scrollOnChange) center(smooth())
+    })
+    observer.observe(box)
+    return () => observer.disconnect()
+  }, [scrollOnChange, center])
 
   // Arrow keys move along the line AND select, which is what a route
   // diagram means: moving to a stop is arriving at it. Home/End are the
@@ -89,7 +111,9 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
     // both moves along the line and advances the Token stepper.
     e.stopPropagation()
     onSelect(next)
-    stopRefs.current[next]?.focus()
+    // The line centres the stop itself; the browser's own scroll on
+    // focus would walk every ancestor up to the page.
+    stopRefs.current[next]?.focus({ preventScroll: true })
   }
 
   return (
@@ -123,10 +147,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
               // breakdown -- this component was originally written
               // without it and paid exactly that cost.
               tabIndex={active ? 0 : -1}
-              ref={el => {
-                stopRefs.current[i] = el
-                if (active) activeRef.current = el
-              }}
+              ref={el => { stopRefs.current[i] = el }}
               type="button"
               // A control, not a div with an onClick -- which is what the
               // transcript this replaces was, and why it was unreachable
@@ -151,7 +172,11 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
                 i === 0 ? 'anl-stop--first' : '',
                 i === sentences.length - 1 ? 'anl-stop--last' : '',
               ].filter(Boolean).join(' ')}
-              onClick={() => onSelect(i)}
+              onClick={e => {
+                // detail is 0 for a click made by the keyboard.
+                if (e.detail > 0 && !active) pressedRef.current = true
+                onSelect(i)
+              }}
             >
               {/* Drawn per stop so the ends can be capped and the line
                   stays unbroken through the gap between them. */}

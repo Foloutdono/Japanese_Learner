@@ -142,7 +142,7 @@ export default function Welcome({ onBoard, onSignIn, boarding = false, authMode 
 // the promise, Board and the band a rung to the left and fading, a beat
 // apart -- and the sign-in steps out of the column, which stays: the
 // masthead stands on the same pixel through the wait (AppLoading's
-// `frame`) and the boarding's line is laid in the same sumi (plan 154).
+// `frame`) and the boarding's line is laid in the same sumi (plan 155).
 // A pass the office could not issue brings it all back, on Sign up.
 function DeskWelcome({ onBoard, boarding, authMode, t }) {
   return (
@@ -160,7 +160,7 @@ function DeskWelcome({ onBoard, boarding, authMode, t }) {
           <EnterKey onEnter={onBoard} disabled={boarding} />
         </div>
         {/* Decoration: the cards say nothing the tagline does not.
-            One lane on the desk (plan 154): two were a wall of
+            One lane on the desk (plan 155): two were a wall of
             twenty-four cards under a two-line promise. It takes both
             lanes' cards in turn, so every line still passes; two
             copies of its twelve (~2000px) are what the loop needs, as

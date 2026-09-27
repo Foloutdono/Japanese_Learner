@@ -116,7 +116,7 @@ describe('first contact at 1440 (P10)', () => {
   it('centres the questions in the paper the line leaves', async () => {
     await board()
     await pastName()
-    // Once the question's car has landed (the desk's pull, plan 154).
+    // Once the question's car has landed (the desk's pull, plan 155).
     await settle(600)
     expect(Math.abs(mid(box(inCar('.brd__q'))) - (360 + (bodyW() - 360) / 2))).toBeLessThan(1.5)
     expect(Math.round(box($('.desk-brd__side')).left)).toBe(0)

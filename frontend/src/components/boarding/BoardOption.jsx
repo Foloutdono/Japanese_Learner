@@ -8,7 +8,7 @@ import { useDesk } from '../../hooks/useDesk'
 // the motion sheet asks; the parent owns which one is on.
 //
 // `pick` is the desk's (plan 122): the digit that picks this row
-// (hooks/useBoardKeys), named and printed -- since plan 154 in the
+// (hooks/useBoardKeys), named and printed -- since plan 155 in the
 // check's own slot (PickMark).
 export function BoardOption({ on = false, onClick, icon = null, code = null, label, tag = null, desc = null, pick = null, ...rest }) {
   const desk = useDesk()
@@ -31,7 +31,7 @@ export function BoardOption({ on = false, onClick, icon = null, code = null, lab
   )
 }
 
-// ── 机 — the key, and then the check, in one slot (plan 154) ─────
+// ── 机 — the key, and then the check, in one slot (plan 155) ─────
 // Every answer on the desk printed its digit AND drew its check: a row
 // carried a keycap beside an empty ring, a tile its keycap in whichever
 // corner its own layout left free (top left on a rhythm, top right on a

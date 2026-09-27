@@ -28,7 +28,7 @@ import { useCountUp, stillPreferred } from './countUp'
 // once the plan is built -- the screen that issued it folds away on the
 // desk, and "Enter the station" is on the plan (PlanStep's `last`).
 //
-// ── 仕上げ — the line as one rail, and your train on it (plan 154) ──
+// ── 仕上げ — the line as one rail, and your train on it (plan 155) ──
 // The line was drawn a half-row at a time, each stop lighting its own
 // wash and ring, so a Continue made the lit stop jump: one row went
 // dark and another came on in the same frame, while the paper beside

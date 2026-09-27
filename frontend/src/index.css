@@ -1934,6 +1934,20 @@
    theme (3.97:1 measured by the contrast guard); the focused word's
    reading takes the primary ink, which the tint already raises. */
 .tok--on .tok__furi { color: var(--text-primary); }
+/* 字幕の流れ — the words lit as they are said (SubtitleLine). While the
+   video is inside the line, the words to come are faded, the word being
+   said fills from its first letter to its last (--said, written each
+   frame), and the words said stand whole. A mask, not an ink: the tint
+   is the focused word's and a rule's, the rule under the word is the
+   SRS's, and every word keeps its own colour -- the mask only takes
+   some of it away. The rule under the word is the border, outside the
+   masked children, so the state reads at every moment. */
+.tok-line--sung .tok { --said: 0%; }
+.tok-line--sung .tok--said { --said: 100%; }
+.tok-line--sung .tok__word,
+.tok-line--sung .tok__furi {
+  mask-image: linear-gradient(to right, #000 var(--said), rgb(0 0 0 / 40%) var(--said));
+}
 /* The furigana dial: readings over everything, only over the words
    the SRS has not mastered, or none. */
 :is(.anl-subs, .anl-m__subs)[data-furigana="none"] .tok__furi { visibility: hidden; }
@@ -23444,27 +23458,369 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     color: var(--text-secondary);
   }
 
-  /* A deck's page (screens/DeckDetailScreen.jsx): its cards, and beside
-     them the deck's platforms (components/decks/DeckPlatforms), boarding
-     directly — or, while a card is being written, the form, beside the
-     list it adds to. */
-  .desk-deck {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
-    align-items: start;
-    column-gap: var(--sp-6);
+  /* ── 教材 on the desk: the shelf beside the open deck (plan 154) ──
+     The owner's pick B of four layouts drawn on the canvas "Tsuji — the
+     shelf (教材) layout" (screens/DecksScreen.jsx,
+     screens/DeckDetailScreen.jsx). The list: the index field over the
+     types as glyph chips with their counts, a row per deck, the two
+     doors at its foot. The page, past a hairline: the deck's head, its
+     four figures, its modes as cards, its first cards as a table, and
+     at its foot the way to add cards beside the one filled action. */
+  .shelf-console > .console__top {
+    border-bottom: 0;
+    border-top: 1px solid var(--surface-line);
   }
-  .desk-deck__main {
+  .shelf-console__n {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    opacity: 0.7;
+  }
+  /* The list takes the window's height and only its rows scroll, so
+     the console over them and the two doors under them stay on it. The
+     rows keep the column's gutter inside their own clip edge ("what a
+     scrolling column must not cut", above). */
+  .shelf-rows {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
-    gap: var(--sp-5);
+    gap: var(--sp-1);
+    min-height: 0;
+    margin: var(--sp-5) calc(-1 * var(--sp-2)) 0;
+    padding: var(--sp-2);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  .shelf-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--r-card);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .shelf-row:hover { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+  .shelf-row:focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
+  /* The open deck: the card's surface, its hairline, and its type's
+     rail down the left edge. */
+  .shelf-row--open,
+  .shelf-row--open:hover {
+    background: var(--surface);
+    box-shadow: inset 3px 0 0 var(--line-color), inset 0 0 0 1px var(--surface-line);
+  }
+  .shelf-row__roundel,
+  .dk-head__roundel {
+    font-family: var(--font-jp);
+    line-height: 1;
+    color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  }
+  .shelf-row__roundel { font-size: var(--fs-caption); }
+  .shelf-row__names {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--sp-1);
     min-width: 0;
   }
-  .desk-deck__study {
+  .shelf-row__name,
+  .shelf-row__sub {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .shelf-row__name {
+    font-family: var(--font-serif);
+    font-size: var(--fs-body);
+    font-weight: 500;
+  }
+  .shelf-row--open .shelf-row__name { font-weight: 600; }
+  .shelf-row__sub {
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .shelf-row__due,
+  .dk-mode__due,
+  .dk-fig__n {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .shelf-row__due,
+  .dk-mode__due {
+    font-size: var(--fs-body);
+    color: var(--state-due);
+  }
+  /* The shelf's two doors at the list's foot, sharing its width. */
+  .desk-split__list > .decks-doors { margin-block-start: var(--sp-5); }
+  .desk-split__list > .decks-doors > * { flex: 1 1 0; }
+
+  .desk-deck {
     display: flex;
     flex-direction: column;
+    gap: var(--sp-6);
+    height: 100%;
+    min-width: 0;
+  }
+  .desk-deck > :not(.dk-scroll) { flex: none; }
+  /* The page's one scroller: the modes (or the form, Browse or More)
+     and the cards. It takes no more than its content, so a short deck's
+     foot sits under its cards, and no more than the window leaves, so a
+     long one's foot is still on it. The gutter is the list's. */
+  .dk-scroll {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+    gap: var(--sp-6);
+    min-height: 0;
+    margin: calc(-1 * var(--sp-2));
+    padding: var(--sp-2);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  .dk-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+  }
+  .dk-head__roundel {
+    width: var(--sp-9);
+    height: var(--sp-9);
+    border-width: 2.5px;
+    font-size: var(--fs-title);
+  }
+  .dk-head__names {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--sp-2);
+    min-width: 0;
+  }
+  .dk-head__cap,
+  .dk-fig__cap,
+  .dk-card__state,
+  .dk-all {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .dk-head__cap {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dk-head__name {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: var(--fs-heading);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .dk-head > .chip { flex: none; }
+  /* The four figures: a hairline lattice of four, the deck's cards
+     partitioned by their state, each numeral in the state's ink. */
+  /* Four across, or two by two where four would crush their captions
+     -- never three and one: each cell's basis is a quarter of the row
+     until the row is narrower than a column and a half, then a half
+     (the flexbox switch, so no width is written here). */
+  .dk-figs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    background: var(--surface-line);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .dk-fig {
+    display: flex;
+    flex: 1 1 clamp(calc(25% - 1px), calc((var(--desk-side-w) * 1.5 - 100%) * 999), calc(50% - 1px));
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+    background: var(--surface);
+  }
+  .dk-fig__n { font-size: var(--fs-heading); }
+  .dk-fig--due .dk-fig__n { color: var(--state-due); }
+  .dk-fig--learning .dk-fig__n { color: var(--state-learning); }
+  .dk-fig--mastered .dk-fig__n { color: var(--state-mastered); }
+  .desk-deck__slot {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  /* The phone's form spaces itself from the list under it; in the slot
+     the page's own gap does. */
+  .desk-deck__slot .deckdetail-form { margin-bottom: 0; }
+  .dk-ways {
+    display: flex;
+    gap: var(--sp-3);
+    margin-block-end: var(--sp-4);
+  }
+  /* The deck's modes as cards, as many across as fit: three on a
+     window's width, two on the narrow desk. */
+  .dk-modes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(calc(var(--desk-side-w) / 2), 1fr));
     gap: var(--sp-4);
   }
+  .dk-mode {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+    font: inherit;
+    text-align: start;
+    color: var(--text-primary);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+  .dk-mode:hover,
+  .dk-mode:focus-visible {
+    filter: none;
+    box-shadow: inset 3px 0 0 var(--line-color);
+  }
+  .dk-mode:focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
+  .dk-mode__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .dk-mode__name {
+    font-family: var(--font-serif);
+    font-size: var(--fs-lead);
+  }
+  .dk-mode__desc {
+    font-size: var(--fs-sm);
+    line-height: 1.45;
+    color: var(--text-secondary);
+  }
+  /* The cards as a table on the page's own ground, a hairline between
+     rows: the word, its reading, its meaning, its state. */
+  /* One grid for the table, each row its subgrid, so the columns line
+     up down the table and a word or a reading is never broken. */
+  .dk-cards {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) max-content;
+    border-block: 1px solid var(--surface-line);
+  }
+  .dk-cards:has(.card-row__tick) { grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) max-content; }
+  .dk-card {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: center;
+    column-gap: var(--sp-5);
+    width: 100%;
+    padding: var(--sp-3) var(--sp-1);
+    font: inherit;
+    text-align: start;
+    color: var(--text-primary);
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-flat);
+  }
+  .dk-card + .dk-card { border-top: 1px solid var(--surface-line); }
+  button.dk-card { cursor: pointer; }
+  button.dk-card:hover {
+    filter: none;
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+  }
+  .dk-card--selected { background: color-mix(in srgb, var(--accent2) 8%, transparent); }
+  /* A word or a reading is never broken over two lines; one too long
+     for its column ends in an ellipsis rather than leave the page. */
+  .dk-card__jp,
+  .dk-card__kana {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dk-card__jp {
+    font-family: var(--font-serif);
+    font-size: var(--fs-lead);
+  }
+  .dk-card__kana {
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .dk-card__gloss {
+    font-size: var(--fs-body);
+    overflow-wrap: anywhere;
+  }
+  .dk-card__state { text-align: end; }
+  .dk-card__state--due { color: var(--state-due); }
+  .dk-card__state--learning { color: var(--state-learning); }
+  .dk-card__state--mastered { color: var(--state-mastered); }
+  /* On a narrow page a card's reading goes under its word, and its
+     meaning and state span the two lines (DeckDetailScreen's `narrow`).
+     Columns are counted from the end, so a selection's tick column
+     ahead of them moves nothing. */
+  .dk-cards--stacked { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) max-content; }
+  .dk-cards--stacked:has(.card-row__tick) { grid-template-columns: auto minmax(0, 1fr) minmax(0, 2fr) max-content; }
+  .dk-cards--stacked .dk-card { row-gap: var(--sp-1); }
+  .dk-cards--stacked .card-row__tick { grid-row: span 2; }
+  .dk-cards--stacked .dk-card__jp { grid-area: 1 / -4; }
+  .dk-cards--stacked .dk-card__kana { grid-area: 2 / -4; }
+  .dk-cards--stacked .dk-card__gloss { grid-area: 1 / -3 / span 2; }
+  .dk-cards--stacked .dk-card__state { grid-area: 1 / -2 / span 2; }
+  .dk-all {
+    align-self: flex-start;
+    margin-block-start: calc(var(--sp-3) - var(--sp-6));
+    padding: var(--sp-4) var(--sp-1);
+    color: var(--line-color);
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  /* The modes as a row of chips, where the page has no room for their
+     cards (DeckDetailScreen's `compact`). */
+  .dk-modeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+  .dk-modeline__n {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    color: var(--state-due);
+  }
+  .dk-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--sp-3);
+  }
+  .dk-foot > .chip { flex: none; }
+  /* The ride set as the chip beside it is, in tracked capitals. */
+  .dk-foot__go {
+    flex: none;
+    width: auto;
+    padding-inline: var(--sp-6);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+  }
+  /* The types' chips keep their own width, not the console's share. */
+  .shelf-console .console__chips .chip { flex: none; }
   /* A door opened in a column (components/chrome/DeskDock, plan 120):
      its cap and ✕ over the phone's own body — a deck's Browse and More,
      the analyser's grab tutorial — standing where the column's tenant
@@ -23485,19 +23841,20 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      type in (plan 123): a place to start from, not a control, so no
      ring -- the next Tab rings the ✕. */
   .desk-dock__head > h2:focus-visible { outline: none; }
-  /* Browse in the deck's side (plan 115, BrowseCardsDock): the result
-     row stacks the way it does on a phone — 13.5rem of headword and a
-     meaning do not share 360px beside a checkbox. */
-  .desk-side .browse-result-row {
+  /* Browse in the deck's slot (plan 115, BrowseCardsDock; in the page
+     beside the shelf since plan 154): the result row stacks the way it
+     does on a phone — 13.5rem of headword and a meaning do not share a
+     narrow desk's page beside a checkbox. */
+  .desk-deck__slot .browse-result-row {
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: start;
   }
-  .desk-side .browse-result-row__level {
+  .desk-deck__slot .browse-result-row__level {
     grid-column: 3;
     grid-row: 1;
   }
-  .desk-side .browse-result-row__meaning,
-  .desk-side .browse-result-row__tag { grid-column: 2 / -1; }
+  .desk-deck__slot .browse-result-row__meaning,
+  .desk-deck__slot .browse-result-row__tag { grid-column: 2 / -1; }
   .desk-deck__cap {
     margin: 0;
     font-family: var(--font-display);
@@ -23685,8 +24042,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   /* In a station's split (below) the platforms are a list beside a
      list: one to a row, the whole page wide, their figures at the
      row's end. */
-  .desk-split__page > .platform-grid,
-  .desk-deck__study > .platform-grid { grid-template-columns: minmax(0, 1fr); }
+  .desk-split__page > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .tier-picker > .platform-grid,
   .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   /* A line's split, filled (plan 137): the page's grid shares the
@@ -23830,9 +24186,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      wall: the phone's thumb-sized vertical padding comes in a rung. */
   .desk-split__page .platform-card__lead,
   .desk-split__page .platform-card__body,
-  .desk-split__page .platform-card__aside,
-  .desk-deck__study .platform-card__lead,
-  .desk-deck__study .platform-card__body { padding-block: var(--sp-5); }
+  .desk-split__page .platform-card__aside { padding-block: var(--sp-5); }
   /* The open radical in the index beside its lesson, and the family's
      door while the family stands in the list (plan 118): the same ring,
      each being a card with its own edge. */
@@ -23847,6 +24201,24 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      its author, its followers — so the shelf takes half the width, not
      a list's column, and the page the other half. */
   .desk-split--shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* The learner's own shelf beside the open deck (plan 154): the page
+     past a hairline the height of the split. */
+  .desk-split--decks > .desk-split__list {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 2 * var(--sp-6) + var(--sp-2) + var(--sp-4));
+    overflow: hidden;
+  }
+  .desk-split--decks > .desk-split__list > :not(.shelf-rows) { flex: none; }
+  /* The page, too, is the window's height and stays in it: its head and
+     its foot never scroll away, only what is between them (.dk-scroll). */
+  .desk-split--decks > .desk-split__page {
+    position: sticky;
+    top: var(--sp-6);
+    height: calc(100dvh - 2 * var(--sp-6));
+    border-inline-start: 1px solid var(--surface-line);
+    padding-inline-start: var(--sp-7);
+  }
   /* A shelf with nothing to open -- empty, or failed -- stands its one
      card across, not beside a blank half (plan 123). */
   .desk-split--shelf:has(> .desk-split__list > .empty):not(:has(> .desk-split__page > *)) { grid-template-columns: minmax(0, 1fr); }
@@ -24781,7 +25153,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-keys__item > .desk-kbd { color: var(--text-primary); }
   /* The boarding's answers carry their pick's digit in the slot their
      check is read from (components/boarding/BoardOption's PickMark,
-     plan 154): a row's trailing slot, a tile's or a station's top right
+     plan 155): a row's trailing slot, a tile's or a station's top right
      corner, where the rating tile keeps its key. The digit at rest; the
      answer picked, it turns over to the check in the pass's gold. The
      slot is the phone's check (.brd-opt__check), so a row's rhythm is
@@ -24881,7 +25253,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   /* The line: a stop per question, each a row of the column -- its dot
      on the rail down the dots' column, its name over its answer. Since
-     plan 154 the rail is one line and the lit stop one object running on
+     plan 155 the rail is one line and the lit stop one object running on
      it (components/boarding/DeskLine's useRoute, which measures the rows
      and hands the route its five lengths): the rail from the first dot
      to the last, the stretch ridden over it, the wash under the lit row
@@ -25182,7 +25554,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     animation: brd-shine 1100ms cubic-bezier(0.3, 0, 0.2, 1) 760ms both;
   }
   /* A step's width, set on its car so a leaving car keeps its own while
-     it pulls away: the card's for most questions (plan 154 widened the
+     it pulls away: the card's for most questions (plan 155 widened the
      lines and the hour from a column's, which left their floor a
      different width from every other), three of a run's columns for the
      six reasons, the canvas for the line of stations, two columns for
@@ -25293,7 +25665,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     cursor: pointer;
   }
   .desk-brd__back > .svg { width: 18px; height: 18px; }
-  /* ── the pull on the desk (plan 154) ──
+  /* ── the pull on the desk (plan 155) ──
      The phone's pull carries a car the frame's whole width in 260ms. On
      the desk that is some 1,200px of paper in a quarter of a second -- a
      smear across the window rather than a train leaving -- and the
@@ -25527,7 +25899,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      provider button's ghost clothes, so Board is the page's one filled
      action.
 
-     Plan 154's second round (owner: "the entry looks bad, make it
+     Plan 155's second round (owner: "the entry looks bad, make it
      simpler"): the sign-in was the paper's card set in the sumi -- a
      pale slab floating mid-column under a caption that repeated the
      link's own words -- beside two lanes of twenty-four cards. Now the
@@ -25613,7 +25985,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     animation: desk-brd-show 900ms ease-out 260ms backwards;
   }
   .desk-door .brd-roll__lane { animation-duration: 52s; }
-  /* ── first contact handed on (plan 154) ──
+  /* ── first contact handed on (plan 155) ──
      The Welcome's paper arrives in reading order -- the promise, Board,
      then the band -- and the column's sign-in a beat after its
      masthead. Board pressed (Welcome's `leaving`), the three leave the
@@ -25678,7 +26050,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   /* A pointer's answer to "is this one I can pick": the name field's
      edge (.brd-field, 1.5px of the pass's gold on the answer's own
      ground) and nothing else -- no wash, no lift, no brightness (plan
-     154, the owner: make the answers' hover like the name's, simpler).
+     155, the owner: make the answers' hover like the name's, simpler).
      A pick keeps its wash and its check, so the two never read alike;
      the focus ring's twin. The sheet's bare button:hover brightened a
      paper tile to a glaring cream and a picked one to yellow; the

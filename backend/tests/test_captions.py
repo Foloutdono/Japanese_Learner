@@ -85,6 +85,64 @@ class ParseTrackTests(unittest.TestCase):
         self.assertEqual(result[0]["text"], "テスト")
 
 
+class WordTimeTests(unittest.TestCase):
+    """A cue's `words`: [offset, seconds] where the file says when a word
+    is said -- VTT's karaoke stamps and ASS's \\k tags -- taken out of the
+    text and kept, the offset into the cue's clean text."""
+
+    def test_vtt_stamps_become_anchors_and_leave_the_text(self) -> None:
+        vtt = (
+            "WEBVTT\n\n"
+            "00:00:01.000 --> 00:00:04.000\n"
+            "今日<00:00:01.500>は<00:00:02.000>いい<00:00:02.600>天気\n"
+        )
+        [cue] = parse_track(vtt, "a.vtt")
+        self.assertEqual(cue["text"], "今日はいい天気")
+        self.assertEqual(cue["words"], [[2, 1.5], [3, 2.0], [5, 2.6]])
+
+    def test_a_stamp_before_a_spaced_word_anchors_the_word_not_the_space(self) -> None:
+        # yt-dlp's auto-captions: <t><c> word</c>
+        vtt = (
+            "WEBVTT\n\n"
+            "00:00:05.000 --> 00:00:07.000 align:start position:0%\n"
+            "<c>雨</c><00:00:05.400><c> が</c><00:00:05.900><c> 降る</c>\n"
+        )
+        [cue] = parse_track(vtt, "a.vtt")
+        self.assertEqual(cue["text"], "雨 が 降る")
+        self.assertEqual(cue["words"], [[2, 5.4], [4, 5.9]])
+
+    def test_a_cue_without_stamps_has_no_words(self) -> None:
+        [cue] = parse_track("WEBVTT\n\n00:00:01.000 --> 00:00:02.000\n雨\n", "a.vtt")
+        self.assertNotIn("words", cue)
+
+    def test_a_stamp_is_never_left_in_an_srt_line(self) -> None:
+        srt = "1\n00:00:01,000 --> 00:00:02,000\n雨<00:00:01.500>が\n"
+        [cue] = parse_track(srt, "a.srt")
+        self.assertEqual(cue["text"], "雨が")
+
+    def test_ass_karaoke_tags_time_each_syllable(self) -> None:
+        ass = (
+            "[Events]\n"
+            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
+            "Dialogue: 0,0:00:01.00,0:00:03.00,Default,,0,0,0,,"
+            "{\\k50}{\\k20}今{\\k30}日{\\an8\\kf40}は\n"
+        )
+        [cue] = parse_track(ass, "a.ass")
+        self.assertEqual(cue["text"], "今日は")
+        # 50cs of silence first: the first syllable starts at 1.5.
+        self.assertEqual(cue["words"], [[0, 1.5], [1, 1.7], [2, 2.0]])
+
+    def test_a_growing_rolling_window_keeps_both_halves_times(self) -> None:
+        vtt = (
+            "WEBVTT\n\n"
+            "00:00:01.000 --> 00:00:02.000\n今日<00:00:01.500>は\n\n"
+            "00:00:02.000 --> 00:00:03.000\n今日は いい<00:00:02.500>天気\n"
+        )
+        [cue] = parse_track(vtt, "a.vtt")
+        self.assertEqual(cue["text"], "今日は いい天気")
+        self.assertEqual(cue["words"], [[2, 1.5], [6, 2.5]])
+
+
 class ParseVideoIdTests(unittest.TestCase):
     """parse_video_id recognizes every YouTube URL shape we've seen and
     rejects everything else, without ever raising."""

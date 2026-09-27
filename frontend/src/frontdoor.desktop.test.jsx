@@ -413,7 +413,7 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     // Six reasons two to a row at 1100 -- three rows, not six.
     expect(rowsOf([...inCar('.brd__opts').children]).size).toBe(3)
     expect(Math.abs(mid(stage) - mid(q))).toBeLessThan(1.5)
-    // The floor at the card's width whatever the answers' (plan 154),
+    // The floor at the card's width whatever the answers' (plan 155),
     // on the question's middle.
     expect(Math.round(foot.width)).toBe(640)
     expect(Math.abs(mid(foot) - mid(q))).toBeLessThan(1.5)
@@ -555,7 +555,7 @@ describe('the front door on the desk (P10, plan 140)', () => {
     // The rail's masthead at its head; the paper keeps no second mark.
     expect(inSide('.desk-rail__glyph').textContent).toBe('辻')
     expect($('.brd-hero .auth-header__glyph')).toBeNull()
-    // Named plainly (plan 154): "Log in", not the link's own sentence.
+    // Named plainly (plan 155): "Log in", not the link's own sentence.
     expect([en.login, fr.login]).toContain(inSide('.desk-deck__cap').textContent)
     // Drawn in the column's material: no card of the paper's in the sumi,
     // on the column's middle, where it always stood (the owner's call).
@@ -700,7 +700,7 @@ describe('the digits at first contact (P12)', () => {
   })
 })
 
-// ── P13 — first contact, finished (plan 154) ──
+// ── P13 — first contact, finished (plan 155) ──
 // The owner's ask: keep the drawing and make it smooth. The way on
 // stands in one place on every question; the lit stop is a train that
 // runs down the line; each answer's key turns over to its check in one
@@ -713,7 +713,7 @@ const landed = () => settle(900)
 const centreY = r => (r.top + r.bottom) / 2
 const opacityOf = el => Number(getComputedStyle(el).opacity)
 
-describe('first contact, finished (P13, plan 154)', () => {
+describe('first contact, finished (P13, plan 155)', () => {
   it('stands the way on where it stood, on every question', async () => {
     await board()
     const floors = []
@@ -931,7 +931,7 @@ describe('first contact, finished (P13, plan 154)', () => {
   })
 })
 
-describe('the hover, simpler (P14, plan 154)', () => {
+describe('the hover, simpler (P14, plan 155)', () => {
   it('draws the name field\'s gold edge on an answer, and nothing else', async () => {
     await board()
     await settle(300)

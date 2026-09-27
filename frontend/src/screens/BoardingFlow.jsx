@@ -114,7 +114,7 @@ function clearStash() {
 }
 
 const PULL_MS = 260
-// 机 (plan 154): the desk's pull is a short one -- a rung sideways and a
+// 机 (plan 155): the desk's pull is a short one -- a rung sideways and a
 // fade, not the paper's whole width -- and the arriving car's answers
 // follow it in a beat apart (the 机 section of index.css, "the pull on
 // the desk"). The leaving car is kept until all of that has landed:

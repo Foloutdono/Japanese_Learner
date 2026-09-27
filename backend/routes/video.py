@@ -35,6 +35,7 @@ from study.captions import (
     proxy_configured, CaptionParseError, CaptionFetchError,
 )
 from study.cue_sentences import sentences_from_cues
+from study.word_timing import align_cues
 from study.sentences import MAX_SENTENCES
 # _analyze_sentence already bundles local + optional-deep + per-user
 # SRS state, and buying its deep tier shares phrase_analysis_cache --
@@ -222,7 +223,8 @@ def _fail_session(session_id: int, message: str) -> None:
 
 
 def _video_worker(session_id: int, source: str, source_ref: str, content: str | None,
-                   filename: str | None, window_start: float | None, window_end: float | None) -> None:
+                   filename: str | None, window_start: float | None, window_end: float | None,
+                   timing: str | None = None) -> None:
     """Runs off-request. Parses/fetches the Track, reconstructs
     Sentences, analyzes each with the LOCAL tier only (never a model --
     see docs/adr/0001), and materializes the result. Owns the job row
@@ -263,6 +265,16 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
         _fail_session(session_id, "Something went wrong reading this transcript. Please try again.")
         return
 
+    # The recognised track beside a hand-written one (the grab sends
+    # both): its word times lent to the lines it agrees with. Best
+    # effort -- a timing track that will not read costs the words their
+    # times, never the session.
+    if timing:
+        try:
+            cues = align_cues(cues, parse_track(timing, "timing.vtt"))
+        except Exception:
+            logger.warning("Word timing skipped for session %s", session_id, exc_info=True)
+
     all_sentences = sentences_from_cues(cues, window_start, window_end)
     truncated = max(0, len(all_sentences) - MAX_SENTENCES)
     kept = all_sentences[:MAX_SENTENCES]
@@ -284,6 +296,8 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
             }
         analysis["cue_start"] = s["cue_start"]
         analysis["cue_end"] = s["cue_end"]
+        if s.get("word_times"):
+            analysis["word_times"] = s["word_times"]
         analysis["local_rev"] = LOCAL_REV
         analyzed.append(analysis)
 
@@ -307,10 +321,11 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
 
 
 def _start_worker(session_id: int, source: str, source_ref: str, content: str | None,
-                   filename: str | None, window_start: float | None, window_end: float | None) -> None:
+                   filename: str | None, window_start: float | None, window_end: float | None,
+                   timing: str | None = None) -> None:
     threading.Thread(
         target=_video_worker,
-        args=(session_id, source, source_ref, content, filename, window_start, window_end),
+        args=(session_id, source, source_ref, content, filename, window_start, window_end, timing),
         name=f"video-session:{session_id}", daemon=True,
     ).start()
 
@@ -349,7 +364,8 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             declared = int(request.headers.get("content-length", ""))
         except ValueError:
             declared = None
-        if declared is not None and declared > _MAX_UPLOAD_BYTES + _MULTIPART_OVERHEAD_BYTES:
+        # Two files at most: the track and its timing.
+        if declared is not None and declared > 2 * _MAX_UPLOAD_BYTES + _MULTIPART_OVERHEAD_BYTES:
             raise HTTPException(status_code=413, detail="Subtitle file is too large")
         form = await request.form()
         upload = form.get("file")
@@ -362,6 +378,16 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             content = raw.decode("utf-8")
         except UnicodeDecodeError:
             raise HTTPException(status_code=400, detail="Subtitle file must be UTF-8 text")
+        # Optional: the recognised track of the same video, with a time
+        # on every word (the grab's srv3, as VTT). Never the lines
+        # studied -- only the clock they are read out on.
+        timing = None
+        timing_upload = form.get("timing")
+        if timing_upload is not None and hasattr(timing_upload, "read"):
+            raw_timing = await timing_upload.read(_MAX_UPLOAD_BYTES + 1)
+            if len(raw_timing) > _MAX_UPLOAD_BYTES:
+                raise HTTPException(status_code=413, detail="Subtitle file is too large")
+            timing = raw_timing.decode("utf-8", errors="replace")
         source = "upload"
         source_ref = upload.filename or "upload"
         # Optional, and NEVER fetched from -- it only names a video to
@@ -424,6 +450,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
                 detail="A YouTube link or a subtitle file is required.",
             )
         filename = None
+        timing = None
         try:
             window_start = _optional_seconds(body.get("start"), "start")
             window_end = _optional_seconds(body.get("end"), "end")
@@ -461,7 +488,7 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
     finally:
         conn.close()
 
-    _start_worker(session_id, source, source_ref, content, filename, window_start, window_end)
+    _start_worker(session_id, source, source_ref, content, filename, window_start, window_end, timing)
     return JSONResponse(
         status_code=202,
         content={"sessionId": session_id, "status": "generating", "windowCapped": window_capped},
@@ -514,7 +541,8 @@ def _current(session_id: int, sentences: list[dict]) -> list[dict]:
     fresh = []
     for s in sentences:
         if s.get("local_rev") != LOCAL_REV and not s.get("foreign"):
-            s = {**analyze_local(s["text"]), "cue_start": s.get("cue_start"), "cue_end": s.get("cue_end")}
+            s = {**analyze_local(s["text"]), "cue_start": s.get("cue_start"), "cue_end": s.get("cue_end"),
+                 **({"word_times": s["word_times"]} if s.get("word_times") else {})}
         fresh.append({**s, "local_rev": LOCAL_REV})
     # Best effort: a failed save costs the next opening the same few
     # milliseconds a line, never the answer.
@@ -721,7 +749,7 @@ def explain_video_sentence(session_id: int, index: int, payload: ExplainPayload,
     # `seconds >= None` never matches again, so the video could never
     # highlight it a second time.
     merged = {**sentences[index], **explained}
-    for key in ("cue_start", "cue_end", "foreign"):
+    for key in ("cue_start", "cue_end", "word_times", "foreign"):
         if key in sentences[index]:
             merged[key] = sentences[index][key]
 

@@ -24,7 +24,7 @@ import { DeskMast } from '../components/chrome/DeskMast'
 export const WAKE_AFTER_MS = 4000
 
 //
-// `frame` is the desk's (plan 154): the wait between the Welcome's Board
+// `frame` is the desk's (plan 155): the wait between the Welcome's Board
 // and the boarding's first question, drawn in the frame the two share --
 // the sumi column down the left edge with its masthead on the same
 // pixel, the paper beside it -- so first contact's column is carried
@@ -78,7 +78,7 @@ export default function AppLoading({ wakesServer = false, wakeAfterMs = WAKE_AFT
 // index.css, .desk-wait).
 const PAPER_WAIT_MS = 480
 
-/** 机 (plan 154): the wait on the paper beside first contact's column --
+/** 机 (plan 155): the wait on the paper beside first contact's column --
     the boot screen's dots, alone, centred on the paper, drawn
     PAPER_WAIT_MS after `since` (a performance.now() reading; the moment
     this mounts when there is none). A negative delay is a fade already
