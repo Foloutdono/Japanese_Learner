@@ -10,7 +10,8 @@ import {
 } from '../components/study/QuizComponents'
 import { usePace } from '../components/study/usePace'
 import {
-  GrammarRule, GrammarPattern, GrammarAnswer, GrammarFillSentence, GrammarContrastSentence,
+  GrammarRule, GrammarPattern, GrammarStructure, GrammarChoice, GrammarAnswer,
+  GrammarFillSentence, GrammarContrastSentence,
 } from '../components/study/GrammarPieces'
 import { GrammarLesson, GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
@@ -227,7 +228,9 @@ export default function GrammarRun({ session }) {
                 </div>
                 <div className="grammar-meaning"><GlossList meaning={c.meaning} /></div>
                 {c.structure && (
-                  <div className="review-grammar-explanation">{c.structure}</div>
+                  <div className="review-grammar-explanation">
+                    <GrammarPattern text={c.structure} parts={c.structure_furigana} />
+                  </div>
                 )}
               </div>
             )}
@@ -365,9 +368,7 @@ export default function GrammarRun({ session }) {
                           : (
                             <>
                               <GrammarRule text={card.grammar} parts={card.grammar_furigana} size={52} />
-                              {card.structure && (
-                                <div className="grammar-structure">{card.structure}</div>
-                              )}
+                              <GrammarStructure text={card.structure} parts={card.structure_furigana} />
                             </>
                           )
                     }
@@ -388,9 +389,7 @@ export default function GrammarRun({ session }) {
                           ? (
                             <>
                               <GrammarRule text={card.grammar} parts={card.grammar_furigana} size={44} />
-                              {card.structure && (
-                                <div className="grammar-structure">{card.structure}</div>
-                              )}
+                              <GrammarStructure text={card.structure} parts={card.structure_furigana} />
                             </>
                           )
                           : <MeaningDisplay meaning={card.meaning} size={30} />
@@ -414,9 +413,7 @@ export default function GrammarRun({ session }) {
                         : (
                           <>
                             <GrammarRule text={card.grammar} parts={card.grammar_furigana} size={52} />
-                            {card.structure && (
-                              <div className="grammar-structure">{card.structure}</div>
-                            )}
+                            <GrammarStructure text={card.structure} parts={card.structure_furigana} />
                           </>
                         )}
                     {isFill && answered && <GrammarAnswer card={card} size={36} divided />}
@@ -433,6 +430,7 @@ export default function GrammarRun({ session }) {
               <MCQGrid
                 choices={card.contrast?.choices ?? []}
                 correct={card.grammar}
+                formatChoice={p => <GrammarChoice text={p} readings={card.choices_furigana} />}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
 
@@ -441,7 +439,9 @@ export default function GrammarRun({ session }) {
               <MCQGrid
                 choices={cardHints[HINTS.CHOICES] ?? []}
                 correct={isFill || isB2F ? card.grammar : card.meaning}
-                formatChoice={isFill || isB2F ? undefined : formatGlossLine}
+                formatChoice={isFill || isB2F
+                  ? p => <GrammarChoice text={p} readings={card.choices_furigana} />
+                  : formatGlossLine}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
 

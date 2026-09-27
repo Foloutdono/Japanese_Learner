@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { render } from 'vitest-browser-react'
 import CardPrompt from './components/study/CardPrompt'
+import { MCQGrid } from './components/study/QuizComponents'
+import { GrammarChoice } from './components/study/GrammarPieces'
 import './index.css'
 
 // ── A grammar card's furigana, on a phone ──────────────────────
@@ -11,7 +13,8 @@ import './index.css'
 // every face the pattern is, that a pattern with no kanji is text as it
 // always was, and -- the one thing a screenshot of a short rule cannot
 // show -- that a long rule's wrapped second line keeps its readings off
-// the line above.
+// the line above. The formation line under the rule, an option that is
+// a pattern and the contrast drill's answer are read the same way.
 
 const t = {}
 
@@ -20,6 +23,7 @@ const card = over => ({
   mode: 'grammar.flashcard.f2b', direction: 'f2b',
   grammar: '〜の中で', structure: 'group + の中で', meaning: 'among, in (a group)',
   grammar_furigana: [{ text: '〜の' }, { text: '中', reading: 'なか' }, { text: 'で' }],
+  structure_furigana: [{ text: 'group + の' }, { text: '中', reading: 'なか' }, { text: 'で' }],
   hints: {}, stage: 'learning',
   ...over,
 })
@@ -35,7 +39,7 @@ const LONG = {
 
 const settle = (ms = 50) => new Promise(r => setTimeout(r, ms))
 
-// Every character of the rule's base text (never its readings), as a
+// Every character of an element's base text (never its readings), as a
 // rect: what a reading must not be printed over.
 function baseRects(rule) {
   const walker = document.createTreeWalker(rule, NodeFilter.SHOW_TEXT)
@@ -100,15 +104,135 @@ describe('the grammar rule’s furigana', () => {
     const screen = await render(
       <div style={{ width: 240 }}><CardPrompt card={card(LONG)} t={t} session={{}} /></div>,
     )
+    expectReadingsClearOfLineAbove(screen.container.querySelector('.grammar-rule'))
+  })
+})
+
+// Two lines, a reading on the second, and each such reading under every
+// character of the first line.
+function expectReadingsClearOfLineAbove(el) {
+  const bases = baseRects(el)
+  const lines = [...new Set(bases.map(r => Math.round(r.top)))].sort((a, b) => a - b)
+  // It wraps, with a reading on the second line, or this proves nothing.
+  expect(lines).toHaveLength(2)
+  const below = [...el.querySelectorAll('rt')].map(rt => rt.getBoundingClientRect()).filter(r => r.top > lines[0])
+  expect(below.length).toBeGreaterThan(0)
+  const above = Math.max(...bases.filter(r => Math.round(r.top) === lines[0]).map(r => r.bottom))
+  for (const reading of below) expect(reading.top).toBeGreaterThanOrEqual(above - 1)
+}
+
+describe('the formation line’s furigana', () => {
+  it('prints the reading over the formation’s kanji, one rung under the line', async () => {
+    const screen = await render(<CardPrompt card={card()} t={t} session={{}} />)
+    const line = screen.container.querySelector('.grammar-structure')
+    expect([...line.querySelectorAll('rt')].map(rt => rt.textContent)).toEqual(['なか'])
+    expect(line.textContent).toBe('group + の中なかで')
+    // and under the rule, never over it
     const rule = screen.container.querySelector('.grammar-rule')
-    const bases = baseRects(rule)
-    const lines = [...new Set(bases.map(r => Math.round(r.top)))].sort((a, b) => a - b)
-    // It wraps, with a reading on the second line, or this proves nothing.
-    expect(lines).toHaveLength(2)
-    const below = [...rule.querySelectorAll('rt')].map(rt => rt.getBoundingClientRect()).filter(r => r.top > lines[0])
-    expect(below.length).toBeGreaterThan(0)
-    // Each of them sits under every character of the line above it.
-    const above = Math.max(...bases.filter(r => Math.round(r.top) === lines[0]).map(r => r.bottom))
-    for (const reading of below) expect(reading.top).toBeGreaterThanOrEqual(above - 1)
+    expect(line.querySelector('rt').getBoundingClientRect().top)
+      .toBeGreaterThanOrEqual(Math.max(...baseRects(rule).map(r => r.bottom)) - 1)
+  })
+
+  it('leaves a formation with no kanji as it always was', async () => {
+    const screen = await render(
+      <CardPrompt card={card({ structure: 'verb て-form + から', structure_furigana: [{ text: 'verb て-form + から' }] })} t={t} session={{}} />,
+    )
+    const line = screen.container.querySelector('.grammar-structure')
+    expect(line.querySelector('ruby')).toBeNull()
+    expect(line.textContent).toBe('verb て-form + から')
+  })
+
+  it('keeps a wrapped formation’s readings off the line above', async () => {
+    const structure = 'verb dictionary form ／ noun + の + 予定だ'
+    const screen = await render(
+      <div style={{ width: 240 }}>
+        <CardPrompt
+          card={card({
+            structure,
+            structure_furigana: [
+              { text: 'verb dictionary form ／ noun + の + ' }, { text: '予', reading: 'よ' }, { text: '定', reading: 'てい' }, { text: 'だ' },
+            ],
+          })}
+          t={t} session={{}}
+        />
+      </div>,
+    )
+    expectReadingsClearOfLineAbove(screen.container.querySelector('.grammar-structure'))
+  })
+})
+
+const choices = ['〜の中で', '〜で', '〜にかわって', '〜と同じ']
+const readings = {
+  '〜の中で': [{ text: '〜の' }, { text: '中', reading: 'なか' }, { text: 'で' }],
+  '〜と同じ': [{ text: '〜と' }, { text: '同', reading: 'おな' }, { text: 'じ' }],
+}
+
+describe('an option that is a pattern', () => {
+
+  it('is read like the rule, and every row of the question stays one height', async () => {
+    const screen = await render(
+      <MCQGrid
+        choices={choices} correct="〜の中で" answered={false} onAnswer={() => {}}
+        formatChoice={c => <GrammarChoice text={c} readings={readings} />}
+      />,
+    )
+    const rows = [...screen.container.querySelectorAll('.mcq-row')]
+    expect(rows.map(r => [...r.querySelectorAll('rt')].map(rt => rt.textContent))).toEqual([['なか'], [], [], ['おな']])
+    const heights = new Set(rows.map(r => Math.round(r.getBoundingClientRect().height)))
+    expect(heights.size).toBe(1)
+    // the reading inside its row, where the row's overflow cannot cut it
+    for (const rt of screen.container.querySelectorAll('rt')) {
+      const row = rt.closest('.mcq-row').getBoundingClientRect()
+      expect(rt.getBoundingClientRect().top).toBeGreaterThanOrEqual(row.top)
+    }
+  })
+
+  it('keeps a wrapped option whole, and a filler still collapses', async () => {
+    const long = '何でも／誰でも／いつでも／どこでも'
+    const screen = await render(
+      <div style={{ width: 300 }}>
+        <MCQGrid
+          choices={[long, '〜で']} correct="〜で" answered={false} onAnswer={() => {}}
+          formatChoice={c => <GrammarChoice text={c} readings={{
+            [long]: [
+              { text: '何', reading: 'なん' }, { text: 'でも／' }, { text: '誰', reading: 'だれ' },
+              { text: 'でも／いつでも／どこでも' },
+            ],
+          }} />}
+        />
+      </div>,
+    )
+    const row = screen.container.querySelector('.mcq-row')
+    // nothing cut by the row's ceiling
+    expect(row.scrollHeight).toBeLessThanOrEqual(row.clientHeight)
+    const text = row.querySelector('.grammar-choice')
+    const lines = new Set(baseRects(text).map(r => Math.round(r.top)))
+    expect(lines.size).toBe(2)
+    // and a filler still collapses once the question is answered
+    const done = await render(
+      <MCQGrid choices={choices} correct="〜の中で" selected="〜で" answered onAnswer={() => {}}
+        formatChoice={c => <GrammarChoice text={c} readings={readings} />} />,
+    )
+    await settle(400)
+    const fillers = [...done.container.querySelectorAll('.mcq-row--filler')]
+    expect(fillers.length).toBe(2)
+    for (const f of fillers) expect(f.getBoundingClientRect().height).toBe(0)
+  })
+})
+
+describe('the contrast drill’s answer', () => {
+  it('prints the rule back into its gap with its reading', async () => {
+    const contrast = card({
+      mode: 'grammar.contrast', direction: null,
+      contrast: {
+        jp: 'クラスの中で一番背が高い。', tr: 'The tallest in the class.',
+        furigana: [{ text: 'クラスの' }, { text: '＿＿＿', blank: true }, { text: '一番背が高い。' }],
+        choices, answer: '〜の中で',
+      },
+    })
+    const before = await render(<CardPrompt card={contrast} t={t} session={{}} answered={false} />)
+    expect(before.container.querySelector('.gl-blank rt')).toBeNull()
+    const after = await render(<CardPrompt card={contrast} t={t} session={{}} answered />)
+    expect(after.container.querySelector('.gl-blank--revealed rt').textContent).toBe('なか')
   })
 })

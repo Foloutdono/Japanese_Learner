@@ -13,7 +13,9 @@ import logging
 import random
 
 from content.grammar_points_data import find, gloss, grammar_to_id, localise
-from study.grammar_examples import blanked_payload, example_payload, pattern_furigana
+from study.grammar_examples import (
+    blanked_payload, example_payload, pattern_furigana, structure_furigana,
+)
 from study.grammar_match import contains_pattern, verifiable
 from study.mcq import pick_distractors
 
@@ -25,12 +27,14 @@ CONTRAST_CHOICES = 4
 
 def lesson_payload(level: str, entry: dict, lang: str) -> dict:
     """
-    {pattern_furigana, register, steps: [{kind, text}], compare: [{pattern,
-    raw_id, level, meaning, text}], examples: [example_payload...]}
+    {pattern_furigana, structure_furigana, register, steps: [{kind, text}],
+    compare: [{pattern, furigana, raw_id, level, meaning, text}],
+    examples: [example_payload...]}
 
-    `pattern_furigana` is the plate's headword as ruby (the catalogue's
-    own reading, study/grammar_examples.pattern_furigana); every caller
-    already puts the pattern beside the lesson.
+    `pattern_furigana` and `structure_furigana` are the plate's headword
+    and formation as ruby, and a rival's `furigana` its pattern's (the
+    catalogue's own readings, study/grammar_examples); every caller
+    already puts the pattern and the formation beside the lesson.
 
     A rival the catalogue no longer holds is dropped with a warning
     rather than shipped as a door onto nothing. The gate makes that
@@ -47,6 +51,7 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
         r_level, r_entry = found
         compare.append({
             "pattern": r_entry["pattern"],
+            "furigana": pattern_furigana(r_entry["pattern"], r_entry.get("reading")),
             "raw_id": grammar_to_id(r_entry, r_level),
             "level": r_level,
             "meaning": gloss(r_entry, lang),
@@ -54,6 +59,7 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
         })
     return {
         "pattern_furigana": pattern_furigana(pattern, entry.get("reading")),
+        "structure_furigana": structure_furigana(entry),
         "register": entry.get("register"),
         "steps": [
             {"kind": step["kind"], "text": localise({"en": step["en"], "fr": step["fr"]}, lang)}

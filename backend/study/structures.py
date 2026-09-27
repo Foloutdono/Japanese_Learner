@@ -294,9 +294,12 @@ def grammar_lesson(fields: dict) -> dict:
 
     Already in the learner's language, because the learner wrote it:
     there is nothing to localise, and no `raw_id` on a rival -- it names
-    no catalogue point, so its row is not a door.
+    no catalogue point, so its row is not a door. The rule and the
+    formation carry their furigana (grammar_examples.written_furigana:
+    the catalogue's reading for a catalogue point, the tokenizer's for
+    the rest), which the card itself prints too.
     """
-    from study.grammar_examples import highlight_span, parts_with_span
+    from study.grammar_examples import highlight_span, parts_with_span, written_furigana
 
     rule = fields.get("rule") or ""
     steps = [
@@ -313,9 +316,12 @@ def grammar_lesson(fields: dict) -> dict:
          "furigana": parts_with_span(p["jp"], highlight_span(p["jp"], rule), "highlight")}
         for p in sentence_pairs(fields)
     ]
+    structure = fields.get("structure") or ""
     return {
         "pattern": rule,
-        "structure": fields.get("structure") or "",
+        "pattern_furigana": written_furigana(rule),
+        "structure": structure,
+        "structure_furigana": written_furigana(structure),
         "meaning": fields.get("meaning") or "",
         "register": fields.get("register") or None,
         "steps": steps,

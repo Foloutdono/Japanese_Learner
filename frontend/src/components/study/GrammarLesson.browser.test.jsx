@@ -135,6 +135,27 @@ describe('the grammar lesson', () => {
     expect(plate.querySelector('[aria-label="Close"]')).toBeTruthy()
   })
 
+  it('reads the pattern, its formation and a rival through their furigana', async () => {
+    const point = {
+      ...RICH, pattern: '〜の中で', structure: 'group + の中で',
+      pattern_furigana: [{ text: '〜の' }, { text: '中', reading: 'なか' }, { text: 'で' }],
+      structure_furigana: [{ text: 'group + の' }, { text: '中', reading: 'なか' }, { text: 'で' }],
+      compare: [{
+        pattern: '〜で一番', raw_id: 'grammar_N5_〜で一番', level: 'N5', meaning: 'the most in', text: 'A place.',
+        furigana: [{ text: '〜で' }, { text: '一', reading: 'いち' }, { text: '番', reading: 'ばん' }],
+      }],
+    }
+    const screen = await mount(<GrammarLesson point={point} variant="sheet" onClose={() => {}} onCompare={() => {}} />)
+    const plate = screen.container.querySelector('.dict-plate')
+    const read = el => [...el.querySelectorAll('rt')].map(rt => rt.textContent)
+    expect(read(plate.querySelector('.dict-plate__word'))).toEqual(['なか'])
+    expect(read(plate.querySelector('.dict-plate__structure'))).toEqual(['なか'])
+    expect(read(screen.container.querySelector('.gl-door__pattern'))).toEqual(['いち', 'ばん'])
+    // A point with no reading prints as it always did.
+    const bare = await mount(<GrammarLesson point={RICH} variant="sheet" onClose={() => {}} />)
+    expect(bare.container.querySelector('.dict-plate ruby')).toBeNull()
+  })
+
   // Plan 146, the owner's pick B: the lesson read for its shape
   // (lessonText). A use that names its forms prints them under it, in
   // Japanese and whole; a paradigm is its labels beside its forms; the

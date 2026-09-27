@@ -43,7 +43,12 @@ const CHECK_WAIT_MS = 2500
 // v8: every card gained `progress` and every rating in its review_preview
 // its own (plan 147), the band along the card's foot. A v7 queue would
 // draw no band on a card still learning until it had been answered past.
-const CACHE_VERSION = 'v8'
+// v9: a grammar card gained its furigana -- `grammar_furigana` and
+// `structure_furigana` over the rule and its formation, `choices_furigana`
+// over options that are patterns (which b2f's now are, where a v8 card
+// holds meanings no option could be graded right against). A v8 grammar
+// queue would print 中 with no なか until it had been answered past.
+const CACHE_VERSION = 'v9'
 
 const KEY_PREFIX = 'jp-session'
 

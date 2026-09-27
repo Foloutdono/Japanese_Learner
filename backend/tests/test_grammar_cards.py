@@ -72,6 +72,19 @@ def test_a_card_keeps_its_whole_lesson(gclient):
     assert lesson["compare"] == [{"pattern": "〜おかげで", "text": "cause heureuse"}]
 
 
+def test_a_written_card_is_read_like_the_catalogues(gclient):
+    """The rule and the formation carry furigana: a rule that is a
+    catalogue point, its reading; the card and its lesson alike."""
+    deck_id = _deck(gclient)
+    fields = {"rule": "~の中で", "meaning": "among", "structure": "group + の中で"}
+    assert gclient.post(f"/api/decks/{deck_id}/cards", json={"fields": fields}).status_code == 200
+    (card,) = _study(gclient, deck_id, "grammar.flashcard.f2b")
+    assert card["grammar_furigana"] == [{"text": "~の"}, {"text": "中", "reading": "なか"}, {"text": "で"}]
+    assert card["lesson"]["pattern_furigana"] == card["grammar_furigana"]
+    assert "".join(p["text"] for p in card["structure_furigana"]) == "group + の中で"
+    assert card["lesson"]["structure_furigana"] == card["structure_furigana"]
+
+
 def test_fill_in_carries_the_sentences_translation(gclient):
     deck_id = _deck(gclient)
     gclient.post(f"/api/decks/{deck_id}/cards", json={"fields": CARD})

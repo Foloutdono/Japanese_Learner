@@ -26,7 +26,7 @@ from study.grammar_examples import pattern_furigana
 from study.grammar_match import contains_pattern, verifiable
 from study.grammar_sentence_gen import check_sentence
 
-ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "meaning", "register", "steps", "compare", "examples"})
+ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "structure_reading", "meaning", "register", "steps", "compare", "examples"})
 REQUIRED_KEYS = frozenset({"pattern", "structure", "meaning", "steps", "compare", "examples"})
 STEP_KINDS = ("rule", "use", "careful")
 REGISTERS = frozenset({"neutral", "casual", "polite", "formal", "written"})
@@ -82,23 +82,24 @@ def _text_problems(what: str, pair, rich: bool, max_chars: int, bullets: bool = 
     return out
 
 
-def _reading_problems(pattern: str, reading) -> list[str]:
-    """The pattern's `reading`, which the card prints over its kanji: on
-    every pattern with a kanji and on no other, spelling the pattern
-    with each kanji run written in kana -- so that it divides run by
-    run, and no reading lands on 〜, a particle or a bracket."""
-    has_kanji = any(is_kanji(c) or c == "々" for c in pattern)
+def _reading_problems(what: str, key: str, text: str, reading) -> list[str]:
+    """A text's reading, which the app prints over its kanji -- the
+    pattern's `reading`, the formation's `structure_reading`: on every
+    such text with a kanji and on no other, spelling the text with each
+    kanji run written in kana -- so that it divides run by run, and no
+    reading lands on 〜, a particle, a bracket or an English word."""
+    has_kanji = any(is_kanji(c) or c == "々" for c in text)
     if reading is None:
-        return ["a pattern with kanji carries its reading"] if has_kanji else []
+        return [f"a {what} with kanji carries its {key}"] if has_kanji else []
     if not has_kanji:
-        return ["reading on a pattern with no kanji"]
+        return [f"{key} on a {what} with no kanji"]
     if not isinstance(reading, str) or not reading.strip() or reading != reading.strip():
-        return ["reading is empty or has surrounding whitespace"]
-    parts = pattern_furigana(pattern, reading)
+        return [f"{key} is empty or has surrounding whitespace"]
+    parts = pattern_furigana(text, reading)
     read = [p["reading"] for p in parts if p.get("reading")]
     if not read:
-        return [f"reading {reading!r} does not spell the pattern (kana, 〜 and brackets as written, each kanji run in kana)"]
-    return [f"reading {r!r} is not kana" for r in read if not _KANA_READING.fullmatch(r)]
+        return [f"{key} {reading!r} does not spell the {what} (everything as written, each kanji run in kana)"]
+    return [f"{key} {r!r} is not kana" for r in read if not _KANA_READING.fullmatch(r)]
 
 
 def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None = None) -> list[str]:
@@ -125,11 +126,14 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
             out.append(f"{tag}: {field} is empty")
         elif value != value.strip():
             out.append(f"{tag}: {field} has surrounding whitespace")
+    if isinstance(entry["structure"], str):
+        out += [f"{tag}: {p}" for p in _reading_problems(
+            "structure", "structure_reading", entry["structure"], entry.get("structure_reading"))]
     if isinstance(pattern, str) and ":" in pattern:
         # core.auth splits "{user_id}:{raw_id}" on the first colon.
         out.append(f"{tag}: pattern contains ':'")
     if isinstance(pattern, str):
-        out += [f"{tag}: {p}" for p in _reading_problems(pattern, entry.get("reading"))]
+        out += [f"{tag}: {p}" for p in _reading_problems("pattern", "reading", pattern, entry.get("reading"))]
         elsewhere = [
             lvl for lvl, entries in catalogue.items()
             if lvl != level and any(e.get("pattern") == pattern for e in entries)

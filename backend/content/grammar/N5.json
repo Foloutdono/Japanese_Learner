@@ -382,6 +382,7 @@
   {
     "pattern": "と",
     "structure": "noun + と + noun ／ 「quotation」 + と + 言う・思う",
+    "structure_reading": "noun + と + noun ／ 「quotation」 + と + いう・おもう",
     "meaning": {
       "en": "and (nouns); with, together with; marks what is said or thought",
       "fr": "et (entre noms) ; avec, en compagnie de ; introduit ce qui est dit ou pensé"
@@ -2829,6 +2830,7 @@
     "pattern": "〜が好きです",
     "reading": "〜がすきです",
     "structure": "Noun + が好きです",
+    "structure_reading": "Noun + がすきです",
     "meaning": {
       "en": "like something",
       "fr": "aimer quelque chose"
@@ -2964,6 +2966,7 @@
     "pattern": "〜が上手です／下手です",
     "reading": "〜がじょうずです／へたです",
     "structure": "Noun + が上手です・が下手です",
+    "structure_reading": "Noun + がじょうずです・がへたです",
     "meaning": {
       "en": "be skilled at / poor at",
       "fr": "être doué / ne pas être doué pour"
@@ -3712,6 +3715,7 @@
     "pattern": "〜と思います",
     "reading": "〜とおもいます",
     "structure": "plain form + と思います",
+    "structure_reading": "plain form + とおもいます",
     "meaning": {
       "en": "I think that",
       "fr": "je pense que"
@@ -3780,6 +3784,7 @@
     "pattern": "〜と言います",
     "reading": "〜といいます",
     "structure": "quoted words + と言います",
+    "structure_reading": "quoted words + といいます",
     "meaning": {
       "en": "says that",
       "fr": "dire que"
@@ -3848,6 +3853,7 @@
     "pattern": "〜のが好きです",
     "reading": "〜のがすきです",
     "structure": "verb dictionary form + のが好きです",
+    "structure_reading": "verb dictionary form + のがすきです",
     "meaning": {
       "en": "enjoy doing something",
       "fr": "aimer faire quelque chose"
@@ -4050,6 +4056,7 @@
     "pattern": "〜が分かります",
     "reading": "〜がわかります",
     "structure": "Noun + が分かります",
+    "structure_reading": "Noun + がわかります",
     "meaning": {
       "en": "grasp or understand something",
       "fr": "comprendre quelque chose"
@@ -4252,6 +4259,7 @@
     "pattern": "〜の中で",
     "reading": "〜のなかで",
     "structure": "group + の中で",
+    "structure_reading": "group + のなかで",
     "meaning": {
       "en": "within a given set",
       "fr": "parmi, au sein d'un ensemble"
@@ -4525,6 +4533,7 @@
     "pattern": "〜に行きます",
     "reading": "〜にいきます",
     "structure": "verb stem + に行きます",
+    "structure_reading": "verb stem + にいきます",
     "meaning": {
       "en": "go somewhere in order to do",
       "fr": "aller quelque part pour faire"
@@ -4593,6 +4602,7 @@
     "pattern": "〜が（逆接）",
     "reading": "〜が（ぎゃくせつ）",
     "structure": "clause + が（逆接） + clause",
+    "structure_reading": "clause + が（ぎゃくせつ） + clause",
     "meaning": {
       "en": "but; and yet (joins two clauses)",
       "fr": "mais ; pourtant (relie deux propositions)"
@@ -4735,6 +4745,7 @@
     "pattern": "〜て（理由）",
     "reading": "〜て（りゆう）",
     "structure": "cause as て（理由）: verb て-form ／ い-adj + くて ／ noun + で, then the result",
+    "structure_reading": "cause as て（りゆう）: verb て-form ／ い-adj + くて ／ noun + で, then the result",
     "meaning": {
       "en": "because …, and so (the て-form giving a reason)",
       "fr": "parce que…, alors (la forme en て qui donne la cause)"
@@ -5070,6 +5081,7 @@
     "pattern": "〜と同じ",
     "reading": "〜とおなじ",
     "structure": "noun + と同じ (+ noun／です)",
+    "structure_reading": "noun + とおなじ (+ noun／です)",
     "meaning": {
       "en": "the same as",
       "fr": "le même que, pareil à"
@@ -5138,6 +5150,7 @@
     "pattern": "〜に〜回",
     "reading": "〜に〜かい",
     "structure": "period + に + number + 回 (how often)",
+    "structure_reading": "period + に + number + かい (how often)",
     "meaning": {
       "en": "N times per (day, week…)",
       "fr": "N fois par (jour, semaine…)"
@@ -5203,6 +5216,7 @@
     "pattern": "〜く／〜に（副詞形）",
     "reading": "〜く／〜に（ふくしけい）",
     "structure": "い-adj (drop い) + く ／ な-adj + に（副詞形） + verb",
+    "structure_reading": "い-adj (drop い) + く ／ な-adj + に（ふくしけい） + verb",
     "meaning": {
       "en": "turning an adjective into an adverb",
       "fr": "transformer un adjectif en adverbe"
@@ -5399,6 +5413,7 @@
     "pattern": "〜を（移動）",
     "reading": "〜を（いどう）",
     "structure": "place + を（移動） + verb of movement",
+    "structure_reading": "place + を（いどう） + verb of movement",
     "meaning": {
       "en": "the space passed through or left (walk along, leave)",
       "fr": "l'espace parcouru ou quitté (marcher dans, sortir de)"
@@ -5593,6 +5608,7 @@
     "pattern": "助数詞 〜つ／〜人／〜枚",
     "reading": "じょすうし 〜つ／〜にん／〜まい",
     "structure": "number + つ／人／枚 (a counter per kind of thing)",
+    "structure_reading": "number + つ／にん／まい (a counter per kind of thing)",
     "meaning": {
       "en": "counters: general things, people, flat things",
       "fr": "les classificateurs : objets, personnes, choses plates"
@@ -5725,6 +5741,7 @@
     "pattern": "〜で（理由）",
     "reading": "〜で（りゆう）",
     "structure": "noun + で（理由） + result",
+    "structure_reading": "noun + で（りゆう） + result",
     "meaning": {
       "en": "because of (a cause stated as a noun)",
       "fr": "à cause de (la cause est un nom)"
@@ -5795,6 +5812,7 @@
     "pattern": "何か／誰か／どこか",
     "reading": "なにか／だれか／どこか",
     "structure": "何か／誰か／どこか (+ particle) + predicate",
+    "structure_reading": "なにか／だれか／どこか (+ particle) + predicate",
     "meaning": {
       "en": "something, someone, somewhere",
       "fr": "quelque chose, quelqu'un, quelque part"
@@ -5863,6 +5881,7 @@
     "pattern": "何も／誰も〜ない",
     "reading": "なにも／だれも〜ない",
     "structure": "何も／誰も + negative predicate (〜ない)",
+    "structure_reading": "なにも／だれも + negative predicate (〜ない)",
     "meaning": {
       "en": "nothing, nobody (with a negative)",
       "fr": "rien, personne (avec une négation)"

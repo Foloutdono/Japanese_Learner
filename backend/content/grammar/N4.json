@@ -1517,6 +1517,7 @@
     "pattern": "〜ようと思う",
     "reading": "〜ようとおもう",
     "structure": "verb volitional form + と思う",
+    "structure_reading": "verb volitional form + とおもう",
     "meaning": {
       "en": "be thinking of doing, plan to",
       "fr": "penser faire, projeter de"
@@ -4514,6 +4515,7 @@
     "pattern": "〜方",
     "reading": "〜かた",
     "structure": "verb stem + 方",
+    "structure_reading": "verb stem + かた",
     "meaning": {
       "en": "the way of doing something",
       "fr": "la façon de faire"
@@ -4579,6 +4581,7 @@
     "pattern": "〜出す",
     "reading": "〜だす",
     "structure": "verb stem + 出す",
+    "structure_reading": "verb stem + だす",
     "meaning": {
       "en": "break into an action abruptly",
       "fr": "se mettre brusquement à"
@@ -4647,6 +4650,7 @@
     "pattern": "〜直す",
     "reading": "〜なおす",
     "structure": "verb stem + 直す",
+    "structure_reading": "verb stem + なおす",
     "meaning": {
       "en": "do it over again",
       "fr": "refaire, recommencer"
@@ -4989,6 +4993,7 @@
     "pattern": "〜場合",
     "reading": "〜ばあい",
     "structure": "verb plain form ／ noun + の + 場合 (+ は)",
+    "structure_reading": "verb plain form ／ noun + の + ばあい (+ は)",
     "meaning": {
       "en": "in the case that, if it happens that",
       "fr": "au cas où, dans le cas de"
@@ -5057,6 +5062,7 @@
     "pattern": "〜必要がある",
     "reading": "〜ひつようがある",
     "structure": "verb dictionary form + 必要がある",
+    "structure_reading": "verb dictionary form + ひつようがある",
     "meaning": {
       "en": "it is necessary to, need to",
       "fr": "il faut, il est nécessaire de"
@@ -5733,6 +5739,7 @@
     "pattern": "〜ように言う",
     "reading": "〜ようにいう",
     "structure": "verb dictionary form／ない-form + ように言う（頼む・伝える）",
+    "structure_reading": "verb dictionary form／ない-form + ようにいう（たのむ・つたえる）",
     "meaning": {
       "en": "tell someone to do (reporting an instruction)",
       "fr": "dire à quelqu'un de faire (rapporter une consigne)"
@@ -5940,6 +5947,7 @@
     "pattern": "〜な（禁止）",
     "reading": "〜な（きんし）",
     "structure": "verb dictionary form + な（禁止）",
+    "structure_reading": "verb dictionary form + な（きんし）",
     "meaning": {
       "en": "don't! (a blunt prohibition)",
       "fr": "ne fais pas ! (une interdiction brutale)"
@@ -6010,6 +6018,7 @@
     "pattern": "命令形 〜ろ／〜え",
     "reading": "めいれいけい 〜ろ／〜え",
     "structure": "verb imperative: る-verb stem + ろ ／ う-verb final え-row (書け, 待て)",
+    "structure_reading": "verb imperative: る-verb stem + ろ ／ う-verb final え-row (かけ, まて)",
     "meaning": {
       "en": "the plain command form",
       "fr": "l'impératif brut"
@@ -6283,6 +6292,7 @@
     "pattern": "〜中",
     "reading": "〜ちゅう・じゅう",
     "structure": "noun + 中（ちゅう：during ／ じゅう：throughout）",
+    "structure_reading": "noun + ちゅう・じゅう（ちゅう：during ／ じゅう：throughout）",
     "meaning": {
       "en": "during (〜ちゅう) or all through (〜じゅう)",
       "fr": "pendant (〜ちゅう) ou tout au long de (〜じゅう)"
@@ -6559,6 +6569,7 @@
     "pattern": "〜か（間接疑問）",
     "reading": "〜か（かんせつぎもん）",
     "structure": "question word + plain clause + か（間接疑問） + 知っている／分かる／教える",
+    "structure_reading": "question word + plain clause + か（かんせつぎもん） + しっている／わかる／おしえる",
     "meaning": {
       "en": "an embedded question: I know where… / do you know when…",
       "fr": "une question enchâssée : je sais où… / sais-tu quand…"
@@ -6624,6 +6635,7 @@
     "pattern": "何でも／誰でも／いつでも／どこでも",
     "reading": "なんでも／だれでも／いつでも／どこでも",
     "structure": "何でも／誰でも／いつでも／どこでも (question word + でも) + predicate",
+    "structure_reading": "なんでも／だれでも／いつでも／どこでも (question word + でも) + predicate",
     "meaning": {
       "en": "anything, anyone, any time, anywhere: whichever it is",
       "fr": "n'importe quoi, n'importe qui, n'importe quand, n'importe où"
@@ -6763,6 +6775,7 @@
     "pattern": "〜も（強調）",
     "reading": "〜も（きょうちょう）",
     "structure": "number + counter + も（強調） + predicate",
+    "structure_reading": "number + counter + も（きょうちょう） + predicate",
     "meaning": {
       "en": "as much as, as many as (stressing a large amount)",
       "fr": "pas moins de, jusqu'à (insister sur une grande quantité)"
@@ -7245,6 +7258,7 @@
     "pattern": "〜予定だ",
     "reading": "〜よていだ",
     "structure": "verb dictionary form ／ noun + の + 予定だ",
+    "structure_reading": "verb dictionary form ／ noun + の + よていだ",
     "meaning": {
       "en": "it is planned that, I am due to",
       "fr": "il est prévu que, je dois…"
@@ -7390,6 +7404,7 @@
     "pattern": "〜が見える／〜が聞こえる",
     "reading": "〜がみえる／〜がきこえる",
     "structure": "noun + が見える ／ が聞こえる",
+    "structure_reading": "noun + がみえる ／ がきこえる",
     "meaning": {
       "en": "can be seen / can be heard (of itself, no effort)",
       "fr": "on voit / on entend (de soi-même, sans effort)"
@@ -7463,6 +7478,7 @@
     "pattern": "〜に見える",
     "reading": "〜にみえる",
     "structure": "noun／な-adj + に見える ／ い-adj + く見える",
+    "structure_reading": "noun／な-adj + にみえる ／ い-adj + くみえる",
     "meaning": {
       "en": "looks (like), appears",
       "fr": "avoir l'air, sembler"

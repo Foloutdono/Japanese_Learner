@@ -16,6 +16,7 @@ import RatingBar from '../components/study/RatingBar'
 import HintBar from '../components/study/HintBar'
 import SessionError from '../components/study/SessionError'
 import CardPrompt from '../components/study/CardPrompt'
+import { GrammarChoice } from '../components/study/GrammarPieces'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 import { ChevronIcon } from '../components/ui/Icons'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
@@ -470,6 +471,7 @@ export default function TodayRun({ session }) {
               <MCQGrid
                 choices={nc.contrast?.choices ?? []}
                 correct={nc.grammar}
+                formatChoice={c => <GrammarChoice text={c} readings={nc.choices_furigana} />}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}
@@ -478,7 +480,9 @@ export default function TodayRun({ session }) {
               <MCQGrid
                 choices={cardHints[HINTS.CHOICES] ?? []}
                 correct={isFill || !isF2B ? nc.grammar : nc.meaning}
-                formatChoice={isFill || !isF2B ? undefined : formatGlossLine}
+                formatChoice={isFill || !isF2B
+                  ? c => <GrammarChoice text={c} readings={nc.choices_furigana} />
+                  : formatGlossLine}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}

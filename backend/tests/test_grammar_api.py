@@ -58,12 +58,46 @@ def test_cards_speak_the_learners_language_and_carry_their_lesson_when_new(clien
         # have does not (see the gate in GrammarRun).
         assert ("lesson" in card) == (card["stage"] == "new")
         if "lesson" in card:
-            assert set(card["lesson"]) == {"pattern_furigana", "register", "steps", "compare", "examples"}
-        # The pattern's furigana spells the pattern, with a reading over
-        # its kanji wherever the catalogue gives one.
-        parts = card["grammar_furigana"]
-        assert "".join(p["text"] for p in parts) == card["grammar"]
-        assert any(p.get("reading") for p in parts) == ("reading" in entry)
+            assert set(card["lesson"]) == {
+                "pattern_furigana", "structure_furigana", "register", "steps", "compare", "examples",
+            }
+            for rival in card["lesson"]["compare"]:
+                assert "".join(p["text"] for p in rival["furigana"]) == rival["pattern"]
+        # The pattern's furigana spells the pattern, and the formation's
+        # the formation, with a reading over their kanji wherever the
+        # catalogue gives one.
+        for text, key, parts in ((card["grammar"], "reading", card["grammar_furigana"]),
+                                 (card["structure"], "structure_reading", card["structure_furigana"])):
+            assert "".join(p["text"] for p in parts) == text
+            assert any(p.get("reading") for p in parts) == (key in entry)
+        # f2b's options are meanings: nothing to read over them.
+        assert "choices_furigana" not in card
+
+
+def test_an_option_that_is_a_pattern_is_read_like_the_rule(client):
+    """b2f shows the meaning and asks for the rule, so its options are
+    patterns -- every run grades them against the pattern, and they were
+    served meanings, which no option could be graded right against. Its
+    options, fill_in's and the contrast drill's carry the catalogue's
+    furigana, keyed by pattern."""
+    n5 = {e["pattern"]: e for e in GRAMMAR_POINTS_BY_LEVEL["N5"]}
+    b2f = _cards(client, "N5", "grammar.flashcard.b2f", lang="en")["cards"]
+    assert b2f
+    for card in b2f:
+        choices = card["hints"]["indice_1"]
+        assert card["grammar"] in choices and set(choices) <= set(n5)
+        # never a rival that means the same thing: two right answers
+        others = [gloss(n5[c], "en").casefold() for c in choices if c != card["grammar"]]
+        assert card["meaning"].casefold() not in others
+        assert set(card["choices_furigana"]) == {c for c in choices if "reading" in n5[c]}
+    for mode in ("grammar.fill_in", "grammar.contrast"):
+        for card in _cards(client, "N5", mode, lang="en")["cards"]:
+            choices = card["hints"]["indice_1"] if mode == "grammar.fill_in" else card["contrast"]["choices"]
+            readings = card["choices_furigana"]
+            assert set(readings) <= set(choices)
+            for pattern, parts in readings.items():
+                assert "".join(p["text"] for p in parts) == pattern
+                assert any(p.get("reading") for p in parts)
 
 
 def test_fill_in_hides_the_answer_from_its_own_sentence(client):
@@ -153,7 +187,7 @@ def test_the_point_endpoint_serves_the_lesson_and_404s_an_unknown_id(client):
     assert [ex["jp"] for ex in body["examples"]] == [ex["jp"] for ex in entry["examples"]]
     assert body["status"]["status"] in ("not_started", "new", "learning", "mastered", "due")
     for rival in body["compare"]:
-        assert set(rival) == {"pattern", "raw_id", "level", "meaning", "text"}
+        assert set(rival) == {"pattern", "furigana", "raw_id", "level", "meaning", "text"}
     assert client.get("/api/grammar/point", params={"id": "grammar_N4_nope"}).status_code == 404
 
 

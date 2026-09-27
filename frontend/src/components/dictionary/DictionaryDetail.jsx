@@ -1118,7 +1118,11 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
           {/* How the pattern is formed, in the reading's place over it:
               "verb て-form + から" is to 〜てから what やま is to 山. */}
           {isGrammar && entry.structure && (
-            <div className="dict-plate__structure" lang="ja">{entry.structure}</div>
+            <div className="dict-plate__structure" lang="ja">
+              {entry.structure_furigana?.some(part => part.reading)
+                ? <FuriganaParts parts={entry.structure_furigana} />
+                : entry.structure}
+            </div>
           )}
           <h2 className={`dict-plate__word dict-plate__word--${headwordSize(headword)}`} lang="ja">
             {headwordFurigana?.length

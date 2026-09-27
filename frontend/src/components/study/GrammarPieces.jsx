@@ -34,9 +34,35 @@ export function GrammarRule({ text, parts, size = 48 }) {
 }
 
 // The pattern as text, or as ruby when it has a reading: what
-// GrammarRule sets as a headline, and the fast review sets as its card.
+// GrammarRule sets as a headline, the fast review as its card, an
+// option as its row.
 export function GrammarPattern({ text, parts }) {
   return hasReading(parts) ? <FuriganaParts parts={parts} /> : text
+}
+
+// The formation line under the rule ("group + の中で"), read the same
+// way: `parts` is the card's `structure_furigana`, from the catalogue's
+// `structure_reading` (or, on a written card, the tokenizer's).
+export function GrammarStructure({ text, parts }) {
+  if (!text) return null
+  return (
+    <div className="grammar-structure">
+      <GrammarPattern text={text} parts={parts} />
+    </div>
+  )
+}
+
+// An option that is a pattern -- fill_in's and b2f's choices, the
+// contrast drill's rivals -- read as the rule is: `readings` is the
+// card's `choices_furigana`, keyed by pattern. Every pattern option sits
+// on the same ruby-ready line, with a reading or without, so the rows of
+// one question stay one height.
+export function GrammarChoice({ text, readings }) {
+  return (
+    <span className="grammar-choice" lang="ja">
+      <GrammarPattern text={text} parts={readings?.[text]} />
+    </span>
+  )
 }
 
 function hasReading(parts) {
@@ -51,7 +77,7 @@ export function GrammarAnswer({ card, size = 44, divided = false }) {
   return (
     <div className={`grammar-answer${divided ? ' grammar-answer--divided' : ''}`}>
       <GrammarRule text={card.grammar} parts={card.grammar_furigana} size={size} />
-      {card.structure && <div className="grammar-structure">{card.structure}</div>}
+      <GrammarStructure text={card.structure} parts={card.structure_furigana} />
       <MeaningDisplay meaning={card.meaning} size={24} />
     </div>
   )
@@ -101,8 +127,10 @@ export function GrammarFillSentence({ card, echo = false, revealed = false }) {
 export function GrammarContrastSentence({ card, revealed = false, t }) {
   const c = card.contrast
   if (!c?.jp) return null
+  // The answer printed back into the gap carries the rule's furigana.
+  const answer = <GrammarPattern text={c.answer ?? card.grammar} parts={card.grammar_furigana} />
   const segments = (c.furigana?.length ? c.furigana : [{ text: c.jp }]).map(seg => (
-    seg.blank ? { ...seg, answer: c.answer ?? card.grammar } : seg
+    seg.blank ? { ...seg, answer } : seg
   ))
   return (
     <div className="grammar-fill-sentence grammar-contrast">
