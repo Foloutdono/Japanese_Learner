@@ -603,13 +603,18 @@ control that changes the question rather than the shelf belongs in row 2, at
 its trailing edge, past the count — the dictionary's 部 index is the one that
 does (`.console__toggle`): it is a second way of reading the kanji collection,
 not a sixth collection, and as a chip in row 1 it read as the latter. Same
-object either way: a `.chip`, at the chip's own height, saying whether it is
-chosen — but **square, and carrying its glyph alone**. A label in row 2 is
-paid for out of the field, and 部 over a kanji dictionary is a body that names
-itself; the word stays in the `title` and the `aria-label`, for the pointer
-and the reader the glyph does not serve. One ring, not two: where a chip in
-row 1 prints its glyph in a `.chip__glyph` roundel, the key in row 2 **is**
-the roundel and sets the glyph bare.
+object either way: a `.chip`, saying whether it is chosen — but in row 2 a
+**key beside the field** (plan 156), the field's 44px and square at
+`--r-card`, as the question field's send stands beside its well, **carrying
+its glyph alone**. A label in row 2 is paid for out of the field, and 部 over
+a kanji dictionary is a body that names itself; the word stays in the `title`
+and the `aria-label`, for the pointer and the reader the glyph does not serve.
+The glyph is set bare: the key is the target, and a `.chip__glyph` roundel
+inside it would draw the target twice.
+
+Row 2's field is the search well (below, "The field, one well"): the mark,
+what you type, the clear and the count are inside it; the keys that act on it
+stand beside it.
 
 **A control that applies to the whole answer is a BAND, at the head.** Rows 1
 and 2 both narrow: the chips cut the shelf down, the field asks it a question.
@@ -639,6 +644,29 @@ meta and the toggle is a way through, and a field squeezed between them is
 cut before anything has been typed into it. And a row 2 with nothing to type
 into keeps its rail and its control rather than going and taking the way back
 with it.
+
+### The field, one well
+
+A field is **a well**: a step through whatever it sits on to the page
+beneath (`.field`, `--bg-main`, no border at rest, `--r-card`, 44px). The
+question field of a practice run (問) is the one the owner pointed at, and
+every other field is drawn from it (plan 156, the owner's pick A of three on
+the canvas "Tsuji — input fields"). On the page itself there is nothing
+beneath to show, so the well steps **up** to `--surface` (`.field--page`);
+on sumi it is `.field--panel`. The well is always **one step away from its
+ground** — a page well on a card is `--surface` on `--surface`, a placeholder
+with no field round it, and that is what the run's entry, the guest's claim
+and the analyser's rail search were on the desk until the two guards
+(`fields.browser.test.jsx` at a phone's width, `fields.desktop.test.jsx` at
+the desk's) measured the mount.
+
+**A search is the same well holding its mark** (`.field--search`): the
+magnifier, the bare input, and at its trailing edge what the search carries —
+the clear, the count. **A key that acts on the field stands beside it**, not
+in it: 問's send, the console's search options and 部, a run's Check (on the
+desk, the entry and Check are one row). Focus is the gold ring on the well,
+flush, and nothing else: never a hairline box, never a line's pigment round a
+field — a line's colour is a place.
 
 ### The primary button
 

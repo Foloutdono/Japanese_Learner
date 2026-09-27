@@ -184,7 +184,7 @@ export function LibraryPanel({ session, onFollowed }) {
         )}
       </div>
       <form className="gate-panel__foot" role="search" onSubmit={search}>
-        <label className="gate-field">
+        <label className="field field--search gate-field">
           <SearchIcon size={16} />
           <input type="search" value={query} onChange={e => setQuery(e.target.value)}
             placeholder={t.decksSearchPlaceholder} aria-label={t.decksSearchPlaceholder} />
