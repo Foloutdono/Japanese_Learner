@@ -22,9 +22,9 @@ const SMALL = new Set(Array.from('ぁぃぅぇぉゃゅょゎゕゖァィゥェ�
 const KANA = /[ぁ-ゖァ-ヺー]/u
 const KANJI = /[㐀-鿿豈-﫿々〆]/u
 const LETTER = /[\p{L}\p{N}]/u
-// A mark between words where a speaker breathes: half a beat of time.
+// A mark between words where a speaker breathes: two beats of time.
 const BREATH = /[\s、。，．,.!?！？…「」『』（）()〜~♪]/u
-const PAUSE = 0.5
+const PAUSE = 2
 
 export function morae(s) {
   let n = 0
@@ -47,15 +47,23 @@ export function beatsOf(tok) {
   return n
 }
 
-// The line's last mora is held a beat longer: speakers and singers alike
-// lengthen the end of a phrase.
-const FINAL = 1
+// The line's last mora is held half a beat longer: speakers and singers
+// alike lengthen the end of a phrase.
+//
+// These two were set on real timing (2026-09-27): every word's start in
+// JSUT's 4,400 read sentences (sarulab-speech/jsut-label) and in the
+// 50 sung songs of the Kiritan database (r9y9/kiritan_singing), each
+// line placed by its beats between its first sound and its last. A
+// breath lasts about two beats, spoken or sung, and the last mora half
+// a beat more: the word lit is the word said 78% of the time in speech
+// and 49% in song, from 68% and 46% with half a beat and one.
+const FINAL = 0.5
 // How many measurements a track's pace or lead is read from, at least.
 const ENOUGH = 8
 // The share of a track's unmeasured lines at or under which its pace is
 // read off their cues: a line's cue is its speech and some slack, never
 // less, so the fullest lines are the closest to the speech's own pace.
-const FULLEST = 0.4
+const FULLEST = 0.2
 
 // The beats before each code point of a line: cum[o], cum[0] = 0. A mark
 // between two said words is a breath, whether or not the tokenizer made

@@ -418,3 +418,17 @@ YouTube's srv3 format (`<s t="…">` per word), in words that are often wrong.
   78→83% for one with only the recognised track, and 75→76%, 46→58% and
   75→81% for speech. The simulation is an argument, not a measurement of real
   tracks; a real track's errors should be checked against it.
+- **The beat model, set on real timing** (the same day). YouTube refuses caption
+  requests from a cloud machine (bot checks, region locks), so no real track
+  could be fetched to check the above against; but two public corpora time
+  every sound of real Japanese: JSUT's 4,400 read sentences
+  (sarulab-speech/jsut-label) and the Kiritan database's 50 sung songs
+  (r9y9/kiritan_singing). Measured on them, a pause between two words lasts
+  about two beats rather than half of one (it also carries the lengthening of
+  the mora before it), and a line's last mora half a beat more rather than one.
+  With a line's first and last sound known, the word lit is the word said 78%
+  of the time in speech and 49% in song, from 68% and 46%; carried at the
+  track's pace through a subtitle held after its speech, 62% and 37%, from 53%
+  and 34% (and 12% and 19% before the pace, spread over the held cue). Weighting
+  ん, っ and long vowels short, as both corpora time them, gained nothing
+  further and was left out.

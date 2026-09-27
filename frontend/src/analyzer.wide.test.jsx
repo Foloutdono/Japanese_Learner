@@ -295,28 +295,28 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
   // 字幕の流れ: the subtitle's words read out as they are said -- the
   // ones said whole, the one being said filling, the ones to come faded.
   // 雨を見ている, 36s to 40s, no times of its own: its eight beats (雨 2,
-  // を 1, 見 2, て 1, いる 2) and its last one held a beat longer, nine
+  // を 1, 見 2, て 1, いる 2) and its last held half a beat longer, 8.5
   // over four seconds. Each word's fill is written straight onto it,
   // every word in the same frame, so the one just said never reads faded
   // while the next one starts.
   it('lights the subtitle\'s words as they are said', async () => {
     await openVideo()
     expect($('.anl-subs__line[data-sung]')).toBeNull()
-    player.last.onTimeUpdate(37)
+    player.last.onTimeUpdate(37.1)
     // Read on the poll itself, paused: no frame is waited for.
     expect($('.anl-subs__line[data-sung]')).not.toBeNull()
-    expect(saidOf()).toEqual(['100%', '25%', '0%', '0%', '0%'])
+    expect(saidOf()).toEqual(['100%', '34%', '0%', '0%', '0%'])
     // The words to come are faded by the mask; the rule under each
     // word, the SRS's, is not.
     const toks = $$('.anl-subs__line .tok')
     expect(getComputedStyle(toks[2].querySelector('.tok__word')).maskImage).toContain('gradient')
     expect(getComputedStyle(toks[2]).borderBottomStyle).toBe('solid')
-    // The next line is read out in its turn: 駅 two beats of seven over
-    // four seconds (待つ, read by its letters, is three, and held one
-    // more), 0.4s into its 1.14.
-    player.last.onTimeUpdate(40.4)
+    // The next line is read out in its turn: 駅 two beats of 6.5 over
+    // four seconds (待つ, read by its letters, is three, and held half
+    // a beat more), 0.3s into its 1.23.
+    player.last.onTimeUpdate(40.3)
     await expect.poll(() => $('.anl-subs__count').textContent).toContain('2 / 2')
-    expect(saidOf()).toEqual(['35%', '0%', '0%'])
+    expect(saidOf()).toEqual(['24%', '0%', '0%'])
     // ...and past the last one's end, the line reads plain again.
     player.last.onTimeUpdate(44.5)
     expect($('.anl-subs__line[data-sung]')).toBeNull()
@@ -379,9 +379,9 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     expect($('.anl-subs__line[data-sung]')).not.toBeNull()
     expect(saidOf()).toEqual(['0%', '0%', '0%', '0%', '0%'])
     // 見 from 38s: 見, て, いる share 38s to 40s by their beats (2, 1,
-    // 2 and the last held one more), a third of a second each.
+    // 2 and the last held half a beat more).
     player.last.onTimeUpdate(38.1)
-    expect(saidOf()).toEqual(['100%', '100%', '15%', '0%', '0%'])
+    expect(saidOf()).toEqual(['100%', '100%', '14%', '0%', '0%'])
   })
 
   it('walks the speed and folds the video away without unmounting it', async () => {
