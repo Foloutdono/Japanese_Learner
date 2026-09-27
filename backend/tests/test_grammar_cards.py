@@ -13,7 +13,7 @@ from routes.profile import get_user_id
 GUID = "grammar-cards-test-user"
 
 CARD = {
-    "rule": "〜せいで", "meaning": "à cause de", "structure": "nom + の + せいで",
+    "rule": "〜せいで", "rule_reading": "", "meaning": "à cause de", "structure": "nom + の + せいで",
     "register": "neutral", "explanation": "Une cause **négative**.",
     "usage": "- Reproches", "careful": "Pour une cause positive, おかげで.",
     "sentences": [{"jp": "雨のせいで中止になった。", "tr": "À cause de la pluie, c'est annulé."}],
@@ -70,6 +70,32 @@ def test_a_card_keeps_its_whole_lesson(gclient):
     assert [s["kind"] for s in lesson["steps"]] == ["rule", "use", "careful"]
     assert lesson["examples"][0]["tr"] == "À cause de la pluie, c'est annulé."
     assert lesson["compare"] == [{"pattern": "〜おかげで", "text": "cause heureuse"}]
+
+
+def test_a_written_card_is_read_like_the_catalogues(gclient):
+    """The rule and the formation carry furigana: a rule that is a
+    catalogue point, its reading; the card and its lesson alike."""
+    deck_id = _deck(gclient)
+    fields = {"rule": "~の中で", "meaning": "among", "structure": "group + の中で"}
+    assert gclient.post(f"/api/decks/{deck_id}/cards", json={"fields": fields}).status_code == 200
+    (card,) = _study(gclient, deck_id, "grammar.flashcard.f2b")
+    assert card["grammar_furigana"] == [{"text": "~の"}, {"text": "中", "reading": "なか"}, {"text": "で"}]
+    assert card["lesson"]["pattern_furigana"] == card["grammar_furigana"]
+    assert "".join(p["text"] for p in card["structure_furigana"]) == "group + の中で"
+    assert card["lesson"]["structure_furigana"] == card["structure_furigana"]
+
+
+def test_a_written_cards_own_reading_is_the_one_it_prints(gclient):
+    """The reading the learner writes corrects the catalogue's or the
+    tokenizer's: 〜方 read ほう, and its formation's 方 with it."""
+    deck_id = _deck(gclient)
+    fields = {"rule": "〜方", "rule_reading": "ほう", "meaning": "direction", "structure": "noun + の + 方"}
+    r = gclient.post(f"/api/decks/{deck_id}/cards", json={"fields": fields})
+    assert r.status_code == 200, r.text
+    assert r.json()["fields"]["rule_reading"] == "ほう"
+    (card,) = _study(gclient, deck_id, "grammar.flashcard.f2b")
+    assert card["grammar_furigana"] == [{"text": "〜"}, {"text": "方", "reading": "ほう"}]
+    assert {"text": "方", "reading": "ほう"} in card["structure_furigana"]
 
 
 def test_fill_in_carries_the_sentences_translation(gclient):

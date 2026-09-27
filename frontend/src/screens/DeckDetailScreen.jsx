@@ -18,7 +18,7 @@ import { board } from '../stores/boarding'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
-import { ChoiceField, LongField, PairsField } from '../components/decks/CardFormFields'
+import { ChoiceField, LongField, PairsField, ReadingOfField } from '../components/decks/CardFormFields'
 import { pairRows } from '../components/decks/importCards'
 import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
@@ -797,6 +797,12 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           }
           if (f.kind === 'choice') {
             return <ChoiceField key={f.key} field={f} value={form[f.key]} onChange={v => setField(f.key, v)} />
+          }
+          if (f.reads) {
+            return (
+              <ReadingOfField key={f.key} field={f} value={form[f.key]} of={form[f.reads]}
+                onChange={v => setField(f.key, v)} />
+            )
           }
           if (f.picker === 'radical') {
             return (

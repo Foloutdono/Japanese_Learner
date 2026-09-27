@@ -92,8 +92,8 @@ class NormaliseTests(unittest.TestCase):
 
     def test_a_grammar_card_keeps_its_whole_lesson(self) -> None:
         raw = {
-            "rule": "〜てください", "meaning": "please do", "structure": "verb て-form + ください",
-            "register": "polite", "explanation": "Asks politely.", "usage": "- Requests",
+            "rule": "〜てください", "rule_reading": "", "meaning": "please do",
+            "structure": "verb て-form + ください", "register": "polite", "explanation": "Asks politely.", "usage": "- Requests",
             "careful": "Still an order.", "sentences": [{"jp": "読んでください。", "tr": "Please read."}],
             "compare": [{"pattern": "〜ないでください", "text": "asks not to"}],
         }
@@ -221,6 +221,19 @@ class GrammarLessonTests(unittest.TestCase):
         # translation, nothing marked, still printed.
         self.assertEqual(second["tr"], "")
         self.assertFalse(any(p.get("highlight") for p in second["furigana"]))
+
+    def test_the_rule_is_read_by_the_learners_reading_and_the_formation_by_the_rule(self) -> None:
+        lesson = grammar_lesson({"rule": "〜方", "rule_reading": "ほう", "meaning": "direction",
+                                 "structure": "noun + の + 方"})
+        self.assertEqual(lesson["pattern_furigana"], [{"text": "〜"}, {"text": "方", "reading": "ほう"}])
+        self.assertIn({"text": "方", "reading": "ほう"}, lesson["structure_furigana"])
+
+    def test_the_rules_reading_is_offered_but_never_moves_a_pasted_column(self) -> None:
+        grammar = next(s for s in describe() if s["key"] == "grammar")
+        reading = next(f for f in grammar["fields"] if f["key"] == "rule_reading")
+        self.assertEqual((reading["positional"], reading["reads"], reading["required"]), (False, "rule", False))
+        # every other field says nothing of either
+        self.assertFalse(any("positional" in f or "reads" in f for f in grammar["fields"] if f["key"] != "rule_reading"))
 
     def test_a_rival_is_not_a_door(self) -> None:
         lesson = grammar_lesson({"rule": "x", "meaning": "y",

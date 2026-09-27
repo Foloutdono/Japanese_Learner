@@ -7,6 +7,8 @@ import { useDialog } from '../../hooks/useDialog'
 import { ChevronIcon } from '../ui/Icons'
 import { ExampleSentence } from '../dictionary/ExampleSentence'
 import { StageMark } from './StageMark'
+import { FuriganaParts } from './Readings'
+import { joinRuns } from '../../domain/rubyRuns'
 import { inline, readUse, SHORT_RUN } from './lessonText'
 
 // ── 文法 — a grammar point, taught (plan 087) ───────────────────
@@ -38,6 +40,11 @@ import { inline, readUse, SHORT_RUN } from './lessonText'
 // compare / examples in the learner's language already.
 
 const STEP_KEY = { rule: 'glRule', use: 'glUse', careful: 'glCareful' }
+
+// A pattern or a formation, with its furigana where it has a reading.
+function Read({ text, parts }) {
+  return parts?.some(part => part.reading) ? <FuriganaParts parts={parts} /> : text
+}
 
 // A step's text: paragraphs, and a run of "- " lines as a list. One
 // delimiter (**…**) for emphasis -- the same, and the only, markup the
@@ -162,8 +169,17 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
             </div>
           </div>
           <div className="dict-plate__stack">
-            {point.structure && <div className="dict-plate__structure" lang="ja">{point.structure}</div>}
-            <h2 className="dict-plate__word dict-plate__word--word" lang="ja">{point.pattern}</h2>
+            {/* The formation and the pattern with their furigana, as
+                the dictionary's plate sets its headword's
+                (lesson_payload's structure_furigana and pattern_furigana). */}
+            {point.structure && (
+              <div className="dict-plate__structure" lang="ja">
+                <Read text={point.structure} parts={joinRuns(point.structure_furigana)} />
+              </div>
+            )}
+            <h2 className="dict-plate__word dict-plate__word--word" lang="ja">
+              <Read text={point.pattern} parts={point.pattern_furigana} />
+            </h2>
             {point.meaning && <div className="dict-plate__caption">{point.meaning}</div>}
           </div>
           <div className="dict-plate__stripe" aria-hidden="true" />
@@ -226,7 +242,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
                   <>
                     <span className="gl-door__body">
                       <span className="gl-door__head">
-                        <span className="gl-door__pattern" lang="ja">{rival.pattern}</span>
+                        <span className="gl-door__pattern" lang="ja"><Read text={rival.pattern} parts={rival.furigana} /></span>
                         {rival.level && <span className="gl-door__level">{rival.level}</span>}
                         {rival.meaning && <span className="gl-door__gloss"><LessonInline text={rival.meaning} /></span>}
                       </span>

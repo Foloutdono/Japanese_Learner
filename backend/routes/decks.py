@@ -2265,6 +2265,7 @@ def build_personal_card(row: dict, raw_id: str, mode: str,
     # inlined so this stays one dict literal per source, matching
     # the flat shape a builtin card's own payload has.
     extras = _custom_card_extras(spec, fields, m) if m else {}
+    lesson = grammar_lesson(fields) if spec.key == "grammar" else None
     return {
         "card_id": raw_id, "source": "custom",
         "structure": spec.key,
@@ -2286,8 +2287,13 @@ def build_personal_card(row: dict, raw_id: str, mode: str,
         "stage": stage,
         "review_preview": _build_review_preview(stage, preview),
         # The lesson behind a written grammar card's door, in the shape
-        # the catalogue's points are drawn in (structures.grammar_lesson).
-        **({"lesson": grammar_lesson(fields)} if spec.key == "grammar" else {}),
+        # the catalogue's points are drawn in (structures.grammar_lesson),
+        # and the rule and formation read as the lesson reads them.
+        **({
+            "lesson": lesson,
+            "grammar_furigana": lesson["pattern_furigana"],
+            "structure_furigana": lesson["structure_furigana"],
+        } if lesson else {}),
         **extras,
     }
 

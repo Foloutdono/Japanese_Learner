@@ -21,6 +21,7 @@ import { useReviewGates } from '../hooks/useReviewGates'
 // structures and a second copy of them is how two payload shapes drift
 // apart. See CardPrompt's own note.
 import CardPrompt from '../components/study/CardPrompt'
+import { GrammarChoice } from '../components/study/GrammarPieces'
 import { wordForm, structureKeyOf, normalizeCard } from '../domain/cardShape'
 import SessionError from '../components/study/SessionError'
 import ReadingsInput from '../components/study/ReadingsInput'
@@ -365,14 +366,15 @@ export default function StudyRun({ session }) {
               />
             )}
 
-            {/* Grammar MCQ — options are plain meaning/pattern strings,
-                for either the flashcard modes or fill_in's own "which
-                rule is at work" choices. */}
+            {/* Grammar MCQ — options are meanings (f2b) or patterns
+                (b2f, and fill_in's own "which rule is at work"), a
+                pattern read with its furigana. */}
             {/* The contrast drill's rivals (plan 087): the exercise, always on. */}
             {structureKey === 'grammar' && isContrast && (
               <MCQGrid
                 choices={nc.contrast?.choices ?? []}
                 correct={nc.grammar}
+                formatChoice={c => <GrammarChoice text={c} readings={nc.choices_furigana} />}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}
@@ -381,7 +383,9 @@ export default function StudyRun({ session }) {
               <MCQGrid
                 choices={cardHints[HINTS.CHOICES] ?? []}
                 correct={isFill || !isF2B ? nc.grammar : nc.meaning}
-                formatChoice={isFill || !isF2B ? undefined : formatGlossLine}
+                formatChoice={isFill || !isF2B
+                  ? c => <GrammarChoice text={c} readings={nc.choices_furigana} />
+                  : formatGlossLine}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer}
               />
             )}

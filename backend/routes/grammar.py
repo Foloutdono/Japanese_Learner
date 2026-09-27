@@ -12,14 +12,16 @@ from content.grammar_points_data import (
 from content.grammar_sentences_data import get_sentences
 from study import card_index
 from study.card_lookup import GRAMMAR_STATUS_MODES, card_stats
-from study.grammar_examples import example_payload
+from study.grammar_examples import (
+    example_payload, furigana_by_pattern, pattern_furigana, structure_furigana,
+)
 from study.grammar_lesson import contrast_payload, lesson_payload
 from study.modes import (
-    CONTRAST, GRAMMAR, GRADED_FOR_SOURCE, GRADED_ORDER_FOR_SOURCE, INDICE_CHOICES,
+    B2F, CONTRAST, GRAMMAR, GRADED_FOR_SOURCE, GRADED_ORDER_FOR_SOURCE, INDICE_CHOICES,
     INDICE_SENTENCES, Mode, require_mode,
 )
 from study.grammar_match import verifiable
-from study.mcq import pick_distractors
+from study.mcq import meaning_key, pick_distractors
 from pydantic import BaseModel
 
 # The grammar section runs on the project's own catalogue,
@@ -143,7 +145,14 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         # b2f: the meaning is shown, recall the pattern.
         "direction": m.direction,
         "grammar":   pattern,
+        # The pattern's furigana, printed on every face that shows it:
+        # a reading names no rule, so it gives nothing away -- the same
+        # call fill_in's sentence makes below -- and without it 〜の中で
+        # asks a learner who cannot read 中 a kanji question.
+        "grammar_furigana": pattern_furigana(pattern, entry.get("reading")),
         "structure": entry["structure"],
+        # The formation line read the same way (`structure_reading`).
+        "structure_furigana": structure_furigana(entry),
         "meaning":   gloss(entry, lang),
         "register":  entry.get("register"),
         # Current SRS stage, so the client can hand it straight back as
@@ -160,12 +169,21 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         # ask for the options mid-card, and a round trip at that moment
         # would stall the card.
         #
-        # fill_in shows the sentence and asks WHICH RULE is at work, so its
-        # options are patterns; the flashcards ask what a rule means, so
-        # theirs are meanings.
+        # fill_in shows the sentence and asks WHICH RULE is at work, and
+        # b2f shows the meaning and asks for the rule, so their options are
+        # patterns; f2b asks what a rule means, so its are meanings. (b2f
+        # was served meanings, while every run graded it against the
+        # pattern: no option could be right.)
         if m.base == "fill_in":
             choices = pick_distractors(
                 [g["pattern"] for g in grammar_list if verifiable(g["pattern"])],
+                lambda p: p, pattern,
+            ) + [pattern]
+        elif m.direction == B2F:
+            # Never a rival that means the same thing: two right answers.
+            same = meaning_key(gloss(entry, lang))
+            choices = pick_distractors(
+                [g["pattern"] for g in grammar_list if meaning_key(gloss(g, lang)) != same],
                 lambda p: p, pattern,
             ) + [pattern]
         else:
@@ -174,6 +192,9 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
             ) + [gloss(entry, lang)]
         random.shuffle(choices)
         payload["hints"][INDICE_CHOICES] = choices
+        if m.base == "fill_in" or m.direction == B2F:
+            # Options that are patterns are read like the rule is.
+            payload["choices_furigana"] = furigana_by_pattern(choices)
 
     if INDICE_SENTENCES in m.hints and sentences:
         # The translation travels with the sentence but the CLIENT keeps it
@@ -211,6 +232,7 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         if contrast is None:
             return None
         payload["contrast"] = contrast
+        payload["choices_furigana"] = furigana_by_pattern(contrast["choices"])
 
     if stage == "new":
         payload["lesson"] = lesson_payload(level, entry, lang)
@@ -371,7 +393,9 @@ def get_grammar_review_cards(level: str, lang: str = "fr", user_id: str = Depend
             "card_id":   raw_id,
             "raw_id":    raw_id,
             "grammar":   entry["pattern"],
+            "grammar_furigana": pattern_furigana(entry["pattern"], entry.get("reading")),
             "structure": entry["structure"],
+            "structure_furigana": structure_furigana(entry),
             "meaning":   gloss(entry, lang),
             "stage":     stage,
         })

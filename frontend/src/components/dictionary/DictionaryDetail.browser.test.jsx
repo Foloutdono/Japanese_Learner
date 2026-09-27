@@ -1465,6 +1465,26 @@ describe('the plate — a grammar point', () => {
     expect(getComputedStyle(plate.querySelector('.dict-plate__stripe')).backgroundColor).toBe(probe('backgroundColor', 'var(--line-jisho)'))
   })
 
+  it('reads a pattern with a kanji through its furigana, as a word is read, and its formation too', async () => {
+    const { root } = await renderEntry({
+      ...GRAMMAR, raw_id: 'grammar_N5_〜の中で', pattern: '〜の中で', structure: 'group + の中で',
+      pattern_furigana: [{ text: '〜の' }, { text: '中', reading: 'なか' }, { text: 'で' }],
+      structure_furigana: [{ text: 'group + の' }, { text: '中', reading: 'なか' }, { text: 'で' }],
+    })
+    const word = root.querySelector('.dict-plate__word')
+    expect(word.querySelectorAll('ruby')).toHaveLength(1)
+    expect(word.querySelector('rt').textContent).toBe('なか')
+    expect(word.textContent).toBe('〜の中なかで')
+    const structure = root.querySelector('.dict-plate__structure')
+    expect(structure.querySelector('rt').textContent).toBe('なか')
+    // The formation's reading at the size readings in running text are
+    // set at, and the formation still above the headword it sits over.
+    expect(getComputedStyle(structure.querySelector('rt')).fontSize).toBe(probe('fontSize', 'var(--fs-caption)'))
+    expect(structure.getBoundingClientRect().bottom).toBeLessThanOrEqual(word.getBoundingClientRect().top + 1)
+    // and the headword's reading is not printed over the formation
+    expect(word.querySelector('rt').getBoundingClientRect().top).toBeGreaterThanOrEqual(structure.getBoundingClientRect().bottom - 1)
+  })
+
   it('offers the add roundel where a screen can mine, as a ghost that adds to the remembered deck and says so', async () => {
     const mining = MINING()
     const { root } = await renderEntry(GRAMMAR, { ...NAV(), mining })

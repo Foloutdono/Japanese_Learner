@@ -9,6 +9,7 @@ import unittest
 from content.grammar_points_data import RICH_LEVELS
 from study import grammar_check
 from study.grammar_check import check_entry, problems, report
+from study.grammar_examples import _as_written, furigana_by_pattern, pattern_furigana, written_furigana
 
 
 def _good(**over) -> dict:
@@ -86,6 +87,31 @@ class GateRuleTests(unittest.TestCase):
         self.assertTrue(any("is empty" in p for p in self._problems(structure="  ")))
         doubled = {**CATALOGUE, "N4": [_good()]}
         self.assertTrue(any("also filed under" in p for p in check_entry("N5", _good(), doubled)))
+
+    def test_a_pattern_with_kanji_carries_a_reading_that_spells_it(self) -> None:
+        def reading_problems(**over):
+            return [p for p in self._problems(**over) if "reading" in p]
+        # the one a card prints over 中
+        self.assertEqual(reading_problems(pattern="〜の中で", reading="〜のなかで"), [])
+        self.assertTrue(any("carries its reading" in p for p in reading_problems(pattern="〜の中で")))
+        self.assertTrue(any("no kanji" in p for p in reading_problems(reading="〜てください")))
+        # a reading that is not the pattern with its kanji in kana
+        self.assertTrue(any("does not spell" in p for p in reading_problems(pattern="〜の中で", reading="〜のなかに")))
+        self.assertTrue(any("does not spell" in p for p in reading_problems(pattern="〜の中で", reading="〜の中で")))
+        self.assertTrue(any("not kana" in p for p in reading_problems(pattern="〜の中で", reading="〜のnakaで")))
+        self.assertTrue(any("whitespace" in p for p in reading_problems(pattern="〜の中で", reading=" 〜のなかで")))
+
+    def test_a_structure_with_kanji_carries_a_reading_that_spells_it(self) -> None:
+        def structure_problems(**over):
+            return [p for p in self._problems(**over) if "structure_reading" in p]
+        # English between the Japanese, spelled as written
+        self.assertEqual(structure_problems(structure="group + の中で", structure_reading="group + のなかで"), [])
+        self.assertTrue(any("carries its structure_reading" in p for p in structure_problems(structure="group + の中で")))
+        self.assertTrue(any("no kanji" in p for p in structure_problems(structure_reading="verb て-form + ください")))
+        self.assertTrue(any("does not spell" in p for p in structure_problems(
+            structure="group + の中で", structure_reading="noun + のなかで")))
+        self.assertTrue(any("not kana" in p for p in structure_problems(
+            structure="group + の中で", structure_reading="group + のnakaで")))
 
     def test_meaning_needs_both_languages(self) -> None:
         self.assertTrue(any("meaning.fr is empty" in p for p in self._problems(meaning={"en": "x y z", "fr": ""})))
@@ -176,3 +202,94 @@ class CatalogueTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PatternFuriganaTests(unittest.TestCase):
+    """What a grammar card prints over its pattern
+    (study/grammar_examples.pattern_furigana)."""
+
+    def test_the_reading_goes_over_the_kanji_and_nothing_else(self) -> None:
+        self.assertEqual(pattern_furigana("〜の中で", "〜のなかで"),
+                         [{"text": "〜の"}, {"text": "中", "reading": "なか"}, {"text": "で"}])
+        # per kanji where the run divides; brackets and 〜 as written
+        self.assertEqual(pattern_furigana("〜が（逆接）", "〜が（ぎゃくせつ）"), [
+            {"text": "〜が（"}, {"text": "逆", "reading": "ぎゃく"}, {"text": "接", "reading": "せつ"}, {"text": "）"},
+        ])
+
+    def test_no_reading_is_the_pattern_as_text(self) -> None:
+        self.assertEqual(pattern_furigana("〜てから", None), [{"text": "〜てから"}])
+        # a written card's own rule: kanji, but nothing to read it by
+        self.assertEqual(pattern_furigana("〜の中で", None), [{"text": "〜の中で"}])
+        # a reading that does not spell the pattern puts nothing over 〜
+        self.assertEqual(pattern_furigana("〜の中で", "〜のなかに"), [{"text": "〜の中で"}])
+
+    def test_every_catalogue_pattern_and_formation_with_kanji_is_read(self) -> None:
+        for level, entries in grammar_check.GRAMMAR_POINTS_BY_LEVEL.items():
+            for entry in entries:
+                for text, key in ((entry["pattern"], "reading"), (entry["structure"], "structure_reading")):
+                    parts = pattern_furigana(text, entry.get(key))
+                    with self.subTest(level=level, text=text):
+                        self.assertEqual("".join(p["text"] for p in parts), text)
+                        self.assertEqual(any(p.get("reading") for p in parts), key in entry)
+
+    def test_options_are_read_by_the_catalogue(self) -> None:
+        self.assertEqual(furigana_by_pattern(["〜の中で", "〜てから", "not a point"]), {
+            "〜の中で": [{"text": "〜の"}, {"text": "中", "reading": "なか"}, {"text": "で"}],
+        })
+
+
+class WrittenFuriganaTests(unittest.TestCase):
+    """A card the learner wrote: the catalogue's reading when its rule is
+    a catalogue point, the tokenizer's otherwise, always its own text."""
+
+    def test_a_catalogue_point_is_read_as_the_catalogue_reads_it(self) -> None:
+        self.assertEqual(written_furigana("〜中"), [{"text": "〜"}, {"text": "中", "reading": "ちゅう・じゅう"}])
+        # a typed tilde is still the point, and still the learner's tilde
+        self.assertEqual(written_furigana("~の中で"), [{"text": "~の"}, {"text": "中", "reading": "なか"}, {"text": "で"}])
+        self.assertEqual(written_furigana("～の中で")[0], {"text": "～の"})
+
+    def test_no_kanji_is_the_text(self) -> None:
+        self.assertEqual(written_furigana("〜てから"), [{"text": "〜てから"}])
+        self.assertEqual(written_furigana(""), [])
+
+    def test_the_tokenizers_parts_keep_the_spaces_it_drops(self) -> None:
+        # align_sentence's parts for "verb て-form + 見る": MeCab drops the
+        # spaces, and a formation is English between its Japanese.
+        parts = [{"text": "verbて-form+"}, {"text": "見", "reading": "み", "word": 4}, {"text": "る"}]
+        self.assertEqual(_as_written("verb て-form + 見る", parts), [
+            {"text": "verb て-form + "}, {"text": "見", "reading": "み"}, {"text": "る"},
+        ])
+        self.assertEqual(_as_written(" 方 ", [{"text": "方", "reading": "かた"}]),
+                         [{"text": " "}, {"text": "方", "reading": "かた"}, {"text": " "}])
+        # parts that spell something else are no furigana at all
+        self.assertEqual(_as_written("見る", [{"text": "観", "reading": "み"}, {"text": "る"}]), [{"text": "見る"}])
+
+    def test_the_learners_reading_comes_first_where_it_spells_the_rule(self) -> None:
+        # over the catalogue's own (〜方 is かた there) ...
+        self.assertEqual(written_furigana("〜方", "ほう"), [{"text": "〜"}, {"text": "方", "reading": "ほう"}])
+        # ... leniently: the 〜 left out, a typed tilde, katakana for hiragana
+        nakade = [{"text": "〜の"}, {"text": "中", "reading": "なか"}, {"text": "で"}]
+        self.assertEqual(written_furigana("〜の中で", "のなかで"), nakade)
+        self.assertEqual(written_furigana("〜の中で", "~のなかで"), nakade)
+        self.assertEqual(written_furigana("〜の中で", "ノナカデ"), nakade)
+        # and not at all where it does not spell it: the catalogue reads it
+        self.assertEqual(written_furigana("〜の中で", "なか"), nakade)
+        self.assertEqual(written_furigana("〜の中で", "〜のnakaで"), nakade)
+
+    def test_a_formation_is_read_as_its_rule_is(self) -> None:
+        rule = written_furigana("〜方", "かた")
+        self.assertEqual(written_furigana("verb stem + 方", known=rule),
+                         [{"text": "verb stem + "}, {"text": "方", "reading": "かた"}])
+        # a kanji the rule does not hold is left to the tokenizer (or to
+        # nothing without one), and never re-reads one the rule does
+        parts = written_furigana("verb stem + 方 ／ 前", known=rule)
+        self.assertEqual("".join(p["text"] for p in parts), "verb stem + 方 ／ 前")
+        self.assertIn({"text": "方", "reading": "かた"}, parts)
+
+    def test_anything_else_is_read_by_the_tokenizer(self) -> None:
+        from study import morphology
+        if morphology.tokenize("見る") is None:
+            self.skipTest("no tokenizer installed")
+        parts = written_furigana("〜に行く前に")
+        self.assertEqual("".join(p["text"] for p in parts), "〜に行く前に")
+        self.assertEqual([(p["text"], p["reading"]) for p in parts if p.get("reading")], [("行", "い"), ("前", "まえ")])

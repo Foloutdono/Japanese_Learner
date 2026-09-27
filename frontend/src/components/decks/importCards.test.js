@@ -7,6 +7,7 @@ const GRAMMAR = {
   key: 'grammar', source: 'grammar', front_key: 'rule', back_key: 'meaning',
   fields: [
     { key: 'rule', kind: 'text', required: true },
+    { key: 'rule_reading', kind: 'text', required: false, positional: false, reads: 'rule' },
     { key: 'meaning', kind: 'text', required: true },
     { key: 'structure', kind: 'text', required: false },
     { key: 'register', kind: 'choice', required: false, options: ['neutral', 'polite', 'casual', 'formal', 'written'] },
@@ -44,6 +45,8 @@ describe('splitRows', () => {
 describe('the columns without a header', () => {
   it('are the one-cell fields, the notes, then the first repeatable field', () => {
     const { once, repeat } = columnsFor(GRAMMAR)
+    // The rule's reading, added after cards were pasted this way, is not
+    // among them: every column after it would have moved.
     expect(once.map(c => c.key)).toEqual(['rule', 'meaning', 'structure', 'register', 'explanation', 'usage', 'careful', 'notes'])
     expect(repeat).toEqual([{ key: 'sentences', part: 'jp' }, { key: 'sentences', part: 'tr' }])
   })
@@ -54,7 +57,7 @@ describe('the columns without a header', () => {
     expect(header).toBe(false)
     expect(cards).toEqual([{
       fields: {
-        rule: '〜てください', meaning: 'please do', structure: 'verb て + ください', register: 'polite',
+        rule: '〜てください', rule_reading: '', meaning: 'please do', structure: 'verb て + ください', register: 'polite',
         explanation: 'Asks.', usage: '- Requests', careful: 'An order.',
         sentences: [{ jp: '読んでください。', tr: 'Please read.' }, { jp: '書いてください。', tr: '' }],
         compare: [],
@@ -89,6 +92,12 @@ describe('a header row', () => {
       sentences: [{ jp: '雨のせいで中止。', tr: 'À cause de la pluie.' }, { jp: '彼のせいだ。', tr: 'C’est sa faute.' }],
       compare: [{ pattern: '〜おかげで', text: 'cause heureuse' }],
     })
+  })
+
+  it('lands the rule’s reading where a column names it', () => {
+    const { cards, ignored } = readCards('Règle\tLecture\tSens\n〜の中で\tのなかで\tparmi', '\t', '\n', GRAMMAR, fr)
+    expect(ignored).toEqual([])
+    expect(cards[0].fields).toMatchObject({ rule: '〜の中で', rule_reading: 'のなかで', meaning: 'parmi' })
   })
 
   it('reports the columns it does not know', () => {

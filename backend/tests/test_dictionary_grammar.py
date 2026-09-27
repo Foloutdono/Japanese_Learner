@@ -15,8 +15,8 @@ from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss, grammar_
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 TOTAL = sum(len(GRAMMAR_POINTS_BY_LEVEL[lvl]) for lvl in LEVELS)
-FIELDS = {"type", "raw_id", "level", "pattern", "structure", "meaning", "register",
-          "steps", "compare", "examples", "status", "app_card"}
+FIELDS = {"type", "raw_id", "level", "pattern", "pattern_furigana", "structure", "structure_furigana",
+          "meaning", "register", "steps", "compare", "examples", "status", "app_card"}
 
 
 def _page(client, **params):

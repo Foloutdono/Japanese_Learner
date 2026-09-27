@@ -356,7 +356,9 @@
   },
   {
     "pattern": "〜に違いない",
+    "reading": "〜にちがいない",
     "structure": "plain form + に違いない",
+    "structure_reading": "plain form + にちがいない",
     "meaning": {
       "en": "must be, surely is (confident conclusion)",
       "fr": "ce doit être, sûrement (conclusion assurée)"
@@ -644,7 +646,9 @@
   },
   {
     "pattern": "〜に対して",
+    "reading": "〜にたいして",
     "structure": "noun + に対して",
+    "structure_reading": "noun + にたいして",
     "meaning": {
       "en": "towards, in regard to",
       "fr": "envers, à l'égard de"
@@ -783,7 +787,9 @@
   },
   {
     "pattern": "〜に関して",
+    "reading": "〜にかんして",
     "structure": "noun + に関して",
+    "structure_reading": "noun + にかんして",
     "meaning": {
       "en": "regarding, concerning",
       "fr": "concernant, au sujet de"
@@ -850,7 +856,9 @@
   },
   {
     "pattern": "〜通りに",
+    "reading": "〜とおりに",
     "structure": "noun/verb dictionary form + 通りに",
+    "structure_reading": "noun/verb dictionary form + とおりに",
     "meaning": {
       "en": "as, according to, in line with",
       "fr": "comme, conformément à"
@@ -989,7 +997,9 @@
   },
   {
     "pattern": "〜一方で",
+    "reading": "〜いっぽうで",
     "structure": "plain form + 一方で",
+    "structure_reading": "plain form + いっぽうで",
     "meaning": {
       "en": "on the other hand, while also",
       "fr": "d'un autre côté, tout en"
@@ -1195,6 +1205,7 @@
   },
   {
     "pattern": "使役受身形 〜させられる",
+    "reading": "しえきうけみけい 〜させられる",
     "structure": "verb causative-passive stem + られる",
     "meaning": {
       "en": "be made to do something one didn't want to",
@@ -1830,7 +1841,9 @@
   },
   {
     "pattern": "〜最中に",
+    "reading": "〜さいちゅうに",
     "structure": "verb ている-form / noun + の + 最中に",
+    "structure_reading": "verb ている-form / noun + の + さいちゅうに",
     "meaning": {
       "en": "right in the middle of",
       "fr": "en plein milieu de"
@@ -1902,7 +1915,9 @@
   },
   {
     "pattern": "〜際に",
+    "reading": "〜さいに",
     "structure": "verb dictionary/た form / noun + の + 際に",
+    "structure_reading": "verb dictionary/た form / noun + の + さいに",
     "meaning": {
       "en": "on the occasion of, when (formal)",
       "fr": "à l'occasion de, lors de (formel)"
@@ -3312,7 +3327,9 @@
   },
   {
     "pattern": "〜以上",
+    "reading": "〜いじょう",
     "structure": "plain form + 以上",
+    "structure_reading": "plain form + いじょう",
     "meaning": {
       "en": "given that it is so, it follows that",
       "fr": "dès lors que, puisque"
@@ -3379,7 +3396,9 @@
   },
   {
     "pattern": "〜上で",
+    "reading": "〜うえで",
     "structure": "verb た-form / noun + の + 上で",
+    "structure_reading": "verb た-form / noun + の + うえで",
     "meaning": {
       "en": "after completing a first step",
       "fr": "après avoir fait (une première étape)"
@@ -3451,7 +3470,9 @@
   },
   {
     "pattern": "〜限り",
+    "reading": "〜かぎり",
     "structure": "plain form + 限り",
+    "structure_reading": "plain form + かぎり",
     "meaning": {
       "en": "for as long as the condition holds",
       "fr": "tant que, dans la mesure où"
@@ -4876,7 +4897,9 @@
   },
   {
     "pattern": "〜途中で",
+    "reading": "〜とちゅうで",
     "structure": "verb dictionary form／noun + の + 途中で",
+    "structure_reading": "verb dictionary form／noun + の + とちゅうで",
     "meaning": {
       "en": "on the way, partway through",
       "fr": "en chemin, en cours de"
@@ -4948,7 +4971,9 @@
   },
   {
     "pattern": "〜気味",
+    "reading": "〜ぎみ",
     "structure": "noun／verb ます-stem + 気味",
+    "structure_reading": "noun／verb ます-stem + ぎみ",
     "meaning": {
       "en": "a touch of, a tendency towards (usually unwelcome)",
       "fr": "un peu…, une tendance à… (souvent fâcheuse)"
@@ -5020,7 +5045,9 @@
   },
   {
     "pattern": "〜的",
+    "reading": "〜てき",
     "structure": "noun + 的（な／に）",
+    "structure_reading": "noun + てき（な／に）",
     "meaning": {
       "en": "-ic, -al: turns a noun into a な-adjective",
       "fr": "-ique, -el : fait d'un nom un adjectif en な"
@@ -5156,7 +5183,9 @@
   },
   {
     "pattern": "〜らしい（典型）",
+    "reading": "〜らしい（てんけい）",
     "structure": "noun + らしい（典型） + noun／です",
+    "structure_reading": "noun + らしい（てんけい） + noun／です",
     "meaning": {
       "en": "typical of, true to what a … should be",
       "fr": "digne de, typique de"
@@ -5295,7 +5324,9 @@
   },
   {
     "pattern": "〜に比べて",
+    "reading": "〜にくらべて",
     "structure": "noun + に比べて",
+    "structure_reading": "noun + にくらべて",
     "meaning": {
       "en": "compared with",
       "fr": "comparé à, par rapport à"
@@ -5367,7 +5398,9 @@
   },
   {
     "pattern": "〜代わりに",
+    "reading": "〜かわりに",
     "structure": "noun + の + 代わりに ／ verb plain form + 代わりに",
+    "structure_reading": "noun + の + かわりに ／ verb plain form + かわりに",
     "meaning": {
       "en": "instead of; in exchange for",
       "fr": "à la place de ; en échange de"
@@ -6000,7 +6033,9 @@
   },
   {
     "pattern": "〜上に",
+    "reading": "〜うえに",
     "structure": "plain form／noun + の + 上に",
+    "structure_reading": "plain form／noun + の + うえに",
     "meaning": {
       "en": "on top of that, in addition",
       "fr": "en plus de cela, de surcroît"
@@ -6576,7 +6611,9 @@
   },
   {
     "pattern": "〜通す",
+    "reading": "〜とおす",
     "structure": "verb ます-stem + 通す",
+    "structure_reading": "verb ます-stem + とおす",
     "meaning": {
       "en": "do all the way through, to the end",
       "fr": "faire jusqu'au bout, d'un bout à l'autre"
@@ -6647,7 +6684,9 @@
   },
   {
     "pattern": "〜化",
+    "reading": "〜か",
     "structure": "noun + 化（する）",
+    "structure_reading": "noun + か（する）",
     "meaning": {
       "en": "-ization: turning into, becoming",
       "fr": "-isation : le fait de devenir"
@@ -6914,7 +6953,9 @@
   },
   {
     "pattern": "〜気がする",
+    "reading": "〜きがする",
     "structure": "plain form + 気がする ／ noun + の + 気がする",
+    "structure_reading": "plain form + きがする ／ noun + の + きがする",
     "meaning": {
       "en": "I have a feeling that, it seems to me",
       "fr": "j'ai l'impression que, il me semble que"
@@ -6986,7 +7027,9 @@
   },
   {
     "pattern": "別に〜ない",
+    "reading": "べつに〜ない",
     "structure": "別に + verb / adjective ない-form",
+    "structure_reading": "べつに + verb / adjective ない-form",
     "meaning": {
       "en": "not particularly",
       "fr": "pas particulièrement"
@@ -7269,7 +7312,9 @@
   },
   {
     "pattern": "〜か何か",
+    "reading": "〜かなにか",
     "structure": "noun + か何か",
+    "structure_reading": "noun + かなにか",
     "meaning": {
       "en": "… or something",
       "fr": "… ou quelque chose comme ça"
@@ -7413,7 +7458,9 @@
   },
   {
     "pattern": "〜に代わって",
+    "reading": "〜にかわって",
     "structure": "noun + に代わって",
+    "structure_reading": "noun + にかわって",
     "meaning": {
       "en": "on behalf of, in place of (someone)",
       "fr": "au nom de, à la place de (quelqu'un)"
@@ -7552,7 +7599,9 @@
   },
   {
     "pattern": "〜とは限らない",
+    "reading": "〜とはかぎらない",
     "structure": "plain form + とは限らない",
+    "structure_reading": "plain form + とはかぎらない",
     "meaning": {
       "en": "not necessarily, doesn't always",
       "fr": "pas forcément, pas toujours"
@@ -7686,7 +7735,9 @@
   },
   {
     "pattern": "〜以外",
+    "reading": "〜いがい",
     "structure": "noun + 以外（は／に／の）",
+    "structure_reading": "noun + いがい（は／に／の）",
     "meaning": {
       "en": "except, other than",
       "fr": "sauf, en dehors de"

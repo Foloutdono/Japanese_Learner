@@ -269,7 +269,9 @@
   },
   {
     "pattern": "〜極まりない",
+    "reading": "〜きわまりない",
     "structure": "な-adjective stem + 極まりない",
+    "structure_reading": "な-adjective stem + きわまりない",
     "meaning": {
       "en": "extremely, in the extreme",
       "fr": "extrêmement, au plus haut point"
@@ -1140,7 +1142,9 @@
   },
   {
     "pattern": "〜が早いか",
+    "reading": "〜がはやいか",
     "structure": "verb dictionary form + が早いか",
+    "structure_reading": "verb dictionary form + がはやいか",
     "meaning": {
       "en": "no sooner than, the instant",
       "fr": "à peine... que, aussitôt"
@@ -1207,7 +1211,9 @@
   },
   {
     "pattern": "〜や否や",
+    "reading": "〜やいなや",
     "structure": "verb dictionary form + や否や",
+    "structure_reading": "verb dictionary form + やいなや",
     "meaning": {
       "en": "as soon as, hardly ... when",
       "fr": "dès que, à peine... que"
@@ -2011,7 +2017,9 @@
   },
   {
     "pattern": "〜ならいざ知らず",
+    "reading": "〜ならいざしらず",
     "structure": "noun / plain form + ならいざ知らず",
+    "structure_reading": "noun / plain form + ならいざしらず",
     "meaning": {
       "en": "I couldn't say about that, but ...",
       "fr": "passe encore pour..., mais"
@@ -2346,7 +2354,9 @@
   },
   {
     "pattern": "〜を余儀なくされる",
+    "reading": "〜をよぎなくされる",
     "structure": "noun + を余儀なくされる",
+    "structure_reading": "noun + をよぎなくされる",
     "meaning": {
       "en": "be forced into, left with no other choice",
       "fr": "être contraint de"
@@ -2413,7 +2423,9 @@
   },
   {
     "pattern": "〜を皮切りに",
+    "reading": "〜をかわきりに",
     "structure": "noun + を皮切りに",
+    "structure_reading": "noun + をかわきりに",
     "meaning": {
       "en": "starting from, with ... as the opening",
       "fr": "à partir de, en commençant par"
@@ -2480,7 +2492,9 @@
   },
   {
     "pattern": "〜に至る",
+    "reading": "〜にいたる",
     "structure": "verb dictionary form / noun + に至る",
+    "structure_reading": "verb dictionary form / noun + にいたる",
     "meaning": {
       "en": "reach the point of, culminate in",
       "fr": "aboutir à, en arriver à"
@@ -2547,7 +2561,9 @@
   },
   {
     "pattern": "〜の極み",
+    "reading": "〜のきわみ",
     "structure": "noun + の極み",
+    "structure_reading": "noun + のきわみ",
     "meaning": {
       "en": "the height of, the utmost",
       "fr": "le comble de"
@@ -4549,7 +4565,9 @@
   },
   {
     "pattern": "〜を禁じ得ない",
+    "reading": "〜をきんじえない",
     "structure": "emotion noun + を禁じ得ない",
+    "structure_reading": "emotion noun + をきんじえない",
     "meaning": {
       "en": "one cannot hold the feeling back",
       "fr": "ne pas pouvoir réprimer (un sentiment)"
@@ -5286,7 +5304,9 @@
   },
   {
     "pattern": "〜に即して",
+    "reading": "〜にそくして",
     "structure": "noun + に即して／に即した",
+    "structure_reading": "noun + にそくして／にそくした",
     "meaning": {
       "en": "in line with, in accordance with (facts, rules)",
       "fr": "conformément à, en fonction de (faits, règles)"
@@ -5353,7 +5373,9 @@
   },
   {
     "pattern": "〜に足る",
+    "reading": "〜にたる",
     "structure": "verb dictionary form / noun + に足る",
+    "structure_reading": "verb dictionary form / noun + にたる",
     "meaning": {
       "en": "worthy of, enough to",
       "fr": "digne de, qui mérite"
@@ -5487,7 +5509,9 @@
   },
   {
     "pattern": "〜の至り",
+    "reading": "〜のいたり",
     "structure": "noun + の至り",
+    "structure_reading": "noun + のいたり",
     "meaning": {
       "en": "the height of (a feeling), utterly (formal)",
       "fr": "le comble de, extrêmement (formel)"
@@ -5621,7 +5645,9 @@
   },
   {
     "pattern": "〜一つ〜ない",
+    "reading": "〜ひとつ〜ない",
     "structure": "noun + 一つ + verb ない-form",
+    "structure_reading": "noun + ひとつ + verb ない-form",
     "meaning": {
       "en": "not even a single",
       "fr": "pas même un seul"
@@ -5822,7 +5848,9 @@
   },
   {
     "pattern": "〜を限りに",
+    "reading": "〜をかぎりに",
     "structure": "noun (a time) + を限りに",
+    "structure_reading": "noun (a time) + をかぎりに",
     "meaning": {
       "en": "as of, from... on (the last time)",
       "fr": "à compter de, (pour la dernière fois) à partir de"
@@ -5889,7 +5917,9 @@
   },
   {
     "pattern": "〜を踏まえて",
+    "reading": "〜をふまえて",
     "structure": "noun + を踏まえて",
+    "structure_reading": "noun + をふまえて",
     "meaning": {
       "en": "on the basis of, taking into account",
       "fr": "en s'appuyant sur, compte tenu de"
@@ -6090,7 +6120,9 @@
   },
   {
     "pattern": "〜といっても過言ではない",
+    "reading": "〜といってもかごんではない",
     "structure": "plain form + といっても過言ではない",
+    "structure_reading": "plain form + といってもかごんではない",
     "meaning": {
       "en": "it is no exaggeration to say",
       "fr": "il n'est pas exagéré de dire que"
@@ -6291,7 +6323,9 @@
   },
   {
     "pattern": "〜と思いきや",
+    "reading": "〜とおもいきや",
     "structure": "plain form + と思いきや",
+    "structure_reading": "plain form + とおもいきや",
     "meaning": {
       "en": "I thought..., but contrary to expectation",
       "fr": "je croyais que..., mais en fait"
@@ -6693,7 +6727,9 @@
   },
   {
     "pattern": "〜と相まって",
+    "reading": "〜とあいまって",
     "structure": "noun + と相まって",
+    "structure_reading": "noun + とあいまって",
     "meaning": {
       "en": "combined with, coupled with",
       "fr": "conjugué à, allié à"
@@ -6961,7 +6997,9 @@
   },
   {
     "pattern": "〜たが最後",
+    "reading": "〜たがさいご",
     "structure": "verb た-form + が最後／ら最後 (〜たが最後／〜たら最後)",
+    "structure_reading": "verb た-form + がさいご／らさいご (〜たがさいご／〜たらさいご)",
     "meaning": {
       "en": "once (something happens), there's no going back",
       "fr": "une fois que..., c'est irrémédiable"
@@ -7028,7 +7066,9 @@
   },
   {
     "pattern": "〜手前",
+    "reading": "〜てまえ",
     "structure": "verb た-form / noun + の + 手前",
+    "structure_reading": "verb た-form / noun + の + てまえ",
     "meaning": {
       "en": "given one's position (I can't back out)",
       "fr": "vu ma position, par égard pour"
@@ -7095,7 +7135,9 @@
   },
   {
     "pattern": "〜に越したことはない",
+    "reading": "〜にこしたことはない",
     "structure": "plain form / noun + に越したことはない",
+    "structure_reading": "plain form / noun + にこしたことはない",
     "meaning": {
       "en": "nothing beats, it's best to",
       "fr": "rien ne vaut, le mieux est de"
@@ -7162,7 +7204,9 @@
   },
   {
     "pattern": "〜ないとも限らない",
+    "reading": "〜ないともかぎらない",
     "structure": "verb ない-form + とも限らない",
+    "structure_reading": "verb ない-form + ともかぎらない",
     "meaning": {
       "en": "it's not impossible that, might just",
       "fr": "il n'est pas exclu que, on ne sait jamais"
@@ -7296,7 +7340,9 @@
   },
   {
     "pattern": "〜には及ばない",
+    "reading": "〜にはおよばない",
     "structure": "verb dictionary form / noun + には及ばない",
+    "structure_reading": "verb dictionary form / noun + にはおよばない",
     "meaning": {
       "en": "no need to; not as good as",
       "fr": "inutile de ; ne pas égaler"
@@ -7698,7 +7744,9 @@
   },
   {
     "pattern": "〜に限ったことではない",
+    "reading": "〜にかぎったことではない",
     "structure": "noun + に限ったことではない",
+    "structure_reading": "noun + にかぎったことではない",
     "meaning": {
       "en": "not limited to, not just",
       "fr": "ne se limite pas à, pas seulement"

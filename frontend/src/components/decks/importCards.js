@@ -78,7 +78,10 @@ const REPEATS = new Set(['lines', 'pairs'])
  */
 export function columnsFor(structure) {
   const fields = structure?.fields ?? []
-  const once = fields.filter(f => !REPEATS.has(f.kind)).map(f => ({ key: f.key }))
+  // A field declared `positional: false` (a grammar card's reading) is
+  // left out: it came after cards were pasted this way, and would move
+  // every column behind it. A header still names it.
+  const once = fields.filter(f => !REPEATS.has(f.kind) && f.positional !== false).map(f => ({ key: f.key }))
   once.push({ key: 'notes' })
   const rep = fields.find(f => REPEATS.has(f.kind)) ?? null
   const repeat = rep
@@ -102,6 +105,7 @@ const ALIASES = {
   radical: ['radical', 'cle'],
   word: ['word', 'mot', 'vocab', 'vocabulary', 'vocabulaire', 'expression'],
   rule: ['rule', 'regle', 'regle de grammaire', 'grammar rule', 'pattern', 'grammar', 'grammaire', 'point'],
+  rule_reading: ['reading', 'lecture', 'furigana', 'yomi', 'kana', 'reading of the rule', 'lecture de la regle'],
   structure: ['structure', 'formation', 'form', 'forme', 'construction', 'conjugaison'],
   register: ['register', 'registre', 'niveau de langue', 'politesse'],
   explanation: ['explanation', 'explication', 'description', 'lesson', 'lecon'],

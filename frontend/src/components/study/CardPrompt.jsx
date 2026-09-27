@@ -2,7 +2,9 @@ import {
   InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
 } from './QuizComponents'
 import { FuriganaWord } from './Readings'
-import { GrammarRule, GrammarAnswer, GrammarFillSentence, GrammarContrastSentence } from './GrammarPieces'
+import {
+  GrammarRule, GrammarStructure, GrammarAnswer, GrammarFillSentence, GrammarContrastSentence,
+} from './GrammarPieces'
 import { RadicalAnswer } from './RadicalPieces'
 import PromptCard from './PromptCard'
 import { speakJapanese, playKana, kanaSound } from '../../lib/audio'
@@ -328,8 +330,8 @@ export default function CardPrompt({
                 : isF2B
                   ? (
                     <>
-                      <GrammarRule text={c.grammar} size={52} />
-                      {c.structure && <div className="grammar-structure">{c.structure}</div>}
+                      <GrammarRule text={c.grammar} parts={c.grammar_furigana} size={52} />
+                      <GrammarStructure text={c.structure} parts={c.structure_furigana} />
                     </>
                   )
                   : <MeaningDisplay meaning={c.meaning} size={34} />
@@ -348,8 +350,8 @@ export default function CardPrompt({
                   ? <MeaningDisplay meaning={c.meaning} size={30} />
                   : (
                     <>
-                      <GrammarRule text={c.grammar} size={44} />
-                      {c.structure && <div className="grammar-structure">{c.structure}</div>}
+                      <GrammarRule text={c.grammar} parts={c.grammar_furigana} size={44} />
+                      <GrammarStructure text={c.structure} parts={c.structure_furigana} />
                     </>
                   )
             }
@@ -367,8 +369,8 @@ export default function CardPrompt({
               : isF2B
                 ? (
                   <>
-                    <GrammarRule text={c.grammar} size={52} />
-                    {c.structure && <div className="grammar-structure">{c.structure}</div>}
+                    <GrammarRule text={c.grammar} parts={c.grammar_furigana} size={52} />
+                    <GrammarStructure text={c.structure} parts={c.structure_furigana} />
                   </>
                 )
                 : <MeaningDisplay meaning={c.meaning} size={34} />}
