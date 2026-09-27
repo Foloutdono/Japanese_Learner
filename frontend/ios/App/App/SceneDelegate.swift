@@ -8,7 +8,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-        // The bridge with the app's own plugin on it (plan 155).
+        // The bridge with the app's own plugin on it (plan 156).
         window?.rootViewController = TsujiBridgeViewController()
         window?.makeKeyAndVisible()
 

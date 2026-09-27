@@ -11,7 +11,7 @@ import { Seg } from '../chrome/Console'
 import { ChevronIcon } from '../ui/Icons'
 import { SettingsPage, Slip } from './SettingsPage'
 
-// ── 通知 — Settings › Notifications (plan 155) ──────────────────
+// ── 通知 — Settings › Notifications (plan 156) ──────────────────
 // The shells only (SettingsScreen leaves the row and the page out of
 // the web): the daily train on or off, its hour -- a door to the
 // ride's own page, the one place the hour is set -- and the next

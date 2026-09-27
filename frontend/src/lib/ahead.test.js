@@ -5,7 +5,7 @@ import {
 } from './ahead'
 import en from '../locales/en/index.js'
 
-// ── 発車案内 — the day ahead (plan 155) ────────────────────────
+// ── 発車案内 — the day ahead (plan 156) ────────────────────────
 // What the notifications and the widget say is decided here, from the
 // answer of GET /api/today/ahead. The rules: one a day at most, none on
 // a day with nothing due, none today once the learner has ridden, and

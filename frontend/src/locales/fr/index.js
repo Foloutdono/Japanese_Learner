@@ -1867,7 +1867,7 @@ const boarding = {
   brdAllow: 'Autoriser les notifications',
   brdNotNow: 'Pas maintenant',
   // ── 発車案内 — le rappel du jour tiré de la file, le widget et
-  // Réglages › Notifications (plan 155). Le titre et le texte du rappel
+  // Réglages › Notifications (plan 156). Le titre et le texte du rappel
   // disent ce que le portillon tiendra à l’heure de l’apprenant.
   nudgeTitle: (time, n) => `Ton train de ${time} · ${n} ${n > 1 ? 'cartes' : 'carte'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'Environ une minute' : `Environ ${m} min`),

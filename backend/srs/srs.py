@@ -1266,7 +1266,7 @@ class SRSEngine:
 
         `until` moves "now" forward: the rows that WILL be owed by then
         if nothing is reviewed in between -- what the day ahead reads to
-        say what a notification at 19:00 will find (plan 155).
+        say what a notification at 19:00 will find (plan 156).
 
         get_due_cards answers the same question one mode and one deck at
         a time, which is what a section session needs and what made a
@@ -1371,7 +1371,7 @@ class SRSEngine:
         """Whether this learner has answered anything since `since` --
         the learner's own midnight, which the device knows and the
         server does not. The daily nudge stays silent on a day already
-        ridden (plan 155)."""
+        ridden (plan 156)."""
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
@@ -1390,7 +1390,7 @@ class SRSEngine:
                           limit: int, kinds: tuple[str, ...] = ()) -> list[tuple[str, str]]:
         """(card_id, one of its modes) for cards the learner knows and
         will not be asked for before `after` in ANY mode -- the words a
-        widget may print with their answer (plan 155). A card due
+        widget may print with their answer (plan 156). A card due
         sooner is left out, because seeing its answer on the lock
         screen is a free pass on the review that tests it.
 

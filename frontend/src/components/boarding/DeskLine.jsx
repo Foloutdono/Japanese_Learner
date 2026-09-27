@@ -1,6 +1,8 @@
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { useCredits } from '../../stores/credits'
 import { SIGNUP_BONUS } from '../../domain/credits'
+import { DeskMast } from '../chrome/DeskMast'
 import { BackChevron } from './icons'
 import { useCountUp, stillPreferred } from './countUp'
 
@@ -26,59 +28,150 @@ import { useCountUp, stillPreferred } from './countUp'
 // once the plan is built -- the screen that issued it folds away on the
 // desk, and "Enter the station" is on the plan (PlanStep's `last`).
 //
+// ── 仕上げ — the line as one rail, and your train on it (plan 155) ──
+// The line was drawn a half-row at a time, each stop lighting its own
+// wash and ring, so a Continue made the lit stop jump: one row went
+// dark and another came on in the same frame, while the paper beside
+// it was still pulling. Now the line is what it draws. One rail from
+// the first stop to the last, the stretch ridden filled over it, and
+// the lit stop's wash and ring are one object -- your train -- that
+// runs down the rail to the stop being asked, and back up it when a
+// door or Back is taken. The rows are measured (a stop whose answer
+// wraps is a taller row), so the train stops on the dot whatever the
+// row's height; the plan built, it runs to the last stop and fades,
+// the whole line ridden. First drawn, the line is laid: the rail
+// draws down from the head, the stops arrive in order, and the train
+// stands at the first. An answer arrives on its stop rather than
+// appearing on it. Under reduced motion every one of those is the rest
+// state (the 机 section of index.css).
+//
 //   stops      [{ key, label, value, state: done|now|next, onOpen }]
 //   projection { label, value } -- value null until it can be priced
 //   pass       { name, profile } -- drawn instead of the projection
 export function DeskLine({ stops, projection = null, pass = null }) {
   const { t } = useLang()
+  const listRef = useRef(null)
+  const route = useRoute(listRef, stops)
   return (
     <aside className="desk-brd__side" aria-label={t.brdBuildingAria}>
-      <div className="desk-rail__mast">
-        <span className="desk-rail__glyph" lang="ja">{t.appTitle}</span>
-        <span className="desk-rail__name">{t.brdAppName}</span>
+      <DeskMast />
+      <div className={`desk-brd__route${route.ready ? ' desk-brd__route--ready' : ''}${route.lit ? '' : ' desk-brd__route--ridden'}`} style={route.style}>
+        <span className="desk-brd__rail" aria-hidden="true" />
+        <span className="desk-brd__ridden" aria-hidden="true" />
+        {route.style && <span className="desk-brd__here" aria-hidden="true" />}
+        <ol className="desk-brd__stops" ref={listRef}>
+          {stops.map((stop, i) => {
+            const face = (
+              <>
+                <span className="desk-brd__dot" aria-hidden="true" />
+                <span className="desk-brd__txt">
+                  <span className="desk-brd__lab">{stop.label}</span>
+                  {stop.state !== 'next' && stop.value && (
+                    // A pick arrives on its stop: keyed on the answer,
+                    // so a change of mind lands again -- except the
+                    // name, typed a letter at a time, and the hour,
+                    // dragged half an hour at a time.
+                    <span key={LIVE.has(stop.key) ? 'live' : stop.value} className="desk-brd__val">{stop.value}</span>
+                  )}
+                </span>
+              </>
+            )
+            return (
+              <li
+                key={stop.key}
+                className={`desk-brd__stop desk-brd__stop--${stop.state}`}
+                data-stop={stop.key}
+                aria-current={stop.state === 'now' ? 'step' : undefined}
+                style={{ '--i': i }}
+              >
+                {stop.onOpen
+                  ? (
+                    <button type="button" className="desk-brd__door" onClick={stop.onOpen}>
+                      {face}
+                      <BackChevron />
+                    </button>
+                  )
+                  : <div className="desk-brd__door">{face}</div>}
+              </li>
+            )
+          })}
+        </ol>
+        {route.style && <span className="desk-brd__train" aria-hidden="true" />}
       </div>
-      <ol className="desk-brd__stops">
-        {stops.map(stop => {
-          const face = (
-            <>
-              <span className="desk-brd__dot" aria-hidden="true" />
-              <span className="desk-brd__txt">
-                <span className="desk-brd__lab">{stop.label}</span>
-                {stop.state !== 'next' && stop.value && <span className="desk-brd__val">{stop.value}</span>}
-              </span>
-            </>
-          )
-          return (
-            <li
-              key={stop.key}
-              className={`desk-brd__stop desk-brd__stop--${stop.state}`}
-              data-stop={stop.key}
-              aria-current={stop.state === 'now' ? 'step' : undefined}
-            >
-              {stop.onOpen
-                ? (
-                  <button type="button" className="desk-brd__door" onClick={stop.onOpen}>
-                    {face}
-                    <BackChevron />
-                  </button>
-                )
-                : <div className="desk-brd__door">{face}</div>}
-            </li>
-          )
-        })}
-      </ol>
       <div className="desk-brd__foot">
         {pass
           ? <ColumnPass name={pass.name} profile={pass.profile} />
           : projection && (
-            <div className="desk-brd__proj" data-stop="projection">
+            <div className={`desk-brd__proj${projection.value == null ? ' desk-brd__proj--blank' : ''}`} data-stop="projection">
               <span className="desk-brd__lab">{projection.label}</span>
-              <span className="desk-brd__fig">{projection.value ?? '—'}</span>
+              {/* A new date drops in as a board's figure turns over. */}
+              <span key={projection.value ?? 'blank'} className="desk-brd__fig">{projection.value ?? '—'}</span>
             </div>
           )}
       </div>
     </aside>
   )
+}
+
+// The stops whose value changes as it is entered rather than picked.
+const LIVE = new Set(['name', 'time'])
+
+// Where the rail runs and where the train stands, read off the rows: the
+// rail from the first dot to the last (a dot is centred on its row), the
+// stretch ridden to the lit stop's dot -- or to the last once the plan is
+// built -- and the train over the lit row. Read before paint, again when
+// a stop, its state or its answer changes, and whenever the list's box
+// does (an answer wrapping onto a second line). The transitions are
+// switched on the frame after the first reading, so the line is drawn in
+// place rather than sliding in from the column's top. The wash and the
+// train are drawn once there is a reading to stand them on.
+function useRoute(listRef, stops) {
+  const [geo, setGeo] = useState(null)
+  const [ready, setReady] = useState(false)
+  const shape = stops.map(s => `${s.key}:${s.state}:${s.value ?? ''}`).join('|')
+  useLayoutEffect(() => {
+    const list = listRef.current
+    if (!list) return undefined
+    const read = () => {
+      const rows = [...list.children]
+      if (rows.length === 0) return
+      const mid = row => row.offsetTop + row.offsetHeight / 2
+      const lit = rows.find(row => row.getAttribute('aria-current') === 'step') ?? null
+      const at = lit ?? rows.at(-1)
+      const next = {
+        top: mid(rows[0]),
+        rail: mid(rows.at(-1)) - mid(rows[0]),
+        ride: mid(at) - mid(rows[0]),
+        y: at.offsetTop,
+        h: at.offsetHeight,
+        lit: lit != null,
+      }
+      setGeo(g => (g && Object.keys(next).every(k => g[k] === next[k]) ? g : next))
+    }
+    read()
+    if (typeof ResizeObserver === 'undefined') return undefined
+    const observer = new ResizeObserver(read)
+    observer.observe(list)
+    return () => observer.disconnect()
+  }, [listRef, shape])
+  useEffect(() => {
+    if (!geo || ready) return undefined
+    const id = requestAnimationFrame(() => setReady(true))
+    return () => cancelAnimationFrame(id)
+  }, [geo, ready])
+  return {
+    ready,
+    lit: geo?.lit ?? true,
+    // Plain numbers, read as pixels by the sheet (calc(var(--x) * 1px)):
+    // the lengths are measured off the rows, not chosen from the scale.
+    style: geo && {
+      '--rail-top': geo.top,
+      '--rail-h': geo.rail,
+      '--ride-h': geo.ride,
+      '--here-y': geo.y,
+      '--here-h': geo.h,
+    },
+  }
 }
 
 // The learner's pass at the column's foot, where the rail will carry
@@ -114,6 +207,7 @@ function ColumnPass({ name, profile }) {
         </span>
       </div>
       {balance === SIGNUP_BONUS && <span className="desk-brd__gift" aria-live="polite">{t.brdCreditsGift(balance)}</span>}
+      <span className="desk-brd__sheen" aria-hidden="true" />
     </div>
   )
 }

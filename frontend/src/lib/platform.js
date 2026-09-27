@@ -94,7 +94,7 @@ export async function nudgePermission() {
   return n.nudgePermission()
 }
 
-/** 発車案内 (plan 155): the day's notifications, as lib/ahead.js planned
+/** 発車案内 (plan 156): the day's notifications, as lib/ahead.js planned
  *  them, replacing every one scheduled before -- an empty list cancels
  *  the lot. Resolves to what was scheduled. A no-op on the web. */
 export async function syncNudges(nudges) {

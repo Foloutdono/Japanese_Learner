@@ -1,4 +1,4 @@
-// ── 発車案内 — the day ahead, as the app says it while closed (plan 155) ──
+// ── 発車案内 — the day ahead, as the app says it while closed (plan 156) ──
 // The native shells tell the learner about the day's queue twice while
 // the app is shut: a daily notification at their hour, and a home or
 // lock screen widget. Both are decided while the app is open, so both

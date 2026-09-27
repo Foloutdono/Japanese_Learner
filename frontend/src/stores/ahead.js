@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-// ── 発車案内 — the last plan of the day ahead (plan 155) ─────────
+// ── 発車案内 — the last plan of the day ahead (plan 156) ─────────
 // NativeBridge plans the daily notifications whenever the app opens,
 // comes back to the front or a run lands; Settings › Notifications
 // prints the next one it scheduled, so the page shows the learner the

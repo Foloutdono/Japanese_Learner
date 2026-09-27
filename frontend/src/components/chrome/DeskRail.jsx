@@ -6,6 +6,7 @@ import { useTodaySummary } from '../../stores/today'
 import { playClick } from '../../lib/audio'
 import { GateIcon } from './GateIcon'
 import { DeskPass } from './DeskPass'
+import { DeskMast } from './DeskMast'
 import { dialogOpen } from '../../lib/dialogOpen'
 
 // ── 机 — the rail: the desk's chrome (plan 113) ────────────────────
@@ -72,10 +73,7 @@ export function DeskRail() {
 
   return (
     <header className="desk-rail">
-      <div className="desk-rail__mast">
-        <span className="desk-rail__glyph" lang="ja">{t.appTitle}</span>
-        <span className="desk-rail__name">{t.brdAppName}</span>
-      </div>
+      <DeskMast />
 
       <nav className="desk-rail__gates" aria-label={t.tabBarLabel} data-guide="tabbar">
         <ul className="desk-rail__list">

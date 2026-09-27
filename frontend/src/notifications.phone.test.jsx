@@ -5,7 +5,7 @@ import { LangProvider } from './LangContext'
 import fr from './locales/fr/index.js'
 import './index.css'
 
-// ── Settings › Notifications on a phone (plan 155) ───────────────
+// ── Settings › Notifications on a phone (plan 156) ───────────────
 // A shell's page only: the web has nothing to schedule, so neither the
 // row nor the page exists there. In the shell, the daily train is a
 // switch that asks the OS before it is stored, the hour is a door to

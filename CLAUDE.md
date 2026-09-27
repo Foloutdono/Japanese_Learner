@@ -908,9 +908,32 @@ runtime purpose. Two consequences worth knowing:
   `src/shelf.desktop.test.jsx`, `src/links.desktop.test.jsx` and the 机
   section of `index.css`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  **155** is 発車案内, the day's queue on the phone while the app is shut
-  (the owner's picks A, D and E of the canvas "Tsuji — notifications from
-  the day's queue"): the daily nudge planned from what the gate will
+  **155** is 仕上げ, first contact finished on the desk (numbered 155
+  because 154 went to the shelf beside the open deck while it was open;
+  owner-directed:
+  keep plan 140's drawing and improve it, transitions included): the
+  floor at the card's width on every question so the way on stands in
+  one place (`--desk-floor-w`), the lines and the hour at the card's
+  width; the column's line as one rail with the lit stop a train
+  running on it, measured off the rows (`DeskLine`'s `useRoute`), the
+  line laid on its first frame and the projection's date dropping in;
+  each answer's key and check in one slot (`BoardOption`'s `PickMark`),
+  the recommended rhythm's tag on its tile's edge; the desk's short pull
+  and the leaving car kept until the arriving one lands (`BoardingFlow`'s
+  `DESK_PULL_MS`); the Welcome handed to the wait and the wait to the
+  boarding in one column (`Welcome`'s `leaving`, `AppLoading`'s `frame`,
+  `App.jsx`'s `boardedHere`, `components/chrome/DeskMast.jsx`); the
+  plan's arrival on the paper; and the account as a form (cited in
+  `components/boarding/DeskLine.jsx`, `BoardOption.jsx`,
+  `AccountStep.jsx`, `Welcome.jsx`, `screens/BoardingFlow.jsx`,
+  `screens/AppLoading.jsx`, `App.jsx`, `src/frontdoor.desktop.test.jsx`'s
+  P13 and the 机 section of `index.css`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`).
+  **156** is 発車案内, the day's queue on the phone while the app is shut
+  (numbered 156 because 155 went to first contact finished while it
+  was open, and its commits' messages say 155; the owner's picks A, D
+  and E of the canvas "Tsuji — notifications from the day's queue"):
+  the daily nudge planned from what the gate will
   hold -- a dated notification for each of the next seven days at the
   learner's hour with the real count, minutes, new cards and lanes, none
   on a day with nothing due, none once the learner has ridden that day,
@@ -931,6 +954,7 @@ runtime purpose. Two consequences worth knowing:
   `src/notifications.phone.test.jsx`, `android/.../TrainWidget.java`,
   `TsujiWidgetPlugin.java`, `ios/App/TsujiWidget/`, `ios/App/App/
   TsujiWidgetPlugin.swift`, the fastlane lane and `docs/release.md`).
+  When starting a new wave, begin at **157** or higher, and check
   When starting a new wave, begin at **156** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

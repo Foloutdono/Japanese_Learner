@@ -94,7 +94,7 @@ this repository (`frontend/.gitignore` refuses `.jks`, `.keystore`, `.p8`,
   the reviewer (Settings › Data), a **test account**, the support and
   privacy URLs, 6.7" and 6.1" screenshots, an external TestFlight group.
 
-## The widget and its App Group (plan 155)
+## The widget and its App Group (plan 156)
 
 The iPhone widget is an app extension, `TsujiWidget` (bundle id
 `app.tsuji.widget`, `frontend/ios/App/TsujiWidget/`), embedded in the

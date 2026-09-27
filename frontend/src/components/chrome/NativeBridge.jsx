@@ -24,7 +24,7 @@ const REPLAN_MS = 10 * 60_000
 // Renders nothing but the planner, and that on a shell only. Inside the
 // router because all of it needs the router: Android's back button
 // closes an open sheet, else steps back through the history, else --
-// at a gate's root -- leaves the app; and the day ahead (plan 155).
+// at a gate's root -- leaves the app; and the day ahead (plan 156).
 export function NativeBridge() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -59,7 +59,7 @@ export function NativeBridge() {
   return <AheadPlanner enabled={summary.notifications === true} time={summary.reminderTime ?? null} />
 }
 
-// ── 発車案内 — the day ahead (plan 155) ──────────────────────
+// ── 発車案内 — the day ahead (plan 156) ──────────────────────
 // The daily nudge used to be one repeating notification with the same
 // words every day, sent whether anything was due or not. It is planned
 // now from what the gate will hold: a dated notification for each of

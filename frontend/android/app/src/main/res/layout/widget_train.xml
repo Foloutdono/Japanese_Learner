@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 発車案内 — the day's train on the home screen (plan 155,
+<!-- 発車案内 — the day's train on the home screen (plan 156,
      TrainWidget.java). Drawn on sumi (bg-panel) with the panel's two
      inks (text-on-panel, text-on-panel-soft), as the canvas drew it:
      the count and what it takes, the word on the right, the lines'

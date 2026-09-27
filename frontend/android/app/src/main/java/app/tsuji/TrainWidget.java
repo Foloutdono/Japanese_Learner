@@ -20,7 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * 発車案内 — the day's train on the home screen (plan 155).
+ * 発車案内 — the day's train on the home screen (plan 156).
  *
  * Android phones have no lock-screen widgets, so the widget the iPhone
  * wears on its lock screen lives here on the home screen: the cards the

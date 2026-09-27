@@ -1934,7 +1934,7 @@ const boarding = {
   brdAllow: 'Allow notifications',
   brdNotNow: 'Not now',
   // ── 発車案内 — the daily nudge from the day's queue, the widget and
-  // Settings › Notifications (plan 155). The nudge's title and body are
+  // Settings › Notifications (plan 156). The nudge's title and body are
   // written from what the gate will hold at the learner's hour.
   nudgeTitle: (time, n) => `Your ${time} train · ${n} ${n === 1 ? 'card' : 'cards'}`,
   nudgeMinutes: (m) => (m <= 1 ? 'About a minute' : `About ${m} min`),

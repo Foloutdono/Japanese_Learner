@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <!-- 発車案内 — le widget tel que le sélecteur le présente (plan 155). -->
+    <!-- 発車案内 — le widget tel que le sélecteur le présente (plan 156). -->
     <string name="widget_label">Ton train du jour</string>
     <string name="widget_description">Les cartes du jour, le temps qu’elles prennent, et un mot que tu connais.</string>
 </resources>

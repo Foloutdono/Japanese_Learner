@@ -2,6 +2,7 @@ import { useLang } from '../../LangContext'
 import { KANA_ANSWERS } from '../../domain/boarding'
 import { BoardQuestion, Continue, FloorBack } from './BoardFrame'
 import { useDesk } from '../../hooks/useDesk'
+import { PickMark } from './BoardOption'
 
 // ── 3 · the kana check, and 4 · the reveal (plan 075) ────────────
 // "Can you read this?" over a card with one word per script. The four
@@ -58,7 +59,7 @@ export function KanaStep({ value, onAnswer }) {
                 aria-keyshortcuts={desk ? String(i + 1) : undefined}
                 data-kana={a}
               >
-                {desk && <kbd className="desk-kbd" aria-hidden="true">{i + 1}</kbd>}
+                {desk && <PickMark digit={i + 1} corner />}
                 <span className="brd-kopt__label">{t.brdKana[a]}</span>
                 {a === 'hiragana' && <span className="brd-kopt__jp" lang="ja">{WORDS[0].jp}</span>}
                 {a === 'katakana' && <span className="brd-kopt__jp" lang="ja">{WORDS[1].jp}</span>}

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 発車案内 (plan 155). Redrawn every three hours by the system, which
+<!-- 発車案内 (plan 156). Redrawn every three hours by the system, which
      is when the word changes and a day ahead's count takes over once
      its midnight has passed (TrainWidget.java); the app redraws it
      whenever it plans the day. -->

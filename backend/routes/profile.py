@@ -293,7 +293,7 @@ class LearningPayload(BaseModel):
     # of vocab / kanji / grammar. Settings › Learning's toggles.
     lines: list[str] | None = None
     # The daily nudge on or off, from Settings › Notifications (plan
-    # 155). The boarding asked once; this is where the answer changes.
+    # 156). The boarding asked once; this is where the answer changes.
     notifications: bool | None = None
 
     @field_validator("lines")

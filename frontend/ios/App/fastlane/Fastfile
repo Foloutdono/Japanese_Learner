@@ -40,7 +40,7 @@ platform :ios do
 
     # match wrote each profile's name into the environment as
     # sigh_<bundle id>_appstore_profile-name; each target signs with its
-    # own -- the app, and the widget extension it embeds (plan 155).
+    # own -- the app, and the widget extension it embeds (plan 156).
     profiles = {
       "App" => ["app.tsuji", ENV.fetch("sigh_app.tsuji_appstore_profile-name")],
       "TsujiWidget" => ["app.tsuji.widget", ENV.fetch("sigh_app.tsuji.widget_appstore_profile-name")]

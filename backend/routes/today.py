@@ -475,7 +475,7 @@ def get_today_forecast(user_id: str = Depends(get_user_id)):
     return {"days": srs.get_due_forecast(user_id, 7)}
 
 
-# ── 発車案内 — the day ahead, for what the app says while closed (plan 155) ──
+# ── 発車案内 — the day ahead, for what the app says while closed (plan 156) ──
 # The native shells schedule the daily nudge as dated notifications, one
 # a day at the learner's hour, and hand a home or lock screen widget the
 # figures it prints. Both are decided while the app is open and shown

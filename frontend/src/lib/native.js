@@ -17,7 +17,7 @@ import { StatusBar, Style } from '@capacitor/status-bar'
 import { openPath } from './platform'
 import { LEGACY_NUDGE_ID, NUDGE_IDS } from './ahead'
 
-// 発車案内 — the shells' own plugin (plan 155): it hands the widget its
+// 発車案内 — the shells' own plugin (plan 156): it hands the widget its
 // figures (android/.../TsujiWidgetPlugin.java, ios/App/App/
 // TsujiWidgetPlugin.swift) and asks the OS to redraw it.
 const TsujiWidget = registerPlugin('TsujiWidget')

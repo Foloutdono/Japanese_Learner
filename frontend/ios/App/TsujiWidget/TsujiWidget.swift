@@ -1,7 +1,7 @@
 import SwiftUI
 import WidgetKit
 
-// ── 発車案内 — the day's train on the lock and home screens (plan 155) ──
+// ── 発車案内 — the day's train on the lock and home screens (plan 156) ──
 // The iPhone half of the widget the canvas drew (the Android half is
 // android/.../TrainWidget.java). On the lock screen: the count in a
 // circle, and a word the learner already knows -- never one due this

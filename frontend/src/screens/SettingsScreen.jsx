@@ -41,7 +41,7 @@ import { useDesk } from '../hooks/useDesk'
 // and the lines, each a door to the page that changes it — and under it
 // the rest as a list whose rows draw what they are set to. Every page
 // lives at /profile/settings/<page>; the phone pushes it, the desk sets
-// it beside the column. Notifications (plan 155) is a shell's page
+// it beside the column. Notifications (plan 156) is a shell's page
 // only: the web has nothing to schedule, and a settings screen above
 // all must be exactly what it says (no dead controls).
 const PAGES = {

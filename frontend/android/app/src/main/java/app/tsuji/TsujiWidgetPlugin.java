@@ -6,7 +6,7 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 /**
- * 発車案内 — the widget's figures, handed over by the web app (plan 155).
+ * 発車案内 — the widget's figures, handed over by the web app (plan 156).
  *
  * The app plans them while it is open (src/lib/ahead.js's widgetPayload)
  * and calls update() with the JSON; the widget reads it back while the

@@ -1,4 +1,4 @@
-# ── 発車案内 — the day ahead (plan 155) ──────────────────────────────
+# ── 発車案内 — the day ahead (plan 156) ──────────────────────────────
 # The native shells schedule the daily nudge as dated notifications and
 # hand a widget its figures, both decided while the app is open and
 # shown while it is not. /api/today/ahead counts the gate at instants

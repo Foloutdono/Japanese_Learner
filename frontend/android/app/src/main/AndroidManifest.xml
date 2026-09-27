@@ -37,7 +37,7 @@
             </intent-filter>
         </activity>
 
-        <!-- 発車案内 — the day's train on the home screen (plan 155,
+        <!-- 発車案内 — the day's train on the home screen (plan 156,
              TrainWidget.java). The system alone sends it updates, so it
              is not exported; its Depart opens MainActivity explicitly
              with app.tsuji://open/today, which needs no intent filter. -->

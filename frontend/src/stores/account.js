@@ -28,7 +28,7 @@ import { forgetToday } from './today'
 //                 platform (the desk's Practice gate, plan 130)
 //   the guide     which gates opened their lesson THIS page load
 //   the day ahead the reminders scheduled on this phone and the
-//                 widget's figures (plan 155): both name the leaving
+//                 widget's figures (plan 156): both name the leaving
 //                 learner's cards, so both are cleared on the device
 //
 // A learner who signs out of one account and boards a new one in the
