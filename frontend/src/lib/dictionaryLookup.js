@@ -31,6 +31,11 @@ export function lookupUrl({ term, kana, category, id, lang }) {
   return `/api/dictionary?${params.toString()}`
 }
 
+function answer(r) {
+  if (r.ok === false) throw new Error(`dictionary ${r.status}`)
+  return r.json()
+}
+
 function keyOf(session, url) {
   return `${session?.user?.id ?? ''} ${url}`
 }
@@ -46,17 +51,16 @@ export function cachedLookup(session, params) {
 }
 
 // The response for these params: the one in hand, the one on its way,
-// or a new request.
-export function fetchLookup(session, params) {
+// or a new request. `keep: false` asks afresh and keeps nothing -- a
+// caller whose card may have been reviewed since.
+export function fetchLookup(session, params, { keep = true } = {}) {
+  if (!keep) return apiFetch(lookupUrl(params), session).then(answer)
   const key = keyOf(session, lookupUrl(params))
   const hit = cache.get(key)
   if (fresh(hit)) return hit.promise
   const entry = { at: Date.now(), data: null, promise: null }
   entry.promise = apiFetch(lookupUrl(params), session)
-    .then(r => {
-      if (r.ok === false) throw new Error(`dictionary ${r.status}`)
-      return r.json()
-    })
+    .then(answer)
     .then(data => { entry.data = data; return data })
     .catch(err => {
       if (cache.get(key) === entry) cache.delete(key)

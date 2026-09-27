@@ -56,3 +56,13 @@ describe('dictionaryLookup', () => {
     expect(pickEntry({ results: [ROW] }, { term: '靴箱', kana: 'くつばこ' })).toBe(ROW)
   })
 })
+
+describe('a lookup that keeps nothing', () => {
+  it('asks every time and leaves the cache alone', async () => {
+    apiFetch.mockImplementation(() => ok({ results: [ROW] }))
+    await fetchLookup(session, WORD, { keep: false })
+    await fetchLookup(session, WORD, { keep: false })
+    expect(apiFetch).toHaveBeenCalledTimes(2)
+    expect(cachedLookup(session, WORD)).toBeUndefined()
+  })
+})

@@ -1387,6 +1387,7 @@ export default function AnalyzerScreen({ session }) {
             mining={mining}
             onExit={lookup ? closeLookup : undefined}
             band
+            cached
           />
         ) : (
           <p className="anl-desk__none">{t.dockNoEntry}</p>
