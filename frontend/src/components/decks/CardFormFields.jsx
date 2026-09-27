@@ -1,6 +1,8 @@
 import { useLang } from '../../LangContext'
 import { Chip } from '../chrome/Console'
 import { CrossIcon } from '../ui/Icons'
+import { FuriganaParts } from '../study/Readings'
+import { hasKanji, readRule } from '../../domain/ruleReading'
 
 // ── The written card's fields, beyond a line of text ──────────────
 // The kinds study/structures.py declares for a grammar card's lesson:
@@ -96,6 +98,38 @@ export function PairsField({ field, value, onChange }) {
       {rows.length < MAX_ROWS && (
         <button type="button" onClick={add} className="deckdetail-form__addline">+ {name}</button>
       )}
+    </div>
+  )
+}
+
+/**
+ * The reading of another field -- a grammar card's rule in kana -- with
+ * the furigana it gives previewed under it as it is typed, or a line
+ * saying it does not spell the rule. Optional: left empty, the card is
+ * read by the catalogue or the tokenizer (grammar_examples.written_furigana),
+ * and a reading that does not spell the rule is not used either, so the
+ * preview is the only place a learner learns theirs was not.
+ */
+export function ReadingOfField({ field, value, onChange, of }) {
+  const { t } = useLang()
+  const name = label(t, field.key)
+  const typed = (value ?? '').trim()
+  // A rule with no kanji has nothing to read over, and nothing to say.
+  const reads = Boolean(typed) && hasKanji(of)
+  const parts = reads ? readRule(of, typed) : null
+  return (
+    <div className="deckdetail-form__group">
+      <input
+        value={value ?? ''}
+        onChange={e => onChange(e.target.value)}
+        placeholder={t[`fieldHint_${field.key}`] ?? name}
+        aria-label={name}
+        lang="ja"
+        className="field deckdetail-form__input"
+      />
+      {reads && (parts
+        ? <div className="deckdetail-form__reading" lang="ja"><FuriganaParts parts={parts} /></div>
+        : <div className="deckdetail-form__reading-off" role="status">{t[`fieldOff_${field.key}`]}</div>)}
     </div>
   )
 }

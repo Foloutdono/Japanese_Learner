@@ -32,6 +32,7 @@ import {
   MODES as STUDY_MODES, RENDER, HINTS, FAST_REVIEW, modeLabel,
 } from '../domain/studyModes'
 import HintBar from '../components/study/HintBar'
+import { joinRuns } from '../domain/rubyRuns'
 import { ChevronIcon } from '../components/ui/Icons'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
@@ -229,7 +230,7 @@ export default function GrammarRun({ session }) {
                 <div className="grammar-meaning"><GlossList meaning={c.meaning} /></div>
                 {c.structure && (
                   <div className="review-grammar-explanation">
-                    <GrammarPattern text={c.structure} parts={c.structure_furigana} />
+                    <GrammarPattern text={c.structure} parts={joinRuns(c.structure_furigana)} />
                   </div>
                 )}
               </div>

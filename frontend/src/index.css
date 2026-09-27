@@ -8003,8 +8003,11 @@ textarea:focus-visible {
   margin-top: var(--sp-3);
 }
 
+/* --fs-body, where it was a bare 13px: the line carries furigana over
+   its kanji now, and its reading has to stay the smaller of the two at
+   the size every reading in running text is set (--fs-caption). */
 .grammar-structure {
-  font-size: 13px;
+  font-size: var(--fs-body);
   color: var(--text-secondary);
   text-align: center;
   margin-top: 4px;
@@ -8206,6 +8209,25 @@ textarea:focus-visible {
    remove button beside the pair (components/decks/CardFormFields.jsx). */
 .deckdetail-form__long { min-height: 5rem; }
 .deckdetail-form__choice { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+/* The rule's reading, previewed under its field as the card will print
+   it (ReadingOfField), or a line saying it does not spell the rule --
+   the only place a learner hears that theirs will not be used. */
+.deckdetail-form__reading {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: calc(1.2em + 2 * var(--fs-caption));
+  color: var(--text-primary);
+}
+.deckdetail-form__reading ruby { ruby-position: over; ruby-align: center; }
+.deckdetail-form__reading rt {
+  font-size: var(--fs-caption);
+  line-height: 1;
+  color: var(--text-secondary);
+}
+.deckdetail-form__reading-off {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
 .pairs-field__row {
   display: flex;
   align-items: center;
@@ -13593,18 +13615,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* The rest of what a grammar card reads the same way: the formation
    line under the rule (and on the lesson's and the dictionary's
    plates), a pattern as an option, a rival in the lesson. The reading
-   one rung under the line it sits on -- --fs-caption-xs over the
-   formation's --fs-sm, as the stepped-back fill_in sentence has it;
-   --fs-caption over an option or a rival, as the sentence itself does
-   -- and a line carrying ruby given that reading's height either side,
-   as the rule is, so a wrapped line keeps its readings off the one
-   above. Set on the ruby, not the block, so a line with no kanji keeps
-   the height it always had. */
+   at --fs-caption, the size every reading in running text is set at
+   (the dictionary's sentences and words, the fill_in sentence): it was
+   --fs-caption-xs on the formation, about 10px, which is under the size
+   a dakuten survives at (see .dict-plate__word rt). And a line carrying
+   ruby given that reading's height either side, as the rule is, so a
+   wrapped line keeps its readings off the one above -- set on the
+   ruby, not the block, so a line with no kanji keeps the height it
+   always had. */
 .grammar-structure ruby,
 .dict-plate__structure ruby,
-.review-grammar-explanation ruby {
-  line-height: calc(1.2em + 2 * var(--fs-caption-xs));
-}
+.review-grammar-explanation ruby,
 .gl-door__pattern ruby {
   line-height: calc(1.2em + 2 * var(--fs-caption));
 }
@@ -13633,15 +13654,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .review-grammar-explanation rt,
 .grammar-choice rt,
 .gl-door__pattern rt {
-  font-size: var(--fs-caption-xs);
+  font-size: var(--fs-caption);
   font-weight: 400;
   line-height: 1;
   letter-spacing: 0;
   color: var(--text-secondary);
   user-select: none;
 }
-.grammar-choice rt,
-.gl-door__pattern rt { font-size: var(--fs-caption); }
 
 .grammar-hint { color: var(--text-secondary); font-size: 14px; margin-top: 8px; }
 .grammar-reveal-hint { font-size: 15px; color: var(--text-secondary); margin-top: 8px; }

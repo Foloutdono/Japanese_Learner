@@ -122,11 +122,21 @@ function expectReadingsClearOfLineAbove(el) {
 }
 
 describe('the formation line’s furigana', () => {
-  it('prints the reading over the formation’s kanji, one rung under the line', async () => {
+  it('prints the reading over the formation’s kanji, at the size a reading is read at', async () => {
     const screen = await render(<CardPrompt card={card()} t={t} session={{}} />)
     const line = screen.container.querySelector('.grammar-structure')
     expect([...line.querySelectorAll('rt')].map(rt => rt.textContent)).toEqual(['なか'])
     expect(line.textContent).toBe('group + の中なかで')
+    // --fs-caption, as every reading in running text is (it was ~10px,
+    // under the size a dakuten survives at), under a line still larger.
+    const probe = document.createElement('div')
+    probe.style.fontSize = 'var(--fs-caption)'
+    document.body.appendChild(probe)
+    const caption = getComputedStyle(probe).fontSize
+    probe.remove()
+    const rt = line.querySelector('rt')
+    expect(getComputedStyle(rt).fontSize).toBe(caption)
+    expect(parseFloat(getComputedStyle(line).fontSize)).toBeGreaterThan(parseFloat(caption))
     // and under the rule, never over it
     const rule = screen.container.querySelector('.grammar-rule')
     expect(line.querySelector('rt').getBoundingClientRect().top)

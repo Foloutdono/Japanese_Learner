@@ -22,7 +22,7 @@ from content.grammar_points_data import (
     GRAMMAR_POINTS_BY_LEVEL, LEVELS, RICH_LEVELS, find,
 )
 from study.furigana import is_kanji
-from study.grammar_examples import pattern_furigana
+from study.grammar_examples import KANA_READING, pattern_furigana
 from study.grammar_match import contains_pattern, verifiable
 from study.grammar_sentence_gen import check_sentence
 
@@ -44,9 +44,6 @@ MIN_EXAMPLES_RICH = 3
 MIN_EXAMPLES = 2
 
 _CJK = re.compile(r"[぀-ヿ一-鿿]")
-# What a reading may be written in: kana, the long-vowel mark, and ・
-# between two readings of one kanji (〜中 is ちゅう・じゅう).
-_KANA_READING = re.compile(r"[ぁ-ゖァ-ヺー・]+")
 _LATIN = re.compile(r"[A-Za-zÀ-ÿ]{3}")
 
 
@@ -99,7 +96,7 @@ def _reading_problems(what: str, key: str, text: str, reading) -> list[str]:
     read = [p["reading"] for p in parts if p.get("reading")]
     if not read:
         return [f"{key} {reading!r} does not spell the {what} (everything as written, each kanji run in kana)"]
-    return [f"{key} {r!r} is not kana" for r in read if not _KANA_READING.fullmatch(r)]
+    return [f"{key} {r!r} is not kana" for r in read if not KANA_READING.fullmatch(r)]
 
 
 def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None = None) -> list[str]:

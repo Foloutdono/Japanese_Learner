@@ -23,11 +23,13 @@ guesses -- 〜中 alone is なか to it, 〜気味 きみ, 〜得る える. The
 formation line under it is read the same way, from `structure_reading`.
 
 A card the learner wrote has no catalogue reading. Its rule takes the
-catalogue's when it IS a catalogue point, and otherwise the tokenizer's
-(written_furigana) -- the reading its own sentences already print, and
-the one place a guess is better than nothing: the learner chose the
-words, and reads them in the form they wrote.
+learner's own `rule_reading` where that spells it, then the catalogue's
+when it IS a catalogue point, and otherwise the tokenizer's
+(written_furigana) -- the reading its own sentences already print, a
+guess the learner corrects by writing the reading. Its formation is
+read as its rule is, where the rule holds its kanji.
 """
+import re
 from functools import lru_cache
 
 from content.grammar_points_data import find
@@ -164,26 +166,124 @@ def furigana_by_pattern(patterns) -> dict[str, list[dict]]:
 
 # The tildes a learner types for 〜: the catalogue writes the wave dash.
 _TILDES = str.maketrans({"~": "〜", "～": "〜"})
+# What a reading may be written in: kana, the long-vowel mark, and ・
+# between two readings of one kanji (〜中 is ちゅう・じゅう).
+KANA_READING = re.compile(r"[ぁ-ゖァ-ヺー・]+")
+_KANJI_RUN = re.compile(r"[一-龯々]+")
+# Neither kana nor kanji: the 〜, brackets, spaces and English a rule
+# opens or closes on, which a learner leaves out of its reading.
+_LEAD = re.compile(r"^[^぀-ヿ一-龯々]*")
+_TRAIL = re.compile(r"[^぀-ヿ一-龯々]*$")
 
 
-def written_furigana(text: str) -> list[dict]:
-    """A written card's rule or formation as ruby. The catalogue's own
-    reading when the text is a catalogue pattern (a typed ~ or ～ read as
-    its 〜); otherwise the tokenizer's, as its sentences have it; the
-    bare text when it has no kanji or the tokenizer is not installed."""
+def _hiragana(s: str) -> str:
+    return "".join(chr(ord(c) - 0x60) if "ァ" <= c <= "ヶ" else c for c in s)
+
+
+def _respelled(text: str, parts: list[dict]) -> list[dict]:
+    """`parts` of text.translate(_TILDES), spelling `text` itself: the
+    two differ only in their tildes, character for character."""
+    at, out = 0, []
+    for part in parts:
+        n = len(part["text"])
+        out.append({**part, "text": text[at:at + n]})
+        at += n
+    return out
+
+
+def _learners_reading(text: str, reading: str) -> list[dict] | None:
+    """`text` read by the reading a learner wrote for it, or None when
+    the reading does not spell it. Lenient where a learner is: a typed ~
+    or ～, the 〜 (or the English) the rule opens on left out, katakana
+    for hiragana."""
+    norm = text.translate(_TILDES)
+    typed = (reading or "").strip().translate(_TILDES)
+    if not typed:
+        return None
+    lead, trail = _LEAD.match(norm).group(0), _TRAIL.search(norm).group(0)
+    tries = []
+    for cand in (typed, _hiragana(typed)):
+        tries.append(cand)
+        tries.append(("" if cand.startswith(lead) else lead) + cand + ("" if cand.endswith(trail) else trail))
+    for cand in dict.fromkeys(tries):
+        parts = pattern_furigana(norm, cand)
+        read = [p["reading"] for p in parts if p.get("reading")]
+        if read and all(KANA_READING.fullmatch(r) for r in read):
+            return _respelled(text, parts)
+    return None
+
+
+def _read_like(text: str, known: list[dict], guessed: list[dict]) -> list[dict]:
+    """`text` with each kanji run read the way `known` reads it -- a
+    formation by its rule's parts -- and a run `known` does not read (or
+    reads two ways) as `guessed` has it, the tokenizer's parts of the
+    same text. So a formation's 方 is the rule's かた, never a second
+    guess of ほう beside it."""
+    readings: dict[str, set[str]] = {}
+    run, read = "", ""
+    for part in [*known, {"text": ""}]:
+        if part.get("reading"):
+            run, read = run + part["text"], read + part["reading"]
+            readings.setdefault(part["text"], set()).add(part["reading"])
+        else:
+            if run:
+                readings.setdefault(run, set()).add(read)
+            run, read = "", ""
+
+    # The guessed parts by where they sit in the text.
+    spans, at = [], 0
+    for part in guessed:
+        spans.append((at, at + len(part["text"]), part))
+        at += len(part["text"])
+
+    out: list[dict] = []
+
+    def plain(chunk: str) -> None:
+        if chunk and out and "reading" not in out[-1]:
+            out[-1] = {"text": out[-1]["text"] + chunk}
+        elif chunk:
+            out.append({"text": chunk})
+
+    at = 0
+    for m in _KANJI_RUN.finditer(text):
+        plain(text[at:m.start()])
+        found = readings.get(m.group(0), set())
+        inside = [p for a, b, p in spans if a >= m.start() and b <= m.end()]
+        if len(found) == 1:
+            parts = pattern_furigana(m.group(0), next(iter(found)))
+        elif sum(len(p["text"]) for p in inside) == len(m.group(0)):
+            parts = inside
+        else:
+            parts = [{"text": m.group(0)}]
+        for part in parts:
+            if part.get("reading"):
+                out.append(part)
+            else:
+                plain(part["text"])
+        at = m.end()
+    plain(text[at:])
+    return out
+
+
+def written_furigana(text: str, reading: str | None = None, known: list[dict] | None = None) -> list[dict]:
+    """A written card's rule or formation as ruby, the first of these
+    that reads it: the `reading` the learner wrote, where it spells the
+    text; the catalogue's own when the text is a catalogue pattern (a
+    typed ~ or ～ read as its 〜); the `known` parts' readings of the same
+    kanji (a formation read as its rule is); the tokenizer's, as its
+    sentences have it. The bare text when it has no kanji or nothing
+    reads it."""
     if not text or not any(_kanji(c) for c in text):
         return [{"text": text}] if text else []
+    if reading:
+        parts = _learners_reading(text, reading)
+        if parts:
+            return parts
     found = find(text.translate(_TILDES))
     if found and found[1].get("reading"):
-        parts = pattern_furigana(found[1]["pattern"], found[1]["reading"])
-        # The same characters but the tildes: spell the learner's own.
-        at, out = 0, []
-        for part in parts:
-            n = len(part["text"])
-            out.append({**part, "text": text[at:at + n]})
-            at += n
-        return out
-    return _as_written(text, align_sentence(text))
+        return _respelled(text, pattern_furigana(found[1]["pattern"], found[1]["reading"]))
+    guessed = _as_written(text, align_sentence(text))
+    return _read_like(text, known, guessed) if known else guessed
 
 
 def _as_written(text: str, parts: list[dict]) -> list[dict]:

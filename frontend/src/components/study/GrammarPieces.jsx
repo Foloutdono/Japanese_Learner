@@ -1,5 +1,6 @@
 import { MeaningDisplay } from './QuizComponents'
 import { FuriganaParts } from './Readings'
+import { joinRuns } from '../../domain/rubyRuns'
 import { ExampleSentence } from '../dictionary/ExampleSentence'
 
 // ── Shared grammar-card pieces ──────────────────────────────
@@ -42,12 +43,14 @@ export function GrammarPattern({ text, parts }) {
 
 // The formation line under the rule ("group + の中で"), read the same
 // way: `parts` is the card's `structure_furigana`, from the catalogue's
-// `structure_reading` (or, on a written card, the tokenizer's).
+// `structure_reading` (or, on a written card, the rule's reading or the
+// tokenizer's). A run's readings joined into one, so a small line's
+// kanji are not pushed apart by readings wider than they are.
 export function GrammarStructure({ text, parts }) {
   if (!text) return null
   return (
     <div className="grammar-structure">
-      <GrammarPattern text={text} parts={parts} />
+      <GrammarPattern text={text} parts={joinRuns(parts)} />
     </div>
   )
 }

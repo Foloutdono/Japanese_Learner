@@ -1477,9 +1477,9 @@ describe('the plate — a grammar point', () => {
     expect(word.textContent).toBe('〜の中なかで')
     const structure = root.querySelector('.dict-plate__structure')
     expect(structure.querySelector('rt').textContent).toBe('なか')
-    // The formation's reading one rung under its line, and still above
-    // the headword it sits over.
-    expect(getComputedStyle(structure.querySelector('rt')).fontSize).toBe(probe('fontSize', 'var(--fs-caption-xs)'))
+    // The formation's reading at the size readings in running text are
+    // set at, and the formation still above the headword it sits over.
+    expect(getComputedStyle(structure.querySelector('rt')).fontSize).toBe(probe('fontSize', 'var(--fs-caption)'))
     expect(structure.getBoundingClientRect().bottom).toBeLessThanOrEqual(word.getBoundingClientRect().top + 1)
     // and the headword's reading is not printed over the formation
     expect(word.querySelector('rt').getBoundingClientRect().top).toBeGreaterThanOrEqual(structure.getBoundingClientRect().bottom - 1)

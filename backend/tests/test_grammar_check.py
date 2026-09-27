@@ -264,6 +264,28 @@ class WrittenFuriganaTests(unittest.TestCase):
         # parts that spell something else are no furigana at all
         self.assertEqual(_as_written("見る", [{"text": "観", "reading": "み"}, {"text": "る"}]), [{"text": "見る"}])
 
+    def test_the_learners_reading_comes_first_where_it_spells_the_rule(self) -> None:
+        # over the catalogue's own (〜方 is かた there) ...
+        self.assertEqual(written_furigana("〜方", "ほう"), [{"text": "〜"}, {"text": "方", "reading": "ほう"}])
+        # ... leniently: the 〜 left out, a typed tilde, katakana for hiragana
+        nakade = [{"text": "〜の"}, {"text": "中", "reading": "なか"}, {"text": "で"}]
+        self.assertEqual(written_furigana("〜の中で", "のなかで"), nakade)
+        self.assertEqual(written_furigana("〜の中で", "~のなかで"), nakade)
+        self.assertEqual(written_furigana("〜の中で", "ノナカデ"), nakade)
+        # and not at all where it does not spell it: the catalogue reads it
+        self.assertEqual(written_furigana("〜の中で", "なか"), nakade)
+        self.assertEqual(written_furigana("〜の中で", "〜のnakaで"), nakade)
+
+    def test_a_formation_is_read_as_its_rule_is(self) -> None:
+        rule = written_furigana("〜方", "かた")
+        self.assertEqual(written_furigana("verb stem + 方", known=rule),
+                         [{"text": "verb stem + "}, {"text": "方", "reading": "かた"}])
+        # a kanji the rule does not hold is left to the tokenizer (or to
+        # nothing without one), and never re-reads one the rule does
+        parts = written_furigana("verb stem + 方 ／ 前", known=rule)
+        self.assertEqual("".join(p["text"] for p in parts), "verb stem + 方 ／ 前")
+        self.assertIn({"text": "方", "reading": "かた"}, parts)
+
     def test_anything_else_is_read_by_the_tokenizer(self) -> None:
         from study import morphology
         if morphology.tokenize("見る") is None:

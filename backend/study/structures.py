@@ -48,6 +48,14 @@ class Field:
     options: tuple[str, ...] = ()
     # For 'pairs': the two keys of a row, the first the one it needs.
     parts: tuple[str, ...] = ()
+    # False keeps the field out of a header-less import's column order
+    # (components/decks/importCards.js's columnsFor), which is positional:
+    # a field added after cards were pasted that way would shift every
+    # column after it. A header naming it still lands it.
+    positional: bool = True
+    # The key of the field this one is the reading of: the form previews
+    # that field's furigana from it (ReadingOfField).
+    reads: str | None = None
 
 
 @dataclass(frozen=True)
@@ -119,6 +127,12 @@ STRUCTURES: dict[str, Structure] = {
         key="grammar", source="grammar", front_key="rule", back_key="meaning",
         fields=(
             Field("rule", required=True),
+            # Optional: the rule with its kanji in kana, for the furigana
+            # a card prints over it (grammar_examples.written_furigana).
+            # Without it the catalogue's reading is used for a catalogue
+            # point and the tokenizer's otherwise -- a guess on a fragment
+            # (〜方 alone is ほう to it), which this is the way to correct.
+            Field("rule_reading", positional=False, reads="rule"),
             Field("meaning", required=True),
             Field("structure"),
             Field("register", kind="choice", options=REGISTERS),
@@ -296,8 +310,9 @@ def grammar_lesson(fields: dict) -> dict:
     there is nothing to localise, and no `raw_id` on a rival -- it names
     no catalogue point, so its row is not a door. The rule and the
     formation carry their furigana (grammar_examples.written_furigana:
-    the catalogue's reading for a catalogue point, the tokenizer's for
-    the rest), which the card itself prints too.
+    the learner's own `rule_reading` where it spells the rule, else the
+    catalogue's reading for a catalogue point, else the tokenizer's),
+    which the card itself prints too.
     """
     from study.grammar_examples import highlight_span, parts_with_span, written_furigana
 
@@ -317,11 +332,14 @@ def grammar_lesson(fields: dict) -> dict:
         for p in sentence_pairs(fields)
     ]
     structure = fields.get("structure") or ""
+    rule_parts = written_furigana(rule, fields.get("rule_reading"))
     return {
         "pattern": rule,
-        "pattern_furigana": written_furigana(rule),
+        "pattern_furigana": rule_parts,
         "structure": structure,
-        "structure_furigana": written_furigana(structure),
+        # The formation's kanji are, nearly always, the rule's: read them
+        # as the rule is read, and the tokenizer only past that.
+        "structure_furigana": written_furigana(structure, known=rule_parts),
         "meaning": fields.get("meaning") or "",
         "register": fields.get("register") or None,
         "steps": steps,
@@ -341,7 +359,9 @@ def describe() -> list[dict]:
             "fields": [
                 {"key": f.key, "kind": f.kind, "required": f.required, "picker": f.picker,
                  **({"options": list(f.options)} if f.options else {}),
-                 **({"parts": list(f.parts)} if f.parts else {})}
+                 **({"parts": list(f.parts)} if f.parts else {}),
+                 **({"positional": False} if not f.positional else {}),
+                 **({"reads": f.reads} if f.reads else {})}
                 for f in s.fields
             ],
         }

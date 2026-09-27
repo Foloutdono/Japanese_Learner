@@ -8,6 +8,7 @@ import { ChevronIcon } from '../ui/Icons'
 import { ExampleSentence } from '../dictionary/ExampleSentence'
 import { StageMark } from './StageMark'
 import { FuriganaParts } from './Readings'
+import { joinRuns } from '../../domain/rubyRuns'
 import { inline, readUse, SHORT_RUN } from './lessonText'
 
 // ── 文法 — a grammar point, taught (plan 087) ───────────────────
@@ -173,7 +174,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
                 (lesson_payload's structure_furigana and pattern_furigana). */}
             {point.structure && (
               <div className="dict-plate__structure" lang="ja">
-                <Read text={point.structure} parts={point.structure_furigana} />
+                <Read text={point.structure} parts={joinRuns(point.structure_furigana)} />
               </div>
             )}
             <h2 className="dict-plate__word dict-plate__word--word" lang="ja">

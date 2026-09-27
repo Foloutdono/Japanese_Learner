@@ -6,6 +6,7 @@ import { useLang } from '../../LangContext'
 import { apiFetch } from '../../lib/api'
 import { api } from '../../lib/origin'
 import { FuriganaParts, splitReadingTokens } from '../study/Readings'
+import { joinRuns } from '../../domain/rubyRuns'
 import { ExampleSentence, SenseNumeral } from './ExampleSentence'
 import { GrammarLesson } from '../study/GrammarLesson'
 import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
@@ -1120,7 +1121,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
           {isGrammar && entry.structure && (
             <div className="dict-plate__structure" lang="ja">
               {entry.structure_furigana?.some(part => part.reading)
-                ? <FuriganaParts parts={entry.structure_furigana} />
+                ? <FuriganaParts parts={joinRuns(entry.structure_furigana)} />
                 : entry.structure}
             </div>
           )}
