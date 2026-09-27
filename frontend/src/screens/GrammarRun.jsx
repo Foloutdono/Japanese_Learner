@@ -9,7 +9,9 @@ import {
   Flashcard, MeaningDisplay, RevealActions,
 } from '../components/study/QuizComponents'
 import { usePace } from '../components/study/usePace'
-import { GrammarRule, GrammarAnswer, GrammarFillSentence, GrammarContrastSentence } from '../components/study/GrammarPieces'
+import {
+  GrammarRule, GrammarPattern, GrammarAnswer, GrammarFillSentence, GrammarContrastSentence,
+} from '../components/study/GrammarPieces'
 import { GrammarLesson, GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
@@ -213,10 +215,16 @@ export default function GrammarRun({ session }) {
             loading={reviewLoading}
             t={t}
             session={session}
-            renderFront={c => <div className="grammar-glyph">{c.grammar}</div>}
+            renderFront={c => (
+              <div className="grammar-glyph" lang="ja">
+                <GrammarPattern text={c.grammar} parts={c.grammar_furigana} />
+              </div>
+            )}
             renderBack={c => (
               <div>
-                <div className="grammar-glyph">{c.grammar}</div>
+                <div className="grammar-glyph" lang="ja">
+                  <GrammarPattern text={c.grammar} parts={c.grammar_furigana} />
+                </div>
                 <div className="grammar-meaning"><GlossList meaning={c.meaning} /></div>
                 {c.structure && (
                   <div className="review-grammar-explanation">{c.structure}</div>
@@ -356,7 +364,7 @@ export default function GrammarRun({ session }) {
                           ? <MeaningDisplay meaning={card.meaning} size={34} />
                           : (
                             <>
-                              <GrammarRule text={card.grammar} size={52} />
+                              <GrammarRule text={card.grammar} parts={card.grammar_furigana} size={52} />
                               {card.structure && (
                                 <div className="grammar-structure">{card.structure}</div>
                               )}
@@ -379,7 +387,7 @@ export default function GrammarRun({ session }) {
                         : isB2F
                           ? (
                             <>
-                              <GrammarRule text={card.grammar} size={44} />
+                              <GrammarRule text={card.grammar} parts={card.grammar_furigana} size={44} />
                               {card.structure && (
                                 <div className="grammar-structure">{card.structure}</div>
                               )}
@@ -405,7 +413,7 @@ export default function GrammarRun({ session }) {
                         ? <MeaningDisplay meaning={card.meaning} size={34} />
                         : (
                           <>
-                            <GrammarRule text={card.grammar} size={52} />
+                            <GrammarRule text={card.grammar} parts={card.grammar_furigana} size={52} />
                             {card.structure && (
                               <div className="grammar-structure">{card.structure}</div>
                             )}

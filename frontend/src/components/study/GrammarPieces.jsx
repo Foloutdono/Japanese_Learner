@@ -15,14 +15,32 @@ import { ExampleSentence } from '../dictionary/ExampleSentence'
 // clips the long end of that range. This wraps instead, and shrinks
 // as the pattern grows so a short rule still reads as a headline
 // while a long one still fits the card.
-export function GrammarRule({ text, size = 48 }) {
+//
+// `parts` is the pattern's furigana (the card's `grammar_furigana`,
+// from the catalogue's own reading -- study/grammar_examples.
+// pattern_furigana): 中 read なか over 〜の中で. Always on, never a
+// hint: a reading names no rule, the same call fill_in's sentence
+// makes below. A pattern with no kanji, or a written card's own rule,
+// has no reading and prints as text.
+export function GrammarRule({ text, parts, size = 48 }) {
   const n = (text || '').length
   const scale = n <= 4 ? 1 : n <= 8 ? 0.8 : n <= 12 ? 0.62 : 0.5
   return (
-    <div className="grammar-rule" style={{ '--rule-size': `${Math.round(size * scale)}px` }} lang="ja">
-      {text}
+    <div className={`grammar-rule${hasReading(parts) ? ' grammar-rule--ruby' : ''}`}
+         style={{ '--rule-size': `${Math.round(size * scale)}px` }} lang="ja">
+      <GrammarPattern text={text} parts={parts} />
     </div>
   )
+}
+
+// The pattern as text, or as ruby when it has a reading: what
+// GrammarRule sets as a headline, and the fast review sets as its card.
+export function GrammarPattern({ text, parts }) {
+  return hasReading(parts) ? <FuriganaParts parts={parts} /> : text
+}
+
+function hasReading(parts) {
+  return Boolean(parts?.some(part => part.reading))
 }
 
 // Rule + its structure line + what it means — the three things that
@@ -32,7 +50,7 @@ export function GrammarRule({ text, size = 48 }) {
 export function GrammarAnswer({ card, size = 44, divided = false }) {
   return (
     <div className={`grammar-answer${divided ? ' grammar-answer--divided' : ''}`}>
-      <GrammarRule text={card.grammar} size={size} />
+      <GrammarRule text={card.grammar} parts={card.grammar_furigana} size={size} />
       {card.structure && <div className="grammar-structure">{card.structure}</div>}
       <MeaningDisplay meaning={card.meaning} size={24} />
     </div>

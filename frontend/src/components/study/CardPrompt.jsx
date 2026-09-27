@@ -328,7 +328,7 @@ export default function CardPrompt({
                 : isF2B
                   ? (
                     <>
-                      <GrammarRule text={c.grammar} size={52} />
+                      <GrammarRule text={c.grammar} parts={c.grammar_furigana} size={52} />
                       {c.structure && <div className="grammar-structure">{c.structure}</div>}
                     </>
                   )
@@ -348,7 +348,7 @@ export default function CardPrompt({
                   ? <MeaningDisplay meaning={c.meaning} size={30} />
                   : (
                     <>
-                      <GrammarRule text={c.grammar} size={44} />
+                      <GrammarRule text={c.grammar} parts={c.grammar_furigana} size={44} />
                       {c.structure && <div className="grammar-structure">{c.structure}</div>}
                     </>
                   )
@@ -367,7 +367,7 @@ export default function CardPrompt({
               : isF2B
                 ? (
                   <>
-                    <GrammarRule text={c.grammar} size={52} />
+                    <GrammarRule text={c.grammar} parts={c.grammar_furigana} size={52} />
                     {c.structure && <div className="grammar-structure">{c.structure}</div>}
                   </>
                 )

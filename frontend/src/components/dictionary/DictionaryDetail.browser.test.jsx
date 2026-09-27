@@ -1465,6 +1465,17 @@ describe('the plate — a grammar point', () => {
     expect(getComputedStyle(plate.querySelector('.dict-plate__stripe')).backgroundColor).toBe(probe('backgroundColor', 'var(--line-jisho)'))
   })
 
+  it('reads a pattern with a kanji through its furigana, as a word is read', async () => {
+    const { root } = await renderEntry({
+      ...GRAMMAR, raw_id: 'grammar_N5_〜の中で', pattern: '〜の中で', structure: 'group + の中で',
+      pattern_furigana: [{ text: '〜の' }, { text: '中', reading: 'なか' }, { text: 'で' }],
+    })
+    const word = root.querySelector('.dict-plate__word')
+    expect(word.querySelectorAll('ruby')).toHaveLength(1)
+    expect(word.querySelector('rt').textContent).toBe('なか')
+    expect(word.textContent).toBe('〜の中なかで')
+  })
+
   it('offers the add roundel where a screen can mine, as a ghost that adds to the remembered deck and says so', async () => {
     const mining = MINING()
     const { root } = await renderEntry(GRAMMAR, { ...NAV(), mining })

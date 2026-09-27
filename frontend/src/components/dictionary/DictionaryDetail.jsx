@@ -707,7 +707,11 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   // is the entry's first gloss (the full list lives in the body), or a
   // kana's romaji.
   const headword = isGrammar ? entry.pattern : (entry.kanji || entry.kana)
-  const headwordFurigana = entry.type === 'vocab' ? entry.furigana : null
+  // A grammar point's is its pattern's (the catalogue's own reading,
+  // study/grammar_examples.pattern_furigana): 中 read なか in 〜の中で.
+  const headwordFurigana = entry.type === 'vocab' ? entry.furigana
+    : isGrammar && entry.pattern_furigana?.some(part => part.reading) ? entry.pattern_furigana
+      : null
   const showKanaLine = entry.type === 'vocab'
     && !headwordFurigana?.length
     && !!entry.kanji && !!entry.kana && entry.kana !== entry.kanji

@@ -7,6 +7,7 @@ import { useDialog } from '../../hooks/useDialog'
 import { ChevronIcon } from '../ui/Icons'
 import { ExampleSentence } from '../dictionary/ExampleSentence'
 import { StageMark } from './StageMark'
+import { FuriganaParts } from './Readings'
 import { inline, readUse, SHORT_RUN } from './lessonText'
 
 // ── 文法 — a grammar point, taught (plan 087) ───────────────────
@@ -163,7 +164,13 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
           </div>
           <div className="dict-plate__stack">
             {point.structure && <div className="dict-plate__structure" lang="ja">{point.structure}</div>}
-            <h2 className="dict-plate__word dict-plate__word--word" lang="ja">{point.pattern}</h2>
+            {/* The pattern's furigana, as the dictionary's plate sets
+                its headword's (lesson_payload's pattern_furigana). */}
+            <h2 className="dict-plate__word dict-plate__word--word" lang="ja">
+              {point.pattern_furigana?.some(part => part.reading)
+                ? <FuriganaParts parts={point.pattern_furigana} />
+                : point.pattern}
+            </h2>
             {point.meaning && <div className="dict-plate__caption">{point.meaning}</div>}
           </div>
           <div className="dict-plate__stripe" aria-hidden="true" />
