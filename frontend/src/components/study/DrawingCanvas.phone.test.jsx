@@ -129,6 +129,10 @@ describe('the drawing board at phone width', () => {
     expect(Math.round(g.top)).toBe(Math.round(b.top))
     expect(Math.round(g.width)).toBe(Math.round(b.width))
     // Faint, or it reads as a second answer over the learner's first.
+    // Read once the 320ms fade (ghost-arrive) has landed: settled()'s
+    // 100ms is inside it, and on a slow runner its first frame had not
+    // even ticked, so the opacity read was the keyframe's 0.
+    await Promise.all(ghost.getAnimations().map(a => a.finished.catch(() => {})))
     const shown = parseFloat(getComputedStyle(ghost).opacity)
     expect(shown).toBeGreaterThan(0)
     expect(shown).toBeLessThan(0.5)

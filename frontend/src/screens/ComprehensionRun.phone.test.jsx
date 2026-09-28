@@ -77,6 +77,18 @@ const ok = body => ({ ok: true, status: 200, json: async () => body })
 // Long enough for the stage's entrance to land — everything here is a
 // measurement, and a card still sliding in measures a few px low.
 const settle = (ms = 700) => new Promise(r => setTimeout(r, ms))
+// A fixed wait is only a guess at when the entrance lands: the card
+// mounts after the exercise's fetch, and on a slow runner 700ms still
+// caught it mid-rise (the strip read 6px lower before a scroll than
+// after it). So, after the wait, every entrance still running is waited
+// out too. Short ones only: the reading clock is an animation as long
+// as the reading time, and waiting on it would outlast the test.
+const landed = () => Promise.all(document.getAnimations()
+  .filter(a => {
+    const end = a.effect?.getComputedTiming().endTime
+    return Number.isFinite(end) && end <= 2000
+  })
+  .map(a => a.finished.catch(() => {})))
 
 async function reading(text) {
   apiFetch.mockReset()
@@ -99,6 +111,7 @@ async function reading(text) {
     </LangProvider>
   )
   await settle()
+  await landed()
   return screen.container
 }
 
