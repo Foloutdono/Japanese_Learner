@@ -1046,7 +1046,35 @@ runtime purpose. Two consequences worth knowing:
   `tests/test_analysis.py`, `screens/AnalyzerScreen.jsx`,
   `components/analysis/WordsList.jsx`, `src/analyzer.desktop.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **162** or higher, and check
+  **163** is 辻, first contact redrawn as the crossroads (numbered 163
+  because 161 went to 字幕 and 162 to the pool's words in the learner's
+  language, open on its branch, while it was open: its commits' messages
+  say 161, their phase letters one behind this plan's from 161b on; the
+  owner's pick D of the canvas "Tsuji — onboarding, new directions", with
+  option 3, 空の弧, for the hour): on the desk no column -- the question at the
+  paper's top-left corner, the journey a strip of named stops at the
+  floor's left end (plan 140's line on its side, its doors kept), the
+  floor in the bottom-right corner -- and each question drawing its
+  answers between them, out of a hub numbered as its stop: the name as
+  the first station, the reasons as six roads, the kana as the two words
+  over a tree of four answers and the words read out, the level and the
+  goal as one climbing line, the lines as three cards, the rhythms as
+  four roads from today on a calendar (`rideAxis`), the hour as the
+  day's arc with the train riding it, the plan as the ride to scale and
+  a guest's account beside the ticket it keeps; and the Welcome as the
+  crossroads itself, 辻 the hub, the app's lines out of it and the gold
+  road to Board, the sign-in in Board's place (`AuthCard`'s `frame`)
+  (cited in `screens/BoardingFlow.jsx`, `screens/AppLoading.jsx`,
+  `App.jsx`, `components/boarding/` -- `DeskStrip.jsx`, `NameStep.jsx`,
+  `WhyStep.jsx`, `icons.jsx`, `KanaStep.jsx`, `LevelStep.jsx`,
+  `LinesStep.jsx`, `RhythmStep.jsx`, `TimeStep.jsx`, `PlanStep.jsx`,
+  `AccountStep.jsx`, `PaperTicket.jsx`, `PaperWait.jsx`, `Welcome.jsx` --
+  `components/account/AuthCard.jsx`, `components/chrome/DeskMast.jsx`,
+  `domain/boarding.js`'s `kanaFigures` and `rideAxis`,
+  `src/frontdoor.desktop.test.jsx`, `src/frontdoor.wide.test.jsx` and the
+  机 section of `index.css`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`).
+  When starting a new wave, begin at **164** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

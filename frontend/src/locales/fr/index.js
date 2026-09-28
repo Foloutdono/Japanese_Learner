@@ -1768,6 +1768,10 @@ const boarding = {
   // table tutoie, comme elle — le choix du propriétaire, pour l’élan.
   brdTagline: 'Accomplis tes objectifs sans détour.',
   brdBoard: 'Embarquer',
+  // 辻 (plan 163): the desk's front door, its corner and the way back to it.
+  brdHaveAccountQ: 'Déjà un compte ?',
+  brdNoAccountYet: 'Pas encore de compte ?',
+  brdBackHome: 'Retour à l’accueil',
   brdHaveAccount: 'Déjà un compte ? Se connecter',
   // Google : « continuer », jamais « s'inscrire » ni « se connecter »
   // — un fournisseur ne distingue pas les deux, on arrive, c'est tout.
@@ -1800,6 +1804,17 @@ const boarding = {
   brdAccountHint: 'Ton parcours est déjà enregistré. Un compte te permet de le retrouver sur un autre appareil — et de ne pas le perdre en changeant de téléphone.',
   brdAccountCreate: 'Créer mon compte',
   brdAccountSkip: 'Continuer sans compte',
+  // 辻 (plan 163): the desk's account, beside the ticket it keeps.
+  brdAccountHintDesk: 'Ton billet est prêt. Un compte le garde, sur tous tes appareils.',
+  brdTicketKind: 'Billet · Tsuji',
+  brdIssued: (date) => `Émis le ${date}`,
+  brdCreditsOffered: 'crédits offerts',
+  brdPunched: 'Composté',
+  brdTermService: 'Service',
+  brdTermRoute: 'Trajet',
+  brdTermValid: 'Valable jusqu’au',
+  brdServiceValue: (name, n) => `${name} · ${n} / jour`,
+  brdTicketNote: 'Sans compte, ton billet reste sur cet appareil.',
   brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulaire', grammar: 'Grammaire', dictation: 'Dictée', reading: 'Lecture', kana: 'Kana', translation: 'Traduction', analyzer: 'Analyseur', exam: 'Examen blanc' },
   brdDemoMeaning: { station: 'gare', toEat: 'manger', whichRule: 'Quelle règle ?', craft: 'métier', writeIt: 'Écris-le', readIt: 'Lis', kippu: 'kippu', ki: 'ki', sayIt: 'Traduis-le', yama: 'yama · san', breakItDown: 'Décortique', timer: '24:18' },
   brdDemoFoot: { kanjiMeaning: 'Kanji → sens', wordMeaning: 'Mot → sens', sentenceRule: 'Phrase → règle', meaningKanji: 'Sens → kanji', soundText: 'Son → texte', sentenceMeaning: 'Phrase → sens', wordReading: 'Mot → lecture', kanaRomaji: 'Kana → rōmaji', meaningSentence: 'Sens → phrase', kanjiReadings: 'Kanji → lectures', sentenceGrammar: 'Phrase → grammaire', timedPaper: 'Épreuve chronométrée' },
@@ -1823,6 +1838,15 @@ const boarding = {
   brdKanaWord: { sushi: 'sushi', hotel: 'hôtel' },
   brdRevealQ: 'Bientôt, tu liras les deux.',
   brdRevealHint: 'Deux écritures, 46 signes chacune. Ton premier arrêt.',
+  // 辻 (plan 163): the desk's kana question and reveal, drawn as the
+  // owner's D03 -- each answer says what it reads, then its name.
+  brdKanaHint: 'Choisis ce que tu lis déjà.',
+  brdKanaOnly: (jp) => `Seulement ${jp}`,
+  brdKanaSays: { hiragana: 'Les hiragana', katakana: 'Les katakana', both: 'Hiragana et katakana', none: 'On commence par là' },
+  brdRevealLead: 'Deux écritures de 46 signes chacune. Voici comment se lisent ces deux mots.',
+  brdRevealMeans: 'veut dire',
+  brdRevealWord: (word) => `« ${word} »`,
+  brdRevealFirst: (date, min) => `Ton premier arrêt : **les kana**, lus d’ici le **${date}** à ${min} min par jour.`,
   brdLevelQ: 'Super ! Quel est ton niveau ?',
   brdLevelHint: 'Les arrêts derrière toi seront marqués connus.',
   brdNovice: 'Novice',
@@ -1853,13 +1877,34 @@ const boarding = {
     kanji: 'Lectures, sens, écriture',
     grammar: 'Les structures, avec des exemples',
   },
+  // 辻 (plan 163): the desk's lines -- the kana's strip and what each
+  // line carries on the ride to its goal.
+  brdKanaFirst: 'hiragana et katakana, en premier',
+  brdOnEveryTicket: 'Sur chaque billet',
+  brdLineCarries: {
+    vocab: (stop) => `mots jusqu’au ${stop}`,
+    kanji: (stop) => `kanji jusqu’au ${stop}`,
+    grammar: (stop) => `points jusqu’au ${stop}`,
+  },
+  brdLinesArrive: (n, stop, date) => `${n === 1 ? 'Avec cette ligne' : n === 2 ? 'Avec ces deux lignes' : 'Avec ces trois lignes'}, arrivée au ${stop} en **${date}**.`,
   brdRhythmQ: 'Quel est ton rythme ?',
+  // 辻 (plan 163): the desk's four roads -- a rhythm's minutes and its
+  // service, and the days its ride takes.
+  brdRhythmHint: 'Plus tu roules chaque jour, plus tôt tu arrives. Modifiable plus tard.',
+  brdADay: 'par jour',
+  brdRhythmName: { 5: 'Omnibus', 10: 'Rapide', 15: 'Rapide spécial', 20: 'Express' },
+  brdRideDays: (n) => (n === 1 ? '1 jour' : `${n} jours`),
   brdMinADay: 'min par jour',
   brdNewItems: (n) => `~${n} nouveautés`,
   brdChangeLater: 'Modifiable plus tard.',
   brdTimeQ: 'Quand étudies-tu ?',
   brdDeparture: 'Départ',
   brdDayAria: 'Heure de départ',
+  // 辻 (plan 163): the desk's hour, the day as the sun's arc.
+  brdTimeHint: 'Ton train part chaque jour à cette heure.',
+  brdYourTrain: 'Ton train',
+  brdThenDaily: 'puis chaque jour',
+  brdTimeFine: 'ou glisse le train le long du jour, par demi-heure',
   // Le rappel (natif seulement), et la notification telle que l’appli
   // l’envoie. brdAppName est le nom sur les stores ; à garder en
   // phase avec appName dans capacitor.config.json.
@@ -1956,6 +2001,18 @@ const boarding = {
   brdEnjoy: 'Bon voyage.',
   brdCreditsGift: (n) => `+${n} crédits offerts`,
   brdEnter: 'Entrer en gare',
+  // 辻 (plan 163): the desk's plan, the ride drawn to scale -- its stops'
+  // days and names, what the terminus holds, what the ride is for.
+  brdPlanHint: (min, purpose) => `À ${min} min par jour, ${purpose}.`,
+  brdInDays: (n) => (n === 1 ? 'demain' : `dans ${n} jours`),
+  brdEvery: { am: 'chaque matin', noon: 'chaque midi', pm: 'chaque soir' },
+  brdAtTime: (every, time) => `${every} à ${time}`,
+  brdKanaDone: 'Kana lus',
+  brdBothScripts: 'hiragana et katakana',
+  brdTerminus: (stop) => `Terminus · ${stop}`,
+  brdAtTerminus: 'Au terminus, tu connaîtras',
+  brdUnit: { vocab: 'mots', kanji: 'kanji', grammar: 'points de grammaire' },
+  brdUnitKana: 'signes',
 }
 
 const ride = {

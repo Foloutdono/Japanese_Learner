@@ -25431,448 +25431,101 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     transform: none;
   }
 
-  /* ── 路線 — first contact as the rail being laid (plans 122, 140) ──
+  /* ── 辻 — first contact as the crossroads (plans 122, 140, 163) ──
      From the Welcome to the first card a computer drew a phone: a 640px
-     column in an empty window. Plan 122 drew a run's frame, the journey
-     in a column at the window's right edge; plan 140 is the owner's pick
-     A of three directions drawn after it (the canvas "Desktop onboarding
-     — options"). The desk's chrome is the rail, so first contact lays it
-     before it has any gates: a sumi column at --desk-side-w down the
-     LEFT edge, the rail's masthead at its head (.desk-rail__mast, the
-     same markup), and under it the sign-in on the Welcome, then the
-     boarding's line -- a named stop per question, its answer printed
-     once given (components/boarding/DeskLine). The head's track and the
-     right-hand journey were the same line drawn twice; the column is
-     the one. The paper holds the question, its answers laid for the
-     width, and the floor: Back beside Continue (BoardFrame's
-     BoardBack). No rail until Today. Every rule here is scoped under
-     .desk-brd or .desk-door, and writes no (element, property) pair the
+     column in an empty window. Plan 122 drew a run's frame, plan 140 laid
+     the rail down the left edge as a sumi column with a stop per
+     question, and plan 163 is the owner's pick D of the canvas "Tsuji —
+     onboarding, new directions": the column goes, and three places never
+     move. The question keeps the paper's top-left corner at the display
+     rung; the journey is a strip at the floor's left end, a named stop
+     per question (components/boarding/DeskStrip); the floor is the
+     bottom-right corner, Back beside Continue (BoardFrame's BoardBack).
+     Between them each question draws its answers in the paper that is
+     left; the Welcome before them is the crossroads itself (.desk-front,
+     below). Every rule here is scoped under .desk-brd or .desk-front,
+     and writes no (element, property) pair the
      boarding's short step writes (@container brd (max-height: 739px);
-     held by src/desk.css.test.js), so a laptop's short window still
-     gets the short step. */
+     held by src/desk.css.test.js), so a laptop's short window still gets
+     the short step. */
   .desk-brd {
     --fs-display-fluid: var(--fs-display);
+    --desk-brd-pad: max(var(--sp-8), calc((100% - var(--desk-board-w)) / 2));
     max-width: none;
-    padding-inline: calc(var(--desk-side-w) + var(--sp-7)) var(--sp-7);
+    padding-inline: var(--desk-brd-pad);
+    /* The frame's own height is the short step's measure (the brd
+       container), so its padding stays a rung each way: a laptop's
+       1100x800 keeps the tall step. The question's room over it is the
+       body's (below). */
+    padding-top: calc(var(--safe-top) + var(--sp-7));
+    padding-bottom: calc(var(--safe-bottom) + var(--sp-7));
   }
-  /* The column: the rail's material -- its sumi, its lit edge and the
-     shadow it throws, turned to face the screen (.desk-rail) -- at a
-     second column's width, so the phone-born sign-in stands in it at
-     the width it was drawn at. It scrolls on its own on a short window;
-     its foot stays under what it holds. */
-  .desk-brd__side,
-  .desk-door__side {
-    --chrome-edge: color-mix(in srgb, var(--text-on-panel) 22%, var(--burger-menu-border));
-    position: fixed;
-    inset: 0 auto 0 0;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-6);
-    width: var(--desk-side-w);
-    padding-top: calc(var(--safe-top) + var(--sp-6));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    background: var(--bg-panel);
-    color: var(--text-on-panel);
-    border-right: 1px solid var(--chrome-edge);
-    box-shadow: 10px 0 24px -12px rgba(0, 0, 0, 0.75);
-  }
-  /* The line: a stop per question, each a row of the column -- its dot
-     on the rail down the dots' column, its name over its answer. Since
-     plan 155 the rail is one line and the lit stop one object running on
-     it (components/boarding/DeskLine's useRoute, which measures the rows
-     and hands the route its five lengths): the rail from the first dot
-     to the last, the stretch ridden over it, the wash under the lit row
-     and the train -- the gold ring -- over its dot. The wash and the
-     train move together, on the pull's own curve, so a Continue reads as
-     the train leaving one stop for the next beside the paper pulling;
-     the plan built, both run to the last stop and fade, the line ridden
-     whole. The five lengths are the rows' own, handed over as plain
-     numbers; until they are, the rail is nothing and the wash and the
-     train are not drawn. */
-  .desk-brd__route {
-    --dot-x: calc(var(--sp-4) + var(--sp-3) + var(--sp-6) / 2);
-    --ride-ease: cubic-bezier(0.65, 0, 0.35, 1);
-    position: relative;
-    isolation: isolate;
-  }
-  .desk-brd__rail,
-  .desk-brd__ridden {
-    position: absolute;
-    left: var(--dot-x);
-    top: calc(var(--rail-top, 0) * 1px);
-    width: 2px;
-    margin-left: -1px;
-    border-radius: var(--r-pill);
-    transform-origin: top;
-  }
-  .desk-brd__rail {
-    height: calc(var(--rail-h, 0) * 1px);
-    background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
-    /* Laid, the first time the line is drawn: down from the head. */
-    animation: desk-brd-lay 720ms cubic-bezier(0.3, 0.7, 0.2, 1) 120ms backwards;
-  }
-  .desk-brd__ridden {
-    height: calc(var(--ride-h, 0) * 1px);
-    background: var(--text-on-panel-soft);
-  }
-  .desk-brd__here {
-    position: absolute;
-    left: var(--sp-4);
-    right: var(--sp-4);
-    top: 0;
-    height: calc(var(--here-h, 0) * 1px);
-    border-radius: var(--r-panel);
-    background: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-    transform: translateY(calc(var(--here-y, 0) * 1px));
-    animation: desk-brd-show 320ms ease-out 360ms backwards;
-  }
-  .desk-brd__train {
-    position: absolute;
-    z-index: 2;
-    left: var(--dot-x);
-    top: 0;
-    width: 18px;
-    height: 18px;
-    margin: -9px 0 0 -9px;
-    box-sizing: border-box;
-    border: 3px solid var(--accent2);
-    border-radius: var(--r-pill);
-    background: var(--bg-panel);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent2) 25%, transparent);
-    transform: translateY(calc((var(--here-y, 0) + var(--here-h, 0) / 2) * 1px));
-    pointer-events: none;
-    animation: desk-brd-show 320ms ease-out 360ms backwards;
-  }
-  /* Measured, the train runs: the wash and the ring on one curve, the
-     ridden stretch filling behind them. Not before -- the first reading
-     would slide them down from the column's top. */
-  .desk-brd__route--ready .desk-brd__ridden { transition: height 560ms var(--ride-ease); }
-  .desk-brd__route--ready .desk-brd__here { transition: transform 560ms var(--ride-ease), height 560ms var(--ride-ease), opacity 240ms ease-out; }
-  .desk-brd__route--ready .desk-brd__train { transition: transform 560ms var(--ride-ease), opacity 240ms ease-out; }
-  /* The plan built: no stop is asked, so the train runs to the last and
-     steps off once it has got there. */
-  .desk-brd__route--ridden .desk-brd__here { opacity: 0; transition-delay: 0s, 0s, 420ms; }
-  .desk-brd__route--ridden .desk-brd__train { opacity: 0; transition-delay: 0s, 420ms; }
-  .desk-brd__stops {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    margin: 0;
-    padding: 0 var(--sp-4);
-    list-style: none;
-  }
-  /* The stops arrive in the order the line is laid, the first as the
-     rail passes it (DESIGN.md, Motion: ~40ms apart, and no list here is
-     past the eighth). A stop that joins the line later -- the level,
-     once both scripts are read -- arrives the same way where it joins. */
-  .desk-brd__stop {
-    position: relative;
-    animation: desk-brd-stop 420ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(160ms + var(--i, 0) * 45ms) backwards;
-  }
-  .desk-brd__door {
-    display: grid;
-    grid-template-columns: var(--sp-6) minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: var(--sp-4);
-    width: 100%;
-    min-height: var(--sp-9);
-    padding: var(--sp-2) var(--sp-3);
-    background: none;
-    border: 0;
-    border-radius: var(--r-panel);
-    color: inherit;
-    font: inherit;
-    text-align: start;
-    transition: background-color 160ms ease;
-  }
-  button.desk-brd__door { cursor: pointer; }
-  .desk-brd__door > .svg {
-    width: 16px;
-    height: 16px;
-    color: var(--text-on-panel-soft);
-    transition: opacity 160ms ease, transform 160ms ease, color 160ms ease;
-  }
-  .desk-brd__dot {
-    position: relative;
-    z-index: 1;
-    justify-self: center;
-    width: 12px;
-    height: 12px;
-    box-sizing: border-box;
-    border: 2px solid color-mix(in srgb, var(--text-on-panel) 40%, transparent);
-    border-radius: var(--r-pill);
-    background: var(--bg-panel);
-    transition: background-color 240ms ease, border-color 240ms ease;
-  }
-  .desk-brd__txt {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-    min-width: 0;
-  }
-  .desk-brd__lab {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--text-on-panel-soft);
-    transition: color 240ms ease;
-  }
-  .desk-brd__val {
-    font-family: var(--font-display);
-    font-size: var(--fs-body);
-    font-weight: 700;
-    line-height: 1.3;
-    color: var(--text-on-panel);
-    overflow-wrap: anywhere;
-    animation: desk-brd-val 300ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-    transition: color 240ms ease;
-  }
-  /* A stop ridden is filled; the one being asked keeps its open ring
-     under the train, so the train pulls into a station rather than onto
-     a filled dot showing past its edge. */
-  .desk-brd__stop--done .desk-brd__dot {
-    border-color: var(--text-on-panel-soft);
-    background: var(--text-on-panel-soft);
-  }
-  /* The stop being asked: the train's ring over its dot and the wash
-     under its row (above), its name in full ink and the pick as it
-     stands in gold, mixed toward the panel's ink as the fare is -- lit
-     as the train pulls in rather than as it leaves the stop before. */
-  .desk-brd__stop--now .desk-brd__lab { color: var(--text-on-panel); transition-delay: 220ms; }
-  .desk-brd__stop--now .desk-brd__val { color: color-mix(in srgb, var(--accent2) 70%, var(--text-on-panel)); transition-delay: 220ms; }
-  @keyframes desk-brd-lay { from { transform: scaleY(0); } }
-  @keyframes desk-brd-show { from { opacity: 0; } }
-  @keyframes desk-brd-stop { from { opacity: 0; transform: translateX(calc(-1 * var(--sp-3))); } }
-  @keyframes desk-brd-val { from { opacity: 0; transform: translateY(var(--sp-1)); } }
-  /* The foot, where the rail's will be: the projection while the
-     questions run, the pass once the plan is built. */
-  .desk-brd__foot {
-    margin-top: auto;
-    padding: 0 var(--sp-4);
-    padding-bottom: calc(var(--sp-4) + var(--safe-bottom));
-  }
-  /* The projection arrives last, once the line is laid, and a new date
-     drops into it as a board's figure turns over (keyed on the date,
-     DeskLine): a figure that changed without moving was a figure nobody
-     saw change. Unpriced, the dash is the panel's soft ink -- a blank on
-     the board, not a figure. */
-  .desk-brd__proj {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    padding: var(--sp-4) var(--sp-5);
-    overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
-    border-radius: var(--r-identity);
-    animation: desk-brd-issue 480ms cubic-bezier(0.22, 0.68, 0.32, 1) 520ms backwards;
-  }
-  .desk-brd__fig {
-    font-family: var(--font-display);
-    font-size: var(--fs-heading);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-on-panel);
-    animation: desk-brd-turn 420ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-  }
-  .desk-brd__proj--blank .desk-brd__fig { color: var(--text-on-panel-soft); animation: none; }
-  @keyframes desk-brd-turn {
-    from { opacity: 0; transform: translateY(-60%); }
-  }
-  /* The pass, issued: the rail's pocket pass (.desk-pass) in its
-     material, with nothing on it to press yet. It rises into the foot
-     as the pass step's pass rose onto its screen. */
-  .desk-brd__pass {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-    padding: var(--sp-4);
-    overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--pass-ink) 70%, transparent);
-    border-radius: var(--r-identity);
-    background:
-      linear-gradient(155deg,
-        color-mix(in srgb, var(--pass-ink) 38%, var(--bg-panel)) 0%,
-        var(--bg-panel) 62%);
-    animation: desk-brd-issue 480ms cubic-bezier(0.22, 0.68, 0.32, 1) 200ms backwards;
-  }
-  .desk-brd__holder {
-    font-family: var(--font-serif);
-    font-size: var(--fs-lead);
-    font-weight: 700;
-    color: var(--text-on-panel);
-  }
-  .desk-brd__face {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-  }
-  .desk-brd__lvl {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 2px solid color-mix(in srgb, var(--pass-ink) 70%, var(--text-on-panel));
-    border-radius: var(--r-pill);
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    /* A roundel centres its line box, not its ink (.hud__level). */
-    line-height: normal;
-  }
-  .desk-brd__climb {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: var(--sp-2);
-    min-width: 0;
-  }
-  .desk-brd__purse {
-    display: flex;
-    flex: none;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--sp-1);
-  }
-  .desk-brd__bal {
-    font-family: var(--font-display);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .desk-brd__gift {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--accent2) 70%, var(--text-on-panel));
-  }
-  @keyframes desk-brd-issue {
-    from { opacity: 0; transform: translateY(var(--sp-5)); }
-  }
-  /* One pass of light across the pass as its balance counts up, the
-     pass step's shine (.brd-issue__shine) at the column's foot. */
-  .desk-brd__sheen {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    border-radius: inherit;
-    pointer-events: none;
-  }
-  .desk-brd__sheen::before {
-    content: "";
-    position: absolute;
-    top: -20%;
-    bottom: -20%;
-    width: 40%;
-    background: linear-gradient(100deg, transparent, color-mix(in srgb, var(--accent2) 22%, transparent), transparent);
-    animation: brd-shine 1100ms cubic-bezier(0.3, 0, 0.2, 1) 760ms both;
-  }
-  /* A step's width, set on its car so a leaving car keeps its own while
-     it pulls away: the card's for most questions (plan 155 widened the
-     lines and the hour from a column's, which left their floor a
-     different width from every other), three of a run's columns for the
-     six reasons, the canvas for the line of stations, two columns for
-     the plan, and a column's for the account's form. The answers stand
-     at it, centred under the question, which keeps the car's.
-
-     The floor does not follow it. It was the step's width too, so the
-     way on moved from question to question -- 360px wide under the
-     lines, 640 under the name, 1174 under the level list, where Back and
-     Continue stood at the canvas's two ends -- and the one action a
-     learner presses on every screen was somewhere new on each. It is the
-     card's width on every question now, Back at its left end and
-     Continue at its right, so the way on stands where it stood; the
-     plan and the account, whose one action stands alone, keep it at a
-     ticket's width. */
+  /* A step's answers stand at the width that serves them, set on its
+     car so a leaving car keeps its own while it pulls away: the canvas
+     for every question -- the name's line, the six roads, the kana's
+     tree, the line of stations, the lines' cards, the four roads, the
+     day's arc, the ride drawn to scale and the account beside its
+     ticket -- and three columns and a gutter for the two words read
+     out. */
   .desk-brd .brd__car {
-    --desk-brd-w: var(--card-w);
-    --desk-floor-w: var(--card-w);
+    --desk-brd-w: var(--desk-board-w);
     --pull: 1;
     animation: desk-brd-pull-in 520ms cubic-bezier(0.16, 1, 0.3, 1) 140ms backwards;
   }
   .desk-brd .brd__car[data-dir="back"] { --pull: -1; }
   .desk-brd .brd__car--out { animation: desk-brd-pull-out 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
-  .desk-brd .brd__car[data-car="why"] { --desk-brd-w: calc(3 * var(--desk-run-col-min) + 2 * var(--sp-3)); }
-  .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
-  .desk-brd .brd__car[data-car="plan"] {
-    --desk-brd-w: calc(2 * var(--desk-side-w) + var(--sp-6));
-    --desk-floor-w: var(--desk-side-w);
-  }
-  .desk-brd .brd__car[data-car="account"] {
-    --desk-brd-w: var(--desk-side-w);
-    --desk-floor-w: var(--desk-side-w);
-  }
-  .desk-brd .brd__stage,
-  .desk-brd .brd__foot,
-  .desk-door .brd__foot {
+  .desk-brd .brd__car[data-car="reveal"] { --desk-brd-w: calc(3 * var(--desk-side-w) + var(--sp-8)); }
+  .desk-brd .brd__stage {
+    --desk-at: var(--desk-brd-w);
     width: 100%;
     max-width: var(--desk-at, var(--desk-side-w));
     margin-inline: auto;
   }
-  .desk-brd .brd__stage { --desk-at: var(--desk-brd-w); }
-  /* A hint is read, not scanned: held to the card's measure under a
-     question that may run the paper's width. */
+  /* The question at the paper's top-left corner, its hint under it, and
+     the answers standing in the middle of the paper that is left: the
+     body's spacers and the air under the question are the phone's way of
+     centring the whole block, and here only the answers are centred.
+     Auto margins, not justify-content: a block taller than the car keeps
+     its top and the body scrolls. */
+  .desk-brd .brd__car > .brd__body {
+    flex: 1 1 auto;
+    padding-top: var(--sp-6);
+  }
+  .desk-brd .brd__body::before,
+  .desk-brd .brd__body::after { content: none; }
+  .desk-brd .brd__body > .brd__air { display: none; }
+  .desk-brd .brd__body > .brd__stage { margin-block: auto; }
+  .desk-brd .brd__q { text-align: start; }
   .desk-brd .brd__hint {
-    max-width: var(--card-w);
-    margin-inline: auto;
+    margin-top: calc(-1 * var(--sp-2));
+    font-size: var(--fs-lead);
+    font-weight: 500;
+    text-align: start;
     text-wrap: pretty;
   }
-  /* The question, its answers and the way on stand as one block on the
-     car's centre line, Continue --sp-8 under the last answer, instead
-     of the answers centred and Continue on the window's floor. Auto
-     margins, not justify-content: a block taller than the car keeps its
-     top and the body scrolls. */
-  .desk-brd .brd__car > :last-child { margin-bottom: auto; }
+  /* The floor: the bottom-right corner, where the way on stands on every
+     question (plan 155's ask kept). The strip holds the corner's left
+     end, so the floor starts past it -- measured, --desk-strip-w -- and
+     Continue, at a ticket's width, gives way before it meets the strip
+     on a window too narrow for both. */
   .desk-brd .brd__foot {
-    --desk-at: var(--desk-floor-w, var(--card-w));
-    margin-top: var(--sp-7);
+    align-items: flex-end;
+    margin-top: var(--sp-6);
+    padding-left: calc(var(--desk-strip-w, 0) * 1px + var(--sp-6));
   }
-  .desk-brd .brd__car > .brd__body:not(.brd__body--center) {
-    flex: 0 1 auto;
-    margin-top: auto;
-    /* Sized to what it holds, the body scrolls with no room under its
-       last answer, and every step's last thing arrives rising -- an
-       answer 6px (brd-in), the kana's readings 8px: while it was still
-       low it hung past the body's foot and printed a scrollbar at every
-       step. The room is kept inside the box and given back outside, so
-       the answers and Continue stand where they did. It is the rung
-       Continue keeps under the last answer, the car's gap and the
-       foot's margin (--sp-8), so the clip stops on the foot's edge; on
-       a frame under 740px, where the gap narrows a rung, it reaches 4px
-       under the foot, which is drawn after the body and covers it. */
-    padding-bottom: var(--sp-8);
-    margin-bottom: calc(-1 * var(--sp-8));
-  }
-  /* A question with no floor -- the kana's, whose answers go on by
-     themselves, when there is no way back to stand there either --
-     stands on the centre line too: the room given back above is the
-     auto margin under it, not the rung it lent the foot (the kana's
-     four answers sat on the window's floor). */
-  .desk-brd .brd__car > .brd__body:not(.brd__body--center):last-child { margin-bottom: auto; }
-  /* The floor: the way back beside the way on, the two ways off a
-     question (plan 140). Back keeps its label's width and the ghost's
-     clothes; Continue keeps a ticket's width at the floor's far end,
-     sharing the room on a question a column wide. */
+  .desk-brd .brd__foot > .btn-depart { width: var(--desk-side-w); max-width: 100%; }
   .desk-brd__floor {
     display: flex;
     align-items: stretch;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: var(--sp-4);
+    width: 100%;
   }
-  .desk-brd__floor > .btn-depart:last-child { flex: 0 1 var(--desk-side-w); }
+  .desk-brd__floor > .btn-depart:last-child {
+    flex: 0 1 var(--desk-side-w);
+    min-width: calc(var(--desk-side-w) * 2 / 3);
+    white-space: nowrap;
+  }
   .desk-brd__back {
     display: inline-flex;
     flex: none;
@@ -25892,6 +25545,78 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     cursor: pointer;
   }
   .desk-brd__back > .svg { width: 18px; height: 18px; }
+  /* The strip: the line on its side at the floor's left end, as tall as
+     the floor (.brd .btn-depart's 56px) so its stops stand on the floor's
+     middle. A stop is a dot and its name, joined to the one before; the
+     ridden ones filled in the second ink, the one asked lit -- the gold
+     ring the phone's track draws for "here" -- and the ones ahead open. */
+  .desk-brd__strip {
+    position: absolute;
+    left: var(--desk-brd-pad);
+    bottom: calc(var(--safe-bottom) + var(--sp-7));
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    animation: desk-brd-show 320ms ease-out 200ms backwards;
+  }
+  .desk-brd__sps {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .desk-brd__sp {
+    display: flex;
+    align-items: center;
+  }
+  .desk-brd__sp + .desk-brd__sp::before {
+    content: "";
+    width: var(--sp-2);
+    height: 2px;
+    margin-inline: var(--sp-1);
+    border-radius: var(--r-pill);
+    background: var(--surface-line);
+    transition: background-color 240ms ease;
+  }
+  .desk-brd__sp--done + .desk-brd__sp::before { background: var(--text-secondary); }
+  .desk-brd__sp-door {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    padding: var(--sp-2) 0;
+    background: none;
+    border: 0;
+    color: var(--text-secondary);
+    font: inherit;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-name);
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: color 240ms ease;
+  }
+  button.desk-brd__sp-door { cursor: pointer; }
+  .desk-brd__sp-dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    box-sizing: border-box;
+    border: 2px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    transition: background-color 240ms ease, border-color 240ms ease;
+  }
+  .desk-brd__sp--done .desk-brd__sp-dot {
+    background: var(--text-secondary);
+    border-color: var(--text-secondary);
+  }
+  .desk-brd__sp--now .desk-brd__sp-door { color: var(--text-primary); }
+  .desk-brd__sp--now .desk-brd__sp-dot {
+    width: 16px;
+    height: 16px;
+    border: 3px solid var(--accent2);
+  }
   /* ── the pull on the desk (plan 155) ──
      The phone's pull carries a car the frame's whole width in 260ms. On
      the desk that is some 1,200px of paper in a quarter of a second -- a
@@ -25915,33 +25640,969 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   @keyframes desk-brd-pull-out {
     to { opacity: 0; transform: translateX(calc(var(--pull) * -1 * var(--sp-9))); }
   }
+  /* A thing drawn once it has somewhere to stand: the strip, the Welcome's
+     sign-in and band, the wait's dots. */
+  @keyframes desk-brd-show { from { opacity: 0; } }
   .desk-brd .brd__car .brd__q { animation: none; }
-  .desk-brd .brd__car :is(.brd-kana, .brd-board, .brd-chart, .brd-notif, .brd-issue) { animation-delay: 160ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn) { animation-delay: 200ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn):nth-child(2) { animation-delay: 240ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn):nth-child(3) { animation-delay: 280ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn):nth-child(4) { animation-delay: 320ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn):nth-child(5) { animation-delay: 360ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn):nth-child(6) { animation-delay: 400ms; }
-  .desk-brd .brd__car .brd-bullet { animation-delay: 300ms; }
-  .desk-brd .brd__car .brd-bullet:nth-child(2) { animation-delay: 360ms; }
-  .desk-brd .brd__car .brd-bullet:nth-child(3) { animation-delay: 420ms; }
-  .desk-brd .brd__car .brd-bullet:nth-child(4) { animation-delay: 480ms; }
+  .desk-brd .brd__car :is(.brd-kana, .brd-board, .brd-notif, .brd-issue) { animation-delay: 160ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell) { animation-delay: 200ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(2) { animation-delay: 240ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(3) { animation-delay: 280ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(4) { animation-delay: 320ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(5) { animation-delay: 360ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(6) { animation-delay: 400ms; }
   .desk-brd .brd__car .brd-kana__read { animation-delay: 420ms; }
   .desk-brd .brd__car .brd-kana__read--second { animation-delay: 600ms; }
   /* A pick answers as the pointer's hover does, at the same pace: the
      edge and the wash come on, the station's stretch of rail lights,
      and Continue comes up from its disabled 0.45 rather than blinking
      on. */
-  .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__tile, .desk-brd__rnd, .brd-opt__icon, .brd-opt__code) {
+  .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .brd-opt__icon, .brd-opt__code) {
     transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
   .desk-brd .brd__foot .btn-depart { transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 200ms ease; }
-  /* The six reasons, three to a row where three run columns fit (two
-     under that): a stack of six full-width rows is a phone's list. */
-  .desk-brd .brd__car[data-car="why"] .brd__opts {
+  /* ── 辻 — the name as the station's (plan 163) ──
+     The owner's D01 (NameStep): the name on its plate -- the field at
+     the card's width, set in from the question by a stop's width, the
+     letters it has left at its end -- a pole down to the question's hub
+     and the line leaving it for the next stop, named under its ring. */
+  .desk-brd__name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: calc(var(--sp-9) + var(--sp-7));
+  }
+  .desk-brd__name > .brd__link { margin-top: var(--sp-4); }
+  .desk-brd__plate {
+    position: relative;
+    width: min(100%, var(--card-w));
+  }
+  .desk-brd__plate > .brd-field { padding-right: calc(var(--sp-9) + var(--sp-8)); }
+  .desk-brd__plate-count {
+    position: absolute;
+    top: 50%;
+    right: var(--sp-6);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    transform: translateY(-50%);
+  }
+  .desk-brd__name-line {
+    position: relative;
+    align-self: stretch;
+    height: calc(var(--sp-9) + var(--sp-4) + 80px);
+  }
+  /* The line, from the hub to the paper's edge... */
+  .desk-brd__name-line::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--sp-9) + var(--sp-4) + 40px - 4px);
+    right: 0;
+    left: 40px;
+    height: 8px;
+    border-radius: var(--r-pill);
+    background: var(--surface-line);
+  }
+  /* ...and the pole from the plate down to the hub. */
+  .desk-brd__name-line::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: calc(40px - 1px);
+    width: 2px;
+    height: calc(var(--sp-9) + var(--sp-4));
+    background: var(--text-primary);
+  }
+  .desk-brd__name-line > .desk-brd__hub--pole {
+    top: calc(var(--sp-9) + var(--sp-4) + 40px);
+    left: 40px;
+    z-index: 1;
+  }
+  .desk-brd__name-next {
+    position: absolute;
+    top: calc(var(--sp-9) + var(--sp-4) + 40px - 14px);
+    /* Halfway from the plate's end to the paper's. */
+    right: calc((100% - var(--card-w)) / 2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--text-secondary);
+    transform: translateX(50%);
+  }
+  .desk-brd__name-next-ring {
+    width: 28px;
+    height: 28px;
+    border: 4px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+  }
+  /* ── 辻 — six reasons, six roads (plan 163) ──
+     The owner's D02 (components/boarding/WhyStep's WhyRoads): the
+     question's hub in the middle of the paper and a road out of it to
+     each reason, which stands at its road's end as a pictogram in a
+     ring, its name on the ring's far side. The stage takes the paper
+     the question and the floor leave, up to the drawing's height (the
+     rings' centres 440px apart, the diagonals at 45 degrees on the
+     canvas's width); the roads stretch with it -- their ends placed out
+     of 100 across the width and down the band between the top and the
+     bottom rings' centres, ROADS's --x and --y -- and the rings keep
+     their size. A name with no room left beside its ring takes a
+     second line rather than leave the paper. */
+  .desk-brd .brd__stage:has(> :is(.desk-brd__roads, .desk-brd__climb, .desk-brd__rides, .desk-brd__day)) {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    /* The body's gap made up to a rung under the question. */
+    padding-top: calc(var(--sp-6) - var(--sp-5));
+  }
+  .desk-brd__roads {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 288px;
+    max-height: 536px;
+    margin-block: auto;
+  }
+  .desk-brd__map {
+    position: absolute;
+    top: 48px;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 96px);
+    overflow: visible;
+    animation: desk-brd-show 320ms ease-out 160ms backwards;
+  }
+  .desk-brd__road {
+    stroke: var(--surface-line);
+    stroke-width: 6;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    transition: stroke 160ms ease;
+  }
+  .desk-brd__road--on { stroke: var(--accent2); stroke-width: 10; }
+  .desk-brd__hub {
+    position: absolute;
+    top: 50%;
+    left: 50%;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--desk-run-col-min)), 1fr));
+    place-items: center;
+    width: 80px;
+    height: 80px;
+    border: 5px solid var(--text-primary);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    transform: translate(-50%, -50%);
+  }
+  .desk-brd__way {
+    position: absolute;
+    top: calc(var(--y, 50) * (100% - 96px) / 100);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-card);
+    background: none;
+    font: inherit;
+    color: var(--text-primary);
+    text-align: start;
+    cursor: pointer;
+    animation: brd-in 360ms ease-out 200ms backwards;
+  }
+  .desk-brd__way:nth-of-type(2) { animation-delay: 240ms; }
+  .desk-brd__way:nth-of-type(3) { animation-delay: 280ms; }
+  .desk-brd__way:nth-of-type(4) { animation-delay: 320ms; }
+  .desk-brd__way:nth-of-type(5) { animation-delay: 360ms; }
+  .desk-brd__way:nth-of-type(6) { animation-delay: 400ms; }
+  .desk-brd__way--end { left: calc(var(--x, 50) * 1% - 48px); }
+  .desk-brd__way--start {
+    right: calc((100 - var(--x, 50)) * 1% - 48px);
+    flex-direction: row-reverse;
+  }
+  .desk-brd__way--under {
+    left: calc(var(--x, 50) * 1% - var(--desk-run-col-min) / 2);
+    width: var(--desk-run-col-min);
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .desk-brd__ring {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    border: 3px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+  }
+  .desk-brd__pic { width: 48px; height: 48px; }
+  .desk-brd__way[aria-pressed="true"] .desk-brd__ring {
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main));
+    box-shadow: inset 0 0 0 1px var(--accent2), 0 0 0 6px color-mix(in srgb, var(--accent2) 18%, transparent);
+  }
+  .desk-brd__way-name {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  .desk-brd__way--under > .desk-brd__way-name { justify-content: center; text-align: center; }
+  /* ── 辻 — the two words, the four answers hung from them (plan 163) ──
+     The owner's D03 (KanaStep's KanaTree): the two words as large as
+     a word is set, and a tree from them to the four answers -- a stem
+     to a knot, and a branch to each answer's middle, the answer picked
+     before (come back to by Back) lit in gold. The branches are boxes
+     drawn by two borders from the stem to their column's middle, placed
+     on the answers' own grid (--gap, the column --i), so they meet each
+     answer at any width. Each answer shows what it reads -- the two
+     words again, solid for a word read, dashed for one not yet -- over
+     what it says and what that is called. */
+  .desk-brd__kana {
+    --gap: var(--sp-6);
+    --stem: var(--sp-9);
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-brd__words {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-items: center;
+    width: min(100%, var(--card-w));
+    margin: 0 auto;
+    font-family: var(--font-jp);
+    font-size: var(--fs-specimen-word);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .desk-brd__tree {
+    position: relative;
+    height: calc(var(--stem) + var(--sp-8));
+    margin-top: var(--sp-6);
+    animation: desk-brd-show 320ms ease-out 160ms backwards;
+  }
+  .desk-brd__tree::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: calc(50% - 2px);
+    width: 4px;
+    height: var(--stem);
+    background: var(--surface-line);
+    transition: background-color 160ms ease;
+  }
+  .desk-brd__kana--on .desk-brd__tree::before { background: var(--accent2); }
+  .desk-brd__branch {
+    --cx: calc((100% - 3 * var(--gap)) / 4 * (var(--i, 0) + 0.5) + var(--gap) * var(--i, 0));
+    position: absolute;
+    top: calc(var(--stem) - 2px);
+    bottom: 0;
+    border: 0 solid var(--surface-line);
+    border-top-width: 4px;
+    transition: border-color 160ms ease;
+  }
+  .desk-brd__branch:nth-child(-n + 2) {
+    left: calc(var(--cx) - 2px);
+    right: calc(50% - 2px);
+    border-left-width: 4px;
+    border-top-left-radius: var(--r-identity);
+  }
+  .desk-brd__branch:nth-child(n + 3) {
+    left: calc(50% - 2px);
+    right: calc(100% - var(--cx) - 2px);
+    border-right-width: 4px;
+    border-top-right-radius: var(--r-identity);
+  }
+  .desk-brd__branch--on { z-index: 1; border-color: var(--accent2); }
+  .desk-brd__knot {
+    position: absolute;
+    top: var(--stem);
+    left: 50%;
+    z-index: 2;
+    width: 22px;
+    height: 22px;
+    border: 4px solid var(--text-primary);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    transform: translate(-50%, -50%);
+  }
+  .desk-brd__kana > .brd-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--gap);
+  }
+  .desk-brd .desk-brd__ans {
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    min-height: 220px;
+    padding: var(--sp-6) var(--sp-4);
+    text-align: center;
+  }
+  .desk-brd__chips {
+    display: flex;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-5);
+  }
+  .desk-brd__chip {
+    display: inline-flex;
+    align-items: center;
+    height: 56px;
+    padding: 0 var(--sp-4);
+    border: 2px solid var(--text-primary);
+    border-radius: var(--r-card);
+    background: var(--bg-main);
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--text-primary);
+  }
+  .desk-brd__chip--not {
+    border-style: dashed;
+    border-color: var(--surface-line);
+    background: none;
+    color: color-mix(in srgb, var(--text-primary) 28%, transparent);
+  }
+  .desk-brd .desk-brd__ans > .brd-kopt__label { font-size: var(--fs-title); line-height: 1.3; }
+  .desk-brd__jp { font-family: var(--font-jp); font-weight: 500; }
+  .desk-brd__ans-sub { font-size: var(--fs-body); color: var(--text-secondary); }
+  .desk-brd__ans.brd-kopt--on > .desk-brd__ans-sub { color: var(--text-primary); }
+  /* ── 辻 — the two words read out, sign by sign (plan 163) ──
+     The owner's D03a (KanaStep's RevealWords): a card per word under
+     the kana line's pigment, its script named beside the script's
+     first sign, the word, its signs each over its sound, and what it
+     means; the first stop under them, in the same pigment. */
+  .desk-brd__reveal {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-8);
+  }
+  .desk-brd__word {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-6);
+    padding: var(--sp-7);
+    border: 1px solid var(--surface-line);
+    border-top: 4px solid var(--line-kana);
+    border-radius: var(--r-card);
+    background: var(--surface);
+    text-align: center;
+    animation: brd-in 360ms ease-out 200ms backwards;
+  }
+  .desk-brd__word + .desk-brd__word { animation-delay: 280ms; }
+  .desk-brd__script {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .desk-brd__glyph {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--line-kana);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--text-primary);
+  }
+  .desk-brd__glyph--stop {
+    width: 44px;
+    height: 44px;
+    border-width: 3px;
+    font-size: var(--fs-title);
+  }
+  .desk-brd__word-jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-specimen-word);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .desk-brd__signs {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+  }
+  .desk-brd__sign {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    width: 76px;
+    height: 92px;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    background: var(--bg-main);
+  }
+  .desk-brd__sign-jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .desk-brd__sign-sound {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__plus {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__means {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-4);
+    font-size: var(--fs-body);
+    color: var(--text-secondary);
+  }
+  .desk-brd__means > b {
+    font-family: var(--font-serif);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .desk-brd__first {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-5);
+    margin: var(--sp-7) 0 0;
+    font-size: var(--fs-lead);
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-wrap: pretty;
+    animation: brd-in 360ms ease-out 420ms backwards;
+  }
+  .desk-brd__first strong { font-weight: 700; color: var(--text-primary); }
+  /* ── 辻 — the lines as cards, the kana over them (plan 163) ──
+     The owner's D05 (LinesStep's LineCards): the kana a strip across the
+     paper under their pigment, locked -- on every ticket, no answer --
+     and the three lines a card each under their own: the line's glyph
+     in its ring, its name and what it is, and at its foot what it
+     carries on the ride. A line taken off greys its ring and its figure
+     and keeps its pigment's edge, so it still reads as that line. */
+  .desk-brd__ticket {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    min-height: 68px;
+    padding: 0 var(--sp-6);
+    border: 1px solid var(--surface-line);
+    border-left: 4px solid var(--line-kana);
+    border-radius: var(--r-card);
+    animation: brd-in 360ms ease-out 160ms backwards;
+  }
+  .desk-brd__glyph--ticket,
+  .desk-brd__glyph--goal {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+  }
+  .desk-brd__glyph--ticket { font-size: var(--fs-lead); }
+  .desk-brd__glyph--goal {
+    border-color: var(--accent2);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+  }
+  .desk-brd__ticket-txt {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-4);
+    font-size: var(--fs-body);
+    color: var(--text-secondary);
+  }
+  .desk-brd__ticket-txt > b {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .desk-brd__ticket-lock {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-left: auto;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__ticket-lock > .svg { width: 16px; height: 16px; }
+  .desk-brd__lines {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-6);
+  }
+  .desk-brd__line {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+    min-height: 320px;
+    padding: var(--sp-8) var(--sp-7) var(--sp-6);
+    border: 1px solid var(--surface-line);
+    border-top: 4px solid var(--c, var(--accent2));
+    border-radius: var(--r-card);
+    background: var(--surface);
+    font: inherit;
+    color: var(--text-primary);
+    text-align: center;
+    cursor: pointer;
+    animation: brd-in 360ms ease-out 200ms backwards;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .desk-brd__line:nth-child(2) { animation-delay: 240ms; }
+  .desk-brd__line:nth-child(3) { animation-delay: 280ms; }
+  .desk-brd__line[data-line="vocab"] { --c: var(--line-vocab); }
+  .desk-brd__line[data-line="kanji"] { --c: var(--line-kanji); }
+  .desk-brd__line[data-line="grammar"] { --c: var(--line-grammar); }
+  .desk-brd__line-ring {
+    display: grid;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    margin-bottom: var(--sp-4);
+    border: 4px solid var(--c, var(--accent2));
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-serif);
+    font-size: var(--fs-display);
+    font-weight: 700;
+    line-height: 1;
+    color: color-mix(in srgb, var(--c, var(--accent2)) 70%, var(--text-primary));
+    transition: border-color 160ms ease, color 160ms ease;
+  }
+  .desk-brd__line-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+  }
+  .desk-brd__line-desc { font-size: var(--fs-body); color: var(--text-secondary); }
+  .desk-brd__line-vol {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--sp-3);
+    width: 100%;
+    margin-top: auto;
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--surface-line);
+  }
+  .desk-brd__line-fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--c, var(--accent2)) 80%, var(--text-primary));
+  }
+  .desk-brd__line-unit {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__line[aria-pressed="false"] .desk-brd__line-ring {
+    border-color: var(--surface-line);
+    color: var(--text-secondary);
+  }
+  .desk-brd__line[aria-pressed="false"] .desk-brd__line-fig { color: var(--text-secondary); }
+  /* ── 辻 — four roads from today (plan 163) ──
+     The owner's D06 (RhythmStep's RideRoads): the rhythms as four roads
+     out of today on one calendar, each as long as its ride, the stop in
+     its ring at the road's end and its month and days beside it, the
+     rhythm picked on a gold band. The calendar is measured off the box
+     (--x, --y, --h and --end, plain pixels); the rows are the answers,
+     laid over the drawing with no ground of their own, so the band and
+     the roads show through. */
+  .desk-brd__rides {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 336px;
+    max-height: 512px;
+    margin-block: auto;
+  }
+  .desk-brd__ride-map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    animation: desk-brd-show 320ms ease-out 160ms backwards;
+  }
+  .desk-brd__ride-band { fill: color-mix(in srgb, var(--accent2) 14%, var(--bg-main)); }
+  .desk-brd__ride-grid { stroke: color-mix(in srgb, var(--text-primary) 10%, transparent); stroke-width: 1; }
+  .desk-brd__ride-grid--jan {
+    stroke: color-mix(in srgb, var(--text-primary) 30%, transparent);
+    stroke-dasharray: 3 4;
+  }
+  .desk-brd__ride-today { stroke: var(--text-primary); stroke-width: 2; }
+  .desk-brd__ride-road {
+    stroke: var(--surface-line);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke 160ms ease;
+  }
+  .desk-brd__ride-start { fill: var(--text-primary); }
+  .desk-brd__ride-stn {
+    fill: var(--bg-main);
+    stroke: var(--surface-line);
+    stroke-width: 4;
+  }
+  .desk-brd__ride-code {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: var(--text-secondary);
+  }
+  .desk-brd__ride-code--jp { font-family: var(--font-jp); }
+  .desk-brd__ride-line--on .desk-brd__ride-road { stroke: var(--accent2); stroke-width: 12; }
+  .desk-brd__ride-line--on .desk-brd__ride-stn { stroke: var(--accent2); stroke-width: 5; }
+  .desk-brd__ride-line--on .desk-brd__ride-code { fill: var(--text-primary); }
+  .desk-brd__ride-cap,
+  .desk-brd__ride-month {
+    position: absolute;
+    left: calc(var(--x, 0) * 1px);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .desk-brd__ride-cap {
+    top: 0;
+    padding-left: var(--sp-1);
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+  }
+  .desk-brd__ride-cap--today {
+    padding-left: 0;
+    transform: translateX(-50%);
+  }
+  .desk-brd__ride-month {
+    top: calc(var(--sp-6) + 2px);
+    letter-spacing: var(--tr-term);
+    text-transform: uppercase;
+    transform: translateX(-50%);
+  }
+  .desk-brd__ride {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px);
+    left: 0;
+    width: 100%;
+    height: calc(var(--h, 116) * 1px);
+    padding: 0 var(--sp-5);
+    border: 1px solid transparent;
+    border-radius: var(--r-card);
+    background: none;
+    font: inherit;
+    color: var(--text-primary);
+    text-align: start;
+    cursor: pointer;
+    animation: brd-in 360ms ease-out 200ms backwards;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .desk-brd__ride:nth-of-type(2) { animation-delay: 240ms; }
+  .desk-brd__ride:nth-of-type(3) { animation-delay: 280ms; }
+  .desk-brd__ride:nth-of-type(4) { animation-delay: 320ms; }
+  .desk-brd__ride-svc {
+    position: absolute;
+    top: 50%;
+    left: var(--sp-5);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    transform: translateY(-50%);
+  }
+  .desk-brd__ride-txt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .desk-brd__ride-min {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-brd__ride-unit,
+  .desk-brd__ride-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__ride-name {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .desk-brd .desk-brd__ride-name > .brd-tag { margin-bottom: 0; }
+  .desk-brd__ride-arr {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--end, 0) * 1px + 24px + var(--sp-3));
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    padding: var(--sp-1) var(--sp-2);
+    border-radius: var(--r-plate);
+    background: var(--bg-main);
+    white-space: nowrap;
+    transform: translateY(-50%);
+  }
+  .desk-brd__ride-when {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__ride-days {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__ride[aria-pressed="true"] .desk-brd__ride-arr { background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main)); }
+  .desk-brd__ride[aria-pressed="true"] .desk-brd__ride-when { font-size: var(--fs-lead); color: var(--text-primary); }
+  .desk-brd__ride[aria-pressed="true"] :is(.desk-brd__ride-days, .desk-brd__ride-unit, .desk-brd__ride-name) { color: var(--text-primary); }
+  /* ── 辻 — the day as the sun's arc (plan 163, option 3) ──
+     The owner's 空の弧 (TimeStep's DayArc): the day as the sky on its
+     horizon, sunrise at the left, noon near the crown, night at the
+     right; the three rides as stations on it; the train riding the arc,
+     the stretch of day behind it gold; the departure board in the bowl.
+     The arc is measured off the box (--x/--y, a station's or the
+     train's centre; --w, the board's width, plain pixels). Standing on a
+     ride's own hour the station is the train, so the knob steps out of
+     sight -- and back, while it holds the focus. */
+  .desk-brd__day {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-height: 0;
+  }
+  .desk-brd__sky {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 380px;
+    max-height: 508px;
+    margin-top: auto;
+    touch-action: none;
+  }
+  .desk-brd__sky-map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    animation: desk-brd-show 320ms ease-out 160ms backwards;
+  }
+  .desk-brd__horizon { stroke: var(--text-secondary); stroke-width: 2; }
+  .desk-brd__arc {
+    fill: none;
+    stroke: var(--surface-line);
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+  .desk-brd__arc--done { stroke: var(--accent2); }
+  .desk-brd__sky-tick { stroke: var(--surface-line); stroke-width: 2; }
+  .desk-brd__sky-tick--major { stroke: var(--text-secondary); }
+  .desk-brd__hour {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: var(--text-secondary);
+  }
+  .desk-brd__sun > path { fill: var(--bg-main); stroke: var(--accent2); stroke-width: 3; }
+  .desk-brd__sun > line { stroke: var(--accent2); stroke-width: 3; stroke-linecap: round; }
+  .desk-brd__moon { fill: var(--text-secondary); }
+  .desk-brd__hour-stn {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px - 48px);
+    left: calc(var(--x, 0) * 1px - 48px);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-card);
+    background: none;
+    font: inherit;
+    color: var(--text-primary);
+    text-align: start;
+    cursor: pointer;
+    animation: brd-in 360ms ease-out 200ms backwards;
+  }
+  .desk-brd__hour-stn--noon {
+    left: calc(var(--x, 0) * 1px - 90px);
+    flex-direction: column;
+    gap: var(--sp-3);
+    width: 180px;
+    text-align: center;
+    animation-delay: 240ms;
+  }
+  .desk-brd__hour-stn--pm {
+    right: calc(100% - var(--x, 0) * 1px - 48px);
+    left: auto;
+    flex-direction: row-reverse;
+    text-align: end;
+    animation-delay: 280ms;
+  }
+  .desk-brd__hour-ring {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    border: 3px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-serif);
+    font-size: var(--fs-display);
+    font-weight: 700;
+    line-height: 1;
+    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+  }
+  .desk-brd__hour-stn[aria-pressed="true"] .desk-brd__hour-ring {
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main));
+    box-shadow: inset 0 0 0 2px var(--accent2), 0 0 0 7px color-mix(in srgb, var(--accent2) 16%, transparent);
+  }
+  .desk-brd__hour-lab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+  }
+  .desk-brd__hour-stn--noon .desk-brd__hour-lab { align-items: center; }
+  .desk-brd__hour-stn--pm .desk-brd__hour-lab { align-items: flex-end; }
+  .desk-brd__hour-name {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+  }
+  .desk-brd__hour-time {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+  }
+  .desk-brd__train {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px - 13px);
+    left: calc(var(--x, 0) * 1px - 13px);
+    z-index: 2;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 3px solid var(--accent2);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    cursor: grab;
+    transition: opacity 160ms ease;
+  }
+  /* A hand's width to take hold of. */
+  .desk-brd__train::before {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--sp-4));
+  }
+  .desk-brd__train--docked { pointer-events: none; }
+  .desk-brd__train--docked:not(:focus-visible) { opacity: 0; }
+  .desk-brd__sky-board {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px - var(--sp-8));
+    left: calc(var(--x, 0) * 1px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-4);
+    width: calc(var(--w, 500) * 1px);
+    padding: var(--sp-5) var(--sp-6) var(--sp-6);
+    border-radius: var(--r-panel);
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    text-align: center;
+    transform: translate(-50%, -100%);
+    animation: desk-brd-show 320ms ease-out 200ms backwards;
+  }
+  /* The last drum's one flip (.brd-flap--turn) is seen from in front of
+     its own tile: the row's vantage point, at the row's middle, sheared
+     a tile this size into a flat blade as it turned. */
+  .desk-brd__sky-board .brd-board__flaps {
+    gap: var(--sp-2);
+    perspective: none;
+  }
+  .desk-brd__sky-board .brd-flap {
+    width: 64px;
+    height: 88px;
+    font-size: var(--fs-specimen-word);
+    color: var(--accent2);
+  }
+  .desk-brd__sky-board .brd-flap--turn { animation-name: desk-brd-flip; }
+  @keyframes desk-brd-flip {
+    0%, 100% { transform: perspective(600px) rotateX(0); }
+    50% { transform: perspective(600px) rotateX(90deg); }
+  }
+  .desk-brd__sky-board .brd-board__colon { font-size: var(--fs-display); }
+  .desk-brd__sky-when { font-size: var(--fs-sm); color: var(--text-on-panel-soft); }
+  .desk-brd__sky-when > b { font-weight: 700; color: var(--text-on-panel); }
+  .desk-brd__fine {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    margin: 0 0 auto;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
   }
   /* The kana's four answers and the four rhythms, one row of tiles. */
   .desk-brd .brd__car:is([data-car="kana"], [data-car="rhythm"]) .brd-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -25959,6 +26620,242 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   /* ...and the corner's key steps down a rung, clear of the badge. */
   .desk-brd .brd-cell > .desk-brd__mark--corner { top: var(--sp-4); }
+  /* ── 辻 — the account beside the ticket it keeps (plan 163) ──
+     The owner's D09 (AccountStep, PaperTicket): the form in the left
+     column, the learner's 乗車券 in the right -- a stub with the balance
+     and the gate's punch, torn along a perforation from the ticket
+     proper: its kind and the mark, the holder and the day it was issued,
+     the ride to scale (--at, 0..1, as the plan's), and three terms. */
+  .desk-brd__keep {
+    display: grid;
+    grid-template-columns: minmax(300px, 460px) minmax(540px, 740px);
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--sp-8);
+  }
+  .desk-brd__tkt-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    animation: brd-in 360ms ease-out 200ms backwards;
+  }
+  .desk-brd__tkt {
+    position: relative;
+    display: grid;
+    grid-template-columns: 172px minmax(0, 1fr);
+    min-height: 340px;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    background:
+      repeating-linear-gradient(135deg, transparent 0 7px, color-mix(in srgb, var(--accent2) 7%, transparent) 7px 8px),
+      var(--bg-card);
+    box-shadow: var(--elev-hang);
+  }
+  /* The perforation's two notches. */
+  .desk-brd__tkt::before,
+  .desk-brd__tkt::after {
+    content: "";
+    position: absolute;
+    left: calc(172px - 11px);
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+  }
+  .desk-brd__tkt::before { top: -12px; }
+  .desk-brd__tkt::after { bottom: -12px; }
+  .desk-brd__tkt-stub {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-7) var(--sp-5) var(--sp-6);
+    border-right: 2px dashed var(--surface-line);
+    text-align: center;
+  }
+  .desk-brd__tkt-cap {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .desk-brd__tkt-bal {
+    margin-top: var(--sp-4);
+    font-family: var(--font-display);
+    font-size: var(--fs-display);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent2);
+  }
+  .desk-brd__tkt-sub { font-size: var(--fs-sm); font-weight: 700; }
+  .desk-brd__tkt-punch {
+    width: 26px;
+    height: 26px;
+    margin-top: auto;
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    box-shadow: inset 0 2px 3px color-mix(in srgb, var(--bg-panel) 22%, transparent);
+  }
+  .desk-brd__tkt-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: var(--sp-6) var(--sp-7);
+  }
+  .desk-brd__tkt-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--sp-4);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .desk-brd__tkt-kind {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-4);
+  }
+  .desk-brd__tkt-jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    letter-spacing: var(--tr-name);
+  }
+  .desk-brd__tkt-mark { width: 30px; height: 30px; }
+  .desk-brd__tkt-who {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    margin-top: var(--sp-5);
+  }
+  .desk-brd__tkt-name {
+    overflow: hidden;
+    font-family: var(--font-serif);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-brd__tkt-issued {
+    flex: none;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  /* The ride: a rail from the departure's dot to the terminus's ring,
+     a stop's name and day under it -- the first set left, the last
+     right, one between centred. */
+  .desk-brd__tkt-route {
+    position: relative;
+    height: 96px;
+    margin: var(--sp-6) 0 var(--sp-5);
+    padding: 0;
+    list-style: none;
+  }
+  .desk-brd__tkt-route::before {
+    content: "";
+    position: absolute;
+    top: calc(24px - 3px);
+    right: 24px;
+    left: 10px;
+    height: 6px;
+    border-radius: var(--r-pill);
+    background: var(--accent2);
+  }
+  .desk-brd__tkt-stop {
+    position: absolute;
+    top: 0;
+    left: calc(var(--at, 0) * 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-1);
+    transform: translateX(-50%);
+  }
+  .desk-brd__tkt-stop--start {
+    align-items: flex-start;
+    transform: none;
+  }
+  .desk-brd__tkt-stop--end {
+    right: 0;
+    left: auto;
+    align-items: flex-end;
+    transform: none;
+  }
+  .desk-brd__tkt-dot {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin-block: 14px var(--sp-3);
+    border-radius: var(--r-pill);
+    background: var(--text-primary);
+  }
+  .desk-brd__tkt-stop--kana .desk-brd__tkt-dot {
+    width: 36px;
+    height: 36px;
+    margin-block: 6px var(--sp-1);
+    border: 3px solid var(--line-kana);
+    background: var(--bg-card);
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    font-weight: 700;
+  }
+  .desk-brd__tkt-stop--end .desk-brd__tkt-dot {
+    width: 48px;
+    height: 48px;
+    margin-block: 0;
+    border: 4px solid var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 22%, var(--bg-card));
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+  }
+  .desk-brd__tkt-at {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+  }
+  .desk-brd__tkt-day {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__tkt-terms {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-4);
+    margin: auto 0 0;
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--surface-line);
+  }
+  .desk-brd__tkt-term {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-width: 0;
+  }
+  .desk-brd__tkt-term > dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  .desk-brd__tkt-term--valid > dd { color: var(--accent2); }
+  .desk-brd__tkt-note {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
   /* The account's form at a column's width, its two fields the sign-in's
      size: an address and a password are not answers to a question, and
      at the name's display size "E-mail" ran as tall as the heading over
@@ -25986,108 +26883,124 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     outline: none;
     box-shadow: 0 0 0 0.5px var(--accent2);
   }
-  /* ── the stops as a line of stations (components/boarding/LevelStep)
-     The level and the goal lists drawn as what they name: a station per
-     stop on a rail, its code in its ring and the stop's card under it,
-     every stop in one row where each holds half a run's column, two
-     rows under that (StationLine counts). The rail is drawn a half a
-     station at a time, each half reaching half the gap, and lit in the
-     pass's gold up to the pick -- the ride. */
-  .desk-brd__line {
-    display: grid;
-    grid-template-columns: repeat(var(--stations, 6), minmax(0, var(--desk-run-col-min)));
-    justify-content: center;
-    gap: var(--sp-6) var(--sp-3);
-  }
-  .desk-brd__stn {
+  /* ── 辻 — the stops as a climbing line (plans 140, 163) ──
+     The owner's D04 (LevelStep's ClimbLine): the line climbing a step a
+     level from the question's hub, a ring per stop on its platform, its
+     name and what it holds under it, the line going on past N1. The
+     geometry is measured off the box (ClimbLine's --x/--y, the ring's
+     centre, and --w, the name's room), so the rules only draw: the
+     plain rail, the stretch inked as known and the ride in the pass's
+     gold; a stop filled as known, one on the ride edged in gold, the
+     pick lit and its callout hung over it on a tie. */
+  .desk-brd__climb {
     position: relative;
+    flex: 1 1 auto;
+    min-height: 420px;
+    max-height: 602px;
+    margin-block: auto;
+  }
+  .desk-brd__rails {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    animation: desk-brd-show 320ms ease-out 160ms backwards;
+  }
+  .desk-brd__rail {
+    fill: none;
+    stroke: var(--surface-line);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .desk-brd__rail--known { stroke: var(--text-primary); stroke-width: 10; }
+  .desk-brd__rail--ride { stroke: var(--accent2); stroke-width: 10; }
+  .desk-brd__hub--at {
+    top: calc(var(--y, 0) * 1px);
+    left: calc(var(--x, 0) * 1px);
+  }
+  .desk-brd__stop {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px - 32px);
+    left: calc(var(--x, 0) * 1px - 32px);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: var(--sp-3);
-    min-width: 0;
+    align-items: flex-start;
+    gap: var(--sp-4);
+    max-width: calc(var(--w, 176) * 1px - var(--sp-4));
     padding: 0;
-    background: none;
     border: 0;
+    border-radius: var(--r-card);
+    background: none;
     font: inherit;
     color: var(--text-primary);
-    text-align: center;
-    cursor: pointer;
+    text-align: start;
+    animation: brd-in 360ms ease-out 200ms backwards;
   }
-  .desk-brd__stn::before,
-  .desk-brd__stn::after {
-    content: "";
-    position: absolute;
-    top: calc(var(--sp-8) / 2);
-    height: 3px;
-    margin-top: -1.5px;
-    background: color-mix(in srgb, var(--text-secondary) 40%, transparent);
-    transition: background-color 240ms ease;
-  }
-  .desk-brd__stn::before { left: calc(-1 * var(--sp-3) / 2); right: 50%; }
-  .desk-brd__stn::after { left: 50%; right: calc(-1 * var(--sp-3) / 2); }
-  .desk-brd__stn--head::before,
-  .desk-brd__stn--tail::after { content: none; }
-  .desk-brd__stn--ride::before,
-  .desk-brd__stn--ride::after,
-  .desk-brd__stn--on::before { background: var(--accent2); }
-  .desk-brd__rnd {
+  button.desk-brd__stop { cursor: pointer; }
+  .desk-brd__stop:nth-of-type(2) { animation-delay: 240ms; }
+  .desk-brd__stop:nth-of-type(3) { animation-delay: 280ms; }
+  .desk-brd__stop:nth-of-type(4) { animation-delay: 320ms; }
+  .desk-brd__stop:nth-of-type(5) { animation-delay: 360ms; }
+  .desk-brd__stop:nth-of-type(6) { animation-delay: 400ms; }
+  .desk-brd__stop-ring {
     position: relative;
-    z-index: 1;
-    display: inline-flex;
+    display: inline-grid;
     flex: none;
-    align-items: center;
-    justify-content: center;
-    width: var(--sp-8);
-    height: var(--sp-8);
-    border: 2px solid var(--surface-line);
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border: 4px solid var(--surface-line);
     border-radius: var(--r-pill);
     background: var(--bg-main);
     font-family: var(--font-display);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-lead);
     font-weight: 700;
-    letter-spacing: var(--tr-term);
-    text-indent: var(--tr-term);
     /* Centred on its line box, not on its ink (.brd-opt__code). */
     line-height: normal;
-    color: var(--text-secondary);
+    transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
-  .desk-brd__stn--ride .desk-brd__rnd {
-    border-color: var(--accent2);
-    color: var(--text-primary);
-  }
-  .desk-brd__stn--on .desk-brd__rnd {
-    border: 3px solid var(--accent2);
-    color: var(--text-primary);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent2) 22%, transparent);
-  }
-  .desk-brd__tile {
-    position: relative;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    align-items: center;
-    align-self: stretch;
-    gap: var(--sp-1);
-    padding: var(--sp-4) var(--sp-3);
-    background: var(--surface);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-card);
-  }
-  .desk-brd__stn--on .desk-brd__tile {
-    border-color: var(--accent2);
-    background: color-mix(in srgb, var(--accent2) 14%, var(--surface));
-  }
-  /* The name shares its line with the corner's key, so it alone keeps
-     clear of it; what the stop holds runs the tile's width. */
-  .desk-brd__name {
-    padding-inline: var(--sp-7);
+  .desk-brd__stop-ring--jp { font-family: var(--font-jp); line-height: 1; }
+  /* The key and its check stand on the ring's shoulder, clear of its
+     code and of the rail through its middle. */
+  .desk-brd .desk-brd__stop-ring > .desk-brd__mark--corner {
+    top: calc(-1 * var(--sp-3));
+    right: calc(-1 * var(--sp-4));
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
     font-family: var(--font-display);
-    font-size: var(--fs-body);
+    line-height: normal;
+    color: var(--text-primary);
+  }
+  .desk-brd__stop--known .desk-brd__stop-ring {
+    border-color: var(--text-primary);
+    background: var(--text-primary);
+    color: var(--bg-main);
+  }
+  .desk-brd__stop--ride .desk-brd__stop-ring { border-color: var(--accent2); }
+  .desk-brd__stop--on .desk-brd__stop-ring {
+    border-width: 5px;
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main));
+    color: var(--text-primary);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent2) 18%, transparent);
+  }
+  .desk-brd__stop-lab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+  }
+  .desk-brd__stop-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
     font-weight: 700;
     line-height: 1.3;
+    white-space: nowrap;
   }
-  .desk-brd__desc {
+  .desk-brd__climb--tight .desk-brd__stop-name { font-size: var(--fs-lead); }
+  .desk-brd__stop-desc {
     display: flex;
     flex-direction: column;
     font-size: var(--fs-sm);
@@ -26095,184 +27008,492 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     text-wrap: balance;
     color: var(--text-secondary);
   }
-  /* On the gold wash the soft ink drops under the floor (.brd-opt--on). */
-  .desk-brd__stn--on .desk-brd__desc { color: var(--text-primary); }
-  /* The next stop's tag stands at the tile's foot, so every station's
-     name starts on one line: over the name, it pushed the next stop's
-     card down a rung against its neighbours'. */
-  .desk-brd .desk-brd__tile > .brd-tag {
-    order: 1;
-    margin-top: auto;
-  }
-  /* The plan: the chart 1:1 in a column of its own, the lead and the
-     promises beside it, the way on under them -- the chart was drawn
-     at 1.76x, and the promise ran past the fold at 1100x800. */
-  .desk-brd .brd__stage:has(> .brd-chart) {
-    display: grid;
-    grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
-    grid-template-rows: 1fr auto auto 1fr;
-    align-items: start;
-  }
-  /* The lead and its promises as one block on the chart's middle, not
-     hung from its top edge with the chart's lower half beside nothing. */
-  .desk-brd .brd__stage:has(> .brd-chart) > .brd-chart { grid-row: 1 / -1; }
-  .desk-brd .brd__stage:has(> .brd-chart) > .brd-lead { grid-area: 2 / 2; }
-  .desk-brd .brd__stage:has(> .brd-chart) > .brd-bullets { grid-area: 3 / 2; }
-  /* The Welcome (components/boarding/Welcome's DeskWelcome): the
-     column's masthead is the mark, so the paper's heading takes the
-     display rung; the heading, the tagline and Board as one block over
-     the rolling stock, run across the paper, the whole centred between
-     grow-only air (the density contract). The column's Log in wears the
-     provider button's ghost clothes, so Board is the page's one filled
-     action.
-
-     Plan 155's second round (owner: "the entry looks bad, make it
-     simpler"): the sign-in was the paper's card set in the sumi -- a
-     pale slab floating mid-column under a caption that repeated the
-     link's own words -- beside two lanes of twenty-four cards. Now the
-     sign-in is drawn in the column's own material (the sumi field, the
-     panel's hairlines, no card), under a plain "Log in", and stands
-     where it stood, on the column's middle (the owner's call); one lane
-     of cards passes under the promise; the tagline is its quiet second
-     line. */
-  .desk-door {
-    --fs-display-fluid: var(--fs-display);
-    max-width: none;
-    padding-inline: var(--desk-side-w) 0;
-  }
-  .desk-door__work {
+  .desk-brd .desk-brd__stop-lab > .brd-tag { margin-bottom: 0; }
+  /* The pick's callout: the sumi plate over its ring, on a tie. */
+  .desk-brd__call {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px - 32px - var(--sp-6));
+    left: calc(var(--x, 0) * 1px);
     display: flex;
-    flex: 1;
     flex-direction: column;
     align-items: center;
-    gap: var(--sp-8);
-    min-width: 0;
-    min-height: 0;
-    overflow-y: auto;
+    justify-content: center;
+    gap: var(--sp-1);
+    min-width: 160px;
+    min-height: 56px;
+    margin: 0;
+    padding: var(--sp-3) var(--sp-5);
+    border-radius: var(--r-card);
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    transform: translate(-50%, -100%);
+    animation: desk-brd-show 240ms ease-out backwards;
   }
-  .desk-door__work::before,
-  .desk-door__work::after {
+  .desk-brd__call::after {
     content: "";
-    flex: 1 0 0;
+    position: absolute;
+    top: 100%;
+    left: calc(50% - 1px);
+    width: 2px;
+    height: var(--sp-6);
+    background: var(--bg-panel);
   }
-  .desk-door__work::before { margin-bottom: calc(-1 * var(--sp-8)); }
-  .desk-door__work::after { margin-top: calc(-1 * var(--sp-8)); }
-  .desk-door__auth {
-    --door-line: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+  .desk-brd__call-cap {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-indent: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-on-panel-soft);
+  }
+  .desk-brd__call-fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent2);
+  }
+  /* ── 辻 — the ride drawn to scale (plan 163) ──
+     The owner's D08 (PlanStep's PlanRoute): the route in gold from the
+     crossroads to the terminus, each stop where its day falls (--at,
+     0..1, between the two ends' own room), its day over it and its name
+     under; then under a rule, what the terminus holds beside what the
+     ride is for. */
+  .desk-brd__plan {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-4);
-    margin-block: auto;
-    padding: 0 var(--sp-6);
-    padding-bottom: calc(var(--sp-6) + var(--safe-bottom));
-    animation: desk-brd-show 480ms ease-out 200ms backwards;
-    transition: opacity 240ms ease;
+    gap: var(--sp-8);
   }
-  .desk-door__side .desk-deck__cap,
-  .desk-door__side .auth-foot { color: var(--text-on-panel-soft); }
-  /* The card's own ground and edge go: the column is the ground. */
-  .desk-door__auth .auth-card {
+  .desk-brd__route {
+    position: relative;
+    height: 232px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    animation: brd-in 360ms ease-out 160ms backwards;
+  }
+  /* The rail from the departure's centre to the terminus's: each end
+     stands half a stop's width (110px) in from the paper's edge. */
+  .desk-brd__route::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--sp-9) + 58px - 5px);
+    right: 110px;
+    left: 110px;
+    height: 10px;
+    border-radius: var(--r-pill);
+    background: var(--accent2);
+  }
+  .desk-brd__halt {
+    position: absolute;
+    top: 0;
+    left: calc(110px + var(--at, 0) * (100% - 220px));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 220px;
+    margin-left: -110px;
+    text-align: center;
+  }
+  .desk-brd__halt-when {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--sp-1);
+    height: var(--sp-9);
+  }
+  .desk-brd__halt-cap {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .desk-brd__halt-date {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-primary);
+  }
+  .desk-brd__halt--end .desk-brd__halt-date { font-size: var(--fs-heading); }
+  .desk-brd__halt--by .desk-brd__halt-date { font-size: var(--fs-body); color: var(--text-secondary); }
+  /* Every ring is centred on the rail: a box of the terminus's height,
+     the ring in its middle. */
+  .desk-brd__halt-ring {
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    margin-block: calc((116px - 88px) / 2);
+    border: 4px solid var(--text-primary);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .desk-brd__halt-ring--hub > .mark { width: 60%; height: 60%; }
+  .desk-brd__halt-ring--kana {
+    width: 80px;
+    height: 80px;
+    margin-block: calc((116px - 80px) / 2);
+    border-color: var(--line-kana);
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+  }
+  .desk-brd__halt-ring--by {
+    width: 22px;
+    height: 22px;
+    margin-block: calc((116px - 22px) / 2);
+    border: 4px solid var(--accent2);
+  }
+  .desk-brd__halt-ring--end {
+    width: 116px;
+    height: 116px;
+    margin-block: 0;
+    border: 6px solid var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 22%, var(--bg-main));
+    font-size: var(--fs-heading);
+  }
+  .desk-brd__halt-ring--jp { font-family: var(--font-jp); }
+  .desk-brd__halt-lab {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    margin-top: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-brd__halt-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .desk-brd__halt--by .desk-brd__halt-name { font-size: var(--fs-lead); }
+  .desk-brd__plan-foot {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-8);
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--surface-line);
+    animation: brd-in 360ms ease-out 280ms backwards;
+  }
+  .desk-brd__plan-cap {
+    margin: 0 0 var(--sp-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .desk-brd__held-list,
+  .desk-brd__for-list {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .desk-brd__held-list { gap: var(--sp-6); }
+  .desk-brd__for-list { flex-direction: column; gap: var(--sp-4); }
+  .desk-brd__held-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    min-width: 0;
+  }
+  .desk-brd__held-item[data-line="vocab"] { --c: var(--line-vocab); }
+  .desk-brd__held-item[data-line="kanji"] { --c: var(--line-kanji); }
+  .desk-brd__held-item[data-line="grammar"] { --c: var(--line-grammar); }
+  .desk-brd__held-item[data-line="kana"] { --c: var(--line-kana); }
+  .desk-brd__held-ring {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border: 3px solid var(--c, var(--accent2));
+    border-radius: var(--r-pill);
+    font-family: var(--font-serif);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    color: color-mix(in srgb, var(--c, var(--accent2)) 70%, var(--text-primary));
+  }
+  .desk-brd__held-txt { display: flex; flex-direction: column; }
+  .desk-brd__held-fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--c, var(--accent2)) 80%, var(--text-primary));
+  }
+  .desk-brd__held-unit {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__for-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    font-size: var(--fs-lead);
+    font-weight: 500;
+  }
+  .desk-brd__for-item > .svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    color: var(--accent2);
+  }
+  /* ── 辻 — the front door as the crossroads (plans 140, 155, 163) ──
+     The owner's D00 (components/boarding/Welcome's DeskWelcome): the
+     paper whole, no column. The way in -- the promise over Board, or the
+     sign-in over its own action -- stands at the paper's left margin, its
+     action a rung under the paper's middle (the block's middle row); from
+     it the gold road runs right into the hub, 辻, and out of the hub the
+     app's lines in their pigments to their signs. The hub's centre and
+     the margin are measured (--cx, --cy, --pad, plain pixels), and each
+     sign is placed on its line's end (--x, --y). The corner holds the
+     other way in: Log in on the promise, Board on the sign-in. */
+  .desk-front {
+    --fs-display-fluid: var(--fs-display);
+    max-width: none;
+    padding: 0;
+    overflow: hidden;
+  }
+  .desk-front__door {
+    position: absolute;
+    top: calc(var(--safe-top) + var(--sp-7));
+    right: calc(var(--pad, 44) * 1px);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    margin: 0;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-front__door-btn {
+    min-height: 44px;
+    padding: 0 var(--sp-6);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    background: none;
+    font: inherit;
+    font-size: var(--fs-body);
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+  .desk-front__block {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--pad, 44) * 1px);
+    z-index: 1;
+    display: grid;
+    /* The action's middle a rung under the paper's (Welcome's BELOW,
+       60px, less half of its own 56px). */
+    grid-template-rows: calc(50% + var(--sp-9) + var(--sp-3) - 28px) auto minmax(0, 1fr);
+    width: var(--desk-side-w);
+    animation: brd-in 480ms ease-out 120ms backwards;
+  }
+  .desk-front__above {
+    display: flex;
+    flex-direction: column;
+    align-self: end;
+    gap: var(--sp-4);
+    padding-bottom: var(--sp-6);
+  }
+  .desk-front .desk-front__above > .brd__q { margin: 0; text-align: start; }
+  .desk-front__above > .brd-tagline {
+    margin: 0;
+    font-weight: 400;
+    text-align: start;
+    color: var(--text-secondary);
+  }
+  .desk-front .desk-front__block > .btn-depart {
+    width: 100%;
+    margin: 0;
+  }
+  .desk-front__below {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: start;
+    gap: var(--sp-3);
+    padding-top: var(--sp-4);
+  }
+  /* The sign-in on the paper: no card, its fields the page's wells
+     (.field--page) since they stand on the bare paper. */
+  .desk-front .auth-card {
+    gap: var(--sp-4);
     padding: 0;
     background: none;
     border: 0;
     border-radius: 0;
+    box-shadow: none;
   }
-  .desk-door__auth .field {
-    --field-ink: var(--text-on-panel);
-    --field-dim: var(--text-on-panel-soft);
-    --field-well: rgba(0, 0, 0, 0.28);
-    border-color: var(--door-line);
+  .desk-front .auth-card .field { --field-well: var(--surface); }
+  .desk-front__below > .brd__link {
+    align-self: flex-start;
+    padding-inline: 0;
   }
-  .desk-door__auth .auth-provider,
-  .desk-door__side .auth-submit {
-    background: transparent;
-    border: 1px solid var(--door-line);
-    color: var(--text-on-panel);
+  .desk-front__map {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: desk-brd-show 480ms ease-out 200ms backwards;
   }
-  .desk-door__auth .auth-or { color: var(--text-on-panel-soft); }
-  .desk-door__auth .auth-or::before,
-  .desk-door__auth .auth-or::after { background: var(--door-line); }
-  .desk-door__auth .auth-message--error { color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
-  /* The promise's second line, in the paper's second ink. */
-  .desk-door .brd-tagline {
-    font-weight: 400;
-    color: var(--text-secondary);
-  }
-  /* The band runs across the paper, capped at the canvas and faded at
-     its ends -- a clip mid-window read as a broken card, not a train
-     leaving. The desk's one lane is four of a phone lane's runs long, so
-     it moves twice as far per loop and the loop takes twice as long: the
-     cards pass at a phone's speed. A pointer resting on the band stops it. */
-  .desk-door .brd-roll {
-    flex: none;
+  .desk-front__roads {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    max-width: var(--desk-board-w);
-    margin-inline: 0;
-    mask-image: linear-gradient(to right, transparent, currentcolor var(--sp-9), currentcolor calc(100% - var(--sp-9)), transparent);
-    animation: desk-brd-show 900ms ease-out 260ms backwards;
+    height: 100%;
+    overflow: visible;
   }
-  .desk-door .brd-roll__lane { animation-duration: 52s; }
-  /* ── first contact handed on (plan 155) ──
-     The Welcome's paper arrives in reading order -- the promise, Board,
-     then the band -- and the column's sign-in a beat after its
-     masthead. Board pressed (Welcome's `leaving`), the three leave the
-     way a car does, a rung to the left and fading, a beat apart, and the
-     sign-in steps out of the column; transitions rather than a one-way
-     animation, so a pass the office could not issue brings them back.
-     The column stays: the wait after it (AppLoading's `frame`,
-     .desk-brd--wait) is the same sumi with the masthead on the same
-     pixel, and the boarding lays its line there. */
-  .desk-door .brd__foot { animation: brd-in 480ms ease-out 120ms backwards; }
-  .desk-door__work > :is(.brd-hero, .brd__foot, .brd-roll) {
-    transition: opacity 240ms ease, transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  .desk-front__way { stroke: var(--accent2); stroke-width: 10; stroke-linecap: round; }
+  .desk-front [data-line="kana"] { --c: var(--line-kana); }
+  .desk-front [data-line="vocab"] { --c: var(--line-vocab); }
+  .desk-front [data-line="kanji"] { --c: var(--line-kanji); }
+  .desk-front [data-line="grammar"] { --c: var(--line-grammar); }
+  .desk-front [data-line="reading"] { --c: var(--line-reading); }
+  .desk-front [data-line="translation"] { --c: var(--line-honyaku); }
+  .desk-front [data-line="dictation"] { --c: var(--line-kakitori); }
+  .desk-front__road { stroke: var(--c, var(--surface-line)); stroke-width: 8; stroke-linecap: round; }
+  .desk-front__hub {
+    position: absolute;
+    top: calc(var(--cy, 0) * 1px);
+    left: calc(var(--cx, 0) * 1px);
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 136px;
+    height: 136px;
+    border: 5px solid var(--text-primary);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    transform: translate(-50%, -50%);
+    animation: desk-brd-show 480ms ease-out 200ms backwards;
   }
-  .desk-door--leaving .desk-door__work > :is(.brd-hero, .brd__foot, .brd-roll) {
+  .desk-front__hub > .mark { width: 84px; height: 84px; }
+  /* A sign at its line's end, its name on its far side. */
+  .desk-front__stn {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px);
+    left: calc(var(--x, 0) * 1px);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    transform: translate(-28px, -50%);
+  }
+  .desk-front__stn--start {
+    flex-direction: row-reverse;
+    transform: translate(calc(-100% + 28px), -50%);
+  }
+  .desk-front__stn--over {
+    flex-direction: column-reverse;
+    gap: var(--sp-3);
+    transform: translate(-50%, calc(-100% + 28px));
+  }
+  .desk-front__stn--under {
+    flex-direction: column;
+    gap: var(--sp-3);
+    transform: translate(-50%, -28px);
+  }
+  .desk-front__sign {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 4px solid var(--c, var(--surface-line));
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1;
+    color: color-mix(in srgb, var(--c, var(--text-primary)) 70%, var(--text-primary));
+  }
+  .desk-front__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--text-primary);
+  }
+  /* Board pressed (Welcome's `leaving`): the way in, the map and the
+     corner leave the way a car does, a rung to the left and fading, a
+     beat apart; transitions rather than a one-way animation, so a pass
+     the office could not issue brings them back. `translate`, so the
+     hub keeps the transform that centres it. */
+  .desk-front :is(.desk-front__block, .desk-front__map, .desk-front__hub, .desk-front__door) {
+    transition: opacity 240ms ease, translate 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .desk-front--leaving :is(.desk-front__block, .desk-front__map, .desk-front__hub, .desk-front__door) {
     opacity: 0;
-    transform: translateX(calc(-1 * var(--sp-9)));
+    translate: calc(-1 * var(--sp-9)) 0;
   }
-  .desk-door--leaving .desk-door__work > .brd__foot { transition-delay: 50ms; }
-  .desk-door--leaving .desk-door__work > .brd-roll { transition-delay: 100ms; }
-  .desk-door--leaving .desk-door__auth { opacity: 0; }
-  /* The wait between them (AppLoading's PaperWait): the paper's dots,
-     centred on the paper the column leaves -- the same spot on the
-     Welcome and on the wait after it -- and drawn only once the wait has
-     lasted long enough to be one, timed from the press (--wait-in). */
+  .desk-front--leaving :is(.desk-front__map, .desk-front__hub) { transition-delay: 60ms; }
+  /* The wait between them (PaperWait): the dots on the paper's middle --
+     the same spot on the Welcome and on the wait after it (AppLoading's
+     `frame`, .desk-brd--wait) -- drawn only once the wait has lasted
+     long enough to be one, timed from the press (--wait-in). */
   .desk-wait {
     position: absolute;
-    inset: 0 0 0 var(--desk-side-w);
+    inset: 0;
     min-height: 0;
     padding: 0;
     background: none;
     pointer-events: none;
     animation: desk-brd-show 320ms ease-out var(--wait-in, 480ms) backwards;
   }
-  /* The plan's arrival (TrainArrival, 到着) boards the paper, not the
-     window: its signboard centred on the paper's middle, where the plan
-     is about to stand, and its scrim over the paper alone -- the column
-     is the line the plan was built from, and it stays in view while the
-     plan arrives beside it. */
-  body:has(.desk-brd) .onb-arrival { padding-left: calc(var(--desk-side-w) + var(--sp-6)); }
-  body:has(.desk-brd) .onb-arrival__scrim { left: var(--desk-side-w); }
   @media (prefers-reduced-motion: reduce) {
-    .desk-brd__pass,
-    .desk-brd__proj,
-    .desk-brd__fig,
-    .desk-brd__rail,
-    .desk-brd__here,
-    .desk-brd__train,
-    .desk-brd__stop,
-    .desk-brd__val { animation: none; }
-    .desk-brd__sheen { display: none; }
+    .desk-brd__strip,
     .desk-brd .brd__car,
-    .desk-door .brd__foot,
-    .desk-door .brd-roll,
-    .desk-door__auth,
+    .desk-front__block,
+    .desk-front__map,
+    .desk-front__hub,
     .desk-wait { animation: none; }
-    .desk-door--leaving .desk-door__work > :is(.brd-hero, .brd__foot, .brd-roll) { transform: none; }
-    .desk-brd__route--ready :is(.desk-brd__ridden, .desk-brd__here, .desk-brd__train),
-    .desk-brd__dot,
-    .desk-brd__lab,
-    .desk-brd__val { transition: none; }
+    .desk-front--leaving :is(.desk-front__block, .desk-front__map, .desk-front__hub, .desk-front__door) { translate: none; }
+    .desk-brd__sp + .desk-brd__sp::before,
+    .desk-brd__sp-door,
+    .desk-brd__sp-dot { transition: none; }
+    .desk-brd__map,
+    .desk-brd__way,
+    .desk-brd__rails,
+    .desk-brd__stop,
+    .desk-brd__call,
+    .desk-brd__tree,
+    .desk-brd__ticket,
+    .desk-brd__line,
+    .desk-brd__ride-map,
+    .desk-brd__ride,
+    .desk-brd__sky-map,
+    .desk-brd__hour-stn,
+    .desk-brd__sky-board,
+    .desk-brd__sky-board .brd-flap--turn,
+    .desk-brd__word,
+    .desk-brd__route,
+    .desk-brd__plan-foot,
+    .desk-brd__tkt-col,
+    .desk-brd__first { animation: none; }
+    .desk-brd__road,
+    .desk-brd__ring,
+    .desk-brd__stop-ring,
+    .desk-brd__line-ring,
+    .desk-brd__ride-road,
+    .desk-brd__hour-ring,
+    .desk-brd__train,
+    .desk-brd__tree::before,
+    .desk-brd__branch { transition: none; }
   }
   /* A pointer's answer to "is this one I can pick": the name field's
      edge (.brd-field, 1.5px of the pass's gold on the answer's own
@@ -26284,16 +27505,24 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      boarding's answers, its doors and its way back, and the Welcome's
      sign-in, are spared it. */
   @media (pointer: fine) {
-    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn, .desk-brd__back, .desk-brd__door):hover,
-    .desk-door__auth button:hover { filter: none; }
+    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stop, .desk-brd__way, .desk-brd__line, .desk-brd__ride, .desk-brd__hour-stn, .desk-brd__train, .desk-brd__back, .desk-brd__sp-door):hover,
+    .desk-front :is(.desk-front__door-btn, .auth-provider):hover { filter: none; }
     .desk-brd .brd-opt:not(.brd-opt--on):hover,
     .desk-brd .brd-opt:not(.brd-opt--on):focus-visible,
     .desk-brd .brd-kopt:not(.brd-kopt--on):hover,
     .desk-brd .brd-kopt:not(.brd-kopt--on):focus-visible,
     .desk-brd .brd-cell:not(.brd-cell--on):hover,
     .desk-brd .brd-cell:not(.brd-cell--on):focus-visible,
-    .desk-brd__stn:not(.desk-brd__stn--on):hover > .desk-brd__tile,
-    .desk-brd__stn:not(.desk-brd__stn--on):focus-visible > .desk-brd__tile {
+    button.desk-brd__stop:not(.desk-brd__stop--on):hover > .desk-brd__stop-ring,
+    button.desk-brd__stop:not(.desk-brd__stop--on):focus-visible > .desk-brd__stop-ring,
+    .desk-brd__line:hover,
+    .desk-brd__line:focus-visible,
+    .desk-brd__ride:not([aria-pressed="true"]):hover,
+    .desk-brd__ride:not([aria-pressed="true"]):focus-visible,
+    .desk-brd__hour-stn:not([aria-pressed="true"]):hover > .desk-brd__hour-ring,
+    .desk-brd__hour-stn:not([aria-pressed="true"]):focus-visible > .desk-brd__hour-ring,
+    .desk-brd__way:not([aria-pressed="true"]):hover > .desk-brd__ring,
+    .desk-brd__way:not([aria-pressed="true"]):focus-visible > .desk-brd__ring {
       border-color: var(--accent2);
       box-shadow: 0 0 0 0.5px var(--accent2);
     }
@@ -26302,31 +27531,13 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
       color: var(--text-primary);
       border-color: var(--text-secondary);
     }
-    button.desk-brd__door:hover,
-    button.desk-brd__door:focus-visible { background: color-mix(in srgb, var(--text-on-panel) 6%, transparent); }
-    /* A stop behind is a door, and says so where a pointer is: the ‹
-       slides in as the hover's ▶ does (DESIGN.md, Motion), rather than
-       five of them standing down the line at rest. */
-    button.desk-brd__door > .svg {
-      opacity: 0;
-      transform: translateX(var(--sp-1));
-    }
-    button.desk-brd__door:hover > .svg,
-    button.desk-brd__door:focus-visible > .svg {
-      opacity: 1;
-      transform: none;
-      color: var(--text-on-panel);
-    }
+    /* A stop behind is a door, and says so where a pointer is: its name
+       takes the full ink. */
+    button.desk-brd__sp-door:hover,
+    button.desk-brd__sp-door:focus-visible { color: var(--text-primary); }
     .desk-brd .brd-day { cursor: pointer; }
-    .desk-door .brd-roll:hover .brd-roll__lane { animation-play-state: paused; }
-    .desk-door__auth :is(.auth-provider, .auth-submit):hover,
-    .desk-door__auth :is(.auth-provider, .auth-submit):focus-visible { border-color: var(--text-on-panel-soft); }
-  }
-  /* A door on the line takes the rail's ring when a key reaches it: the
-     column is sumi, and the paper's ring would not read on it. */
-  button.desk-brd__door:focus-visible {
-    outline: 2px solid var(--text-on-panel);
-    outline-offset: -2px;
+    .desk-front__door-btn:hover,
+    .desk-front__door-btn:focus-visible { border-color: var(--text-secondary); }
   }
 
   /* ── copied, focused (plan 123) ──

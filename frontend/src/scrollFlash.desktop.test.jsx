@@ -121,12 +121,16 @@ describe('a boarding step on the desk', () => {
     expect(overflowY(body())).toBeLessThanOrEqual(0)
   })
 
-  it('keeps Continue its rung under the last answer', async () => {
+  it('stands Continue on the paper\'s floor, the answers held above it', async () => {
+    // Plan 163: the floor is the bottom-right corner, a rung over the
+    // frame's own edge, and the answers stand in the paper above it.
     await render(<Step>{answers}</Step>)
     landed()
+    const main = document.querySelector('main').getBoundingClientRect()
     const last = document.querySelector('.brd-opt:last-child').getBoundingClientRect()
     const foot = document.querySelector('.brd__foot').getBoundingClientRect()
-    expect(Math.round(foot.top - last.bottom)).toBe(cssPx('--sp-8'))
+    expect(Math.round(main.bottom - foot.bottom)).toBe(cssPx('--sp-7'))
+    expect(last.bottom).toBeLessThan(foot.top)
   })
 
   it('leaves Continue on top where the room reaches under it', async () => {

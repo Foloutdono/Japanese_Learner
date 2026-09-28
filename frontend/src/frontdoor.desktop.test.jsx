@@ -204,25 +204,27 @@ describe('the Welcome\'s Enter (P8)', () => {
   })
 })
 
-// ── P9 — the boarding frame (plans 122, 140) ──
-// Plan 140, the owner's pick A of three drawn directions: the line laid
-// down the left. A sumi column at the side's width on the LEFT edge,
-// the rail's masthead at its head and a named stop per question under
-// it, each printing its answer once given and the one being asked lit
-// with the pick as it stands; the projection at its foot while the
-// questions run, the pass once the plan is built. No head: Back stands
-// on the floor beside Continue. The answers laid for the width, no
-// Building, and the plan the last screen -- it enters the station.
+// ── P9 — the boarding frame (plans 122, 140, 163) ──
+// Plan 163, the owner's pick D of the canvas "Tsuji — onboarding, new
+// directions": the sumi column goes, and three places never move. The
+// question at the paper's top-left corner; the journey as a strip at the
+// floor's left end, a named stop per question, the answer given said on
+// its stop and a stop behind a door back to its question (plan 140's
+// rules); the floor in the bottom-right corner, Back beside Continue.
+// The answers laid for the width, no Building, and the plan the last
+// screen -- it enters the station.
 const box = el => el.getBoundingClientRect()
 const mid = r => (r.left + r.right) / 2
+const cy = r => (r.top + r.bottom) / 2
 const bodyW = () => document.body.getBoundingClientRect().width
 const side = () => $('.desk-brd__side')
-const stop = key => side()?.querySelector(`[data-stop="${key}"]`)
-const stops = () => [...side().querySelectorAll('.desk-brd__stop')].map(r => r.dataset.stop)
-const stateOf = key => stop(key)?.className.match(/desk-brd__stop--(\w+)/)?.[1]
-const valueOf = key => stop(key)?.querySelector('.desk-brd__val')?.textContent ?? null
-const priced = () => stop('projection')?.querySelector('.desk-brd__fig')?.textContent ?? null
-const doorOf = key => stop(key)?.querySelector('button.desk-brd__door') ?? null
+const strip = () => $('.desk-brd__strip')
+const stop = key => strip()?.querySelector(`[data-stop="${key}"]`)
+const stops = () => [...strip().querySelectorAll('.desk-brd__sp')].map(r => r.dataset.stop)
+const stateOf = key => stop(key)?.className.match(/desk-brd__sp--(\w+)/)?.[1]
+// The answer said on a stop: read out beside its name, not printed.
+const valueOf = key => stop(key)?.querySelector('.sr-only')?.textContent.replace(/^ · /, '') ?? null
+const doorOf = key => stop(key)?.querySelector('button.desk-brd__sp-door') ?? null
 async function pick(sel) { inCar(sel).click(); await settle(40) }
 async function next() { inCar('[data-action="continue"]').click(); await settle() }
 // The plan's arrival plays out on its own; waited out rather than
@@ -251,22 +253,23 @@ async function toTime() {
 }
 const fits = el => el.scrollHeight <= el.clientHeight + 1
 
-describe('the boarding frame on the desk (P9, plan 140)', () => {
-  it('lays the line in a column on the left edge, a stop per question, and keeps it to the plan', async () => {
+describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
+  it('draws the journey as a strip at the floor\'s left end, a stop per question, and keeps it to the plan', async () => {
     const onComplete = vi.fn()
     await board({ onComplete })
     expect($('main.brd').className).toBe('brd desk-brd')
-    // One drawing of the line: no head, no track.
+    // One drawing of the line: no head, no track, and no column.
     expect($('.brd__head')).toBeNull()
     expect($('.brd__track')).toBeNull()
-    const col = side()
-    expect(Math.round(box(col).width)).toBe(360)
-    expect(Math.round(box(col).left)).toBe(0)
-    expect(Math.round(box(col).height)).toBe(window.innerHeight)
-    expect(col.querySelector('.desk-rail__glyph .mark').getAttribute('aria-label')).toBe('辻')
+    expect(side()).toBeNull()
+    await settle(600)
+    // On the floor's line, at its left end, clear of the way back.
+    const at = box(strip())
+    expect(Math.abs(cy(at) - cy(box(inCar('[data-action="continue"]'))))).toBeLessThan(1.5)
+    expect(Math.round(at.left)).toBe(Math.round(box(inCar('.brd__q')).left))
+    expect(at.right).toBeLessThan(box(inCar('[data-action="back"]')).left)
     // The reveal is the kana's own stop; the level joins once both are read.
     expect(stops()).toEqual(['name', 'why', 'kana', 'goal', 'lines', 'rhythm', 'time'])
-    expect(stop('projection')).not.toBeNull()
     await toLevel()
     expect(stops()).toEqual(['name', 'why', 'kana', 'level', 'goal', 'lines', 'rhythm', 'time'])
     await toTime()
@@ -274,13 +277,10 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     // No Building: the hour goes straight to the plan, under the arrival.
     expect(stepOf()).toBe('plan')
     expect($('.brd-build__track')).toBeNull()
-    // The column stays, every stop ridden and none a door any more; the
-    // pass stands where the projection stood.
-    expect(side()).not.toBeNull()
+    // The strip stays, every stop ridden and none a door any more.
     expect(stops().map(stateOf).every(s => s === 'done')).toBe(true)
-    expect(side().querySelector('button.desk-brd__door')).toBeNull()
-    expect(stop('projection')).toBeNull()
-    expect(stop('pass').querySelector('.desk-brd__holder').textContent).toBe('Tester')
+    expect(strip().querySelector('button.desk-brd__sp-door')).toBeNull()
+    expect(strip().querySelector('[aria-current]')).toBeNull()
     expect($('.onb-arrival')).not.toBeNull()
     // The key that skips the arrival is the arrival's alone.
     await enter()
@@ -298,18 +298,19 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(stepOf()).toBe('plan')
   })
 
-  it('prints each answer on its stop, the pick as it stands, and prices a level before Continue', async () => {
+  it('says each answer on its stop, the pick as it stands, and lights the one asked', async () => {
     await board()
     expect(stops().map(stateOf)).toEqual(['now', 'next', 'next', 'next', 'next', 'next', 'next'])
     expect(stop('name').getAttribute('aria-current')).toBe('step')
     expect(valueOf('name')).toBe('Tester')
-    expect(priced()).toBe('—')
+    // Said, not printed: a pointer's title and the stop's read-out name.
+    expect(stop('name').querySelector('.desk-brd__sp-door').title).toMatch(/· Tester$/)
     await pastName()
     expect(stateOf('name')).toBe('done')
     expect(stateOf('why')).toBe('now')
     expect(valueOf('why')).toBeNull()
     await pick('[data-motive="trip"]')
-    // Printed before Continue: the answer's stop reads it at once.
+    // Said before Continue: the answer's stop reads it at once.
     expect([en.brdMotive.trip, fr.brdMotive.trip]).toContain(valueOf('why'))
     await next()
     await pick('[data-kana="both"]')
@@ -318,47 +319,26 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(stateOf('level')).toBe('now')
     await pick('[data-level="N3"]')
     expect(valueOf('level')).toBe('N3')
-    // A stop ahead prints nothing, even one the draft already prices.
+    // A stop ahead says nothing, even one the draft already prices.
     expect(stateOf('goal')).toBe('next')
     expect(valueOf('goal')).toBeNull()
-    const first = priced()
-    expect(first).toMatch(/\d{4}/)
     await next()
     expect(stepOf()).toBe('goal')
-    // Continue committed what the column priced.
+    // Continue committed what the draft priced.
     expect(inCar('[data-goal="N2"]').getAttribute('aria-pressed')).toBe('true')
     expect(valueOf('goal')).toBe('N3 → N2')
-    expect(priced()).toBe(first)
     await pick('[data-goal="N1"]')
     expect(valueOf('goal')).toBe('N3 → N1')
-    expect(priced()).not.toBe(first)
     await next()
     expect(stateOf('goal')).toBe('done')
     expect(stateOf('lines')).toBe('now')
     expect(valueOf('lines')).toMatch(/·/)
     await next()
     expect(stateOf('rhythm')).toBe('now')
-    const before = priced()
     await pick('[data-rhythm="20"]')
     expect(valueOf('rhythm')).toMatch(/^20 /)
-    expect(priced()).not.toBe(before)
     await next()
     expect(valueOf('time')).toMatch(/^\d\d:\d\d$/)
-  })
-
-  it('prices nothing until the volumes answer', async () => {
-    let release
-    apiJson.mockImplementation(path => (path === '/api/onboarding/volumes'
-      ? new Promise(r => { release = () => r(VOLUMES) })
-      : Promise.resolve({})))
-    await board()
-    await toLevel()
-    await pick('[data-level="N3"]')
-    expect(valueOf('level')).toBe('N3')
-    expect(priced()).toBe('—')
-    release()
-    await settle(100)
-    expect(priced()).toMatch(/\d{4}/)
   })
 
   it('opens a passed stop\'s question in one pull, every answer kept', async () => {
@@ -385,21 +365,24 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(stepOf()).toBe('why')
   })
 
-  it('stands Back beside Continue on the floor, and leaves from the first question', async () => {
+  it('stands Back beside Continue in the bottom-right corner, and leaves from the first question', async () => {
     const onExit = vi.fn()
     await board({ onExit })
+    await settle(600)
     const floor = inCar('.desk-brd__floor')
     const back = floor.querySelector('[data-action="back"]')
     const go = floor.querySelector('[data-action="continue"]')
     expect(box(back).right).toBeLessThan(box(go).left)
     expect(Math.abs(box(back).top - box(go).top)).toBeLessThan(1)
-    expect(Math.round(box(go).right)).toBe(Math.round(box(floor).right))
+    // The corner: the canvas's right edge, --sp-7 over the window's floor.
+    expect(Math.round(bodyW() - box(go).right)).toBe(Math.round(box(strip()).left))
+    expect(Math.round(window.innerHeight - box(go).bottom)).toBe(28)
     expect([en.back, fr.back]).toContain(back.textContent)
     back.click()
     expect(onExit).toHaveBeenCalledTimes(1)
   })
 
-  it('sets the answers at the width that serves them, one block with the question', async () => {
+  it('sets the question in the top-left corner and its answers in the paper under it', async () => {
     await board()
     // The name at the card's width, for a name at the display size.
     expect(Math.round(box(inCar('.brd-field')).width)).toBe(640)
@@ -408,20 +391,19 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     // Measured once the answers' entrance has landed (brd-in, 6px).
     await settle(900)
     const q = box(inCar('.brd__q'))
-    const stage = box(inCar('.brd__stage'))
+    const roads = box(inCar('.desk-brd__roads'))
     const foot = box(inCar('.brd__foot'))
-    // Six reasons two to a row at 1100 -- three rows, not six.
-    expect(rowsOf([...inCar('.brd__opts').children]).size).toBe(3)
-    expect(Math.abs(mid(stage) - mid(q))).toBeLessThan(1.5)
-    // The floor at the card's width whatever the answers' (plan 155),
-    // on the question's middle.
-    expect(Math.round(foot.width)).toBe(640)
-    expect(Math.abs(mid(foot) - mid(q))).toBeLessThan(1.5)
-    // Continue --sp-8 under the last answer, not on the window's floor.
-    const last = box([...inCar('.brd__opts').children].at(-1))
-    expect(Math.round(foot.top - last.bottom)).toBe(44)
-    // Centred in the paper the column leaves.
-    expect(Math.abs(mid(q) - (360 + (bodyW() - 360) / 2))).toBeLessThan(12)
+    // The question at the corner, --sp-7 and --sp-6 under the window's
+    // top, set left -- and at the display rung: 1100x800 is no short step.
+    expect(Math.round(q.left)).toBe(Math.round(box(strip()).left))
+    expect(Math.round(q.top)).toBe(50)
+    expect(getComputedStyle(inCar('.brd__q')).fontSize).toBe('40px')
+    expect(getComputedStyle(inCar('.brd__q')).textAlign).toBe('start')
+    // The answers centred across the paper, between the question and the
+    // floor, a rung (--sp-6) at least under the question.
+    expect(Math.abs(mid(roads) - bodyW() / 2)).toBeLessThan(1.5)
+    expect(roads.top - q.bottom).toBeGreaterThanOrEqual(21.5)
+    expect(roads.bottom).toBeLessThan(foot.top)
     await next()
     await settle(900)
     // The kana's four answers on one row, under the card, and the way
@@ -431,22 +413,231 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(inCar('.btn-depart')).toBeNull()
   })
 
-  it('draws the level list as a line of stations, the ride lit to the pick', async () => {
+  it('sets the name on its plate over the question\'s hub, the line leaving it for the next stop', async () => {
+    await board()
+    await settle(600)
+    const field = box(inCar('.brd-field'))
+    // The letters the name has left, at the plate's end.
+    expect(inCar('.desk-brd__plate-count').textContent).toBe('6 / 20')
+    await userEvent.keyboard('X')
+    expect(inCar('.desk-brd__plate-count').textContent).toBe('7 / 20')
+    // Set in from the question, the hub under the plate's left end.
+    expect(field.left).toBeGreaterThan(box(inCar('.brd__q')).left)
+    const hub = inCar('.desk-brd__hub--pole')
+    expect(hub.textContent).toBe('01')
+    expect(Math.abs(mid(box(hub)) - (field.left + 40))).toBeLessThan(1)
+    expect(box(hub).top).toBeGreaterThan(field.bottom)
+    // The next stop down the line, named.
+    const nextStop = inCar('.desk-brd__name-next')
+    expect([en.brdStop.why, fr.brdStop.why]).toContain(nextStop.textContent)
+    expect(box(nextStop).left).toBeGreaterThan(field.right)
+  })
+
+  it('draws the six reasons as roads out of the question\'s hub, the pick\'s road lit', async () => {
+    await board()
+    await pastName()
+    await settle(900)
+    const roads = inCar('.desk-brd__roads')
+    const hub = roads.querySelector('.desk-brd__hub')
+    // The hub prints the question's place on the strip, in the paper's middle.
+    expect(hub.textContent).toBe('02')
+    expect(Math.abs(mid(box(hub)) - bodyW() / 2)).toBeLessThan(1.5)
+    const ways = [...roads.querySelectorAll('.desk-brd__way')]
+    expect(ways.map(w => w.dataset.motive)).toEqual(['studies', 'fun', 'trip', 'live', 'friends', 'other'])
+    // A road from the hub's centre to each reason's ring, drawn on the
+    // map's own figures -- out of 100 across it and down it.
+    const map = box(roads.querySelector('.desk-brd__map'))
+    const at = (x, y) => [map.left + (Number(x) / 100) * map.width, map.top + (Number(y) / 100) * map.height]
+    const ends = [...roads.querySelectorAll('.desk-brd__road')].map(l => ({
+      start: at(l.getAttribute('x1'), l.getAttribute('y1')),
+      end: at(l.getAttribute('x2'), l.getAttribute('y2')),
+      on: l.classList.contains('desk-brd__road--on'),
+    }))
+    expect(ends).toHaveLength(6)
+    const near = ([x, y], r) => Math.abs(x - mid(r)) < 1 && Math.abs(y - cy(r)) < 1
+    for (const e of ends) expect(near(e.start, box(hub))).toBe(true)
+    const rings = ways.map(w => box(w.querySelector('.desk-brd__ring')))
+    rings.forEach((r, i) => expect(ends.some(e => near(e.end, r)), ways[i].dataset.motive).toBe(true))
+    // Clockwise from the top left, in the order the digits pick them.
+    const angles = rings.map(r => Math.atan2(cy(r) - cy(box(hub)), mid(r) - mid(box(hub))))
+    expect([...angles].sort((a, b) => a - b)).toEqual(angles)
+    expect(angles[0]).toBeLessThan(-Math.PI / 2)
+    // Each whole on the paper, under the question and over the floor, and
+    // none on another or on the hub.
+    const q = box(inCar('.brd__q'))
+    const floor = box(inCar('.brd__foot'))
+    const boxes = ways.map(box)
+    const apart = (a, b) => a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top
+    boxes.forEach((b, i) => {
+      const name = ways[i].dataset.motive
+      expect(b.left, name).toBeGreaterThanOrEqual(q.left - 0.5)
+      expect(b.right, name).toBeLessThanOrEqual(bodyW() - q.left + 0.5)
+      expect(b.top, name).toBeGreaterThan(q.bottom)
+      expect(b.bottom, name).toBeLessThan(floor.top)
+      expect(apart(b, box(hub)), name).toBe(true)
+      boxes.forEach((o, j) => { if (j > i) expect(apart(b, o), `${name}/${ways[j].dataset.motive}`).toBe(true) })
+    })
+    // A pick lights its own road, and only its own.
+    expect(ends.some(e => e.on)).toBe(false)
+    await pick('[data-motive="live"]')
+    const lit = [...roads.querySelectorAll('.desk-brd__road--on')]
+    expect(lit).toHaveLength(1)
+    expect(near(at(lit[0].getAttribute('x2'), lit[0].getAttribute('y2')), rings[3])).toBe(true)
+    expect(inCar('[data-motive="live"]').getAttribute('aria-pressed')).toBe('true')
+    expect(kbdOf(inCar('[data-motive="live"]'))).toBe('4')
+  })
+
+  it('hangs the kana\'s four answers from the two words, each drawn as what it reads', async () => {
+    await board()
+    await pastName()
+    await pick('[data-motive="trip"]')
+    await next()
+    await settle(900)
+    expect(stepOf()).toBe('kana')
+    expect([en.brdKanaHint, fr.brdKanaHint]).toContain(inCar('.brd__hint').textContent)
+    const words = inCar('.desk-brd__words')
+    expect([...words.children].map(w => w.textContent)).toEqual(['すし', 'ホテル'])
+    expect(getComputedStyle(words).fontSize).toBe('72px')
+    const answers = [...inCar('.brd-grid').children]
+    expect(answers.map(a => a.dataset.kana)).toEqual(['hiragana', 'katakana', 'both', 'none'])
+    // Each answer shows the two words, solid where it reads one.
+    const reads = answers.map(a => [...a.querySelectorAll('.desk-brd__chip')].map(c => !c.classList.contains('desk-brd__chip--not')))
+    expect(reads).toEqual([[true, false], [false, true], [true, true], [false, false]])
+    // What it says first, the word set as Japanese; then its name.
+    expect([en.brdKanaOnly('すし'), fr.brdKanaOnly('すし')]).toContain(answers[0].querySelector('.brd-kopt__label').textContent)
+    expect(answers[0].querySelector('.brd-kopt__label [lang="ja"]').textContent).toBe('すし')
+    expect([en.brdKanaSays.none, fr.brdKanaSays.none]).toContain(answers[3].querySelector('.desk-brd__ans-sub').textContent)
+    // A branch down to each answer's middle, from a knot under the words.
+    const branches = [...inCar('.desk-brd__tree').querySelectorAll('.desk-brd__branch')]
+    expect(branches).toHaveLength(4)
+    branches.forEach((b, i) => {
+      const r = box(b)
+      const down = i < 2 ? r.left + 2 : r.right - 2
+      expect(Math.abs(down - mid(box(answers[i]))), answers[i].dataset.kana).toBeLessThan(1)
+      expect(Math.abs(r.bottom - box(answers[i]).top), answers[i].dataset.kana).toBeLessThan(1)
+    })
+    const knot = box(inCar('.desk-brd__knot'))
+    expect(Math.abs(mid(knot) - mid(box(words)))).toBeLessThan(1)
+    expect(knot.top).toBeGreaterThan(box(words).bottom)
+    expect(inCar('.desk-brd__branch--on')).toBeNull()
+    // Answered, and come back to by Back: the answer's branch is lit.
+    await pick('[data-kana="hiragana"]')
+    await settle(900)
+    expect(stepOf()).toBe('reveal')
+    inCar('[data-action="back"]').click()
+    await settle(900)
+    expect(stepOf()).toBe('kana')
+    const lit = [...inCar('.desk-brd__tree').querySelectorAll('.desk-brd__branch')].map(b => b.classList.contains('desk-brd__branch--on'))
+    expect(lit).toEqual([true, false, false, false])
+  })
+
+  it('reads the two words out sign by sign, and names the first stop and its day', async () => {
+    await board()
+    await pastName()
+    await pick('[data-motive="trip"]')
+    await next()
+    await pick('[data-kana="hiragana"]')
+    await settle(900)
+    expect(stepOf()).toBe('reveal')
+    expect([en.brdRevealLead, fr.brdRevealLead]).toContain(inCar('.brd__hint').textContent)
+    const cards = [...inCar('.desk-brd__reveal').children]
+    expect(cards.map(c => c.querySelector('.desk-brd__word-jp').textContent)).toEqual(['すし', 'ホテル'])
+    const signs = c => [...c.querySelectorAll('.desk-brd__sign')].map(s => [s.querySelector('[lang="ja"]').textContent, s.querySelector('.desk-brd__sign-sound').textContent])
+    expect(signs(cards[0])).toEqual([['す', 'su'], ['し', 'shi']])
+    expect(signs(cards[1])).toEqual([['ホ', 'ho'], ['テ', 'te'], ['ル', 'ru']])
+    // Side by side, the same height.
+    expect(Math.abs(box(cards[0]).top - box(cards[1]).top)).toBeLessThan(1)
+    expect(Math.abs(box(cards[0]).height - box(cards[1]).height)).toBeLessThan(1)
+    // The first stop: the 112 signs a hiragana reader has still to
+    // read, at the recommended 10 a day -- twelve days from today.
+    const day = new Date()
+    day.setDate(day.getDate() + 12)
+    const said = ['en', 'fr'].map(l => new Intl.DateTimeFormat(l, { day: 'numeric', month: 'short' }).format(day))
+    const first = inCar('.desk-brd__first').textContent
+    expect(said.some(d => first.includes(d)), first).toBe(true)
+    expect(first).toMatch(/10 min/)
+    expect(fits(inCar('.brd__body'))).toBe(true)
+  })
+
+  it('draws the level and the goal as the line climbing from the hub, the pick hung with its callout', async () => {
     await board()
     await toLevel()
     await settle(900)
-    const stations = () => [...inCar('.desk-brd__line').children]
-    expect(stations().map(s => s.dataset.level)).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
-    // Six do not hold half a run's column each at 1100: two rows of three.
-    expect(rowsOf(stations()).size).toBe(2)
-    const ends = stations().map(s => [s.classList.contains('desk-brd__stn--head'), s.classList.contains('desk-brd__stn--tail')])
-    expect(ends).toEqual([[true, false], [false, false], [false, true], [true, false], [false, false], [false, true]])
+    const climb = () => inCar('.desk-brd__climb')
+    const stops = () => [...climb().querySelectorAll('.desk-brd__stop')]
+    const ring = el => box(el.querySelector('.desk-brd__stop-ring'))
+    const stateOf = el => el.className.match(/desk-brd__stop--(\w+)/)?.[1] ?? null
+    expect([en.brdLevelHint, fr.brdLevelHint]).toContain(inCar('.brd__hint').textContent)
+    expect(stops().map(s => s.dataset.level)).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
+    // A step up and to the right a level, from the hub at the line's foot,
+    // which prints the question's place on the strip.
+    const hub = climb().querySelector('.desk-brd__hub')
+    expect(hub.textContent).toBe('04')
+    const rings = stops().map(ring)
+    ;[box(hub), ...rings].reduce((before, r) => {
+      expect(mid(r)).toBeGreaterThan(mid(before))
+      expect(cy(r)).toBeLessThan(cy(before))
+      return r
+    })
+    // Each stop's name and holdings under its ring, clear of the next
+    // stop's, and the whole line on the paper, over the floor.
+    const q = box(inCar('.brd__q'))
+    const labels = stops().map(s => box(s.querySelector('.desk-brd__stop-lab')))
+    labels.forEach((l, i) => {
+      expect(l.top, stops()[i].dataset.level).toBeGreaterThan(rings[i].bottom)
+      if (i < labels.length - 1) expect(l.right, stops()[i].dataset.level).toBeLessThanOrEqual(labels[i + 1].left)
+      expect(l.right).toBeLessThanOrEqual(bodyW() - q.left + 0.5)
+      expect(l.bottom).toBeLessThan(box(inCar('.brd__foot')).top)
+    })
+    expect(rings[5].top).toBeGreaterThan(box(inCar('.brd__hint')).bottom)
+    expect([...inCar('[data-level="N5"] .desk-brd__stop-desc').children]).toHaveLength(2)
+    expect(inCar('.desk-brd__call')).toBeNull()
+    // The pick: the stops behind it filled, the line inked up to it, and
+    // "You are here" hung over its ring.
     await pick('[data-level="N4"]')
-    expect(stations().map(s => s.classList.contains('desk-brd__stn--ride'))).toEqual([true, true, false, false, false, false])
+    expect(stops().map(stateOf)).toEqual(['known', 'known', 'on', null, null, null])
     expect(inCar('[data-level="N4"]').getAttribute('aria-pressed')).toBe('true')
-    expect(inCar('[data-level="N4"]').classList.contains('desk-brd__stn--on')).toBe(true)
-    // What a stop is over what it holds, a line each.
-    expect([...inCar('[data-level="N5"] .desk-brd__desc').children]).toHaveLength(2)
+    expect(climb().querySelectorAll('.desk-brd__rail--known')).toHaveLength(1)
+    const call = inCar('.desk-brd__call')
+    expect([en.levelCurrentMark, fr.levelCurrentMark]).toContain(call.querySelector('.desk-brd__call-cap').textContent)
+    expect(call.querySelector('.desk-brd__call-fig').textContent).toBe('N4')
+    expect(Math.abs(mid(box(call)) - mid(ring(inCar('[data-level="N4"]'))))).toBeLessThan(1)
+    expect(box(call).bottom).toBeLessThan(ring(inCar('[data-level="N4"]')).top)
+    // The goal: the same line, the stops behind the learner inked and no
+    // longer answers, the next one tagged; the ride to the pick in gold,
+    // and the arrival's month over it.
+    await next()
+    await settle(900)
+    expect(stepOf()).toBe('goal')
+    expect(climb().querySelector('.desk-brd__hub').textContent).toBe('05')
+    expect(stops().map(s => s.dataset.goal ?? null)).toEqual([null, null, null, 'N3', 'N2', 'N1'])
+    expect(stops().slice(0, 3).every(s => s.tagName === 'SPAN' && stateOf(s) === 'known')).toBe(true)
+    expect([en.brdNextStop, fr.brdNextStop]).toContain(inCar('[data-goal="N3"] .brd-tag').textContent)
+    await pick('[data-goal="N2"]')
+    expect(stops().map(stateOf)).toEqual(['known', 'known', 'known', 'ride', 'on', null])
+    expect(climb().querySelectorAll('.desk-brd__rail--ride')).toHaveLength(1)
+    const arrive = inCar('.desk-brd__call')
+    expect([en.statusArrival, fr.statusArrival]).toContain(arrive.querySelector('.desk-brd__call-cap').textContent)
+    expect(arrive.querySelector('.desk-brd__call-fig').textContent).toMatch(/20\d\d/)
+  })
+
+  it('draws a learner short of the kana riding from the hub, the novice\'s stop the next', async () => {
+    await board()
+    await pastName()
+    await pick('[data-motive="trip"]')
+    await next()
+    await pick('[data-kana="none"]')
+    await settle()
+    await next()
+    await settle(900)
+    expect(stepOf()).toBe('goal')
+    const stops = [...inCar('.desk-brd__climb').querySelectorAll('.desk-brd__stop')]
+    // Every stop ahead, the novice's own first: all six are answers.
+    expect(stops.map(s => s.dataset.goal)).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(inCar('.desk-brd__rail--known')).toBeNull()
+    await pick('[data-goal="N5"]')
+    expect(stops.map(s => s.className.match(/desk-brd__stop--(\w+)/)?.[1] ?? null)).toEqual(['ride', 'on', null, null, null, null])
+    expect(inCar('.desk-brd__climb').querySelectorAll('.desk-brd__rail--ride')).toHaveLength(1)
   })
 
   it('fits every question in a laptop\'s window, in French, with no scroll', async () => {
@@ -458,8 +649,10 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
       expect(fits(inCar('.brd__body')), stepOf()).toBe(true)
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
       expect(box(inCar('.brd__foot')).bottom).toBeLessThanOrEqual(window.innerHeight)
-      expect(fits(side()), `${stepOf()}: the column`).toBe(true)
-      for (const r of document.querySelectorAll('.desk-brd__door')) expect(r.scrollWidth).toBeLessThanOrEqual(r.clientWidth)
+      // The strip and the floor share their line and never meet.
+      expect(box(strip()).right, `${stepOf()}: the strip`).toBeLessThan(box(inCar('.brd__foot button')).left)
+      const go = inCar('.brd__foot .btn-depart')
+      if (go) expect(go.scrollWidth, `${stepOf()}: Continue`).toBeLessThanOrEqual(go.clientWidth)
     }
     await check()
     await next()
@@ -477,24 +670,61 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     await check()       // time
   })
 
-  it('draws the plan\'s chart 1:1 beside its promises, with no scroll', async () => {
+  it('draws the plan as the ride to scale, what the terminus holds beside what it is for', async () => {
     await board()
     await toLevel()
     await toTime()
     await next()
     await settle(900)
     expect(stepOf()).toBe('plan')
-    const svg = inCar('.brd-chart svg')
-    expect(box(svg).width).toBeGreaterThanOrEqual(326)
-    expect(box(svg).width).toBeLessThanOrEqual(330)
-    expect(box(inCar('.brd-chart')).right).toBeLessThan(box(inCar('.brd-lead')).left)
+    const halts = [...inCar('.desk-brd__route').children]
+    const ring = h => box(h.querySelector('.desk-brd__halt-ring'))
+    // From the crossroads to the terminus, left to right, on one line.
+    expect(halts[0].classList.contains('desk-brd__halt--start')).toBe(true)
+    expect(halts[0].querySelector('.mark')).not.toBeNull()
+    expect(halts.at(-1).classList.contains('desk-brd__halt--end')).toBe(true)
+    halts.map(ring).reduce((a, b) => { expect(mid(b)).toBeGreaterThan(mid(a)); return b })
+    expect(new Set(halts.map(h => Math.round(cy(ring(h))))).size).toBe(1)
+    // A reader of both scripts has no kana stop; the terminus is the goal
+    // (N3's next, N2) and its date.
+    expect(inCar('.desk-brd__halt--kana')).toBeNull()
+    expect(halts.at(-1).querySelector('.desk-brd__halt-ring').textContent).toBe('N2')
+    expect(halts.at(-1).querySelector('.desk-brd__halt-date').textContent).toMatch(/20\d\d/)
+    // Every stop's name clear of the next one's.
+    const names = halts.map(h => box(h.querySelector('.desk-brd__halt-name')))
+    names.reduce((a, b) => { expect(b.left).toBeGreaterThan(a.right); return b })
+    // Under the rule: each line's figure at the terminus, the trip's two
+    // promises beside them.
+    expect([...inCar('.desk-brd__held-list').children].map(i => i.dataset.line)).toEqual(['vocab', 'kanji', 'grammar'])
+    expect(inCar('.desk-brd__for-list').children).toHaveLength(2)
+    expect(box(inCar('.desk-brd__held')).right).toBeLessThan(box(inCar('.desk-brd__for')).left)
     expect(fits(inCar('.brd__body'))).toBe(true)
     expect(box(inCar('.brd__foot')).bottom).toBeLessThanOrEqual(window.innerHeight)
-    // Its one action at a ticket's width, under the plan's middle.
+    // Its one action at a ticket's width, in the floor's corner.
     const go = box(inCar('[data-action="enter"]'))
     expect(Math.round(go.width)).toBe(360)
-    expect(Math.abs(mid(go) - mid(box(inCar('.brd__stage'))))).toBeLessThan(1.5)
-    expect(fits(side())).toBe(true)
+    expect(Math.round(bodyW() - go.right)).toBe(Math.round(box(strip()).left))
+  })
+
+  it('stops the plan at the kana for a learner who reads neither script yet', async () => {
+    await board()
+    await pastName()
+    await pick('[data-motive="trip"]')
+    await next()
+    await pick('[data-kana="none"]')
+    await settle()
+    await next()          // → goal, N5 picked
+    await next()          // → lines
+    await next()          // → rhythm
+    await next()          // → time
+    await next()          // → plan
+    await settle(900)
+    expect(stepOf()).toBe('plan')
+    const halts = [...inCar('.desk-brd__route').children]
+    expect(halts.map(h => h.className.match(/desk-brd__halt--(\w+)/)[1])).toEqual(['start', 'kana', 'by', 'by', 'end'])
+    expect(halts[1].querySelector('.desk-brd__halt-ring').textContent).toBe('あ')
+    const names = halts.map(h => box(h.querySelector('.desk-brd__halt-name')))
+    names.reduce((a, b) => { expect(b.left).toBeGreaterThan(a.right); return b })
   })
 
   it('says on the plan why the office refused the contract, and stays', async () => {
@@ -523,7 +753,27 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
     expect(inCar('[data-action="enter"]')).toBeNull()
     await next()
     expect(stepOf()).toBe('account')
-    expect(stop('pass')).not.toBeNull()
+    expect(stops().map(stateOf).every(s => s === 'done')).toBe(true)
+    await settle(900)
+    // The form on the left, the ticket it keeps on the right: the holder,
+    // the ride's terminus and its day, the welcome on the stub.
+    const form = box(inCar('.desk-brd__form'))
+    const ticket = inCar('.desk-brd__tkt')
+    expect(form.right).toBeLessThan(box(ticket).left)
+    expect(ticket.querySelector('.desk-brd__tkt-name').textContent).toBe('Tester')
+    expect(ticket.querySelector('.desk-brd__tkt-stop--end .desk-brd__tkt-dot').textContent).toBe('N2')
+    expect(ticket.querySelector('.desk-brd__tkt-bal').textContent).toBe('200')
+    expect([en.brdCreditsOffered, fr.brdCreditsOffered]).toContain(ticket.querySelector('.desk-brd__tkt-sub').textContent)
+    // Every term whole on the ticket.
+    for (const dd of ticket.querySelectorAll('.desk-brd__tkt-term > dd')) {
+      expect(dd.scrollWidth).toBeLessThanOrEqual(dd.clientWidth + 1)
+    }
+    // Riding on without an account is offered under it, and the floor
+    // keeps its one filled action; signing in under the form.
+    expect(inCar('.desk-brd__tkt-note [data-action="account-skip"]')).not.toBeNull()
+    expect(inCar('.brd__foot [data-action="account-skip"]')).toBeNull()
+    expect(inCar('.desk-brd__form [data-action="account-sign-in"]')).not.toBeNull()
+    expect(fits(inCar('.brd__body'))).toBe(true)
     inCar('[data-action="account-skip"]').click()
     await settle()
     expect(apiJsonWithTimeout).toHaveBeenCalledWith('/api/onboarding/complete', expect.anything(), expect.anything())
@@ -532,103 +782,187 @@ describe('the boarding frame on the desk (P9, plan 140)', () => {
   })
 })
 
-// ── P10 — the front door (plans 122, 140) ──
-// The Welcome with the sign-in beside it: a returning learner signs in
-// with no second screen. Since plan 140 the sign-in stands in the sumi
-// column on the left under the rail's masthead, and the paper holds the
-// heading, the tagline and Board as one block over the band, which runs
-// across the paper faded at its ends.
+// ── P10 — the front door (plans 122, 140, 163) ──
+// The Welcome with the sign-in on the same screen: a returning learner
+// signs in with no second screen. Since plan 163 (the owner's D00) the
+// paper is the crossroads, whole, no column: the way in at the paper's
+// left margin -- the promise over Board, or the sign-in over its own
+// action -- on the gold road that runs right into the hub, 辻, and out of
+// the hub the app's seven lines to their signs; the corner holds the
+// other way in.
 const centreOf = r => (r.top + r.bottom) / 2
-function Door({ authMode = null, onBoard = () => {}, boarding = false }) {
-  return <LangProvider><Welcome onBoard={onBoard} onSignIn={() => {}} boarding={boarding} authMode={authMode} /></LangProvider>
+function Door({ authMode = null, onBoard = () => {}, onSignIn = () => {}, onBack = () => {}, boarding = false }) {
+  return <LangProvider><Welcome onBoard={onBoard} onSignIn={onSignIn} onBack={onBack} boarding={boarding} authMode={authMode} /></LangProvider>
 }
-const inSide = s => $('.desk-door__side')?.querySelector(s)
+const inBlock = s => $('.desk-front__block')?.querySelector(s)
+// A token's colour as the sheet paints it.
+function paintOf(token) {
+  const probe = document.createElement('div')
+  probe.style.background = `var(${token})`
+  document.body.appendChild(probe)
+  const colour = getComputedStyle(probe).backgroundColor
+  probe.remove()
+  return colour
+}
+const LINES = ['kana', 'vocab', 'kanji', 'grammar', 'reading', 'translation', 'dictation']
 
-describe('the front door on the desk (P10, plan 140)', () => {
-  it('stands the sign-in in the column on the left, and Board as the one filled action', async () => {
+describe('the front door on the desk (P10, plans 140, 163)', () => {
+  it('stands the promise over Board at the paper\'s margin, on the gold road into the hub', async () => {
     await render(<Door />)
-    await settle(150)
-    const col = $('.desk-door__side')
-    expect(Math.round(box(col).width)).toBe(360)
-    expect(Math.round(box(col).left)).toBe(0)
-    expect(Math.round(box(col).height)).toBe(window.innerHeight)
-    // The rail's masthead at its head; the paper keeps no second mark.
-    expect(inSide('.desk-rail__glyph .mark').getAttribute('aria-label')).toBe('辻')
-    expect($('.brd-hero .auth-header__glyph')).toBeNull()
-    // Named plainly (plan 155): "Log in", not the link's own sentence.
-    expect([en.login, fr.login]).toContain(inSide('.desk-deck__cap').textContent)
-    // Drawn in the column's material: no card of the paper's in the sumi,
-    // on the column's middle, where it always stood (the owner's call).
-    expect(getComputedStyle(inSide('.auth-card')).backgroundColor).toBe('rgba(0, 0, 0, 0)')
-    const auth = box(inSide('.auth-card'))
-    expect(Math.abs(centreOf(auth) - window.innerHeight / 2)).toBeLessThan(40)
-    // One lane of cards passes under the promise.
-    expect(document.querySelectorAll('.brd-roll__lane')).toHaveLength(1)
-    // Signing in only: no Login / Sign up control, no foot.
-    expect(inSide('.seg')).toBeNull()
-    expect(inSide('.auth-foot')).toBeNull()
-    expect(inSide('input[type="email"]')).not.toBeNull()
-    // Its door stands beside it: no link to a second screen.
-    expect($('[data-action="sign-in"]')).toBeNull()
-    const board = $('[data-action="board"]')
-    expect(Math.round(box(board).width)).toBe(360)
-    expect(Math.abs(mid(box(board)) - (360 + (bodyW() - 360) / 2))).toBeLessThan(1.5)
-    // Board stands with the promise, over the band -- not on the floor.
-    expect(box(board).top).toBeGreaterThan(box($('.brd-tagline')).bottom)
-    expect(box(board).bottom).toBeLessThan(box($('.brd-roll')).top)
-    expect(getComputedStyle(inSide('.auth-submit')).backgroundColor).toBe('rgba(0, 0, 0, 0)')
-    expect(getComputedStyle(board).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+    await settle(800)
+    // The paper whole: no column, no masthead, no rolling stock -- the
+    // mark is the hub's.
+    expect($('.desk-door__side')).toBeNull()
+    expect($('.desk-rail__mast')).toBeNull()
+    expect($('.brd-roll')).toBeNull()
+    expect($('.desk-front__hub .mark').getAttribute('aria-label')).toBe('辻')
+    expect($('.desk-front__hub').closest('[aria-hidden="true"]')).toBeNull()
+    expect(document.querySelectorAll('.mark')).toHaveLength(1)
+    const board = box($('[data-action="board"]'))
+    // A ticket wide at the margin, under the promise, a rung under the
+    // paper's middle.
+    expect(Math.round(board.left)).toBe(44)
+    expect(Math.round(board.width)).toBe(360)
+    expect(board.top).toBeGreaterThan(box($('.brd-tagline')).bottom)
+    expect(Math.abs(centreOf(board) - (window.innerHeight / 2 + 60))).toBeLessThan(2)
+    // The gold road on Board's line, from past it into the hub on the
+    // same line.
+    const road = box($('.desk-front__way'))
+    const hub = box($('.desk-front__hub'))
+    expect(Math.abs(centreOf(road) - centreOf(board))).toBeLessThan(2)
+    expect(Math.abs(centreOf(hub) - centreOf(board))).toBeLessThan(2)
+    expect(road.left).toBeGreaterThan(board.right)
+    expect(road.right).toBeGreaterThan(hub.left)
+    expect(getComputedStyle($('.desk-front__way')).stroke).toBe(paintOf('--accent2'))
+    // Seven lines out of the hub, each in its own pigment to its sign,
+    // named; every sign on the paper, right of the way in and under the
+    // corner, and clear of the others.
+    const stns = [...document.querySelectorAll('.desk-front__stn')]
+    expect(stns.map(s => s.dataset.line)).toEqual(LINES)
+    expect(new Set(stns.map(s => getComputedStyle(s.querySelector('.desk-front__sign')).borderTopColor)).size).toBe(7)
+    for (const road of document.querySelectorAll('.desk-front__road')) {
+      const sign = $(`.desk-front__stn[data-line="${road.dataset.line}"] .desk-front__sign`)
+      expect(getComputedStyle(road).stroke).toBe(getComputedStyle(sign).borderTopColor)
+    }
+    for (const s of stns) {
+      expect([en.brdDemoTag[s.dataset.line], fr.brdDemoTag[s.dataset.line]]).toContain(s.querySelector('.desk-front__name').textContent)
+      const r = box(s)
+      expect(r.left, s.dataset.line).toBeGreaterThan(board.right)
+      expect(r.right, s.dataset.line).toBeLessThanOrEqual(bodyW())
+      expect(r.top, s.dataset.line).toBeGreaterThan(box($('.desk-front__door')).bottom)
+      expect(r.bottom, s.dataset.line).toBeLessThanOrEqual(window.innerHeight)
+    }
+    for (let i = 0; i < stns.length; i++) {
+      for (let j = i + 1; j < stns.length; j++) {
+        const a = box(stns[i])
+        const b = box(stns[j])
+        const apart = a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top
+        expect(apart, `${stns[i].dataset.line} / ${stns[j].dataset.line}`).toBe(true)
+      }
+    }
+    // One filled action; the other way in plain, in the top-right corner
+    // at the paper's margin.
+    expect(getComputedStyle($('[data-action="board"]')).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+    const corner = $('[data-action="sign-in"]')
+    expect([en.loginBtn, fr.loginBtn]).toContain(corner.textContent)
+    expect(getComputedStyle(corner).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(Math.round(bodyW() - box(corner).right)).toBe(44)
+    expect(box(corner).bottom).toBeLessThan(hub.top)
     expect(document.querySelectorAll('h1')).toHaveLength(1)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
     // Nothing is focused, so Enter boards.
     expect(document.activeElement).toBe(document.body)
   })
 
-  it('opens on Sign up, both sides named, when Board could not issue a pass', async () => {
-    await render(<Door authMode="signup" />)
-    await settle(150)
-    expect(inSide('.desk-deck__cap')).toBeNull()
-    const sides = [...inSide('.seg').querySelectorAll('.seg__opt')]
-    expect(sides.map(o => o.getAttribute('aria-checked'))).toEqual(['false', 'true'])
-    expect(inSide('.auth-foot')).not.toBeNull()
-    expect(document.activeElement).toBe(inSide('input[type="email"]'))
-  })
-
-  it('focuses the email for a learner who came to sign in, and keeps Enter the form\'s there', async () => {
+  it('puts the sign-in in the promise\'s place from the corner, its action where Board stood, and back', async () => {
     const onBoard = vi.fn()
-    await render(<Door authMode="login" onBoard={onBoard} />)
+    const onSignIn = vi.fn()
+    const onBack = vi.fn()
+    const screen = await render(<Door onBoard={onBoard} onSignIn={onSignIn} onBack={onBack} />)
+    // Measured once the way in's entrance has landed.
+    await settle(800)
+    const boardAt = box($('[data-action="board"]'))
+    const hubAt = box($('.desk-front__hub'))
+    await userEvent.click($('[data-action="sign-in"]'))
+    expect(onSignIn).toHaveBeenCalledTimes(1)
+    await screen.rerender(<Door authMode="login" onBoard={onBoard} onSignIn={onSignIn} onBack={onBack} />)
     await settle(150)
-    expect(inSide('.seg')).toBeNull()
-    expect(document.activeElement).toBe(inSide('input[type="email"]'))
+    // Named plainly, signing in only: no Login / Sign up control, no foot.
+    expect([en.login, fr.login]).toContain($('h1').textContent)
+    expect(document.querySelectorAll('h1')).toHaveLength(1)
+    expect(inBlock('.seg')).toBeNull()
+    expect(inBlock('.auth-foot')).toBeNull()
+    expect(document.activeElement).toBe(inBlock('input[type="email"]'))
+    // Its action is Board's place on the road, filled; the map stays.
+    const submit = $('[data-action="auth-submit"]')
+    expect([en.loginBtn, fr.loginBtn]).toContain(submit.querySelector('.btn-depart__jp').textContent)
+    const at = box(submit)
+    expect([at.left, at.top, at.width].map(Math.round)).toEqual([boardAt.left, boardAt.top, boardAt.width].map(Math.round))
+    expect(box($('.desk-front__hub'))).toEqual(hubAt)
+    expect($('[data-action="board"]')).toBeNull()
+    expect(document.querySelectorAll('.btn-depart')).toHaveLength(1)
+    // No card on the paper; its fields the page's wells.
+    expect(getComputedStyle(inBlock('.auth-card')).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(getComputedStyle(inBlock('input[type="email"]')).backgroundColor).toBe(paintOf('--surface'))
+    // Enter is the form's: typing and Enter do not board.
     await userEvent.keyboard('aiko@example.com{Enter}')
     await settle()
     expect(onBoard).not.toHaveBeenCalled()
+    // The corner offers the other way in, Board.
+    const corner = $('[data-action="board-corner"]')
+    expect([en.brdBoard, fr.brdBoard]).toContain(corner.textContent)
+    expect($('[data-action="sign-in"]')).toBeNull()
+    await userEvent.click(corner)
+    expect(onBoard).toHaveBeenCalledTimes(1)
+    // And the way back to the promise, at the block's left edge.
+    const back = $('[data-action="welcome"]')
+    expect(Math.round(box(back).left)).toBe(Math.round(boardAt.left))
+    await userEvent.click(back)
+    expect(onBack).toHaveBeenCalledTimes(1)
   })
 
-  it('runs the band across the paper, faded at its ends, with no seam at the loop\'s end', async () => {
+  it('opens on Sign up, both sides named, when Board could not issue a pass', async () => {
+    await render(<Door authMode="signup" />)
+    await settle(800)
+    expect([en.signup, fr.signup]).toContain($('h1').textContent)
+    const sides = [...inBlock('.seg').querySelectorAll('.seg__opt')]
+    expect(sides.map(o => o.getAttribute('aria-checked'))).toEqual(['false', 'true'])
+    expect(inBlock('.auth-foot')).not.toBeNull()
+    expect(document.activeElement).toBe(inBlock('input[type="email"]'))
+    // Both sides named, and still one action on the road.
+    expect(document.querySelectorAll('.btn-depart')).toHaveLength(1)
+    const submit = box($('[data-action="auth-submit"]'))
+    expect(Math.abs(centreOf(submit) - (window.innerHeight / 2 + 60))).toBeLessThan(2)
+    expect(box(inBlock('.auth-foot')).top).toBeGreaterThan(submit.bottom)
+  })
+
+  it('draws the crossroads for the paper it has, the lines shorter on a laptop', async () => {
     await render(<Door />)
     await settle(150)
-    const roll = $('.brd-roll')
-    expect(getComputedStyle(roll).maskImage).toMatch(/linear-gradient/)
-    expect(Math.round(box(roll).left)).toBe(360)
-    // The window less html's scrollbar gutter.
-    expect(Math.round(box(roll).right)).toBe(Math.round(bodyW()))
-    for (const lane of document.querySelectorAll('.brd-roll__lane')) {
-      expect(lane.children).toHaveLength(24)
-      // The loop moves a lane by half: that half must still cover the band.
-      expect(lane.scrollWidth / 2).toBeGreaterThan(box(roll).width)
+    const reach = () => {
+      const hub = box($('.desk-front__hub'))
+      const kanji = box($('.desk-front__stn[data-line="kanji"] .desk-front__sign'))
+      return Math.round(mid(kanji) - mid(hub))
     }
+    // 1100 x 800: the lines the paper leaves, past the way in's column
+    // and the names on the left.
+    const laptop = reach()
+    expect(laptop).toBeGreaterThanOrEqual(120)
+    expect(laptop).toBeLessThan(240)
+    // Every name clear of the paper's right edge by its margin.
+    const names = [...document.querySelectorAll('.desk-front__name')].map(n => box(n).right)
+    expect(Math.max(...names)).toBeLessThanOrEqual(bodyW() - 44 + 1)
   })
 
-  it('keeps the Welcome up for a refused Google return, the reason in the column', async () => {
+  it('keeps the Welcome up for a refused Google return, the reason with the sign-in', async () => {
     refusal.current = { error: 'access_denied', code: null, description: 'denied' }
     window.history.replaceState(null, '', '/')
     await render(<App />)
     await settle(300)
     expect($('.brd--welcome')).not.toBeNull()
     expect($('main.auth')).toBeNull()
-    expect(inSide('.auth-message--error')).not.toBeNull()
-    expect(document.activeElement).toBe(inSide('input[type="email"]'))
+    expect(inBlock('.auth-message--error')).not.toBeNull()
+    expect(document.activeElement).toBe(inBlock('input[type="email"]'))
   })
 })
 
@@ -700,14 +1034,14 @@ describe('the digits at first contact (P12)', () => {
   })
 })
 
-// ── P13 — first contact, finished (plan 155) ──
+// ── P13 — first contact, finished (plans 155, 163) ──
 // The owner's ask: keep the drawing and make it smooth. The way on
-// stands in one place on every question; the lit stop is a train that
-// runs down the line; each answer's key turns over to its check in one
-// slot; the Welcome hands its column to the wait and the wait to the
-// boarding with the masthead on one pixel; the plan's arrival boards
-// the paper; and a car is not dropped before the one after it has
-// landed.
+// stands in one place on every question -- since plan 163 the paper's
+// bottom-right corner; the stop being asked is lit on the strip and the
+// light moves with the question; each answer's key turns over to its
+// check in one slot; the Welcome hands its paper to the wait with the
+// dots on one spot; the plan's arrival boards the paper; and a car is
+// not dropped before the one after it has landed.
 const { default: AppLoading } = await import('./screens/AppLoading')
 const landed = () => settle(900)
 const centreY = r => (r.top + r.bottom) / 2
@@ -721,12 +1055,12 @@ describe('first contact, finished (P13, plan 155)', () => {
       await landed()
       const go = box(inCar('[data-action="continue"]'))
       const back = box(inCar('[data-action="back"]'))
-      floors.push({ step: stepOf(), go: [Math.round(go.left), Math.round(go.width)], back: Math.round(back.left) })
+      floors.push({ step: stepOf(), go: [Math.round(go.right), Math.round(go.top)], width: Math.round(go.width), gap: Math.round(go.left - back.right) })
     }
     await read()                          // name
     await pastName()
     await pick('[data-motive="trip"]')
-    await read()                          // why, three columns
+    await read()                          // why, the six roads
     await next()
     await pick('[data-kana="both"]')
     await settle()
@@ -741,54 +1075,41 @@ describe('first contact, finished (P13, plan 155)', () => {
     await next()
     await read()                          // time
     expect(floors.map(f => f.step)).toEqual(['name', 'why', 'level', 'goal', 'lines', 'rhythm', 'time'])
+    // Continue's end and its top in the corner on every question, Back a
+    // rung before it. At 1100 the ticket gives some of its width to the
+    // strip, and a little more once both scripts are read and the level
+    // joins it -- never so much that its label wraps.
     for (const f of floors) {
       expect(f.go, f.step).toEqual(floors[0].go)
-      expect(f.back, f.step).toBe(floors[0].back)
+      expect(f.gap, f.step).toBe(12)
+      expect(f.width, f.step).toBeGreaterThanOrEqual(240)
+      expect(f.width, f.step).toBeLessThanOrEqual(360)
     }
-    // A ticket's width at the card's right end.
-    expect(floors[0].go[1]).toBe(360)
   })
 
-  it('runs the train down the line to the stop being asked, and back up it', async () => {
+  it('lights the stop being asked, and moves the light with the question', async () => {
     await board()
-    const train = () => side().querySelector('.desk-brd__train')
-    const dotOf = key => stop(key).querySelector('.desk-brd__dot')
-    const onDot = key => expect(Math.abs(centreY(box(train())) - centreY(box(dotOf(key)))), key).toBeLessThan(1.5)
+    const lit = () => strip().querySelector('[aria-current="step"]')?.dataset.stop
+    const ring = key => box(stop(key).querySelector('.desk-brd__sp-dot'))
     await landed()
-    onDot('name')
-    const wash = side().querySelector('.desk-brd__here')
-    expect(Math.abs(box(wash).top - box(stop('name')).top)).toBeLessThan(1.5)
+    expect(lit()).toBe('name')
+    // The lit stop's ring is the phone track's "here", larger than a dot.
+    expect(Math.round(ring('name').width)).toBe(16)
+    expect(Math.round(ring('why').width)).toBe(10)
     await pastName()
     await landed()
-    onDot('why')
-    expect(Math.abs(box(wash).top - box(stop('why')).top)).toBeLessThan(1.5)
-    // The ridden stretch ends on the lit stop.
-    const ridden = box(side().querySelector('.desk-brd__ridden'))
-    expect(Math.abs(ridden.bottom - centreY(box(dotOf('why'))))).toBeLessThan(1.5)
+    expect(lit()).toBe('why')
+    expect(Math.round(ring('name').width)).toBe(10)
     await pick('[data-motive="trip"]')
     await next()
     await landed()
-    onDot('kana')
+    expect(lit()).toBe('kana')
     doorOf('name').click()
     await landed()
-    onDot('name')
+    expect(lit()).toBe('name')
     await next()
     await landed()
-    onDot('why')
-  })
-
-  it('lets the train off at the last stop once the plan is built', async () => {
-    await board()
-    await toLevel()
-    await toTime()
-    await next()
-    await arrived()
-    await landed()
-    const route = side().querySelector('.desk-brd__route')
-    expect(route.classList.contains('desk-brd__route--ridden')).toBe(true)
-    expect(opacityOf(side().querySelector('.desk-brd__train'))).toBe(0)
-    const last = stop('time').querySelector('.desk-brd__dot')
-    expect(Math.abs(box(side().querySelector('.desk-brd__ridden')).bottom - centreY(box(last)))).toBeLessThan(1.5)
+    expect(lit()).toBe('why')
   })
 
   it('turns an answer\'s key over to its check, in one slot', async () => {
@@ -798,7 +1119,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     const row = inCar('[data-motive="fun"]')
     const key = () => row.querySelector('.desk-brd__key')
     const tick = () => row.querySelector('.desk-brd__tick')
-    // One slot, trailing the row, where the phone's check stands.
+    // One slot, beside a reason's name (the six roads, plan 163).
     expect(row.querySelectorAll('.desk-kbd')).toHaveLength(1)
     expect(row.querySelector('.brd-opt__check')).toBeNull()
     expect(key().textContent).toBe('2')
@@ -808,7 +1129,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     await settle(300)
     expect(opacityOf(key())).toBe(0)
     expect(opacityOf(tick())).toBe(1)
-    // A tile's in its top right corner: a kana answer's, a station's.
+    // A kana answer's in its tile's top right corner.
     await next()
     await landed()
     // Inside the tile's border, --sp-2 (6px) from its edges.
@@ -818,14 +1139,19 @@ describe('first contact, finished (P13, plan 155)', () => {
       return [Math.round(t.right - el.clientLeft - m.right), Math.round(m.top - t.top - el.clientTop)]
     }
     expect(corner(inCar('[data-kana="hiragana"]'))).toEqual([6, 6])
+    // A station's on its ring's shoulder, clear of its code and the rail
+    // through its middle (the climbing line, plan 163).
     await pick('[data-kana="both"]')
     await landed()
-    const tile = inCar('[data-level="N5"] .desk-brd__tile')
-    expect(corner(tile)).toEqual([6, 6])
+    const ring = box(inCar('[data-level="N5"] .desk-brd__stop-ring'))
+    const mark = box(inCar('[data-level="N5"] .desk-brd__mark'))
+    expect(mid(mark)).toBeGreaterThan(ring.right - ring.width / 4)
+    expect(cy(mark)).toBeLessThan(ring.top + ring.height / 4)
+    expect(kbdOf(inCar('[data-level="N5"]'))).toBe('5')
     expect(inCar('.desk-brd__chk')).toBeNull()
   })
 
-  it('rides the recommended rhythm\'s tag on its edge, every figure on one line', async () => {
+  it('draws the rhythms as four roads from today, the shorter ride the sooner stop', async () => {
     await board()
     await toLevel()
     await pick('[data-level="N3"]')
@@ -834,46 +1160,141 @@ describe('first contact, finished (P13, plan 155)', () => {
     await next()
     expect(stepOf()).toBe('rhythm')
     await landed()
-    const cells = [...inCar('.brd-grid').children]
-    const tops = cells.map(c => Math.round(box(c.querySelector('.brd-cell__n')).top))
-    expect(new Set(tops).size).toBe(1)
-    const tag = inCar('[data-rhythm="10"] .brd-tag')
-    expect(Math.abs(centreY(box(tag)) - box(inCar('[data-rhythm="10"]')).top)).toBeLessThan(1.5)
+    const rides = [...inCar('.desk-brd__rides').querySelectorAll('.desk-brd__ride')]
+    expect(rides.map(r => r.dataset.rhythm)).toEqual(['5', '10', '15', '20'])
+    expect([en.nudgeWhen.today, fr.nudgeWhen.today]).toContain(inCar('.desk-brd__ride-cap--today').textContent)
+    // Each road as long as its ride: the more minutes, the sooner.
+    const ends = rides.map(r => Number(getComputedStyle(r).getPropertyValue('--end')))
+    const days = rides.map(r => Number(r.querySelector('.desk-brd__ride-days').textContent.match(/\d+/)[0]))
+    for (let i = 1; i < 4; i++) {
+      expect(ends[i]).toBeLessThan(ends[i - 1])
+      expect(days[i]).toBeLessThan(days[i - 1])
+    }
+    for (const r of rides) expect(r.querySelector('.desk-brd__ride-when').textContent).toMatch(/20\d\d/)
+    // The recommended rhythm is picked from the start, on the band, its
+    // tag beside its name.
+    const band = () => box(inCar('.desk-brd__ride-band'))
+    expect(inCar('[data-rhythm="10"]').getAttribute('aria-pressed')).toBe('true')
+    expect(Math.abs(band().top - box(rides[1]).top)).toBeLessThan(1.5)
+    expect([en.onbPaceRecommended, fr.onbPaceRecommended]).toContain(inCar('[data-rhythm="10"] .brd-tag').textContent)
+    // Its digit moves the pick, the band with it.
+    await userEvent.keyboard('4')
+    expect(inCar('[data-rhythm="20"]').getAttribute('aria-pressed')).toBe('true')
+    expect(Math.abs(band().top - box(rides[3]).top)).toBeLessThan(1.5)
+    // The rows one under another, each whole on the paper.
+    rides.reduce((a, b) => { expect(box(b).top).toBeGreaterThanOrEqual(box(a).bottom - 0.5); return b })
+    for (const r of rides) {
+      expect(box(r.querySelector('.desk-brd__ride-arr')).right).toBeLessThanOrEqual(bodyW())
+      expect(box(r).bottom).toBeLessThan(box(inCar('.brd__foot')).top)
+    }
   })
 
-  it('hands the Welcome\'s column to the wait, and the wait\'s to the boarding', async () => {
-    const mastAt = () => {
-      const r = box($('.desk-rail__glyph'))
-      return [Math.round(r.left), Math.round(r.top)]
-    }
+  it('draws the hour as the day\'s arc, the train riding it by the half hour', async () => {
+    await board()
+    await toLevel()
+    await toTime()
+    await landed()
+    expect([en.brdTimeHint, fr.brdTimeHint]).toContain(inCar('.brd__hint').textContent)
+    const ring = id => box(inCar(`[data-hour="${id}"] .desk-brd__hour-ring`))
+    // Morning low at the left, noon at the crown, night low at the right.
+    expect(mid(ring('am'))).toBeLessThan(mid(ring('noon')))
+    expect(mid(ring('noon'))).toBeLessThan(mid(ring('pm')))
+    expect(ring('noon').top).toBeLessThan(ring('am').top)
+    expect(ring('noon').top).toBeLessThan(ring('pm').top)
+    // The morning's ride is the day's to begin with: the train stands on
+    // its station, and the station is the train.
+    const train = () => inCar('[role="slider"]')
+    expect(inCar('[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
+    expect(train().getAttribute('aria-valuetext')).toBe('07:30')
+    expect(train().classList.contains('desk-brd__train--docked')).toBe(true)
+    // A half hour on: off the station, on the arc, the stretch behind it
+    // gold to its centre -- and still the morning.
+    train().focus()
+    await userEvent.keyboard('{ArrowRight}')
+    expect(train().getAttribute('aria-valuetext')).toBe('08:00')
+    expect(train().classList.contains('desk-brd__train--docked')).toBe(false)
+    expect(inCar('[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
+    const map = box(inCar('.desk-brd__sky-map'))
+    const [ex, ey] = inCar('.desk-brd__arc--done').getAttribute('d').match(/(-?[\d.]+) (-?[\d.]+)$/).slice(1).map(Number)
+    expect(Math.abs(map.left + ex - mid(box(train())))).toBeLessThan(1)
+    expect(Math.abs(map.top + ey - cy(box(train())))).toBeLessThan(1)
+    // A ride's digit takes the train to its hour; the board says it.
+    await userEvent.keyboard('3')
+    expect(inCar('[data-hour="pm"]').getAttribute('aria-pressed')).toBe('true')
+    expect(train().getAttribute('aria-valuetext')).toBe('21:00')
+    await settle(1400)
+    expect(inCar('.brd-board__flaps').getAttribute('aria-label')).toBe('21:00')
+    // Taken by the arc under the pointer, by the half hour.
+    const at15 = [...inCar('.desk-brd__sky-map').querySelectorAll('.desk-brd__hour')].find(h => h.textContent === '15')
+    const at = box(at15)
+    inCar('.desk-brd__sky').dispatchEvent(new PointerEvent('pointerdown', { clientX: mid(at), clientY: cy(at), pointerId: 7, buttons: 1, bubbles: true }))
+    await settle(40)
+    expect(['14:30', '15:00', '15:30']).toContain(train().getAttribute('aria-valuetext'))
+    // ...and not by the board in the bowl.
+    const was = train().getAttribute('aria-valuetext')
+    const sheet = box(inCar('.desk-brd__sky-board'))
+    inCar('.desk-brd__sky-board').dispatchEvent(new PointerEvent('pointerdown', { clientX: mid(sheet), clientY: cy(sheet), pointerId: 8, buttons: 1, bubbles: true }))
+    await settle(40)
+    expect(train().getAttribute('aria-valuetext')).toBe(was)
+    expect(fits(inCar('.brd__body'))).toBe(true)
+  })
+
+  it('draws the lines as three cards under the kana\'s ticket, each with what it carries', async () => {
+    await board()
+    await toLevel()
+    await pick('[data-level="N3"]')
+    await next()
+    await next()
+    expect(stepOf()).toBe('lines')
+    await landed()
+    expect([en.brdOnEveryTicket, fr.brdOnEveryTicket]).toContain(inCar('.desk-brd__ticket-lock').textContent)
+    const cards = [...inCar('.desk-brd__lines').children]
+    expect(cards.map(c => c.dataset.line)).toEqual(['vocab', 'kanji', 'grammar'])
+    expect(new Set(cards.map(c => Math.round(box(c).top))).size).toBe(1)
+    for (const c of cards) expect(c.querySelector('.desk-brd__line-fig').textContent).toMatch(/^~\d/)
+    // The arrival moves as a line comes off, and goes with the last one.
+    const arrival = () => inCar('.desk-brd__first')?.textContent ?? null
+    const before = arrival()
+    expect(before).toMatch(/N2/)
+    await pick('[data-line="vocab"]')
+    expect(inCar('[data-line="vocab"]').getAttribute('aria-pressed')).toBe('false')
+    expect(arrival()).not.toBe(before)
+    await pick('[data-line="kanji"]')
+    await pick('[data-line="grammar"]')
+    expect(arrival()).toBeNull()
+    expect(inCar('.brd__error')).not.toBeNull()
+    expect(inCar('[data-action="continue"]').disabled).toBe(true)
+  })
+
+  it('hands the Welcome\'s paper to the wait', async () => {
     const dotsAt = () => {
       const r = box($('.desk-wait .loading'))
       return [Math.round(mid(r)), Math.round(centreY(r))]
     }
     const screen = await render(<Door />)
     await landed()
-    const at = mastAt()
     expect($('.desk-wait')).toBeNull()
     await screen.rerender(<Door boarding />)
     await settle(300)
-    expect($('.desk-door').classList.contains('desk-door--leaving')).toBe(true)
-    expect(opacityOf($('.desk-door__auth'))).toBe(0)
-    expect(opacityOf($('.brd-hero'))).toBe(0)
-    expect(opacityOf($('.brd-roll'))).toBe(0)
+    // The way in and the corner pull away, the map a beat after them.
+    expect($('.desk-front').classList.contains('desk-front--leaving')).toBe(true)
+    expect(opacityOf($('.desk-front__block'))).toBe(0)
+    expect(opacityOf($('.desk-front__door'))).toBe(0)
     // The pass being issued: its dots a beat after the press, on the
     // paper's middle.
     expect(opacityOf($('.desk-wait'))).toBe(0)
     await landed()
+    expect(opacityOf($('.desk-front__map'))).toBe(0)
+    expect(opacityOf($('.desk-front__hub'))).toBe(0)
     expect(opacityOf($('.desk-wait'))).toBe(1)
     const dots = dotsAt()
-    expect(Math.abs(dots[0] - (360 + (bodyW() - 360) / 2))).toBeLessThan(2)
+    expect(Math.abs(dots[0] - bodyW() / 2)).toBeLessThan(2)
     await screen.unmount()
-    // The wait after it, handed the press a second ago: the same column,
-    // the same dots on the same spot, already drawn.
+    // The wait after it, handed the press a second ago: the same paper,
+    // no column, the same dots on the same spot, already drawn.
     const wait = await render(<LangProvider><AppLoading wakesServer frame since={performance.now() - 1000} /></LangProvider>)
     await settle(60)
-    expect(Math.round(box(side()).width)).toBe(360)
-    expect(mastAt()).toEqual(at)
+    expect($('.desk-rail__mast')).toBeNull()
     expect(opacityOf($('.desk-brd--wait .desk-wait'))).toBe(1)
     expect(dotsAt()).toEqual(dots)
     await wait.unmount()
@@ -884,8 +1305,6 @@ describe('first contact, finished (P13, plan 155)', () => {
     await landed()
     expect(opacityOf($('.desk-wait'))).toBe(1)
     await cold.unmount()
-    await board()
-    expect(mastAt()).toEqual(at)
   })
 
   it('brings the Welcome back when no pass could be issued', async () => {
@@ -893,12 +1312,14 @@ describe('first contact, finished (P13, plan 155)', () => {
     await landed()
     await screen.rerender(<Door authMode="signup" />)
     await landed()
-    expect($('.desk-door').classList.contains('desk-door--leaving')).toBe(false)
-    expect(opacityOf($('.brd-hero'))).toBe(1)
-    expect(opacityOf($('.desk-door__auth'))).toBe(1)
+    expect($('.desk-front').classList.contains('desk-front--leaving')).toBe(false)
+    expect(opacityOf($('.desk-front__block'))).toBe(1)
+    expect(opacityOf($('.desk-front__map'))).toBe(1)
+    expect(opacityOf($('.desk-front__hub'))).toBe(1)
+    expect([en.signup, fr.signup]).toContain($('h1').textContent)
   })
 
-  it('boards the plan\'s arrival on the paper, the line left in view', async () => {
+  it('boards the plan\'s arrival on the whole paper, no column beside it', async () => {
     await board()
     await toLevel()
     await toTime()
@@ -906,8 +1327,8 @@ describe('first contact, finished (P13, plan 155)', () => {
     await settle(200)
     const sign = $('.onb-arrival__board')
     expect(sign).not.toBeNull()
-    expect(Math.abs(mid(box(sign)) - (360 + (bodyW() - 360) / 2))).toBeLessThan(2)
-    expect(Math.round(box($('.onb-arrival__scrim')).left)).toBe(360)
+    expect(Math.abs(mid(box(sign)) - bodyW() / 2)).toBeLessThan(2)
+    expect(Math.round(box($('.onb-arrival__scrim')).left)).toBe(0)
   })
 
   it('keeps the leaving car until the arriving one has landed, and runs Back the other way', async () => {
@@ -938,14 +1359,16 @@ describe('the hover, simpler (P14, plan 155)', () => {
     const gold = getComputedStyle(inCar('.brd-field')).borderTopColor
     await pastName()
     await landed()
-    const row = inCar('[data-motive="fun"]')
-    const ground = getComputedStyle(row).backgroundColor
-    await userEvent.hover(row)
+    // A reason: its ring takes the edge (the six roads, plan 163).
+    const way = inCar('[data-motive="fun"]')
+    const ring = way.querySelector('.desk-brd__ring')
+    const ground = getComputedStyle(ring).backgroundColor
+    await userEvent.hover(way)
     await settle(250)
-    expect(getComputedStyle(row).filter).toBe('none')
-    expect(getComputedStyle(row).borderTopColor).toBe(gold)
+    expect(getComputedStyle(way).filter).toBe('none')
+    expect(getComputedStyle(ring).borderTopColor).toBe(gold)
     // No wash: the ground it had at rest.
-    expect(getComputedStyle(row).backgroundColor).toBe(ground)
+    expect(getComputedStyle(ring).backgroundColor).toBe(ground)
     await userEvent.hover(inCar('[data-action="back"]'))
     await settle(250)
     expect(getComputedStyle(inCar('[data-action="back"]')).filter).toBe('none')

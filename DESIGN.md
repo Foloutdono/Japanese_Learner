@@ -1045,8 +1045,8 @@ a learner who has just rated one card is already looking for the next.
 - **Between boarding screens the train pulls**: the leaving screen slides
   left as the next arrives from the right, 260ms ease-out; never a
   cross-fade. Under reduced motion only the rest state is drawn. (The
-  desk pulls a shorter way; see *The desk*, "First contact lays the
-  rail".)
+  desk pulls a shorter way; see *The desk*, "First contact is the
+  crossroads".)
 - The chrome's tokens: `--hud-h` (48px), `--tabbar-h` (50px),
   `--dock-bottom`, and the desk's `--desk-rail-w` (256px). The class map
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
@@ -1063,7 +1063,10 @@ dialog left and moved the ones that do not interrupt into their columns;
 plan 122 drew first contact for a desk, and plan 123 made the workspace
 answer a keyboard and a pointer one way everywhere. Plan 130 had the two
 plated gates take the window; plan 140 laid first contact down the left
-as the rail it arrives at.
+as the rail it arrives at, and plan 163 drew it again as the crossroads:
+the question at the paper's top-left corner, the journey a strip of named
+stops at the floor's left end, the floor in the bottom-right corner, and
+each question drawing its answers between them.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
@@ -1605,93 +1608,89 @@ as the rail it arrives at.
   notes that teach a key or point at something say so on the desk (the
   `…Desk` copy — no "tap" is printed there). → and Enter go on; Today's
   stops walk down the rail first (plan 123).
-- **First contact lays the rail** (plans 122, 140; the owner's pick A of
-  three directions drawn on the canvas "Desktop onboarding — options").
-  The desk's chrome is the rail, so from the Welcome to the plan a sumi
-  column at `--desk-side-w` stands on the LEFT edge in the rail's own
-  material, the rail's masthead at its head (辻 over TSUJI — the paper
-  keeps no second mark) — the rail before it has any gates. Its job
-  changes: on the Welcome the sign-in (the paper card, standing in the
-  sumi; no second screen), with the heading, the tagline and Board as
-  one block on the paper over the rolling stock; during the boarding the
-  line itself, a stop per question (the kana's reveal is the kana's own
-  stop), each named and printing its answer once given, the one being
-  asked lit with the pick as it stands, and a stop behind a door back to
-  its question until the plan is built; at its foot the projection,
-  priced on every answer, then the learner's pass. The head's track and
-  the right-hand journey were that line drawn twice, so neither is drawn.
-  The answers are laid for the width: the name, the kana and the rhythm
-  at the card's width (four tiles to a row), the six reasons three to a
-  row where three run columns fit, the level and the goal as a line of
-  stations — the ride lit in gold up to the pick, one row where each
-  holds half a run's column and two rows under that, a row's ends drawing
-  no rail past them. Back stands on the floor beside Continue (the kana,
-  with no Continue, has a floor of Back alone). Building is skipped, and
-  the pass's own screen folds away: the plan is the last screen and
-  enters the station, unless a guest is offered the account first, which
-  then enters. The plan's chart is drawn 1:1. Every answer has a key:
-  Enter goes on from any step, the digits pick (a level answers to its
-  own number, N5 to 5 and the kana stop to 0), and Esc does nothing — the
-  way out of the boarding signs the guest out. On the first ride the
-  column is the card's entry, docked by the flip (plan 122).
-- **First contact is finished, not redrawn** (plan 155, owner-directed:
-  "keep this idea, improve it the most you can, and don't forget the
-  transitions"). The drawing above stands; what changed is that it holds
-  still where it should and moves where it should:
-  - *The way on stands in one place.* The floor is the card's width on
-    every question, Back at its left end and Continue — a ticket wide —
-    at its right, whatever the answers' width; it followed the step and
-    put Continue somewhere new on each (360, 640, 1174px). The lines and
-    the hour went up to the card's width with it; the plan's and the
-    account's lone action keep a ticket's width.
-  - *The lit stop is a train.* The line is one rail with the ridden
-    stretch over it, and the lit stop's wash and gold ring are one
-    object that runs down the rail to the stop being asked — and back up
-    it for a door or Back — on the pull's own time; the plan built, it
-    runs to the last stop and steps off. A stop being asked is an open
-    ring under the train, a stop ridden a filled dot. The line is laid on
-    its first frame (the rail drawn down, the stops in order), an answer
-    arrives on its stop, a new projection date drops in as a board's
-    figure turns, and a stop behind shows its ‹ to a pointer only.
-  - *One slot for the key and the pick.* Each answer's digit stands where
-    its check is read — a row's trailing slot, a tile's or a station's
-    top right corner — and turns over to the gold check once picked; the
-    recommended rhythm's tag rides its tile's edge and the next stop's
-    sits at its tile's foot, so every figure and name starts on one line.
-  - *The desk's pull is a short one*: the leaving car a rung (`--sp-9`)
-    the way it goes, fading, in 180ms; the arriving car the same rung
-    from the other side once it has all but gone — never two questions
-    read over each other — settling in 520ms, its answers a beat apart
-    behind it; Back runs both the other way. A full-width pull across
-    1,200px of paper was a smear, not a train. The leaving car is kept
-    until the arriving one's answers have landed.
-  - *The column is handed on.* Board pulls the Welcome's paper away and
-    steps the sign-in out of the column, which stays: the wait for the
-    boarding — the boot screen's dots alone, on the paper's middle, a
-    beat after the press, first on the Welcome while the pass is issued
-    and then carried on by the wait after it — is drawn in the same
-    column, the masthead on the same pixel, and the boarding lays its
-    line there. A pass that could not be issued brings the Welcome back.
+- **First contact is the crossroads** (plan 163; the owner's pick D of
+  the canvas "Tsuji — onboarding, new directions", with option 3, 空の弧,
+  for the hour; plans 122, 140 and 155 before it). 辻 is a crossroads, so
+  first contact is drawn as one, on the paper whole: plan 140's sumi
+  column down the left edge, and the rail's masthead at its head, are
+  gone.
+  - *The Welcome is the crossroads itself.* 辻 in its hub right of the
+    paper's middle — the app's name — and out of it the app's seven
+    lines, each in its pigment to its sign and its name (the kana, the
+    words, the kanji, the grammar, reading, translation, dictation), and
+    the eighth road, gold, running left to the way in at the paper's
+    margin: the promise over Board, Board a rung under the paper's middle.
+    The corner holds the other way in, a plain button: Log in stands the
+    sign-in in the promise's place — Google, the two fields in the page's
+    wells, its own action where Board stood, ‹ back to the promise under
+    it — and the corner then offers Board. A pass that could not be issued
+    opens it on Sign up, both sides named. The drawing is the paper's own:
+    the lines as long as the paper leaves them. The rolling stock is the
+    phone's.
+  - *Three places never move.* The question at the paper's top-left
+    corner at the display rung; the journey a strip of named stops at the
+    floor's left end, on the line Back and Continue stand on (the ones
+    ridden filled, the one asked lit with the phone track's gold ring, a
+    stop behind a door back to its question while there is a way back,
+    the answer given said in its name rather than printed); the floor in
+    the bottom-right corner, Back beside Continue — a ticket wide, giving
+    way before it meets the strip. The strip stands outside the cars, so
+    it holds still while a question pulls.
+  - *Each question draws its answers as the thing they are*, out of a
+    hub that prints its place on the strip. The name is the first
+    station: its plate, a pole down to the hub, the line leaving it for
+    the next stop. The six reasons are six roads out of the hub to their
+    pictograms in rings, the pick's road in gold. The kana are the two
+    words, large, over a tree to the four answers, each drawn as what it
+    reads (a word read a solid chip, one not yet a dashed one); the
+    reveal reads each word sign by sign and names the first stop and its
+    day. The level and the goal are one line climbing a step a level from
+    the hub — the novice's stop, then N5 up to N1 — the pick called out
+    ("You are here", or the arrival's month). The lines are three cards
+    in their pigments, each with what it carries on this ride, under the
+    kana's ticket (on every ticket, so no answer), the arrival's month
+    under them. The rhythms are four roads out of today on one calendar,
+    each as long as its ride. The hour is the day's arc — sunrise at the
+    left, noon at the top, night at the right, 朝 昼 夜 on it as stations
+    — the train riding it a half hour at a time, dragged or by its keys,
+    over the departure board in the bowl. The plan is the ride to scale,
+    today to the terminus, every stop where its day falls, and under a
+    rule what the terminus holds beside what the ride is for. A guest's
+    account is its form beside the ticket it keeps, the route printed on
+    it and the welcome's credits on its stub; riding on without one is
+    offered under the ticket. Every drawing is measured off its own box,
+    so it fits a laptop's 1100x800 and a wide window alike.
+  - *Every answer keeps its key.* Its digit in the slot its check is read
+    from, turned over to the gold check once picked; Enter goes on from
+    any step; the digits pick (a level its own number, N5 on 5, the
+    novice's stop on 0); Esc does nothing — the way out of the boarding
+    signs the guest out. Building is skipped and the pass's own screen
+    folds away: the plan is the last screen and enters the station,
+    unless a guest is offered the account first, which then enters. The
+    first ride after it stands on the runs' three panels (plan 133).
+  - *The desk's pull is a short one* (plan 155): the leaving car a rung
+    (`--sp-9`) the way it goes, fading, in 180ms; the arriving car the
+    same rung from the other side once it has all but gone — never two
+    questions read over each other — settling in 520ms, its answers a
+    beat apart behind it; Back runs both the other way. A full-width pull
+    across 1,200px of paper was a smear, not a train. The leaving car is
+    kept until the arriving one's answers have landed.
+  - *The wait is drawn on the paper.* Board pulls the way in, the hub and
+    the map a rung to the left, fading, and the boot screen's dots are
+    drawn alone on the paper's middle a beat after the press — first on
+    the Welcome while the pass is issued, then carried on by the wait
+    after it. A pass that could not be issued brings the Welcome back.
     The plan's arrival signboard stands on the paper's middle with its
-    scrim over the paper alone, the line left in view.
-  - *The account is a form*, at a column's width with the sign-in's field
-    size, not two answers at the name's display size.
-  - *The Welcome is simpler* (the owner's second round): the sign-in is
-    drawn in the column's own material — sumi fields, the panel's
-    hairlines, no pale card set in the sumi — under a plain "Log in",
-    on the column's middle where it always stood (the owner's call); one
-    lane of cards (both lanes' cards in turn) passes under the promise,
-    and the tagline is its quiet second line.
+    scrim over the paper.
   - *A field's focus is one edge*: the name (and the account's two
     fields) take 1.5px of the pass's gold when typed in, with no second
     ring outside it, and rest on the answers' hairline, filled or not.
   - *A hover is the name field's edge and nothing else*: an answer
     under the pointer takes the name field's 1.5px of gold on its own
     ground — no wash, no lift — while a pick keeps its wash and its
-    check, so the two never read alike; the sheet's
-    bare `button:hover` brightness, which lit a paper tile cream and a
-    picked one yellow, is cancelled on the boarding and the Welcome's
-    sign-in.
+    check, so the two never read alike; the sheet's bare `button:hover`
+    brightness, which lit a paper tile cream and a picked one yellow, is
+    cancelled on the boarding and on the Welcome's plain buttons.
 - **Every desk rule is in one place.** The last section of `index.css`,
   one media block, names written nowhere else; `src/desk.css.test.js`
   holds it. Never write a desk rule anywhere else, and never let a phone

@@ -118,6 +118,7 @@ describe('the boarding frame on a phone (P9)', () => {
     await board()
     expect($('main.brd').className).toBe('brd')
     expect($('.desk-brd__side')).toBeNull()
+    expect($('.desk-brd__strip')).toBeNull()
     await pastName()
     const next = async () => { inCar('[data-action="continue"]').click(); await settle() }
     inCar('[data-motive="trip"]').click()
@@ -140,12 +141,12 @@ describe('the boarding frame on a phone (P9)', () => {
 
 // ── P10: the front door stays the phone's ──
 describe('the front door on a phone (P10)', () => {
-  it('keeps the link to the sign-in, no side, and two runs a lane', async () => {
+  it('keeps the link to the sign-in, no crossroads, and two runs a lane', async () => {
     await render(<LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} authMode="signup" /></LangProvider>)
     await settle(100)
     expect($('main').className).toBe('brd brd--welcome')
     expect($('[data-action="sign-in"]')).not.toBeNull()
-    expect($('.desk-door__side')).toBeNull()
+    expect($('.desk-front__map')).toBeNull()
     expect($('.auth-card')).toBeNull()
     for (const lane of document.querySelectorAll('.brd-roll__lane')) expect(lane.children).toHaveLength(12)
   })

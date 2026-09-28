@@ -33,7 +33,3 @@ export const BACK_LANE = [
   { line: 'kaiseki', tag: 'analyzer', kind: 'sentence', jp: ['明日は', '雨が降ると', '思う。'], meaning: 'breakItDown', foot: 'sentenceGrammar' },
   { line: 'exam', tag: 'exam', kind: 'paper', jp: '毎朝、駅まで＿＿歩きます。', cap: 'Part 3 · Q7', meaning: 'timer', foot: 'timedPaper' },
 ]
-
-// 机 (plan 155): the desk's one lane, the two lanes' cards taken in
-// turn, so a single band still shows every line the app rides.
-export const DESK_LANE = FRONT_LANE.flatMap((card, i) => [card, BACK_LANE[i]])

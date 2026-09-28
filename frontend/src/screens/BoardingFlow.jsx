@@ -10,12 +10,13 @@ import { USERNAME_RE } from '../components/profile/EditableUsername'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEPART_TIMES } from '../components/onboarding/departures'
 import {
-  LINES, RECOMMENDED_RHYTHM, boardingDraft, bucketFor, goalStops, itemsForRhythm,
+  LINES, RECOMMENDED_RHYTHM, RHYTHMS, boardingDraft, bucketFor, goalStops, itemsForRhythm, kanaFigures,
   levelAnswers, levelForKana, minutesToTime, planFigures, stopsAhead, timeToMinutes,
 } from '../domain/boarding'
 import { BoardHead } from '../components/boarding/BoardFrame'
 import { useBoardKeys } from '../hooks/useBoardKeys'
 import { useDesk } from '../hooks/useDesk'
+import { useBoxWidth } from '../hooks/useBoxWidth'
 import NameStep from '../components/boarding/NameStep'
 import WhyStep from '../components/boarding/WhyStep'
 import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
@@ -25,7 +26,7 @@ import RhythmStep from '../components/boarding/RhythmStep'
 import TimeStep from '../components/boarding/TimeStep'
 import NudgeStep from '../components/boarding/NudgeStep'
 import Building from '../components/boarding/Building'
-import { DeskLine } from '../components/boarding/DeskLine'
+import { DeskStrip } from '../components/boarding/DeskStrip'
 import { BoardBack } from '../components/boarding/boardBack'
 import PlanStep from '../components/boarding/PlanStep'
 import PassStep from '../components/boarding/PassStep'
@@ -192,6 +193,9 @@ export default function BoardingFlow({
   const [arrival, setArrival] = useState(false)
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
+  // 辻 (plan 163): the strip at the floor's left end, measured so the
+  // floor gives way before it (--desk-strip-w).
+  const [stripRef, stripW] = useBoxWidth(desk)
   const arrivalPlayed = useRef(REDUCED)
   // Two stopwatches counting only time the tab was actually looked at
   // (lib/dwell.js): one lapped at every question, one for the whole
@@ -282,9 +286,10 @@ export default function BoardingFlow({
     setStep(prev)
   }
 
-  // 机 (plan 140): a stop already passed on the column's line is a door
-  // straight back to its question -- Back pressed as many times as it
-  // takes, in one pull. Every answer is kept, as Back keeps them.
+  // 机 (plan 140): a stop already passed on the line is a door straight
+  // back to its question -- Back pressed as many times as it takes, in
+  // one pull. Every answer is kept, as Back keeps them. Since plan 163
+  // the line is the strip at the floor's left end.
   function jumpTo(target) {
     const at = history.lastIndexOf(target)
     if (at < 0) return
@@ -403,10 +408,10 @@ export default function BoardingFlow({
   }
 
   // 机 (plan 122, owner's call): no Building on the desk. Its one job --
-  // gathering the answers into the journey -- was done beside every
-  // question, on the column's line (below); the plan arrives straight
-  // after the hour, under the same signboard. The funnel reads time →
-  // plan there.
+  // gathering the answers into the journey -- is done by every question
+  // as it is answered, and the strip (below) holds them; the plan arrives
+  // straight after the hour, under the same signboard. The funnel reads
+  // time → plan there.
   function toBuilding() {
     if (!desk) { go('building'); return }
     mark(step, 'plan', 'fwd')
@@ -429,6 +434,30 @@ export default function BoardingFlow({
   const perDay = itemsForRhythm(answers.rhythm)
   const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, answers.lines)
   const time = minutesToTime(answers.minute)
+  // 辻 (plan 163): the month the goal picked is reached in, hung over it
+  // on the desk's line -- once the volumes that price it have answered.
+  const arrivalMonth = desk && volumes
+    ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(figures.date)
+    : null
+  // What each line carries on the ride to the goal, taken or not, for
+  // the lines' cards.
+  const everyLine = desk && volumes
+    ? planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, LINES)
+    : null
+  const lineCarries = everyLine && { vocab: everyLine.words, kanji: everyLine.kanji, grammar: everyLine.grammar }
+  // What each rhythm's ride comes to, for the four roads.
+  const rhythmRides = desk && volumes
+    ? RHYTHMS.map(min => planFigures(volumes, jlpt, answers.goal, itemsForRhythm(min), answers.kana, now, answers.lines))
+    : null
+  // And the reveal's first stop -- the kana still unread, at the ride's
+  // pace (the recommended one, until it is asked).
+  const kanaStop = desk && volumes
+    ? {
+        date: new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
+          .format(kanaFigures(volumes, answers.kana, perDay, now).date),
+        min: answers.rhythm,
+      }
+    : null
   // The lines as the building screen prints them: the kana first --
   // every ticket rides them -- then the ones chosen.
   const linesLine = [t.kanaTitle, ...answers.lines.map(line => t.brdLine[line])].join(' · ')
@@ -506,6 +535,10 @@ export default function BoardingFlow({
   const index = stops.indexOf(step) + 1
   const total = stops.length
   const displayName = answers.name.trim() || savedName || profile.username || ''
+  // The strip's stops (the reveal is the kana's own, not a stop), and
+  // the number a question's hub prints on the desk: its place on them.
+  const lineStops = stops.filter(key => key !== 'reveal')
+  const hubNo = key => String(lineStops.indexOf(key) + 1).padStart(2, '0')
 
   function renderStep(key) {
     switch (key) {
@@ -521,24 +554,55 @@ export default function BoardingFlow({
             email={session?.user?.email ?? null}
             error={nameError}
             busy={busy}
+            no={hubNo('name')}
+            next={t.brdStop[lineStops[1]]}
           />
         )
       case 'why':
-        return <WhyStep name={displayName} value={answers.motive} onChange={v => set({ motive: v })} onContinue={() => go('kana')} />
+        return <WhyStep name={displayName} value={answers.motive} onChange={v => set({ motive: v })} onContinue={() => go('kana')} no={hubNo('why')} />
       case 'kana':
         return <KanaStep value={answers.kana} onAnswer={answerKana} />
       case 'reveal':
-        return <KanaReveal onContinue={continueReveal} />
+        return <KanaReveal onContinue={continueReveal} first={kanaStop} />
       case 'level':
-        return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => set({ levelChoice: v })} onContinue={continueLevel} />
+        return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => set({ levelChoice: v })} onContinue={continueLevel} no={hubNo('level')} />
       case 'goal':
-        return <GoalStep volumes={volumes} level={answers.levelChoice ?? jlpt} kana={answers.kana} value={answers.goal} onChange={v => set({ goal: v })} onContinue={() => go('lines')} />
+        return (
+          <GoalStep
+            volumes={volumes}
+            level={answers.levelChoice ?? jlpt}
+            kana={answers.kana}
+            value={answers.goal}
+            onChange={v => set({ goal: v })}
+            onContinue={() => go('lines')}
+            arrival={arrivalMonth}
+            no={hubNo('goal')}
+          />
+        )
       case 'lines':
-        return <LinesStep value={answers.lines} onChange={v => set({ lines: v })} onContinue={() => go('rhythm')} />
+        return (
+          <LinesStep
+            value={answers.lines}
+            onChange={v => set({ lines: v })}
+            onContinue={() => go('rhythm')}
+            carries={lineCarries}
+            stop={answers.goal ?? jlpt}
+            arrival={arrivalMonth}
+          />
+        )
       case 'rhythm':
-        return <RhythmStep value={answers.rhythm} onChange={v => set({ rhythm: v })} onContinue={() => go('time')} />
+        return (
+          <RhythmStep
+            value={answers.rhythm}
+            onChange={v => set({ rhythm: v })}
+            onContinue={() => go('time')}
+            rides={rhythmRides}
+            stop={answers.goal ?? jlpt}
+            now={now}
+          />
+        )
       case 'time':
-        return <TimeStep minute={answers.minute} onChange={v => set({ minute: v })} onContinue={continueTime} />
+        return <TimeStep minute={answers.minute} onChange={v => set({ minute: v })} onContinue={continueTime} now={now} />
       case 'nudge':
         return (
           <NudgeStep
@@ -569,11 +633,11 @@ export default function BoardingFlow({
           />
         )
       case 'plan':
-        // 机 (plan 140): on the desk the pass is issued at the column's
-        // foot while the plan is read, so the plan is the last screen
-        // and enters the station -- unless there is an account to offer
-        // first. The funnel reads plan → boarding_done there. The car
-        // names its step (`data-car`) for the width it stands at.
+        // 机 (plan 140): on the desk the pass's own screen folds away, so
+        // the plan is the last screen and enters the station -- unless
+        // there is an account to offer first. The funnel reads plan →
+        // boarding_done there. The car names its step (`data-car`) for
+        // the width it stands at.
         return (
           <PlanStep
             name={displayName}
@@ -583,6 +647,8 @@ export default function BoardingFlow({
             lines={answers.lines}
             figures={figures}
             now={now}
+            time={time}
+            hour={bucketFor(answers.minute)}
             onContinue={desk && !guest ? complete : () => go(guest ? 'account' : 'pass')}
             last={desk && !guest}
             busy={busy}
@@ -599,6 +665,10 @@ export default function BoardingFlow({
             onSignIn={onSignIn}
             onLeaveForAuth={() => stash({ answers, step, savedName })}
             error={desk ? saveError : null}
+            ticket={desk ? {
+              name: displayName, now, figures, goal: answers.goal ?? jlpt,
+              rhythm: answers.rhythm, time, hour: bucketFor(answers.minute),
+            } : null}
           />
         )
       case 'pass':
@@ -608,21 +678,18 @@ export default function BoardingFlow({
     }
   }
 
-  // ── 机 — the line down the column (plans 122, 140) ────────────
-  // On the desk the questions stand beside the line they lay: a stop per
-  // question (the reveal is the kana's own, not a stop), each named and
-  // printing its answer once given, the one being asked lit and printing
-  // the pick as it stands -- a level picked but not yet continued is
-  // already a goal, priced the way Continue will commit it
-  // (boardingDraft). A stop behind is a door back to its question while
-  // there is a way back (the history). The foot is the projection,
-  // priced on every answer, until the plan is built; then it is the pass.
+  // ── 辻 — the strip at the floor's left end (plans 140, 163) ──────
+  // A stop per question (the reveal is the kana's own, not a stop), each
+  // named, the ones ridden filled and the one being asked lit. The
+  // answer given is said on its stop -- a level picked but not yet
+  // continued is already a goal, priced the way Continue will commit it
+  // (boardingDraft) -- and a stop behind is a door back to its question
+  // while there is a way back (the history).
   const draft = boardingDraft(answers, step)
   const draftLevel = draft.levelChoice === 'novice' ? t.brdNovice : draft.jlpt
   const draftGoal = draft.levelChoice == null ? null
     : draft.goal === 'novice' ? t.brdNovice
       : draft.goal ? `${draftLevel} → ${draft.goal}` : draftLevel
-  const draftFigures = planFigures(volumes, draft.jlpt ?? 'N5', draft.goal, perDay, draft.kana, now, draft.lines)
   const stopValue = {
     name: displayName,
     why: answers.motive ? t.brdMotive[answers.motive] : null,
@@ -634,7 +701,6 @@ export default function BoardingFlow({
     time,
     nudge: answers.notifications ? time : t.brdNotNow,
   }
-  const lineStops = stops.filter(key => key !== 'reveal')
   const atStop = lineStops.indexOf(step === 'reveal' ? 'kana' : step)
   const deskStops = lineStops.map((key, i) => {
     const state = atStop < 0 || i < atStop ? 'done' : i === atStop ? 'now' : 'next'
@@ -646,19 +712,21 @@ export default function BoardingFlow({
       onOpen: state === 'done' && history.includes(key) ? () => jumpTo(key) : undefined,
     }
   })
-  const projection = {
-    label: t.brdBuildProjection,
-    value: volumes && draft.levelChoice != null
-      ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(draftFigures.date)
-      : null,
-  }
   // The way back the floor draws beside Continue (BoardBack): the
   // question before, or out of the flow from the first -- the head's ‹,
   // which the desk no longer draws.
   const floorBack = desk && onTrack ? (history.length > 0 ? back : onExit) : null
 
   return (
-    <main className={desk ? 'brd desk-brd' : 'brd'} id="main-content" data-step={step} ref={frameRef}>
+    <main
+      className={desk ? 'brd desk-brd' : 'brd'}
+      id="main-content"
+      data-step={step}
+      ref={frameRef}
+      // A plain number, read as pixels by the sheet: a measured length,
+      // not one chosen from the scale.
+      style={desk && stripW ? { '--desk-strip-w': stripW } : undefined}
+    >
       {onTrack && !desk && <BoardHead index={index} total={total} onBack={history.length > 0 ? back : onExit} />}
       <BoardBack.Provider value={floorBack}>
         <div className="brd__cars">
@@ -672,13 +740,7 @@ export default function BoardingFlow({
           </div>
         </div>
       </BoardBack.Provider>
-      {desk && (
-        <DeskLine
-          stops={deskStops}
-          projection={onTrack ? projection : null}
-          pass={onTrack ? null : { name: displayName, profile }}
-        />
-      )}
+      {desk && <DeskStrip stops={deskStops} stripRef={stripRef} />}
       {/* 到着: the plan arrives under the signboard, once; skippable,
           absent under reduced motion (TrainArrival's own rules). */}
       {arrival && <TrainArrival jp="案内" title={t.brdArrivalTitle} onDone={() => setArrival(false)} />}
