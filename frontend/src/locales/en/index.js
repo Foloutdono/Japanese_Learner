@@ -2113,30 +2113,11 @@ const ride = {
   // Plan 133. On a phone: the known card is not graded until its entry
   // has been opened from the 🔍 and closed again.
   rideKnownDict: 'Every card opens its dictionary entry. Tap 🔍 to read this one, then close it.',
-  // On the desk: the walk round a run's three panels, stop by stop
-  // (screens/RideRun.jsx's TOUR_FRONT and TOUR_BACK), read by the guide
-  // as guide<Key>.
-  guideRideRecords: 'This run in figures: the cards you have graded, the share you knew, the XP they earned, what is left. Your level bar is under them.',
-  guideRideState: 'Where the card on the stage stands: new, learning or learned.',
-  guideRideVerdicts: 'Every grade you can give, and when it would bring the card back. The number in the corner is its key.',
-  guideRideKeys: 'The keys: Space turns the card, Esc leaves the run.',
-  guideRideRhythm: 'Your pace: minutes on this run, cards a minute, and about how long the rest will take.',
-  guideRideCard: 'The card, in the middle. The word is on its front.',
-  guideRideRate: 'The grades, under the card. They light once the card is turned.',
-  guideRideSealed: 'The card’s details. Sealed until you turn it: here, they would give the answer away.',
-  guideRideEntry: 'Turned: the details open. The word, your record on it, and its dictionary entry. A word or a kanji in it opens here too.',
-  guideRideForecast: 'Now the grades say when each brings this card back. Wrong is the soonest.',
-  // The reading ride's walk (screens/RideReading.jsx's TOUR_READ and
-  // TOUR_GRADED): the same three panels on a practice run.
-  guideRideReadRecords: 'This run in figures: the sentences you have graded, the share right, the XP they earned.',
-  guideRideReadLines: 'Every sentence of the run, the one on the stage last. Each keeps its grade as a dot, and a click opens its breakdown again.',
-  guideRideReadKeys: 'The keys: Enter checks your answer and takes the next sentence, the numbers grade, Esc leaves.',
-  guideRideReadRhythm: 'Your pace: minutes on this run, and sentences a minute.',
-  guideRideReadSentence: 'The sentence shows here with its clock, and hides when the clock runs out. It starts when you close this.',
-  guideRideReadAnswer: 'Write what you read here, in romaji or kana, and press Enter.',
-  guideRideReadSealed: 'The sentence’s breakdown. Sealed until you grade it: word by word, it is the answer key.',
-  guideRideReadBreakdown: 'Graded: the breakdown opens. Every word and the grammar that holds them. Click a row to open its entry here.',
-  guideRideReadLine: 'The sentence is a line of the run now, with its grade. In a real run, any line opens its breakdown again.',
+  // On the desk: the guide's one stop a ride (components/guide/
+  // rideTours), at the entry once the known card is turned and at the
+  // breakdown once the sentence is graded, read as guide<Key>.
+  guideRideEntry: 'Turned: the card’s dictionary entry opens beside it. Click a word or a kanji in it to open that one here.',
+  guideRideReadBreakdown: 'Graded: the sentence’s breakdown opens, word by word, with its grammar. Click a row to open its entry.',
   ridePlateCap: 'The pass',
   ridePlateBody: 'These platforms ride on the pass.',
   ridePlateOpen: 'They are open to everyone for now.',
@@ -2150,10 +2131,6 @@ const guide = {
   guideNext: 'Next',
   guideDone: 'Done',
   guideSkip: 'Skip',
-  guideHudLevel: 'Your level. Every card you rate pays into it.',
-  guideHudStatus: 'On time or behind your own plan. Tap it for the ghost train.',
-  guideHudPass: 'Your balance. Reviews cost one each; it refills through the day, one every 48 minutes.',
-  guideTodayStrip: 'The week, the streak, and today\'s new items against your pace.',
   guideTodayGate: 'What is due today, line by line. Switch a line off to leave it for later, then depart.',
   guideTabBar: 'The five gates: Learn, Practice, Today, Dictionary, your pass.',
   guideLearnPlate: 'A line. Tap the plate to open it; the chip is what it owes you today.',
@@ -2172,10 +2149,6 @@ const guide = {
   guideProfileRecords: 'Your figures: every review, what you keep, your best run.',
   guideProfileLedger: 'Each line, and how far along it you are.',
   guideProfileSettings: 'Settings: the level, the pace, the bar you rate with, and this guide again.',
-  guideTodayTake: 'How much to ride today: 20, 50, 100 or all of it, dealt over the lines, and about how long it will take at your pace.',
-  guideTodayFare: 'The fare: what boards on your balance, what waits for the refill, and Depart.',
-  guideTodayJourney: 'Your journey to your goal: how far along the line you are, the pace you promised, and the day you arrive.',
-  guideTodayWeek: 'The week ahead: what comes due each day, counting what you leave for later today.',
   guideLearnLibrary: 'The library: decks other learners publish. Open one to preview it; follow it to study it with your own.',
   guidePracticeExam: 'The mock exam: a JLPT-style paper at the level you pick, marked when you hand it in.',
   guideDictActions: 'Its actions: hear it, and ＋ to keep it on your shelf or add it to one of your decks.',
@@ -2186,7 +2159,6 @@ const guide = {
   guideTodayGateDesk: 'What is due today, line by line. Switch a line off to leave it for later, then depart: Enter does it from anywhere here.',
   guideLearnStopsDesk: 'The whole line. Every stop on it is a door to its platforms.',
   // Worded for a pointer (plan 123): the notes that said "tap".
-  guideHudStatusDesk: 'On time or behind your own plan. Its ghost train stands beside the gate.',
   guideLearnPlateDesk: 'A line. Click the plate to open it; the chip is what it owes you today.',
   guidePracticeDestsDesk: 'The levels, and what you have done at each. Yours is marked; click another to ride it anyway.',
   guideDictEntryDesk: 'An entry, open beside the catalogue. ← and → walk the catalogue.',

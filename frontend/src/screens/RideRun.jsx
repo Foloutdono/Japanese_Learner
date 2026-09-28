@@ -14,7 +14,7 @@ import { Emphasized } from '../components/ui/Emphasized'
 import { Continue } from '../components/boarding/BoardFrame'
 import { Callout } from '../components/guide/Callout'
 import { Guide } from '../components/guide/Guide'
-import { TOUR_FRONT, TOUR_BACK } from '../components/guide/rideTours'
+import { TOUR_BACK } from '../components/guide/rideTours'
 import { HINTS } from '../domain/studyModes'
 import { normalizeCard, wordForm } from '../domain/cardShape'
 import { useProfileSummary } from '../stores/profileSummary'
@@ -50,12 +50,12 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // a door nobody is shown is one nobody finds. On the desk the ride
 // stands on the three panels every card run stands on (plan 126) --
 // this run's figures and the card panel at the left, the card, the
-// details sealed at the right -- and walks the learner round them with
-// the gates' own guide (components/guide/Guide.jsx, handed its stops):
-// every part before the first card is turned (TOUR_FRONT), the entry
-// and the forecast once it is (TOUR_BACK). The ride counts its two
-// ratings in the run's tally (stores/runTally) so the figures it points
-// at move; the tally is the screen's and is never posted.
+// details sealed at the right -- and, once the known card is turned,
+// points at the one thing there its notes cannot: the entry docked
+// beside it, the desk's 🔍 (TOUR_BACK, the gates' own guide handed one
+// stop). The panels' figures, keys and rhythm are left to be found: a
+// first card is not the moment for them. The ride counts its two
+// ratings in the run's tally (stores/runTally) so the figures move; the tally is the screen's and is never posted.
 //
 // The way out is the head's ‹, labelled Skip: quiet, never a primary
 // button. A returning learner who has flipped cards for years does
@@ -75,8 +75,8 @@ export const RIDE_NEXT = '/ride/reading'
 
 // The steps, as ride_step names them: known, known-back, unknown,
 // unknown-back, done (stepFor below); on a phone known-dict between
-// the known card's turn and its grade, and on the desk tour-front and
-// tour-back while a walk round the panels is open.
+// the known card's turn and its grade, and on the desk tour-back while
+// the guide points at the entry.
 // The rating bar's own pressed-state beat (RatingBar.PRESSED_MS): the
 // seal the learner pressed stays lit while the card moves on.
 const HOLD_MS = 420
@@ -86,9 +86,6 @@ function stepFor(index, answered, lookFirst = false) {
   if (index === 0 && answered && lookFirst) return 'known-dict'
   return `${index === 0 ? 'known' : 'unknown'}${answered ? '-back' : ''}`
 }
-
-// The desk's walks round the panels (plan 133, components/guide/rideTours).
-const TOURS = { front: TOUR_FRONT, back: TOUR_BACK }
 
 /** The card as CardPrompt wants it, with the romaji riding on it for
  *  a learner who does not yet read kana: the furigana hint's own
@@ -126,10 +123,9 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
   // been opened and closed once.
   const [lookupOpen, setLookupOpen] = useState(false)
   const [looked, setLooked] = useState(false)
-  // The desk's walks: the one open ('front' | 'back'), and the ones
-  // walked or declined -- a Skip on either declines both.
-  const [tour, setTour] = useState(null)
-  const [toured, setToured] = useState(() => new Set())
+  // The desk's stop at the entry: open now, and seen or declined.
+  const [tour, setTour] = useState(false)
+  const [toured, setToured] = useState(false)
   const watches = useRef(null)
   const holdTimer = useRef(null)
   const finished = useRef(false)
@@ -244,24 +240,20 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lookedOnKnown])
 
-  // The desk's walks: the front one once the first card is on the
-  // stage and the cutscene has lifted, the back one once it is turned.
+  // The desk's stop at the entry, once the known card is turned.
   const panels = desk && Boolean(cards?.length) && step !== 'done'
-  const due = !panels || covered || !card || index !== 0 || tour ? null
-    : !answered && !toured.has('front') ? 'front'
-    : answered && !toured.has('back') ? 'back'
-    : null
+  const due = panels && !covered && Boolean(card) && index === 0 && answered && !tour && !toured
   useEffect(() => {
     if (!due) return
-    mark(step, `tour-${due}`)
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the walk opens once its anchors are painted, which is after this render.
-    setTour(due)
+    mark(step, 'tour-back')
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the stop opens once its anchor is painted, which is after this render.
+    setTour(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [due])
-  function endTour(skipped) {
-    mark(`tour-${tour}`, step)
-    setToured(prev => new Set([...prev, tour, ...(skipped ? ['front', 'back'] : [])]))
-    setTour(null)
+  function endTour() {
+    mark('tour-back', step)
+    setToured(true)
+    setTour(false)
   }
 
   const remaining = cards ? Math.max(0, cards.length - index) : null
@@ -333,7 +325,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       )}
 
       {callout && <Callout anchor={callout.anchor} place={callout.place} text={callout.text} />}
-      {tour && <Guide key={tour} gate="ride" stops={TOURS[tour]} onEnd={endTour} />}
+      {tour && <Guide gate="ride" stops={TOUR_BACK} onEnd={endTour} />}
     </StudyStage>
   )
 }

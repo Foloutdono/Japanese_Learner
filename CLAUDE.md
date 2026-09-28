@@ -492,13 +492,16 @@ runtime purpose. Two consequences worth knowing:
   been opened from the 🔍 and closed (`known-dict`, told through
   `components/study/lookupWatch.js`); on the desk both rides stand on
   the runs' three panels (plans 126, 129) and the gates' guide, handed
-  its stops (`components/guide/rideTours.js`), walks every panel -- the
-  cards before the first turn and after it, the reading before its
-  clock and after the grade, which opens the sentence's breakdown; the
+  its stops (`components/guide/rideTours.js`), points at one thing a
+  ride -- the entry once the known card is turned, the breakdown the
+  grade opens -- where it first walked every panel (cut, with Today's
+  guide to the gate and the gates, owner-directed 2026-09-28: too much
+  for a first card); the
   ride's cards carry a new card's forecast for the verdict tiles (cited
   in `routes/onboarding.py`, `tests/test_ride.py`, `screens/RideRun.jsx`,
   `screens/RideReading.jsx`, `components/guide/Guide.jsx`,
-  `components/guide/Callout.jsx`, `components/study/QuizComponents.jsx`,
+  `components/guide/Callout.jsx`, `components/guide/guides.js`,
+  `components/study/QuizComponents.jsx`,
   `components/study/CardPanel.jsx`, `components/study/RunPanel.jsx`,
   `src/ride.desktop.test.jsx` and `src/ride.phone.test.jsx`).
   **134** is the analyser's video Passage on three columns on the desk
