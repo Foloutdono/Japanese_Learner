@@ -7,20 +7,26 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 // graph is mocked down to the one node every voice opens -- voiceOut --
 // so what is counted is voices started, not what they would sound like.
 
-const mocks = vi.hoisted(() => ({ voiceOut: vi.fn(() => ({})) }))
+const mocks = vi.hoisted(() => ({
+  voiceOut: vi.fn(() => ({})),
+  later: vi.fn((seconds, play) => play()),
+}))
 
 vi.mock('./context', () => ({ getAudioContext: () => ({}), getBuffer: vi.fn() }))
 vi.mock('./mixer', () => ({ busFor: () => ({}), playBuffer: vi.fn() }))
 vi.mock('./synth', () => ({
   voiceOut: mocks.voiceOut,
+  later: mocks.later,
   tones: vi.fn(), bar: vi.fn(), noiseTicks: vi.fn(), noiseSweep: vi.fn(), thump: vi.fn(),
 }))
 
 const { playVoice } = await import('./voices')
+const { playFareTick, FARE_BEAT } = await import('./chimes')
 
 let now = 1000
 beforeEach(() => {
   mocks.voiceOut.mockClear()
+  mocks.later.mockClear()
   now += 10_000   // each test starts well clear of the last one's sounds
   vi.spyOn(performance, 'now').mockImplementation(() => now)
 })
@@ -48,5 +54,23 @@ describe('playVoice', () => {
     playVoice('fare-tick')
     playVoice('card-transition')
     expect(mocks.voiceOut).toHaveBeenCalledTimes(3)
+  })
+})
+
+describe('the fare\'s beat', () => {
+  it('schedules a voice later on the audio clock when asked', () => {
+    playVoice('arrival', { after: 0.25 })
+    expect(mocks.later).toHaveBeenCalledWith(0.25, expect.any(Function))
+  })
+
+  it('lands the fare a beat after a rating\'s answer, and at once elsewhere', () => {
+    // After a rating (XpToast) the coin waits FARE_BEAT behind the
+    // answer; a claimed refill (ClaimSheet) has no answer to wait for.
+    playFareTick(FARE_BEAT)
+    now += 60
+    playFareTick()
+    expect(mocks.later.mock.calls.map(([s]) => s)).toEqual([FARE_BEAT, 0])
+    expect(FARE_BEAT).toBeGreaterThan(0.05)
+    expect(FARE_BEAT).toBeLessThan(0.2)
   })
 })

@@ -172,6 +172,11 @@ const EVENTS = [
     key: 'click-mode-selection', category: 'ui', family: 'interface',
     label: 'Option picked', jp: '選択', where: 'Mode, level, theme, tier and filter rows — the busiest sound in the app',
     variants: [
+      { key: 'wood-pick', label: 'Wood pick', note: 'One E6 on a marimba bar with the pick\'s hair of noise on the front. The busiest sound, with a rounder edge to hear all day.',
+        play: (c, b) => {
+          noiseTicks(c, b, [{ freq: 2400, peak: 0.053, q: 3, dur: 0.008 }])
+          bar(c, b, [{ freq: 1318.51, dur: 0.06, peak: 0.106, material: 'wood' }])
+        } },
       { key: 'pick', label: 'Pick', note: 'E6 with a hair of noise under it. Crisp, over in 45ms.',
         play: (c, b) => {
           noiseTicks(c, b, [{ freq: 2400, peak: 0.09, q: 3, dur: 0.010 }])
@@ -188,18 +193,17 @@ const EVENTS = [
           { freq: 1046.5, at: 0, dur: 0.026, peak: 0.10 },
           { freq: 1318.51, at: 0.030, dur: 0.038, peak: 0.10 },
         ]) },
-      { key: 'wood-pick', label: 'Wood pick', note: 'One E6 on a marimba bar with the pick\'s hair of noise on the front. The busiest sound, with a rounder edge to hear all day.',
-        level: 0.76,
-        play: (c, b) => {
-          noiseTicks(c, b, [{ freq: 2400, peak: 0.07, q: 3, dur: 0.008 }])
-          bar(c, b, [{ freq: 1318.51, dur: 0.06, peak: 0.14, material: 'wood' }])
-        } },
     ],
   },
   {
     key: 'click-screen-selection', category: 'ui', family: 'interface',
     label: 'Screen chosen', jp: '発車', where: 'Anything that navigates. A departure, so it is bigger',
     variants: [
+      { key: 'bar-depart', label: 'Departure on bars', note: 'A5 → E6 struck on vibraphone bars: the departure, with a ring after it.',
+        play: (c, b) => bar(c, b, [
+          { freq: 880.0, at: 0, dur: 0.16, peak: 0.106, material: 'metal' },
+          { freq: 1318.51, at: 0.060, dur: 0.26, peak: 0.099, material: 'metal' },
+        ]) },
       { key: 'depart', label: 'Departure', note: 'A5 → E6, fuller than a pick. You are leaving.',
         play: (c, b) => tones(c, b, [
           { freq: 880.0, at: 0, dur: 0.055, peak: 0.16 },
@@ -217,12 +221,6 @@ const EVENTS = [
           noiseTicks(c, b, [{ freq: 720, peak: 0.22, q: 6, dur: 0.030 }])
           tones(c, b, [{ freq: 1318.51, at: 0.055, dur: 0.10, peak: 0.14 }])
         } },
-      { key: 'bar-depart', label: 'Departure on bars', note: 'The shipped A5 → E6 struck on vibraphone bars: the same leaving, with a ring after it.',
-        level: 0.71,
-        play: (c, b) => bar(c, b, [
-          { freq: 880.0, at: 0, dur: 0.16, peak: 0.15, material: 'metal' },
-          { freq: 1318.51, at: 0.060, dur: 0.26, peak: 0.14, material: 'metal' },
-        ]) },
     ],
   },
 
@@ -270,7 +268,12 @@ const EVENTS = [
     key: 'wrong', category: 'ui', family: 'study',
     label: 'Answer wrong', jp: '不正解', where: 'The rating bar. Not a buzzer — a wrong card is the next card',
     variants: [
-      { key: 'low-double', label: 'Low double', note: 'G3 → D3. Felt more than heard, and over quickly.',
+      { key: 'low-double-voiced', label: 'Low double, voiced', note: 'G3 → D3 with the overtones a phone can play: the low double\'s weight in headphones, and 13dB more of it on a phone.',
+        play: (c, b) => tones(c, b, [
+          ...voiced({ freq: 196.0, at: 0, dur: 0.12, peak: 0.152 }, [0.7, 0.6, 0.4, 0.2]),
+          ...voiced({ freq: 146.8, at: 0.09, dur: 0.20, peak: 0.129 }, [0.7, 0.6, 0.4, 0.2]),
+        ]) },
+      { key: 'low-double', label: 'Low double', note: 'G3 → D3 alone. Felt more than heard, and over quickly -- and on a phone, 20dB under the right answer.',
         play: (c, b) => tones(c, b, [
           { freq: 196.0, at: 0, dur: 0.12, peak: 0.20 },
           { freq: 146.8, at: 0.09, dur: 0.20, peak: 0.17 },
@@ -284,12 +287,6 @@ const EVENTS = [
       { key: 'slump', label: 'Slump', note: 'One note sliding down a fourth. Reads as "not that one".',
         level: 1.10,
         play: (c, b) => tones(c, b, [{ freq: 261.63, to: 196.0, dur: 0.26, peak: 0.17, type: 'triangle', attack: 0.010 }]) },
-      { key: 'low-double-voiced', label: 'Low double, voiced', note: 'The shipped G3 → D3 with the overtones a phone can play. The same weight in headphones; on a phone, 13dB more of it.',
-        level: 0.76,
-        play: (c, b) => tones(c, b, [
-          ...voiced({ freq: 196.0, at: 0, dur: 0.12, peak: 0.20 }, [0.7, 0.6, 0.4, 0.2]),
-          ...voiced({ freq: 146.8, at: 0.09, dur: 0.20, peak: 0.17 }, [0.7, 0.6, 0.4, 0.2]),
-        ]) },
       { key: 'wood-knock', label: 'Wood knock', note: 'G4 → D4 on the marimba\'s low bars, over in a blink. A wrong note on a wooden instrument, not an alarm — and heard on a phone.',
         level: 0.82,
         play: (c, b) => bar(c, b, [
@@ -301,20 +298,19 @@ const EVENTS = [
   {
     // Turning the card over was the generic click, the sound of a
     // settings row -- on the gesture a review is made of, dozens of
-    // times a session. Its first voice is that click, exactly, so the
-    // event changes nothing until one of the others is chosen.
+    // times a session. The card turn was chosen on the listening panel;
+    // the click stays in the palette as the flip it used to be.
     key: 'card-flip', category: 'sfx', family: 'study',
     label: 'Card turned over', jp: '裏返し', where: 'A flashcard tapped to its answer, and back — the review\'s own gesture',
     variants: [
-      { key: 'click', label: 'Click (as now)', note: 'The generic G6 tick every button makes. What the flip has always played.',
-        play: (c, b) => tones(c, b, [{ freq: 1568.0, dur: 0.032, peak: 0.16 }]) },
       { key: 'card-turn', label: 'Card turn', note: 'A stiff card flipped on a table: its edge lifting, a brush of air, and the face landing.',
-        level: 2.61,
         play: (c, b) => {
-          noiseTicks(c, b, [{ freq: 3200, peak: 0.10, q: 2.5, dur: 0.010 }])
-          noiseSweep(c, b, { at: 0.004, dur: 0.075, peak: 0.07, from: 1800, mid: 3200, to: 2200, q: 0.9, hold: 0.3, attack: 0.012 })
-          noiseTicks(c, b, [{ at: 0.070, freq: 1400, peak: 0.26, q: 3, dur: 0.022 }])
+          noiseTicks(c, b, [{ freq: 3200, peak: 0.261, q: 2.5, dur: 0.010 }])
+          noiseSweep(c, b, { at: 0.004, dur: 0.075, peak: 0.183, from: 1800, mid: 3200, to: 2200, q: 0.9, hold: 0.3, attack: 0.012 })
+          noiseTicks(c, b, [{ at: 0.070, freq: 1400, peak: 0.679, q: 3, dur: 0.022 }])
         } },
+      { key: 'click', label: 'Click', note: 'The generic G6 tick every button makes, which the flip played until the card turn.',
+        play: (c, b) => tones(c, b, [{ freq: 1568.0, dur: 0.032, peak: 0.16 }]) },
       { key: 'karuta', label: 'Karuta', note: 'かるた: a thick card snapped over, one crisp slap and nothing after it.',
         level: 3.79,
         play: (c, b) => noiseTicks(c, b, [
@@ -329,13 +325,20 @@ const EVENTS = [
   {
     // The mock exam warned of its last five minutes, and its last one,
     // only to a screen reader and in a red corner nobody taking a test
-    // is looking at. A hall announces it. Silent by default: the first
-    // voice is the exam as it has always been. `loudness` is what the
-    // meter levels the others to, since silence is no reference.
+    // is looking at. A hall announces it; the attention chime was chosen
+    // on the listening panel. `loudness` is the level its voices are
+    // written at, which the meter falls back to should silence ever be
+    // listed first, since silence is no reference.
     key: 'exam-warning', category: 'ui', family: 'study', loudness: 0.060,
     label: 'Time running out', jp: '残り時間', where: 'The mock exam at five minutes left, and at one',
     variants: [
-      { key: 'silent', label: 'Silent (as now)', note: 'No sound: the timer turns red and a screen reader says it.',
+      { key: 'attention', label: 'Attention chime', note: 'The first two notes of the station\'s announcement chime, F5 → A5: "listen", and nothing after it.',
+        space: 0.22,
+        play: (c, b) => bar(c, b, [
+          { freq: 698.46, at: 0, dur: 0.34, peak: 0.098, material: 'metal' },
+          { freq: 880.0, at: 0.17, dur: 0.80, peak: 0.098, material: 'metal' },
+        ]) },
+      { key: 'silent', label: 'Silent', note: 'No sound: the timer turns red and a screen reader says it, as the exam was before.',
         play: () => {} },
       { key: 'hall-bell', label: 'Hall bell', note: 'Two soft strikes of one bar, B5, in the concourse. Noticed without startling anyone mid-question.',
         level: 0.53,
@@ -344,19 +347,14 @@ const EVENTS = [
           { freq: 987.77, at: 0, dur: 0.45, peak: 0.20, material: 'metal' },
           { freq: 987.77, at: 0.32, dur: 0.80, peak: 0.18, material: 'metal' },
         ]) },
-      { key: 'attention', label: 'Attention chime', note: 'The first two notes of the station\'s announcement chime, F5 → A5: "listen", and nothing after it.',
-        level: 0.49,
-        space: 0.22,
-        play: (c, b) => bar(c, b, [
-          { freq: 698.46, at: 0, dur: 0.34, peak: 0.20, material: 'metal' },
-          { freq: 880.0, at: 0.17, dur: 0.80, peak: 0.20, material: 'metal' },
-        ]) },
     ],
   },
   {
     key: 'card-transition', category: 'sfx', family: 'study',
     label: 'Card turns', jp: '次の札', where: 'Between every card in a review session',
     variants: [
+      { key: 'whisk', label: 'Whisk away', note: 'Falling rather than arching: the old card going, not the new one landing.',
+        play: (c, b) => noiseSweep(c, b, { dur: 0.22, peak: 0.066, from: 2600, mid: 1400, to: 700, q: 0.6, hold: 0.3, attack: 0.02 }) },
       { key: 'paper-slip', label: 'Paper slip', note: 'A card leaving the top of the deck. Barely there, by design.',
         play: (c, b) => noiseSweep(c, b, { dur: 0.17, peak: 0.075, from: 900, mid: 2500, to: 1200, q: 0.7, hold: 0.35, attack: 0.02 }) },
       { key: 'flick', label: 'Flick', note: 'Two dry taps — a thumb releasing the corner.',
@@ -365,9 +363,6 @@ const EVENTS = [
           { at: 0, freq: 2700, peak: 0.13, q: 2.2, dur: 0.018 },
           { at: 0.042, freq: 1900, peak: 0.10, q: 2.2, dur: 0.022 },
         ]) },
-      { key: 'whisk', label: 'Whisk away', note: 'Falling rather than arching: the old card going, not the new one landing.',
-        level: 0.94,
-        play: (c, b) => noiseSweep(c, b, { dur: 0.22, peak: 0.07, from: 2600, mid: 1400, to: 700, q: 0.6, hold: 0.3, attack: 0.02 }) },
       { key: 'flap', label: 'Single flap', note: 'One drum of the board turning. Shares its vocabulary with the XP tick.',
         level: 2.41,
         play: (c, b) => noiseTicks(c, b, [{ freq: 2600, peak: 0.20, q: 1.6, dur: 0.030 }]) },
@@ -379,6 +374,12 @@ const EVENTS = [
     key: 'gate-chime', category: 'ui', family: 'station',
     label: 'Ticket gate', jp: '改札', where: 'A valid pass has been read. Rises: accepted, go',
     variants: [
+      { key: 'three-step', label: 'Three step', note: 'B6, D♯7, F♯7. Brighter, and a little more ceremonial.',
+        play: (c, b) => tones(c, b, [
+          { freq: 1975.5, at: 0, dur: 0.045, peak: 0.452 },
+          { freq: 2489.0, at: 0.055, dur: 0.045, peak: 0.452 },
+          { freq: 2960.0, at: 0.110, dur: 0.080, peak: 0.476 },
+        ]) },
       { key: 'rising-pair', label: 'Rising pair', note: 'B6 into E7. Short and bright — it fires on every departure.',
         play: (c, b) => tones(c, b, [
           { freq: 1975.5, at: 0, dur: 0.055, peak: 0.5 },
@@ -390,14 +391,7 @@ const EVENTS = [
           { freq: 2637.0, at: 0, dur: 0.045, peak: 0.42 },
           { freq: 2637.0, at: 0.075, dur: 0.045, peak: 0.42 },
         ]) },
-      { key: 'three-step', label: 'Three step', note: 'B6, D♯7, F♯7. Brighter, and a little more ceremonial.',
-        level: 1.19,
-        play: (c, b) => tones(c, b, [
-          { freq: 1975.5, at: 0, dur: 0.045, peak: 0.38 },
-          { freq: 2489.0, at: 0.055, dur: 0.045, peak: 0.38 },
-          { freq: 2960.0, at: 0.110, dur: 0.080, peak: 0.40 },
-        ]) },
-      { key: 'rising-pair-hall', label: 'Rising pair, in the hall', note: 'The shipped B6 → E7 heard in a concourse: a short tail after the second note, no longer.',
+      { key: 'rising-pair-hall', label: 'Rising pair, in the hall', note: 'The rising pair, B6 → E7, heard in a concourse: a short tail after the second note, no longer.',
         space: 0.16,
         play: (c, b) => tones(c, b, [
           { freq: 1975.5, at: 0, dur: 0.055, peak: 0.5 },
@@ -447,14 +441,13 @@ const EVENTS = [
     key: 'door-slide', category: 'sfx', family: 'station',
     label: 'Doors running open', jp: '開扉', where: 'The stretch after the chime, when the leaves actually move',
     variants: [
+      { key: 'soft-rush', label: 'Soft rush', note: 'The same travel with no stop at the end. Slower, unremarkable.',
+        play: (c, b) => noiseSweep(c, b, { dur: 0.75, peak: 0.418, from: 300, mid: 900, to: 420, q: 1.1, hold: 0.6, attack: 0.16 }) },
       { key: 'pneumatic', label: 'Pneumatic', note: 'Rush opening as they gather speed, closing as they reach the stop.',
         play: (c, b) => {
           noiseSweep(c, b, { dur: 0.62, peak: 0.13, from: 380, mid: 1250, to: 520, q: 0.8, hold: 0.55, attack: 0.10 })
           thump(c, b, { at: 0.59, from: 96, to: 58, dur: 0.15, peak: 0.16 })
         } },
-      { key: 'soft-rush', label: 'Soft rush', note: 'The same travel with no stop at the end. Slower, unremarkable.',
-        level: 4.18,
-        play: (c, b) => noiseSweep(c, b, { dur: 0.75, peak: 0.10, from: 300, mid: 900, to: 420, q: 1.1, hold: 0.6, attack: 0.16 }) },
       { key: 'rolling', label: 'On rollers', note: 'Rush, plus the leaves ticking over their guides, then the stop.',
         play: (c, b) => {
           noiseSweep(c, b, { dur: 0.62, peak: 0.10, from: 380, mid: 1250, to: 520, q: 0.8, hold: 0.55, attack: 0.10 })
@@ -471,6 +464,13 @@ const EVENTS = [
     key: 'platform-chime', category: 'ui', family: 'station',
     label: 'Platform sign lands', jp: '到着ホーム', where: 'The onboarding arrival cutscene',
     variants: [
+      { key: 'arpeggio-bars', label: 'Arpeggio, struck', note: 'A5, C♯6, E6 on vibraphone bars, rising an octave under the gate and ringing in the concourse.',
+        space: 0.22,
+        play: (c, b) => bar(c, b, [
+          { freq: 880.0, at: 0, dur: 0.40, peak: 0.22, material: 'metal' },
+          { freq: 1108.73, at: 0.09, dur: 0.45, peak: 0.22, material: 'metal' },
+          { freq: 1318.51, at: 0.20, dur: 0.85, peak: 0.24, material: 'metal' },
+        ]) },
       { key: 'arpeggio', label: 'Arpeggio', note: 'A5, C♯6, E6 — rising, an octave under the gate.',
         play: (c, b) => tones(c, b, [
           { freq: 880.0, at: 0, dur: 0.16, peak: 0.26 },
@@ -485,17 +485,11 @@ const EVENTS = [
           { freq: 1318.51, at: 0.24, dur: 0.50, peak: 0.24 },
         ]) },
       { key: 'wide', label: 'Wide rise', note: 'A5, E6, A6 — a full octave of travel, and the most triumphant of the three.',
+        level: 1.09,
         play: (c, b) => tones(c, b, [
           { freq: 880.0, at: 0, dur: 0.15, peak: 0.24 },
           { freq: 1318.51, at: 0.10, dur: 0.17, peak: 0.24 },
           { freq: 1760.0, at: 0.22, dur: 0.45, peak: 0.26 },
-        ]) },
-      { key: 'arpeggio-bars', label: 'Arpeggio, struck', note: 'The shipped A5, C♯6, E6 on vibraphone bars, ringing in the concourse.',
-        space: 0.22,
-        play: (c, b) => bar(c, b, [
-          { freq: 880.0, at: 0, dur: 0.40, peak: 0.22, material: 'metal' },
-          { freq: 1108.73, at: 0.09, dur: 0.45, peak: 0.22, material: 'metal' },
-          { freq: 1318.51, at: 0.20, dur: 0.85, peak: 0.24, material: 'metal' },
         ]) },
       { key: 'announcement', label: 'Announcement chime', note: 'ピンポンパンポーン rising: the four notes a station plays before it speaks. F5, A5, C6, F6 on bars, in the hall.',
         space: 0.22,
@@ -588,7 +582,16 @@ const EVENTS = [
     key: 'pass-clip', category: 'ui', family: 'rewards', meter: 'peak',
     label: 'Level up', jp: '改札鋏', where: 'The gate\'s punch clipping your pass as the level turns over',
     variants: [
-      { key: 'punch', label: 'Punch', note: 'Steel jaws through card: a bright snip on a short knock.',
+      { key: 'punch-voiced', label: 'Punch, voiced', note: 'Steel jaws through card: the snip, a knock moved up into steel, and the jaws ringing, so a level-up reads on a phone as more than a click.',
+        play: (c, b) => {
+          noiseTicks(c, b, [
+            { freq: 3600, peak: 0.77, q: 7, dur: 0.022 },
+            { at: 0.006, freq: 1250, peak: 0.572, q: 4, dur: 0.035 },
+          ])
+          bar(c, b, [{ at: 0.004, freq: 1864.66, dur: 0.12, peak: 0.055, material: 'glass' }])
+          thump(c, b, { at: 0.004, from: 190, to: 120, dur: 0.07, peak: 0.132 })
+        } },
+      { key: 'punch', label: 'Punch', note: 'A bright snip on a short, low knock. The knock is 12dB down on a phone.',
         play: (c, b) => {
           noiseTicks(c, b, [
             { freq: 3600, peak: 0.70, q: 7, dur: 0.022 },
@@ -604,16 +607,6 @@ const EVENTS = [
         play: (c, b) => {
           noiseTicks(c, b, [{ freq: 1100, peak: 0.30, q: 4, dur: 0.03 }])
           thump(c, b, { at: 0.004, from: 150, to: 90, dur: 0.12, peak: 0.14 })
-        } },
-      { key: 'punch-voiced', label: 'Punch, voiced', note: 'The shipped punch with its knock moved up into steel — the jaws ring — so a level-up reads on a phone as more than a click.',
-        level: 1.10,
-        play: (c, b) => {
-          noiseTicks(c, b, [
-            { freq: 3600, peak: 0.70, q: 7, dur: 0.022 },
-            { at: 0.006, freq: 1250, peak: 0.52, q: 4, dur: 0.035 },
-          ])
-          bar(c, b, [{ at: 0.004, freq: 1864.66, dur: 0.12, peak: 0.05, material: 'glass' }])
-          thump(c, b, { at: 0.004, from: 190, to: 120, dur: 0.07, peak: 0.12 })
         } },
       { key: 'clip-clip', label: 'Clip-clip', note: 'Two snips, as the gate\'s clerks clicked the punch in the air between passengers. A level earns a flourish.',
         level: 1.68,
@@ -631,6 +624,15 @@ const EVENTS = [
     key: 'card-stamp', category: 'ui', family: 'rewards', meter: 'peak',
     label: 'Card stamped', jp: '押印', where: 'A card climbing a stage — the seal pressed into its corner',
     variants: [
+      { key: 'hanko', label: 'Hanko', note: '判子: the seal pressed, then lifted off the paper a beat later. A small ceremony, still short.',
+        play: (c, b) => {
+          noiseTicks(c, b, [
+            { freq: 900, peak: 0.594, q: 4, dur: 0.035 },
+            { at: 0.002, freq: 600, peak: 1.056, q: 2.5, dur: 0.05 },
+            { at: 0.090, freq: 3200, peak: 0.158, q: 2, dur: 0.014 },
+          ])
+          thump(c, b, { at: 0.004, from: 220, to: 140, dur: 0.07, peak: 0.066 })
+        } },
       { key: 'stamp', label: 'Ticket stamp', note: 'A knock with weight behind it — the gate marking a pass.',
         play: (c, b) => {
           noiseTicks(c, b, [{ freq: 1150, peak: 0.26, q: 5, dur: 0.026 }])
@@ -638,7 +640,7 @@ const EVENTS = [
         } },
       { key: 'soft-press', label: 'Soft press', note: 'The thump alone, no knock. A rubber stamp on paper.',
         play: (c, b) => thump(c, b, { at: 0, from: 160, to: 100, dur: 0.11, peak: 0.10 }) },
-      { key: 'stamp-voiced', label: 'Stamp, voiced', note: 'The shipped knock with the desk under the paper: a body at 700Hz a phone can play, where the thump alone was 22dB down.',
+      { key: 'stamp-voiced', label: 'Stamp, voiced', note: 'The ticket stamp\'s knock with the desk under the paper: a body at 700Hz a phone can play, where the thump alone was 22dB down.',
         level: 1.06,
         play: (c, b) => {
           noiseTicks(c, b, [
@@ -646,16 +648,6 @@ const EVENTS = [
             { at: 0.003, freq: 700, peak: 0.95, q: 2.5, dur: 0.06 },
           ])
           thump(c, b, { at: 0.004, from: 175, to: 115, dur: 0.09, peak: 0.07 })
-        } },
-      { key: 'hanko', label: 'Hanko', note: '判子: the seal pressed, then lifted off the paper a beat later. A small ceremony, still short.',
-        level: 1.32,
-        play: (c, b) => {
-          noiseTicks(c, b, [
-            { freq: 900, peak: 0.45, q: 4, dur: 0.035 },
-            { at: 0.002, freq: 600, peak: 0.80, q: 2.5, dur: 0.05 },
-            { at: 0.090, freq: 3200, peak: 0.12, q: 2, dur: 0.014 },
-          ])
-          thump(c, b, { at: 0.004, from: 220, to: 140, dur: 0.07, peak: 0.05 })
         } },
     ],
   },

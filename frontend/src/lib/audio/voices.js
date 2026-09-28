@@ -3,7 +3,7 @@ import { getAudioContext, getBuffer } from './context'
 import { busFor, playBuffer } from './mixer'
 import { isMuted, voiceLevel } from './settings'
 import { VOICE_EVENTS, VOICE_FAMILIES } from './recipes'
-import { voiceOut } from './synth'
+import { voiceOut, later } from './synth'
 
 // ── The voice palette ─────────────────────────────────────
 // Every interface and effect sound in the app, and for each one a
@@ -171,8 +171,11 @@ function tooSoon(eventKey) {
   return false
 }
 
-/** Play whichever voice is currently selected for this event. */
-export function playVoice(eventKey) {
+/**
+ * Play whichever voice is currently selected for this event, `after`
+ * seconds from now (on the audio clock) where a moment asks for a beat.
+ */
+export function playVoice(eventKey, { after = 0 } = {}) {
   const event = byKey.get(eventKey)
   if (!event || isMuted()) return
   const ctx = getAudioContext()
@@ -182,7 +185,7 @@ export function playVoice(eventKey) {
     if (isMuted()) return
     const voice = getVoice(eventKey)
     const out = trimNode(ctx, event, voice)
-    if (out) voice.play(ctx, out)
+    if (out) later(after, () => voice.play(ctx, out))
   }
 
   const path = event.file
@@ -191,7 +194,7 @@ export function playVoice(eventKey) {
   getBuffer(path)
     .then(buffer => {
       if (isMuted()) return
-      if (buffer) playBuffer(buffer, event.category, event.key)
+      if (buffer) playBuffer(buffer, event.category, event.key, { when: ctx.currentTime + after })
       else { assetMissing.add(path); synth() }
     })
     .catch(() => { assetMissing.add(path); synth() })

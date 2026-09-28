@@ -44,8 +44,15 @@ export function playToggle() { playVoice('toggle') }
  * something else. The default is a coin into the fare box — two short
  * resonant noise pings. `one-flap` in the palette is the alternative:
  * one drum of a departure board.
+ *
+ * `after` is how long it waits, on the audio clock. After a rating it
+ * waits FARE_BEAT: a rating plays the answer, the fare and the card
+ * turning, and all three used to start on the same instant, so the
+ * answer masked the coin its levels were set to let through "a beat
+ * later". The owner chose the beat on the listening panel.
  */
-export function playFareTick() { playVoice('fare-tick') }
+export const FARE_BEAT = 0.11
+export function playFareTick(after = 0) { playVoice('fare-tick', { after }) }
 
 /** 改札鋏 — the gate's punch clipping the pass as the level turns over (plan 142). */
 export function playPassClip() { playVoice('pass-clip') }

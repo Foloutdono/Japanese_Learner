@@ -30,7 +30,7 @@ export { preload } from './context'
 export { playKana, kanaSound, playSfx, playUi, playAnnouncement } from './playback'
 export {
   playClick, playToggle, playFlip, playCorrect, playWrong,
-  playGateChime, playDoorChime, playDoorSlide, playFareTick, playPassClip, playStamp,
+  playGateChime, playDoorChime, playDoorSlide, playFareTick, FARE_BEAT, playPassClip, playStamp,
   playArrival, playPlatformChime,
 } from './chimes'
 export { startAmbiance, stopAmbiance } from './ambiance'

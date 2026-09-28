@@ -22,6 +22,19 @@
 // `at` is always relative to the moment the voice starts, so a recipe
 // reads as a little score and can be moved around wholesale.
 
+// ── Later ─────────────────────────────────────────────────
+// How far ahead of now the voice being played starts. Every primitive
+// reads it, so a whole recipe moves at once, on the audio clock rather
+// than on a timer that drifts against it. Set only for the length of
+// one synchronous play() by later(); zero the rest of the time.
+let lead = 0
+
+/** Play `play` -- one recipe, scheduled synchronously -- `seconds` from now. */
+export function later(seconds, play) {
+  lead = Math.max(0, seconds)
+  try { play() } finally { lead = 0 }
+}
+
 const ATTACK = 0.004   // seconds — below this a blip clicks at its own
                        // onset, which on a 2kHz tone is most of what
                        // you hear
@@ -36,7 +49,7 @@ const FLOOR = 0.0001   // exponentialRamp cannot reach zero
  *   attack override the 4ms onset — longer reads as a swell, not a hit
  */
 export function tones(ctx, bus, notes) {
-  const now = ctx.currentTime
+  const now = ctx.currentTime + lead
 
   for (const n of notes) {
     const { freq, at = 0, dur, peak, type = 'sine', to, attack = ATTACK } = n
@@ -129,7 +142,7 @@ function tickNoise(ctx) {
  *   dur  how long the burst rings (default 0.03, the buffer's length)
  */
 export function noiseTicks(ctx, bus, ticks) {
-  const now = ctx.currentTime
+  const now = ctx.currentTime + lead
   const buffer = tickNoise(ctx)
 
   for (const { at = 0, freq, peak, q = 1.6, dur = 0.03 } of ticks) {
@@ -160,7 +173,7 @@ export function noiseTicks(ctx, bus, ticks) {
  * `hold` is the fraction of dur spent at full level before the fall.
  */
 export function noiseSweep(ctx, bus, { at = 0, dur, peak, from, mid, to, midAt = 0.45, q = 0.8, hold = 0.55, attack = 0.1 }) {
-  const now = ctx.currentTime
+  const now = ctx.currentTime + lead
   const start = now + at
 
   const frames = Math.floor(ctx.sampleRate * dur)
@@ -199,7 +212,7 @@ export function noiseSweep(ctx, bus, { at = 0, dur, peak, from, mid, to, midAt =
 
 /** Something reaching the end of its travel: a low pitch dropping. */
 export function thump(ctx, bus, { at = 0, from = 96, to = 58, dur = 0.15, peak = 0.16 }) {
-  const now = ctx.currentTime
+  const now = ctx.currentTime + lead
   const start = now + at
 
   const osc = ctx.createOscillator()

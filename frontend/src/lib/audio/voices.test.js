@@ -106,14 +106,11 @@ describe('the voice registry', () => {
     }
   })
 
-  it('starts a new moment as the app already sounded it', () => {
-    // A moment given its own event keeps, as its default, exactly what
-    // it played before -- the flip the click, the exam's warning
-    // nothing -- so adding the event changes nothing until a voice is
-    // chosen for it.
-    expect(getVoice('card-flip').label).toMatch(/as now/)
-    expect(getVoice('exam-warning').label).toMatch(/as now/)
-    expect(trimFor('sfx', 'card-flip')).toBe(trimFor('ui', 'click'))
+  it('keeps what a new moment used to play among its voices', () => {
+    // The flip was the generic click and the exam's warning silence
+    // until each had a voice chosen for it; both stay in the palette.
+    expect(voiceEvent('card-flip').variants.map(v => v.key)).toContain('click')
+    expect(voiceEvent('exam-warning').variants.map(v => v.key)).toContain('silent')
   })
 })
 
@@ -184,14 +181,34 @@ describe('choosing a voice', () => {
   })
 
   it('ships the voices that were chosen by ear', () => {
-    // Picked on /dev/sounds and made the defaults. Here so that a
-    // reordering of the variants array cannot quietly change what the
-    // app sounds like.
-    expect(getVoiceKey('correct')).toBe('octave')
-    expect(getVoiceKey('fare-tick')).toBe('coin')
-    expect(getVoiceKey('click')).toBe('tick')
-    expect(getVoiceKey('gate-chime')).toBe('rising-pair')
-    expect(getVoiceKey('door-chime')).toBe('falling-pair')
+    // Picked by the owner on the listening panel (scripts/sound-panel.mjs)
+    // and made the defaults. Here so that a reordering of the variants
+    // array cannot quietly change what the app sounds like.
+    const chosen = {
+      click: 'tick',
+      toggle: 'two-step',
+      'click-menu': 'open-step',
+      'click-close-menu': 'close-step',
+      'click-mode-selection': 'wood-pick',
+      'click-screen-selection': 'bar-depart',
+      correct: 'octave',
+      wrong: 'low-double-voiced',
+      'card-flip': 'card-turn',
+      'exam-warning': 'attention',
+      'card-transition': 'whisk',
+      'gate-chime': 'three-step',
+      'door-chime': 'falling-pair',
+      'door-slide': 'soft-rush',
+      'platform-chime': 'arpeggio-bars',
+      arrival: 'settle',
+      'fare-tick': 'coin',
+      'pass-clip': 'punch-voiced',
+      'card-stamp': 'hanko',
+    }
+    expect(Object.keys(chosen).sort()).toEqual(VOICE_EVENTS.map(e => e.key).sort())
+    for (const [event, voice] of Object.entries(chosen)) {
+      expect(getVoiceKey(event), event).toBe(voice)
+    }
   })
 
   it('remembers a pick', () => {

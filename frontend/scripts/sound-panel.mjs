@@ -190,7 +190,7 @@ textarea { width: 100%; min-height: 96px; font: 15px/1.5 var(--font-jp); color: 
   <header class="mast">
     <div class="mast__mark" lang="ja" aria-hidden="true">音<b>色</b></div>
     <h1>Tsuji Sound Panel</h1>
-    <p class="lede">Every sound the app makes, with the new candidates beside the ones shipping now. Tap a voice to hear it; pick one per moment. Every voice of a moment is set to the same loudness, so you can compare them fairly. Your picks are saved on this page, and I make them the app's defaults.</p>
+    <p class="lede">Every sound the app makes, the one shipping first and its alternatives beside it. Tap a voice to hear it; pick one per moment. Every voice of a moment is set to the same loudness, so you can compare them fairly. Your picks are saved on this page, and become the app's defaults once they are made so in the code.</p>
   </header>
 
   <div class="console" role="group" aria-label="Listening">
@@ -340,21 +340,22 @@ function panelScript(META) {
       }).join('') + '</section>'
   }).join('')
 
-  // The one timing question: a rating's three sounds together, as the
-  // app plays them, or the fare a beat after the answer.
+  // The one timing question: the fare a beat after a rating's answer,
+  // as the app plays it (chimes.js's FARE_BEAT), or all three together,
+  // as it did before.
   const RHYTHM = [
-    { key: 'together', label: 'Together (as now)', note: 'The answer, the fare coin and the card turn start on the same instant.' },
     { key: 'apart', label: 'A beat apart', note: 'The answer first, the fare coin 110 ms later, where the levels were set expecting it.' },
+    { key: 'together', label: 'Together', note: 'The answer, the fare coin and the card turn on the same instant, as they were before.' },
   ]
   const rhythmAdv = META.advice['rating-rhythm']
   $('#rhythm').innerHTML = '<div class="moment__head"><h3>After a rating</h3><span class="moment__jp">評価</span></div>' +
-    '<p class="moment__where">Every rating plays the answer, the XP fare and the card turning. Today they start together.</p>' +
+    '<p class="moment__where">Every rating plays the answer, the XP fare and the card turning. The fare lands a beat after the answer.</p>' +
     (rhythmAdv ? '<p class="advice"><b>My pick:</b> ' + esc(rhythmAdv.why) + '</p>' : '') +
     '<div class="voices" role="radiogroup" aria-label="After a rating">' + RHYTHM.map((r, i) =>
       '<div class="voice" data-event="rating-rhythm" data-variant="' + r.key + '">' +
       '<button type="button" class="voice__play" data-rhythm="' + r.key + '"><span class="tri" aria-hidden="true">▶</span><span>' + r.label + '</span></button>' +
       '<p class="voice__note">' + r.note + '</p><div class="voice__foot">' +
-      (i === 0 ? '<span class="tag tag--now">Shipping now</span>' : '<span class="tag tag--new">New</span>') +
+      (i === 0 ? '<span class="tag tag--now">Shipping now</span>' : '') +
       (rhythmAdv?.pick === r.key ? '<span class="tag tag--rec">Recommended</span>' : '') +
       '<label class="pick" for="pick-rating-rhythm-' + r.key + '"><input type="radio" id="pick-rating-rhythm-' + r.key + '" name="pick-rating-rhythm" value="' + r.key + '"><span>Pick</span></label></div></div>').join('') + '</div>'
 
@@ -408,7 +409,7 @@ function panelScript(META) {
     }
     const scene = e.target.closest('[data-scene]')
     if (scene) {
-      SCENES[Number(scene.dataset.scene)].steps(picks['rating-rhythm'] ?? 'together')
+      SCENES[Number(scene.dataset.scene)].steps(picks['rating-rhythm'] ?? RHYTHM[0].key)
         .forEach(([ev, at]) => sound(ev, current(ev), at))
     }
   })

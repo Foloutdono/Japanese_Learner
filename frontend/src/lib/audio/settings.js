@@ -61,8 +61,8 @@ export const BASE_GAIN = {
   //   0.080  arriving
   //   0.100  the platform sign (onboarding only)
   sfx: {
-    // The flip's first voice is the click, at the click's own trim, so
-    // the new event starts out exactly as the click it was.
+    // The flip sits with the chrome, at the click's 0.030: its voices
+    // are written at the click's loudness through the click's trim.
     'card-flip':       1.17,
     'card-transition': 1.60,
     'door-slide':      1.10,
@@ -97,8 +97,8 @@ export const BASE_GAIN = {
     // The seal's press: the same knock the mode picker's 'stamp'
     // voice makes, levelled with the fare tick it lands beside.
     'card-stamp':             1.70,
-    // Silent by default; its voices are written at the 0.060 of the
-    // doors running open, so this is unity.
+    // Its voices are written at the 0.060 of the doors running open,
+    // so this is unity.
     'exam-warning':           1.00,
   },
   jingle:       0.3,

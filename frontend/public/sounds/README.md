@@ -69,26 +69,32 @@ capability it keeps the picks, one document per event in `picks`.
 | `click` | the generic press | Tick · Wood block · Key tap · Soft pad · Wood tap |
 | `toggle` | settings switches, the theme flip | Two step · Latch · Settle · Wood pair |
 | `click-menu` / `click-close-menu` | a menu opening, and its mirror | Open/close step · Drawer · Soft |
-| `click-mode-selection` | mode, level, theme, tier, filter rows | Pick · Ticket stamp · Two tap · Wood pick |
-| `click-screen-selection` | anything that navigates | Departure · Small gate · Turnstile · Departure on bars |
+| `click-mode-selection` | mode, level, theme, tier, filter rows | Wood pick · Pick · Ticket stamp · Two tap |
+| `click-screen-selection` | anything that navigates | Departure on bars · Departure · Small gate · Turnstile |
 | `correct` | the rating bar | Octave · Rising fifth · Bell · Vibraphone · Marimba fifth · Glass bar |
-| `wrong` | the rating bar | Low double · Thud · Slump · Low double, voiced · Wood knock |
-| `card-flip` | a flashcard turned over, and back | Click (as now) · Card turn · Karuta · Soft bar |
-| `exam-warning` | the mock exam at five minutes left, and one | Silent (as now) · Hall bell · Attention chime |
-| `card-transition` | between every card | Paper slip · Flick · Whisk away · Single flap |
-| `gate-chime` | 改札, a valid pass | Rising pair · Two pips · Three step · Rising pair, in the hall |
+| `wrong` | the rating bar | Low double, voiced · Low double · Thud · Slump · Wood knock |
+| `card-flip` | a flashcard turned over, and back | Card turn · Click · Karuta · Soft bar |
+| `exam-warning` | the mock exam at five minutes left, and one | Attention chime · Silent · Hall bell |
+| `card-transition` | between every card | Whisk away · Paper slip · Flick · Single flap |
+| `gate-chime` | 改札, a valid pass | Three step · Rising pair · Two pips · Rising pair, in the hall |
 | `door-chime` | 扉, just before the doors part | Falling pair · Single bell · Three fall · Ding-dong · Falling pair, struck |
-| `door-slide` | the leaves actually running open | Pneumatic · Soft rush · On rollers |
-| `platform-chime` | 到着ホーム, the onboarding arrival | Arpeggio · Open fifth · Wide rise · Arpeggio, struck · Announcement chime |
+| `door-slide` | the leaves actually running open | Soft rush · Pneumatic · On rollers |
+| `platform-chime` | 到着ホーム, the onboarding arrival | Arpeggio, struck · Arpeggio · Open fifth · Wide rise · Announcement chime |
 | `arrival` | 到着, a session finished (Today's run too) | Settle · Long settle · Warm pad · Settle, struck · End of announcement |
 | `fare-tick` | XP earned, no level | Coin · One flap · Soft tick |
-| `pass-clip` | 改札鋏, the level clipped on the pass | Punch · Snip · Gate press · Punch, voiced · Clip-clip |
-| `card-stamp` | 押印, a card climbing a stage | Ticket stamp · Soft press · Stamp, voiced · Hanko |
+| `pass-clip` | 改札鋏, the level clipped on the pass | Punch, voiced · Punch · Snip · Gate press · Clip-clip |
+| `card-stamp` | 押印, a card climbing a stage | Hanko · Ticket stamp · Soft press · Stamp, voiced |
 
-`card-flip` and `exam-warning` are moments that had no sound of their
-own: the flip played the generic click, the exam's last minutes nothing.
-Each event's first voice is what it played before, so adding the event
-changed nothing until another voice is chosen.
+The first voice of each is the one that ships, every one of them picked
+by the owner on the listening panel (2026-09-28). `card-flip` and
+`exam-warning` are moments that had no sound of their own until that
+round: the flip played the generic click, the exam's last minutes
+nothing. What they used to play stays in the palette.
+
+A picked voice that carried a `level` had it written into its recipe's
+peaks when it became the default, so the default carries none and the
+trims in `settings.js` still name its loudness: every new default lands
+within 0.33dB of the one it replaced.
 
 ### The meter
 
@@ -113,22 +119,24 @@ measured, and every one lands within half a decibel of its default.
 A phone's speaker plays almost nothing under 400Hz, and the levels
 below were measured at the bus, as if every learner wore headphones.
 Through a model of a phone speaker (fourth order under 400Hz) the
-meter found:
+meter found, of the voices shipping at the time:
 
 | Sound | Lost on a phone |
 |---|---|
-| `wrong`, Low double (shipping) | 20dB -- under `correct` by as much |
-| `card-stamp`, Ticket stamp (shipping) | 22dB |
-| `pass-clip`, Punch (shipping) | 12dB |
-| `door-slide`, Pneumatic (shipping) | 7dB |
+| `wrong`, Low double | 20dB -- under `correct` by as much |
+| `card-stamp`, Ticket stamp | 22dB |
+| `pass-clip`, Punch | 12dB |
+| `door-slide`, Pneumatic | 7dB |
 | everything built on 700Hz and up | under 2dB |
 
 On the device most learners hold, the wrong answer was nearly silent
 while the right one was full, and a card's stamp and the level-up were
 clicks. The `voiced` variants keep each sound's low note for
 headphones and add its 2nd to 4th harmonics, from which the ear
-rebuilds the note a phone cannot play: the wrong answer loses 7dB
-instead of 20, the stamp 5 instead of 22, the punch 5 instead of 12.
+rebuilds the note a phone cannot play. What ships now: the wrong
+answer (Low double, voiced) loses 7dB instead of 20, the stamp (Hanko)
+5 instead of 22, the punch (Punch, voiced) 5 instead of 12, and the
+doors running open (Soft rush) under 1.
 
 ### The hall
 
@@ -215,9 +223,12 @@ voice has to keep them:
   *rejects* you, and getting a card wrong in a study app is not that —
   it is the next card. Low, dull, over quickly -- and heard: low is a
   pitch, not a frequency a phone cannot play (see "Heard in a hand").
-- **`correct` sits below the fare tick.** The old `sfx/success.mp3` was
-  loud enough to mask the XP landing a beat later; a sound that drowns
-  the reward it announces is working against the thing it exists for.
+- **`correct` sits below the fare tick, and before it.** The old
+  `sfx/success.mp3` was loud enough to mask the XP landing a beat
+  later; a sound that drowns the reward it announces is working
+  against the thing it exists for. The beat is real now: a rating
+  plays the answer, and the fare `FARE_BEAT` (110ms, `chimes.js`)
+  after it on the audio clock, where the two used to start together.
 - **The fare and the punch are mechanical, not tonal.** `fare-tick`
   and `pass-clip` are resonant filtered noise, never a melody. A tune
   there would both misdescribe the thing on screen and collide with
