@@ -1835,7 +1835,7 @@ const boarding = {
   authModeAria: 'Login or sign up',
   brdDocumentTitle: 'Boarding',
   // Welcome: the sign, the rolling stock, the promise.
-  brdTagline: 'Reach your goals.',
+  brdTagline: 'A ride built around you.',
   brdBoard: 'Board',
   // 辻 (plan 163): the desk's front door, its corner and the way back to it.
   brdHaveAccountQ: 'Have an account?',

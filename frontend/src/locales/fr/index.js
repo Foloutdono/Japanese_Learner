@@ -1766,7 +1766,7 @@ const boarding = {
   // Bienvenue : l’enseigne, le matériel roulant, la promesse. Pas un
   // calque de l’anglais : la ligne française est la sienne. Toute la
   // table tutoie, comme elle — le choix du propriétaire, pour l’élan.
-  brdTagline: 'Accomplis tes objectifs sans détour.',
+  brdTagline: 'Un trajet taillé pour toi.',
   brdBoard: 'Embarquer',
   // 辻 (plan 163): the desk's front door, its corner and the way back to it.
   brdHaveAccountQ: 'Déjà un compte ?',
