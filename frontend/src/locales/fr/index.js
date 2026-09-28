@@ -1986,6 +1986,18 @@ const boarding = {
   brdEnjoy: 'Bon voyage.',
   brdCreditsGift: (n) => `+${n} crédits offerts`,
   brdEnter: 'Entrer en gare',
+  // 辻 (plan 161): the desk's plan, the ride drawn to scale -- its stops'
+  // days and names, what the terminus holds, what the ride is for.
+  brdPlanHint: (min, purpose) => `À ${min} min par jour, ${purpose}.`,
+  brdInDays: (n) => (n === 1 ? 'demain' : `dans ${n} jours`),
+  brdEvery: { am: 'chaque matin', noon: 'chaque midi', pm: 'chaque soir' },
+  brdAtTime: (every, time) => `${every} à ${time}`,
+  brdKanaDone: 'Kana lus',
+  brdBothScripts: 'hiragana et katakana',
+  brdTerminus: (stop) => `Terminus · ${stop}`,
+  brdAtTerminus: 'Au terminus, tu connaîtras',
+  brdUnit: { vocab: 'mots', kanji: 'kanji', grammar: 'points de grammaire' },
+  brdUnitKana: 'signes',
 }
 
 const ride = {

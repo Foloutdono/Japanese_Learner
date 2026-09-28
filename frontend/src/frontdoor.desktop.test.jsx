@@ -650,23 +650,61 @@ describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
     await check()       // time
   })
 
-  it('draws the plan\'s chart 1:1 beside its promises, with no scroll', async () => {
+  it('draws the plan as the ride to scale, what the terminus holds beside what it is for', async () => {
     await board()
     await toLevel()
     await toTime()
     await next()
     await settle(900)
     expect(stepOf()).toBe('plan')
-    const svg = inCar('.brd-chart svg')
-    expect(box(svg).width).toBeGreaterThanOrEqual(326)
-    expect(box(svg).width).toBeLessThanOrEqual(330)
-    expect(box(inCar('.brd-chart')).right).toBeLessThan(box(inCar('.brd-lead')).left)
+    const halts = [...inCar('.desk-brd__route').children]
+    const ring = h => box(h.querySelector('.desk-brd__halt-ring'))
+    // From the crossroads to the terminus, left to right, on one line.
+    expect(halts[0].classList.contains('desk-brd__halt--start')).toBe(true)
+    expect(halts[0].querySelector('.mark')).not.toBeNull()
+    expect(halts.at(-1).classList.contains('desk-brd__halt--end')).toBe(true)
+    halts.map(ring).reduce((a, b) => { expect(mid(b)).toBeGreaterThan(mid(a)); return b })
+    expect(new Set(halts.map(h => Math.round(cy(ring(h))))).size).toBe(1)
+    // A reader of both scripts has no kana stop; the terminus is the goal
+    // (N3's next, N2) and its date.
+    expect(inCar('.desk-brd__halt--kana')).toBeNull()
+    expect(halts.at(-1).querySelector('.desk-brd__halt-ring').textContent).toBe('N2')
+    expect(halts.at(-1).querySelector('.desk-brd__halt-date').textContent).toMatch(/20\d\d/)
+    // Every stop's name clear of the next one's.
+    const names = halts.map(h => box(h.querySelector('.desk-brd__halt-name')))
+    names.reduce((a, b) => { expect(b.left).toBeGreaterThan(a.right); return b })
+    // Under the rule: each line's figure at the terminus, the trip's two
+    // promises beside them.
+    expect([...inCar('.desk-brd__held-list').children].map(i => i.dataset.line)).toEqual(['vocab', 'kanji', 'grammar'])
+    expect(inCar('.desk-brd__for-list').children).toHaveLength(2)
+    expect(box(inCar('.desk-brd__held')).right).toBeLessThan(box(inCar('.desk-brd__for')).left)
     expect(fits(inCar('.brd__body'))).toBe(true)
     expect(box(inCar('.brd__foot')).bottom).toBeLessThanOrEqual(window.innerHeight)
     // Its one action at a ticket's width, in the floor's corner.
     const go = box(inCar('[data-action="enter"]'))
     expect(Math.round(go.width)).toBe(360)
     expect(Math.round(bodyW() - go.right)).toBe(Math.round(box(strip()).left))
+  })
+
+  it('stops the plan at the kana for a learner who reads neither script yet', async () => {
+    await board()
+    await pastName()
+    await pick('[data-motive="trip"]')
+    await next()
+    await pick('[data-kana="none"]')
+    await settle()
+    await next()          // → goal, N5 picked
+    await next()          // → lines
+    await next()          // → rhythm
+    await next()          // → time
+    await next()          // → plan
+    await settle(900)
+    expect(stepOf()).toBe('plan')
+    const halts = [...inCar('.desk-brd__route').children]
+    expect(halts.map(h => h.className.match(/desk-brd__halt--(\w+)/)[1])).toEqual(['start', 'kana', 'by', 'by', 'end'])
+    expect(halts[1].querySelector('.desk-brd__halt-ring').textContent).toBe('あ')
+    const names = halts.map(h => box(h.querySelector('.desk-brd__halt-name')))
+    names.reduce((a, b) => { expect(b.left).toBeGreaterThan(a.right); return b })
   })
 
   it('says on the plan why the office refused the contract, and stays', async () => {

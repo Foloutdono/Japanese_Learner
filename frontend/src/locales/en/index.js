@@ -2054,6 +2054,18 @@ const boarding = {
   brdEnjoy: 'Enjoy the ride.',
   brdCreditsGift: (n) => `+${n} credits, on the house`,
   brdEnter: 'Enter the station',
+  // 辻 (plan 161): the desk's plan, the ride drawn to scale -- its stops'
+  // days and names, what the terminus holds, what the ride is for.
+  brdPlanHint: (min, purpose) => `At ${min} min a day, ${purpose}.`,
+  brdInDays: (n) => (n === 1 ? 'tomorrow' : `in ${n} days`),
+  brdEvery: { am: 'every morning', noon: 'every noon', pm: 'every evening' },
+  brdAtTime: (every, time) => `${every} at ${time}`,
+  brdKanaDone: 'Kana read',
+  brdBothScripts: 'hiragana and katakana',
+  brdTerminus: (stop) => `Terminus · ${stop}`,
+  brdAtTerminus: 'At the terminus, you’ll know',
+  brdUnit: { vocab: 'words', kanji: 'kanji', grammar: 'grammar points' },
+  brdUnitKana: 'signs',
 }
 
 const ride = {

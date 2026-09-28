@@ -25470,11 +25470,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   /* A step's answers stand at the width that serves them, set on its
      car so a leaving car keeps its own while it pulls away: the card's
-     for most questions, the canvas for the six roads, the kana's tree,
-     the line of stations, the lines' cards, the four roads and the day's
-     arc, three columns and a gutter for the two
-     words read out, two columns for the plan and a column's for the
-     account's form. */
+     for most questions; the canvas for the six roads, the kana's tree,
+     the line of stations, the lines' cards, the four roads, the day's
+     arc and the ride drawn to scale; three columns and a gutter for the
+     two words read out, and a column's for the account's form. */
   .desk-brd .brd__car {
     --desk-brd-w: var(--card-w);
     --pull: 1;
@@ -25485,7 +25484,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-brd .brd__car:is([data-car="why"], [data-car="kana"], [data-car="lines"], [data-car="rhythm"], [data-car="time"]) { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="reveal"] { --desk-brd-w: calc(3 * var(--desk-side-w) + var(--sp-8)); }
   .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
-  .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: calc(2 * var(--desk-side-w) + var(--sp-6)); }
+  .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="account"] { --desk-brd-w: var(--desk-side-w); }
   .desk-brd .brd__stage,
   .desk-door .brd__foot {
@@ -25657,17 +25656,13 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      sign-in and band, the wait's dots. */
   @keyframes desk-brd-show { from { opacity: 0; } }
   .desk-brd .brd__car .brd__q { animation: none; }
-  .desk-brd .brd__car :is(.brd-kana, .brd-board, .brd-chart, .brd-notif, .brd-issue) { animation-delay: 160ms; }
+  .desk-brd .brd__car :is(.brd-kana, .brd-board, .brd-notif, .brd-issue) { animation-delay: 160ms; }
   .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell) { animation-delay: 200ms; }
   .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(2) { animation-delay: 240ms; }
   .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(3) { animation-delay: 280ms; }
   .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(4) { animation-delay: 320ms; }
   .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(5) { animation-delay: 360ms; }
   .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(6) { animation-delay: 400ms; }
-  .desk-brd .brd__car .brd-bullet { animation-delay: 300ms; }
-  .desk-brd .brd__car .brd-bullet:nth-child(2) { animation-delay: 360ms; }
-  .desk-brd .brd__car .brd-bullet:nth-child(3) { animation-delay: 420ms; }
-  .desk-brd .brd__car .brd-bullet:nth-child(4) { animation-delay: 480ms; }
   .desk-brd .brd__car .brd-kana__read { animation-delay: 420ms; }
   .desk-brd .brd__car .brd-kana__read--second { animation-delay: 600ms; }
   /* A pick answers as the pointer's hover does, at the same pace: the
@@ -26743,20 +26738,203 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     line-height: 1;
     color: var(--accent2);
   }
-  /* The plan: the chart 1:1 in a column of its own, the lead and the
-     promises beside it, the way on under them -- the chart was drawn
-     at 1.76x, and the promise ran past the fold at 1100x800. */
-  .desk-brd .brd__stage:has(> .brd-chart) {
-    display: grid;
-    grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
-    grid-template-rows: 1fr auto auto 1fr;
-    align-items: start;
+  /* ── 辻 — the ride drawn to scale (plan 161) ──
+     The owner's D08 (PlanStep's PlanRoute): the route in gold from the
+     crossroads to the terminus, each stop where its day falls (--at,
+     0..1, between the two ends' own room), its day over it and its name
+     under; then under a rule, what the terminus holds beside what the
+     ride is for. */
+  .desk-brd__plan {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-8);
   }
-  /* The lead and its promises as one block on the chart's middle, not
-     hung from its top edge with the chart's lower half beside nothing. */
-  .desk-brd .brd__stage:has(> .brd-chart) > .brd-chart { grid-row: 1 / -1; }
-  .desk-brd .brd__stage:has(> .brd-chart) > .brd-lead { grid-area: 2 / 2; }
-  .desk-brd .brd__stage:has(> .brd-chart) > .brd-bullets { grid-area: 3 / 2; }
+  .desk-brd__route {
+    position: relative;
+    height: 232px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    animation: brd-in 360ms ease-out 160ms backwards;
+  }
+  /* The rail from the departure's centre to the terminus's: each end
+     stands half a stop's width (110px) in from the paper's edge. */
+  .desk-brd__route::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--sp-9) + 58px - 5px);
+    right: 110px;
+    left: 110px;
+    height: 10px;
+    border-radius: var(--r-pill);
+    background: var(--accent2);
+  }
+  .desk-brd__halt {
+    position: absolute;
+    top: 0;
+    left: calc(110px + var(--at, 0) * (100% - 220px));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 220px;
+    margin-left: -110px;
+    text-align: center;
+  }
+  .desk-brd__halt-when {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--sp-1);
+    height: var(--sp-9);
+  }
+  .desk-brd__halt-cap {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .desk-brd__halt-date {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-primary);
+  }
+  .desk-brd__halt--end .desk-brd__halt-date { font-size: var(--fs-heading); }
+  .desk-brd__halt--by .desk-brd__halt-date { font-size: var(--fs-body); color: var(--text-secondary); }
+  /* Every ring is centred on the rail: a box of the terminus's height,
+     the ring in its middle. */
+  .desk-brd__halt-ring {
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    margin-block: calc((116px - 88px) / 2);
+    border: 4px solid var(--text-primary);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .desk-brd__halt-ring--hub > .mark { width: 60%; height: 60%; }
+  .desk-brd__halt-ring--kana {
+    width: 80px;
+    height: 80px;
+    margin-block: calc((116px - 80px) / 2);
+    border-color: var(--line-kana);
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+  }
+  .desk-brd__halt-ring--by {
+    width: 22px;
+    height: 22px;
+    margin-block: calc((116px - 22px) / 2);
+    border: 4px solid var(--accent2);
+  }
+  .desk-brd__halt-ring--end {
+    width: 116px;
+    height: 116px;
+    margin-block: 0;
+    border: 6px solid var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 22%, var(--bg-main));
+    font-size: var(--fs-heading);
+  }
+  .desk-brd__halt-ring--jp { font-family: var(--font-jp); }
+  .desk-brd__halt-lab {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    margin-top: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-brd__halt-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .desk-brd__halt--by .desk-brd__halt-name { font-size: var(--fs-lead); }
+  .desk-brd__plan-foot {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-8);
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--surface-line);
+    animation: brd-in 360ms ease-out 280ms backwards;
+  }
+  .desk-brd__plan-cap {
+    margin: 0 0 var(--sp-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .desk-brd__held-list,
+  .desk-brd__for-list {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .desk-brd__held-list { gap: var(--sp-6); }
+  .desk-brd__for-list { flex-direction: column; gap: var(--sp-4); }
+  .desk-brd__held-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    min-width: 0;
+  }
+  .desk-brd__held-item[data-line="vocab"] { --c: var(--line-vocab); }
+  .desk-brd__held-item[data-line="kanji"] { --c: var(--line-kanji); }
+  .desk-brd__held-item[data-line="grammar"] { --c: var(--line-grammar); }
+  .desk-brd__held-item[data-line="kana"] { --c: var(--line-kana); }
+  .desk-brd__held-ring {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border: 3px solid var(--c, var(--accent2));
+    border-radius: var(--r-pill);
+    font-family: var(--font-serif);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    color: color-mix(in srgb, var(--c, var(--accent2)) 70%, var(--text-primary));
+  }
+  .desk-brd__held-txt { display: flex; flex-direction: column; }
+  .desk-brd__held-fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--c, var(--accent2)) 80%, var(--text-primary));
+  }
+  .desk-brd__held-unit {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__for-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    font-size: var(--fs-lead);
+    font-weight: 500;
+  }
+  .desk-brd__for-item > .svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    color: var(--accent2);
+  }
   /* The Welcome (components/boarding/Welcome's DeskWelcome): the
      column's masthead is the mark, so the paper's heading takes the
      display rung; the heading, the tagline and Board as one block over
@@ -26910,6 +27088,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd__hour-stn,
     .desk-brd__sky-board,
     .desk-brd__word,
+    .desk-brd__route,
+    .desk-brd__plan-foot,
     .desk-brd__first { animation: none; }
     .desk-brd__road,
     .desk-brd__ring,

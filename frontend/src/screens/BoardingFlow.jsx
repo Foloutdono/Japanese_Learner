@@ -645,6 +645,8 @@ export default function BoardingFlow({
             lines={answers.lines}
             figures={figures}
             now={now}
+            time={time}
+            hour={bucketFor(answers.minute)}
             onContinue={desk && !guest ? complete : () => go(guest ? 'account' : 'pass')}
             last={desk && !guest}
             busy={busy}

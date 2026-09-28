@@ -189,7 +189,7 @@ describe('first contact at 1440 (P10)', () => {
     expect(sheet.top).toBeGreaterThan(box(inCar('[data-hour="noon"]')).bottom)
   })
 
-  it('stands the plan at two columns\' width, centred in the window', async () => {
+  it('stands the plan across the canvas, centred in the window', async () => {
     await board()
     await pastName()
     inCar('[data-motive="trip"]').click()
@@ -203,8 +203,11 @@ describe('first contact at 1440 (P10)', () => {
     for (let i = 0; i < 4; i++) { inCar('[data-action="continue"]').click(); await settle() }
     expect(stepOf()).toBe('plan')
     await settle(600)
+    // The ride drawn to scale across the canvas.
     const plan = box(inCar('.brd__stage'))
-    expect(Math.round(plan.width)).toBe(2 * 360 + 22)
+    expect(Math.round(plan.width)).toBe(1240)
     expect(Math.abs(mid(plan) - bodyW() / 2)).toBeLessThan(1.5)
+    const route = box(inCar('.desk-brd__route'))
+    expect(Math.round(route.width)).toBe(1240)
   })
 })
