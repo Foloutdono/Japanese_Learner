@@ -25470,8 +25470,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   /* A step's answers stand at the width that serves them, set on its
      car so a leaving car keeps its own while it pulls away: the card's
-     for most questions, the canvas for the six roads, the kana's tree
-     and the line of stations, three columns and a gutter for the two
+     for most questions, the canvas for the six roads, the kana's tree,
+     the line of stations, the lines' cards, the four roads and the day's
+     arc, three columns and a gutter for the two
      words read out, two columns for the plan and a column's for the
      account's form. */
   .desk-brd .brd__car {
@@ -25481,7 +25482,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   .desk-brd .brd__car[data-dir="back"] { --pull: -1; }
   .desk-brd .brd__car--out { animation: desk-brd-pull-out 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
-  .desk-brd .brd__car:is([data-car="why"], [data-car="kana"]) { --desk-brd-w: var(--desk-board-w); }
+  .desk-brd .brd__car:is([data-car="why"], [data-car="kana"], [data-car="lines"], [data-car="rhythm"], [data-car="time"]) { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="reveal"] { --desk-brd-w: calc(3 * var(--desk-side-w) + var(--sp-8)); }
   .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: calc(2 * var(--desk-side-w) + var(--sp-6)); }
@@ -25689,7 +25690,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      bottom rings' centres, ROADS's --x and --y -- and the rings keep
      their size. A name with no room left beside its ring takes a
      second line rather than leave the paper. */
-  .desk-brd .brd__stage:has(> :is(.desk-brd__roads, .desk-brd__climb)) {
+  .desk-brd .brd__stage:has(> :is(.desk-brd__roads, .desk-brd__climb, .desk-brd__rides, .desk-brd__day)) {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -26043,6 +26044,491 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     animation: brd-in 360ms ease-out 420ms backwards;
   }
   .desk-brd__first strong { font-weight: 700; color: var(--text-primary); }
+  /* ── 辻 — the lines as cards, the kana over them (plan 161) ──
+     The owner's D05 (LinesStep's LineCards): the kana a strip across the
+     paper under their pigment, locked -- on every ticket, no answer --
+     and the three lines a card each under their own: the line's glyph
+     in its ring, its name and what it is, and at its foot what it
+     carries on the ride. A line taken off greys its ring and its figure
+     and keeps its pigment's edge, so it still reads as that line. */
+  .desk-brd__ticket {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    min-height: 68px;
+    padding: 0 var(--sp-6);
+    border: 1px solid var(--surface-line);
+    border-left: 4px solid var(--line-kana);
+    border-radius: var(--r-card);
+    animation: brd-in 360ms ease-out 160ms backwards;
+  }
+  .desk-brd__glyph--ticket,
+  .desk-brd__glyph--goal {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+  }
+  .desk-brd__glyph--ticket { font-size: var(--fs-lead); }
+  .desk-brd__glyph--goal {
+    border-color: var(--accent2);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+  }
+  .desk-brd__ticket-txt {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-4);
+    font-size: var(--fs-body);
+    color: var(--text-secondary);
+  }
+  .desk-brd__ticket-txt > b {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .desk-brd__ticket-lock {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-left: auto;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__ticket-lock > .svg { width: 16px; height: 16px; }
+  .desk-brd__lines {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-6);
+  }
+  .desk-brd__line {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+    min-height: 320px;
+    padding: var(--sp-8) var(--sp-7) var(--sp-6);
+    border: 1px solid var(--surface-line);
+    border-top: 4px solid var(--c, var(--accent2));
+    border-radius: var(--r-card);
+    background: var(--surface);
+    font: inherit;
+    color: var(--text-primary);
+    text-align: center;
+    cursor: pointer;
+    animation: brd-in 360ms ease-out 200ms backwards;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .desk-brd__line:nth-child(2) { animation-delay: 240ms; }
+  .desk-brd__line:nth-child(3) { animation-delay: 280ms; }
+  .desk-brd__line[data-line="vocab"] { --c: var(--line-vocab); }
+  .desk-brd__line[data-line="kanji"] { --c: var(--line-kanji); }
+  .desk-brd__line[data-line="grammar"] { --c: var(--line-grammar); }
+  .desk-brd__line-ring {
+    display: grid;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    margin-bottom: var(--sp-4);
+    border: 4px solid var(--c, var(--accent2));
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-serif);
+    font-size: var(--fs-display);
+    font-weight: 700;
+    line-height: 1;
+    color: color-mix(in srgb, var(--c, var(--accent2)) 70%, var(--text-primary));
+    transition: border-color 160ms ease, color 160ms ease;
+  }
+  .desk-brd__line-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+  }
+  .desk-brd__line-desc { font-size: var(--fs-body); color: var(--text-secondary); }
+  .desk-brd__line-vol {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--sp-3);
+    width: 100%;
+    margin-top: auto;
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--surface-line);
+  }
+  .desk-brd__line-fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--c, var(--accent2)) 80%, var(--text-primary));
+  }
+  .desk-brd__line-unit {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__line[aria-pressed="false"] .desk-brd__line-ring {
+    border-color: var(--surface-line);
+    color: var(--text-secondary);
+  }
+  .desk-brd__line[aria-pressed="false"] .desk-brd__line-fig { color: var(--text-secondary); }
+  /* ── 辻 — four roads from today (plan 161) ──
+     The owner's D06 (RhythmStep's RideRoads): the rhythms as four roads
+     out of today on one calendar, each as long as its ride, the stop in
+     its ring at the road's end and its month and days beside it, the
+     rhythm picked on a gold band. The calendar is measured off the box
+     (--x, --y, --h and --end, plain pixels); the rows are the answers,
+     laid over the drawing with no ground of their own, so the band and
+     the roads show through. */
+  .desk-brd__rides {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 336px;
+    max-height: 512px;
+    margin-block: auto;
+  }
+  .desk-brd__ride-map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    animation: desk-brd-show 320ms ease-out 160ms backwards;
+  }
+  .desk-brd__ride-band { fill: color-mix(in srgb, var(--accent2) 14%, var(--bg-main)); }
+  .desk-brd__ride-grid { stroke: color-mix(in srgb, var(--text-primary) 10%, transparent); stroke-width: 1; }
+  .desk-brd__ride-grid--jan {
+    stroke: color-mix(in srgb, var(--text-primary) 30%, transparent);
+    stroke-dasharray: 3 4;
+  }
+  .desk-brd__ride-today { stroke: var(--text-primary); stroke-width: 2; }
+  .desk-brd__ride-road {
+    stroke: var(--surface-line);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke 160ms ease;
+  }
+  .desk-brd__ride-start { fill: var(--text-primary); }
+  .desk-brd__ride-stn {
+    fill: var(--bg-main);
+    stroke: var(--surface-line);
+    stroke-width: 4;
+  }
+  .desk-brd__ride-code {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: var(--text-secondary);
+  }
+  .desk-brd__ride-code--jp { font-family: var(--font-jp); }
+  .desk-brd__ride-line--on .desk-brd__ride-road { stroke: var(--accent2); stroke-width: 12; }
+  .desk-brd__ride-line--on .desk-brd__ride-stn { stroke: var(--accent2); stroke-width: 5; }
+  .desk-brd__ride-line--on .desk-brd__ride-code { fill: var(--text-primary); }
+  .desk-brd__ride-cap,
+  .desk-brd__ride-month {
+    position: absolute;
+    left: calc(var(--x, 0) * 1px);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .desk-brd__ride-cap {
+    top: 0;
+    padding-left: var(--sp-1);
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+  }
+  .desk-brd__ride-cap--today {
+    padding-left: 0;
+    transform: translateX(-50%);
+  }
+  .desk-brd__ride-month {
+    top: calc(var(--sp-6) + 2px);
+    letter-spacing: var(--tr-term);
+    text-transform: uppercase;
+    transform: translateX(-50%);
+  }
+  .desk-brd__ride {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px);
+    left: 0;
+    width: 100%;
+    height: calc(var(--h, 116) * 1px);
+    padding: 0 var(--sp-5);
+    border: 1px solid transparent;
+    border-radius: var(--r-card);
+    background: none;
+    font: inherit;
+    color: var(--text-primary);
+    text-align: start;
+    cursor: pointer;
+    animation: brd-in 360ms ease-out 200ms backwards;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+  .desk-brd__ride:nth-of-type(2) { animation-delay: 240ms; }
+  .desk-brd__ride:nth-of-type(3) { animation-delay: 280ms; }
+  .desk-brd__ride:nth-of-type(4) { animation-delay: 320ms; }
+  .desk-brd__ride-svc {
+    position: absolute;
+    top: 50%;
+    left: var(--sp-5);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    transform: translateY(-50%);
+  }
+  .desk-brd__ride-txt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .desk-brd__ride-min {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-brd__ride-unit,
+  .desk-brd__ride-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__ride-name {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .desk-brd .desk-brd__ride-name > .brd-tag { margin-bottom: 0; }
+  .desk-brd__ride-arr {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--end, 0) * 1px + 24px + var(--sp-3));
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    padding: var(--sp-1) var(--sp-2);
+    border-radius: var(--r-plate);
+    background: var(--bg-main);
+    white-space: nowrap;
+    transform: translateY(-50%);
+  }
+  .desk-brd__ride-when {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__ride-days {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__ride[aria-pressed="true"] .desk-brd__ride-arr { background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main)); }
+  .desk-brd__ride[aria-pressed="true"] .desk-brd__ride-when { font-size: var(--fs-lead); color: var(--text-primary); }
+  .desk-brd__ride[aria-pressed="true"] :is(.desk-brd__ride-days, .desk-brd__ride-unit, .desk-brd__ride-name) { color: var(--text-primary); }
+  /* ── 辻 — the day as the sun's arc (plan 161, option 3) ──
+     The owner's 空の弧 (TimeStep's DayArc): the day as the sky on its
+     horizon, sunrise at the left, noon near the crown, night at the
+     right; the three rides as stations on it; the train riding the arc,
+     the stretch of day behind it gold; the departure board in the bowl.
+     The arc is measured off the box (--x/--y, a station's or the
+     train's centre; --w, the board's width, plain pixels). Standing on a
+     ride's own hour the station is the train, so the knob steps out of
+     sight -- and back, while it holds the focus. */
+  .desk-brd__day {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-height: 0;
+  }
+  .desk-brd__sky {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 380px;
+    max-height: 508px;
+    margin-top: auto;
+    touch-action: none;
+  }
+  .desk-brd__sky-map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    animation: desk-brd-show 320ms ease-out 160ms backwards;
+  }
+  .desk-brd__horizon { stroke: var(--text-secondary); stroke-width: 2; }
+  .desk-brd__arc {
+    fill: none;
+    stroke: var(--surface-line);
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+  .desk-brd__arc--done { stroke: var(--accent2); }
+  .desk-brd__sky-tick { stroke: var(--surface-line); stroke-width: 2; }
+  .desk-brd__sky-tick--major { stroke: var(--text-secondary); }
+  .desk-brd__hour {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: var(--text-secondary);
+  }
+  .desk-brd__sun > path { fill: var(--bg-main); stroke: var(--accent2); stroke-width: 3; }
+  .desk-brd__sun > line { stroke: var(--accent2); stroke-width: 3; stroke-linecap: round; }
+  .desk-brd__moon { fill: var(--text-secondary); }
+  .desk-brd__hour-stn {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px - 48px);
+    left: calc(var(--x, 0) * 1px - 48px);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-card);
+    background: none;
+    font: inherit;
+    color: var(--text-primary);
+    text-align: start;
+    cursor: pointer;
+    animation: brd-in 360ms ease-out 200ms backwards;
+  }
+  .desk-brd__hour-stn--noon {
+    left: calc(var(--x, 0) * 1px - 90px);
+    flex-direction: column;
+    gap: var(--sp-3);
+    width: 180px;
+    text-align: center;
+    animation-delay: 240ms;
+  }
+  .desk-brd__hour-stn--pm {
+    right: calc(100% - var(--x, 0) * 1px - 48px);
+    left: auto;
+    flex-direction: row-reverse;
+    text-align: end;
+    animation-delay: 280ms;
+  }
+  .desk-brd__hour-ring {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    border: 3px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-serif);
+    font-size: var(--fs-display);
+    font-weight: 700;
+    line-height: 1;
+    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+  }
+  .desk-brd__hour-stn[aria-pressed="true"] .desk-brd__hour-ring {
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main));
+    box-shadow: inset 0 0 0 2px var(--accent2), 0 0 0 7px color-mix(in srgb, var(--accent2) 16%, transparent);
+  }
+  .desk-brd__hour-lab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+  }
+  .desk-brd__hour-stn--noon .desk-brd__hour-lab { align-items: center; }
+  .desk-brd__hour-stn--pm .desk-brd__hour-lab { align-items: flex-end; }
+  .desk-brd__hour-name {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+  }
+  .desk-brd__hour-time {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+  }
+  .desk-brd__train {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px - 13px);
+    left: calc(var(--x, 0) * 1px - 13px);
+    z-index: 2;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 3px solid var(--accent2);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    cursor: grab;
+    transition: opacity 160ms ease;
+  }
+  /* A hand's width to take hold of. */
+  .desk-brd__train::before {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--sp-4));
+  }
+  .desk-brd__train--docked { pointer-events: none; }
+  .desk-brd__train--docked:not(:focus-visible) { opacity: 0; }
+  .desk-brd__sky-board {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px - var(--sp-8));
+    left: calc(var(--x, 0) * 1px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-4);
+    width: calc(var(--w, 500) * 1px);
+    padding: var(--sp-5) var(--sp-6) var(--sp-6);
+    border-radius: var(--r-panel);
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    text-align: center;
+    transform: translate(-50%, -100%);
+    animation: desk-brd-show 320ms ease-out 200ms backwards;
+  }
+  .desk-brd__sky-board .brd-board__flaps { gap: var(--sp-2); }
+  .desk-brd__sky-board .brd-flap {
+    width: 64px;
+    height: 88px;
+    font-size: var(--fs-specimen-word);
+    color: var(--accent2);
+  }
+  .desk-brd__sky-board .brd-board__colon { font-size: var(--fs-display); }
+  .desk-brd__sky-when { font-size: var(--fs-sm); color: var(--text-on-panel-soft); }
+  .desk-brd__sky-when > b { font-weight: 700; color: var(--text-on-panel); }
+  .desk-brd__fine {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    margin: 0 0 auto;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
   /* The kana's four answers and the four rhythms, one row of tiles. */
   .desk-brd .brd__car:is([data-car="kana"], [data-car="rhythm"]) .brd-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   /* The recommended rhythm's tag rides its tile's top edge, a badge on
@@ -26416,11 +26902,22 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd__stop,
     .desk-brd__call,
     .desk-brd__tree,
+    .desk-brd__ticket,
+    .desk-brd__line,
+    .desk-brd__ride-map,
+    .desk-brd__ride,
+    .desk-brd__sky-map,
+    .desk-brd__hour-stn,
+    .desk-brd__sky-board,
     .desk-brd__word,
     .desk-brd__first { animation: none; }
     .desk-brd__road,
     .desk-brd__ring,
     .desk-brd__stop-ring,
+    .desk-brd__line-ring,
+    .desk-brd__ride-road,
+    .desk-brd__hour-ring,
+    .desk-brd__train,
     .desk-brd__tree::before,
     .desk-brd__branch { transition: none; }
   }
@@ -26434,7 +26931,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      boarding's answers, its doors and its way back, and the Welcome's
      sign-in, are spared it. */
   @media (pointer: fine) {
-    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stop, .desk-brd__way, .desk-brd__back, .desk-brd__sp-door):hover,
+    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stop, .desk-brd__way, .desk-brd__line, .desk-brd__ride, .desk-brd__hour-stn, .desk-brd__train, .desk-brd__back, .desk-brd__sp-door):hover,
     .desk-door__auth button:hover { filter: none; }
     .desk-brd .brd-opt:not(.brd-opt--on):hover,
     .desk-brd .brd-opt:not(.brd-opt--on):focus-visible,
@@ -26444,6 +26941,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd .brd-cell:not(.brd-cell--on):focus-visible,
     button.desk-brd__stop:not(.desk-brd__stop--on):hover > .desk-brd__stop-ring,
     button.desk-brd__stop:not(.desk-brd__stop--on):focus-visible > .desk-brd__stop-ring,
+    .desk-brd__line:hover,
+    .desk-brd__line:focus-visible,
+    .desk-brd__ride:not([aria-pressed="true"]):hover,
+    .desk-brd__ride:not([aria-pressed="true"]):focus-visible,
+    .desk-brd__hour-stn:not([aria-pressed="true"]):hover > .desk-brd__hour-ring,
+    .desk-brd__hour-stn:not([aria-pressed="true"]):focus-visible > .desk-brd__hour-ring,
     .desk-brd__way:not([aria-pressed="true"]):hover > .desk-brd__ring,
     .desk-brd__way:not([aria-pressed="true"]):focus-visible > .desk-brd__ring {
       border-color: var(--accent2);

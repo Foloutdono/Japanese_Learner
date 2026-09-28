@@ -1862,13 +1862,34 @@ const boarding = {
     kanji: 'Lectures, sens, écriture',
     grammar: 'Les structures, avec des exemples',
   },
+  // 辻 (plan 161): the desk's lines -- the kana's strip and what each
+  // line carries on the ride to its goal.
+  brdKanaFirst: 'hiragana et katakana, en premier',
+  brdOnEveryTicket: 'Sur chaque billet',
+  brdLineCarries: {
+    vocab: (stop) => `mots jusqu’au ${stop}`,
+    kanji: (stop) => `kanji jusqu’au ${stop}`,
+    grammar: (stop) => `points jusqu’au ${stop}`,
+  },
+  brdLinesArrive: (n, stop, date) => `${n === 1 ? 'Avec cette ligne' : n === 2 ? 'Avec ces deux lignes' : 'Avec ces trois lignes'}, arrivée au ${stop} en **${date}**.`,
   brdRhythmQ: 'Quel est ton rythme ?',
+  // 辻 (plan 161): the desk's four roads -- a rhythm's minutes and its
+  // service, and the days its ride takes.
+  brdRhythmHint: 'Plus tu roules chaque jour, plus tôt tu arrives. Modifiable plus tard.',
+  brdADay: 'par jour',
+  brdRhythmName: { 5: 'Omnibus', 10: 'Rapide', 15: 'Rapide spécial', 20: 'Express' },
+  brdRideDays: (n) => (n === 1 ? '1 jour' : `${n} jours`),
   brdMinADay: 'min par jour',
   brdNewItems: (n) => `~${n} nouveautés`,
   brdChangeLater: 'Modifiable plus tard.',
   brdTimeQ: 'Quand étudies-tu ?',
   brdDeparture: 'Départ',
   brdDayAria: 'Heure de départ',
+  // 辻 (plan 161): the desk's hour, the day as the sun's arc.
+  brdTimeHint: 'Ton train part chaque jour à cette heure.',
+  brdYourTrain: 'Ton train',
+  brdThenDaily: 'puis chaque jour',
+  brdTimeFine: 'ou glisse le train le long du jour, par demi-heure',
   // Le rappel (natif seulement), et la notification telle que l’appli
   // l’envoie. brdAppName est le nom sur les stores ; à garder en
   // phase avec appName dans capacitor.config.json.

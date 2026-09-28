@@ -177,6 +177,40 @@ export function kanaKnownCount(volumes, kanaAnswer) {
   return 0
 }
 
+const DAY_MS = 86400000
+
+/** The rhythm's time axis on the desk (plan 161, the four roads): today
+ *  at 0, the latest arrival at 1, and a mark at the start of each month
+ *  between -- every quarter past a year and a half, every January past
+ *  four years. `at` is where a mark falls (0..1) and `mid` where its
+ *  name sits: halfway across the stretch it opens, or on the mark for a
+ *  year; a January also names its year, where months name the stretch. */
+export function rideAxis(now, last, lang) {
+  const start = now.getTime()
+  const span = Math.max(last.getTime() - start, DAY_MS)
+  const at = d => (d.getTime() - start) / span
+  const days = span / DAY_MS
+  const step = days > 4 * 365 ? 12 : days > 540 ? 3 : 1
+  const month = new Intl.DateTimeFormat(lang, { month: 'short' })
+  const marks = []
+  // The first month to start after today -- on a quarter or a year, the
+  // first of those.
+  const m = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+  while (m.getMonth() % step !== 0) m.setMonth(m.getMonth() + 1)
+  for (; m.getTime() <= start + span; m.setMonth(m.getMonth() + step)) {
+    const next = new Date(m.getFullYear(), m.getMonth() + step, 1)
+    const jan = m.getMonth() === 0
+    marks.push({
+      at: at(m),
+      mid: step === 12 ? at(m) : (at(m) + Math.min(1, at(next))) / 2,
+      label: step === 12 ? String(m.getFullYear()) : month.format(m),
+      jan,
+      year: jan && step !== 12 ? String(m.getFullYear()) : null,
+    })
+  }
+  return { at, marks }
+}
+
 /** The kana's own stop on the ride (plan 161, the desk's reveal): the
  *  signs the kana check left unread -- the front-load planFigures
  *  counts on every ride but one to that stop -- and the day they are

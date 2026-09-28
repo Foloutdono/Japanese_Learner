@@ -10,7 +10,7 @@ import { USERNAME_RE } from '../components/profile/EditableUsername'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEPART_TIMES } from '../components/onboarding/departures'
 import {
-  LINES, RECOMMENDED_RHYTHM, boardingDraft, bucketFor, goalStops, itemsForRhythm, kanaFigures,
+  LINES, RECOMMENDED_RHYTHM, RHYTHMS, boardingDraft, bucketFor, goalStops, itemsForRhythm, kanaFigures,
   levelAnswers, levelForKana, minutesToTime, planFigures, stopsAhead, timeToMinutes,
 } from '../domain/boarding'
 import { BoardHead } from '../components/boarding/BoardFrame'
@@ -439,6 +439,16 @@ export default function BoardingFlow({
   const arrivalMonth = desk && volumes
     ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(figures.date)
     : null
+  // What each line carries on the ride to the goal, taken or not, for
+  // the lines' cards.
+  const everyLine = desk && volumes
+    ? planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, LINES)
+    : null
+  const lineCarries = everyLine && { vocab: everyLine.words, kanji: everyLine.kanji, grammar: everyLine.grammar }
+  // What each rhythm's ride comes to, for the four roads.
+  const rhythmRides = desk && volumes
+    ? RHYTHMS.map(min => planFigures(volumes, jlpt, answers.goal, itemsForRhythm(min), answers.kana, now, answers.lines))
+    : null
   // And the reveal's first stop -- the kana still unread, at the ride's
   // pace (the recommended one, until it is asked).
   const kanaStop = desk && volumes
@@ -568,11 +578,29 @@ export default function BoardingFlow({
           />
         )
       case 'lines':
-        return <LinesStep value={answers.lines} onChange={v => set({ lines: v })} onContinue={() => go('rhythm')} />
+        return (
+          <LinesStep
+            value={answers.lines}
+            onChange={v => set({ lines: v })}
+            onContinue={() => go('rhythm')}
+            carries={lineCarries}
+            stop={answers.goal ?? jlpt}
+            arrival={arrivalMonth}
+          />
+        )
       case 'rhythm':
-        return <RhythmStep value={answers.rhythm} onChange={v => set({ rhythm: v })} onContinue={() => go('time')} />
+        return (
+          <RhythmStep
+            value={answers.rhythm}
+            onChange={v => set({ rhythm: v })}
+            onContinue={() => go('time')}
+            rides={rhythmRides}
+            stop={answers.goal ?? jlpt}
+            now={now}
+          />
+        )
       case 'time':
-        return <TimeStep minute={answers.minute} onChange={v => set({ minute: v })} onContinue={continueTime} />
+        return <TimeStep minute={answers.minute} onChange={v => set({ minute: v })} onContinue={continueTime} now={now} />
       case 'nudge':
         return (
           <NudgeStep

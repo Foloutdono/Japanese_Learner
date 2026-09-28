@@ -989,7 +989,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     expect(inCar('.desk-brd__chk')).toBeNull()
   })
 
-  it('rides the recommended rhythm\'s tag on its edge, every figure on one line', async () => {
+  it('draws the rhythms as four roads from today, the shorter ride the sooner stop', async () => {
     await board()
     await toLevel()
     await pick('[data-level="N3"]')
@@ -998,11 +998,110 @@ describe('first contact, finished (P13, plan 155)', () => {
     await next()
     expect(stepOf()).toBe('rhythm')
     await landed()
-    const cells = [...inCar('.brd-grid').children]
-    const tops = cells.map(c => Math.round(box(c.querySelector('.brd-cell__n')).top))
-    expect(new Set(tops).size).toBe(1)
-    const tag = inCar('[data-rhythm="10"] .brd-tag')
-    expect(Math.abs(centreY(box(tag)) - box(inCar('[data-rhythm="10"]')).top)).toBeLessThan(1.5)
+    const rides = [...inCar('.desk-brd__rides').querySelectorAll('.desk-brd__ride')]
+    expect(rides.map(r => r.dataset.rhythm)).toEqual(['5', '10', '15', '20'])
+    expect([en.nudgeWhen.today, fr.nudgeWhen.today]).toContain(inCar('.desk-brd__ride-cap--today').textContent)
+    // Each road as long as its ride: the more minutes, the sooner.
+    const ends = rides.map(r => Number(getComputedStyle(r).getPropertyValue('--end')))
+    const days = rides.map(r => Number(r.querySelector('.desk-brd__ride-days').textContent.match(/\d+/)[0]))
+    for (let i = 1; i < 4; i++) {
+      expect(ends[i]).toBeLessThan(ends[i - 1])
+      expect(days[i]).toBeLessThan(days[i - 1])
+    }
+    for (const r of rides) expect(r.querySelector('.desk-brd__ride-when').textContent).toMatch(/20\d\d/)
+    // The recommended rhythm is picked from the start, on the band, its
+    // tag beside its name.
+    const band = () => box(inCar('.desk-brd__ride-band'))
+    expect(inCar('[data-rhythm="10"]').getAttribute('aria-pressed')).toBe('true')
+    expect(Math.abs(band().top - box(rides[1]).top)).toBeLessThan(1.5)
+    expect([en.onbPaceRecommended, fr.onbPaceRecommended]).toContain(inCar('[data-rhythm="10"] .brd-tag').textContent)
+    // Its digit moves the pick, the band with it.
+    await userEvent.keyboard('4')
+    expect(inCar('[data-rhythm="20"]').getAttribute('aria-pressed')).toBe('true')
+    expect(Math.abs(band().top - box(rides[3]).top)).toBeLessThan(1.5)
+    // The rows one under another, each whole on the paper.
+    rides.reduce((a, b) => { expect(box(b).top).toBeGreaterThanOrEqual(box(a).bottom - 0.5); return b })
+    for (const r of rides) {
+      expect(box(r.querySelector('.desk-brd__ride-arr')).right).toBeLessThanOrEqual(bodyW())
+      expect(box(r).bottom).toBeLessThan(box(inCar('.brd__foot')).top)
+    }
+  })
+
+  it('draws the hour as the day\'s arc, the train riding it by the half hour', async () => {
+    await board()
+    await toLevel()
+    await toTime()
+    await landed()
+    expect([en.brdTimeHint, fr.brdTimeHint]).toContain(inCar('.brd__hint').textContent)
+    const ring = id => box(inCar(`[data-hour="${id}"] .desk-brd__hour-ring`))
+    // Morning low at the left, noon at the crown, night low at the right.
+    expect(mid(ring('am'))).toBeLessThan(mid(ring('noon')))
+    expect(mid(ring('noon'))).toBeLessThan(mid(ring('pm')))
+    expect(ring('noon').top).toBeLessThan(ring('am').top)
+    expect(ring('noon').top).toBeLessThan(ring('pm').top)
+    // The morning's ride is the day's to begin with: the train stands on
+    // its station, and the station is the train.
+    const train = () => inCar('[role="slider"]')
+    expect(inCar('[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
+    expect(train().getAttribute('aria-valuetext')).toBe('07:30')
+    expect(train().classList.contains('desk-brd__train--docked')).toBe(true)
+    // A half hour on: off the station, on the arc, the stretch behind it
+    // gold to its centre -- and still the morning.
+    train().focus()
+    await userEvent.keyboard('{ArrowRight}')
+    expect(train().getAttribute('aria-valuetext')).toBe('08:00')
+    expect(train().classList.contains('desk-brd__train--docked')).toBe(false)
+    expect(inCar('[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
+    const map = box(inCar('.desk-brd__sky-map'))
+    const [ex, ey] = inCar('.desk-brd__arc--done').getAttribute('d').match(/(-?[\d.]+) (-?[\d.]+)$/).slice(1).map(Number)
+    expect(Math.abs(map.left + ex - mid(box(train())))).toBeLessThan(1)
+    expect(Math.abs(map.top + ey - cy(box(train())))).toBeLessThan(1)
+    // A ride's digit takes the train to its hour; the board says it.
+    await userEvent.keyboard('3')
+    expect(inCar('[data-hour="pm"]').getAttribute('aria-pressed')).toBe('true')
+    expect(train().getAttribute('aria-valuetext')).toBe('21:00')
+    await settle(1400)
+    expect(inCar('.brd-board__flaps').getAttribute('aria-label')).toBe('21:00')
+    // Taken by the arc under the pointer, by the half hour.
+    const at15 = [...inCar('.desk-brd__sky-map').querySelectorAll('.desk-brd__hour')].find(h => h.textContent === '15')
+    const at = box(at15)
+    inCar('.desk-brd__sky').dispatchEvent(new PointerEvent('pointerdown', { clientX: mid(at), clientY: cy(at), pointerId: 7, buttons: 1, bubbles: true }))
+    await settle(40)
+    expect(['14:30', '15:00', '15:30']).toContain(train().getAttribute('aria-valuetext'))
+    // ...and not by the board in the bowl.
+    const was = train().getAttribute('aria-valuetext')
+    const sheet = box(inCar('.desk-brd__sky-board'))
+    inCar('.desk-brd__sky-board').dispatchEvent(new PointerEvent('pointerdown', { clientX: mid(sheet), clientY: cy(sheet), pointerId: 8, buttons: 1, bubbles: true }))
+    await settle(40)
+    expect(train().getAttribute('aria-valuetext')).toBe(was)
+    expect(fits(inCar('.brd__body'))).toBe(true)
+  })
+
+  it('draws the lines as three cards under the kana\'s ticket, each with what it carries', async () => {
+    await board()
+    await toLevel()
+    await pick('[data-level="N3"]')
+    await next()
+    await next()
+    expect(stepOf()).toBe('lines')
+    await landed()
+    expect([en.brdOnEveryTicket, fr.brdOnEveryTicket]).toContain(inCar('.desk-brd__ticket-lock').textContent)
+    const cards = [...inCar('.desk-brd__lines').children]
+    expect(cards.map(c => c.dataset.line)).toEqual(['vocab', 'kanji', 'grammar'])
+    expect(new Set(cards.map(c => Math.round(box(c).top))).size).toBe(1)
+    for (const c of cards) expect(c.querySelector('.desk-brd__line-fig').textContent).toMatch(/^~\d/)
+    // The arrival moves as a line comes off, and goes with the last one.
+    const arrival = () => inCar('.desk-brd__first')?.textContent ?? null
+    const before = arrival()
+    expect(before).toMatch(/N2/)
+    await pick('[data-line="vocab"]')
+    expect(inCar('[data-line="vocab"]').getAttribute('aria-pressed')).toBe('false')
+    expect(arrival()).not.toBe(before)
+    await pick('[data-line="kanji"]')
+    await pick('[data-line="grammar"]')
+    expect(arrival()).toBeNull()
+    expect(inCar('.brd__error')).not.toBeNull()
+    expect(inCar('[data-action="continue"]').disabled).toBe(true)
   })
 
   it('hands the Welcome\'s column to the wait', async () => {

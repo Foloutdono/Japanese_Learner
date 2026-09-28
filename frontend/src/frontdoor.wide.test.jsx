@@ -163,6 +163,32 @@ describe('first contact at 1440 (P10)', () => {
     }
   })
 
+  it('draws the day\'s arc at the drawing\'s span, the board in its bowl', async () => {
+    await board()
+    await pastName()
+    inCar('[data-motive="trip"]').click()
+    await settle(40)
+    inCar('[data-action="continue"]').click()
+    await settle()
+    inCar('[data-kana="both"]').click()
+    await settle()
+    inCar('[data-level="N3"]').click()
+    await settle(40)
+    for (let i = 0; i < 4; i++) { inCar('[data-action="continue"]').click(); await settle() }
+    expect(stepOf()).toBe('time')
+    await settle(900)
+    const hours = [...inCar('.desk-brd__sky-map').querySelectorAll('.desk-brd__hour')]
+    const at = label => box(hours.find(h => h.textContent === label))
+    // Six in the morning to midnight across 1080px of sky.
+    expect(Math.round(mid(at('24')) - mid(at('06')))).toBe(1080)
+    // The board under the crown, clear of the morning's and the night's names.
+    const sheet = box(inCar('.desk-brd__sky-board'))
+    expect(Math.abs(mid(sheet) - mid(box(inCar('.desk-brd__sky'))))).toBeLessThan(1)
+    expect(sheet.left).toBeGreaterThan(box(inCar('[data-hour="am"] .desk-brd__hour-lab')).right)
+    expect(sheet.right).toBeLessThan(box(inCar('[data-hour="pm"] .desk-brd__hour-lab')).left)
+    expect(sheet.top).toBeGreaterThan(box(inCar('[data-hour="noon"]')).bottom)
+  })
+
   it('stands the plan at two columns\' width, centred in the window', async () => {
     await board()
     await pastName()

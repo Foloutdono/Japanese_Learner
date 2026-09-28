@@ -1929,13 +1929,34 @@ const boarding = {
     kanji: 'Readings, meanings, writing',
     grammar: 'Patterns, with examples',
   },
+  // 辻 (plan 161): the desk's lines -- the kana's strip and what each
+  // line carries on the ride to its goal.
+  brdKanaFirst: 'hiragana and katakana, first',
+  brdOnEveryTicket: 'On every ticket',
+  brdLineCarries: {
+    vocab: (stop) => `words to ${stop}`,
+    kanji: (stop) => `kanji to ${stop}`,
+    grammar: (stop) => `points to ${stop}`,
+  },
+  brdLinesArrive: (n, stop, date) => `${n === 1 ? 'With this line' : n === 2 ? 'With these two lines' : 'With these three lines'}, you reach ${stop} by **${date}**.`,
   brdRhythmQ: 'What’s your rhythm?',
+  // 辻 (plan 161): the desk's four roads -- a rhythm's minutes and its
+  // service, and the days its ride takes.
+  brdRhythmHint: 'The more you ride each day, the sooner you arrive. You can change it later.',
+  brdADay: 'a day',
+  brdRhythmName: { 5: 'Local', 10: 'Rapid', 15: 'Special rapid', 20: 'Express' },
+  brdRideDays: (n) => (n === 1 ? '1 day' : `${n} days`),
   brdMinADay: 'min a day',
   brdNewItems: (n) => `~${n} new items`,
   brdChangeLater: 'You can change it later.',
   brdTimeQ: 'When do you study?',
   brdDeparture: 'Departure',
   brdDayAria: 'Departure time',
+  // 辻 (plan 161): the desk's hour, the day as the sun's arc.
+  brdTimeHint: 'Your train leaves at this hour every day.',
+  brdYourTrain: 'Your train',
+  brdThenDaily: 'then every day',
+  brdTimeFine: 'or slide the train along the day, by the half hour',
   // The nudge (native only), and the notification as the app sends it.
   // brdAppName is the store name, the one the notification header
   // shows; keep it in step with capacitor.config.json's appName.
