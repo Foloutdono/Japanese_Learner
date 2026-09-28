@@ -1077,7 +1077,17 @@ runtime purpose. Two consequences worth knowing:
   `src/frontdoor.desktop.test.jsx`, `src/frontdoor.wide.test.jsx` and the
   机 section of `index.css`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  When starting a new wave, begin at **164** or higher, and check
+  **164** is 改札, the boarding's gate button (the owner's pick D of four
+  drawn on the canvas "Tsuji — Board & Continue buttons", with its three
+  add-ons): Board and Continue as a gold pill with the pass's
+  contactless mark in a sumi reader, ripples and a breathing halo; not
+  yet as the gate's outline, a pick waking it with one overshoot, an
+  idle nudge after four seconds, and a list that scrolls under it
+  fading into the foot (cited in `components/boarding/BoardFrame.jsx`'s
+  `Continue`, `:root` and the gate block of `index.css` and its 机
+  section, `src/boarding.phone.test.jsx` and
+  `src/scrollFlash.desktop.test.jsx`; DESIGN.md, "The gate button").
+  When starting a new wave, begin at **165** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

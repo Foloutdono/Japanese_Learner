@@ -1,6 +1,7 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { useDesk } from '../../hooks/useDesk'
+import { PassWave } from '../profile/PassWave'
 import { BackChevron } from './icons'
 import { BoardBack } from './boardBack'
 
@@ -73,17 +74,44 @@ export function BoardAir() {
 /** The one filled action: gold, full width, docked. `keys` is the
     desk's (plan 122): Enter presses it -- hooks/useBoardKeys in the
     boarding, EnterKey on the Welcome and at a ride's end -- so it
-    prints the key and names it. Only where Enter really does. */
+    prints the key and names it. Only where Enter really does.
+
+    改札 (plan 164, the owner's pick D of four drawn): the gate you tap
+    your pass on -- a gold pill, the pass's contactless mark in a sumi
+    reader at its left, ripples leaving the reader. Until an answer is
+    picked it is the gate's outline, and the pick WAKES it: the fill
+    comes in and the pill overshoots once. Only on that change -- a
+    Continue that arrives ready does not pop -- so `waking` follows the
+    `disabled` it was last rendered with, never the mount. */
 export function Continue({ label, onClick, disabled = false, keys = false, ...rest }) {
   const { t } = useLang()
   const desk = useDesk()
   const back = useContext(BoardBack)
   const printed = keys && desk
+  const [waking, setWaking] = useState(false)
+  const was = useRef(disabled)
+  useEffect(() => {
+    if (was.current && !disabled) setWaking(true)
+    was.current = disabled
+  }, [disabled])
+  const woke = e => { if (e.animationName === 'btn-gate-wake') setWaking(false) }
   const button = (
-    <button type="button" className="btn-depart" onClick={onClick} disabled={disabled} aria-keyshortcuts={printed ? 'Enter' : undefined} {...rest}>
+    <button
+      type="button"
+      className={waking ? 'btn-depart btn-depart--gate btn-depart--waking' : 'btn-depart btn-depart--gate'}
+      onClick={onClick}
+      onAnimationEnd={woke}
+      disabled={disabled}
+      aria-keyshortcuts={printed ? 'Enter' : undefined}
+      {...rest}
+    >
+      <span className="btn-depart__reader" aria-hidden="true">
+        <i className="btn-depart__rip" />
+        <i className="btn-depart__rip" />
+        <PassWave className="pass__wave btn-depart__wave" />
+      </span>
       <span className="btn-depart__jp">{label}</span>
       {printed && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
-      <span className="btn-depart__go" aria-hidden="true">▶</span>
     </button>
   )
   if (!printed || !back) return button

@@ -707,7 +707,8 @@ the floor when the study screens joined, so the whole family went deeper. **79%
 is the ceiling** — it is the hover's value, and above it 黄丹 fails. Hover goes **lighter**, never darker — a `filter:
 brightness()` is not the hover, and must be turned off where the bare `button`
 rule supplies one. Disabled is `opacity: 0.45`, and there is only one disabled
-treatment.
+treatment (outside the boarding's gate button, whose outline is its own — see
+"The gate button").
 
 **The ink is chosen by the fill's lightness, not fixed.** At the 70/79
 deepening, **every line pigment but one carries `--text-on-panel`** in both
@@ -750,6 +751,43 @@ Two rules the guard exists to keep, both learned by measurement:
   composites toward the ground, not toward the ink, so it is not a way to
   make a dim register — it is a way to fail dark mode too. Reach for a
   dimmer token, not a lower alpha.
+
+### The gate button
+
+The boarding's one action — **Board** on the Welcome, **Continue** on every
+question and at the end of a first ride (`Continue` in
+`components/boarding/BoardFrame.jsx`, `.btn-depart--gate`) — is drawn as a
+ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
+directions drawn for "more vibrant, the user must notice it and want to
+press it"):
+
+- **A gold pill**, 66px on the 844px phone (56px under 800px of frame, 52px
+  under 740px, 66px always on the desk), its fill a top-lit ramp of 山吹
+  (`--gate-gold-lit` → `--gate-gold` → `--gate-gold-deep`) that holds the
+  same value in both themes, inked `--text-on-fill` (6.9:1 in the middle,
+  5.3:1 at the deep end).
+- **A sumi reader** at its left holding the pass's own contactless mark
+  (`PassWave`) in `--gate-lamp`; two ripples leave it, and pressing lights
+  it (`--text-on-panel`), the gate's ピッ. The word stands on the pill's
+  centre line; on the desk the printed Enter takes the right end.
+- **It breathes**: a halo that swells and settles every 2.8s.
+- **Not yet is its outline**, not a faded fill: `--surface`, a
+  `--surface-line` ring, the word and the reader's mark in
+  `--text-secondary`, nothing moving.
+- **A pick wakes it**: the fill fades in over the outline and the pill
+  overshoots once (0.97 → 1.035 → 1). Only on that change — a gate that
+  arrives ready does not pop.
+- **An idle nudge**: ready and not pressed for four seconds, the reader
+  steps toward the way on twice, then rests.
+- **A list that scrolls under it fades** into the foot (the body's last
+  `--sp-7`, driven by the body's own scroll, so nothing when it does not
+  scroll).
+
+It stands outside three rulings on purpose, and nowhere else: the motion
+rule's "no scale, no glow" (the halo, the wake), `--elev-action`'s single
+shadow (the halo is its shadow), and the family's one disabled treatment
+(opacity 0.45). None of the three is precedent: every other `.btn-depart`,
+Today's Depart included, is the primary button above.
 
 ## Space
 
@@ -810,7 +848,8 @@ So:
   are waiting on an animation nobody is watching.
 - Hover is a **1px lift**, a border-colour change to the line pigment, a
   roundel that inverts, and a `▶` that slides in from `-4px`. All at
-  0.15–0.16s ease. No scale, no glow, no fill.
+  0.15–0.16s ease. No scale, no glow, no fill. (The one exception is the
+  boarding's gate button — see "The gate button".)
 - Every `transition` and `animation` needs a `prefers-reduced-motion` answer
   that keeps opacity and drops transform.
 - Every `:hover` rule needs a matching `:focus-visible`. Keyboard users get the

@@ -21,11 +21,15 @@ import './index.css'
 
 const cssPx = name => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name))
 // Every animation held at its first frame: still low, not yet risen.
+// Only the ones in time: the boarding body's scrim (plan 164) runs on
+// the body's own scroll, has no first frame in milliseconds, and moves
+// nothing -- it is a mask's depth.
+const timed = () => document.getAnimations().filter(a => a.timeline === document.timeline)
 function firstFrame() {
-  for (const a of document.getAnimations()) { a.pause(); a.currentTime = 0 }
+  for (const a of timed()) { a.pause(); a.currentTime = 0 }
 }
 function landed() {
-  for (const a of document.getAnimations()) a.finish()
+  for (const a of timed()) a.finish()
 }
 const overflowY = el => el.scrollHeight - el.clientHeight
 
