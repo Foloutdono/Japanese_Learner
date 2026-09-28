@@ -16602,37 +16602,71 @@ button.syllabary-cell:focus-visible {
    The departure cutscene. See components/station/TicketGate for the
    timeline and why this is drawn rather than filmed.
 
-   Everything here is transform and opacity so the whole thing is
-   compositor work — it has to start on the frame you tap, and it has
-   to cost nothing on a phone.
+   Everything that moves here is transform and opacity so the whole
+   thing is compositor work — it has to start on the frame you tap, it
+   has to cost nothing on a phone, and its last beat has to keep running
+   while the destination mounts under it.
 
    Every duration and delay below is multiplied by --gate-x, which the
    component sets from its own SPEED constant. That is the only reason
    the JS timers and these animations stay in step: hand-scaling ten
    numbers to change the pace is how a cutscene ends up navigating
    before its own wipe has covered the screen. The base figures are
-   the unscaled ones — contact 300ms, navigate 600ms, done 780ms.
+   the unscaled ones — contact 300ms, through the lane from 490ms,
+   navigate 600ms, the fade from 640ms, done 780ms.
 
    Plan 144 redrew the objects and left every beat alone (the owner
    kept this gate's motion over six drawn alternatives, and asked only
    for a better look): the rig stands on a phone with a margin instead
-   of running edge to edge; the pillars are cabinets, with a lit top face, a plinth and
-   the door's brushed grain, their lamps on the lane side where the
-   comment below always said they were; the reader is a sumi pad that
-   rings when the pass lands; the flaps have a face, a lit leading edge
-   and a shadow into the lane; the glow beyond them falls off to
-   nothing instead of ending in a visible oval, over a floor and a
+   of running edge to edge; the pillars are cabinets, with a lit top
+   face, a plinth and the door's brushed grain, their lamps on the lane
+   side; the flaps have a face, a lit leading edge and a shadow into the
+   lane; the glow beyond them falls off to nothing, over a floor and a
    horizon; and the pass is the pass, in its own material with its mark
-   and its balance. */
+   and its balance.
+
+   Then the owner found things on top of each other and effects that
+   read as faults, and each was one, measured on a 390px phone and on
+   the desk:
+   - the pass came to rest over the reader it was tapping — it is two
+     and a half cabinets wide — hiding the pad, its ring and its mark,
+     and hung over the right flap into the lane. The reader now stands
+     on the cabinet's top, and the pass comes down onto it from above,
+     clear of the lane, so the pad's answer is seen;
+   - the right lamp ran up into the reader: the lamp began 20px down
+     the cabinet, the pad ended 45px down;
+   - the wipe was the scene's own box with a 50% radius, so a tall pill
+     on a phone and a stadium on the desk, its corners squaring off as
+     it grew, and never more than 0.93 opaque while the scene faded — the
+     rig showed through the wash to the end. Now the view goes through
+     the lane: the open lane fills with the line's light and the rig is
+     pushed until that opening is the screen, which is what walking
+     through a gate looks like;
+   - the fade held its end state only `backwards`, so a frame the
+     unmount came late on was the whole scene again, at full strength;
+   - and the full-height flaps were a second pair of doors — the train
+     door is the other cutscene. A 改札's flaps are paddles at the hip,
+     with the opening above and below them, and they are drawn so. */
 .gate {
   --gate-x: 1;
+  /* The rig's measures, each named once because two objects meet on
+     it: the pass comes to rest on the reader standing on the right
+     cabinet, so the pass's place is written in the cabinet's width and
+     the reader's height. The pass is sized by the height too, so it
+     still stands on the screen above the rig on a phone held sideways. */
+  --gate-rig-w: min(620px, 94vw);
+  --gate-pillar-w: clamp(52px, 12vw, 74px);
+  --gate-pod-h: clamp(24px, 6vw, 30px);
+  --gate-card-w: clamp(96px, min(30vw, 26vh), 156px);
   position: fixed;
   inset: 0;
   z-index: 300;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: gate-leave calc(140ms * var(--gate-x)) linear calc(640ms * var(--gate-x)) backwards;
+  /* The push takes the rig far past the screen's edges. */
+  overflow: hidden;
+  animation: gate-leave calc(140ms * var(--gate-x)) linear calc(640ms * var(--gate-x)) forwards;
 }
 .gate__scrim {
   position: absolute;
@@ -16651,18 +16685,28 @@ button.syllabary-cell:focus-visible {
    phone's flex row squeezed it back to the screen's own width, so it
    ran edge to edge — each cabinet's outer side on the glass, with no
    room around the gate at all; at 94vw both stand in the room with a
-   margin, and the pass still lands on the reader. */
+   margin, and the pass still lands on the reader.
+
+   Once the gate is open the view goes through it: the rig grows about
+   the lane's centre — the lane is the rig's centre, between two equal
+   cabinets — to the scale at which the lane's opening covers the whole
+   scene (--gate-push, measured by the component; CSS cannot divide one
+   box by another). The pace quickens as it goes, a step taken into the
+   light, and it arrives covered at 640ms, when the fade begins. */
 .gate__rig {
   position: relative;
   display: flex;
   align-items: stretch;
-  width: min(620px, 94vw);
+  width: var(--gate-rig-w);
   height: min(252px, 47vh);
   /* Its own stacking context, so the floor shadow under it (::after)
      stays over the scrim once the arrive transform has ended. */
   isolation: isolate;
-  animation: arrive calc(300ms * var(--gate-x)) cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+  animation:
+    arrive calc(300ms * var(--gate-x)) cubic-bezier(0.22, 0.68, 0.32, 1) backwards,
+    gate-through calc(150ms * var(--gate-x)) cubic-bezier(0.6, 0, 0.9, 0.55) calc(490ms * var(--gate-x)) forwards;
 }
+@keyframes gate-through { to { transform: scale(var(--gate-push, 4)); } }
 /* Where it stands: the shadow the gate throws on the concourse floor.
    Without it the rig hung in the middle of an empty page. */
 .gate__rig::after {
@@ -16687,7 +16731,7 @@ button.syllabary-cell:focus-visible {
    side away from the lane falling into shadow. */
 .gate__pillar {
   position: relative;
-  flex: 0 0 clamp(52px, 12vw, 74px);
+  flex: 0 0 var(--gate-pillar-w);
   background:
     linear-gradient(180deg,
       color-mix(in srgb, var(--surface) 70%, var(--bg-main)) 0 var(--sp-4),
@@ -16722,7 +16766,9 @@ button.syllabary-cell:focus-visible {
    opens — the same "this is the colour of where you are going" the
    plate and the board rows already use. It runs between the top face
    and the plinth, set in a dark channel so it reads as a light fitted
-   into the cabinet rather than a stripe painted on it. */
+   into the cabinet rather than a stripe painted on it — and it starts
+   under the top face, a rung below the reader's foot, where it once ran
+   up into the reader's pad. */
 .gate__lamp {
   position: absolute;
   top: calc(var(--sp-4) + var(--sp-3));
@@ -16743,28 +16789,26 @@ button.syllabary-cell:focus-visible {
     0 0 12px 1px var(--line-color, var(--success));
 }
 
-/* The reader pad. */
-/* On the pillar's top face, which is where a 改札 is actually tapped
-   — and the only placement that keeps the card on screen. Mounted on
-   the side, the card had to come to rest beside the rig; at 390px the
-   rig is already 88vw, so it went off the edge. Centred on the
-   pillar, it also stopped hiding the reader it was tapping. */
+/* The reader: a sumi pad standing on the right cabinet's top face, its
+   foot in the face and its head above the gate — which is where a 改札
+   is tapped, and the one place the pass can come down onto it without
+   covering it or the lane. It sat inside the cabinet's top, and the
+   pass, two and a half cabinets wide, came to rest over it. */
 .gate__reader {
   position: absolute;
-  top: 9px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: var(--sp-2);
+  right: var(--sp-2);
+  bottom: calc(100% - var(--sp-3));
+  height: var(--gate-pod-h);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(36px, 8.5vw, 48px);
-  height: clamp(36px, 8.5vw, 48px);
-  border-radius: var(--r-panel);
+  border-radius: var(--r-panel) var(--r-panel) var(--r-plate) var(--r-plate);
   border: 2px solid color-mix(in srgb, var(--text-on-panel) 24%, var(--bg-panel));
-  background: radial-gradient(circle at 50% 35%,
+  background: radial-gradient(circle at 50% 30%,
     color-mix(in srgb, var(--text-on-panel) 9%, var(--bg-panel)) 0%,
     var(--bg-panel) 72%);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45), 0 2px 4px rgba(0, 0, 0, 0.3);
   transition: border-color calc(180ms * var(--gate-x)) ease,
               box-shadow calc(180ms * var(--gate-x)) ease;
 }
@@ -16776,7 +16820,8 @@ button.syllabary-cell:focus-visible {
     0 0 16px color-mix(in srgb, var(--line-color, var(--accent)) 55%, transparent);
 }
 /* The ring the pad throws when the pass lands on it: one, outward, in
-   the line's pigment — the answer to the tap, drawn as an edge. */
+   the line's pigment — the answer to the tap, drawn as an edge. It
+   grows out past the pad's sides and under the pass above it. */
 .gate__reader::after {
   content: '';
   position: absolute;
@@ -16789,7 +16834,7 @@ button.syllabary-cell:focus-visible {
 .gate--open .gate__reader::after { animation: gate-ring calc(440ms * var(--gate-x)) cubic-bezier(0.2, 0.6, 0.3, 1) forwards; }
 @keyframes gate-ring {
   0%   { opacity: 0.9; transform: scale(1); }
-  100% { opacity: 0;   transform: scale(2.2); }
+  100% { opacity: 0;   transform: scale(1.9, 2.4); }
 }
 .gate__wave { width: 16px; height: 18px; }
 /* The reader's contactless mark is borrowed from the pass (.pass__wave),
@@ -16821,8 +16866,19 @@ button.syllabary-cell:focus-visible {
   overflow: hidden;
   /* Sumi in both themes: this is the opening, and a dark one is what
      lets the line colour and the destination name carry. Against
-     --bg-main the glow had nothing to read against in light mode. */
-  background: var(--bg-panel);
+     --bg-main the glow had nothing to read against in light mode. The
+     floor beyond is there before its light is — a faint rise toward
+     the foot and its far edge, where the lit horizon will be — so the
+     lane over and under the flaps reads as a concourse not yet lit
+     rather than a hole. */
+  background:
+    linear-gradient(0deg,
+      transparent calc(18% - 1px),
+      color-mix(in srgb, var(--text-on-panel) 8%, transparent) calc(18% - 1px) 18%,
+      transparent 18%),
+    linear-gradient(0deg,
+      color-mix(in srgb, var(--text-on-panel) 7%, var(--bg-panel)) 0%,
+      var(--bg-panel) 36%);
   border-block: 1px solid color-mix(in srgb, var(--text-primary) 20%, transparent);
   /* Recessed between the cabinets: darker under the lip at its top and
      along its foot, so it reads as an opening and not a dark panel. */
@@ -16855,16 +16911,16 @@ button.syllabary-cell:focus-visible {
       color-mix(in srgb, var(--line-color, var(--accent)) 7%, transparent) 70%,
       transparent 100%);
   opacity: 0;
-  transition: opacity calc(340ms * var(--gate-x)) ease;
+  transition: opacity calc(260ms * var(--gate-x)) ease-out;
 }
 /* The horizon: where the floor beyond meets the far wall, clear of
-   the name above it. */
+   the name above it and under the flaps. */
 .gate__beyond::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 22%;
+  bottom: 18%;
   height: 1px;
   background: linear-gradient(90deg,
     transparent,
@@ -16910,16 +16966,18 @@ button.syllabary-cell:focus-visible {
   color: var(--text-on-panel-soft);
 }
 
-/* The flaps. Closed they meet in the middle; open they retract into
-   the pillars they came from. They were the pillars' own flat grey,
-   and the gate read as four grey rectangles; now each has a face (a
-   sheen at its top, the grain), a leading edge in the line's pigment
-   with a dark rubber lip behind it, rounded where it meets its twin,
-   and a shadow thrown into the lane as it goes. */
+/* The flaps: the gate's paddles, across the lane at the hip, with the
+   opening above and below them. Closed they meet in the middle; open
+   they retract into the cabinets they came from, the lane's own edge
+   clipping them where they go in. They filled the lane top to bottom
+   once, and read as a second pair of doors. Each has a face (a sheen
+   at its top, the grain), a leading edge in the line's pigment with a
+   dark rubber lip behind it, rounded where it meets its twin, and a
+   shadow thrown along the lane and onto the floor under it. */
 .gate__flap {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 40%;
+  height: 30%;
   width: 50%;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, transparent 38%),
@@ -16934,40 +16992,61 @@ button.syllabary-cell:focus-visible {
 }
 .gate__flap--l {
   left: 0;
-  border-radius: 0 var(--r-card) var(--r-card) 0;
+  border-radius: 0 var(--r-identity) var(--r-identity) 0;
   box-shadow:
     inset -3px 0 0 var(--line-color, var(--accent)),
     inset -5px 0 0 color-mix(in srgb, var(--bg-panel) 60%, transparent),
-    var(--sp-3) 0 var(--sp-6) rgba(0, 0, 0, 0.3);
+    var(--sp-3) var(--sp-4) var(--sp-6) rgba(0, 0, 0, 0.4);
 }
 .gate__flap--r {
   right: 0;
-  border-radius: var(--r-card) 0 0 var(--r-card);
+  border-radius: var(--r-identity) 0 0 var(--r-identity);
   box-shadow:
     inset 3px 0 0 var(--line-color, var(--accent)),
     inset 5px 0 0 color-mix(in srgb, var(--bg-panel) 60%, transparent),
-    calc(-1 * var(--sp-3)) 0 var(--sp-6) rgba(0, 0, 0, 0.3);
+    calc(-1 * var(--sp-3)) var(--sp-4) var(--sp-6) rgba(0, 0, 0, 0.4);
 }
 .gate--open .gate__flap--l { transform: translateX(-100%); }
 .gate--open .gate__flap--r { transform: translateX(100%); }
 
-/* The pass, arriving. Starts low and off to the right — where a hand
-   comes from — pauses on the reader, and withdraws. Since plan 144 it
-   is the learner's 定期券 as the profile draws it, at a card's own
-   proportions: the charcoal-into-sumi ground, the hairline, the
-   diagonal sheen (.pass and .pass::after), the contactless mark in its
-   corner and the balance in the pass's gold under the holder's name.
-   The keyframes move it by its own size, so the path is the one it
-   always flew. */
+/* The light the lane floods with as the view goes through it — the
+   wipe. Inside the lane, over the flaps and the name, so it is the
+   lane's own opening that grows to take the screen as the rig is
+   pushed (above), not a shape of its own: the ellipse it replaced was
+   the scene's box at a 50% radius. It is whole — opaque — well before
+   the push has covered the scene, so nothing of the rig shows through
+   it while it fades off the destination. */
+.gate__wipe {
+  position: absolute;
+  inset: 0;
+  background: var(--line-color, var(--accent));
+  opacity: 0;
+  animation: gate-flood calc(90ms * var(--gate-x)) ease-out calc(490ms * var(--gate-x)) forwards;
+}
+@keyframes gate-flood { to { opacity: 1; } }
+
+/* The pass, arriving. It comes up from below and to the right — where
+   a hand comes from — to hover over the reader, comes down onto the
+   pad's head, rests there while the reader answers, and lifts away.
+   Its place at rest is the reader's: its foot on the pad's head,
+   centred on the pad where the screen has the room and otherwise as
+   near as the screen's edge lets it, so it never covers the pad or the
+   lane. Since plan 144 it is the learner's 定期券 as the profile draws
+   it, at a card's own proportions: the charcoal-into-sumi ground, the
+   hairline, the diagonal sheen (.pass and .pass::after), the
+   contactless mark in its corner and the balance in the pass's gold
+   under the holder's name. */
 .gate__card {
   position: absolute;
-  right: clamp(2px, 1.5vw, 12px);
-  top: 0;
+  right: max(
+    calc((var(--gate-pillar-w) - var(--gate-card-w)) / 2),
+    calc((var(--gate-rig-w) - 100vw) / 2 + var(--sp-3)));
+  bottom: calc(100% + var(--gate-pod-h) - var(--sp-3));
   z-index: 2;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: clamp(116px, 30vw, 156px);
+  width: var(--gate-card-w);
   aspect-ratio: 1.586;
   padding: var(--sp-3) var(--sp-4);
   border-radius: var(--r-identity);
@@ -16978,7 +17057,7 @@ button.syllabary-cell:focus-visible {
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
   overflow: hidden;
   color: var(--text-on-panel);
-  animation: gate-tap calc(620ms * var(--gate-x)) cubic-bezier(0.3, 0.7, 0.2, 1) forwards;
+  animation: gate-tap calc(520ms * var(--gate-x)) linear forwards;
 }
 .gate__card::after {
   content: '';
@@ -16999,17 +17078,21 @@ button.syllabary-cell:focus-visible {
   overflow: hidden;
 }
 .gate__card-bar i { display: block; height: 100%; background: var(--accent2); }
-/* The stillness between 48% and 58% is the tap itself: the card waits
-   while the reader answers it. */
+/* The approach eases in over the pad and settles onto it; the rest from
+   58% to 68% is the tap itself — the chime, the lamps and the ring land
+   inside it, at 300ms; then it lifts away, quickening, and is gone
+   before the view goes through the lane. */
 @keyframes gate-tap {
-  0%   { transform: translate(46%, 210%) rotate(12deg);  opacity: 0; }
-  20%  { opacity: 1; }
-  /* Held still over the pad from 48% to 58% — that pause is the tap,
-     and the chime and the lamp land inside it. */
-  48%  { transform: translate(4%, -58%) rotate(-4deg);   opacity: 1; }
-  58%  { transform: translate(4%, -58%) rotate(-4deg);   opacity: 1; }
-  76%  { transform: translate(6%, -86%) rotate(-6deg);   opacity: 1; }
-  100% { transform: translate(18%, -180%) rotate(-11deg); opacity: 0; }
+  0%   { transform: translate(34%, 230%) rotate(14deg); opacity: 0;
+         animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  16%  { opacity: 1; }
+  46%  { transform: translate(0, -18%) rotate(5deg); opacity: 1;
+         animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1); }
+  58%  { transform: none; opacity: 1; }
+  68%  { transform: none; opacity: 1;
+         animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.5); }
+  84%  { transform: translate(10%, -70%) rotate(-3deg); opacity: 1; }
+  100% { transform: translate(22%, -150%) rotate(-7deg); opacity: 0; }
 }
 .gate__card-brand {
   font-family: var(--font-jp);
@@ -17035,24 +17118,6 @@ button.syllabary-cell:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-/* The wipe. Once the flaps are open the line colour floods out of the
-   lane and takes the screen; the destination is revealed from behind
-   it, already mounted and running its own arrive animation. */
-.gate__wipe {
-  position: absolute;
-  inset: 0;
-  background: var(--line-color, var(--accent));
-  opacity: 0;
-  transform: scale(0.25);
-  border-radius: 50%;
-  animation: gate-wipe calc(300ms * var(--gate-x)) cubic-bezier(0.5, 0, 0.3, 1) calc(460ms * var(--gate-x)) forwards;
-}
-@keyframes gate-wipe {
-  0%   { opacity: 0;   transform: scale(0.25); border-radius: 50%; }
-  40%  { opacity: 0.9; }
-  100% { opacity: 1;   transform: scale(3);    border-radius: 0; }
-}
-
 /* No gate at all when motion is unwelcome — TicketGate navigates
    immediately in that case and never mounts this. Belt and braces. */
 @media (prefers-reduced-motion: reduce) {
@@ -17067,8 +17132,18 @@ button.syllabary-cell:focus-visible {
    scrollbar's width and shifting everything under it sideways. That
    is the jolt you see as the doors open. Reserving the gutter costs
    nothing and removes the shift here, at the ticket gate, and behind
-   every dialog in the app. */
-html { scrollbar-gutter: stable; }
+   every dialog in the app.
+
+   Its one cost: the gutter is outside every fixed box, painted in the
+   page's own ground, so no scene can reach it. The ticket gate lends
+   the ground its wash once the lane's light has the screen
+   (TicketGate's --gate-ground), and html's own transition eases it back
+   with the scene's fade. Everywhere but the gutter this ground is under
+   body. */
+html {
+  scrollbar-gutter: stable;
+  background-color: var(--gate-ground, var(--bg-main));
+}
 
 /* ══ 扉 — the train door ════════════════════════════════════
    Boarding, played on the last choice of a selection screen. See
