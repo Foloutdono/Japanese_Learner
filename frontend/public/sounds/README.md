@@ -48,30 +48,98 @@ reasons that turned out to matter more than fidelity:
 ### The palette
 
 Each sound is an *event* — the moment it belongs to — carrying several
-*voices*, of which one is chosen. Run the app and open **`/dev/sounds`**
-to hear them side by side and pick; the choice is stored in
-localStorage and the whole app uses it immediately. "Copy my picks"
-gives you the block to paste back into `voices.js` if a choice should
-become the shipped default. The first voice listed for an event is
-that default today.
+*voices*, of which one is chosen. The recipes are
+`src/lib/audio/recipes.js`; `voices.js` holds the choice and plays it.
+Run the app and open **`/dev/sounds`** to hear them side by side and
+pick; the choice is stored in localStorage and the whole app uses it
+immediately. "Copy my picks" gives you the block to paste back into
+`recipes.js` if a choice should become the shipped default. The first
+voice listed for an event is that default today.
+
+The same palette plays outside the app, on a phone, as **the listening
+panel**: `scripts/sound-panel.mjs` writes it as one HTML page from the
+shipped recipes, with a switch that plays everything through a model of
+a phone's speaker, the meter's figures beside each voice, and the
+moments where sounds meet (a rating, a stage climbed, boarding) played
+together at the app's timings. Published as an Artifact with the `db`
+capability it keeps the picks, one document per event in `picks`.
 
 | Event | Where | Voices |
 |---|---|---|
-| `click` | the generic press, 31 sites | Tick · Wood block · Key tap · Soft pad |
-| `toggle` | settings switches, the theme flip | Two step · Latch · Settle |
+| `click` | the generic press | Tick · Wood block · Key tap · Soft pad · Wood tap |
+| `toggle` | settings switches, the theme flip | Two step · Latch · Settle · Wood pair |
 | `click-menu` / `click-close-menu` | a menu opening, and its mirror | Open/close step · Drawer · Soft |
-| `click-mode-selection` | mode, level, theme, tier, filter rows | Pick · Ticket stamp · Two tap |
-| `click-screen-selection` | anything that navigates | Departure · Small gate · Turnstile |
-| `correct` / `wrong` | the rating bar | Octave · Rising fifth · Bell / Low double · Thud · Slump |
+| `click-mode-selection` | mode, level, theme, tier, filter rows | Pick · Ticket stamp · Two tap · Wood pick |
+| `click-screen-selection` | anything that navigates | Departure · Small gate · Turnstile · Departure on bars |
+| `correct` | the rating bar | Octave · Rising fifth · Bell · Vibraphone · Marimba fifth · Glass bar |
+| `wrong` | the rating bar | Low double · Thud · Slump · Low double, voiced · Wood knock |
+| `card-flip` | a flashcard turned over, and back | Click (as now) · Card turn · Karuta · Soft bar |
+| `exam-warning` | the mock exam at five minutes left, and one | Silent (as now) · Hall bell · Attention chime |
 | `card-transition` | between every card | Paper slip · Flick · Whisk away · Single flap |
-| `gate-chime` | 改札, a valid pass | Rising pair · Two pips · Three step |
-| `door-chime` | 扉, just before the doors part | Falling pair · Single bell · Three fall |
+| `gate-chime` | 改札, a valid pass | Rising pair · Two pips · Three step · Rising pair, in the hall |
+| `door-chime` | 扉, just before the doors part | Falling pair · Single bell · Three fall · Ding-dong · Falling pair, struck |
 | `door-slide` | the leaves actually running open | Pneumatic · Soft rush · On rollers |
-| `platform-chime` | 到着ホーム, the onboarding arrival | Arpeggio · Open fifth · Wide rise |
-| `arrival` | 到着, a session finished | Settle · Long settle · Warm pad |
-| `station-melody` | 発車メロディ, the pass re-issued | Yo scale rising · Yo scale falling · Two bars |
+| `platform-chime` | 到着ホーム, the onboarding arrival | Arpeggio · Open fifth · Wide rise · Arpeggio, struck · Announcement chime |
+| `arrival` | 到着, a session finished (Today's run too) | Settle · Long settle · Warm pad · Settle, struck · End of announcement |
 | `fare-tick` | XP earned, no level | Coin · One flap · Soft tick |
-| `flap-clatter` | 進級, the board turning your level over | Full run · Short run · Heavy board |
+| `pass-clip` | 改札鋏, the level clipped on the pass | Punch · Snip · Gate press · Punch, voiced · Clip-clip |
+| `card-stamp` | 押印, a card climbing a stage | Ticket stamp · Soft press · Stamp, voiced · Hanko |
+
+`card-flip` and `exam-warning` are moments that had no sound of their
+own: the flip played the generic click, the exam's last minutes nothing.
+Each event's first voice is what it played before, so adding the event
+changed nothing until another voice is chosen.
+
+### The meter
+
+`scripts/measure-voices.mjs` renders every voice in Chromium's
+OfflineAudioContext, through the same output node and trim the app
+plays it through, and prints its peak, its loudness, its loudness
+through a phone speaker, how far it sits from its event's default, and
+the `level` that would put it there. Run it after writing or changing a
+voice (the Chromium the environment ships: `CHROMIUM_PATH=...`).
+
+**Every voice is written at its event's loudness.** A voice picked from
+the palette inherits its event's trim, so it was only ever as loud as
+the default if its author happened to type the same level -- and most
+had not: the wood block sat 17.6dB under the tick it was offered in
+place of, the latch 24.8dB under the two step, the soft tick 12.9dB
+under the coin. Heard side by side, each lost for being quieter, not
+for being worse. Each variant now carries the `level` the meter
+measured, and every one lands within half a decibel of its default.
+
+### Heard in a hand
+
+A phone's speaker plays almost nothing under 400Hz, and the levels
+below were measured at the bus, as if every learner wore headphones.
+Through a model of a phone speaker (fourth order under 400Hz) the
+meter found:
+
+| Sound | Lost on a phone |
+|---|---|
+| `wrong`, Low double (shipping) | 20dB -- under `correct` by as much |
+| `card-stamp`, Ticket stamp (shipping) | 22dB |
+| `pass-clip`, Punch (shipping) | 12dB |
+| `door-slide`, Pneumatic (shipping) | 7dB |
+| everything built on 700Hz and up | under 2dB |
+
+On the device most learners hold, the wrong answer was nearly silent
+while the right one was full, and a card's stamp and the level-up were
+clicks. The `voiced` variants keep each sound's low note for
+headphones and add its 2nd to 4th harmonics, from which the ear
+rebuilds the note a phone cannot play: the wrong answer loses 7dB
+instead of 20, the stamp 5 instead of 22, the punch 5 instead of 12.
+
+### The hall
+
+A station chime is never heard dry. `synth.js` builds a short
+concourse (RT60 1.3s, highs dying first) from the same seeded noise as
+everything else, and a voice that asks for it (`space`, a send level)
+rings in it. Only the station's chimes do; the chrome stays dry, since
+a tail on a sound fired dozens of times a screen would smear one tap
+into the next. `bar()` strikes the chimes on bars -- a vibraphone's
+metal, a marimba's wood, a glockenspiel's glass -- instead of the pure
+sines that made them sound like test tones.
 
 ### Levels
 
@@ -94,18 +162,16 @@ and the ceremony fall flat.
 | Loudness | Sounds |
 |---|---|
 | 0.025 | the card turning -- ambient texture, under even the click |
-| 0.030 | the chrome: click, toggle, menus, option picks |
+| 0.030 | the chrome: click, toggle, menus, option picks, the card's flip |
 | 0.042 | correct / wrong |
 | 0.044 | the fare tick |
 | 0.045 | a screen change |
-| 0.047 | the level-up board |
-| 0.060 | doors running open |
+| 0.047 | the level-up (the pass's punch, levelled by peak) |
+| 0.060 | doors running open, the exam's warning |
 | 0.070 | the gate |
 | 0.075 | the door chime |
 | 0.080 | arriving |
 | 0.100 | the platform sign |
-| 0.105 | an unlock |
-| 0.112 | the departure melody |
 
 Two sounds were previously wrong by more than a little. The **gate
 chime** fired on every departure at nearly three times the click and
@@ -147,18 +213,19 @@ voice has to keep them:
   direction. If you generate them separately, generate them as a pair.
 - **`wrong` is not a buzzer.** A buzzer is what a gate does when it
   *rejects* you, and getting a card wrong in a study app is not that —
-  it is the next card. Low, dull, over quickly.
+  it is the next card. Low, dull, over quickly -- and heard: low is a
+  pitch, not a frequency a phone cannot play (see "Heard in a hand").
 - **`correct` sits below the fare tick.** The old `sfx/success.mp3` was
   loud enough to mask the XP landing a beat later; a sound that drowns
   the reward it announces is working against the thing it exists for.
-- **The board is mechanical, not tonal.** `fare-tick` and
-  `flap-clatter` are both resonant filtered noise, never oscillators.
-  A tone there would both misdescribe the thing on screen and collide
-  with the chimes, which are tones and mean something else. The two no
-  longer describe the *same* object -- the shipped fare tick is a coin
-  into the fare box, the level clatter is the board turning -- which
-  is a deliberate choice; `one-flap` is the variant that reunites them
-  as one machine at two sizes.
+- **The fare and the punch are mechanical, not tonal.** `fare-tick`
+  and `pass-clip` are resonant filtered noise, never a melody. A tune
+  there would both misdescribe the thing on screen and collide with
+  the chimes, which are tones and mean something else. (Punch, voiced
+  lets a steel jaw ring for a tenth of a second under the snip; that is
+  the metal, not a note.)
+- **A voice of an event is as loud as its default.** Write it, run the
+  meter, give it the `level` the meter names.
 - **Frequent means quiet and short.** The click and the option pick
   fire dozens of times a screen. At those frequencies the gap between
   "present" and "irritating" is about thirty milliseconds and six
@@ -190,6 +257,13 @@ generated one.
 `ambiant/home`, `selection` · `announcements/` for all eleven sections
 plus `jingle` · `kanas/`. Nothing else — `ui/` and `sfx/` are empty by
 design.
+
+Not everything present is played. Nothing asks for `ambiant/home`
+(1.7MB; only `selection` loops, from `SelectionScreen`), and of the
+announcements `dictionary` and `analyzer` are named in `config/tabs.js`
+but no screen calls them, while `stats` and `dictation` are named
+nowhere. They cost nothing at run time -- a file is fetched only when
+asked for -- but they are candidates for either a caller or the bin.
 
 ---
 

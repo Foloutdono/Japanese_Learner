@@ -36,7 +36,7 @@ describe('the voice registry', () => {
     const required = [
       'click', 'toggle',
       'click-menu', 'click-close-menu', 'click-mode-selection', 'click-screen-selection',
-      'correct', 'wrong', 'card-transition',
+      'correct', 'wrong', 'card-flip', 'card-transition', 'exam-warning',
       'gate-chime', 'door-chime', 'door-slide', 'platform-chime', 'arrival',
       'fare-tick', 'pass-clip',
     ]
@@ -84,6 +84,36 @@ describe('the voice registry', () => {
         expect(v.note, `${e.key}/${v.key} note`).toBeTruthy()
       }
     }
+  })
+
+  it('keeps each voice\'s level and hall send in range', () => {
+    // `level` is measured (scripts/measure-voices.mjs) and multiplies
+    // the event's trim: zero or a negative would silence the voice, a
+    // runaway one would blow past the headroom the trims were set in.
+    // The default is the reference, so it carries none.
+    for (const e of VOICE_EVENTS) {
+      expect(e.variants[0].level, `${e.key}'s default is the reference`).toBeUndefined()
+      for (const v of e.variants) {
+        if (v.level !== undefined) {
+          expect(v.level, `${e.key}/${v.key} level`).toBeGreaterThan(0)
+          expect(v.level, `${e.key}/${v.key} level`).toBeLessThanOrEqual(20)
+        }
+        if (v.space !== undefined) {
+          expect(v.space, `${e.key}/${v.key} space`).toBeGreaterThan(0)
+          expect(v.space, `${e.key}/${v.key} space`).toBeLessThanOrEqual(0.5)
+        }
+      }
+    }
+  })
+
+  it('starts a new moment as the app already sounded it', () => {
+    // A moment given its own event keeps, as its default, exactly what
+    // it played before -- the flip the click, the exam's warning
+    // nothing -- so adding the event changes nothing until a voice is
+    // chosen for it.
+    expect(getVoice('card-flip').label).toMatch(/as now/)
+    expect(getVoice('exam-warning').label).toMatch(/as now/)
+    expect(trimFor('sfx', 'card-flip')).toBe(trimFor('ui', 'click'))
   })
 })
 

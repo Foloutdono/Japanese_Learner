@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { playUi } from '../lib/audio'
+import { playUi, playVoice } from '../lib/audio'
 import { Leave } from '../components/chrome/Bar'
 import { Sheet } from '../components/chrome/Sheet'
 import { StudyStage, RunSide } from '../components/study/StudyStage'
@@ -233,6 +233,13 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   // and needs neither state nor an effect to arrange.
   const announcement =
     minutesLeft !== null && TIME_WARNINGS.includes(minutesLeft) ? t.examTimeWarning(minutesLeft) : ''
+
+  // The same marks, heard: a voice the learner may choose (silent unless
+  // they have), sounded when the announcement's text arrives, which it
+  // does once a mark.
+  useEffect(() => {
+    if (announcement) playVoice('exam-warning')
+  }, [announcement])
 
   useEffect(() => {
     if (!exam || !startedAt) return

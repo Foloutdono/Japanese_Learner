@@ -155,10 +155,9 @@ export default function ExamScreen({ session }) {
   const papers = (
     <ModeSelector
       modes={modes}
-      onSelect={examId => {
-        playUi('click-screen-selection')
-        board(() => navigate(`/practice/exam/${examId}`))
-      }}
+      // ModeSelector sounds the tap; a second sound here stacked two
+      // on one press, a beat before the door's chime.
+      onSelect={examId => board(() => navigate(`/practice/exam/${examId}`))}
     />
   )
 

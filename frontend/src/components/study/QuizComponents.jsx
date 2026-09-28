@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useContext } from 'react'
 import { useLang } from '../../LangContext'
-import { playClick, playArrival } from '../../lib/audio'
+import { playClick, playFlip, playArrival } from '../../lib/audio'
 import { Readings, ReadingGroup } from './Readings'
 import { glossParts } from './gloss'
 import { Loading } from '../ui/Loading'
@@ -827,7 +827,7 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
   // "settle on the answer" point anymore, since re-checking the front
   // after seeing the back is a completely normal thing to want mid-review.
   const handleClick = () => {
-    playClick()
+    playFlip()
     setFlips(n => n + 1)
     if (!revealed) {
       setRevealed(true)

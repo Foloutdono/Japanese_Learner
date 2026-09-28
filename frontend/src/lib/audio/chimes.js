@@ -53,6 +53,9 @@ export function playPassClip() { playVoice('pass-clip') }
 /** 押印 — a card's seal pressed into its corner as it climbs a stage. */
 export function playStamp() { playVoice('card-stamp') }
 
+/** 裏返し — a flashcard turned over to its answer, and back. */
+export function playFlip() { playVoice('card-flip') }
+
 /** A card answered right. Deliberately quiet enough to hear the XP land under it. */
 export function playCorrect() { playVoice('correct') }
 

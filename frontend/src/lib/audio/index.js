@@ -29,7 +29,7 @@ export { preload } from './context'
 // each of those names resolves to a chosen voice in voices.js.
 export { playKana, kanaSound, playSfx, playUi, playAnnouncement } from './playback'
 export {
-  playClick, playToggle, playCorrect, playWrong,
+  playClick, playToggle, playFlip, playCorrect, playWrong,
   playGateChime, playDoorChime, playDoorSlide, playFareTick, playPassClip, playStamp,
   playArrival, playPlatformChime,
 } from './chimes'
