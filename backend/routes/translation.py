@@ -268,6 +268,7 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
         logger.warning("translation review was not the shape; served as prose")
         cleaned = re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
         return {"review": None, "analysis": cleaned}
+    review.pop("japanese", None)  # composition's key; the prompt here never asks for it
     if review["better"]:
         review.update(_corrected(review["better"], payload.user_answer))
     return {"review": review, "analysis": _review_as_text(review)}

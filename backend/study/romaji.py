@@ -338,3 +338,80 @@ def fold(text: str) -> str:
     for spelling, vowel in _LONG:
         letters = letters.replace(spelling, vowel)
     return letters
+
+
+# ── The other way: a sentence typed in romaji, read back as kana ──
+# 作文 (composition) takes a sentence the learner WROTE, and most
+# learners write it in the alphabet (the note at the top). The
+# breakdown and the grammar detector read Japanese and nothing else:
+# handed "mizu to gohan wo tabemashita" the breakdown drew five rows of
+# Latin letters with no card and no rule, and the detector said the
+# point was not there. The tutor writes the sentence out in kanji and
+# kana (routes/composition.py); this is what stands in for it when
+# there is no tutor to ask -- the day's reviews spent, no provider, a
+# failed call -- and what the free check reads meanwhile.
+#
+# Kana only: which kanji a learner meant is a guess this module has no
+# way to make, and the tokenizer reads みずとごはんをたべました well
+# enough to find the particles, the verb and its ending. The syllable
+# table is the dictionary search's (study/search_match.to_kana), which
+# already takes both romanizations; what a SENTENCE adds is its
+# particles, written as they are said (wa, wo/o, e), and its marks.
+_JAPANESE = re.compile(r"[぀-ヿ㐀-鿿豈-﫿ｦ-ﾟ]")
+_KANA_PARTICLES = {"wa": "は", "wo": "を", "o": "を", "e": "へ", "he": "へ"}
+_KANA_MARKS = {".": "。", ",": "、", "?": "？", "!": "！"}
+_SENTENCE_PIECE = re.compile(r"([^\W\d_](?:[^\W\d_]|['’\-](?=[^\W\d_]))*)|([.,?!])|(\S)")
+# Tanaka-san: a hyphen before a title joins it, where in ra-men it is
+# the long vowel.
+_TITLES = {"san", "sama", "kun", "chan", "sensei", "senpai"}
+
+
+def is_romaji(text: str) -> bool:
+    """Whether a sentence is written in the alphabet: letters, and not a
+    single kana or kanji among them."""
+    if not isinstance(text, str) or _JAPANESE.search(text):
+        return False
+    return any(c.isalpha() for c in text)
+
+
+def _word_kana(word: str) -> str | None:
+    from study.search_match import _ROMAJI, fold as latin, to_kana
+
+    # kon'nichiwa: the apostrophe only closes the ん, where
+    # "konnichiwa" would have to guess; ra-men's hyphen is its long vowel.
+    pieces = re.split(r"([-'’])", latin(word))
+    out = ""
+    for i in range(0, len(pieces), 2):
+        part = pieces[i]
+        kana = _ROMAJI.get(part) if len(part) == 1 else (to_kana(part) or (None,))[0]
+        if kana is None:
+            return None
+        joint = pieces[i - 1] if i else ""
+        out += ("ー" if joint == "-" and part not in _TITLES else "") + kana
+    return out or None
+
+
+def kana_of(text: str) -> str | None:
+    """A sentence typed in romaji as hiragana, with no spaces, or None
+    when it is not romaji, or when no word of it reads as kana. A word
+    that does not (a name, an English word) is kept as typed."""
+    if not is_romaji(text):
+        return None
+    out = []
+    read = 0
+    for word, mark, other in _SENTENCE_PIECE.findall(text):
+        if mark:
+            out.append(_KANA_MARKS[mark])
+            continue
+        if other:
+            out.append(other)
+            continue
+        # A particle is a word of its own after another word: は, not わ.
+        particle = _KANA_PARTICLES.get(word.lower()) if out else None
+        kana = particle or _word_kana(word)
+        if kana is None:
+            out.append(word)
+            continue
+        out.append(kana)
+        read += 1
+    return "".join(out) if read else None

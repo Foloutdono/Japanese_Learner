@@ -33,6 +33,11 @@ const BASE = '/practice/composition'
 const BATCH_SIZE = 5
 const PREFETCH_THRESHOLD = 1
 
+// Typed in the alphabet: letters, and not a kana or a kanji among them
+// (the server's study/romaji.is_romaji, for the same sentence).
+const JAPANESE = /[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff66-\uff9f]/
+const isRomaji = text => !JAPANESE.test(text) && /\p{L}/u.test(text)
+
 // Route: /practice/composition/:level — the session on the stage
 // (plan 125). The level list is the station page above it, under the
 // chrome (screens/SentenceStation.jsx), so this has one axis and no
@@ -86,6 +91,10 @@ function Session({ session, level }) {
   const [point, setPoint]     = useState(null)   // { raw_id, level, pattern, structure, meaning, register, stage, _uiKey }
   const [answer, setAnswer]   = useState('')
   const [sentence, setSentence] = useState('')   // the answer as submitted, trimmed
+  // The sentence in Japanese when it was typed in romaji: the tutor's
+  // spelling in kanji and kana, else the check's kana. Null while it is
+  // coming, and for a sentence written in Japanese, which is its own.
+  const [written, setWritten] = useState(null)
   const [found, setFound]     = useState(null)   // the detector's: true | false | null
   const [tutor, setTutor]     = useState(null)   // { review, analysis } from /review
   const [tutorLoading, setTutorLoading] = useState(false)
@@ -158,6 +167,7 @@ function Session({ session, level }) {
     setPoint(next)
     setAnswer('')
     setSentence('')
+    setWritten(null)
     setFound(null)
     setTutor(null)
     setTutorLoading(false)
@@ -176,39 +186,56 @@ function Session({ session, level }) {
     setStage('writing')
   }
 
+  // Resolves to the check's kana of a romaji sentence, or null.
   function fetchCheck(key, raw_id, line) {
-    apiJson('/api/composition/check', session, {
+    return apiJson('/api/composition/check', session, {
       method: 'POST',
       body: JSON.stringify({ raw_id, sentence: line }),
     })
-      .then(d => { if (pointKeyRef.current === key) setFound(typeof d.found === 'boolean' ? d.found : null) })
-      .catch(() => { if (pointKeyRef.current === key) setFound(null) })
+      .then(d => {
+        if (pointKeyRef.current === key) setFound(typeof d.found === 'boolean' ? d.found : null)
+        return d.japanese ?? null
+      })
+      .catch(() => {
+        if (pointKeyRef.current === key) setFound(null)
+        return null
+      })
   }
 
+  // Resolves to the tutor's spelling of a romaji sentence, or null --
+  // none asked for (the day spent), none given, or the call failed.
   function fetchReview(key, raw_id, line) {
     if (limitedRef.current) {
       setLimited(true)
-      return
+      return Promise.resolve(null)
     }
     setTutorLoading(true)
-    apiFetch('/api/composition/review', session, {
+    return apiFetch('/api/composition/review', session, {
       method: 'POST',
       body: JSON.stringify({ raw_id, sentence: line, lang }),
     })
       .then(async r => {
-        if (pointKeyRef.current !== key) return
+        if (pointKeyRef.current !== key) return null
         if (r.status === 429) {
           limitedRef.current = true
           setLimited(true)
-          return
+          return null
         }
         if (!r.ok) {
           setTutor(null)
-          return
+          return null
         }
-        setTutor(await r.json())
+        const d = await r.json()
+        if (pointKeyRef.current !== key) return null
+        setTutor(d)
+        // The detector's word again, on the sentence the tutor wrote out.
+        if (typeof d.found === 'boolean') setFound(d.found)
+        return d.japanese ?? null
       })
-      .catch(() => { if (pointKeyRef.current === key) setTutor(null) })
+      .catch(() => {
+        if (pointKeyRef.current === key) setTutor(null)
+        return null
+      })
       .finally(() => { if (pointKeyRef.current === key) setTutorLoading(false) })
   }
 
@@ -269,7 +296,7 @@ function Session({ session, level }) {
   function askBase() {
     if (!point || !sentence) return null
     return {
-      sentence,
+      sentence: written ?? sentence,
       level,
       translation: tutor?.review?.meaning ?? '',
       point: `${point.pattern} — ${point.meaning}`,
@@ -281,7 +308,7 @@ function Session({ session, level }) {
     // The sentence just graded joins the run's lines (plan 129), with
     // what the tutor said it means as its translation.
     if (point && sentence && quality != null) {
-      lines.commit({ key: point._uiKey, jp: sentence, translation: tutor?.review?.meaning, quality, analysis, ask: askBase() })
+      lines.commit({ key: point._uiKey, jp: written ?? sentence, translation: tutor?.review?.meaning, quality, analysis, ask: askBase() })
     }
     if (queueRef.current.length) {
       const [head, ...rest] = queueRef.current
@@ -305,6 +332,12 @@ function Session({ session, level }) {
   // Three calls at once, and the screen turns on none of them alone:
   // the check prints when it lands, the review prints when it lands,
   // the breakdown is ready by the time the learner has rated.
+  //
+  // A sentence typed in romaji is broken down in Japanese: the
+  // breakdown reads nothing else, and "mizu to gohan wo tabemashita"
+  // drew five rows of letters with no card and no rule. So its
+  // breakdown waits for the tutor to write it out in kanji and kana,
+  // or, with no tutor, for the check's kana.
   function submit() {
     if (stage !== 'writing') return
     const line = answer.trim()
@@ -313,9 +346,20 @@ function Session({ session, level }) {
     const key = point._uiKey
     setSentence(line)
     setStage('feedback')
-    fetchCheck(key, point.raw_id, line)
-    fetchReview(key, point.raw_id, line)
-    fetchAnalysis(line)
+    const kana = fetchCheck(key, point.raw_id, line)
+    const spelled = fetchReview(key, point.raw_id, line)
+    if (!isRomaji(line)) {
+      fetchAnalysis(line)
+      return
+    }
+    setAnalysisLoading(true)
+    spelled
+      .then(jp => jp ?? kana)
+      .then(jp => {
+        if (pointKeyRef.current !== key) return
+        setWritten(jp || null)
+        fetchAnalysis(jp || line)
+      })
   }
 
   // The learner's own grade, on the app's six-segment bar; q > 2 is
@@ -379,7 +423,7 @@ function Session({ session, level }) {
           analysis={analysis}
           loading={analysisLoading}
           translation={tutor?.review?.meaning}
-          sentenceText={sentence}
+          sentenceText={written ?? sentence}
           onExplain={explainLine}
           explaining={explaining}
           explainError={explainError}
@@ -409,7 +453,7 @@ function Session({ session, level }) {
           lines={lines.lines}
           // The point until the sentence is written, then the sentence.
           current={point && stage !== 'error'
-            ? (stage === 'feedback' ? currentLine(sentence, quality) : { label: point.pattern, lang: 'ja', quality: null })
+            ? (stage === 'feedback' ? currentLine(written ?? sentence, quality) : { label: point.pattern, lang: 'ja', quality: null })
             : null}
           openKey={lines.opened?.key ?? null}
           onOpen={key => { setLookup(null); lines.open(key) }}
@@ -500,7 +544,14 @@ function Session({ session, level }) {
                     <span className="prose__measure">{found ? t.compositionFound : t.compositionNotFound}</span>
                   )}
                 </span>
-                <span className="prose__jp" lang="ja">{sentence}</span>
+                {written ? (
+                  <>
+                    <span className="prose__jp" lang="ja">{written}</span>
+                    <span className="prose__romaji">{sentence}</span>
+                  </>
+                ) : (
+                  <span className="prose__jp" lang="ja">{sentence}</span>
+                )}
                 <span className="prose__rule" />
               </>
             )}
@@ -539,7 +590,7 @@ function Session({ session, level }) {
                     analysis={analysis}
                     layout="rows"
                     translation={tutor?.review?.meaning}
-                    sentenceText={sentence}
+                    sentenceText={written ?? sentence}
                     t={t}
                     onTokenClick={w => setLookup(vocabLookup(w))}
                     onGrammarOpen={g => setLookup(grammarLookup(g))}
