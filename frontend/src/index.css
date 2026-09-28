@@ -26558,12 +26558,23 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     transform: translate(-50%, -100%);
     animation: desk-brd-show 320ms ease-out 200ms backwards;
   }
-  .desk-brd__sky-board .brd-board__flaps { gap: var(--sp-2); }
+  /* The last drum's one flip (.brd-flap--turn) is seen from in front of
+     its own tile: the row's vantage point, at the row's middle, sheared
+     a tile this size into a flat blade as it turned. */
+  .desk-brd__sky-board .brd-board__flaps {
+    gap: var(--sp-2);
+    perspective: none;
+  }
   .desk-brd__sky-board .brd-flap {
     width: 64px;
     height: 88px;
     font-size: var(--fs-specimen-word);
     color: var(--accent2);
+  }
+  .desk-brd__sky-board .brd-flap--turn { animation-name: desk-brd-flip; }
+  @keyframes desk-brd-flip {
+    0%, 100% { transform: perspective(600px) rotateX(0); }
+    50% { transform: perspective(600px) rotateX(90deg); }
   }
   .desk-brd__sky-board .brd-board__colon { font-size: var(--fs-display); }
   .desk-brd__sky-when { font-size: var(--fs-sm); color: var(--text-on-panel-soft); }
@@ -27453,6 +27464,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd__sky-map,
     .desk-brd__hour-stn,
     .desk-brd__sky-board,
+    .desk-brd__sky-board .brd-flap--turn,
     .desk-brd__word,
     .desk-brd__route,
     .desk-brd__plan-foot,
