@@ -124,6 +124,95 @@ describe('the gate stands whole on a phone (plan 144)', () => {
   })
 })
 
+// ── The gate's objects stand clear of each other ───────────────────
+// The owner found things on top of each other in the gate, and effects
+// that read as faults. Each was one: the pass came to rest over the
+// reader it taps (it is two and a half cabinets wide) and hung over the
+// right flap; the right lamp ran up into the reader; the wipe was the
+// scene's box at a 50% radius, an oval that was never quite opaque, so
+// the rig showed through the wash as the scene faded; and the fade held
+// its end only `backwards`, so a late unmount was a frame of the whole
+// scene again. Measured with the scene's own animations, not a clock.
+describe('the gate stands clear of itself', () => {
+  const anim = (el, name) => el.getAnimations().find(a => a.animationName === name)
+  const box = s => document.querySelector(s).getBoundingClientRect()
+
+  it('the pass comes to rest on the reader\'s head, over neither the reader nor the lane', async () => {
+    await SCENES.gate()
+    await settle()
+    // Its place at rest is the tap: the keyframes hold it there, untransformed.
+    anim(document.querySelector('.gate__card'), 'gate-tap').cancel()
+    anim(document.querySelector('.gate__rig'), 'arrive')?.cancel()
+    const [card, reader, lane, scene] = ['.gate__card', '.gate__reader', '.gate__lane', '.gate'].map(box)
+    expect(card.bottom).toBeLessThanOrEqual(reader.top + 0.5)
+    expect(reader.top - card.bottom).toBeLessThan(3)
+    expect(card.bottom).toBeLessThan(lane.top)
+    // Over the pad, and on the screen.
+    expect(card.left).toBeLessThan(reader.left)
+    expect(card.right).toBeGreaterThan(reader.right)
+    expect(card.right).toBeLessThanOrEqual(scene.right)
+    expect(card.top).toBeGreaterThanOrEqual(scene.top)
+  })
+
+  it('the lamp under the reader starts below it', async () => {
+    await SCENES.gate()
+    await settle()
+    const reader = box('.gate__reader')
+    const lamp = document.querySelector('.gate__pillar--right .gate__lamp').getBoundingClientRect()
+    expect(lamp.top).toBeGreaterThan(reader.bottom)
+  })
+
+  it('the lane\'s light is whole, and has the scene, before the scene fades', async () => {
+    await SCENES.gate()
+    await settle()
+    const gate = document.querySelector('.gate')
+    const lane = document.querySelector('.gate__lane')
+    const end = a => a.effect.getComputedTiming().endTime
+    const leave = anim(gate, 'gate-leave')
+    const fadeFrom = leave.effect.getComputedTiming().delay
+    expect(end(anim(document.querySelector('.gate__wipe'), 'gate-flood'))).toBeLessThanOrEqual(fadeFrom)
+    expect(end(anim(document.querySelector('.gate__rig'), 'gate-through'))).toBeLessThanOrEqual(fadeFrom)
+    // Pushed to --gate-push about the lane's centre, the lane covers the scene.
+    const push = parseFloat(gate.style.getPropertyValue('--gate-push'))
+    expect(lane.clientWidth * push).toBeGreaterThanOrEqual(gate.clientWidth)
+    expect(lane.clientHeight * push).toBeGreaterThanOrEqual(gate.clientHeight)
+    // And the fade keeps its end until the scene is taken down.
+    expect(['forwards', 'both']).toContain(leave.effect.getComputedTiming().fill)
+  })
+
+  it('lends the window\'s gutter its wash once the light has the screen, and takes it back', async () => {
+    vi.useFakeTimers()
+    try {
+      const done = await SCENES.gate()
+      const ground = () => document.documentElement.style.getPropertyValue('--gate-ground')
+      await vi.advanceTimersByTimeAsync(600 * 1.4)
+      expect(ground()).toBe('')
+      await vi.advanceTimersByTimeAsync(35 * 1.4)
+      expect(ground()).toBe('var(--line-kana)')
+      await vi.advanceTimersByTimeAsync(10 * 1.4)
+      expect(ground()).toBe('')
+      await vi.advanceTimersByTimeAsync(200 * 1.4)
+      expect(done).toHaveBeenCalledTimes(1)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('gives the gutter back when it is skipped', async () => {
+    vi.useFakeTimers()
+    try {
+      await SCENES.gate()
+      await vi.advanceTimersByTimeAsync(632 * 1.4)
+      expect(document.documentElement.style.getPropertyValue('--gate-ground')).not.toBe('')
+      window.dispatchEvent(new PointerEvent('pointerdown'))
+      expect(document.documentElement.style.getPropertyValue('--gate-ground')).toBe('')
+      expect(document.documentElement.style.getPropertyValue('transition')).toBe('')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+})
+
 describe('a cutscene spends the key that skips it', () => {
   for (const [name, mount] of Object.entries(SCENES)) {
     it(`the ${name}: Space skips it and never reaches the screen under it`, async () => {
