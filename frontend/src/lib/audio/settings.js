@@ -61,6 +61,9 @@ export const BASE_GAIN = {
   //   0.080  arriving
   //   0.100  the platform sign (onboarding only)
   sfx: {
+    // The flip sits with the chrome, at the click's 0.030: its voices
+    // are written at the click's loudness through the click's trim.
+    'card-flip':       1.17,
     'card-transition': 1.60,
     'door-slide':      1.10,
   },
@@ -94,6 +97,9 @@ export const BASE_GAIN = {
     // The seal's press: the same knock the mode picker's 'stamp'
     // voice makes, levelled with the fare tick it lands beside.
     'card-stamp':             1.70,
+    // Its voices are written at the 0.060 of the doors running open,
+    // so this is unity.
+    'exam-warning':           1.00,
   },
   jingle:       0.3,
   announcement: 1,
@@ -185,6 +191,22 @@ export function trimFor(category, soundName) {
     ? (categoryGain[soundName] ?? 1)
     : (categoryGain ?? 1)
   return Math.min(MAX_TRIM, Math.max(0, base))
+}
+
+/**
+ * What a synthesised voice plays at: its event's trim, times the
+ * voice's own `level` -- the measured correction that puts an
+ * alternative at its event's loudness (see recipes.js) -- and its send
+ * into the hall. Here, beside the table, because it is the table's
+ * other half; voices.js plays through it and so does the listening
+ * panel (scripts/sound-panel.mjs), which must not load the app's
+ * audio graph to learn a level.
+ */
+export function voiceLevel(event, variant) {
+  return {
+    gain: trimFor(event.category, event.key) * (variant.level ?? 1),
+    space: variant.space ?? 0,
+  }
 }
 
 function subscribeMute(fn)    { muteListeners.add(fn);   return () => muteListeners.delete(fn) }

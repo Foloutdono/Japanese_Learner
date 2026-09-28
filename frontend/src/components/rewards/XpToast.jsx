@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
-import { playFareTick, playPassClip } from '../../lib/audio'
+import { playFareTick, playPassClip, FARE_BEAT } from '../../lib/audio'
 import { rewardTier } from '../../domain/rewardTier'
 import { xpThreshold } from '../../domain/xpCurve'
 import { useProfileSummary } from '../../stores/profileSummary'
@@ -93,11 +93,12 @@ function RewardScene({ toast, dock, onDone }) {
   const tier = toast.tier
 
   useEffect(() => {
-    // The fare's coin sounds as it lands. A level's voice is the punch,
-    // and it sounds on the cut itself (onCut, below).
+    // The fare's coin sounds as it lands, a beat after the rating's
+    // answer (FARE_BEAT), which is played on the same press. A level's
+    // voice is the punch, and it sounds on the cut itself (onCut, below).
     if (tier === 'fare' && !sounded.current) {
       sounded.current = true
-      playFareTick()
+      playFareTick(FARE_BEAT)
     }
 
     // The fare has no visual of its own here and just retires; the

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useTodaySummary, refreshToday } from '../stores/today'
@@ -12,6 +13,7 @@ import { FareSlip } from '../components/credits/FareSlip'
 import Empty from '../components/ui/Empty'
 import { CheckIcon } from '../components/ui/Icons'
 import { useDesk } from '../hooks/useDesk'
+import { playArrival } from '../lib/audio'
 import { DeskSide } from '../components/chrome/DeskSide'
 import { JourneyPanel } from '../components/journey/JourneyPanel'
 import { WeekAhead } from '../components/journey/WeekAhead'
@@ -31,6 +33,15 @@ import { WeekAhead } from '../components/journey/WeekAhead'
 function RunComplete({ run, today, credits, t, lang, onBack }) {
   const desk = useDesk()
   const when = untilNext(today?.next_due, lang)
+  // 到着. Every other run ends on the arrival (DoneMessage); the day's
+  // own run, the one most learners take, ended in silence. Guarded
+  // against StrictMode's double effect, which would flam it.
+  const sounded = useRef(false)
+  useEffect(() => {
+    if (sounded.current) return
+    sounded.current = true
+    playArrival()
+  }, [])
   return (
     <div className="today-clear">
       <span className="today-clear__mark" aria-hidden="true"><CheckIcon size={26} /></span>

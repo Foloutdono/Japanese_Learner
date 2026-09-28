@@ -904,7 +904,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
         <CrossIcon size={14} />{withdrawn ? t.libraryRemove : t.libraryUnfollow}
       </Chip>
       {cards.length > 0 && (
-        <Chip onClick={() => { playUi('click-mode-selection'); exportDeck() }} disabled={exporting}>
+        <Chip onClick={exportDeck} disabled={exporting}>
           <ExportIcon size={14} />{t.export}
         </Chip>
       )}

@@ -36,7 +36,7 @@ describe('the voice registry', () => {
     const required = [
       'click', 'toggle',
       'click-menu', 'click-close-menu', 'click-mode-selection', 'click-screen-selection',
-      'correct', 'wrong', 'card-transition',
+      'correct', 'wrong', 'card-flip', 'card-transition', 'exam-warning',
       'gate-chime', 'door-chime', 'door-slide', 'platform-chime', 'arrival',
       'fare-tick', 'pass-clip',
     ]
@@ -84,6 +84,33 @@ describe('the voice registry', () => {
         expect(v.note, `${e.key}/${v.key} note`).toBeTruthy()
       }
     }
+  })
+
+  it('keeps each voice\'s level and hall send in range', () => {
+    // `level` is measured (scripts/measure-voices.mjs) and multiplies
+    // the event's trim: zero or a negative would silence the voice, a
+    // runaway one would blow past the headroom the trims were set in.
+    // The default is the reference, so it carries none.
+    for (const e of VOICE_EVENTS) {
+      expect(e.variants[0].level, `${e.key}'s default is the reference`).toBeUndefined()
+      for (const v of e.variants) {
+        if (v.level !== undefined) {
+          expect(v.level, `${e.key}/${v.key} level`).toBeGreaterThan(0)
+          expect(v.level, `${e.key}/${v.key} level`).toBeLessThanOrEqual(20)
+        }
+        if (v.space !== undefined) {
+          expect(v.space, `${e.key}/${v.key} space`).toBeGreaterThan(0)
+          expect(v.space, `${e.key}/${v.key} space`).toBeLessThanOrEqual(0.5)
+        }
+      }
+    }
+  })
+
+  it('keeps what a new moment used to play among its voices', () => {
+    // The flip was the generic click and the exam's warning silence
+    // until each had a voice chosen for it; both stay in the palette.
+    expect(voiceEvent('card-flip').variants.map(v => v.key)).toContain('click')
+    expect(voiceEvent('exam-warning').variants.map(v => v.key)).toContain('silent')
   })
 })
 
@@ -154,14 +181,34 @@ describe('choosing a voice', () => {
   })
 
   it('ships the voices that were chosen by ear', () => {
-    // Picked on /dev/sounds and made the defaults. Here so that a
-    // reordering of the variants array cannot quietly change what the
-    // app sounds like.
-    expect(getVoiceKey('correct')).toBe('octave')
-    expect(getVoiceKey('fare-tick')).toBe('coin')
-    expect(getVoiceKey('click')).toBe('tick')
-    expect(getVoiceKey('gate-chime')).toBe('rising-pair')
-    expect(getVoiceKey('door-chime')).toBe('falling-pair')
+    // Picked by the owner on the listening panel (scripts/sound-panel.mjs)
+    // and made the defaults. Here so that a reordering of the variants
+    // array cannot quietly change what the app sounds like.
+    const chosen = {
+      click: 'tick',
+      toggle: 'two-step',
+      'click-menu': 'open-step',
+      'click-close-menu': 'close-step',
+      'click-mode-selection': 'wood-pick',
+      'click-screen-selection': 'bar-depart',
+      correct: 'octave',
+      wrong: 'low-double-voiced',
+      'card-flip': 'card-turn',
+      'exam-warning': 'attention',
+      'card-transition': 'whisk',
+      'gate-chime': 'three-step',
+      'door-chime': 'falling-pair',
+      'door-slide': 'soft-rush',
+      'platform-chime': 'arpeggio-bars',
+      arrival: 'settle',
+      'fare-tick': 'coin',
+      'pass-clip': 'punch-voiced',
+      'card-stamp': 'hanko',
+    }
+    expect(Object.keys(chosen).sort()).toEqual(VOICE_EVENTS.map(e => e.key).sort())
+    for (const [event, voice] of Object.entries(chosen)) {
+      expect(getVoiceKey(event), event).toBe(voice)
+    }
   })
 
   it('remembers a pick', () => {
