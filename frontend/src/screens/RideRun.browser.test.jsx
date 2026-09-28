@@ -157,7 +157,7 @@ describe('RideRun', () => {
     // The done screen: the pace in the sentence, no guess note, the
     // one filled action; no card, no note, no pill.
     expect(root.querySelector('.ride__done')).toBeTruthy()
-    expect(root.querySelector('.ride__done-text').textContent).toContain('10 mots nouveaux par jour')
+    expect(root.querySelector('.ride__done-text').textContent).toContain('10 nouveaux mots par jour')
     expect(root.querySelector('.ride__done-note')).toBeNull()
     expect(root.querySelector('.flashcard')).toBeNull()
     expect(document.querySelector('.guide-callout')).toBeNull()

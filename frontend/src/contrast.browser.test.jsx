@@ -676,14 +676,14 @@ const Fixture = () => (
         exactly the pairs part 1's contract cannot see. */}
     <div className="brd" data-step="why">
       <h1 className="brd__q">Why, <strong className="brd__q-em ob-q-em">Aiko</strong>?</h1>
-      <p className="brd__hint ob-hint">The stops behind you will be marked known.</p>
+      <p className="brd__hint ob-hint">We’ll skip what you already know.</p>
       <p className="brd__error ob-error">Saving failed</p>
       <button type="button" className="brd__link ob-link">Not now</button>
       <button type="button" className="brd-opt brd-opt--on" aria-pressed="true">
         <span className="brd-opt__code ob-code-on">N5</span>
         <span className="brd-opt__names">
           <span className="brd-opt__label ob-label-on">Beginner<span className="brd-tag ob-tag">Next stop</span></span>
-          <span className="brd-opt__desc ob-desc-on">Simple phrases · ~100 kanji</span>
+          <span className="brd-opt__desc ob-desc-on">Basic phrases · ~100 kanji</span>
         </span>
       </button>
       <button type="button" className="brd-opt" aria-pressed="false">
@@ -720,11 +720,11 @@ const Fixture = () => (
       <div className="brd-notif">
         <span className="brd-notif__app ob-notif-app" style={{ background: 'var(--bg-panel)' }}>辻</span>
         <div className="brd-notif__head ob-notif-head"><span>Tsuji</span></div>
-        <span className="brd-notif__text ob-notif-text">Your cards are waiting at the gate.</span>
+        <span className="brd-notif__text ob-notif-text">Your cards are waiting. All aboard!</span>
       </div>
       <div className="brd-step brd-step--done"><span className="brd-step__val ob-step-val">N5 → N4</span></div>
       <div className="brd-chart">
-        <span className="brd-chart__title ob-chart-title">Your projection</span>
+        <span className="brd-chart__title ob-chart-title">Your forecast</span>
         <div className="brd-legend ob-legend">Daily reviews</div>
         <span className="brd-chart__cap ob-chart-cap">an illustration, not a measurement</span>
       </div>
@@ -741,7 +741,7 @@ const Fixture = () => (
         <p className="auth-message auth-message--error ob-auth-error">Wrong password</p>
         <button type="button" className="auth-submit ob-auth-submit">Login</button>
       </div>
-      <p className="auth-foot ob-auth-foot">Everything can be changed later in Settings.</p>
+      <p className="auth-foot ob-auth-foot">You can change all of this later in Settings.</p>
     </main>
     {/* ── 辞書 — the entry plate and its body (2026-09 redesign) ──
         The dock injects the 辞書 pigment; the entry mixes it 60% toward

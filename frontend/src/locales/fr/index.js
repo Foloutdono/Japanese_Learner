@@ -1760,7 +1760,7 @@ const exam = {
 // le sceau sont du contenu et restent en japonais
 // (components/boarding/*, screens/BoardingFlow.jsx).
 const boarding = {
-  authFoot: 'Tout peut être modifié plus tard dans les réglages.',
+  authFoot: 'Tu pourras tout modifier plus tard dans les réglages.',
   authModeAria: 'Connexion ou inscription',
   brdDocumentTitle: 'Embarquement',
   // Bienvenue : l’enseigne, le matériel roulant, la promesse. Pas un
@@ -1772,40 +1772,40 @@ const boarding = {
   brdHaveAccountQ: 'Déjà un compte ?',
   brdNoAccountYet: 'Pas encore de compte ?',
   brdBackHome: 'Retour à l’accueil',
-  brdHaveAccount: 'Déjà un compte ? Se connecter',
+  brdHaveAccount: 'J’ai déjà un compte',
   // Google : « continuer », jamais « s'inscrire » ni « se connecter »
   // — un fournisseur ne distingue pas les deux, on arrive, c'est tout.
   continueWithGoogle: 'Continuer avec Google',
-  orWithEmail: 'ou avec une adresse e-mail',
+  orWithEmail: 'ou avec ton e-mail',
   // 改札 — un aller-retour revenu refusé (lib/authRedirect.js). Les
   // deux nomment ce qui s'est passé plutôt qu'« une erreur est
   // survenue » : sur le web, on les lit dans l'URL une fois la page
   // revenue de Google, et qui vient de faire ce trajet mérite la
   // raison, pas un haussement d'épaules.
-  oauthAlreadyLinked: 'Ce compte Google appartient déjà à une autre carte.',
+  oauthAlreadyLinked: 'Ce compte Google est déjà lié à un autre profil.',
   oauthSignInInstead: 'Se connecter avec ce compte Google',
   nativeReturnNote:  'Connecté. Retour vers l’application…',
   nativeReturnOpen:  'Ouvrir Tsuji',
-  oauthLinkingOff: 'Google ne peut pas être ajouté à cette carte pour le moment. Une adresse e-mail, si.',
+  oauthLinkingOff: 'Impossible d’ajouter Google pour le moment. Utilise plutôt une adresse e-mail.',
   // 本乗車券 — mettre une adresse sur la carte (lib/guest.js). Même
   // règle que les deux au-dessus : nommer ce qui s'est passé, et
   // nommer la voie qui reste ouverte. Les phrases de Supabase sont
   // celles d'un développeur, et sur cette demande l'une d'elles cite
   // une adresse vide au lieu de celle du champ — voir
   // lib/authErrors.js.
-  claimEmailTaken: 'Cette adresse a déjà une carte. Connecte-toi avec elle.',
-  claimEmailUnreachable: 'La confirmation n\u2019a pas pu être envoyée à cette adresse. Essaie-en une autre, ou garde ta progression avec Google.',
-  claimWeakPassword: 'Ce mot de passe est trop facile à deviner. Essaie-en un plus long.',
-  claimTooSoon: 'Trop de tentatives pour le moment. Attends une minute et réessaie.',
+  claimEmailTaken: 'Cette adresse a déjà un compte. Connecte-toi plutôt avec elle.',
+  claimEmailUnreachable: 'Impossible d’envoyer la confirmation à cette adresse. Essaie-en une autre, ou sauvegarde ta progression avec Google.',
+  claimWeakPassword: 'Ce mot de passe est trop facile à deviner. Choisis-en un plus long.',
+  claimTooSoon: 'Trop d’essais d’un coup. Attends une minute, puis réessaie.',
   // Dernier arrêt : le compte, proposé une fois tout vu — et
   // refusable. « Garder » plutôt que « créer » : la progression
   // existe déjà, on ne fait qu'y mettre une clé (lib/guest.js).
-  brdAccountQ: 'Garde ta progression.',
-  brdAccountHint: 'Ton parcours est déjà enregistré. Un compte te permet de le retrouver sur un autre appareil — et de ne pas le perdre en changeant de téléphone.',
+  brdAccountQ: 'Mets ta progression à l’abri.',
+  brdAccountHint: 'Elle est enregistrée sur cet appareil. Avec un compte, elle te suit partout — même sur un nouveau téléphone.',
   brdAccountCreate: 'Créer mon compte',
   brdAccountSkip: 'Continuer sans compte',
   // 辻 (plan 163): the desk's account, beside the ticket it keeps.
-  brdAccountHintDesk: 'Ton billet est prêt. Un compte le garde, sur tous tes appareils.',
+  brdAccountHintDesk: 'Ton billet est prêt. Crée un compte pour le retrouver sur tous tes appareils.',
   brdTicketKind: 'Billet · Tsuji',
   brdIssued: (date) => `Émis le ${date}`,
   brdCreditsOffered: 'crédits offerts',
@@ -1822,99 +1822,99 @@ const boarding = {
   // chaîne de l’interface, pas du contenu.
   brdDemoPrompt: { waiting: 'J’attends un ami à la gare.' },
   // Les questions.
-  brdNameQ: 'Comment tu t’appelles ?',
-  brdNameAria: 'Ton nom',
+  brdNameQ: 'Comment on t’appelle ?',
+  brdNameAria: 'Ton prénom ou ton pseudo',
   // L’adresse à laquelle la carte est émise, dite dès la première
   // question. L’embarquement ne tourne que sur un compte vierge :
   // une adresse ici veut donc toujours dire une NOUVELLE carte pour
   // cette adresse — la seule chose à dire à qui voulait retrouver
   // l’ancienne, avant sept questions. Un invité n’a pas d’adresse et
   // ne voit rien. « Ci-dessous » : le lien de connexion, en pied.
-  brdNameNewPass: email => `Une nouvelle carte, pour ${email}. Si ton trajet est sur un autre compte, connecte-toi ci-dessous.`,
-  brdWhyQ: (name) => `Pourquoi tu apprends le japonais, **${name}** ?`,
+  brdNameNewPass: email => `Tu démarres un nouveau compte avec ${email}. Ta progression est sur un autre compte ? Connecte-toi ci-dessous.`,
+  brdWhyQ: (name) => `Pourquoi le japonais, **${name}** ?`,
   brdMotive: { studies: 'Pour mes études', fun: 'Pour le plaisir', trip: 'Pour un voyage au Japon', live: 'Pour vivre au Japon', friends: 'Pour me faire des amis', other: 'Autre chose' },
   brdKanaQ: 'Tu sais lire ça ?',
   brdKana: { hiragana: 'Hiragana', katakana: 'Katakana', both: 'Les deux', none: 'Pas encore' },
   brdKanaWord: { sushi: 'sushi', hotel: 'hôtel' },
-  brdRevealQ: 'Bientôt, tu liras les deux.',
-  brdRevealHint: 'Deux écritures, 46 signes chacune. Ton premier arrêt.',
+  brdRevealQ: 'Tu liras les deux en un rien de temps.',
+  brdRevealHint: 'Deux écritures, 46 caractères chacune. C’est ton premier arrêt.',
   // 辻 (plan 163): the desk's kana question and reveal, drawn as the
   // owner's D03 -- each answer says what it reads, then its name.
   brdKanaHint: 'Choisis ce que tu lis déjà.',
   brdKanaOnly: (jp) => `Seulement ${jp}`,
   brdKanaSays: { hiragana: 'Les hiragana', katakana: 'Les katakana', both: 'Hiragana et katakana', none: 'On commence par là' },
-  brdRevealLead: 'Deux écritures de 46 signes chacune. Voici comment se lisent ces deux mots.',
+  brdRevealLead: 'Deux écritures, 46 caractères chacune. Voici comment se lisent ces deux mots.',
   brdRevealMeans: 'veut dire',
   brdRevealWord: (word) => `« ${word} »`,
-  brdRevealFirst: (date, min) => `Ton premier arrêt : **les kana**, lus d’ici le **${date}** à ${min} min par jour.`,
-  brdLevelQ: 'Super ! Quel est ton niveau ?',
-  brdLevelHint: 'Les arrêts derrière toi seront marqués connus.',
+  brdRevealFirst: (date, min) => `À ${min} min par jour, tu liras **les kana** d’ici le **${date}**.`,
+  brdLevelQ: 'Super ! Tu en es où ?',
+  brdLevelHint: 'On passera ce que tu connais déjà.',
   brdNovice: 'Novice',
   // Le nombre de kanji est celui de l’appli jusqu’à cet arrêt (~, arrondi).
   brdLevelDesc: {
     novice: 'Les kana et quelques mots',
     N5: (k) => `Phrases simples · ~${k} kanji`,
     N4: (k) => `Conversation courante · ~${k} kanji`,
-    N3: (k) => `Le quotidien sans effort · ~${k} kanji`,
-    N2: (k) => `Presse et travail · ~${k} kanji`,
+    N3: (k) => `Le quotidien, sans effort · ~${k} kanji`,
+    N2: (k) => `L’actu et le travail · ~${k} kanji`,
     N1: (k) => `Presque tout · ~${k} kanji`,
   },
-  brdGoalQ: 'Quel est ton objectif ?',
-  brdGoalHint: (level) => `Les arrêts après ${level}.`,
+  brdGoalQ: 'Jusqu’où veux-tu aller ?',
+  brdGoalHint: (level) => `Choisis un arrêt après ${level}.`,
   // Personne n’a d’arrêt derrière soi avant les kana : la liste s’ouvre
   // sur celui du novice et ne nomme donc aucun niveau (goalStops).
-  brdGoalHintStart: 'Tous les arrêts sont devant toi.',
+  brdGoalHintStart: 'Toute la ligne est devant toi.',
   brdNextStop: 'Prochain arrêt',
   // Les lignes : quoi apprendre. Les kana ne sont pas une ligne à
   // choisir -- chaque billet les emprunte -- l’indication le dit
   // (components/boarding/LinesStep.jsx).
-  brdLinesQ: 'Que veux-tu apprendre ?',
-  brdLinesHint: 'Les kana sont sur chaque billet. Choisis le reste.',
-  brdLinesNone: 'Choisis au moins une ligne.',
+  brdLinesQ: 'Qu’est-ce que tu veux apprendre ?',
+  brdLinesHint: 'Les kana sont toujours inclus. Ajoute ce que tu veux.',
+  brdLinesNone: 'Choisis-en au moins une.',
   brdLine: { vocab: 'Vocabulaire', kanji: 'Kanji', grammar: 'Grammaire' },
   brdLineDesc: {
-    vocab: 'Les mots, de N5 à N1',
-    kanji: 'Lectures, sens, écriture',
-    grammar: 'Les structures, avec des exemples',
+    vocab: 'Les mots, du N5 au N1',
+    kanji: 'Sens, lectures et tracé',
+    grammar: 'Comment les phrases s’assemblent',
   },
   // 辻 (plan 163): the desk's lines -- the kana's strip and what each
   // line carries on the ride to its goal.
   brdKanaFirst: 'hiragana et katakana, en premier',
-  brdOnEveryTicket: 'Sur chaque billet',
+  brdOnEveryTicket: 'Toujours inclus',
   brdLineCarries: {
     vocab: (stop) => `mots jusqu’au ${stop}`,
     kanji: (stop) => `kanji jusqu’au ${stop}`,
     grammar: (stop) => `points jusqu’au ${stop}`,
   },
-  brdLinesArrive: (n, stop, date) => `${n === 1 ? 'Avec cette ligne' : n === 2 ? 'Avec ces deux lignes' : 'Avec ces trois lignes'}, arrivée au ${stop} en **${date}**.`,
-  brdRhythmQ: 'Quel est ton rythme ?',
+  brdLinesArrive: (n, stop, date) => `${n === 1 ? 'Avec cette ligne' : n === 2 ? 'Avec ces deux lignes' : 'Avec ces trois lignes'}, tu arrives au ${stop} en **${date}**.`,
+  brdRhythmQ: 'Combien de temps par jour ?',
   // 辻 (plan 163): the desk's four roads -- a rhythm's minutes and its
   // service, and the days its ride takes.
-  brdRhythmHint: 'Plus tu roules chaque jour, plus tôt tu arrives. Modifiable plus tard.',
+  brdRhythmHint: 'Plus tu roules, plus tu arrives tôt. Modifiable à tout moment.',
   brdADay: 'par jour',
   brdRhythmName: { 5: 'Omnibus', 10: 'Rapide', 15: 'Rapide spécial', 20: 'Express' },
   brdRideDays: (n) => (n === 1 ? '1 jour' : `${n} jours`),
   brdMinADay: 'min par jour',
   brdNewItems: (n) => `~${n} nouveautés`,
-  brdChangeLater: 'Modifiable plus tard.',
-  brdTimeQ: 'Quand étudies-tu ?',
+  brdChangeLater: 'Modifiable à tout moment.',
+  brdTimeQ: 'Quelle heure te va le mieux ?',
   brdDeparture: 'Départ',
   brdDayAria: 'Heure de départ',
   // 辻 (plan 163): the desk's hour, the day as the sun's arc.
-  brdTimeHint: 'Ton train part chaque jour à cette heure.',
+  brdTimeHint: 'Ton train part à cette heure-là, tous les jours.',
   brdYourTrain: 'Ton train',
   brdThenDaily: 'puis chaque jour',
-  brdTimeFine: 'ou glisse le train le long du jour, par demi-heure',
+  brdTimeFine: 'ou fais glisser le train, à la demi-heure près',
   // Le rappel (natif seulement), et la notification telle que l’appli
   // l’envoie. brdAppName est le nom sur les stores ; à garder en
   // phase avec appName dans capacitor.config.json.
-  brdNudgeQ: (time) => `Un rappel à **${time}** ?`,
+  brdNudgeQ: (time) => `Un petit rappel à **${time}** ?`,
   brdAppName: 'Tsuji',
   brdNotifNow: 'maintenant',
   brdNotifTitle: (time) => `Ton train part à ${time}`,
-  brdNotifText: 'Tes cartes t’attendent au portillon.',
+  brdNotifText: 'Tes cartes t’attendent. En voiture !',
   brdNudgeHint: 'Un par jour, à ton heure. Jamais plus.',
-  brdAllow: 'Autoriser les notifications',
+  brdAllow: 'Oui, rappelle-moi',
   brdNotNow: 'Pas maintenant',
   // ── 発車案内 — le rappel du jour tiré de la file, le widget et
   // Réglages › Notifications (plan 156). Le titre et le texte du rappel
@@ -1948,17 +1948,17 @@ const boarding = {
   },
   notifWidgetWhat: 'Il affiche les cartes du jour et un mot que tu connais, jamais un mot à revoir cette semaine.',
   // L’arrivée : la préparation, le plan, la carte.
-  brdBuildingQ: (name) => `Préparation de ton trajet, **${name}**`,
-  brdBuildingAria: 'Préparation de ton trajet',
+  brdBuildingQ: (name) => `On pose tes rails, **${name}**…`,
+  brdBuildingAria: 'Préparation de ton plan',
   brdBuildGoal: 'Ton objectif',
   brdBuildLines: 'Tes lignes',
   brdBuildRide: 'Ton trajet quotidien',
-  brdBuildProjection: 'Ta projection',
+  brdBuildProjection: 'Ta prévision',
   // 机 (plan 140) : les arrêts de la colonne du bureau, un par question.
   brdStop: { name: 'Nom', why: 'Pourquoi', kana: 'Kana', level: 'Niveau', goal: 'Objectif', lines: 'Lignes', rhythm: 'Rythme', time: 'Départ', nudge: 'Rappel' },
   brdArrivalTitle: 'Ton plan',
-  brdPlanQ: (name) => `Ton plan est prêt, **${name}**.`,
-  brdChartTitle: 'Ta projection',
+  brdPlanQ: (name) => `Voici ton plan, **${name}**.`,
+  brdChartTitle: 'Ta prévision',
   brdChartAria: (words) => `Mots retenus au fil du trajet : les révisions quotidiennes montent à environ ${words} ; le bachotage plafonne tôt.`,
   brdChartLabel: (words) => `~${words} mots · révisions quotidiennes`,
   // Le même graphique pour un billet sans les mots : il monte jusqu’à
@@ -1970,9 +1970,9 @@ const boarding = {
   brdChartAriaKana: (kana) => `Kana retenus au fil du trajet : les révisions quotidiennes montent à environ ${kana} ; le bachotage plafonne tôt.`,
   brdChartLabelKana: (kana) => `~${kana} kana · révisions quotidiennes`,
   brdChartCram: 'bachotage',
-  brdLegendUs: (min) => `Révisions quotidiennes, ${min} min`,
+  brdLegendUs: (min) => `${min} min par jour`,
   brdLegendThem: 'Bachotage',
-  brdChartCap: 'Révisions espacées contre bachotage — une illustration, pas une mesure.',
+  brdChartCap: 'Un peu chaque jour vaut mieux que le bachotage. (Une illustration, pas une mesure.)',
   brdLead: (min, date, purpose) => `À **${min} min par jour**, d’ici **${date}**, ${purpose} :`,
   brdFor: { studies: 'pour tes études', fun: 'pour le plaisir', trip: 'pour ton voyage', live: 'pour ta vie au Japon', friends: 'pour tes amis', other: 'pour toi' },
   // La première promesse : un chiffre par ligne du billet, reliés.
@@ -1983,16 +1983,16 @@ const boarding = {
   // L’arrêt du novice pris comme objectif : les kana, puis la ligne qui
   // attend derrière. Pas de compte de mots, et aucune promesse de
   // motif — trois semaines de signes ne font pas un drama sans pause.
-  brdBulletKana: 'Les deux écritures kana, lues à vue',
+  brdBulletKana: 'Les deux kana, lus d’un coup d’œil',
   brdBulletThenLine: 'Puis toute la ligne, arrêt par arrêt',
   // Deux promesses par motif (la note « boarding » de la maquette).
   brdPromise: {
-    studies: ['Tes supports de cours', 'Les termes clés d’un cours'],
-    fun: ['Des cases de manga, des paroles', 'Un drama sans pause'],
+    studies: ['Tes manuels et tes notes de cours', 'Le vocabulaire clé de tes cours'],
+    fun: ['Des mangas, des paroles de chansons', 'Un drama sans appuyer sur pause'],
     trip: ['Lire les panneaux, les menus, les billets', 'Demander son chemin, commander, réserver une chambre'],
     live: ['La mairie, la banque, le médecin', 'Ton courrier et tes contrats'],
     friends: ['Discuter par message', 'Une conversation au dîner'],
-    other: ['Lire ce que tu croises chaque jour', 'Dire ce que tu veux dire'],
+    other: ['Ce que tu croises au quotidien', 'Dire ce que tu as en tête'],
   },
   brdOnTrack: (level) => `En route vers le JLPT ${level}`,
   brdOnTrackLine: 'En route sur toute la ligne',
@@ -2007,7 +2007,7 @@ const boarding = {
   brdInDays: (n) => (n === 1 ? 'demain' : `dans ${n} jours`),
   brdEvery: { am: 'chaque matin', noon: 'chaque midi', pm: 'chaque soir' },
   brdAtTime: (every, time) => `${every} à ${time}`,
-  brdKanaDone: 'Kana lus',
+  brdKanaDone: 'Kana maîtrisés',
   brdBothScripts: 'hiragana et katakana',
   brdTerminus: (stop) => `Terminus · ${stop}`,
   brdAtTerminus: 'Au terminus, tu connaîtras',
@@ -2023,37 +2023,37 @@ const ride = {
   rideJp: '試乗',
   rideCap: 'Essai',
   rideSkip: 'Passer',
-  rideKnownFront: 'Une carte. Le mot est devant. Touchez-la pour la retourner.',
-  rideKnownBack: 'Vous le saviez ? Dites-le. C\'est vous qui notez.',
-  rideUnknownFront: 'Celui-ci, vous ne le connaissez pas. Retournez la carte.',
-  rideUnknownBack: 'Dites faux. Faux n\'est pas une faute : la carte revient plus tôt, et c\'est toute la méthode.',
+  rideKnownFront: 'Voici ta première carte. Touche-la pour la retourner.',
+  rideKnownBack: 'Tu la connaissais ? Sois honnête : c’est toi qui te notes.',
+  rideUnknownFront: 'Celle-ci, tu ne la connais pas. Retourne-la.',
+  rideUnknownBack: 'Choisis « Raté ». Ce n’est pas un échec : la carte revient juste plus tôt. Tout le secret est là.',
   // 机 (plan 115) : les mêmes notes, avec les touches du bureau.
-  rideKnownFrontDesk: 'Une carte. Le mot est devant. Cliquez dessus ou appuyez sur Espace pour la retourner.',
-  rideKnownBackDesk: 'Vous le saviez ? Dites-le, sur la barre ou avec ses touches chiffrées. C\'est vous qui notez.',
-  rideUnknownFrontDesk: 'Celui-ci, vous ne le connaissez pas. Retournez la carte, d\'un clic ou avec Espace.',
-  rideUnknownBackDesk: 'Dites faux, sur la barre ou avec sa touche. Faux n\'est pas une faute : la carte revient plus tôt, et c\'est toute la méthode.',
-  rideGuessed: 'Deviné ? Alors elle revient dans quelques jours. Dites faux quand vous devinez.',
-  rideDoneBody: n => `C'est tout le jeu. **${n} mots nouveaux par jour**, chacun de retour juste avant que vous l'oubliiez.`,
+  rideKnownFrontDesk: 'Voici ta première carte. Clique dessus ou appuie sur Espace pour la retourner.',
+  rideKnownBackDesk: 'Tu la connaissais ? Sois honnête : c’est toi qui te notes, sur la barre ou avec les touches chiffrées.',
+  rideUnknownFrontDesk: 'Celle-ci, tu ne la connais pas. Retourne-la : un clic ou Espace.',
+  rideUnknownBackDesk: 'Choisis « Raté », sur la barre ou avec sa touche. Ce n’est pas un échec : la carte revient juste plus tôt. Tout le secret est là.',
+  rideGuessed: 'Tu as trouvé la nouvelle ? Si c’était au hasard, choisis « Raté » la prochaine fois — sinon, elle ne reviendra pas avant plusieurs jours.',
+  rideDoneBody: n => `C’est tout ! **${n} nouveaux mots par jour**, chacun de retour juste avant que tu l’oublies.`,
   rideContinue: 'Continuer',
   // L'essai de lecture (plan 099) : la phrase, le champ, la mesure,
   // puis la plaque qui dit quels quais sont sur l'abonnement.
-  rideReadFront: 'Lisez-la. Elle se cache dans un instant.',
-  rideReadFrontUntimed: 'Lisez-la, puis écrivez ce que vous avez lu, en romaji ou en kana.',
-  rideReadType: 'Écrivez ce que vous avez lu, en romaji ou en kana.',
-  rideReadMeasure: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre.',
-  rideReadMeasureDesk: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre : sur la barre, ou avec ses touches chiffrées.',
+  rideReadFront: 'Lis vite, elle disparaît dans un instant !',
+  rideReadFrontUntimed: 'Lis-la, puis écris-la en rōmaji ou en kana.',
+  rideReadType: 'Écris ce que tu as lu, en rōmaji ou en kana.',
+  rideReadMeasure: 'Le score montre ce que tu as saisi. À toi de te noter.',
+  rideReadMeasureDesk: 'Le score montre ce que tu as saisi. À toi de te noter : sur la barre, ou avec les touches chiffrées.',
   // Plan 133. Sur un téléphone : la carte connue ne se note qu'une fois
   // sa fiche ouverte depuis la 🔍, puis refermée.
-  rideKnownDict: 'Chaque carte ouvre sa fiche du dictionnaire. Touchez 🔍 pour lire celle-ci, puis refermez-la.',
+  rideKnownDict: 'Chaque carte a sa fiche de dictionnaire. Touche 🔍 pour ouvrir celle-ci, puis referme-la.',
   // Sur le bureau : l'arrêt unique du guide à chaque essai
   // (components/guide/rideTours), sur la fiche une fois la carte connue
   // retournée et sur la décomposition une fois la phrase notée, lus sous
   // guide<Clé>.
-  guideRideEntry: 'Retournée : sa fiche du dictionnaire s\'ouvre à côté. Cliquez sur un mot ou un kanji qu\'elle cite pour l\'ouvrir ici.',
-  guideRideReadBreakdown: 'Notée : la décomposition de la phrase s\'ouvre, mot à mot, avec sa grammaire. Cliquez sur une ligne pour ouvrir sa fiche.',
+  guideRideEntry: 'Sa fiche de dictionnaire s’ouvre ici. Clique sur un mot ou un kanji pour le consulter aussi.',
+  guideRideReadBreakdown: 'Voici la phrase, mot à mot, avec sa grammaire. Clique sur une ligne pour voir sa fiche.',
   ridePlateCap: 'L\'abonnement',
-  ridePlateBody: 'Ces quais sont sur l\'abonnement.',
-  ridePlateOpen: 'Ils sont ouverts à tous pour l\'instant.',
+  ridePlateBody: 'Ces exercices font partie de l’abonnement.',
+  ridePlateOpen: 'Pour l’instant, ils sont ouverts à tous.',
 }
 
 const guide = {
@@ -2064,42 +2064,42 @@ const guide = {
   guideNext: 'Suivant',
   guideDone: 'Terminé',
   guideSkip: 'Passer',
-  guideTodayGate: 'Ce qui est dû aujourd\'hui, ligne par ligne. Éteignez une ligne pour plus tard, puis partez.',
-  guideTabBar: 'Les cinq portes : Apprendre, Pratiquer, Aujourd\'hui, Dictionnaire, votre carte.',
-  guideLearnPlate: 'Une ligne. Touchez la plaque pour l\'ouvrir ; la puce est ce qu\'elle vous doit aujourd\'hui.',
-  guideLearnStops: 'Où vous en êtes sur la ligne, et les arrêts de part et d\'autre.',
-  guideLearnShelf: 'Vos propres decks, et la bibliothèque où les autres publient.',
-  guidePracticePlate: 'Un quai : des phrases à lire, comprendre, traduire, prendre en dictée ou rédiger.',
-  guidePracticeDests: 'Les niveaux. Le vôtre est marqué ; touchez-en un autre pour y monter quand même.',
-  guidePracticePass: 'Ces quais sont sur l\'abonnement.',
-  guideDictConsole: 'Cherchez par mot, lecture ou sens.',
-  guideDictOptions: 'Réglez la recherche : le mot entier, son début ou n’importe où, dans le japonais, le sens ou les deux.',
-  guideDictChips: 'Les collections, et vos entrées gardées au bout.',
-  guideDictEntry: 'Une entrée. Touchez pour l\'ouvrir ; son ＋ la garde sur votre étagère ou l\'ajoute à l\'un de vos decks.',
-  guideDictAnalyzer: 'L\'analyseur : collez, photographiez ou filmez une phrase et décomposez-la.',
-  guideProfilePass: 'Votre carte : le niveau, le solde, votre nom.',
-  guideProfileStamps: 'Le rallye des tampons : un par jour d\'étude.',
-  guideProfileRecords: 'Vos chiffres : chaque révision, ce que vous retenez, votre meilleure série sans faute.',
-  guideProfileLedger: 'Chaque ligne, et où vous en êtes dessus.',
-  guideProfileSettings: 'Réglages : le niveau, le rythme, la barre de notation, et ce guide à nouveau.',
-  guideLearnLibrary: 'La bibliothèque : les decks que publient les autres. Ouvrez-en un pour le parcourir ; abonnez-vous pour l\'étudier avec les vôtres.',
-  guidePracticeExam: 'L\'examen blanc : une épreuve façon JLPT au niveau choisi, corrigée quand vous la rendez.',
-  guideDictActions: 'Ses actions : l\'écouter, et ＋ pour la garder sur votre étagère ou l\'ajouter à l\'un de vos decks.',
-  guideProfileStats: 'Statistiques : ce que vous retenez et ce que vous manquez, ligne par ligne.',
-  guideProfileBoard: 'Le classement, en XP : cette semaine et depuis le début.',
+  guideTodayGate: 'Tes révisions du jour, ligne par ligne. Désactive-en une pour plus tard, puis embarque.',
+  guideTabBar: 'Tes cinq onglets : Apprendre, Pratique, Aujourd’hui, Dictionnaire et ton profil.',
+  guideLearnPlate: 'Une ligne. Touche-la pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
+  guideLearnStops: 'Où tu en es sur la ligne, et les arrêts autour.',
+  guideLearnShelf: 'Tes propres decks, et la bibliothèque des decks partagés par les autres.',
+  guidePracticePlate: 'Un exercice : lire, comprendre, traduire, écouter ou écrire de vraies phrases.',
+  guidePracticeDests: 'Les niveaux. Le tien est marqué : touche-en un autre pour l’essayer quand même.',
+  guidePracticePass: 'Ces exercices font partie de l’abonnement.',
+  guideDictConsole: 'Cherche par mot, lecture ou sens.',
+  guideDictOptions: 'Affine ta recherche : mot exact, début ou n’importe où — dans le japonais, le sens ou les deux.',
+  guideDictChips: 'Parcours par collection. Tes favoris sont au bout.',
+  guideDictEntry: 'Touche une entrée pour l’ouvrir. Son ＋ la garde en favori ou l’ajoute à l’un de tes decks.',
+  guideDictAnalyzer: 'L’analyseur : colle, photographie ou filme du japonais, et il le décortique pour toi.',
+  guideProfilePass: 'Ta carte : ton nom, ton niveau et ton solde.',
+  guideProfileStamps: 'Ta carte de tampons : un tampon par jour d’étude.',
+  guideProfileRecords: 'Tes chiffres : tes révisions, ce que tu retiens, ta meilleure série sans faute.',
+  guideProfileLedger: 'Chaque ligne, et le chemin parcouru.',
+  guideProfileSettings: 'Réglages : ton niveau, ton rythme, ta façon de noter — et ce guide, quand tu veux.',
+  guideLearnLibrary: 'La bibliothèque : des decks partagés par d’autres. Ouvre-en un pour le découvrir ; suis-le pour l’étudier.',
+  guidePracticeExam: 'L’examen blanc : une épreuve type JLPT au niveau de ton choix, corrigée dès que tu la rends.',
+  guideDictActions: 'Écoute-la, ou utilise ＋ pour la garder en favori ou l’ajouter à l’un de tes decks.',
+  guideProfileStats: 'Statistiques : ce qui reste et ce qui t’échappe, ligne par ligne.',
+  guideProfileBoard: 'Le classement en XP : cette semaine et depuis toujours.',
   // 机 (plan 115) : les notes qui enseignent les touches et les portes du bureau.
-  guideTabBarDesk: 'Les cinq portes, à gauche. Appuyez sur / n\'importe où pour chercher dans le dictionnaire.',
-  guideTodayGateDesk: 'Ce qui est dû aujourd\'hui, ligne par ligne. Éteignez une ligne pour plus tard, puis partez : Entrée le fait de n\'importe où ici.',
-  guideLearnStopsDesk: 'Toute la ligne. Chaque arrêt est une porte vers ses quais.',
+  guideTabBarDesk: 'Tes cinq sections, à gauche. Appuie sur / n’importe où pour chercher dans le dictionnaire.',
+  guideTodayGateDesk: 'Tes révisions du jour, ligne par ligne. Désactive-en une pour plus tard, puis embarque — Entrée le fait de n’importe où ici.',
+  guideLearnStopsDesk: 'Toute la ligne. Clique sur un arrêt pour l’étudier.',
   // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
-  guideLearnPlateDesk: 'Une ligne. Cliquez sur la plaque pour l\'ouvrir ; la puce est ce qu\'elle vous doit aujourd\'hui.',
-  guidePracticeDestsDesk: 'Les niveaux, et ce que vous y avez fait. Le vôtre est marqué ; cliquez sur un autre pour y monter quand même.',
-  guideDictEntryDesk: 'Une entrée, ouverte à côté du catalogue. ← et → parcourent le catalogue.',
+  guideLearnPlateDesk: 'Une ligne. Clique dessus pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
+  guidePracticeDestsDesk: 'Les niveaux, et ce que tu y as fait. Le tien est marqué : clique sur un autre pour l’essayer quand même.',
+  guideDictEntryDesk: 'Une entrée, ouverte à côté de la liste. ← et → pour parcourir la liste.',
   // Réglages, les deux retours.
   settingsFirstRide: 'Premier essai',
   settingsRideAgain: 'Refaire l\'essai',
   settingsGuideAgain: 'Revoir le guide',
-  settingsGuideAgainDone: 'Il se jouera à la prochaine ouverture de chaque porte.',
+  settingsGuideAgainDone: 'Il réapparaîtra la prochaine fois que tu ouvriras chaque section.',
 }
 
 const onboarding = {
@@ -2115,14 +2115,14 @@ const onboarding = {
     context: 'Quel mot complète la phrase ?',
     grammar: 'Quelle règle de grammaire est à l’œuvre ?',
   },
-  onbTestStop: 'M’arrêter ici — place-moi d’après mes réponses',
+  onbTestStop: 'M’arrêter ici et me placer',
   onbTestFinish: 'Voir le résultat',
-  onbTestError: 'Le test n’a pas pu être chargé. Réessaie dans un instant.',
+  onbTestError: 'Le test n’a pas pu se charger. Réessaie dans un instant.',
   onbTestRetake: 'Repasser le test',
-  onbTestResult: (level, correct, total) => `${correct} bonnes réponses sur ${total} — on te conseille d’embarquer à ${level}.`,
+  onbTestResult: (level, correct, total) => `${correct} bonnes réponses sur ${total}. On te conseille de démarrer à ${level}.`,
   onbPaceRecommended: 'Recommandé',
-  onbPassError: 'L’enregistrement a échoué — vérifie ta connexion et réessaie.',
-  brdPassRefused: 'Le guichet n’a pas pu émettre ce titre — cela vient de nous, pas de ta connexion. Rien n’a été enregistré.',
+  onbPassError: 'Échec de l’enregistrement. Vérifie ta connexion et réessaie.',
+  brdPassRefused: 'Impossible de créer ta carte. Le souci vient de chez nous, pas de ta connexion. Rien n’a été enregistré.',
   // Le rythme quotidien, vécu : la jauge 新規 du hall et le terminus
   // de session des écrans d'étude (voir components/study/usePace.js).
   paceDoneTitle: 'Objectif du jour atteint',

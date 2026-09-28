@@ -70,6 +70,6 @@ describe('welded', () => {
     expect(fr.brdLead(10, 'décembre 2026', fr.brdFor.other)).toBe(
       `À **10 min par jour**, d’ici **décembre 2026**, pour toi${NBSP}:`
     )
-    expect(fr.brdNameQ).toBe(`Comment tu t’appelles${NBSP}?`)
+    expect(fr.brdNameQ).toBe(`Comment on t’appelle${NBSP}?`)
   })
 })
