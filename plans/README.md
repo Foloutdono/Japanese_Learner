@@ -6963,11 +6963,37 @@ its answers as the thing they are, in the app's own figures:
 | # | What | Status |
 |---|------|--------|
 | 161a | **The frame**: no sumi column (`DeskLine` retired for `DeskStrip`); the question and its hint top-left; the stage centred in the paper that is left; the floor bottom-right, Continue at a ticket's width and giving way before it meets the strip (measured, `--desk-strip-w`); the strip on the floor's line, bottom-left, the answer given on a stop said in its name (a door's label and title) | DONE (2026-09-27) |
-| 161b | **The answers as maps**: Why as six roads out of the junction (the motive icons in 96px rings); Kana as the two words and four answers that draw them (read lit, not read dashed); the reveal as each word read sign by sign; Lines as three cards in their pigments with what each holds at N5, the kana on every ticket, the arrival under them | TODO |
-| 161c | **The lines drawn to time**: Level and Goal as one climbing line, the pick called out (you are here, or the arrival); Rhythm as four roads from today, each as long as the ride, on a month axis; the hour as the day's arc (sunrise left, noon at the top, night right), 朝 昼 夜 on it, the train riding it as the fine control, the board in its bowl | TODO |
-| 161d | **The ends**: the plan as the ride to scale (today, the kana, two halts counting the words, N5) and what the terminus holds; the account as its form beside a paper ticket with that route printed on it; the name as the first station's plate | TODO |
-| 161e | **The front door**: the Welcome as the crossroads (辻 the hub, the app's lines leaving it, the gold line running from Board into it); the sign-in taking the promise's place, the hub kept | TODO |
+| 161b | **The answers as maps**: Why as six roads out of the junction (the motive icons in 96px rings); Kana as the two words and four answers that draw them (read lit, not read dashed); the reveal as each word read sign by sign; Lines as three cards in their pigments with what each holds at N5, the kana on every ticket, the arrival under them | DONE (2026-09-28) |
+| 161c | **The lines drawn to time**: Level and Goal as one climbing line, the pick called out (you are here, or the arrival); Rhythm as four roads from today, each as long as the ride, on a month axis; the hour as the day's arc (sunrise left, noon at the top, night right), 朝 昼 夜 on it, the train riding it as the fine control, the board in its bowl | DONE (2026-09-28) |
+| 161d | **The ends**: the plan as the ride to scale (today, the kana, two halts counting the words, N5) and what the terminus holds; the account as its form beside a paper ticket with that route printed on it; the name as the first station's plate | DONE (2026-09-28) |
+| 161e | **The front door**: the Welcome as the crossroads (辻 the hub, the app's lines leaving it, the gold line running from Board into it); the sign-in taking the promise's place, the hub kept | DONE (2026-09-28) |
 
 Held by `frontdoor.desktop` and `frontdoor.wide` (rewritten per phase),
 the phone lanes unchanged, and `desk.css.test.js` (every rule in the 机
 section, none of the short step's pairs).
+
+**As built.** The commits' labels run one letter behind this table from
+the second phase on: 161b's commits carry Why, Kana and the reveal, and
+the Level, Goal, Lines, Rhythm and hour drawings (this table's 161b and
+161c); 161c's carry the plan, the account and the name (161d); 161e is
+the front door. Where the build departs from the drawings:
+
+- *The account's skip stands under the ticket*, beside its note, not on
+  the floor: at 1100 the floor beside an eight-stop strip holds one
+  action and no more, and the form's own action is the one.
+- *The welcome's credits are printed on the guest's ticket stub* (200,
+  named as given); a learner who is not a guest never reaches the
+  account step, and meets the credits on the rail's pass.
+- *The novice's stop is あ on the desk's line*, the kana's sign in the
+  ring where the list prints a dash.
+- *The hour's train answers a pointer only on the arc or on itself*: a
+  press on the board or the sky does not move it, and the keys step it a
+  half hour (the phone's rail's keys).
+- *The plan's halts keep a fifth of the route apart*, so their dates
+  never overlap on a short ride; the ticket's kana stop keeps a third of
+  the route from either end for the same reason on a laptop.
+- *The Welcome names the app from the hub*: the mark there carries
+  `appTitle` for a screen reader, the map around it decoration.
+- Plan 140's column, `DeskLine`, the `.desk-door` rules, the desk's lane
+  of cards (`DESK_LANE`) and the column's rules are gone; `DeskMast` is
+  the rail's alone.

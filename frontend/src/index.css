@@ -25446,24 +25446,20 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     padding-bottom: calc(var(--safe-bottom) + var(--sp-7));
   }
   /* A step's answers stand at the width that serves them, set on its
-     car so a leaving car keeps its own while it pulls away: the card's
-     for most questions; the canvas for the name's line, the six roads,
-     the kana's tree,
-     the line of stations, the lines' cards, the four roads, the day's
-     arc, the ride drawn to scale and the account beside its ticket;
-     three columns and a gutter for the two words read out. */
+     car so a leaving car keeps its own while it pulls away: the canvas
+     for every question -- the name's line, the six roads, the kana's
+     tree, the line of stations, the lines' cards, the four roads, the
+     day's arc, the ride drawn to scale and the account beside its
+     ticket -- and three columns and a gutter for the two words read
+     out. */
   .desk-brd .brd__car {
-    --desk-brd-w: var(--card-w);
+    --desk-brd-w: var(--desk-board-w);
     --pull: 1;
     animation: desk-brd-pull-in 520ms cubic-bezier(0.16, 1, 0.3, 1) 140ms backwards;
   }
   .desk-brd .brd__car[data-dir="back"] { --pull: -1; }
   .desk-brd .brd__car--out { animation: desk-brd-pull-out 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
-  .desk-brd .brd__car:is([data-car="name"], [data-car="why"], [data-car="kana"], [data-car="lines"], [data-car="rhythm"], [data-car="time"]) { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="reveal"] { --desk-brd-w: calc(3 * var(--desk-side-w) + var(--sp-8)); }
-  .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
-  .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: var(--desk-board-w); }
-  .desk-brd .brd__car[data-car="account"] { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__stage {
     --desk-at: var(--desk-brd-w);
     width: 100%;
