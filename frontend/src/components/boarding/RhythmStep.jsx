@@ -10,7 +10,7 @@ import { PickMark } from './BoardOption'
 // in them. The recommended one wears the tag and is preselected by the
 // flow; the picked card lifts to its wash.
 //
-// On the desk (plan 161) `rides` is what each rhythm's ride comes to --
+// On the desk (plan 163) `rides` is what each rhythm's ride comes to --
 // a { days, date } per rhythm, in RHYTHMS' order -- `stop` the goal it
 // arrives at and `now` the day it leaves; the rhythms are drawn as the
 // four roads to that stop (RideRoads). Until the volumes that price the
@@ -58,7 +58,7 @@ export default function RhythmStep({ value, onChange, onContinue, rides = null, 
   )
 }
 
-// ── 辻 — four roads from today (plan 161) ────────────────────────
+// ── 辻 — four roads from today (plan 163) ────────────────────────
 // The owner's D06 on the desk: the rhythms as four roads out of today on
 // one calendar, each as long as its ride -- the shorter the road, the
 // sooner the stop -- the stop in its ring at the road's end and its

@@ -101,7 +101,7 @@ function Flaps({ time }) {
   )
 }
 
-// `now` is the desk's (plan 161): the day the board's first departure
+// `now` is the desk's (plan 163): the day the board's first departure
 // is counted from.
 export default function TimeStep({ minute, onChange, onContinue, now = null }) {
   const { t } = useLang()
@@ -211,7 +211,7 @@ function stepHour(e, minute, onChange) {
   if (e.key === 'End') { e.preventDefault(); onChange(LAST_DEPARTURE_MIN) }
 }
 
-// ── 辻 — the day as the sun's arc (plan 161, option 3) ───────────
+// ── 辻 — the day as the sun's arc (plan 163, option 3) ───────────
 // The owner's pick of five drawn for the hour (空の弧): the day as the
 // sky from sunrise at the left, over noon at the top, to night at the
 // right -- the three rides announced on it as stations (朝, 昼, 夜) and

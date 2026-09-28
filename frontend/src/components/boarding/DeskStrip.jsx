@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
 
-// ── 辻 — the journey strip (plan 161) ────────────────────────────
+// ── 辻 — the journey strip (plan 163) ────────────────────────────
 // The owner's pick D of the canvas "Tsuji — onboarding, new directions":
 // the sumi column goes (plan 140's DeskLine), and what it said -- where
 // you are, the stops behind you and the ones ahead -- stands at the

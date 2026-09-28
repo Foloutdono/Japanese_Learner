@@ -122,7 +122,7 @@ describe('a boarding step on the desk', () => {
   })
 
   it('stands Continue on the paper\'s floor, the answers held above it', async () => {
-    // Plan 161: the floor is the bottom-right corner, a rung over the
+    // Plan 163: the floor is the bottom-right corner, a rung over the
     // frame's own edge, and the answers stand in the paper above it.
     await render(<Step>{answers}</Step>)
     landed()

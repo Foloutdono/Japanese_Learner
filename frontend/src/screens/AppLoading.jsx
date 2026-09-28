@@ -25,7 +25,7 @@ import { PaperWait } from '../components/boarding/PaperWait'
 export const WAKE_AFTER_MS = 4000
 
 //
-// `frame` is the desk's (plans 155, 161): the wait between the Welcome's
+// `frame` is the desk's (plans 155, 163): the wait between the Welcome's
 // Board and the boarding's first question, drawn on the paper the two
 // share rather than dropped to the boot screen for the length of one
 // request: the dots alone (PaperWait), on the paper's middle, the same

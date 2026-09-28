@@ -93,7 +93,7 @@ function Lane({ cards, back = false, t }) {
   )
 }
 
-// 机 (plans 122, 161): on the desk the sign-in stands in Board's place
+// 机 (plans 122, 163): on the desk the sign-in stands in Board's place
 // on the same screen, so a returning learner signs in with no second
 // screen. `authMode` is App's: null draws the promise and Board; 'login'
 // (the corner's Log in, back from the boarding, a refused Google return)
@@ -127,7 +127,7 @@ export default function Welcome({ onBoard, onSignIn, onBack = null, boarding = f
   )
 }
 
-// ── 辻 — the front door as the crossroads (plans 140, 161) ──────
+// ── 辻 — the front door as the crossroads (plans 140, 163) ──────
 // The owner's pick D of the canvas "Tsuji — onboarding, new directions":
 // the crossroads itself, 辻 in its hub at the right of the paper, and
 // out of it the app's lines, each in its pigment to its sign -- the kana,

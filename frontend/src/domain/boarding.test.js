@@ -184,7 +184,7 @@ describe('the level answer', () => {
   })
 })
 
-// ── 辻 — the desk's figures (plan 161) ──
+// ── 辻 — the desk's figures (plan 163) ──
 describe('the desk’s reveal and rhythm', () => {
   it('prices the kana’s own stop at the signs still unread', () => {
     const now = new Date(2026, 8, 28)

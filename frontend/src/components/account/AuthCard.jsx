@@ -9,7 +9,7 @@ import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
 // Google, then Login / Sign up as a segmented control, the two fields,
 // the one action. On a phone it is AuthScreen's card, a screen of its
 // own. On the desk it is the Welcome's sign-in, in Board's place (plan
-// 161), so a returning learner signs in with no second screen.
+// 163), so a returning learner signs in with no second screen.
 //
 // Google sits above the segmented control because it answers both
 // halves of it at once: there is no such thing as signing up versus
@@ -20,7 +20,7 @@ import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
 //   autoFocus    the email field takes the focus on mount
 //   seg          draw the Login / Sign up control; without it the card
 //                stays on initialMode (the desk signs in only)
-//   frame        the desk's (plan 161): lays the card out itself, handed
+//   frame        the desk's (plan 163): lays the card out itself, handed
 //                { head, submit } -- the card's parts down to the
 //                answers, and the action's { onClick, disabled, label } --
 //                so its action can stand where the Welcome's Board did

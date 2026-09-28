@@ -235,7 +235,7 @@ export default function App() {
   // if they had never tapped anything. The sign-in screen has that
   // line, and it prints the reason on its own mount.
   const [authMode, setAuthMode] = useState(() => (authRedirectError() ? 'login' : null)) // null | 'login' | 'signup'
-  // 机 (plans 122, 161): on the desk the sign-in stands in Board's place
+  // 机 (plans 122, 163): on the desk the sign-in stands in Board's place
   // on the Welcome itself, so there is no second screen to swap to --
   // authMode says whether it stands, and on which side it opens.
   const desk = useDesk()
@@ -279,7 +279,7 @@ export default function App() {
   // flag is only the button's own "working on it" — the session
   // arrives through the auth listener like any other.
   const [boarding, setBoarding] = useState(false)
-  // 机 (plans 155, 161): the learner who pressed Board on this load is
+  // 机 (plans 155, 163): the learner who pressed Board on this load is
   // on the way into the boarding, so the wait before its first question
   // stays on the paper the Welcome and the boarding both stand on
   // (AppLoading's `frame`) rather than dropping to the boot screen and

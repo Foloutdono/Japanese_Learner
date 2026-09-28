@@ -25,7 +25,7 @@ import { useDesk } from '../../hooks/useDesk'
 // `error` is the desk's (plan 140): keeping the progress, or riding on
 // without an account, enters the station from here -- and the office's
 // answer to that is said here, over the button. `ticket` is the desk's
-// too (plan 161): the ticket the account keeps, printed beside the form
+// too (plan 163): the ticket the account keeps, printed beside the form
 // (PaperTicket's props), and riding on without one offered under it.
 export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAuth = null, error = null, ticket = null }) {
   const { t } = useLang()
@@ -81,7 +81,7 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
       )}
       <p className="auth-or">{t.orWithEmail}</p>
       <ClaimFields claim={claim} variant="board" />
-      {/* 辻 (plan 161): on the desk the way to an account already held
+      {/* 辻 (plan 163): on the desk the way to an account already held
           stands under the form it would stand in for. */}
       {desk && <BoardLink onClick={onSignIn} data-action="account-sign-in">{t.brdHaveAccount}</BoardLink>}
     </AccountForm>

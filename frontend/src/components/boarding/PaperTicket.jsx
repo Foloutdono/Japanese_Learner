@@ -3,7 +3,7 @@ import { useCredits } from '../../stores/credits'
 import { SIGNUP_BONUS } from '../../domain/credits'
 import { Mark } from '../ui/Mark'
 
-// ── 乗車券 — the ticket an account keeps (plan 161) ──────────────
+// ── 乗車券 — the ticket an account keeps (plan 163) ──────────────
 // The owner's D09 on the desk: beside the account's form, what it would
 // keep -- the learner's ticket, printed with the ride to scale from the
 // plan's own figures (the departure, the kana when there are kana to

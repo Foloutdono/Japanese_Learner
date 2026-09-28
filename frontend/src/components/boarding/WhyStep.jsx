@@ -8,7 +8,7 @@ import { MotiveGlyph, MotiveIcon } from './icons'
 
 // ── 2 · why (plan 075) ───────────────────────────────────────────
 // Six rows, one choice; the plan's two promise lines come from it. On
-// the desk, six roads out of the question's hub (WhyRoads, plan 161).
+// the desk, six roads out of the question's hub (WhyRoads, plan 163).
 // `no` is the question's place on the strip, which the hub prints.
 export default function WhyStep({ name, value, onChange, onContinue, no = null }) {
   const { t } = useLang()
@@ -44,7 +44,7 @@ export default function WhyStep({ name, value, onChange, onContinue, no = null }
   )
 }
 
-// ── 辻 — six reasons, six roads (plan 161) ───────────────────────
+// ── 辻 — six reasons, six roads (plan 163) ───────────────────────
 // The owner's D02: the question's hub in the middle of the paper, its
 // number on it, and a road out of it to each reason -- clockwise from
 // the top left, in the order the digits pick them. A road ends at its

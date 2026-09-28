@@ -4,10 +4,10 @@ import { userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — first contact on a wide window (plans 122, 140, 161) ──────
+// ── 机 — first contact on a wide window (plans 122, 140, 163) ──────
 // At 1440 the Welcome's band ran four cards a lane and was clipped mid
 // window; the boarding's column stood in the middle of an empty one.
-// Since plan 161 there is no column: the Welcome is the crossroads on
+// Since plan 163 there is no column: the Welcome is the crossroads on
 // the canvas (--desk-board-w) centred in the window, its lines at the
 // drawing's length, and the boarding's questions stand in the canvas's
 // corners and draw their answers across it.
@@ -121,7 +121,7 @@ describe('first contact at 1440 (P10)', () => {
     await pastName()
     // Once the question's car has landed (the desk's pull, plan 155).
     await settle(600)
-    // No column (plan 161): the paper is the window's, and the canvas
+    // No column (plan 163): the paper is the window's, and the canvas
     // (--desk-board-w) centred in it sets the corner.
     expect($('.desk-brd__side')).toBeNull()
     const gutter = (bodyW() - 1240) / 2

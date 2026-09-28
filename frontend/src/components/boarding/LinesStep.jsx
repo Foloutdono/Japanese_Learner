@@ -26,7 +26,7 @@ import { LockMark } from './icons'
 // patterns.
 const GLYPH = { vocab: '語', kanji: '漢', grammar: '文' }
 
-// On the desk (plan 161) `carries` is what each line holds on this ride,
+// On the desk (plan 163) `carries` is what each line holds on this ride,
 // { vocab, kanji, grammar }, `stop` the goal it rides to and `arrival`
 // the month the lines picked arrive in -- each null until the volumes
 // that price them have answered.
@@ -64,7 +64,7 @@ export default function LinesStep({ value, onChange, onContinue, carries = null,
   )
 }
 
-// ── 辻 — the lines as cards, the kana over them (plan 161) ───────
+// ── 辻 — the lines as cards, the kana over them (plan 163) ───────
 // The owner's D05 on the desk: the kana a strip across the paper, on
 // every ticket and so no answer; the three lines a card each under
 // their own pigment -- the glyph that opens the line's plate in its

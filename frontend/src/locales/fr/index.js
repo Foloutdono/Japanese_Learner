@@ -1768,7 +1768,7 @@ const boarding = {
   // table tutoie, comme elle — le choix du propriétaire, pour l’élan.
   brdTagline: 'Accomplis tes objectifs sans détour.',
   brdBoard: 'Embarquer',
-  // 辻 (plan 161): the desk's front door, its corner and the way back to it.
+  // 辻 (plan 163): the desk's front door, its corner and the way back to it.
   brdHaveAccountQ: 'Déjà un compte ?',
   brdNoAccountYet: 'Pas encore de compte ?',
   brdBackHome: 'Retour à l’accueil',
@@ -1804,7 +1804,7 @@ const boarding = {
   brdAccountHint: 'Ton parcours est déjà enregistré. Un compte te permet de le retrouver sur un autre appareil — et de ne pas le perdre en changeant de téléphone.',
   brdAccountCreate: 'Créer mon compte',
   brdAccountSkip: 'Continuer sans compte',
-  // 辻 (plan 161): the desk's account, beside the ticket it keeps.
+  // 辻 (plan 163): the desk's account, beside the ticket it keeps.
   brdAccountHintDesk: 'Ton billet est prêt. Un compte le garde, sur tous tes appareils.',
   brdTicketKind: 'Billet · Tsuji',
   brdIssued: (date) => `Émis le ${date}`,
@@ -1838,7 +1838,7 @@ const boarding = {
   brdKanaWord: { sushi: 'sushi', hotel: 'hôtel' },
   brdRevealQ: 'Bientôt, tu liras les deux.',
   brdRevealHint: 'Deux écritures, 46 signes chacune. Ton premier arrêt.',
-  // 辻 (plan 161): the desk's kana question and reveal, drawn as the
+  // 辻 (plan 163): the desk's kana question and reveal, drawn as the
   // owner's D03 -- each answer says what it reads, then its name.
   brdKanaHint: 'Choisis ce que tu lis déjà.',
   brdKanaOnly: (jp) => `Seulement ${jp}`,
@@ -1877,7 +1877,7 @@ const boarding = {
     kanji: 'Lectures, sens, écriture',
     grammar: 'Les structures, avec des exemples',
   },
-  // 辻 (plan 161): the desk's lines -- the kana's strip and what each
+  // 辻 (plan 163): the desk's lines -- the kana's strip and what each
   // line carries on the ride to its goal.
   brdKanaFirst: 'hiragana et katakana, en premier',
   brdOnEveryTicket: 'Sur chaque billet',
@@ -1888,7 +1888,7 @@ const boarding = {
   },
   brdLinesArrive: (n, stop, date) => `${n === 1 ? 'Avec cette ligne' : n === 2 ? 'Avec ces deux lignes' : 'Avec ces trois lignes'}, arrivée au ${stop} en **${date}**.`,
   brdRhythmQ: 'Quel est ton rythme ?',
-  // 辻 (plan 161): the desk's four roads -- a rhythm's minutes and its
+  // 辻 (plan 163): the desk's four roads -- a rhythm's minutes and its
   // service, and the days its ride takes.
   brdRhythmHint: 'Plus tu roules chaque jour, plus tôt tu arrives. Modifiable plus tard.',
   brdADay: 'par jour',
@@ -1900,7 +1900,7 @@ const boarding = {
   brdTimeQ: 'Quand étudies-tu ?',
   brdDeparture: 'Départ',
   brdDayAria: 'Heure de départ',
-  // 辻 (plan 161): the desk's hour, the day as the sun's arc.
+  // 辻 (plan 163): the desk's hour, the day as the sun's arc.
   brdTimeHint: 'Ton train part chaque jour à cette heure.',
   brdYourTrain: 'Ton train',
   brdThenDaily: 'puis chaque jour',
@@ -2001,7 +2001,7 @@ const boarding = {
   brdEnjoy: 'Bon voyage.',
   brdCreditsGift: (n) => `+${n} crédits offerts`,
   brdEnter: 'Entrer en gare',
-  // 辻 (plan 161): the desk's plan, the ride drawn to scale -- its stops'
+  // 辻 (plan 163): the desk's plan, the ride drawn to scale -- its stops'
   // days and names, what the terminus holds, what the ride is for.
   brdPlanHint: (min, purpose) => `À ${min} min par jour, ${purpose}.`,
   brdInDays: (n) => (n === 1 ? 'demain' : `dans ${n} jours`),

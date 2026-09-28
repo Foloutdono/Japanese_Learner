@@ -179,7 +179,7 @@ export function kanaKnownCount(volumes, kanaAnswer) {
 
 const DAY_MS = 86400000
 
-/** The rhythm's time axis on the desk (plan 161, the four roads): today
+/** The rhythm's time axis on the desk (plan 163, the four roads): today
  *  at 0, the latest arrival at 1, and a mark at the start of each month
  *  between -- every quarter past a year and a half, every January past
  *  four years. `at` is where a mark falls (0..1) and `mid` where its
@@ -211,7 +211,7 @@ export function rideAxis(now, last, lang) {
   return { at, marks }
 }
 
-/** The kana's own stop on the ride (plan 161, the desk's reveal): the
+/** The kana's own stop on the ride (plan 163, the desk's reveal): the
  *  signs the kana check left unread -- the front-load planFigures
  *  counts on every ride but one to that stop -- and the day they are
  *  read by at `perDay` new items a day. */

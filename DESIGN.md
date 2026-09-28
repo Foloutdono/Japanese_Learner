@@ -1063,7 +1063,7 @@ dialog left and moved the ones that do not interrupt into their columns;
 plan 122 drew first contact for a desk, and plan 123 made the workspace
 answer a keyboard and a pointer one way everywhere. Plan 130 had the two
 plated gates take the window; plan 140 laid first contact down the left
-as the rail it arrives at, and plan 161 drew it again as the crossroads:
+as the rail it arrives at, and plan 163 drew it again as the crossroads:
 the question at the paper's top-left corner, the journey a strip of named
 stops at the floor's left end, the floor in the bottom-right corner, and
 each question drawing its answers between them.
@@ -1608,7 +1608,7 @@ each question drawing its answers between them.
   notes that teach a key or point at something say so on the desk (the
   `…Desk` copy — no "tap" is printed there). → and Enter go on; Today's
   stops walk down the rail first (plan 123).
-- **First contact is the crossroads** (plan 161; the owner's pick D of
+- **First contact is the crossroads** (plan 163; the owner's pick D of
   the canvas "Tsuji — onboarding, new directions", with option 3, 空の弧,
   for the hour; plans 122, 140 and 155 before it). 辻 is a crossroads, so
   first contact is drawn as one, on the paper whole: plan 140's sumi

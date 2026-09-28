@@ -26,7 +26,7 @@ function kanjiFigure(volumes, level, lang) {
 // call): N5 on 5 ... N1 on 1, the novice -- before N5 -- on 0.
 const levelDigit = level => (level === 'novice' ? 0 : Number(level.slice(1)))
 
-// ── 辻 — the stops as a climbing line (plans 140, 161) ──────────
+// ── 辻 — the stops as a climbing line (plans 140, 163) ──────────
 // The owner's D04 on the desk: the line itself, climbing a step a
 // level from the question's hub at its foot -- the novice's stop, then
 // N5 up to N1 -- each stop a ring on its platform with its name and

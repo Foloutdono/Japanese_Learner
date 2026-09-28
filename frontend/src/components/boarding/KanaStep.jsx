@@ -78,7 +78,7 @@ export function KanaStep({ value, onAnswer }) {
   )
 }
 
-// ── 辻 — the two words, and the four answers hung from them (plan 161)
+// ── 辻 — the two words, and the four answers hung from them (plan 163)
 // The owner's D03 on the desk: the two words as large as the paper
 // lets them stand, and a tree from them to the four answers, each
 // drawn as what it reads -- the two words again, a solid chip for a
@@ -173,7 +173,7 @@ export function KanaReveal({ onContinue, first = null }) {
   )
 }
 
-// ── 辻 — the two words read out, sign by sign (plan 161) ─────────
+// ── 辻 — the two words read out, sign by sign (plan 163) ─────────
 // The owner's D03a on the desk: each word on a card of its own under
 // the kana line's pigment, named by its script, cut into its signs with
 // each one's sound, and what it means; under them the first stop -- the

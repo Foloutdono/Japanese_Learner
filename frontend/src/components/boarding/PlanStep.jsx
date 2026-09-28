@@ -79,7 +79,7 @@ function Chart({ top, label, aria, from, to, minutes, lang, t }) {
 // the office's answer over it (PassError) and no second press while it
 // is being asked. On a phone the plan goes on to the pass, as it did.
 //
-// On the desk (plan 161) the plan is the owner's D08 instead: the ride
+// On the desk (plan 163) the plan is the owner's D08 instead: the ride
 // drawn to scale (PlanRoute), `time` and `hour` the departure it leaves
 // at every day.
 export default function PlanStep({
@@ -169,7 +169,7 @@ export default function PlanStep({
   )
 }
 
-// ── 辻 — the ride drawn to scale (plan 161) ──────────────────────
+// ── 辻 — the ride drawn to scale (plan 163) ──────────────────────
 // The owner's D08 on the desk: the route from today's departure -- the
 // crossroads, 辻 -- to the terminus, every stop where its day falls: the
 // kana read, two stations of the ride after them with what is known by

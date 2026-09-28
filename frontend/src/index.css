@@ -25431,11 +25431,11 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     transform: none;
   }
 
-  /* ── 辻 — first contact as the crossroads (plans 122, 140, 161) ──
+  /* ── 辻 — first contact as the crossroads (plans 122, 140, 163) ──
      From the Welcome to the first card a computer drew a phone: a 640px
      column in an empty window. Plan 122 drew a run's frame, plan 140 laid
      the rail down the left edge as a sumi column with a stop per
-     question, and plan 161 is the owner's pick D of the canvas "Tsuji —
+     question, and plan 163 is the owner's pick D of the canvas "Tsuji —
      onboarding, new directions": the column goes, and three places never
      move. The question keeps the paper's top-left corner at the display
      rung; the journey is a strip at the floor's left end, a named stop
@@ -25661,7 +25661,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
   .desk-brd .brd__foot .btn-depart { transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 200ms ease; }
-  /* ── 辻 — the name as the station's (plan 161) ──
+  /* ── 辻 — the name as the station's (plan 163) ──
      The owner's D01 (NameStep): the name on its plate -- the field at
      the card's width, set in from the question by a stop's width, the
      letters it has left at its end -- a pole down to the question's hub
@@ -25742,7 +25742,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     border-radius: var(--r-pill);
     background: var(--bg-main);
   }
-  /* ── 辻 — six reasons, six roads (plan 161) ──
+  /* ── 辻 — six reasons, six roads (plan 163) ──
      The owner's D02 (components/boarding/WhyStep's WhyRoads): the
      question's hub in the middle of the paper and a road out of it to
      each reason, which stands at its road's end as a pictogram in a
@@ -25862,7 +25862,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     text-wrap: balance;
   }
   .desk-brd__way--under > .desk-brd__way-name { justify-content: center; text-align: center; }
-  /* ── 辻 — the two words, the four answers hung from them (plan 161) ──
+  /* ── 辻 — the two words, the four answers hung from them (plan 163) ──
      The owner's D03 (KanaStep's KanaTree): the two words as large as
      a word is set, and a tree from them to the four answers -- a stem
      to a knot, and a branch to each answer's middle, the answer picked
@@ -25983,7 +25983,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-brd__jp { font-family: var(--font-jp); font-weight: 500; }
   .desk-brd__ans-sub { font-size: var(--fs-body); color: var(--text-secondary); }
   .desk-brd__ans.brd-kopt--on > .desk-brd__ans-sub { color: var(--text-primary); }
-  /* ── 辻 — the two words read out, sign by sign (plan 161) ──
+  /* ── 辻 — the two words read out, sign by sign (plan 163) ──
      The owner's D03a (KanaStep's RevealWords): a card per word under
      the kana line's pigment, its script named beside the script's
      first sign, the word, its signs each over its sound, and what it
@@ -26108,7 +26108,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     animation: brd-in 360ms ease-out 420ms backwards;
   }
   .desk-brd__first strong { font-weight: 700; color: var(--text-primary); }
-  /* ── 辻 — the lines as cards, the kana over them (plan 161) ──
+  /* ── 辻 — the lines as cards, the kana over them (plan 163) ──
      The owner's D05 (LinesStep's LineCards): the kana a strip across the
      paper under their pigment, locked -- on every ticket, no answer --
      and the three lines a card each under their own: the line's glyph
@@ -26240,7 +26240,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     color: var(--text-secondary);
   }
   .desk-brd__line[aria-pressed="false"] .desk-brd__line-fig { color: var(--text-secondary); }
-  /* ── 辻 — four roads from today (plan 161) ──
+  /* ── 辻 — four roads from today (plan 163) ──
      The owner's D06 (RhythmStep's RideRoads): the rhythms as four roads
      out of today on one calendar, each as long as its ride, the stop in
      its ring at the road's end and its month and days beside it, the
@@ -26405,7 +26405,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-brd__ride[aria-pressed="true"] .desk-brd__ride-arr { background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main)); }
   .desk-brd__ride[aria-pressed="true"] .desk-brd__ride-when { font-size: var(--fs-lead); color: var(--text-primary); }
   .desk-brd__ride[aria-pressed="true"] :is(.desk-brd__ride-days, .desk-brd__ride-unit, .desk-brd__ride-name) { color: var(--text-primary); }
-  /* ── 辻 — the day as the sun's arc (plan 161, option 3) ──
+  /* ── 辻 — the day as the sun's arc (plan 163, option 3) ──
      The owner's 空の弧 (TimeStep's DayArc): the day as the sky on its
      horizon, sunrise at the left, noon near the crown, night at the
      right; the three rides as stations on it; the train riding the arc,
@@ -26620,7 +26620,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   /* ...and the corner's key steps down a rung, clear of the badge. */
   .desk-brd .brd-cell > .desk-brd__mark--corner { top: var(--sp-4); }
-  /* ── 辻 — the account beside the ticket it keeps (plan 161) ──
+  /* ── 辻 — the account beside the ticket it keeps (plan 163) ──
      The owner's D09 (AccountStep, PaperTicket): the form in the left
      column, the learner's 乗車券 in the right -- a stub with the balance
      and the gate's punch, torn along a perforation from the ticket
@@ -26883,7 +26883,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     outline: none;
     box-shadow: 0 0 0 0.5px var(--accent2);
   }
-  /* ── 辻 — the stops as a climbing line (plans 140, 161) ──
+  /* ── 辻 — the stops as a climbing line (plans 140, 163) ──
      The owner's D04 (LevelStep's ClimbLine): the line climbing a step a
      level from the question's hub, a ring per stop on its platform, its
      name and what it holds under it, the line going on past N1. The
@@ -27054,7 +27054,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     line-height: 1;
     color: var(--accent2);
   }
-  /* ── 辻 — the ride drawn to scale (plan 161) ──
+  /* ── 辻 — the ride drawn to scale (plan 163) ──
      The owner's D08 (PlanStep's PlanRoute): the route in gold from the
      crossroads to the terminus, each stop where its day falls (--at,
      0..1, between the two ends' own room), its day over it and its name
@@ -27251,7 +27251,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     height: 18px;
     color: var(--accent2);
   }
-  /* ── 辻 — the front door as the crossroads (plans 140, 155, 161) ──
+  /* ── 辻 — the front door as the crossroads (plans 140, 155, 163) ──
      The owner's D00 (components/boarding/Welcome's DeskWelcome): the
      paper whole, no column. The way in -- the promise over Board, or the
      sign-in over its own action -- stands at the paper's left margin, its

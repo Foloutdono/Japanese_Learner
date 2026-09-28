@@ -5,7 +5,7 @@ import { Loading } from '../ui/Loading'
 // index.css, .desk-wait).
 const PAPER_WAIT_MS = 480
 
-/** 机 (plans 155, 161): the wait on first contact's paper -- the boot
+/** 机 (plans 155, 163): the wait on first contact's paper -- the boot
     screen's dots, alone, centred on the paper, drawn
     PAPER_WAIT_MS after `since` (a performance.now() reading; the moment
     this mounts when there is none). A negative delay is a fade already

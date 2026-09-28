@@ -193,7 +193,7 @@ export default function BoardingFlow({
   const [arrival, setArrival] = useState(false)
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
-  // 辻 (plan 161): the strip at the floor's left end, measured so the
+  // 辻 (plan 163): the strip at the floor's left end, measured so the
   // floor gives way before it (--desk-strip-w).
   const [stripRef, stripW] = useBoxWidth(desk)
   const arrivalPlayed = useRef(REDUCED)
@@ -288,7 +288,7 @@ export default function BoardingFlow({
 
   // 机 (plan 140): a stop already passed on the line is a door straight
   // back to its question -- Back pressed as many times as it takes, in
-  // one pull. Every answer is kept, as Back keeps them. Since plan 161
+  // one pull. Every answer is kept, as Back keeps them. Since plan 163
   // the line is the strip at the floor's left end.
   function jumpTo(target) {
     const at = history.lastIndexOf(target)
@@ -434,7 +434,7 @@ export default function BoardingFlow({
   const perDay = itemsForRhythm(answers.rhythm)
   const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, answers.lines)
   const time = minutesToTime(answers.minute)
-  // 辻 (plan 161): the month the goal picked is reached in, hung over it
+  // 辻 (plan 163): the month the goal picked is reached in, hung over it
   // on the desk's line -- once the volumes that price it have answered.
   const arrivalMonth = desk && volumes
     ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(figures.date)
@@ -678,7 +678,7 @@ export default function BoardingFlow({
     }
   }
 
-  // ── 辻 — the strip at the floor's left end (plans 140, 161) ──────
+  // ── 辻 — the strip at the floor's left end (plans 140, 163) ──────
   // A stop per question (the reveal is the kana's own, not a stop), each
   // named, the ones ridden filled and the one being asked lit. The
   // answer given is said on its stop -- a level picked but not yet

@@ -204,8 +204,8 @@ describe('the Welcome\'s Enter (P8)', () => {
   })
 })
 
-// ── P9 — the boarding frame (plans 122, 140, 161) ──
-// Plan 161, the owner's pick D of the canvas "Tsuji — onboarding, new
+// ── P9 — the boarding frame (plans 122, 140, 163) ──
+// Plan 163, the owner's pick D of the canvas "Tsuji — onboarding, new
 // directions": the sumi column goes, and three places never move. The
 // question at the paper's top-left corner; the journey as a strip at the
 // floor's left end, a named stop per question, the answer given said on
@@ -253,7 +253,7 @@ async function toTime() {
 }
 const fits = el => el.scrollHeight <= el.clientHeight + 1
 
-describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
+describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
   it('draws the journey as a strip at the floor\'s left end, a stop per question, and keeps it to the plan', async () => {
     const onComplete = vi.fn()
     await board({ onComplete })
@@ -782,9 +782,9 @@ describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
   })
 })
 
-// ── P10 — the front door (plans 122, 140, 161) ──
+// ── P10 — the front door (plans 122, 140, 163) ──
 // The Welcome with the sign-in on the same screen: a returning learner
-// signs in with no second screen. Since plan 161 (the owner's D00) the
+// signs in with no second screen. Since plan 163 (the owner's D00) the
 // paper is the crossroads, whole, no column: the way in at the paper's
 // left margin -- the promise over Board, or the sign-in over its own
 // action -- on the gold road that runs right into the hub, 辻, and out of
@@ -806,7 +806,7 @@ function paintOf(token) {
 }
 const LINES = ['kana', 'vocab', 'kanji', 'grammar', 'reading', 'translation', 'dictation']
 
-describe('the front door on the desk (P10, plans 140, 161)', () => {
+describe('the front door on the desk (P10, plans 140, 163)', () => {
   it('stands the promise over Board at the paper\'s margin, on the gold road into the hub', async () => {
     await render(<Door />)
     await settle(800)
@@ -1034,9 +1034,9 @@ describe('the digits at first contact (P12)', () => {
   })
 })
 
-// ── P13 — first contact, finished (plans 155, 161) ──
+// ── P13 — first contact, finished (plans 155, 163) ──
 // The owner's ask: keep the drawing and make it smooth. The way on
-// stands in one place on every question -- since plan 161 the paper's
+// stands in one place on every question -- since plan 163 the paper's
 // bottom-right corner; the stop being asked is lit on the strip and the
 // light moves with the question; each answer's key turns over to its
 // check in one slot; the Welcome hands its paper to the wait with the
@@ -1119,7 +1119,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     const row = inCar('[data-motive="fun"]')
     const key = () => row.querySelector('.desk-brd__key')
     const tick = () => row.querySelector('.desk-brd__tick')
-    // One slot, beside a reason's name (the six roads, plan 161).
+    // One slot, beside a reason's name (the six roads, plan 163).
     expect(row.querySelectorAll('.desk-kbd')).toHaveLength(1)
     expect(row.querySelector('.brd-opt__check')).toBeNull()
     expect(key().textContent).toBe('2')
@@ -1140,7 +1140,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     }
     expect(corner(inCar('[data-kana="hiragana"]'))).toEqual([6, 6])
     // A station's on its ring's shoulder, clear of its code and the rail
-    // through its middle (the climbing line, plan 161).
+    // through its middle (the climbing line, plan 163).
     await pick('[data-kana="both"]')
     await landed()
     const ring = box(inCar('[data-level="N5"] .desk-brd__stop-ring'))
@@ -1359,7 +1359,7 @@ describe('the hover, simpler (P14, plan 155)', () => {
     const gold = getComputedStyle(inCar('.brd-field')).borderTopColor
     await pastName()
     await landed()
-    // A reason: its ring takes the edge (the six roads, plan 161).
+    // A reason: its ring takes the edge (the six roads, plan 163).
     const way = inCar('[data-motive="fun"]')
     const ring = way.querySelector('.desk-brd__ring')
     const ground = getComputedStyle(ring).backgroundColor

@@ -16,7 +16,7 @@ export function CheckMark({ className = 'svg' }) {
   )
 }
 
-// 辻 (plan 161): the kana's strip on the lines, a line no answer holds.
+// 辻 (plan 163): the kana's strip on the lines, a line no answer holds.
 export function LockMark() {
   return (
     <svg className="svg" viewBox="0 0 24 24" aria-hidden="true" {...stroke}>
@@ -81,7 +81,7 @@ export function MotiveIcon({ motive }) {
   )
 }
 
-// ── 辻 — the six reasons as pictograms (plan 161) ────────────────
+// ── 辻 — the six reasons as pictograms (plan 163) ────────────────
 // Solid glyphs at 48, for the desk's six roads (WhyStep's WhyRoads),
 // where each stands alone in a ring at its road's end: the line icons
 // above are drawn for a row's 20px beside a label, and thin to a
