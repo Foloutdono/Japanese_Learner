@@ -9,8 +9,11 @@
 //
 // Six a gate at most, and a stop earns its place only if the layout
 // does not already say it (DESIGN.md, "Say less"). `today` is the first
-// gate a learner sees, so it carries the HUD and the tab bar; the other
-// four never repeat them. The keys are config/tabs.js's TAB_IDS in its
+// gate a learner sees, straight off the first ride, so it says the two
+// things they need to start -- the gate and the way to the others -- and
+// nothing more: the level, the status, the balance and the week strip
+// it once walked are found by using them, and the profile's guide
+// names the level and the balance on the pass. The keys are config/tabs.js's TAB_IDS in its
 // order (the chain, when on, walks them in it), and a node test says so.
 export const GUIDES = Object.freeze({
   learn: [
@@ -24,10 +27,6 @@ export const GUIDES = Object.freeze({
     { anchor: 'practice.pass',  key: 'PracticePass',  radius: 'pill' },
   ],
   today: [
-    { anchor: 'hud.level',    key: 'HudLevel',    radius: 'pill' },
-    { anchor: 'hud.status',   key: 'HudStatus',   radius: 'pill' },
-    { anchor: 'hud.pass',     key: 'HudPass',     radius: 'pill' },
-    { anchor: 'today.strip',  key: 'TodayStrip',  radius: 'card' },
     { anchor: 'today.gate',   key: 'TodayGate',   radius: 'card' },
     { anchor: 'tabbar',       key: 'TabBar',      radius: 'flat', place: 'above' },
   ],
@@ -47,34 +46,19 @@ export const GUIDES = Object.freeze({
 })
 
 // 机 (plan 123): the order a gate's stops are walked in on the desk,
-// where it differs from the phone's. Today's six were written top to
-// bottom for a phone -- the HUD, the strip, the gate, the tab bar -- and
-// on the desk that walked the rail's foot three times, then the side's
-// top right, the gate, and the rail's top left. Down the rail instead,
-// then across the page: the gates, the level, the status, the pass, the
-// gate, the strip beside it.
+// where it differs from the phone's. Today's were written top to bottom
+// for a phone -- the gate, then the tab bar at the foot. On the desk the
+// gates are the rail, at the left: the way the page reads, the rail
+// first, then the gate.
 export const DESK_ORDER = Object.freeze({
-  today: ['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.strip'],
+  today: ['tabbar', 'today.gate'],
 })
 
-// 机 (plan 127): the corner a stop's spot wears on the desk, where it
-// differs from the phone's. The HUD's three are pills on the phone's
-// strip; on the desk they are the three doors of the rail's pass, the
-// face, the purse and the stub, and a pill drawn round a card's door
-// reads as a stadium over the card.
-export const DESK_RADIUS = Object.freeze({
-  'hud.level': 'card',
-  'hud.status': 'card',
-  'hud.pass': 'card',
-})
-
-/** A gate's stops in the order the desk walks them, in the desk's corners. */
+/** A gate's stops in the order the desk walks them. */
 export function deskStops(gate) {
   const stops = GUIDES[gate] ?? []
   const order = DESK_ORDER[gate]
-  const walked = order ? order.map(anchor => stops.find(s => s.anchor === anchor)).filter(Boolean) : stops
-  if (!walked.some(s => DESK_RADIUS[s.anchor])) return walked
-  return walked.map(s => (DESK_RADIUS[s.anchor] ? { ...s, radius: DESK_RADIUS[s.anchor] } : s))
+  return order ? order.map(anchor => stops.find(s => s.anchor === anchor)).filter(Boolean) : stops
 }
 
 // The owner's original ask, one flag away: when true, the last stop's

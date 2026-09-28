@@ -220,9 +220,9 @@ describe('TodayScreen — the guide', () => {
     expect(root.querySelector('[data-guide="today.gate"]')).toBeTruthy()
     const guide = document.querySelector('.guide')
     expect(guide).toBeTruthy()
-    // The HUD and the tab bar are the shell's, not this screen's: the
-    // guide starts on the first anchor that is here.
-    expect(guide.dataset.stop).toBe('today.strip')
+    // The tab bar is the shell's, not this screen's: the guide starts
+    // on the gate, and never stops at the strip.
+    expect(guide.dataset.stop).toBe('today.gate')
     document.querySelector('[data-action="guide-skip"]').click()
     await settleLong()
     expect(document.querySelector('.guide')).toBeNull()

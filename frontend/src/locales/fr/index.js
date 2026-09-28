@@ -1838,30 +1838,12 @@ const ride = {
   // Plan 133. Sur un téléphone : la carte connue ne se note qu'une fois
   // sa fiche ouverte depuis la 🔍, puis refermée.
   rideKnownDict: 'Chaque carte ouvre sa fiche du dictionnaire. Touchez 🔍 pour lire celle-ci, puis refermez-la.',
-  // Sur le bureau : le tour des trois panneaux d'une séance, arrêt par
-  // arrêt (TOUR_FRONT et TOUR_BACK de screens/RideRun.jsx), lus par le
-  // guide sous guide<Clé>.
-  guideRideRecords: 'Cette séance en chiffres : les cartes notées, la part sue, l\'XP gagnée, ce qui reste. Votre barre de niveau est dessous.',
-  guideRideState: 'Où en est la carte sur scène : à apprendre, en cours ou maîtrisée.',
-  guideRideVerdicts: 'Chaque note possible, et quand elle ramènerait la carte. Le chiffre dans le coin est sa touche.',
-  guideRideKeys: 'Les touches : Espace retourne la carte, Échap quitte la séance.',
-  guideRideRhythm: 'Votre rythme : les minutes de la séance, les cartes par minute, et à peu près le temps qu\'il reste.',
-  guideRideCard: 'La carte, au milieu. Le mot est devant.',
-  guideRideRate: 'Les notes, sous la carte. Elles s\'allument une fois la carte retournée.',
-  guideRideSealed: 'La fiche de la carte. Scellée tant qu\'elle n\'est pas retournée : ici, elle donnerait la réponse.',
-  guideRideEntry: 'Retournée : la fiche s\'ouvre. Le mot, votre historique dessus, et sa fiche du dictionnaire. Un mot ou un kanji qu\'elle cite s\'ouvre ici aussi.',
-  guideRideForecast: 'Les notes disent maintenant quand chacune ramène la carte. Faux est la plus proche.',
-  // Le tour de l'essai de lecture (TOUR_READ et TOUR_GRADED de
-  // screens/RideReading.jsx) : les mêmes trois panneaux, en pratique.
-  guideRideReadRecords: 'Cette séance en chiffres : les phrases notées, la part juste, l\'XP gagnée.',
-  guideRideReadLines: 'Chaque phrase de la séance, celle sur scène en dernier. Chacune garde sa note en pastille, et un clic rouvre sa décomposition.',
-  guideRideReadKeys: 'Les touches : Entrée vérifie la réponse puis passe à la phrase suivante, les chiffres notent, Échap quitte.',
-  guideRideReadRhythm: 'Votre rythme : les minutes de la séance, et les phrases par minute.',
-  guideRideReadSentence: 'La phrase s\'affiche ici avec son chrono, et se cache quand il s\'épuise. Il part quand vous fermez ceci.',
-  guideRideReadAnswer: 'Écrivez ici ce que vous avez lu, en romaji ou en kana, puis Entrée.',
-  guideRideReadSealed: 'La décomposition de la phrase. Scellée tant que vous n\'avez pas noté : mot à mot, c\'est le corrigé.',
-  guideRideReadBreakdown: 'Notée : la décomposition s\'ouvre. Chaque mot, et la grammaire qui les tient. Cliquez sur une ligne pour ouvrir sa fiche ici.',
-  guideRideReadLine: 'La phrase est maintenant une ligne de la séance, avec sa note. Dans une vraie séance, chaque ligne rouvre sa décomposition.',
+  // Sur le bureau : l'arrêt unique du guide à chaque essai
+  // (components/guide/rideTours), sur la fiche une fois la carte connue
+  // retournée et sur la décomposition une fois la phrase notée, lus sous
+  // guide<Clé>.
+  guideRideEntry: 'Retournée : sa fiche du dictionnaire s\'ouvre à côté. Cliquez sur un mot ou un kanji qu\'elle cite pour l\'ouvrir ici.',
+  guideRideReadBreakdown: 'Notée : la décomposition de la phrase s\'ouvre, mot à mot, avec sa grammaire. Cliquez sur une ligne pour ouvrir sa fiche.',
   ridePlateCap: 'L\'abonnement',
   ridePlateBody: 'Ces quais sont sur l\'abonnement.',
   ridePlateOpen: 'Ils sont ouverts à tous pour l\'instant.',
@@ -1875,10 +1857,6 @@ const guide = {
   guideNext: 'Suivant',
   guideDone: 'Terminé',
   guideSkip: 'Passer',
-  guideHudLevel: 'Votre niveau. Chaque carte notée y contribue.',
-  guideHudStatus: 'À l\'heure ou en retard sur votre propre plan. Touchez pour le train fantôme.',
-  guideHudPass: 'Votre solde. Une révision en coûte un ; il se recharge à minuit.',
-  guideTodayStrip: 'La semaine, la série, et les nouveautés du jour face à votre rythme.',
   guideTodayGate: 'Ce qui est dû aujourd\'hui, ligne par ligne. Éteignez une ligne pour plus tard, puis partez.',
   guideTabBar: 'Les cinq portes : Apprendre, Pratiquer, Aujourd\'hui, Dictionnaire, votre carte.',
   guideLearnPlate: 'Une ligne. Touchez la plaque pour l\'ouvrir ; la puce est ce qu\'elle vous doit aujourd\'hui.',
@@ -1901,7 +1879,6 @@ const guide = {
   guideTodayGateDesk: 'Ce qui est dû aujourd\'hui, ligne par ligne. Éteignez une ligne pour plus tard, puis partez : Entrée le fait de n\'importe où ici.',
   guideLearnStopsDesk: 'Toute la ligne. Chaque arrêt est une porte vers ses quais.',
   // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
-  guideHudStatusDesk: 'À l\'heure ou en retard sur votre propre plan. Son train fantôme se tient à côté de la porte.',
   guideLearnPlateDesk: 'Une ligne. Cliquez sur la plaque pour l\'ouvrir ; la puce est ce qu\'elle vous doit aujourd\'hui.',
   guidePracticeDestsDesk: 'Les niveaux, et ce que vous y avez fait. Le vôtre est marqué ; cliquez sur un autre pour y monter quand même.',
   guideDictEntryDesk: 'Une entrée, ouverte à côté du catalogue. ← et → parcourent le catalogue ; l\'étoile la garde sur votre étagère.',

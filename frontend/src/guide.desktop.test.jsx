@@ -91,7 +91,7 @@ describe('the guide on the desk', () => {
     expect(onEnd).toHaveBeenCalledWith(true, 2)
   })
 
-  it('walks Today down the rail first, then the gate and the strip', async () => {
+  it('walks Today down the rail first, then the gate', async () => {
     await render(
       <LangProvider>
         <div className="phone phone--desk">
@@ -106,11 +106,13 @@ describe('the guide on the desk', () => {
     )
     await settle()
     const walked = []
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 2; i++) {
       walked.push(stopOf())
       await userEvent.keyboard('{ArrowRight}')
       await settle(120)
     }
-    expect(walked).toEqual(['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.strip'])
+    expect(walked).toEqual(['tabbar', 'today.gate'])
+    // The HUD's anchors are on the page, and walked no more.
+    expect(stopOf()).toBeNull()
   })
 })
