@@ -217,11 +217,20 @@ describe('the card ride on the desk\'s panels (P11)', () => {
     await settle(200)
     expect(walkStop()).toBeNull()
     expect($('.guide-callout__text').textContent).toMatch(/Space|Espace/)
+    // The note asks for the card to be turned, so the card is lit.
+    expect($$('.guide__spot--cue')).toHaveLength(1)
+    await vi.waitFor(() => expect(Math.abs(box($('.guide__spot--cue')).top - (box($('[data-guide="ride.card"]')).top - 6))).toBeLessThan(2), { timeout: 2000 })
 
     await userEvent.keyboard(' ')
     await settle(400)
     expect(plate()).toBe('こんにちは')
+    // The walk's stop explains and asks for nothing: its own spot, and
+    // no cue beside it.
+    await vi.waitFor(() => expect(walkStop()).not.toBeNull(), { timeout: 3000 })
+    expect($$('.guide__spot--cue')).toHaveLength(0)
     expect(await walk()).toEqual(['run.side'])
+    // Then the grade: the bar is lit.
+    await vi.waitFor(() => expect(Math.abs(box($('.guide__spot--cue')).top - (box($('[data-guide="ride.rate"] .rating-bar__buttons')).top - 6))).toBeLessThan(2), { timeout: 2000 })
 
     await userEvent.keyboard('1')
     await nextCard()

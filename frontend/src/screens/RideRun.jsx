@@ -14,6 +14,7 @@ import { Emphasized } from '../components/ui/Emphasized'
 import { Continue } from '../components/boarding/BoardFrame'
 import { Callout } from '../components/guide/Callout'
 import { Guide } from '../components/guide/Guide'
+import { Cue } from '../components/guide/Spot'
 import { TOUR_BACK } from '../components/guide/rideTours'
 import { HINTS } from '../domain/studyModes'
 import { normalizeCard, wordForm } from '../domain/cardShape'
@@ -266,6 +267,19 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     'unknown-back': { anchor: 'ride.rate', place: 'above', text: (desk && t.rideUnknownBackDesk) || t.rideUnknownBack },
   }
   const callout = !covered && !tour && !lookupOpen && card && callouts[step]
+  // The one thing each note asks for, lit (guide/Spot.jsx): the card to turn,
+  // the 🔍 to open, the bar to grade on -- and on the new card its
+  // Wrong tile alone, which is Wrong's quality (1) on every scale. The
+  // learner follows the light and never has to look for the next press.
+  const bar = '[data-guide="ride.rate"]'
+  const cues = {
+    'known':        { target: '[data-guide="ride.card"]', radius: 'card' },
+    'known-dict':   { target: '[data-guide="card.lookup"]', radius: 'pill' },
+    'known-back':   { target: `${bar} .rating-bar__buttons`, radius: 'card' },
+    'unknown':      { target: '[data-guide="ride.card"]', radius: 'card' },
+    'unknown-back': { target: `${bar} .rating-bar__btn--q1`, radius: 'card' },
+  }
+  const cue = callout && cues[step]
 
   return (
     <StudyStage
@@ -324,6 +338,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
         </div>
       )}
 
+      {cue && <Cue target={cue.target} radius={cue.radius} />}
       {callout && <Callout anchor={callout.anchor} place={callout.place} text={callout.text} />}
       {tour && <Guide gate="ride" stops={TOUR_BACK} onEnd={endTour} />}
     </StudyStage>

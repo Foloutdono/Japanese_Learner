@@ -10,6 +10,7 @@ import RatingBar from '../components/study/RatingBar'
 import { Loading } from '../components/ui/Loading'
 import { Continue } from '../components/boarding/BoardFrame'
 import { Callout } from '../components/guide/Callout'
+import { Cue } from '../components/guide/Spot'
 import { Guide } from '../components/guide/Guide'
 import { TOUR_GRADED } from '../components/guide/rideTours'
 import { OfferButton } from '../components/credits/OfferButton'
@@ -216,6 +217,14 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     measure: { anchor: 'ride.rate',     place: 'above', text: (desk && t.rideReadMeasureDesk) || t.rideReadMeasure },
   }
   const callout = sentence && callouts[step]
+  // The thing a note asks for, lit (guide/Spot.jsx): the field to write
+  // in, the bar to grade on. Reading the sentence asks for nothing to be
+  // pressed, so that note lights nothing.
+  const cues = {
+    type:    { target: '[data-guide="ride.answer"]', radius: 'card' },
+    measure: { target: '[data-guide="ride.rate"] .rating-bar__buttons', radius: 'card' },
+  }
+  const cue = callout && !tour && cues[step]
 
   const writing = step === 'read' || step === 'type'
   const graded = step === 'graded'
@@ -320,6 +329,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
         </div>
       )}
 
+      {cue && <Cue target={cue.target} radius={cue.radius} />}
       {callout && <Callout anchor={callout.anchor} place={callout.place} text={callout.text} />}
       {tour && <Guide gate="ride" stops={TOUR_GRADED} onEnd={() => setGradedToured(true)} />}
     </StudyStage>

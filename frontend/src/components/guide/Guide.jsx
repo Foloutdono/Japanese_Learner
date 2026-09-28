@@ -6,6 +6,7 @@ import { track } from '../../lib/track'
 import { stopwatch } from '../../lib/dwell'
 import { playClick } from '../../lib/audio'
 import { GUIDES, deskStops } from './guides'
+import { Spot, PAD } from './Spot'
 import { useDesk } from '../../hooks/useDesk'
 
 // ── 案内 — the guide over a gate (plan 100) ────────────────────────
@@ -28,8 +29,6 @@ import { useDesk } from '../../hooks/useDesk'
 // the sheets. Under the sheets' z-index and the cutscenes': a sheet
 // opened from a stop's own control covers the guide, as it should.
 const GAP = 8
-const PAD = 6
-const MOVE_MS = 260
 // The note's height before it has been measured: a sentence and the
 // 44px controls. Only the first frame of a stop reads it.
 const NOTE_H = 150
@@ -252,15 +251,7 @@ export function Guide({ gate, stops: given = null, onEnd }) {
 
   return createPortal(
     <div className="guide" data-gate={gate} data-stop={stop.anchor}>
-      <div
-        className={`guide__spot guide__spot--${stop.radius ?? 'card'}`}
-        style={{
-          top: rect.top - PAD, left: rect.left - PAD,
-          width: rect.width + 2 * PAD, height: rect.height + 2 * PAD,
-          '--guide-move': `${MOVE_MS}ms`,
-        }}
-        aria-hidden="true"
-      />
+      <Spot rect={rect} radius={stop.radius ?? 'card'} />
       <div
         ref={ref}
         role="dialog"
