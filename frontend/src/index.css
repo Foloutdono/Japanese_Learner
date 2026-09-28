@@ -25339,8 +25339,11 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   /* The breakdown down the panel's height (plan 160): the rows and the
      cards at its head, the button that buys the explanation on its
      floor, where the column had stood empty under a small button. The
-     wrapper SideLookup hides while an entry is open stays hidden. */
-  .desk-pane > .desk-lookup > div:not([hidden]) {
+     wrapper SideLookup hides while an entry is open stays hidden, and
+     the rule is the wrapper's by name: the sentence's ruby line over
+     an open entry is a div in the same place, and a bare div here had
+     turned it into a column, one word a line. */
+  .desk-pane > .desk-lookup > .desk-lookup__body:not([hidden]) {
     display: flex;
     flex: 1 0 auto;
     flex-direction: column;
