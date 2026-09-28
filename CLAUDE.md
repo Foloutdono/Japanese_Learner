@@ -1087,7 +1087,24 @@ runtime purpose. Two consequences worth knowing:
   `Continue`, `:root` and the gate block of `index.css` and its 机
   section, `src/boarding.phone.test.jsx` and
   `src/scrollFlash.desktop.test.jsx`; DESIGN.md, "The gate button").
-  When starting a new wave, begin at **165** or higher, and check
+  **165** is 見本, every platform's specimen on the Practice gate (the
+  last board of plan 159's canvas "Practice screens — layout options",
+  left unbuilt then): on the desk each Practice plate is one door, its
+  head the whole plate, holding a line saying what the run asks (the
+  button's description) over the run's card in a well at the learner's
+  grade (`/api/station/{platform}/samples`), the mock exam's the
+  漢字読み item with the paper's four readings (`routes/station.py`'s
+  `_exam_vocab`, `exam_kanji_gen`'s near-misses under a fixed seed);
+  plan 130's grade rows retired, the station carrying the grades and
+  the record; measured, a short plate drawing no line and comprehension
+  its text alone (cited in `screens/PracticeScreen.jsx`'s
+  `PlatformSpecimen`, `components/station/LinePlate.jsx`'s `body`,
+  `components/practice/PracticeSpecimen.jsx`, `routes/station.py`,
+  `tests/test_station_samples.py`, `src/gates.desktop.test.jsx`,
+  `src/gates.wide.test.jsx`, `src/deskfree.phone.test.jsx`,
+  `src/testing/practiceCards.json` and the 机 section of `index.css`;
+  DESIGN.md, "The desk").
+  When starting a new wave, begin at **166** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

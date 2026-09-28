@@ -25,8 +25,8 @@ jobs:
       DATABASE_URL: postgresql://postgres:dev@localhost:5432/jp_test
       DEV_USER_ID: ci-test-user
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Install backend dependencies
@@ -41,8 +41,8 @@ jobs:
   frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           # 22, not 20: src/lib/supabase.js calls createClient() at module
           # load, and @supabase/realtime-js throws "Node.js 20 detected

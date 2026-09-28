@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { PassWave } from '../profile/PassWave'
@@ -24,18 +24,31 @@ import { spendKey } from '../../lib/keyGuards'
 // The budget is severe because this fires on every departure, dozens
 // of times a session: 780ms end to end, skippable by any input, and
 // skipped outright under prefers-reduced-motion. Navigation happens
-// at 600ms, while the wipe is opaque, so the destination is already
-// mounted and running its own arrive animation by the time the gate
-// fades off it.
+// at 600ms, behind the opaque scrim with the view already most of the
+// way through the lane, so the destination is mounted and running its
+// own arrive animation by the time the gate fades off it.
 // One dial for the whole cutscene. The CSS reads it as --gate-x and
 // multiplies every duration and delay by it, so the timers here and
 // the animations there cannot drift apart — raise this and the card,
-// the flaps, the wipe and the navigation all stretch together.
+// the flaps, the push and the navigation all stretch together.
 const SPEED = 1.4
 
 const CONTACT_MS  = 300 * SPEED   // card meets the reader; chime, lamp turns
-const NAVIGATE_MS = 600 * SPEED   // wipe is opaque — swap the screen behind it
+const NAVIGATE_MS = 600 * SPEED   // behind the scrim — swap the screen behind it
+const WASHED_MS   = 630 * SPEED   // the lane's light has the screen, edge to edge
+const LEAVE_MS    = 640 * SPEED   // ... and starts off the destination
 const DONE_MS     = 780 * SPEED   // gate leaves
+
+// How far the view travels: the scale at which the lane's opening,
+// grown about its centre, covers the whole scene. Measured rather than
+// written down, because it is a ratio of two boxes — the lane is
+// 260px of a 390px phone but 470px of a 1180px desk canvas — and CSS
+// cannot divide one length by another. A hair over, so no edge of the
+// scene is left on a rounding.
+function pushThrough(scene, lane) {
+  if (!lane.clientWidth || !lane.clientHeight) return null
+  return 1.03 * Math.max(scene.clientWidth / lane.clientWidth, scene.clientHeight / lane.clientHeight)
+}
 
 function prefersReducedMotion() {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
@@ -51,6 +64,13 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
   const summary = useProfileSummary()
   const [phase, setPhase] = useState('closed')
   const timers = useRef([])
+  const scene = useRef(null)
+  const lane = useRef(null)
+  // The wash's colour, for the one strip of the window the scene
+  // cannot paint (below): the line's as the gate mounted, which is all
+  // it will ever be — DepartureGate keys a new gate per departure. The
+  // onboarding's finale has no line, and washes in the accent.
+  const wash = useRef(section.color ?? 'var(--accent)')
   // The callbacks are new objects on every render, so the timeline
   // effect below cannot depend on them without restarting the whole
   // cutscene each time the parent re-renders. Held in a ref, kept
@@ -58,6 +78,15 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
   // react-hooks/refs forbids, and rightly.
   const cbs = useRef({ onNavigate, onDone })
   useEffect(() => { cbs.current = { onNavigate, onDone } }, [onNavigate, onDone])
+
+  // Before the first paint, so the push never starts from a guess.
+  // Layout sizes, not the painted box: the rig is still rising on its
+  // arrive transform when this runs.
+  useLayoutEffect(() => {
+    if (!scene.current || !lane.current) return
+    const push = pushThrough(scene.current, lane.current)
+    if (push) scene.current.style.setProperty('--gate-push', push.toFixed(3))
+  }, [])
 
   useEffect(() => {
     const reduced = prefersReducedMotion()
@@ -72,8 +101,35 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
 
     const at = (ms, fn) => timers.current.push(setTimeout(fn, ms))
 
+    // The window's scrollbar gutter (index.css reserves one) is outside
+    // every fixed box, so the wash could never reach it: a desk with
+    // classic scrollbars saw the line's colour stop a strip short of the
+    // window's edge. The gutter is painted in the page's own ground, so
+    // the ground takes the wash the moment the lane's light reaches the
+    // window's edges — at once, not on html's own transition, which
+    // coloured the strip before the light had got there — and gives it
+    // back as the scene fades, on that transition, in step with the
+    // fade. Everywhere else that ground is under body and never seen.
+    const ground = document.documentElement.style
+    const unwash = () => {
+      ground.removeProperty('transition')
+      ground.removeProperty('--gate-ground')
+    }
+
     at(CONTACT_MS, () => { playGateChime(); setPhase('open') })
     at(NAVIGATE_MS, () => cbs.current.onNavigate())
+    at(WASHED_MS, () => {
+      ground.setProperty('transition', 'none')
+      ground.setProperty('--gate-ground', wash.current)
+    })
+    // The two beats are 14ms apart, and a busy frame runs both timers
+    // before any style is worked out: the ground would be washed and
+    // unwashed unseen. Reading it back settles the wash first, so the
+    // transition always runs from it.
+    at(LEAVE_MS, () => {
+      void getComputedStyle(document.documentElement).backgroundColor
+      unwash()
+    })
     at(DONE_MS, () => cbs.current.onDone())
 
     // Any input cuts to the end. A cutscene you cannot skip is a
@@ -81,6 +137,7 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
     const skip = () => {
       timers.current.forEach(clearTimeout)
       timers.current = []
+      unwash()
       cbs.current.onNavigate()
       cbs.current.onDone()
     }
@@ -92,6 +149,7 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
     return () => {
       timers.current.forEach(clearTimeout)
       timers.current = []
+      unwash()
       window.removeEventListener('pointerdown', skip)
       window.removeEventListener('keydown', skipKey, true)
     }
@@ -111,6 +169,7 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
 
   return createPortal(
     <div
+      ref={scene}
       className={`gate gate--${phase}`}
       style={{ '--line-color': section.color, '--gate-x': SPEED }}
       aria-hidden="true"
@@ -122,8 +181,9 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
           <span className="gate__lamp" />
         </div>
 
-        {/* The lane: what is beyond the gate, and the flaps over it. */}
-        <div className="gate__lane">
+        {/* The lane: what is beyond the gate, the flaps across it, and
+            the light it floods with as the view goes through. */}
+        <div className="gate__lane" ref={lane}>
           <span className="gate__beyond">
             {station?.code && <span className="gate__roundel">{station.code}</span>}
             <span className="gate__dest" lang="ja">{section.icon}</span>
@@ -131,12 +191,14 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
           </span>
           <span className="gate__flap gate__flap--l" />
           <span className="gate__flap gate__flap--r" />
+          <span className="gate__wipe" />
         </div>
 
         <div className="gate__pillar gate__pillar--right">
-          {/* The reader. The contactless mark is the same component
-              the pass and the top bar draw, so the thing tapping and
-              the thing being tapped are visibly the same object. */}
+          {/* The reader, standing on the cabinet's top. The contactless
+              mark is the same component the pass and the top bar draw,
+              so the thing tapping and the thing being tapped are
+              visibly the same object. */}
           <span className="gate__reader">
             <PassWave className="pass__wave gate__wave" />
           </span>
@@ -159,8 +221,6 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
           )}
         </div>
       </div>
-
-      <div className="gate__wipe" />
     </div>,
     document.body,
   )

@@ -1,0 +1,319 @@
+{
+ "reading": {
+  "N5": {
+   "card": {
+    "jp": "わたしは学生です。",
+    "en": "I am a student.",
+    "grammar": "です／だ"
+   }
+  },
+  "N4": {
+   "card": {
+    "jp": "あした雨がふったら、家にいます。",
+    "en": "If it rains tomorrow, I will stay home.",
+    "grammar": "〜たら"
+   }
+  },
+  "N3": {
+   "card": {
+    "jp": "うちの子は本ばかり読んでいます。",
+    "en": "My child does nothing but read books.",
+    "grammar": "〜ばかり"
+   }
+  },
+  "N2": {
+   "card": {
+    "jp": "長い会議の末に、答えが決まった。",
+    "en": "After a long meeting, the answer was decided.",
+    "grammar": "〜末に"
+   }
+  },
+  "N1": {
+   "card": {
+    "jp": "彼は今にも泣き出さんばかりに顔をゆがめた。",
+    "en": "His face twisted as if he were about to burst into tears.",
+    "grammar": "〜んばかりに"
+   }
+  }
+ },
+ "translation": {
+  "N5": {
+   "card": {
+    "jp": "わたしは学生です。",
+    "en": "I am a student.",
+    "grammar": "です／だ"
+   }
+  },
+  "N4": {
+   "card": {
+    "jp": "あした雨がふったら、家にいます。",
+    "en": "If it rains tomorrow, I will stay home.",
+    "grammar": "〜たら"
+   }
+  },
+  "N3": {
+   "card": {
+    "jp": "うちの子は本ばかり読んでいます。",
+    "en": "My child does nothing but read books.",
+    "grammar": "〜ばかり"
+   }
+  },
+  "N2": {
+   "card": {
+    "jp": "長い会議の末に、答えが決まった。",
+    "en": "After a long meeting, the answer was decided.",
+    "grammar": "〜末に"
+   }
+  },
+  "N1": {
+   "card": {
+    "jp": "彼は今にも泣き出さんばかりに顔をゆがめた。",
+    "en": "His face twisted as if he were about to burst into tears.",
+    "grammar": "〜んばかりに"
+   }
+  }
+ },
+ "comprehension": {
+  "N5": {
+   "card": {
+    "title": "わたしの一日",
+    "text": "わたしは大学の学生です。毎日、七時におきて、八時にうちを出ます。駅まで十五分ぐらいあるきます。",
+    "question": "À quelle heure l'auteur sort-il de chez lui ?",
+    "options": [
+     "À sept heures",
+     "À huit heures",
+     "À neuf heures",
+     "À cinq heures"
+    ]
+   }
+  },
+  "N4": {
+   "card": {
+    "title": "海へ行くつもりだった日",
+    "text": "先週の土曜日、友だちと海へ行くつもりでした。朝早く起きて、八時に駅で会うやくそくでした。でも、私はめざまし時計を止めて、またねてしまいました。",
+    "question": "Quel était le plan pour samedi ?",
+    "options": [
+     "Aller à la mer avec un ami",
+     "Aller à la montagne seul",
+     "Acheter un gâteau",
+     "Faire la grasse matinée"
+    ]
+   }
+  },
+  "N3": {
+   "card": {
+    "title": "新しくなった図書館",
+    "text": "私の町の図書館は、去年新しくなった。建物が大きくなっただけでなく、開いている時間も夜九時までのびた。そのおかげで、仕事の帰りに本を借りる人が増えたそうだ。",
+    "question": "Qu'est-ce qui a changé dans les horaires de la bibliothèque ?",
+    "options": [
+     "Elle reste désormais ouverte jusqu'à neuf heures du soir",
+     "Elle ouvre désormais à neuf heures du matin",
+     "Elle ferme plus tôt",
+     "Elle n'ouvre que le week-end"
+    ]
+   }
+  },
+  "N2": {
+   "card": {
+    "title": "人口が減る町",
+    "text": "私の住む町では、この十年で人口が二割ほど減った。若い人の多くが仕事を求めて都市へ出ていき、残った住民の平均年齢は上がりつつある。こうした状況にもかかわらず、町は最近、少しずつ活気を取り戻している。",
+    "question": "De combien la population de la ville a-t-elle baissé en dix ans ?",
+    "options": [
+     "D'environ vingt pour cent",
+     "D'environ deux pour cent",
+     "De moitié environ",
+     "Elle n'a pas baissé"
+    ]
+   }
+  },
+  "N1": {
+   "card": {
+    "title": "書店の灯り",
+    "text": "駅前の小さな書店が、来月で店を閉めるという。インターネットで本が買える時代に、小さな書店が生き残るのは難しい。とはいえ、この店が長く地域に親しまれてきたのは、単に本を売っていたからではない。",
+    "question": "Que va-t-il se passer le mois prochain ?",
+    "options": [
+     "La librairie devant la gare va fermer",
+     "Une nouvelle librairie va ouvrir",
+     "Le propriétaire prendra sa retraite mais gardera la boutique",
+     "La boutique passera en ligne"
+    ]
+   }
+  }
+ },
+ "dictation": {
+  "N5": {
+   "card": {
+    "jp": "学校は九時からです。"
+   }
+  },
+  "N4": {
+   "card": {
+    "jp": "昼ごはんの後で、映画を見に行きませんか。"
+   }
+  },
+  "N3": {
+   "card": {
+    "jp": "電車が遅れたので、待ち合わせの時間に間に合いませんでした。"
+   }
+  },
+  "N2": {
+   "card": {
+    "jp": "来月から新しい制度が導入されることになりました。"
+   }
+  },
+  "N1": {
+   "card": {
+    "jp": "本日は貴重なお時間をいただき、誠にありがとうございます。"
+   }
+  }
+ },
+ "composition": {
+  "N5": {
+   "card": {
+    "jp": "です／だ",
+    "meaning": "la copule : être"
+   }
+  },
+  "N4": {
+   "card": {
+    "jp": "〜たら",
+    "meaning": "conditionnel : si / quand"
+   }
+  },
+  "N3": {
+   "card": {
+    "jp": "〜ばかり",
+    "meaning": "venir tout juste de"
+   }
+  },
+  "N2": {
+   "card": {
+    "jp": "〜にもかかわらず",
+    "meaning": "malgré, en dépit de"
+   }
+  },
+  "N1": {
+   "card": {
+    "jp": "〜んばかりに",
+    "meaning": "comme sur le point de, pour ainsi dire"
+   }
+  }
+ },
+ "exam": {
+  "N5": {
+   "card": {
+    "vocab": {
+     "sentence": "わたしは学生です。",
+     "word": "学生",
+     "reading": "がくせい",
+     "options": [
+      "がくせい",
+      "がくぜい",
+      "がぐせい",
+      "がっくせい"
+     ]
+    },
+    "grammar": {
+     "sentence": "わたしは学生です。",
+     "point": "です／だ"
+    },
+    "reading": {
+     "title": "わたしの一日",
+     "text": "わたしは大学の学生です。毎日、七時におきて、八時にうちを出ます。"
+    }
+   }
+  },
+  "N4": {
+   "card": {
+    "vocab": {
+     "sentence": "毎日習って、字が書けるようになりました。",
+     "word": "字",
+     "reading": "じ",
+     "options": [
+      "じ",
+      "あざ",
+      "し",
+      "な"
+     ]
+    },
+    "grammar": {
+     "sentence": "あした雨がふったら、家にいます。",
+     "point": "〜たら"
+    },
+    "reading": {
+     "title": "海へ行くつもりだった日",
+     "text": "先週の土曜日、友だちと海へ行くつもりでした。朝早く起きて、八時に駅で会うやくそくでした。"
+    }
+   }
+  },
+  "N3": {
+   "card": {
+    "vocab": {
+     "sentence": "彼がそんな失礼なことを言うわけがない。",
+     "word": "失礼",
+     "reading": "しつれい",
+     "options": [
+      "しづれい",
+      "しっつれい",
+      "しつれい",
+      "じつれい"
+     ]
+    },
+    "grammar": {
+     "sentence": "うちの子は本ばかり読んでいます。",
+     "point": "〜ばかり"
+    },
+    "reading": {
+     "title": "新しくなった図書館",
+     "text": "私の町の図書館は、去年新しくなった。建物が大きくなっただけでなく、開いている時間も夜九時までのびた。"
+    }
+   }
+  },
+  "N2": {
+   "card": {
+    "vocab": {
+     "sentence": "この点数は努力にほかならない。",
+     "word": "点数",
+     "reading": "てんすう",
+     "options": [
+      "てんすう",
+      "てんす",
+      "てんっすう",
+      "でんすう"
+     ]
+    },
+    "grammar": {
+     "sentence": "長い会議の末に、答えが決まった。",
+     "point": "〜末に"
+    },
+    "reading": {
+     "title": "人口が減る町",
+     "text": "私の住む町では、この十年で人口が二割ほど減った。若い人の多くが仕事を求めて都市へ出ていき、残った住民の平均年齢は上がりつつある。"
+    }
+   }
+  },
+  "N1": {
+   "card": {
+    "vocab": {
+     "sentence": "資金が不足しているゆえに、計画は延期された。",
+     "word": "資金",
+     "reading": "しきん",
+     "options": [
+      "しっきん",
+      "しぎん",
+      "じきん",
+      "しきん"
+     ]
+    },
+    "grammar": {
+     "sentence": "彼は今にも泣き出さんばかりに顔をゆがめた。",
+     "point": "〜んばかりに"
+    },
+    "reading": {
+     "title": "書店の灯り",
+     "text": "駅前の小さな書店が、来月で店を閉めるという。インターネットで本が買える時代に、小さな書店が生き残るのは難しい。"
+    }
+   }
+  }
+ }
+}

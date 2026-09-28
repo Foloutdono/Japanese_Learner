@@ -11,17 +11,17 @@ import './index.css'
 // and Today sets the strip beside the fare gate. The phone's own
 // column (layout.phone.test, PracticeScreen.phone.test) does not move.
 
-// The learner's record on the Practice gate (plan 130): reading at N5
-// and N4, one text at N5, one paper at N5; nothing anywhere else.
-const RECORD = {
-  reading: { N5: { done: 24, right: 20, of: 24 }, N4: { done: 3, right: 2, of: 3 } },
-  comprehension: { N5: { done: 1, right: 3, of: 4 } },
-  translation: {}, dictation: {}, composition: {},
-  exam: { N5: { done: 1, right: 26, of: 40 } },
-}
+// Every practice platform's card at every grade, as
+// /api/station/{platform}/samples serves it (plan 165: the Practice
+// gate's specimens; testing/practiceCards.json is its `stops`, cards
+// only).
+const { default: CARDS } = await import('./testing/practiceCards.json')
 vi.mock('./lib/api', () => ({
   api: p => p,
-  apiFetch: vi.fn(async path => ({ ok: true, status: 200, json: async () => (path === '/api/practice/record' ? RECORD : {}) })),
+  apiFetch: vi.fn(async path => {
+    const line = path.match(/^\/api\/station\/(\w+)\/samples/)?.[1]
+    return { ok: true, status: 200, json: async () => (line ? { stops: CARDS[line] } : {}) }
+  }),
   apiJson: vi.fn(async () => ({})),
   apiJsonWithTimeout: vi.fn(async () => ({})),
   apiUpload: vi.fn(),
@@ -39,7 +39,14 @@ vi.mock('./lib/audio', async o => ({
   ...(await o()), playUi: vi.fn(), playAnnouncement: vi.fn(), playClick: vi.fn(),
 }))
 vi.mock('./stores/boarding', () => ({ board: commit => commit() }))
-vi.mock('./stores/profileSummary', async (o) => ({ ...(await o()), useProfileSummary: () => ({ jlptLevel: 'N4' }) }))
+// The learner's grade: N4, unless a test walks them all.
+const learner = vi.hoisted(() => ({ grade: 'N4' }))
+vi.mock('./stores/profileSummary', async (o) => ({
+  ...(await o()),
+  useProfileSummary: () => ({ jlptLevel: 'N4' }),
+  useProfileSummaryState: () => ({ summary: { jlptLevel: learner.grade }, failed: false }),
+}))
+vi.mock('./stores/departure', async (o) => ({ ...(await o()), beginDeparture: vi.fn() }))
 // The distance on each line (plan 130's upright foot): kana finished,
 // vocab N5 met but not yet learned.
 const STATS = {
@@ -53,6 +60,9 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: PracticeScreen } = await import('./screens/PracticeScreen')
 const { default: LearnScreen } = await import('./screens/LearnScreen')
+const { apiFetch } = await import('./lib/api')
+const { beginDeparture } = await import('./stores/departure')
+const { default: fr } = await import('./locales/fr/index.js')
 
 // The plates arrive staggered (index.css's `arrive`); a slow runner can
 // still be finishing the last of them when the timer fires, and a plate
@@ -162,18 +172,20 @@ describe('the plated gates on the desk', () => {
 // ── plan 130 — the gates take the window ────────────────────────
 // The plates stood a third of the way down the window with the rest of
 // it empty. They fill it now, their rows sharing the room, and the room
-// goes to each plate's body: the line upright on Learn, the grades as
-// rows with the learner's record on Practice.
-describe('the gates take the window (plan 130)', () => {
-  // The page does not scroll, and the last plate stands a gutter from
-  // the window's floor: the plates took the room rather than leaving it.
-  function fills(gate) {
-    const plates = document.querySelector(`.${gate} > .plates`)
-    const gutter = parseFloat(getComputedStyle(document.querySelector(`.${gate}`)).paddingBottom)
-    expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
-    expect(Math.abs(box(plates).bottom - (window.innerHeight - gutter))).toBeLessThanOrEqual(2)
-  }
+// goes to each plate's body: the line upright on Learn, and on Practice
+// the grades as rows with the learner's record -- since plan 165, each
+// platform's specimen (below).
+//
+// The page does not scroll, and the last plate stands a gutter from
+// the window's floor: the plates took the room rather than leaving it.
+function fills(gate) {
+  const plates = document.querySelector(`.${gate} > .plates`)
+  const gutter = parseFloat(getComputedStyle(document.querySelector(`.${gate}`)).paddingBottom)
+  expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
+  expect(Math.abs(box(plates).bottom - (window.innerHeight - gutter))).toBeLessThanOrEqual(2)
+}
 
+describe('the gates take the window (plan 130)', () => {
   it('draws each Learn line across its plate, the four filling the window (plan 132)', async () => {
     await framed('/learn', <LearnScreen />)
     await settle()
@@ -215,49 +227,91 @@ describe('the gates take the window (plan 130)', () => {
     press('ArrowDown')
     expect(document.activeElement).toBe(n4)
   })
+})
 
-  it('hangs Practice\'s grades as rows sharing each plate, with what was done at each', async () => {
+// ── plan 165 — every platform's specimen ───────────────────────
+// The canvas's last board: each Practice plate holds, under its name,
+// the run's own card in a well, at the learner's grade -- the one door
+// to the station. At the desk's tightest the plates stand three rows
+// deep, so the line over the well gives its room to the well and
+// comprehension holds its text without its question; every well shows
+// its card whole, and the gate still takes the window without a scroll.
+describe('every platform\'s specimen on the Practice gate (plan 165)', () => {
+  const plates = () => $$('.practice > .plates > .plate')
+  const well = plate => plate.querySelector('.plate__head .plate__body .prc-spec--plate')
+  const platformOf = plate => ['reading', 'comprehension', 'translation', 'dictation', 'composition', 'exam'][plates().indexOf(plate)]
+
+  it('draws each platform\'s card at the learner\'s grade, whole, in a gate that fills the window', async () => {
     await framed('/practice', <PracticeScreen />)
     await settle()
     fills('practice')
-    expect(document.querySelector('.plate__foot--dests')).toBeNull()
-    const plates = $$('.practice > .plates > .plate')
-    for (const plate of plates) {
-      const rows = $$('.desk-grade', plate)
-      expect(rows.map(r => r.querySelector('.desk-grade__code').textContent)).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
-      const heights = rows.map(r => Math.round(box(r).height))
-      expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1)
-      // The learner's grade is marked, and is the list's one tab stop.
-      expect(rows.map(r => r.getAttribute('aria-current'))).toEqual([null, 'location', null, null, null])
-      expect(rows.map(r => r.tabIndex)).toEqual([-1, 0, -1, -1, -1])
-      for (const rec of $$('.desk-grade__rec', plate)) expect(rec.scrollWidth).toBeLessThanOrEqual(rec.clientWidth)
+    // No grades on the desk's plates: the station a plate opens has them.
+    expect(document.querySelector('.plate__foot')).toBeNull()
+    expect(apiFetch.mock.calls.some(([path]) => path === '/api/practice/record')).toBe(false)
+    expect(plates()).toHaveLength(6)
+    for (const plate of plates()) {
+      const w = well(plate)
+      expect(w, platformOf(plate)).not.toBeNull()
+      // Whole: nothing in the well cut at its foot or its edge.
+      expect(w.scrollHeight, platformOf(plate)).toBeLessThanOrEqual(w.clientHeight + 1)
+      expect(w.scrollWidth, platformOf(plate)).toBeLessThanOrEqual(w.clientWidth + 1)
+      expect(w.getAttribute('aria-hidden')).toBe('true')
     }
-    const rec = (plate, i) => $$('.desk-grade__rec', plates[plate])[i].textContent
-    expect(rec(0, 0)).toMatch(/^24 phrases · 83\s% justes$/)
-    expect(rec(0, 1)).toMatch(/^3 phrases · 67\s% justes$/)
-    expect(rec(0, 2)).toBe('Pas encore')
-    expect(rec(1, 0)).toMatch(/^1 texte · 75\s% justes$/)
-    expect(rec(5, 0)).toMatch(/^1 épreuve · 65\s% justes$/)
-    expect(rec(4, 0)).toBe('Pas encore')
-    // The row names its platform to a screen reader, as the chip did.
-    expect($$('.desk-grade', plates[0])[0].getAttribute('aria-label')).toMatch(/^Entraînement à la lecture — N5 · 24 phrases/)
+    const [reading, comprehension, translation, dictation, composition, exam] = plates().map(well)
+    expect(reading.querySelector('.prc-spec__jp').textContent).toBe(CARDS.reading.N4.card.jp)
+    expect(reading.querySelector('.prc-spec__clock')).not.toBeNull()
+    expect(translation.querySelector('.prc-spec__prompt').textContent).toBe(CARDS.translation.N4.card.en)
+    expect(dictation.querySelector('.prc-spec__audio')).not.toBeNull()
+    expect(composition.querySelector('.prc-spec__jp').textContent).toBe(CARDS.composition.N4.card.jp)
+    expect(composition.querySelector('.prc-spec__gloss').textContent).toBe(CARDS.composition.N4.card.meaning)
+    // The exam's 漢字読み: its word underlined, the paper's four readings.
+    const vocab = CARDS.exam.N4.card.vocab
+    expect(exam.querySelector('.prc-spec__mark').textContent).toBe(vocab.word)
+    expect($$('.prc-spec__opt', exam).map(o => o.textContent.slice(1))).toEqual(vocab.options)
+    // Three rows deep, the plates are short: comprehension holds its
+    // text alone, and no line is drawn over any well.
+    expect(comprehension.querySelector('.prc-spec__title').textContent).toBe(CARDS.comprehension.N4.card.title)
+    expect(comprehension.querySelector('.prc-spec__q')).toBeNull()
+    for (const how of $$('.plate__how')) expect(how.hidden).toBe(true)
   })
 
-  it('walks a platform\'s grades with ↑/↓ and departs from the row as from its chip', async () => {
+  it('holds every grade\'s card whole, N1\'s longest sentences too', async () => {
+    for (const grade of ['N5', 'N4', 'N3', 'N2', 'N1']) {
+      learner.grade = grade
+      const screen = await framed('/practice', <PracticeScreen />)
+      await settle(300)
+      expect(document.scrollingElement.scrollHeight, grade).toBeLessThanOrEqual(window.innerHeight + 1)
+      for (const plate of plates()) {
+        const w = well(plate)
+        expect(w.textContent, `${grade} ${platformOf(plate)}`).not.toBe('')
+        expect(w.scrollHeight, `${grade} ${platformOf(plate)}`).toBeLessThanOrEqual(w.clientHeight + 1)
+        expect(w.scrollWidth, `${grade} ${platformOf(plate)}`).toBeLessThanOrEqual(w.clientWidth + 1)
+      }
+      expect(plates()[0].querySelector('.prc-spec__jp').textContent).toBe(CARDS.reading[grade].card.jp)
+      await screen.unmount()
+    }
+    learner.grade = 'N4'
+  })
+
+  it('makes the plate one door, named for its platform and described by what it asks', async () => {
     await framed('/practice', <PracticeScreen />)
     await settle()
-    const rows = $$('.desk-grade', document.querySelector('.practice > .plates > .plate'))
-    rows[1].focus()
-    press('ArrowDown')
-    expect(document.activeElement).toBe(rows[2])
-    press('Home')
-    expect(document.activeElement).toBe(rows[0])
-    rows[2].click()
-    await settle(80)
-    expect(seen.path).toBe('/practice/reading/level/N3')
-    const exam = $$('.desk-grade', document.querySelector('.practice > .plates > .plate:last-child'))
-    exam[0].click()
-    await settle(80)
-    expect(seen.path).toBe('/practice/exam?level=N5')
+    const heads = plates().map(p => p.querySelector(':scope > .plate__head'))
+    expect(heads.every(h => h.tagName === 'BUTTON')).toBe(true)
+    // The head is the plate: it runs from the plate's top to its stripe.
+    for (const [i, head] of heads.entries()) {
+      expect(Math.abs(box(head).height - (box(plates()[i]).height - box(plates()[i].querySelector('.plate__stripe')).height - 2))).toBeLessThanOrEqual(1)
+    }
+    // The name is the name; what the platform asks is the description,
+    // there to a screen reader even where the plate is too short to draw it.
+    const how = document.getElementById(heads[0].getAttribute('aria-describedby'))
+    expect(how.textContent).toBe(fr.practiceHow.reading)
+    expect(how.getAttribute('aria-hidden')).toBe('true')
+    expect(heads[5].querySelector('.plate__title').textContent).toBe(fr.examTitle)
+    // A click anywhere on the plate -- the well too -- departs for its station.
+    beginDeparture.mockClear()
+    heads[1].querySelector('.prc-spec').click()
+    expect(beginDeparture).toHaveBeenCalledTimes(1)
+    expect(beginDeparture.mock.calls[0][0].path).toBe('/practice/comprehension')
   })
 })
