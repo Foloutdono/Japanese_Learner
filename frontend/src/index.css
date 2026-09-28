@@ -25470,7 +25470,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   /* A step's answers stand at the width that serves them, set on its
      car so a leaving car keeps its own while it pulls away: the card's
-     for most questions; the canvas for the six roads, the kana's tree,
+     for most questions; the canvas for the name's line, the six roads,
+     the kana's tree,
      the line of stations, the lines' cards, the four roads, the day's
      arc, the ride drawn to scale and the account beside its ticket;
      three columns and a gutter for the two words read out. */
@@ -25481,7 +25482,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   .desk-brd .brd__car[data-dir="back"] { --pull: -1; }
   .desk-brd .brd__car--out { animation: desk-brd-pull-out 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
-  .desk-brd .brd__car:is([data-car="why"], [data-car="kana"], [data-car="lines"], [data-car="rhythm"], [data-car="time"]) { --desk-brd-w: var(--desk-board-w); }
+  .desk-brd .brd__car:is([data-car="name"], [data-car="why"], [data-car="kana"], [data-car="lines"], [data-car="rhythm"], [data-car="time"]) { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="reveal"] { --desk-brd-w: calc(3 * var(--desk-side-w) + var(--sp-8)); }
   .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: var(--desk-board-w); }
@@ -25673,6 +25674,87 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
   .desk-brd .brd__foot .btn-depart { transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 200ms ease; }
+  /* ── 辻 — the name as the station's (plan 161) ──
+     The owner's D01 (NameStep): the name on its plate -- the field at
+     the card's width, set in from the question by a stop's width, the
+     letters it has left at its end -- a pole down to the question's hub
+     and the line leaving it for the next stop, named under its ring. */
+  .desk-brd__name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: calc(var(--sp-9) + var(--sp-7));
+  }
+  .desk-brd__name > .brd__link { margin-top: var(--sp-4); }
+  .desk-brd__plate {
+    position: relative;
+    width: min(100%, var(--card-w));
+  }
+  .desk-brd__plate > .brd-field { padding-right: calc(var(--sp-9) + var(--sp-8)); }
+  .desk-brd__plate-count {
+    position: absolute;
+    top: 50%;
+    right: var(--sp-6);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    transform: translateY(-50%);
+  }
+  .desk-brd__name-line {
+    position: relative;
+    align-self: stretch;
+    height: calc(var(--sp-9) + var(--sp-4) + 80px);
+  }
+  /* The line, from the hub to the paper's edge... */
+  .desk-brd__name-line::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--sp-9) + var(--sp-4) + 40px - 4px);
+    right: 0;
+    left: 40px;
+    height: 8px;
+    border-radius: var(--r-pill);
+    background: var(--surface-line);
+  }
+  /* ...and the pole from the plate down to the hub. */
+  .desk-brd__name-line::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: calc(40px - 1px);
+    width: 2px;
+    height: calc(var(--sp-9) + var(--sp-4));
+    background: var(--text-primary);
+  }
+  .desk-brd__name-line > .desk-brd__hub--pole {
+    top: calc(var(--sp-9) + var(--sp-4) + 40px);
+    left: 40px;
+    z-index: 1;
+  }
+  .desk-brd__name-next {
+    position: absolute;
+    top: calc(var(--sp-9) + var(--sp-4) + 40px - 14px);
+    /* Halfway from the plate's end to the paper's. */
+    right: calc((100% - var(--card-w)) / 2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--text-secondary);
+    transform: translateX(50%);
+  }
+  .desk-brd__name-next-ring {
+    width: 28px;
+    height: 28px;
+    border: 4px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+  }
   /* ── 辻 — six reasons, six roads (plan 161) ──
      The owner's D02 (components/boarding/WhyStep's WhyRoads): the
      question's hub in the middle of the paper and a road out of it to

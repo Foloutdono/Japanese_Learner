@@ -1,6 +1,10 @@
 import { useLang } from '../../LangContext'
 import { BoardQuestion, Continue, BoardLink } from './BoardFrame'
 import { composing } from '../../lib/keyGuards'
+import { useDesk } from '../../hooks/useDesk'
+
+// The pass holder's name at its longest (EditableUsername's rule).
+const NAME_MAX = 20
 
 // ── 1 · the name (plan 075) ──────────────────────────────────────
 // A real field, already focused: the keyboard comes up with the
@@ -24,35 +28,69 @@ import { composing } from '../../lib/keyGuards'
 // minted for a Google identity no pass carried, and was shown seven
 // questions with no hint that their own journey was somewhere else —
 // see components/settings/AccountPage.jsx for the road back to it.
+//
+// On the desk (plan 161, the owner's D01) the name is the station's: its
+// plate with the letters it has left, a pole down to the question's hub
+// (`no`, its place on the strip) and the line leaving it for the next
+// stop (`next`, that stop's name); the way to an account already held
+// stands under the hub.
 export default function NameStep({
   value, onChange, onContinue, onSignIn = null, email = null,
-  error = null, busy = false,
+  error = null, busy = false, no = null, next = null,
 }) {
   const { t } = useLang()
+  const desk = useDesk()
   const canGo = value.trim().length > 0 && !busy
+  const field = (
+    <input
+      className={`brd-field${value ? '' : ' brd-field--empty'}`}
+      autoFocus
+      value={value}
+      maxLength={NAME_MAX}
+      autoComplete="nickname"
+      aria-label={t.brdNameAria}
+      aria-invalid={error ? true : undefined}
+      placeholder={t.brdNameAria}
+      onChange={e => onChange(e.target.value)}
+      onKeyDown={e => { if (e.key === 'Enter' && canGo && !composing(e)) onContinue() }}
+    />
+  )
+  const refusal = error && <p className="brd__error" role="alert">{error}</p>
+  const signIn = onSignIn && <BoardLink onClick={onSignIn} data-action="sign-in">{t.brdHaveAccount}</BoardLink>
   return (
     <>
       <div className="brd__body">
         <BoardQuestion hint={email ? t.brdNameNewPass(email) : null}>{t.brdNameQ}</BoardQuestion>
         <div className="brd__stage">
-          <input
-            className={`brd-field${value ? '' : ' brd-field--empty'}`}
-            autoFocus
-            value={value}
-            maxLength={20}
-            autoComplete="nickname"
-            aria-label={t.brdNameAria}
-            aria-invalid={error ? true : undefined}
-            placeholder={t.brdNameAria}
-            onChange={e => onChange(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && canGo && !composing(e)) onContinue() }}
-          />
-          {error && <p className="brd__error" role="alert">{error}</p>}
+          {desk ? (
+            <div className="desk-brd__name">
+              <div className="desk-brd__plate">
+                {field}
+                <span className="desk-brd__plate-count" aria-hidden="true">{`${value.length} / ${NAME_MAX}`}</span>
+              </div>
+              {refusal}
+              <div className="desk-brd__name-line" aria-hidden="true">
+                <span className="desk-brd__hub desk-brd__hub--pole">{no}</span>
+                {next && (
+                  <span className="desk-brd__name-next">
+                    <span className="desk-brd__name-next-ring" />
+                    {next}
+                  </span>
+                )}
+              </div>
+              {signIn}
+            </div>
+          ) : (
+            <>
+              {field}
+              {refusal}
+            </>
+          )}
         </div>
       </div>
       <div className="brd__foot">
         <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!canGo} data-action="continue" />
-        {onSignIn && <BoardLink onClick={onSignIn} data-action="sign-in">{t.brdHaveAccount}</BoardLink>}
+        {!desk && signIn}
       </div>
     </>
   )

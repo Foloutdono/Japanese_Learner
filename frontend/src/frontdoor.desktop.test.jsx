@@ -413,6 +413,26 @@ describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
     expect(inCar('.btn-depart')).toBeNull()
   })
 
+  it('sets the name on its plate over the question\'s hub, the line leaving it for the next stop', async () => {
+    await board()
+    await settle(600)
+    const field = box(inCar('.brd-field'))
+    // The letters the name has left, at the plate's end.
+    expect(inCar('.desk-brd__plate-count').textContent).toBe('6 / 20')
+    await userEvent.keyboard('X')
+    expect(inCar('.desk-brd__plate-count').textContent).toBe('7 / 20')
+    // Set in from the question, the hub under the plate's left end.
+    expect(field.left).toBeGreaterThan(box(inCar('.brd__q')).left)
+    const hub = inCar('.desk-brd__hub--pole')
+    expect(hub.textContent).toBe('01')
+    expect(Math.abs(mid(box(hub)) - (field.left + 40))).toBeLessThan(1)
+    expect(box(hub).top).toBeGreaterThan(field.bottom)
+    // The next stop down the line, named.
+    const nextStop = inCar('.desk-brd__name-next')
+    expect([en.brdStop.why, fr.brdStop.why]).toContain(nextStop.textContent)
+    expect(box(nextStop).left).toBeGreaterThan(field.right)
+  })
+
   it('draws the six reasons as roads out of the question\'s hub, the pick\'s road lit', async () => {
     await board()
     await pastName()

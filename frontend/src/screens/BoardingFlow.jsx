@@ -554,6 +554,8 @@ export default function BoardingFlow({
             email={session?.user?.email ?? null}
             error={nameError}
             busy={busy}
+            no={hubNo('name')}
+            next={t.brdStop[lineStops[1]]}
           />
         )
       case 'why':
