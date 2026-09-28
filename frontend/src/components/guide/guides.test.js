@@ -100,21 +100,12 @@ describe('the guide on the desk', () => {
     expect(deskStops('learn')).toBe(GUIDES.learn)
   })
 
-  // Plan 127: the HUD's three are the doors of the rail's pass on the
-  // desk, and their spot takes a card's corner there, a pill's on the
-  // phone. Every anchor it names is a stop somewhere.
-  it('draws the rail pass\'s doors with a card\'s corner, and only on the desk', () => {
+  // Plan 143: the profile's Settings stop is the rail's station on the
+  // desk, a lozenge; on the phone it is a flush lattice cell. Every
+  // anchor DESK_RADIUS names is a stop somewhere.
+  it('draws the rail\'s stations with a panel\'s corner, and only on the desk', () => {
     const anchors = Object.values(GUIDES).flat().map(s => s.anchor)
     for (const anchor of Object.keys(DESK_RADIUS)) expect(anchors, anchor).toContain(anchor)
-    const desk = Object.fromEntries(deskStops('today').map(s => [s.anchor, s.radius]))
-    const phone = Object.fromEntries(GUIDES.today.map(s => [s.anchor, s.radius]))
-    for (const anchor of ['hud.level', 'hud.status', 'hud.pass']) {
-      expect(desk[anchor], anchor).toBe('card')
-      expect(phone[anchor], anchor).toBe('pill')
-    }
-    expect(desk['today.gate']).toBe(phone['today.gate'])
-    // Plan 143: the profile's Settings stop is the rail's station on the
-    // desk, a lozenge; on the phone it is a flush lattice cell.
     const profile = Object.fromEntries(deskStops('profile').map(s => [s.anchor, s.radius]))
     expect(profile['profile.settings']).toBe('panel')
     expect(GUIDES.profile.find(s => s.anchor === 'profile.settings').radius).toBe('flat')
@@ -122,5 +113,15 @@ describe('the guide on the desk', () => {
     // the desk walks the page first and ends on the rail's station.
     expect(GUIDES.profile.map(s => s.anchor).slice(0, 3)).toEqual(['profile.pass', 'profile.stats', 'profile.settings'])
     expect(deskStops('profile').map(s => s.anchor).slice(-2)).toEqual(['profile.stats', 'profile.settings'])
+  })
+})
+
+// The first gate after the first ride says how to start and where the
+// rest is, and nothing more (2026-09-28): the level, the status, the
+// balance, the run's length and fare, the strip, the journey and the
+// week ahead are left to be found.
+describe('Today\'s guide', () => {
+  it('stops at the gate and the gates only', () => {
+    expect(GUIDES.today.map(s => s.anchor)).toEqual(['today.gate', 'tabbar'])
   })
 })

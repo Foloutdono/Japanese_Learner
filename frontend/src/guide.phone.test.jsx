@@ -23,7 +23,7 @@ describe('the guide at 390×844', () => {
       <LangProvider>
         <div className="phone">
           <header className="hud" style={{ position: 'fixed', top: 0, left: 0, right: 0 }}><div className="hud__inner">
-            <button type="button" className="hud__level" data-guide="hud.level"><span>1</span></button>
+            <div className="gate" data-guide="today.gate" style={{ height: 40 }} />
           </div></header>
           <div className="phone__content"><main style={{ height: 1200 }} /></div>
           <nav className="tabbar" data-guide="tabbar" style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}><div className="tabbar__inner" /></nav>
@@ -32,10 +32,10 @@ describe('the guide at 390×844', () => {
       </LangProvider>
     )
     await settle(900)
-    // hud.level is the first stop of today's guide: the spot is at the
-    // top edge and the note is under it, inside the screen.
+    // today.gate is the first stop of today's guide, pinned here to the
+    // top edge: the note is under it, inside the screen.
     let note = document.querySelector('.guide-callout--live')
-    expect(document.querySelector('.guide').dataset.stop).toBe('hud.level')
+    expect(document.querySelector('.guide').dataset.stop).toBe('today.gate')
     expect(note.dataset.place).toBe('below')
     expect(rect(note).top).toBeGreaterThanOrEqual(rect(document.querySelector('.guide__spot')).bottom - 1)
     expect(rect(note).bottom).toBeLessThanOrEqual(window.innerHeight)
@@ -44,8 +44,7 @@ describe('the guide at 390×844', () => {
     for (const sel of ['[data-action="guide-next"]', '[data-action="guide-skip"]']) {
       expect(rect(note.querySelector(sel)).height).toBeGreaterThanOrEqual(44)
     }
-    // The other today stops are not on this fixture; Next reaches the
-    // tab bar, whose note sits above it.
+    // Next reaches the tab bar, whose note sits above it.
     document.querySelector('[data-action="guide-next"]').click()
     await settle(900)
     expect(document.querySelector('.guide').dataset.stop).toBe('tabbar')
@@ -67,7 +66,7 @@ describe('the guide at 390×844', () => {
       </LangProvider>
     )
     await settle(200)
-    expect(document.querySelector('.guide').dataset.stop).toBe('hud.level')
+    expect(document.querySelector('.guide').dataset.stop).toBe('today.gate')
     const note = document.querySelector('.guide-callout--live')
     expect(note.style.width).toBe('')
     expect(note.style.left).toBe('')
@@ -75,7 +74,7 @@ describe('the guide at 390×844', () => {
     expect(document.querySelector('[aria-keyshortcuts]')).toBeNull()
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
     await settle()
-    expect(document.querySelector('.guide').dataset.stop).toBe('hud.level')
+    expect(document.querySelector('.guide').dataset.stop).toBe('today.gate')
   })
 })
 

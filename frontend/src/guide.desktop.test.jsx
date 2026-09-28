@@ -91,33 +91,7 @@ describe('the guide on the desk', () => {
     expect(onEnd).toHaveBeenCalledWith(true, 2)
   })
 
-  it('walks Today down the rail first, then the gate and the strip', async () => {
-    await render(
-      <LangProvider>
-        <div className="phone phone--desk">
-          <div className="phone__content">
-            {['hud.level', 'hud.status', 'hud.pass', 'today.strip', 'today.gate', 'tabbar'].map(a => (
-              <div key={a} data-guide={a} style={{ height: 40 }}>{a}</div>
-            ))}
-          </div>
-        </div>
-        <Guide gate="today" onEnd={() => {}} />
-      </LangProvider>
-    )
-    await settle()
-    const walked = []
-    for (let i = 0; i < 6; i++) {
-      walked.push(stopOf())
-      await userEvent.keyboard('{ArrowRight}')
-      await settle(120)
-    }
-    expect(walked).toEqual(['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.strip'])
-  })
-
-  // The tour completed (2026-09-26): the run's length and its fare
-  // after the gate, then the side column top to bottom -- the strip, the
-  // journey, the week ahead -- each with its own sentence.
-  it('walks the rest of Today on the desk: the length, the fare, the journey and the week', async () => {
+  it('walks Today down the rail first, then the gate', async () => {
     await render(
       <LangProvider>
         <div className="phone phone--desk">
@@ -132,15 +106,16 @@ describe('the guide on the desk', () => {
     )
     await settle()
     const walked = []
-    const said = new Set()
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 2; i++) {
       walked.push(stopOf())
-      said.add($('.guide-callout__text').textContent)
       await userEvent.keyboard('{ArrowRight}')
       await settle(120)
     }
-    expect(walked).toEqual(['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.take', 'today.fare', 'today.strip', 'today.journey', 'today.week'])
-    expect(said.size).toBe(10)
+    expect(walked).toEqual(['tabbar', 'today.gate'])
+    // Every other part of Today is on the page, and walked no more
+    // (2026-09-28): the first gate after the first ride says how to
+    // start and where the rest is.
+    expect(stopOf()).toBeNull()
   })
 
   // The owner's report: the fare gate takes the window's height on the
@@ -174,19 +149,19 @@ describe('the guide on the desk', () => {
         <div className="phone phone--desk">
           <div className="phone__content">
             <div className="desk-side" style={{ position: 'fixed', right: 0, top: 0, width: 360, height: '100%' }}>
-              <div data-guide="today.strip" style={{ position: 'absolute', bottom: 8, left: 0, right: 0, height: 60 }}>strip</div>
+              <div data-guide="run.side" style={{ position: 'absolute', bottom: 8, left: 0, right: 0, height: 60 }}>side</div>
             </div>
           </div>
         </div>
-        <Guide gate="today" onEnd={() => {}} />
+        <Guide gate="ride" stops={[{ anchor: 'run.side', key: 'RideEntry', radius: 'card' }]} onEnd={() => {}} />
       </LangProvider>
     )
     await settle()
-    expect(stopOf()).toBe('today.strip')
+    expect(stopOf()).toBe('run.side')
     const note = box($('.guide-callout--live'))
     expect(note.top).toBeGreaterThanOrEqual(0)
     expect(note.bottom).toBeLessThanOrEqual(window.innerHeight)
-    expect(note.right).toBeLessThanOrEqual(box($('[data-guide="today.strip"]')).left)
+    expect(note.right).toBeLessThanOrEqual(box($('[data-guide="run.side"]')).left)
   })
 
   it('sets each key cap apart from its word', async () => {

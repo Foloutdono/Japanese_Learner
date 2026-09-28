@@ -10,14 +10,17 @@
 // Ten a gate at most, and a stop earns its place only if the layout
 // does not already say it (DESIGN.md, "Say less"). It was six until the
 // owner asked for the tours to be completed (2026-09-26): the gates had
-// grown -- the run's length and its fare, the journey and the week
-// ahead beside the gate, the library, the mock exam, the entry's
-// actions, the ranking, the statistics -- and nothing said what any of
-// them was. A stop whose part a width does not draw is skipped there.
-// `today` is the first gate a learner sees, so it carries the HUD and
-// the tab bar; the other four never repeat them. The keys are
-// config/tabs.js's TAB_IDS in its order (the chain, when on, walks them
-// in it), and a node test says so.
+// grown -- the library, the mock exam, the entry's actions, the
+// ranking, the statistics -- and nothing said what any of them was. A
+// stop whose part a width does not draw is skipped there. `today` is
+// the exception, by the owner's later word (2026-09-28): it is the
+// first gate a learner sees, straight off the first ride, so it says
+// the two things they need to start -- the gate and the way to the
+// others -- and nothing more. The level, the status, the balance, the
+// run's length and fare, the strip, the journey and the week ahead are
+// found by using them, and the profile's guide names the level and the
+// balance on the pass. The keys are config/tabs.js's TAB_IDS in its
+// order (the chain, when on, walks them in it), and a node test says so.
 export const GUIDES = Object.freeze({
   learn: [
     { anchor: 'learn.plate',  key: 'LearnPlate',  radius: 'plate' },
@@ -32,15 +35,7 @@ export const GUIDES = Object.freeze({
     { anchor: 'practice.pass',  key: 'PracticePass',  radius: 'pill' },
   ],
   today: [
-    { anchor: 'hud.level',    key: 'HudLevel',    radius: 'pill' },
-    { anchor: 'hud.status',   key: 'HudStatus',   radius: 'pill' },
-    { anchor: 'hud.pass',     key: 'HudPass',     radius: 'pill' },
-    { anchor: 'today.strip',  key: 'TodayStrip',  radius: 'card' },
     { anchor: 'today.gate',   key: 'TodayGate',   radius: 'card' },
-    { anchor: 'today.take',   key: 'TodayTake',   radius: 'card' },
-    { anchor: 'today.fare',   key: 'TodayFare',   radius: 'card' },
-    { anchor: 'today.journey', key: 'TodayJourney', radius: 'panel' },
-    { anchor: 'today.week',   key: 'TodayWeek',   radius: 'panel' },
     { anchor: 'tabbar',       key: 'TabBar',      radius: 'flat', place: 'above' },
   ],
   dictionary: [
@@ -65,33 +60,24 @@ export const GUIDES = Object.freeze({
 })
 
 // 机 (plan 123): the order a gate's stops are walked in on the desk,
-// where it differs from the phone's. Today's six were written top to
-// bottom for a phone -- the HUD, the strip, the gate, the tab bar -- and
-// on the desk that walked the rail's foot three times, then the side's
-// top right, the gate, and the rail's top left. Down the rail instead,
-// then across the page: the gates, the level, the status, the pass, the
-// gate, the strip beside it.
+// where it differs from the phone's. Today's were written top to bottom
+// for a phone -- the gate, then the tab bar at the foot. On the desk the
+// gates are the rail, at the left: the way the page reads, the rail
+// first, then the gate.
 // The profile's Settings stop is the rail's station on the desk (plan
 // 143), not a door under the pass, so there it closes the walk: the
 // page first, then the way out -- Statistics, the rail's other station,
-// just before it. Today's added stops follow the gate they belong to
-// (its length, its fare) and the side column top to bottom.
+// just before it.
 export const DESK_ORDER = Object.freeze({
-  today: ['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.take', 'today.fare', 'today.strip', 'today.journey', 'today.week'],
+  today: ['tabbar', 'today.gate'],
   profile: ['profile.pass', 'profile.stamps', 'profile.records', 'profile.ledger', 'profile.board', 'profile.stats', 'profile.settings'],
 })
 
-// 机 (plan 127): the corner a stop's spot wears on the desk, where it
-// differs from the phone's. The HUD's three are pills on the phone's
-// strip; on the desk they are the three doors of the rail's pass, the
-// face, the purse and the stub, and a pill drawn round a card's door
-// reads as a stadium over the card.
+// 机 (plan 143): the corner a stop's spot wears on the desk, where it
+// differs from the phone's. The profile's Settings door is the rail's
+// station there, a lozenge at the panel's corner rather than a flush
+// lattice cell, and Statistics beside it.
 export const DESK_RADIUS = Object.freeze({
-  'hud.level': 'card',
-  'hud.status': 'card',
-  'hud.pass': 'card',
-  // Plan 143: the profile's Settings door is the rail's station there,
-  // a lozenge at the panel's corner rather than a flush lattice cell.
   'profile.settings': 'panel',
   'profile.stats': 'panel',
 })
