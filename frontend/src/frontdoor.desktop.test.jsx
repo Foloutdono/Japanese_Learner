@@ -539,23 +539,85 @@ describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
     expect(fits(inCar('.brd__body'))).toBe(true)
   })
 
-  it('draws the level list as a line of stations, the ride lit to the pick', async () => {
+  it('draws the level and the goal as the line climbing from the hub, the pick hung with its callout', async () => {
     await board()
     await toLevel()
     await settle(900)
-    const stations = () => [...inCar('.desk-brd__line').children]
-    expect(stations().map(s => s.dataset.level)).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
-    // Six hold half a run's column each at 1100 now the paper is the
-    // window's: one row.
-    expect(rowsOf(stations()).size).toBe(1)
-    const ends = stations().map(s => [s.classList.contains('desk-brd__stn--head'), s.classList.contains('desk-brd__stn--tail')])
-    expect(ends).toEqual([[true, false], [false, false], [false, false], [false, false], [false, false], [false, true]])
+    const climb = () => inCar('.desk-brd__climb')
+    const stops = () => [...climb().querySelectorAll('.desk-brd__stop')]
+    const ring = el => box(el.querySelector('.desk-brd__stop-ring'))
+    const stateOf = el => el.className.match(/desk-brd__stop--(\w+)/)?.[1] ?? null
+    expect([en.brdLevelHint, fr.brdLevelHint]).toContain(inCar('.brd__hint').textContent)
+    expect(stops().map(s => s.dataset.level)).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
+    // A step up and to the right a level, from the hub at the line's foot,
+    // which prints the question's place on the strip.
+    const hub = climb().querySelector('.desk-brd__hub')
+    expect(hub.textContent).toBe('04')
+    const rings = stops().map(ring)
+    ;[box(hub), ...rings].reduce((before, r) => {
+      expect(mid(r)).toBeGreaterThan(mid(before))
+      expect(cy(r)).toBeLessThan(cy(before))
+      return r
+    })
+    // Each stop's name and holdings under its ring, clear of the next
+    // stop's, and the whole line on the paper, over the floor.
+    const q = box(inCar('.brd__q'))
+    const labels = stops().map(s => box(s.querySelector('.desk-brd__stop-lab')))
+    labels.forEach((l, i) => {
+      expect(l.top, stops()[i].dataset.level).toBeGreaterThan(rings[i].bottom)
+      if (i < labels.length - 1) expect(l.right, stops()[i].dataset.level).toBeLessThanOrEqual(labels[i + 1].left)
+      expect(l.right).toBeLessThanOrEqual(bodyW() - q.left + 0.5)
+      expect(l.bottom).toBeLessThan(box(inCar('.brd__foot')).top)
+    })
+    expect(rings[5].top).toBeGreaterThan(box(inCar('.brd__hint')).bottom)
+    expect([...inCar('[data-level="N5"] .desk-brd__stop-desc').children]).toHaveLength(2)
+    expect(inCar('.desk-brd__call')).toBeNull()
+    // The pick: the stops behind it filled, the line inked up to it, and
+    // "You are here" hung over its ring.
     await pick('[data-level="N4"]')
-    expect(stations().map(s => s.classList.contains('desk-brd__stn--ride'))).toEqual([true, true, false, false, false, false])
+    expect(stops().map(stateOf)).toEqual(['known', 'known', 'on', null, null, null])
     expect(inCar('[data-level="N4"]').getAttribute('aria-pressed')).toBe('true')
-    expect(inCar('[data-level="N4"]').classList.contains('desk-brd__stn--on')).toBe(true)
-    // What a stop is over what it holds, a line each.
-    expect([...inCar('[data-level="N5"] .desk-brd__desc').children]).toHaveLength(2)
+    expect(climb().querySelectorAll('.desk-brd__rail--known')).toHaveLength(1)
+    const call = inCar('.desk-brd__call')
+    expect([en.levelCurrentMark, fr.levelCurrentMark]).toContain(call.querySelector('.desk-brd__call-cap').textContent)
+    expect(call.querySelector('.desk-brd__call-fig').textContent).toBe('N4')
+    expect(Math.abs(mid(box(call)) - mid(ring(inCar('[data-level="N4"]'))))).toBeLessThan(1)
+    expect(box(call).bottom).toBeLessThan(ring(inCar('[data-level="N4"]')).top)
+    // The goal: the same line, the stops behind the learner inked and no
+    // longer answers, the next one tagged; the ride to the pick in gold,
+    // and the arrival's month over it.
+    await next()
+    await settle(900)
+    expect(stepOf()).toBe('goal')
+    expect(climb().querySelector('.desk-brd__hub').textContent).toBe('05')
+    expect(stops().map(s => s.dataset.goal ?? null)).toEqual([null, null, null, 'N3', 'N2', 'N1'])
+    expect(stops().slice(0, 3).every(s => s.tagName === 'SPAN' && stateOf(s) === 'known')).toBe(true)
+    expect([en.brdNextStop, fr.brdNextStop]).toContain(inCar('[data-goal="N3"] .brd-tag').textContent)
+    await pick('[data-goal="N2"]')
+    expect(stops().map(stateOf)).toEqual(['known', 'known', 'known', 'ride', 'on', null])
+    expect(climb().querySelectorAll('.desk-brd__rail--ride')).toHaveLength(1)
+    const arrive = inCar('.desk-brd__call')
+    expect([en.statusArrival, fr.statusArrival]).toContain(arrive.querySelector('.desk-brd__call-cap').textContent)
+    expect(arrive.querySelector('.desk-brd__call-fig').textContent).toMatch(/20\d\d/)
+  })
+
+  it('draws a learner short of the kana riding from the hub, the novice\'s stop the next', async () => {
+    await board()
+    await pastName()
+    await pick('[data-motive="trip"]')
+    await next()
+    await pick('[data-kana="none"]')
+    await settle()
+    await next()
+    await settle(900)
+    expect(stepOf()).toBe('goal')
+    const stops = [...inCar('.desk-brd__climb').querySelectorAll('.desk-brd__stop')]
+    // Every stop ahead, the novice's own first: all six are answers.
+    expect(stops.map(s => s.dataset.goal)).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(inCar('.desk-brd__rail--known')).toBeNull()
+    await pick('[data-goal="N5"]')
+    expect(stops.map(s => s.className.match(/desk-brd__stop--(\w+)/)?.[1] ?? null)).toEqual(['ride', 'on', null, null, null, null])
+    expect(inCar('.desk-brd__climb').querySelectorAll('.desk-brd__rail--ride')).toHaveLength(1)
   })
 
   it('fits every question in a laptop\'s window, in French, with no scroll', async () => {
@@ -895,7 +957,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     const row = inCar('[data-motive="fun"]')
     const key = () => row.querySelector('.desk-brd__key')
     const tick = () => row.querySelector('.desk-brd__tick')
-    // One slot, trailing the row, where the phone's check stands.
+    // One slot, beside a reason's name (the six roads, plan 161).
     expect(row.querySelectorAll('.desk-kbd')).toHaveLength(1)
     expect(row.querySelector('.brd-opt__check')).toBeNull()
     expect(key().textContent).toBe('2')
@@ -905,7 +967,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     await settle(300)
     expect(opacityOf(key())).toBe(0)
     expect(opacityOf(tick())).toBe(1)
-    // A tile's in its top right corner: a kana answer's, a station's.
+    // A kana answer's in its tile's top right corner.
     await next()
     await landed()
     // Inside the tile's border, --sp-2 (6px) from its edges.
@@ -915,10 +977,15 @@ describe('first contact, finished (P13, plan 155)', () => {
       return [Math.round(t.right - el.clientLeft - m.right), Math.round(m.top - t.top - el.clientTop)]
     }
     expect(corner(inCar('[data-kana="hiragana"]'))).toEqual([6, 6])
+    // A station's on its ring's shoulder, clear of its code and the rail
+    // through its middle (the climbing line, plan 161).
     await pick('[data-kana="both"]')
     await landed()
-    const tile = inCar('[data-level="N5"] .desk-brd__tile')
-    expect(corner(tile)).toEqual([6, 6])
+    const ring = box(inCar('[data-level="N5"] .desk-brd__stop-ring'))
+    const mark = box(inCar('[data-level="N5"] .desk-brd__mark'))
+    expect(mid(mark)).toBeGreaterThan(ring.right - ring.width / 4)
+    expect(cy(mark)).toBeLessThan(ring.top + ring.height / 4)
+    expect(kbdOf(inCar('[data-level="N5"]'))).toBe('5')
     expect(inCar('.desk-brd__chk')).toBeNull()
   })
 

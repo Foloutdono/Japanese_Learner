@@ -434,8 +434,13 @@ export default function BoardingFlow({
   const perDay = itemsForRhythm(answers.rhythm)
   const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, answers.lines)
   const time = minutesToTime(answers.minute)
-  // 辻 (plan 161): the reveal's first stop on the desk -- the kana still
-  // unread, at the ride's pace (the recommended one, until it is asked).
+  // 辻 (plan 161): the month the goal picked is reached in, hung over it
+  // on the desk's line -- once the volumes that price it have answered.
+  const arrivalMonth = desk && volumes
+    ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(figures.date)
+    : null
+  // And the reveal's first stop -- the kana still unread, at the ride's
+  // pace (the recommended one, until it is asked).
   const kanaStop = desk && volumes
     ? {
         date: new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
@@ -548,9 +553,20 @@ export default function BoardingFlow({
       case 'reveal':
         return <KanaReveal onContinue={continueReveal} first={kanaStop} />
       case 'level':
-        return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => set({ levelChoice: v })} onContinue={continueLevel} />
+        return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => set({ levelChoice: v })} onContinue={continueLevel} no={hubNo('level')} />
       case 'goal':
-        return <GoalStep volumes={volumes} level={answers.levelChoice ?? jlpt} kana={answers.kana} value={answers.goal} onChange={v => set({ goal: v })} onContinue={() => go('lines')} />
+        return (
+          <GoalStep
+            volumes={volumes}
+            level={answers.levelChoice ?? jlpt}
+            kana={answers.kana}
+            value={answers.goal}
+            onChange={v => set({ goal: v })}
+            onContinue={() => go('lines')}
+            arrival={arrivalMonth}
+            no={hubNo('goal')}
+          />
+        )
       case 'lines':
         return <LinesStep value={answers.lines} onChange={v => set({ lines: v })} onContinue={() => go('rhythm')} />
       case 'rhythm':

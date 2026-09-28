@@ -25657,12 +25657,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   @keyframes desk-brd-show { from { opacity: 0; } }
   .desk-brd .brd__car .brd__q { animation: none; }
   .desk-brd .brd__car :is(.brd-kana, .brd-board, .brd-chart, .brd-notif, .brd-issue) { animation-delay: 160ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn) { animation-delay: 200ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn):nth-child(2) { animation-delay: 240ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn):nth-child(3) { animation-delay: 280ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn):nth-child(4) { animation-delay: 320ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn):nth-child(5) { animation-delay: 360ms; }
-  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn):nth-child(6) { animation-delay: 400ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell) { animation-delay: 200ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(2) { animation-delay: 240ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(3) { animation-delay: 280ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(4) { animation-delay: 320ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(5) { animation-delay: 360ms; }
+  .desk-brd .brd__car :is(.brd-opt, .brd-kopt, .brd-cell):nth-child(6) { animation-delay: 400ms; }
   .desk-brd .brd__car .brd-bullet { animation-delay: 300ms; }
   .desk-brd .brd__car .brd-bullet:nth-child(2) { animation-delay: 360ms; }
   .desk-brd .brd__car .brd-bullet:nth-child(3) { animation-delay: 420ms; }
@@ -25673,7 +25673,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      edge and the wash come on, the station's stretch of rail lights,
      and Continue comes up from its disabled 0.45 rather than blinking
      on. */
-  .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__tile, .desk-brd__rnd, .brd-opt__icon, .brd-opt__code) {
+  .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .brd-opt__icon, .brd-opt__code) {
     transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
   .desk-brd .brd__foot .btn-depart { transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 200ms ease; }
@@ -25689,7 +25689,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      bottom rings' centres, ROADS's --x and --y -- and the rings keep
      their size. A name with no room left beside its ring takes a
      second line rather than leave the paper. */
-  .desk-brd .brd__stage:has(> .desk-brd__roads) {
+  .desk-brd .brd__stage:has(> :is(.desk-brd__roads, .desk-brd__climb)) {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -26086,108 +26086,124 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     outline: none;
     box-shadow: 0 0 0 0.5px var(--accent2);
   }
-  /* ── the stops as a line of stations (components/boarding/LevelStep)
-     The level and the goal lists drawn as what they name: a station per
-     stop on a rail, its code in its ring and the stop's card under it,
-     every stop in one row where each holds half a run's column, two
-     rows under that (StationLine counts). The rail is drawn a half a
-     station at a time, each half reaching half the gap, and lit in the
-     pass's gold up to the pick -- the ride. */
-  .desk-brd__line {
-    display: grid;
-    grid-template-columns: repeat(var(--stations, 6), minmax(0, var(--desk-run-col-min)));
-    justify-content: center;
-    gap: var(--sp-6) var(--sp-3);
-  }
-  .desk-brd__stn {
+  /* ── 辻 — the stops as a climbing line (plans 140, 161) ──
+     The owner's D04 (LevelStep's ClimbLine): the line climbing a step a
+     level from the question's hub, a ring per stop on its platform, its
+     name and what it holds under it, the line going on past N1. The
+     geometry is measured off the box (ClimbLine's --x/--y, the ring's
+     centre, and --w, the name's room), so the rules only draw: the
+     plain rail, the stretch inked as known and the ride in the pass's
+     gold; a stop filled as known, one on the ride edged in gold, the
+     pick lit and its callout hung over it on a tie. */
+  .desk-brd__climb {
     position: relative;
+    flex: 1 1 auto;
+    min-height: 420px;
+    max-height: 602px;
+    margin-block: auto;
+  }
+  .desk-brd__rails {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    animation: desk-brd-show 320ms ease-out 160ms backwards;
+  }
+  .desk-brd__rail {
+    fill: none;
+    stroke: var(--surface-line);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .desk-brd__rail--known { stroke: var(--text-primary); stroke-width: 10; }
+  .desk-brd__rail--ride { stroke: var(--accent2); stroke-width: 10; }
+  .desk-brd__hub--at {
+    top: calc(var(--y, 0) * 1px);
+    left: calc(var(--x, 0) * 1px);
+  }
+  .desk-brd__stop {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px - 32px);
+    left: calc(var(--x, 0) * 1px - 32px);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: var(--sp-3);
-    min-width: 0;
+    align-items: flex-start;
+    gap: var(--sp-4);
+    max-width: calc(var(--w, 176) * 1px - var(--sp-4));
     padding: 0;
-    background: none;
     border: 0;
+    border-radius: var(--r-card);
+    background: none;
     font: inherit;
     color: var(--text-primary);
-    text-align: center;
-    cursor: pointer;
+    text-align: start;
+    animation: brd-in 360ms ease-out 200ms backwards;
   }
-  .desk-brd__stn::before,
-  .desk-brd__stn::after {
-    content: "";
-    position: absolute;
-    top: calc(var(--sp-8) / 2);
-    height: 3px;
-    margin-top: -1.5px;
-    background: color-mix(in srgb, var(--text-secondary) 40%, transparent);
-    transition: background-color 240ms ease;
-  }
-  .desk-brd__stn::before { left: calc(-1 * var(--sp-3) / 2); right: 50%; }
-  .desk-brd__stn::after { left: 50%; right: calc(-1 * var(--sp-3) / 2); }
-  .desk-brd__stn--head::before,
-  .desk-brd__stn--tail::after { content: none; }
-  .desk-brd__stn--ride::before,
-  .desk-brd__stn--ride::after,
-  .desk-brd__stn--on::before { background: var(--accent2); }
-  .desk-brd__rnd {
+  button.desk-brd__stop { cursor: pointer; }
+  .desk-brd__stop:nth-of-type(2) { animation-delay: 240ms; }
+  .desk-brd__stop:nth-of-type(3) { animation-delay: 280ms; }
+  .desk-brd__stop:nth-of-type(4) { animation-delay: 320ms; }
+  .desk-brd__stop:nth-of-type(5) { animation-delay: 360ms; }
+  .desk-brd__stop:nth-of-type(6) { animation-delay: 400ms; }
+  .desk-brd__stop-ring {
     position: relative;
-    z-index: 1;
-    display: inline-flex;
+    display: inline-grid;
     flex: none;
-    align-items: center;
-    justify-content: center;
-    width: var(--sp-8);
-    height: var(--sp-8);
-    border: 2px solid var(--surface-line);
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border: 4px solid var(--surface-line);
     border-radius: var(--r-pill);
     background: var(--bg-main);
     font-family: var(--font-display);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-lead);
     font-weight: 700;
-    letter-spacing: var(--tr-term);
-    text-indent: var(--tr-term);
     /* Centred on its line box, not on its ink (.brd-opt__code). */
     line-height: normal;
-    color: var(--text-secondary);
+    transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
-  .desk-brd__stn--ride .desk-brd__rnd {
-    border-color: var(--accent2);
-    color: var(--text-primary);
-  }
-  .desk-brd__stn--on .desk-brd__rnd {
-    border: 3px solid var(--accent2);
-    color: var(--text-primary);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent2) 22%, transparent);
-  }
-  .desk-brd__tile {
-    position: relative;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    align-items: center;
-    align-self: stretch;
-    gap: var(--sp-1);
-    padding: var(--sp-4) var(--sp-3);
-    background: var(--surface);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-card);
-  }
-  .desk-brd__stn--on .desk-brd__tile {
-    border-color: var(--accent2);
-    background: color-mix(in srgb, var(--accent2) 14%, var(--surface));
-  }
-  /* The name shares its line with the corner's key, so it alone keeps
-     clear of it; what the stop holds runs the tile's width. */
-  .desk-brd__name {
-    padding-inline: var(--sp-7);
+  .desk-brd__stop-ring--jp { font-family: var(--font-jp); line-height: 1; }
+  /* The key and its check stand on the ring's shoulder, clear of its
+     code and of the rail through its middle. */
+  .desk-brd .desk-brd__stop-ring > .desk-brd__mark--corner {
+    top: calc(-1 * var(--sp-3));
+    right: calc(-1 * var(--sp-4));
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
     font-family: var(--font-display);
-    font-size: var(--fs-body);
+    line-height: normal;
+    color: var(--text-primary);
+  }
+  .desk-brd__stop--known .desk-brd__stop-ring {
+    border-color: var(--text-primary);
+    background: var(--text-primary);
+    color: var(--bg-main);
+  }
+  .desk-brd__stop--ride .desk-brd__stop-ring { border-color: var(--accent2); }
+  .desk-brd__stop--on .desk-brd__stop-ring {
+    border-width: 5px;
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main));
+    color: var(--text-primary);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent2) 18%, transparent);
+  }
+  .desk-brd__stop-lab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+  }
+  .desk-brd__stop-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
     font-weight: 700;
     line-height: 1.3;
+    white-space: nowrap;
   }
-  .desk-brd__desc {
+  .desk-brd__climb--tight .desk-brd__stop-name { font-size: var(--fs-lead); }
+  .desk-brd__stop-desc {
     display: flex;
     flex-direction: column;
     font-size: var(--fs-sm);
@@ -26195,14 +26211,51 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     text-wrap: balance;
     color: var(--text-secondary);
   }
-  /* On the gold wash the soft ink drops under the floor (.brd-opt--on). */
-  .desk-brd__stn--on .desk-brd__desc { color: var(--text-primary); }
-  /* The next stop's tag stands at the tile's foot, so every station's
-     name starts on one line: over the name, it pushed the next stop's
-     card down a rung against its neighbours'. */
-  .desk-brd .desk-brd__tile > .brd-tag {
-    order: 1;
-    margin-top: auto;
+  .desk-brd .desk-brd__stop-lab > .brd-tag { margin-bottom: 0; }
+  /* The pick's callout: the sumi plate over its ring, on a tie. */
+  .desk-brd__call {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px - 32px - var(--sp-6));
+    left: calc(var(--x, 0) * 1px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-1);
+    min-width: 160px;
+    min-height: 56px;
+    margin: 0;
+    padding: var(--sp-3) var(--sp-5);
+    border-radius: var(--r-card);
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    transform: translate(-50%, -100%);
+    animation: desk-brd-show 240ms ease-out backwards;
+  }
+  .desk-brd__call::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: calc(50% - 1px);
+    width: 2px;
+    height: var(--sp-6);
+    background: var(--bg-panel);
+  }
+  .desk-brd__call-cap {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-indent: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-on-panel-soft);
+  }
+  .desk-brd__call-fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent2);
   }
   /* The plan: the chart 1:1 in a column of its own, the lead and the
      promises beside it, the way on under them -- the chart was drawn
@@ -26359,11 +26412,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd__sp-dot { transition: none; }
     .desk-brd__map,
     .desk-brd__way,
+    .desk-brd__rails,
+    .desk-brd__stop,
+    .desk-brd__call,
     .desk-brd__tree,
     .desk-brd__word,
     .desk-brd__first { animation: none; }
     .desk-brd__road,
     .desk-brd__ring,
+    .desk-brd__stop-ring,
     .desk-brd__tree::before,
     .desk-brd__branch { transition: none; }
   }
@@ -26377,7 +26434,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      boarding's answers, its doors and its way back, and the Welcome's
      sign-in, are spared it. */
   @media (pointer: fine) {
-    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn, .desk-brd__way, .desk-brd__back, .desk-brd__sp-door):hover,
+    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stop, .desk-brd__way, .desk-brd__back, .desk-brd__sp-door):hover,
     .desk-door__auth button:hover { filter: none; }
     .desk-brd .brd-opt:not(.brd-opt--on):hover,
     .desk-brd .brd-opt:not(.brd-opt--on):focus-visible,
@@ -26385,8 +26442,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd .brd-kopt:not(.brd-kopt--on):focus-visible,
     .desk-brd .brd-cell:not(.brd-cell--on):hover,
     .desk-brd .brd-cell:not(.brd-cell--on):focus-visible,
-    .desk-brd__stn:not(.desk-brd__stn--on):hover > .desk-brd__tile,
-    .desk-brd__stn:not(.desk-brd__stn--on):focus-visible > .desk-brd__tile,
+    button.desk-brd__stop:not(.desk-brd__stop--on):hover > .desk-brd__stop-ring,
+    button.desk-brd__stop:not(.desk-brd__stop--on):focus-visible > .desk-brd__stop-ring,
     .desk-brd__way:not([aria-pressed="true"]):hover > .desk-brd__ring,
     .desk-brd__way:not([aria-pressed="true"]):focus-visible > .desk-brd__ring {
       border-color: var(--accent2);

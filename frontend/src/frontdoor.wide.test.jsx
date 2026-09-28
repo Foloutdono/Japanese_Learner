@@ -141,7 +141,7 @@ describe('first contact at 1440 (P10)', () => {
     expect(Math.abs((mid(hub) - mid(ring('studies'))) - (cy(hub) - cy(ring('studies'))))).toBeLessThan(2)
   })
 
-  it('draws the level list as one line of six stations', async () => {
+  it('draws the level list as the line climbing across the canvas at 45 degrees', async () => {
     await board()
     await pastName()
     inCar('[data-motive="trip"]').click()
@@ -151,12 +151,16 @@ describe('first contact at 1440 (P10)', () => {
     inCar('[data-kana="both"]').click()
     await settle(900)
     expect(stepOf()).toBe('level')
-    const stations = [...inCar('.desk-brd__line').children]
-    expect(stations).toHaveLength(6)
-    expect(new Set(stations.map(s => Math.round(box(s).top / 4))).size).toBe(1)
-    expect(stations[0].classList.contains('desk-brd__stn--head')).toBe(true)
-    expect(stations[5].classList.contains('desk-brd__stn--tail')).toBe(true)
-    expect(stations.slice(1, 5).some(s => s.className.match(/--(head|tail)/))).toBe(false)
+    const climb = inCar('.desk-brd__climb')
+    expect(Math.round(box(climb).width)).toBe(1240)
+    const rings = [...climb.querySelectorAll('.desk-brd__stop-ring')].map(box)
+    expect(rings).toHaveLength(6)
+    // The drawing's climb where the window has the height: 70px a level,
+    // and a pitch past the widest name.
+    for (let i = 1; i < rings.length; i++) {
+      expect(Math.round(cy(rings[i - 1]) - cy(rings[i]))).toBe(70)
+      expect(mid(rings[i]) - mid(rings[i - 1])).toBeGreaterThan(176)
+    }
   })
 
   it('stands the plan at two columns\' width, centred in the window', async () => {
