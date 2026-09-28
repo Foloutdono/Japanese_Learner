@@ -65,7 +65,8 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // `covered` is App's word for "the 改札 cutscene is still playing over
 // the router": the ride's first paint is under that scrim, so the
 // stopwatch and the known card's sound wait for it. `dryRun` is the
-// workbench's (/dev/ride): no POST, and `cards` may be handed in.
+// workbench's (/dev/ride): no POST, `cards` may be handed in, and the
+// way out is `onDone` alone -- the workbench has no /today to land on.
 
 // Where a finished card ride goes: the reading ride (plan 099), whose
 // last plate carries the lesson's stamp. Only a SKIP stamps from here,
@@ -192,7 +193,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     // Skip and nothing else.
     stamped.then(() => {
       onDone?.()
-      navigate('/today', { replace: true })
+      if (!dryRun) navigate('/today', { replace: true })
     })
   }
 
@@ -203,8 +204,8 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     if (!failed || finished.current) return
     finished.current = true
     onDone?.()
-    navigate('/today', { replace: true })
-  }, [failed, navigate, onDone])
+    if (!dryRun) navigate('/today', { replace: true })
+  }, [failed, navigate, onDone, dryRun])
 
   const card = cards?.[index] ?? null
   const nc = rideCard(card, latin)

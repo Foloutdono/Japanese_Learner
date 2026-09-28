@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { BrowserRouter } from 'react-router-dom'
 import RideRun from './RideRun'
 import RideReading from './RideReading'
 import { playClick } from '../lib/audio'
@@ -42,7 +41,7 @@ export default function RidePreview() {
     setRun(n => n + 1)
   }
   return (
-    <BrowserRouter>
+    <>
       {phase === 'cards' && (
         <RideRun key={run} session={session} dryRun cards={CARDS} onNext={() => setPhase('reading')} onDone={() => setPhase('ended')} />
       )}
@@ -60,6 +59,6 @@ export default function RidePreview() {
         <span className="onb-preview-bar__run">run {run}</span>
         <button type="button" onClick={replay}>↺ Replay</button>
       </div>
-    </BrowserRouter>
+    </>
   )
 }
