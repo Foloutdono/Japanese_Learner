@@ -90,6 +90,17 @@ describe('the dock on the desk', () => {
     await mount()
     const dock = document.querySelector('.dict-dock')
     expect(dock).not.toBeNull()
+    // The dock arrives rising 10px over 280ms (@keyframes arrive), and
+    // mount()'s 250ms settle lands inside it: on a slow runner the dock
+    // was measured a pixel below the door (23 against 22). Measure where
+    // it lands, not where it is on the way.
+    // (Short ones only: a looping animation's `finished` never settles.)
+    await Promise.all(document.getAnimations()
+      .filter(a => {
+        const end = a.effect?.getComputedTiming().endTime
+        return Number.isFinite(end) && end <= 2000
+      })
+      .map(a => a.finished.catch(() => {})))
     expect(headword()).toBe('駅')
     const grid = document.querySelector('.dict-grid').getBoundingClientRect()
     expect(dock.getBoundingClientRect().left).toBeGreaterThan(grid.right - 1)
