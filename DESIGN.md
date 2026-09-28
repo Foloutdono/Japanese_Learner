@@ -1334,6 +1334,25 @@ each question drawing its answers between them.
   paper"; Board is the next paper not sat. Under 600px (measured) the
   page stacks and scrolls; under 720px the papers draw no well. The
   phone keeps its screens.
+- **Every platform's specimen hangs on the Practice gate** (plan 165, the
+  last board of the same canvas). The six plates were five grade rows
+  each, most of them "Not yet", the record and the grades a plate opens
+  onto since plan 159. Each plate now shows what its platform asks: a
+  line saying it, then the run's own card in a well at the learner's
+  grade, as the stop's page draws it a rung down — the timed sentence
+  over the rōmaji field, the English to put into Japanese, a text over
+  its question and choices, the clip heard twice, the point to write
+  with, and the mock exam's 漢字読み with the paper's own four readings
+  (the reading and three of the generator's near-misses). The plate is
+  one door: the well stands inside its head, so a click on the picture
+  departs as the name does, and the line is the button's description.
+  Measured: three rows deep (the desk's tightest) a plate draws no line
+  and comprehension's text stands alone, so every card is whole and the
+  gate still takes the window without a scroll. The Japanese name the
+  canvas printed beside each title (読書, 翻訳 …) stays off: the owner
+  cut it from these plates as a second name for a thing already named,
+  and the roundel still carries the station's code. The phone keeps its
+  chips.
 - **The statistics are the four lines** (plan 138, the owner's pick B of
   four drawn directions, the canvas "Statistics rework — options"). A
   strip of four figures across the top — retention with its line beside
@@ -1786,9 +1805,11 @@ each question drawing its answers between them.
   it — a plate that prints かな over Kana over KANA names one thing three
   times. On a phone the column takes the gate and every plate gets one
   share, the shelf too. On the desk the lattice takes the window the same
-  way, and the plate's foot grows into the room: the whole line upright on
-  Learn, the grades as rows with the learner's record on Practice (plan
-  130, "The desk" above).
+  way, and the plate's body grows into the room: the whole line upright on
+  Learn (plan 130, "The desk" above); on Practice, since plan 165, the
+  platform's own exercise in a well under a line saying what it asks, the
+  head the whole plate — the station it opens carries the grades and the
+  learner's record at each.
 - **A line with stops is how this app draws distance**, and it is one drawing
   shared by two places: the level picker's route diagram and the pass's ghost
   track (the wall map was the third, and went with the plates). Same parts

@@ -7037,3 +7037,18 @@ build departs from the drawings:
 - Plan 140's column, `DeskLine`, the `.desk-door` rules, the desk's lane
   of cards (`DESK_LANE`) and the column's rules are gone; `DeskMast` is
   the rail's alone.
+
+## Plan 165 — 見本, every platform's specimen on the Practice gate (2026-09-28)
+
+The owner, of plan 159's canvas "Practice screens — layout options":
+the last board, "Every platform's specimen", was not built. Plan 159
+built the owner's picks A and S1 (the stations) and read the board as a
+reference for the stop pages' wells, which it drew; the board itself --
+the six platforms three across and two down, each its roundel and name,
+a line saying what the run asks and the run's card in a well -- is the
+Practice gate on the desk, which still hung plan 130's five grade rows
+on every plate.
+
+| # | What | Status |
+|---|------|--------|
+| 165 | **Backend** `routes/station.py`'s `_exam_vocab`: the 漢字読み sample carries `options`, the paper's own four -- the reading and three of `exam_kanji_gen.build_kanji_reading_distractors`' near-misses, dealt by `make_choices` under a seed of the level and the word, a word with fewer than three near-misses passed over as `build_reading_mondai` passes it. **Frontend** `Plate`'s `body` (drawn inside the head button, the head then the whole plate) and `describedBy`; `PracticeScreen`'s `PlatformSpecimen` on the desk: `practiceHow`'s line (aria-hidden, the head's description) over `PracticeSpecimen`'s new `plate` face at the learner's grade (the profile's, N5 without one, an empty well until the profile answers), the exam's new face (`Marked`, moved out of `ExamPapers`, over the four readings); `PracticeSpecimen` all spans (a button holds phrasing content). Measured with `useBoxSize`: a body under `HOW_MIN` (200) draws no line, under `TEXT_MIN` (300) comprehension draws its text alone and the well tightens (`--compact`). Plan 130's `GradeRows` and `.desk-grades` retired; the gate no longer asks `/api/practice/record`. The Japanese name the board printed after each title stays off (the owner's earlier cut, `PracticeScreen.jsx`). `practiceHow.exam`, `guidePracticePlateDesk`. Tests: `gates.desktop` (the six cards at N4, every grade whole at 1100×800 with no scroll, the plate one door), `gates.wide` (the line and comprehension's text over its question at every grade), `deskfree.phone` (no body, no sample asked), `test_station_samples` (the four readings); `src/testing/practiceCards.json` is the samples' cards | DONE (2026-09-28) |

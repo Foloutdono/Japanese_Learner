@@ -2,7 +2,7 @@ import { useLang } from '../../LangContext'
 import { useBoxWidth } from '../../hooks/useBoxWidth'
 import { kindMeta, KIND_JP } from '../../exam/examKinds'
 import { PracticePage } from './PracticePage'
-import { Audio } from './PracticeSpecimen'
+import { Audio, Marked } from './PracticeSpecimen'
 
 // ── 模試 — a grade's papers, each a row that fills the page (plan 159) ──
 // The owner's pick A of the canvas "Practice screens — layout options",
@@ -29,13 +29,6 @@ import { Audio } from './PracticeSpecimen'
 // laptop's narrower page the rows keep their name and their figures and
 // draw no well.
 const SPECIMEN_MIN = 720
-
-/** Where a sentence names its word, the word underlined in it. */
-function Marked({ sentence, word }) {
-  const at = word ? sentence.indexOf(word) : -1
-  if (at < 0) return sentence
-  return <>{sentence.slice(0, at)}<span className="prc-paper__mark">{word}</span>{sentence.slice(at + word.length)}</>
-}
 
 function PaperSpecimen({ kind, card }) {
   let face = null

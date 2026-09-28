@@ -14,6 +14,8 @@ from content.kanji_meanings import KANJI_FR
 from content.kanji_readings import display_reading, split_readings
 from content.radical_data import radical_for
 from content.vocab_data import VOCAB_BY_LEVEL
+from study.exam_gen_utils import make_choices
+from study.exam_kanji_gen import build_kanji_reading_distractors
 from study.grammar_lesson import contrast_payload
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
@@ -297,14 +299,15 @@ def _composition_line(lang: str) -> dict:
 
 
 def _deck_readings(level: str) -> list[dict[str, str]]:
-    """kanji -> kana over the vocab deck, the level's own words first
-    and then every level from N5 up, so a focus word the level's deck
-    does not teach still finds the lowest card that does."""
+    """kanji -> the card's kana field (every reading it accepts, as
+    `あ/い`) over the vocab deck, the level's own words first and then
+    every level from N5 up, so a focus word the level's deck does not
+    teach still finds the lowest card that does."""
     def readings(entries):
         out: dict[str, str] = {}
         for e in entries:
-            kanji, kana = e.get("kanji"), (e.get("kana") or "").split("/")[0].strip()
-            if kanji and kana:
+            kanji, kana = e.get("kanji"), (e.get("kana") or "").strip()
+            if kanji and kana.split("/")[0].strip():
                 out.setdefault(kanji, kana)
         return out
     return [
@@ -318,13 +321,35 @@ def _exam_vocab(level: str) -> dict | None:
     Drawn from the reading bank -- a sentence of the level whose focus
     word is spelled with a kanji and stands in the sentence as written
     (読む is the focus of 読んでください and is not there to underline),
-    with the reading the deck's card gives it."""
+    with the reading the deck's card gives it.
+
+    And its four `options` (plan 165: the Practice gate prints the
+    question whole, as the canvas's "Every platform's specimen" draws
+    it): the paper's own 漢字読み choices -- the reading and three of
+    exam_kanji_gen's near-misses (a voicing, a long vowel, a small っ,
+    the character's other readings), dealt by make_choices under a
+    fixed seed so the order is the same on every process. A word with
+    fewer than three near-misses never reaches a paper
+    (build_reading_mondai skips it), so it is passed over here too."""
     bank = reading_sentences.BY_LEVEL.get(level, [])
     for readings in _deck_readings(level):
         for row in bank:
             focus = row.get("focus", "")
-            if _KANJI.search(focus) and focus in row["jp"] and focus in readings:
-                return {"sentence": row["jp"], "word": focus, "reading": readings[focus]}
+            if not (_KANJI.search(focus) and focus in row["jp"] and focus in readings):
+                continue
+            kana = readings[focus]
+            reading = kana.split("/")[0].strip()
+            rng = random.Random(f"{level}:{focus}")
+            made = make_choices(rng, reading, build_kanji_reading_distractors({"kanji": focus, "kana": kana}, rng))
+            if made is None:
+                continue
+            choices, _ = made
+            return {
+                "sentence": row["jp"],
+                "word": focus,
+                "reading": reading,
+                "options": [c["textJp"] for c in choices],
+            }
     return None
 
 

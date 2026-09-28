@@ -25,6 +25,7 @@ from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from content.kana_data import KANA_SETS
 from content.vocab_data import VOCAB_BY_LEVEL
 from core.db import db_conn
+from routes.station import station_samples
 from tests.conftest import acting_as
 
 LEVELS = ["N5", "N4", "N3", "N2", "N1"]
@@ -277,6 +278,25 @@ def test_the_exam_vocab_reading_is_the_deck_s(client):
     stop = _stops(client, "exam")["N5"]["card"]["vocab"]
     entry = next(e for e in VOCAB_BY_LEVEL["N5"] if e.get("kanji") == stop["word"])
     assert stop["reading"] == entry["kana"].split("/")[0].strip()
+
+
+def test_the_exam_vocab_carries_the_paper_s_four_readings(client):
+    # Plan 165: the Practice gate prints the 漢字読み question whole. Its
+    # four choices are the paper's own -- the reading and three of the
+    # generator's near-misses -- dealt the same on every call, never
+    # another of the card's accepted readings.
+    first = _stops(client, "exam")
+    for level, stop in first.items():
+        vocab = stop["card"]["vocab"]
+        options = vocab["options"]
+        assert len(options) == 4 and len(set(options)) == 4, (level, options)
+        assert vocab["reading"] in options
+        entry = next(e for lvl in LEVELS for e in VOCAB_BY_LEVEL[lvl] if e.get("kanji") == vocab["word"])
+        accepted = {r.strip() for r in entry["kana"].split("/")}
+        assert accepted & set(options) == {vocab["reading"]}, (level, options)
+        assert all(KANA_ONLY.match(o) for o in options), (level, options)
+    station_samples.cache_clear()
+    assert _stops(client, "exam") == first
 
 
 def test_an_unknown_practice_line_is_still_a_404(client):

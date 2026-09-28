@@ -1,6 +1,7 @@
+import { useId } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { useProfileSummary } from '../stores/profileSummary'
+import { useProfileSummary, useProfileSummaryState } from '../stores/profileSummary'
 import { getSections } from '../config/tabs'
 import { beginDeparture } from '../stores/departure'
 import { board } from '../stores/boarding'
@@ -10,8 +11,9 @@ import { Plate } from '../components/station/LinePlate'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { useDesk } from '../hooks/useDesk'
-import { useListWalk, WALK_KEYS } from '../hooks/useListWalk'
-import { usePracticeRecord } from '../stores/practiceRecord'
+import { useBoxSize } from '../hooks/useBoxWidth'
+import { useStationSamples } from '../stores/stationSamples'
+import { PracticeSpecimen } from '../components/practice/PracticeSpecimen'
 import { LEVELS } from '../domain/sentenceSource'
 
 // ── 実践 — the Practice gate: six platforms (plan 068, plates since 094, 作文 since 125) ──
@@ -47,14 +49,26 @@ import { LEVELS } from '../domain/sentenceSource'
 // learner reaches the train in one tap instead of three. The plate's
 // own head still opens the station, where 頻度 and 自分のカード live.
 //
-// ── On the desk, the grades carry the learner's record (plan 130) ──
+// ── On the desk, every platform's specimen (plan 165) ──
 // The chips were a row of five on a plate 600px wide, and six plates
-// of them filled a third of the window. On the desk each grade is a
-// row instead, the plates' rows sharing the window's height, and each
-// row says what the learner has done there — how many sentences, texts
-// or papers, and the share that went right (/api/practice/record, from
-// the logs the platforms already keep). A row departs exactly as its
-// chip does. The phone keeps the chips.
+// of them filled a third of the window, so plan 130 gave each grade a
+// row carrying the learner's record there. Since plan 159 the station
+// a plate opens does both of those things itself -- it opens on the
+// learner's grade, Board and Enter one step away, and its list prints
+// every grade's record -- and the gate was six plates of the same five
+// rows, most of them "Not yet", saying nothing of what each platform
+// asks. The last board of the canvas "Practice screens — layout
+// options", "Every platform's specimen", hangs the six plates with the
+// exercise instead: under the name, a line saying what the run asks,
+// and the run's own card in a well (components/practice/
+// PracticeSpecimen), drawn from the learner's grade
+// (/api/station/{platform}/samples, the same stop's card the station's
+// page prints) -- a timed sentence to read, an English line to put into
+// Japanese, a text and its question, a clip heard twice, a point to
+// write with, and one 漢字読み question of the mock exam with the
+// paper's four choices. The plate is one door: the well stands inside
+// its head, and the whole plate departs to the station. The phone
+// keeps the chips.
 const LEVEL_PATH = {
   '/practice/reading':       lvl => `/practice/reading/level/${lvl}`,
   '/practice/comprehension': lvl => `/practice/comprehension/${lvl}`,
@@ -70,15 +84,15 @@ const LEVEL_PATH = {
   '/practice/exam':          lvl => `/practice/exam?level=${lvl}`,
 }
 
-// Which log a platform's record is read from (routes/practice.py's
-// keys), and what one of its done items is called.
-const RECORD = {
-  '/practice/reading':       { key: 'reading',       unit: 'sentences' },
-  '/practice/comprehension': { key: 'comprehension', unit: 'texts' },
-  '/practice/translation':   { key: 'translation',   unit: 'sentences' },
-  '/practice/dictation':     { key: 'dictation',     unit: 'sentences' },
-  '/practice/composition':   { key: 'composition',   unit: 'sentences' },
-  '/practice/exam':          { key: 'exam',          unit: 'papers' },
+// Which samples a platform's specimen is drawn from (routes/station.py's
+// practice lines).
+const PLATFORM = {
+  '/practice/reading':       'reading',
+  '/practice/comprehension': 'comprehension',
+  '/practice/translation':   'translation',
+  '/practice/dictation':     'dictation',
+  '/practice/composition':   'composition',
+  '/practice/exam':          'exam',
 }
 
 export default function PracticeScreen() {
@@ -106,6 +120,7 @@ export default function PracticeScreen() {
   }
 
   const guide = useGuide('practice', true)
+  const uid = useId()
 
   return (
     <main id="main-content" className="practice">
@@ -121,14 +136,9 @@ export default function PracticeScreen() {
             // guide, completed): a paper, not sentences.
             guide={i === 0 ? 'practice.plate' : section.path === '/practice/exam' ? 'practice.exam' : undefined}
             onClick={() => depart(section)}
-            foot={desk ? (
-              <GradeRows
-                section={section}
-                here={here}
-                guide={i === 0 ? 'practice.dests' : undefined}
-                onGo={level => departLevel(section, level)}
-              />
-            ) : (
+            describedBy={desk ? `${uid}-how-${i}` : undefined}
+            body={desk ? <PlatformSpecimen platform={PLATFORM[section.path]} howId={`${uid}-how-${i}`} /> : null}
+            foot={desk ? null : (
               <div className="plate__foot plate__foot--dests" data-guide={i === 0 ? 'practice.dests' : undefined}>
                 {LEVELS.map(level => (
                   <Chip
@@ -155,46 +165,48 @@ export default function PracticeScreen() {
 }
 
 /**
- * A platform's grades on the desk (plan 130): a row each, the grade's
- * code, what the learner has done there and the share of it right, and
- * the chevron of a row that goes somewhere. A grade never practised
- * says so; while the record has not arrived, or if it never will, the
- * row says nothing rather than "not yet", which would be a claim.
+ * A platform's body on the desk (plan 165): what the run asks, in one
+ * line, over the run's card in a well, at the learner's grade. The line
+ * is the plate's description to a screen reader (`howId`, the head's
+ * aria-describedby) and hidden from its content, so the button's name
+ * stays the platform's; the well is a picture of what the plate opens
+ * and says nothing a screen reader has not been told.
  *
- * The rows are a list, walked like every list on the desk
- * (hooks/useListWalk): one tab stop, the learner's own grade, and
- * ↑/↓/Home/End along the five.
+ * The grade is the learner's own, as the station the plate opens lands
+ * on it (StationSplit's LevelRedirect); a learner with none is at N5.
+ * While the profile has not answered, the well stands empty rather
+ * than showing N5's card and swapping it a moment later.
+ *
+ * Measured, as a station's wells are (plan 137's rule): at the desk's
+ * tightest the six plates stand three rows deep, and a plate's body
+ * under HOW_MIN tall gives the line's room to the well -- the line is
+ * still the button's description, only not drawn -- and under TEXT_MIN
+ * comprehension's well holds its text alone, fading out at its foot:
+ * a question and four choices of a sentence each need the room of a
+ * roomier plate, and a sliver of text over them said nothing. The
+ * plates share one height, so every plate on the gate makes the same
+ * choice.
  */
-function GradeRows({ section, here, guide, onGo }) {
+const HOW_MIN = 200
+const TEXT_MIN = 300
+function PlatformSpecimen({ platform, howId }) {
   const { t } = useLang()
-  const { data } = usePracticeRecord()
-  const onWalk = useListWalk(true)
-  const { key, unit } = RECORD[section.path] ?? {}
-  const tabStop = LEVELS.includes(here) ? here : LEVELS[0]
+  const { summary, failed } = useProfileSummaryState()
+  const samples = useStationSamples(platform)
+  const [boxRef, size] = useBoxSize(true)
+  const own = summary?.jlptLevel
+  const grade = LEVELS.includes(own) ? own : summary || failed ? LEVELS[0] : null
+  const card = grade ? samples?.[grade]?.card ?? null : null
+  const room = size?.height ?? Infinity
   return (
-    <div className="plate__foot desk-grades" data-guide={guide} onKeyDown={onWalk} aria-keyshortcuts={WALK_KEYS}>
-      {LEVELS.map(level => {
-        const rec = data && key ? data[key]?.[level] : undefined
-        const pct = rec?.of > 0 ? Math.round((rec.right / rec.of) * 100) : null
-        const done = rec ? t.practiceDone[unit](rec.done) : null
-        const right = pct === null ? null : t.practiceRight(pct)
-        const said = data ? (done ? [done, right].filter(Boolean).join(' · ') : t.practiceNotYet) : ''
-        return (
-          <button
-            key={level}
-            type="button"
-            className={`desk-grade${level === here ? ' desk-grade--here' : ''}`}
-            aria-label={`${section.title} — ${level}${said ? ` · ${said}` : ''}`}
-            aria-current={level === here ? 'location' : undefined}
-            tabIndex={level === tabStop ? 0 : -1}
-            onClick={() => onGo(level)}
-          >
-            <span className="desk-grade__code">{level}</span>
-            <span className={`desk-grade__rec${rec ? '' : ' desk-grade__rec--none'}`}>{said}</span>
-            <span className="desk-grade__go" aria-hidden="true">›</span>
-          </button>
-        )
-      })}
-    </div>
+    <span className="plate__fill" ref={boxRef}>
+      <span className="plate__how" id={howId} aria-hidden="true" hidden={room < HOW_MIN}>{t.practiceHow[platform]}</span>
+      <PracticeSpecimen
+        platform={platform}
+        card={platform === 'exam' ? card?.vocab ?? null : card}
+        plate
+        compact={room < TEXT_MIN}
+      />
+    </span>
   )
 }

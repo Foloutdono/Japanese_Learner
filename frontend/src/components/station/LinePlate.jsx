@@ -26,21 +26,30 @@ import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 // かな over Kana over KANA names one thing three times.
 //
 // The head is the button — the whole plate reads as one, but the foot
-// may hold buttons of its own (the grades), and a button cannot hold a
-// button. `fill` is how much of the stripe is painted raw: the leg
-// being ridden, 0..1, and 1 for a plate with no track behind it.
+// may hold buttons of its own (the Learn line's legs), and a button
+// cannot hold a button. `fill` is how much of the stripe is painted
+// raw: the leg being ridden, 0..1, and 1 for a plate with no track
+// behind it.
+//
+// A `body` (plan 165, the Practice gate on the desk) is drawn INSIDE
+// the head, under the name, where a plate has nothing in it to press
+// but the plate itself: the platform's exercise, which is a picture of
+// the door rather than a door of its own. The head then grows to the
+// whole plate, and `describedBy` names the element in the body that
+// says what the platform does, so the button's name stays the name.
 
-export function Plate({ section, aside = null, meta = null, foot = null, fill = 1, onClick, className = '', guide }) {
+export function Plate({ section, aside = null, meta = null, foot = null, body = null, describedBy, fill = 1, onClick, className = '', guide }) {
   const code = stationFor(section.path).code
   return (
     <div className={`plate ${className}`.trim()} style={{ '--line-color': section.color }} data-guide={guide}>
-      <button type="button" className="plate__head" onClick={onClick}>
+      <button type="button" className="plate__head" onClick={onClick} aria-describedby={describedBy}>
         <span className="pf-line__roundel plate__roundel" aria-hidden="true">{code}</span>
         <span className="plate__names">
           <span className="plate__title">{section.title}</span>
           {meta && <span className="plate__meta">{meta}</span>}
         </span>
         {aside && <span className="plate__aside">{aside}</span>}
+        {body && <span className="plate__body">{body}</span>}
       </button>
       {foot}
       <span className="plate__stripe" aria-hidden="true">
