@@ -7303,14 +7303,17 @@ textarea:focus-visible {
    broken, and the pick has to be seen lighting it).
 
    The reader, the label and the Enter cap sit on three columns, the
-   outer two the reader's width, so the word stands on the pill's
-   centre line whatever the cap. The fill is a layer under the content
+   outer two equal shares of what the word leaves (never under the
+   reader's width), the reader at the left end of its share and the cap
+   at the right end of its own -- so the word stands on the pill's
+   centre line whatever the cap, and the cap can stand clear of the
+   pill's curve without pushing it. The fill is a layer under the content
    (::before), so a pick can fade it in over the outline: a background
    gradient cannot transition. */
 .btn-depart--gate {
   position: relative;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) minmax(48px, auto);
+  grid-template-columns: minmax(48px, 1fr) auto minmax(48px, 1fr);
   align-items: center;
   column-gap: var(--sp-4);
   isolation: isolate;
@@ -7338,6 +7341,7 @@ textarea:focus-visible {
 .btn-depart__reader {
   position: relative;
   grid-column: 1;
+  justify-self: start;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7349,8 +7353,12 @@ textarea:focus-visible {
   transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
 }
 /* The pass's own mark (PassWave), its three arcs inked in the lamp and
-   all at full strength, as drawn. */
-.btn-depart__wave { width: 22px; height: 24px; }
+   all at full strength, as drawn. The arcs share their box's left edge
+   and each shows only its right quarter, so the ink runs from the small
+   arc's crescent (x ≈ 8) to the big one's edge (x = 23): its middle
+   stands 4px right of the box's. Drawn back by that much, the mark sits
+   on the reader's centre rather than leaning toward the word. */
+.btn-depart__wave { width: 22px; height: 24px; translate: -4px 0; }
 .pass__wave.btn-depart__wave span { border-width: 2px; border-right-color: currentcolor; opacity: 1; }
 .btn-depart__wave span:nth-child(1) { width: 8px;  height: 8px;  margin-top: -4px; }
 .btn-depart__wave span:nth-child(2) { width: 15px; height: 15px; margin-top: -7.5px; opacity: 1; }
@@ -25847,12 +25855,21 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
   .desk-brd .brd__foot .btn-depart { transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 200ms ease; }
-  /* 改札 (plan 164): the printed Enter stands in the gate's third column,
-     and the gate keeps its drawn 66px on the desk whatever the window's
-     height -- the frame's short-phone step is a phone's. Not yet is an
-     outline now, not the family's 0.45, so the floor's pick answers in
-     the wake's colour rather than in opacity. */
-  .btn-depart--gate .desk-kbd { grid-column: 3; justify-self: end; }
+  /* 改札 (plan 164): the printed Enter stands at the right end of the
+     gate's third column, set in from the pill's end by a rung so its
+     square corners clear the curve the round reader nests in, and a
+     step up from the tiles' caption size so it reads beside a 66px
+     pill's word. The gate keeps its drawn 66px on the desk whatever the
+     window's height -- the frame's short-phone step is a phone's. Not
+     yet is an outline now, not the family's 0.45, so the floor's pick
+     answers in the wake's colour rather than in opacity. */
+  .btn-depart--gate .desk-kbd {
+    grid-column: 3;
+    justify-self: end;
+    margin-inline-end: var(--sp-4);
+    padding: 0 var(--sp-2);
+    font-size: var(--fs-caption);
+  }
   .desk-brd .brd__foot .btn-depart--gate,
   .desk-front .desk-front__block > .btn-depart--gate { min-height: 66px; }
   .desk-brd .brd__foot .btn-depart--gate { transition: transform 0.15s ease, color 270ms ease; }
