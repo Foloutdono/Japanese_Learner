@@ -191,9 +191,11 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
       : apiJson('/api/onboarding/ride/done', session, {
           method: 'POST', body: JSON.stringify({ skipped }),
         }).catch(() => {})
+    // A dry run is the workbench's (/dev/ride), which has no /today:
+    // its way out is onDone alone.
     stamped.then(() => {
       onDone?.()
-      navigate('/today', { replace: true })
+      if (!dryRun) navigate('/today', { replace: true })
     })
   }
 
@@ -201,8 +203,8 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     if (!failed || finished.current) return
     finished.current = true
     onDone?.()
-    navigate('/today', { replace: true })
-  }, [failed, navigate, onDone])
+    if (!dryRun) navigate('/today', { replace: true })
+  }, [failed, navigate, onDone, dryRun])
 
   // The desk's second walk, once: the breakdown the grade opened.
   const [gradedToured, setGradedToured] = useState(false)
