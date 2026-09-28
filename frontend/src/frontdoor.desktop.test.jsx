@@ -734,6 +734,26 @@ describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
     await next()
     expect(stepOf()).toBe('account')
     expect(stops().map(stateOf).every(s => s === 'done')).toBe(true)
+    await settle(900)
+    // The form on the left, the ticket it keeps on the right: the holder,
+    // the ride's terminus and its day, the welcome on the stub.
+    const form = box(inCar('.desk-brd__form'))
+    const ticket = inCar('.desk-brd__tkt')
+    expect(form.right).toBeLessThan(box(ticket).left)
+    expect(ticket.querySelector('.desk-brd__tkt-name').textContent).toBe('Tester')
+    expect(ticket.querySelector('.desk-brd__tkt-stop--end .desk-brd__tkt-dot').textContent).toBe('N2')
+    expect(ticket.querySelector('.desk-brd__tkt-bal').textContent).toBe('200')
+    expect([en.brdCreditsOffered, fr.brdCreditsOffered]).toContain(ticket.querySelector('.desk-brd__tkt-sub').textContent)
+    // Every term whole on the ticket.
+    for (const dd of ticket.querySelectorAll('.desk-brd__tkt-term > dd')) {
+      expect(dd.scrollWidth).toBeLessThanOrEqual(dd.clientWidth + 1)
+    }
+    // Riding on without an account is offered under it, and the floor
+    // keeps its one filled action; signing in under the form.
+    expect(inCar('.desk-brd__tkt-note [data-action="account-skip"]')).not.toBeNull()
+    expect(inCar('.brd__foot [data-action="account-skip"]')).toBeNull()
+    expect(inCar('.desk-brd__form [data-action="account-sign-in"]')).not.toBeNull()
+    expect(fits(inCar('.brd__body'))).toBe(true)
     inCar('[data-action="account-skip"]').click()
     await settle()
     expect(apiJsonWithTimeout).toHaveBeenCalledWith('/api/onboarding/complete', expect.anything(), expect.anything())

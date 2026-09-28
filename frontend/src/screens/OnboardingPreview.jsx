@@ -17,11 +17,13 @@ import { playClick } from '../lib/audio'
 // The synthetic bearer token works because a dev backend runs with
 // DEV_USER_ID and never verifies it; the volumes call is therefore
 // live, which is the point — a preview of fake data would not
-// exercise the thing being polished.
+// exercise the thing being polished. `?guest` boards on a guest pass,
+// so the plan goes on to the account's screen.
 export default function OnboardingPreview() {
   const [run, setRun] = useState(1)
   const [phase, setPhase] = useState('flow') // flow | gate | done
   const session = { access_token: 'dev-preview' }
+  const [guest] = useState(() => new URLSearchParams(window.location.search).has('guest'))
 
   function replay() {
     playClick()
@@ -36,6 +38,7 @@ export default function OnboardingPreview() {
           key={run}
           session={session}
           dryRun
+          guest={guest}
           initialProfile={{ username: 'Preview', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
           onComplete={() => setPhase('gate')}
         />

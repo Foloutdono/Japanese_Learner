@@ -663,6 +663,10 @@ export default function BoardingFlow({
             onSignIn={onSignIn}
             onLeaveForAuth={() => stash({ answers, step, savedName })}
             error={desk ? saveError : null}
+            ticket={desk ? {
+              name: displayName, now, figures, goal: answers.goal ?? jlpt,
+              rhythm: answers.rhythm, time, hour: bucketFor(answers.minute),
+            } : null}
           />
         )
       case 'pass':

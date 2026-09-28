@@ -25472,8 +25472,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      car so a leaving car keeps its own while it pulls away: the card's
      for most questions; the canvas for the six roads, the kana's tree,
      the line of stations, the lines' cards, the four roads, the day's
-     arc and the ride drawn to scale; three columns and a gutter for the
-     two words read out, and a column's for the account's form. */
+     arc, the ride drawn to scale and the account beside its ticket;
+     three columns and a gutter for the two words read out. */
   .desk-brd .brd__car {
     --desk-brd-w: var(--card-w);
     --pull: 1;
@@ -25485,7 +25485,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-brd .brd__car[data-car="reveal"] { --desk-brd-w: calc(3 * var(--desk-side-w) + var(--sp-8)); }
   .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: var(--desk-board-w); }
-  .desk-brd .brd__car[data-car="account"] { --desk-brd-w: var(--desk-side-w); }
+  .desk-brd .brd__car[data-car="account"] { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__stage,
   .desk-door .brd__foot {
     width: 100%;
@@ -26540,6 +26540,242 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   /* ...and the corner's key steps down a rung, clear of the badge. */
   .desk-brd .brd-cell > .desk-brd__mark--corner { top: var(--sp-4); }
+  /* ── 辻 — the account beside the ticket it keeps (plan 161) ──
+     The owner's D09 (AccountStep, PaperTicket): the form in the left
+     column, the learner's 乗車券 in the right -- a stub with the balance
+     and the gate's punch, torn along a perforation from the ticket
+     proper: its kind and the mark, the holder and the day it was issued,
+     the ride to scale (--at, 0..1, as the plan's), and three terms. */
+  .desk-brd__keep {
+    display: grid;
+    grid-template-columns: minmax(300px, 460px) minmax(540px, 740px);
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--sp-8);
+  }
+  .desk-brd__tkt-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    animation: brd-in 360ms ease-out 200ms backwards;
+  }
+  .desk-brd__tkt {
+    position: relative;
+    display: grid;
+    grid-template-columns: 172px minmax(0, 1fr);
+    min-height: 340px;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    background:
+      repeating-linear-gradient(135deg, transparent 0 7px, color-mix(in srgb, var(--accent2) 7%, transparent) 7px 8px),
+      var(--bg-card);
+    box-shadow: var(--elev-hang);
+  }
+  /* The perforation's two notches. */
+  .desk-brd__tkt::before,
+  .desk-brd__tkt::after {
+    content: "";
+    position: absolute;
+    left: calc(172px - 11px);
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+  }
+  .desk-brd__tkt::before { top: -12px; }
+  .desk-brd__tkt::after { bottom: -12px; }
+  .desk-brd__tkt-stub {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-7) var(--sp-5) var(--sp-6);
+    border-right: 2px dashed var(--surface-line);
+    text-align: center;
+  }
+  .desk-brd__tkt-cap {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .desk-brd__tkt-bal {
+    margin-top: var(--sp-4);
+    font-family: var(--font-display);
+    font-size: var(--fs-display);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent2);
+  }
+  .desk-brd__tkt-sub { font-size: var(--fs-sm); font-weight: 700; }
+  .desk-brd__tkt-punch {
+    width: 26px;
+    height: 26px;
+    margin-top: auto;
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    box-shadow: inset 0 2px 3px color-mix(in srgb, var(--bg-panel) 22%, transparent);
+  }
+  .desk-brd__tkt-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: var(--sp-6) var(--sp-7);
+  }
+  .desk-brd__tkt-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--sp-4);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .desk-brd__tkt-kind {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-4);
+  }
+  .desk-brd__tkt-jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    letter-spacing: var(--tr-name);
+  }
+  .desk-brd__tkt-mark { width: 30px; height: 30px; }
+  .desk-brd__tkt-who {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    margin-top: var(--sp-5);
+  }
+  .desk-brd__tkt-name {
+    overflow: hidden;
+    font-family: var(--font-serif);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-brd__tkt-issued {
+    flex: none;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  /* The ride: a rail from the departure's dot to the terminus's ring,
+     a stop's name and day under it -- the first set left, the last
+     right, one between centred. */
+  .desk-brd__tkt-route {
+    position: relative;
+    height: 96px;
+    margin: var(--sp-6) 0 var(--sp-5);
+    padding: 0;
+    list-style: none;
+  }
+  .desk-brd__tkt-route::before {
+    content: "";
+    position: absolute;
+    top: calc(24px - 3px);
+    right: 24px;
+    left: 10px;
+    height: 6px;
+    border-radius: var(--r-pill);
+    background: var(--accent2);
+  }
+  .desk-brd__tkt-stop {
+    position: absolute;
+    top: 0;
+    left: calc(var(--at, 0) * 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-1);
+    transform: translateX(-50%);
+  }
+  .desk-brd__tkt-stop--start {
+    align-items: flex-start;
+    transform: none;
+  }
+  .desk-brd__tkt-stop--end {
+    right: 0;
+    left: auto;
+    align-items: flex-end;
+    transform: none;
+  }
+  .desk-brd__tkt-dot {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin-block: 14px var(--sp-3);
+    border-radius: var(--r-pill);
+    background: var(--text-primary);
+  }
+  .desk-brd__tkt-stop--kana .desk-brd__tkt-dot {
+    width: 36px;
+    height: 36px;
+    margin-block: 6px var(--sp-1);
+    border: 3px solid var(--line-kana);
+    background: var(--bg-card);
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    font-weight: 700;
+  }
+  .desk-brd__tkt-stop--end .desk-brd__tkt-dot {
+    width: 48px;
+    height: 48px;
+    margin-block: 0;
+    border: 4px solid var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 22%, var(--bg-card));
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+  }
+  .desk-brd__tkt-at {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+  }
+  .desk-brd__tkt-day {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__tkt-terms {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-4);
+    margin: auto 0 0;
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--surface-line);
+  }
+  .desk-brd__tkt-term {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-width: 0;
+  }
+  .desk-brd__tkt-term > dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  .desk-brd__tkt-term--valid > dd { color: var(--accent2); }
+  .desk-brd__tkt-note {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
   /* The account's form at a column's width, its two fields the sign-in's
      size: an address and a password are not answers to a question, and
      at the name's display size "E-mail" ran as tall as the heading over
@@ -27090,6 +27326,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd__word,
     .desk-brd__route,
     .desk-brd__plan-foot,
+    .desk-brd__tkt-col,
     .desk-brd__first { animation: none; }
     .desk-brd__road,
     .desk-brd__ring,
