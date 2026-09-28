@@ -26,7 +26,7 @@ export function coversToken(point, token) {
   return spansOf(point).some(([s, e]) => s < token.end && token.start < e)
 }
 
-// The verb's own endings (plan 159): the polite and the plain forms,
+// The verb's own endings (plan 160): the polite and the plain forms,
 // present and past, affirmative and negative. Each is a point with a
 // card, but not a rule a learner reads a sentence by -- 作ります is 作る
 // made polite -- so it rides its word as a tag (the words list's
@@ -42,7 +42,7 @@ export function isEnding(point) {
 // は) with the constructions, the endings left to their words -- in the
 // order they stand in the sentence, so the numbers on the cards and on
 // the line read left to right (plan 134, owner-directed; the practice
-// breakdown's too since plan 159). One list for GrammarPoints, the
+// breakdown's too since plan 160). One list for GrammarPoints, the
 // line's frames (SentenceLine, SubtitleLine) and the card in focus.
 export function numberedPointsOf(analysis) {
   return [...(analysis?.grammar ?? [])]

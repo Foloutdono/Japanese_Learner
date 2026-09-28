@@ -54,7 +54,7 @@ export function tokFurigana(tok) {
   return tok.reading
 }
 
-// The state on a line that knows the sentence's grammar (plan 159): a
+// The state on a line that knows the sentence's grammar (plan 160): a
 // word a construction is written on, with no card of its own, is the
 // construction's -- 〜てはいけません's いけ, について's つい -- and reads
 // as the rule's scaffolding, not as a word the course does not teach
@@ -64,7 +64,7 @@ export function lineState(tok, grammar) {
   return tokState(tok)
 }
 
-// What a word means, in the learner's language (plan 159): the model's
+// What a word means, in the learner's language (plan 160): the model's
 // contextual gloss where it was bought (already in that language), else
 // the card's own -- its French beside its English since the analysis
 // carries both (study/analysis._deck_match) -- else nothing. A pool word

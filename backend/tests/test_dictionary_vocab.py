@@ -257,3 +257,24 @@ def test_a_spelling_folded_into_a_card_still_finds_it(client):
         assert card in {_key(r) for r in body["results"]}, typed
         got = _lookup(client, typed, kana=kana)
         assert _key(got) == card, (typed, got)
+
+
+def test_one_answers_with_the_exact_entry_alone(client):
+    """The analyser docks one word's entry on every focus, and the page
+    around it was the whole of the wait. `one` answers with that entry,
+    the same row the page puts first, and nothing else."""
+    for kanji, kana in [("国境", "くにざかい"), ("工場", "こうば"), ("ラブ", "ラブ"),
+                        ("毎月", "まいげつ")]:
+        page = client.get("/api/dictionary", params={
+            "q": kanji, "limit": 10, "category": "vocab", "kana": kana}).json()
+        one = client.get("/api/dictionary", params={
+            "q": kanji, "limit": 10, "category": "vocab", "kana": kana, "one": True}).json()
+        assert one["results"] == page["results"][:1], (kanji, kana)
+        assert (one["total"], one["has_more"], one["exact"]) == (1, False, True)
+
+
+def test_one_without_an_exact_entry_serves_the_page(client):
+    """A reading that names nothing keeps the nearest-match fallback."""
+    params = {"q": "水", "limit": 10, "category": "vocab", "kana": "not-a-reading"}
+    assert client.get("/api/dictionary", params={**params, "one": True}).json() \
+        == client.get("/api/dictionary", params=params).json()

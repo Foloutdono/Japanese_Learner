@@ -310,6 +310,15 @@ class AnalyzeLocalTests(unittest.TestCase):
         # Without notes, the grammar is the local tier's, note-free.
         self.assertFalse(any("note" in g for g in merge_deep(r, [], "x")["grammar"]))
 
+    def test_the_translation_rides_beside_the_explanation(self) -> None:
+        """Plan 161: the sentence's translation, trimmed, beside the
+        prose; none bought is an empty string, never a missing key."""
+        r = analyze_local("駅で待つ。")
+        merged = merge_deep(r, [], "x", None, "  I wait at the station.  ")
+        self.assertEqual(merged["translation"], "I wait at the station.")
+        self.assertEqual(merge_deep(r, [], "x")["translation"], "")
+        self.assertEqual(merge_deep(r, [], "x", None, None)["translation"], "")
+
     def test_the_gloss_is_a_copy_and_never_the_catalogue_s_own(self) -> None:
         """The result is cached and handed around; editing it must not
         reach the catalogue every later analysis reads from."""
@@ -415,7 +424,7 @@ class AttachUserStateTests(unittest.TestCase):
 
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
     def test_a_word_a_construction_owns_is_not_off_deck(self) -> None:
-        # Plan 159: 〜てはいけません's いけ has no card (it is no 行く), and
+        # Plan 160: 〜てはいけません's いけ has no card (it is no 行く), and
         # it is the construction's, not a word the app cannot teach. 話し
         # is the sentence's one unknown content word (ここ is a pronoun).
         out = attach_user_state(analyze_local("ここで話してはいけません。"), {}, "u")
@@ -424,7 +433,7 @@ class AttachUserStateTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class FrenchGlossTests(unittest.TestCase):
-    """Plan 159: a deck card carries its French gloss beside its English
+    """Plan 160: a deck card carries its French gloss beside its English
     one, so the breakdown reads in one language -- the particle's line
     was French (the grammar catalogue) and every word's English."""
 

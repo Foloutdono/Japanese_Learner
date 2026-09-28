@@ -324,7 +324,7 @@ class CompoundParticleTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class NoGoodVerbTests(unittest.TestCase):
-    """Plan 159. The negated verb of a "must" or a "must not" is the
+    """Plan 160. The negated verb of a "must" or a "must not" is the
     point's: 〜てはいけません's いけ took 行く, so いけません read "to go"
     under a sentence that forbids talking. No card, so the row is the
     point's."""

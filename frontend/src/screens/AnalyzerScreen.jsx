@@ -10,6 +10,7 @@ import { Sheet } from '../components/chrome/Sheet'
 import { stationFor } from '../config/stations'
 import { WordsList } from '../components/analysis/WordsList'
 import { FocusCard } from '../components/analysis/FocusCard'
+import { MineButton } from '../components/analysis/MineButton'
 import { SubtitleLine } from '../components/analysis/SubtitleLine'
 import { PlayerBar } from '../components/analysis/PlayerBar'
 import { createPlayhead } from '../components/analysis/playhead'
@@ -21,7 +22,9 @@ import { useLight } from '../components/analysis/useLight'
 import { Dots } from '../components/ui/Loading'
 import { DictionaryLookupSheet, DictionaryLookupBody } from '../components/dictionary/DictionaryDetail'
 import { grammarLookup, lookupKey, tokenLookup } from '../components/analysis/lookup'
+import { prefetchLookup } from '../lib/dictionaryLookup'
 import { useMining } from '../components/analysis/useMining'
+import { useFavorites } from '../hooks/useFavorites'
 import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
 import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
@@ -108,8 +111,12 @@ const FURIGANA_LABEL = { all: 'furiganaAll', unknown: 'furiganaUnknown', none: '
 // bench and the subtitle dock -- and exactly one of them is ever
 // mounted: the platform the segmented control over the page selects.
 export default function AnalyzerScreen({ session }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const mining = useMining(session)
+  // The dictionary's shelf (plan 093), so the entry a word or a point
+  // opens here can be kept as it can in the dictionary: its ＋ offers
+  // the favourites beside the deck.
+  const favorites = useFavorites(session)
   const analyzer = useAnalyzerSession(session)
   const playerRef = useRef(null)
 
@@ -425,6 +432,21 @@ export default function AnalyzerScreen({ session }) {
     // its card (plan 134).
     setSide('card')
   }, [focusIndex, passageKey])
+
+  // 机: the right column follows the word in focus, and each word's
+  // entry was a round trip of its own, fetched only once it was shown.
+  // The focused sentence's words, and the next one's, are asked for as
+  // the sentence comes into focus, so walking them draws each entry at
+  // once (lib/dictionaryLookup).
+  useEffect(() => {
+    if (!wide) return
+    for (const sentence of [sentences[focusIndex], sentences[focusIndex + 1]]) {
+      for (const tok of sentence?.tokens ?? sentence?.words ?? []) {
+        const target = tokenLookup(tok)
+        if (target) prefetchLookup(session, { ...target, lang })
+      }
+    }
+  }, [wide, sentences, focusIndex, session, lang])
 
   useEffect(() => {
     // A NEW Passage starts with the whole line visible. A filter or a
@@ -1130,103 +1152,186 @@ export default function AnalyzerScreen({ session }) {
   const several = sentences.length > 1
   const prevArrow = several && arrow('left', focusIndex === 0, () => goToStop(focusIndex - 1), t.prevSentence)
   const nextArrow = several && arrow('right', focusIndex >= sentences.length - 1, () => goToStop(focusIndex + 1), t.nextSentence)
+  const railPanel = several && (
+    <div className="anl-railcol anl-desk__rail">
+      {/* ── The working rail head ──
+          Search and filters over the stops, with the count
+          always visible so a filter that hides everything
+          says so ("0 / 47") instead of looking like a lost
+          Passage. Client-side: the Passage is in hand. The
+          search well (plan 157) steps down from the rail's
+          surface, so it is the base well and never the page's. */}
+      <div className="anl-railhead">
+        <label className="field field--search anl-railhead__well">
+          <SearchIcon />
+          <input
+            type="search"
+            className="anl-railhead__search"
+            value={stopQuery}
+            onChange={e => setStopQuery(e.target.value)}
+            placeholder={t.searchPassage}
+            aria-label={t.searchPassage}
+            lang="ja"
+          />
+        </label>
+        <div className="chip-row anl-chips" role="group" aria-label={t.filterStops}>
+          {[
+            ['all', t.filterAll],
+            ['kept', t.filterKept],
+            ['i1', 'i+1'],
+            ['new', t.filterHasNew],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              className={`chip anl-chip${stopFilter === key ? ' chip--on' : ''}`}
+              aria-pressed={stopFilter === key}
+              onClick={() => setStopFilter(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="anl-railfoot">
+          <span
+            className="anl-railfoot__count"
+            aria-label={t.stopsShown(visibleStops.length, sentences.length)}
+          >
+            {visibleStops.length} / {sentences.length}
+          </span>
+          {/* i+1 is the app's highest-value signal, and on a
+              long track keeping each one by hand is N trips
+              down the line. Disabled once they are all kept:
+              the button's job is done and it says so. */}
+          {iPlusOneStops.length > 0 && (
+            <button
+              type="button"
+              className="anl-ghost"
+              onClick={keepAllIPlusOne}
+              disabled={unkeptIPlusOne.length === 0}
+            >
+              {t.keepAllIPlusOne}
+            </button>
+          )}
+        </div>
+      </div>
+      <PassageLine
+        sentences={visibleStops.map(v => v.s)}
+        // Position WITHIN the filtered view; -1 when the
+        // focused stop is filtered out, which simply draws no
+        // current marker -- the stage still shows it.
+        activeIndex={visibleStops.findIndex(v => v.i === focusIndex)}
+        onSelect={vi => goToStop(visibleStops[vi].i)}
+        // The current stop is kept in the rail's middle, whoever
+        // moved it -- the clock, the arrows, the keys -- except a
+        // stop the pointer pressed, already under the pointer
+        // (PassageLine holds that one where it is).
+        t={t}
+        kept={analyzer.kept}
+        onKeep={vi => analyzer.keepSentence(visibleStops[vi].i)}
+      />
+    </div>
+  )
+  const pointsPanel = points.length > 0 && (
+    <section className="anl-desk__points anl-points" aria-label={t.grammarSpotted}>
+      <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openPoint} />
+    </section>
+  )
+  // 字幕 (plan 161, the owner's picks B and B′ of the canvas "Tsuji
+  // analyser — text & photo layout"): a typed or photographed Passage
+  // has no video, and the drawing above gave the video's place to panels
+  // with little to hold. Without one the sentence takes the video's
+  // place -- the sumi object to the column's foot, the sentence at
+  // display size, its translation under it once Explain has bought it,
+  // Explain under that -- and the card in focus beside the list goes:
+  // the entry on the right is that card, and its deck action rides the
+  // word's row. One sentence (B′): the words over the grammar on the
+  // left. Several (B): the Passage's line over the grammar on the left,
+  // the words under the sentence.
+  const textDesk = !playerVideoId
+  const focusWord = pointAt === -1 && stageToken?.vocab_match ? stageToken : null
+  const wordAction = textDesk && focusWord && (
+    <MineButton
+      mining={mining}
+      kind="vocab"
+      label={t.addToDeck}
+      className="btn-primary anl-words__add"
+      onMine={deckId => mining.mineApp({
+        deckId, source: 'vocab', level: focusWord.vocab_match.level,
+        rawId: focusWord.vocab_match.raw_id, kind: 'vocab',
+      })}
+      t={t}
+    />
+  )
+  const wordsPanel = readable && (
+    <section className="anl-desk__words" aria-label={t.wordsInSentence}>
+      <WordsList analysis={focused} current={pointAt === -1 ? stageToken : null} onSelect={selectRow} t={t} action={wordAction} />
+    </section>
+  )
+  const explainButton = (
+    <button
+      type="button"
+      className={`anl-explainbtn anl-desk__explain${explainShown ? ' anl-explainbtn--on' : ''}`}
+      onClick={pressExplain}
+      aria-pressed={explainShown}
+    >
+      <OpenBookIcon size={14} />
+      {explainingHere && !hasExplanation
+        ? <>{t.explaining}<Dots /></>
+        : explainShown ? t.explanationOpen : t.explainThisSentence}
+    </button>
+  )
+  // The sentence on the sumi: the video's subtitle, or on a text desk
+  // the sentence in the video's place, stepped with its own arrows.
+  const subsBody = focused && (
+    <div className="anl-subs__body">
+      {textDesk && prevArrow}
+      {focused.foreign ? (
+        <p className="anl-subs__note">
+          <span lang="ja">{focused.text}</span>
+          <span>{t.notJapaneseLine}</span>
+        </p>
+      ) : focused.available === false ? (
+        <p className="anl-subs__note">{t.sentenceAnalysisUnavailable}</p>
+      ) : (
+        <SubtitleLine
+          analysis={focused}
+          index={tokenIndex}
+          setIndex={walkTo}
+          lit={light.lit}
+          t={t}
+          playhead={playerVideoId ? playhead : null}
+          playing={playing}
+          timing={timing}
+        />
+      )}
+      {textDesk && nextArrow}
+    </div>
+  )
   const deskResult = focused && (
     <div
       ref={resultsRef}
-      className={`anl-results anl-desk${several ? '' : ' anl-desk--one'}${points.length ? '' : ' anl-desk--bare'}`}
+      className={`anl-results anl-desk${several ? '' : ' anl-desk--one'}${points.length ? '' : ' anl-desk--bare'}${textDesk ? ' anl-desk--text' : ''}`}
       tabIndex={-1}
       role="region"
       aria-label={t.analysisResult}
     >
-      {several && (
-        <div className="anl-railcol anl-desk__rail">
-          {/* ── The working rail head ──
-              Search and filters over the stops, with the count
-              always visible so a filter that hides everything
-              says so ("0 / 47") instead of looking like a lost
-              Passage. Client-side: the Passage is in hand. The
-              search well (plan 157) steps down from the rail's
-              surface, so it is the base well and never the page's. */}
-          <div className="anl-railhead">
-            <label className="field field--search anl-railhead__well">
-              <SearchIcon />
-              <input
-                type="search"
-                className="anl-railhead__search"
-                value={stopQuery}
-                onChange={e => setStopQuery(e.target.value)}
-                placeholder={t.searchPassage}
-                aria-label={t.searchPassage}
-                lang="ja"
-              />
-            </label>
-            <div className="chip-row anl-chips" role="group" aria-label={t.filterStops}>
-              {[
-                ['all', t.filterAll],
-                ['kept', t.filterKept],
-                ['i1', 'i+1'],
-                ['new', t.filterHasNew],
-              ].map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={`chip anl-chip${stopFilter === key ? ' chip--on' : ''}`}
-                  aria-pressed={stopFilter === key}
-                  onClick={() => setStopFilter(key)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <div className="anl-railfoot">
-              <span
-                className="anl-railfoot__count"
-                aria-label={t.stopsShown(visibleStops.length, sentences.length)}
-              >
-                {visibleStops.length} / {sentences.length}
-              </span>
-              {/* i+1 is the app's highest-value signal, and on a
-                  long track keeping each one by hand is N trips
-                  down the line. Disabled once they are all kept:
-                  the button's job is done and it says so. */}
-              {iPlusOneStops.length > 0 && (
-                <button
-                  type="button"
-                  className="anl-ghost"
-                  onClick={keepAllIPlusOne}
-                  disabled={unkeptIPlusOne.length === 0}
-                >
-                  {t.keepAllIPlusOne}
-                </button>
-              )}
-            </div>
-          </div>
-          <PassageLine
-            sentences={visibleStops.map(v => v.s)}
-            // Position WITHIN the filtered view; -1 when the
-            // focused stop is filtered out, which simply draws no
-            // current marker -- the stage still shows it.
-            activeIndex={visibleStops.findIndex(v => v.i === focusIndex)}
-            onSelect={vi => goToStop(visibleStops[vi].i)}
-            // The current stop is kept in the rail's middle, whoever
-            // moved it -- the clock, the arrows, the keys -- except a
-            // stop the pointer pressed, already under the pointer
-            // (PassageLine holds that one where it is).
-            t={t}
-            kept={analyzer.kept}
-            onKeep={vi => analyzer.keepSentence(visibleStops[vi].i)}
-          />
+      {textDesk ? (
+        <div className="anl-desk__side">
+          {railPanel}
+          {!several && wordsPanel}
+          {pointsPanel}
         </div>
-      )}
-      {points.length > 0 && (
-        <section className="anl-desk__points anl-points" aria-label={t.grammarSpotted}>
-          <GrammarPoints analysis={focused} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openPoint} />
-        </section>
+      ) : (
+        <>
+          {railPanel}
+          {pointsPanel}
+        </>
       )}
 
       <div className="anl-desk__head">
         <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>
-        <h1 className="anl-desk__title" lang="ja">{sentences[0]?.text}</h1>
+        <h1 className={`anl-desk__title${textDesk && !several ? ' sr-only' : ''}`} lang="ja">{sentences[0]?.text}</h1>
         <button
           type="button"
           className={`anl-head__keep${isKept ? ' anl-head__keep--on' : ''}`}
@@ -1278,29 +1383,13 @@ export default function AnalyzerScreen({ session }) {
               </button>
             )}
           </div>
-          <div className="anl-subs__body">
-            {!playerVideoId && prevArrow}
-            {focused.foreign ? (
-              <p className="anl-subs__note">
-                <span lang="ja">{focused.text}</span>
-                <span>{t.notJapaneseLine}</span>
-              </p>
-            ) : focused.available === false ? (
-              <p className="anl-subs__note">{t.sentenceAnalysisUnavailable}</p>
-            ) : (
-              <SubtitleLine
-                analysis={focused}
-                index={tokenIndex}
-                setIndex={walkTo}
-                lit={light.lit}
-                t={t}
-                playhead={playerVideoId ? playhead : null}
-                playing={playing}
-                timing={timing}
-              />
-            )}
-            {!playerVideoId && nextArrow}
-          </div>
+          {textDesk ? (
+            <div className="anl-subs__stage">
+              {subsBody}
+              {focused.translation && <p className="anl-subs__tr" lang={lang}>{focused.translation}</p>}
+              {readable && explainButton}
+            </div>
+          ) : subsBody}
         </div>
         {playerVideoId && (
           <PlayerBar
@@ -1332,11 +1421,9 @@ export default function AnalyzerScreen({ session }) {
         )}
       </div>
 
-      {readable && (
+      {readable && !textDesk && (
         <div className="anl-desk__work">
-          <section className="anl-desk__words" aria-label={t.wordsInSentence}>
-            <WordsList analysis={focused} current={pointAt === -1 ? stageToken : null} onSelect={selectRow} t={t} />
-          </section>
+          {wordsPanel}
           <div className="anl-desk__focus">
             <FocusCard
               analysis={focused}
@@ -1346,20 +1433,11 @@ export default function AnalyzerScreen({ session }) {
               mining={mining}
               t={t}
             />
-            <button
-              type="button"
-              className={`anl-explainbtn anl-desk__explain${explainShown ? ' anl-explainbtn--on' : ''}`}
-              onClick={pressExplain}
-              aria-pressed={explainShown}
-            >
-              <OpenBookIcon size={14} />
-              {explainingHere && !hasExplanation
-                ? <>{t.explaining}<Dots /></>
-                : explainShown ? t.explanationOpen : t.explainThisSentence}
-            </button>
+            {explainButton}
           </div>
         </div>
       )}
+      {textDesk && several && wordsPanel}
 
       <section className={`desk-entry anl-desk__entry${explainShown ? ' anl-desk__entry--explain' : ''}`} aria-label={t.openDictionary}>
         {deskEntry ? (
@@ -1369,8 +1447,10 @@ export default function AnalyzerScreen({ session }) {
             exact={!lookup}
             session={session}
             mining={mining}
+            favorites={favorites}
             onExit={lookup ? closeLookup : undefined}
             band
+            cached
           />
         ) : (
           <p className="anl-desk__none">{t.dockNoEntry}</p>
@@ -1646,6 +1726,7 @@ export default function AnalyzerScreen({ session }) {
           {...lookup}
           session={session}
           mining={mining}
+          favorites={favorites}
           onClose={closeLookup}
         />
       )}

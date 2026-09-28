@@ -1011,7 +1011,9 @@ runtime purpose. Two consequences worth knowing:
   `src/practiceStation.wide.test.jsx`,
   `src/practiceStation.desktop.test.jsx`, `src/deskfree.phone.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  **160** is 番号, a graded
+  **160** is 番号 (numbered 160 because 158 went to the mark redrawn
+  and 159 to the practice stations while it was open; its commits'
+  messages say 158 and 159), a graded
   sentence's breakdown numbered as the
   analyser's (the owner's pick A of five drawn on the canvas "Tsuji
   Breakdown Panel"): the line framing each rule under its number, a row
@@ -1030,9 +1032,26 @@ runtime purpose. Two consequences worth knowing:
   `WordsList.jsx`, `FocusCard.jsx`, `SubtitleLine.jsx`,
   `PassageBreakdown.jsx`, `SentenceBreakdown.browser.test.jsx` and
   `index.css` and its 机 section; DESIGN.md, "The desk").
-  **161** is 辻, first contact redrawn as the crossroads (the owner's
-  pick D of the canvas "Tsuji — onboarding, new directions", with option
-  3, 空の弧, for the hour): on the desk no column -- the question at the
+  **161** is 字幕, a typed or photographed Passage on the desk with its
+  sentence in the video's place (the owner's picks B and B′ of the
+  canvas "Tsuji analyser — text & photo layout"): the sumi object to the
+  middle column's foot, the sentence at display size, its translation
+  under it and Explain under that; the card in focus beside the words
+  gone, its deck action riding the word's row (`WordsList`'s `action`);
+  one sentence's words over its grammar on the left, several's under the
+  sentence; every panel as tall as it holds. The deep tier now returns
+  the sentence's `translation` beside its explanation
+  (`phrase_analysis_cache` v5; `merge_deep`'s `translation`) (cited in
+  `routes/phrase.py`, `study/analysis.py`, `tests/test_phrase_api.py`,
+  `tests/test_analysis.py`, `screens/AnalyzerScreen.jsx`,
+  `components/analysis/WordsList.jsx`, `src/analyzer.desktop.test.jsx`
+  and the 机 section of `index.css`; DESIGN.md, "The desk").
+  **163** is 辻, first contact redrawn as the crossroads (numbered 163
+  because 161 went to 字幕 and 162 to the pool's words in the learner's
+  language, open on its branch, while it was open: its commits' messages
+  say 161, their phase letters one behind this plan's from 161b on; the
+  owner's pick D of the canvas "Tsuji — onboarding, new directions", with
+  option 3, 空の弧, for the hour): on the desk no column -- the question at the
   paper's top-left corner, the journey a strip of named stops at the
   floor's left end (plan 140's line on its side, its doors kept), the
   floor in the bottom-right corner -- and each question drawing its
@@ -1044,9 +1063,8 @@ runtime purpose. Two consequences worth knowing:
   day's arc with the train riding it, the plan as the ride to scale and
   a guest's account beside the ticket it keeps; and the Welcome as the
   crossroads itself, 辻 the hub, the app's lines out of it and the gold
-  road to Board, the sign-in in Board's place (`AuthCard`'s `frame`);
-  its commits' labels run one letter behind the plan's phases from 161b
-  on (cited in `screens/BoardingFlow.jsx`, `screens/AppLoading.jsx`,
+  road to Board, the sign-in in Board's place (`AuthCard`'s `frame`)
+  (cited in `screens/BoardingFlow.jsx`, `screens/AppLoading.jsx`,
   `App.jsx`, `components/boarding/` -- `DeskStrip.jsx`, `NameStep.jsx`,
   `WhyStep.jsx`, `icons.jsx`, `KanaStep.jsx`, `LevelStep.jsx`,
   `LinesStep.jsx`, `RhythmStep.jsx`, `TimeStep.jsx`, `PlanStep.jsx`,
@@ -1056,7 +1074,7 @@ runtime purpose. Two consequences worth knowing:
   `src/frontdoor.desktop.test.jsx`, `src/frontdoor.wide.test.jsx` and the
   机 section of `index.css`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  When starting a new wave, begin at **162** or higher, and check
+  When starting a new wave, begin at **164** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

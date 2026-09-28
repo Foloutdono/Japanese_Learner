@@ -47,6 +47,7 @@ SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese 
   "grammar": [
     {{"pattern": "...", "note": "..."}}
   ],
+  "translation": "...",
   "explanation": "..."
 }}
 
@@ -56,12 +57,14 @@ SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese 
 - "meaning" is what the word means IN THE CONTEXT of this specific phrase, not just a generic dictionary gloss. Write it in {lang_name}.
 - "pos" is a short part-of-speech label (noun, verb, particle, adjective, etc), in {lang_name}.
 - "grammar" has one entry per grammar point listed under the phrase, in the order listed, with "pattern" copied EXACTLY as listed. "note" is ONE sentence, in {lang_name}, saying what that pattern does in THIS phrase -- what it attaches to here and what it adds to the meaning -- not a general definition. An empty list when no points are listed.
+- "translation" is the whole phrase translated into {lang_name}: one natural sentence, as a subtitle would give it, with no notes or alternatives.
 - "explanation" is 2-4 sentences, in {lang_name}, explaining the grammar and nuance of the whole phrase.
 
 The JSON key names ("words", "surface", "base", "reading", "meaning", "pos",
-"grammar", "pattern", "note", "explanation") must stay exactly as shown, in
-English, no matter what {lang_name} is -- only the VALUES you write for
-"meaning", "pos", "note" and "explanation" go in {lang_name}.
+"grammar", "pattern", "note", "translation", "explanation") must stay exactly
+as shown, in English, no matter what {lang_name} is -- only the VALUES you
+write for "meaning", "pos", "note", "translation" and "explanation" go in
+{lang_name}.
 """
 
 
@@ -133,7 +136,11 @@ def _user_message(phrase: str, points: list[dict]) -> str:
 # v4 (plan 095): the prompt lists the grammar points the local tier
 # found and asks for a note on each; an entry bought under v3 has no
 # notes and would never gain them, since the cache never expires.
-CACHE_VERSION = 4
+#
+# v5 (plan 161): the prompt asks for the phrase's translation, which the
+# desk analyser prints under a typed or photographed sentence; an entry
+# bought under v4 has none and would never gain one.
+CACHE_VERSION = 5
 
 
 def _phrase_key(phrase: str, lang: str) -> str:
@@ -302,6 +309,13 @@ class PhraseRequest(BaseModel):
     # input) sends 'image'; plan 019 (video) will send 'video'. Anything
     # else is a 422, not a row the history shelf cannot classify.
     source: Literal["typed", "image", "video"] = "typed"
+    # True for the practice runs, which hand over one exercise and draw
+    # one breakdown of it: the text is analysed as ONE Sentence, never
+    # split. Split, a bank item written as two (「雨がふりました。しかし、
+    # 学校へ行きました。」, nine of the reading bank's) came back as a
+    # Passage of two with no top-level tokens, and the run drew the bare
+    # sentence where its breakdown should have been.
+    whole: bool = False
 
 
 def _call_llm(phrase: str, lang: str, points: list[dict] | None = None) -> dict:
@@ -309,7 +323,7 @@ def _call_llm(phrase: str, lang: str, points: list[dict] | None = None) -> dict:
     with a note on each of `points` (_deep_points) in context.
 
     max_tokens=1500: a segmentation of one sentence, a line per grammar
-    point and a 2-4 sentence note. Generous for the longest phrase the
+    point, its translation and a 2-4 sentence note. Generous for the longest phrase the
     app serves (an N1 reading sentence caps at 80 characters) and stops
     a model that decides to write an essay from billing for it.
 
@@ -357,8 +371,10 @@ def _parse_llm_json(content: str) -> dict:
 # pinning the key names to English -- verified live against
 # nvidia/nemotron-3-super-120b-a12b, which does this consistently even
 # with that instruction present. The schema's other top-level keys
-# ("words", "grammar") hold lists, so any additional string-valued key
-# is unambiguously the mistranslated "explanation".
+# ("words", "grammar") hold lists; since plan 161 a second string sits
+# beside "explanation", the translation, so "translation" under its own
+# name in each language LANG_NAMES offers is taken first, and any other
+# additional string-valued key is the mistranslated "explanation".
 #
 # Applied where llm_result is consumed (_analyze_sentence), not where
 # it's parsed -- a bad key can already be sitting in phrase_analysis_cache
@@ -366,13 +382,25 @@ def _parse_llm_json(content: str) -> dict:
 # and normalizing only on the fresh-call path would leave every such row
 # permanently broken. Doing it here self-heals cache hits too, with no
 # CACHE_VERSION bump needed.
+_TRANSLATION_KEYS = frozenset({
+    "translation", "traduction", "traducción", "übersetzung", "翻訳", "traduzione", "tradução",
+})
+
+
 def _normalize_explanation_key(parsed: dict) -> dict:
-    if not isinstance(parsed, dict) or parsed.get("explanation") or "words" not in parsed:
+    if not isinstance(parsed, dict) or "words" not in parsed:
         return parsed
-    for key, value in parsed.items():
-        if key not in ("words", "explanation") and isinstance(value, str) and value:
-            parsed["explanation"] = value
-            break
+    if not parsed.get("translation"):
+        for key, value in parsed.items():
+            if key.lower() in _TRANSLATION_KEYS and isinstance(value, str) and value:
+                parsed["translation"] = value
+                break
+    if not parsed.get("explanation"):
+        for key, value in parsed.items():
+            if (key not in ("words", "explanation") and key.lower() not in _TRANSLATION_KEYS
+                    and isinstance(value, str) and value):
+                parsed["explanation"] = value
+                break
     return parsed
 
 
@@ -405,7 +433,7 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
             llm_result = _normalize_explanation_key(llm_result)
             analysis = merge_deep(
                 analysis, llm_result.get("words", []), llm_result.get("explanation", ""),
-                llm_result.get("grammar"),
+                llm_result.get("grammar"), llm_result.get("translation", ""),
             )
 
     return attach_user_state(analysis, states, user_id)
@@ -421,10 +449,11 @@ MAX_DEEP_SENTENCES = 50
 
 
 def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
-                      allow_llm_call: bool = True) -> dict:
-    """A Passage split into Sentences and each analyzed independently.
-    No LLM call happens here unless `deep` is set -- see _analyze_sentence."""
-    all_sentences = split_sentences(passage)
+                      allow_llm_call: bool = True, whole: bool = False) -> dict:
+    """A Passage split into Sentences and each analyzed independently --
+    or, `whole`, taken as one Sentence (see PhraseRequest.whole). No LLM
+    call happens here unless `deep` is set -- see _analyze_sentence."""
+    all_sentences = [{"text": passage}] if whole else split_sentences(passage)
     truncated = max(0, len(all_sentences) - MAX_SENTENCES)
     kept = all_sentences[:MAX_SENTENCES]
 
@@ -445,6 +474,7 @@ def _analyze_passage(passage: str, deep: bool, lang: str, user_id: str,
         only = sentences[0]
         result.update({
             "explanation": only.get("explanation", ""),
+            "translation": only.get("translation", ""),
             # Deprecated alias for the pre-2026-08 "words" shape both
             # PhraseAnalyzerScreen.jsx and ReadingScreen.jsx still read.
             # Points at the SAME list as "tokens" rather than a copy.
@@ -474,7 +504,7 @@ def analyze_phrase(payload: PhraseRequest, user_id: str = Depends(get_user_id)):
     # configured at all -- this is the whole point of the two-tier split,
     # see docs/adr/0001-two-tier-sentence-analysis.md. llm_configured()
     # is deliberately never checked here.
-    result = _analyze_passage(phrase, payload.deep, payload.lang, user_id)
+    result = _analyze_passage(phrase, payload.deep, payload.lang, user_id, whole=payload.whole)
 
     if not payload.save:
         return {**result, "id": None, "created_at": None}

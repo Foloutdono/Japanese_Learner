@@ -11,11 +11,17 @@ import { tokState, wordGloss } from './tokens'
 // row drawn on the ground with its edge.
 //
 // The rows are the practice breakdown's (rows.js's wordRowsOf, plan
-// 159): no word a construction is written on with no card of its own
+// 160): no word a construction is written on with no card of its own
 // (〜てはいけません's いけません read "to go"), each word named as the
 // dictionary names it -- 話す beside its reading はなす, where the list
 // printed 話し beside はなす -- and glossed in the learner's language.
-export function WordsList({ analysis, current, onSelect, t }) {
+//
+// `action` (plan 161): what the word in focus can be done with, drawn
+// beside its row -- a typed or photographed passage has no card in
+// focus beside the list, so the deck's one filled action rides the row.
+// The row stays the one button; the action is its neighbour, on the
+// same ground, and falls under it where the column is narrow.
+export function WordsList({ analysis, current, onSelect, t, action = null }) {
   const lang = useLang()?.lang
   const rows = wordRowsOf(analysis)
   return (
@@ -28,7 +34,7 @@ export function WordsList({ analysis, current, onSelect, t }) {
         const meaning = wordGloss(head, lang)
         const level = head.vocab_match?.level ?? null
         const on = Boolean(current) && row.tokens.includes(current)
-        return (
+        const button = (
           <button
             key={i}
             type="button"
@@ -47,6 +53,14 @@ export function WordsList({ analysis, current, onSelect, t }) {
             {level && <span className="anl-words__lvl">{level}</span>}
           </button>
         )
+        return on && action
+          ? (
+            <div key={i} className="anl-words__item">
+              {button}
+              <span className="anl-words__act">{action}</span>
+            </div>
+          )
+          : button
       })}
     </div>
   )

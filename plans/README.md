@@ -6897,10 +6897,11 @@ pushed while this was open.
 |---|---|---|
 | 153 | **The deck's own cards**, each candidate plan 151's word reviewers raised checked against JMdict 2026-07-15 (the `exact_reading`/`term_only` match in `vocab_meanings.json` at f691b87a, and the pool) and the two JLPT lists of `datas/vocab/sources`. **Another reading's gloss**, put right in place (a gloss is not in the id): 半分 "half minute" → *half* (はんぷん's), 盛り さかり "helping, serving" → *peak, full bloom, prime* (もり's), 目下 めした "at present" → *subordinate* (もっか's), 札 さつ "token, label, ticket, charm" → *banknote* (ふだ's), 人気 にんき "sign of life" → *popularity* (ひとけ's), 羽 はね "counter for birds" → *feather, wing* (わ's), 否 いや "no, the noes" → *no, nay* ("the noes" is 否【ひ】's), 寒気 かんき "cold, frost, chill" → *cold, cold air* ("chill" is さむけ's). **Misleading**: 相手 gave sense 1 of 3 where the sentences use *the other party, opponent*; 件 くだん led with *example, precedent*, which JMdict no longer lists; 疎か おろそか was glossed as a noun and is a na-adjective (its French said *négligence* twice); 杯 さかずき was a *wine cup*, and is a sake cup. **Readings put right, the old ids deleted rather than moved** (`RETIRED`, the owner's call: the corrected card starts new for every learner; `migrate_vocab_ids --yes` drops the old schedules, deck rows, pins and favourites and keeps `review_log`): no reading of the form, the card taking the reading of the word its gloss always was — 割 かつ → わり (the N1 list's 〜割, "rate, ten percent"; the gloss was 割る's), 共 きょう → とも (the gloss was 共【とも】's word for word), 愛憎 あいにく → あいぞう (あいにく is 生憎), 音色 おんいろ → ねいろ, 復旧 ふくきゅう → ふっきゅう; a rare JMdict reading on the everyday one's gloss — 地形 じぎょう → ちけい, 統治 とうじ → とうち, 施行 しぎょう → しこう; 下す おろす → 下ろす, JMdict's irregular okurigana (plan 112's 終る), since 下す is くだす, and still 下ろす's spelling (`FOLDED_ONLY`, the fold with no rows behind it, so the N3 list's 下す finds its card); 否 いいえ (N1), whose word is the N5 いいえ, plan 112's 此れ beside これ (JMdict gives 否 no reading いいえ). **Words the deck lacked**, each placed by the lowest level a taught sentence or a JLPT list gives it: 時 じ "o'clock", 年 ねん, 月 がつ and 杯 はい at N5 (the N5 list's 〜時, 〜年, 〜月, 〜杯; 41, 16 and 6 uses for the first three), 寒気 さむけ "chill" at N4 (the N4 〜がする example; the N1 list), 件 けん "matter" at N3 (N3 list), 下 もと "under (guidance)" at N2 (the five 〜のもとで sentences), 社 しゃ at N2 (the N2 list's 〜社; 一社 at N1), 故 ゆえ, 目下 もっか and 札 ふだ at N1 (N1 list). **Grammar, not a card**: 〜はおろか's おろか and 〜や否や's いな, in neither list (`IGNORED_LEMMAS`). **Not a deck word**: 下す read くだす, in no JLPT list and no taught sentence; its "frequent, no card" rank 92 was every ください, which the subtitles cut 下さ + い and UniDic reads 下す alone. `placement_report.FRAGMENTS` credits くださ, 下さ and もら to 下さる and もらう (くださる 5,824th → 68th, もらう 237th → 97th, 盛る 166th → 5,968th), and 下す ranks 16,408th; the pool glosses it (*to make a decision; to hand down a verdict*) wherever a sentence has it. **In context**: `reading_context` reads a lone 盛り さかり where the sentence says peak (〜が盛りだ, 今を盛りと, 盛りを過ぎる, 盛りがつく, 花／夏／人生の盛り), so JMdict's own example on the card, 桜の花は４月が盛りだ, no longer reads もり; ご飯の盛り and 盛りがいい stay もり. **Kana sentences the tokenizer cut into other words** (plan 105 named two): りゅうがく took 流 "current", しゅくだい 対 "versus" or 砕く "to smash", ほうがせが held がせ "fake"; 宿 and 留 are N3 kanji, so each sentence keeps its point and says it in words the tokenizer reads (来年、日本の大学で勉強することにしました, 今日は勉強しなくちゃいけない, しごとはまだおわっていません, わたしよりあにのほうが、せが高いです); `check_grammar` clean. **Scripts**: `prune_pool_overlap --yes` (19 rows; 割 read わり has none, JMdict files it under 割り, so its `curated_senses` row is the 割::かつ row's, which held 割【わり】's senses all along), `audit_vocab_deck --write-snapshot`, `placement_report --rebuild-order` and `--write-lists`. **Measured**: 8,045 → 8,055 cards; absent lemmas 178 → 161, occurrences 419 → 315 (ratchets lowered) | DONE (2026-09-27) |
 
-## Plan 159 — 番号, the breakdown numbered as the analyser's (2026-09-27)
+## Plan 160 — 番号, the breakdown numbered as the analyser's (2026-09-27)
 
-Numbered 159 because 158 went to the mark redrawn (PR #235) while it
-was open; its first commits' messages say 158.
+Numbered 160 because 158 went to the mark redrawn (PR #235) and 159 to
+the practice stations (PR #238) while it was open; its commits'
+messages say 158 and 159.
 
 The owner's screenshot of a reading run's breakdown on the desk
 (ここで話してはいけません。) and "improve the layout and improve the analysis
@@ -6940,7 +6941,45 @@ takes the same rows, names and glosses. The comprehension passage
 (`PassageBreakdown`) draws the same pieces.
 
 
-## Plan 161 — 辻, first contact as the crossroads (2026-09-27)
+## Plan 161 — 字幕, the typed sentence in the video's place (2026-09-27)
+
+The owner's screenshot of a typed sentence (どこにいるの) on the desk and
+"there is too much empty space": the analyser's three columns were drawn
+for a video (plan 134), and a typed or photographed Passage gave the
+player's place to panels with little to hold -- the word in focus printed
+three times (the words list, the card beside it, the entry's plate), and
+every panel stretched to the window's foot. Three directions drawn on the
+canvas "Tsuji analyser — text & photo layout" (A, the page; B, the
+sentence in the video's place; C, the table), then B′ (B with the words
+on the left) at the owner's request; the owner's picks: **B′ for one
+sentence, B for several, both with the translation under the sentence**.
+
+**Layout** (the 机 section of `index.css`, `.anl-desk--text`): no video,
+the sumi object takes the middle column to its foot -- the sentence at
+`--fs-display-fluid`, its translation under it (`.anl-subs__tr`) once
+Explain has bought it, Explain under that. The card in focus beside the
+words goes: the entry on the right is that card, and the deck's filled
+action rides the word's row (`WordsList`'s `action`). One sentence: the
+words over the grammar in the left column (`.anl-desk__side`). Several:
+the Passage's line over the grammar on the left, the words under the
+sentence. Every panel as tall as it holds, the entry's body and the
+explanation included. The video's layout is unchanged.
+
+**Translation**: the deep tier's prompt asks for `translation` beside the
+explanation, `merge_deep` carries it onto the sentence and the
+single-sentence mirror, and `_normalize_explanation_key` takes it by its
+name in the seven languages `LANG_NAMES` offers before any other extra
+string is read as the explanation. `phrase_analysis_cache` goes to v5, as
+plan 095 did for the notes: a sentence explained before is bought once
+more on its next Explain.
+
+
+## Plan 163 — 辻, first contact as the crossroads (2026-09-27)
+
+Numbered 163 because 161 went to 字幕 (above) and 162 to the pool's words
+in the learner's language, open on its branch, while this was open; it
+was written and built as 161, so its commits' messages say 161 (161a to
+161e, their letters as the As built note below reads them).
 
 The owner, of the desk's first contact after plans 140 and 155: "still
 not satisfied by how the onboarding process is laid out and designed.
@@ -6962,21 +7001,22 @@ its answers as the thing they are, in the app's own figures:
 
 | # | What | Status |
 |---|------|--------|
-| 161a | **The frame**: no sumi column (`DeskLine` retired for `DeskStrip`); the question and its hint top-left; the stage centred in the paper that is left; the floor bottom-right, Continue at a ticket's width and giving way before it meets the strip (measured, `--desk-strip-w`); the strip on the floor's line, bottom-left, the answer given on a stop said in its name (a door's label and title) | DONE (2026-09-27) |
-| 161b | **The answers as maps**: Why as six roads out of the junction (the motive icons in 96px rings); Kana as the two words and four answers that draw them (read lit, not read dashed); the reveal as each word read sign by sign; Lines as three cards in their pigments with what each holds at N5, the kana on every ticket, the arrival under them | DONE (2026-09-28) |
-| 161c | **The lines drawn to time**: Level and Goal as one climbing line, the pick called out (you are here, or the arrival); Rhythm as four roads from today, each as long as the ride, on a month axis; the hour as the day's arc (sunrise left, noon at the top, night right), 朝 昼 夜 on it, the train riding it as the fine control, the board in its bowl | DONE (2026-09-28) |
-| 161d | **The ends**: the plan as the ride to scale (today, the kana, two halts counting the words, N5) and what the terminus holds; the account as its form beside a paper ticket with that route printed on it; the name as the first station's plate | DONE (2026-09-28) |
-| 161e | **The front door**: the Welcome as the crossroads (辻 the hub, the app's lines leaving it, the gold line running from Board into it); the sign-in taking the promise's place, the hub kept | DONE (2026-09-28) |
+| 163a | **The frame**: no sumi column (`DeskLine` retired for `DeskStrip`); the question and its hint top-left; the stage centred in the paper that is left; the floor bottom-right, Continue at a ticket's width and giving way before it meets the strip (measured, `--desk-strip-w`); the strip on the floor's line, bottom-left, the answer given on a stop said in its name (a door's label and title) | DONE (2026-09-27) |
+| 163b | **The answers as maps**: Why as six roads out of the junction (the motive icons in 96px rings); Kana as the two words and four answers that draw them (read lit, not read dashed); the reveal as each word read sign by sign; Lines as three cards in their pigments with what each holds at N5, the kana on every ticket, the arrival under them | DONE (2026-09-28) |
+| 163c | **The lines drawn to time**: Level and Goal as one climbing line, the pick called out (you are here, or the arrival); Rhythm as four roads from today, each as long as the ride, on a month axis; the hour as the day's arc (sunrise left, noon at the top, night right), 朝 昼 夜 on it, the train riding it as the fine control, the board in its bowl | DONE (2026-09-28) |
+| 163d | **The ends**: the plan as the ride to scale (today, the kana, two halts counting the words, N5) and what the terminus holds; the account as its form beside a paper ticket with that route printed on it; the name as the first station's plate | DONE (2026-09-28) |
+| 163e | **The front door**: the Welcome as the crossroads (辻 the hub, the app's lines leaving it, the gold line running from Board into it); the sign-in taking the promise's place, the hub kept | DONE (2026-09-28) |
 
 Held by `frontdoor.desktop` and `frontdoor.wide` (rewritten per phase),
 the phone lanes unchanged, and `desk.css.test.js` (every rule in the 机
 section, none of the short step's pairs).
 
-**As built.** The commits' labels run one letter behind this table from
-the second phase on: 161b's commits carry Why, Kana and the reveal, and
-the Level, Goal, Lines, Rhythm and hour drawings (this table's 161b and
-161c); 161c's carry the plan, the account and the name (161d); 161e is
-the front door. Where the build departs from the drawings:
+**As built.** The commits say 161, and their letters run one behind this
+table from the second phase on: 161a's commit is the frame (163a);
+161b's carry Why, Kana and the reveal, and the Level, Goal, Lines,
+Rhythm and hour drawings (163b and 163c); 161c's carry the plan, the
+account and the name (163d); 161e is the front door (163e). Where the
+build departs from the drawings:
 
 - *The account's skip stands under the ticket*, beside its note, not on
   the floor: at 1100 the floor beside an eight-stop strip holds one

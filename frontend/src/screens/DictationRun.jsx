@@ -214,7 +214,7 @@ function Session({ session, level }) {
     // The local tier only; the explanation is bought on demand below.
     apiFetch('/api/phrase/analyze', session, {
       method: 'POST',
-      body: JSON.stringify({ phrase: jp, save: false, deep: false, lang }),
+      body: JSON.stringify({ phrase: jp, save: false, deep: false, whole: true, lang }),
     })
       .then(r => (r.ok ? r.json() : null))
       .then(d => { if (analysisLineRef.current === jp) setAnalysis(d) })

@@ -3513,7 +3513,7 @@ def compound_particles() -> frozenset[str]:
 
 # The verbs a "must" or a "must not" is built on, negated: いけない is
 # "no good", not 行く "to go" unable; ならない is "must", not 成る "to
-# become" (plan 159). UniDic files the いけ of いけません under 行く, and
+# become" (plan 160). UniDic files the いけ of いけません under 行く, and
 # a fuller dictionary under 行ける; both are here.
 NO_GOOD_VERBS = frozenset({"行く", "行ける", "成る"})
 _NEGATIONS = frozenset({"ない", "ず", "ぬ"})
@@ -3523,7 +3523,7 @@ _NEGATIONS = frozenset({"ない", "ず", "ぬ"})
 def no_good_points() -> frozenset[str]:
     """The points written with a negated いける or なる that no longer
     means itself: 〜てはいけません, 〜ないといけない, 〜なければなりません,
-    〜てはならない, 〜にほかならない (plan 159). The verb's card is not the
+    〜てはならない, 〜にほかならない (plan 160). The verb's card is not the
     word's meaning there -- いけません read "to go" under a sentence
     that forbids talking -- so the breakdown gives it none, as it gives
     none to について's つい (compound_particles), and its row is the

@@ -155,12 +155,12 @@ describe('SentenceBreakdown', () => {
     expect(document.querySelectorAll('.phrase-line button').length).toBe(0)
   })
 
-  // ── The rows (plan 084; numbered since plan 159) ──────────────
+  // ── The rows (plan 084; numbered since plan 160) ──────────────
   // The practice modes' breakdown: the ruby line, the translation,
   // one row per WORD, a numbered card per rule, the note last. Words,
   // not morphemes: a run the model glossed as one word is one row, and
   // so is a verb with its polite ending when nothing bound it. A
-  // particle is no row: its marker is a card (plan 159).
+  // particle is no row: its marker is a card (plan 160).
 
   it('rows layout draws one row per word, and none for a particle or punctuation', async () => {
     const analysis = { available: true, tokens: [tokenFixture(), particleFixture(), ...runFixture(), symbolFixture()], grammar: [] }
@@ -223,7 +223,7 @@ describe('SentenceBreakdown', () => {
     expect(readings).toEqual(['がくせい', 'あいました'])
   })
 
-  // Plan 159: the dictionary's name for the word and the card's reading
+  // Plan 160: the dictionary's name for the word and the card's reading
   // -- 話す はなす where the sentence wrote 話し, which the row printed
   // beside はなす -- and its meaning in the learner's language (the
   // browser lane is a French device); a card with no French line keeps
@@ -402,7 +402,7 @@ describe('SentenceBreakdown', () => {
     expect(document.querySelector('.analysis-grammar-chip__gloss').textContent).toBe('while doing')
   })
 
-  // ── The rules, numbered (plans 095 and 159) ──────────────────
+  // ── The rules, numbered (plans 095 and 160) ──────────────────
   // study/grammar_detect tells a MARKER (a point that is one
   // grammatical word: は, へ, です／だ) from a PATTERN built around one.
   // Both are numbered cards under the words, in the sentence's order,
@@ -468,7 +468,7 @@ describe('SentenceBreakdown', () => {
     expect(keep.parentElement.classList.contains('bkd-line')).toBe(true)
   })
 
-  it('an ending rides its word as a tag and takes no number (plan 159)', async () => {
+  it('an ending rides its word as a tag and takes no number (plan 160)', async () => {
     const MASHITA = { pattern: '〜ました／〜ませんでした', level: 'N5', raw_id: 'grammar_N5_〜ました', kind: 'pattern',
       start: 5, end: 8, segments: [[5, 8]], meaning: { en: 'polite past', fr: 'passé poli' } }
     const analysis = {
@@ -484,7 +484,7 @@ describe('SentenceBreakdown', () => {
     expect(document.querySelectorAll('.bkd-frame')).toHaveLength(1)
   })
 
-  // Plan 159: 〜てはいけません's いけ has no card (it is no 行く "to go"),
+  // Plan 160: 〜てはいけません's いけ has no card (it is no 行く "to go"),
   // and a word a construction is written on with no card of its own is
   // the construction's -- no row, no off-deck rule on the line.
   it("a construction's own words are its card's, never rows of their own", async () => {
@@ -612,7 +612,7 @@ describe('SentenceBreakdown', () => {
     expect(litSurfaces()).toEqual([])
   })
 
-  // ── The rules, carded (plans 095 and 159) ────────────────────
+  // ── The rules, carded (plans 095 and 160) ────────────────────
   // One card per rule under the word rows: its number, the pattern, its
   // gloss and level, the words it is made of, and -- once bought -- the
   // model's line on what it does here. A door and a light.

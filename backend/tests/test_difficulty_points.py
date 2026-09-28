@@ -1,7 +1,8 @@
 import unittest
 
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
-from study.difficulty import points_in, estimate_level, LEVELS
+from study import morphology
+from study.difficulty import kanji_over_level, kanji_set, points_in, estimate_level, LEVELS
 
 
 class EstimateLevelTests(unittest.TestCase):
@@ -99,3 +100,30 @@ class PointsInTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class KanjiVouchedByWordTests(unittest.TestCase):
+    """A kanji the kanji deck files above the level passes the kanji gate
+    when the sentence writes it inside a word whose vocab card the level
+    has reached -- and only there."""
+
+    def test_the_premise_holds(self) -> None:
+        # If the kanji deck ever re-files 離 at N3 or below, these tests
+        # stop proving anything: pick another character it files above
+        # a card that writes it.
+        self.assertNotIn("離", kanji_set("N2"))
+
+    def test_a_word_vouches_for_its_kanji(self) -> None:
+        # 離す is an N3 card and 〜ないで N5 grammar: the sentence is N3,
+        # not the N1 the character alone would make it.
+        self.assertEqual(kanji_over_level("離さないで", "N3"), [])
+        self.assertEqual(estimate_level("離さないで"), "N3")
+
+    def test_the_word_s_own_level_still_holds(self) -> None:
+        # Below the card's level the word vouches for nothing.
+        self.assertEqual(kanji_over_level("離さないで", "N4"), ["離"])
+
+    def test_an_n5_word_written_with_an_n1_kanji_is_n5(self) -> None:
+        self.assertNotIn("狭", kanji_set("N2"))
+        self.assertEqual(kanji_over_level("狭い部屋です。", "N5"), [])

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { LEVEL_COLORS } from './levelColors'
 import { shortDate } from '../../lib/formatDate'
 import { useLang } from '../../LangContext'
-import { apiFetch } from '../../lib/api'
+import { cachedLookup, fetchLookup, pickEntry } from '../../lib/dictionaryLookup'
 import { api } from '../../lib/origin'
 import { FuriganaParts, splitReadingTokens } from '../study/Readings'
 import { joinRuns } from '../../domain/rubyRuns'
@@ -256,6 +256,101 @@ export function TagChip({ tag }) {
         document.body,
       )}
     </button>
+  )
+}
+
+// ── The ＋'s menu, out of the plate's panel ──
+// Portaled to document.body at fixed coordinates taken from the ＋, as
+// TagChip's tooltip is and for the same reason: a plate stands in
+// panels that clip. The desk analyser's band (plan 134) sets it in a
+// top panel whose `overflow: hidden` rounds the stripe and the record
+// into its corners, and the menu that hung under the ＋ inside it was
+// cut to its top edge -- a sliver under the plate, with no row to
+// press. Out here it hangs whole wherever the plate stands, under the
+// ＋ with their trailing edges flush (over it where the window's foot
+// is too near), and follows it while anything under it scrolls.
+//
+// Out of the plate's DOM it is also out of its Tab order and out of a
+// lookup sheet's trap, so it takes the keyboard itself, as a menu
+// does: the focus on its first row when it opens, ↑/↓/Home/End between
+// the rows, and Escape or Tab closing it with the focus back on the ＋.
+// Its keys are taken in the capture phase and kept, so an Escape here
+// closes the menu alone -- not the sheet, nor the docked entry's doors
+// -- and the analyser's ↑/↓ do not walk the passage behind it. A press
+// anywhere but the menu or the ＋ closes it; the ＋ toggles it itself.
+function AddMenu({ anchor, label, onClose, children }) {
+  const ref = useRef(null)
+  const onCloseRef = useRef(onClose)
+  useLayoutEffect(() => { onCloseRef.current = onClose })
+
+  // Placed on the node itself, before the first paint and on every
+  // scroll, rather than through state: a render per scroll event is
+  // not what a menu hanging still needs, and the focus below must find
+  // it where it will be seen. From the top-left corner only: the
+  // viewport's far edges move with a scrollbar, which the measure of
+  // them does not always count the way the fixed box does.
+  useLayoutEffect(() => {
+    function place() {
+      const menu = ref.current
+      const box = anchor.current?.getBoundingClientRect()
+      if (!menu || !box) return
+      const tall = menu.offsetHeight
+      const above = box.bottom + tall > window.innerHeight && box.top > tall
+      menu.dataset.placement = above ? 'above' : 'below'
+      menu.style.top = `${above ? box.top - tall : box.bottom}px`
+      menu.style.left = `${box.right - menu.offsetWidth}px`
+    }
+    place()
+    window.addEventListener('resize', place)
+    window.addEventListener('scroll', place, true)
+    return () => {
+      window.removeEventListener('resize', place)
+      window.removeEventListener('scroll', place, true)
+    }
+  }, [anchor])
+
+  useEffect(() => {
+    const rows = () => [...(ref.current?.querySelectorAll('[role^="menuitem"]') ?? [])]
+    rows()[0]?.focus({ preventScroll: true })
+    function back() {
+      onCloseRef.current()
+      anchor.current?.querySelector('button')?.focus({ preventScroll: true })
+    }
+    function onKey(e) {
+      if (e.key === 'Escape' || e.key === 'Tab') {
+        e.preventDefault()
+        e.stopPropagation()
+        back()
+        return
+      }
+      const list = rows()
+      const i = list.indexOf(document.activeElement)
+      const to = e.key === 'ArrowDown' ? (i + 1) % list.length
+        : e.key === 'ArrowUp' ? (i <= 0 ? list.length - 1 : i - 1)
+          : e.key === 'Home' ? 0
+            : e.key === 'End' ? list.length - 1
+              : null
+      if (to === null || list.length === 0) return
+      e.preventDefault()
+      e.stopPropagation()
+      list[to].focus()
+    }
+    function onDown(e) {
+      if (!ref.current?.contains(e.target) && !anchor.current?.contains(e.target)) onCloseRef.current()
+    }
+    window.addEventListener('keydown', onKey, true)
+    document.addEventListener('pointerdown', onDown)
+    return () => {
+      window.removeEventListener('keydown', onKey, true)
+      document.removeEventListener('pointerdown', onDown)
+    }
+  }, [anchor])
+
+  return createPortal(
+    <div ref={ref} className="dict-add-menu" role="menu" aria-label={label}>
+      {children}
+    </div>,
+    document.body,
   )
 }
 
@@ -855,22 +950,19 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
       kind: appCard.source,
     }),
   })
-  // The menu: open under the ＋, closed by a choice, a press outside or
-  // Escape. Keyed to the entry so it never survives onto the next.
+  // The menu: open under the ＋ (AddMenu), closed by a choice, a press
+  // outside or Escape. Keyed to the entry so it never survives onto the
+  // next. A choice hands the focus back to the ＋ before it acts, so
+  // the deck picker it may open returns it there when it closes.
   const [menuFor, setMenuFor] = useState(null)
   const menuOpen = menuFor === entryKey(entry)
   const addRef = useRef(null)
-  useEffect(() => {
-    if (!menuOpen) return
-    function onDown(e) { if (!addRef.current?.contains(e.target)) setMenuFor(null) }
-    function onKey(e) { if (e.key === 'Escape') { e.stopPropagation(); setMenuFor(null) } }
-    document.addEventListener('pointerdown', onDown)
-    window.addEventListener('keydown', onKey, true)
-    return () => {
-      document.removeEventListener('pointerdown', onDown)
-      window.removeEventListener('keydown', onKey, true)
-    }
-  }, [menuOpen])
+  const closeMenu = useCallback(() => setMenuFor(null), [])
+  function choose(e, act) {
+    addRef.current?.querySelector('button')?.focus({ preventScroll: true })
+    setMenuFor(null)
+    act(e)
+  }
   async function toggleFavorite() {
     setFavRefusal(null)
     setFavPending(true)
@@ -1029,14 +1121,14 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                   <PlusIcon size={16} />
                 </button>
                 {menuOpen && (
-                  <div className="dict-add-menu" role="menu" aria-label={t.dictAdd}>
+                  <AddMenu anchor={addRef} label={t.dictAdd} onClose={closeMenu}>
                     {favorites && (
                       <button
                         type="button"
                         role="menuitemcheckbox"
                         aria-checked={kept}
                         className="dict-add-menu__row"
-                        onClick={() => { setMenuFor(null); toggleFavorite() }}
+                        onClick={e => choose(e, toggleFavorite)}
                       >
                         <StarIcon size={14} filled={kept} />
                         {kept ? t.dictFavoriteRemove : t.dictFavoriteAdd}
@@ -1047,13 +1139,13 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                         type="button"
                         role="menuitem"
                         className="dict-add-menu__row"
-                        onClick={e => { setMenuFor(null); mine.press(e) }}
+                        onClick={e => choose(e, mine.press)}
                       >
                         <PlusIcon size={14} />
                         {mine.addedOnce ? t.addToAnotherDeck : t.dictAddToDeck}
                       </button>
                     )}
-                  </div>
+                  </AddMenu>
                 )}
               </span>
             )}
@@ -1378,34 +1470,45 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 // otherwise dock whatever word the search happened to rank first — an
 // unrelated entry printed as the answer. The sheets, opened on a
 // learner's own tap, keep the nearest match.
-function useDictionaryLookup(session, term, category, lang, active, kana, id, exact = false) {
-  const [state, setState] = useState({ entry: null, loading: false, error: false })
+function useDictionaryLookup(session, term, category, lang, active, kana, id, exact = false, cached = false) {
+  // `cached`: an entry already in hand (lib/dictionaryLookup: asked for
+  // ahead, or opened a moment ago) is drawn on the first frame, with no
+  // loading line between one word and the next. Only the analyser asks:
+  // elsewhere a card may have been reviewed since, and its record must
+  // be read again.
+  const inHand = () => {
+    if (!cached || !active || !category || (!term && !id)) return null
+    const data = cachedLookup(session, { term, kana, category, id, lang })
+    if (!data) return null
+    const match = pickEntry(data, { term, kana, id, exact })
+    return { entry: match, loading: false, error: !match }
+  }
+  const [state, setState] = useState(() => inHand() ?? { entry: null, loading: false, error: false })
 
   useEffect(() => {
     if (!active || !category || (!term && !id)) return
     let cancelled = false
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- this setState is the "start of the fetch" reset (clears any previous term's stale result and flips on the loading spinner) that has to happen synchronously with kicking off the fetch below; it's inseparable from the network call, not a standalone "reset on id change" this could be replaced by a key-remount for.
+    const params = { term, kana, category, id, lang }
+    const data = cached ? cachedLookup(session, params) : undefined
+    if (data) {
+      const match = pickEntry(data, { term, kana, id, exact })
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the entry in hand for new params, set with them; same shape as the fetch's own reset below.
+      setState(s => (s.entry === match && !s.loading ? s : { entry: match, loading: false, error: !match }))
+      return
+    }
+    // This setState is the "start of the fetch" reset (clears any previous term's stale result and flips on the loading spinner) that has to happen synchronously with kicking off the fetch below; it's inseparable from the network call, not a standalone "reset on id change" this could be replaced by a key-remount for.
     setState({ entry: null, loading: true, error: false })
 
-    const params = new URLSearchParams({ q: term ?? '', page: 0, limit: 10, lang: lang ?? '', category })
-    if (kana) params.set('kana', kana)
-    if (id) params.set('id', id)
-    apiFetch(`/api/dictionary?${params.toString()}`, session)
-      .then(r => r.json())
-      .then(data => {
+    fetchLookup(session, params, { keep: cached })
+      .then(result => {
         if (cancelled) return
-        const results = data.results || []
-        const match = id
-          ? (results.find(e => e.raw_id === id) ?? null)
-          : (kana && results.find(e => e.kanji === term && e.kana === kana))
-            ?? results.find(e => e.kanji === term || e.kana === term)
-            ?? (exact ? null : results[0] ?? null)
+        const match = pickEntry(result, { term, kana, id, exact })
         setState({ entry: match, loading: false, error: !match })
       })
       .catch(() => { if (!cancelled) setState({ entry: null, loading: false, error: true }) })
 
     return () => { cancelled = true }
-  }, [active, term, category, session, lang, kana, id, exact])
+  }, [active, term, category, session, lang, kana, id, exact, cached])
 
   return state
 }
@@ -1444,7 +1547,7 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id, ex
 // entry at its head. Shared by the sheet (a portal over a quiz or the
 // catalogue) and the body the desk docks beside the catalogue (plan
 // 114), so the two walk their doors the same way.
-function useLookupStack(session, { term, kana, category, id }, exact = false) {
+function useLookupStack(session, { term, kana, category, id }, exact = false, cached = false) {
   const { lang } = useLang()
   // Reset by the caller remounting on a new term (the key it is opened
   // with is the term itself).
@@ -1452,7 +1555,7 @@ function useLookupStack(session, { term, kana, category, id }, exact = false) {
   const here = stack[stack.length - 1]
   // Only the first lookup is the unasked one: a door opened from it is
   // the learner's own tap and keeps the nearest match.
-  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id, exact && stack.length === 1)
+  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id, exact && stack.length === 1, cached)
 
   const open = (nextTerm, nextCategory, nextKana) => {
     if (!nextTerm) return
@@ -1552,8 +1655,8 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
 // way. No portal, no scrim, no dialog: it is a column's content.
 // `band` (plan 126): the entry in the desk run's band layout -- the plate
 // and the learner's record in a top panel, the dictionary under it.
-export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false, band = false }) {
-  const look = useLookupStack(session, { term, kana, category, id }, exact)
+export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false, band = false, cached = false }) {
+  const look = useLookupStack(session, { term, kana, category, id }, exact, cached)
   // `escBack` (plan 123): a host with no way out of its own -- the run's
   // session panel, docked beside the card -- lets Escape step back out
   // of the doors opened in it, to the entry it was opened on. The key
