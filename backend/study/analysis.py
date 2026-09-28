@@ -359,7 +359,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 160: 〜てはいけません's いけ is no 行く "to go"), a word a point is
 # written on and has no card not counted off-deck, and every deck
 # card's French gloss beside its English one (`meaning_fr`).
-LOCAL_REV = 8
+# 9: a sentence's level no longer set by a kanji the kanji deck files
+# above the word it is written in (離さないで was N1 over 離; its word
+# 離す is N3) -- difficulty._word_kanji_levels.
+LOCAL_REV = 9
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

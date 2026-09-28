@@ -17,7 +17,8 @@ so this grades all three.
 
 ── The three gates ───────────────────────────────────────────
 kanji     every kanji in the sentence is in the level's cumulative set
-          (N3 means N5 + N4 + N3). Unchanged from what reading.py had.
+          (N3 means N5 + N4 + N3), or is written inside a word whose
+          vocab card the level has reached -- see _word_kanji_levels.
 
 grammar   no grammar point ABOVE the level appears. The catalogue
           (content/grammar/N5.json … N1.json, one list per level)
@@ -84,13 +85,66 @@ def kanji_set(level: str) -> frozenset:
     return frozenset(get_kanji_string(LEVELS[: idx + 1]))
 
 
+@lru_cache(maxsize=4096)
+def _word_kanji_levels(sentence: str) -> dict[str, int]:
+    """kanji -> the rank of the easiest vocab card that writes it in
+    `sentence`, for every kanji the sentence spells inside a deck word.
+
+    The kanji deck and the vocab deck file the same character at levels
+    that disagree: 離す is an N3 card and 離 an N1 character, 狭い is N5
+    and 狭 N1 -- 1,683 vocab cards are written with a kanji the kanji
+    deck places above the card. Asked about the character alone, the
+    gate called 「離さないで」 N1, a sentence of one N3 word and N5
+    grammar. A learner who has reached a word's card has met its kanji
+    in it, so the word vouches for the character -- in that word only:
+    離 written anywhere else still answers to the kanji deck.
+
+    The words are the breakdown's own (study/analysis._tokens: a deck
+    compound first, then the morpheme), and a character only counts
+    where the card's written form holds it, so a card reached by its
+    READING never vouches for a kanji it is not written with. Empty when
+    the tokenizer is not there, which is the gate as it was.
+    """
+    from study import morphology
+    from study.card_lookup import resolve_compound, resolve_morpheme
+
+    morphemes = morphology.tokenize(sentence)
+    if not morphemes:
+        return {}
+    out: dict[str, int] = {}
+    i = 0
+    while i < len(morphemes):
+        hit = resolve_compound(morphemes, i)
+        if hit:
+            level, entry, _raw_id, n = hit
+        else:
+            found = resolve_morpheme(morphemes, i)
+            level, entry = found[:2] if found else (None, None)
+            n = 1
+        if level in _RANK and entry:
+            written = entry.get("kanji") or ""
+            for c in "".join(m.surface for m in morphemes[i:i + n]):
+                if _is_kanji(c) and c in written:
+                    out[c] = min(out.get(c, _RANK[level]), _RANK[level])
+        i += n
+    return out
+
+
 def kanji_over_level(sentence: str, level: str) -> list[str]:
-    """The kanji in `sentence` that `level` has not reached yet."""
+    """The kanji in `sentence` that `level` has not reached yet: neither
+    in the level's kanji nor written in a word the level's cards teach
+    (see _word_kanji_levels)."""
     allowed = kanji_set(level)
+    limit = rank(level)
+    vouched = None
     seen, out = set(), []
     for c in sentence:
         if _is_kanji(c) and c not in allowed and c not in seen:
             seen.add(c)
+            if vouched is None:
+                vouched = _word_kanji_levels(sentence)
+            if vouched.get(c, len(LEVELS)) <= limit:
+                continue
             out.append(c)
     return out
 
