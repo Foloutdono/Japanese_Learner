@@ -16,10 +16,28 @@ import { useLang } from '../../LangContext'
 // cards -- draws the words the run will build from, or says what it
 // builds from. Decorative for a screen reader, as plan 137's is: the
 // page's description already says what the well shows.
+//
+// ── On the Practice gate too (plan 165) ──
+// The canvas's last board, "Every platform's specimen", hangs the six
+// platforms of the gate each with its exercise in a well: `plate` draws
+// the same faces at a plate's size -- the Japanese a rung down, the
+// field the well's width, comprehension's text over its question
+// rather than beside it, each choice on one line -- and the mock
+// exam's, one 漢字読み question with the paper's four choices. The well
+// stands inside the plate's button, so every element in it is a span (a
+// button holds phrasing content only); the flex column it is laid out
+// in makes each a block.
 
 // A clip's waveform, drawn once: the bars of a spoken line, not of any
 // particular one.
 const WAVE = [30, 55, 80, 45, 65, 95, 60, 35, 70, 50, 85, 40, 25, 55, 75, 45, 30, 60]
+
+/** Where a sentence names its word, the word underlined in it. */
+export function Marked({ sentence, word, className = 'prc-paper__mark' }) {
+  const at = word ? sentence.indexOf(word) : -1
+  if (at < 0) return sentence
+  return <>{sentence.slice(0, at)}<span className={className}>{word}</span>{sentence.slice(at + word.length)}</>
+}
 
 const PLACEHOLDER = {
   reading: 'romajiPlaceholder',
@@ -55,28 +73,35 @@ export function Audio({ listens = null }) {
 }
 
 /**
- * platform — reading | translation | comprehension | dictation | composition
+ * platform — reading | translation | comprehension | dictation | composition,
+ *            and on the gate exam
  * card     — the stop's card from the samples, or null while it is on its way
+ *            (the exam's: its grade's 漢字読み item, samples' card.vocab)
  * tag      — the caption in the well's corner ("Une phrase du grade")
  * words    — a frequency tier's first words, in place of a card
  * note     — a line saying what the run builds from, in place of a card
+ * plate    — drawn on the Practice gate's plate rather than a stop's page
+ * compact  — a short plate's: the well's gaps a rung tighter, and
+ *            comprehension's text alone, the question and its choices
+ *            left to the run
  */
-export function PracticeSpecimen({ platform, card = null, tag, words = null, note = null }) {
+export function PracticeSpecimen({ platform, card = null, tag, words = null, note = null, plate = false, compact = false }) {
   const { t } = useLang()
-  const two = platform === 'comprehension' && card && !words && !note
+  const two = !plate && platform === 'comprehension' && card && !words && !note
+  const cls = ['prc-spec', two && 'prc-spec--two', plate && 'prc-spec--plate', plate && compact && 'prc-spec--compact'].filter(Boolean).join(' ')
   return (
-    <div className={two ? 'prc-spec prc-spec--two' : 'prc-spec'} aria-hidden="true">
+    <span className={cls} aria-hidden="true">
       {tag && <span className="prc-spec__tag">{tag}</span>}
-      {face(platform, card, words, note, t)}
-    </div>
+      {face(platform, card, words, note, t, compact)}
+    </span>
   )
 }
 
-function face(platform, card, words, note, t) {
+function face(platform, card, words, note, t, compact) {
   if (words) {
     return (
       <>
-        <p className="prc-spec__words" lang="ja">{words.join('　')}</p>
+        <span className="prc-spec__words" lang="ja">{words.join('　')}</span>
         <Field platform={platform} />
       </>
     )
@@ -84,7 +109,7 @@ function face(platform, card, words, note, t) {
   if (note) {
     return (
       <>
-        <p className="prc-spec__note">{note}</p>
+        <span className="prc-spec__note">{note}</span>
         <Field platform={platform} />
       </>
     )
@@ -95,7 +120,7 @@ function face(platform, card, words, note, t) {
       return (
         <>
           <span className="prc-spec__clock"><i /></span>
-          <p className="prc-spec__jp" lang="ja">{card.jp}</p>
+          <span className="prc-spec__jp" lang="ja">{card.jp}</span>
           <Field platform={platform} />
         </>
       )
@@ -105,7 +130,7 @@ function face(platform, card, words, note, t) {
       // translation_lang), so the well says so too.
       return (
         <>
-          <p className="prc-spec__prompt" lang="en">{card.en}</p>
+          <span className="prc-spec__prompt" lang="en">{card.en}</span>
           <span className="prc-spec__to">↓</span>
           <Field platform={platform} />
         </>
@@ -120,8 +145,8 @@ function face(platform, card, words, note, t) {
     case 'composition':
       return (
         <>
-          <p className="prc-spec__jp" lang="ja">{card.jp}</p>
-          {card.meaning && <p className="prc-spec__gloss">{card.meaning}</p>}
+          <span className="prc-spec__jp prc-spec__jp--point" lang="ja">{card.jp}</span>
+          {card.meaning && <span className="prc-spec__gloss">{card.meaning}</span>}
           <Field platform={platform} />
         </>
       )
@@ -132,14 +157,34 @@ function face(platform, card, words, note, t) {
             <span className="prc-spec__title" lang="ja">{card.title}</span>
             <span className="prc-spec__body" lang="ja">{card.text}</span>
           </span>
-          <span className="prc-spec__ask">
-            <span className="prc-spec__q">{card.question}</span>
-            <span className="prc-spec__opts">
-              {(card.options ?? []).map((o, i) => (
-                <span key={o} className="prc-spec__opt"><b>{i + 1}</b>{o}</span>
+          {!compact && (
+            <span className="prc-spec__ask">
+              <span className="prc-spec__q">{card.question}</span>
+              <span className="prc-spec__opts">
+                {(card.options ?? []).map((o, i) => (
+                  <span key={o} className="prc-spec__opt"><b>{i + 1}</b><span className="prc-spec__label">{o}</span></span>
+                ))}
+              </span>
+            </span>
+          )}
+        </>
+      )
+    case 'exam':
+      // 漢字読み, as the paper asks it: the sentence with its word
+      // underlined over the four readings. A sample from before the
+      // choices were served still prints the reading it asks for.
+      return (
+        <>
+          <span className="prc-spec__jp" lang="ja"><Marked sentence={card.sentence} word={card.word} className="prc-spec__mark" /></span>
+          {card.options?.length === 4 ? (
+            <span className="prc-spec__opts prc-spec__opts--grid" lang="ja">
+              {card.options.map((o, i) => (
+                <span key={o} className="prc-spec__opt"><b>{i + 1}</b><span className="prc-spec__label">{o}</span></span>
               ))}
             </span>
-          </span>
+          ) : (
+            card.reading && <span className="prc-spec__gloss" lang="ja"><span className="prc-spec__to">→ </span>{card.reading}</span>
+          )}
         </>
       )
     default:

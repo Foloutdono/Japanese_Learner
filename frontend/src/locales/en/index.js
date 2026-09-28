@@ -2160,7 +2160,10 @@ const guide = {
   guideLearnStopsDesk: 'The whole line. Every stop on it is a door to its platforms.',
   // Worded for a pointer (plan 123): the notes that said "tap".
   guideLearnPlateDesk: 'A line. Click the plate to open it; the chip is what it owes you today.',
-  guidePracticeDestsDesk: 'The levels, and what you have done at each. Yours is marked; click another to ride it anyway.',
+  // The desk's platforms carry no grades since plan 165: the stop is
+  // skipped there, but its note is still worded for a pointer.
+  guidePracticeDestsDesk: 'The levels. Yours is marked; click another to ride it anyway.',
+  guidePracticePlateDesk: 'A platform, and what it will ask of you at your level. Click it to open it.',
   guideDictEntryDesk: 'An entry, open beside the catalogue. ← and → walk the catalogue.',
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',
@@ -2236,6 +2239,9 @@ const onboarding = {
     comprehension: 'A short text, then its questions — the exam’s reading section, rehearsed.',
     dictation: 'Two listens, no more: write in rōmaji what you hear.',
     composition: 'You are given a grammar point: write a sentence that uses it, and a tutor reads it.',
+    // On the platform's plate, on the desk (plan 165): the question its
+    // well shows.
+    exam: 'A question in the JLPT’s format, here 漢字読み: the reading of the underlined word.',
   },
   practiceBank: {
     sentences: n => `${n} sentences written for the grade.`,

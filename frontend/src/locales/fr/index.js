@@ -2093,7 +2093,10 @@ const guide = {
   guideLearnStopsDesk: 'Toute la ligne. Chaque arrêt est une porte vers ses quais.',
   // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
   guideLearnPlateDesk: 'Une ligne. Cliquez sur la plaque pour l\'ouvrir ; la puce est ce qu\'elle vous doit aujourd\'hui.',
-  guidePracticeDestsDesk: 'Les niveaux, et ce que vous y avez fait. Le vôtre est marqué ; cliquez sur un autre pour y monter quand même.',
+  // Au bureau, les quais ne portent plus leurs niveaux (plan 165) : l'arrêt
+  // y est sauté, mais sa note reste dite pour un pointeur.
+  guidePracticeDestsDesk: 'Les niveaux. Le vôtre est marqué ; cliquez sur un autre pour y monter quand même.',
+  guidePracticePlateDesk: 'Un quai, et ce qu’il vous fera faire à votre niveau. Cliquez pour l’ouvrir.',
   guideDictEntryDesk: 'Une entrée, ouverte à côté du catalogue. ← et → parcourent le catalogue.',
   // Réglages, les deux retours.
   settingsFirstRide: 'Premier essai',
@@ -2166,6 +2169,9 @@ const onboarding = {
     comprehension: 'Un texte court, puis ses questions — l’épreuve de lecture de l’examen, en répétition.',
     dictation: 'Deux écoutes, pas une de plus : écris en rōmaji ce que tu entends.',
     composition: 'Un point de grammaire est donné : écris une phrase qui l’emploie, un tuteur la relit.',
+    // Sur la plaque du quai, au bureau (plan 165) : la question que son
+    // puits montre.
+    exam: 'Une question au format JLPT, ici 漢字読み : la lecture du mot souligné.',
   },
   practiceBank: {
     sentences: n => `${n} phrases écrites pour le grade.`,

@@ -22835,8 +22835,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      the way down a 950px window with the rest of it empty; now the
      plates fill the room the page has, their rows sharing it the way
      the phone's column shares its own, and the room goes to each
-     plate's body — the line drawn upright on Learn, the grades as rows
-     with the learner's record on Practice — never to air in the box
+     plate's body — the line drawn upright on Learn, on Practice the
+     platform's specimen (plan 165) — never to air in the box
      (DESIGN.md, the density contract). A row's share never goes below
      its content: a window too short for the plates scrolls. The shelf
      keeps its own height, having no body to give the room to. Practice
@@ -22857,8 +22857,41 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .learn > .plates > .plate:last-child:nth-child(odd) { grid-column: 1 / -1; }
   /* A plate with a body keeps its head at the head's own height; the
      body takes the rest. */
-  .learn > .plates > .plate--line > .plate__head,
-  .practice > .plates > .plate > .plate__head { flex: none; }
+  .learn > .plates > .plate--line > .plate__head { flex: none; }
+
+  /* ── 見本 — every platform's specimen (plan 165) ──
+     A Practice plate holds its body inside its head (screens/
+     PracticeScreen's PlatformSpecimen, Plate's `body`): the plate is one
+     door, the name its first row and the body the second, spanning the
+     roundel's column too and taking what the name leaves. In the body,
+     a line saying what the run asks over the run's card in a well
+     (components/practice/PracticeSpecimen's `plate`), the well taking
+     what the line leaves -- the canvas's "Every platform's specimen". */
+  .practice > .plates > .plate > .plate__head {
+    grid-template-rows: auto minmax(0, 1fr);
+    row-gap: var(--sp-4);
+    min-height: 0;
+    padding-bottom: var(--sp-5);
+  }
+  .plate__body {
+    grid-column: 1 / -1;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .plate__fill {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-height: 0;
+  }
+  .plate__how {
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+    color: var(--text-secondary);
+  }
 
   /* ── the second column (plan 114) ──
      components/chrome/DeskSide.jsx: whatever stands beside a screen's
@@ -23428,63 +23461,6 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     background: color-mix(in srgb, var(--accent2) 70%, transparent);
   }
   .gate-row:has(.lib-weeks) { grid-template-columns: auto minmax(0, 1fr) auto auto; }
-
-  /* A Practice plate's foot on the desk (plan 130, screens/
-     PracticeScreen's GradeRows): the five grades as rows sharing the
-     body's height, each its code, what the learner has done there and
-     the share of it right, and a chevron. The learner's own grade wears
-     the chip's --here look it had on the chip row. */
-  .desk-grades {
-    flex: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-auto-rows: 1fr;
-    align-items: stretch;
-    gap: var(--sp-1);
-    padding: var(--sp-3) var(--sp-4) var(--sp-4);
-  }
-  .desk-grade {
-    display: grid;
-    grid-template-columns: var(--sp-8) minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: var(--sp-4);
-    padding: 0 var(--sp-4);
-    border: 1px solid transparent;
-    border-radius: var(--r-card);
-    background: none;
-    color: inherit;
-    font: inherit;
-    line-height: 1.2;
-    text-align: left;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
-  }
-  .desk-grade:hover,
-  .desk-grade:focus-visible {
-    border-color: color-mix(in srgb, var(--line-color) 55%, transparent);
-    background: var(--overlay-hover);
-    filter: none;
-  }
-  .desk-grade--here {
-    border-color: color-mix(in srgb, var(--line-color) 55%, transparent);
-    background: color-mix(in srgb, var(--line-color) 12%, transparent);
-  }
-  .desk-grade__code {
-    font-size: var(--fs-body);
-    letter-spacing: var(--tr-term);
-    color: var(--text-primary);
-  }
-  .desk-grade--here .desk-grade__code { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); }
-  .desk-grade__rec {
-    font-weight: 600;
-    color: var(--text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .desk-grade__rec--none { color: var(--text-secondary); }
-  .desk-grade__go { font-size: var(--fs-lead); }
-  .desk-grade:hover .desk-grade__go,
-  .desk-grade:focus-visible .desk-grade__go { color: var(--text-primary); }
 
   /* Today (plan 114): the fare gate is the work and takes the width;
      beside it, in the second column, what the work is for — the pass at
@@ -29812,6 +29788,74 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     border-radius: var(--r-pill);
     font-size: var(--fs-caption);
     color: var(--text-secondary);
+  }
+  /* On the Practice gate's plate (plan 165): the same faces a rung
+     down -- a sentence at a title's size, so an N1 line holds in two
+     rows of a plate's width, the point to write with a rung over it --
+     the field the well's width, and the choices two by two, each on
+     one line: comprehension's text over its question, the text giving
+     way first (it fades out at its foot, .prc-spec__text's mask), and
+     the mock exam's 漢字読み over its four readings. A short plate's
+     comprehension is its text alone (PracticeScreen's TEXT_MIN), which
+     takes the well rather than the text's own cap. */
+  .prc-spec--plate {
+    flex: 1 1 0;
+    min-height: 0;
+    gap: var(--sp-4);
+    padding: var(--sp-5);
+  }
+  .prc-spec--plate .prc-spec__jp {
+    font-size: var(--fs-title);
+    line-height: 1.6;
+  }
+  .prc-spec--plate .prc-spec__jp--point {
+    font-size: var(--fs-heading);
+    line-height: 1.3;
+  }
+  .prc-spec--plate .prc-spec__prompt { font-size: var(--fs-lead); }
+  .prc-spec--plate .prc-spec__field { width: 100%; }
+  .prc-spec--plate .prc-spec__text {
+    flex: 0 1 auto;
+    align-self: stretch;
+    max-height: calc(3 * var(--sp-8));
+  }
+  .prc-spec--plate .prc-spec__ask {
+    flex: none;
+    align-self: stretch;
+    gap: var(--sp-3);
+  }
+  .prc-spec--plate .prc-spec__q { font-size: var(--fs-body); }
+  .prc-spec--plate .prc-spec__opts,
+  .prc-spec__opts--grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-self: stretch;
+  }
+  .prc-spec--plate .prc-spec__opt {
+    min-width: 0;
+    gap: var(--sp-3);
+    padding: var(--sp-1) var(--sp-3);
+    font-size: var(--fs-sm);
+  }
+  .prc-spec--plate .prc-spec__label {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .prc-spec--plate .prc-spec__text:only-child {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+  .prc-spec--compact {
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+  }
+  .prc-spec__mark {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--line-color);
+    text-underline-offset: var(--sp-2);
   }
 
   /* The figures: the profile's lattice, four across, each figure over
