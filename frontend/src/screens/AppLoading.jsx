@@ -3,7 +3,6 @@ import { useLang } from '../LangContext'
 import { Loading } from '../components/ui/Loading'
 import { Mark } from '../components/ui/Mark'
 import { hideSplash } from '../lib/platform'
-import { DeskMast } from '../components/chrome/DeskMast'
 import { PaperWait } from '../components/boarding/PaperWait'
 
 // ── 待合室 — the boot screen (plan 067) ───────────────────────
@@ -26,19 +25,15 @@ import { PaperWait } from '../components/boarding/PaperWait'
 export const WAKE_AFTER_MS = 4000
 
 //
-// `frame` is the desk's (plan 155): the wait between the Welcome's Board
-// and the boarding's first question, drawn in the frame the two share --
-// the sumi column down the left edge with its masthead on the same
-// pixel, the paper beside it -- so first contact's column is carried
-// from the sign-in to the line rather than dropped to the boot screen
-// for the length of one request and put back. The paper holds the dots
-// alone (PaperWait), the same dots on the same spot the Welcome shows
-// while the pass is being issued. `since` is when Board was pressed
-// (App's `boardedHere`): the dots are drawn a beat after that press
-// whichever of the two screens is up by then, so a wait that ends before
-// the beat is the column standing still, and one that crosses from the
-// Welcome to here does not blink. The line itself is laid by the
-// boarding's first frame (components/boarding/DeskLine).
+// `frame` is the desk's (plans 155, 161): the wait between the Welcome's
+// Board and the boarding's first question, drawn on the paper the two
+// share rather than dropped to the boot screen for the length of one
+// request: the dots alone (PaperWait), on the paper's middle, the same
+// spot the Welcome draws them on while the pass is being issued.
+// `since` is when Board was pressed (App's `boardedHere`): the dots are
+// drawn a beat after that press whichever of the two screens is up by
+// then, so a wait that ends before the beat is the paper standing still,
+// and one that crosses from the Welcome to here does not blink.
 export default function AppLoading({ wakesServer = false, wakeAfterMs = WAKE_AFTER_MS, frame = false, since = null }) {
   const { t } = useLang()
   const [waking, setWaking] = useState(false)
@@ -54,9 +49,6 @@ export default function AppLoading({ wakesServer = false, wakeAfterMs = WAKE_AFT
   if (frame) {
     return (
       <main className="brd desk-brd desk-brd--wait" id="main-content">
-        <aside className="desk-brd__side">
-          <DeskMast />
-        </aside>
         <PaperWait since={since} note={waking ? t.waitingServer : null} />
       </main>
     )

@@ -1,14 +1,12 @@
 import { useLang } from '../../LangContext'
 import { Mark } from '../ui/Mark'
 
-// ── 辻 over TSUJI — the desk's masthead (plans 113, 140) ─────────
-// The head of every sumi column the desk draws down its left edge: the
-// rail's, and before there is a rail the front door's and the
-// boarding's (components/boarding/Welcome, DeskLine) and the wait
-// between them (screens/AppLoading's `frame`). One component so the
-// mark stands on the same pixel in all four -- first contact hands the
-// column from one screen to the next, and a mark that moved by a line
-// would say the column had been replaced rather than carried on.
+// ── 辻 over TSUJI — the desk's masthead (plans 113, 140, 161) ────
+// The head of the sumi column the desk draws down its left edge, the
+// rail's. First contact drew the same column before there was a rail
+// (plan 140) until plan 161 took the column away: the front door is the
+// crossroads with the mark at its hub (components/boarding/Welcome),
+// and the rail is the one column left.
 export function DeskMast() {
   const { t } = useLang()
   return (

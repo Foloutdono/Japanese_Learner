@@ -5,8 +5,8 @@ import { Loading } from '../ui/Loading'
 // index.css, .desk-wait).
 const PAPER_WAIT_MS = 480
 
-/** 机 (plan 155): the wait on the paper beside first contact's column --
-    the boot screen's dots, alone, centred on the paper, drawn
+/** 机 (plans 155, 161): the wait on first contact's paper -- the boot
+    screen's dots, alone, centred on the paper, drawn
     PAPER_WAIT_MS after `since` (a performance.now() reading; the moment
     this mounts when there is none). A negative delay is a fade already
     under way, or done: the dots the Welcome started are carried on

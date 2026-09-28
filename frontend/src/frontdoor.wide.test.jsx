@@ -4,14 +4,13 @@ import { userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — first contact on a wide window (plans 122, 140) ───────────
+// ── 机 — first contact on a wide window (plans 122, 140, 161) ──────
 // At 1440 the Welcome's band ran four cards a lane and was clipped mid
 // window; the boarding's column stood in the middle of an empty one.
-// The band spans the paper the sign-in's column leaves, faded at its
-// ends, and its loop never shows a seam. Since plan 140 that column is
-// on the left and holds the boarding's line; the questions are centred
-// in the paper beside it, the level list is one line of six stations,
-// and the plan stands at two columns' width.
+// Since plan 161 there is no column: the Welcome is the crossroads on
+// the canvas (--desk-board-w) centred in the window, its lines at the
+// drawing's length, and the boarding's questions stand in the canvas's
+// corners and draw their answers across it.
 
 const apiJson = vi.hoisted(() => vi.fn())
 const apiJsonWithTimeout = vi.hoisted(() => vi.fn())
@@ -93,25 +92,28 @@ const mid = r => (r.left + r.right) / 2
 const cy = r => (r.top + r.bottom) / 2
 
 describe('first contact at 1440 (P10)', () => {
-  it('runs the band across the whole area, and covers it to the loop\'s last frame', async () => {
+  it('draws the crossroads on the canvas, its lines at the drawing\'s length', async () => {
     expect(window.innerWidth).toBe(1440)
     await render(<LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} /></LangProvider>)
-    await settle(150)
-    const roll = $('.brd-roll')
-    expect(Math.round(box(roll).width)).toBe(Math.round(bodyW()) - 360)
-    expect(getComputedStyle(roll).maskImage).toMatch(/linear-gradient/)
-    for (const lane of document.querySelectorAll('.brd-roll__lane')) {
-      // Hold the loop on its last frame: the lane must still reach the
-      // band's right edge, or the seam shows as an empty strip.
-      const secs = parseFloat(getComputedStyle(lane).animationDuration)
-      lane.style.animationDelay = `-${secs * 0.999}s`
-      lane.style.animationPlayState = 'paused'
+    // Once the way in's entrance has landed.
+    await settle(800)
+    const gutter = (bodyW() - 1240) / 2
+    const board = box($('[data-action="board"]'))
+    // The way in at the canvas's left edge, the corner at its right.
+    expect(Math.round(board.left)).toBe(Math.round(gutter))
+    expect(Math.round(bodyW() - box($('[data-action="sign-in"]')).right)).toBe(Math.round(gutter))
+    // The lines at their longest: the kanji's sign 240px right of the
+    // hub, the kana's 240px over it.
+    const hub = box($('.desk-front__hub'))
+    const sign = line => box($(`.desk-front__stn[data-line="${line}"] .desk-front__sign`))
+    expect(Math.round(mid(sign('kanji')) - mid(hub))).toBe(240)
+    expect(Math.round(cy(hub) - cy(sign('kana')))).toBe(240)
+    // Every name inside the canvas, right of the way in.
+    for (const n of document.querySelectorAll('.desk-front__name')) {
+      expect(box(n).right).toBeLessThanOrEqual(bodyW() - gutter + 1)
+      expect(box(n).left).toBeGreaterThan(board.right)
     }
-    await settle(60)
-    for (const lane of document.querySelectorAll('.brd-roll__lane')) {
-      expect(box(lane).left).toBeLessThan(box(roll).left)
-      expect(box(lane).right).toBeGreaterThan(box(roll).right)
-    }
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
   })
 
   it('stands the question in the canvas\'s top-left corner, the answers centred under it', async () => {

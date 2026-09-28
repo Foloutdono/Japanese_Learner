@@ -1837,6 +1837,10 @@ const boarding = {
   // Welcome: the sign, the rolling stock, the promise.
   brdTagline: 'Reach your goals.',
   brdBoard: 'Board',
+  // 辻 (plan 161): the desk's front door, its corner and the way back to it.
+  brdHaveAccountQ: 'Have an account?',
+  brdNoAccountYet: 'No account yet?',
+  brdBackHome: 'Back to the start',
   brdHaveAccount: 'Already have an account? Sign in',
   // Google: "continue", never "sign up" or "sign in" — a provider does
   // not tell the two apart. You simply arrive.

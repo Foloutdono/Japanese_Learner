@@ -25427,9 +25427,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      per question (components/boarding/DeskStrip); the floor is the
      bottom-right corner, Back beside Continue (BoardFrame's BoardBack).
      Between them each question draws its answers in the paper that is
-     left. The Welcome and the wait after it keep plan 140's column until
-     the front door is drawn (161e). Every rule here is scoped under
-     .desk-brd or .desk-door, and writes no (element, property) pair the
+     left; the Welcome before them is the crossroads itself (.desk-front,
+     below). Every rule here is scoped under .desk-brd or .desk-front,
+     and writes no (element, property) pair the
      boarding's short step writes (@container brd (max-height: 739px);
      held by src/desk.css.test.js), so a laptop's short window still gets
      the short step. */
@@ -25444,29 +25444,6 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
        body's (below). */
     padding-top: calc(var(--safe-top) + var(--sp-7));
     padding-bottom: calc(var(--safe-bottom) + var(--sp-7));
-  }
-  /* The column: the rail's material -- its sumi, its lit edge and the
-     shadow it throws, turned to face the screen (.desk-rail) -- at a
-     second column's width, so the phone-born sign-in stands in it at
-     the width it was drawn at. It scrolls on its own on a short window;
-     its foot stays under what it holds. */
-  .desk-brd__side,
-  .desk-door__side {
-    --chrome-edge: color-mix(in srgb, var(--text-on-panel) 22%, var(--burger-menu-border));
-    position: fixed;
-    inset: 0 auto 0 0;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-6);
-    width: var(--desk-side-w);
-    padding-top: calc(var(--safe-top) + var(--sp-6));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    background: var(--bg-panel);
-    color: var(--text-on-panel);
-    border-right: 1px solid var(--chrome-edge);
-    box-shadow: 10px 0 24px -12px rgba(0, 0, 0, 0.75);
   }
   /* A step's answers stand at the width that serves them, set on its
      car so a leaving car keeps its own while it pulls away: the card's
@@ -25487,13 +25464,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="account"] { --desk-brd-w: var(--desk-board-w); }
-  .desk-brd .brd__stage,
-  .desk-door .brd__foot {
+  .desk-brd .brd__stage {
+    --desk-at: var(--desk-brd-w);
     width: 100%;
     max-width: var(--desk-at, var(--desk-side-w));
     margin-inline: auto;
   }
-  .desk-brd .brd__stage { --desk-at: var(--desk-brd-w); }
   /* The question at the paper's top-left corner, its hint under it, and
      the answers standing in the middle of the paper that is left: the
      body's spacers and the air under the question are the phone's way of
@@ -27253,128 +27229,204 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     height: 18px;
     color: var(--accent2);
   }
-  /* The Welcome (components/boarding/Welcome's DeskWelcome): the
-     column's masthead is the mark, so the paper's heading takes the
-     display rung; the heading, the tagline and Board as one block over
-     the rolling stock, run across the paper, the whole centred between
-     grow-only air (the density contract). The column's Log in wears the
-     provider button's ghost clothes, so Board is the page's one filled
-     action.
-
-     Plan 155's second round (owner: "the entry looks bad, make it
-     simpler"): the sign-in was the paper's card set in the sumi -- a
-     pale slab floating mid-column under a caption that repeated the
-     link's own words -- beside two lanes of twenty-four cards. Now the
-     sign-in is drawn in the column's own material (the sumi field, the
-     panel's hairlines, no card), under a plain "Log in", and stands
-     where it stood, on the column's middle (the owner's call); one lane
-     of cards passes under the promise; the tagline is its quiet second
-     line. */
-  .desk-door {
+  /* ── 辻 — the front door as the crossroads (plans 140, 155, 161) ──
+     The owner's D00 (components/boarding/Welcome's DeskWelcome): the
+     paper whole, no column. The way in -- the promise over Board, or the
+     sign-in over its own action -- stands at the paper's left margin, its
+     action a rung under the paper's middle (the block's middle row); from
+     it the gold road runs right into the hub, 辻, and out of the hub the
+     app's lines in their pigments to their signs. The hub's centre and
+     the margin are measured (--cx, --cy, --pad, plain pixels), and each
+     sign is placed on its line's end (--x, --y). The corner holds the
+     other way in: Log in on the promise, Board on the sign-in. */
+  .desk-front {
     --fs-display-fluid: var(--fs-display);
     max-width: none;
-    padding-inline: var(--desk-side-w) 0;
+    padding: 0;
+    overflow: hidden;
   }
-  .desk-door__work {
+  .desk-front__door {
+    position: absolute;
+    top: calc(var(--safe-top) + var(--sp-7));
+    right: calc(var(--pad, 44) * 1px);
+    z-index: 1;
     display: flex;
-    flex: 1;
-    flex-direction: column;
     align-items: center;
-    gap: var(--sp-8);
-    min-width: 0;
-    min-height: 0;
-    overflow-y: auto;
+    gap: var(--sp-5);
+    margin: 0;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
   }
-  .desk-door__work::before,
-  .desk-door__work::after {
-    content: "";
-    flex: 1 0 0;
+  .desk-front__door-btn {
+    min-height: 44px;
+    padding: 0 var(--sp-6);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    background: none;
+    font: inherit;
+    font-size: var(--fs-body);
+    color: var(--text-primary);
+    cursor: pointer;
   }
-  .desk-door__work::before { margin-bottom: calc(-1 * var(--sp-8)); }
-  .desk-door__work::after { margin-top: calc(-1 * var(--sp-8)); }
-  .desk-door__auth {
-    --door-line: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+  .desk-front__block {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--pad, 44) * 1px);
+    z-index: 1;
+    display: grid;
+    /* The action's middle a rung under the paper's (Welcome's BELOW,
+       60px, less half of its own 56px). */
+    grid-template-rows: calc(50% + var(--sp-9) + var(--sp-3) - 28px) auto minmax(0, 1fr);
+    width: var(--desk-side-w);
+    animation: brd-in 480ms ease-out 120ms backwards;
+  }
+  .desk-front__above {
     display: flex;
     flex-direction: column;
+    align-self: end;
     gap: var(--sp-4);
-    margin-block: auto;
-    padding: 0 var(--sp-6);
-    padding-bottom: calc(var(--sp-6) + var(--safe-bottom));
-    animation: desk-brd-show 480ms ease-out 200ms backwards;
-    transition: opacity 240ms ease;
+    padding-bottom: var(--sp-6);
   }
-  .desk-door__side .desk-deck__cap,
-  .desk-door__side .auth-foot { color: var(--text-on-panel-soft); }
-  /* The card's own ground and edge go: the column is the ground. */
-  .desk-door__auth .auth-card {
+  .desk-front .desk-front__above > .brd__q { margin: 0; text-align: start; }
+  .desk-front__above > .brd-tagline {
+    margin: 0;
+    font-weight: 400;
+    text-align: start;
+    color: var(--text-secondary);
+  }
+  .desk-front .desk-front__block > .btn-depart {
+    width: 100%;
+    margin: 0;
+  }
+  .desk-front__below {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: start;
+    gap: var(--sp-3);
+    padding-top: var(--sp-4);
+  }
+  /* The sign-in on the paper: no card, its fields the page's wells
+     (.field--page) since they stand on the bare paper. */
+  .desk-front .auth-card {
+    gap: var(--sp-4);
     padding: 0;
     background: none;
     border: 0;
     border-radius: 0;
+    box-shadow: none;
   }
-  .desk-door__auth .field {
-    --field-ink: var(--text-on-panel);
-    --field-dim: var(--text-on-panel-soft);
-    --field-well: rgba(0, 0, 0, 0.28);
-    border-color: var(--door-line);
+  .desk-front .auth-card .field { --field-well: var(--surface); }
+  .desk-front__below > .brd__link {
+    align-self: flex-start;
+    padding-inline: 0;
   }
-  .desk-door__auth .auth-provider,
-  .desk-door__side .auth-submit {
-    background: transparent;
-    border: 1px solid var(--door-line);
-    color: var(--text-on-panel);
+  .desk-front__map {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: desk-brd-show 480ms ease-out 200ms backwards;
   }
-  .desk-door__auth .auth-or { color: var(--text-on-panel-soft); }
-  .desk-door__auth .auth-or::before,
-  .desk-door__auth .auth-or::after { background: var(--door-line); }
-  .desk-door__auth .auth-message--error { color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
-  /* The promise's second line, in the paper's second ink. */
-  .desk-door .brd-tagline {
-    font-weight: 400;
-    color: var(--text-secondary);
-  }
-  /* The band runs across the paper, capped at the canvas and faded at
-     its ends -- a clip mid-window read as a broken card, not a train
-     leaving. The desk's one lane is four of a phone lane's runs long, so
-     it moves twice as far per loop and the loop takes twice as long: the
-     cards pass at a phone's speed. A pointer resting on the band stops it. */
-  .desk-door .brd-roll {
-    flex: none;
+  .desk-front__roads {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    max-width: var(--desk-board-w);
-    margin-inline: 0;
-    mask-image: linear-gradient(to right, transparent, currentcolor var(--sp-9), currentcolor calc(100% - var(--sp-9)), transparent);
-    animation: desk-brd-show 900ms ease-out 260ms backwards;
+    height: 100%;
+    overflow: visible;
   }
-  .desk-door .brd-roll__lane { animation-duration: 52s; }
-  /* ── first contact handed on (plan 155) ──
-     The Welcome's paper arrives in reading order -- the promise, Board,
-     then the band -- and the column's sign-in a beat after its
-     masthead. Board pressed (Welcome's `leaving`), the three leave the
-     way a car does, a rung to the left and fading, a beat apart, and the
-     sign-in steps out of the column; transitions rather than a one-way
-     animation, so a pass the office could not issue brings them back.
-     The column stays: the wait after it (AppLoading's `frame`,
-     .desk-brd--wait) is the same sumi with the masthead on the same
-     pixel, and the boarding lays its line there. */
-  .desk-door .brd__foot { animation: brd-in 480ms ease-out 120ms backwards; }
-  .desk-door__work > :is(.brd-hero, .brd__foot, .brd-roll) {
-    transition: opacity 240ms ease, transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  .desk-front__way { stroke: var(--accent2); stroke-width: 10; stroke-linecap: round; }
+  .desk-front [data-line="kana"] { --c: var(--line-kana); }
+  .desk-front [data-line="vocab"] { --c: var(--line-vocab); }
+  .desk-front [data-line="kanji"] { --c: var(--line-kanji); }
+  .desk-front [data-line="grammar"] { --c: var(--line-grammar); }
+  .desk-front [data-line="reading"] { --c: var(--line-reading); }
+  .desk-front [data-line="translation"] { --c: var(--line-honyaku); }
+  .desk-front [data-line="dictation"] { --c: var(--line-kakitori); }
+  .desk-front__road { stroke: var(--c, var(--surface-line)); stroke-width: 8; stroke-linecap: round; }
+  .desk-front__hub {
+    position: absolute;
+    top: calc(var(--cy, 0) * 1px);
+    left: calc(var(--cx, 0) * 1px);
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 136px;
+    height: 136px;
+    border: 5px solid var(--text-primary);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    transform: translate(-50%, -50%);
+    animation: desk-brd-show 480ms ease-out 200ms backwards;
   }
-  .desk-door--leaving .desk-door__work > :is(.brd-hero, .brd__foot, .brd-roll) {
+  .desk-front__hub > .mark { width: 84px; height: 84px; }
+  /* A sign at its line's end, its name on its far side. */
+  .desk-front__stn {
+    position: absolute;
+    top: calc(var(--y, 0) * 1px);
+    left: calc(var(--x, 0) * 1px);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    transform: translate(-28px, -50%);
+  }
+  .desk-front__stn--start {
+    flex-direction: row-reverse;
+    transform: translate(calc(-100% + 28px), -50%);
+  }
+  .desk-front__stn--over {
+    flex-direction: column-reverse;
+    gap: var(--sp-3);
+    transform: translate(-50%, calc(-100% + 28px));
+  }
+  .desk-front__stn--under {
+    flex-direction: column;
+    gap: var(--sp-3);
+    transform: translate(-50%, -28px);
+  }
+  .desk-front__sign {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 4px solid var(--c, var(--surface-line));
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1;
+    color: color-mix(in srgb, var(--c, var(--text-primary)) 70%, var(--text-primary));
+  }
+  .desk-front__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--text-primary);
+  }
+  /* Board pressed (Welcome's `leaving`): the way in, the map and the
+     corner leave the way a car does, a rung to the left and fading, a
+     beat apart; transitions rather than a one-way animation, so a pass
+     the office could not issue brings them back. `translate`, so the
+     hub keeps the transform that centres it. */
+  .desk-front :is(.desk-front__block, .desk-front__map, .desk-front__hub, .desk-front__door) {
+    transition: opacity 240ms ease, translate 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .desk-front--leaving :is(.desk-front__block, .desk-front__map, .desk-front__hub, .desk-front__door) {
     opacity: 0;
-    transform: translateX(calc(-1 * var(--sp-9)));
+    translate: calc(-1 * var(--sp-9)) 0;
   }
-  .desk-door--leaving .desk-door__work > .brd__foot { transition-delay: 50ms; }
-  .desk-door--leaving .desk-door__work > .brd-roll { transition-delay: 100ms; }
-  .desk-door--leaving .desk-door__auth { opacity: 0; }
-  /* The wait between them (AppLoading's PaperWait): the paper's dots,
-     centred on the paper the column leaves -- the same spot on the
-     Welcome and on the wait after it -- and drawn only once the wait has
-     lasted long enough to be one, timed from the press (--wait-in). */
+  .desk-front--leaving :is(.desk-front__map, .desk-front__hub) { transition-delay: 60ms; }
+  /* The wait between them (PaperWait): the dots on the paper's middle --
+     the same spot on the Welcome and on the wait after it (AppLoading's
+     `frame`, .desk-brd--wait) -- drawn only once the wait has lasted
+     long enough to be one, timed from the press (--wait-in). */
   .desk-wait {
     position: absolute;
-    inset: 0 0 0 var(--desk-side-w);
+    inset: 0;
     min-height: 0;
     padding: 0;
     background: none;
@@ -27384,11 +27436,11 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   @media (prefers-reduced-motion: reduce) {
     .desk-brd__strip,
     .desk-brd .brd__car,
-    .desk-door .brd__foot,
-    .desk-door .brd-roll,
-    .desk-door__auth,
+    .desk-front__block,
+    .desk-front__map,
+    .desk-front__hub,
     .desk-wait { animation: none; }
-    .desk-door--leaving .desk-door__work > :is(.brd-hero, .brd__foot, .brd-roll) { transform: none; }
+    .desk-front--leaving :is(.desk-front__block, .desk-front__map, .desk-front__hub, .desk-front__door) { translate: none; }
     .desk-brd__sp + .desk-brd__sp::before,
     .desk-brd__sp-door,
     .desk-brd__sp-dot { transition: none; }
@@ -27431,7 +27483,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      sign-in, are spared it. */
   @media (pointer: fine) {
     .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stop, .desk-brd__way, .desk-brd__line, .desk-brd__ride, .desk-brd__hour-stn, .desk-brd__train, .desk-brd__back, .desk-brd__sp-door):hover,
-    .desk-door__auth button:hover { filter: none; }
+    .desk-front :is(.desk-front__door-btn, .auth-provider):hover { filter: none; }
     .desk-brd .brd-opt:not(.brd-opt--on):hover,
     .desk-brd .brd-opt:not(.brd-opt--on):focus-visible,
     .desk-brd .brd-kopt:not(.brd-kopt--on):hover,
@@ -27461,9 +27513,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     button.desk-brd__sp-door:hover,
     button.desk-brd__sp-door:focus-visible { color: var(--text-primary); }
     .desk-brd .brd-day { cursor: pointer; }
-    .desk-door .brd-roll:hover .brd-roll__lane { animation-play-state: paused; }
-    .desk-door__auth :is(.auth-provider, .auth-submit):hover,
-    .desk-door__auth :is(.auth-provider, .auth-submit):focus-visible { border-color: var(--text-on-panel-soft); }
+    .desk-front__door-btn:hover,
+    .desk-front__door-btn:focus-visible { border-color: var(--text-secondary); }
   }
 
   /* ── copied, focused (plan 123) ──

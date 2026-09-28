@@ -782,103 +782,187 @@ describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
   })
 })
 
-// ── P10 — the front door (plans 122, 140) ──
-// The Welcome with the sign-in beside it: a returning learner signs in
-// with no second screen. Since plan 140 the sign-in stands in the sumi
-// column on the left under the rail's masthead, and the paper holds the
-// heading, the tagline and Board as one block over the band, which runs
-// across the paper faded at its ends.
+// ── P10 — the front door (plans 122, 140, 161) ──
+// The Welcome with the sign-in on the same screen: a returning learner
+// signs in with no second screen. Since plan 161 (the owner's D00) the
+// paper is the crossroads, whole, no column: the way in at the paper's
+// left margin -- the promise over Board, or the sign-in over its own
+// action -- on the gold road that runs right into the hub, 辻, and out of
+// the hub the app's seven lines to their signs; the corner holds the
+// other way in.
 const centreOf = r => (r.top + r.bottom) / 2
-function Door({ authMode = null, onBoard = () => {}, boarding = false }) {
-  return <LangProvider><Welcome onBoard={onBoard} onSignIn={() => {}} boarding={boarding} authMode={authMode} /></LangProvider>
+function Door({ authMode = null, onBoard = () => {}, onSignIn = () => {}, onBack = () => {}, boarding = false }) {
+  return <LangProvider><Welcome onBoard={onBoard} onSignIn={onSignIn} onBack={onBack} boarding={boarding} authMode={authMode} /></LangProvider>
 }
-const inSide = s => $('.desk-door__side')?.querySelector(s)
+const inBlock = s => $('.desk-front__block')?.querySelector(s)
+// A token's colour as the sheet paints it.
+function paintOf(token) {
+  const probe = document.createElement('div')
+  probe.style.background = `var(${token})`
+  document.body.appendChild(probe)
+  const colour = getComputedStyle(probe).backgroundColor
+  probe.remove()
+  return colour
+}
+const LINES = ['kana', 'vocab', 'kanji', 'grammar', 'reading', 'translation', 'dictation']
 
-describe('the front door on the desk (P10, plan 140)', () => {
-  it('stands the sign-in in the column on the left, and Board as the one filled action', async () => {
+describe('the front door on the desk (P10, plans 140, 161)', () => {
+  it('stands the promise over Board at the paper\'s margin, on the gold road into the hub', async () => {
     await render(<Door />)
-    await settle(150)
-    const col = $('.desk-door__side')
-    expect(Math.round(box(col).width)).toBe(360)
-    expect(Math.round(box(col).left)).toBe(0)
-    expect(Math.round(box(col).height)).toBe(window.innerHeight)
-    // The rail's masthead at its head; the paper keeps no second mark.
-    expect(inSide('.desk-rail__glyph .mark').getAttribute('aria-label')).toBe('辻')
-    expect($('.brd-hero .auth-header__glyph')).toBeNull()
-    // Named plainly (plan 155): "Log in", not the link's own sentence.
-    expect([en.login, fr.login]).toContain(inSide('.desk-deck__cap').textContent)
-    // Drawn in the column's material: no card of the paper's in the sumi,
-    // on the column's middle, where it always stood (the owner's call).
-    expect(getComputedStyle(inSide('.auth-card')).backgroundColor).toBe('rgba(0, 0, 0, 0)')
-    const auth = box(inSide('.auth-card'))
-    expect(Math.abs(centreOf(auth) - window.innerHeight / 2)).toBeLessThan(40)
-    // One lane of cards passes under the promise.
-    expect(document.querySelectorAll('.brd-roll__lane')).toHaveLength(1)
-    // Signing in only: no Login / Sign up control, no foot.
-    expect(inSide('.seg')).toBeNull()
-    expect(inSide('.auth-foot')).toBeNull()
-    expect(inSide('input[type="email"]')).not.toBeNull()
-    // Its door stands beside it: no link to a second screen.
-    expect($('[data-action="sign-in"]')).toBeNull()
-    const board = $('[data-action="board"]')
-    expect(Math.round(box(board).width)).toBe(360)
-    expect(Math.abs(mid(box(board)) - (360 + (bodyW() - 360) / 2))).toBeLessThan(1.5)
-    // Board stands with the promise, over the band -- not on the floor.
-    expect(box(board).top).toBeGreaterThan(box($('.brd-tagline')).bottom)
-    expect(box(board).bottom).toBeLessThan(box($('.brd-roll')).top)
-    expect(getComputedStyle(inSide('.auth-submit')).backgroundColor).toBe('rgba(0, 0, 0, 0)')
-    expect(getComputedStyle(board).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+    await settle(800)
+    // The paper whole: no column, no masthead, no rolling stock -- the
+    // mark is the hub's.
+    expect($('.desk-door__side')).toBeNull()
+    expect($('.desk-rail__mast')).toBeNull()
+    expect($('.brd-roll')).toBeNull()
+    expect($('.desk-front__hub .mark').getAttribute('aria-label')).toBe('辻')
+    expect($('.desk-front__hub').closest('[aria-hidden="true"]')).toBeNull()
+    expect(document.querySelectorAll('.mark')).toHaveLength(1)
+    const board = box($('[data-action="board"]'))
+    // A ticket wide at the margin, under the promise, a rung under the
+    // paper's middle.
+    expect(Math.round(board.left)).toBe(44)
+    expect(Math.round(board.width)).toBe(360)
+    expect(board.top).toBeGreaterThan(box($('.brd-tagline')).bottom)
+    expect(Math.abs(centreOf(board) - (window.innerHeight / 2 + 60))).toBeLessThan(2)
+    // The gold road on Board's line, from past it into the hub on the
+    // same line.
+    const road = box($('.desk-front__way'))
+    const hub = box($('.desk-front__hub'))
+    expect(Math.abs(centreOf(road) - centreOf(board))).toBeLessThan(2)
+    expect(Math.abs(centreOf(hub) - centreOf(board))).toBeLessThan(2)
+    expect(road.left).toBeGreaterThan(board.right)
+    expect(road.right).toBeGreaterThan(hub.left)
+    expect(getComputedStyle($('.desk-front__way')).stroke).toBe(paintOf('--accent2'))
+    // Seven lines out of the hub, each in its own pigment to its sign,
+    // named; every sign on the paper, right of the way in and under the
+    // corner, and clear of the others.
+    const stns = [...document.querySelectorAll('.desk-front__stn')]
+    expect(stns.map(s => s.dataset.line)).toEqual(LINES)
+    expect(new Set(stns.map(s => getComputedStyle(s.querySelector('.desk-front__sign')).borderTopColor)).size).toBe(7)
+    for (const road of document.querySelectorAll('.desk-front__road')) {
+      const sign = $(`.desk-front__stn[data-line="${road.dataset.line}"] .desk-front__sign`)
+      expect(getComputedStyle(road).stroke).toBe(getComputedStyle(sign).borderTopColor)
+    }
+    for (const s of stns) {
+      expect([en.brdDemoTag[s.dataset.line], fr.brdDemoTag[s.dataset.line]]).toContain(s.querySelector('.desk-front__name').textContent)
+      const r = box(s)
+      expect(r.left, s.dataset.line).toBeGreaterThan(board.right)
+      expect(r.right, s.dataset.line).toBeLessThanOrEqual(bodyW())
+      expect(r.top, s.dataset.line).toBeGreaterThan(box($('.desk-front__door')).bottom)
+      expect(r.bottom, s.dataset.line).toBeLessThanOrEqual(window.innerHeight)
+    }
+    for (let i = 0; i < stns.length; i++) {
+      for (let j = i + 1; j < stns.length; j++) {
+        const a = box(stns[i])
+        const b = box(stns[j])
+        const apart = a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top
+        expect(apart, `${stns[i].dataset.line} / ${stns[j].dataset.line}`).toBe(true)
+      }
+    }
+    // One filled action; the other way in plain, in the top-right corner
+    // at the paper's margin.
+    expect(getComputedStyle($('[data-action="board"]')).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+    const corner = $('[data-action="sign-in"]')
+    expect([en.loginBtn, fr.loginBtn]).toContain(corner.textContent)
+    expect(getComputedStyle(corner).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(Math.round(bodyW() - box(corner).right)).toBe(44)
+    expect(box(corner).bottom).toBeLessThan(hub.top)
     expect(document.querySelectorAll('h1')).toHaveLength(1)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
     // Nothing is focused, so Enter boards.
     expect(document.activeElement).toBe(document.body)
   })
 
-  it('opens on Sign up, both sides named, when Board could not issue a pass', async () => {
-    await render(<Door authMode="signup" />)
-    await settle(150)
-    expect(inSide('.desk-deck__cap')).toBeNull()
-    const sides = [...inSide('.seg').querySelectorAll('.seg__opt')]
-    expect(sides.map(o => o.getAttribute('aria-checked'))).toEqual(['false', 'true'])
-    expect(inSide('.auth-foot')).not.toBeNull()
-    expect(document.activeElement).toBe(inSide('input[type="email"]'))
-  })
-
-  it('focuses the email for a learner who came to sign in, and keeps Enter the form\'s there', async () => {
+  it('puts the sign-in in the promise\'s place from the corner, its action where Board stood, and back', async () => {
     const onBoard = vi.fn()
-    await render(<Door authMode="login" onBoard={onBoard} />)
+    const onSignIn = vi.fn()
+    const onBack = vi.fn()
+    const screen = await render(<Door onBoard={onBoard} onSignIn={onSignIn} onBack={onBack} />)
+    // Measured once the way in's entrance has landed.
+    await settle(800)
+    const boardAt = box($('[data-action="board"]'))
+    const hubAt = box($('.desk-front__hub'))
+    await userEvent.click($('[data-action="sign-in"]'))
+    expect(onSignIn).toHaveBeenCalledTimes(1)
+    await screen.rerender(<Door authMode="login" onBoard={onBoard} onSignIn={onSignIn} onBack={onBack} />)
     await settle(150)
-    expect(inSide('.seg')).toBeNull()
-    expect(document.activeElement).toBe(inSide('input[type="email"]'))
+    // Named plainly, signing in only: no Login / Sign up control, no foot.
+    expect([en.login, fr.login]).toContain($('h1').textContent)
+    expect(document.querySelectorAll('h1')).toHaveLength(1)
+    expect(inBlock('.seg')).toBeNull()
+    expect(inBlock('.auth-foot')).toBeNull()
+    expect(document.activeElement).toBe(inBlock('input[type="email"]'))
+    // Its action is Board's place on the road, filled; the map stays.
+    const submit = $('[data-action="auth-submit"]')
+    expect([en.loginBtn, fr.loginBtn]).toContain(submit.querySelector('.btn-depart__jp').textContent)
+    const at = box(submit)
+    expect([at.left, at.top, at.width].map(Math.round)).toEqual([boardAt.left, boardAt.top, boardAt.width].map(Math.round))
+    expect(box($('.desk-front__hub'))).toEqual(hubAt)
+    expect($('[data-action="board"]')).toBeNull()
+    expect(document.querySelectorAll('.btn-depart')).toHaveLength(1)
+    // No card on the paper; its fields the page's wells.
+    expect(getComputedStyle(inBlock('.auth-card')).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(getComputedStyle(inBlock('input[type="email"]')).backgroundColor).toBe(paintOf('--surface'))
+    // Enter is the form's: typing and Enter do not board.
     await userEvent.keyboard('aiko@example.com{Enter}')
     await settle()
     expect(onBoard).not.toHaveBeenCalled()
+    // The corner offers the other way in, Board.
+    const corner = $('[data-action="board-corner"]')
+    expect([en.brdBoard, fr.brdBoard]).toContain(corner.textContent)
+    expect($('[data-action="sign-in"]')).toBeNull()
+    await userEvent.click(corner)
+    expect(onBoard).toHaveBeenCalledTimes(1)
+    // And the way back to the promise, at the block's left edge.
+    const back = $('[data-action="welcome"]')
+    expect(Math.round(box(back).left)).toBe(Math.round(boardAt.left))
+    await userEvent.click(back)
+    expect(onBack).toHaveBeenCalledTimes(1)
   })
 
-  it('runs the band across the paper, faded at its ends, with no seam at the loop\'s end', async () => {
+  it('opens on Sign up, both sides named, when Board could not issue a pass', async () => {
+    await render(<Door authMode="signup" />)
+    await settle(800)
+    expect([en.signup, fr.signup]).toContain($('h1').textContent)
+    const sides = [...inBlock('.seg').querySelectorAll('.seg__opt')]
+    expect(sides.map(o => o.getAttribute('aria-checked'))).toEqual(['false', 'true'])
+    expect(inBlock('.auth-foot')).not.toBeNull()
+    expect(document.activeElement).toBe(inBlock('input[type="email"]'))
+    // Both sides named, and still one action on the road.
+    expect(document.querySelectorAll('.btn-depart')).toHaveLength(1)
+    const submit = box($('[data-action="auth-submit"]'))
+    expect(Math.abs(centreOf(submit) - (window.innerHeight / 2 + 60))).toBeLessThan(2)
+    expect(box(inBlock('.auth-foot')).top).toBeGreaterThan(submit.bottom)
+  })
+
+  it('draws the crossroads for the paper it has, the lines shorter on a laptop', async () => {
     await render(<Door />)
     await settle(150)
-    const roll = $('.brd-roll')
-    expect(getComputedStyle(roll).maskImage).toMatch(/linear-gradient/)
-    expect(Math.round(box(roll).left)).toBe(360)
-    // The window less html's scrollbar gutter.
-    expect(Math.round(box(roll).right)).toBe(Math.round(bodyW()))
-    for (const lane of document.querySelectorAll('.brd-roll__lane')) {
-      expect(lane.children).toHaveLength(24)
-      // The loop moves a lane by half: that half must still cover the band.
-      expect(lane.scrollWidth / 2).toBeGreaterThan(box(roll).width)
+    const reach = () => {
+      const hub = box($('.desk-front__hub'))
+      const kanji = box($('.desk-front__stn[data-line="kanji"] .desk-front__sign'))
+      return Math.round(mid(kanji) - mid(hub))
     }
+    // 1100 x 800: the lines the paper leaves, past the way in's column
+    // and the names on the left.
+    const laptop = reach()
+    expect(laptop).toBeGreaterThanOrEqual(120)
+    expect(laptop).toBeLessThan(240)
+    // Every name clear of the paper's right edge by its margin.
+    const names = [...document.querySelectorAll('.desk-front__name')].map(n => box(n).right)
+    expect(Math.max(...names)).toBeLessThanOrEqual(bodyW() - 44 + 1)
   })
 
-  it('keeps the Welcome up for a refused Google return, the reason in the column', async () => {
+  it('keeps the Welcome up for a refused Google return, the reason with the sign-in', async () => {
     refusal.current = { error: 'access_denied', code: null, description: 'denied' }
     window.history.replaceState(null, '', '/')
     await render(<App />)
     await settle(300)
     expect($('.brd--welcome')).not.toBeNull()
     expect($('main.auth')).toBeNull()
-    expect(inSide('.auth-message--error')).not.toBeNull()
-    expect(document.activeElement).toBe(inSide('input[type="email"]'))
+    expect(inBlock('.auth-message--error')).not.toBeNull()
+    expect(document.activeElement).toBe(inBlock('input[type="email"]'))
   })
 })
 
@@ -955,9 +1039,9 @@ describe('the digits at first contact (P12)', () => {
 // stands in one place on every question -- since plan 161 the paper's
 // bottom-right corner; the stop being asked is lit on the strip and the
 // light moves with the question; each answer's key turns over to its
-// check in one slot; the Welcome hands its column to the wait with the
-// masthead on one pixel; the plan's arrival boards the paper; and a car
-// is not dropped before the one after it has landed.
+// check in one slot; the Welcome hands its paper to the wait with the
+// dots on one spot; the plan's arrival boards the paper; and a car is
+// not dropped before the one after it has landed.
 const { default: AppLoading } = await import('./screens/AppLoading')
 const landed = () => settle(900)
 const centreY = r => (r.top + r.bottom) / 2
@@ -1182,39 +1266,35 @@ describe('first contact, finished (P13, plan 155)', () => {
     expect(inCar('[data-action="continue"]').disabled).toBe(true)
   })
 
-  it('hands the Welcome\'s column to the wait', async () => {
-    const mastAt = () => {
-      const r = box($('.desk-rail__glyph'))
-      return [Math.round(r.left), Math.round(r.top)]
-    }
+  it('hands the Welcome\'s paper to the wait', async () => {
     const dotsAt = () => {
       const r = box($('.desk-wait .loading'))
       return [Math.round(mid(r)), Math.round(centreY(r))]
     }
     const screen = await render(<Door />)
     await landed()
-    const at = mastAt()
     expect($('.desk-wait')).toBeNull()
     await screen.rerender(<Door boarding />)
     await settle(300)
-    expect($('.desk-door').classList.contains('desk-door--leaving')).toBe(true)
-    expect(opacityOf($('.desk-door__auth'))).toBe(0)
-    expect(opacityOf($('.brd-hero'))).toBe(0)
-    expect(opacityOf($('.brd-roll'))).toBe(0)
+    // The way in and the corner pull away, the map a beat after them.
+    expect($('.desk-front').classList.contains('desk-front--leaving')).toBe(true)
+    expect(opacityOf($('.desk-front__block'))).toBe(0)
+    expect(opacityOf($('.desk-front__door'))).toBe(0)
     // The pass being issued: its dots a beat after the press, on the
     // paper's middle.
     expect(opacityOf($('.desk-wait'))).toBe(0)
     await landed()
+    expect(opacityOf($('.desk-front__map'))).toBe(0)
+    expect(opacityOf($('.desk-front__hub'))).toBe(0)
     expect(opacityOf($('.desk-wait'))).toBe(1)
     const dots = dotsAt()
-    expect(Math.abs(dots[0] - (360 + (bodyW() - 360) / 2))).toBeLessThan(2)
+    expect(Math.abs(dots[0] - bodyW() / 2)).toBeLessThan(2)
     await screen.unmount()
-    // The wait after it, handed the press a second ago: the same column,
-    // the same dots on the same spot, already drawn.
+    // The wait after it, handed the press a second ago: the same paper,
+    // no column, the same dots on the same spot, already drawn.
     const wait = await render(<LangProvider><AppLoading wakesServer frame since={performance.now() - 1000} /></LangProvider>)
     await settle(60)
-    expect(Math.round(box(side()).width)).toBe(360)
-    expect(mastAt()).toEqual(at)
+    expect($('.desk-rail__mast')).toBeNull()
     expect(opacityOf($('.desk-brd--wait .desk-wait'))).toBe(1)
     expect(dotsAt()).toEqual(dots)
     await wait.unmount()
@@ -1232,9 +1312,11 @@ describe('first contact, finished (P13, plan 155)', () => {
     await landed()
     await screen.rerender(<Door authMode="signup" />)
     await landed()
-    expect($('.desk-door').classList.contains('desk-door--leaving')).toBe(false)
-    expect(opacityOf($('.brd-hero'))).toBe(1)
-    expect(opacityOf($('.desk-door__auth'))).toBe(1)
+    expect($('.desk-front').classList.contains('desk-front--leaving')).toBe(false)
+    expect(opacityOf($('.desk-front__block'))).toBe(1)
+    expect(opacityOf($('.desk-front__map'))).toBe(1)
+    expect(opacityOf($('.desk-front__hub'))).toBe(1)
+    expect([en.signup, fr.signup]).toContain($('h1').textContent)
   })
 
   it('boards the plan\'s arrival on the whole paper, no column beside it', async () => {

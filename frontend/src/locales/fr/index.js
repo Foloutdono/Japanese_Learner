@@ -1768,6 +1768,10 @@ const boarding = {
   // table tutoie, comme elle — le choix du propriétaire, pour l’élan.
   brdTagline: 'Accomplis tes objectifs sans détour.',
   brdBoard: 'Embarquer',
+  // 辻 (plan 161): the desk's front door, its corner and the way back to it.
+  brdHaveAccountQ: 'Déjà un compte ?',
+  brdNoAccountYet: 'Pas encore de compte ?',
+  brdBackHome: 'Retour à l’accueil',
   brdHaveAccount: 'Déjà un compte ? Se connecter',
   // Google : « continuer », jamais « s'inscrire » ni « se connecter »
   // — un fournisseur ne distingue pas les deux, on arrive, c'est tout.

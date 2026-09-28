@@ -235,9 +235,9 @@ export default function App() {
   // if they had never tapped anything. The sign-in screen has that
   // line, and it prints the reason on its own mount.
   const [authMode, setAuthMode] = useState(() => (authRedirectError() ? 'login' : null)) // null | 'login' | 'signup'
-  // 机 (plan 122): on the desk the sign-in stands beside Board in the
-  // Welcome's side column, so there is no second screen to swap to --
-  // authMode only says which side the card opens on.
+  // 机 (plans 122, 161): on the desk the sign-in stands in Board's place
+  // on the Welcome itself, so there is no second screen to swap to --
+  // authMode says whether it stands, and on which side it opens.
   const desk = useDesk()
   // The browser's Back on the sign-in (plan 123): the sign-in replaces
   // Welcome through state, so Back left Tsuji rather than returning to
@@ -279,9 +279,9 @@ export default function App() {
   // flag is only the button's own "working on it" — the session
   // arrives through the auth listener like any other.
   const [boarding, setBoarding] = useState(false)
-  // 机 (plan 155): the learner who pressed Board on this load is on the
-  // way into the boarding, so the wait before its first question keeps
-  // the column the Welcome and the boarding both stand in
+  // 机 (plans 155, 161): the learner who pressed Board on this load is
+  // on the way into the boarding, so the wait before its first question
+  // stays on the paper the Welcome and the boarding both stand on
   // (AppLoading's `frame`) rather than dropping to the boot screen and
   // back. A returning learner's wait at the same gate goes on to the
   // rail, which is another width, and keeps the boot screen.
@@ -515,7 +515,7 @@ export default function App() {
       <LangProvider>
         {authMode && !desk
           ? <AuthScreen mode={authMode} onBack={() => setAuthMode(null)} />
-          : <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} authMode={authMode} />}
+          : <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} onBack={() => setAuthMode(null)} authMode={authMode} />}
       </LangProvider>
     )
   }
