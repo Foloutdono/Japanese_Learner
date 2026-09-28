@@ -6,8 +6,8 @@ import { Mark } from '../components/ui/Mark'
 // ── Sign in (plan 075, canvas SignIn) ────────────────────────────
 // The sign over one card: Login / Sign up as a segmented control, the
 // two fields, the one action, and the line that takes the pressure
-// off ("You can change all of this later in Settings."). Reached from
-// Welcome -- Board opens it on Sign up, "I already have an account" on Login --
+// off ("Everything can be changed later in Settings."). Reached from
+// Welcome -- Board opens it on Sign up, "Have an account?" on Login --
 // and the back button returns there. No username here any more: the
 // boarding asks the name on its first screen, and Settings keeps it
 // editable; a sign-up that needs email confirmation simply comes back

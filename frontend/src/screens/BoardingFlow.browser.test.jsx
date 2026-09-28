@@ -379,7 +379,7 @@ describe('BoardingFlow', () => {
     // they read one script — so the whole line is ahead of them with the
     // kana at its head, and there is no stop behind them to name.
     expect(stepOf(screen)).toBe('goal')
-    expect(q(screen, '.brd__hint').textContent).toBe('Toute la ligne est devant toi.')
+    expect(q(screen, '.brd__hint').textContent).toBe('Tous les arrêts sont devant toi.')
     expect([...live(screen).querySelectorAll('[data-goal]')].map(el => el.dataset.goal))
       .toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
     expect(q(screen, '[data-goal="novice"] .brd-opt__code').textContent).toBe('—')

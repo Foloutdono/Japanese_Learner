@@ -169,7 +169,7 @@ export default function BoardingFlow({
   // trip that worked returns a learner who is no longer a guest — the
   // button's own onDone never runs, because the component that would
   // have called it was unmounted by the navigation. Resuming onto
-  // "Keep your progress safe." after they just kept it reads as the sign-in
+  // "Keep your progress." after they just kept it reads as the sign-in
   // having done nothing, which is exactly what it looked like. So the
   // resumed step is honoured only while there is still something to
   // offer; the same predicate the forward path uses (`plan` → account
