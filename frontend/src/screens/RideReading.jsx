@@ -11,7 +11,7 @@ import { Loading } from '../components/ui/Loading'
 import { Continue } from '../components/boarding/BoardFrame'
 import { Callout } from '../components/guide/Callout'
 import { Guide } from '../components/guide/Guide'
-import { TOUR_READ, TOUR_GRADED } from '../components/guide/rideTours'
+import { TOUR_GRADED } from '../components/guide/rideTours'
 import { OfferButton } from '../components/credits/OfferButton'
 import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters } from '../components/reading/ReadingPieces'
 import { RunLines } from '../components/study/RunLines'
@@ -48,15 +48,15 @@ import { useReadingPace } from '../stores/readingPace'
 // 机 (plan 133): on the desk the ride stands on the practice runs'
 // three panels (plan 129) -- this run's figures and its lines at the
 // left, the sentence in the middle, the breakdown sealed at the right
-// until the grade -- and walks the learner round them before the clock
-// starts (`intro`, TOUR_READ), then, once graded, opens the sentence's
-// breakdown there (`graded`: the local tier of /api/phrase/analyze,
-// free and cached, never the paid explanation) and points at it and at
-// the line the sentence became (TOUR_GRADED) before the plate. A phone
-// keeps the ride it had.
+// until the grade -- and, once graded, opens the sentence's breakdown
+// there (`graded`: the local tier of /api/phrase/analyze, free and
+// cached, never the paid explanation) and points at it (TOUR_GRADED)
+// before the plate. The sentence, the field and the grade are the
+// notes' as on a phone; the panels are not walked. A phone keeps the
+// ride it had.
 const READING_COLOR = 'var(--line-reading)'
 // The steps, as ride_step names them: read, type, measure, pass; on the
-// desk intro before read and graded between measure and pass.
+// desk graded between measure and pass.
 
 export default function RideReading({ session, onDone, dryRun = false, sentence: given = null }) {
   const navigate = useNavigate()
@@ -67,10 +67,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
 
   const [sentence, setSentence] = useState(given)
   const [failed, setFailed] = useState(false)
-  // The desk opens on its walk, with the clock held; a phone on the
-  // sentence. Decided once: the ride does not change chrome under the
-  // learner.
-  const [step, setStep] = useState(() => (desk ? 'intro' : 'read'))
+  const [step, setStep] = useState('read')
   // null until the sentence is up: a clock that starts at zero would
   // read as already run out, and cover the sentence before it showed.
   const [timeLeft, setTimeLeft] = useState(null)
@@ -204,16 +201,9 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     navigate('/today', { replace: true })
   }, [failed, navigate, onDone])
 
-  // The desk's second walk, once: the breakdown the grade opened.
+  // The desk's stop, once: the breakdown the grade opened.
   const [gradedToured, setGradedToured] = useState(false)
-  const tour = !sentence ? null
-    : step === 'intro' ? TOUR_READ
-    : step === 'graded' && !gradedToured ? TOUR_GRADED
-    : null
-  function endTour() {
-    if (step === 'intro') go('read')
-    else setGradedToured(true)
-  }
+  const tour = Boolean(sentence) && step === 'graded' && !gradedToured
 
   const foot = { left: t.rideJp, right: t.readingTitle }
   const platforms = getAllSections(t).filter(s => Object.values(PASS_PLATFORMS).includes(s.path))
@@ -225,7 +215,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   }
   const callout = sentence && callouts[step]
 
-  const writing = step === 'intro' || step === 'read' || step === 'type'
+  const writing = step === 'read' || step === 'type'
   const graded = step === 'graded'
   const panels = desk && Boolean(sentence) && step !== 'pass'
   const measured = step === 'measure' || graded
@@ -275,9 +265,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
             untimed={factor == null}
             t={t}
           />
-          {/* Covered while the walk is open: its clock has not started,
-              and a sentence left showing under it is free time. */}
-          <ReadingPrompt cardKey="ride" foot={foot} phrase={sentence.phrase} covered={covered || step === 'intro'} guide="ride.sentence" />
+          <ReadingPrompt cardKey="ride" foot={foot} phrase={sentence.phrase} covered={covered} guide="ride.sentence" />
           <AnswerForm answer={answer} setAnswer={setAnswer} onSubmit={submit} t={t} guide="ride.answer" />
         </>
       )}
@@ -299,7 +287,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
           {graded ? (
             <div className="stage__foot">
               <Continue keys label={t.rideContinue} onClick={() => go('pass')} />
-              <EnterKey onEnter={() => go('pass')} disabled={Boolean(tour)} />
+              <EnterKey onEnter={() => go('pass')} disabled={tour} />
             </div>
           ) : (
             <RatingBar active onRate={rate} guide="ride.rate" />
@@ -331,7 +319,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
       )}
 
       {callout && <Callout anchor={callout.anchor} place={callout.place} text={callout.text} />}
-      {tour && <Guide key={step} gate="ride" stops={tour} onEnd={endTour} />}
+      {tour && <Guide gate="ride" stops={TOUR_GRADED} onEnd={() => setGradedToured(true)} />}
     </StudyStage>
   )
 }
