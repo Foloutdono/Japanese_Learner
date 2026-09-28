@@ -223,7 +223,7 @@ export default function ReadingRun({ session }) {
     setAnalysisLoading(true)
     apiFetch('/api/phrase/analyze', session, {
       method: 'POST',
-      body: JSON.stringify({ phrase: phraseText, save: false, deep: false, lang }),
+      body: JSON.stringify({ phrase: phraseText, save: false, deep: false, whole: true, lang }),
     })
       .then(r => (r.ok ? r.json() : null))
       .then(d => {

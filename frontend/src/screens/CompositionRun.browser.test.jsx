@@ -189,7 +189,7 @@ describe('CompositionRun', () => {
     const [tutor] = fetchCalls('/api/composition/review')
     expect(body(tutor)).toEqual({ raw_id: POINTS[0].raw_id, sentence: SENTENCE, lang: 'fr' })
     const [breakdown] = fetchCalls('/api/phrase/analyze')
-    expect(body(breakdown)).toMatchObject({ phrase: SENTENCE, save: false, deep: false })
+    expect(body(breakdown)).toMatchObject({ phrase: SENTENCE, save: false, deep: false, whole: true })
 
     // The sentence under its label, the detector's word on the label.
     expect(root.querySelector('.prose__jp').textContent).toBe(SENTENCE)

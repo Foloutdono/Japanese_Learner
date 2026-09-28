@@ -183,6 +183,23 @@ def test_multi_sentence_passage_returns_one_entry_per_sentence(client):
     assert body["truncated"] == 0
 
 
+def test_whole_takes_a_two_sentence_exercise_as_one_sentence(client):
+    # A practice run's exercise written as two sentences (the reading
+    # bank has nine) is one breakdown: its tokens at the top level, as a
+    # one-Sentence Passage's are, not a Passage of two with none there.
+    phrase = "雨がふりました。しかし、学校へ行きました。"
+    response = client.post(
+        "/api/phrase/analyze",
+        json={"phrase": phrase, "save": False, "whole": True},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body["sentences"]) == 1
+    assert body["sentences"][0]["text"] == phrase
+    surfaces = [t["surface"] for t in body["tokens"]]
+    assert "雨" in surfaces and "学校" in surfaces
+
+
 def test_a_passage_past_fifty_sentences_is_analysed_whole(client):
     """The cap was 50 until 2026-09-27, and cut a long song, an episode
     or an article short (owner-directed: remove it)."""

@@ -254,7 +254,7 @@ describe('the run\'s lines', () => {
     await settle(250)
     expect(apiFetch.mock.calls.filter(c => c[0] === '/api/phrase/analyze').length).toBe(before + 1)
     const call = apiFetch.mock.calls.filter(c => c[0] === '/api/phrase/analyze').at(-1)
-    expect(JSON.parse(call[2].body)).toMatchObject({ phrase: FIRST.phrase, deep: false, save: false })
+    expect(JSON.parse(call[2].body)).toMatchObject({ phrase: FIRST.phrase, deep: false, save: false, whole: true })
     expect($('.desk-run__side .bkd').textContent).toContain(`the words of ${FIRST.phrase}`)
   })
 

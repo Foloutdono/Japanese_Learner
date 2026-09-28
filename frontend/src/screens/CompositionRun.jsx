@@ -218,7 +218,7 @@ function Session({ session, level }) {
     setAnalysisLoading(true)
     apiFetch('/api/phrase/analyze', session, {
       method: 'POST',
-      body: JSON.stringify({ phrase: line, save: false, deep: false, lang }),
+      body: JSON.stringify({ phrase: line, save: false, deep: false, whole: true, lang }),
     })
       .then(r => (r.ok ? r.json() : null))
       .then(d => { if (analysisLineRef.current === line) setAnalysis(d) })

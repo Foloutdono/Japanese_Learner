@@ -7,11 +7,15 @@ import { apiFetch } from './api'
 // analyzer's own Explain works (docs/adr/0001: bought explicitly, per
 // Sentence, never automatically). The result is the whole analysis
 // with the deep tier merged on, so it replaces what the screen holds.
-// `save: false` keeps practice out of the analyzer's own history.
+// `save: false` keeps practice out of the analyzer's own history, and
+// `whole: true` takes the exercise as one sentence however many 。 it
+// holds -- split, 「雨がふりました。しかし、学校へ行きました。」 came
+// back a Passage of two with no rows to draw (routes/phrase.py's
+// PhraseRequest.whole). Every practice fetch of the local tier sends it too.
 export async function explainSentence(session, phrase, lang) {
   const r = await apiFetch('/api/phrase/analyze', session, {
     method: 'POST',
-    body: JSON.stringify({ phrase, save: false, deep: true, lang }),
+    body: JSON.stringify({ phrase, save: false, deep: true, whole: true, lang }),
   })
   if (!r.ok) throw new Error(String(r.status))
   return r.json()
