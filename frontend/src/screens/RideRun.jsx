@@ -13,9 +13,7 @@ import { Loading } from '../components/ui/Loading'
 import { Emphasized } from '../components/ui/Emphasized'
 import { Continue } from '../components/boarding/BoardFrame'
 import { Callout } from '../components/guide/Callout'
-import { Guide } from '../components/guide/Guide'
 import { Cue } from '../components/guide/Spot'
-import { TOUR_BACK } from '../components/guide/rideTours'
 import { HINTS } from '../domain/studyModes'
 import { normalizeCard, wordForm } from '../domain/cardShape'
 import { useProfileSummary } from '../stores/profileSummary'
@@ -51,10 +49,11 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // a door nobody is shown is one nobody finds. On the desk the ride
 // stands on the three panels every card run stands on (plan 126) --
 // this run's figures and the card panel at the left, the card, the
-// details sealed at the right -- and, once the known card is turned,
-// points at the one thing there its notes cannot: the entry docked
-// beside it, the desk's 🔍 (TOUR_BACK, the gates' own guide handed one
-// stop). The panels' figures, keys and rhythm are left to be found: a
+// details sealed at the right, where the flip docks the card's entry.
+// Nothing there is pointed at: the ride lights only what its notes ask
+// the learner to press (the owner's word, 2026-09-28), and a stop that
+// only explains asked for a Next that taught nothing. The panels'
+// figures, keys, rhythm and the docked entry are left to be found: a
 // first card is not the moment for them. The ride counts its two
 // ratings in the run's tally (stores/runTally) so the figures move; the tally is the screen's and is never posted.
 //
@@ -76,8 +75,7 @@ export const RIDE_NEXT = '/ride/reading'
 
 // The steps, as ride_step names them: known, known-back, unknown,
 // unknown-back, done (stepFor below); on a phone known-dict between
-// the known card's turn and its grade, and on the desk tour-back while
-// the guide points at the entry.
+// the known card's turn and its grade.
 // The rating bar's own pressed-state beat (RatingBar.PRESSED_MS): the
 // seal the learner pressed stays lit while the card moves on.
 const HOLD_MS = 420
@@ -124,9 +122,6 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
   // been opened and closed once.
   const [lookupOpen, setLookupOpen] = useState(false)
   const [looked, setLooked] = useState(false)
-  // The desk's stop at the entry: open now, and seen or declined.
-  const [tour, setTour] = useState(false)
-  const [toured, setToured] = useState(false)
   const watches = useRef(null)
   const holdTimer = useRef(null)
   const finished = useRef(false)
@@ -241,21 +236,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lookedOnKnown])
 
-  // The desk's stop at the entry, once the known card is turned.
   const panels = desk && Boolean(cards?.length) && step !== 'done'
-  const due = panels && !covered && Boolean(card) && index === 0 && answered && !tour && !toured
-  useEffect(() => {
-    if (!due) return
-    mark(step, 'tour-back')
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the stop opens once its anchor is painted, which is after this render.
-    setTour(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [due])
-  function endTour() {
-    mark('tour-back', step)
-    setToured(true)
-    setTour(false)
-  }
 
   const remaining = cards ? Math.max(0, cards.length - index) : null
   const foot = { left: t.rideJp, right: t.rideCap }
@@ -266,7 +247,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     'unknown':      { anchor: 'ride.card', place: 'top',   text: (desk && t.rideUnknownFrontDesk) || t.rideUnknownFront },
     'unknown-back': { anchor: 'ride.rate', place: 'above', text: (desk && t.rideUnknownBackDesk) || t.rideUnknownBack },
   }
-  const callout = !covered && !tour && !lookupOpen && card && callouts[step]
+  const callout = !covered && !lookupOpen && card && callouts[step]
   // The one thing each note asks for, lit (guide/Spot.jsx): the card to turn,
   // the 🔍 to open, the bar to grade on -- and on the new card its
   // Wrong tile alone, which is Wrong's quality (1) on every scale. The
@@ -340,7 +321,6 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
 
       {cue && <Cue target={cue.target} radius={cue.radius} />}
       {callout && <Callout anchor={callout.anchor} place={callout.place} text={callout.text} />}
-      {tour && <Guide gate="ride" stops={TOUR_BACK} onEnd={endTour} />}
     </StudyStage>
   )
 }

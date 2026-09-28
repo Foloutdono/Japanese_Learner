@@ -116,34 +116,29 @@ describe('the test ride at 390×844', () => {
       return Math.abs(s.top - (r.top - 6)) < 2 && Math.abs(s.left - (r.left - 6)) < 2
         && Math.abs(s.width - (r.width + 12)) < 2 && Math.abs(s.height - (r.height + 12)) < 2
     }
-    await settle(500)
+    await vi.waitFor(() => expect(spot()).not.toBeNull(), { timeout: 3000 })
     expect(document.querySelectorAll('.guide__spot--cue')).toHaveLength(1)
     expect(getComputedStyle(spot()).pointerEvents).toBe('none')
-    expect(lit(root.querySelector('[data-guide="ride.card"]'))).toBe(true)
+    await vi.waitFor(() => expect(lit(root.querySelector('[data-guide="ride.card"]'))).toBe(true), { timeout: 3000 })
 
     root.querySelector('.flashcard').click()
-    await settle(500)
-    expect(lit(root.querySelector('[data-guide="card.lookup"]'))).toBe(true)
+    await vi.waitFor(() => expect(lit(root.querySelector('[data-guide="card.lookup"]'))).toBe(true), { timeout: 3000 })
 
     root.querySelector('[data-guide="card.lookup"]').click()
     await settle(150)
     // The entry's sheet is open: nothing is lit over it.
     expect(spot()).toBeNull()
     document.querySelector('.dict-sheet__scrim').click()
-    await settle(500)
-    expect(lit(root.querySelector('.rating-bar__buttons'))).toBe(true)
+    await vi.waitFor(() => expect(lit(root.querySelector('.rating-bar__buttons'))).toBe(true), { timeout: 3000 })
 
     root.querySelector('.rating-bar__btn--q4').click()
-    await settle(900)
-    expect(lit(root.querySelector('[data-guide="ride.card"]'))).toBe(true)
+    await vi.waitFor(() => expect(lit(root.querySelector('[data-guide="ride.card"]'))).toBe(true), { timeout: 3000 })
 
     root.querySelector('.flashcard').click()
-    await settle(500)
-    expect(lit(root.querySelector('.rating-bar__btn--q1'))).toBe(true)
+    await vi.waitFor(() => expect(lit(root.querySelector('.rating-bar__btn--q1'))).toBe(true), { timeout: 3000 })
 
     root.querySelector('.rating-bar__btn--q1').click()
-    await settle(900)
-    expect(root.querySelector('.ride__done')).toBeTruthy()
+    await vi.waitFor(() => expect(root.querySelector('.ride__done')).toBeTruthy(), { timeout: 3000 })
     expect(spot()).toBeNull()
   })
 

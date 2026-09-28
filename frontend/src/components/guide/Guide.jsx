@@ -63,11 +63,12 @@ function centredOn(rect) {
   return { left: Math.min(Math.max(centre, from), Math.max(from, to)), width }
 }
 
-// `stops`, when given, is a tour that is not a gate's (plan 133: the
-// first ride's walk round a run's three panels on the desk): walked
-// the same way, in the same spot and note, but counted by the ride's
-// own ride_step rather than as a gate's guide -- `gate` then only names
-// it on the DOM.
+// `stops`, when given, is a tour that is not a gate's: walked the same
+// way, in the same spot and note, but not counted as a gate's guide --
+// `gate` then only names it on the DOM. The first ride walked one on
+// the desk (plan 133) until the owner cut its explain-only stops
+// (2026-09-28); the ride now lights only what its notes ask to be
+// pressed (guide/Spot.jsx's Cue), and this is kept for a tour to come.
 export function Guide({ gate, stops: given = null, onEnd }) {
   const { t } = useLang()
   const desk = useDesk()

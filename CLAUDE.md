@@ -491,12 +491,12 @@ runtime purpose. Two consequences worth knowing:
   phone the known card, once turned, is graded only after its entry has
   been opened from the 🔍 and closed (`known-dict`, told through
   `components/study/lookupWatch.js`); on the desk both rides stand on
-  the runs' three panels (plans 126, 129) and the gates' guide, handed
-  its stops (`components/guide/rideTours.js`), points at one thing a
-  ride -- the entry once the known card is turned, the breakdown the
-  grade opens -- where it first walked every panel (cut, with Today's
-  guide to the gate and the gates, owner-directed 2026-09-28: too much
-  for a first card); the
+  the runs' three panels (plans 126, 129) and walk nothing -- the
+  gates' guide first walked every panel, then one stop a ride (the
+  entry, the breakdown), and both were cut, owner-directed 2026-09-28:
+  the rides light only what a note asks to be pressed, the card, the
+  🔍, the bar, the Wrong tile, the field (`components/guide/Spot.jsx`'s
+  `Cue`), and a note that only explains lights nothing; the
   ride's cards carry a new card's forecast for the verdict tiles (cited
   in `routes/onboarding.py`, `tests/test_ride.py`, `screens/RideRun.jsx`,
   `screens/RideReading.jsx`, `components/guide/Guide.jsx`,

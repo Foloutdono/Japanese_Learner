@@ -2113,11 +2113,6 @@ const ride = {
   // Plan 133. On a phone: the known card is not graded until its entry
   // has been opened from the 🔍 and closed again.
   rideKnownDict: 'Every card has a dictionary entry. Tap 🔍 to open this one, then close it.',
-  // On the desk: the guide's one stop a ride (components/guide/
-  // rideTours), at the entry once the known card is turned and at the
-  // breakdown once the sentence is graded, read as guide<Key>.
-  guideRideEntry: 'Its dictionary entry opens here. Click any word or kanji in it to look that up too.',
-  guideRideReadBreakdown: 'Here’s the sentence, word by word, with its grammar. Click a row to see its entry.',
   ridePlateCap: 'The pass',
   ridePlateBody: 'These practice modes come with the pass.',
   ridePlateOpen: 'For now, they’re free for everyone.',

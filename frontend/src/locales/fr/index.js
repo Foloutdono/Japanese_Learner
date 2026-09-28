@@ -2045,12 +2045,6 @@ const ride = {
   // Plan 133. Sur un téléphone : la carte connue ne se note qu'une fois
   // sa fiche ouverte depuis la 🔍, puis refermée.
   rideKnownDict: 'Chaque carte a sa fiche de dictionnaire. Touche 🔍 pour ouvrir celle-ci, puis referme-la.',
-  // Sur le bureau : l'arrêt unique du guide à chaque essai
-  // (components/guide/rideTours), sur la fiche une fois la carte connue
-  // retournée et sur la décomposition une fois la phrase notée, lus sous
-  // guide<Clé>.
-  guideRideEntry: 'Sa fiche de dictionnaire s’ouvre ici. Clique sur un mot ou un kanji pour le consulter aussi.',
-  guideRideReadBreakdown: 'Voici la phrase, mot à mot, avec sa grammaire. Clique sur une ligne pour voir sa fiche.',
   ridePlateCap: 'L\'abonnement',
   ridePlateBody: 'Ces exercices font partie de l’abonnement.',
   ridePlateOpen: 'Pour l’instant, ils sont ouverts à tous.',
