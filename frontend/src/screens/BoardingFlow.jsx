@@ -10,7 +10,7 @@ import { USERNAME_RE } from '../components/profile/EditableUsername'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEPART_TIMES } from '../components/onboarding/departures'
 import {
-  LINES, RECOMMENDED_RHYTHM, boardingDraft, bucketFor, goalStops, itemsForRhythm,
+  LINES, RECOMMENDED_RHYTHM, boardingDraft, bucketFor, goalStops, itemsForRhythm, kanaFigures,
   levelAnswers, levelForKana, minutesToTime, planFigures, stopsAhead, timeToMinutes,
 } from '../domain/boarding'
 import { BoardHead } from '../components/boarding/BoardFrame'
@@ -434,6 +434,15 @@ export default function BoardingFlow({
   const perDay = itemsForRhythm(answers.rhythm)
   const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, answers.lines)
   const time = minutesToTime(answers.minute)
+  // 辻 (plan 161): the reveal's first stop on the desk -- the kana still
+  // unread, at the ride's pace (the recommended one, until it is asked).
+  const kanaStop = desk && volumes
+    ? {
+        date: new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
+          .format(kanaFigures(volumes, answers.kana, perDay, now).date),
+        min: answers.rhythm,
+      }
+    : null
   // The lines as the building screen prints them: the kana first --
   // every ticket rides them -- then the ones chosen.
   const linesLine = [t.kanaTitle, ...answers.lines.map(line => t.brdLine[line])].join(' · ')
@@ -511,6 +520,10 @@ export default function BoardingFlow({
   const index = stops.indexOf(step) + 1
   const total = stops.length
   const displayName = answers.name.trim() || savedName || profile.username || ''
+  // The strip's stops (the reveal is the kana's own, not a stop), and
+  // the number a question's hub prints on the desk: its place on them.
+  const lineStops = stops.filter(key => key !== 'reveal')
+  const hubNo = key => String(lineStops.indexOf(key) + 1).padStart(2, '0')
 
   function renderStep(key) {
     switch (key) {
@@ -529,11 +542,11 @@ export default function BoardingFlow({
           />
         )
       case 'why':
-        return <WhyStep name={displayName} value={answers.motive} onChange={v => set({ motive: v })} onContinue={() => go('kana')} />
+        return <WhyStep name={displayName} value={answers.motive} onChange={v => set({ motive: v })} onContinue={() => go('kana')} no={hubNo('why')} />
       case 'kana':
         return <KanaStep value={answers.kana} onAnswer={answerKana} />
       case 'reveal':
-        return <KanaReveal onContinue={continueReveal} />
+        return <KanaReveal onContinue={continueReveal} first={kanaStop} />
       case 'level':
         return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => set({ levelChoice: v })} onContinue={continueLevel} />
       case 'goal':
@@ -636,7 +649,6 @@ export default function BoardingFlow({
     time,
     nudge: answers.notifications ? time : t.brdNotNow,
   }
-  const lineStops = stops.filter(key => key !== 'reveal')
   const atStop = lineStops.indexOf(step === 'reveal' ? 'kana' : step)
   const deskStops = lineStops.map((key, i) => {
     const state = atStop < 0 || i < atStop ? 'done' : i === atStop ? 'now' : 'next'

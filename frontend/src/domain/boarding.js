@@ -177,6 +177,16 @@ export function kanaKnownCount(volumes, kanaAnswer) {
   return 0
 }
 
+/** The kana's own stop on the ride (plan 161, the desk's reveal): the
+ *  signs the kana check left unread -- the front-load planFigures
+ *  counts on every ride but one to that stop -- and the day they are
+ *  read by at `perDay` new items a day. */
+export function kanaFigures(volumes, kanaAnswer, perDay, now = new Date()) {
+  const kana = Math.max(0, (volumes?.kana ?? 0) - kanaKnownCount(volumes, kanaAnswer))
+  const days = Math.max(1, Math.ceil(kana / Math.max(1, perDay)))
+  return { kana, days, date: addDays(now, days) }
+}
+
 /**
  * The plan's figures, from the learner's own answers:
  *   words, kanji,    the vocabulary, kanji and grammar points from

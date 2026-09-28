@@ -25470,9 +25470,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   /* A step's answers stand at the width that serves them, set on its
      car so a leaving car keeps its own while it pulls away: the card's
-     for most questions, three of a run's columns for the six reasons,
-     the canvas for the line of stations, two columns for the plan and a
-     column's for the account's form. */
+     for most questions, the canvas for the six roads, the kana's tree
+     and the line of stations, three columns and a gutter for the two
+     words read out, two columns for the plan and a column's for the
+     account's form. */
   .desk-brd .brd__car {
     --desk-brd-w: var(--card-w);
     --pull: 1;
@@ -25480,7 +25481,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   .desk-brd .brd__car[data-dir="back"] { --pull: -1; }
   .desk-brd .brd__car--out { animation: desk-brd-pull-out 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
-  .desk-brd .brd__car[data-car="why"] { --desk-brd-w: calc(3 * var(--desk-run-col-min) + 2 * var(--sp-3)); }
+  .desk-brd .brd__car:is([data-car="why"], [data-car="kana"]) { --desk-brd-w: var(--desk-board-w); }
+  .desk-brd .brd__car[data-car="reveal"] { --desk-brd-w: calc(3 * var(--desk-side-w) + var(--sp-8)); }
   .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
   .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: calc(2 * var(--desk-side-w) + var(--sp-6)); }
   .desk-brd .brd__car[data-car="account"] { --desk-brd-w: var(--desk-side-w); }
@@ -25675,12 +25677,372 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
   .desk-brd .brd__foot .btn-depart { transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 200ms ease; }
-  /* The six reasons, three to a row where three run columns fit (two
-     under that): a stack of six full-width rows is a phone's list. */
-  .desk-brd .brd__car[data-car="why"] .brd__opts {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--desk-run-col-min)), 1fr));
+  /* ── 辻 — six reasons, six roads (plan 161) ──
+     The owner's D02 (components/boarding/WhyStep's WhyRoads): the
+     question's hub in the middle of the paper and a road out of it to
+     each reason, which stands at its road's end as a pictogram in a
+     ring, its name on the ring's far side. The stage takes the paper
+     the question and the floor leave, up to the drawing's height (the
+     rings' centres 440px apart, the diagonals at 45 degrees on the
+     canvas's width); the roads stretch with it -- their ends placed out
+     of 100 across the width and down the band between the top and the
+     bottom rings' centres, ROADS's --x and --y -- and the rings keep
+     their size. A name with no room left beside its ring takes a
+     second line rather than leave the paper. */
+  .desk-brd .brd__stage:has(> .desk-brd__roads) {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    /* The body's gap made up to a rung under the question. */
+    padding-top: calc(var(--sp-6) - var(--sp-5));
   }
+  .desk-brd__roads {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 288px;
+    max-height: 536px;
+    margin-block: auto;
+  }
+  .desk-brd__map {
+    position: absolute;
+    top: 48px;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 96px);
+    overflow: visible;
+    animation: desk-brd-show 320ms ease-out 160ms backwards;
+  }
+  .desk-brd__road {
+    stroke: var(--surface-line);
+    stroke-width: 6;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    transition: stroke 160ms ease;
+  }
+  .desk-brd__road--on { stroke: var(--accent2); stroke-width: 10; }
+  .desk-brd__hub {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 80px;
+    height: 80px;
+    border: 5px solid var(--text-primary);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    transform: translate(-50%, -50%);
+  }
+  .desk-brd__way {
+    position: absolute;
+    top: calc(var(--y, 50) * (100% - 96px) / 100);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+    padding: 0;
+    border: 0;
+    border-radius: var(--r-card);
+    background: none;
+    font: inherit;
+    color: var(--text-primary);
+    text-align: start;
+    cursor: pointer;
+    animation: brd-in 360ms ease-out 200ms backwards;
+  }
+  .desk-brd__way:nth-of-type(2) { animation-delay: 240ms; }
+  .desk-brd__way:nth-of-type(3) { animation-delay: 280ms; }
+  .desk-brd__way:nth-of-type(4) { animation-delay: 320ms; }
+  .desk-brd__way:nth-of-type(5) { animation-delay: 360ms; }
+  .desk-brd__way:nth-of-type(6) { animation-delay: 400ms; }
+  .desk-brd__way--end { left: calc(var(--x, 50) * 1% - 48px); }
+  .desk-brd__way--start {
+    right: calc((100 - var(--x, 50)) * 1% - 48px);
+    flex-direction: row-reverse;
+  }
+  .desk-brd__way--under {
+    left: calc(var(--x, 50) * 1% - var(--desk-run-col-min) / 2);
+    width: var(--desk-run-col-min);
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .desk-brd__ring {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    border: 3px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+  }
+  .desk-brd__pic { width: 48px; height: 48px; }
+  .desk-brd__way[aria-pressed="true"] .desk-brd__ring {
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 14%, var(--bg-main));
+    box-shadow: inset 0 0 0 1px var(--accent2), 0 0 0 6px color-mix(in srgb, var(--accent2) 18%, transparent);
+  }
+  .desk-brd__way-name {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  .desk-brd__way--under > .desk-brd__way-name { justify-content: center; text-align: center; }
+  /* ── 辻 — the two words, the four answers hung from them (plan 161) ──
+     The owner's D03 (KanaStep's KanaTree): the two words as large as
+     a word is set, and a tree from them to the four answers -- a stem
+     to a knot, and a branch to each answer's middle, the answer picked
+     before (come back to by Back) lit in gold. The branches are boxes
+     drawn by two borders from the stem to their column's middle, placed
+     on the answers' own grid (--gap, the column --i), so they meet each
+     answer at any width. Each answer shows what it reads -- the two
+     words again, solid for a word read, dashed for one not yet -- over
+     what it says and what that is called. */
+  .desk-brd__kana {
+    --gap: var(--sp-6);
+    --stem: var(--sp-9);
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-brd__words {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-items: center;
+    width: min(100%, var(--card-w));
+    margin: 0 auto;
+    font-family: var(--font-jp);
+    font-size: var(--fs-specimen-word);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .desk-brd__tree {
+    position: relative;
+    height: calc(var(--stem) + var(--sp-8));
+    margin-top: var(--sp-6);
+    animation: desk-brd-show 320ms ease-out 160ms backwards;
+  }
+  .desk-brd__tree::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: calc(50% - 2px);
+    width: 4px;
+    height: var(--stem);
+    background: var(--surface-line);
+    transition: background-color 160ms ease;
+  }
+  .desk-brd__kana--on .desk-brd__tree::before { background: var(--accent2); }
+  .desk-brd__branch {
+    --cx: calc((100% - 3 * var(--gap)) / 4 * (var(--i, 0) + 0.5) + var(--gap) * var(--i, 0));
+    position: absolute;
+    top: calc(var(--stem) - 2px);
+    bottom: 0;
+    border: 0 solid var(--surface-line);
+    border-top-width: 4px;
+    transition: border-color 160ms ease;
+  }
+  .desk-brd__branch:nth-child(-n + 2) {
+    left: calc(var(--cx) - 2px);
+    right: calc(50% - 2px);
+    border-left-width: 4px;
+    border-top-left-radius: var(--r-identity);
+  }
+  .desk-brd__branch:nth-child(n + 3) {
+    left: calc(50% - 2px);
+    right: calc(100% - var(--cx) - 2px);
+    border-right-width: 4px;
+    border-top-right-radius: var(--r-identity);
+  }
+  .desk-brd__branch--on { z-index: 1; border-color: var(--accent2); }
+  .desk-brd__knot {
+    position: absolute;
+    top: var(--stem);
+    left: 50%;
+    z-index: 2;
+    width: 22px;
+    height: 22px;
+    border: 4px solid var(--text-primary);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    transform: translate(-50%, -50%);
+  }
+  .desk-brd__kana > .brd-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--gap);
+  }
+  .desk-brd .desk-brd__ans {
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    min-height: 220px;
+    padding: var(--sp-6) var(--sp-4);
+    text-align: center;
+  }
+  .desk-brd__chips {
+    display: flex;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-5);
+  }
+  .desk-brd__chip {
+    display: inline-flex;
+    align-items: center;
+    height: 56px;
+    padding: 0 var(--sp-4);
+    border: 2px solid var(--text-primary);
+    border-radius: var(--r-card);
+    background: var(--bg-main);
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--text-primary);
+  }
+  .desk-brd__chip--not {
+    border-style: dashed;
+    border-color: var(--surface-line);
+    background: none;
+    color: color-mix(in srgb, var(--text-primary) 28%, transparent);
+  }
+  .desk-brd .desk-brd__ans > .brd-kopt__label { font-size: var(--fs-title); line-height: 1.3; }
+  .desk-brd__jp { font-family: var(--font-jp); font-weight: 500; }
+  .desk-brd__ans-sub { font-size: var(--fs-body); color: var(--text-secondary); }
+  .desk-brd__ans.brd-kopt--on > .desk-brd__ans-sub { color: var(--text-primary); }
+  /* ── 辻 — the two words read out, sign by sign (plan 161) ──
+     The owner's D03a (KanaStep's RevealWords): a card per word under
+     the kana line's pigment, its script named beside the script's
+     first sign, the word, its signs each over its sound, and what it
+     means; the first stop under them, in the same pigment. */
+  .desk-brd__reveal {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-8);
+  }
+  .desk-brd__word {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-6);
+    padding: var(--sp-7);
+    border: 1px solid var(--surface-line);
+    border-top: 4px solid var(--line-kana);
+    border-radius: var(--r-card);
+    background: var(--surface);
+    text-align: center;
+    animation: brd-in 360ms ease-out 200ms backwards;
+  }
+  .desk-brd__word + .desk-brd__word { animation-delay: 280ms; }
+  .desk-brd__script {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .desk-brd__glyph {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--line-kana);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--text-primary);
+  }
+  .desk-brd__glyph--stop {
+    width: 44px;
+    height: 44px;
+    border-width: 3px;
+    font-size: var(--fs-title);
+  }
+  .desk-brd__word-jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-specimen-word);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .desk-brd__signs {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+  }
+  .desk-brd__sign {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    width: 76px;
+    height: 92px;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    background: var(--bg-main);
+  }
+  .desk-brd__sign-jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .desk-brd__sign-sound {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__plus {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-brd__means {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-4);
+    font-size: var(--fs-body);
+    color: var(--text-secondary);
+  }
+  .desk-brd__means > b {
+    font-family: var(--font-serif);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .desk-brd__first {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-5);
+    margin: var(--sp-7) 0 0;
+    font-size: var(--fs-lead);
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-wrap: pretty;
+    animation: brd-in 360ms ease-out 420ms backwards;
+  }
+  .desk-brd__first strong { font-weight: 700; color: var(--text-primary); }
   /* The kana's four answers and the four rhythms, one row of tiles. */
   .desk-brd .brd__car:is([data-car="kana"], [data-car="rhythm"]) .brd-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   /* The recommended rhythm's tag rides its tile's top edge, a badge on
@@ -25995,6 +26357,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd__sp + .desk-brd__sp::before,
     .desk-brd__sp-door,
     .desk-brd__sp-dot { transition: none; }
+    .desk-brd__map,
+    .desk-brd__way,
+    .desk-brd__tree,
+    .desk-brd__word,
+    .desk-brd__first { animation: none; }
+    .desk-brd__road,
+    .desk-brd__ring,
+    .desk-brd__tree::before,
+    .desk-brd__branch { transition: none; }
   }
   /* A pointer's answer to "is this one I can pick": the name field's
      edge (.brd-field, 1.5px of the pass's gold on the answer's own
@@ -26006,7 +26377,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      boarding's answers, its doors and its way back, and the Welcome's
      sign-in, are spared it. */
   @media (pointer: fine) {
-    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn, .desk-brd__back, .desk-brd__sp-door):hover,
+    .desk-brd :is(.brd-opt, .brd-kopt, .brd-cell, .desk-brd__stn, .desk-brd__way, .desk-brd__back, .desk-brd__sp-door):hover,
     .desk-door__auth button:hover { filter: none; }
     .desk-brd .brd-opt:not(.brd-opt--on):hover,
     .desk-brd .brd-opt:not(.brd-opt--on):focus-visible,
@@ -26015,7 +26386,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd .brd-cell:not(.brd-cell--on):hover,
     .desk-brd .brd-cell:not(.brd-cell--on):focus-visible,
     .desk-brd__stn:not(.desk-brd__stn--on):hover > .desk-brd__tile,
-    .desk-brd__stn:not(.desk-brd__stn--on):focus-visible > .desk-brd__tile {
+    .desk-brd__stn:not(.desk-brd__stn--on):focus-visible > .desk-brd__tile,
+    .desk-brd__way:not([aria-pressed="true"]):hover > .desk-brd__ring,
+    .desk-brd__way:not([aria-pressed="true"]):focus-visible > .desk-brd__ring {
       border-color: var(--accent2);
       box-shadow: 0 0 0 0.5px var(--accent2);
     }

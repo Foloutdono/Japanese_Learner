@@ -391,7 +391,7 @@ describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
     // Measured once the answers' entrance has landed (brd-in, 6px).
     await settle(900)
     const q = box(inCar('.brd__q'))
-    const stage = box(inCar('.brd__stage'))
+    const roads = box(inCar('.desk-brd__roads'))
     const foot = box(inCar('.brd__foot'))
     // The question at the corner, --sp-7 and --sp-6 under the window's
     // top, set left -- and at the display rung: 1100x800 is no short step.
@@ -399,12 +399,11 @@ describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
     expect(Math.round(q.top)).toBe(50)
     expect(getComputedStyle(inCar('.brd__q')).fontSize).toBe('40px')
     expect(getComputedStyle(inCar('.brd__q')).textAlign).toBe('start')
-    // The answers centred across the paper, between the question and the floor.
-    expect(Math.abs(mid(stage) - bodyW() / 2)).toBeLessThan(1.5)
-    expect(stage.top).toBeGreaterThan(q.bottom + 22)
-    expect(stage.bottom).toBeLessThan(foot.top)
-    // Six reasons three to a row at 1100 -- two rows, not six.
-    expect(rowsOf([...inCar('.brd__opts').children]).size).toBe(2)
+    // The answers centred across the paper, between the question and the
+    // floor, a rung (--sp-6) at least under the question.
+    expect(Math.abs(mid(roads) - bodyW() / 2)).toBeLessThan(1.5)
+    expect(roads.top - q.bottom).toBeGreaterThanOrEqual(21.5)
+    expect(roads.bottom).toBeLessThan(foot.top)
     await next()
     await settle(900)
     // The kana's four answers on one row, under the card, and the way
@@ -412,6 +411,132 @@ describe('the boarding frame on the desk (P9, plans 140, 161)', () => {
     expect(rowsOf([...inCar('.brd-grid').children]).size).toBe(1)
     expect(inCar('.desk-brd__floor [data-action="back"]')).not.toBeNull()
     expect(inCar('.btn-depart')).toBeNull()
+  })
+
+  it('draws the six reasons as roads out of the question\'s hub, the pick\'s road lit', async () => {
+    await board()
+    await pastName()
+    await settle(900)
+    const roads = inCar('.desk-brd__roads')
+    const hub = roads.querySelector('.desk-brd__hub')
+    // The hub prints the question's place on the strip, in the paper's middle.
+    expect(hub.textContent).toBe('02')
+    expect(Math.abs(mid(box(hub)) - bodyW() / 2)).toBeLessThan(1.5)
+    const ways = [...roads.querySelectorAll('.desk-brd__way')]
+    expect(ways.map(w => w.dataset.motive)).toEqual(['studies', 'fun', 'trip', 'live', 'friends', 'other'])
+    // A road from the hub's centre to each reason's ring, drawn on the
+    // map's own figures -- out of 100 across it and down it.
+    const map = box(roads.querySelector('.desk-brd__map'))
+    const at = (x, y) => [map.left + (Number(x) / 100) * map.width, map.top + (Number(y) / 100) * map.height]
+    const ends = [...roads.querySelectorAll('.desk-brd__road')].map(l => ({
+      start: at(l.getAttribute('x1'), l.getAttribute('y1')),
+      end: at(l.getAttribute('x2'), l.getAttribute('y2')),
+      on: l.classList.contains('desk-brd__road--on'),
+    }))
+    expect(ends).toHaveLength(6)
+    const near = ([x, y], r) => Math.abs(x - mid(r)) < 1 && Math.abs(y - cy(r)) < 1
+    for (const e of ends) expect(near(e.start, box(hub))).toBe(true)
+    const rings = ways.map(w => box(w.querySelector('.desk-brd__ring')))
+    rings.forEach((r, i) => expect(ends.some(e => near(e.end, r)), ways[i].dataset.motive).toBe(true))
+    // Clockwise from the top left, in the order the digits pick them.
+    const angles = rings.map(r => Math.atan2(cy(r) - cy(box(hub)), mid(r) - mid(box(hub))))
+    expect([...angles].sort((a, b) => a - b)).toEqual(angles)
+    expect(angles[0]).toBeLessThan(-Math.PI / 2)
+    // Each whole on the paper, under the question and over the floor, and
+    // none on another or on the hub.
+    const q = box(inCar('.brd__q'))
+    const floor = box(inCar('.brd__foot'))
+    const boxes = ways.map(box)
+    const apart = (a, b) => a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top
+    boxes.forEach((b, i) => {
+      const name = ways[i].dataset.motive
+      expect(b.left, name).toBeGreaterThanOrEqual(q.left - 0.5)
+      expect(b.right, name).toBeLessThanOrEqual(bodyW() - q.left + 0.5)
+      expect(b.top, name).toBeGreaterThan(q.bottom)
+      expect(b.bottom, name).toBeLessThan(floor.top)
+      expect(apart(b, box(hub)), name).toBe(true)
+      boxes.forEach((o, j) => { if (j > i) expect(apart(b, o), `${name}/${ways[j].dataset.motive}`).toBe(true) })
+    })
+    // A pick lights its own road, and only its own.
+    expect(ends.some(e => e.on)).toBe(false)
+    await pick('[data-motive="live"]')
+    const lit = [...roads.querySelectorAll('.desk-brd__road--on')]
+    expect(lit).toHaveLength(1)
+    expect(near(at(lit[0].getAttribute('x2'), lit[0].getAttribute('y2')), rings[3])).toBe(true)
+    expect(inCar('[data-motive="live"]').getAttribute('aria-pressed')).toBe('true')
+    expect(kbdOf(inCar('[data-motive="live"]'))).toBe('4')
+  })
+
+  it('hangs the kana\'s four answers from the two words, each drawn as what it reads', async () => {
+    await board()
+    await pastName()
+    await pick('[data-motive="trip"]')
+    await next()
+    await settle(900)
+    expect(stepOf()).toBe('kana')
+    expect([en.brdKanaHint, fr.brdKanaHint]).toContain(inCar('.brd__hint').textContent)
+    const words = inCar('.desk-brd__words')
+    expect([...words.children].map(w => w.textContent)).toEqual(['すし', 'ホテル'])
+    expect(getComputedStyle(words).fontSize).toBe('72px')
+    const answers = [...inCar('.brd-grid').children]
+    expect(answers.map(a => a.dataset.kana)).toEqual(['hiragana', 'katakana', 'both', 'none'])
+    // Each answer shows the two words, solid where it reads one.
+    const reads = answers.map(a => [...a.querySelectorAll('.desk-brd__chip')].map(c => !c.classList.contains('desk-brd__chip--not')))
+    expect(reads).toEqual([[true, false], [false, true], [true, true], [false, false]])
+    // What it says first, the word set as Japanese; then its name.
+    expect([en.brdKanaOnly('すし'), fr.brdKanaOnly('すし')]).toContain(answers[0].querySelector('.brd-kopt__label').textContent)
+    expect(answers[0].querySelector('.brd-kopt__label [lang="ja"]').textContent).toBe('すし')
+    expect([en.brdKanaSays.none, fr.brdKanaSays.none]).toContain(answers[3].querySelector('.desk-brd__ans-sub').textContent)
+    // A branch down to each answer's middle, from a knot under the words.
+    const branches = [...inCar('.desk-brd__tree').querySelectorAll('.desk-brd__branch')]
+    expect(branches).toHaveLength(4)
+    branches.forEach((b, i) => {
+      const r = box(b)
+      const down = i < 2 ? r.left + 2 : r.right - 2
+      expect(Math.abs(down - mid(box(answers[i]))), answers[i].dataset.kana).toBeLessThan(1)
+      expect(Math.abs(r.bottom - box(answers[i]).top), answers[i].dataset.kana).toBeLessThan(1)
+    })
+    const knot = box(inCar('.desk-brd__knot'))
+    expect(Math.abs(mid(knot) - mid(box(words)))).toBeLessThan(1)
+    expect(knot.top).toBeGreaterThan(box(words).bottom)
+    expect(inCar('.desk-brd__branch--on')).toBeNull()
+    // Answered, and come back to by Back: the answer's branch is lit.
+    await pick('[data-kana="hiragana"]')
+    await settle(900)
+    expect(stepOf()).toBe('reveal')
+    inCar('[data-action="back"]').click()
+    await settle(900)
+    expect(stepOf()).toBe('kana')
+    const lit = [...inCar('.desk-brd__tree').querySelectorAll('.desk-brd__branch')].map(b => b.classList.contains('desk-brd__branch--on'))
+    expect(lit).toEqual([true, false, false, false])
+  })
+
+  it('reads the two words out sign by sign, and names the first stop and its day', async () => {
+    await board()
+    await pastName()
+    await pick('[data-motive="trip"]')
+    await next()
+    await pick('[data-kana="hiragana"]')
+    await settle(900)
+    expect(stepOf()).toBe('reveal')
+    expect([en.brdRevealLead, fr.brdRevealLead]).toContain(inCar('.brd__hint').textContent)
+    const cards = [...inCar('.desk-brd__reveal').children]
+    expect(cards.map(c => c.querySelector('.desk-brd__word-jp').textContent)).toEqual(['すし', 'ホテル'])
+    const signs = c => [...c.querySelectorAll('.desk-brd__sign')].map(s => [s.querySelector('[lang="ja"]').textContent, s.querySelector('.desk-brd__sign-sound').textContent])
+    expect(signs(cards[0])).toEqual([['す', 'su'], ['し', 'shi']])
+    expect(signs(cards[1])).toEqual([['ホ', 'ho'], ['テ', 'te'], ['ル', 'ru']])
+    // Side by side, the same height.
+    expect(Math.abs(box(cards[0]).top - box(cards[1]).top)).toBeLessThan(1)
+    expect(Math.abs(box(cards[0]).height - box(cards[1]).height)).toBeLessThan(1)
+    // The first stop: the 112 signs a hiragana reader has still to
+    // read, at the recommended 10 a day -- twelve days from today.
+    const day = new Date()
+    day.setDate(day.getDate() + 12)
+    const said = ['en', 'fr'].map(l => new Intl.DateTimeFormat(l, { day: 'numeric', month: 'short' }).format(day))
+    const first = inCar('.desk-brd__first').textContent
+    expect(said.some(d => first.includes(d)), first).toBe(true)
+    expect(first).toMatch(/10 min/)
+    expect(fits(inCar('.brd__body'))).toBe(true)
   })
 
   it('draws the level list as a line of stations, the ride lit to the pick', async () => {
@@ -711,7 +836,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     await read()                          // name
     await pastName()
     await pick('[data-motive="trip"]')
-    await read()                          // why, three columns
+    await read()                          // why, the six roads
     await next()
     await pick('[data-kana="both"]')
     await settle()
@@ -908,14 +1033,16 @@ describe('the hover, simpler (P14, plan 155)', () => {
     const gold = getComputedStyle(inCar('.brd-field')).borderTopColor
     await pastName()
     await landed()
-    const row = inCar('[data-motive="fun"]')
-    const ground = getComputedStyle(row).backgroundColor
-    await userEvent.hover(row)
+    // A reason: its ring takes the edge (the six roads, plan 161).
+    const way = inCar('[data-motive="fun"]')
+    const ring = way.querySelector('.desk-brd__ring')
+    const ground = getComputedStyle(ring).backgroundColor
+    await userEvent.hover(way)
     await settle(250)
-    expect(getComputedStyle(row).filter).toBe('none')
-    expect(getComputedStyle(row).borderTopColor).toBe(gold)
+    expect(getComputedStyle(way).filter).toBe('none')
+    expect(getComputedStyle(ring).borderTopColor).toBe(gold)
     // No wash: the ground it had at rest.
-    expect(getComputedStyle(row).backgroundColor).toBe(ground)
+    expect(getComputedStyle(ring).backgroundColor).toBe(ground)
     await userEvent.hover(inCar('[data-action="back"]'))
     await settle(250)
     expect(getComputedStyle(inCar('[data-action="back"]')).filter).toBe('none')

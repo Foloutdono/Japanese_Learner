@@ -1823,6 +1823,15 @@ const boarding = {
   brdKanaWord: { sushi: 'sushi', hotel: 'hôtel' },
   brdRevealQ: 'Bientôt, tu liras les deux.',
   brdRevealHint: 'Deux écritures, 46 signes chacune. Ton premier arrêt.',
+  // 辻 (plan 161): the desk's kana question and reveal, drawn as the
+  // owner's D03 -- each answer says what it reads, then its name.
+  brdKanaHint: 'Choisis ce que tu lis déjà.',
+  brdKanaOnly: (jp) => `Seulement ${jp}`,
+  brdKanaSays: { hiragana: 'Les hiragana', katakana: 'Les katakana', both: 'Hiragana et katakana', none: 'On commence par là' },
+  brdRevealLead: 'Deux écritures de 46 signes chacune. Voici comment se lisent ces deux mots.',
+  brdRevealMeans: 'veut dire',
+  brdRevealWord: (word) => `« ${word} »`,
+  brdRevealFirst: (date, min) => `Ton premier arrêt : **les kana**, lus d’ici le **${date}** à ${min} min par jour.`,
   brdLevelQ: 'Super ! Quel est ton niveau ?',
   brdLevelHint: 'Les arrêts derrière toi seront marqués connus.',
   brdNovice: 'Novice',

@@ -1891,6 +1891,15 @@ const boarding = {
   brdKanaWord: { sushi: 'sushi', hotel: 'hotel' },
   brdRevealQ: 'Soon you’ll read both.',
   brdRevealHint: 'Two scripts, 46 signs each. Your first stop.',
+  // 辻 (plan 161): the desk's kana question and reveal, drawn as the
+  // owner's D03 -- each answer says what it reads, then its name.
+  brdKanaHint: 'Pick what you can already read.',
+  brdKanaOnly: (jp) => `Only ${jp}`,
+  brdKanaSays: { hiragana: 'The hiragana', katakana: 'The katakana', both: 'Hiragana and katakana', none: 'That’s where we start' },
+  brdRevealLead: 'Two scripts of 46 signs each. Here is how these two words are read.',
+  brdRevealMeans: 'means',
+  brdRevealWord: (word) => `“${word}”`,
+  brdRevealFirst: (date, min) => `Your first stop: **the kana**, read by **${date}** at ${min} min a day.`,
   brdLevelQ: 'Nice! What’s your level?',
   brdLevelHint: 'The stops behind you will be marked known.',
   brdNovice: 'Novice',

@@ -90,6 +90,7 @@ async function pastName() {
 const box = el => el.getBoundingClientRect()
 const bodyW = () => document.body.getBoundingClientRect().width
 const mid = r => (r.left + r.right) / 2
+const cy = r => (r.top + r.bottom) / 2
 
 describe('first contact at 1440 (P10)', () => {
   it('runs the band across the whole area, and covers it to the loop\'s last frame', async () => {
@@ -127,10 +128,17 @@ describe('first contact at 1440 (P10)', () => {
     expect(Math.round(bodyW() - box(inCar('[data-action="continue"]')).right)).toBe(Math.round(gutter))
     // A ticket's width here: the floor has the room the strip leaves.
     expect(Math.round(box(inCar('[data-action="continue"]')).width)).toBe(360)
-    // The six reasons three to a row: two rows.
+    // The six roads across the canvas, at the drawing's height where the
+    // window has it: the top and the bottom rings' centres 440px apart,
+    // and the diagonals at 45 degrees out of the hub.
     inCar('[data-motive="trip"]').click()
     await settle(900)
-    expect(new Set([...inCar('.brd__opts').children].map(o => Math.round(box(o).top / 4))).size).toBe(2)
+    const roads = inCar('.desk-brd__roads')
+    expect(Math.round(box(roads).width)).toBe(1240)
+    const ring = m => box(inCar(`[data-motive="${m}"] .desk-brd__ring`))
+    const hub = box(roads.querySelector('.desk-brd__hub'))
+    expect(Math.round(cy(ring('live')) - cy(ring('fun')))).toBe(440)
+    expect(Math.abs((mid(hub) - mid(ring('studies'))) - (cy(hub) - cy(ring('studies'))))).toBeLessThan(2)
   })
 
   it('draws the level list as one line of six stations', async () => {
