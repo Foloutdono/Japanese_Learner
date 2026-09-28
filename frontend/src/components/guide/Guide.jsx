@@ -6,6 +6,7 @@ import { track } from '../../lib/track'
 import { stopwatch } from '../../lib/dwell'
 import { playClick } from '../../lib/audio'
 import { GUIDES, deskStops } from './guides'
+import { Spot, PAD } from './Spot'
 import { useDesk } from '../../hooks/useDesk'
 
 // ── 案内 — the guide over a gate (plan 100) ────────────────────────
@@ -28,8 +29,6 @@ import { useDesk } from '../../hooks/useDesk'
 // the sheets. Under the sheets' z-index and the cutscenes': a sheet
 // opened from a stop's own control covers the guide, as it should.
 const GAP = 8
-const PAD = 6
-const MOVE_MS = 260
 // The note's height before it has been measured: a sentence and the
 // 44px controls. Only the first frame of a stop reads it.
 const NOTE_H = 150
@@ -64,11 +63,12 @@ function centredOn(rect) {
   return { left: Math.min(Math.max(centre, from), Math.max(from, to)), width }
 }
 
-// `stops`, when given, is a tour that is not a gate's (plan 133: the
-// first ride's walk round a run's three panels on the desk): walked
-// the same way, in the same spot and note, but counted by the ride's
-// own ride_step rather than as a gate's guide -- `gate` then only names
-// it on the DOM.
+// `stops`, when given, is a tour that is not a gate's: walked the same
+// way, in the same spot and note, but not counted as a gate's guide --
+// `gate` then only names it on the DOM. The first ride walked one on
+// the desk (plan 133) until the owner cut its explain-only stops
+// (2026-09-28); the ride now lights only what its notes ask to be
+// pressed (guide/Spot.jsx's Cue), and this is kept for a tour to come.
 export function Guide({ gate, stops: given = null, onEnd }) {
   const { t } = useLang()
   const desk = useDesk()
@@ -252,15 +252,7 @@ export function Guide({ gate, stops: given = null, onEnd }) {
 
   return createPortal(
     <div className="guide" data-gate={gate} data-stop={stop.anchor}>
-      <div
-        className={`guide__spot guide__spot--${stop.radius ?? 'card'}`}
-        style={{
-          top: rect.top - PAD, left: rect.left - PAD,
-          width: rect.width + 2 * PAD, height: rect.height + 2 * PAD,
-          '--guide-move': `${MOVE_MS}ms`,
-        }}
-        aria-hidden="true"
-      />
+      <Spot rect={rect} radius={stop.radius ?? 'card'} />
       <div
         ref={ref}
         role="dialog"

@@ -19962,7 +19962,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   color: var(--text-primary);
   container: brd / size;
 }
-/* The promise stands ON the foot: one rung between "Reach your goals."
+/* The promise stands ON the foot: one rung between "A ride built around you."
    and Embarquer, rather than the frame's own narrower gap. It is the
    last gap of the screen and the only one the welcome sets itself --
    see the roll's block below, which spends the rest of the room. */
@@ -21799,8 +21799,35 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   outline-offset: 3px;
 }
 .guide-callout:focus-visible { outline: none; }
+/* The first ride's cue (guide/Spot.jsx's Cue): the same spot over the
+   one thing a note asks the learner to press. It fades in rather than
+   dropping its scrim at once, then glides to the next press. Under
+   the note (.guide-callout, 220), which stays readable over it. */
+.guide__spot--cue { animation: guide-cue-in 260ms ease-out backwards; }
+@keyframes guide-cue-in {
+  from { opacity: 0; }
+}
+/* The scrim alone is faint on the dark ground, and a 30px 🔍 inside it
+   is easy to miss: the cue also wears a ring, in the gold of the
+   boarding's gate button -- the colour that already means "press
+   here" -- breathing slowly so the eye finds it. A ring, never a fill
+   (Colour). The guide's own spot keeps none: it explains, and asks for
+   no press. */
+.guide__spot--cue::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--accent2);
+  border-radius: inherit;
+  animation: guide-cue-ring 1.6s ease-in-out infinite;
+}
+@keyframes guide-cue-ring {
+  50% { opacity: 0.35; }
+}
 @media (prefers-reduced-motion: reduce) {
   .guide__spot { transition: none; }
+  .guide__spot--cue,
+  .guide__spot--cue::after { animation: none; }
 }
 
 /* ── 解析 — the analyser's result, its pieces at every width (plan 134) ──

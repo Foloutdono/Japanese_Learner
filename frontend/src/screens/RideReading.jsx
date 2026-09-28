@@ -10,8 +10,7 @@ import RatingBar from '../components/study/RatingBar'
 import { Loading } from '../components/ui/Loading'
 import { Continue } from '../components/boarding/BoardFrame'
 import { Callout } from '../components/guide/Callout'
-import { Guide } from '../components/guide/Guide'
-import { TOUR_GRADED } from '../components/guide/rideTours'
+import { Cue } from '../components/guide/Spot'
 import { OfferButton } from '../components/credits/OfferButton'
 import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters } from '../components/reading/ReadingPieces'
 import { RunLines } from '../components/study/RunLines'
@@ -50,10 +49,10 @@ import { useReadingPace } from '../stores/readingPace'
 // left, the sentence in the middle, the breakdown sealed at the right
 // until the grade -- and, once graded, opens the sentence's breakdown
 // there (`graded`: the local tier of /api/phrase/analyze, free and
-// cached, never the paid explanation) and points at it (TOUR_GRADED)
-// before the plate. The sentence, the field and the grade are the
-// notes' as on a phone; the panels are not walked. A phone keeps the
-// ride it had.
+// cached, never the paid explanation) before the plate. The sentence,
+// the field and the grade are the notes' as on a phone; nothing that
+// only explains is pointed at, the breakdown included. A phone keeps
+// the ride it had.
 const READING_COLOR = 'var(--line-reading)'
 // The steps, as ride_step names them: read, type, measure, pass; on the
 // desk graded between measure and pass.
@@ -203,10 +202,6 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     if (!dryRun) navigate('/today', { replace: true })
   }, [failed, navigate, onDone, dryRun])
 
-  // The desk's stop, once: the breakdown the grade opened.
-  const [gradedToured, setGradedToured] = useState(false)
-  const tour = Boolean(sentence) && step === 'graded' && !gradedToured
-
   const foot = { left: t.rideJp, right: t.readingTitle }
   const platforms = getAllSections(t).filter(s => Object.values(PASS_PLATFORMS).includes(s.path))
   const callouts = {
@@ -216,6 +211,14 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     measure: { anchor: 'ride.rate',     place: 'above', text: (desk && t.rideReadMeasureDesk) || t.rideReadMeasure },
   }
   const callout = sentence && callouts[step]
+  // The thing a note asks for, lit (guide/Spot.jsx): the field to write
+  // in, the bar to grade on. Reading the sentence asks for nothing to be
+  // pressed, so that note lights nothing.
+  const cues = {
+    type:    { target: '[data-guide="ride.answer"]', radius: 'card' },
+    measure: { target: '[data-guide="ride.rate"] .rating-bar__buttons', radius: 'card' },
+  }
+  const cue = callout && cues[step]
 
   const writing = step === 'read' || step === 'type'
   const graded = step === 'graded'
@@ -289,7 +292,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
           {graded ? (
             <div className="stage__foot">
               <Continue keys label={t.rideContinue} onClick={() => go('pass')} />
-              <EnterKey onEnter={() => go('pass')} disabled={tour} />
+              <EnterKey onEnter={() => go('pass')} />
             </div>
           ) : (
             <RatingBar active onRate={rate} guide="ride.rate" />
@@ -320,8 +323,8 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
         </div>
       )}
 
+      {cue && <Cue target={cue.target} radius={cue.radius} />}
       {callout && <Callout anchor={callout.anchor} place={callout.place} text={callout.text} />}
-      {tour && <Guide gate="ride" stops={TOUR_GRADED} onEnd={() => setGradedToured(true)} />}
     </StudyStage>
   )
 }

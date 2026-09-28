@@ -153,7 +153,7 @@ describe('the guide on the desk', () => {
             </div>
           </div>
         </div>
-        <Guide gate="ride" stops={[{ anchor: 'run.side', key: 'RideEntry', radius: 'card' }]} onEnd={() => {}} />
+        <Guide gate="ride" stops={[{ anchor: 'run.side', key: 'LearnShelf', radius: 'card' }]} onEnd={() => {}} />
       </LangProvider>
     )
     await settle()

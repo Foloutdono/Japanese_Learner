@@ -93,6 +93,55 @@ describe('the test ride at 390×844', () => {
     }
   })
 
+  // The light goes where the note asks the learner to press, and only
+  // there (guide/Spot.jsx's Cue): the card to turn, the 🔍, the bar to
+  // grade on, the new card, and on it the Wrong tile alone. The done
+  // screen asks for nothing and lights nothing.
+  it('lights the next thing to press, and nothing else', async () => {
+    const screen = await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/ride/cards']}>
+          <Routes>
+            <Route path="/ride/cards" element={<RideRun session={{ access_token: 'tok' }} dryRun cards={CARDS} />} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    const root = screen.container
+    const spot = () => document.querySelector('.guide__spot--cue')
+    // The spot frames its target at the spot's padding, all round.
+    const lit = el => {
+      const s = rect(spot())
+      const r = rect(el)
+      return Math.abs(s.top - (r.top - 6)) < 2 && Math.abs(s.left - (r.left - 6)) < 2
+        && Math.abs(s.width - (r.width + 12)) < 2 && Math.abs(s.height - (r.height + 12)) < 2
+    }
+    await vi.waitFor(() => expect(spot()).not.toBeNull(), { timeout: 3000 })
+    expect(document.querySelectorAll('.guide__spot--cue')).toHaveLength(1)
+    expect(getComputedStyle(spot()).pointerEvents).toBe('none')
+    await vi.waitFor(() => expect(lit(root.querySelector('[data-guide="ride.card"]'))).toBe(true), { timeout: 3000 })
+
+    root.querySelector('.flashcard').click()
+    await vi.waitFor(() => expect(lit(root.querySelector('[data-guide="card.lookup"]'))).toBe(true), { timeout: 3000 })
+
+    root.querySelector('[data-guide="card.lookup"]').click()
+    await settle(150)
+    // The entry's sheet is open: nothing is lit over it.
+    expect(spot()).toBeNull()
+    document.querySelector('.dict-sheet__scrim').click()
+    await vi.waitFor(() => expect(lit(root.querySelector('.rating-bar__buttons'))).toBe(true), { timeout: 3000 })
+
+    root.querySelector('.rating-bar__btn--q4').click()
+    await vi.waitFor(() => expect(lit(root.querySelector('[data-guide="ride.card"]'))).toBe(true), { timeout: 3000 })
+
+    root.querySelector('.flashcard').click()
+    await vi.waitFor(() => expect(lit(root.querySelector('.rating-bar__btn--q1'))).toBe(true), { timeout: 3000 })
+
+    root.querySelector('.rating-bar__btn--q1').click()
+    await vi.waitFor(() => expect(root.querySelector('.ride__done')).toBeTruthy(), { timeout: 3000 })
+    expect(spot()).toBeNull()
+  })
+
   // Plan 122: the desk docks the card's entry in a side column; a phone
   // has no side, and looks the word up from the card's own 🔍.
   it('draws no side, and keeps the look-up on the card', async () => {
