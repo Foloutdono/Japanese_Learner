@@ -2808,6 +2808,17 @@
      mean "this hangs"; this one means "this is the thing to press".
      A fourth meaning needs the same argument this one had. */
   --elev-action:   0 4px 16px color-mix(in srgb, var(--accent2) 30%, transparent);
+  /* 改札 — the boarding's gate button (plan 164, the owner's pick D of
+     four drawn on the "Board & Continue" canvas). Its gold is the metal
+     of a card reader, not the pass's: a top-lit ramp of 山吹 that holds
+     the same value in both themes (the washi theme's deeper --accent2
+     would drop it to olive), inked --text-on-fill at 6.9:1 in the
+     middle and 5.3:1 at the deep end. The lamp is the reader's mark on
+     sumi. Spent on .btn-depart--gate and nothing else. */
+  --gate-gold-lit:  #e6bd62;
+  --gate-gold:      #c99a3e;
+  --gate-gold-deep: #b0852f;
+  --gate-lamp:      #e0b04f;
 
   /* The serif face, which was hardcoded 57 times across the four
      stylesheets and had no token at all. Names and headings only —
@@ -7276,6 +7287,142 @@ textarea:focus-visible {
   filter: none;
   box-shadow: none;
   transform: none;
+}
+
+/* ── 改札 — the gate you tap your pass on (plan 164) ──
+   The boarding's one action -- Board on the Welcome, Continue on every
+   question and at a ride's end (components/boarding/BoardFrame.jsx's
+   Continue) -- drawn as the owner's pick D of four: a gold pill with
+   the pass's contactless mark in a sumi reader at its left, two
+   ripples leaving the reader, and a halo the pill breathes. Pressing
+   it lights the reader, the gate's ピッ. It stands outside three
+   rulings on purpose, and only here (DESIGN.md, "The gate button"):
+   motion's "no glow" (the halo), --elev-action's single shadow (the
+   halo IS its shadow), and the family's one disabled treatment (not
+   yet is the gate's outline, not a faded fill -- a faded gold read as
+   broken, and the pick has to be seen lighting it).
+
+   The reader, the label and the Enter cap sit on three columns, the
+   outer two the reader's width, so the word stands on the pill's
+   centre line whatever the cap. The fill is a layer under the content
+   (::before), so a pick can fade it in over the outline: a background
+   gradient cannot transition. */
+.btn-depart--gate {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) minmax(48px, auto);
+  align-items: center;
+  column-gap: var(--sp-4);
+  isolation: isolate;
+  min-height: 66px;
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-on-fill);
+  box-shadow: none;
+  animation: btn-gate-breathe 2.8s ease-in-out infinite;
+  transition: transform 0.15s ease, color 270ms ease;
+}
+.btn-depart--gate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(130% 160% at 28% 0%, var(--gate-gold-lit) 0%, var(--gate-gold) 55%, var(--gate-gold-deep) 100%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-on-panel) 40%, transparent);
+  transition: opacity 270ms ease;
+}
+.btn-depart--gate .btn-depart__jp { grid-column: 2; text-align: center; }
+.btn-depart__reader {
+  position: relative;
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-pill);
+  background: var(--bg-panel);
+  color: var(--gate-lamp);
+  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+/* The pass's own mark (PassWave), its three arcs inked in the lamp and
+   all at full strength, as drawn. */
+.btn-depart__wave { width: 22px; height: 24px; }
+.pass__wave.btn-depart__wave span { border-width: 2px; border-right-color: currentcolor; opacity: 1; }
+.btn-depart__wave span:nth-child(1) { width: 8px;  height: 8px;  margin-top: -4px; }
+.btn-depart__wave span:nth-child(2) { width: 15px; height: 15px; margin-top: -7.5px; opacity: 1; }
+.btn-depart__wave span:nth-child(3) { width: 22px; height: 22px; margin-top: -11px; opacity: 1; }
+.btn-depart__rip {
+  position: absolute;
+  inset: 0;
+  border: 2px solid color-mix(in srgb, var(--bg-panel) 55%, transparent);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: btn-gate-rip 2.2s ease-out infinite;
+}
+.btn-depart__rip + .btn-depart__rip { animation-delay: 1.1s; }
+.btn-depart--gate:hover,
+.btn-depart--gate:focus-visible { transform: translateY(-2px); box-shadow: none; }
+.btn-depart--gate:active {
+  transform: translateY(1px) scale(0.99);
+  animation: none;
+  box-shadow: inset 0 2px 5px color-mix(in srgb, var(--bg-panel) 45%, transparent);
+}
+.btn-depart--gate:active .btn-depart__reader { background: var(--text-on-panel); color: var(--text-on-fill); }
+/* The idle nudge: an action ready and not taken for four seconds, the
+   reader steps toward the way on twice and rests. Never on the outline
+   -- a screen still waiting for its answer has nothing to press yet. */
+.btn-depart--gate:not(:disabled) .btn-depart__reader { animation: btn-gate-nudge 720ms ease-in-out 4s; }
+/* Not yet: the gate's outline. Written after the family's rule above
+   so it wins at the same weight. */
+.btn-depart--gate:disabled {
+  opacity: 1;
+  color: var(--text-secondary);
+  box-shadow: inset 0 0 0 1.5px var(--surface-line);
+  animation: none;
+}
+.btn-depart--gate:disabled::before { opacity: 0; }
+.btn-depart--gate:disabled .btn-depart__reader {
+  background: transparent;
+  color: var(--text-secondary);
+  box-shadow: inset 0 0 0 1.5px var(--surface-line);
+}
+.btn-depart--gate:disabled .btn-depart__rip { display: none; }
+/* The wake: set by Continue for the one render after a pick enables it. */
+.btn-depart--waking {
+  animation: btn-gate-wake 540ms ease-out, btn-gate-breathe 2.8s ease-in-out infinite;
+}
+@keyframes btn-gate-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gate-gold) 0%, transparent), 0 6px 18px color-mix(in srgb, var(--gate-gold) 35%, transparent); }
+  50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--gate-gold) 16%, transparent), 0 8px 28px color-mix(in srgb, var(--gate-gold) 55%, transparent); }
+}
+@keyframes btn-gate-rip {
+  from { transform: scale(1); opacity: 0.8; }
+  to { transform: scale(1.75); opacity: 0; }
+}
+@keyframes btn-gate-nudge {
+  0%, 50%, 100% { transform: none; }
+  25%, 75% { transform: translateX(6px); }
+}
+@keyframes btn-gate-wake {
+  0% { transform: scale(0.97); }
+  50% { transform: scale(1.035); }
+  100% { transform: none; }
+}
+/* Reduced motion keeps the fill coming in (opacity) and drops every
+   movement: no breath, no ripples, no nudge, no pop. */
+@media (prefers-reduced-motion: reduce) {
+  .btn-depart--gate,
+  .btn-depart--waking,
+  .btn-depart--gate .btn-depart__reader { animation: none; }
+  .btn-depart--gate { transition: color 270ms ease; }
+  .btn-depart--gate:hover,
+  .btn-depart--gate:focus-visible,
+  .btn-depart--gate:active { transform: none; }
+  .btn-depart__rip { display: none; }
 }
 
 /* ── Ghost / panel button utilities ──────────────────────── */
@@ -19754,6 +19901,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   overflow: hidden;
   margin-inline: calc(-1 * var(--sp-1));
   padding-inline: var(--sp-1);
+  /* And down, by the gate's reach (plan 164): the halo the gate button
+     breathes and the ripples leaving its reader stand 9px past the pill,
+     and the foot is the car's last row -- the clip took its lower half.
+     The frame's own bottom padding (--sp-6) has the room. */
+  margin-bottom: calc(-1 * var(--sp-4));
+  padding-bottom: var(--sp-4);
 }
 .brd__car { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-5); }
 .brd__car--in { animation: brd-pull-in 260ms ease-out backwards; }
@@ -19915,7 +20068,32 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .brd__hint { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-align: center; color: var(--text-secondary); }
 .brd__error { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-align: center; color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
 .brd__foot { display: flex; flex-direction: column; gap: var(--sp-3); flex: none; }
-.brd .btn-depart { width: 100%; min-height: 56px; }
+/* ── The scrim over the foot (plan 164, add-on 3) ──
+   The foot was already docked -- the body is what scrolls -- but a
+   list that ran past the room was cut dead at the body's edge, a row
+   sliced in half an inch above the action. Now the body's last rung
+   fades out, and only while there is more under it: the fade's depth
+   is a scroll-driven animation of the body's own scroll, so it is
+   nothing on a body that does not scroll (no timeline, the property's
+   initial 0) and gone once the last row is reached. A browser without
+   scroll timelines keeps the dead edge it always had. */
+@property --brd-scrim {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0;
+}
+@supports (animation-timeline: scroll()) {
+  .brd__body {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - var(--brd-scrim, 0%)), transparent);
+    animation: brd-scrim linear both;
+    animation-timeline: scroll(self);
+  }
+}
+@keyframes brd-scrim {
+  0%, 96% { --brd-scrim: var(--sp-7); }
+  100% { --brd-scrim: 0; }
+}
+.brd .btn-depart { width: 100%; min-height: 66px; }
 .brd .btn-depart__jp { font-size: var(--fs-title); }
 .brd__link {
   align-self: center;
@@ -20435,6 +20613,14 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
    the media query beside it. */
 @media (max-height: 739px) {
   .brd { gap: var(--sp-4); }
+}
+/* The gate is drawn 66px tall on the 844px artboard (plan 164); a
+   phone shorter than 800px gets back the 10px it added, the height the
+   action stood at before it, so the six motives still clear it with
+   the air the block's rungs promise -- then the step below takes it to
+   52px with everything else. */
+@container brd (max-height: 799px) {
+  .brd .btn-depart { min-height: 56px; }
 }
 @container brd (max-height: 739px) {
   .brd__car { gap: var(--sp-4); }
@@ -25546,7 +25732,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   .desk-brd__back > .svg { width: 18px; height: 18px; }
   /* The strip: the line on its side at the floor's left end, as tall as
-     the floor (.brd .btn-depart's 56px) so its stops stand on the floor's
+     the floor (the gate's 66px, plan 164) so its stops stand on the floor's
      middle. A stop is a dot and its name, joined to the one before; the
      ridden ones filled in the second ink, the one asked lit -- the gold
      ring the phone's track draws for "here" -- and the ones ahead open. */
@@ -25556,7 +25742,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     bottom: calc(var(--safe-bottom) + var(--sp-7));
     display: flex;
     align-items: center;
-    min-height: 56px;
+    min-height: 66px;
     animation: desk-brd-show 320ms ease-out 200ms backwards;
   }
   .desk-brd__sps {
@@ -25661,6 +25847,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
   }
   .desk-brd .brd__foot .btn-depart { transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 200ms ease; }
+  /* 改札 (plan 164): the printed Enter stands in the gate's third column,
+     and the gate keeps its drawn 66px on the desk whatever the window's
+     height -- the frame's short-phone step is a phone's. Not yet is an
+     outline now, not the family's 0.45, so the floor's pick answers in
+     the wake's colour rather than in opacity. */
+  .btn-depart--gate .desk-kbd { grid-column: 3; justify-self: end; }
+  .desk-brd .brd__foot .btn-depart--gate,
+  .desk-front .desk-front__block > .btn-depart--gate { min-height: 66px; }
+  .desk-brd .brd__foot .btn-depart--gate { transition: transform 0.15s ease, color 270ms ease; }
   /* ── 辻 — the name as the station's (plan 163) ──
      The owner's D01 (NameStep): the name on its plate -- the field at
      the card's width, set in from the question by a stop's width, the
@@ -27299,8 +27494,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     z-index: 1;
     display: grid;
     /* The action's middle a rung under the paper's (Welcome's BELOW,
-       60px, less half of its own 56px). */
-    grid-template-rows: calc(50% + var(--sp-9) + var(--sp-3) - 28px) auto minmax(0, 1fr);
+       60px, less half of its own 66px -- plan 164's gate). */
+    grid-template-rows: calc(50% + var(--sp-9) + var(--sp-3) - 33px) auto minmax(0, 1fr);
     width: var(--desk-side-w);
     animation: brd-in 480ms ease-out 120ms backwards;
   }
