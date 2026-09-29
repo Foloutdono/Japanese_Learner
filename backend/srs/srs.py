@@ -1095,6 +1095,11 @@ class SRSEngine:
                 cur.execute(sql, (pattern, user_id))
                 return {row[0] for row in cur.fetchall()}
 
+    def count_studied_days(self, user_id: str) -> int:
+        """How many different days this user has reviewed on -- the
+        rating prompt's "used it on more than one evening" (plan 167)."""
+        return len(self._studied_days(user_id))
+
     def get_streak(self, user_id: str) -> dict[str, int]:
         """Current and longest consecutive-day streak of having at least one review."""
         day_set = self._studied_days(user_id)

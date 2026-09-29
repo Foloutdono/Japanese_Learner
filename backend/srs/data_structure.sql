@@ -894,3 +894,24 @@ CREATE TABLE event_daily (
     n       INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day, name)
 );
+
+-- ── 評価 — the learner's rating of the app (plan 167) ────────────────
+-- Owned by routes/rating.py. A row per answer to the rating sheet:
+-- `stars` 1..5 with the comment a rating under five asks for (NULL when
+-- none was written), or NULL stars for "not now", which puts the
+-- question off (SNOOZE_DAYS, at most MAX_PUT_OFFS times). `platform` is
+-- 'ios' | 'android' | 'web' and `lang` the interface's, both validated
+-- in code. The comment is text the learner addressed to us, so it lives
+-- here and never in event_log (ADR 0012). No cascade from auth
+-- (ADR 0010): DELETE /api/account and scripts/purge_orphans.py clear
+-- it. Read with scripts/app_ratings.py.
+CREATE TABLE app_ratings (
+    id       BIGSERIAL PRIMARY KEY,
+    user_id  TEXT NOT NULL,
+    stars    SMALLINT,
+    comment  TEXT,
+    platform TEXT NOT NULL,
+    lang     TEXT,
+    at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_app_ratings_user ON app_ratings(user_id, at);

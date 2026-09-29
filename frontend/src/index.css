@@ -4589,6 +4589,45 @@ textarea:focus-visible {
   animation-delay: calc(min(var(--i, 0), 8) * 30ms);
 }
 .claim-book__stub--room { border: 1px dashed var(--surface-line); }
+/* ── 評価 — the rating sheet (plan 167) ──
+   Five stars, outlines until one is given, then lit in the pass's metal
+   up to it: the verdict is the learner's own, as the services' ★ is.
+   On a pointer that hovers, the row lights up to the star under it --
+   the answer as it would read -- and a phone, which has no hover, lights
+   it on the tap. components/rating/RatingSheet.jsx. */
+.rate-stars {
+  display: flex;
+  justify-content: center;
+}
+.rate-stars__star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px; /* a hit target, not a spacing rung, as .field's */
+  min-height: 44px;
+  padding: var(--sp-2);
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+}
+.rate-stars__star:hover { filter: none; }
+.rate-stars__star--lit { color: var(--accent2); }
+.rate-stars__star--lit polygon { fill: currentcolor; }
+@media (hover: hover) {
+  .rate-stars:hover .rate-stars__star { color: var(--accent2); }
+  .rate-stars:hover .rate-stars__star polygon { fill: currentcolor; }
+  .rate-stars__star:hover ~ .rate-stars__star { color: var(--text-secondary); }
+  .rate-stars__star:hover ~ .rate-stars__star polygon { fill: none; }
+}
+.rate-sheet__note {
+  margin: 0;
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+}
+.rate-sheet__why {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
 .balance__rows {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -25808,6 +25847,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      across), and at the dialog's full --card-w it spread into fifty
      flat bars with the figure a long way from its button. */
   .claim-sheet { width: var(--desk-side-w); }
+  /* 評価 — the rating sheet (plan 167) at the same column's width: five
+     stars and a note, which the dialog's full --card-w spread apart. */
+  .rate-sheet { width: var(--desk-side-w); }
   /* The CSV import (components/decks/ImportCardsMenu) is its own
      overlay, not a sheet; it takes the desk dialog's width, material,
      scrim and arrival. Centred by auto margins, which fall to nothing

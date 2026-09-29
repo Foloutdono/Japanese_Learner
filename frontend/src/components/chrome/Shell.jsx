@@ -10,6 +10,7 @@ import { Hud } from './Hud'
 import { TabBar } from './TabBar'
 import { DeskRail } from './DeskRail'
 import { useChrome } from './useChrome'
+import { RatingSheet } from '../rating/RatingSheet'
 
 // ── 車内 — the two frames every screen renders in (plan 068) ──
 // The canvas's backbone: the HUD across the top (level · goal status ·
@@ -103,6 +104,10 @@ export function Shell() {
         <Outlet />
       </div>
       {desk ? null : <TabBar />}
+      {/* 評価 — the rating sheet (plan 167), here so it can only ever
+          open in the chrome: never over a run. A portal; nothing in the
+          frame's own DOM. */}
+      <RatingSheet />
     </div>
   )
 }

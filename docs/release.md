@@ -91,6 +91,11 @@ this repository (`frontend/.gitignore` refuses `.jks`, `.keystore`, `.p8`,
   questionnaire, category Education, the fr + en listings and screenshots
   from the redesigned app, a **closed test** with 12 testers for 14 days
   (a new personal developer account's rule).
+- The **App Store ID** (App Store Connect → App Information → Apple ID)
+  goes in `APP_STORE_ID` in `frontend/src/config/stores.js`: the rating
+  sheet (plan 167) sends an iPhone learner's five stars to the listing
+  it names, and until it is set an iPhone five is thanked and kept, not
+  sent on. Play's listing is named by the bundle id and needs nothing.
 - App Store Connect: the privacy labels, an **account-deletion note** for
   the reviewer (Settings › Data), a **test account**, the support and
   privacy URLs, 6.7" and 6.1" screenshots, an external TestFlight group.

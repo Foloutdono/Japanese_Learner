@@ -79,6 +79,16 @@ const nav = {
   claimTitle:        'Pendant ton absence',
   claimButton:       'Récupérer',
   claimBookLabel:    (n, cap) => `${n} crédits sur ${cap}`,
+  // 評価 — la fiche de note (plan 167)
+  rateTitle:         'Tsuji te plaît ?',
+  rateStars:         (n) => (n === 1 ? '1 étoile' : `${n} étoiles`),
+  rateNotNow:        'Plus tard',
+  rateWhy:           'Qu’est-ce qui en aurait fait cinq étoiles ?',
+  rateWhyPlaceholder: 'Dis-nous quoi améliorer — on lit tout.',
+  rateSend:          'Envoyer',
+  rateThanks:        'Merci !',
+  rateThanksNote:    'Ton message nous arrive directement.',
+  rateStoreAsk:      'Tu le dirais aussi sur le store ? Ça aide d’autres apprenants à trouver Tsuji.',
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'gratuit',
   laneNew:           n => `${n} nouv.`,

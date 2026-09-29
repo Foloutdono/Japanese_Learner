@@ -61,6 +61,7 @@ from routes.credits         import router as credits_router
 from routes.events          import router as events_router
 from routes.tts             import router as tts_router
 from routes.station         import router as station_router
+from routes.rating          import router as rating_router
 from routes.events          import router as events_router
 from core.credits import OutOfCredits, PassRequired, LimitReached
 # The shared daily counter's table is made here, at the app's start,
@@ -199,6 +200,7 @@ app.include_router(credits_router)
 app.include_router(events_router)
 app.include_router(tts_router)
 app.include_router(station_router)
+app.include_router(rating_router)
 
 
 # ── 402 — the fare gate's three refusals (plan 069) ──

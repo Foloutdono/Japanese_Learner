@@ -1119,7 +1119,22 @@ runtime purpose. Two consequences worth knowing:
   `GateCard.browser.test.jsx`, `screens/TodayScreen.browser.test.jsx`,
   `src/deskfree.phone.test.jsx`, `src/today.wide.test.jsx` and
   `index.css`; DESIGN.md, "The gate button"; `docs/design/mobile/README.md`).
-  When starting a new wave, begin at **167** or higher, and check
+  **167** is 評価, the app asking to be rated: once a learner has used
+  it enough to have an opinion (`MIN_REVIEWS` reviews on `MIN_DAYS`
+  days, `GET /api/rating/prompt`), a sheet at a calm moment -- back in
+  the chrome after ten cards in the visit, never in a run -- asks for
+  one to five stars; a five goes on to the store's listing (the shell's
+  own store, the web offered the listings), under five asks what would
+  have made it five and posts that to us (`app_ratings`, read with
+  `scripts/app_ratings.py`), "not now" snoozes it and three of those
+  end it (cited in `routes/rating.py`, `routes/account.py`,
+  `srs/data_structure.sql`, `tests/test_rating.py`,
+  `scripts/app_ratings.py`, `config/stores.js`, `stores/rating.js`,
+  `components/rating/RatingSheet.jsx`, `components/chrome/Shell.jsx`,
+  `lib/reviews.js`, `lib/platform.js`'s `openStore`,
+  `src/rating.phone.test.jsx`, `src/rating.desktop.test.jsx`,
+  `public/privacy.html` and `index.css` and its 机 section).
+  When starting a new wave, begin at **168** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -1235,10 +1250,11 @@ python -m scripts.prune_withdrawn      # decks an author deleted, past their gra
 python -m scripts.drop_legacy_tables   # tables a removed feature left behind
 ```
 
-One more is read-only and needs no flag, so it is safe to run at any time:
+Two more are read-only and need no flag, so they are safe to run at any time:
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
+python -m scripts.app_ratings          # the app's ratings and what learners wrote (plan 167)
 ```
 
 Two others fill a shared cache ahead of demand rather than maintaining

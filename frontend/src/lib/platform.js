@@ -54,6 +54,20 @@ export async function openExternal(url) {
   window.open(url, '_blank', 'noopener,noreferrer')
 }
 
+/** A store's listing (config/stores.js, plan 167). In the shell a
+ *  top-level navigation off the bundle is handed to the OS by Capacitor
+ *  itself -- an ACTION_VIEW intent on Android, UIApplication.open on
+ *  iOS -- and the OS opens the store's own app on it, which the in-app
+ *  browser openExternal uses cannot do; the WebView stays where it is.
+ *  On the web, a new tab. */
+export function openStore(url) {
+  if (isNative()) {
+    window.location.assign(url)
+    return
+  }
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+
 /** The web's download: an anchor with an object URL, revoked on the
  *  next tick (Safari reads the href after click() returns). */
 export function downloadBlob(blob, filename) {

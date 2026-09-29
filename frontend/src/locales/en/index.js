@@ -78,6 +78,16 @@ const nav = {
   claimTitle:        'While you were away',
   claimButton:       'Claim',
   claimBookLabel:    (n, cap) => `${n} credits of ${cap}`,
+  // 評価 — the rating sheet (plan 167)
+  rateTitle:         'Enjoying Tsuji?',
+  rateStars:         (n) => (n === 1 ? '1 star' : `${n} stars`),
+  rateNotNow:        'Not now',
+  rateWhy:           'What would have made it five stars?',
+  rateWhyPlaceholder: 'Tell us what to fix — we read every one.',
+  rateSend:          'Send',
+  rateThanks:        'Thank you!',
+  rateThanksNote:    'Your note comes straight to us.',
+  rateStoreAsk:      'Would you say so on the store too? It helps other learners find Tsuji.',
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'free',
   laneNew:           n => `${n} new`,

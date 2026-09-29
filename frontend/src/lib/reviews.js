@@ -1,6 +1,7 @@
 import { apiJson, ApiError } from './api'
 import { applySpend, reconcileCredits, markRunOut } from '../stores/credits'
 import { COST_PER_REVIEW, isFreeMode } from '../domain/credits'
+import { noteReview } from '../stores/rating'
 
 // ── Posting a review, with the fare (plan 069) ─────────────────
 // Every study screen used to fire its review POST and forget it. It
@@ -25,6 +26,9 @@ export async function postReview(path, session, body, { cleared = 0 } = {}) {
   try {
     const res = await apiJson(path, session, { method: 'POST', body: JSON.stringify(body) })
     reconcileCredits(res?.credits)
+    // A card answered in this visit: what earns the rating sheet its
+    // calm moment (stores/rating.js, plan 167).
+    noteReview()
     return res
   } catch (e) {
     if (e instanceof ApiError && e.code === 'out_of_credits') {
