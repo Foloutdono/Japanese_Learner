@@ -53,6 +53,17 @@ const VOLUMES = {
 }
 
 const settle = (ms = 340) => new Promise(r => setTimeout(r, ms))
+// A step's answers rise into place as its car arrives (brd-in: 6px over
+// 360ms, staggered up to 400ms), and a fixed wait can land inside that
+// on a loaded runner: the climb's rings were measured 69px apart instead
+// of 70. A test that measures them waits for them to land.
+// (Short ones only: a looping animation's `finished` never settles.)
+const landed = () => Promise.all(document.getAnimations()
+  .filter(a => {
+    const end = a.effect?.getComputedTiming().endTime
+    return Number.isFinite(end) && end <= 2000
+  })
+  .map(a => a.finished.catch(() => {})))
 const $ = s => document.querySelector(s)
 const live = () => $('.brd__car:not(.brd__car--out)')
 const inCar = s => live()?.querySelector(s)
@@ -152,6 +163,7 @@ describe('first contact at 1440 (P10)', () => {
     await settle()
     inCar('[data-kana="both"]').click()
     await settle(900)
+    await landed()
     expect(stepOf()).toBe('level')
     const climb = inCar('.desk-brd__climb')
     expect(Math.round(box(climb).width)).toBe(1240)
