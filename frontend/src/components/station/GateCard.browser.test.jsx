@@ -91,7 +91,11 @@ describe('GateCard — the fare', () => {
     const screen = await mount()
     const gate = screen.container.querySelector('.btn-depart')
     expect(gate.disabled).toBe(true)
-    expect(getComputedStyle(gate).opacity).toBe('0.45')
+    // Closed is the gate's outline (改札, plan 164), not a faded fill:
+    // full strength, the gold layer gone, the word in the second ink.
+    expect(getComputedStyle(gate).opacity).toBe('1')
+    expect(getComputedStyle(gate, '::before').opacity).toBe('0')
+    expect(gate.classList.contains('btn-depart--gate')).toBe(true)
   })
 
   it('prints no notice on a pass', async () => {

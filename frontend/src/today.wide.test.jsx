@@ -322,3 +322,90 @@ describe('Today\'s finish at 1440', () => {
   })
 })
 
+
+// ── 主 — the main flashcards alone, and Depart as the gate ──────────
+// The owner's ask: a way to board each line's main flashcard (the
+// recognition card, `<source>.flashcard.f2b`) and nothing else, and
+// Depart drawn as the boarding's gate button (改札, plan 164).
+describe('the main flashcards alone', () => {
+  const count = () => text($('.gate-card__count'))
+  const modes = () => $$('.gate-card__modes .seg__opt')
+
+  it('boards each line\'s recognition card alone, and remembers it', async () => {
+    await mount()
+    // What each way would ride: 101 every mode, 76 the main cards.
+    expect(modes().map(text)).toEqual(['Tous les modes · 101', 'Principales · 76'])
+    expect(count()).toBe('101')
+    await userEvent.click(modes()[1])
+    await settle(60)
+    expect(count()).toBe('76')
+    expect(modes()[1].getAttribute('aria-checked')).toBe('true')
+    // The other modes stay on the platform, switched off.
+    expect($$('.lane--tile.lane--off')).toHaveLength(3)
+    expect($$('.lane--tile:not(.lane--off)')).toHaveLength(5)
+    press('Enter')
+    await settle(60)
+    const path = decodeURIComponent(departure.begin.mock.calls[0][0].path)
+    expect(path.startsWith('/today/run?lanes=')).toBe(true)
+    const ids = path.split('=')[1].split(',')
+    expect(ids).toHaveLength(5)
+    expect(ids.every(id => id.endsWith('.flashcard.f2b'))).toBe(true)
+    // The next visit opens on it.
+    expect(localStorage.getItem('tsuji.gateMain')).toBe('1')
+  })
+
+  it('opens on the main cards when they were chosen last time', async () => {
+    localStorage.setItem('tsuji.gateMain', '1')
+    await mount()
+    expect(count()).toBe('76')
+    expect(modes()[1].getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('leaves the filter when another mode is switched on, keeping what the gate shows', async () => {
+    await mount()
+    await userEvent.click(modes()[1])
+    await settle(60)
+    const off = $$('.lane--tile.lane--off')
+    await userEvent.click(off[0])
+    await settle(60)
+    expect(modes()[0].getAttribute('aria-checked')).toBe('true')
+    // One lane back on; the other two stay off.
+    expect($$('.lane--tile.lane--off')).toHaveLength(2)
+    expect(Number(count())).toBeGreaterThan(76)
+    expect(Number(count())).toBeLessThan(101)
+  })
+
+  it('gives back the learner\'s own switches with every mode', async () => {
+    await mount()
+    // Kana off, then the main cards, then every mode again: kana stays off.
+    await userEvent.click($$('.gate-band__line')[0])
+    await settle(60)
+    expect(count()).toBe('74')
+    await userEvent.click(modes()[1])
+    await settle(60)
+    expect(count()).toBe('49')
+    await userEvent.click(modes()[0])
+    await settle(60)
+    expect(count()).toBe('74')
+  })
+
+  it('departs through the boarding\'s gate button', async () => {
+    await mount()
+    const go = $('.gate-card__fare .btn-depart')
+    expect(go.classList.contains('btn-depart--gate')).toBe(true)
+    expect(go.querySelector('.btn-depart__reader .pass__wave')).not.toBeNull()
+    expect(text(go.querySelector('.btn-depart__jp'))).toBe('Embarquer')
+    expect(go.querySelector('.desk-kbd')).not.toBeNull()
+    expect(go.getAttribute('aria-keyshortcuts')).toBe('Enter')
+    expect(Math.round(go.getBoundingClientRect().height)).toBe(66)
+    // Nothing chosen: the gate's outline; a lane back on wakes it.
+    for (const line of $$('.gate-band__line')) await userEvent.click(line)
+    await settle(400)
+    expect(go.disabled).toBe(true)
+    expect(getComputedStyle(go, '::before').opacity).toBe('0')
+    await userEvent.click($$('.gate-band__line')[0])
+    await settle(20)
+    expect(go.disabled).toBe(false)
+    expect(go.classList.contains('btn-depart--waking')).toBe(true)
+  })
+})

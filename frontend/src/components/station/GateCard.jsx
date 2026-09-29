@@ -8,13 +8,14 @@ import { beginDeparture } from '../../stores/departure'
 import { playAnnouncement } from '../../lib/audio'
 import { Chip, Seg } from '../chrome/Console'
 import { DepartKey } from '../chrome/DeskKeys'
+import { GateButton } from '../ui/GateButton'
 import { useDesk } from '../../hooks/useDesk'
 import { Loading } from '../ui/Loading'
 import { CheckIcon, HourglassIcon } from '../ui/Icons'
 import { useCredits } from '../../stores/credits'
 import { publishLeft } from '../../stores/gateRun'
 import { runFit, isFreeLane, nextCreditClock, showsCap, CAP } from '../../domain/credits'
-import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, TAKE_STEPS } from '../../domain/lanes'
+import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, isMainLane, TAKE_STEPS } from '../../domain/lanes'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
 // The day's reviews as a card, first thing on Today: the count, the
@@ -116,6 +117,17 @@ export default function GateCard({ today, failed }) {
     setTakeState(next)
     writeTake(next)
   }
+  // 主 — the main flashcards alone (the desk's): each line's recognition
+  // card rides and every other mode stays on the platform. A filter
+  // over the learner's own switches rather than a rewrite of them, so
+  // "every mode" gives back the choice as it stood. Remembered like the
+  // run's length.
+  const [main, setMainState] = useState(readMain)
+  function setMain(next) {
+    setMainState(next)
+    writeMain(next)
+  }
+  const mainOnly = desk && main
 
   if (failed) return null
   if (!today) {
@@ -145,7 +157,7 @@ export default function GateCard({ today, failed }) {
   }
 
   const lanes = orderLanes(today.lanes ?? [])
-  const isOn = lane => !off.has(lane.id)
+  const isOn = lane => !off.has(lane.id) && (!mainOnly || isMainLane(lane))
   // What a lane puts in the run: the reviews it owes and, since plan
   // 098, the day's ration of new cards the server drew for it against
   // the pace. Two figures on the row, one in every sum -- a new card
@@ -162,14 +174,28 @@ export default function GateCard({ today, failed }) {
   // free either — the tag would be on every row and say nothing.
   const metered = Boolean(credits && !credits.unlimited)
   const free = metered ? lanes.filter(l => isOn(l) && isFreeLane(l)).reduce((n, l) => n + count(l), 0) : 0
-  function toggle(id) {
+  // Switch these lanes on or off. Turning on a mode the main-only
+  // filter holds back is leaving the filter: what the gate shows stays
+  // as it is, the filter's lanes now the learner's own switches, and
+  // the lane asked for joins them.
+  function choose(ids, on) {
+    if (mainOnly && on && lanes.some(l => ids.includes(l.id) && !isMainLane(l))) {
+      const next = new Set(lanes.filter(l => !isOn(l)).map(l => l.id))
+      for (const id of ids) next.delete(id)
+      setOff(next)
+      setMain(false)
+      return
+    }
     setOff(prev => {
       const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
+      for (const id of ids) {
+        if (on) next.delete(id)
+        else next.add(id)
+      }
       return next
     })
   }
+  const toggle = id => choose([id], !isOn(lanes.find(l => l.id === id)))
   // ── 路線ごと — the lines in today's queue, as switches ──
   // Twenty lanes is five taps to say "just the kanji" and fifteen to
   // say it the other way round. A line is the coarse choice the fine
@@ -185,16 +211,7 @@ export default function GateCard({ today, failed }) {
     })
     .filter(line => line.lanes.length > 0)
 
-  function toggleLine(line) {
-    setOff(prev => {
-      const next = new Set(prev)
-      for (const l of line.lanes) {
-        if (line.on) next.add(l.id)
-        else next.delete(l.id)
-      }
-      return next
-    })
-  }
+  const toggleLine = line => choose(line.lanes.map(l => l.id), !line.on)
 
   // Closed only under enforcement, and only at zero WITH nothing free
   // in the run: the gate never blocks in shadow mode (plan 069), and
@@ -212,10 +229,13 @@ export default function GateCard({ today, failed }) {
   }
 
   if (desk) {
+    // What the filter leaves out travels as switched off.
+    const offNow = new Set(lanes.filter(l => !isOn(l)).map(l => l.id))
     return (
       <DeskGate
-        today={today} lines={lines} isOn={isOn} off={off}
+        today={today} lines={lines} isOn={isOn} off={offNow}
         toggle={toggle} toggleLine={toggleLine} take={take} setTake={setTake}
+        main={mainOnly} setMain={setMain} chosen={lanes.filter(l => !off.has(l.id))}
         credits={credits} metered={metered} enforced={Boolean(credits?.enforced)} t={t} lang={lang}
       />
     )
@@ -285,19 +305,15 @@ export default function GateCard({ today, failed }) {
 
       <Shortfall due={due} free={free} credits={credits} t={t} lang={lang} />
 
-      <button
-        type="button"
-        className="btn-depart"
+      {/* 改札 (plan 164): the boarding's gate, the one filled action. */}
+      <GateButton
+        label={t.depart}
         data-guide="today.fare"
         onClick={depart}
         aria-label={t.todayDue(due)}
-        aria-keyshortcuts={desk ? 'Enter' : undefined}
+        keys={desk}
         disabled={closed || due === 0}
-      >
-        <span className="btn-depart__jp">{t.depart}</span>
-        {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
-        <span className="btn-depart__go" aria-hidden="true">▶</span>
-      </button>
+      />
       {/* 机 (plan 115): Enter departs, from anywhere on Today. */}
       <DepartKey onDepart={depart} disabled={closed || due === 0} />
     </div>
@@ -306,6 +322,20 @@ export default function GateCard({ today, failed }) {
 
 // ── 区間 — the run's length, kept per browser (plan 135) ─────────
 const TAKE_KEY = 'tsuji.gateTake'
+const MAIN_KEY = 'tsuji.gateMain'
+function readMain() {
+  try {
+    return window.localStorage.getItem(MAIN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+function writeMain(on) {
+  try {
+    if (on) window.localStorage.setItem(MAIN_KEY, '1')
+    else window.localStorage.removeItem(MAIN_KEY)
+  } catch { /* private window: the choice lasts the visit */ }
+}
 function readTake() {
   try {
     const n = Number.parseInt(window.localStorage.getItem(TAKE_KEY) ?? '', 10)
@@ -333,7 +363,7 @@ function writeTake(n) {
 // The length is dealt the way the queue deals (domain/lanes.splitTake),
 // in the queue's order -- `today.lanes` as the server sent them -- while
 // the bands keep the lines' order for reading.
-function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, credits, metered, enforced, t, lang }) {
+function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang }) {
   const queue = (today.lanes ?? []).filter(isOn)
   const chosenTotal = queue.reduce((n, l) => n + laneCount(l), 0)
   const cut = take != null && take < chosenTotal ? take : null
@@ -362,6 +392,14 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
   }, [left])
 
   const steps = TAKE_STEPS.filter(n => n < chosenTotal)
+  // The two ways to board what the switches chose: every mode, or each
+  // line's main flashcard alone -- the figures what each would ride.
+  const everyMode = chosen.reduce((n, l) => n + laneCount(l), 0)
+  const mainCards = chosen.filter(isMainLane).reduce((n, l) => n + laneCount(l), 0)
+  const kinds = [
+    { key: 'all', label: t.gateModesAll(everyMode) },
+    { key: 'main', label: t.gateModesMain(mainCards) },
+  ]
   const options = [...steps.map(n => ({ key: String(n), label: String(n) })), { key: 'all', label: t.gateTakeAll(chosenTotal) }]
 
   function depart() {
@@ -373,16 +411,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
     <div className="gate-card gate-card--desk" data-guide="today.gate">
       <div className="gate-card__head">
         <span className="gate-card__title">{t.fareGate}</span>
-        <span className="gate-card__figs" data-guide="today.take">
-          {steps.length > 0 && (
-            <Seg
-              className="gate-card__take"
-              label={t.gateTake}
-              options={options}
-              value={cut != null ? String(cut) : 'all'}
-              onChange={key => setTake(key === 'all' ? null : Number(key))}
-            />
-          )}
+        <span className="gate-card__figs">
           <span className="gate-card__figure">
             <span className="gate-card__count">{taken}</span>
             <span className="gate-card__unit">{unit}</span>
@@ -394,6 +423,30 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
             </span>
           )}
         </span>
+      </div>
+
+      {/* What boards, as two instruments under the head: which modes
+          (every one, or each line's main flashcard) on the left, the
+          run's length on the right. The head keeps the figures. */}
+      <div className="gate-card__console">
+        <Seg
+          className="gate-card__modes"
+          label={t.gateModes}
+          options={kinds}
+          value={main ? 'main' : 'all'}
+          onChange={key => setMain(key === 'main')}
+        />
+        {steps.length > 0 && (
+          <span className="gate-card__length" data-guide="today.take">
+            <Seg
+              className="gate-card__take"
+              label={t.gateTake}
+              options={options}
+              value={cut != null ? String(cut) : 'all'}
+              onChange={key => setTake(key === 'all' ? null : Number(key))}
+            />
+          </span>
+        )}
       </div>
 
       <div className="gate-card__bands" role="group" aria-label={t.todayLines}>
@@ -476,18 +529,16 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
             </span>
           </div>
         )}
-        <button
-          type="button"
-          className="btn-depart"
+        {/* 改札 (plan 164): Depart drawn as the boarding's gate, the
+            pass's mark in its reader -- the outline while nothing is
+            chosen, woken by the first lane switched back on. */}
+        <GateButton
+          label={t.depart}
           onClick={depart}
           aria-label={t.todayDue(taken)}
-          aria-keyshortcuts="Enter"
+          keys
           disabled={closed || taken === 0}
-        >
-          <span className="btn-depart__jp">{t.depart}</span>
-          <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>
-          <span className="btn-depart__go" aria-hidden="true">▶</span>
-        </button>
+        />
       </div>
       <DepartKey onDepart={depart} disabled={closed || taken === 0} />
     </div>

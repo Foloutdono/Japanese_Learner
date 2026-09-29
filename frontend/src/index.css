@@ -23528,8 +23528,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      canvas's --desk-board-w cap lifted for Today alone), the gate beside
      a --desk-side-w column; in the gate a band per line — its switch in
      a 230px column, its lanes three across beside it — the head's
-     length picker, count and minutes, and the fare row under the bands
-     (the figures, then Depart at 420px). The chips go: a band's switch
+     count and minutes, the console of the modes and the length under
+     it, and the fare row under the bands (the figures, then Depart at
+     420px, or under them on a narrow gate). The chips go: a band's switch
      is its line's chip. Plan 116's two lanes across is retired.
      GateCard's DeskGate draws it; a phone keeps its own gate. */
   .phone--desk .phone__content:has(> main.today) { max-width: none; }
@@ -23554,23 +23555,34 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   /* The length: a plain segmented instrument on the paper, square at
      the plate radius, its words as written (no capitals, no tracking). */
-  .gate-card__take {
+  /* The console under the head: the modes (every one, or each line's
+     main flashcard) at its left, the length at its right -- two of the
+     same instrument, on a row of their own so the head keeps its
+     figures at a laptop's width. */
+  .gate-card__console {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3) var(--sp-6);
+  }
+  :is(.gate-card__take, .gate-card__modes) {
     margin-left: 0;
     border-radius: var(--r-plate);
     background: var(--bg-main);
   }
-  .gate-card__take .seg__opt {
+  :is(.gate-card__take, .gate-card__modes) .seg__opt {
     align-items: center;
     height: 34px;
     padding: 0 var(--sp-5);
   }
-  .gate-card__take .seg__opt-latin {
+  :is(.gate-card__take, .gate-card__modes) .seg__opt-latin {
     font-size: var(--fs-caption);
     letter-spacing: 0;
     text-indent: 0;
     text-transform: none;
   }
-  .gate-card__take .seg__opt--on { background: color-mix(in srgb, var(--text-primary) 9%, var(--bg-main)); }
+  :is(.gate-card__take, .gate-card__modes) .seg__opt--on { background: color-mix(in srgb, var(--text-primary) 9%, var(--bg-main)); }
   .gate-card__time {
     display: flex;
     align-items: baseline;
@@ -23727,15 +23739,16 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      and the balance, then Depart. A pass has no fare, and Depart takes
      the row. */
   .gate-card__fare {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 420px;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: var(--sp-6);
+    gap: var(--sp-5) var(--sp-6);
     padding-top: var(--sp-5);
     border-top: 1px solid var(--surface-line);
   }
   .gate-card__fare-parts {
     display: flex;
+    flex: 999 1 auto;
     gap: var(--sp-7);
   }
   .gate-card__part {
@@ -23760,15 +23773,15 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   }
   .gate-card__part--rides .gate-card__part-n { color: var(--success); }
   .gate-card__part--waits .gate-card__part-n { color: var(--warning); }
-  .gate-card__fare .btn-depart {
-    height: 52px;
-    margin: 0;
-    padding: 0 var(--sp-5);
-    font-size: var(--fs-lead);
-    font-weight: 700;
-    box-shadow: var(--elev-action);
-  }
-  .gate-card__fare > .btn-depart:only-child { grid-column: 1 / -1; }
+  /* Depart is the boarding's gate (改札, plan 164; DESIGN.md, "The gate
+     button"): its own 66px pill, reader and breath, standing in the
+     fare's right column at the column's width. The foot's own rung
+     above it gives the halo its room under the rule. */
+  /* The figures take the row's slack and Depart keeps its 420px beside
+     them; on a gate too narrow for both (a laptop, the side column
+     beside it) Depart wraps under the figures and takes the row. A pass
+     has no figures, and Depart the row. */
+  .gate-card__fare .btn-depart--gate { flex: 1 1 420px; margin: 0; }
 
   /* 七日 — the week ahead at the side's foot (plan 135, WeekAhead): the
      side column runs the window's height on Today and the week takes
