@@ -20,6 +20,19 @@ import { useMediaQuery } from './useMediaQuery'
 // test rather than by a token.
 export const DESK_QUERY = '(min-width: 1100px)'
 
+// ── 低 — the short desk (plan 169) ──
+// A laptop's window is wide enough for the desk and often not tall
+// enough for it: 1366×768 or 1280×720 less the browser's own chrome is
+// 600–660px, and the desk was drawn and tested at 800 (the desktop lane
+// is 1100×800). Under that height the screens that hold themselves to
+// the window crushed or clipped what they hold, so the desk's section
+// answers a second question inside its own: the rules written under
+// this one tighten the rhythm and let a column scroll rather than cut.
+// It never widens the desk's door -- it is nested inside DESK_QUERY in
+// index.css, so a phone cannot reach it -- and src/desk.css.test.js
+// holds the string the same way it holds the width.
+export const DESK_SHORT_QUERY = '(max-height: 799px)'
+
 /** Whether the desk chrome is drawn: reactive, right on the first render. */
 export function useDesk() {
   return useMediaQuery(DESK_QUERY)

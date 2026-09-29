@@ -173,6 +173,29 @@ still the phone's row and the flick's order. The rail has no flick.
 | `src/stores/runTally.test.js` | node | the run's tally and the docked entry's tokens |
 | `src/stats.desktop.test.jsx`, `src/stats.wide.test.jsx`, `src/stats.phone.test.jsx` | desktop, wide, phone | plan 138, the statistics as the four lines |
 | `src/chrome.phone.test.jsx` ("draws no desk"), `RatingBar.browser.test.jsx` ("prints no keys") | phone, browser | nothing of the desk below the line |
+| `src/runs.short.test.jsx`, `src/boarding.short.test.jsx`, `src/today.short.test.jsx`, `src/gates.short.test.jsx`, `src/chrome.short.test.jsx` | short (1280×600) | plan 169: a laptop's short window — a run's choices two by two with the card whole over them and the tiles in the window, the left column whole, the readings drill and the writing board beside their card, the exam's brief answers above its docked nav; every question of first contact whole in its body, the reasons named beside their rings, noon clear of the board, the kana's reveal; Today's side column whole and a lane's name apart from its count; Learn's four plates and Practice's six whole; the rail holding every gate above the pass |
+
+## The short desk (低, plan 169)
+
+A laptop's window is wide enough for the desk and often not tall enough
+for it. The one height the desk answers is `DESK_SHORT_QUERY`
+(`(max-height: 799px)`, `hooks/useDesk.js`), written as one block nested
+inside the 机 section's width query, near the section's end, so it can
+only narrow the desk's door. `src/desk.css.test.js` holds it: the nested
+query is that string, holds rules only, and the string is written once in
+the JavaScript. What it changes, in the density contract's order:
+
+| Where | What |
+|---|---|
+| the rail | the masthead, the gap and the pass's padding a rung in, a station's row 28px: five gates and six stations hold above the pass on a 600px window |
+| first contact | each drawing's floor lowered (`__roads`, `__climb`, `__rides`, `__sky`); the reason straight on named beside its ring; the kana's tree and answers, the lines' cards and the reveal's words a rung tighter; noon named beside its ring and the board lower in the bowl, on smaller flaps |
+| a run on three panels | the columns' padding and gaps a rung in, the specimen at the word's rung, the verdict tiles' figure at the heading rung; the card held at `min-content` over choices (at every height), the choices two by two (`.mcq-list` as a grid, at every height), the tiles `sticky` at the column's floor over choices; the readings drill's boxes beside the kanji and the writing board beside its prompt |
+| the exam's paper | a row a rung shorter; four brief answers (`QuestionRenderer`'s `brief`, eight signs or fewer) two by two at every height (`.mcq-list--brief`) |
+| Today | the side column's blocks never shrink (the pass's strip had been crushed); the week's bars shorter. At every height: a band's lanes drop under its switch when a tile would be under a third of a side column, the lanes `auto-fit`, and a tile's tags run under its name and count |
+| Learn, Practice | Learn's plates a rung tighter and never under their content; Practice three across once three hold `--desk-run-col-min`, rows at least two thirds of a side column, a name on two lines rather than cut |
+| the practice stations | the page at its own height (the narrow page's rule), the well and the panels at their content |
+| the analyser's typed Passage | the sentence at the board rung, its subtitle at the title rung |
+| a run's side (every height) | a headword of two to six signs stacked in the band (as a long one was), the gloss under the marks too |
 
 ## Dialogs on the desk (plan 120)
 

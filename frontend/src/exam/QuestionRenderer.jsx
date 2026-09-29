@@ -84,6 +84,9 @@ function selectWithSound(onSelect, id) {
 // verdict and only exist once `revealed` — during a live exam nothing
 // may hint at the answer, which is exactly why the two are separate
 // classes rather than one shared "active" look.
+// The longest answer, in signs, that still reads whole in half a paper.
+const BRIEF_SIGNS = 8
+
 function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed, answer, label }) {
   const { t } = useLang()
   const keys = useContext(KeysContext)
@@ -100,6 +103,13 @@ function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed
   // Roving tabindex for the same reason — a radiogroup is ONE tab stop,
   // not four.
   const activeIndex = Math.max(0, choices.findIndex(c => c.id === selected))
+  // Four answers of a few signs each -- a reading, a spelling, a word
+  // -- are an answer sheet: on the desk they stand two by two (plan
+  // 169), where four rows down the paper sent the last two under the
+  // docked Previous and Next on a laptop's window. A sentence keeps
+  // its row. The phone draws the rows whatever this says.
+  const brief = choiceType === 'text' && choices.length === 4
+    && choices.every(c => [...(c.textJp ?? '')].length <= BRIEF_SIGNS)
 
   function onKeyDown(e) {
     const delta = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1
@@ -123,7 +133,7 @@ function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed
           buttons rather than radios that lie about being settable. */}
       <div
         ref={listRef}
-        className="mcq-list"
+        className={brief ? 'mcq-list mcq-list--brief' : 'mcq-list'}
         role={revealed ? undefined : 'radiogroup'}
         aria-label={revealed ? undefined : label}
         onKeyDown={revealed ? undefined : onKeyDown}

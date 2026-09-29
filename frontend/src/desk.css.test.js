@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { DESK_QUERY } from './hooks/useDesk'
+import { DESK_QUERY, DESK_SHORT_QUERY } from './hooks/useDesk'
 
 // ── 机 — the desk may not touch the phone (plan 113) ─────────────────
 // Tsuji has two chromes: the phone's, which every width below 1100px
@@ -98,18 +98,37 @@ describe('the desk section of index.css', () => {
     for (const st of top) expect(st.prelude).toBe(`@media ${DESK_QUERY}`)
   })
 
-  it('nests only a motion answer, a pointer answer and its own keyframes', () => {
+  // The short desk (plan 169) is the one height answer, written as the
+  // string hooks/useDesk.js exports: nested inside the width, it can
+  // only ever narrow the desk's door, never open another.
+  it('nests only a motion answer, a pointer answer, the short desk and its own keyframes', () => {
     const allowed = [
       /^@media \(prefers-reduced-motion: reduce\)$/,
       /^@media \(pointer: fine\)$/,
       /^@keyframes desk-[a-z0-9-]+$/,
     ]
+    const short = `@media ${DESK_SHORT_QUERY}`
+    let shorts = 0
     for (const block of statements(section().text)) {
       for (const st of statements(block.body)) {
         if (!st.prelude.startsWith('@')) continue
+        if (st.prelude === short) {
+          shorts++
+          // Rules only: no query nested a level deeper.
+          for (const inner of statements(st.body)) expect(inner.prelude.startsWith('@'), inner.prelude).toBe(false)
+          continue
+        }
         expect(allowed.some(re => re.test(st.prelude)), st.prelude).toBe(true)
       }
     }
+    expect(shorts).toBeGreaterThan(0)
+  })
+
+  it('writes the short desk\'s height nowhere else in the JavaScript', () => {
+    const writers = sources(SRC)
+      .filter(path => readFileSync(path, 'utf8').includes(DESK_SHORT_QUERY))
+      .map(path => relative(SRC, path).split('\\').join('/'))
+    expect(writers).toEqual(['hooks/useDesk.js'])
   })
 
   it('never raises its voice', () => {

@@ -1914,6 +1914,22 @@ each question drawing its answers between them.
   done screen and the pass plate — is the stage with its words centred by
   two grow-only spacers and its one filled action on the floor, the
   boarding's own room.
+- **The short desk (低, plan 169).** A laptop's window is wide enough for
+  the desk and often not tall enough for it: 1366×768 or 1280×720, less
+  the browser's own tabs and address bar, is 600–660px, and the desk was
+  drawn at 800. Under 800px tall (`DESK_SHORT_QUERY`, nested inside the
+  desk's own query, so a phone never reaches it) the desk answers in the
+  density contract's order: the room round a thing gives way first (the
+  rail's masthead and pass, a run's columns, the boarding's drawings, a
+  plate's head), then a drawing draws closer (the verdict tiles, the
+  specimen, the lines' cards), and a column that still holds more than
+  the window scrolls — nothing is crushed or cut. A card never gives
+  down under what it holds. A run's four choices are an answer sheet,
+  two by two under the card, the tiles held at the column's floor; the
+  exam's four brief answers stand the same way (`mcq-list--brief`); a
+  drill's card stands beside its boxes or its board. A station page
+  stands at its own height rather than the window's. The `short` test
+  lane (1280×600) holds all of it.
 
 ## What not to do
 
