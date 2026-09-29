@@ -124,75 +124,129 @@ describe('the gate stands whole on a phone (plan 144)', () => {
   })
 })
 
-// ── The gate's objects stand clear of each other ───────────────────
-// The owner found things on top of each other in the gate, and effects
-// that read as faults. Each was one: the pass came to rest over the
-// reader it taps (it is two and a half cabinets wide) and hung over the
-// right flap; the right lamp ran up into the reader; the wipe was the
-// scene's box at a 50% radius, an oval that was never quite opaque, so
-// the rig showed through the wash as the scene faded; and the fade held
-// its end only `backwards`, so a late unmount was a frame of the whole
-// scene again. Measured with the scene's own animations, not a clock.
-describe('the gate stands clear of itself', () => {
-  const anim = (el, name) => el.getAnimations().find(a => a.animationName === name)
+// ── The gate's arrival (the owner's picks) ──────────────────────────
+// The owner kept plan 144's drawing and asked for its ending: the open
+// gate grows into view with the line's light until its lane is the
+// screen, the destination's name grows with it until it takes the
+// screen, and the two hold a beat before fading off the destination.
+// That replaced a wipe that was the scene's box at a 50% radius, never
+// quite opaque, so the rig showed through it as it faded. With it: the
+// pass lifts clear of the reader after the tap, so the reader is seen
+// to answer; the fade holds its end, where `backwards` let a late
+// unmount show the whole scene again; and a desk's scrollbar gutter
+// takes the light. Read off the scene's own animations, not a clock.
+describe('the gate grows into view and holds on its name', () => {
+  const X = 1.4
   const box = s => document.querySelector(s).getBoundingClientRect()
+  const anims = () => document.querySelector('.gate').getAnimations({ subtree: true })
+  const named = name => anims().find(a => a.animationName === name)
+  const end = a => a.effect.getComputedTiming().endTime
+  // Every animation of the scene stopped at `ms` from its mount — the
+  // ones this block reads were all started by the mount itself.
+  const at = ms => anims().forEach(a => { a.pause(); a.currentTime = ms })
 
-  it('the pass comes to rest on the reader\'s head, over neither the reader nor the lane', async () => {
-    await SCENES.gate()
+  async function gate(section = {}) {
+    const onDone = vi.fn()
+    await render(
+      <TicketGate
+        section={{ color: 'var(--line-vocab)', icon: '単語', title: 'Vocabulary', ...section }}
+        station={{ code: 'V01' }}
+        onNavigate={() => {}}
+        onDone={onDone}
+      />,
+    )
     await settle()
-    // Its place at rest is the tap: the keyframes hold it there, untransformed.
-    anim(document.querySelector('.gate__card'), 'gate-tap').cancel()
-    anim(document.querySelector('.gate__rig'), 'arrive')?.cancel()
-    const [card, reader, lane, scene] = ['.gate__card', '.gate__reader', '.gate__lane', '.gate'].map(box)
-    expect(card.bottom).toBeLessThanOrEqual(reader.top + 0.5)
-    expect(reader.top - card.bottom).toBeLessThan(3)
-    expect(card.bottom).toBeLessThan(lane.top)
-    // Over the pad, and on the screen.
-    expect(card.left).toBeLessThan(reader.left)
-    expect(card.right).toBeGreaterThan(reader.right)
-    expect(card.right).toBeLessThanOrEqual(scene.right)
-    expect(card.top).toBeGreaterThanOrEqual(scene.top)
+    return onDone
+  }
+
+  it('lifts the pass clear of the reader once the tap has been held', async () => {
+    await gate()
+    // 68% of the pass's flight: the tap held from 48% to 60%, then up.
+    const tap = named('gate-tap')
+    tap.pause()
+    tap.currentTime = 0.68 * tap.effect.getComputedTiming().activeDuration
+    expect(box('.gate__card').bottom).toBeLessThan(box('.gate__reader').top)
   })
 
-  it('the lamp under the reader starts below it', async () => {
-    await SCENES.gate()
-    await settle()
-    const reader = box('.gate__reader')
-    const lamp = document.querySelector('.gate__pillar--right .gate__lamp').getBoundingClientRect()
-    expect(lamp.top).toBeGreaterThan(reader.bottom)
-  })
-
-  it('the lane\'s light is whole, and has the scene, before the scene fades', async () => {
-    await SCENES.gate()
-    await settle()
-    const gate = document.querySelector('.gate')
+  it('floods the lane whole, and grows it over the scene, before the hold', async () => {
+    await gate()
+    const gateEl = document.querySelector('.gate')
     const lane = document.querySelector('.gate__lane')
-    const end = a => a.effect.getComputedTiming().endTime
-    const leave = anim(gate, 'gate-leave')
-    const fadeFrom = leave.effect.getComputedTiming().delay
-    expect(end(anim(document.querySelector('.gate__wipe'), 'gate-flood'))).toBeLessThanOrEqual(fadeFrom)
-    expect(end(anim(document.querySelector('.gate__rig'), 'gate-through'))).toBeLessThanOrEqual(fadeFrom)
-    // Pushed to --gate-push about the lane's centre, the lane covers the scene.
-    const push = parseFloat(gate.style.getPropertyValue('--gate-push'))
-    expect(lane.clientWidth * push).toBeGreaterThanOrEqual(gate.clientWidth)
-    expect(lane.clientHeight * push).toBeGreaterThanOrEqual(gate.clientHeight)
+    const hold = named('gate-leave').effect.getComputedTiming().delay
+    expect(end(named('gate-flood'))).toBeLessThan(end(named('gate-through')))
+    expect(end(named('gate-through'))).toBeLessThanOrEqual(660 * X + 1)
+    // A beat on the full light before it fades: 180ms, times the dial.
+    expect(hold - end(named('gate-through'))).toBeGreaterThanOrEqual(180 * X - 1)
+    const push = parseFloat(gateEl.style.getPropertyValue('--gate-push'))
+    expect(lane.clientWidth * push).toBeGreaterThanOrEqual(gateEl.clientWidth)
+    expect(lane.clientHeight * push).toBeGreaterThanOrEqual(gateEl.clientHeight)
     // And the fade keeps its end until the scene is taken down.
-    expect(['forwards', 'both']).toContain(leave.effect.getComputedTiming().fill)
+    expect(['forwards', 'both']).toContain(named('gate-leave').effect.getComputedTiming().fill)
   })
 
-  it('lends the window\'s gutter its wash once the light has the screen, and takes it back', async () => {
+  it('hands the name out of the lane where it stood, and holds it across the screen', async () => {
+    await gate()
+    const scene = box('.gate')
+    // The hand-off: the name leaves the lane on the frame the layer over
+    // it appears, standing where the name stood and at its size.
+    at(480 * X + 2)
+    const [lane, title] = [box('.gate__name'), box('.gate__title-body')]
+    expect(getComputedStyle(document.querySelector('.gate__name')).opacity).toBe('0')
+    expect(getComputedStyle(document.querySelector('.gate__title')).opacity).toBe('1')
+    expect(Math.abs((title.left + title.right) / 2 - (lane.left + lane.right) / 2)).toBeLessThan(1.5)
+    expect(Math.abs((title.top + title.bottom) / 2 - (lane.top + lane.bottom) / 2)).toBeLessThan(1.5)
+    expect(title.width / lane.width).toBeCloseTo(1, 1)
+    // The hold: centred, across most of the screen, and on it.
+    at(700 * X)
+    const held = box('.gate__title-body')
+    expect(Math.abs((held.left + held.right) / 2 - (scene.left + scene.right) / 2)).toBeLessThan(2)
+    expect(Math.abs((held.top + held.bottom) / 2 - (scene.top + scene.bottom) / 2)).toBeLessThan(2)
+    expect(held.width / scene.width).toBeGreaterThan(0.8)
+    expect(held.left).toBeGreaterThanOrEqual(scene.left)
+    expect(held.right).toBeLessThanOrEqual(scene.right)
+  })
+
+  // The owner's two notes on the gate in the door's dress: the right
+  // lamp ran up into the reader, and a light blinked in the middle of
+  // the opening flaps (the door's seam lamp, drawn at the lane's top).
+  it('starts both lamps under the reader, the pad crossed by nothing', async () => {
+    await gate()
+    const reader = box('.gate__reader')
+    for (const lamp of document.querySelectorAll('.gate__lamp')) {
+      expect(lamp.getBoundingClientRect().top).toBeGreaterThan(reader.bottom)
+    }
+  })
+
+  it('lights nothing in the opening', async () => {
+    await gate()
+    const lane = document.querySelector('.gate__lane')
+    expect(getComputedStyle(lane, '::before').content).toBe('none')
+    expect(getComputedStyle(lane, '::after').content).toBe('none')
+  })
+
+  it('inks the name in kinari on the lines that carry it, and dark on gold', async () => {
+    await gate()
+    await gate({ color: 'var(--accent2)', icon: '本日', title: 'Today' })
+    const [vocab, today] = document.querySelectorAll('.gate')
+    expect(vocab.dataset.ink).toBe('panel')
+    expect(today.dataset.ink).toBe('fill')
+  })
+
+  it('lends the window\'s gutter the light while it has the screen, and takes it back', async () => {
     vi.useFakeTimers()
     try {
-      const done = await SCENES.gate()
+      const onDone = vi.fn()
+      await render(<TicketGate section={{ color: 'var(--line-kana)', icon: 'あ', title: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={onDone} />)
       const ground = () => document.documentElement.style.getPropertyValue('--gate-ground')
-      await vi.advanceTimersByTimeAsync(600 * 1.4)
+      await vi.advanceTimersByTimeAsync(650 * X)
       expect(ground()).toBe('')
-      await vi.advanceTimersByTimeAsync(35 * 1.4)
+      await vi.advanceTimersByTimeAsync(20 * X)
       expect(ground()).toBe('var(--line-kana)')
-      await vi.advanceTimersByTimeAsync(10 * 1.4)
+      await vi.advanceTimersByTimeAsync(180 * X)
       expect(ground()).toBe('')
-      await vi.advanceTimersByTimeAsync(200 * 1.4)
-      expect(done).toHaveBeenCalledTimes(1)
+      expect(document.documentElement.style.getPropertyValue('transition')).toBe('')
+      await vi.advanceTimersByTimeAsync(150 * X)
+      expect(onDone).toHaveBeenCalledTimes(1)
     } finally {
       vi.useRealTimers()
     }
@@ -201,8 +255,8 @@ describe('the gate stands clear of itself', () => {
   it('gives the gutter back when it is skipped', async () => {
     vi.useFakeTimers()
     try {
-      await SCENES.gate()
-      await vi.advanceTimersByTimeAsync(632 * 1.4)
+      await render(<TicketGate section={{ color: 'var(--line-kana)', icon: 'あ', title: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={() => {}} />)
+      await vi.advanceTimersByTimeAsync(700 * X)
       expect(document.documentElement.style.getPropertyValue('--gate-ground')).not.toBe('')
       window.dispatchEvent(new PointerEvent('pointerdown'))
       expect(document.documentElement.style.getPropertyValue('--gate-ground')).toBe('')

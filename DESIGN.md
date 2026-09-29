@@ -1917,7 +1917,12 @@ each question drawing its answers between them.
 
 ## What not to do
 
-- Do not create a new stylesheet. One file, namespaced selectors.
+- Do not create a new stylesheet. One file, namespaced selectors. The one
+  exception is outside the app: the landing page (plan 167,
+  `frontend/landing/landing.css`) is a static page that cannot load
+  `index.css`. It copies the tokens it uses, and a test holds the copy
+  equal. Its type, space and radii are those tokens; the few pixel figures
+  it names are the canvas's columns and the device frames it draws.
 - Do not invent a size, space, radius or tracking value.
 - Do not use a line pigment for anything that is not a section — and check the
   object, not the hex; several pigments coincide.

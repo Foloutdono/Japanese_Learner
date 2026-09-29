@@ -55,10 +55,10 @@ describe('the service worker policy', () => {
     })
 
     it('leaves the paths that are not app routes alone', () => {
-      // Two are proxied to the backend by vercel.json, one is a static
-      // page: a navigation to any of them is the browser fetching that
+      // Three are proxied to the backend by vercel.json, two are static
+      // pages: a navigation to any of them is the browser fetching that
       // thing, and answering it with the app shell would be a lie.
-      for (const path of ['/api/today', '/kanjivg/04e00.svg', '/exam-audio/7.mp3', '/privacy']) {
+      for (const path of ['/api/today', '/kanjivg/04e00.svg', '/exam-audio/7.mp3', '/privacy', '/landing/', '/landing/en/']) {
         expect(matches(path), path).toBe(false)
       }
     })
