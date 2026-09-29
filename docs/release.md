@@ -87,12 +87,12 @@ this repository (`frontend/.gitignore` refuses `.jks`, `.keystore`, `.p8`,
 - The **privacy policy** text (`frontend/public/privacy.html`, plan 066);
   its URL, `https://<web origin>/privacy.html`, goes in both listings.
 - Play: **Data safety** (email, user content, usage data; account deletion
-  at Settings › Data and the policy's steps), the content rating
+  at Settings › Account and the policy's steps), the content rating
   questionnaire, category Education, the fr + en listings and screenshots
   from the redesigned app, a **closed test** with 12 testers for 14 days
   (a new personal developer account's rule).
 - App Store Connect: the privacy labels, an **account-deletion note** for
-  the reviewer (Settings › Data), a **test account**, the support and
+  the reviewer (Settings › Account), a **test account**, the support and
   privacy URLs, 6.7" and 6.1" screenshots, an external TestFlight group.
 
 ## The widget and its App Group (plan 156)
