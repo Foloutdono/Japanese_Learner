@@ -89,6 +89,9 @@ def parse_review(content: str) -> dict | None:
         "fix": fix,
         "grammar_used": grammar_used if isinstance(grammar_used, bool) else None,
         "better": short(data.get("better")) if fix else "",
+        # 作文's alone, like `meaning`: the learner's sentence in
+        # Japanese script, when they typed it in romaji.
+        "japanese": short(data.get("japanese")),
     }
 
 

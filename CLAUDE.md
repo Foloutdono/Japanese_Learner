@@ -1104,7 +1104,22 @@ runtime purpose. Two consequences worth knowing:
   `src/gates.wide.test.jsx`, `src/deskfree.phone.test.jsx`,
   `src/testing/practiceCards.json` and the 机 section of `index.css`;
   DESIGN.md, "The desk").
-  When starting a new wave, begin at **166** or higher, and check
+  **166** is 一押し, Today on the phone in one gesture (the owner's pick
+  C of four drawn on the canvas "Tsuji — Today on the phone"): the day
+  as one card -- the run's count and minutes, a bar of each line's share,
+  which cards (every mode or the main flashcards, `domain/lanes.js`'s
+  `isMainLane`) and how many (20 / 50 / 100 / all, the desk's 区間 now on
+  the phone too) -- the gate under it, and the lane switches behind one
+  row that opens them in a sheet, replacing the card's bounded lane
+  list and its line chips; Depart on both gates is the boarding's gate
+  button (`components/ui/GateButton.jsx`) (cited in
+  `components/station/GateCard.jsx`'s `PhoneGate` and `runOf`,
+  `components/ui/GateButton.jsx`, `components/boarding/BoardFrame.jsx`,
+  `domain/lanes.js`, `components/station/GateCard.phone.test.jsx`,
+  `GateCard.browser.test.jsx`, `screens/TodayScreen.browser.test.jsx`,
+  `src/deskfree.phone.test.jsx`, `src/today.wide.test.jsx` and
+  `index.css`; DESIGN.md, "The gate button"; `docs/design/mobile/README.md`).
+  When starting a new wave, begin at **167** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

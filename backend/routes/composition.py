@@ -55,6 +55,7 @@ from core.credits import require_pass, resets_at
 from core.db import db_conn
 from core.srs_instance import srs
 from study import grammar_detect, tutor_review
+from study.romaji import is_romaji, kana_of
 from study.llm_shared import llm_configured
 
 # A pass feature, like the other practice platforms (plan 069): every
@@ -208,11 +209,24 @@ def _found(level: str, pattern: str, sentence: str) -> bool | None:
     )
 
 
+# A sentence typed in romaji is read in Japanese (study/romaji.kana_of):
+# the detector and the breakdown read nothing else, and "mizu to gohan
+# wo tabemashita" had been "point not found" and five rows of letters.
+# The check has only the kana to go on; the review has the tutor's
+# spelling in kanji and kana, and answers the check again on it.
+def _kana(sentence: str) -> str | None:
+    """The kana a romaji sentence spells, or None when it is Japanese
+    already (or reads as nothing)."""
+    return kana_of(sentence.strip())
+
+
 @router.post("/api/composition/check")
 def check_composition(payload: CheckPayload, user_id: str = Depends(get_user_id)):
-    """Free, local, uncapped; writes nothing."""
+    """Free, local, uncapped; writes nothing. `japanese` is the sentence
+    as kana when it was typed in romaji, else null."""
     level, entry = _point(payload.raw_id)
-    return {"found": _found(level, entry["pattern"], payload.sentence)}
+    kana = _kana(payload.sentence)
+    return {"found": _found(level, entry["pattern"], kana or payload.sentence), "japanese": kana}
 
 
 # ── The review: the tutor's word ─────────────────────────────────────
@@ -240,7 +254,8 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) matching exa
   "good": ["..."],
   "fix": [{{"issue": "...", "fix": "..."}}],
   "grammar_used": true,
-  "better": ""
+  "better": "",
+  "japanese": "..."
 }}
 
 Rules:
@@ -251,6 +266,7 @@ Rules:
 - "good" lists what the sentence got right: at most {max_items} items, each a short {lang_name} phrase that NAMES the Japanese it praises in 「 」 (for example: 「ながら」 joins the two actions). May be empty.
 - "fix" lists what is wrong: at most {max_items} items, the most important first. Each has "issue" (a short {lang_name} phrase naming the Japanese in 「 」 and what is wrong with it) and "fix" (what to write instead, the Japanese in 「 」). Empty means nothing to fix.
 - "better" is the learner's OWN sentence with the fixes applied, in Japanese, when "fix" is not empty; the empty string when it is. Keep their wording wherever it was fine: this is their sentence corrected, not an example copied.
+- "japanese" is the learner's sentence exactly as they wrote it, in Japanese script: kanji and kana as a native writer would spell those same words. Many learners type in romaji (mizu to gohan wo tabemashita -> 水とご飯を食べました); write out what they typed, mistakes included -- change no word, particle or ending, that is what "better" is for. A sentence already in Japanese is copied unchanged.
 - Every value is a plain JSON string, list or boolean, and a string opens with the " character and closes with it. Quote Japanese INSIDE a value with 「 」 only, never with quotes.
 - Short over complete. The learner should see the verdict, whether the point was used, the good items and the fix items and know in three seconds where they stand."""
 
@@ -336,10 +352,35 @@ def post_composition_review(payload: ReviewPayload, user_id: str = Depends(get_u
         # prints `analysis` when `review` is missing.
         logger.warning("composition review was not the shape; served as prose")
         cleaned = re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-        return {"review": None, "analysis": cleaned}
+        japanese = _kana(sentence)
+        return {
+            "review": None,
+            "analysis": cleaned,
+            "japanese": japanese,
+            "found": _found(level, entry["pattern"], japanese or sentence),
+        }
+    japanese = _written(sentence, review.pop("japanese", ""))
     if review["better"]:
-        review.update(tutor_review.corrected(review["better"], sentence))
-    return {"review": review, "analysis": tutor_review.review_as_text(review)}
+        # Marked against what the learner wrote, in the script it is
+        # corrected in: against the romaji every character differs.
+        review.update(tutor_review.corrected(review["better"], japanese or sentence))
+    return {
+        "review": review,
+        "analysis": tutor_review.review_as_text(review),
+        "japanese": japanese,
+        "found": _found(level, entry["pattern"], japanese or sentence),
+    }
+
+
+def _written(sentence: str, spelled: str) -> str | None:
+    """The learner's sentence in Japanese: null when they wrote it in
+    Japanese (it is its own), else the tutor's spelling of it when that
+    is Japanese with no letter of the romaji left in it, else its kana."""
+    if not is_romaji(sentence):
+        return None
+    if spelled and not is_romaji(spelled) and not re.search(r"[A-Za-z]", spelled):
+        return spelled
+    return _kana(sentence)
 
 
 # ── The grade, which is the learner's ────────────────────────────────

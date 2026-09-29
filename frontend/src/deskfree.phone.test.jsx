@@ -602,13 +602,13 @@ describe('the keys and the boards (plan 115, P8)', () => {
   })
 })
 
-// ── plan 116 — the gate's lanes a phone keeps ──
-// On a laptop the fare gate's lanes go two across once the gate holds
-// two at a phone's lane width (today.wide.test.jsx). A phone keeps its
-// own box: a column, one lane to a row across the whole of it, and no
-// key printed on Depart.
-describe('the gate\'s lanes (plan 116)', () => {
-  it('keeps one lane to a row across the box, and prints no key', async () => {
+// ── plan 166 — the gate a phone keeps ──
+// On the desk the gate is plan 135's bands, head and fare foot
+// (today.wide.test.jsx). A phone draws the day in one gesture: one
+// card, the gate under it with no key printed, and the switches in a
+// sheet -- a column there, one lane to a row across the whole of it.
+describe('the gate on a phone (plan 166)', () => {
+  it('keeps the switches in a sheet, one lane to a row, and prints no key', async () => {
     apiFetch.mockImplementation(async () => ({
       ok: true, status: 200, json: async () => ({ balance: 50, cap: 200, unlimited: false, enforced: false }),
     }))
@@ -630,9 +630,12 @@ describe('the gate\'s lanes (plan 116)', () => {
       </LangProvider>
     )
     await settle()
-    const box = document.querySelector('.gate-card__lanes')
-    expect(getComputedStyle(box).display).toBe('flex')
-    expect(getComputedStyle(box).flexDirection).toBe('column')
+    expect(document.querySelector('.gate-card--one')).not.toBeNull()
+    expect(document.querySelector('.lane')).toBeNull()
+    expect(document.querySelector('.gate-one .desk-kbd, .gate-one [aria-keyshortcuts]')).toBeNull()
+    document.querySelector('.gate-one__services').click()
+    await settle()
+    const box = document.querySelector('.gate-sheet__lines')
     const rows = [...box.querySelectorAll('.lane')].map(el => el.getBoundingClientRect())
     expect(rows).toHaveLength(6)
     rows.forEach((r, i) => {
@@ -641,11 +644,8 @@ describe('the gate\'s lanes (plan 116)', () => {
       expect(r.top).toBeGreaterThanOrEqual(rows[i - 1].bottom)
       expect(Math.round(r.left)).toBe(Math.round(rows[0].left))
     })
-    expect(document.querySelector('.gate-card .desk-kbd, .gate-card [aria-keyshortcuts]')).toBeNull()
-    // Plan 135's gate is the desk's: no bands, no run length, no fare
-    // foot, and the line chips stay (today.wide.test.jsx).
-    expect(document.querySelector('.gate-card--desk, .gate-band, .gate-card__take, .gate-card__fare')).toBeNull()
-    expect(document.querySelector('.gate-card__lines')).not.toBeNull()
+    // Plan 135's gate is the desk's: no bands and no fare foot.
+    expect(document.querySelector('.gate-card--desk, .gate-band, .gate-card__fare')).toBeNull()
   })
 })
 
@@ -1080,7 +1080,7 @@ describe('the desk\'s key fixes (plan 123, P1)', () => {
 // ── plan 123, P3 to P5 — the stage, the foot, the columns, the board ──
 // Every rule of both is in the 机 block. On a phone a run's stage keeps
 // its own inset -- the level bar is its floor, with nothing under the
-// foot -- the gate's lanes are still the 30dvh box, a state card fills
+// foot -- a state card fills
 // its column and the ticket gate covers the whole screen, chrome or not.
 describe('the stage and the columns (plan 123, P3–P5)', () => {
   it('keeps a run\'s stage on the level bar, nothing under its foot', async () => {
@@ -1097,15 +1097,12 @@ describe('the stage and the columns (plan 123, P3–P5)', () => {
     }
   })
 
-  it('bounds the gate\'s lanes by a phone\'s 30dvh, and a state card by nothing', async () => {
+  it('bounds a state card by nothing', async () => {
     const screen = await render(
       <main className="today">
-        <div className="gate-card"><div className="gate-card__lanes" /></div>
         <div className="empty"><p>Nothing yet</p></div>
       </main>
     )
-    const lanes = screen.container.querySelector('.gate-card__lanes')
-    expect(parseFloat(getComputedStyle(lanes).maxHeight)).toBeCloseTo(window.innerHeight * 0.3, 0)
     expect(getComputedStyle(screen.container.querySelector('.empty')).maxWidth).toBe('none')
   })
 

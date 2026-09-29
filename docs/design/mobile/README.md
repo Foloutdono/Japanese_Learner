@@ -104,7 +104,8 @@ caps at `99+`: a third figure is wider than the gate.
 | `.readings-input*` | the readings face | `components/study/ReadingsInput.jsx` |
 | `.browse-nav` | the fast review's foot | `components/study/ReviewDeck.jsx` |
 | `.levelup*`, `.card-stamp*` | the boards over the stage; the canvas's `.reissue*` (the pass re-issued on a rank crossing) is retired with the rank titles | `components/rewards/XpToast.jsx`, `components/study/CardStamp.jsx` |
-| `.gate-card`, `.gate-card__head`, `.gate-card__title`, `.gate-card__figure`, `.gate-card__count`, `.gate-card__unit`, `.gate-card__lanes`, `.gate-card__pick`, `.gate-card__fare*`, `.gate-card__short*`, `.btn-depart`, `.btn-depart--ghost` | 改札 — the fare gate | `components/station/GateCard.jsx` |
+| `.gate-card`, `.gate-card__head`, `.gate-card__title`, `.gate-card__figure`, `.gate-card__count`, `.gate-card__unit`, `.gate-card__fare*`, `.gate-card__short*`, `.btn-depart`, `.btn-depart--ghost` | 改札 — the fare gate | `components/station/GateCard.jsx` |
+| `.gate-one*`, `.gate-card--one`, `.gate-mix*`, `.gate-card__ask*`, `.gate-sheet*`, `.btn-depart--gate` | 一押し — the phone's gate in one gesture (plan 166): the day as one card, the services in a sheet | `components/station/GateCard.jsx`'s `PhoneGate`, `components/ui/GateButton.jsx` |
 | `.lane`, `.lane--off`, `.lane__tick`, `.lane__where`, `.lane__mode`, `.lane__free`, `.lane__due` | the lanes are the picker; `__free` marks a lane that costs nothing (`core/credits.py`, `FREE_SOURCES` — 仮名 today), and is held back on a pass | `GateCard.jsx` |
 | `.pass--strip` (with `.stamp-rally*`, `.hall-pace*`) | the strip under the gate | `components/station/PassStrip.jsx` |
 | `.today-clear*`, `.fare-slip*` | the finish | `RunComplete` in `screens/TodayScreen.jsx`, `components/credits/FareSlip.jsx` |

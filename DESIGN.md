@@ -756,8 +756,10 @@ Two rules the guard exists to keep, both learned by measurement:
 
 The boarding's one action — **Board** on the Welcome, **Continue** on every
 question and at the end of a first ride (`Continue` in
-`components/boarding/BoardFrame.jsx`, `.btn-depart--gate`) — is drawn as a
-ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
+`components/boarding/BoardFrame.jsx`) — and Today's **Depart** on the fare
+gate (`components/station/GateCard.jsx`, owner-directed after plan 164) are
+drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
+as a ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
 directions drawn for "more vibrant, the user must notice it and want to
 press it"):
 
@@ -786,8 +788,11 @@ press it"):
 It stands outside three rulings on purpose, and nowhere else: the motion
 rule's "no scale, no glow" (the halo, the wake), `--elev-action`'s single
 shadow (the halo is its shadow), and the family's one disabled treatment
-(opacity 0.45). None of the three is precedent: every other `.btn-depart`,
-Today's Depart included, is the primary button above.
+(opacity 0.45). None of the three is precedent: every other `.btn-depart`
+is the primary button above. On Today the gate is closed (its outline) when
+nothing is chosen or the balance cannot pay, and wakes when a lane is
+switched back on; on the desk it takes the fare's right column, or the row's
+width under the fare's figures when the gate is too narrow for both.
 
 ## Space
 

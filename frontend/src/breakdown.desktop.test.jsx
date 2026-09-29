@@ -110,6 +110,12 @@ describe('a graded sentence on the desk', () => {
     expect($('.desk-run__side .desk-entry').textContent).toContain('学校')
     // The sentence stays above the entry, every word still a door.
     expect($('.desk-run__side .bkd-line .bkd-tok--door')).not.toBeNull()
+    // ... as a line: the panel's rule for the breakdown's wrapper had
+    // caught it too, and set it one word a line.
+    const tops = [...document.querySelectorAll('.desk-lookup > .bkd-line .bkd-tok--door')]
+      .map(t => t.getBoundingClientRect().top)
+    expect(tops).toHaveLength(2)
+    expect(tops[1]).toBe(tops[0])
 
     // Another word: one click, the entry swaps.
     document.querySelectorAll('.desk-run__side .bkd-line .bkd-tok--door')[1].click()

@@ -156,6 +156,16 @@ class CheckTests(unittest.TestCase):
     def test_the_check_holds_its_tongue_on_a_point_it_cannot_see(self):
         self.assertIsNone(self.check("い形容詞／な形容詞", "この犬は大きいです。"))
 
+    def test_a_sentence_in_romaji_is_read_as_kana(self):
+        # "mizu to gohan wo tabemashita" had been "point not found".
+        r = self.client.post("/api/composition/check", json={"raw_id": _id("と"), "sentence": "mizu to gohan wo tabemashita"})
+        self.assertEqual(r.json(), {"found": True, "japanese": "みずとごはんをたべました"})
+        self.assertIs(self.check("〜てください", "suwatte kudasai."), True)
+        self.assertIs(self.check("〜てください", "suwarimasu."), False)
+        # Japanese is its own: nothing to write out.
+        r = self.client.post("/api/composition/check", json={"raw_id": _id("と"), "sentence": "水とご飯を食べました。"})
+        self.assertIsNone(r.json()["japanese"])
+
     def test_an_unknown_point_is_404(self):
         r = self.client.post("/api/composition/check", json={"raw_id": "grammar_N5_nope", "sentence": "x"})
         self.assertEqual(r.status_code, 404)
@@ -189,6 +199,37 @@ def test_the_review_is_served_in_the_shape_with_its_meaning(client, tutor):
     assert user["content"].rstrip().endswith(f"The learner's sentence:\n<<<{SENTENCE}>>>")
 
 
+def test_a_sentence_in_romaji_comes_back_in_the_tutors_japanese(client, tutor):
+    romaji = "ongaku ga kikinagara benkyou shimasu."
+    calls = tutor(_reply(japanese=SENTENCE))
+    body = client.post("/api/composition/review", json={"raw_id": _id(NAGARA), "sentence": romaji}).json()
+    assert body["japanese"] == SENTENCE
+    assert body["found"] is True
+    assert "japanese" not in body["review"]
+    assert '"japanese": "..."' in calls[0][0]["content"]
+    # The correction is marked against what was written, in its script:
+    # 音楽が -> 音楽を is one character, not the whole line.
+    marked = "".join(p["text"] for p in body["review"]["better_parts"] if p.get("highlight"))
+    assert marked == "を"
+
+
+def test_a_tutor_that_writes_no_japanese_leaves_the_kana(client, tutor):
+    romaji = "ongaku o kikinagara benkyou shimasu"
+    kana = "おんがくをききながらべんきょうします"
+    for spelled in ("", romaji, "音楽 o 聞きながら"):
+        tutor(_reply(japanese=spelled))
+        body = client.post("/api/composition/review", json={"raw_id": _id(NAGARA), "sentence": romaji}).json()
+        assert body["japanese"] == kana, spelled
+        assert body["found"] is True
+
+
+def test_a_sentence_in_japanese_is_its_own(client, tutor):
+    tutor(_reply(japanese="something else entirely"))
+    body = client.post("/api/composition/review", json={"raw_id": _id(NAGARA), "sentence": SENTENCE}).json()
+    assert body["japanese"] is None
+    assert body["found"] is True
+
+
 def test_the_lessons_sentences_are_at_most_two(client, tutor):
     calls = tutor(_reply())
     client.post("/api/composition/review", json={"raw_id": _id(NAGARA), "sentence": SENTENCE})
@@ -211,7 +252,7 @@ def test_prose_is_served_as_prose(client, tutor):
     tutor("Bonjour ! Ta phrase est correcte.")
     r = client.post("/api/composition/review", json={"raw_id": _id(NAGARA), "sentence": SENTENCE})
     assert r.status_code == 200
-    assert r.json() == {"review": None, "analysis": "Bonjour ! Ta phrase est correcte."}
+    assert r.json() == {"review": None, "analysis": "Bonjour ! Ta phrase est correcte.", "japanese": None, "found": True}
 
 
 def test_a_missing_point_sentence_or_provider_is_refused(client, tutor, monkeypatch):
