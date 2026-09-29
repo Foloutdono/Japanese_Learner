@@ -1119,7 +1119,13 @@ runtime purpose. Two consequences worth knowing:
   `GateCard.browser.test.jsx`, `screens/TodayScreen.browser.test.jsx`,
   `src/deskfree.phone.test.jsx`, `src/today.wide.test.jsx` and
   `index.css`; DESIGN.md, "The gate button"; `docs/design/mobile/README.md`).
-  When starting a new wave, begin at **167** or higher, and check
+  **167** is the public landing page at `/`, for search and the stores:
+  its keyword map is `docs/seo/keywords.md`. Of the four directions
+  drawn on the canvas "Tsuji — landing page" the owner picked A, 辻 the
+  crossroads, improved with B's line to N1, C's working demos and D's
+  pass, plus a presentation video and the features one by one on film
+  (the footage slots, by file name, are on the same canvas).
+  When starting a new wave, begin at **168** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -1477,7 +1483,20 @@ npm run lint
 npm test          # vitest: node, browser, phone, tablet, touch, desktop and wide lanes (see vite.config.js)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
+npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
+npm run landing:og  # its two share cards, rendered in Chromium
 ```
+
+The landing page is a **static page outside `src/`** (`frontend/landing/`,
+built into `public/landing/` and committed, like `public/privacy.html`):
+none of the app's CSS rules or guards apply to it, so it copies the
+tokens it uses (`landing/tokens.mjs`, held equal to `index.css` by
+`src/landing.test.js`). **After a change under `frontend/landing/`, or to a
+deck it counts, run `npm run landing`**: the same test fails on a committed
+page that differs from what the build writes. Its footage is uploaded to a
+public Supabase Storage bucket by file name and needs no rebuild;
+`frontend/landing/README.md` has the slots, the bucket and what changes
+when the page goes live.
 
 `npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,
 ratcheted against a checked-in baseline) and `npm run lint:scale` (a

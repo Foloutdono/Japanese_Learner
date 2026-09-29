@@ -15,6 +15,8 @@
     "cap:ios": "npm run cap:sync && cap open ios",
     "assets:native": "capacitor-assets generate --android --ios --iconBackgroundColor '#100e13' --iconBackgroundColorDark '#100e13' --splashBackgroundColor '#17151a' --splashBackgroundColorDark '#17151a'",
     "icons": "node scripts/render-icon.mjs && pwa-assets-generator && node scripts/place-icons.mjs",
+    "landing": "node landing/build.mjs",
+    "landing:og": "node landing/og.mjs",
     "lint": "eslint .",
     "lint:css": "node scripts/stylelint-ratchet.mjs",
     "lint:css:report": "stylelint \"src/**/*.css\"",
