@@ -1,8 +1,15 @@
+from functools import lru_cache
+
 from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
 
+# Cached: the English maps are built by walking the whole deck, and the
+# per-word routes below would otherwise rebuild one for every word asked.
+# The content is fixed for the life of the process. An unsupported
+# language raises, so it is never cached.
+@lru_cache(maxsize=4)
 def _load_translation_map(lang: str, item_type: str) -> dict:
     if lang == "fr":
         if item_type == "kanji":

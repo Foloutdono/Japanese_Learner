@@ -29,7 +29,6 @@ exercise one devtools panel away, and the mode would be a listening
 mode only for learners who chose not to look.
 """
 import logging
-import random
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
