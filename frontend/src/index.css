@@ -16602,16 +16602,19 @@ button.syllabary-cell:focus-visible {
    The departure cutscene. See components/station/TicketGate for the
    timeline and why this is drawn rather than filmed.
 
-   Everything here is transform and opacity so the whole thing is
-   compositor work — it has to start on the frame you tap, and it has
-   to cost nothing on a phone.
+   Everything that moves here is transform and opacity so the whole
+   thing is compositor work — it has to start on the frame you tap, it
+   has to cost nothing on a phone, and its last beats have to keep
+   running while the destination mounts under them.
 
    Every duration and delay below is multiplied by --gate-x, which the
    component sets from its own SPEED constant. That is the only reason
    the JS timers and these animations stay in step: hand-scaling ten
    numbers to change the pace is how a cutscene ends up navigating
    before its own wipe has covered the screen. The base figures are
-   the unscaled ones — contact 300ms, navigate 600ms, done 780ms.
+   the unscaled ones — contact 300ms, the gate grows from 480ms, the
+   lane has the screen at 660ms, navigate 700ms, the fade from 840ms,
+   done 980ms.
 
    Plan 144 redrew the objects and left every beat alone (the owner
    kept this gate's motion over six drawn alternatives, and asked only
@@ -16623,17 +16626,35 @@ button.syllabary-cell:focus-visible {
    and a shadow into the lane; the glow beyond them falls off to
    nothing instead of ending in a visible oval, over a floor and a
    horizon; and the pass is the pass, in its own material with its mark
-   and its balance. */
+   and its balance.
+
+   Then the owner kept that drawing and asked for its ending instead:
+   the open gate grows into view with the line's light until its lane is
+   the screen, the destination's name grows with it until it takes the
+   screen, and the two hold for a beat before they fade off the
+   destination. That replaced a wipe that was the scene's own box at a
+   50% radius — a tall pill on a phone, a stadium on the desk, its
+   corners squaring off as it grew — and never more than 0.93 opaque, so
+   the rig showed through it to the end. The pass lifts off the reader
+   after the tap rather than resting over it, so the reader is seen to
+   answer; the fade holds its end (`forwards`), where `backwards` had
+   let a late unmount show the whole scene again for a frame. */
 .gate {
   --gate-x: 1;
+  /* The name's ink on the light: the lane's kinari, or the fill's dark
+     ink where the pigment is too light for it (TicketGate's inkFor). */
+  --gate-title-ink: var(--text-on-panel);
   position: fixed;
   inset: 0;
   z-index: 300;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: gate-leave calc(140ms * var(--gate-x)) linear calc(640ms * var(--gate-x)) backwards;
+  /* The gate grows far past the screen's edges. */
+  overflow: hidden;
+  animation: gate-leave calc(140ms * var(--gate-x)) linear calc(840ms * var(--gate-x)) forwards;
 }
+.gate[data-ink="fill"] { --gate-title-ink: var(--text-on-fill); }
 .gate__scrim {
   position: absolute;
   inset: 0;
@@ -16661,8 +16682,16 @@ button.syllabary-cell:focus-visible {
   /* Its own stacking context, so the floor shadow under it (::after)
      stays over the scrim once the arrive transform has ended. */
   isolation: isolate;
-  animation: arrive calc(300ms * var(--gate-x)) cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
+  animation:
+    arrive calc(300ms * var(--gate-x)) cubic-bezier(0.22, 0.68, 0.32, 1) backwards,
+    gate-through calc(180ms * var(--gate-x)) cubic-bezier(0.6, 0, 0.9, 0.55) calc(480ms * var(--gate-x)) forwards;
 }
+/* The gate growing into view: the rig grows about the lane's centre —
+   the rig's, between two equal cabinets — to the scale at which the
+   lane covers the whole scene (--gate-push, measured by the component;
+   CSS cannot divide one box by another). It quickens as it goes, a step
+   into the light, and the lane has the screen at 660ms. */
+@keyframes gate-through { to { transform: scale(var(--gate-push, 4)); } }
 /* Where it stands: the shadow the gate throws on the concourse floor.
    Without it the rig hung in the middle of an empty page. */
 .gate__rig::after {
@@ -16958,11 +16987,19 @@ button.syllabary-cell:focus-visible {
    diagonal sheen (.pass and .pass::after), the contactless mark in its
    corner and the balance in the pass's gold under the holder's name.
    The keyframes move it by its own size, so the path is the one it
-   always flew. */
+   always flew.
+
+   It stands beside the rig, not in it, placed where it stood in it —
+   the rig's top edge, a margin in from its right — so the gate growing
+   into view does not grow the pass with it: the pass is in the
+   learner's hand, and in the rig it swelled into a ghost card across
+   the screen's corner as it faded. The rig's size is written out again
+   here (width min(620px, 94vw), height min(252px, 47vh)); they change
+   together. */
 .gate__card {
   position: absolute;
-  right: clamp(2px, 1.5vw, 12px);
-  top: 0;
+  right: calc((100% - min(620px, 94vw)) / 2 + clamp(2px, 1.5vw, 12px));
+  top: calc((100% - min(252px, 47vh)) / 2);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -17004,11 +17041,14 @@ button.syllabary-cell:focus-visible {
 @keyframes gate-tap {
   0%   { transform: translate(46%, 210%) rotate(12deg);  opacity: 0; }
   20%  { opacity: 1; }
-  /* Held still over the pad from 48% to 58% — that pause is the tap,
-     and the chime and the lamp land inside it. */
+  /* Held still over the pad from 48% to 60% — that pause is the tap,
+     about 100ms, and the chime and the lamp land inside it. Then it
+     lifts clear of the pad by 68%, so the reader is seen to answer: it
+     used to drift up over it for another 150ms, and the ring and the
+     lit pad played under the pass. */
   48%  { transform: translate(4%, -58%) rotate(-4deg);   opacity: 1; }
-  58%  { transform: translate(4%, -58%) rotate(-4deg);   opacity: 1; }
-  76%  { transform: translate(6%, -86%) rotate(-6deg);   opacity: 1; }
+  60%  { transform: translate(4%, -58%) rotate(-4deg);   opacity: 1; }
+  68%  { transform: translate(8%, -112%) rotate(-7deg);  opacity: 1; }
   100% { transform: translate(18%, -180%) rotate(-11deg); opacity: 0; }
 }
 .gate__card-brand {
@@ -17035,23 +17075,78 @@ button.syllabary-cell:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-/* The wipe. Once the flaps are open the line colour floods out of the
-   lane and takes the screen; the destination is revealed from behind
-   it, already mounted and running its own arrive animation. */
+/* The wipe: the line's light the lane floods with as the gate grows,
+   so it is the lane's own opening that takes the screen. It is whole —
+   opaque — long before the lane has the screen, so nothing of the rig
+   shows through it through the hold or the fade; the destination is
+   revealed from behind it, already mounted and running its own arrive
+   animation. */
 .gate__wipe {
   position: absolute;
   inset: 0;
   background: var(--line-color, var(--accent));
   opacity: 0;
-  transform: scale(0.25);
-  border-radius: 50%;
-  animation: gate-wipe calc(300ms * var(--gate-x)) cubic-bezier(0.5, 0, 0.3, 1) calc(460ms * var(--gate-x)) forwards;
+  animation: gate-flood calc(90ms * var(--gate-x)) ease-out calc(480ms * var(--gate-x)) forwards;
 }
-@keyframes gate-wipe {
-  0%   { opacity: 0;   transform: scale(0.25); border-radius: 50%; }
-  40%  { opacity: 0.9; }
-  100% { opacity: 1;   transform: scale(3);    border-radius: 0; }
+@keyframes gate-flood { to { opacity: 1; } }
+
+/* The destination's name, grown out of the lane to take the screen.
+   As the gate starts to grow the name is handed from the lane (.gate__name,
+   under the light) to this layer over it, which stands exactly where
+   the name stood — the component measures the name's centre and the
+   size at which it takes the screen (--gate-title-dx/-dy, --gate-title-k)
+   — and grows from there to the screen's centre, landing a beat after
+   the lane has the screen, for the hold. It is laid out at the size it
+   lands at (zoom) and shrunk to the lane's until then, so the name is
+   sharp when it holds, never a small raster blown up. Its ink turns to
+   the light's as the light comes up behind it. */
+.gate__title {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  animation: gate-hand-on calc(1ms * var(--gate-x)) linear calc(480ms * var(--gate-x)) forwards;
 }
+.gate__title-move {
+  animation: gate-title-grow calc(200ms * var(--gate-x)) cubic-bezier(0.45, 0, 0.15, 1) calc(480ms * var(--gate-x)) both;
+}
+.gate__title-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  zoom: var(--gate-title-k, 3);
+}
+.gate__title .gate__dest {
+  color: var(--gate-title-ink);
+  animation: gate-title-ink calc(90ms * var(--gate-x)) ease-out calc(480ms * var(--gate-x)) backwards;
+}
+.gate__title .gate__dest-latin {
+  color: var(--gate-title-ink);
+  animation: gate-title-soft calc(90ms * var(--gate-x)) ease-out calc(480ms * var(--gate-x)) backwards;
+}
+.gate__name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  animation: gate-hand-off calc(1ms * var(--gate-x)) linear calc(480ms * var(--gate-x)) forwards;
+}
+@keyframes gate-hand-on { to { opacity: 1; } }
+@keyframes gate-hand-off { to { opacity: 0; } }
+@keyframes gate-title-grow {
+  from {
+    transform:
+      translate(var(--gate-title-dx, 0), var(--gate-title-dy, 0))
+      scale(calc(1 / var(--gate-title-k, 3)));
+  }
+  to { transform: none; }
+}
+@keyframes gate-title-ink { from { color: var(--text-on-panel); } }
+@keyframes gate-title-soft { from { color: var(--text-on-panel-soft); } }
 
 /* No gate at all when motion is unwelcome — TicketGate navigates
    immediately in that case and never mounts this. Belt and braces. */
@@ -17068,7 +17163,16 @@ button.syllabary-cell:focus-visible {
    is the jolt you see as the doors open. Reserving the gutter costs
    nothing and removes the shift here, at the ticket gate, and behind
    every dialog in the app. */
-html { scrollbar-gutter: stable; }
+html {
+  scrollbar-gutter: stable;
+  /* The gutter's one cost: it is outside every fixed box, painted in
+     the page's own ground, so no scene can reach it. The ticket gate
+     lends the ground its light while the lane has the screen
+     (TicketGate's --gate-ground), and html's own transition eases it
+     back with the scene's fade. Everywhere but the gutter this ground
+     is under body. */
+  background-color: var(--gate-ground, var(--bg-main));
+}
 
 /* ══ 扉 — the train door ════════════════════════════════════
    Boarding, played on the last choice of a selection screen. See
