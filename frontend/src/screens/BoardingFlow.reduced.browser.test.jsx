@@ -4,8 +4,8 @@ import { LangProvider } from '../LangContext'
 
 // ── The boarding under reduced motion (plan 075) ───────────────
 // The motion sheet's rule: with reduced motion on, only the rest state
-// is drawn. No car moves between screens, the building screen is
-// already built, and the arrival signboard never mounts. The
+// is drawn. No car moves between screens and the arrival signboard
+// never mounts over the plan. The
 // preference is read once at import, so it is stubbed before the flow
 // is imported and this suite is its own file.
 window.matchMedia = query => ({
@@ -49,7 +49,7 @@ async function click(screen, sel) {
 }
 
 describe('BoardingFlow under reduced motion', () => {
-  it('draws rest states only: no pull, a built journey, no signboard', async () => {
+  it('draws rest states only: no pull, no signboard', async () => {
     const screen = await render(
       <LangProvider>
         <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username: 'Tester' }} onComplete={vi.fn()} dryRun />
@@ -79,13 +79,11 @@ describe('BoardingFlow under reduced motion', () => {
     await click(screen, '[data-action="continue"]')   // the hour
     await settle(20)
 
-    // Built at once: every step ticked, the train at the end of the track.
-    expect(stepOf(screen)).toBe('building')
-    expect(screen.container.querySelectorAll('.brd-step--done')).toHaveLength(4)
-    expect(screen.container.querySelector('.brd-build__train').style.left).toBe('100%')
-    await settle(500)
+    // The plan at once and at rest: no Building since plan 168, and no
+    // signboard over it.
     expect(stepOf(screen)).toBe('plan')
+    expect(screen.container.querySelector('.brd__car--in')).toBeNull()
     expect(document.querySelector('.onb-arrival')).toBeNull()
-    expect(getComputedStyle(screen.container.querySelector('.brd-chart__line--us')).animationName).toBe('none')
+    expect(screen.container.querySelector('.brd-ride')).not.toBeNull()
   })
 })

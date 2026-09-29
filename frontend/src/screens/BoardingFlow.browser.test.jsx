@@ -159,7 +159,7 @@ async function walkToPlan(screen) {
   await settle()
   await click(screen, '[data-action="continue"]')   // the hour
   await settle()
-  await passBuilding(screen)
+  await arrive(screen)
 }
 
 // Name → why: the saved name is kept, so no write happens here.
@@ -174,14 +174,10 @@ async function passName(screen, motive = 'trip') {
   expect(stepOf(screen)).toBe('kana')
 }
 
-// The building screen is a wait with a visible end; any tap cuts to it.
-async function passBuilding(screen) {
-  expect(stepOf(screen)).toBe('building')
-  await settle(100)
-  q(screen, '.brd__body--center').click()
-  await settle(120)
+// No Building since plan 168: the hour goes on to the plan, and the
+// arrival signboard plays once over it; any input skips it.
+async function arrive(screen) {
   expect(stepOf(screen)).toBe('plan')
-  // The arrival signboard plays once over the plan; any input skips it.
   expect(document.querySelector('.onb-arrival')).not.toBeNull()
   window.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
   await settle(80)
@@ -205,19 +201,20 @@ beforeEach(() => {
 })
 
 describe('BoardingFlow', () => {
-  it('walks name → why → kana (both) → level → goal → lines → rhythm → time → building → plan → pass and POSTs the whole contract once', async () => {
+  it('walks name → why → kana (both) → level → goal → lines → rhythm → time → plan → pass and POSTs the whole contract once', async () => {
     const { screen, onComplete } = await renderFlow()
 
-    // 1/8 on the web: no nudge stop. Back on the first screen leaves the
+    // 1/7 on the web: no nudge stop, and the level only once both
+    // scripts are read (plan 168). Back on the first screen leaves the
     // flow, so with no `onExit` to leave for there is no button — the
     // guest boarding always passes one (see its own tests below).
     expect(stepOf(screen)).toBe('name')
-    expect(stepsOf(screen)).toBe('1/8')
+    expect(stepsOf(screen)).toBe('1/7')
     expect(screen.container.querySelector('button.brd__back')).toBeNull()
-    expect(document.activeElement?.className).toContain('brd-field')
+    expect(document.activeElement?.className).toContain('brd-plate__field')
 
     // A new name is written before the office moves on.
-    type(q(screen, '.brd-field'), 'Aiko')
+    type(q(screen, '.brd-plate__field'), 'Aiko')
     await click(screen, '[data-action="continue"]')
     await settle()
     const patches = apiFetch.mock.calls.filter(c => c[0] === '/api/profile' && c[2]?.method === 'PATCH')
@@ -236,16 +233,17 @@ describe('BoardingFlow', () => {
     await settle()
 
     expect(stepOf(screen)).toBe('kana')
-    expect(stepsOf(screen)).toBe('3/8')
+    expect(stepsOf(screen)).toBe('3/7')
     // The answers are the foot: each one advances.
     expect(q(screen, '.brd__foot')).toBeNull()
     await click(screen, '[data-kana="both"]')
     await settle()
+    // Both read: the level is a stop of its own, and the track grows one.
     expect(stepOf(screen)).toBe('level')
     expect(stepsOf(screen)).toBe('4/8')
-    expect(q(screen, '[data-level="novice"] .brd-opt__code').textContent).toBe('—')
-    // The volumes price the list: N5's ~100 kanji, N1's ~2,250.
-    expect(q(screen, '[data-level="N5"] .brd-opt__desc').textContent).toContain('100')
+    expect(q(screen, '[data-level="novice"] .brd-stn__ring').textContent).toBe('あ')
+    // The volumes price the line: N5's ~100 kanji, N1's ~2,250.
+    expect(q(screen, '[data-level="N5"] .brd-stn__desc').textContent).toContain('100')
     await click(screen, '[data-level="N5"]')
     await click(screen, '[data-action="continue"]')
     await settle()
@@ -269,7 +267,7 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-line="vocab"]')
     await click(screen, '[data-line="kanji"]')
     expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
-    expect(q(screen, '.brd__error')).not.toBeNull()
+    expect(q(screen, '.brd-arrive--none[role="alert"]')).not.toBeNull()
     await click(screen, '[data-line="kanji"]')
     await click(screen, '[data-line="vocab"]')
     expect(q(screen, '[data-action="continue"]').disabled).toBe(false)
@@ -278,7 +276,7 @@ describe('BoardingFlow', () => {
 
     expect(stepOf(screen)).toBe('rhythm')
     expect(q(screen, '[data-rhythm="10"]').getAttribute('aria-pressed')).toBe('true')
-    expect(q(screen, '[data-rhythm="10"] .brd-tag')).not.toBeNull()
+    expect(q(screen, '[data-rhythm="10"] .brd-train__tag')).not.toBeNull()
     await click(screen, '[data-rhythm="15"]')
     expect(q(screen, '[data-rhythm="15"]').getAttribute('aria-pressed')).toBe('true')
     await click(screen, '[data-action="continue"]')
@@ -299,26 +297,27 @@ describe('BoardingFlow', () => {
     expect(q(screen, '[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
     await click(screen, '[data-hour="pm"]')
     expect(q(screen, '.brd-board__flaps').getAttribute('aria-label')).toBe('21:00')
-    const knob = q(screen, '.brd-day__train')
-    expect(knob.getAttribute('role')).toBe('slider')
-    expect(knob.getAttribute('aria-valuetext')).toBe('21:00')
-    knob.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
-    await settle(30)
-    expect(q(screen, '.brd-day__train').getAttribute('aria-valuetext')).toBe('20:30')
+    // The board is the control (plan 168): ▲ and ▼ over and under the
+    // flaps turn the hour and the half hour.
+    expect(live(screen).querySelectorAll('.brd-clock__step')).toHaveLength(4)
+    await click(screen, `[aria-label="${fr.brdHalfEarlier}"]`)
+    expect(q(screen, '.brd-board__flaps').getAttribute('aria-label')).toBe('20:30')
     expect(q(screen, '[data-hour="pm"]').getAttribute('aria-pressed')).toBe('true')
+    expect(q(screen, '.brd-clock__when').textContent).toContain('20:30')
     await click(screen, '[data-action="continue"]')
     await settle()
 
     // The three arrival screens have no track and no back.
-    expect(stepOf(screen)).toBe('building')
+    await arrive(screen)
     expect(screen.container.querySelector('.brd__head')).toBeNull()
-    expect(live(screen).querySelectorAll('.brd-step')).toHaveLength(4)
-    await passBuilding(screen)
-    expect(screen.container.querySelector('.brd__head')).toBeNull()
-    expect(live(screen).querySelectorAll('.brd-bullet')).toHaveLength(4)
-    expect(q(screen, '.brd-chart svg')).not.toBeNull()
-    expect(q(screen, '.brd-bullet').textContent).toContain('~')
-    expect(live(screen).querySelectorAll('.brd-bullet')[3].textContent).toContain('N4')
+    // The arrival first: the terminus, the ride to it, and what it holds
+    // on each line taken -- grammar was taken off.
+    expect(q(screen, '.brd-plan__cap').textContent).toBe('Terminus · JLPT N4')
+    expect(q(screen, '.brd-ride').getAttribute('role')).toBe('img')
+    const held = [...live(screen).querySelectorAll('.brd-held__cell')]
+    expect(held.map(cell => cell.dataset.line)).toEqual(['vocab', 'kanji'])
+    for (const cell of held) expect(cell.textContent).toContain('~')
+    expect(q(screen, '.brd-for').textContent.startsWith('Pour ton voyage')).toBe(true)
     await click(screen, '[data-action="continue"]')
     await settle()
 
@@ -368,9 +367,10 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-kana="hiragana"]')
     await settle()
 
+    // The reveal is the kana stop's second half, not a stop of its own.
     expect(stepOf(screen)).toBe('reveal')
-    expect(stepsOf(screen)).toBe('4/8')
-    expect(live(screen).querySelectorAll('.brd-kana__read')).toHaveLength(2)
+    expect(stepsOf(screen)).toBe('3/7')
+    expect(live(screen).querySelectorAll('.brd-read__word')).toHaveLength(2)
     await click(screen, '[data-action="continue"]')
     await settle()
 
@@ -378,11 +378,14 @@ describe('BoardingFlow', () => {
     // before the novice's own stop as well — that stop IS the kana, and
     // they read one script — so the whole line is ahead of them with the
     // kana at its head, and there is no stop behind them to name.
+    // The phone says so by drawing it (plan 168): no hint, and no stop
+    // inked as known over the hub.
     expect(stepOf(screen)).toBe('goal')
-    expect(q(screen, '.brd__hint').textContent).toBe('Tous les arrêts sont devant toi.')
+    expect(q(screen, '.brd__hint')).toBeNull()
+    expect(live(screen).querySelectorAll('.brd-stn--known')).toHaveLength(0)
     expect([...live(screen).querySelectorAll('[data-goal]')].map(el => el.dataset.goal))
       .toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
-    expect(q(screen, '[data-goal="novice"] .brd-opt__code').textContent).toBe('—')
+    expect(q(screen, '[data-goal="novice"] .brd-stn__ring').textContent).toBe('あ')
     expect(q(screen, '[data-goal="novice"] .brd-tag')).not.toBeNull()
     // The default is still the nearest JLPT stop: the kana are an offer,
     // and taking them signs a pace and no destination.
@@ -405,7 +408,7 @@ describe('BoardingFlow', () => {
     await click(screen, 'button.brd__back')
     await settle()
     expect(stepOf(screen)).toBe('name')
-    expect(q(screen, '.brd-field').value).toBe('Tester')
+    expect(q(screen, '.brd-plate__field').value).toBe('Tester')
     expect(screen.container.querySelector('button.brd__back')).toBeNull()
     // No write happened: the name never changed.
     expect(apiFetch.mock.calls.filter(c => c[0] === '/api/profile')).toHaveLength(0)
@@ -438,22 +441,16 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="continue"]')   // the hour
     await settle()
 
-    // The destination stands alone on the building screen: they are
-    // short of that stop, not standing on it, so no "Novice → Novice".
-    // The first line is stamped after one tick (600 ms).
-    expect(stepOf(screen)).toBe('building')
-    await settle(700)
-    expect(q(screen, '[data-build="goal"] .brd-step__val').textContent).toBe('Novice')
-    await passBuilding(screen)
-
-    // Three promises, none of them a word count or a motive's line.
-    const bullets = [...live(screen).querySelectorAll('.brd-bullet')].map(el => el.textContent)
-    expect(bullets).toHaveLength(3)
-    expect(bullets[0]).toContain('kana')
-    expect(bullets[2]).toBe('En route vers les kana')
-    expect(bullets.join(' ')).not.toContain('mots')
-    // The chart climbs to the signs on the ride, all 224 of them.
-    expect(q(screen, '.brd-chart__lbl').textContent).toBe('~224 kana · révisions quotidiennes')
+    // The terminus is the kana: the ride arrives at the signs and holds
+    // them, all ~220 -- no word count, and no motive's line.
+    await arrive(screen)
+    expect(q(screen, '.brd-plan__cap').textContent).toBe('Terminus · Kana')
+    const held = [...live(screen).querySelectorAll('.brd-held__cell')]
+    expect(held.map(cell => cell.dataset.line)).toEqual(['kana'])
+    expect(held[0].textContent).toContain('~220')
+    expect(held[0].textContent).toContain('signes')
+    expect(q(screen, '.brd-for').textContent.startsWith('En route vers les kana')).toBe(true)
+    expect(live(screen).textContent).not.toContain('mots')
 
     await click(screen, '[data-action="continue"]')
     await settle()
@@ -507,7 +504,7 @@ describe('BoardingFlow', () => {
     await settle()
     await click(screen, '[data-action="continue"]')
     await settle()
-    await passBuilding(screen)
+    await arrive(screen)
     await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-action="enter"]')
@@ -520,7 +517,7 @@ describe('BoardingFlow', () => {
 
   it('refuses a taken or invalid name on its own screen, never on the pass', async () => {
     const { screen } = await renderFlow()
-    type(q(screen, '.brd-field'), 'a')
+    type(q(screen, '.brd-plate__field'), 'a')
     await click(screen, '[data-action="continue"]')
     await settle(60)
     expect(stepOf(screen)).toBe('name')
@@ -528,7 +525,7 @@ describe('BoardingFlow', () => {
     expect(apiFetch.mock.calls.filter(c => c[0] === '/api/profile')).toHaveLength(0)
 
     patchResponse.current = { ok: false, status: 409, json: async () => ({ detail: 'Username already taken' }) }
-    type(q(screen, '.brd-field'), 'Aiko')
+    type(q(screen, '.brd-plate__field'), 'Aiko')
     expect(q(screen, '.brd__error')).toBeNull() // typing clears the refusal
     await click(screen, '[data-action="continue"]')
     await settle(60)
@@ -541,10 +538,10 @@ describe('BoardingFlow', () => {
     expect(stepOf(screen)).toBe('why')
   })
 
-  it('on a native shell the nudge is the ninth stop and Allow signs the reminder', async () => {
+  it('on a native shell the nudge is the last stop and Allow signs the reminder', async () => {
     nudgeRef.current = true
     const { screen } = await renderFlow()
-    expect(stepsOf(screen)).toBe('1/9')
+    expect(stepsOf(screen)).toBe('1/8')
     await passName(screen)
     await click(screen, '[data-kana="none"]')
     await settle()
@@ -559,11 +556,11 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="continue"]')   // the hour
     await settle()
     expect(stepOf(screen)).toBe('nudge')
-    expect(stepsOf(screen)).toBe('9/9')
+    expect(stepsOf(screen)).toBe('8/8')
     expect(q(screen, '.brd-notif__title').textContent).toContain('07:30')
     await click(screen, '[data-action="allow"]')
     await settle()
-    await passBuilding(screen)
+    await arrive(screen)
     await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-action="enter"]')
@@ -593,7 +590,7 @@ describe('BoardingFlow', () => {
     await settle()
     await click(screen, '[data-action="continue"]')   // the hour
     await settle()
-    await passBuilding(screen)
+    await arrive(screen)
     await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-action="enter"]')
@@ -626,7 +623,7 @@ describe('BoardingFlow', () => {
     await settle()
     await click(screen, '[data-action="continue"]')   // the hour
     await settle()
-    await passBuilding(screen)
+    await arrive(screen)
     await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-action="enter"]')
@@ -663,7 +660,7 @@ describe('BoardingFlow', () => {
 
   it('dryRun walks the whole ride and writes nothing', async () => {
     const { screen, onComplete } = await renderFlow({ dryRun: true })
-    type(q(screen, '.brd-field'), 'Aiko')
+    type(q(screen, '.brd-plate__field'), 'Aiko')
     await click(screen, '[data-action="continue"]')
     await settle()
     expect(stepOf(screen)).toBe('why')
@@ -682,7 +679,7 @@ describe('BoardingFlow', () => {
     await settle()
     await click(screen, '[data-action="continue"]')   // the hour
     await settle()
-    await passBuilding(screen)
+    await arrive(screen)
     await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-action="enter"]')
@@ -720,32 +717,36 @@ describe('BoardingFlow', () => {
   })
 
   // ── the focus ring stands inside every box that clips ──
-  // The name field is the full width of the body, the body scrolls, and
+  // The name field was the full width of the body, the body scrolls, and
   // a box that scrolls one axis clips the other (`overflow-y: auto`
   // computes overflow-x to `auto` — the spec, not a quirk). An outline
   // is drawn OUTSIDE the border box and never counts as scrollable
   // overflow, so the focused field's ring was sliced off flush with its
   // own left and right edges: two corner arcs left hanging in the air,
-  // no sides. Measured rather than described, and walked up the whole
-  // chain — the frame's own clip had already been widened for this once
-  // and the body inside it went on cutting anyway.
-  it('keeps the focused name field’s ring clear of every clipping ancestor', async () => {
+  // no sides. Since plan 168 the ring is the name's plate's -- its edge
+  // turns gold while the field inside holds the focus, drawn outside the
+  // plate as a shadow -- and it is walked up the whole chain the same
+  // way: the frame's own clip had already been widened for this once and
+  // the body inside it went on cutting anyway.
+  it('keeps the focused name plate’s ring clear of every clipping ancestor', async () => {
     const { screen } = await renderFlow()
     expect(stepOf(screen)).toBe('name')
-    const field = q(screen, '.brd-field')
+    const field = q(screen, '.brd-plate__field')
     field.focus()
     expect(document.activeElement).toBe(field)
+    const plate = field.closest('.brd-plate')
 
-    // A focused text input always matches :focus-visible, so this is
-    // the ring as drawn. Reading it (rather than assuming 4) is what
-    // keeps the gutters below honest if the ring is ever restyled.
-    const ink = getComputedStyle(field)
-    const reach = parseFloat(ink.outlineWidth) + parseFloat(ink.outlineOffset)
-    expect(reach).toBe(4)
+    // The ring as drawn: the first shadow's spread. Reading it (rather
+    // than assuming 2) is what keeps the gutters below honest if the
+    // ring is ever restyled.
+    const ring = getComputedStyle(plate).boxShadow.split(/,(?![^(]*\))/)[0]
+    const reach = parseFloat(ring.match(/-?\d+(?:\.\d+)?px/g)[3])
+    expect(reach).toBe(2)
+    expect(getComputedStyle(field).outlineStyle).toBe('none')
 
-    const box = field.getBoundingClientRect()
+    const box = plate.getBoundingClientRect()
     const clips = []
-    for (let el = field.parentElement; el && el !== document.body; el = el.parentElement) {
+    for (let el = plate.parentElement; el && el !== document.body; el = el.parentElement) {
       const s = getComputedStyle(el)
       if (s.overflowX === 'visible') continue
       // Overflow clips at the padding box, not the border box.

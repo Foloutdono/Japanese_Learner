@@ -29,11 +29,12 @@ const NAME_MAX = 20
 // questions with no hint that their own journey was somewhere else —
 // see components/settings/AccountPage.jsx for the road back to it.
 //
-// On the desk (plan 163, the owner's D01) the name is the station's: its
-// plate with the letters it has left, a pole down to the question's hub
-// (`no`, its place on the strip) and the line leaving it for the next
-// stop (`next`, that stop's name); the way to an account already held
-// stands under the hub.
+// The name is the station's (plan 163's D01 on the desk, plan 168's A01
+// on a phone): its plate with the letters it has left, a pole down to
+// the question's hub (`no`, its place on the line) and the line leaving
+// it for the next stop (`next`, that stop's name). On the desk the way
+// to an account already held stands under the hub; on a phone, over the
+// gate, which stands in the same place on every screen.
 export default function NameStep({
   value, onChange, onContinue, onSignIn = null, email = null,
   error = null, busy = false, no = null, next = null,
@@ -43,7 +44,7 @@ export default function NameStep({
   const canGo = value.trim().length > 0 && !busy
   const field = (
     <input
-      className={`brd-field${value ? '' : ' brd-field--empty'}`}
+      className={desk ? `brd-field${value ? '' : ' brd-field--empty'}` : 'brd-plate__field'}
       autoFocus
       value={value}
       maxLength={NAME_MAX}
@@ -81,16 +82,31 @@ export default function NameStep({
               {signIn}
             </div>
           ) : (
-            <>
-              {field}
+            <div className="brd-name">
+              <label className="brd-plate">
+                {field}
+                <span className="brd-plate__count" aria-hidden="true">{`${value.length} / ${NAME_MAX}`}</span>
+                <span className="brd-plate__stripe" aria-hidden="true" />
+              </label>
               {refusal}
-            </>
+              <div className="brd-name__line" aria-hidden="true">
+                <span className="brd-name__pole" />
+                <span className="brd-hub brd-name__hub">{no}</span>
+                <span className="brd-name__road" />
+                {next && (
+                  <span className="brd-name__next">
+                    <span className="brd-name__ring" />
+                    <span className="brd-name__lab">{next}</span>
+                  </span>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </div>
       <div className="brd__foot">
-        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!canGo} data-action="continue" />
         {!desk && signIn}
+        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!canGo} data-action="continue" />
       </div>
     </>
   )

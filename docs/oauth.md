@@ -77,8 +77,8 @@ both used to read to a learner as "the Google button does nothing":
   `lib/supabase.js` builds the client (supabase-js reads the same URL, and an
   error left on it makes its `initialize()` return early without recovering the
   stored session). The screen that mounts prints it: the boarding's account
-  step, `AuthScreen` (which `App` opens for a refusal that arrives with nobody
-  signed in), or Settings › Account. Backing out at Google — `access_denied`
+  step, the Welcome's sign-in (which `App` opens for a refusal that arrives
+  with nobody signed in), or Settings › Account. Backing out at Google — `access_denied`
   with no code — is an answer, not a fault, and says nothing.
 
 The refusals worth knowing by name:
@@ -201,7 +201,7 @@ The app no longer shows that sentence — `src/lib/authErrors.js` names the code
 and points at the roads that still work — but naming it is not the same as
 fixing it. If email claiming has to succeed for guests, that toggle is where it
 is decided, and the cost of turning it off is that no address on the project is
-verified any more (`AuthScreen`'s sign-up included). The project's Auth logs
+verified any more (the Welcome's sign-up included). The project's Auth logs
 show which failure is really behind a given `email_address_invalid`.
 
 ### Supabase → Authentication → Manual Linking

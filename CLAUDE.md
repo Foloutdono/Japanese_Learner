@@ -1125,7 +1125,42 @@ runtime purpose. Two consequences worth knowing:
   crossroads, improved with B's line to N1, C's working demos and D's
   pass, plus a presentation video and the features one by one on film
   (the footage slots, by file name, are on the same canvas).
-  When starting a new wave, begin at **168** or higher, and check
+  **168** is 辻 on a phone, the boarding drawn as maps (numbered 168
+  because 166 went to 一押し, Today on the phone, and 167 to the landing
+  page while it was open: its commits' messages say 167; the owner's
+  pick A of the canvas "Onboarding on the phone", built as drawn, the
+  desk keeping plan 163's): ‹ and the track at the head, the
+  reveal the kana stop's second half and the level a stop only for a
+  reader of both, the gate at the foot, and between them each question
+  centred over its answers, the pair on the room's middle and the air
+  between them giving way on a short phone (owner-directed after the
+  first build, which pinned the question under the head, ranged left:
+  `BoardFrame.jsx`'s `BoardAir`) -- each question's answers drawn on the
+  canvas's 358px stage (`.brd-map`, shorter under 740px by `--ys`): the
+  name's plate on a pole, a junction of six reasons, the two
+  words at a crossing and each read out as a line, the line climbing
+  through the levels, three lines fanning out of the kana, four trains on
+  a departure board, the flap board turned by hand (`firstDeparture`), a
+  week of bells, the arrival first with the ride under it, the ticket an
+  account keeps (`RideTicket`), the pass over the gate's reader; the
+  Welcome as the crossroads and the sign-in in its place
+  (`screens/AuthScreen.jsx` retired); Building gone, the hour going on
+  to the plan; a pick's gold a rung deeper on its wash (`--brd-wash-ink`);
+  and on the desk too the lines the phone had dropped, the plan's and the
+  account's hints and the terminus caption (a screen reader's name now);
+  then, owner-directed on the built screens ("the buttons are the most
+  important feature"), one gate in one place: the foot's last row on
+  every screen, a quiet way over it and never under (the offer a
+  `.brd__link` too), the sign-in's action the gate on the phone and the
+  desk alike, the Rappel's word short enough for the gate's size, and the
+  junction's rows a rung further apart (cited in
+  `screens/BoardingFlow.jsx`, `App.jsx`, `components/boarding/`,
+  `components/account/ClaimAccount.jsx`, `domain/boarding.js`,
+  `src/boarding.phone.test.jsx`, `src/frontdoor.phone.test.jsx`,
+  `screens/BoardingFlow.browser.test.jsx`, `BoardingFlow.touch.test.jsx`,
+  `src/contrast.browser.test.jsx` and `index.css`; DESIGN.md, Structure
+  and "The gate button"; `docs/design/mobile/README.md`).
+  When starting a new wave, begin at **169** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

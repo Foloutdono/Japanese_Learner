@@ -151,11 +151,9 @@ describe('the boarding on a 390x667 handset', () => {
     await record()                                    // time
     await click(screen, '[data-action="continue"]')
 
-    // The building screen is a wait with a visible end; any tap cuts to
-    // the plan, and the arrival signboard over it goes the same way.
-    expect(stepOf(screen)).toBe('building')
-    await settle(200)
-    q(screen, '.brd__body--center').click()
+    // No Building since plan 168: the plan arrives under the arrival
+    // signboard, which any tap sends on its way.
+    expect(stepOf(screen)).toBe('plan')
     await settle(200)
     window.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
     await record()                                    // plan
@@ -166,6 +164,31 @@ describe('the boarding on a 390x667 handset', () => {
       ['name', 'why', 'kana', 'level', 'goal', 'lines', 'rhythm', 'time', 'plan', 'pass'])
     expect(Object.entries(over).filter(([, px]) => px > 0)).toEqual([])
   }, 90000)
+
+  // The other road out of the kana (plan 168): one script read, the two
+  // words read out as lines, and the first stop under them.
+  it('reads the reveal without scrolling', async () => {
+    const screen = await render(
+      <LangProvider>
+        <BoardingFlow
+          session={{ access_token: 'tok' }}
+          initialProfile={{ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
+          onComplete={vi.fn()}
+          dryRun
+        />
+      </LangProvider>
+    )
+    await settle()
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-motive="trip"]')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-kana="hiragana"]')
+    await settle()
+    expect(stepOf(screen)).toBe('reveal')
+    expect(overflowOf(screen)).toBe(0)
+  }, 30000)
 
   it('opens on a welcome that fits', async () => {
     // Step zero, mounted by App rather than by the flow.

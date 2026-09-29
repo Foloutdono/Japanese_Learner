@@ -25,7 +25,6 @@ import LinesStep from '../components/boarding/LinesStep'
 import RhythmStep from '../components/boarding/RhythmStep'
 import TimeStep from '../components/boarding/TimeStep'
 import NudgeStep from '../components/boarding/NudgeStep'
-import Building from '../components/boarding/Building'
 import { DeskStrip } from '../components/boarding/DeskStrip'
 import { BoardBack } from '../components/boarding/boardBack'
 import PlanStep from '../components/boarding/PlanStep'
@@ -125,19 +124,25 @@ const DESK_PULL_MS = 820
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
 
-// The answered stops, in line order -- the track's stops. Which branch
-// the kana check takes and whether a goal exists depend on answers
-// given later, so the count reads the answers so far.
+// The answered stops, in line order -- the track's stops. Whether the
+// level is asked and whether a goal exists depend on answers given
+// later, so the count reads the answers so far. The reveal is the kana
+// stop's second half, never a stop of its own (plan 168, the owner's
+// decision 3): a reader of one script or none rides eight stops in the
+// app, a reader of both nine, the level being one.
 function trackStops(answers) {
-  const branch = answers.kana === 'both' ? 'level' : 'reveal'
   const goal = answers.jlpt == null || stopsAhead(answers.jlpt).length > 0
   return [
-    'name', 'why', 'kana', branch,
+    'name', 'why', 'kana',
+    ...(answers.kana === 'both' ? ['level'] : []),
     ...(goal ? ['goal'] : []),
     'lines', 'rhythm', 'time',
     ...(canNudge() ? ['nudge'] : []),
   ]
 }
+
+// The stop a screen stands at on the track: the reveal is the kana's.
+const stopOf = step => (step === 'reveal' ? 'kana' : step)
 
 export default function BoardingFlow({
   session, initialProfile, onComplete, onExit = null, onSignIn = null,
@@ -266,7 +271,7 @@ export default function BoardingFlow({
       // trackStops() rather than the `stops` const below: this is
       // called from a handler, and computing it here keeps the two
       // independent of declaration order.
-      index: trackStops(answers).indexOf(from) + 1,
+      index: trackStops(answers).indexOf(stopOf(from)) + 1,
     })
   }
 
@@ -398,69 +403,53 @@ export default function BoardingFlow({
 
   function continueTime() {
     if (canNudge()) go('nudge')
-    else toBuilding()
+    else toPlan()
   }
 
-  function buildingDone() {
+  // No Building (plan 122 on the desk, owner's call; plan 168 on the
+  // phone, the owner's decision 1). Its one job -- gathering the answers
+  // into the journey -- is done by every question as it is answered; the
+  // plan arrives straight after the hour (or the nudge), under the 案内
+  // signboard, and the funnel reads time → plan. Back ends here: the plan
+  // is built.
+  function toPlan() {
+    mark(step, 'plan', 'fwd')
     if (!arrivalPlayed.current) { arrivalPlayed.current = true; setArrival(true) }
     setHistory([])
     setStep('plan')
   }
 
-  // 机 (plan 122, owner's call): no Building on the desk. Its one job --
-  // gathering the answers into the journey -- is done by every question
-  // as it is answered, and the strip (below) holds them; the plan arrives
-  // straight after the hour, under the same signboard. The funnel reads
-  // time → plan there.
-  function toBuilding() {
-    if (!desk) { go('building'); return }
-    mark(step, 'plan', 'fwd')
-    buildingDone()
-  }
-
   // ── The contract ─────────────────────────────────────────────
   const jlpt = answers.jlpt ?? 'N5'
-  // What the learner said they are, as they said it: the novice is
-  // stored at N5 and must not be printed as one — they are boarding
-  // before that stop, not at it.
-  const levelLabel = answers.levelChoice === 'novice' ? t.brdNovice : jlpt
-  // The ride, as the building screen prints it. The novice's stop taken
-  // as a GOAL is where the ride ENDS -- the learner is short of it, not
-  // standing on it -- so the destination stands alone rather than
-  // joining "Novice → Novice".
-  const goalLine = answers.goal === 'novice'
-    ? t.brdNovice
-    : answers.goal ? `${levelLabel} → ${answers.goal}` : levelLabel
   const perDay = itemsForRhythm(answers.rhythm)
   const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, answers.lines)
   const time = minutesToTime(answers.minute)
-  // 辻 (plan 163): the month the goal picked is reached in, hung over it
-  // on the desk's line -- once the volumes that price it have answered.
-  const arrivalMonth = desk && volumes
+  // 辻 (plans 163, 168): the month the goal picked is reached in, hung
+  // over it on the line -- once the volumes that price it have answered.
+  const arrivalMonth = volumes
     ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(figures.date)
     : null
   // What each line carries on the ride to the goal, taken or not, for
   // the lines' cards.
-  const everyLine = desk && volumes
+  const everyLine = volumes
     ? planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, LINES)
     : null
   const lineCarries = everyLine && { vocab: everyLine.words, kanji: everyLine.kanji, grammar: everyLine.grammar }
   // What each rhythm's ride comes to, for the four roads.
-  const rhythmRides = desk && volumes
+  const rhythmRides = volumes
     ? RHYTHMS.map(min => planFigures(volumes, jlpt, answers.goal, itemsForRhythm(min), answers.kana, now, answers.lines))
     : null
-  // And the reveal's first stop -- the kana still unread, at the ride's
-  // pace (the recommended one, until it is asked).
-  const kanaStop = desk && volumes
+  // And the kana's own stop -- the signs still unread, at the ride's pace
+  // (the recommended one, until it is asked): the reveal names it, and on
+  // a phone the rhythm's board moves it with the pace. A reader of both
+  // scripts has none.
+  const kanaLeft = volumes ? kanaFigures(volumes, answers.kana, perDay, now) : null
+  const kanaStop = kanaLeft && kanaLeft.kana > 0
     ? {
-        date: new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
-          .format(kanaFigures(volumes, answers.kana, perDay, now).date),
+        date: new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' }).format(kanaLeft.date),
         min: answers.rhythm,
       }
     : null
-  // The lines as the building screen prints them: the kana first --
-  // every ticket rides them -- then the ones chosen.
-  const linesLine = [t.kanaTitle, ...answers.lines.map(line => t.brdLine[line])].join(' · ')
 
   function complete() {
     if (busy) return
@@ -531,13 +520,13 @@ export default function BoardingFlow({
 
   // ── The screens ──────────────────────────────────────────────
   const stops = trackStops(answers)
-  const onTrack = stops.includes(step)
-  const index = stops.indexOf(step) + 1
+  const onTrack = stops.includes(stopOf(step))
+  const index = stops.indexOf(stopOf(step)) + 1
   const total = stops.length
   const displayName = answers.name.trim() || savedName || profile.username || ''
-  // The strip's stops (the reveal is the kana's own, not a stop), and
-  // the number a question's hub prints on the desk: its place on them.
-  const lineStops = stops.filter(key => key !== 'reveal')
+  // The number a question's hub prints: its place on the line -- the
+  // strip's on the desk, the track's on a phone.
+  const lineStops = stops
   const hubNo = key => String(lineStops.indexOf(key) + 1).padStart(2, '0')
 
   function renderStep(key) {
@@ -588,6 +577,7 @@ export default function BoardingFlow({
             carries={lineCarries}
             stop={answers.goal ?? jlpt}
             arrival={arrivalMonth}
+            no={hubNo('lines')}
           />
         )
       case 'rhythm':
@@ -599,6 +589,7 @@ export default function BoardingFlow({
             rides={rhythmRides}
             stop={answers.goal ?? jlpt}
             now={now}
+            first={kanaStop}
           />
         )
       case 'time':
@@ -607,29 +598,15 @@ export default function BoardingFlow({
         return (
           <NudgeStep
             time={time}
+            minute={answers.minute}
+            now={now}
+            no={hubNo('nudge')}
             // Allow asks the OS -- its own prompt, its own words -- and
             // the answer is the answer: a refusal boards without the nudge.
             onAllow={() => {
-              requestNudgePermission().then(granted => { set({ notifications: granted }); toBuilding() })
+              requestNudgePermission().then(granted => { set({ notifications: granted }); toPlan() })
             }}
-            onSkip={() => { set({ notifications: false }); toBuilding() }}
-          />
-        )
-      case 'building':
-        return (
-          <Building
-            name={displayName}
-            onDone={buildingDone}
-            steps={[
-              { key: 'goal', label: t.brdBuildGoal, value: goalLine },
-              { key: 'lines', label: t.brdBuildLines, value: linesLine },
-              { key: 'ride', label: t.brdBuildRide, value: `${answers.rhythm} min · ${time}` },
-              {
-                key: 'projection',
-                label: t.brdBuildProjection,
-                value: new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(figures.date),
-              },
-            ]}
+            onSkip={() => { set({ notifications: false }); toPlan() }}
           />
         )
       case 'plan':
@@ -665,10 +642,10 @@ export default function BoardingFlow({
             onSignIn={onSignIn}
             onLeaveForAuth={() => stash({ answers, step, savedName })}
             error={desk ? saveError : null}
-            ticket={desk ? {
+            ticket={{
               name: displayName, now, figures, goal: answers.goal ?? jlpt,
               rhythm: answers.rhythm, time, hour: bucketFor(answers.minute),
-            } : null}
+            }}
           />
         )
       case 'pass':
@@ -701,7 +678,7 @@ export default function BoardingFlow({
     time,
     nudge: answers.notifications ? time : t.brdNotNow,
   }
-  const atStop = lineStops.indexOf(step === 'reveal' ? 'kana' : step)
+  const atStop = lineStops.indexOf(stopOf(step))
   const deskStops = lineStops.map((key, i) => {
     const state = atStop < 0 || i < atStop ? 'done' : i === atStop ? 'now' : 'next'
     return {
@@ -719,7 +696,8 @@ export default function BoardingFlow({
 
   return (
     <main
-      className={desk ? 'brd desk-brd' : 'brd'}
+      // A phone's three arrival screens stand with no head (plan 168).
+      className={desk ? 'brd desk-brd' : onTrack ? 'brd' : 'brd brd--arrival'}
       id="main-content"
       data-step={step}
       ref={frameRef}

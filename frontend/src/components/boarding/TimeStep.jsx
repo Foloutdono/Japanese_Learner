@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { DEPARTURES, DEPART_JP, DEPART_TIMES } from '../onboarding/departures'
 import {
   DAY_STEP_MIN, DAY_START_MIN, LAST_DEPARTURE_MIN,
-  bucketFor, clampDeparture, dayFraction, minuteAtFraction, minutesToTime, timeToMinutes,
+  bucketFor, clampDeparture, firstDeparture, minuteAtFraction, minutesToTime, timeToMinutes,
 } from '../../domain/boarding'
+import { Emphasized } from '../ui/Emphasized'
 import { BoardQuestion, Continue } from './BoardFrame'
 import { useDesk } from '../../hooks/useDesk'
 import { useBoxSize } from '../../hooks/useBoxWidth'
@@ -13,18 +14,12 @@ import { PickMark } from './BoardOption'
 // ── 7 · the hour (plan 075) ──────────────────────────────────────
 // The departure board prints the hour on split flaps; the three cells
 // are the announced rides (morning, noon, evening -- the same clock
-// Settings › Destination keeps); the day track under them is the fine
-// control, a train on a rail from six to midnight in half hours, with
-// a slider role so it works from a keyboard. Picking a cell moves the
-// train to its hour; dragging the train lights the cell whose part of
-// the day it sits in. The board flips its last digit once per change.
-
-const TICKS = [
-  { label: '06', at: 0, mod: 'first' },
-  { label: '12', at: 1 / 3 },
-  { label: '18', at: 2 / 3 },
-  { label: '24', at: 1, mod: 'last' },
-]
+// Settings › Destination keeps). On a phone (plan 168, the owner's
+// pick ② of A07) the board is the control: ▲ and ▼ over and under the
+// flaps turn the hour and the half hour, the three services under it
+// set their own, and the line under them says when the first train
+// leaves. On the desk (plan 163) the day is the sun's arc (DayArc). The
+// board flips its last digit once per change.
 
 // ── The board settles ────────────────────────────────────────────
 // A 発車標 does not arrive already showing the time: every drum is
@@ -101,94 +96,19 @@ function Flaps({ time }) {
   )
 }
 
-// `now` is the desk's (plan 163): the day the board's first departure
-// is counted from.
+// `now` is the day the board's first departure is counted from.
 export default function TimeStep({ minute, onChange, onContinue, now = null }) {
   const { t } = useLang()
   // 机 (plan 122): 1-3 pick one of the three hours.
   const desk = useDesk()
-  const railRef = useRef(null)
-  const time = minutesToTime(minute)
-  const pct = dayFraction(minute) * 100
-  const bucket = bucketFor(minute)
-
-  function fromPointer(e) {
-    const rect = railRef.current?.getBoundingClientRect()
-    if (!rect || rect.width === 0) return
-    onChange(minuteAtFraction((e.clientX - rect.left) / rect.width))
-  }
-
-  function onPointerDown(e) {
-    e.currentTarget.setPointerCapture?.(e.pointerId)
-    fromPointer(e)
-  }
-
-  function onPointerMove(e) {
-    if (e.buttons === 0) return
-    fromPointer(e)
-  }
-
-  const onKeyDown = e => stepHour(e, minute, onChange)
-
   return (
     <>
       <div className="brd__body">
         <BoardQuestion hint={desk ? t.brdTimeHint : null}>{t.brdTimeQ}</BoardQuestion>
         <div className="brd__stage">
-          {desk ? <DayArc minute={minute} onChange={onChange} now={now ?? new Date()} /> : (
-            <>
-              <div className="brd-board">
-                <span className="brd-board__cap">{t.brdDeparture}</span>
-                <Flaps time={time} />
-              </div>
-              <div className="brd-grid brd-grid--3" role="group" aria-label={t.brdDeparture}>
-                {DEPARTURES.map(id => (
-                  <button
-                    key={id}
-                    type="button"
-                    className={`brd-cell brd-cell--sm${bucket === id ? ' brd-cell--on' : ''}`}
-                    aria-pressed={bucket === id}
-                    onClick={() => onChange(timeToMinutes(DEPART_TIMES[id]))}
-                    data-hour={id}
-                  >
-                    <span className="brd-cell__label">{t.destHour[id]}</span>
-                    <span className="brd-cell__time">{DEPART_TIMES[id]}</span>
-                  </button>
-                ))}
-              </div>
-              <div
-                className="brd-day"
-                ref={railRef}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-              >
-                <div className="brd-day__rail" />
-                <div className="brd-day__done" style={{ width: `${pct}%` }} />
-                {TICKS.map(tick => (
-                  <span
-                    key={tick.label}
-                    className={`brd-day__tick${tick.mod ? ` brd-day__tick--${tick.mod}` : ''}`}
-                    style={{ left: `${tick.at * 100}%` }}
-                    aria-hidden="true"
-                  >
-                    {tick.label}
-                  </span>
-                ))}
-                <button
-                  type="button"
-                  className="brd-day__train"
-                  role="slider"
-                  aria-label={t.brdDayAria}
-                  aria-valuemin={6}
-                  aria-valuemax={24}
-                  aria-valuenow={minute / 60}
-                  aria-valuetext={time}
-                  style={{ left: `${pct}%` }}
-                  onKeyDown={onKeyDown}
-                />
-              </div>
-            </>
-          )}
+          {desk
+            ? <DayArc minute={minute} onChange={onChange} now={now ?? new Date()} />
+            : <HourBoard minute={minute} onChange={onChange} now={now ?? new Date()} />}
         </div>
       </div>
       <div className="brd__foot">
@@ -198,8 +118,73 @@ export default function TimeStep({ minute, onChange, onContinue, now = null }) {
   )
 }
 
-// The train's keys, on the phone's rail and the desk's arc alike: a
-// half hour a press, two hours a page, the day's ends on Home and End.
+// ── 発車標 — the board as the control (plan 168) ───────────────────
+// The flaps turned by hand: ▲ and ▼ over the two hour drums move the
+// hour, over the two minute drums the half hour, the day held from six
+// to half past eleven (clampDeparture). The three services under the
+// board are the announced rides, the one whose part of the day the hour
+// stands in lit.
+const STEPS = [[60, 30], [-60, -30]]
+
+function HourBoard({ minute, onChange, now }) {
+  const { t } = useLang()
+  const time = minutesToTime(minute)
+  const bucket = bucketFor(minute)
+  const { later } = firstDeparture(now, minute)
+  const turn = by => {
+    const next = clampDeparture(minute + by)
+    return { disabled: next === minute, onClick: () => onChange(next) }
+  }
+  return (
+    <>
+      <div className="brd-board brd-clock" role="group" aria-label={t.brdDayAria}>
+        <span className="brd-board__cap">{t.brdDeparture}</span>
+        {STEPS.map(([hour, half], row) => (
+          <Fragment key={hour}>
+            {row === 1 && <Flaps time={time} />}
+            <p className="brd-clock__steps">
+              <button type="button" className="brd-clock__step" aria-label={hour > 0 ? t.brdHourLater : t.brdHourEarlier} {...turn(hour)}>
+                <StepChevron up={hour > 0} />
+              </button>
+              <button type="button" className="brd-clock__step" aria-label={half > 0 ? t.brdHalfLater : t.brdHalfEarlier} {...turn(half)}>
+                <StepChevron up={half > 0} />
+              </button>
+            </p>
+          </Fragment>
+        ))}
+      </div>
+      <div className="brd-hours" role="group" aria-label={t.brdDeparture}>
+        {DEPARTURES.map(id => (
+          <button
+            key={id}
+            type="button"
+            className="brd-hour"
+            aria-pressed={bucket === id}
+            onClick={() => onChange(timeToMinutes(DEPART_TIMES[id]))}
+            data-hour={id}
+          >
+            <span className="brd-hour__jp" lang="ja">{DEPART_JP[id]}</span>
+            <span className="brd-hour__name">{t.destHour[id]}</span>
+            <span className="brd-hour__time">{DEPART_TIMES[id]}</span>
+          </button>
+        ))}
+      </div>
+      <p className="brd-clock__when"><Emphasized text={t.brdTrainAt(later, time)} /></p>
+    </>
+  )
+}
+
+function StepChevron({ up }) {
+  return (
+    <svg className="svg" viewBox="0 0 24 24" aria-hidden="true">
+      <polyline points={up ? '6 15 12 9 18 15' : '6 9 12 15 18 9'} />
+    </svg>
+  )
+}
+
+// The train's keys on the desk's arc (the phone's rail took the same
+// until plan 168 made the board its control): a half hour a press, two
+// hours a page, the day's ends on Home and End.
 function stepHour(e, minute, onChange) {
   const moves = {
     ArrowLeft: -DAY_STEP_MIN, ArrowDown: -DAY_STEP_MIN,
@@ -301,10 +286,7 @@ function DayArc({ minute, onChange, now }) {
   }
 
   // The first departure: today, if the hour is still to come.
-  const first = new Date(now)
-  first.setHours(0, minute, 0, 0)
-  const later = first.getTime() > now.getTime()
-  if (!later) first.setDate(first.getDate() + 1)
+  const { first, later } = firstDeparture(now, minute)
   const day = new Intl.DateTimeFormat(lang, { weekday: 'short', day: 'numeric', month: 'short' }).format(first)
 
   return (

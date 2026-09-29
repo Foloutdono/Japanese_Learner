@@ -18,7 +18,9 @@ import '../../index.css'
 // locales.test.js holds the string tables to the rule; this holds the
 // screen, because the rule can be right in the table and still lose to
 // a stylesheet. The numbers are that screenshot's: 10 minutes a day,
-// ~700 words, ~100 kanji, N5 by December.
+// ~700 words, ~100 kanji, N5 by December. Since plan 168 the phone's
+// plan is the arrival first, and the colon stands in the line that says
+// what the ride is for ("Pour toi : …").
 //
 // The frame is swept rather than measured once. Where a line ends is a
 // question of font metrics, and the width at which THIS phone broke
@@ -31,9 +33,9 @@ import '../../index.css'
 // LangContext pulls the content-translation maps on mount.
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
-const FIGURES = { words: 700, kanji: 100, kana: 224, date: new Date('2026-12-01T00:00:00Z') }
+const FIGURES = { words: 700, kanji: 100, grammar: 90, kana: 224, days: 83, date: new Date('2026-12-01T00:00:00Z') }
 // The copy on this screen, every element that sets more than one word.
-const COPY = '.brd__q, .brd-lead, .brd-bullet, .brd-chart__cap, .brd-legend__key'
+const COPY = '.brd__q, .brd-plan__cap, .brd-plan__sub, .brd-ride__lab, .brd-held__unit, .brd-for'
 
 function mount(props = {}) {
   return render(
@@ -125,12 +127,12 @@ describe('the plan at 390×844', () => {
     expect(seen, `punctuation orphaned across a line break:\n${seen.join('\n')}`).toEqual([])
   })
 
-  it('still prints the colon the lead ends on', async () => {
+  it('still prints the colon the purpose line opens on', async () => {
     const screen = await mount()
-    const lead = screen.container.querySelector('.brd-lead')
-    // Welded, not deleted: the sentence still ends "pour toi :".
-    expect(lead.textContent.endsWith(' :')).toBe(true)
-    expect(lead.textContent).toContain('pour toi')
+    const line = screen.container.querySelector('.brd-for')
+    // Welded, not deleted: the line still opens "Pour toi :".
+    expect(line.textContent.startsWith('Pour toi\u00a0:')).toBe(true)
+    expect(line.textContent.endsWith('.')).toBe(true)
   })
 
   it('keeps the whole arrival inside the phone', async () => {

@@ -1877,11 +1877,9 @@ const boarding = {
   // refusable. "Keep" rather than "create": the progress already
   // exists, this only puts a key on it (lib/guest.js).
   brdAccountQ: 'Keep your progress.',
-  brdAccountHint: 'Your journey is already saved. An account is how you reach it from another device — and how you keep it when you change phones.',
   brdAccountCreate: 'Create my account',
   brdAccountSkip: 'Continue without an account',
   // 辻 (plan 163): the desk's account, beside the ticket it keeps.
-  brdAccountHintDesk: 'Your ticket is ready. An account keeps it, on all your devices.',
   brdTicketKind: 'Ticket · Tsuji',
   brdIssued: (date) => `Issued ${date}`,
   brdCreditsOffered: 'credits, on us',
@@ -1892,11 +1890,6 @@ const boarding = {
   brdServiceValue: (name, n) => `${name} · ${n} a day`,
   brdTicketNote: 'Without an account, your ticket stays on this device.',
   brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulary', grammar: 'Grammar', dictation: 'Dictation', reading: 'Reading', kana: 'Kana', translation: 'Translation', analyzer: 'Analyzer', exam: 'Mock exam' },
-  brdDemoMeaning: { station: 'station', toEat: 'to eat', whichRule: 'Which rule?', craft: 'craft', writeIt: 'Write it', readIt: 'Read it', kippu: 'kippu', ki: 'ki', sayIt: 'Translate it', yama: 'yama · san', breakItDown: 'Break it down', timer: '24:18' },
-  brdDemoFoot: { kanjiMeaning: 'Kanji → meaning', wordMeaning: 'Word → meaning', sentenceRule: 'Sentence → rule', meaningKanji: 'Meaning → kanji', soundText: 'Sound → text', sentenceMeaning: 'Sentence → meaning', wordReading: 'Word → reading', kanaRomaji: 'Kana → romaji', meaningSentence: 'Meaning → sentence', kanjiReadings: 'Kanji → readings', sentenceGrammar: 'Sentence → grammar', timedPaper: 'Timed paper' },
-  // The 翻訳 card's prompt is in the learner's language, so it is a
-  // string of the interface's rather than content.
-  brdDemoPrompt: { waiting: 'I’m waiting for a friend at the station.' },
   // The questions.
   brdNameQ: 'What’s your name?',
   brdNameAria: 'Your name',
@@ -1913,7 +1906,6 @@ const boarding = {
   brdKana: { hiragana: 'Hiragana', katakana: 'Katakana', both: 'Both', none: 'Not yet' },
   brdKanaWord: { sushi: 'sushi', hotel: 'hotel' },
   brdRevealQ: 'Soon you’ll read both.',
-  brdRevealHint: 'Two scripts, 46 signs each. Your first stop.',
   // 辻 (plan 163): the desk's kana question and reveal, drawn as the
   // owner's D03 -- each answer says what it reads, then its name.
   brdKanaHint: 'Pick what you can already read.',
@@ -1989,7 +1981,7 @@ const boarding = {
   brdNotifTitle: (time) => `Your train leaves at ${time}`,
   brdNotifText: 'Your cards are waiting at the gate.',
   brdNudgeHint: 'One a day, at your time. Never more.',
-  brdAllow: 'Allow notifications',
+  brdAllow: 'Remind me',
   brdNotNow: 'Not now',
   // ── 発車案内 — the daily nudge from the day's queue, the widget and
   // Settings › Notifications (plan 156). The nudge's title and body are
@@ -2022,40 +2014,18 @@ const boarding = {
     android: 'Touch and hold your home screen, tap Widgets, then drag Tsuji onto it.',
   },
   notifWidgetWhat: 'It shows the day’s cards and a word you know, never one due this week.',
-  // The arrival: building, the plan, the pass.
-  brdBuildingQ: (name) => `Building your journey, **${name}**`,
+  // The arrival: the plan, the pass.
   brdBuildingAria: 'Building your journey',
-  brdBuildGoal: 'Your goal',
-  brdBuildLines: 'Your lines',
-  brdBuildRide: 'Your daily ride',
-  brdBuildProjection: 'Your projection',
   // 机 (plan 140): the stops on the desk's column, one per question --
   // the part of the boarding each answers, as the line prints it.
   brdStop: { name: 'Name', why: 'Why', kana: 'Kana', level: 'Level', goal: 'Goal', lines: 'Lines', rhythm: 'Rhythm', time: 'Departure', nudge: 'Reminder' },
   brdArrivalTitle: 'Your plan',
   brdPlanQ: (name) => `Your plan is ready, **${name}**.`,
-  brdChartTitle: 'Your projection',
-  brdChartAria: (words) => `Words remembered over the ride: daily reviews climb to about ${words}; cramming levels off early.`,
-  brdChartLabel: (words) => `~${words} words · daily reviews`,
-  // The same chart for a ticket without the words on it: it climbs to
-  // everything the chosen lines hold.
-  brdChartAriaItems: (n) => `Items remembered over the ride: daily reviews climb to about ${n}; cramming levels off early.`,
-  brdChartLabelItems: (n) => `~${n} items · daily reviews`,
-  // The same chart for a ride to the novice's stop, which promises
-  // signs rather than words.
-  brdChartAriaKana: (kana) => `Kana remembered over the ride: daily reviews climb to about ${kana}; cramming levels off early.`,
-  brdChartLabelKana: (kana) => `~${kana} kana · daily reviews`,
-  brdChartCram: 'cramming',
-  brdLegendUs: (min) => `Daily reviews, ${min} min`,
-  brdLegendThem: 'Cramming',
-  brdChartCap: 'Spaced reviews against cramming — an illustration, not a measurement.',
-  brdLead: (min, date, purpose) => `At **${min} min a day**, by **${date}**, ${purpose}:`,
   brdFor: { studies: 'for your studies', fun: 'for the fun of it', trip: 'for your trip', live: 'for your life in Japan', friends: 'for your friends', other: 'for yourself' },
-  // The first promise: one figure per line on the ticket, joined.
+  // One figure per line on the ticket.
   brdFigWords: (n) => `~${n} words`,
   brdFigKanji: (n) => `~${n} kanji`,
   brdFigGrammar: (n) => `~${n} grammar points`,
-  brdBulletFigures: (parts) => (parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}` : parts[0] ?? ''),
   // The novice's stop, taken as a goal: the kana, and the line that
   // waits beyond them. No word count, and no motive line — three weeks
   // of signs cannot promise a drama without pausing.
@@ -2070,8 +2040,6 @@ const boarding = {
     friends: ['Chat by message', 'A dinner conversation'],
     other: ['Read what you meet every day', 'Say what you mean'],
   },
-  brdOnTrack: (level) => `On track for JLPT ${level}`,
-  brdOnTrackLine: 'On track for the whole line',
   brdOnTrackKana: 'On track for the kana',
   brdPassQ: (name) => `Your pass is ready, **${name}**.`,
   brdEnjoy: 'Enjoy the ride.',
@@ -2079,7 +2047,6 @@ const boarding = {
   brdEnter: 'Enter the station',
   // 辻 (plan 163): the desk's plan, the ride drawn to scale -- its stops'
   // days and names, what the terminus holds, what the ride is for.
-  brdPlanHint: (min, purpose) => `At ${min} min a day, ${purpose}.`,
   brdInDays: (n) => (n === 1 ? 'tomorrow' : `in ${n} days`),
   brdEvery: { am: 'every morning', noon: 'every noon', pm: 'every evening' },
   brdAtTime: (every, time) => `${every} at ${time}`,
@@ -2089,6 +2056,19 @@ const boarding = {
   brdAtTerminus: 'At the terminus, you’ll know',
   brdUnit: { vocab: 'words', kanji: 'kanji', grammar: 'grammar points' },
   brdUnitKana: 'signs',
+  // 辻 on a phone (plan 168): the kana over the lines' hub, the board's
+  // arrival column and first stop, the hour's arrows and first train, the
+  // plan's arrival and what the ride is for.
+  brdKanaFirstShort: 'Kana first',
+  brdArriveAt: (stop) => `Arrival at ${stop}`,
+  brdFirstStop: (date) => `First stop: the kana, read by **${date}**`,
+  brdHourLater: 'An hour later',
+  brdHourEarlier: 'An hour earlier',
+  brdHalfLater: 'Half an hour later',
+  brdHalfEarlier: 'Half an hour earlier',
+  brdTrainAt: (today, time) => `Your train · ${today ? 'today' : 'tomorrow'}, **${time}**, then every day`,
+  brdArriveIn: (days, every, time) => `${days === 1 ? '**tomorrow**' : `in **${days} days**`}, ${every} at ${time}`,
+  brdForLine: (purpose, promise) => `${purpose.charAt(0).toUpperCase()}${purpose.slice(1)}: **${promise.charAt(0).toLowerCase()}${promise.slice(1)}**.`,
 }
 
 const ride = {

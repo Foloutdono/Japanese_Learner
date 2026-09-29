@@ -7,23 +7,26 @@ import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
 
 // ── The sign-in card (plan 075; lifted out of AuthScreen, plan 122) ──
 // Google, then Login / Sign up as a segmented control, the two fields,
-// the one action. On a phone it is AuthScreen's card, a screen of its
-// own. On the desk it is the Welcome's sign-in, in Board's place (plan
-// 163), so a returning learner signs in with no second screen.
+// the one action. It is the Welcome's sign-in at every width: in
+// Board's place on the desk (plan 163) and in the promise's on a phone
+// (plan 168, which retired AuthScreen), so a returning learner signs in
+// with no second screen.
 //
 // Google sits above the segmented control because it answers both
 // halves of it at once: there is no such thing as signing up versus
 // signing in with a provider, only arriving. It is a ghost button —
-// the filled action on AuthScreen is the one below it (DESIGN.md).
+// the filled action is the one below it (DESIGN.md).
 //
 //   initialMode  'login' | 'signup' -- the side it opens on
 //   autoFocus    the email field takes the focus on mount
 //   seg          draw the Login / Sign up control; without it the card
 //                stays on initialMode (the desk signs in only)
-//   frame        the desk's (plan 163): lays the card out itself, handed
-//                { head, submit } -- the card's parts down to the
-//                answers, and the action's { onClick, disabled, label } --
-//                so its action can stand where the Welcome's Board did
+//   frame        the Welcome's (plans 163, 168): lays the card out
+//                itself, handed { head, submit } -- the card's parts
+//                down to the answers, and the action's { onClick,
+//                disabled, label } -- so its action can stand where the
+//                Welcome's Board did (the desk) or on the gold road
+//                round the form (a phone)
 export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true, frame = null }) {
   const { t } = useLang()
   const [mode, setMode]         = useState(initialMode) // 'login' | 'signup'

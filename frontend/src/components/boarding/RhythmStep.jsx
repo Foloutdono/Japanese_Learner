@@ -1,21 +1,27 @@
 import { useLang } from '../../LangContext'
 import { RHYTHMS, RECOMMENDED_RHYTHM, itemsForRhythm, rideAxis } from '../../domain/boarding'
+import { serviceLabel } from '../onboarding/paces'
+import { Emphasized } from '../ui/Emphasized'
 import { BoardQuestion, Continue } from './BoardFrame'
 import { useDesk } from '../../hooks/useDesk'
 import { useBoxSize } from '../../hooks/useBoxWidth'
 import { PickMark } from './BoardOption'
 
 // ── 6 · the rhythm (plan 075) ────────────────────────────────────
-// Four cards in a lattice: minutes a day, and the new items that fit
-// in them. The recommended one wears the tag and is preselected by the
-// flow; the picked card lifts to its wash.
+// Minutes a day, and when each pace arrives. On a phone (plan 168, the
+// owner's pick ① of A06) the four rhythms are four trains on a 発車標,
+// each with its service, its minutes and the new items they hold, and
+// its arrival at the goal; under the board, the first stop -- the kana,
+// read by the day the pace picked reaches them. On the desk (plan 163)
+// the rhythms are the four roads to the goal (RideRoads).
 //
-// On the desk (plan 163) `rides` is what each rhythm's ride comes to --
-// a { days, date } per rhythm, in RHYTHMS' order -- `stop` the goal it
-// arrives at and `now` the day it leaves; the rhythms are drawn as the
-// four roads to that stop (RideRoads). Until the volumes that price the
-// rides have answered, the desk keeps the four cards.
-export default function RhythmStep({ value, onChange, onContinue, rides = null, stop = null, now = null }) {
+// `rides` is what each rhythm's ride comes to -- a { days, date } per
+// rhythm, in RHYTHMS' order -- `stop` the goal it arrives at, `now` the
+// day it leaves and `first` the kana's own stop at the pace picked
+// ({ date }, or null for a reader of both scripts); each null until the
+// volumes that price them have answered. Until then the desk keeps the
+// four cards, and the phone's board prints no arrivals.
+export default function RhythmStep({ value, onChange, onContinue, rides = null, stop = null, now = null, first = null }) {
   const { t } = useLang()
   // 机 (plan 122): 1-4 pick a rhythm.
   const desk = useDesk()
@@ -25,35 +31,89 @@ export default function RhythmStep({ value, onChange, onContinue, rides = null, 
       <div className="brd__body">
         <BoardQuestion hint={roads ? t.brdRhythmHint : null}>{t.brdRhythmQ}</BoardQuestion>
         <div className="brd__stage">
-          {roads ? <RideRoads value={value} onChange={onChange} rides={rides} stop={stop} now={now} /> : (
+          {roads ? <RideRoads value={value} onChange={onChange} rides={rides} stop={stop} now={now} /> : desk ? (
             <>
-              <div className="brd-grid" role="group" aria-label={t.brdRhythmQ}>
-                {RHYTHMS.map((min, i) => (
-                  <button
-                    key={min}
-                    type="button"
-                    className={`brd-cell${value === min ? ' brd-cell--on' : ''}`}
-                    aria-pressed={value === min}
-                    onClick={() => onChange(min)}
-                    aria-keyshortcuts={desk ? String(i + 1) : undefined}
-                    data-rhythm={min}
-                  >
-                    {desk && <PickMark digit={i + 1} corner />}
-                    {min === RECOMMENDED_RHYTHM && <span className="brd-tag">{t.onbPaceRecommended}</span>}
-                    <span className="brd-cell__n">{min}</span>
-                    <span className="brd-cell__u">{t.brdMinADay}</span>
-                    <span className="brd-cell__sub">{t.brdNewItems(itemsForRhythm(min))}</span>
-                  </button>
-                ))}
-              </div>
-              <p className="brd__hint">{t.brdChangeLater}</p>
+            <div className="brd-grid" role="group" aria-label={t.brdRhythmQ}>
+              {RHYTHMS.map((min, i) => (
+                <button
+                  key={min}
+                  type="button"
+                  className={`brd-cell${value === min ? ' brd-cell--on' : ''}`}
+                  aria-pressed={value === min}
+                  onClick={() => onChange(min)}
+                  aria-keyshortcuts={String(i + 1)}
+                  data-rhythm={min}
+                >
+                  <PickMark digit={i + 1} corner />
+                  {min === RECOMMENDED_RHYTHM && <span className="brd-tag">{t.onbPaceRecommended}</span>}
+                  <span className="brd-cell__n">{min}</span>
+                  <span className="brd-cell__u">{t.brdMinADay}</span>
+                  <span className="brd-cell__sub">{t.brdNewItems(itemsForRhythm(min))}</span>
+                </button>
+              ))}
+            </div>
+            <p className="brd__hint">{t.brdChangeLater}</p>
             </>
-          )}
+          ) : <DepartureBoard value={value} onChange={onChange} rides={rides} stop={stop} first={first} />}
         </div>
       </div>
       <div className="brd__foot">
         <Continue keys label={t.onbContinue} onClick={onContinue} data-action="continue" />
       </div>
+    </>
+  )
+}
+
+// ── 発車標 — four trains on the board (plan 168) ───────────────────
+// A row a rhythm, as a departure board prints a train: its service (the
+// board's own names, components/onboarding/paces.js), the minutes a day
+// with the new items they hold, and where it arrives and when. The one
+// picked is lit in the gate's gold.
+function DepartureBoard({ value, onChange, rides, stop, first }) {
+  const { t, lang } = useLang()
+  const date = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short', year: 'numeric' })
+  const goal = stop && stop !== 'novice' ? stop : null
+  return (
+    <>
+      <div className="brd-trains" role="group" aria-label={t.brdRhythmQ}>
+        <p className="brd-trains__cols brd-trains__head" aria-hidden="true">
+          <span>{t.brdTermService}</span>
+          <span>{t.brdADay}</span>
+          <span>{goal ? t.brdArriveAt(goal) : t.statusArrival}</span>
+        </p>
+        {RHYTHMS.map((min, i) => {
+          const ride = rides?.[i]
+          return (
+            <button
+              key={min}
+              type="button"
+              className="brd-trains__cols brd-train"
+              aria-pressed={value === min}
+              onClick={() => onChange(min)}
+              data-rhythm={min}
+            >
+              <span className="brd-train__svc">
+                <span className="brd-train__jp" lang="ja">{serviceLabel(min).jp}</span>
+                <span className="brd-train__name">{t.brdRhythmName[min]}</span>
+                {min === RECOMMENDED_RHYTHM && <span className="brd-train__tag">{t.onbPaceRecommended}</span>}
+              </span>
+              <span className="brd-train__min">
+                <span className="brd-train__fig"><b>{min}</b>min</span>
+                <span className="brd-train__new">{t.brdNewItems(itemsForRhythm(min))}</span>
+              </span>
+              <span className="brd-train__arr">
+                {ride && (
+                  <>
+                    <span className="brd-train__date">{date.format(ride.date)}</span>
+                    <span className="brd-train__days">{t.brdRideDays(ride.days)}</span>
+                  </>
+                )}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+      {first && <p className="brd-trains__first"><Emphasized text={t.brdFirstStop(first.date)} /></p>}
     </>
   )
 }

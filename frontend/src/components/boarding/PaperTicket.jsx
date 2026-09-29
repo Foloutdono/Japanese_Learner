@@ -90,3 +90,77 @@ export function PaperTicket({ name, now, figures, goal, rhythm, time, hour }) {
     </section>
   )
 }
+
+// ── 乗車券 on a phone (plan 168) ─────────────────────────────────
+// The owner's A-Compte: the same ticket at a phone's width, the route
+// across its top -- 辻, the departure; the kana when there are kana to
+// read; the terminus -- each with its day under it, the service and the
+// hour at its foot, and the stub the welcome's credits, punched. The
+// same props as PaperTicket.
+//
+// On the ticket's own map (its body, 284px on the canvas): the route
+// from the departure's ring to the terminus's, the kana's kept a third
+// of the way from either end so the three days under it read apart.
+const TK_X0 = 26
+const TK_X1 = 236
+const TK_W = 284
+
+export function RideTicket({ now, figures, goal, rhythm, time }) {
+  const { t, lang } = useLang()
+  const credits = useCredits()
+  const balance = credits?.unlimited ? null : (credits?.balance ?? SIGNUP_BONUS)
+  const short = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
+  const long = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short', year: 'numeric' })
+  const toNovice = goal === 'novice'
+  const total = Math.max(1, figures.days)
+  const kanaDays = figures.kana > 0 && !toNovice ? Math.min(total, Math.ceil(figures.kana / Math.max(1, rhythm))) : 0
+  const kanaAt = kanaDays > 0 ? Math.min(0.63, Math.max(0.37, kanaDays / total)) : null
+  const kanaDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + kanaDays)
+  const x = at => TK_X0 + at * (TK_X1 - TK_X0)
+  const stops = [
+    { key: 'start', at: 0, glyph: '辻', ja: true, day: short.format(now) },
+    ...(kanaAt != null ? [{ key: 'kana', at: kanaAt, glyph: 'あ', ja: true, day: short.format(kanaDate) }] : []),
+    { key: 'end', at: 1, glyph: toNovice ? 'あ' : goal, ja: toNovice, day: long.format(figures.date) },
+  ]
+  return (
+    <section className="brd-tk" aria-label={t.brdTicketKind}>
+      <div className="brd-tk__body">
+        <p className="brd-tk__top">
+          <span className="brd-tk__kind">{t.brdTicketKind}</span>
+          <span className="brd-tk__date">{t.brdIssued(short.format(now))}</span>
+        </p>
+        <div className="brd-tk__map">
+          <svg className="brd-tk__lines" viewBox={`0 0 ${TK_W} 64`} preserveAspectRatio="none" aria-hidden="true">
+            <path className="brd-tk__ride" d={`M${TK_X0} 22H${TK_X1}`} />
+          </svg>
+          {stops.map(stop => (
+            <span
+              key={stop.key}
+              className={`brd-tk__stop brd-tk__stop--${stop.key}`}
+              // A plain number, placed by the sheet: the stop's centre.
+              style={{ '--x': x(stop.at) }}
+            >
+              <span className="brd-tk__ring" lang={stop.ja ? 'ja' : undefined}>{stop.glyph}</span>
+              <span className="brd-tk__day">{stop.day}</span>
+            </span>
+          ))}
+        </div>
+        <dl className="brd-tk__terms">
+          <div className="brd-tk__term">
+            <dt>{t.brdTermService}</dt>
+            <dd>{t.brdServiceValue(t.brdRhythmName[rhythm] ?? '', rhythm)}</dd>
+          </div>
+          <div className="brd-tk__term">
+            <dt>{t.brdDeparture}</dt>
+            <dd>{time}</dd>
+          </div>
+        </dl>
+      </div>
+      <div className="brd-tk__stub">
+        <b className="brd-tk__credits">{balance == null ? '∞' : balance.toLocaleString(lang)}</b>
+        <span className="brd-tk__unit">{balance === SIGNUP_BONUS ? t.brdCreditsOffered : t.creditsUnit}</span>
+        <span className="brd-tk__punch" aria-hidden="true">{t.brdPunched}</span>
+      </div>
+    </section>
+  )
+}

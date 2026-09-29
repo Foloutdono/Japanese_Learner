@@ -3,13 +3,14 @@ import { Emphasized } from '../ui/Emphasized'
 import { MOTIVES } from '../../domain/boarding'
 import { useDesk } from '../../hooks/useDesk'
 import { BoardQuestion, Continue } from './BoardFrame'
-import { BoardOption, PickMark } from './BoardOption'
-import { MotiveGlyph, MotiveIcon } from './icons'
+import { PickMark } from './BoardOption'
+import { MotiveGlyph } from './icons'
 
 // ── 2 · why (plan 075) ───────────────────────────────────────────
-// Six rows, one choice; the plan's two promise lines come from it. On
-// the desk, six roads out of the question's hub (WhyRoads, plan 163).
-// `no` is the question's place on the strip, which the hub prints.
+// Six reasons, one choice; the plan's two promise lines come from it.
+// Drawn as roads out of the question's hub: six round the hub on the
+// desk (WhyRoads, plan 163), a junction down the phone (Junction, plan
+// 168). `no` is the question's place on the line, which the hub prints.
 export default function WhyStep({ name, value, onChange, onContinue, no = null }) {
   const { t } = useLang()
   const desk = useDesk()
@@ -20,27 +21,63 @@ export default function WhyStep({ name, value, onChange, onContinue, no = null }
           <Emphasized text={t.brdWhyQ(name)} strongClassName="brd__q-em" />
         </BoardQuestion>
         <div className="brd__stage">
-          {desk ? <WhyRoads value={value} onChange={onChange} no={no} /> : (
-            <div className="brd__opts">
-              {MOTIVES.map((m, i) => (
-                <BoardOption
-                  key={m}
-                  pick={i + 1}
-                  on={value === m}
-                  onClick={() => onChange(m)}
-                  icon={<MotiveIcon motive={m} />}
-                  label={t.brdMotive[m]}
-                  data-motive={m}
-                />
-              ))}
-            </div>
-          )}
+          {desk ? <WhyRoads value={value} onChange={onChange} no={no} /> : <Junction value={value} onChange={onChange} no={no} />}
         </div>
       </div>
       <div className="brd__foot">
         <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
       </div>
     </>
+  )
+}
+
+// ── 辻 on a phone — the junction (plan 168) ──────────────────────
+// The owner's A02: the question's hub at the top of the stage, a trunk
+// down the middle, and at each of three rungs a road to a reason on
+// either side -- the pictogram in its ring, its name under it. The
+// reason picked lights the road from the hub to it, down the trunk and
+// out along its rung, and its ring, in the pass's gold.
+//
+// The drawing's own figures, on the canvas's 358px stage (brd-map, the
+// phone's map in index.css): the rows' rings' centres, and the two
+// columns' (each road runs to its ring's centre, under the ring). A row
+// every 140px, a rung more than the canvas's 134 (the owner's word on
+// the built screen): a name that wraps under its ring -- "Pour un voyage
+// au Japon" -- stands clear of the ring under it.
+const ROWS = [86, 226, 366]
+const SIDES = [85, 273]
+const HEIGHT = 452
+
+function Junction({ value, onChange, no }) {
+  const { t } = useLang()
+  const picked = MOTIVES.indexOf(value)
+  const on = picked >= 0
+    ? `M179 44V${ROWS[Math.floor(picked / 2)]}H${SIDES[picked % 2]}`
+    : null
+  return (
+    <div className="brd-map brd-junction" style={{ '--h': HEIGHT }}>
+      <svg className="brd-map__lines" viewBox={`0 0 358 ${HEIGHT}`} preserveAspectRatio="none" aria-hidden="true">
+        <path className="brd-road" d={`M179 22V${ROWS[2]}`} />
+        {ROWS.map(y => <path key={y} className="brd-road" d={`M${SIDES[0]} ${y}H${SIDES[1]}`} />)}
+        {on && <path className="brd-road brd-road--on" d={on} />}
+      </svg>
+      <span className="brd-hub brd-map__at" style={{ '--x': 179, '--y': 22 }} aria-hidden="true">{no}</span>
+      {MOTIVES.map((m, i) => (
+        <button
+          key={m}
+          type="button"
+          className="brd-way"
+          // Plain numbers, placed by the sheet: the ring's centre.
+          style={{ '--x': SIDES[i % 2], '--y': ROWS[Math.floor(i / 2)] }}
+          aria-pressed={value === m}
+          onClick={() => onChange(m)}
+          data-motive={m}
+        >
+          <span className="brd-way__ring"><MotiveGlyph motive={m} /></span>
+          <span className="brd-way__name">{t.brdMotive[m]}</span>
+        </button>
+      ))}
+    </div>
   )
 }
 

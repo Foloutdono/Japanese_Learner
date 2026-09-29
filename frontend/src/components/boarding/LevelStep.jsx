@@ -1,7 +1,7 @@
 import { useLang } from '../../LangContext'
 import { LEVELS, approx, goalStops, kanjiThrough } from '../../domain/boarding'
 import { BoardQuestion, Continue } from './BoardFrame'
-import { BoardOption, PickMark } from './BoardOption'
+import { PickMark } from './BoardOption'
 import { useDesk } from '../../hooks/useDesk'
 import { useBoxSize } from '../../hooks/useBoxWidth'
 
@@ -161,12 +161,91 @@ function ClimbLine({ stops, answers, at = null, value, onChange, label, attr, ca
   )
 }
 
-// A stop as the lists name it; the novice's is the kana's own sign on
-// the desk's line, where the row's dash would sit in a ring.
-function stopOf(t, lang, volumes, level, desk) {
+// ── 辻 on a phone — the line climbing (plan 168) ─────────────────
+// The owner's A03b and A04: the same line up the phone, a stop a rung --
+// the novice's, then N5 up to N1 -- climbing from the question's hub at
+// its foot, each stop a ring with its name and what it holds beside it.
+// The level inks the line up to the pick, the stops behind it filled,
+// and says "You are here" under it; the goal inks the line up to where
+// the learner stands, rides it in gold from there to the pick -- the
+// stops on the way ringed -- and says when it is reached.
+//
+// The canvas's figures, in px on the phone's map (brd-map): the top
+// stop's centre, the rung between stops, and the hub under the first.
+// Each stop steps 8px right of the one under it, the line leaning as
+// it climbs.
+const LEVEL_CLIMB = { h: 458, top: 46, rung: 66, foot: 62 }
+const GOAL_CLIMB = { h: 484, top: 46, rung: 70, foot: 68 }
+
+function climbPoints(shape) {
+  const stations = LINE.map((_, k) => [20 + 8 * k, shape.top + (LINE.length - 1 - k) * shape.rung])
+  return { hub: [12, stations[0][1] + shape.foot], stations, tip: [68, 0] }
+}
+const polyline = pts => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join('')
+
+//   stops   the six, in line order: { key, code, name, desc, tag }
+//   answers the keys that are answers here (the goal's: the stops ahead)
+//   at      the goal's: the stop the learner stands at (-1: the hub,
+//           short of the novice's own stop); null on the level
+//   note    what the pick says under it: "You are here", the arrival
+function Climb({ shape, stops, answers, at = null, value, onChange, label, attr, note, no }) {
+  const g = climbPoints(shape)
+  const pick = stops.findIndex(stop => stop.key === value)
+  const upTo = k => [g.hub, ...g.stations.slice(0, k + 1)]
+  // Inked as known: up to the pick on the level, up to where the learner
+  // stands on the goal -- and the goal's ride from there to the pick.
+  const known = at == null ? pick : at
+  const ride = at != null && pick > at ? g.stations.slice(Math.max(0, at), pick + 1) : null
+  return (
+    <div className="brd-map brd-climb" style={{ '--h': shape.h }} role="group" aria-label={label}>
+      <svg className="brd-climb__rails" viewBox={`0 0 80 ${shape.h}`} preserveAspectRatio="none" aria-hidden="true">
+        <path className="brd-climb__rail" d={polyline([g.hub, ...g.stations, g.tip])} />
+        {known >= 0 && <path className="brd-climb__rail brd-climb__rail--ink" d={polyline(upTo(known))} />}
+        {ride && <path className="brd-climb__rail brd-climb__rail--ink" d={polyline(at < 0 ? [g.hub, ...ride] : ride)} />}
+      </svg>
+      <span className="brd-hub brd-hub--sm brd-climb__hub" style={{ '--y': g.hub[1] }} aria-hidden="true">{no}</span>
+      {stops.map((stop, k) => {
+        const answer = answers.includes(stop.key)
+        const state = k === pick ? 'on'
+          : at == null ? (pick >= 0 && k < pick ? 'known' : null)
+            : k <= at ? 'known'
+              : k < pick ? 'ride' : null
+        const Tag = answer ? 'button' : 'span'
+        const own = answer
+          ? { type: 'button', 'aria-pressed': k === pick, onClick: () => onChange(stop.key), [attr]: stop.key }
+          : {}
+        return (
+          <Tag
+            key={stop.key}
+            className={`brd-stn${state ? ` brd-stn--${state}` : ''}`}
+            // Plain numbers, placed by the sheet: the ring's centre.
+            style={{ '--x': g.stations[k][0], '--y': g.stations[k][1] }}
+            {...own}
+          >
+            <span className={`brd-stn__ring${stop.key === 'novice' ? ' brd-stn__ring--jp' : ''}`} lang={stop.key === 'novice' ? 'ja' : undefined}>
+              {stop.code}
+            </span>
+            <span className="brd-stn__lab">
+              <span className="brd-stn__name">
+                {stop.name}
+                {stop.tag && <span className="brd-tag brd-stn__tag">{stop.tag}</span>}
+              </span>
+              <span className="brd-stn__desc">{stop.desc}</span>
+              {k === pick && note && <span className="brd-stn__note" aria-live="polite">{note}</span>}
+            </span>
+          </Tag>
+        )
+      })}
+    </div>
+  )
+}
+
+// A stop as the lines name it; the novice's is the kana's own sign in
+// its ring.
+function stopOf(t, lang, volumes, level) {
   return {
     key: level,
-    code: level === 'novice' ? (desk ? 'あ' : '—') : level,
+    code: level === 'novice' ? 'あ' : level,
     name: level === 'novice' ? t.brdNovice : t.levelName[level],
     desc: level === 'novice' ? t.brdLevelDesc.novice : t.brdLevelDesc[level](kanjiFigure(volumes, level, lang)),
     digit: levelDigit(level),
@@ -177,7 +256,7 @@ function stopOf(t, lang, volumes, level, desk) {
 export function LevelStep({ volumes, value, onChange, onContinue, no = null }) {
   const { t, lang } = useLang()
   const desk = useDesk()
-  const stops = LINE.map(level => stopOf(t, lang, volumes, level, desk))
+  const stops = LINE.map(level => stopOf(t, lang, volumes, level))
   return (
     <>
       <div className="brd__body">
@@ -197,20 +276,17 @@ export function LevelStep({ volumes, value, onChange, onContinue, no = null }) {
               />
             )
             : (
-              <div className="brd__opts">
-                {stops.map(stop => (
-                  <BoardOption
-                    key={stop.key}
-                    on={value === stop.key}
-                    onClick={() => onChange(stop.key)}
-                    code={stop.code}
-                    label={stop.name}
-                    desc={stop.desc}
-                    pick={stop.digit}
-                    data-level={stop.key}
-                  />
-                ))}
-              </div>
+              <Climb
+                shape={LEVEL_CLIMB}
+                stops={stops}
+                answers={LINE}
+                value={value}
+                onChange={onChange}
+                label={t.brdLevelQ}
+                attr="data-level"
+                note={t.levelCurrentMark}
+                no={no}
+              />
             )}
         </div>
       </div>
@@ -239,12 +315,11 @@ export function GoalStep({ volumes, level, kana, value, onChange, onContinue, ar
   const ahead = goalStops(level, kana)
   const fromStart = ahead[0] === 'novice'
   const from = level === 'novice' ? t.brdNovice : level
-  const tagged = stop => ({ ...stopOf(t, lang, volumes, stop, desk), tag: stop === ahead[0] ? t.brdNextStop : null })
-  const stops = ahead.map(tagged)
+  const tagged = stop => ({ ...stopOf(t, lang, volumes, stop), tag: stop === ahead[0] ? t.brdNextStop : null })
   return (
     <>
       <div className="brd__body">
-        <BoardQuestion hint={fromStart ? t.brdGoalHintStart : t.brdGoalHint(from)}>{t.brdGoalQ}</BoardQuestion>
+        <BoardQuestion hint={desk ? (fromStart ? t.brdGoalHintStart : t.brdGoalHint(from)) : null}>{t.brdGoalQ}</BoardQuestion>
         <div className="brd__stage">
           {desk
             ? (
@@ -263,21 +338,18 @@ export function GoalStep({ volumes, level, kana, value, onChange, onContinue, ar
               />
             )
             : (
-              <div className="brd__opts">
-                {stops.map(stop => (
-                  <BoardOption
-                    key={stop.key}
-                    on={value === stop.key}
-                    onClick={() => onChange(stop.key)}
-                    code={stop.code}
-                    label={stop.name}
-                    tag={stop.tag}
-                    desc={stop.desc}
-                    pick={stop.digit}
-                    data-goal={stop.key}
-                  />
-                ))}
-              </div>
+              <Climb
+                shape={GOAL_CLIMB}
+                stops={LINE.map(tagged)}
+                answers={ahead}
+                at={LINE.indexOf(ahead[0]) - 1}
+                value={value}
+                onChange={onChange}
+                label={t.brdGoalQ}
+                attr="data-goal"
+                note={arrival ? `${t.statusArrival} · ${arrival}` : null}
+                no={no}
+              />
             )}
         </div>
       </div>

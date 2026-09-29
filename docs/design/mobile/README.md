@@ -436,9 +436,60 @@ body's own `--sp-5`, before the body will scroll. `--center` bodies are centred
 by a pair of grow-only spacers for the same reason — a centred flex line that
 outgrows its box spills off both ends and no scroll reaches back over the top
 of it. Pinned in `boarding.phone.test.jsx`, which shortens the frame to the
-phones the artboard is not.
+phones the artboard is not. (Plan 168 retired this rhythm: see below.)
 
-## What retired with it
+## The boarding drawn as maps (plan 168)
+
+The owner's pick A of the canvas "Onboarding on the phone", built as drawn;
+the desk keeps plan 163's drawings. ‹ and the track at the head, the gate
+docked at the foot, and between them each question set centred over its
+drawing, the pair on the room's middle: auto margins over the question and
+under the stage (`.brd__body > .brd__q`, `> .brd__stage`), and between them
+`.brd__air`, BoardQuestion's spacer, --sp-8 at rest and shrinking to the
+body's gap before anything scrolls (the owner's word on the first build,
+which pinned the question under the head, ranged left). A drawing is laid
+on the canvas's 358px stage: `.brd-map` is as tall as its `--h` (times
+`--ys`, 0.86 on a frame under 740px), a point is `--x` across as a share of
+the stage and `--y` down in px, each a plain number set by its component,
+the lines an SVG stretched over the stage with their strokes kept at their
+width.
+
+| Class | Drawing | Component |
+|---|---|---|
+| `.brd` (`--arrival`: no head), `.brd__stop` (`--passed`, `--here`), `.brd__air`, `.brd-map` (`__lines`, `__at` `--start`/`--corner`/`--top`), `.brd-road` (`--on`), `.brd-hub` (`--sm`, `--md`) | the frame, the track, the rung under a question, the map, a question's hub | `screens/BoardingFlow.jsx`, `BoardFrame.jsx` (`BoardQuestion`, `BoardAir`) |
+| `.brd-front` (`--auth`, `__head`, `__door`, `__door-btn`, `__promise`, `__map`, `__roads`, `__road`, `__way`, `__stn` `--over`/`--under`, `__sign`, `__name`, `__hub`, `__foot`), `.brd-tagline`; `.brd-signin` (`__stage`, `__road`, `__map`, `__sign`, `__hub`, `__form`, `__card`, `__gate`: its action, the boarding's gate, the road running into its reader) | the Welcome as the crossroads; the sign-in in the promise's place | `Welcome.jsx`'s `PhoneWelcome`, `FrontMap`, `PhoneSignIn` over `AuthCard`'s `frame` |
+| `.brd-name` (`__line`, `__pole`, `__hub`, `__road`, `__next`, `__ring`, `__lab`), `.brd-plate` (`__field`, `__count`, `__stripe`) | the name: the station's plate on its pole | `NameStep.jsx` |
+| `.brd-junction`, `.brd-way` (`__ring`, `__name`) | why: six reasons off one trunk, a row every 140px (the canvas's 134 and a rung, so a name that wraps clears the ring under it) and drawn short only under a 680px frame | `WhyStep.jsx`'s `Junction` |
+| `.brd-cross` (`__words`, `__ans`, `__chips`, `__chip` `--not`, `__label`, `__jp`, `__sub`) | the kana: two words at a crossing, an answer at each end | `KanaStep.jsx`'s `Crossing` |
+| `.brd-read` (`__line`, `__head`, `__word`, `__script`, `__glyph`, `__sign`, `__sign-jp`, `__sound`, `__means`, `__cap`, `__word-fr`), `.brd-first` (`__ring`, `__txt`) | the reveal: each word read as a line, the first stop | `KanaStep.jsx`'s `ReadLines` |
+| `.brd-climb` (`__rails`, `__rail` `--ink`, `__hub`), `.brd-stn` (`--known`, `--ride`, `--on`, `__ring` `--jp`, `__lab`, `__name`, `__desc`, `__note`, `__tag`) | the level and the goal: the line climbing | `LevelStep.jsx`'s `Climb` |
+| `.brd-fan` (`__trunk`, `__road` `--off` with `[data-road]`, `__kana`, `__ticket`), `.brd-lcard` (`__chk`, `__ring`, `__name`, `__desc`, `__vol`, `__fig`, `__unit`), `.brd-arrive` (`--none`) | the lines: the kana into the hub, three lines out | `LinesStep.jsx`'s `LineFan` |
+| `.brd-trains` (`__cols`, `__head`, `__first`), `.brd-train` (`__svc`, `__jp`, `__name`, `__tag`, `__min`, `__fig`, `__new`, `__arr`, `__date`, `__days`) | the rhythm: four trains on the departure board | `RhythmStep.jsx`'s `DepartureBoard` |
+| `.brd-clock` on `.brd-board` (`__steps`, `__step`, `__when`), `.brd-hours`, `.brd-hour` (`__jp`, `__name`, `__time`) | the hour: the flap board turned by hand | `TimeStep.jsx`'s `HourBoard` |
+| `.brd-nudge`, `.brd-notif` (`__name`), `.brd-week` (`__drop`, `__road`, `__day` `--first`, `__bell`, `__cap`, `__name`, `__date`) | the nudge: the notification and the week it arrives in | `NudgeStep.jsx`'s `Week` |
+| `.brd-plan` (`__arrive`, `__cap`, `__date`, `__day`, `__year`, `__sub`), `.brd-ride` (`__line`, `__stop`, `__lab`), `.brd-held` (`__cell`, `__jp`, `__fig`, `__unit`), `.brd-for` | the plan: the arrival first, the ride, what it holds | `PlanStep.jsx`'s `Arrival` |
+| `.brd-keep` (`__skip`, `__note`, `__skip-btn`), `.brd-tk` (`__map`, `__ride`, `__stop`, `__ring`, `__terms`, `__stub`, `__credits`, `__punch`), `.brd-provider`, `.brd-fld` | the account: the ticket it keeps over the form | `AccountStep.jsx`, `PaperTicket.jsx`'s `RideTicket` |
+| `.brd-issue-stn`, `.brd-issue__road`, `.brd__foot--road` | the pass over the gate's reader | `PassStep.jsx` |
+
+Building is gone on the phone as on the desk: the hour (or the nudge) goes
+on to the plan under its 案内 signboard, and the reveal is the kana stop's
+second half on the track. The way on is one gate on every screen, the
+foot's last row, so it stands in one place from Board to the pass; a quiet
+way (the sign-in, Not now, the account already held, the offer) stands a
+rung over it as a `.brd__link` (DESIGN.md, "The gate button"). Pinned in `boarding.phone.test.jsx` (the frame,
+the junction, the crossing, the boards, the crossroads and the sign-in),
+`BoardingFlow.browser.test.jsx` (the walk and its stops),
+`BoardingFlow.touch.test.jsx` (every question at 390x667 without a scroll),
+`Welcome.browser.test.jsx` and the contrast guard's boarding sites.
+
+Retired with it: `screens/AuthScreen.jsx` (`.auth`, `.auth__head`,
+`.auth-header*`), `Building.jsx` (`.brd-build*`, `.brd-steps`, `.brd-step*`),
+`demoCards.js` and the rolling stock (`.brd-hero`, `.brd-roll*`,
+`.brd-demo*`), `BoardOption` (`.brd__opts`, `.brd-opt*`), the kana card (`.brd-kana*`), the day track (`.brd-day*`),
+the chart (`.brd-chart*`, `.brd-legend*`, `.brd-lead*`, `.brd-bullet*`) and
+their locale keys.
+
+## What retired with the plan 075 boarding
 
 `screens/OnboardingFlow.jsx` (the ticket office and its five scenes),
 `screens/LandingScreen.jsx` (`.landing*`), `components/onboarding/FirstRide.jsx`,

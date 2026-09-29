@@ -18,11 +18,12 @@
 // the only thing that changes is where the line is allowed to end.
 //
 // Welding the TABLE rather than the 63 strings that needed it is the
-// point. The sentence that broke is assembled at call time
+// point. The sentence that broke was assembled at call time
 //
 //     brdLead: (min, date, purpose) => `… ${purpose} :`
 //
-// from a fragment held under another key, so a table full of
+// from a fragment held under another key (as brdForLine, which took
+// its place in plan 168, still is), so a table full of
 // hand-typed NBSPs would still have printed an orphan colon the day
 // someone wrote a new one. Here the rule applies to the string the
 // learner actually gets, whenever it is built, and locales.test.js

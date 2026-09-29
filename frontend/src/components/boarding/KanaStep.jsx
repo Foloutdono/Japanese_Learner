@@ -19,27 +19,6 @@ const WORDS = [
   { jp: 'ホテル', romaji: 'ho · te · ru', word: 'hotel', script: 'katakana', signs: [['ホ', 'ho'], ['テ', 'te'], ['ル', 'ru']], glyph: 'ア' },
 ]
 
-function KanaCard({ reveal = false, t }) {
-  return (
-    <div className="brd-kana">
-      {WORDS.map((w, i) => (
-        <div className="brd-kana__pane" key={w.script}>
-          <span className="brd-kana__jp" lang="ja">{w.jp}</span>
-          {reveal && (
-            <>
-              <span className={`brd-kana__read${i ? ' brd-kana__read--second' : ''}`}>
-                <span className="brd-kana__romaji">{w.romaji}</span>
-                <span className="brd-kana__en">{t.brdKanaWord[w.word]}</span>
-              </span>
-              <span className="brd-kana__script">{t.brdKana[w.script]}</span>
-            </>
-          )}
-        </div>
-      ))}
-    </div>
-  )
-}
-
 export function KanaStep({ value, onAnswer }) {
   const { t } = useLang()
   // 机 (plan 122): 1-4 answer, as a tap does.
@@ -49,27 +28,7 @@ export function KanaStep({ value, onAnswer }) {
       <div className="brd__body">
         <BoardQuestion hint={desk ? t.brdKanaHint : null}>{t.brdKanaQ}</BoardQuestion>
         <div className="brd__stage">
-          {desk ? <KanaTree value={value} onAnswer={onAnswer} /> : (
-            <>
-              <KanaCard t={t} />
-              <div className="brd-grid" role="group" aria-label={t.brdKanaQ}>
-                {KANA_ANSWERS.map(a => (
-                  <button
-                    key={a}
-                    type="button"
-                    className={`brd-kopt${value === a ? ' brd-kopt--on' : ''}`}
-                    aria-pressed={value === a}
-                    onClick={() => onAnswer(a)}
-                    data-kana={a}
-                  >
-                    <span className="brd-kopt__label">{t.brdKana[a]}</span>
-                    {a === 'hiragana' && <span className="brd-kopt__jp" lang="ja">{WORDS[0].jp}</span>}
-                    {a === 'katakana' && <span className="brd-kopt__jp" lang="ja">{WORDS[1].jp}</span>}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          {desk ? <KanaTree value={value} onAnswer={onAnswer} /> : <Crossing value={value} onAnswer={onAnswer} />}
         </div>
       </div>
       {/* No Continue here, so no floor on a phone; the desk's way back. */}
@@ -95,10 +54,10 @@ const only = { hiragana: WORDS[0].jp, katakana: WORDS[1].jp }
 
 // The Japanese in a label set as Japanese: the table places the word
 // ("Only すし", "Seulement すし") and it is marked where it falls.
-function withJa(text, jp) {
+function withJa(text, jp, className = 'desk-brd__jp') {
   const at = text.indexOf(jp)
   if (at < 0) return text
-  return <>{text.slice(0, at)}<span className="desk-brd__jp" lang="ja">{jp}</span>{text.slice(at + jp.length)}</>
+  return <>{text.slice(0, at)}<span className={className} lang="ja">{jp}</span>{text.slice(at + jp.length)}</>
 }
 
 function KanaTree({ value, onAnswer }) {
@@ -148,8 +107,59 @@ function KanaTree({ value, onAnswer }) {
   )
 }
 
-// `first` is the desk's: the kana's stop, { date, min } -- when the
-// signs still unread are read by, and at what pace.
+// ── 辻 on a phone — the crossing (plan 168) ──────────────────────
+// The owner's A03: 辻 itself, two roads crossing, the two words where
+// they meet, and an answer at each road's end -- drawn as what it reads
+// (the words again, solid for a word read and dashed for one not yet),
+// over what it says in words and what that is called. The answer picked
+// before, come back to by Back, is lit.
+//
+// On the canvas's 358px stage (brd-map): the answers two by two, the
+// roads from one's centre to the one across.
+const CORNERS = [[81.5, 73], [276.5, 73], [81.5, 457], [276.5, 457]]
+
+function Crossing({ value, onAnswer }) {
+  const { t } = useLang()
+  return (
+    <div className="brd-map brd-cross" style={{ '--h': 530 }}>
+      <svg className="brd-map__lines" viewBox="0 0 358 530" preserveAspectRatio="none" aria-hidden="true">
+        <path className="brd-road" d="M81.5 73L276.5 457" />
+        <path className="brd-road" d="M276.5 73L81.5 457" />
+      </svg>
+      <p className="brd-cross__words brd-map__at" style={{ '--x': 179, '--y': 265 }} lang="ja">
+        {WORDS.map(w => <span key={w.script}>{w.jp}</span>)}
+      </p>
+      <div role="group" aria-label={t.brdKanaQ}>
+        {KANA_ANSWERS.map((a, i) => (
+          <button
+            key={a}
+            type="button"
+            className="brd-cross__ans brd-map__at"
+            // Plain numbers, placed by the sheet: the answer's centre.
+            style={{ '--x': CORNERS[i][0], '--y': CORNERS[i][1] }}
+            aria-pressed={value === a}
+            onClick={() => onAnswer(a)}
+            data-kana={a}
+          >
+            <span className="brd-cross__chips" aria-hidden="true">
+              {WORDS.map((w, j) => (
+                <span key={w.script} className={`brd-cross__chip${READS[a][j] ? '' : ' brd-cross__chip--not'}`} lang="ja">{w.jp}</span>
+              ))}
+            </span>
+            <span className="brd-cross__label">
+              {a === 'hiragana' || a === 'katakana' ? withJa(t.brdKanaOnly(only[a]), only[a], 'brd-cross__jp') : t.brdKana[a]}
+            </span>
+            <span className="brd-cross__sub">{t.brdKanaSays[a]}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// `first` is the kana's stop, { date, min } -- when the signs still
+// unread are read by, and at what pace -- or null until the volumes
+// that price it have answered.
 export function KanaReveal({ onContinue, first = null }) {
   const { t } = useLang()
   const desk = useDesk()
@@ -158,12 +168,7 @@ export function KanaReveal({ onContinue, first = null }) {
       <div className="brd__body">
         <BoardQuestion hint={desk ? t.brdRevealLead : null}>{t.brdRevealQ}</BoardQuestion>
         <div className="brd__stage">
-          {desk ? <RevealWords first={first} /> : (
-            <>
-              <KanaCard reveal t={t} />
-              <p className="brd__hint">{t.brdRevealHint}</p>
-            </>
-          )}
+          {desk ? <RevealWords first={first} /> : <ReadLines first={first} />}
         </div>
       </div>
       <div className="brd__foot">
@@ -212,6 +217,59 @@ function RevealWords({ first }) {
         <p className="desk-brd__first">
           <span className="desk-brd__glyph desk-brd__glyph--stop" lang="ja" aria-hidden="true">あ</span>
           <span><Emphasized text={t.brdRevealFirst(first.date, first.min)} /></span>
+        </p>
+      )}
+    </>
+  )
+}
+
+// ── 辻 on a phone — each word read as a line (plan 168) ──────────
+// The owner's A03b: each word as a little line of its own, under its
+// script's name -- its signs the stations, each with its sound under it,
+// running on to what the word means at the line's end -- and under the
+// two, the first stop: the kana, and the day the signs still unread are
+// read by at the ride's pace.
+//
+// On the canvas's 358px stage (brd-map): a line every 144px, its signs
+// every 72px from the left, the meaning at the terminus.
+const LINE_AT = [66, 210]
+const SIGN_X = [44, 116, 188]
+
+function ReadLines({ first }) {
+  const { t } = useLang()
+  return (
+    <>
+      <div className="brd-map brd-read" style={{ '--h': 294 }}>
+        <svg className="brd-map__lines" viewBox="0 0 358 294" preserveAspectRatio="none" aria-hidden="true">
+          {LINE_AT.map(y => <path key={y} className="brd-read__line" d={`M20 ${y}H232`} />)}
+        </svg>
+        {WORDS.map((w, i) => {
+          const y = LINE_AT[i]
+          return (
+            <div key={w.script} className="brd-read__word">
+              <p className="brd-read__script brd-map__at brd-map__at--start" style={{ '--x': 0, '--y': y - 53 }}>
+                <span className="brd-read__glyph" lang="ja" aria-hidden="true">{w.glyph}</span>
+                {t.brdKana[w.script]}
+              </p>
+              <span className="brd-read__head brd-map__at" style={{ '--x': 237, '--y': y }} aria-hidden="true" />
+              {w.signs.map(([kana, sound], j) => (
+                <span key={kana} className="brd-read__sign brd-map__at" style={{ '--x': SIGN_X[j], '--y': y }}>
+                  <span className="brd-read__sign-jp" lang="ja">{kana}</span>
+                  <span className="brd-read__sound">{sound}</span>
+                </span>
+              ))}
+              <p className="brd-read__means brd-map__at brd-map__at--corner" style={{ '--x': 254, '--y': y - 22 }}>
+                <span className="brd-read__cap"><span lang="ja">{w.jp}</span> {t.brdRevealMeans}</span>
+                <b className="brd-read__word-fr">{t.brdRevealWord(t.brdKanaWord[w.word])}</b>
+              </p>
+            </div>
+          )
+        })}
+      </div>
+      {first && (
+        <p className="brd-first">
+          <span className="brd-first__ring" lang="ja" aria-hidden="true">あ</span>
+          <span className="brd-first__txt"><Emphasized text={t.brdRevealFirst(first.date, first.min)} /></span>
         </p>
       )}
     </>

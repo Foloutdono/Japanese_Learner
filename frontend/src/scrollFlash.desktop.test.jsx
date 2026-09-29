@@ -88,14 +88,15 @@ describe('a boarding step on the desk', () => {
       </main>
     )
   }
+  // The answers as the desk draws them (plan 163): one drawing standing
+  // on the stage, which arrives a rung low.
   const answers = (
     <div className="brd__body">
       <h1 className="brd__q">Pourquoi ?</h1>
-      <div className="brd__air" />
       <div className="brd__stage">
-        <div className="brd__opts">
+        <div className="desk-brd__roads">
           {['Anime', 'Voyage', 'Travail', 'Famille', 'Culture', 'Autre'].map(a => (
-            <button type="button" className="brd-opt" key={a}><span className="brd-opt__names">{a}</span></button>
+            <button type="button" className="desk-brd__way" key={a}><span className="desk-brd__way-name">{a}</span></button>
           ))}
         </div>
       </div>
@@ -106,7 +107,7 @@ describe('a boarding step on the desk', () => {
   it('prints no scrollbar while its answers arrive', async () => {
     await render(<Step>{answers}</Step>)
     firstFrame()
-    expect(getComputedStyle(document.querySelector('.brd-opt:last-child')).transform).not.toBe('none')
+    expect(getComputedStyle(document.querySelector('.brd__stage > :last-child')).transform).not.toBe('none')
     expect(overflowY(body())).toBeLessThanOrEqual(0)
   })
 
@@ -115,7 +116,6 @@ describe('a boarding step on the desk', () => {
       <Step step="pass">
         <div className="brd__body">
           <div className="brd-offer"><h1 className="brd__q">Ta carte est prête.</h1></div>
-          <div className="brd__air" />
           <div className="brd__stage"><div className="brd-issue"><div style={{ height: 220 }}>pass</div></div></div>
         </div>
       </Step>
@@ -131,7 +131,7 @@ describe('a boarding step on the desk', () => {
     await render(<Step>{answers}</Step>)
     landed()
     const main = document.querySelector('main').getBoundingClientRect()
-    const last = document.querySelector('.brd-opt:last-child').getBoundingClientRect()
+    const last = document.querySelector('.brd__stage > :last-child').getBoundingClientRect()
     const foot = document.querySelector('.brd__foot').getBoundingClientRect()
     expect(Math.round(main.bottom - foot.bottom)).toBe(cssPx('--sp-7'))
     expect(last.bottom).toBeLessThan(foot.top)
