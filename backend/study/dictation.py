@@ -271,7 +271,7 @@ def pick(level: str, count: int, exclude: set[str], rng=random) -> list[dict]:
     in a fresh order.
 
     Falls back to the excluded ones rather than returning nothing: the
-    bank is finite (18-20 lines a level), and a learner who has worked
+    bank is finite (30-32 lines a level, plan 111), and a learner who has worked
     through it should be given it again rather than an empty screen.
     Already-heard lines come last, so the fallback only shows once the
     fresh ones are gone."""
@@ -279,8 +279,9 @@ def pick(level: str, count: int, exclude: set[str], rng=random) -> list[dict]:
         return []
     rows = list(BY_LEVEL[level])
     rng.shuffle(rows)
-    fresh = [r for r in rows if clip_id(r["jp"]) not in exclude]
-    heard = [r for r in rows if clip_id(r["jp"]) in exclude]
+    fresh, heard = [], []
+    for r in rows:
+        (heard if clip_id(r["jp"]) in exclude else fresh).append(r)
     return (fresh + heard)[:count]
 
 
