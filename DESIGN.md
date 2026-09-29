@@ -842,9 +842,11 @@ So:
   padding or a margin — the rung is then a maximum, collapsing (never past the
   container's own gap) until the room runs out, and only a screen genuinely
   too short for its content scrolls. The boarding's frame is the worked
-  example (`.brd__body::before`, `.brd__air`), and centring a body that might
-  overflow takes a pair of grow-only spacers, never `justify-content: center`,
-  whose overflow spills off both ends with the top unreachable.
+  example (a question's drawing stands on auto margins, `.brd__body >
+  .brd__stage`, and a short frame draws it shorter, `--ys`, before anything
+  scrolls), and centring a body that might overflow takes auto margins or a
+  pair of grow-only spacers, never `justify-content: center`, whose overflow
+  spills off both ends with the top unreachable.
 
 ## Motion
 
@@ -1091,6 +1093,28 @@ a learner who has just rated one card is already looking for the next.
   cross-fade. Under reduced motion only the rest state is drawn. (The
   desk pulls a shorter way; see *The desk*, "First contact is the
   crossroads".)
+- **On a phone the boarding is drawn as maps** (plan 167; the owner's pick
+  A of the canvas "Onboarding on the phone"). The frame never moves: ‹ and
+  the track at the head — a stop per question, the reveal the kana's
+  second half, the level a stop only for a reader of both scripts — the
+  question a rung under it at the top-left, the gate docked at the foot.
+  Between them each question draws its answers as roads out of a hub
+  numbered as its stop — the name's plate on a pole, a junction of six
+  reasons, the two words at a crossing, the line climbing through the
+  levels, three lines fanning out of the kana — or as the thing they are:
+  a departure board of four trains, the flap board turned by hand over its
+  three services, a week of bells, the arrival first with the ride under
+  it, the ticket an account keeps, the pass over the gate's reader. The
+  Welcome is the crossroads: 辻 in its hub, the app's seven lines out of
+  it and the gold road down into Board's reader; Log in draws the sign-in
+  in the promise's place, the crossroads smaller over it and the road
+  round the form into its action. Building is gone: the hour (or the
+  nudge) goes on to the plan under its signboard, and the three arrival
+  screens stand with no head. A drawing is laid on the canvas's 358px
+  stage and scaled to the phone (`.brd-map`: a point's x a share of the
+  width, its y in px), and a short frame draws it shorter (`--ys`) before
+  anything scrolls. A pick is the pass's gold: its road, its ring, a wash
+  under it with the gold a rung deeper as ink on it.
 - The chrome's tokens: `--hud-h` (48px), `--tabbar-h` (50px),
   `--dock-bottom`, and the desk's `--desk-rail-w` (256px). The class map
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
@@ -1688,8 +1712,8 @@ each question drawing its answers between them.
     wells, its own action where Board stood, ‹ back to the promise under
     it — and the corner then offers Board. A pass that could not be issued
     opens it on Sign up, both sides named. The drawing is the paper's own:
-    the lines as long as the paper leaves them. The rolling stock is the
-    phone's.
+    the lines as long as the paper leaves them. The phone draws its own
+    crossroads down the screen (plan 167).
   - *Three places never move.* The question at the paper's top-left
     corner at the display rung; the journey a strip of named stops at the
     floor's left end, on the line Back and Continue stand on (the ones

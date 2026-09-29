@@ -1119,7 +1119,30 @@ runtime purpose. Two consequences worth knowing:
   `GateCard.browser.test.jsx`, `screens/TodayScreen.browser.test.jsx`,
   `src/deskfree.phone.test.jsx`, `src/today.wide.test.jsx` and
   `index.css`; DESIGN.md, "The gate button"; `docs/design/mobile/README.md`).
-  When starting a new wave, begin at **167** or higher, and check
+  **167** is 辻 on a phone, the boarding drawn as maps (numbered 167
+  because 166 went to 一押し, Today on the phone, while it was open; the
+  owner's pick A of the canvas "Onboarding on the phone", built as
+  drawn, the desk keeping plan 163's): the frame that never moves -- ‹
+  and the track at the head, the reveal the kana stop's second half and
+  the level a stop only for a reader of both, the question a rung under
+  it at the top-left, the gate at the foot -- and each question's answers
+  drawn on the canvas's 358px stage (`.brd-map`, shorter under 740px by
+  `--ys`): the name's plate on a pole, a junction of six reasons, the two
+  words at a crossing and each read out as a line, the line climbing
+  through the levels, three lines fanning out of the kana, four trains on
+  a departure board, the flap board turned by hand (`firstDeparture`), a
+  week of bells, the arrival first with the ride under it, the ticket an
+  account keeps (`RideTicket`), the pass over the gate's reader; the
+  Welcome as the crossroads and the sign-in in its place
+  (`screens/AuthScreen.jsx` retired); Building gone, the hour going on
+  to the plan; a pick's gold a rung deeper on its wash (`--brd-wash-ink`)
+  (cited in `screens/BoardingFlow.jsx`, `App.jsx`, `components/boarding/`,
+  `components/account/ClaimAccount.jsx`, `domain/boarding.js`,
+  `src/boarding.phone.test.jsx`, `src/frontdoor.phone.test.jsx`,
+  `screens/BoardingFlow.browser.test.jsx`, `BoardingFlow.touch.test.jsx`,
+  `src/contrast.browser.test.jsx` and `index.css`; DESIGN.md, Structure;
+  `docs/design/mobile/README.md`).
+  When starting a new wave, begin at **168** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
