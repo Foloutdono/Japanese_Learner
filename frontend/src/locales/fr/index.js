@@ -1809,11 +1809,9 @@ const boarding = {
   // refusable. « Garder » plutôt que « créer » : la progression
   // existe déjà, on ne fait qu'y mettre une clé (lib/guest.js).
   brdAccountQ: 'Garde ta progression.',
-  brdAccountHint: 'Ton parcours est déjà enregistré. Un compte te permet de le retrouver sur un autre appareil — et de ne pas le perdre en changeant de téléphone.',
   brdAccountCreate: 'Créer mon compte',
   brdAccountSkip: 'Continuer sans compte',
   // 辻 (plan 163): the desk's account, beside the ticket it keeps.
-  brdAccountHintDesk: 'Ton billet est prêt. Un compte le garde, sur tous tes appareils.',
   brdTicketKind: 'Billet · Tsuji',
   brdIssued: (date) => `Émis le ${date}`,
   brdCreditsOffered: 'crédits offerts',
@@ -1981,7 +1979,6 @@ const boarding = {
   brdEnter: 'Entrer en gare',
   // 辻 (plan 163): the desk's plan, the ride drawn to scale -- its stops'
   // days and names, what the terminus holds, what the ride is for.
-  brdPlanHint: (min, purpose) => `À ${min} min par jour, ${purpose}.`,
   brdInDays: (n) => (n === 1 ? 'demain' : `dans ${n} jours`),
   brdEvery: { am: 'chaque matin', noon: 'chaque midi', pm: 'chaque soir' },
   brdAtTime: (every, time) => `${every} à ${time}`,

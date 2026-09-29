@@ -20122,26 +20122,38 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   padding-inline: var(--sp-5);
 }
 
-/* ── The question at the top-left, its answers in the room left ──
-   Plan 167, the owner's pick A of the canvas "Onboarding on the phone":
-   the frame never moves. The question stands at the head's foot, at
-   the display rung and ranged left, its hint under it; the answers --
-   drawn as the thing they are, a plate, a junction, a line climbing --
-   stand in the middle of the room between the question and the docked
-   foot. Auto margins rather than justify-content: a stage taller than
-   its room keeps its top, and the body scrolls (the scrim below says
-   there is more). The desk centres its answers the same way (the 机
-   section's `.desk-brd .brd__body > .brd__stage`).
+/* ── The question over its drawing, the pair on the room's middle ──
+   Plan 167, the owner's pick A of the canvas "Onboarding on the phone",
+   then the owner's word on the built screens: the titles centred, and
+   not always at the top of the screen -- the room spent round the
+   question and its answers rather than between them. The question is
+   set centred, its hint under it, and stands a rung over its answers,
+   drawn as the thing they are -- a plate, a junction, a line climbing;
+   the two stand as one block in the middle of the room between the head
+   and the docked foot. Auto margins over the question and under the
+   answers, never justify-content: a block taller than its room keeps its
+   top, and the body scrolls (the scrim below says there is more).
 
-   Until plan 167 the question and its answers stood as ONE block on the
-   centre line, with grow-only spacers at the body's two ends and a rung
-   of air under the question that gave way first; the question's top
-   moved on every screen (300px down on the name, 110 on the reasons),
-   which is the first thing the canvas's review said was wrong. */
+   The rung is `.brd__air`, BoardQuestion's spacer: --sp-8 at rest, and
+   it SHRINKS, down to the body's own gap, before the body scrolls -- a
+   maximum, not a fixed pad (DESIGN.md, "Air gives way before content
+   does"). A spacer rather than a margin because a margin never gives up
+   its height; it cancels the gap it stands behind, so what is drawn at
+   rest is exactly the rung. It is what keeps the rung on a phone with a
+   notch and a home bar, whose frame is under 740px and so on the short
+   step below. The desk keeps its question at the paper's top-left
+   corner, draws no air and centres its answers alone (the 机 section's
+   `.desk-brd .brd__body > .brd__q`, `> .brd__air` and `> .brd__stage`).
+
+   Plan 167's first build pinned the question under the head, ranged
+   left, and centred the answers alone in the room it left, so a short
+   question stood over a gulf; before it, plan 075's block had stood on
+   the centre line between grow-only spacers at the body's two ends. */
 .brd__stage { flex: none; display: flex; flex-direction: column; gap: var(--sp-6); }
-.brd__body > .brd__stage { margin-block: auto; }
-/* The arrival screens stand with no head: the question keeps the rung
-   under the frame's top a question keeps under the head. */
+.brd__air { flex: 0 1 calc(var(--sp-8) - var(--sp-5)); margin-top: calc(-1 * var(--sp-5)); }
+.brd__body > .brd__stage { margin-bottom: auto; }
+/* The arrival screens stand with no head: the room starts a rung under
+   the frame's top. */
 .brd--arrival .brd__body { padding-top: var(--sp-4); }
 
 .brd__head { display: flex; align-items: center; gap: var(--sp-4); height: 44px; flex: none; }
@@ -20206,17 +20218,19 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   font-weight: 700;
   font-size: var(--fs-display-fluid);
   line-height: 1.18;
-  text-align: start;
-  text-wrap: pretty;
+  text-align: center;
+  text-wrap: balance;
   outline: none;
   animation: brd-in 360ms ease-out backwards;
 }
+/* The room over the question: the pair on the room's middle (above). */
+.brd__body > .brd__q { margin-top: auto; }
 /* Gold text on paper reads at ~3.4:1 in light theme; the name in a
    question, a kana's meaning, are mixed toward the ambient ink (the
    same move the status inks make on sumi). */
 .brd__q-em { font-weight: 700; color: color-mix(in srgb, var(--accent2) 65%, var(--text-primary)); }
 /* The hint a short rung under its question (the body's gap, less). */
-.brd__hint { margin: calc(var(--sp-3) - var(--sp-5)) 0 0; font-size: var(--fs-body); line-height: 1.45; text-align: start; color: var(--text-secondary); }
+.brd__hint { margin: calc(var(--sp-3) - var(--sp-5)) 0 0; font-size: var(--fs-body); line-height: 1.45; text-align: center; text-wrap: balance; color: var(--text-secondary); }
 .brd__error { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-align: start; color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
 /* The gate, and a quiet way under it where a screen has one (plan 167:
    the sign-in on the name and the account, Not now on the nudge), a
@@ -21184,7 +21198,6 @@ button.brd-stn { cursor: pointer; }
 .brd-for strong::before { content: "\A"; white-space: pre; }
 
 /* ── Compte: the ticket the account keeps, the form under it ── */
-.brd__body > .brd__stage--top { margin-block: var(--sp-5) auto; }
 .brd-keep { display: flex; flex-direction: column; gap: var(--sp-4); }
 .brd-keep__skip { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); margin: 0; }
 .brd-keep__note { font-size: var(--fs-sm); line-height: 1.35; color: var(--text-secondary); }
@@ -21300,12 +21313,16 @@ button.brd-stn { cursor: pointer; }
 }
 
 /* ── La carte: the pass over the gate's reader ──
-   The stage takes the room under the question, the pass on its middle
-   and a road in the pass's metal from it down to the room's foot; the
-   gate's foot draws the rest of the road, over the gap between the two,
-   into the reader (32px in: the gate's --sp-3 and half its reader). */
-.brd__body > .brd__stage.brd-issue-stn { flex: 1 0 auto; gap: 0; margin-block: 0; }
-.brd-issue-stn::before { content: ""; flex: 1 0 var(--sp-5); }
+   The question over the pass as every question over its drawing, its
+   air between them, and a road in the pass's metal from the pass down to the
+   room's foot; the gate's foot draws the rest of the road, over the gap
+   between the two, into the reader (32px in: the gate's --sp-3 and half
+   its reader). The stage grows to the foot -- the road with it -- so an
+   auto margin over the question would be left nothing: the room over
+   the question is a spacer growing alike, and the pair stands on the
+   room's middle with the road for its lower half. */
+.brd__body:has(> .brd-issue-stn)::before { content: ""; flex: 1 0 0; margin-bottom: calc(-1 * var(--sp-5)); }
+.brd__body > .brd__stage.brd-issue-stn { flex: 1 0 auto; gap: 0; margin-bottom: 0; }
 .brd-issue-stn > .brd-issue { margin-top: 0; }
 .brd-issue__road { flex: 1 0 var(--sp-5); width: 6px; margin-left: 29px; background: var(--accent2); }
 .brd__foot--road { position: relative; }
@@ -21345,7 +21362,7 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-lead);
   font-weight: 600;
   line-height: 1.35;
-  text-align: start;
+  text-align: center;
   color: var(--text-secondary);
 }
 .brd-front__map { position: relative; flex: 1; min-height: 0; margin-top: var(--sp-5); }
@@ -21396,8 +21413,7 @@ button.brd-stn { cursor: pointer; }
 
 /* ── The sign-in, in the promise's place ── */
 .brd-signin.brd__body { gap: var(--sp-5); overflow-y: auto; }
-.brd-signin > .brd__q { margin-top: var(--sp-4); }
-.brd-signin__stage { position: relative; display: flex; flex-direction: column; }
+.brd-signin__stage { position: relative; display: flex; flex-direction: column; margin-bottom: auto; }
 .brd-signin__road { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .brd-signin__road .brd-front__road { stroke-width: 5; }
 .brd-signin__road .brd-front__way { stroke-width: 7; }
@@ -21463,12 +21479,14 @@ button.brd-stn { cursor: pointer; }
 /* ── 短い車内 — a short screen closes the drawings before it scrolls ──
    Measured at 390x667 -- an iPhone SE with nothing above the page --
    the level's six rows once ran 30px past their box, the sixth cut
-   through its own word. The room around a question's drawing gives way
-   first (the stage's auto margins, above); what yields after it, under
-   740px, is the room inside the drawings (plan 167): a map's places and
-   lines draw at 86% of their height (`--ys`), the stage's pieces stand a
-   rung closer, the plan's rows likewise, the question steps down to the
-   heading rung and the gate gives back its height. The rings, names and
+   through its own word. The room around a question and its drawing
+   gives way first (the auto margins over and under the pair, then the
+   air between them, above); what yields after it, under 740px -- which
+   is also a phone with a notch and a home bar -- is the room inside the
+   drawings (plan 167): a map's places and lines draw at 86% of their
+   height (`--ys`), the stage's pieces stand a rung closer, the plan's
+   rows likewise, the question steps down to the heading rung and the
+   gate gives back its height. The rings, names and
    answers keep their size and no line is dropped -- the crossing and the
    lines' fan, which hold whole answers at their two ends, keep their
    height too. What goes is the room around the content, which is the
@@ -26532,10 +26550,11 @@ button.brd-stn { cursor: pointer; }
   }
   /* The question at the paper's top-left corner, its hint under it, and
      the answers standing in the middle of the paper that is left: the
-     body's spacers and the air under the question are the phone's way of
-     centring the whole block, and here only the answers are centred.
-     Auto margins, not justify-content: a block taller than the car keeps
-     its top and the body scrolls. */
+     phone centres the question and its answers as one block (plan 167,
+     auto margins over the one and under the other), and here the
+     question keeps the corner and only the answers are centred. Auto
+     margins, not justify-content: a block taller than the car keeps its
+     top and the body scrolls. */
   .desk-brd .brd__car > .brd__body {
     flex: 1 1 auto;
     padding-top: var(--sp-6);
@@ -26543,7 +26562,9 @@ button.brd-stn { cursor: pointer; }
   .desk-brd .brd__body::before,
   .desk-brd .brd__body::after { content: none; }
   .desk-brd .brd__body > .brd__stage { margin-block: auto; }
-  .desk-brd .brd__q { text-align: start; }
+  .desk-brd .brd__body > .brd__air { display: none; }
+  .desk-brd .brd__q { text-align: start; text-wrap: pretty; }
+  .desk-brd .brd__body > .brd__q { margin-top: 0; }
   .desk-brd .brd__hint {
     margin-top: calc(-1 * var(--sp-2));
     font-size: var(--fs-lead);
@@ -28238,9 +28259,13 @@ button.brd-stn { cursor: pointer; }
     color: var(--text-primary);
   }
   .desk-brd__halt--by .desk-brd__halt-name { font-size: var(--fs-lead); }
+  /* What the terminus holds beside what the ride is for. The first has
+     no caption since plan 167 (the owner's cut, as on a phone), so it
+     stands on the middle of the second rather than on its caption. */
   .desk-brd__plan-foot {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
     gap: var(--sp-8);
     padding-top: var(--sp-6);
     border-top: 1px solid var(--surface-line);

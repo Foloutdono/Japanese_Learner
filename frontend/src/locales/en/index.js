@@ -1877,11 +1877,9 @@ const boarding = {
   // refusable. "Keep" rather than "create": the progress already
   // exists, this only puts a key on it (lib/guest.js).
   brdAccountQ: 'Keep your progress.',
-  brdAccountHint: 'Your journey is already saved. An account is how you reach it from another device — and how you keep it when you change phones.',
   brdAccountCreate: 'Create my account',
   brdAccountSkip: 'Continue without an account',
   // 辻 (plan 163): the desk's account, beside the ticket it keeps.
-  brdAccountHintDesk: 'Your ticket is ready. An account keeps it, on all your devices.',
   brdTicketKind: 'Ticket · Tsuji',
   brdIssued: (date) => `Issued ${date}`,
   brdCreditsOffered: 'credits, on us',
@@ -2049,7 +2047,6 @@ const boarding = {
   brdEnter: 'Enter the station',
   // 辻 (plan 163): the desk's plan, the ride drawn to scale -- its stops'
   // days and names, what the terminus holds, what the ride is for.
-  brdPlanHint: (min, purpose) => `At ${min} min a day, ${purpose}.`,
   brdInDays: (n) => (n === 1 ? 'tomorrow' : `in ${n} days`),
   brdEvery: { am: 'every morning', noon: 'every noon', pm: 'every evening' },
   brdAtTime: (every, time) => `${every} at ${time}`,

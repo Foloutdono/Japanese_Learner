@@ -41,7 +41,7 @@ export default function PlanStep({
   return (
     <>
       <div className="brd__body">
-        <BoardQuestion hint={desk ? t.brdPlanHint(rhythm, t.brdFor[motive] ?? t.brdFor.other) : null}>
+        <BoardQuestion>
           <Emphasized text={t.brdPlanQ(name)} strongClassName="brd__q-em" />
         </BoardQuestion>
         {desk ? (
@@ -167,8 +167,9 @@ function PlanRoute({ motive, rhythm, goal, lines, figures, now, time, hour }) {
       </ol>
       <div className="desk-brd__plan-foot">
         <section className="desk-brd__held">
-          <h2 className="desk-brd__plan-cap">{t.brdAtTerminus}</h2>
-          <ul className="desk-brd__held-list">
+          {/* Named for a screen reader only: the owner cut the caption
+              ("Au terminus, tu connaîtras") on the phone and the desk. */}
+          <ul className="desk-brd__held-list" aria-label={t.brdAtTerminus}>
             {held.map(h => (
               <li key={h.key} className="desk-brd__held-item" data-line={h.key}>
                 <span className="desk-brd__held-ring" lang="ja" aria-hidden="true">{h.glyph}</span>
@@ -273,7 +274,7 @@ function Arrival({ motive, rhythm, goal, lines, figures, now, time, hour }) {
         ))}
         <span className="brd-ride__lab brd-ride__lab--under brd-ride__lab--end" aria-hidden="true">{end}</span>
       </div>
-      <ul className="brd-held">
+      <ul className="brd-held" aria-label={t.brdAtTerminus}>
         {held.map(h => (
           <li key={h.key} className="brd-held__cell" data-line={h.key}>
             <span className="brd-held__jp" lang="ja" aria-hidden="true">{h.glyph}</span>

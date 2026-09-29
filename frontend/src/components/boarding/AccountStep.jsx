@@ -100,8 +100,8 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
   return (
     <>
       <div className="brd__body">
-        <BoardQuestion hint={desk ? (ticket ? t.brdAccountHintDesk : t.brdAccountHint) : null}>{t.brdAccountQ}</BoardQuestion>
-        <div className={desk ? 'brd__stage' : 'brd__stage brd__stage--top'}>
+        <BoardQuestion>{t.brdAccountQ}</BoardQuestion>
+        <div className="brd__stage">
           {desk && ticket
             ? (
               <div className="desk-brd__keep">

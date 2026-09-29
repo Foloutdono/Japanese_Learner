@@ -1122,12 +1122,15 @@ runtime purpose. Two consequences worth knowing:
   **167** is 辻 on a phone, the boarding drawn as maps (numbered 167
   because 166 went to 一押し, Today on the phone, while it was open; the
   owner's pick A of the canvas "Onboarding on the phone", built as
-  drawn, the desk keeping plan 163's): the frame that never moves -- ‹
-  and the track at the head, the reveal the kana stop's second half and
-  the level a stop only for a reader of both, the question a rung under
-  it at the top-left, the gate at the foot -- and each question's answers
-  drawn on the canvas's 358px stage (`.brd-map`, shorter under 740px by
-  `--ys`): the name's plate on a pole, a junction of six reasons, the two
+  drawn, the desk keeping plan 163's): ‹ and the track at the head, the
+  reveal the kana stop's second half and the level a stop only for a
+  reader of both, the gate at the foot, and between them each question
+  centred over its answers, the pair on the room's middle and the air
+  between them giving way on a short phone (owner-directed after the
+  first build, which pinned the question under the head, ranged left:
+  `BoardFrame.jsx`'s `BoardAir`) -- each question's answers drawn on the
+  canvas's 358px stage (`.brd-map`, shorter under 740px by `--ys`): the
+  name's plate on a pole, a junction of six reasons, the two
   words at a crossing and each read out as a line, the line climbing
   through the levels, three lines fanning out of the kana, four trains on
   a departure board, the flap board turned by hand (`firstDeparture`), a
@@ -1135,7 +1138,9 @@ runtime purpose. Two consequences worth knowing:
   account keeps (`RideTicket`), the pass over the gate's reader; the
   Welcome as the crossroads and the sign-in in its place
   (`screens/AuthScreen.jsx` retired); Building gone, the hour going on
-  to the plan; a pick's gold a rung deeper on its wash (`--brd-wash-ink`)
+  to the plan; a pick's gold a rung deeper on its wash (`--brd-wash-ink`);
+  and on the desk too the lines the phone had dropped, the plan's and the
+  account's hints and the terminus caption (a screen reader's name now)
   (cited in `screens/BoardingFlow.jsx`, `App.jsx`, `components/boarding/`,
   `components/account/ClaimAccount.jsx`, `domain/boarding.js`,
   `src/boarding.phone.test.jsx`, `src/frontdoor.phone.test.jsx`,

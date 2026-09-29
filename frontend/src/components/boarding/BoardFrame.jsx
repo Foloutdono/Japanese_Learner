@@ -8,10 +8,11 @@ import { BoardBack } from './boardBack'
 // ── The frame every boarding screen stands in (plan 075) ─────────
 // The canvas's `.brd`: a head with the back button and the track (the
 // line with its stops, your train at the one you are answering); the
-// body with the question at its top-left and its answers standing in
-// the middle of the room left under it (plan 167); the foot docked at
-// the bottom, rising with the keyboard. Composed from these so a screen
-// file is only its own question and its own content.
+// body with the question centred over its answers, the two standing as
+// one block in the middle of the room (plan 167, the owner's word on the
+// built screens); the foot docked at the bottom, rising with the
+// keyboard. Composed from these so a screen file is only its own
+// question and its own content.
 
 export function BoardHead({ index, total, onBack }) {
   const { t } = useLang()
@@ -56,8 +57,18 @@ export function BoardQuestion({ children, hint = null, as: Tag = 'h1' }) {
     <>
       <Tag className="brd__q" tabIndex={-1}>{children}</Tag>
       {hint && <p className="brd__hint">{hint}</p>}
+      <BoardAir />
     </>
   )
+}
+
+/** The rung between a question and its answers, drawn as a spacer
+    rather than a margin so that it can give way on a phone shorter
+    than the block needs (index.css, "The question over its drawing,
+    the pair on the room's middle"): a margin never gives up its
+    height, a flex item does. The desk draws none. */
+export function BoardAir() {
+  return <div className="brd__air" aria-hidden="true" />
 }
 
 /** The one filled action: gold, full width, docked. `keys` is the

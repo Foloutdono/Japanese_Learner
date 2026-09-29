@@ -441,18 +441,22 @@ phones the artboard is not. (Plan 167 retired this rhythm: see below.)
 ## The boarding drawn as maps (plan 167)
 
 The owner's pick A of the canvas "Onboarding on the phone", built as drawn;
-the desk keeps plan 163's drawings. The frame never moves -- ‹ and the track
-at the head, the question a rung under it at the top-left, the gate docked
-at the foot -- and each question's drawing stands on auto margins in the
-room between (`.brd__body > .brd__stage`). A drawing is laid on the canvas's
-358px stage: `.brd-map` is as tall as its `--h` (times `--ys`, 0.86 on a
-frame under 740px), a point is `--x` across as a share of the stage and
-`--y` down in px, each a plain number set by its component, the lines an
-SVG stretched over the stage with their strokes kept at their width.
+the desk keeps plan 163's drawings. ‹ and the track at the head, the gate
+docked at the foot, and between them each question set centred over its
+drawing, the pair on the room's middle: auto margins over the question and
+under the stage (`.brd__body > .brd__q`, `> .brd__stage`), and between them
+`.brd__air`, BoardQuestion's spacer, --sp-8 at rest and shrinking to the
+body's gap before anything scrolls (the owner's word on the first build,
+which pinned the question under the head, ranged left). A drawing is laid
+on the canvas's 358px stage: `.brd-map` is as tall as its `--h` (times
+`--ys`, 0.86 on a frame under 740px), a point is `--x` across as a share of
+the stage and `--y` down in px, each a plain number set by its component,
+the lines an SVG stretched over the stage with their strokes kept at their
+width.
 
 | Class | Drawing | Component |
 |---|---|---|
-| `.brd` (`--arrival`: no head), `.brd__stop` (`--passed`, `--here`), `.brd-map` (`__lines`, `__at` `--start`/`--corner`/`--top`), `.brd-road` (`--on`), `.brd-hub` (`--sm`, `--md`) | the frame, the track, the map, a question's hub | `screens/BoardingFlow.jsx`, `BoardFrame.jsx` |
+| `.brd` (`--arrival`: no head), `.brd__stop` (`--passed`, `--here`), `.brd__air`, `.brd-map` (`__lines`, `__at` `--start`/`--corner`/`--top`), `.brd-road` (`--on`), `.brd-hub` (`--sm`, `--md`) | the frame, the track, the rung under a question, the map, a question's hub | `screens/BoardingFlow.jsx`, `BoardFrame.jsx` (`BoardQuestion`, `BoardAir`) |
 | `.brd-front` (`--auth`, `__head`, `__door`, `__door-btn`, `__promise`, `__map`, `__roads`, `__road`, `__way`, `__stn` `--over`/`--under`, `__sign`, `__name`, `__hub`, `__foot`), `.brd-tagline`; `.brd-signin` (`__stage`, `__road`, `__map`, `__sign`, `__hub`, `__form`, `__card`, `__go`) | the Welcome as the crossroads; the sign-in in the promise's place | `Welcome.jsx`'s `PhoneWelcome`, `FrontMap`, `PhoneSignIn` over `AuthCard`'s `frame` |
 | `.brd-name` (`__line`, `__pole`, `__hub`, `__road`, `__next`, `__ring`, `__lab`), `.brd-plate` (`__field`, `__count`, `__stripe`) | the name: the station's plate on its pole | `NameStep.jsx` |
 | `.brd-junction`, `.brd-way` (`__ring`, `__name`) | why: six reasons off one trunk | `WhyStep.jsx`'s `Junction` |
@@ -478,8 +482,7 @@ the junction, the crossing, the boards, the crossroads and the sign-in),
 Retired with it: `screens/AuthScreen.jsx` (`.auth`, `.auth__head`,
 `.auth-header*`), `Building.jsx` (`.brd-build*`, `.brd-steps`, `.brd-step*`),
 `demoCards.js` and the rolling stock (`.brd-hero`, `.brd-roll*`,
-`.brd-demo*`), `BoardOption` (`.brd__opts`, `.brd-opt*`), `BoardAir`
-(`.brd__air`), the kana card (`.brd-kana*`), the day track (`.brd-day*`),
+`.brd-demo*`), `BoardOption` (`.brd__opts`, `.brd-opt*`), the kana card (`.brd-kana*`), the day track (`.brd-day*`),
 the chart (`.brd-chart*`, `.brd-legend*`, `.brd-lead*`, `.brd-bullet*`) and
 their locale keys.
 

@@ -194,39 +194,32 @@ describe('the boarding at 390×844', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })
 
-  // ── The question at the top-left, its drawing in the room left ──
-  // Plan 167: the frame never moves. The question stands a rung under
-  // the head on every screen -- it moved 300 px down the name and 110
-  // down the reasons while the question and its answers stood as one
-  // block on the centre line -- and its drawing stands in the middle of
-  // the room between the question and the docked foot. A shorter phone
-  // draws the drawing shorter before anything scrolls.
-  it('holds the question a rung under the head on every screen, and centres the drawing under it', async () => {
+  // ── The question over its drawing, the pair on the room's middle ──
+  // Plan 167, the owner's word on the built screens: the titles
+  // centred, and not always at the top of the screen. The question is
+  // set centred, a rung (--sp-8) over its drawing, and the two stand as
+  // one block in the middle of the room between the head and the foot --
+  // the room over the question the room under the drawing. A shorter
+  // phone spends that room first, then the rung, down to the body's own
+  // gap, before anything scrolls.
+  it('centres the question over its drawing, and the pair in the room', async () => {
     const screen = await mountFlow('SilentSamurai6323')
-    const frame = screen.container.querySelector('.brd')
     const q = () => live(screen.container).querySelector('.brd__q')
     const body = () => live(screen.container).querySelector('.brd__body')
     const stage = () => live(screen.container).querySelector('.brd__body > .brd__stage')
-    const underHead = () => rect(q()).top - rect(frame.querySelector('.brd__head')).bottom
-    // Past the question's own arrival (6 px of rise).
-    await settle(500)
-    const tops = [rect(q()).top]
-    expect(Math.round(underHead())).toBe(12)
+    const gap = () => parseFloat(getComputedStyle(body()).rowGap)
+    const rung = () => rect(stage()).top - rect(q()).bottom
+    const over = () => rect(q()).top - rect(body()).top
+    const under = () => rect(body()).bottom - rect(stage()).bottom
     await click(screen.container, '[data-action="continue"]')
     // Past the drawing's arrival: a stage still translated 6 px down is
     // 6 px of overflow that says nothing about the rest state.
     await settle(900)
-    tops.push(rect(q()).top)
-    expect(Math.round(underHead())).toBe(12)
-
-    // The room over the drawing (past the body's gap) is the room under it.
-    const centred = () => {
-      const gap = parseFloat(getComputedStyle(body()).rowGap)
-      const over = rect(stage()).top - rect(q()).bottom - gap
-      const under = rect(body()).bottom - rect(stage()).bottom
-      expect(Math.abs(over - under)).toBeLessThanOrEqual(1)
-    }
-    centred()
+    expect(getComputedStyle(q()).textAlign).toBe('center')
+    expect(Math.round(rung())).toBe(44)
+    expect(Math.abs(over() - under())).toBeLessThanOrEqual(1)
+    // Not pinned under the head: the room is spent round the pair.
+    expect(over()).toBeGreaterThan(gap())
     expect(body().scrollHeight).toBe(body().clientHeight)
 
     for (const height of [800, 764, 700]) {
@@ -234,19 +227,13 @@ describe('the boarding at 390×844', () => {
         const ways = [...live(screen.container).querySelectorAll('.brd-way')]
         expect(ways).toHaveLength(6)
         // Nothing scrolls, the sixth reason clears the docked action,
-        // and the question has not moved.
+        // and the rung gives way no further than the body's own gap.
         expect(body().scrollHeight, `${height} px`).toBe(body().clientHeight)
         expect(rect(ways[5]).bottom).toBeLessThanOrEqual(rect(live(screen.container).querySelector('.brd__foot')).top)
-        expect(rect(q()).top).toBe(tops[0])
-        centred()
+        expect(rung(), `${height} px`).toBeGreaterThanOrEqual(gap() - 0.5)
+        expect(Math.abs(over() - under()), `${height} px`).toBeLessThanOrEqual(1)
       })
     }
-
-    await click(screen.container, '[data-motive="trip"]')
-    await click(screen.container, '[data-action="continue"]')
-    await settle(900)
-    tops.push(rect(q()).top)
-    expect(new Set(tops.map(Math.round)).size).toBe(1)
   })
 
   // ── The question takes focus, and wears no ring for it ──

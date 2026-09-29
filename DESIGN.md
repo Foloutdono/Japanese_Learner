@@ -842,11 +842,12 @@ So:
   padding or a margin — the rung is then a maximum, collapsing (never past the
   container's own gap) until the room runs out, and only a screen genuinely
   too short for its content scrolls. The boarding's frame is the worked
-  example (a question's drawing stands on auto margins, `.brd__body >
-  .brd__stage`, and a short frame draws it shorter, `--ys`, before anything
-  scrolls), and centring a body that might overflow takes auto margins or a
-  pair of grow-only spacers, never `justify-content: center`, whose overflow
-  spills off both ends with the top unreachable.
+  example (the question and its drawing stand on auto margins, the rung
+  between them is a shrinking spacer, `.brd__air`, and a short frame then
+  draws the drawing shorter, `--ys`, before anything scrolls), and centring
+  a body that might overflow takes auto margins or a pair of grow-only
+  spacers, never `justify-content: center`, whose overflow spills off both
+  ends with the top unreachable.
 
 ## Motion
 
@@ -1094,11 +1095,14 @@ a learner who has just rated one card is already looking for the next.
   desk pulls a shorter way; see *The desk*, "First contact is the
   crossroads".)
 - **On a phone the boarding is drawn as maps** (plan 167; the owner's pick
-  A of the canvas "Onboarding on the phone"). The frame never moves: ‹ and
-  the track at the head — a stop per question, the reveal the kana's
-  second half, the level a stop only for a reader of both scripts — the
-  question a rung under it at the top-left, the gate docked at the foot.
-  Between them each question draws its answers as roads out of a hub
+  A of the canvas "Onboarding on the phone"). ‹ and the track at the
+  head — a stop per question, the reveal the kana's second half, the level
+  a stop only for a reader of both scripts — and the gate docked at the
+  foot. Between them each question is set centred over its answers, a
+  rung (`--sp-8`) apart, and the pair stands on the middle of the room —
+  the owner's word on the first build, whose questions stood pinned under
+  the head over a gulf: titles centred, and not always at the top. Each
+  question draws its answers as roads out of a hub
   numbered as its stop — the name's plate on a pole, a junction of six
   reasons, the two words at a crossing, the line climbing through the
   levels, three lines fanning out of the kana — or as the thing they are:
