@@ -1119,7 +1119,11 @@ runtime purpose. Two consequences worth knowing:
   `GateCard.browser.test.jsx`, `screens/TodayScreen.browser.test.jsx`,
   `src/deskfree.phone.test.jsx`, `src/today.wide.test.jsx` and
   `index.css`; DESIGN.md, "The gate button"; `docs/design/mobile/README.md`).
-  When starting a new wave, begin at **167** or higher, and check
+  **167** is the public landing page at `/`, for search and the stores:
+  its keyword map is `docs/seo/keywords.md`, and its four directions
+  (辻 the crossroads, 路線 the line, 実演 try it, 定期券 the pass) are
+  drawn on the canvas "Tsuji — landing page" for the owner's pick.
+  When starting a new wave, begin at **168** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
