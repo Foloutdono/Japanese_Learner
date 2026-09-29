@@ -38,8 +38,9 @@
 // edge request before first paint; the bundle it names still comes from
 // the precache.
 export const navigation = {
-  // The listed paths are not app routes: two are proxied to the backend
-  // by vercel.json, one is a static page. A top-level navigation to any
+  // The listed paths are not app routes: three are proxied to the
+  // backend by vercel.json, two are static pages (the privacy policy and
+  // the landing page, plan 167). A top-level navigation to any
   // of them is the browser fetching that thing, not the app booting, so
   // they are left alone -- and must be, or an offline hit on one would
   // be answered with the app shell. This is the list navigateFallback
@@ -49,7 +50,7 @@ export const navigation = {
   urlPattern: ({ request, url, sameOrigin }) =>
     sameOrigin &&
     request.mode === 'navigate' &&
-    !['/api/', '/kanjivg/', '/exam-audio/', '/privacy'].some(p => url.pathname.startsWith(p)),
+    !['/api/', '/kanjivg/', '/exam-audio/', '/privacy', '/landing'].some(p => url.pathname.startsWith(p)),
   handler: 'NetworkOnly',
   options: { precacheFallback: { fallbackURL: 'index.html' } },
 }
@@ -64,7 +65,9 @@ export const workbox = {
   // `'**/sprites/**'` here and the /sprites/ arm of the media rule
   // below if a sprite sheet ever comes back.
   globPatterns: ['**/*.{js,css,html,ico,svg,png,woff2}'],
-  globIgnores: ['**/noto-*.woff2'],
+  // Nor the landing page (plan 167): a visitor who has not boarded yet
+  // is not served by this worker, and a learner has no use for it cached.
+  globIgnores: ['**/noto-*.woff2', 'landing/**'],
   maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
   // Off, deliberately: see the header. The plugin defaults it to
   // 'index.html', which registers a NavigationRoute served straight out

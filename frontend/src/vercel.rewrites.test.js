@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 
 // The deployment's routing table (vercel.json). Two things about it are
 // load-bearing enough to be worth a test rather than a comment:
@@ -38,6 +38,20 @@ describe('the vercel routing table', () => {
     expect(proxied).toEqual(['/api/:path*', '/kanjivg/:path*', '/exam-audio/:path*'])
     for (const r of config.rewrites) {
       if (!r.destination.startsWith('http')) expect(r.destination).not.toContain('onrender')
+    }
+  })
+
+  // The landing page (plan 167) is two static files under public/landing/.
+  // Vercel serves a file before any rewrite, but a directory's index is
+  // not a file at `/landing`, so without these the fallback would answer
+  // with the app -- which shows a signed-out visitor its Welcome instead.
+  it('serves the landing pages as their static files, ahead of the fallback', () => {
+    const at = source => config.rewrites.findIndex(r => r.source === source)
+    const fallback = config.rewrites.findIndex(r => r.destination === '/index.html')
+    for (const [source, file] of [['/landing', '/landing/index.html'], ['/landing/en', '/landing/en/index.html']]) {
+      expect(config.rewrites[at(source)]?.destination, source).toBe(file)
+      expect(at(source), source).toBeLessThan(fallback)
+      expect(existsSync(new URL(`../public${file}`, import.meta.url)), file).toBe(true)
     }
   })
 
