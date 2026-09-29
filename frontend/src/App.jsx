@@ -700,6 +700,10 @@ export default function App() {
           {/* The gate hall retired with the chrome; the front door is
               the run -- or, once, the test ride. */}
           <Route path="/" element={<Navigate to={rideDue ? '/ride/cards' : '/today'} replace />} />
+          {/* On the web `/` is the landing page (plan 167), which sends a
+              signed-in visitor and every sign-in's return here: the same
+              door, under the name the server leaves to the app. */}
+          <Route path="/app" element={<Navigate to={rideDue ? '/ride/cards' : '/today'} replace />} />
 
           {MOVED.map(([from, to]) => (
             <Route key={from} path={from} element={<Moved to={to} />} />

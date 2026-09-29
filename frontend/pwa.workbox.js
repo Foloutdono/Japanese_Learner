@@ -27,6 +27,8 @@
 // (`skipWaiting`/`clientsClaim`). index.html carries a third guard for
 // the case where a stale document reaches a learner anyway.
 
+import { APP_SHELL } from './appShell.js'
+
 // ── 改札 — the document ──
 // NetworkOnly, not NetworkFirst: a network-first cache would keep a
 // third copy of the document, one that goes on naming a generation of
@@ -52,7 +54,9 @@ export const navigation = {
     request.mode === 'navigate' &&
     !['/api/', '/kanjivg/', '/exam-audio/', '/privacy', '/landing'].some(p => url.pathname.startsWith(p)),
   handler: 'NetworkOnly',
-  options: { precacheFallback: { fallbackURL: 'index.html' } },
+  // The app's document, which the web build names app.html so that `/`
+  // can be the landing page (appShell.js, plan 167).
+  options: { precacheFallback: { fallbackURL: APP_SHELL } },
 }
 
 export const workbox = {

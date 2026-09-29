@@ -9,7 +9,7 @@ import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { DARK, LIGHT, SCALE, FONTS, block } from './tokens.mjs'
 import {
   SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, STORES, CONTACT,
-  PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM,
+  PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM, sessionKey,
 } from './config.mjs'
 import { LEVELS, arrivals, spanOf } from './content.mjs'
 import { STRINGS, CARDS, TOKENS, EXAM_OPTIONS } from './strings.mjs'
@@ -458,6 +458,28 @@ export function styles() {
 // (the same 'jp-theme' key, so a learner's choice follows them here).
 const THEME = "(function(){try{var s=localStorage.getItem('jp-theme');var t=(s==='light'||s==='dark')?s:(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',t==='light'?'#f6f1e4':'#17151a')}catch(e){}})()"
 
+// ── The door to the app (plan 167) ──
+// `/` is this page, so everything that used to open the app there is
+// sent on to APP_ENTRY before the page paints: a learner already signed
+// in (supabase-js's session in localStorage), and a sign-in's return --
+// Google's and every e-mail link come back to `/` (src/lib/oauth.js's
+// redirectTarget, the project's Site URL), carrying ?code, #access_token
+// or an error the app reads on arrival (src/lib/authRedirect.js), so the
+// query and the fragment go along. A signed-in visitor who wants the
+// page itself opens `/?landing`, which holds for the rest of the tab.
+const FORWARD_QUERY = ['code', 'token_hash', 'error', 'error_code', 'error_description']
+const FORWARD_HASH = ['access_token', 'error', 'error_code', 'error_description']
+const STAY = 'tsuji-landing'
+
+export function forwardScript() {
+  const any = (list, from) => `${JSON.stringify(list)}.some(function(k){return ${from}.has(k)})`
+  return '(function(){try{var l=location,q=new URLSearchParams(l.search),h=new URLSearchParams(l.hash.slice(1));'
+    + `if(q.has('landing'))sessionStorage.setItem('${STAY}','1');`
+    + `if(${any(FORWARD_QUERY, 'q')}||${any(FORWARD_HASH, 'h')}`
+    + `||(localStorage.getItem('${sessionKey()}')&&!sessionStorage.getItem('${STAY}')))`
+    + `l.replace('${APP_ENTRY}'+l.search+l.hash)}catch(e){}})()`
+}
+
 export function renderPage(lang, facts, media) {
   const t = STRINGS[lang](facts)
   const other = lang === 'fr' ? 'en' : 'fr'
@@ -494,6 +516,7 @@ ${alternates}
 <link rel="icon" href="/pwa-64x64.png" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png">
 ${fonts}
+<script>${forwardScript()}</script>
 <script>${THEME}</script>
 <style>${faces}${styles()}</style>
 <script type="application/ld+json">${safeJson(jsonLd(t, facts, media, live))}</script>

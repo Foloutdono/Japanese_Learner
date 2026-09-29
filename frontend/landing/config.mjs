@@ -8,19 +8,22 @@ import { readFileSync } from 'node:fs'
 // are written against. The Vercel origin until a custom domain exists.
 export const SITE_ORIGIN = 'https://japanese-learner-seven.vercel.app'
 
-// Where each language's page is served. Under /landing/ until the
-// redirection that makes the French page the site's `/` and the English
-// one `/en/`: change the two paths, regenerate, and add the rewrites.
+// Where each language's page is served: the French page is the site's
+// `/`, the English one `/en`. The files stay under public/landing/ and
+// vercel.json rewrites the two addresses to them, since a file named
+// public/index.html would stand in the app's way in `npm run dev`.
 export const PAGES = {
-  fr: { lang: 'fr', path: '/landing/', out: 'public/landing/index.html', ogLocale: 'fr_FR', ogImage: '/landing/og-fr.png' },
-  en: { lang: 'en', path: '/landing/en/', out: 'public/landing/en/index.html', ogLocale: 'en_GB', ogImage: '/landing/og-en.png' },
+  fr: { lang: 'fr', path: '/', out: 'public/landing/index.html', ogLocale: 'fr_FR', ogImage: '/landing/og-fr.png' },
+  en: { lang: 'en', path: '/en', out: 'public/landing/en/index.html', ogLocale: 'en_GB', ogImage: '/landing/og-en.png' },
 }
 export const DEFAULT_LANG = 'fr'
 
-// Where Embarquer and Se connecter lead: an app route, so the button
-// still reaches the Welcome once `/` is this page. Signed out, every app
-// route shows the Welcome; signed in, this one is the day's gate.
-export const APP_ENTRY = '/today'
+// The app's front door, now that `/` is this page: Embarquer and Se
+// connecter lead there, and the page sends a signed-in visitor and every
+// sign-in's return there before it paints (page.mjs's FORWARD). Signed
+// out it shows the Welcome; signed in it routes as `/` does in the app,
+// to the first ride when it is due, else the day's gate (src/App.jsx).
+export const APP_ENTRY = '/app'
 
 // The two store listings. Null draws the badge as "coming soon" and
 // links nowhere: a badge that 404s is worse than one that waits.
@@ -35,10 +38,23 @@ export const CONTACT = null
 // the dashboard by file name (backend/scripts/sql/landing_media_bucket.sql
 // creates it). The project URL is the one the app already signs in with.
 export const MEDIA_BUCKET = 'landing'
-export function mediaBase(envFile = new URL('../.env.production', import.meta.url)) {
+
+function supabaseUrl(envFile = new URL('../.env.production', import.meta.url)) {
   const line = readFileSync(envFile, 'utf8').split('\n').find(l => l.startsWith('VITE_SUPABASE_URL='))
   if (!line) throw new Error('VITE_SUPABASE_URL is missing from frontend/.env.production')
-  return `${line.slice('VITE_SUPABASE_URL='.length).trim().replace(/\/$/, '')}/storage/v1/object/public/${MEDIA_BUCKET}`
+  return line.slice('VITE_SUPABASE_URL='.length).trim().replace(/\/$/, '')
+}
+
+export function mediaBase(envFile) {
+  return `${supabaseUrl(envFile)}/storage/v1/object/public/${MEDIA_BUCKET}`
+}
+
+// Where supabase-js keeps a signed-in session in the browser: its
+// default key, `sb-<project ref>-auth-token` (src/lib/supabase.js sets
+// no key of its own on the web). The page reads it to tell a learner
+// from a visitor.
+export function sessionKey(envFile) {
+  return `sb-${new URL(supabaseUrl(envFile)).hostname.split('.')[0]}-auth-token`
 }
 
 // The overview presentation. `uploadDate` stays null until the video is

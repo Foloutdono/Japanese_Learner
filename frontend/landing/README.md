@@ -2,8 +2,9 @@
 
 The public page for search and the stores: 辻 the crossroads (the owner's
 pick A on the canvas "Tsuji — landing page", improved with the others' best
-ideas). French at `/landing/`, English at `/landing/en/`, until the
-redirection that makes it the site's `/`.
+ideas). It is the site's `/` in French and `/en` in English; the files
+live under `public/landing/` and `vercel.json` rewrites the two addresses
+to them (the old `/landing/` addresses redirect there for good).
 
 It is a **static page**, not a screen of the app: plain HTML that search
 engines read whole, a stylesheet inlined in it, and one small script
@@ -82,8 +83,24 @@ once the file is really there.
 - **Contact:** set `CONTACT` to an address and the footer prints it.
 - **A custom domain:** change `SITE_ORIGIN`, then run `npm run landing` and
   `npm run landing:og` (the share card prints the domain).
-- **The redirection to `/`:** change `PAGES` to `/` and `/en/`, rebuild, and
-  change how `/` is routed. That means `vercel.json`, which sends `/` to the
-  app today, the service worker's navigation rule in `pwa.workbox.js`, and a
-  signed-in visitor, who should still land in the app. The Board button
-  already points at an app route (`APP_ENTRY`), so it keeps working.
+
+## `/` and the app
+
+The landing page took `/` from the app, which moved to **`/app`**, a route
+that goes where `/` did (the first ride when it is due, else the day's
+gate). Four things make that work, and each has a test:
+
+- **The app's document is `app.html` on the web.** Vercel serves a file
+  before any rewrite, so an `index.html` at the build's root would answer
+  `/` itself. `appShell.js` renames it in the web build; `vercel.json`'s
+  fallback and the service worker's offline fallback point at `app.html`.
+  `npm run dev` and the native shell's bundle keep `index.html`.
+- **The page sends on what `/` used to open.** A script in its `<head>`,
+  before anything is drawn, sends a signed-in learner to `/app`. It sends
+  every sign-in's return there too: Google and the e-mail links come back
+  to `/` (the project's Site URL) with `?code`, `#access_token` or an
+  error, and those go along. Visitors, and search engines, stay.
+- **Signed in and want to see the page?** Open `/?landing`. It holds for
+  the rest of the tab.
+- **The installed app opens at `/app`** (the manifest's `start_url`),
+  keeping its `id` of `/`, so every existing install stays the same app.

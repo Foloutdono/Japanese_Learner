@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { navigation, workbox } from '../pwa.workbox.js'
+import { APP_SHELL, appShell } from '../appShell.js'
 
 // The service worker's policy (pwa.workbox.js). Most of it is caching
 // taste and can change freely; two rules cannot, because between them
@@ -45,7 +46,7 @@ describe('the service worker policy', () => {
 
     it('goes to the network, with the precached shell only as the fallback', () => {
       expect(navigation.handler).toBe('NetworkOnly')
-      expect(navigation.options.precacheFallback).toEqual({ fallbackURL: 'index.html' })
+      expect(navigation.options.precacheFallback).toEqual({ fallbackURL: APP_SHELL })
     })
 
     it('catches the app routes, so a deep link boots on the live build', () => {
@@ -69,6 +70,30 @@ describe('the service worker policy', () => {
       expect(matches('/assets/index-CvmBpqF-.js', { mode: 'no-cors' })).toBe(false)
       expect(matches('/', { mode: 'cors' })).toBe(false)
       expect(matches('/', { sameOrigin: false })).toBe(false)
+    })
+  })
+
+  // The document's name on the web (plan 167): `/` is the landing page,
+  // which only a build with no index.html at its root lets Vercel serve.
+  describe('the app shell', () => {
+    const run = mode => {
+      const bundle = { 'index.html': { type: 'asset', fileName: 'index.html', source: '<!doctype html>' } }
+      const emitted = []
+      appShell(mode).generateBundle.call({ emitFile: f => emitted.push(f) }, {}, bundle)
+      return { bundle, emitted }
+    }
+
+    it('is written as app.html by the web build', () => {
+      const { bundle, emitted } = run('production')
+      expect(bundle['index.html']).toBeUndefined()
+      expect(emitted).toEqual([{ type: 'asset', fileName: APP_SHELL, source: '<!doctype html>' }])
+      expect(APP_SHELL).toBe('app.html')
+    })
+
+    it('keeps its name in the native shell\u2019s bundle, which Capacitor loads as index.html', () => {
+      const { bundle, emitted } = run('native')
+      expect(bundle['index.html']).toBeDefined()
+      expect(emitted).toEqual([])
     })
   })
 
