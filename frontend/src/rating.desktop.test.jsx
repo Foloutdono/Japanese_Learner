@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 評価 — the rating sheet on the desk (plan 167) ────────────────
+// ── 評価 — the web's rating sheet on the desk (plan 167) ──────────
 // Opened by the Shell itself, so only ever in the chrome: a dialog in
 // the window's middle at a column's width, as the claim sheet is --
 // nothing on the rail opened it. Under five, the field takes the focus
@@ -16,11 +16,10 @@ vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch: vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) })),
   apiJson: vi.fn(async (path, _s, opts) => {
-    if (path === '/api/rating/prompt') return { ask: true }
+    if (path.startsWith('/api/rating/prompt')) return { ask: true, how: 'sheet' }
     if (path === '/api/rating') {
-      const body = JSON.parse(opts.body)
-      posts.push(body)
-      return { ok: true, store: body.stars === 5 }
+      posts.push(JSON.parse(opts.body))
+      return { ok: true }
     }
     return {}
   }),
@@ -77,6 +76,11 @@ function mount() {
   )
 }
 
+// The lane shares one localStorage across its files, and the others
+// read French as the device's language: the English these tests ask
+// for leaves with them.
+afterEach(() => localStorage.removeItem('lang'))
+
 beforeEach(() => {
   rating.resetRating()
   posts.length = 0
@@ -108,6 +112,6 @@ describe('the rating sheet on the desk', () => {
     await expect.poll(() => document.activeElement?.id).toBe('rate-comment')
     await page.getByRole('button', { name: 'Close' }).click()
     await expect.poll(() => document.querySelector('[role="dialog"]')).toBe(null)
-    expect(posts).toEqual([{ stars: 4, comment: null, platform: 'web', lang: 'en' }])
+    expect(posts).toEqual([{ kind: 'rating', stars: 4, comment: null, platform: 'web', lang: 'en' }])
   })
 })

@@ -91,11 +91,6 @@ this repository (`frontend/.gitignore` refuses `.jks`, `.keystore`, `.p8`,
   questionnaire, category Education, the fr + en listings and screenshots
   from the redesigned app, a **closed test** with 12 testers for 14 days
   (a new personal developer account's rule).
-- The **App Store ID** (App Store Connect → App Information → Apple ID)
-  goes in `APP_STORE_ID` in `frontend/src/config/stores.js`: the rating
-  sheet (plan 167) sends an iPhone learner's five stars to the listing
-  it names, and until it is set an iPhone five is thanked and kept, not
-  sent on. Play's listing is named by the bundle id and needs nothing.
 - App Store Connect: the privacy labels, an **account-deletion note** for
   the reviewer (Settings › Data), a **test account**, the support and
   privacy URLs, 6.7" and 6.1" screenshots, an external TestFlight group.
@@ -133,7 +128,11 @@ From Linux, Android: `npm run cap:android` with a phone on USB debugging
 list — the boarding end to end, a run with the docked rating bar, a draw
 card, the dictionary sheets, an exam with audio, a deck's CSV share, the
 nudge firing at its hour with the day's count (Settings ›
-Notifications prints the next one), the widget added to the home
+Notifications prints the next one), the store's review prompt (plan
+167: an account past the rating thresholds, ten cards, back to Today;
+Play shows it only to a build installed from Play, internal testing
+included, and TestFlight never shows it -- a development build on iOS
+shows it every time and submits nothing), the widget added to the home
 screen (Android) or lock screen (iPhone) and its Depart opening the
 gate, sign-out emptying the widget, account deletion on a throwaway
 account — and watch the first `/api` call and a `kanjivg` fetch for CORS.

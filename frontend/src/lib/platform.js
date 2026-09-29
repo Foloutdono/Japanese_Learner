@@ -54,18 +54,15 @@ export async function openExternal(url) {
   window.open(url, '_blank', 'noopener,noreferrer')
 }
 
-/** A store's listing (config/stores.js, plan 167). In the shell a
- *  top-level navigation off the bundle is handed to the OS by Capacitor
- *  itself -- an ACTION_VIEW intent on Android, UIApplication.open on
- *  iOS -- and the OS opens the store's own app on it, which the in-app
- *  browser openExternal uses cannot do; the WebView stays where it is.
- *  On the web, a new tab. */
-export function openStore(url) {
-  if (isNative()) {
-    window.location.assign(url)
-    return
-  }
-  window.open(url, '_blank', 'noopener,noreferrer')
+/** 評価 (plan 167): the store's own review prompt -- the only way the
+ *  App Store and Play allow an app to ask for a rating, and with nothing
+ *  of the app's asked before it. The OS decides whether it shows and
+ *  never says what was answered. Resolves false on the web, which has
+ *  no store, and on a shell that cannot ask. */
+export async function requestStoreReview() {
+  if (!isNative()) return false
+  const n = await native()
+  return n.requestReview()
 }
 
 /** The web's download: an anchor with an object URL, revoked on the

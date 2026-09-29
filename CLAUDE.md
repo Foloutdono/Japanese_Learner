@@ -1119,19 +1119,25 @@ runtime purpose. Two consequences worth knowing:
   `GateCard.browser.test.jsx`, `screens/TodayScreen.browser.test.jsx`,
   `src/deskfree.phone.test.jsx`, `src/today.wide.test.jsx` and
   `index.css`; DESIGN.md, "The gate button"; `docs/design/mobile/README.md`).
-  **167** is 評価, the app asking to be rated: once a learner has used
-  it enough to have an opinion (`MIN_REVIEWS` reviews on `MIN_DAYS`
-  days, `GET /api/rating/prompt`), a sheet at a calm moment -- back in
-  the chrome after ten cards in the visit, never in a run -- asks for
-  one to five stars; a five goes on to the store's listing (the shell's
-  own store, the web offered the listings), under five asks what would
-  have made it five and posts that to us (`app_ratings`, read with
-  `scripts/app_ratings.py`), "not now" snoozes it and three of those
-  end it (cited in `routes/rating.py`, `routes/account.py`,
+  **167** is 評価, asking a learner what they think of the app, the
+  way each store's rules allow: once they have used it enough to have
+  an opinion (`MIN_REVIEWS` reviews on `MIN_DAYS` days,
+  `GET /api/rating/prompt`) and at a calm moment -- back in the chrome
+  after ten cards in the visit, never in a run -- the iOS and Android
+  apps request the store's own review prompt with nothing asked before
+  it (App Review Guideline 5.6.1, Play's in-app review guidelines;
+  `@capacitor-community/in-app-review`), spaced `STORE_EVERY_DAYS`
+  apart, at most `MAX_STORE_PROMPTS`; the web asks through the app's
+  own sheet, one to five stars, under five asking what would have made
+  it five, every answer kept by us and none sent on to a store; and
+  anyone can write to us from Settings › Help (`POST /api/feedback`).
+  All of it lands in `app_ratings`, read with `scripts/app_ratings.py`
+  (cited in `routes/rating.py`, `routes/account.py`,
   `srs/data_structure.sql`, `tests/test_rating.py`,
-  `scripts/app_ratings.py`, `config/stores.js`, `stores/rating.js`,
+  `scripts/app_ratings.py`, `stores/rating.js`,
   `components/rating/RatingSheet.jsx`, `components/chrome/Shell.jsx`,
-  `lib/reviews.js`, `lib/platform.js`'s `openStore`,
+  `components/settings/HelpPage.jsx`, `lib/reviews.js`,
+  `lib/platform.js`'s `requestStoreReview`, `lib/native.js`,
   `src/rating.phone.test.jsx`, `src/rating.desktop.test.jsx`,
   `public/privacy.html` and `index.css` and its 机 section).
   When starting a new wave, begin at **168** or higher, and check
@@ -1254,7 +1260,7 @@ Two more are read-only and need no flag, so they are safe to run at any time:
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
-python -m scripts.app_ratings          # the app's ratings and what learners wrote (plan 167)
+python -m scripts.app_ratings          # what learners told us of the app: ratings, feedback (plan 167)
 ```
 
 Two others fill a shared cache ahead of demand rather than maintaining

@@ -19410,6 +19410,10 @@ a.slip__act { text-decoration: none; }
 .slip__label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
 .slip__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
 .slip__hint { font-size: var(--fs-caption); color: var(--text-secondary); line-height: 1.5; }
+/* 評価 — writing to us from Help (plan 167): the hint, the field, the
+   button and its answer, a slip's own rhythm. */
+.stg-feedback { display: flex; flex-direction: column; gap: var(--sp-3); }
+.stg-feedback .slip__hint { margin: 0; }
 /* Every action on a page is the same box, edge to edge: four
    buttons in four widths, each cut to its own word, read as four
    different controls. */

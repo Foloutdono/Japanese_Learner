@@ -1,23 +1,24 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 評価 — the rating sheet on a phone (plan 167) ─────────────────
-// Five stars and "not now", once a visit has been a real one. A five
-// goes to the store; under five asks what would have made it five, and
-// that answer is posted to us. Every way out answers something: closed
-// before a star it is "not now", after one the stars stand alone -- what
-// was typed and not sent is never sent.
+// ── 評価 — asking about the app, at a phone's width (plan 167) ─────
+// On the web, the app's sheet: five stars and "not now", once a visit
+// has been a real one; under five asks what would have made it five,
+// and every answer is posted to us, never sent on to a store. Every way
+// out answers something: closed before a star it is "not now", after
+// one the stars stand alone -- what was typed and not sent is never
+// sent. In the apps, the store's own prompt and no sheet at all. And
+// from Settings › Help, anyone can write to us.
 
-const plat = vi.hoisted(() => ({ native: false, platform: 'web', opened: [] }))
+const plat = vi.hoisted(() => ({ platform: 'web', reviews: 0 }))
 vi.mock('./lib/platform', async o => ({
   ...(await o()),
-  isNative: () => plat.native,
   nativePlatform: () => plat.platform,
-  openStore: url => { plat.opened.push(url) },
+  requestStoreReview: async () => { plat.reviews += 1; return true },
 }))
 
 const posts = vi.hoisted(() => [])
@@ -25,10 +26,9 @@ vi.mock('./lib/api', () => ({
   api: p => p,
   apiFetch: vi.fn(),
   apiJson: vi.fn(async (path, _s, opts) => {
-    if (path === '/api/rating/prompt') return { ask: true }
-    const body = JSON.parse(opts.body)
-    posts.push(body)
-    return { ok: true, store: body.stars === 5 }
+    if (path.startsWith('/api/rating/prompt')) return { ask: true, how: plat.platform === 'web' ? 'sheet' : 'store' }
+    posts.push([path, JSON.parse(opts.body)])
+    return { ok: true }
   }),
   apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
   ApiError: class extends Error {},
@@ -43,6 +43,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const rating = await import('./stores/rating')
 const { RatingSheet } = await import('./components/rating/RatingSheet')
+const { HelpPage } = await import('./components/settings/HelpPage')
 
 function mount() {
   localStorage.setItem('lang', 'en')
@@ -60,6 +61,7 @@ function studied(n = rating.VISIT_REVIEWS) {
 }
 
 const sheet = () => page.getByRole('dialog')
+const rated = body => ['/api/rating', { platform: 'web', lang: 'en', ...body }]
 const star = n => page.getByRole('button', { name: n === 1 ? '1 star' : `${n} stars` })
 
 async function opened() {
@@ -68,12 +70,16 @@ async function opened() {
   await expect.element(sheet(), { timeout: 4000 }).toBeVisible()
 }
 
+// The lane shares one localStorage across its files, and the others
+// read French as the device's language: the English these tests ask
+// for leaves with them.
+afterEach(() => localStorage.removeItem('lang'))
+
 beforeEach(() => {
   rating.resetRating()
   posts.length = 0
-  plat.native = false
   plat.platform = 'web'
-  plat.opened.length = 0
+  plat.reviews = 0
 })
 
 describe('the rating sheet', () => {
@@ -98,7 +104,7 @@ describe('the rating sheet', () => {
     await opened()
     await page.getByRole('button', { name: 'Not now' }).click()
     await expect.poll(() => document.querySelector('[role="dialog"]')).toBe(null)
-    expect(posts).toEqual([{ stars: null, comment: null, platform: 'web', lang: 'en' }])
+    expect(posts).toEqual([rated({ kind: 'put_off' })])
   })
 
   it('asks under five what would have made it five, and sends the answer to us', async () => {
@@ -110,8 +116,7 @@ describe('the rating sheet', () => {
     await userEvent.type(field, 'More listening, please.')
     await page.getByRole('button', { name: 'Send' }).click()
     await expect.element(page.getByText('Your note comes straight to us.')).toBeVisible()
-    expect(posts).toEqual([{ stars: 3, comment: 'More listening, please.', platform: 'web', lang: 'en' }])
-    expect(plat.opened).toEqual([])
+    expect(posts).toEqual([rated({ kind: 'rating', stars: 3, comment: 'More listening, please.' })])
     await page.getByRole('button', { name: 'Close' }).click()
     await expect.poll(() => document.querySelector('[role="dialog"]')).toBe(null)
     expect(posts).toHaveLength(1)
@@ -123,28 +128,54 @@ describe('the rating sheet', () => {
     await userEvent.type(page.getByRole('textbox'), 'half a thought')
     await userEvent.keyboard('{Escape}')
     await expect.poll(() => document.querySelector('[role="dialog"]')).toBe(null)
-    expect(posts).toEqual([{ stars: 2, comment: null, platform: 'web', lang: 'en' }])
+    expect(posts).toEqual([rated({ kind: 'rating', stars: 2, comment: null })])
   })
 
-  it('offers the web a store listing for a five', async () => {
+  it('keeps a five here, sent on to no store', async () => {
     await opened()
     await star(5).click()
-    const play = page.getByRole('button', { name: 'Google Play' })
-    await expect.element(play).toBeVisible()
-    expect(posts).toEqual([{ stars: 5, comment: null, platform: 'web', lang: 'en' }])
-    await play.click()
-    expect(plat.opened).toEqual(['https://play.google.com/store/apps/details?id=app.tsuji'])
+    await expect.element(page.getByText('Thank you!')).toBeVisible()
+    expect(document.querySelector('textarea')).toBe(null)
+    expect(posts).toEqual([rated({ kind: 'rating', stars: 5, comment: null })])
+    expect(plat.reviews).toBe(0)
+    await page.getByRole('button', { name: 'Close' }).click()
     await expect.poll(() => document.querySelector('[role="dialog"]')).toBe(null)
     expect(posts).toHaveLength(1)
   })
 
-  it('sends a five in the Android shell straight to its store', async () => {
-    plat.native = true
+  it.each(['ios', 'android'])('in the %s app, asks through the store\'s own prompt and draws nothing', async (p) => {
+    plat.platform = p
+    studied()
+    mount()
+    await expect.poll(() => plat.reviews, { timeout: 4000 }).toBe(1)
+    await expect.poll(() => posts).toEqual([['/api/rating', { kind: 'store_prompt', platform: p }]])
+    expect(document.querySelector('[role="dialog"]')).toBe(null)
+  })
+})
+
+describe('writing to us from Help', () => {
+  function help() {
+    localStorage.setItem('lang', 'en')
+    return render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/profile/settings/help']}>
+          <HelpPage session={{ access_token: 'tok' }} />
+        </MemoryRouter>
+      </LangProvider>
+    )
+  }
+
+  it('sends what was written and empties the field', async () => {
     plat.platform = 'android'
-    await opened()
-    await star(5).click()
-    await expect.poll(() => document.querySelector('[role="dialog"]')).toBe(null)
-    expect(plat.opened).toEqual(['https://play.google.com/store/apps/details?id=app.tsuji'])
-    expect(posts).toEqual([{ stars: 5, comment: null, platform: 'android', lang: 'en' }])
+    help()
+    const field = page.getByRole('textbox', { name: 'Write to us' })
+    const send = page.getByRole('button', { name: 'Send' })
+    await expect.element(send).toBeDisabled()
+    await userEvent.type(field, 'The kana audio is too quiet.')
+    await send.click()
+    await expect.element(page.getByText('Thank you — we read every one.')).toBeVisible()
+    expect(posts).toEqual([['/api/feedback', { comment: 'The kana audio is too quiet.', platform: 'android', lang: 'en' }]])
+    await expect.element(field).toHaveValue('')
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
   })
 })

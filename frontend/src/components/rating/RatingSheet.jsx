@@ -4,16 +4,17 @@ import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { StarIcon } from '../ui/Icons'
 import { askRating, closeRating, readyToAsk, sendRating, useRatingOpen } from '../../stores/rating'
-import { isNative, nativePlatform, openStore } from '../../lib/platform'
 import { dialogOpen } from '../../lib/dialogOpen'
-import { storePages, storeReview, STORE_NAMES } from '../../config/stores'
 
-// ── 評価 — the app asks what the learner thinks of it (plan 167) ──
-// Five stars and "not now". A five goes on to the store the learner
-// installed the app from, to say it there (config/stores.js); a web
-// learner is offered the listings instead, having no one store. Anything
-// under five stays with us: the sheet asks what would have made it five,
-// and the answer reaches routes/rating.py rather than a public page.
+// ── 評価 — the web's sheet (plan 167) ──────────────────────────
+// Five stars and "not now". A rating under five asks what would have
+// made it five; every answer, five included, reaches routes/rating.py
+// and nowhere else. This is the WEB's way of asking only: in the iOS and
+// Android apps the stores allow nothing but their own review prompt,
+// with nothing of the app's asked before it, so there stores/rating.js
+// requests that prompt instead and this sheet never opens. No rating
+// here is sent on to a store: sending only the fives would be the
+// filtering both stores forbid.
 //
 // Every way out answers something, so the server can keep its promise
 // never to ask twice: closed before a star, it is "not now" (a snooze);
@@ -71,7 +72,7 @@ function Stars({ value, onPick }) {
 
 function RatingBody() {
   const { t, lang } = useLang()
-  // ask → why (under five) → thanks; ask → store (a five on the web)
+  // ask → why (under five) → thanks; ask → thanks (a five)
   const [step, setStep] = useState('ask')
   const [stars, setStars] = useState(0)
   const [comment, setComment] = useState('')
@@ -96,17 +97,7 @@ function RatingBody() {
       return
     }
     send({ stars: 5 })
-    if (isNative()) {
-      const url = storeReview(nativePlatform())
-      if (url) {
-        openStore(url)
-        closeRating()
-        return
-      }
-      setStep('thanks')
-      return
-    }
-    setStep(storePages().length ? 'store' : 'thanks')
+    setStep('thanks')
   }
 
   function submit(e) {
@@ -122,27 +113,6 @@ function RatingBody() {
         <button type="button" className="btn-depart" onClick={close}>
           <span className="btn-depart__jp">{t.close}</span>
         </button>
-      </Sheet>
-    )
-  }
-
-  if (step === 'store') {
-    const pages = storePages()
-    return (
-      <Sheet open className="rate-sheet" onClose={close} jp={t.rateThanks} dismiss>
-        <p className="rate-sheet__note">{t.rateStoreAsk}</p>
-        {pages.map(({ store, url }) => (
-          <button
-            key={store}
-            type="button"
-            className={pages.length === 1 ? 'btn-depart' : 'btn-secondary'}
-            onClick={() => { openStore(url); close() }}
-          >
-            {pages.length === 1
-              ? <span className="btn-depart__jp">{STORE_NAMES[store]}</span>
-              : STORE_NAMES[store]}
-          </button>
-        ))}
       </Sheet>
     )
   }

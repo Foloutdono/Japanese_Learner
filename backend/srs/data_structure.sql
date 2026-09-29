@@ -895,19 +895,23 @@ CREATE TABLE event_daily (
     PRIMARY KEY (user_id, day, name)
 );
 
--- ── 評価 — the learner's rating of the app (plan 167) ────────────────
--- Owned by routes/rating.py. A row per answer to the rating sheet:
--- `stars` 1..5 with the comment a rating under five asks for (NULL when
--- none was written), or NULL stars for "not now", which puts the
--- question off (SNOOZE_DAYS, at most MAX_PUT_OFFS times). `platform` is
--- 'ios' | 'android' | 'web' and `lang` the interface's, both validated
--- in code. The comment is text the learner addressed to us, so it lives
--- here and never in event_log (ADR 0012). No cascade from auth
--- (ADR 0010): DELETE /api/account and scripts/purge_orphans.py clear
--- it. Read with scripts/app_ratings.py.
+-- ── 評価 — what learners tell us of the app (plan 167) ──────────────
+-- Owned by routes/rating.py. A row per event, by `kind`:
+--   'rating'        the web's sheet answered: `stars` 1..5, and the
+--                   comment a rating under five asks for (or NULL)
+--   'put_off'       the web's sheet closed with "not now"
+--   'store_prompt'  the iOS or Android app requested the store's own
+--                   review prompt (which never says what was answered)
+--   'feedback'      a message sent from Settings › Help: `comment`
+-- `platform` is 'ios' | 'android' | 'web' and `lang` the interface's,
+-- all validated in code. A comment is text the learner addressed to
+-- us, so it lives here and never in event_log (ADR 0012). No cascade
+-- from auth (ADR 0010): DELETE /api/account and
+-- scripts/purge_orphans.py clear it. Read with scripts/app_ratings.py.
 CREATE TABLE app_ratings (
     id       BIGSERIAL PRIMARY KEY,
     user_id  TEXT NOT NULL,
+    kind     TEXT NOT NULL,
     stars    SMALLINT,
     comment  TEXT,
     platform TEXT NOT NULL,

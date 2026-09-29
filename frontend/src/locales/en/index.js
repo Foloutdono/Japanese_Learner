@@ -87,7 +87,6 @@ const nav = {
   rateSend:          'Send',
   rateThanks:        'Thank you!',
   rateThanksNote:    'Your note comes straight to us.',
-  rateStoreAsk:      'Would you say so on the store too? It helps other learners find Tsuji.',
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'free',
   laneNew:           n => `${n} new`,
@@ -2183,6 +2182,12 @@ const guide = {
   settingsRideAgain: 'Take the test ride again',
   settingsGuideAgain: 'Show the guide again',
   settingsGuideAgainDone: 'It’ll show again the next time you open each section.',
+  // 評価 — a message to us, at any time (plan 167)
+  feedbackLabel:     'Write to us',
+  feedbackHint:      'A bug, a wrong answer, an idea — it comes straight to us.',
+  feedbackSend:      'Send',
+  feedbackSent:      'Thank you — we read every one.',
+  feedbackFailed:    'It didn’t go through. Try again in a moment.',
 }
 
 const onboarding = {
@@ -2343,7 +2348,7 @@ const onboarding = {
     untimed: 'Nothing hides before you answer',
   },
   settingsHelp: 'Help',
-  settingsHelpValue: 'Ride · Guide',
+  settingsHelpValue: 'Ride · Guide · Write to us',
   settingsCreditsCount: n => `${n} sources`,
   settingsPaceMinutes: m => `≈ ${m} min`,
   settingsYourPace: 'Your pace',

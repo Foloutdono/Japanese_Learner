@@ -107,7 +107,7 @@ PLAN = [
     ("credit_ledger",       "user_id = %(user)s",       "the credit ledger: refills, fares, grants"),
     ("event_log",           "user_id = %(user)s",       "足跡: which screens were opened, and when"),
     ("event_daily",         "user_id = %(user)s",       "the rolled-up half of that same trail"),
-    ("app_ratings",         "user_id = %(user)s",       "the learner's rating of the app, and what they wrote us"),
+    ("app_ratings",         "user_id = %(user)s",       "what the learner told us of the app: ratings, feedback"),
     ("user_profiles",       "user_id = %(user)s",       "identity: username, level, goal, preferences"),
 ]
 

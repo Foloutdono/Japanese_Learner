@@ -14,6 +14,7 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Share } from '@capacitor/share'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { StatusBar, Style } from '@capacitor/status-bar'
+import { InAppReview } from '@capacitor-community/in-app-review'
 import { openPath } from './platform'
 import { LEGACY_NUDGE_ID, NUDGE_IDS } from './ahead'
 
@@ -166,6 +167,18 @@ export async function updateWidget(payload) {
     // null is a signed-out device: the widget empties.
     await TsujiWidget.update({ data: payload ? JSON.stringify(payload) : '' })
   } catch { /* no widget in this build */ }
+}
+
+/** 評価 (plan 167): SKStoreReviewController on iOS, Play's In-App
+ *  Review on Android. True once asked -- whether anything showed is the
+ *  OS's business and it does not say. */
+export async function requestReview() {
+  try {
+    await InAppReview.requestReview()
+    return true
+  } catch {
+    return false
+  }
 }
 
 /** A tap on a nudge, and a link from the widget -- while the app runs,

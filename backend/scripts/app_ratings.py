@@ -1,5 +1,5 @@
 """
-What learners told us through the rating sheet (plan 167), as markdown.
+What learners told us of the app (plan 167), as markdown.
 
     python -m scripts.app_ratings              # last 90 days
     python -m scripts.app_ratings --days 30
@@ -7,11 +7,13 @@ What learners told us through the rating sheet (plan 167), as markdown.
 
 Read-only. There is no --yes because there is nothing to confirm.
 
-A five went on to the store's listing and is read there; everything
-under five stayed here, with what the learner wrote about it -- this is
-where that is read. Three parts: the stars as a distribution, how often
-the question was put off instead of answered, and the comments, newest
-first, each with its stars, platform and language. See routes/rating.py.
+In the iOS and Android apps a learner is asked through the store's own
+review prompt, which is read on the store and tells us nothing; what is
+here is the web's sheet (stars, and what a rating under five would have
+needed) and the feedback anyone sends from Settings. Three parts: the
+web's stars as a distribution, how often each way of asking was used,
+and the comments, newest first, each with its stars (or "feedback"),
+platform and language. See routes/rating.py.
 """
 import argparse
 import logging
@@ -33,7 +35,7 @@ def stars(cur, days: int) -> str:
         """
         SELECT stars, COUNT(*), COUNT(comment)
           FROM app_ratings
-         WHERE stars IS NOT NULL
+         WHERE kind = 'rating'
            AND at > NOW() - (%s || ' days')::interval
          GROUP BY stars
          ORDER BY stars DESC
@@ -50,12 +52,14 @@ def stars(cur, days: int) -> str:
     return body
 
 
-def put_offs(cur, days: int) -> str:
+def asked(cur, days: int) -> str:
     cur.execute(
         """
         SELECT platform,
-               COUNT(*) FILTER (WHERE stars IS NOT NULL),
-               COUNT(*) FILTER (WHERE stars IS NULL)
+               COUNT(*) FILTER (WHERE kind = 'store_prompt'),
+               COUNT(*) FILTER (WHERE kind = 'rating'),
+               COUNT(*) FILTER (WHERE kind = 'put_off'),
+               COUNT(*) FILTER (WHERE kind = 'feedback')
           FROM app_ratings
          WHERE at > NOW() - (%s || ' days')::interval
          GROUP BY platform
@@ -63,13 +67,13 @@ def put_offs(cur, days: int) -> str:
         """,
         (days,),
     )
-    return table(["platform", "rated", "not now"], cur.fetchall())
+    return table(["platform", "store prompt", "rated", "not now", "feedback"], cur.fetchall())
 
 
 def comments(cur, days: int, limit: int | None) -> str:
     cur.execute(
         f"""
-        SELECT at::date, stars, platform, lang, comment
+        SELECT at::date, kind, stars, platform, lang, comment
           FROM app_ratings
          WHERE comment IS NOT NULL
            AND at > NOW() - (%s || ' days')::interval
@@ -82,14 +86,15 @@ def comments(cur, days: int, limit: int | None) -> str:
     if not rows:
         return "_Nothing yet._\n"
     out = []
-    for day, s, platform, lang, text in rows:
+    for day, kind, s, platform, lang, text in rows:
         quoted = "\n".join(f"> {line}" for line in text.splitlines() or [""])
-        out.append(f"**{'★' * s}** · {day} · {platform} · {lang or '—'}\n\n{quoted}\n")
+        head = "★" * s if kind == "rating" else kind
+        out.append(f"**{head}** · {day} · {platform} · {lang or '—'}\n\n{quoted}\n")
     return "\n".join(out)
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="The app's ratings and what learners wrote, as markdown.")
+    ap = argparse.ArgumentParser(description="What learners told us of the app, as markdown.")
     ap.add_argument("--days", type=int, default=DEFAULT_DAYS,
                     help=f"window in days (default {DEFAULT_DAYS})")
     ap.add_argument("--all", action="store_true",
@@ -100,8 +105,8 @@ def main() -> int:
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            out += ["### Stars\n", stars(cur, args.days), ""]
-            out += ["### Answered or put off\n", put_offs(cur, args.days), ""]
+            out += ["### The web's stars\n", stars(cur, args.days), ""]
+            out += ["### How learners were asked\n", asked(cur, args.days), ""]
             out += ["### What they wrote\n", comments(cur, args.days, None if args.all else COMMENTS)]
     finally:
         conn.close()
