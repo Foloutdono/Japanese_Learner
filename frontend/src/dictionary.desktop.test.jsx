@@ -63,6 +63,20 @@ beforeEach(() => {
   }))
 })
 
+// The dock arrives rising 10px over 280ms (@keyframes arrive), and the
+// 250ms settle below lands inside it: on a slow runner the dock was
+// measured a pixel below the door (23 against 22) — in the dock's own
+// test first, then on the grammar page, which measured without waiting.
+// So every mount waits for it, and a test measures where the dock lands,
+// not where it is on the way.
+// (Short ones only: a looping animation's `finished` never settles.)
+const landed = () => Promise.all(document.getAnimations()
+  .filter(a => {
+    const end = a.effect?.getComputedTiming().endTime
+    return Number.isFinite(end) && end <= 2000
+  })
+  .map(a => a.finished.catch(() => {})))
+
 async function mount(entry = '/dictionary') {
   const screen = await render(
     <LangProvider>
@@ -76,6 +90,7 @@ async function mount(entry = '/dictionary') {
     </LangProvider>
   )
   await settle(250)
+  await landed()
   return screen
 }
 
@@ -90,17 +105,6 @@ describe('the dock on the desk', () => {
     await mount()
     const dock = document.querySelector('.dict-dock')
     expect(dock).not.toBeNull()
-    // The dock arrives rising 10px over 280ms (@keyframes arrive), and
-    // mount()'s 250ms settle lands inside it: on a slow runner the dock
-    // was measured a pixel below the door (23 against 22). Measure where
-    // it lands, not where it is on the way.
-    // (Short ones only: a looping animation's `finished` never settles.)
-    await Promise.all(document.getAnimations()
-      .filter(a => {
-        const end = a.effect?.getComputedTiming().endTime
-        return Number.isFinite(end) && end <= 2000
-      })
-      .map(a => a.finished.catch(() => {})))
     expect(headword()).toBe('駅')
     const grid = document.querySelector('.dict-grid').getBoundingClientRect()
     expect(dock.getBoundingClientRect().left).toBeGreaterThan(grid.right - 1)
@@ -389,12 +393,24 @@ describe('the catalogue and its entry (plan 128)', () => {
     serve([DO, KANJI])
     await mount()
     const columns = () => getComputedStyle(document.querySelector('.desk-dict')).gridTemplateColumns.split(' ').length
+    // The search's answer is held until the page has been read while it
+    // loads. Answered at once, it could land before `fill` returned on a
+    // slow runner — the 300ms debounce, then the first row back in the
+    // dock — and the entry was found where it had to be gone.
+    let answer
+    const served = apiFetch.getMockImplementation()
+    apiFetch.mockImplementation(async (path, ...rest) => (
+      new URLSearchParams(String(path).split('?')[1]).get('q') === 'z'
+        ? { ok: true, status: 200, json: () => new Promise(r => { answer = r }) }
+        : served(path, ...rest)))
     const input = document.querySelector('.console input')
     input.focus()
     await userEvent.fill(input, 'z')
+    await expect.poll(() => typeof answer).toBe('function')
     // The entry is gone while the page loads; its column is not.
     expect(document.querySelector('.dict-dock')).toBeNull()
     expect(columns()).toBe(2)
+    answer({ results: [DO, KANJI], total: 2, has_more: false })
     await settle(600)
     await userEvent.fill(input, '')
     await settle(600)
