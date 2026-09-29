@@ -127,7 +127,7 @@ const DEFAULT_TIME = DEPART_TIMES.am
 // The answered stops, in line order -- the track's stops. Whether the
 // level is asked and whether a goal exists depend on answers given
 // later, so the count reads the answers so far. The reveal is the kana
-// stop's second half, never a stop of its own (plan 167, the owner's
+// stop's second half, never a stop of its own (plan 168, the owner's
 // decision 3): a reader of one script or none rides eight stops in the
 // app, a reader of both nine, the level being one.
 function trackStops(answers) {
@@ -406,7 +406,7 @@ export default function BoardingFlow({
     else toPlan()
   }
 
-  // No Building (plan 122 on the desk, owner's call; plan 167 on the
+  // No Building (plan 122 on the desk, owner's call; plan 168 on the
   // phone, the owner's decision 1). Its one job -- gathering the answers
   // into the journey -- is done by every question as it is answered; the
   // plan arrives straight after the hour (or the nudge), under the 案内
@@ -424,7 +424,7 @@ export default function BoardingFlow({
   const perDay = itemsForRhythm(answers.rhythm)
   const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, answers.lines)
   const time = minutesToTime(answers.minute)
-  // 辻 (plans 163, 167): the month the goal picked is reached in, hung
+  // 辻 (plans 163, 168): the month the goal picked is reached in, hung
   // over it on the line -- once the volumes that price it have answered.
   const arrivalMonth = volumes
     ? new Intl.DateTimeFormat(lang, { month: 'short', year: 'numeric' }).format(figures.date)
@@ -696,7 +696,7 @@ export default function BoardingFlow({
 
   return (
     <main
-      // A phone's three arrival screens stand with no head (plan 167).
+      // A phone's three arrival screens stand with no head (plan 168).
       className={desk ? 'brd desk-brd' : onTrack ? 'brd' : 'brd brd--arrival'}
       id="main-content"
       data-step={step}

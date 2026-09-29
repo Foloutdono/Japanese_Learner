@@ -22,7 +22,7 @@ import { useLang } from '../../LangContext'
 const FIELDS = {
   auth: () => 'field field--page',
   board: value => `brd-field${value ? '' : ' brd-field--empty'}`,
-  // The phone's account (plan 167): the page's field, drawn as the
+  // The phone's account (plan 168): the page's field, drawn as the
   // sign-in draws its own (`.brd-fld`).
   phone: () => 'field field--page brd-fld',
 }

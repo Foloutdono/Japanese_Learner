@@ -14,7 +14,7 @@ import { PickMark } from './BoardOption'
 // ── 7 · the hour (plan 075) ──────────────────────────────────────
 // The departure board prints the hour on split flaps; the three cells
 // are the announced rides (morning, noon, evening -- the same clock
-// Settings › Destination keeps). On a phone (plan 167, the owner's
+// Settings › Destination keeps). On a phone (plan 168, the owner's
 // pick ② of A07) the board is the control: ▲ and ▼ over and under the
 // flaps turn the hour and the half hour, the three services under it
 // set their own, and the line under them says when the first train
@@ -118,7 +118,7 @@ export default function TimeStep({ minute, onChange, onContinue, now = null }) {
   )
 }
 
-// ── 発車標 — the board as the control (plan 167) ───────────────────
+// ── 発車標 — the board as the control (plan 168) ───────────────────
 // The flaps turned by hand: ▲ and ▼ over the two hour drums move the
 // hour, over the two minute drums the half hour, the day held from six
 // to half past eleven (clampDeparture). The three services under the
@@ -183,7 +183,7 @@ function StepChevron({ up }) {
 }
 
 // The train's keys on the desk's arc (the phone's rail took the same
-// until plan 167 made the board its control): a half hour a press, two
+// until plan 168 made the board its control): a half hour a press, two
 // hours a page, the day's ends on Home and End.
 function stepHour(e, minute, onChange) {
   const moves = {

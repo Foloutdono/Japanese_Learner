@@ -91,7 +91,7 @@ export function PaperTicket({ name, now, figures, goal, rhythm, time, hour }) {
   )
 }
 
-// ── 乗車券 on a phone (plan 167) ─────────────────────────────────
+// ── 乗車券 on a phone (plan 168) ─────────────────────────────────
 // The owner's A-Compte: the same ticket at a phone's width, the route
 // across its top -- 辻, the departure; the kana when there are kana to
 // read; the terminus -- each with its day under it, the service and the

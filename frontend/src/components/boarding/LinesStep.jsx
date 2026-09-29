@@ -29,7 +29,7 @@ const GLYPH = { vocab: '語', kanji: '漢', grammar: '文' }
 // `carries` is what each line holds on this ride, { vocab, kanji,
 // grammar }, `stop` the goal it rides to and `arrival` the month the
 // lines picked arrive in -- each null until the volumes that price them
-// have answered (plan 163 on the desk, plan 167 on a phone). `no` is the
+// have answered (plan 163 on the desk, plan 168 on a phone). `no` is the
 // question's place on the line, which the phone's hub prints.
 export default function LinesStep({ value, onChange, onContinue, carries = null, stop = null, arrival = null, no = null }) {
   const { t } = useLang()
@@ -52,7 +52,7 @@ export default function LinesStep({ value, onChange, onContinue, carries = null,
   )
 }
 
-// ── 辻 on a phone — the kana into the hub, three lines out (plan 167)
+// ── 辻 on a phone — the kana into the hub, three lines out (plan 168)
 // The owner's A05: the kana run into the question's hub -- they ride on
 // every ticket, so they are no answer -- and three lines leave it in
 // their pigments, each to its card: the glyph that opens the line's

@@ -151,7 +151,7 @@ describe('the boarding on a 390x667 handset', () => {
     await record()                                    // time
     await click(screen, '[data-action="continue"]')
 
-    // No Building since plan 167: the plan arrives under the arrival
+    // No Building since plan 168: the plan arrives under the arrival
     // signboard, which any tap sends on its way.
     expect(stepOf(screen)).toBe('plan')
     await settle(200)
@@ -165,7 +165,7 @@ describe('the boarding on a 390x667 handset', () => {
     expect(Object.entries(over).filter(([, px]) => px > 0)).toEqual([])
   }, 90000)
 
-  // The other road out of the kana (plan 167): one script read, the two
+  // The other road out of the kana (plan 168): one script read, the two
   // words read out as lines, and the first stop under them.
   it('reads the reveal without scrolling', async () => {
     const screen = await render(

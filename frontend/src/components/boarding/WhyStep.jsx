@@ -10,7 +10,7 @@ import { MotiveGlyph } from './icons'
 // Six reasons, one choice; the plan's two promise lines come from it.
 // Drawn as roads out of the question's hub: six round the hub on the
 // desk (WhyRoads, plan 163), a junction down the phone (Junction, plan
-// 167). `no` is the question's place on the line, which the hub prints.
+// 168). `no` is the question's place on the line, which the hub prints.
 export default function WhyStep({ name, value, onChange, onContinue, no = null }) {
   const { t } = useLang()
   const desk = useDesk()
@@ -31,7 +31,7 @@ export default function WhyStep({ name, value, onChange, onContinue, no = null }
   )
 }
 
-// ── 辻 on a phone — the junction (plan 167) ──────────────────────
+// ── 辻 on a phone — the junction (plan 168) ──────────────────────
 // The owner's A02: the question's hub at the top of the stage, a trunk
 // down the middle, and at each of three rungs a road to a reason on
 // either side -- the pictogram in its ring, its name under it. The

@@ -26,7 +26,7 @@ import { useDesk } from '../../hooks/useDesk'
 // without an account, enters the station from here -- and the office's
 // answer to that is said here, over the button. `ticket` is the ticket
 // the account keeps (PaperTicket's props): printed beside the form on
-// the desk (plan 163), over it on a phone (plan 167, the owner's A-Compte),
+// the desk (plan 163), over it on a phone (plan 168, the owner's A-Compte),
 // and riding on without one offered beside it, with what that means.
 export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAuth = null, error = null, ticket = null }) {
   const { t } = useLang()

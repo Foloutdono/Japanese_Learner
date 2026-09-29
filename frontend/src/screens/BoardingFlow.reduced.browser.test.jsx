@@ -79,7 +79,7 @@ describe('BoardingFlow under reduced motion', () => {
     await click(screen, '[data-action="continue"]')   // the hour
     await settle(20)
 
-    // The plan at once and at rest: no Building since plan 167, and no
+    // The plan at once and at rest: no Building since plan 168, and no
     // signboard over it.
     expect(stepOf(screen)).toBe('plan')
     expect(screen.container.querySelector('.brd__car--in')).toBeNull()

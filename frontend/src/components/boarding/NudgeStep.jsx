@@ -13,7 +13,7 @@ import { BoardQuestion, Continue, BoardLink } from './BoardFrame'
 // prompt; the system's own words, never a drawing of them); Not now
 // keeps the hour and skips the prompt.
 //
-// On a phone (plan 167, the owner's A08) the notification is pinned to
+// On a phone (plan 168, the owner's A08) the notification is pinned to
 // the day it first arrives, and the week it arrives in runs under it
 // out of the question's hub (`no`): a bell a day at the learner's hour
 // (`minute`), from the first departure after `now`.
@@ -60,7 +60,7 @@ export default function NudgeStep({ time, minute = null, now = null, no = null, 
   )
 }
 
-// ── 辻 on a phone — the week it arrives in (plan 167) ────────────
+// ── 辻 on a phone — the week it arrives in (plan 168) ────────────
 // Seven days on a line out of the hub, a bell on each: the first -- the
 // day the notification above is pinned to, a drop from it -- in the
 // pass's wash. On the canvas's 358px stage (brd-map), under the

@@ -9,7 +9,7 @@ import { BoardBack } from './boardBack'
 // The canvas's `.brd`: a head with the back button and the track (the
 // line with its stops, your train at the one you are answering); the
 // body with the question centred over its answers, the two standing as
-// one block in the middle of the room (plan 167, the owner's word on the
+// one block in the middle of the room (plan 168, the owner's word on the
 // built screens); the foot docked at the bottom, rising with the
 // keyboard. Composed from these so a screen file is only its own
 // question and its own content.

@@ -3,13 +3,13 @@ import { render } from 'vitest-browser-react'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── The boarding's contract at phone width (plans 075, 167) ──────
+// ── The boarding's contract at phone width (plans 075, 168) ──────
 // The canvas's frame, pinned against the real cascade at 390×844: the
 // foot is docked at the bottom edge with the one filled action full
 // width at 66 px (plan 164's gate), in the same place on every screen;
 // the head is 44 px with a 44 px back button and a 2 px track; the
 // question stands centred over its drawing, the pair on the room's
-// middle (plan 167); every choice is a 44 px target or taller; nothing
+// middle (plan 168); every choice is a 44 px target or taller; nothing
 // scrolls sideways; the sign-in stands in the Welcome's place, its
 // segmented control filling its card and its action the same gate. The
 // stores behind the pass are stubbed: this is about the frame.
@@ -165,7 +165,7 @@ describe('the boarding at 390×844', () => {
     expect(track.querySelectorAll('.brd__stop--passed')).toHaveLength(Number(track.getAttribute('aria-valuenow')) - 1)
   })
 
-  // ── The junction (plan 167, the owner's A02) ──
+  // ── The junction (plan 168, the owner's A02) ──
   // Six reasons at the ends of three rungs off one trunk, each its
   // pictogram in a ring over its name: one choice each, a thumb's
   // target, inside the screen and clear of each other.
@@ -227,7 +227,7 @@ describe('the boarding at 390×844', () => {
   })
 
   // ── The question over its drawing, the pair on the room's middle ──
-  // Plan 167, the owner's word on the built screens: the titles
+  // Plan 168, the owner's word on the built screens: the titles
   // centred, and not always at the top of the screen. The question is
   // set centred, a rung (--sp-8) over its drawing, and the two stand as
   // one block in the middle of the room between the head and the foot --
@@ -296,7 +296,7 @@ describe('the boarding at 390×844', () => {
 
   // ── The name's plate rings gold, inside the clip ──
   // The cars slide sideways, so `.brd__cars` clips them. The name is
-  // the station's plate now (plan 167): the field draws no ring of its
+  // the station's plate now (plan 168): the field draws no ring of its
   // own, the plate's edge turns gold while the field holds the focus,
   // and that edge -- 2 px outside the plate -- stands inside the clip.
   it('rings the name\'s plate in gold while it holds the focus, inside the frame that clips the cars', async () => {
@@ -367,7 +367,7 @@ describe('the boarding at 390×844', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })
 
-  // ── The gate, in one place (plan 167) ──
+  // ── The gate, in one place (plan 168) ──
   // The owner's word on the built screens: the buttons differed from
   // screen to screen, and they are the feature that matters most. Every
   // way on is the one gate, the foot's last row -- a quiet way (the
@@ -474,7 +474,7 @@ describe('the boarding at 390×844', () => {
     for (const k of ['left', 'top', 'width', 'height']) expect(Math.round(at[k]), k).toBe(Math.round(place[k]))
   })
 
-  // ── The front door as the crossroads (plan 167, the owner's A00) ──
+  // ── The front door as the crossroads (plan 168, the owner's A00) ──
   it('draws the Welcome as the crossroads: seven lines out of 辻, and the gold road into Board', async () => {
     const screen = await render(
       <LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} /></LangProvider>
@@ -499,7 +499,7 @@ describe('the boarding at 390×844', () => {
     expect(rect(screen.container.querySelector('[data-action="sign-in"]')).height).toBeGreaterThanOrEqual(44)
   })
 
-  // ── The sign-in, in the promise's place (plan 167, A00b) ──
+  // ── The sign-in, in the promise's place (plan 168, A00b) ──
   it('the sign-in: the segmented control fills the card, the action is the gate', async () => {
     const screen = await render(
       <LangProvider><Welcome authMode="signup" onBack={() => {}} onBoard={() => {}} onSignIn={() => {}} /></LangProvider>

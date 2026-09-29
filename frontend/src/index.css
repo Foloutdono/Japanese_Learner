@@ -4722,7 +4722,7 @@ textarea:focus-visible {
 /* A reading ride's end (screens/RideReading.jsx): a quiet line above
    "Enter the station", never a second primary action competing with it.
    The boarding's own offer is drawn as its other quiet ways are
-   (`.brd__link`, plan 167). */
+   (`.brd__link`, plan 168). */
 .pw-open--quiet {
   align-self: center;
   border: 0;
@@ -20023,7 +20023,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
    landed (+120 ms) and runs once. Under reduced motion only the rest
    state is drawn -- the block at the end. ══ */
 
-/* ── sign-in: the card, drawn on the Welcome at every width (plan 167) ── */
+/* ── sign-in: the card, drawn on the Welcome at every width (plan 168) ── */
 .auth-card {
   display: flex;
   flex-direction: column;
@@ -20119,7 +20119,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  /* The question a rung under the head (plan 167): the canvas's 12px. */
+  /* The question a rung under the head (plan 168): the canvas's 12px. */
   gap: var(--sp-4);
   padding: 0 var(--sp-5);
   padding-top: calc(var(--safe-top) + var(--sp-3));
@@ -20130,7 +20130,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   /* The pass's gold as ink on paper (4.5:1 in light theme), and as the
      wash under a pick; the gold as ink ON that wash, a rung deeper, where
      the paper's ink gives 4.3:1; the kana line's pigment as ink (plan
-     167). A soft ink on the wash is the ambient ink instead, as the
+     168). A soft ink on the wash is the ambient ink instead, as the
      chosen tint always took it (.brd-cell--on). */
   --brd-ink: color-mix(in srgb, var(--accent2) 65%, var(--text-primary));
   --brd-wash: color-mix(in srgb, var(--accent2) 12%, var(--surface));
@@ -20139,7 +20139,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 }
 /* The Welcome's frame stands its parts a rung apart, wider than a
    question's. The phone's crossroads lays out its own (`.brd.brd-front`,
-   plan 167's section below), its map spending the room between. */
+   plan 168's section below), its map spending the room between. */
 .brd--welcome { gap: var(--sp-7); }
 /* The cars slide sideways, so the frame clips them — and that clip
    was taking the focus ring off the name field with them. A focused
@@ -20192,14 +20192,14 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   flex-direction: column;
   gap: var(--sp-5);
   overflow-y: auto;
-  /* To the screen's edge (plan 167): a board's shadow, a hub on the
+  /* To the screen's edge (plan 168): a board's shadow, a hub on the
      line's first rung and a focus ring all stand past the column. */
   margin-inline: calc(-1 * var(--sp-5));
   padding-inline: var(--sp-5);
 }
 
 /* ── The question over its drawing, the pair on the room's middle ──
-   Plan 167, the owner's pick A of the canvas "Onboarding on the phone",
+   Plan 168, the owner's pick A of the canvas "Onboarding on the phone",
    then the owner's word on the built screens: the titles centred, and
    not always at the top of the screen -- the room spent round the
    question and its answers rather than between them. The question is
@@ -20221,7 +20221,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
    corner, draws no air and centres its answers alone (the 机 section's
    `.desk-brd .brd__body > .brd__q`, `> .brd__air` and `> .brd__stage`).
 
-   Plan 167's first build pinned the question under the head, ranged
+   Plan 168's first build pinned the question under the head, ranged
    left, and centred the answers alone in the room it left, so a short
    question stood over a gulf; before it, plan 075's block had stood on
    the centre line between grow-only spacers at the body's two ends. */
@@ -20266,7 +20266,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .brd__track { position: relative; flex: 1; height: 44px; margin-inline: var(--sp-4) var(--sp-3); }
 .brd__rail { position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--surface-line); }
 /* The run behind you advances once the new screen stands still: 300 ms
-   after the pull. A rung heavier than the rail (plan 167): the ride
+   after the pull. A rung heavier than the rail (plan 168): the ride
    drawn over the line. */
 .brd__done { position: absolute; left: 0; top: 50%; height: 3px; margin-top: -1.5px; background: var(--accent2); transition: width 300ms ease-out 300ms; }
 .brd__stop {
@@ -20281,7 +20281,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   transform: translate(-50%, -50%);
 }
 .brd__stop--passed { border-color: var(--accent2); background: var(--accent2); }
-/* Your train (plan 167): a gold ring on the paper, its lamp lit inside. */
+/* Your train (plan 168): a gold ring on the paper, its lamp lit inside. */
 .brd__stop--here {
   width: 19px;
   height: 19px;
@@ -20308,7 +20308,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 /* The hint a short rung under its question (the body's gap, less). */
 .brd__hint { margin: calc(var(--sp-3) - var(--sp-5)) 0 0; font-size: var(--fs-body); line-height: 1.45; text-align: center; text-wrap: balance; color: var(--text-secondary); }
 .brd__error { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-align: start; color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
-/* The gate, and a quiet way over it where a screen has one (plan 167:
+/* The gate, and a quiet way over it where a screen has one (plan 168:
    the sign-in on the name and the account, Not now on the nudge, the
    offer on the pass), a rung apart. Over it, never under: the gate is
    the foot's last row, so it stands in the same place on every screen
@@ -20404,7 +20404,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .brd-kopt--on { border-color: var(--accent2); background: color-mix(in srgb, var(--accent2) 14%, var(--surface)); }
 .brd-kopt__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }
 
-/* ── welcome: the promise (the phone's crossroads is plan 167's, below) ── */
+/* ── welcome: the promise (the phone's crossroads is plan 168's, below) ── */
 .brd-tagline { margin: 0; font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); text-align: center; line-height: 1.4; text-wrap: pretty; }
 
 /* ── the name ── */
@@ -20580,7 +20580,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .brd-gift { animation: none; }
 }
 
-/* ══ 辻 on a phone — the boarding drawn as maps (plan 167) ═════════
+/* ══ 辻 on a phone — the boarding drawn as maps (plan 168) ═════════
    The owner's pick A of the canvas "Onboarding on the phone", direction
    A, built as drawn. The frame never moves (above): ‹ and the track at
    the head, the question top-left at the display rung, the gate at the
@@ -21542,7 +21542,7 @@ button.brd-stn { cursor: pointer; }
    gives way first (the auto margins over and under the pair, then the
    air between them, above); what yields after it, under 740px -- which
    is also a phone with a notch and a home bar -- is the room inside the
-   drawings (plan 167): a map's places and lines draw at 86% of their
+   drawings (plan 168): a map's places and lines draw at 86% of their
    height (`--ys`), the stage's pieces stand a rung closer, the plan's
    rows likewise, the question steps down to the heading rung and the
    gate gives back its height. The rings, names and
@@ -21574,7 +21574,7 @@ button.brd-stn { cursor: pointer; }
   .brd__q { font-size: var(--fs-heading); }
   .brd .btn-depart { min-height: 52px; }
   .brd__foot--road::before { bottom: 26px; }
-  /* The drawings close their rungs rather than scroll (plan 167): a
+  /* The drawings close their rungs rather than scroll (plan 168): a
      map's places and lines draw at 86% of their height, and its rings,
      names and answers keep their size. The crossing and the lines' fan
      hold whole answers at their two ends, so they keep theirs; the
@@ -26621,7 +26621,7 @@ button.brd-stn { cursor: pointer; }
   }
   /* The question at the paper's top-left corner, its hint under it, and
      the answers standing in the middle of the paper that is left: the
-     phone centres the question and its answers as one block (plan 167,
+     phone centres the question and its answers as one block (plan 168,
      auto margins over the one and under the other), and here the
      question keeps the corner and only the answers are centred. Auto
      margins, not justify-content: a block taller than the car keeps its
@@ -28331,7 +28331,7 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-brd__halt--by .desk-brd__halt-name { font-size: var(--fs-lead); }
   /* What the terminus holds beside what the ride is for. The first has
-     no caption since plan 167 (the owner's cut, as on a phone), so it
+     no caption since plan 168 (the owner's cut, as on a phone), so it
      stands on the middle of the second rather than on its caption. */
   .desk-brd__plan-foot {
     display: grid;

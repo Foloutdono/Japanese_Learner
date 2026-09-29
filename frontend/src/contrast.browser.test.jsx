@@ -667,7 +667,7 @@ const Fixture = () => (
     <div className="lvl-sheet__figs"><div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v ls-v">1,318</b><span className="lvl-sheet__fig-l ls-l">Marked known</span></div></div>
     <p className="lvl-sheet__body ls-body">The stops are marked <strong className="lvl-sheet__strong ls-strong">known</strong>.</p>
 
-    {/* ── Plans 075 and 167 — the boarding and the sign-in ──
+    {/* ── Plans 075 and 168 — the boarding and the sign-in ──
         The boarding stands on the page ground with its answers on
         --surface or drawn on the paper as a map; the departure boards,
         the notification's app mark and the printed pass are sumi

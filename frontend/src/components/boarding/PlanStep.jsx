@@ -10,7 +10,7 @@ import { PassError } from './PassStep'
 // ── The plan (plan 075) ──────────────────────────────────────────
 // The one screen that says where the ride arrives and when. Every figure
 // comes from the learner's own answers (domain/boarding.js planFigures)
-// and wears a ~. On a phone (plan 167, the owner's pick ② of A-Le plan)
+// and wears a ~. On a phone (plan 168, the owner's pick ② of A-Le plan)
 // the arrival comes first -- the terminus and its date at the specimen
 // rung -- then the ride as one line under it, what the terminus holds on
 // each line taken, and what the ride is for. On the desk (plan 163) the
@@ -192,7 +192,7 @@ function PlanRoute({ motive, rhythm, goal, lines, figures, now, time, hour }) {
   )
 }
 
-// ── 辻 on a phone — the arrival first (plan 167) ─────────────────
+// ── 辻 on a phone — the arrival first (plan 168) ─────────────────
 // The terminus and its day at the specimen rung, its year beside it,
 // and when the ride takes to get there; the ride as one line under it --
 // today, the kana read, two halts counting what is known by then, the

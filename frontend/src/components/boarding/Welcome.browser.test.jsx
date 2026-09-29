@@ -25,7 +25,7 @@ import '../../index.css'
 //    screen panned sideways under a scrollbar of its own.
 //
 // Both are geometry, so both are measured here rather than described.
-// Since plan 167 the rolling stock is the crossroads, drawn on the
+// Since plan 168 the rolling stock is the crossroads, drawn on the
 // paper's own box: a shorter screen draws shorter lines rather than cut
 // a name, and the gold road still runs from 辻 into Board's reader.
 

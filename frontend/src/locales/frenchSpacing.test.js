@@ -67,7 +67,7 @@ describe('welded', () => {
 
   it('is already applied to the French table', () => {
     // The screen that started this: the plan's lead, which ended on
-    // "pour toi :" -- since plan 167 the line that opens on it.
+    // "pour toi :" -- since plan 168 the line that opens on it.
     expect(fr.brdForLine(fr.brdFor.other, 'Lire ce que tu croises chaque jour')).toBe(
       `Pour toi${NBSP}: **lire ce que tu croises chaque jour**.`
     )

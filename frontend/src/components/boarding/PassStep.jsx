@@ -95,7 +95,7 @@ export function PassError({ error }) {
   )
 }
 
-// On a phone (plan 167, the owner's A-La carte) the pass stands in the
+// On a phone (plan 168, the owner's A-La carte) the pass stands in the
 // room under its question, and a road in the pass's metal runs from it
 // down to the gate's reader: the card is what is tapped on the way in.
 // The offer, when there is one, is a quiet line over the gate, as every

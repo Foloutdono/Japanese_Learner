@@ -174,7 +174,7 @@ async function passName(screen, motive = 'trip') {
   expect(stepOf(screen)).toBe('kana')
 }
 
-// No Building since plan 167: the hour goes on to the plan, and the
+// No Building since plan 168: the hour goes on to the plan, and the
 // arrival signboard plays once over it; any input skips it.
 async function arrive(screen) {
   expect(stepOf(screen)).toBe('plan')
@@ -205,7 +205,7 @@ describe('BoardingFlow', () => {
     const { screen, onComplete } = await renderFlow()
 
     // 1/7 on the web: no nudge stop, and the level only once both
-    // scripts are read (plan 167). Back on the first screen leaves the
+    // scripts are read (plan 168). Back on the first screen leaves the
     // flow, so with no `onExit` to leave for there is no button — the
     // guest boarding always passes one (see its own tests below).
     expect(stepOf(screen)).toBe('name')
@@ -297,7 +297,7 @@ describe('BoardingFlow', () => {
     expect(q(screen, '[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
     await click(screen, '[data-hour="pm"]')
     expect(q(screen, '.brd-board__flaps').getAttribute('aria-label')).toBe('21:00')
-    // The board is the control (plan 167): ▲ and ▼ over and under the
+    // The board is the control (plan 168): ▲ and ▼ over and under the
     // flaps turn the hour and the half hour.
     expect(live(screen).querySelectorAll('.brd-clock__step')).toHaveLength(4)
     await click(screen, `[aria-label="${fr.brdHalfEarlier}"]`)
@@ -378,7 +378,7 @@ describe('BoardingFlow', () => {
     // before the novice's own stop as well — that stop IS the kana, and
     // they read one script — so the whole line is ahead of them with the
     // kana at its head, and there is no stop behind them to name.
-    // The phone says so by drawing it (plan 167): no hint, and no stop
+    // The phone says so by drawing it (plan 168): no hint, and no stop
     // inked as known over the hub.
     expect(stepOf(screen)).toBe('goal')
     expect(q(screen, '.brd__hint')).toBeNull()
@@ -723,7 +723,7 @@ describe('BoardingFlow', () => {
   // is drawn OUTSIDE the border box and never counts as scrollable
   // overflow, so the focused field's ring was sliced off flush with its
   // own left and right edges: two corner arcs left hanging in the air,
-  // no sides. Since plan 167 the ring is the name's plate's -- its edge
+  // no sides. Since plan 168 the ring is the name's plate's -- its edge
   // turns gold while the field inside holds the focus, drawn outside the
   // plate as a shadow -- and it is walked up the whole chain the same
   // way: the frame's own clip had already been widened for this once and

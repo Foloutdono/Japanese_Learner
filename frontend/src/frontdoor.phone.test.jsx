@@ -133,7 +133,7 @@ describe('the boarding frame on a phone (P9)', () => {
     await next()        // → time
     expect(stepOf()).toBe('time')
     expect($('main.brd').className).toBe('brd')
-    // No Building since plan 167: the plan arrives under its signboard,
+    // No Building since plan 168: the plan arrives under its signboard,
     // an arrival screen with no head.
     await next()
     expect(stepOf()).toBe('plan')
@@ -144,7 +144,7 @@ describe('the boarding frame on a phone (P9)', () => {
 })
 
 // ── P10: the front door stays the phone's ──
-// The phone's own crossroads (plan 167), never the desk's; the sign-in
+// The phone's own crossroads (plan 168), never the desk's; the sign-in
 // drawn in the promise's place on the same screen.
 describe('the front door on a phone (P10)', () => {
   it('draws the phone\'s crossroads, never the desk\'s, and the sign-in in the promise\'s place', async () => {

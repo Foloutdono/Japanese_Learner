@@ -234,7 +234,7 @@ export default function App() {
   // if they had never tapped anything. The sign-in screen has that
   // line, and it prints the reason on its own mount.
   const [authMode, setAuthMode] = useState(() => (authRedirectError() ? 'login' : null)) // null | 'login' | 'signup'
-  // 机 (plans 122, 163) and a phone (plan 167): the sign-in stands in the
+  // 机 (plans 122, 163) and a phone (plan 168): the sign-in stands in the
   // promise's place on the Welcome itself, so there is no second screen
   // to swap to -- authMode says whether it stands, and on which side it
   // opens.

@@ -4,7 +4,7 @@ import { render } from 'vitest-browser-react'
 // ── Signed out: Welcome, then the sign-in on the matching side ──
 // The boarding's step zero replaces the landing page (plan 075): Board
 // boards on a guest pass or, with none to be had, opens the sign-in on
-// Sign up; "Have an account?" opens it on Login -- since plan 167 in the
+// Sign up; "Have an account?" opens it on Login -- since plan 168 in the
 // promise's place on the Welcome itself -- and ‹ puts the promise back.
 // No session, no router.
 
@@ -40,7 +40,7 @@ describe('App signed out', () => {
     const screen = await render(<App />)
     await settle()
 
-    // The crossroads (plan 167): the promise over the app's lines.
+    // The crossroads (plan 168): the promise over the app's lines.
     expect(screen.container.querySelector('.brd--welcome')).not.toBeNull()
     expect(screen.container.querySelectorAll('.brd-front__stn')).toHaveLength(7)
     expect(screen.container.querySelector('.brd-tagline')).not.toBeNull()

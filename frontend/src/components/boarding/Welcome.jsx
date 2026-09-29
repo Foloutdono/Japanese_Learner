@@ -10,7 +10,7 @@ import { PaperWait } from './PaperWait'
 import { Mark } from '../ui/Mark'
 import { BackChevron } from './icons'
 
-// ── Welcome — the front door (plans 075, 163, 167) ────────────────
+// ── Welcome — the front door (plans 075, 163, 168) ────────────────
 // The first screen a stranger sees and the boarding's step zero: the
 // promise, the crossroads the app's lines leave from, and the one
 // action. Board → the questions, on a guest pass rather than an account
@@ -32,7 +32,7 @@ export default function Welcome({ onBoard, onSignIn, onBack = null, boarding = f
   return <PhoneWelcome onBoard={onBoard} onSignIn={onSignIn} onBack={onBack} boarding={boarding} authMode={authMode} t={t} />
 }
 
-// ── 辻 on a phone — the front door as the crossroads (plan 167) ──
+// ── 辻 on a phone — the front door as the crossroads (plan 168) ──
 // The owner's A00: the promise over the crossroads itself -- 辻 in its
 // hub and the app's seven lines out of it, each in its pigment to its
 // sign and named -- and the eighth road, in the pass's gold, running
@@ -164,7 +164,7 @@ function FrontMap({ t }) {
   )
 }
 
-// ── The sign-in, in the promise's place (plan 167, A00b) ─────────
+// ── The sign-in, in the promise's place (plan 168, A00b) ─────────
 // Its question where the promise stood, the crossroads smaller under it
 // with no names (the Welcome named the lines), and the form: Google,
 // the address, the password, and its own action -- the boarding's gate,
@@ -345,7 +345,7 @@ function DeskWelcome({ onBoard, onSignIn, onBack, boarding, authMode, t }) {
                     <div className="auth-card">{head}</div>
                   </div>
                   {/* Board's gate, in Board's place: the one button the
-                      boarding draws for its way on (plan 167). */}
+                      boarding draws for its way on (plan 168). */}
                   <GateButton keys label={submit.label} onClick={submit.onClick} disabled={submit.disabled} data-action="auth-submit" />
                   <div className="desk-front__below">
                     {authMode === 'signup' && <p className="auth-foot">{t.authFoot}</p>}

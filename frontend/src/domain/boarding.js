@@ -78,7 +78,7 @@ export function minuteAtFraction(fraction) {
   return clampDeparture(raw)
 }
 
-/** The first departure at a minute of the day (plan 167): today if it
+/** The first departure at a minute of the day (plan 168): today if it
  *  is still to come, else tomorrow -- `later` says which. The hour's
  *  board and the nudge's week both count from it. */
 export function firstDeparture(now, minute) {

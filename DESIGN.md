@@ -757,7 +757,7 @@ Two rules the guard exists to keep, both learned by measurement:
 The boarding's one action — **Board** on the Welcome, **Continue** on every
 question and at the end of a first ride (`Continue` in
 `components/boarding/BoardFrame.jsx`), and the sign-in's own action in
-Board's place (plan 167, phone and desk alike) — and Today's **Depart** on the fare
+Board's place (plan 168, phone and desk alike) — and Today's **Depart** on the fare
 gate (`components/station/GateCard.jsx`, owner-directed after plan 164) are
 drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
 as a ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
@@ -785,7 +785,7 @@ press it"):
 - **A list that scrolls under it fades** into the foot (the body's last
   `--sp-7`, driven by the body's own scroll, so nothing when it does not
   scroll).
-- **One gate, in one place** (plan 167, the owner's word on the built
+- **One gate, in one place** (plan 168, the owner's word on the built
   boarding: the buttons are the feature that matters most). In the
   boarding the gate is the foot's last row, so from Board to the pass it
   stands at the same height and width on every screen; a quiet way — the
@@ -1105,7 +1105,7 @@ a learner who has just rated one card is already looking for the next.
   cross-fade. Under reduced motion only the rest state is drawn. (The
   desk pulls a shorter way; see *The desk*, "First contact is the
   crossroads".)
-- **On a phone the boarding is drawn as maps** (plan 167; the owner's pick
+- **On a phone the boarding is drawn as maps** (plan 168; the owner's pick
   A of the canvas "Onboarding on the phone"). ‹ and the track at the
   head — a stop per question, the reveal the kana's second half, the level
   a stop only for a reader of both scripts — and the gate docked at the
@@ -1728,7 +1728,7 @@ each question drawing its answers between them.
     it — and the corner then offers Board. A pass that could not be issued
     opens it on Sign up, both sides named. The drawing is the paper's own:
     the lines as long as the paper leaves them. The phone draws its own
-    crossroads down the screen (plan 167).
+    crossroads down the screen (plan 168).
   - *Three places never move.* The question at the paper's top-left
     corner at the display rung; the journey a strip of named stops at the
     floor's left end, on the line Back and Continue stand on (the ones

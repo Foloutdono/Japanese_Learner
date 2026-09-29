@@ -107,7 +107,7 @@ function KanaTree({ value, onAnswer }) {
   )
 }
 
-// ── 辻 on a phone — the crossing (plan 167) ──────────────────────
+// ── 辻 on a phone — the crossing (plan 168) ──────────────────────
 // The owner's A03: 辻 itself, two roads crossing, the two words where
 // they meet, and an answer at each road's end -- drawn as what it reads
 // (the words again, solid for a word read and dashed for one not yet),
@@ -223,7 +223,7 @@ function RevealWords({ first }) {
   )
 }
 
-// ── 辻 on a phone — each word read as a line (plan 167) ──────────
+// ── 辻 on a phone — each word read as a line (plan 168) ──────────
 // The owner's A03b: each word as a little line of its own, under its
 // script's name -- its signs the stations, each with its sound under it,
 // running on to what the word means at the line's end -- and under the

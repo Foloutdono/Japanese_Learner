@@ -38,7 +38,7 @@ describe('the day track', () => {
     expect(bucketFor(timeToMinutes('16:30'))).toBe('noon')
     expect(bucketFor(timeToMinutes('21:00'))).toBe('pm')
   })
-  // Plan 167: the hour's board says "today" or "tomorrow", and the
+  // Plan 168: the hour's board says "today" or "tomorrow", and the
   // nudge's week starts on that day.
   it('leaves today while the hour is still to come, else tomorrow', () => {
     const now = new Date(2026, 8, 28, 9, 0)

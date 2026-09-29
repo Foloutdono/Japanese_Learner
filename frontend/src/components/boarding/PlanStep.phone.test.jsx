@@ -18,7 +18,7 @@ import '../../index.css'
 // locales.test.js holds the string tables to the rule; this holds the
 // screen, because the rule can be right in the table and still lose to
 // a stylesheet. The numbers are that screenshot's: 10 minutes a day,
-// ~700 words, ~100 kanji, N5 by December. Since plan 167 the phone's
+// ~700 words, ~100 kanji, N5 by December. Since plan 168 the phone's
 // plan is the arrival first, and the colon stands in the line that says
 // what the ride is for ("Pour toi : …").
 //

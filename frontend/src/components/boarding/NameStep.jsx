@@ -29,7 +29,7 @@ const NAME_MAX = 20
 // questions with no hint that their own journey was somewhere else —
 // see components/settings/AccountPage.jsx for the road back to it.
 //
-// The name is the station's (plan 163's D01 on the desk, plan 167's A01
+// The name is the station's (plan 163's D01 on the desk, plan 168's A01
 // on a phone): its plate with the letters it has left, a pole down to
 // the question's hub (`no`, its place on the line) and the line leaving
 // it for the next stop (`next`, that stop's name). On the desk the way

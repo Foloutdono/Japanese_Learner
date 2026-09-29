@@ -161,7 +161,7 @@ function ClimbLine({ stops, answers, at = null, value, onChange, label, attr, ca
   )
 }
 
-// ── 辻 on a phone — the line climbing (plan 167) ─────────────────
+// ── 辻 on a phone — the line climbing (plan 168) ─────────────────
 // The owner's A03b and A04: the same line up the phone, a stop a rung --
 // the novice's, then N5 up to N1 -- climbing from the question's hub at
 // its foot, each stop a ring with its name and what it holds beside it.

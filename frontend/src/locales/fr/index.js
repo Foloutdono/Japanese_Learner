@@ -1988,7 +1988,7 @@ const boarding = {
   brdAtTerminus: 'Au terminus, tu connaîtras',
   brdUnit: { vocab: 'mots', kanji: 'kanji', grammar: 'points de grammaire' },
   brdUnitKana: 'signes',
-  // 辻 on a phone (plan 167): the kana over the lines' hub, the board's
+  // 辻 on a phone (plan 168): the kana over the lines' hub, the board's
   // arrival column and first stop, the hour's arrows and first train, the
   // plan's arrival and what the ride is for.
   brdKanaFirstShort: 'Kana, en premier',

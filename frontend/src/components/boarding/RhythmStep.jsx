@@ -8,7 +8,7 @@ import { useBoxSize } from '../../hooks/useBoxWidth'
 import { PickMark } from './BoardOption'
 
 // ── 6 · the rhythm (plan 075) ────────────────────────────────────
-// Minutes a day, and when each pace arrives. On a phone (plan 167, the
+// Minutes a day, and when each pace arrives. On a phone (plan 168, the
 // owner's pick ① of A06) the four rhythms are four trains on a 発車標,
 // each with its service, its minutes and the new items they hold, and
 // its arrival at the goal; under the board, the first stop -- the kana,
@@ -64,7 +64,7 @@ export default function RhythmStep({ value, onChange, onContinue, rides = null, 
   )
 }
 
-// ── 発車標 — four trains on the board (plan 167) ───────────────────
+// ── 発車標 — four trains on the board (plan 168) ───────────────────
 // A row a rhythm, as a departure board prints a train: its service (the
 // board's own names, components/onboarding/paces.js), the minutes a day
 // with the new items they hold, and where it arrives and when. The one

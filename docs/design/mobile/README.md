@@ -436,9 +436,9 @@ body's own `--sp-5`, before the body will scroll. `--center` bodies are centred
 by a pair of grow-only spacers for the same reason — a centred flex line that
 outgrows its box spills off both ends and no scroll reaches back over the top
 of it. Pinned in `boarding.phone.test.jsx`, which shortens the frame to the
-phones the artboard is not. (Plan 167 retired this rhythm: see below.)
+phones the artboard is not. (Plan 168 retired this rhythm: see below.)
 
-## The boarding drawn as maps (plan 167)
+## The boarding drawn as maps (plan 168)
 
 The owner's pick A of the canvas "Onboarding on the phone", built as drawn;
 the desk keeps plan 163's drawings. ‹ and the track at the head, the gate

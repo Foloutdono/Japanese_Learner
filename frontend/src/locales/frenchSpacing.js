@@ -23,7 +23,7 @@
 //     brdLead: (min, date, purpose) => `… ${purpose} :`
 //
 // from a fragment held under another key (as brdForLine, which took
-// its place in plan 167, still is), so a table full of
+// its place in plan 168, still is), so a table full of
 // hand-typed NBSPs would still have printed an orphan colon the day
 // someone wrote a new one. Here the rule applies to the string the
 // learner actually gets, whenever it is built, and locales.test.js
