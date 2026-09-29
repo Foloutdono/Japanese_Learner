@@ -25,6 +25,9 @@ import '../../index.css'
 //    screen panned sideways under a scrollbar of its own.
 //
 // Both are geometry, so both are measured here rather than described.
+// Since plan 167 the rolling stock is the crossroads, drawn on the
+// paper's own box: a shorter screen draws shorter lines rather than cut
+// a name, and the gold road still runs from 辻 into Board's reader.
 
 // LangContext pulls the content-translation maps over the network on
 // mount — same stub the boarding flow's own suite uses.
@@ -82,41 +85,38 @@ describe('the welcome screen holds still', () => {
     })
   }
 
-  it('still runs the cards to both screen edges', async () => {
+  for (const [name, w, h] of PHONES) {
+    it(`draws every line and its name whole on ${name}`, async () => {
+      const root = await renderWelcome(w, h)
+      const frame = root.querySelector('.brd--welcome').getBoundingClientRect()
+      const map = root.querySelector('.brd-front__map').getBoundingClientRect()
+      const stations = [...root.querySelectorAll('.brd-front__stn')]
+      expect(stations).toHaveLength(7)
+      for (const stn of stations) {
+        for (const part of stn.querySelectorAll('.brd-front__sign, .brd-front__name')) {
+          const b = part.getBoundingClientRect()
+          expect(b.left, stn.dataset.line).toBeGreaterThanOrEqual(frame.left)
+          expect(b.right, stn.dataset.line).toBeLessThanOrEqual(frame.right)
+          expect(b.top, stn.dataset.line).toBeGreaterThanOrEqual(map.top - 1)
+          expect(b.bottom, stn.dataset.line).toBeLessThanOrEqual(map.bottom + 1)
+        }
+      }
+    })
+  }
+
+  it('runs the gold road from 辻 down into Board\'s reader', async () => {
     const root = await renderWelcome(393, 807)
-    const frame = root.querySelector('.brd--welcome').getBoundingClientRect()
-    const roll = root.querySelector('.brd-roll').getBoundingClientRect()
-    // The bleed is the point of the roll: it reaches past the frame's
-    // gutter to the edge. Widening the body to carry it is what removed
-    // the overflow — the bleed itself must survive that.
-    expect(roll.left).toBeCloseTo(frame.left, 0)
-    expect(roll.right).toBeCloseTo(frame.right, 0)
-  })
-
-  it('keeps one lane whole rather than slicing two, when the screen is short', async () => {
-    const tall = await renderWelcome(393, 807)
-    const bothLanes = [...tall.querySelectorAll('.brd-roll__lane')]
-      .filter(l => getComputedStyle(l).display !== 'none')
-    expect(bothLanes).toHaveLength(2)
-    // Two 204px cards and the sp-4 between them fit whole at this height.
-    const rollTall = tall.querySelector('.brd-roll').getBoundingClientRect()
-    for (const lane of bothLanes) {
-      const b = lane.getBoundingClientRect()
-      expect(b.top).toBeGreaterThanOrEqual(rollTall.top - 1)
-      expect(b.bottom).toBeLessThanOrEqual(rollTall.bottom + 1)
-    }
-
-    await cleanup()
-
-    const short = await renderWelcome(393, 660)
-    const shownLanes = [...short.querySelectorAll('.brd-roll__lane')]
-      .filter(l => getComputedStyle(l).display !== 'none')
-    expect(shownLanes).toHaveLength(1)
-    // And the one that stays is whole — a card cut through its own word
-    // is what dropping the second lane exists to avoid.
-    const rollShort = short.querySelector('.brd-roll').getBoundingClientRect()
-    const kept = shownLanes[0].getBoundingClientRect()
-    expect(kept.top).toBeGreaterThanOrEqual(rollShort.top - 1)
-    expect(kept.bottom).toBeLessThanOrEqual(rollShort.bottom + 1)
+    const map = root.querySelector('.brd-front__map').getBoundingClientRect()
+    const figures = root.querySelector('.brd-front__way').getAttribute('d')
+      .split(/[\s,A-Z]+/).filter(Boolean).map(Number)
+    const hub = root.querySelector('.brd-front__hub').getBoundingClientRect()
+    const reader = root.querySelector('[data-action="board"] .btn-depart__reader').getBoundingClientRect()
+    // From the hub's centre …
+    expect(Math.abs(map.left + figures[0] - (hub.left + hub.width / 2))).toBeLessThanOrEqual(1)
+    expect(Math.abs(map.top + figures[1] - (hub.top + hub.height / 2))).toBeLessThanOrEqual(1)
+    // … to the paper's foot, over the reader's centre.
+    const [x, y] = figures.slice(-2)
+    expect(Math.abs(map.left + x - (reader.left + reader.width / 2))).toBeLessThanOrEqual(1)
+    expect(Math.abs(map.top + y - map.bottom)).toBeLessThanOrEqual(1)
   })
 })

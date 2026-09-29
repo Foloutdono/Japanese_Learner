@@ -667,81 +667,138 @@ const Fixture = () => (
     <div className="lvl-sheet__figs"><div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v ls-v">1,318</b><span className="lvl-sheet__fig-l ls-l">Marked known</span></div></div>
     <p className="lvl-sheet__body ls-body">The stops are marked <strong className="lvl-sheet__strong ls-strong">known</strong>.</p>
 
-    {/* ── Plan 075 — the boarding and the sign-in ──
-        The boarding stands on the page ground with its cards on
-        --surface; the departure board, the notification's app mark and
-        the printed pass are sumi (pinned inline like the panels above,
-        whose gradients the walker cannot composite). The gold inks --
-        the name in a question, a kana's meaning, the tag's ring -- are
-        exactly the pairs part 1's contract cannot see. */}
+    {/* ── Plans 075 and 167 — the boarding and the sign-in ──
+        The boarding stands on the page ground with its answers on
+        --surface or drawn on the paper as a map; the departure boards,
+        the notification's app mark and the printed pass are sumi
+        (pinned inline like the panels above, whose gradients the walker
+        cannot composite). The gold inks -- the name in a question, the
+        stop picked, the arrival's date, a tag's ring -- and the kana
+        line's pigment as ink are exactly the pairs part 1's contract
+        cannot see. The desk's own answers (.brd-cell) stand here too. */}
     <div className="brd" data-step="why">
       <h1 className="brd__q">Why, <strong className="brd__q-em ob-q-em">Aiko</strong>?</h1>
       <p className="brd__hint ob-hint">The stops behind you will be marked known.</p>
       <p className="brd__error ob-error">Saving failed</p>
       <button type="button" className="brd__link ob-link">Not now</button>
-      <button type="button" className="brd-opt brd-opt--on" aria-pressed="true">
-        <span className="brd-opt__code ob-code-on">N5</span>
-        <span className="brd-opt__names">
-          <span className="brd-opt__label ob-label-on">Beginner<span className="brd-tag ob-tag">Next stop</span></span>
-          <span className="brd-opt__desc ob-desc-on">Simple phrases · ~100 kanji</span>
-        </span>
+      <span className="brd-hub ob-hub">2</span>
+      <label className="brd-plate"><span className="brd-plate__count ob-plate-count">7 / 20</span></label>
+      <span className="brd-name__lab ob-name-next">Why</span>
+      <button type="button" className="brd-way"><span className="brd-way__name ob-way">To travel</span></button>
+      <button type="button" className="brd-cross__ans" aria-pressed="true">
+        <span className="brd-cross__label ob-cross-on">Only <span className="brd-cross__jp" lang="ja">すし</span></span>
+        <span className="brd-cross__sub ob-cross-sub-on">the hiragana</span>
       </button>
-      <button type="button" className="brd-opt" aria-pressed="false">
-        <span className="brd-opt__code ob-code">N4</span>
-        <span className="brd-opt__names"><span className="brd-opt__desc ob-desc">Everyday talk</span></span>
+      <button type="button" className="brd-cross__ans" aria-pressed="false">
+        <span className="brd-cross__sub ob-cross-sub">the katakana</span>
       </button>
-      <button type="button" className="brd-cell brd-cell--on" aria-pressed="true">
-        <span className="brd-cell__n ob-cell-n">10</span>
-        <span className="brd-cell__u ob-cell-u">min a day</span>
-        <span className="brd-cell__sub ob-cell-sub">~10 new items</span>
+      <p className="brd-read__script ob-read-script">Hiragana</p>
+      <span className="brd-read__glyph ob-read-glyph" lang="ja">あ</span>
+      <span className="brd-read__sign"><span className="brd-read__sign-jp ob-read-sign" lang="ja">す</span></span>
+      <span className="brd-read__sound ob-read-sound">su</span>
+      <span className="brd-read__cap ob-read-cap">means</span>
+      <span className="brd-first__ring ob-first-ring" lang="ja">あ</span>
+      <div className="brd-map brd-climb">
+        <button type="button" className="brd-stn brd-stn--known">
+          <span className="brd-stn__ring ob-stn-known">N5</span>
+        </button>
+        <button type="button" className="brd-stn brd-stn--on" aria-pressed="true">
+          <span className="brd-stn__ring ob-stn-on">N4</span>
+          <span className="brd-stn__lab">
+            <span className="brd-stn__name">Elementary<span className="brd-tag brd-stn__tag ob-tag">Next stop</span></span>
+            <span className="brd-stn__desc ob-stn-desc">Everyday talk · ~300 kanji</span>
+            <span className="brd-stn__note ob-stn-note">You are here</span>
+          </span>
+        </button>
+      </div>
+      <span className="brd-fan__kana ob-fan-kana" lang="ja">あ</span>
+      <span className="brd-fan__ticket-lock ob-fan-lock">On every ticket</span>
+      <button type="button" className="brd-lcard" data-line="kanji" aria-pressed="true">
+        <span className="brd-lcard__ring ob-lcard-ring" lang="ja">漢</span>
+        <span className="brd-lcard__desc ob-lcard-desc">The characters</span>
+        <span className="brd-lcard__unit ob-lcard-unit">kanji to N4</span>
       </button>
-      <button type="button" className="brd-kopt"><span className="brd-kopt__jp ob-kopt-jp" lang="ja">すし</span></button>
-      <div className="brd-kana">
-        <div className="brd-kana__pane">
-          <span className="brd-kana__romaji ob-romaji">su · shi</span>
-          <span className="brd-kana__en ob-kana-en">sushi</span>
-          <span className="brd-kana__script ob-script">Hiragana</span>
-        </div>
+      <p className="brd-arrive">Arrives in <strong className="ob-arrive">June 2027</strong></p>
+      <p className="brd-arrive brd-arrive--none ob-arrive-none">Keep one line at least.</p>
+      <div className="brd-trains" style={{ background: 'var(--bg-panel)' }}>
+        <p className="brd-trains__head ob-trains-head"><span>Service</span></p>
+        <button type="button" className="brd-train" aria-pressed="true">
+          <span className="brd-train__jp ob-train-jp" lang="ja">快速</span>
+          <span className="brd-train__tag ob-train-tag">Recommended</span>
+          <span className="brd-train__date ob-train-date">3 Jun 2027</span>
+        </button>
+        <button type="button" className="brd-train" aria-pressed="false">
+          <span className="brd-train__new ob-train-new">~15 new a day</span>
+          <span className="brd-train__days ob-train-days">in 248 days</span>
+        </button>
       </div>
-      <div className="brd-demo" style={{ '--line-color': 'var(--line-kanji)' }}>
-        <span className="brd-demo__tag ob-demo-tag">Kanji</span>
-        <span className="brd-demo__meaning ob-demo-meaning">station</span>
-        <span className="brd-demo__foot ob-demo-foot">Kanji → meaning</span>
-      </div>
-      <div className="brd-demo" style={{ '--line-color': 'var(--line-exam)' }}>
-        <span className="brd-demo__tag ob-demo-tag-exam">Listening</span>
-      </div>
+      <p className="brd-trains__first">First stop: the kana, by <strong className="ob-first-stop">12 Oct</strong></p>
       <div className="brd-board" style={{ background: 'var(--bg-panel)' }}>
         <span className="brd-board__cap ob-board-cap">Departure</span>
         <span className="brd-flap ob-flap">0</span>
         <span className="brd-board__colon ob-colon">:</span>
       </div>
-      <div className="brd-day"><span className="brd-day__tick ob-tick">06</span></div>
+      <button type="button" className="brd-hour" aria-pressed="true">
+        <span className="brd-hour__jp ob-hour-jp" lang="ja">朝</span>
+        <span className="brd-hour__name ob-hour-name">Morning</span>
+      </button>
+      <p className="brd-clock__when">Your train · <strong className="ob-when">07:30</strong></p>
       <div className="brd-notif">
         <span className="brd-notif__app ob-notif-app" style={{ background: 'var(--bg-panel)' }}>辻</span>
         <div className="brd-notif__head ob-notif-head"><span>Tsuji</span></div>
         <span className="brd-notif__text ob-notif-text">Your cards are waiting at the gate.</span>
       </div>
-      <div className="brd-step brd-step--done"><span className="brd-step__val ob-step-val">N5 → N4</span></div>
-      <div className="brd-chart">
-        <span className="brd-chart__title ob-chart-title">Your projection</span>
-        <div className="brd-legend ob-legend">Daily reviews</div>
-        <span className="brd-chart__cap ob-chart-cap">an illustration, not a measurement</span>
-      </div>
-      <p className="brd-lead ob-lead">At <strong className="brd-lead__em ob-lead-em">10 min a day</strong></p>
-      <div className="brd-bullet ob-bullet">~1,300 words</div>
+      <span className="brd-week__day ob-week-day">1</span>
+      <span className="brd-week__date ob-week-date">29 Sep</span>
+      <p className="brd-plan__cap ob-plan-cap">Terminus · JLPT N4</p>
+      <p className="brd-plan__date ob-plan-date"><span className="brd-plan__day">3 Jun</span></p>
+      <p className="brd-plan__sub ob-plan-sub">in <strong>248 days</strong></p>
+      <span className="brd-ride__lab brd-ride__lab--today ob-ride-today">Today</span>
+      <span className="brd-ride__lab ob-ride-lab">Kana · 12 Oct</span>
+      <ul className="brd-held">
+        <li className="brd-held__cell" data-line="kanji">
+          <span className="brd-held__jp ob-held-jp" lang="ja">漢</span>
+          <span className="brd-held__unit ob-held-unit">kanji</span>
+        </li>
+      </ul>
+      <p className="brd-keep__note ob-keep-note">Kept on this phone only.</p>
+      <section className="brd-tk">
+        <div className="brd-tk__body">
+          <span className="brd-tk__kind ob-tk-kind">Ticket</span>
+          <span className="brd-tk__stop brd-tk__stop--end"><span className="brd-tk__ring ob-tk-end">N4</span></span>
+          <dl className="brd-tk__terms"><div className="brd-tk__term"><dt className="ob-tk-term">Service</dt></div></dl>
+        </div>
+        <div className="brd-tk__stub">
+          <b className="brd-tk__credits ob-tk-credits">200</b>
+          <span className="brd-tk__unit ob-tk-unit">credits</span>
+          <span className="brd-tk__punch ob-tk-punch">Punched</span>
+        </div>
+      </section>
       <div className="brd-issue" style={{ background: 'var(--bg-panel)' }}>
         <span className="brd-gift ob-gift">+200 credits</span>
       </div>
+      <button type="button" className="brd-cell brd-cell--on" aria-pressed="true">
+        <span className="brd-cell__n ob-cell-n">10</span>
+        <span className="brd-cell__u ob-cell-u">min a day</span>
+        <span className="brd-cell__sub ob-cell-sub">~10 new items</span>
+      </button>
     </div>
-    <main className="auth">
-      <span className="auth-header__glyph ob-auth-glyph" lang="ja">日本語</span>
-      <h1 className="auth-header__title ob-auth-title">Learn Japanese</h1>
-      <div className="auth-card">
-        <p className="auth-message auth-message--error ob-auth-error">Wrong password</p>
-        <button type="button" className="auth-submit ob-auth-submit">Login</button>
+    <main className="brd brd--welcome brd-front">
+      <p className="brd-front__door ob-front-door"><span>Have an account?</span></p>
+      <p className="brd-tagline ob-tagline">A ride cut to your size</p>
+      <span className="brd-front__stn" style={{ '--pig': 'var(--line-kanji)' }}>
+        <span className="brd-front__sign ob-front-sign" lang="ja">漢</span>
+        <span className="brd-front__name ob-front-name">Kanji</span>
+      </span>
+      <div className="brd-signin">
+        <div className="brd-signin__form">
+          <div className="auth-card brd-signin__card">
+            <p className="auth-message auth-message--error ob-auth-error">Wrong password</p>
+          </div>
+          <button type="button" className="brd-signin__go ob-signin-go">Log in</button>
+          <p className="auth-foot ob-auth-foot">Everything can be changed later in Settings.</p>
+        </div>
       </div>
-      <p className="auth-foot ob-auth-foot">Everything can be changed later in Settings.</p>
     </main>
     {/* ── 辞書 — the entry plate and its body (2026-09 redesign) ──
         The dock injects the 辞書 pigment; the entry mixes it 60% toward
@@ -998,42 +1055,73 @@ const SITES = [
   ['.ob-hint', 'boarding hint (soft ink on page)'],
   ['.ob-error', 'boarding error line (danger on page)'],
   ['.ob-link', 'boarding ghost link'],
-  ['.ob-code-on', 'chosen row code (ink on gold tint)'],
-  ['.ob-label-on', 'chosen row label (ink on gold tint)'],
+  ['.ob-hub', 'a question\'s hub (ink on page)'],
+  ['.ob-plate-count', 'the name plate\'s count (soft ink on surface)'],
+  ['.ob-name-next', 'the next stop\'s name (soft ink on page)'],
+  ['.ob-way', 'a reason at the junction (ink on page)'],
+  ['.ob-cross-on', 'the kana answer picked (ink on gold wash)'],
+  ['.ob-cross-sub-on', 'the kana answer picked, its script (soft ink on gold wash)'],
+  ['.ob-cross-sub', 'a kana answer\'s script (soft ink on surface)'],
+  ['.ob-read-script', 'the reveal\'s script caption (soft ink on page)'],
+  ['.ob-read-glyph', 'the reveal\'s script glyph (kana pigment on page)'],
+  ['.ob-read-sign', 'a sign on its line (ink on page)'],
+  ['.ob-read-sound', 'a sign\'s sound (soft ink on page)'],
+  ['.ob-read-cap', 'a word\'s meaning caption (soft ink on page)'],
+  ['.ob-first-ring', 'the kana\'s stop (kana pigment on page)'],
+  ['.ob-stn-known', 'a stop behind (ink on gold fill)'],
+  ['.ob-stn-on', 'the stop picked (gold ink on gold wash)'],
   ['.ob-tag', 'the tag (ink in a gold ring)'],
-  ['.ob-desc-on', 'chosen row description (soft ink on gold tint)'],
-  ['.ob-code', 'row code (soft ink on surface)'],
-  ['.ob-desc', 'row description (soft ink on surface)'],
-  ['.ob-cell-n', 'chosen cell figure (ink on gold tint)'],
-  ['.ob-cell-u', 'chosen cell unit (soft ink on gold tint)'],
-  ['.ob-cell-sub', 'chosen cell sub (soft ink on gold tint)'],
-  ['.ob-kopt-jp', 'kana answer sample (soft ink on surface)'],
-  ['.ob-romaji', 'kana reading (soft ink on surface)'],
-  ['.ob-kana-en', 'kana meaning (gold on surface)'],
-  ['.ob-script', 'kana script caption (soft ink on surface)'],
-  ['.ob-demo-tag', 'demo card tag (kanji pigment on surface)'],
-  ['.ob-demo-tag-exam', 'demo card tag (exam pigment on surface)'],
-  ['.ob-demo-meaning', 'demo card meaning (shu-iro on surface)'],
-  ['.ob-demo-foot', 'demo card foot (soft ink on surface)'],
+  ['.ob-stn-desc', 'a stop\'s description (soft ink on page)'],
+  ['.ob-stn-note', 'you are here (gold ink on page)'],
+  ['.ob-fan-kana', 'the kana over the lines\' hub (kana pigment on page)'],
+  ['.ob-fan-lock', 'on every ticket (soft ink on page)'],
+  ['.ob-lcard-ring', 'a line card\'s glyph (kanji pigment on page)'],
+  ['.ob-lcard-desc', 'a line card\'s description (soft ink on gold wash)'],
+  ['.ob-lcard-unit', 'a line card\'s unit (soft ink on gold wash)'],
+  ['.ob-arrive', 'the lines\' arrival (gold ink on page)'],
+  ['.ob-arrive-none', 'no line left (danger on page)'],
+  ['.ob-trains-head', 'departure board head (soft panel ink on sumi)'],
+  ['.ob-train-jp', 'a train\'s service (lamp on the lit row)'],
+  ['.ob-train-tag', 'the recommended train (lamp on the lit row)'],
+  ['.ob-train-date', 'the picked train\'s arrival (lamp on the lit row)'],
+  ['.ob-train-new', 'a train\'s new items (soft panel ink on sumi)'],
+  ['.ob-train-days', 'a train\'s days (soft panel ink on sumi)'],
+  ['.ob-first-stop', 'the kana\'s date under the board (gold ink on page)'],
   ['.ob-board-cap', 'departure board caption (soft panel ink on sumi)'],
   ['.ob-flap', 'departure board flap (panel ink on flap face)'],
   ['.ob-colon', 'departure board colon (soft panel ink on sumi)'],
-  ['.ob-tick', 'day track tick (soft ink on page)'],
+  ['.ob-hour-jp', 'the hour picked (gold ink on gold wash)'],
+  ['.ob-hour-name', 'the hour\'s name (soft ink on gold wash)'],
+  ['.ob-when', 'the train\'s hour (gold ink on page)'],
   ['.ob-notif-app', 'notification app mark (the mark\'s ink on sumi, plan 158)'],
   ['.ob-notif-head', 'notification head (soft ink on surface)'],
   ['.ob-notif-text', 'notification text (soft ink on surface)'],
-  ['.ob-step-val', 'build step value (soft ink on surface)'],
-  ['.ob-chart-title', 'chart title (soft ink on surface)'],
-  ['.ob-legend', 'chart legend (soft ink on surface)'],
-  ['.ob-chart-cap', 'chart caption (soft ink on surface)'],
-  ['.ob-lead', 'plan lead (soft ink on page)'],
-  ['.ob-lead-em', 'plan lead term (ink on page)'],
-  ['.ob-bullet', 'plan promise (ink on page)'],
+  ['.ob-week-day', 'a day\'s bell (gold ink on page)'],
+  ['.ob-week-date', 'a day\'s date (soft ink on page)'],
+  ['.ob-plan-cap', 'the terminus caption (soft ink on page)'],
+  ['.ob-plan-date', 'the arrival\'s date (gold ink on page)'],
+  ['.ob-plan-sub', 'the arrival\'s line (soft ink on page)'],
+  ['.ob-ride-today', 'the ride\'s today (soft ink on page)'],
+  ['.ob-ride-lab', 'a halt on the ride (ink on page)'],
+  ['.ob-held-jp', 'what a line holds, its glyph (kanji pigment on page)'],
+  ['.ob-held-unit', 'what a line holds, its unit (soft ink on page)'],
+  ['.ob-keep-note', 'the account\'s skip note (soft ink on page)'],
+  ['.ob-tk-kind', 'the ticket\'s kind (soft ink on surface)'],
+  ['.ob-tk-term', 'the ticket\'s term (soft ink on surface)'],
+  ['.ob-tk-end', 'the ticket\'s terminus (gold ink on gold wash)'],
+  ['.ob-tk-credits', 'the ticket\'s credits (gold ink on surface)'],
+  ['.ob-tk-unit', 'the ticket\'s unit (soft ink on surface)'],
+  ['.ob-tk-punch', 'the ticket\'s punch (stamp ink on surface)'],
   ['.ob-gift', 'the welcome on the printed pass (gold mixed toward the panel ink)'],
-  ['.ob-auth-glyph', 'sign-in glyph (ink on page)'],
-  ['.ob-auth-title', 'sign-in title (soft ink on page)'],
-  ['.ob-auth-error', 'sign-in error (danger on surface)'],
-  ['.ob-auth-submit', 'sign-in action (panel ink on shu-iro fill)'],
+  ['.ob-cell-n', 'chosen cell figure (ink on gold tint)'],
+  ['.ob-cell-u', 'chosen cell unit (soft ink on gold tint)'],
+  ['.ob-cell-sub', 'chosen cell sub (soft ink on gold tint)'],
+  ['.ob-front-door', 'the front door\'s question (soft ink on page)'],
+  ['.ob-tagline', 'the promise\'s tagline (soft ink on page)'],
+  ['.ob-front-sign', 'a line\'s sign at the crossroads (kanji pigment on page)'],
+  ['.ob-front-name', 'a line\'s name at the crossroads (ink on page)'],
+  ['.ob-auth-error', 'sign-in error (danger on page)'],
+  ['.ob-signin-go', 'sign-in action (panel ink on gold mixed toward sumi)'],
   ['.ob-auth-foot', 'sign-in foot (soft ink on page)'],
   ['.jr-status-b', 'pass footer status word (state ink on sumi)'],
   ['.jr-validity-b', 'pass footer 有効期限 (gold on sumi)'],

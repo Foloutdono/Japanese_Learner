@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  LINES, approx, axisLabel, boardingDraft, bucketFor, clampDeparture, dayFraction, goalStops, jlptFor,
+  LINES, approx, axisLabel, boardingDraft, bucketFor, clampDeparture, dayFraction, firstDeparture, goalStops, jlptFor,
   kanaFigures, kanaKnownCount, kanjiThrough, levelAnswers, levelForKana, linesOrAll, minuteAtFraction,
   minutesToTime, planFigures, rideAxis, stopsAhead, timeToMinutes, toggleLine,
 } from './boarding'
@@ -37,6 +37,19 @@ describe('the day track', () => {
     expect(bucketFor(timeToMinutes('12:30'))).toBe('noon')
     expect(bucketFor(timeToMinutes('16:30'))).toBe('noon')
     expect(bucketFor(timeToMinutes('21:00'))).toBe('pm')
+  })
+  // Plan 167: the hour's board says "today" or "tomorrow", and the
+  // nudge's week starts on that day.
+  it('leaves today while the hour is still to come, else tomorrow', () => {
+    const now = new Date(2026, 8, 28, 9, 0)
+    const evening = firstDeparture(now, timeToMinutes('21:00'))
+    expect(evening.later).toBe(true)
+    expect(evening.first).toEqual(new Date(2026, 8, 28, 21, 0))
+    const morning = firstDeparture(now, timeToMinutes('07:30'))
+    expect(morning.later).toBe(false)
+    expect(morning.first).toEqual(new Date(2026, 8, 29, 7, 30))
+    // The minute itself has gone: the train it names is tomorrow's.
+    expect(firstDeparture(now, 9 * 60).first).toEqual(new Date(2026, 8, 29, 9, 0))
   })
 })
 

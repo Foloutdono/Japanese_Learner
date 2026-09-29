@@ -1824,11 +1824,6 @@ const boarding = {
   brdServiceValue: (name, n) => `${name} · ${n} / jour`,
   brdTicketNote: 'Sans compte, ton billet reste sur cet appareil.',
   brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulaire', grammar: 'Grammaire', dictation: 'Dictée', reading: 'Lecture', kana: 'Kana', translation: 'Traduction', analyzer: 'Analyseur', exam: 'Examen blanc' },
-  brdDemoMeaning: { station: 'gare', toEat: 'manger', whichRule: 'Quelle règle ?', craft: 'métier', writeIt: 'Écris-le', readIt: 'Lis', kippu: 'kippu', ki: 'ki', sayIt: 'Traduis-le', yama: 'yama · san', breakItDown: 'Décortique', timer: '24:18' },
-  brdDemoFoot: { kanjiMeaning: 'Kanji → sens', wordMeaning: 'Mot → sens', sentenceRule: 'Phrase → règle', meaningKanji: 'Sens → kanji', soundText: 'Son → texte', sentenceMeaning: 'Phrase → sens', wordReading: 'Mot → lecture', kanaRomaji: 'Kana → rōmaji', meaningSentence: 'Sens → phrase', kanjiReadings: 'Kanji → lectures', sentenceGrammar: 'Phrase → grammaire', timedPaper: 'Épreuve chronométrée' },
-  // L’énoncé de la carte 翻訳 est dans la langue de l’apprenant : une
-  // chaîne de l’interface, pas du contenu.
-  brdDemoPrompt: { waiting: 'J’attends un ami à la gare.' },
   // Les questions.
   brdNameQ: 'Comment tu t’appelles ?',
   brdNameAria: 'Ton nom',
@@ -1845,7 +1840,6 @@ const boarding = {
   brdKana: { hiragana: 'Hiragana', katakana: 'Katakana', both: 'Les deux', none: 'Pas encore' },
   brdKanaWord: { sushi: 'sushi', hotel: 'hôtel' },
   brdRevealQ: 'Bientôt, tu liras les deux.',
-  brdRevealHint: 'Deux écritures, 46 signes chacune. Ton premier arrêt.',
   // 辻 (plan 163): the desk's kana question and reveal, drawn as the
   // owner's D03 -- each answer says what it reads, then its name.
   brdKanaHint: 'Choisis ce que tu lis déjà.',
@@ -1955,39 +1949,17 @@ const boarding = {
     android: 'Maintiens ton doigt sur l’écran d’accueil, touche Widgets, puis fais glisser Tsuji.',
   },
   notifWidgetWhat: 'Il affiche les cartes du jour et un mot que tu connais, jamais un mot à revoir cette semaine.',
-  // L’arrivée : la préparation, le plan, la carte.
-  brdBuildingQ: (name) => `Préparation de ton trajet, **${name}**`,
+  // L’arrivée : le plan, la carte.
   brdBuildingAria: 'Préparation de ton trajet',
-  brdBuildGoal: 'Ton objectif',
-  brdBuildLines: 'Tes lignes',
-  brdBuildRide: 'Ton trajet quotidien',
-  brdBuildProjection: 'Ta projection',
   // 机 (plan 140) : les arrêts de la colonne du bureau, un par question.
   brdStop: { name: 'Nom', why: 'Pourquoi', kana: 'Kana', level: 'Niveau', goal: 'Objectif', lines: 'Lignes', rhythm: 'Rythme', time: 'Départ', nudge: 'Rappel' },
   brdArrivalTitle: 'Ton plan',
   brdPlanQ: (name) => `Ton plan est prêt, **${name}**.`,
-  brdChartTitle: 'Ta projection',
-  brdChartAria: (words) => `Mots retenus au fil du trajet : les révisions quotidiennes montent à environ ${words} ; le bachotage plafonne tôt.`,
-  brdChartLabel: (words) => `~${words} mots · révisions quotidiennes`,
-  // Le même graphique pour un billet sans les mots : il monte jusqu’à
-  // tout ce que les lignes choisies contiennent.
-  brdChartAriaItems: (n) => `Éléments retenus au fil du trajet : les révisions quotidiennes montent à environ ${n} ; le bachotage plafonne tôt.`,
-  brdChartLabelItems: (n) => `~${n} éléments · révisions quotidiennes`,
-  // Le même graphique pour un trajet jusqu’à l’arrêt du novice, qui
-  // promet des signes et non des mots.
-  brdChartAriaKana: (kana) => `Kana retenus au fil du trajet : les révisions quotidiennes montent à environ ${kana} ; le bachotage plafonne tôt.`,
-  brdChartLabelKana: (kana) => `~${kana} kana · révisions quotidiennes`,
-  brdChartCram: 'bachotage',
-  brdLegendUs: (min) => `Révisions quotidiennes, ${min} min`,
-  brdLegendThem: 'Bachotage',
-  brdChartCap: 'Révisions espacées contre bachotage — une illustration, pas une mesure.',
-  brdLead: (min, date, purpose) => `À **${min} min par jour**, d’ici **${date}**, ${purpose} :`,
   brdFor: { studies: 'pour tes études', fun: 'pour le plaisir', trip: 'pour ton voyage', live: 'pour ta vie au Japon', friends: 'pour tes amis', other: 'pour toi' },
-  // La première promesse : un chiffre par ligne du billet, reliés.
+  // Un chiffre par ligne du billet.
   brdFigWords: (n) => `~${n} mots`,
   brdFigKanji: (n) => `~${n} kanji`,
   brdFigGrammar: (n) => `~${n} points de grammaire`,
-  brdBulletFigures: (parts) => (parts.length > 1 ? `${parts.slice(0, -1).join(', ')} et ${parts.at(-1)}` : parts[0] ?? ''),
   // L’arrêt du novice pris comme objectif : les kana, puis la ligne qui
   // attend derrière. Pas de compte de mots, et aucune promesse de
   // motif — trois semaines de signes ne font pas un drama sans pause.
@@ -2002,8 +1974,6 @@ const boarding = {
     friends: ['Discuter par message', 'Une conversation au dîner'],
     other: ['Lire ce que tu croises chaque jour', 'Dire ce que tu veux dire'],
   },
-  brdOnTrack: (level) => `En route vers le JLPT ${level}`,
-  brdOnTrackLine: 'En route sur toute la ligne',
   brdOnTrackKana: 'En route vers les kana',
   brdPassQ: (name) => `Ta carte est prête, **${name}**.`,
   brdEnjoy: 'Bon voyage.',
@@ -2021,6 +1991,19 @@ const boarding = {
   brdAtTerminus: 'Au terminus, tu connaîtras',
   brdUnit: { vocab: 'mots', kanji: 'kanji', grammar: 'points de grammaire' },
   brdUnitKana: 'signes',
+  // 辻 on a phone (plan 167): the kana over the lines' hub, the board's
+  // arrival column and first stop, the hour's arrows and first train, the
+  // plan's arrival and what the ride is for.
+  brdKanaFirstShort: 'Kana, en premier',
+  brdArriveAt: (stop) => `Arrivée au ${stop}`,
+  brdFirstStop: (date) => `Premier arrêt : les kana, lus d’ici le **${date}**`,
+  brdHourLater: 'Une heure plus tard',
+  brdHourEarlier: 'Une heure plus tôt',
+  brdHalfLater: 'Une demi-heure plus tard',
+  brdHalfEarlier: 'Une demi-heure plus tôt',
+  brdTrainAt: (today, time) => `Ton train · ${today ? 'aujourd’hui' : 'demain'}, **${time}**, puis chaque jour`,
+  brdArriveIn: (days, every, time) => `${days === 1 ? '**demain**' : `dans **${days} jours**`}, ${every} à ${time}`,
+  brdForLine: (purpose, promise) => `${purpose.charAt(0).toUpperCase()}${purpose.slice(1)} : **${promise.charAt(0).toLowerCase()}${promise.slice(1)}**.`,
 }
 
 const ride = {

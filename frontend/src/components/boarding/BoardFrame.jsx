@@ -8,10 +8,10 @@ import { BoardBack } from './boardBack'
 // ── The frame every boarding screen stands in (plan 075) ─────────
 // The canvas's `.brd`: a head with the back button and the track (the
 // line with its stops, your train at the one you are answering); the
-// body with the question and its answers standing as one block on the
-// centre line of the room between; the foot docked at the bottom,
-// rising with the keyboard. Composed from these four so a screen file
-// is only its own question and its own content.
+// body with the question at its top-left and its answers standing in
+// the middle of the room left under it (plan 167); the foot docked at
+// the bottom, rising with the keyboard. Composed from these so a screen
+// file is only its own question and its own content.
 
 export function BoardHead({ index, total, onBack }) {
   const { t } = useLang()
@@ -56,19 +56,8 @@ export function BoardQuestion({ children, hint = null, as: Tag = 'h1' }) {
     <>
       <Tag className="brd__q" tabIndex={-1}>{children}</Tag>
       {hint && <p className="brd__hint">{hint}</p>}
-      <BoardAir />
     </>
   )
-}
-
-/** The room between a question and its answers, drawn as a spacer
-    rather than a margin so that it can give way on a phone shorter
-    than the block needs (index.css, "The content stands on the
-    centre line; the air gives way before the body scrolls"). Rendered
-    by BoardQuestion, so a screen only ever asks for it directly when
-    it writes its own question block -- the pass does. */
-export function BoardAir() {
-  return <div className="brd__air" aria-hidden="true" />
 }
 
 /** The one filled action: gold, full width, docked. `keys` is the

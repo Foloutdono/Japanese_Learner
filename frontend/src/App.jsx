@@ -35,7 +35,6 @@ import { useDesk } from './hooks/useDesk'
 import { LangProvider, useLang } from './LangContext'
 
 import Welcome from './components/boarding/Welcome'
-import AuthScreen  from './screens/AuthScreen'
 import BoardingFlow from './screens/BoardingFlow'
 import RideRun from './screens/RideRun'
 import RideReading from './screens/RideReading'
@@ -235,9 +234,10 @@ export default function App() {
   // if they had never tapped anything. The sign-in screen has that
   // line, and it prints the reason on its own mount.
   const [authMode, setAuthMode] = useState(() => (authRedirectError() ? 'login' : null)) // null | 'login' | 'signup'
-  // 机 (plans 122, 163): on the desk the sign-in stands in Board's place
-  // on the Welcome itself, so there is no second screen to swap to --
-  // authMode says whether it stands, and on which side it opens.
+  // 机 (plans 122, 163) and a phone (plan 167): the sign-in stands in the
+  // promise's place on the Welcome itself, so there is no second screen
+  // to swap to -- authMode says whether it stands, and on which side it
+  // opens.
   const desk = useDesk()
   // The browser's Back on the sign-in (plan 123): the sign-in replaces
   // Welcome through state, so Back left Tsuji rather than returning to
@@ -513,9 +513,7 @@ export default function App() {
   if (!session) {
     return (
       <LangProvider>
-        {authMode && !desk
-          ? <AuthScreen mode={authMode} onBack={() => setAuthMode(null)} />
-          : <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} onBack={() => setAuthMode(null)} authMode={authMode} />}
+        <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} onBack={() => setAuthMode(null)} authMode={authMode} />
       </LangProvider>
     )
   }

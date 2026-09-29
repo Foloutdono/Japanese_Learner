@@ -66,9 +66,10 @@ describe('welded', () => {
   })
 
   it('is already applied to the French table', () => {
-    // The screen that started this: the lead under the projection.
-    expect(fr.brdLead(10, 'décembre 2026', fr.brdFor.other)).toBe(
-      `À **10 min par jour**, d’ici **décembre 2026**, pour toi${NBSP}:`
+    // The screen that started this: the plan's lead, which ended on
+    // "pour toi :" -- since plan 167 the line that opens on it.
+    expect(fr.brdForLine(fr.brdFor.other, 'Lire ce que tu croises chaque jour')).toBe(
+      `Pour toi${NBSP}: **lire ce que tu croises chaque jour**.`
     )
     expect(fr.brdNameQ).toBe(`Comment tu t’appelles${NBSP}?`)
   })

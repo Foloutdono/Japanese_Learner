@@ -3,8 +3,8 @@ import { LINES, approx, toggleLine } from '../../domain/boarding'
 import { useDesk } from '../../hooks/useDesk'
 import { Emphasized } from '../ui/Emphasized'
 import { BoardQuestion, Continue } from './BoardFrame'
-import { BoardOption, PickMark } from './BoardOption'
-import { LockMark } from './icons'
+import { PickMark } from './BoardOption'
+import { CheckMark, LockMark } from './icons'
 
 // ── the lines: what to learn ─────────────────────────────────────
 // Three rows, any number of them on, all three on to begin with: the
@@ -26,40 +26,100 @@ import { LockMark } from './icons'
 // patterns.
 const GLYPH = { vocab: '語', kanji: '漢', grammar: '文' }
 
-// On the desk (plan 163) `carries` is what each line holds on this ride,
-// { vocab, kanji, grammar }, `stop` the goal it rides to and `arrival`
-// the month the lines picked arrive in -- each null until the volumes
-// that price them have answered.
-export default function LinesStep({ value, onChange, onContinue, carries = null, stop = null, arrival = null }) {
+// `carries` is what each line holds on this ride, { vocab, kanji,
+// grammar }, `stop` the goal it rides to and `arrival` the month the
+// lines picked arrive in -- each null until the volumes that price them
+// have answered (plan 163 on the desk, plan 167 on a phone). `no` is the
+// question's place on the line, which the phone's hub prints.
+export default function LinesStep({ value, onChange, onContinue, carries = null, stop = null, arrival = null, no = null }) {
   const { t } = useLang()
   const desk = useDesk()
   return (
     <>
       <div className="brd__body">
-        <BoardQuestion hint={t.brdLinesHint}>{t.brdLinesQ}</BoardQuestion>
+        <BoardQuestion hint={desk ? t.brdLinesHint : null}>{t.brdLinesQ}</BoardQuestion>
         <div className="brd__stage">
-          {desk ? <LineCards value={value} onChange={onChange} carries={carries} stop={stop} arrival={arrival} /> : (
-            <div className="brd__opts" role="group" aria-label={t.brdLinesQ}>
-              {LINES.map((line, i) => (
-                <BoardOption
-                  key={line}
-                  pick={i + 1}
-                  on={value.includes(line)}
-                  onClick={() => onChange(toggleLine(value, line))}
-                  code={<span lang="ja">{GLYPH[line]}</span>}
-                  label={t.brdLine[line]}
-                  desc={t.brdLineDesc[line]}
-                  data-line={line}
-                />
-              ))}
-            </div>
-          )}
-          {value.length === 0 && <p className="brd__error" role="alert">{t.brdLinesNone}</p>}
+          {desk
+            ? <LineCards value={value} onChange={onChange} carries={carries} stop={stop} arrival={arrival} />
+            : <LineFan value={value} onChange={onChange} carries={carries} stop={stop} arrival={arrival} no={no} />}
+          {desk && value.length === 0 && <p className="brd__error" role="alert">{t.brdLinesNone}</p>}
         </div>
       </div>
       <div className="brd__foot">
         <Continue keys label={t.onbContinue} onClick={onContinue} disabled={value.length === 0} data-action="continue" />
       </div>
+    </>
+  )
+}
+
+// ── 辻 on a phone — the kana into the hub, three lines out (plan 167)
+// The owner's A05: the kana run into the question's hub -- they ride on
+// every ticket, so they are no answer -- and three lines leave it in
+// their pigments, each to its card: the glyph that opens the line's
+// plate in its ring, what it is, and what it carries on this ride. A line
+// switched off goes dashed and its card pales; the arrival under the
+// cards moves with them.
+//
+// On the canvas's 358px stage (brd-map): the kana over the hub, the three
+// cards' top centres the roads run to.
+const FAN = [56, 179, 302]
+
+function LineFan({ value, onChange, carries, stop, arrival, no }) {
+  const { t, lang } = useLang()
+  const reach = stop === 'novice' ? null : stop
+  return (
+    <>
+      <div className="brd-map brd-fan" style={{ '--h': 398 }}>
+        <svg className="brd-map__lines" viewBox="0 0 358 398" preserveAspectRatio="none" aria-hidden="true">
+          <path className="brd-fan__trunk" d="M179 40V98" />
+          {LINES.map((line, i) => (
+            <path
+              key={line}
+              className={`brd-fan__road${value.includes(line) ? '' : ' brd-fan__road--off'}`}
+              data-road={line}
+              d={`M179 98L${FAN[i]} 174`}
+            />
+          ))}
+        </svg>
+        <span className="brd-fan__kana brd-map__at" style={{ '--x': 179, '--y': 20 }} lang="ja" aria-hidden="true">あ</span>
+        <span className="brd-hub brd-map__at" style={{ '--x': 179, '--y': 98 }} aria-hidden="true">{no}</span>
+        <p className="brd-fan__ticket brd-map__at brd-map__at--corner" style={{ '--x': 210, '--y': 2 }}>
+          <b className="brd-fan__ticket-name">{t.brdKanaFirstShort}</b>
+          <span className="brd-fan__ticket-lock"><LockMark />{t.brdOnEveryTicket}</span>
+        </p>
+        <div role="group" aria-label={t.brdLinesQ}>
+          {LINES.map((line, i) => {
+            const on = value.includes(line)
+            const n = carries?.[line] ?? 0
+            return (
+              <button
+                key={line}
+                type="button"
+                className="brd-lcard brd-map__at brd-map__at--top"
+                // Plain numbers, placed by the sheet: the card's top centre.
+                style={{ '--x': FAN[i], '--y': 174 }}
+                aria-pressed={on}
+                onClick={() => onChange(toggleLine(value, line))}
+                data-line={line}
+              >
+                <span className="brd-lcard__chk" aria-hidden="true"><CheckMark /></span>
+                <span className="brd-lcard__ring" lang="ja" aria-hidden="true">{GLYPH[line]}</span>
+                <span className="brd-lcard__name">{t.brdLine[line]}</span>
+                <span className="brd-lcard__desc">{t.brdLineDesc[line]}</span>
+                {reach && n > 0 && (
+                  <span className="brd-lcard__vol">
+                    <b className="brd-lcard__fig">~{ROUNDED(n).toLocaleString(lang)}</b>
+                    <span className="brd-lcard__unit">{t.brdLineCarries[line](reach)}</span>
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+      {value.length === 0
+        ? <p className="brd-arrive brd-arrive--none" role="alert">{t.brdLinesNone}</p>
+        : reach && arrival && <p className="brd-arrive"><Emphasized text={t.brdLinesArrive(value.length, reach, arrival)} /></p>}
     </>
   )
 }

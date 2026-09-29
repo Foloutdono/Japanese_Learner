@@ -78,7 +78,7 @@ async function board({ onComplete = vi.fn(), onExit = vi.fn() } = {}) {
 /** Name → why, the name kept (no write), by Enter in the field. */
 async function pastName() {
   expect(stepOf()).toBe('name')
-  expect(document.activeElement).toBe(inCar('.brd-field'))
+  expect(document.activeElement).toBe(inCar('.brd-plate__field'))
   await enter()
   await settle()
   expect(stepOf()).toBe('why')
@@ -114,7 +114,7 @@ describe('the keys at first contact, on a phone (P8)', () => {
 
 // ── P9: the boarding frame stays the phone's ──
 describe('the boarding frame on a phone (P9)', () => {
-  it('keeps the plain frame with no side, and plays Building after the hour', async () => {
+  it('keeps the plain frame with no side, and goes from the hour to the plan', async () => {
     await board()
     expect($('main.brd').className).toBe('brd')
     expect($('.desk-brd__side')).toBeNull()
@@ -133,35 +133,52 @@ describe('the boarding frame on a phone (P9)', () => {
     await next()        // → time
     expect(stepOf()).toBe('time')
     expect($('main.brd').className).toBe('brd')
+    // No Building since plan 167: the plan arrives under its signboard,
+    // an arrival screen with no head.
     await next()
-    expect(stepOf()).toBe('building')
-    expect($('.brd-build__track')).not.toBeNull()
+    expect(stepOf()).toBe('plan')
+    expect($('main.brd').className).toBe('brd brd--arrival')
+    expect($('.brd__head')).toBeNull()
+    expect($('.brd-build__track')).toBeNull()
   })
 })
 
 // ── P10: the front door stays the phone's ──
+// The phone's own crossroads (plan 167), never the desk's; the sign-in
+// drawn in the promise's place on the same screen.
 describe('the front door on a phone (P10)', () => {
-  it('keeps the link to the sign-in, no crossroads, and two runs a lane', async () => {
-    await render(<LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} authMode="signup" /></LangProvider>)
+  it('draws the phone\'s crossroads, never the desk\'s, and the sign-in in the promise\'s place', async () => {
+    const { unmount } = await render(<LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} /></LangProvider>)
     await settle(100)
-    expect($('main').className).toBe('brd brd--welcome')
+    expect($('main').className).toBe('brd brd--welcome brd-front')
     expect($('[data-action="sign-in"]')).not.toBeNull()
+    expect($('.brd-front__map')).not.toBeNull()
     expect($('.desk-front__map')).toBeNull()
     expect($('.auth-card')).toBeNull()
-    for (const lane of document.querySelectorAll('.brd-roll__lane')) expect(lane.children).toHaveLength(12)
+    await unmount()
+
+    await render(<LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} onBack={() => {}} authMode="signup" /></LangProvider>)
+    await settle(100)
+    expect($('main').className).toBe('brd brd--welcome brd-front brd-front--auth')
+    expect($('.desk-front__map')).toBeNull()
+    expect($('.brd-front__promise')).toBeNull()
+    expect($('.brd-signin .auth-card .seg')).not.toBeNull()
+    expect($('.brd-signin .auth-foot')).not.toBeNull()
   })
 
-  it('swaps the Welcome for the sign-in screen, both sides and its foot', async () => {
+  it('swaps the promise for the sign-in in place: Log in alone, and Board in the corner', async () => {
     const { default: App } = await import('./App')
     window.history.replaceState(null, '', '/')
     await render(<App />)
     await settle(300)
     $('[data-action="sign-in"]').click()
     await settle(120)
-    expect($('main.auth')).not.toBeNull()
-    expect($('.brd--welcome')).toBeNull()
-    expect($('main.auth .seg')).not.toBeNull()
-    expect($('main.auth .auth-foot')).not.toBeNull()
+    expect($('main.brd-front--auth')).not.toBeNull()
+    expect($('.brd-front__promise')).toBeNull()
+    expect($('.brd-signin .seg')).toBeNull()
+    expect($('[data-action="auth-submit"]')).not.toBeNull()
+    expect($('[data-action="board-corner"]')).not.toBeNull()
+    expect($('[data-action="welcome"]')).not.toBeNull()
   })
 })
 

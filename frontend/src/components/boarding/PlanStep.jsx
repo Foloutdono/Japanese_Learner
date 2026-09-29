@@ -1,77 +1,27 @@
 import { useLang } from '../../LangContext'
 import { Emphasized } from '../ui/Emphasized'
 import { Mark } from '../ui/Mark'
-import { CHART_US, CHART_THEM, LINES, approx, axisLabel } from '../../domain/boarding'
+import { LINES, approx } from '../../domain/boarding'
 import { useDesk } from '../../hooks/useDesk'
 import { BoardQuestion, Continue } from './BoardFrame'
 import { CheckMark } from './icons'
 import { PassError } from './PassStep'
 
 // ── The plan (plan 075) ──────────────────────────────────────────
-// The one screen that compares: the chart draws spaced reviews against
-// cramming -- an illustration, and the card says so -- then the lead
-// names the rhythm, the date and the motive, and four promises follow:
-// the figures, two lines from the motive, the JLPT stop. Every figure
-// comes from the learner's own answers (domain/boarding.js
-// planFigures) and wears a ~.
+// The one screen that says where the ride arrives and when. Every figure
+// comes from the learner's own answers (domain/boarding.js planFigures)
+// and wears a ~. On a phone (plan 167, the owner's pick ② of A-Le plan)
+// the arrival comes first -- the terminus and its date at the specimen
+// rung -- then the ride as one line under it, what the terminus holds on
+// each line taken, and what the ride is for. On the desk (plan 163) the
+// ride is drawn to scale beside what it holds (PlanRoute).
 //
-// A ride to the novice's own stop is the exception, and the whole
-// screen answers to it: three weeks of kana promise no word count and
-// no JLPT stop, and the motive's two lines ("a drama without pausing")
-// would be a lie told over signs. So the kana are what the chart
-// climbs to and what the bullets promise -- the line beyond is named
-// as what comes next, not as what this ride buys.
-
-// The chart's box, the canvas's own: 326×150, the plot from x 28..304
-// and y 140 (nothing) to 10 (everything promised).
-const X0 = 28, X1 = 304, Y0 = 140, Y1 = 10
-const GRID = [0, 1 / 3, 2 / 3, 1]
-
-function points(fractions) {
-  const dx = (X1 - X0) / (fractions.length - 1)
-  return fractions.map((f, i) => `${Math.round(X0 + i * dx)},${Math.round(Y0 - f * (Y0 - Y1))}`).join(' ')
-}
-
-function monthLabel(date, lang, withYear = false) {
-  const opts = withYear ? { month: 'short', year: 'numeric' } : { month: 'short' }
-  return new Intl.DateTimeFormat(lang, opts).format(date).replace('.', '').toUpperCase()
-}
-
-function Chart({ top, label, aria, from, to, minutes, lang, t }) {
-  const us = points(CHART_US)
-  const them = points(CHART_THEM)
-  const [uxEnd, uyEnd] = us.split(' ').at(-1).split(',')
-  const [txEnd, tyEnd] = them.split(' ').at(-1).split(',')
-  return (
-    <div className="brd-chart">
-      <span className="brd-chart__title">{t.brdChartTitle}</span>
-      <svg viewBox="0 0 326 150" role="img" aria-label={aria}>
-        {GRID.map(g => {
-          const y = Math.round(Y0 - g * (Y0 - Y1))
-          return <line key={g} className="brd-chart__grid" x1={X0} y1={y} x2={X1} y2={y} />
-        })}
-        {GRID.slice(1).map(g => (
-          <text key={g} className="brd-chart__axis" x={X0 - 4} y={Math.round(Y0 - g * (Y0 - Y1)) + 3} textAnchor="end">
-            {axisLabel(Math.round(top * g))}
-          </text>
-        ))}
-        <text className="brd-chart__axis" x={X0} y="150" textAnchor="start">{monthLabel(from, lang)}</text>
-        <text className="brd-chart__axis" x={X1} y="150" textAnchor="end">{monthLabel(to, lang, true)}</text>
-        <polyline className="brd-chart__line brd-chart__line--them" points={them} />
-        <polyline className="brd-chart__line brd-chart__line--us" points={us} />
-        <circle className="brd-chart__dot brd-chart__dot--them" cx={txEnd} cy={tyEnd} r="4" />
-        <circle className="brd-chart__dot brd-chart__dot--us" cx={uxEnd} cy={uyEnd} r="4" />
-        <text className="brd-chart__lbl" x={X1 - 52} y={Y1 + 14} textAnchor="end">{label}</text>
-        <text className="brd-chart__lbl brd-chart__lbl--soft" x={X1 - 6} y={Number(tyEnd) + 16} textAnchor="end">{t.brdChartCram}</text>
-      </svg>
-      <div className="brd-legend">
-        <span className="brd-legend__key"><i className="brd-legend__swatch" />{t.brdLegendUs(minutes)}</span>
-        <span className="brd-legend__key"><i className="brd-legend__swatch brd-legend__swatch--them" />{t.brdLegendThem}</span>
-      </div>
-      <span className="brd-chart__cap">{t.brdChartCap}</span>
-    </div>
-  )
-}
+// A ride to the novice's own stop is the exception, and both answer to
+// it: three weeks of kana promise no word count and no JLPT stop, and
+// the motive's lines ("a drama without pausing") would be a lie told
+// over signs. So the kana are what the ride arrives at and what it
+// holds -- the line beyond is named as what comes next, not as what this
+// ride buys.
 
 // `last` is the desk's (plan 140): there the pass is issued at the
 // column's foot while the plan is read, so the pass's own screen folds
@@ -86,42 +36,8 @@ export default function PlanStep({
   name, motive, rhythm, goal, lines = LINES, figures, now, onContinue, last = false, busy = false, error = null,
   time = null, hour = 'am',
 }) {
-  const { t, lang } = useLang()
+  const { t } = useLang()
   const desk = useDesk()
-  const dateLabel = new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(figures.date)
-  const toNovice = goal === 'novice'
-  const [line1, line2] = t.brdPromise[motive] ?? t.brdPromise.other
-  // The figures promised are the chosen lines' and no other's: a
-  // learner riding kanji alone is not promised words they will not be
-  // shown. The words and the kanji are the headline figures, as they
-  // always were; the grammar points are named only when they are all
-  // the ticket holds -- seventy a level is not a figure to lead with,
-  // and three figures no longer fit the bullet's one line on a short
-  // phone. Each wears its ~ and its own rounding.
-  const parts = [
-    lines.includes('vocab') && t.brdFigWords(approx(figures.words, 100).toLocaleString(lang)),
-    lines.includes('kanji') && t.brdFigKanji(approx(figures.kanji, 50).toLocaleString(lang)),
-  ].filter(Boolean)
-  if (parts.length === 0) parts.push(t.brdFigGrammar(approx(figures.grammar, 10).toLocaleString(lang)))
-  const bullets = toNovice
-    ? [t.brdBulletKana, t.brdBulletThenLine, t.brdOnTrackKana]
-    : [
-      t.brdBulletFigures(parts),
-      line1,
-      line2,
-      goal ? t.brdOnTrack(goal) : t.brdOnTrackLine,
-    ]
-  // What the climbing line climbs to: the words when the words are on
-  // the ticket, otherwise everything the chosen lines hold -- a chart
-  // climbing to "~0 words" would promise a ride to nowhere. The floors
-  // keep the axis honest on the beat before the volumes answer (and
-  // if they never do).
-  const inWords = lines.includes('vocab')
-  const promised = inWords ? approx(figures.words, 100) : approx(figures.items - figures.kana, 100)
-  const top = toNovice ? Math.max(50, figures.kana) : Math.max(300, promised)
-  const topLabel = top.toLocaleString(lang)
-  const chartLabel = toNovice ? t.brdChartLabelKana(topLabel) : inWords ? t.brdChartLabel(topLabel) : t.brdChartLabelItems(topLabel)
-  const chartAria = toNovice ? t.brdChartAriaKana(topLabel) : inWords ? t.brdChartAria(topLabel) : t.brdChartAriaItems(topLabel)
   return (
     <>
       <div className="brd__body">
@@ -133,26 +49,9 @@ export default function PlanStep({
             <PlanRoute motive={motive} rhythm={rhythm} goal={goal} lines={lines} figures={figures} now={now} time={time} hour={hour} />
           </div>
         ) : (
-        <div className="brd__stage">
-          <Chart
-            top={top}
-            label={chartLabel}
-            aria={chartAria}
-            from={now}
-            to={figures.date}
-            minutes={rhythm}
-            lang={lang}
-            t={t}
-          />
-          <p className="brd-lead">
-            <Emphasized text={t.brdLead(rhythm, dateLabel, t.brdFor[motive] ?? t.brdFor.other)} strongClassName="brd-lead__em" />
-          </p>
-          <div className="brd-bullets">
-            {bullets.map((b, i) => (
-              <div className="brd-bullet" key={i}><CheckMark />{b}</div>
-            ))}
+          <div className="brd__stage">
+            <Arrival motive={motive} rhythm={rhythm} goal={goal} lines={lines} figures={figures} now={now} time={time} hour={hour} />
           </div>
-        </div>
         )}
       </div>
       <div className="brd__foot">
@@ -288,6 +187,105 @@ function PlanRoute({ motive, rhythm, goal, lines, figures, now, time, hour }) {
           </ul>
         </section>
       </div>
+    </div>
+  )
+}
+
+// ── 辻 on a phone — the arrival first (plan 167) ─────────────────
+// The terminus and its day at the specimen rung, its year beside it,
+// and when the ride takes to get there; the ride as one line under it --
+// today, the kana read, two halts counting what is known by then, the
+// terminus -- each halt named over or under the line in turn so no two
+// meet; what the terminus holds on each line taken; and what the ride is
+// for, the motive's first promise.
+//
+// On the canvas's 358px stage (brd-map): the line from today's hub to
+// the terminus, every halt where its day falls on it.
+const RIDE_X0 = 8
+const RIDE_X1 = 344
+const rideX = at => RIDE_X0 + at * (RIDE_X1 - RIDE_X0)
+
+function Arrival({ motive, rhythm, goal, lines, figures, now, time, hour }) {
+  const { t, lang } = useLang()
+  const toNovice = goal === 'novice'
+  const total = Math.max(1, figures.days)
+  const kanaDays = figures.kana > 0 && !toNovice ? Math.min(total, Math.ceil(figures.kana / Math.max(1, rhythm))) : 0
+  const dayOf = days => new Date(now.getFullYear(), now.getMonth(), now.getDate() + days)
+  const short = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
+  const counted = LINES.find(line => lines.includes(line))
+  const countOf = { vocab: figures.words, kanji: figures.kanji, grammar: figures.grammar }
+  const figureOf = (line, n) => ({
+    vocab: t.brdFigWords, kanji: t.brdFigKanji, grammar: t.brdFigGrammar,
+  })[line](approx(n, line === 'grammar' ? 10 : 50).toLocaleString(lang))
+  // The halts: the kana read, then a third and two thirds of the way on
+  // to the terminus, each kept a fifth of the ride from the next.
+  const halts = []
+  if (kanaDays > 0) halts.push({ key: 'kana', at: kanaDays / total, label: `${t.kanaTitle} · ${short.format(dayOf(kanaDays))}` })
+  if (!toNovice && counted) {
+    for (const part of [1 / 3, 2 / 3]) {
+      const days = Math.round(kanaDays + part * (total - kanaDays))
+      const at = days / total
+      if (at - kanaDays / total >= APART && 1 - at >= APART) {
+        halts.push({ key: `by${days}`, at, label: `${figureOf(counted, countOf[counted] * part)} · ${short.format(dayOf(days))}` })
+      }
+    }
+  }
+  const end = toNovice ? t.kanaTitle : goal
+  const [promise] = toNovice ? [t.brdBulletKana] : (t.brdPromise[motive] ?? t.brdPromise.other)
+  const purpose = toNovice ? t.brdOnTrackKana : (t.brdFor[motive] ?? t.brdFor.other)
+  const held = toNovice
+    ? [{ key: 'kana', glyph: 'あ', n: approx(figures.kana, 10), unit: t.brdUnitKana }]
+    : LINES.filter(line => lines.includes(line)).map(line => ({
+      key: line, glyph: GLYPHS[line], n: approx(countOf[line], UNITS_ROUNDING[line]), unit: t.brdUnit[line],
+    }))
+  const long = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short', year: 'numeric' })
+  const ride = [t.nudgeWhen.today, ...halts.map(h => h.label), `${end} · ${long.format(figures.date)}`]
+  return (
+    <div className="brd-plan">
+      <div className="brd-plan__arrive">
+        <p className="brd-plan__cap">{toNovice ? t.brdTerminus(t.kanaTitle) : t.brdTerminus(`JLPT ${goal ?? ''}`.trim())}</p>
+        <p className="brd-plan__date">
+          <span className="brd-plan__day">{short.format(figures.date)}</span>
+          <span className="brd-plan__year">{figures.date.getFullYear()}</span>
+        </p>
+        <p className="brd-plan__sub"><Emphasized text={t.brdArriveIn(total, t.brdEvery[hour] ?? t.brdEvery.am, time)} /></p>
+      </div>
+      <div className="brd-map brd-ride" style={{ '--h': 76 }} role="img" aria-label={ride.join(' → ')}>
+        <svg className="brd-map__lines" viewBox="0 0 358 76" preserveAspectRatio="none" aria-hidden="true">
+          <path className="brd-ride__line" d={`M${RIDE_X0} 40H${RIDE_X1}`} />
+        </svg>
+        <span className="brd-ride__stop brd-ride__stop--today brd-map__at" style={{ '--x': RIDE_X0, '--y': 40 }} />
+        {halts.map(h => (
+          <span key={h.key} className={`brd-ride__stop brd-ride__stop--${h.key === 'kana' ? 'kana' : 'by'} brd-map__at`} style={{ '--x': rideX(h.at), '--y': 40 }} />
+        ))}
+        <span className="brd-ride__stop brd-ride__stop--end brd-map__at" style={{ '--x': RIDE_X1, '--y': 40 }} />
+        <span className="brd-ride__lab brd-ride__lab--under brd-ride__lab--today" aria-hidden="true">{t.nudgeWhen.today}</span>
+        {halts.map((h, i) => (
+          <span
+            key={h.key}
+            className={`brd-ride__lab brd-ride__lab--${i % 2 ? 'under' : 'over'}`}
+            // A plain number, placed by the sheet: the halt's place on the line.
+            style={{ '--x': rideX(h.at) }}
+            aria-hidden="true"
+          >
+            {h.label}
+          </span>
+        ))}
+        <span className="brd-ride__lab brd-ride__lab--under brd-ride__lab--end" aria-hidden="true">{end}</span>
+      </div>
+      <ul className="brd-held">
+        {held.map(h => (
+          <li key={h.key} className="brd-held__cell" data-line={h.key}>
+            <span className="brd-held__jp" lang="ja" aria-hidden="true">{h.glyph}</span>
+            <b className="brd-held__fig">~{h.n.toLocaleString(lang)}</b>
+            <span className="brd-held__unit">{h.unit}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="brd-for">
+        <CheckMark />
+        <span><Emphasized text={t.brdForLine(purpose, promise)} /></span>
+      </p>
     </div>
   )
 }

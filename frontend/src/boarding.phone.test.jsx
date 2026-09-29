@@ -3,13 +3,16 @@ import { render } from 'vitest-browser-react'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── The boarding's contract at phone width (plan 075) ────────────
+// ── The boarding's contract at phone width (plans 075, 167) ──────
 // The canvas's frame, pinned against the real cascade at 390×844: the
 // foot is docked at the bottom edge with the one filled action full
-// width at 66 px (plan 164's gate); the head is 44 px with a 44 px back button and a 2
-// px track; every choice is a 44 px target or taller; nothing scrolls
-// sideways; the sign-in's segmented control fills its card. The
-// stores behind the pass are stubbed: this is about the frame.
+// width at 66 px (plan 164's gate); the head is 44 px with a 44 px back
+// button and a 2 px track; the question stands a rung under the head on
+// every screen and its drawing in the room left (plan 167); every
+// choice is a 44 px target or taller; nothing scrolls sideways; the
+// sign-in stands in the Welcome's place, its segmented control filling
+// its card. The stores behind the pass are stubbed: this is about the
+// frame.
 
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -26,7 +29,6 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: BoardingFlow } = await import('./screens/BoardingFlow')
 const { default: Welcome } = await import('./components/boarding/Welcome')
-const { default: AuthScreen } = await import('./screens/AuthScreen')
 
 const settle = (ms = 340) => new Promise(r => setTimeout(r, ms))
 const rect = el => el.getBoundingClientRect()
@@ -59,6 +61,8 @@ async function atHeight(px, fn) {
   try { await fn() } finally { shorter.remove() }
 }
 
+const live = root => root.querySelector('.brd__car:not(.brd__car--out)')
+
 describe('the boarding at 390×844', () => {
   it('docks the foot with a full-width 52 px action and never scrolls sideways', async () => {
     const screen = await mountFlow()
@@ -74,14 +78,14 @@ describe('the boarding at 390×844', () => {
     expect(rect(action).height).toBeGreaterThanOrEqual(52)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
     // The field is the screen's own control, already focused, 44 px or taller.
-    expect(rect(frame.querySelector('.brd-field')).height).toBeGreaterThanOrEqual(44)
+    expect(rect(frame.querySelector('.brd-plate__field')).height).toBeGreaterThanOrEqual(44)
     // Not yet is the gate's outline (plan 164), not the family's 0.45:
     // the button stays at full strength, its fill layer gone and its
     // edge drawn, the same shape. The field arrives filled with the
     // account's name, so empty it first.
     const height = rect(action).height
     const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-    const field = frame.querySelector('.brd-field')
+    const field = frame.querySelector('.brd-plate__field')
     setValue.call(field, '')
     field.dispatchEvent(new Event('input', { bubbles: true }))
     await settle(600)
@@ -102,8 +106,7 @@ describe('the boarding at 390×844', () => {
     const screen = await mountFlow()
     await click(screen.container, '[data-action="continue"]')
     await settle()
-    const live = () => screen.container.querySelector('.brd__car:not(.brd__car--out)')
-    const go = () => live().querySelector('[data-action="continue"]')
+    const go = () => live(screen.container).querySelector('[data-action="continue"]')
     expect(go().disabled).toBe(true)
     expect(go().classList.contains('btn-depart--waking')).toBe(false)
     expect(Math.round(rect(go()).height)).toBe(66)
@@ -151,76 +154,99 @@ describe('the boarding at 390×844', () => {
     expect(Math.round(rect(back).width)).toBe(44)
     expect(Math.round(rect(back).height)).toBe(44)
     expect(rect(head.querySelector('.brd__rail')).height).toBe(2)
-    // One stop per question, the one you stand at the largest and
-    // gold, the ones behind filled, the ones ahead empty.
+    // One stop per question, the one you stand at a larger ring --
+    // your train -- the ones behind filled, the ones ahead empty.
     const stops = [...track.querySelectorAll('.brd__stop')]
     expect(stops).toHaveLength(Number(track.getAttribute('aria-valuemax')))
     const here = track.querySelector('.brd__stop--here')
-    expect(Math.round(rect(here).width)).toBe(16)
+    expect(Math.round(rect(here).width)).toBe(19)
     expect(track.querySelectorAll('.brd__stop--passed')).toHaveLength(Number(track.getAttribute('aria-valuenow')) - 1)
-    const frame = screen.container.querySelector('.brd')
-    // The rows are one choice each, 60 px or taller, the width of the column.
-    const rows = [...screen.container.querySelectorAll('.brd__car:not(.brd__car--out) .brd-opt')]
-    expect(rows).toHaveLength(6)
-    for (const row of rows) {
-      // Rounded: a 60 px min-height lays out at 59.99997 on a fractional scale.
-      expect(Math.round(rect(row).height)).toBeGreaterThanOrEqual(60)
-      expect(row.getAttribute('aria-pressed')).not.toBeNull()
+  })
+
+  // ── The junction (plan 167, the owner's A02) ──
+  // Six reasons at the ends of three rungs off one trunk, each its
+  // pictogram in a ring over its name: one choice each, a thumb's
+  // target, inside the screen and clear of each other.
+  it('hangs the six reasons off the junction, each a target of its own', async () => {
+    const screen = await mountFlow()
+    await click(screen.container, '[data-action="continue"]')
+    await settle()
+    const ways = [...live(screen.container).querySelectorAll('.brd-way')]
+    expect(ways).toHaveLength(6)
+    for (const way of ways) {
+      expect(rect(way).height).toBeGreaterThanOrEqual(44)
+      expect(rect(way).width).toBeGreaterThanOrEqual(44)
+      expect(rect(way).left).toBeGreaterThanOrEqual(0)
+      expect(rect(way).right).toBeLessThanOrEqual(390)
+      expect(way.getAttribute('aria-pressed')).toBe('false')
     }
-    expect(Math.round(rect(rows[0]).width)).toBeGreaterThanOrEqual(Math.round(rect(frame).width) - 2 * 20 - 4)
-    expect(rect(rows[0]).right).toBeLessThanOrEqual(390)
+    for (const [i, a] of ways.entries()) {
+      for (const b of ways.slice(i + 1)) {
+        const [p, q] = [rect(a), rect(b)]
+        const apart = p.right <= q.left || q.right <= p.left || p.bottom <= q.top || q.bottom <= p.top
+        expect(apart, `${a.dataset.motive} / ${b.dataset.motive}`).toBe(true)
+      }
+    }
+    // A pick lights its road from the hub, and its ring.
+    await click(screen.container, '[data-motive="live"]')
+    expect(live(screen.container).querySelector('[data-motive="live"]').getAttribute('aria-pressed')).toBe('true')
+    expect(live(screen.container).querySelectorAll('.brd-road--on')).toHaveLength(1)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })
 
-  // ── The block stands on the centre line; the air gives way before
-  //    the body scrolls ──
-  // The rhythm around a question was a fixed pad, so on any phone
-  // shorter than the artboard the six motives ran off the bottom while
-  // 164 px of nothing sat above the question -- and on a taller one
-  // the block sat pinned under the head with the room below it empty.
-  // The question and its answers are one block now, centred in the
-  // room between the head and the foot: the spacers at either end
-  // share the free room equally and are nothing once there is none,
-  // the rung under the question is a maximum, and the body only
-  // scrolls once all of it is spent.
-  it('centres the block, then collapses the air rather than scroll the six motives off a shorter phone', async () => {
+  // ── The question at the top-left, its drawing in the room left ──
+  // Plan 167: the frame never moves. The question stands a rung under
+  // the head on every screen -- it moved 300 px down the name and 110
+  // down the reasons while the question and its answers stood as one
+  // block on the centre line -- and its drawing stands in the middle of
+  // the room between the question and the docked foot. A shorter phone
+  // draws the drawing shorter before anything scrolls.
+  it('holds the question a rung under the head on every screen, and centres the drawing under it', async () => {
     const screen = await mountFlow('SilentSamurai6323')
-    await click(screen.container, '[data-action="continue"]')
-    // Past the staggered arrival: the sixth row's brd-in is 200 ms of
-    // delay and 360 ms of travel, and a row still translated 6 px down
-    // is 6 px of scrollable overflow that says nothing about the rest
-    // state being measured here.
-    await settle(620)
     const frame = screen.container.querySelector('.brd')
-    const live = sel => frame.querySelector(`.brd__car:not(.brd__car--out) ${sel}`)
-    const body = () => live('.brd__body')
+    const q = () => live(screen.container).querySelector('.brd__q')
+    const body = () => live(screen.container).querySelector('.brd__body')
+    const stage = () => live(screen.container).querySelector('.brd__body > .brd__stage')
+    const underHead = () => rect(q()).top - rect(frame.querySelector('.brd__head')).bottom
+    // Past the question's own arrival (6 px of rise).
+    await settle(500)
+    const tops = [rect(q()).top]
+    expect(Math.round(underHead())).toBe(12)
+    await click(screen.container, '[data-action="continue"]')
+    // Past the drawing's arrival: a stage still translated 6 px down is
+    // 6 px of overflow that says nothing about the rest state.
+    await settle(900)
+    tops.push(rect(q()).top)
+    expect(Math.round(underHead())).toBe(12)
 
-    // At rest, one rung of air under the question: --sp-8, the body's
-    // --sp-5 gap included -- the same on every screen since the
-    // 2026-09-20 rework -- and the block centred: the room over the
-    // question is the room under the rows, to the pixel.
-    const above = () => rect(live('.brd__q')).top - rect(body()).top
-    const below = () => rect(body()).bottom - rect(live('.brd__stage')).bottom
-    expect(Math.round(rect(live('.brd__stage')).top - rect(live('.brd__q')).bottom)).toBe(60)
-    expect(Math.abs(above() - below())).toBeLessThanOrEqual(1)
-    expect(above()).toBeGreaterThan(16)
+    // The room over the drawing (past the body's gap) is the room under it.
+    const centred = () => {
+      const gap = parseFloat(getComputedStyle(body()).rowGap)
+      const over = rect(stage()).top - rect(q()).bottom - gap
+      const under = rect(body()).bottom - rect(stage()).bottom
+      expect(Math.abs(over - under)).toBeLessThanOrEqual(1)
+    }
+    centred()
     expect(body().scrollHeight).toBe(body().clientHeight)
 
     for (const height of [800, 764, 700]) {
       await atHeight(height, () => {
-        const rows = [...frame.querySelectorAll('.brd__car:not(.brd__car--out) .brd-opt')]
-        expect(rows).toHaveLength(6)
-        // Nothing scrolls, and the sixth motive clears the docked action.
+        const ways = [...live(screen.container).querySelectorAll('.brd-way')]
+        expect(ways).toHaveLength(6)
+        // Nothing scrolls, the sixth reason clears the docked action,
+        // and the question has not moved.
         expect(body().scrollHeight, `${height} px`).toBe(body().clientHeight)
-        expect(rect(rows[5]).bottom).toBeLessThanOrEqual(rect(live('.brd__foot')).top)
-        // The air is spent evenly at the two ends and never past the
-        // body's own gap: the question keeps --sp-5 off the head and
-        // off the rows, and the block stays on the centre line.
-        expect(above()).toBeGreaterThanOrEqual(16)
-        expect(rect(live('.brd__stage')).top - rect(live('.brd__q')).bottom).toBeGreaterThanOrEqual(16)
-        expect(Math.abs(above() - below())).toBeLessThanOrEqual(1)
+        expect(rect(ways[5]).bottom).toBeLessThanOrEqual(rect(live(screen.container).querySelector('.brd__foot')).top)
+        expect(rect(q()).top).toBe(tops[0])
+        centred()
       })
     }
+
+    await click(screen.container, '[data-motive="trip"]')
+    await click(screen.container, '[data-action="continue"]')
+    await settle(900)
+    tops.push(rect(q()).top)
+    expect(new Set(tops.map(Math.round)).size).toBe(1)
   })
 
   // ── The question takes focus, and wears no ring for it ──
@@ -237,54 +263,64 @@ describe('the boarding at 390×844', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }))
     await click(screen.container, '[data-action="continue"]')
     await settle()
-    const frame = screen.container.querySelector('.brd')
-    const q = frame.querySelector('.brd__car:not(.brd__car--out) .brd__q')
+    const q = live(screen.container).querySelector('.brd__q')
     expect(document.activeElement).toBe(q)
     expect(q.matches(':focus-visible')).toBe(true)
     expect(getComputedStyle(q).outlineStyle).toBe('none')
     // The ring is intact for anything a hand can actually reach.
-    const opt = frame.querySelector('.brd__car:not(.brd__car--out) .brd-opt')
-    opt.focus()
+    const way = live(screen.container).querySelector('.brd-way')
+    way.focus()
     await settle(20)
-    expect(getComputedStyle(opt).outlineStyle).toBe('solid')
-    expect(getComputedStyle(opt).outlineWidth).toBe('2px')
+    expect(getComputedStyle(way).outlineStyle).toBe('solid')
+    expect(getComputedStyle(way).outlineWidth).toBe('2px')
   })
 
-  // ── The ring on the name field is inside the clip ──
-  // The cars slide sideways, so `.brd__cars` clips them — and the name
-  // field is the full width of its car, with the ring every control
-  // wears drawn OUTSIDE its border box (2px at +2px offset). The clip
-  // took it off at both edges, which is what the owner photographed on
-  // the very first question.
-  it('leaves the name field its focus ring inside the frame that clips the cars', async () => {
+  // ── The name's plate rings gold, inside the clip ──
+  // The cars slide sideways, so `.brd__cars` clips them. The name is
+  // the station's plate now (plan 167): the field draws no ring of its
+  // own, the plate's edge turns gold while the field holds the focus,
+  // and that edge -- 2 px outside the plate -- stands inside the clip.
+  it('rings the name\'s plate in gold while it holds the focus, inside the frame that clips the cars', async () => {
     const screen = await mountFlow()
     const cars = screen.container.querySelector('.brd__cars')
-    const field = screen.container.querySelector('.brd-field')
+    const field = screen.container.querySelector('.brd-plate__field')
+    const plate = field.closest('.brd-plate')
     expect(getComputedStyle(cars).overflow).toBe('hidden')
-    // The ring's own reach: 2px of outline at 2px of offset.
-    const ring = parseFloat(getComputedStyle(field).outlineOffset) + 2
-    expect(ring).toBe(4)
-    const clip = cars.getBoundingClientRect()
-    const box = field.getBoundingClientRect()
-    expect(box.left - clip.left).toBeGreaterThanOrEqual(ring)
-    expect(clip.right - box.right).toBeGreaterThanOrEqual(ring)
+    expect(document.activeElement).toBe(field)
+    expect(getComputedStyle(field).outlineStyle).toBe('none')
+    const gold = getComputedStyle(plate).boxShadow
+    field.blur()
+    await settle(20)
+    expect(getComputedStyle(plate).boxShadow).not.toBe(gold)
+    field.focus()
+    await settle(20)
+    expect(getComputedStyle(plate).boxShadow).toBe(gold)
+    const clip = rect(cars)
+    const box = rect(plate)
+    expect(box.left - clip.left).toBeGreaterThanOrEqual(2)
+    expect(clip.right - box.right).toBeGreaterThanOrEqual(2)
   })
 
-  it('the kana answers are the foot of their screen, 56 px each, and the hour cells 76', async () => {
+  // The kana's answers go on by themselves, so the screen has no foot;
+  // the four stand at the crossing's ends. The pace is four trains on
+  // the departure board, and the hour is the board turned by hand, the
+  // three services under it.
+  it('the kana at the crossing\'s four ends, the pace as four trains, the hour turned on the board', async () => {
     const screen = await mountFlow()
     await click(screen.container, '[data-action="continue"]')
     await settle()
     await click(screen.container, '[data-motive="trip"]')
     await click(screen.container, '[data-action="continue"]')
     await settle()
-    const live = () => screen.container.querySelector('.brd__car:not(.brd__car--out)')
-    expect(live().querySelector('.brd__foot')).toBeNull()
-    const kopts = [...live().querySelectorAll('.brd-kopt')]
-    expect(kopts).toHaveLength(4)
-    for (const k of kopts) expect(rect(k).height).toBeGreaterThanOrEqual(56)
-    const card = rect(live().querySelector('.brd-kana'))
-    expect(card.width).toBeGreaterThanOrEqual(340)
-    expect(card.right).toBeLessThanOrEqual(390)
+    expect(live(screen.container).querySelector('.brd__foot')).toBeNull()
+    expect(live(screen.container).querySelector('.brd-cross__words')).not.toBeNull()
+    const answers = [...live(screen.container).querySelectorAll('.brd-cross__ans')]
+    expect(answers).toHaveLength(4)
+    for (const a of answers) {
+      expect(rect(a).height).toBeGreaterThanOrEqual(56)
+      expect(rect(a).left).toBeGreaterThanOrEqual(0)
+      expect(rect(a).right).toBeLessThanOrEqual(390)
+    }
 
     await click(screen.container, '[data-kana="both"]')
     await settle()
@@ -295,49 +331,78 @@ describe('the boarding at 390×844', () => {
     await settle()
     await click(screen.container, '[data-action="continue"]')   // the lines
     await settle()
-    const cells = [...live().querySelectorAll('.brd-cell')]
-    expect(cells).toHaveLength(4)
-    for (const c of cells) expect(Math.round(rect(c).height)).toBeGreaterThanOrEqual(120)
+    const trains = [...live(screen.container).querySelectorAll('.brd-train')]
+    expect(trains).toHaveLength(4)
+    for (const tr of trains) expect(Math.round(rect(tr).height)).toBeGreaterThanOrEqual(56)
     await click(screen.container, '[data-action="continue"]')
     await settle()
-    const hours = [...live().querySelectorAll('.brd-cell--sm')]
+    const hours = [...live(screen.container).querySelectorAll('.brd-hour')]
     expect(hours).toHaveLength(3)
     for (const h of hours) expect(rect(h).height).toBeGreaterThanOrEqual(76)
-    const knob = live().querySelector('.brd-day__train')
-    expect(Math.round(rect(knob).width)).toBe(26)
-    expect(getComputedStyle(live().querySelector('.brd-day')).touchAction).toBe('none')
+    const steps = [...live(screen.container).querySelectorAll('.brd-clock__step')]
+    expect(steps).toHaveLength(4)
+    for (const s of steps) {
+      expect(Math.round(rect(s).height)).toBe(44)
+      expect(rect(s).width).toBeGreaterThanOrEqual(44)
+    }
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })
 
-  it('Welcome rolls two lanes of 156×204 cards clipped to the screen', async () => {
+  // ── The front door as the crossroads (plan 167, the owner's A00) ──
+  it('draws the Welcome as the crossroads: seven lines out of 辻, and the gold road into Board', async () => {
     const screen = await render(
       <LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} /></LangProvider>
     )
     await settle(60)
-    const roll = screen.container.querySelector('.brd-roll')
-    expect(getComputedStyle(roll).overflow).toBe('hidden')
-    const card = screen.container.querySelector('.brd-demo')
-    expect(Math.round(rect(card).width)).toBe(156)
-    expect(Math.round(rect(card).height)).toBe(204)
-    expect(getComputedStyle(screen.container.querySelector('.brd-roll__lane')).animationName).toBe('brd-roll')
-    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
+    const stations = [...screen.container.querySelectorAll('.brd-front__stn')]
+    expect(stations).toHaveLength(7)
+    expect(screen.container.querySelector('.brd-front__hub .mark')).not.toBeNull()
+    expect(screen.container.querySelector('.brd-front__way').getAttribute('d')).toMatch(/^M/)
     const action = screen.container.querySelector('[data-action="board"]')
+    for (const stn of stations) {
+      for (const part of stn.querySelectorAll('.brd-front__sign, .brd-front__name')) {
+        expect(rect(part).left, stn.dataset.line).toBeGreaterThanOrEqual(0)
+        expect(rect(part).right, stn.dataset.line).toBeLessThanOrEqual(390)
+        expect(rect(part).bottom, stn.dataset.line).toBeLessThanOrEqual(rect(action).top)
+      }
+    }
+    const body = screen.container.querySelector('.brd-front__body')
+    expect(body.scrollHeight).toBe(body.clientHeight)
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
     expect(rect(action).height).toBeGreaterThanOrEqual(52)
     expect(rect(screen.container.querySelector('[data-action="sign-in"]')).height).toBeGreaterThanOrEqual(44)
   })
 
+  // ── The sign-in, in the promise's place (plan 167, A00b) ──
   it('the sign-in: the segmented control fills the card, the action is 48 px', async () => {
     const screen = await render(
-      <LangProvider><AuthScreen mode="signup" onBack={() => {}} /></LangProvider>
+      <LangProvider><Welcome authMode="signup" onBack={() => {}} onBoard={() => {}} onSignIn={() => {}} /></LangProvider>
     )
     await settle(60)
     const card = screen.container.querySelector('.auth-card')
     const seg = card.querySelector('.seg--full')
     const pad = parseFloat(getComputedStyle(card).paddingLeft)
     expect(Math.abs(rect(seg).width - (rect(card).width - 2 * pad))).toBeLessThanOrEqual(4)
-    expect(rect(card.querySelector('.auth-submit')).height).toBeGreaterThanOrEqual(48)
-    expect(Math.round(rect(screen.container.querySelector('.auth__head .brd__back')).height)).toBe(44)
+    expect(rect(screen.container.querySelector('[data-action="auth-submit"]')).height).toBeGreaterThanOrEqual(48)
+    expect(Math.round(rect(screen.container.querySelector('[data-action="welcome"]')).height)).toBe(44)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
+    // The gold road ends in the action's middle, on its left edge.
+    const way = screen.container.querySelector('.brd-signin__road .brd-front__way')
+    const end = way.getAttribute('d').trim().split(/[\s,A-Z]+/).filter(Boolean).map(Number).slice(-1)[0]
+    const stage = rect(screen.container.querySelector('.brd-signin__stage'))
+    const go = rect(screen.container.querySelector('[data-action="auth-submit"]'))
+    expect(Math.abs(stage.top + end - (go.top + go.height / 2))).toBeLessThanOrEqual(1)
+  })
+
+  it('opens the sign-in on Log in, the address focused and no Sign up beside it', async () => {
+    const screen = await render(
+      <LangProvider><Welcome authMode="login" onBack={() => {}} onBoard={() => {}} onSignIn={() => {}} /></LangProvider>
+    )
+    await settle(60)
+    expect(screen.container.querySelector('.seg--full')).toBeNull()
+    expect(document.activeElement.type).toBe('email')
+    expect(screen.container.querySelector('.brd-front__promise')).toBeNull()
+    expect(screen.container.querySelector('[data-action="board-corner"]')).not.toBeNull()
   })
 })
 
@@ -350,7 +415,6 @@ describe('the boarding at 390×844', () => {
 // it leaves as it always has.
 describe('the browser\'s Back in the boarding', () => {
   const popped = () => new Promise(r => window.addEventListener('popstate', () => setTimeout(r, 60), { once: true }))
-  const live = root => root.querySelector('.brd__car:not(.brd__car--out)')
 
   it('steps back one question at a time, keeping every answer', async () => {
     const start = window.history.length
@@ -360,7 +424,7 @@ describe('the browser\'s Back in the boarding', () => {
     await click(screen.container, '[data-motive="trip"]')
     await click(screen.container, '[data-action="continue"]')        // why → kana
     await settle()
-    expect(live(screen.container).querySelector('.brd-kana')).not.toBeNull()
+    expect(live(screen.container).querySelector('.brd-cross')).not.toBeNull()
     // One entry for the whole flow, however deep.
     expect(window.history.length).toBe(start + 1)
 
@@ -376,8 +440,8 @@ describe('the browser\'s Back in the boarding', () => {
     await back
     await settle()
     // Back on the name, with nothing left behind: the guard is gone.
-    expect(live(screen.container).querySelector('.brd-field')).not.toBeNull()
-    expect(live(screen.container).querySelector('.brd-field').value).toBe('Tester')
+    expect(live(screen.container).querySelector('.brd-plate__field')).not.toBeNull()
+    expect(live(screen.container).querySelector('.brd-plate__field').value).toBe('Tester')
   })
 
   it('takes the guard out when ‹ brings the learner back to the first question', async () => {
@@ -391,35 +455,6 @@ describe('the browser\'s Back in the boarding', () => {
     await back
     await settle()
     expect(window.history.state).toEqual(before)
-    expect(live(screen.container).querySelector('.brd-field')).not.toBeNull()
-  })
-})
-
-// ── The building's lines row holds the longest French line-up ──────
-// (plan 123) The row's value is `nowrap`, and "Kana · Vocabulaire ·
-// Kanji · Grammaire" is the longest thing it is ever asked to hold. At
-// 390 it has to fit beside its label without running past the frame.
-describe('the building\'s rows at 390', () => {
-  it('fit every line, in French', async () => {
-    const { default: Building } = await import('./components/boarding/Building')
-    const screen = await render(
-      <LangProvider>
-        <main className="brd"><div className="brd__cars"><div className="brd__car">
-          <Building name="Tester" onDone={() => {}} steps={[
-            { key: 'goal', label: 'Objectif', value: 'N3 · en 14 mois', always: true },
-            { key: 'lines', label: 'Lignes', value: 'Kana · Vocabulaire · Kanji · Grammaire', always: true },
-            { key: 'ride', label: 'Trajet', value: '15 min · 19:30', always: true },
-          ]} />
-        </div></div></main>
-      </LangProvider>
-    )
-    await settle(60)
-    const frame = rect(screen.container.querySelector('.brd'))
-    for (const row of screen.container.querySelectorAll('.brd-step')) {
-      const val = row.querySelector('.brd-step__val')
-      expect(rect(val).right).toBeLessThanOrEqual(frame.right)
-      expect(rect(val).left).toBeGreaterThanOrEqual(rect(row.querySelector('.brd-step__label')).right)
-    }
-    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
+    expect(live(screen.container).querySelector('.brd-plate__field')).not.toBeNull()
   })
 })

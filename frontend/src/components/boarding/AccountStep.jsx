@@ -5,7 +5,7 @@ import { ClaimFields } from '../account/ClaimAccount'
 import { ProviderButton } from '../account/ProviderButton'
 import { authRedirectError, authRedirectMessage, isAlreadyLinked } from '../../lib/authRedirect'
 import { PassError } from './PassStep'
-import { PaperTicket } from './PaperTicket'
+import { PaperTicket, RideTicket } from './PaperTicket'
 import { useDesk } from '../../hooks/useDesk'
 
 // ── 本乗車券 — the last stop before the pass ─────────────────────
@@ -24,9 +24,10 @@ import { useDesk } from '../../hooks/useDesk'
 // demanded at the door.
 // `error` is the desk's (plan 140): keeping the progress, or riding on
 // without an account, enters the station from here -- and the office's
-// answer to that is said here, over the button. `ticket` is the desk's
-// too (plan 163): the ticket the account keeps, printed beside the form
-// (PaperTicket's props), and riding on without one offered under it.
+// answer to that is said here, over the button. `ticket` is the ticket
+// the account keeps (PaperTicket's props): printed beside the form on
+// the desk (plan 163), over it on a phone (plan 167, the owner's A-Compte),
+// and riding on without one offered beside it, with what that means.
 export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAuth = null, error = null, ticket = null }) {
   const { t } = useLang()
   const desk = useDesk()
@@ -50,7 +51,7 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
           handed a second, empty one; onLeaveForAuth is the last
           moment before the web navigates away, when the answers
           still only exist in memory. */}
-      <ProviderButton link onBeforeRedirect={onLeaveForAuth} onDone={onCreated} onError={claim.setError} />
+      <ProviderButton link className={desk ? 'auth-provider' : 'auth-provider brd-provider'} onBeforeRedirect={onLeaveForAuth} onDone={onCreated} onError={claim.setError} />
       {/* Said here rather than on the fields' own line below: this
           is what the button above did, and the one refusal with a
           way out of it is answered immediately underneath.
@@ -80,7 +81,7 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
         />
       )}
       <p className="auth-or">{t.orWithEmail}</p>
-      <ClaimFields claim={claim} variant="board" />
+      <ClaimFields claim={claim} variant={desk ? 'board' : 'phone'} />
       {/* 辻 (plan 163): on the desk the way to an account already held
           stands under the form it would stand in for. */}
       {desk && <BoardLink onClick={onSignIn} data-action="account-sign-in">{t.brdHaveAccount}</BoardLink>}
@@ -99,8 +100,8 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
   return (
     <>
       <div className="brd__body">
-        <BoardQuestion hint={desk && ticket ? t.brdAccountHintDesk : t.brdAccountHint}>{t.brdAccountQ}</BoardQuestion>
-        <div className="brd__stage">
+        <BoardQuestion hint={desk ? (ticket ? t.brdAccountHintDesk : t.brdAccountHint) : null}>{t.brdAccountQ}</BoardQuestion>
+        <div className={desk ? 'brd__stage' : 'brd__stage brd__stage--top'}>
           {desk && ticket
             ? (
               <div className="desk-brd__keep">
@@ -117,7 +118,16 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
                 </div>
               </div>
             )
-            : form}
+            : (
+              <div className="brd-keep">
+                {ticket && <RideTicket {...ticket} />}
+                <p className="brd-keep__skip">
+                  <span className="brd-keep__note">{t.brdTicketNote}</span>
+                  <button type="button" className="brd-keep__skip-btn" onClick={onSkip} data-action="account-skip">{t.brdAccountSkip}</button>
+                </p>
+                {form}
+              </div>
+            )}
         </div>
       </div>
       <div className="brd__foot">
@@ -128,7 +138,6 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
             <>
               {create}
               <BoardLink onClick={onSignIn} data-action="account-sign-in">{t.brdHaveAccount}</BoardLink>
-              <BoardLink onClick={onSkip} data-action="account-skip">{t.brdAccountSkip}</BoardLink>
             </>
           )}
       </div>

@@ -158,12 +158,11 @@ describe('the boarding reached on a stale address', () => {
     await click(screen, '[data-kana="both"]')                    // → the level list
     await click(screen, '[data-level="N5"]')
     await click(screen, '[data-action="continue"]')              // the level
-    await click(screen, '.brd__opts [data-goal]')                // the first stop ahead
+    await click(screen, 'button[data-goal]')                     // the first stop ahead
     await click(screen, '[data-action="continue"]')              // the goal
     await click(screen, '[data-action="continue"]')              // the lines, all on by default
     await click(screen, '[data-action="continue"]')              // the rhythm
-    await click(screen, '[data-action="continue"]')              // the hour
-    await click(screen, '.brd__body--center')                    // building: any tap cuts to the end
+    await click(screen, '[data-action="continue"]')              // the hour, on to the plan
     await settle(120)
     await click(screen, '[data-action="continue"]')              // the plan
     await click(screen, '[data-action="enter"]')                 // the pass

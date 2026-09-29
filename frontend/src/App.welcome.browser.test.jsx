@@ -3,8 +3,10 @@ import { render } from 'vitest-browser-react'
 
 // ── Signed out: Welcome, then the sign-in on the matching side ──
 // The boarding's step zero replaces the landing page (plan 075): Board
-// opens the sign-in on Sign up, "Have an account?" on Login, and the
-// back button returns to Welcome. No session, no router.
+// boards on a guest pass or, with none to be had, opens the sign-in on
+// Sign up; "Have an account?" opens it on Login -- since plan 167 in the
+// promise's place on the Welcome itself -- and ‹ puts the promise back.
+// No session, no router.
 
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -33,33 +35,41 @@ const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
 const checkedSide = screen => [...screen.container.querySelectorAll('.auth-card .seg__opt')].findIndex(o => o.getAttribute('aria-checked') === 'true')
 
 describe('App signed out', () => {
-  it('shows Welcome, boards onto Sign up, signs in on Login, and comes back', async () => {
+  it('shows Welcome, falls back to Sign up, signs in on Login, and comes back', async () => {
     window.history.replaceState(null, '', '/')
     const screen = await render(<App />)
     await settle()
 
+    // The crossroads (plan 167): the promise over the app's lines.
     expect(screen.container.querySelector('.brd--welcome')).not.toBeNull()
-    expect(screen.container.querySelectorAll('.brd-roll__lane')).toHaveLength(2)
+    expect(screen.container.querySelectorAll('.brd-front__stn')).toHaveLength(7)
     expect(screen.container.querySelector('.brd-tagline')).not.toBeNull()
-    expect(screen.container.querySelector('.auth')).toBeNull()
+    expect(screen.container.querySelector('.brd-signin')).toBeNull()
 
+    // No guest pass to be had here, so Board opens the sign-in on Sign
+    // up, in the promise's place, with both sides named.
     screen.container.querySelector('[data-action="board"]').click()
     await settle(60)
-    expect(screen.container.querySelector('.auth')).not.toBeNull()
+    expect(screen.container.querySelector('.brd-signin')).not.toBeNull()
+    expect(screen.container.querySelector('.brd-front__promise')).toBeNull()
     expect(checkedSide(screen)).toBe(1)
     expect(screen.container.querySelector('.auth-foot')).not.toBeNull()
+    // The seg switches sides in place.
+    screen.container.querySelectorAll('.auth-card .seg__opt')[0].click()
+    await settle(30)
+    expect(checkedSide(screen)).toBe(0)
 
-    screen.container.querySelector('.auth__head .brd__back').click()
+    screen.container.querySelector('[data-action="welcome"]').click()
     await settle(60)
-    expect(screen.container.querySelector('.brd--welcome')).not.toBeNull()
+    expect(screen.container.querySelector('.brd-front__promise')).not.toBeNull()
 
+    // Log in opens on its own side and names no other: Board stands in
+    // the corner instead.
     screen.container.querySelector('[data-action="sign-in"]').click()
     await settle(60)
-    expect(checkedSide(screen)).toBe(0)
-    // The seg switches sides in place.
-    screen.container.querySelectorAll('.auth-card .seg__opt')[1].click()
-    await settle(30)
-    expect(checkedSide(screen)).toBe(1)
+    expect(screen.container.querySelector('.brd-signin')).not.toBeNull()
+    expect(checkedSide(screen)).toBe(-1)
+    expect(screen.container.querySelector('[data-action="board-corner"]')).not.toBeNull()
   })
 
   // The browser's Back (plan 123): the sign-in replaces Welcome through
@@ -74,22 +84,22 @@ describe('App signed out', () => {
 
     screen.container.querySelector('[data-action="sign-in"]').click()
     await settle(60)
-    expect(screen.container.querySelector('.auth')).not.toBeNull()
+    expect(screen.container.querySelector('.brd-signin')).not.toBeNull()
     expect(window.history.length).toBe(start + 1)
     let back = popped()
     window.history.back()
     await back
     await settle(60)
-    expect(screen.container.querySelector('.auth')).toBeNull()
-    expect(screen.container.querySelector('.brd--welcome')).not.toBeNull()
+    expect(screen.container.querySelector('.brd-signin')).toBeNull()
+    expect(screen.container.querySelector('.brd-front__promise')).not.toBeNull()
 
     screen.container.querySelector('[data-action="sign-in"]').click()
     await settle(60)
     back = popped()
-    screen.container.querySelector('.auth__head .brd__back').click()
+    screen.container.querySelector('[data-action="welcome"]').click()
     await back
     await settle(60)
-    expect(screen.container.querySelector('.brd--welcome')).not.toBeNull()
+    expect(screen.container.querySelector('.brd-front__promise')).not.toBeNull()
     expect(window.history.state).toBeNull()
   })
 })

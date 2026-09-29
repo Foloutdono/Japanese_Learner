@@ -3,7 +3,7 @@ import { Emphasized } from '../ui/Emphasized'
 import { CommuterPass } from '../profile/CommuterPass'
 import { useCredits } from '../../stores/credits'
 import { CAP, SIGNUP_BONUS, showsCap, refillMinutes } from '../../domain/credits'
-import { BoardAir, Continue } from './BoardFrame'
+import { BoardQuestion, Continue } from './BoardFrame'
 import { SOURCES } from '../../domain/paywall'
 import { OfferButton } from '../credits/OfferButton'
 import { useCountUp, stillPreferred } from './countUp'
@@ -95,31 +95,33 @@ export function PassError({ error }) {
   )
 }
 
+// On a phone (plan 167, the owner's A-La carte) the pass stands in the
+// room under its question, and a road in the pass's metal runs from it
+// down to the gate's reader: the card is what is tapped on the way in.
+// The offer, when there is one, is a quiet line under the gate. The desk
+// never shows this screen (plan 140: the pass is issued on the plan).
 export default function PassStep({ name, profile, onEnter, busy = false, error = null }) {
   const { t } = useLang()
   return (
     <>
       <div className="brd__body">
-        <div className="brd-offer">
-          <h1 className="brd__q" tabIndex={-1}>
-            <Emphasized text={t.brdPassQ(name)} strongClassName="brd__q-em" />
-          </h1>
-          <p className="brd__hint">{t.brdEnjoy}</p>
-        </div>
-        <BoardAir />
-        <div className="brd__stage">
+        <BoardQuestion hint={t.brdEnjoy}>
+          <Emphasized text={t.brdPassQ(name)} strongClassName="brd__q-em" />
+        </BoardQuestion>
+        <div className="brd__stage brd-issue-stn">
           <div className="brd-issue">
             <CommuterPass profile={{ ...profile, username: name }} t={t} footer={<PrintedBalance />} headingTag="span">
               <PrintedHolder name={name} />
             </CommuterPass>
             <span className="brd-issue__shine" aria-hidden="true" />
           </div>
+          <span className="brd-issue__road" aria-hidden="true" />
         </div>
       </div>
-      <div className="brd__foot">
-        <OfferButton source={SOURCES.ONBOARDING} className="pw-open--quiet" />
+      <div className="brd__foot brd__foot--road">
         <PassError error={error} />
         <Continue keys label={t.brdEnter} onClick={onEnter} disabled={busy} data-action="enter" />
+        <OfferButton source={SOURCES.ONBOARDING} className="pw-open--quiet" />
       </div>
     </>
   )

@@ -41,6 +41,10 @@ export default function OnboardingPreview() {
           guest={guest}
           initialProfile={{ username: 'Preview', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
           onComplete={() => setPhase('gate')}
+          // Back out of the first question, and "Have an account?",
+          // leave the boarding in the app; here they replay it.
+          onExit={replay}
+          onSignIn={replay}
         />
       )}
 
