@@ -30,6 +30,31 @@ The built pages are committed, as `public/privacy.html` is: Vite copies
 **After any change here, or to a deck the page counts, run `npm run landing`**
 and commit what it writes. `src/landing.test.js` fails until you do.
 
+## Motion
+
+The page moves the way the app does (DESIGN.md, Motion):
+- **Arrivals:** blocks arrive once as they are reached, rising 10px a
+  child at a time. They are marked `data-reveal`, or `data-stagger` for a
+  block whose children arrive in turn.
+- **Hover:** a 1px lift, the edge in the line's colour.
+- **Scale and glow:** none, except the gate button and the stamps, which
+  are the app's own exceptions.
+- **The hero:** the gold road runs out of Embarquer into the hub, each
+  line draws out to its station, and trains run along them.
+- **Features:** each tab shows the app's own screen, drawn, with 駅
+  written in its KanjiVG stroke order. The tabs turn over by themselves
+  until one is picked.
+
+Three rules keep it safe:
+- **Content is hidden only while the `js` flag is set** (the head script
+  sets it) and only until it arrives, so a page without script reads
+  whole.
+- **A watcher that never starts shows everything after a beat.**
+- **Reduced motion** keeps the fades and drops every movement and loop.
+
+`src/landing.test.js` checks that every hook the script reaches for is
+on the page.
+
 ## Footage
 
 The footage lives in a public Supabase Storage bucket named `landing`,

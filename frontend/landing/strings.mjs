@@ -270,11 +270,29 @@ const fr = facts => {
       level: 'Niv. 1',
     },
 
+    // The feature screens drawn where a clip is not yet filmed: each is
+    // the app's own screen, in its words (the Today button, Check,
+    // Explain), at phone size.
+    mock: {
+      depart: 'Embarquer',
+      check: 'Vérifier',
+      explain: 'Expliquer',
+      question: (i, n) => `Question ${i} / ${n}`,
+      lanes: 'Lignes du jour',
+      typed: 'eki de tomodachi o matte imasu',
+      field: 'En rōmaji',
+      fill: 'Complète la phrase',
+      subtitle: 'Sous-titre',
+      strokes: n => `${n} traits`,
+      readings: 'Lectures',
+      traced: 'Ordre des traits',
+    },
+
     footer: {
       privacy: 'Confidentialité',
       contact: 'Contact',
       other: 'English',
-      credits: 'Voix : VOICEVOX Nemo · 波音リツ. JLPT est une marque de la Japan Foundation et de JEES, sans lien avec Tsuji.',
+      credits: 'Voix : VOICEVOX Nemo · 波音リツ. Tracés des kanji : KanjiVG (CC BY-SA 3.0). JLPT est une marque de la Japan Foundation et de JEES, sans lien avec Tsuji.',
     },
     appCategory: 'EducationalApplication',
   }
@@ -494,11 +512,26 @@ const en = facts => {
       level: 'Lv. 1',
     },
 
+    mock: {
+      depart: 'Depart',
+      check: 'Check',
+      explain: 'Explain',
+      question: (i, n) => `Question ${i} / ${n}`,
+      lanes: "Today's lines",
+      typed: 'eki de tomodachi o matte imasu',
+      field: 'In rōmaji',
+      fill: 'Complete the sentence',
+      subtitle: 'Subtitle',
+      strokes: n => `${n} strokes`,
+      readings: 'Readings',
+      traced: 'Stroke order',
+    },
+
     footer: {
       privacy: 'Privacy',
       contact: 'Contact',
       other: 'Français',
-      credits: 'Voices: VOICEVOX Nemo · 波音リツ. JLPT is a trademark of the Japan Foundation and JEES, not affiliated with Tsuji.',
+      credits: 'Voices: VOICEVOX Nemo · 波音リツ. Kanji strokes: KanjiVG (CC BY-SA 3.0). JLPT is a trademark of the Japan Foundation and JEES, not affiliated with Tsuji.',
     },
     appCategory: 'EducationalApplication',
   }

@@ -70,3 +70,11 @@ export function spanOf(days) {
   const halves = Math.round(days / 365 * 2)
   return { years: Math.floor(halves / 2), half: halves % 2 === 1 }
 }
+
+/** A kanji's strokes in their order, from the KanjiVG data the app
+ *  serves (backend/kanjivg/, CC BY-SA 3.0, credited in the footer):
+ *  the path of each stroke, as the file lists them. */
+export function kanjiStrokes(code) {
+  const svg = readFileSync(backend(`kanjivg/${code}.svg`), 'utf8')
+  return [...svg.matchAll(/<path[^>]*\sd="([^"]+)"/g)].map(m => m[1])
+}
