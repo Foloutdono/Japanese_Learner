@@ -206,6 +206,24 @@ describe('the gate grows into view and holds on its name', () => {
     expect(held.right).toBeLessThanOrEqual(scene.right)
   })
 
+  // The owner's two notes on the gate in the door's dress: the right
+  // lamp ran up into the reader, and a light blinked in the middle of
+  // the opening flaps (the door's seam lamp, drawn at the lane's top).
+  it('starts both lamps under the reader, the pad crossed by nothing', async () => {
+    await gate()
+    const reader = box('.gate__reader')
+    for (const lamp of document.querySelectorAll('.gate__lamp')) {
+      expect(lamp.getBoundingClientRect().top).toBeGreaterThan(reader.bottom)
+    }
+  })
+
+  it('lights nothing in the opening', async () => {
+    await gate()
+    const lane = document.querySelector('.gate__lane')
+    expect(getComputedStyle(lane, '::before').content).toBe('none')
+    expect(getComputedStyle(lane, '::after').content).toBe('none')
+  })
+
   it('inks the name in kinari on the lines that carry it, and dark on gold', async () => {
     await gate()
     await gate({ color: 'var(--accent2)', icon: '本日', title: 'Today' })
