@@ -1120,9 +1120,11 @@ runtime purpose. Two consequences worth knowing:
   `src/deskfree.phone.test.jsx`, `src/today.wide.test.jsx` and
   `index.css`; DESIGN.md, "The gate button"; `docs/design/mobile/README.md`).
   **167** is the public landing page at `/`, for search and the stores:
-  its keyword map is `docs/seo/keywords.md`, and its four directions
-  (辻 the crossroads, 路線 the line, 実演 try it, 定期券 the pass) are
-  drawn on the canvas "Tsuji — landing page" for the owner's pick.
+  its keyword map is `docs/seo/keywords.md`. Of the four directions
+  drawn on the canvas "Tsuji — landing page" the owner picked A, 辻 the
+  crossroads, improved with B's line to N1, C's working demos and D's
+  pass, plus a presentation video and the features one by one on film
+  (the footage slots, by file name, are on the same canvas).
   When starting a new wave, begin at **168** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
