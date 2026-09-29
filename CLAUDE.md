@@ -1160,7 +1160,26 @@ runtime purpose. Two consequences worth knowing:
   `screens/BoardingFlow.browser.test.jsx`, `BoardingFlow.touch.test.jsx`,
   `src/contrast.browser.test.jsx` and `index.css`; DESIGN.md, Structure
   and "The gate button"; `docs/design/mobile/README.md`).
-  When starting a new wave, begin at **169** or higher, and check
+  **169** is 低, the short desk: a friend's laptop showed most screens
+  broken on a window wide enough for the desk and 600–660px tall (a
+  1366×768 or 1280×720 panel less the browser's chrome), and every screen
+  was audited at 1366×625, 1280×600 and 1100×620 -- one height answer,
+  `DESK_SHORT_QUERY` (`(max-height: 799px)`), nested in the 机 section's
+  width query and held by `src/desk.css.test.js`; a run's choices as an
+  answer sheet two by two with the card never under its content (it had
+  been crushed to a 37px strip under its word), the tiles held at the
+  column's floor, the drills' card beside their boxes or board; the
+  exam's brief answers two by two (`QuestionRenderer`'s `brief`); every
+  question of first contact whole, the reason straight on named beside
+  its ring and noon clear of the board; the rail holding every gate;
+  Today's side column whole and its lane tiles legible; Learn's and
+  Practice's plates whole; the practice stations at their own height;
+  the band's headword stacked in a run's side; and a `short` test lane
+  at 1280×600 (cited in `hooks/useDesk.js`, `exam/QuestionRenderer.jsx`,
+  `vite.config.js`, `src/desk.css.test.js`, the five `src/*.short.test.jsx`
+  and the 机 section of `index.css`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`, "The short desk").
+  When starting a new wave, begin at **170** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

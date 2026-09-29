@@ -24463,18 +24463,24 @@ button.brd-stn { cursor: pointer; }
     padding-top: var(--sp-4);
     overflow-y: auto;
   }
+  /* The switch at 230px and its lanes beside it; a band too narrow to
+     hold a lane's tile beside the switch drops its lanes under it (plan
+     169): on the desk's tightest the lanes had ~116px, three tiles of
+     30 cut at the gate's edge. */
   .gate-band {
-    display: grid;
-    grid-template-columns: 230px minmax(0, 1fr);
-    gap: var(--sp-5);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-4) var(--sp-5);
     padding: var(--sp-4) 0;
     border-top: 1px solid var(--surface-line);
   }
+
   .gate-band:first-child {
     padding-top: 0;
     border-top: none;
   }
   .gate-band__line {
+    flex: 0 0 230px;
     align-self: start;
     display: flex;
     align-items: center;
@@ -24526,9 +24532,16 @@ button.brd-stn { cursor: pointer; }
     font-weight: 600;
     color: var(--text-secondary);
   }
+  /* Three across where each tile holds a third of a side column, and
+     fewer where it would not, a band's few lanes sharing its row (plan
+     169): on a laptop the gate beside its side column left the lanes
+     ~300px, three tiles of 93, and a lane's name read "Hi…" under its
+     tags. */
   .gate-band__lanes {
+    flex: 1 1 calc(var(--desk-side-w) / 3);
+    min-width: 0;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, max(calc(var(--desk-side-w) / 3), calc((100% - 2 * var(--sp-3)) / 3))), 1fr));
     align-content: start;
     gap: var(--sp-3);
   }
@@ -24545,6 +24558,8 @@ button.brd-stn { cursor: pointer; }
     background: color-mix(in srgb, var(--lane-color, var(--accent2)) 9%, var(--bg-main));
   }
   .lane--tile .lane__where {
+    grid-column: 2;
+    grid-row: 1;
     font-size: var(--fs-sm);
     color: var(--text-primary);
   }
@@ -24556,6 +24571,8 @@ button.brd-stn { cursor: pointer; }
   }
   .lane__tags:empty { display: none; }
   .lane--tile .lane__due {
+    grid-column: 3;
+    grid-row: 1;
     display: flex;
     align-items: baseline;
     gap: var(--sp-1);
@@ -24565,6 +24582,16 @@ button.brd-stn { cursor: pointer; }
   }
   .lane--tile .lane__free { color: var(--success); }
   .lane--tile .lane__new { color: var(--line-vocab); }
+  /* The name and the share on the tile's first row, the tags under
+     them across the share's column too (plan 169): held to the name's
+     column, a tile a laptop's gate draws at ~145px printed GRATUIT over
+     its count. The tick takes the first cell left. */
+  .lane--tile > .lane__names { display: contents; }
+  .lane--tile .lane__tags {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    margin-top: calc(-1 * var(--sp-3));
+  }
   .lane__waits {
     display: inline-flex;
     align-items: center;
@@ -26137,6 +26164,18 @@ button.brd-stn { cursor: pointer; }
     padding-block: var(--sp-3);
     background: var(--bg-main);
   }
+  /* A question's four brief answers as an answer sheet, two by two
+     (plan 169, QuestionRenderer's `brief`), as a card run's choices
+     stand: a reading or a spelling is a few signs, and four rows of
+     them down the paper put the third and fourth under the docked
+     Previous and Next on a laptop's window. A sentence keeps its row.
+     Arrows still walk them in their order. */
+  .desk-run--paper .mcq-list--brief {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-4);
+  }
+  .desk-run--paper .mcq-list--brief > .mcq-row + .mcq-row { margin-top: 0; }
   /* The card and its choices side by side: a question and the four
      answers to it read across, not down past the window's floor (the
      fourth kanji choice stood at 870px on a 1100×800 screen). The
@@ -26514,6 +26553,10 @@ button.brd-stn { cursor: pointer; }
     right: calc(-1 * var(--sp-2));
     background: var(--bg-main);
   }
+  /* Esc's cap on the way out stands a rung clear of the place's name
+     (plan 169): it followed the name's last letter with no space, and
+     the exam's read "ExamenÉchap". */
+  .stage__leave .desk-kbd { margin-inline-start: var(--sp-2); }
   /* The card panel's caps (plan 126): the keys the elements no longer
      print, in the page's ink. (Each verdict's digit is in its tile's
      corner, .desk-verdict__key.) */
@@ -28902,19 +28945,40 @@ button.brd-stn { cursor: pointer; }
   /* Nor over the choices: four glosses of a kanji, each a list of
      synonyms, stood the tiles 58px under a 800px window's floor. The
      card gives down to what the choices and the tiles leave (it still
-     fills that room, so it keeps one height through the answer), and
-     the rows come in to the phone's rhythm: 8px over and under, 8px
-     between. */
+     fills that room, so it keeps one height through the answer) -- but
+     never under what it holds (plan 169): given down to nothing it had
+     been a 37px strip on a laptop's 625px window with its word printed
+     over the first three choices, and at 800 the reading the answer
+     opens ran over the rows under it. Held at its content, a card taller
+     than the room scrolls the column instead of standing on its
+     choices. */
   .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage,
   .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .card-transition,
   .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .card-transition-live,
-  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .prompt-card { min-height: 0; }
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .prompt-card { min-height: min-content; }
   .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
-  .desk-run--panels > .stage > .mcq-list { flex: none; }
+  /* The choices as an answer sheet, two by two under the card (plan
+     169): four rows down the column were 224px of a laptop's window
+     for four words, and the card paid for them. The four keys read
+     across in the order they are numbered, a row of the sheet as tall
+     as its longer cell, and a gloss of several senses wraps in its
+     cell. Answered,
+     the two unused cells keep their place, unseen, as the rows did. */
+  .desk-run--panels > .stage > .mcq-list {
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-3);
+    max-width: var(--card-w);
+  }
   .desk-run--panels > .stage > .mcq-list .mcq-row,
-  .desk-run--panels > .stage > .mcq-list .mcq-row.mcq-row--filler { padding-block: var(--sp-3); }
+  .desk-run--panels > .stage > .mcq-list .mcq-row.mcq-row--filler {
+    gap: var(--sp-4);
+    padding: var(--sp-3) var(--sp-4);
+  }
   .desk-run--panels > .stage > .mcq-list .mcq-row + .mcq-row,
-  .desk-run--panels > .stage > .mcq-list .mcq-row + .mcq-row.mcq-row--filler { margin-top: var(--sp-3); }
+  .desk-run--panels > .stage > .mcq-list .mcq-row + .mcq-row.mcq-row--filler { margin-top: 0; }
+  .desk-run--panels > .stage > .mcq-list .mcq-row__text { font-size: var(--fs-lead); line-height: 1.3; }
   /* The tiles framed in a surface row under the card, and before the
      reveal drawn unlit and inert -- the console's buttons are there,
      dark, until there is something to press -- rather than unseen.
@@ -28925,6 +28989,16 @@ button.brd-stn { cursor: pointer; }
     background: var(--surface);
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
+  }
+  /* Over the choices the tiles are held at the column's floor (plan
+     169): a kanji's card opens its readings on the answer, taller than
+     a laptop's column leaves it, and the column scrolls then -- the
+     tiles stay where the learner rates. Only there: over a drill the
+     column's last piece is the drill's own button, which a held row
+     would stand on. */
+  .desk-run--panels > .stage:has(> .mcq-list) > .rating-bar {
+    position: sticky;
+    bottom: 0;
   }
   .desk-run--panels > .stage > .rating-bar--unlit { pointer-events: none; }
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn { opacity: 0.38; }
@@ -29188,14 +29262,16 @@ button.brd-stn { cursor: pointer; }
   /* The plate as a band: the word at the left, its readings and
      meaning beside it, the marks and the actions at the right, the
      stripe under all three. The stack's children take the grid's
-     areas themselves. */
+     areas themselves. The meaning runs under the marks too (plan 169):
+     held to the middle column it had ~100px of a laptop's side column,
+     and a gloss like "Heure (… heures)" ran out under 新 · N5. */
   .dict-entry--band .dict-plate {
     position: static;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas:
       "word readings row"
-      "word caption row"
+      "word caption caption"
       "stripe stripe stripe";
     align-items: center;
     gap: var(--sp-2) var(--sp-6);
@@ -29397,13 +29473,19 @@ button.brd-stn { cursor: pointer; }
     flex-direction: row;
     align-items: center;
   }
-  /* A grammar point, or any long headword, stacked rather than
-     beside: the pattern's auto column took the band's width and left
-     its formation and gloss a word a line (〜ないでください). The marks
-     and actions ride one line over it, as a phone sets them; how it is
-     formed over the pattern, the gloss under it, each the plate's
-     whole width -- the order the desk's dictionary page keeps, above. */
-  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) {
+  /* A grammar point, or any headword of more than one sign, stacked
+     rather than beside: the pattern's auto column took the band's width
+     and left its formation and gloss a word a line (〜ないでください).
+     The marks and actions ride one line over it, as a phone sets them;
+     how it is formed over the pattern, the gloss under it, each the
+     plate's whole width -- the order the desk's dictionary page keeps,
+     above. A word of two to six signs stacks too (plan 169): beside its
+     gloss in a run's side column -- 300px on the narrowest desk, 353 on
+     a 1280 laptop -- it broke a sign a line (涼し / い), or held its line
+     and pushed the speaker off the panel (こんにちは), while the gloss ran
+     out under the marks. A single sign keeps the drawing: at the
+     specimen's size it leaves its gloss the room. */
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long), :has(.dict-plate__word--word)) {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "row"
@@ -29413,20 +29495,20 @@ button.brd-stn { cursor: pointer; }
       "stripe";
     gap: var(--sp-2);
   }
-  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__row {
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long), :has(.dict-plate__word--word)) .dict-plate__row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--sp-2);
   }
-  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__word {
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long), :has(.dict-plate__word--word)) .dict-plate__word {
     justify-self: start;
     text-indent: 0;
   }
-  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) :is(.dict-plate__readings, .dict-plate__reading, .dict-plate__structure) {
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long), :has(.dict-plate__word--word)) :is(.dict-plate__readings, .dict-plate__reading, .dict-plate__structure) {
     align-self: start;
   }
-  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__caption {
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long), :has(.dict-plate__word--word)) .dict-plate__caption {
     font-size: var(--fs-title);
   }
   /* The learner's record under the stripe, four across (below), then
@@ -30581,6 +30663,7 @@ button.brd-stn { cursor: pointer; }
     display: flex;
     align-items: center;
     gap: var(--sp-5);
+    max-width: 100%;
   }
   .prc-spec__play {
     flex: none;
@@ -30598,11 +30681,16 @@ button.brd-stn { cursor: pointer; }
     width: var(--sp-6);
     height: var(--sp-6);
   }
+  /* The wave gives way first, its bars cut at its edge, where a well is
+     narrower than the play, the wave and the listens left (plan 169:
+     three plates across a laptop's width cut the play and the count). */
   .prc-spec__wave {
     display: flex;
     align-items: center;
     gap: var(--sp-1);
+    min-width: 0;
     height: var(--sp-8);
+    overflow: hidden;
   }
   .prc-spec__wave > i {
     width: var(--sp-1);
@@ -31161,5 +31249,251 @@ button.brd-stn { cursor: pointer; }
   }
   .prc-page--narrow .prc-paper__score { flex-direction: row; align-items: baseline; gap: var(--sp-3); }
   .prc-page--narrow .prc-paper__figs > .desk-line__bar { display: none; }
+}
+/* ── 低 — the short desk (plan 169) ──
+   A laptop's window is wide enough for the desk and often not tall
+   enough for it: 1366×768 or 1280×720, less the browser's tabs and its
+   address bar, is a window 600–660px tall, and the desk was drawn and
+   tested at 800 (the desktop lane is 1100×800). Under that height the
+   screens that hold themselves to the window crushed what they hold --
+   a run's card to a 37px sliver with its word printed over the choices
+   -- or cut it at their foot, and the rail hid its last gates under the
+   pass. The audit that found them is plan 169's; the rules that answer
+   it are here, one block under the one height hooks/useDesk.js exports
+   (DESK_SHORT_QUERY), nested in the desk's own door so a phone never
+   reaches it. The order is the density contract's (DESIGN.md, "Air
+   gives way before content does"): the room round a thing gives way
+   first, then a drawing draws closer, and where a column still holds
+   more than the window it scrolls -- nothing is crushed or cut. A
+   first-contact rule here writes none of the pairs the boarding's short
+   step writes (src/desk.css.test.js). */
+@media (min-width: 1100px) {
+  @media (max-height: 799px) {
+    /* ── Today ──
+       The side column scrolls when it is taller than the window, and
+       nothing in it gives way to fit: the pass's strip, which clips its
+       own sheen, had been crushed to a 26px sliver at its top. The week
+       ahead's bars stand a rung shorter. */
+    .today > .desk-side > * { flex-shrink: 0; }
+    .desk-week__bars { min-height: calc(var(--desk-side-w) / 5); }
+    /* ── the rail ──
+       Five gates, the six stations of the lit one and the pass: 676px
+       on a 600px window, and the gates' list scrolled with Profile and
+       Dictionary under the pass. The masthead and the pass come a rung
+       closer and a station's row to 28px -- the gates keep their 44px
+       -- so the rail holds whole down to a 600px window; under that its
+       gates scroll, as they always have. */
+    .desk-rail {
+      gap: var(--sp-4);
+      padding-top: calc(var(--safe-top) + var(--sp-4));
+    }
+    .desk-sec { min-height: 28px; }
+    .desk-rail__foot {
+      padding: var(--sp-3) var(--sp-4);
+      padding-bottom: calc(var(--sp-3) + var(--safe-bottom));
+    }
+    /* ── a run on three panels ──
+       The card, its choices and the tiles, and at the left the run's
+       figures over the card panel, were 589px in a 537px column on a
+       625px window: the head scrolled out of the top and the tiles out
+       of the foot. The columns stand a rung from the window's edges,
+       their pieces a rung closer, the verdict tiles and the specimen a
+       rung smaller -- nothing leaves the column, and a card taller than
+       what is left still scrolls it rather than standing on its
+       neighbours (the min-content above). */
+    .desk-run--panels { padding-block: var(--sp-5); }
+    .desk-run--panels > .desk-run__left,
+    :root .desk-run--panels > .desk-run__side { gap: var(--sp-4); }
+    .screen.desk-run.desk-run--panels > .stage {
+      --fs-specimen-glyph: var(--fs-specimen-word);
+      gap: var(--sp-3);
+    }
+    .desk-run--panels > .stage .prompt-card { --card-pad-y: var(--sp-6); }
+    .desk-run--panels > .stage > .rating-bar { padding-block: var(--sp-3); }
+    /* The readings drill's boxes beside its kanji rather than under
+       it: the two were 511px of a 568px column, with Valider and the
+       tiles under the fold. The head, the line and the tiles span. */
+    .screen.desk-run.desk-run--panels > .stage:has(> .readings-input) {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-content: start;
+      column-gap: var(--sp-3);
+    }
+    .screen.desk-run.desk-run--panels > .stage:has(> .readings-input) > * { grid-column: 1 / -1; }
+    .screen.desk-run.desk-run--panels > .stage:has(> .readings-input) > .quiz-card-stage { grid-column: 1; }
+    .screen.desk-run.desk-run--panels > .stage:has(> .readings-input) > .readings-input {
+      grid-column: 2;
+      --card-pad-y: var(--sp-5);
+      --card-pad-x: var(--sp-5);
+      --card-pad-top: var(--sp-5);
+    }
+    .screen.desk-run.desk-run--panels > .stage:has(> .readings-input) > .readings-input > .readings-input__submit { margin-top: var(--sp-5); }
+    /* The writing board beside its prompt, as plan 115 first set it,
+       and given the column's height: under the prompt it was held to
+       its 160px floor with the tiles 20px under the fold. The prompt
+       takes the narrower column, the board the wider, and the square is
+       what the board's room allows. */
+    .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .drawing-quiz) {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      column-gap: var(--sp-3);
+    }
+    .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .drawing-quiz) > * { grid-column: 1 / -1; }
+    .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .drawing-quiz) > .quiz-card-stage { grid-column: 1; }
+    .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .drawing-quiz) > .drawing-quiz {
+      grid-column: 2;
+      align-self: stretch;
+      min-height: 0;
+      --drawing-card-pad: var(--sp-4);
+    }
+    .desk-run__panel { gap: var(--sp-3); }
+    .desk-verdict {
+      gap: var(--sp-2);
+      padding-block: var(--sp-4);
+    }
+    .desk-verdict__value { font-size: var(--fs-heading); }
+    .desk-rhythm { padding-block: var(--sp-3); }
+    /* ── Learn ──
+       The four line plates share the window's height, and at 556px of
+       it each was 19px shorter than its line: the figures under the
+       stops were cut at every plate's foot. The head and the line come
+       in a rung, so four plates hold whole on a 600px window, and under
+       that a plate keeps its content and the page scrolls. */
+    .learn-desk > .plates { gap: var(--sp-3); }
+    .learn-desk > .plates.plates--across > .plate.plate--line { min-height: min-content; }
+    .learn-desk > .plates.plates--across > .plate.plate--line > .plate__head { padding-block: var(--sp-1); }
+    .learn-desk > .plates.plates--across > .plate.plate--line > .plate__foot { padding-block: var(--sp-1) var(--sp-2); }
+    /* ── Practice ──
+       Six plates two by two left each row 180px on a 600px window, and
+       the specimens in the plates were cut at both edges of their wells
+       (composition's point lost its top, the exam's readings their
+       second row). Three across as soon as three hold a desk column's
+       least width, so two rows share the window; a name that no longer
+       holds on one line takes two. Where three do not fit (under
+       ~1250px) a row keeps two thirds of a side column, the room a
+       specimen needs once its line is not drawn (PracticeScreen's
+       HOW_MIN), and the page scrolls. The floor is a height, never the
+       specimen's own: the specimen measures its room to choose what it
+       draws, and a room sized by what it drew never gave way. */
+    .practice > .plates {
+      grid-template-columns: repeat(auto-fit, minmax(var(--desk-run-col-min), 1fr));
+      grid-auto-rows: minmax(calc(var(--desk-side-w) * 2 / 3), 1fr);
+    }
+    .practice > .plates > .plate .plate__title {
+      white-space: normal;
+      text-wrap: balance;
+    }
+    /* A practice station's page stands at its own height, as the narrow
+       page does (PracticePage's NARROW), rather than the window's: held
+       to 568px its well cut the run's card at both edges -- reading's
+       field, comprehension's question and its choices -- and each of
+       the exam's papers lost its last line. The list beside it stays
+       where it sticks; the page scrolls under the window. */
+    .desk-split--practice > .desk-split__page {
+      position: static;
+      height: auto;
+    }
+    .prc-spec {
+      flex: none;
+      padding: var(--sp-7) var(--sp-6) var(--sp-5);
+    }
+    .prc-lower { flex: none; }
+    .prc-panel { max-height: calc(6 * var(--sp-8)); }
+    .prc-papers,
+    .prc-papers > .prc-paper { flex: none; }
+    /* ── the analyser's typed Passage ──
+       The sentence a rung under display size and its subtitle a rung
+       under its own: at display size three lines of a sentence and its
+       translation left Explain under the fold of their stage on a
+       600px window. */
+    .anl-desk--text .anl-subs { padding-bottom: var(--sp-5); }
+    .anl-desk--text .anl-subs__stage { gap: var(--sp-4); }
+    .anl-desk--text .anl-subs__line .tok { font-size: var(--fs-board-fluid); }
+    .anl-desk--text .anl-subs__tr { font-size: var(--fs-title); }
+    /* ── the exam's paper ──
+       A row of the paper a rung shorter, and the rows a rung closer:
+       the fourth answer to a question in a sentence stood under the
+       docked Previous and Next on a 600px window. */
+    .desk-run--paper .mcq-row { padding-block: var(--sp-3); }
+    .desk-run--paper .mcq-list:not(.mcq-list--brief) > .mcq-row + .mcq-row { margin-top: var(--sp-3); }
+    /* ── first contact ──
+       The drawings take the room the question and the floor leave,
+       down to a floor of their own that a 600px window holds. */
+    .desk-brd__roads { min-height: 240px; }
+    /* The reason straight out to the right names itself beside its
+       ring, as its five neighbours do: under it, the name stood on the
+       ring below once the rows closed up (reported on a 1366x768
+       laptop). A long name takes a second line in the room it has. */
+    .desk-brd__way--under {
+      left: calc(var(--x, 50) * 1% - 48px);
+      width: auto;
+      flex-direction: row;
+      gap: var(--sp-5);
+    }
+    .desk-brd__way--under > .desk-brd__way-name { justify-content: flex-start; text-align: start; }
+    /* The kana's tree: a shorter stem and the answers at their content. */
+    .desk-brd__kana { --stem: var(--sp-7); }
+    .desk-brd__tree {
+      height: calc(var(--stem) + var(--sp-6));
+      margin-top: var(--sp-4);
+    }
+    .desk-brd .desk-brd__ans {
+      min-height: 0;
+      padding: var(--sp-5) var(--sp-4);
+    }
+    .desk-brd__chips { margin-bottom: var(--sp-3); }
+    .desk-brd__chip { height: 48px; }
+    /* The line of levels climbs less steeply; it keeps every stop. */
+    .desk-brd__climb { min-height: 300px; }
+    /* The lines' cards at their content, the ring a rung smaller. */
+    .desk-brd__ticket { min-height: 52px; }
+    .desk-brd__line {
+      gap: var(--sp-2);
+      min-height: 0;
+      padding: var(--sp-4) var(--sp-6);
+    }
+    .desk-brd__line-ring {
+      width: 56px;
+      height: 56px;
+      margin-bottom: var(--sp-2);
+      font-size: var(--fs-heading);
+    }
+    .desk-brd__line-vol { padding-top: var(--sp-3); }
+    .desk-brd__first { margin-top: var(--sp-3); }
+    /* The two words read out: each card a rung tighter round its word
+       and its signs. */
+    .desk-brd__word {
+      gap: var(--sp-4);
+      padding: var(--sp-5);
+    }
+    .desk-brd__sign { height: 64px; }
+    .desk-brd__rides { min-height: 280px; }
+    /* The day's arc: noon names itself beside its ring, and the board
+       sits lower in the bowl on smaller flaps, so the name never stands
+       on the board (it did under 800px). */
+    .desk-brd__day { gap: var(--sp-3); }
+    .desk-brd__sky { min-height: 300px; }
+    .desk-brd__hour-stn--noon {
+      left: calc(var(--x, 0) * 1px - 48px);
+      flex-direction: row;
+      gap: var(--sp-5);
+      width: auto;
+      text-align: start;
+    }
+    .desk-brd__hour-stn--noon .desk-brd__hour-lab { align-items: flex-start; }
+    .desk-brd__sky-board {
+      top: calc(var(--y, 0) * 1px - var(--sp-5));
+      gap: var(--sp-3);
+      padding: var(--sp-4) var(--sp-5) var(--sp-5);
+    }
+    .desk-brd__sky-board .brd-flap {
+      width: 48px;
+      height: 64px;
+      font-size: var(--fs-display);
+    }
+    /* The plan's two halves a rung closer. */
+    .desk-brd__plan { gap: var(--sp-5); }
+  }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

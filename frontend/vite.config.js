@@ -217,6 +217,7 @@ export default defineConfig(({ mode }) => {
             'src/**/*.touch.test.{js,jsx}',
             'src/**/*.desktop.test.{js,jsx}',
             'src/**/*.wide.test.{js,jsx}',
+            'src/**/*.short.test.{js,jsx}',
           ],
         },
       },
@@ -271,6 +272,15 @@ export default defineConfig(({ mode }) => {
       // fire matchMedia's `change` and the desk is a matchMedia answer.
       browserProject('desktop', ['src/**/*.desktop.test.{js,jsx}'], { width: 1100, height: 800 }),
       browserProject('wide', ['src/**/*.wide.test.{js,jsx}'], { width: 1440, height: 900 }),
+      // The short desk (plan 169). The two desk lanes are 800 and 900
+      // tall, and a laptop's window is not: 1366×768 or 1280×720 less
+      // the browser's tabs and address bar is 600-660px, which is
+      // where a run's card was crushed under its choices, the rail hid
+      // its last gates and first contact cut its answers. 1280×600 is
+      // the worst of the common ones -- the desk's width with room for
+      // three plates, the height of a 720p panel -- and the rules it
+      // checks are the 机 section's DESK_SHORT_QUERY block.
+      browserProject('short', ['src/**/*.short.test.{js,jsx}'], { width: 1280, height: 600 }),
     ],
   },
   };
