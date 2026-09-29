@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { splitTake, parseQuota, quotaParam, runPathFor, laneCount } from './lanes'
+import { splitTake, parseQuota, quotaParam, runPathFor, laneCount, isMainLane } from './lanes'
 
 // ── 区間 — the run's length dealt as the queue deals (plan 135) ──
 // backend study/daily_queue.interleave takes one card from each lane in
@@ -42,5 +42,21 @@ describe('the quota in the run\'s URL', () => {
     expect(runPathFor(QUEUE, new Set(), 2)).toBe(`/today/run?quota=${encodeURIComponent('a:1,b:1')}`)
     // Dealt over the lanes still on.
     expect(runPathFor(QUEUE, new Set(['a']), 2)).toBe(`/today/run?quota=${encodeURIComponent('b:1,c:1')}`)
+  })
+})
+
+// ── 主 — a line's main flashcard, the one the gate can board alone ──
+describe('isMainLane', () => {
+  it('is the recognition flashcard of every line, a deck\'s included', () => {
+    for (const mode of ['kana.flashcard.f2b', 'vocab.flashcard.f2b', 'kanji.flashcard.f2b', 'grammar.flashcard.f2b', 'standard.flashcard.f2b']) {
+      expect(isMainLane({ mode })).toBe(true)
+    }
+  })
+  it('is none of the other modes', () => {
+    for (const mode of ['vocab.flashcard.b2f', 'vocab.word_reading', 'kanji.readings', 'kanji.write_kanji', 'kana.write_romaji', 'grammar.fill_in', 'grammar.contrast']) {
+      expect(isMainLane({ mode })).toBe(false)
+    }
+    expect(isMainLane({})).toBe(false)
+    expect(isMainLane(null)).toBe(false)
   })
 })

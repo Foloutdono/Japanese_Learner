@@ -78,7 +78,7 @@ export function SideLookup({ lookup, onExit, session, head, children }) {
 
   return (
     <div ref={ref} className="desk-lookup">
-      <div hidden={open} onFocus={e => { opener.current = e.target }}>{children}</div>
+      <div className="desk-lookup__body" hidden={open} onFocus={e => { opener.current = e.target }}>{children}</div>
       {open && head}
       {open && (
         <section ref={entry} className="desk-entry" aria-label={t.openDictionary} tabIndex={-1}>

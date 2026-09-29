@@ -19,6 +19,14 @@ export function laneWhere(lane, t, kanaSetLabel) {
   return lane.source === 'kana' ? kanaSetLabel(t, lane.deck) : lane.deck
 }
 
+/** A line's main flashcard: the recognition card (kana → romaji, word
+ *  → sense, kanji → sense, structure → sense), `<source>.flashcard.f2b`.
+ *  The desk's gate can board these alone (domain/studyModes' RAPID
+ *  service), leaving the recall, typing, drawing and fill modes. */
+export function isMainLane(lane) {
+  return typeof lane?.mode === 'string' && lane.mode.endsWith('.flashcard.f2b')
+}
+
 /** The run's path for a choice: the query carries only a partial
  *  choice — an empty `lanes` already means the whole queue on the
  *  backend, and the run's session key must not churn. */

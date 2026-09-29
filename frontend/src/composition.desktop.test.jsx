@@ -108,8 +108,8 @@ async function run() {
   await settle(240)
 }
 
-async function answered() {
-  type($('.stage input'), SENTENCE)
+async function answered(sentence = SENTENCE) {
+  type($('.stage input'), sentence)
   await settle(20)
   $('.stage form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
   await settle(240)
@@ -169,5 +169,66 @@ describe('a composition run on the desk', () => {
     expect($('.stage .prose__jp').textContent).toBe('〜てみる')
     expect($('.desk-run__side').getAttribute('aria-label')).toBe('Leçon')
     expect(lessonCalls()).toHaveLength(2)
+  })
+
+  // A sentence typed in romaji is broken down in Japanese: the tutor
+  // writes it out, the breakdown reads that, and the answer prints it
+  // over what the learner typed. It had been five rows of letters.
+  it('breaks a romaji sentence down in the tutor\'s Japanese, and prints it over the romaji', async () => {
+    const ROMAJI = 'ongaku ga kikinagara benkyou shimasu.'
+    apiJson.mockImplementation(async (url) => {
+      const u = String(url)
+      if (u.startsWith('/api/composition/batch')) return { level: 'N4', points: POINTS }
+      if (u === '/api/composition/check') return { found: true, japanese: 'おんがくがききながらべんきょうします。' }
+      if (u.startsWith('/api/grammar/point')) return LESSON
+      return {}
+    })
+    apiFetch.mockImplementation(async (url) => {
+      const u = String(url)
+      if (u === '/api/composition/review') return ok({ ...TUTOR, japanese: SENTENCE, found: true })
+      if (u === '/api/phrase/analyze') return ok(ANALYSIS)
+      return ok({})
+    })
+    await run()
+    await answered(ROMAJI)
+    const asked = apiFetch.mock.calls.filter(c => String(c[0]) === '/api/phrase/analyze')
+    expect(asked).toHaveLength(1)
+    expect(JSON.parse(asked[0][2].body).phrase).toBe(SENTENCE)
+    const answer = $('.stage .prose__label--measured').nextElementSibling
+    expect(answer.classList.contains('prose__jp')).toBe(true)
+    expect(answer.textContent).toBe(SENTENCE)
+    expect(answer.nextElementSibling.textContent).toBe(ROMAJI)
+  })
+
+  it('falls back to the check\'s kana when there is no tutor', async () => {
+    const KANA = 'おんがくがききながらべんきょうします。'
+    apiJson.mockImplementation(async (url) => {
+      const u = String(url)
+      if (u.startsWith('/api/composition/batch')) return { level: 'N4', points: POINTS }
+      if (u === '/api/composition/check') return { found: true, japanese: KANA }
+      if (u.startsWith('/api/grammar/point')) return LESSON
+      return {}
+    })
+    apiFetch.mockImplementation(async (url) => {
+      const u = String(url)
+      if (u === '/api/composition/review') return { ok: false, status: 429, json: async () => ({}) }
+      if (u === '/api/phrase/analyze') return ok(ANALYSIS)
+      return ok({})
+    })
+    await run()
+    await answered('ongaku ga kikinagara benkyou shimasu.')
+    const asked = apiFetch.mock.calls.filter(c => String(c[0]) === '/api/phrase/analyze')
+    expect(JSON.parse(asked[0][2].body).phrase).toBe(KANA)
+  })
+
+  it('breaks a sentence written in Japanese down as written', async () => {
+    await run()
+    await answered()
+    const asked = apiFetch.mock.calls.filter(c => String(c[0]) === '/api/phrase/analyze')
+    expect(JSON.parse(asked[0][2].body).phrase).toBe(SENTENCE)
+    // The answer's one line, and the rule under it: no romaji line.
+    const answer = $('.stage .prose__label--measured').nextElementSibling
+    expect(answer.textContent).toBe(SENTENCE)
+    expect(answer.nextElementSibling.classList.contains('prose__rule')).toBe(true)
   })
 })

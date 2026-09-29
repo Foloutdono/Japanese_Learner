@@ -43,6 +43,14 @@ function mount(today = TODAY) {
 
 beforeEach(() => { creditsRef.current = FREE })
 
+// The switches stand in the services sheet since plan 166, opened from
+// the row under the card; the sheet portals to the body.
+async function services(screen) {
+  screen.container.querySelector('.gate-one__services').click()
+  await new Promise(r => setTimeout(r, 60))
+  return [...document.querySelectorAll('.gate-sheet .lane')]
+}
+
 // A fare line stood over the notice — Fare · n credits · a hairline ·
 // Balance · the figure in gold — printing the count the card already
 // sets in figures three times the size, beside a balance the HUD's
@@ -91,7 +99,11 @@ describe('GateCard — the fare', () => {
     const screen = await mount()
     const gate = screen.container.querySelector('.btn-depart')
     expect(gate.disabled).toBe(true)
-    expect(getComputedStyle(gate).opacity).toBe('0.45')
+    // Closed is the gate's outline (改札, plan 164), not a faded fill:
+    // full strength, the gold layer gone, the word in the second ink.
+    expect(getComputedStyle(gate).opacity).toBe('1')
+    expect(getComputedStyle(gate, '::before').opacity).toBe('0')
+    expect(gate.classList.contains('btn-depart--gate')).toBe(true)
   })
 
   it('prints no notice on a pass', async () => {
@@ -106,7 +118,7 @@ describe('GateCard — the fare', () => {
     const screen = await mount()
     expect(screen.container.querySelector('.gate-card__short')).toBeTruthy()
     // Grouped by line, vocab before kanji: pick the kanji lane by name.
-    const kanji = [...screen.container.querySelectorAll('.lane')].find(l => l.textContent.includes('N4'))
+    const kanji = (await services(screen)).find(l => l.textContent.includes('N4'))
     expect(kanji.getAttribute('aria-pressed')).toBe('true')
     kanji.click()
     await new Promise(r => setTimeout(r, 60))
@@ -122,8 +134,7 @@ describe('GateCard — the fare', () => {
     const screen = await mount({ ...TODAY, total: 22, lanes: [LANES[1], KANA_LANE] })
     expect(screen.container.querySelector('.gate-card__count').textContent).toBe('22')
     expect(screen.container.querySelector('.gate-card__short')).toBeNull()
-    const free = [...screen.container.querySelectorAll('.lane')]
-      .filter(l => l.querySelector('.lane__free'))
+    const free = (await services(screen)).filter(l => l.querySelector('.lane__free'))
     expect(free).toHaveLength(1)
     expect(free[0].textContent).toContain('12')
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(false)
@@ -152,7 +163,7 @@ describe('GateCard — the fare', () => {
   it('closes again once the free lane is switched off', async () => {
     creditsRef.current = { ...FREE, balance: 0, enforced: true }
     const screen = await mount({ ...TODAY, total: 22, lanes: [LANES[1], KANA_LANE] })
-    const kana = [...screen.container.querySelectorAll('.lane')].find(l => l.querySelector('.lane__free'))
+    const kana = (await services(screen)).find(l => l.querySelector('.lane__free'))
     kana.click()
     await new Promise(r => setTimeout(r, 60))
     expect(screen.container.querySelector('.gate-card__short').textContent).toContain('+1')
@@ -162,7 +173,8 @@ describe('GateCard — the fare', () => {
   it('marks nothing free on a pass, where nothing costs anything', async () => {
     creditsRef.current = { ...FREE, balance: null, unlimited: true }
     const screen = await mount({ ...TODAY, total: 22, lanes: [LANES[1], KANA_LANE] })
-    expect(screen.container.querySelector('.lane__free')).toBeNull()
+    expect(await services(screen)).toHaveLength(2)
+    expect(document.querySelector('.lane__free')).toBeNull()
     expect(screen.container.querySelector('.gate-card__short')).toBeNull()
   })
 
@@ -184,7 +196,7 @@ describe('GateCard — the ration', () => {
     const screen = await mount({ ...TODAY, total: 19, lanes: [LANES[0], rationed] })
     const root = screen.container
     expect(root.querySelector('.gate-card__count').textContent).toBe('19')
-    const rows = [...root.querySelectorAll('.lane')]
+    const rows = await services(screen)
     const vocab = rows.find(r => r.textContent.includes('N5'))
     expect(vocab.querySelector('.lane__due').textContent).toBe('5')
     expect(vocab.querySelector('.lane__new').textContent).toContain('5')
@@ -192,8 +204,8 @@ describe('GateCard — the ration', () => {
     const kanji = rows.find(r => r.textContent.includes('N4'))
     expect(kanji.querySelector('.lane__new')).toBeNull()
     expect(kanji.querySelector('.lane__due').textContent).toBe('14')
-    // The line chips carry the same arithmetic.
-    const chips = [...root.querySelectorAll('.gate-card__linedue')].map(el => el.textContent)
+    // The line heads carry the same arithmetic.
+    const chips = [...document.querySelectorAll('.gate-sheet__due')].map(el => el.textContent)
     expect(chips).toContain('5')
     expect(chips).toContain('14')
   })
@@ -216,7 +228,7 @@ describe('GateCard — the ration', () => {
     const screen = await mount({ ...TODAY, total: 21, lanes: [LANES[0], rationed] })
     const root = screen.container
     expect(root.querySelector('.gate-card__count').textContent).toBe('21')
-    const vocab = [...root.querySelectorAll('.lane')].find(r => r.textContent.includes('N5'))
+    const vocab = (await services(screen)).find(r => r.textContent.includes('N5'))
     vocab.click()
     await new Promise(r => setTimeout(r, 50))
     expect(root.querySelector('.gate-card__count').textContent).toBe('14')
