@@ -40,9 +40,13 @@ export default function WhyStep({ name, value, onChange, onContinue, no = null }
 //
 // The drawing's own figures, on the canvas's 358px stage (brd-map, the
 // phone's map in index.css): the rows' rings' centres, and the two
-// columns' (each road runs to its ring's centre, under the ring).
-const ROWS = [86, 220, 354]
+// columns' (each road runs to its ring's centre, under the ring). A row
+// every 140px, a rung more than the canvas's 134 (the owner's word on
+// the built screen): a name that wraps under its ring -- "Pour un voyage
+// au Japon" -- stands clear of the ring under it.
+const ROWS = [86, 226, 366]
 const SIDES = [85, 273]
+const HEIGHT = 452
 
 function Junction({ value, onChange, no }) {
   const { t } = useLang()
@@ -51,9 +55,9 @@ function Junction({ value, onChange, no }) {
     ? `M179 44V${ROWS[Math.floor(picked / 2)]}H${SIDES[picked % 2]}`
     : null
   return (
-    <div className="brd-map brd-junction" style={{ '--h': 440 }}>
-      <svg className="brd-map__lines" viewBox="0 0 358 440" preserveAspectRatio="none" aria-hidden="true">
-        <path className="brd-road" d="M179 22V354" />
+    <div className="brd-map brd-junction" style={{ '--h': HEIGHT }}>
+      <svg className="brd-map__lines" viewBox={`0 0 358 ${HEIGHT}`} preserveAspectRatio="none" aria-hidden="true">
+        <path className="brd-road" d={`M179 22V${ROWS[2]}`} />
         {ROWS.map(y => <path key={y} className="brd-road" d={`M${SIDES[0]} ${y}H${SIDES[1]}`} />)}
         {on && <path className="brd-road brd-road--on" d={on} />}
       </svg>

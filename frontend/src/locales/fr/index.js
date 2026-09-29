@@ -1914,7 +1914,7 @@ const boarding = {
   brdNotifTitle: (time) => `Ton train part à ${time}`,
   brdNotifText: 'Tes cartes t’attendent au portillon.',
   brdNudgeHint: 'Un par jour, à ton heure. Jamais plus.',
-  brdAllow: 'Autoriser les notifications',
+  brdAllow: 'Activer le rappel',
   brdNotNow: 'Pas maintenant',
   // ── 発車案内 — le rappel du jour tiré de la file, le widget et
   // Réglages › Notifications (plan 156). Le titre et le texte du rappel

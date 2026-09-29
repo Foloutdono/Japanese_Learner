@@ -457,9 +457,9 @@ width.
 | Class | Drawing | Component |
 |---|---|---|
 | `.brd` (`--arrival`: no head), `.brd__stop` (`--passed`, `--here`), `.brd__air`, `.brd-map` (`__lines`, `__at` `--start`/`--corner`/`--top`), `.brd-road` (`--on`), `.brd-hub` (`--sm`, `--md`) | the frame, the track, the rung under a question, the map, a question's hub | `screens/BoardingFlow.jsx`, `BoardFrame.jsx` (`BoardQuestion`, `BoardAir`) |
-| `.brd-front` (`--auth`, `__head`, `__door`, `__door-btn`, `__promise`, `__map`, `__roads`, `__road`, `__way`, `__stn` `--over`/`--under`, `__sign`, `__name`, `__hub`, `__foot`), `.brd-tagline`; `.brd-signin` (`__stage`, `__road`, `__map`, `__sign`, `__hub`, `__form`, `__card`, `__go`) | the Welcome as the crossroads; the sign-in in the promise's place | `Welcome.jsx`'s `PhoneWelcome`, `FrontMap`, `PhoneSignIn` over `AuthCard`'s `frame` |
+| `.brd-front` (`--auth`, `__head`, `__door`, `__door-btn`, `__promise`, `__map`, `__roads`, `__road`, `__way`, `__stn` `--over`/`--under`, `__sign`, `__name`, `__hub`, `__foot`), `.brd-tagline`; `.brd-signin` (`__stage`, `__road`, `__map`, `__sign`, `__hub`, `__form`, `__card`, `__gate`: its action, the boarding's gate, the road running into its reader) | the Welcome as the crossroads; the sign-in in the promise's place | `Welcome.jsx`'s `PhoneWelcome`, `FrontMap`, `PhoneSignIn` over `AuthCard`'s `frame` |
 | `.brd-name` (`__line`, `__pole`, `__hub`, `__road`, `__next`, `__ring`, `__lab`), `.brd-plate` (`__field`, `__count`, `__stripe`) | the name: the station's plate on its pole | `NameStep.jsx` |
-| `.brd-junction`, `.brd-way` (`__ring`, `__name`) | why: six reasons off one trunk | `WhyStep.jsx`'s `Junction` |
+| `.brd-junction`, `.brd-way` (`__ring`, `__name`) | why: six reasons off one trunk, a row every 140px (the canvas's 134 and a rung, so a name that wraps clears the ring under it) and drawn short only under a 680px frame | `WhyStep.jsx`'s `Junction` |
 | `.brd-cross` (`__words`, `__ans`, `__chips`, `__chip` `--not`, `__label`, `__jp`, `__sub`) | the kana: two words at a crossing, an answer at each end | `KanaStep.jsx`'s `Crossing` |
 | `.brd-read` (`__line`, `__head`, `__word`, `__script`, `__glyph`, `__sign`, `__sign-jp`, `__sound`, `__means`, `__cap`, `__word-fr`), `.brd-first` (`__ring`, `__txt`) | the reveal: each word read as a line, the first stop | `KanaStep.jsx`'s `ReadLines` |
 | `.brd-climb` (`__rails`, `__rail` `--ink`, `__hub`), `.brd-stn` (`--known`, `--ride`, `--on`, `__ring` `--jp`, `__lab`, `__name`, `__desc`, `__note`, `__tag`) | the level and the goal: the line climbing | `LevelStep.jsx`'s `Climb` |
@@ -473,7 +473,10 @@ width.
 
 Building is gone on the phone as on the desk: the hour (or the nudge) goes
 on to the plan under its 案内 signboard, and the reveal is the kana stop's
-second half on the track. Pinned in `boarding.phone.test.jsx` (the frame,
+second half on the track. The way on is one gate on every screen, the
+foot's last row, so it stands in one place from Board to the pass; a quiet
+way (the sign-in, Not now, the account already held, the offer) stands a
+rung over it as a `.brd__link` (DESIGN.md, "The gate button"). Pinned in `boarding.phone.test.jsx` (the frame,
 the junction, the crossing, the boards, the crossroads and the sign-in),
 `BoardingFlow.browser.test.jsx` (the walk and its stops),
 `BoardingFlow.touch.test.jsx` (every question at 390x667 without a scroll),

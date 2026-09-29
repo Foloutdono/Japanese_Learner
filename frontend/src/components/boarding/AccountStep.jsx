@@ -136,8 +136,8 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
           ? create
           : (
             <>
-              {create}
               <BoardLink onClick={onSignIn} data-action="account-sign-in">{t.brdHaveAccount}</BoardLink>
+              {create}
             </>
           )}
       </div>

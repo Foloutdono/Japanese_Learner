@@ -98,8 +98,9 @@ export function PassError({ error }) {
 // On a phone (plan 167, the owner's A-La carte) the pass stands in the
 // room under its question, and a road in the pass's metal runs from it
 // down to the gate's reader: the card is what is tapped on the way in.
-// The offer, when there is one, is a quiet line under the gate. The desk
-// never shows this screen (plan 140: the pass is issued on the plan).
+// The offer, when there is one, is a quiet line over the gate, as every
+// quiet way in the boarding is, drawn as they are. The desk never shows
+// this screen (plan 140: the pass is issued on the plan).
 export default function PassStep({ name, profile, onEnter, busy = false, error = null }) {
   const { t } = useLang()
   return (
@@ -119,9 +120,9 @@ export default function PassStep({ name, profile, onEnter, busy = false, error =
         </div>
       </div>
       <div className="brd__foot brd__foot--road">
+        <OfferButton source={SOURCES.ONBOARDING} className="brd__link" />
         <PassError error={error} />
         <Continue keys label={t.brdEnter} onClick={onEnter} disabled={busy} data-action="enter" />
-        <OfferButton source={SOURCES.ONBOARDING} className="pw-open--quiet" />
       </div>
     </>
   )

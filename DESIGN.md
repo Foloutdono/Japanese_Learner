@@ -756,7 +756,8 @@ Two rules the guard exists to keep, both learned by measurement:
 
 The boarding's one action — **Board** on the Welcome, **Continue** on every
 question and at the end of a first ride (`Continue` in
-`components/boarding/BoardFrame.jsx`) — and Today's **Depart** on the fare
+`components/boarding/BoardFrame.jsx`), and the sign-in's own action in
+Board's place (plan 167, phone and desk alike) — and Today's **Depart** on the fare
 gate (`components/station/GateCard.jsx`, owner-directed after plan 164) are
 drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
 as a ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
@@ -784,6 +785,16 @@ press it"):
 - **A list that scrolls under it fades** into the foot (the body's last
   `--sp-7`, driven by the body's own scroll, so nothing when it does not
   scroll).
+- **One gate, in one place** (plan 167, the owner's word on the built
+  boarding: the buttons are the feature that matters most). In the
+  boarding the gate is the foot's last row, so from Board to the pass it
+  stands at the same height and width on every screen; a quiet way — the
+  sign-in, Not now, the account already held, the offer — stands a rung
+  over it, never under, and is drawn as a quiet way (`.brd__link`), never
+  as a second button. Its word is short enough to hold one line beside
+  the reader at the gate's own size: a screen whose word will not fit
+  gets a shorter word ("Activer le rappel", not a smaller one). Held by
+  `src/boarding.phone.test.jsx`.
 
 It stands outside three rulings on purpose, and nowhere else: the motion
 rule's "no scale, no glow" (the halo, the wake), `--elev-action`'s single

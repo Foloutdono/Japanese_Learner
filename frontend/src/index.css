@@ -4719,8 +4719,10 @@ textarea:focus-visible {
 
 /* ── The doors into it ── */
 .pw-open--wide { width: 100%; }
-/* The boarding's foot: a quiet line above "Enter the station", never
-   a second primary action competing with it. */
+/* A reading ride's end (screens/RideReading.jsx): a quiet line above
+   "Enter the station", never a second primary action competing with it.
+   The boarding's own offer is drawn as its other quiet ways are
+   (`.brd__link`, plan 167). */
 .pw-open--quiet {
   align-self: center;
   border: 0;
@@ -20232,11 +20234,13 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 /* The hint a short rung under its question (the body's gap, less). */
 .brd__hint { margin: calc(var(--sp-3) - var(--sp-5)) 0 0; font-size: var(--fs-body); line-height: 1.45; text-align: center; text-wrap: balance; color: var(--text-secondary); }
 .brd__error { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-align: start; color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
-/* The gate, and a quiet way under it where a screen has one (plan 167:
-   the sign-in on the name and the account, Not now on the nudge), a
-   rung apart, the foot standing a little higher for it. */
+/* The gate, and a quiet way over it where a screen has one (plan 167:
+   the sign-in on the name and the account, Not now on the nudge, the
+   offer on the pass), a rung apart. Over it, never under: the gate is
+   the foot's last row, so it stands in the same place on every screen
+   whatever else the foot holds (the owner's word -- the gate is the
+   feature that matters most, and a thumb finds it where it was). */
 .brd__foot { display: flex; flex-direction: column; gap: var(--sp-5); flex: none; }
-.brd__foot:has(> .brd__link:last-child) { padding-bottom: var(--sp-2); }
 /* ── The scrim over the foot (plan 164, add-on 3) ──
    The foot was already docked -- the body is what scrolls -- but a
    list that ran past the room was cut dead at the body's edge, a row
@@ -21100,9 +21104,6 @@ button.brd-stn { cursor: pointer; }
 .brd-nudge .brd-notif__name { font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; }
 .brd-nudge .brd-notif__title { font-size: var(--fs-body); }
 .brd-nudge .brd-notif__text { font-size: var(--fs-sm); }
-/* The one gate whose word is a phrase: a rung down, so the reader keeps
-   its place at the pill's left. */
-.brd[data-step="nudge"] .brd__car:not(.brd__car--out) .btn-depart__jp { font-size: var(--fs-lead); }
 .brd-week__drop { stroke: var(--accent2); stroke-width: 3; }
 .brd-week__road { stroke: var(--surface-line); stroke-width: 4; }
 .brd-week__day {
@@ -21316,8 +21317,10 @@ button.brd-stn { cursor: pointer; }
    The question over the pass as every question over its drawing, its
    air between them, and a road in the pass's metal from the pass down to the
    room's foot; the gate's foot draws the rest of the road, over the gap
-   between the two, into the reader (32px in: the gate's --sp-3 and half
-   its reader). The stage grows to the foot -- the road with it -- so an
+   between the two and past the offer over the gate, into the reader
+   (32px in: the gate's --sp-3 and half its reader), ending on the
+   reader's middle -- half the gate's height off the foot's floor, the
+   gate being the foot's last row. The stage grows to the foot -- the road with it -- so an
    auto margin over the question would be left nothing: the room over
    the question is a spacer growing alike, and the pair stands on the
    room's middle with the road for its lower half. */
@@ -21331,8 +21334,8 @@ button.brd-stn { cursor: pointer; }
   position: absolute;
   left: 29px;
   top: calc(-1 * var(--sp-5));
+  bottom: 33px;
   width: 6px;
-  height: calc(var(--sp-5) + 12px);
   background: var(--accent2);
 }
 .brd__foot--road:has(> .brd__error)::before { content: none; }
@@ -21457,24 +21460,6 @@ button.brd-stn { cursor: pointer; }
 .auth-card.brd-signin__card { padding: 0; background: none; border: 0; }
 .brd-signin__card .auth-provider { min-height: 52px; }
 .brd-signin__card .field { min-height: 52px; padding-inline: var(--sp-5); background: var(--surface); border-color: var(--surface-line); }
-.brd-signin__go {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-4);
-  min-height: 56px;
-  background: color-mix(in srgb, var(--accent2) 60%, var(--bg-panel));
-  border: 0;
-  border-radius: var(--r-card);
-  box-shadow: var(--elev-action);
-  font: inherit;
-  font-size: var(--fs-lead);
-  font-weight: 700;
-  color: var(--text-on-panel);
-  cursor: pointer;
-}
-.brd-signin__go:disabled { opacity: 0.6; cursor: default; }
-.brd-signin__go-mark { font-size: var(--fs-caption); opacity: 0.85; }
 
 /* ── 短い車内 — a short screen closes the drawings before it scrolls ──
    Measured at 390x667 -- an iPhone SE with nothing above the page --
@@ -21508,21 +21493,33 @@ button.brd-stn { cursor: pointer; }
    52px with everything else. */
 @container brd (max-height: 799px) {
   .brd .btn-depart { min-height: 56px; }
+  .brd__foot--road::before { bottom: 28px; }
 }
 @container brd (max-height: 739px) {
   .brd__car { gap: var(--sp-4); }
   .brd__q { font-size: var(--fs-heading); }
   .brd .btn-depart { min-height: 52px; }
+  .brd__foot--road::before { bottom: 26px; }
   /* The drawings close their rungs rather than scroll (plan 167): a
      map's places and lines draw at 86% of their height, and its rings,
      names and answers keep their size. The crossing and the lines' fan
-     hold whole answers at their two ends, so they keep theirs. */
+     hold whole answers at their two ends, so they keep theirs; the
+     junction, whose names wrap under their rings a rung over the next
+     row's, keeps its own down to a 680px frame (below). */
   .brd__body > .brd__stage { gap: var(--sp-4); --ys: 0.86; }
   .brd-map.brd-cross,
-  .brd-map.brd-fan { --ys: 1; }
+  .brd-map.brd-fan,
+  .brd-map.brd-junction { --ys: 1; }
   .brd-ride { margin-top: var(--sp-6); }
   .brd-held,
   .brd-for { margin-top: var(--sp-5); }
+}
+/* The junction's rows close up only on a frame under 680px -- an SE --
+   where six reasons and their names would not otherwise stand over the
+   gate; a phone with a notch and a home bar (a 723px frame) keeps them a
+   rung apart, as the owner asked of the built screen. */
+@container brd (max-height: 679px) {
+  .brd-map.brd-junction { --ys: 0.86; }
 }
 
 /* ── What a landed animation leaves behind ──

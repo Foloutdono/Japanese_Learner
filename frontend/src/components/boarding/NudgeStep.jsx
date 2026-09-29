@@ -53,8 +53,8 @@ export default function NudgeStep({ time, minute = null, now = null, no = null, 
         </div>
       </div>
       <div className="brd__foot">
-        <Continue keys label={t.brdAllow} onClick={onAllow} data-action="allow" />
         <BoardLink onClick={onSkip} data-action="not-now">{t.brdNotNow}</BoardLink>
+        <Continue keys label={t.brdAllow} onClick={onAllow} data-action="allow" />
       </div>
     </>
   )

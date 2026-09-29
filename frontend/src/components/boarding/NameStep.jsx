@@ -33,8 +33,8 @@ const NAME_MAX = 20
 // on a phone): its plate with the letters it has left, a pole down to
 // the question's hub (`no`, its place on the line) and the line leaving
 // it for the next stop (`next`, that stop's name). On the desk the way
-// to an account already held stands under the hub; on a phone, under
-// the gate.
+// to an account already held stands under the hub; on a phone, over the
+// gate, which stands in the same place on every screen.
 export default function NameStep({
   value, onChange, onContinue, onSignIn = null, email = null,
   error = null, busy = false, no = null, next = null,
@@ -105,8 +105,8 @@ export default function NameStep({
         </div>
       </div>
       <div className="brd__foot">
-        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!canGo} data-action="continue" />
         {!desk && signIn}
+        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!canGo} data-action="continue" />
       </div>
     </>
   )

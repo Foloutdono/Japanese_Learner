@@ -6,13 +6,13 @@ import './index.css'
 // ── The boarding's contract at phone width (plans 075, 167) ──────
 // The canvas's frame, pinned against the real cascade at 390×844: the
 // foot is docked at the bottom edge with the one filled action full
-// width at 66 px (plan 164's gate); the head is 44 px with a 44 px back
-// button and a 2 px track; the question stands a rung under the head on
-// every screen and its drawing in the room left (plan 167); every
-// choice is a 44 px target or taller; nothing scrolls sideways; the
-// sign-in stands in the Welcome's place, its segmented control filling
-// its card. The stores behind the pass are stubbed: this is about the
-// frame.
+// width at 66 px (plan 164's gate), in the same place on every screen;
+// the head is 44 px with a 44 px back button and a 2 px track; the
+// question stands centred over its drawing, the pair on the room's
+// middle (plan 167); every choice is a 44 px target or taller; nothing
+// scrolls sideways; the sign-in stands in the Welcome's place, its
+// segmented control filling its card and its action the same gate. The
+// stores behind the pass are stubbed: this is about the frame.
 
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -25,6 +25,8 @@ vi.mock('./lib/api', () => ({
 vi.mock('./lib/supabase', () => ({
   supabase: { auth: { getSession: async () => ({ data: { session: null } }) } },
 }))
+const shell = vi.hoisted(() => ({ nudge: false }))
+vi.mock('./lib/platform', async o => ({ ...(await o()), canNudge: () => shell.nudge }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: BoardingFlow } = await import('./screens/BoardingFlow')
@@ -194,6 +196,36 @@ describe('the boarding at 390×844', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })
 
+  // The owner's word on the built junction: a name that wraps under its
+  // ring -- "Pour un voyage au Japon" -- stood all but on the ring under
+  // it. A rung between them, on the lane's phone and on a notched one
+  // whose frame is drawn short (the 723 px an iPhone leaves the page).
+  it('keeps a rung between a reason\'s name and the ring under it', async () => {
+    localStorage.setItem('lang', 'fr')
+    try {
+      const screen = await mountFlow()
+      await click(screen.container, '[data-action="continue"]')
+      await settle(900)
+      const clear = () => {
+        const ways = [...live(screen.container).querySelectorAll('.brd-way')]
+        return Math.min(...ways.slice(0, 4).map((way, i) => (
+          rect(ways[i + 2].querySelector('.brd-way__ring')).top - rect(way.querySelector('.brd-way__name')).bottom
+        )))
+      }
+      expect(clear()).toBeGreaterThanOrEqual(12)
+      for (const height of [764, 723]) {
+        await atHeight(height, () => {
+          expect(clear(), `${height} px`).toBeGreaterThanOrEqual(12)
+          // And still nothing scrolls: the sixth reason over the gate.
+          const body = live(screen.container).querySelector('.brd__body')
+          expect(body.scrollHeight, `${height} px`).toBe(body.clientHeight)
+        })
+      }
+    } finally {
+      localStorage.removeItem('lang')
+    }
+  })
+
   // ── The question over its drawing, the pair on the room's middle ──
   // Plan 167, the owner's word on the built screens: the titles
   // centred, and not always at the top of the screen. The question is
@@ -335,6 +367,113 @@ describe('the boarding at 390×844', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })
 
+  // ── The gate, in one place (plan 167) ──
+  // The owner's word on the built screens: the buttons differed from
+  // screen to screen, and they are the feature that matters most. Every
+  // way on is the one gate, the foot's last row -- a quiet way (the
+  // sign-in, Not now, the account already held, the offer) stands over
+  // it, never under -- so the pill stands in the same place at the same
+  // size from Board to the pass, and its word, at the gate's own size,
+  // holds one line beside the reader.
+  it('stands the one gate in the same place on every screen', async () => {
+    localStorage.setItem('lang', 'fr')
+    shell.nudge = true
+    try {
+      const welcome = await render(
+        <LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} /></LangProvider>
+      )
+      await settle(60)
+      const board = welcome.container.querySelector('[data-action="board"]')
+      const place = rect(board)
+      const size = getComputedStyle(board.querySelector('.btn-depart__jp')).fontSize
+      await welcome.unmount()
+
+      const screen = await render(
+        <LangProvider>
+          <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username: 'Tester' }} onComplete={() => {}} onSignIn={() => {}} guest dryRun />
+        </LangProvider>
+      )
+      await settle(60)
+      const step = () => screen.container.querySelector('.brd').dataset.step
+      const seen = []
+      const measure = () => {
+        const foot = live(screen.container).querySelector('.brd__foot')
+        const gate = foot.lastElementChild
+        expect(gate.classList.contains('btn-depart--gate'), step()).toBe(true)
+        expect(foot.querySelectorAll('.btn-depart'), step()).toHaveLength(1)
+        const at = rect(gate)
+        for (const k of ['left', 'top', 'width', 'height']) {
+          expect(Math.round(at[k]), `${step()} ${k}`).toBe(Math.round(place[k]))
+        }
+        const word = gate.querySelector('.btn-depart__jp')
+        expect(getComputedStyle(word).fontSize, step()).toBe(size)
+        expect(rect(word).height, `${step()}: one line`).toBeLessThan(2 * parseFloat(size))
+        expect(rect(word).left, step()).toBeGreaterThan(rect(gate.querySelector('.btn-depart__reader')).right)
+        seen.push(step())
+      }
+      // Each step measured once its car has landed and a pick's wake (the
+      // pill's one overshoot, 540 ms) has let go.
+      const on = async sel => { await click(screen.container, sel); await settle(700) }
+
+      measure()                                   // the name, the sign-in over it
+      expect(live(screen.container).querySelector('.brd__foot > [data-action="sign-in"] + .btn-depart--gate')).not.toBeNull()
+      await on('[data-action="continue"]')
+      await on('[data-motive="trip"]')
+      measure()                                   // the reasons
+      await on('[data-action="continue"]')
+      await on('[data-kana="both"]')
+      await on('[data-level="N5"]')
+      measure()                                   // the level
+      await on('[data-action="continue"]')
+      measure()                                   // the goal
+      await on('[data-action="continue"]')
+      measure()                                   // the lines
+      await on('[data-action="continue"]')
+      measure()                                   // the rhythm
+      await on('[data-action="continue"]')
+      measure()                                   // the hour
+      await on('[data-action="continue"]')
+      measure()                                   // the nudge, Not now over it
+      expect(live(screen.container).querySelector('.brd__foot > [data-action="not-now"] + .btn-depart--gate')).not.toBeNull()
+      await on('[data-action="not-now"]')
+      measure()                                   // the plan
+      await on('[data-action="continue"]')
+      measure()                                   // the account, the one already held over it
+      expect(live(screen.container).querySelector('.brd__foot > [data-action="account-sign-in"] + .btn-depart--gate')).not.toBeNull()
+      await on('[data-action="account-skip"]')
+      measure()                                   // the pass, the offer over it
+      expect(live(screen.container).querySelector('.brd__foot > [data-action="paywall-open"].brd__link')).not.toBeNull()
+      expect(seen).toEqual(['name', 'why', 'level', 'goal', 'lines', 'rhythm', 'time', 'nudge', 'plan', 'account', 'pass'])
+    } finally {
+      shell.nudge = false
+      localStorage.removeItem('lang')
+    }
+  })
+
+  // The reveal, the kana's second half for a learner who reads neither:
+  // the same gate, in the same place.
+  it('stands the reveal\'s gate where the others stand', async () => {
+    const welcome = await render(
+      <LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} /></LangProvider>
+    )
+    await settle(60)
+    const place = rect(welcome.container.querySelector('[data-action="board"]'))
+    await welcome.unmount()
+    const screen = await mountFlow()
+    await click(screen.container, '[data-action="continue"]')
+    await settle()
+    await click(screen.container, '[data-motive="trip"]')
+    await click(screen.container, '[data-action="continue"]')
+    await settle()
+    await click(screen.container, '[data-kana="none"]')
+    await settle()
+    expect(screen.container.querySelector('.brd').dataset.step).toBe('reveal')
+    const gate = live(screen.container).querySelector('.brd__foot').lastElementChild
+    expect(gate.classList.contains('btn-depart--gate')).toBe(true)
+    const at = rect(gate)
+    for (const k of ['left', 'top', 'width', 'height']) expect(Math.round(at[k]), k).toBe(Math.round(place[k]))
+  })
+
   // ── The front door as the crossroads (plan 167, the owner's A00) ──
   it('draws the Welcome as the crossroads: seven lines out of 辻, and the gold road into Board', async () => {
     const screen = await render(
@@ -361,7 +500,7 @@ describe('the boarding at 390×844', () => {
   })
 
   // ── The sign-in, in the promise's place (plan 167, A00b) ──
-  it('the sign-in: the segmented control fills the card, the action is 48 px', async () => {
+  it('the sign-in: the segmented control fills the card, the action is the gate', async () => {
     const screen = await render(
       <LangProvider><Welcome authMode="signup" onBack={() => {}} onBoard={() => {}} onSignIn={() => {}} /></LangProvider>
     )
@@ -370,15 +509,23 @@ describe('the boarding at 390×844', () => {
     const seg = card.querySelector('.seg--full')
     const pad = parseFloat(getComputedStyle(card).paddingLeft)
     expect(Math.abs(rect(seg).width - (rect(card).width - 2 * pad))).toBeLessThanOrEqual(4)
-    expect(rect(screen.container.querySelector('[data-action="auth-submit"]')).height).toBeGreaterThanOrEqual(48)
+    const action = screen.container.querySelector('[data-action="auth-submit"]')
+    expect(rect(action).height).toBeGreaterThanOrEqual(52)
     expect(Math.round(rect(screen.container.querySelector('[data-action="welcome"]')).height)).toBe(44)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
-    // The gold road ends in the action's middle, on its left edge.
+    // Its action is the boarding's gate, Board's own (the owner's word:
+    // one button, drawn alike everywhere), filled while it can be pressed.
+    expect(action.classList.contains('btn-depart--gate')).toBe(true)
+    expect(action.disabled).toBe(false)
+    expect(getComputedStyle(action, '::before').opacity).toBe('1')
+    // The gold road ends in the gate's reader, on its middle, the gate
+    // painting over its last stretch as Board's does on the Welcome.
     const way = screen.container.querySelector('.brd-signin__road .brd-front__way')
-    const end = way.getAttribute('d').trim().split(/[\s,A-Z]+/).filter(Boolean).map(Number).slice(-1)[0]
+    const [endY, endX] = way.getAttribute('d').trim().split(/[\s,A-Z]+/).filter(Boolean).map(Number).slice(-2)
     const stage = rect(screen.container.querySelector('.brd-signin__stage'))
-    const go = rect(screen.container.querySelector('[data-action="auth-submit"]'))
-    expect(Math.abs(stage.top + end - (go.top + go.height / 2))).toBeLessThanOrEqual(1)
+    const reader = rect(action.querySelector('.btn-depart__reader'))
+    expect(Math.abs(stage.top + endY - (reader.top + reader.height / 2))).toBeLessThanOrEqual(1)
+    expect(Math.abs(stage.left + endX - (reader.left + reader.width / 2))).toBeLessThanOrEqual(1)
   })
 
   it('opens the sign-in on Log in, the address focused and no Sign up beside it', async () => {

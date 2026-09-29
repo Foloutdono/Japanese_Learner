@@ -795,7 +795,6 @@ const Fixture = () => (
           <div className="auth-card brd-signin__card">
             <p className="auth-message auth-message--error ob-auth-error">Wrong password</p>
           </div>
-          <button type="button" className="brd-signin__go ob-signin-go">Log in</button>
           <p className="auth-foot ob-auth-foot">Everything can be changed later in Settings.</p>
         </div>
       </div>
@@ -1121,7 +1120,6 @@ const SITES = [
   ['.ob-front-sign', 'a line\'s sign at the crossroads (kanji pigment on page)'],
   ['.ob-front-name', 'a line\'s name at the crossroads (ink on page)'],
   ['.ob-auth-error', 'sign-in error (danger on page)'],
-  ['.ob-signin-go', 'sign-in action (panel ink on gold mixed toward sumi)'],
   ['.ob-auth-foot', 'sign-in foot (soft ink on page)'],
   ['.jr-status-b', 'pass footer status word (state ink on sumi)'],
   ['.jr-validity-b', 'pass footer 有効期限 (gold on sumi)'],

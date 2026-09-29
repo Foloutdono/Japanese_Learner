@@ -1140,13 +1140,19 @@ runtime purpose. Two consequences worth knowing:
   (`screens/AuthScreen.jsx` retired); Building gone, the hour going on
   to the plan; a pick's gold a rung deeper on its wash (`--brd-wash-ink`);
   and on the desk too the lines the phone had dropped, the plan's and the
-  account's hints and the terminus caption (a screen reader's name now)
-  (cited in `screens/BoardingFlow.jsx`, `App.jsx`, `components/boarding/`,
+  account's hints and the terminus caption (a screen reader's name now);
+  then, owner-directed on the built screens ("the buttons are the most
+  important feature"), one gate in one place: the foot's last row on
+  every screen, a quiet way over it and never under (the offer a
+  `.brd__link` too), the sign-in's action the gate on the phone and the
+  desk alike, the Rappel's word short enough for the gate's size, and the
+  junction's rows a rung further apart (cited in
+  `screens/BoardingFlow.jsx`, `App.jsx`, `components/boarding/`,
   `components/account/ClaimAccount.jsx`, `domain/boarding.js`,
   `src/boarding.phone.test.jsx`, `src/frontdoor.phone.test.jsx`,
   `screens/BoardingFlow.browser.test.jsx`, `BoardingFlow.touch.test.jsx`,
-  `src/contrast.browser.test.jsx` and `index.css`; DESIGN.md, Structure;
-  `docs/design/mobile/README.md`).
+  `src/contrast.browser.test.jsx` and `index.css`; DESIGN.md, Structure
+  and "The gate button"; `docs/design/mobile/README.md`).
   When starting a new wave, begin at **168** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

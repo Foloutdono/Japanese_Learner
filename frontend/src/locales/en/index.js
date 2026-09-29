@@ -1981,7 +1981,7 @@ const boarding = {
   brdNotifTitle: (time) => `Your train leaves at ${time}`,
   brdNotifText: 'Your cards are waiting at the gate.',
   brdNudgeHint: 'One a day, at your time. Never more.',
-  brdAllow: 'Allow notifications',
+  brdAllow: 'Remind me',
   brdNotNow: 'Not now',
   // ── 発車案内 — the daily nudge from the day's queue, the widget and
   // Settings › Notifications (plan 156). The nudge's title and body are

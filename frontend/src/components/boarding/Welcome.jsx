@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { Continue, BoardLink } from './BoardFrame'
+import { GateButton } from '../ui/GateButton'
 import { EnterKey } from '../chrome/DeskKeys'
 import { AuthCard } from '../account/AuthCard'
 import { useDesk } from '../../hooks/useDesk'
@@ -166,13 +167,15 @@ function FrontMap({ t }) {
 // ── The sign-in, in the promise's place (plan 167, A00b) ─────────
 // Its question where the promise stood, the crossroads smaller under it
 // with no names (the Welcome named the lines), and the form: Google,
-// the address, the password, and its own action -- the gold road from
-// the hub running down and round the form into that button. The road is
-// measured off the form, which grows when the card has news to say.
+// the address, the password, and its own action -- the boarding's gate,
+// as Board is (the owner's word: one button, drawn alike everywhere),
+// the gold road from the hub running down and round the form into its
+// reader. The road is measured off the form, which grows when the card
+// has news to say, and off the reader.
 const SMALL_REACH = 76
 const SMALL_HUB = 98
 const SIDE = 10
-const INSET = 32
+const TURN_R = 22
 
 function PhoneSignIn({ authMode, t }) {
   const stageRef = useRef(null)
@@ -187,15 +190,19 @@ function PhoneSignIn({ authMode, t }) {
       const form = formRef.current
       const go = goRef.current
       if (!form || !go) return
-      // The road turns a rung over the form and ends in the button's
-      // middle, both read off the stage's own box.
+      // The road turns a rung over the form and ends in the gate's
+      // reader, both read off the stage's own box: the gate paints over
+      // its last stretch, so it runs into the pill as it does into
+      // Board's on the Welcome.
       const box = stage.getBoundingClientRect()
       const top = form.getBoundingClientRect().top - box.top - 20
-      const button = go.getBoundingClientRect()
-      const mid = button.top - box.top + button.height / 2
+      const reader = (go.querySelector('.btn-depart__reader') ?? go).getBoundingClientRect()
+      const mid = reader.top - box.top + reader.height / 2
+      const into = reader.left - box.left + reader.width / 2
       const cx = width / 2
-      const next = `M${r1(cx)} ${SMALL_HUB}V${r1(top - 22)}Q${r1(cx)} ${r1(top)} ${r1(cx - 22)} ${r1(top)}`
-        + `H${INSET}Q${SIDE} ${r1(top)} ${SIDE} ${r1(top + 22)}V${r1(mid - 22)}Q${SIDE} ${r1(mid)} ${INSET} ${r1(mid)}`
+      const next = `M${r1(cx)} ${SMALL_HUB}V${r1(top - TURN_R)}Q${r1(cx)} ${r1(top)} ${r1(cx - TURN_R)} ${r1(top)}`
+        + `H${SIDE + TURN_R}Q${SIDE} ${r1(top)} ${SIDE} ${r1(top + TURN_R)}V${r1(mid - TURN_R)}Q${SIDE} ${r1(mid)} ${SIDE + TURN_R} ${r1(mid)}`
+        + `H${r1(into)}`
       setRoad(prev => (prev?.d === next && prev.width === width && prev.height === stage.clientHeight ? prev : { d: next, width, height: stage.clientHeight }))
     }
     read()
@@ -243,10 +250,9 @@ function PhoneSignIn({ authMode, t }) {
           frame={({ head, submit }) => (
             <div ref={formRef} className="brd-signin__form">
               <div className="auth-card brd-signin__card">{head}</div>
-              <button ref={goRef} type="button" className="brd-signin__go" onClick={submit.onClick} disabled={submit.disabled} data-action="auth-submit">
-                {submit.label}
-                <span className="brd-signin__go-mark" aria-hidden="true">▶</span>
-              </button>
+              <div ref={goRef} className="brd-signin__gate">
+                <GateButton label={submit.label} onClick={submit.onClick} disabled={submit.disabled} data-action="auth-submit" />
+              </div>
               {authMode === 'signup' && <p className="auth-foot">{t.authFoot}</p>}
             </div>
           )}
@@ -338,11 +344,9 @@ function DeskWelcome({ onBoard, onSignIn, onBack, boarding, authMode, t }) {
                     <h1 className="brd__q">{authMode === 'signup' ? t.signup : t.login}</h1>
                     <div className="auth-card">{head}</div>
                   </div>
-                  <button type="button" className="btn-depart" onClick={submit.onClick} disabled={submit.disabled} data-action="auth-submit">
-                    <span className="btn-depart__jp">{submit.label}</span>
-                    <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>
-                    <span className="btn-depart__go" aria-hidden="true">▶</span>
-                  </button>
+                  {/* Board's gate, in Board's place: the one button the
+                      boarding draws for its way on (plan 167). */}
+                  <GateButton keys label={submit.label} onClick={submit.onClick} disabled={submit.disabled} data-action="auth-submit" />
                   <div className="desk-front__below">
                     {authMode === 'signup' && <p className="auth-foot">{t.authFoot}</p>}
                     {onBack && <BoardLink onClick={onBack} data-action="welcome">{`‹ ${t.brdBackHome}`}</BoardLink>}
