@@ -79,8 +79,8 @@ describe('the stage at phone width', () => {
 
   it('the lanes are 44px switches, off at the disabled opacity', async () => {
     const screen = await render(
-      <div className="gate-card">
-        <div className="gate-card__lanes">
+      <div className="gate-sheet">
+        <div className="gate-sheet__line">
           <button type="button" className="lane" style={{ '--lane-color': 'var(--line-kanji)' }}>
             <span className="lane__tick" /><span className="lane__where">Kanji N4</span><span className="lane__due">9</span>
           </button>

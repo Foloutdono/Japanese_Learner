@@ -91,6 +91,14 @@ beforeEach(() => {
   beginDeparture.mockClear()
 })
 
+// The switches stand in the services sheet since plan 166, which
+// portals to the body.
+async function services(screen) {
+  screen.container.querySelector('.gate-one__services').click()
+  await settle()
+  return [...document.querySelectorAll('.gate-sheet .lane')]
+}
+
 describe('TodayScreen — the gate', () => {
   it('opens on the strip and the gate with every lane on, and no bar', async () => {
     const screen = await mount()
@@ -104,7 +112,7 @@ describe('TodayScreen — the gate', () => {
     const order = [...screen.container.querySelectorAll('.pass--strip, .gate-card')]
       .map(el => (el.classList.contains('pass--strip') ? 'strip' : 'gate'))
     expect(order).toEqual(['strip', 'gate'])
-    const lanes = screen.container.querySelectorAll('.lane')
+    const lanes = await services(screen)
     expect(lanes).toHaveLength(3)
     expect([...lanes].every(l => l.getAttribute('aria-pressed') === 'true')).toBe(true)
     expect(screen.container.querySelector('.gate-card__count').textContent).toBe('19')
@@ -116,7 +124,7 @@ describe('TodayScreen — the gate', () => {
     const screen = await mount()
     await settle()
     // The lanes are grouped by line, vocab before kanji: pick by name.
-    const kanji = [...screen.container.querySelectorAll('.lane')].find(l => l.textContent.includes('N4'))
+    const kanji = (await services(screen)).find(l => l.textContent.includes('N4'))
     kanji.click()
     await settle()
     expect(kanji.classList.contains('lane--off')).toBe(true)
@@ -137,11 +145,12 @@ describe('TodayScreen — the gate', () => {
     // Every line switched off is the whole day off — the all/none link
     // that used to do it in one tap is gone, and the line switches are
     // what stands in for it.
-    for (const chip of screen.container.querySelectorAll('.gate-card__lines .chip')) {
-      if (chip.getAttribute('aria-pressed') === 'true') chip.click()
+    await services(screen)
+    for (const head of document.querySelectorAll('.gate-sheet__head')) {
+      if (head.getAttribute('aria-pressed') === 'true') head.click()
       await settle()
     }
-    expect(screen.container.querySelectorAll('.lane--off')).toHaveLength(3)
+    expect(document.querySelectorAll('.gate-sheet .lane--off')).toHaveLength(3)
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)
   })
 

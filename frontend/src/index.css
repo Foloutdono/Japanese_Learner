@@ -5553,13 +5553,11 @@ textarea:focus-visible {
 /* .select-console__acts joins them: two chips are the whole of what
    you can do with a selection, which is a set and takes the row. */
 .console__chips .chip,
-.gate-card__lines .chip,
 .select-console__acts .chip {
   flex: 1 1 auto;
   justify-content: center;
 }
-.console__chips .chip:only-child,
-.gate-card__lines .chip:only-child { flex: none; }
+.console__chips .chip:only-child { flex: none; }
 
 /* ── the platform card, on a line (the Practice gate) ── */
 .platform-card--line { --rail: var(--line-color); }
@@ -6276,41 +6274,10 @@ textarea:focus-visible {
    not draw, the all/none toggle, is kept from the picker this
    replaces: a learner with sixteen lanes and ten minutes says "just
    the kanji" in two taps, not fifteen. */
-/* The switches are the picker, so they are on the card at every width.
-   A phone block hid them behind a 内訳 disclosure — from when the lanes
-   were a BREAKDOWN, before plan 070 made them the choice — and the
-   toggle that opened it stopped being rendered somewhere along the
-   way: below 560px the gate printed "select none" over nothing, and
-   the day could not be narrowed on the one device it is read on.
-
-   Bounded instead of folded. Twelve lanes is 594px of switch, which
-   put Depart 854px down an 844px screen. The bound is a share of the
-   SCREEN rather than a count of rows: 216px showed four and a half on
-   every phone ever made, which on a tall one left the gate sitting in
-   a third of the space it had. 42dvh is six rows at 844px and eight at
-   1000, and still leaves the head, the lines, the notice and Depart
-   above the fold. Whatever it comes to, the row it cuts is visibly cut
-   — that is what says there is more.
-
-   `scrollbar-gutter` keeps the due figures off a desktop scrollbar and
-   reserves nothing where the scrollbar is an overlay. */
-.gate-card__lanes {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-  max-height: 30vh;
-  max-height: 30dvh;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-}
-
-/* 路線ごと — one switch per line over the lanes it is made of. The
-   figure rides the chip as data, the way a tally rides a mark. */
-.gate-card__lines { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-.gate-card__linedue {
-  font-variant-numeric: tabular-nums;
-  color: color-mix(in srgb, currentcolor 55%, transparent);
-}
+/* Since plan 166 the phone's switches stand in the services sheet
+   (.gate-sheet, below), grouped under their lines, and no longer in a
+   list bounded inside the card; the line chips over them went with it,
+   the sheet's line heads being the same switches. */
 .lane {
   display: flex;
   align-items: center;
@@ -6405,6 +6372,171 @@ textarea:focus-visible {
   color: var(--lane-color, var(--text-secondary));
 }
 .lane__due { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ── 一押し — the gate on a phone, in one gesture (plan 166) ──
+   The owner's pick C of the canvas "Tsuji — Today on the phone": the
+   day as one card -- the run's count and minutes, a bar of each line's
+   share, which cards and how many -- then the row that opens the
+   services, and the gate at the foot of the screen, the air between
+   giving way first on a short phone. */
+.today:has(> .gate-one) { flex: 1 0 auto; }
+.gate-one {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.gate-one__air { flex: 1 1 auto; }
+.gate-one__foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.gate-card--one .gate-card__figure { flex-wrap: wrap; gap: var(--sp-3); }
+.gate-card--one .gate-card__count { font-size: var(--fs-display); }
+.gate-card--one .gate-card__time {
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+/* Each line's share of the run: a bar of its pigments, the pass
+   strip's gauge's height, and its key -- a ring in the line's pigment,
+   its name, its share. The pigment is the line's edge, never a fill
+   under text. */
+.gate-mix {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.gate-mix__bar {
+  display: flex;
+  gap: var(--sp-1);
+  height: 5px;
+}
+.gate-mix__part {
+  flex-basis: 0;
+  border-radius: var(--r-pill);
+  background: var(--lane-color, var(--accent2));
+}
+.gate-mix__keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.gate-mix__key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.gate-mix__ring {
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border: 2px solid var(--lane-color, var(--accent2));
+  border-radius: var(--r-pill);
+}
+.gate-mix__n {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+/* The two questions, under a rule: which cards, how many. */
+.gate-card__asks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--border);
+}
+.gate-card__ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+/* The options' words as written, as the desk's length control sets
+   them (no capitals, no tracking): "Tous les modes · 101" in capitals
+   and tracked broke onto two lines in half a phone's width. */
+.gate-card__ask .seg__opt-latin {
+  font-size: var(--fs-sm);
+  letter-spacing: 0;
+  text-indent: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+.gate-card__ask-label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* The door to the services: a row, not a card, under the card. */
+.gate-one__services {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-1);
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.gate-one__services-name { flex: 1; }
+.gate-one__services-of,
+.gate-one__services svg {
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.gate-one__services:hover .gate-one__services-name,
+.gate-one__services:focus-visible .gate-one__services-name { text-decoration: underline; text-underline-offset: 3px; }
+/* The services sheet: a line's head is its switch, its lanes under it. */
+.gate-sheet__lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.gate-sheet__line {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.gate-sheet__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-1);
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.gate-sheet__head:not(.gate-sheet__head--off) .lane__tick {
+  background: var(--lane-color, var(--accent2));
+  border-color: var(--lane-color, var(--accent2));
+}
+.gate-sheet__name {
+  flex: 1;
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.gate-sheet__due { font-weight: 700; font-variant-numeric: tabular-nums; }
+.gate-sheet__done { width: 100%; }
 
 /* The screen's one filled action. Gold, because Today is gold — and
    gold follows its own standing ruling, not .btn-primary's: the 60%
