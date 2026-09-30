@@ -345,6 +345,10 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .frame { display: flex; flex-direction: column; align-items: center; }
 .frame[data-frame="phone"] .frame__screen { width: 240px; height: 520px; border: 9px solid color-mix(in srgb, #000 35%, var(--bg-panel)); border-radius: 38px; box-shadow: var(--elev-board), 0 0 0 1px var(--surface-line); }
 .frame[data-frame="phone"] .frame__base { display: none; }
+/* The desk's screen is as wide as the panel lets it be, and everything in
+   it is absolute: the frame takes the panel's width, or 100% has nothing
+   to be a share of and the screen shrinks to its border. */
+.frame[data-frame="desk"] { align-self: stretch; }
 .frame[data-frame="desk"] .frame__screen { width: min(720px, 100%); aspect-ratio: 16 / 10; border: 10px solid color-mix(in srgb, #000 35%, var(--bg-panel)); border-radius: 14px 14px var(--r-plate) var(--r-plate); box-shadow: var(--elev-board), 0 0 0 1px var(--surface-line); }
 .frame[data-frame="desk"] .frame__base { width: min(800px, 100%); height: 14px; border-radius: 0 0 12px 12px; background: color-mix(in srgb, var(--text-on-panel) 12%, var(--bg-panel)); border: 1px solid var(--surface-line); border-top: 0; }
 .clip { position: relative; overflow: hidden; background: var(--bg-main); }
