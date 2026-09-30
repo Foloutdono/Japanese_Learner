@@ -111,9 +111,13 @@ function typeInto(el, text) {
   el.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
+// Waits for the result's words to be on the page, then for what they
+// light after: a fixed wait alone read the result before a loaded CI
+// runner had drawn it (.anl-m null, 2026-09-30).
 async function analyze(screen) {
   typeInto(screen.container.querySelector('textarea'), '次の電車は三番線から発車します。犬も好き。')
   screen.container.querySelector('.anl-action').click()
+  await expect.poll(() => screen.container.querySelector('.tok'), { timeout: 5000 }).toBeTruthy()
   await settle(150)
 }
 
