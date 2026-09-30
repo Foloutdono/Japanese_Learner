@@ -99,7 +99,8 @@ function prefersReducedMotion() {
 
 /**
  * `section` is the board row being departed for — it carries the line
- * colour and the name. `station` is its config/stations entry, for the
+ * colour and the name, and `stage` when the destination is a run, drawn
+ * without the chrome (the desk's rail then leaves with the scene). `station` is its config/stations entry, for the
  * code on the roundel beyond the flaps. `onNavigate` is called once,
  * while the line's light has the screen; `onDone` when the gate should
  * unmount.
@@ -218,7 +219,7 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
   return createPortal(
     <div
       ref={scene}
-      className={`gate gate--${phase}`}
+      className={`gate gate--${phase}${section.stage ? ' gate--stage' : ''}`}
       style={{ '--line-color': section.color, '--gate-x': SPEED }}
       aria-hidden="true"
     >
