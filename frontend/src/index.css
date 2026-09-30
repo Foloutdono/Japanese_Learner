@@ -22270,6 +22270,16 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+/* The slots not being answered step back -- a paler rule, the number
+   half-inked -- so the lit one is found at a glance, as the filled
+   chip it replaced was. */
+.exam-blank-pill:not(.exam-blank-pill--active),
+.exam-order-slot:not(.exam-order-slot--star) {
+  border-bottom-color: color-mix(in srgb, var(--line-color, var(--line-exam)) 30%, transparent);
+}
+.exam-blank-pill:not(.exam-blank-pill--active) {
+  color: color-mix(in srgb, var(--text-secondary) 60%, transparent);
+}
 .exam-blank-pill--active { color: var(--gap-ink); }
 .exam-order-slot--star,
 .exam-blank-pill--active {
