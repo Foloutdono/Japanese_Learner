@@ -38,7 +38,7 @@ describe('the voice registry', () => {
       'click-menu', 'click-close-menu', 'click-mode-selection', 'click-screen-selection',
       'correct', 'wrong', 'card-flip', 'card-transition', 'exam-warning',
       'gate-chime', 'door-chime', 'door-slide', 'platform-chime', 'arrival',
-      'fare-tick', 'pass-clip',
+      'fare-tick', 'pass-clip', 'board-flap',
     ]
     for (const key of required) {
       expect(hasVoice(key), `missing event: ${key}`).toBe(true)
@@ -204,6 +204,10 @@ describe('choosing a voice', () => {
       'fare-tick': 'coin',
       'pass-clip': 'punch-voiced',
       'card-stamp': 'hanko',
+      // Not yet by ear: the boarding's hour board had no sound until
+      // its flaps were given one, and the short run ships until the
+      // owner's next round on the listening panel.
+      'board-flap': 'run',
     }
     expect(Object.keys(chosen).sort()).toEqual(VOICE_EVENTS.map(e => e.key).sort())
     for (const [event, voice] of Object.entries(chosen)) {

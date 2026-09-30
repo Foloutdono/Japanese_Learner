@@ -7,6 +7,7 @@ import { authRedirectError, authRedirectMessage, isAlreadyLinked } from '../../l
 import { PassError } from './PassStep'
 import { PaperTicket, RideTicket } from './PaperTicket'
 import { useDesk } from '../../hooks/useDesk'
+import { playClick } from '../../lib/audio'
 
 // ── 本乗車券 — the last stop before the pass ─────────────────────
 // The boarding runs on a guest pass (lib/guest.js), so by the time
@@ -123,7 +124,7 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
                 {ticket && <RideTicket {...ticket} />}
                 <p className="brd-keep__skip">
                   <span className="brd-keep__note">{t.brdTicketNote}</span>
-                  <button type="button" className="brd-keep__skip-btn" onClick={onSkip} data-action="account-skip">{t.brdAccountSkip}</button>
+                  <button type="button" className="brd-keep__skip-btn" onClick={() => { playClick(); onSkip() }} data-action="account-skip">{t.brdAccountSkip}</button>
                 </p>
                 {form}
               </div>

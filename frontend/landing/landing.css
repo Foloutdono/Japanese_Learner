@@ -119,6 +119,10 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 .top__other { font-weight: 700; font-size: var(--fs-sm); color: var(--text-secondary); text-decoration: none; }
 .top__signin { height: auto; padding: 0; border: 0; }
 .top__signin:hover, .top__signin:focus-visible { transform: none; color: var(--accent2); }
+/* The demos' sounds, which is the app's mute: the speaker, struck when off. */
+.top__sound { display: inline-grid; place-items: center; width: 44px; height: 44px; margin: 0 calc(var(--sp-3) * -1); padding: 0; border: 0; border-radius: var(--r-pill); background: transparent; color: var(--text-secondary); cursor: pointer; transition: color .15s ease; }
+.top__sound:hover, .top__sound:focus-visible { color: var(--accent2); }
+.top__sound[aria-pressed="true"] .top__sound-off, .top__sound[aria-pressed="false"] .top__sound-on { display: none; }
 
 /* ── The hero: the phone's Welcome ── */
 .hero { padding: var(--sp-7) 0 var(--sp-8); overflow: hidden; }
@@ -838,7 +842,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .js .mk-strokes path { animation: none; stroke-dashoffset: 0; opacity: 1; }
   .mk-gram__blank { color: var(--text-primary); }
   .mk-gram__opts .is-right, .mk-exam__opts .is-right { border-color: var(--success); }
-  .flip__inner, .pass, .pass::after, .top__board, .nav a::after, .plates .plate, .gate, .ghost, .badge, .ftab, .opt, .rbar button, .lvl__track i, .watch__play, .qcard__band i, .faq summary::after, .faq::details-content, .stop__ring, .stop__name, .stop__next svg, .sec--band::before { transition: none; }
+  .flip__inner, .pass, .pass::after, .top__board, .nav a::after, .top__sound, .plates .plate, .gate, .ghost, .badge, .ftab, .opt, .rbar button, .lvl__track i, .watch__play, .qcard__band i, .faq summary::after, .faq::details-content, .stop__ring, .stop__name, .stop__next svg, .sec--band::before { transition: none; }
   .plates .plate:hover, .plates .plate:focus-within, .top.has-board .top__board:hover, .top.has-board .top__board:focus-visible { transform: none; }
 }
 

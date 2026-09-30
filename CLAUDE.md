@@ -1580,9 +1580,11 @@ open **`/app`** (or any app route) for the app. It is a
 built into `public/landing/` and committed, like `public/privacy.html`):
 none of the app's CSS rules or guards apply to it, so it copies the
 tokens it uses (`landing/tokens.mjs`, held equal to `index.css` by
-`src/landing.test.js`). **After a change under `frontend/landing/`, or to a
-deck it counts, run `npm run landing`**: the same test fails on a committed
-page that differs from what the build writes. Its footage is uploaded to a
+`src/landing.test.js`). **After a change under `frontend/landing/`, to a
+deck it counts, or to the sound palette (`src/lib/audio/recipes.js`, the
+trims in `settings.js`), run `npm run landing`**: the same test fails on a
+committed page, or demos' `voices.js`, that differs from what the build
+writes. Its footage is uploaded to a
 public Supabase Storage bucket by file name and needs no rebuild;
 `frontend/landing/README.md` has the slots, the bucket and what changes
 when the page goes live.

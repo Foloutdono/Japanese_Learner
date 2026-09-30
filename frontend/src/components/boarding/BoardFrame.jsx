@@ -2,6 +2,7 @@ import { useContext } from 'react'
 import { useLang } from '../../LangContext'
 import { useDesk } from '../../hooks/useDesk'
 import { GateButton } from '../ui/GateButton'
+import { playClick, playUi } from '../../lib/audio'
 import { BackChevron } from './icons'
 import { BoardBack } from './boardBack'
 
@@ -27,7 +28,7 @@ export function BoardHead({ index, total, onBack }) {
     <div className="brd__head">
       {onBack
         ? (
-          <button type="button" className="brd__back" onClick={onBack} aria-label={t.back}>
+          <button type="button" className="brd__back" onClick={() => { playClick(); onBack() }} aria-label={t.back}>
             <BackChevron />
           </button>
         )
@@ -78,13 +79,22 @@ export function BoardAir() {
 
     改札 (plan 164, the owner's pick D of four drawn): drawn as the gate
     you tap your pass on (components/ui/GateButton.jsx), the outline
-    until an answer is picked and the pick waking it. */
+    until an answer is picked and the pick waking it.
+
+    発車: pressed, it sounds the departure -- the sound every screen
+    change in the app makes -- on every screen of first contact: the
+    Welcome's Board, each question, the plan and the pass, the intro's
+    pages and the rides' ends. One button drawn alike everywhere is
+    heard alike everywhere. Enter and the digits press it through its
+    click (hooks/useBoardKeys), so they sound it too. Today's Depart,
+    the other gate, is not this: it plays its announcement. */
 export function Continue({ label, onClick, disabled = false, keys = false, ...rest }) {
   const { t } = useLang()
   const desk = useDesk()
   const back = useContext(BoardBack)
   const printed = keys && desk
-  const button = <GateButton label={label} onClick={onClick} disabled={disabled} keys={printed} {...rest} />
+  const depart = e => { playUi('click-screen-selection'); onClick?.(e) }
+  const button = <GateButton label={label} onClick={depart} disabled={disabled} keys={printed} {...rest} />
   if (!printed || !back) return button
   return (
     <div className="desk-brd__floor">
@@ -96,7 +106,7 @@ export function Continue({ label, onClick, disabled = false, keys = false, ...re
 
 function FloorBackButton({ onClick, label }) {
   return (
-    <button type="button" className="desk-brd__back" onClick={onClick} data-action="back">
+    <button type="button" className="desk-brd__back" onClick={() => { playClick(); onClick() }} data-action="back">
       <BackChevron />
       {label}
     </button>
@@ -121,8 +131,10 @@ export function FloorBack() {
   )
 }
 
+/** The quiet way over the gate -- the sign-in, not now, skip: the
+    click every plain press in the app makes (the Bar's way back's). */
 export function BoardLink({ onClick, children, ...rest }) {
   return (
-    <button type="button" className="brd__link" onClick={onClick} {...rest}>{children}</button>
+    <button type="button" className="brd__link" onClick={e => { playClick(); onClick?.(e) }} {...rest}>{children}</button>
   )
 }

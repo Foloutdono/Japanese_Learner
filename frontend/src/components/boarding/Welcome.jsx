@@ -9,6 +9,7 @@ import { useBoxSize } from '../../hooks/useBoxWidth'
 import { PaperWait } from './PaperWait'
 import { Mark } from '../ui/Mark'
 import { BackChevron } from './icons'
+import { playClick, playUi } from '../../lib/audio'
 
 // ── Welcome — the front door (plans 075, 163, 168) ────────────────
 // The first screen a stranger sees and the boarding's step zero: the
@@ -25,11 +26,27 @@ import { BackChevron } from './icons'
 // sign-in, its email focused; 'signup' (Board could not issue a guest
 // pass) the same on Sign up with both sides named. `onBack` puts the
 // promise back.
+//
+// 音: Board sounds the gate's departure wherever it is pressed -- the
+// gate itself (BoardFrame's Continue sounds its own), the corner's
+// Board, the desk's Enter -- and the corner's Log in and the way back
+// the plain click. The first sound Tsuji makes is its departure.
 export default function Welcome({ onBoard, onSignIn, onBack = null, boarding = false, authMode = null }) {
   const { t } = useLang()
   const desk = useDesk()
-  if (desk) return <DeskWelcome onBoard={onBoard} onSignIn={onSignIn} onBack={onBack} boarding={boarding} authMode={authMode} t={t} />
-  return <PhoneWelcome onBoard={onBoard} onSignIn={onSignIn} onBack={onBack} boarding={boarding} authMode={authMode} t={t} />
+  const doors = {
+    onBoard,
+    board: () => { playUi('click-screen-selection'); onBoard() },
+    onSignIn: () => { playClick(); onSignIn() },
+    onBack: onBack && (() => { playClick(); onBack() }),
+    // For a BoardLink, which makes the click itself.
+    linkBack: onBack,
+    boarding,
+    authMode,
+    t,
+  }
+  if (desk) return <DeskWelcome {...doors} />
+  return <PhoneWelcome {...doors} />
 }
 
 // ── 辻 on a phone — the front door as the crossroads (plan 168) ──
@@ -77,7 +94,7 @@ function frontGeometry(width, height) {
   return { cx, cy, reach, width, height }
 }
 
-function PhoneWelcome({ onBoard, onSignIn, onBack, boarding, authMode, t }) {
+function PhoneWelcome({ onBoard, board, onSignIn, onBack, boarding, authMode, t }) {
   const signing = authMode != null
   return (
     <main className={`brd brd--welcome brd-front${signing ? ' brd-front--auth' : ''}`} id="main-content">
@@ -92,7 +109,7 @@ function PhoneWelcome({ onBoard, onSignIn, onBack, boarding, authMode, t }) {
         <p className="brd-front__door">
           <span>{signing ? t.brdNoAccountYet : t.brdHaveAccountQ}</span>
           {signing
-            ? <button type="button" className="brd-front__door-btn" onClick={onBoard} disabled={boarding} data-action="board-corner">{t.brdBoard}</button>
+            ? <button type="button" className="brd-front__door-btn" onClick={board} disabled={boarding} data-action="board-corner">{t.brdBoard}</button>
             : <button type="button" className="brd-front__door-btn" onClick={onSignIn} data-action="sign-in">{t.loginBtn}</button>}
         </p>
       </div>
@@ -305,7 +322,7 @@ function deskGeometry(width, height) {
   return { pad, cx, cy, reach, from: pad + WAY_IN }
 }
 
-function DeskWelcome({ onBoard, onSignIn, onBack, boarding, authMode, t }) {
+function DeskWelcome({ onBoard, board, onSignIn, linkBack, boarding, authMode, t }) {
   const [frameRef, size] = useBoxSize(true)
   const g = size ? deskGeometry(size.width, size.height) : null
   const signing = authMode != null
@@ -327,7 +344,7 @@ function DeskWelcome({ onBoard, onSignIn, onBack, boarding, authMode, t }) {
       <p className="desk-front__door">
         <span>{signing ? t.brdNoAccountYet : t.brdHaveAccountQ}</span>
         {signing
-          ? <button type="button" className="desk-front__door-btn" onClick={onBoard} disabled={boarding} data-action="board-corner">{t.brdBoard}</button>
+          ? <button type="button" className="desk-front__door-btn" onClick={board} disabled={boarding} data-action="board-corner">{t.brdBoard}</button>
           : <button type="button" className="desk-front__door-btn" onClick={onSignIn} data-action="sign-in">{t.loginBtn}</button>}
       </p>
       <div className={`desk-front__block${signing ? ' desk-front__block--auth' : ''}`}>
@@ -349,7 +366,7 @@ function DeskWelcome({ onBoard, onSignIn, onBack, boarding, authMode, t }) {
                   <GateButton keys label={submit.label} onClick={submit.onClick} disabled={submit.disabled} data-action="auth-submit" />
                   <div className="desk-front__below">
                     {authMode === 'signup' && <p className="auth-foot">{t.authFoot}</p>}
-                    {onBack && <BoardLink onClick={onBack} data-action="welcome">{`‹ ${t.brdBackHome}`}</BoardLink>}
+                    {linkBack && <BoardLink onClick={linkBack} data-action="welcome">{`‹ ${t.brdBackHome}`}</BoardLink>}
                   </div>
                 </>
               )}
@@ -362,7 +379,7 @@ function DeskWelcome({ onBoard, onSignIn, onBack, boarding, authMode, t }) {
                 <p className="brd-tagline">{t.brdTagline}</p>
               </div>
               <Continue keys label={t.brdBoard} onClick={onBoard} disabled={boarding} data-action="board" />
-              <EnterKey onEnter={onBoard} disabled={boarding} />
+              <EnterKey onEnter={board} disabled={boarding} />
               <div className="desk-front__below" />
             </>
           )}

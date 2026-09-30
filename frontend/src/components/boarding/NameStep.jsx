@@ -2,6 +2,7 @@ import { useLang } from '../../LangContext'
 import { BoardQuestion, Continue, BoardLink } from './BoardFrame'
 import { composing } from '../../lib/keyGuards'
 import { useDesk } from '../../hooks/useDesk'
+import { playUi } from '../../lib/audio'
 
 // The pass holder's name at its longest (EditableUsername's rule).
 const NAME_MAX = 20
@@ -53,7 +54,9 @@ export default function NameStep({
       aria-invalid={error ? true : undefined}
       placeholder={t.brdNameAria}
       onChange={e => onChange(e.target.value)}
-      onKeyDown={e => { if (e.key === 'Enter' && canGo && !composing(e)) onContinue() }}
+      // Enter in the field is the gate pressed (BoardFrame's Continue), and
+      // sounds its departure.
+      onKeyDown={e => { if (e.key === 'Enter' && canGo && !composing(e)) { playUi('click-screen-selection'); onContinue() } }}
     />
   )
   const refusal = error && <p className="brd__error" role="alert">{error}</p>

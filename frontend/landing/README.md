@@ -21,14 +21,16 @@ in. The page works without that script.
 | `tokens.mjs` | The app's tokens, copied. `src/landing.test.js` holds them equal to `index.css`. |
 | `page.mjs` | The renderer: the sections, the SEO head, the JSON-LD. |
 | `landing.css` | The stylesheet, phone first, inlined at build. |
-| `build.mjs` | `npm run landing`: writes `public/landing/`, `public/sitemap.xml` and `public/robots.txt`. |
+| `build.mjs` | `npm run landing`: writes `public/landing/` (the demos' `voices.js` too), `public/sitemap.xml` and `public/robots.txt`. |
 | `og.mjs` | `npm run landing:og`: renders the two share cards (`og-fr.png`, `og-en.png`). |
 | `../public/landing/landing.js` | The client script. Not built; served as written. |
 
 The built pages are committed, as `public/privacy.html` is: Vite copies
 `public/` as it is, so the deployment needs no step of its own.
-**After any change here, or to a deck the page counts, run `npm run landing`**
-and commit what it writes. `src/landing.test.js` fails until you do.
+**After any change here, to a deck the page counts, or to the app's sound
+palette (`src/lib/audio/recipes.js` and the trims in `settings.js`), run
+`npm run landing`** and commit what it writes. `src/landing.test.js` fails
+until you do.
 
 ## Motion
 
@@ -74,6 +76,38 @@ Three rules keep it safe:
 
 `src/landing.test.js` checks that every hook the script reaches for is
 on the page.
+
+## Sound
+
+The demos sound as the app does, with the app's own voices:
+`public/landing/voices.js` is `src/lib/audio/recipes.js` bundled by
+`scripts/voices-bundle.mjs`, the same bundle the loudness meter and the
+listening panel play, so what a visitor hears is byte for byte what ships.
+The script plays each event's shipped voice through the app's chain (the
+voice's trim, its channel, the master).
+
+| Press | Sound |
+| --- | --- |
+| The trial's card turned | `card-flip`, and the kana card (ぬ) says its syllable with the kana deck's own clip |
+| A verdict | `correct` (Difficult, Correct) or `wrong` (Wrong, Almost), the `fare-tick` 110ms after it, and `card-transition` as the card leaves: a rating in the app |
+| The pace, a word in the analyser, a feature tab | `click-mode-selection` |
+| The exam's answer | `correct` or `wrong` |
+| Phone / Computer, and the sound switch turned on | `toggle` |
+
+Four rules:
+- **Only the visitor's own press makes a sound.** Nothing plays on arrival,
+  on scroll or on the page's own motion: the feature tabs turning by
+  themselves are silent, and no audio context exists before the first press.
+- **The switch in the header is the app's mute.** It reads and writes the
+  app's own key (`jp-app-muted`, `src/lib/audio/settings.js`), and the page
+  plays at the app's volumes (`jp-app-volumes`): the page and the app are
+  one origin, so a visitor who mutes here boards muted, and a learner who
+  muted the app finds the page quiet. Sound is on by default, as in the app.
+- **The switch is drawn by the script**, which alone plays anything; a page
+  without it has no switch.
+- **The voices are fetched when the page is idle**, and the kana clip when
+  the trial is near, so the first card turned is heard. Muted, neither is
+  fetched until the switch is turned on.
 
 ## Footage
 

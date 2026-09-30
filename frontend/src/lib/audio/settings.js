@@ -48,6 +48,7 @@ export const BASE_GAIN = {
   // ceremony fall flat.
   //
   //   0.024  card turning -- ambient texture, under even the click
+  //   0.023  the hour's flaps -- levelled by peak to the chrome's
   //   0.030  the chrome: click, toggle, menus, option picks
   //   0.042  correct/wrong -- BELOW the fare tick on purpose, so the
   //          XP landing a beat later is not masked by the answer
@@ -100,6 +101,12 @@ export const BASE_GAIN = {
     // Its voices are written at the 0.060 of the doors running open,
     // so this is unity.
     'exam-warning':           1.00,
+    // The hour's flaps (the boarding): three noise ticks in 60ms,
+    // levelled by peak for the fare tick's reason, to the chrome's --
+    // the click's 0.185 and the pick's 0.175. That leaves its window
+    // at 0.023, a shade under the chrome's 0.030, which is where a
+    // sound that runs while the train is dragged belongs.
+    'board-flap':             2.07,
   },
   jingle:       0.3,
   announcement: 1,

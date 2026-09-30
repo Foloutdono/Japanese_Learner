@@ -4,11 +4,17 @@
 // voiceOut node every voice sounds through and the level each voice
 // plays at (settings.js's voiceLevel, the app's own), and sets them on
 // `globalThis.TsujiVoices`. Nothing of the app's audio graph comes with
-// them, so a page that plays them owns its one context. Two readers: the loudness
-// meter (measure-voices.mjs), which renders every voice in Chromium's
-// OfflineAudioContext, and the listening panel (sound-panel.mjs), which
-// plays them to a person choosing between them. Both therefore hear
-// the shipped recipes themselves rather than a copy that could drift.
+// them, so a page that plays them owns its one context. Three readers:
+// the loudness meter (measure-voices.mjs), which renders every voice
+// in Chromium's OfflineAudioContext, the listening panel
+// (sound-panel.mjs), which plays them to a person choosing between
+// them, and the landing page
+// (frontend/landing/build.mjs writes it to public/landing/voices.js),
+// whose demos play them to a visitor. All three therefore hear the
+// shipped recipes themselves rather than a copy that could drift.
+// `later` comes too: a moment with a beat in it (the fare after a
+// rating) plays on the audio clock, and left out, the minifier folds
+// the clock's lead to a constant zero.
 import { rolldown } from 'rolldown'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -19,9 +25,9 @@ const audio = path.resolve(here, '../src/lib/audio')
 const ENTRY = '\0tsuji-voices'
 const entrySource = `
 import { VOICE_EVENTS, VOICE_FAMILIES } from ${JSON.stringify(path.join(audio, 'recipes.js'))}
-import { voiceOut } from ${JSON.stringify(path.join(audio, 'synth.js'))}
+import { voiceOut, later } from ${JSON.stringify(path.join(audio, 'synth.js'))}
 import { BASE_GAIN, trimFor, voiceLevel } from ${JSON.stringify(path.join(audio, 'settings.js'))}
-globalThis.TsujiVoices = { VOICE_EVENTS, VOICE_FAMILIES, voiceOut, voiceLevel, BASE_GAIN, trimFor }
+globalThis.TsujiVoices = { VOICE_EVENTS, VOICE_FAMILIES, voiceOut, later, voiceLevel, BASE_GAIN, trimFor }
 `
 
 /** The bundle, as the text of one classic script. */

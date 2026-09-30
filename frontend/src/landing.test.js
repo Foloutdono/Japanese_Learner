@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync } from 'node:fs'
 import { DARK, LIGHT, SCALE } from '../landing/tokens.mjs'
 import { PAGES, SITE_ORIGIN, STORES, PRESENTATION, CLIPS } from '../landing/config.mjs'
-import { landingFiles } from '../landing/build.mjs'
+import { landingFiles, landingVoices } from '../landing/build.mjs'
 import { forwardScript } from '../landing/page.mjs'
 import { sessionKey, APP_ENTRY } from '../landing/config.mjs'
 import { STRINGS } from '../landing/strings.mjs'
@@ -55,8 +55,17 @@ describe('the landing page', () => {
       }
     })
 
-    it('carry their own fonts, script and share cards', () => {
-      for (const path of ['public/landing/landing.js', ...Object.values(PAGES).map(p => `public${p.ogImage}`),
+    // The demos' voices are the app's recipes, bundled: a change to the
+    // palette (src/lib/audio/recipes.js, settings.js's trims) not
+    // followed by a build fails here, as a deck change does above.
+    it('play the app’s own voices, as `npm run landing` bundles them', async () => {
+      for (const [path, text] of Object.entries(await landingVoices())) {
+        expect(read(path), `${path} is stale: run npm run landing`).toBe(text)
+      }
+    })
+
+    it('carry their own fonts, scripts and share cards', () => {
+      for (const path of ['public/landing/landing.js', 'public/landing/voices.js', ...Object.values(PAGES).map(p => `public${p.ogImage}`),
         ...['400', '500', '700'].map(w => `public/landing/fonts/space-grotesk-latin-${w}-normal.woff2`)]) {
         expect(existsSync(new URL(`../${path}`, import.meta.url)), path).toBe(true)
       }

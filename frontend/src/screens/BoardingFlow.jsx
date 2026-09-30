@@ -7,7 +7,8 @@ import { stopwatch } from '../lib/dwell'
 import { refreshSummary } from '../stores/profileSummary'
 import { refreshCredits } from '../stores/credits'
 import { USERNAME_RE } from '../components/profile/EditableUsername'
-import { TrainArrival } from '../components/onboarding/TrainArrival'
+import { TrainArrival, ARRIVAL_CHIME_MS } from '../components/onboarding/TrainArrival'
+import { playBoardFlap, playToggle, playUi, playVoice } from '../lib/audio'
 import { DEPART_TIMES } from '../components/onboarding/departures'
 import {
   LINES, RECOMMENDED_RHYTHM, RHYTHMS, boardingDraft, bucketFor, goalStops, itemsForRhythm, kanaFigures,
@@ -79,6 +80,18 @@ import AccountStep from '../components/boarding/AccountStep'
 // `dryRun` is the dev workbench's hook (/dev/onboarding): the whole
 // flow, the real volumes, and no write -- neither the name nor the
 // contract.
+//
+// 音 — the boarding speaks the app's own sound vocabulary
+// (lib/audio/chimes.js), so that the first minutes in Tsuji already
+// sound like the rest of it. The frame carries the presses every screen
+// shares (BoardFrame: the gate's departure, the click of ‹ and of the
+// quiet links); this file the answers, each where it is set -- a pick
+// the wood pick of every list in the app, a line switched the switch's
+// two step, the hour the departure board's flaps (one run a half hour,
+// so a drag along the day spins the board), the kana's answer, which
+// goes on by itself, the departure. Then the 案内 sign's chime on the
+// plan (TrainArrival), the welcome's coin on the pass (countUp), and
+// the gate's chime into the station (App.jsx's TicketGate).
 
 // ── The stash — surviving an OAuth redirect ──────────────────────
 // Signing in with Google on the WEB navigates the page away and comes
@@ -201,7 +214,7 @@ export default function BoardingFlow({
   // 辻 (plan 163): the strip at the floor's left end, measured so the
   // floor gives way before it (--desk-strip-w).
   const [stripRef, stripW] = useBoxWidth(desk)
-  const arrivalPlayed = useRef(REDUCED)
+  const arrivalPlayed = useRef(false)
   // Two stopwatches counting only time the tab was actually looked at
   // (lib/dwell.js): one lapped at every question, one for the whole
   // line. Wall-clock would say a boarding left open over lunch took an
@@ -211,6 +224,9 @@ export default function BoardingFlow({
   const watches = useRef(null)
 
   const set = patch => setAnswers(a => ({ ...a, ...patch }))
+  // An answer picked: the wood pick every list in the app makes, on every
+  // press, as those do -- the press is what it answers.
+  const pick = patch => { playUi('click-mode-selection'); set(patch) }
   // 机 (plan 122): Enter goes on from anywhere in the live car.
   useBoardKeys(frameRef, { off: arrival })
 
@@ -382,6 +398,8 @@ export default function BoardingFlow({
   }
 
   function answerKana(kana) {
+    // A pick that goes on by itself: it sounds the gate it stands for.
+    playUi('click-screen-selection')
     const choice = levelForKana(kana)
     if (choice) {
       set({ kana })
@@ -414,7 +432,14 @@ export default function BoardingFlow({
   // is built.
   function toPlan() {
     mark(step, 'plan', 'fwd')
-    if (!arrivalPlayed.current) { arrivalPlayed.current = true; setArrival(true) }
+    if (!arrivalPlayed.current) {
+      arrivalPlayed.current = true
+      // Under reduced motion the sign is not drawn, but its chime is
+      // still rung, on the beat it lands on: a sound is not motion, and
+      // the gate's departure has just been played.
+      if (REDUCED) playVoice('platform-chime', { after: ARRIVAL_CHIME_MS / 1000 })
+      else setArrival(true)
+    }
     setHistory([])
     setStep('plan')
   }
@@ -548,13 +573,13 @@ export default function BoardingFlow({
           />
         )
       case 'why':
-        return <WhyStep name={displayName} value={answers.motive} onChange={v => set({ motive: v })} onContinue={() => go('kana')} no={hubNo('why')} />
+        return <WhyStep name={displayName} value={answers.motive} onChange={v => pick({ motive: v })} onContinue={() => go('kana')} no={hubNo('why')} />
       case 'kana':
         return <KanaStep value={answers.kana} onAnswer={answerKana} />
       case 'reveal':
         return <KanaReveal onContinue={continueReveal} first={kanaStop} />
       case 'level':
-        return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => set({ levelChoice: v })} onContinue={continueLevel} no={hubNo('level')} />
+        return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => pick({ levelChoice: v })} onContinue={continueLevel} no={hubNo('level')} />
       case 'goal':
         return (
           <GoalStep
@@ -562,7 +587,7 @@ export default function BoardingFlow({
             level={answers.levelChoice ?? jlpt}
             kana={answers.kana}
             value={answers.goal}
-            onChange={v => set({ goal: v })}
+            onChange={v => pick({ goal: v })}
             onContinue={() => go('lines')}
             arrival={arrivalMonth}
             no={hubNo('goal')}
@@ -572,7 +597,8 @@ export default function BoardingFlow({
         return (
           <LinesStep
             value={answers.lines}
-            onChange={v => set({ lines: v })}
+            // A line is a switch, on or off: the switch's two step.
+            onChange={v => { playToggle(); set({ lines: v }) }}
             onContinue={() => go('rhythm')}
             carries={lineCarries}
             stop={answers.goal ?? jlpt}
@@ -585,7 +611,7 @@ export default function BoardingFlow({
         return (
           <RhythmStep
             value={answers.rhythm}
-            onChange={v => set({ rhythm: v })}
+            onChange={v => pick({ rhythm: v })}
             onContinue={() => go('time')}
             rides={rhythmRides}
             stop={answers.goal ?? jlpt}
@@ -594,7 +620,18 @@ export default function BoardingFlow({
           />
         )
       case 'time':
-        return <TimeStep minute={answers.minute} onChange={v => set({ minute: v })} onContinue={continueTime} now={now} />
+        return (
+          <TimeStep
+            minute={answers.minute}
+            // The board turns: a run of its flaps each half hour the hour
+            // moves -- a ▲ or a ▼, a service, the train dragged along the
+            // day or its keys. A drag reports every move; only a change
+            // turns the board.
+            onChange={v => { if (v !== answers.minute) playBoardFlap(); set({ minute: v }) }}
+            onContinue={continueTime}
+            now={now}
+          />
+        )
       case 'nudge':
         return (
           <NudgeStep

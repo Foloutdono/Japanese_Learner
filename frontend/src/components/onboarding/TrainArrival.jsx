@@ -27,6 +27,9 @@ import { spendKey } from '../../lib/keyGuards'
 
 const SPEED = 1.4
 const SIGN_MS = 260 * SPEED   // the signboard lands; the chime with it
+// When the chime lands, for the boarding to ring it at the same beat
+// where the scene is not drawn (reduced motion): a sound is not motion.
+export const ARRIVAL_CHIME_MS = SIGN_MS
 const DONE_MS = 780 * SPEED   // the overlay leaves; onDone fires
 
 function prefersReducedMotion() {

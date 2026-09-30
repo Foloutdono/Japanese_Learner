@@ -6,12 +6,19 @@
 // test (src/landing.test.js) fails when the committed pages drift from
 // what this script would write. Run it after changing anything in
 // frontend/landing/ or a deck the page counts.
+//
+// And the demos' sounds, public/landing/voices.js: the app's own recipes
+// (src/lib/audio/recipes.js), bundled by scripts/voices-bundle.mjs as the
+// loudness meter and the listening panel bundle them, so a card turned
+// on the page is the card turned in the app. A change to the palette is
+// a change to this file too: run the build after one.
 import { mkdirSync, writeFileSync, copyFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PAGES, SITE_ORIGIN, mediaBase } from './config.mjs'
 import { readFacts } from './content.mjs'
 import { renderPage } from './page.mjs'
+import { voicesBundle } from '../scripts/voices-bundle.mjs'
 
 const root = new URL('../', import.meta.url)
 const out = path => fileURLToPath(new URL(path, root))
@@ -46,12 +53,17 @@ Sitemap: ${SITE_ORIGIN}/sitemap.xml
   return files
 }
 
+/** The demos' voices, as the build writes them: the test compares. */
+export async function landingVoices() {
+  return { 'public/landing/voices.js': `${await voicesBundle()}\n` }
+}
+
 // The Latin faces the page sets its words in, copied from the package
 // the app already loads them from (src/main.jsx).
 const FACES = ['400', '500', '700'].map(w => `space-grotesk-latin-${w}-normal.woff2`)
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  for (const [path, text] of Object.entries(landingFiles())) {
+  for (const [path, text] of Object.entries({ ...landingFiles(), ...(await landingVoices()) })) {
     write(path, text)
     console.log(`wrote ${path}`)
   }

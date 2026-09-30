@@ -1,4 +1,5 @@
 import { useLang } from '../../LangContext'
+import { playClick } from '../../lib/audio'
 
 // ── 辻 — the journey strip (plan 163) ────────────────────────────
 // The owner's pick D of the canvas "Tsuji — onboarding, new directions":
@@ -45,7 +46,7 @@ export function DeskStrip({ stops, stripRef = null, label = null }) {
               aria-current={stop.state === 'now' ? 'step' : undefined}
             >
               {stop.onOpen
-                ? <button type="button" className="desk-brd__sp-door" onClick={stop.onOpen} title={said ?? undefined}>{face}</button>
+                ? <button type="button" className="desk-brd__sp-door" onClick={() => { playClick(); stop.onOpen() }} title={said ?? undefined}>{face}</button>
                 : <span className="desk-brd__sp-door" title={said ?? undefined}>{face}</span>}
             </li>
           )
