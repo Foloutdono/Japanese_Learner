@@ -507,19 +507,7 @@
   gap: 10px;
   margin-bottom: 4px;
 }
-.exam-order-slot {
-  min-width: 56px;
-  padding: 6px 10px;
-  text-align: center;
-  border-bottom: 2px solid var(--border);
-  font-family: var(--font-jp);
-  color: var(--text-secondary);
-}
-.exam-order-slot--star {
-  color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary));
-  font-weight: 700;
-  border-bottom-color: var(--line-color, var(--line-exam));
-}
+/* Each slot is drawn with the gaps, under "The gap". */
 .exam-order-solution {
   margin-top: 16px;
   padding-top: 14px;
@@ -542,25 +530,7 @@
   white-space: pre-line;
   margin-bottom: 18px;
 }
-.exam-blank-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 26px;
-  height: 22px;
-  padding: 0 6px;
-  margin: 0 2px;
-  border-radius: 6px;
-  background: var(--chip-bg);
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-.exam-blank-pill--active {
-  background: var(--line-color, var(--line-exam));
-  color: var(--text-on-panel);
-}
+/* Each blank is drawn with the gaps, under "The gap". */
 
 /* ── Reading passage / memo (reading もんだい4-5) ── */
 .exam-passage {
@@ -22247,21 +22217,65 @@ button.brd-stn { cursor: pointer; }
    to the page, with the line's pigment as its one rule at the foot:
    the place the answer goes. Revealed, the pattern stands on that same
    rule, picked out as any example picks its pattern out, so the gap
-   reads as filled rather than replaced. */
+   reads as filled rather than replaced.
+   The mock exam's gaps are the same slot: a question's ＿＿＿＿
+   (.exam-gap, QuestionRenderer's GapText), a ★ ordering's pieces and a
+   cloze passage's numbered blanks. */
 .gl-blank,
-.gl-blank--revealed {
+.gl-blank--revealed,
+.exam-gap,
+.exam-order-slot,
+.exam-blank-pill {
+  --gap-ink: color-mix(in srgb, var(--line-color, var(--accent2)) 60%, var(--text-primary));
   line-height: 1.4;
   padding-inline: var(--sp-2);
   margin-inline: var(--sp-1);
   border-bottom: 2px solid color-mix(in srgb, var(--line-color, var(--accent2)) 75%, transparent);
 }
-.gl-blank {
-  color: transparent;
+.gl-blank,
+.exam-gap,
+.exam-order-slot,
+.exam-blank-pill {
   background: var(--bg-main);
   border-radius: var(--r-plate) var(--r-plate) 0 0;
   user-select: none;
 }
+.gl-blank,
+.exam-gap,
+.exam-order-slot { color: transparent; }
+.exam-gap,
+.exam-blank-pill { display: inline-block; white-space: nowrap; }
 .gl-blank--revealed { border-bottom-color: var(--dict-ink); }
+/* A ★ ordering's slots: each piece's place a slot, its ＿＿＿ holding
+   the width. The ★ is the one slot the question grades, so it is the
+   one lit -- washed in the pigment, its rule solid -- and the star
+   stands in it in the pigment's ink. */
+.exam-order-slot {
+  position: relative;
+  font-family: var(--font-jp);
+}
+.exam-order-slot__star {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  color: var(--gap-ink);
+}
+/* A cloze passage's blank: the slot holding the paper's number for
+   it, the one being answered lit as the ★ is, the others quiet so the
+   passage reads through them. */
+.exam-blank-pill {
+  padding-inline: var(--sp-5);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.exam-blank-pill--active { color: var(--gap-ink); }
+.exam-order-slot--star,
+.exam-blank-pill--active {
+  background: color-mix(in srgb, var(--line-color, var(--line-exam)) 30%, var(--bg-main));
+  border-bottom-color: var(--line-color, var(--line-exam));
+}
 .grammar-contrast .dict-ex { align-items: center; }
 .grammar-contrast .dict-ex__jp { justify-content: center; font-size: inherit; }
 .grammar-contrast .dict-ex__tr { font-family: var(--font-display); font-size: var(--fs-caption); }
