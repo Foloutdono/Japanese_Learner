@@ -132,6 +132,10 @@ describe('Enter at first contact (P8)', () => {
     expect(stepOf()).toBe('kana')
   })
 
+  // The longest walk in the file: it boards and passes eight screens,
+  // each waiting on the car. It takes ~7s alone and went past vitest's
+  // default 15s on a loaded CI runner (main at 45160ad5, and #264), so
+  // it has a budget of its own.
   it('goes on from a line the pointer clicked off, and leaves it off', async () => {
     await board()
     await pastName()
@@ -168,7 +172,7 @@ describe('Enter at first contact (P8)', () => {
     await enter()
     await settle()
     expect(stepOf()).toBe('time')
-  })
+  }, 30000)
 
   it('does nothing under a dialog, and nothing on Esc', async () => {
     await board()
