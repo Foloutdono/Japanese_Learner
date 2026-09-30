@@ -211,7 +211,7 @@ function McqBlock({ question, selected, onSelect, revealed }) {
         {question.underlineJp ? (
           <PromptWithUnderline text={question.promptJp} underline={question.underlineJp} />
         ) : (
-          question.promptJp
+          <GapText text={question.promptJp} />
         )}
       </p>
       {question.imageAlt && <ImagePlaceholder alt={question.imageAlt} />}
@@ -230,14 +230,27 @@ function McqBlock({ question, selected, onSelect, revealed }) {
 
 function PromptWithUnderline({ text, underline }) {
   const idx = text.indexOf(underline)
-  if (idx === -1) return <>{text}</>
+  if (idx === -1) return <GapText text={text} />
   return (
     <>
-      {text.slice(0, idx)}
+      <GapText text={text.slice(0, idx)} />
       <span className="exam-underline">{underline}</span>
-      {text.slice(idx + underline.length)}
+      <GapText text={text.slice(idx + underline.length)} />
     </>
   )
+}
+
+// A paper writes its gap as a run of ＿ (＿＿＿＿, study/exam_grammar_gen.py
+// and exam_vocab_gen.py). Printed, the underscores are a line of their
+// own; here the run becomes the slot the grammar drill draws (index.css,
+// "The gap"), the characters kept to hold its width and for a copy.
+const GAP_RUN = /(＿{2,})/
+
+export function GapText({ text }) {
+  if (!text || !GAP_RUN.test(text)) return text ?? null
+  return text.split(GAP_RUN).map((part, i) => (
+    i % 2 ? <span key={i} className="exam-gap">{part}</span> : part
+  ))
 }
 
 // もんだい2 — ★ sentence ordering. We only ever grade the piece that
@@ -249,11 +262,12 @@ function SentenceOrderBlock({ question, selected, onSelect, revealed }) {
   const byId = Object.fromEntries(pieces.map(p => [p.id, p]))
   return (
     <div className="exam-question">
-      <p className="exam-question__prompt exam-question__prompt--context" lang="ja">{contextJp}</p>
+      <p className="exam-question__prompt exam-question__prompt--context" lang="ja"><GapText text={contextJp} /></p>
       <div className="exam-order-slots" aria-hidden="true">
         {order.map((pieceId, i) => (
           <span key={i} className={`exam-order-slot${i === starIndex ? ' exam-order-slot--star' : ''}`}>
-            {i === starIndex ? <StarIcon size={15} /> : '＿＿＿'}
+            {'＿＿＿'}
+            {i === starIndex && <StarIcon size={15} className="exam-order-slot__star" />}
           </span>
         ))}
       </div>
@@ -333,7 +347,7 @@ function ReadingPassageBlock({ question, selected, onSelect, revealed, passageAs
           <PassageText passage={passage} />
         </div>
       )}
-      <p className="exam-question__prompt" lang="ja">{question.promptJp}</p>
+      <p className="exam-question__prompt" lang="ja"><GapText text={question.promptJp} /></p>
       <ChoiceList
         choices={question.choices}
         choiceType={question.choiceType || 'text'}
@@ -391,7 +405,7 @@ function TableReadingBlock({ question, selected, onSelect, revealed }) {
           ))}
         </div>
       </div>
-      <p className="exam-question__prompt" lang="ja">{question.promptJp}</p>
+      <p className="exam-question__prompt" lang="ja"><GapText text={question.promptJp} /></p>
       <ChoiceList
         choices={question.choices}
         selected={selected}

@@ -6,7 +6,7 @@ import { Bar } from '../components/chrome/Bar'
 import { Chip } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { useListWalk, useFollowFocus, WALK_KEYS_PAGED } from '../hooks/useListWalk'
-import QuestionRenderer from '../exam/QuestionRenderer'
+import QuestionRenderer, { GapText } from '../exam/QuestionRenderer'
 import ExamCard from '../exam/ExamCard'
 import { StationSplit } from '../components/selection/StationSplit'
 import { SplitRow } from '../components/selection/SplitRow'
@@ -429,7 +429,7 @@ function ReviewRow({ r, open, onClick, desk = false, to = null, navState = null 
       <span className="exam-review-row__q">{t.examQuestionAbbrev}{r.q.number}</span>
       {state === 'blank'
         ? <span className="exam-review-row__blank">{t.examNotAnswered}</span>
-        : <span className="exam-review-row__jp" lang="ja">{line}</span>}
+        : <span className="exam-review-row__jp" lang="ja"><GapText text={line} /></span>}
       {desk ? null : (
         <span className="exam-review-row__chev" aria-hidden="true">
           <ChevronIcon direction={open ? 'up' : 'down'} size={14} />

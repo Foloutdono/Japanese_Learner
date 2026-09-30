@@ -93,7 +93,7 @@ function face(spec) {
       return (
         <>
           <span className="desk-spec__sentence" lang="ja">
-            {spec.before}<span className="desk-spec__gap" />{spec.after}
+            {spec.before}<span className="desk-spec__gap">＿＿＿</span>{spec.after}
           </span>
           <span className="desk-spec__choices" lang="ja">
             {spec.choices.map(c => <span key={c} className="desk-spec__choice">{c}</span>)}
