@@ -268,10 +268,13 @@ function choicesOf(chosen, chosenTotal, t) {
 // Same tap the board rows used to make: the announcement, then the
 // gate. /today has no clip in public/sounds/announcements, so
 // playAnnouncement plays the jingle alone and degrades exactly the
-// way it is built to. The section is Today's, with the run's path.
+// way it is built to. The section is Today's, with the run's path,
+// and `stage`: the run is drawn on the stage, so on the desk the gate
+// spans the window from its first frame rather than stopping at the
+// rail and jumping over it when the chrome turns (TicketGate).
 function departWith(today, off, cut, t) {
   playAnnouncement('today')
-  beginDeparture({ ...sectionFor('/today', t), path: runPathFor(today.lanes ?? [], off, cut) })
+  beginDeparture({ ...sectionFor('/today', t), path: runPathFor(today.lanes ?? [], off, cut), stage: true })
 }
 
 // A lane as a switch's content: its tick, where over what, its tags

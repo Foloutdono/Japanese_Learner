@@ -245,6 +245,8 @@ describe('Enter, on the bands', () => {
     await settle(60)
     expect(departure.begin).toHaveBeenCalledTimes(1)
     expect(departure.begin.mock.calls[0][0].path).toBe('/today/run')
+    // Into a run: the gate spans the window, rail and all (cutscenes.desktop).
+    expect(departure.begin.mock.calls[0][0].stage).toBe(true)
   })
 
   it('departs with the choice made on a tile', async () => {

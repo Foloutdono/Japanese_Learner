@@ -23574,9 +23574,11 @@ button.brd-stn { cursor: pointer; }
   .learn > .tier-picker > .tier-picker__size { max-width: var(--desk-side-w); }
   /* The ticket gate stands on the canvas and leaves the rail lit: the
      rail is the same before and after a departure from a plate (plan
-     123). A departure into a run turns the chrome to the stage while
-     the wipe is opaque, and the gate spans the window again. */
-  :root[data-chrome="shell"] .gate { left: var(--desk-rail-w); }
+     123). A departure into a run (.gate--stage) spans the window from
+     its first frame: the rail leaves with the chrome, and a gate held
+     to the canvas grew to the rail's edge, stopped there, and jumped
+     over it when the navigation turned the chrome to the stage. */
+  :root[data-chrome="shell"] .gate:not(.gate--stage) { left: var(--desk-rail-w); }
   /* The masthead: 辻 over its name, the origin station's plate. The
      Latin at --fs-sm is the pair's caption (DESIGN.md, Rule 1: 1.7–2.2×
      smaller; 1.70 / 0.82 = 2.07). */
