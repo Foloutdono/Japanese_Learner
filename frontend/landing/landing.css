@@ -444,7 +444,6 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .field:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--accent2); }
 .field::placeholder { color: var(--text-secondary); font-weight: 500; }
 .way__gate { display: flex; align-items: center; gap: var(--sp-6); }
-.way__gate .road { display: none; }
 .way .badges { justify-content: flex-start; }
 .way__pass { display: flex; justify-content: center; padding: var(--sp-5) 0; }
 .pass { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-5); width: 100%; max-width: 540px; padding: var(--sp-6) var(--sp-7) var(--sp-6) var(--sp-6); background: linear-gradient(155deg, color-mix(in srgb, var(--pass-ink) 45%, var(--bg-panel)) 0%, var(--bg-panel) 62%); border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent); border-radius: var(--r-identity); overflow: hidden; color: var(--text-on-panel); box-shadow: var(--elev-board); transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotate(-2deg); transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
@@ -840,7 +839,6 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .split--way .split__copy { padding-top: 0; }
   .way__h { font-size: var(--fs-display); }
   .way__gate .gate { flex: none; width: 320px; }
-  .way__gate .road { display: block; flex: 1; height: 10px; border-radius: var(--r-pill); background: var(--gate-gold); }
   .foot__in { padding-top: var(--sp-9); padding-bottom: var(--sp-9); }
 }
 
