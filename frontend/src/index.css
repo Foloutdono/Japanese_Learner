@@ -22238,13 +22238,30 @@ button.brd-stn { cursor: pointer; }
 .gl-tr-toggle:hover,
 .gl-tr-toggle:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
 /* ── The gap ──
-   The contrast drill's blank: a rule under the pattern's place, in
-   the secondary ink, at the sentence's own size. Revealed, it is the
-   pattern picked out as any example picks its pattern out. */
-.gl-blank {
-  border-bottom: 1px solid var(--text-secondary);
-  color: var(--text-secondary);
+   The contrast drill's blank: a slot in the line, not characters. The
+   backend's ＿＿＿ stays in the text -- it is what holds the slot's
+   width, three characters at the sentence's own size, and what a copy
+   carries -- but it is not drawn: printed, its own underscores sat on
+   the rule under them, two lines where there is one gap. The slot is
+   a well (DESIGN.md, "The field, one well"), a step through the card
+   to the page, with the line's pigment as its one rule at the foot:
+   the place the answer goes. Revealed, the pattern stands on that same
+   rule, picked out as any example picks its pattern out, so the gap
+   reads as filled rather than replaced. */
+.gl-blank,
+.gl-blank--revealed {
+  line-height: 1.4;
+  padding-inline: var(--sp-2);
+  margin-inline: var(--sp-1);
+  border-bottom: 2px solid color-mix(in srgb, var(--line-color, var(--accent2)) 75%, transparent);
 }
+.gl-blank {
+  color: transparent;
+  background: var(--bg-main);
+  border-radius: var(--r-plate) var(--r-plate) 0 0;
+  user-select: none;
+}
+.gl-blank--revealed { border-bottom-color: var(--dict-ink); }
 .grammar-contrast .dict-ex { align-items: center; }
 .grammar-contrast .dict-ex__jp { justify-content: center; font-size: inherit; }
 .grammar-contrast .dict-ex__tr { font-family: var(--font-display); font-size: var(--fs-caption); }
