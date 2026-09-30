@@ -9,7 +9,7 @@
    build folds the whitespace. */
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: calc(56px + var(--sp-5)); interpolate-size: allow-keywords; }
+html { --top-h: 57px; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: calc(56px + var(--sp-5)); interpolate-size: allow-keywords; }
 body { margin: 0; background: var(--bg-main); color: var(--text-primary); font-family: var(--font-display); font-size: var(--fs-body); line-height: 1.5; -webkit-font-smoothing: antialiased; --gutter: var(--sp-5); }
 a { color: inherit; }
 button { font: inherit; color: inherit; }
@@ -162,6 +162,11 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
    edges rather than starting at a rule, so the eye moves from one to
    the next instead of stepping over a border. */
 .sec { padding: var(--sp-7) 0; }
+/* A stop fills the window under the sticky bar, so the next stop's
+   plate never shows while this one is read: its plate at the top, its
+   content centred in what is left. */
+.sec:not([hidden]) { display: flex; flex-direction: column; min-height: calc(100svh - var(--top-h)); }
+.sec > .wrap + .wrap { margin-block: auto; }
 .sec--band { position: relative; isolation: isolate; }
 .sec--band::before { content: ""; position: absolute; inset: 0; z-index: -1; background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-main)); -webkit-mask-image: linear-gradient(transparent, #000 var(--sp-9), #000 calc(100% - var(--sp-9)), transparent); mask-image: linear-gradient(transparent, #000 var(--sp-9), #000 calc(100% - var(--sp-9)), transparent); pointer-events: none; transition: opacity 1s ease; }
 .motion .sec--band:not(.in)::before { opacity: 0; }
@@ -751,7 +756,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 @media (min-width: 1100px) {
   body { --gutter: var(--sp-8); --map: clamp(520px, 46vw, 660px); }
   .top__in { height: 80px; }
-  html { scroll-padding-top: calc(80px + var(--sp-5)); }
+  html { --top-h: 81px; scroll-padding-top: calc(80px + var(--sp-5)); }
   .brand .mark { width: 32px; height: 32px; }
   .brand__name { font-size: var(--fs-body); }
   .langs { display: inline-flex; }
