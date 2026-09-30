@@ -284,20 +284,27 @@ describe('settings on the desk', () => {
     }
   })
 
-  // The presets over the mixer, each at the page's width (plan 145):
-  // beside it, at half a page, the presets wrapped onto three lines and
-  // the tracks were cut to a thumb's length. The mixer's names stand in
-  // one column as wide as the longest, each on one line, and every track
-  // starts and ends where the others do.
-  it('stands the presets over a mixer whose tracks run together', async () => {
+  // The switch over the presets over the mixer, each at the page's width
+  // (plan 145): beside it, at half a page, the presets wrapped onto three
+  // lines and the tracks were cut to a thumb's length. The switch is a
+  // slip across the page, its state on the left and its action on the
+  // right. The mixer's names stand in one column as wide as the longest,
+  // each on one line, and every track starts and ends where the others do.
+  it('stands the switch and the presets over a mixer whose tracks run together', async () => {
     await page.viewport(1440, 900)
     try {
       await mount('/profile/settings/sound')
       await settle()
       const pane = document.querySelector('.desk-settings__page')
-      const [presets, mixer] = [...pane.querySelectorAll(':scope > .slip')].map(c => c.getBoundingClientRect())
+      const [power, presets, mixer] = [...pane.querySelectorAll(':scope > .slip')].map(c => c.getBoundingClientRect())
+      expect(power.bottom).toBeLessThan(presets.top)
       expect(presets.bottom).toBeLessThan(mixer.top)
+      near(power.width, mixer.width)
       near(presets.width, mixer.width)
+      const state = pane.querySelector('.snd-switch .slip__label').getBoundingClientRect()
+      const act = pane.querySelector('.snd-switch [data-action="mute"]').getBoundingClientRect()
+      expect(act.left).toBeGreaterThan(state.right)
+      expect(act.left).toBeGreaterThan(power.left + power.width / 2)
       const picks = [...pane.querySelectorAll('[data-preset]')].map(b => b.getBoundingClientRect())
       for (const b of picks) near(b.top, picks[0].top)
       const tracks = [...pane.querySelectorAll('.vol-slider-wrap')].map(t => t.getBoundingClientRect())

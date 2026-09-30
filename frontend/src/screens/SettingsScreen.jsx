@@ -136,7 +136,7 @@ function SettingsHome({ session, current = null }) {
   const langLabel = LANGUAGES.find(l => l.code === lang)?.label ?? lang
   const quiet = THEATRE.every(k => volumes[k] === 0)
   const full = THEATRE.every(k => volumes[k] === DEFAULT_VOLUMES[k])
-  const soundValue = muted ? t.mute : quiet ? t.soundValueQuiet : full ? t.soundValueFull : t.soundValueMixed
+  const soundValue = muted ? t.soundOff : quiet ? t.soundValueQuiet : full ? t.soundValueFull : t.soundValueMixed
   const email = session?.user?.email ?? ''
   const accountValue = email ? `${email.split('@')[0]}@…` : (isGuest(session) ? t.guestLabel : '')
 

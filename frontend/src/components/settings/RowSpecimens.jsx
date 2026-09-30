@@ -1,6 +1,7 @@
 import { SOUND_CATEGORIES } from '../../lib/audio'
 import { scaleFor } from '../../domain/ratingScales'
 import { LONGEST_FACTOR } from '../../domain/readingPace'
+import { SpeakerOffIcon } from '../ui/Icons'
 
 // ── What a row is set to, drawn (plan 139) ──────────────────────
 // Every row of Settings' list prints its state beside its word, and
@@ -17,13 +18,15 @@ export function ThemeSwatch({ theme }) {
 }
 
 /** The mixer's eight channels as bars, the master's share of each drawn;
- *  flat and grey when the sound is cut. */
+ *  a crossed speaker when the sound is cut. The bars drawn flat and grey
+ *  said it first, and read as a dotted rule: nobody saw a mute in it. */
 export function SoundMeter({ volumes, muted }) {
+  if (muted) return <SpeakerOffIcon size={16} className="stg-mute" />
   const channels = ['master', ...SOUND_CATEGORIES]
   return (
-    <span className={`stg-meter${muted ? ' stg-meter--muted' : ''}`} aria-hidden="true">
+    <span className="stg-meter" aria-hidden="true">
       {channels.map(k => {
-        const v = muted ? 0 : (k === 'master' ? volumes.master : volumes.master * volumes[k])
+        const v = k === 'master' ? volumes.master : volumes.master * volumes[k]
         return <span key={k} className="stg-meter__bar" style={{ height: `${Math.max(12, Math.round((v ?? 0) * 100))}%` }} />
       })}
     </span>

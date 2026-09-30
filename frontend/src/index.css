@@ -19432,6 +19432,10 @@ a.slip__act { text-decoration: none; }
 .lvlstrip__code { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
 .lvlstrip__jp { font-family: var(--font-display); font-size: var(--fs-caption-xs); letter-spacing: var(--tr-term); text-transform: uppercase; }
 .svc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+/* Sound (components/settings/SoundPage.jsx): the switch's state beside
+   its speaker, and the two presets under it, a card each. */
+.snd-state { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.snd-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .hour-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); }
 .svc {
   display: flex;
@@ -19696,7 +19700,7 @@ a.slip__act { text-decoration: none; }
 .stg-swatch--auto { background: linear-gradient(135deg, var(--paper) 50%, var(--bg-panel) 50%); }
 .stg-meter { flex: none; display: inline-flex; align-items: flex-end; gap: var(--sp-1); height: var(--sp-5); }
 .stg-meter__bar { width: 3px; border-radius: var(--r-plate); background: var(--accent2); }
-.stg-meter--muted .stg-meter__bar { background: var(--text-secondary); }
+.stg-mute { flex: none; }
 .stg-dots { flex: none; display: inline-flex; align-items: center; gap: var(--sp-1); }
 .stg-dots__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--rating-color, var(--text-secondary)); }
 .stg-dots__dot--best { background: var(--accent2); }
