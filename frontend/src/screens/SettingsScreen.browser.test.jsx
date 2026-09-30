@@ -487,6 +487,54 @@ describe('SettingsScreen — Sound', () => {
     expect(vols.announcement).toBe(0)
     expect(vols.kana ?? audio.DEFAULT_VOLUMES.kana).toBe(audio.DEFAULT_VOLUMES.kana)
   })
+
+  // Muted, the mute stood as a third preset card, lit and reading
+  // "Unmute · every channel" beside a lit Full station, and the row
+  // printed "Mute": a muted app read as sound on. The row says the state
+  // now, beside a crossed speaker; the page heads its switch with the
+  // state, and the way back is its one filled action.
+  it('says the sound is off in its row, beside a crossed speaker', async () => {
+    const { setMuted } = await import('../lib/audio/settings')
+    setMuted(true)
+    try {
+      const screen = await mount()
+      await settle()
+      const row = screen.container.querySelector('.stg-row[data-page="sound"]')
+      expect(row.querySelector('.stg-row__value').textContent).toBe(T.soundOff)
+      expect(row.querySelector('.stg-mute')).not.toBeNull()
+      expect(row.querySelector('.stg-meter')).toBeNull()
+    } finally {
+      setMuted(false)
+    }
+  })
+
+  it('heads the page with the sound off, and turns it back on', async () => {
+    const { setMuted } = await import('../lib/audio/settings')
+    setMuted(true)
+    try {
+      const screen = await mount('/profile/settings/sound')
+      await settle()
+      const root = screen.container
+      const power = root.querySelector('.snd-switch')
+      expect(power.querySelector('.slip__name').textContent).toBe(T.soundOff)
+      expect(power.querySelector('.slip__hint').textContent).toBe(T.soundOffHint)
+      const act = power.querySelector('[data-action="mute"]')
+      expect(act.textContent).toBe(T.unmute)
+      expect(act.classList.contains('btn-primary')).toBe(true)
+      // The mute is no preset: the two presets alone are cards.
+      expect([...root.querySelectorAll('[data-preset]')].map(b => b.dataset.preset)).toEqual(['quiet', 'full'])
+
+      act.click()
+      await settle(30)
+      expect(window.localStorage.getItem('jp-app-muted')).toBe('0')
+      expect(power.querySelector('.slip__name').textContent).toBe(T.soundOn)
+      expect(power.querySelector('.slip__hint')).toBeNull()
+      expect(act.textContent).toBe(T.mute)
+      expect(act.classList.contains('btn-secondary')).toBe(true)
+    } finally {
+      setMuted(false)
+    }
+  })
 })
 
 describe('SettingsScreen — Destination', () => {
