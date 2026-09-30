@@ -614,6 +614,8 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .features .ftab { position: relative; overflow: hidden; }
 .features .ftab[aria-selected="true"]::after { content: ""; position: absolute; left: var(--sp-4); right: var(--sp-4); bottom: 0; height: 2px; border-radius: var(--r-pill); background: var(--c); transform-origin: 0 50%; animation: tab-run 7s linear forwards; }
 .features.is-hold .ftab::after, .features.is-away .ftab::after { animation-play-state: paused; }
+/* A clip's run is the clip: the script follows its playhead (landing.js). */
+.features.is-timed .ftab[aria-selected="true"]::after { animation: none; transform: scaleX(var(--run, 0)); }
 .features.is-manual .ftab::after { display: none; }
 
 /* The mock exam's answer, the analyser's pick. */

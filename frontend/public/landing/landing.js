@@ -342,7 +342,9 @@ function nearView(node, then) {
 // over it once one is filmed. The tabs turn over by themselves, each
 // run drawn under its tab (landing.css, tab-run), held while the pointer
 // or the focus is on them and while the block is off the screen, and
-// stopped for good the moment the reader picks one.
+// stopped for good the moment the reader picks one. A drawn screen's run
+// is seven seconds; a clip's is the clip, so the tab turns once the clip
+// has played through.
 const features = $('.features')
 const tablist = $('[role="tablist"]', features)
 const tabs = $$('[role="tab"]', features)
@@ -355,8 +357,56 @@ let device = 'phone'
 let armed = false
 let typer = 0
 
+const turning = () => !features.classList.contains('is-manual')
+
+// The clip's run: while the tabs turn, the line under the tab is the
+// clip's progress (landing.css, .is-timed) and the clip plays once; its
+// end turns the tab. Until it plays the run holds at its start. A clip
+// that fails hands the run back to a drawn screen's seven seconds, and
+// one that has not started after those seven turns the tab.
+const CLIP_WAIT_MS = 7000
+let following = 0
+let stall = 0
+
+function timed(video) {
+  window.cancelAnimationFrame(following)
+  window.clearTimeout(stall)
+  features.classList.toggle('is-timed', Boolean(video))
+  if (!video) return
+  tablist.style.setProperty('--run', '0')
+  const follow = () => {
+    if (!video.isConnected) return
+    if (video.duration) tablist.style.setProperty('--run', (video.currentTime / video.duration).toFixed(4))
+    following = window.requestAnimationFrame(follow)
+  }
+  follow()
+}
+
+/** Start a clip, and give it a drawn screen's run to begin in. */
+function start(video) {
+  if (turning() && !video.dataset.untimed) {
+    window.clearTimeout(stall)
+    stall = window.setTimeout(() => {
+      if (video.played.length) return
+      video.dataset.untimed = 'true'
+      // Its seven seconds are spent: on, unless the reader is on the block.
+      if (features.classList.contains('is-hold')) timed(false)
+      else pick((feature + 1) % tabs.length, 'auto')
+    }, CLIP_WAIT_MS)
+  }
+  video.play().catch(error => {
+    // A pause interrupting the start (the block went away) is no failure.
+    if (error?.name === 'AbortError' || video.dataset.untimed || !video.isConnected) return
+    video.dataset.untimed = 'true'
+    timed(false)
+  })
+}
+
 function stopTurning() {
   features.classList.add('is-manual')
+  timed(false)
+  const video = $('video', screen)
+  if (video) video.loop = true
 }
 if (reducedMotion.matches) stopTurning()
 
@@ -396,24 +446,41 @@ function drawing() {
 async function loadClip() {
   $('video', screen)?.remove()
   $('.clip__play', screen)?.remove()
+  timed(false)
   if (!armed) return
   const f = data.features[feature]
   const base = `${data.media}/${device === 'desk' ? `${f.id}-desk` : f.id}`
   const wanted = `${feature}:${device}`
   if (!(await still(`${base}.jpg`)) || wanted !== `${feature}:${device}`) return
-  const video = el('video', null, null, { muted: '', loop: '', playsinline: '', preload: 'metadata', poster: `${base}.jpg`, 'aria-label': f.name })
+  const video = el('video', null, null, { muted: '', playsinline: '', preload: 'metadata', poster: `${base}.jpg`, 'aria-label': f.name })
   video.muted = true
+  // Once through while the tabs turn; round and round once they stop.
+  video.loop = !turning()
   video.append(el('source', null, null, { src: `${base}.mp4`, type: 'video/mp4' }))
-  video.addEventListener('error', () => video.remove(), true)
+  video.addEventListener('error', () => {
+    // A clip already replaced has no run left to hand back.
+    if (!video.isConnected) return
+    video.remove()
+    if (!video.dataset.untimed) timed(false)
+  }, true)
+  video.addEventListener('ended', () => {
+    // The reader on the block, or a pick since: the clip again. Else on.
+    if (!turning()) video.loop = true
+    if (!turning() || features.classList.contains('is-hold')) video.play().catch(() => {})
+    else pick((feature + 1) % tabs.length, 'auto')
+  })
   screen.append(video)
   if (reducedMotion.matches) {
     const play = el('button', 'clip__play', null, { type: 'button', 'aria-label': f.play })
     play.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>'
     play.addEventListener('click', () => { play.remove(); video.controls = true; video.play().catch(() => {}) })
     screen.append(play)
-  } else {
-    video.play().catch(() => {})
+    return
   }
+  if (turning()) timed(video)
+  // Off the screen it waits, as the run does, and starts once it is back.
+  if (features.classList.contains('is-away')) video.dataset.away = 'true'
+  else start(video)
 }
 
 function pick(k, how) {
@@ -462,6 +529,25 @@ features.addEventListener('pointerenter', hold(true))
 features.addEventListener('pointerleave', hold(false))
 features.addEventListener('focusin', hold(true))
 features.addEventListener('focusout', event => { if (!features.contains(event.relatedTarget)) features.classList.remove('is-hold') })
+
+// A clip stops while the block is off the screen, as the run does, and
+// goes on from there once it is back.
+if (canWatch) {
+  new IntersectionObserver(([entry]) => {
+    const video = $('video', screen)
+    if (!video) return
+    if (!entry.isIntersecting) {
+      window.clearTimeout(stall)
+      if (!video.paused) {
+        video.pause()
+        video.dataset.away = 'true'
+      }
+    } else if (video.dataset.away) {
+      delete video.dataset.away
+      start(video)
+    }
+  }).observe(features)
+}
 
 for (const button of $$('[data-device]')) {
   button.addEventListener('click', () => {
