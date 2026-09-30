@@ -66,9 +66,34 @@ function gate(t, cls = '') {
 const ring = (glyph, line, cls = '') =>
   `<span class="ring ${cls}" style="--c:${pigment(line)}" lang="ja">${esc(glyph)}</span>`
 
-function head2(t, kicker, h2, body, id, extra = '') {
-  return `<div class="head2" data-stagger><div><p class="cap">${esc(typo(t.lang, kicker))}</p><h2 class="h2" id="${id}-h">${esc(typo(t.lang, h2))}</h2></div>`
+function head2(t, h2, body, id, extra = '') {
+  return `<div class="head2" data-stagger><div><h2 class="h2" id="${id}-h">${esc(typo(t.lang, h2))}</h2></div>`
     + `<div class="head2__end"><p class="body">${esc(typo(t.lang, body))}</p>${extra}</div></div>`
+}
+
+// ── The stops ──
+// The page is the gold line the hero's road starts: every section is a
+// stop on it. Its sign stands where a hairline stood -- the stop's
+// number in a ring, its name, the rail laid across as the section
+// arrives with a train running it once, and the next stop, a door on.
+// The sign of the section being read is lit (landing.js). The way in
+// at the page's foot is the terminus, 終.
+const STOPS = ['presentation', 'lines', 'line', 'method', 'features', 'jlpt', 'tools', 'fare', 'faq', 'way']
+const stopName = (t, key) => (key === 'way' ? t.terminus : t[key].kicker)
+const ONWARD = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+
+function stop(t, key) {
+  const k = STOPS.indexOf(key)
+  const next = STOPS[k + 1]
+  const mark = key === 'presentation' ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 4.5v15l13-7.5z"/></svg>'
+    : key === 'way' ? '<span lang="ja">終</span>' : String(k).padStart(2, '0')
+  const to = next ? stopName(t, next) : ''
+  return `<div class="wrap"><div class="stop${next ? '' : ' stop--end'}" data-reveal data-stop="${t.ids[key]}">`
+    + `<span class="stop__ring fig" aria-hidden="true">${mark}</span>`
+    + `<span class="stop__name">${esc(typo(t.lang, stopName(t, key)))}</span>`
+    + '<span class="stop__rail" aria-hidden="true"><i></i><b></b></span>'
+    + (next ? `<a class="stop__next" href="#${t.ids[next]}" aria-label="${esc(typo(t.lang, t.nextTo(to)))}"><span class="stop__word">${esc(t.next)}</span><span class="stop__to">${esc(typo(t.lang, to))}</span>${ONWARD}</a>` : '')
+    + '</div></div>'
 }
 
 const clock = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
@@ -149,6 +174,7 @@ function hero(t, live) {
     + badges(t)
     + `<a class="watch" href="#${t.ids.presentation}" data-watch${live ? '' : ' hidden'}><span class="watch__play" aria-hidden="true">${PLAY}</span>${esc(typo(t.lang, h.watch))} · ${clock(PRESENTATION.seconds)}</a>`
     + `<p class="hero__note">${esc(typo(t.lang, h.note(STORES.appStore || STORES.googlePlay)))}</p>`
+    + `<a class="hero__cue" href="#${t.ids.lines}"><span>${esc(h.cue)}</span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v13M6 12l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`
     + '</div></section>'
 }
 
@@ -172,8 +198,8 @@ function presentation(t, media, live) {
   }).join('')
   const chapters = p.chapters.map((name, k) =>
     `<li><button type="button" data-seek="${PRESENTATION.chapters[k]}"><i></i>${esc(typo(t.lang, name))}</button></li>`).join('')
-  return `<section class="sec" id="${t.ids.presentation}" aria-labelledby="${t.ids.presentation}-h" data-presentation${live ? '' : ' hidden'}><div class="wrap">`
-    + head2(t, p.kicker, p.h2, p.body, t.ids.presentation)
+  return `<section class="sec" id="${t.ids.presentation}" aria-labelledby="${t.ids.presentation}-h" data-presentation${live ? '' : ' hidden'}>${stop(t, 'presentation')}<div class="wrap">`
+    + head2(t, p.h2, p.body, t.ids.presentation)
     + `<div class="player" data-reveal data-src="${esc(media)}/${PRESENTATION.file}" data-lang="${t.lang}">`
     + `<svg class="player__art" viewBox="0 0 1240 698" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><line x1="300" y1="320" x2="620" y2="320" class="player__road"/>${art}</svg>`
     + `<button type="button" class="play" data-play aria-label="${esc(typo(t.lang, `${p.play}, ${clock(PRESENTATION.seconds)}`))}">${PLAY}</button>`
@@ -194,8 +220,8 @@ function lines(t) {
     + `<div class="specimen plate__spec">${spec}</div></article>`
   const stage = (key, word) => `<span class="stage st-${key}">${esc(word)}</span>`
   const k = t.method.stages
-  return `<section class="sec" id="${t.ids.lines}" aria-labelledby="${t.ids.lines}-h"><div class="wrap">`
-    + head2(t, L.kicker, L.h2, L.body, t.ids.lines)
+  return `<section class="sec" id="${t.ids.lines}" aria-labelledby="${t.ids.lines}-h">${stop(t, 'lines')}<div class="wrap">`
+    + head2(t, L.h2, L.body, t.ids.lines)
     + '<div class="plates" data-stagger>'
     + plate('kana', 'あ', P.kana, `${stage('learning', k.learning)}<span class="spec__glyph" lang="ja">あ</span><span class="spec__gloss">${esc(P.kana.gloss)}</span>`, chips(P.kana.chips))
     + plate('vocab', '語', P.vocab, `${stage('new', k.new)}<span class="spec__reading" lang="ja">でんしゃ</span><span class="spec__word" lang="ja">電車</span><span class="spec__gloss">${esc(P.vocab.gloss)}</span>`, stops)
@@ -215,10 +241,10 @@ function line(t, facts) {
       + `<span class="lrow__counts"><span class="lrow__long">${esc(L.counts(l))}</span><span class="lrow__short">${esc(L.countsShort(l))}</span></span>`
       + `<span class="fig lrow__eta" data-eta${data}>${esc(etas[DEFAULT_RHYTHM][k])}</span></li>`
   }).join('')
-  return `<section class="sec" id="${t.ids.line}" aria-labelledby="${t.ids.line}-h"><div class="wrap split">`
-    + `<div class="split__copy" data-stagger><p class="cap">${esc(typo(t.lang, L.kicker))}</p><h2 class="h2" id="${t.ids.line}-h">${esc(typo(t.lang, L.h2))}</h2>`
+  return `<section class="sec sec--band" id="${t.ids.line}" aria-labelledby="${t.ids.line}-h">${stop(t, 'line')}<div class="wrap split">`
+    + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.line}-h">${esc(typo(t.lang, L.h2))}</h2>`
     + `<p class="body">${esc(typo(t.lang, L.body))}</p>`
-    + `<div class="seg" role="group" aria-label="${esc(L.rhythmsLabel)}" data-rhythms>${rhythms}</div>`
+    + `<div class="seg" role="group" aria-label="${esc(L.rhythmsLabel)}" data-rhythms data-nudge>${rhythms}</div>`
     + `<p class="body body--small">${esc(typo(t.lang, L.note))}</p></div>`
     + `<div class="plate plate--line" style="--c:var(--accent2)" data-reveal><div class="line__head"><h3 class="h3">${esc(L.plate)}</h3><span class="capxs" data-at>${esc(L.at(DEFAULT_RHYTHM))}</span></div>`
     + `<ol class="lrows"><li class="lrow"><span class="lrow__stop lrow__stop--here"></span><span class="lrow__code lrow__kana" lang="ja">かな</span>`
@@ -236,8 +262,8 @@ function method(t) {
     : `<span class="stamp" style="--turn:${rotations[k]}deg" lang="ja">${d}</span>`).join('')
   const ratings = M.ratings.map((word, k) =>
     `<button type="button" class="q${k + 1}" data-rate="${k}" disabled><span class="rbar__dot"></span><span class="rbar__w">${esc(word)}</span><span class="rbar__t">${esc(M.due(card.due[k]))}</span></button>`).join('')
-  return `<section class="sec" id="${t.ids.method}" aria-labelledby="${t.ids.method}-h"><div class="wrap split">`
-    + `<div class="split__copy" data-stagger><p class="cap">${esc(typo(t.lang, M.kicker))}</p><h2 class="h2" id="${t.ids.method}-h">${esc(typo(t.lang, M.h2))}</h2>`
+  return `<section class="sec" id="${t.ids.method}" aria-labelledby="${t.ids.method}-h">${stop(t, 'method')}<div class="wrap split">`
+    + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.method}-h">${esc(typo(t.lang, M.h2))}</h2>`
     + `<p class="body">${esc(typo(t.lang, M.body))}</p>`
     + `<div class="card day"><div class="day__top"><span class="day__count"><span class="fig">${M.day.count}</span> ${esc(typo(t.lang, M.day.unit))}</span>`
     + `<span class="seg seg--still" role="img" aria-label="${esc(M.day.lengthLabel)} : 50">${M.day.lengths.map(v => `<span${v === '50' ? ' class="on"' : ''}>${esc(v)}</span>`).join('')}</span></div>`
@@ -249,7 +275,7 @@ function method(t) {
     // Both faces are in the page and the card turns between them: the
     // back is hidden from a screen reader until it faces the learner.
     + `<div class="flip" data-card tabindex="-1"><div class="flip__inner">`
-    + `<button type="button" class="qcard qcard--front" data-flip aria-label="${esc(M.flipAria)}">`
+    + `<button type="button" class="qcard qcard--front" data-flip data-nudge aria-label="${esc(M.flipAria)}">`
     + `<span class="qcard__stage st-${card.stage}" data-face="stage">${esc(M.stages[card.stage])}</span>`
     + `<span class="qcard__glyph${card.serif ? ' serif' : ''}" lang="ja" data-face="glyph">${esc(card.glyph)}</span>`
     + `<span class="qcard__hint">${esc(M.flip)}</span><span class="qcard__band"><i data-face="band" style="width:${card.progress * 100}%"></i></span></button>`
@@ -343,8 +369,8 @@ function features(t, media) {
   }).join('')
   const devices = ['phone', 'desk'].map((d, k) => `<button type="button" data-device="${d}" aria-pressed="${k === 0}"${k === 0 ? ' class="on"' : ''}>${esc(F.devices[d])}</button>`).join('')
   const f0 = F.items[first.id]
-  return `<section class="sec" id="${t.ids.features}" aria-labelledby="${t.ids.features}-h"><div class="wrap">`
-    + head2(t, F.kicker, F.h2, F.body, t.ids.features, `<div class="seg devices" role="group" aria-label="${esc(F.devicesLabel)}" data-devices>${devices}</div>`)
+  return `<section class="sec sec--band" id="${t.ids.features}" aria-labelledby="${t.ids.features}-h">${stop(t, 'features')}<div class="wrap">`
+    + head2(t, F.h2, F.body, t.ids.features, `<div class="seg devices" role="group" aria-label="${esc(F.devicesLabel)}" data-devices>${devices}</div>`)
     + `<div class="features" data-media="${esc(media)}" data-reveal>`
     + `<div class="ftabs" role="tablist" aria-label="${esc(F.tabsLabel)}" aria-orientation="vertical">${tabs}</div>`
     + `<div class="fpanel" role="tabpanel" id="feature-panel" aria-labelledby="tab-${first.id}" tabindex="0">`
@@ -358,13 +384,13 @@ function features(t, media) {
 function jlpt(t) {
   const J = t.jlpt
   const opts = EXAM_OPTIONS.map((o, k) => `<button type="button" class="opt" data-opt="${k}"><span class="opt__k">${k + 1}</span><span lang="ja">${o}</span></button>`).join('')
-  return `<section class="sec" id="${t.ids.jlpt}" aria-labelledby="${t.ids.jlpt}-h"><div class="wrap split">`
-    + `<div class="split__copy" data-stagger><p class="cap">${esc(J.kicker)}</p><h2 class="h2" id="${t.ids.jlpt}-h">${esc(typo(t.lang, J.h2))}</h2>`
+  return `<section class="sec" id="${t.ids.jlpt}" aria-labelledby="${t.ids.jlpt}-h">${stop(t, 'jlpt')}<div class="wrap split">`
+    + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.jlpt}-h">${esc(typo(t.lang, J.h2))}</h2>`
     + `<p class="body">${esc(typo(t.lang, J.body))}</p><p class="body body--small">${esc(typo(t.lang, J.note))}</p></div>`
     + '<div class="card exam" data-exam data-reveal>'
     + `<div class="exam__top"><span class="exam__head">${ring('模', 'exam', 'exam__ring')}${esc(typo(t.lang, J.head))}</span><span class="fig exam__timer">${J.timer}</span></div>`
     + '<p class="exam__q" lang="ja">この <u>駅</u> は とても 大きいです。</p>'
-    + `<div class="exam__opts" role="group" aria-label="${esc(J.optionsLabel)}">${opts}</div>`
+    + `<div class="exam__opts" role="group" aria-label="${esc(J.optionsLabel)}" data-nudge>${opts}</div>`
     + `<p class="body exam__verdict" aria-live="polite" data-verdict>${esc(typo(t.lang, J.ask))}</p>`
     + '</div></div></section>'
 }
@@ -377,15 +403,15 @@ function tools(t) {
   }).join('')
   const sel = TOKENS.length - 1
   const tok = (w, k) =>
-    `<button type="button" class="tok ${w.gram ? 'tok--gram' : 'tok--word'}${k === sel ? ' tok--on' : ''}" data-tok="${k}" aria-pressed="${k === sel}"><span class="tok__r">${w.reading}</span><span class="tok__w">${w.surface}</span></button>`
+    `<button type="button" class="tok ${w.gram ? 'tok--gram' : 'tok--word'}${k === sel ? ' tok--on' : ''}" data-tok="${k}"${k === 0 ? ' data-nudge' : ''} aria-pressed="${k === sel}"><span class="tok__r">${w.reading}</span><span class="tok__w">${w.surface}</span></button>`
   // The full stop rides with the last word, so a narrow card never
   // wraps it onto a line of its own.
   const tokens = TOKENS.slice(0, -1).map(tok).join('')
     + `<span class="toks__last">${tok(TOKENS[sel], sel)}<span class="tok__w tok__stop">。</span></span>`
   const info = T.tokens[sel]
   const points = T.points.map(([p, g], k) => `<li><span class="num">${k + 1}</span><span class="points__p" lang="ja">${p}</span><span class="points__g">${esc(typo(t.lang, g))}</span></li>`).join('')
-  return `<section class="sec" id="${t.ids.tools}" aria-labelledby="${t.ids.tools}-h"><div class="wrap">`
-    + head2(t, T.kicker, T.h2, T.body, t.ids.tools)
+  return `<section class="sec sec--band" id="${t.ids.tools}" aria-labelledby="${t.ids.tools}-h">${stop(t, 'tools')}<div class="wrap">`
+    + head2(t, T.h2, T.body, t.ids.tools)
     + '<div class="tools" data-stagger>'
     + `<article class="plate dict" style="--c:var(--accent2)"><div class="dict__top"><div class="dict__word"><span class="spec__reading" lang="ja">えき</span><span class="dict__glyph serif" lang="ja">駅</span></div>`
     + `<div class="dict__tags"><span class="chip chip--small">N5</span><span class="stage st-learning">${esc(T.stage)}</span></div></div>`
@@ -403,8 +429,8 @@ function tools(t) {
 function fare(t) {
   const F = t.fare
   const promises = F.promises.map(([h, p]) => `<div><h3 class="h3">${esc(typo(t.lang, h))}</h3><p class="body">${esc(typo(t.lang, p))}</p></div>`).join('')
-  return `<section class="sec" id="${t.ids.fare}" aria-labelledby="${t.ids.fare}-h"><div class="wrap fare" data-stagger>`
-    + `<article class="card fare__card"><p class="cap">${esc(F.kicker)}</p><h2 class="h2" id="${t.ids.fare}-h">${esc(typo(t.lang, F.h2))}</h2><p class="body">${esc(typo(t.lang, F.body))}</p></article>`
+  return `<section class="sec" id="${t.ids.fare}" aria-labelledby="${t.ids.fare}-h">${stop(t, 'fare')}<div class="wrap fare" data-stagger>`
+    + `<article class="card fare__card"><h2 class="h2" id="${t.ids.fare}-h">${esc(typo(t.lang, F.h2))}</h2><p class="body">${esc(typo(t.lang, F.body))}</p></article>`
     + `<div class="lattice promises">${promises}</div>`
     + '</div></section>'
 }
@@ -412,8 +438,8 @@ function fare(t) {
 function faq(t) {
   const F = t.faq
   const items = F.items.map(([q, a], k) => `<details class="faq"${k ? '' : ' open'}><summary>${esc(typo(t.lang, q))}</summary><p>${esc(typo(t.lang, a))}</p></details>`).join('')
-  return `<section class="sec" id="${t.ids.faq}" aria-labelledby="${t.ids.faq}-h"><div class="wrap faqs">`
-    + `<div><p class="cap">${esc(F.kicker)}</p><h2 class="h2" id="${t.ids.faq}-h">${esc(typo(t.lang, F.h2))}</h2></div>`
+  return `<section class="sec sec--band" id="${t.ids.faq}" aria-labelledby="${t.ids.faq}-h">${stop(t, 'faq')}<div class="wrap faqs">`
+    + `<div><h2 class="h2" id="${t.ids.faq}-h">${esc(typo(t.lang, F.h2))}</h2></div>`
     + `<div class="faqs__list" data-stagger>${items}</div></div></section>`
 }
 
@@ -422,7 +448,7 @@ function pass(t, facts) {
   const n5 = arrivals(facts, DEFAULT_RHYTHM)[0].days
   const dots = [['kana', 'あ'], ['vocab', '語'], ['kanji', '漢'], ['grammar', '文']]
     .map(([l, g]) => `<span class="dot" style="--c:${pigment(l)}" lang="ja">${g}</span>`).join('')
-  return '<section class="sec way" aria-labelledby="way-h"><div class="wrap split split--way">'
+  return `<section class="sec way" id="${t.ids.way}" aria-labelledby="way-h">${stop(t, 'way')}<div class="wrap split split--way">`
     + `<div class="split__copy" data-stagger><h2 class="h2 way__h" id="way-h">${esc(typo(t.lang, P.h2))}</h2><p class="body">${esc(typo(t.lang, P.body))}</p>`
     + `<div class="way__field"><label class="capxs" for="pass-name">${esc(P.nameLabel)}</label><input id="pass-name" class="field" type="text" name="given-name" autocomplete="given-name" maxlength="24" placeholder="${esc(P.name)}" data-pass-input></div>`
     + `<div class="way__gate">${gate(t)}<span class="road road--end" aria-hidden="true"></span></div>${badges(t)}</div>`

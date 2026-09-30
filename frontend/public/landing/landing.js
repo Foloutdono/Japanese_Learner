@@ -56,7 +56,8 @@ function arrive(node) {
   for (const figure of $$('[data-count]', node)) countUp(figure)
 }
 
-const blocks = $$('[data-reveal], [data-stagger]')
+// A section on a band arrives too: its band fades in as it is reached.
+const blocks = $$('[data-reveal], [data-stagger], .sec--band')
 if (canWatch) {
   const watcher = new IntersectionObserver(entries => {
     for (const entry of entries) {
@@ -82,7 +83,7 @@ if (canWatch) {
 // ── The header ──
 // Its rail is the reading's progress; once the hero's gate has scrolled
 // away a small Embarquer stands in the header; the section being read
-// is lit in the links.
+// is lit in the links, and its stop's sign on the page.
 const top = $('[data-top]')
 const topBoard = $('[data-top-board]')
 let ticking = false
@@ -109,22 +110,22 @@ if (canWatch) {
   gateWatch.observe($('.hero__gate .gate'))
 
   const links = $$('[data-spy]')
+  const stops = $$('[data-stop]')
+  const sections = $$('.sec[id]')
   const reading = new Set()
   const spy = new IntersectionObserver(entries => {
     for (const entry of entries) {
       if (entry.isIntersecting) reading.add(entry.target.id)
       else reading.delete(entry.target.id)
     }
-    const current = links.find(link => reading.has(link.dataset.spy))
+    const here = sections.find(section => reading.has(section.id))?.id
     for (const link of links) {
-      if (link === current) link.setAttribute('aria-current', 'true')
+      if (link.dataset.spy === here) link.setAttribute('aria-current', 'true')
       else link.removeAttribute('aria-current')
     }
+    for (const sign of stops) sign.classList.toggle('is-here', sign.dataset.stop === here)
   }, { rootMargin: '-40% 0px -55% 0px' })
-  for (const link of links) {
-    const section = document.getElementById(link.dataset.spy)
-    if (section) spy.observe(section)
-  }
+  for (const section of sections) spy.observe(section)
 }
 
 // ── Boarding carries the page's language into the app ──
@@ -138,6 +139,16 @@ for (const link of $$('[data-board]')) {
     } catch { /* storage refused: the app falls back to the device's language */ }
   })
 }
+
+// ── Press here ──
+// Each demo's first step wears the app's cue ring (landing.css, .nudge)
+// until it is answered: the card until it is turned, then the verdicts
+// until one is given; the pace, a word, an answer until one is picked.
+// A ring is never put back.
+function nudge(node, on) {
+  if (node) node.classList.toggle('nudge', on)
+}
+for (const node of $$('[data-nudge]')) nudge(node, true)
 
 // ── Your line: the pace moves every arrival ──
 const monthYear = new Intl.DateTimeFormat(data.lang, { month: 'long', year: 'numeric' })
@@ -159,7 +170,10 @@ function setRhythm(per, shown) {
 }
 
 for (const button of $$('[data-per]')) {
-  button.addEventListener('click', () => setRhythm(Number(button.dataset.per), true))
+  button.addEventListener('click', () => {
+    nudge($('[data-rhythms]'), false)
+    setRhythm(Number(button.dataset.per), true)
+  })
 }
 setRhythm(data.rhythm, false)
 
@@ -198,6 +212,7 @@ const back = $('.qcard--back', trial)
 const rates = $$('[data-rate]', trial)
 const live = $('[data-trial-live]', trial)
 const gain = $('[data-xp-gain]', trial)
+const rbar = $('.rbar', trial)
 let at = 0
 let xp = 0
 
@@ -227,6 +242,10 @@ function facing(backUp) {
 
 front.addEventListener('click', () => {
   const card = data.cards[at]
+  if (front.classList.contains('nudge')) {
+    nudge(front, false)
+    nudge(rbar, xp === 0)
+  }
   facing(true)
   live.textContent = `${card.glyph} · ${card.meaning}`
   flipBox.focus({ preventScroll: true })
@@ -235,6 +254,7 @@ front.addEventListener('click', () => {
 for (const button of rates) {
   button.addEventListener('click', () => {
     const wasHere = trial.contains(document.activeElement)
+    nudge(rbar, false)
     xp += 1
     $('[data-xp]', trial).textContent = data.trial.xp[Math.min(xp, 5)]
     $('[data-xp-bar]', trial).style.width = `${34 + 12 * Math.min(xp, 5)}%`
@@ -263,6 +283,7 @@ const options = $$('[data-opt]')
 for (const option of options) {
   option.addEventListener('click', () => {
     const picked = Number(option.dataset.opt)
+    nudge($('.exam__opts'), false)
     options.forEach((o, k) => {
       o.classList.toggle('opt--right', k === 0)
       if (k === picked && picked !== 0) replay(o, 'opt--wrong')
@@ -278,6 +299,7 @@ const tokinfo = $('.tokinfo')
 for (const token of tokens) {
   token.addEventListener('click', () => {
     const picked = data.tokens[Number(token.dataset.tok)]
+    nudge(tokens[0], false)
     for (const other of tokens) {
       const on = other === token
       other.classList.toggle('tok--on', on)

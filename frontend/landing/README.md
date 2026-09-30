@@ -44,13 +44,29 @@ The page moves the way the app does (DESIGN.md, Motion):
 - **Features:** each tab shows the app's own screen, drawn, with 駅
   written in its KanjiVG stroke order. The tabs turn over by themselves
   until one is picked.
+- **The stops:** the page is the gold line the hero's road starts, and
+  each section is a stop on it. A sign opens every section, where a
+  hairline once cut the page. It holds the stop's number in a ring, its
+  name, the rail to the next stop, and a link on to that stop. The rail is
+  laid as the sign arrives, with one train run along it. The stop being
+  read is lit, as its link in the header is. The line ends at the way in,
+  the terminus 終, where the rail ends at a buffer. Every other section
+  lies on a band that fades in at its edges, so no border stands between
+  two sections.
+- **What to press:** each demo's first step wears the ring the app's
+  guide puts round what a note asks you to press: gold, breathing, never
+  a fill. The steps are the card, then its verdicts, the pace, a word and
+  an answer. The ring moves on or goes once the step is answered, and it
+  never comes back. The hero ends with a link down to the first stop.
 
 Three rules keep it safe:
 - **Content is hidden only while the `js` flag is set** (the head script
   sets it) and only until it arrives, so a page without script reads
   whole.
 - **A watcher that never starts shows everything after a beat.**
-- **Reduced motion** keeps the fades and drops every movement and loop.
+- **Reduced motion** keeps the fades and drops every movement and loop
+  (a ring stands still).
+- **A ring is drawn only by the script**, which alone can take it away.
 
 `src/landing.test.js` checks that every hook the script reaches for is
 on the page.

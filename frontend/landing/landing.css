@@ -140,6 +140,10 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 .hero__gate .road, .hero__gate .map { display: none; }
 .hero .watch { order: 5; margin-top: var(--sp-4); }
 .hero__note { order: 6; margin: var(--sp-4) 0 0; max-width: 420px; font-size: var(--fs-caption); line-height: 1.6; color: var(--text-secondary); }
+/* The way down the line: what the page holds, one tap away. */
+.hero__cue { order: 7; display: inline-flex; flex-direction: column; align-items: center; gap: var(--sp-1); min-width: 44px; min-height: 44px; margin-top: var(--sp-6); padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill); font-weight: 700; font-size: var(--fs-caption-xs); letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); text-decoration: none; transition: color .15s ease; }
+.hero__cue:hover, .hero__cue:focus-visible { color: var(--text-primary); }
+.hero__cue svg { color: var(--accent2); }
 
 /* ── The figures ── */
 .figures__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -147,13 +151,62 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 .figure__n { font-size: var(--fs-title); }
 .figure--wide { display: none; }
 
-/* ── A section ── */
-.sec { padding: var(--sp-8) 0 0; }
+/* ── A section ──
+   Each is a stop on the gold line (page.mjs, stop()): its sign opens
+   it, where a hairline used to cut the page, and says where the line
+   goes next. Every other section lies on a band that fades in at its
+   edges rather than starting at a rule, so the eye moves from one to
+   the next instead of stepping over a border. */
+.sec { padding: var(--sp-7) 0; }
+.sec--band { position: relative; isolation: isolate; }
+.sec--band::before { content: ""; position: absolute; inset: 0; z-index: -1; background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-main)); -webkit-mask-image: linear-gradient(transparent, #000 var(--sp-9), #000 calc(100% - var(--sp-9)), transparent); mask-image: linear-gradient(transparent, #000 var(--sp-9), #000 calc(100% - var(--sp-9)), transparent); pointer-events: none; transition: opacity 1s ease; }
+.motion .sec--band:not(.in)::before { opacity: 0; }
+
+.stop { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-7); }
+.stop__ring { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 2px solid var(--accent2); border-radius: var(--r-pill); background: var(--bg-main); font-size: var(--fs-caption); color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary)); transition: background-color .3s ease, color .3s ease; }
+.stop__ring [lang="ja"] { font-family: var(--font-jp); }
+.stop__name { font-weight: 700; font-size: var(--fs-caption); letter-spacing: var(--tr-caption); text-transform: uppercase; white-space: nowrap; color: var(--text-secondary); transition: color .3s ease; }
+/* The stop being read is lit, as the app lights the one you stand at. */
+.stop.is-here .stop__ring { background: var(--accent2); color: var(--text-on-fill); }
+.stop.is-here .stop__ring::after { content: ""; position: absolute; inset: -5px; border: 2px solid var(--accent2); border-radius: inherit; opacity: 0; animation: rip 1.4s ease-out; }
+.stop.is-here .stop__name { color: var(--text-primary); }
+/* The rail to the next stop, laid as the sign arrives, a train run
+   along it once. */
+.stop__rail { position: relative; flex: 1; min-width: var(--sp-7); height: 6px; overflow: hidden; }
+.stop__rail::before, .stop__rail i { content: ""; position: absolute; left: 0; right: 0; top: 2px; height: 2px; border-radius: var(--r-pill); background: var(--border); }
+.stop__rail i { background: var(--accent2); transform-origin: 0 50%; }
+.stop__rail b { position: absolute; inset: 0; opacity: 0; }
+.stop__rail b::before { content: ""; position: absolute; left: 0; top: 0; width: 22px; height: 6px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent2) 45%, var(--text-primary)); }
+.motion .stop:not(.in) .stop__rail i { transform: scaleX(0); }
+.stop.in .stop__rail i { animation: grow .9s .2s cubic-bezier(.6, 0, .2, 1) backwards; }
+.stop.in .stop__rail b { animation: stop-train 1.5s 1s cubic-bezier(.45, 0, .3, 1); }
+/* The terminus: the line ends at a buffer, and no train runs past it. */
+.stop--end .stop__rail { flex: none; width: var(--sp-9); height: 12px; }
+.stop--end .stop__rail::before, .stop--end .stop__rail i { top: 5px; }
+.stop--end .stop__rail::after { content: ""; position: absolute; right: 0; top: 0; width: 3px; height: 12px; border-radius: var(--r-pill); background: var(--accent2); }
+.stop--end .stop__rail b { display: none; }
+.stop__next { display: inline-flex; align-items: center; gap: var(--sp-2); flex-shrink: 0; min-height: 44px; font-weight: 700; font-size: var(--fs-caption); letter-spacing: var(--tr-caption); text-transform: uppercase; white-space: nowrap; color: var(--text-secondary); text-decoration: none; transition: color .15s ease; }
+.stop__next svg { color: var(--accent2); transition: transform .15s ease; }
+.stop__next:hover, .stop__next:focus-visible { color: var(--text-primary); }
+.stop__next:hover svg, .stop__next:focus-visible svg { transform: translateX(2px); }
+.stop__word { display: none; }
 .head2 { display: flex; flex-direction: column; gap: var(--sp-4); }
 .head2 > div { display: flex; flex-direction: column; gap: var(--sp-4); }
 .head2__end { align-items: flex-start; }
 .split { display: flex; flex-direction: column; gap: var(--sp-6); }
 .split__copy { display: flex; flex-direction: column; gap: var(--sp-4); }
+
+/* ── Press here ──
+   A demo's first step wears the ring the app's guide puts round what a
+   note asks to be pressed (index.css, .guide__spot--cue): gold,
+   breathing, never a fill. landing.js moves it on once it is answered,
+   and takes it away. */
+.nudge { position: relative; }
+.nudge::after { content: ""; position: absolute; inset: -3px; border: 2px solid var(--accent2); border-radius: inherit; pointer-events: none; animation: cue-ring 1.6s ease-in-out infinite; }
+/* Where the host clips (the card, the pace's segments) the ring is drawn
+   on its edge; a group's goes round it. */
+.qcard.nudge::after, .seg.nudge::after, .rbar.nudge::after { inset: 0; }
+.exam__opts.nudge::after { inset: calc(var(--sp-2) * -1); border-radius: var(--r-panel); }
 
 /* ── The overview presentation ── */
 .player { position: relative; margin-top: var(--sp-6); aspect-ratio: 16 / 9; border-radius: var(--r-panel); overflow: hidden; background: radial-gradient(90% 90% at 50% 45%, color-mix(in srgb, var(--text-on-panel) 6%, var(--bg-panel)) 0%, var(--bg-panel) 75%); border: 1px solid var(--surface-line); color: var(--text-on-panel); }
@@ -537,6 +590,8 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .hero .badges { animation-delay: .38s; }
 .hero .watch { animation-delay: .44s; }
 .hero__note { animation-delay: .46s; }
+.hero__cue { animation-delay: .6s; }
+.hero__cue svg { animation: cue-bob 1.8s 1.4s ease-in-out infinite; }
 
 /* A plate lifts a pixel toward the pointer, its edge in its line's colour. */
 .plates .plate { transition: transform .16s ease, border-color .16s ease; }
@@ -579,6 +634,9 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 @keyframes train { 0% { stroke-dashoffset: 7; opacity: 0; } 6% { opacity: .9; } 55% { stroke-dashoffset: -93; opacity: .9; } 60%, 100% { stroke-dashoffset: -93; opacity: 0; } }
 @keyframes rail { from { transform: scaleY(0); } }
 @keyframes grow { from { transform: scaleX(0); } }
+@keyframes stop-train { 0% { opacity: 0; transform: translateX(-24px); } 12%, 82% { opacity: 1; } 100% { opacity: 0; transform: translateX(100%); } }
+@keyframes cue-ring { 50% { opacity: .35; } }
+@keyframes cue-bob { 0%, 100% { transform: none; } 50% { transform: translateY(4px); } }
 @keyframes eta { from { opacity: 0; transform: translateY(6px); } }
 @keyframes stamp-press { 0% { transform: scale(1.8) rotate(var(--stamp-tilt, 0deg)); opacity: 0; } 60% { transform: scale(.92) rotate(var(--stamp-tilt, 0deg)); opacity: 1; } 100% { transform: scale(1) rotate(var(--stamp-tilt, 0deg)); } }
 @keyframes tab-run { from { transform: scaleX(0); } to { transform: scaleX(1); } }
@@ -615,7 +673,10 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .figure--wide { display: flex; }
   .figure { padding: var(--sp-6) var(--sp-5); }
   .figure__n { font-size: var(--fs-heading); }
-  .sec { padding-top: var(--sp-9); }
+  .sec { padding: var(--sp-8) 0; }
+  .stop { margin-bottom: var(--sp-8); }
+  .stop__word { display: inline; font-weight: 500; }
+  .stop__word::after { content: "·"; margin-left: var(--sp-2); }
   .chapters { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--sp-1); flex: 1; margin: 0; padding: 0; list-style: none; }
   .chapters button { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; min-height: 44px; padding: 0; border: 0; background: transparent; text-align: left; font-weight: 700; font-size: var(--fs-caption-xs); letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); cursor: pointer; }
   .chapters button:hover, .chapters button:focus-visible { color: var(--text-on-panel); }
@@ -699,6 +760,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .hero .badges { margin-top: var(--sp-6); justify-content: flex-start; }
   .hero .watch { margin-top: var(--sp-6); }
   .hero__note { max-width: none; margin-top: var(--sp-5); font-size: var(--fs-sm); }
+  .hero .hero__cue { margin-top: var(--sp-7); flex-direction: row; gap: var(--sp-3); margin-left: calc(var(--sp-4) * -1); font-size: var(--fs-caption); }
   .map__art { position: absolute; left: 0; top: 50%; width: 100%; height: auto; overflow: visible; transform: translateY(-50%); stroke-linecap: round; }
   .map__road { stroke: var(--gate-gold); stroke-width: 10; }
   .map__lines line { stroke-width: 8; }
@@ -720,8 +782,11 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .map__glyph { font-family: var(--font-jp); font-weight: 700; font-size: 20px; fill: color-mix(in srgb, var(--c) 70%, var(--text-primary)); }
   .map__name { font-family: var(--font-display); font-weight: 700; font-size: 15px; fill: var(--text-primary); }
 
-  .sec { margin-top: var(--sp-9); padding-top: var(--sp-9); border-top: 1px solid var(--border); }
-  .figures + .sec, .figures + [hidden] + .sec { margin-top: 0; border-top: 0; }
+  .sec { padding: var(--sp-9) 0; }
+  .stop { gap: var(--sp-5); }
+  .stop__ring { width: 36px; height: 36px; font-size: var(--fs-sm); }
+  .stop__name { font-size: var(--fs-sm); }
+  .stop__next { font-size: var(--fs-sm); }
   .head2 { display: grid; grid-template-columns: 560px 1fr; gap: var(--sp-9); align-items: end; }
   .head2__end { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: var(--sp-6); }
   .split { display: grid; grid-template-columns: 520px 1fr; gap: calc(var(--sp-9) + var(--sp-7)); align-items: start; }
@@ -767,14 +832,17 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .gate, .gate__rip, .play, .roll, .mock__gate, .road::after, .lrow__stop--here::after, .mk-gram__blank, .mk-gram__opts .is-right, .mk-exam__opts .is-right, .mk-sub b, .mk-field__typed::after, .opt--wrong, .features .ftab[aria-selected="true"]::after, .hero__gate .road, .plate--line.in .lrows::before, .split__copy.in .day__bars .bar { animation: none; }
   .map__road, .map__line { animation: none; stroke-dashoffset: 0; opacity: 1; }
   .map__train { display: none; }
+  .stop.in .stop__rail i, .stop.in .stop__rail b, .stop.is-here .stop__ring::after, .hero__cue svg, .nudge::after { animation: none; }
   .js .mk-strokes path { animation: none; stroke-dashoffset: 0; opacity: 1; }
   .mk-gram__blank { color: var(--text-primary); }
   .mk-gram__opts .is-right, .mk-exam__opts .is-right { border-color: var(--success); }
-  .flip__inner, .pass, .pass::after, .top__board, .nav a::after, .plates .plate, .gate, .ghost, .badge, .ftab, .opt, .rbar button, .lvl__track i, .watch__play, .qcard__band i, .faq summary::after, .faq::details-content { transition: none; }
+  .flip__inner, .pass, .pass::after, .top__board, .nav a::after, .plates .plate, .gate, .ghost, .badge, .ftab, .opt, .rbar button, .lvl__track i, .watch__play, .qcard__band i, .faq summary::after, .faq::details-content, .stop__ring, .stop__name, .stop__next svg, .sec--band::before { transition: none; }
   .plates .plate:hover, .plates .plate:focus-within, .top.has-board .top__board:hover, .top.has-board .top__board:focus-visible { transform: none; }
 }
 
 @media print {
   .js [data-reveal], .js [data-stagger] > * { opacity: 1 !important; animation: none !important; }
+  .sec--band::before { opacity: 1 !important; }
+  .nudge::after, .hero__cue { display: none; }
   .top { position: static; }
 }

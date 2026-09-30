@@ -71,7 +71,11 @@ const fr = facts => {
     ogAlt: 'Tsuji, le carrefour : quatre lignes de kana au JLPT N1.',
     skip: 'Aller au contenu',
     home: 'Tsuji, accueil',
-    ids: { lines: 'lignes', line: 'ligne', method: 'methode', features: 'fonctionnalites', jlpt: 'jlpt', tools: 'outils', fare: 'tarif', faq: 'faq', presentation: 'presentation' },
+    ids: { lines: 'lignes', line: 'ligne', method: 'methode', features: 'fonctionnalites', jlpt: 'jlpt', tools: 'outils', fare: 'tarif', faq: 'faq', presentation: 'presentation', way: 'depart' },
+    // Every section is a stop on the gold line: its sign names the next.
+    next: 'Suivant',
+    nextTo: name => `Suivant : ${name}`,
+    terminus: 'Terminus',
     nav: [['lines', 'Apprendre'], ['line', 'Ta ligne'], ['method', 'La méthode'], ['features', 'Fonctionnalités'], ['jlpt', 'Examen JLPT'], ['fare', 'Tarif'], ['faq', 'FAQ']],
     navLabel: 'Sections',
     langLabel: 'Langue',
@@ -85,6 +89,7 @@ const fr = facts => {
       rolls: [['あ', 'Kana'], ['電車', 'Vocabulaire'], ['駅', 'Kanji'], ['〜ている', 'Grammaire'], ['ア', 'Kana'],
         ['読む', 'Lecture'], ['訳す', 'Traduction'], ['書く', 'Dictée'], ['解析', 'Analyseur'], ['模試', 'Examen blanc']],
       tagline: 'Un trajet taillé pour toi.',
+      cue: 'Découvrir',
       watch: 'Voir la présentation',
       note: stores => stores
         ? "Gratuit pendant l'accès anticipé · sans compte · iPhone, Android et navigateur"
@@ -178,7 +183,7 @@ const fr = facts => {
     },
 
     features: {
-      kicker: 'Les fonctionnalités, une par une',
+      kicker: 'Fonctionnalités',
       h2: 'Kana, kanji, grammaire, analyseur : chaque fonctionnalité en action',
       body: "Choisis une fonctionnalité : l'extrait montre l'app telle qu'elle est, sans montage.",
       tabsLabel: 'Fonctionnalités',
@@ -198,7 +203,7 @@ const fr = facts => {
     },
 
     jlpt: {
-      kicker: 'JLPT',
+      kicker: 'Examen JLPT',
       h2: 'Des examens blancs du JLPT, de N5 à N1',
       body: `Vocabulaire, grammaire, lecture et écoute, chronométrés et notés sur 180 avec les seuils de réussite officiels. Au N5, ${facts.exam.questions} questions en ${facts.exam.minutes} minutes : tu sais où tu en es avant de t'inscrire.`,
       note: "Au format officiel, notation non officielle. Aucune question copiée d'une vraie session.",
@@ -313,7 +318,10 @@ const en = facts => {
     ogAlt: 'Tsuji, the crossroads: four lines from kana to JLPT N1.',
     skip: 'Skip to content',
     home: 'Tsuji, home',
-    ids: { lines: 'lines', line: 'your-line', method: 'method', features: 'features', jlpt: 'jlpt', tools: 'tools', fare: 'pricing', faq: 'faq', presentation: 'presentation' },
+    ids: { lines: 'lines', line: 'your-line', method: 'method', features: 'features', jlpt: 'jlpt', tools: 'tools', fare: 'pricing', faq: 'faq', presentation: 'presentation', way: 'board' },
+    next: 'Next',
+    nextTo: name => `Next: ${name}`,
+    terminus: 'Last stop',
     nav: [['lines', 'Learn'], ['line', 'Your line'], ['method', 'The method'], ['features', 'Features'], ['jlpt', 'JLPT exam'], ['fare', 'Pricing'], ['faq', 'FAQ']],
     navLabel: 'Sections',
     langLabel: 'Language',
@@ -327,6 +335,7 @@ const en = facts => {
       rolls: [['あ', 'Kana'], ['電車', 'Vocabulary'], ['駅', 'Kanji'], ['〜ている', 'Grammar'], ['ア', 'Kana'],
         ['読む', 'Reading'], ['訳す', 'Translation'], ['書く', 'Dictation'], ['解析', 'Analyser'], ['模試', 'Mock exam']],
       tagline: 'A ride cut to fit you.',
+      cue: 'Explore',
       watch: 'Watch the overview',
       note: stores => stores
         ? 'Free during early access · no account needed · iPhone, Android and the web'
@@ -420,7 +429,7 @@ const en = facts => {
     },
 
     features: {
-      kicker: 'The features, one by one',
+      kicker: 'Features',
       h2: 'Kana, kanji, grammar, the analyser: every feature in action',
       body: 'Pick a feature: the clip shows the app as it is, unedited.',
       tabsLabel: 'Features',
@@ -440,7 +449,7 @@ const en = facts => {
     },
 
     jlpt: {
-      kicker: 'JLPT',
+      kicker: 'JLPT exam',
       h2: 'JLPT mock exams, N5 to N1',
       body: `Vocabulary, grammar, reading and listening, timed and scored out of 180 against the official pass marks. At N5, ${facts.exam.questions} questions in ${facts.exam.minutes} minutes: you know where you stand before you register.`,
       note: 'Official format, unofficial scoring. No question copied from a real session.',
