@@ -29,6 +29,7 @@ export const ROUTES = [
   // 試乗 — the first ride (plan 098). Before any gate, so tabFor
   // answers null for it.
   '/ride',
+  '/ride/intro',
   '/ride/cards',
   '/ride/reading',
 

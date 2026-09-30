@@ -1,4 +1,4 @@
-import { getAudioContext, getBuffer } from './context'
+import { getAudioContext, getBuffer, preload } from './context'
 import { playBuffer } from './mixer'
 import { isMuted } from './settings'
 import { hasVoice, playVoice } from './voices'
@@ -87,6 +87,14 @@ function analyseKana(buffer) {
  */
 export function kanaSound(card) {
   return card?.sound || card?.romaji || ''
+}
+
+/** Fetch and decode kana clips ahead of their first touch (plan 170):
+    a screen that plays signs on a tap -- 入門's vowels and table -- warms
+    them when it opens, so the first sign is not the one that waits on
+    the network and the decoder. The same cache playKana reads. */
+export function preloadKana(names) {
+  preload(names.filter(Boolean).map(KANA))
 }
 
 export function playKana(name) {

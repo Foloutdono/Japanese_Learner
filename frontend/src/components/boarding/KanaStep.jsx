@@ -19,6 +19,12 @@ const WORDS = [
   { jp: 'ホテル', romaji: 'ho · te · ru', word: 'hotel', script: 'katakana', signs: [['ホ', 'ho'], ['テ', 'te'], ['ル', 'ru']], glyph: 'ア' },
 ]
 
+// 入門's first touch on the boarding (plan 170): the reveal names the
+// third script too, quieter, in the kanji line's pigment -- one word read
+// as one sign -- so « Kanji » means something when the lines are asked
+// two screens later. The kana stay the first stop.
+const KANJI = { jp: '駅', sound: 'eki', word: 'station', glyph: '漢' }
+
 export function KanaStep({ value, onAnswer }) {
   const { t } = useLang()
   // 机 (plan 122): 1-4 answer, as a tap does.
@@ -181,37 +187,52 @@ export function KanaReveal({ onContinue, first = null }) {
 // ── 辻 — the two words read out, sign by sign (plan 163) ─────────
 // The owner's D03a on the desk: each word on a card of its own under
 // the kana line's pigment, named by its script, cut into its signs with
-// each one's sound, and what it means; under them the first stop -- the
-// kana, and the day the signs still unread are read by.
+// each one's sound, and what it means; beside them the third script,
+// quieter and for later (plan 170): a column in the kanji line's
+// pigment, as tall as the cards so it costs the paper no height; under
+// them the first stop -- the kana, and the day the signs still unread
+// are read by.
 function RevealWords({ first }) {
   const { t } = useLang()
   return (
     <>
-      <div className="desk-brd__reveal">
-        {WORDS.map(w => (
-          <div key={w.script} className="desk-brd__word">
-            <span className="desk-brd__script">
-              <span className="desk-brd__glyph" lang="ja" aria-hidden="true">{w.glyph}</span>
-              {t.brdKana[w.script]}
-            </span>
-            <span className="desk-brd__word-jp" lang="ja">{w.jp}</span>
-            <span className="desk-brd__signs">
-              {w.signs.map(([kana, sound], i) => (
-                <Fragment key={kana}>
-                  {i > 0 && <span className="desk-brd__plus" aria-hidden="true">+</span>}
-                  <span className="desk-brd__sign">
-                    <span className="desk-brd__sign-jp" lang="ja">{kana}</span>
-                    <span className="desk-brd__sign-sound">{sound}</span>
-                  </span>
-                </Fragment>
-              ))}
-            </span>
-            <span className="desk-brd__means">
-              {t.brdRevealMeans}
-              <b>{t.brdRevealWord(t.brdKanaWord[w.word])}</b>
-            </span>
-          </div>
-        ))}
+      <div className="desk-brd__reveal-row">
+        <div className="desk-brd__reveal">
+          {WORDS.map(w => (
+            <div key={w.script} className="desk-brd__word">
+              <span className="desk-brd__script">
+                <span className="desk-brd__glyph" lang="ja" aria-hidden="true">{w.glyph}</span>
+                {t.brdKana[w.script]}
+              </span>
+              <span className="desk-brd__word-jp" lang="ja">{w.jp}</span>
+              <span className="desk-brd__signs">
+                {w.signs.map(([kana, sound], i) => (
+                  <Fragment key={kana}>
+                    {i > 0 && <span className="desk-brd__plus" aria-hidden="true">+</span>}
+                    <span className="desk-brd__sign">
+                      <span className="desk-brd__sign-jp" lang="ja">{kana}</span>
+                      <span className="desk-brd__sign-sound">{sound}</span>
+                    </span>
+                  </Fragment>
+                ))}
+              </span>
+              <span className="desk-brd__means">
+                {t.brdRevealMeans}
+                <b>{t.brdRevealWord(t.brdKanaWord[w.word])}</b>
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="desk-brd__kanji">
+          <span className="desk-brd__script">
+            <span className="desk-brd__glyph desk-brd__glyph--kanji" lang="ja" aria-hidden="true">{KANJI.glyph}</span>
+            {t.brdRevealKanji}
+          </span>
+          <span className="desk-brd__kanji-jp" lang="ja">{KANJI.jp}</span>
+          <span className="desk-brd__kanji-sound" lang="ja-Latn">{KANJI.sound}</span>
+          <span className="desk-brd__kanji-means">{t.brdRevealMeans} <b>{t.brdRevealWord(t.brdKanaWord[KANJI.word])}</b></span>
+          <span className="desk-brd__kanji-later">{t.brdRevealLater}</span>
+        </p>
       </div>
       {first && (
         <p className="desk-brd__first">
@@ -234,14 +255,17 @@ function RevealWords({ first }) {
 // every 72px from the left, the meaning at the terminus.
 const LINE_AT = [66, 210]
 const SIGN_X = [44, 116, 188]
+// The kanji's line, a third one under the two (plan 170).
+const KANJI_AT = 354
 
 function ReadLines({ first }) {
   const { t } = useLang()
   return (
     <>
-      <div className="brd-map brd-read" style={{ '--h': 294 }}>
-        <svg className="brd-map__lines" viewBox="0 0 358 294" preserveAspectRatio="none" aria-hidden="true">
+      <div className="brd-map brd-read" style={{ '--h': 438 }}>
+        <svg className="brd-map__lines" viewBox="0 0 358 438" preserveAspectRatio="none" aria-hidden="true">
           {LINE_AT.map(y => <path key={y} className="brd-read__line" d={`M20 ${y}H232`} />)}
+          <path className="brd-read__line brd-read__line--kanji" d={`M20 ${KANJI_AT}H232`} />
         </svg>
         {WORDS.map((w, i) => {
           const y = LINE_AT[i]
@@ -265,6 +289,22 @@ function ReadLines({ first }) {
             </div>
           )
         })}
+        <div className="brd-read__word brd-read__word--kanji">
+          <p className="brd-read__script brd-map__at brd-map__at--start" style={{ '--x': 0, '--y': KANJI_AT - 53 }}>
+            <span className="brd-read__glyph brd-read__glyph--kanji" lang="ja" aria-hidden="true">{KANJI.glyph}</span>
+            {t.brdRevealKanji}
+            <span className="brd-read__later">{t.brdRevealLater}</span>
+          </p>
+          <span className="brd-read__head brd-read__head--kanji brd-map__at" style={{ '--x': 237, '--y': KANJI_AT }} aria-hidden="true" />
+          <span className="brd-read__sign brd-read__sign--kanji brd-map__at" style={{ '--x': SIGN_X[0], '--y': KANJI_AT }}>
+            <span className="brd-read__sign-jp" lang="ja">{KANJI.jp}</span>
+            <span className="brd-read__sound">{KANJI.sound}</span>
+          </span>
+          <p className="brd-read__means brd-map__at brd-map__at--corner" style={{ '--x': 254, '--y': KANJI_AT - 22 }}>
+            <span className="brd-read__cap"><span lang="ja">{KANJI.jp}</span> {t.brdRevealMeans}</span>
+            <b className="brd-read__word-fr">{t.brdRevealWord(t.brdKanaWord[KANJI.word])}</b>
+          </p>
+        </div>
       </div>
       {first && (
         <p className="brd-first">

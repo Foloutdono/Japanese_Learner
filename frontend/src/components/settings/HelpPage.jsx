@@ -41,6 +41,16 @@ export function HelpPage({ session }) {
           >
             {t.settingsRideAgain}
           </button>
+          {/* 入門 (plan 170): the six screens before the cards, for
+              anyone who wants the map of the language again. */}
+          <button
+            type="button"
+            className="btn-secondary"
+            data-action="intro-again"
+            onClick={() => { playClick(); navigate('/ride/intro') }}
+          >
+            {t.settingsIntroAgain}
+          </button>
           <button
             type="button"
             className="btn-secondary"
