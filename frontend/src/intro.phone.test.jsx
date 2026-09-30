@@ -40,6 +40,23 @@ const VOLUMES = {
 const settle = (ms = 340) => new Promise(r => setTimeout(r, ms))
 const rect = el => el.getBoundingClientRect()
 const live = root => root.querySelector('.brd__car:not(.brd__car--out)')
+// The arriving car pulls in from the right (brd-pull-in, 260 ms) and
+// its drawing rises after it: measured on a fixed wait alone, a loaded
+// runner caught it still sliding (katakana's stage 17 px past the
+// phone's edge, 2026-09-30). Waits for the arrival's own animations,
+// the pull and the rise, all over within a second and a half; the
+// gate's halo and ripples run forever, its idle nudge starts after four
+// seconds, and the scrim follows the scroll, so none of those is waited for.
+const ARRIVAL_MS = 1500
+async function arrived(root) {
+  const car = live(root)
+  const running = car.getAnimations({ subtree: true }).filter(a => {
+    const end = a.effect?.getComputedTiming().endTime
+    return typeof end === 'number' && end <= ARRIVAL_MS
+  })
+  await Promise.all(running.map(a => a.finished.catch(() => {})))
+  return car
+}
 
 describe('入門 at 390×844', () => {
   it('draws each of the six screens between the head and the gate', async () => {
@@ -53,7 +70,7 @@ describe('入門 at 390×844', () => {
     await settle(120)
     const root = screen.container
     for (const step of INTRO_STEPS) {
-      const car = live(root)
+      const car = await arrived(root)
       expect(car.dataset.intro).toBe(step)
       const head = root.querySelector('.brd__head')
       const stage = car.querySelector('.nyu-stage')
