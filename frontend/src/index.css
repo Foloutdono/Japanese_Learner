@@ -25876,11 +25876,19 @@ button.brd-stn { cursor: pointer; }
     white-space: nowrap;
     text-overflow: ellipsis;
   }
+  /* The run's gap in miniature (see "The gap"): its ＿＿＿ holds the
+     slot's width and is not drawn, the pigment's rule at its foot. The
+     specimen's well is already --bg-main, so the slot steps up to
+     --surface, as a field on the page does. */
   .desk-spec__gap {
     display: inline-block;
-    width: var(--sp-7);
+    line-height: 1.4;
+    padding-inline: var(--sp-2);
     margin-inline: var(--sp-1);
-    border-bottom: 2px solid var(--text-secondary);
+    color: transparent;
+    background: var(--surface);
+    border-bottom: 2px solid color-mix(in srgb, var(--line-color, var(--accent2)) 75%, transparent);
+    border-radius: var(--r-plate) var(--r-plate) 0 0;
   }
   .desk-spec__rule {
     display: flex;
