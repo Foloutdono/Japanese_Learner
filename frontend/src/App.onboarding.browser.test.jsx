@@ -116,6 +116,14 @@ describe('App onboarding gate', () => {
     expect(screen.container.querySelector('main.stage.ride')).not.toBeNull()
     expect(screen.container.querySelector('.brd')).toBeNull()
   })
+  // 入門 (plan 170): the learner with no kana meets the introduction first.
+  it('opens the front door on the introduction for a learner who reads no kana', async () => {
+    apiJsonWithTimeout.mockResolvedValue({ username: 'Tester', onboardedAt: '2026-08-28T09:00:00Z', jlptLevel: 'N5', kanaKnown: 'none', tutorialAt: null, guided: {} })
+    const screen = await render(<App />)
+    await settle(300)
+    expect(window.location.pathname).toBe('/ride/intro')
+    expect(screen.container.querySelector('main.brd.nyu')).not.toBeNull()
+  })
   it('opens the front door on the run once the ride is stamped', async () => {
     apiJsonWithTimeout.mockResolvedValue({ username: 'Tester', onboardedAt: '2026-08-28T09:00:00Z', jlptLevel: 'N4', tutorialAt: '2026-08-28T09:05:00Z', guided: {} })
     await render(<App />)

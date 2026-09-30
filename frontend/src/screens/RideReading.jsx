@@ -25,6 +25,7 @@ import { EnterKey } from '../components/chrome/DeskKeys'
 import { useDesk } from '../hooks/useDesk'
 import { paceFactor } from '../domain/readingPace'
 import { useReadingPace } from '../stores/readingPace'
+import { useProfileSummary } from '../stores/profileSummary'
 
 // ── 試乗 — the reading ride (plan 099) ───────────────────────────
 // The second half of the lesson, on the reading stage: one curated N5
@@ -66,7 +67,12 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
 
   const [sentence, setSentence] = useState(given)
   const [failed, setFailed] = useState(false)
-  const [step, setStep] = useState('read')
+  const [readStep, setStep] = useState('read')
+  // 入門 (plan 170): a learner with no kana was handed the map of the
+  // language instead of a sentence they could not read one sign of, so
+  // their ride goes from the cards straight to the plate.
+  const plateOnly = useProfileSummary()?.kanaKnown === 'none'
+  const step = plateOnly ? 'pass' : readStep
   // null until the sentence is up: a clock that starts at zero would
   // read as already run out, and cover the sentence before it showed.
   const [timeLeft, setTimeLeft] = useState(null)
@@ -102,13 +108,13 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   useEffect(() => { startTally('ride-reading') }, [])
 
   useEffect(() => {
-    if (given) return undefined
+    if (given || plateOnly) return undefined
     let live = true
     apiJson(`/api/onboarding/ride?lang=${encodeURIComponent(lang)}`, session)
       .then(body => { if (live) setSentence(body.sentence ?? null) })
       .catch(() => { if (live) setFailed(true) })
     return () => { live = false }
-  }, [session, lang, given])
+  }, [session, lang, given, plateOnly])
 
   // The clock, as the reading run keeps it: the sentence is covered at
   // zero and writing is open the whole time.
@@ -259,7 +265,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
       ) : undefined}
       sideLabel={t.deskBreakdownLabel}
     >
-      {!sentence && !failed && <Loading />}
+      {!sentence && !failed && !plateOnly && <Loading />}
 
       {sentence && writing && (
         <>

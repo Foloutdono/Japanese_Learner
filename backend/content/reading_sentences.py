@@ -151,6 +151,12 @@ N5 = [
     {"jp": "もうお金がありません。", "en": "I have no money any more.", "grammar": "もう〜ない", "focus": "お金"},
     {"jp": "どこかへ行きましたか。", "en": "Did you go somewhere?", "grammar": "何か／誰か／どこか", "focus": "どこか"},
     {"jp": "きのうは誰も来ませんでした。", "en": "Nobody came yesterday.", "grammar": "何も／誰も〜ない", "focus": "昨日"},
+    # ── Plan 170 (入門): the one sentence the six introduction screens
+    # hang on -- frontend/src/domain/nyumon.js's INTRO_SENTENCE, which
+    # tests/test_nyumon.py holds to this row (ADR 0017: a lesson is fed
+    # from the bank the real thing draws on). Reword it here and the
+    # introduction has to be redrawn with it.
+    {"jp": "駅でコーヒーを飲みます。", "en": "I drink a coffee at the station.", "grammar": "で", "focus": "駅"},
 ]
 
 # ── N4 ────────────────────────────────────────────────────────

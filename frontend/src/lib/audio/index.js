@@ -27,7 +27,7 @@ export { preload } from './context'
 // playClick/playToggle come from chimes, not playback: chimes is the
 // station's vocabulary — the names the app calls moments by — and
 // each of those names resolves to a chosen voice in voices.js.
-export { playKana, kanaSound, playSfx, playUi, playAnnouncement } from './playback'
+export { playKana, preloadKana, kanaSound, playSfx, playUi, playAnnouncement } from './playback'
 export {
   playClick, playToggle, playFlip, playCorrect, playWrong,
   playGateChime, playDoorChime, playDoorSlide, playFareTick, FARE_BEAT, playPassClip, playStamp,

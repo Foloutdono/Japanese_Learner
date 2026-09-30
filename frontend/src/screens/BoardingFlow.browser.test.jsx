@@ -370,7 +370,10 @@ describe('BoardingFlow', () => {
     // The reveal is the kana stop's second half, not a stop of its own.
     expect(stepOf(screen)).toBe('reveal')
     expect(stepsOf(screen)).toBe('3/7')
-    expect(live(screen).querySelectorAll('.brd-read__word')).toHaveLength(2)
+    // The two words read out, then the kanji named as the third script,
+    // for later (plan 170).
+    expect(live(screen).querySelectorAll('.brd-read__word:not(.brd-read__word--kanji)')).toHaveLength(2)
+    expect(live(screen).querySelectorAll('.brd-read__word--kanji')).toHaveLength(1)
     await click(screen, '[data-action="continue"]')
     await settle()
 

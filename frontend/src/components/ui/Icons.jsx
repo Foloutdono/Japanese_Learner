@@ -396,6 +396,19 @@ export function UndoIcon({ size = 18, className }) {
   )
 }
 
+// Two things trading places (plan 170, 入門's sentence: the two tagged
+// words swapped, the meaning kept).
+export function SwapIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <polyline points="16 3 20 7 16 11" />
+      <path d="M4 7h16" />
+      <polyline points="8 21 4 17 8 13" />
+      <path d="M20 17H4" />
+    </svg>
+  )
+}
+
 // One flexible chevron/arrow for every left/right/up/down mark in the
 // app — TopBar's back button, the peek handle, review/exam prev-next
 // nav, and expand/collapse rows all used to render a different

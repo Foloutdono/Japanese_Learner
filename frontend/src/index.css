@@ -20844,6 +20844,13 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .brd-read__means { display: flex; flex-direction: column; margin: 0; }
 .brd-read__cap { white-space: nowrap; font-size: var(--fs-sm); color: var(--text-secondary); }
 .brd-read__word-fr { white-space: nowrap; font-size: var(--fs-title); font-weight: 700; }
+/* The third script, quieter (plan 170): the kanji line's pigment, a
+   thinner line, one sign, and when it comes -- later. */
+.brd-read__line--kanji { stroke: var(--line-kanji); stroke-width: 3; }
+.brd-read__head--kanji { background: var(--line-kanji); }
+.brd-read__glyph--kanji { border-color: var(--line-kanji); color: color-mix(in srgb, var(--line-kanji) 70%, var(--text-primary)); }
+.brd-read__sign--kanji { border-color: var(--line-kanji); }
+.brd-read__later { font-weight: 500; letter-spacing: 0; text-transform: none; }
 .brd-first { display: flex; align-items: flex-start; gap: var(--sp-4); margin: 0; }
 .brd-first__ring {
   display: inline-flex;
@@ -23040,6 +23047,441 @@ button.brd-stn { cursor: pointer; }
 .anl-explainsheet .anl-explainpanel {
   background: transparent;
   border: 0;
+}
+
+/* ── 入門 — the introduction before the first card (plan 170) ──
+   Six screens for a learner who answered « Pas encore » to the kana
+   question (screens/RideIntro.jsx, components/intro/), drawn on the
+   owner's canvas "Tsuji — 入門, day one". They stand in the boarding's
+   own frame (.brd: the head's track, the question over its drawing, the
+   gate at the foot with the quiet way out over it), so only the
+   drawings are here. The kana are the kana line's material and the
+   kanji the kanji line's, so the two pigments are injected once, on the
+   frame; a sentence is no section, so its line is drawn in the ambient
+   ink, and gold stays the learner's own (a pick, the route). */
+.nyu {
+  --nyu-kana: var(--line-kana);
+  --nyu-kanji: var(--line-kanji);
+  --nyu-kana-ink: color-mix(in srgb, var(--line-kana) 70%, var(--text-primary));
+  --nyu-kanji-ink: color-mix(in srgb, var(--line-kanji) 70%, var(--text-primary));
+  /* A dashed underline whose dashes run on across a word's signs: the
+     katakana's, told from the hiragana's solid one without colour. */
+  --nyu-dash: repeating-linear-gradient(to right, var(--nyu-kana) 0 6px, transparent 6px 10px);
+}
+/* The screen that asks for « ke » keeps two lines for its hint, so the
+   answer, which says what was just done in two, moves nothing. */
+.nyu .brd__car[data-intro="table"] .brd__hint { min-height: calc(2 * 1.45em); }
+
+/* The sentence: runs of one script, lit or dimmed. */
+.nyu-said { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
+.nyu-sent {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+}
+.nyu-run {
+  padding-bottom: var(--sp-1);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 3px;
+  transition: color 0.2s ease;
+}
+.nyu-run--off,
+.nyu-run--punct { color: var(--text-secondary); }
+.nyu-run--on.nyu-run--hira { background-image: linear-gradient(var(--nyu-kana), var(--nyu-kana)); }
+.nyu-run--on.nyu-run--kata { background-image: var(--nyu-dash); }
+.nyu-run--on.nyu-run--kanji { background-image: linear-gradient(var(--nyu-kanji), var(--nyu-kanji)); }
+.nyu-sent rt { font-size: var(--fs-caption); font-weight: 500; color: var(--text-secondary); ruby-align: center; }
+.nyu-rom { margin: 0; font-size: var(--fs-sm); font-weight: 500; color: var(--text-secondary); }
+.nyu-fr { margin: 0; font-size: var(--fs-body); color: var(--text-secondary); text-align: center; }
+
+/* A ring holding a glyph, in its pigment (--pig; the ink for the glyph
+   is the pigment mixed toward the text, for contrast). */
+.nyu-ring {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  border: 2.5px solid var(--pig);
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--pig-ink);
+}
+
+/* 1 · the three scripts, one lit */
+.nyu-scripts { display: flex; flex-direction: column; gap: var(--sp-4); }
+.nyu-script {
+  --pig: var(--nyu-kana);
+  --pig-ink: var(--nyu-kana-ink);
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 66px;
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font: inherit;
+  color: var(--text-primary);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.nyu-script--kanji { --pig: var(--nyu-kanji); --pig-ink: var(--nyu-kanji-ink); }
+.nyu-script:hover,
+.nyu-script:focus-visible { border-color: var(--accent2); }
+.nyu-script[aria-pressed="true"] { background: var(--brd-wash); border-color: var(--accent2); }
+.nyu-script__text { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.nyu-script__name { font-size: var(--fs-lead); font-weight: 700; line-height: 1.2; }
+.nyu-script__desc { font-size: var(--fs-sm); line-height: 1.3; color: var(--text-secondary); }
+.nyu-script[aria-pressed="true"] .nyu-script__desc { color: var(--text-primary); }
+.nyu-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: var(--brd-wash-ink);
+}
+.nyu-check__tick { width: 14px; height: 14px; opacity: 0; }
+.nyu-script[aria-pressed="true"] .nyu-check { border-color: var(--accent2); }
+.nyu-script[aria-pressed="true"] .nyu-check__tick { opacity: 1; }
+
+/* 2 · the five vowels on the kana line */
+.nyu-vowels {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* The rail runs through the rings' centres: half a 56px ring down. */
+.nyu-vowels::before {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 25.5px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--nyu-kana);
+}
+.nyu-vowel { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.nyu-vowel__btn {
+  position: relative;
+  display: inline-flex;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+}
+.nyu-vowel__ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 3px solid var(--nyu-kana);
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--nyu-kana-ink);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.nyu-vowel--on .nyu-vowel__ring { border-color: var(--accent2); color: var(--brd-ink); }
+.nyu-vowel__btn:hover .nyu-vowel__ring,
+.nyu-vowel__btn:focus-visible .nyu-vowel__ring { border-color: var(--accent2); color: var(--brd-ink); }
+.nyu-vowel__spk {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--sp-1));
+  transform: translateX(-50%);
+  color: var(--brd-ink);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.nyu-vowel--on .nyu-vowel__spk { opacity: 1; }
+.nyu-vowel__rom { font-size: var(--fs-lead); font-weight: 700; line-height: 1.2; }
+.nyu-vowel__like { font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
+.nyu-line-note { margin: 0; font-size: var(--fs-body); text-align: center; text-wrap: balance; }
+
+/* 3 · the table, its readings hidden until touched */
+.nyu-table { width: 100%; border-collapse: separate; border-spacing: var(--sp-1); table-layout: fixed; }
+.nyu-table th { padding: 0; font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
+.nyu-table__corner { width: 26px; }
+.nyu-table__key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border-radius: var(--r-pill);
+}
+.nyu-table__key--lit { border: 2px solid var(--nyu-kana); color: var(--nyu-kana-ink); }
+.nyu-table td { padding: 0; }
+.nyu-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 30px;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.nyu-cell:hover,
+.nyu-cell:focus-visible { border-color: var(--accent2); }
+.nyu-cell--lit { border-color: color-mix(in srgb, var(--nyu-kana) 60%, var(--surface-line)); }
+.nyu-cell--found { background: var(--brd-wash); border-color: var(--accent2); }
+.nyu-cell__kana { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 500; line-height: 1; }
+.nyu-cell__rom { font-size: var(--fs-caption-xs); font-weight: 700; line-height: 1; color: var(--text-secondary); }
+.nyu-cell__tick { position: absolute; top: 2px; right: 3px; width: 12px; height: 12px; color: var(--brd-wash-ink); }
+
+/* 4 · the same sound in two hands, then words already known */
+.nyu-pairs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  place-items: center;
+  gap: var(--sp-4) var(--sp-6);
+}
+.nyu-pairs__caps,
+.nyu-pair { display: contents; }
+.nyu-pairs__cap {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.nyu-pairs__cap:first-child { grid-column: 1; }
+.nyu-pairs__cap:last-child { grid-column: 3; }
+.nyu-pair__glyph {
+  padding-bottom: var(--sp-1);
+  font-family: var(--font-jp);
+  font-size: var(--fs-display);
+  font-weight: 500;
+  line-height: 1.1;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 3px;
+}
+.nyu-pair__glyph--hira { grid-column: 1; background-image: linear-gradient(var(--nyu-kana), var(--nyu-kana)); }
+.nyu-pair__glyph--kata { grid-column: 3; background-image: var(--nyu-dash); }
+.nyu-pair__rom { grid-column: 2; font-size: var(--fs-lead); font-weight: 700; }
+.nyu-known { display: flex; flex-direction: column; gap: var(--sp-4); }
+.nyu-known__lead { margin: 0; font-size: var(--fs-body); text-align: center; text-wrap: balance; }
+.nyu-words { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-4); }
+.nyu-word {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 104px;
+  padding: var(--sp-4) var(--sp-2);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.nyu-word:hover,
+.nyu-word:focus-visible { border-color: var(--accent2); }
+.nyu-word--heard { background: var(--brd-wash); border-color: var(--accent2); }
+.nyu-word__jp {
+  padding-bottom: var(--sp-1);
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 500;
+  line-height: 1.2;
+  background: var(--nyu-dash) no-repeat 0 100% / 100% 2px;
+}
+.nyu-word__beats { font-size: var(--fs-caption); font-weight: 700; }
+.nyu-word__mean { display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-sm); font-weight: 700; }
+.nyu-word__spk { flex: none; }
+.nyu-word__hear {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 5 · the sentence as a line: down a phone, across the desk. Each stop
+   draws the rail from its mark to the next one's; the ghost's is dotted,
+   the terminus a bar. */
+.nyu-phrase { display: flex; flex-direction: column; gap: var(--sp-5); margin: 0; padding: 0; list-style: none; }
+.nyu-stn {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-areas: "mark head" ". gloss";
+  align-items: center;
+  column-gap: var(--sp-4);
+}
+.nyu-stn__mark {
+  position: relative;
+  z-index: 1;
+  grid-area: mark;
+  justify-self: center;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border: 3px solid var(--text-primary);
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+}
+.nyu-stn:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 14.5px;
+  /* From the mark's centre: half the 44px head row down. */
+  top: 22px;
+  width: 3px;
+  height: calc(100% + var(--sp-5));
+  background: var(--text-primary);
+}
+.nyu-stn--ghost .nyu-stn__mark { border-style: dashed; border-color: var(--text-secondary); }
+.nyu-stn--ghost::after { background: none; border-left: 3px dotted var(--text-secondary); }
+.nyu-stn--end .nyu-stn__mark { width: 32px; height: 5px; border: 0; border-radius: var(--r-pill); background: var(--text-primary); }
+.nyu-stn__head { grid-area: head; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); min-height: 44px; }
+.nyu-stn__jp { font-family: var(--font-jp); font-size: var(--fs-heading); font-weight: 500; line-height: 1.2; }
+.nyu-stn__ghost { font-size: var(--fs-lead); font-weight: 700; color: var(--text-secondary); }
+.nyu-stn__gloss { grid-area: gloss; font-size: var(--fs-sm); color: var(--text-secondary); }
+.nyu-stn__gloss b { font-weight: 700; color: var(--text-primary); }
+.nyu-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 30px;
+  padding: 0 var(--sp-3);
+  box-sizing: border-box;
+  border: 1.5px solid var(--text-primary);
+  border-radius: var(--r-card);
+  background: var(--bg-main);
+}
+.nyu-tag__jp { font-family: var(--font-jp); font-size: var(--fs-lead); line-height: 1; }
+.nyu-tag__role,
+.nyu-stn__verb {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.nyu-swap { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-3); }
+.nyu-swap .nyu-fr { text-align: start; }
+.nyu-swap__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font: inherit;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.nyu-swap__btn:hover,
+.nyu-swap__btn:focus-visible { border-color: var(--accent2); }
+.nyu-swap__btn[aria-pressed="true"] { background: var(--brd-wash); border-color: var(--accent2); }
+.nyu-swap__said { min-height: calc(2 * 1.45em); margin: 0; font-size: var(--fs-sm); line-height: 1.45; color: var(--text-secondary); }
+.nyu-swap__said strong { color: var(--text-primary); }
+
+/* 6 · the kana lit, and the ride ahead in the learner's gold */
+.nyu-sent--route { line-height: 2.1; }
+.nyu-route { position: relative; display: flex; flex-direction: column; gap: var(--sp-5); margin: 0; padding: 0; list-style: none; }
+.nyu-route__stop {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--sp-4);
+  min-height: 40px;
+}
+.nyu-route__stop:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 20px;
+  width: 4px;
+  height: calc(100% + var(--sp-5));
+  background: var(--accent2);
+}
+.nyu-route__mark {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+}
+.nyu-route__stop--start .nyu-route__mark { border: 3px solid var(--accent2); background: radial-gradient(circle, var(--accent2) 7px, var(--bg-main) 7.5px); }
+.nyu-route__stop--kana .nyu-route__mark {
+  border: 3px solid var(--nyu-kana);
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  color: var(--nyu-kana-ink);
+}
+.nyu-route__stop--n5 .nyu-route__mark { width: 40px; height: 5px; border-radius: var(--r-pill); background: var(--accent2); }
+.nyu-route__name { font-size: var(--fs-body); font-weight: 700; }
+.nyu-route__date { font-size: var(--fs-sm); font-weight: 700; color: var(--brd-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nyu-day { margin: 0; font-size: var(--fs-body); text-align: center; color: var(--text-secondary); text-wrap: balance; }
+.nyu-day strong { color: var(--text-primary); }
+@media (prefers-reduced-motion: reduce) {
+  .nyu-run,
+  .nyu-script,
+  .nyu-vowel__ring,
+  .nyu-vowel__spk,
+  .nyu-cell,
+  .nyu-word,
+  .nyu-swap__btn { transition: none; }
 }
 
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
@@ -27360,6 +27802,44 @@ button.brd-stn { cursor: pointer; }
     animation: brd-in 360ms ease-out 420ms backwards;
   }
   .desk-brd__first strong { font-weight: 700; color: var(--text-primary); }
+  /* The third script beside the two words, quieter (plan 170): a
+     column as tall as their cards, so it costs the paper no height --
+     drawn in outline under the kanji line's pigment, its word a rung
+     under theirs, and when it comes: later. */
+  .desk-brd__reveal-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--sp-8);
+  }
+  .desk-brd__kanji {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-4);
+    width: 168px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var(--sp-6) var(--sp-5);
+    border: 1px dashed var(--surface-line);
+    border-top: 4px solid var(--line-kanji);
+    border-radius: var(--r-card);
+    font-size: var(--fs-body);
+    color: var(--text-secondary);
+    text-align: center;
+    animation: brd-in 360ms ease-out 360ms backwards;
+  }
+  .desk-brd__glyph--kanji { border-color: var(--line-kanji); }
+  .desk-brd__kanji-jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-display);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .desk-brd__kanji-sound { font-family: var(--font-display); font-weight: 700; }
+  .desk-brd__kanji b { font-family: var(--font-serif); font-weight: 700; color: var(--text-primary); }
+  .desk-brd__kanji-later { font-size: var(--fs-sm); text-wrap: balance; }
   /* ── 辻 — the lines as cards, the kana over them (plan 163) ──
      The owner's D05 (LinesStep's LineCards): the kana a strip across the
      paper under their pigment, locked -- on every ticket, no answer --
@@ -28740,6 +29220,7 @@ button.brd-stn { cursor: pointer; }
     .desk-brd__route,
     .desk-brd__plan-foot,
     .desk-brd__tkt-col,
+    .desk-brd__kanji,
     .desk-brd__first { animation: none; }
     .desk-brd__road,
     .desk-brd__ring,
@@ -31547,6 +32028,203 @@ button.brd-stn { cursor: pointer; }
     }
     /* The plan's two halves a rung closer. */
     .desk-brd__plan { gap: var(--sp-5); }
+  }
+}
+@media (min-width: 1100px) {
+  /* ── 入門 on the desk (plan 170) ──
+     The boarding's desk frame (plans 163, 164): the question at the
+     paper's corner, the six stops as the strip, Back and the gate at the
+     floor. The way out, over the gate on a phone, stands at the paper's
+     top-right corner, on the question's first line. The drawings lay out
+     for the width: the three scripts as three cards under the sentence
+     at the specimen rung, the vowels a broad line, the table beside its
+     sum, the pairs beside the words, the sentence's line across the
+     paper, and the ride under the sentence as one centred column. */
+  .desk-brd.nyu .nyu-skip {
+    position: absolute;
+    /* On the question's first line: the frame's top, then the body's. */
+    top: calc(var(--safe-top) + var(--sp-7) + var(--sp-6));
+    right: var(--desk-brd-pad);
+    z-index: 2;
+    padding-inline: 0;
+  }
+  .desk-brd .brd__car[data-intro] { --desk-brd-w: var(--desk-board-w); }
+  .desk-brd.nyu .nyu-sent { font-size: var(--fs-specimen-word); }
+  .desk-brd.nyu .nyu-rom { font-size: var(--fs-body); }
+
+  /* 1 · the scripts as three cards */
+  .desk-brd .nyu-stage--scripts { gap: var(--sp-9); }
+  .desk-brd .nyu-scripts { flex-direction: row; gap: var(--sp-6); }
+  .desk-brd .nyu-script {
+    flex: 1 1 0;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: var(--sp-5);
+    padding: var(--sp-7) var(--sp-6);
+    text-align: center;
+  }
+  .desk-brd .nyu-script .nyu-ring { width: 96px; height: 96px; border-width: 4px; font-size: var(--fs-display); }
+  .desk-brd .nyu-script__text { align-items: center; }
+
+  /* 2 · the vowels, a broad line */
+  .desk-brd .nyu-stage--sounds { gap: var(--sp-9); }
+  .desk-brd .nyu-vowel__btn { width: 112px; height: 112px; }
+  .desk-brd .nyu-vowels::before { height: 6px; top: 53px; }
+  .desk-brd .nyu-vowel__ring { border-width: 4px; font-size: var(--fs-display); }
+  .desk-brd .nyu-vowel__rom { font-size: var(--fs-title); }
+  .desk-brd .nyu-vowel__key { position: absolute; top: 0; right: 0; color: var(--text-secondary); }
+  .desk-brd .nyu-vowel--on .nyu-vowel__key { opacity: 0; }
+  .desk-brd .nyu-vowel__spk { inset: 0 0 auto auto; transform: none; }
+  .desk-brd .nyu-line-note { font-size: var(--fs-lead); }
+
+  /* 3 · the table beside its sum */
+  .desk-brd .nyu-table-desk {
+    display: grid;
+    grid-template-columns: minmax(0, 720px) minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--sp-9);
+  }
+  .desk-brd .nyu-table__corner { width: 32px; }
+  .desk-brd .nyu-table__key { width: 28px; height: 28px; }
+  .desk-brd .nyu-cell { height: 36px; }
+  .desk-brd .nyu-cell__kana { font-size: var(--fs-title); }
+  .desk-brd .nyu-sum {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    justify-content: center;
+    align-items: center;
+    gap: var(--sp-3) var(--sp-4);
+  }
+  .desk-brd .nyu-sum__ring {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    height: 96px;
+    box-sizing: border-box;
+    border: 4px solid var(--nyu-kana);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-size: var(--fs-display);
+    font-weight: 700;
+    color: var(--nyu-kana-ink);
+  }
+  .desk-brd .nyu-sum__ring--is { border-style: dashed; border-color: var(--text-secondary); color: var(--text-secondary); font-family: var(--font-jp); }
+  .desk-brd .nyu-sum__ring--found { border-style: solid; border-color: var(--accent2); color: var(--brd-ink); }
+  .desk-brd .nyu-sum__op { font-size: var(--fs-heading); font-weight: 700; color: var(--text-secondary); }
+  .desk-brd .nyu-sum__read { grid-column: 5; font-size: var(--fs-body); font-weight: 700; text-align: center; }
+
+  /* 4 · the pairs beside the words */
+  .desk-brd .nyu-stage--katakana {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--sp-9);
+  }
+  .desk-brd .nyu-pairs { gap: var(--sp-5) var(--sp-8); }
+  .desk-brd .nyu-pair__glyph { font-size: var(--fs-specimen-word); }
+  .desk-brd .nyu-pair__rom { font-size: var(--fs-title); }
+  .desk-brd .nyu-known__lead { font-size: var(--fs-lead); text-align: start; }
+  .desk-brd .nyu-words { grid-template-columns: minmax(0, 1fr); }
+  .desk-brd .nyu-word {
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    gap: var(--sp-2) var(--sp-6);
+    min-height: 88px;
+    padding: var(--sp-5) var(--sp-8) var(--sp-5) var(--sp-6);
+  }
+  .desk-brd .nyu-word__jp { font-size: var(--fs-heading); }
+  .desk-brd .nyu-word__beats { font-size: var(--fs-sm); }
+  .desk-brd .nyu-word__mean { font-size: var(--fs-lead); }
+  .desk-brd .nyu-word__key { position: absolute; top: var(--sp-3); right: var(--sp-3); color: var(--text-secondary); }
+
+  /* 5 · the sentence's line across the paper */
+  .desk-brd .nyu-stage--sentence { gap: var(--sp-9); }
+  .desk-brd .nyu-phrase { flex-direction: row; justify-content: center; align-items: flex-start; gap: var(--sp-9); }
+  .desk-brd .nyu-stn {
+    grid-template-columns: auto;
+    grid-template-areas: "head" "mark" "gloss";
+    align-items: start;
+    row-gap: var(--sp-4);
+  }
+  /* The words at the fluid display rung, never broken: at the specimen
+     rung the line ran past a 1100px paper and コーヒー broke in two. */
+  .desk-brd .nyu-stn__head { flex-wrap: nowrap; min-height: 64px; }
+  .desk-brd .nyu-stn__jp { font-size: var(--fs-display-fluid); line-height: 1.2; white-space: nowrap; }
+  .desk-brd .nyu-stn__ghost { font-size: var(--fs-heading); }
+  .desk-brd .nyu-stn__mark { justify-self: start; width: 28px; height: 28px; }
+  /* The rail from the mark's centre: under the 64px head, a rung down,
+     half the 28px mark down again. */
+  .desk-brd .nyu-stn:not(:last-child)::after {
+    left: 14px;
+    top: calc(64px + var(--sp-4) + 12.5px);
+    width: calc(100% + var(--sp-9));
+    height: 3px;
+  }
+  .desk-brd .nyu-stn--ghost::after { border-left: 0; border-top: 3px dotted var(--text-secondary); height: 0; }
+  .desk-brd .nyu-stn--end .nyu-stn__mark {
+    width: 5px;
+    height: 28px;
+    margin-left: 11.5px;
+    border-radius: var(--r-pill);
+  }
+  .desk-brd .nyu-stn__gloss { font-size: var(--fs-body); }
+  .desk-brd .nyu-swap { align-items: center; }
+  .desk-brd .nyu-swap .nyu-fr { font-size: var(--fs-lead); font-weight: 700; color: var(--text-primary); text-align: center; }
+  .desk-brd .nyu-swap__said { font-size: var(--fs-body); text-align: center; }
+
+  /* 6 · the sentence over the ride, one centred column */
+  .desk-brd .nyu-stage--route { gap: var(--sp-9); align-items: center; }
+  .desk-brd .nyu-route {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: min(100%, 864px);
+    gap: 0;
+  }
+  .desk-brd .nyu-route::before {
+    content: "";
+    position: absolute;
+    left: calc(100% / 6);
+    right: calc(100% / 6);
+    top: calc(24px + var(--sp-3) + 28px - 3px);
+    height: 6px;
+    border-radius: var(--r-pill);
+    background: var(--accent2);
+  }
+  .desk-brd .nyu-route__stop {
+    grid-template-columns: auto;
+    grid-template-rows: 24px 56px auto;
+    justify-items: center;
+    row-gap: var(--sp-3);
+  }
+  .desk-brd .nyu-route__stop:not(:last-child)::after { content: none; }
+  .desk-brd .nyu-route__name { grid-row: 1; }
+  .desk-brd .nyu-route__mark { grid-row: 2; width: 56px; height: 56px; }
+  .desk-brd .nyu-route__stop--kana .nyu-route__mark { font-size: var(--fs-title); }
+  .desk-brd .nyu-route__stop--n5 .nyu-route__mark { width: 6px; height: 56px; }
+  .desk-brd .nyu-route__date { grid-row: 3; font-size: var(--fs-lead); }
+  .desk-brd .nyu-day { font-size: var(--fs-lead); }
+
+  /* The short desk (plan 169): a laptop's 600–660px window. The room
+     round each drawing gives way first, then the drawing draws closer
+     -- the sentence to the fluid display rung, the scripts' rings, the
+     table's cells with the reading beside the sign, the sum's rings --
+     and nothing is cut. */
+  @media (max-height: 799px) {
+    .desk-brd.nyu .nyu-sent { font-size: var(--fs-display-fluid); }
+    .desk-brd .nyu-stage--scripts,
+    .desk-brd .nyu-stage--sounds,
+    .desk-brd .nyu-stage--sentence,
+    .desk-brd .nyu-stage--route { gap: var(--sp-6); }
+    .desk-brd .nyu-script { gap: var(--sp-3); padding: var(--sp-5) var(--sp-6); }
+    .desk-brd .nyu-script .nyu-ring { width: 64px; height: 64px; border-width: 3px; font-size: var(--fs-heading); }
+    .desk-brd .nyu-table { border-spacing: 2px; }
+    .desk-brd .nyu-table__key { width: 22px; height: 22px; }
+    .desk-brd .nyu-cell { flex-direction: row; gap: var(--sp-2); height: 25px; }
+    .desk-brd .nyu-cell__kana { font-size: var(--fs-lead); }
+    .desk-brd .nyu-sum__ring { width: 72px; height: 72px; border-width: 3px; font-size: var(--fs-heading); }
+    /* On the paper's width the answer is one line: no second line held. */
+    .desk-brd.nyu .brd__car[data-intro="table"] .brd__hint { min-height: 0; }
   }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

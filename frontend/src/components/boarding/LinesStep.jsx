@@ -31,17 +31,21 @@ const GLYPH = { vocab: '語', kanji: '漢', grammar: '文' }
 // lines picked arrive in -- each null until the volumes that price them
 // have answered (plan 163 on the desk, plan 168 on a phone). `no` is the
 // question's place on the line, which the phone's hub prints.
-export default function LinesStep({ value, onChange, onContinue, carries = null, stop = null, arrival = null, no = null }) {
+export default function LinesStep({ value, onChange, onContinue, carries = null, stop = null, arrival = null, no = null, novice = false }) {
   const { t } = useLang()
   const desk = useDesk()
+  // 入門 (plan 170): a learner short of both scripts is told the lines in
+  // a beginner's words, and when they start -- after the kana.
+  const desc = novice ? t.brdLineDescNovice : t.brdLineDesc
+  const hint = novice ? t.brdLinesHintNovice : desk ? t.brdLinesHint : null
   return (
     <>
       <div className="brd__body">
-        <BoardQuestion hint={desk ? t.brdLinesHint : null}>{t.brdLinesQ}</BoardQuestion>
+        <BoardQuestion hint={hint}>{t.brdLinesQ}</BoardQuestion>
         <div className="brd__stage">
           {desk
-            ? <LineCards value={value} onChange={onChange} carries={carries} stop={stop} arrival={arrival} />
-            : <LineFan value={value} onChange={onChange} carries={carries} stop={stop} arrival={arrival} no={no} />}
+            ? <LineCards value={value} onChange={onChange} carries={carries} stop={stop} arrival={arrival} desc={desc} />
+            : <LineFan value={value} onChange={onChange} carries={carries} stop={stop} arrival={arrival} no={no} desc={desc} />}
           {desk && value.length === 0 && <p className="brd__error" role="alert">{t.brdLinesNone}</p>}
         </div>
       </div>
@@ -64,7 +68,7 @@ export default function LinesStep({ value, onChange, onContinue, carries = null,
 // cards' top centres the roads run to.
 const FAN = [56, 179, 302]
 
-function LineFan({ value, onChange, carries, stop, arrival, no }) {
+function LineFan({ value, onChange, carries, stop, arrival, no, desc }) {
   const { t, lang } = useLang()
   const reach = stop === 'novice' ? null : stop
   return (
@@ -105,7 +109,7 @@ function LineFan({ value, onChange, carries, stop, arrival, no }) {
                 <span className="brd-lcard__chk" aria-hidden="true"><CheckMark /></span>
                 <span className="brd-lcard__ring" lang="ja" aria-hidden="true">{GLYPH[line]}</span>
                 <span className="brd-lcard__name">{t.brdLine[line]}</span>
-                <span className="brd-lcard__desc">{t.brdLineDesc[line]}</span>
+                <span className="brd-lcard__desc">{desc[line]}</span>
                 {reach && n > 0 && (
                   <span className="brd-lcard__vol">
                     <b className="brd-lcard__fig">~{ROUNDED(n).toLocaleString(lang)}</b>
@@ -133,7 +137,7 @@ function LineFan({ value, onChange, carries, stop, arrival, no }) {
 // moves as a line is taken off or put back.
 const ROUNDED = n => approx(n, n < 200 ? 10 : n < 2000 ? 50 : 100)
 
-function LineCards({ value, onChange, carries, stop, arrival }) {
+function LineCards({ value, onChange, carries, stop, arrival, desc }) {
   const { t, lang } = useLang()
   const reach = stop === 'novice' ? null : stop
   return (
@@ -160,7 +164,7 @@ function LineCards({ value, onChange, carries, stop, arrival }) {
               <PickMark digit={i + 1} corner />
               <span className="desk-brd__line-ring" lang="ja" aria-hidden="true">{GLYPH[line]}</span>
               <span className="desk-brd__line-name">{t.brdLine[line]}</span>
-              <span className="desk-brd__line-desc">{t.brdLineDesc[line]}</span>
+              <span className="desk-brd__line-desc">{desc[line]}</span>
               {reach && n > 0 && (
                 <span className="desk-brd__line-vol">
                   <b className="desk-brd__line-fig">~{ROUNDED(n).toLocaleString(lang)}</b>

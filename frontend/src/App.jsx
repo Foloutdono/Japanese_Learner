@@ -38,6 +38,7 @@ import Welcome from './components/boarding/Welcome'
 import BoardingFlow from './screens/BoardingFlow'
 import RideRun from './screens/RideRun'
 import RideReading from './screens/RideReading'
+import RideIntro from './screens/RideIntro'
 import LearnScreen from './screens/LearnScreen'
 import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
@@ -431,6 +432,10 @@ export default function App() {
   // profile here as well as on the server, because this copy is read
   // again on every visit to '/' and stores/profileSummary's is not it.
   const rideDue = onboardingProfile != null && onboardingProfile.tutorialAt == null
+  // 入門 (plan 170): a learner who answered « Pas encore » to the kana
+  // question meets the introduction before the cards; everyone else
+  // boards the cards as before.
+  const rideStart = onboardingProfile?.kanaKnown === 'none' ? '/ride/intro' : '/ride/cards'
   // 案内 — no gate's guide may open under the 改札 cutscene (plan 100).
   useEffect(() => { holdGuide(onboarding === 'finishing') }, [onboarding])
   const rideDone = () => setGate(g => (
@@ -690,6 +695,13 @@ export default function App() {
                 what sends a new learner here first. `covered` is the
                 改札 cutscene still playing over the router. */}
             <Route path="/ride" element={<Navigate to="/ride/cards" replace />} />
+            {/* 入門 (plan 170): six screens before the cards, for the
+                learner with no kana; its way on and its way out both
+                board the cards. */}
+            <Route
+              path="/ride/intro"
+              element={<RideIntro session={session} covered={onboarding === 'finishing'} />}
+            />
             <Route
               path="/ride/cards"
               element={<RideRun session={session} onDone={rideDone} covered={onboarding === 'finishing'} />}
@@ -699,11 +711,11 @@ export default function App() {
 
           {/* The gate hall retired with the chrome; the front door is
               the run -- or, once, the test ride. */}
-          <Route path="/" element={<Navigate to={rideDue ? '/ride/cards' : '/today'} replace />} />
+          <Route path="/" element={<Navigate to={rideDue ? rideStart : '/today'} replace />} />
           {/* On the web `/` is the landing page (plan 167), which sends a
               signed-in visitor and every sign-in's return here: the same
               door, under the name the server leaves to the app. */}
-          <Route path="/app" element={<Navigate to={rideDue ? '/ride/cards' : '/today'} replace />} />
+          <Route path="/app" element={<Navigate to={rideDue ? rideStart : '/today'} replace />} />
 
           {MOVED.map(([from, to]) => (
             <Route key={from} path={from} element={<Moved to={to} />} />

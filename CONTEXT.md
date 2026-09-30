@@ -202,6 +202,14 @@ for sale (not yet), whose platforms the reading ride's plate lists from
 sentence, on the real stage, writing nothing. `screens/RideRun.jsx`,
 `screens/RideReading.jsx`; `/ride/cards`, `/ride/reading`.
 
+**入門 (nyūmon)** — the introduction: six screens before the test ride for a
+learner who reads no kana yet (the boarding's « Pas encore »): the three
+scripts, the five vowels, the table, the katakana, how a sentence is built
+and the ride ahead, all hung on one sentence of the N5 reading bank,
+駅でコーヒーを飲みます。 It writes nothing, and the reading ride is then its
+plate alone. `screens/RideIntro.jsx`, `components/intro/`,
+`domain/nyumon.js`; `/ride/intro`.
+
 **案内 (annai)** — the guide: a spot on the live screen and one sentence
 beside it, once per gate on its first opening. `components/guide/`,
 `hooks/useGuide.js`; the stops in `components/guide/guides.js`.

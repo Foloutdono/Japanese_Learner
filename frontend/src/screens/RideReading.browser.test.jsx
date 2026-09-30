@@ -35,6 +35,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: RideReading } = await import('./RideReading')
 const { default: fr } = await import('../locales/fr/index.js')
 const { PASS_PLATFORMS } = await import('../domain/paywall')
+const { seedSummary, forgetSummary } = await import('../stores/profileSummary')
 
 const SENTENCE = {
   phrase: '駅で友だちに会います。', romaji: 'eki de tomodachi ni aimasu.',
@@ -162,6 +163,31 @@ describe('RideReading', () => {
     expect(onDone).toHaveBeenCalledTimes(1)
     expect(screen.container.querySelector('.gate-probe')).toBeTruthy()
     expect(track.mock.calls.find(([n]) => n === 'ride_done')[1]).toMatchObject({ skipped: true, at: 'reading' })
+  })
+
+  // 入門 (plan 170): a learner with no kana was handed the map of the
+  // language instead of a sentence, so their ride is the plate alone --
+  // no sentence asked for -- and Enter stamps the lesson as it does at
+  // the reading's end.
+  it('is the plate alone for a learner who reads no kana', async () => {
+    serve()
+    seedSummary({ kanaKnown: 'none' })
+    try {
+      const onDone = vi.fn()
+      const screen = await mount({ onDone })
+      await settle(150)
+      const root = screen.container
+      expect(root.querySelector('.ride__plate')).toBeTruthy()
+      expect(root.querySelector('.sentence')).toBeNull()
+      expect(apiJson.mock.calls.some(([u]) => String(u).startsWith('/api/onboarding/ride?'))).toBe(false)
+      root.querySelector('[data-action="enter"]').click()
+      await settle(200)
+      const done = posts().find(([u]) => u === '/api/onboarding/ride/done')
+      expect(JSON.parse(done[2].body)).toEqual({ skipped: false })
+      expect(onDone).toHaveBeenCalledTimes(1)
+    } finally {
+      forgetSummary()
+    }
   })
 
   it('a sentence that cannot be served leaves for the app without a stamp', async () => {

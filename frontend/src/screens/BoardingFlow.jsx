@@ -578,6 +578,7 @@ export default function BoardingFlow({
             stop={answers.goal ?? jlpt}
             arrival={arrivalMonth}
             no={hubNo('lines')}
+            novice={answers.kana !== 'both'}
           />
         )
       case 'rhythm':

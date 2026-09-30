@@ -1839,7 +1839,7 @@ const boarding = {
   brdMotive: { studies: 'Pour mes études', fun: 'Pour le plaisir', trip: 'Pour un voyage au Japon', live: 'Pour vivre au Japon', friends: 'Pour me faire des amis', other: 'Autre chose' },
   brdKanaQ: 'Tu sais lire ça ?',
   brdKana: { hiragana: 'Hiragana', katakana: 'Katakana', both: 'Les deux', none: 'Pas encore' },
-  brdKanaWord: { sushi: 'sushi', hotel: 'hôtel' },
+  brdKanaWord: { sushi: 'sushi', hotel: 'hôtel', station: 'gare' },
   brdRevealQ: 'Bientôt, tu liras les deux.',
   // 辻 (plan 163): the desk's kana question and reveal, drawn as the
   // owner's D03 -- each answer says what it reads, then its name.
@@ -1847,6 +1847,8 @@ const boarding = {
   brdKanaOnly: (jp) => `Seulement ${jp}`,
   brdKanaSays: { hiragana: 'Les hiragana', katakana: 'Les katakana', both: 'Hiragana et katakana', none: 'On commence par là' },
   brdRevealLead: 'Deux écritures de 46 signes chacune. Voici comment se lisent ces deux mots.',
+  brdRevealKanji: 'Kanji',
+  brdRevealLater: 'Plus tard, un mot à la fois.',
   brdRevealMeans: 'veut dire',
   brdRevealWord: (word) => `« ${word} »`,
   brdRevealFirst: (date, min) => `Ton premier arrêt : **les kana**, lus d’ici le **${date}** à ${min} min par jour.`,
@@ -1875,6 +1877,14 @@ const boarding = {
   brdLinesHint: 'Les kana sont sur chaque billet. Choisis le reste.',
   brdLinesNone: 'Choisis au moins une ligne.',
   brdLine: { vocab: 'Vocabulaire', kanji: 'Kanji', grammar: 'Grammaire' },
+  // 入門 (plan 170): the lines in a beginner's words, for a learner
+  // short of both scripts, and when they start.
+  brdLineDescNovice: {
+    vocab: 'Les mots',
+    kanji: 'Un sens par caractère',
+    grammar: 'Comment se construit une phrase',
+  },
+  brdLinesHintNovice: 'Elles commencent après les kana.',
   brdLineDesc: {
     vocab: 'Les mots, de N5 à N1',
     kanji: 'Lectures, sens, écriture',
@@ -2086,6 +2096,7 @@ const guide = {
   // Réglages, les deux retours.
   settingsFirstRide: 'Premier essai',
   settingsRideAgain: 'Refaire l\'essai',
+  settingsIntroAgain: 'Revoir l’introduction',
   settingsGuideAgain: 'Revoir le guide',
   settingsGuideAgainDone: 'Il réapparaîtra la prochaine fois que tu ouvriras chaque section.',
 }
@@ -2324,6 +2335,59 @@ const onboarding = {
 // devient insécable en sortant d'ici, y compris dans les phrases
 // assemblées à l'appel. Voir locales/frenchSpacing.js — c'est ce qui
 // empêche un deux-points de tomber seul en bout de ligne.
+const nyumon = {
+  // 入門 — l'introduction (plan 170) : six écrans avant la première
+  // carte, pour qui a répondu « Pas encore » à la question des kana.
+  // La carte de la langue, pas son savoir : rien ne s'y apprend par cœur.
+  nyuDocumentTitle: 'Introduction',
+  nyuSkip: 'Passer l’introduction',
+  nyuStop: { scripts: 'Écritures', sounds: 'Sons', table: 'Tableau', katakana: 'Katakana', sentence: 'Phrase', route: 'Trajet' },
+  nyuStripAria: 'Les 6 écrans de l’introduction',
+  nyuQuote: s => `« ${s} »`,
+  nyuTranslation: '« Je bois un café à la gare. »',
+  // 1 · Écritures
+  nyuScriptsQ: 'Le japonais mélange 3\u00a0écritures.',
+  nyuScriptsHint: 'Touche-en une pour la voir dans la phrase.',
+  nyuScript: {
+    hira: { name: 'Hiragana', desc: 'Les petits mots et les terminaisons' },
+    kata: { name: 'Katakana', desc: 'Les mots venus d’ailleurs' },
+    kanji: { name: 'Kanji', desc: 'Un sens par signe, pour plus tard' },
+  },
+  nyuScriptsLit: (name, signs) => `${name} : ${signs}`,
+  // 2 · Sons
+  nyuSoundsQ: 'Tout part de 5\u00a0voyelles.',
+  nyuSoundsHint: 'Touche un signe pour l’entendre.',
+  // Le son d'une voyelle, là où l'écrire en lettres tromperait.
+  nyuSoundsLike: { u: 'ou', e: 'é' },
+  nyuSoundsFoot: 'Elles se prononcent toujours pareil.',
+  nyuVowelsAria: 'Les 5 voyelles',
+  // 3 · Tableau
+  nyuTableQ: '46\u00a0signes, 10\u00a0lignes de\u00a05.',
+  nyuTableHint: 'Où est « ke » ? Croise la ligne k et la colonne e.',
+  nyuTableFound: '**k + e = ke.** Tu viens de lire un signe qu’on ne t’avait pas montré.',
+  nyuTableAria: 'Le tableau des 46 signes',
+  // 4 · Katakana
+  nyuPairsQ: 'Les mêmes sons, 2\u00a0façons de les écrire.',
+  nyuPairsLead: 'Le katakana écrit les mots venus d’ailleurs. Tu en connais déjà :',
+  nyuHearWord: 'Lire le mot',
+  nyuWords: { hotel: 'hôtel', coffee: 'café', tv: 'télé' },
+  // 5 · Phrase
+  nyuSentenceQ: 'Le verbe vient à la fin.',
+  nyuSentenceHint: 'Pas de « je », pas d’article, pas de pluriel.',
+  nyuGhost: '(je)',
+  nyuMeans: { station: 'gare', coffee: 'café', drink: 'bois' },
+  nyuRoles: { where: 'où', what: 'quoi' },
+  nyuVerb: 'verbe',
+  nyuSwap: 'Inverser gare et café',
+  nyuSwapped: '**Même sens :** l’étiquette porte le rôle, pas la place.',
+  // 6 · Trajet
+  nyuRouteQ: date => `D’ici le ${date}, tu liras ces signes-là.`,
+  nyuRouteQSoon: 'Bientôt, tu liras ces signes-là.',
+  nyuRouteStops: { start: 'Départ', kana: 'Les kana', n5: 'N5' },
+  nyuRouteDay: n => `Chaque jour : **${n}\u00a0nouveautés** et tes révisions.`,
+  nyuTryCard: 'Essayer une carte',
+}
+
 export default welded({
   ...auth,
   ...landing,
@@ -2349,5 +2413,6 @@ export default welded({
   ...onboarding,
   ...boarding,
   ...ride,
+  ...nyumon,
   ...guide,
 })

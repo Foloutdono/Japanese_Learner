@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import RideRun from './RideRun'
 import RideReading from './RideReading'
+import RideIntro from './RideIntro'
 import { playClick } from '../lib/audio'
 
 // ── /dev/ride — the test ride on repeat (plan 098) ────────────────
@@ -30,18 +31,31 @@ const SENTENCE = {
   display_seconds: 9.6, grammar: 'で',
 }
 
+// The office's volumes (GET /api/onboarding/volumes, rounded to the day
+// they were read), so 入門's last screen dates its stops as it would.
+const VOLUMES = {
+  vocab: { N5: 678, N4: 643, N3: 1738, N2: 1767, N1: 3229 },
+  kanji: { N5: 103, N4: 144, N3: 366, N2: 367, N1: 1232 },
+  grammar: { N5: 93, N4: 110, N3: 110, N2: 115, N1: 117 },
+  kana: 238,
+}
+
 export default function RidePreview() {
   const [run, setRun] = useState(1)
-  const [phase, setPhase] = useState('cards') // cards | reading | ended
+  // 入門 (plan 170) first: the six screens a learner with no kana meets.
+  const [phase, setPhase] = useState('intro') // intro | cards | reading | ended
   const session = { access_token: 'dev-preview' }
   const ended = phase === 'ended'
   function replay() {
     playClick()
-    setPhase('cards')
+    setPhase('intro')
     setRun(n => n + 1)
   }
   return (
     <>
+      {phase === 'intro' && (
+        <RideIntro key={run} session={session} dryRun volumes={VOLUMES} onNext={() => setPhase('cards')} />
+      )}
       {phase === 'cards' && (
         <RideRun key={run} session={session} dryRun cards={CARDS} onNext={() => setPhase('reading')} onDone={() => setPhase('ended')} />
       )}

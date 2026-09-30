@@ -21,10 +21,12 @@ import { useLang } from '../../LangContext'
 // (--desk-strip-w, the 机 section of index.css).
 //
 //   stops [{ key, label, value, state: done|now|next, onOpen }]
-export function DeskStrip({ stops, stripRef = null }) {
+//   label   the strip's name for a screen reader: the boarding's by
+//           default, 入門's own for its six screens (plan 170)
+export function DeskStrip({ stops, stripRef = null, label = null }) {
   const { t } = useLang()
   return (
-    <nav ref={stripRef} className="desk-brd__strip" aria-label={t.brdBuildingAria}>
+    <nav ref={stripRef} className="desk-brd__strip" aria-label={label ?? t.brdBuildingAria}>
       <ol className="desk-brd__sps">
         {stops.map(stop => {
           const said = stop.state !== 'next' && stop.value ? `${stop.label} · ${stop.value}` : null

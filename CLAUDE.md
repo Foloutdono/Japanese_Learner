@@ -1179,7 +1179,34 @@ runtime purpose. Two consequences worth knowing:
   `vite.config.js`, `src/desk.css.test.js`, the five `src/*.short.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`, "The short desk").
-  When starting a new wave, begin at **170** or higher, and check
+  **170** is 入門, the introduction before the first card: a friend who
+  could not read kana was handed a kanji card and a timed sentence with
+  no notion of how Japanese works, so a learner who answers « Pas
+  encore » to the kana question now rides six screens first, drawn on
+  the canvas "Tsuji — 入門, day one" and all hung on one sentence of the
+  N5 reading bank, 駅でコーヒーを飲みます。 (`domain/nyumon.js`'s
+  `INTRO_SENTENCE`, held to the bank by `tests/test_nyumon.py`, ADR
+  0017): the three scripts lit in it, the five vowels heard, « ke »
+  found where row k meets column e, the katakana beside the hiragana and
+  three loanwords said whole, the particles' roles with the two tagged
+  words swapped and the verb kept last, and the ride dated at the
+  learner's pace -- in the boarding's own frame (the head's track and
+  the quiet way out over the gate on a phone; the strip of six stops,
+  Enter and the digits on the desk, the way out at the corner), writing
+  nothing, each screen a `ride_step` `intro-<step>` and a skip one with
+  `dir` 'skip'; then the card ride, the reading ride for them its plate
+  alone; the sounds warmed on arrival (`lib/audio`'s `preloadKana`);
+  Settings › Help opens it again. In the boarding, the reveal names the
+  kanji as the third script, for later, and a novice's lines say what
+  each holds (cited in `screens/RideIntro.jsx`, `components/intro/`,
+  `domain/nyumon.js`, `lib/audio/playback.js`, `App.jsx`'s `rideStart`,
+  `screens/RideReading.jsx`, `screens/RidePreview.jsx`,
+  `components/settings/HelpPage.jsx`, `components/boarding/KanaStep.jsx`,
+  `LinesStep.jsx`, `DeskStrip.jsx`'s `label`, `lib/routePattern.js`,
+  `backend/content/reading_sentences.py`, `backend/tests/test_nyumon.py`,
+  `src/screens/RideIntro.browser.test.jsx`, the `intro` phone, desktop
+  and short tests, and `index.css` and its 机 section; CONTEXT.md, 入門).
+  When starting a new wave, begin at **171** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

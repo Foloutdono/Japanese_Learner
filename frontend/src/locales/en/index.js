@@ -1907,7 +1907,7 @@ const boarding = {
   brdMotive: { studies: 'For my studies', fun: 'For fun', trip: 'For a trip to Japan', live: 'To live in Japan', friends: 'To make friends', other: 'Something else' },
   brdKanaQ: 'Can you read this?',
   brdKana: { hiragana: 'Hiragana', katakana: 'Katakana', both: 'Both', none: 'Not yet' },
-  brdKanaWord: { sushi: 'sushi', hotel: 'hotel' },
+  brdKanaWord: { sushi: 'sushi', hotel: 'hotel', station: 'station' },
   brdRevealQ: 'Soon you’ll read both.',
   // 辻 (plan 163): the desk's kana question and reveal, drawn as the
   // owner's D03 -- each answer says what it reads, then its name.
@@ -1915,6 +1915,8 @@ const boarding = {
   brdKanaOnly: (jp) => `Only ${jp}`,
   brdKanaSays: { hiragana: 'The hiragana', katakana: 'The katakana', both: 'Hiragana and katakana', none: 'That’s where we start' },
   brdRevealLead: 'Two scripts of 46 signs each. Here is how these two words are read.',
+  brdRevealKanji: 'Kanji',
+  brdRevealLater: 'Later, one word at a time.',
   brdRevealMeans: 'means',
   brdRevealWord: (word) => `“${word}”`,
   brdRevealFirst: (date, min) => `Your first stop: **the kana**, read by **${date}** at ${min} min a day.`,
@@ -1942,6 +1944,14 @@ const boarding = {
   brdLinesHint: 'The kana ride on every ticket. Pick any of the rest.',
   brdLinesNone: 'Pick at least one line.',
   brdLine: { vocab: 'Vocabulary', kanji: 'Kanji', grammar: 'Grammar' },
+  // 入門 (plan 170): the lines in a beginner's words, for a learner
+  // short of both scripts, and when they start.
+  brdLineDescNovice: {
+    vocab: 'Words',
+    kanji: 'One meaning per character',
+    grammar: 'How a sentence is built',
+  },
+  brdLinesHintNovice: 'They start after the kana.',
   brdLineDesc: {
     vocab: 'Words, N5 to N1',
     kanji: 'Readings, meanings, writing',
@@ -2154,6 +2164,7 @@ const guide = {
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',
   settingsRideAgain: 'Take the test ride again',
+  settingsIntroAgain: 'See the introduction again',
   settingsGuideAgain: 'Show the guide again',
   settingsGuideAgainDone: 'It’ll show again the next time you open each section.',
 }
@@ -2389,6 +2400,59 @@ const onboarding = {
   settingsGoalDepartHint: 'The hour you plan to ride — optional, and never a reminder. It is printed on the pass because a promise with a time of day is likelier to survive its first rainy week.',
 }
 
+const nyumon = {
+  // 入門 — the introduction (plan 170): six screens before the first
+  // card, for a learner who answered "Not yet" to the kana question. The
+  // map of the language, not its knowledge: nothing here is memorised.
+  nyuDocumentTitle: 'Introduction',
+  nyuSkip: 'Skip introduction',
+  nyuStop: { scripts: 'Scripts', sounds: 'Sounds', table: 'Table', katakana: 'Katakana', sentence: 'Sentence', route: 'Route' },
+  nyuStripAria: 'The 6 screens of the introduction',
+  nyuQuote: s => `“${s}”`,
+  nyuTranslation: '“I drink a coffee at the station.”',
+  // 1 · Scripts
+  nyuScriptsQ: 'Japanese mixes 3\u00a0scripts.',
+  nyuScriptsHint: 'Tap one to see it in the sentence.',
+  nyuScript: {
+    hira: { name: 'Hiragana', desc: 'The little words and the endings' },
+    kata: { name: 'Katakana', desc: 'Words from abroad' },
+    kanji: { name: 'Kanji', desc: 'A meaning per sign, for later' },
+  },
+  nyuScriptsLit: (name, signs) => `${name}: ${signs}`,
+  // 2 · Sounds
+  nyuSoundsQ: 'It all starts with 5\u00a0vowels.',
+  nyuSoundsHint: 'Tap a sign to hear it.',
+  // A vowel's sound, where writing it in letters would mislead.
+  nyuSoundsLike: { a: 'ah', i: 'ee', u: 'oo', e: 'eh', o: 'oh' },
+  nyuSoundsFoot: 'They always sound the same.',
+  nyuVowelsAria: 'The 5 vowels',
+  // 3 · Table
+  nyuTableQ: '46\u00a0signs, 10\u00a0rows of\u00a05.',
+  nyuTableHint: 'Where is “ke”? Cross row k and column e.',
+  nyuTableFound: '**k + e = ke.** You just read a sign nobody showed you.',
+  nyuTableAria: 'The table of the 46 signs',
+  // 4 · Katakana
+  nyuPairsQ: 'The same sounds, 2\u00a0ways to write them.',
+  nyuPairsLead: 'Katakana writes words from abroad. You already know some:',
+  nyuHearWord: 'Hear the word',
+  nyuWords: { hotel: 'hotel', coffee: 'coffee', tv: 'TV' },
+  // 5 · Sentence
+  nyuSentenceQ: 'The verb comes last.',
+  nyuSentenceHint: 'No “I”, no “a” or “the”, no plural.',
+  nyuGhost: '(I)',
+  nyuMeans: { station: 'station', coffee: 'coffee', drink: 'drink' },
+  nyuRoles: { where: 'where', what: 'what' },
+  nyuVerb: 'verb',
+  nyuSwap: 'Swap station and coffee',
+  nyuSwapped: '**Same meaning:** the tag carries the role, not the place.',
+  // 6 · Route
+  nyuRouteQ: date => `By ${date}, you’ll read these signs.`,
+  nyuRouteQSoon: 'Soon, you’ll read these signs.',
+  nyuRouteStops: { start: 'Start', kana: 'The kana', n5: 'N5' },
+  nyuRouteDay: n => `Every day: **${n}\u00a0new items** and your reviews.`,
+  nyuTryCard: 'Try a card',
+}
+
 export default {
   ...auth,
   ...landing,
@@ -2414,5 +2478,6 @@ export default {
   ...onboarding,
   ...boarding,
   ...ride,
+  ...nyumon,
   ...guide,
 }
