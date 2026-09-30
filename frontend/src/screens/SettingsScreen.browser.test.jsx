@@ -243,7 +243,7 @@ describe('SettingsScreen — the pass and the list', () => {
     pass.click()
     await settle(30)
     // The source is what the whole funnel slices on, so it is pinned.
-    expect(credits.peekPaywall()).toEqual({ source: 'settings', taken: false })
+    expect(credits.peekPaywall()).toEqual({ source: 'settings', taken: false, all: false })
 
     credits.closePaywall()
   })

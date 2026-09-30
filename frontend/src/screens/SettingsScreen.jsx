@@ -193,7 +193,7 @@ function SettingsHome({ session, current = null }) {
               tabIndex={desk ? -1 : undefined}
               onClick={() => { playClick(); openPaywall(SOURCES.SETTINGS) }}
             >
-              <span className="stg-row__names"><span className="stg-row__jp">{t.passLabel}</span></span>
+              <span className="stg-row__names"><span className="stg-row__jp">{t.paywallName_pro}</span></span>
               <span className="stg-row__value"><span className="stg-row__text">{t.paywallRowValue}</span></span>
               <ChevronIcon direction="right" size={16} className="stg-row__chev" />
             </button>

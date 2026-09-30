@@ -198,6 +198,12 @@ an IC/commuter card. `components/profile/CommuterPass.jsx`. Also the pass
 for sale (not yet), whose platforms the reading ride's plate lists from
 `domain/paywall.PASS_PLATFORMS`.
 
+**Pro / Max** — the two paid plans the offer sells, each yearly or monthly
+(`domain/paywall.PLANS`). Pro is the one the offer leads with, yearly
+picked; Max, the step up, waits behind "See all offers". The server knows
+one paid plan yet, the pass, whose limits are Max's.
+`components/credits/PaywallScreen.jsx`.
+
 **試乗 (shijō)** — the test ride: the learner's first two flashcards and one
 sentence, on the real stage, writing nothing. `screens/RideRun.jsx`,
 `screens/RideReading.jsx`; `/ride/cards`, `/ride/reading`.

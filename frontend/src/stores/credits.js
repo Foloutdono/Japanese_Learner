@@ -101,7 +101,7 @@ export function useBalanceOpen() {
 // call sites unable to get it wrong: they open, take and close, and
 // the events are a consequence. The door rides along as `where`, so
 // the dashboard can say which of the five converts.
-let paywall = null   // { source, taken } or null
+let paywall = null   // { source, taken, all } or null
 // How long the offer has been in front of them. Started on open and
 // read once, on whichever of the two answers comes first — the gap
 // between seeing the pass and deciding about it is the difference
@@ -111,7 +111,7 @@ let dwell = null
 
 /** Open the offer from one of domain/paywall.js's SOURCES. */
 export function openPaywall(source) {
-  paywall = { source, taken: false }
+  paywall = { source, taken: false, all: false }
   dwell?.stop()
   dwell = stopwatch()
   track('offer_view', { where: source })
@@ -128,14 +128,33 @@ function spendDwell() {
 }
 
 /**
- * "Prévenez-moi" taken. Recorded once per open — a second tap is the
- * same answer, and counting it twice would inflate the only number
- * this whole feature exists to produce.
+ * "See all offers": the offer leads with Pro alone and lays the other
+ * plans out under it on request (domain/paywall.js's LEAD). Nothing is
+ * recorded here -- the answer carries it (`all`), so the funnel stays
+ * one view and one answer an open, and "did hiding Max cost anything"
+ * is a question the answers can be sliced by.
  */
-export function takePaywall() {
+export function showAllOffers() {
+  if (!paywall || paywall.all) return
+  paywall = { ...paywall, all: true }
+  emit()
+}
+
+/**
+ * "Préviens-moi" taken, on a pick: `{ plan, billing }` from
+ * domain/paywall.js's PLANS and BILLINGS. Recorded once per open — a
+ * second tap is the same answer, and counting it twice would inflate
+ * the only number this whole feature exists to produce.
+ */
+export function takePaywall(pick = null) {
   if (!paywall || paywall.taken) return
   paywall = { ...paywall, taken: true }
-  track('offer_intent', { where: paywall.source, ...spendDwell() })
+  track('offer_intent', {
+    where: paywall.source,
+    ...spendDwell(),
+    ...(pick ? { plan: pick.plan, billing: pick.billing } : {}),
+    all: paywall.all,
+  })
   emit()
 }
 
@@ -145,7 +164,7 @@ export function closePaywall() {
   // leaving it running would carry one learner's deliberation into the
   // next open.
   if (paywall && !paywall.taken) {
-    track('offer_dismiss', { where: paywall.source, ...spendDwell() })
+    track('offer_dismiss', { where: paywall.source, ...spendDwell(), all: paywall.all })
   } else {
     spendDwell()
   }

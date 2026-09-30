@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const track = vi.fn()
 vi.mock('../lib/track', () => ({ track: (...a) => track(...a), EVENTS: {} }))
 
-const { openPaywall, takePaywall, closePaywall, peekPaywall } = await import('./credits')
+const { openPaywall, takePaywall, closePaywall, peekPaywall, showAllOffers } = await import('./credits')
 
 beforeEach(() => {
   track.mockClear()
@@ -20,7 +20,7 @@ beforeEach(() => {
 describe('the paywall funnel', () => {
   it('records one view, carrying the door it was opened from', () => {
     openPaywall('runout')
-    expect(peekPaywall()).toEqual({ source: 'runout', taken: false })
+    expect(peekPaywall()).toEqual({ source: 'runout', taken: false, all: false })
     // The view starts the clock, so it carries no duration of its own.
     expect(track.mock.calls).toEqual([['offer_view', { where: 'runout' }]])
   })
@@ -55,6 +55,42 @@ describe('the paywall funnel', () => {
     expect(Number.isInteger(props.ms)).toBe(true)
     expect(props.ms).toBeGreaterThanOrEqual(0)
     expect(peekPaywall().taken).toBe(true)
+  })
+
+  it('carries the pick on the intent, and whether every offer was seen', () => {
+    openPaywall('balance')
+    track.mockClear()
+    takePaywall({ plan: 'pro', billing: 'yearly' })
+    const [name, props] = track.mock.calls[0]
+    expect(name).toBe('offer_intent')
+    expect(props).toMatchObject({ where: 'balance', plan: 'pro', billing: 'yearly', all: false })
+  })
+
+  it('records "See all offers" on the answer, not as an event of its own', () => {
+    openPaywall('settings')
+    track.mockClear()
+    showAllOffers()
+    showAllOffers()
+    // One view and one answer an open: the expansion rides on the answer.
+    expect(track).not.toHaveBeenCalled()
+    expect(peekPaywall().all).toBe(true)
+    takePaywall({ plan: 'max', billing: 'monthly' })
+    expect(track.mock.calls[0][1]).toMatchObject({ plan: 'max', billing: 'monthly', all: true })
+
+    openPaywall('runout')
+    showAllOffers()
+    track.mockClear()
+    closePaywall()
+    expect(track.mock.calls[0][0]).toBe('offer_dismiss')
+    expect(track.mock.calls[0][1].all).toBe(true)
+  })
+
+  it('opens each time on the lead offer, whatever the last open showed', () => {
+    openPaywall('balance')
+    showAllOffers()
+    closePaywall()
+    openPaywall('balance')
+    expect(peekPaywall().all).toBe(false)
   })
 
   it('records a dismissal when it is closed without an intent', () => {

@@ -48,8 +48,8 @@ export const EVENTS = {
   fare_blocked: ['balance', 'fare', 'kind'],
   limit_reached: ['kind', 'at'],
   offer_view: ['where'],
-  offer_intent: ['where', 'ms'],
-  offer_dismiss: ['where', 'ms'],
+  offer_intent: ['where', 'ms', 'plan', 'billing', 'all'],
+  offer_dismiss: ['where', 'ms', 'all'],
   // The library. Never a deck name or description — both are
   // learner-typed, and no deck id either: the trail should say whether
   // learners give each other decks, not who follows whom.

@@ -6,7 +6,7 @@ import { UpdateToast, OfflineNote } from './components/ui/UpdateToast'
 import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
 import { ClaimSheet } from './components/credits/ClaimSheet'
-import { PaywallSheet } from './components/credits/PaywallSheet'
+import { PaywallScreen } from './components/credits/PaywallScreen'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
 import { getTabs, tabFor } from './config/tabs'
@@ -498,7 +498,7 @@ export default function App() {
               real offer too — otherwise the one tool for polishing
               that screen is the one place its last control does
               nothing. */}
-          <PaywallSheet />
+          <PaywallScreen />
         </BrowserRouter>
       </LangProvider>
     )
@@ -569,7 +569,7 @@ export default function App() {
             dead control domain/paywall.js argues against. Portals to
             document.body and uses no router hook, so it is at home
             outside the BrowserRouter. */}
-        <PaywallSheet />
+        <PaywallScreen />
       </LangProvider>
     )
   }
@@ -748,7 +748,7 @@ export default function App() {
             second is raised by a review the screen fired and forgot. */}
         <BalanceSheet />
         <RunOutSheet />
-        <PaywallSheet />
+        <PaywallScreen />
         {/* 補充 — what the refill landed while the app was closed, on
             arrival (plan 141). Held through the 改札 cutscene and the
             first ride, which have the learner's whole attention, and

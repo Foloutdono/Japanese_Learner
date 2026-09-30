@@ -420,8 +420,8 @@ rule and the kana door (`study/level_rule.py`, `SRSEngine.seed_known`) mark
 the stops behind the level and the scripts already read known. The name is
 written when its screen accepts it (`PATCH /api/profile`), so a taken name
 is refused there and never on the pass. Held from the canvas: the offer
-screen (`.brd-offer__*`, `.brd-perks*`, `.brd-plan*`) waits for a store
-(`domain/credits.js` HAS_STORE); the drawn OS prompt (`.brd-dim`,
+screen as a stop of the boarding (it is built as the paywall's own screen,
+opened from the pass's quiet way -- see "The offer" below); the drawn OS prompt (`.brd-dim`,
 `.brd-alert*`) is never rendered — the system shows its own; the nudge
 screen is skipped on the web; the tutorial is deferred. The motion sheet's
 pull, the +120 ms rule and the rest-state-only rule under reduced motion are
@@ -530,10 +530,29 @@ Pinned by `LibraryCard.phone.test.jsx` (390 px: no overflow, one thumb target,
 the description clamped and measured), `LibraryScreen.browser.test.jsx` and
 `DeckDetailScreen.roles.browser.test.jsx`.
 
+## The offer (the paywall)
+
+The canvas's BoardOffer, drawn as the boarding's last-but-one screen, is
+built as a screen of its own that the five doors open
+(`domain/paywall.js`'s `SOURCES`), not as a stop in the boarding: the pass's
+quiet way still opens it there. It follows the owner's pricing
+(`docs/business/tsuji-costs.xlsx`): Pro alone, yearly first and picked,
+Max only behind "See all offers".
+
+| Canvas class | `index.css` block | Component |
+|---|---|---|
+| `.brd-offer` (`__cap`, `__pct`, `__sub`) | `.pw-head` (`__cap`, `__fig`, `__unit`, `__sub`): the plan, what the pick comes to a month, how it is billed -- the canvas's −X% is the saving on the yearly row instead | `components/credits/PaywallScreen.jsx` |
+| `.brd-perks` (`__pass`, `__inf`, `__cap`, `__list`), `.brd-perk` | `.pw-perks` (`__pass`, `__inf`, `__cap`, `__list`), `.pw-perk` (`__tick`), a panel per plan (`.pw-block`) | `PaywallScreen.jsx`'s `Plan` |
+| `.brd-plan` (`--on`, `__names`, `__label`, `__price`), `.brd-opt__check`, `.brd-tag` | `.pw-plan` (`--on`, `__names`, `__label`, `__price`, `__was`, `__check`), `.pw-tag`, a radio group a plan (`.pw-plans`) | `PaywallScreen.jsx`'s `Plan` |
+| `.brd__foot`, `.brd__link`, `.brd__fine` | `.pw__foot`, `.pw__later` over `.pw__cta`, `.pw__soon` under it | `PaywallScreen.jsx` |
+
+The frame is `.pw-scrim` over `.pw` (`__body` scrolls, `__foot` stays).
+Pinned by `PaywallScreen.browser.test.jsx`, `src/paywall.phone.test.jsx` and,
+for the desk's dialog, `src/paywall.desktop.test.jsx`.
+
 ## Still to port
 
-`.offer*`, `.pass-tag`, `.brd-offer__*`, `.brd-perks*`, `.brd-plan*` (with the
-store). Reading the canvas: `Artifact` `read` on its URL saves the page; the
+`.offer*` and `.pass-tag` (with the store). Reading the canvas: `Artifact` `read` on its URL saves the page; the
 design lives in `<script id="appifact-doc">` as JSON — `content.files` holds
 one `*.dc.html` per artboard plus `canvas.json`; the common prefix of the
 artboard files is this stylesheet.

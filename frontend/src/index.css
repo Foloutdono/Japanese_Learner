@@ -4604,37 +4604,147 @@ textarea:focus-visible {
 }
 
 /* ── 定期券 — the offer (the paywall) ── */
-/* Shown from five doors, sold from none of them yet. The sheet is
-   `sumi`, so this is the pass turned over: charcoal ground, gold for
-   the side of the row the pass buys. No line colour anywhere here —
-   an object about the learner never wears one. */
-.pw__lede {
-  margin: 0;
-  font-size: var(--fs-body);
-  color: var(--text-on-panel-soft);
+/* A screen of its own (components/credits/PaywallScreen.jsx), the
+   canvas's BoardOffer built: the head the pick's month, the pass's
+   perks on its own sumi, the two billings as rows to pick from, the
+   answer docked at the foot. Pro alone until "See all offers" lays
+   Max out under it. On a phone it takes the glass; the desk sets it in
+   the window's middle at a column's width (the 机 section).
+
+   The layer is the sheets' (.scrim, .sheet): it opens from inside the
+   balance and the run-out sheets, and a portal mounted after them
+   stands over them at the same z-index. */
+.pw-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
 }
-.pw-list {
-  display: grid;
-  gap: 1px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  background: color-mix(in srgb, var(--pass-ink) 35%, transparent);
-  border: 1px solid color-mix(in srgb, var(--pass-ink) 35%, transparent);
-  border-radius: var(--r-card);
-  overflow: hidden;
+.pw {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  animation: arrive 0.24s ease-out both;
 }
-/* name | free → pass. The two figure columns are fixed and equal so
-   the arrows line up down the list however wide the names run. */
-.pw-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto auto;
-  align-items: baseline;
+@media (prefers-reduced-motion: reduce) {
+  .pw { animation-name: arrive-soft; }
+}
+/* The body scrolls and the foot stays, as the boarding's frame does:
+   the answer is never carried off a short screen by the list above
+   it. Both hold the card's width and centre on a tablet. */
+.pw__body,
+.pw__foot {
+  width: 100%;
+  max-width: var(--card-w);
+  margin-inline: auto;
+}
+.pw__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-7) var(--sp-5) var(--sp-5);
+  padding-top: calc(var(--sp-7) + var(--safe-top));
+}
+.pw__foot {
+  flex: none;
+  display: flex;
+  flex-direction: column;
   gap: var(--sp-3);
-  padding: var(--sp-4);
-  background: var(--bg-panel);
+  padding: var(--sp-4) var(--sp-5);
+  padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
+  border-top: 1px solid var(--surface-line);
 }
-.pw-row__name {
+
+/* The head: the plan, what the pick comes to a month -- the figure the
+   strategy leads with, "5 €" for Pro yearly -- and how it is billed.
+   Gold because it is the pass's price: its metal, not a line's. */
+.pw-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  text-align: center;
+}
+.pw-head__cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.pw-head__fig {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-display);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent2);
+}
+.pw-head__unit {
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+}
+.pw-head__sub {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+
+/* One plan: its perks over its two billings. The second plan (Max,
+   once asked for) stands a hairline under the first. */
+.pw-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.pw-block + .pw-block {
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--surface-line);
+}
+
+/* The perks, on the pass's own material: the canvas's .brd-perks. The
+   tile names the plan under the ∞ every paid plan reviews at. */
+.pw-perks {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border: 1px solid color-mix(in srgb, var(--accent2) 30%, transparent);
+  border-radius: var(--r-identity);
+}
+.pw-perks__pass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  flex: none;
+  width: 84px;
+  height: 84px;
+  border: 1px solid color-mix(in srgb, var(--accent2) 40%, transparent);
+  border-radius: var(--r-identity);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent2) 22%, transparent), transparent 70%);
+}
+.pw-perks__inf {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-display);
+  line-height: 1;
+  color: var(--accent2);
+}
+.pw-perks__cap {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
@@ -4643,30 +4753,166 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-on-panel-soft);
 }
-.pw-row__free,
-.pw-row__pass {
+.pw-perks__list {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  list-style: none;
+}
+.pw-perk {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
   font-family: var(--font-display);
   font-weight: 700;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.pw-row__free {
   font-size: var(--fs-sm);
-  color: var(--text-on-panel-soft);
-  text-decoration: line-through;
-  text-decoration-color: color-mix(in srgb, currentcolor 45%, transparent);
+  line-height: 1.3;
 }
-.pw-row__arrow {
-  font-size: var(--fs-caption);
-  color: var(--text-on-panel-soft);
-}
-.pw-row__pass {
-  font-size: var(--fs-lead);
+/* A line tall, so the tick sits on the perk's first line however many
+   it wraps to (the SVG centres its drawing in the box it is given). */
+.pw-perk__tick {
+  flex: none;
+  width: 14px;
+  height: 1lh;
   color: var(--accent2);
 }
+.pw-perk small {
+  font-size: inherit;
+  font-weight: 500;
+  color: var(--text-on-panel-soft);
+}
+
+/* The billings: the canvas's .brd-plan, a row to pick, the pick washed
+   in the pass's gold and its check lit. */
+.pw-plans {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.pw-plan {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 60px;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font: inherit;
+  text-align: start;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.pw-plan:hover,
+.pw-plan:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--accent2);
+  filter: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pw-plan { transition: border-color 0.15s ease; }
+  .pw-plan:hover,
+  .pw-plan:focus-visible { transform: none; }
+}
+.pw-plan--on {
+  border-color: var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 14%, var(--surface));
+}
+.pw-plan__names {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.pw-plan__label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-body);
+}
+.pw-plan__price {
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.pw-plan__price b {
+  font-family: var(--font-display);
+  color: var(--text-primary);
+}
+/* Twelve monthly payments, struck through beside the year's price. */
+.pw-plan__was {
+  margin-inline-end: var(--sp-2);
+  text-decoration-color: color-mix(in srgb, currentcolor 60%, transparent);
+}
+.pw-plan__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: transparent;
+}
+.pw-plan--on .pw-plan__check {
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+/* The saving beside "Yearly": the canvas's .brd-tag. */
+.pw-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 var(--sp-2);
+  flex: none;
+  border: 1px solid var(--accent2);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  white-space: nowrap;
+  color: var(--text-primary);
+  /* Centred on its line box, not on its ink: see .brd-tag. */
+  line-height: normal;
+}
+.pw__all { align-self: center; }
+
+/* The foot: the quiet way over the answer (the boarding's rule, plan
+   168 -- a thumb finds the answer where it was), the answer, and the
+   line that says why it is not a purchase yet. */
+.pw__later {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.pw__later:hover,
+.pw__later:focus-visible { color: var(--text-primary); }
 .pw__cta { width: 100%; }
 /* The answer lands where the button was, at the button's own height,
-   so taking the offer does not make the sheet jump. */
+   so taking the offer does not make the foot jump. The gold goes a
+   rung toward the ink: at body size on paper the bare metal is under
+   the floor (the same move as .brd__q-em). */
 .pw__thanks {
   display: flex;
   align-items: center;
@@ -4678,13 +4924,13 @@ textarea:focus-visible {
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: 700;
-  color: var(--accent2);
+  color: color-mix(in srgb, var(--accent2) 65%, var(--text-primary));
 }
 .pw__soon {
   margin: 0;
   text-align: center;
   font-size: var(--fs-caption);
-  color: var(--text-on-panel-soft);
+  color: var(--text-secondary);
 }
 
 /* ── The doors into it ── */
@@ -27073,6 +27319,43 @@ button.brd-stn { cursor: pointer; }
      across), and at the dialog's full --card-w it spread into fifty
      flat bars with the figure a long way from its button. */
   .claim-sheet { width: var(--desk-side-w); }
+  /* 定期券 — the offer as a dialog in the window's middle, at the
+     desk dialogs' width, with the scrim the phone's glass had no need
+     of. The width is spent rather than stretched (the density
+     contract): a plan's two billings side by side, its perks two by
+     two beside their tile, and the answer on one row with its quiet
+     way, as every desk dialog's actions are (plan 123) -- so Pro's
+     offer reads whole in a laptop's window, and only Max, once asked
+     for, scrolls. */
+  .pw-scrim { background: rgba(0, 0, 0, 0.55); }
+  .pw {
+    inset: 0;
+    width: var(--card-w);
+    height: fit-content;
+    max-height: calc(100dvh - 2 * var(--sp-8));
+    margin: auto;
+    overflow: hidden;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    box-shadow: var(--elev-board);
+    animation: arrive-soft 0.2s linear;
+  }
+  .pw__foot {
+    flex-flow: row wrap;
+    align-items: center;
+  }
+  .pw__cta,
+  .pw__thanks { flex: 1 1 0; }
+  .pw__soon { flex: 1 1 100%; }
+  .pw-perks__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-3) var(--sp-5);
+  }
+  .pw-plans {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   /* The CSV import (components/decks/ImportCardsMenu) is its own
      overlay, not a sheet; it takes the desk dialog's width, material,
      scrim and arrival. Centred by auto margins, which fall to nothing
