@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { playFareTick } from '../../lib/audio'
 
 // ── The welcome, counted onto the pass ───────────────────────────
 // The balance a fresh account is given is the one number on this
@@ -38,6 +39,19 @@ export function useCountUp(to, enabled) {
   // figure itself, derived rather than written into state: an effect
   // that sets state on the frame it runs is a cascading render.
   return enabled && to != null ? n : to
+}
+
+// And the welcome is heard landing: the fare box's coin -- the sound the
+// claim sheet makes as credits come into the purse
+// (components/credits/ClaimSheet) -- once, as the count starts. Under
+// reduced motion too, where the figure stands still: a sound is not
+// motion.
+export function useWelcomeCoin(on) {
+  useEffect(() => {
+    if (!on) return undefined
+    const id = setTimeout(() => playFareTick(), COUNT_FROM_MS)
+    return () => clearTimeout(id)
+  }, [on])
 }
 
 export function stillPreferred() {

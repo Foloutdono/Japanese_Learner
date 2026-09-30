@@ -5,6 +5,7 @@ import { PickMark } from '../boarding/BoardOption'
 import { CheckMark } from '../boarding/icons'
 import { INTRO_CELLS, INTRO_ROMAJI } from '../../domain/nyumon'
 import { IntroPage, IntroSentence } from './IntroPage'
+import { playUi } from '../../lib/audio'
 
 // ── 入門 1 · Écritures — three scripts in one sentence (plan 170) ──
 // The sentence, its reading and its meaning; under them the three
@@ -34,7 +35,7 @@ export default function ScriptsStep({ onContinue, skip }) {
             className={`nyu-script nyu-script--${s}`}
             aria-pressed={lit === s}
             aria-keyshortcuts={desk ? String(i + 1) : undefined}
-            onClick={() => setLit(s)}
+            onClick={() => { playUi('click-mode-selection'); setLit(s) }}
             data-script={s}
           >
             <span className="nyu-ring" lang="ja" aria-hidden="true">{GLYPH[s]}</span>

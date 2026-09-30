@@ -371,6 +371,34 @@ const EVENTS = [
 
   // ── Station ─────────────────────────────────────────────
   {
+    // The boarding's hour: the departure board's flaps turned by hand
+    // (▲ and ▼ over the drums on a phone), and on the desk the train
+    // dragged along the day's arc, the board in its bowl turning with
+    // it. One per half hour the board moves, so a drag across the day
+    // is a run of them -- which is what a board spinning sounds like.
+    // Mechanical, never a tone, for the fare tick's reason: fired this
+    // fast, a pitch would play a tune.
+    key: 'board-flap', category: 'ui', family: 'station', meter: 'peak',
+    label: 'Hour board', jp: '発車標', where: 'The boarding\'s hour: the flaps turned by hand, the train dragged along the day',
+    variants: [
+      { key: 'run', label: 'Short run', note: 'The minute drums turning over: three flaps bunching as the board settles, over in 70ms.',
+        play: (c, b) => noiseTicks(c, b, [
+          { at: 0, freq: 2500, peak: 0.30, q: 1.6, dur: 0.022 },
+          { at: 0.030, freq: 2380, peak: 0.22, q: 1.6, dur: 0.022 },
+          { at: 0.052, freq: 2260, peak: 0.16, q: 1.6, dur: 0.020 },
+        ]) },
+      { key: 'one-flap', label: 'One flap', note: 'A single drum of the board, the first of the level\'s clatter. The lightest, for a hand dragging the train across the day.',
+        level: 0.67,
+        play: (c, b) => clatter(c, b, 1) },
+      { key: 'soft-flap', label: 'Soft flap', note: 'The flap and its catch behind the board\'s glass: duller, at 1.8kHz, for when the board is not the point.',
+        level: 1.70,
+        play: (c, b) => noiseTicks(c, b, [
+          { at: 0, freq: 1800, peak: 0.22, q: 2.4, dur: 0.028 },
+          { at: 0.026, freq: 1650, peak: 0.14, q: 2.4, dur: 0.024 },
+        ]) },
+    ],
+  },
+  {
     key: 'gate-chime', category: 'ui', family: 'station',
     label: 'Ticket gate', jp: '改札', where: 'A valid pass has been read. Rises: accepted, go',
     variants: [

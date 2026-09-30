@@ -4,6 +4,7 @@ import { useLang } from '../LangContext'
 import { apiJson } from '../lib/api'
 import { track } from '../lib/track'
 import { stopwatch } from '../lib/dwell'
+import { playClick } from '../lib/audio'
 import { useDesk } from '../hooks/useDesk'
 import { useBoardKeys } from '../hooks/useBoardKeys'
 import { useBoxWidth } from '../hooks/useBoxWidth'
@@ -173,7 +174,7 @@ export default function RideIntro({ session, covered = false, dryRun = false, on
     >
       {!desk && <BoardHead index={index + 1} total={INTRO_STEPS.length} onBack={back} />}
       {desk && (
-        <button type="button" className="brd__link nyu-skip" onClick={skip} data-action="skip">{t.nyuSkip}</button>
+        <button type="button" className="brd__link nyu-skip" onClick={() => { playClick(); skip() }} data-action="skip">{t.nyuSkip}</button>
       )}
       <BoardBack.Provider value={desk ? back : null}>
         <div className="brd__cars">

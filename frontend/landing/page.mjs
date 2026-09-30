@@ -80,6 +80,10 @@ function head2(t, h2, body, id, extra = '') {
 // at the page's foot is the terminus, 終.
 const STOPS = ['presentation', 'lines', 'line', 'method', 'features', 'jlpt', 'tools', 'fare', 'faq', 'way']
 const stopName = (t, key) => (key === 'way' ? t.terminus : t[key].kicker)
+// The sound switch's two faces: the speaker with its waves, and struck.
+const SPEAKER = '<svg class="top__sound-on" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18.2 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+  + '<svg class="top__sound-off" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+
 const ONWARD = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 function stop(t, key) {
@@ -149,7 +153,9 @@ function header(t, other) {
   return `<header class="top" data-top><span class="top__rail" aria-hidden="true"></span><div class="wrap top__in">`
     + `<a class="brand" href="${PAGES[t.lang].path}" aria-label="${esc(t.home)}">${mark(32)}<span class="brand__name">Tsuji</span></a>`
     + `<nav class="nav" aria-label="${esc(t.navLabel)}">${nav}</nav>`
-    + `<div class="top__end"><nav class="seg langs" aria-label="${esc(t.langLabel)}">${langs}</nav>`
+    // The demos' sounds: drawn by the script alone, which alone plays them.
+    + `<div class="top__end"><button type="button" class="top__sound" data-sound aria-pressed="true" aria-label="${esc(t.sound)}" title="${esc(t.sound)}" hidden>${SPEAKER}</button>`
+    + `<nav class="seg langs" aria-label="${esc(t.langLabel)}">${langs}</nav>`
     + `<a class="top__other" href="${PAGES[other].path}" hreflang="${other}" lang="${other}">${other.toUpperCase()}</a>`
     + `<a class="ghost top__signin" href="${APP_ENTRY}" data-board>${esc(t.signIn)}</a>`
     // The way in, kept in reach once the hero's gate has scrolled away.
@@ -296,6 +302,13 @@ function method(t) {
 
 // 駅's fourteen strokes, for the kanji screen's stroke order.
 const STATION_STROKES = kanjiStrokes('099c5')
+
+// A kana card's clip, where the app plays it from: the set's revision is
+// read off the app's own playback.js, so a remade set (a new KANA_REV)
+// reaches the page at its next build rather than a year of cache later.
+const KANA_REV = readFileSync(new URL('../src/lib/audio/playback.js', import.meta.url), 'utf8')
+  .match(/export const KANA_REV = '([^']+)'/)[1]
+const kanaClip = sound => `/sounds/kanas/${sound}.mp3?v=${KANA_REV}`
 
 // ── The feature screens, drawn (plan 167) ──
 // Until a clip is filmed its slot shows the app's own screen for that
@@ -488,7 +501,7 @@ function clientData(t, facts, media) {
     n5Days: Object.fromEntries(RHYTHMS.map(m => [m, Math.ceil(arrivals(facts, m)[0].days)])),
     passName: t.pass.name,
     cards: CARDS.map((c, k) => ({
-      glyph: c.glyph, serif: !!c.serif, reading: c.reading, example: c.example,
+      glyph: c.glyph, serif: !!c.serif, reading: c.reading, example: c.example, clip: c.sound ? kanaClip(c.sound) : null,
       meaning: ty(M.cards[k].meaning), translation: ty(M.cards[k].translation),
       kind: M.kinds[c.kind], stage: c.stage, stageWord: M.stages[c.stage], progress: c.progress,
       due: c.due.map(M.due),

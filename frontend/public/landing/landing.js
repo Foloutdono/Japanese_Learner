@@ -140,6 +140,157 @@ for (const link of $$('[data-board]')) {
   })
 }
 
+// ── Sound ──
+// The demos sound as the app does: a card turned, a verdict given and
+// its fare landing a beat after, a pick, a switch. The voices are the
+// app's own recipes (voices.js, which `npm run landing` bundles from
+// src/lib/audio/recipes.js), each event's shipped voice, through the
+// app's own chain -- the voice's trim, its channel, the master. Only a
+// press of the visitor's makes one: nothing sounds on arrival or on the
+// page's own motion, the tabs turning by themselves included.
+//
+// The switch in the header is the app's mute (src/lib/audio/settings.js,
+// same key, same origin), and the page plays at the app's volumes: a
+// visitor who mutes here boards muted, and a learner who muted the app
+// finds the page quiet.
+const MUTE_KEY = 'jp-app-muted'
+const VOLUME_KEY = 'jp-app-volumes'
+const FARE_BEAT = 0.11     // src/lib/audio/chimes.js: the fare lands after the answer
+const KANA_TRIM = 0.8      // settings.js BASE_GAIN.kana
+const RETRIGGER_MS = 40    // voices.js: one sound per moment
+
+const stored = key => { try { return localStorage.getItem(key) } catch { return null } }
+let muted = stored(MUTE_KEY) === '1'
+let voices = null
+let loading = null
+let audio = null
+const lastPlayed = new Map()
+
+function loadVoices() {
+  loading ||= import('./voices.js')
+    .then(() => { voices = globalThis.TsujiVoices })
+    .catch(() => { loading = null })
+  return loading
+}
+
+function volume(channel) {
+  let saved = {}
+  try { saved = JSON.parse(stored(VOLUME_KEY) ?? 'null') ?? {} } catch { /* the defaults */ }
+  const level = n => (typeof n === 'number' ? Math.min(1, Math.max(0, n)) : 1)
+  return level(saved.master) * level(saved[channel])
+}
+
+/** The one context and its buses, made on the visitor's first press
+    (a context made before one is refused by the browser anyway, and a
+    press the page makes itself -- the device switch as the window
+    narrows -- is none). */
+function wake() {
+  if (!audio) {
+    if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return null
+    const Context = window.AudioContext || window.webkitAudioContext
+    if (!Context) return null
+    const ctx = new Context()
+    const master = ctx.createGain()
+    master.connect(ctx.destination)
+    audio = { ctx, master, buses: new Map() }
+  }
+  if (audio.ctx.state === 'suspended') audio.ctx.resume().catch(() => {})
+  return audio
+}
+
+function bus(channel) {
+  const { ctx, master, buses } = audio
+  if (!buses.has(channel)) {
+    const node = ctx.createGain()
+    node.connect(master)
+    buses.set(channel, node)
+  }
+  const node = buses.get(channel)
+  node.gain.value = volume(channel)
+  return node
+}
+
+/** An event's shipped voice (its first), `after` seconds on. */
+function sound(key, { after = 0 } = {}) {
+  if (muted || !voices) return
+  const event = voices.VOICE_EVENTS.find(e => e.key === key)
+  if (!event || !wake()) return
+  const now = performance.now()
+  if (now - (lastPlayed.get(key) ?? -Infinity) < RETRIGGER_MS) return
+  lastPlayed.set(key, now)
+  const voice = event.variants[0]
+  const out = voices.voiceOut(audio.ctx, bus(event.category), voices.voiceLevel(event, voice))
+  voices.later(after, () => voice.play(audio.ctx, out))
+}
+
+// A kana card says its syllable as it turns, as the app's does: the kana
+// deck's own clip, fetched ahead and decoded on the first play.
+const clipBytes = new Map()
+const clipBuffers = new Map()
+
+function fetchClip(url) {
+  if (!clipBytes.has(url)) {
+    clipBytes.set(url, fetch(url).then(r => (r.ok ? r.arrayBuffer() : null)).catch(() => null))
+  }
+  return clipBytes.get(url)
+}
+
+function playClip(url) {
+  if (muted || !wake()) return
+  if (!clipBuffers.has(url)) {
+    clipBuffers.set(url, fetchClip(url)
+      .then(bytes => (bytes ? audio.ctx.decodeAudioData(bytes.slice(0)) : null))
+      .catch(() => null))
+  }
+  clipBuffers.get(url).then(buffer => {
+    if (!buffer || muted) return
+    const source = audio.ctx.createBufferSource()
+    const trim = audio.ctx.createGain()
+    source.buffer = buffer
+    trim.gain.value = KANA_TRIM
+    source.connect(trim)
+    trim.connect(bus('kana'))
+    source.onended = () => { source.disconnect(); trim.disconnect() }
+    source.start()
+  })
+}
+
+const soundSwitch = $('[data-sound]')
+function showSound() {
+  soundSwitch.setAttribute('aria-pressed', String(!muted))
+}
+soundSwitch.hidden = false
+showSound()
+soundSwitch.addEventListener('click', () => {
+  muted = !muted
+  try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0') } catch { /* this visit only */ }
+  showSound()
+  if (muted) return
+  // The context on this press, while it is one; the switch's own sound
+  // once the voices are in.
+  wake()
+  loadVoices().then(() => sound('toggle'))
+})
+// The app muted in another tab is the page muted too.
+window.addEventListener('storage', event => {
+  if (event.key !== MUTE_KEY) return
+  muted = event.newValue === '1'
+  showSound()
+})
+
+// Fetched once the page is idle, so the first card turned is heard; the
+// kana clip once the trial is near.
+function warm() {
+  if (muted) return
+  loadVoices()
+  nearView($('[data-trial]'), () => {
+    if (muted) return
+    for (const card of data.cards) if (card.clip) fetchClip(card.clip)
+  })
+}
+if ('requestIdleCallback' in window) window.requestIdleCallback(warm, { timeout: 3000 })
+else window.setTimeout(warm, 1500)
+
 // ── Press here ──
 // Each demo's first step wears the app's cue ring (landing.css, .nudge)
 // until it is answered: the card until it is turned, then the verdicts
@@ -171,6 +322,7 @@ function setRhythm(per, shown) {
 
 for (const button of $$('[data-per]')) {
   button.addEventListener('click', () => {
+    sound('click-mode-selection')
     nudge($('[data-rhythms]'), false)
     setRhythm(Number(button.dataset.per), true)
   })
@@ -242,6 +394,8 @@ function facing(backUp) {
 
 front.addEventListener('click', () => {
   const card = data.cards[at]
+  sound('card-flip')
+  if (card.clip) playClip(card.clip)
   if (front.classList.contains('nudge')) {
     nudge(front, false)
     nudge(rbar, xp === 0)
@@ -251,8 +405,14 @@ front.addEventListener('click', () => {
   flipBox.focus({ preventScroll: true })
 })
 
-for (const button of rates) {
+rates.forEach((button, k) => {
   button.addEventListener('click', () => {
+    // A rating plays the answer, the fare a beat after it, and the card
+    // leaving, as the app's does (RatingBar, XpToast, CardTransition).
+    // The bar is drawn worst-first: Difficult and Correct are right.
+    sound(k >= 2 ? 'correct' : 'wrong')
+    sound('fare-tick', { after: FARE_BEAT })
+    sound('card-transition')
     const wasHere = trial.contains(document.activeElement)
     nudge(rbar, false)
     xp += 1
@@ -275,7 +435,7 @@ for (const button of rates) {
       if (wasHere) front.focus({ preventScroll: true })
     }, reducedMotion.matches ? 0 : 230)
   })
-}
+})
 
 // ── The mock exam's question ──
 const verdict = $('[data-verdict]')
@@ -283,6 +443,7 @@ const options = $$('[data-opt]')
 for (const option of options) {
   option.addEventListener('click', () => {
     const picked = Number(option.dataset.opt)
+    sound(picked === 0 ? 'correct' : 'wrong')
     nudge($('.exam__opts'), false)
     options.forEach((o, k) => {
       o.classList.toggle('opt--right', k === 0)
@@ -299,6 +460,7 @@ const tokinfo = $('.tokinfo')
 for (const token of tokens) {
   token.addEventListener('click', () => {
     const picked = data.tokens[Number(token.dataset.tok)]
+    sound('click-mode-selection')
     nudge(tokens[0], false)
     for (const other of tokens) {
       const on = other === token
@@ -484,7 +646,11 @@ async function loadClip() {
 }
 
 function pick(k, how) {
-  if (how !== 'auto') stopTurning()
+  // The reader's pick is heard; the tabs turning by themselves are not.
+  if (how !== 'auto') {
+    sound('click-mode-selection')
+    stopTurning()
+  }
   feature = k
   tabs.forEach((tab, j) => {
     const on = j === k
@@ -551,6 +717,7 @@ if (canWatch) {
 
 for (const button of $$('[data-device]')) {
   button.addEventListener('click', () => {
+    sound('toggle')
     device = button.dataset.device
     for (const other of $$('[data-device]')) {
       const on = other === button

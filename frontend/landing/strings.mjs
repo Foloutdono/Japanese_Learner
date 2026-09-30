@@ -25,7 +25,8 @@ const KNOWN = [180, 600, 74 * 86400, 80 * 86400]
 export const CARDS = [
   { glyph: '駅', serif: true, reading: 'えき', example: '駅はどこですか。', stage: 'new', progress: 0, due: NEW, kind: 'kanji' },
   { glyph: '電車', reading: 'でんしゃ', example: '電車で行きます。', stage: 'learning', progress: 0.375, due: STEP_4, kind: 'vocab' },
-  { glyph: 'ぬ', reading: '', example: 'いぬ', stage: 'learning', progress: 0.25, due: STEP_3, kind: 'kana' },
+  // `sound` is the kana deck's clip (public/sounds/kanas/), heard as the card turns, as the app plays it.
+  { glyph: 'ぬ', reading: '', example: 'いぬ', stage: 'learning', progress: 0.25, due: STEP_3, kind: 'kana', sound: 'nu' },
   { glyph: '〜ている', reading: '', example: '雨が降っている。', stage: 'new', progress: 0, due: NEW, kind: 'grammar' },
   { glyph: '友達', reading: 'ともだち', example: '友達を待っています。', stage: 'mastered', progress: 1, due: KNOWN, kind: 'vocab' },
 ]
@@ -80,6 +81,8 @@ const fr = facts => {
     navLabel: 'Sections',
     langLabel: 'Langue',
     signIn: 'Se connecter',
+    // The switch for the demos' sounds, which is the app's own mute.
+    sound: 'Sons',
 
     hero: {
       kicker: "L'application pour apprendre le japonais",
@@ -326,6 +329,7 @@ const en = facts => {
     navLabel: 'Sections',
     langLabel: 'Language',
     signIn: 'Sign in',
+    sound: 'Sound',
 
     hero: {
       kicker: 'The app to learn Japanese',

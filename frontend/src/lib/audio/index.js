@@ -31,7 +31,7 @@ export { playKana, preloadKana, kanaSound, playSfx, playUi, playAnnouncement } f
 export {
   playClick, playToggle, playFlip, playCorrect, playWrong,
   playGateChime, playDoorChime, playDoorSlide, playFareTick, FARE_BEAT, playPassClip, playStamp,
-  playArrival, playPlatformChime,
+  playArrival, playPlatformChime, playBoardFlap,
 } from './chimes'
 export { startAmbiance, stopAmbiance } from './ambiance'
 export { speakJapanese, voicedUrl } from './speech'

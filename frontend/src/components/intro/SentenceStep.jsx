@@ -5,6 +5,7 @@ import { Emphasized } from '../ui/Emphasized'
 import { SwapIcon } from '../ui/Icons'
 import { phraseOrder } from '../../domain/nyumon'
 import { IntroPage } from './IntroPage'
+import { playToggle } from '../../lib/audio'
 
 // ── 入門 5 · Phrase — words, tags, the verb last (plan 170) ──────
 // The sentence drawn as a line: a ghost stop for the « je » nobody
@@ -51,7 +52,7 @@ export default function SentenceStep({ onContinue, skip }) {
           className="nyu-swap__btn"
           aria-pressed={swapped}
           aria-keyshortcuts={desk ? '1' : undefined}
-          onClick={() => setSwapped(s => !s)}
+          onClick={() => { playToggle(); setSwapped(s => !s) }}
           data-action="swap"
         >
           <SwapIcon size={18} className="nyu-swap__ico" />

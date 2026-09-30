@@ -56,8 +56,11 @@ immediately. "Copy my picks" gives you the block to paste back into
 `recipes.js` if a choice should become the shipped default. The first
 voice listed for an event is that default today.
 
-The same palette plays outside the app, on a phone, as **the listening
-panel**: `scripts/sound-panel.mjs` writes it as one HTML page from the
+The palette plays outside the app twice. The landing page's demos play
+the shipped voices to a visitor (`public/landing/voices.js`, bundled by
+`npm run landing`: a palette change needs that build too, and
+`src/landing.test.js` says so; see `frontend/landing/README.md`, Sound).
+And on a phone, as **the listening panel**: `scripts/sound-panel.mjs` writes it as one HTML page from the
 shipped recipes, with a switch that plays everything through a model of
 a phone's speaker, the meter's figures beside each voice, and the
 moments where sounds meet (a rating, a stage climbed, boarding) played
@@ -79,6 +82,7 @@ capability it keeps the picks, one document per event in `picks`.
 | `gate-chime` | 改札, a valid pass | Three step · Rising pair · Two pips · Rising pair, in the hall |
 | `door-chime` | 扉, just before the doors part | Falling pair · Single bell · Three fall · Ding-dong · Falling pair, struck |
 | `door-slide` | the leaves actually running open | Soft rush · Pneumatic · On rollers |
+| `board-flap` | 発車標, the boarding's hour board turned by a half hour | Short run · One flap · Soft flap |
 | `platform-chime` | 到着ホーム, the onboarding arrival | Arpeggio, struck · Arpeggio · Open fifth · Wide rise · Announcement chime |
 | `arrival` | 到着, a session finished (Today's run too) | Settle · Long settle · Warm pad · Settle, struck · End of announcement |
 | `fare-tick` | XP earned, no level | Coin · One flap · Soft tick |
@@ -86,7 +90,9 @@ capability it keeps the picks, one document per event in `picks`.
 | `card-stamp` | 押印, a card climbing a stage | Hanko · Ticket stamp · Soft press · Stamp, voiced |
 
 The first voice of each is the one that ships, every one of them picked
-by the owner on the listening panel (2026-09-28). `card-flip` and
+by the owner on the listening panel (2026-09-28) -- except `board-flap`,
+added with the boarding's sounds after that round, whose short run ships
+until the next one. `card-flip` and
 `exam-warning` are moments that had no sound of their own until that
 round: the flip played the generic click, the exam's last minutes
 nothing. What they used to play stays in the palette.
@@ -170,6 +176,7 @@ and the ceremony fall flat.
 | Loudness | Sounds |
 |---|---|
 | 0.025 | the card turning -- ambient texture, under even the click |
+| 0.023 | the hour board's flaps -- levelled by peak to the chrome's 0.18, since they run under a dragging hand |
 | 0.030 | the chrome: click, toggle, menus, option picks, the card's flip |
 | 0.042 | correct / wrong |
 | 0.044 | the fare tick |

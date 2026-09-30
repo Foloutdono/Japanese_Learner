@@ -74,3 +74,6 @@ export function playArrival() { playVoice('arrival') }
 
 /** 到着ホーム — the platform sign landing, in the onboarding tour. */
 export function playPlatformChime() { playVoice('platform-chime') }
+
+/** 発車標 — the boarding's hour board turned by a half hour, by hand or by the train dragged along the day. */
+export function playBoardFlap() { playVoice('board-flap') }

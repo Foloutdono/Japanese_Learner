@@ -6,7 +6,7 @@ import { CAP, SIGNUP_BONUS, showsCap, refillMinutes } from '../../domain/credits
 import { BoardQuestion, Continue } from './BoardFrame'
 import { SOURCES } from '../../domain/paywall'
 import { OfferButton } from '../credits/OfferButton'
-import { useCountUp, stillPreferred } from './countUp'
+import { useCountUp, useWelcomeCoin, stillPreferred } from './countUp'
 
 // ── The pass, issued (plan 075) ──────────────────────────────────
 // The last arrival screen: the printed commuter pass slides up and the
@@ -48,6 +48,7 @@ function PrintedBalance() {
   const balance = credits?.unlimited ? null : (credits?.balance ?? SIGNUP_BONUS)
   const counting = balance != null && !stillPreferred()
   const shown = useCountUp(balance, counting)
+  useWelcomeCoin(balance != null)
   // The note says the balance was GIVEN, so it prints only when the
   // balance is the welcome itself. A learner who already had an
   // account (the boarding's sign-in road ends on this same pass) sees

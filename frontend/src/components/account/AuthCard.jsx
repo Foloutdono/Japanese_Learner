@@ -4,6 +4,7 @@ import { useLang } from '../../LangContext'
 import { Seg } from '../chrome/Console'
 import { ProviderButton } from './ProviderButton'
 import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
+import { playUi } from '../../lib/audio'
 
 // ── The sign-in card (plan 075; lifted out of AuthScreen, plan 122) ──
 // Google, then Login / Sign up as a segmented control, the two fields,
@@ -44,12 +45,17 @@ export function AuthCard({ initialMode = 'login', autoFocus = false, seg = true,
   const [success, setSuccess]   = useState(null)
 
   function switchMode(next) {
+    playUi('click-mode-selection')
     setMode(next)
     setError(null)
     setSuccess(null)
   }
 
+  // The action is drawn as the boarding's gate wherever the card stands
+  // (the Welcome's frame), so it sounds the gate's departure -- from the
+  // button and from Enter in either field alike.
   async function handleSubmit() {
+    playUi('click-screen-selection')
     setError(null)
     setSuccess(null)
     setLoading(true)

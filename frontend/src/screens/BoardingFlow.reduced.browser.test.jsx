@@ -34,10 +34,13 @@ vi.mock('../lib/supabase', () => ({
 vi.mock('../lib/audio', async (importOriginal) => ({
   ...(await importOriginal()),
   playPlatformChime: vi.fn(),
+  playVoice: vi.fn(),
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: BoardingFlow } = await import('./BoardingFlow')
+const { playVoice } = await import('../lib/audio')
+const { ARRIVAL_CHIME_MS } = await import('../components/onboarding/TrainArrival')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 const stepOf = screen => screen.container.querySelector('.brd')?.dataset.step
@@ -85,5 +88,9 @@ describe('BoardingFlow under reduced motion', () => {
     expect(screen.container.querySelector('.brd__car--in')).toBeNull()
     expect(document.querySelector('.onb-arrival')).toBeNull()
     expect(screen.container.querySelector('.brd-ride')).not.toBeNull()
+    // The sign is not drawn, but its chime is rung, once, on the beat
+    // the sign would land on: a sound is not motion.
+    const chimes = playVoice.mock.calls.filter(([event]) => event === 'platform-chime')
+    expect(chimes).toEqual([['platform-chime', { after: ARRIVAL_CHIME_MS / 1000 }]])
   })
 })
