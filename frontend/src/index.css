@@ -23160,14 +23160,16 @@ button.brd-stn { cursor: pointer; }
     color: var(--text-on-panel-soft);
   }
   /* The head: the masthead, and Help at its far end -- the lit gate's
-     guide played again (DeskRail), its edge on the pass's below. A pill
-     of ? and its word, in the gates' caption register: the ? a roundel
+     guide played again (DeskRail), its edge on the pass's below and its
+     word on TSUJI's baseline, at TSUJI's size and tracking -- the head
+     aligned by baseline, the pill's baseline its ?'s, which the word
+     shares. A pill of ? and its word: the ? a roundel
      of the lit gate's wash, the pill the rail's own edge. Under a
      pointer or a key the pill lifts to full ink and the roundel turns,
      sumi on ink. Chrome, so no pigment. */
   .desk-rail__head {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     padding-inline-end: var(--sp-4);
   }
   .desk-rail__head > .desk-rail__mast { flex: 1; min-width: 0; }
@@ -23183,7 +23185,7 @@ button.brd-stn { cursor: pointer; }
     background: color-mix(in srgb, var(--text-on-panel) 4%, transparent);
     color: var(--text-on-panel-soft);
     font-family: var(--font-display);
-    font-size: var(--fs-caption);
+    font-size: var(--fs-sm);
     font-weight: 700;
     letter-spacing: var(--tr-caption);
     text-transform: uppercase;
@@ -23200,10 +23202,14 @@ button.brd-stn { cursor: pointer; }
     border-radius: var(--r-pill);
     background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
     color: var(--text-on-panel);
-    font-size: var(--fs-sm);
     letter-spacing: 0;
     transition: color 0.14s ease, background 0.14s ease;
   }
+  /* Each text trimmed to its capitals, so the ? sits in the middle of
+     its roundel and the word in the middle of the pill, where a line box
+     set them high by the room it keeps for descenders. */
+  .desk-rail__help-mark,
+  .desk-rail__help-label { text-box: trim-both cap alphabetic; }
   .desk-rail__help:hover,
   .desk-rail__help:focus-visible {
     color: var(--text-on-panel);

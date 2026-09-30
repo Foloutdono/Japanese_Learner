@@ -96,6 +96,20 @@ function mount(path) {
 
 beforeEach(() => { apiJson.mockClear() })
 
+// Where a text's ink stands: its baseline, from the canvas metrics of
+// its computed font, and its capitals' top and foot.
+function ink(el) {
+  const cs = getComputedStyle(el)
+  const c = document.createElement('canvas').getContext('2d')
+  c.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`
+  const m = c.measureText(el.textContent.toUpperCase())
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  const r = range.getBoundingClientRect()
+  const baseline = r.top + (r.height - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2 + m.fontBoundingBoxAscent
+  return { baseline, middle: baseline - m.actualBoundingBoxAscent / 2 }
+}
+
 describe('Help on the rail', () => {
   it("stands at the masthead's end, naming the lit gate's tour", async () => {
     await mount('/learn')
@@ -124,6 +138,23 @@ describe('Help on the rail', () => {
     expect(r.left).toBeGreaterThan(document.querySelector('.desk-rail__name').getBoundingClientRect().right)
     // A stamped gate opens nothing by itself.
     expect(note()).toBeNull()
+  })
+
+  it("sets its word on TSUJI's line, the ? and the word in the pill's middle", async () => {
+    await mount('/learn')
+    await settle()
+    const name = ink(document.querySelector('.desk-rail__name'))
+    const mark = document.querySelector('.desk-rail__help-mark')
+    const word = ink(document.querySelector('.desk-rail__help-label'))
+    const q = ink(mark)
+    // The word at the name's size, on the name's baseline.
+    expect(getComputedStyle(document.querySelector('.desk-rail__help-label')).fontSize)
+      .toBe(getComputedStyle(document.querySelector('.desk-rail__name')).fontSize)
+    expect(Math.abs(word.baseline - name.baseline)).toBeLessThan(1)
+    // The ? in its roundel's middle, and both in the pill's.
+    const box = el => { const r = el.getBoundingClientRect(); return (r.top + r.bottom) / 2 }
+    expect(Math.abs(q.middle - box(mark))).toBeLessThan(1)
+    expect(Math.abs(word.middle - box(help()))).toBeLessThan(1)
   })
 
   it("plays the gate's guide again in place, and posts no second stamp", async () => {
