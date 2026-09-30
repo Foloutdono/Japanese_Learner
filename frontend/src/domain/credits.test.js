@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import {
   DAILY_REFILL, CAP, SIGNUP_BONUS, COST_PER_REVIEW, FREE_SOURCES,
   FREE_DECKS, FREE_CARDS, PASS_DECKS, PASS_CARDS, REFILL_EVERY_MIN,
-  showsCap, fareFor, runFit, isFreeMode, isFreeLane, refillMinutes, nextCreditClock,
+  showsCap, fareFor, runFit, isFreeMode, isFreeLane, laneFreeShare, refillMinutes, nextCreditClock,
 } from './credits'
 
 // ── 回数券 — the economy as the client states it ──────────────────
@@ -158,6 +158,23 @@ describe('what a run costs', () => {
     expect(runFit(10, SIGNUP_BONUS)).toEqual({ rides: 10, waits: 0 })
     // A pass (null) rides everything.
     expect(runFit(10, null)).toEqual({ rides: 10, waits: 0 })
+  })
+
+  it("counts a lane's learning-step repeats as free, the last of its due cards", () => {
+    const lane = { kind: 'section', source: 'vocab', due: 10, new: 5, free: false, freeCards: 4 }
+    // The whole lane: every repeat.
+    expect(laneFreeShare(lane, 15)).toBe(4)
+    // Cut short: the repeats are the least overdue, so the first six
+    // due cards are the paid ones and none of the repeats is promised.
+    expect(laneFreeShare(lane, 6)).toBe(0)
+    expect(laneFreeShare(lane, 8)).toBe(2)
+    // The day's new cards come after the due ones, and are paid.
+    expect(laneFreeShare(lane, 12)).toBe(4)
+    // A free line rides whole; a lane from before freeCards, none.
+    expect(laneFreeShare({ ...lane, source: 'kana', free: true }, 7)).toBe(7)
+    expect(laneFreeShare({ kind: 'section', source: 'vocab', due: 3 }, 3)).toBe(0)
+    expect(laneFreeShare(lane, 0)).toBe(0)
+    expect(laneFreeShare(null, 3)).toBe(0)
   })
 
   it('rides the free ones whatever the balance is', () => {

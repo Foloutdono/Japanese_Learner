@@ -98,6 +98,24 @@ export function isFreeLane(lane) {
   return lane.kind !== 'personal' && FREE_SOURCES.includes(lane.source)
 }
 
+/**
+ * How many of the `share` cards a run takes from `lane` ride free: all
+ * of them on a free line, else the lane's learning steps' repeats
+ * (`lane.freeCards`, backend/routes/today.py) -- a repeat rides free on
+ * every line, the first sight and the graduated reviews are paid
+ * (backend/core/credits.py, fare). A lane serves its due cards before
+ * the day's new ones, most overdue first, and a repeat fell due minutes
+ * ago, so the repeats are counted as the last of its due cards: a run
+ * cut short never promises one it does not carry.
+ */
+export function laneFreeShare(lane, share) {
+  if (!lane || !(share > 0)) return 0
+  if (isFreeLane(lane)) return share
+  const due = Math.max(0, lane.due ?? 0)
+  const repeats = Math.min(due, Math.max(0, lane.freeCards ?? 0))
+  return Math.max(0, Math.min(share, due) - (due - repeats))
+}
+
 /** The fare a run of `due` reviews costs, `free` of which ride free. */
 export function fareFor(due, free = 0) {
   return Math.max(0, due - Math.max(0, free)) * COST_PER_REVIEW

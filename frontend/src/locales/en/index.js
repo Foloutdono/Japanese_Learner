@@ -68,6 +68,7 @@ const nav = {
   balanceNext:       (at) => `next at ${at}`,
   balanceHolds:      (cap) => `holds up to ${cap}`,
   balanceKanaFree:   'Kana reviews cost nothing',
+  balanceStepsFree:  'A card you are still learning repeats for free: you pay when you first meet it, then for each review once it has stuck',
   gateShort:         (rides, due) => `Only ${rides} of the ${due} can board`,
   gateNoCredits:     (at) => (at ? `No credits left — +1 at ${at}` : 'No credits left'),
   runOutTitle:       'Out of credits',

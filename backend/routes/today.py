@@ -142,9 +142,23 @@ def _review_cost(raw_id: str, mode: str) -> int:
     return credits.cost_of(loc[0]) if loc else credits.COST_PER_REVIEW
 
 
-def _affordable(user_id: str, picked: list[tuple]) -> list[tuple]:
+def _repeats(user_id: str, due_rows: list[dict]) -> set[tuple[str, str]]:
+    """(raw id, mode) of the due rows whose review is a learning step's
+    repeat -- free on every line (core/credits.py, fare). The day's
+    ration is never one: a new card's first review is paid."""
+    cut = len(user_id) + 1
+    return {(row["card_id"][cut:], row["mode"]) for row in due_rows if row.get("repeat")}
+
+
+def _card_cost(key: tuple, raw_id: str, repeats: set) -> int:
+    """One queued card's fare: its lane's, or nothing on a repeat."""
+    return credits.fare(_lane_cost(key), (raw_id, key[-1]) in repeats)
+
+
+def _affordable(user_id: str, picked: list[tuple], repeats: set = frozenset()) -> list[tuple]:
     """Under enforcement, the paid cards a balance cannot cover, dropped
-    from a batch (plan 069). Free cards ride regardless.
+    from a batch (plan 069). Free cards -- a free line's, and a
+    learning step's repeat on any line -- ride regardless.
 
     This trims the BATCH where it used to shorten the requested count.
     A count clamped to the balance was right while every card cost the
@@ -163,7 +177,7 @@ def _affordable(user_id: str, picked: list[tuple]) -> list[tuple]:
         return picked
     kept = []
     for key, raw_id in picked:
-        cost = _lane_cost(key)
+        cost = _card_cost(key, raw_id, repeats)
         if cost > have:
             continue
         have -= cost
@@ -377,6 +391,7 @@ def get_today(user_id: str = Depends(get_user_id)):
         _new_lanes(user_id, level),
     )
 
+    repeats = _repeats(user_id, due_rows)
     by_source: dict[str, int] = defaultdict(int)
     breakdown = []
     for key, ids in lanes.items():
@@ -392,6 +407,10 @@ def get_today(user_id: str = Depends(get_user_id)):
         # and the gate has to both mark the row and leave it out of its
         # own arithmetic.
         lane["free"] = _lane_cost(key) == 0
+        # And how many of its cards ride free: all of a free lane's,
+        # else its learning steps' repeats (credits.fare), which a paid
+        # lane carries among the cards it charges for.
+        lane["freeCards"] = sum(1 for rid in ids if _card_cost(key, rid, repeats) == 0)
         breakdown.append(lane)
         by_source["personal" if key[0] == daily_queue.PERSONAL else key[1]] += len(ids)
 
@@ -409,8 +428,8 @@ def get_today(user_id: str = Depends(get_user_id)):
     # The fare is what the run COSTS, which is no longer the same
     # number as what it CLEARS: the kana lanes are counted into `total`
     # -- they are reviews the run really will get through -- and out of
-    # this (core/credits.py).
-    fare = sum(_lane_cost(key) * len(ids) for key, ids in lanes.items())
+    # this (core/credits.py), as are the learning steps' repeats.
+    fare = sum(_card_cost(key, rid, repeats) for key, ids in lanes.items() for rid in ids)
     # The engine restricts this to servable MODES (see
     # SRSEngine._servable_filter), which is what keeps the sentence
     # screens' own tracks -- scheduled under a mode with no lane behind
@@ -698,7 +717,8 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     # on being served, so an empty balance ends the run only once the
     # kana in it is cleared too. A pass has no balance to stop at, and
     # in shadow mode the queue is untouched.
-    picked = _affordable(user_id, daily_queue.interleave(chosen, count))
+    repeats = _repeats(user_id, due_rows)
+    picked = _affordable(user_id, daily_queue.interleave(chosen, count), repeats)
     if not picked:
         return {"cards": [], "beyond": 0}
     # 残り — what the queue still holds past this batch and past what
@@ -709,7 +729,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     # while the queue went on serving -- a card rated a miss is due
     # again minutes later, and others fall due as the run goes on.
     owed = sum(len(ids) for ids in chosen.values())
-    beyond = len(_affordable(user_id, daily_queue.interleave(chosen, owed))) - len(picked)
+    beyond = len(_affordable(user_id, daily_queue.interleave(chosen, owed), repeats)) - len(picked)
 
     # One bulk lookup per mode for just the handful being served, exactly
     # as the section endpoints do -- so every card arrives carrying its
@@ -798,8 +818,8 @@ def post_today_review(payload: TodayReviewPayload, user_id: str = Depends(get_us
     # review (plan 069): a rejected review is not a ride. Nothing at
     # all when the card is on a free line -- see _review_cost, which
     # is careful to price the CARD and not the mode key the client
-    # chose to send.
-    fare = credits.spend(user_id, _review_cost(payload.card_id, payload.mode), card_id)
+    # chose to send -- nor on a learning step's repeat (credits.fare).
+    fare = credits.spend(user_id, credits.fare(_review_cost(payload.card_id, payload.mode), s["repeat"]), card_id)
     return {
         "card_id": payload.card_id,
         "interval": s["interval"],

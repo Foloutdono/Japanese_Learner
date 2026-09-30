@@ -69,6 +69,7 @@ const nav = {
   balanceNext:       (at) => `prochain à ${at}`,
   balanceHolds:      (cap) => `jusqu’à ${cap}`,
   balanceKanaFree:   'Les révisions de kana ne coûtent rien',
+  balanceStepsFree:  'Une carte en apprentissage se répète gratuitement : tu paies la première vue, puis chaque révision une fois la carte acquise',
   gateShort:         (rides, due) => `Seulement ${rides} sur ${due} peuvent embarquer`,
   gateNoCredits:     (at) => (at ? `Plus de crédits — +1 à ${at}` : 'Plus de crédits'),
   runOutTitle:       'Plus de crédits',

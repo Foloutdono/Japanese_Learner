@@ -15,7 +15,7 @@ import { Loading } from '../ui/Loading'
 import { CheckIcon, ChevronIcon, HourglassIcon } from '../ui/Icons'
 import { useCredits } from '../../stores/credits'
 import { publishLeft } from '../../stores/gateRun'
-import { runFit, isFreeLane, nextCreditClock, showsCap, CAP } from '../../domain/credits'
+import { runFit, isFreeLane, laneFreeShare, nextCreditClock, showsCap, CAP } from '../../domain/credits'
 import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, isMainLane, TAKE_STEPS } from '../../domain/lanes'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
@@ -223,10 +223,11 @@ function runOf({ today, isOn, take, metered, credits, enforced, lang }) {
   const shares = splitTake(queue, cut)
   const share = lane => (isOn(lane) ? shares.get(lane.id) ?? 0 : 0)
   const taken = cut ?? chosenTotal
-  // Of the chosen cards, the ones that cost nothing. A pass is not
-  // asked: nothing costs anything on one, so nothing is worth marking
-  // free either -- the tag would be on every row and say nothing.
-  const free = metered ? queue.filter(isFreeLane).reduce((n, l) => n + (shares.get(l.id) ?? 0), 0) : 0
+  // Of the chosen cards, the ones that cost nothing: a free line's and
+  // the learning steps' repeats on any line. A pass is not asked:
+  // nothing costs anything on one, so nothing is worth marking free
+  // either -- the tag would be on every row and say nothing.
+  const free = metered ? queue.reduce((n, l) => n + laneFreeShare(l, shares.get(l.id) ?? 0), 0) : 0
   const balance = metered ? credits.balance : null
   const { rides, waits } = runFit(taken, balance, free)
   const spr = today.seconds_per_review
@@ -556,7 +557,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
                   const mine = share(lane)
                   const all = laneCount(lane)
                   const isFree = metered && isFreeLane(lane)
-                  const waitsHere = paidWait && on && mine > 0 && !isFreeLane(lane)
+                  const waitsHere = paidWait && on && laneFreeShare(lane, mine) < mine
                   return (
                     <button
                       key={lane.id}
