@@ -656,6 +656,10 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 @keyframes gain { 0% { opacity: 0; transform: translateY(4px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
 @keyframes shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 @keyframes road-train { 0% { transform: translateX(-100%); } 60%, 100% { transform: translateX(560%); } }
+/* The light is 18% of the road: its front reaches the map at 456%, and
+   it has left the road at 556%, at the same pace. */
+@keyframes road-train-out { 0% { transform: translateX(-100%); } 47.4% { transform: translateX(456%); } 55.9%, 100% { transform: translateX(556%); } }
+@keyframes road-train-on { 0% { stroke-dashoffset: 16; opacity: .9; } 55% { stroke-dashoffset: -84; opacity: .9; } 60%, 100% { stroke-dashoffset: -84; opacity: 0; } }
 @keyframes fill-in { 0%, 35% { color: transparent; } 45%, 100% { color: var(--text-primary); } }
 @keyframes mark-right { 0%, 35% { border-color: var(--surface-line); } 45%, 100% { border-color: var(--success); box-shadow: inset 0 0 0 1px var(--success); } }
 @keyframes caret { 50% { opacity: 0; } }
@@ -787,7 +791,15 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .map__line { stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; animation: draw .5s calc(1.1s + var(--k) * 90ms) cubic-bezier(.4, 0, .2, 1) forwards; }
   .map__stn { animation: arrive-soft .4s calc(1.45s + var(--k) * 90ms) backwards; }
   .map__train { animation: train 4.6s calc(2.6s + var(--k) * .65s) linear infinite; }
-  .map__train--road { animation-delay: 2.1s; }
+  /* The gate's light runs on into the map: one light on the gold road,
+     handed from the page's road to the map's at the junction. Both run
+     at an even pace on the trains' 4.6s round, the map's leaving as the
+     page's reaches the map (47.4% of the round, 2.18s after its 2s
+     start). The road train has no --k, so it names its own delay: a
+     calc() over an unset var() drops the whole shorthand, and it never
+     ran. */
+  .hero__gate .road::after { animation: road-train-out 4.6s 2s linear infinite; }
+  .map__train--road { stroke-dasharray: 16 84; stroke-dashoffset: 16; animation: road-train-on 4.6s 4.18s linear infinite; }
   .map__hub { fill: var(--bg-main); stroke: var(--text-primary); stroke-width: 5; }
   .map__ink { fill: var(--text-primary); }
   .map__ring { fill: var(--bg-main); stroke: var(--c); stroke-width: 4; }
@@ -841,7 +853,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   /* Kept: every fade. Dropped: every movement, and whatever loops. */
   .top.has-board .top__board, .js [data-reveal].in, .js [data-stagger].in > *, .hero__in > *, .mock:not([hidden]) .mock__body > *, .mock:not([hidden]) .mock__foot > *, .plate--line.in .lrow, .flip.is-arriving, .lrow__eta.is-new, .stamps__row.in .stamp { animation-name: arrive-soft; }
   .flip.is-leaving { animation-name: arrive-soft; animation-direction: reverse; }
-  .gate, .gate__rip, .play, .roll, .mock__gate, .road::after, .lrow__stop--here::after, .mk-gram__blank, .mk-gram__opts .is-right, .mk-exam__opts .is-right, .mk-sub b, .mk-field__typed::after, .opt--wrong, .features .ftab[aria-selected="true"]::after, .hero__gate .road, .plate--line.in .lrows::before, .split__copy.in .day__bars .bar { animation: none; }
+  .gate, .gate__rip, .play, .roll, .mock__gate, .road::after, .hero__gate .road::after, .lrow__stop--here::after, .mk-gram__blank, .mk-gram__opts .is-right, .mk-exam__opts .is-right, .mk-sub b, .mk-field__typed::after, .opt--wrong, .features .ftab[aria-selected="true"]::after, .hero__gate .road, .plate--line.in .lrows::before, .split__copy.in .day__bars .bar { animation: none; }
   .map__road, .map__line { animation: none; stroke-dashoffset: 0; opacity: 1; }
   .map__train { display: none; }
   .stop.in .stop__rail i, .stop.in .stop__rail b, .stop.is-here .stop__ring::after, .hero__cue svg, .nudge::after { animation: none; }
