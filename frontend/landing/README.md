@@ -145,3 +145,7 @@ gate). Four things make that work, and each has a test:
   the rest of the tab.
 - **The installed app opens at `/app`** (the manifest's `start_url`),
   keeping its `id` of `/`, so every existing install stays the same app.
+- **`npm run dev` and `npm run preview` route as the deployment does.**
+  `appShell.js`'s `siteRoutes` reads `vercel.json` itself, so the landing
+  page is at `/` and `/en` there too, the old addresses redirect, and the
+  app is at `/app` and every app route. Open `/app` for the app.

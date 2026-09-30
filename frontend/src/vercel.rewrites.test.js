@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync, existsSync } from 'node:fs'
-import { APP_SHELL } from '../appShell.js'
+import { readFileSync, existsSync, mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { APP_SHELL, routeLike } from '../appShell.js'
 
 // The deployment's routing table (vercel.json). Two things about it are
 // load-bearing enough to be worth a test rather than a comment:
@@ -95,5 +97,75 @@ describe('the vercel routing table', () => {
         expect(matches(path), path).toBe(false)
       }
     })
+  })
+})
+
+// The dev server and `vite preview` route by the same table (appShell.js,
+// siteRoutes), so `/` is the landing page there too: dev mirrors prod.
+describe('the dev server and preview, routed by the same table', () => {
+  // A directory holding `files`, standing for public/ or the build.
+  function served(files) {
+    const dir = mkdtempSync(join(tmpdir(), 'routes-'))
+    for (const file of files) {
+      mkdirSync(join(dir, file, '..'), { recursive: true })
+      writeFileSync(join(dir, file), '')
+    }
+    return dir
+  }
+  const LANDING = ['landing/index.html', 'landing/en/index.html', 'landing/landing.js', 'privacy.html', 'sw.js']
+  const publicDir = served(LANDING)
+  const buildDir = served([...LANDING, APP_SHELL, 'assets/index-abc.js'])
+
+  // What the middleware does with a request: sent on (to which url), or
+  // answered with a redirect.
+  function route(dir, url, method = 'GET') {
+    const req = { url, method }
+    const res = { headers: {}, setHeader(k, v) { this.headers[k] = v }, end() { this.ended = true } }
+    let passed = false
+    routeLike(config, dir)(req, res, () => { passed = true })
+    return passed ? { url: req.url } : { status: res.statusCode, location: res.headers.Location }
+  }
+
+  it('serves the landing at / and /en, its query kept', () => {
+    for (const dir of [publicDir, buildDir]) {
+      expect(route(dir, '/')).toEqual({ url: '/landing/index.html' })
+      expect(route(dir, '/?landing')).toEqual({ url: '/landing/index.html?landing' })
+      expect(route(dir, '/?code=abc')).toEqual({ url: '/landing/index.html?code=abc' })
+      expect(route(dir, '/en')).toEqual({ url: '/landing/en/index.html' })
+      expect(route(dir, '/en/')).toEqual({ url: '/landing/en/index.html' })
+      expect(route(dir, '/privacy')).toEqual({ url: '/privacy.html' })
+    }
+  })
+
+  it('sends the old addresses on, as the deployment does', () => {
+    expect(route(publicDir, '/landing')).toEqual({ status: 308, location: '/' })
+    expect(route(publicDir, '/landing/en/')).toEqual({ status: 308, location: '/en' })
+    expect(route(buildDir, '/landing?x=1')).toEqual({ status: 308, location: '/?x=1' })
+  })
+
+  it('leaves the app routes to the dev server, which serves the source index.html', () => {
+    for (const url of ['/app', '/today', '/learn/kana', '/src/main.jsx', '/@vite/client']) {
+      expect(route(publicDir, url), url).toEqual({ url })
+    }
+  })
+
+  it('serves the app document for the app routes on preview, as the fallback does', () => {
+    for (const url of ['/app', '/today', '/learn/kana']) {
+      expect(route(buildDir, url), url).toEqual({ url: `/${APP_SHELL}` })
+    }
+  })
+
+  it('serves a file as it is, and a missing bundle as a 404', () => {
+    expect(route(buildDir, '/sw.js')).toEqual({ url: '/sw.js' })
+    expect(route(buildDir, '/assets/index-abc.js')).toEqual({ url: '/assets/index-abc.js' })
+    expect(route(buildDir, '/assets/index-gone.js')).toEqual({ url: '/assets/index-gone.js' })
+    expect(route(buildDir, '/landing/landing.js')).toEqual({ url: '/landing/landing.js' })
+  })
+
+  it('leaves the proxied paths and anything but a read alone', () => {
+    expect(route(buildDir, '/api/today')).toEqual({ url: '/api/today' })
+    expect(route(buildDir, '/kanjivg/0999c.svg')).toEqual({ url: '/kanjivg/0999c.svg' })
+    expect(route(buildDir, '/', 'POST')).toEqual({ url: '/' })
+    expect(route(buildDir, '/%E0%A4%A')).toEqual({ url: `/${APP_SHELL}` })
   })
 })

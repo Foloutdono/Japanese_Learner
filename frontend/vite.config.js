@@ -3,13 +3,18 @@
 // every file browser globals only, and this config is the one file in
 // src reach that legitimately runs in Node.
 import process from 'node:process';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { playwright } from '@vitest/browser-playwright';
 import { workbox } from './pwa.workbox.js';
-import { appShell } from './appShell.js';
+import { appShell, siteRoutes } from './appShell.js';
+
+// The deployment's routing table: the dev server and `vite preview`
+// route by it too, so `/` is the landing page there as in production.
+const VERCEL = JSON.parse(readFileSync(new URL('./vercel.json', import.meta.url), 'utf8'));
 
 // One browser project per viewport, from one helper, so the two lanes
 // cannot drift apart in anything but the viewport they run at.
@@ -126,6 +131,7 @@ export default defineConfig(({ mode }) => {
     // The web build writes the app's document as app.html, so `/` can be
     // the landing page (plan 167): see appShell.js.
     appShell(mode),
+    siteRoutes(VERCEL),
     // ── 駅舎 — the installable app (plan 065) ──
     // The web build only: the native shell's WebView (custom scheme on
     // iOS) has no service worker and its assets ARE the bundle, and a

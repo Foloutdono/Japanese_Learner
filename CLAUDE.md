@@ -1545,7 +1545,10 @@ The landing page is the site's **`/`** (and `/en`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`
 (`appShell.js`) so that `vercel.json` can rewrite `/` to the page, and the
 page sends a signed-in learner and every sign-in's return on to `/app`
-before it paints (`frontend/landing/README.md`, "`/` and the app"). It is a
+before it paints (`frontend/landing/README.md`, "`/` and the app").
+**`npm run dev` and `npm run preview` route by `vercel.json` too**
+(`appShell.js`'s `siteRoutes`), so locally `/` is the landing page as well:
+open **`/app`** (or any app route) for the app. It is a
 **static page outside `src/`** (`frontend/landing/`,
 built into `public/landing/` and committed, like `public/privacy.html`):
 none of the app's CSS rules or guards apply to it, so it copies the
