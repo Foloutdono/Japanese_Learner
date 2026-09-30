@@ -167,11 +167,13 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 .motion .sec--band:not(.in)::before { opacity: 0; }
 
 .stop { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-7); }
-.stop__ring { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 2px solid var(--accent2); border-radius: var(--r-pill); background: var(--bg-main); font-size: var(--fs-caption); color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary)); transition: background-color .3s ease, color .3s ease; }
+.stop__ring { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 2px solid var(--accent2); border-radius: var(--r-pill); background: var(--bg-main); font-size: var(--fs-sm); color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary)); transition: background-color .3s ease, color .3s ease; }
 .stop__ring [lang="ja"] { font-family: var(--font-jp); }
 .stop__name { font-weight: 700; font-size: var(--fs-caption); letter-spacing: var(--tr-caption); text-transform: uppercase; white-space: nowrap; color: var(--text-secondary); transition: color .3s ease; }
 /* The stop being read is lit, as the app lights the one you stand at. */
-.stop.is-here .stop__ring { background: var(--accent2); color: var(--text-on-fill); }
+/* Lit, the ring is the gate's gold, as Board is: the washi page's accent2
+   is too deep a gold for dark ink at a caption's size. */
+.stop.is-here .stop__ring { border-color: var(--gate-gold-deep); background: radial-gradient(130% 160% at 28% 0%, var(--gate-gold-lit) 0%, var(--gate-gold) 55%, var(--gate-gold-deep) 100%); color: var(--text-on-fill); }
 .stop.is-here .stop__ring::after { content: ""; position: absolute; inset: -5px; border: 2px solid var(--accent2); border-radius: inherit; opacity: 0; animation: rip 1.4s ease-out; }
 .stop.is-here .stop__name { color: var(--text-primary); }
 /* The rail to the next stop, laid as the sign arrives, a train run
@@ -794,7 +796,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 
   .sec { padding: var(--sp-9) 0; }
   .stop { gap: var(--sp-5); }
-  .stop__ring { width: 36px; height: 36px; font-size: var(--fs-sm); }
+  .stop__ring { width: 36px; height: 36px; font-size: var(--fs-body); }
   .stop__name { font-size: var(--fs-sm); }
   .stop__next { font-size: var(--fs-sm); }
   .head2 { display: grid; grid-template-columns: 560px 1fr; gap: var(--sp-9); align-items: end; }
