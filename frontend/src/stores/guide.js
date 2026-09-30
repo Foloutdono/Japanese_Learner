@@ -10,10 +10,14 @@ import { useSyncExternalStore } from 'react'
 //   shown  — which gates opened their guide this SESSION, so a gate
 //            revisited before the profile store has caught up with the
 //            stamp does not open it twice.
+//   asked  — the gate whose guide the learner asked for from the desk
+//            rail's Help (components/chrome/DeskRail): played again on
+//            demand, whatever the stamp says, once its screen is ready.
 //
 // Same shape as stores/departure: a value and a set of listeners.
 const listeners = new Set()
 let held = false
+let asked = null
 const shown = new Set()
 
 function notify() { listeners.forEach(fn => fn()) }
@@ -35,3 +39,17 @@ export function useGuideHeld() {
 export function markShown(gate) { shown.add(gate) }
 export function wasShown(gate) { return shown.has(gate) }
 export function forgetShown() { shown.clear() }
+
+/** Ask for `gate`'s guide now (the rail's Help), or drop the ask (null). */
+export function askGuide(gate) {
+  if (asked === gate) return
+  asked = gate
+  notify()
+}
+
+/** The same, read once, for the rail's own effect. */
+export function guideAsked() { return asked }
+
+export function useGuideAsked() {
+  return useSyncExternalStore(subscribe, () => asked, () => null)
+}

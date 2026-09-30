@@ -23159,6 +23159,43 @@ button.brd-stn { cursor: pointer; }
     text-transform: uppercase;
     color: var(--text-on-panel-soft);
   }
+  /* The head: the masthead, and Help at its far end -- the lit gate's
+     guide played again (DeskRail), its edge on the pass's below. A roundel in the panel's inks, the
+     rail's own edge for its ring, washed and ringed as a gate is under
+     a pointer and a key: chrome, so no pigment. */
+  .desk-rail__head {
+    display: flex;
+    align-items: center;
+    padding-inline-end: var(--sp-4);
+  }
+  .desk-rail__head > .desk-rail__mast { flex: 1; min-width: 0; }
+  .desk-rail__help {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--chrome-edge);
+    border-radius: var(--r-pill);
+    background: transparent;
+    color: var(--text-on-panel-soft);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .desk-rail__help:hover,
+  .desk-rail__help:focus-visible {
+    color: var(--text-on-panel);
+    background: color-mix(in srgb, var(--text-on-panel) 6%, transparent);
+  }
+  .desk-rail__help:focus-visible {
+    outline: 2px solid var(--text-on-panel);
+    outline-offset: 2px;
+  }
   .desk-rail__list,
   .desk-rail__stations {
     margin: 0;

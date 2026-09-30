@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiJson } from '../lib/api'
 import { supabase } from '../lib/supabase'
 import { refreshSummary, useProfileSummary } from '../stores/profileSummary'
-import { holdGuide, markShown, useGuideHeld, wasShown } from '../stores/guide'
+import { askGuide, holdGuide, markShown, useGuideAsked, useGuideHeld, wasShown } from '../stores/guide'
 import { GUIDE_CHAIN } from '../components/guide/guides'
 import { TAB_IDS } from '../config/tabs'
 
@@ -21,6 +21,10 @@ import { TAB_IDS } from '../config/tabs'
 // the guide nag on every launch, never an authority. A profile the
 // store has not answered yet opens nothing: a lesson is never shown at
 // the cost of a door, and never twice for want of an answer.
+//
+// Asked for (the desk rail's Help, stores/guide's `asked`), it opens
+// again whatever the stamp says -- still only once the screen is ready
+// and nothing holds it -- and the ask is spent.
 const KEY = 'jp-guided'
 const KEEP = 8
 
@@ -53,6 +57,7 @@ export function forgetGuidedHere() {
 export function useGuide(gate, ready = true) {
   const summary = useProfileSummary()
   const held = useGuideHeld()
+  const asked = useGuideAsked()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [userId, setUserId] = useState(null)
@@ -68,23 +73,33 @@ export function useGuide(gate, ready = true) {
     // (a fixture, a store seeded by hand, an older server) is not a
     // learner who has seen nothing, and a lesson is never shown on a
     // guess.
-    if (open || held || !ready || !summary?.guided || !TAB_IDS.includes(gate)) return
+    if (open || held || !ready || !TAB_IDS.includes(gate)) return
+    if (asked === gate) {
+      askGuide(null)
+      markShown(gate)
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the decision reads four sources that all arrive asynchronously, and the ask a fifth; there is no render-time value to derive it from.
+      setOpen(true)
+      return
+    }
+    if (!summary?.guided) return
     if (wasShown(gate) || summary.guided[gate]) return
     if (userId && noted(userId).has(gate)) return
     markShown(gate)
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the decision reads four sources that all arrive asynchronously; there is no render-time value to derive it from.
     setOpen(true)
-  }, [open, held, ready, summary, gate, userId])
+  }, [open, held, ready, summary, gate, userId, asked])
 
   function onEnd(skipped) {
     setOpen(false)
-    supabase.auth.getSession().then(({ data }) => {
-      const session = data?.session
-      if (!session) return
-      return apiJson(`/api/onboarding/guided/${gate}`, session, { method: 'POST' })
-        .then(() => refreshSummary())
-        .catch(() => note(session.user?.id ?? null, gate))
-    }).catch(() => {})
+    // A guide played again on demand has its stamp already.
+    if (!summary?.guided?.[gate]) {
+      supabase.auth.getSession().then(({ data }) => {
+        const session = data?.session
+        if (!session) return
+        return apiJson(`/api/onboarding/guided/${gate}`, session, { method: 'POST' })
+          .then(() => refreshSummary())
+          .catch(() => note(session.user?.id ?? null, gate))
+      }).catch(() => {})
+    }
     if (GUIDE_CHAIN && !skipped) {
       const i = TAB_IDS.indexOf(gate)
       const nextGate = TAB_IDS[i + 1]
