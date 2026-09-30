@@ -62,6 +62,11 @@ import { GUIDES } from '../guide/guides'
 // lit gate is said by its ground and its rule, not by a glyph that grows.
 const GLYPH = 21
 
+// Help's ?, as Space Grotesk Bold draws it (its outline, cropped to its
+// ink): a shape stands in the middle of its roundel at any zoom, where a
+// letter's baseline is snapped to the pixel grid and stood a pixel high.
+const HELP_Q = 'M175 484V460Q175 409 195.5 376Q216 343 262 321L279 313Q324 292 348 268Q372 244 372 204Q372 175 357.5 154.5Q343 134 317 123Q291 112 256 112Q220 112 191.5 124Q163 136 146.5 160Q130 184 130 220V242H0V222Q0 153 34 103Q68 53 126 26.5Q184 0 256 0Q327 0 382.5 26Q438 52 470 98Q502 144 502 204Q502 264 480 302.5Q458 341 424.5 364.5Q391 388 356 405L339 413Q321 421 314 432.5Q307 444 307 466V484ZM245 728Q205 728 177.5 701.5Q150 675 150 633Q150 591 177.5 564.5Q205 538 245 538Q286 538 313 564.5Q340 591 340 633Q340 675 313 701.5Q286 728 245 728Z'
+
 export function DeskRail() {
   const { t } = useLang()
   const { pathname } = useLocation()
@@ -119,7 +124,9 @@ export function DeskRail() {
             aria-keyshortcuts="?"
             onClick={help}
           >
-            <span className="desk-rail__help-mark" aria-hidden="true">?</span>
+            <span className="desk-rail__help-mark" aria-hidden="true">
+              <svg viewBox="0 0 502 728" focusable="false"><path d={HELP_Q} fill="currentColor" /></svg>
+            </span>
             <span className="desk-rail__help-label">{t.guideHelp}</span>
           </button>
         )}

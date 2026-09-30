@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+// The shipped face (main.jsx), so the ink is measured in the font drawn.
+import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
 // ── 机 — Help on the rail (the owner's ask, 2026-09-30) ─────────────
@@ -124,7 +126,8 @@ describe('Help on the rail', () => {
     // the accessible name opens with the word the learner reads.
     const mark = btn.querySelector('.desk-rail__help-mark')
     const label = btn.querySelector('.desk-rail__help-label')
-    expect(mark.textContent).toBe('?')
+    // The ? is the font's outline, a shape the renderer cannot snap.
+    expect(mark.querySelector('svg path').getAttribute('d')).toBeTruthy()
     expect(label.textContent).toBe(fr.guideHelp)
     expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
     const m = mark.getBoundingClientRect()
@@ -142,19 +145,22 @@ describe('Help on the rail', () => {
 
   it("sets its word on TSUJI's line, the ? and the word in the pill's middle", async () => {
     await mount('/learn')
+    await document.fonts.ready
     await settle()
     const name = ink(document.querySelector('.desk-rail__name'))
     const mark = document.querySelector('.desk-rail__help-mark')
     const word = ink(document.querySelector('.desk-rail__help-label'))
-    const q = ink(mark)
     // The word at the name's size, on the name's baseline.
     expect(getComputedStyle(document.querySelector('.desk-rail__help-label')).fontSize)
       .toBe(getComputedStyle(document.querySelector('.desk-rail__name')).fontSize)
     expect(Math.abs(word.baseline - name.baseline)).toBeLessThan(1)
-    // The ? in its roundel's middle, and both in the pill's.
+    // The ? in its roundel's middle by geometry, the roundel in the
+    // pill's, and the word within the half pixel it is lowered by.
     const box = el => { const r = el.getBoundingClientRect(); return (r.top + r.bottom) / 2 }
-    expect(Math.abs(q.middle - box(mark))).toBeLessThan(1)
-    expect(Math.abs(word.middle - box(help()))).toBeLessThan(1)
+    expect(Math.abs(box(mark.querySelector('svg')) - box(mark))).toBeLessThan(0.25)
+    expect(Math.abs(box(mark) - box(help()))).toBeLessThan(0.5)
+    expect(word.middle - box(help())).toBeGreaterThanOrEqual(0)
+    expect(word.middle - box(help())).toBeLessThan(1)
   })
 
   it("plays the gate's guide again in place, and posts no second stamp", async () => {
