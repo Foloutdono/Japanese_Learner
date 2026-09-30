@@ -3,6 +3,8 @@ import { readFileSync, existsSync } from 'node:fs'
 import { DARK, LIGHT, SCALE } from '../landing/tokens.mjs'
 import { PAGES, SITE_ORIGIN, STORES, PRESENTATION, CLIPS } from '../landing/config.mjs'
 import { landingFiles } from '../landing/build.mjs'
+import { forwardScript } from '../landing/page.mjs'
+import { sessionKey, APP_ENTRY } from '../landing/config.mjs'
 import { STRINGS } from '../landing/strings.mjs'
 import { readFacts } from '../landing/content.mjs'
 
@@ -104,6 +106,52 @@ describe('the landing page', () => {
       const script = read('public/landing/landing.js')
       for (const [, hook] of script.matchAll(/\[data-([a-z-]+)/g)) {
         expect(html, `data-${hook}`).toContain(`data-${hook}`)
+      }
+    })
+  })
+
+  // `/` is the page, so it sends on what used to open the app there.
+  describe('its door to the app', () => {
+    const run = ({ search = '', hash = '', session = false, stay = false } = {}) => {
+      const kept = new Map(stay ? [['tsuji-landing', '1']] : [])
+      let to = null
+      const location = { search, hash, replace: url => { to = url } }
+      const localStorage = { getItem: key => (session && key === sessionKey() ? '{"access_token":"a"}' : null) }
+      const sessionStorage = { getItem: key => kept.get(key) ?? null, setItem: (key, value) => kept.set(key, value) }
+      new Function('location', 'localStorage', 'sessionStorage', forwardScript())(location, localStorage, sessionStorage)
+      return { to, kept }
+    }
+
+    it('lets a visitor read the page, its section links included', () => {
+      expect(run().to).toBeNull()
+      expect(run({ hash: '#faq' }).to).toBeNull()
+      expect(run({ search: '?t=15', hash: '#presentation' }).to).toBeNull()
+    })
+
+    it('sends a signed-in learner to the app', () => {
+      expect(run({ session: true }).to).toBe(APP_ENTRY)
+    })
+
+    it('sends every sign-in\u2019s return on with what it carries', () => {
+      expect(run({ search: '?code=abc' }).to).toBe(`${APP_ENTRY}?code=abc`)
+      expect(run({ hash: '#access_token=a&refresh_token=b&type=signup' }).to).toBe(`${APP_ENTRY}#access_token=a&refresh_token=b&type=signup`)
+      expect(run({ search: '?error=access_denied&error_code=x' }).to).toBe(`${APP_ENTRY}?error=access_denied&error_code=x`)
+      expect(run({ hash: '#error=server_error&error_description=d' }).to).toBe(`${APP_ENTRY}#error=server_error&error_description=d`)
+    })
+
+    it('shows a signed-in learner the page on ?landing, for the rest of the tab', () => {
+      const first = run({ session: true, search: '?landing' })
+      expect(first.to).toBeNull()
+      expect(first.kept.get('tsuji-landing')).toBe('1')
+      expect(run({ session: true, stay: true }).to).toBeNull()
+    })
+
+    it('runs in both pages\u2019 heads, before the page is drawn', () => {
+      for (const page of Object.values(PAGES)) {
+        const html = read(page.out)
+        const at = html.indexOf(`<script>${forwardScript()}</script>`)
+        expect(at, page.lang).toBeGreaterThan(0)
+        expect(at, page.lang).toBeLessThan(html.indexOf('</head>'))
       }
     })
   })

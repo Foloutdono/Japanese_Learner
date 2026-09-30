@@ -17,16 +17,42 @@
       "destination": "/privacy.html"
     },
     {
-      "source": "/landing",
+      "source": "/",
       "destination": "/landing/index.html"
     },
     {
-      "source": "/landing/en",
+      "source": "/en",
+      "destination": "/landing/en/index.html"
+    },
+    {
+      "source": "/en/",
       "destination": "/landing/en/index.html"
     },
     {
       "source": "/((?!assets/).*)",
-      "destination": "/index.html"
+      "destination": "/app.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/landing",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/landing/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/landing/en",
+      "destination": "/en",
+      "permanent": true
+    },
+    {
+      "source": "/landing/en/",
+      "destination": "/en",
+      "permanent": true
     }
   ],
   "headers": [

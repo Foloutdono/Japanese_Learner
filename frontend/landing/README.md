@@ -2,8 +2,9 @@
 
 The public page for search and the stores: 辻 the crossroads (the owner's
 pick A on the canvas "Tsuji — landing page", improved with the others' best
-ideas). French at `/landing/`, English at `/landing/en/`, until the
-redirection that makes it the site's `/`.
+ideas). It is the site's `/` in French and `/en` in English; the files
+live under `public/landing/` and `vercel.json` rewrites the two addresses
+to them (the old `/landing/` addresses redirect there for good).
 
 It is a **static page**, not a screen of the app: plain HTML that search
 engines read whole, a stylesheet inlined in it, and one small script
@@ -28,6 +29,47 @@ The built pages are committed, as `public/privacy.html` is: Vite copies
 `public/` as it is, so the deployment needs no step of its own.
 **After any change here, or to a deck the page counts, run `npm run landing`**
 and commit what it writes. `src/landing.test.js` fails until you do.
+
+## Motion
+
+The page moves the way the app does (DESIGN.md, Motion):
+- **Arrivals:** blocks arrive once as they are reached, rising 10px a
+  child at a time. They are marked `data-reveal`, or `data-stagger` for a
+  block whose children arrive in turn.
+- **Hover:** a 1px lift, the edge in the line's colour.
+- **Scale and glow:** none, except the gate button and the stamps, which
+  are the app's own exceptions.
+- **The hero:** the gold road runs out of Embarquer into the hub, each
+  line draws out to its station, and trains run along them.
+- **Features:** each tab shows the app's own screen, drawn, with 駅
+  written in its KanjiVG stroke order. The tabs turn over by themselves
+  until one is picked.
+- **The stops:** the page is the gold line the hero's road starts, and
+  each section is a stop on it. A sign opens every section, where a
+  hairline once cut the page. It holds the stop's number in a ring, its
+  name, the rail to the next stop, and a link on to that stop. The rail is
+  laid as the sign arrives, with one train run along it. The stop being
+  read is lit, as its link in the header is. The line ends at the way in,
+  the terminus 終, where the rail ends at a buffer. Every other section
+  lies on a band that fades in at its edges, so no border stands between
+  two sections.
+- **What to press:** each demo's first step wears the ring the app's
+  guide puts round what a note asks you to press: gold, breathing, never
+  a fill. The steps are the card, then its verdicts, the pace, a word and
+  an answer. The ring moves on or goes once the step is answered, and it
+  never comes back. The hero ends with a link down to the first stop.
+
+Three rules keep it safe:
+- **Content is hidden only while the `js` flag is set** (the head script
+  sets it) and only until it arrives, so a page without script reads
+  whole.
+- **A watcher that never starts shows everything after a beat.**
+- **Reduced motion** keeps the fades and drops every movement and loop
+  (a ring stands still).
+- **A ring is drawn only by the script**, which alone can take it away.
+
+`src/landing.test.js` checks that every hook the script reaches for is
+on the page.
 
 ## Footage
 
@@ -82,8 +124,28 @@ once the file is really there.
 - **Contact:** set `CONTACT` to an address and the footer prints it.
 - **A custom domain:** change `SITE_ORIGIN`, then run `npm run landing` and
   `npm run landing:og` (the share card prints the domain).
-- **The redirection to `/`:** change `PAGES` to `/` and `/en/`, rebuild, and
-  change how `/` is routed. That means `vercel.json`, which sends `/` to the
-  app today, the service worker's navigation rule in `pwa.workbox.js`, and a
-  signed-in visitor, who should still land in the app. The Board button
-  already points at an app route (`APP_ENTRY`), so it keeps working.
+
+## `/` and the app
+
+The landing page took `/` from the app, which moved to **`/app`**, a route
+that goes where `/` did (the first ride when it is due, else the day's
+gate). Four things make that work, and each has a test:
+
+- **The app's document is `app.html` on the web.** Vercel serves a file
+  before any rewrite, so an `index.html` at the build's root would answer
+  `/` itself. `appShell.js` renames it in the web build; `vercel.json`'s
+  fallback and the service worker's offline fallback point at `app.html`.
+  `npm run dev` and the native shell's bundle keep `index.html`.
+- **The page sends on what `/` used to open.** A script in its `<head>`,
+  before anything is drawn, sends a signed-in learner to `/app`. It sends
+  every sign-in's return there too: Google and the e-mail links come back
+  to `/` (the project's Site URL) with `?code`, `#access_token` or an
+  error, and those go along. Visitors, and search engines, stay.
+- **Signed in and want to see the page?** Open `/?landing`. It holds for
+  the rest of the tab.
+- **The installed app opens at `/app`** (the manifest's `start_url`),
+  keeping its `id` of `/`, so every existing install stays the same app.
+- **`npm run dev` and `npm run preview` route as the deployment does.**
+  `appShell.js`'s `siteRoutes` reads `vercel.json` itself, so the landing
+  page is at `/` and `/en` there too, the old addresses redirect, and the
+  app is at `/app` and every app route. Open `/app` for the app.

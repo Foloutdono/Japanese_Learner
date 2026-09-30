@@ -1541,7 +1541,15 @@ npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, r
 npm run landing:og  # its two share cards, rendered in Chromium
 ```
 
-The landing page is a **static page outside `src/`** (`frontend/landing/`,
+The landing page is the site's **`/`** (and `/en`), and the app's front
+door is **`/app`**: on the web the app's document is built as `app.html`
+(`appShell.js`) so that `vercel.json` can rewrite `/` to the page, and the
+page sends a signed-in learner and every sign-in's return on to `/app`
+before it paints (`frontend/landing/README.md`, "`/` and the app").
+**`npm run dev` and `npm run preview` route by `vercel.json` too**
+(`appShell.js`'s `siteRoutes`), so locally `/` is the landing page as well:
+open **`/app`** (or any app route) for the app. It is a
+**static page outside `src/`** (`frontend/landing/`,
 built into `public/landing/` and committed, like `public/privacy.html`):
 none of the app's CSS rules or guards apply to it, so it copies the
 tokens it uses (`landing/tokens.mjs`, held equal to `index.css` by
@@ -1622,7 +1630,9 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
   `render.yaml`. It holds no state. Starter's 512 MB
   fits it (343 MB at peak with the three voices) at the cost of slow first
   syntheses; Standard halves them. See ADR 0019.
-- Frontend: Vercel (`frontend/vercel.json`), SPA rewrite to `index.html`, plus
+- Frontend: Vercel (`frontend/vercel.json`), SPA rewrite to `app.html` (the
+  app's document under its web name, `appShell.js`; `/` and `/en` are the
+  landing page, plan 167), plus
   proxy rewrites for `/api`, `/kanjivg` and `/exam-audio` to the Render
   backend. The browser never calls `onrender.com` directly — some mobile
   carriers cannot reach that shared zone at all (diagnosed 2026-09-01: every

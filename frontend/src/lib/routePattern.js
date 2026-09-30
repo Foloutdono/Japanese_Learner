@@ -22,6 +22,8 @@
 // thing that can happen quietly.
 export const ROUTES = [
   '/',
+  // The front door under its web name (plan 167): `/` is the landing.
+  '/app',
   '/today',
   '/today/run',
   // 試乗 — the first ride (plan 098). Before any gate, so tabFor
