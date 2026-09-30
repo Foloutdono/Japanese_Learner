@@ -9,8 +9,10 @@ down before the refill has anything to do; the refill lands one credit
 every REFILL_EVERY through the day and waits to be claimed (plan 141),
 never past the cap, and a full tank banks nothing; a claim is paid out
 once; a fare claims what has landed before it charges, and is charged
-only after the scheduler accepted the review; the kana line is charged
-nothing at all; shadow mode records what there is and never blocks;
+only after the scheduler accepted the review; a learning step's repeat
+is charged nothing, the first sight and the graduated reviews are, and
+the gate prices a run the same way; the kana line is charged nothing at
+all; shadow mode records what there is and never blocks;
 enforcement refuses with the 402 shapes; a pass never spends; the free
 tier's deck count; the learner's day follows their clock; and the
 ledger is in the account's deletion plan.
@@ -299,14 +301,17 @@ def test_a_review_costs_one_credit_after_the_scheduler_accepts_it(client):
     before = credits.read_fresh(user)["balance"]
     # Vocab, not kana: the kana line rides free now, so it is no longer
     # a witness for "a review costs a credit" (see below for its own).
-    r = client.post("/api/vocab/review", json={"card_id": "probe_credit_card", "mode": "vocab.flashcard.f2b", "quality": 4})
+    # A card never met, so its review is a first sight and paid (a
+    # learning step's repeat would ride free, below).
+    card = f"probe_credit_card_{uuid.uuid4().hex[:8]}"
+    r = client.post("/api/vocab/review", json={"card_id": card, "mode": "vocab.flashcard.f2b", "quality": 4})
     assert r.status_code == 200
     body = r.json()
     assert body["credits"] == {"balance": before - 1, "unlimited": False}
     assert credits.read_fresh(user)["balance"] == before - 1
     # A rejected review is not a ride: the mode is refused before the
     # scheduler, and nothing is charged.
-    r = client.post("/api/today/review", json={"card_id": "probe_credit_card", "mode": "banana", "quality": 4})
+    r = client.post("/api/today/review", json={"card_id": card, "mode": "banana", "quality": 4})
     assert r.status_code == 400
     assert credits.read_fresh(user)["balance"] == before - 1
     # The fare is in every review response, and the summary beside the
@@ -316,6 +321,91 @@ def test_a_review_costs_one_credit_after_the_scheduler_accepts_it(client):
     assert 0 <= today["fare"] <= today["total"]
     assert today["credits"]["balance"] == before - 1
     assert client.get("/api/credits").json()["balance"] == before - 1
+
+
+# ── 折り返し — a learning step's repeat rides free ───────────────
+
+def _is_learning(card_id, mode="vocab.flashcard.f2b"):
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT is_learning FROM card_modes WHERE card_id = %s AND mode = %s", (card_id, mode))
+            return cur.fetchone()[0]
+    finally:
+        conn.close()
+
+
+def _review(client, card, quality, mode="vocab.flashcard.f2b"):
+    r = client.post("/api/vocab/review", json={"card_id": card, "mode": mode, "quality": quality})
+    assert r.status_code == 200
+    return r.json()
+
+
+def test_the_repeat_rule():
+    assert not srs.is_repeat(0, True)      # the first sight: paid
+    assert srs.is_repeat(1, True)          # a learning step again: free
+    assert srs.is_repeat(9, True)          # relearning a lapse: free
+    assert not srs.is_repeat(9, False)     # graduated: paid
+    assert credits.fare(1, False) == 1
+    assert credits.fare(1, True) == 0
+    assert credits.fare(0, False) == 0     # a free line stays free
+
+
+def test_only_the_first_sight_and_the_graduated_reviews_are_paid(client, uid):
+    from tests.conftest import acting_as
+    card = f"probe_fare_{uuid.uuid4().hex[:8]}"
+    with acting_as(uid):
+        start = credits.read_fresh(uid)["balance"]
+        # Met: paid. Perfect climbs two steps, so the next graduates it.
+        body = _review(client, card, 5)
+        assert body["credits"]["balance"] == start - 1
+        # A learning step's repeat, graduating the card: free.
+        body = _review(client, card, 5)
+        assert body["credits"]["balance"] == start - 1
+        assert _is_learning(f"{uid}:{card}") is False
+        # Graduated, asked again and missed: paid -- it was graduated
+        # when it was asked.
+        body = _review(client, card, 1)
+        assert body["credits"]["balance"] == start - 2
+        # The relearning that miss sent it into: free.
+        body = _review(client, card, 4)
+        assert body["credits"]["balance"] == start - 2
+    # Two rows, one a card: no row of zero for a repeat.
+    assert [r[1] for r in _rows(uid) if r[2] == f"{uid}:{card}"] == ["review", "review"]
+
+
+def test_the_gate_prices_a_repeat_at_nothing(client, uid, monkeypatch):
+    from study import card_index
+    from tests.conftest import acting_as
+    mode = "vocab.flashcard.f2b"
+    learning, graduated = card_index.raw_ids("vocab", "N5", mode)[:2]
+    with acting_as(uid):
+        credits.summary(uid)
+        _review(client, learning, 4, mode)          # in its steps
+        _review(client, graduated, 5, mode)
+        _review(client, graduated, 5, mode)         # graduated
+        assert _is_learning(f"{uid}:{graduated}") is False
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE card_modes SET next_review = NOW() - INTERVAL '1 minute' "
+                            "WHERE card_id LIKE %s", (f"{uid}:%",))
+            conn.commit()
+        finally:
+            conn.close()
+        # No pace stored, so no ration: the run is the two due cards.
+        today = client.get("/api/today").json()
+        assert today["total"] == 2
+        # One is a repeat: the run clears two and costs one.
+        assert today["fare"] == 1
+        (lane,) = today["lanes"]
+        assert (lane["free"], lane["freeCards"]) == (False, 1)
+        # Under enforcement at zero, the repeat still boards and the
+        # graduated card waits for the refill.
+        credits.grant(uid, -credits.read_fresh(uid)["balance"], "test")
+        monkeypatch.setattr(credits, "ENFORCE", True)
+        cards = client.get("/api/today/cards", params={"count": 10}).json()["cards"]
+        assert [c["card_id"] for c in cards] == [learning]
 
 
 # ── 無料 — the kana line ───────────────────────────────────────
@@ -372,7 +462,9 @@ def test_the_queue_prices_the_card_and_not_the_mode_key_it_is_sent(client):
     # And through the route, on the dev user's own balance.
     user = auth.DEV_USER_ID
     before = credits.read_fresh(user)["balance"]
-    r = client.post("/api/today/review", json={"card_id": "probe_not_a_card", "mode": "kana.flashcard.f2b", "quality": 4})
+    # Never met, so a first sight: a repeat would ride free anyway.
+    card = f"probe_not_a_card_{uuid.uuid4().hex[:8]}"
+    r = client.post("/api/today/review", json={"card_id": card, "mode": "kana.flashcard.f2b", "quality": 4})
     assert r.status_code == 200
     assert credits.read_fresh(user)["balance"] == before - 1
 

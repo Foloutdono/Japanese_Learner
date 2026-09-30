@@ -336,7 +336,7 @@ def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)
     # spend() with a fare of 0 writes no ledger row and still answers
     # with the balance, which is what the HUD reconciles against; the
     # response shape is unchanged.
-    fare = credits.spend(user_id, credits.cost_of(KANA), card_id)
+    fare = credits.spend(user_id, credits.fare(credits.cost_of(KANA), s["repeat"]), card_id)
     # No extra bulk-stats call needed at all now — review() returns
     # the post-review stage directly (it already has the updated
     # total_reviews/interval_days in hand from the save), and the

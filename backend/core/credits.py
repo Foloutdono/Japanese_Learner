@@ -2,7 +2,9 @@
 回数券 — the credits ledger (plan 069).
 
 1 credit = 1 review, except on a line that rides free -- see
-FREE_SOURCES below, which today is 仮名 and nothing else. A new account
+FREE_SOURCES below, which today is 仮名 and nothing else -- and except
+a learning step's repeat, which rides free on every line (fare below).
+A new account
 is welcomed with SIGNUP_BONUS. After that a free pass fills itself
 through the day (plan 141): DAILY_REFILL a day, one credit every
 REFILL_EVERY, up to at most CAP -- a balance still above CAP (a fresh
@@ -442,6 +444,35 @@ def is_free(source_or_mode: str | None) -> bool:
     if not source_or_mode:
         return False
     return source_or_mode.split(".", 1)[0] in FREE_SOURCES
+
+
+# ── 折り返し — a learning step's repeat rides free ──────────────
+# A card is paid for twice in its life's worth of fares: once when it
+# is met (its first-ever review) and once each time it comes back after
+# it has graduated. The reviews in between -- the learning steps a new
+# card climbs (3 min, 10 min, 1 h, 1 day) and the ones a lapsed card
+# climbs again -- are the same card being taught, not a new ride, and
+# they are free.
+#
+# Measured on the scheduler itself: at 10 new cards a day, charging
+# every review cost a learner answering everything right 70 credits a
+# day by the end of the first month and 100 by the end of the year, 40
+# of them the learning steps; a learner at 80-87% paid 130 -> 213, the
+# misses priced twice over, since a miss is what sends a card back
+# through the steps. Charging only the first sight and the graduated
+# reviews, the same two learners pay 46 -> 70 and 46 -> 98 -- and a
+# wrong answer no longer costs more than a right one.
+#
+# The graduated review that lapses is still paid (the card was
+# graduated when it was asked); the relearning it sends the card into
+# is not. Decided from the card's state BEFORE the review -- the
+# scheduler has moved it by the time the fare is charged -- so
+# SRSEngine.review hands it over as `repeat` (SRSEngine.is_repeat is
+# the rule), and a due row carries it for the gate's price.
+
+def fare(cost: int, repeat: bool) -> int:
+    """One review's fare: the line's `cost`, or nothing on a repeat."""
+    return 0 if repeat else cost
 
 
 def cost_of(source_or_mode: str | None) -> int:

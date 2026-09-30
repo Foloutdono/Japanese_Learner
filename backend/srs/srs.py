@@ -491,6 +491,10 @@ class SRSEngine:
         # bonus on a grade whose base XP was 0.
         quality = clamp_quality(quality)
         state = self._load_state(card_id, mode)
+        # Read before the scheduler moves the state in place: whether
+        # this review is a learning step's repeat, which rides free
+        # (core/credits.py, fare). Every review route prices on it.
+        repeat = self.is_repeat(state.total_reviews, state.is_learning)
         updated = self.scheduler.review(state, quality)
         self._save_state(updated)
         xp_info = self._log_review(card_id, mode, quality)
@@ -504,7 +508,16 @@ class SRSEngine:
         # kana.py/kanji.py/vocab.py's post_*_review — can drop that
         # extra round trip entirely and read result["stage"] instead.
         result["stage"] = self._classify_stage(updated.total_reviews, updated.interval_days)
+        result["repeat"] = repeat
         return result
+
+    @staticmethod
+    def is_repeat(total_reviews: int, is_learning: bool) -> bool:
+        """Whether a review of a card in this state is a learning step's
+        repeat -- met before, and not graduated (or relearning a lapse).
+        A repeat rides free (core/credits.py, fare); the first sight and
+        every graduated review are paid."""
+        return total_reviews > 0 and bool(is_learning)
 
     @staticmethod
     def _classify_stage(total_reviews: int, interval_days: int) -> str:
@@ -1285,7 +1298,7 @@ class SRSEngine:
             with conn.cursor() as cur:
                 mode_sql, mode_params = self._servable_filter()
                 sql = f"""
-                    SELECT card_id, mode, next_review, interval_days, lapses
+                    SELECT card_id, mode, next_review, interval_days, lapses, is_learning
                     FROM card_modes
                     WHERE card_id LIKE %s
                       AND total_reviews > 0
@@ -1303,8 +1316,12 @@ class SRSEngine:
             {
                 "card_id": card_id, "mode": mode, "next_review": next_review,
                 "interval_days": interval_days, "lapses": lapses,
+                # Whether its review will be a learning step's repeat,
+                # which rides free (core/credits.py, fare): the gate
+                # prices the run on it. total_reviews > 0 above.
+                "repeat": self.is_repeat(1, is_learning),
             }
-            for card_id, mode, next_review, interval_days, lapses in rows
+            for card_id, mode, next_review, interval_days, lapses, is_learning in rows
         ]
 
     def get_stale(self, pairs: list[tuple[str, str]]) -> list[tuple[str, str]]:

@@ -325,8 +325,9 @@ def post_vocab_review(payload: ReviewPayload, user_id: str = Depends(get_user_id
     # The fare, charged only now that the scheduler has accepted the
     # review (plan 069): a rejected review is not a ride. Priced by
     # THIS router's source rather than by the client's mode key, so a
-    # `kana.*` posted here still pays (core/credits.py, FREE_SOURCES).
-    fare = credits.spend(user_id, credits.cost_of(VOCAB), card_id)
+    # `kana.*` posted here still pays (core/credits.py, FREE_SOURCES);
+    # nothing on a learning step's repeat (credits.fare).
+    fare = credits.spend(user_id, credits.fare(credits.cost_of(VOCAB), s["repeat"]), card_id)
     # No extra bulk-stats calls needed at all now — review() returns
     # the post-review stage directly (it already has the updated
     # total_reviews/interval_days in hand from the save), and the

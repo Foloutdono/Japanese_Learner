@@ -61,7 +61,10 @@ export function BalanceSheet() {
           to be spared — a pass has nothing to be free of. It opened
           with 無料 until 2026-09-21; the sentence says it. */}
       {balance != null && (
-        <p className="balance__free">{t.balanceKanaFree}</p>
+        <>
+          <p className="balance__free">{t.balanceKanaFree}</p>
+          <p className="balance__free">{t.balanceStepsFree}</p>
+        </>
       )}
       <OfferButton source={SOURCES.BALANCE} className="btn-depart pw-open--wide" />
       <button type="button" className="btn-secondary" onClick={closeBalance}>{t.close}</button>
