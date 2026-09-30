@@ -49,7 +49,8 @@ import { GUIDES } from '../guide/guides'
 // on a run — a run has no rail, so a slash cannot walk out of one. The
 // Dictionary gate prints the key.
 //
-// Help (the owner's ask, 2026-09-30) stands at the masthead's end: the
+// Help (the owner's ask, 2026-09-30) stands at the masthead's end, a
+// pill of ? and its word: the
 // lit gate's guide (components/guide), played again on demand whatever
 // its stamp says. On the gate's own screen it opens there; from a
 // station behind the gate it walks to the gate first, where the stops
@@ -118,7 +119,8 @@ export function DeskRail() {
             aria-keyshortcuts="?"
             onClick={help}
           >
-            <span aria-hidden="true">?</span>
+            <span className="desk-rail__help-mark" aria-hidden="true">?</span>
+            <span className="desk-rail__help-label">{t.guideHelp}</span>
           </button>
         )}
       </div>

@@ -5,7 +5,7 @@ import { LangProvider } from './LangContext'
 import './index.css'
 
 // ── 机 — Help on the rail (the owner's ask, 2026-09-30) ─────────────
-// A roundel at the masthead's end plays the lit gate's guide again on
+// A pill of ? and its word at the masthead's end plays the lit gate's guide again on
 // demand, whatever its stamp says: in place on the gate's own screen,
 // after walking to the gate from a station behind it, and from the "?"
 // key -- never from a field. The profile here has seen every guide, so
@@ -106,10 +106,22 @@ describe('Help on the rail', () => {
     const gate = document.querySelector('[data-tab="learn"] .desk-gate__label').textContent
     expect(btn.getAttribute('aria-label')).toBe(`${fr.guideHelp} — ${fr.guideHelpTour(gate)}`)
     expect(btn.getAttribute('aria-keyshortcuts')).toBe('?')
-    // A roundel, inside the rail, at the head's right edge.
+    // A pill: the ? in its roundel, then the word, printed whole --
+    // the accessible name opens with the word the learner reads.
+    const mark = btn.querySelector('.desk-rail__help-mark')
+    const label = btn.querySelector('.desk-rail__help-label')
+    expect(mark.textContent).toBe('?')
+    expect(label.textContent).toBe(fr.guideHelp)
+    expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
+    const m = mark.getBoundingClientRect()
+    expect(Math.round(m.width)).toBe(Math.round(m.height))
+    expect(m.right).toBeLessThanOrEqual(label.getBoundingClientRect().left)
+    // Inside the rail, its right edge on the pass's below, and clear of
+    // the masthead's name.
     const r = btn.getBoundingClientRect()
-    expect(Math.round(r.width)).toBe(Math.round(r.height))
-    expect(r.right).toBeLessThanOrEqual(document.querySelector('.desk-rail').getBoundingClientRect().right)
+    const pass = document.querySelector('.desk-pass').getBoundingClientRect()
+    expect(r.right).toBeCloseTo(pass.right, 0)
+    expect(r.left).toBeGreaterThan(document.querySelector('.desk-rail__name').getBoundingClientRect().right)
     // A stamped gate opens nothing by itself.
     expect(note()).toBeNull()
   })

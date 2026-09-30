@@ -23160,9 +23160,11 @@ button.brd-stn { cursor: pointer; }
     color: var(--text-on-panel-soft);
   }
   /* The head: the masthead, and Help at its far end -- the lit gate's
-     guide played again (DeskRail), its edge on the pass's below. A roundel in the panel's inks, the
-     rail's own edge for its ring, washed and ringed as a gate is under
-     a pointer and a key: chrome, so no pigment. */
+     guide played again (DeskRail), its edge on the pass's below. A pill
+     of ? and its word, in the gates' caption register: the ? a roundel
+     of the lit gate's wash, the pill the rail's own edge. Under a
+     pointer or a key the pill lifts to full ink and the roundel turns,
+     sumi on ink. Chrome, so no pigment. */
   .desk-rail__head {
     display: flex;
     align-items: center;
@@ -23173,28 +23175,54 @@ button.brd-stn { cursor: pointer; }
     display: inline-flex;
     flex: none;
     align-items: center;
-    justify-content: center;
-    width: 32px;
+    gap: var(--sp-2);
     height: 32px;
-    padding: 0;
+    padding: 0 var(--sp-4) 0 var(--sp-1);
     border: 1px solid var(--chrome-edge);
     border-radius: var(--r-pill);
-    background: transparent;
+    background: color-mix(in srgb, var(--text-on-panel) 4%, transparent);
     color: var(--text-on-panel-soft);
     font-family: var(--font-display);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-caption);
     font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
     line-height: 1;
     cursor: pointer;
+    transition: color 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+  }
+  .desk-rail__help-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-6);
+    height: var(--sp-6);
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+    color: var(--text-on-panel);
+    font-size: var(--fs-sm);
+    letter-spacing: 0;
+    transition: color 0.14s ease, background 0.14s ease;
   }
   .desk-rail__help:hover,
   .desk-rail__help:focus-visible {
     color: var(--text-on-panel);
-    background: color-mix(in srgb, var(--text-on-panel) 6%, transparent);
+    border-color: color-mix(in srgb, var(--text-on-panel) 45%, var(--chrome-edge));
+    background: color-mix(in srgb, var(--text-on-panel) 10%, transparent);
   }
+  .desk-rail__help:hover > .desk-rail__help-mark,
+  .desk-rail__help:focus-visible > .desk-rail__help-mark {
+    background: var(--text-on-panel);
+    color: var(--bg-panel);
+  }
+  .desk-rail__help:active { background: color-mix(in srgb, var(--text-on-panel) 16%, transparent); }
   .desk-rail__help:focus-visible {
     outline: 2px solid var(--text-on-panel);
     outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .desk-rail__help,
+    .desk-rail__help-mark { transition: none; }
   }
   .desk-rail__list,
   .desk-rail__stations {
