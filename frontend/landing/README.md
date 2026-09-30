@@ -43,7 +43,11 @@ The page moves the way the app does (DESIGN.md, Motion):
   line draws out to its station, and trains run along them.
 - **Features:** each tab shows the app's own screen, drawn, with 駅
   written in its KanjiVG stroke order. The tabs turn over by themselves
-  until one is picked.
+  until one is picked. A drawn screen stays seven seconds. A tab with a
+  clip stays until the clip has played through, the line under the tab
+  following it, and plays it again while the pointer is on the block. A
+  clip that fails leaves the tab to the seven seconds, and one that has
+  not started after seven seconds turns it.
 - **The stops:** the page is the gold line the hero's road starts, and
   each section is a stop on it. A sign opens every section, where a
   hairline once cut the page. It holds the stop's number in a ring, its
@@ -94,7 +98,8 @@ looks for its still, and only a still that loads brings in a player.
 
 - **Phone clips:** portrait 1080×2340, 30 fps, muted, with no status bar.
   Each clip starts and ends on the same screen so the loop is seamless.
-  Keep each under 3 MB, with a still of the same name as a JPEG.
+  Keep each under 3 MB, with a still of the same name as a JPEG. A clip
+  can run as long as its feature needs: its tab waits for it to end.
 - **Computer clips (optional):** the same names with `-desk`
   (`kana-desk.mp4`, `kana-desk.jpg`), 1440×900, with the browser chrome
   cropped. The page's Phone / Computer switch shows them.
