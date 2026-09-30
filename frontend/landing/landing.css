@@ -585,6 +585,19 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .js [data-reveal]:not(.in), .js [data-stagger]:not(.in) > * { opacity: 0; }
 .js [data-reveal].in, .js [data-stagger].in > * { animation: arrive .6s cubic-bezier(.2, .7, .2, 1) backwards; animation-delay: calc(var(--i, 0) * 60ms); }
 .js:not(.motion) [data-reveal]:not(.in), .js:not(.motion) [data-stagger]:not(.in) > * { animation: arrive-soft .3s 2.5s forwards; }
+/* A stop pulls in: its plate first -- the ring set down, the name slid in
+   after it, the rail laid (above), the way on last -- then its heading and
+   what it shows rising from further down, each a beat (--at) after the
+   one before. */
+.js .sec [data-reveal].in, .js .sec [data-stagger].in > * { animation: board .8s cubic-bezier(.2, .7, .2, 1) backwards; animation-delay: calc(var(--at, 0s) + var(--i, 0) * 90ms); }
+.js .stop[data-reveal].in { animation: none; }
+.stop.in .stop__ring { animation: ring-in .55s cubic-bezier(.3, 1.6, .5, 1) backwards; animation-delay: var(--at, 0s); }
+.stop.in .stop__name { animation: slide-in .6s cubic-bezier(.2, .7, .2, 1) backwards; animation-delay: calc(var(--at, 0s) + .12s); }
+.stop.in .stop__next { animation: slide-in-end .6s cubic-bezier(.2, .7, .2, 1) backwards; animation-delay: calc(var(--at, 0s) + .6s); }
+@keyframes board { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: none; } }
+@keyframes ring-in { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: none; } }
+@keyframes slide-in { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+@keyframes slide-in-end { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
 [data-stagger] > :nth-child(2), .stamps__row > :nth-child(2), .lrows > :nth-child(2), .day__bars > :nth-child(2) { --i: 1; }
 [data-stagger] > :nth-child(3), .stamps__row > :nth-child(3), .lrows > :nth-child(3), .day__bars > :nth-child(3) { --i: 2; }
 [data-stagger] > :nth-child(4), .stamps__row > :nth-child(4), .lrows > :nth-child(4), .day__bars > :nth-child(4) { --i: 3; }
@@ -854,7 +867,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   /* Kept: every fade. Dropped: every movement, and whatever loops. */
-  .top.has-board .top__board, .js [data-reveal].in, .js [data-stagger].in > *, .hero__in > *, .mock:not([hidden]) .mock__body > *, .mock:not([hidden]) .mock__foot > *, .plate--line.in .lrow, .flip.is-arriving, .lrow__eta.is-new, .stamps__row.in .stamp { animation-name: arrive-soft; }
+  .top.has-board .top__board, .js [data-reveal].in, .js [data-stagger].in > *, .js .sec [data-reveal].in, .js .sec [data-stagger].in > *, .stop.in .stop__ring, .stop.in .stop__name, .stop.in .stop__next, .hero__in > *, .mock:not([hidden]) .mock__body > *, .mock:not([hidden]) .mock__foot > *, .plate--line.in .lrow, .flip.is-arriving, .lrow__eta.is-new, .stamps__row.in .stamp { animation-name: arrive-soft; }
   .flip.is-leaving { animation-name: arrive-soft; animation-direction: reverse; }
   .gate, .gate__rip, .play, .roll, .mock__gate, .road::after, .hero__gate .road::after, .lrow__stop--here::after, .mk-gram__blank, .mk-gram__opts .is-right, .mk-exam__opts .is-right, .mk-sub b, .mk-field__typed::after, .opt--wrong, .features .ftab[aria-selected="true"]::after, .hero__gate .road, .plate--line.in .lrows::before, .split__copy.in .day__bars .bar { animation: none; }
   .map__road, .map__line { animation: none; stroke-dashoffset: 0; opacity: 1; }
