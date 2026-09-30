@@ -8,6 +8,8 @@ import { GateIcon } from './GateIcon'
 import { DeskPass } from './DeskPass'
 import { DeskMast } from './DeskMast'
 import { dialogOpen } from '../../lib/dialogOpen'
+import { askGuide, guideAsked, guideHeld } from '../../stores/guide'
+import { GUIDES } from '../guide/guides'
 
 // ── 机 — the rail: the desk's chrome (plan 113) ────────────────────
 // At 1100px and up (hooks/useDesk.js) the Shell draws this instead of
@@ -46,10 +48,24 @@ import { dialogOpen } from '../../lib/dialogOpen'
 // focus on arrival. Never while typing, never under a dialog, and never
 // on a run — a run has no rail, so a slash cannot walk out of one. The
 // Dictionary gate prints the key.
+//
+// Help (the owner's ask, 2026-09-30) stands at the masthead's end, a
+// pill of ? and its word: the
+// lit gate's guide (components/guide), played again on demand whatever
+// its stamp says. On the gate's own screen it opens there; from a
+// station behind the gate it walks to the gate first, where the stops
+// are, and opens once that screen is ready (hooks/useGuide). "?" is the
+// same button from the keyboard, under the "/" key's guards. An ask the
+// learner walked away from before it could open is dropped.
 
 // The same glyph size as an unlit gate on the tab bar: in a list, the
 // lit gate is said by its ground and its rule, not by a glyph that grows.
 const GLYPH = 21
+
+// Help's ?, as Space Grotesk Bold draws it (its outline, cropped to its
+// ink): a shape stands in the middle of its roundel at any zoom, where a
+// letter's baseline is snapped to the pixel grid and stood a pixel high.
+const HELP_Q = 'M175 484V460Q175 409 195.5 376Q216 343 262 321L279 313Q324 292 348 268Q372 244 372 204Q372 175 357.5 154.5Q343 134 317 123Q291 112 256 112Q220 112 191.5 124Q163 136 146.5 160Q130 184 130 220V242H0V222Q0 153 34 103Q68 53 126 26.5Q184 0 256 0Q327 0 382.5 26Q438 52 470 98Q502 144 502 204Q502 264 480 302.5Q458 341 424.5 364.5Q391 388 356 405L339 413Q321 421 314 432.5Q307 444 307 466V484ZM245 728Q205 728 177.5 701.5Q150 675 150 633Q150 591 177.5 564.5Q205 538 245 538Q286 538 313 564.5Q340 591 340 633Q340 675 313 701.5Q286 728 245 728Z'
 
 export function DeskRail() {
   const { t } = useLang()
@@ -57,27 +73,68 @@ export function DeskRail() {
   const navigate = useNavigate()
   const active = tabFor(pathname)
   const due = useTodaySummary().data?.total ?? 0
+  const tabs = getDeskTabs(t)
+  const activeLabel = tabs.find(tab => tab.id === active)?.label ?? ''
+
+  const guided = Boolean(active && GUIDES[active])
+
+  function help() {
+    if (!guided || guideHeld()) return
+    playClick()
+    if (pathname !== `/${active}`) navigate(`/${active}`)
+    askGuide(active)
+  }
+
+  useEffect(() => {
+    const asked = guideAsked()
+    if (asked && pathname !== `/${asked}`) askGuide(null)
+  }, [pathname])
 
   useEffect(() => {
     function onKey(e) {
-      if (e.key !== '/' || e.defaultPrevented || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
+      if ((e.key !== '/' && e.key !== '?') || e.defaultPrevented || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
       const el = e.target
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName) || el?.isContentEditable) return
-      if (pathname === '/dictionary' || dialogOpen()) return
+      if (dialogOpen()) return
+      if (e.key === '?') {
+        if (!guided) return
+        e.preventDefault()
+        help()
+        return
+      }
+      if (pathname === '/dictionary') return
       e.preventDefault()
       navigate('/dictionary', { state: { focusSearch: true } })
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [pathname, navigate])
+  })
 
   return (
     <header className="desk-rail">
-      <DeskMast />
+      <div className="desk-rail__head">
+        <DeskMast />
+        {guided && (
+          <button
+            type="button"
+            className="desk-rail__help"
+            data-action="guide"
+            aria-label={`${t.guideHelp} — ${t.guideHelpTour(activeLabel)}`}
+            title={t.guideHelpTour(activeLabel)}
+            aria-keyshortcuts="?"
+            onClick={help}
+          >
+            <span className="desk-rail__help-mark" aria-hidden="true">
+              <svg viewBox="0 0 502 728" focusable="false"><path d={HELP_Q} fill="currentColor" /></svg>
+            </span>
+            <span className="desk-rail__help-label">{t.guideHelp}</span>
+          </button>
+        )}
+      </div>
 
       <nav className="desk-rail__gates" aria-label={t.tabBarLabel} data-guide="tabbar">
         <ul className="desk-rail__list">
-          {getDeskTabs(t).map(tab => {
+          {tabs.map(tab => {
             const on = tab.id === active
             const badge = tab.id === 'today' && due > 0
             const stations = on ? getDeskSections(tab.id, t) : []

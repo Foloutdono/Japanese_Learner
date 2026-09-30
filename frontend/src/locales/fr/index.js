@@ -2059,6 +2059,9 @@ const guide = {
   guideNext: 'Suivant',
   guideDone: 'Terminé',
   guideSkip: 'Passer',
+  // L'aide du rail du bureau : le guide de la porte allumée, rejoué à la demande.
+  guideHelp: 'Aide',
+  guideHelpTour: gate => `Visite guidée : ${gate}`,
   guideTodayGate: 'Tes révisions du jour, ligne par ligne. Désactive-en une pour plus tard, puis embarque.',
   guideTabBar: 'Tes cinq onglets : Apprendre, Pratique, Aujourd’hui, Dictionnaire et ton profil.',
   guideLearnPlate: 'Une ligne. Touche-la pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',

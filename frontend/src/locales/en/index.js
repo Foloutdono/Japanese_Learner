@@ -2127,6 +2127,9 @@ const guide = {
   guideNext: 'Next',
   guideDone: 'Done',
   guideSkip: 'Skip',
+  // The desk rail's Help: the lit gate's guide, played again on demand.
+  guideHelp: 'Help',
+  guideHelpTour: gate => `Guided tour: ${gate}`,
   guideTodayGate: 'Today’s reviews, line by line. Switch one off to save it for later, then hit Depart.',
   guideTabBar: 'Your five tabs: Learn, Practice, Today, Dictionary and your profile.',
   guideLearnPlate: 'A line. Tap it to open it. The badge shows what’s due today.',
