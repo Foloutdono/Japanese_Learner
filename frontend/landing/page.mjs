@@ -503,11 +503,38 @@ function tools(t) {
     + '</div></article></div></div></section>'
 }
 
+// The fare as the ticket it is: the ticket proper -- the statement,
+// what it covers and the lines it is valid on, the crossroads' seven
+// (the hero's map) -- torn along a perforation from its stub, which
+// holds what comes later, the gate and the hero's words under its own
+// gate (no account, in the browser). The body's two sentences part at
+// the perforation. Beside it, the four promises, each with its mark.
+const PROMISE_MARKS = [
+  // No ads, no trackers: an eye, struck.
+  '<path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/>',
+  // Grammar under review: a glass over a tick.
+  '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4l5.1 5.1M7.6 10.6l2 2 3.4-3.8"/>',
+  // Read aloud: the speaker, the header's own.
+  '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18.2 6.5a7.5 7.5 0 0 1 0 11"/>',
+  // Your data is yours: out of the tray.
+  '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v5.5h14V13" stroke-linejoin="round"/>',
+]
+const promiseMark = k => `<span class="promise__mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false">${PROMISE_MARKS[k]}</svg></span>`
+
 function fare(t) {
   const F = t.fare
-  const promises = F.promises.map(([h, p]) => `<div><h3 class="h3">${esc(typo(t.lang, h))}</h3><p class="body">${esc(typo(t.lang, p))}</p></div>`).join('')
-  return `<section class="sec" id="${t.ids.fare}" aria-labelledby="${t.ids.fare}-h">${stop(t, 'fare')}<div class="wrap fare cols" data-stagger>`
-    + `<article class="card fare__card"><h2 class="h2" id="${t.ids.fare}-h">${esc(typo(t.lang, F.h2))}</h2><p class="body">${esc(typo(t.lang, F.body))}</p></article>`
+  const ty = s => esc(typo(t.lang, s))
+  const [, covers = F.body, later = ''] = F.body.match(/^(.+?\.)\s+(.+)$/s) || []
+  const [first, ...rest] = t.hero.note(STORES.appStore || STORES.googlePlay).split(' · ')
+  const how = first === F.h2 ? rest.map(ty).join('\u00a0· ') : ''
+  const lines = ROADS.map(r => `<li style="--c:${pigment(r.line)}"><span class="ring" aria-hidden="true" lang="ja">${esc(r.glyph)}</span><span class="fare__name">${ty(t.hero.stations[r.line])}</span></li>`).join('')
+  const promises = F.promises.map(([h, p], k) => `<div>${promiseMark(k)}<h3 class="h3">${ty(h)}</h3><p class="body">${ty(p)}</p></div>`).join('')
+  return `<section class="sec sec--fare" id="${t.ids.fare}" aria-labelledby="${t.ids.fare}-h">${stop(t, 'fare')}<div class="wrap fare cols" data-stagger>`
+    + '<article class="card fare__card"><div class="fare__ticket">'
+    + `<h2 class="h2" id="${t.ids.fare}-h">${ty(F.h2)}</h2><p class="lead fare__covers">${ty(covers)}</p>`
+    + `<ul class="fare__lines">${lines}</ul></div>`
+    + `<div class="fare__stub">${later ? `<p class="body body--small fare__later">${ty(later)}</p>` : ''}${gate(t, 'fare__gate')}`
+    + `${how ? `<p class="fare__how">${how}</p>` : ''}</div></article>`
     + `<div class="lattice promises">${promises}</div>`
     + '</div></section>'
 }
