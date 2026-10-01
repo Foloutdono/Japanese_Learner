@@ -640,7 +640,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .way__gate { display: flex; align-items: center; gap: var(--sp-6); }
 .way .badges { justify-content: flex-start; }
 .way__pass { display: flex; justify-content: center; padding: var(--sp-5) 0; }
-.pass { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-5); width: 100%; max-width: 540px; padding: var(--sp-6) var(--sp-7) var(--sp-6) var(--sp-6); background: linear-gradient(155deg, color-mix(in srgb, var(--pass-ink) 45%, var(--bg-panel)) 0%, var(--bg-panel) 62%); border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent); border-radius: var(--r-identity); overflow: hidden; color: var(--text-on-panel); box-shadow: var(--elev-board); transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotate(-2deg); transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
+.pass { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: var(--sp-5); width: 100%; max-width: 540px; padding: var(--sp-6) var(--sp-7) var(--sp-6) var(--sp-6); background: linear-gradient(155deg, color-mix(in srgb, var(--pass-ink) 45%, var(--bg-panel)) 0%, var(--bg-panel) 62%); border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent); border-radius: var(--r-identity); overflow: hidden; overflow: clip; color: var(--text-on-panel); box-shadow: var(--elev-board); transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotate(-2deg); transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
 .pass::after { content: ""; position: absolute; inset: -40% 55% -40% -20%; background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--text-on-panel) 7%, transparent) 50%, transparent 70%); transform: translateX(var(--sx, 0%)) skewX(-12deg); transition: transform .5s cubic-bezier(.2, .7, .2, 1); pointer-events: none; }
 .way__pass { perspective: 1000px; }
 .way__pass.is-tilting .pass, .way__pass.is-tilting .pass::after { transition-duration: .08s; }
@@ -675,6 +675,14 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .pass__bal { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-4); align-items: center; font-size: var(--fs-caption); color: var(--text-on-panel-soft); }
 .pass__track { height: 6px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--text-on-panel) 12%, transparent); overflow: hidden; }
 .pass__track i { display: block; width: 22%; height: 100%; background: var(--accent2); }
+/* A window under the desk and short of 800px (most phones', once the
+   browser's bars are counted, and a tablet's on its side) has no room
+   for the words, the pass and the form at once: landed, the form and
+   its gate come first, under the words, and the pass the name prints on
+   under them. */
+@media (max-width: 1099px) and (max-height: 799px) {
+  .way__pass { order: 1; }
+}
 
 /* ── Footer ── */
 .foot { background: var(--bg-panel); color: var(--text-on-panel-soft); }
@@ -1116,14 +1124,24 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
     .faq__a { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: var(--sp-6); }
     .faq__foot { flex-shrink: 0; }
   }
-  .pass { padding: 26px var(--sp-7) var(--sp-6); }
   /* 終 Terminus, tablet: the terminus and the footer are the last window,
-     as on the desk, so the page's end shows the terminus's sign; the
-     pass stands centred in what the copy leaves of it. */
-  html { --foot-h: 160px; }
+     as on the desk, so the page's end shows the terminus's sign whole.
+     The body (the wrap under the sign) is that window less the stop's
+     padding and its sign: the words, then the pass's row taking all the
+     rest, then the form. The pass's row is a size container (way-pass):
+     the pass is as large as it lets a 540:330 card be, less the room its
+     tilt takes (a corner rising and one falling), never past the column,
+     and never under 440px, the narrowest that holds its three fields in
+     one row -- so a short window shrinks it to fit and a tall one fills
+     its paper with it, and the desk (below) uses the same row. */
+  html { --foot-h: 120px; }
   .sec.way:not([hidden]) { min-height: calc(var(--stop-h) - var(--foot-h)); }
-  .split--way { flex: 1; }
-  .way__pass { flex: 1; align-items: center; }
+  .split--way { display: grid; grid-template-rows: auto minmax(var(--pass-row), 1fr) auto; min-height: calc(var(--stop-h) - var(--foot-h) - 3 * var(--sp-8) - 44px); --pass-row: calc(440px * 330 / 540 + 2 * var(--sp-5)); }
+  .way__pass { container: way-pass / size; align-items: center; padding: 0; }
+  .way__pass .pass { width: max(440px, min(100cqw, calc((100cqh - 2 * var(--sp-5)) * 540 / 330))); max-width: none; padding: var(--sp-6) var(--sp-7) var(--sp-5) var(--sp-6); }
+  @media (max-height: 799px) {
+    .split--way { grid-template-rows: auto auto minmax(var(--pass-row), 1fr); }
+  }
   .foot__in { flex-direction: row; align-items: center; justify-content: space-between; min-height: var(--foot-h); padding-top: var(--sp-6); padding-bottom: var(--sp-6); }
   .foot__end { align-items: flex-end; text-align: right; }
   /* A tall tablet: the features' phone at its full size. */
@@ -1977,34 +1995,73 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
     .faq summary::after { transform: none; }
   }
   /* 終 Terminus, desk. The last window: the terminus and the footer.
-     Its body (--way-body) is the stop's less the footer: 525 at
-     1920x890, 535 at 1440x900, 401 at 1366x700 and 1100x700, 421 at
-     1280x720. Col A is the copy, the heading on the heading line, the
-     name and the gate held in the middle of what the heading leaves
-     (level with the name printed on the pass), and the stores standing
-     on the stop's foot under a rule. Col B is the pass as large as the
-     body lets it:
-     its height the body's less the room its tilt takes (it turns -2deg,
-     a corner rising and one falling by up to 12px), its width from its
-     ratio, never past the column; centred, so its tilt, its shadow and
-     its lean toward the pointer are never clipped. */
+     Its body is the stop's less the footer: 525 at 1920x890, 535 at
+     1440x900, 401 at 1366x700 and 1100x700, 421 at 1280x720. Col A as
+     every split's: the heading on the heading line, the words under it,
+     the form (the name, then the gate) --stop-head-gap under them, and
+     the stores pinned to the stop's foot under a rule, so the one slack
+     band is above the rule, as over the notes of stops 02, 03 and 05.
+     Col B is the pass's row (the tablet's size container) spanning the
+     two rows: the pass as large as the body lets it, centred, so its
+     tilt, its shadow and its lean toward the pointer are never clipped. */
   .sec.way:not([hidden]) { min-height: calc(var(--stop-h) - var(--foot-h)); }
   .way > .wrap + .wrap { min-height: calc(var(--stop-body) - var(--foot-h)); }
   .foot__in { min-height: var(--foot-h); padding-top: 0; padding-bottom: 0; }
-  .split--way { --way-body: calc(var(--stop-body) - var(--foot-h)); flex: 0 1 auto; grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "copy pass" "form pass"; align-items: stretch; }
+  .split--way { flex: 0 1 auto; grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "copy pass" "form pass"; row-gap: var(--stop-head-gap); align-items: stretch; }
   .split--way .split__copy { grid-area: copy; gap: var(--sp-5); }
   .split--way .body { font-size: var(--fs-lead); line-height: 1.6; }
   .way__h { font-size: var(--fs-display); }
   .way__form { grid-area: form; gap: var(--sp-5); }
-  .way__field { margin-top: auto; }
-  .way__gate { margin-bottom: auto; }
   .way__gate .gate { width: 100%; }
   /* The name and the gate one form: the field at the gate's height. */
   .way .field { height: 66px; padding: 0 var(--sp-6); font-size: var(--fs-title); }
-  .way .badges { padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
-  .way__pass { grid-area: pass; align-items: center; padding: 0; }
-  .way__pass .pass { width: min(100%, calc((var(--way-body) - 2 * var(--sp-5)) * 540 / 330)); max-width: none; padding: var(--sp-7) var(--sp-8) var(--sp-7) var(--sp-7); }
+  .way .badges { margin-top: auto; padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
+  .way__pass { grid-area: pass; }
+  @media (max-height: 799px) {
+    .split--way .split__copy, .way__form { gap: var(--sp-4); }
+    .split--way .body { font-size: var(--fs-body); line-height: 1.65; }
+    .way .badges { padding-top: var(--sp-4); }
+  }
+  /* A window under 680px (a laptop's 1366x625): the body is under 380,
+     so the words a rung down, the form a rung closer and the field back
+     at its own height. */
+  @media (max-height: 679px) {
+    .split--way .body { font-size: var(--fs-sm); }
+    .way__form { gap: var(--sp-3); }
+    .way .field { height: 52px; font-size: var(--fs-lead); }
+    .way .badges { padding-top: var(--sp-3); }
+  }
+  /* Under 640px (1280x600, the app's short lane): the name and the gate
+     on one row, the field at the gate's height again and the wider of
+     the two -- the gate at its word's width, the balancing column after
+     the word dropped for the pill's own padding. */
+  @media (max-height: 639px) {
+    .way__form { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr) auto; column-gap: var(--sp-6); }
+    .way__field { grid-area: 1 / 1; }
+    .way__gate { grid-area: 1 / 2; align-self: end; }
+    .way__gate .gate { width: auto; grid-template-columns: 48px auto; padding-right: var(--sp-6); }
+    .way .field { height: 66px; }
+    .way__form .badges { grid-area: 3 / 1 / 4 / 3; }
+  }
+  /* Under 600px (a 1280x720 laptop less a taskbar and a bookmarks bar):
+     the footer at its content's height and a rung of air, so the last
+     window still holds the terminus whole. */
+  @media (max-height: 599px) {
+    html { --foot-h: 96px; }
+  }
+}
+
+/* The pass a rung up wherever its row lets it be 560px wide or more
+   (the desk from 680px of window, a tall tablet): every part of it, its
+   contactless mark too, at the desk's sizes. */
+@container way-pass (min-width: 560px) and (min-height: 374px) {
+  .way__pass .pass { padding: var(--sp-7) var(--sp-8) var(--sp-7) var(--sp-7); }
   .pass__brand .mark { width: 28px; height: 28px; }
+  .pwave { width: 26px; height: 28px; }
+  .pwave i { border-width: 2px; }
+  .pwave i:nth-child(1) { width: 9px; height: 9px; margin-top: -4.5px; }
+  .pwave i:nth-child(2) { width: 17px; height: 17px; margin-top: -8.5px; }
+  .pwave i:nth-child(3) { width: 26px; height: 26px; margin-top: -13px; }
   .pass__lbl { font-size: var(--fs-caption); }
   .pass__kind { font-size: var(--fs-sm); }
   .pass__who { gap: var(--sp-3); }
@@ -2015,41 +2072,6 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .pass__dots { gap: var(--sp-2); }
   .pass__bal { font-size: var(--fs-sm); }
   .pass__track { height: 8px; }
-  @media (max-height: 799px) {
-    .split--way .split__copy, .way__form { gap: var(--sp-4); }
-    .split--way .body { font-size: var(--fs-body); line-height: 1.65; }
-    .way .badges { padding-top: var(--sp-4); }
-  }
-  /* A window under 680px (a laptop's 1366x625): the body is under 380,
-     so the form a rung closer, the field back at its own height, and
-     the pass, under 560px wide there, a rung smaller inside. */
-  @media (max-height: 679px) {
-    .split--way { row-gap: var(--sp-4); }
-    .split--way .body { font-size: var(--fs-sm); }
-    .way__form { gap: var(--sp-3); }
-    .way .field { height: 52px; font-size: var(--fs-lead); }
-    .way .badges { padding-top: var(--sp-3); }
-    .way__pass .pass { padding: var(--sp-6) var(--sp-7) var(--sp-5) var(--sp-6); }
-    .pass__brand .mark { width: 22px; height: 22px; }
-    .pass__lbl { font-size: var(--fs-caption-xs); }
-    .pass__kind { font-size: var(--fs-caption); }
-    .pass__name { font-size: var(--fs-heading); }
-    .pass__fields > div { gap: var(--sp-2); }
-    .pass__val { font-size: var(--fs-body); }
-    .dot { width: 26px; height: 26px; font-size: var(--fs-caption); }
-    .pass__bal { font-size: var(--fs-caption); }
-    .pass__track { height: 6px; }
-  }
-  /* Under 640px (1280x600, the app's short lane): the name and the gate
-     on one row, the field at the gate's height again. */
-  @media (max-height: 639px) {
-    .way__form { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr) auto; column-gap: var(--sp-4); }
-    .way__field { grid-area: 2 / 1; margin: 0; }
-    .way__gate { grid-area: 2 / 2; align-self: end; margin: 0; }
-    .way__gate .gate { width: auto; }
-    .way .field { height: 66px; }
-    .way__form .badges { grid-area: 4 / 1 / 5 / 3; }
-  }
 }
 
 @media (min-width: 1240px) {

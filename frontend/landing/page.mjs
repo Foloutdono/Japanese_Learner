@@ -583,10 +583,12 @@ function pass(t, facts) {
   const n5 = arrivals(facts, DEFAULT_RHYTHM)[0].days
   const dots = [['kana', 'あ'], ['vocab', '語'], ['kanji', '漢'], ['grammar', '文']]
     .map(([l, g]) => `<span class="dot" style="--c:${pigment(l)}" lang="ja">${g}</span>`).join('')
-  // Three blocks: the words, the pass, the form. A phone and a tablet
-  // stack them in that order, so the name typed prints on the pass in
-  // view above the field (and above a phone's keyboard); the desk puts
-  // the words over the form in col A and the pass in col B (landing.css).
+  // Three blocks: the words, the pass, the form. A tall phone and a
+  // tablet stack them in that order, so the name typed prints on the pass
+  // in view above the field (and above a phone's keyboard); a window
+  // under the desk and short of 800px puts the form before the pass, so
+  // its gate is in the first view; the desk puts the words over the form in col A and the pass in
+  // col B (landing.css).
   const form = `<div class="way__form" data-stagger><div class="way__field"><label class="capxs" for="pass-name">${esc(P.nameLabel)}</label><input id="pass-name" class="field" type="text" name="given-name" autocomplete="given-name" maxlength="24" placeholder="${esc(P.name)}" data-pass-input></div>`
     + `<div class="way__gate">${gate(t)}</div>${badges(t)}</div>`
   return `<section class="sec way" id="${t.ids.way}" aria-labelledby="way-h">${stop(t, 'way')}<div class="wrap split split--way cols">`
