@@ -284,6 +284,8 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 .lrow__counts b { color: var(--accent2); }
 .lrow__long { display: none; }
 .lrow__eta { font-size: var(--fs-caption); }
+/* Where each pace takes you: the desk's services only. */
+.seg__to, .seg__ride { display: none; }
 
 /* ── The method ── */
 .day { display: flex; flex-direction: column; gap: var(--sp-5); padding: var(--sp-5); }
@@ -981,6 +983,56 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
     .plate__foot { flex-wrap: wrap; }
     @media (max-height: 799px) {
       .plate:not(.plate--line):not(.dict) { row-gap: var(--sp-3); }
+    }
+  }
+
+  /* 02 Ta ligne, desk: the copy beside the timetable, both the body's
+     height. The copy: the heading on the heading line; the pace as four
+     services sharing the column's rest, each with its arrival at N1 and
+     that ride to scale; the estimate's note level with the plate's
+     floor, under a rule. The timetable: its six stops share the plate's
+     height, the rail running stop to stop (half a row in from each end),
+     the counts set as columns (one subgrid), the type a rung up and the
+     arrivals, the answer, two. */
+  .split--line { align-items: stretch; }
+  .split--line .seg { flex: 1; flex-direction: column; align-self: stretch; }
+  .split--line .seg > * { flex: 1 1 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "per to" "ride ride"; align-content: center; gap: var(--sp-4) var(--sp-5); min-height: auto; padding: var(--sp-4) var(--sp-6); border-left: 0; border-top: 1px solid var(--surface-line); font-size: var(--fs-lead); text-align: left; }
+  .split--line .seg > :first-child { border-top: 0; }
+  .split--line .seg .on { box-shadow: inset 3px 0 0 var(--accent2); }
+  .split--line .seg button:focus-visible { outline-offset: -4px; }
+  .split--line .seg__to { grid-area: to; display: inline-flex; align-items: baseline; gap: var(--sp-3); font-size: var(--fs-body); }
+  .seg__to .fig { font-size: var(--fs-caption); color: var(--text-secondary); }
+  .split--line .seg__ride { grid-area: ride; display: block; height: 6px; border-radius: var(--r-pill); background: linear-gradient(90deg, color-mix(in srgb, var(--text-secondary) 45%, transparent) calc(var(--ride) * 100%), color-mix(in srgb, var(--text-secondary) 12%, transparent) 0); }
+  .split--line .seg .on .seg__ride { background: linear-gradient(90deg, var(--accent2) calc(var(--ride) * 100%), color-mix(in srgb, var(--text-secondary) 12%, transparent) 0); }
+  .split--line .split__copy > .body--small { margin-top: var(--sp-5); padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
+  .plate--line { display: flex; flex-direction: column; }
+  .lrows { flex: 1; display: grid; grid-template-columns: 36px auto repeat(3, minmax(max-content, 1fr)) auto; grid-template-rows: repeat(6, minmax(46px, 1fr)); column-gap: var(--sp-6); }
+  .lrows::before { top: calc(100% / 12); bottom: calc(100% / 12); }
+  .lrow { grid-column: 1 / -1; grid-template-columns: subgrid; height: auto; }
+  .lrow__counts, .lrow__long { display: contents; }
+  .lrow__sep { display: none; }
+  .lrow__counts b { grid-column: span 2; }
+  .lrow .capxs { justify-self: end; }
+  .lrow__code { font-size: var(--fs-heading); }
+  .lrow__counts, .lrow__eta { font-size: var(--fs-body); }
+  .lrow__eta { justify-self: end; font-size: var(--fs-title); }
+  /* The narrow desk: the timetable's columns closer and its arrivals a
+     rung down, so the longest counts keep their columns. */
+  @media (max-width: 1239px) {
+    .lrows { column-gap: var(--sp-4); }
+    .lrow__eta { font-size: var(--fs-body); }
+  }
+  /* Short: the services a rung smaller and closer; on the narrow desk
+     too, two by two, so the heading's four lines leave them room. */
+  @media (max-height: 799px) {
+    .split--line .seg > * { gap: var(--sp-3) var(--sp-5); padding: var(--sp-3) var(--sp-5); font-size: var(--fs-body); }
+    .split--line .seg__to { font-size: var(--fs-sm); }
+    @media (max-width: 1239px) {
+      .split--line .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .split--line .seg > * { grid-template-columns: minmax(0, 1fr); grid-template-areas: "per" "to" "ride"; gap: var(--sp-2); border-top: 0; }
+      .split--line .seg > :nth-child(even) { border-left: 1px solid var(--surface-line); }
+      .split--line .seg > :nth-child(n+3) { border-top: 1px solid var(--surface-line); }
+      .split--line .seg__ride { margin-top: var(--sp-2); }
     }
   }
 

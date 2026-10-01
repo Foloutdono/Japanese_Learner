@@ -241,23 +241,32 @@ function lines(t) {
 
 function line(t, facts) {
   const L = t.line
-  const rhythms = RHYTHMS.map(m => `<button type="button" data-per="${m}" aria-pressed="${m === DEFAULT_RHYTHM}"${m === DEFAULT_RHYTHM ? ' class="on"' : ''}>${esc(L.rhythm(m))}</button>`).join('')
   const etas = Object.fromEntries(RHYTHMS.map(m => [m, arrivals(facts, m).map(a => typo(t.lang, L.span(spanOf(a.days))))]))
+  // Each pace with where it takes you: the desk sets the four as
+  // services, each with its arrival at the terminus and that ride to
+  // scale, the slowest the whole bar (hidden from a screen reader, which
+  // hears the timetable say it again for the pace picked).
+  const last = LEVELS.at(-1)
+  const rhythms = RHYTHMS.map(m => `<button type="button" data-per="${m}" aria-pressed="${m === DEFAULT_RHYTHM}"${m === DEFAULT_RHYTHM ? ' class="on"' : ''}>`
+    + `<span>${esc(L.rhythm(m))}</span><span class="seg__to" aria-hidden="true"><span class="fig">${last}</span>${esc(etas[m].at(-1))}</span>`
+    + `<span class="seg__ride" aria-hidden="true" style="--ride:${+(RHYTHMS[0] / m).toFixed(3)}"></span></button>`).join('')
+  // The counts as their figures, so the desk can set them in columns.
+  const parts = s => s.split(' · ').map(p => `<span>${esc(p)}</span>`).join('<span class="lrow__sep"> · </span>')
   const rows = LEVELS.map((level, k) => {
     const data = RHYTHMS.map(m => ` data-per-${m}="${esc(etas[m][k])}"`).join('')
     const l = facts.levels[level]
     return `<li class="lrow"><span class="lrow__stop${k === LEVELS.length - 1 ? ' lrow__stop--end' : ''}"></span><span class="fig lrow__code">${level}</span>`
-      + `<span class="lrow__counts"><span class="lrow__long">${esc(L.counts(l))}</span><span class="lrow__short">${esc(L.countsShort(l))}</span></span>`
+      + `<span class="lrow__counts"><span class="lrow__long">${parts(L.counts(l))}</span><span class="lrow__short">${esc(L.countsShort(l))}</span></span>`
       + `<span class="fig lrow__eta" data-eta${data}>${esc(etas[DEFAULT_RHYTHM][k])}</span></li>`
   }).join('')
-  return `<section class="sec sec--band" id="${t.ids.line}" aria-labelledby="${t.ids.line}-h">${stop(t, 'line')}<div class="wrap split cols">`
+  return `<section class="sec sec--band" id="${t.ids.line}" aria-labelledby="${t.ids.line}-h">${stop(t, 'line')}<div class="wrap split split--line cols">`
     + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.line}-h">${esc(typo(t.lang, L.h2))}</h2>`
     + `<p class="body">${esc(typo(t.lang, L.body))}</p>`
     + `<div class="seg" role="group" aria-label="${esc(L.rhythmsLabel)}" data-rhythms data-nudge>${rhythms}</div>`
     + `<p class="body body--small">${esc(typo(t.lang, L.note))}</p></div>`
     + `<div class="plate plate--line" style="--c:var(--accent2)" data-reveal><div class="line__head"><h3 class="h3">${esc(L.plate)}</h3><span class="capxs" data-at>${esc(L.at(DEFAULT_RHYTHM))}</span></div>`
     + `<ol class="lrows"><li class="lrow"><span class="lrow__stop lrow__stop--here"></span><span class="lrow__code lrow__kana" lang="ja">かな</span>`
-    + `<span class="lrow__counts lrow__counts--here">${esc(L.kana)} · <b>${esc(typo(t.lang, L.here))}</b></span><span class="capxs">${esc(L.start)}</span></li>${rows}</ol></div>`
+    + `<span class="lrow__counts lrow__counts--here"><span>${esc(L.kana)}</span><span class="lrow__sep"> · </span><b>${esc(typo(t.lang, L.here))}</b></span><span class="capxs">${esc(L.start)}</span></li>${rows}</ol></div>`
     + '</div></section>'
 }
 
