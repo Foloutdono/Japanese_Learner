@@ -597,11 +597,12 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .promises .h3 { text-wrap: balance; }
 
 /* ── Questions ──
-   One answer open at a time (page.mjs, faq()), each ending on the stop
-   that shows it: its number in a ring and its name, as its sign prints
-   them, the arrow pointing back up the line. A phone and a short tablet
-   keep the accordion; a tall tablet stands the open answer in a card
-   under the questions and the desk in one beside them (their blocks). */
+   Each answer ends on the stop that shows it: its number in a ring and
+   its name, as its sign prints them, the arrow pointing back up the
+   line. A phone and a short tablet keep the accordion, each answer
+   opening on its own; a tall tablet stands the open answer in a card
+   under the questions and the desk in one beside them, one at a time,
+   headed by its question again (.faq__q; their blocks). */
 .faqs { display: flex; flex-direction: column; }
 .faqs__qs { display: flex; flex-direction: column; gap: var(--sp-5); }
 .faqs__list { counter-reset: faq; }
@@ -615,6 +616,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .faq::details-content { height: 0; overflow: clip; transition: height .3s ease, content-visibility .3s allow-discrete; }
 .faq[open]::details-content { height: auto; }
 .faq__a { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-3); padding-bottom: var(--sp-5); }
+.faq__q { display: none; }
 .faq__a p { margin: 0; max-width: 760px; font-size: var(--fs-body); line-height: 1.7; color: var(--text-secondary); text-wrap: pretty; }
 .faq__to { display: inline-flex; align-items: center; gap: var(--sp-3); min-height: 44px; font-weight: 700; font-size: var(--fs-caption); letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); text-decoration: none; transition: color .15s ease; }
 .faq__stop { display: grid; place-items: center; width: 28px; height: 28px; border: 2px solid var(--accent2); border-radius: var(--r-pill); letter-spacing: 0; color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary)); transition: background-color .15s ease, color .15s ease; }
@@ -1069,13 +1071,23 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .faq summary:hover, .faq summary:focus-visible { box-shadow: inset 3px 0 0 var(--accent2); }
   .faq summary:focus-visible { outline-offset: -4px; }
   .faq__a { padding: 0 var(--sp-6) var(--sp-5) calc(var(--sp-5) + 36px + var(--sp-4)); }
-  /* A tall tablet: the open answer in a card under the list, the rest
-     of the stop, as the desk stands it beside -- the card .faqs' own
-     (::after), the answer laid over it, absolute in .faqs, and one kept
-     open (landing.js). The open row's mark goes: the card is its answer. */
-  @media (max-width: 1099px) and (min-height: 1000px) {
-    .faqs { position: relative; --faq-card: clamp(280px, calc(var(--stop-h) - 680px), 520px); }
-    .faqs::after { content: ""; height: var(--faq-card); margin-top: var(--sp-6); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--surface); }
+  /* A tall tablet: the open answer in a card under the list, as the
+     desk stands it beside -- the card .faqs' own (::after), the answer
+     laid over it, absolute in .faqs, and one kept open (landing.js).
+     .faqs is the rest of the stop (the window less the section's
+     padding, the sign and its margin); the card takes a share of it by
+     the window's height and the list's rows share what the questions
+     leave, so the stop ends on the card's foot. The card is headed by
+     its question, its number in the ring; the open row's mark goes:
+     the card is its answer. */
+  @media (max-width: 1099px) and (min-height: 1080px) {
+    .faqs { position: relative; min-height: calc(var(--stop-h) - 3 * var(--sp-8) - 44px); --faq-card: clamp(300px, calc(var(--stop-h) - 700px), 460px); }
+    .faqs__qs { flex: 1; }
+    .faqs__list { flex: 1; display: grid; }
+    .faq { display: flex; flex-direction: column; }
+    .faq summary { flex: 1; }
+    .faqs::after { content: ""; flex: none; height: var(--faq-card); margin-top: var(--sp-6); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--surface); }
+    .faqs:not(:has(.faq[open]))::after { visibility: hidden; }
     .faq[open] summary::after { opacity: 0; }
     .js .faq[open] summary { cursor: default; }
     .faq__a { position: absolute; z-index: 1; left: var(--gutter); right: var(--gutter); bottom: 0; height: var(--faq-card); gap: var(--sp-5); padding: var(--sp-7); container: faqa / size; transition: opacity .25s ease .12s; }
@@ -1083,25 +1095,24 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
     @starting-style {
       .faq[open] .faq__a { opacity: 0; }
     }
-    .faq__a::before { content: counter(faq); content: counter(faq) / ""; display: none; place-items: center; width: 44px; height: 44px; border: 2.5px solid var(--accent2); border-radius: var(--r-pill); font-weight: 700; font-size: var(--fs-title); line-height: 1; color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary)); }
-    .faq__a p { max-width: none; font-size: var(--fs-lead); line-height: 1.55; color: var(--text-primary); }
-    .faq__foot { align-self: stretch; margin-top: auto; padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); }
-    /* The card's rungs by its height: the answer at title size from
-       220px, its number's ring from 330, the answer at heading size
-       from 360 (an 820 × 1180 tablet's). */
-    @container faqa (min-height: 220px) {
+    .faq__q { display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: var(--sp-4); align-items: center; align-self: stretch; padding-bottom: var(--sp-5); border-bottom: 1px solid var(--surface-line); font-weight: 700; font-size: var(--fs-title); line-height: 1.3; text-wrap: pretty; color: var(--text-primary); }
+    .faq__q::before { content: counter(faq); content: counter(faq) / ""; display: grid; place-items: center; width: 36px; height: 36px; border: 2px solid var(--gate-gold-deep); border-radius: var(--r-pill); background: var(--gate-gold); font-size: var(--fs-sm); line-height: 1; color: var(--text-on-fill); }
+    .faq__a p { max-width: none; margin-block: auto; font-size: var(--fs-lead); line-height: 1.6; color: var(--text-secondary); }
+    .faq__foot { align-self: stretch; padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); }
+    /* A taller card (an 820 x 1180 tablet's, 423) a rung up: the answer
+       at title size; a wider and taller one (a 1024 x 1366 tablet's) the
+       question and the answer at the desk's sizes. */
+    @container faqa (min-height: 360px) {
       .faq__a p { font-size: var(--fs-title); }
     }
-    @container faqa (min-height: 330px) {
-      .faq__a::before { display: grid; }
-    }
-    @container faqa (min-height: 360px) {
-      .faq__a p { font-size: var(--fs-heading); line-height: 1.45; }
+    @container faqa (min-height: 400px) and (min-width: 700px) {
+      .faq__q { font-size: var(--fs-heading); }
+      .faq__a p { font-size: var(--fs-heading); line-height: 1.5; }
     }
   }
   /* A tablet short of that: the answer in its row, the stop that shows
      it beside the answer's foot rather than under it. */
-  @media (max-width: 1099px) and (max-height: 999px) {
+  @media (max-width: 1099px) and (max-height: 1079px) {
     .faq__a { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: var(--sp-6); }
     .faq__foot { flex-shrink: 0; }
   }
@@ -1903,45 +1914,64 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
     .fare__how { display: none; }
   }
   /* 08 Questions, desk: the questions in col A under the heading, the
-     list's rows sharing the column's rest; the open row (lit as on the
-     tablet) a ▶ toward col B, which a row's ▶ slides in to under the
-     pointer; and col B the card the open answer stands in, drawn large:
-     its number's ring at the head, the answer, and the stop that shows
-     it on the card's floor. The card is .faqs' own (::after), so it
-     stands with no answer open. The answer is the open <details>' own,
-     laid over the card: absolute in .faqs -- which arrives as one
-     block, so the answer never changes its containing block -- at col
-     B's left (the gutter, col A, the gap). A row never changes height,
-     so a question opened moves nothing; the answer it leaves fades out
-     before its own fades in. landing.js keeps one open here. */
+     list's rows each its question's height and sharing what the column
+     leaves; the open row (lit as on the tablet) carries a ▶ toward col B,
+     and under the pointer or the keyboard a row shows its rail alone, so
+     nothing but the open row points at the card. Col B is the card the
+     open answer stands in: headed by its question, its number in the
+     lit ring -- the summary's words again, so the card reads whole --
+     the answer centred in what the head and the foot leave, and the stop
+     that shows it on the card's floor. The card is .faqs' own (::after),
+     drawn while an answer is open (always, with the script). The answer
+     is the open <details>' own, laid over the card: absolute in .faqs --
+     which arrives as one block, so the answer never changes its
+     containing block -- at col B's left (the gutter, col A, the gap). A
+     row never changes height, so a question opened moves nothing; the
+     answer it leaves fades out before its own fades in. landing.js keeps
+     one open here. */
   .faqs { position: relative; grid-template-rows: minmax(0, 1fr); align-items: stretch; }
   .faqs::after { content: ""; grid-area: 1 / 2; border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--surface); }
+  .faqs:not(:has(.faq[open]))::after { visibility: hidden; }
   .faqs__qs { gap: var(--stop-head-gap); min-height: 0; }
-  .faqs__list { flex: 1; min-height: 0; display: grid; grid-auto-rows: minmax(0, 1fr); }
+  .faqs__list { flex: 1; min-height: 0; display: grid; }
   .faq { display: flex; flex-direction: column; min-height: 0; }
   .faq summary { flex: 1; grid-template-columns: 36px minmax(0, 1fr) 8px; padding: var(--sp-3) var(--sp-6) var(--sp-3) var(--sp-5); }
   .faq summary::after { content: ""; width: 8px; height: 12px; background: var(--accent2); clip-path: polygon(0 0, 100% 50%, 0 100%); opacity: 0; transform: translateX(-4px); transition: opacity .15s ease, transform .15s ease; }
-  .faq[open] summary::after, .faq summary:hover::after, .faq summary:focus-visible::after { opacity: 1; transform: none; }
+  .faq[open] summary::after { opacity: 1; transform: none; }
   .js .faq[open] summary { cursor: default; }
   .faq__a { position: absolute; z-index: 1; top: 0; bottom: 0; left: calc(var(--gutter) + (100% - 2 * var(--gutter) - var(--col-gap)) * 5 / 12 + var(--col-gap)); right: var(--gutter); gap: var(--sp-7); padding: var(--sp-8); container: faqa / size; transition: opacity .25s ease .12s; }
   .faq:not([open]) .faq__a { opacity: 0; transition-duration: .12s; transition-delay: 0s; }
   @starting-style {
     .faq[open] .faq__a { opacity: 0; }
   }
-  .faq__a::before { content: counter(faq); content: counter(faq) / ""; display: grid; place-items: center; width: 44px; height: 44px; border: 2.5px solid var(--accent2); border-radius: var(--r-pill); font-weight: 700; font-size: var(--fs-title); line-height: 1; color: color-mix(in srgb, var(--accent2) 70%, var(--text-primary)); }
-  .faq__a p { max-width: none; font-size: var(--fs-heading); line-height: 1.45; color: var(--text-primary); }
-  /* Where the card holds it (the tall tier's from 1366 wide, a taller
-     window's from 1280), the answer a rung up, at display size: the
-     longest, seven lines, or nine on the narrower card. */
-  @container faqa ((min-height: 540px) and (min-width: 600px)) or ((min-height: 640px) and (min-width: 560px)) {
-    .faq__a p { font-size: var(--fs-display); line-height: 1.3; }
+  .faq__q { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: var(--sp-5); align-items: center; align-self: stretch; padding-bottom: var(--sp-6); border-bottom: 1px solid var(--surface-line); font-weight: 700; font-size: var(--fs-heading); line-height: 1.3; text-wrap: pretty; color: var(--text-primary); }
+  .faq__q::before { content: counter(faq); content: counter(faq) / ""; display: grid; place-items: center; width: 44px; height: 44px; border: 2.5px solid var(--gate-gold-deep); border-radius: var(--r-pill); background: var(--gate-gold); font-size: var(--fs-title); line-height: 1; color: var(--text-on-fill); }
+  .faq__a p { max-width: none; margin-block: auto; font-size: var(--fs-title); line-height: 1.6; color: var(--text-secondary); }
+  /* Where the card holds it (from the short tier's 1366 x 700, 477
+     tall), the answer a rung up, at the question's heading size and told
+     from it by weight and ink -- never past it, so the card reads as its
+     question and the stop's heading stays the largest; the tall tier's
+     spare goes into the answer's leading. */
+  @container faqa (min-height: 440px) and (min-width: 500px) {
+    .faq__a p { font-size: var(--fs-heading); line-height: 1.45; }
   }
-  .faq__foot { align-self: stretch; margin-top: auto; padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
+  @container faqa (min-height: 540px) and (min-width: 500px) {
+    .faq__a p { line-height: 1.6; }
+  }
+  .faq__foot { align-self: stretch; margin-top: 0; padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
   .faq__to { font-size: var(--fs-sm); }
   .faq__stop { width: 36px; height: 36px; font-size: var(--fs-sm); }
   /* Short: the card and its answer a rung tighter. */
   @media (max-height: 799px) {
     .faq__a { gap: var(--sp-5); padding: var(--sp-6); }
+    .faq__q { padding-bottom: var(--sp-5); }
+  }
+  /* Under 700 tall (a 1280 x 600 or 1100 x 620 window) the questions a
+     rung down, the phone's size, so six of them, four of two lines,
+     stand under a two-line heading. */
+  @media (max-height: 699px) {
+    .faq summary { font-size: var(--fs-body); }
+    .faq__q { font-size: var(--fs-title); }
   }
   @media (prefers-reduced-motion: reduce) {
     .faq summary::after { transform: none; }

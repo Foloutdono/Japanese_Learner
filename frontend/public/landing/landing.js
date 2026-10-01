@@ -500,26 +500,38 @@ for (const token of tokens) {
   })
 }
 
-// ── Questions: one answer open at a time ──
-// The <details> share a name, so a browser opens one at a time on its
-// own; this does it for one that does not. Where the open answer
-// stands in a card of its own (landing.css: the desk, beside the
-// questions, and a tall tablet, under them) one stays open: the open
-// question's own summary closes nothing, and a window grown into that
-// layout with none open opens the first.
+// ── Questions: one answer open at a time where it stands in a card ──
+// Where the open answer stands in a card of its own (landing.css: the
+// desk, beside the questions, and a tall tablet, under them) one is
+// open at a time and one stays open: the <details> share a name, so a
+// browser closes the others on its own, this does it for one that does
+// not, the open question's own summary closes nothing, and a window
+// grown into that layout opens the first if none is. On a phone and a
+// short tablet the answers open in their rows, each on its own: the
+// name comes off, so opening a question never closes one above it and
+// slides the tapped row up under the bar.
 const faqs = $$('[data-faq]')
-const inCard = window.matchMedia('(min-width: 1100px), (min-width: 720px) and (min-height: 1000px)')
+const inCard = window.matchMedia('(min-width: 1100px), (min-width: 720px) and (min-height: 1080px)')
+function faqLayout() {
+  if (!inCard.matches) {
+    for (const faq of faqs) faq.removeAttribute('name')
+    return
+  }
+  const open = faqs.filter(faq => faq.open)
+  for (const faq of open.slice(1)) faq.open = false
+  if (faqs.length && !open.length) faqs[0].open = true
+  for (const faq of faqs) faq.setAttribute('name', 'faq')
+}
 for (const faq of faqs) {
   faq.addEventListener('toggle', () => {
-    if (faq.open) for (const other of faqs) if (other !== faq) other.open = false
+    if (faq.open && inCard.matches) for (const other of faqs) if (other !== faq) other.open = false
   })
   $('summary', faq).addEventListener('click', event => {
     if (faq.open && inCard.matches) event.preventDefault()
   })
 }
-inCard.addEventListener('change', event => {
-  if (event.matches && faqs.length && !faqs.some(faq => faq.open)) faqs[0].open = true
-})
+faqLayout()
+inCard.addEventListener('change', faqLayout)
 
 // ── Footage ──
 const stills = new Map()
