@@ -329,6 +329,9 @@ describe('the mock exam at phone width', () => {
       </div>
     )
     const $ = sel => screen.container.querySelector(sel)
+    // Held to the window: a long passage scrolls in its page rather than
+    // growing the run past the level bar and the dock off the screen.
+    expect(getComputedStyle($('.stage.exam-run')).flexGrow).toBe('0')
     const big = parseFloat(getComputedStyle($('.exam-page__fig')).fontSize)
     expect(big).toBeGreaterThan(parseFloat(getComputedStyle($('.exam-page__of')).fontSize))
     expect(parseFloat(getComputedStyle($('.exam-ask__big')).fontSize)).toBeGreaterThanOrEqual(40)

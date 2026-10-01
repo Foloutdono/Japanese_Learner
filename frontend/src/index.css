@@ -23516,6 +23516,9 @@ button.brd-stn { cursor: pointer; }
    what the head and the dock leave, and a passage scrolls inside it
    rather than pushing the dock off the screen. */
 .stage.exam-run {
+  /* Held to the window, not grown by its content: a long passage
+     scrolls inside its page and the dock stays whole above the bar. */
+  flex: none;
   width: 100%;
   max-width: var(--card-w);
   height: calc(100dvh - var(--lvlbar-h) - var(--safe-bottom));
@@ -23645,8 +23648,10 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-display);
   font-weight: 500;
   line-height: 1.5;
-  word-break: keep-all;
-  overflow-wrap: anywhere;
+  /* Japanese breaks between any two characters; balanced, a sentence
+     set this large is two even lines rather than 毎朝、 alone on one. */
+  line-break: strict;
+  text-wrap: balance;
 }
 .exam-ask__big--long { font-size: var(--fs-heading); line-height: 1.6; }
 .exam-ask__line { margin: 0; font-family: var(--font-jp); font-size: var(--fs-lead); line-height: 1.8; }
