@@ -229,7 +229,7 @@ function lines(t) {
     + `<div class="specimen plate__spec">${spec}</div></article>`
   const stage = (key, word) => `<span class="stage st-${key}">${esc(word)}</span>`
   const k = t.method.stages
-  return `<section class="sec" id="${t.ids.lines}" aria-labelledby="${t.ids.lines}-h">${stop(t, 'lines')}<div class="wrap">`
+  return `<section class="sec lines" id="${t.ids.lines}" aria-labelledby="${t.ids.lines}-h">${stop(t, 'lines')}<div class="wrap">`
     + head2(t, L.h2, L.body, t.ids.lines)
     + '<div class="plates" data-stagger>'
     + plate('kana', 'あ', P.kana, `${stage('learning', k.learning)}<span class="spec__glyph" lang="ja">あ</span><span class="spec__gloss">${esc(P.kana.gloss)}</span>`, chips(P.kana.chips))
