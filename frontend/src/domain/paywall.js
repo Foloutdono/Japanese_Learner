@@ -1,4 +1,4 @@
-import { FREE_DECKS, FREE_CARDS, PASS_DECKS, PASS_CARDS } from './credits'
+import { PASS_DECKS, PASS_CARDS } from './credits'
 
 // ── 定期券 — the offer, as the client knows it ─────────────────
 // The pass, shown before it can be bought. This is deliberately a
@@ -31,23 +31,53 @@ export const HAS_PAYWALL = true
 // its own until plan 143 made its pass's footer the door to the
 // balance sheet, which is where the offer is reached from there now;
 // rows recorded before that still carry `where: 'profile'`.
+//
+// The door decides the screen (offerScreen below, plan 171): a run
+// stopped at zero gets the learner's own week; a Pro learner at one
+// of the plan's ceilings, or asking from Settings, gets the step up to
+// Max; every other door gets the 7-day trial.
 export const SOURCES = Object.freeze({
   ONBOARDING: 'onboarding',   // the last boarding screen, under the pass
   BALANCE: 'balance',         // the balance sheet, off the HUD
   SETTINGS: 'settings',       // the settings list
   RUNOUT: 'runout',           // the run stopped at a zero balance
   RIDE: 'ride',               // the reading ride's pass plate (plan 097)
+  LIMIT: 'limit',             // a Pro learner at one of the plan's ceilings
+  UPGRADE: 'upgrade',         // a Pro learner's Settings: "Passer à Max"
 })
+
+// The three offers (plan 171, the owner's canvas "Tsuji — the three
+// offers"). DISCOVER sells Pro yearly's 7-day trial on what practice
+// unlocks; WEEK sells Pro yearly on the learner's own week, the days
+// the free refill stopped them; MAX sells the step up to Max, told by
+// the ceiling the learner hit (LIMITS) or, from Settings, as the pass
+// turning over.
+export const SCREENS = Object.freeze({ DISCOVER: 'discover', WEEK: 'week', MAX: 'max' })
+// The Pro ceilings a learner can hit, each its own Max screen:
+// practice's fare, the photos and explanations a day, the new mock
+// papers a month. Without one, the Max screen is Settings' upgrade.
+export const LIMITS = Object.freeze(['practice', 'photos', 'explains', 'papers'])
+
+/** Which of the three offers a door opens. */
+export function offerScreen(source) {
+  if (source === SOURCES.RUNOUT) return SCREENS.WEEK
+  if (source === SOURCES.LIMIT || source === SOURCES.UPGRADE) return SCREENS.MAX
+  return SCREENS.DISCOVER
+}
+
+/** The one pick each offer sells: Pro yearly (its trial, on DISCOVER),
+ *  or Max yearly. */
+export function offerPick(screen) {
+  return screen === SCREENS.MAX ? { plan: 'max', billing: 'yearly' } : { plan: 'pro', billing: 'yearly' }
+}
 
 // ── The plans, as the owner priced them ────────────────────────
 // Two paid plans and the free one (docs/business/tsuji-costs.xlsx, the
 // "Pricing" and "Offer review" sheets). The strategy is one sentence:
 // sell Pro yearly, and keep Max as the step up for a Pro learner who
-// reaches a limit. So the offer opens on Pro alone (LEAD), with yearly
-// picked and first (PROMOTED) at "5 € a month" beside the saving, and
-// monthly under it as the anchor that makes yearly look like what it is.
-// Max is not hidden -- "See all offers" lays it out under Pro -- but it
-// is not what a first look is spent on.
+// reaches a limit. So the free learner's two offers sell Pro yearly
+// alone -- its trial, or "5 € a month" against twelve monthly payments
+// -- and Max is shown only to a Pro learner (SCREENS above).
 //
 // Prices are the full-price tier, VAT included, and are what the offer
 // prints until a store answers with the learner's own (the store sets a
@@ -59,26 +89,21 @@ export const SOURCES = Object.freeze({
 // server has one paid plan yet, so Pro's are the figures it will
 // enforce once the plans are split with the store. Nothing is sold
 // before then (HAS_STORE), so nothing here is a promise yet collected on.
+//
+// The allowances are the owner's decision (the sheet's "Offer review"):
+// on Pro practice and the mock exams cost a credit a play, and the AI
+// is rationed -- `photos` analysed and `explains` bought a day, `papers`
+// newly generated a month; Max doubles the three and practice is
+// included (`fare` 0).
 export const CURRENCY = 'EUR'
 export const PLAN_IDS = Object.freeze(['pro', 'max'])
 export const BILLINGS = Object.freeze(['yearly', 'monthly'])
 export const PLANS = Object.freeze({
-  pro: Object.freeze({ yearly: 59.99, monthly: 8.99, decks: 30, cards: 400 }),
-  max: Object.freeze({ yearly: 99.99, monthly: 14.99, decks: PASS_DECKS, cards: PASS_CARDS, photos: 20, explains: 30 }),
+  pro: Object.freeze({ yearly: 59.99, monthly: 8.99, decks: 30, cards: 400, photos: 10, explains: 15, papers: 4, fare: 1 }),
+  max: Object.freeze({ yearly: 99.99, monthly: 14.99, decks: PASS_DECKS, cards: PASS_CARDS, photos: 20, explains: 30, papers: 8, fare: 0 }),
 })
-// The plans the offer opens on; the rest wait behind "See all offers".
-export const LEAD = Object.freeze(['pro'])
-// The pick the offer opens with.
-export const PROMOTED = Object.freeze({ plan: 'pro', billing: 'yearly' })
-// What each plan's panel lists, in order. The figures come from PLANS
-// and, for the free side of a comparison, from domain/credits.js.
-export const PERKS = Object.freeze({
-  pro: Object.freeze(['reviews', 'practice', 'analyzer', 'decks']),
-  max: Object.freeze(['everything', 'included', 'decks', 'allowance']),
-})
-// The free tier's figures a perk is compared with: what a free learner
-// holds today, from the constants the server enforces.
-export const FREE = Object.freeze({ decks: FREE_DECKS, cards: FREE_CARDS })
+// Pro yearly's free trial, in days (the DISCOVER offer).
+export const TRIAL_DAYS = 7
 
 const cents = v => Math.round(v * 100) / 100
 
@@ -91,6 +116,11 @@ export function price(plan, billing) {
 export function perMonth(plan, billing) {
   const p = PLANS[plan]
   return billing === 'yearly' ? cents(p.yearly / 12) : p.monthly
+}
+
+/** Pro yearly to Max yearly, a month: the difference the store prorates. */
+export function upgradePerMonth() {
+  return cents((PLANS.max.yearly - PLANS.pro.yearly) / 12)
 }
 
 /** Twelve months paid monthly: the figure the yearly price is set against. */

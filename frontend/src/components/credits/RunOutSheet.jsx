@@ -1,7 +1,8 @@
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
-import { useRunOut, clearRunOut, useCredits } from '../../stores/credits'
+import { useRunOut, clearRunOut, useCredits, recordStop } from '../../stores/credits'
 import { useTodaySummary } from '../../stores/today'
 import { refillMinutes } from '../../domain/credits'
 import { SOURCES } from '../../domain/paywall'
@@ -16,15 +17,26 @@ import { OfferButton } from './OfferButton'
 // as a secondary control — a balance at zero is the one moment the
 // pass answers a question the learner is actually asking, but the way
 // out of a stopped run must stay the obvious tap, never a purchase.
+//
+// The stop itself is recorded here (plan 171): under enforcement the
+// server refuses the run's first unpaid fare and never sees the rest,
+// so this sheet -- the one place that knows what the run left -- posts
+// it once per stop, for the week the offer draws (WeekOffer).
 export function RunOutSheet() {
   const { t } = useLang()
   const navigate = useNavigate()
   const runOut = useRunOut()
   const credits = useCredits()
   const today = useTodaySummary().data
-  if (!runOut) return null
-  const cleared = runOut.cleared ?? 0
+  const cleared = runOut?.cleared ?? 0
   const waiting = Math.max(0, (today?.total ?? 0) - cleared)
+  const recorded = useRef(null)
+  useEffect(() => {
+    if (!runOut || recorded.current === runOut || !(waiting > 0)) return
+    recorded.current = runOut
+    recordStop(waiting)
+  }, [runOut, waiting])
+  if (!runOut) return null
 
   function leave() {
     clearRunOut()
@@ -55,7 +67,7 @@ export function RunOutSheet() {
           <span className="balance__cap">{t.runOutWaits}</span>
         </div>
       </div>
-      <OfferButton source={SOURCES.RUNOUT} className="btn-secondary pw-open--wide" />
+      <OfferButton source={SOURCES.RUNOUT} detail={{ waiting }} className="btn-secondary pw-open--wide" />
       <button type="button" className="btn-depart" onClick={leave}>
         <span className="btn-depart__jp">{t.backToStation}</span>
       </button>

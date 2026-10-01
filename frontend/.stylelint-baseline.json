@@ -38,6 +38,7 @@
   "no-duplicate-selectors::Duplicate selector \".door__leaf--l\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".door__leaf--r\", first used at line N": 1,
   "property-no-vendor-prefix::Vendor-prefixed property \"-webkit-appearance\"": 2,
+  "property-no-vendor-prefix::Vendor-prefixed property \"-webkit-background-clip\"": 2,
   "selector-not-notation::Expected complex :not() pseudo-class notation": 2,
   "shorthand-property-no-redundant-values::Expected \"0 0 8px 0\" to be \"0 0 8px\"": 1,
   "shorthand-property-no-redundant-values::Expected \"0 0\" to be \"0\"": 1

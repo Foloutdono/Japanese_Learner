@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
-  PLANS, PLAN_IDS, BILLINGS, LEAD, PROMOTED, PERKS,
+  PLANS, PLAN_IDS, BILLINGS, SOURCES, SCREENS, LIMITS, TRIAL_DAYS,
+  offerScreen, offerPick, upgradePerMonth,
   price, perMonth, monthsOfYear, yearlySaving, formatPrice, formatPercent,
 } from './paywall'
 import { PASS_DECKS, PASS_CARDS } from './credits'
@@ -8,20 +9,44 @@ import { PASS_DECKS, PASS_CARDS } from './credits'
 // ── The plans, as the owner priced them ─────────────────────────
 // The strategy the offer is drawn to (docs/business/tsuji-costs.xlsx):
 // Pro yearly is the headline at "5 € a month" with its saving, Pro
-// monthly the anchor, Max the step up that waits behind "See all
-// offers". These pin the arithmetic the screen prints, so a price
-// changed in one place cannot leave a stale saving or per-month figure
-// in another.
+// monthly the anchor, Max the step up a Pro learner is offered at a
+// ceiling (plan 171). These pin the arithmetic the screens print, so a
+// price changed in one place cannot leave a stale saving or per-month
+// figure in another.
 const nbsp = s => s.replace(/[\u00a0\u202f]/g, ' ')
 
-describe('the plans', () => {
-  it('opens on Pro alone, yearly picked', () => {
-    expect(LEAD).toEqual(['pro'])
-    expect(PROMOTED).toEqual({ plan: 'pro', billing: 'yearly' })
-    // Max exists, and is the only plan the lead leaves out.
-    expect(PLAN_IDS.filter(id => !LEAD.includes(id))).toEqual(['max'])
+describe('the three offers', () => {
+  it('opens the screen each door names', () => {
+    expect(offerScreen(SOURCES.RUNOUT)).toBe(SCREENS.WEEK)
+    expect(offerScreen(SOURCES.LIMIT)).toBe(SCREENS.MAX)
+    expect(offerScreen(SOURCES.UPGRADE)).toBe(SCREENS.MAX)
+    for (const door of [SOURCES.ONBOARDING, SOURCES.BALANCE, SOURCES.SETTINGS, SOURCES.RIDE]) {
+      expect(offerScreen(door), door).toBe(SCREENS.DISCOVER)
+    }
   })
 
+  it('sells Pro yearly to a free learner and Max yearly to a Pro one', () => {
+    expect(offerPick(SCREENS.DISCOVER)).toEqual({ plan: 'pro', billing: 'yearly' })
+    expect(offerPick(SCREENS.WEEK)).toEqual({ plan: 'pro', billing: 'yearly' })
+    expect(offerPick(SCREENS.MAX)).toEqual({ plan: 'max', billing: 'yearly' })
+  })
+
+  it("names Pro's four ceilings, each one Max doubles or lifts", () => {
+    expect(LIMITS).toEqual(['practice', 'photos', 'explains', 'papers'])
+    expect(PLANS.max.photos).toBe(2 * PLANS.pro.photos)
+    expect(PLANS.max.explains).toBe(2 * PLANS.pro.explains)
+    expect(PLANS.max.papers).toBe(2 * PLANS.pro.papers)
+    expect(PLANS.pro.fare).toBe(1)
+    expect(PLANS.max.fare).toBe(0)
+    expect(TRIAL_DAYS).toBe(7)
+  })
+
+  it("prints the step up as the year's difference, a month", () => {
+    expect(upgradePerMonth()).toBe(3.33)
+  })
+})
+
+describe('the plans', () => {
   it('prices every plan on a store price point', () => {
     for (const id of PLAN_IDS) {
       for (const billing of BILLINGS) {
@@ -36,9 +61,6 @@ describe('the plans', () => {
     expect(PLANS.max.cards).toBe(PASS_CARDS)
   })
 
-  it('lists four perks a plan, drawn from the same ids for both', () => {
-    for (const id of PLAN_IDS) expect(PERKS[id]).toHaveLength(4)
-  })
 })
 
 describe('the arithmetic', () => {

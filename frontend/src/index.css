@@ -2597,6 +2597,7 @@
      overrides --card-w on its own more specific selector rather than
      fighting max-width directly. */
   --card-w:         640px;
+  --offer-w:        390px;     /* the offers' stage, drawn for a phone (plan 171) */
   --gap:            24px;
   /* The chrome's two heights (plan 068), safe-area excluded: the HUD
      across the top of every tab screen, and the tab bar on the bottom
@@ -4603,76 +4604,141 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 
-/* ── 定期券 — the offer (the paywall) ── */
-/* A screen of its own (components/credits/PaywallScreen.jsx), the
-   canvas's BoardOffer built: the head the pick's month, the pass's
-   perks on its own sumi, the two billings as rows to pick from, the
-   answer docked at the foot. Pro alone until "See all offers" lays
-   Max out under it. On a phone it takes the glass; the desk sets it in
-   the window's middle at a column's width (the 机 section).
+/* ── 定期券 — the three offers (plan 171) ── */
+/* components/offers/: the trial (DISCOVER), the week the credits
+   stopped (WEEK) and the step up to Max (MAX), drawn to the owner's
+   canvas "Tsuji — the three offers" board for board. A stage on the
+   pass's sumi under one cone of warm light (光, the spotlight), the
+   words under it, the answer docked at the foot. Gold is the ticket's
+   and the gate's alone: the offer gets the attention, so every other
+   highlight on the stage is white (what an offer would change) or the
+   states' green (what it includes).
 
    The layer is the sheets' (.scrim, .sheet): it opens from inside the
    balance and the run-out sheets, and a portal mounted after them
-   stands over them at the same z-index. */
-.pw-scrim {
+   stands over them at the same z-index. On a phone it takes the glass;
+   the desk sets it in the window's middle at a phone's width (the 机
+   section). */
+.ofr-scrim {
   position: fixed;
   inset: 0;
   z-index: 240;
 }
-.pw {
+.ofr {
+  /* The pass's gold as a text ink on paper (the bare metal is under
+     the floor at body size in the light theme, as .brd__q-em says),
+     and the hero's own green: the stage is sumi in both themes. */
+  --ofr-gold-ink: color-mix(in srgb, var(--accent2) 68%, var(--text-primary));
+  --ofr-ok: #8fb069;
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   background: var(--bg-main);
   color: var(--text-primary);
+  /* The canvas's leading: the words are set at the fonts' own, not
+     the body's 1.6, so the ticket and the foot sit where they were
+     drawn. */
+  line-height: normal;
   animation: arrive 0.24s ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .pw { animation-name: arrive-soft; }
+  .ofr { animation-name: arrive-soft; }
 }
-/* The body scrolls and the foot stays, as the boarding's frame does:
-   the answer is never carried off a short screen by the list above
-   it. Both hold the card's width and centre on a tablet. */
-.pw__body,
-.pw__foot {
-  width: 100%;
-  max-width: var(--card-w);
-  margin-inline: auto;
-}
-.pw__body {
+/* The stage and the words scroll together; the foot stays. */
+.ofr__scroll {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
-  padding: var(--sp-7) var(--sp-5) var(--sp-5);
-  padding-top: calc(var(--sp-7) + var(--safe-top));
-}
-.pw__foot {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-  padding: var(--sp-4) var(--sp-5);
-  padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
-  border-top: 1px solid var(--surface-line);
 }
 
-/* The head: the plan, what the pick comes to a month -- the figure the
-   strategy leads with, "5 €" for Pro yearly -- and how it is billed.
-   Gold because it is the pass's price: its metal, not a line's. */
-.pw-head {
+/* ── The stage: the light, the floor, the hairline that closes it ── */
+.ofr__hero {
+  position: relative;
+  flex: none;
+  height: calc(344px + var(--safe-top));
+  overflow: hidden;
+  color: var(--text-on-panel);
+  background:
+    radial-gradient(60% 40% at 50% 100%, rgba(255, 244, 222, 0.07), transparent 70%),
+    radial-gradient(120% 95% at 50% 42%, transparent 52%, rgba(0, 0, 0, 0.5) 100%),
+    var(--bg-panel);
+}
+.ofr__hero--upgrade { height: calc(252px + var(--safe-top)); }
+/* The cone, from above the stage's top. */
+.ofr__hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(from 138deg at 50% -14%, transparent 0deg, rgba(255, 244, 222, 0.17) 18deg, rgba(255, 244, 222, 0.17) 66deg, transparent 84deg);
+  mask-image: linear-gradient(180deg, #000 20%, transparent 95%);
+  pointer-events: none;
+}
+.ofr__hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-on-panel) 26%, transparent) 22%, color-mix(in srgb, var(--text-on-panel) 26%, transparent) 78%, transparent);
+}
+.ofr__floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34%;
+  pointer-events: none;
+}
+/* Every stage is drawn on a 390px phone: centred in a wider one,
+   scaled into a narrower one. */
+.ofr__stage {
+  position: absolute;
+  top: var(--safe-top);
+  bottom: 0;
+  left: 50%;
+  width: var(--offer-w);
+  margin-left: calc(var(--offer-w) / -2);
+  transform-origin: 50% 0;
+}
+@media (max-width: 380px) {
+  .ofr__stage { transform: scale(0.95); }
+}
+@media (max-width: 365px) {
+  .ofr__stage { transform: scale(0.92); }
+}
+@media (max-width: 330px) {
+  .ofr__stage { transform: scale(0.82); }
+}
+
+/* ── The words ── */
+.ofr__body {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--sp-2);
+  gap: var(--sp-3);
+  width: 100%;
+  max-width: var(--offer-w);
+  margin-inline: auto;
+  padding: var(--sp-5) var(--sp-5) 0;
   text-align: center;
 }
-.pw-head__cap {
-  font-family: var(--font-display);
+/* The spare room splits above and below the words instead of pooling
+   over the foot: two grow-only spacers, which collapse to nothing on a
+   screen with no room to spare. */
+.ofr__body::before,
+.ofr__body::after {
+  content: '';
+  flex: 1 1 0;
+  margin-top: calc(-1 * var(--sp-3));
+}
+.ofr__eyebrow {
+  margin: 0;
   font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
@@ -4680,224 +4746,49 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.pw-head__fig {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-2);
-  font-family: var(--font-display);
+.ofr__title {
+  margin: 0;
+  font-family: var(--font-serif);
   font-weight: 700;
-  font-size: var(--fs-display);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  color: var(--accent2);
+  font-size: var(--fs-heading);
+  line-height: 1.2;
+  text-wrap: balance;
 }
-.pw-head__unit {
+.ofr__lede {
+  margin: 0;
+  max-width: 340px;
   font-size: var(--fs-body);
+  line-height: 1.45;
   color: var(--text-secondary);
-}
-.pw-head__sub {
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
+  text-wrap: pretty;
 }
 
-/* One plan: its perks over its two billings. The second plan (Max,
-   once asked for) stands a hairline under the first. */
-.pw-block {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
-.pw-block + .pw-block {
-  padding-top: var(--sp-5);
-  border-top: 1px solid var(--surface-line);
-}
-
-/* The perks, on the pass's own material: the canvas's .brd-perks. The
-   tile names the plan under the ∞ every paid plan reviews at. */
-.pw-perks {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-5);
-  padding: var(--sp-4) var(--sp-5);
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border: 1px solid color-mix(in srgb, var(--accent2) 30%, transparent);
-  border-radius: var(--r-identity);
-}
-.pw-perks__pass {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-1);
+/* ── The foot: the quiet way out over the gate, the gate, a line ── */
+.ofr__foot {
   flex: none;
-  width: 84px;
-  height: 84px;
-  border: 1px solid color-mix(in srgb, var(--accent2) 40%, transparent);
-  border-radius: var(--r-identity);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--accent2) 22%, transparent), transparent 70%);
-}
-.pw-perks__inf {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-display);
-  line-height: 1;
-  color: var(--accent2);
-}
-.pw-perks__cap {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-indent: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-on-panel-soft);
-}
-.pw-perks__list {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: var(--sp-2);
-  list-style: none;
-}
-.pw-perk {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--sp-3);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  line-height: 1.3;
-}
-/* A line tall, so the tick sits on the perk's first line however many
-   it wraps to (the SVG centres its drawing in the box it is given). */
-.pw-perk__tick {
-  flex: none;
-  width: 14px;
-  height: 1lh;
-  color: var(--accent2);
-}
-.pw-perk small {
-  font-size: inherit;
-  font-weight: 500;
-  color: var(--text-on-panel-soft);
-}
-
-/* The billings: the canvas's .brd-plan, a row to pick, the pick washed
-   in the pass's gold and its check lit. */
-.pw-plans {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
-.pw-plan {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
   width: 100%;
-  min-height: 60px;
-  padding: var(--sp-3) var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  font: inherit;
-  text-align: start;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  max-width: var(--offer-w);
+  margin-inline: auto;
+  padding: var(--sp-3) var(--sp-5);
+  padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
 }
-.pw-plan:hover,
-.pw-plan:focus-visible {
-  transform: translateY(-1px);
-  border-color: var(--accent2);
-  filter: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .pw-plan { transition: border-color 0.15s ease; }
-  .pw-plan:hover,
-  .pw-plan:focus-visible { transform: none; }
-}
-.pw-plan--on {
-  border-color: var(--accent2);
-  background: color-mix(in srgb, var(--accent2) 14%, var(--surface));
-}
-.pw-plan__names {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-}
-.pw-plan__label {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-body);
-}
-.pw-plan__price {
-  font-size: var(--fs-sm);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-.pw-plan__price b {
-  font-family: var(--font-display);
-  color: var(--text-primary);
-}
-/* Twelve monthly payments, struck through beside the year's price. */
-.pw-plan__was {
-  margin-inline-end: var(--sp-2);
-  text-decoration-color: color-mix(in srgb, currentcolor 60%, transparent);
-}
-.pw-plan__check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: 24px;
-  height: 24px;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  color: transparent;
-}
-.pw-plan--on .pw-plan__check {
-  border-color: var(--accent2);
-  color: var(--accent2);
-}
-/* The saving beside "Yearly": the canvas's .brd-tag. */
-.pw-tag {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 var(--sp-2);
-  flex: none;
-  border: 1px solid var(--accent2);
-  border-radius: var(--r-pill);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-indent: var(--tr-caption);
-  white-space: nowrap;
-  color: var(--text-primary);
-  /* Centred on its line box, not on its ink: see .brd-tag. */
-  line-height: normal;
-}
-.pw__all { align-self: center; }
-
-/* The foot: the quiet way over the answer (the boarding's rule, plan
-   168 -- a thumb finds the answer where it was), the answer, and the
-   line that says why it is not a purchase yet. */
-.pw__later {
+.ofr__quiet {
   align-self: center;
   display: inline-flex;
   align-items: center;
+  gap: var(--sp-2);
+  /* A thumb's 44px, laid out at the canvas's 40: the two extra pixels
+     each side overlap the gaps, so the foot stands where it was drawn
+     and every screen still reads whole at 844px. */
   min-height: 44px;
+  margin-block: -2px;
   padding: 0 var(--sp-3);
   background: none;
-  border: none;
+  border: 0;
   font: inherit;
   font-size: var(--fs-body);
   font-weight: 600;
@@ -4906,31 +4797,1663 @@ textarea:focus-visible {
   text-underline-offset: 3px;
   cursor: pointer;
 }
-.pw__later:hover,
-.pw__later:focus-visible { color: var(--text-primary); }
-.pw__cta { width: 100%; }
-/* The answer lands where the button was, at the button's own height,
-   so taking the offer does not make the foot jump. The gold goes a
-   rung toward the ink: at body size on paper the bare metal is under
-   the floor (the same move as .brd__q-em). */
-.pw__thanks {
+.ofr__quiet:hover,
+.ofr__quiet:focus-visible { color: var(--text-primary); }
+/* The week's way out waits for the refill: its clock. */
+.ofr__clock { flex: none; width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-width: 2; stroke-linecap: round; }
+.ofr__gate { width: 100%; }
+/* The thanks lands where the gate was, at the gate's own height, so
+   taking the offer does not make the foot jump. */
+.ofr__thanks {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--sp-9);
+  min-height: 66px;
   margin: 0;
   padding: 0 var(--sp-4);
   text-align: center;
-  font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: 700;
-  color: color-mix(in srgb, var(--accent2) 65%, var(--text-primary));
+  color: var(--ofr-gold-ink);
 }
-.pw__soon {
+.ofr__fine {
   margin: 0;
-  text-align: center;
   font-size: var(--fs-caption);
   color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ── The price, as a ticket: the fare and its stub ── */
+.ofr-tkt {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  width: 100%;
+  margin-top: var(--sp-2);
+  border: 1.5px solid color-mix(in srgb, var(--accent2) 75%, transparent);
+  border-radius: var(--r-identity);
+  background: color-mix(in srgb, var(--accent2) 10%, var(--surface));
+  text-align: left;
+}
+.ofr-tkt__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-4) var(--sp-5);
+}
+.ofr-tkt__kind,
+.ofr-tkt__cap {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.ofr-tkt__price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-size: var(--fs-display);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ofr-tkt__unit { font-size: var(--fs-body); color: var(--text-secondary); }
+.ofr-tkt__bill { font-size: var(--fs-caption); color: var(--text-secondary); }
+.ofr-tkt__stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  border-left: 2px dashed color-mix(in srgb, var(--accent2) 50%, transparent);
+  text-align: center;
+}
+/* The two notches the perforation runs between. */
+.ofr-tkt__stub::before,
+.ofr-tkt__stub::after {
+  content: '';
+  position: absolute;
+  left: -10px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  background: var(--bg-main);
+  border: 1.5px solid color-mix(in srgb, var(--accent2) 75%, transparent);
+}
+.ofr-tkt__stub::before { top: -10px; clip-path: inset(50% 0 0 0); }
+.ofr-tkt__stub::after { bottom: -10px; clip-path: inset(0 0 50% 0); }
+.ofr-tkt__save {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ofr-gold-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── The small marks ── */
+.ofr-lk { display: block; fill: none; stroke: currentcolor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.ofr-lk__shackle { transform-box: fill-box; transform-origin: 100% 100%; }
+.ofr-chk { display: block; fill: none; stroke: currentcolor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+/* A practice platform as a tile: its roundel in its pigment. */
+.ofr-tile {
+  --pc: var(--accent2);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  height: 84px;
+  border-radius: var(--r-card);
+  border: 1px solid color-mix(in srgb, var(--pc) 70%, transparent);
+  background: color-mix(in srgb, var(--pc) 12%, var(--bg-panel));
+  color: var(--text-on-panel);
+}
+.ofr-tile__ring {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--pc);
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+  color: color-mix(in srgb, var(--pc) 45%, var(--text-on-panel));
+}
+.ofr-tile__name { font-size: var(--fs-caption); font-weight: 700; }
+
+/* ── 辻, struck into a pass, filling with the XP ──
+   (components/offers/StruckMark.jsx) The bar clipping 辶 grows from
+   its foot to the share of the level climbed; 十 never fills. */
+.ofr-mark { display: block; }
+.ofr-mark__bar { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(var(--ofr-xp, 0)); }
+.ofr-mark--etched { filter: drop-shadow(0 0.8px 0 rgba(255, 255, 255, 0.75)); }
+.ofr-mark--etched .ofr-mark__xp { opacity: 0.72; }
+.ofr-mark:not(.ofr-mark--etched) .ofr-mark__ink { fill: rgba(255, 255, 255, 0.055); }
+.ofr-mark:not(.ofr-mark--etched) .ofr-mark__xp { fill: rgba(210, 174, 104, 0.45); }
+
+/* ── The pass at a hand's size (MiniPass) ── */
+.ofr-pass {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 132px;
+  height: 84px;
+  padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-4);
+  border-radius: var(--r-identity);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  color: var(--text-on-panel);
+  overflow: hidden;
+}
+.ofr-pass::after {
+  content: '';
+  position: absolute;
+  inset: -40% 55% -40% -20%;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.07) 50%, transparent 70%);
+  transform: skewX(-12deg);
+}
+.ofr-pass__top,
+.ofr-pass__who { position: relative; z-index: 1; }
+.ofr-pass__top { display: flex; align-items: center; justify-content: space-between; }
+.ofr-pass__kind {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+/* The pass's contactless mark at the cards' size (Wave.jsx). */
+.ofr-wave { position: relative; display: inline-block; flex: none; width: 16px; height: 18px; }
+.ofr-wave__arc {
+  position: absolute;
+  top: 50%;
+  left: 1px;
+  border: 1.4px solid transparent;
+  border-right-color: currentcolor;
+  border-radius: var(--r-pill);
+}
+.ofr-wave__arc--1 { width: 6px; height: 6px; margin-top: -3px; }
+.ofr-wave__arc--2 { width: 11px; height: 11px; margin-top: -5.5px; opacity: 0.7; }
+.ofr-wave__arc--3 { width: 16px; height: 16px; margin-top: -8px; opacity: 0.45; }
+.ofr-pass__who { display: flex; flex-direction: column; gap: var(--sp-1); }
+.ofr-pass__name {
+  max-width: 76px;
+  overflow: hidden;
+  font-family: var(--font-serif);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ofr-pass__lvl { font-size: var(--fs-caption); font-weight: 700; line-height: 1; }
+.ofr-pass .ofr-mark { position: absolute; right: 4px; top: 6px; width: 72px; height: 72px; }
+/* Pro 墨: soft-touch charcoal, printed. */
+.ofr-pass--pro {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    radial-gradient(120% 90% at 18% -10%, rgba(255, 255, 255, 0.08), transparent 55%),
+    linear-gradient(160deg, color-mix(in srgb, var(--pass-ink) 72%, #1a181d) 0%, color-mix(in srgb, var(--pass-ink) 38%, #141216) 62%, #141216 100%);
+}
+.ofr-pass--pro .ofr-pass__kind { color: #d2ae68; }
+/* Max 梨地: satin platinum, its letters engraved, MAX in gold foil. */
+.ofr-pass--max {
+  background: linear-gradient(135deg, #c9ccd2 0%, #e6e8eb 32%, #f5f6f7 48%, #e1e3e7 66%, #c2c5cb 100%);
+  box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(40, 42, 48, 0.5), inset 0 0 0 1px rgba(90, 94, 102, 0.3), 0 14px 30px rgba(0, 0, 0, 0.45), 0 0 30px rgba(214, 220, 232, 0.22);
+  color: #25272c;
+}
+.ofr-pass--max::after { background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%); }
+.ofr-pass--max .ofr-pass__name,
+.ofr-pass--max .ofr-pass__lvl { color: rgba(34, 36, 42, 0.86); text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8); }
+.ofr-pass--max .ofr-pass__kind {
+  background: linear-gradient(180deg, #d9ae55 0%, #b0852f 44%, #7a571c 54%, #b0852f 74%, #e6bd62 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9));
+}
+.ofr-pass--max .ofr-wave__arc { border-right-color: rgba(34, 36, 42, 0.8); }
+
+/* ── 1 · Discover: the trial (DiscoverOffer) ──
+   One 16s loop: the pass taps the padlock open and the six platforms
+   bloom out of it and unlock (0–2.4s), held; each folds into a dot and
+   one card plays the same sentence through each platform in turn
+   (6–15s), its dot lit. Reduced motion: the six platforms, unlocked. */
+.ofr-disc-grid {
+  position: absolute;
+  left: var(--sp-5);
+  right: var(--sp-5);
+  top: 78px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-4);
+}
+.ofr-disc-tile {
+  border-color: var(--pc);
+  box-shadow: 0 0 18px -4px color-mix(in srgb, var(--pc) 70%, transparent);
+  animation: ofr-disc-tile 16s cubic-bezier(0.2, 0.7, 0.2, 1) infinite both, ofr-disc-lit 16s linear infinite both;
+  animation-delay: var(--ofr-d, 0s), var(--ofr-d, 0s);
+}
+.ofr-disc-tlock {
+  position: absolute;
+  top: var(--sp-2);
+  right: var(--sp-2);
+  width: 14px;
+  height: 14px;
+  color: var(--text-on-panel-soft);
+  opacity: 0;
+  animation: ofr-disc-tlock 16s linear infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+.ofr-disc-tlock .ofr-lk__shackle { animation: ofr-disc-tshackle 16s ease-out infinite both; animation-delay: var(--ofr-d, 0s); }
+.ofr-disc-lock {
+  position: absolute;
+  left: 50%;
+  top: 106px;
+  width: 100px;
+  height: 125px;
+  margin-left: -50px;
+  opacity: 0;
+  animation: ofr-disc-lock 16s ease-out infinite both;
+}
+.ofr-disc-lk {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 18px rgba(255, 244, 222, 0.22));
+}
+.ofr-disc-shackle,
+.ofr-disc-body,
+.ofr-disc-hole { fill: none; stroke: var(--text-on-panel); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.ofr-disc-body { fill: color-mix(in srgb, var(--text-on-panel) 8%, var(--bg-panel)); animation: ofr-disc-body 16s linear infinite both; }
+.ofr-disc-hole { stroke-width: 3.5; }
+.ofr-disc-shackle {
+  transform-box: view-box;
+  transform-origin: 47px 36px;
+  animation: ofr-disc-shackle 16s cubic-bezier(0.3, 1.6, 0.5, 1) infinite both;
+}
+.ofr-disc-ring {
+  position: absolute;
+  left: 50%;
+  top: 86px;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  border: 2px solid color-mix(in srgb, var(--text-on-panel) 70%, transparent);
+  border-radius: var(--r-pill);
+  opacity: 0;
+  animation: ofr-disc-ring 16s ease-out infinite both;
+}
+.ofr-disc-ring--2 { animation-delay: 0.22s; }
+.ofr-disc-pass {
+  left: 50%;
+  top: 160px;
+  opacity: 0;
+  animation: ofr-disc-pass 16s cubic-bezier(0.3, 0.7, 0.2, 1) infinite both;
+}
+.ofr-disc-labels {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 34px;
+  height: 30px;
+}
+.ofr-disc-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-on-panel);
+  opacity: 0;
+  animation: ofr-disc-show 16s linear infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+.ofr-disc-label__ring {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--pc);
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption-xs);
+  line-height: 1;
+  color: color-mix(in srgb, var(--pc) 45%, var(--text-on-panel));
+}
+.ofr-disc-card {
+  position: absolute;
+  left: 50%;
+  top: 78px;
+  width: 316px;
+  height: 196px;
+  margin-left: -158px;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 22px 44px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  animation: ofr-disc-card 16s ease-out infinite both;
+}
+.ofr-disc-pane {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  opacity: 0;
+  animation: ofr-disc-show 16s linear infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+.ofr-disc-jp { margin: 0; font-family: var(--font-jp); font-size: var(--fs-title); font-weight: 500; letter-spacing: var(--tr-term); }
+.ofr-disc-fr { margin: 0; font-size: var(--fs-body); font-weight: 600; }
+.ofr-disc-text { margin: 0; font-family: var(--font-jp); font-size: var(--fs-sm); line-height: 1.6; text-align: center; }
+.ofr-disc-q { margin: 0; font-size: var(--fs-sm); font-weight: 700; }
+.ofr-disc-tutor { margin: 0; font-size: var(--fs-caption); font-weight: 700; color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.ofr-disc-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  width: 100%;
+  height: 40px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--text-primary) 5%, var(--bg-main));
+  font-size: var(--fs-body);
+  font-weight: 600;
+  animation: ofr-disc-field 16s linear infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+.ofr-disc-type {
+  white-space: nowrap;
+  clip-path: inset(0 0 0 0);
+  animation: ofr-disc-type 16s steps(22, end) infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+.ofr-disc-ok {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--success);
+  animation: ofr-disc-ok 16s linear infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+.ofr-disc-audio { display: flex; align-items: center; gap: var(--sp-4); height: 44px; }
+.ofr-disc-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: var(--line-kakitori);
+  color: var(--text-on-panel);
+}
+.ofr-disc-play svg { width: 16px; height: 16px; fill: currentcolor; }
+.ofr-disc-bars { display: flex; align-items: center; height: 32px; }
+.ofr-disc-bars i {
+  display: block;
+  width: 4px;
+  height: 100%;
+  margin-right: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--line-kakitori) 70%, var(--text-primary));
+  transform-origin: center;
+  animation: ofr-disc-bar 0.9s ease-in-out infinite alternate;
+  animation-delay: calc(var(--ofr-b, 0) * -0.13s);
+}
+.ofr-disc-opts,
+.ofr-disc-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); width: 100%; }
+.ofr-disc-opts span,
+.ofr-disc-choices span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.ofr-disc-choices span { font-family: var(--font-jp); font-weight: 500; }
+.ofr-disc-pane .ofr-disc-right { animation: ofr-disc-right 16s linear infinite both; animation-delay: var(--ofr-d, 0s); }
+.ofr-disc-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 294px;
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-4);
+  animation: ofr-disc-dots 16s linear infinite both;
+}
+.ofr-disc-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--pc);
+  opacity: 0.45;
+  animation: ofr-disc-dot 16s linear infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+@keyframes ofr-disc-lock {
+  0% { opacity: 0; transform: translateY(14px) scale(0.92); }
+  2.2%, 7.4% { opacity: 1; transform: none; }
+  9.6%, 100% { opacity: 0; transform: translateY(-18px) scale(0.78); }
+}
+@keyframes ofr-disc-shackle {
+  0%, 5.25% { transform: none; }
+  7%, 100% { transform: translateY(-9px) rotate(-32deg); }
+}
+@keyframes ofr-disc-body {
+  0%, 5.25% { fill: color-mix(in srgb, var(--text-on-panel) 8%, var(--bg-panel)); }
+  6.6%, 100% { fill: color-mix(in srgb, var(--text-on-panel) 22%, var(--bg-panel)); }
+}
+@keyframes ofr-disc-ring {
+  0%, 5.5% { opacity: 0; transform: scale(0.6); }
+  5.9% { opacity: 0.9; transform: scale(0.9); }
+  10.9%, 100% { opacity: 0; transform: scale(2.8); }
+}
+@keyframes ofr-disc-pass {
+  0%, 1.3% { opacity: 0; transform: translate(120px, 160px) rotate(18deg); }
+  4.2% { opacity: 1; transform: translate(-6px, 4px) rotate(-8deg); }
+  5.25% { opacity: 1; transform: translate(-12px, -4px) rotate(-8deg); }
+  6.1% { opacity: 1; transform: translate(-6px, 4px) rotate(-8deg); }
+  8.75%, 100% { opacity: 0; transform: translate(130px, 190px) rotate(12deg); }
+}
+/* Each platform blooms out of the lock, and later folds into its dot. */
+@keyframes ofr-disc-tile {
+  0%, 8.3% { opacity: 0; transform: translate(calc(var(--ofr-fx, 0) * 1px), calc(var(--ofr-fy, 0) * 1px)) scale(0.3); }
+  11.8%, 31% { opacity: 1; transform: none; }
+  36%, 100% { opacity: 0; transform: translate(calc(var(--ofr-tx, 0) * 1px), calc(var(--ofr-ty, 0) * 1px)) scale(0.08); }
+}
+@keyframes ofr-disc-lit {
+  0%, 13.1% { border-color: color-mix(in srgb, var(--pc) 35%, transparent); box-shadow: none; }
+  14.9%, 100% { border-color: var(--pc); box-shadow: 0 0 18px -4px color-mix(in srgb, var(--pc) 70%, transparent); }
+}
+@keyframes ofr-disc-tlock {
+  0%, 10.9% { opacity: 0; }
+  11.8%, 14.4% { opacity: 1; }
+  16.6%, 100% { opacity: 0; }
+}
+@keyframes ofr-disc-tshackle {
+  0%, 12.7% { transform: none; }
+  14%, 100% { transform: translateY(-3px) rotate(-32deg); }
+}
+@keyframes ofr-disc-card {
+  0%, 35% { opacity: 0; transform: translateY(14px); }
+  37.5%, 94% { opacity: 1; transform: none; }
+  97%, 100% { opacity: 0; transform: none; }
+}
+@keyframes ofr-disc-dots {
+  0%, 34% { opacity: 0; }
+  36%, 94% { opacity: 1; }
+  97%, 100% { opacity: 0; }
+}
+/* One platform's 1.5s: 9.375% of the loop, from 6s. */
+@keyframes ofr-disc-show {
+  0%, 37.5% { opacity: 0; transform: translateY(6px); }
+  38.3%, 46% { opacity: 1; transform: none; }
+  46.875%, 100% { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes ofr-disc-type {
+  0%, 38.4% { clip-path: inset(0 100% 0 0); }
+  42.2%, 100% { clip-path: inset(0 0 0 0); }
+}
+@keyframes ofr-disc-ok {
+  0%, 42.5% { opacity: 0; transform: scale(0.4); }
+  43.3%, 100% { opacity: 1; transform: none; }
+}
+@keyframes ofr-disc-field {
+  0%, 42.5% { border-color: var(--surface-line); }
+  43.3%, 100% { border-color: color-mix(in srgb, var(--success) 75%, transparent); }
+}
+@keyframes ofr-disc-right {
+  0%, 41.5% { border-color: var(--surface-line); background: transparent; }
+  42.5%, 100% { border-color: var(--success); background: color-mix(in srgb, var(--success) 18%, transparent); }
+}
+@keyframes ofr-disc-dot {
+  0%, 37.5% { opacity: 0.45; transform: none; }
+  38.3%, 46% { opacity: 1; transform: scale(1.6); }
+  46.875%, 100% { opacity: 0.45; transform: none; }
+}
+@keyframes ofr-disc-bar {
+  from { transform: scaleY(0.25); }
+  to { transform: scaleY(1); }
+}
+
+/* ── 2 · The week the credits stopped (WeekOffer) ──
+   Reviews done in the context gray (the point is what waited), the
+   reviews that waited hatched in --danger with a ✕ over the day
+   (status never by colour alone), the free refill a dashed ceiling.
+   Then the ceiling lifts and what waited is reviewed, in white. A 7s
+   loop; at rest, the week with the ceiling lifted. */
+.ofr-week {
+  --ofr-week-done: color-mix(in srgb, var(--text-on-panel-soft) 75%, var(--bg-panel));
+  --ofr-week-pro: #ece4d4;
+  position: absolute;
+  inset: 28px 34px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.ofr-week__head { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); text-align: center; }
+.ofr-week__cap { font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); }
+.ofr-week__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-caption);
+  color: var(--text-on-panel-soft);
+}
+.ofr-week__legend > span { display: inline-flex; align-items: center; gap: var(--sp-2); white-space: nowrap; }
+.ofr-week__key { display: inline-block; width: 10px; height: 10px; border-radius: var(--r-flat); }
+.ofr-week__key--done { background: var(--ofr-week-done); }
+.ofr-week__key--wait { background: repeating-linear-gradient(135deg, var(--danger) 0 2px, transparent 2px 4px); box-shadow: inset 0 0 0 1px var(--danger); }
+.ofr-week__key--cap { width: 16px; height: 0; border-top: 2px dashed color-mix(in srgb, var(--text-on-panel) 70%, transparent); }
+.ofr-week__plot {
+  position: relative;
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: end;
+  gap: var(--sp-3);
+  padding-top: var(--sp-5);
+}
+.ofr-week__ceiling {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(22px + var(--ofr-h, 0) * 1px);
+  border-top: 2px dashed color-mix(in srgb, var(--text-on-panel) 55%, transparent);
+  animation: ofr-week-ceiling 7s cubic-bezier(0.5, 0, 0.3, 1) infinite both;
+}
+.ofr-week__col { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.ofr-week__stack { display: flex; flex-direction: column; align-items: stretch; width: 30px; }
+.ofr-week__done {
+  display: block;
+  height: calc(var(--ofr-h, 0) * 1px);
+  border-radius: var(--r-flat);
+  background: var(--ofr-week-done);
+  transform-origin: bottom;
+  animation: ofr-week-grow 7s cubic-bezier(0.2, 0.7, 0.2, 1) infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+.ofr-week__stack > .ofr-week__done:only-child { border-radius: var(--r-plate) var(--r-plate) var(--r-flat) var(--r-flat); }
+.ofr-week__wait {
+  position: relative;
+  display: block;
+  height: calc(var(--ofr-h, 0) * 1px);
+  margin-bottom: 2px;
+  border-radius: var(--r-plate) var(--r-plate) var(--r-flat) var(--r-flat);
+  background: var(--ofr-week-pro);
+  transform-origin: bottom;
+  animation: ofr-week-wait 7s linear infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+.ofr-week__x {
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  border-radius: var(--r-pill);
+  background: var(--danger);
+  color: var(--text-on-panel);
+  animation: ofr-week-x 7s linear infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+.ofr-week__x svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentcolor; stroke-width: 3; stroke-linecap: round; }
+.ofr-week__day { font-size: var(--fs-caption); font-weight: 700; color: var(--text-on-panel-soft); }
+.ofr-week__gain {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-on-panel);
+  animation: ofr-week-gain 7s linear infinite both;
+}
+@keyframes ofr-week-grow {
+  0% { transform: scaleY(0); }
+  12%, 94% { transform: none; }
+  100% { transform: scaleY(0); }
+}
+/* What waited: absent, then hatched red, then reviewed in white. */
+@keyframes ofr-week-wait {
+  0%, 12% { transform: scaleY(0); background: repeating-linear-gradient(135deg, var(--danger) 0 3px, color-mix(in srgb, var(--danger) 25%, transparent) 3px 6px); box-shadow: inset 0 0 0 1.5px var(--danger); }
+  20%, 44% { transform: none; background: repeating-linear-gradient(135deg, var(--danger) 0 3px, color-mix(in srgb, var(--danger) 25%, transparent) 3px 6px); box-shadow: inset 0 0 0 1.5px var(--danger); }
+  52%, 94% { transform: none; background: var(--ofr-week-pro); box-shadow: 0 0 14px rgba(255, 244, 222, 0.35); }
+  100% { transform: scaleY(0); background: var(--ofr-week-pro); }
+}
+@keyframes ofr-week-x {
+  0%, 18% { opacity: 0; transform: scale(0.4); }
+  22%, 44% { opacity: 1; transform: none; }
+  48%, 100% { opacity: 0; transform: scale(0.4); }
+}
+@keyframes ofr-week-ceiling {
+  0%, 36% { opacity: 1; transform: none; }
+  48%, 94% { opacity: 0; transform: translateY(-70px); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes ofr-week-gain {
+  0%, 52% { opacity: 0; transform: translateY(6px); }
+  58%, 92% { opacity: 1; transform: none; }
+  96%, 100% { opacity: 0; }
+}
+
+/* ── 3A · practice stops costing credits (MaxOffer's FareStage) ──
+   Two halves under a switch, a 10s loop. "With Pro": three exercises
+   played, each charged -- its −1 flies to the balance, 3 → 2 → 1 → 0
+   -- and the fourth refused. "With Max": the switch slides, the
+   balance becomes "Practice included", every fare turns over to
+   "Included" (the states' green), the refused exercise opens, and the
+   allowances under the title count up to Max's. */
+@property --ofr-credits { syntax: '<integer>'; inherits: false; initial-value: 0; }
+@property --ofr-n { syntax: '<integer>'; inherits: false; initial-value: 0; }
+.ofr-fare-switch {
+  position: absolute;
+  left: 50%;
+  top: 22px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 220px;
+  height: 34px;
+  margin-left: -110px;
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--bg-panel) 55%, #000);
+}
+.ofr-fare-knob {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-panel) 30%, transparent);
+  animation: ofr-fare-knob 10s cubic-bezier(0.5, 0, 0.3, 1) infinite both;
+}
+.ofr-fare-sw {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.ofr-fare-sw--pro { animation: ofr-fare-sw-pro 10s linear infinite both; }
+.ofr-fare-sw--max { animation: ofr-fare-sw-max 10s linear infinite both; }
+.ofr-fare-bal {
+  position: absolute;
+  left: 50%;
+  top: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 190px;
+  height: 30px;
+  margin-left: -95px;
+  border: 1.5px solid color-mix(in srgb, var(--text-on-panel) 30%, transparent);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  animation: ofr-fare-bal 10s linear infinite both;
+}
+.ofr-fare-bal > span { position: absolute; white-space: nowrap; }
+.ofr-fare-bal__pro { animation: ofr-fare-bal-pro 10s linear infinite both; }
+.ofr-fare-bal__n { counter-reset: ofr-credits var(--ofr-credits); animation: ofr-fare-credits 10s linear infinite both; }
+.ofr-fare-bal__n::after { content: counter(ofr-credits); }
+.ofr-fare-bal__max { color: var(--ofr-ok); animation: ofr-fare-bal-max 10s linear infinite both; }
+.ofr-fare-rows {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  top: 114px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ofr-fare-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  height: 42px;
+  padding: 0 var(--sp-4) 0 var(--sp-3);
+  border: 1px solid color-mix(in srgb, var(--pc) 45%, transparent);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--pc) 8%, var(--bg-panel));
+  color: var(--text-on-panel);
+  animation: ofr-fare-lit 10s linear infinite both;
+}
+.ofr-fare-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--pc) 30%, transparent);
+  opacity: 0;
+  animation: ofr-fare-play 10s linear infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+/* The refused exercise is never played: no flash, no fare charged. */
+.ofr-fare-row--last::before { animation: none; }
+.ofr-fare-row--last { animation: ofr-fare-lit 10s linear infinite both, ofr-fare-fail 10s linear infinite both; }
+.ofr-fare-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--pc);
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: 1;
+  color: color-mix(in srgb, var(--pc) 45%, var(--text-on-panel));
+}
+.ofr-fare-name { position: relative; flex: 1; font-size: var(--fs-sm); font-weight: 700; }
+.ofr-fare-fare { position: relative; display: grid; perspective: 300px; }
+.ofr-fare-fare b {
+  grid-area: 1 / 1;
+  justify-self: end;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  backface-visibility: hidden;
+}
+.ofr-fare-fare__pro { background: var(--text-on-panel); color: var(--text-on-fill); animation: ofr-fare-fpro 10s ease-in infinite both; animation-delay: var(--ofr-f, 0s); }
+.ofr-fare-fare__max { background: var(--ofr-ok); color: var(--text-on-fill); animation: ofr-fare-fmax 10s ease-out infinite both; animation-delay: var(--ofr-f, 0s); }
+.ofr-fare-coin {
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
+  border-radius: var(--r-pill);
+  background: var(--danger);
+  color: var(--text-on-panel);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-style: normal;
+  opacity: 0;
+  animation: ofr-fare-coin 10s cubic-bezier(0.4, 0, 0.3, 1) infinite both;
+  animation-delay: var(--ofr-d, 0s);
+}
+.ofr-fare-lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  padding-right: var(--sp-4);
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent 20%, color-mix(in srgb, var(--bg-panel) 92%, transparent) 55%);
+  color: #ff9b86;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  opacity: 0;
+  animation: ofr-fare-lockshow 10s linear infinite both;
+}
+.ofr-fare-lock .ofr-lk { width: 16px; height: 16px; }
+/* The three allowances under the title, counting up from Pro's. */
+.ofr-fare-vals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  margin-top: var(--sp-2);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.ofr-fare-val {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-2);
+  background: var(--bg-main);
+}
+.ofr-fare-val + .ofr-fare-val { border-left: 1px solid var(--surface-line); }
+.ofr-fare-val__n {
+  --ofr-n: var(--ofr-to, 0);
+  counter-reset: ofr-n var(--ofr-n);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  animation: ofr-fare-count 10s linear infinite both;
+  animation-delay: calc(var(--ofr-i, 0) * 0.1s);
+}
+.ofr-fare-val__n::after { content: counter(ofr-n); }
+.ofr-fare-val__k { font-size: var(--fs-caption); font-weight: 700; line-height: 1.25; }
+.ofr-fare-val__was { font-size: var(--fs-caption-xs); color: var(--text-secondary); }
+@keyframes ofr-fare-knob {
+  0%, 50% { transform: none; background: color-mix(in srgb, var(--text-on-panel) 14%, transparent); }
+  53.5%, 95% { transform: translateX(100%); background: color-mix(in srgb, var(--text-on-panel) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-panel) 70%, transparent); }
+  99%, 100% { transform: none; }
+}
+@keyframes ofr-fare-sw-pro { 0%, 50% { color: var(--text-on-panel); } 52%, 97% { color: var(--text-on-panel-soft); } 100% { color: var(--text-on-panel); } }
+@keyframes ofr-fare-sw-max { 0%, 51% { color: var(--text-on-panel-soft); } 53%, 96% { color: var(--text-on-panel); } 99%, 100% { color: var(--text-on-panel-soft); } }
+@keyframes ofr-fare-bal {
+  0%, 31.9% { border-color: color-mix(in srgb, var(--text-on-panel) 30%, transparent); color: var(--text-on-panel); }
+  32%, 50% { border-color: #ff9b86; color: #ff9b86; }
+  52%, 95% { border-color: var(--ofr-ok); color: var(--text-on-panel); }
+  98%, 100% { border-color: color-mix(in srgb, var(--text-on-panel) 30%, transparent); }
+}
+@keyframes ofr-fare-bal-pro {
+  0%, 50% { opacity: 1; }
+  51.5%, 97% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes ofr-fare-credits {
+  0%, 11.9% { --ofr-credits: 3; }
+  12%, 21.9% { --ofr-credits: 2; }
+  22%, 31.9% { --ofr-credits: 1; }
+  32%, 97% { --ofr-credits: 0; }
+  100% { --ofr-credits: 3; }
+}
+@keyframes ofr-fare-bal-max { 0%, 51.5% { opacity: 0; } 53.5%, 95% { opacity: 1; } 98%, 100% { opacity: 0; } }
+@keyframes ofr-fare-play { 0%, 5.5% { opacity: 0; } 6.5%, 10.5% { opacity: 1; } 12.5%, 100% { opacity: 0; } }
+@keyframes ofr-fare-coin {
+  0%, 6.5% { opacity: 0; transform: none; }
+  7.5% { opacity: 1; transform: translateY(-8px) scale(1.15); }
+  11.5% { opacity: 1; transform: translate(-137px, calc(var(--ofr-dy, 0) * 1px)) scale(0.8); }
+  12.5%, 100% { opacity: 0; transform: translate(-137px, calc(var(--ofr-dy, 0) * 1px)) scale(0.5); }
+}
+@keyframes ofr-fare-fail {
+  0%, 36% { transform: none; }
+  37% { transform: translateX(-5px); }
+  38% { transform: translateX(5px); }
+  39% { transform: translateX(-3px); }
+  40%, 100% { transform: none; }
+}
+@keyframes ofr-fare-lockshow { 0%, 36.5% { opacity: 0; } 38%, 54% { opacity: 1; } 57%, 100% { opacity: 0; } }
+@keyframes ofr-fare-lit {
+  0%, 56% { border-color: color-mix(in srgb, var(--pc) 45%, transparent); box-shadow: none; }
+  59%, 95% { border-color: var(--pc); box-shadow: 0 0 16px -4px color-mix(in srgb, var(--pc) 70%, transparent); }
+  99%, 100% { border-color: color-mix(in srgb, var(--pc) 45%, transparent); box-shadow: none; }
+}
+@keyframes ofr-fare-fpro {
+  0%, 54% { transform: none; opacity: 1; }
+  55.5%, 97% { transform: rotateX(90deg); opacity: 0; }
+  99%, 100% { transform: none; opacity: 1; }
+}
+@keyframes ofr-fare-fmax {
+  0%, 55.5% { transform: rotateX(-90deg); opacity: 0; }
+  57.5%, 95% { transform: none; opacity: 1; }
+  98%, 100% { transform: rotateX(-90deg); opacity: 0; }
+}
+@keyframes ofr-fare-count {
+  0%, 62% { --ofr-n: var(--ofr-from, 0); }
+  72%, 97% { --ofr-n: var(--ofr-to, 0); }
+  100% { --ofr-n: var(--ofr-from, 0); }
+}
+
+/* ── 3B · a ceiling hit: the counter, and the Max pass tapping it ──
+   (MaxOffer's Count and the three stages under it.) An 8s loop: the
+   pass taps the counter at 20%, the ceiling doubles. */
+.ofr-cap-count {
+  position: absolute;
+  left: 50%;
+  top: 22px;
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--bg-panel) 60%, #000);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.ofr-cap-count__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); }
+.ofr-cap-count__fig { font-size: var(--fs-sm); font-weight: 700; color: var(--text-on-panel); font-variant-numeric: tabular-nums; }
+.ofr-cap-den { display: inline-grid; vertical-align: baseline; }
+.ofr-cap-den b { grid-area: 1 / 1; }
+.ofr-cap-den__old { color: #ff9b86; animation: ofr-cap-old 8s ease-in infinite both; }
+.ofr-cap-den__new { color: var(--text-on-panel); text-shadow: 0 0 10px rgba(255, 244, 222, 0.45); animation: ofr-cap-new 8s cubic-bezier(0.2, 1.4, 0.4, 1) infinite both; }
+.ofr-cap-pass { left: 50%; top: 18px; z-index: 2; opacity: 0; animation: ofr-cap-pass 8s cubic-bezier(0.3, 0.7, 0.2, 1) infinite both; }
+@keyframes ofr-cap-pass {
+  0%, 10% { opacity: 0; transform: translate(150px, 280px) rotate(22deg); }
+  18% { opacity: 1; transform: translate(40px, 10px) rotate(-6deg); }
+  20% { opacity: 1; transform: translate(36px, 2px) rotate(-6deg); }
+  23% { opacity: 1; transform: translate(40px, 10px) rotate(-6deg); }
+  30%, 100% { opacity: 0; transform: translate(160px, 280px) rotate(16deg); }
+}
+@keyframes ofr-cap-old {
+  0%, 20% { opacity: 1; transform: none; }
+  23%, 95% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes ofr-cap-new {
+  0%, 21% { opacity: 0; transform: translateY(10px); }
+  24%, 94% { opacity: 1; transform: none; }
+  98%, 100% { opacity: 0; transform: none; }
+}
+
+/* 3B · photos: the analyser's camera on a menu, shut at the day's
+   limit; the shutter opens, the frame locks on, and the menu's words
+   light as the analyser reads them, the first opening its entry. */
+.ofr-photo-frame { position: absolute; left: 50%; top: 76px; width: 290px; height: 206px; margin-left: -145px; }
+.ofr-photo-menu {
+  position: absolute;
+  inset: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-card);
+  border: 3px solid color-mix(in srgb, var(--text-on-panel) 16%, var(--bg-panel));
+  background: linear-gradient(170deg, color-mix(in srgb, var(--pass-ink) 42%, var(--bg-panel)), color-mix(in srgb, var(--pass-ink) 18%, var(--bg-panel)));
+  color: var(--text-on-panel);
+}
+.ofr-photo-row { display: flex; align-items: baseline; gap: var(--sp-1); margin: 0; font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; }
+.ofr-photo-price { margin-left: auto; font-size: var(--fs-body); color: var(--text-on-panel-soft); }
+.ofr-photo-w { padding-bottom: 2px; border-bottom: 3px solid transparent; animation: ofr-photo-w 8s linear infinite both; }
+.ofr-photo-w--1 { --ofr-c: var(--line-vocab); animation-delay: 0s; }
+.ofr-photo-w--2 { --ofr-c: var(--line-kanji); animation-delay: 0.15s; }
+.ofr-photo-w--3 { --ofr-c: var(--line-grammar); animation-delay: 0.3s; }
+.ofr-photo-w--4 { --ofr-c: var(--line-kana); animation-delay: 0.45s; }
+.ofr-photo-corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 3px solid color-mix(in srgb, var(--text-on-panel) 85%, transparent);
+  animation: ofr-photo-corner 8s ease-out infinite both;
+}
+.ofr-photo-corner--tl { left: 0; top: 0; border-right: 0; border-bottom: 0; border-radius: var(--r-panel) var(--r-flat) var(--r-flat) var(--r-flat); }
+.ofr-photo-corner--tr { right: 0; top: 0; border-left: 0; border-bottom: 0; border-radius: var(--r-flat) var(--r-panel) var(--r-flat) var(--r-flat); }
+.ofr-photo-corner--bl { left: 0; bottom: 0; border-right: 0; border-top: 0; border-radius: var(--r-flat) var(--r-flat) var(--r-flat) var(--r-panel); }
+.ofr-photo-corner--br { right: 0; bottom: 0; border-left: 0; border-top: 0; border-radius: var(--r-flat) var(--r-flat) var(--r-panel) var(--r-flat); }
+.ofr-photo-shut {
+  position: absolute;
+  inset: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+  backdrop-filter: blur(2px);
+  color: var(--text-on-panel);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  animation: ofr-photo-shut 8s linear infinite both;
+}
+.ofr-photo-shut .ofr-lk { width: 30px; height: 30px; color: #ff9b86; }
+.ofr-photo-flash { position: absolute; inset: 14px; border-radius: var(--r-card); background: #fff; opacity: 0; animation: ofr-photo-flash 8s ease-out infinite both; }
+.ofr-photo-look {
+  position: absolute;
+  left: 40px;
+  top: 2px;
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-card);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  animation: ofr-photo-look 8s cubic-bezier(0.2, 1.3, 0.4, 1) infinite both;
+}
+.ofr-photo-look b { font-family: var(--font-jp); font-size: var(--fs-lead); }
+.ofr-photo-look span { font-family: var(--font-jp); color: var(--text-secondary); }
+.ofr-photo-look i { font-style: normal; font-weight: 700; }
+@keyframes ofr-photo-shut {
+  0%, 25% { opacity: 1; }
+  30%, 94% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes ofr-photo-flash {
+  0%, 31% { opacity: 0; }
+  32% { opacity: 0.55; }
+  38%, 100% { opacity: 0; }
+}
+@keyframes ofr-photo-corner {
+  0%, 30% { transform: none; opacity: 0.55; }
+  33% { transform: scale(0.86); opacity: 1; }
+  37%, 94% { transform: none; opacity: 1; }
+  100% { opacity: 0.55; }
+}
+@keyframes ofr-photo-w {
+  0%, 40% { border-bottom-color: transparent; }
+  44%, 94% { border-bottom-color: var(--ofr-c); }
+  98%, 100% { border-bottom-color: transparent; }
+}
+@keyframes ofr-photo-look {
+  0%, 52% { opacity: 0; transform: translateY(-6px) scale(0.9); }
+  56%, 92% { opacity: 1; transform: none; }
+  96%, 100% { opacity: 0; }
+}
+
+/* 3B · explanations: what Explain does, on its own 10s clock. A press
+   on Expliquer, the wait, then the translation and a note on each
+   numbered point, its part of the sentence lit as the note is
+   written. That press was the day's last: the counter reads the limit
+   in its red, until the Max pass taps it. */
+.ofr--max[data-limit="explains"] .ofr-cap-den__old { animation: ofr-expl-den-old 10s ease-in infinite both; }
+.ofr--max[data-limit="explains"] .ofr-cap-den__new { animation: ofr-expl-den-new 10s cubic-bezier(0.2, 1.4, 0.4, 1) infinite both; }
+.ofr-expl-pass { animation-name: ofr-expl-pass; animation-duration: 10s; }
+.ofr-expl-num { display: inline-grid; }
+.ofr-expl-num b { grid-area: 1 / 1; }
+.ofr-expl-num__a { animation: ofr-expl-num-a 10s linear infinite both; }
+.ofr-expl-num__b { animation: ofr-expl-num-b 10s linear infinite both; }
+.ofr-expl-card {
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  top: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 22px 44px rgba(0, 0, 0, 0.55);
+}
+.ofr-expl-jp { margin: 0; font-family: var(--font-jp); font-size: var(--fs-title); font-weight: 500; white-space: nowrap; }
+.ofr-expl-u {
+  padding-bottom: 2px;
+  border-radius: var(--r-flat);
+  border-bottom: 2px solid color-mix(in srgb, var(--line-grammar) 55%, transparent);
+  animation: ofr-expl-u 10s linear infinite both;
+}
+.ofr-expl-u sup { margin-left: 1px; font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; color: var(--line-grammar); vertical-align: 1.1em; line-height: 0; }
+.ofr-expl-u--2 { animation-delay: 0.9s; }
+.ofr-expl-u--3 { animation-delay: 1.8s; }
+/* The button, the wait and the explanation take turns in one place. */
+.ofr-expl-zone { position: relative; display: grid; place-items: center; width: 100%; min-height: 128px; }
+.ofr-expl-zone > * { grid-area: 1 / 1; }
+.ofr-expl-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 var(--sp-6);
+  border-radius: var(--r-pill);
+  background: var(--text-primary);
+  color: var(--bg-card);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  animation: ofr-expl-btn 10s ease-out infinite both;
+}
+/* The press: a fingertip comes in, presses, and a ring opens from it. */
+.ofr-expl-tap {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  margin: 10px 0 0 70px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.75), 0 4px 10px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  animation: ofr-expl-tap 10s ease-out infinite both;
+}
+.ofr-expl-tap i { position: absolute; inset: -2px; border-radius: var(--r-pill); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7); opacity: 0; animation: ofr-expl-ring 10s ease-out infinite both; }
+.ofr-expl-wait { display: inline-flex; align-items: center; font-size: var(--fs-sm); color: var(--text-secondary); animation: ofr-expl-wait 10s linear infinite both; }
+.ofr-expl-dot { width: 4px; height: 4px; margin-left: 4px; border-radius: var(--r-pill); background: currentcolor; animation: ofr-expl-dot 0.9s ease-in-out infinite; }
+.ofr-expl-dot--2 { animation-delay: 0.15s; }
+.ofr-expl-dot--3 { animation-delay: 0.3s; }
+.ofr-expl-out { display: flex; flex-direction: column; align-self: stretch; gap: var(--sp-3); width: 100%; }
+.ofr-expl-tr { margin: 0; font-size: var(--fs-body); font-weight: 700; text-align: center; animation: ofr-expl-tr 10s ease-out infinite both; }
+.ofr-expl-notes { display: flex; flex-direction: column; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.ofr-expl-note {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--surface-line);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+  clip-path: inset(0 100% 0 0);
+  animation: ofr-expl-note 10s steps(24, end) infinite both;
+}
+.ofr-expl-note--2 { animation-delay: 0.9s; }
+.ofr-expl-note--3 { animation-delay: 1.8s; }
+.ofr-expl-note b {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  border-radius: var(--r-pill);
+  background: var(--line-grammar);
+  color: #fff;
+  font-size: var(--fs-caption-xs);
+  transform: translateY(-1px);
+}
+.ofr-expl-note span { flex: none; min-width: 26px; font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; }
+@keyframes ofr-expl-tap {
+  0%, 5% { opacity: 0; transform: translate(40px, 50px) scale(1.15); }
+  9% { opacity: 1; transform: translate(-70px, -10px) scale(1); }
+  10.5% { opacity: 1; transform: translate(-70px, -10px) scale(0.8); }
+  12% { opacity: 1; transform: translate(-70px, -10px) scale(1); }
+  15%, 100% { opacity: 0; transform: translate(-50px, 30px) scale(1); }
+}
+@keyframes ofr-expl-ring {
+  0%, 10.5% { opacity: 0; transform: scale(1); }
+  11% { opacity: 1; transform: scale(1); }
+  15%, 100% { opacity: 0; transform: scale(2.6); }
+}
+@keyframes ofr-expl-btn {
+  0%, 10% { opacity: 1; transform: none; }
+  10.8% { opacity: 1; transform: scale(0.94); }
+  12% { opacity: 1; transform: none; }
+  14%, 96% { opacity: 0; transform: none; }
+  100% { opacity: 1; }
+}
+@keyframes ofr-expl-wait { 0%, 13% { opacity: 0; } 15%, 22% { opacity: 1; } 24%, 100% { opacity: 0; } }
+@keyframes ofr-expl-dot { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-3px); opacity: 1; } }
+@keyframes ofr-expl-tr {
+  0%, 24% { opacity: 0; transform: translateY(6px); }
+  28%, 94% { opacity: 1; transform: none; }
+  97%, 100% { opacity: 0; }
+}
+@keyframes ofr-expl-note {
+  0%, 31% { clip-path: inset(0 100% 0 0); opacity: 1; }
+  38%, 94% { clip-path: inset(0 0 0 0); opacity: 1; }
+  97%, 100% { clip-path: inset(0 0 0 0); opacity: 0; }
+}
+/* Each part of the sentence lights while its note is written, then
+   stays softly marked. */
+@keyframes ofr-expl-u {
+  0%, 31% { background: transparent; border-bottom-color: color-mix(in srgb, var(--line-grammar) 55%, transparent); }
+  32%, 39% { background: color-mix(in srgb, var(--line-grammar) 30%, transparent); border-bottom-color: var(--line-grammar); }
+  43%, 94% { background: color-mix(in srgb, var(--line-grammar) 12%, transparent); border-bottom-color: var(--line-grammar); }
+  97%, 100% { background: transparent; border-bottom-color: color-mix(in srgb, var(--line-grammar) 55%, transparent); }
+}
+@keyframes ofr-expl-num-a { 0%, 10.5% { opacity: 1; transform: none; } 12%, 97% { opacity: 0; transform: translateY(-8px); } 100% { opacity: 1; transform: none; } }
+@keyframes ofr-expl-num-b {
+  0%, 10.5% { opacity: 0; transform: translateY(8px); color: #ff9b86; }
+  12%, 69% { opacity: 1; transform: none; color: #ff9b86; }
+  71%, 96% { opacity: 1; transform: none; color: var(--text-on-panel); }
+  99%, 100% { opacity: 0; }
+}
+@keyframes ofr-expl-den-old {
+  0%, 10.5% { opacity: 1; transform: none; color: var(--text-on-panel); }
+  12%, 69% { opacity: 1; transform: none; color: #ff9b86; }
+  72%, 96% { opacity: 0; transform: translateY(-10px); color: #ff9b86; }
+  100% { opacity: 1; transform: none; color: var(--text-on-panel); }
+}
+@keyframes ofr-expl-den-new {
+  0%, 70% { opacity: 0; transform: translateY(10px); }
+  73%, 95% { opacity: 1; transform: none; }
+  98%, 100% { opacity: 0; transform: none; }
+}
+@keyframes ofr-expl-pass {
+  0%, 60% { opacity: 0; transform: translate(150px, 280px) rotate(22deg); }
+  67% { opacity: 1; transform: translate(40px, 10px) rotate(-6deg); }
+  69.5% { opacity: 1; transform: translate(36px, 2px) rotate(-6deg); }
+  72% { opacity: 1; transform: translate(40px, 10px) rotate(-6deg); }
+  80%, 100% { opacity: 0; transform: translate(160px, 280px) rotate(16deg); }
+}
+
+/* 3B · new mock papers: four this month, each with its score, the
+   fifth slot dashed and locked until the 1st; a new paper slides in. */
+.ofr-exam-desk { position: absolute; left: 0; right: 0; top: 74px; height: 232px; }
+.ofr-exam-paper {
+  position: absolute;
+  top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  width: 150px;
+  height: 204px;
+  padding: var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+}
+.ofr-exam-paper--done { left: calc(26px + var(--ofr-i, 0) * 10px); transform: rotate(var(--ofr-r, 0deg)); }
+.ofr-exam-head { font-family: var(--font-serif); font-size: var(--fs-lead); font-weight: 700; }
+.ofr-exam-sub { font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
+.ofr-exam-lines {
+  display: block;
+  height: 70px;
+  margin-top: var(--sp-3);
+  background: repeating-linear-gradient(180deg, var(--surface-line) 0 2px, transparent 2px 12px);
+}
+.ofr-exam-score {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin-top: auto;
+  border: 2px solid color-mix(in srgb, var(--stamp-ink) 75%, transparent);
+  border-radius: var(--r-pill);
+  color: var(--stamp-ink);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  transform: rotate(-10deg);
+}
+.ofr-exam-slot,
+.ofr-exam-paper--new { left: 214px; }
+.ofr-exam-slot {
+  position: absolute;
+  top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 150px;
+  height: 204px;
+  border: 2px dashed color-mix(in srgb, var(--text-on-panel) 30%, transparent);
+  border-radius: var(--r-card);
+  color: var(--text-on-panel-soft);
+  font-size: var(--fs-caption);
+  text-align: center;
+  animation: ofr-exam-slot 8s linear infinite both;
+}
+.ofr-exam-slot .ofr-lk { width: 22px; height: 22px; color: #ff9b86; }
+.ofr-exam-slot b { color: var(--text-on-panel); font-size: var(--fs-sm); }
+.ofr-exam-paper--new {
+  border-color: color-mix(in srgb, var(--text-on-panel) 70%, transparent);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5), 0 0 24px rgba(255, 244, 222, 0.16);
+  animation: ofr-exam-new 8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite both;
+}
+.ofr-exam-new {
+  align-self: flex-start;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--text-on-panel);
+  color: var(--text-on-fill);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+.ofr-exam-secs { display: flex; flex-direction: column; margin-top: var(--sp-3); font-size: var(--fs-caption); line-height: 1.6; color: var(--text-secondary); }
+.ofr-exam-time { margin-top: auto; font-size: var(--fs-sm); font-weight: 700; }
+@keyframes ofr-exam-slot { 0%, 26% { opacity: 1; } 30%, 95% { opacity: 0; } 99%, 100% { opacity: 1; } }
+@keyframes ofr-exam-new {
+  0%, 28% { opacity: 0; transform: translate(170px, 30px) rotate(14deg); }
+  36% { opacity: 1; transform: translate(-6px, 0) rotate(-3deg); }
+  40%, 94% { opacity: 1; transform: rotate(2deg); }
+  98%, 100% { opacity: 0; transform: rotate(2deg); }
+}
+
+/* ── 3C · the pass turns over (PassTurn) ──
+   The Pro pass lifts, turns on its long axis -- its edge showing, four
+   plates of metal between its faces -- and lands as Max in a burst of
+   white light, the light pooling under it; then it floats, tilting so
+   the metal catches the light twice. An 8s loop, at rest on Max. */
+.ofr-turn { position: absolute; inset: 0; }
+.ofr-turn__glow,
+.ofr-turn__spark,
+.ofr-turn__halo,
+.ofr-turn__reflect { position: absolute; left: 50%; pointer-events: none; }
+.ofr-turn__glow {
+  top: 118px;
+  width: 340px;
+  height: 340px;
+  margin: -170px 0 0 -170px;
+  border-radius: var(--r-pill);
+  background: radial-gradient(circle, rgba(240, 244, 250, 0.4) 0%, rgba(220, 226, 236, 0.14) 30%, transparent 62%);
+  opacity: 0;
+  animation: ofr-turn-glow 8s ease-out infinite both;
+}
+.ofr-turn__spark {
+  top: 118px;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: var(--r-pill);
+  background: #fff;
+  box-shadow: 0 0 6px 1px rgba(240, 244, 250, 0.9), 0 0 14px rgba(200, 210, 225, 0.8);
+  opacity: 0;
+  animation: ofr-turn-spark 8s ease-out infinite both;
+}
+.ofr-turn__spark:nth-of-type(even) { width: 3px; height: 3px; animation-delay: 0.06s; }
+.ofr-turn__halo {
+  top: 214px;
+  width: 300px;
+  height: 36px;
+  margin-left: -150px;
+  border-radius: var(--r-pill);
+  background: radial-gradient(closest-side, rgba(226, 230, 238, 0.26), transparent);
+  opacity: 0;
+  animation: ofr-turn-halo 8s ease-out infinite both;
+}
+/* The floor is polished: the card shows in it once it has landed. */
+.ofr-turn__reflect {
+  top: 206px;
+  width: 272px;
+  height: 30px;
+  margin-left: -136px;
+  border-radius: var(--r-flat) var(--r-flat) var(--r-identity) var(--r-identity);
+  background: linear-gradient(180deg, rgba(226, 229, 235, 0.16), rgba(226, 229, 235, 0) 70%);
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  filter: blur(3px);
+  transform: perspective(300px) rotateX(48deg);
+  transform-origin: top;
+  opacity: 0;
+  animation: ofr-turn-halo 8s ease-out infinite both;
+}
+/* The fade is the holder's: opacity on the turning card itself would
+   flatten it, and its back would show the front mirrored. */
+.ofr-turn__hold {
+  position: absolute;
+  left: 50%;
+  top: 30px;
+  width: 272px;
+  height: 172px;
+  margin-left: -136px;
+  perspective: 1100px;
+  animation: ofr-turn-hold 8s linear infinite both;
+}
+.ofr-turn__flip {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateY(0) scale(1) rotateY(180deg) rotateX(0deg);
+  animation: ofr-turn-flip 8s cubic-bezier(0.45, 0, 0.25, 1) infinite both;
+}
+.ofr-turn__core {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-identity);
+  background: linear-gradient(90deg, #6f737b 0%, #e4e6ea 45%, #9aa0a8 100%);
+  transform: translateZ(calc(var(--ofr-z, 0) * 1px));
+}
+.ofr-turn__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-identity);
+  overflow: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+.ofr-turn__face > * { position: relative; }
+.ofr-turn__grain { position: absolute; inset: 0; pointer-events: none; }
+.ofr-turn__seal { position: absolute; left: 50%; top: 10px; width: 124px; height: 124px; margin-left: -40px; }
+.ofr-turn__row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.ofr-turn__row--foot { align-items: flex-end; }
+.ofr-turn__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+.ofr-corner { display: block; width: 26px; height: 26px; }
+.ofr-turn__who { display: flex; flex-direction: column; gap: var(--sp-1); }
+.ofr-turn__name {
+  max-width: 150px;
+  overflow: hidden;
+  font-family: var(--font-serif);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ofr-turn__lvl { font-size: var(--fs-lead); font-weight: 700; line-height: 1; }
+.ofr-turn__meta { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-name); text-transform: uppercase; white-space: nowrap; }
+.ofr-turn__class { font-size: var(--fs-heading); font-weight: 700; letter-spacing: var(--tr-caption); line-height: 0.9; text-transform: uppercase; }
+/* Pro 墨: soft-touch charcoal, the 辻 printed tone on tone, its words
+   in flat ink and PRO in a muted gold ink, not foil. */
+.ofr-turn__face--pro {
+  transform: translateZ(1.6px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    radial-gradient(120% 90% at 18% -10%, rgba(255, 255, 255, 0.08), transparent 55%),
+    linear-gradient(160deg, color-mix(in srgb, var(--pass-ink) 72%, #1a181d) 0%, color-mix(in srgb, var(--pass-ink) 38%, #141216) 62%, #141216 100%);
+  color: var(--text-on-panel);
+}
+.ofr-turn__face--pro .ofr-turn__grain {
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85  0 0 0 0 0.84  0 0 0 0 0.88  0 0 0 0.1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.ofr-turn__face--pro .ofr-turn__brand,
+.ofr-turn__face--pro .ofr-turn__meta { color: var(--text-on-panel-soft); }
+.ofr-turn__face--pro .ofr-turn__class { color: #d2ae68; }
+.ofr-turn__face--pro .ofr-corner__ink { fill: var(--text-on-panel); }
+.ofr-turn__face--pro .ofr-corner__road { fill: #d2ae68; }
+/* Max 梨地: satin platinum -- a fine grain, a soft light -- its edge
+   lit on top, its letters engraved, MAX in gold foil pressed in. */
+.ofr-turn__face--max {
+  transform: rotateY(180deg) translateZ(1.6px);
+  background: linear-gradient(135deg, #c9ccd2 0%, #e6e8eb 32%, #f5f6f7 48%, #e1e3e7 66%, #c2c5cb 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 1px 0 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(40, 42, 48, 0.5),
+    inset -1px 0 0 rgba(40, 42, 48, 0.3),
+    inset 0 0 0 1px rgba(90, 94, 102, 0.3),
+    0 22px 44px rgba(0, 0, 0, 0.55),
+    0 0 46px rgba(214, 220, 232, 0.28);
+  color: #25272c;
+}
+.ofr-turn__face--max .ofr-turn__grain {
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.46  0 0 0 0 0.5  0 0 0 0.3 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.ofr-turn__face--max .ofr-turn__brand,
+.ofr-turn__face--max .ofr-turn__name,
+.ofr-turn__face--max .ofr-turn__lvl,
+.ofr-turn__face--max .ofr-turn__meta { color: rgba(34, 36, 42, 0.86); text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8); }
+.ofr-turn__face--max .ofr-turn__class {
+  background: linear-gradient(180deg, #d9ae55 0%, #b0852f 44%, #7a571c 54%, #b0852f 74%, #e6bd62 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9)) drop-shadow(0 -0.5px 0 rgba(90, 60, 12, 0.45));
+}
+.ofr-turn__face--max .ofr-wave__arc { border-right-color: rgba(34, 36, 42, 0.8); }
+.ofr-turn__face--max .ofr-corner__ink { fill: rgba(34, 36, 42, 0.86); }
+.ofr-turn__face--max .ofr-corner__road { fill: #b0852f; }
+.ofr-turn__face--max .ofr-corner { filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.8)); }
+.ofr-turn__sheen {
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: 0;
+  width: 90px;
+  background: linear-gradient(105deg, transparent 10%, rgba(255, 255, 255, 0.5) 50%, transparent 90%);
+  mix-blend-mode: soft-light;
+  transform: skewX(-14deg) translateX(-120px);
+  animation: ofr-turn-sheen 8s ease-in-out infinite both;
+}
+/* The Pro side's 辻 fills as the card arrives; the turn keeps it. */
+.ofr-turn__face--pro .ofr-mark__bar { animation: ofr-turn-xp 8s cubic-bezier(0.3, 0.7, 0.3, 1) infinite both; }
+@keyframes ofr-turn-hold { 0% { opacity: 0; } 6%, 95% { opacity: 1; } 99%, 100% { opacity: 0; } }
+@keyframes ofr-turn-flip {
+  0% { transform: translateY(-12px) scale(1) rotateY(0deg) rotateX(0deg); }
+  6%, 20% { transform: translateY(0) scale(1) rotateY(0deg) rotateX(0deg); }
+  25% { transform: translateY(-16px) scale(1.05) rotateY(0deg) rotateX(0deg); }
+  37% { transform: translateY(-16px) scale(1.05) rotateY(180deg) rotateX(0deg); }
+  42% { transform: translateY(0) scale(1) rotateY(180deg) rotateX(0deg); }
+  56% { transform: translateY(-5px) scale(1) rotateY(170deg) rotateX(6deg); }
+  72% { transform: translateY(0) scale(1) rotateY(190deg) rotateX(-5deg); }
+  86% { transform: translateY(-3px) scale(1) rotateY(176deg) rotateX(3deg); }
+  95%, 100% { transform: translateY(0) scale(1) rotateY(180deg) rotateX(0deg); }
+}
+@keyframes ofr-turn-glow {
+  0%, 34% { opacity: 0; transform: scale(0.35); }
+  40% { opacity: 1; transform: scale(1); }
+  62%, 100% { opacity: 0; transform: scale(1.35); }
+}
+@keyframes ofr-turn-spark {
+  0%, 37% { opacity: 0; transform: rotate(var(--ofr-a, 0deg)) translateX(40px); }
+  41% { opacity: 1; }
+  56%, 100% { opacity: 0; transform: rotate(var(--ofr-a, 0deg)) translateX(190px); }
+}
+@keyframes ofr-turn-halo { 0%, 38% { opacity: 0; } 46%, 92% { opacity: 1; } 99%, 100% { opacity: 0; } }
+/* Twice across: once as it lands, once at the far end of its tilt. */
+@keyframes ofr-turn-sheen {
+  0%, 41% { transform: skewX(-14deg) translateX(-120px); }
+  53% { transform: skewX(-14deg) translateX(380px); }
+  53.01%, 64% { transform: skewX(-14deg) translateX(-120px); }
+  76%, 100% { transform: skewX(-14deg) translateX(380px); }
+}
+@keyframes ofr-turn-xp { 0%, 5% { transform: scaleY(0); } 18%, 100% { transform: scaleY(var(--ofr-xp, 0)); } }
+
+/* 3C · what changes, as a hairline lattice: Max's column lit row by
+   row as the pass lands, its three allowances counting up from Pro's.
+   The plan columns take their widest figure ("100 · 10 000"), the
+   label column the rest. */
+.ofr-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content max-content;
+  width: 100%;
+  margin-top: var(--sp-2);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  text-align: left;
+}
+.ofr-grid__row { display: contents; }
+.ofr-grid__k,
+.ofr-grid__pro,
+.ofr-grid__max {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  padding: var(--sp-2) var(--sp-3);
+  border-top: 1px solid var(--surface-line);
+  background: var(--bg-main);
+  font-size: var(--fs-sm);
+}
+.ofr-grid__pro,
+.ofr-grid__max {
+  justify-content: center;
+  border-left: 1px solid var(--surface-line);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ofr-grid__k,
+.ofr-grid__pro { color: var(--text-secondary); }
+.ofr-grid__max {
+  background: color-mix(in srgb, var(--text-primary) 6%, var(--bg-main));
+  font-weight: 700;
+  animation: ofr-grid-cell 8s linear infinite both;
+  animation-delay: calc(var(--ofr-i, 0) * 0.2s);
+}
+.ofr-grid__head {
+  min-height: 26px;
+  border-top: 0;
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  animation: none;
+}
+.ofr-grid__max.ofr-grid__head { color: var(--text-primary); }
+.ofr-grid__count {
+  --ofr-n: var(--ofr-to, 0);
+  counter-reset: ofr-n var(--ofr-n);
+  animation: ofr-grid-cell 8s linear infinite both, ofr-grid-count 8s linear infinite both;
+  animation-delay: calc(var(--ofr-i, 0) * 0.2s), calc(var(--ofr-i, 0) * 0.16s);
+}
+.ofr-grid__count::after { content: counter(ofr-n); }
+@keyframes ofr-grid-cell {
+  0%, 44% { box-shadow: none; }
+  48% { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--text-primary) 45%, transparent); }
+  58%, 100% { box-shadow: none; }
+}
+@keyframes ofr-grid-count {
+  0%, 43% { --ofr-n: var(--ofr-from, 0); }
+  53%, 94% { --ofr-n: var(--ofr-to, 0); }
+  98%, 100% { --ofr-n: var(--ofr-from, 0); }
+}
+
+/* Reduced motion: each stage at its rest -- the platforms unlocked,
+   the week with the ceiling lifted, Max's side of the switch, the
+   ceilings doubled, the explanation written, the new paper in its
+   slot, the pass on Max -- and nothing moving. */
+@media (prefers-reduced-motion: reduce) {
+  .ofr__stage *,
+  .ofr__stage *::before,
+  .ofr__stage *::after,
+  .ofr-fare-val__n,
+  .ofr-grid__max { animation: none !important; }
+  .ofr-disc-tile { opacity: 1; }
+  .ofr-disc-lock,
+  .ofr-disc-pass,
+  .ofr-disc-labels,
+  .ofr-disc-card,
+  .ofr-disc-dots,
+  .ofr-disc-tlock { display: none; }
+  .ofr-week__ceiling,
+  .ofr-week__x { opacity: 0; }
+  .ofr-week__wait { box-shadow: 0 0 14px rgba(255, 244, 222, 0.35); }
+  .ofr-fare-knob { transform: translateX(100%); background: color-mix(in srgb, var(--text-on-panel) 22%, transparent); }
+  .ofr-fare-bal__pro,
+  .ofr-fare-fare__pro,
+  .ofr-cap-den__old,
+  .ofr-photo-shut,
+  .ofr-expl-btn,
+  .ofr-expl-tap,
+  .ofr-expl-wait,
+  .ofr-expl-num__a,
+  .ofr-exam-slot,
+  .ofr-cap-pass,
+  .ofr-turn__glow,
+  .ofr-turn__spark,
+  .ofr-turn__sheen { opacity: 0; }
+  .ofr-fare-sw--max { color: var(--text-on-panel); }
+  .ofr-fare-sw--pro { color: var(--text-on-panel-soft); }
+  .ofr-expl-note { clip-path: none; }
+  .ofr-expl-num__b { color: #ff9b86; }
+  .ofr-turn__halo,
+  .ofr-turn__reflect { opacity: 1; }
 }
 
 /* ── The doors into it ── */
@@ -20561,7 +22084,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   100% { --brd-scrim: 0; }
 }
 .brd .btn-depart { width: 100%; min-height: 66px; }
-.brd .btn-depart__jp { font-size: var(--fs-title); }
+/* The offers' gate (plan 171) reads at the boarding's size. */
+.brd .btn-depart__jp,
+.ofr .btn-depart__jp { font-size: var(--fs-title); }
 .brd__link {
   align-self: center;
   display: inline-flex;
@@ -27319,18 +28844,16 @@ button.brd-stn { cursor: pointer; }
      across), and at the dialog's full --card-w it spread into fifty
      flat bars with the figure a long way from its button. */
   .claim-sheet { width: var(--desk-side-w); }
-  /* 定期券 — the offer as a dialog in the window's middle, at the
-     desk dialogs' width, with the scrim the phone's glass had no need
-     of. The width is spent rather than stretched (the density
-     contract): a plan's two billings side by side, its perks two by
-     two beside their tile, and the answer on one row with its quiet
-     way, as every desk dialog's actions are (plan 123) -- so Pro's
-     offer reads whole in a laptop's window, and only Max, once asked
-     for, scrolls. */
-  .pw-scrim { background: rgba(0, 0, 0, 0.55); }
-  .pw {
+  /* 定期券 — the three offers (plan 171) as a dialog in the window's
+     middle, at the width their stage was drawn for, with the scrim the
+     phone's glass had no need of: the stage, the words and the foot
+     as the phone has them, so the desk shows the owner's canvas board
+     for board. Only a window too short for all of it scrolls, the foot
+     still docked. */
+  .ofr-scrim { background: rgba(0, 0, 0, 0.55); }
+  .ofr {
     inset: 0;
-    width: var(--card-w);
+    width: var(--offer-w);
     height: fit-content;
     max-height: calc(100dvh - 2 * var(--sp-8));
     margin: auto;
@@ -27339,22 +28862,6 @@ button.brd-stn { cursor: pointer; }
     border-radius: var(--r-panel);
     box-shadow: var(--elev-board);
     animation: arrive-soft 0.2s linear;
-  }
-  .pw__foot {
-    flex-flow: row wrap;
-    align-items: center;
-  }
-  .pw__cta,
-  .pw__thanks { flex: 1 1 0; }
-  .pw__soon { flex: 1 1 100%; }
-  .pw-perks__list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--sp-3) var(--sp-5);
-  }
-  .pw-plans {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   /* The CSV import (components/decks/ImportCardsMenu) is its own
      overlay, not a sheet; it takes the desk dialog's width, material,

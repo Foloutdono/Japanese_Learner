@@ -164,6 +164,21 @@ def _init_db() -> None:
                 )
             """)
             cur.execute("CREATE INDEX IF NOT EXISTS idx_credit_ledger_user ON credit_ledger(user_id)")
+            # 止 — where the credits stopped a learner (plan 171): a
+            # row a stop, `cards` the reviews it kept waiting. Shadow
+            # mode writes one for each review it would have refused;
+            # under enforcement the app writes what was left of the run
+            # the balance stopped. The offer's week reads it
+            # (core/credits.week).
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS credit_stops (
+                    id      BIGSERIAL PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    cards   INTEGER NOT NULL,
+                    at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_credit_stops_user ON credit_stops(user_id, at)")
         conn.commit()
     finally:
         conn.close()

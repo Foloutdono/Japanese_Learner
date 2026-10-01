@@ -530,25 +530,40 @@ Pinned by `LibraryCard.phone.test.jsx` (390 px: no overflow, one thumb target,
 the description clamped and measured), `LibraryScreen.browser.test.jsx` and
 `DeckDetailScreen.roles.browser.test.jsx`.
 
-## The offer (the paywall)
+## The offer (the paywall): the three offers (plan 171)
 
-The canvas's BoardOffer, drawn as the boarding's last-but-one screen, is
-built as a screen of its own that the five doors open
-(`domain/paywall.js`'s `SOURCES`), not as a stop in the boarding: the pass's
-quiet way still opens it there. It follows the owner's pricing
-(`docs/business/tsuji-costs.xlsx`): Pro alone, yearly first and picked,
-Max only behind "See all offers".
+Built from the owner's canvas "Tsuji — the three offers"
+(https://claude.ai/artifact/UtX4BG8yzdisZesR3wsnM4), board for board, at the
+390×844 the canvas drew. Which offer opens is the door's
+(`domain/paywall.js`'s `offerScreen`): DISCOVER, Pro yearly's 7-day trial,
+from the boarding, the balance, Settings and the reading ride; WEEK, a free
+learner's own last seven days against the refill, from the run-out sheet;
+MAX, the step up for a Pro learner -- at one of Pro's four ceilings
+(`LIMITS`: practice's fare, photos, explanations, new mock papers) or from
+Settings. Every screen is a stage on the pass's sumi under one cone of warm
+light (光), the words under it, and the answer docked at the foot: the quiet
+way out over the gate button (plan 164). Gold is the ticket's and the gate's
+alone, and Max's own material.
 
 | Canvas class | `index.css` block | Component |
 |---|---|---|
-| `.brd-offer` (`__cap`, `__pct`, `__sub`) | `.pw-head` (`__cap`, `__fig`, `__unit`, `__sub`): the plan, what the pick comes to a month, how it is billed -- the canvas's −X% is the saving on the yearly row instead | `components/credits/PaywallScreen.jsx` |
-| `.brd-perks` (`__pass`, `__inf`, `__cap`, `__list`), `.brd-perk` | `.pw-perks` (`__pass`, `__inf`, `__cap`, `__list`), `.pw-perk` (`__tick`), a panel per plan (`.pw-block`) | `PaywallScreen.jsx`'s `Plan` |
-| `.brd-plan` (`--on`, `__names`, `__label`, `__price`), `.brd-opt__check`, `.brd-tag` | `.pw-plan` (`--on`, `__names`, `__label`, `__price`, `__was`, `__check`), `.pw-tag`, a radio group a plan (`.pw-plans`) | `PaywallScreen.jsx`'s `Plan` |
-| `.brd__foot`, `.brd__link`, `.brd__fine` | `.pw__foot`, `.pw__later` over `.pw__cta`, `.pw__soon` under it | `PaywallScreen.jsx` |
+| `.ofr`, `.ofr__hero` (`::before` the cone, `::after` the hairline), `.ofr__floor`, `.ofr__body`, `.ofr__foot`, `.ofr__quiet`, `.ofr__fine`, `.gbtn` | `.ofr-scrim` over `.ofr` (`__scroll`, `__hero`, `__stage`, `__body`, `__foot`, `__quiet`, `__clock`, `__gate`, `__thanks`, `__fine`) | `components/offers/OfferScreen.jsx`, `OfferFrame.jsx` |
+| `.tkt` (`__main`, `__kind`, `__price`, `__unit`, `__bill`, `__stub`, `__save`, `__cap`) | `.ofr-tkt` (the same parts) | `OfferTicket.jsx` |
+| `.card--pro`, `.card--max`, `.wave--sm`, `.r3c-mark--seal.r3c-mark--xp` | `.ofr-pass--pro`, `.ofr-pass--max`, `.ofr-wave`, `.ofr-mark` (`__ink`, `__xp`, `__bar`, `--etched`) | `MiniPass.jsx`, `icons.jsx`'s `Wave`, `StruckMark.jsx` |
+| `.ptile`, `.lk`, `.chk` | `.ofr-tile`, `.ofr-lk`, `.ofr-chk` | `DiscoverOffer.jsx`, `icons.jsx` |
+| 1 · `.a1-*`, `.b1-*`, `.r1` | `.ofr-disc-*` | `DiscoverOffer.jsx` |
+| 2 · `.c2-*` | `.ofr-week*` | `WeekOffer.jsx` |
+| 3A · `.r3a-*` | `.ofr-fare-*` | `MaxOffer.jsx`'s `FareStage`, `FareVals` |
+| 3B · `.b3-*` (count, photos), `.r3e-*`, `.r3x-*` | `.ofr-cap-*`, `.ofr-photo-*`, `.ofr-expl-*`, `.ofr-exam-*` | `MaxOffer.jsx`'s `PhotosStage`, `ExplainStage`, `ExamsStage` |
+| 3C · `.r3c-*` (`--hakkin`, `--gravure`, `--objet`, `--fin-satin`, `--pro-sumi`), `.c3-grid` | `.ofr-turn*`, `.ofr-corner`, `.ofr-grid*` | `PassTurn.jsx`, `MaxOffer.jsx`'s `UpGrid` |
 
-The frame is `.pw-scrim` over `.pw` (`__body` scrolls, `__foot` stays).
-Pinned by `PaywallScreen.browser.test.jsx`, `src/paywall.phone.test.jsx` and,
-for the desk's dialog, `src/paywall.desktop.test.jsx`.
+The stage is drawn at `--offer-w` (390px) and centred in a wider phone, scaled
+into a narrower one; the words hold the same width. Every screen reads whole
+at 844px with no scroll. `/dev/offers` opens each of the seven over the
+canvas's learner (Aiko, level 12, the canvas's week), the two Max doors that
+have no production caller until the store sells Max included. Pinned by
+`components/offers/OfferScreen.browser.test.jsx`, `src/offers.phone.test.jsx`
+and, for the desk's dialog, `src/offers.desktop.test.jsx`.
 
 ## Still to port
 

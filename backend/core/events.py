@@ -110,12 +110,16 @@ EVENTS: dict[str, frozenset[str]] = {
     # the pass and deciding — a door with a high intent rate and a
     # one-second median is a mis-tap, not demand.
     #
-    # The offer is a choice now (Pro or Max, yearly or monthly), so the
-    # intent says which: `plan` and `billing` are the app's own two
-    # enums, the pick the "Notify me" was pressed on -- what the pricing
-    # sheet's annual share will be checked against. `all` is a boolean,
-    # whether "See all offers" was opened before the answer: the offer
-    # leads with Pro alone, and this is how to know what that costs Max.
+    # The offer is three screens since plan 171, each with its one pick:
+    # Pro yearly's 7-day trial (the boarding, the balance, the ride, the
+    # settings), Pro yearly against the week the credits stopped (a run
+    # at zero, `where` 'runout'), and the step up to Max ('limit', a Pro
+    # learner at one of the plan's ceilings; 'upgrade', from Settings).
+    # `plan` and `billing` are the app's own two enums, the pick the
+    # gate was pressed on -- what the pricing sheet's annual share will
+    # be checked against. `all` is no longer sent: it was whether "See
+    # all offers" was opened before the answer (plan 171 retired that
+    # list); older rows carry it.
     "offer_view":     frozenset({"where"}),
     "offer_intent":   frozenset({"where", "ms", "plan", "billing", "all"}),
     "offer_dismiss":  frozenset({"where", "ms", "all"}),

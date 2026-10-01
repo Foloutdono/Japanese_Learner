@@ -107,7 +107,7 @@ describe('a chord under a run', () => {
 // opened `over`: it hears Escape first and keeps it.
 describe('the offer over another sheet', () => {
   it('closes alone on Escape', async () => {
-    const { PaywallScreen } = await import('../credits/PaywallScreen')
+    const { OfferScreen } = await import('../offers/OfferScreen')
     const { openPaywall, usePaywall } = await import('../../stores/credits')
     const under = vi.fn()
     function Stack() {
@@ -117,7 +117,7 @@ describe('the offer over another sheet', () => {
           <Sheet open onClose={under} jp="券" cap="balance">
             <button type="button" className="probe-see" onClick={() => openPaywall('balance')}>see the pass</button>
           </Sheet>
-          <PaywallScreen />
+          <OfferScreen />
           <span className="probe-offer">{offer ? 'open' : 'closed'}</span>
         </LangProvider>
       )
@@ -128,7 +128,7 @@ describe('the offer over another sheet', () => {
     await settle()
     expect(document.querySelectorAll('[aria-modal="true"]')).toHaveLength(2)
     // From where the focus is, as a real key is: the offer took it.
-    expect(document.activeElement.closest('.pw')).not.toBeNull()
+    expect(document.activeElement.closest('.ofr')).not.toBeNull()
     document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
     await settle()
     expect(document.querySelector('.probe-offer').textContent).toBe('closed')

@@ -1206,7 +1206,31 @@ runtime purpose. Two consequences worth knowing:
   `backend/content/reading_sentences.py`, `backend/tests/test_nyumon.py`,
   `src/screens/RideIntro.browser.test.jsx`, the `intro` phone, desktop
   and short tests, and `index.css` and its 机 section; CONTEXT.md, 入門).
-  When starting a new wave, begin at **171** or higher, and check
+  **171** is 定期券, the three offers (the owner's canvas "Tsuji — the
+  three offers", built board for board at 390×844): which one opens is
+  the door's (`domain/paywall.js`'s `offerScreen`) -- DISCOVER, Pro
+  yearly's 7-day trial, the six platforms blooming out of a padlock and
+  one sentence played through each; WEEK, a free learner's own last
+  seven days against the refill (`GET /api/credits/week`, the stops a
+  shadow fare or the run-out sheet records in `credit_stops`,
+  `core/credits.week`); MAX, the step up for a Pro learner at one of
+  Pro's four ceilings (`LIMITS`: practice's fare, photos, explanations,
+  new mock papers) or from Settings, where the Pro pass (墨, printed)
+  turns over into Max (梨地, satin platinum, its 辻 etched and MAX in
+  gold foil), each card's 辶 filling with the XP from its foot; every
+  stage under one cone of light (光), gold the ticket's, the gate's and
+  Max's material alone; the funnel `offer_view` / `offer_intent`
+  (`plan`, `billing`) / `offer_dismiss`; `components/credits/PaywallScreen.jsx`
+  retired; `/dev/offers` opens each of the seven (cited in
+  `core/credits.py`, `routes/credits.py`, `routes/profile.py`,
+  `routes/account.py`, `srs/data_structure.sql`, `core/events.py`,
+  `tests/test_credits_week.py`, `domain/paywall.js`, `stores/credits.js`,
+  `components/offers/`, `components/credits/RunOutSheet.jsx`,
+  `OfferButton.jsx`, `screens/OffersPreview.jsx`, `App.jsx`, the
+  `ofr*` locale keys, `src/offers.phone.test.jsx`,
+  `src/offers.desktop.test.jsx` and `index.css` and its 机 section;
+  CONTEXT.md, Pro / Max; `docs/design/mobile/README.md`, "The offer").
+  When starting a new wave, begin at **172** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
