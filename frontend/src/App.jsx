@@ -587,7 +587,7 @@ export default function App({ front = NO_FRONT }) {
           session={session}
           initialProfile={onboardingProfile}
           guest={isGuest(session)}
-          onComplete={() => {
+          onComplete={signed => {
             // The contract is signed server-side by now: this device
             // may wave the learner through on a launch the server
             // fails to answer, the same as a profile that said so.
@@ -597,7 +597,17 @@ export default function App({ front = NO_FRONT }) {
             // first ride. A sign-out already put the address back, but
             // a boarding reached on a deep link never had one to leave.
             returnToFrontDoor()
-            setOnboarding('finishing')
+            // The profile the gate holds was read BEFORE the boarding,
+            // so it carries no kana answer, and `rideStart` read off it
+            // sent a learner who had just said « Pas encore » to the
+            // cards rather than to 入門 (plan 170) -- the introduction
+            // only appeared after a reload. The boarding hands over
+            // what it signed, and the ride is decided on that.
+            setGate(g => (g ? {
+              ...g,
+              state: 'finishing',
+              profile: g.profile && signed ? { ...g.profile, ...signed } : g.profile,
+            } : g))
           }}
           onExit={() => leaveBoarding()}
           onSignIn={() => leaveBoarding('login')}
