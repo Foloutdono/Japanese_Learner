@@ -167,9 +167,10 @@ Tout le contenu est classé par niveau du JLPT :
 | N1 | 3 235 | 1 232 | 117 |
 | **Total** | **8 090** | **2 212** | **541** |
 
-- Chaque leçon de grammaire est rédigée à la main, jamais générée. Chaque
-  phrase d’exemple est vérifiée : elle doit contenir son motif et ne pas
-  dépasser les kanji de son niveau.
+- Chaque leçon de grammaire a été rédigée avec l’IA, puis est relue en
+  continu par des agents IA chargés d’y trouver des erreurs. Chaque phrase
+  d’exemple est vérifiée : elle doit contenir son motif et ne pas dépasser
+  les kanji de son niveau.
 - Le dictionnaire couvre 212 000 entrées JMdict et les 13 108 caractères de
   KANJIDIC2, avec 6 702 schémas d’ordre des traits issus de KanjiVG.
 - Les définitions et toute l’interface existent en français et en anglais.

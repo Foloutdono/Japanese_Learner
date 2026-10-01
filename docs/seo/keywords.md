@@ -148,8 +148,8 @@ The informational heads above ("hiragana", "kanji JLPT N5", "grammaire
 japonaise", "dictionnaire japonais français") are where the volume is,
 and the app already holds the content that answers them: the kana deck
 with its audio, the vocabulary deck by JLPT level with French glosses,
-KANJIDIC2 with KanjiVG stroke order, and a hand-written grammar catalogue
-in French and English. Static pages generated from `backend/content/`
+KANJIDIC2 with KanjiVG stroke order, and a grammar catalogue with a lesson
+per point in French and English. Static pages generated from `backend/content/`
 at build time (a kana chart, a list per JLPT level, a page per kanji and
 per grammar point), each ending on the store buttons, are the follow-up
 that turns the landing page into a site. That is its own plan.

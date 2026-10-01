@@ -1,6 +1,6 @@
 """
-study/grammar_check.py is what stands between a hand-written lesson and
-a learner who cannot tell it is wrong. Each rule is exercised with an
+study/grammar_check.py is what stands between a lesson in the catalogue
+and a learner who cannot tell it is wrong. Each rule is exercised with an
 entry crafted to break it, so the gate cannot quietly stop checking
 something (plan 087).
 """

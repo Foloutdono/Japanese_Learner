@@ -160,8 +160,8 @@ if __name__ == "__main__":
 class AuthoredSentenceTests(unittest.TestCase):
     """
     The example sentences live on the points themselves
-    (content/grammar/*.json, plan 087) and are hand-written, which means
-    they are hand-breakable. This runs the generator's own gate over every
+    (content/grammar/*.json, plan 087) and are edited in place, which means
+    any edit can break them. This runs the generator's own gate over every
     entry, so an edit that introduces a kanji above its level, drops the
     pattern out of its own example, or leaves a fragment fails the build
     rather than reaching a learner who by definition cannot spot the
