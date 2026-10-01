@@ -585,3 +585,29 @@ export function FoldVideoIcon({ size = 16, className }) {
     </svg>
   )
 }
+
+// ⓘ — what a part asks, opened on the exam's page (plan 171).
+export function InfoIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <circle cx="12" cy="12" r="8.5" />
+      <line x1="12" y1="11" x2="12" y2="16.5" />
+      <line x1="12" y1="7.6" x2="12" y2="8" />
+    </svg>
+  )
+}
+
+// The answer sheet: a page of bubbles and their lines (plan 171).
+export function SheetIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <rect x="5" y="3.5" width="14" height="17" rx="1.5" />
+      <circle cx="9" cy="8.5" r="1.3" />
+      <circle cx="9" cy="12.5" r="1.3" />
+      <circle cx="9" cy="16.5" r="1.3" />
+      <line x1="12.5" y1="8.5" x2="16" y2="8.5" />
+      <line x1="12.5" y1="12.5" x2="16" y2="12.5" />
+      <line x1="12.5" y1="16.5" x2="16" y2="16.5" />
+    </svg>
+  )
+}

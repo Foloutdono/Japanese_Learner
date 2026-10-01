@@ -14,7 +14,7 @@ from core.srs_instance import srs
 from core.auth import get_user_id
 from study.exam_schema import ensure_exam_schema
 from study.exam_scoring import flatten_questions, score_attempt
-from study.exam_blueprint import LEVEL_BLUEPRINT
+from study.exam_blueprint import LEVEL_BLUEPRINT, name_mondai
 from study.exam_gen_utils import GenerationFailed
 from study.llm_shared import LLMUnavailable
 from study import exam_grammar_gen, exam_listening_gen, exam_reading_gen, exam_vocab_gen
@@ -577,7 +577,7 @@ def get_exam(exam_id: str, revision: int | None = None, exclude: str | None = No
         paper = _load_paper(exam_id, revision)
         if paper is None:
             raise HTTPException(status_code=404, detail=f"Unknown revision {revision} for {exam_id}")
-        return {**paper, "revision": revision}
+        return {**name_mondai(paper), "revision": revision}
 
     selected = _select_paper(exam_id, user_id, _parse_exclude(exclude))
     if selected is not None:
@@ -586,7 +586,7 @@ def get_exam(exam_id: str, revision: int | None = None, exclude: str | None = No
         # to send it back on submit (so the attempt is scored against
         # the paper actually sat, not whichever one the selection rule
         # would pick at submit time) and to key its saved draft.
-        return {**paper, "revision": revision}
+        return {**name_mondai(paper), "revision": revision}
 
     revision = _next_revision(exam_id)
     outcome, detail = _claim_generation(exam_id, revision)

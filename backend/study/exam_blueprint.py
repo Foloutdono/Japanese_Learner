@@ -209,3 +209,30 @@ LEVEL_BLUEPRINT = {
         ],
     },
 }
+
+
+def name_mondai(paper: dict) -> dict:
+    """The paper as it is served: a copy in which every mondai carries
+    its blueprint name as `nameJp` (漢字読み, 表記, 課題理解 …).
+
+    A generated paper keeps only a mondai's id and its official number,
+    and an id names a different mondai at another level (N5's moji_3 is
+    文脈規定, N2's is 語形成), so the client cannot name a part without
+    the blueprint. The phone's paper names each part on its cover, at
+    the head of every question and on the answer sheet (plan 171). Done
+    when the paper is served rather than when it is generated, so the
+    papers already stored are named too. A mondai the blueprint does not
+    know (a hand-written stub) is left as it is."""
+    names = {
+        m["id"]: m["name_jp"]
+        for section in LEVEL_BLUEPRINT.get(paper.get("level"), {}).get("sections", [])
+        for m in section["mondai"]
+    }
+    sections = []
+    for section in paper.get("sections") or []:
+        mondai = []
+        for m in section.get("mondai") or []:
+            name = names.get(m.get("id"))
+            mondai.append({**m, "nameJp": name} if name and "nameJp" not in m else m)
+        sections.append({**section, "mondai": mondai})
+    return {**paper, "sections": sections}

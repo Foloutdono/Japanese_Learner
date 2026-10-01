@@ -291,81 +291,81 @@ describe('the practice sessions at phone width', () => {
   })
 })
 
+// The mock exam on a phone is plan 171's: the page and its dock of
+// answer tiles (V1), the ring player (C5), the result's parts (A7). The
+// runner's meta row, sheet bar and the old result head are the desk's
+// alone now, held by exam.desktop.test.jsx.
 describe('the mock exam at phone width', () => {
-  it('the meta row, the way through the paper, and the sheet bar docked on the dock edge', async () => {
+  it('the page holds the question and its big number; the dock is sumi, its tiles a thumb tall', async () => {
     const screen = await render(
       <div>
-        <main className="container stage" style={{ '--line-color': 'var(--line-exam)' }}>
-          <div className="exam-meta">
-            <button type="button" className="stage__leave">Exam</button>
-            <span className="exam-meta__section"><h1 className="exam-meta__jp">N4 · Vocabulary</h1></span>
-            <span className="exam-timer">24:18</span>
+        <main className="container stage exam-run" style={{ '--line-color': 'var(--line-exam)' }}>
+          <div className="exam-run__head">
+            <button type="button" className="stage__leave exam-run__leave">x</button>
+            <button type="button" className="exam-run__sheet">Sheet</button>
           </div>
-          <button type="button" className="exam-mondai"><span><b className="exam-mondai__part">Part 3</b> · Show instructions</span></button>
-          <div className="exam-nav">
-            <button type="button" className="btn-secondary">Previous</button>
-            <button type="button" className="exam-flag exam-flag--on">f</button>
-            <button type="button" className="btn-primary">Next</button>
-          </div>
-          <div className="exam-sheetbar">
-            <button type="button" className="exam-sheetbar__open">
-              <span className="exam-sheetbar__label"><b className="exam-sheetbar__fig">7 / 21</b><span className="exam-sheetbar__cap">Answer sheet</span></span>
-              <span className="exam-sheetbar__chips">
-                <i className="exam-sheetbar__chip exam-sheetbar__chip--done" /><i className="exam-sheetbar__chip exam-sheetbar__chip--flag" /><i className="exam-sheetbar__chip" />
-              </span>
-            </button>
-            <button type="button" className="exam-finish">Finish</button>
+          <section className="exam-page">
+            <div className="exam-page__head">
+              <span className="exam-page__n"><b className="exam-page__fig">3</b><span className="exam-page__of">/ 28</span></span>
+              <span className="exam-page__part"><b>問題1</b>漢字読み</span>
+              <button type="button" className="exam-page__info">i</button>
+            </div>
+            <div className="exam-ask exam-ask--centre"><p className="exam-ask__big" lang="ja">雨</p></div>
+          </section>
+          <div className="exam-dock">
+            <div className="exam-tiles exam-tiles--two">
+              <button type="button" className="exam-tile exam-tile--on"><span className="exam-tile__b">1</span><span className="exam-tile__t">あめ</span></button>
+              <button type="button" className="exam-tile"><span className="exam-tile__b">2</span><span className="exam-tile__t">ゆき</span></button>
+              <button type="button" className="exam-tile"><span className="exam-tile__b">3</span><span className="exam-tile__t">かぜ</span></button>
+              <button type="button" className="exam-tile"><span className="exam-tile__b">4</span><span className="exam-tile__t">そら</span></button>
+            </div>
+            <div className="exam-dock__nav">
+              <button type="button" className="exam-dock__go" disabled>Previous</button>
+              <button type="button" className="exam-dock__go exam-dock__go--next">Next</button>
+            </div>
           </div>
         </main>
         <div className="sumi-probe" style={{ background: 'var(--bg-panel)' }} />
       </div>
     )
-    const stage = screen.container.querySelector('.stage')
-    const flag = screen.container.querySelector('.exam-flag')
-    expect(flag.getBoundingClientRect().width).toBe(44)
-    expect(flag.getBoundingClientRect().height).toBe(44)
-    expect(getComputedStyle(screen.container.querySelector('.exam-nav')).gridTemplateColumns.split(' ')).toHaveLength(3)
-    expect(parseFloat(getComputedStyle(screen.container.querySelector('.exam-mondai')).minHeight)).toBe(40)
-
-    const bar = screen.container.querySelector('.exam-sheetbar')
-    expect(getComputedStyle(bar).position).toBe('sticky')
-    expect(getComputedStyle(bar).bottom).toBe('0px')
-    // Sumi, edge to edge: the bar's ground is the panel's, and it runs
-    // out to the stage's own edges past the padding.
-    expect(getComputedStyle(bar).backgroundColor).toBe(getComputedStyle(screen.container.querySelector('.sumi-probe')).backgroundColor)
-    expect(bar.getBoundingClientRect().left).toBeCloseTo(stage.getBoundingClientRect().left, 0)
-    expect(bar.getBoundingClientRect().right).toBeCloseTo(stage.getBoundingClientRect().right, 0)
-    const [done, flagged, blank] = screen.container.querySelectorAll('.exam-sheetbar__chip')
-    expect(getComputedStyle(done).backgroundColor).not.toBe(getComputedStyle(blank).backgroundColor)
-    expect(getComputedStyle(flagged).backgroundColor).not.toBe(getComputedStyle(done).backgroundColor)
-    expect(getComputedStyle(done).width).toBe('8px')
+    const $ = sel => screen.container.querySelector(sel)
+    const big = parseFloat(getComputedStyle($('.exam-page__fig')).fontSize)
+    expect(big).toBeGreaterThan(parseFloat(getComputedStyle($('.exam-page__of')).fontSize))
+    expect(parseFloat(getComputedStyle($('.exam-ask__big')).fontSize)).toBeGreaterThanOrEqual(40)
+    expect($('.exam-run__sheet').getBoundingClientRect().height).toBe(44)
+    // The page enters scaled (card-transition-enter): its layout box, not its painted one.
+    expect($('.exam-page__info').offsetHeight).toBe(44)
+    expect(getComputedStyle($('.exam-dock')).backgroundColor).toBe(getComputedStyle($('.sumi-probe')).backgroundColor)
+    // Four short answers two by two, each a thumb tall.
+    const tiles = screen.container.querySelectorAll('.exam-tile')
+    expect(getComputedStyle($('.exam-tiles')).gridTemplateColumns.split(' ')).toHaveLength(2)
+    for (const tile of tiles) expect(tile.getBoundingClientRect().height).toBeGreaterThanOrEqual(56)
+    expect(tiles[0].getBoundingClientRect().top).toBeCloseTo(tiles[1].getBoundingClientRect().top, 0)
+    // The pick is lit: its bubble filled, the others open.
+    expect(getComputedStyle(tiles[0].querySelector('.exam-tile__b')).backgroundColor)
+      .not.toBe(getComputedStyle(tiles[1].querySelector('.exam-tile__b')).backgroundColor)
+    const [prev, next] = screen.container.querySelectorAll('.exam-dock__go')
+    expect(prev.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    expect(next.getBoundingClientRect().top).toBeCloseTo(prev.getBoundingClientRect().top, 0)
+    expect(next.getBoundingClientRect().right).toBeGreaterThan(prev.getBoundingClientRect().right)
   })
 
-  it('the result: the ring is the canvas box, the review rows are 44px', async () => {
+  it('the ring player: the play key centred in its dial', async () => {
     const screen = await render(
       <main className="practice" style={{ '--line-color': 'var(--line-exam)' }}>
-        <div className="exam-result-head">
-          <div className="exam-score-ring">
-            <svg className="exam-score-ring__svg" viewBox="0 0 108 108"><circle className="exam-score-ring__track" cx="54" cy="54" r="46" /><circle className="exam-score-ring__fill" cx="54" cy="54" r="46" /></svg>
-            <span className="exam-score-ring__pct">81%</span>
+        <div className="exam-ring">
+          <div className="exam-ring__dial">
+            <svg className="exam-ring__svg" viewBox="0 0 140 140"><circle className="exam-ring__track" cx="70" cy="70" r="64" /><circle className="exam-ring__fill" cx="70" cy="70" r="64" /></svg>
+            <button type="button" className="exam-ring__play">▶</button>
           </div>
-          <div className="exam-result-figs"><b className="exam-result-figs__score">17 / 21</b><span className="exam-result-figs__cap">correct</span></div>
-        </div>
-        <div className="surface exam-review">
-          <div className="exam-review__part">
-            <div className="exam-group"><b className="exam-group__part">Part 1</b><span className="exam-group__score">6 / 6</span></div>
-            <button type="button" className="exam-review-row"><span className="exam-review-row__mark exam-review-row__mark--x" /><span className="exam-review-row__q">Q9</span><span className="exam-review-row__jp" lang="ja">この本はとても＿＿＿です。</span></button>
-          </div>
+          <span className="exam-ring__clock">0:12 <span className="exam-ring__of">/ 0:40</span></span>
         </div>
       </main>
     )
-    const ring = screen.container.querySelector('.exam-score-ring')
-    expect(getComputedStyle(ring).width).toBe('108px')
-    expect(getComputedStyle(ring).height).toBe('108px')
-    expect(getComputedStyle(screen.container.querySelector('.exam-score-ring__pct')).position).toBe('absolute')
-    const row = screen.container.querySelector('.exam-review-row')
-    expect(parseFloat(getComputedStyle(row).minHeight)).toBe(44)
-    expect(getComputedStyle(row).borderTopWidth).toBe('1px')
-    expect(getComputedStyle(screen.container.querySelector('.exam-review-row__mark')).borderRadius).toBe('999px')
+    const dial = screen.container.querySelector('.exam-ring__dial').getBoundingClientRect()
+    const play = screen.container.querySelector('.exam-ring__play').getBoundingClientRect()
+    expect(dial.width).toBe(140)
+    expect(play.left + play.width / 2).toBeCloseTo(dial.left + dial.width / 2, 0)
+    expect(play.top + play.height / 2).toBeCloseTo(dial.top + dial.height / 2, 0)
   })
 })

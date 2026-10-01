@@ -26,7 +26,16 @@ function formatClock(seconds) {
   return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`
 }
 
-export default function AudioPlayer({ src, keyHint = false }) {
+// The ring (plan 171, the owner's pick of the canvas's C5 player for
+// the phone's paper): the clip's progress drawn round a large play
+// button, the clock under it and the replay with its count as one line.
+// No scrubber: a practice listen is played, replayed, paused -- the
+// thumb's three moves -- and a ring is not a track to drag along.
+const RING_BOX = 140
+const RING_R = 64
+const RING_C = 2 * Math.PI * RING_R
+
+export default function AudioPlayer({ src, keyHint = false, ring = false }) {
   const { t } = useLang()
   const audioRef = useRef(null)
   const [playing, setPlaying] = useState(false)
@@ -139,6 +148,54 @@ export default function AudioPlayer({ src, keyHint = false }) {
     if (!el) return
     el.currentTime = Number(e.target.value)
     setElapsed(el.currentTime)
+  }
+
+  if (ring) {
+    const share = duration > 0 ? Math.min(1, elapsed / duration) : 0
+    const c = RING_BOX / 2
+    return (
+      <div className="exam-ring">
+        <audio
+          ref={audioRef}
+          src={api(voicedUrl(src))}
+          preload="metadata"
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onEnded={() => setPlaying(false)}
+          onTimeUpdate={e => setElapsed(e.currentTarget.currentTime)}
+          onLoadedMetadata={e => setDuration(e.currentTarget.duration || 0)}
+          onError={() => setFailedSrc(src)}
+        />
+        <div className="exam-ring__dial">
+          <svg className="exam-ring__svg" viewBox={`0 0 ${RING_BOX} ${RING_BOX}`} aria-hidden="true">
+            <circle className="exam-ring__track" cx={c} cy={c} r={RING_R} />
+            <circle
+              className="exam-ring__fill"
+              cx={c}
+              cy={c}
+              r={RING_R}
+              strokeDasharray={RING_C.toFixed(1)}
+              strokeDashoffset={(RING_C * (1 - share)).toFixed(1)}
+            />
+          </svg>
+          <button
+            type="button"
+            className="exam-ring__play"
+            onClick={toggle}
+            aria-label={playing ? t.examAudioPause : t.examAudioPlay}
+          >
+            {playing ? <PauseIcon size={28} /> : <PlayIcon size={28} />}
+          </button>
+        </div>
+        <span className="exam-ring__clock">
+          {formatClock(elapsed)} <span className="exam-ring__of">/ {formatClock(duration)}</span>
+        </span>
+        <button type="button" className="exam-ring__replay" onClick={replay}>
+          <UndoIcon size={14} />
+          {plays > 0 ? `${t.examAudioReplayShort} · ${t.examAudioPlayed(plays)}` : t.examAudioReplayShort}
+        </button>
+      </div>
+    )
   }
 
   return (
