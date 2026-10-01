@@ -62,6 +62,18 @@ The page moves the way the app does (DESIGN.md, Motion):
   washed in gold, its entry comes in under the sentence, and its grammar
   point is lit in the numbered list. The entry keeps its height, so a
   word pressed moves nothing.
+- **The questions:** one answer is open at a time (the `<details>` share
+  a name, and the script does it where a browser does not). From the
+  tablet up a question lifts nothing either: under the pointer, or with
+  keyboard focus, its row shows its gold rail (and on the desk a ▶
+  slides in), and nothing more, so it never reads as opened; the open
+  one is washed in gold, its ring the lit stop's. On the desk the open
+  answer stands in a card beside the list, and on a tablet at least
+  1000px tall in a card under it; there the open question stays open
+  (the script), the rows never change height, so a question opened
+  moves nothing, and the answer it leaves fades out before its own fades
+  in. A phone, and a shorter tablet, keep the accordion. Each answer
+  ends on the stop that shows it, a link back up the line.
 - **The stops:** the page is the gold line the hero's road starts, and
   each section is a stop on it. A sign opens every section, where a
   hairline once cut the page. It holds the stop's number in a ring, its

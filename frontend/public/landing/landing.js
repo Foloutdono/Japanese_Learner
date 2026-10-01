@@ -500,6 +500,27 @@ for (const token of tokens) {
   })
 }
 
+// ── Questions: one answer open at a time ──
+// The <details> share a name, so a browser opens one at a time on its
+// own; this does it for one that does not. Where the open answer
+// stands in a card of its own (landing.css: the desk, beside the
+// questions, and a tall tablet, under them) one stays open: the open
+// question's own summary closes nothing, and a window grown into that
+// layout with none open opens the first.
+const faqs = $$('[data-faq]')
+const inCard = window.matchMedia('(min-width: 1100px), (min-width: 720px) and (min-height: 1000px)')
+for (const faq of faqs) {
+  faq.addEventListener('toggle', () => {
+    if (faq.open) for (const other of faqs) if (other !== faq) other.open = false
+  })
+  $('summary', faq).addEventListener('click', event => {
+    if (faq.open && inCard.matches) event.preventDefault()
+  })
+}
+inCard.addEventListener('change', event => {
+  if (event.matches && faqs.length && !faqs.some(faq => faq.open)) faqs[0].open = true
+})
+
 // ── Footage ──
 const stills = new Map()
 

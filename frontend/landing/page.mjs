@@ -539,12 +539,23 @@ function fare(t) {
     + '</div></section>'
 }
 
+// The questions, one answer open at a time: the <details> share a name
+// (landing.js does it where a browser does not). Each answer ends on
+// the stop that shows it, a door back up the line: its number and its
+// name, as its sign prints them. On a phone the questions are the
+// accordion they are; from a tall tablet up the open answer stands in
+// a card of its own, under the list or, on the desk, beside it in col B
+// (landing.css), laid there from inside its <details>, so the whole
+// body arrives as one block.
 function faq(t) {
   const F = t.faq
-  const items = F.items.map(([q, a], k) => `<details class="faq"${k ? '' : ' open'}><summary>${esc(typo(t.lang, q))}</summary><p>${esc(typo(t.lang, a))}</p></details>`).join('')
-  return `<section class="sec sec--band" id="${t.ids.faq}" aria-labelledby="${t.ids.faq}-h">${stop(t, 'faq')}<div class="wrap faqs cols">`
-    + `<div><h2 class="h2" id="${t.ids.faq}-h">${esc(typo(t.lang, F.h2))}</h2></div>`
-    + `<div class="faqs__list" data-stagger>${items}</div></div></section>`
+  const ty = s => esc(typo(t.lang, s))
+  const items = F.items.map(([q, a, to], k) => `<details class="faq" name="faq" data-faq${k ? '' : ' open'}><summary>${ty(q)}</summary>`
+    + `<div class="faq__a"><p>${ty(a)}</p>`
+    + `<div class="faq__foot"><a class="faq__to" href="#${t.ids[to]}"><span class="faq__stop fig" aria-hidden="true">${String(STOPS.indexOf(to)).padStart(2, '0')}</span><span>${ty(stopName(t, to))}</span>${ONWARD}</a></div></div></details>`).join('')
+  return `<section class="sec sec--band" id="${t.ids.faq}" aria-labelledby="${t.ids.faq}-h">${stop(t, 'faq')}<div class="wrap faqs cols" data-reveal>`
+    + `<div class="faqs__qs"><h2 class="h2" id="${t.ids.faq}-h">${ty(F.h2)}</h2>`
+    + `<div class="faqs__list">${items}</div></div></div></section>`
 }
 
 function pass(t, facts) {
