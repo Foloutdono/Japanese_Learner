@@ -105,8 +105,9 @@ const isoDuration = s => `PT${Math.floor(s / 60) ? `${Math.floor(s / 60)}M` : ''
 
 // ── The crossroads (the hero's map, from 1100px) ──
 // The hub at (276, 300) in a 660 × 600 box, seven lines out of it at a
-// radius of 200, the gold road coming in from the left edge: the road
-// the gate row draws from Embarquer runs on into it.
+// radius of 200. The gold road coming in from the left edge is not
+// drawn here: it is the gate row's own lane from Embarquer, run on under
+// the map to the hub's ring (landing.css), so it has no joint.
 const ROADS = [
   { line: 'kana', glyph: 'あ', x: 276, y: 100, at: 'top' },
   { line: 'vocab', glyph: '語', x: 417, y: 159, at: 'right' },
@@ -135,7 +136,6 @@ function crossroads(t) {
       + `<text class="map__glyph" x="${r.x}" y="${r.y + 7}" text-anchor="middle" lang="ja">${r.glyph}</text>${label}</g>`
   }).join('')
   return '<svg class="map__art" viewBox="0 0 660 600" aria-hidden="true" focusable="false">'
-    + '<line class="map__road" pathLength="1" x1="0" y1="300" x2="276" y2="300"/>'
     + `<g class="map__lines">${lines}${trains}</g>`
     + '<g class="map__hubs"><circle class="map__hub" cx="276" cy="300" r="66"/>'
     + `<svg x="234" y="258" width="84" height="84" viewBox="0 0 1000 1000"><path class="mark__road" d="${MARK_ROAD}"/><path class="map__ink" d="${MARK_INK}"/></svg></g>`
