@@ -39,6 +39,11 @@ The page moves the way the app does (DESIGN.md, Motion):
   child at a time. They are marked `data-reveal`, or `data-stagger` for a
   block whose children arrive in turn.
 - **Hover:** a 1px lift, the edge in the line's colour.
+  The mock exam's answers are the one exception: they lift nothing.
+  Under the pointer, or with keyboard focus, an answer's number turns
+  over in the exam's ink and its edge takes a tint of it, so it reads
+  "press this", not "picked". The first pick is the answer, as on the
+  paper: after it, no answer reacts and a second click changes nothing.
 - **Scale and glow:** none, except the gate button and the stamps, which
   are the app's own exceptions.
 - **The hero:** the gold road runs out of Embarquer into the hub, each
@@ -62,8 +67,10 @@ The page moves the way the app does (DESIGN.md, Motion):
 - **What to press:** each demo's first step wears the ring the app's
   guide puts round what a note asks you to press: gold, breathing, never
   a fill. The steps are the card, then its verdicts, the pace, a word and
-  an answer. The ring moves on or goes once the step is answered, and it
-  never comes back. The hero ends with a link down to the first stop.
+  an answer (the ring goes round each answer's number, never round the
+  group, and never round one answer alone). The ring moves on or goes
+  once the step is answered, and it never comes back. The hero ends with
+  a link down to the first stop.
 
 Three rules keep it safe:
 - **Content is hidden only while the `js` flag is set** (the head script

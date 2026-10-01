@@ -14,8 +14,21 @@ const backend = path => new URL(`../../backend/${path}`, import.meta.url)
 const json = path => JSON.parse(readFileSync(backend(path), 'utf8'))
 
 // The N5 mock exam: backend/study/exam_blueprint.py's LEVEL_BLUEPRINT,
-// its mondai counts and section minutes summed.
-export const EXAM_N5 = { questions: 67, minutes: 90 }
+// its three timed sections (each one's minutes, its mondai counts
+// summed, its name without the 言語知識（…） around it), their totals,
+// and PASS_THRESHOLDS' pass mark out of its total.
+const N5_SECTIONS = [
+  { name: '文字・語彙', minutes: 20, questions: 21 },
+  { name: '文法・読解', minutes: 40, questions: 22 },
+  { name: '聴解', minutes: 30, questions: 24 },
+]
+export const EXAM_N5 = {
+  questions: N5_SECTIONS.reduce((n, s) => n + s.questions, 0),
+  minutes: N5_SECTIONS.reduce((n, s) => n + s.minutes, 0),
+  sections: N5_SECTIONS,
+  pass: 80,
+  max: 180,
+}
 
 /** Everything the page counts: the three decks by level, the grammar
  *  lessons' example sentences, the radicals and the kana. */

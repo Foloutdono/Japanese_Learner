@@ -225,7 +225,12 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 /* Where the host clips (the card, the pace's segments) the ring is drawn
    on its edge; a group's goes round it. */
 .qcard.nudge::after, .seg.nudge::after, .rbar.nudge::after { inset: 0; }
-.exam__opts.nudge::after { inset: calc(var(--sp-2) * -1); border-radius: var(--r-panel); }
+/* The exam's answers: a ring round every number, never round the group
+   (which read as a box of its own) and never round one answer alone,
+   the first being the right one. */
+.exam__opts.nudge::after { content: none; }
+.exam__opts.nudge .opt__k { position: relative; }
+.exam__opts.nudge .opt__k::after { content: ""; position: absolute; inset: -5px; border: 2px solid var(--accent2); border-radius: var(--r-pill); pointer-events: none; animation: cue-ring 1.6s ease-in-out infinite; }
 
 /* ── The overview presentation ── */
 .player { position: relative; margin-top: var(--sp-6); aspect-ratio: 16 / 9; border-radius: var(--r-panel); overflow: hidden; background: radial-gradient(90% 90% at 50% 45%, color-mix(in srgb, var(--text-on-panel) 6%, var(--bg-panel)) 0%, var(--bg-panel) 75%); border: 1px solid var(--surface-line); color: var(--text-on-panel); }
@@ -380,23 +385,68 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .clip video { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; object-fit: cover; background: var(--bg-main); animation: arrive-soft .3s ease; }
 .clip__play { position: absolute; z-index: 3; left: 50%; top: 50%; translate: -50% -50%; display: grid; place-items: center; width: 52px; height: 52px; border-radius: var(--r-pill); background: var(--bg-panel); color: var(--gate-lamp); border: 3px solid var(--gate-gold); cursor: pointer; }
 
-/* ── The mock exam ── */
+/* ── The mock exam ──
+   One item of the N5 paper. An answer under the pointer or the keys
+   turns its number over -- the roundel filled with the exam's ink, its
+   digit on it -- and its edge takes a tint of the pigment: nothing lifts
+   and nothing reads as picked. The first pick is the answer, as on the
+   paper: landing.js marks the card [data-answered] and every option
+   aria-disabled, and from then on only the marks and the verdict
+   change. The ink is the pigment taken a quarter toward the text, so
+   the digit holds 4.5:1 on it in both themes. */
+.exam, .paper { --exam-ink: color-mix(in srgb, var(--line-exam) 75%, var(--text-primary)); }
 .exam { display: flex; flex-direction: column; gap: var(--sp-5); padding: var(--sp-5); }
 .exam__top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); }
 .exam__head { display: flex; align-items: center; gap: var(--sp-4); font-weight: 700; font-size: var(--fs-sm); }
 .exam__ring { width: 36px; height: 36px; font-size: var(--fs-sm); }
 .exam__timer { font-size: var(--fs-lead); color: var(--text-secondary); }
-.exam__q { margin: 0; font-size: var(--fs-title); line-height: 1.8; }
+.exam__sheet { display: contents; }
+.exam__mondai { display: none; margin: 0; font-size: var(--fs-sm); line-height: 1.8; color: var(--text-secondary); word-break: keep-all; }
+.exam__mondai b { margin-right: var(--sp-3); padding: var(--sp-1) var(--sp-3); border-radius: var(--r-plate); background: var(--text-primary); color: var(--bg-main); font-size: var(--fs-caption); letter-spacing: var(--tr-term); }
+.exam__mondai span { white-space: nowrap; }
+.exam__q { margin: 0; font-size: var(--fs-title); line-height: 1.8; word-break: keep-all; }
 .exam__q u { text-underline-offset: 6px; }
 .exam__opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
-.opt { display: flex; align-items: center; gap: var(--sp-4); height: 56px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--bg-main); cursor: pointer; text-align: left; font-size: var(--fs-body); transition: border-color .15s ease, transform .15s ease; }
-.opt:hover, .opt:focus-visible { border-color: var(--line-exam); transform: translateY(-1px); }
-.opt__k { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: var(--r-pill); border: 1.5px solid var(--surface-line); font-weight: 700; font-size: var(--fs-caption); }
+.opt { display: flex; align-items: center; gap: var(--sp-4); height: 56px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--bg-main); cursor: pointer; text-align: left; font-size: var(--fs-body); transition: border-color .15s ease; }
+.opt__k { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: var(--r-pill); border: 1.5px solid var(--surface-line); font-weight: 700; font-size: var(--fs-caption); transition: background-color .15s ease, border-color .15s ease, color .15s ease; }
+.exam:not([data-answered]) .opt:hover, .exam:not([data-answered]) .opt:focus-visible { border-color: color-mix(in srgb, var(--line-exam) 45%, var(--surface-line)); }
+.exam:not([data-answered]) .opt:hover .opt__k, .exam:not([data-answered]) .opt:focus-visible .opt__k { border-color: var(--exam-ink); background: var(--exam-ink); color: var(--bg-main); }
+.exam[data-answered] .opt { cursor: default; }
 .opt--right { border-color: var(--success); box-shadow: inset 0 0 0 1px var(--success); }
 .opt--right .opt__k { border-color: var(--success); color: var(--success); }
 .opt--wrong { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
 .opt--wrong .opt__k { border-color: var(--danger); color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+.exam__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-5); }
 .exam__verdict { min-height: 1.65em; color: var(--text-primary); }
+.exam__progress { display: none; flex: none; align-items: center; gap: var(--sp-4); font-size: var(--fs-sm); color: var(--text-secondary); }
+.exam__track { width: 120px; height: 4px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
+.exam__track i { display: block; width: calc(100% / var(--of)); height: 100%; background: var(--line-exam); }
+/* The N5 paper beside the item, from the tablet up: its sections laid
+   along its minutes, each lit where it sits, then the score out of 180,
+   the pass mark a tick with the passing stretch tinted. */
+.paper { display: none; flex-direction: column; gap: var(--sp-5); padding: var(--sp-5); }
+.paper__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); }
+.paper__level { font-weight: 700; font-size: var(--fs-title); color: var(--exam-ink); }
+.paper__total { font-size: var(--fs-lead); }
+.paper__legs { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.paper__leg { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: var(--sp-3) var(--sp-4); padding: var(--sp-4) 0; border-top: 1px solid var(--surface-line); }
+.paper__name { font-weight: 500; font-size: var(--fs-body); }
+.paper__min { font-size: var(--fs-sm); color: var(--text-secondary); }
+.paper__bar { grid-column: 1 / -1; position: relative; height: 8px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--text-secondary) 12%, transparent); }
+.paper__bar i { position: absolute; top: 0; bottom: 0; left: calc(var(--at) * 100%); width: calc(var(--len) * 100%); border-radius: var(--r-pill); background: var(--line-exam); }
+.paper__score { display: grid; grid-template-columns: calc(var(--pass) * 100%) minmax(0, 1fr); align-items: end; row-gap: var(--sp-3); padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); font-size: var(--fs-sm); color: var(--text-secondary); }
+.paper__score > :first-child { grid-area: 1 / 1; }
+.paper__score > :nth-child(3) { grid-area: 1 / 2; justify-self: end; }
+.paper__pass { grid-area: 1 / 2; justify-self: start; display: inline-flex; align-items: baseline; gap: var(--sp-2); font-weight: 700; color: var(--text-primary); }
+.paper__scale { grid-column: 1 / -1; grid-row: 2; position: relative; height: 8px; border-radius: var(--r-pill); background: linear-gradient(90deg, color-mix(in srgb, var(--text-secondary) 12%, transparent) calc(var(--pass) * 100%), color-mix(in srgb, var(--success) 45%, transparent) 0); }
+.paper__scale i { position: absolute; top: calc(var(--sp-1) * -1); bottom: calc(var(--sp-1) * -1); left: calc(var(--pass) * 100% - 1px); width: 2px; border-radius: var(--r-pill); background: var(--text-primary); }
+@media (prefers-reduced-motion: reduce) {
+  .exam__opts.nudge .opt__k::after { animation: none; }
+  .opt__k { transition: none; }
+}
+@media print {
+  .exam__opts.nudge .opt__k::after { display: none; }
+}
 
 /* ── The tools ── */
 .tools { display: grid; gap: var(--sp-5); margin-top: var(--sp-6); }
@@ -771,6 +821,16 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .exam__head { font-size: var(--fs-body); }
   .exam__timer { font-size: var(--fs-title); }
   .opt { padding: 0 var(--sp-5); }
+  /* The mock exam: the N5 paper in the copy, its sections a line each;
+     the item on its sheet under the mondai's instruction; the paper's
+     progress beside the verdict. */
+  .paper { display: flex; padding: var(--sp-7); }
+  .exam__sheet { display: flex; flex-direction: column; gap: var(--sp-5); padding: var(--sp-5) var(--sp-6); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--bg-main); }
+  .exam__mondai { display: block; }
+  .exam__progress { display: flex; }
+  .paper__legs { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: var(--sp-5); }
+  .paper__leg { grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; }
+  .paper__bar { grid-area: 1 / 2; }
   .tok { padding: var(--sp-2) var(--sp-3); }
   .tok__r { font-size: var(--fs-caption); }
   .tok__w { font-size: var(--fs-heading); }
@@ -1208,6 +1268,57 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
       .ftab:nth-child(2) { border-top: 0; }
       .ftab:nth-child(even) { border-left: 1px solid var(--surface-line); }
     }
+  }
+
+  /* 05 Examen JLPT, desk: the copy beside the item, both the body's
+     height. The copy: the heading on the heading line; the N5 paper
+     taking the column's rest, its three sections sharing the spare
+     height; the note level with the card's floor, under a rule. The
+     item: its head and the mondai's instruction, the sentence a rung up
+     in the room the answers leave, the answers taller with their kana a
+     rung up, and at the foot the verdict beside the paper's progress --
+     a line kept for it, so nothing moves when it is given. */
+  .split--exam { align-items: stretch; --exam-foot: calc(var(--sp-5) + 1.65 * var(--fs-body) + var(--sp-7) + 2px); }
+  .split--exam .paper { flex: 1; min-height: 0; }
+  /* The sections share the paper's spare height, a size container
+     (legs): each a line -- its name, where it sits along the minutes,
+     its length -- or, where the paper holds 200px for them, two, the
+     name and the length over the bar, a rung up. Never under a line of
+     28px each: a window too short for that grows the stop instead. */
+  .paper__legs { flex: 1 1 0; min-height: 84px; container: legs / size; grid-auto-rows: minmax(0, 1fr); }
+  .paper__leg { align-content: center; padding: 0; }
+  @container legs (min-height: 200px) {
+    .paper__leg { row-gap: var(--sp-4); }
+    .paper__name { grid-column: 1 / 3; font-size: var(--fs-lead); }
+    .paper__min { font-size: var(--fs-body); }
+    .paper__bar { grid-area: 2 / 1 / 3 / -1; }
+  }
+  /* The note's rule level with the foot's, so the paper ends where the
+     answers do and the note starts where the verdict does: the note's
+     block is the foot's height under its rule (--exam-foot: the foot's
+     padding, the verdict's line, the card's padding, the two hairlines). */
+  .split--exam .split__copy > .body--small { min-height: var(--exam-foot); padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
+  .exam__timer { font-size: var(--fs-heading); }
+  .exam__mondai { font-size: var(--fs-body); }
+  .exam__sheet { flex: 1; padding: var(--sp-6) var(--sp-7); }
+  .exam__q { margin-block: auto; font-size: var(--fs-display); line-height: 1.6; }
+  .exam__q u { text-underline-offset: 10px; }
+  .opt { height: 80px; gap: var(--sp-5); font-size: var(--fs-title); }
+  .opt__k { width: 36px; height: 36px; font-size: var(--fs-sm); }
+  .exam__foot { padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
+  .exam__track { width: 160px; }
+  /* Short: the paper and the item a rung tighter, the answers at the
+     phone's 56px. */
+  @media (max-height: 799px) {
+    .split--exam { --exam-foot: calc(var(--sp-4) + 1.65 * var(--fs-body) + var(--sp-6) + 2px); }
+    .split--exam .paper { padding: var(--sp-6); gap: var(--sp-4); }
+    .split--exam .split__copy > .body--small { padding-top: var(--sp-4); }
+    .exam__mondai { font-size: var(--fs-sm); }
+    .exam__sheet { gap: var(--sp-4); padding: var(--sp-5) var(--sp-6); }
+    .exam__q { font-size: var(--fs-heading); }
+    .exam__q u { text-underline-offset: 6px; }
+    .opt { height: 56px; font-size: var(--fs-lead); }
+    .exam__foot { margin-top: var(--sp-1); padding-top: var(--sp-4); }
   }
 
   /* The card and the promises one height, packed at the body's top

@@ -420,14 +420,35 @@ function features(t, media) {
 function jlpt(t) {
   const J = t.jlpt
   const opts = EXAM_OPTIONS.map((o, k) => `<button type="button" class="opt" data-opt="${k}"><span class="opt__k">${k + 1}</span><span lang="ja">${o}</span></button>`).join('')
-  return `<section class="sec" id="${t.ids.jlpt}" aria-labelledby="${t.ids.jlpt}-h">${stop(t, 'jlpt')}<div class="wrap split cols">`
+  // The N5 paper at a glance, from the tablet up: its three timed
+  // sections laid along its ninety minutes, then the score out of 180
+  // with the pass mark -- the body's figures, drawn.
+  const { sections, minutes, pass, max } = EXAM_N5
+  let at = 0
+  const legs = sections.map(s => {
+    const leg = `<li class="paper__leg" style="--at:${at / minutes};--len:${s.minutes / minutes}"><span class="paper__name" lang="ja">${s.name}</span>`
+      + `<span class="fig paper__min">${esc(t.line.rhythm(s.minutes))}</span><span class="paper__bar"><i></i></span></li>`
+    at += s.minutes
+    return leg
+  }).join('')
+  const paper = '<div class="card paper">'
+    + `<div class="paper__head"><span class="paper__level">${LEVELS[0]}</span><span class="fig paper__total">${esc(t.line.rhythm(minutes))}</span></div>`
+    + `<ol class="paper__legs">${legs}</ol>`
+    + `<div class="paper__score" style="--pass:${pass / max}"><span class="fig">0</span><span class="paper__pass"><span lang="ja">合格</span> <span class="fig">${pass}</span></span><span class="fig">${max}</span><span class="paper__scale"><i></i></span></div>`
+    + '</div>'
+  return `<section class="sec" id="${t.ids.jlpt}" aria-labelledby="${t.ids.jlpt}-h">${stop(t, 'jlpt')}<div class="wrap split split--exam cols">`
     + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.jlpt}-h">${esc(typo(t.lang, J.h2))}</h2>`
-    + `<p class="body">${esc(typo(t.lang, J.body))}</p><p class="body body--small">${esc(typo(t.lang, J.note))}</p></div>`
+    + `<p class="body">${esc(typo(t.lang, J.body))}</p>${paper}<p class="body body--small">${esc(typo(t.lang, J.note))}</p></div>`
     + '<div class="card exam" data-exam data-reveal>'
     + `<div class="exam__top"><span class="exam__head">${ring('模', 'exam', 'exam__ring')}${esc(typo(t.lang, J.head))}</span><span class="fig exam__timer">${J.timer}</span></div>`
-    + '<p class="exam__q" lang="ja">この <u>駅</u> は とても 大きいです。</p>'
+    // The item as the paper prints it: from the tablet up, a sheet with
+    // the mondai's instruction in the app's words
+    // (backend/study/exam_kanji_gen.py) over the sentence.
+    + '<div class="exam__sheet"><p class="exam__mondai" lang="ja"><b>もんだい 1</b> つぎの ことばの 読み方として 最も よい ものを <span>1・2・3・4から</span> 一つ えらんで ください。</p>'
+    + '<p class="exam__q" lang="ja">この <u>駅</u> は とても 大きいです。</p></div>'
     + `<div class="exam__opts" role="group" aria-label="${esc(J.optionsLabel)}" data-nudge>${opts}</div>`
-    + `<p class="body exam__verdict" aria-live="polite" data-verdict>${esc(typo(t.lang, J.ask))}</p>`
+    + `<div class="exam__foot"><p class="body exam__verdict" aria-live="polite" data-verdict>${esc(typo(t.lang, J.ask))}</p>`
+    + `<span class="exam__progress" aria-hidden="true"><span class="fig">1 / ${EXAM_N5.questions}</span><span class="exam__track" style="--of:${EXAM_N5.questions}"><i></i></span></span></div>`
     + '</div></div></section>'
 }
 

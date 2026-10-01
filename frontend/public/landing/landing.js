@@ -456,17 +456,24 @@ rates.forEach((button, k) => {
 })
 
 // ── The mock exam's question ──
+// One answer, as on the paper: the first pick is marked, the card is
+// answered (landing.css drops the options' hover on [data-answered]),
+// and the options stay focusable but aria-disabled, so a later click,
+// or Enter on the one still focused, changes nothing.
+const exam = $('[data-exam]')
 const verdict = $('[data-verdict]')
 const options = $$('[data-opt]')
 for (const option of options) {
   option.addEventListener('click', () => {
+    if (exam.hasAttribute('data-answered')) return
+    exam.setAttribute('data-answered', '')
     const picked = Number(option.dataset.opt)
     sound(picked === 0 ? 'correct' : 'wrong')
     nudge($('.exam__opts'), false)
     options.forEach((o, k) => {
+      o.setAttribute('aria-disabled', 'true')
       o.classList.toggle('opt--right', k === 0)
       if (k === picked && picked !== 0) replay(o, 'opt--wrong')
-      else o.classList.remove('opt--wrong')
     })
     verdict.textContent = picked === 0 ? data.exam.right : data.exam.wrong
   })
