@@ -448,7 +448,16 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .exam__opts.nudge .opt__k::after { display: none; }
 }
 
-/* ── The tools ── */
+/* ── The tools ──
+   The dictionary's entry plate (DESIGN.md, "The entry plate"): the
+   reading over the headword, the level and the stage in the corner,
+   then blocks divided by rules and named by nothing -- the sense, how
+   it is written (the strokes on their sheet beside two record cells,
+   one hairline lattice) and the words it is used in, the kanji picked
+   out in each. The analyser: the sentence on its sumi, as the app sets
+   it under the picture, each grammar point numbered at the corner of
+   the word it sits on; under it the word in focus and the numbered
+   grammar, the point of the word in focus lit (landing.js). */
 .tools { display: grid; gap: var(--sp-5); margin-top: var(--sp-6); }
 .dict { display: flex; flex-direction: column; gap: var(--sp-5); padding: var(--sp-5); }
 .dict__top { display: flex; justify-content: space-between; align-items: flex-start; }
@@ -456,6 +465,14 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .dict__glyph { font-size: var(--fs-specimen-word); line-height: 1; }
 .dict__tags { display: flex; flex-direction: column; align-items: flex-end; gap: var(--sp-3); }
 .dict__sense { margin: 0; font-size: var(--fs-lead); font-weight: 700; }
+.dict__n { color: color-mix(in srgb, var(--c) 60%, var(--text-primary)); }
+.dict__form { display: flex; gap: 1px; background: var(--surface-line); border: 1px solid var(--surface-line); border-radius: var(--r-card); overflow: hidden; }
+.dict__sheet { flex: none; display: grid; place-items: center; width: 96px; aspect-ratio: 1; padding: var(--sp-3); background: linear-gradient(var(--dict-guide), var(--dict-guide)) center / 1px 100% no-repeat, linear-gradient(var(--dict-guide), var(--dict-guide)) center / 100% 1px no-repeat, var(--bg-card); --dict-guide: color-mix(in srgb, var(--surface-line) 55%, transparent); }
+.dict__sheet svg { display: block; width: 100%; height: 100%; }
+.dict__sheet path { fill: none; stroke: var(--text-primary); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.dict__cells { flex: 1; display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 1px; min-width: 0; }
+.dict__cell { display: flex; flex-direction: column; justify-content: center; gap: var(--sp-1); min-width: 0; padding: var(--sp-3) var(--sp-5); background: var(--surface); }
+.dict__fig { font-size: var(--fs-title); line-height: 1.2; }
 .words { margin: 0; padding: 0; list-style: none; border-bottom: 1px solid var(--surface-line); }
 .word { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--sp-4); padding: var(--sp-4) 0; border-top: 1px solid var(--surface-line); }
 .word__w { font-size: var(--fs-lead); }
@@ -465,29 +482,51 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .analyser { display: flex; flex-direction: column; gap: var(--sp-5); padding: var(--sp-5); }
 .analyser__top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
 .analyser__tap { margin-left: auto; }
+.analyser__line { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-5) var(--sp-4); border-radius: var(--r-card); background: var(--bg-panel); color: var(--text-on-panel); --kai: color-mix(in srgb, var(--line-kaiseki) 70%, var(--text-on-panel)); }
 .toks { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-1); }
-.tok { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; min-height: 44px; padding: var(--sp-2) var(--sp-2); border: 0; border-bottom: 3px solid transparent; border-radius: var(--r-plate); background: transparent; cursor: pointer; }
-.tok:hover, .tok:focus-visible { background: color-mix(in srgb, var(--text-primary) 6%, transparent); }
-.tok__r { min-height: 1.2em; font-size: var(--fs-caption-xs); letter-spacing: .1em; color: var(--text-secondary); }
+.tok { position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: 2px; min-height: 44px; padding: var(--sp-2) var(--sp-2); border: 0; border-bottom: 3px solid transparent; border-radius: var(--r-plate); background: transparent; color: inherit; cursor: pointer; }
+.tok__r { min-height: 1.2em; font-size: var(--fs-caption-xs); letter-spacing: .1em; color: var(--text-on-panel-soft); }
 .tok__w { font-size: var(--fs-title); line-height: 1.2; }
-.tok--word { border-bottom-color: color-mix(in srgb, var(--text-primary) 18%, transparent); }
-.tok--gram { border-bottom-color: var(--line-kaiseki); }
-.tok--on { background: color-mix(in srgb, var(--accent2) 14%, transparent); border-bottom-color: var(--accent2); }
+.tok--word { border-bottom-color: color-mix(in srgb, var(--text-on-panel) 22%, transparent); }
+.tok--gram { border-bottom-color: var(--kai); }
+/* A word answers the pointer by its rule turning gold, the pick's
+   colour; picked, it is washed in gold too. */
+.tok:hover, .tok:focus-visible { border-bottom-color: var(--accent2); }
+.tok--on { background: color-mix(in srgb, var(--accent2) 24%, transparent); border-bottom-color: var(--accent2); }
+.tok__n { position: absolute; top: calc(var(--sp-1) * -1); right: calc(var(--sp-1) * -1); display: grid; place-items: center; width: var(--sp-6); height: var(--sp-6); border: 1.5px solid var(--kai); border-radius: var(--r-pill); background: var(--bg-panel); font-size: var(--fs-caption-xs); color: var(--text-on-panel); }
 .tok__stop { padding-bottom: var(--sp-2); }
 .toks__last { display: inline-flex; align-items: flex-end; }
-.analyser__trans { margin-top: calc(var(--sp-3) * -1); }
+.analyser__trans { color: var(--text-on-panel-soft); }
+.analyser__low { display: grid; gap: var(--sp-5); }
 .tokinfo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-5); align-items: start; padding: var(--sp-4) var(--sp-5); }
 .tokinfo__word, .tokinfo__note { display: flex; flex-direction: column; gap: var(--sp-1); }
 .tokinfo__note { gap: var(--sp-3); }
 .tokinfo__note .body { color: var(--text-primary); }
-.tokinfo__r { min-height: 1.2em; font-size: var(--fs-caption); letter-spacing: .1em; color: var(--text-secondary); }
+.tokinfo__r { min-height: 1.2em; font-size: var(--fs-caption); line-height: 1.2; letter-spacing: .1em; color: var(--text-secondary); }
 .tokinfo__d { font-size: var(--fs-heading); font-weight: 700; }
-.tokinfo__m { font-weight: 700; }
-.points { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
-.points li { display: flex; align-items: center; gap: var(--sp-3); }
+/* Two lines kept for the meaning on a phone, the longest's, so a word
+   pressed never moves the list under it. */
+.tokinfo__m { min-height: 3em; font-weight: 700; }
+.analyser__points { display: flex; flex-direction: column; gap: var(--sp-3); }
+.analyser__points > .capxs { margin: 0; }
+/* The numbered grammar, a ledger: the roundels, the patterns and their
+   glosses each in a column of their own. */
+.points { display: grid; grid-template-columns: auto auto minmax(0, 1fr); margin: 0; padding: 0; list-style: none; border-bottom: 1px solid var(--surface-line); }
+.points li { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; column-gap: var(--sp-4); padding: var(--sp-3) 0; border-top: 1px solid var(--surface-line); }
 .num { display: grid; place-items: center; flex-shrink: 0; width: 24px; height: 24px; border-radius: var(--r-pill); border: 1.5px solid var(--line-kaiseki); font-weight: 700; font-size: var(--fs-caption); }
+.points .is-lit .num { background: var(--line-kaiseki); color: var(--text-on-panel); }
 .points__p { font-weight: 700; }
 .points__g { font-size: var(--fs-caption); color: var(--text-secondary); }
+/* 駅's strokes drawn in their order as the stop arrives; only once the
+   script is watching (.motion), so a page without it shows them drawn. */
+.motion .tools .dict__sheet path { stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
+.motion .tools.in .dict__sheet path { animation: draw .3s ease-out forwards; animation-delay: calc(var(--at, 0s) + .8s + var(--s) * .1s); }
+@media (prefers-reduced-motion: reduce) {
+  .motion .tools .dict__sheet path, .motion .tools.in .dict__sheet path { animation: none; stroke-dasharray: none; opacity: 1; }
+}
+@media print {
+  .motion .tools .dict__sheet path { animation: none; stroke-dasharray: none; opacity: 1; }
+}
 
 /* ── The fare ── */
 .fare { display: grid; gap: var(--sp-5); }
@@ -831,10 +870,27 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .paper__legs { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: var(--sp-5); }
   .paper__leg { grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; }
   .paper__bar { grid-area: 1 / 2; }
+  /* The tools: the entry's head and sense beside how it is written,
+     its words across under them; under the sentence, the word in focus
+     across the analyser, its note beside it under a rule, over the
+     numbered grammar three across. */
+  .dict { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "top form" "sense form" "words words"; column-gap: var(--sp-7); }
+  .dict__top { grid-area: top; }
+  .dict__sense { grid-area: sense; align-self: end; }
+  .dict__form { grid-area: form; }
+  .dict__sheet { width: 128px; }
+  .words { grid-area: words; }
   .tok { padding: var(--sp-2) var(--sp-3); }
   .tok__r { font-size: var(--fs-caption); }
   .tok__w { font-size: var(--fs-heading); }
-  .points { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-4); }
+  .analyser__line { padding: var(--sp-5) var(--sp-6) var(--sp-6); }
+  .tokinfo { padding: var(--sp-5) var(--sp-6); }
+  .tokinfo__m { min-height: 0; }
+  .tokinfo__note { padding-left: var(--sp-5); border-left: 1px solid var(--surface-line); }
+  .tokinfo__note .body { min-height: 3.3em; }
+  .points { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--sp-5); border-bottom: 0; }
+  .points li { grid-column: auto; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--sp-3); }
+  .points .num { grid-row: span 2; }
   .fare__card { padding: var(--sp-7); }
   .promises > div { padding: var(--sp-7); }
   .faq summary { padding: var(--sp-6) 0; font-size: var(--fs-lead); }
@@ -1319,6 +1375,106 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
     .exam__q u { text-underline-offset: 6px; }
     .opt { height: 56px; font-size: var(--fs-lead); }
     .exam__foot { margin-top: var(--sp-1); padding-top: var(--sp-4); }
+  }
+
+  /* 06 Les outils, desk: the head row, then the two tools side by side
+     on the columns, both the rest of the body's height. The entry: its
+     head a rung up, the sense, its words, and how it is written taking
+     the spare height -- the strokes' sheet as tall as its block (200px
+     at most) beside the two record cells. The analyser: the sentence on
+     its sumi, a rung up where the window and the slab hold it on one
+     line; under it the word in focus beside the numbered grammar, both
+     the rest -- the word's note on the card's floor under a rule, two
+     lines kept for it, so a word pressed moves nothing, and the points'
+     rows sharing their column. */
+  .sec--tools > .wrap + .wrap { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+  .tools { align-items: stretch; }
+  .dict { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(72px, 1fr) auto; grid-template-areas: "top" "sense" "form" "words"; min-height: 0; }
+  .dict__glyph { font-size: var(--fs-specimen-glyph); }
+  .dict__sense { align-self: start; font-size: var(--fs-title); }
+  .dict__form { container-type: size; }
+  .dict__sheet { width: min(100cqh, 200px); aspect-ratio: auto; }
+  .dict__cells { grid-template-rows: none; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dict__cell { padding: var(--sp-4) var(--sp-6); }
+  .dict__fig { font-size: var(--fs-heading); }
+  .word__w { font-size: var(--fs-title); }
+  .word__r { font-size: var(--fs-sm); }
+  .word__g { font-size: var(--fs-body); }
+  .analyser { display: grid; grid-template-rows: auto auto minmax(0, 1fr); min-height: 0; }
+  .analyser__line { gap: var(--sp-4); padding: var(--sp-7) var(--sp-6); container: line / inline-size; }
+  .analyser__trans { font-size: var(--fs-lead); }
+  .analyser__low { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--sp-6); min-height: 0; }
+  .tokinfo { display: flex; flex-direction: column; align-items: stretch; gap: var(--sp-5); padding: var(--sp-6); }
+  .tokinfo__word { gap: var(--sp-2); }
+  .tokinfo__d { font-size: var(--fs-display); line-height: 1.2; }
+  .tokinfo__m { font-size: var(--fs-title); }
+  .tokinfo__note { margin-top: auto; padding: var(--sp-5) 0 0; border-left: 0; border-top: 1px solid var(--surface-line); }
+  .tokinfo__note .body { font-size: var(--fs-body); }
+  .analyser__points { gap: var(--sp-4); }
+  .points { flex: 1; grid-template-columns: auto auto minmax(0, 1fr); grid-auto-rows: 1fr; border-bottom: 1px solid var(--surface-line); }
+  .points li { grid-column: 1 / -1; grid-template-columns: subgrid; column-gap: var(--sp-4); }
+  .points .num { grid-row: auto; width: var(--sp-7); height: var(--sp-7); font-size: var(--fs-sm); }
+  .points__p { font-size: var(--fs-heading); }
+  .points__g { font-size: var(--fs-body); }
+  /* The narrow desk: the points a rung down, so a gloss keeps its line
+     in the narrower column. */
+  @media (max-width: 1239px) {
+    .points li { column-gap: var(--sp-4); }
+    .points .num { width: 24px; height: 24px; font-size: var(--fs-caption); }
+    .points__p { font-size: var(--fs-lead); }
+    .points__g { font-size: var(--fs-sm); }
+  }
+  @media (min-height: 880px) {
+    @container line (min-width: 590px) {
+      .tok__w { font-size: var(--fs-display); }
+    }
+  }
+  /* Under 880px of window (the hero's own line; 900px on the narrow
+     desk, whose heading takes three lines) the tall analyser no longer
+     fits (it needs 494px): the sentence and the word in focus a rung
+     down, and on the narrow desk the headword. Under 840px every block
+     of both a rung down and the rows closer, so the strokes keep a sheet
+     near the headword's size. On the narrow short desk the headword a
+     rung further, and the word in focus across the analyser, its note
+     beside it, over the numbered grammar three across (its caption the
+     list's name only). */
+  @media (max-height: 879px), (max-height: 899px) and (max-width: 1239px) {
+    .analyser__line { gap: var(--sp-2); padding: var(--sp-4) var(--sp-6); }
+    .analyser__trans { font-size: var(--fs-body); }
+    .tokinfo__d { font-size: var(--fs-heading); }
+  }
+  @media (max-height: 879px) and (max-width: 1239px) {
+    .dict__glyph { font-size: var(--fs-specimen-word); }
+  }
+  @media (max-height: 839px) {
+    .dict__glyph { font-size: var(--fs-specimen-word); }
+    .dict__sense { font-size: var(--fs-lead); }
+    .dict__cell { padding: var(--sp-3) var(--sp-5); }
+    .dict__fig { font-size: var(--fs-title); }
+    .word { padding: var(--sp-3) 0; }
+    .word__w { font-size: var(--fs-lead); }
+    .word__r { font-size: var(--fs-caption); }
+    .word__g { font-size: var(--fs-sm); }
+    .tokinfo { gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); }
+    .tokinfo__word { gap: var(--sp-1); }
+    .tokinfo__m { font-size: var(--fs-lead); }
+    .tokinfo__note { padding-top: var(--sp-4); }
+    .tokinfo__note .body { font-size: var(--fs-sm); }
+    .analyser__points { gap: var(--sp-3); }
+    .points .num { width: 24px; height: 24px; font-size: var(--fs-caption); }
+    .points__p { font-size: var(--fs-lead); }
+    .points__g { font-size: var(--fs-caption); }
+  }
+  @media (max-height: 799px) and (max-width: 1239px) {
+    .dict__glyph { font-size: var(--fs-display); }
+    .analyser__low { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: var(--sp-4); }
+    .tokinfo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-content: start; gap: var(--sp-5); }
+    .tokinfo__note { margin-top: 0; padding: 0 0 0 var(--sp-5); border-top: 0; border-left: 1px solid var(--surface-line); }
+    .tokinfo__m { font-size: var(--fs-body); }
+    .analyser__points > .capxs { display: none; }
+    .points { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: auto; column-gap: var(--sp-4); border-bottom: 0; }
+    .points li { grid-column: auto; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--sp-3); padding: var(--sp-2) 0; }
+    .points .num { grid-row: span 2; }
   }
 
   /* The card and the promises one height, packed at the body's top

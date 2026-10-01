@@ -55,6 +55,13 @@ The page moves the way the app does (DESIGN.md, Motion):
   following it, and plays it again while the pointer is on the block. A
   clip that fails leaves the tab to the seven seconds, and one that has
   not started after seven seconds turns it.
+- **The tools:** the dictionary entry writes 駅 stroke by stroke, once,
+  as the stop arrives; without script, or with reduced motion, it is
+  drawn whole. In the analyser a word lifts nothing either: under the
+  pointer, or with keyboard focus, its rule turns gold. Pressed, it is
+  washed in gold, its entry comes in under the sentence, and its grammar
+  point is lit in the numbered list. The entry keeps its height, so a
+  word pressed moves nothing.
 - **The stops:** the page is the gold line the hero's road starts, and
   each section is a stop on it. A sign opens every section, where a
   hairline once cut the page. It holds the stop's number in a ring, its

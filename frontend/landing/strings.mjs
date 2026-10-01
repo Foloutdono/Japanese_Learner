@@ -32,12 +32,15 @@ export const CARDS = [
 ]
 
 // The analyser's sentence, a token each: 駅で友達を待っています。
+// `point` is the numbered grammar point the word carries (the tools'
+// `points`, from 1), 0 for none: the sentence is numbered as the app's
+// analyser numbers it.
 export const TOKENS = [
-  { surface: '駅', reading: 'えき', dict: '駅', dictReading: 'えき', gram: false },
-  { surface: 'で', reading: '', dict: '〜で', dictReading: '', gram: true },
-  { surface: '友達', reading: 'ともだち', dict: '友達', dictReading: 'ともだち', gram: false },
-  { surface: 'を', reading: '', dict: '〜を', dictReading: '', gram: true },
-  { surface: '待っています', reading: 'まっています', dict: '待つ', dictReading: 'まつ', gram: false },
+  { surface: '駅', reading: 'えき', dict: '駅', dictReading: 'えき', gram: false, point: 0 },
+  { surface: 'で', reading: '', dict: '〜で', dictReading: '', gram: true, point: 1 },
+  { surface: '友達', reading: 'ともだち', dict: '友達', dictReading: 'ともだち', gram: false, point: 0 },
+  { surface: 'を', reading: '', dict: '〜を', dictReading: '', gram: true, point: 2 },
+  { surface: '待っています', reading: 'まっています', dict: '待つ', dictReading: 'まつ', gram: false, point: 3 },
 ]
 
 // The mock exam's item: この駅はとても大きいです, 駅 underlined.

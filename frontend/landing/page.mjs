@@ -452,35 +452,55 @@ function jlpt(t) {
     + '</div></div></section>'
 }
 
+// The dictionary's entry plate and the analyser, side by side on the
+// desk. The entry is the app's (DESIGN.md, "The entry plate"): the
+// reading over the headword, the level and the stage in the corner, the
+// sense, how it is written (駅's strokes beside its reading and their
+// count) and the words it is used in, the kanji picked out in each. The
+// analyser: the sentence on its sumi, a grammar point numbered where it
+// sits, the word in focus, and the numbered grammar, the point of the
+// word in focus lit (landing.js).
 function tools(t) {
   const T = t.tools
+  const ty = x => esc(typo(t.lang, x))
   const compounds = T.compounds.map(([a, b, reading, gloss]) => {
     const word = a === '駅' ? `<span class="hit">駅</span>${b}` : `${a}<span class="hit">駅</span>`
-    return `<li class="word"><span class="word__w" lang="ja">${word}</span><span class="word__r" lang="ja">${reading}</span><span class="word__g">${esc(typo(t.lang, gloss))}</span></li>`
+    return `<li class="word"><span class="word__w" lang="ja">${word}</span><span class="word__r" lang="ja">${reading}</span><span class="word__g">${ty(gloss)}</span></li>`
   }).join('')
+  const [, senseN = '', sense = T.sense] = T.sense.match(/^(\d+\.)\s*(.*)$/) || []
+  // "14 traits": the figure and its word, as the app's record cell sets them.
+  const [strokesBefore, strokesAfter] = t.mock.strokes('\u0000').split('\u0000')
+  const form = '<div class="dict__form">'
+    + `<span class="dict__sheet" aria-hidden="true"><svg viewBox="0 0 109 109" focusable="false">${STATION_STROKES.map((d, k) => `<path pathLength="1" d="${d}" style="--s:${k}"/>`).join('')}</svg></span>`
+    + '<span class="dict__cells">'
+    + `<span class="dict__cell"><b class="dict__fig" lang="ja">エキ</b><span class="capxs">${ty(t.mock.readings)}</span></span>`
+    + `<span class="dict__cell"><b class="dict__fig fig">${STATION_STROKES.length}</b><span class="capxs">${ty(`${strokesBefore}${strokesAfter}`.trim())}</span></span>`
+    + '</span></div>'
   const sel = TOKENS.length - 1
   const tok = (w, k) =>
-    `<button type="button" class="tok ${w.gram ? 'tok--gram' : 'tok--word'}${k === sel ? ' tok--on' : ''}" data-tok="${k}"${k === 0 ? ' data-nudge' : ''} aria-pressed="${k === sel}"><span class="tok__r">${w.reading}</span><span class="tok__w">${w.surface}</span></button>`
+    `<button type="button" class="tok ${w.gram ? 'tok--gram' : 'tok--word'}${k === sel ? ' tok--on' : ''}" data-tok="${k}"${k === 0 ? ' data-nudge' : ''} aria-pressed="${k === sel}">`
+    + `<span class="tok__r">${w.reading}</span><span class="tok__w">${w.surface}</span>${w.point ? `<span class="tok__n fig" aria-hidden="true">${w.point}</span>` : ''}</button>`
   // The full stop rides with the last word, so a narrow card never
   // wraps it onto a line of its own.
   const tokens = TOKENS.slice(0, -1).map(tok).join('')
     + `<span class="toks__last">${tok(TOKENS[sel], sel)}<span class="tok__w tok__stop">。</span></span>`
   const info = T.tokens[sel]
-  const points = T.points.map(([p, g], k) => `<li><span class="num">${k + 1}</span><span class="points__p" lang="ja">${p}</span><span class="points__g">${esc(typo(t.lang, g))}</span></li>`).join('')
-  return `<section class="sec sec--band" id="${t.ids.tools}" aria-labelledby="${t.ids.tools}-h">${stop(t, 'tools')}<div class="wrap">`
+  const points = T.points.map(([p, g], k) => `<li data-point="${k + 1}"${k + 1 === TOKENS[sel].point ? ' class="is-lit"' : ''}><span class="num fig">${k + 1}</span><span class="points__p" lang="ja">${p}</span><span class="points__g">${ty(g)}</span></li>`).join('')
+  return `<section class="sec sec--band sec--tools" id="${t.ids.tools}" aria-labelledby="${t.ids.tools}-h">${stop(t, 'tools')}<div class="wrap">`
     + head2(t, T.h2, T.body, t.ids.tools)
     + '<div class="tools cols" data-stagger>'
     + `<article class="plate dict" style="--c:var(--accent2)"><div class="dict__top"><div class="dict__word"><span class="spec__reading" lang="ja">えき</span><span class="dict__glyph serif" lang="ja">駅</span></div>`
-    + `<div class="dict__tags"><span class="chip chip--small">N5</span><span class="stage st-learning">${esc(T.stage)}</span></div></div>`
-    + `<p class="dict__sense">${esc(typo(t.lang, T.sense))}</p><ul class="words">${compounds}</ul></article>`
+    + `<div class="dict__tags"><span class="chip chip--small">N5</span><span class="stage st-learning">${ty(T.stage)}</span></div></div>`
+    + `<p class="dict__sense">${senseN ? `<span class="dict__n fig">${senseN}</span> ` : ''}${ty(sense)}</p>${form}<ul class="words">${compounds}</ul></article>`
     + '<article class="card analyser" data-analyser>'
-    + `<div class="analyser__top">${T.intakes.map((x, k) => `<span class="chip${k ? '' : ' chip--on'}">${esc(x)}</span>`).join('')}<span class="capxs analyser__tap">${esc(typo(t.lang, T.tap))}</span></div>`
-    + `<div class="toks" lang="ja">${tokens}</div>`
-    + `<p class="body analyser__trans">${esc(typo(t.lang, T.translation))}</p>`
-    + `<div class="specimen tokinfo" aria-live="polite"><div class="tokinfo__word"><span class="tokinfo__r" lang="ja" data-ti="dictReading">${TOKENS[sel].dictReading}</span><span class="tokinfo__d" lang="ja" data-ti="dict">${TOKENS[sel].dict}</span><span class="tokinfo__m" data-ti="meaning">${esc(typo(t.lang, info.meaning))}</span></div>`
-    + `<div class="tokinfo__note"><span class="capxs" data-ti="kind">${esc(typo(t.lang, info.kind))}</span><span class="body body--small" data-ti="note">${esc(typo(t.lang, info.note))}</span></div></div>`
-    + `<ol class="points" aria-label="${esc(typo(t.lang, T.pointsLabel))}">${points}</ol>`
-    + '</article></div></div></section>'
+    + `<div class="analyser__top">${T.intakes.map((x, k) => `<span class="chip${k ? '' : ' chip--on'}">${esc(x)}</span>`).join('')}<span class="capxs analyser__tap">${ty(T.tap)}</span></div>`
+    + `<div class="analyser__line"><div class="toks" lang="ja">${tokens}</div>`
+    + `<p class="body analyser__trans">${ty(T.translation)}</p></div>`
+    + '<div class="analyser__low">'
+    + `<div class="specimen tokinfo" aria-live="polite"><div class="tokinfo__word"><span class="tokinfo__r" lang="ja" data-ti="dictReading">${TOKENS[sel].dictReading}</span><span class="tokinfo__d" lang="ja" data-ti="dict">${TOKENS[sel].dict}</span><span class="tokinfo__m" data-ti="meaning">${ty(info.meaning)}</span></div>`
+    + `<div class="tokinfo__note"><span class="capxs" data-ti="kind">${ty(info.kind)}</span><span class="body body--small" data-ti="note">${ty(info.note)}</span></div></div>`
+    + `<div class="analyser__points"><p class="capxs" id="${t.ids.tools}-points">${ty(T.pointsLabel)}</p><ol class="points" aria-labelledby="${t.ids.tools}-points">${points}</ol></div>`
+    + '</div></article></div></div></section>'
 }
 
 function fare(t) {

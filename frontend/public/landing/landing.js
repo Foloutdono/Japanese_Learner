@@ -480,8 +480,10 @@ for (const option of options) {
 }
 
 // ── The analyser: a word tapped, its entry beside it ──
+// and its grammar point lit in the numbered list (none for a bare word).
 const tokens = $$('[data-tok]')
 const tokinfo = $('.tokinfo')
+const points = $$('[data-point]')
 for (const token of tokens) {
   token.addEventListener('click', () => {
     const picked = data.tokens[Number(token.dataset.tok)]
@@ -493,6 +495,7 @@ for (const token of tokens) {
       other.setAttribute('aria-pressed', String(on))
     }
     for (const field of $$('[data-ti]')) field.textContent = picked[field.dataset.ti]
+    for (const point of points) point.classList.toggle('is-lit', Number(point.dataset.point) === picked.point)
     replay(tokinfo, 'is-new')
   })
 }
