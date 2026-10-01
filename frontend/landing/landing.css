@@ -64,7 +64,10 @@ img, video { display: block; max-width: 100%; }
 .seg > :first-child { border-left: 0; }
 .seg button { cursor: pointer; }
 .seg .on, .seg [aria-current] { background: color-mix(in srgb, var(--accent2) 14%, transparent); color: var(--text-primary); }
-.seg button:hover, .seg a:hover, .seg button:focus-visible { color: var(--text-primary); }
+.seg button:hover, .seg a:hover, .seg button:focus-visible, .seg a:focus-visible { color: var(--text-primary); }
+/* The group clips its segments, so a segment's focus ring is drawn
+   inside it, as the rating bar's is. */
+.seg button:focus-visible, .seg a:focus-visible { outline-offset: -4px; }
 .seg--still > * { min-height: 32px; padding: 0 var(--sp-3); font-size: var(--fs-caption); }
 
 /* 改札 — the gate button (DESIGN.md, "The gate button"). */
@@ -295,7 +298,7 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 .lrow__counts b { color: var(--accent2); }
 .lrow__long { display: none; }
 .lrow__eta { font-size: var(--fs-caption); }
-/* Where each pace takes you: the desk's services only. */
+/* Where each pace takes you: the services' only, from the tablet up. */
 .seg__to, .seg__ride { display: none; }
 
 /* ── The method ── */
@@ -904,15 +907,42 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .spec__sentence { font-size: var(--fs-body); }
   .spec__trans { font-size: var(--fs-sm); }
   .plate__spec .stage { top: var(--sp-4); right: var(--sp-5); }
-  .plate--line { padding: var(--sp-7) var(--sp-7) var(--sp-5); }
-  .lrows::before { left: 16px; top: 31px; bottom: 31px; width: 4px; }
-  .lrow { grid-template-columns: 36px 52px minmax(0, 1fr) auto; gap: var(--sp-5); height: 62px; }
+  /* 02 Ta ligne, from the tablet up. The timetable: its six stops share
+     the plate's height, the rail running stop to stop (half a row in
+     from each end), the counts set as columns (one subgrid), the type a
+     rung up and the arrivals, the answer, two. */
+  .plate--line { display: flex; flex-direction: column; padding: var(--sp-7) var(--sp-7) var(--sp-5); }
+  .lrows { flex: 1; display: grid; grid-template-columns: 36px auto repeat(3, minmax(max-content, 1fr)) auto; grid-template-rows: repeat(6, minmax(62px, 1fr)); column-gap: var(--sp-6); }
+  .lrows::before { left: 16px; top: calc(100% / 12); bottom: calc(100% / 12); width: 4px; }
+  .lrow { grid-column: 1 / -1; grid-template-columns: subgrid; gap: var(--sp-5); height: auto; }
   .lrow__stop { width: 18px; height: 18px; border-width: 4px; }
   .lrow__stop--end { width: 26px; height: 26px; border-width: 6px; }
-  .lrow__code { font-size: var(--fs-title); }
-  .lrow__counts, .lrow__eta { font-size: var(--fs-sm); }
-  .lrow__long { display: inline; }
-  .lrow__short { display: none; }
+  .lrow__counts, .lrow__long { display: contents; }
+  .lrow__short, .lrow__sep { display: none; }
+  .lrow__counts b { grid-column: span 2; }
+  .lrow .capxs { justify-self: end; }
+  .lrow__code { font-size: var(--fs-heading); }
+  .lrow__counts, .lrow__eta { font-size: var(--fs-body); }
+  .lrow__eta { justify-self: end; font-size: var(--fs-title); }
+  /* The pace as four services, each its pace over its arrival at N1
+     and that ride to scale (the slowest the whole bar), four across
+     under the copy; the desk stands them by the room its column leaves
+     them (its block). The one picked wears the wash and a gold rail on
+     its edge. */
+  .split--line .seg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-self: stretch; }
+  .split--line .seg > * { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "per" "to" "ride"; align-content: center; gap: var(--sp-2); padding: var(--sp-4) var(--sp-5); font-size: var(--fs-lead); text-align: left; }
+  .split--line .seg .on { box-shadow: inset 3px 0 0 var(--accent2); }
+  .split--line .seg__to { grid-area: to; display: inline-flex; align-items: baseline; gap: var(--sp-3); font-size: var(--fs-sm); }
+  .seg__to .fig { font-size: var(--fs-caption); color: var(--text-secondary); }
+  .split--line .seg__ride { grid-area: ride; display: block; height: 6px; margin-top: var(--sp-2); border-radius: var(--r-pill); background: linear-gradient(90deg, color-mix(in srgb, var(--text-secondary) 45%, transparent) calc(var(--ride) * 100%), color-mix(in srgb, var(--text-secondary) 12%, transparent) 0); }
+  .split--line .seg .on .seg__ride { background: linear-gradient(90deg, var(--accent2) calc(var(--ride) * 100%), color-mix(in srgb, var(--text-secondary) 12%, transparent) 0); }
+  /* The tablet: the timetable takes the rest of the stop, so a tall
+     tablet's window ends on the plate's floor, not on an empty band
+     under it. */
+  @media (max-width: 1099px) {
+    .split--line { flex: 1; }
+    .plate--line { flex: 1; }
+  }
   .stagebox { padding: var(--sp-7); gap: var(--sp-5); }
   .flip__inner { height: 320px; }
   .qcard { padding: var(--sp-7); }
@@ -1285,54 +1315,41 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
     }
   }
 
-  /* 02 Ta ligne, desk: the copy beside the timetable, both the body's
-     height. The copy: the heading on the heading line; the pace as four
-     services sharing the column's rest, each with its arrival at N1 and
-     that ride to scale; the estimate's note level with the plate's
-     floor, under a rule. The timetable: its six stops share the plate's
-     height, the rail running stop to stop (half a row in from each end),
-     the counts set as columns (one subgrid), the type a rung up and the
-     arrivals, the answer, two. */
+  /* 02 Ta ligne, desk: the copy beside the timetable (laid from the
+     tablet up), both the body's height. The copy: the heading on the
+     heading line; the four services sharing the column's rest; the
+     estimate's note level with the plate's floor, under a rule. */
   .split--line { align-items: stretch; }
-  .split--line .seg { flex: 1; flex-direction: column; align-self: stretch; }
-  .split--line .seg > * { flex: 1 1 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "per to" "ride ride"; align-content: center; gap: var(--sp-4) var(--sp-5); min-height: auto; padding: var(--sp-4) var(--sp-6); border-left: 0; border-top: 1px solid var(--surface-line); font-size: var(--fs-lead); text-align: left; }
+  /* The services stand by the room the heading and the note leave them
+     (a size container, so a heading on four lines -- the narrow desk's,
+     in either language -- or a short window decides, not a guess at
+     either): one a row, the pace beside its arrival over the ride, the
+     type a rung up; short of the 248px that needs, a rung down and
+     closer; short of the 216px that needs, two by two, whose 168px is
+     the floor. A row's height above its need is shared out round its
+     content, so its padding is only its floor. */
+  .split--line .seg { flex: 1; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); min-height: 168px; container: rhythms / size; }
+  .split--line .seg > * { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "per to" "ride ride"; gap: var(--sp-4) var(--sp-5); padding: var(--sp-3) var(--sp-6); border-left: 0; border-top: 1px solid var(--surface-line); }
   .split--line .seg > :first-child { border-top: 0; }
-  .split--line .seg .on { box-shadow: inset 3px 0 0 var(--accent2); }
-  .split--line .seg button:focus-visible { outline-offset: -4px; }
-  .split--line .seg__to { grid-area: to; display: inline-flex; align-items: baseline; gap: var(--sp-3); font-size: var(--fs-body); }
-  .seg__to .fig { font-size: var(--fs-caption); color: var(--text-secondary); }
-  .split--line .seg__ride { grid-area: ride; display: block; height: 6px; border-radius: var(--r-pill); background: linear-gradient(90deg, color-mix(in srgb, var(--text-secondary) 45%, transparent) calc(var(--ride) * 100%), color-mix(in srgb, var(--text-secondary) 12%, transparent) 0); }
-  .split--line .seg .on .seg__ride { background: linear-gradient(90deg, var(--accent2) calc(var(--ride) * 100%), color-mix(in srgb, var(--text-secondary) 12%, transparent) 0); }
+  .split--line .seg__to { font-size: var(--fs-body); }
+  .split--line .seg__ride { margin-top: 0; }
+  @container rhythms (height < 248px) {
+    .split--line .seg > * { gap: var(--sp-3) var(--sp-5); padding-inline: var(--sp-5); font-size: var(--fs-body); }
+    .split--line .seg__to { font-size: var(--fs-sm); }
+  }
+  @container rhythms (height < 216px) {
+    .split--line .seg > * { grid-column: auto; grid-template-columns: minmax(0, 1fr); grid-template-areas: "per" "to" "ride"; gap: var(--sp-2); border-top: 0; }
+    .split--line .seg > :nth-child(even) { border-left: 1px solid var(--surface-line); }
+    .split--line .seg > :nth-child(n+3) { border-top: 1px solid var(--surface-line); }
+    .split--line .seg__ride { margin-top: var(--sp-2); }
+  }
   .split--line .split__copy > .body--small { margin-top: var(--sp-5); padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
-  .plate--line { display: flex; flex-direction: column; }
-  .lrows { flex: 1; display: grid; grid-template-columns: 36px auto repeat(3, minmax(max-content, 1fr)) auto; grid-template-rows: repeat(6, minmax(46px, 1fr)); column-gap: var(--sp-6); }
-  .lrows::before { top: calc(100% / 12); bottom: calc(100% / 12); }
-  .lrow { grid-column: 1 / -1; grid-template-columns: subgrid; height: auto; }
-  .lrow__counts, .lrow__long { display: contents; }
-  .lrow__sep { display: none; }
-  .lrow__counts b { grid-column: span 2; }
-  .lrow .capxs { justify-self: end; }
-  .lrow__code { font-size: var(--fs-heading); }
-  .lrow__counts, .lrow__eta { font-size: var(--fs-body); }
-  .lrow__eta { justify-self: end; font-size: var(--fs-title); }
+  .lrows { grid-template-rows: repeat(6, minmax(46px, 1fr)); }
   /* The narrow desk: the timetable's columns closer and its arrivals a
      rung down, so the longest counts keep their columns. */
   @media (max-width: 1239px) {
     .lrows { column-gap: var(--sp-4); }
     .lrow__eta { font-size: var(--fs-body); }
-  }
-  /* Short: the services a rung smaller and closer; on the narrow desk
-     too, two by two, so the heading's four lines leave them room. */
-  @media (max-height: 799px) {
-    .split--line .seg > * { gap: var(--sp-3) var(--sp-5); padding: var(--sp-3) var(--sp-5); font-size: var(--fs-body); }
-    .split--line .seg__to { font-size: var(--fs-sm); }
-    @media (max-width: 1239px) {
-      .split--line .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .split--line .seg > * { grid-template-columns: minmax(0, 1fr); grid-template-areas: "per" "to" "ride"; gap: var(--sp-2); border-top: 0; }
-      .split--line .seg > :nth-child(even) { border-left: 1px solid var(--surface-line); }
-      .split--line .seg > :nth-child(n+3) { border-top: 1px solid var(--surface-line); }
-      .split--line .seg__ride { margin-top: var(--sp-2); }
-    }
   }
 
   /* 03 La méthode, desk: the copy beside the trial, both the body's
