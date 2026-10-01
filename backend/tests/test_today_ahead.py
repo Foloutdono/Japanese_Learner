@@ -57,6 +57,17 @@ def _board_words(client) -> None:
         conn.close()
 
 
+def _clear_of_midnight(now: datetime, span: timedelta) -> datetime:
+    """`now`, or an instant earlier on its UTC day when `now + span`
+    would fall on the next one. The pace's day is UTC (core/pace.py),
+    and the reviews a test records are stamped with the real clock: an
+    instant asked about after midnight is a new day, whose ration is
+    whole again."""
+    if (now + span).date() == now.date():
+        return now
+    return now - span
+
+
 def _answered(raw_ids: list[str], due: datetime) -> None:
     """These words answered once, and next due at `due`."""
     for raw_id in raw_ids:
@@ -107,7 +118,10 @@ def test_each_instant_counts_what_the_gate_will_hold(client):
     # Vocab only, both scripts read: no kana lane, a pace of 5.
     _board_words(client)
     words = card_index.raw_ids("vocab", "N5", F2B)[:6]
-    now = datetime.now(timezone.utc)
+    # The first instant must fall on the day the reviews below are
+    # made, or it is tomorrow's gate: run at 23:56 UTC, `now + 5 min`
+    # was, and held the five new cards of a fresh day.
+    now = _clear_of_midnight(datetime.now(timezone.utc), timedelta(minutes=10))
     # Six first reviews today spend the whole pace: nothing new is left
     # for today, a whole day's worth for tomorrow's instant.
     _answered(words[:2], now - timedelta(minutes=1))
