@@ -485,14 +485,15 @@ const Fixture = () => (
         <input className="field pr-entry" placeholder="ex. konnichiwa" defaultValue="konnichiwa" />
       </form>
       <div className="exam-nav"><button type="button" className="exam-flag exam-flag--on pr-flag">f</button></div>
-      <div className="exam-sheetbar">
-        <button type="button" className="exam-sheetbar__open">
-          <span className="exam-sheetbar__label">
-            <b className="exam-sheetbar__fig pr-fig">7 / 21</b>
-            <span className="exam-sheetbar__cap pr-sheetcap">Answer sheet</span>
-          </span>
-        </button>
-        <button type="button" className="exam-finish pr-finish">Finish</button>
+      <div className="exam-dock">
+        <div className="exam-tiles">
+          <button type="button" className="exam-tile exam-tile--on"><span className="exam-tile__b pr-tile-b-on">1</span><span className="exam-tile__t pr-tile">あめ</span></button>
+          <button type="button" className="exam-tile"><span className="exam-tile__b pr-tile-b">2</span><span className="exam-tile__t exam-tile__t--long pr-tile-long">雨が降っています</span></button>
+        </div>
+        <div className="exam-dock__nav">
+          <button type="button" className="exam-dock__go pr-dock-prev">Previous</button>
+          <button type="button" className="exam-dock__go exam-dock__go--next pr-dock-next">Next</button>
+        </div>
       </div>
     </main>
     <main className="practice" style={{ '--line-color': 'var(--line-exam)' }}>
@@ -1032,9 +1033,12 @@ const SITES = [
   ['.pr-mondai', 'exam part row'],
   ['.pr-part', 'exam part label'],
   ['.pr-flag', 'exam flag, on (warning ink mixed)'],
-  ['.pr-fig', 'sheet bar count (on sumi)'],
-  ['.pr-sheetcap', 'sheet bar caption (soft ink on sumi)'],
-  ['.pr-finish', 'sheet bar finish (on sumi)'],
+  ['.pr-tile', 'answer tile (on sumi)'],
+  ['.pr-tile-long', 'answer tile, a long answer (on sumi)'],
+  ['.pr-tile-b', 'answer tile bubble (on sumi)'],
+  ['.pr-tile-b-on', 'answer tile bubble, picked (sumi on its fill)'],
+  ['.pr-dock-prev', 'exam dock, previous (soft ink on sumi)'],
+  ['.pr-dock-next', 'exam dock, next (on sumi)'],
   ['.pr-rcap', 'result figures caption'],
   ['.pr-rnote', 'result figures note'],
   ['.pr-hint', 'hint line'],

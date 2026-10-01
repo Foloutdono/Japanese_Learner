@@ -134,16 +134,21 @@ draw and readings faces keep their button under the widget).
 | `.stage__foot` (a `<form>` with `.field.field--page` + `.btn-primary`), `.stage__foot .field` (the answer rung), `.btn-row` | the field and the action docked in the foot; two actions side by side | the three sessions, `screens/ExamResult.jsx` |
 | `.result-lattice` (of `.record`s), `.surface`, `.qrows`, `.qrow-item`, `.qrow`, `.qrow__q`, `.qrow__note`, `.qrow__detail` | the comprehension result | `ComprehensionRun.jsx` |
 | `.paper-slot` | `.platform-slot__action` ("Different paper", under a sat paper) | `ModeSelector`'s `action` slot, from `screens/ExamScreen.jsx` |
-| `.exam-meta`, `.exam-meta__section`, `.exam-meta__jp`, `.exam-timer` (`--low`) | the runner's head row | `ExamRunner.jsx` |
-| `.exam-mondai`, `.exam-mondai__part`, `.exam-mondai__text` | Part n · Show instructions | `ExamRunner.jsx` |
-| `.cap`, `.exam-underline` | the question's number and its underline | `ExamRunner.jsx`, `QuestionRenderer.jsx` |
-| `.exam-nav`, `.exam-flag` (`--on`) | Previous · flag · Next | `ExamRunner.jsx` |
-| `.exam-sheetbar`, `.exam-sheetbar__open`, `__label`, `__fig`, `__cap`, `__chips`, `__chip` (`--done`, `--flag`, `--here`), `.exam-finish` | the sheet bar, docked like the rating bar (the ≤768px block on `.stage`) | `SheetBar` in `exam/AnswerSheet.jsx` |
-| `.exam-sheet`, `.exam-sheet__legend*`, `__grid`, `__chip*` | the numbered grid, in a `Sheet` the bar opens | `AnswerSheet` in `exam/AnswerSheet.jsx` |
+| `.seg` (`full`), `.exam-st__hero` (`__tag`, `__head`, `__title`, `__jp`, `__facts`, `__parts`, `__part`, `__part-jp`, `__part-fr`, `__note`, `__go`, `__fresh`), `.exam-st__list`, `.exam-st__row` (`__glyph`, `__names`, `__name`, `__sub`, `__fig`, `__of`) | the station (plan 171, C1): the grade as a band, the paper to sit next as a card with its parts and Start, the others as rows that swap into it | `exam/ExamStation.jsx`, from `screens/ExamScreen.jsx` |
+| `.exam-run--cover`, `.exam-cover` (`__tag`, `__names`, `__jp`, `__name`, `__figs`, `__parts`, `__part`, `__no`, `__part-jp`, `__part-fr`, `__count`, `__notes`, `__foot`, `__last`, `__last-fig`, `__go`) | the paper's cover (A2): what it is, its parts by their JLPT names, Start — which starts the clock | `ExamCover` in `screens/ExamRunner.jsx` |
+| `.stage.exam-run`, `.exam-run__head` (`.exam-run__leave`, `.exam-run__sheet`, `.exam-flag` `--on`, `.exam-timer`) | the run held to the window: the way out, the sheet's door, the flag, the clock | `screens/ExamRunner.jsx` |
+| `.exam-page` (`__head`, `__n`, `__fig`, `__of`, `__part`, `__info`, `__inst`), `.exam-ask` (`--centre`, `--read`, `__big` `--long`, `__line`, `__hint`, `__slots`, `__scroll`, `__foot`) | the question's page (V1): its number big at the head, the part's name, the instructions behind ⓘ; the question centred, or a passage or a clip scrolling | `screens/ExamRunner.jsx`, `QuestionRenderer`'s `apart` |
+| `.exam-dock`, `.exam-tiles` (`--two`), `.exam-tile` (`--on`, `__b`, `__t` `--mid`/`--long`), `.exam-dock__nav`, `.exam-dock__go` (`--next`) | the sumi dock: the answers as tiles (a bubble and the words), Previous and Next under them | `AnswerTiles` in `exam/QuestionRenderer.jsx`, `screens/ExamRunner.jsx` |
+| `.exam-ring` (`__dial`, `__svg`, `__track`, `__fill`, `__play`, `__clock`, `__of`, `__replay`) | the listening clip (C5): the play key inside its ring of progress | `AudioPlayer`'s `ring` in `exam/AudioPlayer.jsx` |
+| `.exam-parts` (`__sum`, `__flags`, `__part`, `__head`, `__jp`, `__fr`, `__fig`, `__finish`) over `.exam-sheet__chip*` | the sheet by parts (C6), in a `Sheet` the head opens | `PartsSheet` in `exam/AnswerSheet.jsx` |
 | `.sheet` + `.hint` + `.btn-primary` / `.btn-secondary` (`--danger`) | the confirm, the leave guard, the submit error | `ExamRunner.jsx` on `components/chrome/Sheet.jsx` |
-| `.exam-result-head`, `.exam-score-ring` (`--low`, `__svg`, `__track`, `__fill`, `__tick`, `__pct`), `.exam-result-figs` (`__score`, `__cap`, `__note`) | the result's head, under the bar | `ExamResult.jsx` |
-| `.section-header--paired` + `.chip--on` (`.section-header__chip`) | Review your answers · Missed only | `ExamResult.jsx` |
-| `.exam-review`, `.exam-review__part`, `.exam-group` (`__part`, `__score`), `.exam-review-row` (`__mark` `--ok`/`--x`/`--blank`, `__q`, `__jp`, `__blank`, `__chev`, `__detail`) | the review surface | `ExamResult.jsx` |
+| `.exam-res` (`__score`, `__figs`, `__fig`, `__of`, `__pct` `--low`, `__bar`, `__fill`, `__tick`, `__caps`, `__parts`, `__part`, `__no`, `__jp`, `__marks`, `__mk` `--x`/`--blank`, `__s` `--low`, `__mhead`, `__misses`), `.exam-miss` (`__l1`, `__n`, `__q`, `__chev`, `__l2`, `__b` `--x`/`--right`/`--got`, `__blank`, `__a`) | the result (A7): the score against the pass line, each part graded, the misses with the answer given and the right one | the phone branch of `screens/ExamResult.jsx` |
+
+The runner's meta row, part toggle, Previous · flag · Next, the numbered
+grid and the old result head (`.exam-meta*`, `.exam-mondai*`, `.exam-nav`,
+`.exam-sheet__grid`, `.exam-sheet__legend*`, `.exam-result-head`, `.exam-score-ring*`,
+`.exam-review*`) are the desk's alone since plan 171; the sheet bar
+(`.exam-sheetbar*`, `.exam-finish`) is gone.
 
 The practice pickers (source, level, word list + tier, the exam's level and
 papers) render on `SelectionScreen` — the station page's own bar, with the

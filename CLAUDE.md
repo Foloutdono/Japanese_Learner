@@ -1206,7 +1206,28 @@ runtime purpose. Two consequences worth knowing:
   `backend/content/reading_sentences.py`, `backend/tests/test_nyumon.py`,
   `src/screens/RideIntro.browser.test.jsx`, the `intro` phone, desktop
   and short tests, and `index.css` and its 机 section; CONTEXT.md, 入門).
-  When starting a new wave, begin at **171** or higher, and check
+  **171** is 模試 on a phone, the mock exam redrawn below the desk (the
+  owner's mix of the canvas "Tsuji — the mock exam on the phone": C1,
+  A2–A5 with C5's player, C6 and A7, then variant V1 with the question
+  bigger and its number at the head of the page): the grade and its
+  papers one screen, the paper to sit next a card with its parts and
+  Start, the others rows that swap into it (`exam/ExamStation.jsx`); a
+  cover before the first question, which is what starts the clock; each
+  question a page under its big number and its part's JLPT name, the
+  answers a sumi dock of tiles (a bubble and the words, two by two when
+  short) over Previous and Next (`QuestionRenderer`'s `apart`,
+  `AnswerTiles`); the listening clip a ring with the play key in it
+  (`AudioPlayer`'s `ring`); the sheet by parts (`AnswerSheet`'s
+  `PartsSheet`, the sheet bar retired); and the result as the score
+  against the pass line, the parts graded and the misses with the
+  answer given and the right one (`ExamResult`'s phone branch). The
+  server names each part (`exam_blueprint.name_mondai`). The desk is
+  unchanged (cited in `routes/exams.py`, `study/exam_blueprint.py`,
+  `tests/test_exam_mondai_names.py`, `screens/ExamScreen.jsx`,
+  `screens/ExamRunner.jsx`, `screens/ExamResult.jsx`, `exam/`,
+  `src/practice.phone.test.jsx`, the `Exam*` screen tests and
+  `index.css`; `docs/design/mobile/README.md`).
+  When starting a new wave, begin at **172** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

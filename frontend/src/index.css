@@ -187,85 +187,6 @@
   background: color-mix(in srgb, var(--warning) 12%, transparent);
 }
 
-/* ── The sheet bar ──
-   Sumi: the count and the word open the grid, the chips are the same
-   facts at a glance (done, flagged, and where you are), Finish sits
-   on the right. */
-.exam-sheetbar {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-4);
-  margin-top: auto;
-  padding: var(--sp-3) var(--sp-5);
-  border-radius: var(--r-card);
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-}
-.exam-sheetbar__open {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  padding: 0;
-  background: none;
-  border: 0;
-  border-radius: 0;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-}
-.exam-sheetbar__label {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-.exam-sheetbar__fig {
-  font-family: var(--font-display);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.exam-sheetbar__cap {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-on-panel-soft);
-  white-space: nowrap;
-}
-.exam-sheetbar__chips {
-  display: grid;
-  grid-template-columns: repeat(11, 8px);
-  gap: 3px;
-}
-.exam-sheetbar__chip {
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
-}
-.exam-sheetbar__chip--done { background: var(--text-on-panel-soft); }
-.exam-sheetbar__chip--flag { background: var(--warning); }
-.exam-sheetbar__chip--here { outline: 1px solid var(--accent2); outline-offset: 1px; }
-.exam-finish {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  height: 40px;
-  padding: 0 var(--sp-4);
-  border-radius: var(--r-card);
-  border: 1px solid color-mix(in srgb, var(--text-on-panel) 18%, transparent);
-  background: transparent;
-  color: var(--text-on-panel);
-  font-family: var(--font-display);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-}
-
 /* ── Answer sheet ──
    The numbered grid, in the sheet the bar opens (the legend and the
    chips below are its rows). */
@@ -15536,16 +15457,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
        (index.css:9554) holds the segments to the very same column. */
     padding-inline: max(var(--sp-5), calc((100% - var(--card-w)) / 2 + var(--sp-5)));
   }
-  /* The exam's sheet bar docks the same way (plan 072): sumi, edge to
-     edge, on the dock's edge, its own inset under it. */
-  .stage > .exam-sheetbar {
-    position: sticky;
-    bottom: var(--dock-bottom);
-    z-index: 10;
-    margin-inline: calc(-1 * var(--sp-5));
-    border-radius: 0;
-    padding-bottom: calc(var(--sp-3) + var(--safe-bottom));
-  }
   /* While the level-up's pass hangs across the top (see XpToast.jsx,
      plan 142), the stage slides down under it: the pass takes the top,
      the card keeps its head clear, and everything slides back as it
@@ -23482,6 +23393,656 @@ button.brd-stn { cursor: pointer; }
   .nyu-cell,
   .nyu-word,
   .nyu-swap__btn { transition: none; }
+}
+
+/* ══ 模試 on a phone (plan 171) ════════════════════════════════
+   The mock exam redrawn for the phone, from the owner's mix on the
+   canvas "Tsuji — the mock exam on the phone": the station as the next
+   paper over the others (C1), the paper's cover (A2), a question as a
+   page over a dock of answer tiles (V1), the clip as a ring (C5), the
+   answer sheet by part (C6) and the result graded part by part (A7).
+   Here rather than in the exam section at the top of the file: that
+   section loses every tie to the button, record and stage rules below
+   it, and these rules lean on those. Only the phone draws these classes
+   (ExamScreen, ExamRunner and ExamResult branch on useDesk); the desk
+   keeps the paper of plan 115. */
+
+/* ── The station ── */
+.exam-st__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-6) var(--sp-6) var(--sp-5);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-panel);
+}
+.exam-st__tag,
+.exam-cover__tag { color: color-mix(in srgb, var(--line-exam) 65%, var(--text-primary)); }
+.exam-st__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); }
+.exam-st__title { margin: 0; font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1.1; }
+.exam-st__jp { font-family: var(--font-jp); font-size: var(--fs-body); color: var(--text-secondary); }
+/* What a learner weighs before a timed paper, as three figures read
+   left to right under its name rather than a line pushed to the edge. */
+.exam-st__facts { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-5); }
+.exam-st__fact {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.exam-st__fact b {
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.exam-st__parts { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.exam-st__part {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--border);
+}
+.exam-st__part-jp { flex: none; font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; }
+.exam-st__part-fr {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.exam-st__note { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.exam-st__hero .exam-st__go,
+.exam-cover__foot .exam-cover__go,
+.exam-parts .exam-parts__finish { width: 100%; min-height: 52px; }
+.exam-st__fresh {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  background: none;
+  border: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.exam-st__fresh:hover,
+.exam-st__fresh:focus-visible { color: var(--text-primary); filter: none; }
+.exam-st__list { display: flex; flex-direction: column; gap: var(--sp-3); }
+.exam-st__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 60px;
+  padding: 0 var(--sp-5) 0 var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  text-align: left;
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+.exam-st__row:hover,
+.exam-st__row:focus-visible { border-color: var(--line-exam); transform: translateY(-1px); filter: none; }
+.exam-st__glyph {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--line-exam);
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+  color: color-mix(in srgb, var(--line-exam) 65%, var(--text-primary));
+}
+.exam-st__names { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.exam-st__name { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; line-height: 1.25; }
+.exam-st__sub { font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.exam-st__fig {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.exam-st__of { font-size: var(--fs-sm); color: var(--text-secondary); }
+
+/* ── The paper: a head, a page, a dock ──
+   The run is held to the window over the level bar, so the page takes
+   what the head and the dock leave, and a passage scrolls inside it
+   rather than pushing the dock off the screen. */
+.stage.exam-run {
+  /* Held to the window, not grown by its content: a long passage
+     scrolls inside its page and the dock stays whole above the bar. */
+  flex: none;
+  width: 100%;
+  max-width: var(--card-w);
+  height: calc(100dvh - var(--lvlbar-h) - var(--safe-bottom));
+  margin-inline: auto;
+  padding-top: calc(var(--safe-top) + var(--sp-3));
+  padding-inline: var(--sp-5);
+  padding-bottom: 0;
+  justify-content: flex-start;
+  gap: var(--sp-4);
+  overflow: hidden;
+  text-align: left;
+}
+.exam-run__head { flex: none; display: flex; align-items: center; gap: var(--sp-4); min-height: 44px; }
+.exam-run__head .exam-run__leave { width: 44px; padding: 0; justify-content: center; }
+.exam-run__sheet {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  height: 44px;
+  padding: 0 var(--sp-4);
+  background: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.exam-run__sheet:hover,
+.exam-run__sheet:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
+
+.exam-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-panel);
+  animation: card-transition-enter 260ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.exam-page__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 52px;
+  padding: 0 var(--sp-1) 0 var(--sp-5);
+  border-bottom: 1px solid var(--border);
+}
+.exam-page__n { display: flex; align-items: baseline; gap: var(--sp-1); }
+.exam-page__fig {
+  font-family: var(--font-display);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.exam-page__of {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.exam-page__part {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.exam-page__part b,
+.exam-cover__no,
+.exam-res__no { color: color-mix(in srgb, var(--line-exam) 65%, var(--text-primary)); }
+.exam-page__part b { margin-right: var(--sp-2); }
+.exam-page__info {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--text-secondary);
+}
+.exam-page__info:hover,
+.exam-page__info:focus-visible,
+.exam-page__info[aria-expanded="true"] { color: var(--text-primary); filter: none; }
+.exam-page__inst {
+  flex: none;
+  margin: 0;
+  padding: var(--sp-3) var(--sp-5);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* What the page holds: a question set large, centred on auto margins
+   so a long one scrolls from its top; or a text that scrolls over the
+   question it asks. */
+.exam-ask { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.exam-ask--centre {
+  align-items: center;
+  gap: var(--sp-6);
+  overflow-y: auto;
+  padding: var(--sp-6) var(--sp-5);
+  text-align: center;
+}
+.exam-ask--centre > :first-child { margin-top: auto; }
+.exam-ask--centre > :last-child { margin-bottom: auto; }
+.exam-ask__big {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-display);
+  font-weight: 500;
+  line-height: 1.5;
+  /* Japanese breaks between any two characters; balanced, a sentence
+     set this large is two even lines rather than 毎朝、 alone on one. */
+  line-break: strict;
+  text-wrap: balance;
+}
+.exam-ask__big--long { font-size: var(--fs-heading); line-height: 1.6; }
+.exam-ask__line { margin: 0; font-family: var(--font-jp); font-size: var(--fs-lead); line-height: 1.8; }
+.exam-ask__hint { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.exam-ask__slots { justify-content: center; }
+.exam-ask__scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: var(--sp-5); }
+.exam-ask__scroll .exam-passage__text { margin-bottom: 0; }
+.exam-ask__foot {
+  flex: none;
+  margin: 0;
+  padding: var(--sp-4) var(--sp-5);
+  border-top: 1px solid var(--border);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: 1.75;
+}
+
+/* The dock: the answers under the thumb, in sumi like the rating bar,
+   each a bubble carrying its words; Previous and Next under them. */
+.exam-dock {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-inline: calc(-1 * var(--sp-5));
+  padding: var(--sp-4) var(--sp-5) var(--sp-1);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+}
+.exam-tiles { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); }
+.exam-tiles--two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.exam-tile {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 56px;
+  padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-2);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  border-radius: var(--r-panel);
+  color: var(--text-on-panel);
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.exam-tile:hover,
+.exam-tile:focus-visible { border-color: var(--text-on-panel-soft); filter: none; }
+.exam-tile__b {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--text-on-panel-soft);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+  color: var(--text-on-panel-soft);
+}
+.exam-tile__t {
+  min-width: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.exam-tile__t--mid { font-size: var(--fs-body); }
+.exam-tile__t--long { font-size: var(--fs-sm); font-weight: 500; line-height: 1.5; }
+.exam-tile--on { background: color-mix(in srgb, var(--text-on-panel) 8%, var(--bg-panel)); border-color: var(--text-on-panel); }
+.exam-tile--on .exam-tile__b { background: var(--text-on-panel); border-color: var(--text-on-panel); color: var(--bg-panel); }
+.exam-dock__nav { display: flex; align-items: center; justify-content: space-between; }
+.exam-dock__go {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  background: none;
+  border: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-on-panel-soft);
+}
+.exam-dock__go--next { color: var(--text-on-panel); }
+.exam-dock__go:disabled { opacity: 0.45; }
+.exam-dock__go:not(:disabled):hover,
+.exam-dock__go:not(:disabled):focus-visible { color: var(--text-on-panel); filter: none; }
+
+/* The clip as a ring round its play button. */
+.exam-ring { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.exam-ring__dial { position: relative; width: 140px; height: 140px; }
+.exam-ring__svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.exam-ring__track { fill: none; stroke: var(--surface-line); stroke-width: 6; }
+.exam-ring__fill {
+  fill: none;
+  stroke: var(--line-color, var(--line-exam));
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.25s linear;
+}
+.exam-ring__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  margin: -42px 0 0 -42px;
+  padding: 0;
+  background: color-mix(in srgb, var(--line-color, var(--line-exam)) 70%, var(--bg-panel));
+  border: 0;
+  border-radius: var(--r-pill);
+  color: var(--text-on-panel);
+}
+.exam-ring__play:hover,
+.exam-ring__play:focus-visible { background: color-mix(in srgb, var(--line-color, var(--line-exam)) 79%, var(--bg-panel)); filter: none; }
+.exam-ring__clock {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.exam-ring__of { color: var(--text-secondary); }
+.exam-ring__replay {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  background: none;
+  border: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.exam-ring__replay:hover,
+.exam-ring__replay:focus-visible { color: var(--text-primary); filter: none; }
+
+/* ── The cover ── */
+.exam-cover {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  overflow-y: auto;
+  padding: var(--sp-6);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-panel);
+}
+.exam-cover__names { display: flex; flex-direction: column; gap: var(--sp-2); }
+.exam-cover__jp { margin: 0; font-family: var(--font-serif); font-size: var(--fs-title); font-weight: 700; line-height: 1.3; }
+.exam-cover__name { font-size: var(--fs-body); font-weight: 700; }
+.exam-cover__figs .record { padding: var(--sp-4); }
+.exam-cover__parts { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.exam-cover__part { display: flex; align-items: center; gap: var(--sp-4); min-height: 50px; border-top: 1px solid var(--border); }
+.exam-cover__part:last-child { border-bottom: 1px solid var(--border); }
+.exam-cover__no { flex: none; width: 44px; font-family: var(--font-jp); font-size: var(--fs-caption); font-weight: 700; }
+.exam-cover__part-names { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.exam-cover__part-jp { font-family: var(--font-jp); font-size: var(--fs-body); font-weight: 700; line-height: 1.3; }
+.exam-cover__part-fr { font-size: var(--fs-caption); line-height: 1.3; color: var(--text-secondary); }
+.exam-cover__count,
+.exam-cover__last-fig {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.exam-cover__notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: auto 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+.exam-cover__foot { flex: none; display: flex; flex-direction: column; gap: var(--sp-3); padding-bottom: var(--sp-5); }
+.exam-cover__last { display: flex; align-items: baseline; justify-content: space-between; margin: 0; }
+
+/* ── The answer sheet, by part ── */
+.exam-parts { display: flex; flex-direction: column; gap: var(--sp-4); }
+.exam-parts__sum {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-5);
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.exam-parts__flags { display: inline-flex; align-items: center; gap: var(--sp-1); color: color-mix(in srgb, var(--warning) 60%, var(--text-primary)); }
+.exam-parts__part { display: flex; flex-direction: column; gap: var(--sp-2); }
+.exam-parts__head { display: flex; align-items: baseline; gap: var(--sp-3); }
+.exam-parts__jp { flex: none; font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; }
+.exam-parts__fr {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.exam-parts__fig {
+  flex: none;
+  margin-left: auto;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.exam-parts .exam-sheet__grid { gap: var(--sp-2); }
+
+/* ── The result ── */
+.exam-res__score { display: flex; flex-direction: column; gap: var(--sp-3); }
+.exam-res__figs { display: flex; align-items: baseline; gap: var(--sp-3); }
+.exam-res__fig,
+.exam-res__of,
+.exam-res__pct {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.exam-res__fig { font-size: var(--fs-display); }
+.exam-res__of { font-size: var(--fs-title); color: var(--text-secondary); }
+.exam-res__pct { margin-left: auto; font-size: var(--fs-heading); color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+.exam-res__pct--low,
+.exam-res__s--low { color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
+.exam-res__bar { position: relative; height: 6px; border-radius: var(--r-pill); background: var(--surface-line); }
+.exam-res__fill { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-pill); background: var(--success); }
+.exam-res__fill--low { background: var(--danger); }
+.exam-res__tick { position: absolute; top: -4px; width: 2px; height: 14px; margin-left: -1px; background: var(--text-primary); }
+/* The time the paper took against the time it allows, on a hairline of
+   its own under the score's caption. */
+.exam-res__time {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-3);
+  margin-top: var(--sp-2);
+}
+.exam-res__clock { font-family: var(--font-display); font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+.exam-res__limit { color: var(--text-secondary); }
+.exam-res__track { grid-column: 1 / -1; position: relative; height: 4px; border-radius: var(--r-pill); background: var(--surface-line); }
+.exam-res__used { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-pill); background: var(--text-secondary); }
+.exam-res__parts {
+  padding: 0 var(--sp-4);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-panel);
+}
+.exam-res__part { display: flex; align-items: center; gap: var(--sp-4); min-height: 40px; border-top: 1px solid var(--border); }
+.exam-res__part:first-child { border-top: 0; }
+.exam-res__no { flex: none; width: 38px; font-family: var(--font-jp); font-size: var(--fs-caption); font-weight: 700; }
+.exam-res__jp {
+  flex: none;
+  width: 86px;
+  overflow: hidden;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.exam-res__marks { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1); }
+.exam-res__mk { width: 10px; height: 10px; border: 2px solid var(--success); border-radius: var(--r-pill); }
+.exam-res__mk--x { background: var(--danger); border-color: var(--danger); }
+.exam-res__mk--blank { border: 1.5px dashed var(--text-secondary); }
+.exam-res__s { flex: none; font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; }
+.exam-res__mhead { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.exam-res__all {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.exam-res__all:hover,
+.exam-res__all:focus-visible { color: var(--text-primary); filter: none; }
+.exam-res__misses { display: flex; flex-direction: column; gap: var(--sp-3); }
+.exam-miss {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+.exam-miss:hover,
+.exam-miss:focus-visible { border-color: var(--line-exam); filter: none; }
+.exam-miss__l1 { display: flex; align-items: center; gap: var(--sp-4); min-width: 0; }
+.exam-miss__n {
+  flex: none;
+  width: 24px;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.exam-miss__q {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.exam-miss__chev { flex: none; color: var(--text-secondary); }
+.exam-miss__l2 { display: flex; align-items: center; gap: var(--sp-1); min-width: 0; padding-left: calc(24px + var(--sp-4)); }
+.exam-miss__b {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  /* The figure's ink centred, not its line box: a line box keeps room
+     for descenders a digit never has, which sat every figure high. */
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+  padding: 0;
+  color: var(--text-secondary);
+}
+.exam-miss__b--right { border: 2px solid var(--success); color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+.exam-miss__b--got { background: var(--success); border-color: var(--success); color: var(--bg-main); }
+.exam-miss__b--x { background: var(--danger); border-color: var(--danger); color: var(--text-on-panel); }
+.exam-miss__blank {
+  margin-left: var(--sp-2);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.exam-miss__a {
+  min-width: 0;
+  margin-left: var(--sp-3);
+  overflow: hidden;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+@media (prefers-reduced-motion: reduce) {
+  .exam-page { animation-duration: 10ms; }
+  .exam-ring__fill,
+  .exam-tile { transition: none; }
+  .exam-st__row { transition: none; }
+  .exam-st__row:hover,
+  .exam-st__row:focus-visible { transform: none; }
 }
 
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
