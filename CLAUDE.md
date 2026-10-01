@@ -1219,7 +1219,14 @@ runtime purpose. Two consequences worth knowing:
   turns over into Max (梨地, satin platinum, its 辻 etched and MAX in
   gold foil), each card's 辶 filling with the XP from its foot; every
   stage under one cone of light (光), gold the ticket's, the gate's and
-  Max's material alone; the funnel `offer_view` / `offer_intent`
+  Max's material alone; a limit printed red and a raised one white
+  (3A's allowances rising, 3B's count at its ceiling), and 3C's Max
+  column revealed as the pass lands rather than counted; on the desk
+  the owner's pick A 対 of the canvas's Desktop page -- the dialog at
+  `--offer-desk-w` with the stage beside the words, the phone's drawing
+  scaled whole into the left pane, the words at the phone's width in
+  the right, Enter printed on the gate that holds the focus and Esc at
+  the corner; the funnel `offer_view` / `offer_intent`
   (`plan`, `billing`) / `offer_dismiss`; `components/credits/PaywallScreen.jsx`
   retired; `/dev/offers` opens each of the seven (cited in
   `core/credits.py`, `routes/credits.py`, `routes/profile.py`,
@@ -1228,7 +1235,8 @@ runtime purpose. Two consequences worth knowing:
   `components/offers/`, `components/credits/RunOutSheet.jsx`,
   `OfferButton.jsx`, `screens/OffersPreview.jsx`, `App.jsx`, the
   `ofr*` locale keys, `src/offers.phone.test.jsx`,
-  `src/offers.desktop.test.jsx` and `index.css` and its 机 section;
+  `src/offers.desktop.test.jsx`, `src/offers.short.test.jsx` and
+  `index.css` and its 机 section;
   CONTEXT.md, Pro / Max; `docs/design/mobile/README.md`, "The offer").
   When starting a new wave, begin at **172** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind

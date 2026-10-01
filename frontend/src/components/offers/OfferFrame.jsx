@@ -1,6 +1,7 @@
 import { useLang } from '../../LangContext'
 import { closePaywall } from '../../stores/credits'
 import { GateButton } from '../ui/GateButton'
+import { useDesk } from '../../hooks/useDesk'
 
 // ── The frame every offer is drawn in (plan 171) ───────────────────
 // The canvas "Tsuji — the three offers", as built: a stage on the
@@ -24,6 +25,7 @@ import { GateButton } from '../ui/GateButton'
 // in a live region, and the way out says Close.
 export function OfferFrame({ kind, hero, children, quiet, clock = false, cta, onTake, fine, taken }) {
   const { t } = useLang()
+  const desk = useDesk()
   return (
     <>
       <div className="ofr__scroll">
@@ -46,7 +48,7 @@ export function OfferFrame({ kind, hero, children, quiet, clock = false, cta, on
         {taken ? (
           <p className="ofr__thanks" role="status">{t.paywallThanks}</p>
         ) : (
-          <GateButton label={cta} onClick={onTake} className="ofr__gate" data-action="paywall-intent" />
+          <GateButton label={cta} onClick={onTake} keys={desk} className="ofr__gate" data-action="paywall-intent" />
         )}
         <p className="ofr__fine">{fine}</p>
       </div>

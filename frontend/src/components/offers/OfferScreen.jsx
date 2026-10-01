@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
 import { useDialog } from '../../hooks/useDialog'
+import { isDesk, useDesk } from '../../hooks/useDesk'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { usePaywall, takePaywall, closePaywall, useCredits, useOfferWeek, refreshOfferWeek } from '../../stores/credits'
 import { SCREENS } from '../../domain/paywall'
@@ -18,9 +19,13 @@ import { MaxOffer } from './MaxOffer'
 // — the three offers", drawn to it board for board.
 //
 // On a phone it takes the glass, its stage and words scrolling over a
-// docked foot; on the desk it is a dialog in the window's middle at a
-// phone's width (the 机 section), one of the few the desk keeps
-// (docs/design/desk/README.md, "Dialogs on the desk"). It portals to
+// docked foot. On the desk it is a dialog in the window's middle, the
+// owner's pick A of the canvas's Desktop page: the stage beside the
+// words, the phone's drawing scaled whole into the left pane, the words
+// and the foot at the phone's width in the right (the 机 section). It
+// is one of the few dialogs the desk keeps (docs/design/desk/README.md,
+// "Dialogs on the desk"), so it prints its keys: Enter on the gate,
+// which takes the focus as it opens, and Esc at its corner. It portals to
 // the body and stands at the sheets' layer: it opens from inside the
 // balance and the run-out sheets, and one Escape must close it alone
 // (useDialog's `capture`, Sheet's `over`).
@@ -32,7 +37,9 @@ export function OfferScreen() {
 
 function Offer({ paywall }) {
   const { t } = useLang()
-  const ref = useDialog(closePaywall, { capture: true })
+  const desk = useDesk()
+  // Read once, at mount: on the desk Enter takes the offer.
+  const ref = useDialog(closePaywall, { capture: true, focus: isDesk() ? '.ofr__gate' : 'first' })
   const profile = useProfileSummary()
   const credits = useCredits()
   const week = useOfferWeek()
@@ -78,6 +85,7 @@ function Offer({ paywall }) {
         data-limit={paywall.limit ?? undefined}
         onClick={e => e.stopPropagation()}
       >
+        {desk && <kbd className="desk-kbd ofr__esc" aria-hidden="true">{t.keyEscape}</kbd>}
         {body}
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { openPaywall, closePaywall, seedCredits, seedOfferWeek, useCredits, useOfferWeek } from '../stores/credits'
+import { openPaywall, closePaywall, seedCredits, seedOfferWeek, useCredits, useOfferWeek, usePaywall } from '../stores/credits'
 import { seedSummary, useProfileSummary } from '../stores/profileSummary'
 import { SOURCES } from '../domain/paywall'
 
@@ -76,6 +76,10 @@ export default function OffersPreview() {
     SCREENS.find(s => s.id === direct)?.open()
   })
   useEffect(() => () => closePaywall(), [])
+  // The list steps out while an offer is open: on the desk the dialog
+  // stands over an empty page, not over the workbench's buttons.
+  const open = usePaywall()
+  if (open) return <div className="onb-preview-done" />
   return (
     <div className="onb-preview-done">
       <span lang="ja">定期券</span>

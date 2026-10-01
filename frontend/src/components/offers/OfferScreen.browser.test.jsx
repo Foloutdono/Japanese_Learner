@@ -130,6 +130,32 @@ describe('OfferScreen', () => {
     }
   })
 
+  it('prints a limit in red, and a raised one in the page ink', async () => {
+    // Every animation of an element held at one instant of its loop.
+    const at = (el, ms) => {
+      el.getAnimations().forEach(a => { a.pause(); a.currentTime = ms })
+      return getComputedStyle(el).color
+    }
+    await mount()
+    credits.openPaywall('limit', { limit: 'photos' })
+    await settle()
+    // 10 / 10: the count is the limit's red, then white under 20.
+    expect(at($('.ofr-cap-num'), 0)).toBe('rgb(255, 155, 134)')
+    expect(at($('.ofr-cap-num'), 4000)).not.toBe('rgb(255, 155, 134)')
+    credits.closePaywall()
+    await settle()
+
+    credits.openPaywall('limit', { limit: 'practice' })
+    await settle()
+    const probe = document.createElement('span')
+    probe.style.color = 'var(--stamp-ink)'
+    $('.ofr').appendChild(probe)
+    const red = getComputedStyle(probe).color
+    const val = $('.ofr-fare-val__n')
+    expect(at(val, 0)).toBe(red)
+    expect(at(val, 8000)).toBe(getComputedStyle($('.ofr__title')).color)
+  })
+
   it('lays out what Max changes from Settings, every figure on one line', async () => {
     await mount()
     credits.openPaywall('upgrade')
@@ -137,7 +163,11 @@ describe('OfferScreen', () => {
     expect($('.ofr__hero--upgrade')).not.toBeNull()
     expect($$('.ofr-turn__face')).toHaveLength(2)
     expect($$('.ofr-grid__row')).toHaveLength(6)
-    expect($$('.ofr-grid__count').map(c => c.getAttribute('aria-label'))).toEqual(['20', '30', '8'])
+    // Max's figures are written in the table, not counted: they are
+    // revealed as the pass lands.
+    expect($$('.ofr-grid__val').map(v => flat(v.textContent))).toEqual(['Sans crédit', '20', '30', '8', '100 · 10 000'])
+    const first = $('.ofr-grid__val').getAnimations()
+    expect(first.map(a => a.animationName)).toEqual(['ofr-grid-reveal'])
     const decks = $$('.ofr-grid__row').at(-1).querySelector('.ofr-grid__max')
     expect(flat(decks.textContent)).toBe('100 · 10 000')
     // The widest figure never breaks.

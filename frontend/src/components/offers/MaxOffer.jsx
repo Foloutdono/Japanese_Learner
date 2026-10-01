@@ -179,13 +179,15 @@ function FareVals() {
 // The counter that ran out, the thing it stopped, and the Max pass
 // tapping the counter: the ceiling doubles and the thing goes on.
 
-/** "Photos today 10 / 10" whose ceiling the Max pass doubles. */
+/** "Photos today 10 / 10" whose ceiling the Max pass doubles: at the
+ *  limit both figures are red, and the count turns white once the
+ *  ceiling over it has risen (the owner, round 12). */
 function Count({ cap, n, from, to }) {
   return (
     <div className="ofr-cap-count" aria-hidden="true">
       <span className="ofr-cap-count__cap">{cap}</span>
       <span className="ofr-cap-count__fig">
-        {n} / <span className="ofr-cap-den"><b className="ofr-cap-den__old">{from}</b><b className="ofr-cap-den__new">{to}</b></span>
+        <b className="ofr-cap-num">{n}</b> / <span className="ofr-cap-den"><b className="ofr-cap-den__old">{from}</b><b className="ofr-cap-den__new">{to}</b></span>
       </span>
     </div>
   )
@@ -310,16 +312,17 @@ function ExamsStage({ pass, level, next }) {
 }
 
 // ── 3C · from Settings: what changes, as a lattice ──
-// Max's column lit row by row as the pass lands, its three allowances
-// counting up from Pro's.
+// Max's column is empty until the pass lands on Max, then each figure
+// is revealed in its row as the row lights -- a table does not count
+// (the owner, round 12).
 function UpGrid() {
   const { t, lang } = useLang()
   const n = v => v.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US')
   const rows = [
     { k: t.ofrUpPractice, pro: t.ofrUpCredit, max: t.ofrUpNoCredit },
-    { k: t.ofrUpPhotos, pro: pro.photos, max: max.photos, count: true },
-    { k: t.ofrUpExplains, pro: pro.explains, max: max.explains, count: true },
-    { k: t.ofrUpPapers, pro: pro.papers, max: max.papers, count: true },
+    { k: t.ofrUpPhotos, pro: pro.photos, max: max.photos },
+    { k: t.ofrUpExplains, pro: pro.explains, max: max.explains },
+    { k: t.ofrUpPapers, pro: pro.papers, max: max.papers },
     { k: t.ofrUpDecks, pro: `${n(pro.decks)} · ${n(pro.cards)}`, max: `${n(max.decks)} · ${n(max.cards)}` },
   ]
   return (
@@ -333,16 +336,9 @@ function UpGrid() {
         <div key={r.k} className="ofr-grid__row" role="row">
           <span className="ofr-grid__k" role="rowheader">{r.k}</span>
           <span className="ofr-grid__pro" role="cell">{r.pro}</span>
-          {r.count ? (
-            <span
-              className="ofr-grid__max ofr-grid__count"
-              role="cell"
-              aria-label={String(r.max)}
-              style={{ '--ofr-i': i, '--ofr-from': r.pro, '--ofr-to': r.max }}
-            />
-          ) : (
-            <span className="ofr-grid__max" role="cell" style={{ '--ofr-i': i }}>{r.max}</span>
-          )}
+          <span className="ofr-grid__max" role="cell" style={{ '--ofr-i': i }}>
+            <b className="ofr-grid__val">{r.max}</b>
+          </span>
         </div>
       ))}
     </div>

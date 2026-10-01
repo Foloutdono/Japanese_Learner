@@ -2598,6 +2598,8 @@
      fighting max-width directly. */
   --card-w:         640px;
   --offer-w:        390px;     /* the offers' stage, drawn for a phone (plan 171) */
+  --offer-desk-w:   920px;     /* the offer's dialog on the desk: the stage beside the words */
+  --offer-desk-h:   600px;
   --gap:            24px;
   /* The chrome's two heights (plan 068), safe-area excluded: the HUD
      across the top of every tab screen, and the tab bar on the bottom
@@ -5722,10 +5724,12 @@ textarea:focus-visible {
   57.5%, 95% { transform: none; opacity: 1; }
   98%, 100% { transform: rotateX(-90deg); opacity: 0; }
 }
+/* Each allowance printed at Pro's limit in the stamp's red (it reads
+   on the paper of both themes), rising to Max's in the page's ink. */
 @keyframes ofr-fare-count {
-  0%, 62% { --ofr-n: var(--ofr-from, 0); }
-  72%, 97% { --ofr-n: var(--ofr-to, 0); }
-  100% { --ofr-n: var(--ofr-from, 0); }
+  0%, 62% { --ofr-n: var(--ofr-from, 0); color: var(--stamp-ink); }
+  72%, 97% { --ofr-n: var(--ofr-to, 0); color: var(--text-primary); }
+  100% { --ofr-n: var(--ofr-from, 0); color: var(--stamp-ink); }
 }
 
 /* ── 3B · a ceiling hit: the counter, and the Max pass tapping it ──
@@ -5748,6 +5752,9 @@ textarea:focus-visible {
 .ofr-cap-count__cap { font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); }
 .ofr-cap-count__fig { font-size: var(--fs-sm); font-weight: 700; color: var(--text-on-panel); font-variant-numeric: tabular-nums; }
 .ofr-cap-den { display: inline-grid; vertical-align: baseline; }
+/* The count used, red while it is the limit, white once the ceiling
+   over it has doubled. */
+.ofr-cap-num { animation: ofr-cap-num 8s linear infinite both; }
 .ofr-cap-den b { grid-area: 1 / 1; }
 .ofr-cap-den__old { color: #ff9b86; animation: ofr-cap-old 8s ease-in infinite both; }
 .ofr-cap-den__new { color: var(--text-on-panel); text-shadow: 0 0 10px rgba(255, 244, 222, 0.45); animation: ofr-cap-new 8s cubic-bezier(0.2, 1.4, 0.4, 1) infinite both; }
@@ -5758,6 +5765,11 @@ textarea:focus-visible {
   20% { opacity: 1; transform: translate(36px, 2px) rotate(-6deg); }
   23% { opacity: 1; transform: translate(40px, 10px) rotate(-6deg); }
   30%, 100% { opacity: 0; transform: translate(160px, 280px) rotate(16deg); }
+}
+@keyframes ofr-cap-num {
+  0%, 20% { color: #ff9b86; }
+  23%, 95% { color: var(--text-on-panel); }
+  100% { color: #ff9b86; }
 }
 @keyframes ofr-cap-old {
   0%, 20% { opacity: 1; transform: none; }
@@ -6396,22 +6408,23 @@ textarea:focus-visible {
   animation: none;
 }
 .ofr-grid__max.ofr-grid__head { color: var(--text-primary); }
-.ofr-grid__count {
-  --ofr-n: var(--ofr-to, 0);
-  counter-reset: ofr-n var(--ofr-n);
-  animation: ofr-grid-cell 8s linear infinite both, ofr-grid-count 8s linear infinite both;
-  animation-delay: calc(var(--ofr-i, 0) * 0.2s), calc(var(--ofr-i, 0) * 0.16s);
+/* Each figure revealed in its row as the row lights, once the pass has
+   landed on Max; the column is empty before. */
+.ofr-grid__val {
+  display: inline-block;
+  font-weight: inherit;
+  animation: ofr-grid-reveal 8s ease-out infinite both;
+  animation-delay: calc(var(--ofr-i, 0) * 0.2s);
 }
-.ofr-grid__count::after { content: counter(ofr-n); }
 @keyframes ofr-grid-cell {
   0%, 44% { box-shadow: none; }
   48% { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--text-primary) 45%, transparent); }
   58%, 100% { box-shadow: none; }
 }
-@keyframes ofr-grid-count {
-  0%, 43% { --ofr-n: var(--ofr-from, 0); }
-  53%, 94% { --ofr-n: var(--ofr-to, 0); }
-  98%, 100% { --ofr-n: var(--ofr-from, 0); }
+@keyframes ofr-grid-reveal {
+  0%, 44% { opacity: 0; transform: translateY(5px); }
+  49%, 94% { opacity: 1; transform: none; }
+  98%, 100% { opacity: 0; transform: none; }
 }
 
 /* Reduced motion: each stage at its rest -- the platforms unlocked,
@@ -6423,7 +6436,8 @@ textarea:focus-visible {
   .ofr__stage *::before,
   .ofr__stage *::after,
   .ofr-fare-val__n,
-  .ofr-grid__max { animation: none !important; }
+  .ofr-grid__max,
+  .ofr-grid__val { animation: none !important; }
   .ofr-disc-tile { opacity: 1; }
   .ofr-disc-lock,
   .ofr-disc-pass,
@@ -28845,17 +28859,24 @@ button.brd-stn { cursor: pointer; }
      flat bars with the figure a long way from its button. */
   .claim-sheet { width: var(--desk-side-w); }
   /* 定期券 — the three offers (plan 171) as a dialog in the window's
-     middle, at the width their stage was drawn for, with the scrim the
-     phone's glass had no need of: the stage, the words and the foot
-     as the phone has them, so the desk shows the owner's canvas board
-     for board. Only a window too short for all of it scrolls, the foot
-     still docked. */
+     middle, the owner's pick A 対 of the canvas's Desktop page: the
+     stage beside the words. The phone's stage drawing is kept whole --
+     its 390-wide box, scaled into the left pane, every animation as
+     drawn -- and the words and the foot stand in the right pane at the
+     phone's width, so they wrap as they do on a phone. The scroller
+     steps aside (display: contents) and the dialog lays its three parts
+     out itself; a window too short for the words scrolls them, the
+     foot docked. The light pools under the drawing, and the hairline
+     that closed the phone's stage runs down the pane's right edge. */
   .ofr-scrim { background: rgba(0, 0, 0, 0.55); }
   .ofr {
     inset: 0;
-    width: var(--offer-w);
-    height: fit-content;
-    max-height: calc(100dvh - 2 * var(--sp-8));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) calc(var(--offer-w) + 2 * var(--sp-6));
+    grid-template-rows: minmax(0, 1fr) auto;
+    width: var(--offer-desk-w);
+    height: var(--offer-desk-h);
+    max-height: calc(100dvh - 2 * var(--sp-6));
     margin: auto;
     overflow: hidden;
     border: 1px solid var(--surface-line);
@@ -28863,6 +28884,43 @@ button.brd-stn { cursor: pointer; }
     box-shadow: var(--elev-board);
     animation: arrive-soft 0.2s linear;
   }
+  .ofr__scroll { display: contents; }
+  .ofr__hero {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    height: auto;
+    background:
+      radial-gradient(52% 26% at 50% 80%, rgba(255, 244, 222, 0.08), transparent 70%),
+      radial-gradient(120% 95% at 50% 42%, transparent 50%, rgba(0, 0, 0, 0.5) 100%),
+      var(--bg-panel);
+  }
+  .ofr__hero::after {
+    top: 0;
+    left: auto;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--text-on-panel) 26%, transparent) 22%, color-mix(in srgb, var(--text-on-panel) 26%, transparent) 78%, transparent);
+  }
+  .ofr__floor { display: none; }
+  .ofr__stage {
+    top: 50%;
+    bottom: auto;
+    height: 344px;
+    transform: translateY(-50%) scale(1.16);
+    transform-origin: 50% 50%;
+  }
+  .ofr__hero--upgrade { height: auto; }
+  .ofr__hero--upgrade .ofr__stage { height: 252px; transform: translateY(-50%) scale(1.3); }
+  .ofr__body {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-top: var(--sp-8);
+  }
+  .ofr__foot { grid-column: 2; grid-row: 2; padding-bottom: var(--sp-6); }
+  /* Esc closes it as the way out does: printed at its corner. */
+  .ofr__esc { position: absolute; z-index: 1; top: var(--sp-5); right: var(--sp-5); color: var(--text-secondary); }
   /* The CSV import (components/decks/ImportCardsMenu) is its own
      overlay, not a sheet; it takes the desk dialog's width, material,
      scrim and arrival. Centred by auto margins, which fall to nothing

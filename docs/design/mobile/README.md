@@ -558,12 +558,16 @@ alone, and Max's own material.
 | 3C · `.r3c-*` (`--hakkin`, `--gravure`, `--objet`, `--fin-satin`, `--pro-sumi`), `.c3-grid` | `.ofr-turn*`, `.ofr-corner`, `.ofr-grid*` | `PassTurn.jsx`, `MaxOffer.jsx`'s `UpGrid` |
 
 The stage is drawn at `--offer-w` (390px) and centred in a wider phone, scaled
-into a narrower one; the words hold the same width. Every screen reads whole
+into a narrower one; the words hold the same width. On the desk (the canvas's
+Desktop page, the owner's pick A 対) the same three parts stand as a dialog:
+the stage scaled into a left pane, the words and the foot beside it (the 机
+section; `docs/design/desk/README.md`). Every screen reads whole
 at 844px with no scroll. `/dev/offers` opens each of the seven over the
 canvas's learner (Aiko, level 12, the canvas's week), the two Max doors that
 have no production caller until the store sells Max included. Pinned by
 `components/offers/OfferScreen.browser.test.jsx`, `src/offers.phone.test.jsx`
-and, for the desk's dialog, `src/offers.desktop.test.jsx`.
+and, for the desk's dialog, `src/offers.desktop.test.jsx` and
+`src/offers.short.test.jsx`.
 
 ## Still to port
 
