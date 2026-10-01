@@ -563,10 +563,14 @@ function pass(t, facts) {
   const n5 = arrivals(facts, DEFAULT_RHYTHM)[0].days
   const dots = [['kana', 'あ'], ['vocab', '語'], ['kanji', '漢'], ['grammar', '文']]
     .map(([l, g]) => `<span class="dot" style="--c:${pigment(l)}" lang="ja">${g}</span>`).join('')
-  return `<section class="sec way" id="${t.ids.way}" aria-labelledby="way-h">${stop(t, 'way')}<div class="wrap split split--way cols">`
-    + `<div class="split__copy" data-stagger><h2 class="h2 way__h" id="way-h">${esc(typo(t.lang, P.h2))}</h2><p class="body">${esc(typo(t.lang, P.body))}</p>`
-    + `<div class="way__field"><label class="capxs" for="pass-name">${esc(P.nameLabel)}</label><input id="pass-name" class="field" type="text" name="given-name" autocomplete="given-name" maxlength="24" placeholder="${esc(P.name)}" data-pass-input></div>`
+  // Three blocks: the words, the pass, the form. A phone and a tablet
+  // stack them in that order, so the name typed prints on the pass in
+  // view above the field (and above a phone's keyboard); the desk puts
+  // the words over the form in col A and the pass in col B (landing.css).
+  const form = `<div class="way__form" data-stagger><div class="way__field"><label class="capxs" for="pass-name">${esc(P.nameLabel)}</label><input id="pass-name" class="field" type="text" name="given-name" autocomplete="given-name" maxlength="24" placeholder="${esc(P.name)}" data-pass-input></div>`
     + `<div class="way__gate">${gate(t)}</div>${badges(t)}</div>`
+  return `<section class="sec way" id="${t.ids.way}" aria-labelledby="way-h">${stop(t, 'way')}<div class="wrap split split--way cols">`
+    + `<div class="split__copy" data-stagger><h2 class="h2 way__h" id="way-h">${esc(typo(t.lang, P.h2))}</h2><p class="body">${esc(typo(t.lang, P.body))}</p></div>`
     + `<div class="way__pass" data-reveal data-tilt><div class="pass" role="img" aria-label="${esc(P.aria)}">`
     + '<span class="pass__edge" aria-hidden="true"></span>'
     + `<div class="pass__top"><span class="pass__brand">${mark(22)}<span class="pass__lbl pass__lbl--on">Tsuji</span><span class="pass__kind" lang="ja">定期券</span></span><span class="pwave" aria-hidden="true"><i></i><i></i><i></i></span></div>`
@@ -575,7 +579,7 @@ function pass(t, facts) {
     + `<div><span class="pass__lbl">${esc(P.lines)}</span><span class="pass__dots" role="img" aria-label="${esc(P.linesAria)}">${dots}</span></div>`
     + `<div><span class="pass__lbl">${esc(P.arrival)}</span><span class="pass__val pass__val--gold" data-pass-arrival data-days="${Math.ceil(n5)}">${esc(typo(t.lang, t.line.span(spanOf(n5))))}</span></div></div>`
     + `<div class="pass__bal"><span class="fig">${esc(P.level)}</span><span class="pass__track"><i></i></span></div>`
-    + '</div></div></div></section>'
+    + `</div></div>${form}</div></section>`
 }
 
 function footer(t, other) {
