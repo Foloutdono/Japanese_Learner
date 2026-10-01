@@ -356,7 +356,8 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 
 /* ── The features, one by one ── */
 .devices { display: none; }
-.features { display: flex; flex-direction: column; gap: var(--sp-6); margin-top: var(--sp-6); }
+.features { display: flex; flex-direction: column; gap: var(--sp-6); }
+.features__copy { display: flex; flex-direction: column; gap: var(--sp-4); }
 .ftabs { display: flex; gap: var(--sp-3); overflow-x: auto; margin: 0 calc(var(--gutter) * -1); padding: var(--sp-1) var(--gutter) var(--sp-3); scrollbar-width: none; }
 .ftab { flex-shrink: 0; display: inline-flex; align-items: center; gap: var(--sp-3); height: 44px; padding: 0 var(--sp-4) 0 var(--sp-2); border: 1px solid var(--surface-line); border-radius: var(--r-pill); background: transparent; text-align: left; cursor: pointer; transition: border-color .15s ease, transform .15s ease; }
 .ftab[aria-selected="true"] { background: var(--surface); border-color: var(--accent2); box-shadow: inset 0 0 0 1px var(--accent2); }
@@ -364,6 +365,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .ftab__name { display: block; font-weight: 700; font-size: var(--fs-sm); white-space: nowrap; }
 .ftab__line { display: none; }
 .fpanel { display: flex; flex-direction: column; align-items: center; gap: var(--sp-5); outline: none; }
+.fpanel__head { order: 1; }
 .fpanel__what { text-align: center; color: var(--text-primary); }
 .frame { display: flex; flex-direction: column; align-items: center; }
 .frame[data-frame="phone"] .frame__screen { width: 240px; height: 520px; border: 9px solid color-mix(in srgb, #000 35%, var(--bg-panel)); border-radius: 38px; box-shadow: var(--elev-board), 0 0 0 1px var(--surface-line); }
@@ -586,8 +588,6 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .mk-progress { display: flex; flex-direction: column; gap: var(--sp-2); }
 .mk-progress__bar { height: 4px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
 .mk-progress__bar i { display: block; width: calc(100% / 67); height: 100%; background: var(--line-exam); }
-.frame[data-frame="desk"] .mock__body, .frame[data-frame="desk"] .mock__foot { align-self: center; width: min(100%, 400px); }
-.frame[data-frame="desk"] .mock__bar { padding-top: var(--sp-3); }
 
 /* ── Motion ──
    Everything below arrives once, as the page scrolls to it, in the
@@ -782,6 +782,10 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .pass { padding: 26px var(--sp-7) var(--sp-6); }
   .foot__in { flex-direction: row; align-items: center; justify-content: space-between; }
   .foot__end { align-items: flex-end; text-align: right; }
+  /* A tall tablet: the features' phone at its full size. */
+  @media (min-height: 1000px) {
+    .frame[data-frame="phone"] .frame__screen { width: 280px; height: 606px; border-width: 10px; border-radius: 44px; }
+  }
 }
 
 /* ── From 1100px: the desk, as the canvas drew it ──
@@ -921,7 +925,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .head2 > .head2__end { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: var(--sp-6); }
   .split { align-items: start; }
   .split__copy { gap: var(--sp-5); }
-  .plates, .features, .tools, .player-room { margin-top: var(--stop-head-gap); }
+  .plates, .tools, .player-room { margin-top: var(--stop-head-gap); }
 
   /* The presentation: the player as large as the body's rest lets a
      16:9 be, centred. The rest is a grid row, whose size is known before
@@ -1092,17 +1096,119 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
     .split--method .rbar button { padding: var(--sp-3) var(--sp-1); }
   }
 
-  .devices { display: inline-flex; flex-shrink: 0; }
-  .features { display: grid; }
-  .ftabs { flex-direction: column; gap: var(--sp-2); margin: 0; padding: 0; overflow: visible; }
-  .ftab { display: grid; grid-template-columns: 44px 1fr; column-gap: var(--sp-4); width: 100%; height: auto; padding: var(--sp-3) var(--sp-5); border-color: transparent; border-radius: var(--r-card); }
-  .ftab:hover, .ftab:focus-visible { border-color: var(--surface-line); transform: translateY(-1px); }
-  .ftab__ring { width: 44px; height: 44px; border-width: 2.5px; font-size: var(--fs-sm); }
+  /* 04 Fonctionnalités, desk: the heading and the tabs beside the
+     stage, both the body's height. The copy on the heading line; the
+     tabs one group sharing the column's rest, as stop 02's services
+     are -- a ring and a name each, the picked one washed gold with its
+     edge, and opening on its line where the group has the room (a size
+     container). The stage is a plate in the feature's pigment: at its
+     head the clip's caption, two lines held, and the Phone / Computer
+     switch, which stands in one place whichever device it draws; under
+     them the device, as tall as the rest lets it be (the frame is a
+     size container). On a computer the drawn screen is the desk's, a
+     rail down its left edge. A row of the group shows its hover as its
+     edge in its line's pigment and its roundel inverted, without the
+     lift (a row in a group, as stop 02's); those and the floor's change
+     of pigment are fades, kept under reduced motion. */
+  .features { grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "copy panel" "tabs panel"; row-gap: var(--stop-head-gap); }
+  .features__copy { grid-area: copy; gap: var(--sp-5); }
+  .ftabs { grid-area: tabs; flex-direction: column; gap: 0; margin: 0; padding: 0; overflow: hidden; border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--surface); container: ftabs / size; }
+  .ftab { flex: 1 1 auto; display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: var(--sp-4); width: 100%; height: auto; min-height: 44px; padding: var(--sp-2) var(--sp-5); border: 0; border-top: 1px solid var(--surface-line); border-radius: 0; }
+  .ftab:first-child { border-top: 0; }
+  .ftab[aria-selected="true"] { background: color-mix(in srgb, var(--accent2) 14%, transparent); box-shadow: inset 3px 0 0 var(--accent2); }
+  .ftab:hover, .ftab:focus-visible { box-shadow: inset 3px 0 0 var(--c); }
+  .ftab[aria-selected="true"]:hover, .ftab[aria-selected="true"]:focus-visible { box-shadow: inset 3px 0 0 var(--accent2); }
+  .ftab:focus-visible { outline-offset: -4px; }
+  .ftab__ring { width: 44px; height: 44px; border-width: 2.5px; font-size: var(--fs-sm); transition: background-color .15s ease, color .15s ease; }
+  .ftab:hover .ftab__ring, .ftab:focus-visible .ftab__ring { background: var(--c); color: var(--bg-main); }
   .ftab__name { font-size: var(--fs-body); white-space: normal; }
-  .ftab__line { display: block; font-size: var(--fs-sm); line-height: 1.45; color: var(--text-secondary); }
-  .frame[data-frame="phone"] .frame__screen { width: 280px; height: 606px; border-width: 10px; border-radius: 44px; }
-  .frame[data-frame="desk"] { margin-top: 60px; }
-  .clip__ring { width: 96px; height: 96px; font-size: var(--fs-heading); }
+  .ftab__line { font-size: var(--fs-sm); line-height: 1.45; color: var(--text-secondary); }
+  @container ftabs (min-height: 460px) {
+    .ftab[aria-selected="true"] .ftab__line { display: block; margin-top: var(--sp-1); }
+  }
+  .fpanel { grid-area: panel; position: relative; align-items: stretch; gap: var(--sp-5); min-height: 0; padding: var(--sp-6) var(--sp-6) calc(var(--sp-5) + 3px); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-plate); box-shadow: var(--elev-hang); overflow: hidden; }
+  .fpanel::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--c); transition: background-color .3s ease; }
+  .fpanel__head { order: 0; display: flex; align-items: center; justify-content: space-between; gap: var(--sp-6); }
+  .fpanel__what { display: flex; align-items: center; min-height: calc(2 * 1.65em); text-align: left; }
+  .devices { display: inline-flex; flex-shrink: 0; align-self: center; }
+  .frame, .frame[data-frame="desk"] { flex: 1 1 0; align-self: stretch; justify-content: center; min-height: 0; container-type: size; }
+  .frame[data-frame="phone"] .frame__screen { width: auto; height: min(100cqh, 640px); aspect-ratio: 280 / 606; border-width: 10px; border-radius: 44px; container: screen / size; }
+  /* A phone narrower than the tablet's (a short window's): the drawn
+     screen keeps its type and gives ground in its layout -- a long title
+     on two lines, the rating bar two by two, the chips wrapping, the
+     answers closer. */
+  @container screen (max-width: 219px) {
+    .mock__title { white-space: normal; line-height: 1.2; }
+    .mock__rate { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mock__rate > span:nth-child(3) { border-left: 0; }
+    .mock__rate > span:nth-child(n+3) { border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 10%, transparent); }
+    .mk-kanji__meta { flex-wrap: wrap; justify-content: center; }
+    .mk-gram__blank { min-width: 2em; }
+    .mk-exam__opts b { gap: var(--sp-1); padding-inline: var(--sp-2); }
+  }
+  /* A phone shorter than a 700px window's: the drawn screen's gaps a
+     rung closer, so its floor keeps clear of its body. */
+  @container screen (max-height: 419px) {
+    .mock__body { justify-content: safe center; gap: var(--sp-2); padding-block: var(--sp-3); }
+    .mock__foot { padding-bottom: var(--sp-4); }
+    .mk-today__cap { margin-top: 0; }
+    .mk-lanes li { padding-block: var(--sp-1); }
+    .mk-anl, .mk-read, .mk-kanji { gap: var(--sp-2); }
+    .mk-today__n { font-size: var(--fs-heading); }
+    .mk-strokes { width: 52%; }
+    .mk-gram > .capxs { display: none; }
+    .mk-gram__pattern { font-size: var(--fs-title); }
+    .mk-video { aspect-ratio: 2 / 1; }
+    .mk-points { gap: var(--sp-1); }
+    .mk-points li:nth-child(n+3), .mk-card__ex { display: none; }
+  }
+  .frame[data-frame="desk"] .frame__screen { width: min(100cqw, (100cqh - 14px) * 1.6); container: laptop / size; }
+  .frame[data-frame="desk"] .frame__base { width: min(100cqw, (100cqh - 14px) * 1.6 * 10 / 9); }
+  /* The computer's screen: the bar a rail down its left edge, the
+     screen's own column beside it. */
+  .frame[data-frame="desk"] .mock { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); grid-template-rows: minmax(0, 1fr) auto; grid-template-areas: "bar body" "bar foot"; }
+  .frame[data-frame="desk"] .mock__bar { grid-area: bar; flex-direction: column; align-items: flex-start; gap: var(--sp-3); padding: var(--sp-5) var(--sp-4); border-bottom: 0; border-right: 3px solid var(--c); }
+  .frame[data-frame="desk"] .mock__title { flex: none; max-width: 100%; white-space: normal; }
+  .frame[data-frame="desk"] .mock__body, .frame[data-frame="desk"] .mock__foot { justify-self: center; width: min(100%, 420px); }
+  .frame[data-frame="desk"] .mock__body { grid-area: body; }
+  .frame[data-frame="desk"] .mock__foot { grid-area: foot; }
+  .frame[data-frame="desk"] .mk-kanji { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: 1fr 1fr; column-gap: var(--sp-5); text-align: left; }
+  .frame[data-frame="desk"] .mk-strokes { grid-row: 1 / 3; width: 100%; }
+  .frame[data-frame="desk"] .mk-kanji .capxs { align-self: end; }
+  .frame[data-frame="desk"] .mk-kanji__meta { align-self: start; flex-wrap: wrap; }
+  .frame[data-frame="desk"] .mk-anl { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: center; gap: var(--sp-3) var(--sp-5); }
+  .frame[data-frame="desk"] .mk-points { grid-column: 2; grid-row: 1 / 3; }
+  .frame[data-frame="desk"] .mk-points li { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--sp-2); }
+  .frame[data-frame="desk"] .mk-points .num { grid-row: span 2; }
+  .frame[data-frame="desk"] .mk-sub { flex-wrap: nowrap; font-size: var(--fs-sm); }
+  /* A short computer (the narrow short desk's): its screen's gaps a
+     rung closer. */
+  @container laptop (max-height: 339px) {
+    .mock__body { gap: var(--sp-2); padding-block: var(--sp-3); }
+    .mk-today__cap { margin-top: 0; }
+    .mk-lanes li { padding-block: var(--sp-1); }
+  }
+  /* Short: the rows a name each at 44px, the plate a rung tighter, the
+     phone's bezel and its bar a rung slimmer. */
+  @media (max-height: 799px) {
+    .ftab { grid-template-columns: 36px minmax(0, 1fr); padding-block: 0; }
+    .ftab__ring { width: 36px; height: 36px; }
+    .fpanel { gap: var(--sp-4); padding: var(--sp-5) var(--sp-6) calc(var(--sp-4) + 3px); }
+    .frame[data-frame="phone"] .frame__screen { border-width: 9px; border-radius: 38px; }
+    .frame[data-frame="phone"] .mock__bar { padding-top: var(--sp-5); }
+    /* Under 700px of window the phone keeps a width its screen can be
+       read at, a little less tall for its width. */
+    @media (max-height: 699px) {
+      .frame[data-frame="phone"] .frame__screen { width: max(100cqh * 280 / 606, 200px); aspect-ratio: auto; }
+    }
+    /* The narrow short desk (the heading takes three lines) and a
+       window under 700px: the tabs go two across. */
+    @media (max-width: 1239px), (max-height: 699px) {
+      .ftabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(44px, 1fr); }
+      .ftab:nth-child(2) { border-top: 0; }
+      .ftab:nth-child(even) { border-left: 1px solid var(--surface-line); }
+    }
+  }
 
   /* The card and the promises one height, packed at the body's top
      rather than drawn down the whole body. */

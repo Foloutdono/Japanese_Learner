@@ -684,7 +684,7 @@ function pick(k, how) {
   }
   const f = data.features[k]
   panel.setAttribute('aria-labelledby', tabs[k].id)
-  screen.style.setProperty('--c', f.line)
+  panel.style.setProperty('--c', f.line)
   mocks.forEach((mock, j) => { mock.hidden = j !== k })
   $('[data-clip-what]', panel).textContent = f.what
   loadClip()

@@ -399,16 +399,22 @@ function features(t, media) {
   }).join('')
   const devices = ['phone', 'desk'].map((d, k) => `<button type="button" data-device="${d}" aria-pressed="${k === 0}"${k === 0 ? ' class="on"' : ''}>${esc(F.devices[d])}</button>`).join('')
   const f0 = F.items[first.id]
-  return `<section class="sec sec--band" id="${t.ids.features}" aria-labelledby="${t.ids.features}-h">${stop(t, 'features')}<div class="wrap">`
-    + head2(t, F.h2, F.body, t.ids.features, `<div class="seg devices" role="group" aria-label="${esc(F.devicesLabel)}" data-devices>${devices}</div>`)
-    + `<div class="features cols" data-media="${esc(media)}" data-reveal>`
-    + `<div class="ftabs" role="tablist" aria-label="${esc(F.tabsLabel)}" aria-orientation="vertical">${tabs}</div>`
-    + `<div class="fpanel" role="tabpanel" id="feature-panel" aria-labelledby="tab-${first.id}" tabindex="0">`
-    + `<div class="frame" data-frame="phone"><div class="frame__screen clip" style="--c:${pigment(first.line)}" data-clip>`
+  // The stop's body is the block the script turns (.features): the
+  // heading and the tabs in one column, the device in the other -- on
+  // the desk a stage the column's height, the clip's caption and the
+  // Phone / Computer switch at its head, the screen as tall as the rest
+  // lets it be. The stage carries the feature's pigment (landing.js).
+  return `<section class="sec sec--band" id="${t.ids.features}" aria-labelledby="${t.ids.features}-h">${stop(t, 'features')}`
+    + `<div class="wrap features cols" data-media="${esc(media)}">`
+    + `<div class="features__copy" data-stagger><h2 class="h2" id="${t.ids.features}-h">${esc(typo(t.lang, F.h2))}</h2><p class="body">${esc(typo(t.lang, F.body))}</p></div>`
+    + `<div class="ftabs" role="tablist" aria-label="${esc(F.tabsLabel)}" aria-orientation="vertical" data-reveal>${tabs}</div>`
+    + `<div class="fpanel" role="tabpanel" id="feature-panel" aria-labelledby="tab-${first.id}" tabindex="0" style="--c:${pigment(first.line)}" data-reveal>`
+    + `<div class="fpanel__head"><p class="body fpanel__what" data-clip-what>${esc(typo(t.lang, f0.what))}</p>`
+    + `<div class="seg devices" role="group" aria-label="${esc(F.devicesLabel)}" data-devices>${devices}</div></div>`
+    + '<div class="frame" data-frame="phone"><div class="frame__screen clip" data-clip>'
     + CLIPS.map((clip, k) => mockScreen(t, clip, k === 0)).join('')
-    + '</div><span class="frame__base"></span></div>'
-    + `<p class="body fpanel__what" data-clip-what>${esc(typo(t.lang, f0.what))}</p></div>`
-    + '</div></div></section>'
+    + '</div><span class="frame__base"></span></div></div>'
+    + '</div></section>'
 }
 
 function jlpt(t) {
