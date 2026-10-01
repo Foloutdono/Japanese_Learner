@@ -464,7 +464,7 @@ function pass(t, facts) {
   return `<section class="sec way" id="${t.ids.way}" aria-labelledby="way-h">${stop(t, 'way')}<div class="wrap split split--way">`
     + `<div class="split__copy" data-stagger><h2 class="h2 way__h" id="way-h">${esc(typo(t.lang, P.h2))}</h2><p class="body">${esc(typo(t.lang, P.body))}</p>`
     + `<div class="way__field"><label class="capxs" for="pass-name">${esc(P.nameLabel)}</label><input id="pass-name" class="field" type="text" name="given-name" autocomplete="given-name" maxlength="24" placeholder="${esc(P.name)}" data-pass-input></div>`
-    + `<div class="way__gate">${gate(t)}<span class="road road--end" aria-hidden="true"></span></div>${badges(t)}</div>`
+    + `<div class="way__gate">${gate(t)}</div>${badges(t)}</div>`
     + `<div class="way__pass" data-reveal data-tilt><div class="pass" role="img" aria-label="${esc(P.aria)}">`
     + '<span class="pass__edge" aria-hidden="true"></span>'
     + `<div class="pass__top"><span class="pass__brand">${mark(22)}<span class="pass__lbl pass__lbl--on">Tsuji</span><span class="pass__kind" lang="ja">定期券</span></span><span class="pwave" aria-hidden="true"><i></i><i></i><i></i></span></div>`

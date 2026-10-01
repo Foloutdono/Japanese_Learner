@@ -56,14 +56,32 @@ function arrive(node) {
   for (const figure of $$('[data-count]', node)) countUp(figure)
 }
 
-// A section on a band arrives too: its band fades in as it is reached.
-const blocks = $$('[data-reveal], [data-stagger], .sec--band')
+// A stop arrives as one: whichever of its blocks is reached first brings
+// in the stop and every block of it already on the screen, in order, a
+// beat apart (--at) -- the plate, the heading, then what it shows. A
+// block further down a tall stop waits to be reached, as before. A
+// section on a band arrives too: its band fades in as it is reached.
+const blocks = $$('[data-reveal], [data-stagger], .sec')
 if (canWatch) {
   const watcher = new IntersectionObserver(entries => {
     for (const entry of entries) {
-      if (!entry.isIntersecting) continue
+      // Its first report comes on watching, however little of it shows.
+      if (!entry.isIntersecting || entry.intersectionRatio < 0.12) continue
+      const sec = entry.target.closest('.sec')
+      if (sec && !sec.classList.contains('in')) {
+        sec.classList.add('in')
+        watcher.unobserve(sec)
+        let k = 0
+        for (const block of $$('[data-reveal], [data-stagger]', sec)) {
+          if (block.classList.contains('in') || block.getBoundingClientRect().top > window.innerHeight) continue
+          watcher.unobserve(block)
+          block.style.setProperty('--at', `${k++ * 0.2}s`)
+          arrive(block)
+        }
+        continue
+      }
       watcher.unobserve(entry.target)
-      arrive(entry.target)
+      if (entry.target !== sec) arrive(entry.target)
     }
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 })
   for (const block of blocks) watcher.observe(block)
