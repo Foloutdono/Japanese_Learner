@@ -517,11 +517,14 @@ function tools(t) {
 }
 
 // The fare as the ticket it is: the ticket proper -- the statement,
-// what it covers and the lines it is valid on, the crossroads' seven
-// (the hero's map) -- torn along a perforation from its stub, which
-// holds what comes later, the gate and the hero's words under its own
-// gate (no account, in the browser). The body's two sentences part at
-// the perforation. Beside it, the four promises, each with its mark.
+// what it covers and what it is valid on, by name: the crossroads'
+// seven (the hero's map), then the two stops the sentence also names,
+// the JLPT exam and the tools (the analyser and the dictionary), under
+// their signs' own names -- torn along a perforation from its stub,
+// which holds what comes later, the gate and the hero's words under its
+// own gate (no account, in the browser). The body's two sentences part
+// at the perforation. Beside it, the four promises, each with its mark.
+const FARE_STOPS = [{ line: 'exam', glyph: '模', key: 'jlpt' }, { line: 'kaiseki', glyph: '解', key: 'tools' }]
 const PROMISE_MARKS = [
   // No ads, no trackers: an eye, struck.
   '<path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/>',
@@ -540,7 +543,8 @@ function fare(t) {
   const [, covers = F.body, later = ''] = F.body.match(/^(.+?\.)\s+(.+)$/s) || []
   const [first, ...rest] = t.hero.note(STORES.appStore || STORES.googlePlay).split(' · ')
   const how = first === F.h2 ? rest.map(ty).join('\u00a0· ') : ''
-  const lines = ROADS.map(r => `<li style="--c:${pigment(r.line)}"><span class="ring" aria-hidden="true" lang="ja">${esc(r.glyph)}</span><span class="fare__name">${ty(t.hero.stations[r.line])}</span></li>`).join('')
+  const valid = [...ROADS.map(r => [r.line, r.glyph, t.hero.stations[r.line]]), ...FARE_STOPS.map(s => [s.line, s.glyph, t[s.key].kicker])]
+  const lines = valid.map(([line, glyph, name]) => `<li style="--c:${pigment(line)}"><span class="ring" aria-hidden="true" lang="ja">${esc(glyph)}</span><span class="fare__name">${ty(name)}</span></li>`).join('')
   const promises = F.promises.map(([h, p], k) => `<div>${promiseMark(k)}<h3 class="h3">${ty(h)}</h3><p class="body">${ty(p)}</p></div>`).join('')
   return `<section class="sec sec--fare" id="${t.ids.fare}" aria-labelledby="${t.ids.fare}-h">${stop(t, 'fare')}<div class="wrap fare cols" data-stagger>`
     + '<article class="card fare__card"><div class="fare__ticket">'
