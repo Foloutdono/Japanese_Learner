@@ -234,7 +234,7 @@ function lines(t) {
     + '<div class="plates" data-stagger>'
     + plate('kana', 'あ', P.kana, `${stage('learning', k.learning)}<span class="spec__glyph" lang="ja">あ</span><span class="spec__gloss">${esc(P.kana.gloss)}</span>`, chips(P.kana.chips))
     + plate('vocab', '語', P.vocab, `${stage('new', k.new)}<span class="spec__reading" lang="ja">でんしゃ</span><span class="spec__word" lang="ja">電車</span><span class="spec__gloss">${esc(P.vocab.gloss)}</span>`, stops)
-    + plate('kanji', '漢', P.kanji, `${stage('mastered', k.mastered)}<span class="spec__word spec__word--kanji serif" lang="ja">駅</span><span class="spec__reading spec__reading--flat" lang="ja">${esc(typo(t.lang, P.kanji.strokes))}</span><span class="spec__gloss">${esc(P.kanji.gloss)}</span>`, chips(P.kanji.chips))
+    + plate('kanji', '漢', P.kanji, `${stage('mastered', k.mastered)}<span class="spec__word spec__word--kanji serif" lang="ja">駅</span><span class="spec__line"><span class="spec__reading spec__reading--flat" lang="ja">${esc(typo(t.lang, P.kanji.strokes))}</span><span class="spec__gloss">${esc(P.kanji.gloss)}</span></span>`, chips(P.kanji.chips))
     + plate('grammar', '文', P.grammar, `<span class="spec__pattern" lang="ja">〜ている</span><span class="spec__sentence" lang="ja">雨が降っている。</span><span class="spec__trans">${esc(typo(t.lang, P.grammar.gloss))}</span>`, chips(P.grammar.chips))
     + '</div></div></section>'
 }

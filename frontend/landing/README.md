@@ -38,8 +38,10 @@ The page moves the way the app does (DESIGN.md, Motion):
 - **Arrivals:** blocks arrive once as they are reached, rising 10px a
   child at a time. They are marked `data-reveal`, or `data-stagger` for a
   block whose children arrive in turn.
-- **Hover:** a 1px lift, the edge in the line's colour.
-  The mock exam's answers are the one exception: they lift nothing.
+- **Hover:** a 1px lift, the edge in the line's colour, and only on
+  what can be pressed: the four lines' plates are no doors, so they
+  lift nothing. The mock exam's answers are the one exception: they
+  lift nothing.
   Under the pointer, or with keyboard focus, an answer's number turns
   over in the exam's ink and its edge takes a tint of it, so it reads
   "press this", not "picked". The first pick is the answer, as on the

@@ -266,6 +266,9 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 .spec__word { font-size: var(--fs-heading); line-height: 1.1; }
 .spec__reading { font-size: var(--fs-caption); letter-spacing: var(--tr-reading); color: var(--text-secondary); }
 .spec__reading--flat { letter-spacing: 0; }
+/* A kanji's reading and its gloss: two lines of the card, set as one on
+   the desk where the well is too short for both (below). */
+.spec__line { display: contents; }
 .spec__gloss { font-weight: 700; font-size: var(--fs-sm); color: var(--text-secondary); }
 .spec__pattern { font-size: var(--fs-title); font-weight: 700; }
 .spec__sentence { font-size: var(--fs-caption); }
@@ -780,10 +783,6 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .hero__cue { animation-delay: .6s; }
 .hero__cue svg { animation: cue-bob 1.8s 1.4s ease-in-out infinite; }
 
-/* A plate lifts a pixel toward the pointer, its edge in its line's colour. */
-.plates .plate { transition: transform .16s ease, border-color .16s ease; }
-.plates .plate:hover, .plates .plate:focus-within { transform: translateY(-1px); border-color: color-mix(in srgb, var(--c) 60%, var(--surface-line)); }
-
 /* Your line: the rail laid top to bottom, each stop landing on it, the
    one you stand at breathing; a changed pace prints its new arrivals. */
 .plate--line.in .lrows::before { transform-origin: 50% 0; animation: rail .9s .1s cubic-bezier(.4, 0, .2, 1) backwards; }
@@ -1213,11 +1212,13 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
      share one subgrid, so their heads, wells, bodies and feet line up
      across the row: the head (ring, reading, name), the well with the
      line's card, which takes the spare height, the body, and the foot
-     (the chips, or the line's stops) on the plate's floor. The well is
-     a size container, its card a rung up the specimen scale where the
-     well has the room and a rung down where it has not. */
+     (the chips, or the line's stops) on the plate's floor, always one
+     row, so no plate's foot costs the others' wells anything. The well
+     is a size container, its card a rung up the specimen scale where the
+     well has the room and a rung down where it has not; its floor holds
+     every card at its lowest rung. */
   .lines > .wrap + .wrap { display: grid; grid-template-rows: auto minmax(0, 1fr); }
-  .plates { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: auto minmax(96px, 1fr) auto auto; gap: 0 var(--sp-6); }
+  .plates { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: auto minmax(112px, 1fr) auto auto; gap: 0 var(--sp-6); }
   .plate:not(.plate--line):not(.dict) { grid-row: span 4; grid-template-columns: minmax(0, 1fr); grid-template-rows: subgrid; grid-template-areas: "head" "spec" "body" "foot"; gap: var(--sp-5) 0; }
   .plate__head { align-self: start; align-items: flex-start; }
   .plate__head .h3 { text-wrap: balance; }
@@ -1225,46 +1226,61 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   /* The card's stage on the well's top edge, a tab cut into its border,
      so a card of any rung has the whole well. */
   .plate__spec .stage { top: 0; right: var(--sp-4); padding: 0 var(--sp-2); background: linear-gradient(var(--surface) 50%, var(--bg-card) 50%); line-height: 1.5; transform: translateY(-50%); }
-  .plate__foot { align-self: start; flex-wrap: nowrap; gap: var(--sp-2); min-height: 28px; }
+  .plate__foot { align-self: start; flex-wrap: nowrap; gap: var(--sp-2); min-height: 28px; container: foot / inline-size; }
   .plate__foot .chip { padding: 0 var(--sp-3); }
   .plate__foot .stops { flex: 1; }
   .plate__foot .stops b { flex: 1; }
-  /* The card's rungs by the well's height (its content box): each a
-     rung up where its card has the room for it, down where it has not. */
-  @container spec (min-height: 130px) {
+  /* A foot narrower than the widest pair of chips (the grammar's, 230px
+     in French) sets every plate's chips a rung smaller, so the pair
+     stays one row inside the plate. */
+  @container foot (width < 234px) {
+    .plate__foot .chip { height: 24px; padding: 0 var(--sp-2); font-size: var(--fs-caption-xs); }
+  }
+  /* The card's rungs by the well's height (its content box), one scale
+     across the row: the two single characters, あ and 駅, always on the
+     same rung, the word 電車 on theirs or one under it, the pattern one
+     under the word. Under 165px the kanji's reading and gloss share a
+     line, so 駅 needs no more height than あ: 104px from 141px of well,
+     72px from 106px, 40px under it. */
+  @container spec (height >= 130px) {
     .spec__word { font-size: var(--fs-specimen-word); }
     .spec__pattern { font-size: var(--fs-display); }
     .spec__sentence { font-size: var(--fs-lead); }
   }
-  @container spec (min-height: 165px) {
+  @container spec (height >= 141px) {
     .spec__word--kanji { font-size: var(--fs-specimen-glyph); }
   }
-  @container spec (max-height: 140px) {
+  @container spec (height < 165px) {
+    .spec__line { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: var(--sp-3); }
+  }
+  @container spec (height < 141px) {
     .spec__glyph { font-size: var(--fs-specimen-word); }
   }
-  @container spec (max-height: 129px) {
-    .spec__word--kanji { font-size: var(--fs-display); }
+  @container spec (height < 106px) {
+    .spec__glyph, .spec__word--kanji { font-size: var(--fs-display); }
   }
-  @container spec (max-height: 105px) {
-    .spec__glyph { font-size: var(--fs-display); }
-  }
-  @container spec (max-height: 94px) {
-    .spec__word { font-size: var(--fs-heading); }
+  @container spec (height < 95px) {
+    .spec__word:not(.spec__word--kanji) { font-size: var(--fs-heading); }
     .spec__pattern { font-size: var(--fs-title); }
     .spec__sentence, .spec__gloss { font-size: var(--fs-sm); }
   }
-  @media (max-height: 799px) {
+  /* Dense plates where the plates' row is short: under 880px of window,
+     not only in the short tier, since the tall tier's rhythm takes 52px
+     more from the row and the roomy plate would starve its well. */
+  @media (max-height: 879px) {
     .plates .plate__body { font-size: var(--fs-sm); }
-    .plate:not(.plate--line):not(.dict) { gap: var(--sp-4) 0; }
+    .plate:not(.plate--line):not(.dict) { gap: var(--sp-4) 0; padding: var(--sp-6); }
   }
-  /* The narrow desk: the plates closer and padded a rung less, a pair
-     of chips too wide for a plate taking two rows (and, short, the
-     plate's rows a rung closer, so its card keeps a rung). */
-  @media (max-width: 1239px) {
+  /* Until the wrap reaches its 1240px (under 1328px of window), the
+     plates are narrower than the full desk's: closer, padded a rung less
+     (and, dense, their rows a rung closer), so a card keeps its rung and
+     a pair of chips its size. Not the other stops' 1240px line: there
+     the gap between the plates steps up and each is narrower than at
+     1239px. */
+  @media (max-width: 1327px) {
     .plates { column-gap: var(--sp-5); }
     .plate:not(.plate--line):not(.dict) { padding: var(--sp-5); }
-    .plate__foot { flex-wrap: wrap; }
-    @media (max-height: 799px) {
+    @media (max-height: 879px) {
       .plate:not(.plate--line):not(.dict) { row-gap: var(--sp-3); }
     }
   }
@@ -1833,8 +1849,8 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .js .mk-strokes path { animation: none; stroke-dashoffset: 0; opacity: 1; }
   .mk-gram__blank { color: var(--text-primary); }
   .mk-gram__opts .is-right, .mk-exam__opts .is-right { border-color: var(--success); }
-  .flip__inner, .pass, .pass::after, .top__board, .nav a::after, .top__sound, .plates .plate, .gate, .ghost, .badge, .ftab, .opt, .rbar button, .lvl__track i, .watch__play, .qcard__band i, .faq summary::after, .faq::details-content, .stop__ring, .stop__name, .stop__next svg, .sec--band::before { transition: none; }
-  .plates .plate:hover, .plates .plate:focus-within, .top.has-board .top__board:hover, .top.has-board .top__board:focus-visible { transform: none; }
+  .flip__inner, .pass, .pass::after, .top__board, .nav a::after, .top__sound, .gate, .ghost, .badge, .ftab, .opt, .rbar button, .lvl__track i, .watch__play, .qcard__band i, .faq summary::after, .faq::details-content, .stop__ring, .stop__name, .stop__next svg, .sec--band::before { transition: none; }
+  .top.has-board .top__board:hover, .top.has-board .top__board:focus-visible { transform: none; }
 }
 
 @media print {
