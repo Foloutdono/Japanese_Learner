@@ -294,9 +294,13 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 .day__count .fig { font-size: var(--fs-heading); color: var(--text-primary); }
 .day__bars { display: flex; gap: 3px; }
 .bar { height: 8px; border-radius: var(--r-pill); background: var(--c); }
-.stamps { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-4); }
-.stamps__row { display: flex; gap: var(--sp-2); }
-.stamp { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--r-pill); border: 2px solid var(--stamp-ink); color: var(--stamp-ink); font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-body); line-height: 1; transform: rotate(var(--turn, 0deg)); }
+/* Each line's count under the bar: the desk's only. */
+.day__lanes { display: none; }
+/* The week at the day's foot, under a rule. On the narrowest phones it
+   gives a little: the stamps shrink, round, rather than leave the card. */
+.stamps { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-4); padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
+.stamps__row { display: flex; align-items: center; min-width: 0; gap: var(--sp-2); }
+.stamp { display: grid; flex: 0 1 auto; place-items: center; width: 40px; height: auto; aspect-ratio: 1; min-width: 0; border-radius: var(--r-pill); border: 2px solid var(--stamp-ink); color: var(--stamp-ink); font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-body); line-height: 1; transform: rotate(var(--turn, 0deg)); }
 .stamp--miss { border-style: dashed; border-color: var(--surface-line); color: var(--surface-line); }
 
 .stagebox { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-5); background: var(--bg-panel); border-radius: var(--r-identity); color: var(--text-on-panel); }
@@ -329,6 +333,8 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .rbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent); border-radius: var(--r-panel); overflow: hidden; }
 .rbar button { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); min-height: 44px; padding: var(--sp-4) var(--sp-1); background: transparent; border: 0; border-left: 1px solid color-mix(in srgb, var(--text-on-panel) 10%, transparent); cursor: pointer; transition: background-color .15s ease; }
 .rbar button:first-child { border-left: 0; }
+/* The bar clips, so a focused button's ring is drawn inside it. */
+.rbar button:focus-visible { outline-offset: -4px; }
 .rbar button:hover:not(:disabled), .rbar button:focus-visible { background: color-mix(in srgb, var(--text-on-panel) 6%, transparent); }
 .rbar button:disabled { cursor: default; opacity: .45; }
 .rbar__dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--dot); transition: box-shadow .2s ease; }
@@ -1034,6 +1040,56 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
       .split--line .seg > :nth-child(n+3) { border-top: 1px solid var(--surface-line); }
       .split--line .seg__ride { margin-top: var(--sp-2); }
     }
+  }
+
+  /* 03 La méthode, desk: the copy beside the trial, both the body's
+     height. The copy: the heading on the heading line; the day as one
+     ticket taking the column's rest -- its count and length, each
+     line's share, the lines as rows sharing the spare height, the
+     week's stamps spread along its foot; the reminder level with the
+     trial's floor, under a rule. The trial: the card takes whatever the
+     panel's head, the rating bar and the level leave it (its faces are
+     laid over each other, so the height is the column's, not theirs),
+     its type a rung up. */
+  .split--method { align-items: stretch; }
+  .split--method .day { flex: 1; }
+  /* The lines take the card's spare height, as rows where it holds
+     four of them, two by two where it holds two, else as one line of
+     legend under the bar: the list is a size container (lanes), so the
+     rows follow the room the card has, whatever the copy's length. */
+  .day__lanes { display: block; flex: 1 1 0; min-height: 20px; container: lanes / size; }
+  .day__lanes ul { display: flex; flex-wrap: wrap; place-content: center space-between; gap: var(--sp-2) var(--sp-4); height: 100%; margin: 0; padding: 0; list-style: none; }
+  .day__lanes li { display: flex; align-items: center; gap: var(--sp-2); font-weight: 700; font-size: var(--fs-caption); }
+  .day__lanes i { flex: none; width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--c); }
+  .day__lanes .fig { font-size: var(--fs-sm); }
+  @container lanes (min-height: 64px) {
+    .day__lanes ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 0 var(--sp-6); }
+    .day__lanes li { display: grid; grid-template-columns: var(--sp-5) minmax(0, 1fr) auto; gap: var(--sp-4); border-top: 1px solid var(--surface-line); font-size: var(--fs-sm); }
+    .day__lanes i { width: auto; }
+    .day__lanes .fig { font-size: var(--fs-body); }
+  }
+  @container lanes (min-height: 144px) {
+    .day__lanes ul { grid-template-columns: minmax(0, 1fr); }
+    .day__lanes li { font-size: var(--fs-body); }
+    .day__lanes .fig { font-size: var(--fs-title); }
+  }
+  .split--method .stamps { flex-direction: column; align-items: stretch; gap: var(--sp-3); }
+  .split--method .stamps__row { justify-content: space-between; }
+  .split--method .split__copy > .body--small { margin-top: var(--sp-5); padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
+  .split--method .flip { flex: 1; display: flex; flex-direction: column; min-height: 180px; }
+  .split--method .flip__inner { flex: 1; height: auto; }
+  .split--method .qcard--front .qcard__glyph { font-size: var(--fs-specimen-glyph); }
+  .split--method .qcard--back .qcard__glyph { font-size: var(--fs-specimen-word); }
+  .split--method .qcard__hint, .split--method .qcard__reading, .split--method .qcard__trans { font-size: var(--fs-body); }
+  .split--method .qcard__meaning { font-size: var(--fs-heading); }
+  .split--method .qcard__example { font-size: var(--fs-lead); }
+  .split--method .rbar__w { font-size: var(--fs-body); }
+  .split--method .rbar__t { font-size: var(--fs-sm); }
+  /* Short: the week and the rating bar's buttons a rung tighter. */
+  @media (max-height: 799px) {
+    .split--method .stamps { gap: var(--sp-2); padding-top: var(--sp-4); }
+    .split--method .stamp { width: 40px; height: 40px; }
+    .split--method .rbar button { padding: var(--sp-3) var(--sp-1); }
   }
 
   .devices { display: inline-flex; flex-shrink: 0; }

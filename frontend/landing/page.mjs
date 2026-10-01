@@ -273,20 +273,25 @@ function line(t, facts) {
 function method(t) {
   const M = t.method
   const card = CARDS[0]
-  const shares = [['kana', 19], ['vocab', 43], ['kanji', 24], ['grammar', 14]]
+  // The day's 42 cards, line by line: the bar's shares, and on the desk
+  // each line's count under it (the features' Today screen deals the same).
+  const lanes = [['kana', 8], ['vocab', 18], ['kanji', 10], ['grammar', 6]]
   const rotations = [-6, 4, -3, 0, 7, -5, 2]
   const stamps = [...M.stamps].map((d, k) => k === 3
     ? `<span class="stamp stamp--miss" lang="ja">${d}</span>`
     : `<span class="stamp" style="--turn:${rotations[k]}deg" lang="ja">${d}</span>`).join('')
   const ratings = M.ratings.map((word, k) =>
     `<button type="button" class="q${k + 1}" data-rate="${k}" disabled><span class="rbar__dot"></span><span class="rbar__w">${esc(word)}</span><span class="rbar__t">${esc(M.due(card.due[k]))}</span></button>`).join('')
-  return `<section class="sec" id="${t.ids.method}" aria-labelledby="${t.ids.method}-h">${stop(t, 'method')}<div class="wrap split cols">`
+  // The day as one ticket: its count and length, each line's share, and
+  // the week's stamps at its foot.
+  return `<section class="sec" id="${t.ids.method}" aria-labelledby="${t.ids.method}-h">${stop(t, 'method')}<div class="wrap split split--method cols">`
     + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.method}-h">${esc(typo(t.lang, M.h2))}</h2>`
     + `<p class="body">${esc(typo(t.lang, M.body))}</p>`
     + `<div class="card day"><div class="day__top"><span class="day__count"><span class="fig">${M.day.count}</span> ${esc(typo(t.lang, M.day.unit))}</span>`
     + `<span class="seg seg--still" role="img" aria-label="${esc(M.day.lengthLabel)} : 50">${M.day.lengths.map(v => `<span${v === '50' ? ' class="on"' : ''}>${esc(v)}</span>`).join('')}</span></div>`
-    + `<div class="day__bars" role="img" aria-label="${esc(M.day.sharesLabel)}">${shares.map(([l, w]) => `<span class="bar" style="--c:${pigment(l)};flex-grow:${w}"></span>`).join('')}</div></div>`
-    + `<div class="stamps"><div class="stamps__row" data-reveal role="img" aria-label="${esc(typo(t.lang, M.stampsLabel))}">${stamps}</div><span class="body body--small">${esc(typo(t.lang, M.stampsNote))}</span></div>`
+    + `<div class="day__bars" role="img" aria-label="${esc(M.day.sharesLabel)}">${lanes.map(([l, n]) => `<span class="bar" style="--c:${pigment(l)};flex-grow:${n}"></span>`).join('')}</div>`
+    + `<div class="day__lanes"><ul>${lanes.map(([l, n]) => `<li style="--c:${pigment(l)}"><i></i><span>${esc(typo(t.lang, t.hero.stations[l]))}</span><b class="fig">${n}</b></li>`).join('')}</ul></div>`
+    + `<div class="stamps"><div class="stamps__row" data-reveal role="img" aria-label="${esc(typo(t.lang, M.stampsLabel))}">${stamps}</div><span class="body body--small">${esc(typo(t.lang, M.stampsNote))}</span></div></div>`
     + `<p class="body body--small">${esc(typo(t.lang, M.reminder))}</p></div>`
     + `<div class="stagebox" data-trial data-reveal role="group" aria-label="${esc(typo(t.lang, M.trial))}">`
     + `<div class="stagebox__top"><span class="capxs" data-trial-pos>${esc(M.trialPos(1, CARDS.length))}</span><span class="capxs" data-trial-kind>${esc(M.kinds[card.kind])}</span></div>`
