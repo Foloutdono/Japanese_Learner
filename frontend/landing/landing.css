@@ -332,6 +332,10 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
 .qcard { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-2); padding: var(--sp-5); background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-panel); overflow: hidden; color: var(--text-primary); text-align: center; }
 button.qcard { cursor: pointer; transition: border-color .15s ease; }
 button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
+/* Turned by a key, the card keeps its ring: the turn hands the focus to
+   the wrapper (landing.js), which draws none, so the face it shows does,
+   as the front's button did. A click shows none (no :focus-visible). */
+.flip:focus-visible .qcard--back { border-color: var(--accent2); outline: 2px solid var(--accent2); outline-offset: 3px; }
 .qcard__stage { position: absolute; top: var(--sp-4); right: var(--sp-5); font-weight: 700; font-size: var(--fs-caption-xs); letter-spacing: var(--tr-caption); text-transform: uppercase; }
 .qcard__glyph { font-size: var(--fs-specimen-word); line-height: 1.1; }
 .qcard--back .qcard__glyph { font-size: var(--fs-display); }
@@ -361,12 +365,20 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .rbar button.is-pressed { background: color-mix(in srgb, var(--text-on-panel) 8%, transparent); }
 .rbar__w { font-weight: 700; font-size: var(--fs-caption); color: var(--text-on-panel); }
 .rbar__t { font-weight: 500; font-size: var(--fs-caption-xs); color: var(--text-on-panel-soft); font-variant-numeric: tabular-nums; }
-.lvl { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--sp-4); font-size: var(--fs-caption); }
-.lvl__gain { position: absolute; right: 0; bottom: 100%; color: var(--gate-gold); opacity: 0; pointer-events: none; }
+.lvl { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--sp-4); font-size: var(--fs-caption); }
+/* A rating's gain is said in the level's own row, over the track's end
+   beside the figure it adds to, on the panel's ground so the track does
+   not run through it: it lifts into the row and fades there, never up
+   into the rating bar over it. */
+.lvl__track, .lvl__gain { grid-area: 1 / 2; }
+.lvl__xp { grid-column: 3; color: var(--gate-gold); }
+.lvl__gain { justify-self: end; padding-left: var(--sp-3); background: var(--bg-panel); color: var(--gate-gold); opacity: 0; pointer-events: none; }
 .lvl__gain.is-on { animation: gain .8s ease-out; }
 .lvl__track { height: 6px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--text-on-panel) 12%, transparent); overflow: hidden; }
 .lvl__track i { display: block; width: 34%; height: 100%; background: var(--accent2); transition: width .4s ease; }
-.lvl__xp { color: var(--gate-gold); }
+@media (prefers-reduced-motion: reduce) {
+  .lvl__gain { --rise: 0; }
+}
 
 /* ── The features, one by one ── */
 .devices { display: none; }
@@ -835,7 +847,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 @keyframes stamp-press { 0% { transform: scale(1.8) rotate(var(--stamp-tilt, 0deg)); opacity: 0; } 60% { transform: scale(.92) rotate(var(--stamp-tilt, 0deg)); opacity: 1; } 100% { transform: scale(1) rotate(var(--stamp-tilt, 0deg)); } }
 @keyframes tab-run { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes card-out { to { opacity: 0; transform: translateX(-16px); } }
-@keyframes gain { 0% { opacity: 0; transform: translateY(4px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
+@keyframes gain { 0% { opacity: 0; transform: translateY(var(--rise, 4px)); } 25%, 60% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
 @keyframes shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 @keyframes road-train { 0% { background-position: calc(var(--glint) * -1) 0; } 55%, 100% { background-position: calc(100% + var(--glint)) 0; } }
 @keyframes fill-in { 0%, 35% { color: transparent; } 45%, 100% { color: var(--text-primary); } }
@@ -1400,6 +1412,38 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
     .split--method .stamps { gap: var(--sp-2); padding-top: var(--sp-4); }
     .split--method .stamp { width: 40px; height: 40px; }
     .split--method .rbar button { padding: var(--sp-3) var(--sp-1); }
+  }
+  /* The card's answer is laid out at the type above while the card has
+     the height for it (about 262px: its five lines and the padding),
+     else a rung down, as below the desk, so a short window's card never
+     runs its reading into the stage's tag. The card is a size container
+     (flip), its height whatever the trial's floor leaves it. */
+  .split--method .flip { container: flip / size; }
+  @container flip (max-height: 261px) {
+    .split--method .qcard--back .qcard__glyph { font-size: var(--fs-display); }
+    .split--method .qcard__meaning { font-size: var(--fs-title); }
+    .split--method .qcard__example { font-size: var(--fs-body); }
+  }
+  /* Under 700px of window, the lines' legend costs the ticket nothing it
+     has not got: it hands the gap over it to its own foot, and shows
+     only where the ticket's spare height holds a line of it and the gap
+     (32px), so it can no longer push the copy past the window's foot.
+     Where it shows, it stands where it stood. The reminder's rule a rung
+     closer. */
+  @media (max-height: 699px) {
+    .split--method .day__lanes { min-height: 0; margin-bottom: calc(var(--sp-4) * -1); }
+    .split--method .day__lanes ul { padding-bottom: var(--sp-4); }
+    @container lanes (max-height: 31px) {
+      .day__lanes ul { visibility: hidden; }
+    }
+    .split--method .split__copy > .body--small { margin-top: 0; padding-top: var(--sp-4); }
+  }
+  /* Under 660px (a laptop's 1366x625, the app's 1280x600 and 1100x620):
+     the body is under 480, so the paragraph and the ticket a rung
+     smaller, and the trial's card takes what the copy gives up. */
+  @media (max-height: 659px) {
+    .split--method .split__copy > .body:not(.body--small) { font-size: var(--fs-sm); }
+    .split--method .day { padding: var(--sp-5); }
   }
 
   /* 04 Fonctionnalités, desk: the heading and the tabs beside the
