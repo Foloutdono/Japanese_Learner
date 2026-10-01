@@ -107,8 +107,9 @@ const SCREENS = {
 // exercises played, each charged -- its −1 flies to the balance, 3 → 2
 // → 1 → 0 -- and the fourth is refused. "With Max": the switch slides,
 // the balance becomes "Practice included", every fare turns over to
-// "Included", the refused exercise opens, and the allowances under the
-// title count up to Max's.
+// "Included", the refused exercise opens, and Max's allowances under
+// the title, written there from the start, each give a small shake as
+// they grow (the owner, round 13).
 const FARE_ROWS = [
   { id: 'translation', jp: '翻訳', line: 'honyaku', d: '0s', f: '0s', dy: -49 },
   { id: 'dictation', jp: '書取', line: 'kakitori', d: '1s', f: '0.2s', dy: -97 },
@@ -154,7 +155,7 @@ function FareStage() {
   )
 }
 
-/** The three allowances, counting up from Pro's to Max's. */
+/** Max's three allowances, Pro's under each. */
 function FareVals() {
   const { t } = useLang()
   const vals = [
@@ -166,7 +167,7 @@ function FareVals() {
     <div className="ofr-fare-vals">
       {vals.map(v => (
         <div key={v.k} className="ofr-fare-val">
-          <b className="ofr-fare-val__n" style={{ '--ofr-from': v.from, '--ofr-to': v.to, '--ofr-i': v.i }} aria-label={String(v.to)} />
+          <b className="ofr-fare-val__n" style={{ '--ofr-i': v.i }}>{v.to}</b>
           <span className="ofr-fare-val__k">{v.k}</span>
           <span className="ofr-fare-val__was">{t.ofrInstead(v.from)}</span>
         </div>

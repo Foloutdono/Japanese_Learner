@@ -130,7 +130,7 @@ describe('OfferScreen', () => {
     }
   })
 
-  it('prints a limit in red, and a raised one in the page ink', async () => {
+  it('prints a counter at its limit in red, and Max\'s allowances as written', async () => {
     // Every animation of an element held at one instant of its loop.
     const at = (el, ms) => {
       el.getAnimations().forEach(a => { a.pause(); a.currentTime = ms })
@@ -145,15 +145,17 @@ describe('OfferScreen', () => {
     credits.closePaywall()
     await settle()
 
+    // 3A writes Max's allowances down from the start, in the page's
+    // ink, and only shakes them as they grow when the switch turns.
     credits.openPaywall('limit', { limit: 'practice' })
     await settle()
-    const probe = document.createElement('span')
-    probe.style.color = 'var(--stamp-ink)'
-    $('.ofr').appendChild(probe)
-    const red = getComputedStyle(probe).color
-    const val = $('.ofr-fare-val__n')
-    expect(at(val, 0)).toBe(red)
-    expect(at(val, 8000)).toBe(getComputedStyle($('.ofr__title')).color)
+    const vals = [...document.querySelectorAll('.ofr-fare-val__n')]
+    expect(vals.map(v => v.textContent)).toEqual(['20', '30', '8'])
+    const ink = getComputedStyle($('.ofr__title')).color
+    expect(at(vals[0], 0)).toBe(ink)
+    expect(getComputedStyle(vals[0]).transform).toBe('none')
+    at(vals[0], 6000)
+    expect(getComputedStyle(vals[0]).transform).not.toBe('none')
   })
 
   it('lays out what Max changes from Settings, every figure on one line', async () => {

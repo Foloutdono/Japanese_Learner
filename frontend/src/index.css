@@ -5470,10 +5470,10 @@ textarea:focus-visible {
    played, each charged -- its −1 flies to the balance, 3 → 2 → 1 → 0
    -- and the fourth refused. "With Max": the switch slides, the
    balance becomes "Practice included", every fare turns over to
-   "Included" (the states' green), the refused exercise opens, and the
-   allowances under the title count up to Max's. */
+   "Included" (the states' green), the refused exercise opens, and
+   Max's allowances under the title -- written there from the start --
+   each give a small shake as they grow. */
 @property --ofr-credits { syntax: '<integer>'; inherits: false; initial-value: 0; }
-@property --ofr-n { syntax: '<integer>'; inherits: false; initial-value: 0; }
 .ofr-fare-switch {
   position: absolute;
   left: 50%;
@@ -5635,7 +5635,7 @@ textarea:focus-visible {
   animation: ofr-fare-lockshow 10s linear infinite both;
 }
 .ofr-fare-lock .ofr-lk { width: 16px; height: 16px; }
-/* The three allowances under the title, counting up from Pro's. */
+/* Max's three allowances under the title, Pro's under each. */
 .ofr-fare-vals {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -5655,17 +5655,15 @@ textarea:focus-visible {
 }
 .ofr-fare-val + .ofr-fare-val { border-left: 1px solid var(--surface-line); }
 .ofr-fare-val__n {
-  --ofr-n: var(--ofr-to, 0);
-  counter-reset: ofr-n var(--ofr-n);
+  display: inline-block;
   font-size: var(--fs-heading);
   font-weight: 700;
   line-height: 1;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
-  animation: ofr-fare-count 10s linear infinite both;
+  animation: ofr-fare-pop 10s ease-out infinite both;
   animation-delay: calc(var(--ofr-i, 0) * 0.1s);
 }
-.ofr-fare-val__n::after { content: counter(ofr-n); }
 .ofr-fare-val__k { font-size: var(--fs-caption); font-weight: 700; line-height: 1.25; }
 .ofr-fare-val__was { font-size: var(--fs-caption-xs); color: var(--text-secondary); }
 @keyframes ofr-fare-knob {
@@ -5724,12 +5722,14 @@ textarea:focus-visible {
   57.5%, 95% { transform: none; opacity: 1; }
   98%, 100% { transform: rotateX(-90deg); opacity: 0; }
 }
-/* Each allowance printed at Pro's limit in the stamp's red (it reads
-   on the paper of both themes), rising to Max's in the page's ink. */
-@keyframes ofr-fare-count {
-  0%, 62% { --ofr-n: var(--ofr-from, 0); color: var(--stamp-ink); }
-  72%, 97% { --ofr-n: var(--ofr-to, 0); color: var(--text-primary); }
-  100% { --ofr-n: var(--ofr-from, 0); color: var(--stamp-ink); }
+/* Once, as the switch turns to Max: a small shake as it grows. */
+@keyframes ofr-fare-pop {
+  0%, 57% { transform: none; }
+  58.5% { transform: scale(1.16) rotate(-5deg); }
+  60% { transform: scale(1.24) rotate(4deg); }
+  61.5% { transform: scale(1.2) rotate(-3deg); }
+  63% { transform: scale(1.1) rotate(1.5deg); }
+  65%, 100% { transform: none; }
 }
 
 /* ── 3B · a ceiling hit: the counter, and the Max pass tapping it ──
@@ -6357,9 +6357,9 @@ textarea:focus-visible {
 }
 @keyframes ofr-turn-xp { 0%, 5% { transform: scaleY(0); } 18%, 100% { transform: scaleY(var(--ofr-xp, 0)); } }
 
-/* 3C · what changes, as a hairline lattice: Max's column lit row by
-   row as the pass lands, its three allowances counting up from Pro's.
-   The plan columns take their widest figure ("100 · 10 000"), the
+/* 3C · what changes, as a hairline lattice: Max's column empty until
+   the pass lands, then each figure revealed as its row lights. The
+   plan columns take their widest figure ("100 · 10 000"), the
    label column the rest. */
 .ofr-grid {
   display: grid;

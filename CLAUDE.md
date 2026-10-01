@@ -1219,9 +1219,10 @@ runtime purpose. Two consequences worth knowing:
   turns over into Max (梨地, satin platinum, its 辻 etched and MAX in
   gold foil), each card's 辶 filling with the XP from its foot; every
   stage under one cone of light (光), gold the ticket's, the gate's and
-  Max's material alone; a limit printed red and a raised one white
-  (3A's allowances rising, 3B's count at its ceiling), and 3C's Max
-  column revealed as the pass lands rather than counted; on the desk
+  Max's material alone; a counter at its ceiling printed red (3B), 3A's
+  allowances written down and shaking as they grow when the switch
+  turns to Max, and 3C's Max column revealed as the pass lands -- the
+  figures never count; on the desk
   the owner's pick A 対 of the canvas's Desktop page -- the dialog at
   `--offer-desk-w` with the stage beside the words, the phone's drawing
   scaled whole into the left pane, the words at the phone's width in
