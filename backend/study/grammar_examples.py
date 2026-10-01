@@ -17,7 +17,7 @@ longest stem. A bare particle has no verifiable stem, so it gets no span
 
 The pattern itself is drawn the same way, as furigana parts
 (pattern_furigana): 〜の中で is 〜の, 中 read なか, で. Its reading is
-the catalogue's own `reading`, written by hand, never the tokenizer's:
+the catalogue's own `reading`, stored with the entry, never the tokenizer's:
 a pattern is a fragment, and a fragment is exactly where the tokenizer
 guesses -- 〜中 alone is なか to it, 〜気味 きみ, 〜得る える. The
 formation line under it is read the same way, from `structure_reading`.

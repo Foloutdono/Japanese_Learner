@@ -34,7 +34,7 @@ catalogue already know:
    sentence in the catalogue that ends in ました -- 137 of them.
 
 3. **A point looks the way its own examples look.** Plan 087's catalogue
-   gives every point three to five hand-written sentences that use it.
+   gives every point three to five example sentences that use it.
    Tokenize those and you learn what part of speech the point is
    realized by: 〜なり is a particle なり, so the verb なり in
    先生になりました is not it; 〜とき is the noun とき, and finding that

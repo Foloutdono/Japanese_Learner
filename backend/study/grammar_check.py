@@ -1,10 +1,10 @@
 """
 The gate every grammar point passes before it reaches a learner (plan 087).
 
-content/grammar/*.json is hand-written, which means it is hand-breakable,
-and a grammar lesson is the one place a learner cannot spot the error
-themselves: they are reading it because they do not know the pattern
-yet. So the shape of an entry, the two languages, the example sentences
+content/grammar/*.json was drafted with an AI model and is edited in place,
+which means any edit can break it, and a grammar lesson is the one place
+a learner cannot spot the error themselves: they are reading it because
+they do not know the pattern yet. So the shape of an entry, the two languages, the example sentences
 and the contrast marks are all checked in code, here, by one function
 that tests/test_grammar_points.py runs over the whole catalogue and
 scripts/check_grammar.py runs from the command line while authoring.
