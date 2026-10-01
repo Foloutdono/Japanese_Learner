@@ -449,8 +449,10 @@ function jlpt(t) {
     + `<div class="exam__top"><span class="exam__head">${ring('模', 'exam', 'exam__ring')}${esc(typo(t.lang, J.head))}</span><span class="fig exam__timer">${J.timer}</span></div>`
     // The item as the paper prints it: from the tablet up, a sheet with
     // the mondai's instruction in the app's words
-    // (backend/study/exam_kanji_gen.py) over the sentence.
-    + '<div class="exam__sheet"><p class="exam__mondai" lang="ja"><b>もんだい 1</b> つぎの ことばの 読み方として 最も よい ものを <span>1・2・3・4から</span> 一つ えらんで ください。</p>'
+    // (backend/study/exam_kanji_gen.py) over the sentence. Its last two
+    // phrases are held whole (.exam__mondai span), so a line never ends
+    // the instruction on 「ください。」 alone.
+    + '<div class="exam__sheet"><p class="exam__mondai" lang="ja"><b>もんだい 1</b> つぎの ことばの 読み方として 最も よい ものを <span>1・2・3・4から</span> <span>一つ えらんで ください。</span></p>'
     + '<p class="exam__q" lang="ja">この <u>駅</u> は とても 大きいです。</p></div>'
     + `<div class="exam__opts" role="group" aria-label="${esc(J.optionsLabel)}" data-nudge>${opts}</div>`
     + `<div class="exam__foot"><p class="body exam__verdict" aria-live="polite" data-verdict>${esc(typo(t.lang, J.ask))}</p>`

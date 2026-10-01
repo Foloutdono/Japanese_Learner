@@ -236,7 +236,7 @@ a.badge:hover, a.badge:focus-visible { transform: translateY(-1px); }
    the first being the right one. */
 .exam__opts.nudge::after { content: none; }
 .exam__opts.nudge .opt__k { position: relative; }
-.exam__opts.nudge .opt__k::after { content: ""; position: absolute; inset: -5px; border: 2px solid var(--accent2); border-radius: var(--r-pill); pointer-events: none; animation: cue-ring 1.6s ease-in-out infinite; }
+.exam__opts.nudge .opt__k::after { content: ""; position: absolute; inset: calc(var(--sp-1) * -1); border: 2px solid var(--accent2); border-radius: var(--r-pill); pointer-events: none; animation: cue-ring 1.6s ease-in-out infinite; }
 
 /* ── The overview presentation ── */
 .player { position: relative; margin-top: var(--sp-6); aspect-ratio: 16 / 9; border-radius: var(--r-panel); overflow: hidden; background: radial-gradient(90% 90% at 50% 45%, color-mix(in srgb, var(--text-on-panel) 6%, var(--bg-panel)) 0%, var(--bg-panel) 75%); border: 1px solid var(--surface-line); color: var(--text-on-panel); }
@@ -429,7 +429,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .exam__mondai b { margin-right: var(--sp-3); padding: var(--sp-1) var(--sp-3); border-radius: var(--r-plate); background: var(--text-primary); color: var(--bg-main); font-size: var(--fs-caption); letter-spacing: var(--tr-term); }
 .exam__mondai span { white-space: nowrap; }
 .exam__q { margin: 0; font-size: var(--fs-title); line-height: 1.8; word-break: keep-all; }
-.exam__q u { text-underline-offset: 6px; }
+.exam__q u { text-underline-offset: var(--sp-2); }
 .exam__opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
 .opt { display: flex; align-items: center; gap: var(--sp-4); height: 56px; padding: 0 var(--sp-4); border: 1px solid var(--surface-line); border-radius: var(--r-card); background: var(--bg-main); cursor: pointer; text-align: left; font-size: var(--fs-body); transition: border-color .15s ease; }
 .opt__k { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: var(--r-pill); border: 1.5px solid var(--surface-line); font-weight: 700; font-size: var(--fs-caption); transition: background-color .15s ease, border-color .15s ease, color .15s ease; }
@@ -443,22 +443,25 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .exam__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-5); }
 .exam__verdict { min-height: 1.65em; color: var(--text-primary); }
 .exam__progress { display: none; flex: none; align-items: center; gap: var(--sp-4); font-size: var(--fs-sm); color: var(--text-secondary); }
-.exam__track { width: 120px; height: 4px; border-radius: var(--r-pill); background: var(--surface-line); overflow: hidden; }
-.exam__track i { display: block; width: calc(100% / var(--of)); height: 100%; background: var(--line-exam); }
+.exam__track { width: 120px; height: 4px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--text-secondary) 12%, transparent); overflow: hidden; }
+.exam__track i { display: block; width: max(var(--sp-2), calc(100% / var(--of))); height: 100%; border-radius: var(--r-pill); background: var(--line-exam); }
 /* The N5 paper beside the item, from the tablet up: its sections laid
-   along its minutes, each lit where it sits, then the score out of 180,
-   the pass mark a tick with the passing stretch tinted. */
+   along its minutes, each lit where it sits, the last closed by the
+   list's own rule (so each section sits between two rules alike), then
+   the score out of 180, the pass mark a tick with the passing stretch
+   tinted. The item's progress is drawn as those bars are: a pale track
+   and the pigment, never less than a dot of it. */
 .paper { display: none; flex-direction: column; gap: var(--sp-5); padding: var(--sp-5); }
 .paper__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); }
 .paper__level { font-weight: 700; font-size: var(--fs-title); color: var(--exam-ink); }
 .paper__total { font-size: var(--fs-lead); }
-.paper__legs { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.paper__legs { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; border-bottom: 1px solid var(--surface-line); }
 .paper__leg { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: var(--sp-3) var(--sp-4); padding: var(--sp-4) 0; border-top: 1px solid var(--surface-line); }
 .paper__name { font-weight: 500; font-size: var(--fs-body); }
 .paper__min { font-size: var(--fs-sm); color: var(--text-secondary); }
 .paper__bar { grid-column: 1 / -1; position: relative; height: 8px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--text-secondary) 12%, transparent); }
 .paper__bar i { position: absolute; top: 0; bottom: 0; left: calc(var(--at) * 100%); width: calc(var(--len) * 100%); border-radius: var(--r-pill); background: var(--line-exam); }
-.paper__score { display: grid; grid-template-columns: calc(var(--pass) * 100%) minmax(0, 1fr); align-items: end; row-gap: var(--sp-3); padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); font-size: var(--fs-sm); color: var(--text-secondary); }
+.paper__score { display: grid; grid-template-columns: calc(var(--pass) * 100%) minmax(0, 1fr); align-items: end; row-gap: var(--sp-3); font-size: var(--fs-sm); color: var(--text-secondary); }
 .paper__score > :first-child { grid-area: 1 / 1; }
 .paper__score > :nth-child(3) { grid-area: 1 / 2; justify-self: end; }
 .paper__pass { grid-area: 1 / 2; justify-self: start; display: inline-flex; align-items: baseline; gap: var(--sp-2); font-weight: 700; color: var(--text-primary); }
@@ -1626,9 +1629,18 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   .split--exam .split__copy > .body--small { min-height: var(--exam-foot); padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
   .exam__timer { font-size: var(--fs-heading); }
   .exam__mondai { font-size: var(--fs-body); }
-  .exam__sheet { flex: 1; padding: var(--sp-6) var(--sp-7); }
-  .exam__q { margin-block: auto; font-size: var(--fs-display); line-height: 1.6; }
-  .exam__q u { text-underline-offset: 10px; }
+  /* The sentence a rung up, and a second where the sheet holds it on
+     one line: the sheet is measured, not the window, so a narrow desk
+     never breaks it in two. 36.5rem is the sentence at --fs-display
+     (14.5em of 2.5rem: 580px in Noto Sans JP); the sheet's padding a
+     rung in, so the full wrap's sheet (594px, from a 1312px window)
+     clears it with room for a system face's wider spaces. */
+  .exam__sheet { flex: 1; padding: var(--sp-6); container: sheet / inline-size; }
+  .exam__q { margin-block: auto; font-size: var(--fs-heading); line-height: 1.6; }
+  @container sheet (min-width: 36.5rem) {
+    .exam__q { font-size: var(--fs-display); }
+    .exam__q u { text-underline-offset: var(--sp-3); }
+  }
   .opt { height: 80px; gap: var(--sp-5); font-size: var(--fs-title); }
   .opt__k { width: 36px; height: 36px; font-size: var(--fs-sm); }
   .exam__foot { padding-top: var(--sp-5); border-top: 1px solid var(--surface-line); }
@@ -1642,7 +1654,7 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
     .exam__mondai { font-size: var(--fs-sm); }
     .exam__sheet { gap: var(--sp-4); padding: var(--sp-5) var(--sp-6); }
     .exam__q { font-size: var(--fs-heading); }
-    .exam__q u { text-underline-offset: 6px; }
+    .exam__q u { text-underline-offset: var(--sp-2); }
     .opt { height: 56px; font-size: var(--fs-lead); }
     .exam__foot { margin-top: var(--sp-1); padding-top: var(--sp-4); }
   }
