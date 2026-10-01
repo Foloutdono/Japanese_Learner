@@ -511,14 +511,15 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .analyser__tap { margin-left: auto; }
 .analyser__line { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-5) var(--sp-4); border-radius: var(--r-card); background: var(--bg-panel); color: var(--text-on-panel); --kai: color-mix(in srgb, var(--line-kaiseki) 70%, var(--text-on-panel)); }
 .toks { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-1); }
-.tok { position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: 2px; min-height: 44px; padding: var(--sp-2) var(--sp-2); border: 0; border-bottom: 3px solid transparent; border-radius: var(--r-plate); background: transparent; color: inherit; cursor: pointer; }
+.tok { position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: 2px; min-width: 44px; min-height: 44px; padding: var(--sp-2) var(--sp-2); border: 0; border-bottom: 3px solid transparent; border-radius: var(--r-plate); background: transparent; color: inherit; cursor: pointer; }
 .tok__r { min-height: 1.2em; font-size: var(--fs-caption-xs); letter-spacing: .1em; color: var(--text-on-panel-soft); }
 .tok__w { font-size: var(--fs-title); line-height: 1.2; }
 .tok--word { border-bottom-color: color-mix(in srgb, var(--text-on-panel) 22%, transparent); }
 .tok--gram { border-bottom-color: var(--kai); }
-/* A word answers the pointer by its rule turning gold, the pick's
-   colour; picked, it is washed in gold too. */
-.tok:hover, .tok:focus-visible { border-bottom-color: var(--accent2); }
+/* A word answers the pointer by its rule turning half gold, a step
+   short of the pick's: picked, its rule is the whole gold and it is
+   washed in gold too. */
+.tok:not(.tok--on):hover, .tok:not(.tok--on):focus-visible { border-bottom-color: color-mix(in srgb, var(--accent2) 55%, transparent); }
 .tok--on { background: color-mix(in srgb, var(--accent2) 24%, transparent); border-bottom-color: var(--accent2); }
 .tok__n { position: absolute; top: calc(var(--sp-1) * -1); right: calc(var(--sp-1) * -1); display: grid; place-items: center; width: var(--sp-6); height: var(--sp-6); border: 1.5px solid var(--kai); border-radius: var(--r-pill); background: var(--bg-panel); font-size: var(--fs-caption-xs); color: var(--text-on-panel); }
 .tok__stop { padding-bottom: var(--sp-2); }
@@ -528,7 +529,8 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
 .tokinfo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-5); align-items: start; padding: var(--sp-4) var(--sp-5); }
 .tokinfo__word, .tokinfo__note { display: flex; flex-direction: column; gap: var(--sp-1); }
 .tokinfo__note { gap: var(--sp-3); }
-.tokinfo__note .body { color: var(--text-primary); }
+/* The Japanese in the note never cut (待つ, 〜ています). */
+.tokinfo__note .body { color: var(--text-primary); word-break: keep-all; }
 .tokinfo__r { min-height: 1.2em; font-size: var(--fs-caption); line-height: 1.2; letter-spacing: .1em; color: var(--text-secondary); }
 .tokinfo__d { font-size: var(--fs-heading); font-weight: 700; }
 /* Two lines kept for the meaning on a phone, the longest's, so a word
@@ -1660,103 +1662,144 @@ button.qcard:hover, button.qcard:focus-visible { border-color: var(--accent2); }
   }
 
   /* 06 Les outils, desk: the head row, then the two tools side by side
-     on the columns, both the rest of the body's height. The entry: its
-     head a rung up, the sense, its words, and how it is written taking
-     the spare height -- the strokes' sheet as tall as its block (200px
-     at most) beside the two record cells. The analyser: the sentence on
-     its sumi, a rung up where the window and the slab hold it on one
-     line; under it the word in focus beside the numbered grammar, both
-     the rest -- the word's note on the card's floor under a rule, two
-     lines kept for it, so a word pressed moves nothing, and the points'
-     rows sharing their column. */
+     on the columns, both the rest of the body's height. That rest is a
+     size container (tools), so each tool takes its rung from the room it
+     is given, not from the window: a heading of two lines or three, a
+     tier or a language changes the room, and the rung follows it. The
+     type steps up wherever the row holds the next rung, so the spare is
+     never much more than a row's worth -- and from 420px it is the base:
+     - the entry: the reading over the headword, the level and the stage
+       in the corner, the sense, how it is written (the strokes on a
+       square sheet beside the two record cells) and its words, a ledger
+       whose rows share the spare. The sheet is never larger than the
+       headword, nor wider than two fifths of the plate, so the cells
+       keep their words on a line;
+     - the analyser: the sentence on its sumi, which centres it, over the
+       word in focus beside the numbered grammar, the sumi taking two
+       parts of the spare and they one -- the word's note on the card's
+       floor under a rule, two lines kept for it, so a word pressed
+       moves nothing, and the points' rows sharing their column.
+     Never under 352px of room: a window too short for that grows the
+     stop instead. */
   .sec--tools > .wrap + .wrap { display: grid; grid-template-rows: auto minmax(0, 1fr); }
-  .tools { align-items: stretch; }
-  .dict { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(72px, 1fr) auto; grid-template-areas: "top" "sense" "form" "words"; min-height: 0; }
-  .dict__glyph { font-size: var(--fs-specimen-glyph); }
-  .dict__sense { align-self: start; font-size: var(--fs-title); }
-  .dict__form { container-type: size; }
-  .dict__sheet { width: min(100cqh, 200px); aspect-ratio: auto; }
+  .tools { align-items: stretch; container: tools / size; min-height: 352px; }
+  .dict { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto minmax(0, 1fr); grid-template-areas: "top" "sense" "form" "words"; min-height: 0; --sheet: 72px; }
+  .dict__sense { align-self: start; }
+  .dict__sheet { width: min(var(--sheet), 40%); }
   .dict__cells { grid-template-rows: none; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .dict__cell { padding: var(--sp-4) var(--sp-6); }
-  .dict__fig { font-size: var(--fs-heading); }
-  .word__w { font-size: var(--fs-title); }
-  .word__r { font-size: var(--fs-sm); }
-  .word__g { font-size: var(--fs-body); }
-  .analyser { display: grid; grid-template-rows: auto auto minmax(0, 1fr); min-height: 0; }
-  .analyser__line { gap: var(--sp-4); padding: var(--sp-7) var(--sp-6); container: line / inline-size; }
-  .analyser__trans { font-size: var(--fs-lead); }
-  .analyser__low { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--sp-6); min-height: 0; }
-  .tokinfo { display: flex; flex-direction: column; align-items: stretch; gap: var(--sp-5); padding: var(--sp-6); }
-  .tokinfo__word { gap: var(--sp-2); }
-  .tokinfo__d { font-size: var(--fs-display); line-height: 1.2; }
-  .tokinfo__m { font-size: var(--fs-title); }
-  .tokinfo__note { margin-top: auto; padding: var(--sp-5) 0 0; border-left: 0; border-top: 1px solid var(--surface-line); }
-  .tokinfo__note .body { font-size: var(--fs-body); }
-  .analyser__points { gap: var(--sp-4); }
+  .dict__fig, .dict__cell .capxs { white-space: nowrap; }
+  .words { display: grid; grid-auto-rows: minmax(0, 1fr); }
+  .word { padding: var(--sp-3) 0; }
+  .analyser__line { flex: 2 1 auto; justify-content: center; gap: var(--sp-2); padding: var(--sp-4) var(--sp-6); container: line / inline-size; }
+  .analyser__low { flex: 1 1 auto; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--sp-6); }
+  .tokinfo { display: flex; flex-direction: column; align-items: stretch; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); }
+  .tokinfo__word { gap: var(--sp-1); }
+  .tokinfo__d { line-height: 1.2; }
+  .tokinfo__m { font-size: var(--fs-lead); }
+  .tokinfo__note { margin-top: auto; padding: var(--sp-4) 0 0; border-left: 0; border-top: 1px solid var(--surface-line); }
+  .tokinfo__note .body { font-size: var(--fs-sm); }
+  .analyser__points { gap: var(--sp-3); }
   .points { flex: 1; grid-template-columns: auto auto minmax(0, 1fr); grid-auto-rows: 1fr; border-bottom: 1px solid var(--surface-line); }
   .points li { grid-column: 1 / -1; grid-template-columns: subgrid; column-gap: var(--sp-4); }
-  .points .num { grid-row: auto; width: var(--sp-7); height: var(--sp-7); font-size: var(--fs-sm); }
-  .points__p { font-size: var(--fs-heading); }
-  .points__g { font-size: var(--fs-body); }
-  /* The narrow desk: the points a rung down, so a gloss keeps its line
-     in the narrower column. */
-  @media (max-width: 1239px) {
-    .points li { column-gap: var(--sp-4); }
-    .points .num { width: 24px; height: 24px; font-size: var(--fs-caption); }
-    .points__p { font-size: var(--fs-lead); }
-    .points__g { font-size: var(--fs-sm); }
-  }
-  @media (min-height: 880px) {
-    @container line (min-width: 590px) {
-      .tok__w { font-size: var(--fs-display); }
-    }
-  }
-  /* Under 880px of window (the hero's own line; 900px on the narrow
-     desk, whose heading takes three lines) the tall analyser no longer
-     fits (it needs 494px): the sentence and the word in focus a rung
-     down, and on the narrow desk the headword. Under 840px every block
-     of both a rung down and the rows closer, so the strokes keep a sheet
-     near the headword's size. On the narrow short desk the headword a
-     rung further, and the word in focus across the analyser, its note
-     beside it, over the numbered grammar three across (its caption the
-     list's name only). */
-  @media (max-height: 879px), (max-height: 899px) and (max-width: 1239px) {
-    .analyser__line { gap: var(--sp-2); padding: var(--sp-4) var(--sp-6); }
-    .analyser__trans { font-size: var(--fs-body); }
-    .tokinfo__d { font-size: var(--fs-heading); }
-  }
-  @media (max-height: 879px) and (max-width: 1239px) {
-    .dict__glyph { font-size: var(--fs-specimen-word); }
-  }
-  @media (max-height: 839px) {
-    .dict__glyph { font-size: var(--fs-specimen-word); }
-    .dict__sense { font-size: var(--fs-lead); }
-    .dict__cell { padding: var(--sp-3) var(--sp-5); }
-    .dict__fig { font-size: var(--fs-title); }
-    .word { padding: var(--sp-3) 0; }
-    .word__w { font-size: var(--fs-lead); }
-    .word__r { font-size: var(--fs-caption); }
-    .word__g { font-size: var(--fs-sm); }
-    .tokinfo { gap: var(--sp-4); padding: var(--sp-4) var(--sp-5); }
-    .tokinfo__word { gap: var(--sp-1); }
-    .tokinfo__m { font-size: var(--fs-lead); }
-    .tokinfo__note { padding-top: var(--sp-4); }
-    .tokinfo__note .body { font-size: var(--fs-sm); }
-    .analyser__points { gap: var(--sp-3); }
-    .points .num { width: 24px; height: 24px; font-size: var(--fs-caption); }
-    .points__p { font-size: var(--fs-lead); }
-    .points__g { font-size: var(--fs-caption); }
-  }
-  @media (max-height: 799px) and (max-width: 1239px) {
-    .dict__glyph { font-size: var(--fs-display); }
+  .points .num { grid-row: auto; }
+  .points__p { font-size: var(--fs-lead); }
+  /* Under 420px of room (a laptop's window, 1366 × 657, or the narrow
+     desk's under 720): the entry's sense beside its headword, as a
+     dictionary prints it, the sheet a size down; the tablet's analyser
+     -- the word in focus across, its note beside it, over the numbered
+     grammar three across, its caption the list's name only. Under 385px
+     both a rung closer. */
+  @container tools (max-height: 419px) {
+    .dict { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: auto auto minmax(0, 1fr); grid-template-areas: "word sense tags" "form form form" "words words words"; column-gap: var(--sp-5); --sheet: 64px; }
+    .dict__top { display: contents; }
+    .dict__word { grid-area: word; }
+    .dict__tags { grid-area: tags; align-self: start; }
+    .dict__sense { grid-area: sense; align-self: end; }
+    .word { padding: var(--sp-2) 0; }
+    .analyser__line { padding: var(--sp-3) var(--sp-5); }
     .analyser__low { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: var(--sp-4); }
-    .tokinfo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-content: start; gap: var(--sp-5); }
+    .tokinfo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-content: center; gap: var(--sp-5); }
     .tokinfo__note { margin-top: 0; padding: 0 0 0 var(--sp-5); border-top: 0; border-left: 1px solid var(--surface-line); }
     .tokinfo__m { font-size: var(--fs-body); }
     .analyser__points > .capxs { display: none; }
     .points { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: auto; column-gap: var(--sp-4); border-bottom: 0; }
     .points li { grid-column: auto; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--sp-3); padding: var(--sp-2) 0; }
     .points .num { grid-row: span 2; }
+  }
+  /* Under 490px of room the cards keep the short tier's padding and
+     gaps, whatever the window's tier. */
+  @container tools (max-height: 489px) {
+    .dict, .analyser { padding: var(--sp-6); }
+    .dict { row-gap: var(--sp-4); }
+    .analyser { gap: var(--sp-4); }
+  }
+  @container tools (max-height: 384px) {
+    .dict { row-gap: var(--sp-3); padding: var(--sp-5); }
+    .analyser { gap: var(--sp-3); padding: var(--sp-5); }
+    .analyser__top .chip { height: 24px; }
+    .analyser__low { gap: var(--sp-3); }
+    .tokinfo { padding: var(--sp-3) var(--sp-5); }
+  }
+  /* From 490px: the headword at its glyph size, and every block of both
+     a rung up. */
+  @container tools (min-height: 490px) {
+    .dict { --sheet: 88px; }
+    .dict__glyph { font-size: var(--fs-specimen-glyph); }
+    .dict__sense { font-size: var(--fs-title); }
+    .dict__cell { padding: var(--sp-4) var(--sp-6); }
+    .dict__fig { font-size: var(--fs-heading); }
+    .word__w { font-size: var(--fs-title); }
+    .word__r { font-size: var(--fs-sm); }
+    .word__g { font-size: var(--fs-body); }
+    .tokinfo { gap: var(--sp-5); padding: var(--sp-6); }
+    .tokinfo__word { gap: var(--sp-2); }
+    .tokinfo__m { font-size: var(--fs-title); }
+    .tokinfo__note { padding-top: var(--sp-5); }
+    .tokinfo__note .body { font-size: var(--fs-body); }
+    .analyser__points { gap: var(--sp-4); }
+    .points .num { width: var(--sp-7); height: var(--sp-7); font-size: var(--fs-sm); }
+    .points__p { font-size: var(--fs-heading); }
+    .points__g { font-size: var(--fs-body); }
+  }
+  /* From 560px: the sheet at the headword's size, the sense a rung
+     further; the sentence on its sumi -- a rung up where the slab holds
+     it on one line -- and the word in focus at display. */
+  @container tools (min-height: 560px) {
+    .dict { --sheet: 104px; }
+    .dict__sense { font-size: var(--fs-heading); }
+    .analyser__line { gap: var(--sp-4); padding: var(--sp-7) var(--sp-6); }
+    .analyser__trans { font-size: var(--fs-lead); }
+    .tokinfo__d { font-size: var(--fs-display); }
+    @container line (min-width: 590px) {
+      .tok__w { font-size: var(--fs-display); }
+    }
+  }
+  /* From 600px (a window from about 920px tall): the words, the
+     translation and the note a rung further (the meaning stays at
+     title, where the narrowest word card still holds "the object of the
+     action" on one line, and the ledger's glosses at body, where "in
+     progress" keeps its line beside its pattern). */
+  @container tools (min-height: 600px) {
+    .word__w { font-size: var(--fs-heading); }
+    .word__r { font-size: var(--fs-body); }
+    .word__g { font-size: var(--fs-lead); }
+    .analyser__trans { font-size: var(--fs-title); }
+    .tokinfo__note .body { font-size: var(--fs-lead); }
+  }
+  /* The narrow desk: each point's gloss under its pattern, so it keeps
+     its line in the narrower column. */
+  @media (max-width: 1239px) {
+    @container tools (min-height: 420px) {
+      .points { grid-template-columns: auto minmax(0, 1fr); }
+      .points li { align-content: center; }
+      .points .num { grid-row: span 2; }
+    }
+    @container tools (min-height: 420px) and (max-height: 489px) {
+      .points li { padding: var(--sp-2) 0; }
+    }
+    @container tools (min-height: 600px) {
+      .points__g { font-size: var(--fs-lead); }
+    }
   }
 
   /* 07 Tarif, desk: the ticket in col A and the four promises in col

@@ -70,7 +70,8 @@ The page moves the way the app does (DESIGN.md, Motion):
 - **The tools:** the dictionary entry writes 駅 stroke by stroke, once,
   as the stop arrives; without script, or with reduced motion, it is
   drawn whole. In the analyser a word lifts nothing either: under the
-  pointer, or with keyboard focus, its rule turns gold. Pressed, it is
+  pointer, or with keyboard focus, its rule turns half gold, a step
+  short of the pick's. Pressed, its rule turns the whole gold and it is
   washed in gold, its entry comes in under the sentence, and its grammar
   point is lit in the numbered list. The entry keeps its height, so a
   word pressed moves nothing.

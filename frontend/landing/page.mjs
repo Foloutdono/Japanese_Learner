@@ -27,6 +27,11 @@ export function typo(lang, s) {
   return out
 }
 
+// Japanese inside a line of prose is never cut (DESIGN.md): the
+// analyser's note sets keep-all, which holds a form's kana together but
+// still breaks after the 〜 that opens it; a word joiner holds that too.
+const holdJa = s => String(s).replace(/〜(?=[\u3040-\u30ff\u4e00-\u9fff])/g, '〜\u2060')
+
 // ── Pieces ──
 
 const pigment = line => `var(--line-${line === 'today' ? 'jisho' : line})`
@@ -506,7 +511,7 @@ function tools(t) {
     + `<p class="body analyser__trans">${ty(T.translation)}</p></div>`
     + '<div class="analyser__low">'
     + `<div class="specimen tokinfo" aria-live="polite"><div class="tokinfo__word"><span class="tokinfo__r" lang="ja" data-ti="dictReading">${TOKENS[sel].dictReading}</span><span class="tokinfo__d" lang="ja" data-ti="dict">${TOKENS[sel].dict}</span><span class="tokinfo__m" data-ti="meaning">${ty(info.meaning)}</span></div>`
-    + `<div class="tokinfo__note"><span class="capxs" data-ti="kind">${ty(info.kind)}</span><span class="body body--small" data-ti="note">${ty(info.note)}</span></div></div>`
+    + `<div class="tokinfo__note"><span class="capxs" data-ti="kind">${ty(info.kind)}</span><span class="body body--small" data-ti="note">${holdJa(ty(info.note))}</span></div></div>`
     + `<div class="analyser__points"><p class="capxs" id="${t.ids.tools}-points">${ty(T.pointsLabel)}</p><ol class="points" aria-labelledby="${t.ids.tools}-points">${points}</ol></div>`
     + '</div></article></div></div></section>'
 }
@@ -621,7 +626,7 @@ function clientData(t, facts, media) {
       due: c.due.map(M.due),
     })),
     trial: { pos: CARDS.map((_, k) => M.trialPos(k + 1, CARDS.length)), flip: M.flip, flipAria: M.flipAria, xp: [0, 1, 2, 3, 4, 5].map(M.xp) },
-    tokens: TOKENS.map((w, k) => ({ ...w, ...Object.fromEntries(Object.entries(t.tools.tokens[k]).map(([key, v]) => [key, ty(v)])) })),
+    tokens: TOKENS.map((w, k) => ({ ...w, ...Object.fromEntries(Object.entries(t.tools.tokens[k]).map(([key, v]) => [key, holdJa(ty(v))])) })),
     exam: { right: ty(t.jlpt.right), wrong: ty(t.jlpt.wrong) },
     features: CLIPS.map(c => ({ id: c.id, glyph: c.glyph, line: pigment(c.line), name: ty(t.features.items[c.id].name), says: ty(t.features.items[c.id].line), what: ty(t.features.items[c.id].what), play: ty(t.features.play(t.features.items[c.id].name)) })),
   }
