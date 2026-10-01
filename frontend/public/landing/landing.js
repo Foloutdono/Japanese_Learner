@@ -552,7 +552,8 @@ function nearView(node, then) {
 // A tab each; the frame shows the feature's drawn screen, and its clip
 // over it once one is filmed. The tabs turn over by themselves, each
 // run drawn under its tab (landing.css, tab-run), held while the pointer
-// or the focus is on them and while the block is off the screen, and
+// or the focus is on them or on the stage and while the block is off the
+// screen, and
 // stopped for good the moment the reader picks one. A drawn screen's run
 // is seven seconds; a clip's is the clip, so the tab turns once the clip
 // has played through.
@@ -717,6 +718,11 @@ function pick(k, how) {
   panel.setAttribute('aria-labelledby', tabs[k].id)
   panel.style.setProperty('--c', f.line)
   mocks.forEach((mock, j) => { mock.hidden = j !== k })
+  // The stage's label: the feature's roundel and name, its line, and
+  // what the clip shows.
+  $('[data-clip-glyph]', panel).textContent = f.glyph
+  $('[data-clip-name]', panel).textContent = f.name
+  $('[data-clip-line]', panel).textContent = f.says
   $('[data-clip-what]', panel).textContent = f.what
   loadClip()
   typing()
@@ -739,9 +745,13 @@ tablist.addEventListener('animationend', event => {
   if (event.animationName !== 'tab-run' || features.classList.contains('is-manual')) return
   pick((feature + 1) % tabs.length, 'auto')
 })
+// Held while the pointer is on the tabs or the stage, not on the
+// heading beside them; the focus can only be on those.
 const hold = on => () => features.classList.toggle('is-hold', on)
-features.addEventListener('pointerenter', hold(true))
-features.addEventListener('pointerleave', hold(false))
+for (const part of [tablist, panel]) {
+  part.addEventListener('pointerenter', hold(true))
+  part.addEventListener('pointerleave', hold(false))
+}
 features.addEventListener('focusin', hold(true))
 features.addEventListener('focusout', event => { if (!features.contains(event.relatedTarget)) features.classList.remove('is-hold') })
 
@@ -774,6 +784,8 @@ for (const button of $$('[data-device]')) {
       other.setAttribute('aria-pressed', String(on))
     }
     frame.dataset.frame = device
+    // The stage lays its label beside a phone, over a computer (landing.css).
+    panel.classList.toggle('is-desk', device === 'desk')
     stopTurning()
     loadClip()
   })

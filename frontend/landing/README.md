@@ -40,23 +40,33 @@ The page moves the way the app does (DESIGN.md, Motion):
   block whose children arrive in turn.
 - **Hover:** a 1px lift, the edge in the line's colour, and only on
   what can be pressed: the four lines' plates are no doors, so they
-  lift nothing. The mock exam's answers are the one exception: they
-  lift nothing.
+  lift nothing. The mock exam's answers are an exception: they lift
+  nothing.
   Under the pointer, or with keyboard focus, an answer's number turns
   over in the exam's ink and its edge takes a tint of it, so it reads
   "press this", not "picked". The first pick is the answer, as on the
   paper: after it, no answer reacts and a second click changes nothing.
+  On the desk the feature tabs, a row each in one group, lift nothing
+  either: under the pointer, or with keyboard focus, a tab shows a 1px
+  edge in its line's colour and a tint in its roundel, and nothing
+  more, so it never reads as a second pick; the picked tab is washed in
+  gold with its rail, its roundel lit in its line's colour.
 - **Scale and glow:** none, except the gate button and the stamps, which
   are the app's own exceptions.
 - **The hero:** the gold road runs out of Embarquer into the hub, each
   line draws out to its station, and trains run along them.
 - **Features:** each tab shows the app's own screen, drawn, with 駅
   written in its KanjiVG stroke order. The tabs turn over by themselves
-  until one is picked. A drawn screen stays seven seconds. A tab with a
-  clip stays until the clip has played through, the line under the tab
-  following it, and plays it again while the pointer is on the block. A
-  clip that fails leaves the tab to the seven seconds, and one that has
-  not started after seven seconds turns it.
+  until one is picked, and hold while the pointer or the focus is on
+  the tabs or the stage (not on the heading beside them). A drawn
+  screen stays seven seconds. A tab with a clip stays until the clip
+  has played through, the line under the tab following it, and plays
+  it again while the pointer is on the tabs or the stage. A clip that
+  fails leaves the tab to the seven seconds, and one that has not
+  started after seven seconds turns it. On the desk the stage's label
+  stands beside the phone -- the feature's roundel and name and its
+  line at the head, what the clip shows at the foot, each held at two
+  lines -- and every tab is the same height, so a turn moves nothing.
 - **The tools:** the dictionary entry writes 駅 stroke by stroke, once,
   as the stop arrives; without script, or with reduced motion, it is
   drawn whole. In the analyser a word lifts nothing either: under the

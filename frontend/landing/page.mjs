@@ -401,15 +401,21 @@ function features(t, media) {
   const f0 = F.items[first.id]
   // The stop's body is the block the script turns (.features): the
   // heading and the tabs in one column, the device in the other -- on
-  // the desk a stage the column's height, the clip's caption and the
-  // Phone / Computer switch at its head, the screen as tall as the rest
-  // lets it be. The stage carries the feature's pigment (landing.js).
+  // the desk a stage the column's height. Its label (the feature's
+  // roundel and name, its line and the clip's caption) and the
+  // Phone / Computer switch stand beside the phone, as tall as the
+  // stage, or over the computer; the label's roundel and name repeat
+  // the tab the panel is labelled by, so a screen reader skips them.
+  // The stage carries the feature's pigment (landing.js).
   return `<section class="sec sec--band" id="${t.ids.features}" aria-labelledby="${t.ids.features}-h">${stop(t, 'features')}`
     + `<div class="wrap features cols" data-media="${esc(media)}">`
     + `<div class="features__copy" data-stagger><h2 class="h2" id="${t.ids.features}-h">${esc(typo(t.lang, F.h2))}</h2><p class="body">${esc(typo(t.lang, F.body))}</p></div>`
     + `<div class="ftabs" role="tablist" aria-label="${esc(F.tabsLabel)}" aria-orientation="vertical" data-reveal>${tabs}</div>`
     + `<div class="fpanel" role="tabpanel" id="feature-panel" aria-labelledby="tab-${first.id}" tabindex="0" style="--c:${pigment(first.line)}" data-reveal>`
-    + `<div class="fpanel__head"><p class="body fpanel__what" data-clip-what>${esc(typo(t.lang, f0.what))}</p>`
+    + `<div class="fpanel__head"><div class="fpanel__say">`
+    + `<p class="fpanel__name" aria-hidden="true"><span class="ring fpanel__ring" lang="ja" data-clip-glyph>${esc(first.glyph)}</span><span data-clip-name>${esc(typo(t.lang, f0.name))}</span></p>`
+    + `<p class="fpanel__line" data-clip-line>${esc(typo(t.lang, f0.line))}</p>`
+    + `<p class="body fpanel__what" data-clip-what>${esc(typo(t.lang, f0.what))}</p></div>`
     + `<div class="seg devices" role="group" aria-label="${esc(F.devicesLabel)}" data-devices>${devices}</div></div>`
     + '<div class="frame" data-frame="phone"><div class="frame__screen clip" data-clip>'
     + CLIPS.map((clip, k) => mockScreen(t, clip, k === 0)).join('')
@@ -615,7 +621,7 @@ function clientData(t, facts, media) {
     trial: { pos: CARDS.map((_, k) => M.trialPos(k + 1, CARDS.length)), flip: M.flip, flipAria: M.flipAria, xp: [0, 1, 2, 3, 4, 5].map(M.xp) },
     tokens: TOKENS.map((w, k) => ({ ...w, ...Object.fromEntries(Object.entries(t.tools.tokens[k]).map(([key, v]) => [key, ty(v)])) })),
     exam: { right: ty(t.jlpt.right), wrong: ty(t.jlpt.wrong) },
-    features: CLIPS.map(c => ({ id: c.id, glyph: c.glyph, line: pigment(c.line), name: ty(t.features.items[c.id].name), what: ty(t.features.items[c.id].what), play: ty(t.features.play(t.features.items[c.id].name)) })),
+    features: CLIPS.map(c => ({ id: c.id, glyph: c.glyph, line: pigment(c.line), name: ty(t.features.items[c.id].name), says: ty(t.features.items[c.id].line), what: ty(t.features.items[c.id].what), play: ty(t.features.play(t.features.items[c.id].name)) })),
   }
 }
 
