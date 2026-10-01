@@ -224,7 +224,10 @@ function Moved({ to }) {
   return <Navigate to={path + search + hash} replace />
 }
 
-export default function App() {
+// No Board pressed on the landing page (lib/frontEntry.js).
+const NO_FRONT = Object.freeze({ entry: null, back: '/' })
+
+export default function App({ front = NO_FRONT }) {
   const [session, setSession] = useState(undefined)
   // Signed out: Welcome (the boarding's step zero) until Board or
   // "Have an account?" opens the sign-in on the matching side.
@@ -288,7 +291,28 @@ export default function App() {
   // rail, which is another width, and keeps the boot screen.
   // When Board was pressed (a performance.now() reading), or null: the
   // wait's dots are drawn a beat after the press, whichever screen is up.
-  const [boardedHere, setBoardedHere] = useState(null)
+  // Board pressed on the landing page counts from this load.
+  const [boardedHere, setBoardedHere] = useState(() => (front.entry === 'board' ? performance.now() : null))
+  // 正面口 (lib/frontEntry.js): Board pressed on the landing page is
+  // honoured before any screen is drawn -- the pass is minted at once and
+  // the boarding opens on its name, with no Welcome asking a second time.
+  // On until a session arrives, or until the pass could not be minted (the
+  // Welcome then opens on the sign-up, as its own Board does).
+  const [pageBoard, setPageBoard] = useState(front.entry === 'board')
+  const pageBoarded = useRef(false)
+  useEffect(() => {
+    if (session !== null || !pageBoard || pageBoarded.current) return
+    pageBoarded.current = true
+    startGuest().then(r => {
+      if (r.ok) return
+      setAuthMode('signup')
+      setPageBoard(false)
+    })
+  }, [session, pageBoard])
+  // And backing out of its first question goes back to that page, not to
+  // the Welcome it skipped. The page to go to while it loads, or null.
+  const pageBehind = useRef(front.entry === 'board' ? front.back : null)
+  const [leavingForPage, setLeavingForPage] = useState(false)
 
   // Anonymous sign-ins are a project setting, so this can legitimately
   // be unavailable. It is not something the learner can act on, so the
@@ -322,7 +346,13 @@ export default function App() {
   // scope, like Settings' own sign-out: this device only.
   function leaveBoarding(mode = null) {
     setAuthMode(mode)
-    supabase.auth.signOut({ scope: 'local' })
+    const out = supabase.auth.signOut({ scope: 'local' })
+    const page = mode == null ? pageBehind.current : null
+    pageBehind.current = null
+    if (page) {
+      setLeavingForPage(true)
+      out.finally(() => window.location.replace(page))
+    }
   }
   // The onboarding gate: undefined = still asking, 'needed' = show the
   // ticket office instead of the router, 'finishing' = the router is
@@ -462,6 +492,7 @@ export default function App() {
       // it, so without this the boarding hands a brand-new learner the
       // last one's screen. A token refresh carries a session and moves
       // nothing.
+      if (next) setPageBoard(false)
       if (!next) {
         setBoarding(false)
         setBoardedHere(null)
@@ -516,6 +547,15 @@ export default function App() {
   }
 
   if (!session) {
+    // Board pressed on the landing page, and the pass on its way -- or the
+    // boarding being left for that page: the wait, never the Welcome.
+    if (pageBoard || leavingForPage) {
+      return (
+        <LangProvider>
+          <AppLoading frame={desk} since={boardedHere} />
+        </LangProvider>
+      )
+    }
     return (
       <LangProvider>
         <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} onBack={() => setAuthMode(null)} authMode={authMode} />
@@ -547,7 +587,7 @@ export default function App() {
           session={session}
           initialProfile={onboardingProfile}
           guest={isGuest(session)}
-          onComplete={() => {
+          onComplete={signed => {
             // The contract is signed server-side by now: this device
             // may wave the learner through on a launch the server
             // fails to answer, the same as a profile that said so.
@@ -557,7 +597,17 @@ export default function App() {
             // first ride. A sign-out already put the address back, but
             // a boarding reached on a deep link never had one to leave.
             returnToFrontDoor()
-            setOnboarding('finishing')
+            // The profile the gate holds was read BEFORE the boarding,
+            // so it carries no kana answer, and `rideStart` read off it
+            // sent a learner who had just said « Pas encore » to the
+            // cards rather than to 入門 (plan 170) -- the introduction
+            // only appeared after a reload. The boarding hands over
+            // what it signed, and the ride is decided on that.
+            setGate(g => (g ? {
+              ...g,
+              state: 'finishing',
+              profile: g.profile && signed ? { ...g.profile, ...signed } : g.profile,
+            } : g))
           }}
           onExit={() => leaveBoarding()}
           onSignIn={() => leaveBoarding('login')}
