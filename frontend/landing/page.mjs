@@ -136,7 +136,6 @@ function crossroads(t) {
   }).join('')
   return '<svg class="map__art" viewBox="0 0 660 600" aria-hidden="true" focusable="false">'
     + '<line class="map__road" pathLength="1" x1="0" y1="300" x2="276" y2="300"/>'
-    + '<line class="map__train map__train--road" pathLength="100" x1="0" y1="300" x2="276" y2="300"/>'
     + `<g class="map__lines">${lines}${trains}</g>`
     + '<g class="map__hubs"><circle class="map__hub" cx="276" cy="300" r="66"/>'
     + `<svg x="234" y="258" width="84" height="84" viewBox="0 0 1000 1000"><path class="mark__road" d="${MARK_ROAD}"/><path class="map__ink" d="${MARK_INK}"/></svg></g>`
