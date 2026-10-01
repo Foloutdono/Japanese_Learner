@@ -585,7 +585,12 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
                 </button>
               )}
             </header>
-            {mondai && instructionsOpen && <p className="exam-page__inst" lang="ja">{mondai.instructionsJp}</p>}
+            {/* The instruction in the learner's words, not a second title in
+                Japanese under the part's (plan 171); the paper's own
+                Japanese for a part the table does not know. */}
+            {mondai && instructionsOpen && (t.examMondaiHow[mondai.nameJp]
+              ? <p className="exam-page__inst">{t.examMondaiHow[mondai.nameJp]}</p>
+              : <p className="exam-page__inst" lang="ja">{mondai.instructionsJp}</p>)}
             <QuestionRenderer question={current} selected={selected} onSelect={select} devMode={devMode} apart />
           </article>
 

@@ -370,14 +370,21 @@ export default function ExamResult({ session }) {
           <span className={metTarget ? 'exam-res__fill' : 'exam-res__fill exam-res__fill--low'} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
           <span className="exam-res__tick" style={{ left: `${PRACTICE_TARGET_PCT}%` }} />
         </div>
-        <div className="exam-res__caps">
-          {/* The one screen where a generated practice number could be
-              taken for a real JLPT result, so it says it is not one. */}
-          <span className="cap">{t.examPracticeTarget} {PRACTICE_TARGET_PCT} % · {t.examUnofficial}</span>
-          {elapsedMs !== null && (
-            <span className="cap">{t.examTimeOf(formatDuration(elapsedMs), `${section.timeLimitMin}:00`)}</span>
-          )}
-        </div>
+        {/* The one screen where a generated practice number could be
+            taken for a real JLPT result, so it says it is not one. */}
+        <span className="cap">{t.examPracticeTarget} {PRACTICE_TARGET_PCT} % · {t.examUnofficial}</span>
+        {elapsedMs !== null && (
+          <div className="exam-res__time">
+            <span className="cap">{t.examTimeLabel}</span>
+            <span className="exam-res__clock">
+              <b>{formatDuration(elapsedMs)}</b>
+              <span className="exam-res__limit"> / {section.timeLimitMin}:00</span>
+            </span>
+            <span className="exam-res__track" aria-hidden="true">
+              <span className="exam-res__used" style={{ width: `${Math.min(100, elapsedMs / (section.timeLimitMin * 600))}%` }} />
+            </span>
+          </div>
+        )}
       </div>
 
       <section className="exam-res__parts" aria-label={t.examByPart}>
@@ -406,13 +413,15 @@ export default function ExamResult({ session }) {
         {/* Rendered on a clean sheet too: every question can still be
             opened -- a listening transcript is what somebody who aced
             the paper may want to read. */}
-        <Chip
-          on={showAll}
-          color={EXAM_COLOR}
+        <button
+          type="button"
+          className="exam-res__all"
+          aria-pressed={showAll}
           onClick={() => { playUi('click-mode-selection'); setShowAll(v => !v) }}
         >
-          {t.examShowAll}
-        </Chip>
+          {showAll ? t.examMissesOnly : t.examSeeAll}
+          <ChevronIcon direction="right" size={14} />
+        </button>
       </div>
 
       {listed.length > 0 && (

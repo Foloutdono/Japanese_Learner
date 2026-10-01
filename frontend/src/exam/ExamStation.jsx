@@ -68,7 +68,11 @@ export function ExamStation({ level, papers, onLevel, onOpen, onFresh }) {
           <div className="exam-st__head">
             <h2 className="exam-st__title">{META[hero.kind]?.label ?? hero.title}</h2>
             {KIND_JP[hero.kind] && <span className="exam-st__jp" lang="ja">{KIND_JP[hero.kind]}</span>}
-            <span className="exam-st__facts">{facts(hero)}</span>
+          </div>
+          <div className="exam-st__facts">
+            <span className="exam-st__fact"><b>{hero.questionCount}</b> {t.examQuestions}</span>
+            {hero.minutes ? <span className="exam-st__fact"><b>{hero.minutes}</b> min</span> : null}
+            {hero.mondai?.length > 0 && <span className="exam-st__fact"><b>{hero.mondai.length}</b> {t.examPartsUnit(hero.mondai.length)}</span>}
           </div>
           {hero.mondai?.length > 0 && (
             <ol className="exam-st__parts">

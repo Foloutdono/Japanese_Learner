@@ -23422,13 +23422,19 @@ button.brd-stn { cursor: pointer; }
 .exam-st__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); }
 .exam-st__title { margin: 0; font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: 1.1; }
 .exam-st__jp { font-family: var(--font-jp); font-size: var(--fs-body); color: var(--text-secondary); }
-.exam-st__facts {
-  margin-left: auto;
-  font-family: var(--font-display);
+/* What a learner weighs before a timed paper, as three figures read
+   left to right under its name rather than a line pushed to the edge. */
+.exam-st__facts { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-5); }
+.exam-st__fact {
   font-size: var(--fs-sm);
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
+}
+.exam-st__fact b {
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
 }
 .exam-st__parts { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
 .exam-st__part {
@@ -23711,7 +23717,8 @@ button.brd-stn { cursor: pointer; }
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: 700;
-  line-height: normal;
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
   color: var(--text-on-panel-soft);
 }
 .exam-tile__t {
@@ -23898,7 +23905,19 @@ button.brd-stn { cursor: pointer; }
 .exam-res__fill { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-pill); background: var(--success); }
 .exam-res__fill--low { background: var(--danger); }
 .exam-res__tick { position: absolute; top: -4px; width: 2px; height: 14px; margin-left: -1px; background: var(--text-primary); }
-.exam-res__caps { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-2); }
+/* The time the paper took against the time it allows, on a hairline of
+   its own under the score's caption. */
+.exam-res__time {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-3);
+  margin-top: var(--sp-2);
+}
+.exam-res__clock { font-family: var(--font-display); font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+.exam-res__limit { color: var(--text-secondary); }
+.exam-res__track { grid-column: 1 / -1; position: relative; height: 4px; border-radius: var(--r-pill); background: var(--surface-line); }
+.exam-res__used { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-pill); background: var(--text-secondary); }
 .exam-res__parts {
   padding: 0 var(--sp-4);
   background: var(--bg-card);
@@ -23924,6 +23943,20 @@ button.brd-stn { cursor: pointer; }
 .exam-res__mk--blank { border: 1.5px dashed var(--text-secondary); }
 .exam-res__s { flex: none; font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; }
 .exam-res__mhead { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.exam-res__all {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.exam-res__all:hover,
+.exam-res__all:focus-visible { color: var(--text-primary); filter: none; }
 .exam-res__misses { display: flex; flex-direction: column; gap: var(--sp-3); }
 .exam-miss {
   display: flex;
@@ -23973,7 +24006,12 @@ button.brd-stn { cursor: pointer; }
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
-  line-height: normal;
+  font-variant-numeric: tabular-nums;
+  /* The figure's ink centred, not its line box: a line box keeps room
+     for descenders a digit never has, which sat every figure high. */
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+  padding: 0;
   color: var(--text-secondary);
 }
 .exam-miss__b--right { border: 2px solid var(--success); color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
