@@ -1327,7 +1327,13 @@ runtime purpose. Two consequences worth knowing:
   twenty, blended with the gap pace by how many there were (cited in
   `srs/srs.py`'s `personal_pace`, `run_paces` and `get_review_pace`,
   `routes/today.py` and `tests/test_today_take.py`).
-  When starting a new wave, begin at **176** or higher, and check
+  **176** is the vocab deck's archaic readings: twelve N1 cards whose
+  every JMdict sense is tagged arch, obs or dated and whose (spelling,
+  reading) is on none of the Tanos JLPT lists (弟 おと, 銃 つつ, 会 え ...)
+  retired in `content/vocab_renames.py`'s `RETIRED`, the common word each
+  spells keeping its own card. The tag test misses a word that is current
+  but names an outdated thing (テープレコーダー); those are not removed.
+  When starting a new wave, begin at **177** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

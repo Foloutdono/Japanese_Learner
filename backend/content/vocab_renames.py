@@ -745,6 +745,23 @@ RETIRED: dict[str, str] = {
     "vocab_N1_施行_しぎょう": "plan 153: a rare reading on しこう's gloss; now 施行 read しこう",
     "vocab_N3_下す_おろす": "plan 153: 下す read おろす is 下ろす's irregular okurigana; now 下ろす",
     "vocab_N1_否_いいえ": "plan 153: JMdict gives 否 no reading いいえ; the N5 いいえ is the word",
+    # ── Plan 176: archaic readings and words ─────────────────────
+    # Every sense tagged arch, obs or dated in the deck's JMdict
+    # senses, and the pair (spelling, reading) on none of the Tanos
+    # JLPT lists. Dropped rather than moved: the common word these
+    # spell has its own card (弟 おとうと, 銃 じゅう, 長 ちょう ...).
+    "vocab_N1_弟_おと": "plan 176: archaic reading; おとうと is the word",
+    "vocab_N1_女子_おなご": "plan 176: archaic reading; じょし is the word",
+    "vocab_N1_捕吏_ほり": "plan 176: archaic; no list has it",
+    "vocab_N1_保母_ほぼ": "plan 176: dated; 保育士 is the word, no list has ほぼ",
+    "vocab_N1_銃_つつ": "plan 176: archaic reading; じゅう is the word",
+    "vocab_N1_長_おさ": "plan 176: archaic reading; no list has おさ",
+    "vocab_N1_悪口_あっこう": "plan 176: archaic reading; わるぐち is the word",
+    "vocab_N1_種々_くさぐさ": "plan 176: archaic reading; しゅじゅ is the word",
+    "vocab_N1_一定_いちじょう": "plan 176: archaic reading; いってい is the word",
+    "vocab_N1_末_うら": "plan 176: archaic reading; すえ and まつ are the words",
+    "vocab_N1_哉_や": "plan 176: archaic particle, not a word to learn",
+    "vocab_N1_会_え": "plan 176: archaic reading; かい is the word",
 }
 
 
