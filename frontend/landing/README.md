@@ -38,18 +38,59 @@ The page moves the way the app does (DESIGN.md, Motion):
 - **Arrivals:** blocks arrive once as they are reached, rising 10px a
   child at a time. They are marked `data-reveal`, or `data-stagger` for a
   block whose children arrive in turn.
-- **Hover:** a 1px lift, the edge in the line's colour.
+- **Hover:** a 1px lift, the edge in the line's colour, and only on
+  what can be pressed: the four lines' plates are no doors, so they
+  lift nothing. The mock exam's answers are an exception: they lift
+  nothing.
+  Under the pointer, or with keyboard focus, an answer's number turns
+  over in the exam's ink and its edge takes a tint of it, so it reads
+  "press this", not "picked". The first pick is the answer, as on the
+  paper: after it, no answer reacts and a second click changes nothing.
+  On the desk the feature tabs, a row each in one group, lift nothing
+  either: under the pointer, or with keyboard focus, a tab shows a 1px
+  edge in its line's colour and a tint in its roundel, and nothing
+  more, so it never reads as a second pick; the picked tab is washed in
+  gold with its rail, its roundel lit in its line's colour.
 - **Scale and glow:** none, except the gate button and the stamps, which
   are the app's own exceptions.
 - **The hero:** the gold road runs out of Embarquer into the hub, each
   line draws out to its station, and trains run along them.
 - **Features:** each tab shows the app's own screen, drawn, with 駅
   written in its KanjiVG stroke order. The tabs turn over by themselves
-  until one is picked. A drawn screen stays seven seconds. A tab with a
-  clip stays until the clip has played through, the line under the tab
-  following it, and plays it again while the pointer is on the block. A
-  clip that fails leaves the tab to the seven seconds, and one that has
-  not started after seven seconds turns it.
+  until one is picked, and hold while the pointer or the focus is on
+  the tabs or the stage (not on the heading beside them). A drawn
+  screen stays seven seconds. A tab with a clip stays until the clip
+  has played through, the line under the tab following it, and plays
+  it again while the pointer is on the tabs or the stage. A clip that
+  fails leaves the tab to the seven seconds, and one that has not
+  started after seven seconds turns it. On the desk the stage's label
+  stands beside the phone -- the feature's roundel and name and its
+  line at the head, what the clip shows at the foot, each held at two
+  lines -- and every tab is the same height, so a turn moves nothing.
+- **The tools:** the dictionary entry writes 駅 stroke by stroke, once,
+  as the stop arrives; without script, or with reduced motion, it is
+  drawn whole. In the analyser a word lifts nothing either: under the
+  pointer, or with keyboard focus, its rule turns half gold, a step
+  short of the pick's. Pressed, its rule turns the whole gold and it is
+  washed in gold, its entry comes in under the sentence, and its grammar
+  point is lit in the numbered list. The entry keeps its height, so a
+  word pressed moves nothing.
+- **The questions:** from the tablet up a question lifts nothing:
+  under the pointer, or with keyboard focus, its row shows its gold
+  rail, and nothing more, so it never reads as opened; the open one is
+  washed in gold, its ring the lit stop's, and on the desk a ▶ points
+  from it to its answer. On the desk the open answer stands in a card
+  beside the list, and on a tablet at least 1080px tall in a card under
+  it, headed by its question again (its number in the lit ring); there
+  one answer is open at a time (the `<details>` share a name, and the
+  script does it where a browser does not), the open question stays
+  open, the rows never change height, so a question opened moves
+  nothing, and the answer it leaves fades out before its own fades in.
+  A phone, and a shorter tablet, keep the accordion, each answer
+  opening on its own (the script takes the name off), so opening one
+  never closes another above it. Without script, a card with no answer
+  open is not drawn. Each answer ends on the stop that shows it, a link
+  back up the line.
 - **The stops:** the page is the gold line the hero's road starts, and
   each section is a stop on it. A sign opens every section, where a
   hairline once cut the page. It holds the stop's number in a ring, its
@@ -62,8 +103,10 @@ The page moves the way the app does (DESIGN.md, Motion):
 - **What to press:** each demo's first step wears the ring the app's
   guide puts round what a note asks you to press: gold, breathing, never
   a fill. The steps are the card, then its verdicts, the pace, a word and
-  an answer. The ring moves on or goes once the step is answered, and it
-  never comes back. The hero ends with a link down to the first stop.
+  an answer (the ring goes round each answer's number, never round the
+  group, and never round one answer alone). The ring moves on or goes
+  once the step is answered, and it never comes back. The hero ends with
+  a link down to the first stop.
 
 Three rules keep it safe:
 - **Content is hidden only while the `js` flag is set** (the head script

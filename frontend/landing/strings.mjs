@@ -32,12 +32,15 @@ export const CARDS = [
 ]
 
 // The analyser's sentence, a token each: 駅で友達を待っています。
+// `point` is the numbered grammar point the word carries (the tools'
+// `points`, from 1), 0 for none: the sentence is numbered as the app's
+// analyser numbers it.
 export const TOKENS = [
-  { surface: '駅', reading: 'えき', dict: '駅', dictReading: 'えき', gram: false },
-  { surface: 'で', reading: '', dict: '〜で', dictReading: '', gram: true },
-  { surface: '友達', reading: 'ともだち', dict: '友達', dictReading: 'ともだち', gram: false },
-  { surface: 'を', reading: '', dict: '〜を', dictReading: '', gram: true },
-  { surface: '待っています', reading: 'まっています', dict: '待つ', dictReading: 'まつ', gram: false },
+  { surface: '駅', reading: 'えき', dict: '駅', dictReading: 'えき', gram: false, point: 0 },
+  { surface: 'で', reading: '', dict: '〜で', dictReading: '', gram: true, point: 1 },
+  { surface: '友達', reading: 'ともだち', dict: '友達', dictReading: 'ともだち', gram: false, point: 0 },
+  { surface: 'を', reading: '', dict: '〜を', dictReading: '', gram: true, point: 2 },
+  { surface: '待っています', reading: 'まっています', dict: '待つ', dictReading: 'まつ', gram: false, point: 3 },
 ]
 
 // The mock exam's item: この駅はとても大きいです, 駅 underlined.
@@ -254,13 +257,15 @@ const fr = facts => {
     faq: {
       kicker: 'Questions',
       h2: 'Apprendre le japonais avec Tsuji',
+      // Each: the question, its answer, and the stop that shows it (its
+      // key in ids), which the answer ends on (page.mjs, faq()).
       items: [
-        ['Combien de temps faut-il pour apprendre le japonais ?', `Jusqu'au N5, ${span(n5At10).replace('≈ ', 'environ ')} à dix minutes par jour en partant de zéro, kana compris, selon l'estimation de Tsuji. Il te montre ta propre date d'arrivée et la recalcule quand ton rythme change.`],
-        ['Par où commencer : hiragana, katakana ou kanji ?', 'Par les hiragana puis les katakana : ils écrivent tout le reste. Tsuji te demande ce que tu sais déjà et te fait monter à la bonne station.'],
-        ["Qu'est-ce que la répétition espacée ?", "Chaque carte revient à l'intervalle où tu étais sur le point de l'oublier : quelques minutes après une erreur, des jours puis des semaines quand tu la sais. C'est ce que fait la carte d'essai plus haut."],
-        ['Tsuji est-il gratuit ?', "Oui, pendant l'accès anticipé, sans compte pour commencer. Un abonnement viendra plus tard pour réviser sans compter ; les kana resteront gratuits."],
-        ['Tsuji remplace-t-il Anki ?', "La même répétition espacée, sans rien à configurer, avec le programme du JLPT déjà écrit. Tes propres cartes s'y ajoutent, ou s'importent d'un tableur."],
-        ['Mes données sont-elles revendues ?', 'Non. Aucune publicité, aucun traqueur, aucune revente ; ta progression s’exporte et ton compte se supprime en deux gestes.'],
+        ['Combien de temps faut-il pour apprendre le japonais ?', `Jusqu'au N5, ${span(n5At10).replace('≈ ', 'environ ')} à dix minutes par jour en partant de zéro, kana compris, selon l'estimation de Tsuji. Il te montre ta propre date d'arrivée et la recalcule quand ton rythme change.`, 'line'],
+        ['Par où commencer : hiragana, katakana ou kanji ?', 'Par les hiragana puis les katakana : ils écrivent tout le reste. Tsuji te demande ce que tu sais déjà et te fait monter à la bonne station.', 'lines'],
+        ["Qu'est-ce que la répétition espacée ?", "Chaque carte revient à l'intervalle où tu étais sur le point de l'oublier : quelques minutes après une erreur, des jours puis des semaines quand tu la sais. C'est ce que fait la carte d'essai plus haut.", 'method'],
+        ['Tsuji est-il gratuit ?', "Oui, pendant l'accès anticipé, sans compte pour commencer. Un abonnement viendra plus tard pour réviser sans compter ; les kana resteront gratuits.", 'fare'],
+        ['Tsuji remplace-t-il Anki ?', "La même répétition espacée, sans rien à configurer, avec le programme du JLPT déjà écrit. Tes propres cartes s'y ajoutent, ou s'importent d'un tableur.", 'method'],
+        ['Mes données sont-elles revendues ?', 'Non. Aucune publicité, aucun traqueur, aucune revente ; ta progression s’exporte et ton compte se supprime en deux gestes.', 'fare'],
       ],
     },
 
@@ -502,12 +507,12 @@ const en = facts => {
       kicker: 'Questions',
       h2: 'Learning Japanese with Tsuji',
       items: [
-        ['How long does it take to learn Japanese?', `To N5, ${span(n5At10).replace('≈ ', 'about ')} at ten minutes a day from zero, kana included, by Tsuji's estimate. It shows you your own arrival date and works it out again when your pace changes.`],
-        ['Where to start: hiragana, katakana or kanji?', 'With hiragana, then katakana: they write everything else. Tsuji asks what you already know and boards you at the right station.'],
-        ['What is spaced repetition?', "Each card comes back at the interval where you were about to forget it: minutes after a miss, days then weeks once you know it. It is what the trial card above does."],
-        ['Is Tsuji free?', 'Yes, during early access, with no account needed to start. A subscription will come later for unlimited reviews; the kana will stay free.'],
-        ['Does Tsuji replace Anki?', 'The same spaced repetition, with nothing to configure and the JLPT syllabus already written. Your own cards join in, or import from a spreadsheet.'],
-        ['Is my data sold?', 'No. No ads, no trackers, no sale of data; your progress exports and your account deletes in two taps.'],
+        ['How long does it take to learn Japanese?', `To N5, ${span(n5At10).replace('≈ ', 'about ')} at ten minutes a day from zero, kana included, by Tsuji's estimate. It shows you your own arrival date and works it out again when your pace changes.`, 'line'],
+        ['Where to start: hiragana, katakana or kanji?', 'With hiragana, then katakana: they write everything else. Tsuji asks what you already know and boards you at the right station.', 'lines'],
+        ['What is spaced repetition?', "Each card comes back at the interval where you were about to forget it: minutes after a miss, days then weeks once you know it. It is what the trial card above does.", 'method'],
+        ['Is Tsuji free?', 'Yes, during early access, with no account needed to start. A subscription will come later for unlimited reviews; the kana will stay free.', 'fare'],
+        ['Does Tsuji replace Anki?', 'The same spaced repetition, with nothing to configure and the JLPT syllabus already written. Your own cards join in, or import from a spreadsheet.', 'method'],
+        ['Is my data sold?', 'No. No ads, no trackers, no sale of data; your progress exports and your account deletes in two taps.', 'fare'],
       ],
     },
 
