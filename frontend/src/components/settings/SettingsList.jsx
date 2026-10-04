@@ -8,6 +8,7 @@ import { useThemeChoice } from '../../stores/theme'
 import { useRatingScale } from '../../stores/ratingScale'
 import { useReadingPace } from '../../stores/readingPace'
 import { useProfileSummaryState } from '../../stores/profileSummary'
+import { useAgenda } from '../../stores/agenda'
 import { openPaywall } from '../../stores/credits'
 import { useOfferable } from '../../hooks/useOfferable'
 import { paceFactor } from '../../domain/readingPace'
@@ -15,7 +16,7 @@ import { ATTRIBUTIONS } from '../../domain/attributions'
 import { SOURCES } from '../../domain/paywall'
 import {
   ChevronIcon, MonitorIcon, SpeakerIcon, BellIcon, StarIcon, HourglassIcon,
-  InfoIcon, UserIcon, BooksIcon,
+  InfoIcon, UserIcon, BooksIcon, CalendarIcon,
 } from '../ui/Icons'
 import { SettingsDoor } from './SettingsDoor'
 import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
@@ -34,7 +35,7 @@ import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
 // a heading to be legible is not finished):
 //
 //   the app     display, sound, reminders (a shell's only)
-//   the study   the rating bar, the reading pace, help
+//   the study   the agenda, the rating bar, the reading pace, help
 //   the learner the account, the credits
 //
 // and the pass, which opens an offer rather than a page, on its own.
@@ -51,6 +52,7 @@ function useGroups(session) {
   const volumes = useVolumes()
   const muted = useMuted()
   const { summary } = useProfileSummaryState()
+  const { blocks } = useAgenda()
 
   const langLabel = LANGUAGES.find(l => l.code === lang)?.label ?? lang
   const themeLabel = { auto: t.themeAuto, dark: t.themeDark, light: t.themeLight }[theme]
@@ -72,6 +74,7 @@ function useGroups(session) {
       }] : []),
     ],
     [
+      { id: 'agenda', Icon: CalendarIcon, label: t.settingsAgenda, value: blocks?.length ? t.agdRowValue(blocks.length) : t.agdRowEmpty },
       { id: 'rating', Icon: StarIcon, iconProps: { filled: false }, label: t.settingsRatingShort, value: t.settingsRatingScaleOption[scale] ?? '', spec: <RatingDots scale={scale} /> },
       { id: 'reading', Icon: HourglassIcon, label: t.settingsReadingPace, value: t.readingPaceOption[pace], spec: <PaceLine factor={paceFactor(pace)} /> },
       { id: 'help', Icon: InfoIcon, label: t.settingsHelp, value: t.settingsHelpValue },

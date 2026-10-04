@@ -172,31 +172,32 @@ describe('SettingsScreen — the card and the list', () => {
     // No destination, so no date to be valid until.
     expect(root.querySelector('.pcb__valid')).toBeNull()
 
-    // Seven doors to pages, then the pass — which opens the offer sheet
+    // Eight doors to pages, then the pass — which opens the offer sheet
     // rather than navigating, so it is last and is not one of PAGES.
     const rows = [...root.querySelectorAll('.stg-row')]
-    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'rating', 'reading', 'help', 'account', 'credits', 'pass'])
+    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'agenda', 'rating', 'reading', 'help', 'account', 'credits', 'pass'])
     const value = i => rows[i].querySelector('.stg-row__value').textContent
-    expect(value(2)).toBe(T.settingsRatingScaleOption.simple)
-    expect(value(3)).toBe(T.readingPaceOption.standard)
-    expect(value(5)).toBe('dev@…')
-    expect(value(6)).toBe(T.settingsCreditsCount(ATTRIBUTIONS.length))
+    expect(value(2)).toBe(T.agdRowEmpty)
+    expect(value(3)).toBe(T.settingsRatingScaleOption.simple)
+    expect(value(4)).toBe(T.readingPaceOption.standard)
+    expect(value(6)).toBe('dev@…')
+    expect(value(7)).toBe(T.settingsCreditsCount(ATTRIBUTIONS.length))
     // What can be seen is drawn beside the words: the served bar's dots,
     // and the standard pace's clock, half the slowest one's.
-    expect(rows[2].querySelectorAll('.stg-dots__dot')).toHaveLength(4)
+    expect(rows[3].querySelectorAll('.stg-dots__dot')).toHaveLength(4)
     expect(rows[0].querySelector('.stg-swatch')).not.toBeNull()
-    expect(rows[3].querySelector('.stg-pace__fill').style.width).toBe('50%')
+    expect(rows[4].querySelector('.stg-pace__fill').style.width).toBe('50%')
 
     // A door navigates, and React Router renders a navigation as a
     // transition: the page arrives when React gets to it, not after a
     // fixed pause, so each arrival is waited for rather than timed (a
     // 30ms settle lost that race on a loaded CI runner).
     const title = () => screen.container.querySelector('h1.bar__title')?.textContent
-    rows[5].click()
+    rows[6].click()
     await vi.waitFor(() => expect(title()).toBe(T.account))
     // ‹ Settings brings the column back.
     screen.container.querySelector('.stage__leave').click()
-    await vi.waitFor(() => expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(8))
+    await vi.waitFor(() => expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(9))
 
     screen.container.querySelector('.pcard-slot--settings .stg-door[data-page="service"]').click()
     await vi.waitFor(() => expect(title()).toBe(T.destService))
@@ -216,7 +217,7 @@ describe('SettingsScreen — the card and the list', () => {
   it('an unknown page falls back to the list', async () => {
     const screen = await mount('/profile/settings/nothing')
     await settle()
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(8)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(9)
   })
 
   // Learning went to the pass's fields and Data into the account page
@@ -257,7 +258,7 @@ describe('SettingsScreen — the card and the list', () => {
     const screen = await mount()
     await settle()
     expect(screen.container.querySelector('.stg-row[data-page="pass"]')).toBeNull()
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(8)
 
     // The credits store is module state: leave it as the rest of this
     // file expects to find it, or the pass row vanishes from every

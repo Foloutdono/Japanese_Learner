@@ -1425,7 +1425,34 @@ runtime purpose. Two consequences worth knowing:
   `components/settings/RowSpecimens.jsx`, `screens/SettingsScreen.jsx`,
   `components/ui/Icons.jsx`, `src/settings.desktop.test.jsx` and
   `index.css`; DESIGN.md, "Settings opens on the pass").
-  When starting a new wave, begin at **180** or higher, and check
+  **181** is 時間割, the weekly agenda (owner-directed: "a weekly agenda,
+  with dedicated timeframe for specific things like 9-11 kanji, 14-16
+  reading, and the notification going with it"): Settings › Agenda
+  (`components/settings/AgendaPage.jsx`) is the learner's week -- blocks
+  of time given to a subject (the day's queue, the four Learn lines, the
+  six Practice platforms), each on the weekdays it repeats, between two
+  times on a five-minute grid, with a reminder of its own (on or off, and
+  none to sixty minutes before) -- drawn as seven columns by the hour
+  (`AgendaWeek.jsx`), listed, and edited on a sheet (`AgendaEditor.jsx`)
+  that names the block in the way when two share a stretch of a day.
+  Stored as rows and replaced whole (`GET`/`PUT /api/agenda`,
+  `routes/agenda.py`, `agenda_blocks`; days a bit mask, times minutes
+  after midnight on the learner's own clock, no time zone), validated
+  on both sides (`domain/agenda.js` mirrors the server's rules, held
+  by `backend/tests/test_agenda.py`); erased with the account. The
+  native shells turn each block into dated local notifications for the
+  next seven days (`lib/agenda.js`'s `planAgenda`, ids 201-248 apart from
+  the day's train, `NativeBridge`'s `AgendaPlanner`, re-planned on every
+  save and return to the front), a tap opening the subject's own place
+  (`domain/agenda.js`'s `OPENABLE_PATHS`; `nudge_opened`); the web has no
+  notification to schedule, so the page says where the reminders arrive
+  (cited in `routes/agenda.py`, `srs/data_structure.sql`,
+  `routes/account.py`, `tests/test_agenda.py`, `domain/agenda.js`,
+  `lib/agenda.js`, `lib/native.js`, `lib/platform.js`,
+  `stores/agenda.js`, `components/chrome/NativeBridge.jsx`,
+  `components/settings/Agenda*.jsx`, `components/settings/SettingsList.jsx`,
+  `screens/SettingsScreen.jsx` and the `.agd-*` block of `index.css`).
+  When starting a new wave, begin at **182** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

@@ -5,6 +5,7 @@ import { useListWalk, WALK_KEYS } from '../hooks/useListWalk'
 import { GearIcon } from '../components/ui/Icons'
 import { SettingsCard } from '../components/pass/LearnerCard'
 import { SettingsList } from '../components/settings/SettingsList'
+import { AgendaPage } from '../components/settings/AgendaPage'
 import { LevelPage } from '../components/settings/LevelPage'
 import { DestinationPage } from '../components/settings/DestinationPage'
 import { ServicePage } from '../components/settings/ServicePage'
@@ -43,6 +44,7 @@ const PAGES = {
   display: DisplayPage,
   sound: SoundPage,
   notifications: NotificationsPage,
+  agenda: AgendaPage,
   rating: RatingPage,
   reading: ReadingPacePage,
   help: HelpPage,

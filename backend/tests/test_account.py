@@ -101,6 +101,11 @@ def _seed(uid):
                 (uid,),
             )
             cur.execute(
+                "INSERT INTO agenda_blocks (user_id, subject, days_mask, start_min, end_min) "
+                "VALUES (%s, 'kanji', 31, 540, 660)",
+                (uid,),
+            )
+            cur.execute(
                 "INSERT INTO phrase_history (user_id, phrase, created_at) VALUES (%s, %s, NOW())",
                 (uid, "駅で待っています。"),
             )
@@ -141,6 +146,7 @@ def test_delete_user_rows_empties_every_table_and_keeps_other_users():
                 assert seeded["dictionary_favorites"] == 1
                 assert seeded["phrase_history"] == 1
                 assert seeded["credit_ledger"] == 1
+                assert seeded["agenda_blocks"] == 1
 
                 counts = delete_user_rows(cur, uid)
                 conn.commit()

@@ -22043,6 +22043,97 @@ a.slip__act { text-decoration: none; }
    wide enough. */
 .stg-pair { display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
 
+/* ── 時間割 — Settings › Agenda (plan 181) ──
+   The week as seven columns of one stretch of the day, each block where
+   its hours fall in its subject's line colour (--agd-line, set on the
+   block from config/tabs); the blocks listed under it as the list's own
+   rows; and the editor sheet. A line's edge is 3px (線). */
+.agd-next { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.agd-next b { color: var(--text-primary); }
+.agd-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--sp-2); }
+.agd-col { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.agd-col__name {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-name);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.agd-col--today .agd-col__name { color: var(--sel-ink); }
+/* Eighteen hours (06:00 to midnight) in six bands of three, a hairline
+   at the top of each. */
+.agd-track {
+  position: relative;
+  height: calc(var(--sp-8) * 6);
+  border-radius: var(--r-card);
+  background-color: var(--bg-main);
+  background-image: linear-gradient(to bottom, var(--surface-line) 1px, transparent 1px);
+  background-size: 100% calc(100% / 6);
+  overflow: hidden;
+}
+.agd-col--today .agd-track { box-shadow: inset 0 0 0 1px var(--sel-line); }
+.agd-block {
+  position: absolute;
+  left: var(--sp-1);
+  right: var(--sp-1);
+  top: calc(var(--agd-top, 0) * 100%);
+  height: calc(var(--agd-size, 0.1) * 100%);
+  min-height: var(--sp-5);
+  display: grid;
+  place-items: start center;
+  padding: 0;
+  border: 0;
+  border-left: 3px solid var(--agd-line, var(--accent2));
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, var(--agd-line, var(--accent2)) 28%, var(--surface));
+  color: var(--text-primary);
+  font-size: var(--fs-caption);
+  line-height: var(--sp-5);
+  overflow: hidden;
+}
+.agd-block:hover { filter: brightness(1.15); }
+.agd-block:focus-visible { outline: 2px solid var(--accent2); outline-offset: 1px; }
+.agd-row { box-shadow: inset 3px 0 0 var(--agd-line, var(--accent2)); }
+.agd-row__glyph { color: var(--agd-line, var(--accent2)); font-size: var(--fs-caption); font-weight: 700; }
+.agd-row__bell {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.agd-row__bell--off { opacity: 0.7; }
+/* `flex: none`: the sheet scrolls when the form is taller than the
+   window; left to shrink, the form squashed the segment (its overflow
+   makes its minimum height nothing) instead. */
+.agd-form { display: flex; flex: none; flex-direction: column; gap: var(--sp-5); }
+.agd-field > * { flex: none; }
+.agd-field .seg { margin-left: 0; align-self: flex-start; }
+.agd-field { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+.agd-field__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
+.agd-field__sub { font-size: var(--fs-caption); color: var(--text-secondary); }
+.agd-times { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+.agd-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--sp-2); }
+.agd-daybtn {
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: none;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.agd-daybtn--on { color: var(--sel-ink); border-color: var(--sel-line); background: var(--sel-wash); }
+.agd-actions { display: flex; flex-direction: column; gap: var(--sp-3); }
+.agd-error { margin: 0; color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
+
 /* ── Service: each pace a line to the destination (plan 139) ──
    One time axis for the three services and the learner's own pace, the
    names in a column sized by the longest, every rail starting today.

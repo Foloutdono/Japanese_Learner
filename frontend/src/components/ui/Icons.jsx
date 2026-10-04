@@ -645,3 +645,13 @@ export function UserIcon({ size = 18, className }) {
     </svg>
   )
 }
+
+// A month's page with its two rings: the agenda (plan 181).
+export function CalendarIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+      <path d="M3.5 10h17M8 3v4M16 3v4" />
+    </svg>
+  )
+}
