@@ -73,6 +73,24 @@ def test_the_offer_records_all_three_verbs_with_its_door(client):
     ]
 
 
+def test_the_offer_keeps_the_pick_and_whether_every_offer_was_seen(client):
+    # The offer is a choice now: Pro or Max, yearly or monthly, with Max
+    # behind "See all offers". The pick is two of the app's own enums
+    # and `all` a boolean -- nothing typed -- and together they are what
+    # the pricing sheet's annual share and the cost of leading with Pro
+    # alone are read from.
+    r = client.post("/api/events", json={"events": [
+        {"name": "offer_intent", "props": {"where": "balance", "ms": 9100,
+                                            "plan": "pro", "billing": "yearly", "all": False}},
+        {"name": "offer_dismiss", "props": {"where": "runout", "ms": 4000, "all": True}},
+    ]})
+    assert r.status_code == 202
+    assert [props for _, props, _ in rows()] == [
+        {"where": "balance", "ms": 9100, "plan": "pro", "billing": "yearly", "all": False},
+        {"where": "runout", "ms": 4000, "all": True},
+    ]
+
+
 def test_a_boarding_step_carries_how_long_it_held_them(client):
     # `ms` is ENGAGED time -- the client stops counting while the tab is
     # hidden (frontend/src/lib/dwell.js) -- which is what makes "which

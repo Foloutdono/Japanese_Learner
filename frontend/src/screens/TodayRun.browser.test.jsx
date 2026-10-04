@@ -50,6 +50,9 @@ function Gate() {
 }
 
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
+// The cards the run's meter (plan 174) has left: its segments not yet
+// rated -- the one in hand and the unlit ones after it.
+const left = root => root.querySelectorAll('.run-meter .run-meter__s:not(.run-meter__s--done)').length
 
 function mount(entry = '/today/run') {
   return render(
@@ -87,14 +90,16 @@ describe('TodayRun', () => {
     await settle(300)
 
     // The stage, not a screen with a bar: ‹ Gate, the lane in the gate's
-    // words, the mode under it, the pill, the pass.
+    // words, the mode under it, the pass -- and under the head the run's
+    // meter (plan 174), a segment a card, the ones left unrated.
     const stage = screen.container.querySelector('main.stage')
     expect(stage, `no stage — page: ${screen.container.textContent.slice(0, 300)}`).toBeTruthy()
     expect(document.querySelector('.hud')).toBeNull()
     expect(stage.querySelector('.stage__leave').textContent).toContain('Portique')
     expect(stage.querySelector('.stage__where-jp').textContent).toContain('Hiragana')
-    expect(stage.querySelector('.today-remaining').textContent).toBe('1')
-    expect(stage.querySelector('.hud__pass')).toBeTruthy()
+    expect(stage.querySelector('.today-remaining')).toBeNull()
+    expect(left(stage)).toBe(1)
+    expect(stage.querySelector('.hstrip--solo [data-guide="hud.pass"]')).toBeTruthy()
     expect(stage.querySelector('.prompt-card')).toBeTruthy()
 
     // Reveal and rate.
@@ -135,8 +140,8 @@ describe('TodayRun', () => {
 
     const screen = await mount()
     await settle(300)
-    const pill = () => screen.container.querySelector('.today-remaining')?.textContent
-    expect(pill()).toBe('2')
+    const pill = () => left(screen.container)
+    expect(pill()).toBe(2)
 
     const rate = async () => {
       screen.container.querySelector('.flashcard').click()
@@ -147,7 +152,7 @@ describe('TodayRun', () => {
     await rate()
     // The second card, past the gate's one: one left, not zero.
     expect(screen.container.querySelector('.prompt-card')?.textContent).toContain('ね')
-    expect(pill()).toBe('1')
+    expect(pill()).toBe(1)
 
     await rate()
     expect(screen.container.querySelector('.gate-probe')?.textContent).toBe('cleared 2 xp 6')
@@ -181,8 +186,8 @@ describe('TodayRun with a quota', () => {
     const screen = await mount(`/today/run?quota=${encodeURIComponent(`${LANE.id}:1`)}`)
     await settle(300)
     expect(calls[0]).toContain(`quota=${encodeURIComponent(`${LANE.id}:1`)}`)
-    // The pill counts the run's length, not the lane's whole due.
-    expect(screen.container.querySelector('.today-remaining').textContent).toBe('1')
+    // The meter counts the run's length, not the lane's whole due.
+    expect(left(screen.container)).toBe(1)
     // Holding the one card, the lane has nothing left to ask for.
     expect(calls.every(u => u === calls[0] || !u.includes('quota='))).toBe(true)
 

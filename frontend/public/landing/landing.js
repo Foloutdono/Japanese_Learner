@@ -456,25 +456,34 @@ rates.forEach((button, k) => {
 })
 
 // ── The mock exam's question ──
+// One answer, as on the paper: the first pick is marked, the card is
+// answered (landing.css drops the options' hover on [data-answered]),
+// and the options stay focusable but aria-disabled, so a later click,
+// or Enter on the one still focused, changes nothing.
+const exam = $('[data-exam]')
 const verdict = $('[data-verdict]')
 const options = $$('[data-opt]')
 for (const option of options) {
   option.addEventListener('click', () => {
+    if (exam.hasAttribute('data-answered')) return
+    exam.setAttribute('data-answered', '')
     const picked = Number(option.dataset.opt)
     sound(picked === 0 ? 'correct' : 'wrong')
     nudge($('.exam__opts'), false)
     options.forEach((o, k) => {
+      o.setAttribute('aria-disabled', 'true')
       o.classList.toggle('opt--right', k === 0)
       if (k === picked && picked !== 0) replay(o, 'opt--wrong')
-      else o.classList.remove('opt--wrong')
     })
     verdict.textContent = picked === 0 ? data.exam.right : data.exam.wrong
   })
 }
 
 // ── The analyser: a word tapped, its entry beside it ──
+// and its grammar point lit in the numbered list (none for a bare word).
 const tokens = $$('[data-tok]')
 const tokinfo = $('.tokinfo')
+const points = $$('[data-point]')
 for (const token of tokens) {
   token.addEventListener('click', () => {
     const picked = data.tokens[Number(token.dataset.tok)]
@@ -486,9 +495,43 @@ for (const token of tokens) {
       other.setAttribute('aria-pressed', String(on))
     }
     for (const field of $$('[data-ti]')) field.textContent = picked[field.dataset.ti]
+    for (const point of points) point.classList.toggle('is-lit', Number(point.dataset.point) === picked.point)
     replay(tokinfo, 'is-new')
   })
 }
+
+// ── Questions: one answer open at a time where it stands in a card ──
+// Where the open answer stands in a card of its own (landing.css: the
+// desk, beside the questions, and a tall tablet, under them) one is
+// open at a time and one stays open: the <details> share a name, so a
+// browser closes the others on its own, this does it for one that does
+// not, the open question's own summary closes nothing, and a window
+// grown into that layout opens the first if none is. On a phone and a
+// short tablet the answers open in their rows, each on its own: the
+// name comes off, so opening a question never closes one above it and
+// slides the tapped row up under the bar.
+const faqs = $$('[data-faq]')
+const inCard = window.matchMedia('(min-width: 1100px), (min-width: 720px) and (min-height: 1080px)')
+function faqLayout() {
+  if (!inCard.matches) {
+    for (const faq of faqs) faq.removeAttribute('name')
+    return
+  }
+  const open = faqs.filter(faq => faq.open)
+  for (const faq of open.slice(1)) faq.open = false
+  if (faqs.length && !open.length) faqs[0].open = true
+  for (const faq of faqs) faq.setAttribute('name', 'faq')
+}
+for (const faq of faqs) {
+  faq.addEventListener('toggle', () => {
+    if (faq.open && inCard.matches) for (const other of faqs) if (other !== faq) other.open = false
+  })
+  $('summary', faq).addEventListener('click', event => {
+    if (faq.open && inCard.matches) event.preventDefault()
+  })
+}
+faqLayout()
+inCard.addEventListener('change', faqLayout)
 
 // ── Footage ──
 const stills = new Map()
@@ -521,7 +564,8 @@ function nearView(node, then) {
 // A tab each; the frame shows the feature's drawn screen, and its clip
 // over it once one is filmed. The tabs turn over by themselves, each
 // run drawn under its tab (landing.css, tab-run), held while the pointer
-// or the focus is on them and while the block is off the screen, and
+// or the focus is on them or on the stage and while the block is off the
+// screen, and
 // stopped for good the moment the reader picks one. A drawn screen's run
 // is seven seconds; a clip's is the clip, so the tab turns once the clip
 // has played through.
@@ -684,8 +728,13 @@ function pick(k, how) {
   }
   const f = data.features[k]
   panel.setAttribute('aria-labelledby', tabs[k].id)
-  screen.style.setProperty('--c', f.line)
+  panel.style.setProperty('--c', f.line)
   mocks.forEach((mock, j) => { mock.hidden = j !== k })
+  // The stage's label: the feature's roundel and name, its line, and
+  // what the clip shows.
+  $('[data-clip-glyph]', panel).textContent = f.glyph
+  $('[data-clip-name]', panel).textContent = f.name
+  $('[data-clip-line]', panel).textContent = f.says
   $('[data-clip-what]', panel).textContent = f.what
   loadClip()
   typing()
@@ -708,9 +757,13 @@ tablist.addEventListener('animationend', event => {
   if (event.animationName !== 'tab-run' || features.classList.contains('is-manual')) return
   pick((feature + 1) % tabs.length, 'auto')
 })
+// Held while the pointer is on the tabs or the stage, not on the
+// heading beside them; the focus can only be on those.
 const hold = on => () => features.classList.toggle('is-hold', on)
-features.addEventListener('pointerenter', hold(true))
-features.addEventListener('pointerleave', hold(false))
+for (const part of [tablist, panel]) {
+  part.addEventListener('pointerenter', hold(true))
+  part.addEventListener('pointerleave', hold(false))
+}
 features.addEventListener('focusin', hold(true))
 features.addEventListener('focusout', event => { if (!features.contains(event.relatedTarget)) features.classList.remove('is-hold') })
 
@@ -743,6 +796,8 @@ for (const button of $$('[data-device]')) {
       other.setAttribute('aria-pressed', String(on))
     }
     frame.dataset.frame = device
+    // The stage lays its label beside a phone, over a computer (landing.css).
+    panel.classList.toggle('is-desk', device === 'desk')
     stopTurning()
     loadClip()
   })

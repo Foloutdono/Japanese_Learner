@@ -322,20 +322,24 @@ describe('BoardingFlow', () => {
     await settle()
 
     expect(stepOf(screen)).toBe('pass')
-    const pass = q(screen, '.pass')
+    // The learner's card (plan 173), issued face up to its holder.
+    const pass = q(screen, '.brd-issue .pcard')
     expect(pass).not.toBeNull()
+    expect(pass.dataset.side).toBe('face')
     expect(pass.textContent).toContain('Aiko')
     // The 発行 seal that used to land on the card is gone (owner's
-    // call): the printed pass says it is issued by being printed.
+    // call): the printed card says it is issued by being printed.
     expect(screen.container.querySelector('.brd-issue__seal')).toBeNull()
-    // The balance on the pass's foot: 30 of 50, counted up to rather
-    // than printed — the figure climbs for about a second.
-    await settle(1700)
-    expect(q(screen, '.balance-line').textContent).toContain('30')
-    expect(q(screen, '.balance-line').textContent).toContain('/ 50')
+    // Once it has landed it turns over by itself, to the contract and
+    // the balance -- 30 of 50, counted up to rather than printed.
+    await settle(1500 + 1700)
+    expect(pass.dataset.side).toBe('back')
+    const balance = q(screen, '.pcb__meter--balance')
+    expect(balance.textContent).toContain('30')
+    expect(balance.textContent).toContain('/ 50')
     // This account already had those 30; only a welcome is announced as
     // one, and this is not a welcome.
-    expect(screen.container.querySelector('.brd-gift')).toBeNull()
+    expect(balance.textContent).not.toContain('offerts')
     expect(apiJsonWithTimeout).not.toHaveBeenCalled()
 
     await click(screen, '[data-action="enter"]')
@@ -466,13 +470,13 @@ describe('BoardingFlow', () => {
     expect(body.goalTargetDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
 
-  // ── The welcome, counted onto the pass ──
+  // ── The welcome, counted onto the card ──
   // The balance a fresh account is given is the one figure on that
   // screen the learner did not work for, and it printed like every
   // other: already there, in the same grey as the refill line under
   // it (owner's call — "transmitting the feeling that you are lucky to
   // receive this").
-  it('counts the welcome onto a fresh pass, and says it is a gift', async () => {
+  it('counts the welcome onto a fresh card, and says it is a gift', async () => {
     const { seedCredits } = await import('../stores/credits')
     seedCredits({ balance: 200, cap: 50, dailyRefill: 30, plan: 'free', unlimited: false })
     const { screen } = await renderFlow()
@@ -481,12 +485,15 @@ describe('BoardingFlow', () => {
     await settle()
     expect(stepOf(screen)).toBe('pass')
 
-    // The note names the gift while the figure climbs to it …
-    expect(q(screen, '.brd-gift').textContent).toContain('200')
-    expect(Number(q(screen, '.balance-line .jour-line__validity b').textContent)).toBeLessThan(200)
+    // Turned over, the figure climbs to the gift and the unit names it
+    // as given …
+    await settle(1500 + 200)
+    const figure = () => q(screen, '.pcb__meter--balance .pcb__fig')
+    expect(figure().textContent).toContain('crédits offerts')
+    expect(Number(figure().firstChild.textContent.trim())).toBeLessThan(200)
     // … and the figure lands on what the account actually holds.
     await settle(1700)
-    expect(q(screen, '.balance-line .jour-line__validity b').textContent).toBe('200')
+    expect(figure().firstChild.textContent.trim()).toBe('200')
     seedCredits(CREDITS)
   })
 

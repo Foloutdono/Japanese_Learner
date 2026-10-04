@@ -178,12 +178,12 @@ describe('TodayScreen — the gate', () => {
   })
 })
 
-describe('.btn-primary — the filled action (plans 051, 052)', () => {
+describe('.btn-primary — the filled action (plans 051, 052, 174)', () => {
   function mountButton() {
     return render(
       <LangProvider>
         <MemoryRouter>
-          <main className="stage"><button type="button" className="btn-primary">Submit</button></main>
+          <main className="stage" style={{ '--line-color': 'var(--line-kana)' }}><button type="button" className="btn-primary">Submit</button></main>
         </MemoryRouter>
       </LangProvider>
     )
@@ -192,24 +192,25 @@ describe('.btn-primary — the filled action (plans 051, 052)', () => {
   it('renders as a real filled button, not the bare-button default', async () => {
     const screen = await mountButton()
     const style = getComputedStyle(screen.container.querySelector('.btn-primary'))
-    expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
-    expect(style.backgroundColor).not.toBe('transparent')
+    expect(style.backgroundImage).toMatch(/linear-gradient/)
     expect(style.fontFamily).toContain('Space Grotesk')
   })
 
-  it('inks the paper ink on a deepened pigment fill, above the 4.5:1 floor', async () => {
+  // 一金 (plan 174): the primary is the gate's metal in every section --
+  // a line's pigment no longer fills it, so the section's colour here
+  // changes nothing -- inked --text-on-fill, clear of the floor on the
+  // gradient's lighter stop and its deeper one alike.
+  it('inks the fill ink on the gate\'s gold, above the 4.5:1 floor', async () => {
     const screen = await mountButton()
     const style = getComputedStyle(screen.container.querySelector('.btn-primary'))
-    // --text-on-panel #f3ecdf, the mockup's ink at every primary swatch.
-    expect(rgbOf(style.color)).toEqual([243, 236, 223])
-    // color-mix(in srgb, #c1442c 70%, #100e13): the raw pigment measures
-    // 4.33:1, under the floor; 70/79 is the one pair that clears it on
-    // all twelve pigments in both themes (plan 060).
-    const fill = rgbOf(style.backgroundColor)
-    expect(fill[0]).toBeCloseTo(139.9, 0)
-    expect(fill[1]).toBeCloseTo(51.8, 0)
-    expect(fill[2]).toBeCloseTo(36.5, 0)
-    expect(contrast(rgbOf(style.color), fill)).toBeGreaterThanOrEqual(4.5)
+    // --text-on-fill #1c1811.
+    expect(rgbOf(style.color)).toEqual([28, 24, 17])
+    const root = getComputedStyle(document.documentElement)
+    const hex = name => root.getPropertyValue(name).trim().replace('#', '').match(/../g).map(h => parseInt(h, 16))
+    for (const stop of ['--gate-gold-lit', '--gate-gold']) {
+      expect(style.backgroundImage).toContain(`rgb(${hex(stop).join(', ')})`)
+      expect(contrast(rgbOf(style.color), hex(stop))).toBeGreaterThanOrEqual(4.5)
+    }
   })
 })
 

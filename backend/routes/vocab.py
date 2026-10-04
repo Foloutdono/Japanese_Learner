@@ -1,6 +1,6 @@
 import logging
 import random
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from core.auth import get_user_id, prefixed, unprefixed
 from core import credits
@@ -11,7 +11,7 @@ from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from study.modes import (
     VOCAB, GRADED_FOR_SOURCE, INDICE_CHOICES, INDICE_FURIGANA, WORD_READING,
-    Mode, check_review_mode, eligible_for, require_mode,
+    Mode, eligible_for, require_mode, resolve_for_source,
 )
 from study.furigana import align_deck as align_furigana
 from study.mcq import pick_distractors
@@ -222,10 +222,13 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     # _build_review_preview above.
     previews = srs.preview_reviews_bulk(picked, mode, user_id)
 
+    # The ids were computed above; a scan of the pool per picked card
+    # rebuilt each one again (3,229 × 25 on N1).
+    word_by_id = dict(zip(raw_ids, pool))
     cards = []
     for card_id in picked:
         raw_id = unprefixed(card_id, user_id)
-        word = next((w for w in pool if vocab_to_id(w, level) == raw_id), None)
+        word = word_by_id.get(raw_id)
         if word is not None:
             cards.append(_build_vocab_card(raw_id, word, vocab_list, m, lang, states.get(card_id), previews.get(card_id)))
 
@@ -320,7 +323,11 @@ def get_vocab_review_cards(level: str, lang: str = "fr", user_id: str = Depends(
 
 @router.post("/api/vocab/review")
 def post_vocab_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
-    check_review_mode(VOCAB, payload.mode)
+    # Refused before the scheduler, as require_mode does on the card
+    # endpoints: a key this section does not grade would otherwise
+    # schedule, log and charge a review under a mode nothing reads.
+    if resolve_for_source(VOCAB, payload.mode) is None:
+        raise HTTPException(status_code=400, detail=f"Invalid mode: {payload.mode!r}")
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # The fare, charged only now that the scheduler has accepted the

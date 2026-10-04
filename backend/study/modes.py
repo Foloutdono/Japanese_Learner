@@ -333,25 +333,6 @@ def require_mode(source: str):
     return dependency
 
 
-def check_review_mode(source: str, key: str) -> Mode:
-    """require_mode for a POSTed review, whose mode rides in the body
-    rather than the query string. A section's review endpoint prices
-    the ride by its own source (credits.cost_of), so a mode from
-    another line -- or no line at all -- must never reach srs.review
-    through it: posted to the free kana line, a vocab card would be
-    rescheduled and paid XP for nothing. routes/today.py does the same
-    check for the mixed queue."""
-    from fastapi import HTTPException  # local: keeps this module importable without FastAPI
-
-    resolved = resolve_for_source(source, key)
-    if resolved is None:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid mode for {source}: {key!r}",
-        )
-    return resolved
-
-
 def describe() -> list[dict]:
     """
     Registry dump for GET /api/study/modes — lets the client render a

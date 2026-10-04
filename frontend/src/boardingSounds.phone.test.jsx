@@ -194,7 +194,7 @@ describe('the name', () => {
 })
 
 describe('the arrival', () => {
-  it('lands the welcome’s coin once on the pass, as its count starts', async () => {
+  it('lands the welcome’s coin once on the card, as its count starts', async () => {
     await board()
     await toTime()
     await press('[data-action="continue"]')   // → the plan, under its sign
@@ -203,7 +203,11 @@ describe('the arrival', () => {
     await press('[data-action="continue"]')   // → the pass
     expect(stepOf()).toBe('pass')
     expect(sound.playFareTick).not.toHaveBeenCalled()
+    // The card is issued face up and turns over by itself (plan 173):
+    // the count starts on its back, and the coin with it.
     await settle(500)
+    expect(sound.playFareTick).not.toHaveBeenCalled()
+    await settle(1700)
     expect(sound.playFareTick).toHaveBeenCalledTimes(1)
     await settle(600)
     expect(sound.playFareTick).toHaveBeenCalledTimes(1)

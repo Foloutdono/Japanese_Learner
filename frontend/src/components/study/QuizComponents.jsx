@@ -10,6 +10,7 @@ import { GrammarLessonSheet } from './GrammarLesson'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { useDesk } from '../../hooks/useDesk'
 import { EntryDockContext } from './entryDock'
+import { RunConsoleContext } from './runPanels'
 import { LookupWatchContext } from './lookupWatch'
 import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
 import { EnterKey } from '../chrome/DeskKeys'
@@ -386,9 +387,27 @@ function deckSegments(stats, t) {
   ]
 }
 
+// The run's own hairline, for a run that has a length but no deck to
+// split it by (Today's mixed queue): the share cleared, in one ink.
+// Drawn nowhere under the phone's run console (plan 174), as above.
+export function RunHairline({ pct, color }) {
+  const metered = useContext(RunConsoleContext)
+  if (metered) return null
+  return (
+    <div className="deck-progress" aria-hidden="true">
+      <div className="deck-progress__bar">
+        <div className="deck-progress__segment" style={{ width: `${pct}%`, background: color }} />
+      </div>
+    </div>
+  )
+}
+
 export function DeckProgress({ stats }) {
   const { t } = useLang()
-  if (!stats || !stats.total) return null
+  // Under a phone's run console the meter is the run's progress (plan
+  // 174): the hairline would say it twice.
+  const metered = useContext(RunConsoleContext)
+  if (metered || !stats || !stats.total) return null
   const { total } = stats
 
   return (

@@ -1,47 +1,38 @@
-import { nextStop } from '../../domain/goalMath'
+import { useLang } from '../../LangContext'
+import { addDays, nextStop } from '../../domain/goalMath'
 
-// ── 路線図の影 — the one-rail track ─────────────────────────────
-// The ghost train's drawing, shared by the pass back (/profile) and,
-// come phase F, the onboarding's 案内 scene. Pure and presentational:
-// positions arrive as percentages, the judgement that produced them
-// lives in domain/goalMath.js, and every word about the journey lives
-// beside it in the caller — the track itself is aria-hidden decoration
-// over that text, and now carries no text of its own but the stop
-// names.
+// ── 路線図の影 — the ghost train's line ─────────────────────────────
+// One drawing, two grounds: the card's back on a phone (JourneyCard.jsx,
+// in the card's material) and the desk's journey body (JourneyBody.jsx,
+// the status sheet and Today's panel, on the panel's sumi) -- the
+// owner's pick C″ of the canvas "Tsuji — the three offers", page "The
+// ghost train", drawn on the desk too since it was built for the phone.
+// The inks are the ground's: --jc-ink (the run behind you and your
+// train), --jc-line (the legs ahead), --jc-soft (the stops ahead) and
+// --jc-st (the stretch owed), set by .jcard--* and by .jour-track.
 //
-// The 区間・新幹線 round (2026-09-25, the owner's pick of drawn
-// options: the legs of one, the train of another):
 //  - The line is cut into its legs, one per level. A stop is the cut at
-//    the end of the leg it names, with its name under the line — no dot,
-//    no stripe — so where it falls is read off the line itself.
-//  - Your train is a Shinkansen in profile riding the legs, its NOSE at
-//    your position: the x it claims is exact, and it stands above the
-//    line and the names, so it never hides a stop.
-//  - Before the journey starts the train waits on a siding left of 発,
-//    which is why the inner span is inset by a train's length on the
-//    left.
-//  - The run behind you fills leg by leg and ends exactly at the nose;
-//    once the train has left 発 the siding it waited on is behind it
-//    too and fills with the run; the leg being ridden is drawn a shade brighter than the ones ahead.
-//  - The promise is a dashed marker ACROSS the line, and the stretch
-//    you owe it (or it owes you) is hatched in the state's pigment.
-//  - Stop names: passed in the state's ink, the next one in full ink,
-//    the rest soft. Level names are Latin figures, so they take the
-//    display face; 発 and かな keep the Japanese one.
+//    the end of the leg it names, its name under the line, the next one
+//    dated "~ 6 déc." and the terminus with the arrival the pace kept
+//    delivers.
+//  - Your train is a Shinkansen in profile, its NOSE at your position.
+//  - Before the journey starts it waits on a siding left of 発 -- the
+//    line's inset is a train's length -- and once it has left, the
+//    siding is behind it and fills with the run, as the legs do.
+//  - The promise is the same train as a dashed outline, the train that
+//    is not there, and the stretch between the two is hatched in the
+//    state's ink. It carries no word ("promis" went: it clipped at the
+//    card's edge, and the head over the line already says how far).
 //
-// What retired with the round: the hollow dot per stop (every stop
-// looked the same, passed or next or last), and the car on a stem.
+// Pure and presentational over journeyPositions' percentages; aria-
+// hidden, since the head and the sheet's label say what it draws.
 
 const clamp = f => Math.min(Math.max(f, 0), 100)
 
-// A gap under one percent of the line is noise, not a delay: at the
-// sheet's width that is a hairline of hatching, which reads as dirt on
-// the drawing. The head above it carries the exact backlog either way.
+// A gap under one percent of the line is noise, not a delay.
 const OWED_MIN_PCT = 1
 
-// Half the cut a stop makes in the line, in px: each leg stops this
-// short of the stop on either side. The terminus has no leg after it,
-// so the last leg runs to it.
+// Half the cut a stop makes in the line, in px.
 const CUT = 2
 
 // The legs between consecutive stops. A line with no destination yet
@@ -59,10 +50,10 @@ function legsOf(stations) {
 }
 
 // The train, facing the destination. Its windows and stripe are holes
-// (evenodd), not paint, so it reads on whatever the track is drawn on.
-function Train() {
+// (evenodd), not paint, so it reads on whatever the line is drawn on.
+export function Train({ className = 'jline__svg' }) {
   return (
-    <svg className="jour-track__train" viewBox="0 0 46 15" focusable="false">
+    <svg className={className} viewBox="0 0 46 15" focusable="false" aria-hidden="true">
       <path
         fillRule="evenodd"
         d="M1 2.5Q1 1 2.5 1H27C35 1 41.5 5 45 11.5Q45.8 13.5 43.5 13.5H2.5Q1 13.5 1 12Z
@@ -74,65 +65,94 @@ function Train() {
   )
 }
 
-export function GhostTrack({ stations, youF, planF = null }) {
+// The promise's train: the same body, drawn as a dashed outline with
+// its windows faint.
+function Ghost() {
+  return (
+    <svg className="jline__svg" viewBox="-1 -1 48 17" focusable="false" aria-hidden="true">
+      <path d="M1 2.5Q1 1 2.5 1H27C35 1 41.5 5 45 11.5Q45.8 13.5 43.5 13.5H2.5Q1 13.5 1 12Z" fill="none" strokeWidth="1.4" strokeDasharray="3 2.2" />
+      <path d="M5 4H9V7H5ZM11 4H15V7H11ZM17 4H21V7H17ZM23 4H27V7H23Z" opacity="0.55" />
+    </svg>
+  )
+}
+
+/**
+ * The line. `stations` and the two positions as journeyPositions gives
+ * them; `status`, `model` and `now` date the next stop and the terminus
+ * at the pace the last 14 days kept (none without them).
+ */
+export function JourneyLine({ stations, youF, planF = null, status = null, model = null, now = null }) {
+  const { lang } = useLang()
+  const loc = lang === 'fr' ? 'fr' : 'en'
+  const full = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short', year: 'numeric' })
+  const short = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short' })
   const you = clamp(youF)
   const plan = planF == null ? null : clamp(planF)
-  const owedW = plan == null ? 0 : Math.abs(you - plan)
-  const showOwed = plan != null && owedW >= OWED_MIN_PCT
-  const next = nextStop(stations, you)
+  const owed = plan == null ? 0 : Math.abs(you - plan)
+  const next = stations.length > 1 ? nextStop(stations, you) : null
+
+  function etaOf(st) {
+    if (!status || !model || !now) return null
+    const left = (st.pos / 100) * status.itemsTotal - status.itemsDone
+    if (left <= 0 || !(model.actualPerDay > 0)) return null
+    return addDays(now, left / model.actualPerDay)
+  }
 
   return (
-    <div className="jour-track" aria-hidden="true">
-      <span className="jour-track__span">
-        <span className={`jour-track__siding${you > 0 ? ' jour-track__siding--done' : ''}`} />
+    <div className="jline" aria-hidden="true">
+      <span className="jline__span">
+        <span className={`jline__siding${you > 0 ? ' jline__siding--done' : ''}`} />
         {legsOf(stations).map(({ a, b, last }) => {
           const cuts = CUT + (last ? 0 : CUT)
           const left = `calc(${a}% + ${CUT}px)`
-          const full = `calc(${b - a}% - ${cuts}px)`
-          const riding = you > a && you < b
+          const width = `calc(${b - a}% - ${cuts}px)`
           return [
-            <span
-              key={`leg-${a}`}
-              className={`jour-track__leg${riding ? ' jour-track__leg--now' : ''}`}
-              style={{ left, width: full }}
-            />,
+            <span key={`leg-${a}`} className="jline__leg" style={{ left, width }} />,
             // The run behind you, cut where the leg is: it ends at the
             // nose, never inside a cut.
             you > a && (
               <span
                 key={`done-${a}`}
-                className="jour-track__done"
-                style={{ left, width: you >= b ? full : `max(0px, calc(${you - a}% - ${CUT}px))` }}
+                className="jline__done"
+                style={{ left, width: you >= b ? width : `max(0px, calc(${you - a}% - ${CUT}px))` }}
               />
             ),
           ]
         })}
-        {showOwed && (
-          <span
-            className="jour-track__owed"
-            style={{ left: `${Math.min(you, plan)}%`, width: `${owedW}%` }}
-          />
+        {plan != null && owed >= OWED_MIN_PCT && (
+          <span className="jline__gap" style={{ left: `${Math.min(you, plan)}%`, width: `${owed}%` }} />
         )}
-        {stations.map(st => {
-          const state = st.pos <= you ? ' jour-track__station--passed' : st === next ? ' jour-track__station--next' : ''
+        {stations.map((st, i) => {
+          const passed = st.pos <= you
+          const last = i === stations.length - 1
+          const eta = !passed && i > 0 && (st === next || last) ? (last ? model?.projected ?? etaOf(st) : etaOf(st)) : null
+          const state = passed ? ' jline__stop--passed' : st === next ? ' jline__stop--next' : ''
+          const end = last && i > 0 ? ' jline__stop--last' : i === 0 ? ' jline__stop--first' : ''
           return (
-            <span key={st.label} className={`jour-track__station${state}`} style={{ left: `${clamp(st.pos)}%` }}>
-              <span
-                className={`jour-track__station-name${st.jp ? ' jour-track__station-name--jp' : ''}`}
-                lang={st.jp ? 'ja' : undefined}
-              >
-                {st.label}
-              </span>
+            <span key={st.label} className={`jline__stop${state}${end}`} style={{ left: `${clamp(st.pos)}%` }}>
+              <b lang={st.jp ? 'ja' : undefined}>{st.label}</b>
+              {eta && <small>{last ? full.format(eta) : `~ ${short.format(eta)}`}</small>}
             </span>
           )
         })}
-        {/* The promise before your own train, so the train paints over
-            it where the two stand together. */}
-        {plan != null && <span className="jour-track__plan" style={{ left: `${plan}%` }} />}
-        <span className="jour-track__you" style={{ left: `${you}%` }}>
+        {plan != null && (
+          <span className="jline__car jline__car--ghost" style={{ left: `${plan}%` }}>
+            <Ghost />
+          </span>
+        )}
+        <span className="jline__car jline__car--you" style={{ left: `${you}%` }}>
           <Train />
         </span>
       </span>
+    </div>
+  )
+}
+
+/** The line on the desk's journey body, on the panel's sumi. */
+export function GhostTrack(props) {
+  return (
+    <div className="jour-track">
+      <JourneyLine {...props} />
     </div>
   )
 }

@@ -27,6 +27,11 @@ export function typo(lang, s) {
   return out
 }
 
+// Japanese inside a line of prose is never cut (DESIGN.md): the
+// analyser's note sets keep-all, which holds a form's kana together but
+// still breaks after the 〜 that opens it; a word joiner holds that too.
+const holdJa = s => String(s).replace(/〜(?=[\u3040-\u30ff\u4e00-\u9fff])/g, '〜\u2060')
+
 // ── Pieces ──
 
 const pigment = line => `var(--line-${line === 'today' ? 'jisho' : line})`
@@ -67,7 +72,7 @@ const ring = (glyph, line, cls = '') =>
   `<span class="ring ${cls}" style="--c:${pigment(line)}" lang="ja">${esc(glyph)}</span>`
 
 function head2(t, h2, body, id, extra = '') {
-  return `<div class="head2" data-stagger><div><h2 class="h2" id="${id}-h">${esc(typo(t.lang, h2))}</h2></div>`
+  return `<div class="head2 cols" data-stagger><div><h2 class="h2" id="${id}-h">${esc(typo(t.lang, h2))}</h2></div>`
     + `<div class="head2__end"><p class="body">${esc(typo(t.lang, body))}</p>${extra}</div></div>`
 }
 
@@ -105,8 +110,9 @@ const isoDuration = s => `PT${Math.floor(s / 60) ? `${Math.floor(s / 60)}M` : ''
 
 // ── The crossroads (the hero's map, from 1100px) ──
 // The hub at (276, 300) in a 660 × 600 box, seven lines out of it at a
-// radius of 200, the gold road coming in from the left edge: the road
-// the gate row draws from Embarquer runs on into it.
+// radius of 200. The gold road coming in from the left edge is not
+// drawn here: it is the gate row's own lane from Embarquer, run on under
+// the map to the hub's ring (landing.css), so it has no joint.
 const ROADS = [
   { line: 'kana', glyph: 'あ', x: 276, y: 100, at: 'top' },
   { line: 'vocab', glyph: '語', x: 417, y: 159, at: 'right' },
@@ -135,8 +141,6 @@ function crossroads(t) {
       + `<text class="map__glyph" x="${r.x}" y="${r.y + 7}" text-anchor="middle" lang="ja">${r.glyph}</text>${label}</g>`
   }).join('')
   return '<svg class="map__art" viewBox="0 0 660 600" aria-hidden="true" focusable="false">'
-    + '<line class="map__road" pathLength="1" x1="0" y1="300" x2="276" y2="300"/>'
-    + '<line class="map__train map__train--road" pathLength="100" x1="0" y1="300" x2="276" y2="300"/>'
     + `<g class="map__lines">${lines}${trains}</g>`
     + '<g class="map__hubs"><circle class="map__hub" cx="276" cy="300" r="66"/>'
     + `<svg x="234" y="258" width="84" height="84" viewBox="0 0 1000 1000"><path class="mark__road" d="${MARK_ROAD}"/><path class="map__ink" d="${MARK_INK}"/></svg></g>`
@@ -163,6 +167,8 @@ function header(t, other) {
     + '</div></header>'
 }
 
+// The first window: the hero, and the figures as its foot (landing.css,
+// "The first window"). One section, so a landing on #top holds both.
 function hero(t, live) {
   const h = t.hero
   const [front, back] = [h.rolls.slice(0, 5), h.rolls.slice(5)]
@@ -179,9 +185,11 @@ function hero(t, live) {
     + `<div class="hero__gate">${gate(t)}<span class="road" aria-hidden="true"></span><div class="map">${crossroads(t)}</div></div>`
     + badges(t)
     + `<a class="watch" href="#${t.ids.presentation}" data-watch${live ? '' : ' hidden'}><span class="watch__play" aria-hidden="true">${PLAY}</span>${esc(typo(t.lang, h.watch))} · ${clock(PRESENTATION.seconds)}</a>`
-    + `<p class="hero__note">${esc(typo(t.lang, h.note(STORES.appStore || STORES.googlePlay)))}</p>`
+    // A separator keeps to the word before it, so a wrapped note never
+    // opens its second line on a dot.
+    + `<p class="hero__note">${esc(typo(t.lang, h.note(STORES.appStore || STORES.googlePlay))).replace(/ · /g, '\u00a0· ')}</p>`
     + `<a class="hero__cue" href="#${t.ids.lines}"><span>${esc(h.cue)}</span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v13M6 12l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`
-    + '</div></section>'
+    + `</div>${figures(t)}</section>`
 }
 
 function figures(t) {
@@ -206,12 +214,12 @@ function presentation(t, media, live) {
     `<li><button type="button" data-seek="${PRESENTATION.chapters[k]}"><i></i>${esc(typo(t.lang, name))}</button></li>`).join('')
   return `<section class="sec" id="${t.ids.presentation}" aria-labelledby="${t.ids.presentation}-h" data-presentation${live ? '' : ' hidden'}>${stop(t, 'presentation')}<div class="wrap">`
     + head2(t, p.h2, p.body, t.ids.presentation)
-    + `<div class="player" data-reveal data-src="${esc(media)}/${PRESENTATION.file}" data-lang="${t.lang}">`
+    + `<div class="player-room"><div class="player" data-reveal data-src="${esc(media)}/${PRESENTATION.file}" data-lang="${t.lang}">`
     + `<svg class="player__art" viewBox="0 0 1240 698" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><line x1="300" y1="320" x2="620" y2="320" class="player__road"/>${art}</svg>`
     + `<button type="button" class="play" data-play aria-label="${esc(typo(t.lang, `${p.play}, ${clock(PRESENTATION.seconds)}`))}">${PLAY}</button>`
     + `<div class="player__bar"><ol class="chapters" aria-label="${esc(p.chaptersLabel)}">${chapters}</ol>`
     + `<span class="player__meta"><span class="cc" title="${esc(p.captions)}">CC · FR · EN</span><span class="fig">${clock(PRESENTATION.seconds)}</span></span></div>`
-    + '</div></div></section>'
+    + '</div></div></div></section>'
 }
 
 function lines(t) {
@@ -226,55 +234,69 @@ function lines(t) {
     + `<div class="specimen plate__spec">${spec}</div></article>`
   const stage = (key, word) => `<span class="stage st-${key}">${esc(word)}</span>`
   const k = t.method.stages
-  return `<section class="sec" id="${t.ids.lines}" aria-labelledby="${t.ids.lines}-h">${stop(t, 'lines')}<div class="wrap">`
+  return `<section class="sec lines" id="${t.ids.lines}" aria-labelledby="${t.ids.lines}-h">${stop(t, 'lines')}<div class="wrap">`
     + head2(t, L.h2, L.body, t.ids.lines)
     + '<div class="plates" data-stagger>'
     + plate('kana', 'あ', P.kana, `${stage('learning', k.learning)}<span class="spec__glyph" lang="ja">あ</span><span class="spec__gloss">${esc(P.kana.gloss)}</span>`, chips(P.kana.chips))
     + plate('vocab', '語', P.vocab, `${stage('new', k.new)}<span class="spec__reading" lang="ja">でんしゃ</span><span class="spec__word" lang="ja">電車</span><span class="spec__gloss">${esc(P.vocab.gloss)}</span>`, stops)
-    + plate('kanji', '漢', P.kanji, `${stage('mastered', k.mastered)}<span class="spec__word spec__word--kanji serif" lang="ja">駅</span><span class="spec__reading spec__reading--flat" lang="ja">${esc(typo(t.lang, P.kanji.strokes))}</span><span class="spec__gloss">${esc(P.kanji.gloss)}</span>`, chips(P.kanji.chips))
+    + plate('kanji', '漢', P.kanji, `${stage('mastered', k.mastered)}<span class="spec__word spec__word--kanji serif" lang="ja">駅</span><span class="spec__line"><span class="spec__reading spec__reading--flat" lang="ja">${esc(typo(t.lang, P.kanji.strokes))}</span><span class="spec__gloss">${esc(P.kanji.gloss)}</span></span>`, chips(P.kanji.chips))
     + plate('grammar', '文', P.grammar, `<span class="spec__pattern" lang="ja">〜ている</span><span class="spec__sentence" lang="ja">雨が降っている。</span><span class="spec__trans">${esc(typo(t.lang, P.grammar.gloss))}</span>`, chips(P.grammar.chips))
     + '</div></div></section>'
 }
 
 function line(t, facts) {
   const L = t.line
-  const rhythms = RHYTHMS.map(m => `<button type="button" data-per="${m}" aria-pressed="${m === DEFAULT_RHYTHM}"${m === DEFAULT_RHYTHM ? ' class="on"' : ''}>${esc(L.rhythm(m))}</button>`).join('')
   const etas = Object.fromEntries(RHYTHMS.map(m => [m, arrivals(facts, m).map(a => typo(t.lang, L.span(spanOf(a.days))))]))
+  // Each pace with where it takes you: the desk sets the four as
+  // services, each with its arrival at the terminus and that ride to
+  // scale, the slowest the whole bar (hidden from a screen reader, which
+  // hears the timetable say it again for the pace picked).
+  const last = LEVELS.at(-1)
+  const rhythms = RHYTHMS.map(m => `<button type="button" data-per="${m}" aria-pressed="${m === DEFAULT_RHYTHM}"${m === DEFAULT_RHYTHM ? ' class="on"' : ''}>`
+    + `<span>${esc(L.rhythm(m))}</span><span class="seg__to" aria-hidden="true"><span class="fig">${last}</span>${esc(etas[m].at(-1))}</span>`
+    + `<span class="seg__ride" aria-hidden="true" style="--ride:${+(RHYTHMS[0] / m).toFixed(3)}"></span></button>`).join('')
+  // The counts as their figures, so the desk can set them in columns.
+  const parts = s => s.split(' · ').map(p => `<span>${esc(p)}</span>`).join('<span class="lrow__sep"> · </span>')
   const rows = LEVELS.map((level, k) => {
     const data = RHYTHMS.map(m => ` data-per-${m}="${esc(etas[m][k])}"`).join('')
     const l = facts.levels[level]
     return `<li class="lrow"><span class="lrow__stop${k === LEVELS.length - 1 ? ' lrow__stop--end' : ''}"></span><span class="fig lrow__code">${level}</span>`
-      + `<span class="lrow__counts"><span class="lrow__long">${esc(L.counts(l))}</span><span class="lrow__short">${esc(L.countsShort(l))}</span></span>`
+      + `<span class="lrow__counts"><span class="lrow__long">${parts(L.counts(l))}</span><span class="lrow__short">${esc(L.countsShort(l))}</span></span>`
       + `<span class="fig lrow__eta" data-eta${data}>${esc(etas[DEFAULT_RHYTHM][k])}</span></li>`
   }).join('')
-  return `<section class="sec sec--band" id="${t.ids.line}" aria-labelledby="${t.ids.line}-h">${stop(t, 'line')}<div class="wrap split">`
+  return `<section class="sec sec--band" id="${t.ids.line}" aria-labelledby="${t.ids.line}-h">${stop(t, 'line')}<div class="wrap split split--line cols">`
     + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.line}-h">${esc(typo(t.lang, L.h2))}</h2>`
     + `<p class="body">${esc(typo(t.lang, L.body))}</p>`
     + `<div class="seg" role="group" aria-label="${esc(L.rhythmsLabel)}" data-rhythms data-nudge>${rhythms}</div>`
     + `<p class="body body--small">${esc(typo(t.lang, L.note))}</p></div>`
     + `<div class="plate plate--line" style="--c:var(--accent2)" data-reveal><div class="line__head"><h3 class="h3">${esc(L.plate)}</h3><span class="capxs" data-at>${esc(L.at(DEFAULT_RHYTHM))}</span></div>`
     + `<ol class="lrows"><li class="lrow"><span class="lrow__stop lrow__stop--here"></span><span class="lrow__code lrow__kana" lang="ja">かな</span>`
-    + `<span class="lrow__counts lrow__counts--here">${esc(L.kana)} · <b>${esc(typo(t.lang, L.here))}</b></span><span class="capxs">${esc(L.start)}</span></li>${rows}</ol></div>`
+    + `<span class="lrow__counts lrow__counts--here"><span>${esc(L.kana)}</span><span class="lrow__sep"> · </span><b>${esc(typo(t.lang, L.here))}</b></span><span class="capxs">${esc(L.start)}</span></li>${rows}</ol></div>`
     + '</div></section>'
 }
 
 function method(t) {
   const M = t.method
   const card = CARDS[0]
-  const shares = [['kana', 19], ['vocab', 43], ['kanji', 24], ['grammar', 14]]
+  // The day's 42 cards, line by line: the bar's shares, and on the desk
+  // each line's count under it (the features' Today screen deals the same).
+  const lanes = [['kana', 8], ['vocab', 18], ['kanji', 10], ['grammar', 6]]
   const rotations = [-6, 4, -3, 0, 7, -5, 2]
   const stamps = [...M.stamps].map((d, k) => k === 3
     ? `<span class="stamp stamp--miss" lang="ja">${d}</span>`
     : `<span class="stamp" style="--turn:${rotations[k]}deg" lang="ja">${d}</span>`).join('')
   const ratings = M.ratings.map((word, k) =>
     `<button type="button" class="q${k + 1}" data-rate="${k}" disabled><span class="rbar__dot"></span><span class="rbar__w">${esc(word)}</span><span class="rbar__t">${esc(M.due(card.due[k]))}</span></button>`).join('')
-  return `<section class="sec" id="${t.ids.method}" aria-labelledby="${t.ids.method}-h">${stop(t, 'method')}<div class="wrap split">`
+  // The day as one ticket: its count and length, each line's share, and
+  // the week's stamps at its foot.
+  return `<section class="sec" id="${t.ids.method}" aria-labelledby="${t.ids.method}-h">${stop(t, 'method')}<div class="wrap split split--method cols">`
     + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.method}-h">${esc(typo(t.lang, M.h2))}</h2>`
     + `<p class="body">${esc(typo(t.lang, M.body))}</p>`
     + `<div class="card day"><div class="day__top"><span class="day__count"><span class="fig">${M.day.count}</span> ${esc(typo(t.lang, M.day.unit))}</span>`
     + `<span class="seg seg--still" role="img" aria-label="${esc(M.day.lengthLabel)} : 50">${M.day.lengths.map(v => `<span${v === '50' ? ' class="on"' : ''}>${esc(v)}</span>`).join('')}</span></div>`
-    + `<div class="day__bars" role="img" aria-label="${esc(M.day.sharesLabel)}">${shares.map(([l, w]) => `<span class="bar" style="--c:${pigment(l)};flex-grow:${w}"></span>`).join('')}</div></div>`
-    + `<div class="stamps"><div class="stamps__row" data-reveal role="img" aria-label="${esc(typo(t.lang, M.stampsLabel))}">${stamps}</div><span class="body body--small">${esc(typo(t.lang, M.stampsNote))}</span></div>`
+    + `<div class="day__bars" role="img" aria-label="${esc(M.day.sharesLabel)}">${lanes.map(([l, n]) => `<span class="bar" style="--c:${pigment(l)};flex-grow:${n}"></span>`).join('')}</div>`
+    + `<div class="day__lanes"><ul>${lanes.map(([l, n]) => `<li style="--c:${pigment(l)}"><i></i><span>${esc(typo(t.lang, t.hero.stations[l]))}</span><b class="fig">${n}</b></li>`).join('')}</ul></div>`
+    + `<div class="stamps"><div class="stamps__row" data-reveal role="img" aria-label="${esc(typo(t.lang, M.stampsLabel))}">${stamps}</div><span class="body body--small">${esc(typo(t.lang, M.stampsNote))}</span></div></div>`
     + `<p class="body body--small">${esc(typo(t.lang, M.reminder))}</p></div>`
     + `<div class="stagebox" data-trial data-reveal role="group" aria-label="${esc(typo(t.lang, M.trial))}">`
     + `<div class="stagebox__top"><span class="capxs" data-trial-pos>${esc(M.trialPos(1, CARDS.length))}</span><span class="capxs" data-trial-kind>${esc(M.kinds[card.kind])}</span></div>`
@@ -382,78 +404,178 @@ function features(t, media) {
   }).join('')
   const devices = ['phone', 'desk'].map((d, k) => `<button type="button" data-device="${d}" aria-pressed="${k === 0}"${k === 0 ? ' class="on"' : ''}>${esc(F.devices[d])}</button>`).join('')
   const f0 = F.items[first.id]
-  return `<section class="sec sec--band" id="${t.ids.features}" aria-labelledby="${t.ids.features}-h">${stop(t, 'features')}<div class="wrap">`
-    + head2(t, F.h2, F.body, t.ids.features, `<div class="seg devices" role="group" aria-label="${esc(F.devicesLabel)}" data-devices>${devices}</div>`)
-    + `<div class="features" data-media="${esc(media)}" data-reveal>`
-    + `<div class="ftabs" role="tablist" aria-label="${esc(F.tabsLabel)}" aria-orientation="vertical">${tabs}</div>`
-    + `<div class="fpanel" role="tabpanel" id="feature-panel" aria-labelledby="tab-${first.id}" tabindex="0">`
-    + `<div class="frame" data-frame="phone"><div class="frame__screen clip" style="--c:${pigment(first.line)}" data-clip>`
-    + CLIPS.map((clip, k) => mockScreen(t, clip, k === 0)).join('')
-    + '</div><span class="frame__base"></span></div>'
+  // The stop's body is the block the script turns (.features): the
+  // heading and the tabs in one column, the device in the other -- on
+  // the desk a stage the column's height. Its label (the feature's
+  // roundel and name, its line and the clip's caption) and the
+  // Phone / Computer switch stand beside the phone, as tall as the
+  // stage, or over the computer; the label's roundel and name repeat
+  // the tab the panel is labelled by, so a screen reader skips them.
+  // The stage carries the feature's pigment (landing.js).
+  return `<section class="sec sec--band" id="${t.ids.features}" aria-labelledby="${t.ids.features}-h">${stop(t, 'features')}`
+    + `<div class="wrap features cols" data-media="${esc(media)}">`
+    + `<div class="features__copy" data-stagger><h2 class="h2" id="${t.ids.features}-h">${esc(typo(t.lang, F.h2))}</h2><p class="body">${esc(typo(t.lang, F.body))}</p></div>`
+    + `<div class="ftabs" role="tablist" aria-label="${esc(F.tabsLabel)}" aria-orientation="vertical" data-reveal>${tabs}</div>`
+    + `<div class="fpanel" role="tabpanel" id="feature-panel" aria-labelledby="tab-${first.id}" tabindex="0" style="--c:${pigment(first.line)}" data-reveal>`
+    + `<div class="fpanel__head"><div class="fpanel__say">`
+    + `<p class="fpanel__name" aria-hidden="true"><span class="ring fpanel__ring" lang="ja" data-clip-glyph>${esc(first.glyph)}</span><span data-clip-name>${esc(typo(t.lang, f0.name))}</span></p>`
+    + `<p class="fpanel__line" data-clip-line>${esc(typo(t.lang, f0.line))}</p>`
     + `<p class="body fpanel__what" data-clip-what>${esc(typo(t.lang, f0.what))}</p></div>`
-    + '</div></div></section>'
+    + `<div class="seg devices" role="group" aria-label="${esc(F.devicesLabel)}" data-devices>${devices}</div></div>`
+    + '<div class="frame" data-frame="phone"><div class="frame__screen clip" data-clip>'
+    + CLIPS.map((clip, k) => mockScreen(t, clip, k === 0)).join('')
+    + '</div><span class="frame__base"></span></div></div>'
+    + '</div></section>'
 }
 
 function jlpt(t) {
   const J = t.jlpt
   const opts = EXAM_OPTIONS.map((o, k) => `<button type="button" class="opt" data-opt="${k}"><span class="opt__k">${k + 1}</span><span lang="ja">${o}</span></button>`).join('')
-  return `<section class="sec" id="${t.ids.jlpt}" aria-labelledby="${t.ids.jlpt}-h">${stop(t, 'jlpt')}<div class="wrap split">`
+  // The N5 paper at a glance, from the tablet up: its three timed
+  // sections laid along its ninety minutes, then the score out of 180
+  // with the pass mark -- the body's figures, drawn.
+  const { sections, minutes, pass, max } = EXAM_N5
+  let at = 0
+  const legs = sections.map(s => {
+    const leg = `<li class="paper__leg" style="--at:${at / minutes};--len:${s.minutes / minutes}"><span class="paper__name" lang="ja">${s.name}</span>`
+      + `<span class="fig paper__min">${esc(t.line.rhythm(s.minutes))}</span><span class="paper__bar"><i></i></span></li>`
+    at += s.minutes
+    return leg
+  }).join('')
+  const paper = '<div class="card paper">'
+    + `<div class="paper__head"><span class="paper__level">${LEVELS[0]}</span><span class="fig paper__total">${esc(t.line.rhythm(minutes))}</span></div>`
+    + `<ol class="paper__legs">${legs}</ol>`
+    + `<div class="paper__score" style="--pass:${pass / max}"><span class="fig">0</span><span class="paper__pass"><span lang="ja">合格</span> <span class="fig">${pass}</span></span><span class="fig">${max}</span><span class="paper__scale"><i></i></span></div>`
+    + '</div>'
+  return `<section class="sec" id="${t.ids.jlpt}" aria-labelledby="${t.ids.jlpt}-h">${stop(t, 'jlpt')}<div class="wrap split split--exam cols">`
     + `<div class="split__copy" data-stagger><h2 class="h2" id="${t.ids.jlpt}-h">${esc(typo(t.lang, J.h2))}</h2>`
-    + `<p class="body">${esc(typo(t.lang, J.body))}</p><p class="body body--small">${esc(typo(t.lang, J.note))}</p></div>`
+    + `<p class="body">${esc(typo(t.lang, J.body))}</p>${paper}<p class="body body--small">${esc(typo(t.lang, J.note))}</p></div>`
     + '<div class="card exam" data-exam data-reveal>'
     + `<div class="exam__top"><span class="exam__head">${ring('模', 'exam', 'exam__ring')}${esc(typo(t.lang, J.head))}</span><span class="fig exam__timer">${J.timer}</span></div>`
-    + '<p class="exam__q" lang="ja">この <u>駅</u> は とても 大きいです。</p>'
+    // The item as the paper prints it: from the tablet up, a sheet with
+    // the mondai's instruction in the app's words
+    // (backend/study/exam_kanji_gen.py) over the sentence. Its last two
+    // phrases are held whole (.exam__mondai span), so a line never ends
+    // the instruction on 「ください。」 alone.
+    + '<div class="exam__sheet"><p class="exam__mondai" lang="ja"><b>もんだい 1</b> つぎの ことばの 読み方として 最も よい ものを <span>1・2・3・4から</span> <span>一つ えらんで ください。</span></p>'
+    + '<p class="exam__q" lang="ja">この <u>駅</u> は とても 大きいです。</p></div>'
     + `<div class="exam__opts" role="group" aria-label="${esc(J.optionsLabel)}" data-nudge>${opts}</div>`
-    + `<p class="body exam__verdict" aria-live="polite" data-verdict>${esc(typo(t.lang, J.ask))}</p>`
+    + `<div class="exam__foot"><p class="body exam__verdict" aria-live="polite" data-verdict>${esc(typo(t.lang, J.ask))}</p>`
+    + `<span class="exam__progress" aria-hidden="true"><span class="fig">1 / ${EXAM_N5.questions}</span><span class="exam__track" style="--of:${EXAM_N5.questions}"><i></i></span></span></div>`
     + '</div></div></section>'
 }
 
+// The dictionary's entry plate and the analyser, side by side on the
+// desk. The entry is the app's (DESIGN.md, "The entry plate"): the
+// reading over the headword, the level and the stage in the corner, the
+// sense, how it is written (駅's strokes beside its reading and their
+// count) and the words it is used in, the kanji picked out in each. The
+// analyser: the sentence on its sumi, a grammar point numbered where it
+// sits, the word in focus, and the numbered grammar, the point of the
+// word in focus lit (landing.js).
 function tools(t) {
   const T = t.tools
+  const ty = x => esc(typo(t.lang, x))
   const compounds = T.compounds.map(([a, b, reading, gloss]) => {
     const word = a === '駅' ? `<span class="hit">駅</span>${b}` : `${a}<span class="hit">駅</span>`
-    return `<li class="word"><span class="word__w" lang="ja">${word}</span><span class="word__r" lang="ja">${reading}</span><span class="word__g">${esc(typo(t.lang, gloss))}</span></li>`
+    return `<li class="word"><span class="word__w" lang="ja">${word}</span><span class="word__r" lang="ja">${reading}</span><span class="word__g">${ty(gloss)}</span></li>`
   }).join('')
+  const [, senseN = '', sense = T.sense] = T.sense.match(/^(\d+\.)\s*(.*)$/) || []
+  // "14 traits": the figure and its word, as the app's record cell sets them.
+  const [strokesBefore, strokesAfter] = t.mock.strokes('\u0000').split('\u0000')
+  const form = '<div class="dict__form">'
+    + `<span class="dict__sheet" aria-hidden="true"><svg viewBox="0 0 109 109" focusable="false">${STATION_STROKES.map((d, k) => `<path pathLength="1" d="${d}" style="--s:${k}"/>`).join('')}</svg></span>`
+    + '<span class="dict__cells">'
+    + `<span class="dict__cell"><b class="dict__fig" lang="ja">エキ</b><span class="capxs">${ty(t.mock.readings)}</span></span>`
+    + `<span class="dict__cell"><b class="dict__fig fig">${STATION_STROKES.length}</b><span class="capxs">${ty(`${strokesBefore}${strokesAfter}`.trim())}</span></span>`
+    + '</span></div>'
   const sel = TOKENS.length - 1
   const tok = (w, k) =>
-    `<button type="button" class="tok ${w.gram ? 'tok--gram' : 'tok--word'}${k === sel ? ' tok--on' : ''}" data-tok="${k}"${k === 0 ? ' data-nudge' : ''} aria-pressed="${k === sel}"><span class="tok__r">${w.reading}</span><span class="tok__w">${w.surface}</span></button>`
+    `<button type="button" class="tok ${w.gram ? 'tok--gram' : 'tok--word'}${k === sel ? ' tok--on' : ''}" data-tok="${k}"${k === 0 ? ' data-nudge' : ''} aria-pressed="${k === sel}">`
+    + `<span class="tok__r">${w.reading}</span><span class="tok__w">${w.surface}</span>${w.point ? `<span class="tok__n fig" aria-hidden="true">${w.point}</span>` : ''}</button>`
   // The full stop rides with the last word, so a narrow card never
   // wraps it onto a line of its own.
   const tokens = TOKENS.slice(0, -1).map(tok).join('')
     + `<span class="toks__last">${tok(TOKENS[sel], sel)}<span class="tok__w tok__stop">。</span></span>`
   const info = T.tokens[sel]
-  const points = T.points.map(([p, g], k) => `<li><span class="num">${k + 1}</span><span class="points__p" lang="ja">${p}</span><span class="points__g">${esc(typo(t.lang, g))}</span></li>`).join('')
-  return `<section class="sec sec--band" id="${t.ids.tools}" aria-labelledby="${t.ids.tools}-h">${stop(t, 'tools')}<div class="wrap">`
+  const points = T.points.map(([p, g], k) => `<li data-point="${k + 1}"${k + 1 === TOKENS[sel].point ? ' class="is-lit"' : ''}><span class="num fig">${k + 1}</span><span class="points__p" lang="ja">${p}</span><span class="points__g">${ty(g)}</span></li>`).join('')
+  return `<section class="sec sec--band sec--tools" id="${t.ids.tools}" aria-labelledby="${t.ids.tools}-h">${stop(t, 'tools')}<div class="wrap">`
     + head2(t, T.h2, T.body, t.ids.tools)
-    + '<div class="tools" data-stagger>'
+    + '<div class="tools cols" data-stagger>'
     + `<article class="plate dict" style="--c:var(--accent2)"><div class="dict__top"><div class="dict__word"><span class="spec__reading" lang="ja">えき</span><span class="dict__glyph serif" lang="ja">駅</span></div>`
-    + `<div class="dict__tags"><span class="chip chip--small">N5</span><span class="stage st-learning">${esc(T.stage)}</span></div></div>`
-    + `<p class="dict__sense">${esc(typo(t.lang, T.sense))}</p><ul class="words">${compounds}</ul></article>`
+    + `<div class="dict__tags"><span class="chip chip--small">N5</span><span class="stage st-learning">${ty(T.stage)}</span></div></div>`
+    + `<p class="dict__sense">${senseN ? `<span class="dict__n fig">${senseN}</span> ` : ''}${ty(sense)}</p>${form}<ul class="words">${compounds}</ul></article>`
     + '<article class="card analyser" data-analyser>'
-    + `<div class="analyser__top">${T.intakes.map((x, k) => `<span class="chip${k ? '' : ' chip--on'}">${esc(x)}</span>`).join('')}<span class="capxs analyser__tap">${esc(typo(t.lang, T.tap))}</span></div>`
-    + `<div class="toks" lang="ja">${tokens}</div>`
-    + `<p class="body analyser__trans">${esc(typo(t.lang, T.translation))}</p>`
-    + `<div class="specimen tokinfo" aria-live="polite"><div class="tokinfo__word"><span class="tokinfo__r" lang="ja" data-ti="dictReading">${TOKENS[sel].dictReading}</span><span class="tokinfo__d" lang="ja" data-ti="dict">${TOKENS[sel].dict}</span><span class="tokinfo__m" data-ti="meaning">${esc(typo(t.lang, info.meaning))}</span></div>`
-    + `<div class="tokinfo__note"><span class="capxs" data-ti="kind">${esc(typo(t.lang, info.kind))}</span><span class="body body--small" data-ti="note">${esc(typo(t.lang, info.note))}</span></div></div>`
-    + `<ol class="points" aria-label="${esc(typo(t.lang, T.pointsLabel))}">${points}</ol>`
-    + '</article></div></div></section>'
+    + `<div class="analyser__top">${T.intakes.map((x, k) => `<span class="chip${k ? '' : ' chip--on'}">${esc(x)}</span>`).join('')}<span class="capxs analyser__tap">${ty(T.tap)}</span></div>`
+    + `<div class="analyser__line"><div class="toks" lang="ja">${tokens}</div>`
+    + `<p class="body analyser__trans">${ty(T.translation)}</p></div>`
+    + '<div class="analyser__low">'
+    + `<div class="specimen tokinfo" aria-live="polite"><div class="tokinfo__word"><span class="tokinfo__r" lang="ja" data-ti="dictReading">${TOKENS[sel].dictReading}</span><span class="tokinfo__d" lang="ja" data-ti="dict">${TOKENS[sel].dict}</span><span class="tokinfo__m" data-ti="meaning">${ty(info.meaning)}</span></div>`
+    + `<div class="tokinfo__note"><span class="capxs" data-ti="kind">${ty(info.kind)}</span><span class="body body--small" data-ti="note">${holdJa(ty(info.note))}</span></div></div>`
+    + `<div class="analyser__points"><p class="capxs" id="${t.ids.tools}-points">${ty(T.pointsLabel)}</p><ol class="points" aria-labelledby="${t.ids.tools}-points">${points}</ol></div>`
+    + '</div></article></div></div></section>'
 }
+
+// The fare as the ticket it is: the ticket proper -- the statement,
+// what it covers and what it is valid on, by name: the crossroads'
+// seven (the hero's map), then the two stops the sentence also names,
+// the JLPT exam and the tools (the analyser and the dictionary), under
+// their signs' own names -- torn along a perforation from its stub,
+// which holds what comes later, the gate and the hero's words under its
+// own gate (no account, in the browser). The body's two sentences part
+// at the perforation. Beside it, the four promises, each with its mark.
+const FARE_STOPS = [{ line: 'exam', glyph: '模', key: 'jlpt' }, { line: 'kaiseki', glyph: '解', key: 'tools' }]
+const PROMISE_MARKS = [
+  // No ads, no trackers: an eye, struck.
+  '<path d="M3 12s3.3-6 9-6 9 6 9 6-3.3 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/>',
+  // Grammar under review: a glass over a tick.
+  '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4l5.1 5.1M7.6 10.6l2 2 3.4-3.8"/>',
+  // Read aloud: the speaker, the header's own.
+  '<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18.2 6.5a7.5 7.5 0 0 1 0 11"/>',
+  // Your data is yours: out of the tray.
+  '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v5.5h14V13" stroke-linejoin="round"/>',
+]
+const promiseMark = k => `<span class="promise__mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false">${PROMISE_MARKS[k]}</svg></span>`
 
 function fare(t) {
   const F = t.fare
-  const promises = F.promises.map(([h, p]) => `<div><h3 class="h3">${esc(typo(t.lang, h))}</h3><p class="body">${esc(typo(t.lang, p))}</p></div>`).join('')
-  return `<section class="sec" id="${t.ids.fare}" aria-labelledby="${t.ids.fare}-h">${stop(t, 'fare')}<div class="wrap fare" data-stagger>`
-    + `<article class="card fare__card"><h2 class="h2" id="${t.ids.fare}-h">${esc(typo(t.lang, F.h2))}</h2><p class="body">${esc(typo(t.lang, F.body))}</p></article>`
+  const ty = s => esc(typo(t.lang, s))
+  const [, covers = F.body, later = ''] = F.body.match(/^(.+?\.)\s+(.+)$/s) || []
+  const [first, ...rest] = t.hero.note(STORES.appStore || STORES.googlePlay).split(' · ')
+  const how = first === F.h2 ? rest.map(ty).join('\u00a0· ') : ''
+  const valid = [...ROADS.map(r => [r.line, r.glyph, t.hero.stations[r.line]]), ...FARE_STOPS.map(s => [s.line, s.glyph, t[s.key].kicker])]
+  const lines = valid.map(([line, glyph, name]) => `<li style="--c:${pigment(line)}"><span class="ring" aria-hidden="true" lang="ja">${esc(glyph)}</span><span class="fare__name">${ty(name)}</span></li>`).join('')
+  const promises = F.promises.map(([h, p], k) => `<div>${promiseMark(k)}<h3 class="h3">${ty(h)}</h3><p class="body">${ty(p)}</p></div>`).join('')
+  return `<section class="sec sec--fare" id="${t.ids.fare}" aria-labelledby="${t.ids.fare}-h">${stop(t, 'fare')}<div class="wrap fare cols" data-stagger>`
+    + '<article class="card fare__card"><div class="fare__ticket">'
+    + `<h2 class="h2" id="${t.ids.fare}-h">${ty(F.h2)}</h2><p class="lead fare__covers">${ty(covers)}</p>`
+    + `<ul class="fare__lines">${lines}</ul></div>`
+    + `<div class="fare__stub">${later ? `<p class="body body--small fare__later">${ty(later)}</p>` : ''}${gate(t, 'fare__gate')}`
+    + `${how ? `<p class="fare__how">${how}</p>` : ''}</div></article>`
     + `<div class="lattice promises">${promises}</div>`
     + '</div></section>'
 }
 
+// The questions: where the open answer stands in a card, one at a time
+// -- the <details> share a name, and landing.js keeps it there and takes
+// it off on a phone, whose answers open each on its own. Each answer ends on
+// the stop that shows it, a door back up the line: its number and its
+// name, as its sign prints them. On a phone the questions are the
+// accordion they are; from a tall tablet up the open answer stands in
+// a card of its own, under the list or, on the desk, beside it in col B
+// (landing.css), laid there from inside its <details>, so the whole
+// body arrives as one block. The card is headed by its question again
+// (.faq__q, the summary's own words, hidden from a screen reader, which
+// has just read them), so it reads whole away from the list.
 function faq(t) {
   const F = t.faq
-  const items = F.items.map(([q, a], k) => `<details class="faq"${k ? '' : ' open'}><summary>${esc(typo(t.lang, q))}</summary><p>${esc(typo(t.lang, a))}</p></details>`).join('')
-  return `<section class="sec sec--band" id="${t.ids.faq}" aria-labelledby="${t.ids.faq}-h">${stop(t, 'faq')}<div class="wrap faqs">`
-    + `<div><h2 class="h2" id="${t.ids.faq}-h">${esc(typo(t.lang, F.h2))}</h2></div>`
-    + `<div class="faqs__list" data-stagger>${items}</div></div></section>`
+  const ty = s => esc(typo(t.lang, s))
+  const items = F.items.map(([q, a, to], k) => `<details class="faq" name="faq" data-faq${k ? '' : ' open'}><summary>${ty(q)}</summary>`
+    + `<div class="faq__a"><div class="faq__q" aria-hidden="true">${ty(q)}</div><p>${ty(a)}</p>`
+    + `<div class="faq__foot"><a class="faq__to" href="#${t.ids[to]}"><span class="faq__stop fig" aria-hidden="true">${String(STOPS.indexOf(to)).padStart(2, '0')}</span><span>${ty(stopName(t, to))}</span>${ONWARD}</a></div></div></details>`).join('')
+  return `<section class="sec sec--band" id="${t.ids.faq}" aria-labelledby="${t.ids.faq}-h">${stop(t, 'faq')}<div class="wrap faqs cols" data-reveal>`
+    + `<div class="faqs__qs"><h2 class="h2" id="${t.ids.faq}-h">${ty(F.h2)}</h2>`
+    + `<div class="faqs__list">${items}</div></div></div></section>`
 }
 
 function pass(t, facts) {
@@ -461,10 +583,16 @@ function pass(t, facts) {
   const n5 = arrivals(facts, DEFAULT_RHYTHM)[0].days
   const dots = [['kana', 'あ'], ['vocab', '語'], ['kanji', '漢'], ['grammar', '文']]
     .map(([l, g]) => `<span class="dot" style="--c:${pigment(l)}" lang="ja">${g}</span>`).join('')
-  return `<section class="sec way" id="${t.ids.way}" aria-labelledby="way-h">${stop(t, 'way')}<div class="wrap split split--way">`
-    + `<div class="split__copy" data-stagger><h2 class="h2 way__h" id="way-h">${esc(typo(t.lang, P.h2))}</h2><p class="body">${esc(typo(t.lang, P.body))}</p>`
-    + `<div class="way__field"><label class="capxs" for="pass-name">${esc(P.nameLabel)}</label><input id="pass-name" class="field" type="text" name="given-name" autocomplete="given-name" maxlength="24" placeholder="${esc(P.name)}" data-pass-input></div>`
+  // Three blocks: the words, the pass, the form. A tall phone and a
+  // tablet stack them in that order, so the name typed prints on the pass
+  // in view above the field (and above a phone's keyboard); a window
+  // under the desk and short of 800px puts the form before the pass, so
+  // its gate is in the first view; the desk puts the words over the form in col A and the pass in
+  // col B (landing.css).
+  const form = `<div class="way__form" data-stagger><div class="way__field"><label class="capxs" for="pass-name">${esc(P.nameLabel)}</label><input id="pass-name" class="field" type="text" name="given-name" autocomplete="given-name" maxlength="24" placeholder="${esc(P.name)}" data-pass-input></div>`
     + `<div class="way__gate">${gate(t)}</div>${badges(t)}</div>`
+  return `<section class="sec way" id="${t.ids.way}" aria-labelledby="way-h">${stop(t, 'way')}<div class="wrap split split--way cols">`
+    + `<div class="split__copy" data-stagger><h2 class="h2 way__h" id="way-h">${esc(typo(t.lang, P.h2))}</h2><p class="body">${esc(typo(t.lang, P.body))}</p></div>`
     + `<div class="way__pass" data-reveal data-tilt><div class="pass" role="img" aria-label="${esc(P.aria)}">`
     + '<span class="pass__edge" aria-hidden="true"></span>'
     + `<div class="pass__top"><span class="pass__brand">${mark(22)}<span class="pass__lbl pass__lbl--on">Tsuji</span><span class="pass__kind" lang="ja">定期券</span></span><span class="pwave" aria-hidden="true"><i></i><i></i><i></i></span></div>`
@@ -473,7 +601,7 @@ function pass(t, facts) {
     + `<div><span class="pass__lbl">${esc(P.lines)}</span><span class="pass__dots" role="img" aria-label="${esc(P.linesAria)}">${dots}</span></div>`
     + `<div><span class="pass__lbl">${esc(P.arrival)}</span><span class="pass__val pass__val--gold" data-pass-arrival data-days="${Math.ceil(n5)}">${esc(typo(t.lang, t.line.span(spanOf(n5))))}</span></div></div>`
     + `<div class="pass__bal"><span class="fig">${esc(P.level)}</span><span class="pass__track"><i></i></span></div>`
-    + '</div></div></div></section>'
+    + `</div></div>${form}</div></section>`
 }
 
 function footer(t, other) {
@@ -507,9 +635,9 @@ function clientData(t, facts, media) {
       due: c.due.map(M.due),
     })),
     trial: { pos: CARDS.map((_, k) => M.trialPos(k + 1, CARDS.length)), flip: M.flip, flipAria: M.flipAria, xp: [0, 1, 2, 3, 4, 5].map(M.xp) },
-    tokens: TOKENS.map((w, k) => ({ ...w, ...Object.fromEntries(Object.entries(t.tools.tokens[k]).map(([key, v]) => [key, ty(v)])) })),
+    tokens: TOKENS.map((w, k) => ({ ...w, ...Object.fromEntries(Object.entries(t.tools.tokens[k]).map(([key, v]) => [key, holdJa(ty(v))])) })),
     exam: { right: ty(t.jlpt.right), wrong: ty(t.jlpt.wrong) },
-    features: CLIPS.map(c => ({ id: c.id, glyph: c.glyph, line: pigment(c.line), name: ty(t.features.items[c.id].name), what: ty(t.features.items[c.id].what), play: ty(t.features.play(t.features.items[c.id].name)) })),
+    features: CLIPS.map(c => ({ id: c.id, glyph: c.glyph, line: pigment(c.line), name: ty(t.features.items[c.id].name), says: ty(t.features.items[c.id].line), what: ty(t.features.items[c.id].what), play: ty(t.features.play(t.features.items[c.id].name)) })),
   }
 }
 
@@ -655,7 +783,6 @@ ${fonts}
 ${header(t, other)}
 <main id="main">
 ${hero(t, live)}
-${figures(t)}
 ${presentation(t, media, live)}
 ${lines(t)}
 ${line(t, facts)}

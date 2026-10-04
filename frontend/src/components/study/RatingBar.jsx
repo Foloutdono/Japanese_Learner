@@ -119,7 +119,7 @@ export default function RatingBar({ onRate, active, scale, guide, specimen = fal
       <Box className={`rating-bar__buttons rating-bar__buttons--${QUALITY_BTNS.length}`}>
         {specimen && QUALITY_BTNS.slice().reverse().map(({ q, label }) => (
           <span key={q} className={`rating-bar__btn rating-bar__btn--q${q}${q === QUALITY_BTNS[0].q ? ' rating-bar__btn--best' : ''}`}>
-            {q !== QUALITY_BTNS[0].q && <span className="rating-bar__btn-ring" />}
+            <span className="rating-bar__btn-ring" />
             <span className="rating-bar__btn-label">{label}</span>
           </span>
         ))}
@@ -129,10 +129,10 @@ export default function RatingBar({ onRate, active, scale, guide, specimen = fal
             type="button"
             disabled={panels && !active}
             onClick={() => handleRate(q)}
-            /* The best answer the bar offers is the one tile filled
-               gold (index.css, .rating-bar__btn--best): the press most
-               taken, drawn as the one to reach for. Best-first, so it
-               is QUALITY_BTNS[0] on every scale. */
+            /* The best answer the bar offers keeps its --best mark
+               (QUALITY_BTNS[0] on every scale, best-first), though since
+               plan 174 it is drawn like the others: gold is the action's
+               metal, not a verdict's (index.css, the rating bar's 5). */
             className={`rating-bar__btn rating-bar__btn--q${q}${q === QUALITY_BTNS[0].q ? ' rating-bar__btn--best' : ''}${pressed === q ? ' rating-bar__btn--pressed' : ''}`}
             /* The digits are NOT in display order: QUALITY_BTNS is
                best-first, so "1" is the best answer at the RIGHT end and
@@ -148,11 +148,12 @@ export default function RatingBar({ onRate, active, scale, guide, specimen = fal
             title={`${label} (${digit})`}
           >
             {desk && !panels && <kbd className="desk-kbd" aria-hidden="true">{digit}</kbd>}
-            {/* The ring is the whole colour story now: unfilled at rest,
-                filled when this rating is the one chosen. Marked hidden
-                because it says nothing the label does not -- it is the
-                seal, and the word beside it is the name. */}
-            {q !== QUALITY_BTNS[0].q && <span className="rating-bar__btn-ring" aria-hidden="true" />}
+            {/* The pill is the whole colour story: its verdict's ink at
+                rest, lit when this rating is the one chosen -- the same
+                ink as the run meter's segment (RunConsole.jsx). Marked
+                hidden because it says nothing the label does not -- it
+                is the seal, and the word beside it is the name. */}
+            <span className="rating-bar__btn-ring" aria-hidden="true" />
             <span className="rating-bar__btn-label">{label}</span>
           </button>
         ))}

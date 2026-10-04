@@ -57,33 +57,40 @@ const $ = sel => document.querySelector(sel)
 const $$ = sel => [...document.querySelectorAll(sel)]
 
 describe('the profile at phone width (plan 143)', () => {
-  it('prints the XP once: an initial with no ring, the bar on the balance row', async () => {
+  // Plan 173 replaced the pass with the learner's card: face up here,
+  // its back a touch away, and the old pass's figures on that back.
+  const turn = async () => { $('.pcard__turn').click(); await settle(100) }
+
+  it('prints the learner\'s card face up, the climb in its engraving', async () => {
     await mount()
-    expect($('.pass__avatar')).not.toBeNull()
-    expect($('.pass__ring')).toBeNull()
-    expect($$('.pass__track')).toHaveLength(1)
+    const card = $('.pcard-slot--profile .pcard')
+    expect(card.dataset.side).toBe('face')
+    expect($('.pass__avatar')).toBeNull()
+    expect(Number($('.pcf__seal').style.getPropertyValue('--ofr-xp'))).toBeGreaterThan(0)
+    // The card at the column's width, at the card's proportions.
+    const box = card.getBoundingClientRect()
+    expect(box.height).toBeCloseTo(box.width * 172 / 272, 0)
   })
 
-  it('prints the month the pass was issued under the name', async () => {
+  it('prints the month the card was issued on its back', async () => {
     await mount()
-    const since = $('.pass__since')
-    expect(since).not.toBeNull()
+    await turn()
     // The lane is a French device; the fallback boarded six months ago.
-    expect(since.textContent).toMatch(/^Depuis \S+ \d{4}$/)
-    const name = $('.pass__holder .profile-card__name').getBoundingClientRect()
-    expect(since.getBoundingClientRect().top).toBeGreaterThan(name.bottom - 1)
+    expect($('.pcb__month').textContent).toMatch(/^Émise en \S+ \d{4}$/)
   })
 
-  it('makes the balance line the door to the balance sheet, and stands no offer of its own', async () => {
+  it('makes the balance meter the door to the balance sheet, and stands no offer of its own', async () => {
     await mount()
     expect($('main .pw-open')).toBeNull()
     expect($('[data-source="profile"]')).toBeNull()
-    const door = $('.pass__footer > .pass__door')
+    await turn()
+    const door = $('.pcb__meter--balance')
     expect(door.tagName).toBe('BUTTON')
-    expect(door.querySelector('.balance-line')).not.toBeNull()
-    expect(door.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    expect(door.textContent).toContain('34')
     door.click()
     expect(openBalance).toHaveBeenCalledTimes(1)
+    // A touch on a door never turns the card back.
+    expect($('.pcard').dataset.side).toBe('back')
   })
 
   it('titles the stamp book with its month and prints the year in its margin', async () => {
@@ -94,11 +101,11 @@ describe('the profile at phone width (plan 143)', () => {
     expect($('.sbook__month .fig__l').textContent).toBe(String(new Date().getFullYear()))
   })
 
-  it('lays the inserts out in order: the pass, the doors, the stamps, the records, five on the board', async () => {
+  it('lays the inserts out in order: the card, the doors, the stamps, the records, five on the board', async () => {
     await mount()
-    // The doors stand straight under the pass (the owner's call after
+    // The doors stand straight under the card (the owner's call after
     // the first round of plan 143), above the stamp book.
-    const order = ['.pass', '.record--door', '.sbook', '.records--three', '.banzuke']
+    const order = ['.pcard-slot--profile', '.record--door', '.sbook', '.records--three', '.banzuke']
       .map(sel => $(sel).getBoundingClientRect().top)
     expect([...order].sort((a, b) => a - b)).toEqual(order)
     const figures = $$('.records--three > .record')

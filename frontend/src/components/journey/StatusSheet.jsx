@@ -3,8 +3,12 @@ import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { useJourneyStatus, useVolumes, useStatusOpenedAt, closeStatus } from '../../stores/journey'
 import { useProfileSummary } from '../../stores/profileSummary'
+import { useCredits } from '../../stores/credits'
 import { journeyModel } from '../../domain/goalMath'
-import { JourneyBody } from './JourneyBody'
+import { cardTier } from '../../domain/passCard'
+import { useDesk } from '../../hooks/useDesk'
+import { JourneyBody, JourneyMoves } from './JourneyBody'
+import { JourneyCard } from './JourneyCard'
 
 // ── 運行状況 — the status sheet (進捗が主役, chosen off a four-
 // direction mockup round; plan 074 drew the two-lane one it replaces) ─
@@ -34,6 +38,12 @@ import { JourneyBody } from './JourneyBody'
 //
 // The body is JourneyBody.jsx (plan 114), which the desk also stands
 // beside the fare gate on Today; this is the sheet around it.
+//
+// On a phone since plan 174 the sheet holds the card's back instead
+// (JourneyCard.jsx, the owner's pick C″): the line alone, the drift in
+// days signed in the state's ink, the next stop and the arrival dated
+// under it, and the two moves beneath the card. The desk keeps the
+// body, the same one its Today panel stands.
 
 export function StatusSheet({ session }) {
   const { t } = useLang()
@@ -43,6 +53,8 @@ export function StatusSheet({ session }) {
   const { data: status } = useJourneyStatus()
   const { data: volumes } = useVolumes()
   const summary = useProfileSummary()
+  const credits = useCredits()
+  const desk = useDesk()
 
   const model = useMemo(
     () => (status && nowMs ? journeyModel(status, new Date(nowMs)) : null),
@@ -64,15 +76,29 @@ export function StatusSheet({ session }) {
          name is where a screen reader still hears it. */
       label={`${t.hudStatusLabel} — ${t.jourStatus[model.status]}`}
     >
-      <JourneyBody
-        status={status}
-        model={model}
-        now={new Date(nowMs)}
-        volumes={volumes}
-        summary={summary}
-        session={session}
-        onLeave={closeStatus}
-      />
+      {desk ? (
+        <JourneyBody
+          status={status}
+          model={model}
+          now={new Date(nowMs)}
+          volumes={volumes}
+          summary={summary}
+          session={session}
+          onLeave={closeStatus}
+        />
+      ) : (
+        <>
+          <JourneyCard
+            status={status}
+            model={model}
+            now={new Date(nowMs)}
+            volumes={volumes}
+            summary={summary}
+            tier={cardTier(credits)}
+          />
+          <JourneyMoves model={model} session={session} onLeave={closeStatus} />
+        </>
+      )}
     </Sheet>
   )
 }

@@ -139,15 +139,15 @@ describe('Settings\' doors on the desk', () => {
     const rows = $$('.desk-settings__list .stg-row[data-page]:not([data-page="pass"])')
     expect(rows.every(r => r.tagName === 'A')).toBe(true)
     expect(rows.map(r => r.getAttribute('href'))).toContain('/profile/settings/display')
-    // The pass's fields are doors of the same column (plan 139).
-    const fields = $$('.desk-settings__list .stg-pass .stg-door')
+    // The card's fields are doors of the same column (plans 139, 173).
+    const fields = $$('.desk-settings__list .pcard-slot--settings .stg-door')
     expect(fields.map(f => f.getAttribute('href'))).toEqual(['level', 'destination', 'service', 'hour', 'lines'].map(p => `/profile/settings/${p}`))
     expect($$('.desk-settings__list .stg-door').filter(r => r.tabIndex === 0).map(r => r.dataset.page)).toEqual(['sound'])
     expect(getComputedStyle($('.desk-settings__list .stg-row[data-page="sound"] .stg-row__chev')).display).toBe('none')
-    expect($('.desk-settings__list .stg-pass__chev')).toBeNull()
+    expect($('.desk-settings__list .pcb__chev')).toBeNull()
     await compare($('.desk-settings__list .stg-list'), '.stg-row[data-page]:not([data-page="pass"])')
-    await compare($('.desk-settings__list .stg-pass__fields'), '.stg-pass__field[data-page]')
-    await compare($('.desk-settings__list .stg-pass__route'), '.stg-pass__stop')
+    await compare($('.desk-settings__list .pcb__print'), '.pcb__field[data-page]')
+    await compare($('.desk-settings__list .pcb__route'), '.pcb__stop')
   })
 
   it('opens three pages with no entry for Back, walked with ↑/↓ from the pass down, with the button\'s hover and ring', async () => {
@@ -174,11 +174,13 @@ describe('Settings\' doors on the desk', () => {
     await settle(150)
     expect(here.path).toBe('/profile/settings/level')
     expect(here.type).toBe('REPLACE')
-    // The ring a button draws, and the hover it keeps.
+    // The card's own ring, inside the door's touch in the card's ink
+    // (the page's outline stood off the print's grid), and the hover
+    // it keeps.
     await userEvent.keyboard('{ArrowDown}')
-    const ring = getComputedStyle(door('destination'))
     expect(document.activeElement).toBe(door('destination'))
-    expect([ring.outlineStyle, ring.outlineWidth]).toEqual(['solid', '2px'])
+    expect(getComputedStyle(door('destination')).outlineStyle).toBe('none')
+    expect(getComputedStyle(door('destination'), '::after').boxShadow).toMatch(/inset.*2px|2px.*inset/)
     await userEvent.hover(door('rating'))
     await settle(250)
     expect(getComputedStyle(door('rating')).filter).toBe('brightness(1.15)')

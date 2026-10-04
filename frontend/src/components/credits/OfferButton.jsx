@@ -14,8 +14,12 @@ import { useOfferable } from '../../hooks/useOfferable'
 // (stg-row, with a chevron and a value), so it calls useOfferable()
 // (hooks/useOfferable.js) and draws its own. Same guard, same source,
 // different furniture.
+//
+// `detail` is what only the door knows (stores/credits.js's
+// openPaywall): the run-out sheet passes the cards its run left, which
+// the week offer draws as today's wait.
 
-export function OfferButton({ source, className = 'btn-secondary', children = null }) {
+export function OfferButton({ source, detail, className = 'btn-secondary', children = null }) {
   const { t } = useLang()
   const may = useOfferable()
   if (!may) return null
@@ -23,7 +27,7 @@ export function OfferButton({ source, className = 'btn-secondary', children = nu
     <button
       type="button"
       className={`${className} pw-open`}
-      onClick={() => openPaywall(source)}
+      onClick={() => openPaywall(source, detail)}
       data-action="paywall-open"
       data-source={source}
     >

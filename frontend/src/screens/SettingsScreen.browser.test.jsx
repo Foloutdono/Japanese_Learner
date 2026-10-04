@@ -153,22 +153,24 @@ beforeEach(async () => {
   await Promise.all([refreshSummary(), refreshJourney()])
 })
 
-describe('SettingsScreen — the pass and the list', () => {
-  it('prints the pass\'s contract and seven rows plus the pass, each printing its value', async () => {
+describe('SettingsScreen — the card and the list', () => {
+  it('prints the card\'s contract and seven rows plus the pass, each printing its value', async () => {
     const screen = await mount()
     await settle()
     const root = screen.container
 
-    // The contract: the boarding level and the destination, then the
-    // service, the hour and the lines, each a door to its own page.
-    const fields = [...root.querySelectorAll('.stg-pass .stg-door')]
+    // The contract, on the card's back (plan 173): the boarding level and
+    // the destination, then the service, the hour and the lines, each a
+    // door to its own page.
+    expect(root.querySelector('.pcard-slot--settings .pcard').dataset.side).toBe('back')
+    const fields = [...root.querySelectorAll('.pcard-slot--settings .stg-door')]
     expect(fields.map(f => f.dataset.page)).toEqual(['level', 'destination', 'service', 'hour', 'lines'])
     expect(fields[0].textContent).toContain('N5')
     expect(fields[1].textContent).toContain(T.settingsGoalNoneShort)
     expect(fields[2].textContent).toContain(`${T.paceName.rapid} · 10`)
     expect(fields[3].textContent).toContain(T.destFlexible)
     // No destination, so no date to be valid until.
-    expect(root.querySelector('.stg-pass__field--valid')).toBeNull()
+    expect(root.querySelector('.pcb__valid')).toBeNull()
 
     // Seven doors to pages, then the pass — which opens the offer sheet
     // rather than navigating, so it is last and is not one of PAGES.
@@ -196,11 +198,11 @@ describe('SettingsScreen — the pass and the list', () => {
     screen.container.querySelector('.stage__leave').click()
     await vi.waitFor(() => expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(8))
 
-    screen.container.querySelector('.stg-pass .stg-door[data-page="service"]').click()
+    screen.container.querySelector('.pcard-slot--settings .stg-door[data-page="service"]').click()
     await vi.waitFor(() => expect(title()).toBe(T.destService))
   })
 
-  it('prints the destination and its validity when the pass has one', async () => {
+  it('prints the destination and its validity when the card has one', async () => {
     journey = WITH_GOAL
     seedJourneyStatus(WITH_GOAL)
     await refreshJourney()
@@ -208,7 +210,7 @@ describe('SettingsScreen — the pass and the list', () => {
     await settle()
     const root = screen.container
     expect(root.querySelector('.stg-door[data-page="destination"]').textContent).toContain('N3')
-    expect(root.querySelector('.stg-pass__field--valid').textContent).toMatch(/2031/)
+    expect(root.querySelector('.pcb__valid').textContent).toMatch(/2031/)
   })
 
   it('an unknown page falls back to the list', async () => {
@@ -243,7 +245,7 @@ describe('SettingsScreen — the pass and the list', () => {
     pass.click()
     await settle(30)
     // The source is what the whole funnel slices on, so it is pinned.
-    expect(credits.peekPaywall()).toEqual({ source: 'settings', taken: false })
+    expect(credits.peekPaywall()).toEqual({ source: 'settings', screen: 'discover', limit: null, waiting: null, taken: false })
 
     credits.closePaywall()
   })

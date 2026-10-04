@@ -99,7 +99,6 @@ export default function VocabScreen({ session }) {
     return (
       <SelectionScreen
         title={t.vocabulary}
-        sub={t.stationSources}
         aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         <ModeSelector modes={SOURCES} onSelect={key => navigate(`${BASE}/${key}`)} />
