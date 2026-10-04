@@ -1734,6 +1734,7 @@ const decks = {
   libraryOpen:           'Ouvrir',
   libraryFollow:         'Suivre',
   libraryPublish:        'Publier dans la bibliothèque',
+  libraryPublishHint:    'Les autres pourront le trouver et le suivre.',
   libraryPublished:      'Ce deck est dans la bibliothèque.',
   libraryUnpublish:      'Retirer de la bibliothèque',
   libraryMakeMine:       'En faire ma copie',

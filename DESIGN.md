@@ -1459,8 +1459,13 @@ each question drawing its answers between them.
   cards by state as a bar and four figures, beside the gate button --
   the page's one action, there being no foot any more. What acts on the
   cards (add, import, export, select) is one row of ghost buttons over
-  the table; More holds the library and the deck's deletion, a
-  `.chip--danger` that arms the dialog. The shelf's and the deck's
+  the table; More opens in the gate's place and holds the library and
+  the deck's deletion. More's rows are one list on the phone's sheet and
+  the desk's page alike (`.more-row`: a glyph in its well, the word, a
+  line where the row has something to say), the deletion a list of its
+  own in the danger's ink, never a fill -- the question it opens fills.
+  On a phone the deck's gate is the same button, and its four actions
+  each a glyph over its word. The shelf's and the deck's
   buttons print their words in sentence case at `--fs-sm`, not the
   chip's tracked capitals (`.dk-tool`). Narrow or short, the gate keeps
   its switch, its count and its button.

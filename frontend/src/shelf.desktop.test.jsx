@@ -273,7 +273,7 @@ const addCards = () => $('.dk-tools .dk-tool')
 const escape = () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
 
 describe('a deck\'s More on the desk', () => {
-  it('opens in the slot, pressed while it holds it, and gives the slot back', async () => {
+  it('opens in the gate\'s place, pressed while it holds it, and gives it back', async () => {
     deckApi(CARDS)
     await mountDeck()
     await settle(400)
@@ -283,13 +283,19 @@ describe('a deck\'s More on the desk', () => {
     more.click()
     await settle()
     expect($('[role="dialog"]')).toBeNull()
-    const dock = $('.desk-deck__slot .desk-more')
+    const dock = $('.desk-deck > .desk-more')
     expect(dock).not.toBeNull()
+    expect($('.dk-gate')).toBeNull()
+    expect($('.desk-deck__slot')).toBeNull()
+    // Under the head that opened it, over the row of tools.
+    expect(dock.getBoundingClientRect().top).toBeGreaterThanOrEqual($('.dk-head').getBoundingClientRect().bottom)
+    expect(dock.getBoundingClientRect().bottom).toBeLessThanOrEqual($('.dk-tools').getBoundingClientRect().top)
     expect(more.getAttribute('aria-pressed')).toBe('true')
-    // The library, and the deletion apart under it, a chip that arms
-    // the dialog; import and export are the row of tools'.
-    expect([...dock.querySelectorAll('.dk-more__acts > .btn-secondary')].map(b => b.textContent.trim())).toEqual(['Publier dans la bibliothèque'])
-    expect(dock.querySelector('.dk-more__end .chip--danger')).not.toBeNull()
+    // The library, and the deletion a list of its own, arming the
+    // dialog; import and export are the row of tools'.
+    const lists = [...dock.querySelectorAll('.more-list')]
+    expect(lists.map(l => [...l.querySelectorAll('.more-row__label')].map(r => r.textContent))).toEqual([['Publier dans la bibliothèque'], ['Supprimer le deck']])
+    expect(lists[1].querySelector('.more-row--danger').getAttribute('aria-haspopup')).toBe('dialog')
     expect(dock.querySelector('.btn-primary--danger')).toBeNull()
     expect($$('.dk-tools .dk-tool').map(c => c.textContent)).toContain('Exporter')
     expect($('.desk-deck__study')).toBeNull()
@@ -317,7 +323,7 @@ describe('a deck\'s More on the desk', () => {
     moreChip().click()
     await settle()
     expect($('.desk-browse')).toBeNull()
-    expect($('.desk-deck__slot .desk-more')).not.toBeNull()
+    expect($('.desk-deck > .desk-more')).not.toBeNull()
   })
 
   it('asks before deleting the deck, in a dialog over the dock', async () => {
@@ -326,7 +332,7 @@ describe('a deck\'s More on the desk', () => {
     await settle(400)
     moreChip().click()
     await settle()
-    $('.desk-more .chip--danger').click()
+    $('.desk-more .more-row--danger').click()
     await settle()
     const dialog = $('[role="dialog"]')
     expect(dialog).not.toBeNull()
@@ -352,7 +358,7 @@ describe('a deck\'s More on the desk', () => {
     $$('.chip-row button')[0].click()
     await settle()
     expect($('[role="dialog"] .sheet__q')).not.toBeNull()
-    expect($('.desk-deck__slot [class*="desk-more"]')).toBeNull()
+    expect($('[class*="desk-more"]')).toBeNull()
   })
 })
 

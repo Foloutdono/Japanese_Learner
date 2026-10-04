@@ -856,43 +856,43 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   )
 
   // What More holds (plan 071): the cards in and out, and the deck into
-  // the library. A sheet on a phone; on the desk it opens in the side
-  // instead (plan 120), since none of it is a question.
-  const moreActions = (
-    <>
-      {allowCustom && (
-        <button type="button" className="btn-secondary" onClick={() => { setMoreOpen(false); setShowImport(true) }}>
-          <ImportIcon size={14} /> {t.import}
-        </button>
-      )}
-      {cards.length > 0 && (
-        <button type="button" className="btn-secondary" disabled={exporting} onClick={() => { setMoreOpen(false); exportDeck() }}>
-          <ExportIcon size={14} /> {t.export}
-        </button>
-      )}
-      {/* The library, from the deck that goes into it. Publishing is
-          not an action on the shelf card — the card is one whole
-          button into the deck — and it is not a chip either: the chip
-          row is what you do to the CARDS. */}
-      {cards.length > 0 && deck?.visibility !== 'public' && (
-        <button type="button" className="btn-secondary" disabled={busy}
-          onClick={() => publish(true)}>
-          <BooksIcon size={14} /> {t.libraryPublish}
-        </button>
-      )}
-      {deck?.visibility === 'public' && (
-        <>
-          {/* A statement, not a question: .sheet__q is what the
-              sheet ASKS, and there is nothing to answer here. */}
-          <span className="lib-note">{t.libraryPublished}</span>
-          <button type="button" className="btn-secondary" disabled={busy}
-            onClick={() => publish(false)}>
-            <CrossIcon size={14} /> {t.libraryUnpublish}
-          </button>
-        </>
-      )}
-    </>
+  // the library. A sheet on a phone; on the desk it opens in the gate's
+  // place (plans 120, 178), where the row of tools already carries the
+  // cards in and out. One list of rows, each a glyph and its word, the
+  // library's saying where the deck stands; the deletion a list of its
+  // own at the end, in the danger's ink, arming the question that fills.
+  const moreRow = (key, icon, label, onClick, { hint, danger = false, disabled = false } = {}) => (
+    <button key={key} type="button" className={`more-row${danger ? ' more-row--danger' : ''}`}
+      onClick={onClick} disabled={disabled} aria-haspopup={danger ? 'dialog' : undefined}>
+      <span className="more-row__icon" aria-hidden="true">{icon}</span>
+      <span className="more-row__text">
+        <span className="more-row__label">{label}</span>
+        {hint && <span className="more-row__hint">{hint}</span>}
+      </span>
+    </button>
   )
+  const libraryRow = cards.length > 0 && deck?.visibility !== 'public'
+    ? moreRow('publish', <BooksIcon size={16} />, t.libraryPublish, () => publish(true), { hint: t.libraryPublishHint, disabled: busy })
+    : deck?.visibility === 'public'
+      ? moreRow('unpublish', <CrossIcon size={16} />, t.libraryUnpublish, () => publish(false), { hint: t.libraryPublished, disabled: busy })
+      : null
+  const moreRows = withCards => {
+    const rows = [
+      withCards && allowCustom && moreRow('import', <ImportIcon size={16} />, t.import, () => { setMoreOpen(false); setShowImport(true) }),
+      withCards && cards.length > 0 && moreRow('export', <ExportIcon size={16} />, t.export, () => { setMoreOpen(false); exportDeck() }, { disabled: exporting }),
+      libraryRow,
+    ].filter(Boolean)
+    return (
+      <>
+        {rows.length > 0 && <div className="more-list">{rows}</div>}
+        {!confirmingDeck && (
+          <div className="more-list">
+            {moreRow('delete', <TrashIcon size={16} />, t.deleteDeck, () => { playUi('click-mode-selection'); setConfirmingDeck(true) }, { danger: true })}
+          </div>
+        )}
+      </>
+    )
+  }
 
   // What both layouts draw: a follower's doors, the selection's
   // console and the import/export banners.
@@ -987,8 +987,9 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   // by state as a bar and four figures, and the gate itself, the
   // screen's one action. Under it the cards, with what acts on them in
   // one row over the table -- add, import, export, select -- and the
-  // deck's own library and deletion behind More. The card form, Browse
-  // and More open in the gate's place, under the row that opened them.
+  // deck's own library and deletion behind More. The card form and
+  // Browse open under the row that opened them, More in the gate's own
+  // place, under the head's ···.
   const modes = useDeckModes(desk && !loading ? deck_id : null, session, cards.length > 0)
   const [deckBox, deckSize] = useBoxSize(desk)
   // Narrow: the row's quieter tools are their icons and a card's
@@ -1044,30 +1045,11 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   )
 
   // More on the desk holds what the row of tools does not: the deck in
-  // the library, and its deletion, a chip that arms the dialog.
-  const deskMore = (
+  // the library, and its deletion, which asks in a dialog of its own.
+  // It opens in the gate's place, under the ··· that opened it.
+  const morePanel = desk && moreOpen && !adding && !showBrowse && (
     <DeskDock title={t.deckMore} className="desk-more" onClose={closeMore}>
-      <div className="dk-more__acts">
-        {cards.length > 0 && deck?.visibility !== 'public' && (
-          <button type="button" className="btn-secondary" disabled={busy} onClick={() => publish(true)}>
-            <BooksIcon size={14} /> {t.libraryPublish}
-          </button>
-        )}
-        {deck?.visibility === 'public' && (
-          <>
-            <span className="lib-note">{t.libraryPublished}</span>
-            <button type="button" className="btn-secondary" disabled={busy} onClick={() => publish(false)}>
-              <CrossIcon size={14} /> {t.libraryUnpublish}
-            </button>
-          </>
-        )}
-      </div>
-      <div className="dk-more__end">
-        <Chip className="chip--danger dk-tool" aria-haspopup="dialog"
-          onClick={() => { playUi('click-mode-selection'); setConfirmingDeck(true) }}>
-          <TrashIcon size={14} />{t.deleteDeck}
-        </Chip>
-      </div>
+      {moreRows(false)}
     </DeskDock>
   )
 
@@ -1086,15 +1068,11 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
           <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
         </>
       )
-      // More is a list of what can be done to the deck, not a question:
-      // it opens in the page (plan 120), and only its deletion asks, in
-      // a dialog of its own (below).
-      : moreOpen ? deskMore
       : null
 
   // 改札: the switch across the panel, the run's count and the deck's
   // states beside the gate under it.
-  const gate = desk && !loading && cards.length > 0 && rideOptions.length > 0 && !deskSlot && (
+  const gate = desk && !loading && cards.length > 0 && rideOptions.length > 0 && !deskSlot && !morePanel && (
     <section className={`dk-gate${compact ? ' dk-gate--compact' : ''}${narrow ? ' dk-gate--narrow' : ''}`} aria-label={t.study} style={{ '--line-color': dt.color }}>
       <Seg full className="dk-gate__modes" label={t.study} value={rideOn} options={rideOptions}
         onChange={key => { playUi('click-mode-selection'); setRideKey(key) }} />
@@ -1157,7 +1135,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
 
       {isFollower && followerActs}
 
-      {gate}
+      {morePanel || gate}
 
       {/* What acts on the cards, in one row over them. */}
       {!isFollower && !loading && (canAdd || cards.length > 0) && (
@@ -1259,13 +1237,12 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
             {dueToday > 0 && <> · <span className="deck-identity__due">{t.todayDue(dueToday)}</span></>}
           </span>
         </span>
-        <button
-          type="button"
-          className="btn-primary deck-identity__study"
+        {/* The gate, as on the desk's page and Today (plan 178). */}
+        <GateButton
+          label={t.study}
+          className="deck-identity__study"
           onClick={() => { playUi('click-screen-selection'); navigate(`/learn/decks/${deck_id}/study`, { state: { deck } }) }}
-        >
-          ▶ {t.study}
-        </button>
+        />
       </div>
 
       {/* Warn, then vanish. The author has deleted this deck; it is
@@ -1445,8 +1422,8 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       </Sheet>
 
       <Sheet open={moreOpen && !desk} onClose={closeMore} jp={deck?.name ?? t.deckFallbackTitle} cap={t.deckMore}>
-        {moreActions}
-        {confirmingDeck ? (
+        {moreRows(true)}
+        {confirmingDeck && (
           <>
             <span className="sheet__q">
               {deck?.followers > 0
@@ -1458,15 +1435,6 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
             </button>
             <button type="button" className="btn-secondary" onClick={() => setConfirmingDeck(false)}>{t.cancel}</button>
           </>
-        ) : (
-          /* The sheet's own one action, so it is filled — the ghost it
-             was set raw --danger as TEXT, which is 2.11:1 on this
-             ground in dark and read as a warning label rather than a
-             button. Import and Export beside it stay ghosts; the
-             screen's filled ▶ Study is behind the scrim. */
-          <button type="button" className="btn-primary btn-primary--danger" onClick={() => setConfirmingDeck(true)}>
-            <TrashIcon size={14} /> {t.deleteDeck}
-          </button>
         )}
       </Sheet>
 

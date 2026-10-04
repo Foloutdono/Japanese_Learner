@@ -11337,6 +11337,10 @@ textarea:focus-visible {
 .deck-identity__meta { font-size: var(--fs-caption); color: var(--text-secondary); }
 .deck-identity__due { color: color-mix(in srgb, var(--warning) 55%, var(--text-primary)); font-weight: 700; }
 .deck-identity__study { flex: none; }
+/* The gate (plan 178) beside the name takes two fifths of the card, so
+   its reader and its word keep the gate's own proportions rather than
+   the word's width. */
+.deck-identity__study.btn-depart--gate { flex: 0 0 40%; margin: 0; }
 
 /* ── 通報 — the report, in the identity's corner ──
    Reporting a deck is not one of this page's offers. As a labelled
@@ -11706,7 +11710,19 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 
 /* The dangerous variants of the two buttons, and a sheet's question
    line — a deletion asks first, in the same row. */
-.btn-primary--danger { background: color-mix(in srgb, var(--danger) 70%, var(--bg-panel)); }
+.btn-primary--danger {
+  background: color-mix(in srgb, var(--danger) 70%, var(--bg-panel));
+  /* The pigment fill's ink (The primary button): the danger deepened
+     toward the sumi panel carries --text-on-panel in both themes. It
+     had kept the metal's dark ink, ~2:1 on this red. */
+  color: var(--text-on-panel);
+}
+/* Its hover is the family's 79%, lighter, not the metal's lift -- the
+   bare .btn-primary:hover is more specific than the variant and had
+   turned a deletion gold under the cursor. */
+.btn-primary.btn-primary--danger:hover {
+  background: color-mix(in srgb, var(--danger) 79%, var(--bg-panel));
+}
 .btn-secondary--danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
 .sheet__q { font-size: var(--fs-sm); color: var(--text-primary); }
 
@@ -11748,13 +11764,88 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-overflow: ellipsis;
 }
 .chip-row.deckdetail-acts > .chip + .chip { border-left: 1px solid var(--surface-line); }
-/* On a phone the four words take the row's width between them, so the
-   glyphs in front of them go: the words are the actions, and with the
-   glyphs Sélectionner was cut. */
+/* On a phone the four share the row evenly, each its glyph over its
+   word (plan 178): side by side the glyphs had to go for Sélectionner
+   to fit, and More was still cut at the row's edge. */
 @media (max-width: 560px) {
-  .chip-row.deckdetail-acts > .chip { padding-inline: var(--sp-2); }
-  .chip-row.deckdetail-acts > .chip > :is(svg, .chip__dots) { display: none; }
+  .chip-row.deckdetail-acts > .chip {
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: var(--sp-1);
+    height: auto;
+    padding: var(--sp-3) var(--sp-1);
+    font-size: var(--fs-caption);
+  }
+  .chip-row.deckdetail-acts > .chip > .chip__dots { line-height: 1; }
 }
+/* More's rows (plan 178), in the phone's sheet and in the desk's page
+   alike: one list, a glyph in its well and the word, a line under it
+   where the row has something to say; the deletion a list of its own
+   at the end, in the danger's ink (the mix .chip--danger reads at),
+   never a fill -- the question it opens is what fills. */
+.more-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.more-list + .more-list { margin-block-start: var(--sp-2); }
+.more-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 52px; /* a hit target, as the sheet's buttons' */
+  padding: var(--sp-3) var(--sp-5);
+  font: inherit;
+  text-align: start;
+  color: var(--text-primary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-flat);
+  cursor: pointer;
+}
+.more-row + .more-row { border-top: 1px solid var(--surface-line); }
+.more-row:hover,
+.more-row:focus-visible {
+  filter: none;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+.more-row:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: -2px;
+}
+.more-row:disabled { opacity: 0.45; cursor: default; }
+.more-row__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--sp-7);
+  height: var(--sp-7);
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  border-radius: var(--r-card);
+}
+.more-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.more-row__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+.more-row__hint {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.more-row--danger,
+.more-row--danger .more-row__icon { color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
+.more-row--danger .more-row__icon { background: color-mix(in srgb, var(--danger) 14%, transparent); }
 .chip-row.deckdetail-acts > .chip:not(.chip--on):hover,
 .chip-row.deckdetail-acts > .chip:not(.chip--on):focus-visible {
   background: color-mix(in srgb, var(--text-primary) 6%, transparent);
@@ -28563,29 +28654,10 @@ button.brd-stn { cursor: pointer; }
     cursor: pointer;
   }
   .dk-all:hover { filter: none; color: var(--text-primary); }
-  /* More in the gate's place (plan 120's dock): the deck in the
-     library -- where it stands, and the way in or out -- and the
-     deletion apart at the dock's right-hand foot, a chip that arms it
-     as the selection's Delete does; the dialog it opens is the one that
-     fills (.chip--danger). Adding, importing and exporting are the row
-     of tools' (plan 178). */
-  .dk-more__acts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-3);
-  }
-  .dk-more__acts > .btn-secondary {
-    flex: 1 1 calc(var(--desk-side-w) / 2);
-    width: auto;
-  }
-  .dk-more__acts > .lib-note {
-    flex-basis: 100%;
-    order: -1;
-  }
-  .dk-more__end {
-    display: flex;
-    justify-content: flex-end;
-  }
+  /* More in the gate's place (plans 120, 178): the dock's caption and
+     ✕ over More's rows, the deletion apart; adding, importing and
+     exporting are the row of tools'. */
+  .desk-deck > .desk-more { gap: var(--sp-3); }
   /* The types' chips keep their own width, not the console's share. */
   .shelf-console .console__chips .chip { flex: none; }
   /* A door opened in a column (components/chrome/DeskDock, plan 120):

@@ -1807,6 +1807,7 @@ const decks = {
   libraryOpen:           'Open',
   libraryFollow:         'Follow',
   libraryPublish:        'Publish to the library',
+  libraryPublishHint:    'Other learners can find and follow it.',
   libraryPublished:      'This deck is in the library.',
   libraryUnpublish:      'Remove from the library',
   libraryMakeMine:       'Make it mine',

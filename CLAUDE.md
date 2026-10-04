@@ -1373,10 +1373,15 @@ runtime purpose. Two consequences worth knowing:
   deck's lanes of the day's queue, then each mode), today's count and
   the deck's cards by state beside the gate button, the page's one
   action; the cards' tools (add, import, export, select) one row over
-  the table; More the library and the deletion; and the shelf's and the
-  deck's buttons in sentence case (cited in
+  the table; More the library and the deletion, as one list of rows
+  (`.more-row`) on the phone's sheet and the desk's page alike; on a
+  phone the gate as the deck's Study and the four actions a glyph over
+  each word; `.btn-primary--danger` inked `--text-on-panel` and no longer
+  gold under the cursor; and the shelf's and the deck's buttons in
+  sentence case (cited in
   `screens/DeckDetailScreen.jsx`, `components/ui/GateButton.jsx`,
   `src/decks.desktop.test.jsx`, `src/deckFit.desktop.test.jsx`,
+  `src/deskfree.phone.test.jsx`,
   `src/deckFit.wide.test.jsx`, `src/shelf.desktop.test.jsx` and the 机
   section of `index.css`; DESIGN.md, "The gate button" and "The desk").
   When starting a new wave, begin at **179** or higher, and check
