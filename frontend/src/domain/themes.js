@@ -11,7 +11,7 @@ export function themeLabelFor(t, key) {
 }
 
 // ── The four levels inside a theme ───────────────────────────
-// A theme is cut into four bands by frequency (see
+// A theme is cut into four levels by difficulty, placed by hand (see
 // backend/content/theme_data.py). Ordered easiest-first; this order and
 // these keys must match theme_data.LEVELS — the backend rejects anything
 // else with a 400.
