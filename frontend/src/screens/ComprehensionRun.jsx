@@ -19,6 +19,7 @@ import { SealedPanel } from '../components/study/SessionPanel'
 import { RunLines } from '../components/study/RunLines'
 import { KeyCap } from '../components/chrome/DeskKeys'
 import { startTally, countReview } from '../stores/runTally'
+import { RunStreak } from '../components/study/RunStreak'
 import { useAsk } from '../hooks/useAsk'
 import { AskPanel } from '../components/study/AskPanel'
 import { askTarget } from '../domain/ask'
@@ -488,6 +489,7 @@ export default function ComprehensionRun({ session }) {
       // On the desk the count is the run's lines' (plan 129).
       remaining={stage === 'questions' && !desk ? `${currentQ + 1} / ${total}` : undefined}
       pass={false}
+      aside={<RunStreak />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records

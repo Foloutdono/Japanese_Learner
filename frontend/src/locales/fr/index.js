@@ -812,6 +812,8 @@ const stats = {
   overview:           'Aperçu',
   streak:             'Série',
   longestStreak:      'Meilleure série',
+  resultNotSaved:  "Cette réponse n’a pas pu être enregistrée dans ton historique. Elle ne comptera pas.",
+  runStreak:          (n, best) => `${n} de suite · record ${best}`,
   accuracy:           'Précision',
   dueToday:           'À réviser aujourd\'hui',
 

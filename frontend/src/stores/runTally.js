@@ -33,7 +33,14 @@ import { useSyncExternalStore } from 'react'
 // phone (components/study/RunConsole.jsx) -- a segment a rating, in
 // its verdict's ink. Unlike `cards` it keeps a card rated twice twice:
 // the meter counts ratings, as the run's length does.
-const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]), verdicts: Object.freeze([]), startedAt: null })
+//
+// `streak` / `best` (plan 177): the answers in a row rated good or better
+// at this moment, and the longest such run this run has had. Counted from
+// the rating alone, so a mode needs to say nothing more than it already
+// does -- the five practice runs show it as the stamp in their head
+// (components/study/RunStreak.jsx), which each used to keep for itself
+// off a local flag, in two of the five.
+const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]), verdicts: Object.freeze([]), startedAt: null, streak: 0, best: 0 })
 
 let tally = EMPTY
 const listeners = new Set()
@@ -49,6 +56,7 @@ export function startTally(key) {
 /** One rated card; `entry` is the dictionary entry it was revealed on, if any. */
 export function countReview({ quality, xp, entry } = {}) {
   const id = entryId(entry)
+  const streak = quality >= 3 ? tally.streak + 1 : 0
   tally = {
     ...tally,
     reviewed: tally.reviewed + 1,
@@ -58,6 +66,8 @@ export function countReview({ quality, xp, entry } = {}) {
     // misses are listed in is the order they were last seen.
     cards: id ? [...tally.cards.filter(c => c.id !== id), { id, entry: shape(entry), quality }] : tally.cards,
     verdicts: Number.isFinite(quality) ? [...tally.verdicts, quality] : tally.verdicts,
+    streak,
+    best: Math.max(tally.best, streak),
   }
   emit()
 }
