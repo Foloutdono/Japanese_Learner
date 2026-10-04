@@ -455,6 +455,21 @@ def _records(user_id: str) -> dict:
 CALENDAR_DAYS = 35
 
 
+def _with_practice(reviews: list[dict], practice: list[dict]) -> list[dict]:
+    """The stamp book's days: {date, count, practice}, oldest first.
+
+    `count` stays the card reviews of the day, as it always was; `practice`
+    is the graded sentences, texts and papers of the practice modes (plan
+    178), which schedule no card and so never reached `count`. A day is
+    stamped when either is above zero -- the streak counts it the same way
+    (srs._studied_days) -- so the book and the number cannot disagree."""
+    days: dict[str, dict] = {d["date"]: {"date": d["date"], "count": d["count"], "practice": 0} for d in reviews}
+    for d in practice:
+        day = days.setdefault(d["date"], {"date": d["date"], "count": 0, "practice": 0})
+        day["practice"] = d["count"]
+    return [days[k] for k in sorted(days)]
+
+
 # ── Routes ────────────────────────────────────────────────────
 @router.get("/api/profile")
 def get_profile(user_id: str = Depends(get_user_id)):
@@ -469,7 +484,10 @@ def get_profile(user_id: str = Depends(get_user_id)):
     # One query for the sheet; the week the home hall's stamp rally and
     # every other consumer of `week` still read is sliced off it rather
     # than asked for again. Same helper the stats calendar uses.
-    calendar = srs.get_daily_review_counts(user_id, days=CALENDAR_DAYS)
+    calendar = _with_practice(
+        srs.get_daily_review_counts(user_id, days=CALENDAR_DAYS),
+        srs.get_daily_practice_counts(user_id, days=CALENDAR_DAYS),
+    )
     week_from = (datetime.now(timezone.utc).date() - timedelta(days=6)).isoformat()
 
     return {

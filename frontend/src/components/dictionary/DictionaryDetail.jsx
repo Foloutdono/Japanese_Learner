@@ -498,41 +498,49 @@ function ReadingGate({ name, n, open, onPick }) {
 }
 
 // One reading, and the words that demonstrate it: the reading as a
-// band of sumi that sticks to the top of the list while its words
-// pass under it, then the words in the ledger's own rows, unchanged —
-// the kanji in each picked out in the entry's ink exactly as the
-// ledger picks it out.
+// head that sticks to the top of the list while its words pass under
+// it, then the words in the ledger's own rows.
 //
-// The band is the fix for the sheet's second defect. The reading used
-// to be set at --fs-lead in --text-primary — the rung and the ink of
-// the word rows it heads — flush with a list that bleeds sixteen
-// pixels further left than it does. A head cannot be the quietest
-// thing in its own group. GROUND is what separates them now, which is
-// what lets the rows keep their own gold: sumi against surface is not
-// a distinction the rows can dilute, the way a shared rung was.
+// The head is ONE line — the register's mark, the reading, its share
+// as a bar and a figure — and a caption under it says what the figure
+// counts: the tier, the words, and how many of them are shown, since a
+// reading lists at most four (kanji_words.MAX_WORDS) and "10 words of
+// 14" over four rows read as six gone missing. The reading is the one
+// gold in the list: 辞書's pigment is the selection's and the metal's
+// hex, so a bar, a tier and every picked-out kanji in it too had made
+// the whole sheet one colour. The bar is in the secondary ink, and a
+// row picks its kanji out by contrast instead (index.css, 割合).
 function ReadingBand({ reading, words, kind, char, onWord, share, total }) {
   const { t, lang } = useLang()
+  const shown = share && words.length > 0 && words.length < share.n
   return (
     <section className="dict-rd" aria-label={reading}>
       <h2 className="dict-rd__head">
         <span className="dict-rd__kind" aria-hidden="true">{kind}</span>
         <span className="dict-rd__yomi" lang="ja">{reading}</span>
         {share && (
-          <span className="dict-rd__pct">
-            {formatPct(share.pct, lang)}<span className="dict-rd__pct-unit">%</span>
-          </span>
+          <>
+            <span className="dict-share__bar" aria-hidden="true">
+              <i style={{ width: `${Math.max(share.pct, 0.8)}%` }} />
+            </span>
+            <span className="dict-rd__pct">
+              {formatPct(share.pct, lang)}<span className="dict-rd__pct-unit">%</span>
+            </span>
+          </>
         )}
       </h2>
       {share && (
-        <div className="dict-share">
-          <div className="dict-share__bar" role="img" aria-label={`${formatPct(share.pct, lang)} %`}>
-            <i style={{ width: `${Math.max(share.pct, 0.8)}%` }} />
-          </div>
-          <div className="dict-share__meta">
-            <span className={`dict-share__tier dict-share__tier--${share.tier}`}>{t.readingsTier[share.tier]}</span>
-            <span>{t.readingsOfWords(share.n, total)}</span>
-          </div>
-        </div>
+        <p className="dict-share__meta">
+          <span className="dict-share__tier">{t.readingsTier[share.tier]}</span>
+          <span aria-hidden="true">·</span>
+          <span>{t.readingsOfWords(share.n, total)}</span>
+          {shown && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{t.readingsExamples(words.length)}</span>
+            </>
+          )}
+        </p>
       )}
       {words.length > 0 && (
         <div className="dict-words">
@@ -691,9 +699,12 @@ function ReadingsByShare({ entry, groups, onClose, jump }) {
   const courseEmpty = scope === SCOPE_COURSE && total === 0
   return (
     <>
+      {/* The count's scope beside the line that says what it counts:
+          one row, the switch at its own size rather than the sheet's
+          width — the widest gold on the sheet, for a choice made once. */}
       <div className="dict-scope">
+        <p className="dict-scope__hint">{hint}</p>
         <Seg
-          full
           label={t.readingsScopeLabel}
           value={scope}
           onChange={pick}
@@ -702,7 +713,6 @@ function ReadingsByShare({ entry, groups, onClose, jump }) {
             { key: SCOPE_ALL, label: t.readingsScopeAll },
           ]}
         />
-        {hint && <p className="dict-scope__hint">{hint}</p>}
       </div>
       {scope === SCOPE_ALL && !shares && (
         <p className="dict-scope__wait" role="status">

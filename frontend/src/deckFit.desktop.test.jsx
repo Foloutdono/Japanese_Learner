@@ -10,7 +10,7 @@ import './index.css'
 // them scroll, so the ride is on the screen however many cards the deck
 // holds, and nothing leaves the page's right edge. Where the page is
 // narrow or short the gate keeps its switch, its count and its button
-// (plan 178). The shelf's list, too: its
+// (plan 179). The shelf's list, too: its
 // rows scroll between the console and the two doors. This is the narrow desk,
 // 1100px: the page beside a column is narrow.
 

@@ -33,7 +33,9 @@ function localIso(d) {
 }
 
 export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
-  const byDate = new Map((calendar ?? []).map(d => [d.date, d.count]))
+  // A day is stamped for a review or, since plan 178, a graded practice
+  // answer: the streak counts both, so the book has to.
+  const byDate = new Map((calendar ?? []).map(d => [d.date, (d.count ?? 0) + (d.practice ?? 0)]))
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const dow = (today.getDay() + 6) % 7 // Monday-first

@@ -11,7 +11,7 @@ import './index.css'
 // list -- the index field over glyph chips, a row per deck, the two doors
 // at its foot -- and the open deck stands beside it: the bare shelf opens
 // on its first deck, another row swaps the page in place. The page: the
-// head with More; the gate (plan 178) -- what the run rides as a switch
+// head with More; the gate (plan 179) -- what the run rides as a switch
 // (the deck's lanes of the day's queue, then each mode), today's count,
 // the four figures and the gate button, the page's one action; the row
 // of tools over the cards (add, import, export, select); the first six

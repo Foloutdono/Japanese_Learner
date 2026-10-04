@@ -864,7 +864,7 @@ question and at the end of a first ride (`Continue` in
 Board's place (plan 168, phone and desk alike) — and Today's **Depart** on the fare
 gate (`components/station/GateCard.jsx`, owner-directed after plan 164) — and,
 on the desk, a deck's **Study** (`screens/DeckDetailScreen.jsx`'s gate, plan
-178) are drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
+179) are drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
 as a ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
 directions drawn for "more vibrant, the user must notice it and want to
 press it"):
@@ -1010,6 +1010,12 @@ So:
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a
   station.
+- **A run's streak is the same stamp, one more size.** In the head of a
+  practice run the answers in a row rated good or better are the rally's
+  lacquer roundel holding the count (`.run-streak`), pressed afresh as the
+  run lengthens, filled from five, absent below two. It replaced the flame
+  two runs had drawn; the daily streak the rally counts includes a day of
+  practice, not only a day of cards.
 - **The rally has two sizes, and they are the same mark.** Seven days on the
   pass in the gate hall; five whole weeks, Monday to Sunday, as the profile's
   スタンプ帳. Same lacquer (`--stamp-ink`), same per-slot wobble, same press
@@ -1451,7 +1457,7 @@ each question drawing its answers between them.
   learner's own shelf does the same: its decks a list beside the open
   deck's page, the bare shelf opening on its first deck, another deck
   swapping the page in place, the shelf's two doors at the list's foot.
-  Since plan 178 (改札, the owner's pick B of four directions drawn for
+  Since plan 179 (改札, the owner's pick B of four directions drawn for
   "the buttons are the main problem") the deck's page leads with **the
   gate**: one panel holding what the run rides as a segmented switch
   across it (the deck's lanes of the day's queue while it has any, then

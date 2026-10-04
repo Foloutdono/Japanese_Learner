@@ -965,26 +965,30 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(dialog.querySelector('.dict-rest').getAttribute('aria-label')).toBe('No example words yet')
     // Pills come after the bands.
     expect(bands()[0].compareDocumentPosition(dialog.querySelector('.dict-rest')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    // Each row picks out the kanji it is an example of, in the entry's
-    // ink — the same mark the ledger under the sheet makes, because a
-    // band of sumi over the rows is not a distinction the rows' own
-    // gold can dilute.
+    // Each row picks out the kanji it is an example of — by contrast
+    // here, not by colour: the kanji and its reading in the ambient ink,
+    // the rest of the word in the secondary one. The reading over the
+    // rows is the list's gold, and five gold kanji under it made the
+    // sheet one colour.
     for (const row of dialog.querySelectorAll('.dict-word')) {
       expect(baseText(row.querySelector('.dict-word__hit'))).toBe('木')
     }
     const hit = dialog.querySelector('.dict-word__hit')
     const rt = hit.querySelector('rt')
+    const primary = probe('color', 'var(--text-primary)', root)
+    expect(getComputedStyle(hit).color).toBe(primary)
+    expect(getComputedStyle(rt).color).toBe(primary)
+    expect(getComputedStyle(hit.closest('.dict-word__jp')).color).toBe(probe('color', 'var(--text-secondary)', root))
     const ink = probe('color', 'color-mix(in srgb, var(--line-jisho) 60%, var(--text-primary))', root)
-    expect(getComputedStyle(hit).color).toBe(ink)
-    expect(getComputedStyle(rt).color).toBe(ink)
+    expect(getComputedStyle(dialog.querySelector('.dict-rd__yomi')).color).toBe(ink)
     // …and the declaration that keeps a reading wider than its kanji
     // from hanging off the side of it. Asserted here as the computed
     // value, which no font can move; the geometry it buys is measured
     // in its own test below, on a reading long enough to be the wider
     // of the two however the kana are set.
     expect(getComputedStyle(hit).rubyAlign).toBe('space-between')
-    // The same ink as the ledger's hit underneath, to the value: one
-    // mark for one thing, wherever the row is drawn.
+    // The ledger underneath keeps the entry's ink: the sheet's rows
+    // stand under a gold reading, the ledger's under nothing.
     const led = root.querySelector('section[aria-label="Used in these words"] .dict-word__hit')
     expect(getComputedStyle(led).color).toBe(ink)
 
@@ -1708,7 +1712,7 @@ describe('the readings — each with the share of the words that use it', () => 
   it('opens on the course, most used reading first, with its share, its tier and only the course\'s words', async () => {
     await open()
     expect(scopeButtons().map(b => [b.textContent, b.getAttribute('aria-checked')]))
-      .toEqual([['JLPT course', 'true'], ['All JMdict', 'false']])
+      .toEqual([['Course', 'true'], ['JMdict', 'false']])
     expect(sheet().querySelector('.dict-scope__hint').textContent)
       .toBe('Share of the course\'s 20 words that use each reading.')
     // The gates count the readings with a share; the open one is 音.
@@ -1716,7 +1720,9 @@ describe('the readings — each with the share of the words that use it', () => 
     expect(r.map(x => x.yomi)).toEqual(['モク'])
     expect(r[0].pct).toBe('60.0%')
     expect(r[0].tier).toBe('Common')
+    // Twelve words read モク and two are listed: the caption says so.
     expect(sheet().querySelector('.dict-rd .dict-share__meta').textContent).toContain('12 of 20 words')
+    expect(sheet().querySelector('.dict-rd .dict-share__meta').textContent).toContain('2 examples')
     expect(sheet().querySelector('.dict-share__bar i').style.width).toBe('60%')
     // The reading no course word uses is a pill, not a band.
     expect([...sheet().querySelectorAll('.dict-rest__chip')].map(el => el.textContent)).toEqual(['ボク'])

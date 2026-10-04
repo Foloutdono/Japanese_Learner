@@ -23,6 +23,7 @@ import { useAsk } from '../hooks/useAsk'
 import { AskPanel } from '../components/study/AskPanel'
 import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
+import { RunStreak } from '../components/study/RunStreak'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { Loading } from '../components/ui/Loading'
@@ -444,6 +445,7 @@ function Session({ session, level }) {
       // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
+      aside={<RunStreak />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records

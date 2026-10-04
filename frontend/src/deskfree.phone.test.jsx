@@ -971,7 +971,7 @@ describe('the doors (plan 120)', () => {
     await settle()
     const sheet = document.querySelector('.scrim [role="dialog"]')
     expect(sheet).not.toBeNull()
-    // More's rows (plan 178): import, export and the library, then the
+    // More's rows (plan 179): import, export and the library, then the
     // deletion a list of its own, in the danger's ink and not a fill.
     expect([...sheet.querySelectorAll('.more-list')].map(l => l.querySelectorAll('.more-row').length)).toEqual([3, 1])
     expect(sheet.querySelector('.btn-primary--danger')).toBeNull()

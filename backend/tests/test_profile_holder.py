@@ -16,8 +16,9 @@ def test_profile_carries_the_stamp_book_calendar(client):
     calendar_dates = {d["date"] for d in body["calendar"]}
     assert {d["date"] for d in body["week"]} <= calendar_dates
     for day in body["calendar"]:
-        assert set(day) == {"date", "count"}
-        assert day["count"] >= 1
+        assert set(day) == {"date", "count", "practice"}
+        # A day is in the book because of a review or a practice answer.
+        assert day["count"] + day["practice"] >= 1
 
 
 def test_profile_retention_is_a_share_or_absent(client):

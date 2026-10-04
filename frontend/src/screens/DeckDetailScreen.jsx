@@ -254,7 +254,7 @@ function ReadingsField({ label, value, onChange }) {
 // its cards it lists before the way to all of them.
 const FIG_KEYS = ['due', 'new', 'learning', 'mastered']
 const PREVIEW_CARDS = 6
-// The gate's switch (plan 178): the day's lanes, beside the deck's modes.
+// The gate's switch (plan 179): the day's lanes, beside the deck's modes.
 const RIDE_TODAY = 'today'
 // Below these the page is too short or too narrow for the whole gate:
 // it keeps its switch, its count and its button, so the cards keep
@@ -857,7 +857,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
 
   // What More holds (plan 071): the cards in and out, and the deck into
   // the library. A sheet on a phone; on the desk it opens in the gate's
-  // place (plans 120, 178), where the row of tools already carries the
+  // place (plans 120, 179), where the row of tools already carries the
   // cards in and out. One list of rows, each a glyph and its word, the
   // library's saying where the deck stands; the deletion a list of its
   // own at the end, in the danger's ink, arming the question that fills.
@@ -980,7 +980,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
 
   // ── 机 — the deck's page beside the shelf (plan 154) ──────────
   // The deck named in its head with More; then 改札, the gate (plan
-  // 178, the owner's pick B of four directions drawn for "the buttons
+  // 179, the owner's pick B of four directions drawn for "the buttons
   // are the main problem"): one panel holding the run -- what it rides
   // as a switch (the day's lanes of this deck, while it has any, then
   // each of its modes), how many cards that is today, the deck's cards
@@ -1237,7 +1237,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
             {dueToday > 0 && <> · <span className="deck-identity__due">{t.todayDue(dueToday)}</span></>}
           </span>
         </span>
-        {/* The gate, as on the desk's page and Today (plan 178). */}
+        {/* The gate, as on the desk's page and Today (plan 179). */}
         <GateButton
           label={t.study}
           className="deck-identity__study"

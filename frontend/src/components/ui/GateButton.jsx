@@ -14,7 +14,7 @@ import { PassWave } from '../profile/PassWave'
     The boarding's Continue (components/boarding/BoardFrame.jsx) and
     Today's Depart (components/station/GateCard.jsx) are the two gates,
     and a deck's Study on the desk (screens/DeckDetailScreen.jsx, plan
-    178) the third.
+    179) the third.
     `keys` prints the Enter cap at the pill's right end: only where
     Enter really does press it. */
 export function GateButton({ label, onClick, disabled = false, keys = false, className = '', ...rest }) {

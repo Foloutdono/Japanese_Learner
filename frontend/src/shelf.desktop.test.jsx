@@ -260,14 +260,14 @@ describe('a deck\'s Browse on the desk', () => {
 
 // ── plan 120 — More opens in the page; only its deletion asks ──
 // More is a list of what can be done to the deck (on the desk, since
-// plan 178, the library alone: adding, importing and exporting are the
+// plan 179, the library alone: adding, importing and exporting are the
 // row of tools'), not a question, so on the desk it takes the deck page's
 // slot (its column until plan 154) the way Browse does, taking turns
 // with it. Deleting the deck is
 // still asked, in a dialog of its own, as the follower's two
 // irreversibles are. The phone's side is deskfree.phone.
 const moreChip = () => $('.dk-head__more')
-// Add cards, first in the row of tools over the cards (plan 178): Browse
+// Add cards, first in the row of tools over the cards (plan 179): Browse
 // on a deck that browses the catalogue, else the card form.
 const addCards = () => $('.dk-tools .dk-tool')
 const escape = () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))

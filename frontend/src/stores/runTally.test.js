@@ -71,6 +71,30 @@ describe('the run\'s misses (plan 115)', () => {
   })
 })
 
+describe('a run\'s streak (plan 178)', () => {
+  it('counts the answers in a row rated good or better, and keeps the best', () => {
+    startTally('reading:level:N5')
+    expect(peekTally()).toMatchObject({ streak: 0, best: 0 })
+    countReview({ quality: 4 })
+    countReview({ quality: 3 })
+    countReview({ quality: 5 })
+    expect(peekTally()).toMatchObject({ streak: 3, best: 3 })
+    // Difficult is good (the line retention draws), wrong breaks it.
+    countReview({ quality: 2 })
+    expect(peekTally()).toMatchObject({ streak: 0, best: 3 })
+    countReview({ quality: 4 })
+    expect(peekTally()).toMatchObject({ streak: 1, best: 3 })
+  })
+
+  it('starts again with the next run', () => {
+    startTally('reading:level:N5')
+    countReview({ quality: 4 })
+    countReview({ quality: 4 })
+    startTally('translation:level:N5')
+    expect(peekTally()).toMatchObject({ streak: 0, best: 0 })
+  })
+})
+
 describe('the docked entry', () => {
   it('is withdrawn only by the publish that put it there', () => {
     const first = publishEntry({ term: '山', category: 'vocab' })
