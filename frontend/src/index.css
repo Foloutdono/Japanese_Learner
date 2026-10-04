@@ -12750,15 +12750,36 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
   text-align: left;
 }
-/* The streak, in the head's aside: a lightweight gaming touch. */
-.stage__streak {
+/* 連 — the run's streak (plan 178): the rally's stamp, lacquer-inked,
+   holding the count; pressed afresh each time the run lengthens (the
+   component keys on the count) and filled once it is hot. */
+.run-streak {
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-1);
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 var(--sp-1);
+  border-radius: var(--r-pill);
+  border: 2px solid var(--stamp-ink);
+  background: color-mix(in srgb, var(--stamp-ink) 14%, transparent);
+  color: color-mix(in srgb, var(--stamp-ink) 75%, var(--text-primary));
+  transform: rotate(var(--stamp-tilt, 0deg));
+  animation: stamp-press 0.45s ease-out backwards;
+}
+.run-streak--hot {
+  background: var(--stamp-ink);
+  color: var(--text-on-panel);
+}
+.run-streak__count {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: 700;
-  color: color-mix(in srgb, var(--warning) 55%, var(--text-primary));
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .run-streak { animation: none; }
 }
 
 .reading-group { margin-bottom: 10px; }

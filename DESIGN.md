@@ -1009,6 +1009,12 @@ So:
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a
   station.
+- **A run's streak is the same stamp, one more size.** In the head of a
+  practice run the answers in a row rated good or better are the rally's
+  lacquer roundel holding the count (`.run-streak`), pressed afresh as the
+  run lengthens, filled from five, absent below two. It replaced the flame
+  two runs had drawn; the daily streak the rally counts includes a day of
+  practice, not only a day of cards.
 - **The rally has two sizes, and they are the same mark.** Seven days on the
   pass in the gate hall; five whole weeks, Monday to Sunday, as the profile's
   スタンプ帳. Same lacquer (`--stamp-ink`), same per-slot wobble, same press

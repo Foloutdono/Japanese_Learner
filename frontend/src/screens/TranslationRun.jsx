@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+import { postResult } from '../lib/postResult'
 import { explainSentence } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
 import { runSource, logLabel } from '../domain/sentenceSource'
@@ -11,7 +12,7 @@ import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
-import { FireIcon } from '../components/ui/Icons'
+import { RunStreak } from '../components/study/RunStreak'
 // The tutor's review, drawn by the component 作文 shares (plan 125).
 import { TutorReview } from '../components/study/TutorReview'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
@@ -65,8 +66,9 @@ export default function TranslationRun({ session }) {
   const [score, setScore]   = useState({ correct: 0, total: 0 })
   // The fare per rated sentence, from the result's own response.
   const fare = usePracticeXp()
-  const [streak, setStreak] = useState(0)
   const [error, setError]   = useState(null)
+  // The last rated sentence's result post never landed (lib/postResult).
+  const [unsaved, setUnsaved] = useState(false)
 
   // LLM analysis of THIS attempt — unlike reading mode's breakdown,
   // this can't be prefetched while the phrase is on screen (it needs
@@ -153,7 +155,7 @@ export default function TranslationRun({ session }) {
 
   function startSession() {
     setScore({ correct: 0, total: 0 })
-    setStreak(0)
+    setUnsaved(false)
     startTally(`translation:${sourceLabel()}`)
     lines.reset()
     asking.reset()
@@ -339,7 +341,7 @@ export default function TranslationRun({ session }) {
 
   // `quality` is the learner's own rating, 0..5 worst to best, as
   // RatingBar emits it. `isCorrect` stays the derived pass/fail, because
-  // it is what the score row, the streak and every existing reader of
+  // it is what the score row and every existing reader of
   // translation_log understand -- the rating is recorded alongside it,
   // not instead of it.
   function gradeAnswer(isCorrect, quality = null) {
@@ -347,7 +349,6 @@ export default function TranslationRun({ session }) {
 
     setFeedback(f => ({ ...f, correct: isCorrect, quality }))
     setScore(s => ({ correct: s.correct + (isCorrect ? 1 : 0), total: s.total + 1 }))
-    setStreak(s => (isCorrect ? s + 1 : 0))
     countReview({ quality })
     lines.close()
     setLookup(null)
@@ -355,31 +356,26 @@ export default function TranslationRun({ session }) {
     // both sides, and grading is only ever reached through it now --
     // calling it here too doubled the sound on a correct answer.
 
-    apiFetch('/api/translation/result', session, {
-      method: 'POST',
-      body: JSON.stringify({
-        source: sourceLabel(),
-        level: source === 'level' ? level : null,
-        translation_prompt: data.translation,
-        phrase: data.phrase,
-        romaji: data.romaji,
-        answer: answer.trim(),
-        correct: isCorrect,
-        quality,
-        // The word this sentence was chosen to practise. The endpoint
-        // resolves it to that word's SRS card so the rating schedules
-        // something, rather than only being written down.
-        source_word: data.source_word ?? null,
-      }),
-    })
+    postResult('/api/translation/result', session, {
+      source: sourceLabel(),
+      level: source === 'level' ? level : null,
+      translation_prompt: data.translation,
+      phrase: data.phrase,
+      romaji: data.romaji,
+      answer: answer.trim(),
+      correct: isCorrect,
+      quality,
+      // The word this sentence was chosen to practise. The endpoint
+      // resolves it to that word's SRS card so the rating schedules
+      // something, rather than only being written down.
+      source_word: data.source_word ?? null,
+    }).then(({ saved, data: res }) => {
       // The fare rides the response (xp_earned, top-level): the level
-      // bar moves once the rating is on the server, and a failed post
-      // costs the fare and nothing else.
-      .then(r => (r.ok ? r.json() : null))
-      .then(res => fare.pay(res, quality))
-      .catch(() => {
-        // Logging failure shouldn't block the learner from continuing.
-      })
+      // bar moves once the rating is on the server. A post that never
+      // landed is said so (unsaved), not dropped (lib/postResult).
+      setUnsaved(!saved)
+      if (saved) fare.pay(res, quality)
+    })
   }
 
   function retry() {
@@ -420,8 +416,8 @@ export default function TranslationRun({ session }) {
       setAnswer={setAnswer}
       feedback={feedback}
       score={score}
-      streak={streak}
       fare={fare}
+      unsaved={unsaved}
       error={error}
       analysis={analysis}
       analysisLoading={analysisLoading}
@@ -450,22 +446,13 @@ export default function TranslationRun({ session }) {
   )
 }
 
-function Streak({ streak, t }) {
-  if (streak < 2) return null
-  return (
-    <span className="stage__streak" title={t.streak}>
-      <FireIcon size={14} /> {streak}
-    </span>
-  )
-}
-
 // Kicks off the session's first batch fetch exactly once, then renders
 // the stage machine. A component of its own for the same reason
 // ReadingRun.jsx splits it: the mount is the start, and the route above
 // is what decides there is a session to start.
 function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, answer, setAnswer,
-  feedback, score, streak, fare, error, analysis, analysisLoading, backLabel,
+  feedback, score, fare, unsaved, error, analysis, analysisLoading, backLabel,
   breakdown, breakdownLoading, onExplain, explaining, explainError,
   showBreakdown, setShowBreakdown, lookup, setLookup, closeLookup, lines, asking, askBase,
   session, onBack, onStart, submitAnswer, gradeAnswer, next, retry,
@@ -515,7 +502,7 @@ function SessionView({
       // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
-      aside={<Streak streak={streak} t={t} />}
+      aside={<RunStreak />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records
@@ -686,6 +673,7 @@ function SessionView({
             <RatingBar active onRate={q => gradeAnswer(q >= 3, q)} />
           ) : (
             <div className="stage__foot">
+              {unsaved && <p className="hint" role="status">{t.resultNotSaved}</p>}
               <button type="button" onClick={next} className="btn-primary" aria-keyshortcuts={desk ? 'Enter' : undefined}>
                 {t.nextPhrase}
                 <KeyCap>{t.keyEnter}</KeyCap>

@@ -848,6 +848,8 @@ const stats = {
   overview:        'Overview',
   streak:          'Streak',
   longestStreak:   'Best streak',
+  resultNotSaved:  "This answer could not be saved to your record and will not appear in it.",
+  runStreak:       (n, best) => `${n} in a row · best ${best}`,
   accuracy:        'Accuracy',
   dueToday:        'Due today',
 

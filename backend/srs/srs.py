@@ -1153,24 +1153,61 @@ class SRSEngine:
                 rows = cur.fetchall()
         return [{"date": day.isoformat(), "count": int(count)} for day, count in rows]
 
+    def get_daily_practice_counts(self, user_id: str, days: int = 30) -> list[dict[str, Any]]:
+        """Practice answers per day for the last `days` days (oldest
+        first): the reading, translation, dictation, composition and
+        comprehension answers and the mock-exam papers that were graded
+        without scheduling a card (plan 178).
+
+        They are xp_ledger rows -- award_practice writes one per graded
+        answer -- and never review_log rows, so get_daily_review_counts
+        cannot see them. Kept as its own figure rather than added to the
+        review counts: "reviews" is a card figure everywhere it is read
+        (retention, the stamp book's tooltips), and a sentence is not a
+        card. A rating that DID schedule a card (a reading sentence
+        whose word is in the deck) is paid by that review and has no
+        ledger row, so it is counted by the review side, not here."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT date_trunc('day', awarded_at)::date AS day, COUNT(*)
+                    FROM xp_ledger
+                    WHERE user_id = %s
+                      AND awarded_at >= NOW() - (%s || ' days')::interval
+                    GROUP BY 1
+                    ORDER BY 1 ASC
+                """
+                self._log_sql("get_daily_practice_counts", sql, (user_id, days))
+                cur.execute(sql, (user_id, days))
+                rows = cur.fetchall()
+        return [{"date": day.isoformat(), "count": int(count)} for day, count in rows]
+
     def _studied_days(self, user_id: str) -> set:
-        """Every day this user has a review on — what "showed up" means
-        for streak purposes."""
+        """Every day this user showed up -- a card review, or (plan 178)
+        a graded practice answer -- which is what "showed up" means for
+        streak purposes."""
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 # UNION (not UNION ALL): a day the learner studied is a
                 # day whether it is still a row, already a rollup, or —
-                # on the day compaction ran — both.
+                # on the day compaction ran — both. xp_ledger is the
+                # practice modes' trail (see get_daily_practice_counts):
+                # a day spent reading sentences, with no card due, was
+                # a day that broke the streak before this.
                 sql = """
                     SELECT DISTINCT date_trunc('day', reviewed_at)::date AS day
                     FROM review_log
                     WHERE card_id LIKE %s
                     UNION
                     SELECT day FROM review_daily WHERE user_id = %s
+                    UNION
+                    SELECT DISTINCT date_trunc('day', awarded_at)::date AS day
+                    FROM xp_ledger
+                    WHERE user_id = %s
                 """
-                self._log_sql("studied_days", sql, (pattern, user_id))
-                cur.execute(sql, (pattern, user_id))
+                self._log_sql("studied_days", sql, (pattern, user_id, user_id))
+                cur.execute(sql, (pattern, user_id, user_id))
                 return {row[0] for row in cur.fetchall()}
 
     def get_streak(self, user_id: str) -> dict[str, int]:

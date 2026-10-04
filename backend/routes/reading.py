@@ -77,21 +77,29 @@ logger = logging.getLogger(__name__)
 # back by _recent_grammar_patterns so the next exercise is written
 # around points the learner has not just seen.
 def _migrate_reading_log_schema() -> None:
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "ALTER TABLE reading_log ADD COLUMN IF NOT EXISTS quality SMALLINT"
-            )
-            cur.execute(
-                "ALTER TABLE reading_log ADD COLUMN IF NOT EXISTS accuracy SMALLINT"
-            )
-            cur.execute(
-                "ALTER TABLE comprehension_log ADD COLUMN IF NOT EXISTS grammar JSONB"
-            )
-        conn.commit()
-    finally:
-        conn.close()
+    # One statement, one transaction each, and IF EXISTS on the table: the
+    # three used to share a single transaction, so a comprehension_log
+    # that was missing (or locked) rolled back the two reading_log columns
+    # with it -- and with them every INSERT post_reading_result makes,
+    # which names `quality` and `accuracy`. A learner's reading history
+    # then stopped being written at all, with nothing on the screen to say
+    # so (the run drops a failed result post quietly).
+    statements = (
+        "ALTER TABLE IF EXISTS reading_log ADD COLUMN IF NOT EXISTS quality SMALLINT",
+        "ALTER TABLE IF EXISTS reading_log ADD COLUMN IF NOT EXISTS accuracy SMALLINT",
+        "ALTER TABLE IF EXISTS comprehension_log ADD COLUMN IF NOT EXISTS grammar JSONB",
+    )
+    for sql in statements:
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(sql)
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            logger.exception("schema migration failed: %s", sql)
+        finally:
+            conn.close()
 
 
 try:

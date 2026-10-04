@@ -1367,6 +1367,26 @@ runtime purpose. Two consequences worth knowing:
   `DictionaryDetail.browser.test.jsx`, `routes/kanji.py`,
   `components/study/ReadingShares.browser.test.jsx`,
   `tests/test_kanji_card_shares.py` and `index.css`).
+  **178** is 連, the streak in the practice modes: the daily streak and
+  the stamp book counted card reviews only (`review_log`), so a day spent
+  on reading, translation, dictation, composition, comprehension or the
+  mock exam -- which pay a fare in `xp_ledger` and schedule no card --
+  broke it; `srs._studied_days` now reads those days too, the profile's
+  calendar carries `practice` beside `count`
+  (`srs.get_daily_practice_counts`, `routes/profile.py`'s `_with_practice`),
+  and the stamp book and rally stamp either. The in-run streak (answers in
+  a row rated good or better) moved into the run tally (`streak`, `best`)
+  and is drawn in all five practice runs' heads as the rally's lacquer
+  stamp (`components/study/RunStreak.jsx`) in place of the flame two of
+  them had. Also: a reading or translation result that fails to post is
+  retried once and, if it still fails, said so under the card
+  (`lib/postResult.js`) instead of dropped, and the `reading_log` column
+  migration no longer shares a transaction with `comprehension_log`'s
+  (cited in `srs/srs.py`, `routes/profile.py`, `routes/reading.py`,
+  `tests/test_practice_streak.py`, `stores/runTally.js`,
+  `components/study/RunStreak.jsx`, `lib/postResult.js`,
+  `screens/ReadingRun.jsx`, `screens/TranslationRun.jsx` and `index.css`;
+  DESIGN.md, Motion).
   When starting a new wave, begin at **178** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
