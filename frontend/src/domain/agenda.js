@@ -224,3 +224,39 @@ export function axisTicks({ from, to }, step = 180) {
 export function durationParts(minutes) {
   return { h: Math.floor(minutes / 60), m: minutes % 60 }
 }
+
+/** The occurrences to come after `now` (the one under way included,
+ *  first), within the week: up to `n` of them. */
+export function upcoming(blocks, now, n = 3) {
+  const out = []
+  for (const occ of occurrences(blocks, now, 7)) {
+    const end = new Date(occ.start.getTime() + (occ.block.end - occ.block.start) * 60_000)
+    if (end <= now) continue
+    out.push({ ...occ, now: occ.start <= now })
+    if (out.length >= n) break
+  }
+  return out
+}
+
+/** How far a block under way has run at `now`, from 0 to 1. */
+export function progressOf(occ, now) {
+  const length = (occ.block.end - occ.block.start) * 60_000
+  return Math.min(1, Math.max(0, (now - occ.start) / length))
+}
+
+/** The week's minutes by subject, the largest share first:
+ *  { total, parts: [{ subject, minutes }] }. */
+export function weekShare(blocks) {
+  const by = new Map()
+  for (const b of blocks) by.set(b.subject, (by.get(b.subject) ?? 0) + (b.end - b.start) * b.days.length)
+  const parts = [...by].map(([subject, minutes]) => ({ subject, minutes })).sort((a, b) => b.minutes - a.minutes)
+  return { total: parts.reduce((sum, p) => sum + p.minutes, 0), parts }
+}
+
+/** Three weeks to start from, for an empty agenda: kanji on weekday
+ *  mornings, reading at the weekend, the day's queue every evening. */
+export const TEMPLATES = [
+  { subject: 'kanji', days: WEEKDAYS, start: 9 * 60, end: 10 * 60, notify: true, lead: 10 },
+  { subject: 'reading', days: [5, 6], start: 10 * 60, end: 11 * 60, notify: true, lead: 10 },
+  { subject: 'review', days: DAYS, start: 21 * 60, end: 21 * 60 + 30, notify: true, lead: 0 },
+]

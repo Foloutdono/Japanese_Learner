@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
-  SUBJECTS, SUBJECT_GROUPS, SUBJECT_PATH, OPENABLE_PATHS, agendaDay, axisFor, axisTicks, durationParts, blockProblem, blocksOn, clashWith, clock, dayName,
+  SUBJECTS, SUBJECT_GROUPS, SUBJECT_PATH, OPENABLE_PATHS, TEMPLATES, agendaDay, axisFor, axisTicks, durationParts,
+  progressOf, upcoming, weekShare, blockProblem, blocksOn, clashWith, clock, dayName,
   dayRuns, daysLabel, forServer, fromInput, newBlock, nextBlock, occurrences, snap, toInput, withBlock,
 } from './agenda'
 
@@ -182,5 +183,42 @@ describe('the week as drawn', () => {
 
   it('groups every subject once, the queue and the lines before the platforms', () => {
     expect([...SUBJECT_GROUPS.learn, ...SUBJECT_GROUPS.practice]).toEqual(SUBJECTS)
+  })
+})
+
+describe('what comes next', () => {
+  const week = [
+    block({ subject: 'kanji', days: [2], start: 540, end: 660 }),
+    block({ subject: 'dictation', days: [2], start: 780, end: 840 }),
+    block({ subject: 'reading', days: [5], start: 840, end: 960 }),
+  ]
+
+  it('lists the block under way first, then those to come, within the week', () => {
+    const at = upcoming(week, new Date(2026, 9, 7, 10, 0), 3)
+    expect(at.map(o => [o.block.subject, o.now])).toEqual([['kanji', true], ['dictation', false], ['reading', false]])
+    // A block over and done is not listed.
+    expect(upcoming(week, new Date(2026, 9, 7, 12, 0), 2).map(o => o.block.subject)).toEqual(['dictation', 'reading'])
+    expect(upcoming([], new Date(2026, 9, 7, 12, 0))).toEqual([])
+  })
+
+  it('says how far a block under way has run', () => {
+    const [occ] = upcoming(week, new Date(2026, 9, 7, 9, 0), 1)
+    expect(progressOf(occ, new Date(2026, 9, 7, 9, 0))).toBe(0)
+    expect(progressOf(occ, new Date(2026, 9, 7, 10, 30))).toBe(0.75)
+    expect(progressOf(occ, new Date(2026, 9, 7, 12, 0))).toBe(1)
+  })
+
+  it('sums the week by subject, the largest share first', () => {
+    expect(weekShare([
+      block({ subject: 'kanji', days: [0, 1, 2, 3, 4], start: 540, end: 600 }),
+      block({ subject: 'reading', days: [5], start: 840, end: 960 }),
+      block({ subject: 'kanji', days: [6], start: 600, end: 630 }),
+    ])).toEqual({ total: 450, parts: [{ subject: 'kanji', minutes: 330 }, { subject: 'reading', minutes: 120 }] })
+    expect(weekShare([])).toEqual({ total: 0, parts: [] })
+  })
+
+  it('offers starting blocks that are blocks the server would take, and never clash', () => {
+    for (const t of TEMPLATES) expect(blockProblem(t)).toBeNull()
+    TEMPLATES.forEach((t, i) => expect(clashWith(t, TEMPLATES, i)).toBeNull())
   })
 })

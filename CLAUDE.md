@@ -1450,7 +1450,17 @@ runtime purpose. Two consequences worth knowing:
   (`agdSubjectName`), the days with three presets, the two times with
   the length under them, the reminder on one line with six keys for its
   lead, and Save fixed at its foot; it names the block in the way when
-  two share a stretch of a day.
+  two share a stretch of a day. What is next is one card
+  (`components/agenda/AgendaNext.jsx`: the block under way with its hours
+  at the ends of a bar and the way into its subject, else the next one
+  and when, the clock read once a minute by `hooks/useMinute.js`), drawn
+  over the week, on Today under the pass's strip on a phone, and in the
+  desk's side column between the strip and the journey with the two
+  blocks after it -- on Today its words the door to the agenda, and
+  nothing at all for a learner with no agenda. The page also lights the
+  block under way in the day's list, sums the week's hours by subject
+  under the week (`weekShare`), and offers an empty week three blocks to
+  start from (`TEMPLATES`).
   Stored as rows and replaced whole (`GET`/`PUT /api/agenda`,
   `routes/agenda.py`, `agenda_blocks`; days a bit mask, times minutes
   after midnight on the learner's own clock, no time zone), validated
@@ -1467,8 +1477,10 @@ runtime purpose. Two consequences worth knowing:
   `lib/agenda.js`, `lib/native.js`, `lib/platform.js`,
   `stores/agenda.js`, `components/chrome/NativeBridge.jsx`,
   `components/settings/Agenda*.jsx`, `components/settings/SettingsList.jsx`,
-  `screens/SettingsScreen.jsx`, `src/agenda.desktop.test.jsx` and the `.agd-*`
-  block of `index.css`).
+  `screens/SettingsScreen.jsx`, `screens/TodayScreen.jsx`,
+  `components/agenda/AgendaNext.jsx`, `hooks/useMinute.js`,
+  `src/agenda.desktop.test.jsx`, `src/today.phone.test.jsx`,
+  `src/today.desktop.test.jsx` and the `.agd-*` block of `index.css`).
   When starting a new wave, begin at **182** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

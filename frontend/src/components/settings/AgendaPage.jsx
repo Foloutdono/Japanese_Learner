@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { playClick } from '../../lib/audio'
 import { subjectInfo } from '../../lib/agenda'
-import { whenLabel } from '../../lib/ahead'
 import { canNudge, nudgePermission, requestNudgePermission } from '../../lib/platform'
 import { saveAgenda, useAgenda } from '../../stores/agenda'
 import { useDesk } from '../../hooks/useDesk'
 import { useBoxWidth } from '../../hooks/useBoxWidth'
+import { useMinute } from '../../hooks/useMinute'
 import {
-  MAX_BLOCKS, agendaDay, blocksOn, clashWith, clock, dayName, daysLabel, durationParts,
-  newBlock, nextBlock, withBlock,
+  MAX_BLOCKS, TEMPLATES, agendaDay, blocksOn, clashWith, clock, dayName, daysLabel, durationParts,
+  newBlock, nextBlock, weekShare, withBlock,
 } from '../../domain/agenda'
+import { AgendaNext } from '../agenda/AgendaNext'
 import { Loading } from '../ui/Loading'
 import { BellIcon } from '../ui/Icons'
 import { SettingsPage } from './SettingsPage'
@@ -59,9 +59,9 @@ export function AgendaPage() {
   // `null` closed; otherwise the block being edited and its place.
   const [editing, setEditing] = useState(null)
   const [permission, setPermission] = useState(null)
-  // The clock as the page opened: it names today, the next block and the
+  // The clock, once a minute: it names today, what is under way and the
   // rule on today's column, and render does not read it.
-  const [now] = useState(() => new Date())
+  const now = useMinute()
   const [day, setDay] = useState(() => agendaDay(now))
   const duration = useDuration()
 
@@ -126,10 +126,10 @@ export function AgendaPage() {
     <SettingsPage title={t.settingsAgenda}>
       <div ref={ref} className={`agd${(width ?? 0) >= WIDE ? ' agd--wide' : ''}`}>
         <div className="agd-top">
-          {next ? (
-            <NowCard next={next} now={now} t={t} lang={lang} />
+          {blocks.length ? (
+            <AgendaNext blocks={blocks} now={now} />
           ) : (
-            <p className="agd-intro">{t.agdEmpty}</p>
+            <Starters blocks={blocks} onPick={block => { playClick(); setDay(block.days[0]); setEditing({ index: -1, block }) }} />
           )}
         </div>
 
@@ -144,6 +144,7 @@ export function AgendaPage() {
             onAddAt={addAt}
             pointer={pointer}
           />
+          {blocks.length > 0 && <WeekShare blocks={blocks} duration={duration} />}
         </section>
 
         <section className="agd-day" aria-label={dayLong}>
@@ -156,11 +157,12 @@ export function AgendaPage() {
               {dayBlocks.map(block => {
                 const i = blocks.indexOf(block)
                 const info = subjectInfo(block.subject, t)
+                const live = Boolean(next?.now && next.block === block && day === today)
                 return (
                   <button
                     key={i}
                     type="button"
-                    className="stg-row agd-row"
+                    className={`stg-row agd-row${live ? ' agd-row--live' : ''}`}
                     data-block={i}
                     style={{ '--agd-line': info.color }}
                     onClick={() => { playClick(); open(i) }}
@@ -180,10 +182,14 @@ export function AgendaPage() {
                         </span>
                       </span>
                     </span>
-                    <span className={`agd-row__bell${block.notify ? '' : ' agd-row__bell--off'}`}>
-                      {block.notify && <BellIcon size={14} />}
-                      {block.notify ? t.agdBell(block.lead) : t.agdNoBell}
-                    </span>
+                    {live ? (
+                      <span className="agd-row__live">{t.agdNow}</span>
+                    ) : (
+                      <span className={`agd-row__bell${block.notify ? '' : ' agd-row__bell--off'}`}>
+                        {block.notify && <BellIcon size={14} />}
+                        {block.notify ? t.agdBell(block.lead) : t.agdNoBell}
+                      </span>
+                    )}
                   </button>
                 )
               })}
@@ -218,23 +224,67 @@ export function AgendaPage() {
   )
 }
 
-// What now: the block under way, with when it ends, or the next one and
-// when it starts; its subject's glyph in its colour and the way in.
-function NowCard({ next, now, t, lang }) {
-  const info = subjectInfo(next.block.subject, t)
-  // The card is what is next by being there: a block to come says only
-  // when, so the hour is never what a narrow card cuts.
-  const when = next.now
-    ? `${t.agdNow} · ${t.agdUntil(clock(next.block.end))}`
-    : `${whenLabel(next.start, now, t, lang)} ${clock(next.block.start)}`
+// The week's hours by subject: the total, a bar of each subject's share
+// in its line colour, and the four largest named with their hours.
+function WeekShare({ blocks, duration }) {
+  const { t } = useLang()
+  const { total, parts } = weekShare(blocks)
   return (
-    <div className={`agd-now${next.now ? ' agd-now--live' : ''}`} style={{ '--agd-line': info.color }} data-next>
-      <span className="agd-now__glyph" lang="ja" aria-hidden="true">{info.icon}</span>
-      <span className="agd-now__text">
-        <span className="agd-now__when">{when}</span>
-        <b className="agd-now__name">{info.title}</b>
+    <div className="agd-share">
+      <div className="agd-share__head">
+        <span className="agd-field__sub">{t.agdWeekTotalLabel}</span>
+        <b className="agd-share__total">{duration(total)}</b>
+      </div>
+      <span className="agd-share__bar" aria-hidden="true">
+        {parts.map(p => (
+          <i key={p.subject} style={{ flexGrow: p.minutes, '--agd-line': subjectInfo(p.subject, t).color }} />
+        ))}
       </span>
-      <Link to={info.path} className="btn-secondary agd-now__go" onClick={() => playClick()}>{t.agdGo}</Link>
+      <ul className="agd-share__parts">
+        {parts.slice(0, 4).map(p => {
+          const info = subjectInfo(p.subject, t)
+          return (
+            <li key={p.subject} style={{ '--agd-line': info.color }}>
+              <span className="agd-share__dot" aria-hidden="true" />
+              {info.title}
+              <span className="agd-share__h">{duration(p.minutes)}</span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+
+// An empty week: what the page is for, and three blocks to start from,
+// each opening the editor already filled in.
+function Starters({ blocks, onPick }) {
+  const { t, lang } = useLang()
+  return (
+    <div className="agd-start">
+      <p className="agd-intro">{t.agdEmpty}</p>
+      <span className="agd-field__sub">{t.agdStartWith}</span>
+      <div className="agd-start__picks">
+        {TEMPLATES.map(block => {
+          const info = subjectInfo(block.subject, t)
+          return (
+            <button
+              key={block.subject}
+              type="button"
+              className="agd-start__pick"
+              style={{ '--agd-line': info.color }}
+              disabled={Boolean(clashWith(block, blocks))}
+              onClick={() => onPick({ ...block })}
+            >
+              <span className="agd-now__glyph" lang="ja" aria-hidden="true">{info.icon}</span>
+              <span className="agd-start__words">
+                <b>{info.title}</b>
+                <span className="agd-start__when">{daysLabel(block.days, lang, t.agdEveryDay)} · {clock(block.start)}–{clock(block.end)}</span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

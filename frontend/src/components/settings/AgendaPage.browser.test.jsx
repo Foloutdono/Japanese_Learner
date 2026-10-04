@@ -88,6 +88,28 @@ describe('the agenda on a phone', () => {
     expect(byText('button', fr.agdAddOn('mercredi'))).toBeTruthy()
   })
 
+  it('offers three blocks to start an empty week from, each opening the editor filled in', async () => {
+    await mount()
+    const picks = $$('.agd-start__pick')
+    expect(picks.map(p => p.querySelector('b').textContent)).toEqual(['Kanji', 'Lecture', 'Révisions'])
+    picks[1].click()
+    await settle()
+    expect($('.agd-subject--on').textContent).toContain('Lecture')
+    expect($$('.agd-days .agd-daybtn--on').map(b => b.getAttribute('aria-label'))).toEqual(['samedi', 'dimanche'])
+    expect($$('input[type="time"]').map(i => i.value)).toEqual(['10:00', '11:00'])
+    expect($('.agd-day__name').textContent).toBe('samedi')
+  })
+
+  it('sums the week by subject under it, the largest share first', async () => {
+    state.blocks = [KANJI, READING, VOCAB]
+    await mount()
+    expect($('.agd-share__total').textContent).toBe(fr.agdDuration(13, 30))
+    expect($$('.agd-share__parts li').map(li => li.textContent)).toEqual([
+      `Kanji${fr.agdDuration(10, 0)}`, `Lecture${fr.agdDuration(2, 0)}`, `Vocabulaire${fr.agdDuration(1, 30)}`,
+    ])
+    expect($$('.agd-share__bar i').map(i => i.style.flexGrow)).toEqual(['600', '120', '90'])
+  })
+
   it('marks the hours down the side of the week, morning to midnight', async () => {
     state.blocks = [KANJI]
     await mount()
@@ -133,7 +155,11 @@ describe('the agenda on a phone', () => {
     expect(rows().map(r => r.querySelector('.stg-row__jp').textContent)).toEqual(['漢字Kanji', '単語Vocabulaire'])
     expect(rows()[0].querySelector('.agd-row__time').textContent).toBe('9:0011:00')
     expect(rows()[0].textContent).toContain(`lun.–ven. · ${fr.agdDuration(2, 0)}`)
-    expect(rows()[0].textContent).toContain(fr.agdBell(10))
+    // Kanji is under way at ten on a Wednesday: its row says so where
+    // the bell goes, and is lit.
+    expect(rows()[0].querySelector('.agd-row__live').textContent).toBe(fr.agdNow)
+    expect(rows()[0].classList.contains('agd-row--live')).toBe(true)
+    expect(rows()[0].querySelector('.agd-row__bell')).toBeNull()
     expect(rows()[1].textContent).toContain(fr.agdDuration(1, 30))
     expect(rows()[1].textContent).toContain(fr.agdBell(0))
 
@@ -152,9 +178,14 @@ describe('the agenda on a phone', () => {
   it('says what is under way, with the way into its subject', async () => {
     state.blocks = [KANJI]
     await mount()
-    expect($('.agd-now__when').textContent).toBe(`${fr.agdNow} · ${fr.agdUntil('11:00')}`)
+    expect($('.agd-now__when').textContent).toBe(fr.agdNow)
     expect($('.agd-now__name').textContent).toBe('Kanji')
     expect($('.agd-now__go').getAttribute('href')).toBe('/learn/kanji')
+    // Its hours at the two ends of the bar, an hour of two gone.
+    expect($$('.agd-now__at').map(a => a.textContent)).toEqual(['9:00', '11:00'])
+    expect($('.agd-now__bar').getAttribute('aria-valuenow')).toBe('50')
+    // On its own page the card is no door to the page.
+    expect($('a.agd-now__open')).toBeNull()
   })
 
   it('says when the next block starts once nothing is under way', async () => {

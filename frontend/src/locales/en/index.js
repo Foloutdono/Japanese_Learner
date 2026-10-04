@@ -2232,6 +2232,10 @@ const boarding = {
   agdLeadCaption: 'minutes before it starts',
   agdDayAria: (day, n) => `${day}, ${n} ${n === 1 ? 'block' : 'blocks'}`,
   agdHoursAria: 'Hours of the day',
+  agdProgressAria: (name) => `${name}, time gone`,
+  agdThen: 'Then',
+  agdStartWith: 'To start with',
+  agdWeekTotalLabel: 'Each week',
   // The arrival: the plan, the pass.
   brdBuildingAria: 'Building your journey',
   // 机 (plan 140): the stops on the desk's column, one per question --

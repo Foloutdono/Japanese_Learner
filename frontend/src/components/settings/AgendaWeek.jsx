@@ -26,6 +26,7 @@ import { DAYS, axisFor, axisTicks, clock, dayName, snap } from '../../domain/age
 // and every three on the short one.
 const ROOMY = 480
 const LONG = 90
+const SHORT = 45
 
 export function AgendaWeek({ blocks, today = -1, nowMinute = null, selected, onSelect, onOpen, onAddAt, pointer = false }) {
   const { t, lang } = useLang()
@@ -104,8 +105,10 @@ export function AgendaWeek({ blocks, today = -1, nowMinute = null, selected, onS
                 </>
               )
               // A block long enough for two lines on the tall week says
-              // when it starts under its name; a shorter one, its name.
-              const cls = `agd-block${block.end - block.start >= LONG ? ' agd-block--long' : ''}`
+              // when it starts under its name; a shorter one, its name, and
+              // a half hour its name set tight, so it is not cut.
+              const length = block.end - block.start
+              const cls = `agd-block${length >= LONG ? ' agd-block--long' : ''}${length < SHORT ? ' agd-block--short' : ''}`
               return pointer ? (
                 <button
                   key={i}

@@ -22058,18 +22058,33 @@ a.slip__act { text-decoration: none; }
 }
 .agd--wide > .agd-top { grid-column: 1 / -1; }
 
-/* What now: the block under way or the next, and the way into it. */
+/* What now (components/agenda/AgendaNext.jsx): the block under way or
+   the next, and the way into it -- on the Agenda page, and on Today under
+   the pass's strip or in the desk's side column, where its words are the
+   door to the agenda and it lists the blocks after it. */
 .agd-intro { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
 .agd-now {
   display: flex;
-  align-items: center;
-  gap: var(--sp-4);
+  flex-direction: column;
+  gap: var(--sp-3);
   padding: var(--sp-4);
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-panel);
   box-shadow: inset 3px 0 0 var(--agd-line, var(--accent2));
 }
+.agd-now__main { display: flex; align-items: center; gap: var(--sp-4); min-width: 0; }
+.agd-now__open {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--sp-4);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+a.agd-now__open:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; border-radius: var(--r-card); }
+.agd-now__chev { flex: none; margin-left: auto; color: var(--text-secondary); }
 .agd-now__glyph {
   flex: none;
   display: grid;
@@ -22083,14 +22098,59 @@ a.slip__act { text-decoration: none; }
   font-weight: 700;
 }
 .agd-now__text { display: flex; flex: 1; flex-direction: column; gap: var(--sp-1); min-width: 0; }
-.agd-now__when {
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  color: var(--text-secondary);
-}
+.agd-now__when { font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
 .agd-now--live .agd-now__when { color: var(--sel-ink); }
 .agd-now__name { font-family: var(--font-display); font-size: var(--fs-lead); }
+a.agd-now__open:hover .agd-now__name { text-decoration: underline; text-underline-offset: 3px; }
 .agd-now__go { flex: none; padding-inline: var(--sp-4); font-size: var(--fs-sm); text-decoration: none; }
+/* How far the block under way has run, in its line's colour. */
+.agd-now__run { display: flex; align-items: center; gap: var(--sp-3); }
+.agd-now__at { flex: none; font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.agd-now__bar {
+  display: block;
+  flex: 1;
+  height: var(--sp-1);
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+  overflow: hidden;
+}
+.agd-now__bar i { display: block; height: 100%; border-radius: inherit; background: var(--agd-line, var(--accent2)); }
+.agd-now__then {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--sp-2) var(--sp-4);
+  margin: 0;
+  padding: var(--sp-3) 0 0;
+  border-top: 1px solid var(--surface-line);
+  list-style: none;
+}
+.agd-now__then li { display: contents; font-size: var(--fs-sm); }
+.agd-now__then-when {
+  align-self: baseline;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.agd-now__then-name { display: flex; align-items: baseline; gap: var(--sp-2); min-width: 0; font-size: var(--fs-sm); font-weight: 700; }
+.agd-now__then-glyph { font-size: var(--fs-caption); color: color-mix(in srgb, var(--agd-line, var(--accent2)) 60%, var(--text-primary)); }
+
+/* An empty week's three blocks to start from. */
+.agd-start { display: flex; flex-direction: column; gap: var(--sp-3); }
+.agd-start__picks { display: flex; flex-direction: column; gap: var(--sp-2); }
+.agd-start__pick {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--agd-line, var(--accent2));
+  text-align: left;
+}
+.agd-start__words { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.agd-start__words b { font-family: var(--font-display); font-size: var(--fs-body); }
+.agd-start__when { font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); }
 
 /* The week: the hours down the side, the days across, a column each. */
 .agd-board {
@@ -22170,6 +22230,17 @@ a.slip__act { text-decoration: none; }
   height: 2px;
   background: var(--accent2);
 }
+.agd-track__now::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: var(--sp-2);
+  height: var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--accent2);
+  translate: 0 -50%;
+}
 .agd-block {
   position: absolute;
   left: var(--sp-1);
@@ -22203,6 +22274,12 @@ a.slip__act { text-decoration: none; }
   text-align: left;
 }
 .agd-week--roomy .agd-block__glyph { display: none; }
+.agd-week--roomy .agd-block--short {
+  justify-content: center;
+  padding-block: 0;
+  font-size: var(--fs-caption-xs);
+  line-height: 1.2;
+}
 .agd-week--roomy .agd-block__name,
 .agd-week--roomy .agd-block--long .agd-block__time {
   display: block;
@@ -22255,6 +22332,36 @@ a.slip__act { text-decoration: none; }
   white-space: nowrap;
 }
 .agd-row__bell--off { opacity: 0.7; }
+/* The block under way, in today's list: lit, and saying so. */
+.agd-row--live { background: color-mix(in srgb, var(--agd-line, var(--accent2)) 10%, transparent); }
+.agd-row__live {
+  flex: none;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--sel-wash);
+  color: var(--sel-ink);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+/* The week's hours by subject, under the week. */
+.agd-share {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.agd-share__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.agd-share__total { font-family: var(--font-display); font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+.agd-share__bar { display: flex; gap: var(--sp-1); height: var(--sp-2); border-radius: var(--r-pill); overflow: hidden; }
+.agd-share__bar i { flex-basis: 0; min-width: var(--sp-1); background: var(--agd-line, var(--accent2)); }
+.agd-share__parts { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); margin: 0; padding: 0; list-style: none; }
+.agd-share__parts li { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-caption); font-weight: 700; }
+.agd-share__dot { width: var(--sp-2); height: var(--sp-2); border-radius: var(--r-pill); background: var(--agd-line, var(--accent2)); }
+.agd-share__h { font-weight: 600; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
 /* The editor. `flex: none`: the sheet scrolls when the form is taller
    than the window; left to shrink, the form squashed the segment (its
