@@ -226,7 +226,8 @@ list:
 (use hiragana instead for anything else).
 
 Then give exactly 4 short answer choices in Japanese (each a word or short \
-phrase). Exactly ONE choice could naturally replace the bracketed word in \
+phrase). No choice may be the target word itself, in any form or reading \
+-- the item asks for ANOTHER way to say it. Exactly ONE choice could naturally replace the bracketed word in \
 that sentence with (nearly) the same meaning. The other THREE must be \
 different enough in meaning to be clearly wrong, but still plausible words \
 a learner could confuse it with.
@@ -270,6 +271,28 @@ Respond with ONLY JSON (no markdown fences, no commentary): a JSON array \
 of exactly {n} booleans, ONE PER CLAIM IN THE SAME ORDER, \
 e.g. [true, false, ...].
 """
+
+
+# Live-found 2026-10: 休みは【三日】だけあります。 was served with 三日
+# among its four choices, and the self-check passed it -- a word does
+# mean the same as itself. The underlined word, its dictionary form or
+# its reading offered as a choice gives the item away (or leaves it
+# with two answers), so such an item is never kept, whatever the
+# verifier says.
+def choice_repeats_target(choices: list[str], bracketed: str, word: dict) -> bool:
+    bracketed = (bracketed or "").strip()
+    targets = {bracketed, _display(word), (word.get("kanji") or "").strip()}
+    targets.update(r.strip() for r in (word.get("kana") or "").split("/"))
+    targets.discard("")
+    for choice in choices:
+        c = choice.strip()
+        if c in targets:
+            return True
+        # 三日 inside 三日間, or 食べ inside 食べた: the word is still
+        # there to be matched by eye.
+        if bracketed and (bracketed in c or (len(c) >= 2 and c in bracketed)):
+            return True
+    return False
 
 
 def _verify_paraphrase_answers_batch(claims: list[tuple[str, str, str]]) -> list[bool]:
@@ -385,6 +408,9 @@ def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set
             if not all(isinstance(c, str) and c.strip() for c in choices_text) or len(set(choices_text)) != 4:
                 continue
             if not isinstance(correct_index, int) or not (0 <= correct_index < 4):
+                continue
+            if choice_repeats_target(choices_text, bracketed, word):
+                logger.warning("paraphrase item for %s offers the target word itself: %r", display, choices_text)
                 continue
             pending.append((word, display, clean, bracketed, choices_text, correct_index))
 

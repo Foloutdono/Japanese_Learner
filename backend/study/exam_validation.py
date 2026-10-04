@@ -43,7 +43,33 @@ def validate_mcq_question(question: dict) -> list[str]:
     if question.get("answer") not in ids:
         errors.append(f"{question.get('id')}: answer {question.get('answer')!r} not among choice ids {ids}")
 
+    if offers_underlined_word(question):
+        errors.append(f"{question.get('id')}: a choice repeats the underlined word {question.get('underlineJp')!r}")
+
     return errors
+
+
+def offers_underlined_word(question: dict) -> bool:
+    """An underlined-word item (言い換え類義) whose choices include the
+    underlined word itself: 休みは【三日】だけあります。 offered 三日 as
+    one of its four choices (live-found 2026-10). The answer is then
+    read off the question rather than known."""
+    underline = (question.get("underlineJp") or "").strip()
+    if not underline:
+        return False
+    return any((c.get("textJp") or "").strip() == underline for c in question.get("choices") or [])
+
+
+def paper_gives_answer_away(paper: dict) -> bool:
+    """Whether any question of a stored paper fails offers_underlined_word.
+    Papers stored before the check existed are skipped when one is
+    served (routes/exams.py's _select_paper), not deleted: an attempt
+    already sat on one still renders against it."""
+    for section in paper.get("sections") or []:
+        for mondai in section.get("mondai") or []:
+            if any(offers_underlined_word(q) for q in mondai.get("questions") or []):
+                return True
+    return False
 
 
 def validate_sentence_order_question(question: dict) -> list[str]:
