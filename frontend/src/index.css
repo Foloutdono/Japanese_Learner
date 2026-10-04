@@ -30079,6 +30079,289 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-source__here { color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary)); }
 
+  /* ── 机 — the vocabulary's sources, what you started first (plan 183) ──
+     The owner's pick C: the five levels had shared a plate the window's
+     height while the tiers and the themes scrolled beside them. A strip
+     of what the learner has started opens the page -- their own level
+     wider, with its first words and the gate that resumes it, then the
+     stops with the most cards met, as many as the page is wide for --
+     and the three sources stand under it: JLPT's line with a bar on
+     each level, the tiers as a grid of numbered cells, the themes in
+     columns. The strip takes its own height; the sources take the rest,
+     their grids scrolling inside their plates, never under eight rows'
+     height. */
+  .desk-sources--resume {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+  }
+  .desk-sources__lower {
+    flex: 1 1 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1.15fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: var(--sp-6);
+    min-height: calc(8 * var(--sp-8));
+  }
+  /* The lead never narrower than its gate wants; the stops beside it,
+     no more than the page is wide for (VocabSources' stripRoom,
+     measured) and no more than the learner has started, share the rest
+     of the row -- the lead alone takes the whole of it. */
+  .desk-resume {
+    flex: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-5);
+  }
+  .desk-resume--1 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) minmax(0, 1fr); }
+  .desk-resume--2 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) repeat(2, minmax(0, 1fr)); }
+  .desk-resume--3 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) repeat(3, minmax(0, 1fr)); }
+  .desk-resume__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    min-width: 0;
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  a.desk-resume__card:hover,
+  a.desk-resume__card:focus-visible {
+    border-color: var(--line-color);
+    transform: translateY(-1px);
+  }
+  a.desk-resume__card:focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
+  .desk-resume__card--lead {
+    gap: var(--sp-4);
+    padding: var(--sp-6);
+  }
+  .desk-resume__cap {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--text-secondary);
+  }
+  .desk-resume__name {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+  }
+  a.desk-resume__name { border-radius: var(--r-card); }
+  a.desk-resume__name:focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
+  .desk-resume__code {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
+  }
+  .desk-resume__card--lead .desk-resume__code { font-size: var(--fs-heading); }
+  .desk-resume__label {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    transition: color 0.15s ease;
+  }
+  .desk-resume__card--lead .desk-resume__label { font-size: var(--fs-body); }
+  a.desk-resume__name:hover .desk-resume__label,
+  a.desk-resume__name:focus-visible .desk-resume__label { color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary)); }
+  .desk-resume__sample {
+    overflow: hidden;
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    word-spacing: var(--sp-1);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: color-mix(in srgb, var(--line-color) 62%, var(--text-secondary));
+  }
+  /* The figures over the gate, the gate across the card up to its own
+     measure: a gate at its own width beside the words would not fit a
+     lead this narrow. The air round it is the halo's -- its ring (9px)
+     and the reader's ripples (as far out of the pill) stay inside the
+     card's padding and clear of the figures. */
+  .desk-resume__go {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-5);
+    margin-top: auto;
+  }
+  .desk-resume__go > .desk-source__num {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-resume__go > .btn-depart--gate { max-width: calc(8 * var(--sp-8)); }
+  /* A lead wide enough (VocabSources' SPLIT, measured on the card) gives
+     the gate a column of its own beside its words, as a deck's page
+     sets its count beside its gate (plan 179): the strip a row shorter,
+     the level's name whole, the halo in the card's own air. */
+  .desk-resume__card--split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: repeat(4, auto);
+    align-content: center;
+    gap: var(--sp-3) var(--sp-7);
+  }
+  .desk-resume__card--split > .desk-resume__go {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    align-self: center;
+    margin-top: 0;
+    text-align: center;
+  }
+  /* The narrowest desk (VocabSources' NARROW, measured): the lead a
+     share narrower, so its two stops keep their names; the tiers' plate
+     the widest, the themes' the narrowest, in one column. */
+  .desk-sources--narrow > .desk-resume--2 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2fr) repeat(2, minmax(0, 1fr)); }
+  .desk-sources--narrow > .desk-resume--1 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2fr) minmax(0, 1fr); }
+  .desk-sources--narrow > .desk-sources__lower { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.15fr) minmax(0, 0.95fr); }
+  /* A plate's figure goes under its name when the two do not fit one
+     line, rather than breaking the name (which breaks only when it is
+     wider than the plate on its own); JLPT's codes at their own
+     width, so a level's name has the room. */
+  .desk-sources--resume .desk-source__head {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+  .desk-sources--resume .desk-source__title {
+    flex: none;
+    max-width: 100%;
+  }
+  .desk-sources--resume .desk-source__rows--line > .desk-source__row { grid-template-columns: var(--sp-8) auto minmax(0, 1fr) auto; }
+  /* A level's bar under its name, its figure at the bar's end, in JLPT's
+     line under the strip ... */
+  .desk-source__meter {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-top: var(--sp-1);
+  }
+  .desk-source__meter > .desk-line__bar { flex: 1; }
+  /* ... and the level's first words between its name and its bar
+     (/api/station/vocab/samples, as the station's stops print them). */
+  .desk-source__sample {
+    overflow: hidden;
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    word-spacing: var(--sp-1);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: color-mix(in srgb, var(--line-color) 62%, var(--text-secondary));
+  }
+  /* The tiers as a grid: a numbered cell each, a row's height and width
+     at least, as many to a row as the plate holds, the rows sharing what
+     the plate has and scrolling past it. */
+  .desk-source__cells {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--sp-8), 1fr));
+    grid-auto-rows: minmax(var(--sp-8), 1fr);
+    gap: var(--sp-2);
+    min-height: 0;
+    padding: var(--sp-4) var(--sp-6) var(--sp-6);
+    overflow-y: auto;
+  }
+  .desk-source__cell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    overflow: hidden;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .desk-source__cell:hover,
+  .desk-source__cell:focus-visible {
+    border-color: var(--line-color);
+    background: var(--bg-card-hover);
+  }
+  .desk-source__cell:focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: -2px;
+  }
+  .desk-source__cell--met { border-color: color-mix(in srgb, var(--line-color) 55%, var(--surface-line)); }
+  .desk-source__cell-code {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--line-color) 50%, var(--text-secondary));
+  }
+  .desk-source__cell--met .desk-source__cell-code { color: var(--text-primary); }
+  .desk-source__cell-met {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-source__cell-fill {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--line-color);
+  }
+  /* The themes in as many columns as hold a name, two on a laptop, a
+     row's height each. */
+  .desk-source__rows--cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(calc(3 * var(--sp-8)), 1fr));
+    grid-auto-rows: var(--sp-8);
+    align-content: start;
+    column-gap: var(--sp-5);
+    padding-inline: var(--sp-6);
+  }
+  .desk-source__rows--cols > .desk-source__row--plain {
+    min-height: 0;
+    padding-inline: var(--sp-2);
+  }
+  .desk-source__rows--cols > .desk-source__row:last-child { border-bottom: 1px solid color-mix(in srgb, var(--surface-line) 45%, transparent); }
+  @media (prefers-reduced-motion: reduce) {
+    .desk-resume__card,
+    .desk-resume__label,
+    .desk-source__cell { transition: none; }
+    a.desk-resume__card:hover,
+    a.desk-resume__card:focus-visible { transform: none; }
+  }
+  /* The short desk (plan 169): the first words, the strip's and the
+     line's, and the lead's air give way first, and the sources under
+     it hold six rows' height rather than eight, so a 600px window
+     shows the page whole. */
+  @media (max-height: 799px) {
+    .desk-resume__sample,
+    .desk-source__sample { display: none; }
+    .desk-resume__card--lead { padding: var(--sp-5); }
+    .desk-sources__lower { min-height: calc(6 * var(--sp-8)); }
+  }
+
   /* ── a run's column ──
      A run's card is --card-w; its head row (‹ the way out, where you
      are, the pass), its answer field, its timer and its results were

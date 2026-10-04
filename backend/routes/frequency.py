@@ -192,9 +192,38 @@ def get_tiers(domain: str, tier_size: int = freq.DEFAULT_TIER_SIZE):
     for t in range(1, n_tiers + 1):
         start, end = freq.tier_bounds(t, tier_size)
         count = max(0, min(end, total) - start + 1)
-        tiers.append({"tier": t, "start_rank": start, "end_rank": min(end, total), "count": count})
+        tier = {"tier": t, "start_rank": start, "end_rank": min(end, total), "count": count}
+        # The first words a tier teaches (plan 183), printed on the
+        # desk's vocabulary sources where a tier the learner has
+        # started is offered again. The deck's domains only: a key there
+        # resolves from a dict, while the JMdict pool's 1,464 tiers
+        # would each be a sqlite read for a sample nobody is shown.
+        if domain != "vocab_jmdict":
+            tier["sample"] = _tier_sample(domain, order[start - 1:start - 1 + TIER_SAMPLE_SIZE])
+        tiers.append(tier)
 
     return {"domain": domain, "tier_size": tier_size, "total_items": total, "tiers": tiers}
+
+
+# Fewer than a station's vocab stop prints (routes/station.py's 8): the
+# card that prints them is a fifth of the page's width.
+TIER_SAMPLE_SIZE = 6
+
+
+def _tier_sample(domain: str, keys: list[str]) -> list[str]:
+    """Each key's word as the page writes it: its kanji, else its first
+    kana reading. The standard order, so the same for every learner --
+    an override moves a word for its learner only."""
+    sample = []
+    for key in keys:
+        resolved = freq.resolve(domain, key)
+        if resolved is None:
+            continue
+        _level, entry = resolved
+        written = entry.get("kanji") or (entry.get("kana") or "").split("/")[0].strip()
+        if written:
+            sample.append(written)
+    return sample
 
 
 @router.get("/api/frequency/{domain}/tiers/started")

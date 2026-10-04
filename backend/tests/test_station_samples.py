@@ -170,6 +170,29 @@ def test_a_learner_with_nothing_met_answers_an_empty_map(client):
         assert client.get("/api/frequency/kanji/tiers/started").json()["started"] == {}
 
 
+# ── the tiers' samples (plan 183) ──
+# The desk's vocabulary sources offer a started tier again with the
+# first words it teaches: the tier's own, in rank order, as the page
+# writes them.
+def _written(key):
+    kanji, _, kana = key.partition("::")
+    return kanji or kana.split("/")[0].strip()
+
+
+def test_a_tier_samples_its_own_first_words_in_rank_order(client):
+    order = freq.standard_order("vocab")
+    for size in (200, 500):
+        tiers = client.get(f"/api/frequency/vocab/tiers?tier_size={size}").json()["tiers"]
+        for tier in (tiers[0], tiers[1], tiers[-1]):
+            first = tier["start_rank"] - 1
+            assert tier["sample"] == [_written(k) for k in order[first:first + 6]]
+
+
+def test_the_jmdict_pool_carries_no_sample(client):
+    tiers = client.get("/api/frequency/vocab_jmdict/tiers").json()["tiers"]
+    assert tiers and all("sample" not in t for t in tiers)
+
+
 # ── The practice platforms' samples (plan 159) ──
 # The practice stations filled on the desk print, per grade, the bank's
 # first item as the platform's specimen, the grammar the bank is written
