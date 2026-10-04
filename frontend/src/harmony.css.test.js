@@ -14,6 +14,7 @@ import { readFileSync } from 'node:fs'
 //   線    a line's edge is 3px; a figure on a plate is not boxed
 //   一戻  the way back is bare
 //   状態  the rating's best tile is not gold
+//   正解  a pass is a key in its verdict's ink, not the metal (plan 180)
 //   一族  the line pigments are one family: one lightness per theme
 
 const CSS = readFileSync(new URL('./index.css', import.meta.url), 'utf8')
@@ -85,6 +86,18 @@ describe('調和 — the harmony rules (plan 174)', () => {
 
   it('状態: the rating\'s best tile is not filled', () => {
     expect(SHEET).not.toMatch(/\.rating-bar__btn--best[^{]*\{[^}]*background:\s*var\(--accent2\)/)
+  })
+
+  it('正解: a pass is a key in its verdict\'s own ink, not the metal (plan 180)', () => {
+    const key = rule('.rating-bar__btn.rating-bar__btn--key')
+    expect(decl(key, 'background')).toContain('var(--rating-color)')
+    expect(key).not.toContain('--metal')
+    expect(key).not.toContain('--accent2')
+    expect(decl(key, 'color')).toBe('var(--text-on-fill)')
+    expect(rule('.rating-bar__btn--q4')).toContain('var(--rating-correct)')
+    expect(rule('.rating-bar__btn--q5')).toContain('var(--rating-perfect)')
+    // The run's meter wears the keys' inks too.
+    expect(rule('.run-meter__s--q4')).toContain('var(--rating-correct)')
   })
 
   it('一族: the line pigments are one lightness in each theme', () => {

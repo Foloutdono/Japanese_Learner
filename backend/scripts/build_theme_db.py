@@ -3,719 +3,213 @@ Build script for the thematic vocab decks ("fruits", "vegetables", "body
 parts", ...) — the theme counterpart to frequency_data.py's tiers.
 
 Output is `datas/vocab/theme_words.json`, read at import by
-content/theme_data.py. It used to be a `theme_words` table inside the
-76 MB datas/vocab/vocab_jmdict.sqlite3; at ~1.5k rows the whole thing is
-a couple of hundred KB, and a JSON file is REVIEWABLE — a rebuild shows
-up as a readable diff instead of a 28 MB opaque blob, which matters more
-than the bytes because the failure mode here is plausible-looking bad
-data, not a crash. (The old table is left in the sqlite file: nothing
-reads it, and dropping it would cost a full rewrite of the binary. The
-next JMdict rebuild removes it for free.)
+content/theme_data.py. The input is content/theme_lists.py, the hand-
+written lists: every theme's words, already placed in its four levels
+and in order inside each level, with an English and a French gloss.
 
-A theme is a different GROUPING over words that already live in the app's
-curated deck (vocab_data.py) or the JMdict pool (vocab_jmdict_data.py) —
-never a second copy. Card ids come from frequency_data.to_id(), so a word
-studied under "Fruits · 基本" and the same word studied under "N4" or
-"Top 200" is the SAME SRS card.
-
-Run offline: `python -m scripts.build_theme_db [--dump THEME]`.
+Run offline: `python -m scripts.build_theme_db [--dump THEME] [--check]`.
 Safe to re-run — rewrites the JSON from scratch each time.
 
 
-WHAT THIS REPLACES, AND WHY IT MATTERED
----------------------------------------
-The previous build matched an English keyword as a SUBSTRING of the
-comma-joined gloss, then filled each theme up to a quota of 220 JMdict
-words. Both halves were wrong, and together they made the feature
-unusable:
+WHY THE LISTS ARE WRITTEN BY HAND
+---------------------------------
+The previous build matched English keywords against JMdict's first gloss
+and cut each theme into four bands by JMdict's newspaper-frequency tags.
+That kept the archaic padding out, but the levels it made were not a
+difficulty scale: newspaper frequency measures how often the Mainichi
+prints a word, not how early a learner needs it. 梅, 桑 and 杏 came out
+as the basic fruits and バナナ as an advanced one, 象 as an expert
+animal, 風 as an expert weather word — and 犬, 梨 or キリン were not in
+their themes at all, because their first gloss did not happen to equal a
+keyword.
 
-  * The quota was a floor, not a ceiling. Every one of the 36 themes hit
-    exactly 220, so each was ~30 real words padded with ~190 archaic ones
-    (蒲桜, 波波迦, 樋殿). The last word accepted into `rooms` sat at
-    frequency rank 175,210 of 212,460.
-  * Substring-of-a-gloss picks the wrong words outright: 石灰 "lime" (the
-    mineral) in fruits, 紅茶 "black tea" in colors, 分野 "field,sphere,
-    realm" in shapes, 競馬 "horse racing" in animals.
+So membership and level are now a judgement, written down in
+content/theme_lists.py: basic is the word everybody knows (apple), medium
+the everyday word a step further (pear), advanced the word one meets but
+seldom uses (pomegranate), expert the word only a specialist or an
+enthusiast reaches for (kumquat). The level is the word's place on that
+scale inside its theme, not its JLPT level and not its frequency.
 
-Three rules replace it, and the first is doing most of the work.
+What stays automatic is the part that has to be exact: RESOLUTION. Every
+listed word is looked up as a card the app already has, so a theme stays
+a grouping and never a second copy — the same word studied under
+"Fruits · 基本", "N5" or "Top 200" is one SRS card:
 
+  1. the deck (vocab_deck.json), exactly as it stores the word — its
+     kanji (or "" for a word it teaches in kana) and its kana, where a
+     kana field of several readings ("まいげつ/まいつき") matches any;
+  2. else the JMdict pool, exactly by (kanji, kana).
 
-1. ELIGIBILITY — a word with no JMdict priority tag is not a candidate.
-   `entries.freq_rank` looks like the obvious frequency source and is
-   NOT one: it is a real ranking only to about rank 23,000 (every ⭐ row
-   is <= 22,964), after which it degenerates into kana-alphabetical dump
-   order. And datas/vocab/vocab_frequency.json is a documented
-   placeholder — plain JLPT deck order, see frequency_data.py's own
-   docstring.
-
-   What does work is the JMdict priority tags, which are already in the
-   shipped sqlite for BOTH pools: `senses.blob` for the JMdict pool
-   (24,556 entries carry one) and `curated_senses.blob` for the deck
-   (7,488 of 8,066). `news1k`..`news24k` are the Mainichi Shimbun
-   frequency bands in 1,000-word steps. See `_score`.
-
-   Requiring one drops the candidate pool from 220,865 words to ~30,500
-   and makes the archaic padding impossible rather than merely capped.
-
-2. MATCHING — sense 1, gloss 1, exact after normalisation.
-   Matching runs against the structured `glossary` array in the sense
-   blob, never the flattened `meaning` string, and only against the
-   FIRST gloss of the FIRST sense. That is what separates 円 "circle,
-   money" (in) from 範囲 "extent, scope, sphere, range" (out).
-
-   This is deliberately strict and MUST STAY STRICT. Measured: allowing
-   senses 1-2 and glosses 1-2 takes `shapes` from 48 words to 115 and
-   brings the disease straight back — 妻 "wife", 路線, 骨, 影, 趣旨, 欄,
-   土俵, 内野, 折衷, 略, トン, コール — while `colors` regains 未熟
-   "inexperience" and トルコ "turkey", and `fruits` regains ライム
-   "rhyme". If a theme is too thin, widen its KEYWORDS; never loosen
-   this.
-
-   Note the normaliser does NOT strip a leading article. Stripping it is
-   how 赤字 "(being in) the red" got into colors and 世界 "the world"
-   into shapes.
-
-3. DEDUPE — once by surface, once by head gloss.
-   The old data had 鼠/ねずみ beside 鼠/ねず, and "kitchen" nine times over
-   in `rooms` (台所/厨房/キッチン/厨/調理場/炊事場/庖厨). Duplicate glosses
-   make MCQ distractors collapse (study/mcq.py dedupes by meaning) and
-   the meaning->word direction unanswerable. Parentheticals are stripped
-   BEFORE splitting on commas — splitting first breaks the parenthesis
-   and defeats the key, which is why 苺 "strawberry (esp. the garden
-   strawberry, Fragaria x ananassa)" and ストロベリー "strawberry" both
-   survived.
-
-Levels: each theme's survivors are sorted by score and cut into four
-growing bands (LEVEL_SHARES). Growing on purpose — 基本 should be a
-short, high-value starter set, not a quarter of a long list.
+A word found in neither is an error, not a skip. And a word found in the
+pool while the deck teaches the same reading under another spelling
+(林檎 in the pool, りんご in the deck) is an error too: it would be a
+second card for the word the learner already studies. `--check` prints
+every such problem with the forms the deck and the pool do hold, and
+writes nothing.
 """
 import argparse
 import json
 import os
 import re
 import sqlite3
+import sys
 from collections import defaultdict
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _BASE_DIR)
+
+from content.theme_lists import THEMES  # noqa: E402
+
 _VOCAB_DIR = os.path.join(_BASE_DIR, "datas", "vocab")
 _JMDICT_DB = os.path.join(_VOCAB_DIR, "vocab_jmdict.sqlite3")
 _DECK_JSON = os.path.join(_VOCAB_DIR, "vocab_deck.json")
-_TAGS_JSON = os.path.join(_VOCAB_DIR, "vocab_tags.json")
 _OUT_JSON = os.path.join(_VOCAB_DIR, "theme_words.json")
 
 LEVELS = ("basic", "medium", "advanced", "expert")
-# Shares of a theme's words per band. Tuned against the real post-cleanup
-# sizes (15-50 words per theme, not the old 220): a 10% basic band would
-# be two words for half the themes.
-LEVEL_SHARES = (0.20, 0.25, 0.27, 0.28)
-
-with open(_TAGS_JSON, encoding="utf-8") as f:
-    _TAG_INFO = json.load(f)
-
-# JMdict entries tagged with a category="name" code (place, person,
-# company, given, surname, myth, work, ...) are proper nouns — never
-# useful in a themed vocab deck, and easy to mismatch (a person's name
-# that happens to contain a food word).
-_NAME_TAG_CODES = {code for code, info in _TAG_INFO.items() if info.get("category") == "name"}
-
-# POS codes that make a sense a noun/thing rather than an action. n-pr
-# (proper noun) is deliberately absent — see _NAME_TAG_CODES.
-_NOUN_POS = {"n", "n-adv", "n-pref", "n-suf", "n-t"}
-# Themes whose members are legitimately adjectives (a colour, a feeling).
-_ADJ_POS = {"adj-i", "adj-na", "adj-no", "adj-t", "adj-f"}
-_ADJ_THEMES = {"colors", "emotions"}
-
-# Usage tags that disqualify a sense whatever it glosses: archaic, rare,
-# obsolete, slang, idiom, proverb, four-character compound, and the
-# register markers. These are what let 梓 "Japanese cherry birch" and
-# 波波迦 into a beginner's fruit deck.
-_BAD_USAGE = {
-    "arch", "rare", "obs", "obsc", "derog", "vulg", "sl", "net-sl", "X",
-    "joc", "poet", "dated", "hist", "male", "fem", "chn", "id", "proverb",
-    "yoji",
-}
-
-# Per-theme field-tag rejections — JMdict's own subject labels doing the
-# disambiguation English cannot. `chem` is why 石灰 "lime" is not a fruit;
-# `finc` is why 赤字 "the red" is not a colour.
-FIELD_DENY: dict[str, set[str]] = {
-    "fruits":      {"chem", "geol", "physics", "math", "finc", "comp", "astron"},
-    "vegetables":  {"chem", "comp", "finc"},
-    "colors":      {"finc", "comp", "math", "physics"},
-    "shapes":      {"geogr", "bus", "ling", "sports", "music", "finc"},
-    "animals":     {"astron", "comp", "food", "sumo", "shogi", "mahj"},
-    "birds":       {"astron", "comp", "shogi"},
-    "insects_bugs": {"comp"},
-    "body_parts":  {"comp", "archit", "bus", "math", "ling", "finc", "sumo"},
-    "nature":      {"comp", "math", "finc", "Buddh"},
-    "plants_trees": {"comp", "finc"},
-    "materials":   {"finc", "comp"},
-    "seafood":     {"comp"},
-    "geography":   {"comp", "math"},
-}
-
-# Words a theme must never contain, checked by hand against the build's
-# own --dump output. Whole-gloss matching already rules out the bulk of
-# what the old substring matcher let through; these are the residue where
-# the FIRST gloss genuinely is the keyword but the word is not a member
-# of the category. Cheap to extend — it costs nothing at runtime.
-DENY_SURFACE: dict[str, set[str]] = {
-    "fruits":     {"石灰", "実", "産物", "所産", "桃色", "種子", "皮", "殻", "果皮",
-                   "橙色", "オリーブ色"},   # colour words, not fruit
-    "vegetables": {"芽", "芽生え"},
-    "colors":     {"赤字", "黒字", "日陰", "陰", "カラー", "傘", "藍", "顔料", "濃淡", "陰影"},
-    "shapes":     {"格好", "世界", "分野", "範囲", "区域", "方面", "畑", "広場", "象", "玉",
-                   "形態", "妻", "額", "台詞", "楽隊", "楽団", "要旨", "土俵", "先", "前",
-                   "ダイヤ", "面", "表", "筋", "路線", "骨", "影", "趣旨", "欄", "類",
-                   "方式", "大筋", "フォーム"},
-    "animals":    {"寅", "午", "申", "巳", "未", "子", "丑", "辰", "酉", "戌", "亥", "卯",
-                   "動物性", "海馬", "馬頭", "ホース", "ズック", "剣山", "畜生"},
-    "birds":      {"羽根", "羽", "ウイング"},          # a shuttlecock, a counter, a duplicate
-    "insects_bugs": {"クリケット"},                    # the sport
-    "body_parts": {"首脳", "主席", "先頭", "面", "左", "右", "筋", "肝心",
-                   "所長", "麓", "節", "継ぎ目", "レバー", "主人"},
-    "emotions":   {"空気", "雰囲気", "緩和", "救援", "救済", "反省"},
-    "nature":     {"一寸", "分野", "核", "天", "地味", "性"},
-    "plants_trees": {"支部", "根本", "胴"},            # an organisation's branch, a torso
-    "school":     {"入室", "元本", "白亜"},            # financial principal, the mineral
-    "rooms":      {"勉強", "学問"},                    # studying, not a study
-    "drinks":     {"生", "ビア", "水分"},
-    "dishes":     {"ランチ"},                          # gloss reads "launch, lunch"
-    "geography":  {"国境", "州", "様子", "状態", "世"},
-    "office_supplies": {"汗", "チョキ"},               # チョキ is the hand sign
-    "buildings":  {"工場", "詰め所"},
-    "technology": {"ぶれ", "機関", "応募", "申し込み", "講師", "適用", "演目",
-                   "願書", "番組", "鼠", "ネズミ"},
-    "furniture":  {"内閣", "議長", "画面", "閣内"},            # a cabinet of ministers, a chairman
-    "kitchen_items": {"盆", "分岐点", "分かれ目"},                 # a road fork
-    "materials":  {"林", "核", "資料", "生地"},
-    "medical":    {"試験", "運転", "扱い", "寒冷"},    # an exam, machine operation
-    "music":      {"調子", "器官"},                    # a bodily organ
-    "shopping_money": {"変化", "法案", "異動", "交替", "札", "金", "蓄え"},
-    "sports":     {"出馬", "走行", "研修", "中継", "馬車", "修行"},
-    "tools":      {"水準", "平準", "指針", "悪徳", "爪", "チョキ"},
-    "travel":     {"関税", "移民", "札", "着"},
-    "vehicles":   {"熟し", "急先鋒"},                  # 急先鋒 is a vanguard
-    "jobs":       {"長官"},
-    "clothing":   {"一律", "一様", "首輪", "毛並み", "口金"},
-    "holidays_events": {"事件", "党"},                 # an incident, a political party
-    "household_items": {"鉄"},                         # the metal, not the appliance
-}
-
-# theme_key -> the English glosses that name a member of the category.
-#
-# Under whole-gloss matching a keyword is only as good as it is
-# unambiguous: it matches a word whose FIRST gloss is exactly it. That
-# makes umbrella terms safe and welcome ("fruit" matches 果物 and nothing
-# else), and makes a polysemous everyday noun poison. Measured: adding
-# "star / line / edge / frame / corner / band / column / point / surface"
-# to `shapes` immediately pulled in 妻 (a gable), 額 (a picture frame),
-# 台詞 "line in a play" and 楽隊 "band". One careless keyword undoes the
-# whole selection — run `--dump <theme>` and read every row after
-# touching a list.
-KEYWORDS: dict[str, list[str]] = {
-    "fruits": [
-        "fruit", "fruit tree", "berry", "citrus", "apple", "banana", "strawberry",
-        "peach", "pear", "melon", "watermelon", "cherry", "lemon", "lime", "pineapple",
-        "mango", "kiwi", "kiwifruit", "fig", "plum", "apricot", "persimmon", "coconut",
-        "papaya", "raspberry", "blueberry", "cranberry", "pomegranate", "tangerine",
-        "mandarin", "mandarin orange", "orange", "chestnut", "grape", "grapes",
-        "loquat", "pomelo", "yuzu", "olive", "avocado", "lychee", "guava", "durian",
-        "nectarine", "quince", "grapefruit", "blackberry", "mulberry", "japanese apricot",
-    ],
-    "vegetables": [
-        "vegetable", "root vegetable", "carrot", "potato", "sweet potato", "onion",
-        "tomato", "cucumber", "cabbage", "lettuce", "spinach", "eggplant", "aubergine",
-        "pumpkin", "radish", "garlic", "ginger", "broccoli", "cauliflower", "corn",
-        "mushroom", "turnip", "celery", "asparagus", "leek", "yam", "scallion",
-        "bamboo shoot", "bean sprouts", "soybean", "pea", "lotus root", "burdock",
-        "taro", "okra", "chili pepper", "bell pepper", "watercress", "beet",
-    ],
-    "body_parts": [
-        "body", "head", "face", "eye", "ear", "nose", "mouth", "tooth", "teeth",
-        "tongue", "neck", "shoulder", "elbow", "wrist", "finger", "thumb", "chest",
-        "breast", "stomach", "belly", "waist", "hip", "knee", "ankle", "toe", "skin",
-        "bone", "muscle", "brain", "heart", "lung", "liver", "throat", "eyebrow",
-        "eyelash", "cheek", "chin", "forehead", "fingernail", "eyelid", "spine", "rib",
-        "artery", "vein", "nerve", "kidney", "arm", "leg", "hand", "foot", "hair",
-        "blood", "skull", "jaw", "lip", "palm", "heel", "thigh", "intestines",
-        "internal organs", "stomach ache", "pulse", "joint", "skeleton", "eyeball",
-    ],
-    "rooms": [
-        "room", "bedroom", "kitchen", "bathroom", "living room", "dining room",
-        "hallway", "corridor", "closet", "attic", "basement", "garage", "balcony",
-        "veranda", "entrance hall", "restroom", "lavatory", "toilet", "study",
-        "guest room", "japanese-style room", "storeroom", "porch", "terrace",
-    ],
-    "buildings": [
-        "building", "house", "apartment", "hospital", "temple", "shrine", "church",
-        "castle", "tower", "factory", "library", "museum", "stadium", "skyscraper",
-        "warehouse", "cottage", "mansion", "palace", "dormitory", "embassy",
-        "cathedral", "school", "station", "hotel", "bridge", "theatre", "theater",
-        "post office", "city hall", "police station", "gymnasium", "inn", "cinema",
-        "prison", "barn", "hut", "greenhouse", "lighthouse", "monastery",
-    ],
-    "furniture": [
-        "furniture", "chair", "desk", "table", "bed", "sofa", "couch", "bookshelf",
-        "cupboard", "wardrobe", "drawer", "cabinet", "bench", "stool", "mirror",
-        "curtain", "carpet", "futon", "shelf", "nightstand", "rug", "lamp", "armchair",
-        "chest of drawers", "coffee table", "dressing table", "blind",
-    ],
-    "school": [
-        "school", "classroom", "textbook", "blackboard", "chalk", "university",
-        "professor", "schoolbag", "semester", "kindergarten", "homework",
-        "exam", "examination", "notebook", "pencil", "backpack", "teacher", "student",
-        "education", "curriculum", "lecture", "tuition", "scholarship", "diploma",
-        "recess", "pupil", "graduation", "entrance exam", "school trip", "club activity",
-        "report card", "attendance", "elementary school", "junior high school",
-        "high school", "college",
-    ],
-    "travel": [
-        "travel", "trip", "journey", "airport", "passport", "luggage", "baggage",
-        "suitcase", "ticket", "itinerary", "souvenir", "visa", "boarding pass",
-        "tourist", "sightseeing", "voyage", "excursion", "layover", "customs",
-        "immigration", "guidebook", "reservation", "departure", "arrival", "map",
-        "backpacking", "tour", "traveller", "traveler", "hot spring", "camping",
-    ],
-    "jobs": [
-        "occupation", "profession", "doctor", "teacher", "engineer", "lawyer", "nurse",
-        "police officer", "firefighter", "farmer", "cook", "chef", "waiter", "waitress",
-        "driver", "pilot", "artist", "musician", "actor", "actress", "singer", "writer",
-        "dentist", "salesperson", "businessman", "businesswoman", "carpenter",
-        "electrician", "plumber", "hairdresser", "barber", "photographer", "accountant",
-        "librarian", "veterinarian", "journalist", "architect", "translator",
-        "interpreter", "clerk", "scientist", "novelist", "reporter", "editor",
-        "secretary", "banker", "soldier", "sailor", "fisherman", "miner", "baker",
-        "butcher", "tailor", "mechanic", "pharmacist", "surgeon", "judge",
-        "civil servant", "office worker", "part-time job",
-    ],
-    "dishes": [
-        "dish", "meal", "cuisine", "dessert", "curry", "noodle", "noodles", "ramen",
-        "sushi", "tempura", "dumpling", "sandwich", "porridge", "sukiyaki", "udon",
-        "soba", "miso soup", "hot pot", "rice ball", "pizza", "salad", "pastry",
-        "stew", "omelette", "pancake", "steak", "hamburger", "sausage", "bread",
-        "cake", "pudding", "ice cream", "chocolate", "biscuit", "fried rice",
-        "grilled meat", "boxed lunch", "breakfast", "lunch", "dinner", "snack",
-    ],
-    "animals": [
-        "animal", "mammal", "dog", "cat", "horse", "cow", "cattle", "pig", "sheep",
-        "goat", "chicken", "duck", "rabbit", "mouse", "rat", "elephant", "lion",
-        "tiger", "bear", "monkey", "fox", "wolf", "deer", "snake", "frog", "turtle",
-        "tortoise", "giraffe", "zebra", "camel", "kangaroo", "hedgehog", "raccoon",
-        "squirrel", "hippopotamus", "rhinoceros", "leopard", "panda", "koala",
-        "dolphin", "whale", "weasel", "otter", "boar", "donkey",
-        "livestock", "pet", "puppy", "kitten", "calf", "lizard",
-        # No "seal", "bat" or "mole": each is a commoner non-animal word in
-        # English and pulled in 封 (an envelope seal), バット (a baseball
-        # bat) and ほくろ (a skin mole). See the note above KEYWORDS.
-    ],
-    "colors": [
-        "colour", "color", "red", "blue", "green", "yellow", "black", "white",
-        "purple", "pink", "brown", "gray", "grey", "crimson", "scarlet", "turquoise",
-        "beige", "indigo", "maroon", "pastel", "navy blue", "deep red", "deep blue",
-        "orange", "violet", "emerald green",
-        "light blue", "dark blue", "yellowish green", "vermilion",
-        # No "gold", "silver", "ivory" or "amber": in Japanese those glosses
-        # belong to the substance (黄金, 銀, 象牙, 琥珀), which is `materials`.
-    ],
-    "clothing": [
-        "clothing", "clothes", "garment", "shirt", "trousers", "pants", "skirt",
-        "dress", "jacket", "coat", "sweater", "suit", "necktie", "tie", "hat", "cap",
-        "shoe", "shoes", "sock", "socks", "glove", "gloves", "scarf", "belt",
-        "underwear", "kimono", "uniform", "raincoat", "swimsuit", "pajamas",
-        "pyjamas", "mitten", "cardigan", "blouse", "jeans", "shorts", "vest",
-        "apron", "sandals", "boots", "slippers", "sweatshirt", "sleeve", "pocket",
-        "button", "collar", "hood",
-    ],
-    "weather": [
-        "weather", "forecast", "climate", "rain", "snow", "wind", "storm", "typhoon",
-        "cloud", "fog", "mist", "thunder", "lightning", "drizzle", "monsoon",
-        "heatwave", "frost", "hail", "gale", "blizzard", "downpour", "sunshine",
-        "humidity", "temperature", "rainbow", "shower", "breeze", "sleet", "dew",
-        "rainy season", "clear weather", "cloudy weather", "weather forecast",
-    ],
-    "family": [
-        "family", "father", "mother", "son", "daughter", "brother", "sister",
-        "grandfather", "grandmother", "uncle", "aunt", "cousin", "nephew", "niece",
-        "husband", "wife", "twin", "spouse", "stepfather", "stepmother", "parent",
-        "parents", "sibling", "siblings", "relative", "relatives", "child", "children",
-        "grandchild", "elder brother", "elder sister", "younger brother",
-        "younger sister", "ancestor", "descendant", "household", "in-laws",
-    ],
-    "emotions": [
-        "emotion", "feeling", "mood", "happy", "sad", "angry", "afraid", "joy",
-        "sorrow", "surprise", "excited", "nervous", "worried", "love", "hate",
-        "lonely", "jealous", "proud", "ashamed", "embarrassed", "loneliness", "grief",
-        "delight", "resentment", "affection", "gratitude", "regret", "envy",
-        "despair", "irritation", "nostalgia", "anxiety", "anger", "fear", "hope",
-        "disappointment", "satisfaction", "sympathy", "pity", "shame", "pride",
-        "courage", "patience", "happiness", "sadness", "loathing", "kindness",
-    ],
-    "nature": [
-        "nature", "mountain", "river", "sea", "ocean", "lake", "forest", "woods",
-        "valley", "waterfall", "volcano", "cliff", "cave", "meadow", "swamp",
-        "canyon", "glacier", "island", "desert", "sky", "sun", "moon", "star",
-        "stone", "rock", "wilderness", "horizon", "beach", "shore", "coast", "pond",
-        "stream", "hill", "sand", "soil", "earth", "wave", "tide", "cape",
-        "spring water", "marsh", "plain",
-    ],
-    "vehicles": [
-        "vehicle", "transportation", "car", "bus", "train", "bicycle", "bike",
-        "motorcycle", "truck", "ship", "boat", "airplane", "aeroplane", "aircraft",
-        "subway", "taxi", "tram", "helicopter", "ambulance", "fire engine", "ferry",
-        "yacht", "scooter", "spaceship", "submarine", "carriage", "sled", "sledge",
-        "tractor", "rocket", "canoe", "raft", "wagon", "streetcar",
-    ],
-    "technology": [
-        "technology", "device", "computer", "phone", "telephone", "smartphone",
-        "camera", "television", "radio", "printer", "keyboard", "monitor", "robot",
-        "battery", "laptop", "tablet", "headphones", "charger", "software",
-        "hardware", "internet", "processor", "database", "server",
-        "algorithm", "screen", "mouse", "speaker", "microphone", "cable", "network",
-        "file", "password", "electricity", "machine", "engine", "circuit",
-        "antenna", "satellite", "sensor",
-    ],
-    "sports": [
-        "sport", "sports", "athlete", "soccer", "football", "baseball", "basketball",
-        "tennis", "swimming", "volleyball", "golf", "boxing", "judo", "karate",
-        "sumo", "skiing", "skating", "wrestling", "marathon", "gymnastics", "archery",
-        "fencing", "badminton", "rugby", "cycling", "tournament",
-        "referee", "stadium", "medal", "champion", "training", "practice",
-        "table tennis", "ice hockey", "surfing", "climbing", "sprint", "relay",
-    ],
-    "music": [
-        "music", "instrument", "musical instrument", "piano", "guitar", "violin",
-        "trumpet", "flute", "drum", "cello", "saxophone", "harmonica", "song",
-        "melody", "rhythm", "orchestra", "symphony", "harmony", "chorus", "concert",
-        "singer", "composer", "conductor", "lyrics", "score", "opera", "jazz",
-        "folk song", "national anthem", "recital", "tune", "musician",
-        "harp", "accordion", "trombone", "clarinet",
-    ],
-    "kitchen_items": [
-        "kitchen", "cookware", "utensil", "pot", "pan", "frying pan", "knife", "fork",
-        "spoon", "chopsticks", "plate", "dish", "bowl", "cup", "glass", "kettle",
-        "oven", "refrigerator", "fridge", "microwave", "cutting board", "colander",
-        "ladle", "whisk", "grater", "spatula", "rolling pin", "strainer", "teapot",
-        "saucepan", "tray", "lid", "apron", "sink", "stove", "dishcloth", "can opener",
-    ],
-    "office_supplies": [
-        "office", "stationery", "pen", "pencil", "ballpoint pen", "fountain pen",
-        "stapler", "scissors", "tape", "envelope", "folder", "binder", "eraser",
-        "ruler", "glue", "notebook", "calculator", "paperclip", "highlighter",
-        "clipboard", "whiteboard", "ink", "stamp", "paper", "file", "desk", "diary",
-        "memo pad", "adhesive tape", "correction fluid", "pencil case",
-    ],
-    "shopping_money": [
-        "money", "price", "shopping", "cost", "purchase", "payment", "coin",
-        "banknote", "shop", "store", "market", "supermarket", "cashier",
-        "receipt", "discount", "wallet", "purse", "bank", "currency", "coupon",
-        "invoice", "refund", "warranty", "sale", "bargain", "customer",
-        "salary", "wage", "tax", "budget", "savings", "debt", "loan", "credit card",
-        "cash", "profit", "expense", "department store", "convenience store",
-    ],
-    "geography": [
-        "geography", "region", "world", "country", "continent", "capital",
-        "province", "prefecture", "city", "town", "village", "border", "territory",
-        "archipelago", "hemisphere", "equator", "latitude", "longitude", "peninsula",
-        "nation", "county", "district", "suburb", "population", "atlas",
-        "globe", "north", "south", "east", "west", "colony", "frontier",
-    ],
-    "insects_bugs": [
-        "insect", "bug", "mosquito", "cricket", "cicada", "dragonfly", "cockroach",
-        "ladybug", "ladybird", "caterpillar", "centipede", "grasshopper", "beetle",
-        "firefly", "moth", "ant", "bee", "butterfly", "spider", "larva", "wasp",
-        "flea", "louse", "termite", "snail", "worm", "earthworm", "scorpion",
-        "praying mantis", "silkworm", "honeybee", "hornet",
-    ],
-    "birds": [
-        "bird", "sparrow", "pigeon", "dove", "eagle", "hawk", "owl", "swan",
-        "parrot", "peacock", "penguin", "seagull", "crane", "woodpecker", "falcon",
-        "stork", "nightingale", "crow", "raven", "duck", "goose", "chicken",
-        "rooster", "swallow", "heron", "pheasant", "quail", "ostrich", "flamingo",
-        "canary", "wing", "beak", "feather", "nest", "egg",
-    ],
-    "seafood": [
-        "seafood", "shellfish", "shrimp", "prawn", "crab", "squid", "cuttlefish",
-        "octopus", "clam", "oyster", "salmon", "seaweed", "lobster", "eel",
-        "scallop", "sardine", "mackerel", "tuna", "fish", "cod", "trout", "carp",
-        "sea bream", "flounder", "herring", "anchovy", "sea urchin", "jellyfish",
-        "abalone", "bonito", "saury", "yellowtail", "pufferfish", "roe", "kelp",
-        "raw fish", "dried fish", "grilled fish",
-    ],
-    "drinks": [
-        "drink", "beverage", "water", "tea", "coffee", "juice", "milk", "beer",
-        "wine", "sake", "soda", "cocktail", "lemonade", "smoothie", "espresso",
-        "cola", "green tea", "black tea", "hot water", "mineral water", "whisky",
-        "whiskey", "champagne", "cocoa", "soft drink", "alcohol", "liquor",
-        "orange juice", "barley tea", "milk tea", "iced coffee",
-    ],
-    "shapes": [
-        # No "form" or "outline" — 方式 "form, method, system", 大筋
-        # "outline, summary" and フォーム "foam, form" are not shapes.
-        "shape", "circle", "square", "triangle", "rectangle", "sphere",
-        "cube", "cylinder", "oval", "ellipse", "hexagon", "pentagon", "octagon",
-        "cone", "pyramid", "spiral", "arc", "diamond", "semicircle", "polygon",
-        "rhombus", "prism", "trapezoid", "quadrilateral", "round shape",
-        "cross shape", "star shape", "equilateral triangle", "right angle",
-        "curved line", "straight line", "diagonal line", "parallel lines",
-        "concentric circles", "symmetry", "contour", "silhouette",
-    ],
-    "materials": [
-        "material", "fabric", "cloth", "wood", "metal", "iron", "steel", "plastic",
-        "glass", "cotton", "wool", "silk", "leather", "rubber", "bronze", "aluminum",
-        "aluminium", "cement", "concrete", "marble", "ceramic", "velvet", "linen",
-        "copper", "brass", "tin", "lead", "zinc", "paper", "cardboard", "clay",
-        "porcelain", "nylon", "polyester", "gold", "silver", "platinum", "stone",
-        "brick", "plaster", "timber", "lumber",
-    ],
-    "tools": [
-        "tool", "hammer", "screwdriver", "wrench", "spanner", "chisel", "drill",
-        "pliers", "shovel", "spade", "crowbar", "sandpaper", "wheelbarrow", "saw",
-        "axe", "nail", "screw", "ladder", "rope", "chain", "hook", "scissors",
-        "file", "clamp", "bolt", "nut", "washer", "toolbox", "tape measure",
-        "hoe", "sickle", "pickaxe", "needle", "thread",
-    ],
-    "medical": [
-        "medicine", "medical treatment", "injection", "surgery", "symptom", "clinic",
-        "bandage", "prescription", "vaccine", "diagnosis", "stethoscope",
-        "anesthesia", "stitches", "crutches", "wheelchair", "pill", "tablet",
-        "treatment", "illness", "disease", "patient", "injury", "wound", "fever",
-        "cough", "headache", "therapy", "ointment", "syringe",
-        "thermometer", "ambulance", "nurse", "surgeon", "infection", "allergy",
-        "first aid", "hospital room", "cold", "influenza",
-    ],
-    "plants_trees": [
-        "plant", "tree", "flower", "grass", "leaf", "blossom", "sapling", "bamboo",
-        "moss", "fern", "vine", "petal", "pollen", "orchid", "cherry blossom",
-        "pine", "pine tree", "bush", "shrub", "root", "stem", 
-        "seed", "bud", "sprout", "weed", "maple", "willow", "oak", "cedar", "palm tree",
-        "rose", "tulip", "sunflower", "lily", "chrysanthemum", "cactus", "ivy",
-        "seedling", "bouquet", "forest tree",
-    ],
-    "household_items": [
-        "household", "towel", "soap", "toothbrush", "toothpaste", "broom", "bucket",
-        "vacuum cleaner", "washing machine", "clothespin", "detergent", "dustpan",
-        "mop", "flashlight", "torch", "candle", "iron", "thermos", "blanket", "pillow",
-        "sheet", "cushion", "shampoo", "comb", "brush", "razor", "hanger",
-        "wastebasket", "clock", "key", "umbrella", "basket", "rubbish",
-        "garbage", "trash", "dust", "sponge", "bathtub",
-    ],
-    "holidays_events": [
-        "holiday", "celebration", "event", "party", "festival", "ceremony",
-        "anniversary", "parade", "fireworks", "pilgrimage", "reunion", "banquet",
-        "wedding", "birthday", "new year", "christmas", "funeral", "carnival",
-        "vacation", "public holiday", "national holiday", "new year's day",
-        "coming-of-age ceremony", "graduation ceremony", "opening ceremony",
-        "closing ceremony", "summer festival", "memorial service", "feast",
-    ],
-}
+DECK_LEVELS = ("N5", "N4", "N3", "N2", "N1")
 
 
-_PAREN = re.compile(r"\([^)]*\)")
-_NEWS_BAND = re.compile(r"^news(\d+)k$")
+def parse_line(line: str) -> tuple[str, str, str, str]:
+    """`漢字 かな | english | français` or `かな | english | français`
+    -> (kanji, kana, en, fr)."""
+    parts = [p.strip() for p in line.split("|")]
+    if len(parts) != 3 or not all(parts):
+        raise ValueError(f"expected 'word | en | fr', got {line!r}")
+    word, en, fr = parts
+    forms = word.split()
+    if len(forms) == 1:
+        return "", forms[0], en, fr
+    if len(forms) == 2:
+        return forms[0], forms[1], en, fr
+    raise ValueError(f"expected 'kanji kana' or 'kana', got {word!r}")
 
 
-def normalise(gloss: str) -> str:
-    """Lowercase, drop parentheticals and Latin binomials, squeeze
-    whitespace, trim trailing punctuation.
-
-    Deliberately does NOT strip a leading article: "the red" must not
-    become "red" (that is 赤字, a budget deficit) and "the world" must not
-    become "world"."""
-    return re.sub(r"\s+", " ", _PAREN.sub(" ", gloss).lower()).strip(" .,;:")
-
-
-def head_gloss(meaning: str) -> str:
-    """The dedupe key: the first gloss, parentheticals removed FIRST so
-    the comma inside "(esp. the garden strawberry, Fragaria x ananassa)"
-    cannot split it. Splitting first leaves an unclosed parenthesis, the
-    key keeps the whole tail, and 苺 "strawberry (esp. …)" no longer
-    matches ストロベリー "strawberry" — which is how both survived."""
-    return normalise(_PAREN.sub(" ", meaning).split(",")[0])
+def parsed_themes() -> dict[str, dict[str, list[tuple[str, str, str, str]]]]:
+    out = {}
+    for theme, levels in THEMES.items():
+        if tuple(levels) != LEVELS:
+            raise ValueError(f"{theme}: levels must be {LEVELS}, got {tuple(levels)}")
+        out[theme] = {
+            level: [parse_line(l) for l in text.strip().splitlines() if l.strip()]
+            for level, text in levels.items()
+        }
+    return out
 
 
-def display_meaning(glosses: list[str], keep: int = 2) -> str:
-    """The meaning as it is stored, and therefore as the card reads.
+class Resolver:
+    def __init__(self):
+        with open(_DECK_JSON, encoding="utf-8") as f:
+            deck = json.load(f)
+        # (kanji, one reading) -> the deck's stored (kanji, kana); first
+        # level wins, as frequency_data's resolution does.
+        self.deck: dict[tuple[str, str], tuple[str, str]] = {}
+        self.deck_by_reading: dict[str, list[tuple[str, str, str]]] = defaultdict(list)
+        self.deck_meaning: dict[tuple[str, str, str], str] = {}
+        for level in DECK_LEVELS:
+            for w in deck.get(level, []):
+                kanji, kana = w.get("kanji", ""), w.get("kana", "")
+                for reading in kana.split("/"):
+                    self.deck.setdefault((kanji, reading), (kanji, kana))
+                    self.deck_by_reading[reading].append((level, kanji, kana))
+                    self.deck_meaning[(level, kanji, kana)] = w.get("meaning", "")
+        self.conn = sqlite3.connect(f"file:{_JMDICT_DB}?mode=ro", uri=True)
 
-    Built from the glossary of the sense the word was MATCHED on, not
-    from the deck's own gloss or `entries.meaning`. Those disagree often
-    enough to matter (2.7% of the pool outright, and more on the deck
-    side), and when they disagree the stored gloss is the one that does
-    not explain why the word is in this theme: 羽根 entered `birds` on
-    the gloss "feather" but the deck calls it "shuttlecock", 盆 entered
-    `kitchen_items` on "tray" but the deck calls it "Lantern Festival".
-    A card whose answer contradicts its own category is worse than a
-    card with a slightly different wording elsewhere in the app.
+    def pool_rows(self, column: str, value: str) -> list[tuple[str, str, str]]:
+        return self.conn.execute(
+            f"SELECT kanji, kana, meaning FROM entries WHERE {column} = ? ORDER BY freq_rank LIMIT 6",
+            (value,),
+        ).fetchall()
 
-    Parentheticals go — "peach (Prunus persica)" is the raw dictionary
-    leaking onto the study screen — and only the first couple of glosses
-    are kept so the answer stays a word rather than a paragraph."""
-    parts = [p.strip() for p in _PAREN.sub(" ", ", ".join(glosses)).split(",")]
-    parts = [re.sub(r"\s+", " ", p) for p in parts if p.strip()]
-    seen, out = set(), []
-    for p in parts:
-        if p.lower() in seen:
-            continue
-        seen.add(p.lower())
-        out.append(p)
-        if len(out) >= keep:
-            break
-    return ", ".join(out) or meaning.strip()
+    @staticmethod
+    def same_sense(en: str, meaning: str) -> bool:
+        words = lambda text: {w for w in re.findall(r"[a-z]+", text.lower()) if len(w) > 3}
+        return bool(words(en) & words(meaning))
 
-
-def _score(term_tags: set[str]) -> float | None:
-    """One frequency scale for both pools, from JMdict's own priority
-    tags. Lower is commoner. None means "no priority signal at all" —
-    the word is not a theme candidate, which is what keeps the archaic
-    tail out. See the module docstring for why entries.freq_rank cannot
-    be used for this."""
-    bands = [int(m.group(1)) for m in map(_NEWS_BAND.match, term_tags) if m]
-    if bands:
-        return (min(bands) - 1) * 1000 + 500  # 500, 1500, ... 23500
-    if "ichi" in term_tags:
-        return 26000.0   # Ichimango Goi Bunruishuu, the 10k common-word list
-    if "spec" in term_tags:
-        return 30000.0   # flagged common by the JMdict editors
-    if "gai" in term_tags:
-        return 34000.0   # common loanword
-    if "⭐" in term_tags:
-        return 38000.0   # high-priority term, no finer signal
-    return None
-
-
-def _candidates(conn: sqlite3.Connection) -> list[dict]:
-    """Every word eligible for any theme, from both pools, scored once.
-
-    Built ONCE and matched against all 36 themes, rather than rescanning
-    the 212k-row entries table per theme as the old build did."""
-    out: list[dict] = []
-
-    curated = {key: blob for key, blob in conn.execute("SELECT key, blob FROM curated_senses")}
-    with open(_DECK_JSON, encoding="utf-8") as f:
-        deck = json.load(f)
-    seen_deck = set()
-    for level in ("N5", "N4", "N3", "N2", "N1"):
-        for word in deck.get(level, []):
-            kanji, kana = word.get("kanji", ""), word.get("kana", "")
-            if (kanji, kana) in seen_deck:
-                continue
-            seen_deck.add((kanji, kana))
-            blob = curated.get(f"{kanji}::{kana}")
-            if not blob:
-                continue
-            out.append(_candidate("vocab", kanji, kana, word.get("meaning", ""), blob))
-
-    for kanji, kana, meaning, blob in conn.execute(
-        "SELECT e.kanji, e.kana, e.meaning, s.blob FROM entries e JOIN senses s ON s.id = e.id"
-    ):
-        out.append(_candidate("vocab_jmdict", kanji, kana, meaning, blob))
-
-    return [c for c in out if c is not None]
+    def resolve(self, kanji: str, kana: str, en: str) -> tuple[str | None, str, str, list[str]]:
+        """(domain, kanji, kana, problems). domain None = unresolved."""
+        hit = self.deck.get((kanji, kana))
+        if hit:
+            return "vocab", hit[0], hit[1], []
+        row = self.conn.execute(
+            "SELECT kanji, kana FROM entries WHERE kanji = ? AND kana = ?", (kanji, kana),
+        ).fetchone()
+        problems = []
+        twins = [d for d in self.deck_by_reading.get(kana, ())]
+        if row:
+            # A homophone (国歌 beside the deck's 国家) is no twin: only the
+            # deck's kana spelling of the reading, or a spelling whose gloss
+            # shares a word with this one (御飯 "cooked rice" for ご飯), is
+            # the same word under another form.
+            same = [(lv, k, r) for lv, k, r in twins
+                    if not k or self.same_sense(en, self.deck_meaning[(lv, k, r)])]
+            if same:
+                problems.append("pool form, but the deck teaches this word as: "
+                                + "; ".join(f"{lv} {k or '-'} {r}" for lv, k, r in same))
+            return "vocab_jmdict", row[0], row[1], problems
+        problems.append("not found")
+        if twins:
+            problems.append("deck: " + "; ".join(f"{lv} {k or '-'} {r}" for lv, k, r in twins))
+        for column, value in (("kana", kana), ("kanji", kanji)):
+            if value:
+                rows = self.pool_rows(column, value)
+                if rows:
+                    problems.append(f"pool by {column}: "
+                                    + "; ".join(f"{k or '-'} {r} ({m[:30]})" for k, r, m in rows))
+        return None, kanji, kana, problems
 
 
-def _candidate(domain: str, kanji: str, kana: str, meaning: str, blob: str) -> dict | None:
-    senses = json.loads(blob)          # parsed once per word, not once per theme
-    if not senses:
-        return None
-    term_tags = {t for s in senses for t in s.get("term_tags", [])}
-    score = _score(term_tags)
-    if score is None:
-        return None
-    first = senses[0]
-    tags = set(first.get("tags", []))
-    if tags & _BAD_USAGE or tags & _NAME_TAG_CODES:
-        return None
-    glossary = first.get("glossary", [])
-    if not glossary:
-        return None
-    return {
-        "domain": domain, "kanji": kanji, "kana": kana,
-        "meaning": display_meaning(glossary) or meaning.strip(),
-        "score": score, "tags": tags, "gloss1": normalise(glossary[0]),
-    }
-
-
-def _cut(n: int) -> list[int]:
-    """Sizes of the four bands for a theme of n words: growing, and each
-    at least one word wherever the theme has four to give."""
-    if n <= 0:
-        return [0, 0, 0, 0]
-    if n < len(LEVELS):
-        return [1] * n + [0] * (len(LEVELS) - n)
-    sizes = [max(1, round(n * s)) for s in LEVEL_SHARES]
-    while sum(sizes) > n:
-        sizes[sizes.index(max(sizes))] -= 1
-    while sum(sizes) < n:
-        sizes[-1] += 1
-    return sizes
-
-
-def build() -> dict[str, list[dict]]:
-    conn = sqlite3.connect(f"file:{_JMDICT_DB}?mode=ro", uri=True)
-    try:
-        candidates = _candidates(conn)
-    finally:
-        conn.close()
-
-    themes: dict[str, list[dict]] = {}
-    for theme in sorted(KEYWORDS):
-        keys = {normalise(k) for k in KEYWORDS[theme]}
-        field_deny = FIELD_DENY.get(theme, set())
-        deny = DENY_SURFACE.get(theme, set())
-        allow_adj = theme in _ADJ_THEMES
-
-        hits = []
-        for c in candidates:
-            if c["gloss1"] not in keys:
-                continue
-            if (c["kanji"] or c["kana"]) in deny:
-                continue
-            if c["tags"] & field_deny:
-                continue
-            if not (c["tags"] & _NOUN_POS or (allow_adj and c["tags"] & _ADJ_POS)):
-                continue
-            hits.append(c)
-
-        # Commonest first; a curated-deck word wins a tie because it
-        # carries a French gloss, a JLPT level and curated examples.
-        hits.sort(key=lambda c: (c["score"], c["domain"] != "vocab", c["kanji"], c["kana"]))
-
-        rows, seen_surface, seen_gloss = [], set(), set()
-        for c in hits:
-            surface = c["kanji"] or c["kana"]
-            gloss = head_gloss(c["meaning"])
-            if surface in seen_surface or gloss in seen_gloss:
-                continue
-            seen_surface.add(surface)
-            seen_gloss.add(gloss)
-            rows.append(c)
-
-        sizes = _cut(len(rows))
-        out, i = [], 0
-        for level, size in zip(LEVELS, sizes):
-            for c in rows[i:i + size]:
-                out.append({
-                    "rank": len(out) + 1,
+def build(check: bool = False) -> tuple[dict[str, list[dict]], list[str]]:
+    resolver = Resolver()
+    themes, errors = {}, []
+    for theme, levels in sorted(parsed_themes().items()):
+        rows, surfaces, glosses = [], set(), set()
+        for level in LEVELS:
+            for kanji, kana, en, fr in levels[level]:
+                where = f"{theme}/{level} {kanji or '-'} {kana}"
+                domain, s_kanji, s_kana, problems = resolver.resolve(kanji, kana, en)
+                surface = s_kanji or s_kana
+                head = en.split(",")[0].strip().lower()
+                if surface in surfaces:
+                    problems.append("repeats a word of this theme")
+                if head in glosses:
+                    problems.append(f"repeats the gloss {head!r} in this theme")
+                surfaces.add(surface)
+                glosses.add(head)
+                if problems:
+                    errors.append(f"{where}: " + " | ".join(problems))
+                if domain is None:
+                    continue
+                rows.append({
+                    "rank": len(rows) + 1,
                     "level": level,
-                    "score": c["score"],
-                    "domain": c["domain"],
-                    "kanji": c["kanji"],
-                    "kana": c["kana"],
-                    "meaning": c["meaning"],   # already trimmed in _candidate
+                    "domain": domain,
+                    "kanji": s_kanji,
+                    "kana": s_kana,
+                    "meaning": en,
+                    "meaning_fr": fr,
                 })
-            i += size
-        themes[theme] = out
-
-    return themes
+        themes[theme] = rows
+    return themes, errors
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__)
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dump", metavar="THEME",
                     help="print every word of one theme (or 'all') and write nothing")
+    ap.add_argument("--check", action="store_true",
+                    help="report every word that does not resolve cleanly and write nothing")
     args = ap.parse_args()
 
-    themes = build()
+    themes, errors = build()
+
+    if args.check or errors:
+        for e in errors:
+            print(e)
+        if errors:
+            raise SystemExit(f"\n{len(errors)} problem(s); nothing written")
+        print("every word resolves")
+        return
 
     if args.dump:
         wanted = sorted(themes) if args.dump == "all" else [args.dump]
@@ -725,9 +219,9 @@ def main() -> None:
                 raise SystemExit(f"unknown theme: {theme}")
             print(f"\n=== {theme} ({len(rows)})")
             for r in rows:
-                print(f"  {r['rank']:3d} {r['level']:9s} {int(r['score']):6d} "
-                      f"{r['domain'][:5]:5s} {(r['kanji'] or r['kana']):12s} "
-                      f"{r['kana']:16s} {r['meaning']}")
+                print(f"  {r['rank']:3d} {r['level']:9s} {r['domain'][:5]:5s} "
+                      f"{(r['kanji'] or r['kana']):12s} {r['kana']:16s} "
+                      f"{r['meaning']} / {r['meaning_fr']}")
         return
 
     with open(_OUT_JSON, "w", encoding="utf-8") as f:

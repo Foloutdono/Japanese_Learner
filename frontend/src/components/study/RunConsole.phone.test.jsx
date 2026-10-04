@@ -31,8 +31,8 @@ describe('the run\'s meter', () => {
     expect(all).toHaveLength(5)
     expect(all.filter(s => s.classList.contains('run-meter__s--done'))).toHaveLength(3)
     expect(all[3].classList.contains('run-meter__s--now')).toBe(true)
-    // The verdicts' inks: the rating tiles' own.
-    expect(getComputedStyle(all[0]).backgroundColor).toBe(rgb(ink('--teal')))
+    // The verdicts' inks: the rating tiles' own (Correct's key's since plan 180).
+    expect(getComputedStyle(all[0]).backgroundColor).toBe(rgb(ink('--rating-correct')))
     expect(getComputedStyle(all[1]).backgroundColor).toBe(rgb(ink('--rating-wrong')))
     expect(getComputedStyle(all[2]).backgroundColor).toBe(rgb(ink('--warning')))
     expect(meter.querySelector('.run-meter__n').textContent).toBe('3/ 5')

@@ -347,7 +347,7 @@ const quiz = {
   // term ("No results for {query}") rather than standing alone.
   themeNoResults:    'No themes match your filter',
 
-  // The four bands inside a theme, cut by frequency (see
+  // The four levels inside a theme, placed by difficulty (see
   // backend/content/theme_data.py). The Japanese half of each name lives
   // in domain/themes.js — it is the same in every language.
   themeLevelBasic:    'Basic',

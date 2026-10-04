@@ -396,12 +396,12 @@ describe('the install row on the desk', () => {
   })
 })
 
-// ── plan 180 — the list read by its left and right edges ──
+// ── plan 182 — the list read by its left and right edges ──
 // A glyph a row at one x, the names after it at another, and the
 // drawings of what a row is set to in one column at the right, however
 // long the words beside them. The lit stop on the pass is ringed clear
 // of the code it names, and a focused row is ringed inside its card.
-describe('the list under the pass (plan 180)', () => {
+describe('the list under the pass (plan 182)', () => {
   const rows = () => [...document.querySelectorAll('.desk-settings__list .stg-row[data-page]:not([data-page="pass"])')]
   const left = el => Math.round(el.getBoundingClientRect().left)
   const right = el => Math.round(el.getBoundingClientRect().right)

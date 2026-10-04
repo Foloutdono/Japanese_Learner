@@ -1405,26 +1405,16 @@ runtime purpose. Two consequences worth knowing:
   `src/deskfree.phone.test.jsx`,
   `src/deckFit.wide.test.jsx`, `src/shelf.desktop.test.jsx` and the 机
   section of `index.css`; DESIGN.md, "The gate button" and "The desk").
-  **180** is Settings' list read by its edges (owner-directed: "fix the
-  icons, focus, alignment issues and make things clearer and simpler to
-  modify"): the list under the pass is data, not markup -- one entry per
-  row in `components/settings/SettingsList.jsx`'s `useGroups`, drawn
-  by one `Row`, so a new setting is one line there and one in
-  `SettingsScreen`'s `PAGES` -- every row a glyph (`MonitorIcon`,
-  `BellIcon`, `UserIcon` and the set's own) in one column, its name over
-  what it is set to, and the drawing of the state (theme, mixer, rating
-  dots, pace) in a slot of one width at the trailing edge, so nothing is
-  ragged whatever the words; the display row says the theme and the
-  language; the rows fall into three cards by what they are for (the
-  app, the study, the learner) and the pass on its own, set apart by the
-  gap and not by a caption; the dark theme's swatch has a ring; the open
-  stop on the pass is ringed as a focused one is (the touch's box, clear
-  of the print) instead of an outline lying over its code, and a focused
-  row is ringed inside its card where the list clips a ring outside
-  (cited in `components/settings/SettingsList.jsx`,
-  `components/settings/RowSpecimens.jsx`, `screens/SettingsScreen.jsx`,
-  `components/ui/Icons.jsx`, `src/settings.desktop.test.jsx` and
-  `index.css`; DESIGN.md, "Settings opens on the pass").
+  **180** is 正解, the rating bar's passes as keys of their own (the
+  owner's pick B of five drawn on the canvas "Tsuji — the rating bar",
+  asked a step more vibrant): the misses stay plan 174's one instrument,
+  and Correct -- with Perfect on the six -- stands beside it as a key
+  filled in its own ink, `--rating-correct` and `--rating-perfect`,
+  which the run's meter and the desk's verdict tiles wear too; on a
+  phone the six's keys go under its misses (cited in
+  `components/study/RatingBar.jsx`, `index.css` and its 机 section,
+  `src/harmony.css.test.js`, `src/stage.phone.test.jsx` and
+  `components/study/RatingBar.browser.test.jsx`; DESIGN.md, Controls).
   **181** is 時間割, the weekly agenda (owner-directed: "a weekly agenda,
   with dedicated timeframe for specific things like 9-11 kanji, 14-16
   reading, and the notification going with it"): Settings › Agenda
@@ -1481,7 +1471,29 @@ runtime purpose. Two consequences worth knowing:
   `components/agenda/AgendaNext.jsx`, `hooks/useMinute.js`,
   `src/agenda.desktop.test.jsx`, `src/today.phone.test.jsx`,
   `src/today.desktop.test.jsx` and the `.agd-*` block of `index.css`).
-  When starting a new wave, begin at **182** or higher, and check
+  **182** is Settings' list read by its edges (numbered 182 because 180
+  went to the rating bar's passes and 181 to the agenda while it was open:
+  its commit's message says 180; owner-directed: "fix the
+  icons, focus, alignment issues and make things clearer and simpler to
+  modify"): the list under the pass is data, not markup -- one entry per
+  row in `components/settings/SettingsList.jsx`'s `useGroups`, drawn
+  by one `Row`, so a new setting is one line there and one in
+  `SettingsScreen`'s `PAGES` -- every row a glyph (`MonitorIcon`,
+  `BellIcon`, `UserIcon` and the set's own) in one column, its name over
+  what it is set to, and the drawing of the state (theme, mixer, rating
+  dots, pace) in a slot of one width at the trailing edge, so nothing is
+  ragged whatever the words; the display row says the theme and the
+  language; the rows fall into three cards by what they are for (the
+  app, the study, the learner) and the pass on its own, set apart by the
+  gap and not by a caption; the dark theme's swatch has a ring; the open
+  stop on the pass is ringed as a focused one is (the touch's box, clear
+  of the print) instead of an outline lying over its code, and a focused
+  row is ringed inside its card where the list clips a ring outside
+  (cited in `components/settings/SettingsList.jsx`,
+  `components/settings/RowSpecimens.jsx`, `screens/SettingsScreen.jsx`,
+  `components/ui/Icons.jsx`, `src/settings.desktop.test.jsx` and
+  `index.css`; DESIGN.md, "Settings opens on the pass").
+  When starting a new wave, begin at **183** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

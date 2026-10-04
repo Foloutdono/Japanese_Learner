@@ -229,6 +229,11 @@ all twelve in both themes — and the native widgets' copies follow.
 琥珀, 緑青, 錆 and the rating's 臙脂 — run red to green at one strength,
 lightness .62 to .72 where they ran .54 to .74, so no verdict shouts over
 another and the teal no longer sinks into the sumi it is drawn on.
+The two pass verdicts step off it since plan 180 (正解): Correct and
+Perfect are the rating bar's keys and wear their own brighter inks,
+`--rating-correct` and `--rating-perfect`, wherever a verdict's ink is
+drawn (the bar, the run's meter, the desk's verdict tiles). `--teal` and
+`--success` keep their place on the ramp for everything else.
 
 ### One metal, one selection
 
@@ -1004,8 +1009,21 @@ So:
   segments sit in one bordered instrument (an inset outline, so it takes no
   height) split by hairlines, each word under a pill in its verdict's ink —
   the same ink and shape as its segment in the run's meter — and a press
-  washes its segment and lights the pill. The six-tile bar is two rows of
-  three inside the one instrument.
+  washes its segment and lights the pill.
+  **Since plan 180 (正解, the owner's pick B of the canvas "Tsuji — the
+  rating bar") the passes are keys of their own.** The misses (Wrong,
+  Almost, Difficult; Blackout on the six) stay that one instrument; Correct
+  — and Perfect on the six — stands beside it a gap apart as a key filled
+  in its own verdict ink (`--rating-correct` 青竹, `--rating-perfect` 若葉),
+  lit from the top with a soft glow, the sumi type and a check where the
+  pill was. Correct is the answer pressed most, so it is the widest target
+  on the bar (half again a miss on the four) and the one thing on it in
+  colour. Still not gold: a pass is lit in its verdict's ink, and gold
+  stays the action's metal. On a phone the six puts its four misses on one
+  row and the two keys under them, on the edge the thumb is nearest; on
+  the desk's panels the keys are drawn unlit, like the segments, until the
+  reveal, and the card panel's Correct and Perfect tiles are edged and
+  washed in the same inks.
 - **The streak is a スタンプラリー stamp rally**, not a flame — a row of
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a
@@ -1990,7 +2008,7 @@ each question drawing its answers between them.
   The daily pace is one field: it was on two pages over one number. Under
   the card the rest is a list whose rows **draw what they are set to**
   beside their words (`RowSpecimens`: the theme's grounds, the mixer's
-  levels, the rating bar's dots, the reading pace's clock). Plan 180 laid
+  levels, the rating bar's dots, the reading pace's clock). Plan 182 laid
   the rows out by their edges: a glyph in one column at the left, the
   name over what it is set to, the drawing in a slot of one width at the
   right (so the drawings stand in a column whatever the words say), the

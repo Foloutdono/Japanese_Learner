@@ -612,7 +612,7 @@ export function SheetIcon({ size = 18, className }) {
   )
 }
 
-// ── Settings' list (plan 180) ──
+// ── Settings' list (plan 182) ──
 // One glyph a row, so the list reads by its left edge before its words.
 // On the same `base` as the rest of the set.
 

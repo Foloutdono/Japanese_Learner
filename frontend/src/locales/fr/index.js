@@ -335,7 +335,7 @@ const quiz = {
   filterThemes:      'Filtrer les thèmes…',
   themeNoResults:    'Aucun thème ne correspond à ton filtre',
 
-  // Les quatre paliers d'un thème, découpés par fréquence (voir
+  // Les quatre paliers d'un thème, placés par difficulté (voir
   // backend/content/theme_data.py). La moitié japonaise de chaque nom est
   // dans domain/themes.js — elle est identique dans toutes les langues.
   themeLevelBasic:    'Base',

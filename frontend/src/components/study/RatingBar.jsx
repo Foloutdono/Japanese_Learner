@@ -6,12 +6,20 @@ import { useRatingScale } from '../../stores/ratingScale'
 import { useDesk } from '../../hooks/useDesk'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { RunPanelsContext } from './runPanels'
+import { CheckIcon } from '../ui/Icons'
 
 // Keys 1-N map to the bar's buttons. On an AZERTY keyboard the
 // unshifted number row types &é"' rather than 1234, so those are
 // accepted too — same physical top-row keys, either layout. Key 6 is
 // '-' on a French PC keyboard and '§' on a French Mac (plan 123).
 const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '-': 5, '§': 5 }
+
+// 正解 (plan 180): the passes -- Correct, and Perfect on the six -- are
+// keys of their own beside the instrument the misses make, each filled
+// in its verdict's ink. Correct is the answer pressed most, so it is
+// the biggest target and the one thing on the bar in colour. Gold
+// stays the action's metal (plan 174): a pass is lit in its own ink.
+const isKey = q => q >= 4
 
 /**
  * `scale` overrides the learner's own choice — tests pass it, and the
@@ -91,6 +99,69 @@ export default function RatingBar({ onRate, active, scale, guide, specimen = fal
     return () => window.removeEventListener('keydown', handler)
   }, [active, onRate, QUALITY_BTNS.length])
 
+  // Worst to best, as the bar draws them. `.map()` returns a new array,
+  // so the `.reverse()` sorts that copy and never QUALITY_BTNS itself;
+  // the digit is captured BEFORE the reverse, the only place it can be
+  // read correctly, while the keyboard handler above keeps indexing the
+  // untouched original.
+  const tiles = QUALITY_BTNS.map((b, i) => ({ ...b, digit: i + 1 })).reverse()
+  const best = QUALITY_BTNS[0].q
+
+  // One tile. A miss is a segment of the instrument, a word under its
+  // verdict's pill; a pass (正解, plan 180) is a key of its own, filled
+  // in its verdict's ink, a check where the pill was. The --best mark
+  // stays on the best answer the bar offers (QUALITY_BTNS[0] on every
+  // scale, best-first), for the tests and the guide.
+  function tile({ q, label, digit }) {
+    const cls = [
+      'rating-bar__btn',
+      `rating-bar__btn--q${q}`,
+      isKey(q) && 'rating-bar__btn--key',
+      q === best && 'rating-bar__btn--best',
+      !specimen && pressed === q && 'rating-bar__btn--pressed',
+    ].filter(Boolean).join(' ')
+    const mark = isKey(q)
+      ? <CheckIcon size={18} className="rating-bar__btn-check" />
+      : <span className="rating-bar__btn-ring" aria-hidden="true" />
+    if (specimen) {
+      return (
+        <span key={q} className={cls}>
+          {mark}
+          <span className="rating-bar__btn-label">{label}</span>
+        </span>
+      )
+    }
+    return (
+      <button
+        key={q}
+        type="button"
+        disabled={panels && !active}
+        onClick={() => handleRate(q)}
+        className={cls}
+        /* The digits are NOT in display order: QUALITY_BTNS is
+           best-first, so "1" is the best answer at the RIGHT end and
+           the highest digit is the worst at the left. On a phone they
+           are not drawn at all (numeric indices are noise on a
+           thumb's control, and a thumb has no number row), so the
+           shortcut is announced to assistive tech and shown on hover.
+           On the desk (plan 113) there IS a keyboard under the hands,
+           and undiscoverable-and-reversed was the bad pair: each tile
+           prints its key in its corner, which is what makes the
+           reversal readable. */
+        aria-keyshortcuts={String(digit)}
+        title={`${label} (${digit})`}
+      >
+        {desk && !panels && <kbd className="desk-kbd" aria-hidden="true">{digit}</kbd>}
+        {/* The pill (or a key's check) says nothing the label does not
+            -- it is the seal, and the word beside it is the name -- so
+            it is hidden from a screen reader. Its ink is the verdict's,
+            the same as the run meter's segment (RunConsole.jsx). */}
+        {mark}
+        <span className="rating-bar__btn-label">{label}</span>
+      </button>
+    )
+  }
+
   // Rendered even before the reveal, inert, so its space is RESERVED.
   // Returning null here used to make the bar appear out of nowhere on
   // reveal -- and because .stage is a centred flex column, adding
@@ -104,59 +175,16 @@ export default function RatingBar({ onRate, active, scale, guide, specimen = fal
   // keyboard handler above is separately gated on `active`.
   return (
     <Box className={`rating-bar${specimen ? ' rating-bar--specimen' : active ? '' : (panels ? ' rating-bar--unlit' : ' rating-bar--idle')}`} aria-hidden={specimen || !active} data-guide={guide}>
-      {/* One continuous instrument, worst to best -- see index.css for
-          why. `.map()` already returns a new array, so the `.reverse()`
-          below sorts that copy and never QUALITY_BTNS itself; DOM order
-          (and therefore tab and screen-reader order) matches what is on
-          screen while the keyboard handler above keeps indexing the
-          untouched original. The digit is captured BEFORE the reverse,
-          which is the only place it can be read correctly.
+      {/* Worst to best, in DOM order too (and therefore tab and
+          screen-reader order): the misses as one instrument, then the
+          passes as keys beside it -- see index.css for why.
 
           The count rides on the container because the phone layout
-          depends on it: six segments wrap to two rows of three, four to
-          two of two, and the hairlines between them have to be redrawn
-          for whichever grid that is. */}
+          depends on it: six wrap to the four misses over the two keys,
+          and nth-child cannot count its own siblings. */}
       <Box className={`rating-bar__buttons rating-bar__buttons--${QUALITY_BTNS.length}`}>
-        {specimen && QUALITY_BTNS.slice().reverse().map(({ q, label }) => (
-          <span key={q} className={`rating-bar__btn rating-bar__btn--q${q}${q === QUALITY_BTNS[0].q ? ' rating-bar__btn--best' : ''}`}>
-            <span className="rating-bar__btn-ring" />
-            <span className="rating-bar__btn-label">{label}</span>
-          </span>
-        ))}
-        {!specimen && QUALITY_BTNS.map((b, i) => ({ ...b, digit: i + 1 })).reverse().map(({ q, label, digit }) => (
-          <button
-            key={q}
-            type="button"
-            disabled={panels && !active}
-            onClick={() => handleRate(q)}
-            /* The best answer the bar offers keeps its --best mark
-               (QUALITY_BTNS[0] on every scale, best-first), though since
-               plan 174 it is drawn like the others: gold is the action's
-               metal, not a verdict's (index.css, the rating bar's 5). */
-            className={`rating-bar__btn rating-bar__btn--q${q}${q === QUALITY_BTNS[0].q ? ' rating-bar__btn--best' : ''}${pressed === q ? ' rating-bar__btn--pressed' : ''}`}
-            /* The digits are NOT in display order: QUALITY_BTNS is
-               best-first, so "1" is the best answer at the RIGHT end and
-               the highest digit is the worst at the left. On a phone they
-               are not drawn at all (numeric indices are noise on a
-               thumb's control, and a thumb has no number row), so the
-               shortcut is announced to assistive tech and shown on hover.
-               On the desk (plan 113) there IS a keyboard under the hands,
-               and undiscoverable-and-reversed was the bad pair: each tile
-               prints its key in its corner, which is what makes the
-               reversal readable. */
-            aria-keyshortcuts={String(digit)}
-            title={`${label} (${digit})`}
-          >
-            {desk && !panels && <kbd className="desk-kbd" aria-hidden="true">{digit}</kbd>}
-            {/* The pill is the whole colour story: its verdict's ink at
-                rest, lit when this rating is the one chosen -- the same
-                ink as the run meter's segment (RunConsole.jsx). Marked
-                hidden because it says nothing the label does not -- it
-                is the seal, and the word beside it is the name. */}
-            <span className="rating-bar__btn-ring" aria-hidden="true" />
-            <span className="rating-bar__btn-label">{label}</span>
-          </button>
-        ))}
+        <Box className="rating-bar__misses">{tiles.filter(b => !isKey(b.q)).map(tile)}</Box>
+        <Box className="rating-bar__keys">{tiles.filter(b => isKey(b.q)).map(tile)}</Box>
       </Box>
     </Box>
   )

@@ -21,7 +21,7 @@ import {
 import { SettingsDoor } from './SettingsDoor'
 import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from './RowSpecimens'
 
-// ── The list under the pass (plans 139, 180) ─────────────────────
+// ── The list under the pass (plans 139, 182) ─────────────────────
 // Every row is one shape: a glyph for what it is, its name over what it
 // is set to, then — where the state can be seen — a drawing of it, in a
 // slot of one width so the drawings stand in a column whatever the words
