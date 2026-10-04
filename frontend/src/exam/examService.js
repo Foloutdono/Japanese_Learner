@@ -145,6 +145,10 @@ function pushMondaiQuestions(section, mondai, out) {
     sectionLabel: section.label,
     mondaiId: mondai.id,
     mondaiNumber: mondai.number,
+    // The blueprint's name for the part (漢字読み …), which the server
+    // adds as it serves the paper (plan 171); absent on a paper from
+    // before it, which the screens name by number instead.
+    mondaiName: mondai.nameJp ?? null,
     type: mondai.type,
     ...(mondai.flyer ? { flyer: mondai.flyer } : {}),
   }

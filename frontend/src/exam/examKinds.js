@@ -34,6 +34,12 @@ const KIND_BY_SECTION_ID = {
   listening: 'listening',
 }
 
+/** The kind of a fetched paper (vocab, grammar …), read off its one
+ * section's id; null for a paper whose section is not one of the four. */
+export function paperKind(exam) {
+  return KIND_BY_SECTION_ID[exam?.sections?.[0]?.id] ?? null
+}
+
 /** Localized "N5 · Vocabulaire" for a fetched paper — the runner's
  * meta row and the result's bar sub (the canvas's "N4 · Vocabulary"). */
 export function paperTitle(exam, t) {

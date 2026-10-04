@@ -143,7 +143,7 @@ const LIST = [
   }),
 
   // ── grammar ──
-  // Runs on the project's own 205-point catalogue and its hand-written
+  // Runs on the project's own 205-point catalogue and its own
   // example sentences (content/grammar_sentences.json), not the scraped
   // source. indice_2 shows those sentences with the translation hidden.
   mode('grammar.flashcard.f2b', 'grammar', 'flashcard', {

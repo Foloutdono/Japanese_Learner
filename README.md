@@ -157,9 +157,9 @@ All content is organised by JLPT level:
 | N1 | 3,235 | 1,232 | 117 |
 | **Total** | **8,090** | **2,212** | **541** |
 
-- Every grammar lesson is written by hand, never generated. Each example
-  sentence is checked to contain its pattern and to stay within its level's
-  kanji.
+- Every grammar lesson was drafted with AI, then reviewed continually by AI
+  agents whose job is to find its errors. Each example sentence is checked
+  to contain its pattern and to stay within its level's kanji.
 - The dictionary covers 212,000 JMdict entries and all 13,108 KANJIDIC2
   characters, with 6,702 stroke-order diagrams from KanjiVG.
 - Glosses and the whole interface are available in English and French.

@@ -3,9 +3,10 @@
 One JSON file per JLPT level, `N5.json` … `N1.json`, each a list of grammar
 points in the order the level teaches them. This is the whole of what the
 文法 line, the dictionary's grammar collection, the exam generators and the
-reading gate know about grammar (plan 087). Nothing here is generated: every
-line is written by hand, in both of the app's languages, and checked in code
-before it can ship.
+reading gate know about grammar (plan 087). Nothing here is generated at
+request time: every line was drafted with an AI model, in both of the app's
+languages, is checked in code before it can ship, and is audited since by AI
+agents looking for its errors (`docs/content-audit/PLAYBOOK.md`).
 
 ```
 cd backend

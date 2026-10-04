@@ -332,9 +332,11 @@ describe('the folded stations (plan 115, P3)', () => {
 // ── plan 115, P4 — the mock exam a phone keeps ──
 // On the desk the answer sheet stands in the run's side, a reading
 // passage beside its questions, the keys are named, and the review is a
-// list beside its page. A phone keeps the sheet bar and its sheet, the
-// passage inside the question's card, no key names, and the review's
-// rows opening under themselves with both ways on at the foot.
+// list beside its page. A phone keeps its own paper (plan 171): the
+// cover first, then the page over the dock of answer tiles, the passage
+// scrolling in the page, no key names, the answer sheet in a sheet, and
+// the review's rows opening under themselves with both ways on at the
+// foot.
 describe('the mock exam (plan 115, P4)', () => {
   const choices = (...texts) => texts.map((textJp, i) => ({ id: `c${i + 1}`, textJp }))
   const PAPER = {
@@ -351,7 +353,7 @@ describe('the mock exam (plan 115, P4)', () => {
     }],
   }
 
-  it('keeps the sheet bar, the passage in its card and no key names', async () => {
+  it('keeps the cover, the dock, the passage in its page and no key names', async () => {
     localStorage.clear()
     apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => PAPER }))
     const { MemoryRouter, Routes, Route } = await import('react-router-dom')
@@ -364,13 +366,18 @@ describe('the mock exam (plan 115, P4)', () => {
       </LangProvider>
     )
     await settle(300)
-    expect(document.querySelector('.exam-sheetbar')).not.toBeNull()
-    expect(document.querySelector('.exam-meta [role="timer"]')).not.toBeNull()
-    expect(document.querySelector('.exam-card .exam-passage .exam-passage__text')).not.toBeNull()
-    expect(document.querySelector('[class*="desk-"], [aria-keyshortcuts]')).toBeNull()
-    document.querySelector('.exam-sheetbar__open').click()
+    expect(document.querySelector('.exam-cover')).not.toBeNull()
+    expect(document.querySelector('[role="timer"]')).toBeNull()
+    document.querySelector('.exam-cover__go').click()
     await settle(250)
-    expect(document.querySelector('[role="dialog"] .exam-sheet__grid')).not.toBeNull()
+    expect(document.querySelector('.exam-dock .exam-tiles')).not.toBeNull()
+    expect(document.querySelector('.exam-run__head [role="timer"]')).not.toBeNull()
+    expect(document.querySelector('.exam-page .exam-ask__scroll .exam-passage__text')).not.toBeNull()
+    expect(document.querySelector('.exam-sheetbar, .exam-meta, .exam-card')).toBeNull()
+    expect(document.querySelector('[class*="desk-"], [aria-keyshortcuts]')).toBeNull()
+    document.querySelector('.exam-run__sheet').click()
+    await settle(250)
+    expect(document.querySelector('[role="dialog"] .exam-parts .exam-sheet__grid')).not.toBeNull()
   })
 
   it('keeps the review opening each row under itself', async () => {
@@ -389,15 +396,15 @@ describe('the mock exam (plan 115, P4)', () => {
       </LangProvider>
     )
     await settle(200)
-    const rows = document.querySelectorAll('.exam-review-row')
+    const rows = document.querySelectorAll('.exam-miss')
     expect(rows).toHaveLength(1)
     expect(rows[0].getAttribute('aria-expanded')).toBe('false')
     expect(document.querySelector('[aria-current="page"], .desk-split, .exam-card')).toBeNull()
+    expect(document.querySelectorAll('.exam-res__part')).toHaveLength(1)
     rows[0].click()
     await settle()
     expect(document.querySelector('.exam-review-row__detail .mcq-row--correct')).not.toBeNull()
     expect(document.querySelectorAll('.btn-row button')).toHaveLength(2)
-    expect(document.querySelector('p.hint')).not.toBeNull()
   })
 })
 
@@ -720,12 +727,19 @@ describe('the split\'s rows (plan 117)', () => {
     expect(seen.path).toBe('/learn/kana')
     buttonsOnly('.route-stop')
 
-    // The grades show once there are papers to sit.
-    const paper = level => ({ id: `e-${level}`, level, kind: 'vocab', title: `${level} 語彙`, questionCount: 18, generated: true, revision: 1 })
-    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => (path === '/api/exams' ? [paper('N5'), paper('N4')] : {}) }))
+    // The grades show once there are papers to sit: on a phone a band of
+    // radios over the papers (plan 171), every one a button, no link.
+    const paper = (level, kind) => ({ id: `e-${level}-${kind}`, level, kind, title: `${level} ${kind}`, questionCount: 18, generated: true, revision: 1 })
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => (path === '/api/exams' ? [paper('N5', 'vocab'), paper('N5', 'grammar'), paper('N4', 'vocab')] : {}) }))
     seen = await mount('/practice/exam', <Route path="/practice/exam" element={<ExamScreen session={{}} />} />)
     expect(seen.path).toBe('/practice/exam')
-    buttonsOnly('.route-stop')
+    expect(document.querySelector('.learn a:not(.skip-link)')).toBeNull()
+    const grades = [...document.querySelectorAll('.seg__opt')]
+    expect(grades.map(g => g.textContent)).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
+    for (const b of [...grades, ...document.querySelectorAll('.exam-st__row')]) expect(b.tagName).toBe('BUTTON')
+    grades[1].click()
+    await settle()
+    expect(seen.path).toBe('/practice/exam?level=N4')
     apiFetch.mockReset()
   })
 
@@ -812,7 +826,7 @@ describe('the split\'s rows (plan 117)', () => {
       { pathname: '/practice/exam/e1/results', search: '?attempt=9', state: { summary, exam: PAPER } },
       <Route path="/practice/exam/:examId/results" element={<ExamResult session={{}} />} />,
     )
-    const [row] = buttonsOnly('.exam-review-row')
+    const [row] = buttonsOnly('.exam-miss')
     expect(row.getAttribute('aria-expanded')).toBe('false')
     row.click()
     await settle()
@@ -1755,7 +1769,8 @@ describe('the stations filled (plan 137)', () => {
 // specimen each. A phone keeps its screens -- reading's three source
 // cards, the grades across, the papers as cards -- and asks for none of
 // what only the desk prints; the learner's own cards, a page of the
-// desk's, send a phone back to the sources.
+// desk's, send a phone back to the sources. The exam's papers are the
+// phone's own since plan 171: the next paper as a card over the others.
 describe('the practice stations filled (plan 159)', () => {
   const practiceRoutes = async () => {
     const { Routes, Route } = await import('react-router-dom')
@@ -1805,7 +1820,7 @@ describe('the practice stations filled (plan 159)', () => {
     expect(document.querySelectorAll('.learn > .platform-grid .platform-card')).toHaveLength(3)
   })
 
-  it('keeps the exam\'s papers as cards, and asks for no record and no specimen', async () => {
+  it('keeps the exam\'s papers its own, and asks for no record and no specimen', async () => {
     apiFetch.mockReset()
     apiFetch.mockImplementation(async path => ({
       ok: true,
@@ -1818,7 +1833,7 @@ describe('the practice stations filled (plan 159)', () => {
     const routes = await practiceRoutes()
     await render(<LangProvider><MemoryRouter initialEntries={['/practice/exam?level=N5']}>{routes}</MemoryRouter></LangProvider>)
     await settle(250)
-    expect(document.querySelectorAll('.learn > .platform-grid .platform-card')).toHaveLength(1)
+    expect(document.querySelectorAll('.exam-st__hero')).toHaveLength(1)
     expect(document.querySelector('.prc-paper, .prc-papers, .desk-split')).toBeNull()
     expect(asked('/api/practice/record')).toBe(false)
     expect(asked('/api/station/exam')).toBe(false)

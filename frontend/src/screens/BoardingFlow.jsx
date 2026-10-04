@@ -529,7 +529,10 @@ export default function BoardingFlow({
         // cutscene mounts. Fire-and-forget: both stores fail quietly.
         refreshSummary()
         refreshCredits()
-        onComplete()
+        // What App's copy of the profile, read before the boarding,
+        // cannot know: the kana answer decides the first ride (入門 for
+        // « Pas encore », plan 170).
+        onComplete({ kanaKnown: answers.kana })
       })
       .catch(err => {
         setBusy(false)

@@ -299,6 +299,8 @@ describe('the boarding frame on the desk (P9, plans 140, 163)', () => {
     await settle()
     expect(apiJsonWithTimeout).toHaveBeenCalledWith('/api/onboarding/complete', expect.anything(), expect.anything())
     expect(onComplete).toHaveBeenCalledTimes(1)
+    // The kana answer goes with it: App decides the first ride on it.
+    expect(onComplete).toHaveBeenCalledWith({ kanaKnown: 'both' })
     expect(stepOf()).toBe('plan')
   })
 

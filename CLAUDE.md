@@ -1206,6 +1206,27 @@ runtime purpose. Two consequences worth knowing:
   `backend/content/reading_sentences.py`, `backend/tests/test_nyumon.py`,
   `src/screens/RideIntro.browser.test.jsx`, the `intro` phone, desktop
   and short tests, and `index.css` and its 机 section; CONTEXT.md, 入門).
+  **171** is 模試 on a phone, the mock exam redrawn below the desk (the
+  owner's mix of the canvas "Tsuji — the mock exam on the phone": C1,
+  A2–A5 with C5's player, C6 and A7, then variant V1 with the question
+  bigger and its number at the head of the page): the grade and its
+  papers one screen, the paper to sit next a card with its parts and
+  Start, the others rows that swap into it (`exam/ExamStation.jsx`); a
+  cover before the first question, which is what starts the clock; each
+  question a page under its big number and its part's JLPT name, the
+  answers a sumi dock of tiles (a bubble and the words, two by two when
+  short) over Previous and Next (`QuestionRenderer`'s `apart`,
+  `AnswerTiles`); the listening clip a ring with the play key in it
+  (`AudioPlayer`'s `ring`); the sheet by parts (`AnswerSheet`'s
+  `PartsSheet`, the sheet bar retired); and the result as the score
+  against the pass line, the parts graded and the misses with the
+  answer given and the right one (`ExamResult`'s phone branch). The
+  server names each part (`exam_blueprint.name_mondai`). The desk is
+  unchanged (cited in `routes/exams.py`, `study/exam_blueprint.py`,
+  `tests/test_exam_mondai_names.py`, `screens/ExamScreen.jsx`,
+  `screens/ExamRunner.jsx`, `screens/ExamResult.jsx`, `exam/`,
+  `src/practice.phone.test.jsx`, the `Exam*` screen tests and
+  `index.css`; `docs/design/mobile/README.md`).
   **172** is 定期券, the three offers (numbered 172 because 171 went to
   模試 on a phone while it was open: its commits' messages say 171; the
   owner's canvas "Tsuji — the
@@ -1684,7 +1705,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 - `core/` — cross-cutting singletons: `auth.py` (identity), `db.py` (raw psycopg2 connections), `srs_instance.py` / `frequency_store_instance.py` (module-level singletons constructed once at import time from `DATABASE_URL`, imported by routes needing SRS/frequency state).
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
 - `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), grammar detection (`grammar_detect.py` — which catalogue points a sentence actually uses, over the tokenizer and the catalogue's own example sentences; `difficulty.points_in` is its name to the rest of the app), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`, `romaji.py` — Hepburn conversion and the fold two romanizations are compared under), dictation (`dictation.py` — clip identity and the transcription measure), speech (`voice_engine.py` — the only client of the VOICEVOX Nemo engine; `exam_tts.py` — the clip store, content keys, the voice epoch and dialogue assembly; `word_tts.py` — the `/api/tts` card-reading clips), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.
-- `content/` — static/generated reference data (grammar points, vocab, kanji readings/meanings, frequency lists, reading sentences, the dictation bank in `listening_clips.py`) as Python modules or JSON, built/refreshed by scripts in `scripts/`. **The grammar catalogue is `content/grammar/N5.json … N1.json`** (plan 087, ADR 0016): one list per level, every text in both languages, the lesson (`steps`, `compare`, four examples) beside the gloss at the levels in `RICH_LEVELS`. It is authored, never generated — no sentence from a published list, no model output — and held to `study/grammar_check.py`: run `python -m scripts.check_grammar --report` before every content commit. A pattern string is a card id, so a rename or a level move goes through `content/grammar/renames.py` and the migration script; `content/grammar/README.md` has the schema and the style guide. `content/grammar_data.py` is a dead scrape kept only as the provenance test's negative corpus. **The two big reference sets are SQLite, not JSON, and deliberately so**: `datas/vocab/vocab_jmdict.sqlite3` (212k JMdict entries, via `vocab_jmdict_data.py`) and `datas/kanji/kanji.sqlite3` (all 13,108 KANJIDIC2 characters, via `kanji_pool_data.py`). A dict held at import costs RSS on every worker for the whole process lifetime; SQLite reads only the pages a query touches. Do not "simplify" either back into a `json.load` at module scope — that is what the 512 MB Render budget cannot take. The JSON they are built from is gitignored (`backend/.gitignore`); restore the upstream export beside them and re-run `scripts/build_jmdict_db.py` / `scripts/build_kanji_db.py` to refresh.
+- `content/` — static/generated reference data (grammar points, vocab, kanji readings/meanings, frequency lists, reading sentences, the dictation bank in `listening_clips.py`) as Python modules or JSON, built/refreshed by scripts in `scripts/`. **The grammar catalogue is `content/grammar/N5.json … N1.json`** (plan 087, ADR 0016): one list per level, every text in both languages, the lesson (`steps`, `compare`, four examples) beside the gloss at the levels in `RICH_LEVELS`. Its text was drafted with an AI model and is audited by AI agents (the content audit below), never copied — no sentence from a published list — and it is held to `study/grammar_check.py`: run `python -m scripts.check_grammar --report` before every content commit. A pattern string is a card id, so a rename or a level move goes through `content/grammar/renames.py` and the migration script; `content/grammar/README.md` has the schema and the style guide. `content/grammar_data.py` is a dead scrape kept only as the provenance test's negative corpus. **The two big reference sets are SQLite, not JSON, and deliberately so**: `datas/vocab/vocab_jmdict.sqlite3` (212k JMdict entries, via `vocab_jmdict_data.py`) and `datas/kanji/kanji.sqlite3` (all 13,108 KANJIDIC2 characters, via `kanji_pool_data.py`). A dict held at import costs RSS on every worker for the whole process lifetime; SQLite reads only the pages a query touches. Do not "simplify" either back into a `json.load` at module scope — that is what the 512 MB Render budget cannot take. The JSON they are built from is gitignored (`backend/.gitignore`); restore the upstream export beside them and re-run `scripts/build_jmdict_db.py` / `scripts/build_kanji_db.py` to refresh.
 - `scripts/` — one-off data-pipeline scripts (build JMDict/frequency/theme/radical indexes, generate grammar sentences, migrate card IDs, wipe SRS data) and the database-maintenance tools below. Not part of the request path.
 - `translations/` — i18n string tables served to the frontend.
 

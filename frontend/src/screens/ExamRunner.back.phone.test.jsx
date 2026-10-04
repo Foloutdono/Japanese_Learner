@@ -58,9 +58,13 @@ describe('the exam runner, finished', () => {
     )
     await settle()
     const root = screen.container
-    root.querySelector('.mcq-row').click()
+    root.querySelector('.exam-cover__go').click()
     await settle()
-    root.querySelector('.exam-finish').click()
+    root.querySelector('.exam-tile').click()
+    await settle()
+    root.querySelector('.exam-run__sheet').click()
+    await settle()
+    document.querySelector('.exam-parts__finish').click()
     await settle(150)
     expect(submitAttempt).toHaveBeenCalledTimes(1)
 

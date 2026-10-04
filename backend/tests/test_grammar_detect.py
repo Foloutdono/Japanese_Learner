@@ -558,7 +558,7 @@ class EveryKeyTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheCatalogueIsTheMeasureTests(unittest.TestCase):
-    """The 2,169 hand-written example sentences are ground truth: each
+    """The catalogue's 2,169 example sentences are ground truth: each
     one was written to demonstrate exactly one point, and detection
     should find that point in it.
 

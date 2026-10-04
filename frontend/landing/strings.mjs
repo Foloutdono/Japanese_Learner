@@ -135,7 +135,7 @@ const fr = facts => {
         kana: { reading: 'かな', h3: 'Hiragana et katakana', body: "Son par son, chaque kana lu par une voix enregistrée. Les reconnaître d'abord, les écrire à la main ensuite : le sol sur lequel tout le reste repose.", chips: ['Hiragana', 'Katakana'], stage: 'En cours', gloss: 'a' },
         vocab: { reading: 'ごい', h3: 'Vocabulaire du JLPT', body: `Les ${n(facts.words)} mots du programme, par niveau, par fréquence ou par thème, tous glosés en français. De la forme au sens, puis du sens à la forme.`, stops: 'De N5 à N1', stage: 'Nouveau', gloss: 'train' },
         kanji: { reading: 'かんじ', h3: 'Kanji', body: `${n(facts.kanji)} caractères par niveau, avec l'ordre des traits animé. Chaque lecture, chaque sens ; les lire, puis les tracer de mémoire.`, chips: ['Ordre des traits', `${n(facts.radicals)} radicaux`], stage: 'Maîtrisé', strokes: 'エキ · 14 traits', gloss: 'gare' },
-        grammar: { reading: 'ぶんぽう', h3: 'Grammaire japonaise', body: `${n(facts.grammar)} points, de N5 à N1, dans des leçons écrites à la main : ce à quoi le point s'accroche, ce qu'il fait, ses rivaux, et des phrases qui l'emploient vraiment.`, chips: ['Leçons en français', `${n(facts.examples)} exemples`], gloss: 'Il pleut (en ce moment).' },
+        grammar: { reading: 'ぶんぽう', h3: 'Grammaire japonaise', body: `${n(facts.grammar)} points, de N5 à N1, chacun avec sa leçon : ce à quoi le point s'accroche, ce qu'il fait, ses rivaux, et des phrases qui l'emploient vraiment.`, chips: ['Leçons en français', `${n(facts.examples)} exemples`], gloss: 'Il pleut (en ce moment).' },
       },
     },
 
@@ -198,7 +198,7 @@ const fr = facts => {
         kana: { name: 'Kana', line: 'Hiragana et katakana, son par son, puis tracés du doigt.', what: "Reconnaître un kana, l'entendre, puis le tracer." },
         vocabulaire: { name: 'Vocabulaire', line: `${n(facts.words)} mots du JLPT, glosés en français, dans les deux sens.`, what: 'Une carte retournée, notée, et la suivante qui arrive.' },
         kanji: { name: 'Kanji', line: "L'ordre des traits animé, puis le kanji tracé de mémoire.", what: 'Le tracé animé, puis le kanji écrit de mémoire.' },
-        grammaire: { name: 'Grammaire', line: 'Une leçon écrite à la main, puis la phrase à compléter.', what: "La leçon d'un point, puis la phrase qui l'emploie." },
+        grammaire: { name: 'Grammaire', line: 'Une leçon par point, puis la phrase à compléter.', what: "La leçon d'un point, puis la phrase qui l'emploie." },
         pratique: { name: 'Lecture et dictée', line: 'De vraies phrases à lire, à écouter et à écrire, à ton niveau.', what: 'Une phrase lue, une phrase entendue, chacune vérifiée.' },
         analyseur: { name: 'Analyseur', line: 'Une vidéo YouTube, une photo ou un texte, décortiqués mot à mot.', what: 'Un sous-titre YouTube découpé, sa grammaire numérotée.' },
         examen: { name: 'Examen blanc', line: 'Une épreuve au format du JLPT, chronométrée et notée sur 180.', what: 'Une épreuve chronométrée, puis la note et la correction.' },
@@ -245,7 +245,7 @@ const fr = facts => {
       body: "Toutes les lignes, tous les exercices, l'analyseur et le dictionnaire, ouverts à tous. Un abonnement viendra plus tard pour réviser sans compter ; les kana resteront toujours gratuits.",
       promises: [
         ['Sans publicité, sans traqueur', 'Aucune revente de données. Nos statistiques ne contiennent jamais ce que tu tapes.'],
-        ['Des leçons écrites à la main', 'La grammaire est rédigée et relue, jamais générée. Chaque exemple est vérifié.'],
+        ['Une grammaire passée au crible', "Rédigée avec l'IA, puis relue en continu par des agents IA qui y traquent les erreurs. Chaque exemple est vérifié."],
         ['Tout se lit à voix haute', 'Les kana par une voix humaine enregistrée, le reste par une voix japonaise de synthèse.'],
         ["Tes données t'appartiennent", 'Exporte ta progression en CSV, supprime ton compte en deux gestes.'],
       ],
@@ -382,7 +382,7 @@ const en = facts => {
         kana: { reading: 'かな', h3: 'Hiragana and katakana', body: 'Sound by sound, every kana read by a recorded voice. Recognise them first, then write them by hand: the ground everything else stands on.', chips: ['Hiragana', 'Katakana'], stage: 'Learning', gloss: 'a' },
         vocab: { reading: 'ごい', h3: 'JLPT vocabulary', body: `All ${n(facts.words)} words of the syllabus, by level, by frequency or by theme, each glossed in English and French. From the form to the meaning, then back.`, stops: 'N5 to N1', stage: 'New', gloss: 'train' },
         kanji: { reading: 'かんじ', h3: 'Kanji', body: `${n(facts.kanji)} characters by level, with animated stroke order. Every reading, every meaning; read them, then write them from memory.`, chips: ['Stroke order', `${n(facts.radicals)} radicals`], stage: 'Mastered', strokes: 'エキ · 14 strokes', gloss: 'station' },
-        grammar: { reading: 'ぶんぽう', h3: 'Japanese grammar', body: `${n(facts.grammar)} points, N5 to N1, in hand-written lessons: what the point attaches to, what it does, its rivals, and sentences that really use it.`, chips: ['Lessons in English', `${n(facts.examples)} examples`], gloss: "It's raining (right now)." },
+        grammar: { reading: 'ぶんぽう', h3: 'Japanese grammar', body: `${n(facts.grammar)} points, N5 to N1, each with its lesson: what the point attaches to, what it does, its rivals, and sentences that really use it.`, chips: ['Lessons in English', `${n(facts.examples)} examples`], gloss: "It's raining (right now)." },
       },
     },
 
@@ -445,7 +445,7 @@ const en = facts => {
         kana: { name: 'Kana', line: 'Hiragana and katakana, sound by sound, then traced with a finger.', what: 'Recognise a kana, hear it, then trace it.' },
         vocabulaire: { name: 'Vocabulary', line: `${n(facts.words)} JLPT words, glossed, in both directions.`, what: 'A card flipped, rated, and the next one arriving.' },
         kanji: { name: 'Kanji', line: 'Animated stroke order, then the kanji written from memory.', what: 'The strokes animated, then the kanji written from memory.' },
-        grammaire: { name: 'Grammar', line: 'A hand-written lesson, then the sentence to complete.', what: 'The lesson for a point, then the sentence that uses it.' },
+        grammaire: { name: 'Grammar', line: 'A lesson per point, then the sentence to complete.', what: 'The lesson for a point, then the sentence that uses it.' },
         pratique: { name: 'Reading and dictation', line: 'Real sentences to read, hear and write, at your level.', what: 'A sentence read, a sentence heard, each one checked.' },
         analyseur: { name: 'Analyser', line: 'A YouTube video, a photo or a text, taken apart word by word.', what: 'A YouTube subtitle taken apart, its grammar numbered.' },
         examen: { name: 'Mock exam', line: 'A paper in the JLPT format, timed and scored out of 180.', what: 'A timed paper, then the score and the answers.' },
@@ -492,7 +492,7 @@ const en = facts => {
       body: 'Every line, every exercise, the analyser and the dictionary, open to all. A subscription will come later for unlimited reviews; the kana will always stay free.',
       promises: [
         ['No ads, no trackers', 'No sale of data. Our statistics never contain what you type.'],
-        ['Hand-written lessons', 'The grammar is written and reviewed, never generated. Every example is checked.'],
+        ['Grammar under constant review', 'Drafted with AI, then reviewed continually by AI agents that hunt for its errors. Every example is checked.'],
         ['Everything read aloud', 'The kana by a recorded human voice, the rest by a synthesised Japanese voice.'],
         ['Your data is yours', 'Export your progress as CSV, delete your account in two taps.'],
       ],

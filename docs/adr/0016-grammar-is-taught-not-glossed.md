@@ -16,8 +16,15 @@ map. And there was no lesson surface: `/learn/grammar` went level → mode →
 flashcards.
 
 The runtime LLM is free-tier and the project had already ruled that grammar
-examples are authored, not generated. So the fix is content written into the
-repo and held to gates in code, plus the surfaces to show it.
+examples are written into the repo, not generated per request. So the fix is
+content written into the repo and held to gates in code, plus the surfaces to
+show it.
+
+*Corrected 2026-10-01: this record first said the examples were "authored,
+not generated", which read as written by hand. The catalogue's text was
+drafted with an AI model, is held to the gates below and is audited since by
+AI agents looking for its errors (`docs/content-audit/PLAYBOOK.md`). What it
+is not is generated at request time.*
 
 ## Decision
 

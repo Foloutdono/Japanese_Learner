@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 import { DARK, LIGHT, SCALE, FONTS, block } from './tokens.mjs'
 import {
-  SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, STORES, CONTACT,
+  SITE_ORIGIN, PAGES, DEFAULT_LANG, APP_ENTRY, BOARD_ENTRY, STORES, CONTACT,
   PRESENTATION, CLIPS, RHYTHMS, DEFAULT_RHYTHM, sessionKey,
 } from './config.mjs'
 import { LEVELS, EXAM_N5, arrivals, spanOf, kanjiStrokes } from './content.mjs'
@@ -58,7 +58,7 @@ function badge(t, store) {
 const badges = t => `<div class="badges">${badge(t, 'appStore')}${badge(t, 'googlePlay')}</div>`
 
 function gate(t, cls = '') {
-  return `<a class="gate ${cls}" href="${APP_ENTRY}" data-board aria-label="${esc(typo(t.lang, t.boardAria))}">`
+  return `<a class="gate ${cls}" href="${BOARD_ENTRY}" data-board aria-label="${esc(typo(t.lang, t.boardAria))}">`
     + '<span class="gate__reader" aria-hidden="true"><i class="gate__rip"></i><i class="gate__rip"></i><span class="wave"><i></i><i></i><i></i></span></span>'
     + `<span class="gate__word">${esc(t.board)}</span></a>`
 }
@@ -159,7 +159,7 @@ function header(t, other) {
     + `<a class="top__other" href="${PAGES[other].path}" hreflang="${other}" lang="${other}">${other.toUpperCase()}</a>`
     + `<a class="ghost top__signin" href="${APP_ENTRY}" data-board>${esc(t.signIn)}</a>`
     // The way in, kept in reach once the hero's gate has scrolled away.
-    + `<a class="top__board" href="${APP_ENTRY}" data-board data-top-board tabindex="-1" aria-hidden="true">${esc(t.board)}</a></div>`
+    + `<a class="top__board" href="${BOARD_ENTRY}" data-board data-top-board tabindex="-1" aria-hidden="true">${esc(t.board)}</a></div>`
     + '</div></header>'
 }
 
@@ -464,7 +464,7 @@ function pass(t, facts) {
   return `<section class="sec way" id="${t.ids.way}" aria-labelledby="way-h">${stop(t, 'way')}<div class="wrap split split--way">`
     + `<div class="split__copy" data-stagger><h2 class="h2 way__h" id="way-h">${esc(typo(t.lang, P.h2))}</h2><p class="body">${esc(typo(t.lang, P.body))}</p>`
     + `<div class="way__field"><label class="capxs" for="pass-name">${esc(P.nameLabel)}</label><input id="pass-name" class="field" type="text" name="given-name" autocomplete="given-name" maxlength="24" placeholder="${esc(P.name)}" data-pass-input></div>`
-    + `<div class="way__gate">${gate(t)}<span class="road road--end" aria-hidden="true"></span></div>${badges(t)}</div>`
+    + `<div class="way__gate">${gate(t)}</div>${badges(t)}</div>`
     + `<div class="way__pass" data-reveal data-tilt><div class="pass" role="img" aria-label="${esc(P.aria)}">`
     + '<span class="pass__edge" aria-hidden="true"></span>'
     + `<div class="pass__top"><span class="pass__brand">${mark(22)}<span class="pass__lbl pass__lbl--on">Tsuji</span><span class="pass__kind" lang="ja">定期券</span></span><span class="pwave" aria-hidden="true"><i></i><i></i><i></i></span></div>`

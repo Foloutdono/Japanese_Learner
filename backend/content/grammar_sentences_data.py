@@ -9,7 +9,8 @@ the translation hidden until asked for), fill_in (a sentence shown
 intact, name the rule) and contrast (a sentence with the pattern blanked,
 pick it from among its rivals).
 
-Every sentence is authored, not generated, and passes
+Every sentence was drafted with an AI model and is stored here rather
+than generated per request, and passes
 study/grammar_sentence_gen.check_sentence -- see content/grammar/README.md
 and tests/test_grammar_sentences.py. The generator in
 study/grammar_sentence_gen.py is kept for drafting.
