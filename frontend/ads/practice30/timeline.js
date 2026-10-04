@@ -33,7 +33,7 @@
     reading: { type: [0.45, 1.25], check: 1.4, rows: 1.6 },
     rikai: { mark: [0.6, 0.95], pick: 1.35 },
     honyaku: { type: [0.4, 1.1], convert: 1.2, ok: 1.38, tutor: 1.58 },
-    kakitori: { play: 0.3, wave: [0.35, 1.25], type: [0.9, 1.6], check: 1.72, answer: 1.84 },
+    kakitori: { play: 0.3, wave: [0.35, 1.7], type: [0.9, 1.6], check: 1.72, answer: 1.84 },
     sakubun: { type: [0.35, 1.0], convert: 1.1, found: 1.3, tutor: 1.55 },
     exam: { clock: [0.2, 1.6], pick: 1.0, flip: [1.6, 1.9], count: [1.95, 2.7], stamp: 2.85 },
   }
