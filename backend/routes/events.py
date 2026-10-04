@@ -37,7 +37,10 @@ class Event(BaseModel):
 
 
 class Batch(BaseModel):
-    events: list[Event] = Field(default_factory=list)
+    # Only MAX_BATCH rows are kept, but the body is parsed whole first, so
+    # it is bounded here too -- generously, well past what lib/track.js
+    # sends in one flush, so an honest client is never refused a batch.
+    events: list[Event] = Field(default_factory=list, max_length=4 * events.MAX_BATCH)
 
 
 @router.post("/api/events", status_code=202)
@@ -56,18 +59,23 @@ def post_events(batch: Batch, user_id: str = Depends(get_user_id)):
     if not rows:
         return {"kept": 0}
 
-    conn = db_conn()
+    conn = None
     try:
+        # Inside the try: a pool that is exhausted or a database that is
+        # down is the same swallowed failure as a write that fails.
+        conn = db_conn()
         with conn.cursor() as cur:
             kept = events.write(cur, user_id, rows)
         conn.commit()
     except Exception:
-        conn.rollback()
+        if conn is not None:
+            conn.rollback()
         # Swallowed on purpose: the client has already moved on, and a
         # 500 here would make lib/track.js retry a batch that will fail
         # again the same way.
         logger.exception("events: batch of %d could not be written", len(rows))
         return {"kept": 0}
     finally:
-        conn.close()
+        if conn is not None:
+            conn.close()
     return {"kept": kept}

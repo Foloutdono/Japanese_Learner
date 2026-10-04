@@ -42,6 +42,9 @@ export function seedVolumes(data) {
  */
 export function forgetJourney() {
   store.forget()
+  // The status sheet open over the last learner's journey is not the
+  // next one's (stores/credits does the same for its sheet).
+  closeStatus()
 }
 
 // ── 運行状況の裏 — the status sheet (plan 074) ────────────────

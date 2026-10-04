@@ -71,8 +71,16 @@ export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
   function use() {
     const [state, setState] = useState(() => ({ data: cache, failed, at: cacheAt || seededAt }))
     useEffect(() => {
-      const sync = () => setState({ data: cache, failed, at: cacheAt || seededAt })
+      const sync = () => setState(prev => (
+        prev.data === cache && prev.failed === failed && prev.at === (cacheAt || seededAt)
+          ? prev
+          : { data: cache, failed, at: cacheAt || seededAt }
+      ))
       listeners.add(sync)
+      // An answer that landed between the first render and this effect
+      // notified nobody: take it now, or a fresh cache would keep this
+      // consumer on its first render's null until the next answer.
+      sync()
       if (!cache || Date.now() - cacheAt >= ttlMs) fetchOnce()
       return () => { listeners.delete(sync) }
     }, [])

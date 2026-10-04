@@ -45,7 +45,7 @@ export async function startGuest() {
       // Supabase names the disabled provider in `code`; older
       // deployments only say it in the message, so both are read.
       const disabled = error.code === 'anonymous_provider_disabled'
-        || /anonymous/i.test(error.message ?? '')
+        || /anonymous sign-?ins are disabled/i.test(error.message ?? '')
       return disabled
         ? { ok: false, unavailable: true }
         : { ok: false, message: error.message }
