@@ -12717,7 +12717,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: grid;
   justify-items: center;
   gap: var(--sp-1);
-  min-width: 4em;
+  /* One track for every bar: a bar as wide as its reading's text made
+     い.きる and なま, both 7.3 %, two different lengths. The item is as
+     wide as the track so the readings keep one rhythm. */
+  --share-track: calc(var(--sp-8) * 3);
+  min-width: var(--share-track);
 }
 .reading-share__text {
   font-family: var(--reading-font, inherit);
@@ -12740,7 +12744,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .reading-share--core .reading-share__pct { color: var(--sel-ink); }
 .reading-share__bar {
-  width: 100%;
+  width: var(--share-track, 100%);
   height: var(--sp-1);
   border-radius: var(--r-pill);
   background: var(--surface-line);
@@ -12752,13 +12756,20 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   border-radius: var(--r-pill);
   background: var(--line-color, var(--accent2));
 }
-.reading-shares--ranked { gap: 0; }
+/* The rows share one set of columns (a subgrid), so every bar starts at
+   the same place and is the same length: a row sizing its own columns
+   made the bars of two equal shares unequal. */
+.reading-shares--ranked {
+  display: grid;
+  grid-template-columns: var(--sp-6) auto minmax(0, 1fr) 4.2em;
+  justify-items: stretch;
+  gap: 0 var(--sp-4);
+}
 .reading-share-row {
   display: grid;
-  grid-template-columns: var(--sp-6) minmax(4.5em, auto) minmax(0, 1fr) 4.2em;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
-  gap: var(--sp-4);
-  width: 100%;
   padding: var(--sp-3) 0;
   border-top: 1px solid var(--surface-line);
 }
@@ -12769,7 +12780,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
 }
 .reading-share-row .reading-share__pct { text-align: right; font-size: var(--fs-lead); }
-.reading-shares--ranked .reading-group__more { margin-top: var(--sp-3); }
+.reading-shares--ranked .reading-group__more { grid-column: 1 / -1; justify-self: center; margin-top: var(--sp-3); }
 
 .meaning-display {
   text-align: left;
