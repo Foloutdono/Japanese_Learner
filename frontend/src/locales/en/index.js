@@ -674,6 +674,12 @@ const stats = {
   learningUnit:       'in progress',
   sourceTiers:        n => `${n} tiers`,
   sourceThemes:       n => `${n} themes`,
+  // The vocabulary's sources on the desk (plan 180): the strip of what
+  // the learner has started, over the three sources.
+  sourcesInProgress:  'In progress',
+  sourcesResume:      'Resume',
+  unseenNote:         n => `${n} never seen`,
+  tierWords:          range => `Words ${range}`,
   // The origin of every Learn line: where you stand before a level is
   // finished (domain/lineProgress.js's ORIGIN_STOP).
   originStop:         'Novice',

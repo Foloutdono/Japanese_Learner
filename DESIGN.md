@@ -1509,15 +1509,24 @@ each question drawing its answers between them.
   and the grammar level's **points**, which open rather than board, are
   doors at the page's foot, one row. The bar names no level: the open
   stop does.
-- **Vocabulary's sources are three plates** (plan 137, the owner's pick
-  S2). /learn/vocab was three cards across the top of an empty window,
-  each opening a list of its own. Each source now hangs as a plate the
-  window's height (the gates' plate, `--elev-hang`) with its whole list
-  on it — JLPT's five levels as a line sharing the plate, the frequency
-  tiers under their pool and size with the cards met in each, the
-  themes under their filter — and every row is a link that pushes to
-  its stop's platforms. The lists scroll inside their plates, never the
-  page. The phone keeps its three cards.
+- **Vocabulary's sources open on what you started** (plan 180, the
+  owner's pick C of the canvas "Tsuji — the vocabulary's sources"; plan
+  137 had hung the three sources as equal plates, and on a real window
+  the five levels shared 800px while the 41 tiers and the 36 themes
+  scrolled beside them). A strip comes first: the learner's own level,
+  wider, with its bar, its first words, what is met and never seen,
+  and the gate button that resumes it on its first platform; then the
+  other stops with the most cards met — another level or a tier of the
+  deck's ranking — each a door to its platforms, as many as the page
+  is wide for (four, three or two, measured). Under it the three
+  sources as plates (the gates' plate, `--elev-hang`): JLPT's five
+  levels as a line with a bar on each, the tiers under their pool and
+  size as a grid of numbered cells (a cell's border lit and its foot
+  filled where cards are met, its name and count in its label), the
+  themes under their filter in as many columns as hold a name. Every
+  door pushes; the grids scroll inside their plates, never the page.
+  The short desk drops the strip's words. The phone keeps its three
+  cards. The kanji's sources keep plan 137's plates.
 - **A practice station takes the window** (plan 159, the owner's picks A
   and S1 of the canvas "Practice screens — layout options"). Reading and
   translation opened on three source cards across the top of an empty

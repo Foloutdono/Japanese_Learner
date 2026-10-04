@@ -653,6 +653,12 @@ const stats = {
   learningUnit:       'en cours',
   sourceTiers:        n => `${n} paliers`,
   sourceThemes:       n => `${n} thèmes`,
+  // Les sources du vocabulaire sur le bureau (plan 180) : la bande de ce
+  // que l'apprenant a commencé, au-dessus des trois sources.
+  sourcesInProgress:  'En cours',
+  sourcesResume:      'Reprendre',
+  unseenNote:         n => `${n} jamais vues`,
+  tierWords:          range => `Mots ${range}`,
   originStop:         'Débutant',
   stageGate:          'Portique',
   nothingGraded:      'Rien n’est noté',
