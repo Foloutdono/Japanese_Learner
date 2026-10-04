@@ -1368,6 +1368,20 @@ const dictionary = {
   kanaExamples:      'Read in these words',
   allReadings:       'All readings',
   readingsNoWords:   'No example words yet',
+  // 割合 (plan 177): the share of the words that use each reading.
+  readingsScopeLabel:  'Scope of the count',
+  readingsScopeCourse: 'JLPT course',
+  readingsScopeAll:    'All JMdict',
+  readingsScopeHintCourse: (n) => `Share of the course's ${n} words that use each reading.`,
+  readingsScopeHintAll:    (n) => `Share of JMdict's ${n} words that use each reading.`,
+  readingsTier:      { core: 'Common', usual: 'Usual', rare: 'Rare' },
+  readingsOfWords:   (n, total) => `${n} of ${total.toLocaleString('en-US')} word${total > 1 ? 's' : ''}`,
+  readingsWholeShare: 'Word read as a whole',
+  readingsShareLoading: 'Counting…',
+  readingsShareError:   'The count could not be loaded.',
+  readingsCourseEmpty:  (kanji) => `No word in the JLPT course uses ${kanji}.`,
+  readingsCourseEmptyBody: 'The course count is empty. The full dictionary has words with this kanji.',
+  readingsCountAll:  'Count over all of JMdict',
   // The two gates on the readings sheet. The Japanese half is the
   // heading and the plain-language half its caption (DESIGN.md, "Every
   // name is a pair") — never "ON'YOMI", which is the Japanese written

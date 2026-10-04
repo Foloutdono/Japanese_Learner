@@ -1157,7 +1157,7 @@ class SRSEngine:
         """Practice answers per day for the last `days` days (oldest
         first): the reading, translation, dictation, composition and
         comprehension answers and the mock-exam papers that were graded
-        without scheduling a card (plan 177).
+        without scheduling a card (plan 178).
 
         They are xp_ledger rows -- award_practice writes one per graded
         answer -- and never review_log rows, so get_daily_review_counts
@@ -1183,7 +1183,7 @@ class SRSEngine:
         return [{"date": day.isoformat(), "count": int(count)} for day, count in rows]
 
     def _studied_days(self, user_id: str) -> set:
-        """Every day this user showed up -- a card review, or (plan 177)
+        """Every day this user showed up -- a card review, or (plan 178)
         a graded practice answer -- which is what "showed up" means for
         streak purposes."""
         pattern = self._user_prefix_pattern(user_id)

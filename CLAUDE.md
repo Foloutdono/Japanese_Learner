@@ -1333,7 +1333,41 @@ runtime purpose. Two consequences worth knowing:
   retired in `content/vocab_renames.py`'s `RETIRED`, the common word each
   spells keeping its own card. The tag test misses a word that is current
   but names an outdated thing (テープレコーダー); those are not removed.
-  **177** is 連, the streak in the practice modes: the daily streak and
+  **177** is 数と全語, numbers read and every reading shown a word: an
+  Arabic numeral now carries furigana (100 ひゃく, 300 さんびゃく, 1,000
+  せん, 3.5 さんてんご), made in `study/reading_context.py`
+  (`read_number`, `numeral_furigana`) because the tokenizer reads a digit
+  as itself, and changed the way the counter after it changes it through
+  the same table the kanji numerals use (1本 いっぽん, 3日 みっか, 4時 よじ,
+  7月 しちがつ, 1人 ひとり, 3つ みっつ, 3月1日 の 1日 ついたち) and set as one
+  ruby with the counter (`study/furigana.py`'s `align_sentence`); times,
+  dates, ranges, codes and a number beside a Latin letter stay bare, and
+  the tokenizer's own readings are untouched. And a kanji's readings the
+  deck has no word for (桃 もも) are topped up from the JMdict pool,
+  commonest first, behind the deck's words and with no level
+  (`study/kanji_words.py`, `content/vocab_jmdict_data.by_kanji_char` over
+  a character index folded from the pool in one pass, ~2 MB), and a word
+  files under the reading whose okurigana it writes (生かす under い.かす,
+  not the first い.*). Each reading on the readings sheet then prints the
+  share of the words that use it (割合), counted over the JLPT course by
+  default (`reading_shares` on every kanji entry) or over all of JMdict
+  on request (`GET /api/dictionary/readings-share`, aligned on demand and
+  cached), the readings in that order with a word for it (common from
+  20 %, usual from 5 %), the scope kept on the device
+  (`domain/readingShare.js`, `ReadingsByShare` in
+  `components/dictionary/DictionaryDetail.jsx`); and the kanji study card
+  prints its four most used readings with their course share under each
+  (the owner's pick A of two drawn layouts, without the bars: `ReadingShares`
+  in `components/study/Readings.jsx`, `topReadings`, and `reading_shares`
+  on every kanji card from `study/kanji_words.course_shares`) (cited in
+  `study/reading_context.py`, `study/furigana.py`, `study/kanji_words.py`,
+  `content/vocab_jmdict_data.py`, `routes/dictionary.py`,
+  `domain/readingShare.js`, `tests/test_furigana_context.py`,
+  `tests/test_kanji_words.py`, `tests/test_dictionary_kanji.py`,
+  `DictionaryDetail.browser.test.jsx`, `routes/kanji.py`,
+  `components/study/ReadingShares.browser.test.jsx`,
+  `tests/test_kanji_card_shares.py` and `index.css`).
+  **178** is 連, the streak in the practice modes: the daily streak and
   the stamp book counted card reviews only (`review_log`), so a day spent
   on reading, translation, dictation, composition, comprehension or the
   mock exam -- which pay a fare in `xp_ledger` and schedule no card --

@@ -1,4 +1,4 @@
-"""連続 — the daily streak counts the practice modes (plan 177).
+"""連続 — the daily streak counts the practice modes (plan 178).
 
 A graded reading sentence, translation, dictation line, composition,
 comprehension text or mock-exam paper that schedules no card pays its

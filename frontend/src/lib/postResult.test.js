@@ -17,7 +17,7 @@ const post = () => {
   return vi.runAllTimersAsync().then(() => done)
 }
 
-describe('postResult (plan 177)', () => {
+describe('postResult (plan 178)', () => {
   it('is saved on the first answer, with its body', async () => {
     apiFetch.mockResolvedValueOnce(reply(200, { xp_earned: 7 }))
     expect(await post()).toEqual({ saved: true, data: { xp_earned: 7 } })

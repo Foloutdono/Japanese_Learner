@@ -460,7 +460,7 @@ def _with_practice(reviews: list[dict], practice: list[dict]) -> list[dict]:
 
     `count` stays the card reviews of the day, as it always was; `practice`
     is the graded sentences, texts and papers of the practice modes (plan
-    177), which schedule no card and so never reached `count`. A day is
+    178), which schedule no card and so never reached `count`. A day is
     stamped when either is above zero -- the streak counts it the same way
     (srs._studied_days) -- so the book and the number cannot disagree."""
     days: dict[str, dict] = {d["date"]: {"date": d["date"], "count": d["count"], "practice": 0} for d in reviews}

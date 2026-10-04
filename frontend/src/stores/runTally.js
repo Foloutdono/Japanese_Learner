@@ -34,7 +34,7 @@ import { useSyncExternalStore } from 'react'
 // its verdict's ink. Unlike `cards` it keeps a card rated twice twice:
 // the meter counts ratings, as the run's length does.
 //
-// `streak` / `best` (plan 177): the answers in a row rated good or better
+// `streak` / `best` (plan 178): the answers in a row rated good or better
 // at this moment, and the longest such run this run has had. Counted from
 // the rating alone, so a mode needs to say nothing more than it already
 // does -- the five practice runs show it as the stamp in their head

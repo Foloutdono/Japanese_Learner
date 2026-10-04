@@ -71,7 +71,7 @@ describe('the run\'s misses (plan 115)', () => {
   })
 })
 
-describe('a run\'s streak (plan 177)', () => {
+describe('a run\'s streak (plan 178)', () => {
   it('counts the answers in a row rated good or better, and keeps the best', () => {
     startTally('reading:level:N5')
     expect(peekTally()).toMatchObject({ streak: 0, best: 0 })

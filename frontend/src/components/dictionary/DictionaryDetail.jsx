@@ -5,6 +5,11 @@ import { shortDate } from '../../lib/formatDate'
 import { useLang } from '../../LangContext'
 import { cachedLookup, fetchLookup, pickEntry } from '../../lib/dictionaryLookup'
 import { api } from '../../lib/origin'
+import { apiJson } from '../../lib/api'
+import { Seg } from '../chrome/Console'
+import {
+  SCOPE_ALL, SCOPE_COURSE, formatPct, readingRows,
+} from '../../domain/readingShare'
 import { FuriganaParts, splitReadingTokens } from '../study/Readings'
 import { joinRuns } from '../../domain/rubyRuns'
 import { ExampleSentence, SenseNumeral } from './ExampleSentence'
@@ -505,16 +510,35 @@ function ReadingGate({ name, n, open, onPick }) {
 // thing in its own group. GROUND is what separates them now, which is
 // what lets the rows keep their own gold: sumi against surface is not
 // a distinction the rows can dilute, the way a shared rung was.
-function ReadingBand({ reading, words, kind, char, onWord }) {
+function ReadingBand({ reading, words, kind, char, onWord, share, total }) {
+  const { t, lang } = useLang()
   return (
     <section className="dict-rd" aria-label={reading}>
       <h2 className="dict-rd__head">
         <span className="dict-rd__kind" aria-hidden="true">{kind}</span>
         <span className="dict-rd__yomi" lang="ja">{reading}</span>
+        {share && (
+          <span className="dict-rd__pct">
+            {formatPct(share.pct, lang)}<span className="dict-rd__pct-unit">%</span>
+          </span>
+        )}
       </h2>
-      <div className="dict-words">
-        {words.map((w, i) => <WordRow key={i} w={w} char={char} onClick={onWord} />)}
-      </div>
+      {share && (
+        <div className="dict-share">
+          <div className="dict-share__bar" role="img" aria-label={`${formatPct(share.pct, lang)} %`}>
+            <i style={{ width: `${Math.max(share.pct, 0.8)}%` }} />
+          </div>
+          <div className="dict-share__meta">
+            <span className={`dict-share__tier dict-share__tier--${share.tier}`}>{t.readingsTier[share.tier]}</span>
+            <span>{t.readingsOfWords(share.n, total)}</span>
+          </div>
+        </div>
+      )}
+      {words.length > 0 && (
+        <div className="dict-words">
+          {words.map((w, i) => <WordRow key={i} w={w} char={char} onClick={onWord} />)}
+        </div>
+      )}
     </section>
   )
 }
@@ -596,6 +620,160 @@ function ReadingsInPlace({ entry, groups, onClose, onVocabClick }) {
   )
 }
 
+// ── 割合 — which readings are worth the time (plan 177) ──────────
+// Each reading prints the share of the words that use it, counted over
+// the JLPT course the app teaches by default (the entry carries it:
+// `reading_shares`) or over all of JMdict on request, and the list is in
+// that order: the reading a learner meets most is the first they see. The
+// course is the default because it is what following the levels will put
+// in front of them; the whole dictionary is for the kanji the course
+// hardly shows (桃 has no word in it at all). The choice is remembered on
+// the device. An entry that carries no counts (an older cached answer, a
+// fixture) keeps the list it always had.
+const SCOPE_KEY = 'tsuji.readingsScope'
+
+function loadScope() {
+  try {
+    return localStorage.getItem(SCOPE_KEY) === SCOPE_ALL ? SCOPE_ALL : SCOPE_COURSE
+  } catch {
+    return SCOPE_COURSE
+  }
+}
+
+function saveScope(scope) {
+  try { localStorage.setItem(SCOPE_KEY, scope) } catch { /* private window: the choice lasts the sheet */ }
+}
+
+// The counts over all of JMdict are a character's, not a learner's, so
+// they are kept for the page's life and asked for once.
+const allSharesCache = new Map()
+
+function useAllShares(char, active) {
+  const [failed, setFailed] = useState(null)
+  const [, bump] = useState(0)
+  const cached = allSharesCache.get(char) ?? null
+  useEffect(() => {
+    if (!active || cached) return undefined
+    let cancelled = false
+    apiJson(`/api/dictionary/readings-share?char=${encodeURIComponent(char)}`, null)
+      .then(data => {
+        allSharesCache.set(char, data)
+        if (!cancelled) bump(n => n + 1)
+      })
+      .catch(() => { if (!cancelled) setFailed(char) })
+    return () => { cancelled = true }
+  }, [char, active, cached])
+  return { data: cached, failed: !cached && failed === char }
+}
+
+function ReadingsByShare({ entry, groups, onClose, jump }) {
+  const { t, lang } = useLang()
+  const [scope, setScope] = useState(loadScope)
+  const pick = next => { setScope(next); saveScope(next) }
+  const all = useAllShares(entry.kanji, scope === SCOPE_ALL)
+  const shares = scope === SCOPE_ALL ? all.data : entry.reading_shares
+  const { rows, idle, whole, total } = useMemo(
+    () => readingRows(groups, shares, scope), [groups, shares, scope],
+  )
+  const onRows = rows.filter(r => isOnyomiToken(r.reading))
+  const kunRows = rows.filter(r => !isOnyomiToken(r.reading))
+  const bothRegisters = groups.some(g => isOnyomiToken(g.reading)) && groups.some(g => !isOnyomiToken(g.reading))
+  const [gate, setGate] = useState(() => (
+    groups.every(g => isOnyomiToken(g.reading)) || isOnyomiToken(groups[0]?.reading) ? 'on' : 'kun'
+  ))
+  // A register with nothing to show in this scope gives way to the other.
+  const openOn = gate === 'on' ? (onRows.length > 0 || kunRows.length === 0) : kunRows.length === 0
+  const shown = openOn ? onRows : kunRows
+  const pills = idle.filter(r => isOnyomiToken(r) === openOn)
+  const hint = shares
+    ? (scope === SCOPE_ALL ? t.readingsScopeHintAll : t.readingsScopeHintCourse)(total.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US'))
+    : ''
+  const courseEmpty = scope === SCOPE_COURSE && total === 0
+  return (
+    <>
+      <div className="dict-scope">
+        <Seg
+          full
+          label={t.readingsScopeLabel}
+          value={scope}
+          onChange={pick}
+          options={[
+            { key: SCOPE_COURSE, label: t.readingsScopeCourse },
+            { key: SCOPE_ALL, label: t.readingsScopeAll },
+          ]}
+        />
+        {hint && <p className="dict-scope__hint">{hint}</p>}
+      </div>
+      {scope === SCOPE_ALL && !shares && (
+        <p className="dict-scope__wait" role="status">
+          {all.failed ? t.readingsShareError : t.readingsShareLoading}
+        </p>
+      )}
+      {courseEmpty && (
+        <section className="dict-scope__empty">
+          <strong>{t.readingsCourseEmpty(entry.kanji)}</strong>
+          <p>{t.readingsCourseEmptyBody}</p>
+          <button type="button" className="btn-secondary" onClick={() => pick(SCOPE_ALL)}>
+            {t.readingsCountAll}
+          </button>
+        </section>
+      )}
+      {!courseEmpty && shares && bothRegisters && (
+        <div className="dict-gates">
+          <ReadingGate name={t.readingsOnName} n={onRows.length} open={openOn} onPick={() => setGate('on')} />
+          <ReadingGate name={t.readingsKunName} n={kunRows.length} open={!openOn} onPick={() => setGate('kun')} />
+        </div>
+      )}
+      {!courseEmpty && shares && (
+        <div className="dict-entry__body dict-readings"
+             aria-label={openOn ? t.readingsOnName : t.readingsKunName}>
+          {shown.map(row => (
+            <ReadingBand
+              key={row.reading} reading={row.reading} words={row.words}
+              kind={openOn ? '音' : '訓'} char={entry.kanji} onWord={jump}
+              share={row} total={total}
+            />
+          ))}
+          {whole && (
+            <div className="dict-whole">
+              <span>{t.readingsWholeShare}</span>
+              <span className="dict-whole__pct">{formatPct(whole.pct, lang)} %</span>
+            </div>
+          )}
+          {pills.length > 0 && <ReadingPills readings={pills} />}
+          <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
+            {t.close}
+          </button>
+        </div>
+      )}
+      {courseEmpty && (
+        <div className="dict-entry__body dict-readings">
+          <ReadingPills readings={groups.map(g => g.reading)} />
+          <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
+            {t.close}
+          </button>
+        </div>
+      )}
+    </>
+  )
+}
+
+// The readings no word demonstrates, as pills under a caption that says
+// what they are.
+function ReadingPills({ readings }) {
+  const { t } = useLang()
+  return (
+    <section className="dict-rest" aria-label={t.readingsNoWords}>
+      <div className="dict-rest__cap">{t.readingsNoWords}</div>
+      <ul className="dict-rest__chips">
+        {readings.map(reading => (
+          <li key={reading} className="dict-rest__chip" lang="ja">{reading}</li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 // The list itself — the plate's head, the gates, the bands and the
 // pills — shared by the sheet and the list in place.
 function ReadingsList({ entry, groups, onClose, onVocabClick }) {
@@ -616,6 +794,7 @@ function ReadingsList({ entry, groups, onClose, onVocabClick }) {
   const kind = open === on ? '音' : '訓'
   const withWords = open.filter(g => g.words?.length > 0)
   const rest = open.filter(g => !g.words?.length)
+  const byShare = Boolean(entry.reading_shares)
   return (
     <article className="dict-entry">
       <header className="dict-plate">
@@ -640,7 +819,8 @@ function ReadingsList({ entry, groups, onClose, onVocabClick }) {
         </div>
         <div className="dict-plate__stripe" aria-hidden="true" />
       </header>
-      {on.length > 0 && kun.length > 0 && (
+      {byShare && <ReadingsByShare entry={entry} groups={groups} onClose={onClose} jump={jump} />}
+      {!byShare && on.length > 0 && kun.length > 0 && (
         <div className="dict-gates">
           <ReadingGate
             name={t.readingsOnName} n={on.length}
@@ -652,28 +832,21 @@ function ReadingsList({ entry, groups, onClose, onVocabClick }) {
           />
         </div>
       )}
-      <div className="dict-entry__body dict-readings"
-           aria-label={open === on ? t.readingsOnName : t.readingsKunName}>
-        {withWords.map(({ reading, words }) => (
-          <ReadingBand
-            key={reading} reading={reading} words={words}
-            kind={kind} char={entry.kanji} onWord={jump}
-          />
-        ))}
-        {rest.length > 0 && (
-          <section className="dict-rest" aria-label={t.readingsNoWords}>
-            <div className="dict-rest__cap">{t.readingsNoWords}</div>
-            <ul className="dict-rest__chips">
-              {rest.map(({ reading }) => (
-                <li key={reading} className="dict-rest__chip" lang="ja">{reading}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-        <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
-          {t.close}
-        </button>
-      </div>
+      {!byShare && (
+        <div className="dict-entry__body dict-readings"
+             aria-label={open === on ? t.readingsOnName : t.readingsKunName}>
+          {withWords.map(({ reading, words }) => (
+            <ReadingBand
+              key={reading} reading={reading} words={words}
+              kind={kind} char={entry.kanji} onWord={jump}
+            />
+          ))}
+          {rest.length > 0 && <ReadingPills readings={rest.map(g => g.reading)} />}
+          <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
+            {t.close}
+          </button>
+        </div>
+      )}
     </article>
   )
 }

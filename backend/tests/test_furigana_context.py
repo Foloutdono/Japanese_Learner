@@ -29,7 +29,7 @@ import unittest
 
 from study import morphology
 from study.furigana import align, align_deck, align_sentence
-from study.reading_context import correct_readings, read_numeral
+from study.reading_context import correct_readings, numeral_furigana, read_numeral, read_number
 
 NEEDS_TOKENIZER = unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs fugashi/unidic-lite")
 
@@ -372,6 +372,125 @@ class CounterTests(unittest.TestCase):
             self.assertIsNone(read_numeral(not_a_number), not_a_number)
 
 
+class NumberReadingTests(unittest.TestCase):
+    """Plan 177: the tokenizer reads 100 as "100", and a number is a thing
+    furigana is for -- ひゃく over 100, さんびゃく over 300."""
+
+    def test_the_numbers_the_sound_changes_in(self) -> None:
+        expected = {
+            "0": "ぜろ", "1": "いち", "10": "じゅう", "11": "じゅういち", "20": "にじゅう",
+            "100": "ひゃく", "300": "さんびゃく", "600": "ろっぴゃく", "800": "はっぴゃく",
+            "1000": "せん", "3000": "さんぜん", "8000": "はっせん", "2020": "にせんにじゅう",
+            "10000": "いちまん", "11000": "いちまんせん", "30000": "さんまん", "100000": "じゅうまん",
+            "1000000": "ひゃくまん", "100000000": "いちおく", "１０００": "せん",
+        }
+        for digits, reading in expected.items():
+            with self.subTest(digits):
+                self.assertEqual(read_number(digits), reading)
+
+    def test_commas_and_decimals(self) -> None:
+        self.assertEqual(read_number("1,000"), "せん")
+        self.assertEqual(read_number("12,345"), "いちまんにせんさんびゃくよんじゅうご")
+        self.assertEqual(read_number("3.5"), "さんてんご")
+        self.assertEqual(read_number("0.05"), "れいてんぜろご")
+        self.assertEqual(read_number("1,000.5"), "せんてんご")
+
+    def test_what_is_not_a_quantity_has_no_reading(self) -> None:
+        # A list, a code and a telephone number's worth of digits.
+        for text in ("1,2,3", "12,34", "007", "0312345678901234567", "3.", ".5", "3.x", ""):
+            with self.subTest(text):
+                self.assertIsNone(read_number(text))
+
+    def test_a_counter_changes_the_number(self) -> None:
+        cases = [
+            # (digits, counter, the tokenizer's reading of it) -> (numeral, counter)
+            (("1", "本", "ぽん"), ("いっ", None)), (("3", "本", "ぼん"), ("さん", None)),
+            (("6", "回", "かい"), ("ろっ", None)), (("6", "冊", "さつ"), ("ろく", None)),
+            (("100", "回", "かい"), ("ひゃっ", None)), (("100", "円", "えん"), ("ひゃく", None)),
+            (("30", "分", "ぷん"), ("さんじゅっ", None)), (("10", "歳", "さい"), ("じゅっ", None)),
+            (("4", "時", "じ"), ("よ", None)), (("7", "時", "じ"), ("しち", None)),
+            (("9", "時", "じ"), ("く", None)), (("14", "時", "じ"), ("じゅうよ", None)),
+            (("4", "月", "がつ"), ("し", None)), (("9", "月", "がつ"), ("く", None)),
+            # 7月 comes back つき from the tokenizer; the month is がつ.
+            (("7", "月", "つき"), ("しち", "がつ")),
+            (("1", "人", "にん"), ("ひと", "り")), (("2", "人", "にん"), ("ふた", "り")),
+            (("3", "人", "にん"), ("さん", None)), (("4", "人", "にん"), ("よ", None)),
+            (("3", "つ", "つ"), ("みっ", None)), (("8", "つ", "つ"), ("やっ", None)),
+            (("3", "日", "か"), ("みっ", None)), (("14", "日", "か"), ("じゅうよっ", None)),
+            (("20", "日", "か"), ("はつ", None)), (("10", "日", "か"), ("とお", None)),
+            (("12", "日", "にち"), ("じゅうに", None)), (("1", "日", "にち"), ("いち", None)),
+            (("3", "日間", "かかん"), ("みっ", None)), (("11", "日間", "にちかん"), ("じゅういち", None)),
+        ]
+        for (digits, counter, reading), expected in cases:
+            with self.subTest(digits + counter):
+                self.assertEqual(numeral_furigana(digits, counter, reading, "suffix"), expected)
+
+    def test_the_first_of_the_month_is_told_by_the_month_before_it(self) -> None:
+        self.assertEqual(numeral_furigana("1", "日", "にち", "suffix", before="月"), ("つい", "たち"))
+        self.assertEqual(numeral_furigana("1", "日", "にち", "suffix", before="毎"), ("いち", None))
+
+    def test_a_number_alone_or_with_a_counter_this_does_not_know(self) -> None:
+        self.assertEqual(numeral_furigana("100"), ("ひゃく", None))
+        self.assertEqual(numeral_furigana("3.5", "倍", "ばい", "suffix"), ("さんてんご", None))
+        self.assertEqual(numeral_furigana("007", "号", "ごう", "suffix"), (None, None))
+
+
+@NEEDS_TOKENIZER
+class NumberFuriganaTests(unittest.TestCase):
+    """The same, through the tokenizer: what the learner sees over a number."""
+
+    CASES = {
+        "100円です。": "100[ひゃく]円[えん]",
+        "300円": "300[さんびゃく]円[えん]",
+        "1000人": "1000[せん]人[にん]",
+        "１０００円": "１０００[せん]円[えん]",
+        "1,000円": "1,000[せん]円[えん]",
+        "3.5倍": "3.5[さんてんご] 倍[ばい]",
+        "2020年": "2020[にせんにじゅう]年[ねん]",
+        "100万円": "100[ひゃく] 万[まん] 円[えん]",
+        # A counter and its number are one word, and keep their euphony.
+        "1本": "1[いっ]本[ぽん]",
+        "3本": "3[さん]本[ぼん]",
+        "6回": "6[ろっ]回[かい]",
+        "30分": "30[さんじゅっ]分[ぷん]",
+        "3日": "3[みっ]日[か]",
+        "3日間": "3[みっ]日[か]間[かん]",
+        "20日": "20[はつ]日[か]",
+        "3月1日": "3[さん]月[がつ] 1[つい]日[たち]",
+        "7月": "7[しち]月[がつ]",
+        "4時": "4[よ]時[じ]",
+        "10時30分": "10[じゅう]時[じ] 30[さんじゅっ]分[ぷん]",
+        "1人で行く": "1[ひと]人[り] 行[い]",
+        "3人": "3[さん]人[にん]",
+        "第3課": "第[だい] 3[さん]課[か]",
+        "1か月": "1[いっ] 月[げつ]",
+        # Kanji numerals were always read by the tokenizer.
+        "三百円": "三[さん]百[びゃく] 円[えん]",
+    }
+
+    def test_numbers_carry_furigana(self) -> None:
+        for sentence, expected in self.CASES.items():
+            with self.subTest(sentence):
+                self.assertEqual(_ruby(sentence), expected)
+
+    def test_a_native_counter_is_set_over_the_number_alone(self) -> None:
+        # 3つ: みっ over the 3, and つ is kana.
+        self.assertEqual(_ruby("りんごが3つある。"), "3[みっ]")
+        self.assertEqual(_ruby("りんごを1つください。"), "1[ひと]")
+
+    def test_what_is_not_a_quantity_stays_bare(self) -> None:
+        for sentence in ("2024/10/04", "10:30", "3-5人", "5G", "100m走", "A4", "電話は0312345678"):
+            with self.subTest(sentence):
+                digits = [p for p in align_sentence(sentence)
+                          if p.get("reading") and any(c.isdigit() for c in p["text"])]
+                self.assertEqual(digits, [])
+
+    def test_the_parts_still_spell_the_sentence(self) -> None:
+        for sentence in self.CASES:
+            with self.subTest(sentence):
+                self.assertEqual("".join(p["text"] for p in align_sentence(sentence)), sentence)
+
+
 @NEEDS_TOKENIZER
 class SentenceReadingTests(unittest.TestCase):
     """Whole sentences through the real tokenizer: what the learner sees."""
@@ -408,7 +527,7 @@ class SentenceReadingTests(unittest.TestCase):
         "私たちは学生です。": "私[わたし] 学[がく]生[せい]",
         "絵を描くのが好きです。": "絵[え] 描[か] 好[す]",
         "努力が実を結んだ。": "努[ど]力[りょく] 実[み] 結[むす]",
-        "桜の花は４月が盛りだ。": "桜[さくら] 花[はな] 月[がつ] 盛[さか]",
+        "桜の花は４月が盛りだ。": "桜[さくら] 花[はな] ４[し]月[がつ] 盛[さか]",
         "彼はもう盛りを過ぎた。": "彼[かれ] 盛[さか] 過[す]",
         "ご飯の盛りが少ない。": "飯[はん] 盛[も] 少[すく]",
         "言うまでもない。": "言[い]",

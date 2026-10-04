@@ -12750,7 +12750,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
   text-align: left;
 }
-/* 連 — the run's streak (plan 177): the rally's stamp, lacquer-inked,
+/* 連 — the run's streak (plan 178): the rally's stamp, lacquer-inked,
    holding the count; pressed afresh each time the run lengthens (the
    component keys on the count) and filled once it is hot. */
 .run-streak {
@@ -12825,6 +12825,38 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .reading-group__item-text {
   font-family: var(--reading-font, inherit);
 }
+
+/* 割合 on the study card (plan 177): the few readings the course uses
+   most, each with its share under it. See ReadingShares. */
+.reading-shares { display: grid; gap: var(--sp-3); justify-items: center; width: 100%; }
+.reading-shares .reading-group { margin-bottom: 0; width: 100%; }
+.reading-shares .reading-group__list { gap: var(--sp-3) var(--sp-5); }
+.reading-share {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-1);
+  min-width: 4em;
+}
+.reading-share__text {
+  font-family: var(--reading-font, inherit);
+  font-size: var(--reading-size, 18px);
+  line-height: 1.2;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.reading-share__pct {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.reading-share__pct small {
+  margin-left: 1px;
+  font-size: var(--fs-caption);
+  font-weight: 500;
+}
+.reading-share--core .reading-share__pct { color: var(--sel-ink); }
 
 .meaning-display {
   text-align: left;
@@ -15553,6 +15585,97 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   letter-spacing: var(--tr-term);
   text-indent: var(--tr-term);
   color: var(--text-secondary);
+}
+/* 割合 (plan 177): the share of the words that use each reading. The
+   count's scope is a segmented control under the sheet's head; each band
+   carries its share in the sumi head, and a bar and a word for it under
+   (common / usual / rare), so the reading to learn first is the one the
+   eye meets first. The bar takes the pigment of the reading beside it. */
+.dict-scope {
+  display: grid;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+}
+.dict-scope__hint,
+.dict-scope__wait {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.dict-scope__wait { padding: var(--sp-5); }
+.dict-scope__empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+}
+.dict-scope__empty p {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.dict-rd__pct {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel);
+}
+.dict-rd__pct-unit {
+  font-size: var(--fs-caption);
+  color: var(--text-on-panel-soft);
+}
+.dict-share {
+  display: grid;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-5) var(--sp-2);
+}
+.dict-share__bar {
+  height: var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+  overflow: hidden;
+}
+.dict-share__bar i {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--line-color, var(--accent2));
+}
+.dict-share__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.dict-share__tier {
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+.dict-share__tier--core { color: var(--sel-ink); }
+.dict-whole {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.dict-whole__pct {
+  margin-left: auto;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
 }
 /* The sheet over a quiz has no dictionary underneath to jump around
    in: the same row, with nothing to approach — no rail, no wash. */

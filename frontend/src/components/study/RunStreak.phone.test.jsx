@@ -6,7 +6,7 @@ import { RunStreak } from './RunStreak'
 import { startTally, countReview } from '../../stores/runTally'
 import '../../index.css'
 
-// ── 連 — the run's streak stamp (plan 177) ───────────────────────────
+// ── 連 — the run's streak stamp (plan 178) ───────────────────────────
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 const mark = root => root.querySelector('.run-streak')
 

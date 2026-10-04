@@ -14,6 +14,7 @@ from study.modes import (
     Mode, eligible_for, require_mode, resolve_for_source,
 )
 from study.mcq import pick_distractors
+from study.kanji_words import course_shares
 from content.kanji_readings import split_readings, display_reading
 from content.radical_data import (
     radical_for, siblings_by_stroke, RADICAL_BY_NUMBER,
@@ -131,6 +132,9 @@ def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], m: Mode,
         "direction":    m.direction,
         "kanji":        entry.get("kanji", ""),
         "kana":         entry.get("kana", ""),
+        # How many of the course's words use each reading, so the card can
+        # print the share of the few it shows (plan 177).
+        "reading_shares": course_shares(entry.get("kanji", "")),
         "meaning":      meaning,
         "stroke_count": entry.get("stroke_count", ""),
         # Current SRS stage, so the client can hand it straight back
@@ -404,6 +408,7 @@ def get_kanji_review_cards(level: str | None = None, lang: str = "fr", radical: 
             "card_id":      raw_id,
             "kanji":        entry.get("kanji", ""),
             "kana":         entry.get("kana", ""),
+            "reading_shares": course_shares(entry.get("kanji", "")),
             "meaning":      get_meaning(entry, lang, FR_MAP),
             "stroke_count": entry.get("stroke_count", ""),
             "stage":        stage,

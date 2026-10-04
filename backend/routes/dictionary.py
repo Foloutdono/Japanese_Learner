@@ -31,7 +31,7 @@ from study.card_lookup import (
 from study.grammar_lesson import lesson_payload
 from study import search_match
 from study.kana_words import kana_words
-from study.kanji_words import kanji_as_word, kanji_words, reading_of, word_furigana
+from study.kanji_words import full_shares, kanji_as_word, kanji_words, reading_of, word_furigana
 
 router = APIRouter()
 
@@ -85,6 +85,27 @@ def _corrected(query, lexicon, found):
         if found(candidate):
             return candidate
     return query
+
+
+@router.get("/api/dictionary/readings-share")
+def get_readings_share(char: str = Query(..., min_length=1, max_length=1)):
+    """How often each reading of `char` is used across ALL of JMdict
+    (plan 177): {"total", "whole", "readings": {reading: words}}.
+
+    The readings sheet's "Tout JMdict" scope. The course's own shares
+    ride on every kanji entry (`reading_shares`, a count over the deck's
+    words); this one aligns every JMdict word written with the character
+    -- 1,943 of them for 生 -- so it is asked for only when the learner
+    switches to it, and answered from a cache. Course content, nothing of
+    the learner's: no identity is read.
+    """
+    if char in DECK_BY_CHAR:
+        packed = None  # reading_tokens() reads the deck's own
+    else:
+        packed = kanji_db.packed_readings_for([char]).get(char)
+        if packed is None:
+            return {"total": 0, "whole": 0, "readings": {}}
+    return full_shares(char, packed)
 
 
 @router.get("/api/dictionary/radicals")
@@ -318,6 +339,10 @@ def _kanji_result(char: str, kana: str, meaning: str, level: str | None,
         # Every reading in the deck's order, each with the words that use
         # it -- the plate shows two, the panel all.
         "readings":     words["readings"],
+        # How many of the course's words use each reading -- the share
+        # printed beside it (plan 177). The same count over all of
+        # JMdict is /api/dictionary/readings-share.
+        "reading_shares": words["shares"],
     }
 
 

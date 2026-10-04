@@ -12,7 +12,7 @@
 const WEEKDAY_JP = ['日', '月', '火', '水', '木', '金', '土']
 
 export function StampRally({ week, streak, t }) {
-  // Reviews and, since plan 177, graded practice answers: both are a day
+  // Reviews and, since plan 178, graded practice answers: both are a day
   // shown up, as the streak counts it.
   const byDate = new Map((week ?? []).map(d => [d.date, (d.count ?? 0) + (d.practice ?? 0)]))
   const today = new Date()

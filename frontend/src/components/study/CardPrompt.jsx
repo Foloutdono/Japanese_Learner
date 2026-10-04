@@ -195,7 +195,7 @@ export default function CardPrompt({
             front={isF2B ? <CharDisplay char={c.kanji} variant="glyph" /> : <MeaningDisplay meaning={c.meaning} size={44} />}
             back={
               <InlineReveal
-                t={t} kana={c.kana} isLarge={isF2B}
+                t={t} kana={c.kana} shares={c.reading_shares} isLarge={isF2B}
                 main={isF2B ? <MeaningDisplay meaning={c.meaning} size={28} /> : <CharDisplay char={c.kanji} variant="word" />}
               />
             }
@@ -206,7 +206,7 @@ export default function CardPrompt({
         {showChoices && (
           <>
             <InlineReveal
-              t={t} kana={c.kana} revealed={answered}
+              t={t} kana={c.kana} shares={c.reading_shares} revealed={answered}
               main={isF2B ? <CharDisplay char={c.kanji} variant="glyph" /> : <MeaningDisplay meaning={c.meaning} size={44} />}
             />
             <RevealActions

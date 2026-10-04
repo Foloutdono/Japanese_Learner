@@ -1,7 +1,7 @@
 import { useLang } from '../../LangContext'
 import { useRunTally } from '../../stores/runTally'
 
-// ── 連 — the run's streak, as a stamp (plan 177) ──────────────────
+// ── 連 — the run's streak, as a stamp (plan 178) ──────────────────
 // The answers in a row rated good or better, in the head of a practice
 // run (reading, translation, dictation, composition, comprehension).
 // DESIGN.md, Motion: the streak is a stamp rally, not a flame -- so the
