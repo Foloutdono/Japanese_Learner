@@ -5,7 +5,7 @@ claiming it: POST /api/credits/claim is what writes that to the ledger
 -- the "while you were away" sheet's button, and the app's quiet claim
 as each credit lands while it is open (plan 141). GET /api/credits/week
 is the offer's week and POST /api/credits/stop what a stopped run left
-waiting (plan 171). See core/credits.py."""
+waiting (plan 172). See core/credits.py."""
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 

@@ -111,14 +111,14 @@ const nav = {
   paywallThanks:      'Noted — we’ll tell you when it opens.',
   paywallOpen:        'See Pro',
   paywallRowValue:    'Soon',
-  // ── 定期券 — the three offers (plan 171, components/offers/) ──
+  // ── 定期券 — the three offers (plan 172, components/offers/) ──
   ofrLabel:           'Tsuji plans',
   ofrCardBrand:       'Pass',
   ofrCardPro:         'Pro',
   ofrCardMax:         'Max',
   ofrCardFarePro:     'Practice · 1 credit',
   ofrCardFareMax:     'Practice · no credit',
-  // ── 定期券 — the card, face and back (plan 172) ──
+  // ── 定期券 — the card, face and back (plan 173) ──
   cardFree:           'Free',
   cardFareFree:       'Practice · locked',
   cardTurn:           'Turn the card over',

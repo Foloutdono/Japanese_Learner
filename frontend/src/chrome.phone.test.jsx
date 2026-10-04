@@ -181,7 +181,7 @@ describe('the HUD', () => {
     expect(off(getComputedStyle(bar))).toBe('-10')
     expect(getComputedStyle(hud).paddingTop).toBe('0px') // --safe-top is 0 in chromium
     expect(getComputedStyle(hud).position).toBe('sticky')
-    // 帯 (plan 172): the card as one strip, in its material -- the free
+    // 帯 (plan 173): the card as one strip, in its material -- the free
     // card's, the credits being unknown -- with two doors on it: the
     // level, its struck 辻 filled to the climb, and the balance.
     const strip = hud.querySelector('.hstrip')

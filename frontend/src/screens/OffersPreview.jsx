@@ -4,7 +4,7 @@ import { openPaywall, closePaywall, seedCredits, seedOfferWeek, useCredits, useO
 import { seedSummary, useProfileSummary } from '../stores/profileSummary'
 import { SOURCES } from '../domain/paywall'
 
-// ── /dev/offers — the three offers, each of the seven screens (plan 171) ──
+// ── /dev/offers — the three offers, each of the seven screens (plan 172) ──
 // The workbench for the canvas "Tsuji — the three offers": the REAL
 // OfferScreen (App.jsx mounts it beside this route), opened through
 // the real doors, over the learner the canvas drew -- Aiko, level 12,

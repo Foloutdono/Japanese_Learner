@@ -700,7 +700,7 @@ CREATE TABLE credit_ledger (
 CREATE INDEX idx_credit_ledger_user
 ON credit_ledger(user_id);
 
--- Owned by routes/profile.py's migration, beside the ledger (plan 171)
+-- Owned by routes/profile.py's migration, beside the ledger (plan 172)
 -- -- 止, where the credits stopped a learner: a row a stop, `cards`
 -- the reviews it kept waiting (one per refused review in shadow mode,
 -- what was left of the stopped run under enforcement). Read by

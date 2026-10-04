@@ -27,7 +27,7 @@ describe('the stage at phone width', () => {
     expect(getComputedStyle(bar).position).toBe('sticky')
     expect(getComputedStyle(bar).bottom).toBe('0px')
     expect(getComputedStyle(screen.container.querySelector('.stage__leave')).height).toBe('44px')
-    // The pass at pocket size: the card's strip holding the balance alone (plan 172).
+    // The pass at pocket size: the card's strip holding the balance alone (plan 173).
     expect(getComputedStyle(screen.container.querySelector('.hstrip--solo')).height).toBe('34px')
     expect(getComputedStyle(screen.container.querySelector('.today-remaining')).borderRadius).toBe('999px')
   })

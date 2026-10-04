@@ -210,7 +210,7 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
 
   if (prefersReducedMotion()) return null
 
-  // The learner's own card (plan 172), face up: their material, the
+  // The learner's own card (plan 173), face up: their material, the
   // name, the level under it and the road of its struck 辻 filled to the
   // climb -- the face every other screen draws.
   const holder = summary?.username ?? '—'

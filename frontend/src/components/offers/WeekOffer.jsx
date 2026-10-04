@@ -4,7 +4,7 @@ import { OfferFrame } from './OfferFrame'
 import { OfferTicket } from './OfferTicket'
 import { clockTime, dayLetter, weekDays } from './format'
 
-// ── 2 · The week the credits stopped (plan 171) ────────────────────
+// ── 2 · The week the credits stopped (plan 172) ────────────────────
 // A free learner's run stopped at zero (the run-out sheet's door).
 // The stage is their own last seven days (GET /api/credits/week): each
 // day's paid reviews in the context gray, the reviews that waited for

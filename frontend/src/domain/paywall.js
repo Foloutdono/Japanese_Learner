@@ -32,7 +32,7 @@ export const HAS_PAYWALL = true
 // balance sheet, which is where the offer is reached from there now;
 // rows recorded before that still carry `where: 'profile'`.
 //
-// The door decides the screen (offerScreen below, plan 171): a run
+// The door decides the screen (offerScreen below, plan 172): a run
 // stopped at zero gets the learner's own week; a Pro learner at one
 // of the plan's ceilings, or asking from Settings, gets the step up to
 // Max; every other door gets the 7-day trial.
@@ -46,7 +46,7 @@ export const SOURCES = Object.freeze({
   UPGRADE: 'upgrade',         // a Pro learner's Settings: "Passer à Max"
 })
 
-// The three offers (plan 171, the owner's canvas "Tsuji — the three
+// The three offers (plan 172, the owner's canvas "Tsuji — the three
 // offers"). DISCOVER sells Pro yearly's 7-day trial on what practice
 // unlocks; WEEK sells Pro yearly on the learner's own week, the days
 // the free refill stopped them; MAX sells the step up to Max, told by

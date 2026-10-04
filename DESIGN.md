@@ -189,7 +189,7 @@ render identically and mean different things, and each reads its own token.
 Never reach for the token that happens to match — reach for the one that
 names what the object is.
 
-**Since plan 172 the pass is one card in three materials**, which one being
+**Since plan 173 the pass is one card in three materials**, which one being
 the learner's plan (`domain/passCard.js`'s `cardTier`): Free 白, white
 plastic with a band along its foot; Pro 墨, soft-touch charcoal, the
 `--pass-ink` family above; Max 梨地, satin platinum with its 辻 etched and
@@ -1000,7 +1000,7 @@ objects, and not one of them waits to be dismissed:
   the next card for under a second (`CardStamp.browser.test` pins every
   hold and the faintness), because the moment is the press, not a pageant:
   the wash, the kumadori, the brush and the petals are gone.
-- **The level** (進級) is **told by the card's engraving** (plan 172, the
+- **The level** (進級) is **told by the card's engraving** (plan 173, the
   owner's direction on the canvas "The pocket pass & the level-up"; it
   replaced plan 142's punch, 改札鋏). The learner's card comes down face
   up in its own material, and the struck 辻 on it — whose road 辶 the
@@ -1038,7 +1038,7 @@ a learner who has just rated one card is already looking for the next.
 
 - **Two chromes, one line** (owner's call, 2026-09-22; ADR 0018). Below
   1100px it is the phone's: the HUD across the top (the goal-status panel
-  · the card as one strip, its level and its balance — plan 172), the five gates across the bottom
+  · the card as one strip, its level and its balance — plan 173), the five gates across the bottom
   (Learn · Practice · Today · Dictionary · Profile), the screen between
   them; between 769 and 1099 the same frame is a centred column of
   `--board-w`. At 1100px and up it is **the desk** (below): a rail down
@@ -1172,7 +1172,7 @@ each question drawing its answers between them.
   foot. It is chrome, so it wears no line pigment — the one colour in the
   rail's own ink is Today's due count, a state's.
 - **The rail's foot is the learner's card in its holder** (定期入れ,
-  plan 172; it replaced plan 127's pocket pass, which the owner found too
+  plan 173; it replaced plan 127's pocket pass, which the owner found too
   big, and which drew the profile's card a second time beside it). The
   card stands in a holder's mouth with only its top edge out — the card's
   real face, its material and its print, clipped at 60px — and rises a

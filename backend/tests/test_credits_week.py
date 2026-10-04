@@ -1,5 +1,5 @@
 """
-止 — where the credits stopped a learner, and the offer's week (plan 171).
+止 — where the credits stopped a learner, and the offer's week (plan 172).
 
 The offer a free learner is shown when a run stops at zero draws their
 last seven days: the paid reviews of each day (the ledger's fares) and

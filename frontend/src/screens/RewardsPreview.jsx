@@ -130,7 +130,7 @@ export default function RewardsPreview() {
 
         <SectionHeader jp="進級" title="Level up" />
         <p className="preview-note">
-          The level told by the card&apos;s engraving (進級, plan 172): the
+          The level told by the card&apos;s engraving (進級, plan 173): the
           learner&apos;s card comes down, the struck 辻&apos;s road fills
           from empty to full while the card trembles harder, bursts into
           sparks of its own material, empties, and the level&apos;s figure

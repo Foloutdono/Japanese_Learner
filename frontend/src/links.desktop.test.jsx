@@ -139,7 +139,7 @@ describe('Settings\' doors on the desk', () => {
     const rows = $$('.desk-settings__list .stg-row[data-page]:not([data-page="pass"])')
     expect(rows.every(r => r.tagName === 'A')).toBe(true)
     expect(rows.map(r => r.getAttribute('href'))).toContain('/profile/settings/display')
-    // The card's fields are doors of the same column (plans 139, 172).
+    // The card's fields are doors of the same column (plans 139, 173).
     const fields = $$('.desk-settings__list .pcard-slot--settings .stg-door')
     expect(fields.map(f => f.getAttribute('href'))).toEqual(['level', 'destination', 'service', 'hour', 'lines'].map(p => `/profile/settings/${p}`))
     expect($$('.desk-settings__list .stg-door').filter(r => r.tabIndex === 0).map(r => r.dataset.page)).toEqual(['sound'])

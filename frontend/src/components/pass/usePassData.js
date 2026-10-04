@@ -10,7 +10,7 @@ import { cardTier, xpClimb, driftWords, sinceMonth } from '../../domain/passCard
 import { statusOf } from '../chrome/hudStatus'
 import { dateFormat, hourLabel, paceLabel, stopParts } from '../settings/contract'
 
-// ── What the card prints, from the stores the old passes read (plan 172) ──
+// ── What the card prints, from the stores the old passes read (plan 173) ──
 // The profile summary (/api/profile: the holder, the climb, the level
 // boarded at, the lines, the month issued), the journey (the
 // destination, its date, the service and the hour, the journey's word),

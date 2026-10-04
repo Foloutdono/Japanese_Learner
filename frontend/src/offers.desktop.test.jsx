@@ -4,7 +4,7 @@ import { userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 定期券 — the three offers on the desk (plan 171) ────────────────
+// ── 定期券 — the three offers on the desk (plan 172) ────────────────
 // The owner's pick A 対 of the canvas's Desktop page: the offer is a
 // dialog in the window's middle, the stage beside the words. The
 // phone's stage drawing stands whole in the left pane, scaled; the

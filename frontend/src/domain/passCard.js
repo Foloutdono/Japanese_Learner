@@ -1,4 +1,4 @@
-// ── 定期券 — the learner's card, by its plan (plan 172) ──────────
+// ── 定期券 — the learner's card, by its plan (plan 173) ──────────
 // One card in three materials, the owner's picks of the canvas "Tsuji —
 // the three offers" (its pages "The free card" and "The cards in the
 // app"): Free 白, plain white plastic with the vocab line's band; Pro 墨,

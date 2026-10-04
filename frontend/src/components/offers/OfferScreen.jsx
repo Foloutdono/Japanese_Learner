@@ -11,7 +11,7 @@ import { DiscoverOffer } from './DiscoverOffer'
 import { WeekOffer } from './WeekOffer'
 import { MaxOffer } from './MaxOffer'
 
-// ── 定期券 — the three offers (plan 171) ───────────────────────────
+// ── 定期券 — the three offers (plan 172) ───────────────────────────
 // The screen every door opens (domain/paywall.js's SOURCES), and which
 // of the three it is is the door's (offerScreen): DISCOVER, the 7-day
 // trial; WEEK, the free learner's own week against the refill; MAX,

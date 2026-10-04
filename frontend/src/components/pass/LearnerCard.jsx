@@ -8,7 +8,7 @@ import { PassCard } from './PassCard'
 import { PassBack } from './PassBack'
 import { usePassData } from './usePassData'
 
-// ── 定期券 — the card where the learner holds it (plan 172) ─────────
+// ── 定期券 — the card where the learner holds it (plan 173) ─────────
 // Two screens print the whole card, both sides: the profile, which
 // opens on its face, and Settings, which opens on its back -- 設定 is
 // the card's own preferences (DESIGN.md), and the back is where the

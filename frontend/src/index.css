@@ -2597,13 +2597,13 @@
      overrides --card-w on its own more specific selector rather than
      fighting max-width directly. */
   --card-w:         640px;
-  --offer-w:        390px;     /* the offers' stage, drawn for a phone (plan 171) */
+  --offer-w:        390px;     /* the offers' stage, drawn for a phone (plan 172) */
   --offer-desk-w:   920px;     /* the offer's dialog on the desk: the stage beside the words */
-  --pcard-face-w:   272px;     /* the learner's card, its face drawn at (plan 172, components/pass/cardScale.js) */
+  --pcard-face-w:   272px;     /* the learner's card, its face drawn at (plan 173, components/pass/cardScale.js) */
   --pcard-face-h:   172px;
   --pcard-back-w:   424px;     /* ... and its back's denser print */
   --pcard-back-h:   268px;
-  --levelup-w:      300px;     /* the level-up's card on a phone (plan 172) */
+  --levelup-w:      300px;     /* the level-up's card on a phone (plan 173) */
   --offer-desk-h:   600px;
   --gap:            24px;
   /* The chrome's two heights (plan 068), safe-area excluded: the HUD
@@ -2992,7 +2992,7 @@
      candidates side by side — 消炭 won because the darkest neutral is
      the one that reads as a possession rather than another panel. */
   --pass-ink:       #575060;  /* 消炭     keshizumi,   charcoal    */
-  /* The free card's band (plan 172): the livery printed on its white
+  /* The free card's band (plan 173): the livery printed on its white
      plastic, the owner's pick on the canvas "The free card". The same
      indigo as the vocab line, but the card's own and not the line's (see
      "The pass has two materials" in DESIGN.md), and one value in both
@@ -4531,7 +4531,7 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 
-/* ── 定期券 — the three offers (plan 171) ── */
+/* ── 定期券 — the three offers (plan 172) ── */
 /* components/offers/: the trial (DISCOVER), the week the credits
    stopped (WEEK) and the step up to Max (MAX), drawn to the owner's
    canvas "Tsuji — the three offers" board for board. A stage on the
@@ -7257,7 +7257,7 @@ textarea:focus-visible {
 
 /* ── 運賃 — the fare, on the HUD it was paid into ──────────
    A review's XP reports to the strip's engraving (components/chrome/
-   Hud.jsx's useXpGain; plan 172): the struck 辻 glows gold once — the
+   Hud.jsx's useXpGain; plan 173): the struck 辻 glows gold once — the
    pass's own metal — and the amount rises off the strip's left edge,
    clear of its balance. */
 /* (the strip's engraving glows gold once: .hstrip__lv--gain, with the strip) */
@@ -7280,7 +7280,7 @@ textarea:focus-visible {
   animation: hud-fare 1000ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 /* On the strip the level is its left door: the fare rises off the
-   strip's left edge, never over its balance (plan 172). */
+   strip's left edge, never over its balance (plan 173). */
 .hstrip__lv .hud-fare { left: auto; right: 100%; margin-left: 0; margin-right: var(--sp-3); }
 .hud-fare__unit {
   font-size: var(--fs-caption-xs);
@@ -7519,7 +7519,7 @@ textarea:focus-visible {
 }
 
 
-/* ══ 定期券 — the learner's card (plan 172) ════════════════════
+/* ══ 定期券 — the learner's card (plan 173) ════════════════════
    One card in three materials (domain/passCard.js's cardTier), the
    owner's picks of the canvas "Tsuji — the three offers": Free 白,
    plain white plastic with the vocab line's band; Pro 墨, soft-touch
@@ -7918,7 +7918,7 @@ textarea:focus-visible {
 }
 
 
-/* ── 帯 — the learner's card at pocket size (plan 172) ──
+/* ── 帯 — the learner's card at pocket size (plan 173) ──
    One strip in the card's own stuff (components/chrome/Hud.jsx's
    HudStrip), two doors: the struck 辻 filled to the climb with the
    level, and the balance at the level's size, its cap a step under;
@@ -8008,7 +8008,7 @@ textarea:focus-visible {
 }
 
 /* ══ 定期券 — the pass's charcoal ground ══════════════════════
-   The profile's pass was drawn on this ground until plan 172 made it
+   The profile's pass was drawn on this ground until plan 173 made it
    the learner's card (.pcard, above); what is left of it is the ground
    Today's stamp strip still wears (.pass--strip, components/station/
    PassStrip.jsx) and the contactless mark the gate's reader and its
@@ -14050,7 +14050,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: 11px;
   color: var(--danger);
 }
-/* On the card's signature strip (plan 172, components/pass/PassBack.jsx)
+/* On the card's signature strip (plan 173, components/pass/PassBack.jsx)
    the name is the holder's hand, and renaming it stays inside the
    strip. */
 .pcb__sign .profile-card__name-text { overflow: hidden; font-family: var(--font-serif); font-size: var(--fs-lead); font-style: italic; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
@@ -19657,7 +19657,7 @@ html {
   .door { display: none; }
 }
 
-/* ══ 進級 — the level, told by the card's engraving (plan 172) ═══════
+/* ══ 進級 — the level, told by the card's engraving (plan 173) ═══════
    The level turned over, and the card says so (components/rewards/
    XpToast.jsx). The owner's drawing on the canvas page "The pocket
    pass & the level-up": the learner's card comes down; the road 辶 of
@@ -20006,7 +20006,7 @@ html {
    路線図の影 section — the journey pass (plan 063, phase C).
    Owns .jour-*: the status sheet's distance and comparisons (the
    pass's flip, its footer line and its back face, which this section
-   drew, went with the pass in plan 172). Appended at the
+   drew, went with the pass in plan 173). Appended at the
    end on purpose — a fresh namespace with no ties to win, so cascade
    position carries no meaning here. Every surface in this section is
    the pass's own permanently-sumi ground, so inks come from the
@@ -22019,7 +22019,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   100% { --brd-scrim: 0; }
 }
 .brd .btn-depart { width: 100%; min-height: 66px; }
-/* The offers' gate (plan 171) reads at the boarding's size. */
+/* The offers' gate (plan 172) reads at the boarding's size. */
 .brd .btn-depart__jp,
 .ofr .btn-depart__jp { font-size: var(--fs-title); }
 .brd__link {
@@ -25531,7 +25531,7 @@ button.brd-stn { cursor: pointer; }
     padding: var(--sp-4);
     padding-bottom: calc(var(--sp-4) + var(--safe-bottom));
   }
-  /* 定期入れ — the holder (plan 172, components/chrome/DeskPass.jsx): the
+  /* 定期入れ — the holder (plan 173, components/chrome/DeskPass.jsx): the
      case the learner's card is carried in, the real card's top edge
      out of its mouth (a pointer draws it a little further), and on the
      case the HUD's three doors -- the climb, then the balance over what
@@ -28458,7 +28458,7 @@ button.brd-stn { cursor: pointer; }
   .desk-pane .bkd__foot { margin-top: auto; }
   .desk-pane .bkd__explain { align-items: stretch; }
   .desk-pane .bkd__explain-btn { width: 100%; }
-  /* ── 進級 — the level-up in a run's column (plans 123, 142, 172) ──
+  /* ── 進級 — the level-up in a run's column (plans 123, 142, 173) ──
      Above a phone's width the card floats at the screen's right -- and
      on a run with a column, that is over the column: its entry, its
      tally or its lines hidden for four seconds (plan 123 docked the old
@@ -28702,7 +28702,7 @@ button.brd-stn { cursor: pointer; }
      across), and at the dialog's full --card-w it spread into fifty
      flat bars with the figure a long way from its button. */
   .claim-sheet { width: var(--desk-side-w); }
-  /* 定期券 — the three offers (plan 171) as a dialog in the window's
+  /* 定期券 — the three offers (plan 172) as a dialog in the window's
      middle, the owner's pick A 対 of the canvas's Desktop page: the
      stage beside the words. The phone's stage drawing is kept whole --
      its 390-wide box, scaled into the left pane, every animation as
@@ -33603,7 +33603,7 @@ button.brd-stn { cursor: pointer; }
       padding: var(--sp-3) var(--sp-4);
       padding-bottom: calc(var(--sp-3) + var(--safe-bottom));
     }
-    /* The holder (plan 172) stands 24px taller than plan 127's pass did:
+    /* The holder (plan 173) stands 24px taller than plan 127's pass did:
        the card shows less of its top edge out of the mouth, and the
        case's rows close up -- each door still a pointer's target. */
     .desk-holder { padding-top: 20px; }

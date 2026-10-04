@@ -7,7 +7,7 @@ import { PassTurn } from './PassTurn'
 import { PadLock } from './icons'
 import { clockTime, firstOfNextMonth } from './format'
 
-// ── 3 · The step up to Max (plan 171) ──────────────────────────────
+// ── 3 · The step up to Max (plan 172) ──────────────────────────────
 // A Pro learner at one of the plan's ceilings (domain/paywall.js's
 // LIMITS), each its own screen: practice's fare (3A), the photos and
 // the explanations a day and the new mock papers a month (3B); or,

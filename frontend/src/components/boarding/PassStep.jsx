@@ -13,7 +13,7 @@ import { dateFormat, hourLabel, paceLabel, stopParts } from '../settings/contrac
 import { playClick } from '../../lib/audio'
 import { useCountUp, useWelcomeCoin, stillPreferred } from './countUp'
 
-// ── The card, issued (plan 075; the card, plan 172) ─────────────────
+// ── The card, issued (plan 075; the card, plan 173) ─────────────────
 // The last arrival screen: the learner's card slides up, face up -- the
 // holder at level one, the road of its struck 辻 empty -- and once it has
 // landed it turns over by itself, to show what it holds: the contract

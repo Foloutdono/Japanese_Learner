@@ -159,7 +159,7 @@ describe('SettingsScreen — the card and the list', () => {
     await settle()
     const root = screen.container
 
-    // The contract, on the card's back (plan 172): the boarding level and
+    // The contract, on the card's back (plan 173): the boarding level and
     // the destination, then the service, the hour and the lines, each a
     // door to its own page.
     expect(root.querySelector('.pcard-slot--settings .pcard').dataset.side).toBe('back')

@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { LangProvider } from '../../LangContext'
 import '../../index.css'
 
-// ── 定期券 — the three offers (plan 171) ────────────────────────────
+// ── 定期券 — the three offers (plan 172) ────────────────────────────
 // The screen every door opens, and which of the three it is is the
 // door's: the trial (DISCOVER), a free learner's own week against the
 // refill (WEEK), and the step up to Max at one of Pro's ceilings or

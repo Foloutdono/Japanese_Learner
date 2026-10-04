@@ -112,14 +112,14 @@ const nav = {
   paywallThanks:      'C’est noté — on te prévient au lancement.',
   paywallOpen:        'Découvrir Pro',
   paywallRowValue:    'Bientôt',
-  // ── 定期券 — the three offers (plan 171, components/offers/) ──
+  // ── 定期券 — the three offers (plan 172, components/offers/) ──
   ofrLabel:           'Les offres Tsuji',
   ofrCardBrand:       'Pass',
   ofrCardPro:         'Pro',
   ofrCardMax:         'Max',
   ofrCardFarePro:     'Pratique · 1 crédit',
   ofrCardFareMax:     'Pratique · sans crédit',
-  // ── 定期券 — la carte, face et dos (plan 172) ──
+  // ── 定期券 — la carte, face et dos (plan 173) ──
   cardFree:           'Free',
   cardFareFree:       'Pratique · verrouillée',
   cardTurn:           'Retourner la carte',

@@ -21,7 +21,7 @@ import { isDesk } from '../../hooks/useDesk'
 //          components/ui/TopBar.jsx). This component only sounds the
 //          tick and announces the amount to assistive tech.
 //   level  The level turned over, told by the card's engraving (plan
-//          172, the owner's drawing on the canvas page "The pocket pass
+//          173, the owner's drawing on the canvas page "The pocket pass
 //          & the level-up"): the learner's card comes down, the road 辶
 //          of its struck 辻 fills from empty to full, faster as it goes,
 //          the card trembling harder the fuller it gets; full, the road

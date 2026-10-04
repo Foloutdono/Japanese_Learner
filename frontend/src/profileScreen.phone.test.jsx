@@ -57,7 +57,7 @@ const $ = sel => document.querySelector(sel)
 const $$ = sel => [...document.querySelectorAll(sel)]
 
 describe('the profile at phone width (plan 143)', () => {
-  // Plan 172 replaced the pass with the learner's card: face up here,
+  // Plan 173 replaced the pass with the learner's card: face up here,
   // its back a touch away, and the old pass's figures on that back.
   const turn = async () => { $('.pcard__turn').click(); await settle(100) }
 

@@ -203,7 +203,7 @@ describe('the arrival', () => {
     await press('[data-action="continue"]')   // → the pass
     expect(stepOf()).toBe('pass')
     expect(sound.playFareTick).not.toHaveBeenCalled()
-    // The card is issued face up and turns over by itself (plan 172):
+    // The card is issued face up and turns over by itself (plan 173):
     // the count starts on its back, and the coin with it.
     await settle(500)
     expect(sound.playFareTick).not.toHaveBeenCalled()

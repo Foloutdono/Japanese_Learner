@@ -575,7 +575,7 @@ const Fixture = () => (
       </p>
       <p className="hint status-sheet__error ss-error">error line</p>
     </div>
-    {/* Plan 172 -- the learner's card, in its three materials: the back's
+    {/* Plan 173 -- the learner's card, in its three materials: the back's
         print, its meters and its class, the face's foot on the free
         card's band, and the HUD's strip. Each material is a gradient the
         walker cannot composite, so each is pinned at its mid tone, and
@@ -1247,7 +1247,7 @@ const SITES = [
   ['.dj-due', 'record cell: a card that is due (due ink mixed toward the ink)'],
   ['.dj-due-action', 'the review action under the record (same ink, ghost ground)'],
   ['.dj-tip', 'tag note (panel ink on sumi)'],
-  // Plan 172 -- the learner's card and the HUD's strip, on each material.
+  // Plan 173 -- the learner's card and the HUD's strip, on each material.
   ['.pc-free-value', 'card back: the print on white plastic'],
   ['.pc-free-fig', 'card back: a meter\'s figure on white plastic'],
   ['.pc-free-note', 'card back: a meter\'s note on white plastic'],

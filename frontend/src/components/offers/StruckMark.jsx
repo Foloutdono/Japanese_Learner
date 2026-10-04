@@ -1,7 +1,7 @@
 import { useId } from 'react'
 import { CROSS, SHIN, ROAD } from './markParts'
 
-// ── 辻, struck into a pass, filling with the XP (plan 171) ─────────
+// ── 辻, struck into a pass, filling with the XP (plan 172) ─────────
 // The owner's drawing: the pass carries the app's mark large and
 // faint, and the XP bar is the mark itself -- 辶, the road, filling
 // from its foot up (the sweep, then the zigzag, then the dot) to the

@@ -1,4 +1,4 @@
-// The price as a ticket (plan 171): the fare on the left -- what it
+// The price as a ticket (plan 172): the fare on the left -- what it
 // is, the figure, how it is billed -- and on its stub, torn along a
 // perforation, the one number that sells it. The only gold a screen
 // carries besides its gate: the offer is what gets the attention.

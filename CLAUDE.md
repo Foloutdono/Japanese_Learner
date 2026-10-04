@@ -1206,7 +1206,9 @@ runtime purpose. Two consequences worth knowing:
   `backend/content/reading_sentences.py`, `backend/tests/test_nyumon.py`,
   `src/screens/RideIntro.browser.test.jsx`, the `intro` phone, desktop
   and short tests, and `index.css` and its 机 section; CONTEXT.md, 入門).
-  **171** is 定期券, the three offers (the owner's canvas "Tsuji — the
+  **172** is 定期券, the three offers (numbered 172 because 171 went to
+  模試 on a phone while it was open: its commits' messages say 171; the
+  owner's canvas "Tsuji — the
   three offers", built board for board at 390×844): which one opens is
   the door's (`domain/paywall.js`'s `offerScreen`) -- DISCOVER, Pro
   yearly's 7-day trial, the six platforms blooming out of a padlock and
@@ -1239,7 +1241,9 @@ runtime purpose. Two consequences worth knowing:
   `src/offers.desktop.test.jsx`, `src/offers.short.test.jsx` and
   `index.css` and its 机 section;
   CONTEXT.md, Pro / Max; `docs/design/mobile/README.md`, "The offer").
-  **172** is 定期券, the learner's card (the owner's picks on the canvas
+  **173** is 定期券, the learner's card (numbered 173 because 171 went to
+  模試 on a phone and 172 to the offers while it was open: its commit's
+  message says 172; the owner's picks on the canvas
   "Tsuji — the three offers", its pages "The free card", "The cards in
   the app" and "The pocket pass & the level-up"): one card in three
   materials by plan (`domain/passCard.js`'s `cardTier` -- Free 白, white
@@ -1261,7 +1265,7 @@ runtime purpose. Two consequences worth knowing:
   `screens/SettingsScreen.jsx`, the card's tests and `index.css` and its
   机 section; DESIGN.md, "The pass has two materials", Rewards and "The
   desk").
-  When starting a new wave, begin at **173** or higher, and check
+  When starting a new wave, begin at **174** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

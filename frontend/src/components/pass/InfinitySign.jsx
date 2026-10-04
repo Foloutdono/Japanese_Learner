@@ -1,4 +1,4 @@
-// ∞, drawn rather than set (plan 172): the fonts' sign is a thin glyph
+// ∞, drawn rather than set (plan 173): the fonts' sign is a thin glyph
 // half the figures' height, so an unlimited balance read as a smudge
 // beside a counted one. A stroke at the figures' weight, sized by its
 // caller's em.

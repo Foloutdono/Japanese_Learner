@@ -7,7 +7,7 @@ import { PassCard, CardFace } from './PassCard'
 import { PassBack } from './PassBack'
 import '../../index.css'
 
-// ── 定期券 — the learner's card (plan 172) ──────────────────────────
+// ── 定期券 — the learner's card (plan 173) ──────────────────────────
 // One card in three materials, face up and turned by a touch to its
 // back, where the old passes' figures are printed and their doors kept.
 
@@ -77,7 +77,7 @@ const $$ = sel => [...document.querySelectorAll(sel)]
 const face = () => $('.pcard__side--face')
 const back = () => $('.pcard__side--back')
 
-describe('the card (plan 172)', () => {
+describe('the card (plan 173)', () => {
   it('is drawn at the card’s proportions, scaled to its slot', async () => {
     await mount()
     const box = $('.pcard').getBoundingClientRect()
@@ -132,7 +132,7 @@ describe('the card (plan 172)', () => {
   })
 })
 
-describe('the back (plan 172)', () => {
+describe('the back (plan 173)', () => {
   it('prints the route, the contract, the climb, the balance, the journey and the signature', async () => {
     await mount({ initial: 'back' })
     expect($$('.pcb__code').map(n => n.textContent)).toEqual(['N5', 'N3'])
@@ -176,7 +176,7 @@ describe('the back (plan 172)', () => {
   })
 })
 
-describe('the face alone (plan 172)', () => {
+describe('the face alone (plan 173)', () => {
   it('is a picture with no door, the level-up’s figure in the level’s place', async () => {
     document.body.innerHTML = ''
     await render(

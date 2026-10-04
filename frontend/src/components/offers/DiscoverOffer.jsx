@@ -5,7 +5,7 @@ import { OfferTicket } from './OfferTicket'
 import { MiniPass } from './MiniPass'
 import { PadLock, Tick } from './icons'
 
-// ── 1 · Discover — Pro yearly's 7-day trial (plan 171) ─────────────
+// ── 1 · Discover — Pro yearly's 7-day trial (plan 172) ─────────────
 // The boarding's last screen, the balance sheet, the reading ride's
 // plate and Settings open this: the offer of what practice unlocks.
 // One 16s loop on the stage, the canvas's "1 · A, then B": the pass

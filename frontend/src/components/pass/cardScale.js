@@ -1,8 +1,8 @@
 import { useLayoutEffect, useState } from 'react'
 
-// ── The card's two sizes (plan 172) ──────────────────────────────────
+// ── The card's two sizes (plan 173) ──────────────────────────────────
 // The card (PassCard.jsx) is drawn at two fixed sizes and scaled to its slot, the way
-// the offers' stage is (plan 171): the face's print and both sides'
+// the offers' stage is (plan 172): the face's print and both sides'
 // stuff at FACE_W, where the scale's own tokens draw it, and the back's
 // denser print at BACK_W, where the same tokens fit its smaller type.
 // One measured width sets both factors, so the corners, the band and

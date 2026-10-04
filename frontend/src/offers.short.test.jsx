@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 定期券 — the offers on a short desk (plans 169, 171) ─────────────
+// ── 定期券 — the offers on a short desk (plans 169, 172) ─────────────
 // 1280×600, a laptop's window less its browser. The dialog keeps to the
 // window: never past its foot, the stage whole in its pane, and the
 // answer docked in view -- only the words scroll, when 3C's table needs

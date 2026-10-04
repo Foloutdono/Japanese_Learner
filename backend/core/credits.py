@@ -622,7 +622,7 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
     return {"balance": new_balance, "unlimited": False}
 
 
-# ── 止 — where the credits stopped the learner (plan 171) ─────
+# ── 止 — where the credits stopped the learner (plan 172) ─────
 # The offer a free learner is shown when a run stops at zero draws
 # their last seven days: what they reviewed (the ledger's fares) and
 # what waited because the balance ran out (credit_stops). A stop is

@@ -322,7 +322,7 @@ describe('BoardingFlow', () => {
     await settle()
 
     expect(stepOf(screen)).toBe('pass')
-    // The learner's card (plan 172), issued face up to its holder.
+    // The learner's card (plan 173), issued face up to its holder.
     const pass = q(screen, '.brd-issue .pcard')
     expect(pass).not.toBeNull()
     expect(pass.dataset.side).toBe('face')

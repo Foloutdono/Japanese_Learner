@@ -2,7 +2,7 @@ import { useLang } from '../../LangContext'
 import { Wave } from './icons'
 import { StruckMark } from './StruckMark'
 
-// The learner's pass at a hand's size (plan 171): the one the
+// The learner's pass at a hand's size (plan 172): the one the
 // discover offer taps on the lock (Pro), and the one the Max offers
 // tap on a counter. The two materials the step up is drawn in --
 // Pro printed on soft-touch charcoal, Max engraved in satin platinum

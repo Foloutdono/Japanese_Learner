@@ -135,7 +135,7 @@ describe('a copy on the desk', () => {
 
 describe('the keys and the names the desk prints', () => {
   // The card's strip holding the balance alone is the stage head's
-  // (plan 172; the pocket pass before it), the rail carrying the card in
+  // (plan 173; the pocket pass before it), the rail carrying the card in
   // its holder (DeskPass, whose level door carries its title:
   // chrome.desktop.test.jsx).
   it('names the stage head\'s balance and the console\'s clear under a pointer', async () => {

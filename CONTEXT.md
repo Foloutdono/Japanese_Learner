@@ -202,7 +202,7 @@ for sale (not yet), whose platforms the reading ride's plate lists from
 (`domain/paywall.PLANS`). A free learner is offered Pro yearly -- its 7-day
 trial, or, when the credits stopped a run, their own week against the
 refill; a Pro learner is offered Max yearly, at one of Pro's four ceilings
-or from Settings (plan 171, `domain/paywall.offerScreen`). Pro is printed
+or from Settings (plan 172, `domain/paywall.offerScreen`). Pro is printed
 on soft-touch charcoal (墨), Max on satin platinum (梨地). The server knows
 one paid plan yet, the pass, whose limits are Max's.
 `components/offers/`.

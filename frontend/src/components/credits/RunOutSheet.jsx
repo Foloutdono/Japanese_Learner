@@ -18,7 +18,7 @@ import { OfferButton } from './OfferButton'
 // pass answers a question the learner is actually asking, but the way
 // out of a stopped run must stay the obvious tap, never a purchase.
 //
-// The stop itself is recorded here (plan 171): under enforcement the
+// The stop itself is recorded here (plan 172): under enforcement the
 // server refuses the run's first unpaid fare and never sees the rest,
 // so this sheet -- the one place that knows what the run left -- posts
 // it once per stop, for the week the offer draws (WeekOffer).

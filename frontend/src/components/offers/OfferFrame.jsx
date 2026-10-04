@@ -3,7 +3,7 @@ import { closePaywall } from '../../stores/credits'
 import { GateButton } from '../ui/GateButton'
 import { useDesk } from '../../hooks/useDesk'
 
-// ── The frame every offer is drawn in (plan 171) ───────────────────
+// ── The frame every offer is drawn in (plan 172) ───────────────────
 // The canvas "Tsuji — the three offers", as built: a stage on the
 // pass's sumi under one cone of warm light (the owner's pick 光, the
 // spotlight), its subject in the light; under it the words -- an

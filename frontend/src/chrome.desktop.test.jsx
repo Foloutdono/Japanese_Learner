@@ -280,9 +280,9 @@ describe('the rail', () => {
     expect(today.getAttribute('aria-label')).toMatch(/312/)
   })
 
-  // ── 定期入れ — the learner's card in its holder (plans 127, 172) ──
+  // ── 定期入れ — the learner's card in its holder (plans 127, 173) ──
   // Plan 127 set the HUD's three instruments at the foot as one card,
-  // the learner's pass. Plan 172 drew the pass as the learner's card,
+  // the learner's pass. Plan 173 drew the pass as the learner's card,
   // and the foot is the holder it is carried in: the card's top edge out
   // of its mouth, and on the case the HUD's three doors and their
   // anchors -- the climb, the balance and the journey -- the case's edge
@@ -496,7 +496,7 @@ describe('the rail', () => {
       probe.style.color = `var(${n})`
       return getComputedStyle(probe).color
     }))
-    // The card in the holder (plan 172) is the learner's object, not the
+    // The card in the holder (plan 173) is the learner's object, not the
     // rail's: the free card's band is its own --pass-band, whose hex the
     // vocab line's pigment shares, and the holder's figures wear the
     // card's ink, as plan 127's pass wore its metal (DESIGN.md, "The

@@ -82,7 +82,7 @@ describe('the profile on the desk', () => {
     expect(cells).toHaveLength(3)
     for (const c of cells) expect(c.top).toBeCloseTo(cells[0].top, 0)
     // The card's balance meter, on its back, is the door to the balance
-    // sheet (plan 172).
+    // sheet (plan 173).
     expect(document.querySelector('.pcard-slot--profile button.pcb__meter--balance')).not.toBeNull()
   })
 

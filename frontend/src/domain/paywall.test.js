@@ -10,7 +10,7 @@ import { PASS_DECKS, PASS_CARDS } from './credits'
 // The strategy the offer is drawn to (docs/business/tsuji-costs.xlsx):
 // Pro yearly is the headline at "5 € a month" with its saving, Pro
 // monthly the anchor, Max the step up a Pro learner is offered at a
-// ceiling (plan 171). These pin the arithmetic the screens print, so a
+// ceiling (plan 172). These pin the arithmetic the screens print, so a
 // price changed in one place cannot leave a stale saving or per-month
 // figure in another.
 const nbsp = s => s.replace(/[\u00a0\u202f]/g, ' ')

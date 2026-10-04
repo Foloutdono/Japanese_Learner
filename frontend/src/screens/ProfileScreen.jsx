@@ -137,7 +137,7 @@ export default function ProfileScreen({ session }) {
         {t.profileStale}
       </p>
     ),
-    // The card (plan 172): face up, its back a touch away -- the
+    // The card (plan 173): face up, its back a touch away -- the
     // balance, the journey and the contract printed there, each a door,
     // and the holder's name renamed in place on its signature strip.
     pass: (

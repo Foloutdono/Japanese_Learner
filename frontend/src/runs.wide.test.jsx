@@ -95,7 +95,7 @@ describe('a run\'s workspace', () => {
   })
 })
 
-describe('the level-up\'s card on a run\'s desk column (plans 142, 172)', () => {
+describe('the level-up\'s card on a run\'s desk column (plans 142, 173)', () => {
   // The column's first element other than the card, and the card: the
   // card is portalled in last and ordered first.
   const firstOther = (col, pass) => [...col.children].find(c => c !== pass)

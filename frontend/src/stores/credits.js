@@ -95,7 +95,7 @@ export function useBalanceOpen() {
 // — and most of those are outside any screen that could hold the
 // state. (The profile was a door until plan 143; its pass's footer
 // opens the balance sheet now.) The door decides which of the three
-// offers it is (domain/paywall.js's offerScreen, plan 171).
+// offers it is (domain/paywall.js's offerScreen, plan 172).
 //
 // The funnel is recorded HERE rather than in the screen, on purpose.
 // Every open must produce exactly one `offer_view` and exactly one of
@@ -176,7 +176,7 @@ export function usePaywall() {
   return useSyncExternalStore(subscribe, () => paywall, () => null)
 }
 
-// ── 止 — the week the credits stopped (plan 171) ──────────────
+// ── 止 — the week the credits stopped (plan 172) ──────────────
 // The WEEK offer draws the learner's last seven days from GET
 // /api/credits/week: each day's paid reviews and the reviews that
 // waited for the balance (core/credits.week). Under enforcement the

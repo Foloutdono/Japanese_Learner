@@ -3,10 +3,10 @@ import { StruckMark } from '../offers/StruckMark'
 import { Wave, CornerMark } from '../offers/icons'
 import { useSlotWidth, scaleVars, classLabel } from './cardScale'
 
-// ── 定期券 — the learner's card (plan 172) ──────────────────────────
+// ── 定期券 — the learner's card (plan 173) ──────────────────────────
 // The owner's pick of the canvas "Tsuji — the three offers": one card in
 // three materials (domain/passCard.js's cardTier), replacing every pass
-// the app drew. Its face is the offers' (plan 171): the contactless mark
+// the app drew. Its face is the offers' (plan 172): the contactless mark
 // and "Pass", 辻 in the corner, the holder with the level under the name,
 // the struck 辻 whose road 辶 fills with the climb, and at its foot what
 // practice costs on it and the class. Whatever the old passes printed

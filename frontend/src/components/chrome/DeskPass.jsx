@@ -15,9 +15,9 @@ import { CardFace } from '../pass/PassCard'
 import { InfinitySign } from '../pass/InfinitySign'
 import { playClick } from '../../lib/audio'
 
-// ── 定期入れ — the holder at the rail's foot (plan 127; the holder, plan 172) ──
+// ── 定期入れ — the holder at the rail's foot (plan 127; the holder, plan 173) ──
 // Plan 127 set the HUD's three instruments at the rail's foot as one
-// card, the learner's pass. Plan 172 redrew the pass as the learner's
+// card, the learner's pass. Plan 173 redrew the pass as the learner's
 // card (components/pass/), and the owner's pick for the foot of the
 // canvas page "The pocket pass & the level-up" is the holder: the
 // case the card is carried in, the real card's top edge out of its

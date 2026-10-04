@@ -1107,7 +1107,7 @@ describe('the stage and the columns (plan 123, P3–P5)', () => {
   })
 
   // P5: the workspace's inset and the level-up docked in a run's column
-  // (plans 142, 172) key on .desk-run, which a phone never renders: the
+  // (plans 142, 173) key on .desk-run, which a phone never renders: the
   // learner's card hangs at the top, centred at --levelup-w, over the
   // stage, which no longer steps down under it.
   it('hangs the level-up\'s card at the top of a run, the stage staying put', async () => {
@@ -1235,7 +1235,7 @@ describe('the places (plan 123, P16)', () => {
     const { default: SettingsScreen } = await import('./screens/SettingsScreen')
     const seen = await mount('/profile/settings', <SettingsScreen session={{ access_token: 't', user: { email: 'a@b.c' } }} />)
     const rows = buttons('.stg-row[data-page]')
-    // The card's doors too (plans 139, 172): a field keeps its ›.
+    // The card's doors too (plans 139, 173): a field keeps its ›.
     buttons('.pcard-slot--settings .stg-door')
     expect(document.querySelectorAll('.pcb__field .pcb__chev')).toHaveLength(3)
     expect(document.querySelector('main a')).toBeNull()
@@ -1527,13 +1527,13 @@ describe('the three panels (plan 126)', () => {
   })
 })
 
-// ── plans 127, 172 — the holder at the rail's foot, which a phone does without ──
+// ── plans 127, 173 — the holder at the rail's foot, which a phone does without ──
 // On the desk the HUD's doors stand on the case of the holder the
 // learner's card is carried in, at the rail's foot
 // (components/chrome/DeskPass.jsx). A phone keeps its HUD: the station
 // panel and the card as one strip (帯), no holder, no card's edge, no
 // caption under the balance, and no pointer's names.
-describe('the rail\'s holder (plans 127, 172)', () => {
+describe('the rail\'s holder (plans 127, 173)', () => {
   it('leaves the phone\'s HUD its panel and its strip, and no holder', async () => {
     const { MemoryRouter } = await import('react-router-dom')
     const { Hud } = await import('./components/chrome/Hud')

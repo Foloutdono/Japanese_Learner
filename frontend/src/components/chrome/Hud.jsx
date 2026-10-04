@@ -17,7 +17,7 @@ import { statusOf, showStatus } from './hudStatus'
 
 // ── 運行案内 — the HUD (plan 068) ─────────────────────────────
 // The strip across the top of every tab screen: sumi, two registers
-// of ink, no line colour. Two objects (three until plan 172 folded the
+// of ink, no line colour. Two objects (three until plan 173 folded the
 // level's roundel and the pass into one strip, below), each a door:
 //
 //   status   a station panel: the journey model's word in the
@@ -28,7 +28,7 @@ import { statusOf, showStatus } from './hudStatus'
 //            place the shell owns up to being offline. Tap → the
 //            status sheet (components/journey/StatusSheet.jsx, plan
 //            074): the pass's back, as a sheet.
-//   strip    the learner's card at pocket size (plan 172, HudStrip
+//   strip    the learner's card at pocket size (plan 173, HudStrip
 //            below): the level and the balance, each its own door.
 
 // The figure itself: the amount, and a unit in the caption register so
@@ -88,7 +88,7 @@ function HudStatus({ onClick }) {
   return <StatusChip model={data ? journeyModel(data) : null} onClick={onClick} />
 }
 
-// ── 帯 — the pocket pass as one strip (plan 172) ─────────────────
+// ── 帯 — the pocket pass as one strip (plan 173) ─────────────────
 // The owner's pick of the canvas page "The pocket pass & the level-up":
 // the card at full size belongs to Profile and Settings, and the HUD
 // carries it as one strip in the card's own stuff (domain/passCard.js's

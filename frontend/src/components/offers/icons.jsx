@@ -1,7 +1,7 @@
 import { MARK_INK, MARK_ROAD } from '../ui/markPaths'
 
 // The small marks the offers draw in their stages and on their cards
-// (plan 171).
+// (plan 172).
 
 /** A padlock; `.ofr-lk__shackle` is what the stages lift to open it. */
 export function PadLock({ className = '' }) {

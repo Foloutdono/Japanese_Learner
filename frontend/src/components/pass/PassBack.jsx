@@ -5,7 +5,7 @@ import { EditableUsername } from '../profile/EditableUsername'
 import { classLabel } from './cardScale'
 import { InfinitySign } from './InfinitySign'
 
-// ── 定期券 — the back of the card (plan 172) ─────────────────────────
+// ── 定期券 — the back of the card (plan 173) ─────────────────────────
 // Everything the old passes printed that the face no longer does, laid
 // out as the owner drew it on the canvas's "The cards in the app":
 //

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { cardTier, xpClimb, driftWords, sinceMonth } from './passCard'
 import fr from '../locales/fr/index.js'
 
-// ── 定期券 — the learner's card, by its plan (plan 172) ──────────
+// ── 定期券 — the learner's card, by its plan (plan 173) ──────────
 
 describe('cardTier', () => {
   it('draws the free card until the credits are known, and on the free plan', () => {

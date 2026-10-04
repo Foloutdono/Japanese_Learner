@@ -1,4 +1,4 @@
-// Small readings the offers print (plan 171). Pure, so the screens
+// Small readings the offers print (plan 172). Pure, so the screens
 // stay drawings and these stay testable.
 
 /** "14:32" / "2:32 PM": when the refill lands its next credit. */

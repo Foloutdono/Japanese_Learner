@@ -2,7 +2,7 @@ import { useLang } from '../../LangContext'
 import { Wave, CornerMark } from './icons'
 import { StruckMark } from './StruckMark'
 
-// ── 3C · the pass turns over (plan 171) ─────────────────────────────
+// ── 3C · the pass turns over (plan 172) ─────────────────────────────
 // From Settings, where nothing hurt: the learner's Pro pass lifts,
 // turns on its long axis -- its edge showing, the card being an object
 // with a thickness -- and lands as Max, a burst of white light behind

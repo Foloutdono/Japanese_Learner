@@ -39,7 +39,7 @@ import { useDesk } from '../hooks/useDesk'
 // ── Settings (canvas Settings, plan 074; the pass's contract, plan 139) ──
 // The owner's pick of the "Settings rework — options" canvas: B's pass
 // with C's list. Settings opens on the learner's card turned over, its
-// back printed with the contract it was issued under (plan 172,
+// back printed with the contract it was issued under (plan 173,
 // components/pass/LearnerCard.jsx's SettingsCard) — the level it boards
 // at, the destination, the service, the daily ride and the lines, each
 // a door to the page that changes it — and under it

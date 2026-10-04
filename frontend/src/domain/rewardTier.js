@@ -12,7 +12,7 @@
 //            screen, no interaction.
 //   'level'  The level number changed. The card's engraving fills,
 //            bursts and empties, and the figure rolls over (進級, plan
-//            172; plan 142 clipped the pass, and a 発車標 flap turned
+//            173; plan 142 clipped the pass, and a 発車標 flap turned
 //            over before that). Self-dismissing, and it never holds the
 //            next card.
 //

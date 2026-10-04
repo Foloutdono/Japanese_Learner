@@ -164,7 +164,7 @@ def _init_db() -> None:
                 )
             """)
             cur.execute("CREATE INDEX IF NOT EXISTS idx_credit_ledger_user ON credit_ledger(user_id)")
-            # 止 — where the credits stopped a learner (plan 171): a
+            # 止 — where the credits stopped a learner (plan 172): a
             # row a stop, `cards` the reviews it kept waiting. Shadow
             # mode writes one for each review it would have refused;
             # under enforcement the app writes what was left of the run

@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 定期券 — the three offers on a phone (plan 171) ─────────────────
+// ── 定期券 — the three offers on a phone (plan 172) ─────────────────
 // 390×844, the size the owner's canvas drew every board at. Each of the
 // seven screens takes the glass, its stage across the top at the
 // canvas's height, its words and its docked answer under it -- and
