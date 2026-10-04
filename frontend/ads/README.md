@@ -27,7 +27,7 @@ a few minutes. Two files come out:
 
 | File | What it is |
 | --- | --- |
-| `ads/out/tsuji-practice-30s.mp4` | The ad: music and effects, mastered to -14 LUFS, -1 dBTP. |
+| `ads/out/tsuji-practice-30s.mp4` | The ad: music and effects, mastered to -14 LUFS, -2 dBTP. |
 | `ads/out/tsuji-practice-30s-sfx.mp4` | The same picture with the effects only, for laying a track from TikTok's Commercial Music Library or Meta's Sound Collection. Ads cannot use trending sounds. |
 
 `ads/out/` is not committed: the source renders the same file every

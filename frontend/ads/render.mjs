@@ -96,7 +96,7 @@ for (const [name, b64] of Object.entries(stems)) writeFileSync(join(out, `${name
 console.log('rendered the music and effects stems')
 if (args.includes('--audio')) {
   await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', join(out, 'music.wav'), '-i', join(out, 'sfx.wav'),
-    '-filter_complex', '[0:a][1:a]amix=inputs=2:weights=1 0.8:normalize=0,loudnorm=I=-14:TP=-1.0:LRA=9,aresample=48000', join(out, 'mix.wav')])
+    '-filter_complex', '[0:a][1:a]amix=inputs=2:weights=1 0.8:normalize=0,loudnorm=I=-14:TP=-2.0:LRA=9,aresample=48000', join(out, 'mix.wav')])
   console.log('wrote ads/out/music.wav, sfx.wav and mix.wav')
   await browser.close()
   process.exit(0)
@@ -132,8 +132,9 @@ process.stdout.write(`\rframe ${frames}/${frames}\n`)
 await browser.close()
 
 // ── The two cuts: the picture with each mix, at the platforms'
-// loudness (-14 LUFS integrated, -1 dBTP) ─────────────────────
-const master = 'loudnorm=I=-14:TP=-1.0:LRA=9,aresample=48000'
+// loudness (-14 LUFS integrated) under a -2 dBTP ceiling, since the AAC
+// encode overshoots a -1 one ─────────────────────────────────
+const master = 'loudnorm=I=-14:TP=-2.0:LRA=9,aresample=48000'
 async function mux(file, filter, inputs) {
   await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', silent, ...inputs.flatMap(i => ['-i', i]),
     '-filter_complex', `${filter}${master}[a]`, '-map', '0:v', '-map', '[a]',
