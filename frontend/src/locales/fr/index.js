@@ -1828,6 +1828,16 @@ const exam = {
   // question d'écoute ratée exploitable — caché pendant l'épreuve,
   // proposé à la correction.
   examTranscript:      'Transcription',
+  // L'étude sous une question corrigée (exam/ExamStudy.jsx) : sa
+  // phrase et ses propositions traduites, et la décomposition.
+  examStudyOpen:       'Traduction et décomposition',
+  examStudyHide:       'Masquer la traduction',
+  examStudyFailed:     'La traduction est indisponible pour le moment. Réessaie dans un instant.',
+  examStudyRetry:      'Réessayer',
+  examStudySentence:   'La phrase',
+  examStudyChoices:    'Les propositions',
+  examStudyPassage:    'Le texte',
+  examStudyNoWord:     'pas un mot',
 
   // ── Feuille de réponses ──
   // La grille numérotée sous la question. Nommée d'après ce qu'elle

@@ -683,6 +683,83 @@
   white-space: pre-line;
 }
 
+/* The study under a reviewed question (exam/ExamStudy.jsx): the
+   choices translated, the passage or script translated, the sentence's
+   breakdown. One hairline above it, as the transcript has. */
+.exam-study {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  text-align: left;
+}
+.exam-study__toggle { align-self: flex-start; }
+.exam-study__failed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.exam-study__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.exam-study__part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.exam-study__context {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  white-space: pre-line;
+  color: var(--text-primary);
+}
+.exam-study__choices {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.exam-study__choice {
+  display: grid;
+  grid-template-columns: auto minmax(0, max-content) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-card);
+  background: var(--overlay-hover);
+}
+.exam-study__choice--right {
+  box-shadow: inset 3px 0 0 var(--success);
+}
+.exam-study__no {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.exam-study__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.exam-study__en {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.exam-study__sentence {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+}
+
 
 .exam-sheet__legend {
   display: flex;

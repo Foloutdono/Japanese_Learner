@@ -1899,6 +1899,16 @@ const exam = {
   // listening question learnable — withheld during the exam, offered
   // in review.
   examTranscript:      'Transcript',
+  // The study under a reviewed question (exam/ExamStudy.jsx): its
+  // sentence and choices translated, and the sentence's breakdown.
+  examStudyOpen:       'Translation & breakdown',
+  examStudyHide:       'Hide translation',
+  examStudyFailed:     'The translation is unavailable right now. Try again shortly.',
+  examStudyRetry:      'Try again',
+  examStudySentence:   'The sentence',
+  examStudyChoices:    'The choices',
+  examStudyPassage:    'The text',
+  examStudyNoWord:     'not a word',
 
   // ── Answer sheet ──
   // The numbered grid under the question. Named for the real thing it

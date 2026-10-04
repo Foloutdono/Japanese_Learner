@@ -16,6 +16,8 @@ from study.exam_schema import ensure_exam_schema
 from study.exam_scoring import flatten_questions, score_attempt
 from study.exam_blueprint import LEVEL_BLUEPRINT, name_mondai
 from study.exam_gen_utils import GenerationFailed
+from study.exam_validation import paper_gives_answer_away
+from study.exam_study import study_question
 from study.llm_shared import LLMUnavailable
 from study import exam_grammar_gen, exam_listening_gen, exam_reading_gen, exam_vocab_gen
 from study.exam_vocab_gen import generate_vocabulary_paper
@@ -222,12 +224,16 @@ def _select_paper(exam_id: str, user_id: str, exclude: tuple[int, ...] = ()) -> 
                            AND a.revision = p.revision
                            AND a.user_id = %s)
                  ORDER BY revision
-                 LIMIT 1
                 """,
                 (exam_id, generator_version, list(exclude), user_id),
             )
-            row = cur.fetchone()
-            return (row[0], row[1]) if row else None
+            # A paper stored before a check existed that it fails is
+            # passed over rather than served (paper_gives_answer_away:
+            # the underlined word among its own choices).
+            for revision, paper in cur:
+                if not paper_gives_answer_away(paper):
+                    return revision, paper
+            return None
     finally:
         conn.close()
 
@@ -745,3 +751,31 @@ def get_attempt(exam_id: str, attempt_id: int, user_id: str = Depends(get_user_i
         "startedAt": _epoch_ms(started_at),
         "finishedAt": _epoch_ms(finished_at),
     }
+
+
+@router.get("/api/exams/{exam_id}/revisions/{revision}/questions/{question_id}/study")
+def get_question_study(exam_id: str, revision: int, question_id: str, lang: str = "en",
+                       user_id: str = Depends(get_user_id)):
+    """A sat question made something to study, for the result screen's
+    review: its sentence with the answer in place (what the breakdown
+    reads), that sentence and each choice in the learner's language, and
+    a reading passage or listening script translated. The texts come
+    from the stored paper, never from the request; the translations are
+    cached by content (study/exam_study.py), so a shared paper costs one
+    model call per question and language, whoever asks."""
+    if exam_id not in EXAM_GENERATORS:
+        raise HTTPException(status_code=404, detail=f"Unknown exam id: {exam_id}")
+    paper = _load_paper(exam_id, revision)
+    if paper is None:
+        raise HTTPException(status_code=404, detail=f"Unknown revision {revision} for {exam_id}")
+    # Imported here: routes/reading.py seeds the comprehension pool at
+    # import, which the exam router has no business triggering.
+    from routes.reading import LANG_NAMES
+    try:
+        study = study_question(paper, question_id, lang, LANG_NAMES.get(lang, lang))
+    except (LLMUnavailable, GenerationFailed) as e:
+        logger.warning("exam study for %s/%s/%s failed: %s", exam_id, revision, question_id, e)
+        raise HTTPException(status_code=503, detail="Translation unavailable")
+    if study is None:
+        raise HTTPException(status_code=404, detail=f"Unknown question {question_id}")
+    return study

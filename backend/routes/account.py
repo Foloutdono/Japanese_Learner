@@ -116,6 +116,7 @@ SHARED = {
     "comprehension_pool":    "generated exercises are a shared pool, like exam_papers; only who READ one is personal (comprehension_served, in PLAN)",
     "exam_papers":           "generated papers are a shared pool; other learners' attempts reference them",
     "exam_generation_jobs":  "claim locks keyed by exam id, not by user",
+    "exam_translations":     "a sat question's translations, keyed by a hash of the text; shared across every caller",
     "grammar_sentences":     "generated content cache keyed by (level, pattern)",
     "phrase_analysis_cache": "keyed by a hash of the phrase; shared across every caller",
 }
