@@ -60,9 +60,11 @@ function legsOf(stations) {
 
 // The train, facing the destination. Its windows and stripe are holes
 // (evenodd), not paint, so it reads on whatever the track is drawn on.
-function Train() {
+// Exported for the card's back (JourneyCard.jsx, plan 174), which rides
+// the same train on its own line.
+export function Train({ className = 'jour-track__train' }) {
   return (
-    <svg className="jour-track__train" viewBox="0 0 46 15" focusable="false">
+    <svg className={className} viewBox="0 0 46 15" focusable="false" aria-hidden="true">
       <path
         fillRule="evenodd"
         d="M1 2.5Q1 1 2.5 1H27C35 1 41.5 5 45 11.5Q45.8 13.5 43.5 13.5H2.5Q1 13.5 1 12Z

@@ -5,11 +5,13 @@ import { LangProvider } from '../../LangContext'
 import '../../index.css'
 import { addDays } from '../../domain/goalMath'
 
-// ── The status sheet (進捗が主役 round) ──────────────────────────
-// The pass's back, as a sheet off the HUD's station panel: the
-// distance travelled, the ghost track, the two comparison rows and
-// the two honest moves — and the detail that a reprint re-judges the
-// pass the moment the fresh facts arrive.
+// ── The status sheet (進捗が主役 round; the card's back since plan 174) ──
+// The pass's back, as a sheet off the HUD's station panel. On a phone
+// (this lane's 414px) it is the card turned over (JourneyCard.jsx, the
+// owner's pick C″): the drift in days, signed, the route, the line with
+// your train and the promise's ghost, the next stop and the arrival
+// dated -- then the two honest moves under the card, and the detail
+// that a reprint re-judges the pass the moment the fresh facts arrive.
 
 const apiJson = vi.fn()
 const apiFetch = vi.fn()
@@ -102,20 +104,21 @@ describe('StatusSheet', () => {
     // the provider's own default language, so every assertion on copy
     // below accepts either table.)
     expect(sheet.getAttribute('aria-label')).toMatch(/En retard|Delayed/)
-    // Distance leads: the count, the percent, and the stop ahead. The
-    // group separator is the locale's, thin space included.
-    const count = sheet.querySelector('.jour-dist__count').textContent.replace(/[\s,]/g, '')
-    expect(count).toContain('112')
-    expect(count).toContain('1000')
-    expect(sheet.querySelector('.jour-dist__pct').textContent).toMatch(/11\s*%/)
-    expect(sheet.querySelector('.jour-dist__leg').textContent).toMatch(/retard|behind plan/)
-    // The track carries the promise, and both comparisons are there.
-    expect(sheet.querySelector('.jour-track__plan')).not.toBeNull()
-    expect(sheet.querySelectorAll('.jour-cmp').length).toBe(2)
-    expect(sheet.querySelector('.jour-cmp__sub').textContent).toContain('10')
-    // Every date carries its year: "3 Jan" beside "15 Feb" read as
-    // early when the projection crossed a year end.
-    expect(sheet.querySelectorAll('.jour-cmp__v')[1].textContent).toMatch(/20\d\d/)
+    // The card's back, in the free card's stuff (no credits seeded).
+    const card = sheet.querySelector('.jcard')
+    expect(card.classList.contains('jcard--free')).toBe(true)
+    // The drift, signed and wordless: a late train is a minus.
+    expect(card.querySelector('.jcard__st').textContent).toMatch(/^−\d+ (jours?|days?)$/)
+    expect(card.querySelector('.jcard__route').textContent).toBe('N5 → N3')
+    // The line: the stops named, the promise's ghost labelled, your train.
+    expect([...card.querySelectorAll('.jcard__stop b')].map(b => b.textContent)).toEqual(['発', 'N5', 'N4', 'N3'])
+    expect(card.querySelector('.jcard__car--ghost i').textContent).toMatch(/promis/)
+    expect(card.querySelector('.jcard__car--you svg')).not.toBeNull()
+    // The arrival under the terminus carries its year: "3 Jan" beside
+    // "15 Feb" read as early when the projection crossed a year end.
+    expect(card.querySelector('.jcard__stop--last small').textContent).toMatch(/20\d\d/)
+    // The old body's figures are not drawn on a phone.
+    expect(sheet.querySelector('.jour-dist, .jour-cmp')).toBeNull()
 
     closeStatus()
     await settle(30)
@@ -142,12 +145,9 @@ describe('StatusSheet', () => {
     openStatus()
     await settle()
     const sheet = dialog()
-    expect([...sheet.querySelectorAll('.jour-track__station-name')].map(el => el.textContent))
+    expect([...sheet.querySelectorAll('.jcard__stop b')].map(el => el.textContent))
       .toEqual(['発', 'かな'])
-    const count = sheet.querySelector('.jour-dist__count').textContent.replace(/[\s,]/g, '')
-    expect(count).toContain('70')
-    expect(count).toContain('224')
-    expect(sheet.querySelector('.jour-dist__leg').textContent).toContain('かな')
+    expect(sheet.querySelector('.jcard__route').textContent).toBe('発 → かな')
   })
 
   it('offers the two honest moves when behind, and a pace reprint adopts the recovery', async () => {
@@ -174,10 +174,13 @@ describe('StatusSheet', () => {
       expect(call).toBeTruthy()
       expect(JSON.parse(call[2].body)).toEqual({ dailyNewTarget: 21 })
     })
-    // The store refetched: the sheet now judges the pass on the new pace.
+    // The store refetched the facts the card is drawn from, so the
+    // sheet re-judges the pass on them (the card prints no promised
+    // pace to read the 21 back off).
     await vi.waitFor(() => {
-      expect(dialog().querySelector('.jour-cmp__sub').textContent).toContain('21')
+      expect(apiFetch.mock.calls.some(([path]) => path === '/api/journey/status')).toBe(true)
     })
+    expect(dialog().querySelector('.jcard')).not.toBeNull()
   })
 
   it('moves the date in ink and re-judges the pass on the way back', async () => {
@@ -221,11 +224,11 @@ describe('StatusSheet', () => {
     await settle()
     const sheet = dialog()
     expect(sheet.classList.contains('jour-st--onTime')).toBe(true)
-    expect(sheet.querySelector('.jour-track__plan')).toBeNull()
-    // No promise to stand against: no arrival row, and the head names
-    // no drift — the pace row is the whole judgement.
-    expect(sheet.querySelectorAll('.jour-cmp').length).toBe(1)
-    expect(sheet.querySelector('.jour-dist__leg').textContent).not.toMatch(/retard|avance|behind|ahead/)
+    // No promise to stand against: no ghost, no route, and the head
+    // names the state rather than a drift.
+    expect(sheet.querySelector('.jcard__car--ghost')).toBeNull()
+    expect(sheet.querySelector('.jcard__route')).toBeNull()
+    expect(sheet.querySelector('.jcard__st').textContent).not.toMatch(/\d/)
     expect(sheet.querySelector('.jour-act')).toBeNull()
     const office = sheet.querySelector('.status-sheet__office')
     expect(office).not.toBeNull()

@@ -79,7 +79,7 @@ export default function SentenceStation({ session, base, levelsOnly = false }) {
   if (levelsPage || levelsOnly) {
     const run = lvl => navigate(levelsOnly ? `${base}/${lvl}` : `${base}/level/${lvl}`)
     return (
-      <SelectionScreen sub={t.selectLevel} aside={levelsOnly ? leavePractice : leaveSources}>
+      <SelectionScreen aside={levelsOnly ? leavePractice : leaveSources}>
         {/* The figures on these stops are the level's VOCABULARY: a
             sentence at N4 is built from N4 words (backend's
             reading._pick_words_level), so how many of them the learner
@@ -95,7 +95,7 @@ export default function SentenceStation({ session, base, levelsOnly = false }) {
   // ── The word list and the tier, on one page ──
   if (tiersPage) {
     return (
-      <SelectionScreen sub={t.selectTier} aside={leaveSources}>
+      <SelectionScreen aside={leaveSources}>
         <Seg
           full
           label={t.selectDomain}
@@ -127,7 +127,7 @@ export default function SentenceStation({ session, base, levelsOnly = false }) {
   ]
   const NEXT = sourcePaths(base)
   return (
-    <SelectionScreen sub={t.selectStudySource} aside={leavePractice}>
+    <SelectionScreen aside={leavePractice}>
       <ModeSelector
         modes={SOURCES}
         onSelect={key => (key === 'mastery'

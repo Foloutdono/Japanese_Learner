@@ -63,16 +63,51 @@ describe('the stage at phone width', () => {
       // The rating bar docks over the level bar's height, not on the inset.
       const bar = screen.container.querySelector('.rating-bar')
       expect(getComputedStyle(bar).bottom).toBe('36px')
-      // Tiles a gap apart, and the best answer filled in the pass's gold
-      // with the panel's ink on it; the plain tile keeps the panel ink.
-      expect(getComputedStyle(screen.container.querySelector('.rating-bar__buttons')).columnGap).toBe('8px')
+      // RB1 段 (plan 174): one instrument -- no gap, one hairline and a
+      // panel's corner round the four, a hairline between two -- and the
+      // best answer is a tile like the others, no gold: gold is the
+      // action's metal. Each word sits under its verdict's pill.
+      const buttons = getComputedStyle(screen.container.querySelector('.rating-bar__buttons'))
+      expect(buttons.columnGap).toBe('0px')
+      expect(buttons.outlineWidth).toBe('1px')
+      expect(buttons.outlineOffset).toBe('-1px')
+      expect(buttons.borderTopLeftRadius).toBe('8px')
+      expect(buttons.overflow).toBe('hidden')
       const [plain, best] = screen.container.querySelectorAll('.rating-bar__btn')
-      const gold = getComputedStyle(document.documentElement).getPropertyValue('--accent2').trim()
-      const hex = gold.replace('#', '').match(/../g).map(h => parseInt(h, 16))
-      expect(getComputedStyle(best).backgroundColor).toBe(`rgb(${hex.join(', ')})`)
-      expect(getComputedStyle(best).color).toBe(getComputedStyle(lvl).backgroundColor)
+      expect(getComputedStyle(best).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+      expect(getComputedStyle(best).color).toBe(getComputedStyle(lvl).color)
       expect(getComputedStyle(plain).color).toBe(getComputedStyle(lvl).color)
-      expect(getComputedStyle(plain).borderRadius).toBe('6px')
+      expect(getComputedStyle(plain).borderRadius).toBe('0px')
+      expect(getComputedStyle(best).borderLeftWidth).toBe('1px')
+      const ring = getComputedStyle(plain.querySelector('.rating-bar__btn-ring'))
+      expect(ring.width).toBe('26px')
+      expect(ring.height).toBe('6px')
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
+  })
+
+  // 上下 (plan 174): a run with a tally floors on the level as the card's
+  // struck 辻, a rung taller than the strip, and the docks above read
+  // its height.
+  it('docks the run\'s floor on the bottom edge and the rating bar on top of it', async () => {
+    document.documentElement.dataset.chrome = 'stage'
+    try {
+      const screen = await render(
+        <div className="screen">
+          <main className="container stage">
+            <div className="prompt-card"><div className="prompt-card__body">駅</div></div>
+            <div className="rating-bar"><div className="rating-bar__buttons rating-bar__buttons--2" /></div>
+          </main>
+          <div className="run-floor run-floor--free">
+            <span className="run-floor__track"><span className="run-floor__fill" style={{ width: '40%' }} /></span>
+          </div>
+        </div>
+      )
+      const floor = screen.container.querySelector('.run-floor')
+      expect(getComputedStyle(floor).position).toBe('sticky')
+      expect(floor.getBoundingClientRect().height).toBe(60)
+      expect(getComputedStyle(screen.container.querySelector('.rating-bar')).bottom).toBe('60px')
     } finally {
       delete document.documentElement.dataset.chrome
     }

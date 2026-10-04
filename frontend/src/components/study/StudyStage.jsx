@@ -6,8 +6,9 @@ import { openBalance } from '../../stores/credits'
 import { useDesk } from '../../hooks/useDesk'
 import { useLang } from '../../LangContext'
 import { EntryDockContext } from './entryDock'
-import { RunPanelsContext } from './runPanels'
+import { RunPanelsContext, RunConsoleContext } from './runPanels'
 import { RunPanel } from './RunPanel'
+import { RunMeter, RunFloor } from './RunConsole'
 
 // ── The run's frame (plan 070) ────────────────────────────────
 // The canvas's <main class="stage">: both bars have left, the head
@@ -51,15 +52,25 @@ import { RunPanel } from './RunPanel'
 // (side={null}, plan 123) and no panels beside its error; `done` is the
 // run's end, and one that rated nothing keeps no three zeros either
 // (RunRecords).
+//
+// Below the desk a run with `records` wears the console instead (plan
+// 174, components/study/RunConsole.jsx): the run's meter under the head
+// -- a segment a rating, "n / total" when `remaining` is a count, the
+// run's own score when it is a string (a practice run's) -- and
+// the level on the floor in place of the level bar. The head's remaining
+// pill goes (the meter carries it) and so does the run's own hairline
+// (RunConsoleContext). `meter={false}` keeps a run on the old floor: the
+// comprehension run, whose answers are graded together at its end.
 export function StudyStage({
   color, onLeave, leaveLabel, where, sub, remaining, pass = true, aside,
   toast, onToastDone, className = '', levelBar = true, side, sideLabel, records = false, done = false,
-  panel = null, progress = null, recordsLabel = null, children,
+  panel = null, progress = null, recordsLabel = null, meter = true, children,
 }) {
   const desk = useDesk()
   const { t } = useLang()
   const split = desk && side !== undefined
   const panels = split && records && side !== null
+  const runConsole = !desk && records && meter
   const classes = ['container', 'stage', className].filter(Boolean).join(' ')
   // 進級 (plans 142, 173): on the desk the level-up's card docks at the
   // top of a run's column rather than floating over it -- the left column
@@ -69,6 +80,7 @@ export function StudyStage({
   const [dock, setDock] = useState(null)
   return (
     <RunPanelsContext.Provider value={panels}>
+    <RunConsoleContext.Provider value={runConsole}>
     <div className={split ? `screen desk-run${panels ? ' desk-run--panels' : ''}` : 'screen'}>
       {toast !== undefined && <XpToast toast={toast} onDone={onToastDone} dock={split ? dock : null} />}
       {panels && (
@@ -81,9 +93,10 @@ export function StudyStage({
         <EntryDockContext.Provider value={split}>
           <StageHead
             onLeave={onLeave} leaveLabel={leaveLabel}
-            where={where} sub={sub} remaining={panels ? undefined : remaining}
+            where={where} sub={sub} remaining={panels || runConsole ? undefined : remaining}
             pass={pass} onPass={openBalance} aside={aside} keys={!panels}
           />
+          {runConsole && <RunMeter remaining={remaining ?? null} />}
           {children}
         </EntryDockContext.Provider>
       </main>
@@ -93,9 +106,10 @@ export function StudyStage({
           `levelBar={false}` is for the one phase that is bounded to the
           screen and can pay nothing — the comprehension passage. On the
           desk's panels the session panel draws it instead. */}
-      {levelBar && !panels && <LevelBar />}
+      {levelBar && !panels && (runConsole ? <RunFloor /> : <LevelBar />)}
       {split && <RunSide label={sideLabel} color={color} ref={panels ? undefined : setDock}>{side}</RunSide>}
     </div>
+    </RunConsoleContext.Provider>
     </RunPanelsContext.Provider>
   )
 }

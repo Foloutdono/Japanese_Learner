@@ -157,7 +157,12 @@ describe('the boot screen', () => {
 })
 
 describe('the closed gate', () => {
-  it('is opacity 0.45 and nothing else, across the button family', async () => {
+  // 一金 (plan 174): the metal goes unlit rather than faded -- gold at
+  // 0.45 composited to a bronze that read as a fourth colour -- so the
+  // two metal buttons close onto the panel's ground and hairline in the
+  // secondary ink, at full opacity; the ghost secondary keeps the fade.
+  // The shape is the open gate's either way.
+  it('keeps its shape, the metal unlit and the secondary faded', async () => {
     const screen = await render(
       <div>
         <button type="button" className="btn-depart"><span className="btn-depart__jp">出発する</span></button>
@@ -167,15 +172,20 @@ describe('the closed gate', () => {
       </div>
     )
     const [open, closed, primary, secondary] = screen.container.querySelectorAll('button')
-    for (const btn of [closed, primary, secondary]) {
+    for (const btn of [closed, primary]) {
       const cs = getComputedStyle(btn)
-      expect(cs.opacity).toBe('0.45')
-      expect(cs.boxShadow).toBe('none')
+      expect(cs.opacity).toBe('1')
+      expect(cs.backgroundImage).toBe('none')
+      expect(cs.boxShadow).toMatch(/inset/)
       expect(cs.transform).toBe('none')
     }
-    // The shape and the fill are the open gate's.
+    expect(getComputedStyle(open).backgroundImage).toMatch(/linear-gradient/)
+    const sec = getComputedStyle(secondary)
+    expect(sec.opacity).toBe('0.45')
+    expect(sec.boxShadow).toBe('none')
+    expect(sec.transform).toBe('none')
+    // The shape is the open gate's.
     const a = getComputedStyle(open), b = getComputedStyle(closed)
-    expect(b.backgroundColor).toBe(a.backgroundColor)
     expect(b.borderTopLeftRadius).toBe(a.borderTopLeftRadius)
     expect(b.paddingTop).toBe(a.paddingTop)
     expect(closed.getBoundingClientRect().height).toBe(open.getBoundingClientRect().height)

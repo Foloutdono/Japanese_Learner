@@ -9,7 +9,7 @@ import { CardPanel } from '../components/study/CardPanel'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
-import { MCQGrid, TypeInput } from '../components/study/QuizComponents'
+import { MCQGrid, TypeInput, RunHairline } from '../components/study/QuizComponents'
 import { DrawingQuiz } from '../components/study/DrawingCanvas'
 import ReadingsInput from '../components/study/ReadingsInput'
 import RatingBar from '../components/study/RatingBar'
@@ -387,13 +387,7 @@ export default function TodayRun({ session }) {
       {/* The run's own hairline: what this session has cleared of what
           it has to clear, in the day's gold. A mixed queue has no
           per-deck stage split to draw, so the bar is the run's. */}
-      {length > 0 && (
-        <div className="deck-progress" aria-hidden="true">
-          <div className="deck-progress__bar">
-            <div className="deck-progress__segment" style={{ width: `${pct}%`, background: 'var(--accent2)' }} />
-          </div>
-        </div>
-      )}
+      {length > 0 && <RunHairline pct={pct} color="var(--accent2)" />}
 
       {error && !card && <SessionError error={error} onRetry={retry} />}
       {loading && !card && <Loading />}

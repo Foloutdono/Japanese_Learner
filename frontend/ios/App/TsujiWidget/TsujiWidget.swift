@@ -42,11 +42,11 @@ private enum Ink {
 
     static func line(_ line: String) -> Color {
         switch line {
-        case "kana": return Color(hex: 0xc1442c)
-        case "vocab": return Color(hex: 0x3f6d8e)
-        case "kanji": return Color(hex: 0x7c6a9c)
-        case "grammar": return Color(hex: 0x6b8a4a)
-        case "personal": return Color(hex: 0x9c4a5e)
+        case "kana": return Color(hex: 0xb84f3c)
+        case "vocab": return Color(hex: 0x3e7ba6)
+        case "kanji": return Color(hex: 0x7b68a3)
+        case "grammar": return Color(hex: 0x608045)
+        case "personal": return Color(hex: 0xa15d6e)
         default: return Color(hex: 0x575060)
         }
     }

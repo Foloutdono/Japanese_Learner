@@ -491,6 +491,9 @@ export default function ComprehensionRun({ session }) {
       toast={fare.toast}
       onToastDone={fare.toastDone}
       records
+      // Its answers are graded together at the end, so a meter would sit
+      // empty through the questions: it keeps its own count (plan 174).
+      meter={false}
       recordsLabel={t.deskQuestionsRated}
       panel={(
         <RunLines

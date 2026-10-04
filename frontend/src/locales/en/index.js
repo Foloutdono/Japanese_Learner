@@ -638,6 +638,8 @@ const quiz = {
   levelUp:          'Level up!',
   level:            'Level',
   levelShort:       'Lv',
+  // 上下 (plan 174): the run's meter under the head, for a screen reader.
+  runMeter:          (n, total) => (total == null ? `${n} rated` : `${n} of ${total}`),
 
 }
 
@@ -1536,6 +1538,12 @@ const profile = {
     `Last 14 days: **${a} a day** against your promised **${p}**. No fixed arrival — the pace is the whole promise.`,
   jourFootPaceSuspended: (p) =>
     `No study in 14 days against a promise of **${p} a day**. The line waits — the gate opens with one card.`,
+  // 定期券の裏 (plan 174): the line alone on the card's back. The drift
+  // in days, signed and wordless -- the colour says the rest; the ghost
+  // train is labelled "promised".
+  jourDrift:         (n) => `${n > 0 ? '+' : '−'}${Math.abs(n)} day${Math.abs(n) > 1 ? 's' : ''}`,
+  jourPromised:      'promised',
+  jourRoute:         (from, to) => `${from} → ${to}`,
   jourNoDest:        'No destination on this pass.',
   jourNoDestLink:    'Set one at the office',
   // The two moves are ONE choice, so they are written as one: the

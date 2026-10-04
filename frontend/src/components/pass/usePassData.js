@@ -45,6 +45,10 @@ export function usePassData(profile = null) {
     status: panel.status,
     word: panel.status === 'offline' ? t.hudOffline : t.hudStatus[panel.status],
     drift: driftWords(t, panel),
+    // The drift as the card prints it since plan 174: the days, signed,
+    // in the state's ink, with no word -- the word and the drift stay in
+    // the meter's name for a screen reader.
+    signed: panel.days ? t.statusDaysDelta(panel.status === 'ahead' ? panel.days : -panel.days) : null,
     days: panel.days,
   }
 

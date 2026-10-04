@@ -229,14 +229,16 @@ const Fixture = () => (
 
     {/* 作文 (plan 125) -- the thirteenth pigment, 紫, measured where the
         twelve before it were assumed: its filled action at rest and at
-        the hover mix (the guard cannot hover, so the 79% recipe is
-        written inline), and its plate roundel. */}
+        the hover (the guard cannot hover, so the hover's ground is
+        written inline), and its plate roundel. Since plan 174 the action
+        is the gate's metal in every section, so these two measure the
+        metal under 紫: its rest and its lit stop. */}
     <div style={{ '--line-color': 'var(--line-sakubun)' }}>
       <button type="button" className="btn-primary sb-btn">Valider</button>
       <button
         type="button"
         className="btn-primary sb-btn-hover"
-        style={{ background: 'color-mix(in srgb, var(--line-sakubun) 79%, var(--bg-panel))' }}
+        style={{ background: 'var(--gate-gold-lit)' }}
       >
         Valider
       </button>
@@ -985,8 +987,8 @@ const SITES = [
   ['.lp-edge', 'plate foot, the stops either side'],
   ['.lp-here', 'plate foot, the stop reached'],
   // Plan 124 -- 紫, the composition platform's pigment (see the fixture).
-  ['.sb-btn', "composition's filled action at rest (紫 mixed 70% toward the panel)"],
-  ['.sb-btn-hover', "composition's filled action hovering (the 79% mix)"],
+  ['.sb-btn', "composition's filled action at rest (the metal, under 紫)"],
+  ['.sb-btn-hover', "composition's filled action hovering (the metal's lit stop)"],
   ['.sb-roundel', "composition's plate roundel (紫 mixed toward the ink)"],
   ['.station-sign__kana', 'station sign kana'],
   ['.station-sign__romaji', 'station sign romaji'],

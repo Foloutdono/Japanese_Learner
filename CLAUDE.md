@@ -1286,7 +1286,41 @@ runtime purpose. Two consequences worth knowing:
   `screens/SettingsScreen.jsx`, the card's tests and `index.css` and its
   机 section; DESIGN.md, "The pass has two materials", Rewards and "The
   desk").
-  When starting a new wave, begin at **174** or higher, and check
+  **174** is 調和, the harmony round (the owner's picks on the canvas
+  "Tsuji — harmony": T2 for the type, S2 for the grounds, C″, console C
+  refined and H4 from the round before it; RB1 for the rating bar): seven
+  rules the screens had drifted from, read statically by
+  `src/harmony.css.test.js` — 一面 a panel at `--r-panel` and a control at
+  `--r-card`; 一金 every primary action the gate's metal (`--metal`,
+  unlit rather than faded when disabled; the console's action pill, "+
+  Créer un deck", kept its pigment by the owner's word); 一選 what is
+  chosen lit in the selection's gold (`--sel-*`), where you are keeping
+  the line's pigment; 線 a line's edge 3px and a plate's count unboxed;
+  一戻 the way back bare; 状態 the verdicts one ramp and no gold tile;
+  一族 the twelve line pigments recut to one lightness per theme (the
+  landing page's tokens and the native widgets' colours with them). 標:
+  a screen's or sheet's name serif at `--fs-heading`, every name under it
+  the display face bold, one caption, no instructional sub. 墨: in the
+  dark theme every panel the chrome's sumi (`--surface` is `--bg-panel`).
+  On a phone, the HUD's journey panel the arrival plate (H4, unchanged
+  since its pick), the status sheet the card's back with the drift signed
+  in the state's ink and no word (C″), and a run's console — the meter
+  under the head and the level on the floor (`--run-floor-h`) — and the
+  rating bar one instrument again, each word under its verdict's pill
+  (cited in `components/chrome/Hud.jsx`'s `ArrivalPlate`,
+  `components/journey/JourneyCard.jsx`, `JourneyBody.jsx`'s
+  `JourneyMoves`, `StatusSheet.jsx`, `GhostTrack.jsx`,
+  `components/study/RunConsole.jsx`, `StudyStage.jsx`, `runPanels.js`,
+  `QuizComponents.jsx`'s `RunHairline`, `RatingBar.jsx`,
+  `stores/runTally.js`'s `verdicts`, `components/pass/usePassData.js`,
+  `PassBack.jsx`, `screens/TodayRun.jsx`, `screens/ComprehensionRun.jsx`,
+  `landing/tokens.mjs`, `android/.../TrainWidget.java`,
+  `ios/App/TsujiWidget/`, `src/harmony.css.test.js`,
+  `components/study/RunConsole.phone.test.jsx`, the phone tests it
+  changed and `index.css`; DESIGN.md, "One line, one colour", "One metal,
+  one selection", "A name's rank", Surfaces, "The primary button",
+  Controls, "The study stage on a phone" and The chrome).
+  When starting a new wave, begin at **175** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

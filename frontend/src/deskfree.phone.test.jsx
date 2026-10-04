@@ -1477,8 +1477,12 @@ describe('the pointer and the copy (plan 123, P19)', () => {
 // fixed above the level bar, and this run's three figures on the bar
 // beside the fare. A phone's level bar is the strip it always was, with
 // no figures on it, and its rating bar docks in the stage as before.
-describe('the console (plan 124)', () => {
-  it('keeps the level bar a strip with no figures, and the rating bar docked in the stage', async () => {
+// Plan 174 gave the phone its own console (components/study/RunConsole.jsx,
+// the owner's pick "console C refined"): a run with a tally draws the
+// run's meter under the head and the level on the floor, in place of
+// the level strip. The contract below is that one's.
+describe('the console (plans 124, 174)', () => {
+  it('keeps the desk\'s console off, the run\'s meter under the head, the level on the floor and the rating bar docked', async () => {
     const { MemoryRouter } = await import('react-router-dom')
     const { StudyStage } = await import('./components/study/StudyStage')
     const { CardTransition } = await import('./components/study/CardTransition')
@@ -1497,9 +1501,12 @@ describe('the console (plan 124)', () => {
     )
     await settle(500)
     expect(document.querySelector('.desk-run--console, .desk-tally, .desk-run__side')).toBeNull()
-    const lvl = document.querySelector('.lvlbar')
-    expect(lvl.getBoundingClientRect().height).toBe(36)
-    expect(lvl.querySelector('.lvlbar__track').getAttribute('role')).toBe('progressbar')
+    expect(document.querySelector('.lvlbar')).toBeNull()
+    const floor = document.querySelector('.screen > .run-floor')
+    expect(floor.getBoundingClientRect().height).toBe(60)
+    expect(floor.querySelector('.run-floor__track').getAttribute('role')).toBe('progressbar')
+    // The meter follows the head, inside the stage.
+    expect(document.querySelector('.stage__head + .run-meter')).not.toBeNull()
     expect(getComputedStyle(document.querySelector('.rating-bar')).position).toBe('sticky')
   })
 })
@@ -1536,8 +1543,12 @@ describe('the three panels (plan 126)', () => {
     expect(bar.classList.contains('rating-bar--idle')).toBe(true)
     expect(bar.classList.contains('rating-bar--unlit')).toBe(false)
     expect([...document.querySelectorAll('.rating-bar__btn')].some(b => b.disabled)).toBe(false)
-    expect(document.querySelector('.today-remaining')).not.toBeNull()
-    expect(document.querySelector('.screen > .lvlbar')).not.toBeNull()
+    // The count left rides the meter since plan 174, its length the
+    // three left and no rating yet.
+    expect(document.querySelector('.today-remaining')).toBeNull()
+    expect(document.querySelectorAll('.run-meter__s')).toHaveLength(3)
+    expect(document.querySelector('.run-meter__n').textContent).toBe('0/ 3')
+    expect(document.querySelector('.screen > .run-floor')).not.toBeNull()
   })
 })
 
@@ -1668,8 +1679,12 @@ describe('the run\'s lines (plan 129)', () => {
     await settle(300)
     expect(document.querySelector('.screen').className).toBe('screen')
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
-    expect(document.querySelector('.stage__head .today-remaining').textContent).toBe('1 / 1')
-    expect(document.querySelector('.screen > .lvlbar')).not.toBeNull()
+    // The head's score rides the meter since plan 174, a segment for the
+    // one sentence rated, in its verdict's ink.
+    expect(document.querySelector('.stage__head .today-remaining')).toBeNull()
+    expect(document.querySelector('.run-meter__n').textContent).toBe('1 / 1')
+    expect(document.querySelector('.run-meter__s--done.run-meter__s--q4')).not.toBeNull()
+    expect(document.querySelector('.screen > .run-floor')).not.toBeNull()
     expect(document.querySelector('.stage .prose__breakdown button')).not.toBeNull()
     expect(document.querySelector('kbd')).toBeNull()
     apiJson.mockReset()

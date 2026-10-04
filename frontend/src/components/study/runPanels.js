@@ -13,3 +13,12 @@ import { createContext } from 'react'
 // every phone, every run without a side, and the runs that pass no
 // records (a browse, a practice run, a ride).
 export const RunPanelsContext = createContext(false)
+
+// ── 上下 — whether a run wears the console on a phone (plan 174) ──
+// True inside a StudyStage below the desk that keeps a tally: the run's
+// meter under the head and the level on the floor
+// (components/study/RunConsole.jsx, the owner's pick "console C
+// refined"). The run's own hairline (QuizComponents' DeckProgress,
+// Today's) reads it and draws nothing there: the meter is the run's
+// progress, and two bars under one head said it twice.
+export const RunConsoleContext = createContext(false)

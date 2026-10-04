@@ -1656,7 +1656,7 @@
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
 }
 .anl-entry__row {
   display: flex;
@@ -2540,6 +2540,9 @@
      LevelBar.jsx): the dock's floor on a stage, the way the tab bar is
      the floor under the shell. */
   --lvlbar-h:       36px;
+  /* The run's floor on a phone (plan 174, RunConsole.jsx): the level as
+     the card's struck 辻, so a rung taller than the bar it replaced. */
+  --run-floor-h:    60px;
   /* The desk's rail (plan 113, components/chrome/DeskRail.jsx): the
      second chrome's one width, at and above the desk's 1100px. Declared
      here rather than inside the desk's own section because every :root
@@ -2599,9 +2602,18 @@
      --surface is lifted off the wall behind it: in dark theme
      --bg-card and --bg-main are close enough that a flat panel
      disappears. --surface-line is crisper than --border alone, which
-     all but vanishes on sumi. */
-  --surface:        color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
-  --surface-line:   color-mix(in srgb, var(--text-primary) 15%, var(--border));
+     all but vanishes on sumi.
+
+     墨, the panels sunk (plan 174, the owner's pick S2 of the canvas
+     "Tsuji — harmony"): in the dark theme every panel is the chrome's
+     own ink now, under the ground like a board set in a station wall,
+     so the HUD, the panels, the sheets and the tab bar are one
+     material and the page is the one step lighter around them. The
+     hairline is the panel ink's, which is what reads on sumi. Paper
+     keeps the lifted card (the washi block below): a sumi panel there
+     would need the panel's inks in every word it holds. */
+  --surface:        var(--bg-panel);
+  --surface-line:   color-mix(in srgb, var(--text-on-panel) 13%, var(--bg-panel));
   --surface-radius: 6px;
 
   /* ── 文字寸法 — the type scale ────────────────────────────
@@ -2686,11 +2698,14 @@
   /* ── 角丸 — radii, assigned by weight of object ──────────
      The app already rations these correctly; it just spells them as
      literals. --r-card is the same 6px as --surface-radius, which
-     stays as the name the surface trio uses. */
+     stays as the name the surface trio uses. Since plan 174 (一面) a
+     panel -- anything that holds a screen's content -- is --r-panel
+     and a control inside one is --r-card: src/harmony.css.test.js
+     reads the list. */
   --r-flat:          0;        /* the hairline lattice, board rows           */
   --r-plate:         4px;      /* the hanging 駅名標                         */
-  --r-card:          6px;      /* cards and panels                           */
-  --r-panel:         8px;      /* 発車標 and the next-service strip          */
+  --r-card:          6px;      /* controls: segments, fields, tiles          */
+  --r-panel:         8px;      /* panels, 発車標 and the next-service strip  */
   --r-identity:     10px;      /* 定期券 and the IC card                     */
   --r-pill:        999px;      /* pills, roundels, segmented toggles         */
   /* ── 影 — elevation, deliberately rationed ────────────────
@@ -2714,6 +2729,23 @@
   --gate-gold:      #c99a3e;
   --gate-gold-deep: #b0852f;
   --gate-lamp:      #e0b04f;
+  /* 一金 — one metal (plan 174, the harmony round): every primary
+     action is cut from the gate's gold, top-lit, inked --text-on-fill.
+     Four primaries had drifted into four colours — the gate's gold, the
+     exam's tea, the deck's sappanwood, the reading run's verdigris —
+     each a line pigment doing the metal's job. The hover lifts it
+     toward the panel ink rather than darkening it. */
+  --metal:          linear-gradient(180deg, var(--gate-gold-lit) 0%, var(--gate-gold) 100%);
+  --metal-hover:    linear-gradient(180deg, color-mix(in srgb, var(--gate-gold-lit) 80%, var(--text-on-panel)) 0%, var(--gate-gold-lit) 100%);
+  /* 一選 — one selection (plan 174): what is chosen — a chip, a
+     segment, a tab — is lit in the same gold, a wash and a line, in
+     every section. A chosen chip used to take the section's pigment
+     and a chosen segment the gold, so "selected" had two colours.
+     Where the learner IS on a line (your grade, your stop) is not a
+     choice and keeps the line's pigment. */
+  --sel-wash:       color-mix(in srgb, var(--accent2) 15%, transparent);
+  --sel-line:       color-mix(in srgb, var(--accent2) 60%, transparent);
+  --sel-ink:        color-mix(in srgb, var(--accent2) 65%, var(--text-primary));
 
   /* The serif face, which was hardcoded 57 times across the four
      stylesheets and had no token at all. Names and headings only —
@@ -2773,10 +2805,14 @@
   --accent2:        #c99a3e;
   /* Fuji-iro (藤色) — wisteria */
   --accent3:        #7c6a9c;
-  /* Matcha (抹茶) */
-  --success:        #7d9a5b;
+  /* Matcha (抹茶). The five state inks — this, kohaku, rokushou,
+     sabi and the rating's enji — are one ramp since plan 174 (状態, the
+     harmony round): red to green at one strength, OKLCH lightness .62
+     to .72 where they ran .54 to .74, so no verdict shouts over another
+     and the teal no longer sinks into the sumi it is drawn on. */
+  --success:        #74a15f;
   /* Kohaku (琥珀) — amber, kept close to yamabuki but distinct */
-  --warning:        #d1a24a;
+  --warning:        #c89d48;
   /* Enji-iro (臙脂色) — deep carmine */
   --danger:         #9c3428;
 
@@ -2806,9 +2842,9 @@
   /* Ai-iro (藍色) — indigo, for cool contrast against the vermillion accent */
   --indigo:         #3d5a73;
   /* Rokusho-iro (緑青色) — verdigris, the patina green of aged bronze */
-  --teal:            #4f7a72;
+  --teal:            #499d8e;
   /* Sabi-iro (錆色) — rust, the colour of oxidised iron */
-  --rust:            #a8622f;
+  --rust:            #c37746;
   /* Enji-iro (臙脂色) — deep carmine, dedicated to the rating bar's q1
      ("wrong") ink. Plan 045's mockup asks for exactly #b7402a here,
      which is also --state-learning's value and, in light theme,
@@ -2817,8 +2853,10 @@
      its own named token rather than a reach for either of those. That
      it lands on the same hex is the traditional palette being small,
      not a hidden alias: --accent and --line-kana already coincide the
-     same way in dark theme, as two independently-named tokens. */
-  --rating-wrong:    #b7402a;
+     same way in dark theme, as two independently-named tokens. Since
+     plan 174 it is a step lighter than --state-learning, on the state
+     ramp above (--success's note). */
+  --rating-wrong:    #c86556;
 
   /* Kinari (生成り) — raw silk, warm off-white */
   --text-primary:   #ece5d8;
@@ -2861,18 +2899,31 @@
      These walk the wheel instead, so no two are confusable and none
      carries a second meaning. Still traditional pigments — that
      convention is worth keeping; it just needed to be a set rather
-     than leftovers. */
-  --line-kana:      #c1442c;  /* 朱色     shu-iro,     vermillion  */
-  --line-vocab:     #3f6d8e;  /* 藍色     ai-iro,      indigo      */
-  --line-kanji:     #7c6a9c;  /* 藤色     fuji-iro,    wisteria    */
-  --line-grammar:   #6b8a4a;  /* 松葉色   matsuba-iro, pine        */
-  --line-reading:   #4f7d7a;  /* 緑青     rokushou,    verdigris   */
-  --line-rikai:     #c1702f;  /* 黄丹     ouni,        safflower   */
-  --line-honyaku:   #4f6aa8;  /* 瑠璃色   ruri-iro,    lapis       */
-  --line-kaiseki:   #7a4a6e;  /* 葡萄色   budou-iro,   grape       */
+     than leftovers.
+
+     一族, one family (plan 174, the harmony round): the twelve were
+     each mixed on their own and had drifted — OKLCH lightness .48 to
+     .62, chroma .05 to .17 — so 朱 shouted, 葡萄 sank and 緑青 read
+     grey. They are recut to one lightness (.56; .48 on paper) and one
+     strength (about .09), each keeping its hue, so the hue alone says
+     which line; 朱 keeps a step more strength as the app's accent and
+     茶 a step less, as a tea is. 山吹 is not recut: it is the metal
+     (--gate-gold), and a line that is the metal stays it. The notes
+     below that quote a "deepened 30% toward the panel" ratio are the
+     old .btn-primary recipe, which plan 174 retired for the gate's
+     gold; a pigment is an edge, a ring and a figure now, never a
+     button's fill. */
+  --line-kana:      #b84f3c;  /* 朱色     shu-iro,     vermillion  */
+  --line-vocab:     #3e7ba6;  /* 藍色     ai-iro,      indigo      */
+  --line-kanji:     #7b68a3;  /* 藤色     fuji-iro,    wisteria    */
+  --line-grammar:   #608045;  /* 松葉色   matsuba-iro, pine        */
+  --line-reading:   #358281;  /* 緑青     rokushou,    verdigris   */
+  --line-rikai:     #9e653e;  /* 黄丹     ouni,        safflower   */
+  --line-honyaku:   #5d72ab;  /* 瑠璃色   ruri-iro,    lapis       */
+  --line-kaiseki:   #995e84;  /* 葡萄色   budou-iro,   grape       */
   --line-jisho:     #c99a3e;  /* 山吹色   yamabuki,    kerria gold */
-  --line-decks:     #9c4a5e;  /* 蘇芳     suou,        sappanwood  */
-  --line-exam:      #8a6b4f;  /* 茶色     cha-iro,     tea brown   */
+  --line-decks:     #a15d6e;  /* 蘇芳     suou,        sappanwood  */
+  --line-exam:      #8a6f51;  /* 茶色     cha-iro,     tea brown   */
   /* 常磐色 tokiwa — 書取, the dictation platform, added when that
      section was. A twelfth section needs a twelfth pigment; borrowing
      one is the drift this block was written to end. The green between
@@ -2885,7 +2936,7 @@
      and 4.74:1 hovering here, 6.59:1 and 5.90:1 for the light theme's
      value below — clear of the 4.5 floor with more room than 黄丹, the
      tightest pigment in this list, which sits at 5.29:1 and 4.53:1. */
-  --line-kakitori:  #3f8f63;  /* 常磐色   tokiwa-iro,  evergreen   */
+  --line-kakitori:  #3d8562;  /* 常磐色   tokiwa-iro,  evergreen   */
   /* 紫 murasaki — 作文, the composition platform (plan 125), added when
      that section was: a thirteenth section, a thirteenth pigment. The
      stretch between 藤 (262°) and 葡萄 (315°) was the widest left on
@@ -2897,7 +2948,7 @@
      and 7.99:1 for the light theme's value below — clear of the 4.5
      floor with more room than any pigment in this list; measured by
      src/contrast.browser.test.jsx's sakubun sites. */
-  --line-sakubun:   #884898;  /* 紫       murasaki,    purple      */
+  --line-sakubun:   #8c6296;  /* 紫       murasaki,    purple      */
   /* 鶯色 uguisu — no longer a board line (plan 027 merged 動画 into
      解析). Kept, and reserved for exactly one thing: the timestamp
      chips on video Sentences, the only data that exists for that
@@ -2944,11 +2995,19 @@
   --bg-panel:       #1e1912;
   --overlay-hover:  rgba(28, 24, 17, 0.045);
   --chip-bg:        rgba(28, 24, 17, 0.055);
+  /* The selection's ink a step deeper on paper (一選, plan 174): at the
+     dark theme's 65% it read 4.2:1 on its own wash. */
+  --sel-ink:        color-mix(in srgb, var(--accent2) 50%, var(--text-primary));
+  /* The lifted card, which paper keeps (the dark block's 墨 note). */
+  --surface:        color-mix(in srgb, var(--text-primary) 4%, var(--bg-card));
+  --surface-line:   color-mix(in srgb, var(--text-primary) 15%, var(--border));
 
   --accent:         #b7402a;
   --accent2:        #a97a25;
   --accent3:        #6f5d8f;
-  --success:        #5c7a43;
+  --success:        #4d7639;
+  /* Kept where it was: deepened with the ramp it measured 4.0:1 on the
+     washi theme's sumi, where the status sheet sets it as text. */
   --warning:        #ad7c2e;
   --danger:         #93301f;
   --accent4:        #375b78;
@@ -2962,16 +3021,17 @@
      light value at all, which only stopped mattering because nothing
      prominent used them — the rating bar does now. */
   --indigo:         #33495d;
-  --teal:           #43645f;
-  --rust:           #8d5027;
+  --teal:           #26786b;
+  --rust:           #995425;
   /* Kept identical to its dark-theme value rather than deepened --
      the same choice this file already makes for every --state-* token
      (--state-learning, --state-mastered, --state-due all repeat their
      dark value here unchanged). This one reads as a semantic "this
      was wrong" signal, not a decorative accent, so it follows that
      precedent instead of the paper-deepening one --teal/--rust just
-     above use. */
-  --rating-wrong:    #b7402a;
+     above use. Plan 174 put it on the state ramp with the others (the
+     dark block's --success note), deepened for paper as they are. */
+  --rating-wrong:    #a4493c;
 
   --stamp-ink:       #b23425;
 
@@ -2999,20 +3059,22 @@
   --level-up-overlay-before: rgba(234, 173, 50, 0.14);
 
   /* The same set, deepened a shade so each still reads as text and as
-     a 2.5px ring on paper rather than only as a fill on ink. */
-  --line-kana:      #b7402a;
-  --line-vocab:     #375b78;
-  --line-kanji:     #6f5d8f;
-  --line-grammar:   #5a7540;
-  --line-reading:   #43645f;
-  --line-rikai:     #a85c26;
-  --line-honyaku:   #43598c;
-  --line-kaiseki:   #653d5b;
+     a 2.5px ring on paper rather than only as a fill on ink — since
+     plan 174 at one lightness, .48, each at its dark value's strength
+     and hue (5.5:1 or better on --bg-main, 5:1 on --bg-card). */
+  --line-kana:      #9d3625;
+  --line-vocab:     #25638d;
+  --line-kanji:     #64518a;
+  --line-grammar:   #4a682e;
+  --line-reading:   #186b6a;
+  --line-rikai:     #854e27;
+  --line-honyaku:   #475b92;
+  --line-kaiseki:   #80476d;
   --line-jisho:     #a97a25;
-  --line-decks:     #853d4e;
-  --line-exam:      #7a5c40;
-  --line-kakitori:  #35784f;
-  --line-sakubun:   #743d82;
+  --line-decks:     #874657;
+  --line-exam:      #72583b;
+  --line-kakitori:  #226d4c;
+  --line-sakubun:   #744c7e;
   /* Retired as a board line by plan 027 — see the dark-theme value. */
   --line-douga:     #6a7a35;
   --pass-ink:       #4a4452;
@@ -3342,7 +3404,7 @@ button:focus-visible {
      --bg-main are close enough that a flat card disappears. */
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: 6px;
+  border-radius: var(--r-panel);
   overflow: hidden;
   color: var(--text-primary);
   text-align: left;
@@ -3450,10 +3512,16 @@ button:focus-visible {
   gap: 8px;
   padding: 28px 20px 28px 18px;
 }
+/* 標 (plan 174, the owner's pick T2 of the canvas "Tsuji — harmony"):
+   a screen's own name is serif (.bar__title, .sheet__jp) and every
+   name under it — a plate, a platform, a deck, a stop, a paper — is
+   set as a station prints its names: the display face, bold, one size
+   a rank. One rank of names had come in three faces (a serif plate, a
+   grotesque platform, a lighter serif deck) at three sizes. */
 .platform-card__title {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  font-size: 1.25rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
   line-height: 1.3;
 }
 .platform-card__desc {
@@ -3483,12 +3551,6 @@ button:focus-visible {
   display: flex;
   align-items: baseline;
   gap: var(--sp-3);
-}
-.platform-card__titlerow .platform-card__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-title);
-  letter-spacing: 0.02em;
 }
 
 /* The right-hand column a wide card must earn (DESIGN.md's density
@@ -4213,6 +4275,51 @@ textarea:focus-visible {
 .hud__status--delayed,
 .hud__status--suspended,
 .hud__status--offline { --st-ink: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
+/* 到着 — the arrival plate (plan 174, the owner's pick H4): the panel
+   holds the destination's grade on a white plate — the 駅名標's white,
+   edged in the state's ink as a station plate is edged in its line's —
+   then the month the train gets there over the drift, in the state's
+   ink. A plate rather than a word: where you are going and when you
+   get there were the two facts the old panel made the learner open
+   the sheet for. No scan lines; the plate is printed, not lit. */
+.hud__status--arrival {
+  gap: var(--sp-3);
+  height: 34px;
+  padding: 0 var(--sp-3) 0 var(--sp-2);
+  border-color: rgba(255, 255, 255, 0.12);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, #000 28%, var(--bg-panel));
+  font-family: var(--font-display);
+  line-height: 1;
+}
+.hud__status--arrival::after { content: none; }
+.hud__dest {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-plate);
+  background: #f3f2ef;
+  color: #222428;
+  box-shadow: inset 0 -3px 0 var(--st-ink);
+}
+/* The way the line runs, as a plate prints it: a solid triangle. */
+.hud__dest i {
+  width: 0;
+  height: 0;
+  border: 4px solid transparent;
+  border-left: 6px solid currentcolor;
+  border-right: 0;
+}
+.hud__dest b { font-size: var(--fs-sm); font-weight: 700; }
+.hud__when { display: flex; flex-direction: column; gap: 2px; }
+.hud__month {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-on-panel);
+  white-space: nowrap;
+}
+.hud__status--arrival .hud__status-word { font-size: var(--fs-caption-xs); }
 
 /* ── 改札口 — the tab bar. Sumi, docked, five gates. ── */
 /* The bar is over the page, and has to look it. A 1px hairline was the
@@ -4414,7 +4521,7 @@ textarea:focus-visible {
   gap: 1px;
   background: var(--surface-line);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   overflow: hidden;
 }
 .balance__cell {
@@ -6454,8 +6561,10 @@ textarea:focus-visible {
   text-overflow: ellipsis;
   font-family: var(--font-serif);
   font-weight: 700;
-  font-size: var(--fs-title);
-  line-height: 1.2;
+  /* A rung above every name under it (plan 174): at --fs-title it
+     was the size of the plates it headed, and the screen had no head. */
+  font-size: var(--fs-heading);
+  line-height: 1.1;
   white-space: nowrap;
 }
 .bar__sub {
@@ -6683,6 +6792,140 @@ textarea:focus-visible {
   .lvlbar__gain { animation: none; }
 }
 
+/* ── 上下 — the run's console on a phone (plan 174) ─────────────────
+   components/study/RunConsole.jsx, the owner's pick "console C
+   refined": the run under the head, the level on the floor. A run below
+   the desk with a tally draws these in place of the level bar, the
+   head's remaining pill and the run's hairline.
+
+   The meter: a segment a rating in its verdict's ink (the rating tiles'
+   --rating-color, the same pill the tile wears over its word), the card
+   in hand lit in the page ink, the rest unlit to the run's length. An
+   open run (no length) keeps its segments a fixed width until they
+   fill the bar; past forty, the gaps close into one bar. */
+.run-meter {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  max-width: var(--card-w);
+  min-height: 16px;
+  margin: 0 auto;
+  font-family: var(--font-display);
+  line-height: 1;
+}
+.run-meter__segs { flex: 1; display: flex; gap: var(--sp-1); height: 6px; min-width: 0; }
+.run-meter__s {
+  flex: 1 1 0;
+  min-width: 0;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+}
+.run-meter__s--now { background: color-mix(in srgb, var(--text-primary) 55%, transparent); }
+.run-meter__s--q0 { background: var(--danger); }
+.run-meter__s--q1 { background: var(--rating-wrong); }
+.run-meter__s--q2 { background: var(--rust); }
+.run-meter__s--q3 { background: var(--warning); }
+.run-meter__s--q4 { background: var(--teal); }
+.run-meter__s--q5 { background: var(--success); }
+.run-meter--open .run-meter__s { flex: 0 0 12px; }
+.run-meter--dense .run-meter__segs { gap: 0; overflow: hidden; border-radius: var(--r-pill); }
+.run-meter--dense .run-meter__s { border-radius: 0; }
+.run-meter--dense .run-meter__s--now { background: var(--text-primary); }
+.run-meter__n {
+  flex: none;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.run-meter__n small { margin-left: var(--sp-1); font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); }
+
+/* The floor: the level's own object, the card's struck 辻 at the run's
+   foot with its road filled to the climb, the track with this run's
+   gain lit on it, and the run's XP in the card's ink. Docked where the
+   level bar was and taller than it, so the docks above it (the rating
+   bar, a run's field) read its height through --lvlbar-h. */
+:root:has(.run-floor) { --lvlbar-h: var(--run-floor-h); }
+.run-floor {
+  position: sticky;
+  bottom: 0;
+  z-index: 11;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  height: calc(var(--lvlbar-h) + var(--safe-bottom));
+  padding-inline: max(var(--sp-5), calc((100% - var(--card-w)) / 2 + var(--sp-5)));
+  padding-bottom: var(--safe-bottom);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  font-family: var(--font-display);
+  line-height: 1;
+  user-select: none;
+}
+/* Each card's ink, lifted for sumi: the free card's band blue, the
+   charcoal's and the platinum's gold. */
+.run-floor--free { --rf-ink: color-mix(in srgb, var(--pass-band) 70%, var(--text-on-panel)); }
+.run-floor--pro { --rf-ink: #d2ae68; }
+.run-floor--max { --rf-ink: var(--gate-gold-lit); }
+.run-floor__lv { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.run-floor__lv b { font-size: var(--fs-title); font-weight: 700; font-variant-numeric: tabular-nums; }
+.run-floor__mark { width: 34px; height: 34px; flex: none; }
+.run-floor .ofr-mark .ofr-mark__ink { fill: color-mix(in srgb, var(--text-on-panel) 14%, transparent); }
+.run-floor .ofr-mark .ofr-mark__xp { fill: var(--rf-ink); }
+.run-floor .ofr-mark.ofr-mark--etched .ofr-mark__xp { opacity: 1; }
+.run-floor__track {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--text-on-panel) 15%, transparent);
+}
+.run-floor__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: var(--r-pill);
+  background: var(--rf-ink);
+  transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+.run-floor--max .run-floor__fill { background: linear-gradient(90deg, var(--gate-gold-deep), var(--gate-gold-lit)); }
+/* This run's span, lit toward the panel ink over the fill it is part of. */
+.run-floor__gain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 0 var(--r-pill) var(--r-pill) 0;
+  background: color-mix(in srgb, var(--rf-ink) 45%, var(--text-on-panel));
+}
+/* The last tenth of a level: the next one waits at the track's end. */
+.run-floor__track--near { margin-right: var(--sp-5); }
+.run-floor__next {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(100%, -50%);
+  padding-left: var(--sp-2);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-on-panel-soft);
+}
+.run-floor__trip {
+  position: relative;
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--rf-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.run-floor__trip small { margin-left: var(--sp-1); font-size: var(--fs-caption); font-weight: 700; color: var(--text-on-panel-soft); }
+/* The fare rises off the run's figure, as the bar's did off its XP. */
+.run-floor__fare { left: auto; right: 100%; margin-left: 0; margin-right: var(--sp-2); }
+@media (prefers-reduced-motion: reduce) {
+  .run-floor__fill { transition: none; }
+}
+
 /* ── the head of a run (plan 070 mounts it) ── */
 .stage__head {
   display: flex;
@@ -6691,14 +6934,17 @@ textarea:focus-visible {
   min-height: 40px;
 }
 
-/* ‹ and the name of where it goes. */
+/* ‹ and the name of where it goes. Bare since plan 174 (一戻, one way
+   back): it was the one boxed control in a bar of plain words, and the
+   box said "button" louder than the screen's own action. The 44px row
+   is still the target; the hover is the ink alone. */
 .stage__leave {
   display: inline-flex;
   align-items: center;
   gap: var(--sp-1);
   height: 44px;
-  padding: 0 var(--sp-3) 0 var(--sp-2);
-  border: 1px solid var(--surface-line);
+  padding: 0 var(--sp-2) 0 0;
+  border: 0;
   border-radius: var(--r-plate);
   background: none;
   color: var(--text-secondary);
@@ -6708,7 +6954,7 @@ textarea:focus-visible {
   line-height: 1;
 }
 .stage__leave:hover,
-.stage__leave:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
+.stage__leave:focus-visible { color: var(--text-primary); filter: none; }
 .stage__where {
   display: flex;
   flex-direction: column;
@@ -6817,7 +7063,7 @@ textarea:focus-visible {
 .sheet__head { cursor: grab; user-select: none; }
 .sheet--dragging .sheet__handle,
 .sheet--dragging .sheet__head { cursor: grabbing; }
-.sheet__jp { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); }
+.sheet__jp { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-heading); line-height: 1.1; }
 .sheet__cap {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
@@ -6887,11 +7133,12 @@ textarea:focus-visible {
 .console__band-opt:first-child { border-left: 0; }
 .console__band-opt:hover,
 .console__band-opt:focus-visible { color: var(--text-primary); filter: none; }
-/* The chosen one wears the line's own pigment, in the mix .chip--on
-   wears: the console has one on state, whatever the control. */
+/* The chosen one is lit as .chip--on is: the console has one on
+   state, whatever the control — since plan 174 the selection's gold
+   (一選, --sel-*), not the line's pigment. */
 .console__band-opt--on {
-  background: color-mix(in srgb, var(--line-color) 14%, transparent);
-  color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  background: var(--sel-wash);
+  color: var(--sel-ink);
 }
 .console__chips {
   display: flex;
@@ -6937,10 +7184,16 @@ textarea:focus-visible {
 }
 .chip:hover,
 .chip:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
-/* --on is a filter that is switched on; --here is the learner's own
-   grade on the practice gate's rows (aria-current='location', the same
-   word the route stops use). One look: this is the one that is yours. */
-.chip--on,
+/* --on is a filter that is switched on: lit in the selection's gold
+   (一選, plan 174), in every section, as a segment is. --here is not
+   a choice: it is the learner's own grade on the practice gate's rows
+   (aria-current='location', the same word the route stops use), so it
+   keeps the line's pigment — where you are is the line's to say. */
+.chip--on {
+  color: var(--sel-ink);
+  border-color: var(--sel-line);
+  background: var(--sel-wash);
+}
 .chip--here {
   color: color-mix(in srgb, var(--tab-color, var(--line-color)) 60%, var(--text-primary));
   border-color: color-mix(in srgb, var(--tab-color, var(--line-color)) 55%, transparent);
@@ -7519,28 +7772,36 @@ textarea:focus-visible {
   transform: scale(var(--pcard-kf, 1));
 }
 .pcs__grain,
-.pcs__band { position: absolute; pointer-events: none; }
-.pcs__grain { inset: 0; }
+.pcs__band,
+.jcard__grain { position: absolute; pointer-events: none; }
+.pcs__grain,
+.jcard__grain { inset: 0; }
 .pcs__band { left: 0; right: 0; bottom: 0; height: 44px; background: var(--pass-band); }
-/* 白 white plastic. */
-.pcs--free {
+/* 白 white plastic. The card's back in the status sheet (.jcard, plan
+   174) is cut from the same three stuffs, so it names them here rather
+   than copying them. */
+.pcs--free,
+.jcard--free {
   background:
     radial-gradient(80% 70% at 22% 0%, rgba(255, 255, 255, 0.9), transparent 60%),
     linear-gradient(160deg, #f3f2ef 0%, #e2e0db 100%);
   box-shadow: inset 0 0 0 1px rgba(30, 32, 36, 0.12), 0 14px 30px rgba(0, 0, 0, 0.5), 0 3px 7px rgba(0, 0, 0, 0.3);
 }
 /* 墨 soft-touch charcoal. */
-.pcs--pro {
+.pcs--pro,
+.jcard--pro {
   background:
     radial-gradient(120% 90% at 18% -10%, rgba(255, 255, 255, 0.08), transparent 55%),
     linear-gradient(160deg, color-mix(in srgb, var(--pass-ink) 72%, #1a181d) 0%, color-mix(in srgb, var(--pass-ink) 38%, #141216) 62%, #141216 100%);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 14px 30px rgba(0, 0, 0, 0.55), 0 3px 7px rgba(0, 0, 0, 0.35);
 }
-.pcs--pro .pcs__grain {
+.pcs--pro .pcs__grain,
+.jcard--pro .jcard__grain {
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85  0 0 0 0 0.84  0 0 0 0 0.88  0 0 0 0.1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 /* 梨地 satin platinum, its edge lit on top. */
-.pcs--max {
+.pcs--max,
+.jcard--max {
   background: linear-gradient(135deg, #c9ccd2 0%, #e6e8eb 32%, #f5f6f7 48%, #e1e3e7 66%, #c2c5cb 100%);
   box-shadow:
     inset 0 1px 0 #fff,
@@ -7551,7 +7812,8 @@ textarea:focus-visible {
     0 14px 30px rgba(0, 0, 0, 0.55),
     0 0 30px rgba(214, 220, 232, 0.24);
 }
-.pcs--max .pcs__grain {
+.pcs--max .pcs__grain,
+.jcard--max .jcard__grain {
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.46  0 0 0 0 0.5  0 0 0 0.3 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
@@ -7738,6 +8000,12 @@ textarea:focus-visible {
 .pcb__lamp--offline { background: var(--pcb-late); }
 .pcb__lamp--none,
 .pcb__lamp--suspended { background: var(--pcb-rule); }
+/* The journey's figure (plan 174): the drift in days, signed, in the
+   lamp's ink -- the colour says ahead or late, the word went. */
+.pcb__fig--ahead,
+.pcb__fig--onTime { color: var(--pcb-ahead); font-variant-numeric: tabular-nums; }
+.pcb__fig--slightlyBehind,
+.pcb__fig--delayed { color: var(--pcb-late); font-variant-numeric: tabular-nums; }
 .pcb__strip {
   position: absolute;
   left: var(--sp-5);
@@ -8043,7 +8311,7 @@ textarea:focus-visible {
   margin-left: auto;
   display: inline-flex;
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-plate);
+  border-radius: var(--r-card);
   overflow: hidden;
 }
 .seg__opt {
@@ -8070,7 +8338,7 @@ textarea:focus-visible {
 .seg__opt:first-child { border-left: 0; }
 .seg__opt:hover,
 .seg__opt:focus-visible { color: var(--text-primary); filter: none; }
-.seg__opt--on { background: color-mix(in srgb, var(--accent2) 14%, transparent); color: var(--text-primary); }
+.seg__opt--on { background: var(--sel-wash); color: var(--sel-ink); box-shadow: inset 0 -2px 0 var(--accent2); }
 /* The canvas's variants (plan 068): a plain-word option, the full-width
    form (the analyzer's Text / Photo / Video), the analyzer's pigment. */
 .seg__opt-latin {
@@ -8081,10 +8349,9 @@ textarea:focus-visible {
   text-indent: var(--tr-caption);
   text-transform: uppercase;
 }
-.seg__opt--on .seg__opt-latin { color: var(--text-primary); }
+.seg__opt--on .seg__opt-latin { color: var(--sel-ink); }
 .seg--full { width: 100%; margin-left: 0; }
 .seg--full .seg__opt { flex: 1; justify-content: center; align-items: center; height: 40px; }
-.seg--kaiseki .seg__opt--on { background: color-mix(in srgb, var(--line-kaiseki) 14%, transparent); }
 /* A glyph before the word (the analyser's three sources, plan 136). */
 .seg__opt-icon { flex: none; align-self: center; }
 
@@ -8136,8 +8403,11 @@ textarea:focus-visible {
   align-items: center;
   gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--r-card);
-  border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent);
+  border-radius: var(--r-panel);
+  /* A panel like the rest (plan 174): the amber outline made it a fifth
+     ground in the hall; the mark before the words carries the warning. */
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
@@ -8475,8 +8745,11 @@ textarea:focus-visible {
      shared height — the slack lands above the action, not under it. */
   margin-top: auto;
   padding: var(--sp-4) var(--sp-5);
-  background: color-mix(in srgb, var(--accent2) 60%, var(--bg-panel));
-  color: var(--text-on-panel);
+  /* The metal (一金, plan 174): it was the gold sunk 40% into the
+     panel, a bronze no other primary wore. */
+  background: var(--metal);
+  background-color: var(--gate-gold);
+  color: var(--text-on-fill);
   border: none;
   border-radius: var(--r-card);
   font: inherit;
@@ -8512,16 +8785,25 @@ textarea:focus-visible {
    The pass at strip size under the gate: the stamp rally and the
    day's new-item gauge, and nothing else of the card — a shortcut to
    the profile, not the profile. The full pass stays on /profile. */
+/* The week on Today (plan 174, 墨): a panel like every other, in the
+   panels' sumi with their hairline and corner. It had kept the old
+   pass's charcoal glow and its plastic sheen (.pass, .pass::after)
+   when the pass itself moved onto the card (plan 173), so the hall's
+   one progress panel was the one object in a material of its own. */
 .pass--strip {
   gap: var(--sp-4);
   padding: var(--sp-4) var(--sp-5);
   margin-bottom: 0;
   width: 100%;
+  background: var(--bg-panel);
+  border-color: color-mix(in srgb, var(--text-on-panel) 13%, var(--bg-panel));
+  border-radius: var(--r-panel);
   font: inherit;
   text-align: left;
   cursor: pointer;
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
+.pass--strip::after { content: none; }
 .pass--strip:hover,
 .pass--strip:focus-visible {
   border-color: color-mix(in srgb, var(--pass-ink) 55%, var(--text-on-panel));
@@ -8606,6 +8888,8 @@ textarea:focus-visible {
 .hall-pace__latin {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
+  /* The one caption (plan 174): 700, as every other one is. */
+  font-weight: 700;
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
   color: var(--text-on-panel-soft);
@@ -8703,7 +8987,7 @@ textarea:focus-visible {
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-plate);
+  border-radius: var(--r-panel);
   box-shadow: var(--elev-hang);
   overflow: hidden;
   transition: border-color 0.15s ease, transform 0.15s ease;
@@ -8750,7 +9034,7 @@ textarea:focus-visible {
 .plate__names { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .plate__title {
   min-width: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--fs-title);
   line-height: 1.2;
@@ -8777,13 +9061,14 @@ textarea:focus-visible {
    (.deck-card__due): 琥珀 mixed 55% toward the ambient ink, because
    raw --warning carried on the map's sumi and reads 2.75:1 on paper in
    light theme — guard 4 caught it on the first render. */
+/* The count due, as type (線, plan 174): a figure on a plate is printed,
+   never boxed — the pill it wore read as a ticket, a second object on
+   a plate that is already the door. The state's ink carries it. */
 .plate__due {
   display: inline-flex;
   align-items: baseline;
   gap: var(--sp-1);
-  padding: var(--sp-1) var(--sp-3);
-  border-radius: var(--r-pill);
-  border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
+  padding: var(--sp-1) 0;
   color: color-mix(in srgb, var(--warning) 55%, var(--text-primary));
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -8796,7 +9081,7 @@ textarea:focus-visible {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--fs-caption-xs);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tr-caption);
   text-transform: uppercase;
   opacity: 0.8;
 }
@@ -8838,10 +9123,11 @@ textarea:focus-visible {
 }
 /* The stripe: the pigment at rest along the whole edge, raw over the
    stretch ridden. A plate with no track behind it — the shelf, a
-   platform — is painted raw end to end. */
+   platform — is painted raw end to end. 3px since plan 174 (線): every
+   line's edge is one weight, the stats plate's rule included. */
 .plate__stripe {
   display: block;
-  height: 4px;
+  height: 3px;
   background: color-mix(in srgb, var(--line-color, var(--accent2)) 30%, transparent);
 }
 .plate__stripe i {
@@ -8924,7 +9210,7 @@ textarea:focus-visible {
   padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-8);
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   color: var(--text-primary);
   text-align: left;
   transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
@@ -9017,7 +9303,7 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 .route-stop__names { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.route-stop__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
+.route-stop__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }
 .route-stop__hint { font-size: var(--fs-caption); color: var(--text-secondary); }
 /* 現在地 — the learner's own stop (user_profiles.jlpt_level): text,
    not colour alone, so the mark survives both themes and colour
@@ -9258,10 +9544,19 @@ textarea:focus-visible {
    a light ink), which is why the gold pill at the console keeps the
    dark ink. Assuming one ink for all twelve pigments is precisely
    what produced this rule. Check the ratio before filling a button
-   in a new section. */
+   in a new section.
+
+   一金 (plan 174) retired all of the above: the primary is the
+   gate's metal in every section (--metal, beside the gate's tokens),
+   inked --text-on-fill at 6.9:1, so no pigment has to carry a button's
+   ink and none is a button's fill. The note stays for the arithmetic,
+   which still governs .btn-primary--danger and any pigment fill. */
 .btn-primary {
-  background: color-mix(in srgb, var(--line-color, var(--accent)) 70%, var(--bg-panel));
-  color: var(--text-on-panel);
+  /* The gold under the gradient too: what a contrast measure reads as
+     the ground, and what paints if the gradient does not. */
+  background: var(--metal);
+  background-color: var(--gate-gold);
+  color: var(--text-on-fill);
 }
 /* The mockup's hover is a lighter *fill*, not the bare `button` rule's
    blanket brightness filter -- so that filter is turned off here rather
@@ -9272,10 +9567,11 @@ textarea:focus-visible {
    --text-on-panel on every pigment (see the rest rule's own note). The mockup's own literal
    hover, #cf5a42, is 3.44:1 -- *less* contrast than its rest state,
    which is backwards; a hover must not drop below the floor the rest
-   state clears. */
+   state clears. Since plan 174 the metal's own lift (--metal-hover). */
 .btn-primary:hover {
   filter: none;
-  background: color-mix(in srgb, var(--line-color, var(--accent)) 79%, var(--bg-panel));
+  background: var(--metal-hover);
+  background-color: var(--gate-gold-lit);
 }
 .btn-primary:focus-visible {
   outline: 2px solid var(--accent2);
@@ -9331,6 +9627,17 @@ textarea:focus-visible {
   filter: none;
   box-shadow: none;
   transform: none;
+}
+/* ...but the metal goes unlit rather than faded (plan 174): gold at
+   0.45 composites to a muddy bronze that reads as a fourth colour, and
+   a button that cannot be pressed does not wear the press's metal. The
+   panel's ground, its hairline and the secondary ink, at full opacity. */
+.btn-depart:disabled,
+.btn-primary:disabled {
+  opacity: 1;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--surface-line);
+  color: var(--text-secondary);
 }
 
 /* ── 改札 — the gate you tap your pass on (plan 164) ──
@@ -10913,7 +11220,7 @@ textarea:focus-visible {
   padding: var(--sp-4);
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
 }
 .deck-identity__roundel { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); }
 /* --sp-1 between the name and its figures: at line-height 1.2 the
@@ -10922,7 +11229,7 @@ textarea:focus-visible {
 .deck-identity__names { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; flex: 1; }
 .deck-identity__name {
   margin: 0;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--fs-title);
   line-height: 1.2;
@@ -11124,7 +11431,7 @@ textarea:focus-visible {
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   overflow: hidden;
 }
 /* The row is the hairline and the seat; what you press is
@@ -13359,12 +13666,28 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
       on the four- and two-button bars, Perfect on six — is filled in
       the pass's gold with sumi type on it: the press most taken,
       drawn as the one to reach for, and the same metal the level bar
-      under it climbs in. The dot stays on the other tiles. */
+      under it climbs in. The dot stays on the other tiles.
+
+   5. ONE INSTRUMENT AGAIN, AND NO GOLD (plan 174, the owner's pick RB1
+      段 of the canvas "Tsuji — harmony"): gold is the action's metal
+      (--metal), and a verdict is not an action's colour, so the best
+      tile lost its fill. The four sit in one bordered instrument split
+      by hairlines, each word under a pill in its verdict's ink — the
+      same ink, the same shape, as its segment in the run's meter under
+      the head (RunConsole.jsx) — and a press washes its segment and
+      lights the pill. */
 .rating-bar__buttons {
   display: flex;
-  gap: var(--sp-3);
+  gap: 0;
   max-width: 640px;
   margin: 0 auto;
+  overflow: hidden;
+  /* The instrument's hairline as an inset outline, not a border: it
+     takes no height (a run's column is measured to the pixel on a
+     laptop) and it paints over a washed segment's corner. */
+  outline: 1px solid color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+  outline-offset: -1px;
+  border-radius: var(--r-panel);
 }
 
 .rating-bar__btn {
@@ -13382,31 +13705,34 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
                        pressed with a thumb at the bottom edge of a phone, so
                        they get the extra rung rather than the minimum. */
   padding: var(--sp-4) var(--sp-1);
-  background: var(--bg-panel);
-  border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-  border-radius: var(--r-card);
+  background: transparent;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  border-radius: 0;
   color: var(--text-on-panel);
   text-align: center;
   transition: background 0.15s ease;
 }
+.rating-bar__btn:first-child { border-left: 0; }
 
 .rating-bar__btn:hover,
 .rating-bar__btn:focus-visible {
   background: color-mix(in srgb, var(--rating-color, transparent) 14%, transparent);
 }
 
-/* The mark. A dot in the rating's colour above each word, three
-   quarters strength at rest and full with a halo when that rating is
+/* The mark. A pill in the rating's colour above each word (plan 174:
+   a dot until then), the run meter's segment at the bar's scale, nine
+   tenths strength at rest and full with a glow when that rating is
    chosen -- the same gesture as pressing a hanko, and unlike a tint it
    survives being glanced at. `flex: none` because a column flex item
    shrinks to nothing next to a text run otherwise. */
 .rating-bar__btn-ring {
-  width: 6px;
+  width: 26px;
   height: 6px;
   border-radius: var(--r-pill);
   border: 0;
   background: var(--rating-color, var(--text-on-panel-soft));
-  opacity: 0.75;
+  opacity: 0.9;
   flex: none;
   transition: opacity 0.15s ease, box-shadow 0.15s ease;
 }
@@ -13420,29 +13746,16 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    the bar takes to fade. Written at hover's own specificity so it
    neither loses to it nor descends below it. */
 .rating-bar__btn.rating-bar__btn--pressed {
-  background: color-mix(in srgb, var(--rating-color, transparent) 14%, transparent);
+  background: color-mix(in srgb, var(--rating-color, transparent) 20%, transparent);
 }
 .rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-ring {
   opacity: 1;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rating-color, transparent) 30%, transparent);
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--rating-color, transparent) 70%, transparent);
 }
 
-/* The best answer: gold, with sumi type (山吹色 reaches 3.9:1 against
-   the panel ink as text, but as a ground under sumi it clears 7:1).
-   Its hover, focus and press wash it toward the ink and halo it, at
-   the plain tile's own specificity in each state, so the two never
-   fight over the same button. RatingBar.jsx leaves the dot off it. */
-.rating-bar__btn.rating-bar__btn--best {
-  background: var(--accent2);
-  border-color: transparent;
-  color: var(--bg-panel);
-}
-.rating-bar__btn.rating-bar__btn--best:hover,
-.rating-bar__btn.rating-bar__btn--best:focus-visible,
-.rating-bar__btn.rating-bar__btn--best.rating-bar__btn--pressed {
-  background: color-mix(in srgb, var(--accent2) 82%, var(--text-on-panel));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent2) 30%, transparent);
-}
+/* The best answer is a tile like the others since plan 174 (5, above):
+   RatingBar.jsx still marks it --best, for the tests and the desk's
+   key, and gives it its pill like every other. */
 
 .rating-bar__btn-label {
   font-family: var(--font-display);
@@ -13522,6 +13835,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
      rather than as an answer. */
   .rating-bar__buttons--4 .rating-bar__btn { flex: 1 1 0; }
   .rating-bar__buttons--2 .rating-bar__btn { flex: 1 1 0; }
+  /* Six as two rows of three inside the one instrument (plan 174):
+     the fourth opens the second row, so it takes the row's top
+     hairline and drops the left one. */
+  .rating-bar__buttons--6 .rating-bar__btn:nth-child(n+4) { border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent); }
+  .rating-bar__buttons--6 .rating-bar__btn:nth-child(4) { border-left: 0; }
 }
 
 /* The mark (plan 158), in the page's ink: it wore --accent here, which
@@ -14764,7 +15082,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: 1px;
   background: var(--surface-line);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   overflow: hidden;
 }
 /* Washi (--paper) — the one bright surface, reserved for exactly this:
@@ -17441,8 +17759,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     padding-inline: var(--sp-5);
     background: var(--bg-panel);
   }
-  .stage > .rating-bar .rating-bar__btn { background: color-mix(in srgb, var(--text-on-panel) 8%, transparent); }
-  .stage > .rating-bar .rating-bar__btn.rating-bar__btn--best { background: var(--accent2); }
   /* ── The run's foot docks too ──
      The field and Submit (the canvas's Reading foot), the browse's two
      buttons, comprehension's pair: one control at the bottom of a run,
@@ -17632,9 +17948,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 
   .platform-card__lead { width: 64px; padding: 16px 4px 16px 12px; }
   .platform-card__no { width: 32px; height: 32px; font-size: 0.92rem; border-width: 2px; }
-  .platform-card__service { font-size: 0.64rem; }
   .platform-card__body { padding: 14px 10px 14px 14px; }
-  .platform-card__title { font-size: 1.08rem; }
   .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
   /* A deck card carries three controls the other platform cards
      don't, and at this width their labels were wrapping under their
@@ -17970,7 +18284,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   padding: var(--sp-3) var(--sp-4);
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   color: var(--text-primary);
   font: inherit;
   text-align: left;
@@ -17998,9 +18312,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: 1px;
 }
 .anl-door__title {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  font-size: var(--fs-lead);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
   line-height: 1.3;
 }
 .anl-door__desc {
@@ -18078,7 +18392,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   padding: var(--sp-6) var(--sp-3) var(--sp-4);
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   color: var(--text-primary);
   font: inherit;
   text-align: center;
@@ -18346,14 +18660,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-/* Chosen: the chip's own three-part treatment (.chip--on above) in
-   the line's ink — 辞書's gold under the dictionary, 漢字's under the
-   station, 教材's under the deck form. A ring and a wash, never a
-   fill. */
+/* Chosen: the chip's own three-part treatment (.chip--on above), in
+   the selection's gold under every line since plan 174. A ring and a
+   wash, never a fill. */
 .stroke-rail__key--on {
-  color: color-mix(in srgb, var(--line-color, var(--line-jisho)) 60%, var(--text-primary));
-  border-color: color-mix(in srgb, var(--line-color, var(--line-jisho)) 55%, transparent);
-  background: color-mix(in srgb, var(--line-color, var(--line-jisho)) 12%, transparent);
+  color: var(--sel-ink);
+  border-color: var(--sel-line);
+  background: var(--sel-wash);
 }
 
 .dict-radical-index {
@@ -20125,7 +20438,7 @@ html {
   gap: 1px;
   background: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   overflow: hidden;
 }
 .jour-cmp {
@@ -20232,6 +20545,124 @@ html {
   font-weight: 700;
 }
 .jour-act strong [lang="ja"] { font-weight: 500; margin-right: var(--sp-2); }
+
+/* ── 定期券の裏 — the card's back, in the phone's status sheet (plan 174) ──
+   components/journey/JourneyCard.jsx, the owner's pick C″: the card
+   turned over in its own stuff (the materials are .pcs--*'s, above),
+   and on it the drift in days over the line alone -- the legs, your
+   train, the promise's ghost, the next stop and the arrival dated under
+   the line -- and the card's band at its foot. Each stuff names its
+   own inks: the free card's band blue on white, the charcoal's gold,
+   the platinum's deep gold. The state's ink is the journey's
+   (.jour-st--*, on the sheet), darkened on the light stuffs. */
+.jcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-5) var(--sp-5) 0;
+  border-radius: var(--r-identity);
+  overflow: hidden;
+  font-family: var(--font-display);
+  line-height: 1;
+}
+.jcard--free {
+  --jc-ink: var(--pass-band);
+  --jc-soft: rgba(34, 36, 40, 0.62);
+  --jc-line: rgba(34, 36, 40, 0.14);
+  --jc-st: color-mix(in srgb, var(--jour-st) 72%, #000);
+  --jc-foot: var(--pass-band);
+  color: #222428;
+}
+.jcard--pro {
+  --jc-ink: #d2ae68;
+  --jc-soft: var(--text-on-panel-soft);
+  --jc-line: rgba(255, 255, 255, 0.13);
+  --jc-st: var(--jour-st-ink);
+  --jc-foot: linear-gradient(90deg, var(--gate-gold-deep), #d2ae68);
+  color: var(--text-on-panel);
+}
+.jcard--max {
+  --jc-ink: #8a6424;
+  --jc-soft: rgba(34, 36, 42, 0.64);
+  --jc-line: rgba(34, 36, 42, 0.16);
+  --jc-st: color-mix(in srgb, var(--jour-st) 72%, #000);
+  --jc-foot: linear-gradient(90deg, var(--gate-gold-deep), var(--gate-gold-lit));
+  color: rgba(34, 36, 42, 0.9);
+}
+.jcard__head {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.jcard__st {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--jc-st);
+  font-variant-numeric: tabular-nums;
+}
+.jcard__st i { width: 10px; height: 10px; border-radius: var(--r-pill); background: var(--jour-st); flex: none; }
+.jcard__route { font-size: var(--fs-sm); font-weight: 700; color: var(--jc-soft); white-space: nowrap; }
+/* The line: legs at 40px, names under them, the trains over them. The
+   left inset is a train's length, so a train at 発 stands on the card. */
+.jcard__line { position: relative; height: 92px; margin: var(--sp-3) var(--sp-2) 0 64px; }
+.jcard__leg,
+.jcard__done { position: absolute; top: 40px; height: 5px; border-radius: var(--r-pill); }
+.jcard__leg { background: var(--jc-line); }
+.jcard__done { background: var(--jc-ink); }
+.jcard__gap {
+  position: absolute;
+  top: 37px;
+  height: 11px;
+  border-radius: var(--r-plate);
+  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--jc-st) 55%, transparent) 0 3px, transparent 3px 6px);
+}
+.jcard__stop {
+  position: absolute;
+  top: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translateX(-50%);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.jcard__stop b { font-size: var(--fs-sm); font-weight: 700; color: var(--jc-soft); }
+.jcard__stop b[lang="ja"] { font-family: var(--font-jp); font-size: var(--fs-caption); }
+.jcard__stop small { font-size: var(--fs-caption); color: var(--jc-soft); }
+.jcard__stop--passed b { color: var(--jc-ink); }
+.jcard__stop--next b { color: currentcolor; }
+.jcard__stop--last { align-items: flex-end; transform: translateX(-100%); }
+.jcard__stop--first { align-items: flex-start; transform: none; }
+.jcard__car { position: absolute; width: 0; }
+.jcard__car--you { top: 21px; z-index: 2; }
+.jcard__car--ghost { top: 2px; }
+.jcard__svg { position: absolute; right: 0; top: 0; }
+.jcard__car--you .jcard__svg { width: 60px; height: 20px; fill: var(--jc-ink); }
+.jcard__car--ghost .jcard__svg {
+  width: 52px;
+  height: 18px;
+  fill: color-mix(in srgb, currentcolor 30%, transparent);
+  stroke: color-mix(in srgb, currentcolor 62%, transparent);
+}
+.jcard__car i {
+  position: absolute;
+  right: 58px;
+  top: 3px;
+  font-style: normal;
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--jc-soft);
+  white-space: nowrap;
+}
+.jcard__foot { height: 10px; margin: 0 calc(-1 * var(--sp-5)); background: var(--jc-foot); }
 
 /* ── The gear on the pass ──────────────────────────────────────
    設定 belongs to the card (config/identity.js), so the card carries
@@ -20353,7 +20784,7 @@ html {
   gap: 1px;
   background: var(--surface-line);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   overflow: hidden;
 }
 .records--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -20501,7 +20932,7 @@ form.stage__foot > .btn-primary {
   padding: var(--sp-5);
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
 }
 .sbook__month {
   display: flex;
@@ -20513,7 +20944,7 @@ form.stage__foot > .btn-primary {
 }
 /* Latin, so untracked — see .bz__jp above. */
 .sbook__title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--fs-title);
 }
@@ -20776,7 +21207,7 @@ form.stage__foot > .btn-primary {
   overflow: hidden;
   background: var(--surface-line);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
 }
 .rep-strip__cell {
   display: flex;
@@ -20817,7 +21248,7 @@ form.stage__foot > .btn-primary {
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-bottom: 3px solid var(--line-color);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
 }
 .rep-plate__head {
   display: flex;
@@ -20838,7 +21269,7 @@ form.stage__foot > .btn-primary {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: var(--fs-body);
+  font-size: var(--fs-title);
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -20997,7 +21428,7 @@ form.stage__foot > .btn-primary {
   flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   overflow: hidden;
 }
 .stg-row {
@@ -25095,8 +25526,8 @@ button.brd-stn { cursor: pointer; }
   flex-direction: column;
   gap: var(--sp-4);
   padding: var(--sp-6) var(--sp-6) var(--sp-5);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
   border-radius: var(--r-panel);
 }
 .exam-st__tag,
@@ -25164,7 +25595,7 @@ button.brd-stn { cursor: pointer; }
   padding: 0 var(--sp-5) 0 var(--sp-4);
   background: var(--surface);
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   color: var(--text-primary);
   text-align: left;
   transition: border-color 0.16s ease, transform 0.16s ease;
@@ -25187,7 +25618,7 @@ button.brd-stn { cursor: pointer; }
   color: color-mix(in srgb, var(--line-exam) 65%, var(--text-primary));
 }
 .exam-st__names { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
-.exam-st__name { font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; line-height: 1.25; }
+.exam-st__name { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; line-height: 1.25; }
 .exam-st__sub { font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
 .exam-st__fig {
   font-family: var(--font-display);
@@ -31874,11 +32305,6 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-run--panels > .stage > .rating-bar--unlit { pointer-events: none; }
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn { opacity: 0.38; }
-  .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn--best {
-    background: var(--bg-panel);
-    border-color: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-    color: var(--text-on-panel);
-  }
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn-ring { background: var(--text-on-panel-soft); }
   /* A panel: the surface, its hairline and corner. No caption: its
      figures, its stops and its tiles name themselves (owner's cut). */
@@ -34572,5 +34998,12 @@ button.brd-stn { cursor: pointer; }
     /* On the paper's width the answer is one line: no second line held. */
     .desk-brd.nyu .brd__car[data-intro="table"] .brd__hint { min-height: 0; }
   }
+
+  /* 標 on the desk (plan 174): the harmony round was drawn on the
+     phone, where a sheet's name went a rung up with the screen's. The
+     desk's sheets are dialogs beside a page whose name is the rail's
+     (the bar's title is read, not drawn, here), so theirs keep the
+     names' rung until the desk is drawn for it. */
+  .sheet__jp { font-size: var(--fs-title); line-height: 1.2; }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

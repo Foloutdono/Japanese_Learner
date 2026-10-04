@@ -129,11 +129,12 @@ describe('the phone layout contract', () => {
     const seg = screen.container.querySelector('.seg')
     const opts = [...seg.querySelectorAll('.seg__opt')]
     // The corners and the clip are the container's, and only the
-    // container's: square-cornered at the plate's radius since
-    // 2026-09-26, as the library's order switch is, not a pill.
+    // container's: a control's radius since plan 174 (一面: every panel
+    // at --r-panel, every control -- a button, a field, a segment -- at
+    // --r-card), not a pill.
     expect(getComputedStyle(seg).overflow).toBe('hidden')
     expect(getComputedStyle(seg).borderTopLeftRadius)
-      .toBe(getComputedStyle(document.documentElement).getPropertyValue('--r-plate').trim())
+      .toBe(getComputedStyle(document.documentElement).getPropertyValue('--r-card').trim())
     for (const opt of opts) expect(getComputedStyle(opt).borderRadius).toBe('0px')
     // One hairline between two segments, none before the first.
     expect(getComputedStyle(opts[0]).borderLeftWidth).toBe('0px')

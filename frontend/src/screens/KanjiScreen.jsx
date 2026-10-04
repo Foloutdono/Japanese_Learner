@@ -120,7 +120,6 @@ export default function KanjiScreen({ session }) {
     return (
       <SelectionScreen
         title={t.kanjiTitle}
-        sub={t.stationSources}
         aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         <ModeSelector modes={SOURCES} onSelect={key => navigate(`${BASE}/${key}`)} />

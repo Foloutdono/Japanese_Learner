@@ -90,7 +90,6 @@ export default function ExamScreen({ session }) {
     return (
       <SelectionScreen
         title={t.examTitle}
-        sub={t.stationJlpt}
         aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
       >
         <LevelRedirect to={lvl => `/practice/exam?level=${lvl}`} />
@@ -103,7 +102,6 @@ export default function ExamScreen({ session }) {
     return (
       <SelectionScreen
         title={t.examTitle}
-        sub={t.stationJlpt}
         aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
       >
         {exams === null && <Loading />}
@@ -132,7 +130,6 @@ export default function ExamScreen({ session }) {
   return (
     <SelectionScreen
       title={t.examTitle}
-      sub={t.stationJlpt}
       aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
     >
       {exams === null && <Loading />}
