@@ -12705,6 +12705,72 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-family: var(--reading-font, inherit);
 }
 
+/* 割合 on the study card (plan 175): the few readings the course uses
+   most, each with its share. Two settings of the same four, see
+   ReadingShares: 'grouped' keeps the card's two registers and puts the
+   share and a bar under each reading; 'ranked' is one column, most used
+   first. The bar takes the pigment of the line the card is on. */
+.reading-shares { display: grid; gap: var(--sp-3); justify-items: center; width: 100%; }
+.reading-shares .reading-group { margin-bottom: 0; width: 100%; }
+.reading-shares .reading-group__list { gap: var(--sp-3) var(--sp-5); }
+.reading-share {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-1);
+  min-width: 4em;
+}
+.reading-share__text {
+  font-family: var(--reading-font, inherit);
+  font-size: var(--reading-size, 18px);
+  line-height: 1.2;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.reading-share__pct {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.reading-share__pct small {
+  margin-left: 1px;
+  font-size: var(--fs-caption);
+  font-weight: 500;
+}
+.reading-share--core .reading-share__pct { color: var(--sel-ink); }
+.reading-share__bar {
+  width: 100%;
+  height: var(--sp-1);
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+  overflow: hidden;
+}
+.reading-share__bar i {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--line-color, var(--accent2));
+}
+.reading-shares--ranked { gap: 0; }
+.reading-share-row {
+  display: grid;
+  grid-template-columns: var(--sp-6) minmax(4.5em, auto) minmax(0, 1fr) 4.2em;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  padding: var(--sp-3) 0;
+  border-top: 1px solid var(--surface-line);
+}
+.reading-share-row:first-child { border-top: 0; }
+.reading-share-row__kind {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.reading-share-row .reading-share__pct { text-align: right; font-size: var(--fs-lead); }
+.reading-shares--ranked .reading-group__more { margin-top: var(--sp-3); }
+
 .meaning-display {
   text-align: left;
   /* Declared here, set per card by MeaningDisplay. The default keeps

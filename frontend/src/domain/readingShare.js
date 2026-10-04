@@ -74,3 +74,34 @@ export function formatPct(pct, lang) {
     maximumFractionDigits: 1,
   }).format(pct)
 }
+
+// ── The study card's few ─────────────────────────────────────────
+// A card is a glance: it prints the TOP_ON_CARD readings the course uses
+// most, each with its share, and counts the rest as "+N" (the entry has
+// them all). Only readings the course's words use are candidates -- a
+// reading no word demonstrates is never worth a slot on a card -- so a
+// kanji the course barely shows prints fewer, and one it never shows
+// prints none, which is the caller's cue to keep the card it had.
+export const TOP_ON_CARD = 4
+
+/**
+ * `tokens`  the kanji's readings in the deck's order (splitReadingTokens)
+ * `shares`  the entry's `reading_shares` (the course's counts)
+ * Returns {top: [{reading, n, pct, tier}], more}, `top` most used first
+ * with ties in the deck's order, `more` the readings left out.
+ */
+export function topReadings(tokens, shares, limit = TOP_ON_CARD) {
+  const total = shares?.total ?? 0
+  if (!total) return { top: [], more: 0 }
+  const used = (tokens ?? [])
+    .map((reading, order) => ({ reading, order, n: shares.readings?.[reading] ?? 0 }))
+    .filter(r => r.n > 0)
+    .sort((a, b) => b.n - a.n || a.order - b.order)
+    .slice(0, limit)
+    .map(({ reading, n }) => {
+      const pct = sharePct(n, total)
+      return { reading, n, pct, tier: shareTier(pct) }
+    })
+  return { top: used, more: (tokens ?? []).length - used.length }
+}
+
