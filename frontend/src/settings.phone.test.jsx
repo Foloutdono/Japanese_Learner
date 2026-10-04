@@ -71,21 +71,28 @@ async function mount(path) {
 const box = el => el.getBoundingClientRect()
 
 describe('Settings at phone width', () => {
-  it('prints the pass with its doors as thumb targets, buttons each', async () => {
+  it('prints the card with its back up, its doors buttons each', async () => {
     await mount('/profile/settings')
-    const doors = [...document.querySelectorAll('.stg-pass .stg-door')]
-    expect(doors).toHaveLength(5)
+    expect(document.querySelector('.pcard-slot--settings .pcard').dataset.side).toBe('back')
+    const doors = [...document.querySelectorAll('.pcard-slot--settings .stg-door')]
+    expect(doors.map(d => d.dataset.page)).toEqual(['level', 'destination', 'service', 'hour', 'lines'])
     for (const door of doors) {
       expect(door.tagName).toBe('BUTTON')
-      expect(box(door).height).toBeGreaterThanOrEqual(44)
+      // Drawn at the card's scale, a door's touch takes in the room round
+      // it (::after), so a thumb's 44px holds where the print is smaller.
+      // The insets are the print's own pixels, drawn at its scale.
+      const touch = getComputedStyle(door, '::after')
+      const scale = box(door).height / door.offsetHeight
+      const h = (door.offsetHeight - parseFloat(touch.top) - parseFloat(touch.bottom)) * scale
+      expect(h).toBeGreaterThanOrEqual(44)
     }
     // The fields keep their chevron here; the stops name themselves.
-    expect(document.querySelectorAll('.stg-pass__field .stg-pass__chev')).toHaveLength(3)
+    expect(document.querySelectorAll('.pcb__field .pcb__chev')).toHaveLength(3)
     // The card stands inside the screen's box.
-    const pass = box(document.querySelector('.stg-pass'))
+    const card = box(document.querySelector('.pcard-slot--settings .pcard'))
     const list = box(document.querySelector('.stg-list'))
-    expect(Math.round(pass.left)).toBe(Math.round(list.left))
-    expect(Math.round(pass.right)).toBe(Math.round(list.right))
+    expect(Math.round(card.left)).toBe(Math.round(list.left))
+    expect(Math.round(card.right)).toBe(Math.round(list.right))
   })
 
   it('keeps the service lines\' dates and ticks inside the chart and clear of each other', async () => {

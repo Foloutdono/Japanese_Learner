@@ -26,11 +26,44 @@ import { ImageIcon, StarIcon } from '../components/ui/Icons'
 //   passageAside — the desk's too: a reading passage stands flat beside
 //                its questions (ExamRunner's .desk-paper), so the block
 //                draws the question without it.
-export default function QuestionRenderer({ question, selected, onSelect, revealed = false, devMode = false, keys = false, passageAside = false }) {
+//   apart      — the phone's paper (plan 171): the choices are not drawn
+//                here but in the answer dock under the page (AnswerTiles,
+//                below), so the page holds the question alone -- a prompt
+//                set large, a passage that scrolls over its question, a
+//                clip round its play button.
+export default function QuestionRenderer({ question, selected, onSelect, revealed = false, devMode = false, keys = false, passageAside = false, apart = false }) {
   return (
     <KeysContext.Provider value={keys}>
-      <QuestionBlock question={question} selected={selected} onSelect={onSelect} revealed={revealed} devMode={devMode} passageAside={passageAside} />
+      <ApartContext.Provider value={apart && !revealed}>
+        <QuestionBlock question={question} selected={selected} onSelect={onSelect} revealed={revealed} devMode={devMode} passageAside={passageAside} />
+      </ApartContext.Provider>
     </KeysContext.Provider>
+  )
+}
+
+const ApartContext = createContext(false)
+
+// ── The answer dock's tiles (plan 171) ───────────────────────
+// The owner's pick V1 of the canvas "Tsuji — the mock exam on the
+// phone": the mark sheet's bubbles carry each answer's own words, docked
+// under the page where the thumb is, so the place an answer is given
+// never moves whatever the question's length. The same radiogroup as the
+// rows (arrows, one tab stop); two by two where four answers are brief,
+// one under another where a sentence needs the width.
+export function AnswerTiles({ question, selected, onSelect }) {
+  const choices = question.choices ?? question.pieces ?? []
+  const label = question.promptJp ?? question.questionPromptJp ?? question.passage?.titleJp ?? ''
+  return (
+    <ChoiceList
+      tiles
+      choices={choices}
+      choiceType={question.choiceType || 'text'}
+      selected={selected}
+      onSelect={onSelect}
+      revealed={false}
+      answer={null}
+      label={label}
+    />
   )
 }
 
@@ -87,7 +120,7 @@ function selectWithSound(onSelect, id) {
 // The longest answer, in signs, that still reads whole in half a paper.
 const BRIEF_SIGNS = 8
 
-function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed, answer, label }) {
+function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed, answer, label, tiles = false }) {
   const { t } = useLang()
   const keys = useContext(KeysContext)
   const listRef = useRef(null)
@@ -120,7 +153,44 @@ function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed
     e.stopPropagation()
     const next = (activeIndex + delta + choices.length) % choices.length
     selectWithSound(onSelect, choices[next].id)
-    listRef.current?.querySelectorAll('.mcq-row')[next]?.focus()
+    listRef.current?.querySelectorAll(tiles ? '.exam-tile' : '.mcq-row')[next]?.focus()
+  }
+
+  if (tiles) {
+    // Two tiles to a row hold six signs at the lead rung; past that the
+    // words step down one, and a sentence takes the row's width.
+    const longest = Math.max(0, ...choices.map(c => [...(c.textJp ?? '')].length))
+    const tileText = !brief ? 'exam-tile__t exam-tile__t--long'
+      : longest > 6 ? 'exam-tile__t exam-tile__t--mid' : 'exam-tile__t'
+    return (
+      <div
+        ref={listRef}
+        className={brief ? 'exam-tiles exam-tiles--two' : 'exam-tiles'}
+        role="radiogroup"
+        aria-label={label}
+        onKeyDown={onKeyDown}
+      >
+        {choices.map((choice, i) => {
+          const on = selected === choice.id
+          return (
+            <button
+              key={choice.id}
+              type="button"
+              className={on ? 'exam-tile exam-tile--on' : 'exam-tile'}
+              role="radio"
+              aria-checked={on}
+              tabIndex={i === activeIndex ? 0 : -1}
+              onClick={() => selectWithSound(onSelect, choice.id)}
+            >
+              <span className="exam-tile__b">{i + 1}</span>
+              {choiceType === 'image'
+                ? <ImagePlaceholder alt={choice.imageAlt} compact />
+                : <span className={tileText} lang="ja">{choice.textJp}</span>}
+            </button>
+          )
+        })}
+      </div>
+    )
   }
 
   return (
@@ -204,7 +274,24 @@ function ImagePlaceholder({ alt, compact = false }) {
   )
 }
 
+// Past this many signs a prompt set at the display rung runs to five
+// lines on a phone; it steps down a rung instead.
+const LONG_PROMPT = 24
+
 function McqBlock({ question, selected, onSelect, revealed }) {
+  const apart = useContext(ApartContext)
+  if (apart) {
+    return (
+      <div className="exam-ask exam-ask--centre">
+        <p className={[...(question.promptJp ?? '')].length > LONG_PROMPT ? 'exam-ask__big exam-ask__big--long' : 'exam-ask__big'} lang="ja">
+          {question.underlineJp
+            ? <PromptWithUnderline text={question.promptJp} underline={question.underlineJp} />
+            : <GapText text={question.promptJp} />}
+        </p>
+        {question.imageAlt && <ImagePlaceholder alt={question.imageAlt} />}
+      </div>
+    )
+  }
   return (
     <div className="exam-question">
       <p className="exam-question__prompt" lang="ja">
@@ -260,6 +347,23 @@ function SentenceOrderBlock({ question, selected, onSelect, revealed }) {
   const { t } = useLang()
   const { pieces, order, starIndex, contextJp } = question
   const byId = Object.fromEntries(pieces.map(p => [p.id, p]))
+  const apart = useContext(ApartContext)
+  if (apart) {
+    return (
+      <div className="exam-ask exam-ask--centre">
+        {contextJp && <p className="exam-ask__line" lang="ja"><GapText text={contextJp} /></p>}
+        <div className="exam-order-slots exam-ask__slots" aria-hidden="true">
+          {order.map((pieceId, i) => (
+            <span key={i} className={`exam-order-slot${i === starIndex ? ' exam-order-slot--star' : ''}`}>
+              {'＿＿＿'}
+              {i === starIndex && <StarIcon size={15} className="exam-order-slot__star" />}
+            </span>
+          ))}
+        </div>
+        <p className="exam-ask__hint">{t.examStarHint}</p>
+      </div>
+    )
+  }
   return (
     <div className="exam-question">
       <p className="exam-question__prompt exam-question__prompt--context" lang="ja"><GapText text={contextJp} /></p>
@@ -301,6 +405,19 @@ function ClozeBlock({ question, selected, onSelect, revealed }) {
   // paper prints: 【1】 is the first blank of this passage whichever
   // question of the section it is (exam/examService.js).
   const { passage, blankNumber, number } = question
+  const apart = useContext(ApartContext)
+  if (apart) {
+    return (
+      <div className="exam-ask exam-ask--read">
+        <div className="exam-ask__scroll">
+          {passage.titleJp && <h4 className="exam-passage__title" lang="ja">{passage.titleJp}</h4>}
+          <p className="exam-passage__text" lang="ja">
+            <ClozeText template={passage.textTemplateJp} activeNumber={blankNumber ?? number} />
+          </p>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="exam-question">
       <h4 className="exam-passage__title" lang="ja">{passage.titleJp}</h4>
@@ -340,6 +457,15 @@ function ClozeText({ template, activeNumber }) {
 // On the desk the passage stands beside them instead (`passageAside`).
 function ReadingPassageBlock({ question, selected, onSelect, revealed, passageAside }) {
   const { passage } = question
+  const apart = useContext(ApartContext)
+  if (apart) {
+    return (
+      <div className="exam-ask exam-ask--read">
+        <div className="exam-ask__scroll"><PassageText passage={passage} /></div>
+        <p className="exam-ask__foot" lang="ja"><GapText text={question.promptJp} /></p>
+      </div>
+    )
+  }
   return (
     <div className="exam-question">
       {!passageAside && (
@@ -384,9 +510,10 @@ export function PassageText({ passage }) {
 // work rather than being cleared away as unreachable code.
 function TableReadingBlock({ question, selected, onSelect, revealed }) {
   const { flyer } = question
+  const apart = useContext(ApartContext)
   return (
-    <div className="exam-question">
-      <div className="prompt-card exam-flyer">
+    <div className={apart ? 'exam-ask exam-ask--read' : 'exam-question'}>
+      <div className={apart ? 'exam-ask__scroll exam-flyer' : 'prompt-card exam-flyer'}>
         <h4 className="exam-flyer__title" lang="ja">{flyer.titleJp}</h4>
         <p className="exam-flyer__subtitle" lang="ja">{flyer.subtitleJp}</p>
         <p className="exam-flyer__hours" lang="ja">{flyer.hoursJp}</p>
@@ -405,15 +532,17 @@ function TableReadingBlock({ question, selected, onSelect, revealed }) {
           ))}
         </div>
       </div>
-      <p className="exam-question__prompt" lang="ja"><GapText text={question.promptJp} /></p>
-      <ChoiceList
-        choices={question.choices}
-        selected={selected}
-        onSelect={onSelect}
-        revealed={revealed}
-        answer={question.answer}
-        label={question.promptJp}
-      />
+      <p className={apart ? 'exam-ask__foot' : 'exam-question__prompt'} lang="ja"><GapText text={question.promptJp} /></p>
+      {!apart && (
+        <ChoiceList
+          choices={question.choices}
+          selected={selected}
+          onSelect={onSelect}
+          revealed={revealed}
+          answer={question.answer}
+          label={question.promptJp}
+        />
+      )}
     </div>
   )
 }
@@ -435,8 +564,30 @@ function ListeningBlock({ question, selected, onSelect, revealed, devMode }) {
   const { t } = useLang()
   const keys = useContext(KeysContext)
   const [showScript, setShowScript] = useState(false)
+  const apart = useContext(ApartContext)
   const choices = question.choices
   const choiceType = question.choiceType || 'text'
+
+  // The phone's page: the question over the clip, the clip as the ring
+  // round its play button (the owner's pick of C5's player for the
+  // paper, plan 171); the answers are the dock's.
+  if (apart) {
+    return (
+      <div className="exam-ask exam-ask--centre">
+        {question.questionPromptJp && <p className="exam-ask__line" lang="ja">{question.questionPromptJp}</p>}
+        {question.imageAlt && <ImagePlaceholder alt={question.imageAlt} />}
+        <AudioPlayer src={question.audioSrc} ring />
+        {devMode && (
+          <div className="exam-dev-panel">
+            <button type="button" className="exam-dev-panel__toggle" onClick={() => setShowScript(s => !s)}>
+              {showScript ? 'Hide script (dev)' : 'Show script (dev)'}
+            </button>
+            {showScript && <p className="exam-dev-panel__script" lang="ja">{question.scriptJp}</p>}
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="exam-question">

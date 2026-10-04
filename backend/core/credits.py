@@ -603,6 +603,10 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
                 from core import events
                 events.record(user_id, "fare_blocked",
                               {"balance": have, "fare": n, "kind": "review"}, cur=cur)
+                # And as the learner's own record: the review that would
+                # have waited, for the offer's week (week below).
+                cur.execute("INSERT INTO credit_stops (user_id, cards) VALUES (%s, %s)",
+                            (user_id, max(1, n - have)))
             charge = min(n, have)
             if charge > 0:
                 _insert(cur, user_id, -charge, "review", ref)
@@ -616,6 +620,76 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
         conn.close()
     forget(user_id)
     return {"balance": new_balance, "unlimited": False}
+
+
+# ── 止 — where the credits stopped the learner (plan 172) ─────
+# The offer a free learner is shown when a run stops at zero draws
+# their last seven days: what they reviewed (the ledger's fares) and
+# what waited because the balance ran out (credit_stops). A stop is
+# written in two places, never both for the same review: shadow mode
+# writes one for each review it would have refused (spend above), and
+# under enforcement -- where the server refuses the first fare and
+# never sees the rest of the run -- the app posts what was left of the
+# run it stopped (POST /api/credits/stop).
+STOP_MAX = 500
+WEEK_DAYS = 7
+
+
+def record_stop(user_id: str, cards: int) -> int:
+    """One stop, `cards` reviews kept waiting, clamped to 1..STOP_MAX."""
+    cards = max(1, min(STOP_MAX, int(cards)))
+    from core.db import db_conn
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO credit_stops (user_id, cards) VALUES (%s, %s)", (user_id, cards))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+    return cards
+
+
+def week(user_id: str, now: datetime | None = None) -> dict:
+    """The learner's last WEEK_DAYS local days, oldest first: each day's
+    paid reviews and the reviews that waited for the balance, beside the
+    day's refill (the ceiling the offer draws them against)."""
+    now = now or datetime.now(timezone.utc)
+    from core.db import db_conn
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            tz = _profile_bits(cur, user_id)["tz"] or 0
+            today = local_today(tz, now)
+            first = today - timedelta(days=WEEK_DAYS - 1)
+            since = _midnight_starting(first, tz)
+            day = "((at AT TIME ZONE 'UTC') + make_interval(mins => %s))::date"
+            cur.execute(
+                f"SELECT {day} AS d, SUM(-delta) FROM credit_ledger "
+                "WHERE user_id = %s AND reason = 'review' AND at >= %s GROUP BY d",
+                (tz, user_id, since),
+            )
+            reviewed = {d: int(n) for d, n in cur.fetchall()}
+            cur.execute(
+                f"SELECT {day} AS d, SUM(cards) FROM credit_stops "
+                "WHERE user_id = %s AND at >= %s GROUP BY d",
+                (tz, user_id, since),
+            )
+            waited = {d: int(n) for d, n in cur.fetchall()}
+    finally:
+        conn.close()
+    days = []
+    for i in range(WEEK_DAYS):
+        d = first + timedelta(days=i)
+        days.append({"date": d.isoformat(), "reviewed": reviewed.get(d, 0), "waited": waited.get(d, 0)})
+    return {
+        "days": days,
+        "cap": DAILY_REFILL,
+        "stops": sum(1 for d in days if d["waited"] > 0),
+        "waited": sum(d["waited"] for d in days),
+    }
 
 
 def grant(user_id: str, n: int, ref: str | None = None) -> int:

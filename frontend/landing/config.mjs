@@ -3,6 +3,7 @@
 // is here, and only here: `npm run landing` regenerates the pages from
 // it (frontend/landing/README.md).
 import { readFileSync } from 'node:fs'
+import { BOARD_PARAM } from '../src/lib/frontEntry.js'
 
 // The web origin the canonical, hreflang, sitemap and share-card URLs
 // are written against. The Vercel origin until a custom domain exists.
@@ -18,12 +19,20 @@ export const PAGES = {
 }
 export const DEFAULT_LANG = 'fr'
 
-// The app's front door, now that `/` is this page: Embarquer and Se
-// connecter lead there, and the page sends a signed-in visitor and every
-// sign-in's return there before it paints (page.mjs's FORWARD). Signed
-// out it shows the Welcome; signed in it routes as `/` does in the app,
-// to the first ride when it is due, else the day's gate (src/App.jsx).
+// The app's front door, now that `/` is this page: Se connecter leads
+// there (Embarquer to BOARD_ENTRY, below), and the page sends a
+// signed-in visitor and every sign-in's return there before it paints
+// (page.mjs's FORWARD). Signed out it shows the Welcome; signed in it
+// routes as `/` does in the app, to the first ride when it is due, else
+// the day's gate (src/App.jsx).
 export const APP_ENTRY = '/app'
+
+// Where Embarquer leads: the app with Board already pressed, so it
+// mints the guest pass at once and opens the boarding on its first
+// question, the name, rather than on its own Welcome, which would ask
+// the visitor to board a second time (src/lib/frontEntry.js). Se
+// connecter keeps APP_ENTRY: the sign-in stands on the Welcome.
+export const BOARD_ENTRY = `${APP_ENTRY}?${BOARD_PARAM}`
 
 // The two store listings. Null draws the badge as "coming soon" and
 // links nowhere: a badge that 404s is worse than one that waits.

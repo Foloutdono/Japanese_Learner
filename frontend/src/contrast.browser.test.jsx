@@ -485,14 +485,15 @@ const Fixture = () => (
         <input className="field pr-entry" placeholder="ex. konnichiwa" defaultValue="konnichiwa" />
       </form>
       <div className="exam-nav"><button type="button" className="exam-flag exam-flag--on pr-flag">f</button></div>
-      <div className="exam-sheetbar">
-        <button type="button" className="exam-sheetbar__open">
-          <span className="exam-sheetbar__label">
-            <b className="exam-sheetbar__fig pr-fig">7 / 21</b>
-            <span className="exam-sheetbar__cap pr-sheetcap">Answer sheet</span>
-          </span>
-        </button>
-        <button type="button" className="exam-finish pr-finish">Finish</button>
+      <div className="exam-dock">
+        <div className="exam-tiles">
+          <button type="button" className="exam-tile exam-tile--on"><span className="exam-tile__b pr-tile-b-on">1</span><span className="exam-tile__t pr-tile">あめ</span></button>
+          <button type="button" className="exam-tile"><span className="exam-tile__b pr-tile-b">2</span><span className="exam-tile__t exam-tile__t--long pr-tile-long">雨が降っています</span></button>
+        </div>
+        <div className="exam-dock__nav">
+          <button type="button" className="exam-dock__go pr-dock-prev">Previous</button>
+          <button type="button" className="exam-dock__go exam-dock__go--next pr-dock-next">Next</button>
+        </div>
       </div>
     </main>
     <main className="practice" style={{ '--line-color': 'var(--line-exam)' }}>
@@ -575,16 +576,52 @@ const Fixture = () => (
       </p>
       <p className="hint status-sheet__error ss-error">error line</p>
     </div>
-    {/* The pass's footer (plan 074): the balance line on the pass's own
-        sumi — the word, the gold figure, the cap and the refill. */}
-    <div className="pass" style={{ background: 'var(--bg-panel)' }}>
-      <div className="jour-line balance-line">
-        <span className="balance-line__reading">
-          <span className="jour-line__status"><b className="bl-word">Balance</b></span>
-          <span className="jour-line__validity"><b className="bl-fig">30</b><span className="jour-cap bl-cap">/ 50 credits</span></span>
-        </span>
-        <span className="jour-cap balance-line__refill bl-refill">+1 at 14:48</span>
-      </div>
+    {/* Plan 173 -- the learner's card, in its three materials: the back's
+        print, its meters and its class, the face's foot on the free
+        card's band, and the HUD's strip. Each material is a gradient the
+        walker cannot composite, so each is pinned at its mid tone, and
+        the band where a line is printed on it. */}
+    <div className="pcb pcb--free" style={{ background: '#eae8e4' }}>
+      <div className="pcb__print"><b className="pcb__value pc-free-value">Rapid · 10 / day</b></div>
+      <span className="pcb__meter"><b className="pcb__fig pc-free-fig">640 / 1,000</b><em className="pc-free-note">+1 at 14:48</em></span>
+    </div>
+    <div className="pcb pcb--free" style={{ background: 'var(--pass-band)' }}>
+      <span className="pcb__issued pc-free-issued"><b className="pcb__class">Free</b></span>
+    </div>
+    <div className="pcf pcf--free" style={{ background: 'var(--pass-band)' }}>
+      <span className="pcf__meta pc-free-meta">Practice · locked</span>
+      <span className="pcf__class pc-free-class">Free</span>
+    </div>
+    <div className="pcb pcb--pro" style={{ background: '#221f25' }}>
+      <div className="pcb__print"><b className="pcb__value pc-pro-value">Rapid · 10 / day</b></div>
+      <span className="pcb__meter"><b className="pcb__fig pc-pro-fig">24 / 60</b><em className="pc-pro-note">1 credit an exercise</em></span>
+      <span className="pcb__issued pc-pro-issued"><b className="pcb__class pc-pro-class">Pro</b><span className="pcb__month">Issued March 2026</span></span>
+    </div>
+    <div className="pcf pcf--pro" style={{ background: '#221f25' }}>
+      <span className="pcf__meta pc-pro-meta">1 credit an exercise</span>
+    </div>
+    <div className="pcb pcb--max" style={{ background: '#e2e4e7' }}>
+      <div className="pcb__print"><b className="pcb__value pc-max-value">Rapid · 10 / day</b></div>
+      <span className="pcb__meter"><b className="pcb__fig pcb__fig--inf pc-max-inf">∞</b><em className="pc-max-note">No credit</em></span>
+      <span className="pcb__issued pc-max-issued"><b className="pcb__class pc-max-class">Max</b><span className="pcb__month">Issued March 2026</span></span>
+    </div>
+    <div className="pcf pcf--max" style={{ background: '#e2e4e7' }}>
+      <span className="pcf__meta pc-max-meta">Unlimited</span>
+    </div>
+    <div className="hstrip hstrip--free" style={{ background: '#eae8e4' }}>
+      <span className="hstrip__lv"><b className="hs-free-lv">12</b></span>
+      <span className="hstrip__fig hs-free-fig"><b>12</b></span>
+    </div>
+    <div className="hstrip hstrip--free hstrip--out" style={{ background: '#eae8e4' }}>
+      <span className="hstrip__fig hs-out-fig"><b>0</b></span>
+    </div>
+    <div className="hstrip hstrip--pro" style={{ background: '#221f25' }}>
+      <span className="hstrip__lv"><b className="hs-pro-lv">12</b></span>
+      <span className="hstrip__fig hs-pro-fig"><b>24</b></span>
+    </div>
+    <div className="hstrip hstrip--max" style={{ background: '#e2e4e7' }}>
+      <span className="hstrip__lv"><b className="hs-max-lv">12</b></span>
+      <span className="hstrip__fig hs-max-fig">∞</span>
     </div>
     {/* Plan 074 -- the statistics' notes and caps, the settings' rows,
         the service cards (on the pass-ink wash when chosen), the level
@@ -605,18 +642,6 @@ const Fixture = () => (
         <span className="stg-row__value st-value"><span className="stg-meter" /><span className="stg-row__text">Busy station</span></span>
       </button>
     </div>
-    {/* Plan 139 — the pass printed with its contract: panel inks on the
-        card's sumi, the open field on its gold wash, the validity in
-        the pass's metal. */}
-    <section className="pass stg-pass" style={{ background: 'var(--bg-panel)' }}>
-      <div className="stg-pass__route">
-        <button type="button" className="stg-pass__stop"><span className="stg-pass__code sp-code">N4</span><span className="stg-pass__name sp-name">Elementary</span></button>
-      </div>
-      <div className="stg-pass__fields">
-        <button type="button" className="stg-pass__field"><span className="stg-pass__key sp-key">Service</span><span className="stg-pass__value sp-value">Rapid · 10 / day</span></button>
-        <div className="stg-pass__field stg-pass__field--valid"><span className="stg-pass__key">Valid until</span><span className="stg-pass__value sp-valid">12 Mar 2027</span></div>
-      </div>
-    </section>
     <div className="slip">
       <div className="slip__label"><b className="slip__name st-slip-name">JLPT level</b><span className="cap st-slip-cap">You are here</span></div>
       <span className="slip__hint st-slip-hint">A hint.</span>
@@ -774,9 +799,6 @@ const Fixture = () => (
           <span className="brd-tk__punch ob-tk-punch">Punched</span>
         </div>
       </section>
-      <div className="brd-issue" style={{ background: 'var(--bg-panel)' }}>
-        <span className="brd-gift ob-gift">+200 credits</span>
-      </div>
       <button type="button" className="brd-cell brd-cell--on" aria-pressed="true">
         <span className="brd-cell__n ob-cell-n">10</span>
         <span className="brd-cell__u ob-cell-u">min a day</span>
@@ -929,10 +951,6 @@ const Fixture = () => (
     </div>
 
     <div className="jour-st--delayed" style={{ background: 'var(--bg-panel)' }}>
-      <div className="jour-line">
-        <span className="jour-line__status"><b className="jr-status-b" lang="ja">遅延</b></span>
-        <span className="jour-line__validity"><b className="jr-validity-b">2 sept. ’27</b></span>
-      </div>
       {/* 遅延's ink is the mixed one (raw 臙脂 reads 2.6:1 on sumi), and
           the delta on a comparison row is where it now lands as TEXT —
           the day-bracket that used to carry it went with the two-lane
@@ -1032,9 +1050,12 @@ const SITES = [
   ['.pr-mondai', 'exam part row'],
   ['.pr-part', 'exam part label'],
   ['.pr-flag', 'exam flag, on (warning ink mixed)'],
-  ['.pr-fig', 'sheet bar count (on sumi)'],
-  ['.pr-sheetcap', 'sheet bar caption (soft ink on sumi)'],
-  ['.pr-finish', 'sheet bar finish (on sumi)'],
+  ['.pr-tile', 'answer tile (on sumi)'],
+  ['.pr-tile-long', 'answer tile, a long answer (on sumi)'],
+  ['.pr-tile-b', 'answer tile bubble (on sumi)'],
+  ['.pr-tile-b-on', 'answer tile bubble, picked (sumi on its fill)'],
+  ['.pr-dock-prev', 'exam dock, previous (soft ink on sumi)'],
+  ['.pr-dock-next', 'exam dock, next (on sumi)'],
   ['.pr-rcap', 'result figures caption'],
   ['.pr-rnote', 'result figures note'],
   ['.pr-hint', 'hint line'],
@@ -1111,7 +1132,6 @@ const SITES = [
   ['.ob-tk-credits', 'the ticket\'s credits (gold ink on surface)'],
   ['.ob-tk-unit', 'the ticket\'s unit (soft ink on surface)'],
   ['.ob-tk-punch', 'the ticket\'s punch (stamp ink on surface)'],
-  ['.ob-gift', 'the welcome on the printed pass (gold mixed toward the panel ink)'],
   ['.ob-cell-n', 'chosen cell figure (ink on gold tint)'],
   ['.ob-cell-u', 'chosen cell unit (soft ink on gold tint)'],
   ['.ob-cell-sub', 'chosen cell sub (soft ink on gold tint)'],
@@ -1121,8 +1141,6 @@ const SITES = [
   ['.ob-front-name', 'a line\'s name at the crossroads (ink on page)'],
   ['.ob-auth-error', 'sign-in error (danger on page)'],
   ['.ob-auth-foot', 'sign-in foot (soft ink on page)'],
-  ['.jr-status-b', 'pass footer status word (state ink on sumi)'],
-  ['.jr-validity-b', 'pass footer 有効期限 (gold on sumi)'],
   ['.jr-delta-b', 'status sheet delta, delayed (state ink on sumi)'],
 
   // The 定期入れ profile — every one a mix on a mix (see the fixture).
@@ -1156,10 +1174,6 @@ const SITES = [
   ['.ss-none', 'status sheet goal-less line (soft ink on sumi)'],
   ['.ss-office', 'status sheet office link (on sumi)'],
   ['.ss-error', 'status sheet error (state ink on sumi)'],
-  ['.bl-word', 'pass balance word (on sumi)'],
-  ['.bl-fig', 'pass balance figure (gold on sumi)'],
-  ['.bl-cap', 'pass balance cap (soft ink on sumi)'],
-  ['.bl-refill', 'pass balance refill (soft ink on sumi)'],
   ['.st-unit', 'statistics figure unit'],
   ['.st-delta', 'retention delta'],
   ['.st-cap', 'statistics cap'],
@@ -1186,11 +1200,6 @@ const SITES = [
   ['.sv-on-jp', 'chosen service card name (on the gold wash)'],
   ['.sv-on-pace', 'chosen service card pace (on the gold wash)'],
   ['.sv-on-words', 'chosen service card minutes (on the gold wash)'],
-  ['.sp-code', 'settings pass stop code (sumi)'],
-  ['.sp-name', 'settings pass stop name (sumi)'],
-  ['.sp-key', 'settings pass field key (sumi)'],
-  ['.sp-value', 'settings pass field value (sumi)'],
-  ['.sp-valid', 'settings pass validity in gold (sumi)'],
   ['.sr-on-pace', 'chosen service line pace (on the gold wash)'],
   ['.sr-on-tag', 'chosen service line tag (on the gold wash)'],
   ['.sr-when', 'service line arrival'],
@@ -1242,6 +1251,32 @@ const SITES = [
   ['.dj-due', 'record cell: a card that is due (due ink mixed toward the ink)'],
   ['.dj-due-action', 'the review action under the record (same ink, ghost ground)'],
   ['.dj-tip', 'tag note (panel ink on sumi)'],
+  // Plan 173 -- the learner's card and the HUD's strip, on each material.
+  ['.pc-free-value', 'card back: the print on white plastic'],
+  ['.pc-free-fig', 'card back: a meter\'s figure on white plastic'],
+  ['.pc-free-note', 'card back: a meter\'s note on white plastic'],
+  ['.pc-free-issued', 'card back: the class on the free card\'s band'],
+  ['.pc-free-meta', 'card face: the fare on the free card\'s band'],
+  ['.pc-free-class', 'card face: the class on the free card\'s band'],
+  ['.pc-pro-value', 'card back: the print on charcoal'],
+  ['.pc-pro-fig', 'card back: a meter\'s figure on charcoal'],
+  ['.pc-pro-note', 'card back: a meter\'s note on charcoal'],
+  ['.pc-pro-issued', 'card back: the month issued on charcoal'],
+  ['.pc-pro-class', 'card back: the class in gold on charcoal'],
+  ['.pc-pro-meta', 'card face: the fare on charcoal'],
+  ['.pc-max-value', 'card back: the print on platinum'],
+  ['.pc-max-inf', 'card back: ∞ in gold on platinum'],
+  ['.pc-max-note', 'card back: a meter\'s note on platinum'],
+  ['.pc-max-issued', 'card back: the month issued on platinum'],
+  ['.pc-max-class', 'card back: the class in gold on platinum'],
+  ['.pc-max-meta', 'card face: the fare on platinum'],
+  ['.hs-free-lv', 'HUD strip: the level on white plastic'],
+  ['.hs-free-fig', 'HUD strip: the balance in the band\'s indigo'],
+  ['.hs-out-fig', 'HUD strip: a spent balance in the danger\'s ink'],
+  ['.hs-pro-lv', 'HUD strip: the level on charcoal'],
+  ['.hs-pro-fig', 'HUD strip: the balance in gold on charcoal'],
+  ['.hs-max-lv', 'HUD strip: the level on platinum'],
+  ['.hs-max-fig', 'HUD strip: ∞ in gold on platinum'],
 ]
 
 // Composite every non-transparent background from <html> down to the element.

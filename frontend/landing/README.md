@@ -223,6 +223,13 @@ gate). Four things make that work, and each has a test:
   every sign-in's return there too: Google and the e-mail links come back
   to `/` (the project's Site URL) with `?code`, `#access_token` or an
   error, and those go along. Visitors, and search engines, stay.
+- **Embarquer boards at once.** Its links open `/app?board` (`BOARD_ENTRY`),
+  and the app, reading the marker before it mounts
+  (`src/lib/frontEntry.js`), mints the guest pass and opens the boarding
+  on its first question, the name, instead of its own Welcome, which
+  would ask the visitor to board a second time. Backing out of that
+  question comes back to the page it was pressed on. Se connecter keeps
+  `/app`: the sign-in stands on the Welcome.
 - **Signed in and want to see the page?** Open `/?landing`. It holds for
   the rest of the tab.
 - **The installed app opens at `/app`** (the manifest's `start_url`),

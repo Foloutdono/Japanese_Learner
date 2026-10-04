@@ -4,7 +4,7 @@ import { DARK, LIGHT, SCALE } from '../landing/tokens.mjs'
 import { PAGES, SITE_ORIGIN, STORES, PRESENTATION, CLIPS } from '../landing/config.mjs'
 import { landingFiles, landingVoices } from '../landing/build.mjs'
 import { forwardScript } from '../landing/page.mjs'
-import { sessionKey, APP_ENTRY } from '../landing/config.mjs'
+import { sessionKey, APP_ENTRY, BOARD_ENTRY } from '../landing/config.mjs'
 import { STRINGS } from '../landing/strings.mjs'
 import { readFacts } from '../landing/content.mjs'
 
@@ -109,6 +109,15 @@ describe('the landing page', () => {
     it('links a store badge only where the listing exists', () => {
       const linked = [...html.matchAll(/data-store="(\w+)"/g)].map(m => m[1])
       expect(linked.sort()).toEqual(Object.keys(STORES).filter(k => STORES[k]).flatMap(k => [k, k]).sort())
+    })
+
+    it('boards from every Embarquer, and signs in on the Welcome', () => {
+      const doors = [...html.matchAll(/<a class="([^"]+)" href="([^"]+)" data-board/g)]
+        .map(([, cls, href]) => [cls.trim().split(' ')[0], href])
+      expect(doors.filter(([cls]) => cls !== 'ghost').length).toBeGreaterThan(1)
+      for (const [cls, href] of doors) {
+        expect(href, cls).toBe(cls === 'ghost' ? APP_ENTRY : BOARD_ENTRY)
+      }
     })
 
     it('holds every hook the client script reaches for', () => {

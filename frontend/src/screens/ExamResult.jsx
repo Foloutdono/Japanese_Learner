@@ -146,7 +146,7 @@ export default function ExamResult({ session }) {
       const key = q.mondaiId
       let group = out.find(g => g.key === key)
       if (!group) {
-        group = { key, number: q.mondaiNumber, rows: [], correct: 0 }
+        group = { key, number: q.mondaiNumber, name: q.mondaiName, rows: [], correct: 0 }
         out.push(group)
       }
       group.rows.push({ ...r, q })
@@ -348,49 +348,138 @@ export default function ExamResult({ session }) {
     )
   }
 
+  // ── The phone's result (plan 171) ──
+  // The owner's pick A7 of the canvas "Tsuji — the mock exam on the
+  // phone": the score against the practice target on one bar, the paper
+  // graded part by part -- a mark per question, so where the points went
+  // is seen before it is read -- then the misses, each with the bubble
+  // picked and the one that was right, opening on the whole question.
+  const pct = sectionStats.pct
+  const listed = groups.flatMap(g => (showAll ? g.rows : g.rows.filter(r => !r.isCorrect)))
   return (
-    <main id="main-content" className="practice" style={{ '--line-color': EXAM_COLOR }}>
+    <main id="main-content" className="practice exam-res" style={{ '--line-color': EXAM_COLOR }}>
       <Bar code={station.code} color={EXAM_COLOR} title={t.examTitle} sub={paperTitle(exam, t)} />
 
-      {head}
+      <div className="exam-res__score">
+        <div className="exam-res__figs">
+          <b className="exam-res__fig">{sectionStats.correct}</b>
+          <span className="exam-res__of">/ {sectionStats.total}</span>
+          <span className={metTarget ? 'exam-res__pct' : 'exam-res__pct exam-res__pct--low'}>{pct} %</span>
+        </div>
+        <div className="exam-res__bar" role="img" aria-label={t.examScoreAgainst(pct, PRACTICE_TARGET_PCT)}>
+          <span className={metTarget ? 'exam-res__fill' : 'exam-res__fill exam-res__fill--low'} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
+          <span className="exam-res__tick" style={{ left: `${PRACTICE_TARGET_PCT}%` }} />
+        </div>
+        {/* The one screen where a generated practice number could be
+            taken for a real JLPT result, so it says it is not one. */}
+        <span className="cap">{t.examPracticeTarget} {PRACTICE_TARGET_PCT} % · {t.examUnofficial}</span>
+        {elapsedMs !== null && (
+          <div className="exam-res__time">
+            <span className="cap">{t.examTimeLabel}</span>
+            <span className="exam-res__clock">
+              <b>{formatDuration(elapsedMs)}</b>
+              <span className="exam-res__limit"> / {section.timeLimitMin}:00</span>
+            </span>
+            <span className="exam-res__track" aria-hidden="true">
+              <span className="exam-res__used" style={{ width: `${Math.min(100, elapsedMs / (section.timeLimitMin * 600))}%` }} />
+            </span>
+          </div>
+        )}
+      </div>
 
-      {(showAll || missedCount > 0) && (
-        <div className="surface exam-review">
-          {groups.map(group => {
-            const rows = showAll ? group.rows : group.rows.filter(r => !r.isCorrect)
-            if (rows.length === 0) return null
-            return (
-              <div key={group.key} className="exam-review__part">
-                <div className="exam-group">
-                  <b className="exam-group__part">{t.examPart(group.number)}</b>
-                  <span className="exam-group__score">{group.correct} / {group.rows.length}</span>
+      <section className="exam-res__parts" aria-label={t.examByPart}>
+        {groups.map(g => {
+          const low = g.correct / g.rows.length < PRACTICE_TARGET_PCT / 100
+          return (
+            <div key={g.key} className="exam-res__part">
+              <span className="exam-res__no" lang="ja">問題{g.number}</span>
+              <span className="exam-res__jp" lang="ja">{g.name ?? t.examPart(g.number)}</span>
+              <span className="exam-res__marks" aria-hidden="true">
+                {g.rows.map(r => (
+                  <i
+                    key={r.id}
+                    className={r.isCorrect ? 'exam-res__mk' : r.given == null ? 'exam-res__mk exam-res__mk--blank' : 'exam-res__mk exam-res__mk--x'}
+                  />
+                ))}
+              </span>
+              <span className={low ? 'exam-res__s exam-res__s--low' : 'exam-res__s'}>{g.correct}/{g.rows.length}</span>
+            </div>
+          )
+        })}
+      </section>
+
+      <div className="exam-res__mhead">
+        <span className="cap">{missedCount === 0 ? t.examAllCorrect : t.examMisses(missedCount)}</span>
+        {/* Rendered on a clean sheet too: every question can still be
+            opened -- a listening transcript is what somebody who aced
+            the paper may want to read. */}
+        <button
+          type="button"
+          className="exam-res__all"
+          aria-pressed={showAll}
+          onClick={() => { playUi('click-mode-selection'); setShowAll(v => !v) }}
+        >
+          {showAll ? t.examMissesOnly : t.examSeeAll}
+          <ChevronIcon direction="right" size={14} />
+        </button>
+      </div>
+
+      {listed.length > 0 && (
+        <div className="exam-res__misses">
+          {listed.map(r => (
+            <div key={r.id}>
+              <MissRow r={r} open={expandedId === r.id} onClick={() => toggle(r.id)} />
+              {expandedId === r.id && (
+                <div className="exam-review-row__detail">
+                  <QuestionRenderer question={r.q} selected={r.given} onSelect={() => {}} revealed devMode={false} />
                 </div>
-                {rows.map(r => {
-                  const isOpen = expandedId === r.id
-                  return (
-                    <div key={r.id}>
-                      <ReviewRow r={r} open={isOpen} onClick={() => toggle(r.id)} />
-                      {isOpen && (
-                        <div className="exam-review-row__detail">
-                          <QuestionRenderer question={r.q} selected={r.given} onSelect={() => {}} revealed devMode={false} />
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })}
+              )}
+            </div>
+          ))}
         </div>
       )}
 
       <div className="btn-row">
         <button type="button" className="btn-secondary" onClick={() => { playUi('click-screen-selection'); navigate('/practice/exam') }}>
-          {t.examBackToExams}
+          {t.examPapers}
         </button>
         {newPaper}
       </div>
     </main>
+  )
+}
+
+// One question in the phone's list (plan 171): its number and its line,
+// then the sheet's bubbles -- the one picked, the one that was right --
+// and the right answer's words. Opens the question, revealed, under it.
+function MissRow({ r, open, onClick }) {
+  const { t } = useLang()
+  const choices = r.q.choices ?? r.q.pieces ?? []
+  const right = choices.findIndex(c => c.id === r.q.answer)
+  const given = choices.findIndex(c => c.id === r.given)
+  const line = questionLine(r.q)
+  return (
+    <button type="button" className="exam-miss" onClick={onClick} aria-expanded={open}>
+      <span className="exam-miss__l1">
+        <span className="exam-miss__n">{r.q.number}</span>
+        {line
+          ? <span className="exam-miss__q" lang="ja"><GapText text={line} /></span>
+          : <span className="exam-miss__q" />}
+        <ChevronIcon direction={open ? 'up' : 'down'} size={14} className="exam-miss__chev" />
+      </span>
+      <span className="exam-miss__l2">
+        {choices.map((c, i) => {
+          const cls = i === right
+            ? (r.isCorrect ? 'exam-miss__b exam-miss__b--got' : 'exam-miss__b exam-miss__b--right')
+            : i === given ? 'exam-miss__b exam-miss__b--x' : 'exam-miss__b'
+          return <span key={c.id} className={cls}>{i + 1}</span>
+        })}
+        {r.given == null && <span className="exam-miss__blank">{t.examNotAnswered}</span>}
+        {right !== -1 && choices[right].textJp && (
+          <span className="exam-miss__a" lang="ja">{choices[right].textJp}</span>
+        )}
+      </span>
+    </button>
   )
 }
 

@@ -700,6 +700,21 @@ CREATE TABLE credit_ledger (
 CREATE INDEX idx_credit_ledger_user
 ON credit_ledger(user_id);
 
+-- Owned by routes/profile.py's migration, beside the ledger (plan 172)
+-- -- 止, where the credits stopped a learner: a row a stop, `cards`
+-- the reviews it kept waiting (one per refused review in shadow mode,
+-- what was left of the stopped run under enforcement). Read by
+-- core/credits.week for the offer's week.
+CREATE TABLE credit_stops (
+    id       BIGSERIAL PRIMARY KEY,
+    user_id  TEXT NOT NULL,
+    cards    INTEGER NOT NULL,
+    at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_credit_stops_user
+ON credit_stops(user_id, at);
+
 -- Owned by routes/translation.py -- translation-mode study log,
 -- mirrors reading_log/comprehension_log's shape for the same feature
 -- family.

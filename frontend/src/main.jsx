@@ -25,6 +25,7 @@ import { isNativeReturn } from './lib/nativeReturn'
 import { registerSW } from 'virtual:pwa-register'
 import { swUpdate } from './stores/swUpdate'
 import { isNative } from './lib/platform'
+import { takeEntry } from './lib/frontEntry'
 
 // The dead-bundle guard in index.html sets this before reloading; that
 // this module is running at all is the proof it worked, and clearing it
@@ -81,8 +82,13 @@ if (isNative()) {
 // will not follow a custom scheme on its own.
 const passingThrough = isNativeReturn(window.location.href)
 
+// ── 正面口 (lib/frontEntry.js) ──
+// Board pressed on the landing page: read here, once, before StrictMode
+// can call App's initialisers twice, and taken off the address.
+const front = passingThrough ? undefined : takeEntry()
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {passingThrough ? <NativeReturn /> : <App />}
+    {passingThrough ? <NativeReturn /> : <App front={front} />}
   </StrictMode>,
 )

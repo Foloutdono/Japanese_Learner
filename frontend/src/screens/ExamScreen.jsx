@@ -6,18 +6,19 @@ import { board } from '../stores/boarding'
 import { Leave } from '../components/chrome/Bar'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
-import ModeSelector from '../components/selection/ModeSelector'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { listExams } from '../exam/examService'
 import { LEVELS } from '../domain/sentenceSource'
-import { KIND_ORDER, kindMeta, KIND_JP } from '../exam/examKinds'
+import { KIND_ORDER, KIND_JP } from '../exam/examKinds'
 import { PageIcon } from '../components/ui/Icons'
 import { useDesk } from '../hooks/useDesk'
 import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
 import { ExamPapers } from '../components/practice/ExamPapers'
 import { usePracticeRecord } from '../stores/practiceRecord'
 import { useStationSamples } from '../stores/stationSamples'
+import { useProfileSummary } from '../stores/profileSummary'
+import { ExamStation } from '../exam/ExamStation'
 
 // Route: /practice/exam
 // Level first, then which paper — the same two-step every other study
@@ -59,6 +60,7 @@ export default function ExamScreen({ session }) {
   const [sp, setSp] = useSearchParams()
   const [exams, setExams] = useState(null)
   const desk = useDesk()
+  const profile = useProfileSummary()
   // ?level=N4 arrives from the practice gate, whose platform rows carry
   // the five grades (screens/PracticeScreen.jsx): the chip opens that
   // grade's papers rather than the list of grades the learner just
@@ -96,8 +98,8 @@ export default function ExamScreen({ session }) {
     )
   }
 
-  // ── Level ──
-  if (!level) {
+  // ── 机 — the grades, while the catalogue loads or holds nothing ──
+  if (desk && !level) {
     return (
       <SelectionScreen
         title={t.examTitle}
@@ -108,7 +110,6 @@ export default function ExamScreen({ session }) {
         {exams?.length === 0 && (
           <Empty icon={<PageIcon size={40} />} message={t.examNoneAvailable} />
         )}
-        {exams?.length > 0 && <LevelSelector onSelect={setLevel} />}
       </SelectionScreen>
     )
   }
@@ -116,58 +117,38 @@ export default function ExamScreen({ session }) {
   // ── 机 — the grades beside a grade's papers, filled (plan 159) ──
   if (desk) return <DeskExams level={level} exams={exams} />
 
-  // ── Which paper, within that level ──
-  const META = kindMeta(t)
-  const modes = (exams ?? [])
-    .filter(e => e.level === level)
-    .sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind))
-    .map(exam => {
-      const meta = META[exam.kind]
-      return {
-        key: exam.id,
-        label: meta?.label ?? exam.title,
-        // Question count is the useful half of the old "1 sections ·
-        // 21 questions" line; the section count was noise (always 1,
-        // and pluralised wrong). `generated: false` means opening this
-        // triggers generation, so say so before the learner commits to
-        // a two-minute wait rather than after.
-        desc: [
-          `${exam.questionCount} ${t.examQuestions}`,
-          exam.generated ? null : t.examNotGeneratedYet,
-        ].filter(Boolean).join(' · '),
-        // Only where there IS a paper to be different from. Asking for
-        // a fresh one means excluding the revision on offer, which the
-        // catalog entry carries for exactly this purpose — the server
-        // then serves another existing paper if it has one, and only
-        // generates when it doesn't. A learner who has already sat every
-        // revision arrives here with generated:false and no action:
-        // opening it is already a fresh paper.
-        action: exam.generated
-          ? {
-              label: t.examFreshPaper,
-              title: t.examFreshPaperHint,
-              onClick: () => board(() => navigate(`/practice/exam/${exam.id}?exclude=${exam.revision}`)),
-            }
-          : undefined,
-      }
-    })
-
-  const papers = (
-    <ModeSelector
-      modes={modes}
-      // ModeSelector sounds the tap; a second sound here stacked two
-      // on one press, a beat before the door's chime.
-      onSelect={examId => board(() => navigate(`/practice/exam/${examId}`))}
-    />
-  )
-
+  // ── The phone: the grade and its papers on one screen (plan 171) ──
+  // No grade in the URL is the learner's own (else N5): the band at
+  // the head is the way to another, and it writes the URL as the
+  // grade list did.
+  const shown = level ?? (LEVELS.includes(profile?.jlptLevel) ? profile.jlptLevel : LEVELS[0])
+  const open = (exam, exclude) => {
+    playUi('click-screen-selection')
+    const search = exclude != null ? `?exclude=${exclude}` : ''
+    // The last sitting rides along for the paper's cover, which has the
+    // paper but not the catalogue entry that knows it.
+    board(() => navigate(`/practice/exam/${exam.id}${search}`, { state: { last: exam.last ?? null } }))
+  }
   return (
     <SelectionScreen
       title={t.examTitle}
-      sub={level}
-      aside={<Leave onClick={() => setLevel(null)}>{t.leaveLevels}</Leave>}
+      sub={t.stationJlpt}
+      aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
     >
-      {papers}
+      {exams === null && <Loading />}
+      {exams?.length === 0 && (
+        <Empty icon={<PageIcon size={40} />} message={t.examNoneAvailable} />
+      )}
+      {exams?.length > 0 && (
+        <ExamStation
+          key={shown}
+          level={shown}
+          papers={exams.filter(e => e.level === shown)}
+          onLevel={setLevel}
+          onOpen={exam => open(exam)}
+          onFresh={exam => open(exam, exam.revision)}
+        />
+      )}
     </SelectionScreen>
   )
 }

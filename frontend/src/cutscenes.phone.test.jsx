@@ -41,7 +41,7 @@ function screenUnder() {
 const SCENES = {
   gate: async () => {
     const onDone = vi.fn()
-    await render(<TicketGate section={{ color: 'var(--line-kana)', name: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={onDone} />)
+    await render(<LangProvider><TicketGate section={{ color: 'var(--line-kana)', name: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={onDone} /></LangProvider>)
     return onDone
   },
   arrival: async () => {
@@ -148,12 +148,14 @@ describe('the gate grows into view and holds on its name', () => {
   async function gate(section = {}) {
     const onDone = vi.fn()
     await render(
-      <TicketGate
-        section={{ color: 'var(--line-vocab)', icon: '単語', title: 'Vocabulary', ...section }}
-        station={{ code: 'V01' }}
-        onNavigate={() => {}}
-        onDone={onDone}
-      />,
+      <LangProvider>
+        <TicketGate
+          section={{ color: 'var(--line-vocab)', icon: '単語', title: 'Vocabulary', ...section }}
+          station={{ code: 'V01' }}
+          onNavigate={() => {}}
+          onDone={onDone}
+        />
+      </LangProvider>,
     )
     await settle()
     return onDone
@@ -236,7 +238,7 @@ describe('the gate grows into view and holds on its name', () => {
     vi.useFakeTimers()
     try {
       const onDone = vi.fn()
-      await render(<TicketGate section={{ color: 'var(--line-kana)', icon: 'あ', title: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={onDone} />)
+      await render(<LangProvider><TicketGate section={{ color: 'var(--line-kana)', icon: 'あ', title: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={onDone} /></LangProvider>)
       const ground = () => document.documentElement.style.getPropertyValue('--gate-ground')
       await vi.advanceTimersByTimeAsync(650 * X)
       expect(ground()).toBe('')
@@ -255,7 +257,7 @@ describe('the gate grows into view and holds on its name', () => {
   it('gives the gutter back when it is skipped', async () => {
     vi.useFakeTimers()
     try {
-      await render(<TicketGate section={{ color: 'var(--line-kana)', icon: 'あ', title: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={() => {}} />)
+      await render(<LangProvider><TicketGate section={{ color: 'var(--line-kana)', icon: 'あ', title: 'Kana' }} station={{ code: 'KN' }} onNavigate={() => {}} onDone={() => {}} /></LangProvider>)
       await vi.advanceTimersByTimeAsync(700 * X)
       expect(document.documentElement.style.getPropertyValue('--gate-ground')).not.toBe('')
       window.dispatchEvent(new PointerEvent('pointerdown'))

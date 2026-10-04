@@ -1206,7 +1206,87 @@ runtime purpose. Two consequences worth knowing:
   `backend/content/reading_sentences.py`, `backend/tests/test_nyumon.py`,
   `src/screens/RideIntro.browser.test.jsx`, the `intro` phone, desktop
   and short tests, and `index.css` and its 机 section; CONTEXT.md, 入門).
-  When starting a new wave, begin at **171** or higher, and check
+  **171** is 模試 on a phone, the mock exam redrawn below the desk (the
+  owner's mix of the canvas "Tsuji — the mock exam on the phone": C1,
+  A2–A5 with C5's player, C6 and A7, then variant V1 with the question
+  bigger and its number at the head of the page): the grade and its
+  papers one screen, the paper to sit next a card with its parts and
+  Start, the others rows that swap into it (`exam/ExamStation.jsx`); a
+  cover before the first question, which is what starts the clock; each
+  question a page under its big number and its part's JLPT name, the
+  answers a sumi dock of tiles (a bubble and the words, two by two when
+  short) over Previous and Next (`QuestionRenderer`'s `apart`,
+  `AnswerTiles`); the listening clip a ring with the play key in it
+  (`AudioPlayer`'s `ring`); the sheet by parts (`AnswerSheet`'s
+  `PartsSheet`, the sheet bar retired); and the result as the score
+  against the pass line, the parts graded and the misses with the
+  answer given and the right one (`ExamResult`'s phone branch). The
+  server names each part (`exam_blueprint.name_mondai`). The desk is
+  unchanged (cited in `routes/exams.py`, `study/exam_blueprint.py`,
+  `tests/test_exam_mondai_names.py`, `screens/ExamScreen.jsx`,
+  `screens/ExamRunner.jsx`, `screens/ExamResult.jsx`, `exam/`,
+  `src/practice.phone.test.jsx`, the `Exam*` screen tests and
+  `index.css`; `docs/design/mobile/README.md`).
+  **172** is 定期券, the three offers (numbered 172 because 171 went to
+  模試 on a phone while it was open: its commits' messages say 171; the
+  owner's canvas "Tsuji — the
+  three offers", built board for board at 390×844): which one opens is
+  the door's (`domain/paywall.js`'s `offerScreen`) -- DISCOVER, Pro
+  yearly's 7-day trial, the six platforms blooming out of a padlock and
+  one sentence played through each; WEEK, a free learner's own last
+  seven days against the refill (`GET /api/credits/week`, the stops a
+  shadow fare or the run-out sheet records in `credit_stops`,
+  `core/credits.week`); MAX, the step up for a Pro learner at one of
+  Pro's four ceilings (`LIMITS`: practice's fare, photos, explanations,
+  new mock papers) or from Settings, where the Pro pass (墨, printed)
+  turns over into Max (梨地, satin platinum, its 辻 etched and MAX in
+  gold foil), each card's 辶 filling with the XP from its foot; every
+  stage under one cone of light (光), gold the ticket's, the gate's and
+  Max's material alone; a counter at its ceiling printed red (3B), 3A's
+  allowances written down and shaking as they grow when the switch
+  turns to Max, and 3C's Max column revealed as the pass lands -- the
+  figures never count; on the desk
+  the owner's pick A 対 of the canvas's Desktop page -- the dialog at
+  `--offer-desk-w` with the stage beside the words, the phone's drawing
+  scaled whole into the left pane, the words at the phone's width in
+  the right, Enter printed on the gate that holds the focus and Esc at
+  the corner; the funnel `offer_view` / `offer_intent`
+  (`plan`, `billing`) / `offer_dismiss`; `components/credits/PaywallScreen.jsx`
+  retired; `/dev/offers` opens each of the seven (cited in
+  `core/credits.py`, `routes/credits.py`, `routes/profile.py`,
+  `routes/account.py`, `srs/data_structure.sql`, `core/events.py`,
+  `tests/test_credits_week.py`, `domain/paywall.js`, `stores/credits.js`,
+  `components/offers/`, `components/credits/RunOutSheet.jsx`,
+  `OfferButton.jsx`, `screens/OffersPreview.jsx`, `App.jsx`, the
+  `ofr*` locale keys, `src/offers.phone.test.jsx`,
+  `src/offers.desktop.test.jsx`, `src/offers.short.test.jsx` and
+  `index.css` and its 机 section;
+  CONTEXT.md, Pro / Max; `docs/design/mobile/README.md`, "The offer").
+  **173** is 定期券, the learner's card (numbered 173 because 171 went to
+  模試 on a phone and 172 to the offers while it was open: its commit's
+  message says 172; the owner's picks on the canvas
+  "Tsuji — the three offers", its pages "The free card", "The cards in
+  the app" and "The pocket pass & the level-up"): one card in three
+  materials by plan (`domain/passCard.js`'s `cardTier` -- Free 白, white
+  plastic with its band, `--pass-band`; Pro 墨; Max 梨地, the server's
+  `pass` plan), its face the offers' with the struck 辻 filled to the
+  climb, its back the route and the contract, the climb, the balance and
+  the journey as doors and the signature (`components/pass/`), replacing
+  every pass the app drew: whole on the profile (face up) and Settings
+  (back up), issued in the boarding, face up in the gate's reader; on the
+  phone's HUD one strip (帯) of the level and the balance; on the desk
+  the card in its holder (定期入れ) at the rail's foot, the mouth empty
+  where the card is drawn whole; and the level-up told by its engraving
+  (進級), filling while the card trembles, bursting in its material's
+  sparks, emptying, the figure rolling over -- plan 142's punch retired
+  (cited in `components/pass/`, `domain/passCard.js`,
+  `components/chrome/Hud.jsx`, `components/chrome/DeskPass.jsx`,
+  `components/rewards/XpToast.jsx`, `components/boarding/PassStep.jsx`,
+  `components/station/TicketGate.jsx`, `screens/ProfileScreen.jsx`,
+  `screens/SettingsScreen.jsx`, the card's tests and `index.css` and its
+  机 section; DESIGN.md, "The pass has two materials", Rewards and "The
+  desk").
+  When starting a new wave, begin at **174** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

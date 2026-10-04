@@ -13,7 +13,7 @@ describe('the stage at phone width', () => {
           <button type="button" className="stage__leave">Gate</button>
           <span className="stage__where"><h1 className="stage__where-jp">Kanji N4</h1></span>
           <span className="today-remaining">18</span>
-          <button type="button" className="hud__pass"><span className="hud__pass-fig">24</span></button>
+          <div className="hstrip hstrip--free hstrip--solo"><button type="button" className="hstrip__bal"><span className="hstrip__fig"><b>24</b></span></button></div>
         </div>
         <div className="prompt-card"><div className="prompt-card__body">駅</div></div>
         <div className="rating-bar" />
@@ -27,7 +27,8 @@ describe('the stage at phone width', () => {
     expect(getComputedStyle(bar).position).toBe('sticky')
     expect(getComputedStyle(bar).bottom).toBe('0px')
     expect(getComputedStyle(screen.container.querySelector('.stage__leave')).height).toBe('44px')
-    expect(getComputedStyle(screen.container.querySelector('.hud__pass')).height).toBe('34px')
+    // The pass at pocket size: the card's strip holding the balance alone (plan 173).
+    expect(getComputedStyle(screen.container.querySelector('.hstrip--solo')).height).toBe('34px')
     expect(getComputedStyle(screen.container.querySelector('.today-remaining')).borderRadius).toBe('999px')
   })
 

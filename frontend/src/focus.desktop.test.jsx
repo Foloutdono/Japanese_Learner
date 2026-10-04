@@ -134,10 +134,11 @@ describe('a copy on the desk', () => {
 })
 
 describe('the keys and the names the desk prints', () => {
-  // The pocket pass is the stage head's since plan 127 gave the rail a
-  // pass of its own (DeskPass, whose level door carries its title:
+  // The card's strip holding the balance alone is the stage head's
+  // (plan 173; the pocket pass before it), the rail carrying the card in
+  // its holder (DeskPass, whose level door carries its title:
   // chrome.desktop.test.jsx).
-  it('names the stage head\'s pass and the console\'s clear under a pointer', async () => {
+  it('names the stage head\'s balance and the console\'s clear under a pointer', async () => {
     const { HudPass } = await import('./components/chrome/Hud')
     const { ConsoleIndex } = await import('./components/chrome/Console')
     await render(
@@ -146,7 +147,7 @@ describe('the keys and the names the desk prints', () => {
         <ConsoleIndex value="駅" onChange={() => {}} onClear={() => {}} clearLabel="Effacer" />
       </Desk>
     )
-    const pass = $('.hud__pass')
+    const pass = $('.hstrip--solo [data-guide="hud.pass"]')
     expect(pass.title).toBe(pass.getAttribute('aria-label'))
     expect($('.console__clear').title).toBe('Effacer')
   })
