@@ -90,7 +90,7 @@ def _corrected(query, lexicon, found):
 @router.get("/api/dictionary/readings-share")
 def get_readings_share(char: str = Query(..., min_length=1, max_length=1)):
     """How often each reading of `char` is used across ALL of JMdict
-    (plan 175): {"total", "whole", "readings": {reading: words}}.
+    (plan 176): {"total", "whole", "readings": {reading: words}}.
 
     The readings sheet's "Tout JMdict" scope. The course's own shares
     ride on every kanji entry (`reading_shares`, a count over the deck's
@@ -340,7 +340,7 @@ def _kanji_result(char: str, kana: str, meaning: str, level: str | None,
         # it -- the plate shows two, the panel all.
         "readings":     words["readings"],
         # How many of the course's words use each reading -- the share
-        # printed beside it (plan 175). The same count over all of
+        # printed beside it (plan 176). The same count over all of
         # JMdict is /api/dictionary/readings-share.
         "reading_shares": words["shares"],
     }

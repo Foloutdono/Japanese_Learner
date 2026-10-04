@@ -101,6 +101,32 @@ describe('the card (plan 173)', () => {
     expect(back().inert).toBe(false)
   })
 
+  it('has its depth only in the air, so the print is flat and crisp at rest', async () => {
+    // A perspective on the card, however far, put the print on a 3D
+    // layer the browser resampled: every glyph read soft. At rest the
+    // card is flat; turning, it has its depth for the flip.
+    await mount({ initial: 'back' })
+    expect(getComputedStyle($('.pcard')).perspective).toBe('none')
+    $('.pcb__print').click()
+    await new Promise(r => setTimeout(r, 30))
+    expect($('.pcard').classList.contains('pcard--turning')).toBe(true)
+    expect(getComputedStyle($('.pcard')).perspective).toBe('1600px')
+    await new Promise(r => setTimeout(r, 900))
+    expect($('.pcard').classList.contains('pcard--turning')).toBe(false)
+    expect(getComputedStyle($('.pcard')).perspective).toBe('none')
+  })
+
+  it('rings a door the keys reach inside it, in the card\'s ink', async () => {
+    await mount({ initial: 'back', doors: { settings: null, onBalance: () => {} } })
+    const door = $('.pcb__meter--balance')
+    door.focus({ focusVisible: true })
+    await new Promise(r => setTimeout(r, 30))
+    expect(getComputedStyle(door).outlineStyle).toBe('none')
+    const ring = getComputedStyle(door, '::after')
+    expect(ring.boxShadow).toMatch(/inset/)
+    expect(ring.borderTopLeftRadius).not.toBe('0px')
+  })
+
   it('turns back over from a touch off its doors, and not from a door', async () => {
     const onBalance = vi.fn()
     await mount({ initial: 'back', doors: { onBalance } })

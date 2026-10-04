@@ -620,7 +620,7 @@ function ReadingsInPlace({ entry, groups, onClose, onVocabClick }) {
   )
 }
 
-// ── 割合 — which readings are worth the time (plan 175) ──────────
+// ── 割合 — which readings are worth the time (plan 176) ──────────
 // Each reading prints the share of the words that use it, counted over
 // the JLPT course the app teaches by default (the entry carries it:
 // `reading_shares`) or over all of JMdict on request, and the list is in

@@ -483,7 +483,7 @@ def align_sentence(text: str) -> list[dict]:
     return parts
 
 
-# ── Numbers (plan 175) ────────────────────────────────────────
+# ── Numbers (plan 176) ────────────────────────────────────────
 # The tokenizer reads a digit as itself, so 100円 had no furigana at all:
 # align() puts a reading over kanji, and 100 has none. The reading is
 # made in study/reading_context.py (read_number, numeral_furigana), which

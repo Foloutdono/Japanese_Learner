@@ -188,7 +188,7 @@ def read_numeral(surface: str) -> str | None:
     return _below_10000(value)
 
 
-# Plan 175: the Arabic numeral, which the tokenizer reads as itself.
+# Plan 176: the Arabic numeral, which the tokenizer reads as itself.
 _FULL_WIDTH = str.maketrans("０１２３４５６７８９", "0123456789")
 _MYRIADS = ("", "まん", "おく", "ちょう")
 # Nothing above 9,999,999,999,999,999 (千兆): past it a string of digits
@@ -277,7 +277,7 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
     if cls is None:
         return None
     n_read, c_read = num_reading, ctr_reading
-    # Digits whose reading is already kana (plan 175, numeral_furigana):
+    # Digits whose reading is already kana (plan 176, numeral_furigana):
     # the tokenizer's pass leaves a digit as itself, and the two rules
     # below that REPLACE a numeral's reading are for the kana case only.
     kana_digits = bool(_ARABIC.match(num_surface)) and not _ARABIC.match(n_read)
@@ -384,7 +384,7 @@ def numeral_furigana(numeral: str, counter: str = "", counter_reading: str = "",
                      counter_pos: str = "", *, before: str = "", after=()):
     """(numeral reading, counter reading) for a number as a sentence
     prints it -- the furigana of 100, 1,000, 3.5 and of the 3 in 3日 --
-    or (None, None) where there is no reading to give (plan 175).
+    or (None, None) where there is no reading to give (plan 176).
 
     The tokenizer reads a digit as itself, so the reading is made here
     (read_number) and then changed the way the counter after it changes

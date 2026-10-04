@@ -1366,7 +1366,7 @@ const dictionary = {
   kanaExamples:      'Read in these words',
   allReadings:       'All readings',
   readingsNoWords:   'No example words yet',
-  // 割合 (plan 175): the share of the words that use each reading.
+  // 割合 (plan 176): the share of the words that use each reading.
   readingsScopeLabel:  'Scope of the count',
   readingsScopeCourse: 'JLPT course',
   readingsScopeAll:    'All JMdict',
@@ -1556,7 +1556,6 @@ const profile = {
   // in days, signed and wordless -- the colour says the rest; the ghost
   // train is labelled "promised".
   jourDrift:         (n) => `${n > 0 ? '+' : '−'}${Math.abs(n)} day${Math.abs(n) > 1 ? 's' : ''}`,
-  jourPromised:      'promised',
   jourRoute:         (from, to) => `${from} → ${to}`,
   jourNoDest:        'No destination on this pass.',
   jourNoDestLink:    'Set one at the office',
@@ -1914,6 +1913,16 @@ const exam = {
   // listening question learnable — withheld during the exam, offered
   // in review.
   examTranscript:      'Transcript',
+  // The study under a reviewed question (exam/ExamStudy.jsx): its
+  // sentence and choices translated, and the sentence's breakdown.
+  examStudyOpen:       'Translation & breakdown',
+  examStudyHide:       'Hide translation',
+  examStudyFailed:     'The translation is unavailable right now. Try again shortly.',
+  examStudyRetry:      'Try again',
+  examStudySentence:   'The sentence',
+  examStudyChoices:    'The choices',
+  examStudyPassage:    'The text',
+  examStudyNoWord:     'not a word',
 
   // ── Answer sheet ──
   // The numbered grid under the question. Named for the real thing it

@@ -8,6 +8,7 @@ import { stationFor } from '../config/stations'
 import { useListWalk, useFollowFocus, WALK_KEYS_PAGED } from '../hooks/useListWalk'
 import QuestionRenderer, { GapText } from '../exam/QuestionRenderer'
 import ExamCard from '../exam/ExamCard'
+import ExamStudy from '../exam/ExamStudy'
 import { StationSplit } from '../components/selection/StationSplit'
 import { SplitRow } from '../components/selection/SplitRow'
 import { useDesk } from '../hooks/useDesk'
@@ -340,6 +341,7 @@ export default function ExamResult({ session }) {
           )}
         >
           {openRow && <ExamCard key={openRow.id} question={openRow.q} selected={openRow.given} revealed keys />}
+          {openRow && <ExamStudy key={`study-${openRow.id}`} session={session} examId={examId} revision={exam.revision} question={openRow.q} />}
           {/* The way back to the exams is the rail's; the page keeps
               the one thing to do next, under the card. */}
           <div className="btn-row">{newPaper}</div>
@@ -432,6 +434,7 @@ export default function ExamResult({ session }) {
               {expandedId === r.id && (
                 <div className="exam-review-row__detail">
                   <QuestionRenderer question={r.q} selected={r.given} onSelect={() => {}} revealed devMode={false} />
+                  <ExamStudy session={session} examId={examId} revision={exam.revision} question={r.q} />
                 </div>
               )}
             </div>

@@ -1320,7 +1320,14 @@ runtime purpose. Two consequences worth knowing:
   changed and `index.css`; DESIGN.md, "One line, one colour", "One metal,
   one selection", "A name's rank", Surfaces, "The primary button",
   Controls, "The study stage on a phone" and The chrome).
-  **175** is 数と全語, numbers read and every reading shown a word: an
+  **175** is 走行, the estimate of a run's time read from the learner's own
+  runs: `review_log` has no run id, so a run is a sitting (reviews under
+  ten minutes apart, at least ten of them), and the figure the gate and
+  the notifications print is the median seconds a card cost in the last
+  twenty, blended with the gap pace by how many there were (cited in
+  `srs/srs.py`'s `personal_pace`, `run_paces` and `get_review_pace`,
+  `routes/today.py` and `tests/test_today_take.py`).
+  **176** is 数と全語, numbers read and every reading shown a word: an
   Arabic numeral now carries furigana (100 ひゃく, 300 さんびゃく, 1,000
   せん, 3.5 さんてんご), made in `study/reading_context.py`
   (`read_number`, `numeral_furigana`) because the tokenizer reads a digit
@@ -1354,7 +1361,7 @@ runtime purpose. Two consequences worth knowing:
   `DictionaryDetail.browser.test.jsx`, `routes/kanji.py`,
   `components/study/ReadingShares.browser.test.jsx`,
   `tests/test_kanji_card_shares.py` and `index.css`).
-  When starting a new wave, begin at **176** or higher, and check
+  When starting a new wave, begin at **177** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

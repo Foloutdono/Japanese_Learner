@@ -1666,7 +1666,7 @@ describe('the lookup sheet — a grammar point by its card id', () => {
   })
 })
 
-// ── 割合 — the share of the words that use each reading (plan 175) ──
+// ── 割合 — the share of the words that use each reading (plan 176) ──
 describe('the readings — each with the share of the words that use it', () => {
   beforeEach(async () => {
     await page.viewport(1099, 900)

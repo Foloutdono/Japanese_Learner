@@ -2,7 +2,7 @@
 // A kanji's readings are a list, and a list does not say which ones are
 // worth the learner's time: 生 has twenty, and セイ is half the course's
 // words that use it while お.う is none of them. The backend counts the
-// words per reading (study/kanji_words.py, plan 175) over two scopes --
+// words per reading (study/kanji_words.py, plan 176) over two scopes --
 // the JLPT course the app teaches, which rides on every kanji entry as
 // `reading_shares`, and all of JMdict, fetched on demand from
 // /api/dictionary/readings-share -- and this turns a count into what the

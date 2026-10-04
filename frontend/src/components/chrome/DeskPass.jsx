@@ -142,7 +142,10 @@ export function DeskPass() {
               aria-label={[t.hudStatusLabel, word, drift].filter(Boolean).join(' · ')}
               onClick={() => { playClick(); showStatus() }}
             >
-              <b><i className="desk-holder__lamp" aria-hidden="true" />{drift ?? word}</b>
+              {/* With no drift to print (suspended, offline) the word
+                  takes the figure's place, in the word's own register:
+                  at the figure's size it was cut at the case's edge. */}
+              <b className={drift ? undefined : 'desk-holder__st-word'}><i className="desk-holder__lamp" aria-hidden="true" />{drift ?? word}</b>
               {drift && <em>{word}</em>}
             </button>
           )}

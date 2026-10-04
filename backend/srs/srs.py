@@ -21,6 +21,26 @@ PACE_SAMPLE = 400
 PACE_BREAK = 120
 PACE_MIN_GAPS = 20
 
+# ── 走行 — the runs the pace is read from (plan 175) ──────────
+# The gap pace above is the learner's speed card to card, and a real run
+# is slower than that: a pause of a few minutes to look something up, a
+# kanji drawn rather than tapped, a phone put down. review_log has no
+# run id either, so a run is a SITTING: reviews less than RUN_BREAK
+# apart. The last RUNS_KEPT of them, each at least RUN_MIN_CARDS long (a
+# shorter one is a lookup, not a run), say what a card really costs
+# this learner over a whole run. The figure the gate prints is the two
+# paces blended, leaning on the runs as there are more of them: with
+# PACE_PRIOR_RUNS runs it is half each, with none it is the gap pace.
+RUN_BREAK = 600
+RUNS_KEPT = 20
+RUN_MIN_CARDS = 10
+# review_log is trimmed to no fewer than 35 days of rows
+# (scripts/compact_review_log.py's MIN_RETENTION_DAYS), so no further
+# back than that can be read.
+RUN_DAYS = 35
+RUN_SAMPLE = 2000
+PACE_PRIOR_RUNS = 3
+
 # The interval, in days, at which a card counts as mastered. The SQL
 # counts below spell the same 21 out inline.
 MASTERED_DAYS = 21
@@ -40,6 +60,51 @@ def seconds_per_review(times) -> int | None:
     mid = len(gaps) // 2
     median = gaps[mid] if len(gaps) % 2 else (gaps[mid - 1] + gaps[mid]) / 2
     return max(1, round(median))
+
+
+def runs_of(times) -> list[list]:
+    """The sittings in `times` (any order), oldest first: a gap of
+    RUN_BREAK or more closes one."""
+    runs: list[list] = []
+    for t in sorted(times):
+        if runs and (t - runs[-1][-1]).total_seconds() < RUN_BREAK:
+            runs[-1].append(t)
+        else:
+            runs.append([t])
+    return runs
+
+
+def run_paces(times) -> list[float]:
+    """Seconds a card took in each of the learner's last RUNS_KEPT runs,
+    newest last: first review to last, over the cards after the first
+    (the first has no start to measure from). A sitting under
+    RUN_MIN_CARDS reviews is not a run and is left out before the twenty
+    are counted."""
+    runs = [r for r in runs_of(times) if len(r) >= RUN_MIN_CARDS]
+    return [
+        (r[-1] - r[0]).total_seconds() / (len(r) - 1)
+        for r in runs[-RUNS_KEPT:]
+    ]
+
+
+def personal_pace(times, recent=None) -> int | None:
+    """What a review takes this learner, in whole seconds: the median of
+    the last runs' seconds a card, blended with the gap pace
+    (seconds_per_review) by how many runs there were -- PACE_PRIOR_RUNS
+    runs weigh as much as the gap pace. Either alone when the other is
+    missing; None when neither can say. `times` is every review the runs
+    are read from, `recent` the ones the gap pace is (all of `times` when
+    not given); both in any order."""
+    gap_pace = seconds_per_review(times if recent is None else recent)
+    paces = sorted(run_paces(times))
+    if not paces:
+        return gap_pace
+    mid = len(paces) // 2
+    run_pace = paces[mid] if len(paces) % 2 else (paces[mid - 1] + paces[mid]) / 2
+    if gap_pace is None:
+        return max(1, round(run_pace))
+    k = len(paces)
+    return max(1, round((k * run_pace + PACE_PRIOR_RUNS * gap_pace) / (k + PACE_PRIOR_RUNS)))
 
 
 class SRSEngine:
@@ -1705,13 +1770,15 @@ class SRSEngine:
 
     def get_review_pace(self, user_id: str) -> int | None:
         """Seconds a review takes this learner, or None before there is
-        enough to say (plan 135).
+        enough to say (plans 135, 175).
 
         review_log keeps no duration, so the pace is read off the gaps
-        between consecutive reviews: the median of the ones short enough
-        to be two cards of one sitting (see seconds_per_review). The
-        last PACE_SAMPLE reviews of the last PACE_DAYS days -- the pace
-        now, not the pace of a first week.
+        between consecutive reviews, two ways (see personal_pace): the
+        median of the gaps short enough to be two cards of one sitting,
+        over the last PACE_SAMPLE reviews of the last PACE_DAYS days --
+        the pace now, not the pace of a first week -- and what a card
+        cost in each of the last RUNS_KEPT runs, which carries the
+        pauses a run really holds.
         """
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
@@ -1723,10 +1790,14 @@ class SRSEngine:
                     ORDER BY reviewed_at DESC
                     LIMIT %s
                 """
-                self._log_sql("get_review_pace", sql, (pattern, PACE_DAYS, PACE_SAMPLE))
-                cur.execute(sql, (pattern, PACE_DAYS, PACE_SAMPLE))
-                rows = cur.fetchall()
-        return seconds_per_review([r[0] for r in rows])
+                self._log_sql("get_review_pace", sql, (pattern, RUN_DAYS, RUN_SAMPLE))
+                cur.execute(sql, (pattern, RUN_DAYS, RUN_SAMPLE))
+                rows = [r[0] for r in cur.fetchall()]
+        # Newest first, so the gap pace's window is a prefix: the last
+        # PACE_SAMPLE reviews, none older than PACE_DAYS.
+        horizon = datetime.now(timezone.utc) - timedelta(days=PACE_DAYS)
+        recent = [t for t in rows[:PACE_SAMPLE] if t >= horizon]
+        return personal_pace(rows, recent)
 
     def get_interval_histogram(self, user_id: str) -> list[dict[str, int]]:
         """(interval, number of card-modes sitting at it) for every card

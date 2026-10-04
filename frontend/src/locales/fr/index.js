@@ -1313,7 +1313,7 @@ const dictionary = {
   kanaExamples:      'Se lit dans ces mots',
   allReadings:       'Toutes les lectures',
   readingsNoWords:   'Pas encore de mots d\'exemple',
-  // 割合 (plan 175) : la part des mots qui emploient chaque lecture.
+  // 割合 (plan 176) : la part des mots qui emploient chaque lecture.
   readingsScopeLabel:  'Portée du décompte',
   readingsScopeCourse: 'Cursus JLPT',
   readingsScopeAll:    'Tout JMdict',
@@ -1324,7 +1324,7 @@ const dictionary = {
   readingsWholeShare: 'Mot lu en entier',
   readingsShareLoading: 'Décompte en cours…',
   readingsShareError:   'Le décompte n\'a pas pu être chargé.',
-  readingsCourseEmpty:  (kanji) => `Aucun mot du cursus JLPT n\'emploie ${kanji}.`,
+  readingsCourseEmpty:  (kanji) => `Aucun mot du cursus JLPT n'emploie ${kanji}.`,
   readingsCourseEmptyBody: 'Le décompte du cursus est vide. Le dictionnaire complet a des mots avec ce kanji.',
   readingsCountAll:  'Compter sur tout JMdict',
   // Voir en/index.js : la moitié japonaise est le titre, la moitié en
@@ -1513,7 +1513,6 @@ const profile = {
   // en jours, signé, sans mot — la couleur dit le reste ; le train fantôme
   // porte « promis ».
   jourDrift:         (n) => `${n > 0 ? '+' : '−'}${Math.abs(n)} jour${Math.abs(n) > 1 ? 's' : ''}`,
-  jourPromised:      'promis',
   jourRoute:         (from, to) => `${from} → ${to}`,
   jourNoDest:        'Aucune destination sur cette carte.',
   jourNoDestLink:    'En choisir une au guichet',
@@ -1843,6 +1842,16 @@ const exam = {
   // question d'écoute ratée exploitable — caché pendant l'épreuve,
   // proposé à la correction.
   examTranscript:      'Transcription',
+  // L'étude sous une question corrigée (exam/ExamStudy.jsx) : sa
+  // phrase et ses propositions traduites, et la décomposition.
+  examStudyOpen:       'Traduction et décomposition',
+  examStudyHide:       'Masquer la traduction',
+  examStudyFailed:     'La traduction est indisponible pour le moment. Réessaie dans un instant.',
+  examStudyRetry:      'Réessayer',
+  examStudySentence:   'La phrase',
+  examStudyChoices:    'Les propositions',
+  examStudyPassage:    'Le texte',
+  examStudyNoWord:     'pas un mot',
 
   // ── Feuille de réponses ──
   // La grille numérotée sous la question. Nommée d'après ce qu'elle

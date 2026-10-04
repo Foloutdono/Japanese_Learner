@@ -219,7 +219,7 @@ def test_a_pool_character_still_files_its_deck_words(client):
     already carries, not left unfiled."""
     entry = next(r for r in _page(client, q="繋", limit=5)["results"] if r["kanji"] == "繋")
     filed = {r["reading"]: r for r in entry["readings"] if r["words"]}
-    # The deck's word is filed under つな.ぐ; since plan 175 the pool also
+    # The deck's word is filed under つな.ぐ; since plan 176 the pool also
     # tops up the readings the deck has no word for, so it is no longer
     # the only filed reading.
     assert "つな.ぐ" in filed
@@ -228,7 +228,7 @@ def test_a_pool_character_still_files_its_deck_words(client):
 
 
 def test_a_kanji_entry_carries_the_courses_share_of_each_reading(client):
-    """Plan 175: the percentage beside a reading is a count of the
+    """Plan 176: the percentage beside a reading is a count of the
     course's words, shipped on every kanji entry."""
     entry = next(r for r in _page(client, q="生", limit=5)["results"] if r["kanji"] == "生")
     shares = entry["reading_shares"]

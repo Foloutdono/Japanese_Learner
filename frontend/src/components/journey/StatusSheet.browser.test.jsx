@@ -110,13 +110,15 @@ describe('StatusSheet', () => {
     // The drift, signed and wordless: a late train is a minus.
     expect(card.querySelector('.jcard__st').textContent).toMatch(/^−\d+ (jours?|days?)$/)
     expect(card.querySelector('.jcard__route').textContent).toBe('N5 → N3')
-    // The line: the stops named, the promise's ghost labelled, your train.
-    expect([...card.querySelectorAll('.jcard__stop b')].map(b => b.textContent)).toEqual(['発', 'N5', 'N4', 'N3'])
-    expect(card.querySelector('.jcard__car--ghost i').textContent).toMatch(/promis/)
-    expect(card.querySelector('.jcard__car--you svg')).not.toBeNull()
+    // The line: the stops named, the promise's ghost (no word on it: it
+    // clipped at the card's edge), your train.
+    expect([...card.querySelectorAll('.jline__stop b')].map(b => b.textContent)).toEqual(['発', 'N5', 'N4', 'N3'])
+    expect(card.querySelector('.jline__car--ghost svg')).not.toBeNull()
+    expect(card.querySelector('.jline__car--ghost').textContent).toBe('')
+    expect(card.querySelector('.jline__car--you svg')).not.toBeNull()
     // The arrival under the terminus carries its year: "3 Jan" beside
     // "15 Feb" read as early when the projection crossed a year end.
-    expect(card.querySelector('.jcard__stop--last small').textContent).toMatch(/20\d\d/)
+    expect(card.querySelector('.jline__stop--last small').textContent).toMatch(/20\d\d/)
     // The old body's figures are not drawn on a phone.
     expect(sheet.querySelector('.jour-dist, .jour-cmp')).toBeNull()
 
@@ -145,7 +147,7 @@ describe('StatusSheet', () => {
     openStatus()
     await settle()
     const sheet = dialog()
-    expect([...sheet.querySelectorAll('.jcard__stop b')].map(el => el.textContent))
+    expect([...sheet.querySelectorAll('.jline__stop b')].map(el => el.textContent))
       .toEqual(['発', 'かな'])
     expect(sheet.querySelector('.jcard__route').textContent).toBe('発 → かな')
   })
@@ -226,7 +228,7 @@ describe('StatusSheet', () => {
     expect(sheet.classList.contains('jour-st--onTime')).toBe(true)
     // No promise to stand against: no ghost, no route, and the head
     // names the state rather than a drift.
-    expect(sheet.querySelector('.jcard__car--ghost')).toBeNull()
+    expect(sheet.querySelector('.jline__car--ghost')).toBeNull()
     expect(sheet.querySelector('.jcard__route')).toBeNull()
     expect(sheet.querySelector('.jcard__st').textContent).not.toMatch(/\d/)
     expect(sheet.querySelector('.jour-act')).toBeNull()

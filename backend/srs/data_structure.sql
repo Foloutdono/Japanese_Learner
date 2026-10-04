@@ -644,6 +644,16 @@ CREATE TABLE exam_generation_jobs (
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Created by study/exam_schema.py, read and written by
+-- study/exam_study.py: a sat question's sentence, choices and passage
+-- translated for the result screen, keyed by a hash of the text and
+-- the language so a shared paper is translated once per language.
+CREATE TABLE exam_translations (
+    key        TEXT PRIMARY KEY,
+    payload    JSONB NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Owned by study/grammar_sentence_store.py -- generated example
 -- sentences for one grammar point, cached wholesale per (level,
 -- pattern) and regenerated in full rather than patched.

@@ -222,7 +222,7 @@ def by_kanji(kanji: str, limit: int = 8) -> list[dict]:
     return [_row_to_entry(r) for r in rows]
 
 
-# ── The words a kanji is written in (plan 175) ────────────────
+# ── The words a kanji is written in (plan 176) ────────────────
 # study/kanji_words.py fills a kanji's readings from the deck, and a
 # reading no deck word demonstrates (桃 もも, 腿 もも, 躾 しつけ) used to
 # stay a bare chip under "no example words yet". The pool has a word for
@@ -278,7 +278,7 @@ def by_kanji_char(char: str, limit: int = KANJI_INDEX_CAP) -> list[dict]:
 
 def all_with_kanji(char: str) -> list[tuple[str, str]]:
     """(kanji, kana) for EVERY pool word written with `char`, uncapped:
-    the count behind a reading's share of all JMdict (plan 175). One
+    the count behind a reading's share of all JMdict (plan 176). One
     scan of the kanji column (~50 ms warm), asked per character on
     demand and cached by the caller -- the capped index above is for the
     few example words a page shows, not for counting."""

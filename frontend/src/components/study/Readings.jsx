@@ -172,7 +172,7 @@ export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = f
   return <ReadingGroup readings={tokens} size={size} color={color} center={center} isLarge={isLarge} limit={limit} moreLabel={moreLabel} />
 }
 
-// ── 割合 on the study card (plan 175) ─────────────────────────────
+// ── 割合 on the study card (plan 176) ─────────────────────────────
 // The few readings the course uses most (domain/readingShare's
 // topReadings), each with the share of the course's words that use it
 // under it, in place of the numbered list: the ranking and the number

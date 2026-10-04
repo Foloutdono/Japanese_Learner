@@ -105,6 +105,15 @@ def ensure_exam_schema() -> None:
                     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
+            # The result screen's translations (study/exam_study.py),
+            # keyed by a hash of what was translated, not by paper.
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS exam_translations (
+                    key        TEXT PRIMARY KEY,
+                    payload    JSONB NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
             _migrate_to_revisions(cur)
         conn.commit()
     finally:

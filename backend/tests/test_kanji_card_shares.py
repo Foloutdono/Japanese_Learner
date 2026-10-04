@@ -1,5 +1,5 @@
 """
-A kanji card carries the course's count for each of its readings (plan 175),
+A kanji card carries the course's count for each of its readings (plan 176),
 so the card can print the share of the few readings it shows. The figures
 are study/kanji_words.course_shares', the same as the entry's.
 """

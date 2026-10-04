@@ -293,6 +293,31 @@ describe('the rail', () => {
     plannedPerDay: 10, itemsTotal: 1000, itemsDone: 100, actual14: 14, days14: 14,
   }
 
+  it.each(['fr', 'en'])('prints a journey with no drift -- its word alone -- whole on the case (%s)', async lang => {
+    // Suspended (nothing done in 14 days) has no days to print, so the
+    // stub prints the word in the figure's place; "Suspendu" and
+    // "Suspended" were cut at the case's edge (the stub's column was
+    // sized for "+89 j").
+    localStorage.setItem('lang', lang)
+    try {
+      journeyRef.current = { ...CONTRACT, actual14: 0 }
+      creditsRef.current = { balance: 26, cap: 50, dailyRefill: 30, nextCreditAt: new Date(Date.now() + 3600e3).toISOString(), unlimited: false, plan: 'free' }
+      await mountShell()
+      await settle()
+      const stub = holder().querySelector('[data-guide="hud.status"]')
+      expect(stub.classList.contains('desk-holder__st--suspended')).toBe(true)
+      const b = stub.querySelector('b')
+      expect.soft(b.scrollWidth).toBeLessThanOrEqual(stub.clientWidth)
+      const s = stub.getBoundingClientRect()
+      expect.soft(b.getBoundingClientRect().right).toBeLessThanOrEqual(s.right - 8)
+      for (const el of holder().querySelector('[data-guide="hud.pass"]').children) {
+        expect.soft(el.getBoundingClientRect().right, el.className).toBeLessThanOrEqual(s.left + 0.5)
+      }
+    } finally {
+      localStorage.removeItem('lang')
+    }
+  })
+
   it('carries the learner\'s card in its holder at its foot, the HUD\'s three doors on the case', async () => {
     journeyRef.current = CONTRACT
     creditsRef.current = { balance: 34, cap: 50, dailyRefill: 30, nextCreditAt: null, unlimited: false, plan: 'free' }

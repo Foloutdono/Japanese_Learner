@@ -32,7 +32,7 @@ words, and never under a reading it cannot vouch for.
 ── Words the deck does not have ──────────────────────────────
 The deck is 8,405 words and a kanji's readings run past it: 桃 has
 もも and the deck has no word for it, so the reading was a bare chip
-under "no example words yet" (plan 175). A reading with fewer than
+under "no example words yet" (plan 176). A reading with fewer than
 MAX_WORDS deck words is topped up from the JMdict pool, the commonest
 words first (content/vocab_jmdict_data.by_kanji_char), filed under the
 reading by the same aligner and the same token matching as the deck's
@@ -234,7 +234,7 @@ def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str]
         }
         buckets[_file_under(char, kanji, furigana, tokens)].append(entry)
     # How many deck words each reading has, before the pool tops any up:
-    # the figure behind the share of the JLPT course (plan 175).
+    # the figure behind the share of the JLPT course (plan 176).
     deck_counts = {tok: len(words) for tok, words in buckets.items()}
     # The pool tops up every reading the deck leaves short, behind the
     # deck's own words. Asked only if one is short, so a character the
@@ -386,7 +386,7 @@ def _deck_counts(char: str, tokens: list[str]) -> tuple[dict[str | None, int], s
 def course_shares(char: str, packed: str | None = None) -> dict:
     """The course's counts alone, without building a reading's example
     words: what a study card carries so the reading can print its share
-    (plan 175). The same figures as kanji_words(char)["shares"], cheap
+    (plan 176). The same figures as kanji_words(char)["shares"], cheap
     enough to ride on every kanji card and cached by character."""
     tokens = reading_tokens(char, packed)
     counts, _seen = _deck_counts(char, tokens)
@@ -399,7 +399,7 @@ def full_shares(char: str, packed: str | None = None) -> dict:
     pool word written with `char` (the pool is everything the course is
     not). The count behind the readings sheet's "Tout JMdict" scope --
     aligning every one of 生's 1,943 words, so it is asked for when the
-    learner switches to it, and cached (plan 175)."""
+    learner switches to it, and cached (plan 176)."""
     tokens = reading_tokens(char, packed)
     counts, seen = _deck_counts(char, tokens)
     for kanji, kana in jmdict_db.all_with_kanji(char):

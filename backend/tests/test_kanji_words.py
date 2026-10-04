@@ -182,7 +182,7 @@ class TestKanjiAsWord:
 
 
 class TestPoolWords:
-    """Plan 175: a reading the deck has no word for is filled from the
+    """Plan 176: a reading the deck has no word for is filled from the
     JMdict pool, behind the deck's own words."""
 
     def test_the_index_answers_for_a_character_in_commonest_order(self):
@@ -245,7 +245,7 @@ class TestPoolWords:
 
 
 class TestReadingShares:
-    """Plan 175: how many words use each reading, over the course and
+    """Plan 176: how many words use each reading, over the course and
     over all of JMdict -- the figure behind the percentage on the
     readings sheet."""
 

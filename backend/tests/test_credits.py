@@ -563,3 +563,31 @@ def test_the_tz_offset_lands_on_the_profile(client):
 def test_the_ledger_is_in_the_deletion_plan():
     assert "credit_ledger" in _tables(PLAN)
     assert _tables(PLAN).index("credit_ledger") < _tables(PLAN).index("user_profiles")
+
+
+def test_the_free_line_reviews_only_its_own_cards(client):
+    # The kana endpoint prices by its own line, so it must refuse what
+    # is not a kana card: a vocab card posted there -- under its own
+    # mode or under a kana one -- would be rescheduled and paid XP for
+    # nothing. Refused before the scheduler, so nothing moves.
+    user = auth.DEV_USER_ID
+    before = credits.read_fresh(user)["balance"]
+    card = f"probe_free_ride_{uuid.uuid4().hex[:8]}"
+    for body in (
+        {"card_id": card, "mode": "vocab.flashcard.f2b", "quality": 4},
+        {"card_id": card, "mode": "kana.flashcard.f2b", "quality": 4},
+        {"card_id": "kana_あ", "mode": "banana", "quality": 4},
+    ):
+        r = client.post("/api/kana/review", json=body)
+        assert r.status_code == 400, body
+    assert credits.read_fresh(user)["balance"] == before
+    assert srs.get_bulk_stats([f"{user}:{card}"], "vocab.flashcard.f2b") in ({}, {f"{user}:{card}": "new"})
+    assert srs.get_bulk_stats([f"{user}:{card}"], "kana.flashcard.f2b") in ({}, {f"{user}:{card}": "new"})
+
+
+@pytest.mark.parametrize("line", ["vocab", "kanji", "grammar"])
+def test_a_section_review_refuses_another_lines_mode(client, line):
+    card = f"probe_cross_line_{uuid.uuid4().hex[:8]}"
+    for mode in ("kana.flashcard.f2b", "banana"):
+        r = client.post(f"/api/{line}/review", json={"card_id": card, "mode": mode, "quality": 4})
+        assert r.status_code == 400, (line, mode)
