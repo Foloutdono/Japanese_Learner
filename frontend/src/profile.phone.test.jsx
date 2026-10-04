@@ -107,7 +107,7 @@ describe('the profile at phone width', () => {
     expect(seg.top).toBeLessThan(mark.bottom)
   })
 
-  it('the status sheet: distance, a 52px track, two rows, the moves side by side', async () => {
+  it('the status sheet: distance, a 70px track, two rows, the moves side by side', async () => {
     const screen = await render(
       <div className="sheet sheet--sumi status-sheet jour-st--slightlyBehind" style={{ position: 'static' }}>
         <div className="jour-dist">
@@ -116,21 +116,17 @@ describe('the profile at phone width', () => {
           <span className="jour-dist__leg">Next stop N4 · 474 behind plan</span>
         </div>
         <div className="jour-track">
-          <span className="jour-track__span">
-            <span className="jour-track__siding" />
-            <span className="jour-track__leg jour-track__leg--now" style={{ left: 'calc(0% + 2px)', width: 'calc(46% - 4px)' }} />
-            <span className="jour-track__done" style={{ left: 'calc(0% + 2px)', width: 'max(0px, calc(43.5% - 2px))' }} />
-            <span className="jour-track__leg" style={{ left: 'calc(46% + 2px)', width: 'calc(54% - 2px)' }} />
-            <span className="jour-track__owed" style={{ left: '43.5%', width: '11.3%' }} />
-            <span className="jour-track__station jour-track__station--passed" style={{ left: '0%' }}>
-              <span className="jour-track__station-name jour-track__station-name--jp">発</span>
+          <div className="jline">
+            <span className="jline__span">
+              <span className="jline__siding jline__siding--done" />
+              <span className="jline__leg" style={{ left: 'calc(0% + 2px)', width: 'calc(46% - 4px)' }} />
+              <span className="jline__done" style={{ left: 'calc(0% + 2px)', width: 'max(0px, calc(43.5% - 2px))' }} />
+              <span className="jline__leg" style={{ left: 'calc(46% + 2px)', width: 'calc(54% - 2px)' }} />
+              <span className="jline__gap" style={{ left: '43.5%', width: '11.3%' }} />
+              <span className="jline__stop jline__stop--passed jline__stop--first" style={{ left: '0%' }}><b lang="ja">発</b></span>
+              <span className="jline__stop jline__stop--next" style={{ left: '46%' }}><b>N4</b></span>
             </span>
-            <span className="jour-track__station jour-track__station--next" style={{ left: '46%' }}>
-              <span className="jour-track__station-name">N4</span>
-            </span>
-            <span className="jour-track__plan" style={{ left: '54.8%' }} />
-            <span className="jour-track__you" style={{ left: '43.5%' }} />
-          </span>
+          </div>
         </div>
         <div className="jour-cmps">
           <div className="jour-cmp">
@@ -161,13 +157,10 @@ describe('the profile at phone width', () => {
     expect(pct.top).toBeCloseTo(count.top, 0)
     expect(head.right - pct.right).toBeLessThan(1)
     expect(leg.top).toBeGreaterThan(count.bottom - 1)
-    // The drawing costs 52px of a phone, not 132. It was 44 until the
-    // rail moved 8px down the box to put air between the train and the
-    // line it rides: at a 2px gap the car read as a lozenge stuck to
-    // the rail rather than a train standing above it. The 区間・新幹線
-    // round redrew it inside the same 52: the train stands on the line
-    // now, and the names sit under it where the dots were.
-    expect(screen.container.querySelector('.jour-track').getBoundingClientRect().height).toBe(52)
+    // The drawing costs 70px: the card's line (plan 174's ghost train,
+    // drawn on the desk too) less the dates the card prints under its
+    // stops, which the comparisons below print here.
+    expect(screen.container.querySelector('.jour-track').getBoundingClientRect().height).toBe(70)
     // Each row: value and delta on one line, the promise under them.
     const rows = [...screen.container.querySelectorAll('.jour-cmp')].map(r => r.getBoundingClientRect())
     expect(rows[1].top).toBeGreaterThan(rows[0].bottom - 1)
