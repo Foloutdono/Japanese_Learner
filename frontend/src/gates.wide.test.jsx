@@ -2,6 +2,11 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+// The shipped face (main.jsx), so a platform's name is measured in the
+// font it is drawn in: since plan 174 the names are the display face,
+// and the runner's fallback for it (DejaVu Sans) sets « Entraînement à
+// la lecture » 45px wider than Space Grotesk does.
+import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
 // ── 机 — the Practice gate three across (plan 130) ───────────────
@@ -49,6 +54,7 @@ const { default: PracticeScreen } = await import('./screens/PracticeScreen')
 // fraction of a pixel short of its place is a row out of line.
 const settle = async (ms = 620) => {
   await new Promise(r => setTimeout(r, ms))
+  await document.fonts.ready
   await Promise.all(document.getAnimations()
     .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
     .map(a => a.finished.catch(() => {})))
