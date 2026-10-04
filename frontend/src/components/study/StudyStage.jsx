@@ -61,10 +61,10 @@ export function StudyStage({
   const split = desk && side !== undefined
   const panels = split && records && side !== null
   const classes = ['container', 'stage', className].filter(Boolean).join(' ')
-  // 改札鋏 (plan 142): on the desk the level-up's pass docks at the top
-  // of a run's column rather than floating over it -- the left column
+  // 進級 (plans 142, 172): on the desk the level-up's card docks at the
+  // top of a run's column rather than floating over it -- the left column
   // on three panels, whose level bar row it just topped off, else the
-  // side. Held as state from the column's ref so the pass is portalled
+  // side. Held as state from the column's ref so the card is portalled
   // into the element that is actually standing.
   const [dock, setDock] = useState(null)
   return (

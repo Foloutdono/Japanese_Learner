@@ -687,7 +687,18 @@ export default function BoardingFlow({
           />
         )
       case 'pass':
-        return <PassStep name={displayName} profile={profile} onEnter={complete} busy={busy} error={saveError} />
+        return (
+          <PassStep
+            name={displayName}
+            contract={{
+              jlpt, goal: answers.goal, perDay, departure: bucketFor(answers.minute),
+              lines: answers.lines, date: volumes ? figures.date : null,
+            }}
+            onEnter={complete}
+            busy={busy}
+            error={saveError}
+          />
+        )
       default:
         return null
     }

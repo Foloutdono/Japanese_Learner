@@ -1,22 +1,28 @@
+import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { Emphasized } from '../ui/Emphasized'
-import { CommuterPass } from '../profile/CommuterPass'
 import { useCredits } from '../../stores/credits'
 import { CAP, SIGNUP_BONUS, showsCap, refillMinutes } from '../../domain/credits'
+import { cardTier, sinceMonth } from '../../domain/passCard'
 import { BoardQuestion, Continue } from './BoardFrame'
 import { SOURCES } from '../../domain/paywall'
 import { OfferButton } from '../credits/OfferButton'
+import { PassCard } from '../pass/PassCard'
+import { PassBack } from '../pass/PassBack'
+import { dateFormat, hourLabel, paceLabel, stopParts } from '../settings/contract'
+import { playClick } from '../../lib/audio'
 import { useCountUp, useWelcomeCoin, stillPreferred } from './countUp'
 
-// ── The pass, issued (plan 075) ──────────────────────────────────
-// The last arrival screen: the printed commuter pass slides up and the
-// 発行 seal lands on it. The pass is the profile's own object
-// (components/profile/CommuterPass.jsx) with the holder at level one
-// and the balance on its foot -- a new account's SIGNUP_BONUS, the
-// welcome core/credits.py grants on first read. It is above the cap, so
-// the line prints the figure without one (domain/credits' showsCap).
-// "Enter the station" posts the whole contract; the gate then opens
-// (App.jsx's TicketGate finale).
+// ── The card, issued (plan 075; the card, plan 172) ─────────────────
+// The last arrival screen: the learner's card slides up, face up -- the
+// holder at level one, the road of its struck 辻 empty -- and once it has
+// landed it turns over by itself, to show what it holds: the contract
+// just chosen printed on its back, and the balance, a new account's
+// SIGNUP_BONUS (the welcome core/credits.py grants on first read)
+// counted up with the coin, named as given while it is the welcome
+// itself. It is above the cap, so it prints without one (showsCap). A
+// touch turns it, as the profile's does. "Enter the station" posts the
+// whole contract; the gate then opens (App.jsx's TicketGate finale).
 //
 // The offer sits above that button as a quiet line, never as the
 // primary action: the last thing a learner does before their first
@@ -24,58 +30,66 @@ import { useCountUp, useWelcomeCoin, stillPreferred } from './countUp'
 // screen where the balance is explained, which is the only place the
 // pass means anything yet.
 
-// The profile's holder as printed: the initial with no ring, since plan
-// 143 took the XP arc off the pass (the balance row's bar is the climb).
-function PrintedHolder({ name }) {
-  return (
-    <div className="pass__holder">
-      <div className="pass__avatar-wrap">
-        <div className="pass__avatar">{name.charAt(0).toUpperCase()}</div>
-      </div>
-      <span className="profile-card__name">{name}</span>
-    </div>
-  )
-}
+// Long enough for the card to have risen and settled (.brd-issue).
+const TURN_AFTER_MS = 1500
 
-// The balance line as the boarding prints it: the store's answer when
-// it has one, and the welcome -- what a fresh account holds -- until
-// then. Same classes as components/credits/BalanceLine.jsx, so
-// the profile and the boarding print the same line.
-function PrintedBalance() {
-  const { t } = useLang()
-  const credits = useCredits()
+// The back as the boarding prints it, from the answers rather than an
+// account that does not exist yet: the contract the gate will post.
+function issuedBack(t, lang, name, contract, credits, shown) {
   const cap = credits?.cap ?? CAP
   const balance = credits?.unlimited ? null : (credits?.balance ?? SIGNUP_BONUS)
-  const counting = balance != null && !stillPreferred()
-  const shown = useCountUp(balance, counting)
-  useWelcomeCoin(balance != null)
-  // The note says the balance was GIVEN, so it prints only when the
-  // balance is the welcome itself. A learner who already had an
-  // account (the boarding's sign-in road ends on this same pass) sees
-  // their own figure counted up, and is not told it is a present.
   const gift = balance === SIGNUP_BONUS
+  return {
+    from: stopParts(t, contract?.jlpt ?? null),
+    to: stopParts(t, contract?.goal ?? null),
+    valid: contract?.goal && contract?.date ? dateFormat(lang).format(contract.date) : null,
+    service: paceLabel(t, contract?.perDay ?? null),
+    hour: hourLabel(t, contract?.departure ?? null),
+    lines: contract?.lines ?? ['vocab', 'kanji', 'grammar'],
+    level: 1,
+    into: 0,
+    span: 100,
+    share: 0,
+    balance,
+    unlimited: balance == null,
+    cap,
+    counted: balance == null ? null : shown.toLocaleString(lang),
+    unit: balance == null ? '' : gift ? t.brdCreditsOffered : `${showsCap(balance, cap) ? `/ ${cap} ` : ''}${t.creditsUnit}`,
+    // The rhythm rather than an hour: a welcome over the cap has no
+    // next credit to name yet, and the rhythm is what it will be (plan
+    // 141).
+    note: balance == null ? t.cardNoCredit : t.balanceRefillRate(refillMinutes(credits)),
+    status: { status: 'onTime', word: t.hudStatus.onTime, drift: null },
+    name,
+    since: sinceMonth(new Date().toISOString(), lang),
+  }
+}
+
+function IssuedCard({ name, contract }) {
+  const { t, lang } = useLang()
+  const credits = useCredits()
+  const tier = cardTier(credits)
+  const [side, setSide] = useState('face')
+  const turned = side === 'back'
+  useEffect(() => {
+    const id = setTimeout(() => setSide('back'), TURN_AFTER_MS)
+    return () => clearTimeout(id)
+  }, [])
+  const balance = credits?.unlimited ? null : (credits?.balance ?? SIGNUP_BONUS)
+  const shown = useCountUp(balance, turned && balance != null && !stillPreferred())
+  useWelcomeCoin(turned && balance != null)
+  const turn = () => { playClick(); setSide(s => (s === 'face' ? 'back' : 'face')) }
   return (
-    <div className="jour-line balance-line">
-      {/* The word and the figure are one part — see BalanceLine, whose
-          composition this repeats. (The gift note is absolute, so it
-          takes no part in the line's division.) */}
-      <span className="balance-line__reading">
-        <span className="jour-line__status"><b className="balance-line__word">{t.balanceLabel}</b></span>
-        <span className="jour-line__validity">
-          <b>{balance == null ? '∞' : shown}</b>
-          {balance != null && (
-            <span className="jour-cap">
-              {showsCap(balance, cap) ? `/ ${cap} ` : ''}{t.creditsUnit}
-            </span>
-          )}
-        </span>
-      </span>
-      {/* The rhythm rather than an hour: a welcome over the cap has no
-          next credit to name yet, and the rhythm is what it will be
-          (plan 141). */}
-      {balance != null && <span className="jour-cap balance-line__refill">{t.balanceRefillRate(refillMinutes(credits))}</span>}
-      {gift && <span className="brd-gift" aria-live="polite">{t.brdCreditsGift(balance)}</span>}
-    </div>
+    <PassCard
+      tier={tier}
+      name={name}
+      level={1}
+      share={0}
+      side={side}
+      onTurn={turn}
+      label={t.passLabel}
+      back={<PassBack tier={tier} data={issuedBack(t, lang, name, contract, credits, shown ?? 0)} onTurn={turn} />}
+    />
   )
 }
 
@@ -102,7 +116,7 @@ export function PassError({ error }) {
 // The offer, when there is one, is a quiet line over the gate, as every
 // quiet way in the boarding is, drawn as they are. The desk never shows
 // this screen (plan 140: the pass is issued on the plan).
-export default function PassStep({ name, profile, onEnter, busy = false, error = null }) {
+export default function PassStep({ name, contract, onEnter, busy = false, error = null }) {
   const { t } = useLang()
   return (
     <>
@@ -112,9 +126,7 @@ export default function PassStep({ name, profile, onEnter, busy = false, error =
         </BoardQuestion>
         <div className="brd__stage brd-issue-stn">
           <div className="brd-issue">
-            <CommuterPass profile={{ ...profile, username: name }} t={t} footer={<PrintedBalance />} headingTag="span">
-              <PrintedHolder name={name} />
-            </CommuterPass>
+            <IssuedCard name={name} contract={contract} />
             <span className="brd-issue__shine" aria-hidden="true" />
           </div>
           <span className="brd-issue__road" aria-hidden="true" />

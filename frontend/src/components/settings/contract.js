@@ -3,9 +3,10 @@ import { PACES } from '../onboarding/paces'
 import { DEPART_TIMES } from '../onboarding/departures'
 
 // ── The pass's contract, as words (plan 139) ─────────────────────
-// Settings prints the learner's contract on the pass at its head
-// (SettingsPass.jsx) and each field opens the page that changes it, so
-// the pass and the pages say every value the same way. Its own module
+// Settings prints the learner's contract on the card's back at its head
+// (plan 172, components/pass/PassBack.jsx) and each field opens the page
+// that changes it, so the card and the pages say every value the same
+// way. Its own module
 // because a component file exports components alone (react-refresh).
 
 /** The day, the month and the year: a promise a year out printed

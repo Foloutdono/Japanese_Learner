@@ -7,17 +7,19 @@ import { useOnline } from '../../hooks/useOnline'
 import { useXpGain } from './useXpGain'
 import { journeyModel } from '../../domain/goalMath'
 import { showsCap } from '../../domain/credits'
+import { cardTier, xpClimb } from '../../domain/passCard'
+import { StruckMark } from '../offers/StruckMark'
+import { Wave } from '../offers/icons'
+import { InfinitySign } from '../pass/InfinitySign'
 import { playClick } from '../../lib/audio'
 import { useDesk } from '../../hooks/useDesk'
 import { statusOf, showStatus } from './hudStatus'
 
 // ── 運行案内 — the HUD (plan 068) ─────────────────────────────
 // The strip across the top of every tab screen: sumi, two registers
-// of ink, no line colour. Three objects, each a door:
+// of ink, no line colour. Two objects (three until plan 172 folded the
+// level's roundel and the pass into one strip, below), each a door:
 //
-//   level    the roundel the old top bar already had, the level
-//            inside it, the fare (+4 xp) rising off it in gold when a
-//            review pays in. Tap → the pass.
 //   status   a station panel: the journey model's word in the
 //            learner's language with the drift in days beside it
 //            (AHEAD · 9d, ON TIME, LATE · 9d, SUSPENDED after 14 idle
@@ -26,10 +28,8 @@ import { statusOf, showStatus } from './hudStatus'
 //            place the shell owns up to being offline. Tap → the
 //            status sheet (components/journey/StatusSheet.jsx, plan
 //            074): the pass's back, as a sheet.
-//   pass     the commuter pass at pocket size with the balance inside
-//            (stores/credits, plan 069; ∞ on a subscription). The
-//            card's edge goes warning at ≤5 and danger at 0. Tap → the
-//            balance sheet (components/credits/BalanceSheet.jsx).
+//   strip    the learner's card at pocket size (plan 172, HudStrip
+//            below): the level and the balance, each its own door.
 
 // The figure itself: the amount, and a unit in the caption register so
 // a bare number under a level roundel cannot be read as levels. `key`
@@ -88,77 +88,105 @@ function HudStatus({ onClick }) {
   return <StatusChip model={data ? journeyModel(data) : null} onClick={onClick} />
 }
 
-// The pass at pocket size. Shared with the stage head (plan 070), so a
-// run shows the same object the shell does.
+// ── 帯 — the pocket pass as one strip (plan 172) ─────────────────
+// The owner's pick of the canvas page "The pocket pass & the level-up":
+// the card at full size belongs to Profile and Settings, and the HUD
+// carries it as one strip in the card's own stuff (domain/passCard.js's
+// cardTier: white plastic and its band, charcoal, satin platinum), two
+// doors on it:
 //
-// On the desk (plan 123) the icon-only figures carry their name as a
-// title too, as the entry's roundels and the rating tiles do: a pointer
-// over them is told what they are.
-export function HudPass({ onClick }) {
+//   the level    the struck 辻 at pocket size, its road filled to the
+//                climb, and the level beside it; the fare (+4 xp) rises
+//                off it when a review pays in. Tap → the profile.
+//   the balance  the contactless mark and the balance at the level's
+//                size, its cap a step under; ∞ drawn on a plan without
+//                one. The strip's edge goes warning at ≤5 and danger at
+//                0 (plan 069). Tap → the balance sheet.
+//
+// The roundel's place went to the station panel, on the strip's left.
+
+/** The balance half: the mark and the figure. */
+function HudBalance({ onClick }) {
   const { t } = useLang()
   const desk = useDesk()
   const credits = useCredits()
   const balance = credits?.unlimited ? null : credits?.balance
-  const low = balance != null && balance > 0 && balance <= 5
-  const out = balance === 0
-  const classes = ['hud__pass', low ? 'hud__pass--low' : '', out ? 'hud__pass--out' : ''].filter(Boolean).join(' ')
+  const label = [t.passLabel, credits?.unlimited ? t.cardUnlimited : balance != null ? `${balance} / ${credits.cap}` : null].filter(Boolean).join(' · ')
   return (
-    <button type="button" className={classes} onClick={onClick} aria-label={t.passLabel} title={desk ? t.passLabel : undefined} data-guide="hud.pass">
-      {/* The contactless mark: three rings, classed rather than bare
-          spans so the pass block's own `span` rules never meet them
-          in stylelint's specificity order. */}
-      <span className="hud__pass-wave" aria-hidden="true">
-        <span className="hud__pass-ring" />
-        <span className="hud__pass-ring hud__pass-ring--2" />
-        <span className="hud__pass-ring hud__pass-ring--3" />
-      </span>
-      {credits?.unlimited && <span className="hud__pass-fig hud__pass-fig--inf">∞</span>}
+    <button type="button" className="hstrip__bal" onClick={onClick} aria-label={label} title={desk ? label : undefined} data-guide="hud.pass">
+      <Wave />
+      {credits?.unlimited && <span className="hstrip__fig hstrip__fig--inf"><InfinitySign /></span>}
       {balance != null && (
-        <span className="hud__pass-fig">
-          {balance}
-          {showsCap(balance, credits.cap) && <span className="hud__pass-of">/{credits.cap}</span>}
+        <span className="hstrip__fig">
+          <b>{balance}</b>
+          {showsCap(balance, credits.cap) && <small>/{credits.cap}</small>}
         </span>
       )}
     </button>
   )
 }
 
-// The level roundel, with the fare rising off it. A door to the pass.
-function HudLevel() {
-  const { t } = useLang()
-  const navigate = useNavigate()
-  const summary = useProfileSummary()
-  const { gain, clear } = useXpGain(summary)
-  const toPass = () => { playClick(); navigate('/profile') }
-  const desk = useDesk()
-  const label = summary ? `${t.level} ${summary.level}` : t.profileTitle
+function stripClass(credits, solo = false) {
+  const balance = credits?.unlimited ? null : credits?.balance
+  return [
+    'hstrip', `hstrip--${cardTier(credits)}`,
+    solo ? 'hstrip--solo' : '',
+    balance != null && balance > 0 && balance <= 5 ? 'hstrip--low' : '',
+    balance === 0 ? 'hstrip--out' : '',
+  ].filter(Boolean).join(' ')
+}
 
+// The balance alone, in the card's stuff: the stage head's (plan 070),
+// so a run shows the same object the shell does.
+export function HudPass({ onClick }) {
+  const credits = useCredits()
   return (
-    <button
-      type="button"
-      className={`hud__level${gain ? ' hud__level--gain' : ''}`}
-      data-guide="hud.level"
-      onClick={toPass}
-      aria-label={label}
-      title={desk ? label : undefined}
-    >
-      <span>{summary?.level ?? ''}</span>
-      <FareFigure gain={gain} className="hud-fare" onEnd={clear} />
-    </button>
+    <div className={stripClass(credits, true)}>
+      <HudBalance onClick={onClick} />
+    </div>
   )
 }
 
-// The three instruments, in the order the HUD prints them. The desk's
-// rail set these same three at its foot until plan 127 gave it the pass
-// they read from (DeskPass.jsx): the same stores, doors and anchors.
+// The strip: the level's door and the balance's, perforated between.
+function HudStrip() {
+  const { t } = useLang()
+  const navigate = useNavigate()
+  const summary = useProfileSummary()
+  const credits = useCredits()
+  const { gain, clear } = useXpGain(summary)
+  const desk = useDesk()
+  const { share } = xpClimb(summary)
+  const label = summary ? `${t.level} ${summary.level}` : t.profileTitle
+  return (
+    <div className={stripClass(credits)}>
+      <button
+        type="button"
+        className={`hstrip__lv${gain ? ' hstrip__lv--gain' : ''}`}
+        data-guide="hud.level"
+        onClick={() => { playClick(); navigate('/profile') }}
+        aria-label={label}
+        title={desk ? label : undefined}
+      >
+        <StruckMark xp={share} etched={cardTier(credits) === 'max'} className="hstrip__mark" />
+        <b>{summary?.level ?? ''}</b>
+        <FareFigure gain={gain} className="hud-fare" onEnd={clear} />
+      </button>
+      <i className="hstrip__perf" aria-hidden="true" />
+      <HudBalance onClick={() => { playClick(); openBalance() }} />
+    </div>
+  )
+}
+
+// The HUD's two objects, in the order it prints them: the station
+// panel, then the strip. The desk's rail sets the same doors at its
+// foot (DeskPass.jsx, the holder): the same stores, doors and anchors.
 export function HudInstruments() {
   return (
     <>
-      <HudLevel />
-      {/* The panel opens the status sheet — the pass's back (plan
-          074) — rather than walking to the pass. */}
+      {/* The panel opens the status sheet — the card's journey (plan
+          074) — rather than walking to the card. */}
       <HudStatus onClick={() => { playClick(); showStatus() }} />
-      <HudPass onClick={() => { playClick(); openBalance() }} />
+      <HudStrip />
     </>
   )
 }

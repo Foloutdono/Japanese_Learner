@@ -280,127 +280,150 @@ describe('the rail', () => {
     expect(today.getAttribute('aria-label')).toMatch(/312/)
   })
 
-  // ── 定期券 — the learner's pass at the foot (plan 127) ──
-  // The HUD's three instruments were set at the foot as the phone draws
-  // them, three shapes on three alignments. They are one card now, the
-  // learner's pass, with the HUD's three doors on it and their anchors:
-  // the face (the level and its climb), the purse (the balance) and the
-  // stub (the journey's word), and the card's edge is the balance's.
-  it('sets the learner\'s pass at its foot: one card, the HUD\'s three doors and anchors', async () => {
-    journeyRef.current = {
-      goalLevel: 'N4', goalTargetDate: '2027-03-14', goalSetAt: '2026-09-01T00:00:00Z',
-      plannedPerDay: 10, itemsTotal: 1000, itemsDone: 100, actual14: 14, days14: 14,
-    }
-    creditsRef.current = { balance: 34, cap: 50, dailyRefill: 30, nextCreditAt: null, unlimited: false }
+  // ── 定期入れ — the learner's card in its holder (plans 127, 172) ──
+  // Plan 127 set the HUD's three instruments at the foot as one card,
+  // the learner's pass. Plan 172 drew the pass as the learner's card,
+  // and the foot is the holder it is carried in: the card's top edge out
+  // of its mouth, and on the case the HUD's three doors and their
+  // anchors -- the climb, the balance and the journey -- the case's edge
+  // the balance's.
+  const holder = () => rail().querySelector('.desk-holder')
+  const CONTRACT = {
+    goalLevel: 'N4', goalTargetDate: '2027-03-14', goalSetAt: '2026-09-01T00:00:00Z',
+    plannedPerDay: 10, itemsTotal: 1000, itemsDone: 100, actual14: 14, days14: 14,
+  }
+
+  it('carries the learner\'s card in its holder at its foot, the HUD\'s three doors on the case', async () => {
+    journeyRef.current = CONTRACT
+    creditsRef.current = { balance: 34, cap: 50, dailyRefill: 30, nextCreditAt: null, unlimited: false, plan: 'free' }
     await mountShell()
     await settle()
     const foot = rail().querySelector('.desk-rail__foot')
-    const pass = foot.querySelector('.desk-pass')
     expect(foot.children).toHaveLength(1)
-    expect(foot.firstElementChild).toBe(pass)
-    // One object: every door inside the card, none outside it.
+    expect(foot.firstElementChild).toBe(holder())
+    // One object: every door on the case, none outside it.
     for (const anchor of ['hud.level', 'hud.status', 'hud.pass']) {
       expect(foot.querySelectorAll(`[data-guide="${anchor}"]`), anchor).toHaveLength(1)
-      expect(pass.querySelector(`[data-guide="${anchor}"]`).tagName, anchor).toBe('BUTTON')
+      expect(holder().querySelector(`[data-guide="${anchor}"]`).tagName, anchor).toBe('BUTTON')
     }
-    // The face: the HUD's roundel, and the climb to the next level as
-    // the run's level bar measures it -- 1200 xp between 1000 and 1500.
-    const level = pass.querySelector('[data-guide="hud.level"]')
-    expect(level.querySelector('.hud__level').textContent).toBe('12')
-    expect(level.querySelector('.desk-pass__xp').textContent).toMatch(/^200 \/ 500\s*xp$/)
-    expect(level.querySelector('.desk-pass__fill').style.width).toBe('40%')
+    // The card's real face, its top edge alone out of the mouth: the
+    // free card, its struck 辻 filled to the climb.
+    const card = holder().querySelector('.desk-holder__card')
+    expect(card.querySelector('.pcard.pcard--free')).not.toBeNull()
+    expect(Math.round(card.getBoundingClientRect().height)).toBe(60)
+    expect(getComputedStyle(card).overflow).toBe('hidden')
+    // The climb: 1200 xp between 1000 and 1500.
+    const level = holder().querySelector('[data-guide="hud.level"]')
+    expect(level.querySelector('.desk-holder__level').textContent).toMatch(/^12\s+200 \/ 500$/)
+    expect(level.querySelector('.desk-holder__mark').style.getPropertyValue('--ofr-xp')).toBe('0.4')
+    expect(level.querySelector('.desk-holder__track i').style.getPropertyValue('--holder-xp')).toBe('0.4')
     expect(level.getAttribute('aria-label')).toMatch(/12.*200 \/ 500/)
     expect(level.title).toMatch(/12$/)
-    // The purse beside it, the stub across the card under both.
-    const purse = pass.querySelector('[data-guide="hud.pass"]')
-    const stub = pass.querySelector('[data-guide="hud.status"]')
-    const card = pass.getBoundingClientRect()
-    expect(Math.round(purse.getBoundingClientRect().left)).toBeGreaterThanOrEqual(Math.round(level.getBoundingClientRect().right))
-    expect(Math.round(stub.getBoundingClientRect().top)).toBe(Math.round(level.getBoundingClientRect().bottom))
-    expect(Math.round(stub.getBoundingClientRect().width)).toBe(Math.round(card.width) - 2)
-    // The stub prints the journey's word and drift, and says both.
-    expect(stub.classList.contains('desk-pass__stub--delayed')).toBe(true)
-    expect(stub.querySelector('.desk-pass__word').textContent.length).toBeGreaterThan(0)
-    expect(stub.querySelector('.desk-pass__drift').textContent).toMatch(/\d/)
-    expect(stub.getAttribute('aria-label')).toContain(stub.querySelector('.desk-pass__word').textContent)
-    // The card: the pass's identity corner, inset on the rail's floor.
-    const cs = getComputedStyle(pass)
-    expect(cs.borderTopLeftRadius).toBe('10px')
-    expect(Math.round(card.left)).toBe(12)
-    // The rail's own edge is its last pixel: the card stands 12px in
-    // from it, as from the window's left.
-    expect(Math.round(card.right)).toBe(rail().clientWidth - 12)
+    // The balance beside the journey, in one row under the climb.
+    const purse = holder().querySelector('[data-guide="hud.pass"]')
+    const stub = holder().querySelector('[data-guide="hud.status"]')
+    const p = purse.getBoundingClientRect()
+    const st = stub.getBoundingClientRect()
+    expect(Math.round(p.top)).toBe(Math.round(st.top))
+    expect(p.top).toBeGreaterThanOrEqual(level.getBoundingClientRect().bottom - 1)
+    expect(st.left).toBeGreaterThanOrEqual(p.right - 1)
+    // The journey prints its drift over its word, and says both.
+    expect(stub.classList.contains('desk-holder__st--delayed')).toBe(true)
+    expect(stub.querySelector('b').textContent).toMatch(/\d/)
+    const word = stub.querySelector('em').textContent
+    expect(word.length).toBeGreaterThan(0)
+    expect(stub.getAttribute('aria-label')).toContain(word)
+    // The case stands as far in from the rail's edges as from its floor.
+    const box = holder().querySelector('.desk-holder__case').getBoundingClientRect()
+    const r = rail().getBoundingClientRect()
+    const inset = Math.round(box.left - r.left)
+    expect(inset).toBeGreaterThan(0)
+    expect(Math.round(r.left + rail().clientWidth - box.right)).toBe(inset)
+    expect(Math.round(window.innerHeight - box.bottom)).toBe(inset)
     // At the foot: under the last gate, on the rail's bottom edge.
     const last = gates().at(-1).getBoundingClientRect()
     expect(foot.getBoundingClientRect().top).toBeGreaterThan(last.bottom)
     expect(Math.round(foot.getBoundingClientRect().bottom)).toBe(window.innerHeight)
-    expect(Math.round(window.innerHeight - card.bottom)).toBe(12)
+  })
+
+  // The profile and Settings print the whole card: there it is out of
+  // the holder, and the mouth says so, so it is never drawn twice.
+  it('leaves its mouth empty where the page prints the card, saying where it went', async () => {
+    // Each mount stands beside the one before it: read the newest.
+    const latest = () => [...document.querySelectorAll('.desk-holder')].at(-1)
+    for (const path of ['/profile', '/profile/settings/level']) {
+      await mountShell(path)
+      await settle()
+      expect(latest().classList.contains('desk-holder--away'), path).toBe(true)
+      expect(latest().querySelector('.desk-holder__card'), path).toBeNull()
+      expect(latest().querySelector('.desk-holder__slot').textContent, path).toBe('Sur la page')
+      expect(latest().querySelector('[data-guide="hud.level"]'), path).not.toBeNull()
+    }
+    await mountShell('/learn')
+    await settle()
+    expect(latest().classList.contains('desk-holder--away')).toBe(false)
+    expect(latest().querySelector('.desk-holder__card .pcard')).not.toBeNull()
   })
 
   // The guide centres each stop's anchor in view (Guide.jsx), and the
-  // stub is Today's third on the desk. A card clipped with `hidden` is
-  // a scroll container, and the pass's sheen reaches 40% under its
-  // floor, so centring the stub scrolled the card inside itself: the
-  // roundel cut at the top, the balance gone, an empty band under the
-  // stub -- and left so once the guide was skipped there.
-  it('keeps the pass\'s face in place when the guide centres its stub', async () => {
-    journeyRef.current = {
-      goalLevel: 'N4', goalTargetDate: '2027-03-14', goalSetAt: '2026-09-01T00:00:00Z',
-      plannedPerDay: 10, itemsTotal: 1000, itemsDone: 100, actual14: 14, days14: 14,
-    }
+  // journey is Today's third on the desk. Plan 127's card, clipped with
+  // `hidden`, was a scroll container and scrolled inside itself; the
+  // case must not be one.
+  it('keeps the case in place when the guide centres its journey', async () => {
+    journeyRef.current = CONTRACT
     creditsRef.current = { balance: 34, cap: 50, dailyRefill: 30, nextCreditAt: null, unlimited: false }
     await mountShell()
     await settle()
-    const pass = rail().querySelector('.desk-pass')
-    const level = pass.querySelector('[data-guide="hud.level"]')
-    const stub = pass.querySelector('[data-guide="hud.status"]')
-    const face = level.getBoundingClientRect().top
+    const level = holder().querySelector('[data-guide="hud.level"]')
+    const stub = holder().querySelector('[data-guide="hud.status"]')
+    const top = level.getBoundingClientRect().top
     stub.scrollIntoView({ block: 'center', inline: 'nearest' })
-    expect(pass.scrollTop).toBe(0)
-    expect(level.getBoundingClientRect().top).toBe(face)
-    expect(Math.round(stub.getBoundingClientRect().bottom)).toBe(Math.round(pass.getBoundingClientRect().bottom) - 1)
+    expect(holder().scrollTop).toBe(0)
+    expect(holder().querySelector('.desk-holder__case').scrollTop).toBe(0)
+    expect(level.getBoundingClientRect().top).toBe(top)
   })
 
-  // The purse, at a balance, at five or fewer and spent. The edge is the
-  // balance's, as the pocket pass's was; spent, the caption says when
-  // it comes back rather than what it counts.
-  const note = () => rail().querySelector('.desk-pass__note')
-  const edge = () => getComputedStyle(rail().querySelector('.desk-pass')).borderTopColor
-  const fig = () => rail().querySelector('.desk-pass .hud__pass-fig')
+  // The balance, at a figure, at five or fewer and spent. The case's
+  // edge is the balance's; spent, the caption says when it comes back
+  // rather than what it counts.
+  const note = () => rail().querySelector('.desk-holder__cr em')
+  const edge = () => getComputedStyle(rail().querySelector('.desk-holder__case')).borderTopColor
+  const fig = () => rail().querySelector('.desk-holder__fig')
   // A value as the rail resolves it, for a colour-mix the browser
   // prints in its own notation.
-  const resolved = (value) => {
+  const resolved = (value, prop = 'borderTopColor') => {
     const probe = document.createElement('span')
-    probe.style.borderTop = `1px solid ${value}`
+    probe.className = holder().className
+    if (prop === 'color') probe.style.color = value
+    else probe.style.borderTop = `1px solid ${value}`
     rail().appendChild(probe)
-    const c = getComputedStyle(probe).borderTopColor
+    const c = getComputedStyle(probe)[prop]
     probe.remove()
     return c
   }
-  const PLAIN_EDGE = 'color-mix(in srgb, var(--pass-ink) 70%, transparent)'
+  const PLAIN_EDGE = 'rgba(255, 255, 255, 0.1)'
   const LOW_EDGE = 'color-mix(in srgb, var(--warning) 70%, transparent)'
   const OUT_EDGE = 'color-mix(in srgb, var(--danger) 70%, var(--text-on-panel))'
-  const METAL = 'rgb(201, 154, 62)'
   const purseAt = async (balance, nextCreditAt = null) => {
-    creditsRef.current = { balance, cap: 50, dailyRefill: 30, nextCreditAt, unlimited: false }
+    creditsRef.current = { balance, cap: 50, dailyRefill: 30, nextCreditAt, unlimited: false, plan: 'free' }
     await mountShell()
     await settle()
   }
 
-  it('says what the balance counts, in the pass\'s metal on the pass\'s edge', async () => {
+  it('says what the balance counts, in the card\'s ink, on a plain edge', async () => {
     await purseAt(34)
     expect(fig().textContent).toBe('34/50')
     expect(note().textContent).toBe('crédits')
     expect(edge()).toBe(resolved(PLAIN_EDGE))
-    expect(getComputedStyle(fig()).color).toBe(METAL)
+    expect(getComputedStyle(fig()).color).toBe(resolved('var(--holder-ink)', 'color'))
   })
 
-  it('warns on its edge at five or fewer, the figure keeping its metal', async () => {
+  it('warns on its edge at five or fewer, the figure keeping the card\'s ink', async () => {
     await purseAt(4)
-    expect(rail().querySelector('.desk-pass').classList.contains('desk-pass--low')).toBe(true)
+    expect(holder().classList.contains('desk-holder--low')).toBe(true)
     expect(edge()).toBe(resolved(LOW_EDGE))
     expect(edge()).not.toBe(resolved(PLAIN_EDGE))
-    expect(getComputedStyle(fig()).color).toBe(METAL)
+    expect(getComputedStyle(fig()).color).toBe(resolved('var(--holder-ink)', 'color'))
   })
 
   // Spent, it names the hour the refill lands its next credit (plan
@@ -409,22 +432,29 @@ describe('the rail', () => {
     const at = '2026-09-07T14:48:00+00:00'
     await purseAt(0, at)
     const clock = new Intl.DateTimeFormat('fr', { hour: '2-digit', minute: '2-digit' }).format(new Date(at))
-    const pass = rail().querySelector('.desk-pass')
-    expect(pass.classList.contains('desk-pass--out')).toBe(true)
+    expect(holder().classList.contains('desk-holder--out')).toBe(true)
     expect(edge()).toBe(resolved(OUT_EDGE))
-    expect(getComputedStyle(fig()).color).not.toBe(METAL)
+    expect(getComputedStyle(fig()).color).not.toBe(resolved('var(--holder-ink)', 'color'))
     expect(note().textContent).toBe(`+1 à ${clock}`)
-    expect(pass.querySelector('[data-guide="hud.pass"]').getAttribute('aria-label')).toContain(`+1 à ${clock}`)
+    expect(holder().querySelector('[data-guide="hud.pass"]').getAttribute('aria-label')).toContain(`+1 à ${clock}`)
   })
 
-  it('prints no figure and no caption before the balance arrives, nor a stub with no contract', async () => {
+  it('draws ∞ on a plan without a ceiling, on the Max card', async () => {
+    creditsRef.current = { balance: null, cap: 50, unlimited: true, plan: 'pass' }
     await mountShell()
     await settle()
-    const pass = rail().querySelector('.desk-pass')
-    expect(pass.querySelectorAll('.hud__pass-ring')).toHaveLength(3)
-    expect(pass.querySelector('.hud__pass-fig')).toBeNull()
-    expect(pass.querySelector('.desk-pass__note')).toBeNull()
-    expect(pass.querySelector('[data-guide="hud.status"]')).toBeNull()
+    expect(holder().classList.contains('desk-holder--max')).toBe(true)
+    expect(holder().querySelector('.desk-holder__card .pcard--max')).not.toBeNull()
+    expect(holder().querySelector('.desk-holder__fig--inf .pinf')).not.toBeNull()
+    expect(note().textContent.length).toBeGreaterThan(0)
+  })
+
+  it('prints no figure and no caption before the balance arrives, nor a journey with no contract', async () => {
+    await mountShell()
+    await settle()
+    expect(holder().querySelector('.desk-holder__fig')).toBeNull()
+    expect(note()).toBeNull()
+    expect(holder().querySelector('[data-guide="hud.status"]')).toBeNull()
   })
 
   // A laptop's short window (plan 123): the rail used to scroll as one,
@@ -466,18 +496,22 @@ describe('the rail', () => {
       probe.style.color = `var(${n})`
       return getComputedStyle(probe).color
     }))
-    // The pass at the foot (plan 127) is the learner's object, not the
-    // rail's: it wears the pass's metal, whose hex 辞書's pigment shares
-    // (DESIGN.md, "The test is the object, not the hex"). That one value
-    // is the pass's inside the card, and a line's everywhere else.
-    probe.style.color = 'var(--accent2)'
-    const metal = getComputedStyle(probe).color
+    // The card in the holder (plan 172) is the learner's object, not the
+    // rail's: the free card's band is its own --pass-band, whose hex the
+    // vocab line's pigment shares, and the holder's figures wear the
+    // card's ink, as plan 127's pass wore its metal (DESIGN.md, "The
+    // test is the object, not the hex"). Those values are the card's
+    // inside the holder, and a line's everywhere else.
+    const own = new Set(['var(--accent2)', 'var(--pass-band)'].map(v => {
+      probe.style.color = v
+      return getComputedStyle(probe).color
+    }))
     probe.remove()
     for (const el of [rail(), ...rail().querySelectorAll('*')]) {
       const cs = getComputedStyle(el)
-      const onPass = el.closest('.desk-pass') != null
+      const onCard = el.closest('.desk-holder') != null
       for (const c of [cs.color, cs.backgroundColor, cs.borderTopColor, cs.borderLeftColor]) {
-        if (onPass && c === metal) continue
+        if (onCard && own.has(c)) continue
         expect(pigments.has(c), `${el.className} ${c}`).toBe(false)
       }
     }

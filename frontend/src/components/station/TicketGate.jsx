@@ -1,6 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useProfileSummary } from '../../stores/profileSummary'
+import { useCredits } from '../../stores/credits'
+import { cardTier, xpClimb } from '../../domain/passCard'
+import { CardFace } from '../pass/PassCard'
 import { PassWave } from '../profile/PassWave'
 import { playGateChime } from '../../lib/audio'
 import { spendKey } from '../../lib/keyGuards'
@@ -107,6 +110,7 @@ function prefersReducedMotion() {
  */
 export function TicketGate({ section, station, onNavigate, onDone }) {
   const summary = useProfileSummary()
+  const credits = useCredits()
   const [phase, setPhase] = useState('closed')
   const timers = useRef([])
   const scene = useRef(null)
@@ -206,15 +210,13 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
 
   if (prefersReducedMotion()) return null
 
+  // The learner's own card (plan 172), face up: their material, the
+  // name, the level under it and the road of its struck 辻 filled to the
+  // climb -- the face every other screen draws.
   const holder = summary?.username ?? '—'
-  const level = summary?.level
-  // The balance, as the pass prints it: how far into this level the
-  // learner's XP has climbed (the LevelBar's and DeskPass's figure).
-  // No bar at all where the summary cannot say (not loaded, or the top
-  // of the curve, where there is no next level to climb to).
-  const span = summary?.xpForNext != null ? Math.max(1, summary.xpForNext - summary.xpPrevLevel) : NaN
-  const into = Math.min(span, Math.max(0, summary?.xp - summary?.xpPrevLevel))
-  const balance = Number.isFinite(into / span) ? Math.round((into / span) * 100) : null
+  const level = summary?.level ?? null
+  const { share } = xpClimb(summary)
+  const tier = cardTier(credits)
 
   return createPortal(
     <div
@@ -256,23 +258,12 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
         </div>
       </div>
 
-      {/* The pass, flying in to meet the reader: the learner's own,
-          with the mark it taps with and the balance under the name.
+      {/* The card, flying in to meet the reader: the learner's own.
           Beside the rig rather than in it, where it stands at the same
           place: it is in the learner's hand, not part of the gate, so
           it does not grow with the gate as the gate grows into view. */}
       <div className="gate__card">
-        <span className="gate__card-top">
-          <span className="gate__card-brand" lang="ja">定期券</span>
-          <PassWave className="pass__wave gate__card-wave" />
-        </span>
-        <span className="gate__card-name">{holder}</span>
-        {level != null && (
-          <span className="gate__card-bal">
-            <span className="gate__card-level">{level}</span>
-            {balance != null && <span className="gate__card-bar"><i style={{ width: `${balance}%` }} /></span>}
-          </span>
-        )}
+        <CardFace tier={tier} name={holder} level={level ?? ''} share={share} />
       </div>
 
       {/* The destination's name, handed out of the lane as the gate

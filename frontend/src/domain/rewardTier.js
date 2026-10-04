@@ -10,9 +10,11 @@
 //   'fare'   XP, no level. The overwhelming majority. A tick, the way
 //            a gate deducts a fare — under a second, corner of the
 //            screen, no interaction.
-//   'level'  The level number changed. The pass is clipped: 改札鋏,
-//            plan 142, where a 発車標 flap turned over until then.
-//            Self-dismissing, and it never holds the next card.
+//   'level'  The level number changed. The card's engraving fills,
+//            bursts and empties, and the figure rolls over (進級, plan
+//            172; plan 142 clipped the pass, and a 発車標 flap turned
+//            over before that). Self-dismissing, and it never holds the
+//            next card.
 //
 // There was a third, 'rank'. The level bands each carried a title
 // (見習い → 浪人 → 侍 → 師範 → 免許皆伝), and crossing one re-issued

@@ -156,7 +156,7 @@ describe('the shell', () => {
 })
 
 describe('the HUD', () => {
-  it('is sumi at its height, under the notch, with the level in a roundel and the pass beside it', async () => {
+  it('is sumi at its height, under the notch, with the learner\'s card as one strip', async () => {
     await mountShell()
     await settle()
     const hud = document.querySelector('.hud')
@@ -181,11 +181,26 @@ describe('the HUD', () => {
     expect(off(getComputedStyle(bar))).toBe('-10')
     expect(getComputedStyle(hud).paddingTop).toBe('0px') // --safe-top is 0 in chromium
     expect(getComputedStyle(hud).position).toBe('sticky')
-    const level = hud.querySelector('.hud__level')
+    // 帯 (plan 172): the card as one strip, in its material -- the free
+    // card's, the credits being unknown -- with two doors on it: the
+    // level, its struck 辻 filled to the climb, and the balance.
+    const strip = hud.querySelector('.hstrip')
+    expect(strip.classList.contains('hstrip--free')).toBe(true)
+    const level = strip.querySelector('[data-guide="hud.level"]')
+    expect(level.tagName).toBe('BUTTON')
     expect(level.textContent).toBe('12')
-    expect(getComputedStyle(level).color).toBe(getComputedStyle(hud).color)
-    expect(hud.querySelector('.hud__pass')).toBeTruthy()
-    expect(hud.querySelectorAll('.hud__pass-ring')).toHaveLength(3)
+    expect(level.querySelector('.hstrip__mark').style.getPropertyValue('--ofr-xp')).toBe('0.4')
+    const balance = strip.querySelector('[data-guide="hud.pass"]')
+    expect(balance.tagName).toBe('BUTTON')
+    // Before the balance arrives, the mark and no figure.
+    expect(balance.querySelector('.ofr-wave')).toBeTruthy()
+    expect(balance.querySelector('.hstrip__fig')).toBeNull()
+    // The strip at the HUD's height, inside it.
+    const sb = strip.getBoundingClientRect()
+    const ib = inner.getBoundingClientRect()
+    expect(sb.top).toBeGreaterThanOrEqual(ib.top)
+    expect(sb.bottom).toBeLessThanOrEqual(ib.bottom)
+    expect(sb.right).toBeLessThanOrEqual(ib.right)
     // No contract yet: no panel, and nothing pretends there is one.
     expect(hud.querySelector('.hud__status')).toBeNull()
   })

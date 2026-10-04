@@ -130,10 +130,11 @@ export default function RewardsPreview() {
 
         <SectionHeader jp="進級" title="Level up" />
         <p className="preview-note">
-          The level number turned over, clipped on the pass (改札鋏,
-          plan 142): the pass comes down, the gate&apos;s punch bites its top
-          edge, the old figure is struck and the new one printed in gold,
-          and the balance empties to the new level&apos;s start. Hung at
+          The level told by the card&apos;s engraving (進級, plan 172): the
+          learner&apos;s card comes down, the struck 辻&apos;s road fills
+          from empty to full while the card trembles harder, bursts into
+          sparks of its own material, empties, and the level&apos;s figure
+          rolls over to the new one. Hung at
           the top of a phone, floating at the right of a wider screen; on
           the desk a run docks it at the top of its column, which this
           workbench has none of. Self-dismissing, and it never holds the

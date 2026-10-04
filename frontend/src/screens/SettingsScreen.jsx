@@ -15,7 +15,7 @@ import { ChevronIcon, GearIcon } from '../components/ui/Icons'
 import { useOfferable } from '../hooks/useOfferable'
 import { openPaywall } from '../stores/credits'
 import { SOURCES } from '../domain/paywall'
-import { SettingsPass } from '../components/settings/SettingsPass'
+import { SettingsCard } from '../components/pass/LearnerCard'
 import { SettingsDoor } from '../components/settings/SettingsDoor'
 import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from '../components/settings/RowSpecimens'
 import { LevelPage } from '../components/settings/LevelPage'
@@ -38,10 +38,11 @@ import { useDesk } from '../hooks/useDesk'
 
 // ── Settings (canvas Settings, plan 074; the pass's contract, plan 139) ──
 // The owner's pick of the "Settings rework — options" canvas: B's pass
-// with C's list. Settings opens on the learner's pass, printed with the
-// contract it was issued under (components/settings/SettingsPass.jsx) —
-// the level it boards at, the destination, the service, the daily ride
-// and the lines, each a door to the page that changes it — and under it
+// with C's list. Settings opens on the learner's card turned over, its
+// back printed with the contract it was issued under (plan 172,
+// components/pass/LearnerCard.jsx's SettingsCard) — the level it boards
+// at, the destination, the service, the daily ride and the lines, each
+// a door to the page that changes it — and under it
 // the rest as a list whose rows draw what they are set to. Every page
 // lives at /profile/settings/<page>; the phone pushes it, the desk sets
 // it beside the column. Notifications (plan 156) is a shell's page
@@ -75,9 +76,10 @@ const THEATRE = ['ambiance', 'jingle', 'announcement']
 // contract's destination, the field the rest of the pass is priced by.
 const FIRST_PAGE = 'destination'
 
-// Every door in the column, the pass's and the list's: one tab stop on
-// the desk, walked with ↑/↓ (plan 123).
-const DOORS = '.stg-door'
+// Every door in the column, the card's and the list's: one tab stop on
+// the desk, walked with ↑/↓ (plan 123) -- the card's only while its
+// back is up (a side turned away is inert).
+const DOORS = '.stg-door:not([inert] *)'
 
 export default function SettingsScreen({ session }) {
   const { page } = useParams()
@@ -170,7 +172,7 @@ function SettingsHome({ session, current = null }) {
       )}
 
       <div className="stg-home" onKeyDown={onWalk} aria-keyshortcuts={desk ? WALK_KEYS : undefined}>
-        <SettingsPass current={current} />
+        <SettingsCard current={current} session={session} />
 
         <div className="stg-list">
           {ROWS.map(row => (

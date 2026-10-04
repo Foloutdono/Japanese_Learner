@@ -77,8 +77,8 @@ describe('the kana fast review', () => {
 
     // And the pass, with the balance on it — the whole point of this
     // file.
-    const pass = stage.querySelector('.hud__pass')
+    const pass = stage.querySelector('.hstrip--solo [data-guide="hud.pass"]')
     expect(pass, 'the fast review dropped the pocket pass').toBeTruthy()
-    expect(pass.querySelector('.hud__pass-fig').textContent).toContain('24')
+    expect(pass.querySelector('.hstrip__fig').textContent).toContain('24')
   })
 })

@@ -1239,7 +1239,29 @@ runtime purpose. Two consequences worth knowing:
   `src/offers.desktop.test.jsx`, `src/offers.short.test.jsx` and
   `index.css` and its 机 section;
   CONTEXT.md, Pro / Max; `docs/design/mobile/README.md`, "The offer").
-  When starting a new wave, begin at **172** or higher, and check
+  **172** is 定期券, the learner's card (the owner's picks on the canvas
+  "Tsuji — the three offers", its pages "The free card", "The cards in
+  the app" and "The pocket pass & the level-up"): one card in three
+  materials by plan (`domain/passCard.js`'s `cardTier` -- Free 白, white
+  plastic with its band, `--pass-band`; Pro 墨; Max 梨地, the server's
+  `pass` plan), its face the offers' with the struck 辻 filled to the
+  climb, its back the route and the contract, the climb, the balance and
+  the journey as doors and the signature (`components/pass/`), replacing
+  every pass the app drew: whole on the profile (face up) and Settings
+  (back up), issued in the boarding, face up in the gate's reader; on the
+  phone's HUD one strip (帯) of the level and the balance; on the desk
+  the card in its holder (定期入れ) at the rail's foot, the mouth empty
+  where the card is drawn whole; and the level-up told by its engraving
+  (進級), filling while the card trembles, bursting in its material's
+  sparks, emptying, the figure rolling over -- plan 142's punch retired
+  (cited in `components/pass/`, `domain/passCard.js`,
+  `components/chrome/Hud.jsx`, `components/chrome/DeskPass.jsx`,
+  `components/rewards/XpToast.jsx`, `components/boarding/PassStep.jsx`,
+  `components/station/TicketGate.jsx`, `screens/ProfileScreen.jsx`,
+  `screens/SettingsScreen.jsx`, the card's tests and `index.css` and its
+  机 section; DESIGN.md, "The pass has two materials", Rewards and "The
+  desk").
+  When starting a new wave, begin at **173** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

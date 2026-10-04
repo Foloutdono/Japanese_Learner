@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { LangProvider } from './LangContext'
 import './index.css'
 
 // ── 改札 on the desk: where the gate stands ───────────────────────
@@ -24,7 +25,7 @@ afterEach(() => { delete document.documentElement.dataset.chrome })
 
 async function gate(section) {
   document.documentElement.dataset.chrome = 'shell'
-  await render(<TicketGate section={{ color: 'var(--line-today)', title: 'Today', ...section }} station={{ code: 'TD' }} onNavigate={() => {}} onDone={() => {}} />)
+  await render(<LangProvider><TicketGate section={{ color: 'var(--line-today)', title: 'Today', ...section }} station={{ code: 'TD' }} onNavigate={() => {}} onDone={() => {}} /></LangProvider>)
   await settle()
   return document.querySelector('.gate')
 }
