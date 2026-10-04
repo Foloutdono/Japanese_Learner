@@ -179,3 +179,35 @@ describe('RatingBar below the desk', () => {
     expect(document.querySelector('.rating-bar .desk-kbd, .rating-bar kbd')).toBeNull()
   })
 })
+
+// 正解 (plan 180): the misses are one instrument and the passes keys of
+// their own beside it -- Correct, and Perfect on the six -- in DOM order
+// worst to best, so tab and screen-reader order match the screen.
+describe('RatingBar — the passes as keys', () => {
+  const qs = nodes => [...nodes].map(b => [...b.classList].find(c => /--q\d$/.test(c)).slice(-1))
+
+  it('puts Correct alone in the keys on the four', async () => {
+    const screen = await renderBar({ active: true, onRate: vi.fn(), scale: 'simple' })
+    const c = screen.container
+    expect(qs(c.querySelectorAll('.rating-bar__misses .rating-bar__btn'))).toEqual(['1', '2', '3'])
+    expect(qs(c.querySelectorAll('.rating-bar__keys .rating-bar__btn'))).toEqual(['4'])
+    expect(c.querySelector('.rating-bar__btn--q4').classList.contains('rating-bar__btn--key')).toBe(true)
+    expect(c.querySelector('.rating-bar__btn--q4 .rating-bar__btn-check')).not.toBeNull()
+    expect(c.querySelector('.rating-bar__btn--q4 .rating-bar__btn-ring')).toBeNull()
+  })
+
+  it('keys Correct and Perfect on the six, worst to best', async () => {
+    const screen = await renderBar({ active: true, onRate: vi.fn(), scale: 'full' })
+    const c = screen.container
+    expect(qs(c.querySelectorAll('.rating-bar__btn'))).toEqual(['0', '1', '2', '3', '4', '5'])
+    expect(qs(c.querySelectorAll('.rating-bar__keys .rating-bar__btn'))).toEqual(['4', '5'])
+    expect(c.querySelector('.rating-bar__btn--best').classList.contains('rating-bar__btn--q5')).toBe(true)
+  })
+
+  it('keys Correct on the two, beside the one miss', async () => {
+    const screen = await renderBar({ active: true, onRate: vi.fn(), scale: 'binary' })
+    const c = screen.container
+    expect(qs(c.querySelectorAll('.rating-bar__misses .rating-bar__btn'))).toEqual(['1'])
+    expect(qs(c.querySelectorAll('.rating-bar__keys .rating-bar__btn'))).toEqual(['4'])
+  })
+})

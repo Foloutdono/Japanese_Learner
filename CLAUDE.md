@@ -1405,7 +1405,17 @@ runtime purpose. Two consequences worth knowing:
   `src/deskfree.phone.test.jsx`,
   `src/deckFit.wide.test.jsx`, `src/shelf.desktop.test.jsx` and the 机
   section of `index.css`; DESIGN.md, "The gate button" and "The desk").
-  When starting a new wave, begin at **180** or higher, and check
+  **180** is 正解, the rating bar's passes as keys of their own (the
+  owner's pick B of five drawn on the canvas "Tsuji — the rating bar",
+  asked a step more vibrant): the misses stay plan 174's one instrument,
+  and Correct -- with Perfect on the six -- stands beside it as a key
+  filled in its own ink, `--rating-correct` and `--rating-perfect`,
+  which the run's meter and the desk's verdict tiles wear too; on a
+  phone the six's keys go under its misses (cited in
+  `components/study/RatingBar.jsx`, `index.css` and its 机 section,
+  `src/harmony.css.test.js`, `src/stage.phone.test.jsx` and
+  `components/study/RatingBar.browser.test.jsx`; DESIGN.md, Controls).
+  When starting a new wave, begin at **181** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
