@@ -125,6 +125,22 @@ describe('a deck beside the shelf on a wide window', () => {
     await expectHeld()
   })
 
+  it('fills the modes\' row and stands its foot level with the shelf\'s doors', async () => {
+    await mount()
+    await settle()
+    // Three modes share the row to the page's edge: no fourth card's hole.
+    const modes = $$('.dk-modes .dk-mode').map(m => m.getBoundingClientRect())
+    const table = $('.dk-cards').getBoundingClientRect()
+    expect(new Set(modes.map(m => Math.round(m.top))).size).toBe(1)
+    expect(Math.abs(modes.at(-1).right - table.right)).toBeLessThanOrEqual(1)
+    // Six cards listed, the foot is still at the page's floor, its
+    // bottom level with the doors' at the list's foot.
+    const foot = $('.dk-foot .btn-primary').getBoundingClientRect()
+    const doors = $('.desk-split__list .decks-doors').getBoundingClientRect()
+    expect(Math.abs(foot.bottom - doors.bottom)).toBeLessThanOrEqual(2)
+    expect(foot.top).toBeGreaterThan(table.bottom)
+  })
+
   it('gives the mode cards up for chips on a short window', async () => {
     await page.viewport(1366, 640)
     try {

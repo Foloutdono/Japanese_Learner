@@ -286,9 +286,13 @@ describe('a deck\'s More on the desk', () => {
     expect(dock).not.toBeNull()
     expect(more.getAttribute('aria-pressed')).toBe('true')
     // Import, Export and Publish, as the phone's sheet lists them, and
-    // the deletion under them.
-    expect(dock.querySelectorAll('.btn-secondary')).toHaveLength(3)
-    expect(dock.querySelector('.btn-primary--danger')).not.toBeNull()
+    // the deletion apart under them, a chip that arms the dialog.
+    expect(dock.querySelectorAll('.dk-more__acts > .btn-secondary')).toHaveLength(3)
+    expect(dock.querySelector('.dk-more__end .chip--danger')).not.toBeNull()
+    expect(dock.querySelector('.btn-primary--danger')).toBeNull()
+    // The three actions share one row.
+    const tops = [...dock.querySelectorAll('.dk-more__acts > .btn-secondary')].map(b => Math.round(b.getBoundingClientRect().top))
+    expect(new Set(tops).size).toBe(1)
     expect($('.desk-deck__study')).toBeNull()
     expect($('.dk-scroll > .dk-cards')).not.toBeNull()
 
@@ -323,7 +327,7 @@ describe('a deck\'s More on the desk', () => {
     await settle(400)
     moreChip().click()
     await settle()
-    $('.desk-more .btn-primary--danger').click()
+    $('.desk-more .chip--danger').click()
     await settle()
     const dialog = $('[role="dialog"]')
     expect(dialog).not.toBeNull()

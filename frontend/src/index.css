@@ -28280,12 +28280,14 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-deck > :not(.dk-scroll) { flex: none; }
   /* The page's one scroller: the modes (or the form, Browse or More)
-     and the cards. It takes no more than its content, so a short deck's
-     foot sits under its cards, and no more than the window leaves, so a
-     long one's foot is still on it. The gutter is the list's. */
+     and the cards. It takes what the window leaves between the head and
+     the foot, so the foot stands at the page's floor, level with the
+     shelf's two doors across the hairline, however short the deck --
+     a foot that rode up under a short deck's cards stood the page's two
+     feet at two heights. The gutter is the list's. */
   .dk-scroll {
     display: flex;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: var(--sp-6);
     min-height: 0;
@@ -28363,6 +28365,9 @@ button.brd-stn { cursor: pointer; }
   .dk-fig--due .dk-fig__n { color: var(--state-due); }
   .dk-fig--learning .dk-fig__n { color: var(--state-learning); }
   .dk-fig--mastered .dk-fig__n { color: var(--state-mastered); }
+  /* A state that holds no card says so in the caption's ink: a zero in
+     the state's pigment lit a figure that has nothing to report. */
+  .dk-fig--none .dk-fig__n { color: var(--text-secondary); }
   .desk-deck__slot {
     display: flex;
     flex-direction: column;
@@ -28376,11 +28381,13 @@ button.brd-stn { cursor: pointer; }
     gap: var(--sp-3);
     margin-block-end: var(--sp-4);
   }
-  /* The deck's modes as cards, as many across as fit: three on a
-     window's width, two on the narrow desk. */
+  /* The deck's modes as cards, as many across as fit, sharing the row:
+     a track no mode fills is folded away (auto-fit), so three modes on
+     a window's width meet the page's edge rather than leave a fourth
+     card's hole beside them. */
   .dk-modes {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(calc(var(--desk-side-w) / 2), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(calc(var(--desk-side-w) / 2), 1fr));
     gap: var(--sp-4);
   }
   .dk-mode {
@@ -28510,6 +28517,29 @@ button.brd-stn { cursor: pointer; }
     font-variant-numeric: tabular-nums;
     letter-spacing: 0;
     color: var(--state-due);
+  }
+  /* More in the modes' place (plan 120's dock): where the deck stands
+     in the library over one row of what can be done to it, each action
+     a share of the row as the modes are, and the deletion apart at the
+     dock's right-hand foot -- a chip that arms it, as the
+     selection's Delete does; the dialog it opens is the one that fills
+     (.chip--danger). */
+  .dk-more__acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+  .dk-more__acts > .btn-secondary {
+    flex: 1 1 calc(var(--desk-side-w) / 2);
+    width: auto;
+  }
+  .dk-more__acts > .lib-note {
+    flex-basis: 100%;
+    order: -1;
+  }
+  .dk-more__end {
+    display: flex;
+    justify-content: flex-end;
   }
   .dk-foot {
     display: flex;

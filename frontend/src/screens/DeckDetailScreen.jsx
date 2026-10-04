@@ -1043,10 +1043,13 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       // a dialog of its own (below).
       : moreOpen ? (
         <DeskDock title={t.deckMore} className="desk-more" onClose={closeMore}>
-          {moreActions}
-          <button type="button" className="btn-primary btn-primary--danger" onClick={() => setConfirmingDeck(true)}>
-            <TrashIcon size={14} /> {t.deleteDeck}
-          </button>
+          <div className="dk-more__acts">{moreActions}</div>
+          <div className="dk-more__end">
+            <Chip className="chip--danger" aria-haspopup="dialog"
+              onClick={() => { playUi('click-mode-selection'); setConfirmingDeck(true) }}>
+              <TrashIcon size={14} />{t.deleteDeck}
+            </Chip>
+          </div>
         </DeskDock>
       )
       : modes?.length > 0 && !compact ? (
@@ -1105,7 +1108,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
       {!loading && cards.length > 0 && (
         <div className="dk-figs">
           {FIG_KEYS.map(k => (
-            <div key={k} className={`dk-fig dk-fig--${k}`}>
+            <div key={k} className={`dk-fig dk-fig--${k}${figs[k] === 0 ? ' dk-fig--none' : ''}`}>
               <b className="dk-fig__n">{figs[k]}</b>
               <span className="dk-fig__cap">{t.deckFigs[k]}</span>
             </div>
