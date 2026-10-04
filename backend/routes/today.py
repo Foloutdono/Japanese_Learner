@@ -449,7 +449,9 @@ def get_today(user_id: str = Depends(get_user_id)):
     )
     pace = resolve_pace(user_id)
     # 所要 (plan 135): what a review takes this learner, so the gate can
-    # print what a run will take. A figure, never a reason to fail.
+    # print what a run will take -- from the gaps between their reviews
+    # and from what a card cost in their last twenty runs (plan 175). A
+    # figure, never a reason to fail.
     try:
         spr = srs.get_review_pace(user_id) if total else None
     except Exception:

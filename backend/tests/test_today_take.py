@@ -3,7 +3,8 @@
 # over the chosen lanes the way the queue deals, and the run hands each
 # lane's remaining figure back as `quota` (less what it has answered
 # and what it holds); the server keeps those lanes and cuts each to it. Beside the count, the gate prints what
-# the run will take, from the median gap between this learner's reviews.
+# the run will take, from the median gap between this learner's reviews
+# blended (plan 175) with what a card cost in each of their last twenty runs.
 from collections import OrderedDict
 from datetime import datetime, timedelta, timezone
 
@@ -11,7 +12,10 @@ from core.db import db_conn
 from core.srs_instance import srs
 from study import card_index, daily_queue
 from study.daily_queue import SECTION
-from srs.srs import PACE_BREAK, PACE_MIN_GAPS, seconds_per_review
+from srs.srs import (
+    PACE_BREAK, PACE_MIN_GAPS, PACE_PRIOR_RUNS, RUN_BREAK, RUN_MIN_CARDS, RUNS_KEPT,
+    personal_pace, run_paces, runs_of, seconds_per_review,
+)
 
 # The HTTP half boards a user of its own, as the ration tests do.
 from tests.test_today_ration import RATION_USER, _board, client  # noqa: F401  (fixture)
@@ -61,6 +65,74 @@ def test_the_pace_waits_for_enough_gaps():
     assert seconds_per_review([]) is None
 
 
+# ── 走行 — the pace read from the last runs (plan 175) ────────────
+
+def _run(start, n, every):
+    """n reviews `every` seconds apart from `start`."""
+    return [start + i * every for i in range(n)]
+
+
+def test_a_gap_of_a_break_or_more_closes_a_run():
+    runs = runs_of(_at(*_run(0, 12, 5), *_run(60 + RUN_BREAK, 3, 5), *_run(5000, 4, 5)))
+    assert [len(r) for r in runs] == [12, 3, 4]
+    # The break is the boundary: one second short of it stays one run.
+    assert len(runs_of(_at(0, RUN_BREAK - 1))) == 1
+    assert len(runs_of(_at(0, RUN_BREAK))) == 2
+
+
+def test_a_run_s_pace_counts_its_pauses_and_skips_the_lookups():
+    # 10 cards 10s apart, with one five-minute pause in the middle.
+    times = _run(0, 5, 10) + _run(40 + 300, 5, 10)
+    assert run_paces(_at(*times)) == [(340 + 40) / 9]
+    # Fewer than RUN_MIN_CARDS reviews is a lookup: no run, no pace.
+    assert run_paces(_at(*_run(0, RUN_MIN_CARDS - 1, 10))) == []
+
+
+def test_only_the_last_runs_are_counted():
+    times = []
+    for day in range(RUNS_KEPT + 5):
+        # The first five runs are slow, the last twenty fast.
+        times += _run(day * 10_000, RUN_MIN_CARDS, 60 if day < 5 else 6)
+    assert run_paces(_at(*times)) == [6.0] * RUNS_KEPT
+
+
+def test_runs_that_slow_the_learner_down_lift_the_figure():
+    # Short gaps of 8s, but each run holds a long pause: the gap pace says
+    # 8 and the runs say more.
+    times = []
+    for day in range(10):
+        start = day * 10_000
+        times += _run(start, 10, 8) + _run(start + 72 + 400, 10, 8)
+    assert seconds_per_review(_at(*times)) == 8
+    pace = personal_pace(_at(*times))
+    assert pace > 8
+    # Ten runs, each 9 gaps of 8s, a 400s pause and 9 more: 19 gaps in all.
+    run_pace = (72 + 400 + 72) / 19  # the 400s lands between the two halves
+    assert pace == round((10 * run_pace + PACE_PRIOR_RUNS * 8) / (10 + PACE_PRIOR_RUNS))
+
+
+def test_without_runs_the_figure_is_the_gap_pace():
+    # Twenty-one reviews 8s apart: a gap pace, and one run under the
+    # break whose pace is the same 8s -- but with a lookup-sized sitting
+    # there is only the gap pace.
+    short = _at(*[i * 8 for i in range(PACE_MIN_GAPS + 1)])
+    assert personal_pace(short[:RUN_MIN_CARDS - 1]) is None
+    assert personal_pace(short) == 8
+    # And a figure from runs alone when the gaps are all pauses.
+    slow = _at(*_run(0, 10, 200) + _run(100_000, 10, 200))
+    assert seconds_per_review(slow) is None
+    assert personal_pace(slow) == 200
+    assert personal_pace([]) is None
+
+
+def test_the_gap_pace_is_read_from_the_recent_reviews_only():
+    # The runs see everything; the gap pace only what `recent` holds.
+    old = _at(*_run(0, 30, 30))
+    recent = _at(*_run(500_000, PACE_MIN_GAPS + 1, 8))
+    both = old + recent
+    assert personal_pace(both, recent) != personal_pace(both)
+
+
 # ── The queue ─────────────────────────────────────────────────────
 
 def test_a_quota_serves_exactly_its_split(client):  # noqa: F811
@@ -85,6 +157,35 @@ def test_the_summary_carries_no_pace_before_there_is_one(client):  # noqa: F811
     today = client.get("/api/today").json()
     assert "seconds_per_review" in today
     assert today["seconds_per_review"] is None
+
+
+def _log_reviews(user_id, instants):
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            for t in instants:
+                cur.execute(
+                    "INSERT INTO review_log (card_id, mode, quality, reviewed_at) VALUES (%s, %s, 4, %s)",
+                    (f"{user_id}:vocab_N5_x_x", F2B, t),
+                )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def test_the_pace_is_read_from_the_last_runs_in_the_log(client):  # noqa: F811
+    # Three runs on three recent days, 10 cards 6s apart with a 200s
+    # pause after the fifth: 54 + 200 over 9 gaps. The gap pace skips the
+    # pause and says 6s (24 short gaps); the runs say 254/9, and the two
+    # weigh equally at PACE_PRIOR_RUNS runs.
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    instants = []
+    for days_ago in (3, 2, 1):
+        start = now - timedelta(days=days_ago)
+        instants += [start + timedelta(seconds=6 * i + (200 if i >= 5 else 0)) for i in range(10)]
+    _log_reviews(RATION_USER, instants)
+    assert PACE_PRIOR_RUNS == 3
+    assert srs.get_review_pace(RATION_USER) == round((3 * (54 + 200) / 9 + 3 * 6) / 6)
 
 
 def test_the_forecast_is_seven_days_today_first(client):  # noqa: F811

@@ -1320,7 +1320,14 @@ runtime purpose. Two consequences worth knowing:
   changed and `index.css`; DESIGN.md, "One line, one colour", "One metal,
   one selection", "A name's rank", Surfaces, "The primary button",
   Controls, "The study stage on a phone" and The chrome).
-  When starting a new wave, begin at **175** or higher, and check
+  **175** is 走行, the estimate of a run's time read from the learner's own
+  runs: `review_log` has no run id, so a run is a sitting (reviews under
+  ten minutes apart, at least ten of them), and the figure the gate and
+  the notifications print is the median seconds a card cost in the last
+  twenty, blended with the gap pace by how many there were (cited in
+  `srs/srs.py`'s `personal_pace`, `run_paces` and `get_review_pace`,
+  `routes/today.py` and `tests/test_today_take.py`).
+  When starting a new wave, begin at **176** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
