@@ -971,11 +971,18 @@ describe('the doors (plan 120)', () => {
     await settle()
     const sheet = document.querySelector('.scrim [role="dialog"]')
     expect(sheet).not.toBeNull()
-    expect(sheet.querySelectorAll('.btn-secondary').length).toBeGreaterThan(0)
-    sheet.querySelector('.btn-primary--danger').click()
+    // More's rows (plan 179): import, export and the library, then the
+    // deletion a list of its own, in the danger's ink and not a fill.
+    expect([...sheet.querySelectorAll('.more-list')].map(l => l.querySelectorAll('.more-row').length)).toEqual([3, 1])
+    expect(sheet.querySelector('.btn-primary--danger')).toBeNull()
+    sheet.querySelector('.more-row--danger').click()
     await settle()
     expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1)
     expect(sheet.querySelector('.sheet__q')).not.toBeNull()
+    // The question fills, in the panel's ink.
+    const ask = sheet.querySelector('.btn-primary--danger')
+    expect(getComputedStyle(ask).color).toBe(getComputedStyle(document.documentElement).getPropertyValue('--text-on-panel').trim().replace(/^#(..)(..)(..)$/, (_, r, g, b) => `rgb(${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)})`))
+    expect(sheet.querySelector('.more-row--danger')).toBeNull()
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
   })
 

@@ -11337,6 +11337,10 @@ textarea:focus-visible {
 .deck-identity__meta { font-size: var(--fs-caption); color: var(--text-secondary); }
 .deck-identity__due { color: color-mix(in srgb, var(--warning) 55%, var(--text-primary)); font-weight: 700; }
 .deck-identity__study { flex: none; }
+/* The gate (plan 179) beside the name takes two fifths of the card, so
+   its reader and its word keep the gate's own proportions rather than
+   the word's width. */
+.deck-identity__study.btn-depart--gate { flex: 0 0 40%; margin: 0; }
 
 /* ── 通報 — the report, in the identity's corner ──
    Reporting a deck is not one of this page's offers. As a labelled
@@ -11706,7 +11710,19 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 
 /* The dangerous variants of the two buttons, and a sheet's question
    line — a deletion asks first, in the same row. */
-.btn-primary--danger { background: color-mix(in srgb, var(--danger) 70%, var(--bg-panel)); }
+.btn-primary--danger {
+  background: color-mix(in srgb, var(--danger) 70%, var(--bg-panel));
+  /* The pigment fill's ink (The primary button): the danger deepened
+     toward the sumi panel carries --text-on-panel in both themes. It
+     had kept the metal's dark ink, ~2:1 on this red. */
+  color: var(--text-on-panel);
+}
+/* Its hover is the family's 79%, lighter, not the metal's lift -- the
+   bare .btn-primary:hover is more specific than the variant and had
+   turned a deletion gold under the cursor. */
+.btn-primary.btn-primary--danger:hover {
+  background: color-mix(in srgb, var(--danger) 79%, var(--bg-panel));
+}
 .btn-secondary--danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
 .sheet__q { font-size: var(--fs-sm); color: var(--text-primary); }
 
@@ -11748,13 +11764,88 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-overflow: ellipsis;
 }
 .chip-row.deckdetail-acts > .chip + .chip { border-left: 1px solid var(--surface-line); }
-/* On a phone the four words take the row's width between them, so the
-   glyphs in front of them go: the words are the actions, and with the
-   glyphs Sélectionner was cut. */
+/* On a phone the four share the row evenly, each its glyph over its
+   word (plan 179): side by side the glyphs had to go for Sélectionner
+   to fit, and More was still cut at the row's edge. */
 @media (max-width: 560px) {
-  .chip-row.deckdetail-acts > .chip { padding-inline: var(--sp-2); }
-  .chip-row.deckdetail-acts > .chip > :is(svg, .chip__dots) { display: none; }
+  .chip-row.deckdetail-acts > .chip {
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: var(--sp-1);
+    height: auto;
+    padding: var(--sp-3) var(--sp-1);
+    font-size: var(--fs-caption);
+  }
+  .chip-row.deckdetail-acts > .chip > .chip__dots { line-height: 1; }
 }
+/* More's rows (plan 179), in the phone's sheet and in the desk's page
+   alike: one list, a glyph in its well and the word, a line under it
+   where the row has something to say; the deletion a list of its own
+   at the end, in the danger's ink (the mix .chip--danger reads at),
+   never a fill -- the question it opens is what fills. */
+.more-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.more-list + .more-list { margin-block-start: var(--sp-2); }
+.more-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 52px; /* a hit target, as the sheet's buttons' */
+  padding: var(--sp-3) var(--sp-5);
+  font: inherit;
+  text-align: start;
+  color: var(--text-primary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-flat);
+  cursor: pointer;
+}
+.more-row + .more-row { border-top: 1px solid var(--surface-line); }
+.more-row:hover,
+.more-row:focus-visible {
+  filter: none;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+.more-row:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: -2px;
+}
+.more-row:disabled { opacity: 0.45; cursor: default; }
+.more-row__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--sp-7);
+  height: var(--sp-7);
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  border-radius: var(--r-card);
+}
+.more-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.more-row__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+.more-row__hint {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.more-row--danger,
+.more-row--danger .more-row__icon { color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
+.more-row--danger .more-row__icon { background: color-mix(in srgb, var(--danger) 14%, transparent); }
 .chip-row.deckdetail-acts > .chip:not(.chip--on):hover,
 .chip-row.deckdetail-acts > .chip:not(.chip--on):focus-visible {
   background: color-mix(in srgb, var(--text-primary) 6%, transparent);
@@ -28298,21 +28389,39 @@ button.brd-stn { cursor: pointer; }
     color: var(--text-secondary);
   }
   .shelf-row__due,
-  .dk-mode__due,
-  .dk-fig__n {
+  .dk-fig__n,
+  .dk-gate__count > b {
     font-family: var(--font-display);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: 1;
   }
-  .shelf-row__due,
-  .dk-mode__due {
+  .shelf-row__due {
     font-size: var(--fs-body);
     color: var(--state-due);
   }
   /* The shelf's two doors at the list's foot, sharing its width. */
   .desk-split__list > .decks-doors { margin-block-start: var(--sp-5); }
   .desk-split__list > .decks-doors > * { flex: 1 1 0; }
+  /* The buttons of the shelf and of its deck (plan 179): words in
+     sentence case at the body's small rung, in the primary ink, at the
+     controls' corner -- not the chips' tracked capitals, which set a
+     button's word as a caption's. Pressed, the selection's gold. */
+  .desk-split--decks .decks-doors > .chip,
+  .dk-tool {
+    height: 44px; /* a hit target, as .btn-secondary's */
+    padding-inline: var(--sp-5);
+    border-radius: var(--r-card);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-primary);
+  }
+  .dk-tool { gap: var(--sp-3); }
+  .dk-tool.chip--on { color: var(--sel-ink); }
+  .dk-tool.chip--danger { color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
+  .dk-head__more { flex: none; width: 44px; padding: 0; justify-content: center; }
 
   .desk-deck {
     display: flex;
@@ -28322,13 +28431,13 @@ button.brd-stn { cursor: pointer; }
     min-width: 0;
   }
   .desk-deck > :not(.dk-scroll) { flex: none; }
-  /* The page's one scroller: the modes (or the form, Browse or More)
-     and the cards. It takes no more than its content, so a short deck's
-     foot sits under its cards, and no more than the window leaves, so a
-     long one's foot is still on it. The gutter is the list's. */
+  /* The page's one scroller: the form, Browse or More where they open,
+     and the cards. It takes what the window leaves under the head, the
+     gate and the row of tools, which never scroll away. The gutter is
+     the list's. */
   .dk-scroll {
     display: flex;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: var(--sp-6);
     min-height: 0;
@@ -28356,9 +28465,8 @@ button.brd-stn { cursor: pointer; }
     min-width: 0;
   }
   .dk-head__cap,
-  .dk-fig__cap,
   .dk-card__state,
-  .dk-all {
+  .dk-tools__cap {
     font-family: var(--font-display);
     font-size: var(--fs-caption-xs);
     font-weight: 700;
@@ -28378,34 +28486,122 @@ button.brd-stn { cursor: pointer; }
     font-weight: 600;
     line-height: 1.2;
   }
-  .dk-head > .chip { flex: none; }
-  /* The four figures: a hairline lattice of four, the deck's cards
-     partitioned by their state, each numeral in the state's ink. */
-  /* Four across, or two by two where four would crush their captions
-     -- never three and one: each cell's basis is a quarter of the row
-     until the row is narrower than a column and a half, then a half
-     (the flexbox switch, so no width is written here). */
-  .dk-figs {
+  /* 改札, the gate (plan 179): the run in one panel -- what it rides
+     as a switch across it, a line on what that asks, then the count of
+     today's cards and the deck's cards by state beside the gate, the
+     page's one action (components/ui/GateButton, the boarding's and
+     Today's own). Compact (DeckDetailScreen's `compact`), the count
+     beside the gate alone. */
+  .dk-gate {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1px;
-    background: var(--surface-line);
+    flex-direction: column;
+    gap: var(--sp-4);
+    padding: var(--sp-6);
+    background: var(--surface);
     border: 1px solid var(--surface-line);
-    border-radius: var(--r-card);
+    border-radius: var(--r-panel);
+  }
+  .dk-gate--compact { padding: var(--sp-5); }
+  /* The switch in sentence case, as the page's buttons are; a deck of
+     five modes beside the day's lanes wraps it rather than crush it. */
+  .dk-gate .seg--full { flex-wrap: wrap; }
+  .dk-gate .seg--full .seg__opt { flex: 1 1 calc(var(--desk-side-w) / 3); }
+  .dk-gate .seg__opt-latin {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-indent: 0;
+    text-transform: none;
+  }
+  .dk-gate__desc {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .dk-gate__run {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--sp-7);
+    margin-block-start: var(--sp-2);
+  }
+  .dk-gate--compact .dk-gate__run { margin-block-start: 0; }
+  /* A narrow page stands the count over the gate, the gate across. */
+  .dk-gate--narrow .dk-gate__run {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-4);
+  }
+  .dk-gate__figs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-width: 0;
+  }
+  .dk-gate__count {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    margin: 0;
+  }
+  .dk-gate__count > b { font-size: var(--fs-heading); }
+  .dk-gate__count > span {
+    font-size: var(--fs-body);
+    color: var(--text-secondary);
+  }
+  /* The deck's cards by state, one bar: each state its share. */
+  .dk-gate__bar {
+    display: flex;
+    height: var(--sp-3);
     overflow: hidden;
+    background: var(--surface-line);
+    border-radius: var(--r-pill);
+  }
+  .dk-gate__part--due { background: var(--state-due); }
+  .dk-gate__part--new { background: var(--state-new); }
+  .dk-gate__part--learning { background: var(--state-learning); }
+  .dk-gate__part--mastered { background: var(--state-mastered); }
+  /* Its key: the four figures two by two, each with its state's dot. */
+  .dk-figs {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: var(--sp-2) var(--sp-6);
   }
   .dk-fig {
-    display: flex;
-    flex: 1 1 clamp(calc(25% - 1px), calc((var(--desk-side-w) * 1.5 - 100%) * 999), calc(50% - 1px));
-    flex-direction: column;
-    gap: var(--sp-3);
-    padding: var(--sp-5);
-    background: var(--surface);
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
   }
-  .dk-fig__n { font-size: var(--fs-heading); }
-  .dk-fig--due .dk-fig__n { color: var(--state-due); }
-  .dk-fig--learning .dk-fig__n { color: var(--state-learning); }
-  .dk-fig--mastered .dk-fig__n { color: var(--state-mastered); }
+  .dk-fig::before {
+    content: '';
+    flex: none;
+    align-self: center;
+    width: var(--sp-3);
+    height: var(--sp-3);
+    border-radius: var(--r-pill);
+    background: var(--fig-ink);
+  }
+  .dk-fig--due { --fig-ink: var(--state-due); }
+  .dk-fig--new { --fig-ink: var(--state-new); }
+  .dk-fig--learning { --fig-ink: var(--state-learning); }
+  .dk-fig--mastered { --fig-ink: var(--state-mastered); }
+  .dk-fig__n { font-size: var(--fs-sm); }
+  .dk-fig__cap { color: var(--text-secondary); }
+  /* A state that holds no card says so in the caption's ink. */
+  .dk-fig--none .dk-fig__n { color: var(--text-secondary); }
+  .dk-gate__go { margin: 0; }
+  /* What acts on the cards, in one row over them: its caption, then
+     the tools at the row's end. */
+  .dk-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--sp-3);
+  }
+  .dk-tools__cap { margin-inline-end: auto; }
+  /* The row sits close over the table it acts on. */
+  .desk-deck > .dk-tools { margin-block-end: calc(var(--sp-4) - var(--sp-6)); }
   .desk-deck__slot {
     display: flex;
     flex-direction: column;
@@ -28418,51 +28614,6 @@ button.brd-stn { cursor: pointer; }
     display: flex;
     gap: var(--sp-3);
     margin-block-end: var(--sp-4);
-  }
-  /* The deck's modes as cards, as many across as fit: three on a
-     window's width, two on the narrow desk. */
-  .dk-modes {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(calc(var(--desk-side-w) / 2), 1fr));
-    gap: var(--sp-4);
-  }
-  .dk-mode {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-    padding: var(--sp-5);
-    font: inherit;
-    text-align: start;
-    color: var(--text-primary);
-    background: var(--surface);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-card);
-    cursor: pointer;
-    transition: box-shadow 0.15s;
-  }
-  .dk-mode:hover,
-  .dk-mode:focus-visible {
-    filter: none;
-    box-shadow: inset 3px 0 0 var(--line-color);
-  }
-  .dk-mode:focus-visible {
-    outline: 2px solid var(--accent2);
-    outline-offset: 2px;
-  }
-  .dk-mode__top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--sp-3);
-  }
-  .dk-mode__name {
-    font-family: var(--font-serif);
-    font-size: var(--fs-lead);
-  }
-  .dk-mode__desc {
-    font-size: var(--fs-sm);
-    line-height: 1.45;
-    color: var(--text-secondary);
   }
   /* The cards as a table on the page's own ground, a hairline between
      rows: the word, its reading, its meaning, its state. */
@@ -28537,42 +28688,19 @@ button.brd-stn { cursor: pointer; }
     align-self: flex-start;
     margin-block-start: calc(var(--sp-3) - var(--sp-6));
     padding: var(--sp-4) var(--sp-1);
-    color: var(--line-color);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
     background: none;
     border: 0;
     cursor: pointer;
   }
-  /* The modes as a row of chips, where the page has no room for their
-     cards (DeckDetailScreen's `compact`). */
-  .dk-modeline {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-3);
-  }
-  .dk-modeline__n {
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0;
-    color: var(--state-due);
-  }
-  .dk-foot {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--sp-3);
-  }
-  .dk-foot > .chip { flex: none; }
-  /* The ride set as the chip beside it is, in tracked capitals. */
-  .dk-foot__go {
-    flex: none;
-    width: auto;
-    padding-inline: var(--sp-6);
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-  }
+  .dk-all:hover { filter: none; color: var(--text-primary); }
+  /* More in the gate's place (plans 120, 179): the dock's caption and
+     ✕ over More's rows, the deletion apart; adding, importing and
+     exporting are the row of tools'. */
+  .desk-deck > .desk-more { gap: var(--sp-3); }
   /* The types' chips keep their own width, not the console's share. */
   .shelf-console .console__chips .chip { flex: none; }
   /* A door opened in a column (components/chrome/DeskDock, plan 120):

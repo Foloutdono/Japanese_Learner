@@ -246,7 +246,7 @@ describe('a deck\'s Browse on the desk', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settle()
     expect($('.desk-browse')).toBeNull()
-    expect($('.dk-modes .dk-mode')).not.toBeNull()
+    expect($('.dk-gate')).not.toBeNull()
   })
 
   it('says an empty deck is empty once, in the page', async () => {
@@ -259,20 +259,21 @@ describe('a deck\'s Browse on the desk', () => {
 })
 
 // ── plan 120 — More opens in the page; only its deletion asks ──
-// More is a list of what can be done to the deck (import, export, the
-// library), not a question, so on the desk it takes the deck page's
+// More is a list of what can be done to the deck (on the desk, since
+// plan 179, the library alone: adding, importing and exporting are the
+// row of tools'), not a question, so on the desk it takes the deck page's
 // slot (its column until plan 154) the way Browse does, taking turns
 // with it. Deleting the deck is
 // still asked, in a dialog of its own, as the follower's two
 // irreversibles are. The phone's side is deskfree.phone.
 const moreChip = () => $('.dk-head__more')
-// Add cards, at the page's foot (plan 154): Browse on a deck that browses
-// the catalogue, else the card form.
-const addCards = () => $('.dk-foot .chip')
+// Add cards, first in the row of tools over the cards (plan 179): Browse
+// on a deck that browses the catalogue, else the card form.
+const addCards = () => $('.dk-tools .dk-tool')
 const escape = () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
 
 describe('a deck\'s More on the desk', () => {
-  it('opens in the slot, pressed while it holds it, and gives the slot back', async () => {
+  it('opens in the gate\'s place, pressed while it holds it, and gives it back', async () => {
     deckApi(CARDS)
     await mountDeck()
     await settle(400)
@@ -282,13 +283,21 @@ describe('a deck\'s More on the desk', () => {
     more.click()
     await settle()
     expect($('[role="dialog"]')).toBeNull()
-    const dock = $('.desk-deck__slot .desk-more')
+    const dock = $('.desk-deck > .desk-more')
     expect(dock).not.toBeNull()
+    expect($('.dk-gate')).toBeNull()
+    expect($('.desk-deck__slot')).toBeNull()
+    // Under the head that opened it, over the row of tools.
+    expect(dock.getBoundingClientRect().top).toBeGreaterThanOrEqual($('.dk-head').getBoundingClientRect().bottom)
+    expect(dock.getBoundingClientRect().bottom).toBeLessThanOrEqual($('.dk-tools').getBoundingClientRect().top)
     expect(more.getAttribute('aria-pressed')).toBe('true')
-    // Import, Export and Publish, as the phone's sheet lists them, and
-    // the deletion under them.
-    expect(dock.querySelectorAll('.btn-secondary')).toHaveLength(3)
-    expect(dock.querySelector('.btn-primary--danger')).not.toBeNull()
+    // The library, and the deletion a list of its own, arming the
+    // dialog; import and export are the row of tools'.
+    const lists = [...dock.querySelectorAll('.more-list')]
+    expect(lists.map(l => [...l.querySelectorAll('.more-row__label')].map(r => r.textContent))).toEqual([['Publier dans la bibliothèque'], ['Supprimer le deck']])
+    expect(lists[1].querySelector('.more-row--danger').getAttribute('aria-haspopup')).toBe('dialog')
+    expect(dock.querySelector('.btn-primary--danger')).toBeNull()
+    expect($$('.dk-tools .dk-tool').map(c => c.textContent)).toContain('Exporter')
     expect($('.desk-deck__study')).toBeNull()
     expect($('.dk-scroll > .dk-cards')).not.toBeNull()
 
@@ -297,7 +306,7 @@ describe('a deck\'s More on the desk', () => {
     await settle()
     expect($('.desk-more')).toBeNull()
     expect(more.getAttribute('aria-pressed')).toBe('false')
-    expect($('.dk-modes .dk-mode')).not.toBeNull()
+    expect($('.dk-gate')).not.toBeNull()
     expect(document.activeElement).toBe(more)
   })
 
@@ -314,7 +323,7 @@ describe('a deck\'s More on the desk', () => {
     moreChip().click()
     await settle()
     expect($('.desk-browse')).toBeNull()
-    expect($('.desk-deck__slot .desk-more')).not.toBeNull()
+    expect($('.desk-deck > .desk-more')).not.toBeNull()
   })
 
   it('asks before deleting the deck, in a dialog over the dock', async () => {
@@ -323,7 +332,7 @@ describe('a deck\'s More on the desk', () => {
     await settle(400)
     moreChip().click()
     await settle()
-    $('.desk-more .btn-primary--danger').click()
+    $('.desk-more .more-row--danger').click()
     await settle()
     const dialog = $('[role="dialog"]')
     expect(dialog).not.toBeNull()
@@ -349,7 +358,7 @@ describe('a deck\'s More on the desk', () => {
     $$('.chip-row button')[0].click()
     await settle()
     expect($('[role="dialog"] .sheet__q')).not.toBeNull()
-    expect($('.desk-deck__slot [class*="desk-more"]')).toBeNull()
+    expect($('[class*="desk-more"]')).toBeNull()
   })
 })
 
@@ -438,7 +447,7 @@ describe('the column\'s doors (plan 123, P18)', () => {
       await settle(300)
       expect(open().getAttribute('aria-pressed')).toBe('false')
       expect($('.desk-dock')).toBeNull()
-      expect($('.dk-modes .dk-mode')).not.toBeNull()
+      expect($('.dk-gate')).not.toBeNull()
     }
   })
 

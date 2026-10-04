@@ -5,11 +5,12 @@ import { LangProvider } from './LangContext'
 import './index.css'
 
 // ── 机 — the shelf and its deck held to the window (plan 154) ──────
-// The deck's page beside the shelf is the window's height: its head and
-// its foot stay on it and only what is between them scrolls, so the
-// ride is on the screen however many cards the deck holds, and nothing
-// leaves the page's right edge. Where the page is narrow or short the
-// mode cards give way to a row of chips. The shelf's list, too: its
+// The deck's page beside the shelf is the window's height: its head,
+// its gate and its row of tools stay on it and only the cards under
+// them scroll, so the ride is on the screen however many cards the deck
+// holds, and nothing leaves the page's right edge. Where the page is
+// narrow or short the gate keeps its switch, its count and its button
+// (plan 179). The shelf's list, too: its
 // rows scroll between the console and the two doors. This is the narrow desk,
 // 1100px: the page beside a column is narrow.
 
@@ -90,7 +91,7 @@ async function expectHeld() {
   await settle(200)
   expect($$('.dk-card')).toHaveLength(30)
   const bottom = window.innerHeight
-  const go = $('.dk-foot .btn-primary').getBoundingClientRect()
+  const go = $('.dk-gate .btn-depart--gate').getBoundingClientRect()
   expect(go.bottom).toBeLessThanOrEqual(bottom)
   expect(go.top).toBeGreaterThanOrEqual(0)
   expect($('.dk-head').getBoundingClientRect().top).toBeGreaterThanOrEqual(0)
@@ -114,18 +115,22 @@ async function expectHeld() {
 }
 
 describe('a deck beside the shelf on the narrow desk', () => {
-  it('keeps its ride on the window, its modes as chips', async () => {
+  it('keeps its gate on the window, compact, and its tools on one line', async () => {
     await mount()
     await settle()
-    expect($('.dk-modes')).toBeNull()
-    expect($$('.dk-modeline .chip').map(c => c.textContent)).toEqual(['Mot → sens7', 'Sens → mot3', 'Lecture2'])
-    // Edit is its pencil, Add its short word, and the foot one line.
-    const edit = $('.dk-head > .chip')
-    expect([edit.textContent, edit.getAttribute('aria-label')]).toEqual(['', 'Modifier'])
-    const add = $('.dk-foot .chip')
-    expect(add.textContent).toBe('Ajouter')
-    const middle = el => { const r = el.getBoundingClientRect(); return Math.round(r.top + r.height / 2) }
-    expect(middle(add)).toBe(middle($('.dk-foot .btn-primary')))
+    // The switch, the count and the gate; no line, no figures.
+    expect($$('.dk-gate [role="radio"]').map(c => c.textContent)).toEqual(['Aujourd’hui', 'Mot → sens', 'Sens → mot', 'Lecture'])
+    expect($('.dk-gate__desc')).toBeNull()
+    expect($('.dk-figs')).toBeNull()
+    // The count over the gate, the gate across the panel.
+    const count = $('.dk-gate__count').getBoundingClientRect()
+    const gate = $('.dk-gate .btn-depart--gate').getBoundingClientRect()
+    expect(gate.top).toBeGreaterThanOrEqual(count.bottom)
+    expect($('.dk-gate__count').scrollHeight).toBeLessThan(2 * parseFloat(getComputedStyle($('.dk-gate__count > span')).lineHeight) || 60)
+    // Add its short word, the quieter tools their icons, the row one line.
+    const tools = $$('.dk-tools .dk-tool')
+    expect(tools.map(c => [c.textContent, c.getAttribute('aria-label')])).toEqual([['Ajouter', null], ['', 'Importer'], ['', 'Exporter'], ['', 'Sélectionner']])
+    expect(new Set(tools.map(c => Math.round(c.getBoundingClientRect().top))).size).toBe(1)
     // A reading under its word.
     const card = $('.dk-card')
     expect(card.querySelector('.dk-card__kana').getBoundingClientRect().top).toBeGreaterThanOrEqual(card.querySelector('.dk-card__jp').getBoundingClientRect().bottom - 1)
