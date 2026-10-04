@@ -1,6 +1,6 @@
 import logging
 import random
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from content.kana_data import KANA_SETS, kana_to_id, sound_of
 from core.auth import get_user_id, prefixed, unprefixed
 from core import credits
@@ -8,7 +8,7 @@ from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from study.modes import (
-    B2F, GRADED_FOR_SOURCE, INDICE_CHOICES, KANA, Mode, require_mode,
+    B2F, GRADED_FOR_SOURCE, INDICE_CHOICES, KANA, Mode, require_mode, resolve_for_source,
 )
 from pydantic import BaseModel
 
@@ -322,6 +322,11 @@ def get_kana_review_cards(set_name: str, user_id: str = Depends(get_user_id)):
 
 @router.post("/api/kana/review")
 def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
+    # Refused before the scheduler, as require_mode does on the card
+    # endpoints: a key this section does not grade would otherwise
+    # schedule, log and charge a review under a mode nothing reads.
+    if resolve_for_source(KANA, payload.mode) is None:
+        raise HTTPException(status_code=400, detail=f"Invalid mode: {payload.mode!r}")
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # 無料 — the kana line rides free (core/credits.py), so the fare

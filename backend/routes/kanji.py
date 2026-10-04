@@ -11,7 +11,7 @@ from translations import get_meaning
 from content.kanji_meanings import KANJI_FR
 from study.modes import (
     KANJI, GRADED_FOR_SOURCE, INDICE_CHOICES, RADICAL, READINGS,
-    Mode, eligible_for, require_mode,
+    Mode, eligible_for, require_mode, resolve_for_source,
 )
 from study.mcq import pick_distractors
 from content.kanji_readings import split_readings, display_reading
@@ -418,6 +418,11 @@ def get_kanji_review_cards(level: str | None = None, lang: str = "fr", radical: 
 
 @router.post("/api/kanji/review")
 def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
+    # Refused before the scheduler, as require_mode does on the card
+    # endpoints: a key this section does not grade would otherwise
+    # schedule, log and charge a review under a mode nothing reads.
+    if resolve_for_source(KANJI, payload.mode) is None:
+        raise HTTPException(status_code=400, detail=f"Invalid mode: {payload.mode!r}")
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # The fare, charged only now that the scheduler has accepted the
