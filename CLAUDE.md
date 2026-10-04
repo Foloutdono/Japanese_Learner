@@ -1320,7 +1320,26 @@ runtime purpose. Two consequences worth knowing:
   changed and `index.css`; DESIGN.md, "One line, one colour", "One metal,
   one selection", "A name's rank", Surfaces, "The primary button",
   Controls, "The study stage on a phone" and The chrome).
-  When starting a new wave, begin at **175** or higher, and check
+  **175** is 数と全語, numbers read and every reading shown a word: an
+  Arabic numeral now carries furigana (100 ひゃく, 300 さんびゃく, 1,000
+  せん, 3.5 さんてんご), made in `study/reading_context.py`
+  (`read_number`, `numeral_furigana`) because the tokenizer reads a digit
+  as itself, and changed the way the counter after it changes it through
+  the same table the kanji numerals use (1本 いっぽん, 3日 みっか, 4時 よじ,
+  7月 しちがつ, 1人 ひとり, 3つ みっつ, 3月1日 の 1日 ついたち) and set as one
+  ruby with the counter (`study/furigana.py`'s `align_sentence`); times,
+  dates, ranges, codes and a number beside a Latin letter stay bare, and
+  the tokenizer's own readings are untouched. And a kanji's readings the
+  deck has no word for (桃 もも) are topped up from the JMdict pool,
+  commonest first, behind the deck's words and with no level
+  (`study/kanji_words.py`, `content/vocab_jmdict_data.by_kanji_char` over
+  a character index folded from the pool in one pass, ~2 MB), and a word
+  files under the reading whose okurigana it writes (生かす under い.かす,
+  not the first い.*) (cited in `study/reading_context.py`,
+  `study/furigana.py`, `study/kanji_words.py`,
+  `content/vocab_jmdict_data.py`, `tests/test_furigana_context.py` and
+  `tests/test_kanji_words.py`).
+  When starting a new wave, begin at **176** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

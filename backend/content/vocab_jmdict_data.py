@@ -55,6 +55,8 @@ specifically to prevent that.
 import os
 import sqlite3
 import threading
+from array import array
+from functools import lru_cache
 
 from study import search_match
 
@@ -216,6 +218,60 @@ def by_kanji(kanji: str, limit: int = 8) -> list[dict]:
         "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
         "WHERE kanji = ? ORDER BY freq_rank LIMIT ?",
         (kanji, limit),
+    ).fetchall()
+    return [_row_to_entry(r) for r in rows]
+
+
+# ── The words a kanji is written in (plan 175) ────────────────
+# study/kanji_words.py fills a kanji's readings from the deck, and a
+# reading no deck word demonstrates (桃 もも, 腿 もも, 躾 しつけ) used to
+# stay a bare chip under "no example words yet". The pool has a word for
+# nearly all of them; what it lacked was a way to ask "which pool words
+# contain this character" without a `LIKE '%桃%'` over 212k rows, which a
+# catalogue page of fifty kanji would pay fifty times.
+#
+# So one streamed pass in rank order folds the pool into character ->
+# ids, the way study/kana_words.py folds it into kana -> rows, and keeps
+# the first KANJI_INDEX_CAP of each: 4-byte ids in an array, ~350k of
+# them at most -- about 1.4 MB for the whole pool, which is what this
+# adds to a worker. Rank order is the commonest first, so the cap cuts
+# the arbitrary tail, not the words anyone meets.
+KANJI_INDEX_CAP = 400
+
+
+def _is_kanji_char(c: str) -> bool:
+    # The same range study/furigana.is_kanji draws, which is what the
+    # aligner can divide a word by.
+    return "一" <= c <= "龯"
+
+
+@lru_cache(maxsize=1)
+def _kanji_index() -> dict[str, array]:
+    index: dict[str, array] = {}
+    for entry_id, kanji in _conn().execute(
+        "SELECT id, kanji FROM entries WHERE kanji != '' ORDER BY freq_rank"
+    ):
+        for char in {c for c in kanji if _is_kanji_char(c)}:
+            ids = index.get(char)
+            if ids is None:
+                index[char] = array("I", (entry_id,))
+            elif len(ids) < KANJI_INDEX_CAP:
+                ids.append(entry_id)
+    return index
+
+
+def by_kanji_char(char: str, limit: int = KANJI_INDEX_CAP) -> list[dict]:
+    """The pool words written with `char` anywhere in them, commonest
+    first, up to `limit` (and never more than KANJI_INDEX_CAP): 桃色,
+    胡桃, 桃源郷 for 桃. By id from the index above, so one indexed read
+    for the rows and none for the search."""
+    ids = list(_kanji_index().get(char, ()))[:limit]
+    if not ids:
+        return []
+    rows = _conn().execute(
+        "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
+        f"WHERE id IN ({','.join('?' * len(ids))}) ORDER BY freq_rank",
+        ids,
     ).fetchall()
     return [_row_to_entry(r) for r in rows]
 
