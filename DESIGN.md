@@ -215,6 +215,39 @@ backdrops; it was retired with the storehouse, and nothing outside a section
 wears its pigment now. Any new use of a line pigment outside its section is
 drift.
 
+**The pigments are one family** (一族, plan 174, the harmony round). They had
+been mixed one at a time and had drifted — OKLCH lightness .48 to .62,
+chroma .05 to .17 — so 朱 shouted, 葡萄 sank and 緑青 read grey. They are
+recut to one lightness per theme (.56 on sumi, .48 on paper) and about one
+strength (.09), each keeping its hue, so **the hue alone says which line**.
+朱 keeps a step more strength as the app's accent and 茶 a step less, as a
+tea is; 山吹 is not recut, because it is the metal (below). A new line's
+pigment is minted at that lightness — `src/harmony.css.test.js` measures
+all twelve in both themes — and the native widgets' copies follow.
+
+**The verdicts are one ramp** (状態, same round): the five state inks — 抹茶,
+琥珀, 緑青, 錆 and the rating's 臙脂 — run red to green at one strength,
+lightness .62 to .72 where they ran .54 to .74, so no verdict shouts over
+another and the teal no longer sinks into the sumi it is drawn on.
+
+### One metal, one selection
+
+Two of the colours the screens had drifted on most were never a line's:
+
+- **一金 — every primary action is the metal** (`--metal`, the gate's gold
+  lit from the top, `--metal-hover` its lift). It had been four colours for
+  "do this": a section's pigment deepened, the gold pill, the gate, an amber
+  outline. See *The primary button*.
+- **一選 — what is chosen is lit in the selection's gold** (`--sel-wash`
+  under it, `--sel-line` round it, `--sel-ink` on it): a chip, a segment, a
+  console band's option, a stroke key, a picked answer in the boarding. It
+  had been a section's pigment on one screen and the gold on the next, so
+  "chosen" and "this line" read alike. **Where you are is not a choice**:
+  `.chip--here` keeps the line's pigment, because it names a place.
+
+The gold is the pass's metal (below); the action and the selection borrow it
+because both are things the learner does, and a place never is.
+
 ### Colour is an edge, a ring, or a numeral — never a fill
 
 The pigment appears as:
@@ -233,12 +266,13 @@ the chrome, and it is not a line's pigment there: it is the mark's material,
 the pass's `--accent2`, drawn the same on every ground (plan 158). It licenses
 nothing else — any other part of the chrome stays sumi and its two inks.
 
-**One standing exception, decided deliberately**: the **primary button** is a
-filled use of a line pigment — see *The primary button* under Surfaces. It
-applies to **the one action on a screen**, and to nothing else. It is not
-precedent for filling a card, a row, a chip, a header or a second button; a
-screen with two filled buttons has misidentified which one is the action. It
-is allowed to exist *because* the rule is otherwise absolute.
+**One standing exception, decided deliberately**: the **console's action
+pill** (`ConsoleAction`, `.console__action` — "+ Créer un deck" on the
+shelf) is a filled use of a line pigment. It was the primary button's
+exception until plan 174 gave the primary the metal; the owner kept this
+one as it was. It is not precedent for filling a card, a row, a chip, a
+header or a second button; it is allowed to exist *because* the rule is
+otherwise absolute.
 
 ### The pigment is injected once
 
@@ -256,6 +290,24 @@ Two Japanese faces, assigned by **job**, never by taste:
   readings, 番線, 種別, the sample characters on a card.
 
 `--font-display` (Space Grotesk) carries **all Latin** and **all figures**.
+
+### A name's rank (標, plan 174)
+
+The owner's pick T2 of the canvas "Tsuji — harmony". One rank of names had
+come in three faces at three sizes — a serif plate, a grotesque platform, a
+lighter serif deck — so every screen read as its own app. Now:
+
+- **The screen's own name is serif**, at `--fs-heading`: the bar's title
+  (`.bar__title`) and a sheet's (`.sheet__jp`). On the desk a sheet keeps
+  `--fs-title`, since it is a dialog over a page that already has its name.
+- **Every name under it is set as a station prints its names**: the display
+  face, bold, one size a rank — `--fs-title` for a plate, a platform card, a
+  deck, a paper, a stop; `--fs-lead` for a row in a list.
+- **One caption**: `--fs-caption-xs`, 700, uppercase, `--tr-caption`, the
+  secondary ink. A caption in another weight is drift.
+- **A bar's sub is not an instruction.** "Choose a level", "Pick a mode" under
+  a screen's name went: the screen under it is the instruction. A sub that
+  says something (a count, a score) stays.
 
 ### The scale
 
@@ -390,12 +442,23 @@ what may not be split, `pretty` decides where the sentence would rather break.
 ```css
 background: var(--surface);
 border: 1px solid var(--surface-line);
-border-radius: var(--r-card);
+border-radius: var(--r-panel);   /* --r-card for a control inside one */
 ```
 
 That is the app's raised object — a platform card, a deck, a stats panel, an
 answer row. If a new surface differs from this, there must be a reason written
 next to it.
+
+**On sumi the panel is the chrome's ink** (墨, plan 174, the owner's pick S2
+of the canvas "Tsuji — harmony"): in the dark theme `--surface` is
+`--bg-panel` and its hairline the panel ink at 13%, so the HUD, the panels,
+the sheets and the tab bar are one material, sunk into the ground like a
+board set in a station wall, and the page is the one step lighter around
+them. Today had shown the cost of the old way — the gate, the week, the
+pass strip and the journey each on a ground of its own. Paper keeps the
+lifted card: a sumi panel there would need the panel's inks in every word it
+holds. A panel never takes a tint of its own to say a state; its edge, a
+figure or a lamp does (the status sheet's drift, the HUD's arrival plate).
 
 ### Two panel idioms, chosen by content
 
@@ -425,8 +488,18 @@ lattice of two of their own.
 ### Radii are assigned by weight
 
 `--r-flat` (lattice, board rows) → `--r-plate` (the hanging plate) → `--r-card`
-(cards and panels) → `--r-panel` (the two big panels) → `--r-identity` (pass,
-IC card) → `--r-pill`.
+(controls: a segment, a field, a tile) → `--r-panel` (every panel) →
+`--r-identity` (the card) → `--r-pill`.
+
+**一面** (plan 174): a panel — anything that holds a screen's content — is
+`--r-panel`, and a control inside one is `--r-card`. One panel had been drawn
+at three radii across the screens. `src/harmony.css.test.js` reads the
+panels' list.
+
+**線** (same round): a line's edge is 3px wherever it is drawn (a plate's
+stripe, a row's rail), and a figure on a plate is printed, never boxed — the
+count due on a Learn plate lost its border. **一戻**: the way back (`‹ Gate`
+in the stage head) is bare, a word and its chevron, never a button's box.
 
 ### Elevation is rationed
 
@@ -653,9 +726,11 @@ An ordering does neither — it arranges the whole of what is left — so it is
 neither a chip nor a key in the field, and the Library's Newest / Most followed
 is the case the rule was written for. `.console__band` is the object: the
 console's full width, options divided by its own `--surface-line` hairline
-rather than set in a pill of their own, the chosen one **washed at 14% in the
-line's pigment** — the rating bar's construction at console width, and the same
-on state `.chip--on` wears. It sits **above row 1**, over everything it orders.
+rather than set in a pill of their own, the chosen one **washed in the
+selection's gold** (`--sel-wash`, `--sel-ink`; it was the line's pigment at 14%
+until plan 174's 一選) — the rating bar's construction at console width, and the
+same on state `.chip--on` wears. It sits **above row 1**, over everything it
+orders.
 
 A pill was tried first and is what the band replaced. The chips take the full
 width, so a `Seg` wrapped to a line of its own and sat at the trailing edge
@@ -701,17 +776,33 @@ field — a line's colour is a place.
 
 ### The primary button
 
-One screen, one filled action — `.btn-primary`, the only class in the app that
-fills with a line pigment. Everything beside it is a ghost: transparent, a
+One screen, one filled action — `.btn-primary` (and `.btn-depart`, the
+departure's plain form) — and since plan 174 (一金) it is **the metal, in
+every section**. Everything beside it is a ghost: transparent, a
 `--surface-line` border, `--text-primary`.
 
 ```css
-background: color-mix(in srgb, var(--line-color, var(--accent)) 70%, var(--bg-panel));
-color: var(--text-on-panel);
-/* :hover lifts the fill to 79% — lighter, not a brightness filter */
+background: var(--metal);            /* --gate-gold-lit → --gate-gold */
+background-color: var(--gate-gold);  /* what the contrast guard reads */
+color: var(--text-on-fill);          /* 6.9:1 */
+/* :hover is --metal-hover, the lift — lighter, not a brightness filter */
 ```
 
-The fill is **the section's own pigment, deepened 30% toward the panel ink**,
+The press had been four colours across the app — a section's pigment, the
+console's gold pill, the gate, an amber outline — so the one thing every
+screen asks of the learner looked different on each. It is now the gate's
+own gold (*The gate button*), without the gate's reader, halo or wake: those
+stay the boarding's and Today's. No pigment has to carry a button's ink any
+more, and none is a button's fill (the console's action pill is the one kept
+exception; see *Colour is an edge*). **Disabled, the metal goes unlit**
+rather than faded: the panel's ground, its hairline and the secondary ink at
+full opacity, because gold at 0.45 composites to a muddy bronze that reads
+as a fourth colour. The ghost and the danger button keep the 0.45.
+
+The rest of this section is the arithmetic of the pigment fill the metal
+replaced. It still governs `.btn-primary--danger` and any pigment fill.
+
+The fill was **the section's own pigment, deepened 30% toward the panel ink**,
 so a button on Decks is 蘇芳 and one on Today is 朱色 without either screen
 inventing a colour. The deepening is not decoration: the raw pigment does not
 carry the ink at 15.2px/600. It was 12% when this family was written, calibrated
@@ -905,6 +996,15 @@ So:
   six-segment bar wraps. Chosen from three forms drawn side by side in the
   study-mode redesign (a board row with the ramp as a rule, this dock, a
   hairline pill).
+  **Since plan 174 (段, the owner's pick RB1 of the canvas "Tsuji —
+  harmony") it is one instrument again, and no tile is gold.** For a round
+  it had been tiles a gap apart with the best answer filled in the pass's
+  gold; gold is the action's metal now, and a verdict is not an action. The
+  segments sit in one bordered instrument (an inset outline, so it takes no
+  height) split by hairlines, each word under a pill in its verdict's ink —
+  the same ink and shape as its segment in the run's meter — and a press
+  washes its segment and lights the pill. The six-tile bar is two rows of
+  three inside the one instrument.
 - **The streak is a スタンプラリー stamp rally**, not a flame — a row of
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a
@@ -919,7 +1019,8 @@ So:
   month is the information.
 - **A segmented toggle is the rating bar's construction at chip size** — one
   pill, segments divided by hairlines rather than gaps, and the selected
-  segment *washed* at ~14% rather than filled. The 番付's 今週/通算 switch is
+  segment *washed* in the selection's gold rather than filled (`--sel-wash`,
+  plan 174), at `--r-card` like every control. The 番付's 今週/通算 switch is
   the first outside the quiz. Anything that picks one of two or three views of
   the same data reaches for this, not for two buttons that both look pressable.
 
@@ -929,9 +1030,23 @@ The study screens are designed at phone width first and adapted up. Below
 768px the viewport is the stage and nothing is centred in a column that
 scrolls away:
 
-- the deck's progress is a **hairline rule** at the top edge, three inks and
-  no figures — the same inks the card's own seal wears, so the rule says how
-  much of the deck is vermillion and how much is gold without a legend;
+- **the run's console** (上下, plan 174, the owner's pick "console C
+  refined"; `components/study/RunConsole.jsx`): a run with a tally splits
+  what its floor used to stack into the two places each belongs. Under the
+  head, **the meter** — a segment a rating in its verdict's ink (the rating
+  tile's own pill), the card in hand lit, the rest unlit to the run's
+  length, and `n / total` at its end; a run with no length draws the
+  ratings so far at one width, and past forty segments the gaps close into
+  one bar. On the floor, **the level** — the card's struck 辻 filled to the
+  climb, the level, the track with this run's gain lit on it, the run's XP
+  and the fare rising off it (`--run-floor-h`, 60px). The balance stays in
+  the head's pocket pass, where the owner asked to keep it. The meter
+  replaces the head's remaining pill and the deck's hairline; the floor
+  replaces the level bar. A run without the console — no tally, or
+  comprehension, whose answers are graded together at the end so a meter
+  would sit empty — keeps the old floor: the head's own count, the level
+  bar, and the deck's hairline rule (three inks and no figures, the inks the
+  card's own seal wears);
 - the hint switches are a row of pills under it;
 - **the card grows** to fill whatever the answer widget leaves, so a lone
   kana sits in the middle of a tall card and four choices under a kanji
@@ -1104,6 +1219,21 @@ a learner who has just rated one card is already looking for the next.
   Anything modal, a field, a rail that scrolls sideways, the strip down
   each edge where the OS keeps its own back gesture, and a departure
   already in flight all outrank it (`hooks/useGateSwipe.js`).
+- **The HUD's journey panel is the arrival** (到着, plan 174, the owner's pick
+  H4): with a destination, the panel holds the destination's grade on a
+  white plate — the 駅名標's white, edged in the state's ink as a station
+  plate is edged in its line's — then the month the train gets there over
+  the drift, in that ink. Where you are going and when you get there were
+  the two facts the old word made the learner open the sheet for. Without a
+  destination the panel keeps its status word. **The sheet it opens is the
+  card's back** on a phone (定期券の裏, the owner's pick C″;
+  `components/journey/JourneyCard.jsx`), in the card's own material: the
+  drift in days, signed, in the state's ink — no "en avance", no "en
+  retard", the colour and the sign say it — the route start → destination,
+  the line with your train on it and the promise's ghost dashed above it,
+  the next stop and the arrival dated under the line, and the two moves
+  under the card. The desk keeps the full body (`JourneyBody`), the one its
+  Today panel stands.
 - **A run leaves the chrome.** Both bars go; the level bar takes the bottom
   edge (sumi, the level, the gold track, the XP figure — the fare's home once
   the HUD has left), the rating bar (or the field) docks on top of it and

@@ -36,6 +36,22 @@ describe('a practice run\'s tally (plan 129)', () => {
   })
 })
 
+describe('the run\'s verdicts (plan 174)', () => {
+  it('keeps every rating in order, a card rated twice twice, from empty per run', () => {
+    startTally('kanji:N4:f2b')
+    expect(peekTally().verdicts).toEqual([])
+    const entry = { term: '駅', kana: 'えき', category: 'kanji', id: 'k1' }
+    countReview({ quality: 4, xp: 3, entry })
+    countReview({ quality: 1, xp: 1 })
+    countReview({ quality: 3, xp: 2, entry })
+    // A rating without a quality (none is sent today) is no segment.
+    countReview({ xp: 1 })
+    expect(peekTally().verdicts).toEqual([4, 1, 3])
+    startTally('kanji:N3:f2b')
+    expect(peekTally().verdicts).toEqual([])
+  })
+})
+
 describe('the run\'s misses (plan 115)', () => {
   it('keeps each card by its entry, with the rating it got last', () => {
     startTally('kanji:N5:f2b')

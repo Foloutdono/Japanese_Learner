@@ -77,7 +77,6 @@ export default function GrammarScreen({ session }) {
     return (
       <SelectionScreen
         title={t.grammarTitle}
-        sub={t.stationJlpt}
         aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         {/* On the desk the line stands beside a level's platforms, so

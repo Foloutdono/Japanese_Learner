@@ -1263,6 +1263,8 @@ const dictionary = {
   examples:          'Exemples',
   level:             'Niveau',
   levelShort:        'Niv',
+  // 上下 (plan 174) : le compteur du trajet sous l'en-tête, pour un lecteur d'écran.
+  runMeter:          (n, total) => (total == null ? `${n} noté${n > 1 ? 's' : ''}` : `${n} sur ${total}`),
   listen:            'Écouter',
   displayedKanji:    'kanji affichés',
   radical:           'Radical',
@@ -1493,6 +1495,12 @@ const profile = {
     `14 derniers jours : **${a} par jour** contre **${p}** promis. Pas d'arrivée fixée — le rythme est toute la promesse.`,
   jourFootPaceSuspended: (p) =>
     `Aucune étude en 14 jours contre une promesse de **${p} par jour**. La ligne attend — le portillon s'ouvre avec une seule carte.`,
+  // 定期券の裏 (plan 174) : la ligne seule sur le dos de la carte. L'écart
+  // en jours, signé, sans mot — la couleur dit le reste ; le train fantôme
+  // porte « promis ».
+  jourDrift:         (n) => `${n > 0 ? '+' : '−'}${Math.abs(n)} jour${Math.abs(n) > 1 ? 's' : ''}`,
+  jourPromised:      'promis',
+  jourRoute:         (from, to) => `${from} → ${to}`,
   jourNoDest:        'Aucune destination sur cette carte.',
   jourNoDestLink:    'En choisir une au guichet',
   // Voir en/index.js : les deux gestes sont un seul choix, donc la

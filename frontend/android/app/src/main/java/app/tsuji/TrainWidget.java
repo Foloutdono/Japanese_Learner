@@ -46,11 +46,11 @@ public class TrainWidget extends AppWidgetProvider {
      *  widget is drawn on sumi whatever the phone's theme. */
     private static int lineColor(String line) {
         switch (line) {
-            case "kana": return Color.parseColor("#c1442c");
-            case "vocab": return Color.parseColor("#3f6d8e");
-            case "kanji": return Color.parseColor("#7c6a9c");
-            case "grammar": return Color.parseColor("#6b8a4a");
-            case "personal": return Color.parseColor("#9c4a5e");
+            case "kana": return Color.parseColor("#b84f3c");
+            case "vocab": return Color.parseColor("#3e7ba6");
+            case "kanji": return Color.parseColor("#7b68a3");
+            case "grammar": return Color.parseColor("#608045");
+            case "personal": return Color.parseColor("#a15d6e");
             default: return Color.parseColor("#575060");
         }
     }

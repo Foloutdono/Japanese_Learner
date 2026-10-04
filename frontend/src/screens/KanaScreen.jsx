@@ -78,7 +78,6 @@ export default function KanaScreen() {
     return (
       <SelectionScreen
         title={t.kanaTitle}
-        sub={t.stationSets}
         aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         {/* On the desk the sets stand beside a set's platforms, so the

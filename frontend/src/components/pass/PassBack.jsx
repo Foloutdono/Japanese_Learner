@@ -110,8 +110,7 @@ export function PassBack({ tier, data, doors = {}, onTurn }) {
         </Meter>
         <Meter onClick={onStatus} className="pcb__meter" label={[t.cardJourney, data.status?.word, data.status?.drift].filter(Boolean).join(' · ')}>
           <span className="pcb__key">{t.cardJourney}</span>
-          <b className="pcb__fig"><i className={`pcb__lamp pcb__lamp--${data.status?.status ?? 'none'}`} aria-hidden="true" />{data.status?.word ?? '—'}</b>
-          {data.status?.drift && <em>{data.status.drift}</em>}
+          <b className={`pcb__fig pcb__fig--st pcb__fig--${data.status?.status ?? 'none'}`}><i className={`pcb__lamp pcb__lamp--${data.status?.status ?? 'none'}`} aria-hidden="true" />{data.status?.signed ?? data.status?.word ?? '—'}</b>
         </Meter>
       </div>
 

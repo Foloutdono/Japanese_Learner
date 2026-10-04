@@ -205,7 +205,10 @@ describe('the HUD', () => {
     expect(hud.querySelector('.hud__status')).toBeNull()
   })
 
-  it('prints the journey model\'s word on the station panel, with the drift', async () => {
+  // 到着 (plan 174, the owner's pick H4): the panel is the arrival plate
+  // -- the destination's grade on a white plate edged in the state's ink,
+  // the month the pace kept arrives in, and the drift under it.
+  it('prints the arrival plate: the destination, the month and the drift', async () => {
     journeyRef.current = {
       goalLevel: 'N4', goalTargetDate: '2027-03-14', goalSetAt: '2026-09-01T00:00:00Z',
       plannedPerDay: 10, itemsTotal: 1000, itemsDone: 100, actual14: 14, days14: 14,
@@ -215,10 +218,27 @@ describe('the HUD', () => {
     const panel = document.querySelector('.hud__status')
     expect(panel).toBeTruthy()
     // 1 a day against 10 promised: the projected arrival is far past
-    // the printed one — late, by a delta the panel prints in days.
+    // the printed one — late, by a delta the plate prints in days.
     expect(panel.classList.contains('hud__status--delayed')).toBe(true)
+    expect(panel.classList.contains('hud__status--arrival')).toBe(true)
+    expect(panel.querySelector('.hud__dest').textContent).toBe('N4')
+    expect(panel.querySelector('.hud__month').textContent).toMatch(/20\d\d/)
+    expect(panel.querySelector('.hud__status-word').textContent).toMatch(/\d/)
+    // The plate's edge is the state's ink.
+    expect(getComputedStyle(panel.querySelector('.hud__dest')).boxShadow).toMatch(/inset/)
+  })
+
+  it('keeps the word-and-days panel for a pass judged on pace alone', async () => {
+    journeyRef.current = {
+      goalLevel: null, goalTargetDate: null, goalSetAt: '2026-09-01T00:00:00Z',
+      plannedPerDay: 10, itemsTotal: 0, itemsDone: 0, actual14: 140, days14: 14,
+    }
+    await mountShell()
+    await settle()
+    const panel = document.querySelector('.hud__status')
+    expect(panel).toBeTruthy()
+    expect(panel.classList.contains('hud__status--arrival')).toBe(false)
     expect(panel.querySelector('.hud__status-word').textContent.length).toBeGreaterThan(0)
-    expect(panel.querySelector('.hud__status-delta').textContent).toMatch(/\d/)
   })
 })
 

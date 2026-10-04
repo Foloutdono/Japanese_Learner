@@ -49,9 +49,6 @@ function Cmp({ label, value, unit, promised, delta }) {
 
 export function JourneyBody({ status, model, now, volumes, summary, session, onLeave = () => {}, resume = true }) {
   const { t, lang } = useLang()
-  const navigate = useNavigate()
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState(false)
 
   const loc = lang === 'fr' ? 'fr' : 'en'
   // The year rides on every date now. Without it a projection that
@@ -64,8 +61,6 @@ export function JourneyBody({ status, model, now, volumes, summary, session, onL
   const start = status.goalStartLevel ?? summary?.jlptLevel ?? null
   const stations = journeyStations(volumes, start, status.goalLevel, status.itemsTotal)
   const { youF, planF, behind: itemsBehind } = journeyPositions(status, model, now)
-  const behind = model.status === 'delayed' || model.status === 'slightlyBehind'
-  const canRecover = behind && model.recovery != null && model.recovery <= MAX_PACE
 
   // The head's second line: the stop the train is heading for, and how
   // many items it stands behind the promise. Without stops (no volumes
@@ -83,28 +78,6 @@ export function JourneyBody({ status, model, now, volumes, summary, session, onL
 
   const paceDelta = model.actualPerDay - model.plannedPerDay
   const showPaceDelta = Math.abs(paceDelta) >= 0.05
-
-  async function reprint(body) {
-    if (busy) return
-    setBusy(true)
-    setError(false)
-    try {
-      await apiJson('/api/journey/reprint', session, { method: 'POST', body: JSON.stringify(body) })
-      // The pace rides on the summary, the facts on the journey store:
-      // both redraw the HUD and this sheet from the fresh answer.
-      await Promise.all([refreshJourney(), refreshSummary()])
-    } catch {
-      setError(true)
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  function toOffice() {
-    playClick()
-    onLeave()
-    navigate('/profile/settings/destination')
-  }
 
   return (
     <>
@@ -141,6 +114,52 @@ export function JourneyBody({ status, model, now, volumes, summary, session, onL
         )}
       </div>
 
+      <JourneyMoves model={model} session={session} onLeave={onLeave} resume={resume} />
+    </>
+  )
+}
+
+// ── 二つの手 — the honest moves, and the office ─────────────────────
+// When behind, the two moves the pass offers -- run faster and keep the
+// date, or reprint the date at the pace kept -- and, suspended, resume
+// or slow down; a pass with no destination points at the office
+// (Settings › Destination). Its own component since plan 174: the
+// status sheet draws the card's back (JourneyCard.jsx) on the phone and
+// keeps these under it, while the desk's panel keeps them under the
+// comparisons. A reprint redraws the HUD and both from the fresh facts.
+export function JourneyMoves({ model, session, onLeave = () => {}, resume = true }) {
+  const { t, lang } = useLang()
+  const navigate = useNavigate()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState(false)
+  const fmt = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { day: 'numeric', month: 'short', year: 'numeric' })
+  const behind = model.status === 'delayed' || model.status === 'slightlyBehind'
+  const canRecover = behind && model.recovery != null && model.recovery <= MAX_PACE
+
+  async function reprint(body) {
+    if (busy) return
+    setBusy(true)
+    setError(false)
+    try {
+      await apiJson('/api/journey/reprint', session, { method: 'POST', body: JSON.stringify(body) })
+      // The pace rides on the summary, the facts on the journey store:
+      // both redraw the HUD and this sheet from the fresh answer.
+      await Promise.all([refreshJourney(), refreshSummary()])
+    } catch {
+      setError(true)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function toOffice() {
+    playClick()
+    onLeave()
+    navigate('/profile/settings/destination')
+  }
+
+  return (
+    <>
       {model.hasGoal && (behind || model.status === 'suspended') && (
         <div className="jour-rev__actions">
           {model.status === 'suspended' ? (
