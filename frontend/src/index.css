@@ -12805,7 +12805,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-family: var(--reading-font, inherit);
 }
 
-/* 割合 on the study card (plan 176): the few readings the course uses
+/* 割合 on the study card (plan 177): the few readings the course uses
    most, each with its share under it. See ReadingShares. */
 .reading-shares { display: grid; gap: var(--sp-3); justify-items: center; width: 100%; }
 .reading-shares .reading-group { margin-bottom: 0; width: 100%; }
@@ -15565,7 +15565,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-indent: var(--tr-term);
   color: var(--text-secondary);
 }
-/* 割合 (plan 176): the share of the words that use each reading. The
+/* 割合 (plan 177): the share of the words that use each reading. The
    count's scope is a segmented control under the sheet's head; each band
    carries its share in the sumi head, and a bar and a word for it under
    (common / usual / rare), so the reading to learn first is the one the

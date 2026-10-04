@@ -5,7 +5,7 @@ import '../../index.css'
 import { InlineReveal } from './QuizComponents'
 import { ReadingShares } from './Readings'
 
-// ── 割合 on the study card (plan 176) ─────────────────────────────
+// ── 割合 on the study card (plan 177) ─────────────────────────────
 // The card prints the four readings the course uses most, each with the
 // share of the course's words that use it and nothing else under it (no
 // bar), the two registers kept, and counts the rest as "+N". A kanji the

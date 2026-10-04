@@ -373,7 +373,7 @@ class CounterTests(unittest.TestCase):
 
 
 class NumberReadingTests(unittest.TestCase):
-    """Plan 176: the tokenizer reads 100 as "100", and a number is a thing
+    """Plan 177: the tokenizer reads 100 as "100", and a number is a thing
     furigana is for -- ひゃく over 100, さんびゃく over 300."""
 
     def test_the_numbers_the_sound_changes_in(self) -> None:

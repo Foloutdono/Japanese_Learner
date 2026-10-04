@@ -1313,7 +1313,7 @@ const dictionary = {
   kanaExamples:      'Se lit dans ces mots',
   allReadings:       'Toutes les lectures',
   readingsNoWords:   'Pas encore de mots d\'exemple',
-  // 割合 (plan 176) : la part des mots qui emploient chaque lecture.
+  // 割合 (plan 177) : la part des mots qui emploient chaque lecture.
   readingsScopeLabel:  'Portée du décompte',
   readingsScopeCourse: 'Cursus JLPT',
   readingsScopeAll:    'Tout JMdict',

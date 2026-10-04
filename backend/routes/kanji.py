@@ -133,7 +133,7 @@ def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], m: Mode,
         "kanji":        entry.get("kanji", ""),
         "kana":         entry.get("kana", ""),
         # How many of the course's words use each reading, so the card can
-        # print the share of the few it shows (plan 176).
+        # print the share of the few it shows (plan 177).
         "reading_shares": course_shares(entry.get("kanji", "")),
         "meaning":      meaning,
         "stroke_count": entry.get("stroke_count", ""),

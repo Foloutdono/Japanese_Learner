@@ -1366,7 +1366,7 @@ const dictionary = {
   kanaExamples:      'Read in these words',
   allReadings:       'All readings',
   readingsNoWords:   'No example words yet',
-  // 割合 (plan 176): the share of the words that use each reading.
+  // 割合 (plan 177): the share of the words that use each reading.
   readingsScopeLabel:  'Scope of the count',
   readingsScopeCourse: 'JLPT course',
   readingsScopeAll:    'All JMdict',
