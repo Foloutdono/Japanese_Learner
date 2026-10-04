@@ -27089,12 +27089,8 @@ button.brd-stn { cursor: pointer; }
     width: auto;
     height: 0.728em;
   }
-  /* The word trimmed to its capitals, then lowered by the half pixel a
-     snapped baseline takes off it: Chrome on Windows set it 0.75px high
-     in the pill (the owner's screenshot, 2026-09-30). */
+  /* The word trimmed to its capitals. */
   .desk-rail__help-label {
-    position: relative;
-    top: 0.04em;
     text-box: trim-both cap alphabetic;
   }
   .desk-rail__help:hover,
