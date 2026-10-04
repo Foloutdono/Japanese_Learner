@@ -11,12 +11,13 @@ import './index.css'
 // list -- the index field over glyph chips, a row per deck, the two doors
 // at its foot -- and the open deck stands beside it: the bare shelf opens
 // on its first deck, another row swaps the page in place. The page: the
-// head with Edit and More, the four figures, the modes as cards, the
-// first six cards as a table with their states and the way to all of
-// them, and at the foot Add cards beside the one filled action (the
-// deck's lanes of the day's queue, or its first mode). The card form
-// takes the modes' place while a card is written; the shelf's "new
-// deck" form is a dialog. The phone's side is deskfree.phone.
+// head with More; the gate (plan 178) -- what the run rides as a switch
+// (the deck's lanes of the day's queue, then each mode), today's count,
+// the four figures and the gate button, the page's one action; the row
+// of tools over the cards (add, import, export, select); the first six
+// cards as a table with their states and the way to all of them. The
+// card form takes the gate's place while a card is written; the shelf's
+// "new deck" form is a dialog. The phone's side is deskfree.phone.
 
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
 vi.mock('./stores/boarding', () => ({ board: commit => commit() }))
@@ -165,16 +166,21 @@ describe('a deck on the desk', () => {
     expect($('.dk-figs')).toBeNull()
   })
 
-  it('names itself in its head, with Edit and More', async () => {
+  it('names itself in its head with More, and selects from the row of tools', async () => {
     await mount('/learn/decks/1', deckAlone)
     await settle()
     expect($('.dk-head__cap').textContent).toBe('Standard · 7 cartes')
-    const [edit, more] = $$('.dk-head > .chip')
-    expect(edit.textContent).toBe('Modifier')
+    const [more] = $$('.dk-head > .chip')
+    expect($$('.dk-head > .chip')).toHaveLength(1)
     expect(more.getAttribute('aria-label')).toBe('Plus')
+    // The tools in sentence case, the words a button's, not a caption's.
+    const tools = $$('.dk-tools .dk-tool')
+    expect(tools.map(c => c.textContent)).toEqual(['Ajouter des cartes', 'Importer', 'Exporter', 'Sélectionner'])
+    expect(getComputedStyle(tools[0]).textTransform).toBe('none')
+    const edit = tools[3]
     edit.click()
     await settle(60)
-    // Edit is the selection: every card, each with its tick.
+    // Select is the selection: every card, each with its tick.
     expect(edit.getAttribute('aria-pressed')).toBe('true')
     expect($('.select-console')).not.toBeNull()
     expect($$('.dk-card .card-row__tick')).toHaveLength(7)
@@ -191,19 +197,27 @@ describe('a deck on the desk', () => {
     if (tops.size === 2) expect($$('.dk-fig').filter(f => Math.round(f.getBoundingClientRect().top) === [...tops][0])).toHaveLength(2)
   })
 
-  it('stands its modes as cards over its cards, and boards from them', async () => {
+  it('stands its gate over its cards, and boards the mode its switch picks', async () => {
     await mount('/learn/decks/1', deckAlone)
     await settle()
     expect($('.desk-side')).toBeNull()
     expect($('.deck-identity')).toBeNull()
-    const slot = $('.dk-scroll > .desk-deck__slot').getBoundingClientRect()
-    const list = $('.dk-scroll > .dk-cards').getBoundingClientRect()
-    expect(slot.bottom).toBeLessThanOrEqual(list.top)
-    const modes = $$('.dk-modes .dk-mode')
-    expect(modes.map(m => m.querySelector('.dk-mode__name').textContent)).toEqual(['Mot → sens', 'Sens → mot'])
-    modes[0].click()
+    const gate = $('.dk-gate')
+    expect(gate.getBoundingClientRect().bottom).toBeLessThanOrEqual($('.dk-cards').getBoundingClientRect().top)
+    const modes = $$('.dk-gate [role="radio"]')
+    expect(modes.map(m => m.textContent)).toEqual(['Mot → sens', 'Sens → mot'])
+    expect(modes[0].getAttribute('aria-checked')).toBe('true')
+    expect($('.dk-gate__desc').textContent).not.toBe('')
+    // One action on the page: the gate.
+    const go = gate.querySelector('.btn-depart--gate')
+    expect(go.textContent).toBe('Étudier')
+    expect($$('.btn-primary, .btn-depart').filter(b => b.closest('main'))).toEqual([go])
+    modes[1].click()
     await settle(60)
-    expect(here.path).toBe('/learn/decks/1/study/vocab.flashcard.f2b')
+    expect(modes[1].getAttribute('aria-checked')).toBe('true')
+    go.click()
+    await settle(60)
+    expect(here.path).toBe('/learn/decks/1/study/vocab.flashcard.b2f')
   })
 
   it('lists its first six cards with their states, then all of them', async () => {
@@ -216,27 +230,27 @@ describe('a deck on the desk', () => {
     const lefts = rows().map(r => Math.round(r.querySelector('.dk-card__gloss').getBoundingClientRect().left))
     expect(new Set(lefts).size).toBe(1)
     const all = $('.dk-all')
-    expect(all.textContent).toBe('Les 7 cartes ▶')
+    expect(all.textContent).toBe('Les 7 cartes ›')
     all.click()
     await settle(60)
     expect(rows()).toHaveLength(7)
     expect($('.dk-all')).toBeNull()
   })
 
-  it('writes a card in the modes\' place, from Add cards at its foot', async () => {
+  it('writes a card in the gate\'s place, from Add cards in the row of tools', async () => {
     await mount('/learn/decks/1', deckAlone)
     await settle()
-    const add = $('.dk-foot .chip')
+    const add = $('.dk-tools .dk-tool')
     expect(add.textContent).toBe('Ajouter des cartes')
     add.click()
     await settle(60)
     expect(add.getAttribute('aria-pressed')).toBe('true')
     expect($('.desk-deck__slot .deckdetail-form')).not.toBeNull()
-    expect($('.dk-modes')).toBeNull()
+    expect($('.dk-gate')).toBeNull()
     expect($('.dk-scroll > .dk-cards')).not.toBeNull()
   })
 
-  it('rides its lanes of the day\'s queue from its foot, and comes back to it', async () => {
+  it('rides its lanes of the day\'s queue from the gate, and comes back to it', async () => {
     today.lanes = [
       { id: 'p|1|vocab.flashcard.f2b', kind: 'personal', deck_id: 1, deck_name: 'Voyage', mode: 'vocab.flashcard.f2b', due: 2, new: 1 },
       { id: 'p|1|vocab.flashcard.b2f', kind: 'personal', deck_id: 1, deck_name: 'Voyage', mode: 'vocab.flashcard.b2f', due: 1, new: 0 },
@@ -246,13 +260,21 @@ describe('a deck on the desk', () => {
     try {
       await mount('/learn/decks/1', shelf)
       await settle(400)
-      // Each mode with what the queue holds for it: a chip each on a page
-      // this narrow (the wide lane holds the cards).
-      expect($('.dk-modes')).toBeNull()
-      expect($$('.dk-modeline .chip').map(m => m.querySelector('.dk-modeline__n')?.textContent ?? null)).toEqual(['3', '1'])
-      const ride = $('.dk-foot .btn-primary')
-      expect(ride.textContent).toBe('Réviser 4 cartes ▶')
-      expect($$('.btn-primary').filter(b => b.closest('main'))).toHaveLength(1)
+      // The day's lanes first, then each mode with what the queue holds
+      // for it.
+      const opts = () => $$('.dk-gate [role="radio"]')
+      const count = () => $('.dk-gate__count > b').textContent
+      expect(opts().map(o => o.textContent)).toEqual(['Aujourd’hui', 'Mot → sens', 'Sens → mot'])
+      expect(opts()[0].getAttribute('aria-checked')).toBe('true')
+      expect(count()).toBe('4')
+      opts()[2].click()
+      await settle(60)
+      expect(count()).toBe('1')
+      opts()[0].click()
+      await settle(60)
+      expect(count()).toBe('4')
+      const ride = $('.dk-gate .btn-depart--gate')
+      expect($$('.btn-primary, .btn-depart').filter(b => b.closest('main'))).toEqual([ride])
       // The shelf's row says it too.
       expect($('.shelf-row[aria-current="page"] .shelf-row__due').firstChild.textContent).toBe('3')
       ride.click()
@@ -268,8 +290,10 @@ describe('a deck on the desk', () => {
   it('boards its first mode when nothing of it is due today', async () => {
     await mount('/learn/decks/1', deckAlone)
     await settle()
-    const go = $('.dk-foot .btn-primary')
-    expect(go.textContent).toBe('Étudier ▶')
+    expect($$('.dk-gate [role="radio"]')[0].textContent).toBe('Mot → sens')
+    expect($('.dk-gate__count > b').textContent).toBe('0')
+    const go = $('.dk-gate .btn-depart--gate')
+    expect(go.textContent).toBe('Étudier')
     go.click()
     await settle(60)
     expect(here.path).toBe('/learn/decks/1/study/vocab.flashcard.f2b')

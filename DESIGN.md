@@ -862,8 +862,9 @@ The boarding's one action — **Board** on the Welcome, **Continue** on every
 question and at the end of a first ride (`Continue` in
 `components/boarding/BoardFrame.jsx`), and the sign-in's own action in
 Board's place (plan 168, phone and desk alike) — and Today's **Depart** on the fare
-gate (`components/station/GateCard.jsx`, owner-directed after plan 164) are
-drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
+gate (`components/station/GateCard.jsx`, owner-directed after plan 164) — and,
+on the desk, a deck's **Study** (`screens/DeckDetailScreen.jsx`'s gate, plan
+178) are drawn by one component, `components/ui/GateButton.jsx` (`.btn-depart--gate`),
 as a ticket gate you tap your pass on (改札, plan 164: the owner's pick D of four
 directions drawn for "more vibrant, the user must notice it and want to
 press it"):
@@ -1450,6 +1451,19 @@ each question drawing its answers between them.
   learner's own shelf does the same: its decks a list beside the open
   deck's page, the bare shelf opening on its first deck, another deck
   swapping the page in place, the shelf's two doors at the list's foot.
+  Since plan 178 (改札, the owner's pick B of four directions drawn for
+  "the buttons are the main problem") the deck's page leads with **the
+  gate**: one panel holding what the run rides as a segmented switch
+  across it (the deck's lanes of the day's queue while it has any, then
+  each mode), a line on what that asks, today's count and the deck's
+  cards by state as a bar and four figures, beside the gate button --
+  the page's one action, there being no foot any more. What acts on the
+  cards (add, import, export, select) is one row of ghost buttons over
+  the table; More holds the library and the deck's deletion, a
+  `.chip--danger` that arms the dialog. The shelf's and the deck's
+  buttons print their words in sentence case at `--fs-sm`, not the
+  chip's tracked capitals (`.dk-tool`). Narrow or short, the gate keeps
+  its switch, its count and its button.
   A long list scrolls in its own column; the
   stops are one tab stop, walked with ↑/↓. Every row of the lists above is
   a link to what it opens (plan 117), the exam review's question included,
