@@ -23,14 +23,16 @@ export const AGENDA_DAYS = 7
 // while the app that planned it is still open.
 const LEAD_MS = 60_000
 
-/** A subject as the gates name it: its title, glyph and line colour.
- *  The queue is the Today gate's, the rest their own sections'. */
+/** A subject as the agenda names it: a short name (the gates' own
+ *  titles run to "Entraînement à la lecture", too long for a block or a
+ *  notification's title), and the glyph and line colour of the place it
+ *  opens -- the Today gate's for the queue, the rest their sections'. */
 export function subjectInfo(subject, t) {
   const path = SUBJECT_PATH[subject]
   const section = getAllSections(t).find(s => s.path === path)
   return {
     path,
-    title: section?.title ?? subject,
+    title: t.agdSubjectName?.[subject] ?? section?.title ?? subject,
     icon: section?.icon ?? '',
     color: section?.color ?? 'var(--accent2)',
   }

@@ -46,10 +46,17 @@ export const MIN_BLOCK = 15
 /** The server's bound on a week. */
 export const MAX_BLOCKS = 40
 
-/** The bounds of the week as drawn: the hours a day's column covers. A
- *  block outside them is clipped to the picture and still listed. */
+/** The hours a day's column covers when nothing starts earlier: from
+ *  the morning to midnight. */
 export const AXIS_FROM = 6 * 60
 export const AXIS_TO = DAY_MINUTES
+
+/** The subjects as the editor groups them: the day's queue and the Learn
+ *  gate's lines, then the Practice gate's platforms. */
+export const SUBJECT_GROUPS = {
+  learn: ['review', 'kana', 'vocab', 'kanji', 'grammar'],
+  practice: ['reading', 'translation', 'dictation', 'composition', 'comprehension', 'exam'],
+}
 
 /** JavaScript's Date#getDay (Sunday = 0) as the agenda's day (Monday = 0). */
 export function agendaDay(date) {
@@ -195,4 +202,25 @@ export function daysLabel(days, lang, everyDay) {
   return dayRuns(days)
     .map(([a, b]) => (a === b ? dayName(a, lang) : `${dayName(a, lang)}–${dayName(b, lang)}`))
     .join(', ')
+}
+
+/** The stretch of the day the week is drawn over, on whole steps of
+ *  `step` minutes: the morning to midnight, reaching back earlier when a
+ *  block starts before the morning, so nothing is ever cut off. */
+export function axisFor(blocks, step = 180) {
+  const earliest = Math.min(AXIS_FROM, ...blocks.map(b => b.start))
+  return { from: Math.floor(earliest / step) * step, to: AXIS_TO }
+}
+
+/** The marks down the side of the week: every `step` minutes from the
+ *  axis's start to its end, both included. */
+export function axisTicks({ from, to }, step = 180) {
+  const out = []
+  for (let m = from; m <= to; m += step) out.push(m)
+  return out
+}
+
+/** A block's length as hours and minutes, for the words to say. */
+export function durationParts(minutes) {
+  return { h: Math.floor(minutes / 60), m: minutes % 60 }
 }

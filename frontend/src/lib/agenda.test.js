@@ -80,4 +80,15 @@ describe('subjectInfo', () => {
     }
     expect(subjectInfo('kanji', en)).toMatchObject({ path: '/learn/kanji', icon: '漢字', color: 'var(--line-kanji)' })
   })
+
+  it('names a subject short, as a block and a notification have room for', () => {
+    expect(subjectInfo('reading', fr).title).toBe('Lecture')
+    expect(subjectInfo('review', en).title).toBe('Reviews')
+    for (const subject of SUBJECTS) {
+      expect(subjectInfo(subject, fr).title.length, subject).toBeLessThanOrEqual(14)
+      expect(subjectInfo(subject, en).title.length, subject).toBeLessThanOrEqual(14)
+    }
+    const [p] = planAgenda({ blocks: [block({ subject: 'reading', days: [3], lead: 30 })], t: fr, now })
+    expect(p.title).toBe('Lecture dans 30 min')
+  })
 })

@@ -1432,9 +1432,25 @@ runtime purpose. Two consequences worth knowing:
   of time given to a subject (the day's queue, the four Learn lines, the
   six Practice platforms), each on the weekdays it repeats, between two
   times on a five-minute grid, with a reminder of its own (on or off, and
-  none to sixty minutes before) -- drawn as seven columns by the hour
-  (`AgendaWeek.jsx`), listed, and edited on a sheet (`AgendaEditor.jsx`)
-  that names the block in the way when two share a stretch of a day.
+  none to sixty minutes before). The page, owner-redrawn for ease of use
+  on a phone: what is under way or next with the way into its subject
+  (`NowCard`), the week under its hours (`AgendaWeek.jsx` -- marks every
+  three hours, every two where the week is roomy, reaching back before
+  the morning for an early block, the day being looked at lit and a rule
+  at the hour on today), and that day's blocks as rows with their times,
+  days, length and reminder, with "Add on <day>". On a phone a day's
+  column is one target that chooses the day; with a pointer (the desk) a
+  block opens its editor, a day's name chooses the day and a click in
+  free time begins a block on the half hour, ending where the next one
+  starts. The density and the layout are the box's, measured: a roomy
+  week prints each block's name (and a long one's start), and only a
+  page wide enough for both stands the day beside the week. The editor
+  (`AgendaEditor.jsx`, a sheet, a dialog on the desk) is the subject as
+  tiles in the gates' two groups under the agenda's short names
+  (`agdSubjectName`), the days with three presets, the two times with
+  the length under them, the reminder on one line with six keys for its
+  lead, and Save fixed at its foot; it names the block in the way when
+  two share a stretch of a day.
   Stored as rows and replaced whole (`GET`/`PUT /api/agenda`,
   `routes/agenda.py`, `agenda_blocks`; days a bit mask, times minutes
   after midnight on the learner's own clock, no time zone), validated
@@ -1451,7 +1467,8 @@ runtime purpose. Two consequences worth knowing:
   `lib/agenda.js`, `lib/native.js`, `lib/platform.js`,
   `stores/agenda.js`, `components/chrome/NativeBridge.jsx`,
   `components/settings/Agenda*.jsx`, `components/settings/SettingsList.jsx`,
-  `screens/SettingsScreen.jsx` and the `.agd-*` block of `index.css`).
+  `screens/SettingsScreen.jsx`, `src/agenda.desktop.test.jsx` and the `.agd-*`
+  block of `index.css`).
   When starting a new wave, begin at **182** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

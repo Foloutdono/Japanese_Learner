@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  SUBJECTS, SUBJECT_PATH, OPENABLE_PATHS, agendaDay, blockProblem, blocksOn, clashWith, clock, dayName,
+  SUBJECTS, SUBJECT_GROUPS, SUBJECT_PATH, OPENABLE_PATHS, agendaDay, axisFor, axisTicks, durationParts, blockProblem, blocksOn, clashWith, clock, dayName,
   dayRuns, daysLabel, forServer, fromInput, newBlock, nextBlock, occurrences, snap, toInput, withBlock,
 } from './agenda'
 
@@ -154,5 +154,33 @@ describe('the subjects', () => {
   it('are the server\'s eleven, each opening a place a notification may open', () => {
     expect(SUBJECTS).toHaveLength(11)
     for (const subject of SUBJECTS) expect(OPENABLE_PATHS.has(SUBJECT_PATH[subject])).toBe(true)
+  })
+})
+
+describe('the week as drawn', () => {
+  it('runs from the morning to midnight', () => {
+    expect(axisFor([block()])).toEqual({ from: 360, to: 1440 })
+    expect(axisFor([])).toEqual({ from: 360, to: 1440 })
+  })
+
+  it('reaches back to the mark before a block that starts earlier', () => {
+    expect(axisFor([block({ start: 270, end: 330 })])).toEqual({ from: 180, to: 1440 })
+    expect(axisFor([block({ start: 270, end: 330 })], 120)).toEqual({ from: 240, to: 1440 })
+    expect(axisFor([block({ start: 0, end: 60 })])).toEqual({ from: 0, to: 1440 })
+  })
+
+  it('marks every step, both ends included', () => {
+    expect(axisTicks({ from: 360, to: 1440 })).toEqual([360, 540, 720, 900, 1080, 1260, 1440])
+    expect(axisTicks({ from: 360, to: 1440 }, 120)).toHaveLength(10)
+  })
+
+  it('says a length in hours and minutes', () => {
+    expect(durationParts(120)).toEqual({ h: 2, m: 0 })
+    expect(durationParts(90)).toEqual({ h: 1, m: 30 })
+    expect(durationParts(45)).toEqual({ h: 0, m: 45 })
+  })
+
+  it('groups every subject once, the queue and the lines before the platforms', () => {
+    expect([...SUBJECT_GROUPS.learn, ...SUBJECT_GROUPS.practice]).toEqual(SUBJECTS)
   })
 })

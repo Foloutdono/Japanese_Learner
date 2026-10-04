@@ -22044,59 +22044,207 @@ a.slip__act { text-decoration: none; }
 .stg-pair { display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
 
 /* ── 時間割 — Settings › Agenda (plan 181) ──
-   The week as seven columns of one stretch of the day, each block where
-   its hours fall in its subject's line colour (--agd-line, set on the
-   block from config/tabs); the blocks listed under it as the list's own
-   rows; and the editor sheet. A line's edge is 3px (線). */
-.agd-next { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
-.agd-next b { color: var(--text-primary); }
-.agd-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--sp-2); }
-.agd-col { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
-.agd-col__name {
-  text-align: center;
+   components/settings/AgendaPage.jsx and its two pieces. Three blocks
+   on the page -- what now, the week, the day -- stacked, or (.agd--wide,
+   measured on the page, not set at a window width) the week and the day
+   side by side under what now. A subject's line colour reaches each
+   block, row and tile through --agd-line, set where it is drawn; a
+   line's edge is 3px (線). */
+.agd { display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
+.agd--wide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  align-items: start;
+}
+.agd--wide > .agd-top { grid-column: 1 / -1; }
+
+/* What now: the block under way or the next, and the way into it. */
+.agd-intro { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
+.agd-now {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  box-shadow: inset 3px 0 0 var(--agd-line, var(--accent2));
+}
+.agd-now__glyph {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--sp-8);
+  height: var(--sp-8);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--agd-line, var(--accent2)) 24%, transparent);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.agd-now__text { display: flex; flex: 1; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.agd-now__when {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.agd-now--live .agd-now__when { color: var(--sel-ink); }
+.agd-now__name { font-family: var(--font-display); font-size: var(--fs-lead); }
+.agd-now__go { flex: none; padding-inline: var(--sp-4); font-size: var(--fs-sm); text-decoration: none; }
+
+/* The week: the hours down the side, the days across, a column each. */
+.agd-board {
+  min-width: 0;
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.agd-week {
+  display: grid;
+  grid-template-columns: calc(var(--sp-7) + var(--sp-1)) repeat(7, minmax(0, 1fr));
+  gap: var(--sp-2) var(--sp-1);
+}
+.agd-week--roomy { grid-template-columns: calc(var(--sp-8) - var(--sp-2)) repeat(7, minmax(0, 1fr)); column-gap: var(--sp-2); }
+.agd-dayhead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-height: var(--sp-7);
+  padding: 0;
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: 700;
-  letter-spacing: var(--tr-name);
+  letter-spacing: var(--tr-caption);
   text-transform: uppercase;
-  color: var(--text-secondary);
 }
-.agd-col--today .agd-col__name { color: var(--sel-ink); }
-/* Eighteen hours (06:00 to midnight) in six bands of three, a hairline
-   at the top of each. */
+/* Today is underlined in gold; the day being looked at is lit. */
+.agd-dayhead--today .agd-dayhead__name {
+  text-decoration: underline 2px var(--accent2);
+  text-underline-offset: 3px;
+}
+.agd-dayhead--on { background: var(--sel-wash); color: var(--sel-ink); }
+.agd-hours { position: relative; }
+.agd-hours__mark {
+  position: absolute;
+  right: 0;
+  top: calc(var(--agd-at, 0) * 100%);
+  transform: translateY(-50%);
+  font-size: var(--fs-caption-xs);
+  line-height: 1;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.agd-week--roomy .agd-hours__mark { font-size: var(--fs-caption); }
+.agd-hours__mark--first { transform: none; }
+.agd-hours__mark--last { transform: translateY(-100%); }
+/* A hairline at each mark down the side, the column's own ground the
+   page's under the card. */
 .agd-track {
   position: relative;
-  height: calc(var(--sp-8) * 6);
+  display: block;
+  height: calc(var(--sp-8) * 5);
+  padding: 0;
   border-radius: var(--r-card);
   background-color: var(--bg-main);
   background-image: linear-gradient(to bottom, var(--surface-line) 1px, transparent 1px);
-  background-size: 100% calc(100% / 6);
+  background-size: 100% calc(100% / var(--agd-rows, 6));
   overflow: hidden;
 }
-.agd-col--today .agd-track { box-shadow: inset 0 0 0 1px var(--sel-line); }
+.agd-week--roomy .agd-track { height: calc(var(--sp-8) * 12); }
+.agd-track--on {
+  background-color: color-mix(in srgb, var(--accent2) 7%, var(--bg-main));
+  box-shadow: inset 0 0 0 1px var(--sel-line);
+}
+.agd-week--pointer .agd-track { cursor: copy; }
+.agd-week--pointer .agd-track:not(.agd-track--on):hover { background-color: color-mix(in srgb, var(--text-primary) 4%, var(--bg-main)); }
+.agd-track__now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--agd-top, 0) * 100%);
+  height: 2px;
+  background: var(--accent2);
+}
 .agd-block {
   position: absolute;
   left: var(--sp-1);
   right: var(--sp-1);
   top: calc(var(--agd-top, 0) * 100%);
   height: calc(var(--agd-size, 0.1) * 100%);
-  min-height: var(--sp-5);
-  display: grid;
-  place-items: start center;
+  min-height: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 0;
-  border: 0;
   border-left: 3px solid var(--agd-line, var(--accent2));
   border-radius: var(--r-plate);
-  background: color-mix(in srgb, var(--agd-line, var(--accent2)) 28%, var(--surface));
+  background: color-mix(in srgb, var(--agd-line, var(--accent2)) 30%, var(--surface));
   color: var(--text-primary);
-  font-size: var(--fs-caption);
-  line-height: var(--sp-5);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
   overflow: hidden;
 }
-.agd-block:hover { filter: brightness(1.15); }
+.agd-block__time { font-weight: 600; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.agd-block__name,
+.agd-block__time { display: none; }
+/* Where a day's column has the width, a block says what it is and when
+   instead of its glyph. */
+.agd-week--roomy .agd-block {
+  align-items: flex-start;
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-caption);
+  text-align: left;
+}
+.agd-week--roomy .agd-block__glyph { display: none; }
+.agd-week--roomy .agd-block__name,
+.agd-week--roomy .agd-block--long .agd-block__time {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .agd-block:focus-visible { outline: 2px solid var(--accent2); outline-offset: 1px; }
+
+/* The day: its blocks as the list's rows, the way to add one on it. */
+.agd-day { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+.agd-day__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.agd-day__name { display: block; font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
+.agd-day__name::first-letter { text-transform: uppercase; }
+.agd-day__empty {
+  margin: 0;
+  padding: var(--sp-5) var(--sp-4);
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--r-panel);
+  font-size: var(--fs-sm);
+  text-align: center;
+  color: var(--text-secondary);
+}
+.agd-day__add { align-self: stretch; }
 .agd-row { box-shadow: inset 3px 0 0 var(--agd-line, var(--accent2)); }
-.agd-row__glyph { color: var(--agd-line, var(--accent2)); font-size: var(--fs-caption); font-weight: 700; }
+.agd-row__time {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: calc(var(--sp-8) + var(--sp-1));
+  font-size: var(--fs-sm);
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+.agd-row__end { font-size: var(--fs-caption); color: var(--text-secondary); }
+.agd-row__glyph {
+  margin-right: var(--sp-2);
+  font-size: var(--fs-caption);
+  color: color-mix(in srgb, var(--agd-line, var(--accent2)) 60%, var(--text-primary));
+}
 .agd-row__bell {
   flex: none;
   display: inline-flex;
@@ -22107,15 +22255,53 @@ a.slip__act { text-decoration: none; }
   white-space: nowrap;
 }
 .agd-row__bell--off { opacity: 0.7; }
-/* `flex: none`: the sheet scrolls when the form is taller than the
-   window; left to shrink, the form squashed the segment (its overflow
-   makes its minimum height nothing) instead. */
+
+/* The editor. `flex: none`: the sheet scrolls when the form is taller
+   than the window; left to shrink, the form squashed the segment (its
+   overflow makes its minimum height nothing) instead. */
 .agd-form { display: flex; flex: none; flex-direction: column; gap: var(--sp-5); }
-.agd-field > * { flex: none; }
-.agd-field .seg { margin-left: 0; align-self: flex-start; }
 .agd-field { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+.agd-field > * { flex: none; }
+.agd-field__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.agd-field__row .console__chips { flex: 0 1 auto; justify-content: flex-end; }
 .agd-field__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
 .agd-field__sub { font-size: var(--fs-caption); color: var(--text-secondary); }
+.agd-subjects { display: flex; flex-direction: column; gap: var(--sp-4); }
+.agd-subjects__group { display: flex; flex-direction: column; gap: var(--sp-2); }
+.agd-subjects__tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--sp-2); }
+.agd-subject {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-height: 60px;
+  padding: var(--sp-2) var(--sp-1);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+}
+.agd-subject__glyph {
+  display: grid;
+  place-items: center;
+  min-width: var(--sp-7);
+  height: var(--sp-6);
+  padding: 0 var(--sp-1);
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, var(--agd-line, var(--accent2)) 24%, transparent);
+  color: var(--text-primary);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.agd-subject__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.agd-subject--on { color: var(--sel-ink); border-color: var(--sel-line); background: var(--sel-wash); }
 .agd-times { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
 .agd-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--sp-2); }
 .agd-daybtn {
@@ -22123,7 +22309,6 @@ a.slip__act { text-decoration: none; }
   padding: 0;
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
-  background: none;
   color: var(--text-secondary);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -22131,7 +22316,21 @@ a.slip__act { text-decoration: none; }
   text-transform: uppercase;
 }
 .agd-daybtn--on { color: var(--sel-ink); border-color: var(--sel-line); background: var(--sel-wash); }
-.agd-actions { display: flex; flex-direction: column; gap: var(--sp-3); }
+.agd-leads { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--sp-2); }
+.agd-leadkey { font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+/* Save stays in reach at the sheet's foot however far it scrolls. */
+.agd-foot {
+  position: sticky;
+  bottom: calc(-1 * var(--sp-5));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: 0 calc(-1 * var(--sp-5));
+  padding: var(--sp-3) var(--sp-5);
+  background: var(--surface);
+  border-top: 1px solid var(--surface-line);
+}
+.agd-foot__acts { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: var(--sp-3); }
 .agd-error { margin: 0; color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
 
 /* ── Service: each pace a line to the destination (plan 139) ──
