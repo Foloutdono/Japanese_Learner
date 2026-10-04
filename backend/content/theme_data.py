@@ -13,22 +13,22 @@ via frequency_data.resolve()/to_id() (domain is always "vocab" or
 "vocab_jmdict" here — themes don't cover kanji).
 
 FOUR LEVELS
-Each theme is split into `basic` / `medium` / `advanced` / `expert`, cut by
-frequency: the theme's words are sorted commonest-first and divided into
-four growing bands. The bands are relative to the theme, not to the
-language as a whole — no fruit word is newspaper-frequent, so absolute
-cut-points would leave "Fruits · 基本" empty, whereas a learner opening it
-wants りんご and バナナ. See scripts/build_theme_db.py for how the
-frequency score is derived (JMdict priority tags, NOT entries.freq_rank —
-that column is only a real ranking to about rank 23,000).
+Each theme is split into `basic` / `medium` / `advanced` / `expert` by
+judgement, not by frequency: content/theme_lists.py places every word on a
+difficulty scale inside its theme — the word everybody knows (りんご,
+apple), the everyday word a step further (梨, pear), the word one meets
+but seldom uses (ざくろ, pomegranate), the word only a specialist reaches
+for (金柑, kumquat). Frequency used to cut the bands, and newspaper
+frequency is no measure of how early a learner needs a word: 梅 and 杏
+came out as basic fruits and バナナ as an advanced one.
 
-Membership is precomputed OFFLINE by build_theme_db.py into
-datas/vocab/theme_words.json, which this module loads once at import. It
-used to be a `theme_words` table inside the 76 MB vocab_jmdict.sqlite3;
-the old memory argument for SQLite (a 292k-row pool that must not be held
-in RAM — see vocab_jmdict_data.py) does not apply to ~1k rows, and a JSON
-file is reviewable in a diff, which is the only practical guard against
-the real failure mode here: data that looks plausible and is wrong.
+The lists are resolved OFFLINE by scripts/build_theme_db.py into
+datas/vocab/theme_words.json, which this module loads once at import —
+each row naming the card the app already has for its word (the deck's,
+else the JMdict pool's) and carrying the theme's own gloss in English and
+French. A JSON file is reviewable in a diff, which is the only practical
+guard against the real failure mode here: data that looks plausible and
+is wrong.
 """
 import json
 import os
@@ -46,8 +46,8 @@ _BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 _DATA_PATH = os.path.join(_BASE_DIR, "datas", "vocab", "theme_words.json")
 
 with open(_DATA_PATH, encoding="utf-8") as f:
-    # {theme: [{rank, level, score, domain, kanji, kana, meaning}, ...]},
-    # each list already in rank (frequency) order.
+    # {theme: [{rank, level, domain, kanji, kana, meaning, meaning_fr}, ...]},
+    # each list already in rank order: basic to expert, easiest first.
     _THEMES: dict[str, list[dict]] = json.load(f)
 
 
@@ -85,8 +85,12 @@ def has_theme(theme: str) -> bool:
 
 
 def theme_entries(theme: str, level: str | None = None) -> list[dict]:
-    """Full display rows for `theme`, in frequency order — {card_id,
-    domain, kanji, kana, meaning, level, theme_level}.
+    """Full display rows for `theme`, easiest first — {card_id, domain,
+    kanji, kana, meaning, meaning_fr, level, theme_level}.
+
+    `meaning` and `meaning_fr` are the theme's own glosses, the sense the
+    word has IN the theme (羽 is a feather in `birds`, not a counter), and
+    the French one is what a pool word has no other source for.
 
     `level` filters to one band; None returns the whole theme.
 
@@ -118,6 +122,7 @@ def theme_entries(theme: str, level: str | None = None) -> list[dict]:
             "kanji":       row["kanji"],
             "kana":        row["kana"],
             "meaning":     row["meaning"],
+            "meaning_fr":  row["meaning_fr"],
             "level":       native_level,
             "theme_level": row["level"],
         })

@@ -347,7 +347,7 @@ const quiz = {
   // term ("No results for {query}") rather than standing alone.
   themeNoResults:    'No themes match your filter',
 
-  // The four bands inside a theme, cut by frequency (see
+  // The four levels inside a theme, placed by difficulty (see
   // backend/content/theme_data.py). The Japanese half of each name lives
   // in domain/themes.js — it is the same in every language.
   themeLevelBasic:    'Basic',
@@ -674,7 +674,7 @@ const stats = {
   learningUnit:       'in progress',
   sourceTiers:        n => `${n} tiers`,
   sourceThemes:       n => `${n} themes`,
-  // The vocabulary's sources on the desk (plan 181): the strip of what
+  // The vocabulary's sources on the desk (plan 183): the strip of what
   // the learner has started, over the three sources.
   sourcesInProgress:  'In progress',
   sourcesResume:      'Resume',
@@ -2187,6 +2187,61 @@ const boarding = {
     android: 'Touch and hold your home screen, tap Widgets, then drag Tsuji onto it.',
   },
   notifWidgetWhat: 'It shows the day’s cards and a word you know, never one due this week.',
+  // 時間割 (plan 181): the week's agenda.
+  settingsAgenda: 'Agenda',
+  agdRowEmpty: 'No blocks',
+  agdRowValue: (n) => `${n} ${n === 1 ? 'block' : 'blocks'}`,
+  agdEveryDay: 'Every day',
+  agdWeek: 'My week',
+  agdWeekAria: 'Your week, day by day',
+  agdEmpty: 'Plan your week: a block for each subject, and Tsuji tells you when it starts.',
+  agdAdd: 'Add a block',
+  agdNew: 'New block',
+  agdEdit: 'Edit block',
+  agdNow: 'Now',
+  agdSubject: 'Subject',
+  agdDays: 'Days',
+  agdFrom: 'From',
+  agdTo: 'To',
+  agdPresets: { weekdays: 'Weekdays', weekend: 'Weekend', all: 'Every day' },
+  agdRemind: 'Reminder',
+  agdLeadLabel: 'Tell me',
+  agdLead: (m) => (m === 0 ? 'On time' : `${m} min before`),
+  agdBell: (m) => (m === 0 ? 'On time' : `${m} min before`),
+  agdNoBell: 'No reminder',
+  agdSave: 'Save',
+  agdDelete: 'Delete',
+  agdProblem: {
+    days: 'Choose at least one day.',
+    time: 'Choose a start and an end.',
+    length: 'A block lasts 15 minutes at least.',
+  },
+  agdClash: (name, days, from, to) => `This block overlaps ${name} (${days}, ${from}–${to}).`,
+  agdSaveFailed: 'The block could not be saved. Try again.',
+  agdLoadFailed: 'Your agenda could not be loaded.',
+  agdWebNote: 'Reminders come on the mobile app: on the web, the agenda is a guide.',
+  agdDenied: 'Notifications are off for Tsuji in your phone’s settings, so blocks won’t announce anything.',
+  agdBlockAria: (name, day, from, to) => `${name}, ${day} from ${from} to ${to}`,
+  agdNotifTitle: (name, lead) => (lead === 0 ? `${name} starts now` : `${name} in ${lead} min`),
+  agdNotifBody: (from, to, lead) => (lead === 0 ? `${from}–${to}` : `At ${from}, until ${to}`),
+  agdSubjectName: {
+    review: 'Reviews', kana: 'Kana', vocab: 'Vocabulary', kanji: 'Kanji', grammar: 'Grammar',
+    reading: 'Reading', translation: 'Translation', dictation: 'Dictation', composition: 'Writing',
+    comprehension: 'Comprehension', exam: 'Mock exam',
+  },
+  agdGo: 'Start',
+  agdUntil: (end) => `until ${end}`,
+  agdDayEmpty: (day) => `Nothing planned on ${day}.`,
+  agdAddOn: (day) => `Add on ${day}`,
+  agdDuration: (h, m) => (h && m ? `${h} h ${m} min` : h ? `${h} h` : `${m} min`),
+  agdLasts: (d) => `Lasts ${d}`,
+  agdLeadCaption: 'minutes before it starts',
+  agdDayAria: (day, n) => `${day}, ${n} ${n === 1 ? 'block' : 'blocks'}`,
+  agdHoursAria: 'Hours of the day',
+  agdProgressAria: (name) => `${name}, time gone`,
+  agdThen: 'Then',
+  agdStartWith: 'To start with',
+  agdWeekTotalLabel: 'Each week',
   // The arrival: the plan, the pass.
   brdBuildingAria: 'Building your journey',
   // 机 (plan 140): the stops on the desk's column, one per question --

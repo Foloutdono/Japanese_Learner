@@ -1527,7 +1527,7 @@ each question drawing its answers between them.
   and the grammar level's **points**, which open rather than board, are
   doors at the page's foot, one row. The bar names no level: the open
   stop does.
-- **Vocabulary's sources open on what you started** (plan 181, the
+- **Vocabulary's sources open on what you started** (plan 183, the
   owner's pick C of the canvas "Tsuji — the vocabulary's sources"; plan
   137 had hung the three sources as equal plates, and on a real window
   the five levels shared 800px while the 41 tiers and the 36 themes
@@ -2021,7 +2021,13 @@ each question drawing its answers between them.
   The daily pace is one field: it was on two pages over one number. Under
   the card the rest is a list whose rows **draw what they are set to**
   beside their words (`RowSpecimens`: the theme's grounds, the mixer's
-  levels, the rating bar's dots, the reading pace's clock), and every
+  levels, the rating bar's dots, the reading pace's clock). Plan 182 laid
+  the rows out by their edges: a glyph in one column at the left, the
+  name over what it is set to, the drawing in a slot of one width at the
+  right (so the drawings stand in a column whatever the words say), the
+  rows in three cards by what they are for -- the app, the study, the
+  learner -- and the pass apart, set apart by the gap and never by a
+  caption. Every page draws what it sets, and every
   page draws what it sets:
   each stop ahead with the date the service reaches it, each service as
   a line to the destination on one time axis with the learner's own pace

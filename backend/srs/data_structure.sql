@@ -875,6 +875,26 @@ CREATE TABLE dictionary_favorites (
     PRIMARY KEY (user_id, kind, key)
 );
 
+-- ── 時間割 — the learner's weekly agenda ───────────────────────────
+-- Owned by routes/agenda.py (plan 181). One row per study block: a
+-- subject, the weekdays it repeats on (a bit mask, Monday = bit 0) and
+-- the minutes after midnight it spans, on the learner's own wall clock,
+-- and whether and how many minutes ahead the phone announces it. The
+-- list is replaced whole by PUT /api/agenda. No cascade from auth
+-- (ADR 0010): DELETE /api/account and scripts/purge_orphans.py clear it.
+CREATE TABLE agenda_blocks (
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    TEXT NOT NULL,
+    subject    TEXT NOT NULL,
+    days_mask  INTEGER NOT NULL,
+    start_min  INTEGER NOT NULL,
+    end_min    INTEGER NOT NULL,
+    notify     BOOLEAN NOT NULL DEFAULT TRUE,
+    lead_min   INTEGER NOT NULL DEFAULT 10,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX agenda_blocks_user ON agenda_blocks (user_id);
+
 -- ── 足跡 — the trail of screens a learner walked ─────────────────────
 -- Owned by core/events.py, written by routes/events.py (a batch the
 -- client queues and flushes) and by core/credits.py (the fare gate's

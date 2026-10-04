@@ -103,6 +103,16 @@ export async function syncNudges(nudges) {
   return n.scheduleNudges(nudges)
 }
 
+/** 時間割 (plan 181): the agenda's notifications, as lib/agenda.js planned
+ *  them, replacing the agenda's own -- an empty list cancels them. The
+ *  day's train is not touched. Resolves to what was scheduled. A no-op on
+ *  the web. */
+export async function syncAgenda(items) {
+  if (!isNative()) return []
+  const n = await native()
+  return n.scheduleAgenda(items)
+}
+
 /** The widget's figures (lib/ahead.js's widgetPayload), handed to the
  *  shell's own plugin. A no-op on the web, and on a shell built before
  *  the widget existed. */
@@ -116,6 +126,7 @@ export async function updateWidget(payload) {
  *  widget with nothing of theirs on it. Never throws (stores/account). */
 export function clearAhead() {
   syncNudges([]).catch(() => {})
+  syncAgenda([]).catch(() => {})
   updateWidget(null).catch(() => {})
 }
 

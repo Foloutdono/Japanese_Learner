@@ -193,7 +193,7 @@ def get_tiers(domain: str, tier_size: int = freq.DEFAULT_TIER_SIZE):
         start, end = freq.tier_bounds(t, tier_size)
         count = max(0, min(end, total) - start + 1)
         tier = {"tier": t, "start_rank": start, "end_rank": min(end, total), "count": count}
-        # The first words a tier teaches (plan 181), printed on the
+        # The first words a tier teaches (plan 183), printed on the
         # desk's vocabulary sources where a tier the learner has
         # started is offered again. The deck's domains only: a key there
         # resolves from a dict, while the JMdict pool's 1,464 tiers

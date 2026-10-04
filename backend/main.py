@@ -37,6 +37,7 @@ from routes.kanji           import router as kanji_router
 from routes.stats           import router as stats_router
 from routes.dictionary      import router as dictionary_router
 from routes.favorites       import router as favorites_router
+from routes.agenda          import router as agenda_router
 from routes.decks           import router as decks_router
 from routes.translations    import router as translations_router
 from routes.grammar         import router as grammar_router
@@ -177,6 +178,7 @@ app.include_router(kanji_router)
 app.include_router(stats_router)
 app.include_router(dictionary_router)
 app.include_router(favorites_router)
+app.include_router(agenda_router)
 app.include_router(decks_router)
 app.include_router(translations_router)
 app.include_router(grammar_router)

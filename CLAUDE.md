@@ -1415,9 +1415,88 @@ runtime purpose. Two consequences worth knowing:
   `components/study/RatingBar.jsx`, `index.css` and its 机 section,
   `src/harmony.css.test.js`, `src/stage.phone.test.jsx` and
   `components/study/RatingBar.browser.test.jsx`; DESIGN.md, Controls).
-  **181** is 途中, the vocabulary's sources on the desk led by what the
-  learner has started (numbered 181 because 180 went to 正解 while it
-  was open: its first commit's message says 180; the owner's pick C of
+  **181** is 時間割, the weekly agenda (owner-directed: "a weekly agenda,
+  with dedicated timeframe for specific things like 9-11 kanji, 14-16
+  reading, and the notification going with it"): Settings › Agenda
+  (`components/settings/AgendaPage.jsx`) is the learner's week -- blocks
+  of time given to a subject (the day's queue, the four Learn lines, the
+  six Practice platforms), each on the weekdays it repeats, between two
+  times on a five-minute grid, with a reminder of its own (on or off, and
+  none to sixty minutes before). The page, owner-redrawn for ease of use
+  on a phone: what is under way or next with the way into its subject
+  (`NowCard`), the week under its hours (`AgendaWeek.jsx` -- marks every
+  three hours, every two where the week is roomy, reaching back before
+  the morning for an early block, the day being looked at lit and a rule
+  at the hour on today), and that day's blocks as rows with their times,
+  days, length and reminder, with "Add on <day>". On a phone a day's
+  column is one target that chooses the day; with a pointer (the desk) a
+  block opens its editor, a day's name chooses the day and a click in
+  free time begins a block on the half hour, ending where the next one
+  starts. The density and the layout are the box's, measured: a roomy
+  week prints each block's name (and a long one's start), and only a
+  page wide enough for both stands the day beside the week. The editor
+  (`AgendaEditor.jsx`, a sheet, a dialog on the desk) is the subject as
+  tiles in the gates' two groups under the agenda's short names
+  (`agdSubjectName`), the days with three presets, the two times with
+  the length under them, the reminder on one line with six keys for its
+  lead, and Save fixed at its foot; it names the block in the way when
+  two share a stretch of a day. What is next is one card
+  (`components/agenda/AgendaNext.jsx`: the block under way with its hours
+  at the ends of a bar and the way into its subject, else the next one
+  and when, the clock read once a minute by `hooks/useMinute.js`), drawn
+  over the week, on Today under the pass's strip on a phone, and in the
+  desk's side column between the strip and the journey with the two
+  blocks after it -- on Today its words the door to the agenda, and
+  nothing at all for a learner with no agenda. The page also lights the
+  block under way in the day's list, sums the week's hours by subject
+  under the week (`weekShare`), and offers an empty week three blocks to
+  start from (`TEMPLATES`).
+  Stored as rows and replaced whole (`GET`/`PUT /api/agenda`,
+  `routes/agenda.py`, `agenda_blocks`; days a bit mask, times minutes
+  after midnight on the learner's own clock, no time zone), validated
+  on both sides (`domain/agenda.js` mirrors the server's rules, held
+  by `backend/tests/test_agenda.py`); erased with the account. The
+  native shells turn each block into dated local notifications for the
+  next seven days (`lib/agenda.js`'s `planAgenda`, ids 201-248 apart from
+  the day's train, `NativeBridge`'s `AgendaPlanner`, re-planned on every
+  save and return to the front), a tap opening the subject's own place
+  (`domain/agenda.js`'s `OPENABLE_PATHS`; `nudge_opened`); the web has no
+  notification to schedule, so the page says where the reminders arrive
+  (cited in `routes/agenda.py`, `srs/data_structure.sql`,
+  `routes/account.py`, `tests/test_agenda.py`, `domain/agenda.js`,
+  `lib/agenda.js`, `lib/native.js`, `lib/platform.js`,
+  `stores/agenda.js`, `components/chrome/NativeBridge.jsx`,
+  `components/settings/Agenda*.jsx`, `components/settings/SettingsList.jsx`,
+  `screens/SettingsScreen.jsx`, `screens/TodayScreen.jsx`,
+  `components/agenda/AgendaNext.jsx`, `hooks/useMinute.js`,
+  `src/agenda.desktop.test.jsx`, `src/today.phone.test.jsx`,
+  `src/today.desktop.test.jsx` and the `.agd-*` block of `index.css`).
+  **182** is Settings' list read by its edges (numbered 182 because 180
+  went to the rating bar's passes and 181 to the agenda while it was open:
+  its commit's message says 180; owner-directed: "fix the
+  icons, focus, alignment issues and make things clearer and simpler to
+  modify"): the list under the pass is data, not markup -- one entry per
+  row in `components/settings/SettingsList.jsx`'s `useGroups`, drawn
+  by one `Row`, so a new setting is one line there and one in
+  `SettingsScreen`'s `PAGES` -- every row a glyph (`MonitorIcon`,
+  `BellIcon`, `UserIcon` and the set's own) in one column, its name over
+  what it is set to, and the drawing of the state (theme, mixer, rating
+  dots, pace) in a slot of one width at the trailing edge, so nothing is
+  ragged whatever the words; the display row says the theme and the
+  language; the rows fall into three cards by what they are for (the
+  app, the study, the learner) and the pass on its own, set apart by the
+  gap and not by a caption; the dark theme's swatch has a ring; the open
+  stop on the pass is ringed as a focused one is (the touch's box, clear
+  of the print) instead of an outline lying over its code, and a focused
+  row is ringed inside its card where the list clips a ring outside
+  (cited in `components/settings/SettingsList.jsx`,
+  `components/settings/RowSpecimens.jsx`, `screens/SettingsScreen.jsx`,
+  `components/ui/Icons.jsx`, `src/settings.desktop.test.jsx` and
+  `index.css`; DESIGN.md, "Settings opens on the pass").
+  **183** is 途中, the vocabulary's sources on the desk led by what the
+  learner has started (numbered 183 because 180 went to 正解, 181 to
+  時間割 and 182 to Settings' list while it was open: its first commit's
+  message says 180, the next 181; the owner's pick C of
   four drawn on the canvas
   "Tsuji — the vocabulary's sources", replacing plan 137's three equal
   plates): a strip of the learner's own level -- its bar, its first
@@ -1436,7 +1515,7 @@ runtime purpose. Two consequences worth knowing:
   `components/selection/VocabSources.jsx`, `src/vocabSources.desktop.test.jsx`,
   `src/vocabSources.wide.test.jsx`, `src/vocabSources.short.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **182** or higher, and check
+  When starting a new wave, begin at **184** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

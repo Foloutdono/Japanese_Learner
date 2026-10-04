@@ -17,7 +17,7 @@ import { useBoxWidth } from '../../hooks/useBoxWidth'
 import { Seg, Console, ConsoleIndex } from '../chrome/Console'
 import { GateButton } from '../ui/GateButton'
 
-// ── 机 — the vocabulary's sources, what you started first (plan 181) ──
+// ── 机 — the vocabulary's sources, what you started first (plan 183) ──
 // The owner's pick C of the canvas "Tsuji — the vocabulary's sources".
 // Plan 137 hung the three sources as three equal plates the window's
 // height, and on a real window the five JLPT levels shared 800px while

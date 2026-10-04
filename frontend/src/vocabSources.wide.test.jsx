@@ -7,7 +7,7 @@ import '@fontsource/space-grotesk/latin-500.css'
 import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
-// ── 机 — the vocabulary's sources on a 1,440px window (plan 181) ─────
+// ── 机 — the vocabulary's sources on a 1,440px window (plan 183) ─────
 // The page as the owner drew it (pick C): the lead, its gate in a column
 // of its own beside its words, and three stops in the strip, the row
 // shared by as many as were started; the 41 tiers whole in their plate,
@@ -121,7 +121,7 @@ afterEach(() => {
   STARTED = MET
 })
 
-describe('the vocabulary\'s sources on a wide desk (plan 181)', () => {
+describe('the vocabulary\'s sources on a wide desk (plan 183)', () => {
   it('fills the strip with three stops beside the lead, the most met first, the gate and its halo in its card', async () => {
     STATS.items.vocab.N4.started = 40
     await mount()

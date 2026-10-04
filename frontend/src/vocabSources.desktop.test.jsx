@@ -8,7 +8,7 @@ import '@fontsource/space-grotesk/latin-500.css'
 import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
-// ── 机 — the vocabulary's sources, what you started first (plan 181) ──
+// ── 机 — the vocabulary's sources, what you started first (plan 183) ──
 // The owner's pick C of the canvas "Tsuji — the vocabulary's sources".
 // Plan 137 hung the three sources as three equal plates the window's
 // height; the page now opens on a strip of what the learner has started
@@ -124,7 +124,7 @@ afterEach(() => {
   SUMMARY.jlptLevel = 'N5'
 })
 
-describe('the vocabulary\'s sources on the desk (plan 181)', () => {
+describe('the vocabulary\'s sources on the desk (plan 183)', () => {
   it('lays the strip over three plates side by side, down to the window\'s foot and no further', async () => {
     await mount()
     const s = strip().getBoundingClientRect()

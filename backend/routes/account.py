@@ -104,6 +104,7 @@ PLAN = [
     ("ocr_usage",           "user_id = %(user)s",       "the OCR daily counters"),
     ("daily_usage",         "user_id = %(user)s",       "the daily counters, per feature (composition's reviews, the asking)"),
     ("dictionary_favorites", "user_id = %(user)s",      "the dictionary's shelf of kept entries"),
+    ("agenda_blocks",       "user_id = %(user)s",       "the weekly agenda: study blocks and their reminders"),
     ("credit_ledger",       "user_id = %(user)s",       "the credit ledger: refills, fares, grants"),
     ("credit_stops",        "user_id = %(user)s",       "where the credits stopped a run: the offer's week"),
     ("event_log",           "user_id = %(user)s",       "足跡: which screens were opened, and when"),

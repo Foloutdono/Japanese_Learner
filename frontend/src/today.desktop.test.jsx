@@ -44,6 +44,15 @@ vi.mock('./stores/credits', async o => ({ ...(await o()),
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
+// 時間割 (plan 181): an empty week unless a test fills it, so the gate
+// stands as it did for every test that is not about the agenda.
+const agenda = vi.hoisted(() => ({ blocks: [] }))
+vi.mock('./stores/agenda', () => ({ useAgenda: () => ({ blocks: agenda.blocks, failed: false }), saveAgenda: vi.fn() }))
+const WEEK = [
+  { id: 1, subject: 'kanji', days: [0, 1, 2, 3, 4], start: 540, end: 660, notify: true, lead: 10 },
+  { id: 2, subject: 'dictation', days: [2], start: 780, end: 840, notify: true, lead: 15 },
+  { id: 3, subject: 'reading', days: [5], start: 840, end: 960, notify: false, lead: 0 },
+]
 const { default: TodayScreen } = await import('./screens/TodayScreen')
 
 const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
@@ -196,3 +205,35 @@ describe('Today\'s side, called and finished (plan 123)', () => {
   })
 })
 
+
+// ── 時間割 (plan 181) — what is next on the agenda, beside the gate ──
+describe('the agenda beside the gate', () => {
+  afterEach(() => { agenda.blocks = []; vi.useRealTimers() })
+
+  it('stands under the strip, over the journey, with the two blocks after it', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 9, 7, 10, 0))
+    agenda.blocks = WEEK
+    journeyRef.current = BEHIND
+    await mount()
+    await settle()
+    const side = document.querySelector('.today > .desk-side')
+    const kids = [...side.children]
+    const card = side.querySelector(':scope > .agd-now')
+    expect(card).not.toBeNull()
+    expect(kids.indexOf(card)).toBe(kids.indexOf(side.querySelector(':scope > .pass--strip')) + 1)
+    expect(kids.indexOf(card)).toBeLessThan(kids.indexOf(side.querySelector(':scope > .desk-journey')))
+    expect(card.querySelectorAll('.agd-now__then li')).toHaveLength(2)
+    // The card stays inside the column.
+    const s = side.getBoundingClientRect()
+    const c = card.getBoundingClientRect()
+    expect(c.left).toBeGreaterThanOrEqual(s.left)
+    expect(c.right).toBeLessThanOrEqual(s.right)
+  })
+
+  it('stands nothing for a learner with no agenda', async () => {
+    await mount()
+    await settle()
+    expect(document.querySelector('.desk-side .agd-now')).toBeNull()
+  })
+})

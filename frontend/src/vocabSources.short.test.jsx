@@ -7,7 +7,7 @@ import '@fontsource/space-grotesk/latin-500.css'
 import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
-// ── 低 — the vocabulary's sources on a laptop's short window (plan 181) ──
+// ── 低 — the vocabulary's sources on a laptop's short window (plan 183) ──
 // A 600px window (plan 169): the first words give way, the strip's and
 // the line's, and the page shows whole -- the strip, the three plates to
 // the window's foot, JLPT's five rows each a row's height at least, the
@@ -111,7 +111,7 @@ const rows = plate => [...plate.querySelectorAll('.desk-source__rows > a')]
 
 afterEach(() => { STATS.items.vocab.N4.started = 0 })
 
-describe('the vocabulary\'s sources on a short desk (plan 181)', () => {
+describe('the vocabulary\'s sources on a short desk (plan 183)', () => {
   it('shows the page whole: no first words, the plates down to the foot and no further', async () => {
     await mount()
     expect(getComputedStyle(lead().querySelector('.desk-resume__sample')).display).toBe('none')

@@ -8,7 +8,7 @@ difference is where the word pool and card ids come from —
 theme_data.theme_entries() instead of VOCAB_BY_LEVEL/vocab_to_id.
 
 A theme is further split into four levels — basic/medium/advanced/expert,
-cut by frequency, see theme_data.py. The level travels as an OPTIONAL
+placed by hand on a difficulty scale, see theme_data.py. The level travels as an OPTIONAL
 query param rather than a path segment, matching how frequency.py carries
 `tier` on its own card/cards/stats endpoints; omitting it studies the
 whole theme, which is what every pre-level client does.
@@ -57,12 +57,15 @@ FR_MAP = VOCAB_FR
 
 
 def _entry_meaning(entry: dict, lang: str) -> str:
-    """Curated-deck ("vocab") entries have a hand-translated FR gloss
-    via get_meaning/FR_MAP, same as vocab.py. JMdict-pool
-    ("vocab_jmdict") entries don't — VOCAB_FR only covers the app's own
-    deck — so those fall back to the raw JMdict meaning untranslated,
-    exactly like dictionary.py's category="jmdict" branch already does
-    for the same reason."""
+    """The theme's own gloss: content/theme_lists.py writes every word's
+    meaning in the sense it has in the theme, in English and in French.
+    The French one matters most for a JMdict-pool word, which VOCAB_FR
+    (the course's table, keyed by written form) does not cover and which
+    used to fall back to JMdict's English. A row without a French gloss
+    keeps the old rule: the deck's translation for a deck word, the
+    English otherwise."""
+    if lang == "fr" and entry.get("meaning_fr"):
+        return entry["meaning_fr"]
     if entry["domain"] == "vocab":
         return get_meaning(entry, lang, FR_MAP)
     return entry["meaning"]
@@ -117,7 +120,7 @@ def _select_theme_cards(theme: str, level: str | None, m: Mode, lang: str, count
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(
         cache_key, due,
-        # ordered=True: the pool is already commonest-first and that is
+        # ordered=True: the pool is already easiest-first and that is
         # the whole point of the levels — see theme_data.py.
         lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids, ordered=True),
         count, exclude_ids, new_limit=new_limit,
