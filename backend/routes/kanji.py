@@ -11,7 +11,7 @@ from translations import get_meaning
 from content.kanji_meanings import KANJI_FR
 from study.modes import (
     KANJI, GRADED_FOR_SOURCE, INDICE_CHOICES, RADICAL, READINGS,
-    Mode, eligible_for, require_mode,
+    Mode, check_review_mode, eligible_for, require_mode,
 )
 from study.mcq import pick_distractors
 from content.kanji_readings import split_readings, display_reading
@@ -418,6 +418,7 @@ def get_kanji_review_cards(level: str | None = None, lang: str = "fr", radical: 
 
 @router.post("/api/kanji/review")
 def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
+    check_review_mode(KANJI, payload.mode)
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # The fare, charged only now that the scheduler has accepted the

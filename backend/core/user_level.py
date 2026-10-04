@@ -52,6 +52,18 @@ GOAL_LEVELS = (NOVICE_GOAL, *LEVELS)
 # note_stored_level() below.
 _CACHE_TTL_S = 60.0
 _cache: dict[str, tuple[str, float]] = {}
+# Past this many entries, the expired ones are swept on the next write:
+# an entry nobody asks about again would otherwise sit in every worker
+# for the life of the process.
+_CACHE_SWEEP_AT = 4096
+
+
+def _remember(user_id: str, level: str) -> None:
+    now = time.monotonic()
+    if len(_cache) >= _CACHE_SWEEP_AT:
+        for uid in [u for u, (_, exp) in _cache.items() if exp <= now]:
+            del _cache[uid]
+    _cache[user_id] = (level, now + _CACHE_TTL_S)
 
 
 def _stored_level(user_id: str) -> str | None:
@@ -85,7 +97,7 @@ def _stored_level(user_id: str) -> str | None:
 
     level = row[0] if row else None
     if level in LEVELS:
-        _cache[user_id] = (level, time.monotonic() + _CACHE_TTL_S)
+        _remember(user_id, level)
         return level
     return None
 
@@ -95,7 +107,7 @@ def note_stored_level(user_id: str, level: str) -> None:
     user_profiles.jlpt_level, so this process answers with the new
     level immediately instead of after the TTL."""
     if level in LEVELS:
-        _cache[user_id] = (level, time.monotonic() + _CACHE_TTL_S)
+        _remember(user_id, level)
 
 
 def forget_stored_level(user_id: str) -> None:

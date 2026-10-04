@@ -11,7 +11,7 @@ from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
 from study.modes import (
     VOCAB, GRADED_FOR_SOURCE, INDICE_CHOICES, INDICE_FURIGANA, WORD_READING,
-    Mode, eligible_for, require_mode,
+    Mode, check_review_mode, eligible_for, require_mode,
 )
 from study.furigana import align_deck as align_furigana
 from study.mcq import pick_distractors
@@ -320,6 +320,7 @@ def get_vocab_review_cards(level: str, lang: str = "fr", user_id: str = Depends(
 
 @router.post("/api/vocab/review")
 def post_vocab_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
+    check_review_mode(VOCAB, payload.mode)
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # The fare, charged only now that the scheduler has accepted the

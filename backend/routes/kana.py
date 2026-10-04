@@ -1,6 +1,6 @@
 import logging
 import random
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from content.kana_data import KANA_SETS, kana_to_id, sound_of
 from core.auth import get_user_id, prefixed, unprefixed
 from core import credits
@@ -8,7 +8,7 @@ from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from study.modes import (
-    B2F, GRADED_FOR_SOURCE, INDICE_CHOICES, KANA, Mode, require_mode,
+    B2F, GRADED_FOR_SOURCE, INDICE_CHOICES, KANA, Mode, check_review_mode, require_mode,
 )
 from pydantic import BaseModel
 
@@ -16,6 +16,11 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 MAX_BATCH = 25
+
+# Every card this line can review. The kana line rides free, so a card
+# from any other line posted here would be rescheduled, paid XP and
+# charged nothing -- the review endpoint answers only for its own cards.
+KANA_CARD_IDS = frozenset(kana_to_id(k) for kana_list in KANA_SETS.values() for k in kana_list)
 
 
 class ReviewPayload(BaseModel):
@@ -190,10 +195,11 @@ def _select_cards(set_name: str, m: Mode, count: int, exclude_ids: set[str], use
     # _build_review_preview above.
     previews = srs.preview_reviews_bulk(picked, mode, user_id)
 
+    by_id = {kana_to_id(k): k for k in kana_list}
     cards = []
     for card_id in picked:
         raw_id = unprefixed(card_id, user_id)
-        kana_entry = next((k for k in kana_list if kana_to_id(k) == raw_id), None)
+        kana_entry = by_id.get(raw_id)
         if kana_entry is not None:
             cards.append(_build_kana_card(kana_entry, kana_list, m, states.get(card_id), previews.get(card_id)))
 
@@ -212,7 +218,7 @@ def get_kana_card(set_name: str, m: Mode = Depends(require_mode(KANA)),
     mode = m.key
     kana_list, cards = _select_cards(set_name, m, count=1, exclude_ids=set(), user_id=user_id)
     if kana_list is None:
-        print(f"Unknown set: {set_name}")
+        logger.warning("kana study unknown set_name=%s user_id=%s", set_name, user_id)
         return {"error": "Unknown set"}
     if not cards:
         logger.warning("kana study exhausted set_name=%s mode=%s user_id=%s", set_name, mode, user_id)
@@ -322,6 +328,9 @@ def get_kana_review_cards(set_name: str, user_id: str = Depends(get_user_id)):
 
 @router.post("/api/kana/review")
 def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
+    check_review_mode(KANA, payload.mode)
+    if payload.card_id not in KANA_CARD_IDS:
+        raise HTTPException(status_code=400, detail=f"Not a kana card: {payload.card_id!r}")
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # 無料 — the kana line rides free (core/credits.py), so the fare

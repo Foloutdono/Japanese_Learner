@@ -18,7 +18,7 @@ from study.grammar_examples import (
 from study.grammar_lesson import contrast_payload, lesson_payload
 from study.modes import (
     B2F, CONTRAST, GRAMMAR, GRADED_FOR_SOURCE, GRADED_ORDER_FOR_SOURCE, INDICE_CHOICES,
-    INDICE_SENTENCES, Mode, require_mode,
+    INDICE_SENTENCES, Mode, check_review_mode, require_mode,
 )
 from study.grammar_match import verifiable
 from study.mcq import meaning_key, pick_distractors
@@ -473,6 +473,7 @@ def get_grammar_point(id: str, lang: str = "fr", user_id: str = Depends(get_user
 @router.post("/api/grammar/review")
 def post_grammar_review(payload: ReviewPayload,
                         user_id: str = Depends(get_user_id)):
+    check_review_mode(GRAMMAR, payload.mode)
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # The fare, charged only now that the scheduler has accepted the
