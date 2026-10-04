@@ -57,3 +57,6 @@ shots/
 *.p8
 *.p12
 *.mobileprovision
+
+# The ads' renders (ads/README.md): the source makes the same file every time.
+ads/out

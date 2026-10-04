@@ -1765,6 +1765,7 @@ npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
 npm run landing:og  # its two share cards, rendered in Chromium
+npm run ad        # the 30-second practice ad for TikTok/Reels, into ads/out/ (ads/README.md)
 ```
 
 The landing page is the site's **`/`** (and `/en`), and the app's front

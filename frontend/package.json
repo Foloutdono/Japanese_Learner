@@ -17,6 +17,7 @@
     "icons": "node scripts/render-icon.mjs && pwa-assets-generator && node scripts/place-icons.mjs",
     "landing": "node landing/build.mjs",
     "landing:og": "node landing/og.mjs",
+    "ad": "node ads/render.mjs",
     "lint": "eslint .",
     "lint:css": "node scripts/stylelint-ratchet.mjs",
     "lint:css:report": "stylelint \"src/**/*.css\"",
