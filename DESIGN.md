@@ -229,6 +229,11 @@ all twelve in both themes — and the native widgets' copies follow.
 琥珀, 緑青, 錆 and the rating's 臙脂 — run red to green at one strength,
 lightness .62 to .72 where they ran .54 to .74, so no verdict shouts over
 another and the teal no longer sinks into the sumi it is drawn on.
+The two pass verdicts step off it since plan 180 (正解): Correct and
+Perfect are the rating bar's keys and wear their own brighter inks,
+`--rating-correct` and `--rating-perfect`, wherever a verdict's ink is
+drawn (the bar, the run's meter, the desk's verdict tiles). `--teal` and
+`--success` keep their place on the ramp for everything else.
 
 ### One metal, one selection
 
@@ -1004,8 +1009,21 @@ So:
   segments sit in one bordered instrument (an inset outline, so it takes no
   height) split by hairlines, each word under a pill in its verdict's ink —
   the same ink and shape as its segment in the run's meter — and a press
-  washes its segment and lights the pill. The six-tile bar is two rows of
-  three inside the one instrument.
+  washes its segment and lights the pill.
+  **Since plan 180 (正解, the owner's pick B of the canvas "Tsuji — the
+  rating bar") the passes are keys of their own.** The misses (Wrong,
+  Almost, Difficult; Blackout on the six) stay that one instrument; Correct
+  — and Perfect on the six — stands beside it a gap apart as a key filled
+  in its own verdict ink (`--rating-correct` 青竹, `--rating-perfect` 若葉),
+  lit from the top with a soft glow, the sumi type and a check where the
+  pill was. Correct is the answer pressed most, so it is the widest target
+  on the bar (half again a miss on the four) and the one thing on it in
+  colour. Still not gold: a pass is lit in its verdict's ink, and gold
+  stays the action's metal. On a phone the six puts its four misses on one
+  row and the two keys under them, on the edge the thumb is nearest; on
+  the desk's panels the keys are drawn unlit, like the segments, until the
+  reveal, and the card panel's Correct and Perfect tiles are edged and
+  washed in the same inks.
 - **The streak is a スタンプラリー stamp rally**, not a flame — a row of
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a
@@ -1509,7 +1527,7 @@ each question drawing its answers between them.
   and the grammar level's **points**, which open rather than board, are
   doors at the page's foot, one row. The bar names no level: the open
   stop does.
-- **Vocabulary's sources open on what you started** (plan 180, the
+- **Vocabulary's sources open on what you started** (plan 181, the
   owner's pick C of the canvas "Tsuji — the vocabulary's sources"; plan
   137 had hung the three sources as equal plates, and on a real window
   the five levels shared 800px while the 41 tiers and the 36 themes

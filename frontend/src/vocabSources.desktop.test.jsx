@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the vocabulary's sources, what you started first (plan 180) ──
+// ── 机 — the vocabulary's sources, what you started first (plan 181) ──
 // The owner's pick C of the canvas "Tsuji — the vocabulary's sources".
 // Plan 137 hung the three sources as three equal plates the window's
 // height; the page now opens on a strip of what the learner has started
@@ -109,7 +109,7 @@ afterEach(() => {
   SUMMARY.jlptLevel = 'N5'
 })
 
-describe('the vocabulary\'s sources on the desk (plan 180)', () => {
+describe('the vocabulary\'s sources on the desk (plan 181)', () => {
   it('lays the strip over three plates side by side, down to the window\'s foot and no further', async () => {
     await mount()
     const s = strip().getBoundingClientRect()

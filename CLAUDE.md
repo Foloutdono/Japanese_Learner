@@ -1405,8 +1405,20 @@ runtime purpose. Two consequences worth knowing:
   `src/deskfree.phone.test.jsx`,
   `src/deckFit.wide.test.jsx`, `src/shelf.desktop.test.jsx` and the 机
   section of `index.css`; DESIGN.md, "The gate button" and "The desk").
-  **180** is 途中, the vocabulary's sources on the desk led by what the
-  learner has started (the owner's pick C of four drawn on the canvas
+  **180** is 正解, the rating bar's passes as keys of their own (the
+  owner's pick B of five drawn on the canvas "Tsuji — the rating bar",
+  asked a step more vibrant): the misses stay plan 174's one instrument,
+  and Correct -- with Perfect on the six -- stands beside it as a key
+  filled in its own ink, `--rating-correct` and `--rating-perfect`,
+  which the run's meter and the desk's verdict tiles wear too; on a
+  phone the six's keys go under its misses (cited in
+  `components/study/RatingBar.jsx`, `index.css` and its 机 section,
+  `src/harmony.css.test.js`, `src/stage.phone.test.jsx` and
+  `components/study/RatingBar.browser.test.jsx`; DESIGN.md, Controls).
+  **181** is 途中, the vocabulary's sources on the desk led by what the
+  learner has started (numbered 181 because 180 went to 正解 while it
+  was open: its first commit's message says 180; the owner's pick C of
+  four drawn on the canvas
   "Tsuji — the vocabulary's sources", replacing plan 137's three equal
   plates): a strip of the learner's own level -- its bar, its first
   words and the gate that resumes it on its first platform -- then the
@@ -1421,7 +1433,7 @@ runtime purpose. Two consequences worth knowing:
   `components/selection/VocabSources.jsx`, `src/vocabSources.desktop.test.jsx`,
   `src/vocabSources.wide.test.jsx`, `src/vocabSources.short.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **181** or higher, and check
+  When starting a new wave, begin at **182** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

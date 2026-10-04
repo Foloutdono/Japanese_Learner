@@ -674,7 +674,7 @@ const stats = {
   learningUnit:       'in progress',
   sourceTiers:        n => `${n} tiers`,
   sourceThemes:       n => `${n} themes`,
-  // The vocabulary's sources on the desk (plan 180): the strip of what
+  // The vocabulary's sources on the desk (plan 181): the strip of what
   // the learner has started, over the three sources.
   sourcesInProgress:  'In progress',
   sourcesResume:      'Resume',

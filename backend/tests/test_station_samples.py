@@ -170,7 +170,7 @@ def test_a_learner_with_nothing_met_answers_an_empty_map(client):
         assert client.get("/api/frequency/kanji/tiers/started").json()["started"] == {}
 
 
-# ── the tiers' samples (plan 180) ──
+# ── the tiers' samples (plan 181) ──
 # The desk's vocabulary sources offer a started tier again with the
 # first words it teaches: the tier's own, in rank order, as the page
 # writes them.

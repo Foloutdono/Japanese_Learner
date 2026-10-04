@@ -2576,6 +2576,16 @@
   /* Dark ink text for use on light/mid-tone colour fills (success,
      warning) that stay legible with dark text regardless of theme. */
   --text-on-fill:       #1c1811;
+  /* 正解 (plan 180) — the pass verdicts' inks: Correct's 青竹 and
+     Perfect's 若葉, the two keys the rating bar fills. A step brighter
+     than the state ramp the misses stand on (plan 174's 状態), by the
+     owner's word ("a bit more vibrant"): the answer pressed most is the
+     one thing on the bar in colour. Fixed, because the keys stand on
+     sumi in both themes; the run's meter and the desk's verdict tiles
+     wear the same two, as every verdict's segment wears its key's ink.
+     Dark text on both: 7.3:1 and 7.9:1. */
+  --rating-correct:     #22b89c;
+  --rating-perfect:     #6cc24a;
 
   /* Washi (和紙) — the one bright surface reserved for diagrams that
      need true white behind black ink (stroke order refs, kanji
@@ -6903,8 +6913,8 @@ textarea:focus-visible {
 .run-meter__s--q1 { background: var(--rating-wrong); }
 .run-meter__s--q2 { background: var(--rust); }
 .run-meter__s--q3 { background: var(--warning); }
-.run-meter__s--q4 { background: var(--teal); }
-.run-meter__s--q5 { background: var(--success); }
+.run-meter__s--q4 { background: var(--rating-correct); }
+.run-meter__s--q5 { background: var(--rating-perfect); }
 .run-meter--open .run-meter__s { flex: 0 0 12px; }
 .run-meter--dense .run-meter__segs { gap: 0; overflow: hidden; border-radius: var(--r-pill); }
 .run-meter--dense .run-meter__s { border-radius: 0; }
@@ -13919,20 +13929,50 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
       by hairlines, each word under a pill in its verdict's ink — the
       same ink, the same shape, as its segment in the run's meter under
       the head (RunConsole.jsx) — and a press washes its segment and
-      lights the pill. */
+      lights the pill.
+
+   6. THE PASS IS A KEY OF ITS OWN (plan 180, 正解, the owner's pick B, 改札,
+      of the canvas "Tsuji — the rating bar", over a filled tile in the
+      instrument, a tile lit at rest, the gold again and a ring): the
+      misses stay the one instrument of 5, and the passes — Correct, and
+      Perfect on the six — stand beside it as keys, each filled in its
+      own verdict ink (--rating-correct, --rating-perfect), lit from the
+      top, a check where the pill was. Correct is the answer pressed most,
+      so it is the widest target on the bar and the one thing in colour.
+      Not gold: gold is still the action's metal. */
 .rating-bar__buttons {
   display: flex;
-  gap: 0;
+  gap: var(--sp-3);
   max-width: 640px;
   margin: 0 auto;
+}
+/* The misses: the one instrument. Its hairline is an inset outline,
+   not a border: it takes no height (a run's column is measured to the
+   pixel on a laptop) and it paints over a washed segment's corner. */
+.rating-bar__misses {
+  display: flex;
+  flex: 3 1 0;
+  gap: 0;
+  min-width: 0;
   overflow: hidden;
-  /* The instrument's hairline as an inset outline, not a border: it
-     takes no height (a run's column is measured to the pixel on a
-     laptop) and it paints over a washed segment's corner. */
   outline: 1px solid color-mix(in srgb, var(--text-on-panel) 14%, transparent);
   outline-offset: -1px;
   border-radius: var(--r-panel);
 }
+/* The passes: a key each, a gap apart. Each count says its share: the
+   four's Correct half again as wide as a miss, the two's pair equal
+   (a binary rating wants the biggest, least ambiguous targets), the
+   six's two keys beside four misses. */
+.rating-bar__keys {
+  display: flex;
+  flex: 1.5 1 0;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.rating-bar__buttons--2 > .rating-bar__misses,
+.rating-bar__buttons--2 > .rating-bar__keys { flex: 1 1 0; }
+.rating-bar__buttons--6 > .rating-bar__misses { flex: 4 1 0; }
+.rating-bar__buttons--6 > .rating-bar__keys { flex: 2.4 1 0; }
 
 .rating-bar__btn {
   display: flex;
@@ -13997,9 +14037,36 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   box-shadow: 0 0 8px 1px color-mix(in srgb, var(--rating-color, transparent) 70%, transparent);
 }
 
-/* The best answer is a tile like the others since plan 174 (5, above):
-   RatingBar.jsx still marks it --best, for the tests and the desk's
-   key, and gives it its pill like every other. */
+/* The key (6, above): its verdict's ink as the fill, lit from the top
+   the way the metal is, the sumi type on it, a glow round it on the
+   bar's sumi. Hover and focus lift it; a press rings it in the panel
+   ink and widens the glow, held while the bar fades, as a segment's
+   press is. Written at the pressed rule's specificity so the segment's
+   wash never paints over the fill. */
+.rating-bar__btn.rating-bar__btn--key {
+  gap: var(--sp-1);
+  border: 0;
+  border-radius: var(--r-panel);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rating-color) 78%, var(--text-on-panel)) 0%, var(--rating-color) 55%);
+  color: var(--text-on-fill);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text-on-panel) 35%, transparent),
+    0 0 18px -4px color-mix(in srgb, var(--rating-color) 70%, transparent);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.rating-bar__btn.rating-bar__btn--key:hover,
+.rating-bar__btn.rating-bar__btn--key:focus-visible {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rating-color) 65%, var(--text-on-panel)) 0%, color-mix(in srgb, var(--rating-color) 88%, var(--text-on-panel)) 60%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text-on-panel) 45%, transparent),
+    0 0 22px -2px color-mix(in srgb, var(--rating-color) 80%, transparent);
+}
+.rating-bar__btn.rating-bar__btn--key.rating-bar__btn--pressed {
+  box-shadow:
+    inset 0 0 0 2px var(--text-on-panel),
+    0 0 26px 4px color-mix(in srgb, var(--rating-color) 75%, transparent);
+}
+.rating-bar__btn-check { flex: none; }
 
 .rating-bar__btn-label {
   font-family: var(--font-display);
@@ -14015,8 +14082,8 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 
 .rating-bar__btn--q0 { --rating-color: var(--danger); }
-.rating-bar__btn--q5 { --rating-color: var(--success); }
-.rating-bar__btn--q4 { --rating-color: var(--teal); }
+.rating-bar__btn--q5 { --rating-color: var(--rating-perfect); }
+.rating-bar__btn--q4 { --rating-color: var(--rating-correct); }
 .rating-bar__btn--q3 { --rating-color: var(--warning); }
 .rating-bar__btn--q2 { --rating-color: var(--rust); }
 /* q1's own dedicated ink -- not --accent, which is exactly --line-kana
@@ -14045,45 +14112,33 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    it, so falling back to ring-only would leave colour as the sole
    channel.
 
-   So below 560px SIX segments wrap to two rows of three. Four and two
-   stay on one row: at 375px four segments are ~80px each, and the
-   longest word either bar carries (Difficile, ~62px at --fs-sm/700)
-   fits with room to spare. One row is the shape a thumb sweeps along
-   the bottom edge of a phone, worst to best, left to right — the same
-   shape the bar has on a desktop, so nothing has to be relearnt
-   between the two. It stays ONE object -- one container, one border,
-   hairlines between segments -- and the six-wide grid still reads
-   left to right, top to bottom.
+   So below 560px the SIX wrap (plan 180): the four misses as the
+   instrument across a row, the two keys under it. Four and two stay on
+   one row: at 375px the four's misses are ~78px each, and the longest
+   word they carry (Difficile, ~62px at --fs-sm/700) fits; Correct's key
+   is half again as wide. One row is the shape a thumb sweeps along the
+   bottom edge of a phone, worst to best, left to right — the same shape
+   the bar has on a desktop, so nothing has to be relearnt between the
+   two.
 
    The bar keeps the card's column at every count, so the two-button
-   variant is two 320px segments on a desktop. Deliberate: switching
+   variant is two ~315px targets on a desktop. Deliberate: switching
    bars changes how many judgements you are offered, not where the
    instrument sits or how wide it is, and a binary rating wants the
    biggest, least ambiguous target of the three.
 
    The count is on the container (see RatingBar.jsx) rather than
-   inferred, because the hairlines have to be redrawn for whichever
-   grid it is and nth-child cannot ask how many siblings there are. */
+   inferred, because each count shares the row differently and
+   nth-child cannot ask how many siblings there are. */
 @media (max-width: 560px) {
-  .rating-bar__buttons { flex-wrap: wrap; }
   .rating-bar__btn { padding-inline: var(--sp-1); }
-
-  /* Grouped by what they do rather than by bar — both widths first,
-     then both sets of hairlines — because an :nth-child override has
-     to come after every plain selector it outranks (the
-     no-descending-specificity guard). */
-  .rating-bar__buttons--6 .rating-bar__btn { flex: 1 1 calc(33.333% - var(--sp-3)); }
-  /* Written out rather than left to the base rule's `flex: 1 1 0`,
-     which produces the same single row: every count the bar can have
-     says what it does here, so a missing one reads as an omission
-     rather than as an answer. */
-  .rating-bar__buttons--4 .rating-bar__btn { flex: 1 1 0; }
-  .rating-bar__buttons--2 .rating-bar__btn { flex: 1 1 0; }
-  /* Six as two rows of three inside the one instrument (plan 174):
-     the fourth opens the second row, so it takes the row's top
-     hairline and drops the left one. */
-  .rating-bar__buttons--6 .rating-bar__btn:nth-child(n+4) { border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent); }
-  .rating-bar__buttons--6 .rating-bar__btn:nth-child(4) { border-left: 0; }
+  /* Six (plan 180): the four misses as the instrument across the row,
+     the two keys under them -- the passes on the bottom edge, nearest
+     the thumb, the bar still reading worst to best. Four and two stay
+     one row: the four's misses are ~78px at 375, room for Difficile. */
+  .rating-bar__buttons--6 { flex-wrap: wrap; }
+  .rating-bar__buttons--6 > .rating-bar__misses,
+  .rating-bar__buttons--6 > .rating-bar__keys { flex: 1 1 100%; }
 }
 
 /* The mark (plan 158), in the page's ink: it wore --accent here, which
@@ -29587,7 +29642,7 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-source__here { color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary)); }
 
-  /* ── 机 — the vocabulary's sources, what you started first (plan 180) ──
+  /* ── 机 — the vocabulary's sources, what you started first (plan 181) ──
      The owner's pick C: the five levels had shared a plate the window's
      height while the tiers and the themes scrolled beside them. A strip
      of what the learner has started opens the page -- their own level
@@ -32857,6 +32912,13 @@ button.brd-stn { cursor: pointer; }
   .desk-run--panels > .stage > .rating-bar--unlit { pointer-events: none; }
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn { opacity: 0.38; }
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn-ring { background: var(--text-on-panel-soft); }
+  /* A key before the reveal is drawn unlit like the segments: its
+     ground the panel ink's wash, no fill and no glow (plan 180). */
+  .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn.rating-bar__btn--key {
+    background: color-mix(in srgb, var(--text-on-panel) 10%, transparent);
+    color: var(--text-on-panel);
+    box-shadow: none;
+  }
   /* A panel: the surface, its hairline and corner. No caption: its
      figures, its stops and its tiles name themselves (owner's cut). */
   .desk-run__panel {
@@ -33000,8 +33062,16 @@ button.brd-stn { cursor: pointer; }
   .desk-verdict--q1 { --rating-color: var(--rating-wrong); }
   .desk-verdict--q2 { --rating-color: var(--rust); }
   .desk-verdict--q3 { --rating-color: var(--warning); }
-  .desk-verdict--q4 { --rating-color: var(--teal); }
-  .desk-verdict--q5 { --rating-color: var(--success); }
+  .desk-verdict--q4 { --rating-color: var(--rating-correct); }
+  .desk-verdict--q5 { --rating-color: var(--rating-perfect); }
+  /* The passes' tiles echo their keys on the bar under the card (plan
+     180): edged and washed in the key's ink, the wait in it (after
+     .desk-verdict__when, below). */
+  .desk-verdict--q4,
+  .desk-verdict--q5 {
+    border-color: color-mix(in srgb, var(--rating-color) 55%, transparent);
+    background: color-mix(in srgb, var(--rating-color) 10%, transparent);
+  }
   .desk-verdict__when {
     display: flex;
     flex-wrap: wrap;
@@ -33013,6 +33083,8 @@ button.brd-stn { cursor: pointer; }
     line-height: 1;
     color: var(--text-primary);
   }
+  .desk-verdict--q4 .desk-verdict__when,
+  .desk-verdict--q5 .desk-verdict__when { color: color-mix(in srgb, var(--rating-color) 55%, var(--text-primary)); }
   .desk-verdict__value {
     font-size: var(--fs-display);
     font-variant-numeric: tabular-nums;

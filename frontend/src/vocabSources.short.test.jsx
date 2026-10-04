@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 低 — the vocabulary's sources on a laptop's short window (plan 180) ──
+// ── 低 — the vocabulary's sources on a laptop's short window (plan 181) ──
 // A 600px window (plan 169): the strip's first words give way, and the
 // page shows whole -- the strip, the three plates to the window's foot,
 // JLPT's five rows each a row's height at least, the gate in its card.
@@ -98,7 +98,7 @@ const rows = plate => [...plate.querySelectorAll('.desk-source__rows > a')]
 
 afterEach(() => { STATS.items.vocab.N4.started = 0 })
 
-describe('the vocabulary\'s sources on a short desk (plan 180)', () => {
+describe('the vocabulary\'s sources on a short desk (plan 181)', () => {
   it('shows the page whole: no first words, the plates down to the foot and no further', async () => {
     await mount()
     expect(getComputedStyle(lead().querySelector('.desk-resume__sample')).display).toBe('none')

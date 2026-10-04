@@ -653,7 +653,7 @@ const stats = {
   learningUnit:       'en cours',
   sourceTiers:        n => `${n} paliers`,
   sourceThemes:       n => `${n} thèmes`,
-  // Les sources du vocabulaire sur le bureau (plan 180) : la bande de ce
+  // Les sources du vocabulaire sur le bureau (plan 181) : la bande de ce
   // que l'apprenant a commencé, au-dessus des trois sources.
   sourcesInProgress:  'En cours',
   sourcesResume:      'Reprendre',

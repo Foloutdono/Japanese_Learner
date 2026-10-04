@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the vocabulary's sources on a 1,440px window (plan 180) ─────
+// ── 机 — the vocabulary's sources on a 1,440px window (plan 181) ─────
 // The page as the owner drew it (pick C): the lead and four stops in
 // the strip, the 41 tiers whole in their plate, seven or more cells to
 // a row, and the themes in two columns. The narrowest desk's version is
@@ -107,7 +107,7 @@ afterEach(() => {
   STARTED = MET
 })
 
-describe('the vocabulary\'s sources on a wide desk (plan 180)', () => {
+describe('the vocabulary\'s sources on a wide desk (plan 181)', () => {
   it('fills the strip with four stops beside the lead, the most met first, the gate inside its card', async () => {
     STATS.items.vocab.N4.started = 40
     await mount()
