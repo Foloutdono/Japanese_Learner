@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
+import { currentSession } from '../../lib/session'
 import { playClick, playUi } from '../../lib/audio'
 import { refreshSummary, useProfileSummary } from '../../stores/profileSummary'
 import { useJourneyStatus, useVolumes, refreshJourney } from '../../stores/journey'
@@ -85,7 +86,8 @@ export function ServicePage({ session }) {
     setFailed(false)
     // A fresh clock for the printed date: the office's own rule.
     const target = iso(goalDerived(volumes, startLevel, { dest, mode: 'service', perDay: chosen }, new Date()).targetDate)
-    apiJson('/api/journey/reprint', null, { method: 'POST', body: JSON.stringify({ goalTargetDate: target, dailyNewTarget: chosen }) })
+    currentSession()
+      .then(session => apiJson('/api/journey/reprint', session, { method: 'POST', body: JSON.stringify({ goalTargetDate: target, dailyNewTarget: chosen }) }))
       .then(() => Promise.all([refreshJourney(), refreshSummary()]))
       .then(() => { setPick(undefined); setDone(true) })
       .catch(() => setFailed(true))

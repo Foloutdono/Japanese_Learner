@@ -1,4 +1,5 @@
 import { apiJson } from '../lib/api'
+import { currentSession } from '../lib/session'
 import { forServer } from '../domain/agenda'
 import { createRemoteStore } from './remote'
 
@@ -27,7 +28,7 @@ export function seedAgenda(blocks) {
  *  ApiError the page words (an overlap is a 422 whose detail.code says
  *  so). */
 export async function saveAgenda(blocks) {
-  const out = await apiJson('/api/agenda', null, { method: 'PUT', body: JSON.stringify({ blocks: forServer(blocks) }) })
+  const out = await apiJson('/api/agenda', await currentSession(), { method: 'PUT', body: JSON.stringify({ blocks: forServer(blocks) }) })
   store.seed(out)
   return out.blocks
 }

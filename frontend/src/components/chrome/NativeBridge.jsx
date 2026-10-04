@@ -8,6 +8,7 @@ import { refreshAgenda, useAgenda } from '../../stores/agenda'
 import { planAgenda } from '../../lib/agenda'
 import { kanaSetLabel } from '../../domain/kanaSets'
 import { apiJson } from '../../lib/api'
+import { currentSession } from '../../lib/session'
 import { track } from '../../lib/track'
 import { aheadInstants, aheadQuery, planNudges, widgetPayload, WIDGET_HOUR } from '../../lib/ahead'
 import {
@@ -108,7 +109,7 @@ function AheadPlanner({ enabled, time }) {
     const handle = setTimeout(async () => {
       const now = new Date()
       const hour = nudgeAt(time)
-      const ahead = await apiJson(aheadQuery(aheadInstants(hour ?? WIDGET_HOUR, now), now, lang), null)
+      const ahead = await apiJson(aheadQuery(aheadInstants(hour ?? WIDGET_HOUR, now), now, lang), await currentSession())
         .catch(() => null)
       if (cancelled) return
       last.current = { key, at: Date.now() }

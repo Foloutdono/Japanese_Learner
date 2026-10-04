@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
+import { currentSession } from '../../lib/session'
 import { playClick, playUi } from '../../lib/audio'
 import { refreshSummary, useProfileSummary } from '../../stores/profileSummary'
 import { useJourneyStatus, useVolumes, refreshJourney } from '../../stores/journey'
@@ -104,12 +105,12 @@ export function DestinationPage() {
     // A fresh clock for the printed date: the office's own rule.
     const target = iso(goalDerived(volumes, startLevel, { dest: chosenDest, mode: 'service', perDay: pace }, new Date()).targetDate)
     const body = { goalLevel: chosenDest, goalTargetDate: target, dailyNewTarget: pace }
-    send(apiJson('/api/journey/goal', null, { method: 'POST', body: JSON.stringify(body) }), 'issued')
+    send(currentSession().then(session => apiJson('/api/journey/goal', session, { method: 'POST', body: JSON.stringify(body) })), 'issued')
   }
 
   function drop() {
     playUi('click')
-    send(apiJson('/api/journey/goal', null, { method: 'DELETE' }), 'dropped')
+    send(currentSession().then(session => apiJson('/api/journey/goal', session, { method: 'DELETE' })), 'dropped')
   }
 
   const here = stopParts(t, startLevel)

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
+import { currentSession } from '../../lib/session'
 import { playClick } from '../../lib/audio'
 import { refreshSummary } from '../../stores/profileSummary'
 import { useJourneyStatus, refreshJourney } from '../../stores/journey'
@@ -32,7 +33,8 @@ export function HourPage() {
     playClick()
     setBusy(true)
     setFailed(false)
-    apiJson('/api/journey/reprint', null, { method: 'POST', body: JSON.stringify({ dailyDeparture: id }) })
+    currentSession()
+      .then(session => apiJson('/api/journey/reprint', session, { method: 'POST', body: JSON.stringify({ dailyDeparture: id }) }))
       .then(() => Promise.all([refreshJourney(), refreshSummary()]))
       .catch(() => setFailed(true))
       .finally(() => setBusy(false))
