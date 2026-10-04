@@ -1665,3 +1665,132 @@ describe('the lookup sheet — a grammar point by its card id', () => {
     await screen.unmount()
   })
 })
+
+// ── 割合 — the share of the words that use each reading (plan 177) ──
+describe('the readings — each with the share of the words that use it', () => {
+  beforeEach(async () => {
+    await page.viewport(1099, 900)
+    localStorage.removeItem('tsuji.readingsScope')
+  })
+  afterEach(async () => { await page.viewport(1300, 900) })
+  const sheet = () => document.querySelector('.dict-sheet__scrim--over .dict-sheet[role="dialog"]')
+  const word = (kanji, kana, level) => ({
+    kanji, kana, meaning: kanji, level,
+    furigana: [{ text: kanji[0], reading: kana }],
+  })
+  // 木 as study/kanji_words.py counts it: the course has 20 words, 12 of
+  // them read モク; ボク has none. JMdict has 200, ボク among them.
+  const SHARED = {
+    ...KANJI,
+    readings: [
+      { reading: 'ボク', words: [word('樹木', 'ぼく', null)] },
+      { reading: 'モク', words: [word('木曜日', 'もく', 'N5'), word('木材', 'もく', 'N2')] },
+      { reading: 'き', words: [word('木', 'き', 'N5'), word('植木', 'き', null)] },
+      { reading: 'こ~', words: [] },
+    ],
+    reading_shares: { total: 20, whole: 2, readings: { 'モク': 12, 'き': 6 } },
+  }
+  const ALL = { total: 200, whole: 10, readings: { 'ボク': 120, 'モク': 40, 'き': 30 } }
+  const open = async () => {
+    const out = await renderEntry(SHARED)
+    out.root.querySelector('.dict-plate__more').click()
+    await settle()
+    return out
+  }
+  const rows = () => [...sheet().querySelectorAll('.dict-rd')].map(el => ({
+    yomi: el.querySelector('.dict-rd__yomi').textContent,
+    pct: el.querySelector('.dict-rd__pct')?.textContent,
+    tier: el.querySelector('.dict-share__tier')?.textContent,
+    words: [...el.querySelectorAll('.dict-word__jp')].map(w => w.textContent),
+  }))
+  const scopeButtons = () => [...sheet().querySelectorAll('.dict-scope [role="radio"]')]
+
+  it('opens on the course, most used reading first, with its share, its tier and only the course\'s words', async () => {
+    await open()
+    expect(scopeButtons().map(b => [b.textContent, b.getAttribute('aria-checked')]))
+      .toEqual([['JLPT course', 'true'], ['All JMdict', 'false']])
+    expect(sheet().querySelector('.dict-scope__hint').textContent)
+      .toBe('Share of the course\'s 20 words that use each reading.')
+    // The gates count the readings with a share; the open one is 音.
+    const r = rows()
+    expect(r.map(x => x.yomi)).toEqual(['モク'])
+    expect(r[0].pct).toBe('60.0%')
+    expect(r[0].tier).toBe('Common')
+    expect(sheet().querySelector('.dict-rd .dict-share__meta').textContent).toContain('12 of 20 words')
+    expect(sheet().querySelector('.dict-share__bar i').style.width).toBe('60%')
+    // The reading no course word uses is a pill, not a band.
+    expect([...sheet().querySelectorAll('.dict-rest__chip')].map(el => el.textContent)).toEqual(['ボク'])
+    // The words that are not the course's stay out of it.
+    expect(sheet().querySelector('.dict-whole').textContent).toContain('Word read as a whole')
+    expect(sheet().querySelector('.dict-whole__pct').textContent).toBe('10.0 %')
+  })
+
+  it('counts over all of JMdict on request, asks the backend once, and remembers the choice', async () => {
+    const { apiJson } = await import('../../lib/api')
+    apiJson.mockClear()
+    apiJson.mockResolvedValueOnce(ALL)
+    await open()
+    scopeButtons()[1].click()
+    await settle()
+    expect(apiJson).toHaveBeenCalledTimes(1)
+    expect(apiJson.mock.calls[0][0]).toBe('/api/dictionary/readings-share?char=%E6%9C%A8')
+    expect(rows().map(x => [x.yomi, x.pct, x.tier])).toEqual([
+      ['ボク', '60.0%', 'Common'],
+      ['モク', '20.0%', 'Common'],
+    ])
+    // The same sheet's kun gate carries the rest, most used first.
+    sheet().querySelectorAll('.dict-gate')[1].click()
+    await settle()
+    expect(rows().map(x => [x.yomi, x.pct, x.tier])).toEqual([['き', '15.0%', 'Usual']])
+    // Every word, not only the course's, under a reading over all of JMdict.
+    expect(rows()[0].words).toHaveLength(2)
+    expect(localStorage.getItem('tsuji.readingsScope')).toBe('all')
+    // Back to the course and out again: no second request.
+    scopeButtons()[0].click()
+    await settle()
+    scopeButtons()[1].click()
+    await settle()
+    expect(apiJson).toHaveBeenCalledTimes(1)
+  })
+
+  it('opens on the scope the learner chose last', async () => {
+    localStorage.setItem('tsuji.readingsScope', 'all')
+    const { apiJson } = await import('../../lib/api')
+    apiJson.mockResolvedValue(ALL)
+    await open()
+    expect(scopeButtons().map(b => b.getAttribute('aria-checked'))).toEqual(['false', 'true'])
+    apiJson.mockResolvedValue({})
+  })
+
+  it('says so, and offers JMdict, for a kanji the course has no word for', async () => {
+    const PEACH = {
+      ...SHARED, kanji: '桃',
+      readings: [
+        { reading: 'トウ', words: [word('白桃', 'とう', null)] },
+        { reading: 'もも', words: [word('桃', 'もも', null)] },
+      ],
+      reading_shares: { total: 0, whole: 0, readings: {} },
+    }
+    const { apiJson } = await import('../../lib/api')
+    apiJson.mockResolvedValueOnce({ total: 64, whole: 13, readings: { 'トウ': 29, 'もも': 22 } })
+    const { root } = await renderEntry(PEACH)
+    root.querySelector('.dict-plate__more').click()
+    await settle()
+    expect(sheet().querySelector('.dict-scope__empty strong').textContent)
+      .toBe('No word in the JLPT course uses 桃.')
+    expect(sheet().querySelectorAll('.dict-rd')).toHaveLength(0)
+    sheet().querySelector('.dict-scope__empty button').click()
+    await settle()
+    expect(sheet().querySelector('.dict-scope__empty')).toBeNull()
+    expect(rows().map(x => [x.yomi, x.pct])).toEqual([['トウ', '45.3%']])
+  })
+
+  it('keeps the old list for an entry that carries no counts', async () => {
+    const { root } = await renderEntry(KANJI)
+    root.querySelector('.dict-plate__more').click()
+    await settle()
+    expect(sheet().querySelector('.dict-scope')).toBeNull()
+    expect(sheet().querySelector('.dict-rd__pct')).toBeNull()
+  })
+})
+

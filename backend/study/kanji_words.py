@@ -29,6 +29,17 @@ appear in the ledger, but only once every filed reading has run out of
 words, and never under a reading it cannot vouch for.
 
 ── Words written in kana ──────────────────────────────────────
+── Words the deck does not have ──────────────────────────────
+The deck is 8,405 words and a kanji's readings run past it: 桃 has
+もも and the deck has no word for it, so the reading was a bare chip
+under "no example words yet" (plan 177). A reading with fewer than
+MAX_WORDS deck words is topped up from the JMdict pool, the commonest
+words first (content/vocab_jmdict_data.by_kanji_char), filed under the
+reading by the same aligner and the same token matching as the deck's
+own and shown after them. A pool word carries no level -- the ledger row
+draws no badge for it -- and is glossed in English where vocab_fr has no
+entry, as the kana ledger's pool rows are (study/kana_words.py).
+
 A word JMdict says is written in kana in every sense (火傷 やけど,
 不山戯る ふざける) is the weakest example a kanji can have: the reader
 will meet the word, but not the character in it. Such a word goes after
@@ -36,7 +47,9 @@ the others of its group rather than out of it, because for some readings
 it is the only word the deck has.
 """
 from collections import defaultdict
+from functools import lru_cache
 
+import content.vocab_jmdict_data as jmdict_db
 from content.kanji_data import KANJI_BY_LEVEL
 from content.vocab_data import VOCAB_BY_LEVEL
 from content.vocab_extras import is_written_in_kana
@@ -116,7 +129,77 @@ def reading_of(char: str, furigana: list[dict]) -> str | None:
     return None
 
 
-def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str], dict[str | None, list[dict]]]:
+def _file_under(char: str, kanji: str, furigana: list[dict], tokens: list[str]) -> str | None:
+    """The reading of `char` a word (already aligned) is filed under, or
+    None where the aligner could not place it: the token the slice of its
+    reading matches (reading_token_for), then the one whose okurigana the
+    word writes (_by_okurigana)."""
+    surface = reading_of(char, furigana)
+    token = reading_token_for(surface, tokens, first=kanji.find(char) == 0) if surface else None
+    if token is not None:
+        token = _by_okurigana(token, tokens, _okurigana_after(char, furigana))
+    return token
+
+
+def _okurigana_after(char: str, furigana: list[dict]) -> str:
+    """The kana written straight after `char` in a word, as the aligner
+    left it: 生きる → きる, 生け花 → け, 生活 → ''."""
+    for i, part in enumerate(furigana[:-1]):
+        nxt = furigana[i + 1]
+        if part.get("text") == char and not nxt.get("reading"):
+            return nxt["text"]
+    return ""
+
+
+def _by_okurigana(token: str, tokens: list[str], okurigana: str) -> str:
+    """Of the readings that share `token`'s sound, the one whose own
+    okurigana the word writes: 生かす and 生ける are both い, and
+    reading_token_for files both under the first い.* of the list, so
+    い.かす and い.ける never owned a word. The longest ending the word
+    begins with wins (うま.れる over うま.れ for 生まれる); a word that
+    matches none keeps the token it was filed under."""
+    if not okurigana or "." not in token:
+        return token
+    stem, best, best_len = reading_stem(token), token, -1
+    for other in tokens:
+        if "." not in other or reading_stem(other) != stem:
+            continue
+        tail = other.split(".", 1)[1].replace("~", "")
+        if tail and okurigana.startswith(tail) and len(tail) > best_len:
+            best, best_len = other, len(tail)
+    return best if best_len >= 0 else token
+
+
+# How many pool rows are aligned for one character, commonest first. A
+# bucket needs four words and the aligner is the cost: 生 has 1,888
+# words in the pool and the first 300 already read it eleven ways.
+POOL_SCAN = 300
+# Candidates kept per reading: a few more than shown, so a pool word that
+# is also a deck word, or one written in kana, can be passed over.
+_POOL_KEPT = 2 * MAX_WORDS
+
+
+@lru_cache(maxsize=512)
+def _pool_candidates(char: str, tokens: tuple[str, ...]) -> dict[str, tuple[tuple[str, str, str], ...]]:
+    """reading token -> (kanji, kana, English meaning) for the pool words
+    that demonstrate it, written-in-kanji first and commonest first.
+
+    Language-free and small on purpose (a tuple of strings per word,
+    ~7 KB for a character with a dozen readings): the furigana and the
+    gloss are made for the few that are shown."""
+    found: dict[str, list[tuple[str, str, str]]] = {tok: [] for tok in tokens}
+    for row in jmdict_db.by_kanji_char(char, POOL_SCAN):
+        kanji, kana = row["kanji"], row["kana"]
+        token = _file_under(char, kanji, word_furigana(kanji, kana), list(tokens))
+        if token is not None and len(found[token]) < _POOL_KEPT * 2:
+            found[token].append((kanji, kana, row["meaning"]))
+    return {
+        tok: tuple(sorted(words, key=lambda w: is_written_in_kana(w[0], w[1]))[:_POOL_KEPT])
+        for tok, words in found.items() if words
+    }
+
+
+def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str], dict[str | None, list[dict]], dict[str | None, int]]:
     """Every deck word containing `char`, filed under the reading it uses.
 
     Order inside a bucket is most-common level first, and multi-character
@@ -149,13 +232,33 @@ def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str]
             "level":    level,
             "furigana": furigana,
         }
-        surface = reading_of(char, furigana)
-        token = reading_token_for(surface, tokens, first=kanji.find(char) == 0) if surface else None
-        buckets[token].append(entry)
+        buckets[_file_under(char, kanji, furigana, tokens)].append(entry)
+    # How many deck words each reading has, before the pool tops any up:
+    # the figure behind the share of the JLPT course (plan 177).
+    deck_counts = {tok: len(words) for tok, words in buckets.items()}
+    # The pool tops up every reading the deck leaves short, behind the
+    # deck's own words. Asked only if one is short, so a character the
+    # deck covers well never touches it.
+    if any(len(buckets[tok]) < MAX_WORDS for tok in tokens):
+        pool = _pool_candidates(char, tuple(tokens))
+        for tok in tokens:
+            for kanji, kana, meaning in pool.get(tok, ()):
+                if len(buckets[tok]) >= MAX_WORDS:
+                    break
+                if (kanji, kana) in seen:
+                    continue
+                seen.add((kanji, kana))
+                buckets[tok].append({
+                    "kanji":    kanji,
+                    "kana":     kana,
+                    "meaning":  meaning,
+                    "level":    None,
+                    "furigana": word_furigana(kanji, kana),
+                })
     # Stable: the level and compound order above holds on either side.
     for words in buckets.values():
         words.sort(key=lambda e: is_written_in_kana(e["kanji"], e["kana"]))
-    return tokens, buckets
+    return tokens, buckets, deck_counts
 
 
 def _build_single_kanji_words() -> dict[str, str]:
@@ -218,7 +321,7 @@ def kanji_words(char: str, lang: str, packed: str | None = None) -> dict:
                火山. A kanji with one reading is unaffected: one bucket,
                the same order it always had.
     """
-    tokens, buckets = _buckets(char, lang, packed)
+    tokens, buckets, deck_counts = _buckets(char, lang, packed)
     readings = [{"reading": tok, "words": buckets[tok][:MAX_WORDS]} for tok in tokens]
 
     # One queue per stem, in the deck's order; a stem's queue is its
@@ -248,4 +351,60 @@ def kanji_words(char: str, lang: str, packed: str | None = None) -> dict:
         depth += 1
     # The unplaced words, only in the slots the placed ones left.
     examples.extend(buckets[None][:MAX_WORDS - len(examples)])
-    return {"readings": readings, "examples": examples}
+    return {"readings": readings, "examples": examples,
+            "shares": _shares(deck_counts, tokens)}
+
+
+def _shares(counts: dict[str | None, int], tokens: list[str]) -> dict:
+    """{"total", "whole", "readings": {token: words}} from a count per
+    reading: `whole` is the words the aligner could not place (a reading
+    that belongs to the whole word, 今朝 けさ), and `total` every word,
+    placed or not, so the shares of a kanji add up to its whole."""
+    return {
+        "total": sum(counts.values()),
+        "whole": counts.get(None, 0),
+        "readings": {tok: counts[tok] for tok in tokens if counts.get(tok)},
+    }
+
+
+def _deck_counts(char: str, tokens: list[str]) -> tuple[dict[str | None, int], set[tuple[str, str]]]:
+    """How many of the course's words use each reading of `char`, and the
+    (kanji, kana) pairs counted -- each word once, under the reading it
+    uses (None where the aligner could not place it)."""
+    counts: dict[str | None, int] = defaultdict(int)
+    seen: set[tuple[str, str]] = set()
+    for _level, w in _KANJI_TO_VOCAB.get(char, []):
+        key = (w.get("kanji", ""), w.get("kana", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        counts[_file_under(char, key[0], word_furigana(*key), tokens)] += 1
+    return counts, seen
+
+
+@lru_cache(maxsize=4096)
+def course_shares(char: str, packed: str | None = None) -> dict:
+    """The course's counts alone, without building a reading's example
+    words: what a study card carries so the reading can print its share
+    (plan 177). The same figures as kanji_words(char)["shares"], cheap
+    enough to ride on every kanji card and cached by character."""
+    tokens = reading_tokens(char, packed)
+    counts, _seen = _deck_counts(char, tokens)
+    return _shares(counts, tokens)
+
+
+@lru_cache(maxsize=256)
+def full_shares(char: str, packed: str | None = None) -> dict:
+    """The same counts over ALL of JMdict: the course's words plus every
+    pool word written with `char` (the pool is everything the course is
+    not). The count behind the readings sheet's "Tout JMdict" scope --
+    aligning every one of 生's 1,943 words, so it is asked for when the
+    learner switches to it, and cached (plan 177)."""
+    tokens = reading_tokens(char, packed)
+    counts, seen = _deck_counts(char, tokens)
+    for kanji, kana in jmdict_db.all_with_kanji(char):
+        if (kanji, kana) in seen:
+            continue
+        seen.add((kanji, kana))
+        counts[_file_under(char, kanji, word_furigana(kanji, kana), tokens)] += 1
+    return _shares(counts, tokens)

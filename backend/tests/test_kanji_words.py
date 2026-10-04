@@ -8,9 +8,10 @@ knows and this must not lose: an on-reading written in katakana in the
 deck, a kun-reading's okurigana stem, and a non-initial element voicing
 or geminating.
 """
+import content.vocab_jmdict_data as jmdict_db
 from content.kanji_data import KANJI_BY_LEVEL
 from study.furigana import reading_stem, reading_token_for
-from study.kanji_words import kanji_as_word, kanji_words, reading_tokens, MAX_WORDS
+from study.kanji_words import course_shares, full_shares, kanji_as_word, kanji_words, reading_tokens, MAX_WORDS
 
 
 class TestReadingTokenFor:
@@ -138,7 +139,9 @@ class TestKanjiWords:
         assert words.index("葉書") > words.index("下書き")
 
     def test_a_kanji_outside_the_deck_has_no_readings_and_no_words(self):
-        assert kanji_words("鰻", "en") == {"readings": [], "examples": []}
+        assert kanji_words("鰻", "en") == {
+            "readings": [], "examples": [], "shares": {"total": 0, "whole": 0, "readings": {}},
+        }
 
     def test_french_glosses_follow_the_language(self):
         en = kanji_words("木", "en")["readings"][1]["words"][0]["meaning"]
@@ -176,3 +179,122 @@ class TestKanjiAsWord:
         from study.kanji_words import _SINGLE_KANJI_WORDS
         assert all(len(char) == 1 for char in _SINGLE_KANJI_WORDS)
         assert all(kana for kana in _SINGLE_KANJI_WORDS.values())
+
+
+class TestPoolWords:
+    """Plan 177: a reading the deck has no word for is filled from the
+    JMdict pool, behind the deck's own words."""
+
+    def test_the_index_answers_for_a_character_in_commonest_order(self):
+        rows = jmdict_db.by_kanji_char("桃")
+        assert [(r["kanji"], r["kana"]) for r in rows[:2]] == [("桃", "もも"), ("桃色", "ももいろ")]
+        assert [r["freq_rank"] for r in rows] == sorted(r["freq_rank"] for r in rows)
+        assert all("桃" in r["kanji"] for r in rows)
+
+    def test_the_index_is_capped_and_empty_for_a_character_no_word_has(self):
+        assert len(jmdict_db.by_kanji_char("生")) <= jmdict_db.KANJI_INDEX_CAP
+        assert len(jmdict_db.by_kanji_char("生", limit=5)) == 5
+        assert jmdict_db.by_kanji_char("a") == []
+        assert jmdict_db.by_kanji_char("") == []
+
+    def test_a_reading_the_deck_has_no_word_for_gets_pool_words(self):
+        # 桃 (peach): the deck has no word for it at all, and the plate
+        # used to print もも as a bare chip.
+        out = kanji_words("桃", "en")
+        by = {r["reading"]: r["words"] for r in out["readings"]}
+        assert [w["kanji"] for w in by["もも"]][:2] == ["桃", "桃色"]
+        assert by["トウ"], by
+        for words in by.values():
+            for w in words:
+                assert w["level"] is None
+                assert w["furigana"] and w["meaning"]
+                assert set(w) == {"kanji", "kana", "meaning", "level", "furigana"}
+
+    def test_the_ledger_shows_the_pool_words_too(self):
+        shown = {w["kanji"] for w in kanji_words("桃", "en")["examples"]}
+        assert "桃" in shown and shown & {"黄桃", "桃源郷", "白桃", "武陵桃源"}
+
+    def test_the_deck_words_stay_ahead_of_the_pool(self):
+        # 生: the deck's N5 words open セイ, whatever the pool holds.
+        words = {r["reading"]: r["words"] for r in kanji_words("生", "en")["readings"]}["セイ"]
+        assert [w["level"] for w in words] == ["N5"] * len(words)
+        for r in kanji_words("生", "en")["readings"]:
+            levels = [w["level"] is None for w in r["words"]]
+            assert levels == sorted(levels), (r["reading"], levels)
+
+    def test_no_word_is_listed_twice_across_readings(self):
+        for char in ("生", "桃", "日", "人"):
+            seen = [(w["kanji"], w["kana"]) for r in kanji_words(char, "en")["readings"] for w in r["words"]]
+            assert len(seen) == len(set(seen)), char
+
+    def test_a_pool_word_is_glossed_as_jmdict_wrote_it_in_either_language(self):
+        # vocab_fr is the deck's; a pool homograph would collect the deck
+        # word's French (routes/dictionary.py serves the pool the same way).
+        fr = {r["reading"]: r["words"] for r in kanji_words("桃", "fr")["readings"]}["もも"][0]
+        en = {r["reading"]: r["words"] for r in kanji_words("桃", "en")["readings"]}["もも"][0]
+        assert fr["meaning"] == en["meaning"]
+
+    def test_a_pool_word_is_filed_under_the_okurigana_it_writes(self):
+        # 生かす and 生ける are both い; they used to file under the first
+        # い.* of the list, so い.かす and い.ける stayed bare chips.
+        by = {r["reading"]: [w["kanji"] for w in r["words"]] for r in kanji_words("生", "en")["readings"]}
+        assert "生かす" in by["い.かす"]
+        assert "生ける" in by["い.ける"]
+        assert "生きる" in by["い.きる"] and "生きる" not in by["い.かす"]
+        assert "生まれる" in by["う.まれる"] and "生まれ" in by["う.まれ"]
+
+
+class TestReadingShares:
+    """Plan 177: how many words use each reading, over the course and
+    over all of JMdict -- the figure behind the percentage on the
+    readings sheet."""
+
+    def test_the_courses_counts_ride_on_the_entry(self):
+        shares = kanji_words("生", "en")["shares"]
+        assert shares["total"] == 55
+        assert shares["readings"]["セイ"] == 27 and shares["readings"]["ショウ"] == 8
+        assert shares["whole"] == 3
+
+    def test_every_word_is_counted_once_so_the_shares_add_up(self):
+        for char in ("生", "日", "木", "人"):
+            shares = kanji_words(char, "en")["shares"]
+            assert sum(shares["readings"].values()) + shares["whole"] == shares["total"], char
+
+    def test_the_course_counts_ignore_the_pools_top_up(self):
+        # 桃 has words in the readings panel (the pool's) and none in the
+        # course: the share of the course is nothing, not four words.
+        out = kanji_words("桃", "en")
+        assert any(r["words"] for r in out["readings"])
+        assert out["shares"] == {"total": 0, "whole": 0, "readings": {}}
+
+    def test_a_reading_the_course_never_uses_is_not_listed(self):
+        shares = kanji_words("生", "en")["shares"]["readings"]
+        assert "い.ける" not in shares and "う.む" not in shares
+
+    def test_all_of_jmdict_is_the_course_plus_the_pool(self):
+        full = full_shares("生")
+        course = kanji_words("生", "en")["shares"]
+        assert full["total"] > 1500 > course["total"]
+        assert sum(full["readings"].values()) + full["whole"] == full["total"]
+        for reading, n in course["readings"].items():
+            assert full["readings"][reading] >= n, reading
+        # The reading the course barely has and JMdict is full of.
+        assert full["readings"]["い.ける"] > 0 and full["readings"]["セイ"] > full["readings"]["ショウ"]
+
+    def test_a_kanji_the_course_lacks_is_counted_in_jmdict(self):
+        full = full_shares("桃")
+        assert full["total"] >= 60
+        assert full["readings"]["トウ"] > 0 and full["readings"]["もも"] > 0
+
+    def test_a_character_no_word_has_counts_nothing(self):
+        assert full_shares("a") == {"total": 0, "whole": 0, "readings": {}}
+
+    def test_a_study_cards_counts_are_the_entrys_without_building_the_words(self):
+        for char in ("生", "日", "木", "桃", "鰻"):
+            assert course_shares(char) == kanji_words(char, "en")["shares"], char
+
+    def test_a_pool_characters_counts_follow_the_readings_it_is_given(self):
+        # 繋 is no deck kanji: its readings arrive packed, as the pool serves them.
+        shares = course_shares("繋", "ケイ・つな.ぐ・つな.がる")
+        assert shares["readings"].get("つな.ぐ", 0) >= 1
+

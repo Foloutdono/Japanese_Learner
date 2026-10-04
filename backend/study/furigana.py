@@ -457,8 +457,9 @@ def align_sentence(text: str) -> list[dict]:
         return [{"text": text}]
 
     parts: list[dict] = []
-    for word, m in enumerate(morphemes):
-        for part in align_deck(m.surface, m.reading):
+
+    def emit(found: list[dict], word: int) -> None:
+        for part in found:
             if part.get("reading") is None:
                 if parts and parts[-1].get("reading") is None:
                     parts[-1] = {"text": parts[-1]["text"] + part["text"]}
@@ -466,7 +467,89 @@ def align_sentence(text: str) -> list[dict]:
                     parts.append(part)
             else:
                 parts.append({**part, "word": word})
+
+    spans = _number_spans(morphemes)
+    i = 0
+    while i < len(morphemes):
+        numbered = _numeral_parts(morphemes, i, spans[i]) if i in spans else None
+        if numbered is None:
+            emit(align_deck(morphemes[i].surface, morphemes[i].reading), word=i)
+            i += 1
+        else:
+            found, i_next = numbered
+            # The number and its counter are ONE word: みっか over 3日.
+            emit(found, word=i)
+            i = i_next
     return parts
+
+
+# ── Numbers (plan 177) ────────────────────────────────────────
+# The tokenizer reads a digit as itself, so 100円 had no furigana at all:
+# align() puts a reading over kanji, and 100 has none. The reading is
+# made in study/reading_context.py (read_number, numeral_furigana), which
+# also knows what a counter does to it -- いっぽん, みっか, しちがつ.
+
+_DIGITS = set("0123456789０１２３４５６７８９")
+_POINT = {".", ",", "．", "，"}
+# Beside one of these a number is a time (10:30), a range (3-5), a date
+# (2024/10/04), a sum or a code, not a quantity, and its cardinal reading
+# would be wrong: left bare, as before. A Latin letter beside it is a
+# unit or a name (100m, 5G, A4), also not read here.
+_NOT_A_QUANTITY = set("/／:：-－−ー~〜～+＋*×÷=＝・")
+
+
+def _is_number_token(surface: str) -> bool:
+    return bool(surface) and all(c in _DIGITS for c in surface)
+
+
+def _number_spans(morphemes) -> dict[int, tuple[int, str]]:
+    """{index of a number's first morpheme: (index after its last, the
+    number as printed)}. 1,000 and 3.5 are three morphemes each, and
+    one number."""
+    spans: dict[int, tuple[int, str]] = {}
+    i = 0
+    n = len(morphemes)
+    while i < n:
+        if not _is_number_token(morphemes[i].surface):
+            i += 1
+            continue
+        j = i + 1
+        while (j + 1 < n and morphemes[j].surface in _POINT
+               and _is_number_token(morphemes[j + 1].surface)):
+            j += 2
+        before = morphemes[i - 1].surface[-1:] if i else ""
+        after = morphemes[j].surface[:1] if j < n else ""
+        if not any(c and (c in _NOT_A_QUANTITY or (c.isascii() and c.isalpha()))
+                   for c in (before, after)):
+            spans[i] = (j, "".join(m.surface for m in morphemes[i:j]))
+        i = j
+    return spans
+
+
+def _numeral_parts(morphemes, i: int, span: tuple[int, str]):
+    """([parts], index after them) for the number at morpheme `i` and the
+    counter after it, or None where the number has no reading to give."""
+    from study.reading_context import COUNTER_SURFACES, numeral_furigana
+
+    j, number = span
+    counter = morphemes[j] if j < len(morphemes) else None
+    if counter is not None and (counter.surface not in COUNTER_SURFACES or not counter.reading):
+        counter = None
+    reading, counter_reading = numeral_furigana(
+        number,
+        counter.surface if counter else "",
+        counter.reading if counter else "",
+        counter.pos if counter else "",
+        before=morphemes[i - 1].surface if i else "",
+        after=tuple(m.surface for m in morphemes[j + 1:j + 3]),
+    )
+    if reading is None:
+        return None
+    found = [{"text": number, "reading": reading}]
+    if counter is None:
+        return found, j
+    found += align_deck(counter.surface, counter_reading or counter.reading)
+    return found, j + 1
 
 
 def mark_spans(parts: list[dict], spans: list[tuple[int, int]]) -> list[dict]:

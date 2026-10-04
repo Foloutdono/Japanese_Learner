@@ -162,12 +162,8 @@ _HUNDREDS = {1: "ひゃく", 3: "さんびゃく", 6: "ろっぴゃく", 8: "は
 _THOUSANDS = {1: "せん", 3: "さんぜん", 8: "はっせん"}
 
 
-def read_numeral(surface: str) -> str | None:
-    """The reading of a kanji numeral up to 9999 (三百五十 さんびゃくごじゅう),
-    or None for anything else."""
-    value = _numeral_value(surface)
-    if value is None or not 0 < value < 10000 or not all(c in _NUMERAL_CHARS for c in surface):
-        return None
+def _below_10000(value: int) -> str:
+    """The reading of 1..9999: 三百五十 さんびゃくごじゅう."""
     out = []
     thousands, rest = divmod(value, 1000)
     hundreds, rest = divmod(rest, 100)
@@ -181,6 +177,84 @@ def read_numeral(surface: str) -> str | None:
     if ones:
         out.append(_DIGIT_READING[ones])
     return "".join(out)
+
+
+def read_numeral(surface: str) -> str | None:
+    """The reading of a kanji numeral up to 9999 (三百五十 さんびゃくごじゅう),
+    or None for anything else."""
+    value = _numeral_value(surface)
+    if value is None or not 0 < value < 10000 or not all(c in _NUMERAL_CHARS for c in surface):
+        return None
+    return _below_10000(value)
+
+
+# Plan 177: the Arabic numeral, which the tokenizer reads as itself.
+_FULL_WIDTH = str.maketrans("０１２３４５６７８９", "0123456789")
+_MYRIADS = ("", "まん", "おく", "ちょう")
+# Nothing above 9,999,999,999,999,999 (千兆): past it a string of digits
+# is an identifier, not a quantity.
+_MAX_DIGITS = 16
+
+
+def _digits_of(surface: str) -> str | None:
+    """`surface` as ASCII digits when it is one plain number: no sign,
+    no leading zero (007, 0123 are codes, not quantities), at most
+    _MAX_DIGITS long."""
+    digits = surface.translate(_FULL_WIDTH)
+    if not digits.isascii() or not digits.isdigit() or len(digits) > _MAX_DIGITS:
+        return None
+    if len(digits) > 1 and digits.startswith("0"):
+        return None
+    return digits
+
+
+def read_arabic(surface: str) -> str | None:
+    """The reading of an Arabic numeral, full-width or not: 100 ひゃく,
+    300 さんびゃく, 1000 せん, 10000 いちまん, 2020 にせんにじゅう. The ones
+    place is the citation form (よん, なな, きゅう) -- a counter that
+    wants よ, しち or く changes it (_counter_readings). None for anything
+    that is not one plain number (a code with a leading zero, a phone
+    number's worth of digits)."""
+    digits = _digits_of(surface)
+    if digits is None:
+        return None
+    value = int(digits)
+    if value == 0:
+        return "ぜろ"
+    groups = []
+    while value:
+        value, rest = divmod(value, 10000)
+        groups.append(rest)
+    out = []
+    for place in range(len(groups) - 1, -1, -1):
+        rest = groups[place]
+        if not rest:
+            continue
+        # 一万, 一億: the one is said where 百 and 千 drop it.
+        out.append(("いち" if rest == 1 and place else _below_10000(rest)) + _MYRIADS[place])
+    return "".join(out)
+
+
+def read_number(surface: str) -> str | None:
+    """A number as a sentence prints it: 100, 1,000, 3.5, 1,000.5,
+    full-width or not. Commas must sit where a thousands separator does
+    (1,2,3 is a list, not a number). A decimal is its integer part,
+    てん, and the digits one by one: 3.5 さんてんご, 0.05 れいてんぜろご."""
+    text = surface.translate(_FULL_WIDTH).replace("，", ",").replace("．", ".")
+    whole, dot, fraction = text.partition(".")
+    if "," in whole:
+        groups = whole.split(",")
+        if not (1 <= len(groups[0]) <= 3 and all(len(g) == 3 for g in groups[1:])):
+            return None
+        whole = "".join(groups)
+    if not dot:
+        return read_arabic(whole)
+    if not fraction.isascii() or not fraction.isdigit() or len(fraction) > 8:
+        return None
+    head = "れい" if whole == "0" else read_arabic(whole)
+    if head is None:
+        return None
+    return head + "てん" + "".join("ぜろ" if d == "0" else _DIGIT_READING[int(d)] for d in fraction)
 
 
 # The days of the month (and N days), which are their own words.
@@ -203,6 +277,10 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
     if cls is None:
         return None
     n_read, c_read = num_reading, ctr_reading
+    # Digits whose reading is already kana (plan 177, numeral_furigana):
+    # the tokenizer's pass leaves a digit as itself, and the two rules
+    # below that REPLACE a numeral's reading are for the kana case only.
+    kana_digits = bool(_ARABIC.match(num_surface)) and not _ARABIC.match(n_read)
     geminates = cls in _GEMINATING
     ends_in_n = cls in ("nan", 3, 1000, 10000)
 
@@ -245,9 +323,10 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
         # 一切れ ひときれ, 二口 ふたくち: the native number.
         return ("ひと" if num_surface == "一" else "ふた"), c_read
 
-    if ctr_surface == "つ" and whole and len(num_surface) == 1 and num_surface in _KANJI_DIGIT:
+    if ctr_surface == "つ" and whole and len(num_surface) == 1 and (
+            num_surface in _KANJI_DIGIT or kana_digits):
         # 一つ ... 九つ, the native numbers: UniDic reads 六つ むい, 八つ よう.
-        native = _TSU.get(_KANJI_DIGIT[num_surface])
+        native = _TSU.get(_numeral_value(num_surface))
         return (native, c_read) if native else None
 
     if ctr_surface == "日" and ctr_pos in ("suffix", "noun"):
@@ -257,14 +336,14 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
         value = _numeral_value(num_surface)
         if value is None:
             return None
-        spelled = any(c in _NUMERAL_CHARS for c in num_surface)
+        spelled = any(c in _NUMERAL_CHARS for c in num_surface) or kana_digits
         if not (2 <= value <= 10 or value in (14, 20, 24)):
             return n_read, "にち"
         if not spelled:
             return n_read, "か"
         if value % 10 == 4:
             return _swap_tail(n_read, "よん", "よっ"), "か"
-        if value <= 10 and len(num_surface) == 1:
+        if value <= 10 and (len(num_surface) == 1 or kana_digits):
             return _DAYS[value], "か"
         if value == 20 and whole:
             return "はつ", "か"
@@ -292,6 +371,65 @@ def _counter_readings(num_surface, num_reading, ctr_surface, ctr_reading, ctr_po
         return _swap_tail(n_read, "よん", "よ"), c_read
 
     return None
+
+
+# The counters a numeral and its counter are set as one word over
+# (numeral_furigana's callers): the ruby over 3日 is みっか, not さん over
+# 3 and か over 日.
+COUNTER_SURFACES = (set(_COUNTER_BASE) | set(_H_COUNTERS) | set(_KST_COUNTERS)
+                    | _NATIVE_COUNTERS | {"日", "日間", "つ", "分", "分間", "泊", "時間"})
+
+
+def numeral_furigana(numeral: str, counter: str = "", counter_reading: str = "",
+                     counter_pos: str = "", *, before: str = "", after=()):
+    """(numeral reading, counter reading) for a number as a sentence
+    prints it -- the furigana of 100, 1,000, 3.5 and of the 3 in 3日 --
+    or (None, None) where there is no reading to give (plan 177).
+
+    The tokenizer reads a digit as itself, so the reading is made here
+    (read_number) and then changed the way the counter after it changes
+    it: 1本 いっぽん, 3本 さんぼん, 4時 よじ, 7月 しちがつ, 3日 みっか, 3つ みっつ,
+    1人 ひとり. `counter_reading` is the counter's own, which the
+    tokenizer gave in context (本 ぼん after a 3) and is kept unless a
+    rule here says the tokenizer was wrong (月 つき after a 7); the second
+    value is None when it stands. `before` is the surface before the
+    numeral, which is what tells 3月1日 (ついたち) from 1日 (いちにち);
+    `after` the surfaces after the counter.
+
+    A number with a decimal point is read without its counter -- there is
+    no 1.5本 to be euphonic about -- and a counter these rules do not
+    know leaves the number in its plain reading.
+    """
+    base = read_number(numeral)
+    if base is None:
+        return None, None
+    digits = _digits_of(numeral)
+    if digits is None or not counter:
+        return base, None
+    value = int(digits)
+    ctr = _to_hira(counter_reading)
+
+    if counter == "日間" and ctr.endswith("かん"):
+        # 3日間 is one morpheme: the days, then かん (みっかかん).
+        number, day = numeral_furigana(numeral, "日", ctr[:-2], counter_pos,
+                                       before=before, after=("間", *after))
+        return number, ((day or ctr[:-2]) + "かん" if day else None)
+    if counter == "人" and value in (1, 2):
+        # ひとり, ふたり: one word, the numeral its first half.
+        return ("ひと" if value == 1 else "ふた"), "り"
+    if counter == "月" and 1 <= value <= 12:
+        # しがつ, しちがつ, くがつ -- whatever the tokenizer made of 月 beside
+        # an Arabic digit (7月 it reads つき).
+        fixed = _counter_readings(numeral, base, counter, "がつ", counter_pos, after=after)
+        return (fixed[0] if fixed else base), ("がつ" if ctr != "がつ" else None)
+    if counter == "日" and value == 1 and before.endswith("月"):
+        return "つい", "たち"
+
+    fixed = _counter_readings(numeral, base, counter, counter_reading, counter_pos,
+                              whole=True, after=after)
+    if not fixed:
+        return base, None
+    return fixed[0], (fixed[1] if _to_hira(fixed[1]) != ctr else None)
 
 
 # ── Family words ────────────────────────────────────────────────

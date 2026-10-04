@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useContext } from 'react'
 import { useLang } from '../../LangContext'
 import { playClick, playFlip, playArrival } from '../../lib/audio'
-import { Readings, ReadingGroup } from './Readings'
+import { Readings, ReadingGroup, ReadingShares } from './Readings'
 import { glossParts } from './gloss'
 import { Loading } from '../ui/Loading'
 import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
@@ -529,7 +529,7 @@ const READINGS_ON_CARD = 5
 // pinned to the primary line's height, visually orphaned from the
 // secondary line under it. Kanji's on'yomi/kun'yomi block is often
 // wider than it is tall, so it keeps the side-by-side default.
-export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false, stacked = false }) {
+export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false, stacked = false, shares }) {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
@@ -566,6 +566,16 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
               transition, visibly jumping between layouts whenever
               there's more than one on'yomi/kun'yomi reading. */}
           <div className="inline-reveal__panel-inner">
+            {shares?.total > 0 ? (
+              <ReadingShares
+                kana={kana}
+                shares={shares}
+                onLabel={t.onyomi}
+                kunLabel={t.kunyomi}
+                isLarge={isLarge}
+                moreLabel={t.readingsMore}
+              />
+            ) : (
             <Readings
               kana={kana}
               onLabel={t.onyomi}
@@ -581,6 +591,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
               limit={READINGS_ON_CARD}
               moreLabel={t.readingsMore}
             />
+            )}
           </div>
         </div>
       )}
