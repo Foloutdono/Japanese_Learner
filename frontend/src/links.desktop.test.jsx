@@ -174,11 +174,13 @@ describe('Settings\' doors on the desk', () => {
     await settle(150)
     expect(here.path).toBe('/profile/settings/level')
     expect(here.type).toBe('REPLACE')
-    // The ring a button draws, and the hover it keeps.
+    // The card's own ring, inside the door's touch in the card's ink
+    // (the page's outline stood off the print's grid), and the hover
+    // it keeps.
     await userEvent.keyboard('{ArrowDown}')
-    const ring = getComputedStyle(door('destination'))
     expect(document.activeElement).toBe(door('destination'))
-    expect([ring.outlineStyle, ring.outlineWidth]).toEqual(['solid', '2px'])
+    expect(getComputedStyle(door('destination')).outlineStyle).toBe('none')
+    expect(getComputedStyle(door('destination'), '::after').boxShadow).toMatch(/inset.*2px|2px.*inset/)
     await userEvent.hover(door('rating'))
     await settle(250)
     expect(getComputedStyle(door('rating')).filter).toBe('brightness(1.15)')
