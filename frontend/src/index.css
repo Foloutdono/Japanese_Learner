@@ -15494,21 +15494,24 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   background: var(--line-color, var(--accent2));
 }
 
-/* The list, and the band over each reading. Sumi is the app's chrome
-   ink and it does NOT flip with the theme, so the band takes the panel
-   inks and the RAW pigment rather than --dict-ink (DESIGN.md, "The
-   ambient inks flip; the sumi inks do not"): 山吹 reads 6.4:1 on dark
-   paper and sumi is darker still, in both themes. */
+/* The list, and the head over each reading: one line — the mark, the
+   reading, its share as a bar and a figure — sticking to the top of
+   the list on the sheet's own ground. It was a band of sumi, and plan
+   174 made the dark theme's surface that same sumi, so the band had
+   stopped separating anything: a hairline between readings does it
+   now, in both themes. The reading is the list's one gold, in the
+   entry's ink (--dict-ink: the raw pigment is 2.9:1 on light paper). */
+.dict-rd + .dict-rd { border-top: 1px solid var(--surface-line); }
 .dict-rd__head {
   position: sticky;
   top: 0;
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
-  min-height: var(--sp-7);
+  gap: var(--sp-4);
+  min-height: var(--sp-8);
   padding: 0 var(--sp-5);
-  background: var(--bg-panel);
+  background: var(--surface);
 }
 .dict-rd__kind {
   flex-shrink: 0;
@@ -15516,20 +15519,25 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-caption);
   font-weight: 700;
   line-height: 1;
-  color: var(--text-on-panel-soft);
+  color: var(--text-secondary);
 }
 .dict-rd__yomi {
+  flex-shrink: 0;
   font-family: var(--font-jp);
-  font-size: var(--fs-lead);
+  font-size: var(--fs-title);
   font-weight: 700;
   line-height: 1;
   letter-spacing: var(--tr-reading);
-  color: var(--line-color, var(--accent2));
+  color: var(--dict-ink);
 }
 /* The band above the rows already runs edge to edge, so the ledger's
    own bleed — which exists to put the rail on a padded block's edge —
    would carry these rows --sp-5 outside the sheet. */
-.dict-rd .dict-words { margin: 0; }
+.dict-rd .dict-words {
+  /* The rows' picked-out kanji take the ambient ink (割合, below). */
+  --dict-ink: var(--text-primary);
+  margin: 0;
+}
 /* The readings with no word to show for them: pills in the secondary
    register, the reading alone. Hairline rings rather than a run of
    kana joined by middots, so twenty of them read as twenty readings
@@ -15566,14 +15574,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
 }
 /* 割合 (plan 177): the share of the words that use each reading. The
-   count's scope is a segmented control under the sheet's head; each band
-   carries its share in the sumi head, and a bar and a word for it under
-   (common / usual / rare), so the reading to learn first is the one the
-   eye meets first. The bar takes the pigment of the reading beside it. */
+   count's scope is a segmented control beside the line saying what it
+   counts; each reading carries its share in its head, as a bar and a
+   figure, and a caption under it (common / usual / rare, the words, the
+   examples shown), so the reading to learn first is the one the eye
+   meets first. The bar is in the secondary ink: a quantity, not a
+   place, and the reading beside it is already the gold. */
 .dict-scope {
-  display: grid;
-  gap: var(--sp-3);
-  padding: var(--sp-4) var(--sp-5);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-5);
   border-bottom: 1px solid var(--surface-line);
 }
 .dict-scope__hint,
@@ -15581,6 +15592,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   margin: 0;
   font-size: var(--fs-caption);
   color: var(--text-secondary);
+}
+.dict-scope__hint { flex: 1; min-width: 0; }
+/* The switch at its own width, still a thumb's height. */
+.dict-scope .seg { flex-shrink: 0; }
+.dict-scope .seg__opt {
+  align-items: center;
+  min-height: var(--sp-8);
 }
 .dict-scope__wait { padding: var(--sp-5); }
 .dict-scope__empty {
@@ -15596,27 +15614,27 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
 }
 .dict-rd__pct {
-  margin-left: auto;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: baseline;
+  justify-content: flex-end;
   gap: var(--sp-1);
+  min-width: var(--sp-9);
   font-family: var(--font-display);
   font-size: var(--fs-lead);
   font-weight: 700;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--text-on-panel);
+  color: var(--text-primary);
 }
 .dict-rd__pct-unit {
   font-size: var(--fs-caption);
-  color: var(--text-on-panel-soft);
-}
-.dict-share {
-  display: grid;
-  gap: var(--sp-2);
-  padding: var(--sp-3) var(--sp-5) var(--sp-2);
+  color: var(--text-secondary);
 }
 .dict-share__bar {
-  height: var(--sp-2);
+  flex: 1;
+  min-width: var(--sp-8);
+  height: var(--sp-1);
   border-radius: var(--r-pill);
   background: var(--surface-line);
   overflow: hidden;
@@ -15625,22 +15643,25 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: block;
   height: 100%;
   border-radius: var(--r-pill);
-  background: var(--line-color, var(--accent2));
+  background: var(--text-secondary);
 }
 .dict-share__meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--sp-4);
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0 var(--sp-5) var(--sp-3);
   font-size: var(--fs-caption);
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
-.dict-share__tier {
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-}
-.dict-share__tier--core { color: var(--sel-ink); }
+/* A row of the sheet picks its kanji out by contrast rather than by
+   colour: the character this reading is read in at the ambient ink and
+   weight 700, the rest of the word in the secondary ink. In the gold
+   it is everywhere else, it was the sheet's fourth gold — five rows,
+   ten gold marks, under a gold reading over a gold bar. */
+.dict-rd .dict-word__jp { color: var(--text-secondary); }
 .dict-whole {
   display: flex;
   align-items: baseline;
@@ -15656,6 +15677,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
+.dict-rd + .dict-whole { border-top: 1px solid var(--surface-line); }
 /* The sheet over a quiz has no dictionary underneath to jump around
    in: the same row, with nothing to approach — no rail, no wash. */
 .dict-word--static { cursor: default; }
