@@ -129,6 +129,18 @@ def reading_of(char: str, furigana: list[dict]) -> str | None:
     return None
 
 
+def _file_under(char: str, kanji: str, furigana: list[dict], tokens: list[str]) -> str | None:
+    """The reading of `char` a word (already aligned) is filed under, or
+    None where the aligner could not place it: the token the slice of its
+    reading matches (reading_token_for), then the one whose okurigana the
+    word writes (_by_okurigana)."""
+    surface = reading_of(char, furigana)
+    token = reading_token_for(surface, tokens, first=kanji.find(char) == 0) if surface else None
+    if token is not None:
+        token = _by_okurigana(token, tokens, _okurigana_after(char, furigana))
+    return token
+
+
 def _okurigana_after(char: str, furigana: list[dict]) -> str:
     """The kana written straight after `char` in a word, as the aligner
     left it: 生きる → きる, 生け花 → け, 生活 → ''."""
@@ -178,11 +190,7 @@ def _pool_candidates(char: str, tokens: tuple[str, ...]) -> dict[str, tuple[tupl
     found: dict[str, list[tuple[str, str, str]]] = {tok: [] for tok in tokens}
     for row in jmdict_db.by_kanji_char(char, POOL_SCAN):
         kanji, kana = row["kanji"], row["kana"]
-        furigana = word_furigana(kanji, kana)
-        surface = reading_of(char, furigana)
-        token = reading_token_for(surface, list(tokens), first=kanji.find(char) == 0) if surface else None
-        if token is not None:
-            token = _by_okurigana(token, list(tokens), _okurigana_after(char, furigana))
+        token = _file_under(char, kanji, word_furigana(kanji, kana), list(tokens))
         if token is not None and len(found[token]) < _POOL_KEPT * 2:
             found[token].append((kanji, kana, row["meaning"]))
     return {
@@ -191,7 +199,7 @@ def _pool_candidates(char: str, tokens: tuple[str, ...]) -> dict[str, tuple[tupl
     }
 
 
-def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str], dict[str | None, list[dict]]]:
+def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str], dict[str | None, list[dict]], dict[str | None, int]]:
     """Every deck word containing `char`, filed under the reading it uses.
 
     Order inside a bucket is most-common level first, and multi-character
@@ -224,11 +232,10 @@ def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str]
             "level":    level,
             "furigana": furigana,
         }
-        surface = reading_of(char, furigana)
-        token = reading_token_for(surface, tokens, first=kanji.find(char) == 0) if surface else None
-        if token is not None:
-            token = _by_okurigana(token, tokens, _okurigana_after(char, furigana))
-        buckets[token].append(entry)
+        buckets[_file_under(char, kanji, furigana, tokens)].append(entry)
+    # How many deck words each reading has, before the pool tops any up:
+    # the figure behind the share of the JLPT course (plan 175).
+    deck_counts = {tok: len(words) for tok, words in buckets.items()}
     # The pool tops up every reading the deck leaves short, behind the
     # deck's own words. Asked only if one is short, so a character the
     # deck covers well never touches it.
@@ -251,7 +258,7 @@ def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str]
     # Stable: the level and compound order above holds on either side.
     for words in buckets.values():
         words.sort(key=lambda e: is_written_in_kana(e["kanji"], e["kana"]))
-    return tokens, buckets
+    return tokens, buckets, deck_counts
 
 
 def _build_single_kanji_words() -> dict[str, str]:
@@ -314,7 +321,7 @@ def kanji_words(char: str, lang: str, packed: str | None = None) -> dict:
                火山. A kanji with one reading is unaffected: one bucket,
                the same order it always had.
     """
-    tokens, buckets = _buckets(char, lang, packed)
+    tokens, buckets, deck_counts = _buckets(char, lang, packed)
     readings = [{"reading": tok, "words": buckets[tok][:MAX_WORDS]} for tok in tokens]
 
     # One queue per stem, in the deck's order; a stem's queue is its
@@ -344,4 +351,41 @@ def kanji_words(char: str, lang: str, packed: str | None = None) -> dict:
         depth += 1
     # The unplaced words, only in the slots the placed ones left.
     examples.extend(buckets[None][:MAX_WORDS - len(examples)])
-    return {"readings": readings, "examples": examples}
+    return {"readings": readings, "examples": examples,
+            "shares": _shares(deck_counts, tokens)}
+
+
+def _shares(counts: dict[str | None, int], tokens: list[str]) -> dict:
+    """{"total", "whole", "readings": {token: words}} from a count per
+    reading: `whole` is the words the aligner could not place (a reading
+    that belongs to the whole word, 今朝 けさ), and `total` every word,
+    placed or not, so the shares of a kanji add up to its whole."""
+    return {
+        "total": sum(counts.values()),
+        "whole": counts.get(None, 0),
+        "readings": {tok: counts[tok] for tok in tokens if counts.get(tok)},
+    }
+
+
+@lru_cache(maxsize=256)
+def full_shares(char: str, packed: str | None = None) -> dict:
+    """The same counts over ALL of JMdict: the course's words plus every
+    pool word written with `char` (the pool is everything the course is
+    not). The count behind the readings sheet's "Tout JMdict" scope --
+    aligning every one of 生's 1,943 words, so it is asked for when the
+    learner switches to it, and cached (plan 175)."""
+    tokens = reading_tokens(char, packed)
+    counts: dict[str | None, int] = defaultdict(int)
+    seen: set[tuple[str, str]] = set()
+    for _level, w in _KANJI_TO_VOCAB.get(char, []):
+        key = (w.get("kanji", ""), w.get("kana", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        counts[_file_under(char, key[0], word_furigana(*key), tokens)] += 1
+    for kanji, kana in jmdict_db.all_with_kanji(char):
+        if (kanji, kana) in seen:
+            continue
+        seen.add((kanji, kana))
+        counts[_file_under(char, kanji, word_furigana(kanji, kana), tokens)] += 1
+    return _shares(counts, tokens)

@@ -15433,6 +15433,97 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-indent: var(--tr-term);
   color: var(--text-secondary);
 }
+/* 割合 (plan 175): the share of the words that use each reading. The
+   count's scope is a segmented control under the sheet's head; each band
+   carries its share in the sumi head, and a bar and a word for it under
+   (common / usual / rare), so the reading to learn first is the one the
+   eye meets first. The bar takes the pigment of the reading beside it. */
+.dict-scope {
+  display: grid;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+}
+.dict-scope__hint,
+.dict-scope__wait {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.dict-scope__wait { padding: var(--sp-5); }
+.dict-scope__empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+}
+.dict-scope__empty p {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.dict-rd__pct {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel);
+}
+.dict-rd__pct-unit {
+  font-size: var(--fs-caption);
+  color: var(--text-on-panel-soft);
+}
+.dict-share {
+  display: grid;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-5) var(--sp-2);
+}
+.dict-share__bar {
+  height: var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+  overflow: hidden;
+}
+.dict-share__bar i {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--line-color, var(--accent2));
+}
+.dict-share__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.dict-share__tier {
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+.dict-share__tier--core { color: var(--sel-ink); }
+.dict-whole {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--surface-line);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.dict-whole__pct {
+  margin-left: auto;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
 /* The sheet over a quiz has no dictionary underneath to jump around
    in: the same row, with nothing to approach — no rail, no wash. */
 .dict-word--static { cursor: default; }

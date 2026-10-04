@@ -1335,10 +1335,19 @@ runtime purpose. Two consequences worth knowing:
   (`study/kanji_words.py`, `content/vocab_jmdict_data.by_kanji_char` over
   a character index folded from the pool in one pass, ~2 MB), and a word
   files under the reading whose okurigana it writes (生かす under い.かす,
-  not the first い.*) (cited in `study/reading_context.py`,
-  `study/furigana.py`, `study/kanji_words.py`,
-  `content/vocab_jmdict_data.py`, `tests/test_furigana_context.py` and
-  `tests/test_kanji_words.py`).
+  not the first い.*). Each reading on the readings sheet then prints the
+  share of the words that use it (割合), counted over the JLPT course by
+  default (`reading_shares` on every kanji entry) or over all of JMdict
+  on request (`GET /api/dictionary/readings-share`, aligned on demand and
+  cached), the readings in that order with a word for it (common from
+  20 %, usual from 5 %), the scope kept on the device
+  (`domain/readingShare.js`, `ReadingsByShare` in
+  `components/dictionary/DictionaryDetail.jsx`) (cited in
+  `study/reading_context.py`, `study/furigana.py`, `study/kanji_words.py`,
+  `content/vocab_jmdict_data.py`, `routes/dictionary.py`,
+  `domain/readingShare.js`, `tests/test_furigana_context.py`,
+  `tests/test_kanji_words.py`, `tests/test_dictionary_kanji.py`,
+  `DictionaryDetail.browser.test.jsx` and `index.css`).
   When starting a new wave, begin at **176** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

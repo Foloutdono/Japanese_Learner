@@ -276,6 +276,19 @@ def by_kanji_char(char: str, limit: int = KANJI_INDEX_CAP) -> list[dict]:
     return [_row_to_entry(r) for r in rows]
 
 
+def all_with_kanji(char: str) -> list[tuple[str, str]]:
+    """(kanji, kana) for EVERY pool word written with `char`, uncapped:
+    the count behind a reading's share of all JMdict (plan 175). One
+    scan of the kanji column (~50 ms warm), asked per character on
+    demand and cached by the caller -- the capped index above is for the
+    few example words a page shows, not for counting."""
+    if not char:
+        return []
+    return list(_conn().execute(
+        "SELECT kanji, kana FROM entries WHERE instr(kanji, ?) > 0", (char,),
+    ))
+
+
 def by_kana(kana: str, limit: int = 8) -> list[dict]:
     """Every pool row read `kana` (written with kanji or without),
     commonest first."""

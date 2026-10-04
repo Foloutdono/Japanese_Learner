@@ -218,9 +218,39 @@ def test_a_pool_character_still_files_its_deck_words(client):
     its ledger is grouped under つな.ぐ from the readings the database row
     already carries, not left unfiled."""
     entry = next(r for r in _page(client, q="繋", limit=5)["results"] if r["kanji"] == "繋")
-    filed = [r for r in entry["readings"] if r["words"]]
-    assert filed and filed[0]["reading"] == "つな.ぐ"
+    filed = {r["reading"]: r for r in entry["readings"] if r["words"]}
+    # The deck's word is filed under つな.ぐ; since plan 175 the pool also
+    # tops up the readings the deck has no word for, so it is no longer
+    # the only filed reading.
+    assert "つな.ぐ" in filed
+    assert [w["kanji"] for w in filed["つな.ぐ"]["words"] if w["level"]], filed["つな.ぐ"]
     assert "繋ぐ" in [w["kanji"] for w in entry["vocab_examples"]]
+
+
+def test_a_kanji_entry_carries_the_courses_share_of_each_reading(client):
+    """Plan 175: the percentage beside a reading is a count of the
+    course's words, shipped on every kanji entry."""
+    entry = next(r for r in _page(client, q="生", limit=5)["results"] if r["kanji"] == "生")
+    shares = entry["reading_shares"]
+    assert shares["total"] > 0
+    assert shares["readings"]["セイ"] > shares["readings"]["ショウ"]
+    assert sum(shares["readings"].values()) + shares["whole"] == shares["total"]
+
+
+def test_the_readings_share_over_all_of_jmdict_is_one_cheap_route(client):
+    """The "Tout JMdict" scope: a deck character, a pool character and one
+    no word is written with."""
+    deck = client.get("/api/dictionary/readings-share", params={"char": "生"}).json()
+    assert deck["total"] > 1500 and deck["readings"]["セイ"] > deck["readings"]["ショウ"]
+
+    peach = client.get("/api/dictionary/readings-share", params={"char": "桃"}).json()
+    assert peach["total"] >= 60 and peach["readings"]["もも"] > 0
+
+    assert client.get("/api/dictionary/readings-share", params={"char": "a"}).json() == {
+        "total": 0, "whole": 0, "readings": {},
+    }
+    assert client.get("/api/dictionary/readings-share", params={"char": "生生"}).status_code == 422
+    assert client.get("/api/dictionary/readings-share").status_code == 422
 
 
 # ── The tables that were reclaimed ────────────────────────────

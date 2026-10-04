@@ -1313,6 +1313,20 @@ const dictionary = {
   kanaExamples:      'Se lit dans ces mots',
   allReadings:       'Toutes les lectures',
   readingsNoWords:   'Pas encore de mots d\'exemple',
+  // 割合 (plan 175) : la part des mots qui emploient chaque lecture.
+  readingsScopeLabel:  'Portée du décompte',
+  readingsScopeCourse: 'Cursus JLPT',
+  readingsScopeAll:    'Tout JMdict',
+  readingsScopeHintCourse: (n) => `Part des ${n} mots du cursus qui emploient chaque lecture.`,
+  readingsScopeHintAll:    (n) => `Part des ${n} mots de JMdict qui emploient chaque lecture.`,
+  readingsTier:      { core: 'Courante', usual: 'Usuelle', rare: 'Rare' },
+  readingsOfWords:   (n, total) => `${n} mot${n > 1 ? 's' : ''} sur ${total.toLocaleString('fr-FR')}`,
+  readingsWholeShare: 'Mot lu en entier',
+  readingsShareLoading: 'Décompte en cours…',
+  readingsShareError:   'Le décompte n\'a pas pu être chargé.',
+  readingsCourseEmpty:  (kanji) => `Aucun mot du cursus JLPT n\'emploie ${kanji}.`,
+  readingsCourseEmptyBody: 'Le décompte du cursus est vide. Le dictionnaire complet a des mots avec ce kanji.',
+  readingsCountAll:  'Compter sur tout JMdict',
   // Voir en/index.js : la moitié japonaise est le titre, la moitié en
   // langue claire sa légende.
   readingsOnName:    'Lecture chinoise',
