@@ -1342,12 +1342,18 @@ runtime purpose. Two consequences worth knowing:
   cached), the readings in that order with a word for it (common from
   20 %, usual from 5 %), the scope kept on the device
   (`domain/readingShare.js`, `ReadingsByShare` in
-  `components/dictionary/DictionaryDetail.jsx`) (cited in
+  `components/dictionary/DictionaryDetail.jsx`); and the kanji study card
+  prints its four most used readings with their course share under each
+  (the owner's pick A of two drawn layouts, without the bars: `ReadingShares`
+  in `components/study/Readings.jsx`, `topReadings`, and `reading_shares`
+  on every kanji card from `study/kanji_words.course_shares`) (cited in
   `study/reading_context.py`, `study/furigana.py`, `study/kanji_words.py`,
   `content/vocab_jmdict_data.py`, `routes/dictionary.py`,
   `domain/readingShare.js`, `tests/test_furigana_context.py`,
   `tests/test_kanji_words.py`, `tests/test_dictionary_kanji.py`,
-  `DictionaryDetail.browser.test.jsx` and `index.css`).
+  `DictionaryDetail.browser.test.jsx`, `routes/kanji.py`,
+  `components/study/ReadingShares.browser.test.jsx`,
+  `tests/test_kanji_card_shares.py` and `index.css`).
   When starting a new wave, begin at **176** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

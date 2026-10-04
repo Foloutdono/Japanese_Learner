@@ -173,44 +173,23 @@ export function Readings({ kana, onLabel, kunLabel, size = 18, color, center = f
 }
 
 // ── 割合 on the study card (plan 175) ─────────────────────────────
-// The few readings the course uses most, each with the share of the
-// course's words that use it, in place of the numbered list: the ranking
-// and the number say the same thing. `layout` is the card's two ways of
-// setting it: 'grouped' keeps the two registers and puts the share under
-// each reading; 'ranked' is one column, most used first. Returns null
-// where the kanji has no word in the course, so the caller keeps the
-// list it had.
-export function ReadingShares({ kana, shares, onLabel, kunLabel, size = 25, isLarge = false, layout = 'grouped', moreLabel }) {
+// The few readings the course uses most (domain/readingShare's
+// topReadings), each with the share of the course's words that use it
+// under it, in place of the numbered list: the ranking and the number
+// say the same thing. The card's two registers stay, each with its own
+// readings, and the readings the card leaves out are counted as "+N".
+// Returns null where the kanji has no word in the course, so the caller
+// keeps the list it had.
+export function ReadingShares({ kana, shares, onLabel, kunLabel, size = 25, isLarge = false, moreLabel }) {
   const { lang } = useLang()
-  const tokens = splitReadingTokens(kana)
-  const { top, more } = topReadings(tokens, shares)
+  const { top, more } = topReadings(splitReadingTokens(kana), shares)
   if (!top.length) return null
-  const style = readingVars(size, undefined, isLarge)
-  const moreMark = more > 0 && (
-    <span className="reading-group__more" title={moreLabel?.(more)}>+{more}</span>
-  )
-  const pct = r => <>{formatPct(r.pct, lang)}<small>%</small></>
-  if (layout === 'ranked') {
-    return (
-      <div className="reading-shares reading-shares--ranked" style={style}>
-        {top.map(r => (
-          <div key={r.reading} className={`reading-share-row reading-share--${r.tier}`}>
-            <span className="reading-share-row__kind" aria-hidden="true">{isOnyomiToken(r.reading) ? '音' : '訓'}</span>
-            <span className="reading-share__text">{r.reading}</span>
-            <span className="reading-share__bar" aria-hidden="true"><i style={{ width: `${Math.max(r.pct, 2)}%` }} /></span>
-            <span className="reading-share__pct">{pct(r)}</span>
-          </div>
-        ))}
-        {moreMark}
-      </div>
-    )
-  }
   const groups = [
     [onLabel, top.filter(r => isOnyomiToken(r.reading))],
     [kunLabel, top.filter(r => !isOnyomiToken(r.reading))],
   ].filter(([, list]) => list.length > 0)
   return (
-    <div className="reading-shares reading-shares--grouped" style={style}>
+    <div className="reading-shares" style={readingVars(size, undefined, isLarge)}>
       {groups.map(([label, list]) => (
         <div key={label} className="reading-group">
           <div className="reading-group__label reading-group__label--center">{label}</div>
@@ -218,15 +197,15 @@ export function ReadingShares({ kana, shares, onLabel, kunLabel, size = 25, isLa
             {list.map(r => (
               <span key={r.reading} className={`reading-share reading-share--${r.tier}`}>
                 <span className="reading-share__text">{r.reading}</span>
-                <span className="reading-share__pct">{pct(r)}</span>
-                <span className="reading-share__bar" aria-hidden="true"><i style={{ width: `${Math.max(r.pct, 3)}%` }} /></span>
+                <span className="reading-share__pct">{formatPct(r.pct, lang)}<small>%</small></span>
               </span>
             ))}
           </div>
         </div>
       ))}
-      {moreMark}
+      {more > 0 && (
+        <span className="reading-group__more" title={moreLabel?.(more)}>+{more}</span>
+      )}
     </div>
   )
 }
-

@@ -529,7 +529,7 @@ const READINGS_ON_CARD = 5
 // pinned to the primary line's height, visually orphaned from the
 // secondary line under it. Kanji's on'yomi/kun'yomi block is often
 // wider than it is tall, so it keeps the side-by-side default.
-export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false, stacked = false, shares, shareLayout = 'grouped' }) {
+export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge = false, stacked = false, shares }) {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
@@ -570,7 +570,6 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
               <ReadingShares
                 kana={kana}
                 shares={shares}
-                layout={shareLayout}
                 onLabel={t.onyomi}
                 kunLabel={t.kunyomi}
                 isLarge={isLarge}

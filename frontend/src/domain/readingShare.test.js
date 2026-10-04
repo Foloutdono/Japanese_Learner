@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { SCOPE_ALL, SCOPE_COURSE, formatPct, readingRows, sharePct, shareTier } from './readingShare'
+import { SCOPE_ALL, SCOPE_COURSE, TOP_ON_CARD, formatPct, readingRows, sharePct, shareTier, topReadings } from './readingShare'
 
 // 生, as study/kanji_words.py counts it (the course: 55 words).
 const GROUPS = [
@@ -76,3 +76,28 @@ describe('formatPct', () => {
     expect(formatPct(0.4, 'fr')).toBe('0,4')
   })
 })
+
+describe('topReadings', () => {
+  const TOKENS = ['セイ', 'ショウ', 'い.きる', 'い.かす', 'い.ける', 'なま']
+
+  it('takes the four the course uses most, ties in the deck\'s order, and counts the rest', () => {
+    const { top, more } = topReadings(TOKENS, COURSE)
+    expect(TOP_ON_CARD).toBe(4)
+    expect(top.map(r => r.reading)).toEqual(['セイ', 'ショウ', 'い.きる', 'なま'])
+    expect(top.map(r => r.tier)).toEqual(['core', 'usual', 'usual', 'usual'])
+    expect(top[0].pct).toBeCloseTo(49.09, 1)
+    expect(more).toBe(2)
+  })
+
+  it('never spends a slot on a reading no course word uses', () => {
+    const { top, more } = topReadings(['ボク', 'モク', 'き', 'こ~'], { total: 13, whole: 1, readings: { 'ボク': 3, 'モク': 5, 'き': 4 } })
+    expect(top.map(r => r.reading)).toEqual(['モク', 'き', 'ボク'])
+    expect(more).toBe(1)
+  })
+
+  it('is empty for a kanji the course never uses, so the card keeps its list', () => {
+    expect(topReadings(TOKENS, { total: 0, whole: 0, readings: {} })).toEqual({ top: [], more: 0 })
+    expect(topReadings(TOKENS, undefined)).toEqual({ top: [], more: 0 })
+  })
+})
+

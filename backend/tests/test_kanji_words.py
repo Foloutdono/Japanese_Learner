@@ -11,7 +11,7 @@ or geminating.
 import content.vocab_jmdict_data as jmdict_db
 from content.kanji_data import KANJI_BY_LEVEL
 from study.furigana import reading_stem, reading_token_for
-from study.kanji_words import full_shares, kanji_as_word, kanji_words, reading_tokens, MAX_WORDS
+from study.kanji_words import course_shares, full_shares, kanji_as_word, kanji_words, reading_tokens, MAX_WORDS
 
 
 class TestReadingTokenFor:
@@ -288,4 +288,13 @@ class TestReadingShares:
 
     def test_a_character_no_word_has_counts_nothing(self):
         assert full_shares("a") == {"total": 0, "whole": 0, "readings": {}}
+
+    def test_a_study_cards_counts_are_the_entrys_without_building_the_words(self):
+        for char in ("生", "日", "木", "桃", "鰻"):
+            assert course_shares(char) == kanji_words(char, "en")["shares"], char
+
+    def test_a_pool_characters_counts_follow_the_readings_it_is_given(self):
+        # 繋 is no deck kanji: its readings arrive packed, as the pool serves them.
+        shares = course_shares("繋", "ケイ・つな.ぐ・つな.がる")
+        assert shares["readings"].get("つな.ぐ", 0) >= 1
 

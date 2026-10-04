@@ -269,7 +269,7 @@ export default function KanjiRun({ session }) {
             onReplaySound={c => speakJapanese(c.kana)}
             renderFront={c => <CharDisplay char={c.kanji} size={100} />}
             renderBack={c => (
-              <InlineReveal t={t} kana={c.kana} main={<MeaningDisplay meaning={c.meaning} size={28} />} />
+              <InlineReveal t={t} kana={c.kana} shares={c.reading_shares} main={<MeaningDisplay meaning={c.meaning} size={28} />} />
             )}
             onExit={leave}
           />
@@ -407,6 +407,7 @@ export default function KanjiRun({ session }) {
                         <InlineReveal
                           t={t}
                           kana={card.kana}
+                          shares={card.reading_shares}
                           isLarge={isKjToM}
                           main={
                             isKjToM
@@ -427,6 +428,7 @@ export default function KanjiRun({ session }) {
                       <InlineReveal
                         t={t}
                         kana={card.kana}
+                        shares={card.reading_shares}
                         revealed={answered}
                         main={
                           isKjToM
