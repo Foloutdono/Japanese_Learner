@@ -32,7 +32,7 @@ const BASE = '/learn/vocab'
 // /learn/vocab/themes is by subject. /learn/vocab/:level and
 // /tier/:tier (?size=&domain=) list that stop's modes as platforms; a
 // theme has one stop more, because it is itself a little line —
-// /theme/:theme is its four frequency bands (基本 → 達人) and
+// /theme/:theme is its four difficulty levels (基本 → 達人) and
 // /theme/:theme/level/:themeLevel is where the platforms are. Picking a
 // platform boards the train into the run on the stage frame
 // (screens/VocabRun.jsx). The fast review exists on the JLPT path only.
@@ -157,7 +157,7 @@ export default function VocabScreen({ session }) {
     )
   }
 
-  // ── A theme's own line: its four frequency bands ──
+  // ── A theme's own line: its four difficulty levels ──
   if (theme && !themeLevel) {
     // The desk draws the bands beside a band's platforms (below): the
     // line alone opens on its first band, the commonest words.

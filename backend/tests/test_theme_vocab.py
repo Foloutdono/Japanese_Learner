@@ -1,9 +1,11 @@
-"""Thematic vocab decks and their four frequency levels.
+"""Thematic vocab decks and their four levels.
 
 A theme used to be one flat list of ~220 words, ~190 of them archaic
-padding a quota (蒲桜, 波波迦, 樋殿), drawn in random order. It is now a
-short curated list cut into basic/medium/advanced/expert by frequency and
-served commonest-first. Nothing tested any of it.
+padding a quota (蒲桜, 波波迦, 樋殿), drawn in random order; then a list
+matched by gloss and cut into four bands by newspaper frequency, which
+made 梅 a basic fruit and バナナ an advanced one. It is now written by
+hand (content/theme_lists.py): basic/medium/advanced/expert placed on a
+difficulty scale inside the theme and served easiest-first.
 
 The invariant these exist to protect, above all the others, is that a
 theme is a GROUPING and never a second copy: the same word studied under
@@ -71,28 +73,64 @@ def test_a_level_is_a_contiguous_slice_of_its_theme(theme):
 
 
 @pytest.mark.parametrize("theme", THEMES)
-def test_the_bands_grow(theme):
-    """Basic is the short high-value starter set and expert the long
-    tail, never the other way round."""
+def test_every_band_is_a_real_step(theme):
+    """A band of one or two words is not a level a learner can study."""
     sizes = [len(theme_data.theme_entries(theme, lv)) for lv in theme_data.LEVELS]
-    assert sizes == sorted(sizes), sizes
+    assert min(sizes) >= 5, sizes
 
 
-@pytest.mark.parametrize("theme", THEMES)
-def test_words_arrive_commonest_first_and_basic_is_easier_than_expert(theme):
-    """The levels only mean anything if the underlying order is by
-    frequency. Checked through the shipped data rather than recomputing
-    the score, so a rebuild that sorted by something else fails here."""
+def _shipped(theme=None):
     import json, os
     path = os.path.join(os.path.dirname(theme_data.__file__), "..", "datas", "vocab", "theme_words.json")
     with open(path, encoding="utf-8") as f:
-        rows = json.load(f)[theme]
-    scores = [r["score"] for r in rows]
-    assert scores == sorted(scores), theme
+        data = json.load(f)
+    return data if theme is None else data[theme]
+
+
+@pytest.mark.parametrize("theme", THEMES)
+def test_words_arrive_easiest_first(theme):
+    """The ranks run 1..n and the levels never step back down, so the
+    whole theme served in order walks basic to expert."""
+    rows = _shipped(theme)
     assert [r["rank"] for r in rows] == list(range(1, len(rows) + 1))
-    basic = [r["score"] for r in rows if r["level"] == "basic"]
-    expert = [r["score"] for r in rows if r["level"] == "expert"]
-    assert max(basic) <= min(expert)
+    order = [theme_data.LEVELS.index(r["level"]) for r in rows]
+    assert order == sorted(order), theme
+
+
+def test_the_shipped_json_is_what_the_lists_build():
+    """theme_words.json is built from content/theme_lists.py; an edit to
+    the lists without a rebuild (or a hand edit of the JSON) would serve
+    something nobody reviewed."""
+    from scripts.build_theme_db import build
+    themes, errors = build()
+    assert errors == []
+    assert themes == _shipped()
+
+
+def test_the_scale_is_a_judgement_not_a_frequency():
+    """The owner's own example of the scale, and the words the frequency
+    bands got backwards."""
+    def level_of(theme, surface):
+        rows = [r for r in _shipped(theme) if surface in (r["kanji"], r["kana"])]
+        assert rows, (theme, surface)
+        return rows[0]["level"]
+
+    assert level_of("fruits", "りんご") == "basic"      # apple
+    assert level_of("fruits", "梨") == "medium"         # pear
+    assert level_of("fruits", "柘榴") == "advanced"     # pomegranate
+    assert level_of("fruits", "金柑") == "expert"       # kumquat
+    assert level_of("fruits", "バナナ") == "basic"      # was advanced
+    assert level_of("animals", "犬") == "basic"         # was missing
+    assert level_of("animals", "象") == "basic"         # was expert
+    assert level_of("weather", "風") == "basic"         # was expert
+
+
+@pytest.mark.parametrize("theme", THEMES)
+def test_every_word_has_a_french_gloss(theme):
+    rows = theme_data.theme_entries(theme)
+    assert all(e["meaning_fr"].strip() for e in rows)
+    heads = [e["meaning_fr"].split(",")[0].strip().lower() for e in rows]
+    assert len(set(heads)) == len(heads)
 
 
 @pytest.mark.parametrize("theme", THEMES)
@@ -113,11 +151,7 @@ def test_every_row_resolves_to_a_real_card(theme):
     """theme_entries skips a row it cannot resolve, so a rebuild against a
     changed pool would quietly shrink a band with nothing noticing. Count
     the raw rows and the resolved ones and insist they match."""
-    import json, os
-    path = os.path.join(os.path.dirname(theme_data.__file__), "..", "datas", "vocab", "theme_words.json")
-    with open(path, encoding="utf-8") as f:
-        raw = json.load(f)[theme]
-    assert len(theme_data.theme_entries(theme)) == len(raw)
+    assert len(theme_data.theme_entries(theme)) == len(_shipped(theme))
 
 
 @pytest.mark.parametrize("theme", THEMES)
@@ -193,7 +227,7 @@ def test_get_new_cards_can_preserve_the_callers_order(client):
     assert len(got) > 1, "need more than one new card for this to mean anything"
 
 
-def test_a_theme_session_introduces_its_words_commonest_first(client):
+def test_a_theme_session_introduces_its_words_easiest_first(client):
     """The end-to-end version, through the route. This is the bug the
     learner actually saw: the ordering theme_data computed was discarded
     downstream, so opening Fruits was as likely to hand over マンゴー as
@@ -244,6 +278,22 @@ def test_a_card_carries_the_band_it_came_from(client):
     body = client.get("/api/vocab/theme/animals/cards",
                       params={"level": "basic", "mode": MODE, "count": 5}).json()
     assert all(c["theme_level"] == "basic" for c in body["cards"])
+
+
+def test_a_pool_word_reads_in_french(client):
+    """A JMdict-pool word has no line in the course's French table and
+    used to arrive in JMdict's English; the theme's own gloss is French."""
+    pool = [e for e in theme_data.theme_entries("fruits", "advanced")
+            if e["domain"] == "vocab_jmdict"]
+    assert pool
+    body = client.get("/api/vocab/theme/fruits/cards",
+                      params={"level": "advanced", "mode": MODE, "count": 25,
+                              "lang": "fr"}).json()
+    by_id = {e["card_id"]: e for e in pool}
+    served = [c for c in body["cards"] if c["card_id"] in by_id]
+    assert served
+    for card in served:
+        assert card["meaning"] == by_id[card["card_id"]]["meaning_fr"]
 
 
 def test_every_mode_the_ui_offers_can_serve_the_smallest_band(client):
