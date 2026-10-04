@@ -611,3 +611,37 @@ export function SheetIcon({ size = 18, className }) {
     </svg>
   )
 }
+
+// ── Settings' list (plan 180) ──
+// One glyph a row, so the list reads by its left edge before its words.
+// On the same `base` as the rest of the set.
+
+// A screen: the display row (theme and language).
+export function MonitorIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <rect x="3" y="4" width="18" height="12" rx="1.8" />
+      <path d="M9 20h6M12 16v4" />
+    </svg>
+  )
+}
+
+// A bell: the reminders.
+export function BellIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z" />
+      <path d="M10 20.5a2.2 2.2 0 0 0 4 0" />
+    </svg>
+  )
+}
+
+// A head and shoulders: the account.
+export function UserIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <circle cx="12" cy="8" r="3.6" />
+      <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" />
+    </svg>
+  )
+}

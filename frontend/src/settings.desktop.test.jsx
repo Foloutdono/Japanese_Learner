@@ -395,3 +395,90 @@ describe('the install row on the desk', () => {
     }
   })
 })
+
+// ── plan 180 — the list read by its left and right edges ──
+// A glyph a row at one x, the names after it at another, and the
+// drawings of what a row is set to in one column at the right, however
+// long the words beside them. The lit stop on the pass is ringed clear
+// of the code it names, and a focused row is ringed inside its card.
+describe('the list under the pass (plan 180)', () => {
+  const rows = () => [...document.querySelectorAll('.desk-settings__list .stg-row[data-page]:not([data-page="pass"])')]
+  const left = el => Math.round(el.getBoundingClientRect().left)
+  const right = el => Math.round(el.getBoundingClientRect().right)
+
+  it('is cards by what the rows are for, the pass on its own', async () => {
+    await mount('/profile/settings/sound')
+    await settle()
+    const lists = [...document.querySelectorAll('.desk-settings__list .stg-list')]
+    expect(lists.map(l => [...l.querySelectorAll('.stg-row')].map(r => r.dataset.page))).toEqual([
+      ['display', 'sound'],
+      ['rating', 'reading', 'help'],
+      ['account', 'credits'],
+      ['pass'],
+    ])
+    // Set apart by a gap, not by a caption.
+    const gap = lists[1].getBoundingClientRect().top - lists[0].getBoundingClientRect().bottom
+    expect(gap).toBeGreaterThan(0)
+  })
+
+  it('gives every row a glyph in one place, its name and value in another', async () => {
+    await mount('/profile/settings/sound')
+    await settle()
+    const all = rows()
+    expect(all.length).toBeGreaterThanOrEqual(7)
+    for (const r of all) {
+      expect(r.querySelector('.stg-row__icon svg')).not.toBeNull()
+      expect(r.querySelector('.stg-row__names .stg-row__value')).not.toBeNull()
+    }
+    expect(new Set(all.map(r => left(r.querySelector('.stg-row__icon')))).size).toBe(1)
+    expect(new Set(all.map(r => left(r.querySelector('.stg-row__names')))).size).toBe(1)
+  })
+
+  it('stands the drawings in one column, whatever they are', async () => {
+    await mount('/profile/settings/sound')
+    await settle()
+    const drawn = rows().filter(r => r.querySelector('.stg-row__spec'))
+    // The theme, the mixer, the rating bar and the reading pace.
+    expect(drawn.map(r => r.dataset.page)).toEqual(['display', 'sound', 'rating', 'reading'])
+    expect(new Set(drawn.map(r => right(r.querySelector('.stg-row__spec > *')))).size).toBe(1)
+    // The words are never pushed under a drawing.
+    for (const r of drawn) {
+      const spec = r.querySelector('.stg-row__spec').getBoundingClientRect()
+      expect(r.querySelector('.stg-row__names').getBoundingClientRect().right).toBeLessThanOrEqual(spec.left + 1)
+    }
+  })
+
+  it('says the theme and the language on the display row', async () => {
+    await mount('/profile/settings/sound')
+    await settle()
+    expect(document.querySelector('.stg-row[data-page="display"] .stg-row__text').textContent).toMatch(/·/)
+  })
+
+  it('rings the open stop on the pass clear of the code it names', async () => {
+    await mount('/profile/settings/level')
+    await settle()
+    const stop = document.querySelector('.pcb__stop[data-page="level"]')
+    expect(stop.classList.contains('pcb__door--on')).toBe(true)
+    // Not an outline on the element, which lay over its text.
+    expect(getComputedStyle(stop).outlineStyle).toBe('none')
+    const ring = getComputedStyle(stop, '::after')
+    expect(ring.boxShadow).not.toBe('none')
+    const text = stop.querySelector('.pcb__code').getBoundingClientRect()
+    const box = stop.getBoundingClientRect()
+    const scale = box.height / stop.offsetHeight
+    // The ring's box is the stop's touch: the room round the print.
+    expect(parseFloat(ring.left) * scale).toBeLessThan(0)
+    expect(text.left - box.left).toBeLessThanOrEqual(1)
+  })
+
+  it('rings a focused row inside its card, where the list would not clip it', async () => {
+    await mount('/profile/settings/sound')
+    await settle()
+    const row = document.querySelector('.stg-row[data-page="sound"]')
+    row.focus()
+    expect(row.matches(':focus-visible')).toBe(true)
+    const ring = getComputedStyle(row)
+    expect(ring.outlineStyle).not.toBe('none')
+    expect(parseFloat(ring.outlineOffset)).toBeLessThan(0)
+  })
+})

@@ -1405,6 +1405,26 @@ runtime purpose. Two consequences worth knowing:
   `src/deskfree.phone.test.jsx`,
   `src/deckFit.wide.test.jsx`, `src/shelf.desktop.test.jsx` and the 机
   section of `index.css`; DESIGN.md, "The gate button" and "The desk").
+  **180** is Settings' list read by its edges (owner-directed: "fix the
+  icons, focus, alignment issues and make things clearer and simpler to
+  modify"): the list under the pass is data, not markup -- one entry per
+  row in `components/settings/SettingsList.jsx`'s `useGroups`, drawn
+  by one `Row`, so a new setting is one line there and one in
+  `SettingsScreen`'s `PAGES` -- every row a glyph (`MonitorIcon`,
+  `BellIcon`, `UserIcon` and the set's own) in one column, its name over
+  what it is set to, and the drawing of the state (theme, mixer, rating
+  dots, pace) in a slot of one width at the trailing edge, so nothing is
+  ragged whatever the words; the display row says the theme and the
+  language; the rows fall into three cards by what they are for (the
+  app, the study, the learner) and the pass on its own, set apart by the
+  gap and not by a caption; the dark theme's swatch has a ring; the open
+  stop on the pass is ringed as a focused one is (the touch's box, clear
+  of the print) instead of an outline lying over its code, and a focused
+  row is ringed inside its card where the list clips a ring outside
+  (cited in `components/settings/SettingsList.jsx`,
+  `components/settings/RowSpecimens.jsx`, `screens/SettingsScreen.jsx`,
+  `components/ui/Icons.jsx`, `src/settings.desktop.test.jsx` and
+  `index.css`; DESIGN.md, "Settings opens on the pass").
   When starting a new wave, begin at **180** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

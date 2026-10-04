@@ -1,23 +1,10 @@
 import { Navigate, useParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { LANGUAGES } from '../i18n'
-import { playClick } from '../lib/audio'
-import { useVolumes, useMuted, DEFAULT_VOLUMES } from '../lib/audio'
-import { isGuest } from '../lib/guest'
-import { useThemeChoice } from '../stores/theme'
-import { useRatingScale } from '../stores/ratingScale'
-import { useReadingPace } from '../stores/readingPace'
-import { paceFactor } from '../domain/readingPace'
-import { ATTRIBUTIONS } from '../domain/attributions'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { useListWalk, WALK_KEYS } from '../hooks/useListWalk'
-import { ChevronIcon, GearIcon } from '../components/ui/Icons'
-import { useOfferable } from '../hooks/useOfferable'
-import { openPaywall } from '../stores/credits'
-import { SOURCES } from '../domain/paywall'
+import { GearIcon } from '../components/ui/Icons'
 import { SettingsCard } from '../components/pass/LearnerCard'
-import { SettingsDoor } from '../components/settings/SettingsDoor'
-import { ThemeSwatch, SoundMeter, RatingDots, PaceLine } from '../components/settings/RowSpecimens'
+import { SettingsList } from '../components/settings/SettingsList'
 import { LevelPage } from '../components/settings/LevelPage'
 import { DestinationPage } from '../components/settings/DestinationPage'
 import { ServicePage } from '../components/settings/ServicePage'
@@ -32,7 +19,6 @@ import { AccountPage } from '../components/settings/AccountPage'
 import { CreditsPage } from '../components/settings/CreditsPage'
 import { NotificationsPage } from '../components/settings/NotificationsPage'
 import { canNudge } from '../lib/platform'
-import { useProfileSummaryState } from '../stores/profileSummary'
 import { SettingsPaneContext } from '../components/settings/pane'
 import { useDesk } from '../hooks/useDesk'
 
@@ -69,8 +55,6 @@ const PAGES = {
 // doors), and Data is the account page's second half. An address kept
 // from before lands where its content went.
 const MOVED = { learning: 'level', data: 'account' }
-
-const THEATRE = ['ambiance', 'jingle', 'announcement']
 
 // The page the desk opens when the column is asked for on its own: the
 // contract's destination, the field the rest of the pass is priced by.
@@ -124,38 +108,9 @@ export default function SettingsScreen({ session }) {
 // The column: the pass, then the list. `current` is the page open beside
 // it on the desk, and lights its door; the phone has no such page.
 function SettingsHome({ session, current = null }) {
-  const { t, lang } = useLang()
+  const { t } = useLang()
   const desk = current != null
   const onWalk = useListWalk(desk, { items: DOORS })
-  const [theme] = useThemeChoice()
-  const scale = useRatingScale()
-  const pace = useReadingPace()
-  const volumes = useVolumes()
-  const muted = useMuted()
-  const offerable = useOfferable()
-  const { summary } = useProfileSummaryState()
-
-  const langLabel = LANGUAGES.find(l => l.code === lang)?.label ?? lang
-  const quiet = THEATRE.every(k => volumes[k] === 0)
-  const full = THEATRE.every(k => volumes[k] === DEFAULT_VOLUMES[k])
-  const soundValue = muted ? t.soundOff : quiet ? t.soundValueQuiet : full ? t.soundValueFull : t.soundValueMixed
-  const email = session?.user?.email ?? ''
-  const accountValue = email ? `${email.split('@')[0]}@…` : (isGuest(session) ? t.guestLabel : '')
-
-  const ROWS = [
-    { id: 'display', label: t.settingsEnvShort, value: langLabel, spec: <ThemeSwatch theme={theme} /> },
-    { id: 'sound', label: t.sound, value: soundValue, spec: <SoundMeter volumes={volumes} muted={muted} /> },
-    ...(canNudge() ? [{
-      id: 'notifications',
-      label: t.settingsNotif,
-      value: summary?.notifications && summary?.reminderTime ? summary.reminderTime : t.notifOff,
-    }] : []),
-    { id: 'rating', label: t.settingsRatingShort, value: t.settingsRatingScaleOption[scale] ?? '', spec: <RatingDots scale={scale} /> },
-    { id: 'reading', label: t.settingsReadingPace, value: t.readingPaceOption[pace], spec: <PaceLine factor={paceFactor(pace)} /> },
-    { id: 'help', label: t.settingsHelp, value: t.settingsHelpValue },
-    { id: 'account', label: t.account, value: accountValue },
-    { id: 'credits', label: t.settingsCredits, value: t.settingsCreditsCount(ATTRIBUTIONS.length) },
-  ]
 
   return (
     <>
@@ -173,34 +128,7 @@ function SettingsHome({ session, current = null }) {
 
       <div className="stg-home" onKeyDown={onWalk} aria-keyshortcuts={desk ? WALK_KEYS : undefined}>
         <SettingsCard current={current} session={session} />
-
-        <div className="stg-list">
-          {ROWS.map(row => (
-            <SettingsDoor key={row.id} page={row.id} current={current} className="stg-row" onClassName="stg-row--on">
-              <span className="stg-row__names"><span className="stg-row__jp">{row.label}</span></span>
-              <span className="stg-row__value">{row.spec}<span className="stg-row__text">{row.value}</span></span>
-              <ChevronIcon direction="right" size={16} className="stg-row__chev" />
-            </SettingsDoor>
-          ))}
-
-          {/* The pass. Not one of PAGES — it opens the offer sheet, so it
-              is drawn here rather than joining ROWS, and it leaves the
-              list entirely for a learner who already holds one. */}
-          {offerable && (
-            <button
-              type="button"
-              className="stg-row stg-row--pass stg-door"
-              data-page="pass"
-              data-action="paywall-open"
-              tabIndex={desk ? -1 : undefined}
-              onClick={() => { playClick(); openPaywall(SOURCES.SETTINGS) }}
-            >
-              <span className="stg-row__names"><span className="stg-row__jp">{t.paywallName_pro}</span></span>
-              <span className="stg-row__value"><span className="stg-row__text">{t.paywallRowValue}</span></span>
-              <ChevronIcon direction="right" size={16} className="stg-row__chev" />
-            </button>
-          )}
-        </div>
+        <SettingsList session={session} current={current} />
       </div>
     </>
   )
