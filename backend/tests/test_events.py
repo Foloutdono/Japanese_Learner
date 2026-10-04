@@ -125,6 +125,27 @@ def test_the_batch_is_capped(client):
     assert r.json()["kept"] == events.MAX_BATCH
 
 
+def test_a_body_far_past_the_cap_is_refused_before_it_is_parsed(client):
+    # lib/track.js sends a flush of twenty at most; a list this long is
+    # no client of ours, and the body is bounded before validation.
+    over = [{"name": "screen_view"}] * (4 * events.MAX_BATCH + 1)
+    assert client.post("/api/events", json={"events": over}).status_code == 422
+
+
+def test_a_database_that_is_down_is_not_an_error(client, monkeypatch):
+    # The pool refusing a connection is the same failure as a write that
+    # fails: swallowed, so lib/track.js does not retry it.
+    import routes.events
+
+    def down():
+        raise RuntimeError("pool exhausted")
+
+    monkeypatch.setattr(routes.events, "db_conn", down)
+    r = client.post("/api/events", json={"events": [{"name": "screen_view", "props": {"route": "/today"}}]})
+    assert r.status_code == 202
+    assert r.json() == {"kept": 0}
+
+
 # ── The privacy rule ──────────────────────────────────────────────
 
 def test_a_property_outside_the_allowlist_never_lands(client):

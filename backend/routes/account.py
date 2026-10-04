@@ -73,8 +73,8 @@ logger = logging.getLogger(__name__)
 # a deck holds this learner's own typed text, and ADR 0010's "delete
 # means delete" outranks a follower's convenience. Note that the
 # `decks` step therefore also cascades away OTHER learners'
-# deck_subscriptions rows, which the deck_subscriptions count above
-# does not include — it counts only what this learner followed.
+# deck_subscriptions rows, which the deck_subscriptions step below
+# does not count — it counts only what this learner followed.
 PLAN = [
     ("review_log",          "card_id LIKE %(prefix)s",  "review history: XP, level, streak, leaderboard standing"),
     ("review_daily",        "user_id = %(user)s",       "the rolled-up half of that same history — XP and reviews per day"),
