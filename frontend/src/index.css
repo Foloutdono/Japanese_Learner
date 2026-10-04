@@ -8144,7 +8144,7 @@ textarea:focus-visible {
 .pcb__door { margin: 0; border-radius: var(--r-flat); background: none; color: inherit; font: inherit; text-decoration: none; cursor: pointer; }
 .pcb__door:hover { color: inherit; filter: none; }
 .pcb__chev { position: absolute; right: var(--sp-2); top: 50%; translate: 0 -50%; opacity: 0.4; }
-.pcb__door--on { outline: 2px solid var(--pcb-fill); outline-offset: -2px; border-radius: var(--r-plate); }
+.pcb__door--on { outline: none; border-radius: var(--r-plate); }
 /* The doors' touch. The print is drawn at the card's scale, so on a
    phone a stop or a field stands under a thumb's 44px; each door's touch
    takes in the room round it -- a stop the route's padding, a field the
@@ -8197,13 +8197,18 @@ textarea:focus-visible {
 .pcb__issued::after { content: ''; position: absolute; inset: calc(-1 * var(--sp-1)) calc(-1 * var(--sp-2)); border-radius: var(--r-plate); }
 .pcb .pcb__door:focus-visible,
 .pcb .pcb__issued:focus-visible { outline: none; }
+/* The door whose page is open (Settings on the desk) is ringed as a
+   focused one is -- the ring on the touch's box, clear of the print --
+   not an outline on the element itself, which for a stop with no padding
+   of its own lay straight over the N5 it names (plan 182). */
+.pcb .pcb__door--on::after,
 .pcb .pcb__door:focus-visible::after {
   border-radius: var(--r-plate);
   background: color-mix(in srgb, var(--pcb-focus) 10%, transparent);
   box-shadow: inset 0 0 0 2px var(--pcb-focus);
 }
 /* A field's touch reaches under the print; its ring keeps to the grid. */
-.pcb .pcb__field.pcb__door:focus-visible::after { bottom: 0; }
+.pcb .pcb__field.pcb__door:is(:focus-visible, .pcb__door--on)::after { bottom: 0; }
 .pcb .pcb__issued:focus-visible::after { box-shadow: inset 0 0 0 2px currentcolor; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -21751,6 +21756,10 @@ form.stage__foot > .btn-primary {
   border-radius: var(--r-panel);
   overflow: hidden;
 }
+/* Settings' list is a few of these cards (components/settings/
+   SettingsList.jsx, plan 182), set apart by the gap and by nothing
+   written: the app's, the study's, the learner's, and the pass. */
+.stg-groups { display: flex; flex-direction: column; gap: var(--sp-3); }
 .stg-row {
   display: flex;
   align-items: center;
@@ -21766,11 +21775,16 @@ form.stage__foot > .btn-primary {
   text-align: left;
 }
 .stg-row:first-child { border-top: 0; }
+/* A ring on a row is drawn inside it: the list clips what a ring
+   outside would paint, and the card's rounded corner took its edge. */
+.stg-row:focus-visible { outline-offset: -2px; }
 .stg-row__names { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .stg-row__jp { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); line-height: 1.2; }
-/* The value: what the row is set to, drawn where it can be (plan 139,
-   components/settings/RowSpecimens.jsx) and said beside the drawing. The
-   words give way before the drawing does. */
+/* The value: what the row is set to, said in words. On Settings' own
+   rows it is the second line under the name (the drawing beside it, in
+   the spec slot, says the same in a picture); a page's rows that carry
+   a value at their trailing edge (Credits, Notifications) keep it
+   there. */
 .stg-row__value {
   display: inline-flex;
   align-items: center;
@@ -21780,11 +21794,34 @@ form.stage__foot > .btn-primary {
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
+.stg-row__names > .stg-row__value { max-width: none; line-height: 1.3; }
 .stg-row__text {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* The glyph that says what the row is: one box for every row, so the
+   names start at one edge down the card. */
+.stg-row__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--sp-7);
+  height: var(--sp-7);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  color: var(--text-secondary);
+}
+/* The drawing of the state: one slot as wide as the widest (the
+   mixer's eight bars), the drawings against its trailing edge, so they
+   stand in a column however long the words beside them are. */
+.stg-row__spec {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: calc(var(--sp-8) + var(--sp-3));
 }
 .stg-row__chev { flex: none; color: var(--text-secondary); }
 /* The pass row: the list's own furniture, with its value in the
@@ -21792,6 +21829,7 @@ form.stage__foot > .btn-primary {
    Declared here, after .stg-row__value, so the modifier does not
    descend in specificity (guard 2). */
 .stg-row--pass .stg-row__value { color: var(--accent2); }
+.stg-row--pass .stg-row__icon { color: var(--accent2); }
 .stg-row--link { text-decoration: none; }
 /* A page's action that is a link (the privacy policy) is the same
    ghost as its button neighbours: no underline through the label. */
@@ -22026,10 +22064,12 @@ a.slip__act { text-decoration: none; }
    grounds, the mixer's levels, the rating bar's dots. */
 .stg-swatch {
   flex: none;
-  width: var(--sp-5);
-  height: var(--sp-5);
+  width: var(--sp-6);
+  height: var(--sp-6);
   border-radius: var(--r-pill);
-  border: 1px solid var(--surface-line);
+  /* The grounds are the page's own; on the dark theme the sumi disc has
+     no edge against its card, so the ring is the text's, not the line's. */
+  border: 1px solid var(--text-secondary);
 }
 .stg-swatch--light { background: var(--paper); }
 .stg-swatch--dark { background: var(--bg-panel); }
@@ -22057,6 +22097,403 @@ a.slip__act { text-decoration: none; }
    own gap; the desk stands a row's two side by side where the page is
    wide enough. */
 .stg-pair { display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
+
+/* ── 時間割 — Settings › Agenda (plan 181) ──
+   components/settings/AgendaPage.jsx and its two pieces. Three blocks
+   on the page -- what now, the week, the day -- stacked, or (.agd--wide,
+   measured on the page, not set at a window width) the week and the day
+   side by side under what now. A subject's line colour reaches each
+   block, row and tile through --agd-line, set where it is drawn; a
+   line's edge is 3px (線). */
+.agd { display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
+.agd--wide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  align-items: start;
+}
+.agd--wide > .agd-top { grid-column: 1 / -1; }
+
+/* What now (components/agenda/AgendaNext.jsx): the block under way or
+   the next, and the way into it -- on the Agenda page, and on Today under
+   the pass's strip or in the desk's side column, where its words are the
+   door to the agenda and it lists the blocks after it. */
+.agd-intro { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
+.agd-now {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  box-shadow: inset 3px 0 0 var(--agd-line, var(--accent2));
+}
+.agd-now__main { display: flex; align-items: center; gap: var(--sp-4); min-width: 0; }
+.agd-now__open {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--sp-4);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+a.agd-now__open:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; border-radius: var(--r-card); }
+.agd-now__chev { flex: none; margin-left: auto; color: var(--text-secondary); }
+.agd-now__glyph {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--sp-8);
+  height: var(--sp-8);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--agd-line, var(--accent2)) 24%, transparent);
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.agd-now__text { display: flex; flex: 1; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.agd-now__when { font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
+.agd-now--live .agd-now__when { color: var(--sel-ink); }
+.agd-now__name { font-family: var(--font-display); font-size: var(--fs-lead); }
+a.agd-now__open:hover .agd-now__name { text-decoration: underline; text-underline-offset: 3px; }
+.agd-now__go { flex: none; padding-inline: var(--sp-4); font-size: var(--fs-sm); text-decoration: none; }
+/* How far the block under way has run, in its line's colour. */
+.agd-now__run { display: flex; align-items: center; gap: var(--sp-3); }
+.agd-now__at { flex: none; font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.agd-now__bar {
+  display: block;
+  flex: 1;
+  height: var(--sp-1);
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+  overflow: hidden;
+}
+.agd-now__bar i { display: block; height: 100%; border-radius: inherit; background: var(--agd-line, var(--accent2)); }
+.agd-now__then {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--sp-2) var(--sp-4);
+  margin: 0;
+  padding: var(--sp-3) 0 0;
+  border-top: 1px solid var(--surface-line);
+  list-style: none;
+}
+.agd-now__then li { display: contents; font-size: var(--fs-sm); }
+.agd-now__then-when {
+  align-self: baseline;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.agd-now__then-name { display: flex; align-items: baseline; gap: var(--sp-2); min-width: 0; font-size: var(--fs-sm); font-weight: 700; }
+.agd-now__then-glyph { font-size: var(--fs-caption); color: color-mix(in srgb, var(--agd-line, var(--accent2)) 60%, var(--text-primary)); }
+
+/* An empty week's three blocks to start from. */
+.agd-start { display: flex; flex-direction: column; gap: var(--sp-3); }
+.agd-start__picks { display: flex; flex-direction: column; gap: var(--sp-2); }
+.agd-start__pick {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--agd-line, var(--accent2));
+  text-align: left;
+}
+.agd-start__words { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.agd-start__words b { font-family: var(--font-display); font-size: var(--fs-body); }
+.agd-start__when { font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); }
+
+/* The week: the hours down the side, the days across, a column each. */
+.agd-board {
+  min-width: 0;
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.agd-week {
+  display: grid;
+  grid-template-columns: calc(var(--sp-7) + var(--sp-1)) repeat(7, minmax(0, 1fr));
+  gap: var(--sp-2) var(--sp-1);
+}
+.agd-week--roomy { grid-template-columns: calc(var(--sp-8) - var(--sp-2)) repeat(7, minmax(0, 1fr)); column-gap: var(--sp-2); }
+.agd-dayhead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-height: var(--sp-7);
+  padding: 0;
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+/* Today is underlined in gold; the day being looked at is lit. */
+.agd-dayhead--today .agd-dayhead__name {
+  text-decoration: underline 2px var(--accent2);
+  text-underline-offset: 3px;
+}
+.agd-dayhead--on { background: var(--sel-wash); color: var(--sel-ink); }
+.agd-hours { position: relative; }
+.agd-hours__mark {
+  position: absolute;
+  right: 0;
+  top: calc(var(--agd-at, 0) * 100%);
+  transform: translateY(-50%);
+  font-size: var(--fs-caption-xs);
+  line-height: 1;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.agd-week--roomy .agd-hours__mark { font-size: var(--fs-caption); }
+.agd-hours__mark--first { transform: none; }
+.agd-hours__mark--last { transform: translateY(-100%); }
+/* A hairline at each mark down the side, the column's own ground the
+   page's under the card. */
+.agd-track {
+  position: relative;
+  display: block;
+  height: calc(var(--sp-8) * 5);
+  padding: 0;
+  border-radius: var(--r-card);
+  background-color: var(--bg-main);
+  background-image: linear-gradient(to bottom, var(--surface-line) 1px, transparent 1px);
+  background-size: 100% calc(100% / var(--agd-rows, 6));
+  overflow: hidden;
+}
+.agd-week--roomy .agd-track { height: calc(var(--sp-8) * 12); }
+.agd-track--on {
+  background-color: color-mix(in srgb, var(--accent2) 7%, var(--bg-main));
+  box-shadow: inset 0 0 0 1px var(--sel-line);
+}
+.agd-week--pointer .agd-track { cursor: copy; }
+.agd-week--pointer .agd-track:not(.agd-track--on):hover { background-color: color-mix(in srgb, var(--text-primary) 4%, var(--bg-main)); }
+.agd-track__now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--agd-top, 0) * 100%);
+  height: 2px;
+  background: var(--accent2);
+}
+.agd-track__now::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: var(--sp-2);
+  height: var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--accent2);
+  translate: 0 -50%;
+}
+.agd-block {
+  position: absolute;
+  left: var(--sp-1);
+  right: var(--sp-1);
+  top: calc(var(--agd-top, 0) * 100%);
+  height: calc(var(--agd-size, 0.1) * 100%);
+  min-height: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border-left: 3px solid var(--agd-line, var(--accent2));
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, var(--agd-line, var(--accent2)) 30%, var(--surface));
+  color: var(--text-primary);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  overflow: hidden;
+}
+.agd-block__time { font-weight: 600; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.agd-block__name,
+.agd-block__time { display: none; }
+/* Where a day's column has the width, a block says what it is and when
+   instead of its glyph. */
+.agd-week--roomy .agd-block {
+  align-items: flex-start;
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-caption);
+  text-align: left;
+}
+.agd-week--roomy .agd-block__glyph { display: none; }
+.agd-week--roomy .agd-block--short {
+  justify-content: center;
+  padding-block: 0;
+  font-size: var(--fs-caption-xs);
+  line-height: 1.2;
+}
+.agd-week--roomy .agd-block__name,
+.agd-week--roomy .agd-block--long .agd-block__time {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.agd-block:focus-visible { outline: 2px solid var(--accent2); outline-offset: 1px; }
+
+/* The day: its blocks as the list's rows, the way to add one on it. */
+.agd-day { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+.agd-day__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.agd-day__name { display: block; font-family: var(--font-display); font-size: var(--fs-body); font-weight: 700; }
+.agd-day__name::first-letter { text-transform: uppercase; }
+.agd-day__empty {
+  margin: 0;
+  padding: var(--sp-5) var(--sp-4);
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--r-panel);
+  font-size: var(--fs-sm);
+  text-align: center;
+  color: var(--text-secondary);
+}
+.agd-day__add { align-self: stretch; }
+.agd-row { box-shadow: inset 3px 0 0 var(--agd-line, var(--accent2)); }
+.agd-row__time {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: calc(var(--sp-8) + var(--sp-1));
+  font-size: var(--fs-sm);
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+.agd-row__end { font-size: var(--fs-caption); color: var(--text-secondary); }
+.agd-row__glyph {
+  margin-right: var(--sp-2);
+  font-size: var(--fs-caption);
+  color: color-mix(in srgb, var(--agd-line, var(--accent2)) 60%, var(--text-primary));
+}
+.agd-row__bell {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.agd-row__bell--off { opacity: 0.7; }
+/* The block under way, in today's list: lit, and saying so. */
+.agd-row--live { background: color-mix(in srgb, var(--agd-line, var(--accent2)) 10%, transparent); }
+.agd-row__live {
+  flex: none;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--sel-wash);
+  color: var(--sel-ink);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+/* The week's hours by subject, under the week. */
+.agd-share {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.agd-share__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.agd-share__total { font-family: var(--font-display); font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+.agd-share__bar { display: flex; gap: var(--sp-1); height: var(--sp-2); border-radius: var(--r-pill); overflow: hidden; }
+.agd-share__bar i { flex-basis: 0; min-width: var(--sp-1); background: var(--agd-line, var(--accent2)); }
+.agd-share__parts { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); margin: 0; padding: 0; list-style: none; }
+.agd-share__parts li { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-caption); font-weight: 700; }
+.agd-share__dot { width: var(--sp-2); height: var(--sp-2); border-radius: var(--r-pill); background: var(--agd-line, var(--accent2)); }
+.agd-share__h { font-weight: 600; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+/* The editor. `flex: none`: the sheet scrolls when the form is taller
+   than the window; left to shrink, the form squashed the segment (its
+   overflow makes its minimum height nothing) instead. */
+.agd-form { display: flex; flex: none; flex-direction: column; gap: var(--sp-5); }
+.agd-field { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+.agd-field > * { flex: none; }
+.agd-field__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.agd-field__row .console__chips { flex: 0 1 auto; justify-content: flex-end; }
+.agd-field__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
+.agd-field__sub { font-size: var(--fs-caption); color: var(--text-secondary); }
+.agd-subjects { display: flex; flex-direction: column; gap: var(--sp-4); }
+.agd-subjects__group { display: flex; flex-direction: column; gap: var(--sp-2); }
+.agd-subjects__tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--sp-2); }
+.agd-subject {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-height: 60px;
+  padding: var(--sp-2) var(--sp-1);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+}
+.agd-subject__glyph {
+  display: grid;
+  place-items: center;
+  min-width: var(--sp-7);
+  height: var(--sp-6);
+  padding: 0 var(--sp-1);
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, var(--agd-line, var(--accent2)) 24%, transparent);
+  color: var(--text-primary);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.agd-subject__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.agd-subject--on { color: var(--sel-ink); border-color: var(--sel-line); background: var(--sel-wash); }
+.agd-times { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+.agd-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--sp-2); }
+.agd-daybtn {
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.agd-daybtn--on { color: var(--sel-ink); border-color: var(--sel-line); background: var(--sel-wash); }
+.agd-leads { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--sp-2); }
+.agd-leadkey { font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+/* Save stays in reach at the sheet's foot however far it scrolls. */
+.agd-foot {
+  position: sticky;
+  bottom: calc(-1 * var(--sp-5));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: 0 calc(-1 * var(--sp-5));
+  padding: var(--sp-3) var(--sp-5);
+  background: var(--surface);
+  border-top: 1px solid var(--surface-line);
+}
+.agd-foot__acts { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: var(--sp-3); }
+.agd-error { margin: 0; color: color-mix(in srgb, var(--danger) 50%, var(--text-primary)); }
 
 /* ── Service: each pace a line to the destination (plan 139) ──
    One time axis for the three services and the learner's own pace, the
@@ -29191,6 +29628,10 @@ button.brd-stn { cursor: pointer; }
     outline-offset: 2px;
   }
   .desk-settings__list .stg-row:not(.stg-row--pass) > .stg-row__chev { display: none; }
+  /* Inside the row, as on the phone (.stg-row:focus-visible): the list
+     clips a ring outside it. */
+  a.stg-row:focus-visible { outline-offset: -2px; }
+  .desk-settings .stg-row--on .stg-row__icon { color: var(--accent2); }
   /* The list's rows are links (plan 117, components/selection/SplitRow),
      so that a stop, a point or a deck opens in a new tab too — and a
      link is not a button: neither the global `button` rule nor the

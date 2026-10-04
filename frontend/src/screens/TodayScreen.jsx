@@ -17,6 +17,9 @@ import { playArrival } from '../lib/audio'
 import { DeskSide } from '../components/chrome/DeskSide'
 import { JourneyPanel } from '../components/journey/JourneyPanel'
 import { WeekAhead } from '../components/journey/WeekAhead'
+import { AgendaNext } from '../components/agenda/AgendaNext'
+import { useAgenda } from '../stores/agenda'
+import { useMinute } from '../hooks/useMinute'
 
 // ── 本日 — the gate (plan 070) ────────────────────────────────
 // The Today tab: the bar, the pass at strip size, and under it the
@@ -72,6 +75,10 @@ export default function TodayScreen({ session }) {
   // 案内 — the gate's guide, once, after the lanes have painted (plan 100).
   const guide = useGuide('today', Boolean(today) || failed)
   const credits = useCredits()
+  // 時間割 (plan 181): what is next on the learner's agenda, read once a
+  // minute so a block starting while the gate is open is seen starting.
+  const { blocks } = useAgenda()
+  const now = useMinute()
 
   // What the run just cleared, handed back through the router's state
   // (screens/TodayRun.jsx). A reload has no state and shows the gate.
@@ -98,6 +105,11 @@ export default function TodayScreen({ session }) {
           {/* On the desk the strip stands beside the gate instead, with
               the pass's back under it (below). */}
           {desk ? null : <PassStrip pace={today?.pace} />}
+          {/* Under the strip, over the gate: the block under way (and the
+              way into it) or the next, and the door to the agenda. Nothing
+              for a learner with no agenda. On the desk it stands in the
+              side column instead (below). */}
+          {!desk && blocks?.length > 0 && <AgendaNext blocks={blocks} now={now} open />}
           {failed && !today ? (
             <Empty
               tone="error"
@@ -122,6 +134,9 @@ export default function TodayScreen({ session }) {
           {/* The strip stays on the finish too (plan 123): the run has
               just inked today's stamp and moved the new-items gauge. */}
           <PassStrip pace={today?.pace} />
+          {/* What is next on the agenda, and the two blocks after it:
+              the hour's business before the journey's. */}
+          {blocks?.length > 0 && <AgendaNext blocks={blocks} now={now} open then={2} />}
           <JourneyPanel session={session} />
           {/* 七日 (plan 135): the week ahead, at the column's foot. */}
           {!run && <WeekAhead />}

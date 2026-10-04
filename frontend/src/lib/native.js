@@ -16,6 +16,8 @@ import { SplashScreen } from '@capacitor/splash-screen'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { openPath } from './platform'
 import { LEGACY_NUDGE_ID, NUDGE_IDS } from './ahead'
+import { AGENDA_IDS } from './agenda'
+import { OPENABLE_PATHS } from '../domain/agenda'
 
 // 発車案内 — the shells' own plugin (plan 156): it hands the widget its
 // figures (android/.../TsujiWidgetPlugin.java, ios/App/App/
@@ -159,6 +161,28 @@ export async function scheduleNudges(nudges) {
   return nudges
 }
 
+/** 時間割 (plan 181): the agenda's notifications (lib/agenda.js),
+ *  replacing the agenda's own and leaving the day's train alone; nothing
+ *  when the OS has not allowed them. */
+export async function scheduleAgenda(items) {
+  try {
+    await LocalNotifications.cancel({ notifications: AGENDA_IDS.map(id => ({ id })) })
+  } catch { /* nothing scheduled */ }
+  if (!items.length) return []
+  const { display } = await LocalNotifications.checkPermissions()
+  if (display !== 'granted') return []
+  await LocalNotifications.schedule({
+    notifications: items.map(n => ({
+      id: n.id,
+      title: n.title,
+      body: n.body,
+      schedule: { at: n.at, allowWhileIdle: true },
+      extra: n.extra,
+    })),
+  })
+  return items
+}
+
 /** The widget's figures, and the OS asked to redraw it. A shell built
  *  before the widget has no plugin to answer: the call fails quietly. */
 export async function updateWidget(payload) {
@@ -182,7 +206,8 @@ export function onOpenings(handler) {
   const pending = [
     LocalNotifications.addListener('localNotificationActionPerformed', ({ notification }) => {
       const to = notification?.extra?.to
-      if (to === '/today') take(to, 'notification', `n${notification.id}`)
+      // The day's train opens the gate; an agenda block opens its subject.
+      if (OPENABLE_PATHS.has(to)) take(to, 'notification', `n${notification.id}`)
     }),
     App.addListener('appUrlOpen', ({ url }) => {
       const to = openPath(url)

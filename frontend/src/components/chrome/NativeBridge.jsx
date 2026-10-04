@@ -1,16 +1,18 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { useProfileSummaryState } from '../../stores/profileSummary'
 import { useTodaySummary, refreshToday } from '../../stores/today'
 import { setAheadPlan } from '../../stores/ahead'
+import { refreshAgenda, useAgenda } from '../../stores/agenda'
+import { planAgenda } from '../../lib/agenda'
 import { kanaSetLabel } from '../../domain/kanaSets'
 import { apiJson } from '../../lib/api'
 import { track } from '../../lib/track'
 import { aheadInstants, aheadQuery, planNudges, widgetPayload, WIDGET_HOUR } from '../../lib/ahead'
 import {
   backAction, bindBackButton, bindOpenings, bindResume, exitApp, isNative, nativePlatform,
-  nudgeAt, syncNudges, updateWidget,
+  nudgeAt, syncAgenda, syncNudges, updateWidget,
 } from '../../lib/platform'
 
 // A plan waits this long after what it reads last moved, so a run's
@@ -56,7 +58,12 @@ export function NativeBridge() {
   }, [navigate])
 
   if (!isNative() || !summary) return null
-  return <AheadPlanner enabled={summary.notifications === true} time={summary.reminderTime ?? null} />
+  return (
+    <>
+      <AheadPlanner enabled={summary.notifications === true} time={summary.reminderTime ?? null} />
+      <AgendaPlanner />
+    </>
+  )
 }
 
 // ── 発車案内 — the day ahead (plan 156) ──────────────────────
@@ -123,6 +130,40 @@ function AheadPlanner({ enabled, time }) {
     // they have moved.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, time, lang, total, at])
+
+  return null
+}
+
+// ── 時間割 — the agenda's reminders (plan 181) ───────────────
+// One notification for each coming occurrence of each block that asks
+// for one, a week ahead (lib/agenda.js). The week rolls on, so the plan
+// is made again whenever the agenda changes (here or on another device,
+// which the return to the front fetches), the language does, and the app
+// comes back to the front. It never touches the day's train.
+function AgendaPlanner() {
+  const { t, lang } = useLang()
+  const { blocks } = useAgenda()
+  const [front, setFront] = useState(0)
+
+  useEffect(() => {
+    let unbind = () => {}
+    let gone = false
+    bindResume(() => { refreshAgenda(); setFront(n => n + 1) }).then(fn => { if (gone) fn(); else unbind = fn })
+    return () => { gone = true; unbind() }
+  }, [])
+
+  useEffect(() => {
+    // No answer yet: whatever was scheduled before stays scheduled.
+    if (!blocks) return
+    let cancelled = false
+    const handle = setTimeout(async () => {
+      const planned = planAgenda({ blocks, t, now: new Date() })
+      if (!cancelled) await syncAgenda(planned).catch(() => {})
+    }, PLAN_DELAY_MS)
+    return () => { cancelled = true; clearTimeout(handle) }
+    // `t` follows `lang`; `front` is the app coming back.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blocks, lang, front])
 
   return null
 }

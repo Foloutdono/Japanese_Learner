@@ -37,6 +37,15 @@ vi.mock('./stores/profileSummary', async o => ({ ...(await o()),
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
+// 時間割 (plan 181): an empty week unless a test fills it, so the gate
+// stands as it did for every test that is not about the agenda.
+const agenda = vi.hoisted(() => ({ blocks: [] }))
+vi.mock('./stores/agenda', () => ({ useAgenda: () => ({ blocks: agenda.blocks, failed: false }), saveAgenda: vi.fn() }))
+const WEEK = [
+  { id: 1, subject: 'kanji', days: [0, 1, 2, 3, 4], start: 540, end: 660, notify: true, lead: 10 },
+  { id: 2, subject: 'dictation', days: [2], start: 780, end: 840, notify: true, lead: 15 },
+  { id: 3, subject: 'reading', days: [5], start: 840, end: 960, notify: false, lead: 0 },
+]
 const { default: TodayScreen } = await import('./screens/TodayScreen')
 const { default: DictionaryScreen } = await import('./screens/DictionaryScreen')
 
@@ -53,6 +62,42 @@ describe('Today below the desk', () => {
     const main = document.querySelector('main.today')
     expect(main.querySelector(':scope > .pass--strip')).not.toBeNull()
     expect(document.querySelector('.desk-side, .desk-journey')).toBeNull()
+    // No agenda, no card.
+    expect(document.querySelector('.agd-now')).toBeNull()
+  })
+
+  it('stands what is next on the agenda between the strip and the gate', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 9, 7, 10, 0))
+    agenda.blocks = WEEK
+    try {
+      await render(
+        <LangProvider>
+          <MemoryRouter initialEntries={['/today']}><TodayScreen session={{}} /></MemoryRouter>
+        </LangProvider>
+      )
+      await settle()
+      const main = document.querySelector('main.today')
+      const kids = [...main.children].map(el => el.className.split(' ')[0])
+      const strip = kids.indexOf('pass')
+      const card = kids.indexOf('agd-now')
+      expect(card).toBe(strip + 1)
+      expect(kids.indexOf('gate-card')).toBeGreaterThan(card)
+      const now = main.querySelector('.agd-now')
+      expect(now.querySelector('.agd-now__name').textContent).toBe('Kanji')
+      expect(now.querySelector('.agd-now__go').getAttribute('href')).toBe('/learn/kanji')
+      expect(now.querySelector('a.agd-now__open').getAttribute('href')).toBe('/profile/settings/agenda')
+      // A thumb's card: the way in and the door each 44px at least, and
+      // nothing wider than the phone.
+      expect(now.querySelector('.agd-now__go').getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+      expect(now.querySelector('a.agd-now__open').getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+      expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
+      // The phone lists no blocks after it: the gate needs the room.
+      expect(now.querySelector('.agd-now__then')).toBeNull()
+    } finally {
+      agenda.blocks = []
+      vi.useRealTimers()
+    }
   })
 })
 

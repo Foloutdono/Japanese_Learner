@@ -2008,7 +2008,13 @@ each question drawing its answers between them.
   The daily pace is one field: it was on two pages over one number. Under
   the card the rest is a list whose rows **draw what they are set to**
   beside their words (`RowSpecimens`: the theme's grounds, the mixer's
-  levels, the rating bar's dots, the reading pace's clock), and every
+  levels, the rating bar's dots, the reading pace's clock). Plan 182 laid
+  the rows out by their edges: a glyph in one column at the left, the
+  name over what it is set to, the drawing in a slot of one width at the
+  right (so the drawings stand in a column whatever the words say), the
+  rows in three cards by what they are for -- the app, the study, the
+  learner -- and the pass apart, set apart by the gap and never by a
+  caption. Every page draws what it sets, and every
   page draws what it sets:
   each stop ahead with the date the service reaches it, each service as
   a line to the destination on one time axis with the learner's own pace
