@@ -1542,7 +1542,6 @@ const profile = {
   // in days, signed and wordless -- the colour says the rest; the ghost
   // train is labelled "promised".
   jourDrift:         (n) => `${n > 0 ? '+' : '−'}${Math.abs(n)} day${Math.abs(n) > 1 ? 's' : ''}`,
-  jourPromised:      'promised',
   jourRoute:         (from, to) => `${from} → ${to}`,
   jourNoDest:        'No destination on this pass.',
   jourNoDestLink:    'Set one at the office',

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { StruckMark } from '../offers/StruckMark'
 import { Wave, CornerMark } from '../offers/icons'
@@ -80,6 +81,30 @@ export function CardFace({ tier, name, level, share, levelSlot, className = '', 
   )
 }
 
+// How long the card is in the air: the flip's own 0.7s (index.css's
+// .pcard__flip) and a margin, in case its transitionend never comes.
+const TURN_MS = 800
+
+/**
+ * Whether the card is turning: from a change of side until the flip
+ * lands. The card's depth (its perspective) is drawn only then. At rest
+ * a perspective, however far, puts the print on a 3D layer the browser
+ * resamples, and every glyph on the card read soft; flat, the two sides
+ * stand exactly where they did and the print is crisp.
+ */
+function useTurning(side) {
+  const [turning, setTurning] = useState(false)
+  const first = useRef(side)
+  useEffect(() => {
+    if (first.current === side) return undefined
+    first.current = side
+    setTurning(true)
+    const timer = setTimeout(() => setTurning(false), TURN_MS)
+    return () => clearTimeout(timer)
+  }, [side])
+  return turning
+}
+
 /**
  * The card with both sides, turned by a touch. The face is one button,
  * the whole of it; the back carries its doors (PassBack), and a touch
@@ -90,6 +115,7 @@ export function PassCard({ tier, name, level, share, side = 'face', onTurn, back
   const { t } = useLang()
   const [ref, width] = useSlotWidth()
   const turned = side === 'back'
+  const turning = useTurning(side)
   const offDoor = e => {
     if (!turned || e.target.closest('button, a, input, [role="button"]')) return
     onTurn?.()
@@ -97,7 +123,7 @@ export function PassCard({ tier, name, level, share, side = 'face', onTurn, back
   return (
     <div
       ref={ref}
-      className={`pcard pcard--${tier} pcard--turnable${turned ? ' pcard--turned' : ''} ${className}`.trim()}
+      className={`pcard pcard--${tier} pcard--turnable${turned ? ' pcard--turned' : ''}${turning ? ' pcard--turning' : ''} ${className}`.trim()}
       style={scaleVars(width)}
       data-side={side}
     >

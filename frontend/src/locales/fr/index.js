@@ -1499,7 +1499,6 @@ const profile = {
   // en jours, signé, sans mot — la couleur dit le reste ; le train fantôme
   // porte « promis ».
   jourDrift:         (n) => `${n > 0 ? '+' : '−'}${Math.abs(n)} jour${Math.abs(n) > 1 ? 's' : ''}`,
-  jourPromised:      'promis',
   jourRoute:         (from, to) => `${from} → ${to}`,
   jourNoDest:        'Aucune destination sur cette carte.',
   jourNoDestLink:    'En choisir une au guichet',

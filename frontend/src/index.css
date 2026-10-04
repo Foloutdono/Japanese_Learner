@@ -7715,7 +7715,6 @@ textarea:focus-visible {
   display: block;
   width: 100%;
   aspect-ratio: 272 / 172;
-  perspective: 1600px;
   font-family: var(--font-display);
   line-height: normal;
   text-align: left;
@@ -7726,6 +7725,10 @@ textarea:focus-visible {
   transform-style: preserve-3d;
   transition: transform 0.7s cubic-bezier(0.45, 0, 0.25, 1);
 }
+/* The card's depth, only in the air (PassCard's useTurning): at rest a
+   perspective put the print on a 3D layer the browser resampled, and
+   every glyph on the card read soft. */
+.pcard--turning { perspective: 1600px; }
 .pcard--turned .pcard__flip { transform: rotateY(180deg); }
 .pcard__side { position: absolute; inset: 0; backface-visibility: hidden; }
 .pcard--turnable .pcard__side--face { transform: translateZ(1.6px); }
@@ -7901,6 +7904,7 @@ textarea:focus-visible {
 .pcb {
   --pcb-rule: rgba(34, 36, 40, 0.14);
   --pcb-fill: var(--pass-band);
+  --pcb-focus: var(--pass-band);
   --pcb-ahead: #3f8a5a;
   --pcb-late: #b4562f;
   position: absolute;
@@ -8031,6 +8035,7 @@ textarea:focus-visible {
 }
 .pcb__sign-name { overflow: hidden; font-family: var(--font-serif); font-size: var(--fs-lead); font-style: italic; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .pcb__issued {
+  position: relative;
   display: flex;
   flex: none;
   flex-direction: column;
@@ -8076,6 +8081,7 @@ textarea:focus-visible {
   --pcb-late: #e08a6a;
   --pcb-sign: #e9e5dc;
   --pcb-sign-2: #dcd7cc;
+  --pcb-focus: #d2ae68;
   color: var(--text-on-panel);
 }
 .pcb--pro .pcb__print { background: rgba(0, 0, 0, 0.28); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
@@ -8087,6 +8093,7 @@ textarea:focus-visible {
   --pcb-fill: linear-gradient(90deg, #b0852f, #e6bd62);
   --pcb-sign: #fbfbfc;
   --pcb-sign-2: #eff0f2;
+  --pcb-focus: #b0852f;
   color: rgba(34, 36, 42, 0.88);
 }
 .pcb--max .pcb__print { background: rgba(255, 255, 255, 0.38); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 0 0 1px rgba(90, 94, 102, 0.18); color: #24262b; }
@@ -8095,6 +8102,22 @@ textarea:focus-visible {
 .pcb--max .pcb__class { color: #7a571c; }
 .pcb--max .pcb__sign { box-shadow: inset 0 1px 1px rgba(40, 42, 48, 0.18); }
 .pcb--max .pcb__door--on { outline-color: #b0852f; }
+/* The keys' focus on the back: the door's own touch, ringed inside in
+   the card's ink and washed a shade, at the plate's radius -- not the
+   page's gold ring outside a square box, which stood off the print's
+   grid and crossed its rules. The class block (it turns the card back)
+   rings the same way, in the strip's ink. */
+.pcb__issued::after { content: ''; position: absolute; inset: calc(-1 * var(--sp-1)) calc(-1 * var(--sp-2)); border-radius: var(--r-plate); }
+.pcb .pcb__door:focus-visible,
+.pcb .pcb__issued:focus-visible { outline: none; }
+.pcb .pcb__door:focus-visible::after {
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, var(--pcb-focus) 10%, transparent);
+  box-shadow: inset 0 0 0 2px var(--pcb-focus);
+}
+/* A field's touch reaches under the print; its ring keeps to the grid. */
+.pcb .pcb__field.pcb__door:focus-visible::after { bottom: 0; }
+.pcb .pcb__issued:focus-visible::after { box-shadow: inset 0 0 0 2px currentcolor; }
 
 @media (prefers-reduced-motion: reduce) {
   /* The turn is a cross-fade: the sides change places without the
@@ -20256,133 +20279,96 @@ html {
    Status word · gold 有効期限 · the turn-over control. Rides the
    pass's existing footer slot, on the pass's sumi. */
 
-/* ── The one-rail track (区間・新幹線 round) ────────────────────
+/* ── 路線図の影 — the ghost train's line (components/journey/GhostTrack.jsx) ──
+   One drawing on two grounds: the card's back on a phone (.jcard, its
+   inks the card's material) and the desk's journey body (.jour-track,
+   on the panel's sumi). Each ground names the four inks: --jc-ink the
+   run behind you and your train, --jc-line the legs ahead, --jc-soft
+   the stops ahead, --jc-st the stretch owed.
+
    Positional geometry is deliberately numeric (nothing on the space
-   scale means "the line sits 27px down a 52px drawing"); everything
-   typographic reads the token scales. The inner span insets the
-   coordinate system: by a train's length on the left, where the train
-   waits on its siding before 発, and by 20px on the right, because the
-   widest thing centred on the terminus is its own name. The guarantee
-   travels with the component instead of leaning on whatever padding
-   the panel around it happens to have.
-
-   Top to bottom in its 52px: the train (12–27) standing on the line,
-   the line's legs (27–33) with the stretch owed hatched across them
-   (24–36), the promise's dashed marker crossing all of it (9–39), and
-   the stop names under the line (40 down). The train and the names
-   never share a pixel of height, which is what keeps a stop readable
-   with the train standing at it (GhostTrack.browser.test.jsx measures
-   every rule relatively).
-
-   It was 132px and two lanes once, then (the 進捗が主役 round) one 3px
-   rail with a hollow dot per stop and a car on a stem above it. The
-   dots made every stop look alike, passed, next or last; the cuts in
-   the line and the names' ink say which is which now. */
-.jour-track { position: relative; height: 52px; }
-.jour-track__span { position: absolute; inset: 0 20px 0 48px; }
+   scale means "the line sits 40px down a 92px drawing"). The inner
+   span insets the coordinate system by a train's length on the left,
+   where the train waits on its siding before 発, so a train at 発 stands
+   on the drawing. Top to bottom: the promise's ghost (2–20), your train
+   (21–41) standing on the legs (40–45) with the stretch owed hatched
+   across them (37–48), and the stops named and dated under the line
+   (52 down). The two trains and the names never share a pixel of
+   height (GhostTrack.browser.test.jsx measures every rule). */
+.jline { position: relative; height: 92px; }
+.jcard .jline { margin-top: var(--sp-3); }
+.jline__span { position: absolute; inset: 0 var(--sp-2) 0 64px; }
 /* The siding: a stub of line before 発, the train's own length less
-   the cut, where it stands until the first item is done. */
-.jour-track__siding {
+   the cut, where it waits until the first item is done -- and, once it
+   has left, filled with the run like the legs behind it. */
+.jline__siding,
+.jline__leg,
+.jline__done { position: absolute; top: 40px; height: 5px; border-radius: var(--r-pill); }
+.jline__siding { left: -60px; width: 58px; background: var(--jc-line); }
+.jline__leg { background: var(--jc-line); }
+.jline__done,
+.jline__siding--done { background: var(--jc-ink); }
+.jline__done { transition: width 0.25s ease; }
+/* 未達区間 — the stretch you owe the promise, or it owes you. */
+.jline__gap {
   position: absolute;
-  left: -46px; width: 44px;
-  top: 27px; height: 6px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
-}
-/* Left behind once the train is under way: the run's pigment, as the
-   legs it has covered. */
-.jour-track__siding--done { background: var(--jour-st, var(--success)); }
-/* One leg per level, stop to stop, each stopping 2px short of the stop
-   on either side (GhostTrack's CUT): the cut IS the stop. */
-.jour-track__leg {
-  position: absolute;
-  top: 27px; height: 6px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
-}
-/* The leg being ridden, a shade up from the ones still ahead. */
-.jour-track__leg--now { background: color-mix(in srgb, var(--text-on-panel) 26%, transparent); }
-/* The run behind you, drawn over each leg it covers and cut with it. */
-.jour-track__done {
-  position: absolute;
-  top: 27px; height: 6px;
-  border-radius: var(--r-pill);
-  background: var(--jour-st, var(--success));
-  transition: width 0.25s ease;
-}
-/* 未達区間 — the stretch you owe the promise, or it owes you. Hatched
-   rather than washed: at 20% on sumi a flat tint is invisible, and
-   hatching is what a route diagram already uses for a stretch that is
-   not running normally. */
-.jour-track__owed {
-  position: absolute;
-  top: 24px; height: 12px;
-  background:
-    repeating-linear-gradient(45deg,
-      color-mix(in srgb, var(--jour-st, var(--warning)) 60%, transparent) 0 1px,
-      transparent 1px 5px),
-    color-mix(in srgb, var(--jour-st, var(--warning)) 16%, transparent);
+  top: 37px;
+  height: 11px;
+  border-radius: var(--r-plate);
+  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--jc-st) 55%, transparent) 0 3px, transparent 3px 6px);
   transition: left 0.25s ease, width 0.25s ease;
 }
-/* A stop is its name under the cut, and nothing else: passed in the
-   state's ink, the one you are heading for in full ink, the rest soft. */
-.jour-track__station {
+.jline__stop {
   position: absolute;
-  top: 40px;
+  top: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   transform: translateX(-50%);
-}
-.jour-track__station-name {
-  display: block;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: var(--tr-term);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-on-panel-soft);
+  line-height: 1.1;
   white-space: nowrap;
 }
-/* 発 and かな are Japanese; the levels are Latin figures. */
-.jour-track__station-name--jp { font-family: var(--font-jp); }
-.jour-track__station--passed .jour-track__station-name { color: var(--jour-st-ink, var(--text-on-panel-soft)); }
-.jour-track__station--next .jour-track__station-name { color: var(--text-on-panel); }
-/* The promise is a timetable marker ACROSS the line, not a second
-   train: a line has no width to collide with, so the two marks can
-   stand at the same x with nothing to keep apart. */
-.jour-track__plan {
-  position: absolute;
-  top: 9px;
-  transform: translateX(-50%);
-  width: 0; height: 30px;
-  border-left: 2px dashed color-mix(in srgb, var(--text-on-panel) 55%, transparent);
-  transition: left 0.6s cubic-bezier(0.3, 0.7, 0.3, 1);
+.jline__stop b { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--jc-soft); }
+.jline__stop b[lang="ja"] { font-family: var(--font-jp); font-size: var(--fs-caption); }
+.jline__stop small { font-family: var(--font-display); font-size: var(--fs-caption); color: var(--jc-soft); }
+.jline__stop--passed b { color: var(--jc-pass, var(--jc-ink)); }
+.jline__stop--next b { color: currentcolor; }
+.jline__stop--last { align-items: flex-end; transform: translateX(-100%); }
+.jline__stop--first { align-items: flex-start; transform: none; }
+/* A train's box ends at `left`: its nose is the x it claims. It is a
+   TRAIN: it pulls away and settles rather than sliding at a flat rate. */
+.jline__car { position: absolute; width: 0; transition: left 0.6s cubic-bezier(0.3, 0.7, 0.3, 1); }
+.jline__car--you { top: 21px; z-index: 2; }
+.jline__car--ghost { top: 2px; }
+.jline__svg { position: absolute; right: 0; top: 0; }
+.jline__car--you .jline__svg { width: 60px; height: 20px; fill: var(--jc-ink); }
+.jline__car--ghost .jline__svg {
+  width: 52px;
+  height: 18px;
+  fill: color-mix(in srgb, currentcolor 30%, transparent);
+  stroke: color-mix(in srgb, currentcolor 62%, transparent);
 }
-/* Your train stands ON the line, its nose at your position: the box
-   ends at `left`, so the x it claims is exact. It is a TRAIN: it pulls
-   away and settles rather than sliding at a flat rate, the reason it
-   keeps a different curve from the fill and the hatching (those keep
-   0.25s ease). */
-.jour-track__you {
-  position: absolute;
-  top: 12px;
-  width: 46px; height: 15px;
-  transform: translateX(-100%);
-  color: var(--jour-st, var(--success));
-  transition: left 0.6s cubic-bezier(0.3, 0.7, 0.3, 1);
-}
-.jour-track__train { display: block; width: 100%; height: 100%; fill: currentcolor; }
-/* The moving parts of the drawing — the filled run behind you, the two
-   marks, and the hatching between them — all animate their position.
-   DESIGN.md: every transition needs a prefers-reduced-motion answer.
-   The positions are still correct with the motion off, which is the
-   whole point of answering with `none` rather than a shorter
-   duration. */
+/* The positions are still correct with the motion off, which is the
+   point of answering with `none` rather than a shorter duration. */
 @media (prefers-reduced-motion: reduce) {
-  .jour-track__done,
-  .jour-track__owed,
-  .jour-track__you,
-  .jour-track__plan { transition: none; }
+  .jline__done,
+  .jline__gap,
+  .jline__car { transition: none; }
 }
+/* The desk's ground: the panel's sumi, the run in the state's pigment
+   and a passed stop's name in the state's ink. */
+.jour-track {
+  --jc-ink: var(--jour-st, var(--success));
+  --jc-line: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  --jc-soft: var(--text-on-panel-soft);
+  --jc-st: var(--jour-st-ink, var(--warning));
+  --jc-pass: var(--jour-st-ink, var(--text-on-panel-soft));
+  color: var(--text-on-panel);
+}
+/* The desk dates no stop -- the comparisons under the line print the
+   arrival -- so its drawing ends under the names. */
+.jour-track .jline { height: 70px; }
 
 /* ── 進捗 — the head: how far along the line you are ───────────
    The count is the fact a learner can act on without arithmetic, and
@@ -20607,61 +20593,6 @@ html {
 }
 .jcard__st i { width: 10px; height: 10px; border-radius: var(--r-pill); background: var(--jour-st); flex: none; }
 .jcard__route { font-size: var(--fs-sm); font-weight: 700; color: var(--jc-soft); white-space: nowrap; }
-/* The line: legs at 40px, names under them, the trains over them. The
-   left inset is a train's length, so a train at 発 stands on the card. */
-.jcard__line { position: relative; height: 92px; margin: var(--sp-3) var(--sp-2) 0 64px; }
-.jcard__leg,
-.jcard__done { position: absolute; top: 40px; height: 5px; border-radius: var(--r-pill); }
-.jcard__leg { background: var(--jc-line); }
-.jcard__done { background: var(--jc-ink); }
-.jcard__gap {
-  position: absolute;
-  top: 37px;
-  height: 11px;
-  border-radius: var(--r-plate);
-  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--jc-st) 55%, transparent) 0 3px, transparent 3px 6px);
-}
-.jcard__stop {
-  position: absolute;
-  top: 52px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  transform: translateX(-50%);
-  line-height: 1.1;
-  white-space: nowrap;
-}
-.jcard__stop b { font-size: var(--fs-sm); font-weight: 700; color: var(--jc-soft); }
-.jcard__stop b[lang="ja"] { font-family: var(--font-jp); font-size: var(--fs-caption); }
-.jcard__stop small { font-size: var(--fs-caption); color: var(--jc-soft); }
-.jcard__stop--passed b { color: var(--jc-ink); }
-.jcard__stop--next b { color: currentcolor; }
-.jcard__stop--last { align-items: flex-end; transform: translateX(-100%); }
-.jcard__stop--first { align-items: flex-start; transform: none; }
-.jcard__car { position: absolute; width: 0; }
-.jcard__car--you { top: 21px; z-index: 2; }
-.jcard__car--ghost { top: 2px; }
-.jcard__svg { position: absolute; right: 0; top: 0; }
-.jcard__car--you .jcard__svg { width: 60px; height: 20px; fill: var(--jc-ink); }
-.jcard__car--ghost .jcard__svg {
-  width: 52px;
-  height: 18px;
-  fill: color-mix(in srgb, currentcolor 30%, transparent);
-  stroke: color-mix(in srgb, currentcolor 62%, transparent);
-}
-.jcard__car i {
-  position: absolute;
-  right: 58px;
-  top: 3px;
-  font-style: normal;
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--jc-soft);
-  white-space: nowrap;
-}
 .jcard__foot { height: 10px; margin: 0 calc(-1 * var(--sp-5)); background: var(--jc-foot); }
 
 /* ── The gear on the pass ──────────────────────────────────────
@@ -26613,7 +26544,10 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-holder__level { font-size: var(--fs-body); font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .desk-holder__level small { font-size: var(--fs-caption); font-weight: 600; color: var(--text-on-panel-soft); }
-  .desk-holder__row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); border-top: 1px solid rgba(255, 255, 255, 0.07); }
+  /* The journey's stub takes what its figure needs -- "+89 j" or, with
+     no drift to print, the word alone ("Suspendu", "Suspended") -- and
+     the balance the rest: a fixed share cut the word at the case's edge. */
+  .desk-holder__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; border-top: 1px solid rgba(255, 255, 255, 0.07); }
   .desk-holder__cr,
   .desk-holder__st {
     display: flex;
@@ -26623,7 +26557,7 @@ button.brd-stn { cursor: pointer; }
     gap: var(--sp-1);
     min-width: 0;
     min-height: 46px;
-    padding: var(--sp-2) var(--sp-4);
+    padding: var(--sp-2) var(--sp-3);
   }
   .desk-holder__st {
     --st-ink: var(--success);
@@ -26644,6 +26578,7 @@ button.brd-stn { cursor: pointer; }
   .desk-holder__st em { font-size: var(--fs-caption); font-style: normal; font-weight: 600; white-space: nowrap; color: var(--text-on-panel-soft); }
   .desk-holder__st b { font-size: var(--fs-body); font-weight: 700; line-height: 1; white-space: nowrap; }
   .desk-holder__st em { font-weight: 700; letter-spacing: var(--tr-name); text-transform: uppercase; color: var(--st-ink); }
+  .desk-holder__st b.desk-holder__st-word { font-size: var(--fs-sm); color: var(--st-ink); }
   .desk-holder__lamp { display: inline-block; width: 7px; height: 7px; margin-right: var(--sp-2); border-radius: var(--r-pill); background: var(--st-ink); vertical-align: 1px; }
   .desk-holder__lv:hover,
   .desk-holder__cr:hover,

@@ -2010,7 +2010,11 @@ each question drawing its answers between them.
   with its name under the line, passed in the state's ink, the next in
   full ink; your train is a Shinkansen in profile standing on the legs,
   its nose at your position, waiting on a siding before 発 until the
-  first item is done (`components/journey/GhostTrack.jsx`).
+  first item is done, and the siding fills with the run once it has left
+  (`components/journey/GhostTrack.jsx`). Since plan 174 the promise is the
+  same train as a dashed ghost above the line, with no word on it, and the
+  card's back on a phone and the desk's journey body draw the one line in
+  their own inks.
   **A stop stands at the END of the leg it names, and the line opens at
   初, the novice's stop** — so reaching a stop is finishing the thing it is
   named for, never starting it, and a learner who has done nothing is drawn
