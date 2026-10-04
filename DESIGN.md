@@ -1533,17 +1533,21 @@ each question drawing its answers between them.
   the five levels shared 800px while the 41 tiers and the 36 themes
   scrolled beside them). A strip comes first: the learner's own level,
   wider, with its bar, its first words, what is met and never seen,
-  and the gate button that resumes it on its first platform; then the
-  other stops with the most cards met — another level or a tier of the
-  deck's ranking — each a door to its platforms, as many as the page
-  is wide for (four, three or two, measured). Under it the three
-  sources as plates (the gates' plate, `--elev-hang`): JLPT's five
-  levels as a line with a bar on each, the tiers under their pool and
+  and the gate button that resumes it on its first platform — in a
+  column of its own beside the words once the card is wide enough
+  (measured on the card), so the strip is a row of words high and the
+  gate's ring and ripples stay inside the card; then the other stops
+  with the most cards met — another level or a tier of the deck's
+  ranking — each a door to its platforms, three, two or one by the
+  page's width and only as many as were started, the row shared by
+  what is there. Under it the three sources as plates (the gates'
+  plate, `--elev-hang`): JLPT's five levels as a line with each one's
+  first words and bar, the tiers under their pool and
   size as a grid of numbered cells (a cell's border lit and its foot
   filled where cards are met, its name and count in its label), the
   themes under their filter in as many columns as hold a name. Every
   door pushes; the grids scroll inside their plates, never the page.
-  The short desk drops the strip's words. The phone keeps its three
+  The short desk drops the first words. The phone keeps its three
   cards. The kanji's sources keep plan 137's plates.
 - **A practice station takes the window** (plan 159, the owner's picks A
   and S1 of the canvas "Practice screens — layout options"). Reading and

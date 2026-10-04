@@ -2,13 +2,18 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+// The faces main.jsx loads: the gate's width is its label's.
+import '@fontsource/space-grotesk/latin-500.css'
+import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
 // ── 机 — the vocabulary's sources on a 1,440px window (plan 181) ─────
-// The page as the owner drew it (pick C): the lead and four stops in
-// the strip, the 41 tiers whole in their plate, seven or more cells to
-// a row, and the themes in two columns. The narrowest desk's version is
-// vocabSources.desktop's; a short window's, vocabSources.short's.
+// The page as the owner drew it (pick C): the lead, its gate in a column
+// of its own beside its words, and three stops in the strip, the row
+// shared by as many as were started; the 41 tiers whole in their plate,
+// seven or more cells to a row, and the themes in two columns. The
+// narrowest desk's version is vocabSources.desktop's; a short window's,
+// vocabSources.short's.
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -63,6 +68,7 @@ const { default: VocabScreen } = await import('./screens/VocabScreen')
 // fraction of a pixel short of its place is a row out of line.
 const settle = async (ms = 300) => {
   await new Promise(r => setTimeout(r, ms))
+  await document.fonts.ready
   await Promise.all(document.getAnimations()
     .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
     .map(a => a.finished.catch(() => {})))
@@ -101,6 +107,14 @@ const plates = () => [...document.querySelectorAll('.desk-sources__lower > .desk
 const rows = plate => [...plate.querySelectorAll('.desk-source__rows > a')]
 const cells = () => [...plates()[1].querySelectorAll('.desk-source__cells > a')]
 const near = (a, b) => Math.abs(a - b) < 2
+// The gate's breathing ring stands 9px out of its pill, and the reader's
+// ripples as far: all of it inside the card.
+const RING = 9
+const gateInside = card => {
+  const c = card.getBoundingClientRect()
+  const g = card.querySelector('button.btn-depart--gate').getBoundingClientRect()
+  return g.left - RING >= c.left && g.right + RING <= c.right && g.top - RING >= c.top && g.bottom + RING <= c.bottom
+}
 
 afterEach(() => {
   STATS.items.vocab.N4.started = 0
@@ -108,29 +122,48 @@ afterEach(() => {
 })
 
 describe('the vocabulary\'s sources on a wide desk (plan 181)', () => {
-  it('fills the strip with four stops beside the lead, the most met first, the gate inside its card', async () => {
+  it('fills the strip with three stops beside the lead, the most met first, the gate and its halo in its card', async () => {
     STATS.items.vocab.N4.started = 40
     await mount()
     expect($('.desk-sources--narrow')).toBeNull()
     expect(others().map(o => o.getAttribute('href'))).toEqual([
-      '/learn/vocab/N4', '/learn/vocab/tier/1?size=200', '/learn/vocab/tier/5?size=200', '/learn/vocab/tier/3?size=200',
+      '/learn/vocab/N4', '/learn/vocab/tier/1?size=200', '/learn/vocab/tier/5?size=200',
     ])
-    const card = lead().getBoundingClientRect()
-    const gate = lead().querySelector('button.btn-depart--gate').getBoundingClientRect()
-    expect(gate.left).toBeGreaterThanOrEqual(card.left)
-    expect(gate.right).toBeLessThanOrEqual(card.right)
-    expect(gate.bottom).toBeLessThanOrEqual(card.bottom)
+    const card = lead()
+    expect(card.classList.contains('desk-resume__card--split')).toBe(true)
+    expect(gateInside(card)).toBe(true)
+    // The gate beside the words, so the strip is a row of words high, not
+    // the words and the gate under them.
+    const words = card.querySelector('.desk-resume__name').getBoundingClientRect()
+    const gate = card.querySelector('button.btn-depart--gate').getBoundingClientRect()
+    expect(gate.left).toBeGreaterThan(words.right)
+    expect(card.getBoundingClientRect().height).toBeLessThan(200)
     const band = $('.desk-resume').getBoundingClientRect()
     expect(others().at(-1).getBoundingClientRect().right).toBeGreaterThan(band.right - 2)
+    for (const o of others()) {
+      const label = o.querySelector('.desk-resume__label')
+      expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
+    }
   })
 
-  it('keeps an empty place empty: a lead with less beside it is no wider', async () => {
+  it('shares the row among what was started: one stop takes the rest of it, none leaves the lead the whole', async () => {
     STARTED = { 1: 18 }
     await mount()
     expect(others()).toHaveLength(1)
-    const width = lead().getBoundingClientRect().width
-    expect(others()[0].getBoundingClientRect().width).toBeLessThan(width)
-    expect($('.desk-resume').getBoundingClientRect().right - others().at(-1).getBoundingClientRect().right).toBeGreaterThan(100)
+    const band = $('.desk-resume').getBoundingClientRect()
+    expect(others()[0].getBoundingClientRect().width).toBeLessThan(lead().getBoundingClientRect().width)
+    expect(near(others()[0].getBoundingClientRect().right, band.right)).toBe(true)
+    expect(gateInside(lead())).toBe(true)
+  })
+
+  it('leaves the lead the whole row when nothing else is started', async () => {
+    STARTED = {}
+    await mount()
+    expect(others()).toHaveLength(0)
+    const band = $('.desk-resume').getBoundingClientRect()
+    expect(near(lead().getBoundingClientRect().width, band.width)).toBe(true)
+    expect(lead().classList.contains('desk-resume__card--split')).toBe(true)
+    expect(gateInside(lead())).toBe(true)
   })
 
   it('draws the 41 tiers whole, seven or more to a row, and the themes in two columns', async () => {

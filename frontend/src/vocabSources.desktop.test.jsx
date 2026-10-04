@@ -2,17 +2,22 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+// The faces main.jsx loads: the gate's width is its label's, and the
+// runner's fallback sets « Reprendre » narrower than Space Grotesk does.
+import '@fontsource/space-grotesk/latin-500.css'
+import '@fontsource/space-grotesk/latin-700.css'
 import './index.css'
 
 // ── 机 — the vocabulary's sources, what you started first (plan 181) ──
 // The owner's pick C of the canvas "Tsuji — the vocabulary's sources".
 // Plan 137 hung the three sources as three equal plates the window's
 // height; the page now opens on a strip of what the learner has started
-// -- their own level, wider, with the gate that resumes it, then the
-// stops with the most cards met -- over the three sources: JLPT's line
-// with a bar on each level, the tiers as a grid of numbered cells, the
-// themes in two columns. Every door pushes. The phone keeps its three
-// cards (deskfree.phone).
+// -- their own level, wider, its gate in a column of its own beside its
+// words, then the stops with the most cards met -- over the three
+// sources: JLPT's line with each level's first words and bar, the tiers
+// as a grid of numbered cells, the themes in columns. Every door pushes.
+// This is the narrowest desk (1100×800): one stop beside the lead. The
+// phone keeps its three cards (deskfree.phone).
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -65,6 +70,7 @@ const { default: VocabScreen } = await import('./screens/VocabScreen')
 // fraction of a pixel short of its place is a row out of line.
 const settle = async (ms = 300) => {
   await new Promise(r => setTimeout(r, ms))
+  await document.fonts.ready
   await Promise.all(document.getAnimations()
     .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
     .map(a => a.finished.catch(() => {})))
@@ -103,6 +109,15 @@ const plates = () => [...document.querySelectorAll('.desk-sources__lower > .desk
 const rows = plate => [...plate.querySelectorAll('.desk-source__rows > a')]
 const cells = () => [...plates()[1].querySelectorAll('.desk-source__cells > a')]
 const near = (a, b) => Math.abs(a - b) < 2
+// The gate's breathing ring stands 9px out of its pill (index.css,
+// btn-gate-breathe), and the reader's ripples as far: all of it inside
+// the card.
+const RING = 9
+const gateInside = card => {
+  const c = card.getBoundingClientRect()
+  const g = card.querySelector('button.btn-depart--gate').getBoundingClientRect()
+  return g.left - RING >= c.left && g.right + RING <= c.right && g.top - RING >= c.top && g.bottom + RING <= c.bottom
+}
 
 afterEach(() => {
   STATS.items.vocab.N4.started = 0
@@ -134,6 +149,14 @@ describe('the vocabulary\'s sources on the desk (plan 181)', () => {
     await mount()
     const card = lead()
     expect(card.getBoundingClientRect().width).toBeGreaterThan(others()[0].getBoundingClientRect().width * 1.4)
+    // The gate in a column of its own beside the words, its halo in the
+    // card, the level's name whole.
+    expect(card.classList.contains('desk-resume__card--split')).toBe(true)
+    expect(gateInside(card)).toBe(true)
+    const words = card.querySelector('.desk-resume__name').getBoundingClientRect()
+    expect(card.querySelector('button.btn-depart--gate').getBoundingClientRect().left).toBeGreaterThan(words.right)
+    const label = card.querySelector('.desk-resume__label')
+    expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
     expect(card.querySelector('.desk-resume__cap').textContent).toBe('JLPT · Tu es ici')
     expect(card.querySelector('.desk-source__meter .desk-source__num').textContent).toBe('12/ 674')
     const name = card.querySelector('a.desk-resume__name')
@@ -151,30 +174,36 @@ describe('the vocabulary\'s sources on the desk (plan 181)', () => {
     expect(where.path).toBe('/learn/vocab/N5/vocab.flashcard.f2b')
   })
 
-  it('follows with the stops the most cards are met in, each a pushing door to its platforms', async () => {
-    STATS.items.vocab.N4.started = 40
+  it('follows with the stop the most cards are met in, a pushing door to its platforms', async () => {
     await mount()
-    // Two beside the lead on the narrowest desk (four on a wider one:
-    // vocabSources.wide).
+    // One beside the lead on the narrowest desk (three on a wider one:
+    // vocabSources.wide), the rest of the row its.
     expect($('.desk-sources--narrow')).not.toBeNull()
     const os = others()
-    expect(os.map(o => o.getAttribute('href'))).toEqual(['/learn/vocab/N4', '/learn/vocab/tier/1?size=200'])
-    expect(os[1].querySelector('.desk-resume__cap').textContent).toBe('Par fréquence')
-    expect(os[1].querySelector('.desk-resume__name').textContent).toBe('1Mots 1–200')
-    expect(os[1].querySelector('.desk-source__meter .desk-source__num').textContent).toBe('18/ 200')
-    expect(os[1].querySelector('.desk-resume__sample').textContent).toBe('語1 何')
-    expect(os[0].querySelector('.desk-resume__sample').textContent).toBe('彼 君')
-    // All in one row, at one height.
-    const rs = [lead(), ...os].map(c => c.getBoundingClientRect())
-    for (const r of rs) {
-      expect(near(r.top, rs[0].top)).toBe(true)
-      expect(near(r.height, rs[0].height)).toBe(true)
-    }
-    os[1].click()
+    expect(os.map(o => o.getAttribute('href'))).toEqual(['/learn/vocab/tier/1?size=200'])
+    expect(os[0].querySelector('.desk-resume__cap').textContent).toBe('Par fréquence')
+    expect(os[0].querySelector('.desk-resume__name').textContent).toBe('1Mots 1–200')
+    expect(os[0].querySelector('.desk-source__meter .desk-source__num').textContent).toBe('18/ 200')
+    expect(os[0].querySelector('.desk-resume__sample').textContent).toBe('語1 何')
+    // One row at one height, to the strip's end.
+    const [a, b] = [lead(), os[0]].map(c => c.getBoundingClientRect())
+    expect(near(a.top, b.top)).toBe(true)
+    expect(near(a.height, b.height)).toBe(true)
+    expect(near(b.right, strip().getBoundingClientRect().right)).toBe(true)
+    os[0].click()
     await settle(50)
     expect(where.path).toBe('/learn/vocab/tier/1')
     expect(where.search).toBe('?size=200')
     expect(where.type).toBe('PUSH')
+  })
+
+  it('ranks another level with more met before a tier', async () => {
+    STATS.items.vocab.N4.started = 40
+    await mount()
+    const os = others()
+    expect(os.map(o => o.getAttribute('href'))).toEqual(['/learn/vocab/N4'])
+    expect(os[0].querySelector('.desk-resume__cap').textContent).toBe('JLPT')
+    expect(os[0].querySelector('.desk-resume__sample').textContent).toBe('彼 君')
   })
 
   it('offers somewhere to go on with nothing met: the level the learner chose, to start', async () => {
@@ -187,7 +216,7 @@ describe('the vocabulary\'s sources on the desk (plan 181)', () => {
     expect(others()[0].getAttribute('href')).toBe('/learn/vocab/N5')
   })
 
-  it('draws JLPT as a line of five rows sharing the plate, each with its bar', async () => {
+  it('draws JLPT as a line of five rows sharing the plate, each with its first words and its bar', async () => {
     await mount()
     const [jlpt] = plates()
     const rs = rows(jlpt)
@@ -196,6 +225,8 @@ describe('the vocabulary\'s sources on the desk (plan 181)', () => {
     for (const h of hs) expect(near(h, hs[0])).toBe(true)
     expect(rs[0].getAttribute('aria-current')).toBe('location')
     expect(rs.every(r => r.querySelector('.desk-line__bar'))).toBe(true)
+    expect(rs[0].querySelector('.desk-source__sample').textContent).toBe('何 私 来る')
+    expect(rs[2].querySelector('.desk-source__sample')).toBeNull()
     expect(parseFloat(rs[0].querySelector('.desk-line__learned').style.width)).toBeCloseTo((100 * 12) / 674, 1)
     expect(jlpt.querySelector('.desk-source__cap')).toBeNull()
     expect(jlpt.querySelector('.desk-source__fig').textContent).toMatch(/12\s*\/\s*8045/)
@@ -252,7 +283,7 @@ describe('the vocabulary\'s sources on the desk (plan 181)', () => {
     expect(cells()[0].getAttribute('href')).toBe('/learn/vocab/tier/1?size=200&domain=jmdict')
     const grid = cells()[0].parentElement
     expect(grid.scrollHeight).toBeGreaterThan(grid.clientHeight)
-    expect(others().map(o => o.getAttribute('href'))).toEqual(['/learn/vocab/tier/1?size=200', '/learn/vocab/tier/3?size=200'])
+    expect(others().map(o => o.getAttribute('href'))).toEqual(['/learn/vocab/tier/1?size=200'])
     // The size under the pool, as wide as it, with no caption over it:
     // its name is the switch's label.
     const sizeRow = plates()[1].querySelector('.desk-source__size')

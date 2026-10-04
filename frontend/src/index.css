@@ -29667,17 +29667,18 @@ button.brd-stn { cursor: pointer; }
     min-height: calc(8 * var(--sp-8));
   }
   /* The lead never narrower than its gate wants; the stops beside it,
-     as many as the page is wide for (VocabSources' stripCount, measured),
-     share the rest -- an empty place stays empty, so a lead with nothing
-     beside it is no wider than with four. */
+     no more than the page is wide for (VocabSources' stripRoom,
+     measured) and no more than the learner has started, share the rest
+     of the row -- the lead alone takes the whole of it. */
   .desk-resume {
     flex: none;
     display: grid;
-    grid-template-columns: minmax(calc(7 * var(--sp-8)), 1.5fr) repeat(4, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--sp-5);
   }
-  .desk-resume--3 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 1.5fr) repeat(3, minmax(0, 1fr)); }
-  .desk-resume--2 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 1.5fr) repeat(2, minmax(0, 1fr)); }
+  .desk-resume--1 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) minmax(0, 1fr); }
+  .desk-resume--2 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) repeat(2, minmax(0, 1fr)); }
+  .desk-resume--3 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2.4fr) repeat(3, minmax(0, 1fr)); }
   .desk-resume__card {
     display: flex;
     flex-direction: column;
@@ -29758,22 +29759,46 @@ button.brd-stn { cursor: pointer; }
     text-overflow: ellipsis;
     color: color-mix(in srgb, var(--line-color) 62%, var(--text-secondary));
   }
-  /* The figures over the gate: the lead is a third of the page at most,
-     and the gate at its own width beside them would not fit it. */
+  /* The figures over the gate, the gate across the card up to its own
+     measure: a gate at its own width beside the words would not fit a
+     lead this narrow. The air round it is the halo's -- its ring (9px)
+     and the reader's ripples (as far out of the pill) stay inside the
+     card's padding and clear of the figures. */
   .desk-resume__go {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: var(--sp-3);
+    align-items: stretch;
+    gap: var(--sp-5);
     margin-top: auto;
   }
   .desk-resume__go > .desk-source__num {
-    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  /* The narrowest desk (VocabSources' NARROW, measured): the tiers'
-     plate the widest, the themes' the narrowest, in one column. */
+  .desk-resume__go > .btn-depart--gate { max-width: calc(8 * var(--sp-8)); }
+  /* A lead wide enough (VocabSources' SPLIT, measured on the card) gives
+     the gate a column of its own beside its words, as a deck's page
+     sets its count beside its gate (plan 179): the strip a row shorter,
+     the level's name whole, the halo in the card's own air. */
+  .desk-resume__card--split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: repeat(4, auto);
+    align-content: center;
+    gap: var(--sp-3) var(--sp-7);
+  }
+  .desk-resume__card--split > .desk-resume__go {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    align-self: center;
+    margin-top: 0;
+    text-align: center;
+  }
+  /* The narrowest desk (VocabSources' NARROW, measured): the lead a
+     share narrower, so its two stops keep their names; the tiers' plate
+     the widest, the themes' the narrowest, in one column. */
+  .desk-sources--narrow > .desk-resume--2 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2fr) repeat(2, minmax(0, 1fr)); }
+  .desk-sources--narrow > .desk-resume--1 { grid-template-columns: minmax(calc(7 * var(--sp-8)), 2fr) minmax(0, 1fr); }
   .desk-sources--narrow > .desk-sources__lower { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.15fr) minmax(0, 0.95fr); }
   /* A plate's figure goes under its name when the two do not fit one
      line, rather than breaking the name (which breaks only when it is
@@ -29789,7 +29814,7 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-sources--resume .desk-source__rows--line > .desk-source__row { grid-template-columns: var(--sp-8) auto minmax(0, 1fr) auto; }
   /* A level's bar under its name, its figure at the bar's end, in JLPT's
-     line under the strip. */
+     line under the strip ... */
   .desk-source__meter {
     display: flex;
     align-items: center;
@@ -29797,6 +29822,17 @@ button.brd-stn { cursor: pointer; }
     margin-top: var(--sp-1);
   }
   .desk-source__meter > .desk-line__bar { flex: 1; }
+  /* ... and the level's first words between its name and its bar
+     (/api/station/vocab/samples, as the station's stops print them). */
+  .desk-source__sample {
+    overflow: hidden;
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    word-spacing: var(--sp-1);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: color-mix(in srgb, var(--line-color) 62%, var(--text-secondary));
+  }
   /* The tiers as a grid: a numbered cell each, a row's height and width
      at least, as many to a row as the plate holds, the rows sharing what
      the plate has and scrolling past it. */
@@ -29878,11 +29914,13 @@ button.brd-stn { cursor: pointer; }
     a.desk-resume__card:hover,
     a.desk-resume__card:focus-visible { transform: none; }
   }
-  /* The short desk (plan 169): the strip's first words and the lead's
-     air give way first, and the sources under it hold six rows' height
-     rather than eight, so a 600px window shows the page whole. */
+  /* The short desk (plan 169): the first words, the strip's and the
+     line's, and the lead's air give way first, and the sources under
+     it hold six rows' height rather than eight, so a 600px window
+     shows the page whole. */
   @media (max-height: 799px) {
-    .desk-resume__sample { display: none; }
+    .desk-resume__sample,
+    .desk-source__sample { display: none; }
     .desk-resume__card--lead { padding: var(--sp-5); }
     .desk-sources__lower { min-height: calc(6 * var(--sp-8)); }
   }

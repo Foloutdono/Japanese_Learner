@@ -1421,14 +1421,17 @@ runtime purpose. Two consequences worth knowing:
   four drawn on the canvas
   "Tsuji — the vocabulary's sources", replacing plan 137's three equal
   plates): a strip of the learner's own level -- its bar, its first
-  words and the gate that resumes it on its first platform -- then the
-  other stops with the most cards met, a level or a tier of the deck's
-  ranking, as many as the page is wide for (four, three or two, measured
-  by `useBoxWidth`); under it JLPT's line with a bar on each level, the
-  tiers as a grid of numbered cells lit and filled where cards are met,
-  and the themes in as many columns as hold a name; each tier's first
+  words and the gate that resumes it on its first platform, in a column
+  of its own beside them once the card is wide enough (`SPLIT`, measured
+  on the card), its halo inside the card -- then the other stops with
+  the most cards met, a level or a tier of the deck's ranking, three,
+  two or one by the page's width (measured by `useBoxWidth`) and only as
+  many as were started, the row shared by what is there; under it JLPT's
+  line with each level's first words and bar, the tiers as a grid of
+  numbered cells lit and filled where cards are met, and the themes in
+  as many columns as hold a name; each tier's first
   words on `GET /api/frequency/{domain}/tiers`'s `sample` (the deck's
-  domains only); the short desk dropping the strip's words (cited in
+  domains only); the short desk dropping the first words (cited in
   `routes/frequency.py`, `tests/test_station_samples.py`,
   `components/selection/VocabSources.jsx`, `src/vocabSources.desktop.test.jsx`,
   `src/vocabSources.wide.test.jsx`, `src/vocabSources.short.test.jsx`

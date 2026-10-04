@@ -50,15 +50,21 @@ import { GateButton } from '../ui/GateButton'
 // `base` its URL.
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 const BASE = '/learn/vocab'
-// The strip's stops beside the lead, by the page's width: four on a
-// 1,440px window, three on a laptop's 1,280 or 1,366, two on the
-// narrowest desk (a 1,100px window leaves the page ~720px), each wide
-// enough for its level's name. Measured, as a deck's page measures its
-// modes (plan 154): the desk's stylesheet answers one width only. Under
-// NARROW the sources under the strip are laid for the width too.
+// The strip's stops beside the lead, by the page's width: three where
+// the page is 1,140px or more (a 1,440px window), two from NARROW, one
+// on the narrowest desk (a 1,100px window leaves the page ~800px), so
+// the lead keeps the width to stand its gate beside its words -- and
+// only as many as the learner has started, the row shared by what is
+// there. Measured, as a deck's page measures its modes (plan 154): the
+// desk's stylesheet answers one width only. Under NARROW the sources
+// under the strip are laid for the width too.
 const NARROW = 960
-const WIDE = 1120
-const stripCount = width => (width == null || width >= WIDE ? 4 : width >= NARROW ? 3 : 2)
+const WIDE = 1140
+const stripRoom = width => (width == null || width >= WIDE ? 3 : width >= NARROW ? 2 : 1)
+// The lead's own width at which its gate takes a column of its own
+// beside its words, rather than standing under them: the words keep
+// their level's name whole and the gate its halo inside the card.
+const SPLIT = 460
 // What the lead's gate boards: the stop's first platform.
 const RESUME_MODE = offeredModes('vocab')[0]
 
@@ -75,7 +81,7 @@ export default function VocabSources({ session }) {
   const deck = useDeckTiers(session, cut)
   return (
     <div ref={boxRef} className={`desk-sources desk-sources--resume${narrow ? ' desk-sources--narrow' : ''}`}>
-      <ResumeStrip t={t} size={cut.size} tiers={deck.tiers} started={deck.started} count={stripCount(width)} />
+      <ResumeStrip t={t} size={cut.size} tiers={deck.tiers} started={deck.started} room={stripRoom(width)} />
       <div className="desk-sources__lower">
         <JlptPlate t={t} desc={null} bars />
         <TierCellsPlate t={t} cut={cut} />
@@ -147,8 +153,10 @@ function Meter({ figure, total, ...bar }) {
 }
 
 // ── the strip ──
-function ResumeStrip({ t, size, tiers, started, count }) {
+function ResumeStrip({ t, size, tiers, started, room }) {
   const navigate = useNavigate()
+  const [leadRef, leadWidth] = useBoxWidth(true)
+  const split = leadWidth != null && leadWidth >= SPLIT
   const stats = useStats().data
   const here = useProfileSummary()?.jlptLevel ?? null
   const samples = useStationSamples('vocab')
@@ -187,12 +195,16 @@ function ResumeStrip({ t, size, tiers, started, count }) {
     // The most met first; a tie keeps the levels before the tiers and
     // each in its own order (the sort is stable).
     .sort((a, b) => b.started - a.started)
-    .slice(0, count)
+    .slice(0, room)
   const unseen = lead.total - lead.started
   const depart = () => board(() => navigate(`${BASE}/${lead.level}/${RESUME_MODE}`))
   return (
-    <div className={`desk-resume desk-resume--${count}`} role="group" aria-label={t.sourcesInProgress}>
-      <section className="desk-resume__card desk-resume__card--lead" aria-labelledby="desk-resume-lead">
+    <div className={`desk-resume desk-resume--${others.length}`} role="group" aria-label={t.sourcesInProgress}>
+      <section
+        ref={leadRef}
+        className={`desk-resume__card desk-resume__card--lead${split ? ' desk-resume__card--split' : ''}`}
+        aria-labelledby="desk-resume-lead"
+      >
         <span className={`desk-resume__cap${lead.level === here ? ' desk-source__here' : ''}`}>
           {lead.level === here ? `${t.byLevel} · ${t.levelCurrentMark}` : t.byLevel}
         </span>
@@ -236,11 +248,12 @@ function ResumeStrip({ t, size, tiers, started, count }) {
 // ── the JLPT line ──
 // `compact`: the rows at their own height rather than sharing the
 // plate's, for a plate that stands over another in its column. `bars`:
-// each level's bar under its name, where the strip above already says
-// where the learner is and how far.
+// each level's first words and its bar under its name, where the strip
+// above already says where the learner is and how far.
 export function JlptPlate({ t, source = 'vocab', base = BASE, compact = false, bars = false, desc = t.byLevelDesc }) {
   const stats = useStats().data
   const here = useProfileSummary()?.jlptLevel ?? null
+  const samples = useStationSamples(source, bars)
   const rows = LEVELS.map(level => ({ level, ...deckItems(stats, source, level) }))
   const learned = rows.reduce((n, r) => n + r.learned, 0)
   const total = rows.reduce((n, r) => n + r.total, 0)
@@ -275,6 +288,9 @@ export function JlptPlate({ t, source = 'vocab', base = BASE, compact = false, b
                     {isHere && <span className="desk-source__here">{t.levelCurrentMark}</span>}
                     {met && <span>{t.startedNote(r.started)}</span>}
                   </span>
+                )}
+                {samples?.[r.level]?.sample && (
+                  <span className="desk-source__sample" lang="ja" aria-hidden="true">{samples[r.level].sample.join(' ')}</span>
                 )}
                 {bars && <Meter learned={r.learned} started={r.started} total={r.total} figure={r.learned} />}
               </span>
