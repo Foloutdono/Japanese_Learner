@@ -4,6 +4,7 @@ import { track } from '../lib/track'
 import { stopwatch } from '../lib/dwell'
 import { supabase } from '../lib/supabase'
 import { apiFetch } from '../lib/api'
+import { offerScreen, offerPick } from '../domain/paywall'
 
 // ── 回数券 — the balance, as the chrome sees it (plan 069) ────
 // One cached answer from GET /api/credits, printed on the HUD's pass
@@ -35,6 +36,7 @@ export function seedCredits(data) {
 /** The learner this balance belongs to has signed out (stores/account). */
 export function forgetCredits() {
   store.forget()
+  week.forget()
   // A claim asked for the last learner must not seed the next one's
   // balance, and their "while you were away" is not the next one's.
   claimGeneration += 1
@@ -88,20 +90,21 @@ export function useBalanceOpen() {
 
 // ── 定期券 — the offer (the paywall) ────────────────────────────
 // Module state for the same reason the balance sheet is: it opens from
-// five unrelated places — the last boarding screen, the balance sheet,
-// the settings list, a run that hit zero and the reading ride's pass
-// plate — and three of those are outside any screen that could hold
-// the state. (The profile was a sixth until plan 143; its pass's footer
-// opens the balance sheet now.)
+// unrelated places — the last boarding screen, the balance sheet, the
+// settings list, a run that hit zero and the reading ride's pass plate
+// — and most of those are outside any screen that could hold the
+// state. (The profile was a door until plan 143; its pass's footer
+// opens the balance sheet now.) The door decides which of the three
+// offers it is (domain/paywall.js's offerScreen, plan 172).
 //
-// The funnel is recorded HERE rather than in the sheet, on purpose.
+// The funnel is recorded HERE rather than in the screen, on purpose.
 // Every open must produce exactly one `offer_view` and exactly one of
 // `offer_intent` / `offer_dismiss` (lib/track.js's closed set), and
-// the only way to guarantee that across five call sites is to make the
+// the only way to guarantee that across the call sites is to make the
 // call sites unable to get it wrong: they open, take and close, and
 // the events are a consequence. The door rides along as `where`, so
-// the dashboard can say which of the five converts.
-let paywall = null   // { source, taken } or null
+// the dashboard can say which of them converts.
+let paywall = null   // { source, screen, limit, waiting, taken } or null
 // How long the offer has been in front of them. Started on open and
 // read once, on whichever of the two answers comes first — the gap
 // between seeing the pass and deciding about it is the difference
@@ -109,16 +112,27 @@ let paywall = null   // { source, taken } or null
 // intent rate but a one-second median is a mis-tap, not demand.
 let dwell = null
 
-/** Open the offer from one of domain/paywall.js's SOURCES. */
-export function openPaywall(source) {
-  paywall = { source, taken: false }
+/**
+ * Open the offer from one of domain/paywall.js's SOURCES. `detail`
+ * carries what only the door knows: `limit`, the Pro ceiling a LIMIT
+ * door hit (domain/paywall.js's LIMITS), and `waiting`, the cards a
+ * stopped run left (the week's today, before the server has it).
+ */
+export function openPaywall(source, detail = {}) {
+  paywall = {
+    source,
+    screen: offerScreen(source),
+    limit: detail.limit ?? null,
+    waiting: detail.waiting ?? null,
+    taken: false,
+  }
   dwell?.stop()
   dwell = stopwatch()
   track('offer_view', { where: source })
   emit()
 }
 
-/** Engaged ms since the sheet opened, and the stopwatch spent. */
+/** Engaged ms since the offer opened, and the stopwatch spent. */
 function spendDwell() {
   if (!dwell) return {}
   const ms = dwell.read()
@@ -128,14 +142,18 @@ function spendDwell() {
 }
 
 /**
- * "Prévenez-moi" taken. Recorded once per open — a second tap is the
- * same answer, and counting it twice would inflate the only number
- * this whole feature exists to produce.
+ * The gate pressed: the offer's own pick (domain/paywall.js's
+ * offerPick) unless one is passed. Recorded once per open — a second
+ * tap is the same answer, and counting it twice would inflate the only
+ * number this whole feature exists to produce. There is no store yet
+ * (domain/credits.js's HAS_STORE), so this is the interest, and the
+ * screen says it is noted.
  */
-export function takePaywall() {
+export function takePaywall(pick = null) {
   if (!paywall || paywall.taken) return
+  const { plan, billing } = pick ?? offerPick(paywall.screen)
   paywall = { ...paywall, taken: true }
-  track('offer_intent', { where: paywall.source, ...spendDwell() })
+  track('offer_intent', { where: paywall.source, ...spendDwell(), plan, billing })
   emit()
 }
 
@@ -156,6 +174,39 @@ export function closePaywall() {
 export function peekPaywall() { return paywall }
 export function usePaywall() {
   return useSyncExternalStore(subscribe, () => paywall, () => null)
+}
+
+// ── 止 — the week the credits stopped (plan 172) ──────────────
+// The WEEK offer draws the learner's last seven days from GET
+// /api/credits/week: each day's paid reviews and the reviews that
+// waited for the balance (core/credits.week). Under enforcement the
+// server refuses a stopped run's first fare and never sees the rest,
+// so the run-out sheet posts what the run left (recordStop) -- the
+// one place that knows.
+const week = createRemoteStore('/api/credits/week', { ttlMs: 60_000 })
+
+export function useOfferWeek() {
+  return week.use().data
+}
+export function refreshOfferWeek() {
+  return week.refresh()
+}
+export function seedOfferWeek(data) {
+  week.seed(data)
+}
+
+/** POST /api/credits/stop: `cards` reviews a stopped run left waiting. */
+export async function recordStop(cards) {
+  if (!(cards > 0)) return
+  const { data } = await supabase.auth.getSession()
+  const session = data?.session
+  if (!session) return
+  const r = await apiFetch('/api/credits/stop', session, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cards: Math.min(500, Math.round(cards)) }),
+  })
+  if (r.ok) week.refresh()
 }
 
 /** A 402 out_of_credits mid-run: the run stops at the balance and says so. */

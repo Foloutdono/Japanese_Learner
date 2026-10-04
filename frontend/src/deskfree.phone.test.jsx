@@ -1121,10 +1121,10 @@ describe('the stage and the columns (plan 123, P3–P5)', () => {
   })
 
   // P5: the workspace's inset and the level-up docked in a run's column
-  // (plan 142) key on .desk-run, which a phone never renders: the pass
-  // hangs across the top inside the stage's gutters, and the stage steps
-  // down under it by the pass and a gap.
-  it('hangs the level-up\'s pass across the top of a run, the stage stepping down', async () => {
+  // (plans 142, 173) key on .desk-run, which a phone never renders: the
+  // learner's card hangs at the top, centred at --levelup-w, over the
+  // stage, which no longer steps down under it.
+  it('hangs the level-up\'s card at the top of a run, the stage staying put', async () => {
     const { XpToast } = await import('./components/rewards/XpToast')
     document.documentElement.dataset.chrome = 'stage'
     try {
@@ -1136,15 +1136,27 @@ describe('the stage and the columns (plan 123, P3–P5)', () => {
           </div>
         </LangProvider>
       )
-      await new Promise(r => setTimeout(r, 400))
+      await new Promise(r => setTimeout(r, 600))
       const root = getComputedStyle(document.documentElement)
       const px = name => parseFloat(root.getPropertyValue(name))
-      const pass = document.querySelector('.levelup').getBoundingClientRect()
-      expect(pass.left).toBe(px('--sp-5'))
-      expect(Math.round(pass.width)).toBe(Math.round(document.body.getBoundingClientRect().width - 2 * px('--sp-5')))
-      expect(Math.round(pass.height)).toBe(px('--levelup-h'))
-      expect(parseFloat(getComputedStyle(screen.container.querySelector('.stage')).paddingTop))
-        .toBe(px('--sp-3') + px('--levelup-h') + px('--sp-4'))
+      const card = document.querySelector('.levelup').getBoundingClientRect()
+      const w = px('--levelup-w')
+      expect(Math.round(card.width)).toBe(w)
+      // Centred on the window less html's reserved scrollbar gutter.
+      expect(Math.round(card.left + card.width / 2)).toBe(Math.round(document.body.getBoundingClientRect().width / 2))
+      expect(Math.round(card.top)).toBe(px('--sp-4'))
+      // The learner's card, face up at the card's proportions, its old
+      // level struck for the new one.
+      const face = document.querySelector('.levelup .pcard').getBoundingClientRect()
+      expect(face.height).toBeCloseTo(face.width * 172 / 272, 0)
+      expect(document.querySelector('.levelup__was').textContent).toBe('12')
+      expect(document.querySelector('.levelup__now').textContent).toBe('13')
+      // The stage does not step down: its top is what it is with no card.
+      const stage = screen.container.querySelector('.stage')
+      const under = getComputedStyle(stage).paddingTop
+      expect(document.documentElement.hasAttribute('data-levelup')).toBe(true)
+      document.documentElement.removeAttribute('data-levelup')
+      expect(getComputedStyle(stage).paddingTop).toBe(under)
     } finally {
       delete document.documentElement.dataset.chrome
     }
@@ -1237,9 +1249,9 @@ describe('the places (plan 123, P16)', () => {
     const { default: SettingsScreen } = await import('./screens/SettingsScreen')
     const seen = await mount('/profile/settings', <SettingsScreen session={{ access_token: 't', user: { email: 'a@b.c' } }} />)
     const rows = buttons('.stg-row[data-page]')
-    // The pass's doors too (plan 139): a field keeps its ›.
-    buttons('.stg-pass .stg-door')
-    expect(document.querySelectorAll('.stg-pass__field .stg-pass__chev')).toHaveLength(3)
+    // The card's doors too (plans 139, 173): a field keeps its ›.
+    buttons('.pcard-slot--settings .stg-door')
+    expect(document.querySelectorAll('.pcb__field .pcb__chev')).toHaveLength(3)
     expect(document.querySelector('main a')).toBeNull()
     expect(getComputedStyle(rows[0].querySelector('.stg-row__chev')).display).not.toBe('none')
     rows.find(r => r.dataset.page === 'display').click()
@@ -1529,13 +1541,14 @@ describe('the three panels (plan 126)', () => {
   })
 })
 
-// ── plan 127 — the pass the rail's foot became, which a phone keeps apart ──
-// On the desk the HUD's three instruments are one card at the rail's
-// foot, the learner's pass (components/chrome/DeskPass.jsx). A phone
-// keeps its HUD as it was: the roundel and the pocket pass across the
-// strip, three objects, no card, no climb, no caption under the balance.
-describe('the rail\'s pass (plan 127)', () => {
-  it('leaves the phone\'s HUD its three instruments, apart', async () => {
+// ── plans 127, 173 — the holder at the rail's foot, which a phone does without ──
+// On the desk the HUD's doors stand on the case of the holder the
+// learner's card is carried in, at the rail's foot
+// (components/chrome/DeskPass.jsx). A phone keeps its HUD: the station
+// panel and the card as one strip (帯), no holder, no card's edge, no
+// caption under the balance, and no pointer's names.
+describe('the rail\'s holder (plans 127, 173)', () => {
+  it('leaves the phone\'s HUD its panel and its strip, and no holder', async () => {
     const { MemoryRouter } = await import('react-router-dom')
     const { Hud } = await import('./components/chrome/Hud')
     await render(
@@ -1547,12 +1560,13 @@ describe('the rail\'s pass (plan 127)', () => {
     )
     await settle()
     const inner = document.querySelector('.hud__inner')
-    expect(inner.querySelector(':scope > .hud__level')).not.toBeNull()
-    expect(inner.querySelector(':scope > .hud__pass')).not.toBeNull()
-    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    const strip = inner.querySelector(':scope > .hstrip')
+    expect(strip).not.toBeNull()
+    expect(document.querySelector('[class*="desk-"], .pcard')).toBeNull()
+    expect(strip.querySelector('em')).toBeNull()
     // The pointer's names are the desk's alone.
-    expect(inner.querySelector('.hud__level').hasAttribute('title')).toBe(false)
-    expect(inner.querySelector('.hud__pass').hasAttribute('title')).toBe(false)
+    expect(strip.querySelector('.hstrip__lv').hasAttribute('title')).toBe(false)
+    expect(strip.querySelector('.hstrip__bal').hasAttribute('title')).toBe(false)
   })
 })
 

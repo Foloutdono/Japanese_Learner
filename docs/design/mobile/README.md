@@ -25,7 +25,7 @@ the widths this canvas covers.
 |---|---|---|
 | `.phone`, `.phone__content` | 車内 — the mobile chrome | `components/chrome/Shell.jsx` (`Shell`, `StageFrame`) |
 | `.phone__content[data-pull]` (`"next"` / `"back"`) | 乗り換え — the flick between gates: the arriving gate pulls in from the side the flick came from. Not a class of the canvas's — the canvas drew the bar and nothing else along the row of five | `hooks/useGateSwipe.js`, `gateBeside` in `config/tabs.js`, set by `Shell.jsx` |
-| `.hud`, `.hud__level`, `.hud__status*`, `.hud__pass*`, `.hud-fare` | 運行案内 — the HUD | `components/chrome/Hud.jsx` (`Hud`, `HudPass`, `useXpGain`, `FareFigure`) |
+| `.hud`, `.hud__status*`, `.hstrip` (`--free`, `--pro`, `--max`, `--low`, `--out`, `--solo`, `__lv`, `__mark`, `__perf`, `__bal`, `__fig`), `.hud-fare` | 運行案内 — the HUD: the station panel and the learner's card as one strip, its level and its balance (帯, plan 173; the level roundel and the pocket pass before it) | `components/chrome/Hud.jsx` (`Hud`, `HudPass`, `useXpGain`, `FareFigure`) |
 | `.tabbar`, `.tab`, `.tab__ico`, `.tab__cap`, `.tab__due`, `.tab--on`, `.tab--badged` | 改札口 — the tab bar; the canvas's `.tab__jp` (a kanji where the pictogram goes) and its row of captions are retired — see below | `components/chrome/TabBar.jsx`, `GateIcon.jsx`; the five gates in `config/tabs.js` |
 | `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__names--stacked`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header; the canvas set the sub a gap after the title, the app sets the two registers at the row's two ends — see below | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
 | `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining` | the head of a run | `components/chrome/StageHead.jsx`, `Leave` in `Bar.jsx` |
@@ -92,7 +92,7 @@ caps at `99+`: a third figure is wider than the gate.
 | Canvas class | `index.css` block | Component |
 |---|---|---|
 | `.stage` (the frame), `.stage__foot` | the study stage — the ≤768px block docks the rating bar and grows the card | `components/study/StudyStage.jsx`; the six study screens render inside it |
-| `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining`, `.stage__head .hud__pass` | the head of a run | `components/chrome/StageHead.jsx` |
+| `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining`, `.hstrip--solo` | the head of a run, the card's strip holding its balance alone | `components/chrome/StageHead.jsx` |
 | `.lvlbar` (`__level`, `__level-num`, `__track`, `__fill`, `__gain`, `__xp`, `__unit`), `.hud-fare--bar` | the level bar docked on a run's bottom edge — the fare's home once the HUD has left; `--dock-bottom` on a stage is its height | `components/chrome/LevelBar.jsx`, mounted by `StudyStage` and by the exam runner |
 | `.rating-bar__btn--best` | the rating bar's best answer, the one tile filled gold (2026-09: the segments became tiles) | `components/study/RatingBar.jsx` |
 | `.deck-progress`, `.deck-progress__bar`, `.deck-progress__segment` | the hairline (the legend hides on a phone) | `DeckProgress` in `components/study/QuizComponents.jsx`; the run's own bar in `screens/TodayRun.jsx` |
@@ -103,7 +103,7 @@ caps at `99+`: a third figure is wider than the gate.
 | `.draw-prompt`, `.canvas-wrap`, `.canvas-clear-btn` | the draw face | `components/study/DrawingCanvas.jsx` |
 | `.readings-input*` | the readings face | `components/study/ReadingsInput.jsx` |
 | `.browse-nav` | the fast review's foot | `components/study/ReviewDeck.jsx` |
-| `.levelup*`, `.card-stamp*` | the boards over the stage; the canvas's `.reissue*` (the pass re-issued on a rank crossing) is retired with the rank titles | `components/rewards/XpToast.jsx`, `components/study/CardStamp.jsx` |
+| `.levelup*` (`--free`, `--pro`, `--max`, `__shake`, `__burst`, `__ring`, `__spark`, `__num`, `__was`, `__now`), `.card-stamp*` | the boards over the stage: the level-up as the card's engraving filling, bursting and emptying (進級, plan 173) and the press; the canvas's `.reissue*` (the pass re-issued on a rank crossing) is retired with the rank titles | `components/rewards/XpToast.jsx` over `components/pass/PassCard.jsx`'s `CardFace`, `components/study/CardStamp.jsx` |
 | `.gate-card`, `.gate-card__head`, `.gate-card__title`, `.gate-card__figure`, `.gate-card__count`, `.gate-card__unit`, `.gate-card__fare*`, `.gate-card__short*`, `.btn-depart`, `.btn-depart--ghost` | 改札 — the fare gate | `components/station/GateCard.jsx` |
 | `.gate-one*`, `.gate-card--one`, `.gate-mix*`, `.gate-card__ask*`, `.gate-sheet*`, `.btn-depart--gate` | 一押し — the phone's gate in one gesture (plan 166): the day as one card, the services in a sheet | `components/station/GateCard.jsx`'s `PhoneGate`, `components/ui/GateButton.jsx` |
 | `.lane`, `.lane--off`, `.lane__tick`, `.lane__where`, `.lane__mode`, `.lane__free`, `.lane__due` | the lanes are the picker; `__free` marks a lane that costs nothing (`core/credits.py`, `FREE_SOURCES` — 仮名 today), and is held back on a pass | `GateCard.jsx` |
@@ -273,7 +273,7 @@ the growth chain below 768px that handed the card the slack. The line
 
 | Canvas class | `index.css` block | Component |
 |---|---|---|
-| `.pass` (the existing block), `.pass__holder-names`, `.pass__since`, `.pass__door` (`-chev`), `.jour-line` as the balance line (`.balance-line`, `__refill`) | the pass — the initial with no ring, the name over the month it was issued — the balance on its footer, the footer the door to the balance sheet (plan 143) | `components/profile/CommuterPass.jsx`, `PassHolder.jsx`, `components/credits/BalanceLine.jsx`, `screens/ProfileScreen.jsx` |
+| `.pcard` (`--free`, `--pro`, `--max`, `--turned`, `__flip`, `__side`, `__core`, `__turn`), `.pcs` (the material), `.pcf` (the face's print), `.pcb` (the back: `__print`, `__route`, `__field`, `__meters`, `__meter`, `__strip`, `__sign`, `__issued`, `__door`), `.pinf` | the learner's card, face up, turned by a touch to its back — the route and the contract, the climb, the balance and the journey (each a door), the signature renamed in place and the month it was issued (plan 173; plan 143's pass before it) | `components/pass/` (`PassCard`, `CardFace`, `PassBack`, `LearnerCard`'s `ProfileCard`, `usePassData`), `screens/ProfileScreen.jsx` |
 | `.sbook` (`__month`, `__title`, `__dows`, `__dow`, `__grid`, `__stamp` `--missed`/`--today`/`--future`, `__side`, `__figs`), `.fig` (`__v`, `__u`, `__l`) | the stamp book, titled with its month, its three figures in one row | `StampBook` in `components/profile/ProfileBlocks.jsx` |
 | `.records` (`--three`), `.record` (`--door`, `__note`), `.pf-line__id` (`__roundel` `--icon`, `__names`, `__jp`) | the records, three across, and the two doors, a lattice of their own under the pass (plan 143) | `Records` and `ProfileDoors` in `ProfileBlocks.jsx`, `LineMark` in `LineLedger.jsx` |
 | `.pf-ledger`, `.pf-line` (`__fig`, `__of`, `__track`, `__done`) | the ride ledger, a row a line on one subgrid of columns (plan 143) | `components/profile/LineLedger.jsx` |
@@ -292,7 +292,7 @@ the growth chain below 768px that handed the card the slack. The line
 | `.lvlstrip` (`__stop` `--on`, `__dot`, `__code`, `__jp`), `.lvl-note` (`__strong`) | the level strip and its note | `LevelPage.jsx` |
 | `.sheet.lvl-sheet`, `.lvl-sheet__body` (`__strong`), `__figs`, `__fig` (`-v`, `-l`), `.btn-depart--sheet` | the level confirm sheets (Move up / Move down) | `LevelSheet` in `LevelPage.jsx` |
 | `.dest-stops`, `.dest-here` (`--leaving`), `.dest-grid`, `.dest` (`--on`, `--ridden`, `--through`, `__dot`, `__names`, `__code`, `__load`, `__when` `--here`, `__tag`); `.dest-line__date`, `.form__row` | Destination (plan 139): the line upright from the stop you stand at, each stop ahead with the date the service reaches it, the rail drawn a half per row and inked as far as the stop chosen; the foot prints the validity, Hand it back and Reprint | `DestinationPage.jsx` |
-| `.pass.stg-pass`, `.stg-pass__route`, `__stop` (`--on`), `__code`, `__name`, `__rail`, `__fields`, `__field` (`--on`, `--valid`), `__key`, `__value`, `__chev` | the pass printed with its contract at Settings' head (plan 139): the level → the destination, the service, the daily ride, the lines, the validity in gold — each field but the validity a door | `components/settings/SettingsPass.jsx` (`PassHead` from `components/profile/CommuterPass.jsx`) |
+| `.pcard-slot--settings`, `.pcb__route`, `.pcb__stop`, `.pcb__field`, `.pcb__door` (`--on`), `.pcb__valid` | the learner's card at Settings' head, its back up: the contract printed on it (plan 139's fields, plan 173's card) — the level → the destination, the validity, the service, the daily ride, the lines, each but the validity a door | `components/pass/LearnerCard.jsx`'s `SettingsCard`, `PassBack.jsx` |
 | `.stg-swatch` (`--light`, `--dark`, `--auto`), `.stg-meter` (`--muted`, `__bar`), `.stg-dots` (`__dot` `--best`) | what a row is set to, drawn: the theme's grounds, the mixer's levels, the rating bar's dots | `components/settings/RowSpecimens.jsx` |
 | `.svc-chart` (`__axis`, `__tick`), `.svc-row` (`--on`, `--yours`, `__names`, `__name`, `__pace`, `__tag`, `__track`, `__rail` `--dashed`, `__end` `--dashed`, `__when` `--back`) | Service (plan 139): each pace a line to the destination on one time axis (a subgrid, so the axis and the rails agree), the learner's own pace dashed | `ServicePage.jsx`, `timeAxis` in `components/settings/contract.js` |
 | `.theme-picks`, `.theme-pick` (`--on`, `__name`), `.theme-mini` (`__face` `--light`/`--dark`/`--cut`, `__bar` `--foot`, `__card`, `__line` `--short`), `.lang-picks`, `.lang-pick` (`--on`, `__name`, `__sample`) | Display (plan 139): the themes as screens drawn small, the languages saying the gates' names in themselves | `DisplayPage.jsx` |
@@ -411,7 +411,7 @@ entries in `.stylelint-baseline.json` went in the same commit.
 | `.brd-notif` (`__app`, `__body`, `__head`, `__title`, `__text`) | the nudge (native shells only, `lib/platform.js`); the next reminder as it will read (plan 156) | `NudgeStep.jsx`, `settings/NotificationsPage.jsx` |
 | `.brd-build__track` (`__done`, `__train`), `.brd-steps`, `.brd-step` (`--done`, `--now`, `--next`, `__mark`, `__label`, `__val`) | building the journey | `Building.jsx`; the 到着 signboard over the plan is `components/onboarding/TrainArrival.jsx` |
 | `.brd-chart` (`__title`, `__grid`, `__axis`, `__lbl` `--soft`, `__line` `--us`/`--them`, `__dot`, `__cap`), `.brd-legend` (`__key`, `__swatch` `--them`), `.brd-lead` (`.brd-lead__em`), `.brd-bullets`, `.brd-bullet` | the plan | `PlanStep.jsx`, the figures from `domain/boarding.js` |
-| `.brd-offer` (the centred title block only), `.brd-issue` (`__seal`), the `.pass` with `.balance-line` on its foot | the pass, issued | `PassStep.jsx` over `components/profile/CommuterPass.jsx` |
+| `.brd-issue` (`__shine`), the learner's card (`.pcard`) | the card, issued: face up, then turned to its back, where the gift of credits counts up (plan 173) | `PassStep.jsx` over `components/pass/PassCard.jsx` |
 | `.auth`, `.auth__head`, `.auth-header` (`__glyph`, `__title`), `.auth-card` with a `Seg` (`.seg--full`) and `.field`s, `.auth-message` (`--error`, `--success`), `.auth-submit`, `.auth-foot` | the sign-in | `screens/AuthScreen.jsx` |
 
 Pre-auth and pre-onboarding, no router: `App.jsx` mounts Welcome for a
@@ -425,8 +425,8 @@ rule and the kana door (`study/level_rule.py`, `SRSEngine.seed_known`) mark
 the stops behind the level and the scripts already read known. The name is
 written when its screen accepts it (`PATCH /api/profile`), so a taken name
 is refused there and never on the pass. Held from the canvas: the offer
-screen (`.brd-offer__*`, `.brd-perks*`, `.brd-plan*`) waits for a store
-(`domain/credits.js` HAS_STORE); the drawn OS prompt (`.brd-dim`,
+screen as a stop of the boarding (it is built as the paywall's own screen,
+opened from the pass's quiet way -- see "The offer" below); the drawn OS prompt (`.brd-dim`,
 `.brd-alert*`) is never rendered — the system shows its own; the nudge
 screen is skipped on the web; the tutorial is deferred. The motion sheet's
 pull, the +120 ms rule and the rest-state-only rule under reduced motion are
@@ -474,7 +474,7 @@ width.
 | `.brd-nudge`, `.brd-notif` (`__name`), `.brd-week` (`__drop`, `__road`, `__day` `--first`, `__bell`, `__cap`, `__name`, `__date`) | the nudge: the notification and the week it arrives in | `NudgeStep.jsx`'s `Week` |
 | `.brd-plan` (`__arrive`, `__cap`, `__date`, `__day`, `__year`, `__sub`), `.brd-ride` (`__line`, `__stop`, `__lab`), `.brd-held` (`__cell`, `__jp`, `__fig`, `__unit`), `.brd-for` | the plan: the arrival first, the ride, what it holds | `PlanStep.jsx`'s `Arrival` |
 | `.brd-keep` (`__skip`, `__note`, `__skip-btn`), `.brd-tk` (`__map`, `__ride`, `__stop`, `__ring`, `__terms`, `__stub`, `__credits`, `__punch`), `.brd-provider`, `.brd-fld` | the account: the ticket it keeps over the form | `AccountStep.jsx`, `PaperTicket.jsx`'s `RideTicket` |
-| `.brd-issue-stn`, `.brd-issue__road`, `.brd__foot--road` | the pass over the gate's reader | `PassStep.jsx` |
+| `.brd-issue-stn`, `.brd-issue__road`, `.brd__foot--road` | the card over the gate's reader | `PassStep.jsx` |
 
 Building is gone on the phone as on the desk: the hour (or the nudge) goes
 on to the plan under its 案内 signboard, and the reveal is the kana stop's
@@ -535,10 +535,48 @@ Pinned by `LibraryCard.phone.test.jsx` (390 px: no overflow, one thumb target,
 the description clamped and measured), `LibraryScreen.browser.test.jsx` and
 `DeckDetailScreen.roles.browser.test.jsx`.
 
+## The offer (the paywall): the three offers (plan 172)
+
+Built from the owner's canvas "Tsuji — the three offers"
+(https://claude.ai/artifact/UtX4BG8yzdisZesR3wsnM4), board for board, at the
+390×844 the canvas drew. Which offer opens is the door's
+(`domain/paywall.js`'s `offerScreen`): DISCOVER, Pro yearly's 7-day trial,
+from the boarding, the balance, Settings and the reading ride; WEEK, a free
+learner's own last seven days against the refill, from the run-out sheet;
+MAX, the step up for a Pro learner -- at one of Pro's four ceilings
+(`LIMITS`: practice's fare, photos, explanations, new mock papers) or from
+Settings. Every screen is a stage on the pass's sumi under one cone of warm
+light (光), the words under it, and the answer docked at the foot: the quiet
+way out over the gate button (plan 164). Gold is the ticket's and the gate's
+alone, and Max's own material.
+
+| Canvas class | `index.css` block | Component |
+|---|---|---|
+| `.ofr`, `.ofr__hero` (`::before` the cone, `::after` the hairline), `.ofr__floor`, `.ofr__body`, `.ofr__foot`, `.ofr__quiet`, `.ofr__fine`, `.gbtn` | `.ofr-scrim` over `.ofr` (`__scroll`, `__hero`, `__stage`, `__body`, `__foot`, `__quiet`, `__clock`, `__gate`, `__thanks`, `__fine`) | `components/offers/OfferScreen.jsx`, `OfferFrame.jsx` |
+| `.tkt` (`__main`, `__kind`, `__price`, `__unit`, `__bill`, `__stub`, `__save`, `__cap`) | `.ofr-tkt` (the same parts) | `OfferTicket.jsx` |
+| `.card--pro`, `.card--max`, `.wave--sm`, `.r3c-mark--seal.r3c-mark--xp` | `.ofr-pass--pro`, `.ofr-pass--max`, `.ofr-wave`, `.ofr-mark` (`__ink`, `__xp`, `__bar`, `--etched`) | `MiniPass.jsx`, `icons.jsx`'s `Wave`, `StruckMark.jsx` |
+| `.ptile`, `.lk`, `.chk` | `.ofr-tile`, `.ofr-lk`, `.ofr-chk` | `DiscoverOffer.jsx`, `icons.jsx` |
+| 1 · `.a1-*`, `.b1-*`, `.r1` | `.ofr-disc-*` | `DiscoverOffer.jsx` |
+| 2 · `.c2-*` | `.ofr-week*` | `WeekOffer.jsx` |
+| 3A · `.r3a-*` | `.ofr-fare-*` | `MaxOffer.jsx`'s `FareStage`, `FareVals` |
+| 3B · `.b3-*` (count, photos), `.r3e-*`, `.r3x-*` | `.ofr-cap-*`, `.ofr-photo-*`, `.ofr-expl-*`, `.ofr-exam-*` | `MaxOffer.jsx`'s `PhotosStage`, `ExplainStage`, `ExamsStage` |
+| 3C · `.r3c-*` (`--hakkin`, `--gravure`, `--objet`, `--fin-satin`, `--pro-sumi`), `.c3-grid` | `.ofr-turn*`, `.ofr-corner`, `.ofr-grid*` | `PassTurn.jsx`, `MaxOffer.jsx`'s `UpGrid` |
+
+The stage is drawn at `--offer-w` (390px) and centred in a wider phone, scaled
+into a narrower one; the words hold the same width. On the desk (the canvas's
+Desktop page, the owner's pick A 対) the same three parts stand as a dialog:
+the stage scaled into a left pane, the words and the foot beside it (the 机
+section; `docs/design/desk/README.md`). Every screen reads whole
+at 844px with no scroll. `/dev/offers` opens each of the seven over the
+canvas's learner (Aiko, level 12, the canvas's week), the two Max doors that
+have no production caller until the store sells Max included. Pinned by
+`components/offers/OfferScreen.browser.test.jsx`, `src/offers.phone.test.jsx`
+and, for the desk's dialog, `src/offers.desktop.test.jsx` and
+`src/offers.short.test.jsx`.
+
 ## Still to port
 
-`.offer*`, `.pass-tag`, `.brd-offer__*`, `.brd-perks*`, `.brd-plan*` (with the
-store). Reading the canvas: `Artifact` `read` on its URL saves the page; the
+`.offer*` and `.pass-tag` (with the store). Reading the canvas: `Artifact` `read` on its URL saves the page; the
 design lives in `<script id="appifact-doc">` as JSON — `content.files` holds
 one `*.dc.html` per artboard plus `canvas.json`; the common prefix of the
 artboard files is this stylesheet.

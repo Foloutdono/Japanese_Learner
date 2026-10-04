@@ -18,9 +18,6 @@
   "no-descending-specificity::Expected selector \".mcq-row--selected .mcq-row__index\" to come before selector \".mcq-row:not(:disabled):hover .mcq-row__index\", at line N": 1,
   "no-descending-specificity::Expected selector \".meaning-display\" to come before selector \".grammar-answer .meaning-display\", at line N": 1,
   "no-descending-specificity::Expected selector \".stroke-ref__img\" to come before selector \".stroke-ref__frame--multi .stroke-ref__img\", at line N": 1,
-  "no-descending-specificity::Expected selector \".profile-card__name\" to come before selector \".pass__holder .profile-card__name\", at line N": 1,
-  "no-descending-specificity::Expected selector \".profile-card__edit-glyph\" to come before selector \".pass__holder .profile-card__name .profile-card__edit-glyph\", at line N": 1,
-  "no-descending-specificity::Expected selector \".profile-card__name--editable:hover .profile-card__edit-glyph\" to come before selector \".pass__holder .profile-card__name:hover .profile-card__edit-glyph\", at line N": 1,
   "no-descending-specificity::Expected selector \".grammar-rule\" to come before selector \".grammar-answer .grammar-rule\", at line N": 1,
   "no-descending-specificity::Expected selector \".phrase-word-card__surface\" to come before selector \".phrase-word-card__surface-wrap--clickable .phrase-word-card__surface\", at line N": 1,
   "no-descending-specificity::Expected selector \".study-drawing-toggle--active\" to come before selector \":root[data-theme=\"light\"] .study-drawing-toggle--active\", at line N": 1,
@@ -38,6 +35,7 @@
   "no-duplicate-selectors::Duplicate selector \".door__leaf--l\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".door__leaf--r\", first used at line N": 1,
   "property-no-vendor-prefix::Vendor-prefixed property \"-webkit-appearance\"": 2,
+  "property-no-vendor-prefix::Vendor-prefixed property \"-webkit-background-clip\"": 3,
   "selector-not-notation::Expected complex :not() pseudo-class notation": 2,
   "shorthand-property-no-redundant-values::Expected \"0 0 8px 0\" to be \"0 0 8px\"": 1,
   "shorthand-property-no-redundant-values::Expected \"0 0\" to be \"0\"": 1

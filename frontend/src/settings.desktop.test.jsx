@@ -128,17 +128,18 @@ describe('settings on the desk', () => {
     }
   })
 
-  it('marks the pass\'s field whose page is open', async () => {
+  it('marks the card\'s field whose page is open', async () => {
     await mount('/profile/settings/service')
     await settle()
     const on = [...document.querySelectorAll('.desk-settings__list [aria-current="page"]')]
     expect(on.map(d => d.dataset.page)).toEqual(['service'])
-    expect(on[0].classList.contains('stg-pass__field--on')).toBe(true)
+    expect(on[0].classList.contains('pcb__door--on')).toBe(true)
+    expect(on[0].classList.contains('pcb__field')).toBe(true)
     expect(on[0].tagName).toBe('A')
     document.querySelector('.stg-door[data-page="level"]').click()
     await settle()
     expect(here.path).toBe('/profile/settings/level')
-    expect(document.querySelector('.stg-door[data-page="level"]').classList.contains('stg-pass__stop--on')).toBe(true)
+    expect(document.querySelector('.stg-door[data-page="level"]').classList.contains('pcb__door--on')).toBe(true)
   })
 
   it('prints Sign out once, on the account page, and nowhere else (plan 139)', async () => {

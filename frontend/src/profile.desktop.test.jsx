@@ -81,8 +81,9 @@ describe('the profile on the desk', () => {
     const cells = [...right.querySelectorAll('.records--three > .record')].map(c => c.getBoundingClientRect())
     expect(cells).toHaveLength(3)
     for (const c of cells) expect(c.top).toBeCloseTo(cells[0].top, 0)
-    // The pass's footer is the door to the balance sheet.
-    expect(document.querySelector('.pass__footer > button.pass__door')).not.toBeNull()
+    // The card's balance meter, on its back, is the door to the balance
+    // sheet (plan 173).
+    expect(document.querySelector('.pcard-slot--profile button.pcb__meter--balance')).not.toBeNull()
   })
 
   it('draws each line with a rail per stop, the stops sharing one column (plan 143)', async () => {

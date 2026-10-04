@@ -133,10 +133,10 @@ describe('Help on the rail', () => {
     const m = mark.getBoundingClientRect()
     expect(Math.round(m.width)).toBe(Math.round(m.height))
     expect(m.right).toBeLessThanOrEqual(label.getBoundingClientRect().left)
-    // Inside the rail, its right edge on the pass's below, and clear of
-    // the masthead's name.
+    // Inside the rail, its right edge on the card holder's below, and
+    // clear of the masthead's name.
     const r = btn.getBoundingClientRect()
-    const pass = document.querySelector('.desk-pass').getBoundingClientRect()
+    const pass = document.querySelector('.desk-holder__case').getBoundingClientRect()
     expect(r.right).toBeCloseTo(pass.right, 0)
     expect(r.left).toBeGreaterThan(document.querySelector('.desk-rail__name').getBoundingClientRect().right)
     // A stamped gate opens nothing by itself.

@@ -198,6 +198,15 @@ an IC/commuter card. `components/profile/CommuterPass.jsx`. Also the pass
 for sale (not yet), whose platforms the reading ride's plate lists from
 `domain/paywall.PASS_PLATFORMS`.
 
+**Pro / Max** — the two paid plans the offer sells, each yearly or monthly
+(`domain/paywall.PLANS`). A free learner is offered Pro yearly -- its 7-day
+trial, or, when the credits stopped a run, their own week against the
+refill; a Pro learner is offered Max yearly, at one of Pro's four ceilings
+or from Settings (plan 172, `domain/paywall.offerScreen`). Pro is printed
+on soft-touch charcoal (墨), Max on satin platinum (梨地). The server knows
+one paid plan yet, the pass, whose limits are Max's.
+`components/offers/`.
+
 **試乗 (shijō)** — the test ride: the learner's first two flashcards and one
 sentence, on the real stage, writing nothing. `screens/RideRun.jsx`,
 `screens/RideReading.jsx`; `/ride/cards`, `/ride/reading`.

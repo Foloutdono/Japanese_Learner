@@ -3,14 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { Loading } from '../components/ui/Loading'
-import { ChevronIcon, WarningIcon } from '../components/ui/Icons'
-import { CommuterPass } from '../components/profile/CommuterPass'
+import { WarningIcon } from '../components/ui/Icons'
+import { ProfileCard } from '../components/pass/LearnerCard'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { useDesk } from '../hooks/useDesk'
-import { PassHolder } from '../components/profile/PassHolder'
-import { BalanceLine } from '../components/credits/BalanceLine'
-import { openBalance } from '../stores/credits'
 import { StampBook, Records, ProfileDoors } from '../components/profile/ProfileBlocks'
 import { Banzuke } from '../components/profile/Banzuke'
 import { LineLedger } from '../components/profile/LineLedger'
@@ -140,28 +137,15 @@ export default function ProfileScreen({ session }) {
         {t.profileStale}
       </p>
     ),
-    // The pass, the balance on its footer (plan 069's figure, printed
-    // where the canvas prints it) — and since plan 143 the footer is a
-    // door: it opens the balance sheet the HUD's pass opens, which is
-    // where the offer lives.
+    // The card (plan 173): face up, its back a touch away -- the
+    // balance, the journey and the contract printed there, each a door,
+    // and the holder's name renamed in place on its signature strip.
     pass: (
-      <CommuterPass
+      <ProfileCard
         profile={profile}
-        t={t}
-        footer={(
-          <button type="button" className="pass__door" aria-haspopup="dialog" onClick={openBalance}>
-            <BalanceLine />
-            <ChevronIcon direction="right" size={14} className="pass__door-chev" />
-          </button>
-        )}
-      >
-        <PassHolder
-          profile={profile}
-          session={session}
-          onUsernameChange={u => setProfile(p => ({ ...p, username: u }))}
-          t={t}
-        />
-      </CommuterPass>
+        session={session}
+        onUsernameChange={u => setProfile(p => ({ ...p, username: u }))}
+      />
     ),
     stamps: (
       <StampBook

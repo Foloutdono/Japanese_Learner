@@ -95,9 +95,9 @@ describe('a run\'s workspace', () => {
   })
 })
 
-describe('the level-up\'s pass on a run\'s desk column (plan 142)', () => {
-  // The column's first element other than the pass, and the pass: the
-  // pass is portalled in last and ordered first.
+describe('the level-up\'s card on a run\'s desk column (plans 142, 173)', () => {
+  // The column's first element other than the card, and the card: the
+  // card is portalled in last and ordered first.
   const firstOther = (col, pass) => [...col.children].find(c => c !== pass)
 
   it('docks at the side\'s top, the column stepping down under it', async () => {
@@ -112,10 +112,17 @@ describe('the level-up\'s pass on a run\'s desk column (plan 142)', () => {
     expect(Math.round(p.top)).toBe(Math.round(c.top + parseFloat(cs.paddingTop)))
     expect(Math.round(p.left)).toBe(Math.round(c.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft)))
     expect(Math.round(p.right)).toBe(Math.round(c.right - parseFloat(cs.paddingRight)))
-    expect(Math.round(p.height)).toBe(token('--levelup-h'))
+    // The learner's card at the column's width, at the card's proportions.
+    expect(p.height).toBeCloseTo(p.width * 172 / 272, 0)
     expect(Math.round(firstOther(col, pass).getBoundingClientRect().top - p.bottom)).toBe(token('--sp-5'))
-    const card = $('.levelup__pass')
-    expect(card.scrollWidth).toBeLessThanOrEqual(card.clientWidth)
+    // Its print whole inside it (the burst's sparks fly past its edges
+    // by design, so the card's own scroll width says nothing).
+    const card = $('.levelup .pcard').getBoundingClientRect()
+    for (const el of document.querySelectorAll('.levelup .pcf__row, .levelup .pcf__who')) {
+      const r = el.getBoundingClientRect()
+      expect(r.left).toBeGreaterThanOrEqual(card.left - 0.5)
+      expect(r.right).toBeLessThanOrEqual(card.right + 0.5)
+    }
   })
 
   it('docks at the top of the left column on three panels, over this run\'s panel', async () => {
@@ -144,7 +151,12 @@ describe('the level-up\'s pass on a run\'s desk column (plan 142)', () => {
     expect(Math.round(p.width)).toBe(Math.round(c.width))
     const session = $('.desk-session').getBoundingClientRect()
     expect(Math.round(session.top - p.bottom)).toBe(token('--sp-6'))
-    // Nothing of the pass is left over the card's details at the right.
+    // Nothing of the level-up is left over the card's details at the right.
     expect($('.desk-run__side .levelup')).toBeNull()
+    // The column never scrolls sideways: not at rest, nor while the card
+    // trembles as its engraving fills, a few pixels past the edge.
+    expect(col.scrollWidth).toBe(col.clientWidth)
+    await settle(1900)
+    expect(col.scrollWidth).toBe(col.clientWidth)
   })
 })

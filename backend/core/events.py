@@ -109,9 +109,20 @@ EVENTS: dict[str, frozenset[str]] = {
     # willingness-to-pay signal there is. `ms` is the gap between seeing
     # the pass and deciding — a door with a high intent rate and a
     # one-second median is a mis-tap, not demand.
+    #
+    # The offer is three screens since plan 172, each with its one pick:
+    # Pro yearly's 7-day trial (the boarding, the balance, the ride, the
+    # settings), Pro yearly against the week the credits stopped (a run
+    # at zero, `where` 'runout'), and the step up to Max ('limit', a Pro
+    # learner at one of the plan's ceilings; 'upgrade', from Settings).
+    # `plan` and `billing` are the app's own two enums, the pick the
+    # gate was pressed on -- what the pricing sheet's annual share will
+    # be checked against. `all` is no longer sent: it was whether "See
+    # all offers" was opened before the answer (plan 172 retired that
+    # list); older rows carry it.
     "offer_view":     frozenset({"where"}),
-    "offer_intent":   frozenset({"where", "ms"}),
-    "offer_dismiss":  frozenset({"where", "ms"}),
+    "offer_intent":   frozenset({"where", "ms", "plan", "billing", "all"}),
+    "offer_dismiss":  frozenset({"where", "ms", "all"}),
 
     # ── The library ──────────────────────────────────────────────
     # Whether learners give each other decks at all, and whether a

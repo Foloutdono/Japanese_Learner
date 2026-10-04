@@ -189,6 +189,19 @@ render identically and mean different things, and each reads its own token.
 Never reach for the token that happens to match — reach for the one that
 names what the object is.
 
+**Since plan 173 the pass is one card in three materials**, which one being
+the learner's plan (`domain/passCard.js`'s `cardTier`): Free 白, white
+plastic with a band along its foot; Pro 墨, soft-touch charcoal, the
+`--pass-ink` family above; Max 梨地, satin platinum with its 辻 etched and
+MAX in gold foil. They are still the People family — none wears a line.
+The free card's band is the one place that looked like an exception: it is
+the vocab line's indigo by the owner's pick, and it reads `--pass-band`,
+the card's own token at that value, so a change to the line never repaints
+the card. The card is one object everywhere it is drawn
+(`components/pass/`): whole on the profile and in Settings, its back the
+contract; face up in the gate's reader and the level-up; a strip on the
+phone's HUD and a card in its holder at the rail's foot on the desk.
+
 ### One line, one colour
 
 Each section owns exactly one pigment, and nothing else may use it. The
@@ -947,8 +960,8 @@ Every card is rewarded, and none of it is a ceremony. Three moments, three
 objects, and not one of them waits to be dismissed:
 
 - **The fare** (運賃) — the XP an answer earns — is reported on the object it
-  was paid into: the **level HUD** on a tab screen, where the roundel pulses
-  gold once and the amount rises off it, and the **level bar** on a run
+  was paid into: the **level HUD** on a tab screen, where the strip's struck
+  辻 glows gold once and the amount rises off it, and the **level bar** on a run
   (`components/chrome/LevelBar.jsx`), docked on the bottom edge under the
   rating bar, where the span it gained lights gold and the figure rises off
   the XP count. There is no toast, no panel and nothing to dismiss; the
@@ -987,26 +1000,28 @@ objects, and not one of them waits to be dismissed:
   the next card for under a second (`CardStamp.browser.test` pins every
   hold and the faintness), because the moment is the press, not a pageant:
   the wash, the kumadori, the brush and the petals are gone.
-- **The level** (進級) is **clipped on the pass** (改札鋏, plan 142): the
-  learner's 定期券 comes down, in its own material (the charcoal-into-sumi
-  ground, hairline and sheen of `.pass`), the old figure is read for a
-  beat, then the gate's punch bites its top edge — a real hole the ground
-  shows through, the chip falling away, the punch's snip on the frame the
-  bite opens — the old figure is struck, the new one printed in the pass's
-  gold, and the balance empties to what the new level already holds. It is
-  the People family throughout: no line pigment, no board. On a phone it
-  hangs across the top inside the stage's gutters (the top bar is hidden
-  while studying, so the edge is free and the docked rating bar stays
-  usable) and the stage steps down under it by `--levelup-h`; wider, it
-  floats at the screen's right at a phone's content width; on the desk it
-  docks in a run's column (see *The desk*). On a clock, never gating — it
-  leaves by itself while the next card is already in hand. It replaced a
-  sumi board whose split-flap drums turned while it was still sliding in,
-  so the one moment it existed for was half missed; the owner's pick of
-  four directions drawn side by side (the board retimed, a hanging station
-  plate, the in-car route, this). Under reduced motion the cut still
-  happens — the bite, the figures, the balance — but nothing drops, jolts,
-  scales or falls.
+- **The level** (進級) is **told by the card's engraving** (plan 173, the
+  owner's direction on the canvas "The pocket pass & the level-up"; it
+  replaced plan 142's punch, 改札鋏). The learner's card comes down face
+  up in its own material, and the struck 辻 on it — whose road 辶 the
+  climb fills everywhere the card is drawn — fills from empty to full
+  over three seconds while the card trembles, harder as it fills; full,
+  it bursts in sparks of the card's own stuff (the band's indigo, the
+  charcoal's gold, the platinum's), the engraving empties, and the
+  level's figure rolls over to the new one. The punch's voice
+  (`pass-clip`) sounds on the burst. It is the People family
+  throughout: no line pigment. On a phone it hangs at the top inside the
+  stage's gutters (the top bar is hidden while studying, so the edge is
+  free and the docked rating bar stays usable), nothing stepping down
+  under it; wider, it floats at the screen's right at the side column's
+  width; on the desk it docks in a run's column (see *The desk*). It is
+  gone 4.05 seconds after it arrives, on a clock, never gating — it
+  leaves by itself while the next card is already in hand. Before the
+  punch it was a sumi board whose split-flap drums turned while it was
+  still sliding in, so the one moment it existed for was half missed.
+  Under reduced motion the card fades in and out, the engraving stands at
+  the new level's climb and the figure changes in place; nothing fills,
+  trembles, bursts or rolls.
 
 There was a fourth, **the rank** (再発行): the level bands each carried a
 title (見習い → 浪人 → 侍 → 師範 → 免許皆伝), and crossing one re-issued the
@@ -1022,8 +1037,8 @@ a learner who has just rated one card is already looking for the next.
 ### The chrome (the mobile canvas, plan 068)
 
 - **Two chromes, one line** (owner's call, 2026-09-22; ADR 0018). Below
-  1100px it is the phone's: the HUD across the top (level roundel ·
-  goal-status panel · commuter pass), the five gates across the bottom
+  1100px it is the phone's: the HUD across the top (the goal-status panel
+  · the card as one strip, its level and its balance — plan 173), the five gates across the bottom
   (Learn · Practice · Today · Dictionary · Profile), the screen between
   them; between 769 and 1099 the same frame is a centred column of
   `--board-w`. At 1100px and up it is **the desk** (below): a rail down
@@ -1156,22 +1171,21 @@ each question drawing its answers between them.
   辻 over TSUJI at its head, the five gates, and the learner's pass at its
   foot. It is chrome, so it wears no line pigment — the one colour in the
   rail's own ink is Today's due count, a state's.
-- **The rail's foot is the learner's pass** (定期券, plan 127; the owner's
-  pick of five drawn directions, the canvas "Rail foot directions"). The
-  HUD's three instruments set as the phone draws them were three shapes on
-  three alignments, none on the rail's column; on the desk they are one
-  card, the rail's other bookend — the origin station's plate at its head,
-  your pass at its foot. The profile pass at pocket size: its charcoal
-  sheen and identity corner, gold as its metal. Three doors on the card,
-  each the HUD's own with its guide anchor: the face (the HUD's roundel,
-  the fare still paid into it, and the climb to the next level as the
-  run's level bar draws it), the purse (the balance, captioned with what
-  it counts, or, spent, when it comes back), and the stub (the journey's
-  word and drift under a perforation, lit by a lamp in the state's ink).
-  The card's edge is the balance's, as the pocket pass's was. The pass is
-  the learner's object, not the chrome's, so its gold and its state inks
-  are the pass's materials rather than colour on chrome; the phone keeps
-  the three apart on its HUD.
+- **The rail's foot is the learner's card in its holder** (定期入れ,
+  plan 173; it replaced plan 127's pocket pass, which the owner found too
+  big, and which drew the profile's card a second time beside it). The
+  card stands in a holder's mouth with only its top edge out — the card's
+  real face, its material and its print, clipped at 60px — and rises a
+  few pixels under the pointer. The case under it is the HUD's two doors
+  and the climb: the level (the struck 辻 at pocket size with the level's
+  figure and the XP to the next one, a bar under them; the fare still
+  paid into it; the profile's door) over a row of the balance (its
+  figure, or ∞, with when the next credit lands or what an exercise
+  costs; the balance sheet's door) and the journey (its lamp, its word
+  and drift; the status sheet's door). On the profile and in Settings,
+  where the card is drawn whole, the holder's mouth is empty and says
+  where the card went, so the card is never on the screen twice. Its
+  edge is the balance's state, as the pocket pass's was.
 - **Every gate is captioned, Today first.** A column has the room the
   phone's row lacked, so the pictogram carries its word; and with no thumb
   to set Today under, it opens the list the way `/` opens on it

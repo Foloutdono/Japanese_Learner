@@ -94,7 +94,7 @@ describe('TodayRun', () => {
     expect(stage.querySelector('.stage__leave').textContent).toContain('Portique')
     expect(stage.querySelector('.stage__where-jp').textContent).toContain('Hiragana')
     expect(stage.querySelector('.today-remaining').textContent).toBe('1')
-    expect(stage.querySelector('.hud__pass')).toBeTruthy()
+    expect(stage.querySelector('.hstrip--solo [data-guide="hud.pass"]')).toBeTruthy()
     expect(stage.querySelector('.prompt-card')).toBeTruthy()
 
     // Reveal and rate.
