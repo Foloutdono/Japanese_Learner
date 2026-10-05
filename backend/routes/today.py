@@ -743,7 +743,7 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
 
 @router.get("/api/today/cards")
 def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "", lanes: str = "", lang: str = "fr",
-                    only: str = "", quota: str = "", user_id: str = Depends(get_user_id)):
+                    only: str = "", quota: str = "", unit: str = "", user_id: str = Depends(get_user_id)):
     """
     The queue itself: up to `count` due cards, mixed across sections and
     personal decks, each carrying the mode it must be reviewed under.
@@ -766,6 +766,13 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     pressed the action on one entry is not asking for a day. The credit
     gate still applies, because a card that cannot be paid for cannot be
     paid for wherever it was started from.
+
+    `unit` is a unit of the basics (plan 186g), boarded from its station
+    on the Learn gate: that unit's cards alone, its due reviews first and
+    then the cards never met in the order the course deals them -- its
+    rules, each opening on its lesson, then its words, then its kanji --
+    in the learner's lines, whatever the day's ration or the learner's
+    level, since they chose the unit. Like `only`, not a day.
     """
     count = max(1, min(count, MAX_BATCH))
 
@@ -774,6 +781,8 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     all_lanes = daily_queue.lanes(user_id, due_rows, personal)
     level = resolve_level(user_id)
     riding = _riding_basics(level)
+    if unit:
+        return _unit_cards(user_id, unit, all_lanes, due_rows, count, exclude, lang)
     if only:
         chosen = daily_queue.keep_card(all_lanes, only)
     else:
@@ -868,6 +877,61 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
         user_id, len(chosen), only or lanes or "all", count, len(cards),
     )
     # Each card's bar, new to mastered (plan 147).
+    srs.attach_progress(cards, user_id)
+    return {"cards": cards, "beyond": beyond}
+
+
+def _unit_cards(user_id: str, unit_id: str, all_lanes, due_rows, count: int, exclude: str, lang: str) -> dict:
+    """One unit of the basics as a run (plan 186g): see get_today_cards'
+    `unit`. A card due under another mode than its line's primary one
+    rides too -- it is the unit's card, and it is due."""
+    n = next((i for i, u in enumerate(basics.units()) if u["id"] == unit_id), None)
+    if n is None:
+        raise HTTPException(status_code=404, detail="no such unit")
+    lines = lines_or_all(_profile_row(user_id)[9])
+    sources = [source for source in basics.SOURCES if source in lines]
+    ids = {raw_id for source in sources for raw_id in basics.units()[n]["cards"][source]}
+    skip = daily_queue.parse_exclude(exclude)
+    due = daily_queue.drop_seen(
+        OrderedDict((key, [rid for rid in held if rid in ids]) for key, held in all_lanes.items()
+                    if key[0] == daily_queue.SECTION),
+        skip,
+    )
+    order = daily_queue.interleave(due, sum(len(v) for v in due.values()))
+    held = {(rid, key[-1]) for key, rid in order}
+    for source in sources:
+        unit_ids = basics.units()[n]["cards"][source]
+        mode = primary_mode(source)
+        fresh = srs.get_new_cards(mode, limit=len(unit_ids), card_ids=prefixed(unit_ids, user_id), ordered=True)
+        key = (daily_queue.SECTION, source, basics.LEVEL, mode)
+        order += [(key, rid) for rid in (unprefixed(cid, user_id) for cid in fresh)
+                  if (rid, mode) not in skip and (rid, mode) not in held]
+    repeats = _repeats(user_id, due_rows)
+    picked = _affordable(user_id, order[:count], repeats)
+    if not picked:
+        return {"cards": [], "beyond": 0}
+    beyond = len(_affordable(user_id, order, repeats)) - len(picked)
+    by_mode: dict[str, list[str]] = defaultdict(list)
+    for key, raw_id in picked:
+        by_mode[key[-1]].append(f"{user_id}:{raw_id}")
+    states: dict = {}
+    previews: dict = {}
+    for mode, card_ids in by_mode.items():
+        states.update({(cid, mode): v for cid, v in srs.get_bulk_stats(card_ids, mode).items()})
+        previews.update({(cid, mode): v for cid, v in srs.preview_reviews_bulk(card_ids, mode, user_id).items()})
+    cards = []
+    for key, raw_id in picked:
+        _, source, deck_key, mode = key
+        card_id = f"{user_id}:{raw_id}"
+        stage = states.get((card_id, mode))
+        preview = previews.get((card_id, mode))
+        card = _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview)
+        if card is None:
+            continue
+        card["lane"] = daily_queue.label(key)
+        card["basics"] = _unit_label(n)
+        cards.append(card)
+    logger.info("basics unit run user_id=%s unit=%s served=%d", user_id, unit_id, len(cards))
     srs.attach_progress(cards, user_id)
     return {"cards": cards, "beyond": beyond}
 
