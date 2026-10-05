@@ -1022,6 +1022,44 @@ describe('the doors (plan 120)', () => {
     apiJson.mockReset()
   })
 
+  it('keeps a lesson\'s rival a sheet over the day\'s run too (plan 186b)', async () => {
+    const { apiJson } = await import('./lib/api')
+    const lesson = {
+      register: 'polite', steps: [{ kind: 'rule', text: 'A polite request.' }], examples: [],
+      compare: [{ pattern: '〜ないでください', raw_id: 'grammar_N5_〜ないでください', level: 'N5', meaning: 'please do not', text: 'the negative' }],
+    }
+    const card = {
+      card_id: 'grammar_N5_〜てください', raw_id: 'grammar_N5_〜てください', mode: 'grammar.flashcard.f2b', direction: 'f2b',
+      grammar: '〜てください', structure: 'verb て-form + ください', meaning: 'please do', register: 'polite',
+      stage: 'new', review_preview: null, hints: {}, lesson, source: 'grammar',
+      lane: { id: 's~grammar~N5~grammar.flashcard.f2b', kind: 'section', source: 'grammar', deck: 'N5', mode: 'grammar.flashcard.f2b' },
+    }
+    localStorage.clear()
+    let batch = 0
+    apiJson.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/today/cards')) { batch += 1; return { cards: batch === 1 ? [card] : [] } }
+      if (u.startsWith('/api/grammar/point')) return { raw_id: 'grammar_N5_〜ないでください', level: 'N5', pattern: '〜ないでください', structure: 'x', meaning: 'please do not', steps: [], compare: [], examples: [] }
+      return {}
+    })
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: TodayRun } = await import('./screens/TodayRun')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/today/run']}>
+          <Routes><Route path="/today/run" element={<TodayRun session={{ access_token: 't' }} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(400)
+    document.querySelector('.gl--gate .gl-door').click()
+    await settle(300)
+    expect(document.querySelector('.gl-sheet[role="dialog"]')).not.toBeNull()
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    apiJson.mockReset()
+  })
+
   it('keeps the grab\'s walkthrough a dialog, from the video sheet', async () => {
     const { apiJson } = await import('./lib/api')
     apiJson.mockImplementation(async () => ({}))

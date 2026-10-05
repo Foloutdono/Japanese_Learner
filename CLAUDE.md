@@ -1592,7 +1592,27 @@ runtime purpose. Two consequences worth knowing:
   `src/lines.desktop.test.jsx`, `src/comprehension.desktop.test.jsx` and
   `index.css` and its 机 section; DESIGN.md, "The practice card" and
   "The desk").
-  When starting a new wave, begin at **186** or higher, and check
+  **186** is 基礎, the basics before the level (owner-directed: "new
+  users get thrown fairly advanced grammar and words in the Today queue
+  without knowing the basics"): first 186a, 教順, every deck's new cards
+  dealt in the order it teaches them rather than drawn at random --
+  grammar in its catalogue's order (です／だ, は, が, を…), vocab and
+  kanji by their frequency rankings, kana in the syllabary's -- in the
+  day's ration and every section run (`study/teaching_order.py`,
+  `get_new_cards(..., ordered=True)`), so the gate counts the cards the
+  run serves, and a refill never hands back a card the client holds
+  (`batch_cache._skipping`); then 186b, a grammar point never met
+  opening on its lesson in the day's run as on its own (`TodayRun.jsx`'s
+  gate, GrammarRun's since plan 087); the course itself (units of
+  N5 points, words and kanji, the misfiled basic words moved to N5) is
+  the plan's later phases (cited in `study/teaching_order.py`,
+  `routes/today.py`, `routes/vocab.py`, `routes/kanji.py`,
+  `routes/kana.py`, `routes/grammar.py`, `routes/frequency.py`,
+  `srs/batch_cache.py`, `tests/test_teaching_order.py`,
+  `tests/test_today_ration.py`, `tests/test_batch_cache.py`,
+  `screens/TodayRun.jsx`, `screens/TodayRun.gate.browser.test.jsx`,
+  `src/todayLesson.desktop.test.jsx` and `src/deskfree.phone.test.jsx`).
+  When starting a new wave, begin at **187** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

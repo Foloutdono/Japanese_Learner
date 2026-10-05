@@ -5,6 +5,9 @@ import { useLang } from '../LangContext'
 import { StudyStage } from '../components/study/StudyStage'
 import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
+import { SideLookup } from '../components/analysis/SideLookup'
+import { GrammarLesson, GrammarLessonSheet } from '../components/study/GrammarLesson'
+import { useDesk } from '../hooks/useDesk'
 import { CardPanel } from '../components/study/CardPanel'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
@@ -144,6 +147,14 @@ export default function TodayRun({ session }) {
 
   const recentlyReviewedRef = useRef(new Map())
 
+  // The lesson gate's doors (plan 186b), as GrammarRun has them: a
+  // compare row opens the rival's lesson in a sheet, or on the desk in
+  // the run's column beside the lesson that named it.
+  const desk = useDesk()
+  const [sheet, setSheet] = useState(null)
+  const [compared, setCompared] = useState(null)
+  const closeCompared = useCallback(() => setCompared(null), [])
+
   // A card is identified by (id, mode) throughout: the same kanji can be
   // due as a flashcard AND as a writing drill, and those are two cards
   // here even though they share an id. See useCardSession's cardKey.
@@ -198,7 +209,7 @@ export default function TodayRun({ session }) {
     for (const c of cards ?? []) if (c?.lane?.id) laneOfRef.current.set(cardKey(c), c.lane.id)
     return staleCards(session, cards, signal)
   }, [session, cardKey])
-  const { current: card, queueLength, loading, done, error, retry, advance } = useCardSession({
+  const { current: card, queueLength, loading, done, error, retry, advance, updateCurrent } = useCardSession({
     // The choice is part of the key: picking different lanes is a
     // different session, and resuming the previous one's cached queue
     // would serve cards from lanes the learner just switched off.
@@ -262,10 +273,28 @@ export default function TodayRun({ session }) {
   const nc = card ? normalizeCard(card) : null
   const { structureKey, renderer, isRadical, isFill, isContrast, isF2B } = cardShape(nc ?? {})
 
-  // A grammar point's lesson is a tap from the CARD now, not the head:
-  // the corner magnifier kanji/kana/vocab carry opens the point's
-  // dictionary entry, lesson and all, once the answer is revealed. See
-  // CardPrompt's grammar branch.
+  // 教順 (plan 186b): a grammar point the learner has never met is read
+  // before it is drilled, here as on its own run (GrammarRun's gate,
+  // plan 087). The day's ration hands a novice は and を in this queue,
+  // and a rule to rate before anyone has said what it does taught
+  // nothing. Seen is a flag on the queued card (updateCurrent keeps it
+  // in the session mirror), so a reload does not gate again. Once met,
+  // the lesson is a tap from the card: the corner magnifier opens the
+  // point's dictionary entry, lesson and all, after the reveal (see
+  // CardPrompt's grammar branch).
+  const gated = Boolean(card && structureKey === 'grammar' && card.stage === 'new'
+    && card.lesson && !card.lesson_seen)
+  // The lesson as the gate and the sheet print it: the card's identity
+  // over the embedded lesson. The level is the id's (grammar_N5_は).
+  const lessonOf = c => c.lesson && ({
+    ...c.lesson, raw_id: c.raw_id ?? c.card_id,
+    level: /^grammar_(N[1-5])_/.exec(c.raw_id ?? c.card_id)?.[1],
+    pattern: c.grammar, structure: c.structure, meaning: c.meaning, stage: c.stage,
+  })
+  const comparing = desk && gated && compared?.card === transitionKey
+    ? { category: 'grammar', id: compared.id }
+    : null
+
   const cardHints = nc?.hints ?? {}
   const availableHints = availableHintsFor(nc)
   const choicesOn = activeHints.includes(HINTS.CHOICES) && Array.isArray(cardHints[HINTS.CHOICES])
@@ -381,7 +410,11 @@ export default function TodayRun({ session }) {
       records
       panel={card ? <CardPanel card={card} remaining={remaining} keys={structureKey === 'kanji' && renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
       done={done}
-      side={error && !card ? null : <SessionPanel done={done} misses={false} />}
+      side={error && !card ? null : (
+        <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
+          <SessionPanel done={done} misses={false} />
+        </SideLookup>
+      )}
       sideLabel={t.dictionaryTitle}
     >
       {/* The run's own hairline: what this session has cleared of what
@@ -392,7 +425,18 @@ export default function TodayRun({ session }) {
       {error && !card && <SessionError error={error} onRetry={retry} />}
       {loading && !card && <Loading />}
 
-        {card && (
+        {card && gated && (
+          <div className="gl-gate">
+            <GrammarLesson
+              point={lessonOf(card)}
+              variant="gate"
+              onCompare={id => (desk ? setCompared({ card: transitionKey, id }) : setSheet(id))}
+              onBoard={() => updateCurrent({ lesson_seen: true })}
+            />
+          </div>
+        )}
+
+        {card && !gated && (
           <>
             {/* The help switch sits above the card, which is where the
                 section screens put it. Below the card it was past the
@@ -542,6 +586,16 @@ export default function TodayRun({ session }) {
 
             <RatingBar active={showRating && !gates.locked} onRate={postReview} />
           </>
+        )}
+
+        {sheet && (
+          <GrammarLessonSheet
+            key={sheet}
+            id={sheet}
+            initial={card && (card.raw_id ?? card.card_id) === sheet ? lessonOf(card) : null}
+            session={session}
+            onClose={() => setSheet(null)}
+          />
         )}
 
     </StudyStage>
