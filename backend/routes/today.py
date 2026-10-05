@@ -42,7 +42,8 @@ Two things have to be right that a single-section session gets for free:
    bounds it: the ration is what is left of daily_new_target after
    today's first-ever reviews (core/pace.py), kana first for a learner
    who does not yet read them, then the chosen lines in turn
-   (study/daily_queue.ration). A learner with no stored target is
+   (study/daily_queue.ration), each deck's cards in the order it teaches
+   them (study/teaching_order, plan 186a). A learner with no stored target is
    served no ration at all. When the due set and the ration are both
    empty, this returns nothing and the client shows the next scheduled
    time from /api/today.
@@ -63,7 +64,7 @@ from core.lines import lines_or_all
 from core.pace import resolve_pace
 from core.srs_instance import srs
 from core.user_level import resolve_level
-from study import card_index, daily_queue
+from study import card_index, daily_queue, teaching_order
 from study.level_rule import kana_sets_for, primary_mode
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES, try_resolve
 
@@ -341,12 +342,15 @@ def _new_pools(user_id: str, level: str, budget: int):
     kana_known, lines = row[6], lines_or_all(row[9])
 
     def fresh(source: str, deck_key: str, mode: str) -> list[str]:
-        ids = card_index.raw_ids(source, deck_key, mode)
+        ids = teaching_order.raw_ids(source, deck_key, mode)
         if not ids:
             return []
-        # get_new_cards shuffles: the ration is a random draw from what
-        # the learner has never met, as a section run's top-up is.
-        picked = srs.get_new_cards(mode, limit=budget, card_ids=prefixed(ids, user_id))
+        # The first cards the deck teaches that the learner has never
+        # met (plan 186a). The ration was a random draw once, which dealt
+        # 〜なければなりません as readily as は on day one -- and, drawn
+        # again on every request, served other cards than the gate had
+        # counted. In order, the gate and the run agree.
+        picked = srs.get_new_cards(mode, limit=budget, card_ids=prefixed(ids, user_id), ordered=True)
         return [unprefixed(cid, user_id) for cid in picked]
 
     kana_mode = primary_mode(KANA)

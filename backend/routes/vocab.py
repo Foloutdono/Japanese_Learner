@@ -15,6 +15,7 @@ from study.modes import (
 )
 from study.furigana import align_deck as align_furigana
 from study.mcq import pick_distractors
+from study import teaching_order
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -195,6 +196,9 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     if not pool:
         return vocab_list, []
 
+    # The level in the order it teaches (plan 186a): commonest first.
+    # The pool itself is sorted, so its entries and ids stay paired.
+    pool.sort(key=lambda w: teaching_order.rank(VOCAB, vocab_to_id(w, level)))
     raw_ids   = [vocab_to_id(w, level) for w in pool]
     card_ids  = prefixed(raw_ids, user_id)
     cache_key = batch_key("user", user_id, mode, level)
@@ -207,7 +211,7 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(
         cache_key, due,
-        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
+        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids, ordered=True),
         count, exclude_ids, new_limit=new_limit,
     )
 

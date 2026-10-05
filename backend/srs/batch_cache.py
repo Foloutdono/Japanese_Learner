@@ -134,6 +134,24 @@ def pick_ids(cache_key: str, due_ids: list[str], new_fetch_fn, count: int,
     if new_limit is not None:
         remaining = min(remaining, max(0, new_limit))
     if remaining > 0:
-        picked += take_batch(cache_key, new_fetch_fn, count=remaining)
+        picked += take_batch(cache_key, _skipping(new_fetch_fn, exclude_ids), count=remaining)
 
     return picked
+
+
+def _skipping(new_fetch_fn, exclude_ids: set[str]):
+    """`new_fetch_fn` without what the client already holds.
+
+    A refill re-reads the cards nobody has answered, and a card served
+    but not yet answered is one of them. A shuffled pool only sometimes
+    handed it back; a pool in teaching order (plan 186a) hands back
+    exactly those first, so a client topping up its queue before
+    answering would be served its own cards again. The fetch asks for as
+    many more as it may have to drop."""
+    if not exclude_ids:
+        return new_fetch_fn
+
+    def fetch(limit: int) -> list[str]:
+        return [i for i in new_fetch_fn(limit=limit + len(exclude_ids)) if i not in exclude_ids][:limit]
+
+    return fetch

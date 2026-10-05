@@ -281,7 +281,8 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(
         cache_key, due,
-        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
+        # The level in the order its catalogue teaches it (plan 186a).
+        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids, ordered=True),
         count, exclude_ids, new_limit=new_limit,
     )
 

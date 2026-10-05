@@ -156,3 +156,33 @@ def test_no_target_no_ration(client):
 def test_only_serves_that_card_and_no_ration(client):
     _board(client, "N5", "both", 5, ["vocab"])
     assert client.get("/api/today/cards?only=vocab_N5_駅_えき").json()["cards"] == []
+
+
+# ── 教順 — the ration in teaching order (plan 186a) ──────────────
+
+def test_the_ration_deals_each_deck_in_the_order_it_teaches(client):
+    # A random draw once dealt 〜なければなりません before は. The rules
+    # now come in the catalogue's order, the words and kanji commonest
+    # first.
+    from study import teaching_order
+    _board(client, "N5", "both", 9, ["vocab", "kanji", "grammar"])
+    cards = client.get("/api/today/cards?count=10").json()["cards"]
+    by_source = {}
+    for c in cards:
+        by_source.setdefault(c["source"], []).append(c["card_id"])
+    for source, mode in (("vocab", "vocab.flashcard.f2b"), ("kanji", "kanji.flashcard.f2b"),
+                         ("grammar", "grammar.flashcard.f2b")):
+        assert by_source[source] == teaching_order.raw_ids(source, "N5", mode)[:3], source
+    assert by_source["grammar"] == ["grammar_N5_です／だ", "grammar_N5_は", "grammar_N5_が"]
+
+
+def test_the_gate_counts_the_cards_the_run_serves(client):
+    # Drawn at random on every request, the cards the gate counted were
+    # not the cards the run then served, and a client topping up its
+    # queue was dealt cards past the pace. In order, both agree.
+    _board(client, "N5", "both", 4, ["vocab", "grammar"])
+    first = client.get("/api/today/cards?count=10").json()["cards"]
+    again = client.get("/api/today/cards?count=10").json()["cards"]
+    assert [c["card_id"] for c in first] == [c["card_id"] for c in again]
+    held = ",".join(f'{c["card_id"]}|{c["mode"]}' for c in first)
+    assert client.get(f"/api/today/cards?count=10&exclude={held}").json()["cards"] == []

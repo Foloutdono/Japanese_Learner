@@ -15,6 +15,7 @@ from study.modes import (
 )
 from study.mcq import pick_distractors
 from study.kanji_words import course_shares
+from study import teaching_order
 from content.kanji_readings import split_readings, display_reading
 from content.radical_data import (
     radical_for, siblings_by_stroke, RADICAL_BY_NUMBER,
@@ -287,6 +288,10 @@ def _select_cards(level: str | None, m: Mode, lang: str, count: int, exclude_ids
     if not pool:
         return kanji_list, []
 
+    if radical is None:
+        # A level in the order it teaches (plan 186a): commonest first.
+        # The pool itself is sorted, so its entries and ids stay paired.
+        pool.sort(key=lambda p: teaching_order.rank(KANJI, kanji_to_id(p[1], p[0])))
     raw_ids   = [kanji_to_id(k, lv) for lv, k in pool]
     by_raw_id = dict(zip(raw_ids, (k for _, k in pool)))
     card_ids  = prefixed(raw_ids, user_id)
@@ -301,9 +306,8 @@ def _select_cards(level: str | None, m: Mode, lang: str, count: int, exclude_ids
     picked = pick_ids(
         cache_key, due,
         # A family is served easy-first (N5 before N1 — see
-        # radical_data.DECK_BY_RADICAL's order); a level keeps its
-        # shuffle.
-        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids, ordered=radical is not None),
+        # radical_data.DECK_BY_RADICAL's order), a level commonest first.
+        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids, ordered=True),
         count, exclude_ids, new_limit=new_limit,
     )
 

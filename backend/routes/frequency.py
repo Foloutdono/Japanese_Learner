@@ -155,7 +155,8 @@ def _select_cards(domain: str, tier: int, m: Mode, lang: str, count: int, exclud
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(
         cache_key, due,
-        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
+        # A tier is already a ranking: commonest first (plan 186a).
+        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids, ordered=True),
         count, exclude_ids, new_limit=new_limit,
     )
 
