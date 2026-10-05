@@ -1523,13 +1523,23 @@ runtime purpose. Two consequences worth knowing:
   bar's misses on a sumi of their own, which the frame's surface had
   been standing in for (paper in the light theme, under the panel's
   inks), and comprehension's floor with them (`stage--comprehension`);
-  then the card itself, redrawn from the owner's pick of four
-  directions on the canvas "Tsuji — the practice cards" (A 見本,
-  B 照合, C 切符, D 時刻表) (cited in `screens/ReadingRun.jsx`,
-  `TranslationRun.jsx`, `DictationRun.jsx`, `CompositionRun.jsx`,
-  `ComprehensionRun.jsx`, `src/lines.desktop.test.jsx`,
-  `src/comprehension.desktop.test.jsx` and `index.css`; DESIGN.md, "The
-  desk").
+  then the card itself, the owner's pick A, 見本, of four directions on
+  the canvas "Tsuji — the practice cards" (B 照合, C 切符, D 時刻表 set
+  aside): the sentence leading with its furigana (`furigana` on reading's
+  batch and the ride's sentence, `align_sentence`), the answer in a well
+  with its misses marked (`domain/answerDiff.js`), the tutor's verdict at
+  the well or leading its notes, the point a tag, no foot strip
+  (PromptCard's `page`); three small-tweak variants of it, A1–A3, drawn
+  on the same canvas for the next pick (cited in `routes/reading.py`,
+  `routes/onboarding.py`, `tests/test_reading_furigana.py`,
+  `components/study/PracticeCard.jsx`, `TutorReview.jsx`,
+  `PromptCard.jsx`, `components/reading/ReadingPieces.jsx`,
+  `domain/answerDiff.js`, `screens/ReadingRun.jsx`, `TranslationRun.jsx`,
+  `DictationRun.jsx`, `CompositionRun.jsx`, `RideReading.jsx`,
+  `ComprehensionRun.jsx`, `src/practiceCard.phone.test.jsx`,
+  `src/lines.desktop.test.jsx`, `src/comprehension.desktop.test.jsx` and
+  `index.css` and its 机 section; DESIGN.md, "The practice card" and
+  "The desk").
   When starting a new wave, begin at **185** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

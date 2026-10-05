@@ -138,7 +138,7 @@ describe('a composition run on the desk', () => {
     const sakubun = getComputedStyle(document.documentElement).getPropertyValue('--line-sakubun').trim()
     expect(sakubun).not.toBe('')
     expect(getComputedStyle(side).getPropertyValue('--line-color').trim()).toBe(sakubun)
-    expect($('.stage .prose__jp').getBoundingClientRect().right).toBeLessThanOrEqual(box.left)
+    expect($('.stage .pcard-lead__jp').getBoundingClientRect().right).toBeLessThanOrEqual(box.left)
   })
 
   it('keeps the lesson through the review, stands the breakdown once rated, and Enter takes the next point', async () => {
@@ -166,15 +166,15 @@ describe('a composition run on the desk', () => {
 
     press('Enter')
     await settle(240)
-    expect($('.stage .prose__jp').textContent).toBe('〜てみる')
+    expect($('.stage .pcard-lead__jp--point').textContent).toBe('〜てみる')
     expect($('.desk-run__side').getAttribute('aria-label')).toBe('Leçon')
     expect(lessonCalls()).toHaveLength(2)
   })
 
   // A sentence typed in romaji is broken down in Japanese: the tutor
-  // writes it out, the breakdown reads that, and the answer prints it
-  // over what the learner typed. It had been five rows of letters.
-  it('breaks a romaji sentence down in the tutor\'s Japanese, and prints it over the romaji', async () => {
+  // writes it out, the breakdown reads that, and the card leads with it,
+  // corrected in place (plan 184). It had been five rows of letters.
+  it('breaks a romaji sentence down in the tutor\'s Japanese, and leads with it corrected', async () => {
     const ROMAJI = 'ongaku ga kikinagara benkyou shimasu.'
     apiJson.mockImplementation(async (url) => {
       const u = String(url)
@@ -194,10 +194,11 @@ describe('a composition run on the desk', () => {
     const asked = apiFetch.mock.calls.filter(c => String(c[0]) === '/api/phrase/analyze')
     expect(asked).toHaveLength(1)
     expect(JSON.parse(asked[0][2].body).phrase).toBe(SENTENCE)
-    const answer = $('.stage .prose__label--measured').nextElementSibling
-    expect(answer.classList.contains('prose__jp')).toBe(true)
-    expect(answer.textContent).toBe(SENTENCE)
-    expect(answer.nextElementSibling.textContent).toBe(ROMAJI)
+    const lead = $('.stage .pcard-lead__jp')
+    expect(lead.querySelector('.pcard-del').textContent).toBe('が')
+    expect(lead.querySelector('.pcard-ins').textContent).toBe('を')
+    // The romaji under it is the corrected sentence's, read.
+    expect($('.stage .pcard-lead__ro').textContent).toBe(TUTOR.review.better_romaji)
   })
 
   it('falls back to the check\'s kana when there is no tutor', async () => {
@@ -226,9 +227,9 @@ describe('a composition run on the desk', () => {
     await answered()
     const asked = apiFetch.mock.calls.filter(c => String(c[0]) === '/api/phrase/analyze')
     expect(JSON.parse(asked[0][2].body).phrase).toBe(SENTENCE)
-    // The answer's one line, and the rule under it: no romaji line.
-    const answer = $('.stage .prose__label--measured').nextElementSibling
-    expect(answer.textContent).toBe(SENTENCE)
-    expect(answer.nextElementSibling.classList.contains('prose__rule')).toBe(true)
+    // The sentence as written, corrected in place.
+    const lead = $('.stage .pcard-lead__jp')
+    expect(lead.textContent).toBe('音楽がを聞きながら勉強します。')
+    expect(lead.querySelector('.pcard-del').textContent).toBe('が')
   })
 })

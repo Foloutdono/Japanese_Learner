@@ -694,6 +694,46 @@ them:
   This is `ExampleSentence`, so it holds wherever an example sentence
   is printed.
 
+### The practice card (見本, plan 184)
+
+The card a sentence run's answer is read against — reading, translation,
+dictation, composition, and the reading ride — is the owner's pick A of
+the canvas "Tsuji — the practice cards" (`components/study/PracticeCard.jsx`).
+It had set the sentence, its English and the learner's answer at one size
+under five stacked captions (EN, YOUR ANSWER, REFERENCE, AI ANALYSIS,
+CORRECTED), centred a short page in a tall card, repeated the head's level
+in its foot, and left the learner to find "tchisai" against "sukoshi" by
+eye. Now:
+
+- **The sentence leads.** The Japanese is the largest line on the card,
+  centred, with its reading over the kanji (`furigana`, served with the
+  sentence since this plan), at `--fs-heading` (`--fs-title` on a phone,
+  where fourteen characters must hold a line); its romaji under it, then
+  what it means. A prompt with nothing else on its card — a short sentence
+  to read, a composition point — is set at `--fs-display` on the desk.
+- **The answer stands in a well**, the field it was typed in drawn again
+  (`--bg-main` through the card, as `.field`'s base well), so it needs no
+  caption. Its misses are marked against the sentence's romaji,
+  word by word (`domain/answerDiff.js`'s `diffWords`): a wrong word struck
+  in the miss ink with the right one beside it in the success ink, a long
+  vowel left short underlined in the near ink with its spelling given, a
+  word left out given, a word added struck. The server's measure is a
+  figure at the well's end (79 %, captioned once). On translation the
+  tutor's verdict stands there instead, the learner's own line put right
+  under the answer; on composition the learner's sentence IS the lead,
+  corrected in place (`diffChars`, `correctionParts`).
+- **The grammar point is a tag** at the card's top, the line's pigment as
+  its edge, a check or a cross where the tutor or the detector said
+  whether it was used. The level left the card: the head prints it, and
+  the card has no foot strip (PromptCard's `page`).
+- **The sentence and the well stand together** in the middle of what the
+  tag leaves (`.pcard-group`), so a short sentence is not a page of air
+  over its answer; the tutor's notes follow in the same group — the
+  summary, the fixes numbered with their fix, and what was right as one
+  quiet line, so two fixes outweigh three things that were fine.
+- **No verdict on the card.** "Did you get it right?" and its answer went:
+  the rating bar under the card is the question and the grade (ADR 0013).
+
 ### The console, one everywhere
 
 Decks, Dictionary, Today and the Library share **one console pattern**: a

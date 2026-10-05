@@ -148,12 +148,13 @@ async function play(root) {
 
 const toggle = root => root.querySelector('.prose__breakdown button')
 
-/** The four things "show breakdown" takes off the card. */
+/** What "show breakdown" takes off the card: the sentence leading with
+ *  its romaji and its translation, and the answer's well (plan 184). */
 function registersShowing(root) {
-  return Boolean(root.querySelector('.prose__jp'))
+  return Boolean(root.querySelector('.pcard-lead'))
     && root.textContent.includes(PHRASE.romaji)
     && root.textContent.includes(PHRASE.translation)
-    && root.textContent.includes(ANSWER)
+    && Boolean(root.querySelector('.pcard-well .pcard-answer'))
 }
 
 beforeEach(() => {
@@ -249,7 +250,9 @@ describe('ReadingRun — the breakdown toggle', () => {
 // simply absent if it never lands, and it never shows a figure
 // belonging to a sentence the reader has already left.
 describe('ReadingRun — the measurement', () => {
-  const measure = root => root.querySelector('.prose__measure')
+  // The figure at the end of the answer's well (plan 184): the number
+  // and its % in the bold, the caption under it.
+  const measure = root => root.querySelector('.pcard-well__fig b')
 
   /** A phrase read, answered and revealed — no rating. */
   async function answered(root, given = ANSWER) {
@@ -275,14 +278,18 @@ describe('ReadingRun — the measurement', () => {
 
     const root = await answered(await run())
 
-    expect(measure(root).textContent).toBe(translations.fr.answerMatched(78))
+    expect(measure(root).textContent).toBe('78%')
+    expect(root.querySelector('.pcard-well__cap').textContent).toBe(translations.fr.pcardMatched)
     // Measured against the sentence the batch served and the romaji it
     // served with it — the run holds both, so the reveal itself never
     // waited on this request.
     expect(checks).toEqual([
       { phrase: PHRASE.phrase, romaji: PHRASE.romaji, answer: ANSWER },
     ])
-    expect(root.textContent).toContain(ANSWER)
+    // The answer in its well, read against the sentence's romaji: the
+    // word it left out given in its place.
+    expect(root.querySelector('.pcard-well .pcard-answer').textContent).toBe('gakkou wa kuji kara desu')
+    expect(root.querySelector('.pcard-well .pcard-add').textContent).toBe('kara')
   })
 
   it('shows the answer with no figure when the measurement fails', async () => {
@@ -298,8 +305,8 @@ describe('ReadingRun — the measurement', () => {
     // The reveal is the run; the figure is a hint on it. Losing the
     // hint costs the hint.
     expect(measure(root)).toBeFalsy()
-    expect(root.textContent).toContain(ANSWER)
-    expect(root.textContent).toContain(translations.fr.yourAnswer)
+    expect(root.querySelector('.pcard-well__fig')).toBeNull()
+    expect(root.querySelector('.pcard-well .pcard-answer').textContent).toContain('gakkou wa kuji')
     expect(root.querySelector('.rating-bar__btn')).toBeTruthy()
   })
 
@@ -328,14 +335,14 @@ describe('ReadingRun — the measurement', () => {
     await settle(80)
     await answered(root, 'zenzen chigau')
 
-    expect(measure(root).textContent).toBe(translations.fr.answerMatched(42))
+    expect(measure(root).textContent).toBe('42%')
 
     // The first sentence's figure, landing late. It belongs to a card
     // that is no longer on screen and must not overwrite this one.
     held.release(res({ accuracy: 99, matched: 'romaji' }))
     await settle(120)
 
-    expect(measure(root).textContent).toBe(translations.fr.answerMatched(42))
+    expect(measure(root).textContent).toBe('42%')
   })
 
   it('sends the figure up with the rating, and null when it never landed', async () => {

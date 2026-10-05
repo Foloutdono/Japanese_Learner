@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { CardTransition } from '../study/CardTransition'
 import PromptCard from '../study/PromptCard'
+import { SentenceCheck } from '../study/PracticeCard'
 import { EyeOffIcon, PlayIcon } from '../ui/Icons'
 import { runKey } from '../../lib/keyGuards'
 import { useLang } from '../../LangContext'
@@ -77,6 +78,10 @@ export function PaceChip({ session }) {
   )
 }
 
+// Characters a sentence may hold and still be set at the display size
+// on the desk's card: twelve or so fit its column at 40px.
+const SHORT_SENTENCE = 14
+
 /** The sentence on its card, covered when the clock runs out so
  *  recall keeps mattering for anyone still writing.
  *
@@ -84,12 +89,16 @@ export function PaceChip({ session }) {
  *  the play button instead, and the run shows the sentence and starts
  *  its clock when it is pressed, so the learner decides when the
  *  reading begins. */
-export function ReadingPrompt({ cardKey, foot, phrase, covered, guide, onPlay, playLabel, keyHint = false }) {
+export function ReadingPrompt({ cardKey, phrase, covered, guide, onPlay, playLabel, keyHint = false }) {
+  // The practice card (plan 184): no foot -- the head says where the
+  // sentence is from -- and a short sentence a rung up on the desk, the
+  // one thing on the card.
+  const short = [...(phrase ?? '')].length <= SHORT_SENTENCE
   return (
     <CardTransition cardKey={cardKey} guide={guide}>
-      <PromptCard foot={foot}>
+      <PromptCard page>
         {onPlay ? <PlayButton onPlay={onPlay} label={playLabel} keyHint={keyHint} /> : (
-          <span className={`sentence${covered ? ' sentence--covered' : ''}`} lang="ja">
+          <span className={`sentence${short ? ' sentence--lead' : ''}${covered ? ' sentence--covered' : ''}`} lang="ja">
             {covered ? <EyeOffIcon size={34} /> : phrase}
           </span>
         )}
@@ -174,40 +183,25 @@ export function AnswerForm({ answer, setAnswer, onSubmit, t, guide, disabled = f
   )
 }
 
-/** The registers the answer is read against: the sentence, its
- *  romaji, the translation (English only, and labelled so — see
- *  reading.py's translation_lang note), then the learner's own answer
- *  with the measurement on its label, and the verdict line.
- *
- *  The measurement rides on the answer's own label, as it does in
- *  書取: a hint for the learner grading below, not the grade. Absent
- *  until it lands, and absent for good if it never does — the label is
- *  the same label either way rather than a row that jumps when a
- *  number arrives in it. */
-export function ReadingRegisters({ phrase, romaji, translation, translationLang, answer, accuracy, correct, t }) {
+/** The page the answer is read against, after it is in: the practice
+ *  card's (plan 184, components/study/PracticeCard.jsx's SentenceCheck)
+ *  -- the point's tag, the sentence leading with its reading over the
+ *  kanji, and the answer in its well with its misses marked and the
+ *  server's measure at its end, absent until it lands. The grade is the
+ *  rating bar's, under the card: the card no longer asks for it or
+ *  repeats it. */
+export function ReadingRegisters({ phrase, parts, romaji, translation, translationLang, answer, accuracy, point, t }) {
   return (
-    <>
-      <span className="prose__jp" lang="ja">{phrase}</span>
-      <span className="prose__romaji">{romaji}</span>
-      {translation && (
-        <>
-          <span className="prose__label">{translationLang === 'en' ? t.translationEnglish : t.translation}</span>
-          <span className="prose__en">{translation}</span>
-        </>
-      )}
-      <span className="prose__rule" />
-      <span className="prose__label prose__label--measured">
-        {t.yourAnswer}
-        {accuracy !== null && accuracy !== undefined && (
-          <span className="prose__measure">{t.answerMatched(accuracy)}</span>
-        )}
-      </span>
-      <span className="prose__en">{answer}</span>
-      <span
-        className={`prose__verdict${correct === null ? '' : correct ? ' prose__verdict--ok' : ' prose__verdict--x'}`}
-      >
-        {correct === null ? t.didYouGetIt : correct ? t.correct : t.incorrect}
-      </span>
-    </>
+    <SentenceCheck
+      point={point}
+      parts={parts}
+      text={phrase}
+      romaji={romaji}
+      meaning={translation}
+      meaningLang={translationLang}
+      answer={answer}
+      accuracy={accuracy}
+      t={t}
+    />
   )
 }

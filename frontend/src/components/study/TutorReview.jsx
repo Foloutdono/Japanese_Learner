@@ -1,80 +1,65 @@
-import { CheckIcon, CrossIcon } from '../ui/Icons'
+import { CheckIcon } from '../ui/Icons'
 
 // ── The tutor's review, at a glance ──
-// A verdict, one line, then what worked and what to fix as rows a
-// learner can tell apart without reading: a ✓ in the success pigment,
-// a ✕ in the danger one, the fix under its issue in the quiet
-// register, and the corrected sentence last when there is one. The
-// shape is study/tutor_review.py's; this only draws it.
-//
 // Two runs draw it: 翻訳 (screens/TranslationRun.jsx), where it reads
 // a translation attempt against a reference, and 作文
 // (screens/CompositionRun.jsx, plan 125), where it reads a sentence
 // the learner wrote from a grammar point and there is no reference at
-// all. It lived inside TranslationRun until the second run needed it;
-// a near-copy would have drifted inside two features (DESIGN.md,
-// "What not to do").
+// all. The shape is study/tutor_review.py's; this only draws it.
 //
-// `meaning` is the one line only the second run asks for -- what the
-// learner's sentence actually says, in their language -- and it is
-// drawn only when the review carries it, so translation's reviews
-// read exactly as they did.
+// Since plan 184 (the practice card, the owner's pick A) it is drawn
+// in three places rather than one block. The verdict stands at the end
+// of the learner's answer well (translation) or leads the summary
+// (composition): TutorVerdict. The corrected sentence is the learner's
+// own line put right, so it stands with that line -- under the answer
+// in the well (Corrected), or as the sentence itself, corrected in place
+// (composition, PracticeCard's CorrectedInPlace). What is left here is
+// the notes: one sentence saying why, what to fix numbered with its fix
+// under it, and what was right as one quiet line, so the two fixes weigh
+// more than the three things that were fine. Whether the point was used
+// is the point's tag's check (PracticeCard's PointTag), and what the
+// learner's sentence says is the line under it.
 const VERDICT_KEY = {
   correct: 'reviewCorrect', acceptable: 'reviewAcceptable',
   partial: 'reviewPartial', incorrect: 'reviewIncorrect',
 }
 
-export function TutorReview({ review, grammar, t }) {
-  const verdict = VERDICT_KEY[review.verdict] ? review.verdict : 'partial'
+/** The tutor's verdict, as a badge in its state's ink. */
+export function TutorVerdict({ review, t }) {
+  const verdict = VERDICT_KEY[review?.verdict] ? review.verdict : 'partial'
+  return <span className={`type-badge rvw__verdict rvw__verdict--${verdict}`}>{t[VERDICT_KEY[verdict]]}</span>
+}
+
+/** The notes: the summary (led by the verdict when `verdict`), the
+ *  fixes numbered with what to write instead, and what worked. */
+export function TutorReview({ review, t, verdict = false }) {
   const good = review.good ?? []
   const fix = review.fix ?? []
   return (
     <div className="rvw">
-      <div className="rvw__head">
-        <span className={`type-badge rvw__verdict rvw__verdict--${verdict}`}>{t[VERDICT_KEY[verdict]]}</span>
-        {grammar && typeof review.grammar_used === 'boolean' && (
-          <span className="type-badge">
-            <span lang="ja">{grammar}</span> · {review.grammar_used ? t.reviewGrammarUsed : t.reviewGrammarMissed}
-          </span>
-        )}
-        {review.summary && <span className="rvw__summary">{review.summary}</span>}
-      </div>
-      {review.meaning && (
-        <>
-          <span className="prose__label">{t.reviewMeaning}</span>
-          <span className="prose__en">{review.meaning}</span>
-        </>
-      )}
-      {good.length > 0 && (
-        <div className="rvw__list" aria-label={t.reviewGood}>
-          {good.map((item, i) => (
-            <div key={i} className="rvw__row">
-              <span className="rvw__mark rvw__mark--ok" aria-hidden="true"><CheckIcon size={11} /></span>
-              <span className="rvw__item">{item}</span>
-            </div>
-          ))}
+      {(verdict || review.summary) && (
+        <div className="rvw__head">
+          {verdict && <TutorVerdict review={review} t={t} />}
+          {review.summary && <span className="rvw__summary">{review.summary}</span>}
         </div>
       )}
       {fix.length > 0 && (
-        <div className="rvw__list" aria-label={t.reviewFix}>
+        <ol className="rvw__fixes" aria-label={t.reviewFix}>
           {fix.map((item, i) => (
-            <div key={i} className="rvw__row">
-              <span className="rvw__mark rvw__mark--x" aria-hidden="true"><CrossIcon size={11} /></span>
+            <li key={i} className="rvw__row">
+              <span className="rvw__n" aria-hidden="true">{i + 1}</span>
               <span className="rvw__item">{item.issue}</span>
-              {item.fix && <span className="rvw__fix">{item.fix}</span>}
-            </div>
+              {item.fix && <span className="rvw__fix"><span aria-hidden="true">→ </span><span className="rvw__to">{item.fix}</span></span>}
+            </li>
           ))}
-        </div>
+        </ol>
       )}
-      {review.better && (
-        <>
-          <span className="prose__label">{t.reviewBetter}</span>
-          <Corrected
-            parts={review.better_parts}
-            text={review.better}
-            romaji={review.better_romaji}
-          />
-        </>
+      {good.length > 0 && (
+        <ul className="rvw__right" aria-label={t.reviewGood}>
+          {good.map((item, i) => (
+            <li key={i} className="rvw__good"><CheckIcon size={11} className="rvw__tick" />{item}</li>
+          ))}
+        </ul>
       )}
     </div>
   )

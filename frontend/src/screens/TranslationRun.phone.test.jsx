@@ -127,7 +127,8 @@ describe('the translation page at 390×844', () => {
   it('keeps a run-on answer inside the card', async () => {
     const root = await answered(await run(), RUN_ON)
     const card = root.querySelector('.prompt-card--footed')
-    const answer = [...root.querySelectorAll('.prose__jp')][0]
+    // The answer in its well (plan 184).
+    const answer = root.querySelector('.pcard-well__line > span')
     expect(answer.textContent).toBe(RUN_ON)
 
     // It wrapped rather than running out of the card, and the card
@@ -162,7 +163,7 @@ describe('the translation page at 390×844', () => {
   it('sits the sentence to translate in the middle of its card', async () => {
     const root = await run()
     const card = root.querySelector('.prompt-card--footed')
-    const prompt = root.querySelector('.prose__en--lead')
+    const prompt = root.querySelector('.pcard-ask')
     const box = card.getBoundingClientRect()
     const line = prompt.getBoundingClientRect()
 

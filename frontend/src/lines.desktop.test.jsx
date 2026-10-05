@@ -177,6 +177,36 @@ describe('a practice run on three panels', () => {
     expect(caps).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
   })
 
+  // The practice card (plan 184, the owner's pick A): the prompt's short
+  // sentence at the display size, the one thing on its card; then the
+  // card with no foot strip, the sentence leading and the answer's well
+  // under it with the miss marked.
+  it('leads with the sentence: the display size on the prompt, the well under it after', async () => {
+    await reading()
+    await settle(300)
+    $('.clip-player__play').click()
+    await settle(40)
+    const sentence = $('.prompt-card--page .sentence')
+    expect(sentence.classList.contains('sentence--lead')).toBe(true)
+    expect(getComputedStyle(sentence).fontSize).toBe('40px')
+    expect($('.prompt-card__foot')).toBeNull()
+
+    await userEvent.keyboard('denki o tsukemasu ka')
+    await userEvent.keyboard('{Enter}')
+    await settle(250)
+    const card = $('.stage > .prompt-card--page')
+    expect($('.prompt-card__foot')).toBeNull()
+    const lead = card.querySelector('.pcard-lead__jp')
+    expect(lead.textContent).toBe(FIRST.phrase)
+    // The heading rung (1.7rem) once there is an answer under it.
+    expect(getComputedStyle(lead).fontSize).toBe('27.2px')
+    const well = card.querySelector('.pcard-well')
+    expect(well.querySelector('.pcard-miss s').textContent).toBe('tsukemasu')
+    expect(well.querySelector('.pcard-miss ins').textContent).toBe('tsukemashou')
+    expect(well.getBoundingClientRect().top).toBeGreaterThan(lead.getBoundingClientRect().bottom)
+    expect(well.getBoundingClientRect().right).toBeLessThanOrEqual(card.getBoundingClientRect().right)
+  })
+
   // The rating bar unframed with them (plan 184): its misses carry their
   // own sumi, the ground their panel inks read on -- in the light theme
   // too, where the frame's surface was paper under them.

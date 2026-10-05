@@ -454,13 +454,25 @@ const Fixture = () => (
         <span className="stage__streak pr-streak">3</span>
       </div>
       <div className="timer"><span className="timer__label pr-timer">12.3s</span></div>
-      <div className="prompt-card prompt-card--footed">
-        <div className="prompt-card__body prompt-card__body--prose prose">
-          <span className="prose__label pr-label">EN</span>
-          <span className="prose__romaji pr-romaji">ashita wa</span>
+      {/* The practice card (plan 184): the point's tag, the sentence's
+          romaji, and the answer's well -- a miss struck, the right word
+          and a near miss's spelling given, the figure's caption -- on the
+          page's ground stepped through the card. */}
+      <div className="prompt-card prompt-card--footed prompt-card--page">
+        <div className="prompt-card__body prompt-card__body--page prose">
+          <span className="pcard-tag"><span className="pcard-tag__cap pr-label">Point</span><span className="pcard-tag__jp">〜ましょう</span></span>
+          <span className="pcard-lead__ro pr-romaji">ashita wa</span>
           <span className="prose__ai pr-ai">Natural and correct.</span>
-          <span className="prose__verdict prose__verdict--ok pr-ok">Correct!</span>
-          <span className="prose__verdict prose__verdict--x pr-x">Not quite</span>
+          <div className="pcard-well">
+            <div className="pcard-well__line">
+              <span className="pcard-answer">
+                <span className="pcard-miss"><s className="pr-x">tchisai</s> <ins className="pr-ok">sukoshi</ins></span>
+                {' '}
+                <span className="pcard-miss pcard-miss--near"><s>aimasho</s> <ins className="pr-near">aimashou</ins></span>
+              </span>
+            </div>
+            <span className="pcard-well__fig"><b>79</b><span className="pcard-well__cap pr-well-cap">matched</span></span>
+          </div>
         </div>
       </div>
       <div className="prompt-card prompt-card--ask">
@@ -1040,11 +1052,13 @@ const SITES = [
   // and its result under the bar.
   ['.pr-streak', 'practice streak (warning ink mixed)'],
   ['.pr-timer', 'practice timer label'],
-  ['.pr-label', 'prose label'],
-  ['.pr-romaji', 'prose romaji'],
+  ['.pr-label', 'practice card tag caption'],
+  ['.pr-romaji', 'practice card romaji'],
   ['.pr-ai', 'prose AI analysis'],
-  ['.pr-ok', 'verdict (success ink mixed)'],
-  ['.pr-x', 'verdict (danger ink mixed)'],
+  ['.pr-ok', 'answer correction (success ink mixed), in the well'],
+  ['.pr-x', 'answer miss (danger ink mixed), in the well'],
+  ['.pr-near', 'near miss spelling (warning ink mixed), in the well'],
+  ['.pr-well-cap', 'answer well figure caption'],
   ['.pr-badge', 'question type badge (tinted)'],
   ['.pr-cap', 'question cap'],
   ['.pr-note', 'result row note'],

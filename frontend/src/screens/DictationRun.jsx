@@ -8,9 +8,9 @@ import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
 import { usePracticeXp } from '../hooks/usePracticeXp'
 import PromptCard from '../components/study/PromptCard'
+import { SentenceCheck } from '../components/study/PracticeCard'
 import RatingBar from '../components/study/RatingBar'
 import ClipPlayer from '../components/study/ClipPlayer'
-import { FuriganaParts } from '../components/study/Readings'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide, LineSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
@@ -457,7 +457,7 @@ function Session({ session, level }) {
               already a flex column whose body owns the leftover height
               and centres in it, so the player needs no rule of its
               own. */}
-          <PromptCard foot={{ left: where, right: t.dictationTitle }}>
+          <PromptCard page>
             <ClipPlayer
               key={clip.audioSrc}
               src={clip.audioSrc}
@@ -505,44 +505,27 @@ function Session({ session, level }) {
 
       {stage === 'feedback' && result && (
         <>
-          <PromptCard prose foot={{ left: where, right: t.dictationTitle }}>
-            {/* Opening the breakdown puts the registers away, exactly as
-                reading practice does: the card IS the stage on a phone,
-                and rows stacked under six lines of already-read text
-                get what is left rather than what they need. Nothing is
-                lost with them — the breakdown's own line and its
-                translation, up top, are the same sentence and gloss. */}
+          {/* The practice card (plan 184, the owner's pick A): the line
+              leading with its reading over the kanji -- built backend-
+              side from the bank's own kana, so the ruby over 九時 is くじ
+              rather than a guess (study/dictation.reveal) -- its romaji,
+              the alphabet the learner answered in, its gloss, and the
+              answer in its well with its misses marked against that
+              romaji and the server's measure at its end. Opening the
+              breakdown puts the page away, as reading's does: the
+              breakdown's own line and gloss say the same. */}
+          <PromptCard page prose>
             {!showBreakdown && (
-              <>
-                {/* The line, with its reading over the kanji that need one.
-                    Built backend-side from the bank's own kana, so the ruby
-                    over 九時 is くじ rather than a guess — see
-                    study/dictation.reveal. The kana line this replaces said
-                    the same thing twice, once detached from the writing it
-                    belonged to. */}
-                <span className="prose__jp kaki-line" lang="ja">
-                  <FuriganaParts parts={result.furigana} />
-                </span>
-                {/* Romaji rather than kana: it is the alphabet the learner
-                    just answered in, so it is the line they can actually
-                    check themselves against. */}
-                <span className="prose__romaji">{result.romaji}</span>
-                <span className="prose__label">
-                  {result.translation_lang === 'en' ? t.translationEnglish : t.translation}
-                </span>
-                <span className="prose__en">{result.translation}</span>
-                <span className="prose__rule" />
-                {/* The measurement rides on the answer's own label rather
-                    than standing over the card as a verdict: it is a hint
-                    for the learner grading below, not the grade. 読解
-                    prints the same figure from the same measure and in
-                    the same place (ReadingRun.jsx). */}
-                <span className="prose__label prose__label--measured">
-                  {t.yourAnswer}
-                  <span className="prose__measure">{t.answerMatched(result.accuracy)}</span>
-                </span>
-                <span className="prose__en">{answer.trim() || '—'}</span>
-              </>
+              <SentenceCheck
+                parts={result.furigana}
+                text={result.jp}
+                romaji={result.romaji}
+                meaning={result.translation}
+                meaningLang={result.translation_lang}
+                answer={answer.trim()}
+                accuracy={result.accuracy}
+                t={t}
+              />
             )}
 
             {/* Only once the learner has rated. Before that the rating

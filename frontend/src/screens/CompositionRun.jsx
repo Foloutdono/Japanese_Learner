@@ -11,6 +11,7 @@ import PromptCard from '../components/study/PromptCard'
 import RatingBar from '../components/study/RatingBar'
 import { CardTransition } from '../components/study/CardTransition'
 import { TutorReview } from '../components/study/TutorReview'
+import { PointTag, PointForm, SentenceLead, CorrectedInPlace } from '../components/study/PracticeCard'
 import { GrammarLessonBody, GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide, LineSide, DeskPane } from '../components/analysis/BreakdownSide'
@@ -392,9 +393,8 @@ function Session({ session, level }) {
   }
 
   const where = `${level} · ${t.stationJlpt}`
-  const grammarFoot = point
-    ? <>{t.readingGrammarPoint} · <span lang="ja">{point.pattern}</span></>
-    : t.compositionTitle
+  // The tutor's review, when it answered in its shape.
+  const review = tutor?.review ?? null
 
   // The desk's column (plan 114): the point's lesson while the learner
   // writes — rule, use, careful, the examples, the rivals, the same body
@@ -481,8 +481,9 @@ function Session({ session, level }) {
       {stage === 'writing' && point && (
         <>
           {/* The point as the page: the pattern where the sentence goes
-              in the other runs, its structure under it, its meaning in
-              the learner's language. No example sentence, ever — an
+              in the other runs, the one thing on the card (plan 184),
+              its form as its pieces under it, its meaning in the
+              learner's language. No example sentence, ever — an
               example on the card is a sentence to copy; the examples
               live behind the lesson's door, which costs nothing to
               open. The prose card rather than the entry plate: the
@@ -490,12 +491,14 @@ function Session({ session, level }) {
               field leaves, and the plate is the entry panel's header,
               drawn only with the entry's own marks and actions. */}
           <CardTransition cardKey={point._uiKey}>
-            <PromptCard prose foot={{ left: where, right: t.compositionTitle }}>
-              <span className="prose__label">{t.compositionPrompt}</span>
-              <span className="prose__jp" lang="ja">{point.pattern}</span>
-              {point.structure && <span className="prose__romaji" lang="ja">{point.structure}</span>}
-              <span className="prose__rule" />
-              <span className="prose__en">{point.meaning}</span>
+            <PromptCard page prose>
+              <div className="pcard-group">
+                <div className="pcard-lead">
+                  <span className="pcard-lead__jp pcard-lead__jp--point" lang="ja">{point.pattern}</span>
+                  {point.structure && <PointForm structure={point.structure} />}
+                  <span className="pcard-lead__en pcard-lead__en--quiet">{point.meaning}</span>
+                </div>
+              </div>
               {!desk && (
                 <div className="prose__breakdown">
                   <button type="button" className="btn-secondary" onClick={() => setLesson(true)}>
@@ -533,43 +536,36 @@ function Session({ session, level }) {
 
       {stage === 'feedback' && point && (
         <>
-          <PromptCard prose foot={{ left: where, right: grammarFoot }}>
-            {/* Opening the breakdown puts the sentence away — its own
-                line prints it — and keeps the tutor's reading of it. */}
+          {/* The practice card (plan 184, the owner's pick A): the
+              point's tag with the detector's word on it (nothing on a
+              point it is not trusted on); the learner's sentence leading,
+              corrected in place -- what the tutor took out struck, what it
+              put in beside it, the corrected sentence's reading over the
+              kanji -- its romaji and what it says under it; then the
+              tutor's notes, led by the verdict. Opening the breakdown puts
+              the sentence away (its own line prints it) and keeps the
+              notes. */}
+          <PromptCard page prose>
             {!showBreakdown && (
-              <>
-                {/* The detector's word rides on the answer's own label
-                    rather than standing over the card as a verdict: a
-                    hint for the learner grading below, not the grade,
-                    exactly where dictation prints its accuracy. Nothing
-                    at all on a point the detector is not trusted on. */}
-                <span className="prose__label prose__label--measured">
-                  {t.yourAnswer}
-                  {typeof found === 'boolean' && (
-                    <span className="prose__measure">{found ? t.compositionFound : t.compositionNotFound}</span>
-                  )}
-                </span>
-                {written ? (
-                  <>
-                    <span className="prose__jp" lang="ja">{written}</span>
-                    <span className="prose__romaji">{sentence}</span>
-                  </>
-                ) : (
-                  <span className="prose__jp" lang="ja">{sentence}</span>
-                )}
-                <span className="prose__rule" />
-              </>
+              <PointTag point={point.pattern} label={t.pcardPoint} used={typeof found === 'boolean' ? found : null} />
             )}
-            <span className="prose__label">{t.aiAnalysis}</span>
-            {tutorLoading && <Loading inline copy={t.analyzingComposition} />}
-            {!tutorLoading && limited && <span className="prose__ai">{t.compositionLimitReached}</span>}
-            {!tutorLoading && !limited && tutor?.review && (
-              <TutorReview review={tutor.review} grammar={point.pattern} t={t} />
-            )}
-            {!tutorLoading && !limited && tutor && !tutor.review && (
-              <span className="prose__ai">{tutor.analysis}</span>
-            )}
-            {!tutorLoading && !limited && !tutor && <span className="prose__ai">{t.analysisUnavailable}</span>}
+            <div className="pcard-group">
+              {!showBreakdown && (
+                <SentenceLead
+                  romaji={review?.better ? review.better_romaji : (written ? sentence : null)}
+                  meaning={review?.meaning}
+                >
+                  <CorrectedInPlace given={written ?? sentence} parts={review?.better ? review.better_parts : null} />
+                </SentenceLead>
+              )}
+              <div className="pcard-notes">
+              {tutorLoading && <Loading inline copy={t.analyzingComposition} />}
+              {!tutorLoading && limited && <span className="prose__ai">{t.compositionLimitReached}</span>}
+              {!tutorLoading && !limited && review && <TutorReview review={review} t={t} verdict />}
+              {!tutorLoading && !limited && tutor && !review && <span className="prose__ai">{tutor.analysis}</span>}
+              {!tutorLoading && !limited && !tutor && <span className="prose__ai">{t.analysisUnavailable}</span>}
+              </div>
+            </div>
 
             {/* The sentence word by word, once the learner has rated —
                 the same gate and the same button states as dictation's. */}

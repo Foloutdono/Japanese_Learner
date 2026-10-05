@@ -622,7 +622,6 @@ function SessionView({
           />
           <ReadingPrompt
             cardKey={data._uiKey}
-            foot={{ left: where, right: t.readingTitle }}
             phrase={data.phrase}
             covered={phraseCovered}
             onPlay={started ? undefined : onPlay}
@@ -635,34 +634,24 @@ function SessionView({
 
       {stage === 'feedback' && data && feedback && (
         <>
-          <PromptCard
-            prose
-            foot={{
-              left: where,
-              // Only a curated sentence carries a grammar point: it was
-              // written to demonstrate exactly this one, and a test
-              // proves it contains it (content/reading_sentences.py).
-              // A corpus sentence gets the section's name rather than
-              // a guessed label.
-              right: data.grammar
-                ? <>{t.readingGrammarPoint} · <span lang="ja">{data.grammar}</span></>
-                : t.readingTitle,
-            }}
-          >
-            {/* Pushing "show breakdown" hides everything above the toggle
-                (phrase/romaji/translation/your answer): the rows below
-                print the sentence and its translation themselves, so
-                the registers would only say it twice, over the room
-                the rows need. */}
+          {/* The practice card (plan 184, the owner's pick A): the
+              point's tag, the sentence leading with its reading over the
+              kanji, and the answer in its well, its misses marked. Only
+              a curated sentence carries a grammar point: it was written
+              to demonstrate exactly this one, and a test proves it
+              contains it (content/reading_sentences.py). The level is
+              the head's to print. */}
+          <PromptCard page prose>
             {!showBreakdown && (
               <ReadingRegisters
                 phrase={data.phrase}
+                parts={data.furigana}
                 romaji={feedback.romaji}
                 translation={data.translation}
                 translationLang={data.translation_lang}
                 answer={answer}
                 accuracy={feedback.accuracy}
-                correct={feedback.correct}
+                point={data.grammar}
                 t={t}
               />
             )}

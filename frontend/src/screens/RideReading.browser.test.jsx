@@ -103,10 +103,11 @@ describe('RideReading', () => {
     await settle(50)
     root.querySelector('.stage__foot button').click()
     await settle(200)
-    // The registers, the measure from the office's own check, the note
-    // over the bar.
-    expect(root.querySelector('.prose__jp').textContent).toBe(SENTENCE.phrase)
-    expect(root.querySelector('.prose__measure').textContent).toContain('100')
+    // The practice card (plan 184): the sentence leading, the answer in
+    // its well with the measure from the office's own check at its end;
+    // the note over the bar.
+    expect(root.querySelector('.pcard-lead__jp').textContent).toBe(SENTENCE.phrase)
+    expect(root.querySelector('.pcard-well__fig b').textContent).toBe('100%')
     const check = posts().find(([u]) => u === '/api/onboarding/ride/check')
     expect(JSON.parse(check[2].body)).toEqual({ answer: 'eki de tomodachi ni aimasu' })
     expect(document.querySelector('.guide-callout__text').textContent).toContain(fr.rideReadMeasure)

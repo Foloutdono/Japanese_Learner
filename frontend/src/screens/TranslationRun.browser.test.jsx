@@ -150,24 +150,27 @@ describe('TranslationRun', () => {
     expect(calls('/api/translation/analyze')).toHaveLength(0)
   })
 
-  it("draws the tutor's review at a glance: the verdict, what worked, what to fix, the corrected sentence", async () => {
+  it("draws the tutor's review at a glance: the verdict at the answer, the fix numbered, what worked, the corrected line", async () => {
     const root = await answered(await run())
+    // The verdict stands at the end of the answer's well (plan 184), the
+    // learner's own line put right under the answer in it.
+    const well = root.querySelector('.pcard-well')
+    expect(well.querySelector('.rvw__verdict').textContent).toBe('En partie')
+    expect(well.querySelector('.rvw__verdict').classList.contains('rvw__verdict--partial')).toBe(true)
+    expect(well.querySelector('.pcard-better .rvw__better').textContent).toBe(REVIEW.better)
+    // The notes: the summary, the fix numbered with what to write, what
+    // worked as one line after it.
     const review = root.querySelector('.rvw')
-    expect(review).toBeTruthy()
-    expect(review.querySelector('.rvw__verdict').textContent).toBe('En partie')
-    expect(review.querySelector('.rvw__verdict').classList.contains('rvw__verdict--partial')).toBe(true)
+    expect(review.querySelector('.rvw__verdict')).toBeNull()
     expect(review.querySelector('.rvw__summary').textContent).toBe(REVIEW.summary)
-    expect(review.querySelectorAll('.rvw__mark--ok')).toHaveLength(1)
-    expect(review.querySelectorAll('.rvw__mark--x')).toHaveLength(1)
-    const rows = review.querySelectorAll('.rvw__row')
-    expect(rows[0].querySelector('.rvw__item').textContent).toBe(REVIEW.good[0])
-    expect(rows[1].querySelector('.rvw__item').textContent).toBe(REVIEW.fix[0].issue)
-    expect(rows[1].querySelector('.rvw__fix').textContent).toBe(REVIEW.fix[0].fix)
-    expect(review.querySelector('.rvw__better').textContent).toBe(REVIEW.better)
+    const fix = review.querySelector('.rvw__fixes > .rvw__row')
+    expect(fix.querySelector('.rvw__item').textContent).toBe(REVIEW.fix[0].issue)
+    expect(fix.querySelector('.rvw__to').textContent).toBe(REVIEW.fix[0].fix)
+    expect([...review.querySelectorAll('.rvw__good')].map(g => g.textContent)).toEqual(REVIEW.good)
     // The paragraph is gone: the shape is the review.
     expect(root.querySelector('.prose__ai')).toBeNull()
-    // No grammar point on this phrase, so no used/not-used badge.
-    expect(review.querySelectorAll('.type-badge')).toHaveLength(1)
+    // No grammar point on this phrase, so no tag to say it was used.
+    expect(root.querySelector('.pcard-tag')).toBeNull()
   })
 
   it('prints the prose when the model did not answer in the shape', async () => {
@@ -215,18 +218,18 @@ describe('TranslationRun', () => {
     expect(root.querySelector('.bkd__en').textContent).toBe(PHRASES[0].translation)
     // A row per word; the particles are their cards' (plan 160).
     expect(root.querySelectorAll('.bkd-row')).toHaveLength(2)
-    // The reference's romaji register is put away; the sentence is the
-    // breakdown's own line now.
-    expect(root.querySelector('.prose__romaji')).toBeNull()
+    // The reference is put away; the sentence is the breakdown's own
+    // line now.
+    expect(root.querySelector('.pcard-lead')).toBeNull()
     // The tutor's review of the attempt stays: it is the mode's point.
     expect(root.querySelector('.rvw__summary').textContent).toBe(REVIEW.summary)
-    // And so does the learner's own answer.
-    expect(root.textContent).toContain('学校は九時からです。')
+    // And so does the learner's own answer, in its well.
+    expect(root.querySelector('.pcard-well').textContent).toContain('学校は九時からです。')
 
     breakdownButton(root).click()
     await settle(80)
     expect(root.querySelector('.bkd')).toBeNull()
-    expect(root.querySelector('.prose__romaji')).toBeTruthy()
+    expect(root.querySelector('.pcard-lead')).toBeTruthy()
   })
 
   // Plan 096: the row -- not the word in it -- is the door, and what

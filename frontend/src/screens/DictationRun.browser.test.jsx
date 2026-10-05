@@ -245,7 +245,7 @@ describe('DictationRun', () => {
     // The bases reconstruct the sentence — a part dropped in rendering
     // would show a line that was never said. Read without the rt
     // nodes, which textContent would otherwise interleave into it.
-    const line = root.querySelector('.kaki-line')
+    const line = root.querySelector('.pcard-lead__jp')
     const bases = [...line.childNodes].map(node =>
       node.tagName === 'RUBY'
         ? [...node.childNodes].filter(c => c.tagName !== 'RT').map(c => c.textContent).join('')
@@ -256,15 +256,18 @@ describe('DictationRun', () => {
 
     // Romaji where the kana line used to be: the alphabet the learner
     // just answered in is the one they can check themselves against.
-    expect(root.querySelector('.prose__romaji').textContent).toBe(LINE.romaji)
+    expect(root.querySelector('.pcard-lead__ro').textContent).toBe(LINE.romaji)
     expect(root.querySelector('.prose__kana')).toBeNull()
-    expect(root.textContent).toContain(LINE.en)
+    expect(root.querySelector('.pcard-lead__en').textContent).toBe(LINE.en)
   })
 
-  it('prints what was typed back, beside how much of it matched', async () => {
+  it('prints what was typed back, its misses marked, beside how much of it matched', async () => {
     const root = await answered()
-    expect(root.textContent).toContain('gakkou wa kuji desu')
-    expect(root.querySelector('.prose__measure').textContent).toContain('90')
+    // In its well (plan 184), read against the line's romaji: the word
+    // the answer left out given where it goes.
+    expect(root.querySelector('.pcard-well .pcard-answer').textContent).toBe('gakkou wa kuji kara desu')
+    expect(root.querySelector('.pcard-well .pcard-add').textContent).toBe('kara')
+    expect(root.querySelector('.pcard-well__fig b').textContent).toBe('90%')
   })
 
   it('hands the grade to the learner, not to the server', async () => {
@@ -371,7 +374,7 @@ describe('DictationRun', () => {
     // own line, over its translation, rather than as the registers
     // that were put away.
     expect(root.querySelector('.bkd')).toBeTruthy()
-    expect(root.querySelector('.kaki-line')).toBeNull()
+    expect(root.querySelector('.pcard-lead')).toBeNull()
     expect(root.textContent).not.toContain(LINE.romaji)
     expect(root.querySelector('.bkd-line').textContent).toContain('学校')
     expect(root.querySelector('.bkd__en').textContent).toBe(LINE.en)
@@ -385,7 +388,7 @@ describe('DictationRun', () => {
     breakdownButton(root).click()
     await settle(80)
     expect(root.querySelector('.bkd')).toBeNull()
-    expect(root.querySelector('.kaki-line')).toBeTruthy()
+    expect(root.querySelector('.pcard-lead')).toBeTruthy()
   })
 
   it('buys the explanation when asked, and prints it under the rows', async () => {
@@ -417,7 +420,7 @@ describe('DictationRun', () => {
 
     button.click()
     await settle(60)
-    expect(root.querySelector('.kaki-line'), 'the registers stayed put').toBeTruthy()
+    expect(root.querySelector('.pcard-lead'), 'the registers stayed put').toBeTruthy()
 
     release({ ok: true, status: 200, json: async () => ANALYSIS })
     await settle(120)
@@ -431,8 +434,8 @@ describe('DictationRun', () => {
     // The run is still on its reveal, with the line and the learner's
     // own answer on it -- not on the error screen.
     expect(root.querySelector('.empty--error')).toBeNull()
-    expect(root.querySelector('.kaki-line')).toBeTruthy()
-    expect(root.textContent).toContain('gakkou wa kuji desu')
+    expect(root.querySelector('.pcard-lead')).toBeTruthy()
+    expect(root.querySelector('.pcard-well .pcard-answer').textContent).toContain('gakkou wa kuji')
 
     const button = breakdownButton(root)
     expect(button.disabled).toBe(true)

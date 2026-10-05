@@ -123,7 +123,7 @@ describe('every hover has its focus twin on the desk', () => {
 
 describe('a copy on the desk', () => {
   it('leaves the readings out of every ruby line', async () => {
-    const lines = ['rvw__better', 'kaki-line', 'bkd-line', 'bkd-row__word', 'dict-word__jp', 'furigana-word']
+    const lines = ['rvw__better', 'pcard-lead__jp', 'bkd-line', 'bkd-row__word', 'dict-word__jp', 'furigana-word']
     await render(
       <Desk>
         {lines.map(cls => <span key={cls} className={cls}><ruby>日本<rt>にほん</rt></ruby></span>)}
