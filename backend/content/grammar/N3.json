@@ -4791,9 +4791,9 @@
             "fr": "Dis que oui : tu as tendance à te réveiller en retard, alors tu prends de l'avance."
           },
           "choices": [
-            "うん、ぼくはねぼうしがちだから。",
-            "うん、ぼくはねぼうしそうだから。",
-            "うん、ぼくはねぼうしたから。"
+            "うん、ねぼうしがちだから。",
+            "うん、ねぼうしそうだから。",
+            "うん、ねぼうしたから。"
           ],
           "why": {
             "en": "A habit you'd rather not have: がち. そう would say you look about to oversleep now, and した that you overslept once.",

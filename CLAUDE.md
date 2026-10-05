@@ -1656,12 +1656,14 @@ runtime purpose. Two consequences worth knowing:
   `routes/basics.py`, `tests/test_basics_api.py`, `screens/BasicsScreen.jsx`,
   `screens/LearnScreen.jsx`, `stores/basics.js`, `config/tabs.js`,
   `src/basics.phone.test.jsx` and `src/basics.desktop.test.jsx`).
-  **187** is 発見, a grammar point found before it is drilled (187a–f
-  built, 187g planned in `plans/187-hakken-grammar-tour.md`; cited in
+  **187** is 発見, a grammar point found before it is drilled (187a–g
+  built, `plans/187-hakken-grammar-tour.md`; cited in
   `study/grammar_tour.py`, `study/grammar_check.py`, `study/grammar_audio.py`,
   `study/grammar_ladder.py`, `study/modes.py`, `study/card_index.py`,
-  `content/grammar/N5.json`, `content/grammar/ladder.json` and the
-  README, `routes/grammar.py`, `routes/today.py`, `routes/decks.py`,
+  `content/grammar/N5.json` … `N1.json` (every point's `tour` but the
+  six no tour can be drawn on), `content/grammar/ladder.json` and the
+  README, `scripts/audit_slice.py`'s `tours` area,
+  `docs/content-audit/PLAYBOOK.md`, `routes/grammar.py`, `routes/today.py`, `routes/decks.py`,
   `routes/tts.py`, `routes/account.py`, `srs/data_structure.sql`,
   `core/events.py`, `scripts/build_grammar_audio.py`,
   `scripts/build_ladder_flags.py`, `scripts/migrate_grammar_ladder.py`,

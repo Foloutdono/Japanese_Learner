@@ -99,6 +99,29 @@ note says what the scene just showed, and the learner's own line is
 chosen against the rivals of the lesson's `compare`. Keep the Japanese at
 the level: a word above it is written in kana (とうきょう, おおさか).
 
+Every point carries one (plan 187g) except the six no tour can be drawn
+on, which keep the lesson: 〜て（理由）, 〜を（移動）, 〜で（理由）,
+自動詞／他動詞, 使役受身形 and 〜み. A new point is written with its
+tour. What the gate cannot see, and what the reviews of the first 535
+found most often:
+
+- **A second right answer.** A rival the lesson calls a same-meaning
+  form (はずがない beside わけがない, 〜とはいえ beside 〜といえども) or
+  a plain form a native speaker would accept (のに, ので, たら, だけ)
+  is never a wrong choice. A wrong choice is wrong for the reason its
+  `why` gives, and is a sentence someone could say, not broken Japanese.
+- **Who says it.** A formal or written form sits in a mouth that would
+  use it: a notice read aloud, an announcement, staff at the window, a
+  stiff older speaker. A literary form is never put in a friend's mouth.
+- **The learner has no gender.** "me", and the tu/vous a cue, a task or
+  a why addresses, never agree in the French (« Pardon » for « Désolé »,
+  « j'ai pris le mauvais train » for « je me suis trompé de train »), and
+  the English never calls them "sir"; in the Japanese they say わたし or
+  nothing, never ぼく or あたし.
+- **The scene holds together.** The place fits what happens (a ticket
+  bought at the gates or the window, not on the train), and the figures
+  add up.
+
 ## The ladder's snapshot (plan 187e)
 
 `ladder.json`, beside the five levels, is not an entry file: it writes
