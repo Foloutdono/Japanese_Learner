@@ -15,6 +15,7 @@ import {
 } from '../components/study/GrammarPieces'
 import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
+import { TourRoute, TourLedger } from '../components/study/TourPanels'
 import { GrammarBuild, GrammarWrite, LadderStrip } from '../components/study/GrammarWork'
 import { cardShape } from '../domain/cardShape'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
@@ -92,6 +93,7 @@ export default function GrammarRun({ session }) {
   // a later gated card never opens on it.
   const desk = useDesk()
   const [compared, setCompared]     = useState(null)
+  const [tourView, setTourView]     = useState(null)
   const closeCompared = useCallback(() => setCompared(null), [])
 
   // One session per level+mode+language (see useCardSession): the
@@ -288,6 +290,9 @@ export default function GrammarRun({ session }) {
   const pointId = card && (card.raw_id ?? card.card_id)
 
   // The rival open in the side: only while its card is still at its gate.
+  // 発見 on the desk (plan 187f): the tour's stops at the left, its plate
+  // at the right.
+  const touring = desk && gated && Boolean(card?.lesson?.tour)
   const comparing = desk && gated && compared?.card === card?.card_id
     ? { category: 'grammar', id: compared.id }
     : null
@@ -304,11 +309,11 @@ export default function GrammarRun({ session }) {
       onToastDone={gates.toastDone}
       records
       progress={progress}
-      panel={card ? <CardPanel card={card} /> : null}
+      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} /> : card ? <CardPanel card={card} /> : null}
       done={done}
       side={error && !card ? null : (
         <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
-          <SessionPanel done={done} />
+          {touring ? <TourLedger point={lessonOf(card)} view={tourView} /> : <SessionPanel done={done} />}
         </SideLookup>
       )}
       sideLabel={t.dictionaryTitle}
@@ -327,6 +332,7 @@ export default function GrammarRun({ session }) {
               onCompare={id => (desk ? setCompared({ card: card.card_id, id }) : setSheet(id))}
               onBoard={() => updateCurrent({ lesson_seen: true })}
               onLesson={() => setSheet(card.raw_id ?? card.card_id)}
+              onView={setTourView}
             />
           </div>
         )}

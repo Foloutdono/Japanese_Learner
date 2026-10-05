@@ -7,6 +7,10 @@ import { CheckIcon, SpeakerIcon } from '../ui/Icons'
 import { ExampleSentence } from '../dictionary/ExampleSentence'
 import { LessonInline } from './GrammarLesson'
 import { FuriganaParts } from './Readings'
+import { stopsOf } from '../../domain/tourStops'
+import { PICK_KEY_DIGIT } from '../../domain/choiceKeys'
+import { dialogOpen } from '../../lib/dialogOpen'
+import { composing, pressedByPointer, trackPresses } from '../../lib/keyGuards'
 
 // ── 発見 — a grammar point found before it is drilled (plan 187b) ──
 // The owner's pick of the canvas "Tsuji — grammar, learned by doing":
@@ -31,10 +35,6 @@ import { FuriganaParts } from './Readings'
 // `point` is the gate's (the card's identity over its lesson), carrying
 // `tour` from study/grammar_tour.py.
 const MAX_MISSES = 2
-
-function stopsOf(tour) {
-  return ['look', 'guess', 'found', tour.twist && 'twist', tour.scene && 'scene', 'terminus'].filter(Boolean)
-}
 
 /** A line said aloud, from the server (lib/audio's speakLine): the
     reader's voice for an example, the scene's two voices for its lines. */
@@ -334,7 +334,7 @@ function Scene({ scene, phase, pick, done, onPick }) {
   )
 }
 
-function Terminus({ tour, point }) {
+function Terminus({ tour, point, desk }) {
   const { t } = useLang()
   const first = tour.look[0]
   return (
@@ -343,7 +343,15 @@ function Terminus({ tour, point }) {
         <Pattern point={point} />
         <h2 className="tour__q tour__q--name" tabIndex={-1}>{t.tourTerminus}</h2>
       </div>
-      <ol className="tour-card tour-found">
+      {/* On the desk the found lines are the plate's, beside the stop
+          (TourPanels.jsx): the stop holds the point's first sentence
+          whole instead, and the learner's own line. */}
+      {desk && first && (
+        <div className="tour-card tour-terminus__ex">
+          <ExampleSentence ex={{ ...first, segments: first.furigana }} />
+        </div>
+      )}
+      {!desk && <ol className="tour-card tour-found">
         <li className="tour-found__line">
           <span className="tour-found__n">1</span>
           <div className="tour-found__body">
@@ -368,7 +376,7 @@ function Terminus({ tour, point }) {
             </div>
           </li>
         )}
-      </ol>
+      </ol>}
       {tour.scene && (
         <div className="tour-reply">
           <span className="tour-reply__who">{t.tourYourLine}</span>
@@ -379,11 +387,53 @@ function Terminus({ tour, point }) {
   )
 }
 
+// The keys on the desk (plan 187f), as the boarding's (hooks/useBoardKeys):
+// Enter presses the gate, a digit the tile it numbers -- a guess, the
+// twist's or the scene's choices -- on either keyboard row. Nothing on
+// the panels names them (the owner's word). Not from a field, a
+// composing input method, a dialog or a control the keyboard is on,
+// which keeps its own Enter -- except one the pointer just pressed,
+// where Enter would press it again.
+function useTourKeys(ref, on) {
+  useEffect(() => {
+    if (!on) return undefined
+    trackPresses()
+    const onKey = e => {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey || composing(e) || dialogOpen()) return
+      const target = e.target instanceof Element ? e.target : null
+      if (target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName ?? '')) return
+      const root = ref.current
+      if (!root) return
+      const digit = PICK_KEY_DIGIT[e.key]
+      if (digit !== undefined) {
+        const tile = root.querySelector(`.tour__body [data-guess="${digit - 1}"], .tour__body [data-choice="${digit - 1}"]`)
+        if (!tile || tile.disabled) return
+        e.preventDefault()
+        tile.click()
+        return
+      }
+      if (e.key !== 'Enter' || e.shiftKey) return
+      const control = target?.closest('button, a[href], summary')
+      if (control && !pressedByPointer(control)) return
+      const gate = root.querySelector('.tour__foot .btn-depart')
+      if (!gate || gate.disabled) return
+      e.preventDefault()
+      gate.click()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [ref, on])
+}
+
 // `replay` (plan 187e, the plate's two ghosts): the tour run again from
 // the lesson, from its start or `startAt` a stop (the scene). A replay
 // records nothing -- no event, no record, no card (plan 187, Q4) -- and
 // its terminus goes back to the lesson rather than boarding a card.
-export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt = null }) {
+// `desk` (plan 187f): the tour as the middle of the run's three panels.
+// Its stops are the left panel's and its plate the right's
+// (TourPanels.jsx), so the track is not drawn here; `onView` hands the
+// run what both need to know of where the tour stands.
+export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt = null, desk = false, onView }) {
   const { t } = useLang()
   const tour = point.tour
   const stops = stopsOf(tour)
@@ -398,6 +448,8 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
   const [scenePick, setScenePick] = useState(null)
   const [sceneDone, setSceneDone] = useState(false)
   const bodyRef = useRef(null)
+  const rootRef = useRef(null)
+  useTourKeys(rootRef, desk)
   const stop = stops[at]
   const level = point.level
 
@@ -408,6 +460,15 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
     body.scrollTop = 0
     body.querySelector('.tour__q')?.focus({ preventScroll: true })
   }, [at, phase])
+
+  // What the desk's two panels read (plan 187f): the stop in hand and
+  // how each one went so far.
+  const twistRight = twistDone ? Boolean(tour.twist?.choices[twistPick]?.correct) : null
+  const sceneRight = sceneDone ? Boolean(tour.scene?.ask.choices[scenePick]?.correct) : null
+  useEffect(() => {
+    onView?.({ at, misses: wrong.length, helped, twist: twistRight, scene: sceneRight })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reported on what it says, not on the callback's identity.
+  }, [at, wrong.length, helped, twistRight, sceneRight])
 
   // Nothing goes on talking once the tour has moved on or closed.
   useEffect(() => () => stopSpeaking(), [])
@@ -457,8 +518,8 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
   else gate = <GateButton label={t.onbContinue} onClick={() => go('first')} data-action="continue" />
 
   return (
-    <section className="tour" data-stop={stop} aria-label={t.tourAria(point.pattern)}>
-      <Track at={at} total={stops.length} />
+    <section ref={rootRef} className={`tour${desk ? ' tour--desk' : ''}`} data-stop={stop} aria-label={t.tourAria(point.pattern)}>
+      {!desk && <Track at={at} total={stops.length} />}
       <div className="tour__body" ref={bodyRef} key={`${stop}:${stop === 'scene' ? phase : ''}`}>
         {stop === 'look' && <Look tour={tour} point={point} />}
         {stop === 'guess' && (
@@ -467,7 +528,7 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
         {stop === 'found' && <Found tour={tour} point={point} misses={wrong.length} helped={helped} />}
         {stop === 'twist' && <Twist twist={tour.twist} pick={twistPick} done={twistDone} onPick={setTwistPick} />}
         {stop === 'scene' && <Scene scene={tour.scene} phase={phase} pick={scenePick} done={sceneDone} onPick={setScenePick} />}
-        {stop === 'terminus' && <Terminus tour={tour} point={point} />}
+        {stop === 'terminus' && <Terminus tour={tour} point={point} desk={desk} />}
       </div>
       <div className="tour__foot">
         {stop === 'terminus' && onLesson && !replay && (

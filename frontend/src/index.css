@@ -37043,5 +37043,116 @@ button.brd-stn { cursor: pointer; }
      (the bar's title is read, not drawn, here), so theirs keep the
      names' rung until the desk is drawn for it. */
   .sheet__jp { font-size: var(--fs-title); line-height: 1.2; }
+
+  /* 発見 on the desk (plan 187f; the owner's pick F of the canvas
+     "Tsuji — grammar, learned by doing", boards 11 and 12): the tour on
+     the runs' three panels. The stop in the middle, its gate centred at
+     the boarding's width (.desk-brd's) and docked at the column's foot,
+     its guesses two across; the point and its stops at the left
+     (TourRoute), each stop on one rail in the line's pigment with how it
+     went; the plate at the right (TourLedger), each line found numbered
+     in the line's ink and the rest sealed. No key is printed. */
+  .tour--desk { gap: var(--sp-5); }
+  .tour--desk .tour__foot { bottom: 0; align-items: center; }
+  .tour--desk .btn-depart { width: var(--desk-side-w); max-width: 100%; }
+  .tour--desk .tour-guesses { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tour--desk[data-stop="scene"] .tour-guesses { grid-template-columns: minmax(0, 1fr); }
+
+  .tour-route,
+  .tour-ledger {
+    --line-color: var(--line-grammar);
+    --tour-ink: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-width: 0;
+  }
+  .tour-route__head { display: flex; flex-direction: column; gap: var(--sp-1); }
+  .tour-route__pattern { font-family: var(--font-jp); font-size: var(--fs-heading); line-height: 1.3; color: var(--tour-ink); overflow-wrap: anywhere; }
+  .tour-route__structure { font-size: var(--fs-sm); color: var(--text-secondary); }
+  .tour-route__stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .tour-route__stop {
+    position: relative;
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--sp-3);
+    min-height: 44px;
+  }
+  /* The rail, from each stop's dot to the next one's: drawn once a stop
+     is behind, a hairline ahead. */
+  .tour-route__stop:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    height: 100%;
+    width: 2px;
+    background: var(--surface-line);
+  }
+  .tour-route__stop--done:not(:last-child)::after { width: 3px; left: 7.5px; background: var(--line-color); }
+  .tour-route__dot {
+    position: relative;
+    z-index: 1;
+    justify-self: center;
+    width: 10px;
+    height: 10px;
+    box-sizing: border-box;
+    border: 2px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+  }
+  .tour-route__stop--done .tour-route__dot { border-color: var(--line-color); background: var(--line-color); }
+  .tour-route__stop--here .tour-route__dot { width: 18px; height: 18px; border: 3px solid var(--line-color); }
+  .tour-route__name { font-size: var(--fs-body); color: var(--text-primary); }
+  .tour-route__stop--here .tour-route__name { font-weight: 700; color: var(--tour-ink); }
+  .tour-route__stop--ahead .tour-route__name { color: var(--text-secondary); }
+  .tour-route__res { display: inline-flex; align-items: center; font-size: var(--fs-sm); color: var(--text-secondary); }
+  .tour-route__res--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+  .tour-route__res--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+
+  .tour-ledger { flex: 1; }
+  .tour-ledger__head { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); text-align: center; }
+  .tour-ledger__structure { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+  .tour-ledger__pattern { margin: 0; font-family: var(--font-jp); font-size: var(--fs-display); line-height: 1.2; overflow-wrap: anywhere; }
+  .tour-ledger__edge { height: 3px; border-radius: var(--r-pill); background: var(--line-color); }
+  .tour-ledger__lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .tour-ledger__line {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    column-gap: var(--sp-4);
+    padding-block: var(--sp-4);
+    border-top: 1px solid var(--surface-line);
+  }
+  .tour-ledger__line:first-child { border-top: none; padding-top: 0; }
+  .tour-ledger__n {
+    width: 28px;
+    height: 28px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--line-color);
+    border-radius: var(--r-pill);
+    color: var(--tour-ink);
+    font-weight: 700;
+    font-size: var(--fs-sm);
+    font-variant-numeric: tabular-nums;
+  }
+  .tour-ledger__line--sealed .tour-ledger__n { border-color: var(--surface-line); color: var(--text-secondary); }
+  .tour-ledger__sealed { align-self: center; font-size: var(--fs-sm); color: var(--text-secondary); }
+  .tour-ledger__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+  .tour-ledger__say { margin: 0; font-weight: 600; line-height: 1.45; text-wrap: pretty; }
+  .tour-ledger__note { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
+  .tour-ledger__examples { display: flex; flex-direction: column; gap: var(--sp-4); }
+  .tour-ledger__later { margin: auto 0 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+
+  /* The short desk (plan 169): the stops a rung closer, the plate's
+     headword a rung down, so the line and the plate stand whole. */
+  @media (max-height: 799px) {
+    .tour-route__stop { min-height: 36px; }
+    .tour-ledger__pattern { font-size: var(--fs-heading); }
+    .tour-ledger__line { padding-block: var(--sp-3); }
+  }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

@@ -1389,6 +1389,15 @@ const dictionary = {
   tourReplay: 'Redo the tour',
   tourReplayScene: 'Replay the scene',
   tourBackToLesson: 'Back to the lesson',
+  // 発見 on the desk (plan 187f): the stops at the left, the plate at the right.
+  tourStops: { look: 'Look', guess: 'Guess', found: 'Found', twist: 'The twist', terminus: 'Terminus' },
+  tourTries: n => `${n} miss${n > 1 ? 'es' : ''}`,
+  tourRuleGiven: 'rule given',
+  tourMissed: 'missed',
+  tourToFind: 'To find',
+  tourLedgerLater: 'The examples and the neighbours open at the terminus.',
+  tourRouteAria: 'The tour\'s stops',
+  tourLedgerAria: 'What you have found',
   tourAria:          p => `Discover ${p}`,
   // 文法 — the lesson (plan 087): the pair marks over the steps, the
   // door on every card and the station's index, the gate's one button.

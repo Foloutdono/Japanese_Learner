@@ -1056,8 +1056,23 @@ it is the one that rung asks.
 Both end on the run's own rating bar. The exercise says what happened,
 never the grade (ADR 0013).
 
-The desk keeps the lesson at the gate until plan 187f lays the tour on
-the runs' three panels.
+On the desk (plan 187f, the owner's pick F) the tour stands on the runs'
+three panels. The stop is the middle, with no track of its own: its gate
+centred at the boarding's width and docked at the column's foot, its
+guesses two across. At the left, under the run's figures, the point and
+its stops as one line. Each stop is a dot on a rail in the line's
+pigment, drawn 3px once it is behind, and says how it went: a check, the
+tries ("1 miss" in the wrong ink while the guess is still in hand, the
+plain ink once it is passed), "rule given", a missed twist. The scene's
+stop is named by its place. At the right, the plate: the formation over
+the pattern at display size, the line's edge, then the lines found,
+numbered in the line's ink and sealed (« À trouver ») until each is
+found. The rule opens at the found stop, the twist once it is answered,
+the neighbour once the stop that met it is behind. The other examples
+open at the terminus, whose middle is then the point's first sentence and
+the learner's own line rather than the plate again. Enter presses the
+gate and a digit the tile it numbers, on either keyboard row, and **no key
+is printed** on any of the three (the owner's word).
 
 ## Space
 

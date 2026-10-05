@@ -1351,6 +1351,15 @@ const dictionary = {
   tourReplay: 'Refaire le tutoriel',
   tourReplayScene: 'Rejouer la scène',
   tourBackToLesson: 'Retour à la leçon',
+  // 発見 on the desk (plan 187f): the stops at the left, the plate at the right.
+  tourStops: { look: 'Regarde', guess: 'Devine', found: 'Trouvé', twist: 'La surprise', terminus: 'Terminus' },
+  tourTries: n => `${n} essai${n > 1 ? 's' : ''}`,
+  tourRuleGiven: 'règle donnée',
+  tourMissed: 'raté',
+  tourToFind: 'À trouver',
+  tourLedgerLater: 'Les exemples et les voisins s\'ouvrent au terminus.',
+  tourRouteAria: 'Les étapes du tutoriel',
+  tourLedgerAria: 'Ce que tu as trouvé',
   tourAria:          p => `Découvrir ${p}`,
   // 文法 — la leçon (plan 087)
   glLesson:          'Leçon',

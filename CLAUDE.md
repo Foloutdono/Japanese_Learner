@@ -1656,8 +1656,8 @@ runtime purpose. Two consequences worth knowing:
   `routes/basics.py`, `tests/test_basics_api.py`, `screens/BasicsScreen.jsx`,
   `screens/LearnScreen.jsx`, `stores/basics.js`, `config/tabs.js`,
   `src/basics.phone.test.jsx` and `src/basics.desktop.test.jsx`).
-  **187** is 発見, a grammar point found before it is drilled (187a–e
-  built, the rest planned in `plans/187-hakken-grammar-tour.md`; cited in
+  **187** is 発見, a grammar point found before it is drilled (187a–f
+  built, 187g planned in `plans/187-hakken-grammar-tour.md`; cited in
   `study/grammar_tour.py`, `study/grammar_check.py`, `study/grammar_audio.py`,
   `study/grammar_ladder.py`, `study/modes.py`, `study/card_index.py`,
   `content/grammar/N5.json`, `content/grammar/ladder.json` and the
@@ -1668,12 +1668,15 @@ runtime purpose. Two consequences worth knowing:
   `tests/test_grammar_tour.py`, `tests/test_grammar_audio.py`,
   `tests/test_grammar_ladder.py`, `components/study/GrammarTour.jsx`,
   `components/study/GrammarGate.jsx`, `components/study/GrammarWork.jsx`,
+  `components/study/TourPanels.jsx`, `domain/tourStops.js`,
   `components/study/GrammarLesson.jsx`, `components/study/CardPrompt.jsx`,
   `domain/studyModes.js`, `domain/cardShape.js`, `domain/lanes.js`,
   `screens/GrammarRun.jsx`, `screens/StudyRun.jsx`,
   `lib/audio/speech.js`'s `speakLine`, `lib/track.js`,
-  `src/tour.phone.test.jsx`, `src/ladder.phone.test.jsx` and
-  `index.css`; DESIGN.md,
+  `src/tour.phone.test.jsx`, `src/ladder.phone.test.jsx`,
+  `src/tour.desktop.test.jsx`, `src/tour.short.test.jsx`,
+  `src/deskfree.phone.test.jsx` and `index.css` and its 机 section;
+  DESIGN.md,
   "The tour"; the owner's pick of the canvas
   "Tsuji — grammar, learned by doing": B, discovery, with D's scene at its
   end, E's ladder and plate, and F on the desk without printed keys): the
