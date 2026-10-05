@@ -16,6 +16,7 @@ import { useGridWalk } from '../../hooks/useGridWalk'
 import { useBoxWidth } from '../../hooks/useBoxWidth'
 import { Seg, Console, ConsoleIndex } from '../chrome/Console'
 import { GateButton } from '../ui/GateButton'
+import { Loading } from '../ui/Loading'
 
 // ── 机 — the vocabulary's sources, what you started first (plan 183) ──
 // The owner's pick C of the canvas "Tsuji — the vocabulary's sources".
@@ -340,7 +341,8 @@ function useTierCut({ session, source = 'vocab', base = BASE, pools = true }) {
     return next
   }, { replace: true })
   const at = n => `${base}/tier/${n}?size=${size}${jmdict ? '&domain=jmdict' : ''}`
-  return { size, jmdict, pools, tiers: shown, started, choose, at }
+  // undefined is a wait (useJson): the plate shows the dots, not an empty list.
+  return { size, jmdict, pools, loading: tiers === undefined, tiers: shown, started, choose, at }
 }
 
 // The deck's own tiers at the cut's size: the cut's when it shows them,
@@ -394,7 +396,7 @@ export function FrequencyPlate({ t, session, source = 'vocab', base = BASE, pool
       desc={desc}
       tools={<CutTools t={t} cut={cut} />}
     >
-      <Rows label={t.byFrequencyShort} className="desk-source__rows--scroll">
+      {cut.loading ? <Loading tight /> : <Rows label={t.byFrequencyShort} className="desk-source__rows--scroll">
         {cut.tiers.map((tr, i) => {
           const met = cut.started[String(tr.tier)] ?? 0
           return (
@@ -412,7 +414,7 @@ export function FrequencyPlate({ t, session, source = 'vocab', base = BASE, pool
             </Link>
           )
         })}
-      </Rows>
+      </Rows>}
     </SourcePlate>
   )
 }
@@ -428,7 +430,7 @@ function TierCellsPlate({ t, cut }) {
       fig={cut.tiers.length > 0 ? t.sourceTiers(cut.tiers.length) : null}
       tools={<CutTools t={t} cut={cut} />}
     >
-      <Grid label={t.byFrequencyShort} className="desk-source__cells">
+      {cut.loading ? <Loading tight /> : <Grid label={t.byFrequencyShort} className="desk-source__cells">
         {cut.tiers.map((tr, i) => {
           const met = cut.started[String(tr.tier)] ?? 0
           const name = [
@@ -452,7 +454,7 @@ function TierCellsPlate({ t, cut }) {
             </Link>
           )
         })}
-      </Grid>
+      </Grid>}
     </SourcePlate>
   )
 }
