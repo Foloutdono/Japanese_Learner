@@ -2052,10 +2052,11 @@ python -m scripts.placement_report --rebuild-order  # vocab_frequency.json, in r
 python -m scripts.placement_report --write-lists    # placement_lists.json, for the audit's rotation
 ```
 
-The slice is a pure function of the date — grammar, vocab, sentences and,
-since plan 109, placement (the three candidate lists, read from
+The slice is a pure function of the date — grammar, vocab, sentences,
+since plan 109 placement (the three candidate lists, read from
 `datas/vocab/placement_lists.json`, which `placement_report --write-lists`
-writes) in rotation, each area walking its own list — so there is no
+writes) and since plan 187g tours (each grammar point's written twist and
+scene) in rotation, each area walking its own list — so there is no
 ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env`, no network:
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does

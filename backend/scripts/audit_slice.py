@@ -17,14 +17,18 @@ rather than imported, so this runs in a fresh clone with nothing installed
 ── The rotation ──────────────────────────────────────────────
 Runs are Tuesday and Friday (ANCHOR is the first). The nth run audits
 
-    AREAS[n % 3]
+    AREAS[n % 5]
 
-so grammar, vocab, sentences and placement advance in parallel — a whole
-area is never starved behind another's backlog — and within an area the
-cursor is n // 4, walking that area's slices in order and wrapping when it
-reaches the end. (Placement joined on 2026-09-21, plan 109: the three
-candidate lists an outside ranking and the community JLPT lists raise
-against the deck. Runs before that date rotated over three areas.) Nothing is stored: the slice is a pure function of the date, so a
+so grammar, vocab, sentences, placement and tours advance in parallel — a
+whole area is never starved behind another's backlog — and within an area
+the cursor is n // 5, walking that area's slices in order and wrapping
+when it reaches the end. (Placement joined on 2026-09-21, plan 109: the
+three candidate lists an outside ranking and the community JLPT lists
+raise against the deck. Runs before that date rotated over three areas.
+Tours joined on 2026-10-05, plan 187g: the twist and the scene written
+for each grammar point's tour, which no gate reads for whether a native
+speaker would say them. Runs before that date rotated over four.)
+Nothing is stored: the slice is a pure function of the date, so a
 run can be reproduced (--on) and the next months inspected (--schedule)
 without a ledger to keep in sync.
 
@@ -55,7 +59,7 @@ _CONTENT = os.path.join(_BASE_DIR, "content")
 _VOCAB = os.path.join(_BASE_DIR, "datas", "vocab")
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
-AREAS = ("grammar", "vocab", "sentences", "placement")
+AREAS = ("grammar", "vocab", "sentences", "placement", "tours")
 
 # The first run — the Routine's own first firing. Tuesdays and Fridays
 # after it are the others, and the two must agree: a run on any other
@@ -71,6 +75,9 @@ CHUNK_GRAMMAR = 30
 CHUNK_VOCAB = 40
 CHUNK_READING = 25
 CHUNK_PLACEMENT = 40
+# A tour block is a twist and a scene: a dialogue to read aloud in the
+# head, three answers each to try to make right. Fewer to a run.
+CHUNK_TOURS = 15
 RICH_LEVELS = ("N5", "N4")
 
 
@@ -358,11 +365,38 @@ def _placement_slices() -> list[dict]:
     return out
 
 
+def toured_points(level: str) -> list[dict]:
+    """The level's points that carry a written tour (plan 187), each as
+    the audit reads it: the point, its gloss and its rivals, the block."""
+    return [
+        {"pattern": p["pattern"], "meaning": p.get("meaning"), "structure": p.get("structure"),
+         "compare": [c.get("pattern") for c in p.get("compare", [])], "tour": p["tour"]}
+        for p in grammar_points(level) if p.get("tour")
+    ]
+
+
+def _tour_slices() -> list[dict]:
+    out = []
+    for level in LEVELS:
+        points = toured_points(level)
+        if not points:
+            continue
+        for sid, start, stop in _chunk_ids(f"tours-{level}", len(points), CHUNK_TOURS):
+            out.append({
+                "id": sid, "area": "tours",
+                "title": f"{level} tours, the twist and the scene, points {start + 1}–{stop}",
+                "source": f"backend/content/grammar/{level}.json (each point's `tour`)",
+                "level": level, "start": start, "stop": stop,
+            })
+    return out
+
+
 def slices(area: str) -> list[dict]:
     return {"grammar": _grammar_slices,
             "vocab": _vocab_slices,
             "sentences": _sentence_slices,
-            "placement": _placement_slices}[area]()
+            "placement": _placement_slices,
+            "tours": _tour_slices}[area]()
 
 
 def slice_for(index: int) -> dict:
@@ -411,6 +445,15 @@ CHECKS = {
         "Would a card for it be one the app's own sentences ever use, or a word with nothing to teach it in?",
         "For a level move: is the card's level the word's, not its kanji's (the review's decision 3)?",
     ],
+    "tours": [
+        "The twist: is the reading marked right really right, and is each wrong one really wrong -- no second right answer?",
+        "Is the twist a real surprise about the point (a second use, the rival the lesson warns about), or a trick?",
+        "The scene: is every line what someone would actually say at that place -- register, politeness, the reply a native speaker gives?",
+        "Does the learner's right line use the point as the lesson teaches it, and is each wrong line wrong for the reason the `why` gives?",
+        "Is a wrong line in fact acceptable Japanese for the task (then it is a second right answer, a finding)?",
+        "Do the English and the French say what the Japanese says, at the same register, and does the `note` hold for the point and its rivals?",
+        "Is anything above the level in kanji, grammar or vocabulary?",
+    ],
     "sentences": [
         "Is the Japanese natural — what someone would actually say or write, not translationese?",
         "Does the English say what the Japanese says, at the same register?",
@@ -432,6 +475,8 @@ def entries_of(chosen: dict) -> list[dict]:
         return list(vocab_entries()[chosen["start"]:chosen["stop"]])
     if area == "placement":
         return list(placement_lists()[chosen["kind"]][chosen["start"]:chosen["stop"]])
+    if area == "tours":
+        return toured_points(chosen["level"])[chosen["start"]:chosen["stop"]]
     if chosen["kind"] == "listening":
         return list(_literal("listening_clips.py", chosen["level"]))
     bank = _literal("reading_sentences.py", chosen["level"])
