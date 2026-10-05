@@ -13,9 +13,10 @@ class ModeRegistryTests(unittest.TestCase):
     """
 
     def test_expected_graded_key_count(self) -> None:
-        # kana 4 + kanji 5 + vocab 3 + grammar 4 + standard 2.
+        # kana 4 + kanji 5 + vocab 3 + grammar 7 + standard 2: the
+        # grammar ladder and its two exercises of its own (plan 187e).
         # A change here should be deliberate, not incidental.
-        self.assertEqual(len(modes.SRS_MODES), 18)
+        self.assertEqual(len(modes.SRS_MODES), 21)
 
     def test_every_key_is_namespaced_and_uses_the_dot_separator(self) -> None:
         for key in modes.SRS_MODES:
@@ -152,6 +153,7 @@ class ModeRegistryTests(unittest.TestCase):
             self.assertIn(row["renderer"], {
                 modes.RENDER_FLASHCARD, modes.RENDER_TYPE, modes.RENDER_DRAW,
                 modes.RENDER_FILL, modes.RENDER_CONTRAST, modes.RENDER_BROWSE,
+                modes.RENDER_BUILD, modes.RENDER_WRITE, modes.RENDER_LADDER,
             })
 
     def test_directions_only_on_flashcards(self) -> None:

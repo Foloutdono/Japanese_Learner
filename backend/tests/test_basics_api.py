@@ -24,7 +24,7 @@ def test_the_plate_lists_every_unit_at_the_first(client):
 def test_a_met_card_moves_its_unit(client):
     _board(client, "N5", "both", 6, ["grammar"])
     for raw_id in basics.units()[0]["cards"]["grammar"]:
-        client.post("/api/today/review", json={"card_id": raw_id, "mode": "grammar.flashcard.f2b", "quality": 4})
+        client.post("/api/today/review", json={"card_id": raw_id, "mode": "grammar.ladder", "quality": 4})
     first = client.get("/api/basics").json()["units"][0]
     assert first["met"] == 3
     # A card in progress counts for how far it has come (plan 184): three

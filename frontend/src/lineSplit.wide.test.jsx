@@ -194,8 +194,11 @@ describe('the grammar and the kana lines (plan 137)', () => {
     await mount('/learn/grammar/N5', <Route path="/learn/grammar/:level" element={<GrammarScreen session={null} />} />)
     await settle()
     const wells = platforms().map(card => card.querySelector('.desk-spec__well'))
-    expect(wells[0].classList.contains('desk-spec__well--stack')).toBe(true)
-    expect(wells[0].textContent).toContain('から〜まで')
+    // The ladder first (plan 187e), on the rung a card starts on: the
+    // sentence to name the rule in. Then the flashcard.
+    expect(wells[0].classList.contains('desk-spec__well--sentence')).toBe(true)
+    expect(wells[1].classList.contains('desk-spec__well--stack')).toBe(true)
+    expect(wells[1].textContent).toContain('から〜まで')
     const fill = document.querySelector('.desk-spec__well--sentence')
     expect(fill.querySelector('.desk-spec__sentence').textContent).toBe('九時から五時まではたらきます。')
     const blank = document.querySelector('.desk-spec__well--blank')

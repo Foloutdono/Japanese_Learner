@@ -43,8 +43,8 @@ python -m scripts.audit_slice                 # what today's run is for
 python -m scripts.audit_slice --dump > /tmp/slice.json
 ```
 
-The slice is a pure function of the date — grammar, vocab, sentences and
-placement in rotation, each area walking its own list — so there is no
+The slice is a pure function of the date — grammar, vocab, sentences,
+placement and tours in rotation, each area walking its own list — so there is no
 ledger to update and a run can be reproduced later with `--on`. Read
 `scripts/audit_slice.py`'s docstring for the rotation; `--schedule 12`
 shows what is coming.
@@ -69,6 +69,28 @@ Most claims will not survive: the subtitle ranking credits verb stems
 and homophones, the JLPT lists are the deck's own ancestors, and a
 "missing" word is often present under another spelling. That is the
 point of auditing them rather than importing them.
+
+**A tours slice is a grammar point's written tour** (plan 187): the
+`twist` (a sentence, a question, three readings with the one marked
+right) and the `scene` (a few lines at a station, the learner's line
+chosen from three). `check_grammar` already holds their shape, their
+kanji and that the point is in the right answer and in no wrong one;
+what no gate can say is whether a native speaker would say it. What to
+try to disprove:
+
+- **a second right answer**: a wrong reading or a wrong line that is in
+  fact acceptable for the task. This is the commonest real finding, and
+  the most harmful, since the learner is marked wrong for saying it;
+- **the register**: a clerk who speaks casually, a stranger addressed in
+  plain form, a reply a native speaker would not give at that place;
+- **the twist's surprise**: a "second use" that is not one, or a rival
+  the lesson does not in fact warn about;
+- **the why and the note**: a rule that is true of this sentence but not
+  of the point, or not of its rivals.
+
+A finding proposes the corrected line with its evidence, as for an
+example sentence; the audit does not rewrite the scene (Rule 0), and a
+proposal must still pass `check_grammar`.
 
 ### 2. Run the repo's own gates first
 

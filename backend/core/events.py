@@ -160,6 +160,15 @@ EVENTS: dict[str, frozenset[str]] = {
     "basics_unit_done": frozenset({"unit"}),
     "basics_skipped":   frozenset({"unit"}),
 
+    # ── 発見 — a grammar point's tour (plan 187b) ────────────────
+    # `level` is N5…N1, never the pattern: the funnel is read by level.
+    # `stop` is look / guess / found / terminus; `outcome` first, retry
+    # (a wrong guess) or helped (the rule given after two). The done
+    # event carries the wrong guesses and whether the twist and scene
+    # were the point's own (`authored`, plan 187c).
+    "grammar_tour_step": frozenset({"level", "stop", "outcome"}),
+    "grammar_tour_done": frozenset({"level", "tries", "helped", "authored"}),
+
     # ── Friction ─────────────────────────────────────────────────
     # `path` is a route pattern, never a URL with ids in it, and no
     # response body is ever carried.

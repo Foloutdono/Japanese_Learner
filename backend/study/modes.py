@@ -82,6 +82,12 @@ WORD_READING = "word_reading"
 FILL_IN = "fill_in"
 CONTRAST = "contrast"
 FAST_REVIEW = "fast_review"
+# The grammar ladder (plan 187e): build and write are exercises of their
+# own; ladder is the track whose exercise climbs with the card
+# (study/grammar_ladder.py).
+BUILD = "build"
+WRITE = "write"
+LADDER = "ladder"
 
 # How the client renders a mode. Kept here rather than only in the
 # frontend so the two cannot disagree about what a key *is*, only about
@@ -92,6 +98,11 @@ RENDER_DRAW = "draw"
 RENDER_FILL = "fill"
 RENDER_CONTRAST = "contrast"
 RENDER_BROWSE = "browse"
+RENDER_BUILD = "build"
+RENDER_WRITE = "write"
+# The ladder has no drawing of its own: each card names the exercise it
+# is asked in (`exercise` on the payload), and is drawn as that one.
+RENDER_LADDER = "ladder"
 
 
 @dataclass(frozen=True)
@@ -149,6 +160,11 @@ _ORDERED: dict[str, tuple[Mode, ...]] = {
         _m(VOCAB, WORD_READING),
     ),
     GRAMMAR: (
+        # First, so it is the source's primary mode (level_rule.
+        # primary_mode): the track Today deals a new point on, the level
+        # rule marks known and the basics course rides (plan 187e). One
+        # scheduler row whatever rung the card is asked on.
+        _m(GRAMMAR, LADDER, renderer=RENDER_LADDER),
         _m(GRAMMAR, FLASHCARD, F2B, _CHOICES_SENTENCES),
         _m(GRAMMAR, FLASHCARD, B2F, _CHOICES_SENTENCES),
         # The sentence is shown INTACT and the learner names the rule at
@@ -164,6 +180,15 @@ _ORDERED: dict[str, tuple[Mode, ...]] = {
         # switches on. Only points with a marked contrast sentence and a
         # rival are served (card_index.contrast_ok).
         _m(GRAMMAR, CONTRAST, renderer=RENDER_CONTRAST),
+        # The sentence as tiles, the point and its word missing, a
+        # rival's form as the wrong tile -- only where a sentence is
+        # marked as telling the point from its rivals (contrast's own
+        # marking, so the wrong tile is certainly wrong).
+        _m(GRAMMAR, BUILD, renderer=RENDER_BUILD),
+        # A situation to say in Japanese with the point, the detector
+        # saying whether it is there -- only where it can be trusted to
+        # (grammar_detect.can_find). Self-rated, as composition is.
+        _m(GRAMMAR, WRITE, renderer=RENDER_WRITE),
     ),
     STANDARD: (
         _m(STANDARD, FLASHCARD, F2B, _CHOICES),
@@ -251,7 +276,7 @@ STATUS_MODES: dict[str, tuple[str, ...]] = {
 
 
 # ── Card-pool eligibility ─────────────────────────────────────
-# Four modes can only draw from a subset of their source's deck. The
+# Six modes can only draw from a subset of their source's deck. The
 # filter has to be applied to the card pool AND to the stats totals — if
 # only the pool is filtered, vocab.word_reading's mastery bar is scored
 # out of 8,405 while only 7,308 cards can ever be reached, so it can
@@ -274,6 +299,13 @@ def eligible_for(mode: Mode, entry: dict) -> bool:
         # Needs a rival to offer and a sentence the author marked as
         # telling them apart — see card_index.contrast_ok.
         return bool(entry.get("contrast_ok"))
+    if mode.base == BUILD:
+        # A marked sentence a build can be cut from (grammar_ladder.build_ok).
+        return bool(entry.get("build_ok"))
+    if mode.base == WRITE:
+        # A point the detector is trusted on (grammar_ladder.write_ok).
+        return bool(entry.get("write_ok"))
+    # The ladder asks every point: its last fallback is the flashcard.
     return True
 
 

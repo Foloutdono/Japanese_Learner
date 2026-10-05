@@ -983,6 +983,97 @@ nothing is chosen or the balance cannot pay, and wakes when a lane is
 switched back on; on the desk it takes the fare's right column, or the row's
 width under the fare's figures when the gate is too narrow for both.
 
+### The tour (発見, plan 187)
+
+A grammar point the learner has never met is **asked before it is
+drilled**, where the run used to print its lesson: three of its own
+examples with the point lit, a guess at what it does, the rule as
+confirmation, then the terminus (`components/study/GrammarTour.jsx`,
+chosen by `GrammarGate`). It is the boarding's frame inside a run's
+stage, not a new idiom:
+
+- **A track of stops at the head**, drawn in the line's pigment: where
+  you are keeps the line's colour (the boarding's own track is the pass's
+  gold, because the boarding is the learner's).
+- **One stop over its drawing**, the question set in the display face
+  bold at `--fs-title`, its pattern in the line's ink as Japanese.
+- **The gate button at the foot** (`GateButton`), docked over the run's
+  floor through `--dock-bottom`, the outline until a guess is picked, with
+  a quiet way over it and never under: « Lire la leçon complète » at the
+  terminus, which opens the lesson's sheet.
+- **A guess is a tile**: picked, it wears the selection's gold; a wrong
+  one is answered at once by the lesson's own line for that rival, in a
+  card with the state's ring (`--rating-wrong`) and never a fill; the
+  right one is ringed in `--success`. A hint after one miss, the rule
+  given after two (its head in the selection's ink, because it is given,
+  not found).
+- **Where the tour is written** (plan 187c), two stops join before the
+  terminus. The twist is a sentence and three readings, checked once,
+  the right one ringed and a wrong pick crossed, the why said under them.
+  The scene opens on its place as a **station plate**: the name over its
+  caption on the 駅名標's white in either theme (the HUD's arrival
+  plate's), the line's edge under it at 3px. The lines follow as rows,
+  each with who says it. The learner's own lines are named in the
+  selection's gold, because they are what the learner will say. Then
+  the note, and « À toi de jouer » on the gate. The ask is the cue, the task
+  and three Japanese lines; the reply chosen is ringed in gold at the
+  terminus, as « Ta réplique ».
+- **Every sentence has its voice beside it**: a 44px ring at the row's
+  end in the line's ink. It plays from the server, never the device,
+  because a scene is two voices: the other person is the dialogue's A,
+  the learner B (`study/grammar_audio.py`). A quiet « Écouter la scène »
+  plays the lines in turn and stops when a single line is tapped.
+
+The lesson itself is not thrown away: it is the plate a learner comes
+back to, behind the card's magnifier and in the dictionary. Over its body
+the plate says how the point was first met (« Découvert le 5 oct. · 2
+essais ») and keeps the tour a tap away in two plain secondary buttons,
+« Refaire le tutoriel » and, where there is a scene, « Rejouer la scène »:
+the tour runs again in the lesson's place, its terminus « Retour à la
+leçon », and records nothing (plan 187e).
+
+### The ladder (梯子, plan 187e)
+
+After the tour, a grammar card is one track whose exercise climbs with it:
+recognise, choose, build, write. A ladder card wears **a strip of four
+rungs** over its content, each a 3px bar in the line's pigment, the passed
+ones filled and the one it stands on named in the line's ink, the others
+in the secondary ink. The strip says where the card is; the exercise under
+it is the one that rung asks.
+
+- **Build** (組立) is the sentence with its gaps and a tray of pieces under
+  it. A gap is a control at `--r-card` and 44px, dashed in the secondary
+  ink while empty, the next one to fill dashed in the line's pigment;
+  filled, it is solid on the surface. A piece is a tile like a guess.
+  Checked, a gap is ringed in `--success` or `--rating-wrong`, never filled,
+  and a wrong build prints the sentence with the point lit.
+- **Write** (書く) is the situation at `--fs-lead`, the point in the line's
+  ink, the words to use as small framed chips with their readings, and the
+  field beside its Check. After the check: what was written, the
+  detector's word in the state's ink (nothing where it cannot judge), and
+  one way to say it, lit.
+
+Both end on the run's own rating bar. The exercise says what happened,
+never the grade (ADR 0013).
+
+On the desk (plan 187f, the owner's pick F) the tour stands on the runs'
+three panels. The stop is the middle, with no track of its own: its gate
+centred at the boarding's width and docked at the column's foot, its
+guesses two across. At the left, under the run's figures, the point and
+its stops as one line. Each stop is a dot on a rail in the line's
+pigment, drawn 3px once it is behind, and says how it went: a check, the
+tries ("1 miss" in the wrong ink while the guess is still in hand, the
+plain ink once it is passed), "rule given", a missed twist. The scene's
+stop is named by its place. At the right, the plate: the formation over
+the pattern at display size, the line's edge, then the lines found,
+numbered in the line's ink and sealed (« À trouver ») until each is
+found. The rule opens at the found stop, the twist once it is answered,
+the neighbour once the stop that met it is behind. The other examples
+open at the terminus, whose middle is then the point's first sentence and
+the learner's own line rather than the plate again. Enter presses the
+gate and a digit the tile it numbers, on either keyboard row, and **no key
+is printed** on any of the three (the owner's word).
+
 ## Space
 
 Nine rungs, `--sp-1` … `--sp-9`. The upper rungs carry meaning:

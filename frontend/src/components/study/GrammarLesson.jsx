@@ -10,6 +10,7 @@ import { StageMark } from './StageMark'
 import { FuriganaParts } from './Readings'
 import { joinRuns } from '../../domain/rubyRuns'
 import { inline, readUse, SHORT_RUN } from './lessonText'
+import { GrammarTour } from './GrammarTour'
 
 // ── 文法 — a grammar point, taught (plan 087) ───────────────────
 // One lesson, printed in three places: before a NEW card in a run
@@ -133,8 +134,13 @@ function registerTag(point, ex, t) {
 }
 
 export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, onClose, onBack }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [showTr, setShowTr] = useState(true)
+  // 発見 again (plan 187e): the plate keeps the tour a tap away, from its
+  // start or at its scene, and says how the point was first met. Not on
+  // the gate, which is the tour's own fallback, nor on a point with none.
+  const [replay, setReplay] = useState(null)
+  const canReplay = variant !== 'gate' && Boolean(point.tour)
   const steps = point.steps ?? []
   const compare = point.compare ?? []
   const examples = point.examples ?? []
@@ -186,7 +192,36 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
         </header>
       )}
 
-      <div className="dict-entry__body gl-body">
+      {replay && (
+        <div className="gl-replay">
+          <GrammarTour point={point} replay startAt={replay} onBoard={() => setReplay(null)} />
+        </div>
+      )}
+
+      {!replay && canReplay && (
+        <div className="gl-tour">
+          {point.tour_record && (
+            <p className="gl-tour__record">
+              {t.tourRecord(
+                new Date(point.tour_record.done_at).toLocaleDateString(lang, { day: 'numeric', month: 'short' }),
+                point.tour_record.tries, point.tour_record.helped,
+              )}
+            </p>
+          )}
+          <div className="gl-tour__ghosts">
+            <button type="button" className="btn-secondary" onClick={() => { playUi('click-screen-selection'); setReplay('look') }} data-action="replay">
+              {t.tourReplay}
+            </button>
+            {point.tour.scene && (
+              <button type="button" className="btn-secondary" onClick={() => { playUi('click-screen-selection'); setReplay('scene') }} data-action="replay-scene">
+                {t.tourReplayScene}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!replay && <div className="dict-entry__body gl-body">
         {/* The plate variant opens on the lesson. It used to open on
             two blocks reprinting the formation and the gloss — and it
             is the ONE variant where the plate above has already printed
@@ -273,7 +308,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
             </button>
           </div>
         )}
-      </div>
+      </div>}
     </article>
   )
 }

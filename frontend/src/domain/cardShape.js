@@ -92,7 +92,9 @@ export function normalizeCard(card) {
 
 /** Everything the renderers below derive from the card's own mode. */
 export function cardShape(card) {
-  const mode = card?.mode
+  // A ladder card (plan 187e) is filed under the ladder and drawn as the
+  // exercise its rung asks, which it names.
+  const mode = card?.exercise ?? card?.mode
   const spec = STUDY_MODES[mode]
   return {
     structureKey: structureKeyOf(card),
@@ -107,6 +109,10 @@ export function cardShape(card) {
     isContrast: spec?.renderer === RENDER.CONTRAST,
     isRadical: spec?.base === 'radical',
     isWordReading: spec?.base === 'word_reading',
+    isBuild: spec?.renderer === RENDER.BUILD,
+    isWrite: spec?.renderer === RENDER.WRITE,
+    // On the ladder: where the card stands, 0 to 3 (null off it).
+    rung: card?.mode === 'grammar.ladder' ? (card?.rung ?? 0) : null,
   }
 }
 

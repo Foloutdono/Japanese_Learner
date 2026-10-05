@@ -16,13 +16,16 @@ from study.grammar_examples import (
     example_payload, furigana_by_pattern, pattern_furigana, structure_furigana,
 )
 from study.grammar_lesson import contrast_payload, lesson_payload
+from study.grammar_tour import tour_payload
+from study import grammar_ladder
 from study.modes import (
-    B2F, CONTRAST, GRAMMAR, GRADED_FOR_SOURCE, GRADED_ORDER_FOR_SOURCE, INDICE_CHOICES,
-    INDICE_SENTENCES, Mode, require_mode, resolve_for_source,
+    B2F, BUILD, CONTRAST, GRAMMAR, GRADED_FOR_SOURCE, GRADED_ORDER_FOR_SOURCE, INDICE_CHOICES,
+    INDICE_SENTENCES, LADDER, MODES, WRITE, Mode, require_mode, resolve_for_source,
 )
 from study.grammar_match import verifiable
 from study.mcq import meaning_key, pick_distractors
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from core.db import db_conn
 
 # The grammar section runs on the project's own catalogue,
 # content/grammar/*.json (plan 087) -- one file per level, each point
@@ -114,8 +117,54 @@ def get_grammar_levels():
     return {"levels": list(GRAMMAR_BY_LEVEL.keys())}
 
 
+# The mode each base of the ladder's chain is asked in: the flashcard is
+# the recognition face, the one Today's main lane was before the ladder.
+_LADDER_MODES = {
+    grammar_ladder.FLASHCARD: "grammar.flashcard.f2b",
+    grammar_ladder.FILL_IN:   "grammar.fill_in",
+    grammar_ladder.CONTRAST:  "grammar.contrast",
+    grammar_ladder.BUILD:     "grammar.build",
+    grammar_ladder.WRITE:     "grammar.write",
+}
+
+
+def ladder_progress(card_ids: list[str], mode: str) -> dict[str, float]:
+    """Each card's progress on the ladder, which its rung is read from,
+    keyed like card_ids (prefixed). Empty for any other mode: only the
+    ladder builds by progress, and nobody else should pay the query."""
+    if mode != f"{GRAMMAR}.{LADDER}" or not card_ids:
+        return {}
+    return srs.get_bulk_progress(card_ids, mode)
+
+
+def _build_ladder_card(entry: dict, level: str, grammar_list: list[dict], m: Mode, lang: str,
+                       stage: str | None, preview: dict[int, dict] | None,
+                       progress: float | None) -> dict | None:
+    """A ladder card (plan 187e): the exercise its rung asks, built by
+    that exercise's own builder, under the ladder's key. The rung is read
+    from the card's progress; where the point cannot be asked on its rung
+    (no marked sentence, a detector not trusted on it) the card goes down
+    the chain to the flashcard, which every point can be. `exercise` is
+    the mode the client draws; `mode` stays the ladder, which is what the
+    review is filed under."""
+    rung = grammar_ladder.rung_of(progress)
+    for base in grammar_ladder.chain_for(rung):
+        sub = MODES[_LADDER_MODES[base]]
+        if not card_index.eligible(GRAMMAR, level, sub.key, entry):
+            continue
+        card = _build_grammar_card(entry, level, grammar_list, sub, lang, stage, preview)
+        if card is None:
+            continue
+        card["mode"] = m.key
+        card["exercise"] = sub.key
+        card["rung"] = rung
+        return card
+    return None
+
+
 def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mode, lang: str,
-                        stage: str | None = None, preview: dict[int, dict] | None = None) -> dict | None:
+                        stage: str | None = None, preview: dict[int, dict] | None = None,
+                        progress: float | None = None) -> dict | None:
     """
     Takes a resolved Mode, matching kana/kanji/vocab. The flat `choices`
     list and the `format`-style mode string are gone: the options are a
@@ -133,6 +182,9 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
     when the point has no marked sentence, which the pool filter should
     already have ruled out. Callers skip a None.
     """
+    if m.base == LADDER:
+        return _build_ladder_card(entry, level, grammar_list, m, lang, stage, preview, progress)
+
     pattern   = entry["pattern"]
     sentences = get_sentences(level, pattern)
     raw_id    = grammar_to_id(entry, level)
@@ -234,8 +286,22 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         payload["contrast"] = contrast
         payload["choices_furigana"] = furigana_by_pattern(contrast["choices"])
 
+    if m.base == BUILD:
+        built = grammar_ladder.build_payload(level, entry, lang)
+        if built is None:
+            return None
+        payload["build"] = built
+
+    if m.base == WRITE:
+        written = grammar_ladder.write_payload(level, entry, lang)
+        if written is None:
+            return None
+        payload["write"] = written
+
     if stage == "new":
-        payload["lesson"] = lesson_payload(level, entry, lang)
+        # The tour rides with the lesson (plan 187): the gate asks it
+        # first and keeps the lesson for a point it cannot be drawn on.
+        payload["lesson"] = {**lesson_payload(level, entry, lang), "tour": tour_payload(level, entry, lang)}
 
     return payload
 
@@ -296,6 +362,8 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     # possible rating (0-5) — see preview_reviews_bulk and
     # _build_review_preview above.
     previews = srs.preview_reviews_bulk(picked, mode, user_id)
+    # The ladder's rung is read from the card's progress (plan 187e).
+    progress = ladder_progress(picked, mode)
 
     cards = []
     for card_id in picked:
@@ -303,7 +371,8 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
         found = entry_by_id(raw_id)
         if found is None or found[0] != level:
             continue
-        card = _build_grammar_card(found[1], level, grammar_list, m, lang, states.get(card_id), previews.get(card_id))
+        card = _build_grammar_card(found[1], level, grammar_list, m, lang, states.get(card_id), previews.get(card_id),
+                                   progress.get(card_id))
         if card is not None:
             cards.append(card)
 
@@ -485,8 +554,87 @@ def get_grammar_point(id: str, lang: str = "fr", user_id: str = Depends(get_user
         "structure": entry["structure"],
         "meaning":   gloss(entry, lang),
         **lesson_payload(level, entry, lang),
+        "tour":      tour_payload(level, entry, lang),
+        # How the point was first met (plan 187e): what the plate prints
+        # beside its two ghosts, or None for a point never toured.
+        "tour_record": _tour_record(user_id, id),
         "status":    card_stats(states, user_id, id, GRAMMAR_STATUS_MODES),
     }
+
+
+# ── 発見 — the tour's record (plan 187b) ─────────────────────────
+# One row per point a learner was toured through, the FIRST tour only:
+# the guesses it took and whether the rule had to be given. A replay
+# never changes it (plan 187, Q4), and the tour grades no card (Q1): this
+# is what the plate prints of how the point was met, nothing the
+# scheduler reads. No cascade from auth (ADR 0010): DELETE /api/account
+# and scripts/purge_orphans.py clear it.
+def _ensure_tour_schema() -> None:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS grammar_tours (
+                    user_id  TEXT NOT NULL,
+                    card_id  TEXT NOT NULL,
+                    tries    SMALLINT NOT NULL,
+                    helped   BOOLEAN NOT NULL,
+                    done_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    PRIMARY KEY (user_id, card_id)
+                )
+            """)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+try:
+    _ensure_tour_schema()
+except Exception:  # pragma: no cover - a missing DB must not stop import
+    logger.exception("grammar_tours schema could not be initialised")
+
+
+def _tour_record(user_id: str, raw_id: str) -> dict | None:
+    """The learner's first tour of the point: {done_at, tries, helped}."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT done_at, tries, helped FROM grammar_tours WHERE user_id = %s AND card_id = %s",
+                        (user_id, raw_id))
+            row = cur.fetchone()
+    finally:
+        conn.close()
+    if row is None:
+        return None
+    return {"done_at": row[0].isoformat(), "tries": row[1], "helped": row[2]}
+
+
+class TourPayload(BaseModel):
+    raw_id: str = Field(min_length=1, max_length=200)
+    # Wrong guesses before the right one (the tour gives the rule after two).
+    tries: int = Field(ge=0, le=9)
+    helped: bool = False
+
+
+@router.post("/api/grammar/tour")
+def post_grammar_tour(payload: TourPayload, user_id: str = Depends(get_user_id)):
+    """The terminus of a point's tour. `recorded` is False when the
+    learner had been toured through it already: the first tour stands."""
+    if entry_by_id(payload.raw_id) is None:
+        raise HTTPException(status_code=404, detail=f"Unknown grammar point: {payload.raw_id}")
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO grammar_tours (user_id, card_id, tries, helped) VALUES (%s, %s, %s, %s) "
+                "ON CONFLICT (user_id, card_id) DO NOTHING",
+                (user_id, payload.raw_id, payload.tries, payload.helped),
+            )
+            recorded = cur.rowcount == 1
+        conn.commit()
+    finally:
+        conn.close()
+    return {"recorded": recorded}
 
 
 @router.post("/api/grammar/review")

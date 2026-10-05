@@ -25329,6 +25329,365 @@ button.brd-stn { cursor: pointer; }
   padding: var(--sp-5);
   border-top: 1px solid var(--surface-line);
 }
+/* ══ 発見 — the tour before a never-met point (plan 187b) ══════════
+   The boarding's frame inside a run's stage: a track of stops at the
+   head, the stop over its drawing, the gate docked at the foot with a
+   quiet way over it. The track is the line's (where you are keeps the
+   line's pigment), a pick is the selection's gold, and a verdict wears
+   its state's ink as an edge and a ring, never a fill. The pigment is
+   named here as the sheet names it, because Today's run is not 文法's. */
+/* The tour takes the stage's room under its head, so a short stop's
+   gate stands at the foot of the screen as the boarding's does; a long
+   one scrolls the page behind its docked gate, as a tall card does. */
+.gl-gate:has(> .tour) { flex: 1; display: flex; flex-direction: column; }
+.tour {
+  --line-color: var(--line-grammar);
+  --dict-ink: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  --tour-ink: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  flex: 1;
+  min-height: 0;
+  text-align: start;
+}
+.tour__track { position: relative; height: 44px; margin-inline: var(--sp-3); flex: none; }
+.tour__rail { position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--surface-line); }
+.tour__done { position: absolute; left: 0; top: 50%; height: 3px; margin-top: -1.5px; background: var(--line-color); transition: width 300ms ease-out; }
+.tour__stop {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--surface-line);
+  background: var(--bg-main);
+  transform: translate(-50%, -50%);
+}
+.tour__stop--passed { border-color: var(--line-color); background: var(--line-color); }
+.tour__stop--here { width: 18px; height: 18px; border: 3px solid var(--line-color); }
+.tour__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  animation: brd-in 360ms ease-out backwards;
+}
+.tour__q {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  line-height: 1.3;
+  text-wrap: balance;
+  outline: none;
+}
+.tour__hint { margin: calc(var(--sp-3) - var(--sp-5)) 0 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.tour-pattern { font-family: var(--font-jp); color: var(--tour-ink); }
+.tour-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin: 0;
+}
+.tour-look--mini { padding-block: var(--sp-4); gap: var(--sp-3); font-size: var(--fs-sm); }
+.tour-look--mini .dict-ex__tr { display: none; }
+.tour-guesses { display: grid; gap: var(--sp-3); }
+.tour-guess {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 56px;
+  padding: var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.tour-guess__key { flex: none; font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.tour-guess__text { flex: 1; min-width: 0; text-wrap: pretty; }
+.tour-guess--sel { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
+.tour-guess--ok { border: 2px solid var(--success); }
+.tour-guess--no { border: 2px solid var(--rating-wrong); color: var(--text-secondary); cursor: default; }
+.tour-guess:disabled { cursor: default; }
+.tour-guess:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.tour-guess:not(:disabled):hover,
+.tour-guess:not(:disabled):focus-visible { border-color: var(--line-color); }
+.tour-said {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+}
+.tour-said__mark {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid currentcolor;
+  border-radius: var(--r-pill);
+}
+.tour-guess .tour-said__mark { width: 24px; height: 24px; }
+.tour-said__mark--ok { color: var(--success); }
+.tour-said__mark--no { color: var(--rating-wrong); }
+.tour-said__text { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.tour-said__head { margin: 0; font-weight: 700; font-size: var(--fs-body); }
+.tour-said--ok .tour-said__head { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.tour-said--no .tour-said__head { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+.tour-said--given .tour-said__head { color: var(--sel-ink); }
+.tour-said--given .tour-said__mark { color: var(--sel-ink); }
+.tour-said__line { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-wrap: pretty; }
+.tour-said__hint { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.tour-rule__text { margin: 0; font-size: var(--fs-lead); font-weight: 600; line-height: 1.45; text-wrap: pretty; }
+.tour-rule__structure { margin: 0; font-family: var(--font-jp); color: var(--text-secondary); }
+.tour-chain { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-lead); }
+.tour-chain__from { color: var(--text-secondary); }
+.tour-chain__arrow { color: var(--tour-ink); font-family: var(--font-display); }
+.tour-chain__to { color: var(--tour-ink); }
+.tour-head { display: flex; flex-direction: column; gap: var(--sp-2); }
+.tour-head .tour-pattern { font-size: var(--fs-heading); line-height: 1.2; overflow-wrap: anywhere; }
+.tour-found { list-style: none; gap: 0; }
+.tour-found__line {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--sp-4);
+  padding-block: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.tour-found__line:first-child { border-top: none; padding-top: 0; }
+.tour-found__line:last-child { padding-bottom: 0; }
+.tour-found__n {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--line-color);
+  border-radius: var(--r-pill);
+  color: var(--tour-ink);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+.tour-found__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.tour-found__say { margin: 0; font-weight: 600; line-height: 1.45; }
+.tour-found__line-text { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
+/* Spoken lines (plan 187d): a sentence and its voice beside it. */
+.tour-ex { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: start; gap: var(--sp-3); }
+.tour-speak {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--surface-line);
+  padding: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--tour-ink);
+  cursor: pointer;
+}
+.tour-speak svg { flex: none; }
+.tour-speak:hover { border-color: var(--line-color); }
+.tour-speak:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.tour-guess__text--ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 500; }
+.tour-said__line--ja { font-family: var(--font-jp); font-weight: 600; }
+.tour-pair { margin: var(--sp-2) 0 0; display: flex; flex-wrap: wrap; gap: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-lead); }
+.tour-pair__bar { color: var(--text-secondary); }
+/* The scene's place, as the station's plate: its name over its caption
+   on the 駅名標's white in either theme (the HUD's arrival plate's,
+   .hud__dest), the line's edge under it. */
+.tour-plate {
+  --plate-ink: #222428;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-plate);
+  background: #f3f2ef;
+  color: var(--plate-ink);
+  border-bottom: 3px solid var(--line-color);
+}
+.tour-plate__name { font-family: var(--font-jp); font-size: var(--fs-title); font-weight: 700; line-height: 1.6; }
+.tour-plate__name rt,
+.tour-plate__cap { color: color-mix(in srgb, var(--plate-ink) 62%, #f3f2ef); }
+.tour-plate__name rt { font-size: var(--fs-caption-xs); }
+.tour-plate__cap { font-size: var(--fs-caption); }
+.tour-scene { list-style: none; gap: 0; }
+.tour-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  gap: var(--sp-1) var(--sp-3);
+  padding-block: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.tour-line:first-child { border-top: none; padding-top: 0; }
+.tour-line:last-child { padding-bottom: 0; }
+.tour-line__who { grid-column: 1 / -1; font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
+/* The learner's own lines in the selection's gold: what they will say. */
+.tour-line--me .tour-line__who { color: var(--sel-ink); }
+.tour-line__text { min-width: 0; }
+.tour-line .tour-speak { align-self: center; }
+.tour-scene__all { align-self: flex-start; }
+.tour-note { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
+.tour-reply {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-4) var(--sp-5);
+  border: 2px solid var(--sel-line);
+  border-radius: var(--r-panel);
+  background: var(--sel-wash);
+}
+.tour-reply__who { font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); }
+.tour-reply__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 600; }
+
+/* 梯子 — the grammar ladder (plan 187e). The strip over a ladder card:
+   four rungs in the line's pigment, those passed filled, the one the
+   card stands on named in the line's ink. */
+.lad-strip {
+  list-style: none;
+  margin: 0 0 var(--sp-3);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--sp-2);
+  width: 100%;
+  --line-color: var(--line-grammar);
+}
+.lad-strip__rung { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.lad-strip__bar { height: 3px; border-radius: var(--r-pill); background: var(--surface-line); }
+.lad-strip__rung--passed .lad-strip__bar,
+.lad-strip__rung--here .lad-strip__bar { background: var(--line-color); }
+.lad-strip__name {
+  font-size: var(--fs-caption-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lad-strip__rung--here .lad-strip__name { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); font-weight: 700; }
+
+/* 組立 build: the cue, the sentence with its gaps, the tray of pieces. */
+.bld, .wrt { display: flex; flex-direction: column; gap: var(--sp-4); width: 100%; text-align: start; }
+.bld-cue, .wrt-cue { margin: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.bld-cue__ask, .wrt-cue__ask, .wrt-said__label { font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
+.bld-cue__tr, .wrt-cue__situation { font-size: var(--fs-lead); font-weight: 600; line-height: 1.4; text-wrap: pretty; }
+.bld-sentence {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-2) var(--sp-1);
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: 2;
+}
+.bld-tile { white-space: nowrap; }
+.bld-slot {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  border: 1px dashed var(--text-secondary);
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.bld-slot:disabled { cursor: default; }
+.bld-slot:not(.bld-slot--empty) { border-style: solid; background: var(--surface); }
+.bld-slot--next { border: 2px dashed var(--line-grammar); }
+.bld-slot--ok { border: 2px solid var(--success); }
+.bld-slot--no { border: 2px solid var(--rating-wrong); }
+.bld-tray { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.bld-piece {
+  min-height: 48px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: 2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.bld-piece:disabled { opacity: 0.35; cursor: default; }
+.bld-slot:focus-visible, .bld-piece:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.bld-piece:not(:disabled):hover { border-color: var(--line-grammar); }
+.bld-said, .wrt-said { display: flex; flex-direction: column; gap: var(--sp-2); }
+.bld-said__head, .wrt-said__found { margin: 0; font-weight: 700; font-size: var(--fs-body); }
+.bld-said--ok .bld-said__head, .wrt-said__found--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.bld-said--no .bld-said__head, .wrt-said__found--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+
+/* 書く write: the point and the words to use, the field and Check, then
+   what was written, the detector's word and one way to say it. */
+.wrt-with { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-2); }
+.wrt-with__label { font-size: var(--fs-caption); color: var(--text-secondary); }
+.wrt-with__point { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; color: color-mix(in srgb, var(--line-grammar) 60%, var(--text-primary)); }
+.wrt-word {
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  line-height: 2;
+}
+.wrt-form { display: flex; gap: var(--sp-3); }
+.wrt-form .field { flex: 1; min-width: 0; }
+.wrt-said__mine { margin: 0; font-family: var(--font-jp); font-size: var(--fs-lead); }
+.wrt-said__label { margin: var(--sp-2) 0 0; }
+
+/* The plate's two ghosts (plan 187e): how the point was first met, and
+   the tour again, from its start or at its scene, in the lesson's place.
+   In a sheet the tour's gate docks to the sheet's foot, not the run's. */
+.gl-tour { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4) var(--sp-5) 0; }
+.gl-tour__record { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.gl-tour__ghosts { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.gl-replay { padding: var(--sp-4) var(--sp-5) 0; }
+/* The gate docked over the run's floor (--dock-bottom, the level bar
+   and the safe area), the quiet way a rung over it. */
+.tour__foot {
+  position: sticky;
+  bottom: var(--dock-bottom, 0);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-block: var(--sp-4) var(--sp-5);
+  background: var(--bg-main);
+  flex: none;
+}
+.tour .btn-depart { width: 100%; min-height: 66px; }
+/* A replay in the lesson's sheet (plan 187e) docks to the sheet's foot. */
+.gl-replay .tour__foot { bottom: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .tour__body { animation: none; }
+  .tour__done, .tour-guess { transition: none; }
+}
+
 /* The register, in the plate's corner: a word in the caption register,
    the way the level numeral beside it is. */
 .gl-register {
@@ -36684,5 +37043,116 @@ button.brd-stn { cursor: pointer; }
      (the bar's title is read, not drawn, here), so theirs keep the
      names' rung until the desk is drawn for it. */
   .sheet__jp { font-size: var(--fs-title); line-height: 1.2; }
+
+  /* 発見 on the desk (plan 187f; the owner's pick F of the canvas
+     "Tsuji — grammar, learned by doing", boards 11 and 12): the tour on
+     the runs' three panels. The stop in the middle, its gate centred at
+     the boarding's width (.desk-brd's) and docked at the column's foot,
+     its guesses two across; the point and its stops at the left
+     (TourRoute), each stop on one rail in the line's pigment with how it
+     went; the plate at the right (TourLedger), each line found numbered
+     in the line's ink and the rest sealed. No key is printed. */
+  .tour--desk { gap: var(--sp-5); }
+  .tour--desk .tour__foot { bottom: 0; align-items: center; }
+  .tour--desk .btn-depart { width: var(--desk-side-w); max-width: 100%; }
+  .tour--desk .tour-guesses { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tour--desk[data-stop="scene"] .tour-guesses { grid-template-columns: minmax(0, 1fr); }
+
+  .tour-route,
+  .tour-ledger {
+    --line-color: var(--line-grammar);
+    --tour-ink: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-width: 0;
+  }
+  .tour-route__head { display: flex; flex-direction: column; gap: var(--sp-1); }
+  .tour-route__pattern { font-family: var(--font-jp); font-size: var(--fs-heading); line-height: 1.3; color: var(--tour-ink); overflow-wrap: anywhere; }
+  .tour-route__structure { font-size: var(--fs-sm); color: var(--text-secondary); }
+  .tour-route__stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .tour-route__stop {
+    position: relative;
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--sp-3);
+    min-height: 44px;
+  }
+  /* The rail, from each stop's dot to the next one's: drawn once a stop
+     is behind, a hairline ahead. */
+  .tour-route__stop:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    height: 100%;
+    width: 2px;
+    background: var(--surface-line);
+  }
+  .tour-route__stop--done:not(:last-child)::after { width: 3px; left: 7.5px; background: var(--line-color); }
+  .tour-route__dot {
+    position: relative;
+    z-index: 1;
+    justify-self: center;
+    width: 10px;
+    height: 10px;
+    box-sizing: border-box;
+    border: 2px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+  }
+  .tour-route__stop--done .tour-route__dot { border-color: var(--line-color); background: var(--line-color); }
+  .tour-route__stop--here .tour-route__dot { width: 18px; height: 18px; border: 3px solid var(--line-color); }
+  .tour-route__name { font-size: var(--fs-body); color: var(--text-primary); }
+  .tour-route__stop--here .tour-route__name { font-weight: 700; color: var(--tour-ink); }
+  .tour-route__stop--ahead .tour-route__name { color: var(--text-secondary); }
+  .tour-route__res { display: inline-flex; align-items: center; font-size: var(--fs-sm); color: var(--text-secondary); }
+  .tour-route__res--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+  .tour-route__res--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+
+  .tour-ledger { flex: 1; }
+  .tour-ledger__head { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); text-align: center; }
+  .tour-ledger__structure { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+  .tour-ledger__pattern { margin: 0; font-family: var(--font-jp); font-size: var(--fs-display); line-height: 1.2; overflow-wrap: anywhere; }
+  .tour-ledger__edge { height: 3px; border-radius: var(--r-pill); background: var(--line-color); }
+  .tour-ledger__lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .tour-ledger__line {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    column-gap: var(--sp-4);
+    padding-block: var(--sp-4);
+    border-top: 1px solid var(--surface-line);
+  }
+  .tour-ledger__line:first-child { border-top: none; padding-top: 0; }
+  .tour-ledger__n {
+    width: 28px;
+    height: 28px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--line-color);
+    border-radius: var(--r-pill);
+    color: var(--tour-ink);
+    font-weight: 700;
+    font-size: var(--fs-sm);
+    font-variant-numeric: tabular-nums;
+  }
+  .tour-ledger__line--sealed .tour-ledger__n { border-color: var(--surface-line); color: var(--text-secondary); }
+  .tour-ledger__sealed { align-self: center; font-size: var(--fs-sm); color: var(--text-secondary); }
+  .tour-ledger__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+  .tour-ledger__say { margin: 0; font-weight: 600; line-height: 1.45; text-wrap: pretty; }
+  .tour-ledger__note { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
+  .tour-ledger__examples { display: flex; flex-direction: column; gap: var(--sp-4); }
+  .tour-ledger__later { margin: auto 0 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+
+  /* The short desk (plan 169): the stops a rung closer, the plate's
+     headword a rung down, so the line and the plate stand whole. */
+  @media (max-height: 799px) {
+    .tour-route__stop { min-height: 36px; }
+    .tour-ledger__pattern { font-size: var(--fs-heading); }
+    .tour-ledger__line { padding-block: var(--sp-3); }
+  }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

@@ -66,6 +66,9 @@ export const EVENTS = {
   // The basics course (plan 186f): its own unit number, never a card.
   basics_unit_done: ['unit'],
   basics_skipped: ['unit'],
+  // A grammar point's tour (plan 187b): the level, never the pattern.
+  grammar_tour_step: ['level', 'stop', 'outcome'],
+  grammar_tour_done: ['level', 'tries', 'helped', 'authored'],
   api_error: ['path', 'status'],
   install_prompt: ['outcome'],
 }

@@ -37,7 +37,9 @@ def test_known_batches_take_one_row_per_item_in_the_primary_mode():
     assert set(by_source) == {"vocab", "kanji", "grammar"}
     for source, (mode, ids) in by_source.items():
         assert mode == level_rule.primary_mode(source)
-        assert mode.endswith(".flashcard.f2b")
+        # The recognition flashcard, but for grammar: its track is the
+        # ladder (plan 187e), whose exercise climbs with the card.
+        assert mode == ("grammar.ladder" if source == "grammar" else f"{source}.flashcard.f2b")
         # The deck's ids, once each (two same-kana words share an id).
         assert ids == list(dict.fromkeys(card_index.raw_ids(source, "N5", mode)))
         assert len(ids) == len(set(ids))

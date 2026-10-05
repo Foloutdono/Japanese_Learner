@@ -1899,3 +1899,25 @@ describe('the practice stations filled (plan 159)', () => {
     expect(asked('/api/station/exam')).toBe(false)
   })
 })
+
+describe('the tour (plan 187f)', () => {
+  it('keeps its own track and its found lines, no side panels and no keys', async () => {
+    const { default: tours } = await import('./testing/grammarTour.json')
+    const { GrammarGate } = await import('./components/study/GrammarGate')
+    const KA = tours.ka
+    const point = {
+      raw_id: 'grammar_N5_か', level: 'N5', pattern: 'か', structure: 'sentence + か', meaning: 'question marker',
+      steps: [], compare: [], examples: KA.look, tour: KA,
+    }
+    const screen = await render(<LangProvider><GrammarGate point={point} session={null} /></LangProvider>)
+    await settle()
+    const tour = screen.container.querySelector('.tour')
+    expect(tour.classList.contains('tour--desk')).toBe(false)
+    expect(tour.querySelector('.tour__track')).not.toBeNull()
+    expect(document.querySelector('.tour-route, .tour-ledger')).toBeNull()
+    // Enter is the desk's: on a phone the gate is pressed, not keyed.
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))
+    await settle()
+    expect(tour.dataset.stop).toBe('look')
+  })
+})

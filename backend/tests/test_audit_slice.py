@@ -130,6 +130,27 @@ class VocabRankingTests(unittest.TestCase):
             self.assertEqual(entry["fr"], fr_gloss(entry, french))
 
 
+class TourSliceTests(unittest.TestCase):
+    """Plan 187g: the written tours are audited as an area of their own,
+    since no gate reads a scene for whether a native speaker would say it."""
+
+    def test_every_written_tour_is_in_a_slice_once(self) -> None:
+        for level in audit.LEVELS:
+            toured = [p["pattern"] for p in audit.grammar_points(level) if p.get("tour")]
+            sliced = [e["pattern"] for s in audit.slices("tours") if s["level"] == level
+                      for e in audit.entries_of(s)]
+            self.assertEqual(sliced, toured, level)
+
+    def test_a_tour_slice_hands_the_run_the_block_and_its_point(self) -> None:
+        chosen = audit.slices("tours")[0]
+        entries = audit.entries_of(chosen)
+        self.assertLessEqual(len(entries), audit.CHUNK_TOURS)
+        for entry in entries:
+            self.assertIn("twist", entry["tour"])
+            self.assertIn("scene", entry["tour"])
+            self.assertIn("compare", entry)
+
+
 class DumpTests(unittest.TestCase):
     def test_the_payload_is_what_the_playbook_tells_a_run_to_read(self) -> None:
         payload = audit.payload(audit.slice_for(0))

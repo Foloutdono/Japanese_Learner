@@ -13,7 +13,11 @@ import {
   GrammarRule, GrammarPattern, GrammarStructure, GrammarChoice, GrammarAnswer,
   GrammarFillSentence, GrammarContrastSentence,
 } from '../components/study/GrammarPieces'
-import { GrammarLesson, GrammarLessonSheet } from '../components/study/GrammarLesson'
+import { GrammarLessonSheet } from '../components/study/GrammarLesson'
+import { GrammarGate } from '../components/study/GrammarGate'
+import { TourRoute, TourLedger } from '../components/study/TourPanels'
+import { GrammarBuild, GrammarWrite, LadderStrip } from '../components/study/GrammarWork'
+import { cardShape } from '../domain/cardShape'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
 import { Loading } from '../components/ui/Loading'
@@ -29,7 +33,7 @@ import PromptCard from '../components/study/PromptCard'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import {
-  MODES as STUDY_MODES, RENDER, HINTS, FAST_REVIEW, modeLabel,
+  MODES as STUDY_MODES, HINTS, FAST_REVIEW, modeLabel,
 } from '../domain/studyModes'
 import HintBar from '../components/study/HintBar'
 import { joinRuns } from '../domain/rubyRuns'
@@ -89,6 +93,7 @@ export default function GrammarRun({ session }) {
   // a later gated card never opens on it.
   const desk = useDesk()
   const [compared, setCompared]     = useState(null)
+  const [tourView, setTourView]     = useState(null)
   const closeCompared = useCallback(() => setCompared(null), [])
 
   // One session per level+mode+language (see useCardSession): the
@@ -98,10 +103,6 @@ export default function GrammarRun({ session }) {
 
   const paceCtl = usePace(storageKey)
   const { capture: capturePace, query: paceQuery } = paceCtl
-
-  const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
-  const isFill     = renderer === RENDER.FILL
-  const isContrast = renderer === RENDER.CONTRAST
 
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
     if (!valid || reviewing) return []
@@ -113,9 +114,11 @@ export default function GrammarRun({ session }) {
     return data.cards ?? []
   }, [valid, reviewing, level, mode, lang, session, paceQuery, capturePace])
 
+  // Read off each card rather than the run: on the ladder (plan 187e)
+  // every card names the exercise it is asked in.
   const validateCard = useCallback(
-    c => !isContrast || Array.isArray(c.contrast?.choices),
-    [isContrast],
+    c => !cardShape(c).isContrast || Array.isArray(c.contrast?.choices),
+    [],
   )
 
   // What the saved queue must not replay: cards answered since, here
@@ -242,8 +245,11 @@ export default function GrammarRun({ session }) {
   }
 
   const currentModeLabel = modeLabel(t, mode)
-  // Study.dc.html's footer strip.
-  const cardFoot = { left: level ? `${level} 文法` : '文法', right: currentModeLabel }
+  // The card's own shape: the run's mode, or on the ladder (plan 187e)
+  // the exercise the card's rung asks.
+  const { isFill, isContrast, isBuild, isWrite, rung } = cardShape(card ?? { mode })
+  // Study.dc.html's footer strip: the exercise in hand.
+  const cardFoot = { left: level ? `${level} 文法` : '文法', right: modeLabel(t, card?.exercise ?? mode) }
   // b2f shows the meaning and asks for the rule; f2b is the other way up.
   const isB2F    = card?.direction === 'b2f'
 
@@ -284,6 +290,9 @@ export default function GrammarRun({ session }) {
   const pointId = card && (card.raw_id ?? card.card_id)
 
   // The rival open in the side: only while its card is still at its gate.
+  // 発見 on the desk (plan 187f): the tour's stops at the left, its plate
+  // at the right.
+  const touring = desk && gated && Boolean(card?.lesson?.tour)
   const comparing = desk && gated && compared?.card === card?.card_id
     ? { category: 'grammar', id: compared.id }
     : null
@@ -300,11 +309,11 @@ export default function GrammarRun({ session }) {
       onToastDone={gates.toastDone}
       records
       progress={progress}
-      panel={card ? <CardPanel card={card} /> : null}
+      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} /> : card ? <CardPanel card={card} /> : null}
       done={done}
       side={error && !card ? null : (
         <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
-          <SessionPanel done={done} />
+          {touring ? <TourLedger point={lessonOf(card)} view={tourView} /> : <SessionPanel done={done} />}
         </SideLookup>
       )}
       sideLabel={t.dictionaryTitle}
@@ -317,11 +326,13 @@ export default function GrammarRun({ session }) {
 
         {card && !loading && gated && (
           <div className="gl-gate">
-            <GrammarLesson
+            <GrammarGate
               point={lessonOf(card)}
-              variant="gate"
+              session={session}
               onCompare={id => (desk ? setCompared({ card: card.card_id, id }) : setSheet(id))}
               onBoard={() => updateCurrent({ lesson_seen: true })}
+              onLesson={() => setSheet(card.raw_id ?? card.card_id)}
+              onView={setTourView}
             />
           </div>
         )}
@@ -340,6 +351,7 @@ export default function GrammarRun({ session }) {
               onStampDone={gates.stampDone}
             >
               <PromptCard className="grammar-prompt" foot={cardFoot}>
+                {rung != null && <LadderStrip rung={rung} />}
                 {/* Every mode here is the same card with a different
                     front: a rule, a meaning, or a sentence. The flip is
                     the reveal in all three, and switching the choices on
@@ -348,7 +360,17 @@ export default function GrammarRun({ session }) {
                     Kanji and Vocab use for their own indice_1. The
                     contrast drill has no flip at all: its choices are
                     the exercise, and the reveal is the answer chosen. */}
-                {isContrast ? (
+                {isBuild || isWrite ? (
+                  <>
+                    {isBuild
+                      ? <GrammarBuild key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} />
+                      : <GrammarWrite key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} session={session} />}
+                    {answered && <GrammarAnswer card={card} size={36} divided />}
+                    <RevealActions
+                      t={t} revealed={answered} resetKey={card.card_id}
+                      dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
+                  </>
+                ) : isContrast ? (
                   <>
                     <GrammarContrastSentence card={card} revealed={answered} t={t} />
                     {answered && <GrammarAnswer card={card} size={36} divided />}

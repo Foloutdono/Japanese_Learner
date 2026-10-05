@@ -6,7 +6,9 @@ import { StudyStage } from '../components/study/StudyStage'
 import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { SideLookup } from '../components/analysis/SideLookup'
-import { GrammarLesson, GrammarLessonSheet } from '../components/study/GrammarLesson'
+import { GrammarLessonSheet } from '../components/study/GrammarLesson'
+import { GrammarGate } from '../components/study/GrammarGate'
+import { TourRoute, TourLedger } from '../components/study/TourPanels'
 import { useDesk } from '../hooks/useDesk'
 import { CardPanel } from '../components/study/CardPanel'
 import { Loading } from '../components/ui/Loading'
@@ -60,7 +62,7 @@ import { romajiEquals } from '../lib/romaji'
 function laneFoot(card, t) {
   const lane = card?.lane
   if (!lane) return undefined
-  return { left: whereOf(lane, t, kanaSetLabel), right: modeLabel(t, card.mode) }
+  return { left: whereOf(lane, t, kanaSetLabel), right: modeLabel(t, card.exercise ?? card.mode) }
 }
 
 /** The stage floor every section screen gives its card, by structure:
@@ -296,6 +298,11 @@ export default function TodayRun({ session }) {
     level: /^grammar_(N[1-5])_/.exec(c.raw_id ?? c.card_id)?.[1],
     pattern: c.grammar, structure: c.structure, meaning: c.meaning, stage: c.stage,
   })
+  // 発見 on the desk (plan 187f): a point's tour stands on the three
+  // panels, its stops at the left and its plate at the right, from what
+  // the tour says of where it stands.
+  const [tourView, setTourView] = useState(null)
+  const touring = desk && gated && Boolean(card?.lesson?.tour)
   const comparing = desk && gated && compared?.card === transitionKey
     ? { category: 'grammar', id: compared.id }
     : null
@@ -396,7 +403,7 @@ export default function TodayRun({ session }) {
   // other study screen names one section; this queue draws a kanji
   // card, then grammar, then a personal deck).
   const where = card?.lane ? whereOf(card.lane, t, kanaSetLabel) : t.todayTitle
-  const sub = card ? modeLabel(t, card.mode) : undefined
+  const sub = card ? modeLabel(t, card.exercise ?? card.mode) : undefined
   const color = card?.lane ? LINE_COLOR[laneTypeOf(card.lane)] : undefined
   // The run's length as it stands, cleared and left: a card coming
   // back lengthens the bar rather than running past its end.
@@ -414,11 +421,12 @@ export default function TodayRun({ session }) {
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
-      panel={card ? <CardPanel card={card} remaining={remaining} keys={structureKey === 'kanji' && renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
+      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} />
+        : card ? <CardPanel card={card} remaining={remaining} keys={structureKey === 'kanji' && renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
       done={done}
       side={error && !card ? null : (
         <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
-          <SessionPanel done={done} misses={false} />
+          {touring ? <TourLedger point={lessonOf(card)} view={tourView} /> : <SessionPanel done={done} misses={false} />}
         </SideLookup>
       )}
       sideLabel={t.dictionaryTitle}
@@ -433,11 +441,13 @@ export default function TodayRun({ session }) {
 
         {card && gated && (
           <div className="gl-gate">
-            <GrammarLesson
+            <GrammarGate
               point={lessonOf(card)}
-              variant="gate"
+              session={session}
               onCompare={id => (desk ? setCompared({ card: transitionKey, id }) : setSheet(id))}
               onBoard={() => updateCurrent({ lesson_seen: true })}
+              onLesson={() => setSheet(card.raw_id ?? card.card_id)}
+              onView={setTourView}
             />
           </div>
         )}

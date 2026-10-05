@@ -1656,7 +1656,38 @@ runtime purpose. Two consequences worth knowing:
   `routes/basics.py`, `tests/test_basics_api.py`, `screens/BasicsScreen.jsx`,
   `screens/LearnScreen.jsx`, `stores/basics.js`, `config/tabs.js`,
   `src/basics.phone.test.jsx` and `src/basics.desktop.test.jsx`).
-  When starting a new wave, begin at **187** or higher, and check
+  **187** is 発見, a grammar point found before it is drilled (187a–g
+  built, `plans/187-hakken-grammar-tour.md`; cited in
+  `study/grammar_tour.py`, `study/grammar_check.py`, `study/grammar_audio.py`,
+  `study/grammar_ladder.py`, `study/modes.py`, `study/card_index.py`,
+  `content/grammar/N5.json` … `N1.json` (every point's `tour` but the
+  six no tour can be drawn on), `content/grammar/ladder.json` and the
+  README, `scripts/audit_slice.py`'s `tours` area,
+  `docs/content-audit/PLAYBOOK.md`, `routes/grammar.py`, `routes/today.py`, `routes/decks.py`,
+  `routes/tts.py`, `routes/account.py`, `srs/data_structure.sql`,
+  `core/events.py`, `scripts/build_grammar_audio.py`,
+  `scripts/build_ladder_flags.py`, `scripts/migrate_grammar_ladder.py`,
+  `tests/test_grammar_tour.py`, `tests/test_grammar_audio.py`,
+  `tests/test_grammar_ladder.py`, `components/study/GrammarTour.jsx`,
+  `components/study/GrammarGate.jsx`, `components/study/GrammarWork.jsx`,
+  `components/study/TourPanels.jsx`, `domain/tourStops.js`,
+  `components/study/GrammarLesson.jsx`, `components/study/CardPrompt.jsx`,
+  `domain/studyModes.js`, `domain/cardShape.js`, `domain/lanes.js`,
+  `screens/GrammarRun.jsx`, `screens/StudyRun.jsx`,
+  `lib/audio/speech.js`'s `speakLine`, `lib/track.js`,
+  `src/tour.phone.test.jsx`, `src/ladder.phone.test.jsx`,
+  `src/tour.desktop.test.jsx`, `src/tour.short.test.jsx`,
+  `src/deskfree.phone.test.jsx` and `index.css` and its 机 section;
+  DESIGN.md,
+  "The tour"; the owner's pick of the canvas
+  "Tsuji — grammar, learned by doing": B, discovery, with D's scene at its
+  end, E's ladder and plate, and F on the desk without printed keys): the
+  lesson gate before a new grammar card replaced by a tour of six stops
+  (look, guess, found, the twist, the scene, terminus), its first three
+  derived from the catalogue and the twist and the scene an authored
+  `tour` block; the reviews on one `grammar.ladder` track whose exercise
+  climbs with the card's progress; the lesson text kept as the plate.
+  When starting a new wave, begin at **188** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -1734,7 +1765,16 @@ The one optional warm-up, and it needs no database:
 ```bash
 python -m scripts.build_dictation_audio --check   # what is missing
 python -m scripts.build_dictation_audio           # synthesize it
+python -m scripts.build_grammar_audio --tours     # the grammar tours' scenes (plan 187d)
 ```
+
+The grammar tours (plan 187d) speak through `GET /api/grammar/audio`,
+which voices only lines the catalogue says, by who says them: the reader
+for an example or a twist, speaker A for the other person in a scene and
+B for the learner. `build_grammar_audio` makes them ahead of the first
+learner, as `build_dictation_audio` does for dictation; without it each
+line is made on the request that wants it. Without `--tours` it also
+voices every example sentence in the catalogue (~2,400 lines).
 
 書取 (dictation, `/practice/dictation`) plays a clip per line of
 `content/listening_clips.py`. Nothing depends on having run this — a missing
@@ -1816,7 +1856,18 @@ python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
 python -m scripts.migrate_vocab_ids    # report; --yes to apply, --user to scope
 python -m scripts.migrate_kanji_ids    # report; --yes to apply, --user to scope
 python -m scripts.migrate_pool_cards   # same, for a pool card whose word the deck now teaches
+python -m scripts.migrate_grammar_ladder  # plan 187e: each studied point onto the ladder
 ```
+
+The last is run once, after the deploy that carries the grammar ladder
+(plan 187e), which makes `grammar.ladder` grammar's primary track: it
+writes each studied point a ladder row with the schedule of its best
+grammar mode and folds the old `grammar.flashcard.f2b` row (Today's main
+lane before it) into it. Until it runs, Today deals already-studied points
+as new on the ladder. **After any change to `content/grammar/*.json`, run
+`python -m scripts.build_ladder_flags`** too: `content/grammar/ladder.json`
+writes down which points the build and write rungs can be asked on, and
+`tests/test_grammar_ladder.py` fails while it disagrees.
 
 The fourth reads `datas/vocab/pool_moves.json`, which
 `scripts/prune_pool_overlap.py` appends to for every pool row it takes
@@ -2003,10 +2054,11 @@ python -m scripts.placement_report --rebuild-order  # vocab_frequency.json, in r
 python -m scripts.placement_report --write-lists    # placement_lists.json, for the audit's rotation
 ```
 
-The slice is a pure function of the date — grammar, vocab, sentences and,
-since plan 109, placement (the three candidate lists, read from
+The slice is a pure function of the date — grammar, vocab, sentences,
+since plan 109 placement (the three candidate lists, read from
 `datas/vocab/placement_lists.json`, which `placement_report --write-lists`
-writes) in rotation, each area walking its own list — so there is no
+writes) and since plan 187g tours (each grammar point's written twist and
+scene) in rotation, each area walking its own list — so there is no
 ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env`, no network:
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does

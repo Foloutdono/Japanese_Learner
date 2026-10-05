@@ -1,0 +1,501 @@
+{
+ "en": {
+  "rev": 1,
+  "look": [
+   {
+    "jp": "この本を読んでください。",
+    "tr": "Please read this book.",
+    "furigana": [
+     {
+      "text": "この"
+     },
+     {
+      "text": "本",
+      "reading": "ほん",
+      "word": 1
+     },
+     {
+      "text": "を"
+     },
+     {
+      "text": "読",
+      "reading": "よ",
+      "word": 3
+     },
+     {
+      "text": "ん"
+     },
+     {
+      "text": "で",
+      "highlight": true
+     },
+     {
+      "text": "ください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "spans": [
+     [
+      6,
+      11
+     ]
+    ]
+   },
+   {
+    "jp": "ここに名前を書いてください。",
+    "tr": "Please write your name here.",
+    "furigana": [
+     {
+      "text": "ここに"
+     },
+     {
+      "text": "名",
+      "reading": "な",
+      "word": 2
+     },
+     {
+      "text": "前",
+      "reading": "まえ",
+      "word": 2
+     },
+     {
+      "text": "を"
+     },
+     {
+      "text": "書",
+      "reading": "か",
+      "word": 4
+     },
+     {
+      "text": "い"
+     },
+     {
+      "text": "て",
+      "highlight": true
+     },
+     {
+      "text": "ください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "spans": [
+     [
+      8,
+      13
+     ]
+    ]
+   },
+   {
+    "jp": "ちょっとまってください。",
+    "tr": "Please wait a moment.",
+    "furigana": [
+     {
+      "text": "ちょっと"
+     },
+     {
+      "text": "まっ"
+     },
+     {
+      "text": "て",
+      "highlight": true
+     },
+     {
+      "text": "ください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "spans": [
+     [
+      6,
+      11
+     ]
+    ]
+   }
+  ],
+  "guesses": [
+   {
+    "text": "please do",
+    "correct": true
+   },
+   {
+    "text": "a polite request for a favour",
+    "correct": false,
+    "pattern": "〜てもらえませんか",
+    "furigana": [
+     {
+      "text": "〜てもらえませんか"
+     }
+    ],
+    "answer": "てください is a plain request; てもらえませんか asks whether they would, which is gentler."
+   },
+   {
+    "text": "please don't do",
+    "correct": false,
+    "pattern": "〜ないでください",
+    "furigana": [
+     {
+      "text": "〜ないでください"
+     }
+    ],
+    "answer": "てください asks someone to do; ないでください asks them not to."
+   },
+   {
+    "text": "asking to be given something",
+    "correct": false,
+    "pattern": "〜をください",
+    "furigana": [
+     {
+      "text": "〜をください"
+     }
+    ],
+    "answer": "てください asks for an action; をください asks for a thing."
+   }
+  ],
+  "rule": "**て-form + ください** asks someone to do something politely: 書いてください (please write).",
+  "structure": "verb て-form + ください",
+  "structure_furigana": [
+   {
+    "text": "verb て-form + ください"
+   }
+  ],
+  "chain": [
+   "読む",
+   "読んでください"
+  ],
+  "rival": {
+   "pattern": "〜ないでください",
+   "furigana": [
+    {
+     "text": "〜ないでください"
+    }
+   ],
+   "text": "てください asks someone to do; ないでください asks them not to."
+  },
+  "twist": null,
+  "scene": null
+ },
+ "ka": {
+  "rev": 1,
+  "look": [
+   {
+    "jp": "あなたは学生ですか。",
+    "tr": "Are you a student?",
+    "furigana": [
+     {
+      "text": "あなたは"
+     },
+     {
+      "text": "学",
+      "reading": "がく",
+      "word": 2
+     },
+     {
+      "text": "生",
+      "reading": "せい",
+      "word": 2
+     },
+     {
+      "text": "です"
+     },
+     {
+      "text": "か",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "spans": [
+     [
+      8,
+      9
+     ]
+    ]
+   },
+   {
+    "jp": "おちゃかコーヒーを飲みますか。",
+    "tr": "Will you drink tea or coffee?",
+    "furigana": [
+     {
+      "text": "おちゃ"
+     },
+     {
+      "text": "か",
+      "highlight": true
+     },
+     {
+      "text": "コーヒーを"
+     },
+     {
+      "text": "飲",
+      "reading": "の",
+      "word": 5
+     },
+     {
+      "text": "みますか。"
+     }
+    ],
+    "spans": [
+     [
+      3,
+      4
+     ]
+    ]
+   },
+   {
+    "jp": "あした、何をしますか。",
+    "tr": "What will you do tomorrow?",
+    "furigana": [
+     {
+      "text": "あした、"
+     },
+     {
+      "text": "何",
+      "reading": "なに",
+      "word": 2
+     },
+     {
+      "text": "を"
+     },
+     {
+      "text": "します"
+     },
+     {
+      "text": "か",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "spans": [
+     [
+      9,
+      10
+     ]
+    ]
+   }
+  ],
+  "guesses": [
+   {
+    "text": "and then (linking actions in order)",
+    "correct": false,
+    "pattern": "〜て、〜て",
+    "furigana": [
+     {
+      "text": "〜て、〜て"
+     }
+    ],
+    "answer": null
+   },
+   {
+    "text": "seeks agreement: right?, isn't it?",
+    "correct": false,
+    "pattern": "ね",
+    "furigana": [
+     {
+      "text": "ね"
+     }
+    ],
+    "answer": "か asks for information you do not have; ね asks the listener to agree with what you both see."
+   },
+   {
+    "text": "A or B (a choice between two)",
+    "correct": false,
+    "pattern": "〜か〜か",
+    "furigana": [
+     {
+      "text": "〜か〜か"
+     }
+    ],
+    "answer": "A single か asks a question; か… か… offers a choice between two whole options."
+   },
+   {
+    "text": "turns a statement into a question; also 'or' between nouns",
+    "correct": true
+   }
+  ],
+  "rule": "**か** at the end of a sentence turns it into a question. Between two nouns it means « or ».",
+  "structure": "sentence + か",
+  "structure_furigana": [
+   {
+    "text": "sentence + か"
+   }
+  ],
+  "chain": null,
+  "rival": {
+   "pattern": "〜か〜か",
+   "furigana": [
+    {
+     "text": "〜か〜か"
+    }
+   ],
+   "text": "A single か asks a question; か… か… offers a choice between two whole options."
+  },
+  "twist": {
+   "jp": "おちゃかコーヒーを飲みますか。",
+   "furigana": [
+    {
+     "text": "おちゃ"
+    },
+    {
+     "text": "か",
+     "highlight": true
+    },
+    {
+     "text": "コーヒーを"
+    },
+    {
+     "text": "飲",
+     "reading": "の",
+     "word": 5
+    },
+    {
+     "text": "みますか。"
+    }
+   ],
+   "ask": "There are two here. What does the first one mean?",
+   "choices": [
+    {
+     "text": "« and »: tea and coffee",
+     "correct": false
+    },
+    {
+     "text": "It asks a question about the tea.",
+     "correct": false
+    },
+    {
+     "text": "« or »: tea or coffee",
+     "correct": true
+    }
+   ],
+   "why": "Between two nouns, か means « or ». The second か, at the end, asks the question.",
+   "pair": null
+  },
+  "scene": {
+   "place": "売店",
+   "place_reading": "ばいてん",
+   "place_caption": "Kiosk",
+   "them": "Vendor",
+   "lines": [
+    {
+     "who": "them",
+     "jp": "いらっしゃいませ。",
+     "tr": "Hello there.",
+     "furigana": [
+      {
+       "text": "いらっしゃいませ。"
+      }
+     ]
+    },
+    {
+     "who": "me",
+     "jp": "すみません、これはおちゃですか。",
+     "tr": "Excuse me, is this tea?",
+     "furigana": [
+      {
+       "text": "すみません、"
+      },
+      {
+       "text": "これは"
+      },
+      {
+       "text": "おちゃです"
+      },
+      {
+       "text": "か",
+       "highlight": true
+      },
+      {
+       "text": "。"
+      }
+     ]
+    },
+    {
+     "who": "them",
+     "jp": "いいえ、コーヒーです。おちゃもありますよ。",
+     "tr": "No, it's coffee. There is tea too.",
+     "furigana": [
+      {
+       "text": "いいえ、"
+      },
+      {
+       "text": "コーヒーです。"
+      },
+      {
+       "text": "おちゃも"
+      },
+      {
+       "text": "ありますよ。"
+      }
+     ]
+    }
+   ],
+   "note": "か at the end makes a question: you ask what you do not know.",
+   "ask": {
+    "cue": {
+     "who": "them",
+     "jp": "おちゃはこちらです。",
+     "tr": "The tea is over here.",
+     "furigana": [
+      {
+       "text": "おちゃは"
+      },
+      {
+       "text": "こちらです。"
+      }
+     ]
+    },
+    "task": "Ask him whether the tea is cold.",
+    "choices": [
+     {
+      "jp": "おちゃはつめたいです。",
+      "furigana": [
+       {
+        "text": "おちゃは"
+       },
+       {
+        "text": "つめたいです。"
+       }
+      ],
+      "correct": false
+     },
+     {
+      "jp": "おちゃはつめたいですね。",
+      "furigana": [
+       {
+        "text": "おちゃは"
+       },
+       {
+        "text": "つめたいですね。"
+       }
+      ],
+      "correct": false
+     },
+     {
+      "jp": "おちゃはつめたいですか。",
+      "furigana": [
+       {
+        "text": "おちゃは"
+       },
+       {
+        "text": "つめたいですか。"
+       }
+      ],
+      "correct": true
+     }
+    ],
+    "why": "You don't know whether it is cold: you ask, so か."
+   }
+  }
+ }
+}
