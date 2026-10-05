@@ -1656,7 +1656,16 @@ runtime purpose. Two consequences worth knowing:
   `routes/basics.py`, `tests/test_basics_api.py`, `screens/BasicsScreen.jsx`,
   `screens/LearnScreen.jsx`, `stores/basics.js`, `config/tabs.js`,
   `src/basics.phone.test.jsx` and `src/basics.desktop.test.jsx`).
-  When starting a new wave, begin at **187** or higher, and check
+  **187** is 発見, a grammar point found before it is drilled (planned,
+  `plans/187-hakken-grammar-tour.md`; the owner's pick of the canvas
+  "Tsuji — grammar, learned by doing": B, discovery, with D's scene at its
+  end, E's ladder and plate, and F on the desk without printed keys): the
+  lesson gate before a new grammar card replaced by a tour of six stops
+  (look, guess, found, the twist, the scene, terminus), its first three
+  derived from the catalogue and the twist and the scene an authored
+  `tour` block; the reviews on one `grammar.ladder` track whose exercise
+  climbs with the card's progress; the lesson text kept as the plate.
+  When starting a new wave, begin at **188** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
