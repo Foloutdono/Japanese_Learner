@@ -287,6 +287,11 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
       player.last.onTimeUpdate(at)
       await settle(700)
       expect($('.anl-subs__count').textContent).toContain(`${index + 1} / 36`)
+      // The rail scrolls smoothly, and under a full run's load it was
+      // still 367px short after the 700ms: waited for until it lands,
+      // then read again, so a stop passing the middle does not count.
+      await vi.waitFor(() => expect(centred()).toBeLessThan(4), { timeout: 3000 })
+      await settle()
       expect(centred()).toBeLessThan(4)
     }
     expect(document.scrollingElement.scrollTop).toBe(0)
