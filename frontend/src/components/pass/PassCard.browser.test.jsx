@@ -189,8 +189,9 @@ describe('the back (plan 173)', () => {
     await mount({ initial: 'back', doors: { settings: null } })
     expect($$('.pcb__door[data-page]').map(n => n.dataset.page)).toEqual(['level', 'destination', 'service', 'hour', 'lines'])
     $('.pcb__door[data-page="hour"]').click()
-    await new Promise(r => setTimeout(r, 30))
-    expect($('output.where').textContent).toBe('/profile/settings/hour')
+    // The router moves in a transition, rendered when the scheduler gets
+    // to it rather than in the click: a loaded runner had not after 30ms.
+    await vi.waitFor(() => expect($('output.where').textContent).toBe('/profile/settings/hour'))
   })
 
   it('marks the page open beside the column on the desk, its doors links', async () => {

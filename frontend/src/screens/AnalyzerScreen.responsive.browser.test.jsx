@@ -228,6 +228,10 @@ describe('AnalyzerScreen structure', () => {
   // intake is a column with ONE filled action: setting up the bookmark
   // until it has brought a passage, then opening the video on YouTube.
   it('offers the bookmark, a file and DownSub on 動画 — and no paste ingest', async () => {
+    // Never used, said here: the flag is the browser's, and storage
+    // leaks across files like the viewport -- the polling file's #grab=
+    // arrival leaves it set for whichever file the lane runs next.
+    localStorage.removeItem('tsuji.grabUsed')
     const screen = await renderScreen()
     await goToPlatform(screen, 'video')
 

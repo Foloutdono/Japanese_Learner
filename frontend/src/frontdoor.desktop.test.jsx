@@ -1281,7 +1281,11 @@ describe('first contact, finished (P13, plan 155)', () => {
     await landed()
     expect($('.desk-wait')).toBeNull()
     await screen.rerender(<Door boarding />)
-    await settle(300)
+    // Read 300ms after the press on the scene's own clock, its fades and
+    // the wait's entrance stopped there: on the wall clock a busy runner
+    // had started the fades late, and the block was 0.0004 from gone.
+    const beats = ['.desk-front__block', '.desk-front__door', '.desk-wait'].flatMap(s => $(s).getAnimations())
+    beats.forEach(a => { a.pause(); a.currentTime = 300 })
     // The way in and the corner pull away, the map a beat after them.
     expect($('.desk-front').classList.contains('desk-front--leaving')).toBe(true)
     expect(opacityOf($('.desk-front__block'))).toBe(0)
@@ -1289,6 +1293,7 @@ describe('first contact, finished (P13, plan 155)', () => {
     // The pass being issued: its dots a beat after the press, on the
     // paper's middle.
     expect(opacityOf($('.desk-wait'))).toBe(0)
+    beats.forEach(a => a.play())
     await landed()
     expect(opacityOf($('.desk-front__map'))).toBe(0)
     expect(opacityOf($('.desk-front__hub'))).toBe(0)
