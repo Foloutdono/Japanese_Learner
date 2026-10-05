@@ -14,8 +14,8 @@ import { playClick } from '../lib/audio'
 // screen prints the default pace.
 const CARDS = [
   {
-    card_id: 'vocab_N3__こんにちは', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b',
-    kanji: '', kana: 'こんにちは', meaning: 'hello', level: 'N3', romaji: 'konnichiwa',
+    card_id: 'vocab_N5__こんにちは', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b',
+    kanji: '', kana: 'こんにちは', meaning: 'hello', level: 'N5', romaji: 'konnichiwa',
     hints: {},
   },
   {

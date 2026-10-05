@@ -46,8 +46,8 @@ const { default: RideReading } = await import('./screens/RideReading')
 // A new card's forecast, as the ride serves it (plan 133).
 const FORECAST = Object.fromEntries([60, 180, 180, 390, 600, 3600].map((due_in, q) => [String(q), { due_in }]))
 const KNOWN = {
-  card_id: 'vocab_N3__こんにちは', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b',
-  kanji: '', kana: 'こんにちは', meaning: 'hello', level: 'N3', romaji: 'konnichiwa',
+  card_id: 'vocab_N5__こんにちは', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b',
+  kanji: '', kana: 'こんにちは', meaning: 'hello', level: 'N5', romaji: 'konnichiwa',
   stage: null, review_preview: FORECAST, hints: {},
 }
 const UNKNOWN = {

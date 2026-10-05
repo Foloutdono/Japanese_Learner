@@ -30,7 +30,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: RideRun } = await import('./screens/RideRun')
 
 const CARDS = [
-  { card_id: 'vocab_N3__こんにちは', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b', kanji: '', kana: 'こんにちは', meaning: 'hello', level: 'N3', romaji: 'konnichiwa', stage: null, review_preview: null, hints: {} },
+  { card_id: 'vocab_N5__こんにちは', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b', kanji: '', kana: 'こんにちは', meaning: 'hello', level: 'N5', romaji: 'konnichiwa', stage: null, review_preview: null, hints: {} },
   { card_id: 'vocab_N5_駅_えき', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b', kanji: '駅', kana: 'えき', meaning: 'station', level: 'N5', romaji: 'eki', stage: null, review_preview: null, hints: {} },
 ]
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))

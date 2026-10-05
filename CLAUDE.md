@@ -1603,15 +1603,22 @@ runtime purpose. Two consequences worth knowing:
   run serves, and a refill never hands back a card the client holds
   (`batch_cache._skipping`); then 186b, a grammar point never met
   opening on its lesson in the day's run as on its own (`TodayRun.jsx`'s
-  gate, GrammarRun's since plan 087); the course itself (units of
-  N5 points, words and kanji, the misfiled basic words moved to N5) is
+  gate, GrammarRun's since plan 087); then 186c, the words a first
+  lesson teaches made N5 cards -- 円, 分 (ふん, from N1), 週, 週間 and
+  five greetings moved down (`vocab_renames.MOVES`, the older lines to
+  them retargeted), 日本 one card read にほん/にっぽん, and the twelve
+  months, 何月, 何時, 何曜日 and 日本語 added out of the pool (each with
+  its French; `migrate_vocab_ids` and `migrate_pool_cards` after the
+  deploy); the course itself (units of N5 points, words and kanji) is
   the plan's later phases (cited in `study/teaching_order.py`,
   `routes/today.py`, `routes/vocab.py`, `routes/kanji.py`,
   `routes/kana.py`, `routes/grammar.py`, `routes/frequency.py`,
   `srs/batch_cache.py`, `tests/test_teaching_order.py`,
   `tests/test_today_ration.py`, `tests/test_batch_cache.py`,
   `screens/TodayRun.jsx`, `screens/TodayRun.gate.browser.test.jsx`,
-  `src/todayLesson.desktop.test.jsx` and `src/deskfree.phone.test.jsx`).
+  `src/todayLesson.desktop.test.jsx`, `src/deskfree.phone.test.jsx`,
+  `content/vocab_renames.py`, `routes/onboarding.py`'s `RIDE_KNOWN`,
+  `tests/test_lookup_precision.py` and `tests/test_onboarding_profile.py`).
   When starting a new wave, begin at **187** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
