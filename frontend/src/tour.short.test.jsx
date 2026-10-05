@@ -53,7 +53,6 @@ const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 const key = k => window.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }))
 const stop = () => $('.desk-run .tour--desk').dataset.stop
-const route = name => $(`.tour-route__stop[data-stop="${name}"]`)
 
 beforeEach(() => {
   localStorage.clear()

@@ -56,9 +56,9 @@ export function specimenFor(modeKey, card) {
       return pair(front, jp(card.radical))
     case 'fill_in':
       return card.sentence ? { kind: 'sentence', sentence: card.sentence, a: front } : null
-    case 'contrast':
     // A build's gap among its pieces reads, in a well, as contrast's
     // blank among its rivals (plan 187e).
+    case 'contrast':
     case 'build': {
       const b = card.blank
       return b?.choices?.length ? { kind: 'blank', before: b.before ?? '', after: b.after ?? '', choices: b.choices } : null
