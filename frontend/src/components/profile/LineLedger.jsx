@@ -7,9 +7,10 @@ import { useDesk } from '../../hooks/useDesk'
 // ── The ride ledger — how far down each line you have ridden ────
 // The map on the Learn tab draws the four SRS lines with a train on
 // each; this is the same arithmetic as a ledger of figures, one cell
-// per line: the roundel, the line's name, the cards mastered out of
-// what the line can reach, and the distance travelled as a rail in the
-// line's own pigment.
+// per line: the roundel, the line's name, the cards learned out of
+// what the line can reach (each card counting for how far it has come,
+// the sum shown whole, plan 184), and the distance travelled as a rail
+// in the line's own pigment.
 //
 // The figure and the rail are ONE number: cards learned out of cards
 // there are (lineTotals). They used to be two — the figure counted
@@ -99,7 +100,7 @@ export function LineLedger({ stats, t, navigate }) {
                 <span className="pf-line__done" style={{ width: `${pct}%` }} />
               </span>
             )}
-            <span className="pf-line__fig" aria-label={`${learned.toLocaleString()} ${t.mastered}`}>
+            <span className="pf-line__fig">
               {learned.toLocaleString()}
               <span className="pf-line__of">/ {total.toLocaleString()}</span>
             </span>

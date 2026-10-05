@@ -14,12 +14,13 @@ import { RouteStops } from './RouteStops'
  * map's train position is computed from (/api/stats' `items`, through
  * the shared store), so the station and the map cannot disagree.
  *
- * Two figures, not one. `learned` is the 21-day mastery count and the
- * number the row is read for; on its own it left every stop of every
- * line reading 0 / 665 for a learner's first fortnight, because that
- * is how long the threshold takes. `started` — cards met at all — is
- * the one that answers today's work, so it rides under the figure as
- * its caption and RouteStops drops it once the two agree.
+ * Two figures, not one. `learned` is the number the row is read for:
+ * what the stop's cards add up to, each for how far it has come (plan
+ * 184), so it moves with the work. It used to be the count of cards
+ * held for 21 days and left every stop of every line reading 0 / 665
+ * for a learner's first fortnight. `started` — cards met at all — says
+ * how many cards that figure is drawn from, so it rides under the
+ * figure as its caption and RouteStops drops it once the two agree.
  *
  * The learner's own level (user_profiles.jlpt_level via /api/profile)
  * is the stop marked "You are here", and the stops behind it are

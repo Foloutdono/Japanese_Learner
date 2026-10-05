@@ -618,6 +618,19 @@ class SRSEngine:
         days = max(1, interval_days)
         return round(0.5 + 0.5 * math.log(days) / math.log(MASTERED_DAYS), 3)
 
+    @staticmethod
+    def whole_cards(progresses) -> int:
+        """How many cards a set of progresses adds up to, as a figure to
+        print (plan 184). A card in progress counts for how far it has
+        come (_progress: 0.0 new, 1.0 mastered), so a week of work shows
+        on every bar instead of reading 0 until a first card has held
+        for 21 days -- and the sum is shown without its fraction, 11.5
+        cards' worth reading 11, so a figure never claims a card that is
+        only half known. Summed in thousandths, the precision _progress
+        rounds to, so float drift cannot leave a sum that is exactly 12
+        reading 11."""
+        return sum(round(p * 1000) for p in progresses) // 1000
+
     def get_bulk_progress(self, card_ids: list[str], mode: str) -> dict[str, float]:
         """_progress for each of `card_ids` in `mode`, 0.0 for a card
         with no row yet. Same shape and scope as get_bulk_stats, for the

@@ -195,7 +195,9 @@ def test_the_points_endpoint_is_the_levels_index(client):
     body = client.get("/api/grammar/points", params={"level": "N2", "lang": "en"}).json()
     assert body["level"] == "N2"
     assert body["total"] == len(GRAMMAR_POINTS_BY_LEVEL["N2"]) == len(body["points"])
-    assert body["learned"] + body["started"] <= body["total"]
+    # learned is the sum of the points' progress shown whole (plan 184), so
+    # it never passes the points met, which never pass the points there are.
+    assert 0 <= body["learned"] <= body["started"] <= body["total"]
     for point, entry in zip(body["points"], GRAMMAR_POINTS_BY_LEVEL["N2"]):
         assert point["raw_id"] == grammar_to_id(entry, "N2")
         assert point["meaning"] == gloss(entry, "en")
@@ -205,6 +207,42 @@ def test_the_points_endpoint_is_the_levels_index(client):
     for mode, total in body["totals"].items():
         assert total == card_index.total("grammar", "N2", mode)
     assert client.get("/api/grammar/points", params={"level": "N9"}).status_code == 404
+
+
+def test_the_index_adds_progress_up_like_the_levels_stop(client):
+    """Plan 184: the index's door and the Learn gate's stop for the same
+    level print one figure. Three points taken through their learning
+    steps are none of them mastered, and all of them worth more than a
+    half: 1.84 points' worth, printed 1 where the figure used to read 0."""
+    from core.auth import DEV_USER_ID
+    from core.db import db_conn
+    from core.srs_instance import srs
+
+    mode = "grammar.flashcard.f2b"
+    ids = [grammar_to_id(e, "N5") for e in GRAMMAR_POINTS_BY_LEVEL["N5"][:3]]
+    try:
+        for raw_id in ids:
+            for _ in range(4):
+                srs.review(f"{DEV_USER_ID}:{raw_id}", mode, 4)
+
+        body = client.get("/api/grammar/points", params={"level": "N5", "lang": "en"}).json()
+        stop = client.get("/api/stats").json()["items"]["grammar"]["N5"]
+        assert (body["learned"], body["started"], body["total"]) == (
+            stop["learned"], stop["started"], stop["total"])
+        assert body["started"] == 3
+        assert body["learned"] == 1
+        assert {p["stage"] for p in body["points"] if p["raw_id"] in ids} == {"learning"}
+    finally:
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                like = f"{DEV_USER_ID}:grammar\\_%"
+                for table in ("review_log", "card_first_review", "card_modes"):
+                    cur.execute(f"DELETE FROM {table} WHERE card_id LIKE %s", (like,))
+                cur.execute("DELETE FROM cards WHERE id LIKE %s", (like,))
+            conn.commit()
+        finally:
+            conn.close()
 
 
 def test_level_stats_are_sized_by_the_modes_own_pool(client):

@@ -99,7 +99,9 @@ export default function GrammarScreen({ session }) {
   // The platforms this level can actually serve: a mode whose pool is
   // empty here is not offered rather than boarded into "done".
   const offered = MODES.filter(m => m.key === FAST_REVIEW || !index || (index.totals?.[m.key] ?? 1) > 0)
-  const startedNote = index && index.started > 0 ? t.startedNote(index.started) : null
+  // `started` is the points met at all, so it is news only while it
+  // outruns the figure beside it — as on the radical lesson's door.
+  const startedNote = index && index.started > index.learned ? t.startedNote(index.started) : null
 
   const sheet = point && (
     <GrammarLessonSheet key={point} id={point} session={session} onClose={closePoint} />
