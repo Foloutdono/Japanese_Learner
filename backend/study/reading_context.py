@@ -735,11 +735,11 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
     # 一月 is January (いちがつ) to UniDic every time; it is ひとつき, "one
     # month", where what follows measures it: 一月かかる, 一月が経つ,
     # 一月前, 一月の間, 一月ほど, and 一月も before a verb's negative in
-    # its clause (一月も会っていません, "not for a whole month"). Only 一:
-    # 三月 as a span is written 三か月. Never 十一月 (November), and
-    # nothing that could still be the month -- 一月も寒くない (an
-    # adjective's), 一月も二月も, 一月が過ぎた, 一月で are left as UniDic
-    # reads them.
+    # its clause (一月も会っていません, "not for a whole month") or a verb
+    # of time spent (一月も勉強した). Only 一: 三月 as a span is written
+    # 三か月. Never 十一月 (November), and nothing that could still be the
+    # month -- 一月も寒くない (an adjective's), 一月も二月も, 一月も終わった,
+    # 一月が過ぎた, 一月で are left as UniDic reads them.
     for i in range(1, n):
         if not (surf[i - 1] == "一" and surf[i] == "月" and out[i] == "がつ"):
             continue
@@ -767,7 +767,7 @@ def _measures_a_span(tokens: list[dict], j: int) -> bool:
     if after["surface"] == "の" and j + 1 < len(tokens) and tokens[j + 1]["surface"] == "間":
         return True
     if after["surface"] == "も":
-        return _negated_after(tokens, j + 1)
+        return _negated_after(tokens, j + 1) or _spent_after(tokens, j + 1)
     if after["surface"] == "が" and j + 1 < len(tokens):
         after = tokens[j + 1]
     return after.get("lemma") in _SPAN_VERBS
@@ -800,4 +800,32 @@ def _negated_after(tokens: list[dict], k: int) -> bool:
             verb = True
         elif t.get("pos") == "auxiliary" and t.get("lemma") in _NEGATIVES and verb:
             return True
+    return False
+
+
+# What the month itself does: 一月も終わった, 一月も過ぎた, 一月もすぐ来る
+# are January's, never a span.
+_MONTH_VERBS = {"終わる", "終える", "過ぎる", "始まる", "来る", "明ける", "近付く",
+                "去る", "迎える", "暮れる", "変わる"}
+
+
+def _spent_after(tokens: list[dict], k: int) -> bool:
+    """Is the clause starting at `k` (after 一月も) a time spent -- 一月も
+    勉強した, 一月も待ちました, 一月も日本にいました, "for a whole month"?
+    Its first predicate a verb, nothing before it that could make 一月
+    the subject: no adjective (一月も寒い日が続いた), no copula (一月も
+    休みです), no が-marked subject (一月も雪が降った, which may be
+    January's), no other month (一月も二月も), and not a verb the month
+    itself does (一月も終わった)."""
+    if k < len(tokens) and _is_numeral(tokens[k]["surface"]):
+        return False
+    for t in tokens[k:]:
+        tags = t.get("tags") or ("", "", "")
+        if t["surface"] in _CLAUSE_PUNCT or (tags[0] == "助詞" and tags[1] == "接続助詞"):
+            return False
+        pos = t.get("pos")
+        if pos == "verb":
+            return t.get("lemma") not in _MONTH_VERBS
+        if pos in ("adjective", "auxiliary") or (pos == "particle" and t["surface"] == "が"):
+            return False
     return False

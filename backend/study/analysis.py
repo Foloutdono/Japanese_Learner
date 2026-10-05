@@ -374,7 +374,8 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # interjection reaches its kana-only card (おはよう, ありがとう), and a
 # set phrase standing as a clause is one word (すみません is no 済む).
 # 11: 一月 read ひとつき, "one month", where what follows measures it
-# (一月かかる, 一月前, 一月の間, 一月も before a verb's negative), so it
+# (一月かかる, 一月前, 一月の間, 一月も before a verb's negative or a
+# verb of time spent), so it
 # reaches that card and not January's
 # (study/reading_context.py's span rule).
 LOCAL_REV = 11
