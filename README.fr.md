@@ -177,20 +177,6 @@ Tout le contenu est classé par niveau du JLPT :
 
 ## Aperçu en images
 
-<!--
-TODO : ajouter les six captures ci-dessous dans docs/readme/, puis retirer
-les marqueurs d’ouverture et de fermeture de ce commentaire pour afficher la
-galerie. Ce sont les mêmes fichiers que dans README.md.
-
-  docs/readme/today-phone.png         La file du jour, sur téléphone
-  docs/readme/analyzer-phone.png      L’analyseur qui décompose une phrase, sur téléphone
-  docs/readme/grammar-phone.png       Une leçon de grammaire, sur téléphone
-  docs/readme/dictionary-desktop.png  Une entrée du dictionnaire, sur ordinateur
-  docs/readme/exam-desktop.png        Un examen blanc, sur ordinateur
-  docs/readme/stats-desktop.png       La page des statistiques, sur ordinateur
-
-Téléphone : environ 390×844 (portrait). Ordinateur : environ 1440×900.
-
 <table>
   <tr>
     <td align="center"><img src="docs/readme/today-phone.png" alt="La file du jour sur téléphone" width="240"><br><sub>Aujourd’hui</sub></td>
@@ -202,9 +188,6 @@ Téléphone : environ 390×844 (portrait). Ordinateur : environ 1440×900.
 <p align="center"><img src="docs/readme/dictionary-desktop.png" alt="Une entrée du dictionnaire sur ordinateur" width="720"><br><sub>Dictionnaire, sur ordinateur</sub></p>
 <p align="center"><img src="docs/readme/exam-desktop.png" alt="Un examen blanc du JLPT sur ordinateur" width="720"><br><sub>Examen blanc</sub></p>
 <p align="center"><img src="docs/readme/stats-desktop.png" alt="La page des statistiques sur ordinateur" width="720"><br><sub>Statistiques</sub></p>
--->
-
-*Les captures d’écran arrivent bientôt.*
 
 ## Essayer Tsuji
 
