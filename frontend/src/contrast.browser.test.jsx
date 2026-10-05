@@ -454,13 +454,43 @@ const Fixture = () => (
         <span className="stage__streak pr-streak">3</span>
       </div>
       <div className="timer"><span className="timer__label pr-timer">12.3s</span></div>
-      <div className="prompt-card prompt-card--footed">
-        <div className="prompt-card__body prompt-card__body--prose prose">
-          <span className="prose__label pr-label">EN</span>
-          <span className="prose__romaji pr-romaji">ashita wa</span>
+      {/* The practice card (plan 185, A1 with A2.2 and A2.3): the
+          point's tag, the sentence's romaji with a fix's number on it,
+          and the answer's well -- a miss struck and the right word small
+          over it, a near miss's spelling over it, the match's figure --
+          the words missed under it, and a fix leading with what to write,
+          on the page's ground stepped through the card. */}
+      <div className="prompt-card prompt-card--footed prompt-card--page">
+        <div className="prompt-card__body prompt-card__body--page prose">
+          <span className="pcard-tag"><span className="pcard-tag__cap pr-label">Point</span><span className="pcard-tag__jp">〜ましょう</span></span>
+          <span className="pcard-lead__jp"><span className="pcard-hit pcard-hit--x">十本</span><sup className="pcard-pin pr-pin">2</sup></span>
+          <span className="pcard-lead__ro pr-romaji">ashita wa</span>
           <span className="prose__ai pr-ai">Natural and correct.</span>
-          <span className="prose__verdict prose__verdict--ok pr-ok">Correct!</span>
-          <span className="prose__verdict prose__verdict--x pr-x">Not quite</span>
+          <div className="pcard-well pcard-well--metered">
+            <div className="pcard-well__line">
+              <span className="pcard-answer">
+                <ruby className="pcard-miss pcard-over"><s className="pr-x">tchisai</s><rt><ins className="pr-ok">sukoshi</ins></rt></ruby>
+                {' '}
+                <ruby className="pcard-miss pcard-over pcard-miss--near"><s>aimasho</s><rt><ins className="pr-near">aimashou</ins></rt></ruby>
+              </span>
+            </div>
+            <span className="pcard-well__fig"><b className="pr-well-fig">79<small>%</small></b></span>
+            <span className="pcard-well__meter"><i style={{ inlineSize: '79%' }} /></span>
+          </div>
+          <ul className="pcard-misses">
+            <li className="pcard-missed">
+              <b className="pcard-missed__jp">少し</b>
+              <span className="pcard-missed__kana pr-missed-kana">すこし</span>
+              <span className="pcard-missed__en pr-missed-en">a little</span>
+            </li>
+          </ul>
+          <ol className="rvw__fixes">
+            <li className="rvw__row">
+              <span className="rvw__n">1</span>
+              <span className="rvw__to pr-fix-to">「十本」</span>
+              <span className="rvw__why pr-why">十本 is read じゅっぽん.</span>
+            </li>
+          </ol>
         </div>
       </div>
       <div className="prompt-card prompt-card--ask">
@@ -1040,11 +1070,18 @@ const SITES = [
   // and its result under the bar.
   ['.pr-streak', 'practice streak (warning ink mixed)'],
   ['.pr-timer', 'practice timer label'],
-  ['.pr-label', 'prose label'],
-  ['.pr-romaji', 'prose romaji'],
+  ['.pr-label', 'practice card tag caption'],
+  ['.pr-romaji', 'practice card romaji'],
   ['.pr-ai', 'prose AI analysis'],
-  ['.pr-ok', 'verdict (success ink mixed)'],
-  ['.pr-x', 'verdict (danger ink mixed)'],
+  ['.pr-ok', 'answer correction (success ink mixed), in the well'],
+  ['.pr-x', 'answer miss (danger ink mixed), in the well'],
+  ['.pr-near', 'near miss spelling (warning ink mixed), in the well'],
+  ['.pr-well-fig', 'answer well figure, a rung down'],
+  ['.pr-pin', "a fix's number on the sentence"],
+  ['.pr-missed-kana', "a word missed's reading, under the well"],
+  ['.pr-missed-en', "a word missed's meaning, under the well"],
+  ['.pr-fix-to', "a fix's correction (success ink mixed), leading its row"],
+  ['.pr-why', "a fix's reason, under its correction"],
   ['.pr-badge', 'question type badge (tinted)'],
   ['.pr-cap', 'question cap'],
   ['.pr-note', 'result row note'],

@@ -14,7 +14,9 @@ import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { RunStreak } from '../components/study/RunStreak'
 // The tutor's review, drawn by the component 作文 shares (plan 125).
-import { TutorReview } from '../components/study/TutorReview'
+import { TutorReview, TutorVerdict } from '../components/study/TutorReview'
+import { PointTag, SentenceLead, AnswerWell, CorrectedInPlace } from '../components/study/PracticeCard'
+import { isRomajiAnswer, fixMarks, mostlyKept } from '../domain/answerDiff'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide, LineSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
@@ -495,6 +497,9 @@ function SessionView({
   return (
     <StudyStage
       color={TRANSLATION_COLOR}
+      // One of the four sentence runs: on the desk its floor stands
+      // unframed on the page (index.css, the 机 section's 三面 block).
+      className="stage--sentence"
       onLeave={onBack}
       leaveLabel={backLabel}
       where={t.translationTitle}
@@ -545,9 +550,16 @@ function SessionView({
 
       {stage === 'writing' && data && (
         <>
+          {/* The practice card (plan 185, the owner's pick A): the point
+              the sentence was written for as a tag (a curated sentence
+              alone carries one), and the English to translate in the
+              middle, the one thing on the card. */}
           <CardTransition cardKey={data._uiKey}>
-            <PromptCard prose foot={{ left: where, right: t.translationTitle }}>
-              <span className="prose__en prose__en--lead">{data.translation}</span>
+            <PromptCard page prose>
+              <PointTag point={data.grammar} label={t.pcardUse} />
+              <div className="pcard-group">
+                <span className="pcard-ask" lang={data.translation_lang}>{data.translation}</span>
+              </div>
             </PromptCard>
           </CardTransition>
 
@@ -581,48 +593,55 @@ function SessionView({
 
       {stage === 'feedback' && data && feedback && (
         <>
-          <PromptCard
-            prose
-            foot={{
-              left: where,
-              // What this sentence was chosen to practise. Only a curated
-              // sentence carries it, and a test proves the sentence
-              // contains the point it names -- see
-              // content/reading_sentences.py.
-              right: data.grammar
-                ? <>{t.readingGrammarPoint} · <span lang="ja">{data.grammar}</span></>
-                : t.translationTitle,
-            }}
-          >
-            {/* Opening the breakdown puts the prompt and the reference
-                away -- its rows print the sentence and its translation
-                themselves -- and keeps the learner's answer and the
-                tutor's reading of it, which are the point of this mode. */}
+          {/* The practice card (plan 185, the owner's pick A, then
+              A1): the point's tag, checked or crossed by the tutor's word
+              on it; the reference leading -- the English it was asked
+              from over it, its reading over the kanji, each fix's number
+              on the words it is about, its romaji under -- and the
+              learner's answer in its well with the tutor's verdict at its
+              end, corrected in place when it is Japanese the tutor kept
+              most of; then the notes, each fix leading with what to
+              write. Opening the breakdown puts the tag and the reference
+              away (its rows print the sentence and its translation) and
+              keeps the answer and the tutor's reading of it, which are
+              the point of this mode. */}
+          <PromptCard page prose>
             {!showBreakdown && (
-              <>
-                <span className="prose__en">{data.translation}</span>
-                <span className="prose__rule" />
-              </>
+              <PointTag point={data.grammar} label={t.pcardPoint} used={analysis?.review?.grammar_used} />
             )}
-            <span className="prose__label">{t.yourAnswer}</span>
-            <span className="prose__jp" lang="ja">{answer}</span>
-            {!showBreakdown && (
-              <>
-                <span className="prose__label">{t.reference}</span>
-                <span className="prose__jp" lang="ja">{data.phrase}</span>
-                <span className="prose__romaji">{data.romaji}</span>
-              </>
-            )}
-            <span className="prose__rule" />
-            <span className="prose__label">{t.aiAnalysis}</span>
-            {analysisLoading && <Loading inline copy={t.analyzingTranslation} />}
-            {!analysisLoading && analysis?.review && (
-              <TutorReview review={analysis.review} grammar={data.grammar} t={t} />
-            )}
-            {!analysisLoading && analysis && !analysis.review && (
-              <span className="prose__ai">{analysis.analysis}</span>
-            )}
-            {!analysisLoading && !analysis && <span className="prose__ai">{t.analysisUnavailable}</span>}
+            <div className="pcard-group">
+              {!showBreakdown && (
+                <SentenceLead
+                  ask={data.translation}
+                  askLang={data.translation_lang}
+                  parts={data.furigana}
+                  text={data.phrase}
+                  marks={!analysisLoading && analysis?.review ? fixMarks(data.phrase, analysis.review.fix) : null}
+                  romaji={data.romaji}
+                />
+              )}
+              <AnswerWell aside={!analysisLoading && analysis?.review ? <TutorVerdict review={analysis.review} t={t} /> : null}>
+                {(() => {
+                  const better = !analysisLoading ? analysis?.review?.better : null
+                  if (isRomajiAnswer(answer)) return <span>{answer}</span>
+                  return (
+                    <span lang="ja" className="pcard-answer">
+                      {better && mostlyKept(answer, better)
+                        ? <CorrectedInPlace given={answer} parts={analysis.review.better_parts} />
+                        : answer}
+                    </span>
+                  )
+                })()}
+              </AnswerWell>
+              <div className="pcard-notes">
+              {analysisLoading && <Loading inline copy={t.analyzingTranslation} />}
+              {!analysisLoading && analysis?.review && <TutorReview review={analysis.review} t={t} />}
+              {!analysisLoading && analysis && !analysis.review && (
+                <span className="prose__ai">{analysis.analysis}</span>
+              )}
+              {!analysisLoading && !analysis && <span className="prose__ai">{t.analysisUnavailable}</span>}
+              </div>
+            </div>
 
             {/* The reference, word by word, once the learner has
                 graded themselves -- the same gate and the same button

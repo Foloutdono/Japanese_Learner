@@ -1551,7 +1551,48 @@ runtime purpose. Two consequences worth knowing:
   `components/selection/LevelSelector.jsx`, `RouteStops.jsx`,
   `components/profile/LineLedger.jsx`, `screens/GrammarScreen.jsx` and
   `GrammarScreen.index.browser.test.jsx`).
-  When starting a new wave, begin at **185** or higher, and check
+  **185** is the four sentence runs' cards (reading, translation,
+  dictation, composition; owner-directed; numbered 185 because 184 went
+  to 進捗, the cards in progress counted, while it was open: its commits'
+  messages say 184): first, on the desk, the
+  floor under the card unframed -- the field and Check, the rating bar
+  and Next on the page at the card's edges (StudyStage's
+  `stage--sentence`, the 机 section of `index.css`) -- and the rating
+  bar's misses on a sumi of their own, which the frame's surface had
+  been standing in for (paper in the light theme, under the panel's
+  inks), and comprehension's floor with them (`stage--comprehension`);
+  then the card itself, the owner's pick A, 見本, of four directions on
+  the canvas "Tsuji — the practice cards" (B 照合, C 切符, D 時刻表 set
+  aside): the sentence leading with its furigana (`furigana` on reading's
+  batch and the ride's sentence, `align_sentence`), the answer in a well
+  with its misses marked (`domain/answerDiff.js`), the tutor's verdict at
+  the well or leading its notes, the point a tag, no foot strip
+  (PromptCard's `page`); then, of three small-tweak variants drawn on
+  the same canvas, the owner's A1 (添削, the red pen) with A2.2 and
+  A2.3: a correction written small over what it corrects, the romaji
+  line gone over a romaji well, each miss underlined in the Japanese
+  and a tutor's fix numbered on the words it is about, the fixes
+  leading with the correction, each word missed named under the well
+  with its reading and meaning, and the match a bar along the well's
+  foot -- the misses placed by the sentence's `words`
+  (`study/romaji.sentence_words`, on reading's batch, the ride's
+  sentence and 書取's reveal, there read as the bank reads them:
+  `dictation.bank_words`); and the romaji read as the furigana reads,
+  every correction `reading_context` makes and a number in digits with
+  its counter (十本 juppon, 明日 ashita, 日本語 nihongo, 6本 roppon),
+  where it had its own table for 時 and 分 alone (cited in `routes/reading.py`,
+  `routes/onboarding.py`, `study/romaji.py`, `study/dictation.py`,
+  `tests/test_reading_furigana.py`, `tests/test_sentence_words.py`,
+  `tests/test_romaji_counters.py`,
+  `components/study/PracticeCard.jsx`, `TutorReview.jsx`,
+  `PromptCard.jsx`, `components/reading/ReadingPieces.jsx`,
+  `domain/answerDiff.js`, `screens/ReadingRun.jsx`, `TranslationRun.jsx`,
+  `DictationRun.jsx`, `CompositionRun.jsx`, `RideReading.jsx`,
+  `ComprehensionRun.jsx`, `src/practiceCard.phone.test.jsx`,
+  `src/lines.desktop.test.jsx`, `src/comprehension.desktop.test.jsx` and
+  `index.css` and its 机 section; DESIGN.md, "The practice card" and
+  "The desk").
+  When starting a new wave, begin at **186** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

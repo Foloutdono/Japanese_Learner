@@ -1109,18 +1109,12 @@ const reading = {
   tierLabel:             'Palier {n}',
   jumpToTier:            'Aller au palier…',
 
-  // Les vraies phrases d'exemple n'ont qu'une traduction anglaise,
-  // quelle que soit la langue de l'interface — voir la note
-  // translation_lang de reading.py. Affiché en préfixe court pour ne
-  // pas laisser croire qu'elle correspond à `lang`.
-  translationEnglish:    'EN',
 
   // Source "mes cartes" : affiché à la place d'une phrase quand
   // l'apprenant n'a pas encore assez de vocabulaire en cours/maîtrisé
   // pour une phrase complète.
   notEnoughMasteryWords: "Pas encore assez de mots en cours ou maîtrisés — continue à étudier et reviens pour ce mode.",
 
-  readingGrammarPoint: 'Point de grammaire',
   readingFetchError:    "Impossible de charger une phrase. Réessaie.",
   writeWhatYouSaw:      'Écris ce que tu as vu, en romaji',
   // Le chrono au rythme « Sans limite » (Réglages › Rythme de lecture).
@@ -1132,15 +1126,16 @@ const reading = {
   incorrect:            'Pas tout à fait',
   correctRomaji:        'Romaji attendu',
   yourAnswer:           'Ta réponse',
-  // La part de la phrase retrouvée par le serveur, imprimée à côté de
-  // la réponse de l'apprenant, sur les deux scènes qui en demandent une
-  // (ReadingRun, DictationRun). Une mesure, pas un verdict — le
-  // verdict, c'est la barre de notation sous la carte, et elle lui
-  // appartient.
-  answerMatched:        n => `${n}\u00A0% retrouvé`,
+  // The practice card (plan 185): the grammar point's tag at the card's
+  // top, on the answer and (translation) on the prompt; and, for a screen
+  // reader, what the figure in the answer's well counts and the name of
+  // the words missed under it.
+  pcardPoint:           'Point',
+  pcardUse:             'Avec',
+  pcardMatched:         'retrouvé',
+  pcardMissed:          'Mots manqués',
   nextPhrase:           'Phrase suivante',
   translation:          'Traduction',
-  didYouGetIt:          'Alors, c’était juste ?',
   gradeCorrect:         'C’était juste',
   gradeIncorrect:       'C’était faux',
 
@@ -1187,7 +1182,7 @@ const readingComprehension = {
 // byFrequency*, byMastery*, selectStudySource, selectLevel,
 // selectDomain, selectTier, domainVocabDeck*/domainVocabJmdict*,
 // tierLabel, jumpToTier, submit, loadError, retry, score, streak,
-// translation, translationEnglish, yourAnswer, gradeCorrect/
+// translation, yourAnswer, gradeCorrect/
 // gradeIncorrect, nextPhrase) — seules les clés vraiment nouvelles
 // vivent ici.
 const translationMode = {
@@ -1195,7 +1190,6 @@ const translationMode = {
   translationDesc:       'À toi de le dire en japonais\nUne réponse de référence, et un avis sur la tienne\nDans le sens difficile, exprès',
   translationFetchError: "Impossible de charger une phrase. Réessaie.",
   japanesePlaceholder:   'Écris-la en japonais…',
-  aiAnalysis:            'Analyse IA',
   // L'avis du tuteur en forme fixe, pas en paragraphe (routes/translation.py).
   reviewCorrect:         'Correct',
   reviewAcceptable:      'Acceptable',
@@ -1203,11 +1197,6 @@ const translationMode = {
   reviewIncorrect:       'À revoir',
   reviewGood:            'Ce qui marche',
   reviewFix:             'À corriger',
-  reviewBetter:          'Version corrigée',
-  // Ce que dit la phrase de l'apprenant, dans sa langue : demandé par
-  // 作文 seul, dessiné par components/study/TutorReview.jsx dès qu'un
-  // avis le porte.
-  reviewMeaning:         'Ce que ça dit',
   reviewGrammarUsed:     'utilisé',
   reviewGrammarMissed:   'non utilisé',
   analyzingTranslation:  'Analyse de ta traduction…',
@@ -1217,7 +1206,7 @@ const translationMode = {
 // ── 書取 — la dictée ──────────────────────────────────────────
 // DictationRun.jsx réutilise telles quelles les clés partagées
 // (selectLevel, leaveLevels, stationJlpt, submit, retry, yourAnswer,
-// translation/translationEnglish, nextPhrase, examAudioPause/
+// translation, nextPhrase, examAudioPause/
 // examAudioPending/examAudioUnavailable) — seules les clés vraiment
 // nouvelles vivent ici.
 //
@@ -1241,8 +1230,8 @@ const dictationMode = {
 // ── 作文 — la rédaction (plan 125) ──────────────────────────────
 // CompositionRun.jsx réutilise telles quelles les clés partagées
 // (selectLevel, leaveLevels, stationJlpt, submit, retry, yourAnswer,
-// japanesePlaceholder, aiAnalysis, analysisUnavailable, nextPhrase,
-// readingGrammarPoint, glLesson, les clés review*, celles de la
+// japanesePlaceholder, analysisUnavailable, nextPhrase,
+// pcardPoint, glLesson, les clés review*, celles de la
 // décomposition et de l'explication) — seules les clés vraiment
 // nouvelles vivent ici.
 const compositionMode = {
@@ -1250,12 +1239,6 @@ const compositionMode = {
   compositionDesc:         'Écris une phrase avec le point donné\nUn tuteur te la relit\nDe N5 à N1',
   compositionFetchError:   "Impossible de charger un point de grammaire. Réessaie.",
   compositionPrompt:       'Écris une phrase avec',
-  // Le mot du détecteur, sur l'étiquette de la réponse à côté de « Ta
-  // réponse » : un indice pour la note que l'apprenant donne en
-  // dessous, jamais la note — et rien du tout sur un point que le
-  // détecteur ne sait pas voir.
-  compositionFound:        'point repéré',
-  compositionNotFound:     'point non repéré',
   analyzingComposition:    'Lecture de ta phrase…',
   // Les avis du jour sont épuisés (routes/composition.py, 429). La
   // session continue : l'indice s'affiche toujours et la note compte.

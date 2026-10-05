@@ -8,6 +8,10 @@
 # citation reading, so the compounds whose reading is irregular came
 # back as the sum of their parts. Pinned here because the correction is
 # a table and a table is exactly the thing that quietly loses a row.
+# Since plan 185 the table is the furigana's (study/reading_context.py),
+# which the romaji now reads too, so the two can no longer disagree --
+# ContextTests below holds the words that table puts right beyond the
+# hour and the minute.
 #
 # The app's own hand-written banks are the authority for each figure:
 # content/listening_clips.py writes 九時 くじ, 十分 じゅっぷん and
@@ -16,7 +20,7 @@
 import unittest
 
 from study import morphology
-from study.romaji import sentence_romaji
+from study.romaji import fold, sentence_romaji
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs fugashi/unidic-lite")
@@ -147,11 +151,71 @@ class NotACounterTests(unittest.TestCase):
         self.assertEqual(sentence_romaji("十分に休みました。"), "juubunni yasumimashita.")
 
     def test_the_particles_and_the_weekday_still_work(self) -> None:
-        """The counter fix sits in the same chain as _SAID_KANA and the
-        〜曜日 rendaku, so it is worth proving it did not displace
-        either."""
+        """The reading in context sits in the same chain as _SAID_KANA,
+        and the 〜曜日 rendaku is now the context table's, so it is worth
+        proving neither was lost."""
         self.assertEqual(sentence_romaji("わたしは学生です。"), "watashi wa gakuseidesu.")
         self.assertEqual(sentence_romaji("日よう日に来ます。"), "nichiyoubi ni kimasu.")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs fugashi/unidic-lite")
+class ContextTests(unittest.TestCase):
+    """The romaji reads what the furigana reads (plan 185): every word
+    study/reading_context.py puts right in context, and every number in
+    digits read with its counter (plan 177). Before, the romaji under a
+    sentence said "juupon" where the reading over it said じゅっぽん."""
+
+    def test_the_counters_beyond_the_hour_and_the_minute(self) -> None:
+        for jp, expected in (
+            ("百円の花を十本買いました。", "hyakuen no hana o juppon kaimashita."),
+            ("水を一本ください。", "mizu o ippon kudasai."),
+            ("三本あります。", "sanbon arimasu."),
+            ("七月です。", "shichigatsudesu."),
+            ("この本を一晩で読み通すつもりだ。", "kono hon o hitoban de yomi toosu tsumorida."),
+        ):
+            with self.subTest(jp=jp):
+                self.assertEqual(sentence_romaji(jp), expected)
+
+    def test_a_number_in_digits_is_read(self) -> None:
+        for jp, expected in (
+            ("りんごを6本買いました。", "ringo o roppon kaimashita."),
+            ("100円です。", "hyakuendesu."),
+            ("3日に会いましょう。", "mikka ni aimashou."),
+        ):
+            with self.subTest(jp=jp):
+                self.assertEqual(sentence_romaji(jp), expected)
+
+    def test_the_words_read_by_their_neighbours(self) -> None:
+        for jp, expected in (
+            ("明日、日本語を話します。", "ashita, nihongo o hanashimasu."),
+            ("何をしますか。", "nani o shimasu ka."),
+            ("今、何時ですか。", "ima, nanjidesu ka."),
+            ("世界中を旅しています。", "sekaijuu o tabi shite imasu."),
+            ("お母さんは大きい。", "okaasan wa ookii."),
+        ):
+            with self.subTest(jp=jp):
+                self.assertEqual(sentence_romaji(jp), expected)
+
+    def test_the_romaji_spells_the_furigana(self) -> None:
+        """Word for word, the romaji is the furigana's reading: what is
+        printed over a sentence and under it never disagree."""
+        from study.furigana import align_sentence
+        from study.romaji import to_romaji
+        for jp in ("百円の花を十本買いました。", "明日の朝、駅で待っています。", "6本と3日。"):
+            with self.subTest(jp=jp):
+                reading = "".join(p.get("reading") or p["text"] for p in align_sentence(jp))
+                self.assertEqual(fold(sentence_romaji(jp)), fold(to_romaji(reading)))
+
+    def test_the_dictation_bank_agrees(self) -> None:
+        """書取's romaji is written by hand from what the clip says, so
+        it is the one gold romaji the repo holds. Every line agrees with
+        the generated one but 十分 in 駅までバスで十分です, which UniDic reads
+        as the adverb じゅうぶん, as the furigana does: the tokenizer's call
+        (see test_the_adverb_juubun_is_left_alone)."""
+        from content.listening_clips import BY_LEVEL
+        off = [row["jp"] for rows in BY_LEVEL.values() for row in rows
+               if fold(row["romaji"]) != fold(sentence_romaji(row["jp"]))]
+        self.assertEqual(off, ["駅までバスで十分です。"])
 
 
 if __name__ == "__main__":  # pragma: no cover

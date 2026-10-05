@@ -121,7 +121,13 @@ async function graded(root, at = -1) {
   return root
 }
 
-const measure = root => root.querySelector('.prose__measure')?.textContent ?? null
+// The detector's word, on the point's tag (plan 185): a check where it
+// found the point, a cross where it did not, nothing where it has none.
+const measure = root => {
+  const mark = root.querySelector('.pcard-tag .pcard-tag__used')
+  if (!mark) return null
+  return mark.classList.contains('pcard-tag__used--x') ? 'missed' : 'found'
+}
 
 beforeEach(() => {
   found = true
@@ -154,10 +160,12 @@ describe('CompositionRun', () => {
     expect(params.get('count')).toBe('5')
 
     expect(root.querySelector('.stage__where, .stage__head').textContent).toContain('Rédaction')
-    expect(root.querySelector('.prose__label').textContent).toBe('Écris une phrase avec')
-    expect(root.querySelector('.prose__jp').textContent).toBe('〜ながら')
-    expect(root.querySelector('.prose__romaji').textContent).toBe('V-ます + ながら')
-    expect(root.querySelector('.prose__en').textContent).toBe('en faisant')
+    // The point the one thing on the card (plan 185), its form as its
+    // pieces under it, its meaning under that.
+    expect(root.querySelector('.pcard-lead__jp--point').textContent).toBe('〜ながら')
+    expect([...root.querySelectorAll('.pcard-form__piece')].map(p => p.textContent)).toEqual(['V-ます', 'ながら'])
+    expect(root.querySelector('.pcard-lead__en').textContent).toBe('en faisant')
+    expect(root.querySelector('input').getAttribute('aria-label')).toBe('Écris une phrase avec')
     expect(root.textContent).not.toContain(EXAMPLE)
     // The field takes Japanese, from an IME nothing may second-guess.
     const field = root.querySelector('input')
@@ -191,18 +199,28 @@ describe('CompositionRun', () => {
     const [breakdown] = fetchCalls('/api/phrase/analyze')
     expect(body(breakdown)).toMatchObject({ phrase: SENTENCE, save: false, deep: false, whole: true })
 
-    // The sentence under its label, the detector's word on the label.
-    expect(root.querySelector('.prose__jp').textContent).toBe(SENTENCE)
-    expect(measure(root)).toBe('point repéré')
-    // The tutor's review: the verdict, the point named as used, what
-    // the sentence says, the correction.
-    expect(root.querySelector('.rvw__verdict').textContent).toBe('Acceptable')
-    const badges = [...root.querySelectorAll('.type-badge')].map(b => b.textContent)
-    expect(badges[1]).toContain('〜ながら')
-    expect(badges[1]).toContain('utilisé')
-    expect(root.textContent).toContain('Ce que ça dit')
-    expect(root.textContent).toContain("J'étudie en écoutant de la musique.")
-    expect(root.querySelector('.rvw__better').textContent).toBe('音楽を聞きながら勉強します。')
+    // The point's tag with the detector's word on it; the sentence
+    // leading, corrected in place -- the tutor's change struck and the
+    // right word written small over it, the fix's number after it -- and
+    // what it says under it (plan 185, A1). Written in Japanese, so no
+    // romaji line.
+    expect(root.querySelector('.pcard-tag__jp').textContent).toBe('〜ながら')
+    expect(measure(root)).toBe('found')
+    const lead = root.querySelector('.pcard-lead__jp')
+    const over = lead.querySelector('ruby.pcard-over')
+    expect(over.querySelector('s').textContent).toBe('が')
+    expect(over.querySelector('rt').textContent).toBe('を')
+    expect(lead.querySelector('.pcard-pin').textContent).toBe('1')
+    const bare = lead.cloneNode(true)
+    bare.querySelectorAll('rt, .pcard-pin').forEach(n => n.remove())
+    expect(bare.textContent).toBe('音楽が聞きながら勉強します。')
+    expect(root.querySelector('.pcard-lead__ro')).toBeNull()
+    expect(root.querySelector('.pcard-lead__en').textContent).toBe("J'étudie en écoutant de la musique.")
+    // The notes, led by the tutor's verdict; the fix led by what to
+    // write, numbered as the sentence numbers it.
+    expect(root.querySelector('.rvw__head .rvw__verdict').textContent).toBe('Acceptable')
+    expect(root.querySelector('.rvw__to').textContent).toBe('「音楽を」')
+    expect(root.querySelector('.rvw__row .rvw__n').textContent).toBe('1')
     // The rating bar is up; the breakdown waits for the grade.
     expect(root.querySelector('.rating-bar')).not.toBeNull()
     expect(root.querySelector('.prose__breakdown')).toBeNull()
@@ -211,12 +229,12 @@ describe('CompositionRun', () => {
   it('prints the detector\'s word only where it has one', async () => {
     found = false
     const missed = await answered(await run())
-    expect(measure(missed)).toBe('point non repéré')
+    expect(measure(missed)).toBe('missed')
 
     found = null
     const unsaid = await answered(await run())
     expect(measure(unsaid)).toBeNull()
-    expect(unsaid.querySelector('.prose__label--measured').textContent).toBe('Ta réponse')
+    expect(unsaid.querySelector('.pcard-tag__jp').textContent).toBe('〜ながら')
   })
 
   it('rates on the bar, posts the grade beside the two other opinions, and moves on', async () => {
@@ -249,7 +267,7 @@ describe('CompositionRun', () => {
     expect(root.textContent).toContain('Le tuteur a fini sa journée')
     expect(root.querySelector('.rvw')).toBeNull()
     // The detector still spoke, and the bar still grades.
-    expect(measure(root)).toBe('point repéré')
+    expect(measure(root)).toBe('found')
     await graded(root, 0)
     const [result] = jsonCalls('/api/composition/result')
     expect(body(result)).toMatchObject({ found: true, verdict: null, grammar_used: null })
@@ -272,7 +290,7 @@ describe('CompositionRun', () => {
     await graded(root)
     root.querySelector('.stage__foot .btn-primary').click()
     await settle(60)
-    expect(root.querySelector('.prose__jp').textContent).toBe('〜てみる')
+    expect(root.querySelector('.pcard-lead__jp--point').textContent).toBe('〜てみる')
     // The queue ran to its last point, so the next batch was asked
     // for, naming everything this session has been handed.
     const batches = jsonCalls('/api/composition/batch')

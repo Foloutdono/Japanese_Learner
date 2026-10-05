@@ -42,6 +42,7 @@ from core.lines import clean_lines
 from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL, note_stored_level, resolve_level
 from routes.profile import _profile_row, apply_kana_rule, apply_level_rule, ensure_profile_row
 from routes.reading import _display_seconds, phrase_to_romaji
+from study.furigana import align_sentence
 from routes.vocab import _build_vocab_card
 from srs.models import CardState
 from srs.scheduler import Scheduler
@@ -50,7 +51,7 @@ from study.exam_scoring import flatten_questions, score_attempt
 from study.level_rule import KANA_KNOWN
 from study.modes import resolve as resolve_mode
 from study.placement import build_placement_paper, recommend_level, strip_answers
-from study.romaji import sentence_romaji
+from study.romaji import sentence_romaji, sentence_words
 
 router = APIRouter()
 
@@ -508,6 +509,8 @@ def get_ride(lang: str = "fr", user_id: str = Depends(get_user_id)):
         "sentence": {
             "phrase": jp,
             "romaji": phrase_to_romaji(jp),
+            "furigana": align_sentence(jp),
+            "words": sentence_words(jp),
             "translation": _RIDE_SENTENCE["en"],
             "translation_lang": "en",
             "display_seconds": _display_seconds(jp),

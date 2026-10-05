@@ -208,7 +208,6 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     if (!dryRun) navigate('/today', { replace: true })
   }, [failed, navigate, onDone, dryRun])
 
-  const foot = { left: t.rideJp, right: t.readingTitle }
   const platforms = getAllSections(t).filter(s => Object.values(PASS_PLATFORMS).includes(s.path))
   const callouts = {
     // Untimed, nothing hides: the one callout says both halves.
@@ -276,22 +275,27 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
             untimed={factor == null}
             t={t}
           />
-          <ReadingPrompt cardKey="ride" foot={foot} phrase={sentence.phrase} covered={covered} guide="ride.sentence" />
+          <ReadingPrompt cardKey="ride" phrase={sentence.phrase} covered={covered} guide="ride.sentence" />
           <AnswerForm answer={answer} setAnswer={setAnswer} onSubmit={submit} t={t} guide="ride.answer" />
         </>
       )}
 
       {sentence && measured && (
         <>
-          <PromptCard prose foot={{ left: t.rideJp, right: <>{t.readingGrammarPoint} · <span lang="ja">{sentence.grammar}</span></> }}>
+          {/* The run's practice card (plan 185): the point's tag, the
+              sentence leading, the answer in its well. */}
+          <PromptCard page prose>
             <ReadingRegisters
               phrase={sentence.phrase}
+              parts={sentence.furigana}
+              words={sentence.words}
+              tokens={analysis?.tokens}
               romaji={sentence.romaji}
               translation={sentence.translation}
               translationLang={sentence.translation_lang}
               answer={answer}
               accuracy={accuracy}
-              correct={correct}
+              point={sentence.grammar}
               t={t}
             />
           </PromptCard>

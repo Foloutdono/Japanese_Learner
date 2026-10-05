@@ -150,24 +150,63 @@ describe('TranslationRun', () => {
     expect(calls('/api/translation/analyze')).toHaveLength(0)
   })
 
-  it("draws the tutor's review at a glance: the verdict, what worked, what to fix, the corrected sentence", async () => {
+  it("draws the tutor's review at a glance: the verdict at the answer, the fix numbered and led by what to write, what worked", async () => {
     const root = await answered(await run())
+    // The verdict stands at the end of the answer's well (plan 185).
+    // This answer is not the tutor's line corrected (it kept none of
+    // it), so the well holds it as typed: no corrected line under it.
+    const well = root.querySelector('.pcard-well')
+    expect(well.querySelector('.rvw__verdict').textContent).toBe('En partie')
+    expect(well.querySelector('.rvw__verdict').classList.contains('rvw__verdict--partial')).toBe(true)
+    expect(well.querySelector('.pcard-answer').textContent).toBe('学校は九時からです。')
+    expect(well.querySelector('.pcard-over')).toBeNull()
+    // The notes: the summary, the fix numbered, leading with what to
+    // write and the reason under it (A1.4), what worked as one line.
     const review = root.querySelector('.rvw')
-    expect(review).toBeTruthy()
-    expect(review.querySelector('.rvw__verdict').textContent).toBe('En partie')
-    expect(review.querySelector('.rvw__verdict').classList.contains('rvw__verdict--partial')).toBe(true)
+    expect(review.querySelector('.rvw__verdict')).toBeNull()
     expect(review.querySelector('.rvw__summary').textContent).toBe(REVIEW.summary)
-    expect(review.querySelectorAll('.rvw__mark--ok')).toHaveLength(1)
-    expect(review.querySelectorAll('.rvw__mark--x')).toHaveLength(1)
-    const rows = review.querySelectorAll('.rvw__row')
-    expect(rows[0].querySelector('.rvw__item').textContent).toBe(REVIEW.good[0])
-    expect(rows[1].querySelector('.rvw__item').textContent).toBe(REVIEW.fix[0].issue)
-    expect(rows[1].querySelector('.rvw__fix').textContent).toBe(REVIEW.fix[0].fix)
-    expect(review.querySelector('.rvw__better').textContent).toBe(REVIEW.better)
+    const fix = review.querySelector('.rvw__fixes > .rvw__row')
+    expect(fix.querySelector('.rvw__to').textContent).toBe(REVIEW.fix[0].fix)
+    expect(fix.querySelector('.rvw__why').textContent).toBe(REVIEW.fix[0].issue)
+    expect([...review.querySelectorAll('.rvw__good')].map(g => g.textContent)).toEqual(REVIEW.good)
     // The paragraph is gone: the shape is the review.
     expect(root.querySelector('.prose__ai')).toBeNull()
-    // No grammar point on this phrase, so no used/not-used badge.
-    expect(review.querySelectorAll('.type-badge')).toHaveLength(1)
+    // No grammar point on this phrase, so no tag to say it was used.
+    expect(root.querySelector('.pcard-tag')).toBeNull()
+    // The fix quotes nothing the reference holds: no number on it.
+    expect(root.querySelector('.pcard-lead .pcard-pin')).toBeNull()
+  })
+
+  it('corrects a Japanese answer in place and numbers the fix on the reference\'s words (A1.1, A1.3)', async () => {
+    const review = {
+      verdict: 'partial',
+      summary: 'One particle.',
+      good: [],
+      fix: [{ issue: '「学校が」 makes the school the subject', fix: '「学校は」' }],
+      grammar_used: null,
+      better: '学校は九時からです。',
+      better_parts: [
+        { text: '学校', reading: 'がっこう' }, { text: 'は', highlight: true },
+        { text: '九時', reading: 'くじ' }, { text: 'からです。' },
+      ],
+    }
+    apiFetch.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/translation/batch')) return ok({ phrases: PHRASES })
+      if (u === '/api/translation/analyze') return ok({ review, analysis: review.summary })
+      if (u === '/api/phrase/analyze') return ok(ANALYSIS)
+      return ok({})
+    })
+    const root = await answered(await run(), '学校が九時からです。')
+    const over = root.querySelector('.pcard-well .pcard-over')
+    expect(over.querySelector('s').textContent).toBe('が')
+    expect(over.querySelector('rt').textContent).toBe('は')
+    // On the reference: the words the fix is about underlined, its
+    // number after them.
+    const lead = root.querySelector('.pcard-lead__jp')
+    expect(lead.querySelector('.pcard-hit').textContent).toBe('学校は')
+    expect(lead.querySelector('.pcard-pin').textContent).toBe('1')
+    expect(root.querySelector('.rvw__row .rvw__n').textContent).toBe('1')
   })
 
   it('prints the prose when the model did not answer in the shape', async () => {
@@ -215,18 +254,18 @@ describe('TranslationRun', () => {
     expect(root.querySelector('.bkd__en').textContent).toBe(PHRASES[0].translation)
     // A row per word; the particles are their cards' (plan 160).
     expect(root.querySelectorAll('.bkd-row')).toHaveLength(2)
-    // The reference's romaji register is put away; the sentence is the
-    // breakdown's own line now.
-    expect(root.querySelector('.prose__romaji')).toBeNull()
+    // The reference is put away; the sentence is the breakdown's own
+    // line now.
+    expect(root.querySelector('.pcard-lead')).toBeNull()
     // The tutor's review of the attempt stays: it is the mode's point.
     expect(root.querySelector('.rvw__summary').textContent).toBe(REVIEW.summary)
-    // And so does the learner's own answer.
-    expect(root.textContent).toContain('学校は九時からです。')
+    // And so does the learner's own answer, in its well.
+    expect(root.querySelector('.pcard-well').textContent).toContain('学校は九時からです。')
 
     breakdownButton(root).click()
     await settle(80)
     expect(root.querySelector('.bkd')).toBeNull()
-    expect(root.querySelector('.prose__romaji')).toBeTruthy()
+    expect(root.querySelector('.pcard-lead')).toBeTruthy()
   })
 
   // Plan 096: the row -- not the word in it -- is the door, and what

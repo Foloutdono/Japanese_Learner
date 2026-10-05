@@ -148,24 +148,92 @@ describe('a practice run on three panels', () => {
     expect($('.desk-run__side .bkd')).toBeNull()
   })
 
-  it('frames the floor under the card, and prints no cap on it', async () => {
+  // Unframed since plan 185 (owner-directed): the floor stands on the
+  // page at the card's edges, the card the one panel in the column.
+  it('stands the floor under the card unframed, and prints no cap on it', async () => {
     await reading()
     await settle(300)
     const foot = $('form.stage__foot')
     const stage = $('.stage').getBoundingClientRect()
     const box = foot.getBoundingClientRect()
     expect(Math.abs(box.bottom - stage.bottom)).toBeLessThan(2)
-    expect(getComputedStyle(foot).borderTopStyle).toBe('solid')
+    expect(getComputedStyle(foot).borderTopStyle).toBe('none')
+    expect(getComputedStyle(foot).backgroundColor).toBe('rgba(0, 0, 0, 0)')
     expect(getComputedStyle(foot).position).toBe('static')
+    // The field and Check at the card's own edges.
+    const edge = $('.stage .prompt-card').getBoundingClientRect()
+    expect(Math.abs(box.left - edge.left)).toBeLessThan(1)
+    expect(Math.abs(box.right - edge.right)).toBeLessThan(1)
     // The card grows to what the floor leaves.
     const card = $('.stage .prompt-card').getBoundingClientRect()
     expect(box.top - card.bottom).toBeLessThan(40)
     await grade('denki')
+    // Next, unframed too.
+    expect(getComputedStyle($('.stage__foot')).borderTopStyle).toBe('none')
     expect($('.stage__foot .btn-primary .desk-kbd')).toBeNull()
     expect($('.stage__head .desk-kbd')).toBeNull()
     const caps = $$('.desk-sentences .desk-keys .desk-kbd').map(k => k.textContent)
     // Space first: it shows the sentence the run's play button holds.
     expect(caps).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
+  })
+
+  // The practice card (plan 185, the owner's pick A): the prompt's short
+  // sentence at the display size, the one thing on its card; then the
+  // card with no foot strip, the sentence leading and the answer's well
+  // under it with the miss marked.
+  it('leads with the sentence: the display size on the prompt, the well under it after', async () => {
+    await reading()
+    await settle(300)
+    $('.clip-player__play').click()
+    await settle(40)
+    const sentence = $('.prompt-card--page .sentence')
+    expect(sentence.classList.contains('sentence--lead')).toBe(true)
+    expect(getComputedStyle(sentence).fontSize).toBe('40px')
+    expect($('.prompt-card__foot')).toBeNull()
+
+    await userEvent.keyboard('denki o tsukemasu ka')
+    await userEvent.keyboard('{Enter}')
+    await settle(250)
+    const card = $('.stage > .prompt-card--page')
+    expect($('.prompt-card__foot')).toBeNull()
+    const lead = card.querySelector('.pcard-lead__jp')
+    expect(lead.textContent).toBe(FIRST.phrase)
+    // The heading rung (1.7rem) once there is an answer under it.
+    expect(getComputedStyle(lead).fontSize).toBe('27.2px')
+    const well = card.querySelector('.pcard-well')
+    expect(well.querySelector('.pcard-miss s').textContent).toBe('tsukemasu')
+    expect(well.querySelector('.pcard-miss ins').textContent).toBe('tsukemashou')
+    expect(well.getBoundingClientRect().top).toBeGreaterThan(lead.getBoundingClientRect().bottom)
+    expect(well.getBoundingClientRect().right).toBeLessThanOrEqual(card.getBoundingClientRect().right)
+  })
+
+  // The rating bar unframed with them (plan 185): its misses carry their
+  // own sumi, the ground their panel inks read on -- in the light theme
+  // too, where the frame's surface was paper under them.
+  it('stands the rating bar unframed, its misses on their own sumi in either theme', async () => {
+    for (const theme of [null, 'light']) {
+      if (theme) document.documentElement.setAttribute('data-theme', theme)
+      else document.documentElement.removeAttribute('data-theme')
+      document.body.innerHTML = ''
+      await reading()
+      await settle(300)
+      $('.clip-player__play').click()
+      await settle(20)
+      await userEvent.keyboard('denki')
+      await userEvent.keyboard('{Enter}')
+      await settle(250)
+      const bar = $('.stage > .rating-bar')
+      expect(getComputedStyle(bar).borderTopStyle).toBe('none')
+      expect(getComputedStyle(bar).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+      const misses = $('.rating-bar__misses')
+      const panel = getComputedStyle(document.documentElement).getPropertyValue('--bg-panel').trim()
+      const probe = document.createElement('i')
+      probe.style.color = panel
+      document.body.append(probe)
+      expect(getComputedStyle(misses).backgroundColor).toBe(getComputedStyle(probe).color)
+      probe.remove()
+    }
+    document.documentElement.removeAttribute('data-theme')
   })
 
   it('opens the breakdown as the column\'s panel once graded, and counts the sentence', async () => {

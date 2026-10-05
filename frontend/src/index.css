@@ -12005,7 +12005,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    pair that belongs closest together came out furthest apart — 書取's
    sentence and its romaji measured 23.6px of ink between them against
    ~15px everywhere else, because the line above carries 2.2 of leading
-   for its ruby (see .kaki-line) and eleven of those pixels are empty.
+   for its ruby and eleven of those pixels are empty.
 
    So the gap here is the smallest one on the page: what holds a label
    to the line it names, and a line of Japanese to its own romaji. The
@@ -12040,27 +12040,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-/* The answer's label carries the measurement on its own right: how
-   much of the line the server matched, beside the line it matched
-   against. Not a verdict and deliberately not drawn as one — the
-   verdict is the rating bar under the card, and it is the learner's.
-   In the prose family rather than 書取's own (where it was born)
-   because 読解 prints the same figure from the same measure, and a
-   .kaki- class reused on the reading stage would only say otherwise. */
-.prose__label--measured {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--sp-4);
-}
-.prose__measure {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: normal;
-  text-transform: none;
-  color: var(--text-secondary);
-}
 .prose__en {
   font-family: var(--font-display);
   font-size: var(--fs-lead);
@@ -12090,11 +12069,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   line-height: 1.75;
   white-space: pre-line;
 }
-.prose__romaji {
-  font-family: var(--font-display);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
 .prose__ai {
   font-size: var(--fs-sm);
   line-height: 1.55;
@@ -12102,16 +12076,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   white-space: pre-line;
 }
 .prose__rule { height: 1px; background: var(--border); }
-/* The verdict the learner gives: a pigment as ink, mixed toward the
-   text ink so it reads on the light sheet. */
-.prose__verdict {
-  font-family: var(--font-display);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--text-secondary);
-}
-.prose__verdict--ok { color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
-.prose__verdict--x { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
 .prose__breakdown {
   display: flex;
   flex-direction: column;
@@ -12252,32 +12216,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   transition: transform 0.1s linear;
 }
 
-/* The line in the reveal, carrying its reading as ruby. The reading
-   needs room above the text and .prose's own row gap cannot give it —
-   a ruby annotation is drawn outside the line box, so without this the
-   kana sits on the sentence above.
-
-   Leading is symmetric and the ruby is not: the same ~11.7px opens
-   under the sentence, where nothing is drawn, and it fell between this
-   line and the romaji that reads it — the one pair on the page that
-   should be tightest. The margin gives back most of what the ruby does
-   not use, so the sentence and its romaji sit at the binding gap the
-   rest of the page uses (measured: 23.6px of ink before, 11.6px after,
-   against 11.5px under a label). */
-.kaki-line {
-  line-height: 2.2;
-  margin-bottom: calc(-1 * var(--sp-3));
-}
-/* `.kaki-line rt` and not `.kaki-line ruby > rt`: the dictionary's own
-   rt rules are plain descendants declared further down the sheet, and
-   the child combinator put this one above them in specificity while
-   sitting above them in the file — which is exactly the ordering
-   stylelint refuses. Equal specificity, earlier, is fine. */
-.kaki-line rt {
-  font-size: var(--fs-caption);
-  font-weight: 500;
-  color: var(--text-secondary);
-}
 /* The rail's fill is the state, not the animation: under reduced
    motion it still shows where the clip is, it just stops sliding
    there. Same answer for the roundel's fill on hover. */
@@ -12755,10 +12693,22 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-body);
   line-height: 1.5;
 }
-.rvw__list {
+/* The notes (plan 185): what to fix numbered, its number a roundel in
+   the miss ink -- the number the sentence carries on the words it is
+   about -- each fix leading with what to write instead, in Japanese and
+   the success ink, the reason under it in the quiet register (the
+   owner's A1.4); what was right one quiet line after them, so two
+   fixes outweigh three things that were fine. */
+.rvw__fixes,
+.rvw__right {
   display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rvw__fixes {
   flex-direction: column;
-  gap: var(--sp-2);
+  gap: var(--sp-4);
 }
 .rvw__row {
   display: grid;
@@ -12766,67 +12716,397 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: var(--sp-1) var(--sp-3);
   align-items: baseline;
 }
-.rvw__mark {
-  --mark: var(--text-secondary);
+/* A roundel holding a figure: `normal` leading (DESIGN.md, Figures). */
+.rvw__n {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: var(--r-pill);
-  color: var(--mark);
-  border: 1px solid color-mix(in srgb, var(--mark) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 60%, var(--text-primary));
+  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: normal;
+  font-variant-numeric: tabular-nums;
 }
-.rvw__mark--ok { --mark: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
-.rvw__mark--x { --mark: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+.rvw__to {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+}
 .rvw__item {
   font-size: var(--fs-sm);
   line-height: 1.45;
 }
-.rvw__fix {
+.rvw__why {
   grid-column: 2;
   font-size: var(--fs-sm);
   line-height: 1.45;
   color: var(--text-secondary);
 }
-/* The sentence and its romaji are one object, held together by the
-   binding gap .prose uses for the same pair, inside the review's own
-   wider rhythm. */
-.rvw__corrected {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-}
-.rvw__better {
-  font-family: var(--font-jp);
-  font-size: var(--fs-lead);
-  font-weight: 600;
-  /* Room for the furigana: the leading a ruby line needs, the same
-     .bkd-line takes for the same reason. Without it the readings of
-     one line touch the sentence above them. */
-  line-height: 1.9;
-}
-.rvw__better rt {
-  font-size: var(--fs-caption-xs);
-  font-weight: 500;
+.rvw__right {
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-4);
+  font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
-/* What the tutor changed, picked out IN the corrected sentence — the
-   learner should not have to diff two lines to find the fix. Ink and
-   weight, never a fill: the dictionary's own way of picking a word out
-   of a sentence (.dict-ex__hl), and the rule that colour is an edge or
-   a numeral and never a background (DESIGN.md, Colour). The pigment is
-   the state family's: this is the part that is now right, said in the
-   same ink the ✓ rows and the learner's own "correct" verdict wear. */
-.rvw__fixed {
-  background: none;
+.rvw__good {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+}
+.rvw__tick {
+  flex: none;
+  align-self: center;
   color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
-  font-weight: 700;
 }
 .rvw__verdict--correct { --badge-color: var(--success); }
 .rvw__verdict--acceptable { --badge-color: var(--success); }
 .rvw__verdict--partial { --badge-color: var(--warning); }
 .rvw__verdict--incorrect { --badge-color: var(--danger); }
+
+/* ── 見本 — the practice card (plan 185) ──
+   The owner's pick A of the canvas "Tsuji — the practice cards", for
+   reading, translation, dictation and composition
+   (components/study/PracticeCard.jsx): the sentence leads, centred, the
+   largest line on the card with its reading over the kanji; the
+   learner's answer stands in a well under it, the field it was typed in
+   drawn again, its misses struck and corrected in place; the grammar
+   point is a tag at the card's top; the level left the card for the
+   head. No caption names a line its place already names.
+
+   The page is PromptCard's `page` (a footed card with no strip): it
+   grows as a footed card does, its body top-down, and the sentence and
+   the well stand together in the middle of what the tag leaves
+   (.pcard-group), so a short sentence is not a page of air over it. */
+.pcard-group {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-6);
+}
+/* The point: a caption naming it and the pattern, the line's pigment as
+   its edge (colour is an edge), and a check or a cross for whether the
+   learner's sentence uses it, when the tutor or the detector said. */
+.pcard-tag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-1) var(--sp-4) var(--sp-1) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  box-shadow: inset 3px 0 0 var(--line-color, var(--accent2));
+  line-height: 1.5;
+}
+.pcard-tag__cap {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.pcard-tag__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.pcard-tag__used { flex: none; color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+.pcard-tag__used--x { color: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+/* The sentence, leading. Room in its leading for the readings over it;
+   a line breaks between phrases where the browser can find them
+   (auto-phrase), never inside a word it knows. */
+.pcard-lead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  text-align: center;
+}
+.pcard-lead__ask {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+  margin-bottom: var(--sp-2);
+}
+.pcard-lead__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  font-weight: 500;
+  line-height: 2;
+  letter-spacing: var(--tr-term);
+  text-indent: var(--tr-term);
+  text-wrap: balance;
+  word-break: auto-phrase;
+  line-break: strict;
+  /* The leading is the ruby's room above; the same half opens under
+     the line, where nothing is drawn, and the romaji belongs closer. */
+  margin-bottom: calc(-1 * var(--sp-2));
+}
+/* A composition point, the one thing on its card. */
+.pcard-lead__jp--point { font-weight: 600; }
+/* A reading wider than its kanji is centred over them, and where kana
+   stands on both sides (.pcard-ruby--over, PracticeCard's overhung) it
+   leans on them by half a reading character each side rather than
+   spreading the word apart (勉 強), as the dictionary's examples set it
+   (.dict-ex__ruby--over). */
+.pcard-lead__jp ruby,
+.pcard-answer ruby { ruby-align: center; }
+.pcard-ruby--over rt { margin-inline: -0.5em; }
+.pcard-lead__jp rt {
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+.pcard-lead__ro {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.pcard-lead__en {
+  margin-top: var(--sp-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 500;
+  line-height: 1.45;
+}
+.pcard-lead__en--quiet { color: var(--text-secondary); }
+/* A prompt's line with nothing else on the card: the English to
+   translate, a rung up and in the display face. */
+.pcard-ask {
+  max-width: 24ch;
+  margin-inline: auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-heading);
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  text-wrap: balance;
+}
+/* A composition point's form as its pieces (Vます stem + ながら). */
+.pcard-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+}
+.pcard-form__step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.pcard-form__piece {
+  padding: var(--sp-1) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+}
+/* The answer's well: the field it was typed in, a step down through the
+   card to the page, as .field's base well is. */
+.pcard-well {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-5);
+  border-radius: var(--r-card);
+  background: var(--bg-main);
+}
+.pcard-well__line {
+  flex: 1 1 12rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 500;
+  /* Room over the line for a correction written over it (A1.1). */
+  line-height: 2;
+}
+/* The match (A2.3): its figure a rung under the line's, at the well's
+   end, and a bar along the well's foot, as long as the share matched --
+   the card band's bar (.card-band), in the measure's quiet ink: it is
+   the server's measure, not a verdict. */
+.pcard-well__fig {
+  flex: none;
+  line-height: 1;
+}
+.pcard-well__fig b {
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.pcard-well__fig small { font-size: var(--fs-caption); }
+.pcard-well__meter {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: var(--sp-1);
+  overflow: hidden;
+  border-radius: 0 0 var(--r-card) var(--r-card);
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+}
+.pcard-well__meter i {
+  display: block;
+  height: 100%;
+  background: var(--text-secondary);
+}
+/* The misses, as a teacher marks a page (A1.1): what was written struck
+   in the miss ink and the right word written small over it in the
+   success ink, so the line keeps its length; a long vowel left short
+   underlined in the near ink, its spelling over it in that ink; a word
+   left out written over a caret, a word added struck. Ink and weight,
+   never a fill. */
+.pcard-over { ruby-position: over; }
+.pcard-over rt {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+.pcard-miss s,
+.pcard-extra,
+.pcard-del {
+  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
+  text-decoration-thickness: 2px;
+}
+.pcard-miss ins {
+  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+  text-decoration: none;
+}
+.pcard-miss--near s {
+  color: inherit;
+  text-decoration: underline wavy color-mix(in srgb, var(--warning) 70%, transparent);
+  text-underline-offset: 4px;
+}
+.pcard-miss--near ins { color: color-mix(in srgb, var(--warning) 60%, var(--text-primary)); }
+/* The caret is drawn, not written: the answer's text is what was typed
+   and what was given, nothing else. */
+.pcard-caret::before {
+  content: "‸";
+  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+  font-weight: 700;
+}
+/* Each miss underlined in the Japanese too, where the word stands
+   (A1.3): the miss ink, or the near ink's wave; and a tutor's fix
+   numbered after the words it is about, the number its row carries
+   (.rvw__n's roundel, a rung smaller). */
+.pcard-hit {
+  text-decoration: underline 2px;
+  text-underline-offset: 0.3em;
+  text-decoration-skip-ink: none;
+}
+.pcard-hit--x { text-decoration-color: color-mix(in srgb, var(--danger) 80%, transparent); }
+.pcard-hit--near {
+  text-decoration-color: color-mix(in srgb, var(--warning) 80%, transparent);
+  text-decoration-style: wavy;
+}
+.pcard-pinned { white-space: nowrap; }
+/* A phrase of the sentence (answerDiff's phrases): the line breaks
+   between phrases and never inside one -- an atomic box, which only a
+   phrase wider than the whole line breaks inside. Its first line takes
+   no indent of the lead's own. */
+.pcard-unit {
+  display: inline-block;
+  text-indent: 0;
+}
+.pcard-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-inline-start: 2px;
+  border: 1px solid color-mix(in srgb, var(--danger) 60%, var(--text-primary));
+  border-radius: var(--r-pill);
+  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: 0;
+  text-indent: 0;
+  vertical-align: super;
+  font-variant-numeric: tabular-nums;
+}
+/* The words missed, under the well (A2.2): each the word, its reading
+   and its meaning, the miss ink as its edge. */
+.pcard-misses {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pcard-missed {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0 var(--sp-3);
+  padding: var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--danger) 70%, transparent);
+}
+.pcard-missed__jp {
+  grid-row: span 2;
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.pcard-missed__kana {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.pcard-missed__en {
+  font-size: var(--fs-sm);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+/* The notes under the sentence (translation, composition), in the
+   group with it, so a short review stands under what it reviews rather
+   than at the card's foot. */
+.pcard-notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.pcard-well > .rvw__verdict { flex: none; white-space: nowrap; }
+/* The sentence a reading run shows, broken as the lead's is. */
+.prompt-card--page .sentence {
+  text-wrap: balance;
+  word-break: auto-phrase;
+  line-break: strict;
+}
+/* A phone's line holds some fourteen characters at the title rung and
+   eleven at the heading's: the sentence steps down a rung there, where
+   the card is the stage's whole width. */
+@media (max-width: 768px) {
+  .pcard-lead__jp,
+  .prompt-card--page .sentence { font-size: var(--fs-title); }
+  /* A point is a few characters, the one thing on its card. */
+  .pcard-lead__jp.pcard-lead__jp--point { font-size: var(--fs-heading); }
+}
 /* Two actions side by side, the filled one forward: equal columns,
    as the browse foot's pair is drawn (a flex split keeps the two
    buttons' border difference). On the stage's foot (a flex column)
@@ -13960,6 +14240,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: 0;
   min-width: 0;
   overflow: hidden;
+  /* Its own sumi (plan 185). The words are the panel's inks, which
+     only read on sumi; the ground had been the wrapper's -- the
+     phone's dock, the desk floor's frame -- and the frame is
+     --surface, paper in the light theme, where the misses' words
+     stood at about 1.3:1. On the dock this is the dock's own ink. */
+  background: var(--bg-panel);
   outline: 1px solid color-mix(in srgb, var(--text-on-panel) 14%, transparent);
   outline-offset: -1px;
   border-radius: var(--r-panel);
@@ -15342,7 +15628,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* One rung up from --fs-caption-xs, and medium: at 9.9px ご's dakuten
    were one smudge, and ご read as こ (see .dict-plate__word rt). The
    rung and weight 書取's line already sets over the same --fs-lead
-   sentence (.kaki-line rt), not the plate's --fs-sm: running text
+   sentence (.pcard-lead__jp rt), not the plate's --fs-sm: running text
    cannot afford it. A two-kana reading at this rung (23px) already
    widens the 18px kanji under it by a few pixels. */
 .dict-ex__jp rt {
@@ -17560,6 +17846,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .prompt-card--footed .prompt-card__body--prose {
   align-items: stretch;
   justify-content: flex-start;
+  padding: var(--sp-5);
+}
+/* The practice card's page (plan 185, PromptCard's `page`): the footed
+   card's growth with no strip, top-down, its pieces a rung apart -- the
+   point's tag, then the sentence and the well (.pcard-group). */
+.prompt-card--footed .prompt-card__body--page {
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--sp-4);
   padding: var(--sp-5);
 }
 
@@ -33134,7 +33429,7 @@ button.brd-stn { cursor: pointer; }
      kept their readings in a selection, where the plate, the examples,
      the tiles and the fill sentence already let them go. On the desk
      only, so the phone stays as it is. */
-  :is(.rvw__better, .kaki-line, .bkd-line, .bkd-row__word, .dict-word__jp, .furigana-word) rt { user-select: none; }
+  :is(.pcard-lead__jp, .bkd-line, .bkd-row__word, .dict-word__jp, .furigana-word) rt { user-select: none; }
   /* Every hover has its focus twin (DESIGN.md, Controls) on the surfaces
      the desk sets in its pages and columns: a keyboard reader was given
      the global ring and none of what the pointer is shown -- the answer
@@ -34153,6 +34448,29 @@ button.brd-stn { cursor: pointer; }
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
+  /* The practice runs' floor stands on the page (plan 185, owner-
+     directed: "remove the box encapsulating the next button and
+     rating bar", then "from comprehension too"). Reading, translation,
+     dictation and composition (StudyStage's `stage--sentence`) and
+     comprehension (`stage--comprehension`): the field and Check, the rating
+     bar, Next and the review's pair under the card at its edges, with
+     no surface, hairline or corner of their own -- the card is the one
+     panel in the column. The bar's misses keep their sumi
+     (.rating-bar__misses), which is what the frame's surface had been
+     standing in for. */
+  .desk-run--panels > .stage:is(.stage--sentence, .stage--comprehension) > .stage__foot:not(.browse-nav),
+  .desk-run--panels > .stage.stage--sentence > .rating-bar {
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+  }
+  /* The practice card's one line a rung up on the desk (plan 185): a
+     short sentence to read and a composition point are the only thing
+     on their card, and the desk's column has the room for the display
+     size the phone's has not. */
+  .prompt-card--page .sentence--lead,
+  .pcard-lead__jp--point { font-size: var(--fs-display); }
   /* An entry's floor is one row (plan 157): the answer typed beside the
      key that hands it in, as 問's well stands beside its send -- the
      field at Check's 56px, Check at its word's width. */
@@ -34174,7 +34492,7 @@ button.brd-stn { cursor: pointer; }
      they step down, as .field's own well does on anything raised. */
   .import-modal .field--page,
   .desk-settings__page .slip .field--page,
-  .desk-run--panels > .stage > .stage__foot .field--page { --field-well: var(--bg-main); }
+  .desk-run--panels > .stage:not(.stage--sentence) > .stage__foot .field--page { --field-well: var(--bg-main); }
 
   /* The run's lines: the list takes the panel's height and scrolls in
      it, newest at its foot; the keys and the rhythm keep the panel's

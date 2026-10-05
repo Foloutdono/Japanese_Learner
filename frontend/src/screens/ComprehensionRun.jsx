@@ -528,7 +528,9 @@ export default function ComprehensionRun({ session }) {
       // The reading stage is the one that holds a page: it is bounded
       // to the screen so the passage scrolls in its own card rather
       // than taking the stage with it (index.css, .prompt-card--passage).
-      className={stage === 'reading' ? 'stage--passage' : ''}
+      // `stage--comprehension` stands its floor unframed on the desk, as
+      // the four sentence runs' does (plan 185; the 机 section's 三面).
+      className={stage === 'reading' ? 'stage--comprehension stage--passage' : 'stage--comprehension'}
     >
       {/* A long wait (the text is written on demand) owes a sentence;
           the dots carry it (plan 067). */}

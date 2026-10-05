@@ -1151,16 +1151,11 @@ const reading = {
   tierLabel:             'Tier {n}',
   jumpToTier:            'Jump to tier…',
 
-  // Real example sentences only carry an English translation, whatever
-  // the UI language — see reading.py's translation_lang note. Shown as
-  // a short prefix so it doesn't read as if it matched `lang`.
-  translationEnglish:    'EN',
 
   // Mastery source: shown instead of a phrase when the learner doesn't
   // have enough learning/mastered vocabulary yet for a full sentence.
   notEnoughMasteryWords: 'Not enough words in learning or mastered state yet — keep studying and check back for this mode.',
 
-  readingGrammarPoint: 'Grammar point',
   readingFetchError:    "Couldn't load a phrase. Try again.",
   writeWhatYouSaw:      'Write what you saw, in romaji',
   // The clock at the "No limit" pace (Settings › Reading pace).
@@ -1172,14 +1167,16 @@ const reading = {
   incorrect:            'Not quite',
   correctRomaji:        'Correct romaji',
   yourAnswer:           'Your answer',
-  // How much of the line the server matched, printed beside the
-  // learner's own answer on both stages that ask for one (ReadingRun,
-  // DictationRun). A measurement, not a verdict — the verdict is the
-  // rating bar under the card, and it is theirs.
-  answerMatched:        n => `${n}% matched`,
+  // The practice card (plan 185): the grammar point's tag at the card's
+  // top, on the answer and (translation) on the prompt; and, for a screen
+  // reader, what the figure in the answer's well counts and the name of
+  // the words missed under it.
+  pcardPoint:           'Point',
+  pcardUse:             'Use',
+  pcardMatched:         'matched',
+  pcardMissed:          'Words missed',
   nextPhrase:           'Next phrase',
   translation:          'Translation',
-  didYouGetIt:          'Did you get it right?',
   gradeCorrect:         'I got it right',
   gradeIncorrect:       'I got it wrong',
 
@@ -1224,7 +1221,7 @@ const readingComprehension = {
 // for everything the two screens share (byLevel*, byFrequency*,
 // byMastery*, selectStudySource, selectLevel, selectDomain, selectTier,
 // domainVocabDeck*/domainVocabJmdict*, tierLabel, jumpToTier, submit,
-// loadError, retry, score, streak, translation, translationEnglish,
+// loadError, retry, score, streak, translation,
 // yourAnswer, gradeCorrect/gradeIncorrect, nextPhrase) — only the
 // genuinely new keys live here.
 const translationMode = {
@@ -1232,7 +1229,6 @@ const translationMode = {
   translationDesc:       'Put it into Japanese yourself\nA reference answer, and a read on yours\nThe hard direction, on purpose',
   translationFetchError: "Couldn't load a phrase. Try again.",
   japanesePlaceholder:   'Write it in Japanese…',
-  aiAnalysis:            'AI analysis',
   // The tutor's review as a shape, not a paragraph (routes/translation.py).
   reviewCorrect:         'Correct',
   reviewAcceptable:      'Acceptable',
@@ -1240,11 +1236,6 @@ const translationMode = {
   reviewIncorrect:       'Incorrect',
   reviewGood:            'What worked',
   reviewFix:             'To fix',
-  reviewBetter:          'Corrected',
-  // What the learner's own sentence says, in their language: asked for
-  // by 作文 alone, drawn by components/study/TutorReview.jsx wherever a
-  // review carries it.
-  reviewMeaning:         'What it says',
   reviewGrammarUsed:     'used',
   reviewGrammarMissed:   'not used',
   analyzingTranslation:  'Analyzing your translation…',
@@ -1253,7 +1244,7 @@ const translationMode = {
 // ── 書取 — dictation ──────────────────────────────────────────
 // DictationRun.jsx reuses the shared study/quiz keys wholesale
 // (selectLevel, leaveLevels, stationJlpt, submit, retry, yourAnswer,
-// translation/translationEnglish, nextPhrase, examAudioPause/
+// translation, nextPhrase, examAudioPause/
 // examAudioPending/examAudioUnavailable) — only the genuinely new
 // keys live here.
 //
@@ -1277,19 +1268,14 @@ const dictationMode = {
 // ── 作文 — composition (plan 125) ───────────────────────────────
 // CompositionRun.jsx reuses the shared keys wholesale (selectLevel,
 // leaveLevels, stationJlpt, submit, retry, yourAnswer,
-// japanesePlaceholder, aiAnalysis, analysisUnavailable, nextPhrase,
-// readingGrammarPoint, glLesson, the review* keys, the breakdown and
+// japanesePlaceholder, analysisUnavailable, nextPhrase,
+// pcardPoint, glLesson, the review* keys, the breakdown and
 // explain keys) — only the genuinely new keys live here.
 const compositionMode = {
   compositionTitle:        'Composition',
   compositionDesc:         'Write a sentence with the point you are shown\nA tutor reads it back to you\nN5 through N1',
   compositionFetchError:   "Couldn't load a grammar point. Try again.",
   compositionPrompt:       'Write a sentence using',
-  // The detector's word, on the answer's own label beside "Your answer":
-  // a hint for the learner grading below, never the grade — and nothing
-  // at all on a point the detector is not trusted on.
-  compositionFound:        'point found',
-  compositionNotFound:     'point not found',
   analyzingComposition:    'Reading your sentence…',
   // The day's reviews are spent (routes/composition.py, 429). The run
   // goes on: the check still prints and the rating still counts.
