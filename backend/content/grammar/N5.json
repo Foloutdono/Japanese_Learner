@@ -1768,7 +1768,90 @@
         "fr": "Cette personne n'a pas d'argent.",
         "register": "casual"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "今、お金がない。",
+        "ask": {
+          "en": "ない stands alone here, with no verb before it. What does it say?",
+          "fr": "Ici, ない est seul, sans verbe devant. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "I have no money right now.",
+            "fr": "Je n'ai pas d'argent en ce moment."
+          },
+          {
+            "en": "I don't want money right now.",
+            "fr": "Je ne veux pas d'argent en ce moment."
+          },
+          {
+            "en": "Please don't give me money now.",
+            "fr": "Ne me donne pas d'argent maintenant."
+          }
+        ],
+        "why": {
+          "en": "The plain negative of ある is just ない: お金がある, お金がない.",
+          "fr": "La forme négative neutre de ある est simplement ない : お金がある, お金がない."
+        },
+        "pair": [
+          "お金がある",
+          "お金がない"
+        ]
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A friend",
+          "fr": "Un ami"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "電車、来ないね。",
+            "en": "The train isn't coming, is it?",
+            "fr": "Le train n'arrive pas, hein ?"
+          },
+          {
+            "who": "me",
+            "jp": "うん、まだ来ない。",
+            "en": "No, still not here.",
+            "fr": "Non, toujours pas."
+          },
+          {
+            "who": "them",
+            "jp": "じゃあ、パンを買う。",
+            "en": "Then I'll buy some bread.",
+            "fr": "Bon, je vais acheter du pain."
+          }
+        ],
+        "note": {
+          "en": "Between friends, ない is the plain negative; with a clerk you would say ません.",
+          "fr": "Entre amis, ない est la négation neutre ; avec un employé, on dirait ません."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "パン、食べる？",
+            "en": "Want some bread?",
+            "fr": "Tu veux du pain ?"
+          },
+          "task": {
+            "en": "Tell him no, you won't have any.",
+            "fr": "Dis-lui que non, tu n'en mangeras pas."
+          },
+          "choices": [
+            "ううん、食べない。",
+            "ううん、食べる。",
+            "ううん、食べたい。"
+          ],
+          "why": {
+            "en": "You say you won't eat: the plain negative, 食べない.",
+            "fr": "Tu dis que tu ne manges pas : la négation neutre, 食べない."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "た形 〜た",
@@ -1833,7 +1916,96 @@
         "fr": "Il a plu, alors je suis resté à la maison.",
         "register": "written"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "日本に行ったことがある。",
+        "ask": {
+          "en": "た is followed by ことがある here. What does it add?",
+          "fr": "Ici, た est suivi de ことがある. Qu'est-ce que ça ajoute ?"
+        },
+        "choices": [
+          {
+            "en": "I have been to Japan before.",
+            "fr": "Je suis déjà allé au Japon."
+          },
+          {
+            "en": "I went to Japan yesterday.",
+            "fr": "Je suis allé au Japon hier."
+          },
+          {
+            "en": "I want to go to Japan.",
+            "fr": "Je veux aller au Japon."
+          }
+        ],
+        "why": {
+          "en": "た alone says it happened; with ことがある it says you have done it at least once.",
+          "fr": "た seul dit que c'est arrivé ; avec ことがある, qu'on l'a fait au moins une fois."
+        },
+        "pair": [
+          "日本に行った",
+          "日本に行ったことがある"
+        ]
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A friend",
+          "fr": "Une amie"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "おそいね。どうしたの？",
+            "en": "You're late. What happened?",
+            "fr": "Tu es en retard. Qu'est-ce qui s'est passé ?"
+          },
+          {
+            "who": "me",
+            "jp": "ごめん、ねぼうした。",
+            "en": "Sorry, I overslept.",
+            "fr": "Désolé, je me suis réveillé trop tard."
+          },
+          {
+            "who": "them",
+            "jp": "あさごはん、食べた？",
+            "en": "Did you have breakfast?",
+            "fr": "Tu as pris ton petit-déjeuner ?"
+          },
+          {
+            "who": "me",
+            "jp": "うん、パンを食べた。",
+            "en": "Yes, I had some bread.",
+            "fr": "Oui, j'ai mangé du pain."
+          }
+        ],
+        "note": {
+          "en": "Between friends, た is the plain past; with a clerk it would be ました.",
+          "fr": "Entre amis, た est le passé neutre ; avec un employé, ce serait ました."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "きっぷ、もう買った？",
+            "en": "Have you bought your ticket yet?",
+            "fr": "Tu as déjà acheté ton billet ?"
+          },
+          "task": {
+            "en": "Tell her yes, you bought it.",
+            "fr": "Dis-lui que oui, tu l'as acheté."
+          },
+          "choices": [
+            "うん、買った。",
+            "うん、買う。",
+            "うん、買って。"
+          ],
+          "why": {
+            "en": "It is already done: the plain past, 買った.",
+            "fr": "C'est déjà fait : le passé neutre, 買った."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜たいです",
@@ -2057,7 +2229,90 @@
         "fr": "Entrez, je vous en prie.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "ここに入らないでください。",
+        "ask": {
+          "en": "ないでください here. What is asked?",
+          "fr": "Ici, ないでください. Que demande-t-on ?"
+        },
+        "choices": [
+          {
+            "en": "Please don't come in here.",
+            "fr": "Merci de ne pas entrer ici."
+          },
+          {
+            "en": "Please come in here.",
+            "fr": "Entrez ici, s'il vous plaît."
+          },
+          {
+            "en": "You may come in here.",
+            "fr": "Vous pouvez entrer ici."
+          }
+        ],
+        "why": {
+          "en": "てください asks someone to do; ないでください asks them not to.",
+          "fr": "てください demande de faire ; ないでください demande de ne pas faire."
+        },
+        "pair": [
+          "入ってください",
+          "入らないでください"
+        ]
+      },
+      "scene": {
+        "place": "窓口",
+        "them": {
+          "en": "Clerk",
+          "fr": "Agent"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "いらっしゃいませ。",
+            "en": "Hello.",
+            "fr": "Bonjour."
+          },
+          {
+            "who": "me",
+            "jp": "おおさかまで一まい、おねがいします。",
+            "en": "One to Osaka, please.",
+            "fr": "Un pour Osaka, s'il vous plaît."
+          },
+          {
+            "who": "them",
+            "jp": "はい、すこしまってください。",
+            "en": "Certainly, please wait a moment.",
+            "fr": "Bien, patientez un instant, s'il vous plaît."
+          }
+        ],
+        "note": {
+          "en": "てください asks for an action (まってください); をください asks for a thing.",
+          "fr": "てください demande une action (まってください) ; をください demande une chose."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "一万三千六百円です。",
+            "en": "That's thirteen thousand six hundred yen.",
+            "fr": "Ça fait treize mille six cents yens."
+          },
+          "task": {
+            "en": "You didn't catch it. Ask him to say it slowly.",
+            "fr": "Tu n'as pas compris. Demande-lui de le dire lentement."
+          },
+          "choices": [
+            "すみません、ゆっくり言ってください。",
+            "すみません、ゆっくり言わないでください。",
+            "すみません、ゆっくり言ってもいいですか。"
+          ],
+          "why": {
+            "en": "You ask him to do something: the て-form with ください.",
+            "fr": "Tu lui demandes de faire quelque chose : la forme en て avec ください."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜ています",
@@ -2130,7 +2385,86 @@
         "fr": "Connaissez-vous le nom de cette personne ?",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "あにはけっこんしています。",
+        "ask": {
+          "en": "What does ています say here?",
+          "fr": "Que dit ています ici ?"
+        },
+        "choices": [
+          {
+            "en": "My brother is married.",
+            "fr": "Mon frère est marié."
+          },
+          {
+            "en": "My brother is getting married right now.",
+            "fr": "Mon frère est en train de se marier."
+          },
+          {
+            "en": "My brother will get married.",
+            "fr": "Mon frère va se marier."
+          }
+        ],
+        "why": {
+          "en": "After a change like けっこんする, ています is the state it left: he is married.",
+          "fr": "Après un changement comme けっこんする, ています dit l'état qui reste : il est marié."
+        }
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A colleague, on the phone",
+          "fr": "Une collègue, au téléphone"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "もしもし、今どこですか。",
+            "en": "Hello, where are you now?",
+            "fr": "Allô, tu es où ?"
+          },
+          {
+            "who": "me",
+            "jp": "駅で電車をまっています。",
+            "en": "I'm waiting for the train at the station.",
+            "fr": "J'attends le train à la gare."
+          },
+          {
+            "who": "them",
+            "jp": "そうですか。わたしはもう電車にのっています。",
+            "en": "I see. I'm already on the train.",
+            "fr": "D'accord. Moi, je suis déjà dans le train."
+          }
+        ],
+        "note": {
+          "en": "ています says what is going on right now; ました would say it is over.",
+          "fr": "ています dit ce qui se passe en ce moment ; ました dirait que c'est fini."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "そちらは雨がふっていますか。",
+            "en": "Is it raining where you are?",
+            "fr": "Il pleut, chez toi ?"
+          },
+          "task": {
+            "en": "Tell her yes, it is raining.",
+            "fr": "Dis-lui que oui, il pleut."
+          },
+          "choices": [
+            "はい、ふっています。",
+            "はい、ふりました。",
+            "はい、ふります。"
+          ],
+          "why": {
+            "en": "It is raining at this moment: ています.",
+            "fr": "Il pleut en ce moment : ています."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜てもいいです",
@@ -2197,7 +2531,90 @@
         "fr": "Vous pouvez écrire au crayon.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "きっぷを買わなくてもいいです。",
+        "ask": {
+          "en": "なくてもいいです here. What does it say?",
+          "fr": "Ici, なくてもいいです. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "You don't have to buy a ticket.",
+            "fr": "Pas besoin d'acheter de billet."
+          },
+          {
+            "en": "You may buy a ticket.",
+            "fr": "Vous pouvez acheter un billet."
+          },
+          {
+            "en": "You must not buy a ticket.",
+            "fr": "Il ne faut pas acheter de billet."
+          }
+        ],
+        "why": {
+          "en": "てもいいです: you may do it. なくてもいいです: you may skip it.",
+          "fr": "てもいいです : on peut le faire. なくてもいいです : on peut s'en passer."
+        },
+        "pair": [
+          "買ってもいいです",
+          "買わなくてもいいです"
+        ]
+      },
+      "scene": {
+        "place": "車内",
+        "them": {
+          "en": "A passenger",
+          "fr": "Une passagère"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、ここにすわってもいいですか。",
+            "en": "Excuse me, may I sit here?",
+            "fr": "Excusez-moi, je peux m'asseoir ici ?"
+          },
+          {
+            "who": "them",
+            "jp": "はい、どうぞ。",
+            "en": "Yes, go ahead.",
+            "fr": "Oui, je vous en prie."
+          },
+          {
+            "who": "them",
+            "jp": "にもつは上においてもいいですよ。",
+            "en": "You can put your bag up there.",
+            "fr": "Vous pouvez mettre votre bagage en haut."
+          }
+        ],
+        "note": {
+          "en": "てもいいですか asks permission; てはいけません would forbid.",
+          "fr": "てもいいですか demande la permission ; てはいけません interdirait."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "あついですね。",
+            "en": "It's hot, isn't it?",
+            "fr": "Il fait chaud, hein ?"
+          },
+          "task": {
+            "en": "Ask her whether you may open the window.",
+            "fr": "Demande-lui si tu peux ouvrir la fenêtre."
+          },
+          "choices": [
+            "まどをあけてもいいですか。",
+            "まどをあけなくてもいいですか。",
+            "まどをあけなければなりませんか。"
+          ],
+          "why": {
+            "en": "You ask for permission: the て-form with もいいですか.",
+            "fr": "Tu demandes la permission : la forme en て avec もいいですか."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜てはいけません",
@@ -2264,7 +2681,90 @@
         "fr": "Il ne faut pas mentir.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "ここで電話をしないでください。",
+        "ask": {
+          "en": "This is ないでください. How does it differ from てはいけません?",
+          "fr": "Ici, c'est ないでください. En quoi est-ce différent de てはいけません ?"
+        },
+        "choices": [
+          {
+            "en": "It asks you, politely, not to phone.",
+            "fr": "On vous demande poliment de ne pas téléphoner."
+          },
+          {
+            "en": "It says you may phone here.",
+            "fr": "On vous dit que vous pouvez téléphoner ici."
+          },
+          {
+            "en": "It says you need not phone.",
+            "fr": "On vous dit qu'il n'est pas utile de téléphoner."
+          }
+        ],
+        "why": {
+          "en": "てはいけません states the rule; ないでください is someone asking you to keep it.",
+          "fr": "てはいけません énonce la règle ; ないでください, c'est quelqu'un qui vous demande de la suivre."
+        },
+        "pair": [
+          "電話をしてはいけません",
+          "電話をしないでください"
+        ]
+      },
+      "scene": {
+        "place": "待合室",
+        "them": {
+          "en": "A traveller",
+          "fr": "Une voyageuse"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "すみません、ここで電話をしてもいいですか。",
+            "en": "Excuse me, may I make a call here?",
+            "fr": "Excusez-moi, je peux téléphoner ici ?"
+          },
+          {
+            "who": "me",
+            "jp": "いいえ、ここで電話をしてはいけません。",
+            "en": "No, you must not make calls here.",
+            "fr": "Non, il est interdit de téléphoner ici."
+          },
+          {
+            "who": "them",
+            "jp": "そうですか。ありがとうございます。",
+            "en": "I see. Thank you.",
+            "fr": "Ah bon. Merci."
+          }
+        ],
+        "note": {
+          "en": "てはいけません forbids; てもいいです would allow.",
+          "fr": "てはいけません interdit ; てもいいです permettrait."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "あれは何ですか。",
+            "en": "What's that, over there?",
+            "fr": "C'est quoi, ça, là-bas ?"
+          },
+          "task": {
+            "en": "It's a sign. Tell her it says you must not smoke here.",
+            "fr": "C'est un panneau. Dis-lui qu'il est interdit de fumer ici."
+          },
+          "choices": [
+            "ここでたばこをすってはいけません。",
+            "ここでたばこをすってもいいです。",
+            "ここでたばこをすわなくてもいいです。"
+          ],
+          "why": {
+            "en": "A rule that forbids: the て-form with はいけません.",
+            "fr": "Une règle qui interdit : la forme en て avec はいけません."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜ことができます",
@@ -2331,7 +2831,90 @@
         "fr": "Hier, je n'ai pas pu bien dormir.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "日本語がすこし話せます。",
+        "ask": {
+          "en": "No ことができます here, but the same idea. What does it say?",
+          "fr": "Pas de ことができます ici, mais la même idée. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "I can speak a little Japanese.",
+            "fr": "Je sais parler un peu japonais."
+          },
+          {
+            "en": "I speak Japanese well.",
+            "fr": "Je parle bien japonais."
+          },
+          {
+            "en": "I want to speak a little Japanese.",
+            "fr": "Je veux parler un peu japonais."
+          }
+        ],
+        "why": {
+          "en": "話せます is the short everyday form (N4) of 話すことができます.",
+          "fr": "話せます est la forme courte de tous les jours (N4) de 話すことができます."
+        },
+        "pair": [
+          "話すことができます",
+          "話せます"
+        ]
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeur"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、カードをつかうことができますか。",
+            "en": "Excuse me, can I use a card?",
+            "fr": "Excusez-moi, je peux payer par carte ?"
+          },
+          {
+            "who": "them",
+            "jp": "はい、つかうことができます。",
+            "en": "Yes, you can.",
+            "fr": "Oui, c'est possible."
+          },
+          {
+            "who": "me",
+            "jp": "よかった。",
+            "en": "Great.",
+            "fr": "Tant mieux."
+          }
+        ],
+        "note": {
+          "en": "ことができます says you can; が上手です would say you do it well.",
+          "fr": "ことができます dit qu'on peut ; が上手です dirait qu'on le fait bien."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "ほかに何かありますか。",
+            "en": "Anything else?",
+            "fr": "Autre chose ?"
+          },
+          "task": {
+            "en": "Ask him whether you can top up your travel card here.",
+            "fr": "Demande-lui si tu peux recharger ta carte de transport ici."
+          },
+          "choices": [
+            "ここでチャージすることができますか。",
+            "ここでチャージすることがありますか。",
+            "ここでチャージしたことがありますか。"
+          ],
+          "why": {
+            "en": "You ask whether it is possible: the dictionary form with ことができます.",
+            "fr": "Tu demandes si c'est possible : la forme du dictionnaire avec ことができます."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜ないでください",
@@ -2398,7 +2981,90 @@
         "fr": "Ne vous inquiétez pas.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "今日はきっぷを見せなくてもいいです。",
+        "ask": {
+          "en": "なくてもいいです, not ないでください. What does it say?",
+          "fr": "なくてもいいです, et pas ないでください. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "You don't need to show your ticket today.",
+            "fr": "Pas besoin de montrer votre billet aujourd'hui."
+          },
+          {
+            "en": "Please don't show your ticket today.",
+            "fr": "Ne montrez pas votre billet aujourd'hui."
+          },
+          {
+            "en": "You must show your ticket today.",
+            "fr": "Il faut montrer votre billet aujourd'hui."
+          }
+        ],
+        "why": {
+          "en": "ないでください tells you not to; なくてもいいです says you need not.",
+          "fr": "ないでください dit de ne pas le faire ; なくてもいいです dit que ce n'est pas obligatoire."
+        },
+        "pair": [
+          "見せないでください",
+          "見せなくてもいいです"
+        ]
+      },
+      "scene": {
+        "place": "車内",
+        "them": {
+          "en": "A passenger",
+          "fr": "Une passagère"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "すみません、ここにすわってもいいですか。",
+            "en": "Excuse me, may I sit here?",
+            "fr": "Excusez-moi, je peux m'asseoir ici ?"
+          },
+          {
+            "who": "me",
+            "jp": "はい、どうぞ。",
+            "en": "Yes, go ahead.",
+            "fr": "Oui, je vous en prie."
+          },
+          {
+            "who": "me",
+            "jp": "あ、にもつはドアの前におかないでください。",
+            "en": "Oh, please don't leave your bag in front of the door.",
+            "fr": "Ah, ne laissez pas votre bagage devant la porte, s'il vous plaît."
+          }
+        ],
+        "note": {
+          "en": "ないでください asks politely not to; てはいけません would sound like a rule laid down.",
+          "fr": "ないでください demande poliment de ne pas faire ; てはいけません sonnerait comme une règle imposée."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "まどをあけましょうか。",
+            "en": "Shall I open the window?",
+            "fr": "J'ouvre la fenêtre ?"
+          },
+          "task": {
+            "en": "It's cold. Ask her, kindly, not to open it.",
+            "fr": "Il fait froid. Demande-lui gentiment de ne pas l'ouvrir."
+          },
+          "choices": [
+            "さむいから、あけないでください。",
+            "さむいから、あけてください。",
+            "さむいから、あけてはいけません。"
+          ],
+          "why": {
+            "en": "A polite request not to: the ない-form with でください. てはいけません would be a rule.",
+            "fr": "Une demande polie de ne pas faire : la forme en ない avec でください. てはいけません serait une règle."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜なければなりません",
@@ -2470,7 +3136,90 @@
         "fr": "Je dois écrire la lettre d'ici demain.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "日よう日は、はたらかなくてもいいです。",
+        "ask": {
+          "en": "なくてもいいです here. What does it say?",
+          "fr": "Ici, なくてもいいです. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "On Sundays I don't have to work.",
+            "fr": "Le dimanche, je ne suis pas obligé de travailler."
+          },
+          {
+            "en": "On Sundays I must work.",
+            "fr": "Le dimanche, je dois travailler."
+          },
+          {
+            "en": "On Sundays I must not work.",
+            "fr": "Le dimanche, il m'est interdit de travailler."
+          }
+        ],
+        "why": {
+          "en": "なければなりません: it must be done. なくてもいいです: it need not be.",
+          "fr": "なければなりません : il faut le faire. なくてもいいです : ce n'est pas obligatoire."
+        },
+        "pair": [
+          "はたらかなければなりません",
+          "はたらかなくてもいいです"
+        ]
+      },
+      "scene": {
+        "place": "窓口",
+        "them": {
+          "en": "Clerk",
+          "fr": "Agent"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "きょうとまでのきっぷをください。",
+            "en": "A ticket to Kyoto, please.",
+            "fr": "Un billet pour Kyoto, s'il vous plaît."
+          },
+          {
+            "who": "them",
+            "jp": "おおさかでのりかえなければなりません。",
+            "en": "You have to change trains at Osaka.",
+            "fr": "Il faut changer de train à Osaka."
+          },
+          {
+            "who": "me",
+            "jp": "わかりました。",
+            "en": "I see.",
+            "fr": "D'accord."
+          }
+        ],
+        "note": {
+          "en": "なければなりません is an obligation; ほうがいいです would only be advice.",
+          "fr": "なければなりません est une obligation ; ほうがいいです ne serait qu'un conseil."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "とっきゅうけんもいりますよ。",
+            "en": "You need an express ticket too.",
+            "fr": "Il vous faut aussi un supplément express."
+          },
+          "task": {
+            "en": "Ask him whether you must buy it now.",
+            "fr": "Demande-lui si tu dois l'acheter maintenant."
+          },
+          "choices": [
+            "今、買わなければなりませんか。",
+            "今、買ったほうがいいですか。",
+            "今、買ってはいけませんか。"
+          ],
+          "why": {
+            "en": "You ask about a duty: the ない-form with ければなりません.",
+            "fr": "Tu demandes si c'est obligatoire : la forme en ない avec ければなりません."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "へ",
@@ -2664,7 +3413,90 @@
         "fr": "Il y a des stylos, des clés et d'autres choses dans le sac.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "パンとコーヒーを買いました。",
+        "ask": {
+          "en": "と here, not や. What changes?",
+          "fr": "Ici, と et pas や. Qu'est-ce qui change ?"
+        },
+        "choices": [
+          {
+            "en": "That is all I bought: bread and coffee.",
+            "fr": "C'est tout ce que j'ai acheté : du pain et du café."
+          },
+          {
+            "en": "I bought other things too.",
+            "fr": "J'ai acheté d'autres choses aussi."
+          },
+          {
+            "en": "I bought bread or coffee, one of the two.",
+            "fr": "J'ai acheté du pain ou du café, l'un des deux."
+          }
+        ],
+        "why": {
+          "en": "と lists everything there is; や gives a few examples and leaves the list open.",
+          "fr": "と donne la liste complète ; や donne quelques exemples et laisse la liste ouverte."
+        },
+        "pair": [
+          "パンやコーヒー",
+          "パンとコーヒー"
+        ]
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeuse"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "いらっしゃいませ。",
+            "en": "Hello there.",
+            "fr": "Bonjour."
+          },
+          {
+            "who": "me",
+            "jp": "おにぎりやパンはありますか。",
+            "en": "Do you have rice balls, bread, that kind of thing?",
+            "fr": "Vous avez des onigiris, du pain, ce genre de choses ?"
+          },
+          {
+            "who": "them",
+            "jp": "はい、あちらにおにぎりやサンドイッチがあります。",
+            "en": "Yes, there are rice balls, sandwiches and so on over there.",
+            "fr": "Oui, il y a des onigiris, des sandwichs, etc. là-bas."
+          }
+        ],
+        "note": {
+          "en": "や lists a few examples among others; と would name every one.",
+          "fr": "や cite quelques exemples parmi d'autres ; と les nommerait tous."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "何をさがしていますか。",
+            "en": "What are you looking for?",
+            "fr": "Vous cherchez quelque chose ?"
+          },
+          "task": {
+            "en": "Tell her you're looking for water, tissues, that sort of thing.",
+            "fr": "Dis-lui que tu cherches de l'eau, des mouchoirs, ce genre de choses."
+          },
+          "choices": [
+            "水やティッシュをさがしています。",
+            "水とティッシュをさがしています。",
+            "水かティッシュをさがしています。"
+          ],
+          "why": {
+            "en": "You give examples and leave the list open: や. と would be those two exactly, か one or the other.",
+            "fr": "Tu donnes des exemples sans fermer la liste : や. と voudrait dire ces deux-là exactement, か l'un ou l'autre."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "か",
@@ -3139,7 +3971,90 @@
         "fr": "Pourquoi tu ne manges pas ? Parce que je n'ai plus faim.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "雨です。だから、今日は行きません。",
+        "ask": {
+          "en": "Here から opens a new sentence, as だから. What does it do?",
+          "fr": "Ici, から ouvre une nouvelle phrase, sous la forme だから. Que fait-il ?"
+        },
+        "choices": [
+          {
+            "en": "« So »: it's raining, so I'm not going today.",
+            "fr": "« Donc » : il pleut, donc je n'y vais pas aujourd'hui."
+          },
+          {
+            "en": "« If »: if it rains, I'm not going today.",
+            "fr": "« Si » : s'il pleut, je n'y vais pas aujourd'hui."
+          },
+          {
+            "en": "« But »: it's raining, but I'm going today.",
+            "fr": "« Mais » : il pleut, mais j'y vais aujourd'hui."
+          }
+        ],
+        "why": {
+          "en": "から joins the reason inside one sentence; だから starts a new one with « so ».",
+          "fr": "から relie la raison dans la même phrase ; だから commence une nouvelle phrase par « donc »."
+        },
+        "pair": [
+          "雨だから、行きません",
+          "雨です。だから、行きません"
+        ]
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A colleague",
+          "fr": "Une collègue"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "電車がおくれていますね。",
+            "en": "The train is running late.",
+            "fr": "Le train a du retard."
+          },
+          {
+            "who": "me",
+            "jp": "ええ、雨がたくさんふっていますから。",
+            "en": "Yes, because it's raining hard.",
+            "fr": "Oui, parce qu'il pleut beaucoup."
+          },
+          {
+            "who": "them",
+            "jp": "そうですね。",
+            "en": "That's right.",
+            "fr": "C'est vrai."
+          }
+        ],
+        "note": {
+          "en": "から follows the reason it gives, and can even end the reply on it.",
+          "fr": "から se place après la raison qu'il donne, et peut même terminer la réponse."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "あそこでコーヒーを飲みませんか。",
+            "en": "Shall we have a coffee over there?",
+            "fr": "On prend un café là-bas ?"
+          },
+          "task": {
+            "en": "Turn her down: you have no time, so no.",
+            "fr": "Refuse : tu n'as pas le temps, donc non."
+          },
+          "choices": [
+            "すみません、時間がないから、今日はちょっと。",
+            "すみません、時間がないと、今日はちょっと。",
+            "すみません、時間がありませんが、今日はちょっと。"
+          ],
+          "why": {
+            "en": "The lack of time is your reason: put it first, with から.",
+            "fr": "Le manque de temps est ta raison : mets-la d'abord, avec から."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜ませんか",
@@ -3492,7 +4407,90 @@
         "fr": "On rentre bientôt ?",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "いっしょにおちゃを飲みませんか。",
+        "ask": {
+          "en": "ませんか here, not ましょうか. What does it do?",
+          "fr": "Ici, ませんか et pas ましょうか. Que fait-il ?"
+        },
+        "choices": [
+          {
+            "en": "It invites the other to have tea with you.",
+            "fr": "Il invite l'autre à prendre le thé avec soi."
+          },
+          {
+            "en": "It offers to make tea for the other.",
+            "fr": "Il propose de faire du thé pour l'autre."
+          },
+          {
+            "en": "It asks whether the other has had tea.",
+            "fr": "Il demande si l'autre a pris du thé."
+          }
+        ],
+        "why": {
+          "en": "ましょうか offers to do something for the other; ませんか invites them to do it with you.",
+          "fr": "ましょうか propose de faire quelque chose pour l'autre ; ませんか l'invite à le faire avec soi."
+        },
+        "pair": [
+          "おちゃをいれましょうか",
+          "おちゃを飲みませんか"
+        ]
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "An older lady",
+          "fr": "Une dame âgée"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "かいだんが多いですね。",
+            "en": "So many stairs, aren't there?",
+            "fr": "Il y a beaucoup d'escaliers, hein ?"
+          },
+          {
+            "who": "me",
+            "jp": "そのかばん、もちましょうか。",
+            "en": "Shall I carry that bag for you?",
+            "fr": "Je vous porte ce sac ?"
+          },
+          {
+            "who": "them",
+            "jp": "まあ、ありがとう。",
+            "en": "Oh, thank you.",
+            "fr": "Oh, merci."
+          }
+        ],
+        "note": {
+          "en": "ましょうか offers your help; ませんか would invite her to do something with you.",
+          "fr": "ましょうか propose ton aide ; ませんか l'inviterait à faire quelque chose avec toi."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "エレベーターはどこでしょうか。",
+            "en": "Where might the lift be?",
+            "fr": "Où peut bien être l'ascenseur ?"
+          },
+          "task": {
+            "en": "You don't know. Offer to ask the station staff for her.",
+            "fr": "Tu ne sais pas. Propose-lui de demander pour elle au personnel de la gare."
+          },
+          "choices": [
+            "わたしが駅の人に聞きましょうか。",
+            "駅の人に聞きませんか。",
+            "駅の人に聞いてください。"
+          ],
+          "why": {
+            "en": "You offer to do it for her: ましょうか. ませんか would invite her to ask, てください tell her to.",
+            "fr": "Tu proposes de le faire pour elle : ましょうか. ませんか l'inviterait à demander, てください le lui demanderait."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜があります／います",
@@ -3849,7 +4847,90 @@
         "fr": "Cette pièce est spacieuse et calme.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "このへやはしずかで、きれいです。",
+        "ask": {
+          "en": "しずか takes で here, not くて. Why?",
+          "fr": "Ici, しずか prend で et pas くて. Pourquoi ?"
+        },
+        "choices": [
+          {
+            "en": "しずか is a な-adjective: it joins with で.",
+            "fr": "しずか est un adjectif en な : il se relie avec で."
+          },
+          {
+            "en": "で says where the room is.",
+            "fr": "で dit où se trouve la pièce."
+          },
+          {
+            "en": "で means « but ».",
+            "fr": "で veut dire « mais »."
+          }
+        ],
+        "why": {
+          "en": "An い-adjective drops い and takes くて; a な-adjective takes で.",
+          "fr": "Un adjectif en い perd son い et prend くて ; un adjectif en な prend で."
+        },
+        "pair": [
+          "やすくて",
+          "しずかで"
+        ]
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeur"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "このおべんとうは安くておいしいですよ。",
+            "en": "This lunch box is cheap and tasty.",
+            "fr": "Ce bento est bon marché et délicieux."
+          },
+          {
+            "who": "me",
+            "jp": "そうですか。大きいですか。",
+            "en": "Really? Is it big?",
+            "fr": "Ah oui ? Il est grand ?"
+          },
+          {
+            "who": "them",
+            "jp": "はい、大きくて、人気があります。",
+            "en": "Yes, it's big and popular.",
+            "fr": "Oui, il est copieux et très demandé."
+          }
+        ],
+        "note": {
+          "en": "くて joins two adjectives: 安くておいしい. と would join only nouns.",
+          "fr": "くて relie deux adjectifs : 安くておいしい. と ne relierait que des noms."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "このおちゃはどうですか。",
+            "en": "How is this tea?",
+            "fr": "Et ce thé, il est comment ?"
+          },
+          "task": {
+            "en": "Tell him it's cold and delicious.",
+            "fr": "Dis-lui qu'il est frais et délicieux."
+          },
+          "choices": [
+            "つめたくておいしいです。",
+            "つめたいでおいしいです。",
+            "つめたいとおいしいです。"
+          ],
+          "why": {
+            "en": "つめたい is an い-adjective: drop い and add くて.",
+            "fr": "つめたい est un adjectif en い : on enlève い et on ajoute くて."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜くなる／〜になる",
@@ -3915,7 +4996,90 @@
         "fr": "J'ai pris le médicament et je vais mieux.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "わたしはコーヒーにします。",
+        "ask": {
+          "en": "にします, not になります. What does it say?",
+          "fr": "にします, et pas になります. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "I'll have coffee: it is my choice.",
+            "fr": "Je prends un café : c'est mon choix."
+          },
+          {
+            "en": "I turn into coffee.",
+            "fr": "Je deviens du café."
+          },
+          {
+            "en": "I go to the coffee.",
+            "fr": "Je vais au café."
+          }
+        ],
+        "why": {
+          "en": "になる is a change of state; にします is what you pick.",
+          "fr": "になる est un changement d'état ; にします, c'est ce qu'on choisit."
+        },
+        "pair": [
+          "げんきになります",
+          "コーヒーにします"
+        ]
+      },
+      "scene": {
+        "place": "待合室",
+        "them": {
+          "en": "A traveller",
+          "fr": "Une voyageuse"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "さむくなりましたね。",
+            "en": "It's got cold, hasn't it?",
+            "fr": "Il s'est mis à faire froid, hein ?"
+          },
+          {
+            "who": "me",
+            "jp": "ええ、もう十一月ですから。",
+            "en": "Yes, it's already November.",
+            "fr": "Oui, on est déjà en novembre."
+          },
+          {
+            "who": "them",
+            "jp": "外もくらくなりました。",
+            "en": "It's got dark outside too.",
+            "fr": "Dehors, il fait déjà nuit."
+          }
+        ],
+        "note": {
+          "en": "くなる says a change: さむい becomes さむくなる, it gets cold.",
+          "fr": "くなる dit un changement : さむい devient さむくなる, il se met à faire froid."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "あついおちゃを飲んで、どうですか。",
+            "en": "How do you feel after the hot tea?",
+            "fr": "Alors, après ce thé chaud ?"
+          },
+          "task": {
+            "en": "Tell her you've warmed up.",
+            "fr": "Dis-lui que tu t'es réchauffé."
+          },
+          "choices": [
+            "あたたかくなりました。",
+            "あたたかいになりました。",
+            "あたたかくしました。"
+          ],
+          "why": {
+            "en": "A change in you: an い-adjective drops い and takes くなりました.",
+            "fr": "Un changement en toi : un adjectif en い perd son い et prend くなりました."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜より〜のほうが",
@@ -3981,7 +5145,90 @@
         "fr": "Mon frère est plus grand que moi.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "電車とバスとどちらがはやいですか。",
+        "ask": {
+          "en": "This one asks. What is it asking?",
+          "fr": "Celle-ci pose une question. Laquelle ?"
+        },
+        "choices": [
+          {
+            "en": "Which is faster, the train or the bus?",
+            "fr": "Lequel est le plus rapide, le train ou le bus ?"
+          },
+          {
+            "en": "The train is faster than the bus.",
+            "fr": "Le train est plus rapide que le bus."
+          },
+          {
+            "en": "Are the train and the bus both fast?",
+            "fr": "Le train et le bus sont-ils rapides tous les deux ?"
+          }
+        ],
+        "why": {
+          "en": "と〜とどちらが asks which of two; より〜のほうが gives the answer.",
+          "fr": "と〜とどちらが demande lequel des deux ; より〜のほうが donne la réponse."
+        },
+        "pair": [
+          "電車とバスとどちらが",
+          "バスより電車のほうが"
+        ]
+      },
+      "scene": {
+        "place": "窓口",
+        "them": {
+          "en": "Clerk",
+          "fr": "Agent"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "おおさかまで、電車とバスとどちらがはやいですか。",
+            "en": "To Osaka, which is faster, the train or the bus?",
+            "fr": "Pour Osaka, lequel est le plus rapide, le train ou le bus ?"
+          },
+          {
+            "who": "them",
+            "jp": "バスより電車のほうがはやいですよ。",
+            "en": "The train is faster than the bus.",
+            "fr": "Le train est plus rapide que le bus."
+          },
+          {
+            "who": "me",
+            "jp": "じゃあ、電車にします。",
+            "en": "Then I'll take the train.",
+            "fr": "Alors je prends le train."
+          }
+        ],
+        "note": {
+          "en": "より〜のほうが ranks two; で〜がいちばん would pick the top of a group.",
+          "fr": "より〜のほうが classe deux choses ; で〜がいちばん choisirait le premier d'un groupe."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "まどがわとつうろがわと、どちらがいいですか。",
+            "en": "Window side or aisle side, which would you like?",
+            "fr": "Côté fenêtre ou côté couloir, que préférez-vous ?"
+          },
+          "task": {
+            "en": "Tell him you prefer the window to the aisle.",
+            "fr": "Dis-lui que tu préfères la fenêtre au couloir."
+          },
+          "choices": [
+            "つうろがわよりまどがわのほうがいいです。",
+            "まどがわより、つうろがわがいいです。",
+            "まどがわもつうろがわもいいです。"
+          ],
+          "why": {
+            "en": "Two seats compared: より the one you like less, のほうが the one you prefer.",
+            "fr": "Deux places comparées : より pour la moins appréciée, のほうが pour celle qu'on préfère."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜で〜がいちばん",
@@ -4047,7 +5294,86 @@
         "fr": "Quel mois de l'année préférez-vous ?",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "この三つの中で、どれがいちばん安いですか。",
+        "ask": {
+          "en": "の中で here, not で alone. What does it set?",
+          "fr": "Ici, の中で et pas で seul. Que pose-t-il ?"
+        },
+        "choices": [
+          {
+            "en": "The group: of these three, which is cheapest?",
+            "fr": "Le groupe : parmi ces trois, lequel est le moins cher ?"
+          },
+          {
+            "en": "A place: which is cheapest inside the box?",
+            "fr": "Un lieu : lequel est le moins cher dans la boîte ?"
+          },
+          {
+            "en": "A pair: is this one cheaper than that one?",
+            "fr": "Une paire : celui-ci est-il moins cher que celui-là ?"
+          }
+        ],
+        "why": {
+          "en": "で names a place or a category as the group; の中で names a set you list.",
+          "fr": "で désigne un lieu ou une catégorie comme groupe ; の中で désigne un ensemble qu'on énumère."
+        }
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeuse"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、この店で何がいちばん人気がありますか。",
+            "en": "Excuse me, what's the most popular thing in this shop?",
+            "fr": "Excusez-moi, qu'est-ce qui se vend le mieux ici ?"
+          },
+          {
+            "who": "them",
+            "jp": "このおべんとうがいちばん人気がありますよ。",
+            "en": "This lunch box is the most popular.",
+            "fr": "C'est ce bento qui est le plus demandé."
+          },
+          {
+            "who": "me",
+            "jp": "じゃあ、それをください。",
+            "en": "Then I'll have that.",
+            "fr": "Alors je le prends."
+          }
+        ],
+        "note": {
+          "en": "で〜がいちばん picks the top of a whole group; より〜のほうが would compare only two.",
+          "fr": "で〜がいちばん choisit le premier d'un groupe entier ; より〜のほうが ne comparerait que deux choses."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "のみものもありますよ。",
+            "en": "We have drinks too.",
+            "fr": "Il y a aussi des boissons."
+          },
+          "task": {
+            "en": "Ask her which drink is the cheapest in the shop.",
+            "fr": "Demande-lui quelle boisson est la moins chère du magasin."
+          },
+          "choices": [
+            "この店でどののみものがいちばん安いですか。",
+            "この店でどののみものが安いですか。",
+            "この店でどののみもののほうが安いですか。"
+          ],
+          "why": {
+            "en": "The top of a whole group: で for the group, がいちばん for the top.",
+            "fr": "Le premier d'un groupe entier : で pour le groupe, がいちばん pour le premier."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜ほうがいいです",
@@ -4114,7 +5440,90 @@
         "fr": "Je pense qu'il vaut mieux l'acheter dans ce magasin.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "このくすりを飲まなければなりません。",
+        "ask": {
+          "en": "なければなりません here: advice or duty?",
+          "fr": "Ici, なければなりません : conseil ou obligation ?"
+        },
+        "choices": [
+          {
+            "en": "Duty: I must take this medicine.",
+            "fr": "Obligation : je dois prendre ce médicament."
+          },
+          {
+            "en": "Advice: I'd better take this medicine.",
+            "fr": "Conseil : je ferais mieux de prendre ce médicament."
+          },
+          {
+            "en": "Permission: I may take this medicine.",
+            "fr": "Permission : je peux prendre ce médicament."
+          }
+        ],
+        "why": {
+          "en": "ほうがいいです recommends; なければなりません obliges.",
+          "fr": "ほうがいいです recommande ; なければなりません oblige."
+        },
+        "pair": [
+          "飲んだほうがいいです",
+          "飲まなければなりません"
+        ]
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A colleague",
+          "fr": "Une collègue"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "あたまがいたいです。",
+            "en": "I have a headache.",
+            "fr": "J'ai mal à la tête."
+          },
+          {
+            "who": "me",
+            "jp": "だいじょうぶですか。今日ははやくかえったほうがいいですよ。",
+            "en": "Are you all right? You'd better go home early today.",
+            "fr": "Ça va ? Tu ferais mieux de rentrer tôt aujourd'hui."
+          },
+          {
+            "who": "them",
+            "jp": "そうですね。",
+            "en": "You're right.",
+            "fr": "Tu as raison."
+          }
+        ],
+        "note": {
+          "en": "ほうがいいです gives advice; なければなりません would make it a duty.",
+          "fr": "ほうがいいです donne un conseil ; なければなりません en ferait une obligation."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "午後から雨ですね。",
+            "en": "It's going to rain this afternoon.",
+            "fr": "Il va pleuvoir cet après-midi."
+          },
+          "task": {
+            "en": "Tell her she'd better take an umbrella.",
+            "fr": "Dis-lui qu'elle ferait mieux de prendre un parapluie."
+          },
+          "choices": [
+            "かさをもって行ったほうがいいですよ。",
+            "かさをもって行かなければなりませんよ。",
+            "かさをもって行ってもいいですよ。"
+          ],
+          "why": {
+            "en": "Advice, not a duty: the た-form with ほうがいいです.",
+            "fr": "Un conseil, pas une obligation : la forme en た avec ほうがいいです."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜なくてもいいです",
@@ -4181,7 +5590,90 @@
         "fr": "Pas besoin de faire le ménage aujourd'hui.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "くつをぬがないでください。",
+        "ask": {
+          "en": "ないでください, not なくてもいいです. What does it say?",
+          "fr": "ないでください, et pas なくてもいいです. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "Please don't take your shoes off.",
+            "fr": "Merci de ne pas enlever vos chaussures."
+          },
+          {
+            "en": "You needn't take your shoes off.",
+            "fr": "Pas besoin d'enlever vos chaussures."
+          },
+          {
+            "en": "You must take your shoes off.",
+            "fr": "Il faut enlever vos chaussures."
+          }
+        ],
+        "why": {
+          "en": "なくてもいいです leaves you free; ないでください asks you not to.",
+          "fr": "なくてもいいです laisse le choix ; ないでください demande de ne pas le faire."
+        },
+        "pair": [
+          "ぬがなくてもいいです",
+          "ぬがないでください"
+        ]
+      },
+      "scene": {
+        "place": "改札",
+        "them": {
+          "en": "Station staff",
+          "fr": "Agent de gare"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、このきっぷはここに入れますか。",
+            "en": "Excuse me, does this ticket go in here?",
+            "fr": "Excusez-moi, ce billet se met ici ?"
+          },
+          {
+            "who": "them",
+            "jp": "いいえ、入れなくてもいいです。見せてください。",
+            "en": "No, you don't need to put it in. Just show it.",
+            "fr": "Non, pas besoin de l'insérer. Montrez-le simplement."
+          },
+          {
+            "who": "me",
+            "jp": "はい、どうぞ。",
+            "en": "Here you are.",
+            "fr": "Voilà."
+          }
+        ],
+        "note": {
+          "en": "なくてもいいです says you need not; ないでください would ask you not to.",
+          "fr": "なくてもいいです dit que ce n'est pas nécessaire ; ないでください demanderait de ne pas le faire."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "おこさんもいっしょですか。",
+            "en": "Is your child with you?",
+            "fr": "Votre enfant est avec vous ?"
+          },
+          "task": {
+            "en": "Ask him whether your child doesn't have to buy a ticket.",
+            "fr": "Demande-lui si ton enfant peut se passer de billet."
+          },
+          "choices": [
+            "この子はきっぷを買わなくてもいいですか。",
+            "この子はきっぷを買ってはいけませんか。",
+            "この子はきっぷを買わないでください。"
+          ],
+          "why": {
+            "en": "You ask whether it can be skipped: the ない-form with くてもいいですか.",
+            "fr": "Tu demandes si on peut s'en passer : la forme en ない avec くてもいいですか."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜てから",
@@ -4248,7 +5740,90 @@
         "fr": "Je verrai un ami après le travail.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "電車にのるまえに、水を買います。",
+        "ask": {
+          "en": "まえに, not てから. Which comes first?",
+          "fr": "まえに, et pas てから. Qu'est-ce qui vient en premier ?"
+        },
+        "choices": [
+          {
+            "en": "Buying water comes first, then the train.",
+            "fr": "D'abord l'eau, ensuite le train."
+          },
+          {
+            "en": "The train comes first, then buying water.",
+            "fr": "D'abord le train, ensuite l'eau."
+          },
+          {
+            "en": "Both at the same time.",
+            "fr": "Les deux en même temps."
+          }
+        ],
+        "why": {
+          "en": "てから: B after A. まえに: B before A.",
+          "fr": "てから : B après A. まえに : B avant A."
+        },
+        "pair": [
+          "のってから",
+          "のるまえに"
+        ]
+      },
+      "scene": {
+        "place": "駅前",
+        "them": {
+          "en": "A friend",
+          "fr": "Une amie"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "おなかがすきましたね。",
+            "en": "I'm hungry.",
+            "fr": "J'ai faim."
+          },
+          {
+            "who": "me",
+            "jp": "そうですね。きっぷを買ってから、何か食べましょう。",
+            "en": "Me too. Let's eat something after we buy the tickets.",
+            "fr": "Moi aussi. Mangeons quelque chose après avoir acheté les billets."
+          },
+          {
+            "who": "them",
+            "jp": "いいですね。",
+            "en": "Good idea.",
+            "fr": "Bonne idée."
+          }
+        ],
+        "note": {
+          "en": "てから says the first thing must be done first; まえに would put it second.",
+          "fr": "てから dit que la première chose doit être faite d'abord ; まえに la mettrait en second."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "すぐ電車にのりますか。",
+            "en": "Are you getting on the train right away?",
+            "fr": "Tu montes tout de suite dans le train ?"
+          },
+          "task": {
+            "en": "Tell her you'll get on after calling your mother.",
+            "fr": "Dis-lui que tu monteras après avoir appelé ta mère."
+          },
+          "choices": [
+            "母に電話してから、のります。",
+            "母に電話するまえに、のります。",
+            "母に電話したから、のります。"
+          ],
+          "why": {
+            "en": "The call comes first, then the train: the て-form with から. したから would say you have already called.",
+            "fr": "L'appel d'abord, le train ensuite : la forme en て avec から. したから dirait que tu as déjà appelé."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜まえに",
@@ -4315,7 +5890,80 @@
         "fr": "Je suis arrivé dans cette ville il y a deux ans.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "三年まえに、日本に来ました。",
+        "ask": {
+          "en": "After a length of time, what does まえに mean?",
+          "fr": "Après une durée, que veut dire まえに ?"
+        },
+        "choices": [
+          {
+            "en": "« ago »: I came to Japan three years ago.",
+            "fr": "« il y a » : je suis venu au Japon il y a trois ans."
+          },
+          {
+            "en": "« for »: I have been in Japan for three years.",
+            "fr": "« depuis » : je suis au Japon depuis trois ans."
+          },
+          {
+            "en": "« in »: I will come to Japan in three years.",
+            "fr": "« dans » : je viendrai au Japon dans trois ans."
+          }
+        ],
+        "why": {
+          "en": "After a length of time, まえに means « ago »: 三年まえに, three years ago.",
+          "fr": "Après une durée, まえに veut dire « il y a » : 三年まえに, il y a trois ans."
+        }
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A colleague",
+          "fr": "Une collègue"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "電車にのるまえに、トイレに行きます。",
+            "en": "I'll go to the toilet before we get on.",
+            "fr": "Je vais aux toilettes avant de monter."
+          },
+          {
+            "who": "me",
+            "jp": "じゃあ、ここでまっています。",
+            "en": "Then I'll wait here.",
+            "fr": "Alors je t'attends ici."
+          }
+        ],
+        "note": {
+          "en": "まえに puts the action before another: the dictionary form, then まえに.",
+          "fr": "まえに place une action avant une autre : la forme du dictionnaire, puis まえに."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "あ、おべんとうも買いますか。",
+            "en": "Oh, are you buying a lunch box too?",
+            "fr": "Ah, tu achètes aussi un bento ?"
+          },
+          "task": {
+            "en": "Tell her yes, you'll buy one before getting on.",
+            "fr": "Dis-lui que oui, tu en achètes un avant de monter."
+          },
+          "choices": [
+            "はい、のるまえに買います。",
+            "はい、のってから買います。",
+            "はい、のったら買います。"
+          ],
+          "why": {
+            "en": "Buying comes before boarding: the dictionary form のる with まえに.",
+            "fr": "L'achat vient avant de monter : la forme du dictionnaire のる avec まえに."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜あとで",
@@ -4382,7 +6030,90 @@
         "fr": "Après le film, nous avons pris un café.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "あした、しごとをしたあとで、えいがを見ます。",
+        "ask": {
+          "en": "The verb before あとで is in the past. When does this happen?",
+          "fr": "Le verbe devant あとで est au passé. Quand cela se passe-t-il ?"
+        },
+        "choices": [
+          {
+            "en": "Tomorrow, after work.",
+            "fr": "Demain, après le travail."
+          },
+          {
+            "en": "Yesterday, after work.",
+            "fr": "Hier, après le travail."
+          },
+          {
+            "en": "Tomorrow, before work.",
+            "fr": "Demain, avant le travail."
+          }
+        ],
+        "why": {
+          "en": "Before あとで the verb is always in the た-form, even for tomorrow: the first thing is done by then.",
+          "fr": "Devant あとで, le verbe est toujours à la forme en た, même pour demain : la première chose sera faite."
+        },
+        "pair": [
+          "食べたあとで",
+          "食べるまえに"
+        ]
+      },
+      "scene": {
+        "place": "待合室",
+        "them": {
+          "en": "A friend",
+          "fr": "Une amie"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "えいがは四時からですね。",
+            "en": "The film starts at four, right?",
+            "fr": "Le film commence à quatre heures, c'est ça ?"
+          },
+          {
+            "who": "them",
+            "jp": "えいがのあとで、何をしますか。",
+            "en": "What shall we do after the film?",
+            "fr": "Qu'est-ce qu'on fait après le film ?"
+          },
+          {
+            "who": "me",
+            "jp": "えいがを見たあとで、かいものをしましょう。",
+            "en": "After the film, let's go shopping.",
+            "fr": "Après le film, allons faire les magasins."
+          }
+        ],
+        "note": {
+          "en": "あとで comes after a noun with の or a verb in the た-form: えいがのあとで, 見たあとで.",
+          "fr": "あとで vient après un nom avec の ou un verbe à la forme en た : えいがのあとで, 見たあとで."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "おちゃは、いつ飲みましょうか。",
+            "en": "When shall we have tea?",
+            "fr": "On prend le thé quand ?"
+          },
+          "task": {
+            "en": "Say: after eating.",
+            "fr": "Dis : après avoir mangé."
+          },
+          "choices": [
+            "ごはんを食べたあとで、飲みましょう。",
+            "ごはんを食べるまえに、飲みましょう。",
+            "ごはんを食べるとき、飲みましょう。"
+          ],
+          "why": {
+            "en": "After eating: the verb in the た-form, then あとで. まえに would be before.",
+            "fr": "Après avoir mangé : le verbe à la forme en た, puis あとで. まえに voudrait dire avant."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜とき",
@@ -4449,7 +6180,84 @@
         "fr": "Quand j'étais petit, je nageais dans cette rivière.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "きょうとへ行くとき、かさを買いました。",
+        "ask": {
+          "en": "行くとき, not 行ったとき. Where was the umbrella bought?",
+          "fr": "行くとき, et pas 行ったとき. Où le parapluie a-t-il été acheté ?"
+        },
+        "choices": [
+          {
+            "en": "Before getting to Kyoto.",
+            "fr": "Avant d'arriver à Kyoto."
+          },
+          {
+            "en": "In Kyoto, after arriving.",
+            "fr": "À Kyoto, une fois arrivé."
+          },
+          {
+            "en": "Every time I go to Kyoto.",
+            "fr": "Chaque fois que je vais à Kyoto."
+          }
+        ],
+        "why": {
+          "en": "Before とき, the dictionary form means the trip was not over yet; 行ったとき would mean once there.",
+          "fr": "Devant とき, la forme du dictionnaire dit que le trajet n'était pas fini ; 行ったとき voudrait dire une fois là-bas."
+        },
+        "pair": [
+          "行くとき",
+          "行ったとき"
+        ]
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A friend",
+          "fr": "Un ami"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "学生のとき、毎日この電車にのりました。",
+            "en": "When I was a student, I took this train every day.",
+            "fr": "Quand j'étais étudiant, je prenais ce train tous les jours."
+          },
+          {
+            "who": "me",
+            "jp": "そうですか。わたしも、子どものとき、よくこの駅に来ました。",
+            "en": "Really? I often came to this station as a child too.",
+            "fr": "Ah bon ? Moi aussi, je venais souvent à cette gare quand j'étais enfant."
+          }
+        ],
+        "note": {
+          "en": "とき sets one thing at the time of another: 学生のとき, when I was a student. まえに would be before.",
+          "fr": "とき place une chose au moment d'une autre : 学生のとき, quand j'étais étudiant. まえに voudrait dire avant."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "雨の日は、どうしますか。",
+            "en": "What do you do on rainy days?",
+            "fr": "Tu fais comment, les jours de pluie ?"
+          },
+          "task": {
+            "en": "Say that when it rains, you take the bus.",
+            "fr": "Dis que quand il pleut, tu prends le bus."
+          },
+          "choices": [
+            "雨のとき、バスにのります。",
+            "雨のまえに、バスにのります。",
+            "雨のあとで、バスにのります。"
+          ],
+          "why": {
+            "en": "At the time of the rain: noun, の, then とき. まえに is before it, あとで after it.",
+            "fr": "Au moment de la pluie : le nom, の, puis とき. まえに, c'est avant ; あとで, c'est après."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜が好きです",
@@ -4946,7 +6754,90 @@
         "fr": "Je voudrais plus de temps.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "つめたい水が飲みたいです。",
+        "ask": {
+          "en": "Here it is たいです, not ほしいです. Why?",
+          "fr": "Ici, たいです et pas ほしいです. Pourquoi ?"
+        },
+        "choices": [
+          {
+            "en": "たい wants to do something: to drink.",
+            "fr": "たい veut faire quelque chose : boire."
+          },
+          {
+            "en": "たい wants a thing: the water.",
+            "fr": "たい veut une chose : l'eau."
+          },
+          {
+            "en": "たい is more polite than ほしい.",
+            "fr": "たい est plus poli que ほしい."
+          }
+        ],
+        "why": {
+          "en": "ほしい wants a thing (水がほしい); たい goes on a verb and wants to do it (飲みたい).",
+          "fr": "ほしい veut une chose (水がほしい) ; たい se met sur un verbe et veut le faire (飲みたい)."
+        },
+        "pair": [
+          "水がほしいです",
+          "水が飲みたいです"
+        ]
+      },
+      "scene": {
+        "place": "待合室",
+        "them": {
+          "en": "A friend",
+          "fr": "Une amie"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "電車まで、まだ三十分ありますね。",
+            "en": "Still thirty minutes until the train.",
+            "fr": "Encore trente minutes avant le train."
+          },
+          {
+            "who": "me",
+            "jp": "あ、あそこに店があります。わたしは新聞がほしいです。",
+            "en": "Oh, there's a shop over there. I want a newspaper.",
+            "fr": "Ah, il y a une boutique là-bas. Je voudrais un journal."
+          },
+          {
+            "who": "them",
+            "jp": "わたしもです。",
+            "en": "Me too.",
+            "fr": "Moi aussi."
+          }
+        ],
+        "note": {
+          "en": "ほしいです says what thing you want: 新聞がほしいです. With a verb it would be たいです.",
+          "fr": "ほしいです dit quelle chose on veut : 新聞がほしいです. Avec un verbe, ce serait たいです."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "のどが、かわきましたか。",
+            "en": "Are you thirsty?",
+            "fr": "Tu as soif ?"
+          },
+          "task": {
+            "en": "Yes: say you want some water.",
+            "fr": "Oui : dis que tu veux de l'eau."
+          },
+          "choices": [
+            "はい、水がほしいです。",
+            "はい、水がたいです。",
+            "はい、水がすきです。"
+          ],
+          "why": {
+            "en": "A thing you want: noun, が, ほしいです. たい goes on a verb, never on a noun; すきです would say you like it.",
+            "fr": "Une chose qu'on veut : le nom, が, ほしいです. たい se met sur un verbe, jamais sur un nom ; すきです dirait qu'on l'aime."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜でしょう",
@@ -5018,7 +6909,86 @@
         "fr": "Cette personne ne viendra probablement pas.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "あなたも行くでしょう？",
+        "ask": {
+          "en": "Said with a rising tone, what does でしょう do here?",
+          "fr": "Dit avec la voix qui monte, que fait でしょう ici ?"
+        },
+        "choices": [
+          {
+            "en": "You're coming too, right?",
+            "fr": "Tu viens aussi, hein ?"
+          },
+          {
+            "en": "You will probably not come.",
+            "fr": "Tu ne viendras sans doute pas."
+          },
+          {
+            "en": "Please come too.",
+            "fr": "Viens aussi, s'il te plaît."
+          }
+        ],
+        "why": {
+          "en": "With a rising tone, でしょう？ asks the listener to agree, like ね.",
+          "fr": "Avec la voix qui monte, でしょう？ demande à l'autre d'être d'accord, comme ね."
+        }
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A traveller",
+          "fr": "Une voyageuse"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "電車がおそいですね。",
+            "en": "The train is late, isn't it.",
+            "fr": "Le train est en retard, hein."
+          },
+          {
+            "who": "me",
+            "jp": "そうですね。でも、すぐ来るでしょう。",
+            "en": "It is. But it will probably come soon.",
+            "fr": "Oui. Mais il va sans doute arriver bientôt."
+          },
+          {
+            "who": "them",
+            "jp": "そうですね。",
+            "en": "I suppose so.",
+            "fr": "Sans doute."
+          }
+        ],
+        "note": {
+          "en": "でしょう guesses what is likely: すぐ来るでしょう. です would say it for sure.",
+          "fr": "でしょう suppose ce qui est probable : すぐ来るでしょう. です l'affirmerait."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "とうきょうは、今日さむいですか。",
+            "en": "Is it cold in Tokyo today?",
+            "fr": "Il fait froid à Tokyo aujourd'hui ?"
+          },
+          "task": {
+            "en": "You don't know for sure: say it is probably cold.",
+            "fr": "Tu n'en es pas sûr : dis qu'il fait sans doute froid."
+          },
+          "choices": [
+            "たぶん、さむいでしょう。",
+            "さむいです。",
+            "さむいですね。"
+          ],
+          "why": {
+            "en": "A guess, not a fact: plain form, then でしょう. さむいです and さむいですね say it as known.",
+            "fr": "Une supposition, pas un fait : la forme neutre, puis でしょう. さむいです et さむいですね le disent comme un fait connu."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "まだ〜ていません",
@@ -5085,7 +7055,90 @@
         "fr": "Le travail n'est pas encore fini.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "きのう、その本を読みませんでした。",
+        "ask": {
+          "en": "Here it is ませんでした, not まだ〜ていません. What does it say?",
+          "fr": "Ici, ませんでした et pas まだ〜ていません. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "I didn't read it yesterday, and yesterday is over.",
+            "fr": "Je ne l'ai pas lu hier, et hier est passé."
+          },
+          {
+            "en": "I haven't read it yet, but I will.",
+            "fr": "Je ne l'ai pas encore lu, mais je vais le lire."
+          },
+          {
+            "en": "I already read it yesterday.",
+            "fr": "Je l'ai déjà lu hier."
+          }
+        ],
+        "why": {
+          "en": "ませんでした closes a time in the past; まだ〜ていません leaves the door open: not yet.",
+          "fr": "ませんでした ferme un moment passé ; まだ〜ていません laisse la porte ouverte : pas encore."
+        },
+        "pair": [
+          "まだ読んでいません",
+          "読みませんでした"
+        ]
+      },
+      "scene": {
+        "place": "改札",
+        "them": {
+          "en": "A friend",
+          "fr": "Un ami"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "きっぷは買いましたか。",
+            "en": "Did you buy your ticket?",
+            "fr": "Tu as acheté ton billet ?"
+          },
+          {
+            "who": "me",
+            "jp": "いいえ、まだ買っていません。",
+            "en": "No, I haven't bought it yet.",
+            "fr": "Non, je ne l'ai pas encore acheté."
+          },
+          {
+            "who": "them",
+            "jp": "じゃあ、あそこで買いましょう。",
+            "en": "Then let's buy it over there.",
+            "fr": "Alors, achetons-le là-bas."
+          }
+        ],
+        "note": {
+          "en": "まだ〜ていません: not yet, and it can still happen. 買いませんでした would close the matter.",
+          "fr": "まだ〜ていません : pas encore, et ça peut encore se faire. 買いませんでした fermerait l'affaire."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "ひるごはんは食べましたか。",
+            "en": "Have you had lunch?",
+            "fr": "Tu as déjeuné ?"
+          },
+          "task": {
+            "en": "Say no, you haven't eaten yet.",
+            "fr": "Dis que non, tu n'as pas encore mangé."
+          },
+          "choices": [
+            "いいえ、まだ食べていません。",
+            "いいえ、まだ食べませんでした。",
+            "いいえ、もう食べました。"
+          ],
+          "why": {
+            "en": "Not yet, but you still will: まだ and the て-form with いません.",
+            "fr": "Pas encore, mais tu vas le faire : まだ et la forme en て avec いません."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "もう〜ました",
@@ -5152,7 +7205,86 @@
         "fr": "Avez-vous déjà vu ce film ?",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "今日は、もう電車がありません。",
+        "ask": {
+          "en": "もう with a negative verb. What does it mean?",
+          "fr": "もう avec un verbe au négatif. Que veut-il dire ?"
+        },
+        "choices": [
+          {
+            "en": "There are no more trains today.",
+            "fr": "Il n'y a plus de train aujourd'hui."
+          },
+          {
+            "en": "There is already a train today.",
+            "fr": "Il y a déjà un train aujourd'hui."
+          },
+          {
+            "en": "The train has not come yet today.",
+            "fr": "Le train n'est pas encore venu aujourd'hui."
+          }
+        ],
+        "why": {
+          "en": "With ました, もう means « already »; with a negative, it means « no longer, not any more ».",
+          "fr": "Avec ました, もう veut dire « déjà » ; avec un négatif, il veut dire « ne plus »."
+        }
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "Station staff",
+          "fr": "Agent de gare"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、八時の電車は来ましたか。",
+            "en": "Excuse me, has the eight o'clock train come?",
+            "fr": "Excusez-moi, le train de huit heures est passé ?"
+          },
+          {
+            "who": "them",
+            "jp": "その電車は、もう出ました。",
+            "en": "That train has already left.",
+            "fr": "Ce train est déjà parti."
+          },
+          {
+            "who": "them",
+            "jp": "つぎは八時半です。",
+            "en": "The next one is at half past eight.",
+            "fr": "Le prochain est à huit heures et demie."
+          }
+        ],
+        "note": {
+          "en": "もう〜ました: it has already happened. Not yet would be まだ〜ていません.",
+          "fr": "もう〜ました : c'est déjà fait. « Pas encore » se dirait まだ〜ていません."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "きっぷは、もう買いましたか。",
+            "en": "Have you already bought your ticket?",
+            "fr": "Vous avez déjà acheté votre billet ?"
+          },
+          "task": {
+            "en": "Yes: tell him you've already bought it.",
+            "fr": "Oui : dis-lui que tu l'as déjà acheté."
+          },
+          "choices": [
+            "はい、もう買いました。",
+            "はい、まだ買っていません。",
+            "はい、もう買います。"
+          ],
+          "why": {
+            "en": "Already done: もう and the past ました. もう買います would be « I'll buy it now ».",
+            "fr": "Déjà fait : もう et le passé ました. もう買います voudrait dire « je l'achète maintenant »."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜くらい／〜ぐらい",
@@ -5219,7 +7351,90 @@
         "fr": "Combien de japonais parlez-vous chaque jour ?",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "三時ごろ、駅に来てください。",
+        "ask": {
+          "en": "Here it is ごろ, not くらい. Why?",
+          "fr": "Ici, ごろ et pas くらい. Pourquoi ?"
+        },
+        "choices": [
+          {
+            "en": "ごろ rounds a time on the clock: around three o'clock.",
+            "fr": "ごろ arrondit une heure : vers trois heures."
+          },
+          {
+            "en": "ごろ rounds a length: about three hours.",
+            "fr": "ごろ arrondit une durée : environ trois heures."
+          },
+          {
+            "en": "ごろ means « only at three ».",
+            "fr": "ごろ veut dire « seulement à trois heures »."
+          }
+        ],
+        "why": {
+          "en": "くらい rounds an amount or a length of time; for a time on the clock, it is ごろ.",
+          "fr": "くらい arrondit une quantité ou une durée ; pour une heure précise, c'est ごろ."
+        },
+        "pair": [
+          "三時ごろ",
+          "三時間くらい"
+        ]
+      },
+      "scene": {
+        "place": "窓口",
+        "them": {
+          "en": "Clerk",
+          "fr": "Agent"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、きょうとまで何時間くらいですか。",
+            "en": "Excuse me, about how many hours is it to Kyoto?",
+            "fr": "Excusez-moi, il faut environ combien d'heures jusqu'à Kyoto ?"
+          },
+          {
+            "who": "them",
+            "jp": "電車で二時間くらいです。",
+            "en": "About two hours by train.",
+            "fr": "Environ deux heures en train."
+          },
+          {
+            "who": "me",
+            "jp": "ありがとうございます。",
+            "en": "Thank you.",
+            "fr": "Merci."
+          }
+        ],
+        "note": {
+          "en": "くらい rounds a length of time or an amount: 二時間くらい, about two hours.",
+          "fr": "くらい arrondit une durée ou une quantité : 二時間くらい, environ deux heures."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "駅からホテルまでは、バスがあります。",
+            "en": "There is a bus from the station to the hotel.",
+            "fr": "Il y a un bus de la gare à l'hôtel."
+          },
+          "task": {
+            "en": "Ask him roughly how many minutes the bus takes.",
+            "fr": "Demande-lui en gros combien de minutes prend le bus."
+          },
+          "choices": [
+            "バスで何分くらいですか。",
+            "バスで何分ごろですか。",
+            "バスで何時ごろですか。"
+          ],
+          "why": {
+            "en": "A length of time, rounded: くらい. ごろ rounds a time on the clock, so it asks at what time, never how long.",
+            "fr": "Une durée, arrondie : くらい. ごろ arrondit une heure : il demande quand, jamais combien de temps."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜ごろ",
@@ -5426,7 +7641,90 @@
         "fr": "J'apprends cinq kanji par jour.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "りんごを二つだけ買いました。",
+        "ask": {
+          "en": "Here it is だけ, not ずつ. What does it say?",
+          "fr": "Ici, だけ et pas ずつ. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "I bought only two apples.",
+            "fr": "J'ai acheté seulement deux pommes."
+          },
+          {
+            "en": "I bought two apples each.",
+            "fr": "J'ai acheté deux pommes chacun."
+          },
+          {
+            "en": "I bought about two apples.",
+            "fr": "J'ai acheté environ deux pommes."
+          }
+        ],
+        "why": {
+          "en": "だけ limits the amount; ずつ would share it out: 二つずつ, two each.",
+          "fr": "だけ limite la quantité ; ずつ la répartirait : 二つずつ, deux chacun."
+        },
+        "pair": [
+          "二つずつ",
+          "二つだけ"
+        ]
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeuse"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、おにぎりとおちゃを二つずつください。",
+            "en": "Excuse me, rice balls and tea, two of each, please.",
+            "fr": "Excusez-moi, des onigiris et du thé, deux de chaque, s'il vous plaît."
+          },
+          {
+            "who": "them",
+            "jp": "はい、おにぎり二つと、おちゃ二つですね。",
+            "en": "Right, two rice balls and two teas.",
+            "fr": "Bien, deux onigiris et deux thés."
+          },
+          {
+            "who": "them",
+            "jp": "ぜんぶで六百円です。",
+            "en": "That's six hundred yen in all.",
+            "fr": "Ça fait six cents yens en tout."
+          }
+        ],
+        "note": {
+          "en": "ずつ says how many go to each: 二つずつ, two of each. だけ would say only two.",
+          "fr": "ずつ dit combien va à chacun : 二つずつ, deux de chaque. だけ dirait seulement deux."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "子どもさんにも、あめをあげましょうか。",
+            "en": "Shall I give your children some sweets too?",
+            "fr": "Je donne aussi des bonbons à vos enfants ?"
+          },
+          "task": {
+            "en": "Say: yes, one each, please.",
+            "fr": "Dis : oui, un pour chacun, s'il vous plaît."
+          },
+          "choices": [
+            "はい、一つずつおねがいします。",
+            "はい、一つだけおねがいします。",
+            "はい、一つくらいおねがいします。"
+          ],
+          "why": {
+            "en": "One for each child: the number, then ずつ. だけ would mean only one in all.",
+            "fr": "Un pour chaque enfant : le nombre, puis ずつ. だけ voudrait dire un seul en tout."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜だけ",
@@ -5493,7 +7791,90 @@
         "fr": "Une seule personne n'est pas venue.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "わたしだけ、コーヒーを飲みました。",
+        "ask": {
+          "en": "だけ comes after わたし. What does it say?",
+          "fr": "だけ vient après わたし. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "I was the only one who had coffee.",
+            "fr": "J'ai été le seul à prendre un café."
+          },
+          {
+            "en": "I had only coffee.",
+            "fr": "Je n'ai pris que du café."
+          },
+          {
+            "en": "I had a little coffee.",
+            "fr": "J'ai pris un peu de café."
+          }
+        ],
+        "why": {
+          "en": "だけ limits the word just before it: わたしだけ, only me. コーヒーだけ would be only coffee.",
+          "fr": "だけ limite le mot juste devant lui : わたしだけ, moi seul. コーヒーだけ, ce serait seulement du café."
+        },
+        "pair": [
+          "わたしだけ飲みました",
+          "コーヒーだけ飲みました"
+        ]
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeuse"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、おべんとうはありますか。",
+            "en": "Excuse me, do you have any lunch boxes?",
+            "fr": "Excusez-moi, vous avez des bentos ?"
+          },
+          {
+            "who": "them",
+            "jp": "すみません、今はおにぎりだけです。",
+            "en": "Sorry, right now there are only rice balls.",
+            "fr": "Désolée, pour l'instant il n'y a que des onigiris."
+          },
+          {
+            "who": "me",
+            "jp": "じゃあ、おにぎりを一つください。",
+            "en": "Then one rice ball, please.",
+            "fr": "Alors, un onigiri, s'il vous plaît."
+          }
+        ],
+        "note": {
+          "en": "だけ: only that, said plainly, and the verb stays positive.",
+          "fr": "だけ : seulement cela, dit tel quel, et le verbe reste positif."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "おのみものは、いかがですか。",
+            "en": "Would you like something to drink?",
+            "fr": "Vous voulez quelque chose à boire ?"
+          },
+          "task": {
+            "en": "Tell her no: just this, that's all.",
+            "fr": "Dis-lui que non : juste ça, c'est tout."
+          },
+          "choices": [
+            "いいえ、これだけです。",
+            "いいえ、これもです。",
+            "いいえ、これくらいです。"
+          ],
+          "why": {
+            "en": "Nothing more than this: だけ. も would add something, くらい only rounds.",
+            "fr": "Rien de plus que ça : だけ. も ajouterait quelque chose, くらい ne fait qu'arrondir."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜など",
@@ -5560,7 +7941,86 @@
         "fr": "Je vais acheter du pain, du poisson, etc.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "日よう日は、ざっしなどを読みます。",
+        "ask": {
+          "en": "Only one thing is named. What does など do here?",
+          "fr": "Une seule chose est nommée. Que fait など ici ?"
+        },
+        "choices": [
+          {
+            "en": "Magazines and things like that.",
+            "fr": "Des magazines, ce genre de choses."
+          },
+          {
+            "en": "Only magazines.",
+            "fr": "Seulement des magazines."
+          },
+          {
+            "en": "Magazines too.",
+            "fr": "Des magazines aussi."
+          }
+        ],
+        "why": {
+          "en": "Even after one noun, など says it is one example of a kind.",
+          "fr": "Même après un seul nom, など dit que c'est un exemple parmi d'autres."
+        }
+      },
+      "scene": {
+        "place": "車内",
+        "them": {
+          "en": "A friend",
+          "fr": "Un ami"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "駅で、何か買いましたか。",
+            "en": "Did you buy something at the station?",
+            "fr": "Tu as acheté quelque chose à la gare ?"
+          },
+          {
+            "who": "me",
+            "jp": "はい、パンやおちゃなどを買いました。",
+            "en": "Yes, I bought bread, tea and so on.",
+            "fr": "Oui, j'ai acheté du pain, du thé, ce genre de choses."
+          },
+          {
+            "who": "them",
+            "jp": "いいですね。",
+            "en": "Nice.",
+            "fr": "Super."
+          }
+        ],
+        "note": {
+          "en": "や sits between the examples, など comes after the last one: パンやおちゃなど.",
+          "fr": "や se place entre les exemples, など vient après le dernier : パンやおちゃなど."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "電車の中で、いつも何をしますか。",
+            "en": "What do you usually do on the train?",
+            "fr": "Tu fais quoi d'habitude dans le train ?"
+          },
+          "task": {
+            "en": "Say you read books and the like.",
+            "fr": "Dis que tu lis des livres, ce genre de choses."
+          },
+          "choices": [
+            "本などを読みます。",
+            "本だけを読みます。",
+            "本も読みます。"
+          ],
+          "why": {
+            "en": "Books as one example among others: など, before the particle を.",
+            "fr": "Les livres comme un exemple parmi d'autres : など, devant la particule を."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜でも",
@@ -5632,7 +8092,86 @@
         "fr": "Même un enfant peut lire ce kanji.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "この本は、子どもでもわかります。",
+        "ask": {
+          "en": "Here, what does でも mean?",
+          "fr": "Ici, que veut dire でも ?"
+        },
+        "choices": [
+          {
+            "en": "« even »: even a child understands it.",
+            "fr": "« même » : même un enfant le comprend."
+          },
+          {
+            "en": "« or someone »: a child or someone understands it.",
+            "fr": "« ou quelqu'un » : un enfant ou quelqu'un le comprend."
+          },
+          {
+            "en": "« but »: but a child understands it.",
+            "fr": "« mais » : mais un enfant le comprend."
+          }
+        ],
+        "why": {
+          "en": "After a noun, でも can also mean « even ». « But » is the でも that starts a sentence.",
+          "fr": "Après un nom, でも peut aussi vouloir dire « même ». « Mais », c'est le でも en début de phrase."
+        }
+      },
+      "scene": {
+        "place": "待合室",
+        "them": {
+          "en": "A friend",
+          "fr": "Une amie"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "電車まで、まだ三十分ありますね。",
+            "en": "Still thirty minutes until the train.",
+            "fr": "Encore trente minutes avant le train."
+          },
+          {
+            "who": "me",
+            "jp": "そうですね。コーヒーでも飲みませんか。",
+            "en": "Right. Shall we have a coffee or something?",
+            "fr": "C'est vrai. On prend un café ou quelque chose ?"
+          },
+          {
+            "who": "them",
+            "jp": "いいですね。",
+            "en": "Good idea.",
+            "fr": "Bonne idée."
+          }
+        ],
+        "note": {
+          "en": "でも softens a suggestion: a coffee, or something like it. コーヒーを would be just coffee.",
+          "fr": "でも adoucit une proposition : un café, ou quelque chose du genre. コーヒーを, ce serait juste un café."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "コーヒーのあとで、何をしましょうか。",
+            "en": "What shall we do after the coffee?",
+            "fr": "On fait quoi après le café ?"
+          },
+          "task": {
+            "en": "Suggest reading a magazine or something.",
+            "fr": "Propose de lire un magazine ou quelque chose."
+          },
+          "choices": [
+            "ざっしでも読みましょう。",
+            "ざっしを読みましょう。",
+            "ざっしも読みましょう。"
+          ],
+          "why": {
+            "en": "One suggestion, left open: でも. を names just the magazine; も adds it to something else.",
+            "fr": "Une seule proposition, laissée ouverte : でも. を ne nomme que le magazine ; も l'ajoute à autre chose."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜と思います",
@@ -5701,7 +8240,84 @@
         "fr": "Je trouve le japonais intéressant.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "たなかさんは、あした来ると言いました。",
+        "ask": {
+          "en": "Here it is と言いました, not と思います. What does it report?",
+          "fr": "Ici, と言いました et pas と思います. Que rapporte la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "Tanaka's words: he said he would come tomorrow.",
+            "fr": "Les paroles de Tanaka : il a dit qu'il viendrait demain."
+          },
+          {
+            "en": "My guess: I think Tanaka will come tomorrow.",
+            "fr": "Mon avis : je pense que Tanaka viendra demain."
+          },
+          {
+            "en": "Tanaka's wish to come tomorrow.",
+            "fr": "L'envie de Tanaka de venir demain."
+          }
+        ],
+        "why": {
+          "en": "と言います reports words someone said; と思います reports a thought.",
+          "fr": "と言います rapporte des paroles ; と思います rapporte une pensée."
+        },
+        "pair": [
+          "来ると思います",
+          "来ると言いました"
+        ]
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A friend",
+          "fr": "Une amie"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "駅のそばのラーメンやは、どうですか。",
+            "en": "How is the ramen place by the station?",
+            "fr": "Il est comment, le restaurant de ramen près de la gare ?"
+          },
+          {
+            "who": "me",
+            "jp": "おいしいと思います。でも、少し高いです。",
+            "en": "I think it's good. But it's a little expensive.",
+            "fr": "Je trouve qu'il est bon. Mais il est un peu cher."
+          }
+        ],
+        "note": {
+          "en": "と思います gives your own opinion. でしょう would only guess what is likely.",
+          "fr": "と思います donne ton propre avis. でしょう ne ferait que supposer ce qui est probable."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "あしたは雨ですか。",
+            "en": "Will it rain tomorrow?",
+            "fr": "Il va pleuvoir demain ?"
+          },
+          "task": {
+            "en": "Tell her you think it will be sunny.",
+            "fr": "Dis-lui que tu penses qu'il fera beau."
+          },
+          "choices": [
+            "はれだと思います。",
+            "はれだと言います。",
+            "はれです。"
+          ],
+          "why": {
+            "en": "Your own thought: plain form, then と思います. と言います would report words; はれです says it for sure.",
+            "fr": "Ta propre pensée : la forme neutre, puis と思います. と言います rapporterait des paroles ; はれです l'affirme."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜と言います",
@@ -5770,7 +8386,86 @@
         "fr": "J'ai dit « merci » à ma mère.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "この花は、日本語で「さくら」と言います。",
+        "ask": {
+          "en": "No one is speaking here. What does と言います do?",
+          "fr": "Personne ne parle ici. Que fait と言います ?"
+        },
+        "choices": [
+          {
+            "en": "It gives a name: in Japanese this flower is called « sakura ».",
+            "fr": "Il donne un nom : en japonais, cette fleur s'appelle « sakura »."
+          },
+          {
+            "en": "It reports what someone said about the flower.",
+            "fr": "Il rapporte ce que quelqu'un a dit de la fleur."
+          },
+          {
+            "en": "It gives my opinion about the flower.",
+            "fr": "Il donne mon avis sur la fleur."
+          }
+        ],
+        "why": {
+          "en": "と言います also says what a thing is called: 日本語で「さくら」と言います.",
+          "fr": "と言います dit aussi comment une chose s'appelle : 日本語で「さくら」と言います."
+        }
+      },
+      "scene": {
+        "place": "改札",
+        "them": {
+          "en": "A friend",
+          "fr": "Un ami"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "駅の人は、何と言いましたか。",
+            "en": "What did the station staff say?",
+            "fr": "Qu'est-ce qu'a dit l'agent de la gare ?"
+          },
+          {
+            "who": "me",
+            "jp": "電車は三時半に来ると言いました。",
+            "en": "He said the train comes at half past three.",
+            "fr": "Il a dit que le train arrive à trois heures et demie."
+          },
+          {
+            "who": "them",
+            "jp": "そうですか。じゃあ、まちましょう。",
+            "en": "I see. Then let's wait.",
+            "fr": "D'accord. Alors, attendons."
+          }
+        ],
+        "note": {
+          "en": "と言います reports what someone said. と思います would be what you think.",
+          "fr": "と言います rapporte ce que quelqu'un a dit. と思います serait ce que tu penses."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "お母さんは、来ますか。",
+            "en": "Is your mother coming?",
+            "fr": "Ta mère vient ?"
+          },
+          "task": {
+            "en": "Tell him she said she isn't coming.",
+            "fr": "Dis-lui qu'elle a dit qu'elle ne venait pas."
+          },
+          "choices": [
+            "母は来ないと言いました。",
+            "母は来ないとおもいます。",
+            "母は来ないでしょう。"
+          ],
+          "why": {
+            "en": "Her words, not your thought: と言いました. と思います and でしょう are your own idea.",
+            "fr": "Ses paroles, pas ta pensée : と言いました. と思います et でしょう sont ton idée à toi."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜のが好きです",
@@ -5839,7 +8534,90 @@
         "fr": "Mon père aime regarder la télévision.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "今、本が読みたいです。",
+        "ask": {
+          "en": "Here it is たいです, not のが好きです. What does it say?",
+          "fr": "Ici, たいです et pas のが好きです. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "I want to read a book right now.",
+            "fr": "J'ai envie de lire un livre maintenant."
+          },
+          {
+            "en": "I like reading books.",
+            "fr": "J'aime lire des livres."
+          },
+          {
+            "en": "I don't like reading books.",
+            "fr": "Je n'aime pas lire."
+          }
+        ],
+        "why": {
+          "en": "たいです wants to do it now; のが好きです is a lasting liking.",
+          "fr": "たいです, c'est vouloir le faire maintenant ; のが好きです est un goût durable."
+        },
+        "pair": [
+          "本を読むのが好きです",
+          "本が読みたいです"
+        ]
+      },
+      "scene": {
+        "place": "車内",
+        "them": {
+          "en": "A friend",
+          "fr": "Une amie"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "いつも、まどの外を見ていますね。",
+            "en": "You're always looking out of the window.",
+            "fr": "Tu regardes toujours par la fenêtre."
+          },
+          {
+            "who": "me",
+            "jp": "はい、電車から外を見るのが好きです。",
+            "en": "Yes, I like looking out from the train.",
+            "fr": "Oui, j'aime regarder dehors depuis le train."
+          },
+          {
+            "who": "them",
+            "jp": "わたしもです。",
+            "en": "Me too.",
+            "fr": "Moi aussi."
+          }
+        ],
+        "note": {
+          "en": "のが好きです: you enjoy doing it, again and again. The verb in its dictionary form, then の.",
+          "fr": "のが好きです : on aime le faire, encore et encore. Le verbe à la forme du dictionnaire, puis の."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "休みの日は、何をするのが好きですか。",
+            "en": "What do you like doing on your days off?",
+            "fr": "Qu'est-ce que tu aimes faire les jours de repos ?"
+          },
+          "task": {
+            "en": "Say you like walking in the mountains.",
+            "fr": "Dis que tu aimes marcher en montagne."
+          },
+          "choices": [
+            "山をあるくのが好きです。",
+            "山をあるきたいです。",
+            "山をあるくが好きです。"
+          ],
+          "why": {
+            "en": "A liking for an activity: the verb, の, then が好きです; without の the verb cannot take が. たいです would be wanting it now.",
+            "fr": "Le goût d'une activité : le verbe, の, puis が好きです ; sans の, le verbe ne peut pas prendre が. たいです, ce serait en avoir envie maintenant."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜ないで",
@@ -5906,7 +8684,90 @@
         "fr": "Je suis allé à pied à la gare au lieu de prendre le train.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "電車の中で、大きいこえで話さないでください。",
+        "ask": {
+          "en": "Here ないで is followed by ください. What does it do?",
+          "fr": "Ici, ないで est suivi de ください. Que fait-il ?"
+        },
+        "choices": [
+          {
+            "en": "It asks you not to talk loudly on the train.",
+            "fr": "Il demande de ne pas parler fort dans le train."
+          },
+          {
+            "en": "Someone rode the train without talking loudly.",
+            "fr": "Quelqu'un a pris le train sans parler fort."
+          },
+          {
+            "en": "It asks you to talk loudly on the train.",
+            "fr": "Il demande de parler fort dans le train."
+          }
+        ],
+        "why": {
+          "en": "ないでください asks someone not to do something; ないで alone joins two actions: « without ».",
+          "fr": "ないでください demande de ne pas faire quelque chose ; ないで seul relie deux actions : « sans »."
+        },
+        "pair": [
+          "話さないで聞きます",
+          "話さないでください"
+        ]
+      },
+      "scene": {
+        "place": "改札",
+        "them": {
+          "en": "A friend",
+          "fr": "Une amie"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "おそいですね。どうしましたか。",
+            "en": "You're late. What happened?",
+            "fr": "Tu es en retard. Qu'est-ce qui s'est passé ?"
+          },
+          {
+            "who": "me",
+            "jp": "すみません。バスにのらないで、あるいて来ました。",
+            "en": "Sorry. I walked here instead of taking the bus.",
+            "fr": "Désolé. Je suis venu à pied, sans prendre le bus."
+          },
+          {
+            "who": "them",
+            "jp": "そうですか。たいへんでしたね。",
+            "en": "I see. That must have been hard.",
+            "fr": "Ah bon. Ça a dû être dur."
+          }
+        ],
+        "note": {
+          "en": "ないで joins two actions: you did the second without the first.",
+          "fr": "ないで relie deux actions : on a fait la seconde sans la première."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "あさごはんは、食べましたか。",
+            "en": "Did you have breakfast?",
+            "fr": "Tu as pris ton petit déjeuner ?"
+          },
+          "task": {
+            "en": "Say no: you came without eating breakfast.",
+            "fr": "Dis que non : tu es venu sans prendre de petit déjeuner."
+          },
+          "choices": [
+            "いいえ、食べないで来ました。",
+            "いいえ、食べて来ました。",
+            "いいえ、食べないでください。"
+          ],
+          "why": {
+            "en": "Without eating, then coming: the ない-form, で, then the second verb. 食べて来ました says you ate; ないでください asks someone not to.",
+            "fr": "Sans manger, puis venir : la forme en ない, で, puis le second verbe. 食べて来ました dit qu'on a mangé ; ないでください demande de ne pas le faire."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜をください",
@@ -6271,7 +9132,86 @@
         "fr": "Le repas est prêt.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "コーヒーができましたよ。",
+        "ask": {
+          "en": "Here, what does できました mean?",
+          "fr": "Ici, que veut dire できました ?"
+        },
+        "choices": [
+          {
+            "en": "The coffee is ready.",
+            "fr": "Le café est prêt."
+          },
+          {
+            "en": "I can make coffee.",
+            "fr": "Je sais faire le café."
+          },
+          {
+            "en": "I was able to drink coffee.",
+            "fr": "J'ai pu boire un café."
+          }
+        ],
+        "why": {
+          "en": "できます also means « is ready, is made »: コーヒーができました.",
+          "fr": "できます veut aussi dire « est prêt, est fait » : コーヒーができました."
+        }
+      },
+      "scene": {
+        "place": "窓口",
+        "them": {
+          "en": "Clerk",
+          "fr": "Agente"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、この駅で、かいものができますか。",
+            "en": "Excuse me, can I do some shopping in this station?",
+            "fr": "Excusez-moi, on peut faire des achats dans cette gare ?"
+          },
+          {
+            "who": "them",
+            "jp": "はい、二かいでできますよ。",
+            "en": "Yes, you can, on the second floor.",
+            "fr": "Oui, au premier étage."
+          },
+          {
+            "who": "me",
+            "jp": "ありがとうございます。",
+            "en": "Thank you.",
+            "fr": "Merci."
+          }
+        ],
+        "note": {
+          "en": "ができます after a noun: かいものができます. After a verb it would be ことができます.",
+          "fr": "ができます après un nom : かいものができます. Après un verbe, ce serait ことができます."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "日本語ができますか。",
+            "en": "Do you speak Japanese?",
+            "fr": "Vous parlez japonais ?"
+          },
+          "task": {
+            "en": "Say yes, you can speak a little Japanese.",
+            "fr": "Dis que oui, tu parles un peu japonais."
+          },
+          "choices": [
+            "はい、少し日本語ができます。",
+            "はい、少し日本語をできます。",
+            "はい、少し日本語がすきです。"
+          ],
+          "why": {
+            "en": "Being able: noun, が, できます; できます takes が, never を. すきです would say you like it.",
+            "fr": "Savoir faire : le nom, が, できます ; できます prend が, jamais を. すきです dirait qu'on l'aime."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜たくないです",
@@ -6338,7 +9278,90 @@
         "fr": "Hier, je n'avais envie de rien faire.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "わたしは魚がきらいです。",
+        "ask": {
+          "en": "Here it is きらいです, not たくないです. What does it say?",
+          "fr": "Ici, きらいです et pas たくないです. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "I dislike fish, always.",
+            "fr": "Je n'aime pas le poisson, en général."
+          },
+          {
+            "en": "I don't want to eat fish today.",
+            "fr": "Je n'ai pas envie de poisson aujourd'hui."
+          },
+          {
+            "en": "I want to eat fish.",
+            "fr": "J'ai envie de manger du poisson."
+          }
+        ],
+        "why": {
+          "en": "きらいです is a lasting dislike; たくないです refuses this one time.",
+          "fr": "きらいです est une aversion durable ; たくないです refuse pour cette fois."
+        },
+        "pair": [
+          "今日は魚を食べたくないです",
+          "魚がきらいです"
+        ]
+      },
+      "scene": {
+        "place": "待合室",
+        "them": {
+          "en": "A friend",
+          "fr": "Un ami"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "つかれましたね。どこかへ行きますか。",
+            "en": "We're tired. Shall we go somewhere?",
+            "fr": "On est fatigués. On va quelque part ?"
+          },
+          {
+            "who": "me",
+            "jp": "いいえ、今日はもうあるきたくないです。",
+            "en": "No, I don't want to walk any more today.",
+            "fr": "Non, je n'ai plus envie de marcher aujourd'hui."
+          },
+          {
+            "who": "them",
+            "jp": "じゃあ、ここで休みましょう。",
+            "en": "Then let's rest here.",
+            "fr": "Alors, reposons-nous ici."
+          }
+        ],
+        "note": {
+          "en": "たくないです says you don't want to do it this time; きらいです would be a dislike for good.",
+          "fr": "たくないです dit qu'on n'a pas envie de le faire cette fois ; きらいです serait une aversion pour de bon."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "駅の前で、ばんごはんを食べますか。",
+            "en": "Shall we have dinner in front of the station?",
+            "fr": "On dîne devant la gare ?"
+          },
+          "task": {
+            "en": "Say no: you don't want to eat now.",
+            "fr": "Dis que non : tu n'as pas envie de manger maintenant."
+          },
+          "choices": [
+            "いいえ、今は食べたくないです。",
+            "いいえ、今は食べたいです。",
+            "いいえ、ごはんがきらいです。"
+          ],
+          "why": {
+            "en": "Not wanting to, this time: the verb stem, then たくないです.",
+            "fr": "Ne pas en avoir envie, cette fois : le radical du verbe, puis たくないです."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜の中で",
@@ -6406,7 +9429,90 @@
         "register": "polite",
         "contrast": true
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "かばんの中に本があります。",
+        "ask": {
+          "en": "Here it is の中に, not の中で. What does it say?",
+          "fr": "Ici, の中に et pas の中で. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "There is a book inside the bag.",
+            "fr": "Il y a un livre dans le sac."
+          },
+          {
+            "en": "There is a book among the bags.",
+            "fr": "Il y a un livre parmi les sacs."
+          },
+          {
+            "en": "I put a book in the bag.",
+            "fr": "J'ai mis un livre dans le sac."
+          }
+        ],
+        "why": {
+          "en": "の中に says where something is: inside. の中で names the set you choose from: among.",
+          "fr": "の中に dit où se trouve une chose : dedans. の中で nomme l'ensemble où l'on choisit : parmi."
+        },
+        "pair": [
+          "三つの中で",
+          "かばんの中に"
+        ]
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeur"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、このおべんとうの中で、どれがいちばんおいしいですか。",
+            "en": "Excuse me, of these lunch boxes, which is the tastiest?",
+            "fr": "Excusez-moi, parmi ces bentos, lequel est le meilleur ?"
+          },
+          {
+            "who": "them",
+            "jp": "これがいちばん人気がありますよ。",
+            "en": "This one is the most popular.",
+            "fr": "Celui-ci est le plus demandé."
+          },
+          {
+            "who": "me",
+            "jp": "じゃあ、それをください。",
+            "en": "Then that one, please.",
+            "fr": "Alors, celui-là, s'il vous plaît."
+          }
+        ],
+        "note": {
+          "en": "の中で names the set you choose from; then どれ, だれ or 何 asks which.",
+          "fr": "の中で nomme l'ensemble où l'on choisit ; puis どれ, だれ ou 何 demande lequel."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "のみものは、おちゃとジュースとコーヒーがあります。",
+            "en": "For drinks, there's tea, juice and coffee.",
+            "fr": "Comme boissons, il y a du thé, du jus et du café."
+          },
+          "task": {
+            "en": "Ask him which of the three is the cheapest.",
+            "fr": "Demande-lui lequel des trois est le moins cher."
+          },
+          "choices": [
+            "この三つの中で、どれがいちばんやすいですか。",
+            "この三つの中に、どれがいちばんやすいですか。",
+            "この三つで、どちらがやすいですか。"
+          ],
+          "why": {
+            "en": "Choosing among three: の中で, then どれ. の中に says what is inside.",
+            "fr": "Choisir parmi trois : の中で, puis どれ. の中に dit ce qui est dedans."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "そして",
@@ -6478,7 +9584,90 @@
         "fr": "J'ai retrouvé un ami à la gare. Puis nous sommes rentrés ensemble.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "このパンはやすいです。しかし、おいしくないです。",
+        "ask": {
+          "en": "Here it is しかし, not そして. What does it do?",
+          "fr": "Ici, しかし et pas そして. Que fait-il ?"
+        },
+        "choices": [
+          {
+            "en": "It turns against the first sentence: but.",
+            "fr": "Il va à l'encontre de la première phrase : mais."
+          },
+          {
+            "en": "It adds in the same direction: and.",
+            "fr": "Il ajoute dans le même sens : et."
+          },
+          {
+            "en": "It gives a result: so.",
+            "fr": "Il donne une conséquence : donc."
+          }
+        ],
+        "why": {
+          "en": "そして goes on in the same direction; しかし turns against what came before.",
+          "fr": "そして continue dans le même sens ; しかし va à l'encontre de ce qui précède."
+        },
+        "pair": [
+          "そして",
+          "しかし"
+        ]
+      },
+      "scene": {
+        "place": "駅前",
+        "them": {
+          "en": "A friend",
+          "fr": "Une amie"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "この駅の前に、何がありますか。",
+            "en": "What is there in front of this station?",
+            "fr": "Qu'est-ce qu'il y a devant cette gare ?"
+          },
+          {
+            "who": "me",
+            "jp": "大きい本やがあります。そして、きっさてんもあります。",
+            "en": "There's a big bookshop. And there's a café, too.",
+            "fr": "Il y a une grande librairie. Et il y a aussi un café."
+          },
+          {
+            "who": "them",
+            "jp": "いいですね。",
+            "en": "Nice.",
+            "fr": "Sympa."
+          }
+        ],
+        "note": {
+          "en": "そして adds a second fact in the same direction: and also. しかし would turn against it.",
+          "fr": "そして ajoute un second fait dans le même sens : et aussi. しかし irait à l'encontre."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "そのきっさてんは、どうですか。",
+            "en": "What is that café like?",
+            "fr": "Il est comment, ce café ?"
+          },
+          "task": {
+            "en": "Say it is quiet, and the coffee is good too.",
+            "fr": "Dis qu'il est calme, et que le café est bon aussi."
+          },
+          "choices": [
+            "しずかです。そして、コーヒーもおいしいです。",
+            "しずかです。しかし、コーヒーもおいしいです。",
+            "しずかです。だから、コーヒーもおいしいです。"
+          ],
+          "why": {
+            "en": "Two good things, the same way: そして. しかし would be « but », だから « so ».",
+            "fr": "Deux bonnes choses, dans le même sens : そして. しかし serait « mais », だから « donc »."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "それから",
@@ -6545,7 +9734,90 @@
         "fr": "Je me lave les mains. Ensuite, je mange.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "手をあらってから、ごはんを食べます。",
+        "ask": {
+          "en": "Here it is てから, inside one sentence. What does it say?",
+          "fr": "Ici, てから, dans une seule phrase. Que dit-elle ?"
+        },
+        "choices": [
+          {
+            "en": "After washing my hands, I eat.",
+            "fr": "Après m'être lavé les mains, je mange."
+          },
+          {
+            "en": "I eat, then I wash my hands.",
+            "fr": "Je mange, puis je me lave les mains."
+          },
+          {
+            "en": "I wash my hands while I eat.",
+            "fr": "Je me lave les mains en mangeant."
+          }
+        ],
+        "why": {
+          "en": "てから joins two verbs in one sentence; それから starts a new sentence: « after that ».",
+          "fr": "てから relie deux verbes dans une phrase ; それから commence une nouvelle phrase : « après cela »."
+        },
+        "pair": [
+          "あらいます。それから、食べます",
+          "あらってから食べます"
+        ]
+      },
+      "scene": {
+        "place": "駅前",
+        "them": {
+          "en": "A friend",
+          "fr": "Un ami"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "あした、何をしますか。",
+            "en": "What are you doing tomorrow?",
+            "fr": "Tu fais quoi demain ?"
+          },
+          {
+            "who": "me",
+            "jp": "あさ、とうきょうへ行きます。それから、友だちに会います。",
+            "en": "In the morning I go to Tokyo. After that, I see a friend.",
+            "fr": "Le matin, je vais à Tokyo. Après ça, je vois un ami."
+          },
+          {
+            "who": "them",
+            "jp": "いいですね。",
+            "en": "Sounds good.",
+            "fr": "Super."
+          }
+        ],
+        "note": {
+          "en": "それから puts the next thing after: first Tokyo, then the friend. そして would only add.",
+          "fr": "それから place la chose suivante après : d'abord Tokyo, puis l'ami. そして ne ferait qu'ajouter."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "友だちに会ったあとで、何をしますか。",
+            "en": "What will you do after seeing your friend?",
+            "fr": "Tu feras quoi après avoir vu ton ami ?"
+          },
+          "task": {
+            "en": "Say you'll have lunch, and after that see a film.",
+            "fr": "Dis que tu vas déjeuner, et après ça voir un film."
+          },
+          "choices": [
+            "ひるごはんを食べます。それから、えいがを見ます。",
+            "ひるごはんを食べます。しかし、えいがを見ます。",
+            "ひるごはんを食べます。だから、えいがを見ます。"
+          ],
+          "why": {
+            "en": "One thing after another in time: それから. しかし is « but », だから « so ».",
+            "fr": "Une chose après l'autre dans le temps : それから. しかし, c'est « mais » ; だから, « donc »."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "しかし",
@@ -6612,7 +9884,90 @@
         "fr": "Ce livre est cher. Mais il est très bon.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "高いですが、おいしいです。",
+        "ask": {
+          "en": "No しかし here, but the same « but ». What does が do?",
+          "fr": "Pas de しかし ici, mais le même « mais ». Que fait が ?"
+        },
+        "choices": [
+          {
+            "en": "It joins the two halves inside one sentence.",
+            "fr": "Il relie les deux moitiés dans une seule phrase."
+          },
+          {
+            "en": "It marks the subject of the sentence.",
+            "fr": "Il marque le sujet de la phrase."
+          },
+          {
+            "en": "It means « and ».",
+            "fr": "Il veut dire « et »."
+          }
+        ],
+        "why": {
+          "en": "しかし opens a new sentence; が says the same « but » inside one.",
+          "fr": "しかし ouvre une nouvelle phrase ; が dit le même « mais » à l'intérieur d'une seule."
+        },
+        "pair": [
+          "高いです。しかし、おいしいです",
+          "高いですが、おいしいです"
+        ]
+      },
+      "scene": {
+        "place": "窓口",
+        "them": {
+          "en": "Clerk",
+          "fr": "Agent"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、きょうとまでの電車はありますか。",
+            "en": "Excuse me, is there a train to Kyoto?",
+            "fr": "Excusez-moi, il y a un train pour Kyoto ?"
+          },
+          {
+            "who": "them",
+            "jp": "はい、あります。しかし、とても高いですよ。",
+            "en": "Yes, there is. But it is very expensive.",
+            "fr": "Oui, il y en a un. Mais il est très cher."
+          },
+          {
+            "who": "me",
+            "jp": "そうですか。",
+            "en": "I see.",
+            "fr": "Ah bon."
+          }
+        ],
+        "note": {
+          "en": "しかし opens a new, polite sentence that turns against the first. が would say it inside one sentence, けど more casually.",
+          "fr": "しかし ouvre une nouvelle phrase, polie, qui va contre la première. が le dirait dans une seule phrase, けど plus familièrement."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "バスもありますよ。",
+            "en": "There is a bus too.",
+            "fr": "Il y a aussi un bus."
+          },
+          "task": {
+            "en": "Tell him: « The bus is cheap. But it is slow. »",
+            "fr": "Dis-lui : « Le bus est bon marché. Mais il est lent. »"
+          },
+          "choices": [
+            "バスは安いです。しかし、おそいです。",
+            "バスは安いです。そして、おそいです。",
+            "バスは安いです。だから、おそいです。"
+          ],
+          "why": {
+            "en": "The second sentence goes against the first: しかし. そして only adds, だから gives a result.",
+            "fr": "La seconde phrase va contre la première : しかし. そして ajoute seulement, だから donne une conséquence."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜に行きます",
@@ -6681,7 +10036,90 @@
         "fr": "Dimanche, je vais voir un film.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "駅前の店にパンを買いに行きます。",
+        "ask": {
+          "en": "There are two に here. What does the second one say?",
+          "fr": "Il y a deux に ici. Que dit le second ?"
+        },
+        "choices": [
+          {
+            "en": "What you go there to do: to buy bread.",
+            "fr": "Ce qu'on y va faire : acheter du pain."
+          },
+          {
+            "en": "Where you go: the shop.",
+            "fr": "Où l'on va : le magasin."
+          },
+          {
+            "en": "When you go.",
+            "fr": "Quand on y va."
+          }
+        ],
+        "why": {
+          "en": "After a place, に says where; after a verb's stem (買い), に行きます says what for.",
+          "fr": "Après un lieu, に dit où ; après le radical d'un verbe (買い), に行きます dit pour quoi faire."
+        },
+        "pair": [
+          "店に行きます",
+          "パンを買いに行きます"
+        ]
+      },
+      "scene": {
+        "place": "駅前",
+        "them": {
+          "en": "A neighbour",
+          "fr": "Une voisine"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "こんにちは。どこへ行きますか。",
+            "en": "Hello. Where are you going?",
+            "fr": "Bonjour. Vous allez où ?"
+          },
+          {
+            "who": "me",
+            "jp": "いもうとに会いに行きます。",
+            "en": "I'm going to see my little sister.",
+            "fr": "Je vais voir ma petite sœur."
+          },
+          {
+            "who": "them",
+            "jp": "いいですね。",
+            "en": "How nice.",
+            "fr": "C'est bien."
+          }
+        ],
+        "note": {
+          "en": "へ only says where you go; verb stem + に行きます says what you go there to do.",
+          "fr": "へ dit seulement où l'on va ; radical du verbe + に行きます dit ce qu'on y va faire."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "あしたは何をしますか。",
+            "en": "What are you doing tomorrow?",
+            "fr": "Qu'est-ce que vous faites demain ?"
+          },
+          "task": {
+            "en": "Tell her you are going to Tokyo to see a film.",
+            "fr": "Dis-lui que tu vas à Tokyo voir un film."
+          },
+          "choices": [
+            "とうきょうへえいがを見に行きます。",
+            "とうきょうへえいがを見て行きます。",
+            "とうきょうへえいがを見に来ます。"
+          ],
+          "why": {
+            "en": "The purpose takes the verb's stem: 見に行きます. 見て行きます is « watch, then go »; 来ます is coming here, not going there.",
+            "fr": "Le but prend le radical du verbe : 見に行きます. 見て行きます, c'est « regarder, puis partir » ; 来ます, c'est venir ici, pas aller là-bas."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜が（逆接）",
@@ -6752,7 +10190,86 @@
         "fr": "Je veux y aller, mais je n'ai pas d'argent.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "すみませんが、まどをあけてもいいですか。",
+        "ask": {
+          "en": "No real « but » here. What does が do after すみません?",
+          "fr": "Pas de vrai « mais » ici. Que fait が après すみません ?"
+        },
+        "choices": [
+          {
+            "en": "It softens the request that comes next.",
+            "fr": "Il adoucit la demande qui suit."
+          },
+          {
+            "en": "It marks すみません as the subject.",
+            "fr": "Il fait de すみません le sujet."
+          },
+          {
+            "en": "It means « because ».",
+            "fr": "Il veut dire « parce que »."
+          }
+        ],
+        "why": {
+          "en": "After すみません, が opens a request gently; the « but » has faded.",
+          "fr": "Après すみません, が ouvre une demande en douceur ; le « mais » s'est effacé."
+        }
+      },
+      "scene": {
+        "place": "窓口",
+        "them": {
+          "en": "Clerk",
+          "fr": "Agente"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "とうきょうまでのきっぷをください。",
+            "en": "A ticket to Tokyo, please.",
+            "fr": "Un billet pour Tokyo, s'il vous plaît."
+          },
+          {
+            "who": "them",
+            "jp": "しんかんせんは高いですが、はやいですよ。",
+            "en": "The shinkansen is expensive, but it's fast.",
+            "fr": "Le shinkansen est cher, mais il est rapide."
+          },
+          {
+            "who": "me",
+            "jp": "じゃあ、しんかんせんでおねがいします。",
+            "en": "Then the shinkansen, please.",
+            "fr": "Alors en shinkansen, s'il vous plaît."
+          }
+        ],
+        "note": {
+          "en": "が joins two clauses that pull against each other, politely. しかし would open a new sentence; けど is casual.",
+          "fr": "が relie deux propositions qui s'opposent, poliment. しかし ouvrirait une nouvelle phrase ; けど est familier."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "かえりのきっぷもいりますか。",
+            "en": "Do you need a return ticket too?",
+            "fr": "Il vous faut aussi un billet retour ?"
+          },
+          "task": {
+            "en": "Tell her you would like one, but you have no money today.",
+            "fr": "Dis-lui que tu en voudrais un, mais que tu n'as pas d'argent aujourd'hui."
+          },
+          "choices": [
+            "ほしいですが、今日はお金がありません。",
+            "ほしいですから、今日はお金がありません。",
+            "ほしいです。そして、今日はお金がありません。"
+          ],
+          "why": {
+            "en": "The second half goes against the first: が. から would make it a reason, そして a simple addition.",
+            "fr": "La seconde moitié va contre la première : が. から en ferait une raison, そして un simple ajout."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜て、〜て",
@@ -6824,7 +10341,90 @@
         "fr": "Je me suis lavé les mains et j'ai mangé.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "電車をおりてから、電話します。",
+        "ask": {
+          "en": "Here it is てから, not just て. What does it add?",
+          "fr": "Ici, てから et pas seulement て. Qu'est-ce que ça ajoute ?"
+        },
+        "choices": [
+          {
+            "en": "The first is over before the second starts.",
+            "fr": "La première est finie avant que la seconde commence."
+          },
+          {
+            "en": "The two happen at the same time.",
+            "fr": "Les deux se passent en même temps."
+          },
+          {
+            "en": "It gives a reason: because I get off.",
+            "fr": "Il donne une raison : parce que je descends."
+          }
+        ],
+        "why": {
+          "en": "て、て just gives the order; てから insists that the first is finished first.",
+          "fr": "て、て donne seulement l'ordre ; てから insiste : la première est finie d'abord."
+        },
+        "pair": [
+          "おりて、電話します",
+          "おりてから、電話します"
+        ]
+      },
+      "scene": {
+        "place": "駅前",
+        "them": {
+          "en": "A traveller",
+          "fr": "Un voyageur"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "すみません、ゆうびんきょくはどこですか。",
+            "en": "Excuse me, where is the post office?",
+            "fr": "Excusez-moi, où est la poste ?"
+          },
+          {
+            "who": "me",
+            "jp": "まっすぐ行って、右にまがってください。",
+            "en": "Go straight, then turn right.",
+            "fr": "Allez tout droit, puis tournez à droite."
+          },
+          {
+            "who": "them",
+            "jp": "ありがとうございます。",
+            "en": "Thank you.",
+            "fr": "Merci."
+          }
+        ],
+        "note": {
+          "en": "Each て hands on to the next step, in the order they happen. てから would stress that one is over first.",
+          "fr": "Chaque て passe à l'étape suivante, dans l'ordre où elles arrivent. てから insisterait sur la fin de la première."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "電車の中で何をしますか。",
+            "en": "What do you do on the train?",
+            "fr": "Vous faites quoi dans le train ?"
+          },
+          "task": {
+            "en": "Tell him: you eat, then you read a book.",
+            "fr": "Dis-lui : tu manges, puis tu lis un livre."
+          },
+          "choices": [
+            "ごはんを食べて、本を読みます。",
+            "ごはんを食べる、本を読みます。",
+            "ごはんを食べた、本を読みます。"
+          ],
+          "why": {
+            "en": "To chain two actions in one sentence, the first takes the て-form: 食べて.",
+            "fr": "Pour enchaîner deux actions dans une phrase, la première prend la forme en て : 食べて."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜て（理由）",
@@ -6962,7 +10562,80 @@
         "fr": "Excusez-moi, mais fermez la fenêtre, s'il vous plaît.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "すみませんけど、ちょっと見せてください。",
+        "ask": {
+          "en": "No contrast here. What does けど do?",
+          "fr": "Pas d'opposition ici. Que fait けど ?"
+        },
+        "choices": [
+          {
+            "en": "It softens the request that follows.",
+            "fr": "Il adoucit la demande qui suit."
+          },
+          {
+            "en": "It gives the reason for the request.",
+            "fr": "Il donne la raison de la demande."
+          },
+          {
+            "en": "It says the request is refused.",
+            "fr": "Il dit que la demande est refusée."
+          }
+        ],
+        "why": {
+          "en": "Before a request, けど only cushions it, like « sorry, but… ».",
+          "fr": "Devant une demande, けど l'amortit seulement, comme « pardon, mais… »."
+        }
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A friend",
+          "fr": "Un ami"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "あの電車、はやいけど、高いよ。",
+            "en": "That train is fast, but it's expensive.",
+            "fr": "Ce train-là est rapide, mais il est cher."
+          },
+          {
+            "who": "me",
+            "jp": "じゃあ、バスで行くよ。",
+            "en": "Then I'll take the bus.",
+            "fr": "Alors je prends le bus."
+          }
+        ],
+        "note": {
+          "en": "けど is the casual « but », between friends. With a clerk, が; to open a new sentence, しかし.",
+          "fr": "けど est le « mais » familier, entre amis. Avec un agent, が ; pour ouvrir une nouvelle phrase, しかし."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "今日、えいがを見に行かない？",
+            "en": "Want to go see a film today?",
+            "fr": "On va voir un film aujourd'hui ?"
+          },
+          "task": {
+            "en": "Tell him you want to go, but you have work today.",
+            "fr": "Dis-lui que tu veux y aller, mais que tu as du travail aujourd'hui."
+          },
+          "choices": [
+            "行きたいけど、今日はしごとがある。",
+            "行きたいから、今日はしごとがある。",
+            "行きたい。だから、今日はしごとがある。"
+          ],
+          "why": {
+            "en": "The work goes against your wish: けど. から and だから would make the work its result.",
+            "fr": "Le travail va contre ton envie : けど. から et だから en feraient la conséquence."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜か〜か",
@@ -7026,7 +10699,86 @@
         "fr": "Voyons-nous samedi ou dimanche.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "あした来るか来ないか、おしえてください。",
+        "ask": {
+          "en": "Here か〜か joins a verb and its negative. What is asked?",
+          "fr": "Ici, か〜か relie un verbe et sa négation. Que demande-t-on ?"
+        },
+        "choices": [
+          {
+            "en": "Whether or not you are coming tomorrow.",
+            "fr": "Si tu viens demain ou non."
+          },
+          {
+            "en": "Whether you are coming or going tomorrow.",
+            "fr": "Si tu viens ou si tu pars demain."
+          },
+          {
+            "en": "When you are coming tomorrow.",
+            "fr": "À quelle heure tu viens demain."
+          }
+        ],
+        "why": {
+          "en": "A verb, か, its negative, か: « whether or not ».",
+          "fr": "Un verbe, か, sa négation, か : « si… ou non »."
+        }
+      },
+      "scene": {
+        "place": "車内",
+        "them": {
+          "en": "A colleague",
+          "fr": "Une collègue"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "日よう日は何をしますか。",
+            "en": "What are you doing on Sunday?",
+            "fr": "Vous faites quoi dimanche ?"
+          },
+          {
+            "who": "me",
+            "jp": "山か川か、どちらかへ行きます。",
+            "en": "I'll go to the mountains or the river, one of the two.",
+            "fr": "J'irai à la montagne ou à la rivière, l'un des deux."
+          },
+          {
+            "who": "them",
+            "jp": "いいですね。",
+            "en": "Sounds nice.",
+            "fr": "C'est bien."
+          }
+        ],
+        "note": {
+          "en": "か between two nouns lays out the choice, « A or B ». A lone か at the end asks a question.",
+          "fr": "か entre deux noms pose le choix, « A ou B ». Un か seul en fin de phrase pose une question."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "何時に会いましょうか。",
+            "en": "What time shall we meet?",
+            "fr": "On se voit à quelle heure ?"
+          },
+          "task": {
+            "en": "Ask her which suits her, nine or ten.",
+            "fr": "Demande-lui ce qui lui convient, neuf heures ou dix heures."
+          },
+          "choices": [
+            "九時か十時か、どちらがいいですか。",
+            "九時と十時と、どれがいいですか。",
+            "九時から十時まで、どちらがいいですか。"
+          ],
+          "why": {
+            "en": "Two options laid out with か〜か, then どちら for which. どれ is for three or more, から〜まで is a span.",
+            "fr": "Deux options posées avec か〜か, puis どちら pour choisir. どれ sert pour trois ou plus, から〜まで est une durée."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "あまり〜ない",
@@ -7239,7 +10991,90 @@
         "fr": "Je n'ai pas du tout le temps aujourd'hui.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "このパンはあまりおいしくないです。",
+        "ask": {
+          "en": "Here it is あまり, not ぜんぜん. How bad is the bread?",
+          "fr": "Ici, あまり et pas ぜんぜん. Le pain est mauvais à quel point ?"
+        },
+        "choices": [
+          {
+            "en": "Not very good.",
+            "fr": "Pas très bon."
+          },
+          {
+            "en": "Not good at all.",
+            "fr": "Pas bon du tout."
+          },
+          {
+            "en": "Very good.",
+            "fr": "Très bon."
+          }
+        ],
+        "why": {
+          "en": "あまり〜ない is « not much »; ぜんぜん〜ない is « not at all ».",
+          "fr": "あまり〜ない, c'est « pas beaucoup » ; ぜんぜん〜ない, « pas du tout »."
+        },
+        "pair": [
+          "ぜんぜんおいしくないです",
+          "あまりおいしくないです"
+        ]
+      },
+      "scene": {
+        "place": "待合室",
+        "them": {
+          "en": "A traveller",
+          "fr": "Un voyageur"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "日本語の新聞を読みますか。",
+            "en": "Do you read Japanese newspapers?",
+            "fr": "Vous lisez des journaux japonais ?"
+          },
+          {
+            "who": "me",
+            "jp": "いいえ、新聞はぜんぜん読みません。",
+            "en": "No, I don't read newspapers at all.",
+            "fr": "Non, je ne lis pas du tout de journaux."
+          },
+          {
+            "who": "them",
+            "jp": "わたしもです。",
+            "en": "Me neither.",
+            "fr": "Moi non plus."
+          }
+        ],
+        "note": {
+          "en": "ぜんぜん with a negative leaves nothing: not at all. あまり would leave a little: not much.",
+          "fr": "ぜんぜん avec une négation ne laisse rien : pas du tout. あまり laisserait un peu : pas beaucoup."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "おなかがすきましたか。",
+            "en": "Are you hungry?",
+            "fr": "Vous avez faim ?"
+          },
+          "task": {
+            "en": "Tell him: no, not at all.",
+            "fr": "Dis-lui : non, pas du tout."
+          },
+          "choices": [
+            "いいえ、おなかはぜんぜんすいていません。",
+            "いいえ、おなかはあまりすいていません。",
+            "いいえ、おなかはもうすいていません。"
+          ],
+          "why": {
+            "en": "Not at all: ぜんぜん. あまり is « not very », もう « not any more ».",
+            "fr": "Pas du tout : ぜんぜん. あまり, c'est « pas très », もう, « plus »."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜と同じ",
@@ -7308,7 +11143,90 @@
         "fr": "Ma voiture est la même que celle de mon frère.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "友だちと電車にのります。",
+        "ask": {
+          "en": "Here と has no 同じ after it. What does it mean?",
+          "fr": "Ici, と n'a pas 同じ après lui. Que veut-il dire ?"
+        },
+        "choices": [
+          {
+            "en": "« with »: I take the train with a friend.",
+            "fr": "« avec » : je prends le train avec un ami."
+          },
+          {
+            "en": "« same as »: the same train as a friend.",
+            "fr": "« le même que » : le même train qu'un ami."
+          },
+          {
+            "en": "« or »: a friend or the train.",
+            "fr": "« ou » : un ami ou le train."
+          }
+        ],
+        "why": {
+          "en": "Alone, と is « with » or « and »; it is « as » only in と同じ.",
+          "fr": "Seul, と veut dire « avec » ou « et » ; il ne fait le « que » qu'avec と同じ."
+        },
+        "pair": [
+          "友だちと同じ電車にのります",
+          "友だちと電車にのります"
+        ]
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeur"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "いらっしゃいませ。",
+            "en": "Hello there.",
+            "fr": "Bonjour."
+          },
+          {
+            "who": "me",
+            "jp": "あの人と同じものをください。",
+            "en": "The same as that person, please.",
+            "fr": "La même chose que cette personne, s'il vous plaît."
+          },
+          {
+            "who": "them",
+            "jp": "はい、コーヒーですね。",
+            "en": "Right, a coffee.",
+            "fr": "Bien, un café."
+          }
+        ],
+        "note": {
+          "en": "と同じ says two things are the same. より would say one is more than the other.",
+          "fr": "と同じ dit que deux choses sont pareilles. より dirait que l'une l'emporte sur l'autre."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "パンもありますよ。",
+            "en": "We have bread too.",
+            "fr": "Il y a aussi du pain."
+          },
+          "task": {
+            "en": "Ask for the same bread as yesterday.",
+            "fr": "Demande le même pain qu'hier."
+          },
+          "choices": [
+            "きのうと同じパンをください。",
+            "きのうより大きいパンをください。",
+            "きのうとちがうパンをください。"
+          ],
+          "why": {
+            "en": "The same as yesterday's: きのうと同じ. より compares, ちがう says different.",
+            "fr": "Le même qu'hier : きのうと同じ. より compare, ちがう dit « différent »."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜に〜回",
@@ -7374,7 +11292,86 @@
         "fr": "Combien de fois par mois allez-vous au cinéma ?",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "一週間に何回、電車にのりますか。",
+        "ask": {
+          "en": "What is this question about?",
+          "fr": "Sur quoi porte cette question ?"
+        },
+        "choices": [
+          {
+            "en": "How many times a week you take the train.",
+            "fr": "Combien de fois par semaine tu prends le train."
+          },
+          {
+            "en": "How long the train ride takes.",
+            "fr": "Combien de temps dure le trajet."
+          },
+          {
+            "en": "Which day you take the train.",
+            "fr": "Quel jour tu prends le train."
+          }
+        ],
+        "why": {
+          "en": "何回 asks how many times; the period before に is what each count is per.",
+          "fr": "何回 demande combien de fois ; la période avant に dit « par » quoi."
+        }
+      },
+      "scene": {
+        "place": "窓口",
+        "them": {
+          "en": "Clerk",
+          "fr": "Agent"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "毎日電車にのりますか。",
+            "en": "Do you take the train every day?",
+            "fr": "Vous prenez le train tous les jours ?"
+          },
+          {
+            "who": "me",
+            "jp": "いいえ、週に三回です。",
+            "en": "No, three times a week.",
+            "fr": "Non, trois fois par semaine."
+          },
+          {
+            "who": "them",
+            "jp": "では、このきっぷがいいですよ。",
+            "en": "Then this ticket is the one for you.",
+            "fr": "Alors, ce billet-ci vous conviendra."
+          }
+        ],
+        "note": {
+          "en": "Period + に + number + 回: how many times in each period. に alone would only give the time.",
+          "fr": "Période + に + nombre + 回 : combien de fois dans chaque période. に seul donnerait seulement le moment."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "とうきょうへはよく行きますか。",
+            "en": "Do you often go to Tokyo?",
+            "fr": "Vous allez souvent à Tokyo ?"
+          },
+          "task": {
+            "en": "Tell him: once a month.",
+            "fr": "Dis-lui : une fois par mois."
+          },
+          "choices": [
+            "一か月に一回行きます。",
+            "一回に一か月行きます。",
+            "一か月に一つ行きます。"
+          ],
+          "why": {
+            "en": "The period comes first with に, then the count with 回: 一か月に一回.",
+            "fr": "La période vient d'abord avec に, puis le nombre avec 回 : 一か月に一回."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜く／〜に（副詞形）",
@@ -7440,7 +11437,84 @@
         "fr": "J'ai bien nettoyé la chambre.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "名前をきれいに書いてください。",
+        "ask": {
+          "en": "Here it is に, not く. Why?",
+          "fr": "Ici, に et pas く. Pourquoi ?"
+        },
+        "choices": [
+          {
+            "en": "きれい is a な-adjective, so it takes に.",
+            "fr": "きれい est un adjectif en な, donc il prend に."
+          },
+          {
+            "en": "に marks the place where you write.",
+            "fr": "に marque l'endroit où l'on écrit."
+          },
+          {
+            "en": "きれい ends in い, so it takes に.",
+            "fr": "きれい finit par い, donc il prend に."
+          }
+        ],
+        "why": {
+          "en": "An い-adjective takes く (はやく); a な-adjective takes に (きれいに), even when it ends in い.",
+          "fr": "Un adjectif en い prend く (はやく) ; un adjectif en な prend に (きれいに), même s'il finit par い."
+        },
+        "pair": [
+          "はやく書いてください",
+          "きれいに書いてください"
+        ]
+      },
+      "scene": {
+        "place": "窓口",
+        "them": {
+          "en": "Clerk",
+          "fr": "Agente"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、ここに何を書きますか。",
+            "en": "Excuse me, what do I write here?",
+            "fr": "Excusez-moi, j'écris quoi ici ?"
+          },
+          {
+            "who": "them",
+            "jp": "お名前です。大きく書いてくださいね。",
+            "en": "Your name. Write it big, please.",
+            "fr": "Votre nom. Écrivez-le en grand, s'il vous plaît."
+          }
+        ],
+        "note": {
+          "en": "大きい drops its い and takes く to say how you write: 大きく書く. A な-adjective would take に.",
+          "fr": "大きい perd son い et prend く pour dire comment on écrit : 大きく書く. Un adjectif en な prendrait に."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "とうきょうまで、九千円です。",
+            "en": "To Tokyo, that's nine thousand yen.",
+            "fr": "Pour Tokyo, ça fait neuf mille yens."
+          },
+          "task": {
+            "en": "She spoke too softly. Ask her to say it again, loudly.",
+            "fr": "Elle a parlé trop bas. Demande-lui de le redire, fort."
+          },
+          "choices": [
+            "すみません、もういちど大きく言ってください。",
+            "すみません、もういちど大きい言ってください。",
+            "すみません、もういちど大きいに言ってください。"
+          ],
+          "why": {
+            "en": "To describe how she says it, 大きい drops い and takes く: 大きく.",
+            "fr": "Pour décrire comment elle le dit, 大きい perd son い et prend く : 大きく."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜にします",
@@ -7507,7 +11581,90 @@
         "fr": "Que prenez-vous à boire ?",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "雨になりました。",
+        "ask": {
+          "en": "Here it is になります, not にします. What does it say?",
+          "fr": "Ici, になります et pas にします. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "It has turned to rain.",
+            "fr": "Il s'est mis à pleuvoir."
+          },
+          {
+            "en": "I chose rain.",
+            "fr": "J'ai choisi la pluie."
+          },
+          {
+            "en": "Let's have rain.",
+            "fr": "Prenons la pluie."
+          }
+        ],
+        "why": {
+          "en": "になる is what something becomes on its own; にする is what you decide.",
+          "fr": "になる, c'est ce que devient une chose d'elle-même ; にする, ce que l'on décide."
+        },
+        "pair": [
+          "コーヒーにしました",
+          "雨になりました"
+        ]
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeuse"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "お飲みものは何にしますか。",
+            "en": "What would you like to drink?",
+            "fr": "Qu'est-ce que vous prenez comme boisson ?"
+          },
+          {
+            "who": "me",
+            "jp": "おちゃにします。",
+            "en": "I'll have tea.",
+            "fr": "Je prends du thé."
+          },
+          {
+            "who": "them",
+            "jp": "はい、百五十円です。",
+            "en": "That's a hundred and fifty yen.",
+            "fr": "Ça fait cent cinquante yens."
+          }
+        ],
+        "note": {
+          "en": "にします says what you pick. をください asks to be given it; になる says what something becomes.",
+          "fr": "にします dit ce que l'on choisit. をください demande qu'on vous le donne ; になる dit ce que devient une chose."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "パンは、どれにしますか。",
+            "en": "Which bread will you have?",
+            "fr": "Quel pain vous prenez ?"
+          },
+          "task": {
+            "en": "Tell her you'll go with this one.",
+            "fr": "Dis-lui que tu prends celui-ci."
+          },
+          "choices": [
+            "これにします。",
+            "これになります。",
+            "これをします。"
+          ],
+          "why": {
+            "en": "You are choosing: noun + にします. になります would say what it turns into.",
+            "fr": "Tu choisis : nom + にします. になります dirait ce que ça devient."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜も〜も",
@@ -7571,7 +11728,84 @@
         "fr": "Samedi et dimanche sont tous les deux des jours de congé.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "今日は電車もバスもありません。",
+        "ask": {
+          "en": "With a negative, what does も〜も say?",
+          "fr": "Avec une négation, que dit も〜も ?"
+        },
+        "choices": [
+          {
+            "en": "Neither: no train and no bus today.",
+            "fr": "Ni l'un ni l'autre : pas de train ni de bus aujourd'hui."
+          },
+          {
+            "en": "Both: there are trains and buses today.",
+            "fr": "Les deux : il y a des trains et des bus aujourd'hui."
+          },
+          {
+            "en": "Either: a train or a bus today.",
+            "fr": "L'un ou l'autre : un train ou un bus aujourd'hui."
+          }
+        ],
+        "why": {
+          "en": "も〜も with a positive is « both »; with a negative it becomes « neither… nor ».",
+          "fr": "も〜も avec un verbe positif, c'est « les deux » ; avec une négation, « ni… ni »."
+        },
+        "pair": [
+          "電車もバスもあります",
+          "電車もバスもありません"
+        ]
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeur"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "すみません、おちゃとコーヒーはありますか。",
+            "en": "Excuse me, do you have tea and coffee?",
+            "fr": "Excusez-moi, vous avez du thé et du café ?"
+          },
+          {
+            "who": "them",
+            "jp": "はい、おちゃもコーヒーもありますよ。",
+            "en": "Yes, we have both tea and coffee.",
+            "fr": "Oui, nous avons du thé comme du café."
+          }
+        ],
+        "note": {
+          "en": "も〜も says « both, alike ». と only joins the two names, か offers one or the other.",
+          "fr": "も〜も dit « les deux, pareil ». と relie seulement les deux noms, か propose l'un ou l'autre."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "パンとおにぎりがありますよ。",
+            "en": "We have bread and rice balls.",
+            "fr": "Nous avons du pain et des onigiris."
+          },
+          "task": {
+            "en": "Tell him you'll have both.",
+            "fr": "Dis-lui que tu prends les deux."
+          },
+          "choices": [
+            "パンもおにぎりもください。",
+            "パンかおにぎりをください。",
+            "パンだけください。"
+          ],
+          "why": {
+            "en": "Both, alike: パンもおにぎりも. か would pick one, だけ only the bread.",
+            "fr": "Les deux, pareil : パンもおにぎりも. か en choisirait un, だけ seulement le pain."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜を（移動）",
@@ -8136,7 +12370,90 @@
         "fr": "La gare, c'est à l'est ou à l'ouest ?",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "バスより電車のほうがはやいです。",
+        "ask": {
+          "en": "This answers a どちら question. Which one is faster?",
+          "fr": "Ceci répond à une question en どちら. Lequel est le plus rapide ?"
+        },
+        "choices": [
+          {
+            "en": "The train.",
+            "fr": "Le train."
+          },
+          {
+            "en": "The bus.",
+            "fr": "Le bus."
+          },
+          {
+            "en": "Both are the same.",
+            "fr": "Les deux sont pareils."
+          }
+        ],
+        "why": {
+          "en": "と〜とどちらが asks; より〜のほうが answers, and のほうが marks the winner.",
+          "fr": "と〜とどちらが demande ; より〜のほうが répond, et のほうが marque le gagnant."
+        },
+        "pair": [
+          "バスと電車とどちらがはやいですか",
+          "バスより電車のほうがはやいです"
+        ]
+      },
+      "scene": {
+        "place": "売店",
+        "them": {
+          "en": "Vendor",
+          "fr": "Vendeuse"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "このおにぎりとそのおにぎりとどちらがおいしいですか。",
+            "en": "Which is tastier, this rice ball or that one?",
+            "fr": "Lequel est le meilleur, cet onigiri-ci ou celui-là ?"
+          },
+          {
+            "who": "them",
+            "jp": "こちらのほうがおいしいですよ。",
+            "en": "This one is tastier.",
+            "fr": "Celui-ci est meilleur."
+          },
+          {
+            "who": "me",
+            "jp": "じゃあ、それをください。",
+            "en": "Then I'll take that one.",
+            "fr": "Alors je prends celui-là."
+          }
+        ],
+        "note": {
+          "en": "と〜とどちらが asks which of two; the answer comes with のほうが. Out of many, you would ask with いちばん.",
+          "fr": "と〜とどちらが demande lequel des deux ; la réponse vient avec のほうが. Parmi plusieurs, on demanderait avec いちばん."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "飲みものもありますよ。",
+            "en": "We have drinks too.",
+            "fr": "Il y a aussi des boissons."
+          },
+          "task": {
+            "en": "Ask her which is cheaper, the tea or the coffee.",
+            "fr": "Demande-lui lequel est le moins cher, le thé ou le café."
+          },
+          "choices": [
+            "おちゃとコーヒーとどちらが安いですか。",
+            "おちゃとコーヒーとどれが安いですか。",
+            "おちゃとコーヒーとどちらも安いですか。"
+          ],
+          "why": {
+            "en": "Two things compared: どちらが, with the adjective after it. どれ is for three or more; どちらも asks if both are.",
+            "fr": "Deux choses comparées : どちらが, avec l'adjectif après. どれ sert pour trois ou plus ; どちらも demande si les deux le sont."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜で（理由）",
@@ -8276,7 +12593,90 @@
         "fr": "Y a-t-il quelque chose à boire ?",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "何か食べますか。",
+        "ask": {
+          "en": "With か after 何, what is asked?",
+          "fr": "Avec か après 何, que demande-t-on ?"
+        },
+        "choices": [
+          {
+            "en": "Will you eat something? (yes or no)",
+            "fr": "Tu manges quelque chose ? (oui ou non)"
+          },
+          {
+            "en": "What will you eat?",
+            "fr": "Qu'est-ce que tu manges ?"
+          },
+          {
+            "en": "Will you eat nothing?",
+            "fr": "Tu ne manges rien ?"
+          }
+        ],
+        "why": {
+          "en": "何か is « something »: the answer is はい or いいえ. 何を asks what.",
+          "fr": "何か veut dire « quelque chose » : on répond はい ou いいえ. 何を demande quoi."
+        },
+        "pair": [
+          "何を食べますか",
+          "何か食べますか"
+        ]
+      },
+      "scene": {
+        "place": "待合室",
+        "them": {
+          "en": "A colleague",
+          "fr": "Un collègue"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "電車まで、まだ三十分ありますね。",
+            "en": "Still thirty minutes until the train.",
+            "fr": "Encore trente minutes avant le train."
+          },
+          {
+            "who": "me",
+            "jp": "何か食べませんか。",
+            "en": "How about eating something?",
+            "fr": "Si on mangeait quelque chose ?"
+          },
+          {
+            "who": "them",
+            "jp": "いいですね。どこかに店がありますか。",
+            "en": "Good idea. Is there a shop somewhere?",
+            "fr": "Bonne idée. Il y a un magasin quelque part ?"
+          }
+        ],
+        "note": {
+          "en": "何か, 誰か, どこか: something, someone, somewhere. With も and a negative they become nothing, nobody.",
+          "fr": "何か, 誰か, どこか : quelque chose, quelqu'un, quelque part. Avec も et une négation, ils deviennent rien, personne."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "あ、あそこに店がありますよ。",
+            "en": "Oh, there's a shop over there.",
+            "fr": "Ah, il y a un magasin là-bas."
+          },
+          "task": {
+            "en": "Ask him: « Will you buy something? »",
+            "fr": "Demande-lui : « Vous achetez quelque chose ? »"
+          },
+          "choices": [
+            "何か買いますか。",
+            "何も買いますか。",
+            "何を買いますか。"
+          ],
+          "why": {
+            "en": "A yes-or-no question about « something »: 何か. 何を asks what; 何も needs a negative.",
+            "fr": "Une question en oui ou non sur « quelque chose » : 何か. 何を demande quoi ; 何も demande une négation."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "何も／誰も〜ない",
@@ -8345,7 +12745,84 @@
         "fr": "Hier, je n'ai rien acheté.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "かばんの中に何もありません。",
+        "ask": {
+          "en": "What is in the bag?",
+          "fr": "Qu'y a-t-il dans le sac ?"
+        },
+        "choices": [
+          {
+            "en": "Nothing.",
+            "fr": "Rien."
+          },
+          {
+            "en": "Something.",
+            "fr": "Quelque chose."
+          },
+          {
+            "en": "Everything.",
+            "fr": "Tout."
+          }
+        ],
+        "why": {
+          "en": "何も with a negative is « nothing »; 何か would be « something ».",
+          "fr": "何も avec une négation, c'est « rien » ; 何か serait « quelque chose »."
+        },
+        "pair": [
+          "何かあります",
+          "何もありません"
+        ]
+      },
+      "scene": {
+        "place": "待合室",
+        "them": {
+          "en": "A traveller",
+          "fr": "Une voyageuse"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "すみません、このせきに誰かいますか。",
+            "en": "Excuse me, is anyone sitting here?",
+            "fr": "Excusez-moi, quelqu'un est assis ici ?"
+          },
+          {
+            "who": "me",
+            "jp": "いいえ、誰もいません。どうぞ。",
+            "en": "No, nobody. Go ahead.",
+            "fr": "Non, personne. Je vous en prie."
+          }
+        ],
+        "note": {
+          "en": "誰か asks about someone; 誰も with a negative answers: nobody.",
+          "fr": "誰か demande s'il y a quelqu'un ; 誰も avec une négation répond : personne."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "けさ、何か食べましたか。",
+            "en": "Did you eat anything this morning?",
+            "fr": "Vous avez mangé quelque chose ce matin ?"
+          },
+          "task": {
+            "en": "Tell her: no, you ate nothing.",
+            "fr": "Dis-lui : non, tu n'as rien mangé."
+          },
+          "choices": [
+            "いいえ、何も食べませんでした。",
+            "いいえ、何か食べませんでした。",
+            "いいえ、何を食べませんでした。"
+          ],
+          "why": {
+            "en": "Nothing: 何も with a negative. 何か is « something », 何を asks what.",
+            "fr": "Rien : 何も avec une négation. 何か veut dire « quelque chose », 何を demande quoi."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜は〜が",
@@ -8555,7 +13032,90 @@
         "fr": "Ce magasin est bon marché. C'est pourquoi il y a toujours du monde.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "雨がふっています。そして、さむいです。",
+        "ask": {
+          "en": "No だから here. How are the two sentences linked?",
+          "fr": "Pas de だから ici. Comment les deux phrases sont-elles liées ?"
+        },
+        "choices": [
+          {
+            "en": "It adds a second fact: and it is cold.",
+            "fr": "Il ajoute un second fait : et il fait froid."
+          },
+          {
+            "en": "The cold comes from the rain: so it is cold.",
+            "fr": "Le froid vient de la pluie : donc il fait froid."
+          },
+          {
+            "en": "It contrasts: but it is cold.",
+            "fr": "Il oppose : mais il fait froid."
+          }
+        ],
+        "why": {
+          "en": "そして only adds; だから would make the second sentence the result of the first.",
+          "fr": "そして ajoute seulement ; だから ferait de la seconde phrase la conséquence de la première."
+        },
+        "pair": [
+          "雨です。そして、さむいです",
+          "雨です。だから、行きません"
+        ]
+      },
+      "scene": {
+        "place": "ホーム",
+        "them": {
+          "en": "A colleague",
+          "fr": "Une collègue"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "電車がおくれていますね。",
+            "en": "The train is late.",
+            "fr": "Le train a du retard."
+          },
+          {
+            "who": "me",
+            "jp": "ええ。だから、バスで行きます。",
+            "en": "Yes. So I'll go by bus.",
+            "fr": "Oui. Donc je vais prendre le bus."
+          },
+          {
+            "who": "them",
+            "jp": "わたしもそうします。",
+            "en": "I'll do the same.",
+            "fr": "Je vais faire pareil."
+          }
+        ],
+        "note": {
+          "en": "だから opens a sentence that follows from the one before. そして would only add; しかし would turn against it.",
+          "fr": "だから ouvre une phrase qui découle de la précédente. そして ajouterait seulement ; しかし irait contre elle."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "あしたは休みですか。",
+            "en": "Are you off tomorrow?",
+            "fr": "Vous êtes en congé demain ?"
+          },
+          "task": {
+            "en": "Tell her: yes, you are off. So you'll go to the mountains.",
+            "fr": "Dis-lui : oui, tu es en congé. Donc tu vas à la montagne."
+          },
+          "choices": [
+            "はい、休みです。だから、山へ行きます。",
+            "はい、休みです。しかし、山へ行きます。",
+            "はい、休みです。そして、山へ行きます。"
+          ],
+          "why": {
+            "en": "The trip follows from the day off: だから. しかし would set them against each other, そして would only add.",
+            "fr": "La sortie découle du congé : だから. しかし les opposerait, そして ajouterait seulement."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "もう〜ない",
@@ -8622,7 +13182,90 @@
         "fr": "Mon frère n'est plus étudiant.",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "もう食べました。",
+        "ask": {
+          "en": "Here もう has no negative. What does it say?",
+          "fr": "Ici, もう n'a pas de négation. Que dit la phrase ?"
+        },
+        "choices": [
+          {
+            "en": "Already: I have already eaten.",
+            "fr": "Déjà : j'ai déjà mangé."
+          },
+          {
+            "en": "Not any more: I don't eat now.",
+            "fr": "Plus : je ne mange plus."
+          },
+          {
+            "en": "Not yet: I haven't eaten.",
+            "fr": "Pas encore : je n'ai pas mangé."
+          }
+        ],
+        "why": {
+          "en": "もう with a past verb is « already »; with a negative it is « not any more ».",
+          "fr": "もう avec un verbe au passé, c'est « déjà » ; avec une négation, « ne… plus »."
+        },
+        "pair": [
+          "もう食べません",
+          "もう食べました"
+        ]
+      },
+      "scene": {
+        "place": "車内",
+        "them": {
+          "en": "A colleague",
+          "fr": "Une collègue"
+        },
+        "lines": [
+          {
+            "who": "them",
+            "jp": "おかしはまだありますか。",
+            "en": "Are there any sweets left?",
+            "fr": "Il reste des gâteaux ?"
+          },
+          {
+            "who": "me",
+            "jp": "いいえ、もうありません。",
+            "en": "No, there are none left.",
+            "fr": "Non, il n'y en a plus."
+          },
+          {
+            "who": "them",
+            "jp": "じゃあ、つぎの駅で買いましょう。",
+            "en": "Then let's buy some at the next station.",
+            "fr": "Alors achetons-en à la prochaine gare."
+          }
+        ],
+        "note": {
+          "en": "もう with a negative: no longer. まだ〜ない would be « not yet »; もう with a past verb, « already ».",
+          "fr": "もう avec une négation : ne… plus. まだ〜ない serait « pas encore » ; もう avec un passé, « déjà »."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "おちゃ、まだ飲みますか。",
+            "en": "Will you have more tea?",
+            "fr": "Vous reprenez du thé ?"
+          },
+          "task": {
+            "en": "Tell her: no, not any more.",
+            "fr": "Dis-lui : non, plus maintenant."
+          },
+          "choices": [
+            "いいえ、もう飲みません。",
+            "いいえ、まだ飲みません。",
+            "はい、もう飲みました。"
+          ],
+          "why": {
+            "en": "Not any more: もう with the negative. まだ would be « not yet », もう飲みました « I already drank ».",
+            "fr": "Ne… plus : もう avec la négation. まだ serait « pas encore », もう飲みました « j'ai déjà bu »."
+          }
+        }
+      }
+    }
   },
   {
     "pattern": "〜はどうですか",
@@ -8694,6 +13337,85 @@
         "fr": "Comment est le pain de ce magasin ?",
         "register": "polite"
       }
-    ]
+    ],
+    "tour": {
+      "twist": {
+        "jp": "日本の電車はどうですか。",
+        "ask": {
+          "en": "Nothing is offered here. What is asked?",
+          "fr": "Rien n'est proposé ici. Que demande-t-on ?"
+        },
+        "choices": [
+          {
+            "en": "What you think of Japanese trains.",
+            "fr": "Ce que tu penses des trains japonais."
+          },
+          {
+            "en": "Whether you want to take a Japanese train.",
+            "fr": "Si tu veux prendre un train japonais."
+          },
+          {
+            "en": "Where the Japanese trains are.",
+            "fr": "Où sont les trains japonais."
+          }
+        ],
+        "why": {
+          "en": "はどうですか either offers something or asks your opinion of it; here, your opinion.",
+          "fr": "はどうですか propose une chose ou demande ton avis sur elle ; ici, ton avis."
+        }
+      },
+      "scene": {
+        "place": "窓口",
+        "them": {
+          "en": "Clerk",
+          "fr": "Agente"
+        },
+        "lines": [
+          {
+            "who": "me",
+            "jp": "あしたのとうきょうまでのきっぷはありますか。",
+            "en": "Do you have a ticket to Tokyo for tomorrow?",
+            "fr": "Vous avez un billet pour Tokyo demain ?"
+          },
+          {
+            "who": "them",
+            "jp": "九時のはありません。十時はどうですか。",
+            "en": "Not the nine o'clock. How about ten?",
+            "fr": "Plus pour neuf heures. Et dix heures ?"
+          },
+          {
+            "who": "me",
+            "jp": "じゃあ、十時のをください。",
+            "en": "Then the ten o'clock, please.",
+            "fr": "Alors celui de dix heures, s'il vous plaît."
+          }
+        ],
+        "note": {
+          "en": "Noun + はどうですか offers a thing or a time. To invite someone to do something, you would use ませんか.",
+          "fr": "Nom + はどうですか propose une chose ou un moment. Pour inviter à faire quelque chose, on dirait ませんか."
+        },
+        "ask": {
+          "cue": {
+            "who": "them",
+            "jp": "かえりは何時がいいですか。",
+            "en": "What time would you like for the return?",
+            "fr": "Pour le retour, quelle heure vous convient ?"
+          },
+          "task": {
+            "en": "Offer five o'clock: « How about five? »",
+            "fr": "Propose cinq heures : « Et cinq heures ? »"
+          },
+          "choices": [
+            "五時はどうですか。",
+            "五時がどうですか。",
+            "五時に行きませんか。"
+          ],
+          "why": {
+            "en": "The thing offered takes は, then どうですか. ませんか would invite her to go with you.",
+            "fr": "Ce qu'on propose prend は, puis どうですか. ませんか l'inviterait à y aller avec toi."
+          }
+        }
+      }
+    }
   }
 ]
