@@ -7,10 +7,8 @@ from pydantic import BaseModel, Field
 
 from core.db import db_conn
 from core.auth import get_user_id
-from core.srs_instance import srs
 import routes.reading as reading  # reused wholesale below — see get_translation_batch's docstring
 from study import tutor_review
-from study.card_lookup import vocab_card_id_for_word
 from study.llm_shared import llm_configured
 
 # A pass feature (plan 069): every route here refuses a free learner
@@ -352,35 +350,7 @@ def post_translation_result(payload: ResultPayload, user_id: str = Depends(get_u
     finally:
         conn.close()
 
-    # Scheduling happens after the log is committed, and never instead
-    # of it: a rating is a fact about what the learner did, and it must
-    # survive even if the word cannot be resolved to a card.
-    scheduled = None
-    if payload.quality is not None:
-        card_id = vocab_card_id_for_word(payload.source_word, user_id)
-        if card_id:
-            state = srs.review(card_id, SRS_MODE, payload.quality)
-            scheduled = {
-                "card_id": card_id,
-                "mode": SRS_MODE,
-                "interval_days": state["interval_days"],
-                "next_review": state["next_review"],
-                "stage": state["stage"],
-                "xp_earned": state.get("xp_earned"),
-                "leveled_up": state.get("leveled_up"),
-                "new_level": state.get("new_level"),
-            }
-
-    # The fare. A rating that scheduled a card was paid by that review;
-    # one that scheduled nothing -- no card behind the sentence, or an
-    # older client sending no quality -- is paid here at the practice
-    # rate (srs.award_practice), so the run's level bar moves either
-    # way. Top-level on purpose: every run reads the same three keys.
-    if scheduled:
-        fare = {k: scheduled[k] for k in ("xp_earned", "leveled_up", "new_level")}
-    else:
-        quality = payload.quality if payload.quality is not None else (4 if payload.correct else 1)
-        fare = srs.award_practice(user_id, "translation", payload.source, [quality])
+    scheduled, fare = reading._schedule_rating(payload, user_id, SRS_MODE, "translation")
 
     return {
         **fare,
