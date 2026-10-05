@@ -120,7 +120,7 @@ describe('comprehension on the desk', () => {
     // not the button's.
     expect($('.stage__foot .btn-primary .desk-kbd')).toBeNull()
     expect($('.stage__foot .btn-primary').getAttribute('aria-keyshortcuts')).toBe('Enter')
-    expect($('.desk-sentences .desk-keys').textContent).toMatch(/A–D.*Entrée/)
+    expect($('.run-help .desk-keys').textContent).toMatch(/A–D.*Entrée/)
     // The question asked so far is the lines' last row, the one lit.
     expect($('.desk-sentence--lit').textContent).toContain('Where did they wait?')
     press('b')

@@ -419,6 +419,7 @@ const quiz = {
   // L'attente en chiffre, sur la tuile : l'unité à côté du nombre.
   forecastUnit:       (unit, n) => ({ minute: 'min', hour: 'h', day: n > 1 ? 'jours' : 'jour', week: 'sem.', month: 'mois', year: n > 1 ? 'ans' : 'an' })[unit],
   deskKeysTitle:      'Les touches',
+  deskKeysHelp:       'Aide',
   deskKeyTurn:        'retourne la carte',
   deskKeyChoices:     'affiche les choix',
   deskKeyLeave:       'quitte le trajet',
@@ -813,7 +814,7 @@ const stats = {
   dueNow:             'À réviser',
   // The same state as dueNow, in the record cell that owns the
   // schedule: a figure, so one word rather than a phrase (plan 089).
-  dueValue:          'Maintenant',
+  dueValue:          'Main­tenant', // soft hyphen: a record cell is ~76px wide on the desk
   reviewThisCard:    'Réviser cette carte',
   total:              'Total',
   overview:           'Aperçu',

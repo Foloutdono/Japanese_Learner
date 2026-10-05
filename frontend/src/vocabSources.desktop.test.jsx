@@ -320,4 +320,22 @@ describe('the vocabulary\'s sources on the desk (plan 183)', () => {
     await settle(50)
     expect(rows(themes).map(r => r.getAttribute('href'))).toEqual(['/learn/vocab/theme/family'])
   })
+
+  it('shows the wait in the tiers\' plate until the ranking arrives, not an empty plate', async () => {
+    let release
+    const held = new Promise(r => { release = r })
+    apiFetch.mockImplementation(async path => {
+      if (path.startsWith('/api/frequency/vocab/tiers?')) await held
+      return { ok: true, status: 200, json: async () => answer(path) }
+    })
+    await mount()
+    const plate = plates()[1]
+    expect(plate.querySelector('.loading')).not.toBeNull()
+    expect(plate.querySelector('.desk-source__cells')).toBeNull()
+    release()
+    await settle(100)
+    expect(plates()[1].querySelector('.loading')).toBeNull()
+    expect(cells().length).toBeGreaterThan(0)
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => answer(path) }))
+  })
 })

@@ -3,6 +3,7 @@ import { useLang } from '../../LangContext'
 import { useRunTally } from '../../stores/runTally'
 import { QUALITY_LABEL_KEY } from '../../domain/ratingScales'
 import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
+import { useRegisterRunKeys } from '../../stores/runKeys'
 import { DeskFigure } from './RunRecords'
 
 // ── 机 — the run's lines, the second of a practice run's left panels (plan 129) ──
@@ -59,6 +60,7 @@ export function RunLines({ lines = [], current = null, openKey = null, onOpen, o
   const listRef = useRef(null)
   const doors = Boolean(onOpen)
   const onWalk = useListWalk(doors, { items: ':scope > li > button' })
+  useRegisterRunKeys(keys)
   const pace = useLinesRhythm()
   const figures = [pace.elapsed, ...(rhythm ?? [pace.perMinute])]
   const count = lines.length + (current ? 1 : 0)
@@ -133,13 +135,6 @@ export function RunLines({ lines = [], current = null, openKey = null, onOpen, o
         </ol>
       )}
       {ask}
-      {keys.length > 0 && (
-        <div className="desk-keys" role="list" aria-label={t.deskKeysTitle} data-guide="run.keys">
-          {keys.map(([cap, what]) => (
-            <span key={cap} role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{cap}</kbd>{what}</span>
-          ))}
-        </div>
-      )}
       <div className="desk-rhythm" role="group" aria-label={t.deskRhythm} data-guide="run.rhythm">
         {figures.map(f => <DeskFigure key={f.label} label={f.label} value={f.value} unit={f.unit} />)}
       </div>

@@ -1,5 +1,6 @@
 import { Leave } from './Bar'
 import { HudPass } from './Hud'
+import { RunHelp } from './RunHelp'
 import { LeaveKey } from './DeskKeys'
 import { useDesk } from '../../hooks/useDesk'
 import { useLang } from '../../LangContext'
@@ -29,8 +30,9 @@ import { useEscHeld } from '../../stores/escHold'
 // (stores/escHold, plan 123), when the cap goes: it said "leave" while
 // Esc closed the entry.
 // `keys` off (plan 126): the run's panels list the keys, so the way out
-// prints no cap there.
-export function StageHead({ onLeave, leaveLabel, where, sub, remaining, pass = true, onPass, aside, keys = true }) {
+// prints no cap there. They list them behind `help`, a "?" in this row
+// (RunHelp, from stores/runKeys), which a run on the panels turns on.
+export function StageHead({ onLeave, leaveLabel, where, sub, remaining, pass = true, onPass, aside, keys = true, help = false }) {
   const desk = useDesk()
   const lang = useLang()
   const held = useEscHeld()
@@ -48,6 +50,7 @@ export function StageHead({ onLeave, leaveLabel, where, sub, remaining, pass = t
       </span>
       {remaining != null && <span className="today-remaining">{remaining}</span>}
       {aside}
+      {help && <RunHelp />}
       {pass && <HudPass onClick={onPass} />}
     </div>
   )

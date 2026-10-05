@@ -21441,6 +21441,16 @@ html {
   font-family: var(--font-jp);
   font-weight: 400;
 }
+/* A figure whose value is a WORD ("Now", "Maintenant"): a numeral's size
+   is a numeral's, and a word at it ran 176px into a 76px cell on the
+   desk's four-across record and was cut off. A rung down, allowed to
+   break (the French carries a soft hyphen) rather than clip. */
+.record__value--word {
+  font-size: var(--fs-lead);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+  hyphens: manual;
+}
 /* The one STATE a record cell carries. "Due now" was a caption
    hanging over the lattice (the retired .dict-block__note); it is the
    next-review cell's own value now, in the due pigment mixed toward
@@ -34483,6 +34493,12 @@ button.brd-stn { cursor: pointer; }
     min-width: 0;
     min-height: 56px;
   }
+  /* The stage scrolls (overflow-y: auto) and the unframed floor sits flush
+     on its edges, so the focus ring drawn outside the field was cut off at
+     the foot. Draw it inside the field instead. */
+  .desk-run--panels > .stage > form.stage__foot > .field:focus-visible {
+    outline-offset: -2px;
+  }
   /* The page's well on a desk surface (plan 157). .field--page steps UP
      to --surface because a field on the page has nothing below it to
      show; three of its mounts stand on a surface on the desk where the
@@ -34570,7 +34586,42 @@ button.brd-stn { cursor: pointer; }
   .desk-sentence__dot:is(.desk-sentence__dot--q0, .desk-sentence__dot--q1, .desk-sentence__dot--q2, .desk-sentence__dot--q3, .desk-sentence__dot--q4, .desk-sentence__dot--q5) {
     border-color: var(--rating-color);
   }
-  .desk-sentences > .desk-keys { margin-top: auto; }
+  .desk-sentences > .desk-rhythm { margin-top: auto; }
+  /* Help in a run's head (RunHelp): a round "?" beside the pass, the keys
+     in a card under it, right-aligned to the head's edge. */
+  .run-help { position: relative; flex: none; }
+  .run-help__btn {
+    display: grid;
+    place-items: center;
+    width: var(--sp-7);
+    height: var(--sp-7);
+    padding: 0;
+    border: 1px solid var(--surface-line);
+    border-radius: 50%;
+    background: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .run-help__btn:hover,
+  .run-help__btn[aria-expanded="true"] { color: var(--text-primary); border-color: var(--text-secondary); }
+  .run-help__btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+  .run-help__pop {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + var(--sp-2));
+    right: 0;
+    flex-flow: column nowrap;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  }
+  .run-help__pop[hidden] { display: none; }
 
   /* What stands in the right column, as its one panel: the breakdown,
      the lesson (DeskPane). At least the column's height, the column

@@ -189,7 +189,7 @@ describe('the card ride on the desk\'s panels (P11)', () => {
     expect($('.desk-run__left .desk-card')).not.toBeNull()
     expect($('.desk-run__side .desk-sealed')).not.toBeNull()
     // The ride has no choices: no C among the keys.
-    expect($$('.desk-card .desk-keys .desk-kbd').map(k => k.textContent)).not.toContain('C')
+    expect($$('.run-help .desk-keys .desk-kbd').map(k => k.textContent)).not.toContain('C')
     // The tiles carry the new card's forecast, not dashes.
     expect($$('.desk-verdict__value').every(v => v.textContent !== '—')).toBe(true)
     // No walk: the ride's own note says how.
