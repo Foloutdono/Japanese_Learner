@@ -128,11 +128,11 @@
             "who": "them",
             "jp": "学生ですか。",
             "en": "Are you a student?",
-            "fr": "Vous êtes étudiant ?"
+            "fr": "Vous faites des études ?"
           },
           "task": {
             "en": "Answer that yes, you are a student.",
-            "fr": "Réponds que oui, tu es étudiant."
+            "fr": "Réponds que oui, tu fais des études."
           },
           "choices": [
             "はい、学生です。",
@@ -141,7 +141,7 @@
           ],
           "why": {
             "en": "です links you to what you are: a student. あります would say a thing is somewhere.",
-            "fr": "です te relie à ce que tu es : étudiant. あります dirait qu'une chose se trouve quelque part."
+            "fr": "です te relie à ce que tu es : quelqu'un qui étudie. あります dirait qu'une chose se trouve quelque part."
           }
         }
       }
@@ -277,17 +277,17 @@
             "fr": "Et vous ?"
           },
           "task": {
-            "en": "Tell her your name: « I'm Marie. »",
-            "fr": "Dis-lui ton nom : « Moi, c'est Marie. »"
+            "en": "Tell her your name: « I'm Camille. »",
+            "fr": "Dis-lui ton nom : « Moi, c'est Camille. »"
           },
           "choices": [
-            "わたしはマリーです。",
-            "わたしがマリーです。",
-            "わたしもマリーです。"
+            "わたしはカミーユです。",
+            "わたしがカミーユです。",
+            "わたしもカミーユです。"
           ],
           "why": {
-            "en": "You are introducing yourself, the topic: は. が would answer « which one is Marie? »",
-            "fr": "Tu te présentes, c'est le thème : は. が répondrait à « laquelle est Marie ? »"
+            "en": "You are introducing yourself, the topic: は. が would answer « which one is Camille? »",
+            "fr": "Tu te présentes, c'est le thème : は. が répondrait à « qui est Camille ? »"
           }
         }
       }
@@ -1964,7 +1964,7 @@
             "who": "me",
             "jp": "ごめん、ねぼうした。",
             "en": "Sorry, I overslept.",
-            "fr": "Désolé, je me suis réveillé trop tard."
+            "fr": "Pardon, j'ai dormi trop longtemps."
           },
           {
             "who": "them",
@@ -5066,7 +5066,7 @@
           },
           "task": {
             "en": "Tell her you've warmed up.",
-            "fr": "Dis-lui que tu t'es réchauffé."
+            "fr": "Dis-lui que tu n'as plus froid."
           },
           "choices": [
             "あたたかくなりました。",
@@ -6510,7 +6510,7 @@
             "who": "me",
             "jp": "すみません、わたしはさかながきらいです。",
             "en": "Sorry, I don't like fish.",
-            "fr": "Désolé, je n'aime pas le poisson."
+            "fr": "Pardon, je n'aime pas le poisson."
           },
           {
             "who": "them",
@@ -6975,7 +6975,7 @@
           },
           "task": {
             "en": "You don't know for sure: say it is probably cold.",
-            "fr": "Tu n'en es pas sûr : dis qu'il fait sans doute froid."
+            "fr": "Tu ne le sais pas vraiment : dis qu'il fait sans doute froid."
           },
           "choices": [
             "たぶん、さむいでしょう。",
@@ -8732,7 +8732,7 @@
             "who": "me",
             "jp": "すみません。バスにのらないで、あるいて来ました。",
             "en": "Sorry. I walked here instead of taking the bus.",
-            "fr": "Désolé. Je suis venu à pied, sans prendre le bus."
+            "fr": "Pardon. J'ai marché jusqu'ici, sans prendre le bus."
           },
           {
             "who": "them",
@@ -8754,7 +8754,7 @@
           },
           "task": {
             "en": "Say no: you came without eating breakfast.",
-            "fr": "Dis que non : tu es venu sans prendre de petit déjeuner."
+            "fr": "Dis que non : tu as fait le trajet sans prendre de petit déjeuner."
           },
           "choices": [
             "いいえ、食べないで来ました。",
@@ -9052,7 +9052,7 @@
           },
           "task": {
             "en": "You didn't catch it. Say: « Sorry, I don't understand the Japanese. »",
-            "fr": "Tu n'as pas compris. Dis : « Désolé, je ne comprends pas le japonais. »"
+            "fr": "Tu n'as pas compris. Dis : « Pardon, je ne comprends pas le japonais. »"
           },
           "choices": [
             "すみません、日本語が分かりません。",
@@ -12930,7 +12930,7 @@
             "who": "me",
             "jp": "ちょっとつかれました。",
             "en": "I'm a bit tired.",
-            "fr": "Je suis un peu fatigué."
+            "fr": "J'ai un coup de fatigue."
           },
           {
             "who": "them",

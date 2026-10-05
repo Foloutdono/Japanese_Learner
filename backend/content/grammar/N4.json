@@ -137,11 +137,11 @@
             "who": "them",
             "jp": "おおさかに着いたら、何をする？",
             "en": "What will you do once we get to Osaka?",
-            "fr": "Tu fais quoi une fois arrivé à Osaka ?"
+            "fr": "Tu fais quoi une fois à Osaka ?"
           },
           "task": {
             "en": "Tell her: once you arrive, you'll call your mother.",
-            "fr": "Dis-lui : une fois arrivé, tu appelleras ta mère."
+            "fr": "Dis-lui : une fois là-bas, tu appelleras ta mère."
           },
           "choices": [
             "おおさかに着いたら、母に電話する。",
@@ -718,7 +718,7 @@
             "who": "them",
             "jp": "早く起きたのに、ざんねんだね。",
             "en": "We got up early for nothing, too bad.",
-            "fr": "On s'est levés tôt pour rien, dommage."
+            "fr": "Se lever tôt pour rien, dommage."
           }
         ],
         "note": {
@@ -1597,7 +1597,7 @@
             "who": "them",
             "jp": "どこからのりましたか。",
             "en": "Where did you get on?",
-            "fr": "Vous êtes monté où ?"
+            "fr": "Vous avez pris le train où ?"
           },
           {
             "who": "me",
@@ -2069,7 +2069,7 @@
           },
           "task": {
             "en": "Tell her you've come to be able to read a little.",
-            "fr": "Dis-lui que tu es arrivé à en lire un peu."
+            "fr": "Dis-lui que tu arrives maintenant à en lire un peu."
           },
           "choices": [
             "はい、少し読めるようになりました。",
@@ -2078,7 +2078,7 @@
           ],
           "why": {
             "en": "Your reading changed over time: ようになる. ことになる would mean someone decided it, ようにする that you made an effort.",
-            "fr": "Ta lecture a changé avec le temps : ようになる. ことになる voudrait dire qu'on l'a décidé, ようにする que tu t'y es efforcé."
+            "fr": "Ta lecture a changé avec le temps : ようになる. ことになる voudrait dire qu'on l'a décidé, ようにする que tu as fait des efforts pour cela."
           }
         }
       }
@@ -2672,7 +2672,7 @@
           ],
           "why": {
             "en": "You know his train, so you are quite sure: はずです. かもしれません is only maybe, and つもり is someone's own intention.",
-            "fr": "Tu connais son train, tu es donc assez sûr : はずです. かもしれません n'est qu'un peut-être, et つもり une intention."
+            "fr": "Tu connais son train, tu as donc de bonnes raisons d'y croire : はずです. かもしれません n'est qu'un peut-être, et つもり une intention."
           }
         }
       }
@@ -2816,7 +2816,7 @@
           ],
           "why": {
             "en": "You are not sure he will: かもしれない. はず would be a firm expectation, the bare form a certainty.",
-            "fr": "Tu n'es pas sûr qu'il en aura besoin : かもしれない. はず serait une attente ferme, la forme seule une certitude."
+            "fr": "Rien ne garantit qu'il en aura besoin : かもしれない. はず serait une attente ferme, la forme seule une certitude."
           }
         }
       }
@@ -2951,7 +2951,7 @@
           },
           "task": {
             "en": "Ask him whether it's all right to stay seated.",
-            "fr": "Demande-lui si tu peux rester assis."
+            "fr": "Demande-lui si tu peux ne pas te lever."
           },
           "choices": [
             "すわったままでいいですか。",
@@ -5706,7 +5706,7 @@
             "who": "me",
             "jp": "すみません、五百円しかありません。",
             "en": "Sorry, I only have five hundred yen.",
-            "fr": "Désolé, je n'ai que cinq cents yens."
+            "fr": "Pardon, je n'ai que cinq cents yens."
           },
           {
             "who": "them",
@@ -5883,7 +5883,7 @@
           },
           "task": {
             "en": "Tell her no, but it doesn't matter even if you get wet.",
-            "fr": "Dis-lui que non, mais que ce n'est pas grave même si tu es mouillé."
+            "fr": "Dis-lui que non, mais que ce n'est pas grave même si tu te mouilles."
           },
           "choices": [
             "いいえ。でも、ぬれてもだいじょうぶです。",
@@ -5892,7 +5892,7 @@
           ],
           "why": {
             "en": "Whatever happens, nothing changes: ても. たら makes « fine » depend on getting wet, and のに needs it to have happened.",
-            "fr": "Quoi qu'il arrive, rien ne change : ても. たら ferait dépendre « ça va » du fait d'être mouillé, et のに demande que ce soit déjà arrivé."
+            "fr": "Quoi qu'il arrive, rien ne change : ても. たら ferait dépendre « ça va » du fait de se mouiller, et のに demande que ce soit déjà arrivé."
           }
         }
       }
@@ -6175,7 +6175,7 @@
             "who": "them",
             "jp": "そうですか。どこからのりましたか。",
             "en": "I see. Where did you get on?",
-            "fr": "Je vois. Vous êtes monté où ?"
+            "fr": "Je vois. Vous avez pris le train où ?"
           }
         ],
         "note": {
@@ -6191,7 +6191,7 @@
           },
           "task": {
             "en": "Explain why you're in a hurry: you want to catch the next train.",
-            "fr": "Explique-lui pourquoi tu es pressé : tu veux prendre le prochain train."
+            "fr": "Explique-lui pourquoi tu as hâte : tu veux prendre le prochain train."
           },
           "choices": [
             "すみません、つぎの電車にのりたいんです。",
@@ -7565,7 +7565,7 @@
           ],
           "why": {
             "en": "You are unsure and thinking aloud: かな. だろう would guess with confidence, です would state it.",
-            "fr": "Tu n'es pas sûr et tu réfléchis à voix haute : かな. だろう supposerait avec assurance, です l'affirmerait."
+            "fr": "Tu ne le sais pas et tu réfléchis à voix haute : かな. だろう supposerait avec assurance, です l'affirmerait."
           }
         }
       }
@@ -8460,7 +8460,7 @@
           },
           "task": {
             "en": "Own up: you got on without buying a ticket.",
-            "fr": "Avoue : tu es monté sans acheter de billet."
+            "fr": "Avoue : tu as pris le train sans acheter de billet."
           },
           "choices": [
             "すみません、きっぷを買わずにのりました。",
@@ -9039,7 +9039,7 @@
             "who": "me",
             "jp": "いいえ、先週来たばかりです。",
             "en": "No, I only arrived last week.",
-            "fr": "Non, je suis arrivé la semaine dernière."
+            "fr": "Non, je ne suis là que depuis la semaine dernière."
           },
           {
             "who": "them",
@@ -10242,7 +10242,7 @@
             "who": "me",
             "jp": "あ、すみません、まちがえました。",
             "en": "Oh, sorry, I made a mistake.",
-            "fr": "Oh, pardon, je me suis trompé."
+            "fr": "Oh, pardon, j'ai fait une erreur."
           },
           {
             "who": "them",
@@ -10259,8 +10259,8 @@
           "cue": {
             "who": "them",
             "jp": "おきゃくさま、このきっぷは明日のですよ。",
-            "en": "Sir, this ticket is for tomorrow.",
-            "fr": "Monsieur, ce billet est pour demain."
+            "en": "Excuse me, this ticket is for tomorrow.",
+            "fr": "Pardon, ce billet est pour demain."
           },
           "task": {
             "en": "Tell him you'll buy it over again, for today.",
@@ -11304,7 +11304,7 @@
           },
           "task": {
             "en": "Tell him, surprised, that it's actually really good!",
-            "fr": "Dis-lui, surpris, que c'est vraiment bon !"
+            "fr": "Dis-lui, avec surprise, que c'est vraiment bon !"
           },
           "choices": [
             "おいしいじゃないか！",
@@ -11313,7 +11313,7 @@
           ],
           "why": {
             "en": "You are struck and want him to admit it: じゃないか. It does not mean « not good ».",
-            "fr": "Tu es frappé et tu veux qu'il le reconnaisse : じゃないか. Ça ne veut pas dire « pas bon »."
+            "fr": "Ça te frappe et tu veux qu'il le reconnaisse : じゃないか. Ça ne veut pas dire « pas bon »."
           }
         }
       }
@@ -12315,7 +12315,7 @@
             "who": "them",
             "jp": "きっぷ、一人で買えましたか。",
             "en": "Did you manage to buy the ticket on your own?",
-            "fr": "Tu as pu acheter le billet tout seul ?"
+            "fr": "Tu as pu acheter le billet sans aide ?"
           },
           {
             "who": "me",
@@ -12773,8 +12773,8 @@
           "cue": {
             "who": "them",
             "jp": "ほかに何かございますか。",
-            "en": "Is there anything else, sir?",
-            "fr": "Autre chose, monsieur ?"
+            "en": "Is there anything else?",
+            "fr": "Y a-t-il autre chose ?"
           },
           "task": {
             "en": "Ask him, as politely as you can, whether he could tell you the way to the platform.",
@@ -12928,7 +12928,7 @@
           },
           "task": {
             "en": "Tell her it's delicious and you're glad you bought it.",
-            "fr": "Dis-lui qu'il est délicieux et que tu es content de l'avoir acheté."
+            "fr": "Dis-lui qu'il est délicieux et que tu te réjouis de l'avoir acheté."
           },
           "choices": [
             "おいしい！買ってよかった。",
@@ -12937,7 +12937,7 @@
           ],
           "why": {
             "en": "You bought it and are glad: てよかった. ばよかった would mean you didn't.",
-            "fr": "Tu l'as acheté et tu en es content : てよかった. ばよかった voudrait dire que tu ne l'as pas fait."
+            "fr": "Tu l'as acheté et tu t'en réjouis : てよかった. ばよかった voudrait dire que tu ne l'as pas fait."
           }
         }
       }
@@ -14128,14 +14128,14 @@
         ],
         "note": {
           "en": "なくて gives the cause: I didn't make it in time, and so I missed the train.",
-          "fr": "なくて donne la cause : je ne suis pas arrivé à temps, et donc j'ai raté le train."
+          "fr": "なくて donne la cause : je n'ai pas été à l'heure, et donc j'ai raté le train."
         },
         "ask": {
           "cue": {
             "who": "them",
             "jp": "おきゃくさま、どうしましたか。",
-            "en": "Sir, is something wrong?",
-            "fr": "Monsieur, il y a un souci ?"
+            "en": "Excuse me, is something wrong?",
+            "fr": "Pardon, il y a un souci ?"
           },
           "task": {
             "en": "Tell him you have no small change, and so you can't buy a ticket.",
@@ -14871,7 +14871,7 @@
             "who": "me",
             "jp": "ごめん。電車が三十分もおくれたんだ。",
             "en": "Sorry. The train was a whole thirty minutes late.",
-            "fr": "Désolé. Le train a eu trente minutes de retard, rien que ça."
+            "fr": "Pardon. Le train a eu trente minutes de retard, rien que ça."
           },
           {
             "who": "them",
@@ -15020,7 +15020,7 @@
             "who": "them",
             "jp": "どうしてタクシーで来たの？",
             "en": "Why did you come by taxi?",
-            "fr": "Pourquoi t'es venu en taxi ?"
+            "fr": "Pourquoi t'as pris le taxi ?"
           },
           {
             "who": "me",
@@ -15333,7 +15333,7 @@
             "who": "me",
             "jp": "ええ、つかれました。ところで、しゅうまつは何をしますか。",
             "en": "Yes, I'm tired. By the way, what are you doing this weekend?",
-            "fr": "Oui, je suis fatigué. Au fait, tu fais quoi ce week-end ?"
+            "fr": "Oui, quelle fatigue. Au fait, tu fais quoi ce week-end ?"
           },
           {
             "who": "them",
@@ -15501,7 +15501,7 @@
             "who": "them",
             "jp": "何でお知らせしましょうか。",
             "en": "How shall we let you know?",
-            "fr": "Par quel moyen souhaitez-vous être prévenu ?"
+            "fr": "Par quel moyen souhaitez-vous qu'on vous prévienne ?"
           },
           "task": {
             "en": "Answer formally: by phone or by email, please.",
