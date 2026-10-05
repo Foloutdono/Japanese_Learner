@@ -731,4 +731,38 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
                                   after=surf[i + 1:i + 3])
         if fixed:
             out[i - 1], out[i] = fixed
+
+    # 一月 is January (いちがつ) to UniDic every time; it is ひとつき, "one
+    # month", where what follows measures it: 一月かかる, 一月が経つ,
+    # 一月前, 一月の間, 一月ほど. Only 一: 三月 as a span is written
+    # 三か月. Never 十一月 (November), and nothing that could still be the
+    # month -- 一月も, 一月が過ぎた, 一月で are left as UniDic reads them.
+    for i in range(1, n):
+        if not (surf[i - 1] == "一" and surf[i] == "月" and out[i] == "がつ"):
+            continue
+        if i > 1 and _is_numeral(surf[i - 2]):
+            continue
+        if _measures_a_span(tokens, i + 1):
+            out[i - 1], out[i] = "ひと", "つき"
     return out
+
+
+# What makes 一月 a span of time rather than the month (see the rule at
+# the end of correct_readings): a word after it that measures or places
+# a span, the の of 一月の間, or a verb of time taken or passed.
+_SPAN_AFTER = {"間", "ぶり", "振り", "ほど", "程", "ぐらい", "くらい", "位", "以上",
+               "以内", "近く", "足らず", "余り", "おき", "ごと", "半", "前", "後"}
+_SPAN_VERBS = {"掛かる", "掛ける", "経つ"}
+
+
+def _measures_a_span(tokens: list[dict], j: int) -> bool:
+    if j >= len(tokens):
+        return False
+    after = tokens[j]
+    if after["surface"] in _SPAN_AFTER:
+        return True
+    if after["surface"] == "の" and j + 1 < len(tokens) and tokens[j + 1]["surface"] == "間":
+        return True
+    if after["surface"] == "が" and j + 1 < len(tokens):
+        after = tokens[j + 1]
+    return after.get("lemma") in _SPAN_VERBS

@@ -357,6 +357,27 @@ class CounterTests(unittest.TestCase):
         self.assertEqual(_read(_tok("一", "いち", "名詞", "数詞"), _tok("晩", "ばん"))[0], "ひと")
         # 一月 is January, いちがつ.
         self.assertEqual(_read(_tok("一", "いち", "名詞", "数詞"), _tok("月", "がつ"))[0], "いち")
+
+    def test_hitotsuki_a_span(self) -> None:
+        """一月 is ひとつき, "one month", where what follows measures it;
+        January otherwise, and never inside 十一月."""
+        ichi = lambda: _tok("一", "いち", "名詞", "数詞")
+        gatsu = lambda: _tok("月", "がつ", "名詞", "普通名詞", "助数詞可能")
+        verb = lambda s, lemma: {**_tok(s, s, "動詞", "一般", "*", "verb"), "lemma": lemma}
+        span = ["ひと", "つき"]
+        self.assertEqual(_read(ichi(), gatsu(), verb("かかり", "掛かる"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("が"), verb("たち", "経つ"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _tok("前", "まえ"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("の"), _tok("間", "あいだ"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("ほど"))[:2], span)
+        # The month: a date, 一月に, and what could still be it.
+        self.assertEqual(_read(ichi(), gatsu(), _particle("に"))[:2], ["いち", "がつ"])
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"))[:2], ["いち", "がつ"])
+        self.assertEqual(_read(ichi(), gatsu(), _particle("が"), verb("過ぎ", "過ぎる"))[:2], ["いち", "がつ"])
+        self.assertEqual(_read(ichi(), gatsu())[:2], ["いち", "がつ"])
+        # November.
+        self.assertEqual(_read(_tok("十", "じゅう", "名詞", "数詞"), ichi(), gatsu(), _tok("前", "まえ"))[1:3],
+                         ["いち", "がつ"])
         # 三切れ is さんきれ: the native number stops at two.
         self.assertEqual(_read(_tok("三", "さん", "名詞", "数詞"), _tok("切れ", "きれ"))[0], "さん")
 
@@ -531,6 +552,8 @@ class SentenceReadingTests(unittest.TestCase):
         "彼はもう盛りを過ぎた。": "彼[かれ] 盛[さか] 過[す]",
         "ご飯の盛りが少ない。": "飯[はん] 盛[も] 少[すく]",
         "言うまでもない。": "言[い]",
+        "一月かかりました。": "一[ひと] 月[つき]",
+        "一月に日本へ行きます。": "一[いち] 月[がつ] 日本[にほん] 行[い]",
     }
 
     def test_sentences(self) -> None:

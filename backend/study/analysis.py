@@ -373,7 +373,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 10: the greetings a first lesson teaches (plan 186d) -- an
 # interjection reaches its kana-only card (おはよう, ありがとう), and a
 # set phrase standing as a clause is one word (すみません is no 済む).
-LOCAL_REV = 10
+# 11: 一月 read ひとつき, "one month", where what follows measures it
+# (一月かかる, 一月前, 一月の間), so it reaches that card and not January's
+# (study/reading_context.py's span rule).
+LOCAL_REV = 11
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

@@ -1609,7 +1609,8 @@ runtime purpose. Two consequences worth knowing:
   them retargeted), 日本 one card read にほん/にっぽん, and the twelve
   months, 何月, 何時, 何曜日 and 日本語 added out of the pool (each with
   its French; `migrate_vocab_ids` and `migrate_pool_cards` after the
-  deploy); then 186d, the course as data -- fourteen units in
+  deploy), 一月 read ひとつき, "one month", where what follows measures it
+  (`study/reading_context.py`'s span rule, `LOCAL_REV` 11); then 186d, the course as data -- fourteen units in
   `content/basics.json` (32 N5 points, 231 words, 80 kanji, each a
   reference to an N5 card), loaded by `study/basics.py`, and 51 sentences
   added to the N5 reading bank, each held by `tests/test_basics.py` to

@@ -198,6 +198,12 @@ class TheCardsPutRightTests(unittest.TestCase):
             ("4月ごろ、日本へ行きます。", "4月", "vocab_N5_四月_しがつ"),
             ("四月ごろ、日本へ行きます。", "日本", "vocab_N5_日本_にほん/にっぽん"),
             ("十二月に日本語を勉強します。", "日本語", "vocab_N5_日本語_にほんご"),
+            # 一月 is the month until what follows measures it: then it
+            # is ひとつき, "one month" (reading_context's span rule).
+            ("一月に日本へ行きます。", "一月", "vocab_N5_一月_いちがつ"),
+            ("一月かかりました。", "一月", "vocab_N5_一月_ひとつき"),
+            ("一月前に来ました。", "一月", "vocab_N5_一月_ひとつき"),
+            ("十一月に行きます。", "十一月", "vocab_N5_十一月_じゅういちがつ"),
             ("今、何時ですか。", "何時", "vocab_N5_何時_なんじ"),
             ("今日は何曜日ですか。", "何曜日", "vocab_N5_何曜日_なんようび"),
             ("五分待ってください。", "分", "vocab_N5_分_ふん"),
