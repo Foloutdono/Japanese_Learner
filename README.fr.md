@@ -554,8 +554,7 @@ La documentation interne est rédigée en anglais.
 
 ## Auteur
 
-<!-- TODO : remplacer les champs ci-dessous -->
-**[Your Name]**, étudiant en troisième année de bachelier en intelligence
+**Alexandre Bauwens**, étudiant en troisième année de bachelier en intelligence
 artificielle à l’Hénallux (Namur, Belgique), et apprenant le japonais.
 
 Je cherche un **stage de février à mai 2027, en Belgique**, en
@@ -565,8 +564,7 @@ l’idée à la production en dirigeant un agent de code IA. Concrètement, je
 définis le travail, j’écris les règles, je relis le résultat et je le teste
 en conditions réelles.
 
-- LinkedIn : [LinkedIn URL] <!-- TODO -->
-- Portfolio : [Portfolio URL] <!-- TODO -->
+- LinkedIn : [linkedin.com/in/alexandrebauwens](https://www.linkedin.com/in/alexandrebauwens)
 - GitHub : [@Foloutdono](https://github.com/Foloutdono)
 
 ## Crédits et licence
@@ -588,6 +586,6 @@ ouverts, utilisés selon leurs propres licences :
 Les mentions complètes figurent dans
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
-© 2026 [Your Name]. Tous droits réservés. Le code source de ce projet n’est
+© 2026 Alexandre Bauwens. Tous droits réservés. Le code source de ce projet n’est
 pas sous licence de réutilisation. Les données tierces ci-dessus restent
 sous leurs propres licences.

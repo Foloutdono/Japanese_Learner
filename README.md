@@ -518,8 +518,7 @@ If `DATABASE_URL` isn't set, the backend tests look for a database at
 
 ## Author
 
-<!-- TODO: replace the placeholders below -->
-**[Your Name]**, third-year Bachelor's student in Artificial Intelligence at
+**Alexandre Bauwens**, third-year Bachelor's student in Artificial Intelligence at
 Hénallux (Namur, Belgium), learning Japanese.
 
 I'm looking for an **internship from February to May 2027, in Belgium**, in
@@ -528,8 +527,7 @@ shows how I work: I take a product from idea to production by directing an
 AI coding agent. That means defining the work, writing down the rules,
 reviewing the result and testing it in real use.
 
-- LinkedIn: [LinkedIn URL] <!-- TODO -->
-- Portfolio: [Portfolio URL] <!-- TODO -->
+- LinkedIn: [linkedin.com/in/alexandrebauwens](https://www.linkedin.com/in/alexandrebauwens)
 - GitHub: [@Foloutdono](https://github.com/Foloutdono)
 
 ## Credits and licence
@@ -549,6 +547,6 @@ their own licences:
 
 The full notices are in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
-© 2026 [Your Name]. All rights reserved. The source code of this project is
+© 2026 Alexandre Bauwens. All rights reserved. The source code of this project is
 not licensed for reuse. The third-party data above remains under its own
 licences.
