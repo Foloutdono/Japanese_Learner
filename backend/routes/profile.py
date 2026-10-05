@@ -184,7 +184,10 @@ def _init_db() -> None:
         conn.close()
 
 
-_init_db()
+try:
+    _init_db()
+except Exception:  # pragma: no cover - a missing DB must not stop import
+    logger.exception("user_profiles could not be initialised")
 
 # ── Username generation ──────────────────────────────────────
 _ADJECTIVES = ["Swift", "Silent", "Lucky", "Bold", "Calm", "Bright", "Quiet", "Keen"]

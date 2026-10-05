@@ -125,7 +125,10 @@ def _init_db() -> None:
         conn.close()
 
 
-_init_db()
+try:
+    _init_db()
+except Exception:  # pragma: no cover - a missing DB must not stop import
+    logger.exception("dictation_log could not be initialised")
 
 
 # ── The clips ────────────────────────────────────────────────────────
