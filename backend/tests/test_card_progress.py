@@ -108,7 +108,11 @@ def test_a_sum_of_progress_is_shown_whole():
     assert SRSEngine.whole_cards([1.0] * 12) == 12
     assert SRSEngine.whole_cards([]) == 0
     assert SRSEngine.whole_cards([0.999]) == 0
-    # Summed in thousandths: ten tenths are one card, though
-    # sum([0.1] * 10) is 0.9999999999999999 in floats.
-    assert sum([0.1] * 10) < 1
+    # Summed in thousandths: ten tenths are one card, though added one
+    # after another in floats they come to 0.9999999999999999. (A loop,
+    # not sum(): Python 3.12's sum() compensates and returns exactly 1.0.)
+    drifted = 0.0
+    for p in [0.1] * 10:
+        drifted += p
+    assert drifted < 1
     assert SRSEngine.whole_cards([0.1] * 10) == 1
