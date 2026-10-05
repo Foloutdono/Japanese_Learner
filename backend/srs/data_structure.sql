@@ -895,6 +895,21 @@ CREATE TABLE agenda_blocks (
 );
 CREATE INDEX agenda_blocks_user ON agenda_blocks (user_id);
 
+-- ── 発見 — how a grammar point's first tour went ─────────────────────
+-- Owned by routes/grammar.py (plan 187b). One row per point a learner was
+-- toured through before its first card, the first tour only: the wrong
+-- guesses it took and whether the rule had to be given. Read by the
+-- plate, never by the scheduler. No cascade from auth (ADR 0010):
+-- DELETE /api/account and scripts/purge_orphans.py clear it.
+CREATE TABLE grammar_tours (
+    user_id  TEXT NOT NULL,
+    card_id  TEXT NOT NULL,
+    tries    SMALLINT NOT NULL,
+    helped   BOOLEAN NOT NULL,
+    done_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, card_id)
+);
+
 -- ── 足跡 — the trail of screens a learner walked ─────────────────────
 -- Owned by core/events.py, written by routes/events.py (a batch the
 -- client queues and flushes) and by core/credits.py (the fare gate's

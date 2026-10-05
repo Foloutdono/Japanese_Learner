@@ -1656,8 +1656,13 @@ runtime purpose. Two consequences worth knowing:
   `routes/basics.py`, `tests/test_basics_api.py`, `screens/BasicsScreen.jsx`,
   `screens/LearnScreen.jsx`, `stores/basics.js`, `config/tabs.js`,
   `src/basics.phone.test.jsx` and `src/basics.desktop.test.jsx`).
-  **187** is 発見, a grammar point found before it is drilled (planned,
-  `plans/187-hakken-grammar-tour.md`; the owner's pick of the canvas
+  **187** is 発見, a grammar point found before it is drilled (187a–b
+  built, the rest planned in `plans/187-hakken-grammar-tour.md`; cited in
+  `study/grammar_tour.py`, `routes/grammar.py`, `routes/account.py`,
+  `srs/data_structure.sql`, `core/events.py`, `tests/test_grammar_tour.py`,
+  `components/study/GrammarTour.jsx`, `components/study/GrammarGate.jsx`,
+  `lib/track.js`, `src/tour.phone.test.jsx` and `index.css`; DESIGN.md,
+  "The tour"; the owner's pick of the canvas
   "Tsuji — grammar, learned by doing": B, discovery, with D's scene at its
   end, E's ladder and plate, and F on the desk without printed keys): the
   lesson gate before a new grammar card replaced by a tour of six stops

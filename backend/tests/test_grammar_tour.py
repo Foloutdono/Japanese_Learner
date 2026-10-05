@@ -164,3 +164,46 @@ def test_the_id_seeds_the_order():
     en = [g.get("pattern") for g in tour_payload(level, entry, "en")["guesses"]]
     assert grammar_to_id(entry, level)
     assert fr == en
+
+
+# ── The record (plan 187b) ────────────────────────────────────
+
+def _clear_tours():
+    from core.auth import DEV_USER_ID
+    from core.db import db_conn
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM grammar_tours WHERE user_id = %s", (DEV_USER_ID,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def test_the_terminus_records_the_first_tour_only(client):
+    _clear_tours()
+    level, entry = find("〜てください")
+    raw_id = grammar_to_id(entry, level)
+    first = client.post("/api/grammar/tour", json={"raw_id": raw_id, "tries": 2, "helped": True})
+    assert first.status_code == 200 and first.json() == {"recorded": True}
+    # A replay never changes it (plan 187, Q4).
+    again = client.post("/api/grammar/tour", json={"raw_id": raw_id, "tries": 0, "helped": False})
+    assert again.json() == {"recorded": False}
+    from core.auth import DEV_USER_ID
+    from core.db import db_conn
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT tries, helped FROM grammar_tours WHERE user_id = %s AND card_id = %s", (DEV_USER_ID, raw_id))
+            assert cur.fetchall() == [(2, True)]
+    finally:
+        conn.close()
+    _clear_tours()
+
+
+def test_the_record_refuses_what_is_no_point(client):
+    assert client.post("/api/grammar/tour", json={"raw_id": "grammar_N5_nope", "tries": 0}).status_code == 404
+    level, entry = find("か")
+    raw_id = grammar_to_id(entry, level)
+    assert client.post("/api/grammar/tour", json={"raw_id": raw_id, "tries": 10}).status_code == 422
+    assert client.post("/api/grammar/tour", json={"raw_id": raw_id, "tries": -1}).status_code == 422

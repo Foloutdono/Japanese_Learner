@@ -1346,6 +1346,23 @@ const dictionary = {
   dictFavoriteFull:    'Favourites are full — remove one first.',
   dictFavoritesEmpty:  'No favourites yet',
   dictFavoritesHint:   'The star on an entry keeps it here.',
+  // 発見 — a grammar point's tour (plan 187b)
+  tourLookQ:         p => `What does ${p} do?`,
+  tourLookHint:      n => `${n === 2 ? 'Two' : 'Three'} sentences. Look where it sits, and what the translations say.`,
+  tourIdea:          'I have an idea',
+  tourGuessQ:        p => `What does ${p} mean?`,
+  tourCheck:         'Check',
+  tourThatIs:        p => `That one is ${p}.`,
+  tourNotThis:       'That is not what these sentences do.',
+  tourHint:          'Look at what the translations say.',
+  tourGiven:         'Here it is.',
+  tourGivenNote:     'Keep it in mind: it comes back at the end.',
+  tourFound:         n => (n === 0 ? 'Well spotted, first time.' : n === 1 ? 'Well spotted, on the second try.' : `Well spotted, on try ${n + 1}.`),
+  tourTerminus:      'What you found',
+  tourNotLike:       p => `Not ${p}`,
+  tourBoard:         'Board',
+  tourReadLesson:    'Read the full lesson',
+  tourAria:          p => `Discover ${p}`,
   // 文法 — the lesson (plan 087): the pair marks over the steps, the
   // door on every card and the station's index, the gate's one button.
   glLesson:          'Lesson',

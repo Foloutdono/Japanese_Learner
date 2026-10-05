@@ -1,0 +1,171 @@
+{
+ "en": {
+  "rev": 1,
+  "look": [
+   {
+    "jp": "この本を読んでください。",
+    "tr": "Please read this book.",
+    "furigana": [
+     {
+      "text": "この"
+     },
+     {
+      "text": "本",
+      "reading": "ほん",
+      "word": 1
+     },
+     {
+      "text": "を"
+     },
+     {
+      "text": "読",
+      "reading": "よ",
+      "word": 3
+     },
+     {
+      "text": "ん"
+     },
+     {
+      "text": "でください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "spans": [
+     [
+      6,
+      11
+     ]
+    ]
+   },
+   {
+    "jp": "ここに名前を書いてください。",
+    "tr": "Please write your name here.",
+    "furigana": [
+     {
+      "text": "ここに"
+     },
+     {
+      "text": "名",
+      "reading": "な",
+      "word": 2
+     },
+     {
+      "text": "前",
+      "reading": "まえ",
+      "word": 2
+     },
+     {
+      "text": "を"
+     },
+     {
+      "text": "書",
+      "reading": "か",
+      "word": 4
+     },
+     {
+      "text": "い"
+     },
+     {
+      "text": "てください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "spans": [
+     [
+      8,
+      13
+     ]
+    ]
+   },
+   {
+    "jp": "ちょっとまってください。",
+    "tr": "Please wait a moment.",
+    "furigana": [
+     {
+      "text": "ちょっとまっ"
+     },
+     {
+      "text": "てください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "spans": [
+     [
+      6,
+      11
+     ]
+    ]
+   }
+  ],
+  "guesses": [
+   {
+    "text": "please do",
+    "correct": true
+   },
+   {
+    "text": "a polite request for a favour",
+    "correct": false,
+    "pattern": "〜てもらえませんか",
+    "furigana": [
+     {
+      "text": "〜てもらえませんか"
+     }
+    ],
+    "answer": "てください is a plain request; てもらえませんか asks whether they would, which is gentler."
+   },
+   {
+    "text": "please don't do",
+    "correct": false,
+    "pattern": "〜ないでください",
+    "furigana": [
+     {
+      "text": "〜ないでください"
+     }
+    ],
+    "answer": "てください asks someone to do; ないでください asks them not to."
+   },
+   {
+    "text": "asking to be given something",
+    "correct": false,
+    "pattern": "〜をください",
+    "furigana": [
+     {
+      "text": "〜をください"
+     }
+    ],
+    "answer": "てください asks for an action; をください asks for a thing."
+   }
+  ],
+  "rule": "**て-form + ください** asks someone to do something politely: 書いてください (please write).",
+  "structure": "verb て-form + ください",
+  "structure_furigana": [
+   {
+    "text": "verb て-form + ください"
+   }
+  ],
+  "chain": [
+   "読む",
+   "読んでください"
+  ],
+  "rival": {
+   "pattern": "〜ないでください",
+   "furigana": [
+    {
+     "text": "〜ないでください"
+    }
+   ],
+   "text": "てください asks someone to do; ないでください asks them not to."
+  },
+  "twist": null,
+  "scene": null
+ }
+}

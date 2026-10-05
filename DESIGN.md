@@ -983,6 +983,36 @@ nothing is chosen or the balance cannot pay, and wakes when a lane is
 switched back on; on the desk it takes the fare's right column, or the row's
 width under the fare's figures when the gate is too narrow for both.
 
+### The tour (発見, plan 187)
+
+A grammar point the learner has never met is **asked before it is
+drilled**, where the run used to print its lesson: three of its own
+examples with the point lit, a guess at what it does, the rule as
+confirmation, then the terminus (`components/study/GrammarTour.jsx`,
+chosen by `GrammarGate`). It is the boarding's frame inside a run's
+stage, not a new idiom:
+
+- **A track of stops at the head**, drawn in the line's pigment: where
+  you are keeps the line's colour (the boarding's own track is the pass's
+  gold, because the boarding is the learner's).
+- **One stop over its drawing**, the question set in the display face
+  bold at `--fs-title`, its pattern in the line's ink as Japanese.
+- **The gate button at the foot** (`GateButton`), docked over the run's
+  floor through `--dock-bottom`, the outline until a guess is picked, with
+  a quiet way over it and never under: « Lire la leçon complète » at the
+  terminus, which opens the lesson's sheet.
+- **A guess is a tile**: picked, it wears the selection's gold; a wrong
+  one is answered at once by the lesson's own line for that rival, in a
+  card with the state's ring (`--rating-wrong`) and never a fill; the
+  right one is ringed in `--success`. A hint after one miss, the rule
+  given after two (its head in the selection's ink, because it is given,
+  not found).
+
+The lesson itself is not thrown away: it is the plate a learner comes
+back to, behind the card's magnifier and in the dictionary. The desk
+keeps the lesson at the gate until plan 187f lays the tour on the runs'
+three panels.
+
 ## Space
 
 Nine rungs, `--sp-1` … `--sp-9`. The upper rungs carry meaning:

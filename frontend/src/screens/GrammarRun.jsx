@@ -13,7 +13,8 @@ import {
   GrammarRule, GrammarPattern, GrammarStructure, GrammarChoice, GrammarAnswer,
   GrammarFillSentence, GrammarContrastSentence,
 } from '../components/study/GrammarPieces'
-import { GrammarLesson, GrammarLessonSheet } from '../components/study/GrammarLesson'
+import { GrammarLessonSheet } from '../components/study/GrammarLesson'
+import { GrammarGate } from '../components/study/GrammarGate'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
 import { Loading } from '../components/ui/Loading'
@@ -317,11 +318,12 @@ export default function GrammarRun({ session }) {
 
         {card && !loading && gated && (
           <div className="gl-gate">
-            <GrammarLesson
+            <GrammarGate
               point={lessonOf(card)}
-              variant="gate"
+              session={session}
               onCompare={id => (desk ? setCompared({ card: card.card_id, id }) : setSheet(id))}
               onBoard={() => updateCurrent({ lesson_seen: true })}
+              onLesson={() => setSheet(card.raw_id ?? card.card_id)}
             />
           </div>
         )}

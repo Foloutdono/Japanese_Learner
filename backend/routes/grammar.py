@@ -23,7 +23,8 @@ from study.modes import (
 )
 from study.grammar_match import verifiable
 from study.mcq import meaning_key, pick_distractors
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from core.db import db_conn
 
 # The grammar section runs on the project's own catalogue,
 # content/grammar/*.json (plan 087) -- one file per level, each point
@@ -491,6 +492,66 @@ def get_grammar_point(id: str, lang: str = "fr", user_id: str = Depends(get_user
         "tour":      tour_payload(level, entry, lang),
         "status":    card_stats(states, user_id, id, GRAMMAR_STATUS_MODES),
     }
+
+
+# ── 発見 — the tour's record (plan 187b) ─────────────────────────
+# One row per point a learner was toured through, the FIRST tour only:
+# the guesses it took and whether the rule had to be given. A replay
+# never changes it (plan 187, Q4), and the tour grades no card (Q1): this
+# is what the plate prints of how the point was met, nothing the
+# scheduler reads. No cascade from auth (ADR 0010): DELETE /api/account
+# and scripts/purge_orphans.py clear it.
+def _ensure_tour_schema() -> None:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS grammar_tours (
+                    user_id  TEXT NOT NULL,
+                    card_id  TEXT NOT NULL,
+                    tries    SMALLINT NOT NULL,
+                    helped   BOOLEAN NOT NULL,
+                    done_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    PRIMARY KEY (user_id, card_id)
+                )
+            """)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+try:
+    _ensure_tour_schema()
+except Exception:  # pragma: no cover - a missing DB must not stop import
+    logger.exception("grammar_tours schema could not be initialised")
+
+
+class TourPayload(BaseModel):
+    raw_id: str = Field(min_length=1, max_length=200)
+    # Wrong guesses before the right one (the tour gives the rule after two).
+    tries: int = Field(ge=0, le=9)
+    helped: bool = False
+
+
+@router.post("/api/grammar/tour")
+def post_grammar_tour(payload: TourPayload, user_id: str = Depends(get_user_id)):
+    """The terminus of a point's tour. `recorded` is False when the
+    learner had been toured through it already: the first tour stands."""
+    if entry_by_id(payload.raw_id) is None:
+        raise HTTPException(status_code=404, detail=f"Unknown grammar point: {payload.raw_id}")
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO grammar_tours (user_id, card_id, tries, helped) VALUES (%s, %s, %s, %s) "
+                "ON CONFLICT (user_id, card_id) DO NOTHING",
+                (user_id, payload.raw_id, payload.tries, payload.helped),
+            )
+            recorded = cur.rowcount == 1
+        conn.commit()
+    finally:
+        conn.close()
+    return {"recorded": recorded}
 
 
 @router.post("/api/grammar/review")

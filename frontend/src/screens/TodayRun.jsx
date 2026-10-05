@@ -6,7 +6,8 @@ import { StudyStage } from '../components/study/StudyStage'
 import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { SideLookup } from '../components/analysis/SideLookup'
-import { GrammarLesson, GrammarLessonSheet } from '../components/study/GrammarLesson'
+import { GrammarLessonSheet } from '../components/study/GrammarLesson'
+import { GrammarGate } from '../components/study/GrammarGate'
 import { useDesk } from '../hooks/useDesk'
 import { CardPanel } from '../components/study/CardPanel'
 import { Loading } from '../components/ui/Loading'
@@ -433,11 +434,12 @@ export default function TodayRun({ session }) {
 
         {card && gated && (
           <div className="gl-gate">
-            <GrammarLesson
+            <GrammarGate
               point={lessonOf(card)}
-              variant="gate"
+              session={session}
               onCompare={id => (desk ? setCompared({ card: transitionKey, id }) : setSheet(id))}
               onBoard={() => updateCurrent({ lesson_seen: true })}
+              onLesson={() => setSheet(card.raw_id ?? card.card_id)}
             />
           </div>
         )}

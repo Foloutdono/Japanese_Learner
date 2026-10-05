@@ -25329,6 +25329,186 @@ button.brd-stn { cursor: pointer; }
   padding: var(--sp-5);
   border-top: 1px solid var(--surface-line);
 }
+/* ══ 発見 — the tour before a never-met point (plan 187b) ══════════
+   The boarding's frame inside a run's stage: a track of stops at the
+   head, the stop over its drawing, the gate docked at the foot with a
+   quiet way over it. The track is the line's (where you are keeps the
+   line's pigment), a pick is the selection's gold, and a verdict wears
+   its state's ink as an edge and a ring, never a fill. The pigment is
+   named here as the sheet names it, because Today's run is not 文法's. */
+/* The tour takes the stage's room under its head, so a short stop's
+   gate stands at the foot of the screen as the boarding's does; a long
+   one scrolls the page behind its docked gate, as a tall card does. */
+.gl-gate:has(> .tour) { flex: 1; display: flex; flex-direction: column; }
+.tour {
+  --line-color: var(--line-grammar);
+  --dict-ink: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  --tour-ink: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  flex: 1;
+  min-height: 0;
+  text-align: start;
+}
+.tour__track { position: relative; height: 44px; margin-inline: var(--sp-3); flex: none; }
+.tour__rail { position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--surface-line); }
+.tour__done { position: absolute; left: 0; top: 50%; height: 3px; margin-top: -1.5px; background: var(--line-color); transition: width 300ms ease-out; }
+.tour__stop {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--surface-line);
+  background: var(--bg-main);
+  transform: translate(-50%, -50%);
+}
+.tour__stop--passed { border-color: var(--line-color); background: var(--line-color); }
+.tour__stop--here { width: 18px; height: 18px; border: 3px solid var(--line-color); }
+.tour__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  animation: brd-in 360ms ease-out backwards;
+}
+.tour__q {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  line-height: 1.3;
+  text-wrap: balance;
+  outline: none;
+}
+.tour__hint { margin: calc(var(--sp-3) - var(--sp-5)) 0 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.tour-pattern { font-family: var(--font-jp); color: var(--tour-ink); }
+.tour-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin: 0;
+}
+.tour-look--mini { padding-block: var(--sp-4); gap: var(--sp-3); font-size: var(--fs-sm); }
+.tour-look--mini .dict-ex__tr { display: none; }
+.tour-guesses { display: grid; gap: var(--sp-3); }
+.tour-guess {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 56px;
+  padding: var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.tour-guess__key { flex: none; font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.tour-guess__text { flex: 1; min-width: 0; text-wrap: pretty; }
+.tour-guess--sel { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
+.tour-guess--ok { border: 2px solid var(--success); }
+.tour-guess--no { border: 2px solid var(--rating-wrong); color: var(--text-secondary); cursor: default; }
+.tour-guess:disabled { cursor: default; }
+.tour-guess:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.tour-guess:not(:disabled):hover,
+.tour-guess:not(:disabled):focus-visible { border-color: var(--line-color); }
+.tour-said {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+}
+.tour-said__mark {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid currentcolor;
+  border-radius: var(--r-pill);
+}
+.tour-guess .tour-said__mark { width: 24px; height: 24px; }
+.tour-said__mark--ok { color: var(--success); }
+.tour-said__mark--no { color: var(--rating-wrong); }
+.tour-said__text { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.tour-said__head { margin: 0; font-weight: 700; font-size: var(--fs-body); }
+.tour-said--ok .tour-said__head { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.tour-said--no .tour-said__head { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+.tour-said--given .tour-said__head { color: var(--sel-ink); }
+.tour-said--given .tour-said__mark { color: var(--sel-ink); }
+.tour-said__line { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-wrap: pretty; }
+.tour-said__hint { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.tour-rule__text { margin: 0; font-size: var(--fs-lead); font-weight: 600; line-height: 1.45; text-wrap: pretty; }
+.tour-rule__structure { margin: 0; font-family: var(--font-jp); color: var(--text-secondary); }
+.tour-chain { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-lead); }
+.tour-chain__from { color: var(--text-secondary); }
+.tour-chain__arrow { color: var(--tour-ink); font-family: var(--font-display); }
+.tour-chain__to { color: var(--tour-ink); }
+.tour-head { display: flex; flex-direction: column; gap: var(--sp-2); }
+.tour-head .tour-pattern { font-size: var(--fs-heading); line-height: 1.2; overflow-wrap: anywhere; }
+.tour-found { list-style: none; gap: 0; }
+.tour-found__line {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--sp-4);
+  padding-block: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.tour-found__line:first-child { border-top: none; padding-top: 0; }
+.tour-found__line:last-child { padding-bottom: 0; }
+.tour-found__n {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--line-color);
+  border-radius: var(--r-pill);
+  color: var(--tour-ink);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+.tour-found__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.tour-found__say { margin: 0; font-weight: 600; line-height: 1.45; }
+.tour-found__line-text { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
+/* The gate docked over the run's floor (--dock-bottom, the level bar
+   and the safe area), the quiet way a rung over it. */
+.tour__foot {
+  position: sticky;
+  bottom: var(--dock-bottom, 0);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-block: var(--sp-4) var(--sp-5);
+  background: var(--bg-main);
+  flex: none;
+}
+.tour .btn-depart { width: 100%; min-height: 66px; }
+@media (prefers-reduced-motion: reduce) {
+  .tour__body { animation: none; }
+  .tour__done, .tour-guess { transition: none; }
+}
+
 /* The register, in the plate's corner: a word in the caption register,
    the way the level numeral beside it is. */
 .gl-register {
