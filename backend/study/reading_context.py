@@ -734,9 +734,12 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
 
     # 一月 is January (いちがつ) to UniDic every time; it is ひとつき, "one
     # month", where what follows measures it: 一月かかる, 一月が経つ,
-    # 一月前, 一月の間, 一月ほど. Only 一: 三月 as a span is written
-    # 三か月. Never 十一月 (November), and nothing that could still be the
-    # month -- 一月も, 一月が過ぎた, 一月で are left as UniDic reads them.
+    # 一月前, 一月の間, 一月ほど, and 一月も before a verb's negative in
+    # its clause (一月も会っていません, "not for a whole month"). Only 一:
+    # 三月 as a span is written 三か月. Never 十一月 (November), and
+    # nothing that could still be the month -- 一月も寒くない (an
+    # adjective's), 一月も二月も, 一月が過ぎた, 一月で are left as UniDic
+    # reads them.
     for i in range(1, n):
         if not (surf[i - 1] == "一" and surf[i] == "月" and out[i] == "がつ"):
             continue
@@ -763,6 +766,38 @@ def _measures_a_span(tokens: list[dict], j: int) -> bool:
         return True
     if after["surface"] == "の" and j + 1 < len(tokens) and tokens[j + 1]["surface"] == "間":
         return True
+    if after["surface"] == "も":
+        return _negated_after(tokens, j + 1)
     if after["surface"] == "が" and j + 1 < len(tokens):
         after = tokens[j + 1]
     return after.get("lemma") in _SPAN_VERBS
+
+
+# A verb's negative: ない, ず and the ん of ません, all auxiliaries to
+# UniDic -- the ない of 寒くない is the adjective 無い, and is not one.
+_NEGATIVES = {"ない", "ず", "ぬ"}
+# Where a clause ends, for 一月も's negative: the sentence's end, a
+# comma, or a conjunctive particle (UniDic's 接続助詞: the が of
+# 待ったが, けど, ので) -- but not the て／で that joins a verb to its
+# auxiliary (会って|いません).
+_CLAUSE_PUNCT = set("。、！？!?,.，．")
+_JOINING = {"て", "で"}
+
+
+def _negated_after(tokens: list[dict], k: int) -> bool:
+    """Is the clause starting at `k` (after 一月も) a verb negated? A
+    verb, then its negative before the clause ends. Another month
+    straight after (一月も二月も) is a list of months, never a span."""
+    if k < len(tokens) and _is_numeral(tokens[k]["surface"]):
+        return False
+    verb = False
+    for t in tokens[k:]:
+        tags = t.get("tags") or ("", "", "")
+        if t["surface"] in _CLAUSE_PUNCT or (
+                tags[0] == "助詞" and tags[1] == "接続助詞" and t["surface"] not in _JOINING):
+            return False
+        if t.get("pos") == "verb":
+            verb = True
+        elif t.get("pos") == "auxiliary" and t.get("lemma") in _NEGATIVES and verb:
+            return True
+    return False

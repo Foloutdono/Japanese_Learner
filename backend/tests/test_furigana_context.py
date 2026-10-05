@@ -370,9 +370,30 @@ class CounterTests(unittest.TestCase):
         self.assertEqual(_read(ichi(), gatsu(), _tok("前", "まえ"))[:2], span)
         self.assertEqual(_read(ichi(), gatsu(), _particle("の"), _tok("間", "あいだ"))[:2], span)
         self.assertEqual(_read(ichi(), gatsu(), _particle("ほど"))[:2], span)
+        # 一月も before a verb's negative in its clause: "not for a month".
+        aux = lambda s, lemma: {**_tok(s, s, "助動詞", "*", "*", "auxiliary"), "lemma": lemma}
+        te = {**_tok("て", "て", "助詞", "接続助詞", "*", "particle")}
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), verb("会っ", "会う"), te,
+                               verb("い", "居る"), aux("ませ", "ます"), aux("ん", "ず"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), _tok("連絡", "れんらく"), _particle("が"),
+                               verb("来", "来る"), aux("ない", "ない"))[:2], span)
         # The month: a date, 一月に, and what could still be it.
         self.assertEqual(_read(ichi(), gatsu(), _particle("に"))[:2], ["いち", "がつ"])
         self.assertEqual(_read(ichi(), gatsu(), _particle("も"))[:2], ["いち", "がつ"])
+        # An adjective's ない (無い) is no verb's negative: 一月も寒くない.
+        adj = lambda s, lemma: {**_tok(s, s, "形容詞", "一般", "*", "adjective"), "lemma": lemma}
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), adj("寒く", "寒い"),
+                               adj("ない", "無い"))[:2], ["いち", "がつ"])
+        # Another month after it: 一月も二月も.
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), _tok("二", "に", "名詞", "数詞"), gatsu(),
+                               _particle("も"), verb("降ら", "降る"), aux("ない", "ない"))[:2], ["いち", "がつ"])
+        # A negative in the next clause: 一月も待ったが、来なかった.
+        but = _tok("が", "が", "助詞", "接続助詞", "*", "particle")
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), verb("待っ", "待つ"), aux("た", "た"), but,
+                               verb("来", "来る"), aux("なかっ", "ない"))[:2], ["いち", "がつ"])
+        # Affirmative: left as UniDic reads it.
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), verb("し", "為る"), aux("た", "た"))[:2],
+                         ["いち", "がつ"])
         self.assertEqual(_read(ichi(), gatsu(), _particle("が"), verb("過ぎ", "過ぎる"))[:2], ["いち", "がつ"])
         self.assertEqual(_read(ichi(), gatsu())[:2], ["いち", "がつ"])
         # November.
@@ -553,6 +574,8 @@ class SentenceReadingTests(unittest.TestCase):
         "ご飯の盛りが少ない。": "飯[はん] 盛[も] 少[すく]",
         "言うまでもない。": "言[い]",
         "一月かかりました。": "一[ひと] 月[つき]",
+        "一月も会っていません。": "一[ひと] 月[つき] 会[あ]",
+        "一月も寒くない。": "一[いち] 月[がつ] 寒[さむ]",
         "一月に日本へ行きます。": "一[いち] 月[がつ] 日本[にほん] 行[い]",
     }
 
