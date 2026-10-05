@@ -481,6 +481,7 @@ def get_kanji_stats(level: str | None = None, radical: int | None = None,
         "new":      sum(1 for s in states.values() if s == "new"),
         "learning": sum(1 for s in states.values() if s == "learning"),
         "mastered": sum(1 for s in states.values() if s == "mastered"),
+        "learned":  srs.get_bulk_learned(card_ids, mode),
         "due_now":  len(due),
     }
 
@@ -491,13 +492,9 @@ def get_kanji_stats(level: str | None = None, radical: int | None = None,
 # denominator — the course teaches 123 of them, and 123 is the number
 # a learner can finish. Progress is per character, best mode wins, the
 # same three figures /api/stats prints on a level's stop (started,
-# learned, total; routes/stats.py's _item_stats), so the radical index
-# and the JLPT line cannot disagree about what "learned" means.
-
-# The day-count an interval has to reach to be "learned" — the same
-# threshold routes/stats.py names for the level stops. Imported rather
-# than re-declared, so the two figures cannot drift.
-from routes.stats import MASTERED_DAYS  # noqa: E402
+# learned, total; routes/stats.py's _item_stats), summed the same way
+# (srs.whole_cards, plan 184), so the radical index and the JLPT line
+# cannot disagree about what "learned" means.
 
 _GRADED_KANJI_MODES = sorted(GRADED_FOR_SOURCE[KANJI])
 
@@ -505,13 +502,15 @@ _GRADED_KANJI_MODES = sorted(GRADED_FOR_SOURCE[KANJI])
 def _family_progress(cache: dict, user_id: str, raw_ids: list[str]) -> tuple[dict[str, str], int, int]:
     """(stage per raw id, started, learned) over one get_user_states()
     read. A card's stage is the best it has reached in any graded mode;
-    `started` counts cards reviewed at all, `learned` those whose best
-    interval has reached MASTERED_DAYS."""
+    `started` counts cards reviewed at all, `learned` is what the
+    family's cards add up to -- each for its best mode's progress, 0.0
+    new to 1.0 mastered, the sum shown whole."""
     stages: dict[str, str] = {}
-    started = learned = 0
+    started = 0
+    progresses: list[float] = []
     for raw_id in raw_ids:
         best_stage = "new"
-        best_days = 0
+        best = 0.0
         reviewed = False
         for mode in _GRADED_KANJI_MODES:
             item = cache.get((f"{user_id}:{raw_id}", mode))
@@ -520,13 +519,12 @@ def _family_progress(cache: dict, user_id: str, raw_ids: list[str]) -> tuple[dic
             reviewed = True
             if item["state"] == "mastered" or (item["state"] == "learning" and best_stage != "mastered"):
                 best_stage = item["state"]
-            best_days = max(best_days, item["interval_days"] or 0)
+            best = max(best, item["progress"])
         stages[raw_id] = best_stage
         if reviewed:
             started += 1
-        if best_days >= MASTERED_DAYS:
-            learned += 1
-    return stages, started, learned
+        progresses.append(best)
+    return stages, started, srs.whole_cards(progresses)
 
 
 @router.get("/api/kanji/radicals")

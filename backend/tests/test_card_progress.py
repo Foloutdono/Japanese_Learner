@@ -99,3 +99,20 @@ def test_the_dictionary_reads_the_same_bar(clean):
     state = srs.get_user_states(USER)[(CARD, MODE)]
     assert state["progress"] == srs.get_bulk_progress([CARD], MODE)[CARD]
     assert 0.0 < state["progress"] < 0.5
+
+
+def test_a_sum_of_progress_is_shown_whole():
+    # The figure a bar prints (plan 184): the cards' progress added up,
+    # without its fraction.
+    assert SRSEngine.whole_cards([0.5] * 23) == 11      # 11.5 reads 11
+    assert SRSEngine.whole_cards([1.0] * 12) == 12
+    assert SRSEngine.whole_cards([]) == 0
+    assert SRSEngine.whole_cards([0.999]) == 0
+    # Summed in thousandths: ten tenths are one card, though added one
+    # after another in floats they come to 0.9999999999999999. (A loop,
+    # not sum(): Python 3.12's sum() compensates and returns exactly 1.0.)
+    drifted = 0.0
+    for p in [0.1] * 10:
+        drifted += p
+    assert drifted < 1
+    assert SRSEngine.whole_cards([0.1] * 10) == 1

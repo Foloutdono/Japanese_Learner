@@ -254,3 +254,24 @@ def test_a_review_under_the_radical_shows_on_the_index_the_lesson_and_the_level(
 
     browse = client.get("/api/kanji/review-cards", params={"radical": WATER}).json()["cards"]
     assert [c["card_id"] for c in browse] == ["kanji_N5_水"]
+
+
+def test_a_family_adds_its_progress_up_and_shows_it_whole(client):
+    """Plan 184: a family's `learned` is what its kanji add up to, each for
+    how far it has come, so a week into a radical the index does not read
+    0. Three kanji taken through their learning steps are none of them
+    mastered (1.84 kanji's worth, printed 1), and the index tile and the
+    lesson print the same figure."""
+    lesson = client.get(f"/api/kanji/radical/{WATER}").json()
+    ids = [k["card_id"] for lv in lesson["levels"] for k in lv["kanji"]][:3]
+    for card_id in ids:
+        for _ in range(4):
+            r = client.post("/api/kanji/review", json={"card_id": card_id, "mode": MODE, "quality": 4})
+            assert r.status_code == 200, r.text
+
+    tiles = [r for g in client.get("/api/kanji/radicals").json()["groups"] for r in g["radicals"]]
+    water = next(r for r in tiles if r["number"] == WATER)
+    lesson = client.get(f"/api/kanji/radical/{WATER}").json()
+    assert water["started"] == lesson["started"] == 3
+    assert water["learned"] == lesson["learned"] == 1
+    assert {k["stage"] for lv in lesson["levels"] for k in lv["kanji"] if k["card_id"] in ids} == {"learning"}

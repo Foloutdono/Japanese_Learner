@@ -15,11 +15,14 @@
 // nothing on screen saying why. The per-mode view still exists and is
 // still the right unit for the stats screen's bars; it is the wrong
 // one for a map. See routes/stats.py's `items` block for the score
-// itself, which is continuous — a card counts for how far its best
-// mode has come toward the 21-day mastery mark, climbing the learning
-// steps first and then the interval — so one pass over a deck no
-// longer buys exactly half of it, and a card still in the steps is
-// not worth nothing either.
+// itself, which is continuous: every card counts for how far its best
+// mode has come, 0 new to 1 mastered (the card's own bar, plan 147 —
+// the learning steps the first half, the interval the second), so a
+// card still in the steps is not worth nothing, and one pass over a
+// deck does not buy half of it either. The figures a stop prints are
+// that same sum (plan 184): `learned` is the score times the stop's
+// cards, shown whole, so a week of work moves it where the count of
+// cards held for 21 days sat at 0 for three weeks.
 //
 // The deck orders are the app's own: JLPT levels walk N5 → N1, and
 // kana walks the four sets in the order the kana screen teaches them.
@@ -80,10 +83,12 @@ export const KANA_STOPS = [
  *  same figures (components/selection/LevelSelector.jsx,
  *  screens/KanaScreen.jsx): three copies of `Number(x) || 0` over one
  *  payload is three chances to disagree about what a missing field
- *  means. `started` is the backend's own count of cards met at all —
- *  never below `learned`, since a mastered card was met — and it is
- *  the figure that moves before the 21-day mark does (routes/stats.py's
- *  `_item_stats`). */
+ *  means. `learned` is what the deck's cards add up to, each for how
+ *  far it has come and the sum already whole (11.5 arrives as 11,
+ *  plan 184), reaching `total` only when every card is mastered.
+ *  `started` is the backend's own count of cards met at all — never
+ *  below `learned`, since a card counts for at most one and a card
+ *  that counts was met (routes/stats.py's `_item_stats`). */
 export function deckItems(stats, source, deckKey) {
   const entry = stats?.items?.[source]?.[deckKey]
   if (!entry || typeof entry !== 'object') return { score: 0, started: 0, learned: 0, total: 0 }
@@ -153,8 +158,9 @@ export function lineMarks(stops) {
  * the figure said 1,838 / 24,118, which is 7.6%.
  *
  * "Learned" is whole cards only — a count of things you know should
- * not be fractional. The partial credit the stops carry is where
- * work-in-progress shows up, which is the map's job, not this one's.
+ * not be fractional — so it is each stop's figure, already the floor of
+ * its cards' progress, added up: the stops' printed figures add up to
+ * the line's, whatever fractions each stop dropped.
  * Garbage in, zeros out, like lineStops: a failed stats fetch must
  * never throw here.
  */

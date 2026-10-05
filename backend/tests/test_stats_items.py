@@ -9,6 +9,9 @@
 #   * the score is continuous in how far the card has come toward the
 #     21-day mastery mark — the old three buckets put a whole deck
 #     reviewed once at exactly half, and it crawled from there
+#   * a card counts for how far it has come (plan 184, srs._progress, the
+#     bar the card itself draws), so a week of work is not 0 -- and
+#     `learned` is that sum shown whole: 11.5 cards' worth reads 11
 #   * a deck's denominator is its cards counted once, never the sum of
 #     its modes' pools
 #   * the per-mode buckets are UNTOUCHED, because the stats screen is
@@ -17,11 +20,19 @@ import pytest
 
 from core.auth import DEV_USER_ID
 from core.db import db_conn
-from routes.stats import LEARNING_SHARE, LEARNING_STEPS, MASTERED_DAYS
+from srs.scheduler import LEARNING_STEPS
+from srs.srs import MASTERED_DAYS, SRSEngine
 from study import card_index
 
 SOURCE, DECK = "kanji", "N5"
 READ, WRITE = "kanji.flashcard.f2b", "kanji.write_kanji"
+STEPS = len(LEARNING_STEPS)
+
+
+def _bar(interval=0, step=0):
+    """The progress a card seeded by _seed carries: graduated at
+    `interval` days, or mid-steps at `step` when the interval is 0."""
+    return SRSEngine._progress(1, interval, interval == 0, step)
 
 
 def _seed(rows):
@@ -103,10 +114,11 @@ def test_the_score_is_continuous_rather_than_three_buckets(client):
     a, b = card_index.item_ids(SOURCE, DECK)[:2]
     _seed([(a, READ, 3, 2), (b, READ, 7, 4)])
 
-    graduated = lambda iv: LEARNING_SHARE + (1 - LEARNING_SHARE) * iv / MASTERED_DAYS
-    expected = (graduated(3) + graduated(7)) / 103
+    expected = (_bar(3) + _bar(7)) / 103
     assert _items(client)["score"] == pytest.approx(expected, abs=1e-4)
-    assert _items(client)["learned"] == 0
+    # Neither card is mastered, and both count: 0.68 + 0.82 = 1.50 cards'
+    # worth, shown as 1 where the old rule showed 0.
+    assert _items(client)["learned"] == 1
     # And the flat rule those two cards used to get.
     assert expected != pytest.approx((0.5 + 0.5) / 103, abs=1e-4)
 
@@ -120,8 +132,9 @@ def test_a_card_climbing_the_learning_steps_is_not_worth_nothing(client):
     # mostly new, which is most learners most of the time.
     a = card_index.item_ids(SOURCE, DECK)[0]
     _seed([(a, READ, 0, 2, 1)])            # mid-learning-steps
+    assert _items(client)["score"] == pytest.approx(_bar(0, 1) / 103, abs=1e-4)
     assert _items(client)["score"] > 0
-    assert _items(client)["learned"] == 0
+    assert _items(client)["learned"] == 0  # one card's eighth is not a card
 
 
 def test_the_learning_steps_are_worth_more_the_further_up_they_go(client):
@@ -129,7 +142,7 @@ def test_the_learning_steps_are_worth_more_the_further_up_they_go(client):
     # two phases are one continuous ramp rather than two scales.
     a = card_index.item_ids(SOURCE, DECK)[0]
     seen = []
-    for step in range(LEARNING_STEPS):
+    for step in range(STEPS):
         _seed([(a, READ, 0, step + 1, step)])
         seen.append(_items(client)["score"])
     assert seen == sorted(seen) and seen[0] < seen[-1]
@@ -140,10 +153,15 @@ def test_the_learning_steps_are_worth_more_the_further_up_they_go(client):
 
 def test_the_learning_steps_are_worth_far_less_than_the_half_they_used_to_be(client):
     # The other side of it: the rule this replaced counted any touched
-    # card as 0.5, so one pass over a deck bought half the line.
+    # card as 0.5, so one pass over a deck bought half the line. A pass
+    # that passes every card once leaves each on its first step, an
+    # eighth of the way to mastered.
     ids = card_index.item_ids(SOURCE, DECK)
-    _seed([(raw, READ, 0, 1, 0) for raw in ids])       # every card, seen once
-    assert _items(client)["score"] < 0.1
+    _seed([(raw, READ, 0, 1, 1) for raw in ids])       # every card, passed once
+    got = _items(client)
+    assert got["score"] == pytest.approx(_bar(0, 1), abs=1e-3)
+    assert got["score"] < 0.2
+    assert got["learned"] == int(got["total"] * _bar(0, 1))   # 12 of 103
 
 
 def test_a_card_nearer_the_threshold_scores_higher_than_one_further(client):
@@ -176,13 +194,14 @@ def test_a_card_met_once_is_started_before_it_is_anything_else(client):
     # The figure the station's rows are FOR: the other two are honest
     # and nearly motionless early, so a first pass over twenty words
     # printed 0 / 665 and then, with partial credit, 1 / 665. `started`
-    # is what moves the moment the work is done.
+    # is what moves the moment the work is done. A card met and not yet
+    # advanced (a miss on its first sight) is started and worth nothing.
     ids = card_index.item_ids(SOURCE, DECK)[:20]
-    _seed([(raw, READ, 0, 1, 0) for raw in ids])       # each met once
+    _seed([(raw, READ, 0, 1, 0) for raw in ids])       # each met once, no step won
     got = _items(client)
     assert got["started"] == 20
     assert got["learned"] == 0
-    assert round(got["score"] * got["total"]) <= 1
+    assert got["score"] == 0.0
 
 
 def test_a_card_met_in_two_modes_is_one_card_started(client):
@@ -221,3 +240,146 @@ def test_the_per_mode_buckets_are_left_alone(client):
     assert bucket["total"] == card_index.total(SOURCE, DECK, READ) == 103
     assert (bucket["mastered"], bucket["learning"]) == (1, 0)
     assert bucket["new"] == 102
+
+
+# ── Plan 184: a card in progress counts for how far it has come ───
+# `learned` was the count of cards at a 21-day interval, so a learner a
+# week in -- every card they had touched graduated, none held for three
+# weeks -- read 0 on every bar however much they had done. It is now the
+# sum of the cards' progress, shown whole.
+
+def test_a_week_of_work_is_not_zero(client):
+    # Forty cards graduated a few days ago: none mastered, all of them
+    # worth most of a card. The old figure for this learner was 0.
+    ids = card_index.item_ids(SOURCE, DECK)[:40]
+    _seed([(raw, READ, 3, 4) for raw in ids])
+
+    got = _items(client)
+    assert client.get("/api/stats").json()[SOURCE][DECK][READ]["mastered"] == 0
+    assert got["learned"] == int(40 * _bar(3))      # 27 of 103
+    assert got["learned"] > 20
+    assert got["started"] == 40
+
+
+def test_the_figure_is_the_sum_shown_whole(client):
+    # 23 cards a day out are worth a half each: 11.5 cards, printed 11.
+    ids = card_index.item_ids(SOURCE, DECK)[:23]
+    _seed([(raw, READ, 1, 3) for raw in ids])
+
+    got = _items(client)
+    assert _bar(1) == 0.5
+    assert got["learned"] == 11
+    # The score keeps the half the figure drops.
+    assert got["score"] == pytest.approx(11.5 / 103, abs=1e-4)
+
+
+def test_the_figure_and_the_score_are_one_sum(client):
+    # So the number a stop prints, the bar beside it and the map's train
+    # cannot disagree: score is the figure's unrounded self.
+    ids = card_index.item_ids(SOURCE, DECK)[:30]
+    _seed([(raw, READ, interval, 3) for raw, interval in zip(ids, range(2, 32))])
+
+    got = _items(client)
+    assert int(got["score"] * got["total"] + 1e-6) == got["learned"]
+
+
+def test_a_finished_deck_reads_its_total_and_one_card_short_does_not(client):
+    ids = card_index.item_ids(SOURCE, DECK)
+    _seed([(raw, READ, 40, 6) for raw in ids])
+    got = _items(client)
+    assert (got["learned"], got["started"], got["score"]) == (103, 103, 1.0)
+
+    # One card relearning (back on its first step) and the deck is 102.125
+    # cards' worth: 102, not 103 -- the figure reaches the total only when
+    # every card is mastered.
+    _seed([(ids[0], READ, 40, 6, 1)])
+    got = _items(client)
+    assert got["learned"] == 102
+
+
+def test_a_card_met_and_missed_is_started_and_worth_nothing_yet(client):
+    a = card_index.item_ids(SOURCE, DECK)[0]
+    _seed([(a, READ, 0, 1, 0)])
+    got = _items(client)
+    assert (got["started"], got["learned"], got["score"]) == (1, 0, 0.0)
+
+
+# ── Plan 184, the platform figures ────────────────────────────────
+# A platform card's own figure is what its cards add up to in that mode,
+# as a stop's is: seven cards a day out are worth a half each, so 3.5,
+# printed 3 -- and none of them is mastered, which is what the figure
+# used to count.
+
+def _a_day_out(raws, mode):
+    _seed([(raw, mode, 1, 3) for raw in raws])
+
+
+def test_a_platforms_bucket_adds_its_cards_up_like_a_stop(client):
+    ids = card_index.raw_ids(SOURCE, DECK, READ)[:7]
+    _a_day_out(ids, READ)
+
+    bucket = client.get("/api/stats").json()[SOURCE][DECK][READ]
+    assert bucket["mastered"] == 0 and bucket["learning"] == 7
+    assert bucket["learned"] == 3
+    # Another mode of the same cards is its own platform, its own sum.
+    assert client.get("/api/stats").json()[SOURCE][DECK][WRITE]["learned"] == 0
+
+
+def test_an_untouched_platform_reads_zero(client):
+    payload = client.get("/api/stats").json()
+    assert all(
+        bucket["learned"] == 0
+        for source in ("kana", "vocab", "kanji", "grammar")
+        for modes in payload[source].values() for bucket in modes.values()
+    )
+
+
+# (url, params) for each route a platform card's figure or a run's head
+# reads, with the cards that route counts.
+def _scoped_routes():
+    from content import theme_data
+    from study.modes import KANA
+    import content.frequency_data as freq
+
+    kana_mode = "kana.flashcard.f2b"
+    vocab_mode = "vocab.flashcard.f2b"
+    grammar_mode = "grammar.flashcard.f2b"
+    tier = [freq.to_id("kanji", k) for k in freq.tier_keys("kanji", 1)]
+    return [
+        ("/api/kana/stats", {"set_name": "hiragana_basic", "mode": kana_mode},
+         card_index.raw_ids(KANA, "hiragana_basic", kana_mode), kana_mode),
+        ("/api/kanji/stats", {"level": DECK, "mode": READ},
+         card_index.raw_ids(SOURCE, DECK, READ), READ),
+        ("/api/vocab/stats", {"level": "N5", "mode": vocab_mode},
+         card_index.raw_ids("vocab", "N5", vocab_mode), vocab_mode),
+        ("/api/grammar/level-stats", {"level": "N5", "mode": grammar_mode},
+         card_index.raw_ids("grammar", "N5", grammar_mode), grammar_mode),
+        ("/api/vocab/theme/animals/stats", {"mode": vocab_mode},
+         [e["card_id"] for e in theme_data.theme_entries("animals")], vocab_mode),
+        ("/api/frequency/kanji/stats", {"tier": 1, "mode": READ},
+         [raw for raw in tier if raw], READ),
+    ]
+
+
+@pytest.mark.parametrize("index", range(6))
+def test_every_scoped_route_reports_what_its_cards_add_up_to(client, index):
+    url, params, raws, mode = _scoped_routes()[index]
+    assert len(raws) >= 7, url
+
+    before = client.get(url, params=params).json()
+    assert before["learned"] == 0, url
+
+    _a_day_out(raws[:7], mode)
+    got = client.get(url, params=params).json()
+    assert got["mastered"] == 0 and got["learning"] == 7, url
+    assert got["learned"] == 3, url                  # 7 x 0.5 = 3.5, printed 3
+    assert got["learned"] <= got["learning"] + got["mastered"], url
+
+
+def test_a_mastered_card_is_a_whole_one_in_a_platforms_figure(client):
+    ids = card_index.raw_ids(SOURCE, DECK, READ)
+    _seed([(ids[0], READ, 40, 6), (ids[1], READ, 1, 3), (ids[2], READ, 1, 3)])
+
+    got = client.get("/api/kanji/stats", params={"level": DECK, "mode": READ}).json()
+    assert got["mastered"] == 1
+    assert got["learned"] == 2                       # 1 + 0.5 + 0.5

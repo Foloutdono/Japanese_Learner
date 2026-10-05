@@ -47,7 +47,9 @@ const POINTS = [
   { raw_id: 'grammar_N4_c', pattern: '〜そうだ', meaning: 'looks like', stage: 'new' },
 ]
 const lesson = p => ({ ...p, level: 'N4', structure: 'verb + ' + p.pattern, steps: [], compare: [], examples: [], status: { status: 'new' } })
-const BUCKET = { total: 60, new: 30, learning: 18, mastered: 12, due_now: 5 }
+// Twelve mastered and eighteen in progress, which add up to 21 cards' worth
+// (plan 184): the platform's figure is that sum, not the mastered count.
+const BUCKET = { total: 60, new: 30, learning: 18, mastered: 12, learned: 21, due_now: 5 }
 const ok = body => ({ ok: true, status: 200, json: async () => body })
 
 beforeEach(() => {
@@ -192,7 +194,12 @@ describe('the frequency tiers beside a tier\'s platforms', () => {
     const figs = $$('.desk-split__page .desk-mode-fig')
     expect(figs.length).toBeGreaterThanOrEqual(2)
     expect(figs[0].querySelector('.desk-mode-fig__due').textContent).toMatch(/^5/)
-    expect(figs[0].querySelector('.desk-mode-fig__count').textContent).toMatch(/12\s*\/\s*60/)
+    expect(figs[0].querySelector('.desk-mode-fig__count').textContent).toMatch(/21\s*\/\s*60/)
+    // The bar is the figure in full and the cards met beyond it in part:
+    // 21 of 60, and the 9 more of the 30 met.
+    const width = sel => parseFloat(figs[0].querySelector(sel).style.width)
+    expect(width('.composition__seg--mastered')).toBeCloseTo(35, 5)
+    expect(width('.composition__seg--learning')).toBeCloseTo(15, 5)
     const stats = apiFetch.mock.calls.map(([u]) => String(u)).filter(u => u.includes('/stats'))
     expect(stats.every(u => u.startsWith('/api/frequency/vocab/stats?tier=3&tier_size=200&mode='))).toBe(true)
   })
@@ -253,7 +260,7 @@ describe('a theme\'s bands beside a band\'s platforms', () => {
     const stops = $$('.desk-split__list .route-stop')
     expect(stops).toHaveLength(4)
     expect($('.desk-split__list .route-stop[aria-current="page"] .route-stop__code').textContent).toBe('基本')
-    expect($('.desk-split__page .desk-mode-fig__count').textContent).toMatch(/12\s*\/\s*60/)
+    expect($('.desk-split__page .desk-mode-fig__count').textContent).toMatch(/21\s*\/\s*60/)
     const stats = apiFetch.mock.calls.map(([u]) => String(u)).filter(u => u.includes('/stats'))
     expect(stats.every(u => u.startsWith('/api/vocab/theme/animaux/stats?level=basic&mode='))).toBe(true)
     expect(stops.every(r => r.tagName === 'A')).toBe(true)

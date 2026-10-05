@@ -2648,7 +2648,7 @@ def get_deck_stats(deck_id: str, mode: str = "standard.flashcard.f2b",
     card_ids = prefixed([p["raw_id"] for p in pool], user_id)
 
     if not card_ids:
-        return {"total": 0, "new": 0, "learning": 0, "mastered": 0, "due_now": 0}
+        return {"total": 0, "new": 0, "learning": 0, "mastered": 0, "learned": 0, "due_now": 0}
 
     states  = srs.get_bulk_stats(card_ids, mode)
     due_now = len(srs.get_due_cards(mode, card_ids=card_ids))
@@ -2657,6 +2657,7 @@ def get_deck_stats(deck_id: str, mode: str = "standard.flashcard.f2b",
         "new":      sum(1 for s in states.values() if s == "new"),
         "learning": sum(1 for s in states.values() if s == "learning"),
         "mastered": sum(1 for s in states.values() if s == "mastered"),
+        "learned":  srs.get_bulk_learned(card_ids, mode),
         "due_now":  due_now,
     }
 

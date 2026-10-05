@@ -21,34 +21,6 @@ SECTIONS = (KANA, VOCAB, KANJI, GRAMMAR)
 SECTION_MODES = {source: sorted(GRADED_FOR_SOURCE[source]) for source in SECTIONS}
 
 
-# The day-count a card's interval has to reach to be "mastered" —
-# srs.py's own _classify_stage threshold, named here because the item
-# score below is a fraction OF it rather than a second, independent
-# idea of what mastery means.
-MASTERED_DAYS = 21
-
-# What getting a card through its learning steps is worth, out of the
-# whole journey to mastery.
-#
-# It has to be more than nothing. interval_days is 0 for the entire
-# learning phase — it is written on graduation and not before — so
-# scoring purely on the interval put a card reviewed four times, an
-# hour from its next drill, at exactly the same 0 as a card never
-# opened. Every line on the wall map then reads empty for a learner
-# whose deck is mostly new, which is most learners most of the time.
-#
-# And it has to be much less than half. The rule this replaced counted
-# any touched card as 0.5, so one pass over a deck — everything seen
-# once, nothing retained — bought half the line and the rest crawled.
-#
-# A tenth: the four learning steps are a tenth of knowing a card, and
-# holding it from one day out to twenty-one is the other nine. The
-# split is a judgement, not a measurement; it is one number here so it
-# can be argued with in one place.
-LEARNING_SHARE = 0.1
-LEARNING_STEPS = 4
-
-
 def _empty_bucket(total: int) -> dict:
     # Everything starts as "new" until the cache proves otherwise.
     return {
@@ -56,59 +28,48 @@ def _empty_bucket(total: int) -> dict:
         "new": total,
         "learning": 0,
         "mastered": 0,
+        "learned": 0,   # what the cards add up to, whole (plan 184); set once the sums are in
         "due_now": 0,
         "reviews": 0,   # sum of total_reviews across cards in this bucket
         "correct": 0,   # sum of correct_reviews across cards in this bucket
     }
 
 
-def _row_score(item: dict) -> float:
-    """How far one (card, mode) has come toward being known, 0..1.
+def _item_stats(best: dict[str, float], total: int) -> dict:
+    """One deck's cards, counted once each (plan 184).
 
-    Two phases, because the card has two: climbing the learning steps,
-    then holding a growing interval. They are continuous with each other
-    — the last learning step scores just under a freshly graduated card
-    — so the number only ever goes up as the card does.
-    """
-    if item["is_learning"]:
-        step = min(item["learning_step"] or 0, LEARNING_STEPS - 1)
-        return LEARNING_SHARE * (step + 1) / LEARNING_STEPS
-    interval = item["interval_days"] or 0
-    return LEARNING_SHARE + (1 - LEARNING_SHARE) * min(1.0, interval / MASTERED_DAYS)
-
-
-def _item_stats(best: dict[str, tuple[float, int]], total: int) -> dict:
-    """One deck's cards, counted once each.
-
-    `best` is {raw_id: (score, interval) of the mode that card has come
-    furthest in}; cards never reviewed are simply absent, and score
-    zero. `total` is every card the deck holds, so a deck nobody has
+    `best` is {raw_id: progress of the mode that card has come furthest
+    in}, progress being srs.py's _progress -- 0.0 new, 1.0 mastered, the
+    learning steps the first half and the interval the second, the same
+    figure the card's own bar draws. Cards never reviewed are simply
+    absent. `total` is every card the deck holds, so a deck nobody has
     opened scores 0 rather than dividing by nothing.
 
     Three figures, because a deck is three questions:
 
       started  how many of its cards you have met at all
-      learned  how many have reached the 21-day mark
-      score    how far the whole deck has come, 0..1, partial credit
+      learned  how many cards the deck's progress adds up to, whole
+      score    the same sum over the deck, 0..1
 
-    `started` is free — `best` holds exactly the cards with a review
-    behind them, keyed once each — and it exists because the other two
-    move too slowly to be feedback. A level's stop on the station page
-    prints `learned`, so a week of first passes leaves every row of the
-    route reading 0 / 665: nothing on screen answers the work. `score`
-    is continuous but deliberately small early (a card in the learning
-    steps is worth at most a tenth of itself), so twenty fresh words of
-    665 round to 1 and the row still reads dead. The count of cards MET
-    moves on the first review, and overstates nothing as long as it is
-    labelled as what it is.
+    `learned` and `score` are ONE sum read twice, so the figure a stop
+    prints, the bar beside it and the train on the map cannot disagree.
+    Every card counts for how far it has come. It used to count only
+    once its interval reached 21 days, so a week of daily work printed
+    0 / 665 and nothing on screen answered it; now the figure moves
+    with each review and is shown whole (srs.whole_cards: 11.5 reads
+    11). A card is worth 1 only when mastered, so `learned` reaches
+    `total` exactly when the deck is finished.
+
+    `started` is the count of cards MET, free -- `best` holds exactly
+    the cards with a review behind them -- and is what a bar draws in
+    half its pigment beyond `learned`: the cards met but not yet
+    credited in full.
     """
-    learned = sum(1 for _, days in best.values() if days >= MASTERED_DAYS)
-    scored = sum(score for score, _ in best.values())
     return {
         "total": total,
         "started": len(best),
-        "learned": learned,
-        "score": round(scored / total, 4) if total else 0.0,
+        "learned": srs.whole_cards(best.values()),
+        "score": round(sum(best.values()) / total, 4) if total else 0.0,
     }
 
 
@@ -146,23 +107,30 @@ def get_stats(user_id: str = Depends(get_user_id)):
     # (card x mode) a number that exists nowhere outside this table, and
     # capped every line at the modes the learner happens to practise.
     #
-    # So each card is scored by its BEST mode and counted once:
+    # So each card is counted once, by its BEST mode (plan 184):
     #
-    #   score   = how far its best mode has come toward 21 days, with
-    #             the learning steps carrying LEARNING_SHARE of that
-    #   learned = that best mode's interval has reached 21 days
-    #   started = it has been reviewed at all, in any mode
+    #   progress = how far that mode has come, 0.0 new to 1.0 mastered --
+    #              the card's own bar (srs._progress, plan 147), so the
+    #              learning steps climb the first half and the interval
+    #              the second
+    #   started  = it has been reviewed at all, in any mode
     #
-    # Continuous on purpose. The buckets' three states put every card at
-    # 0, a flat half, or 1, so one pass over a deck — every card reviewed
-    # once, none of them retained — scored exactly 50% and then crawled.
-    # A fraction of the way to the mastery threshold has no cliff and no
-    # magic constant: it IS the definition of mastered, read early.
-    best_card: dict[tuple[str, str], dict[str, tuple[float, int]]] = {
+    # and a deck's `learned` and `score` are the sum of its cards'
+    # progress, whole and over the deck. Continuous on purpose, and with
+    # no second curve of its own: the buckets' three states put every
+    # card at 0, a flat half, or 1, and a count of mastered cards read 0
+    # for the first three weeks of a deck, so neither answered the work.
+    best_card: dict[tuple[str, str], dict[str, float]] = {
         (source, deck_key): {}
         for source in SECTIONS
         for deck_key in card_index.deck_keys(source)
     }
+
+    # The progress of every row the learner has touched, by bucket, for
+    # each bucket's `learned` (plan 184): a platform's own figure is what
+    # its cards add up to, as a stop's is, and not the count of cards
+    # held for 21 days.
+    progress: dict[tuple[str, str, str], list[float]] = {}
 
     prefix_len = len(user_id) + 1  # strip "user_id:" from the stored card_id
 
@@ -195,16 +163,19 @@ def get_stats(user_id: str = Depends(get_user_id)):
 
         bucket["reviews"] += item["total_reviews"]
         bucket["correct"] += item["correct_reviews"]
+        progress.setdefault((source, deck_key, mode), []).append(item["progress"])
 
         # A row with no reviews behind it is not progress on the card,
         # whatever interval it happens to carry. Scored per mode and
         # kept by the best one, so a kanji you can read but not write is
-        # one kanji at its reading's score.
+        # one kanji at its reading's progress. A card met and not yet
+        # advanced is kept at 0.0: started, worth nothing yet.
         if item["total_reviews"] > 0:
             seen = best_card[(source, deck_key)]
-            scored = (_row_score(item), item["interval_days"] or 0)
-            if scored > seen.get(raw_id, (-1.0, -1)):
-                seen[raw_id] = scored
+            seen[raw_id] = max(item["progress"], seen.get(raw_id, 0.0))
+
+    for (source, deck_key, mode), values in progress.items():
+        buckets[source][deck_key][mode]["learned"] = srs.whole_cards(values)
 
     items = {
         source: {

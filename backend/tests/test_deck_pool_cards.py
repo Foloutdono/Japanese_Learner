@@ -251,3 +251,39 @@ def test_a_followed_deck_hands_its_pool_word_to_the_follower(pclient, other_user
             assert cur.fetchall() == [(TOUGENKYOU, POOL_LEVEL)]
     finally:
         conn.close()
+
+
+def _graduated(user_id: str, raw_id: str, mode: str, days: int) -> None:
+    """A card graduated with an interval of `days`, and not due."""
+    card_id = f"{user_id}:{raw_id}"
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO cards (id) VALUES (%s) ON CONFLICT DO NOTHING", (card_id,))
+            cur.execute("""
+                INSERT INTO card_modes (card_id, mode, interval_days, difficulty,
+                                        stability, repetitions, is_learning,
+                                        learning_step, total_reviews,
+                                        correct_reviews, next_review)
+                VALUES (%s, %s, %s, 2.5, 10, 3, FALSE, 4, 3, 3, NOW() + make_interval(days => %s))
+                ON CONFLICT (card_id, mode) DO UPDATE SET interval_days = EXCLUDED.interval_days,
+                                                          is_learning = FALSE, learning_step = 4
+            """, (card_id, mode, days, days))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def test_a_decks_figure_adds_its_cards_up_rather_than_waiting_for_mastery(pclient):
+    # Plan 184: two cards a day out are worth a half each, so the deck's
+    # platform reads 1 of 2 with nothing mastered -- where it read 0.
+    deck_id = _deck(pclient, "Anime")
+    course = "vocab_N5_行く_いく"
+    assert _add(pclient, deck_id, {"source": "vocab", "raw_id": TOUGENKYOU},
+                {"source": "vocab", "level": "N5", "raw_id": course}) == 2
+    mode = "vocab.flashcard.f2b"
+    for raw_id in (TOUGENKYOU, course):
+        _graduated(PUID, raw_id, mode, days=1)
+
+    stats = pclient.get(f"/api/decks/{deck_id}/stats", params={"mode": mode}).json()
+    assert (stats["total"], stats["mastered"], stats["learned"]) == (2, 0, 1)
