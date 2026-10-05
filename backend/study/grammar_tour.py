@@ -20,7 +20,9 @@ which is why every point that can be lit gets one on the same day.
   where the point attaches to a verb, the verb of the first example from
   its dictionary form to the point (書く → 書いてください).
 - `rival`: the first rival the lesson names, for the terminus.
-- `twist`, `scene`: the authored block (plans 187c–d), None until then.
+- `twist`, `scene`: the point's authored `tour` block (plan 187c),
+  localised, the choices shuffled by a seed of the card id: None where it
+  is not written yet. study/grammar_check.py holds the block's shape.
 
 A point with no rival has nothing to guess against and gets no tour: the
 gate keeps the lesson for it. Static per (level, pattern, lang), so it is
@@ -48,6 +50,22 @@ TOUR_REV = 1
 LOOK_COUNT = 3
 MIN_LIT = 2
 GUESS_COUNT = 4
+
+# Where a scene happens (plan 187, Q5): a closed set of places the app
+# already is, each drawn as a station plate with its plain-language caption
+# (a place is what gets a pair, DESIGN.md). A scene's `place` is one key.
+SCENE_PLACES: dict[str, dict] = {
+    "窓口":   {"reading": "まどぐち",     "en": "Ticket window",           "fr": "Guichet"},
+    "売店":   {"reading": "ばいてん",     "en": "Kiosk",                   "fr": "Kiosque"},
+    "ホーム": {"reading": None,          "en": "Platform",                "fr": "Quai"},
+    "車内":   {"reading": "しゃない",     "en": "On the train",            "fr": "Dans le train"},
+    "改札":   {"reading": "かいさつ",     "en": "Ticket gates",            "fr": "Portillons"},
+    "待合室": {"reading": "まちあいしつ", "en": "Waiting room",            "fr": "Salle d'attente"},
+    "駅前":   {"reading": "えきまえ",     "en": "In front of the station", "fr": "Devant la gare"},
+}
+# The two voices of a scene: the other person, whom the scene names
+# (`them`: the agent, the vendor, a traveller), and the learner.
+SCENE_WHO = ("them", "me")
 
 _SPACE = re.compile(r"\s+")
 
@@ -187,6 +205,68 @@ def _rival(entry: dict, lang: str) -> dict | None:
     return None
 
 
+def _lit(jp: str, pattern: str, level: str) -> list[dict]:
+    """A line's furigana with the point lit where it is written."""
+    return mark_spans(align_sentence(jp), lit_spans(jp, pattern, level))
+
+
+def _spoken(line: dict, pattern: str, level: str, lang: str) -> dict:
+    return {
+        "who": line["who"],
+        "jp": line["jp"],
+        "tr": localise({"en": line["en"], "fr": line["fr"]}, lang),
+        "furigana": _lit(line["jp"], pattern, level),
+    }
+
+
+def _twist(level: str, entry: dict, lang: str) -> dict | None:
+    twist = (entry.get("tour") or {}).get("twist")
+    if not twist:
+        return None
+    rng = random.Random(f"{TOUR_REV}:{grammar_to_id(entry, level)}:twist")
+    choices = [
+        {"text": localise(choice, lang), "correct": i == 0}
+        for i, choice in enumerate(twist["choices"])
+    ]
+    rng.shuffle(choices)
+    return {
+        "jp": twist["jp"],
+        "furigana": _lit(twist["jp"], entry["pattern"], level),
+        "ask": localise(twist["ask"], lang),
+        "choices": choices,
+        "why": localise(twist["why"], lang),
+        "pair": list(twist.get("pair") or []) or None,
+    }
+
+
+def _scene(level: str, entry: dict, lang: str) -> dict | None:
+    scene = (entry.get("tour") or {}).get("scene")
+    if not scene:
+        return None
+    pattern = entry["pattern"]
+    rng = random.Random(f"{TOUR_REV}:{grammar_to_id(entry, level)}:scene")
+    place = SCENE_PLACES[scene["place"]]
+    choices = [
+        {"jp": jp, "furigana": align_sentence(jp), "correct": i == 0}
+        for i, jp in enumerate(scene["ask"]["choices"])
+    ]
+    rng.shuffle(choices)
+    return {
+        "place": scene["place"],
+        "place_reading": place["reading"],
+        "place_caption": localise(place, lang),
+        "them": localise(scene["them"], lang),
+        "lines": [_spoken(line, pattern, level, lang) for line in scene["lines"]],
+        "note": localise(scene["note"], lang),
+        "ask": {
+            "cue": _spoken(scene["ask"]["cue"], pattern, level, lang),
+            "task": localise(scene["ask"]["task"], lang),
+            "choices": choices,
+            "why": localise(scene["ask"]["why"], lang),
+        },
+    }
+
+
 @lru_cache(maxsize=2048)
 def _tour(level: str, pattern: str, lang: str) -> dict | None:
     found = find(pattern)
@@ -209,8 +289,8 @@ def _tour(level: str, pattern: str, lang: str) -> dict | None:
         "structure_furigana": structure_furigana(entry),
         "chain": _chain(entry, look),
         "rival": _rival(entry, lang),
-        "twist": None,
-        "scene": None,
+        "twist": _twist(level, entry, lang),
+        "scene": _scene(level, entry, lang),
     }
 
 

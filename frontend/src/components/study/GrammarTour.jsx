@@ -29,8 +29,10 @@ import { FuriganaParts } from './Readings'
 // `tour` from study/grammar_tour.py.
 const MAX_MISSES = 2
 
-function stopsOf(tour) {
-  return ['look', 'guess', 'found', tour.twist && 'twist', tour.scene && 'scene', 'terminus'].filter(Boolean)
+// The twist and the scene ride on the payload once a point's tour block
+// is written (plan 187c); they join the line when they are drawn (187d).
+function stopsOf() {
+  return ['look', 'guess', 'found', 'terminus']
 }
 
 /** A question with the pattern in it set as Japanese, in the line's ink. */
@@ -217,7 +219,7 @@ function Terminus({ tour, point }) {
 export function GrammarTour({ point, onBoard, onLesson }) {
   const { t } = useLang()
   const tour = point.tour
-  const stops = stopsOf(tour)
+  const stops = stopsOf()
   const [at, setAt] = useState(0)
   const [pick, setPick] = useState(null)
   const [wrong, setWrong] = useState([])

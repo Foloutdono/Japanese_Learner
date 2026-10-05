@@ -49,6 +49,56 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 | `examples` | each passes `study/grammar_sentence_gen.check_sentence`: 8–60 characters, ends in 。！？, kanji within the level (the pattern's own kanji excepted), and visibly contains the pattern. Distinct sentences. |
 | `contrast` | marks a sentence in which the rivals in `compare` are **wrong**; the contrast drill blanks the pattern in it and offers the rivals as choices. So the sentence must not also contain a rival, and the point must compare something. |
 
+## The tour block (plan 187)
+
+A point a learner has never met is toured before it is drilled
+(`study/grammar_tour.py`): its examples, a guess at what it does, the
+rule. That much is derived from the entry above. Two stops are written
+by hand, in an optional `tour` key, and where it is written both halves
+are:
+
+```jsonc
+"tour": {
+  "twist": {                                  // the point doing something else, or its nearest rival
+    "jp": "おちゃかコーヒーを飲みますか。",
+    "ask": {"en": "…", "fr": "…"},            // the question over it
+    "choices": [{"en": "…", "fr": "…"}, …],   // three readings of it, the RIGHT ONE FIRST (the screen shuffles)
+    "why": {"en": "…", "fr": "…"},            // one line said once it is answered
+    "pair": ["すってください", "すわないでください"]  // optional: two forms drawn side by side
+  },
+  "scene": {                                  // the point at work, at a station
+    "place": "売店",                          // one of grammar_tour.SCENE_PLACES
+    "them": {"en": "Vendor", "fr": "Vendeur"}, // who the learner talks to
+    "lines": [{"who": "them" | "me", "jp": "…", "en": "…", "fr": "…"}, …],  // two to five
+    "note": {"en": "…", "fr": "…"},           // the point against its rivals, in this scene
+    "ask": {
+      "cue": {"who": "them", "jp": "…", "en": "…", "fr": "…"},  // what the learner answers
+      "task": {"en": "…", "fr": "…"},         // what to say, in the learner's language
+      "choices": ["…", "…", "…"],             // three Japanese lines, the RIGHT ONE FIRST
+      "why": {"en": "…", "fr": "…"}
+    }
+  }
+}
+```
+
+`study/grammar_check.py` holds it: every Japanese line a whole sentence
+(ending in 。！？, at most 60 characters) in the level's kanji (the
+pattern's own exempt), every translation in both languages with no
+Japanese in it, and the scene ABOUT its point -- the point written in one
+of its lines or the cue, in the right answer, and in no wrong answer
+(read by the detector where `grammar_detect.can_find` trusts it, else by
+the stems). A point that names its own alternatives (`〜つ／〜人／〜枚`,
+`〜があります／います`) may be answered wrong with another of them.
+
+Writing one: the twist is the surprise the guess did not prepare for -- a
+second use (か between two nouns), or the rival the lesson warns about
+(ないでください). Its wrong readings are the confusions a learner would
+really make. The scene is a few lines a learner will live through at a
+ticket window, a kiosk, on a platform; the point does its job in it, the
+note says what the scene just showed, and the learner's own line is
+chosen against the rivals of the lesson's `compare`. Keep the Japanese at
+the level: a word above it is written in kana (とうきょう, おおさか).
+
 ## Rich levels
 
 `RICH_LEVELS` in `content/grammar_points_data.py` names the levels whose

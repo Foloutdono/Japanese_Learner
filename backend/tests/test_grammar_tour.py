@@ -49,7 +49,9 @@ def test_a_tour_has_its_shape():
         assert tour["rev"] == TOUR_REV
         assert MIN_LIT <= len(tour["look"]) <= LOOK_COUNT
         assert 2 <= len(tour["guesses"]) <= GUESS_COUNT
-        assert tour["twist"] is None and tour["scene"] is None
+        # The authored half is there exactly where the point's tour is
+        # written (plan 187c).
+        assert (tour["twist"] is None) == (tour["scene"] is None) == ("tour" not in entry)
         assert tour["structure"] == entry["structure"]
 
 
@@ -207,3 +209,50 @@ def test_the_record_refuses_what_is_no_point(client):
     raw_id = grammar_to_id(entry, level)
     assert client.post("/api/grammar/tour", json={"raw_id": raw_id, "tries": 10}).status_code == 422
     assert client.post("/api/grammar/tour", json={"raw_id": raw_id, "tries": -1}).status_code == 422
+
+
+# ── The authored half (plan 187c) ─────────────────────────────
+
+def test_the_basics_course_points_carry_their_tour():
+    from study import basics
+    course = [p for unit in basics.units() for p in unit.get("grammar", [])]
+    assert len(course) == 32
+    for pattern in course:
+        level, entry = find(pattern)
+        assert "tour" in entry, pattern
+        tour = tour_payload(level, entry, "fr")
+        assert tour["twist"] and tour["scene"], pattern
+
+
+def test_the_authored_half_is_served_in_the_learners_language():
+    level, entry = find("か")
+    written = entry["tour"]
+    for lang in ("fr", "en"):
+        tour = tour_payload(level, entry, lang)
+        twist, scene = tour["twist"], tour["scene"]
+        assert twist["jp"] == written["twist"]["jp"]
+        assert twist["ask"] == written["twist"]["ask"][lang]
+        right = [c for c in twist["choices"] if c["correct"]]
+        assert [c["text"] for c in right] == [written["twist"]["choices"][0][lang]]
+        assert {c["text"] for c in twist["choices"]} == {c[lang] for c in written["twist"]["choices"]}
+        assert scene["place"] == written["scene"]["place"]
+        assert scene["place_caption"] == {"fr": "Kiosque", "en": "Kiosk"}[lang]
+        assert scene["them"] == written["scene"]["them"][lang]
+        assert [l["jp"] for l in scene["lines"]] == [l["jp"] for l in written["scene"]["lines"]]
+        assert [l["tr"] for l in scene["lines"]] == [l[lang] for l in written["scene"]["lines"]]
+        for line in scene["lines"] + [scene["ask"]["cue"]]:
+            assert "".join(p["text"] for p in line["furigana"]) == line["jp"]
+        # The point is lit where a line writes it.
+        lit = [l for l in scene["lines"] if any(p.get("highlight") for p in l["furigana"])]
+        assert lit
+        choices = scene["ask"]["choices"]
+        assert [c["jp"] for c in choices if c["correct"]] == [written["scene"]["ask"]["choices"][0]]
+        assert sorted(c["jp"] for c in choices) == sorted(written["scene"]["ask"]["choices"])
+
+
+def test_the_authored_choices_are_seeded_by_the_id():
+    level, entry = find("か")
+    a = tour_payload(level, entry, "fr")
+    b = tour_payload(level, entry, "en")
+    assert [c["correct"] for c in a["twist"]["choices"]] == [c["correct"] for c in b["twist"]["choices"]]
+    assert [c["jp"] for c in a["scene"]["ask"]["choices"]] == [c["jp"] for c in b["scene"]["ask"]["choices"]]

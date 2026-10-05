@@ -25,8 +25,9 @@ from study.furigana import is_kanji
 from study.grammar_examples import KANA_READING, pattern_furigana
 from study.grammar_match import contains_pattern, verifiable
 from study.grammar_sentence_gen import check_sentence
+from study.llm_shared import sentence_kanji_ok
 
-ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "structure_reading", "meaning", "register", "steps", "compare", "examples"})
+ENTRY_KEYS = frozenset({"pattern", "reading", "structure", "structure_reading", "meaning", "register", "steps", "compare", "examples", "tour"})
 REQUIRED_KEYS = frozenset({"pattern", "structure", "meaning", "steps", "compare", "examples"})
 STEP_KINDS = ("rule", "use", "careful")
 REGISTERS = frozenset({"neutral", "casual", "polite", "formal", "written"})
@@ -97,6 +98,162 @@ def _reading_problems(what: str, key: str, text: str, reading) -> list[str]:
     if not read:
         return [f"{key} {reading!r} does not spell the {what} (everything as written, each kanji run in kana)"]
     return [f"{key} {r!r} is not kana" for r in read if not KANA_READING.fullmatch(r)]
+
+
+# ── The tour's authored block (plan 187c) ──────────────────────────
+# A point's `tour` is the two stops the catalogue cannot derive: the
+# twist (a sentence that shows the point doing something else, or its
+# nearest rival, and three readings of it) and the scene (a short
+# dialogue at a station place in which the point does its job, then the
+# learner's own line chosen from three). Both are required where a tour
+# is written at all.
+TOUR_KEYS = frozenset({"twist", "scene"})
+TWIST_KEYS = frozenset({"jp", "ask", "choices", "why", "pair"})
+SCENE_KEYS = frozenset({"place", "them", "lines", "note", "ask"})
+SCENE_ASK_KEYS = frozenset({"cue", "task", "choices", "why"})
+SCENE_LINES = (2, 5)
+TOUR_CHOICES = 3
+MAX_LINE_CHARS = 60
+MAX_TOUR_CHARS = 220
+
+
+def _carries(jp: str, pattern: str, level: str) -> bool | None:
+    """Whether `jp` writes the point: the detector's word where it can be
+    trusted on this point (grammar_detect.can_find), else the stems'
+    where the pattern has any, else no answer (None)."""
+    from study.grammar_detect import can_find, hits
+    if can_find(pattern):
+        return any((h["pattern"], h["level"]) == (pattern, level) for h in hits(jp))
+    if verifiable(pattern):
+        return contains_pattern(jp, pattern)
+    return None
+
+
+def _line_problems(what: str, jp, level: str, pattern: str) -> list[str]:
+    """One Japanese line of a tour: a whole sentence, short, in the
+    level's kanji (the pattern's own exempt, as an example's are)."""
+    if not isinstance(jp, str) or not jp.strip():
+        return [f"{what} is empty"]
+    out = []
+    if jp != jp.strip():
+        out.append(f"{what} has surrounding whitespace")
+    if jp[-1] not in "。！？":
+        out.append(f"{what} does not end in 。！？")
+    if len(jp) > MAX_LINE_CHARS:
+        out.append(f"{what} is {len(jp)} chars, cap {MAX_LINE_CHARS}")
+    if _LATIN.search(jp):
+        out.append(f"{what} has Latin letters in it")
+    if not _CJK.search(jp):
+        out.append(f"{what} is not Japanese")
+    bad = sorted({
+        c for c in jp
+        if "一" <= c <= "鿿" and c not in set(pattern) and not sentence_kanji_ok(c, level)
+    })
+    if bad:
+        out.append(f"{what} uses kanji above {level}: {''.join(bad)}")
+    return out
+
+
+def _spoken_problems(what: str, line, level: str, pattern: str, rich: bool) -> list[str]:
+    """A line of a scene: who says it, what, and its translation."""
+    from study.grammar_tour import SCENE_WHO
+    if not isinstance(line, dict) or set(line) != {"who", "jp", "en", "fr"}:
+        return [f"{what} must be {{who, jp, en, fr}}"]
+    out = []
+    if line["who"] not in SCENE_WHO:
+        out.append(f"{what} who {line['who']!r} not in {SCENE_WHO}")
+    out += _line_problems(f"{what} jp", line["jp"], level, pattern)
+    for lang in LANGS:
+        tr = line[lang]
+        if not isinstance(tr, str) or not tr.strip() or tr != tr.strip():
+            out.append(f"{what} {lang} is empty or has surrounding whitespace")
+        elif _CJK.search(tr):
+            out.append(f"{what} {lang} contains Japanese")
+    if rich and line["en"] == line["fr"]:
+        out.append(f"{what} fr is a copy of en")
+    return out
+
+
+def _tour_problems(level: str, entry: dict, rich: bool) -> list[str]:
+    from study.grammar_tour import SCENE_PLACES
+    pattern = entry.get("pattern") or ""
+    tour = entry["tour"]
+    if not isinstance(tour, dict) or set(tour) != TOUR_KEYS:
+        return [f"tour must be {{twist, scene}}, both written"]
+    out: list[str] = []
+
+    twist = tour["twist"]
+    if not isinstance(twist, dict) or not {"jp", "ask", "choices", "why"} <= set(twist) or set(twist) - TWIST_KEYS:
+        out.append("tour twist must be {jp, ask, choices, why[, pair]}")
+    else:
+        out += _line_problems("tour twist jp", twist["jp"], level, pattern)
+        out += _text_problems("tour twist ask", twist["ask"], rich, MAX_TOUR_CHARS)
+        out += _text_problems("tour twist why", twist["why"], rich, MAX_TOUR_CHARS)
+        choices = twist["choices"]
+        if not isinstance(choices, list) or len(choices) != TOUR_CHOICES:
+            out.append(f"tour twist has {len(choices) if isinstance(choices, list) else '?'} choices, needs {TOUR_CHOICES} (the answer first)")
+        else:
+            for i, choice in enumerate(choices):
+                out += _text_problems(f"tour twist choice {i}", choice, rich, MAX_TOUR_CHARS)
+            texts = [c.get("en") for c in choices if isinstance(c, dict)]
+            if len(set(texts)) != len(texts):
+                out.append("tour twist choices repeat")
+        pair = twist.get("pair")
+        if pair is not None and (
+            not isinstance(pair, list) or len(pair) != 2
+            or any(not isinstance(p, str) or not _CJK.search(p) or _LATIN.search(p) for p in pair)
+        ):
+            out.append("tour twist pair must be two Japanese forms")
+
+    scene = tour["scene"]
+    if not isinstance(scene, dict) or set(scene) != SCENE_KEYS:
+        out.append("tour scene must be {place, them, lines, note, ask}")
+        return out
+    if scene["place"] not in SCENE_PLACES:
+        out.append(f"tour scene place {scene['place']!r} not in {sorted(SCENE_PLACES)}")
+    out += _text_problems("tour scene them", scene["them"], rich, MAX_TOUR_CHARS)
+    out += _text_problems("tour scene note", scene["note"], rich, MAX_TOUR_CHARS)
+    lines = scene["lines"]
+    if not isinstance(lines, list) or not SCENE_LINES[0] <= len(lines) <= SCENE_LINES[1]:
+        out.append(f"tour scene has {len(lines) if isinstance(lines, list) else '?'} lines, needs {SCENE_LINES[0]}–{SCENE_LINES[1]}")
+        lines = lines if isinstance(lines, list) else []
+    for i, line in enumerate(lines):
+        out += _spoken_problems(f"tour scene line {i}", line, level, pattern, rich)
+
+    ask = scene["ask"]
+    if not isinstance(ask, dict) or set(ask) != SCENE_ASK_KEYS:
+        out.append("tour scene ask must be {cue, task, choices, why}")
+        return out
+    out += _spoken_problems("tour scene cue", ask["cue"], level, pattern, rich)
+    out += _text_problems("tour scene task", ask["task"], rich, MAX_TOUR_CHARS)
+    out += _text_problems("tour scene why", ask["why"], rich, MAX_TOUR_CHARS)
+    choices = ask["choices"]
+    if not isinstance(choices, list) or len(choices) != TOUR_CHOICES:
+        out.append(f"tour scene ask has {len(choices) if isinstance(choices, list) else '?'} choices, needs {TOUR_CHOICES} (the answer first)")
+        return out
+    for i, jp in enumerate(choices):
+        out += _line_problems(f"tour scene choice {i}", jp, level, pattern)
+    if len(set(choices)) != len(choices):
+        out.append("tour scene choices repeat")
+    if out:
+        return out
+
+    # The scene is about the point: it is written in one of its lines (or
+    # the cue), in the learner's answer, and in no wrong answer -- where
+    # anything can tell (_carries); a point no rule reads is taken on trust.
+    spoken = [line["jp"] for line in lines] + [ask["cue"]["jp"]]
+    if not any(_carries(jp, pattern, level) is not False for jp in spoken):
+        out.append("tour scene: no line writes the point")
+    if _carries(choices[0], pattern, level) is False:
+        out.append(f"tour scene: the answer {choices[0]!r} does not write the point")
+    # A point that names its own alternatives (〜つ／〜人／〜枚, あります／
+    # います) is learned by choosing among them, so a wrong answer may be
+    # written with another of its forms; any other point's may not.
+    if "／" not in pattern:
+        for jp in choices[1:]:
+            if _carries(jp, pattern, level) is True:
+                out.append(f"tour scene: the wrong answer {jp!r} writes the point too")
+    return out
 
 
 def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None = None) -> list[str]:
@@ -236,6 +393,9 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
         out.append(f"{tag}: compares {len(rivals)} rival(s) but marks no contrast example")
     if rich and not rivals:
         out.append(f"{tag}: a rich level's point names at least one neighbour to compare")
+
+    if "tour" in entry:
+        out += [f"{tag}: {p}" for p in _tour_problems(level, entry, rich)]
 
     return out
 

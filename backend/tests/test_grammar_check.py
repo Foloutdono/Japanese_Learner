@@ -293,3 +293,108 @@ class WrittenFuriganaTests(unittest.TestCase):
         parts = written_furigana("〜に行く前に")
         self.assertEqual("".join(p["text"] for p in parts), "〜に行く前に")
         self.assertEqual([(p["text"], p["reading"]) for p in parts if p.get("reading")], [("行", "い"), ("前", "まえ")])
+
+
+# ── The tour's authored block (plan 187c) ──────────────────────────
+
+def _tour(**over) -> dict:
+    """The tour drawn on the canvas for 〜てください: the negative request
+    as the twist, a ticket window as the scene."""
+    tour = {
+        "twist": {
+            "jp": "ここでたばこをすわないでください。",
+            "ask": {"en": "What is being asked?", "fr": "Que demande-t-on ?"},
+            "choices": [
+                {"en": "Not to smoke here, please.", "fr": "De ne pas fumer ici, s'il vous plaît."},
+                {"en": "To smoke here, please.", "fr": "De fumer ici, s'il vous plaît."},
+                {"en": "Whether one may smoke here.", "fr": "Si l'on peut fumer ici."},
+            ],
+            "why": {"en": "The ない-form and でください ask someone not to.", "fr": "La forme en ない et でください demandent de ne pas faire."},
+            "pair": ["すってください", "すわないでください"],
+        },
+        "scene": {
+            "place": "窓口",
+            "them": {"en": "Clerk", "fr": "Agent"},
+            "lines": [
+                {"who": "them", "jp": "いらっしゃいませ。", "en": "Good morning.", "fr": "Bonjour."},
+                {"who": "them", "jp": "ここに名前を書いてください。", "en": "Please write your name here.", "fr": "Écrivez votre nom ici, s'il vous plaît."},
+            ],
+            "note": {"en": "A thing: をください. An action: てください.", "fr": "Une chose : をください. Une action : てください."},
+            "ask": {
+                "cue": {"who": "them", "jp": "三ばんせんです。", "en": "Platform three.", "fr": "Quai numéro trois."},
+                "task": {"en": "You didn't hear. Ask him to say it again.", "fr": "Tu n'as pas entendu. Demande-lui de répéter."},
+                "choices": ["もういちど言ってください。", "もういちど言わないでください。", "もういちど言いました。"],
+                "why": {"en": "An action, asked politely: 言って and ください.", "fr": "Une action, demandée poliment : 言って et ください."},
+            },
+        },
+    }
+    for path, value in over.items():
+        *keys, last = path.split(".")
+        node = tour
+        for key in keys:
+            node = node[int(key)] if key.isdigit() else node[key]
+        if value is DROP:
+            del node[last]
+        elif last.isdigit():
+            node[int(last)] = value
+        else:
+            node[last] = value
+    return tour
+
+
+DROP = object()
+
+
+class TourRuleTests(unittest.TestCase):
+    def _problems(self, **over):
+        entry = _good(tour=_tour(**over))
+        return check_entry("N5", entry, _catalogue("N5", entry))
+
+    def _says(self, fragment, **over):
+        found = self._problems(**over)
+        self.assertTrue(any(fragment in p for p in found), f"{fragment!r} not in {found}")
+
+    def test_the_canvas_tour_is_clean(self) -> None:
+        self.assertEqual(self._problems(), [])
+
+    def test_a_tour_is_both_halves(self) -> None:
+        self._says("tour must be {twist, scene}", scene=DROP)
+
+    def test_the_twist(self) -> None:
+        self._says("has 1 choices, needs 3", **{"twist.choices": [{"en": "Only one choice.", "fr": "Un seul choix."}]})
+        self._says("twist pair must be two Japanese forms", **{"twist.pair": ["smoke", "no smoke"]})
+        self._says("twist jp does not end in", **{"twist.jp": "ここでたばこをすわないでください"})
+        self._says("twist choices repeat", **{"twist.choices.2": {"en": "To smoke here, please.", "fr": "Fumer ici."}})
+
+    def test_the_place_is_a_station_place(self) -> None:
+        self._says("place 'カフェ' not in", **{"scene.place": "カフェ"})
+
+    def test_the_lines(self) -> None:
+        self._says("has 1 lines, needs 2–5", **{"scene.lines": [_tour()["scene"]["lines"][0]]})
+        self._says("who 'clerk' not in", **{"scene.lines.0.who": "clerk"})
+        self._says("uses kanji above N5: 京", **{"scene.lines.0.jp": "東京までのきっぷをください。"})
+        self._says("en contains Japanese", **{"scene.lines.0.en": "Irasshaimase いらっしゃい."})
+        self._says("them: fr is a copy of en", **{"scene.them": {"en": "Agent", "fr": "Agent"}})
+
+    def test_the_scene_writes_the_point(self) -> None:
+        self._says("no line writes the point", **{
+            "scene.lines.1": {"who": "me", "jp": "とうきょうまでです。", "en": "To Tokyo.", "fr": "Pour Tokyo."},
+        })
+
+    def test_the_answer_writes_the_point_and_no_wrong_answer_does(self) -> None:
+        self._says("does not write the point", **{
+            "scene.ask.choices": ["もういちど言いました。", "もういちど言わないでください。", "もういちど言いません。"],
+        })
+        self._says("writes the point too", **{
+            "scene.ask.choices": ["もういちど言ってください。", "ゆっくり話してください。", "もういちど言いました。"],
+        })
+
+    def test_a_point_of_alternatives_may_be_answered_wrong_with_another(self) -> None:
+        # 〜つ／〜人／〜枚 is learned by choosing among its own counters: its
+        # wrong answers are written with another of them, and that is allowed.
+        from content.grammar_points_data import find
+        from study.grammar_check import _carries
+        level, entry = find("助数詞 〜つ／〜人／〜枚")
+        wrong = entry["tour"]["scene"]["ask"]["choices"][1:]
+        self.assertTrue(all(_carries(jp, entry["pattern"], level) is not False for jp in wrong))
+        self.assertEqual(check_entry(level, entry), [])

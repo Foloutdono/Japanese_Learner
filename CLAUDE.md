@@ -1656,9 +1656,10 @@ runtime purpose. Two consequences worth knowing:
   `routes/basics.py`, `tests/test_basics_api.py`, `screens/BasicsScreen.jsx`,
   `screens/LearnScreen.jsx`, `stores/basics.js`, `config/tabs.js`,
   `src/basics.phone.test.jsx` and `src/basics.desktop.test.jsx`).
-  **187** is 発見, a grammar point found before it is drilled (187a–b
+  **187** is 発見, a grammar point found before it is drilled (187a–c
   built, the rest planned in `plans/187-hakken-grammar-tour.md`; cited in
-  `study/grammar_tour.py`, `routes/grammar.py`, `routes/account.py`,
+  `study/grammar_tour.py`, `study/grammar_check.py`, `content/grammar/N5.json`
+  and its README, `routes/grammar.py`, `routes/account.py`,
   `srs/data_structure.sql`, `core/events.py`, `tests/test_grammar_tour.py`,
   `components/study/GrammarTour.jsx`, `components/study/GrammarGate.jsx`,
   `lib/track.js`, `src/tour.phone.test.jsx` and `index.css`; DESIGN.md,
