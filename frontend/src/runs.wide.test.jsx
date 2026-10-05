@@ -143,6 +143,10 @@ describe('the level-up\'s card on a run\'s desk column (plans 142, 173)', () => 
     await settle(500)
     const col = $('.desk-run__left')
     const pass = $('.levelup')
+    // Measured once the card has come down: its drop (desk-levelup-in)
+    // carries it and the column's step under it over 400ms, and a busy
+    // runner started it late enough to read it 7px short at 500ms.
+    await Promise.all(pass.getAnimations().map(a => a.finished))
     expect(pass.parentElement).toBe(col)
     const c = col.getBoundingClientRect()
     const p = pass.getBoundingClientRect()
