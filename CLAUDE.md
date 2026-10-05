@@ -1522,11 +1522,14 @@ runtime purpose. Two consequences worth knowing:
   `stage--sentence`, the 机 section of `index.css`) -- and the rating
   bar's misses on a sumi of their own, which the frame's surface had
   been standing in for (paper in the light theme, under the panel's
-  inks); then the card itself, redrawn from the owner's pick of four
+  inks), and comprehension's floor with them (`stage--comprehension`);
+  then the card itself, redrawn from the owner's pick of four
   directions on the canvas "Tsuji — the practice cards" (A 見本,
   B 照合, C 切符, D 時刻表) (cited in `screens/ReadingRun.jsx`,
   `TranslationRun.jsx`, `DictationRun.jsx`, `CompositionRun.jsx`,
-  `src/lines.desktop.test.jsx` and `index.css`; DESIGN.md, "The desk").
+  `ComprehensionRun.jsx`, `src/lines.desktop.test.jsx`,
+  `src/comprehension.desktop.test.jsx` and `index.css`; DESIGN.md, "The
+  desk").
   When starting a new wave, begin at **185** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

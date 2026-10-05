@@ -1729,8 +1729,9 @@ each question drawing its answers between them.
   the page at the card's edges, the card the one panel in the column,
   and the tiles' misses carry their own sumi (`.rating-bar__misses`) —
   the frame had been their ground, and in the light theme it was
-  paper, under words in the panel's inks. Comprehension keeps its
-  framed floor. At the right
+  paper, under words in the panel's inks. Comprehension's floor (Next,
+  its review's pair) followed, at the owner's word
+  (`stage--comprehension`). At the right
   **the breakdown**, sealed until the grade (the breakdown is the
   answer), then the column's one panel; composition's lesson and
   comprehension's text stand there the same way. Comprehension's lines

@@ -34159,15 +34159,17 @@ button.brd-stn { cursor: pointer; }
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
-  /* The sentence runs' floor stands on the page (plan 184, owner-
+  /* The practice runs' floor stands on the page (plan 184, owner-
      directed: "remove the box encapsulating the next button and
-     rating bar"). Reading, translation, dictation and composition
-     (StudyStage's `stage--sentence`): the field and Check, the rating
-     bar and Next under the card at its edges, with no surface, hairline
-     or corner of their own -- the card is the one panel in the column.
-     The bar's misses keep their sumi (.rating-bar__misses), which is
-     what the frame's surface had been standing in for. */
-  .desk-run--panels > .stage.stage--sentence > .stage__foot:not(.browse-nav),
+     rating bar", then "from comprehension too"). Reading, translation,
+     dictation and composition (StudyStage's `stage--sentence`) and
+     comprehension (`stage--comprehension`): the field and Check, the rating
+     bar, Next and the review's pair under the card at its edges, with
+     no surface, hairline or corner of their own -- the card is the one
+     panel in the column. The bar's misses keep their sumi
+     (.rating-bar__misses), which is what the frame's surface had been
+     standing in for. */
+  .desk-run--panels > .stage:is(.stage--sentence, .stage--comprehension) > .stage__foot:not(.browse-nav),
   .desk-run--panels > .stage.stage--sentence > .rating-bar {
     padding: 0;
     background: none;
