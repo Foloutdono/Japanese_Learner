@@ -8744,6 +8744,63 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
+/* 基礎 — the basics course on the gate (plan 186f): the unit the next
+   new card comes from, by name, over a bar of the units with the ones
+   met filled. Neutral inks: the course is no line, so it wears no
+   line's pigment; the unit at hand is the selection's gold. */
+.basics-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+}
+.basics-line__head,
+.basics-line__name { display: inline-flex; align-items: baseline; gap: var(--sp-2); }
+.basics-line__jp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+}
+.basics-line__of {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.basics-line__name { font-size: var(--fs-sm); font-weight: 700; color: var(--text-primary); }
+.basics-line__title { font-weight: 400; color: var(--text-secondary); }
+.basics-line__bar {
+  display: flex;
+  flex-basis: 100%;
+  gap: var(--sp-1);
+  height: 5px;
+}
+.basics-line__unit {
+  flex: 1 1 0;
+  border-radius: var(--r-pill);
+  background: var(--border);
+}
+.basics-line__unit--met { background: var(--text-secondary); }
+.basics-line__unit--on { background: var(--sel-line); }
+.basics-line--done { align-items: center; }
+.basics-line--done .basics-line__name { font-weight: 600; }
+.basics-line__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--sp-8);
+  height: var(--sp-8);
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-primary);
+}
 /* The two questions, under a rule: which cards, how many. */
 .gate-card__asks {
   display: flex;

@@ -59,13 +59,14 @@ from pydantic import BaseModel, Field
 import psycopg2.extras
 
 from core.auth import get_user_id, prefixed, unprefixed
-from core import credits
+from core import credits, events
 from core.db import db_conn
 from core.lines import lines_or_all
 from core.pace import resolve_pace
 from core.srs_instance import srs
 from core.user_level import resolve_level
 from study import basics, card_index, daily_queue, teaching_order
+from study import level_rule
 from study.level_rule import kana_sets_for, primary_mode
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES, try_resolve
 
@@ -871,6 +872,47 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     return {"cards": cards, "beyond": beyond}
 
 
+def _note_unit_done(user_id: str, raw_id: str) -> None:
+    """基礎 (plan 186f): a first review that leaves its unit of the
+    basics with nothing unmet in the learner's lines is that unit done,
+    recorded as `basics_unit_done`. Only a course card's first review at
+    N5 asks, and nothing here may fail the review."""
+    unit = basics.unit_of(raw_id)
+    if unit is None:
+        return
+    try:
+        if not _riding_basics(resolve_level(user_id)):
+            return
+        course = _course(user_id, lines_or_all(_profile_row(user_id)[9]))
+        if all(n != unit for _, _, n in course):
+            events.record(user_id, "basics_unit_done", {"unit": unit + 1})
+    except Exception:
+        logger.exception("basics unit check failed")
+
+
+@router.post("/api/today/basics/skip")
+def post_basics_skip(user_id: str = Depends(get_user_id)):
+    """Skip the basics (plan 186f), for a learner who knows them: every
+    course card not yet met is marked known, in its line's primary mode,
+    as the level rule marks the stops behind a level -- a row that exists
+    is left alone, the first checks spread over the same weeks -- and the
+    ration goes on to the rest of N5. Undone by nothing but study, as the
+    level rule is; a card the learner is shown again and misses comes back
+    like any other."""
+    level = resolve_level(user_id)
+    if not _riding_basics(level):
+        return {"markedKnown": 0, "basics": None}
+    at = _basics_status(user_id, level)
+    marked = 0
+    for source in basics.SOURCES:
+        marked += srs.seed_known(prefixed(basics.course_ids(source), user_id), primary_mode(source),
+                                 spread_days=level_rule.SPREAD_DAYS)
+    if at and not at.get("done"):
+        events.record(user_id, "basics_skipped", {"unit": at["unit"]})
+    logger.info("basics skipped user_id=%s marked_known=%d", user_id, marked)
+    return {"markedKnown": marked, "basics": _basics_status(user_id, level)}
+
+
 class TodayReviewPayload(BaseModel):
     card_id: str
     mode: str
@@ -903,6 +945,8 @@ def post_today_review(payload: TodayReviewPayload, user_id: str = Depends(get_us
     # is careful to price the CARD and not the mode key the client
     # chose to send -- nor on a learning step's repeat (credits.fare).
     fare = credits.spend(user_id, credits.fare(_review_cost(payload.card_id, payload.mode), s["repeat"]), card_id)
+    if payload.prev_stage in (None, "new"):
+        _note_unit_done(user_id, payload.card_id)
     return {
         "card_id": payload.card_id,
         "interval": s["interval"],

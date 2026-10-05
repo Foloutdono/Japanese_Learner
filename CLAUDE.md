@@ -1627,8 +1627,13 @@ runtime purpose. Two consequences worth knowing:
   (`routes/today.py`'s `Pools`, `_course`); each served course card
   names its unit (`basics` on `/api/today/cards`) and the gate the unit
   the course is at (`basics` on `/api/today`); a learner above N5 never
-  rides it; showing it, the skip and the Learn plate are the plan's
-  later phases (cited in `study/teaching_order.py`,
+  rides it; then 186f, the course seen and skippable -- the gate's line
+  naming the unit at hand over a bar of the fourteen, in neutral inks
+  (`components/station/BasicsLine.jsx`), a note once the course is met,
+  Settings › Level's skip (`POST /api/today/basics/skip`, every unmet
+  course card marked known as the level rule marks a stop) and the
+  `basics_unit_done` and `basics_skipped` events; the Learn plate is the
+  plan's later phase (cited in `study/teaching_order.py`,
   `routes/today.py`, `routes/vocab.py`, `routes/kanji.py`,
   `routes/kana.py`, `routes/grammar.py`, `routes/frequency.py`,
   `srs/batch_cache.py`, `tests/test_teaching_order.py`,
@@ -1639,7 +1644,9 @@ runtime purpose. Two consequences worth knowing:
   `tests/test_lookup_precision.py`, `tests/test_onboarding_profile.py`,
   `content/basics.json`, `study/basics.py`, `study/card_lookup.py`,
   `study/analysis.py`, `content/reading_sentences.py`,
-  `scripts/basics_report.py` and `tests/test_basics.py`).
+  `scripts/basics_report.py`, `tests/test_basics.py`, `core/events.py`,
+  `lib/track.js`, `components/station/BasicsLine.jsx`,
+  `components/station/GateCard.jsx` and `components/settings/LevelPage.jsx`).
   When starting a new wave, begin at **187** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

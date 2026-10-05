@@ -264,3 +264,66 @@ def test_a_met_unit_gives_way_to_the_next(client):
     assert status["unit"] == 2 and status["id"] == "kore-sore"
     cards = client.get("/api/today/cards?count=5").json()["cards"]
     assert _new_ids(cards)[0] == "grammar_N5_これ／それ／あれ／どれ"
+
+
+# ── Seen and skippable (plan 186f) ───────────────────────────────
+
+def _events(user_id, name):
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT props FROM event_log WHERE user_id = %s AND name = %s ORDER BY at", (user_id, name))
+            return [row[0] for row in cur.fetchall()]
+    finally:
+        conn.close()
+
+
+def _clear_events(user_id):
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM event_log WHERE user_id = %s", (user_id,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def test_skipping_the_basics_marks_the_course_known_and_moves_on(client):
+    from study import basics, teaching_order
+    _clear_events(RATION_USER)
+    _board(client, "N5", "both", 4, ["vocab"])
+    r = client.post("/api/today/basics/skip")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["markedKnown"] > 0 and body["basics"]["done"] is True
+    assert client.get("/api/today").json()["basics"]["done"] is True
+    # The ration goes on to the rest of N5, never a course card.
+    new = _new_ids(client.get("/api/today/cards?count=10").json()["cards"])
+    assert new and all(basics.unit_of(raw_id) is None for raw_id in new)
+    assert new[0] == next(i for i in teaching_order.raw_ids("vocab", "N5", "vocab.flashcard.f2b")
+                          if basics.unit_of(i) is None)
+    assert _events(RATION_USER, "basics_skipped") == [{"unit": 1}]
+    _clear_events(RATION_USER)
+
+
+def test_a_skip_above_n5_writes_nothing(client):
+    _board(client, "N4", "both", 4, ["vocab"])
+    assert client.post("/api/today/basics/skip").json() == {"markedKnown": 0, "basics": None}
+
+
+def test_finishing_a_unit_is_recorded_once(client):
+    from study import basics
+    _clear_events(RATION_USER)
+    _board(client, "N5", "both", 50, ["grammar"])
+    points = basics.units()[0]["cards"]["grammar"]
+    for i, raw_id in enumerate(points):
+        r = client.post("/api/today/review", json={"card_id": raw_id, "mode": "grammar.flashcard.f2b",
+                                                   "quality": 4, "prev_stage": None})
+        assert r.status_code == 200
+        # Not done until the unit's last card in the learner's lines.
+        assert len(_events(RATION_USER, "basics_unit_done")) == (1 if i == len(points) - 1 else 0)
+    # A second review of a met card records nothing more.
+    client.post("/api/today/review", json={"card_id": points[0], "mode": "grammar.flashcard.f2b",
+                                           "quality": 4, "prev_stage": "learning"})
+    assert _events(RATION_USER, "basics_unit_done") == [{"unit": 1}]
+    _clear_events(RATION_USER)

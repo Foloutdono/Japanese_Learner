@@ -107,6 +107,14 @@ const nav = {
   fareReviews:       'révisions',
   fareFare:          'tarif',
   fareCreditsLeft:   'crédits restants',
+  // 基礎 — le cursus de base sur le portillon et dans Réglages › Niveau (plan 186f)
+  basicsUnit:        (n, of) => `Leçon ${n} sur ${of}`,
+  basicsMet:         (n, of) => `${n} leçons sur ${of} vues`,
+  basicsDone:        'Bases acquises — le reste du N5 est ouvert.',
+  basicsSkip:        'Passer les bases',
+  basicsSkipLabel:   'Bases',
+  basicsSkipAct:     'Je les connais',
+  basicsSkipped:     n => `${n} cartes de base marquées connues.`,
   // ── 定期券 — les portes de l'offre et son merci (domain/paywall.js) ──
   paywallName_pro:    'Tsuji Pro',
   paywallThanks:      'C’est noté — on te prévient au lancement.',
