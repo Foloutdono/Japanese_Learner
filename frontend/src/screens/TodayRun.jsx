@@ -61,7 +61,7 @@ import { romajiEquals } from '../lib/romaji'
 function laneFoot(card, t) {
   const lane = card?.lane
   if (!lane) return undefined
-  return { left: whereOf(lane, t, kanaSetLabel), right: modeLabel(t, card.mode) }
+  return { left: whereOf(lane, t, kanaSetLabel), right: modeLabel(t, card.exercise ?? card.mode) }
 }
 
 /** The stage floor every section screen gives its card, by structure:
@@ -397,7 +397,7 @@ export default function TodayRun({ session }) {
   // other study screen names one section; this queue draws a kanji
   // card, then grammar, then a personal deck).
   const where = card?.lane ? whereOf(card.lane, t, kanaSetLabel) : t.todayTitle
-  const sub = card ? modeLabel(t, card.mode) : undefined
+  const sub = card ? modeLabel(t, card.exercise ?? card.mode) : undefined
   const color = card?.lane ? LINE_COLOR[laneTypeOf(card.lane)] : undefined
   // The run's length as it stands, cleared and left: a card coming
   // back lengthens the bar rather than running past its end.

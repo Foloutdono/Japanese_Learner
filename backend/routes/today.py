@@ -82,7 +82,7 @@ from routes.kana import _build_kana_card              # noqa: E402
 from routes.kanji import _build_kanji_card, FR_MAP as KANJI_FR_MAP     # noqa: E402
 from routes.vocab import _build_vocab_card, FR_MAP as VOCAB_FR_MAP     # noqa: E402
 from translations import get_meaning                  # noqa: E402
-from routes.grammar import _build_grammar_card        # noqa: E402
+from routes.grammar import _build_grammar_card, ladder_progress   # noqa: E402
 from routes.decks import build_personal_card, build_pool_card, VISIBLE_DECKS_CTE   # noqa: E402
 from content.vocab_jmdict_data import POOL_ID_PREFIX                # noqa: E402
 from routes.profile import _profile_row                # noqa: E402
@@ -104,8 +104,8 @@ _SECTION_BUILDERS = {
         _build_kanji_card(raw_id, entry, deck_list, m, lang, stage, preview),
     VOCAB:   lambda raw_id, entry, deck_key, deck_list, m, lang, stage, preview:
         _build_vocab_card(raw_id, entry, deck_list, m, lang, stage, preview),
-    GRAMMAR: lambda raw_id, entry, deck_key, deck_list, m, lang, stage, preview:
-        _build_grammar_card(entry, deck_key, deck_list, m, lang, stage, preview),
+    GRAMMAR: lambda raw_id, entry, deck_key, deck_list, m, lang, stage, preview, progress=None:
+        _build_grammar_card(entry, deck_key, deck_list, m, lang, stage, preview, progress),
 }
 
 
@@ -188,7 +188,7 @@ def _affordable(user_id: str, picked: list[tuple], repeats: set = frozenset()) -
     return kept
 
 
-def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview):
+def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview, progress=None):
     """One card, built by its own section's builder.
 
     `deck_list` is the level the card came from, which is what the
@@ -210,7 +210,10 @@ def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview):
     ]
     deck_list = [e for e in deck_list if e is not None]
 
-    card = build(raw_id, entry, deck_key, deck_list, m, lang, stage, preview)
+    # The card's progress goes to the one builder that reads it: the
+    # grammar ladder asks the exercise of the card's rung (plan 187e).
+    card = (build(raw_id, entry, deck_key, deck_list, m, lang, stage, preview, progress)
+            if source == GRAMMAR else build(raw_id, entry, deck_key, deck_list, m, lang, stage, preview))
     # Every builder already sets its own card_id (kana/grammar derive it
     # from `entry` the same way card_index just did to find it -- see
     # kana_to_id/grammar_to_id -- kanji/vocab take it as raw_id directly).
@@ -829,10 +832,12 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
 
     states: dict = {}
     previews: dict = {}
+    progresses: dict = {}
     for mode, ids in by_mode.items():
         card_ids = prefixed(ids, user_id)
         states.update({(cid, mode): v for cid, v in srs.get_bulk_stats(card_ids, mode).items()})
         previews.update({(cid, mode): v for cid, v in srs.preview_reviews_bulk(card_ids, mode, user_id).items()})
+        progresses.update({(cid, mode): v for cid, v in ladder_progress(card_ids, mode).items()})
 
     cards = []
     for key, raw_id in picked:
@@ -843,7 +848,8 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
 
         if key[0] == daily_queue.SECTION:
             _, source, deck_key, _ = key
-            card = _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview)
+            card = _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview,
+                                       progresses.get((card_id, mode)))
         else:
             _, deck_id, deck_name, _ = key
             row = personal[raw_id]
@@ -916,16 +922,19 @@ def _unit_cards(user_id: str, unit_id: str, all_lanes, due_rows, count: int, exc
         by_mode[key[-1]].append(f"{user_id}:{raw_id}")
     states: dict = {}
     previews: dict = {}
+    progresses: dict = {}
     for mode, card_ids in by_mode.items():
         states.update({(cid, mode): v for cid, v in srs.get_bulk_stats(card_ids, mode).items()})
         previews.update({(cid, mode): v for cid, v in srs.preview_reviews_bulk(card_ids, mode, user_id).items()})
+        progresses.update({(cid, mode): v for cid, v in ladder_progress(card_ids, mode).items()})
     cards = []
     for key, raw_id in picked:
         _, source, deck_key, mode = key
         card_id = f"{user_id}:{raw_id}"
         stage = states.get((card_id, mode))
         preview = previews.get((card_id, mode))
-        card = _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview)
+        card = _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview,
+                                   progresses.get((card_id, mode)))
         if card is None:
             continue
         card["lane"] = daily_queue.label(key)

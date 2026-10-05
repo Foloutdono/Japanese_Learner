@@ -1025,9 +1025,39 @@ stage, not a new idiom:
   plays the lines in turn and stops when a single line is tapped.
 
 The lesson itself is not thrown away: it is the plate a learner comes
-back to, behind the card's magnifier and in the dictionary. The desk
-keeps the lesson at the gate until plan 187f lays the tour on the runs'
-three panels.
+back to, behind the card's magnifier and in the dictionary. Over its body
+the plate says how the point was first met (« Découvert le 5 oct. · 2
+essais ») and keeps the tour a tap away in two plain secondary buttons,
+« Refaire le tutoriel » and, where there is a scene, « Rejouer la scène »:
+the tour runs again in the lesson's place, its terminus « Retour à la
+leçon », and records nothing (plan 187e).
+
+### The ladder (梯子, plan 187e)
+
+After the tour, a grammar card is one track whose exercise climbs with it:
+recognise, choose, build, write. A ladder card wears **a strip of four
+rungs** over its content, each a 3px bar in the line's pigment, the passed
+ones filled and the one it stands on named in the line's ink, the others
+in the secondary ink. The strip says where the card is; the exercise under
+it is the one that rung asks.
+
+- **Build** (組立) is the sentence with its gaps and a tray of pieces under
+  it. A gap is a control at `--r-card` and 44px, dashed in the secondary
+  ink while empty, the next one to fill dashed in the line's pigment;
+  filled, it is solid on the surface. A piece is a tile like a guess.
+  Checked, a gap is ringed in `--success` or `--rating-wrong`, never filled,
+  and a wrong build prints the sentence with the point lit.
+- **Write** (書く) is the situation at `--fs-lead`, the point in the line's
+  ink, the words to use as small framed chips with their readings, and the
+  field beside its Check. After the check: what was written, the
+  detector's word in the state's ink (nothing where it cannot judge), and
+  one way to say it, lit.
+
+Both end on the run's own rating bar. The exercise says what happened,
+never the grade (ADR 0013).
+
+The desk keeps the lesson at the gate until plan 187f lays the tour on
+the runs' three panels.
 
 ## Space
 

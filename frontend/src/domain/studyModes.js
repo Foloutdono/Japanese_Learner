@@ -36,6 +36,12 @@ export const RENDER = {
   FILL: 'fill',
   CONTRAST: 'contrast',
   BROWSE: 'browse',
+  // The grammar ladder (plan 187e). LADDER draws nothing of its own: a
+  // ladder card names the exercise it is asked in (`exercise`), and
+  // cardShape reads that one's renderer.
+  BUILD: 'build',
+  WRITE: 'write',
+  LADDER: 'ladder',
 }
 
 // 種別 rungs, unchanged from config/stations.js — how much the mode holds
@@ -146,6 +152,13 @@ const LIST = [
   // Runs on the project's own 205-point catalogue and its own
   // example sentences (content/grammar_sentences.json), not the scraped
   // source. indice_2 shows those sentences with the translation hidden.
+  // The ladder (plan 187e): one track whose exercise climbs with the
+  // card — fill_in, contrast, build, write — read from its progress on
+  // the server. First, so it is grammar's primary mode, as in modes.py.
+  mode('grammar.ladder', 'grammar', 'ladder', {
+    renderer: RENDER.LADDER, service: SERVICE.EXPRESS,
+    format: 'fill', statsDirection: 'recall',
+  }),
   mode('grammar.flashcard.f2b', 'grammar', 'flashcard', {
     direction: 'f2b', hints: CS, service: SERVICE.RAPID,
     format: 'flashcard', statsDirection: 'recognition',
@@ -168,6 +181,19 @@ const LIST = [
   mode('grammar.contrast', 'grammar', 'contrast', {
     renderer: RENDER.CONTRAST, service: SERVICE.EXPRESS,
     format: 'fill', statsDirection: 'recall',
+  }),
+  // The sentence as tiles, the point and its word missing, a rival's
+  // form as the wrong tile — where a sentence is marked as telling the
+  // point from its rivals.
+  mode('grammar.build', 'grammar', 'build', {
+    renderer: RENDER.BUILD, service: SERVICE.EXPRESS,
+    format: 'fill', statsDirection: 'production',
+  }),
+  // A situation to say with the point; composition's check says whether
+  // it is there, and the learner rates themselves.
+  mode('grammar.write', 'grammar', 'write', {
+    renderer: RENDER.WRITE, service: SERVICE.LTD,
+    format: 'writing', statsDirection: 'production',
   }),
 
   // ── standard (a hand-authored front/back card) ──

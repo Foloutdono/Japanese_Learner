@@ -1,0 +1,193 @@
+{
+ "build": {
+  "card_id": "grammar_N5_〜てください",
+  "raw_id": "grammar_N5_〜てください",
+  "mode": "grammar.ladder",
+  "direction": null,
+  "grammar": "〜てください",
+  "grammar_furigana": [
+   {
+    "text": "〜てください"
+   }
+  ],
+  "structure": "verb て-form + ください",
+  "structure_furigana": [
+   {
+    "text": "verb て-form + ください"
+   }
+  ],
+  "meaning": "please do",
+  "register": "polite",
+  "stage": "learning",
+  "review_preview": null,
+  "hints": {},
+  "build": {
+   "tr": "Please write your name here.",
+   "tiles": [
+    {
+     "furigana": [
+      {
+       "text": "ここに"
+      }
+     ]
+    },
+    {
+     "furigana": [
+      {
+       "text": "名",
+       "reading": "な",
+       "word": 2
+      },
+      {
+       "text": "前",
+       "reading": "まえ",
+       "word": 2
+      },
+      {
+       "text": "を"
+      }
+     ]
+    },
+    {
+     "slot": 0
+    },
+    {
+     "slot": 1
+    }
+   ],
+   "tail": "。",
+   "tray": [
+    {
+     "id": 0,
+     "text": "をください",
+     "furigana": [
+      {
+       "text": "をください"
+      }
+     ]
+    },
+    {
+     "id": 1,
+     "text": "てください",
+     "furigana": [
+      {
+       "text": "てください"
+      }
+     ]
+    },
+    {
+     "id": 2,
+     "text": "書い",
+     "furigana": [
+      {
+       "text": "書",
+       "reading": "か",
+       "word": 4
+      },
+      {
+       "text": "い"
+      }
+     ]
+    }
+   ],
+   "answer": [
+    2,
+    1
+   ],
+   "jp": "ここに名前を書いてください。",
+   "furigana": [
+    {
+     "text": "ここに"
+    },
+    {
+     "text": "名",
+     "reading": "な",
+     "word": 2
+    },
+    {
+     "text": "前",
+     "reading": "まえ",
+     "word": 2
+    },
+    {
+     "text": "を"
+    },
+    {
+     "text": "書",
+     "reading": "か",
+     "word": 4
+    },
+    {
+     "text": "い"
+    },
+    {
+     "text": "てください",
+     "highlight": true
+    },
+    {
+     "text": "。"
+    }
+   ]
+  },
+  "exercise": "grammar.build",
+  "rung": 2
+ },
+ "write": {
+  "card_id": "grammar_N5_〜てください",
+  "raw_id": "grammar_N5_〜てください",
+  "mode": "grammar.ladder",
+  "direction": null,
+  "grammar": "〜てください",
+  "grammar_furigana": [
+   {
+    "text": "〜てください"
+   }
+  ],
+  "structure": "verb て-form + ください",
+  "structure_furigana": [
+   {
+    "text": "verb て-form + ください"
+   }
+  ],
+  "meaning": "please do",
+  "register": "polite",
+  "stage": "learning",
+  "review_preview": null,
+  "hints": {},
+  "write": {
+   "situation": "Please come in.",
+   "helpers": [
+    {
+     "text": "入る",
+     "reading": "はいる"
+    }
+   ],
+   "model": {
+    "jp": "どうぞ入ってください。",
+    "tr": "Please come in.",
+    "furigana": [
+     {
+      "text": "どうぞ"
+     },
+     {
+      "text": "入",
+      "reading": "はい",
+      "word": 1
+     },
+     {
+      "text": "っ"
+     },
+     {
+      "text": "てください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ]
+   }
+  },
+  "exercise": "grammar.write",
+  "rung": 3
+ }
+}

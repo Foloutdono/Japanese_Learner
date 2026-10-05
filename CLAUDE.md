@@ -1656,16 +1656,24 @@ runtime purpose. Two consequences worth knowing:
   `routes/basics.py`, `tests/test_basics_api.py`, `screens/BasicsScreen.jsx`,
   `screens/LearnScreen.jsx`, `stores/basics.js`, `config/tabs.js`,
   `src/basics.phone.test.jsx` and `src/basics.desktop.test.jsx`).
-  **187** is 発見, a grammar point found before it is drilled (187a–d
+  **187** is 発見, a grammar point found before it is drilled (187a–e
   built, the rest planned in `plans/187-hakken-grammar-tour.md`; cited in
   `study/grammar_tour.py`, `study/grammar_check.py`, `study/grammar_audio.py`,
-  `content/grammar/N5.json` and its README, `routes/grammar.py`,
+  `study/grammar_ladder.py`, `study/modes.py`, `study/card_index.py`,
+  `content/grammar/N5.json`, `content/grammar/ladder.json` and the
+  README, `routes/grammar.py`, `routes/today.py`, `routes/decks.py`,
   `routes/tts.py`, `routes/account.py`, `srs/data_structure.sql`,
   `core/events.py`, `scripts/build_grammar_audio.py`,
+  `scripts/build_ladder_flags.py`, `scripts/migrate_grammar_ladder.py`,
   `tests/test_grammar_tour.py`, `tests/test_grammar_audio.py`,
-  `components/study/GrammarTour.jsx`, `components/study/GrammarGate.jsx`,
+  `tests/test_grammar_ladder.py`, `components/study/GrammarTour.jsx`,
+  `components/study/GrammarGate.jsx`, `components/study/GrammarWork.jsx`,
+  `components/study/GrammarLesson.jsx`, `components/study/CardPrompt.jsx`,
+  `domain/studyModes.js`, `domain/cardShape.js`, `domain/lanes.js`,
+  `screens/GrammarRun.jsx`, `screens/StudyRun.jsx`,
   `lib/audio/speech.js`'s `speakLine`, `lib/track.js`,
-  `src/tour.phone.test.jsx` and `index.css`; DESIGN.md,
+  `src/tour.phone.test.jsx`, `src/ladder.phone.test.jsx` and
+  `index.css`; DESIGN.md,
   "The tour"; the owner's pick of the canvas
   "Tsuji — grammar, learned by doing": B, discovery, with D's scene at its
   end, E's ladder and plate, and F on the desk without printed keys): the
@@ -1843,7 +1851,18 @@ python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
 python -m scripts.migrate_vocab_ids    # report; --yes to apply, --user to scope
 python -m scripts.migrate_kanji_ids    # report; --yes to apply, --user to scope
 python -m scripts.migrate_pool_cards   # same, for a pool card whose word the deck now teaches
+python -m scripts.migrate_grammar_ladder  # plan 187e: each studied point onto the ladder
 ```
+
+The last is run once, after the deploy that carries the grammar ladder
+(plan 187e), which makes `grammar.ladder` grammar's primary track: it
+writes each studied point a ladder row with the schedule of its best
+grammar mode and folds the old `grammar.flashcard.f2b` row (Today's main
+lane before it) into it. Until it runs, Today deals already-studied points
+as new on the ladder. **After any change to `content/grammar/*.json`, run
+`python -m scripts.build_ladder_flags`** too: `content/grammar/ladder.json`
+writes down which points the build and write rungs can be asked on, and
+`tests/test_grammar_ladder.py` fails while it disagrees.
 
 The fourth reads `datas/vocab/pool_moves.json`, which
 `scripts/prune_pool_overlap.py` appends to for every pool row it takes

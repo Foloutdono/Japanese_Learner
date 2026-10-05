@@ -15,6 +15,8 @@ import {
 } from '../components/study/GrammarPieces'
 import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
+import { GrammarBuild, GrammarWrite, LadderStrip } from '../components/study/GrammarWork'
+import { cardShape } from '../domain/cardShape'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
 import { Loading } from '../components/ui/Loading'
@@ -30,7 +32,7 @@ import PromptCard from '../components/study/PromptCard'
 import SessionError from '../components/study/SessionError'
 import ReviewDeck from '../components/study/ReviewDeck'
 import {
-  MODES as STUDY_MODES, RENDER, HINTS, FAST_REVIEW, modeLabel,
+  MODES as STUDY_MODES, HINTS, FAST_REVIEW, modeLabel,
 } from '../domain/studyModes'
 import HintBar from '../components/study/HintBar'
 import { joinRuns } from '../domain/rubyRuns'
@@ -100,10 +102,6 @@ export default function GrammarRun({ session }) {
   const paceCtl = usePace(storageKey)
   const { capture: capturePace, query: paceQuery } = paceCtl
 
-  const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
-  const isFill     = renderer === RENDER.FILL
-  const isContrast = renderer === RENDER.CONTRAST
-
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
     if (!valid || reviewing) return []
     const data = capturePace(await apiJson(
@@ -114,9 +112,11 @@ export default function GrammarRun({ session }) {
     return data.cards ?? []
   }, [valid, reviewing, level, mode, lang, session, paceQuery, capturePace])
 
+  // Read off each card rather than the run: on the ladder (plan 187e)
+  // every card names the exercise it is asked in.
   const validateCard = useCallback(
-    c => !isContrast || Array.isArray(c.contrast?.choices),
-    [isContrast],
+    c => !cardShape(c).isContrast || Array.isArray(c.contrast?.choices),
+    [],
   )
 
   // What the saved queue must not replay: cards answered since, here
@@ -243,8 +243,11 @@ export default function GrammarRun({ session }) {
   }
 
   const currentModeLabel = modeLabel(t, mode)
-  // Study.dc.html's footer strip.
-  const cardFoot = { left: level ? `${level} 文法` : '文法', right: currentModeLabel }
+  // The card's own shape: the run's mode, or on the ladder (plan 187e)
+  // the exercise the card's rung asks.
+  const { isFill, isContrast, isBuild, isWrite, rung } = cardShape(card ?? { mode })
+  // Study.dc.html's footer strip: the exercise in hand.
+  const cardFoot = { left: level ? `${level} 文法` : '文法', right: modeLabel(t, card?.exercise ?? mode) }
   // b2f shows the meaning and asks for the rule; f2b is the other way up.
   const isB2F    = card?.direction === 'b2f'
 
@@ -342,6 +345,7 @@ export default function GrammarRun({ session }) {
               onStampDone={gates.stampDone}
             >
               <PromptCard className="grammar-prompt" foot={cardFoot}>
+                {rung != null && <LadderStrip rung={rung} />}
                 {/* Every mode here is the same card with a different
                     front: a rule, a meaning, or a sentence. The flip is
                     the reveal in all three, and switching the choices on
@@ -350,7 +354,17 @@ export default function GrammarRun({ session }) {
                     Kanji and Vocab use for their own indice_1. The
                     contrast drill has no flip at all: its choices are
                     the exercise, and the reveal is the answer chosen. */}
-                {isContrast ? (
+                {isBuild || isWrite ? (
+                  <>
+                    {isBuild
+                      ? <GrammarBuild key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} />
+                      : <GrammarWrite key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} session={session} />}
+                    {answered && <GrammarAnswer card={card} size={36} divided />}
+                    <RevealActions
+                      t={t} revealed={answered} resetKey={card.card_id}
+                      dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
+                  </>
+                ) : isContrast ? (
                   <>
                     <GrammarContrastSentence card={card} revealed={answered} t={t} />
                     {answered && <GrammarAnswer card={card} size={36} divided />}

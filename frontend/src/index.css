@@ -25561,6 +25561,113 @@ button.brd-stn { cursor: pointer; }
 }
 .tour-reply__who { font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); }
 .tour-reply__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 600; }
+
+/* 梯子 — the grammar ladder (plan 187e). The strip over a ladder card:
+   four rungs in the line's pigment, those passed filled, the one the
+   card stands on named in the line's ink. */
+.lad-strip {
+  list-style: none;
+  margin: 0 0 var(--sp-3);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--sp-2);
+  width: 100%;
+  --line-color: var(--line-grammar);
+}
+.lad-strip__rung { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.lad-strip__bar { height: 3px; border-radius: var(--r-pill); background: var(--surface-line); }
+.lad-strip__rung--passed .lad-strip__bar,
+.lad-strip__rung--here .lad-strip__bar { background: var(--line-color); }
+.lad-strip__name {
+  font-size: var(--fs-caption-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lad-strip__rung--here .lad-strip__name { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); font-weight: 700; }
+
+/* 組立 build: the cue, the sentence with its gaps, the tray of pieces. */
+.bld, .wrt { display: flex; flex-direction: column; gap: var(--sp-4); width: 100%; text-align: start; }
+.bld-cue, .wrt-cue { margin: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.bld-cue__ask, .wrt-cue__ask, .wrt-said__label { font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
+.bld-cue__tr, .wrt-cue__situation { font-size: var(--fs-lead); font-weight: 600; line-height: 1.4; text-wrap: pretty; }
+.bld-sentence {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-2) var(--sp-1);
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: 2;
+}
+.bld-tile { white-space: nowrap; }
+.bld-slot {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  border: 1px dashed var(--text-secondary);
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.bld-slot:disabled { cursor: default; }
+.bld-slot:not(.bld-slot--empty) { border-style: solid; background: var(--surface); }
+.bld-slot--next { border: 2px dashed var(--line-grammar); }
+.bld-slot--ok { border: 2px solid var(--success); }
+.bld-slot--no { border: 2px solid var(--rating-wrong); }
+.bld-tray { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.bld-piece {
+  min-height: 48px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  line-height: 2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.bld-piece:disabled { opacity: 0.35; cursor: default; }
+.bld-slot:focus-visible, .bld-piece:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.bld-piece:not(:disabled):hover { border-color: var(--line-grammar); }
+.bld-said, .wrt-said { display: flex; flex-direction: column; gap: var(--sp-2); }
+.bld-said__head, .wrt-said__found { margin: 0; font-weight: 700; font-size: var(--fs-body); }
+.bld-said--ok .bld-said__head, .wrt-said__found--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.bld-said--no .bld-said__head, .wrt-said__found--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+
+/* 書く write: the point and the words to use, the field and Check, then
+   what was written, the detector's word and one way to say it. */
+.wrt-with { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-2); }
+.wrt-with__label { font-size: var(--fs-caption); color: var(--text-secondary); }
+.wrt-with__point { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; color: color-mix(in srgb, var(--line-grammar) 60%, var(--text-primary)); }
+.wrt-word {
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  line-height: 2;
+}
+.wrt-form { display: flex; gap: var(--sp-3); }
+.wrt-form .field { flex: 1; min-width: 0; }
+.wrt-said__mine { margin: 0; font-family: var(--font-jp); font-size: var(--fs-lead); }
+.wrt-said__label { margin: var(--sp-2) 0 0; }
+
+/* The plate's two ghosts (plan 187e): how the point was first met, and
+   the tour again, from its start or at its scene, in the lesson's place.
+   In a sheet the tour's gate docks to the sheet's foot, not the run's. */
+.gl-tour { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4) var(--sp-5) 0; }
+.gl-tour__record { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.gl-tour__ghosts { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.gl-replay { padding: var(--sp-4) var(--sp-5) 0; }
 /* The gate docked over the run's floor (--dock-bottom, the level bar
    and the safe area), the quiet way a rung over it. */
 .tour__foot {
@@ -25574,6 +25681,8 @@ button.brd-stn { cursor: pointer; }
   flex: none;
 }
 .tour .btn-depart { width: 100%; min-height: 66px; }
+/* A replay in the lesson's sheet (plan 187e) docks to the sheet's foot. */
+.gl-replay .tour__foot { bottom: 0; }
 @media (prefers-reduced-motion: reduce) {
   .tour__body { animation: none; }
   .tour__done, .tour-guess { transition: none; }

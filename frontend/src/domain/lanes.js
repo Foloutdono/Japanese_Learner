@@ -24,7 +24,9 @@ export function laneWhere(lane, t, kanaSetLabel) {
  *  The desk's gate can board these alone (domain/studyModes' RAPID
  *  service), leaving the recall, typing, drawing and fill modes. */
 export function isMainLane(lane) {
-  return typeof lane?.mode === 'string' && lane.mode.endsWith('.flashcard.f2b')
+  // Grammar's main track is the ladder (plan 187e), every other source's
+  // the recognition flashcard.
+  return typeof lane?.mode === 'string' && (lane.mode.endsWith('.flashcard.f2b') || lane.mode === 'grammar.ladder')
 }
 
 /** The run's path for a choice: the query carries only a partial

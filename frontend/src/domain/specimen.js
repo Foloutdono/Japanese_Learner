@@ -56,10 +56,20 @@ export function specimenFor(modeKey, card) {
       return pair(front, jp(card.radical))
     case 'fill_in':
       return card.sentence ? { kind: 'sentence', sentence: card.sentence, a: front } : null
-    case 'contrast': {
+    case 'contrast':
+    // A build's gap among its pieces reads, in a well, as contrast's
+    // blank among its rivals (plan 187e).
+    case 'build': {
       const b = card.blank
       return b?.choices?.length ? { kind: 'blank', before: b.before ?? '', after: b.after ?? '', choices: b.choices } : null
     }
+    // Write: the point, and a sentence written with it.
+    case 'write':
+      return card.sentence ? { kind: 'type', q: front, typed: card.sentence } : null
+    // The ladder (plan 187e) shows the rung a card starts on: the sentence
+    // to name the rule in, else the flashcard it falls back to.
+    case 'ladder':
+      return specimenFor(`${mode.source}.fill_in`, card) ?? specimenFor(`${mode.source}.flashcard.f2b`, card)
     default:
       return null
   }

@@ -379,11 +379,15 @@ function Terminus({ tour, point }) {
   )
 }
 
-export function GrammarTour({ point, onBoard, onLesson }) {
+// `replay` (plan 187e, the plate's two ghosts): the tour run again from
+// the lesson, from its start or `startAt` a stop (the scene). A replay
+// records nothing -- no event, no record, no card (plan 187, Q4) -- and
+// its terminus goes back to the lesson rather than boarding a card.
+export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt = null }) {
   const { t } = useLang()
   const tour = point.tour
   const stops = stopsOf(tour)
-  const [at, setAt] = useState(0)
+  const [at, setAt] = useState(() => Math.max(0, stops.indexOf(startAt)))
   const [pick, setPick] = useState(null)
   const [wrong, setWrong] = useState([])
   const [helped, setHelped] = useState(false)
@@ -410,7 +414,7 @@ export function GrammarTour({ point, onBoard, onLesson }) {
   useEffect(() => { stopSpeaking() }, [at])
 
   function go(outcome) {
-    track('grammar_tour_step', { level, stop, outcome })
+    if (!replay) track('grammar_tour_step', { level, stop, outcome })
     playUi('click-screen-selection')
     setAt(i => i + 1)
   }
@@ -435,7 +439,7 @@ export function GrammarTour({ point, onBoard, onLesson }) {
   }
 
   function board() {
-    track('grammar_tour_done', { level, tries: wrong.length, helped, authored: Boolean(tour.twist || tour.scene) })
+    if (!replay) track('grammar_tour_done', { level, tries: wrong.length, helped, authored: Boolean(tour.twist || tour.scene) })
     playUi('click-screen-selection')
     onBoard?.({ tries: wrong.length, helped })
   }
@@ -449,7 +453,7 @@ export function GrammarTour({ point, onBoard, onLesson }) {
   else if (stop === 'scene' && phase === 'watch') gate = <GateButton label={t.tourYourTurn} onClick={() => { playUi('click-screen-selection'); setPhase('ask') }} data-action="your-turn" />
   else if (stop === 'scene' && !sceneDone) gate = <GateButton label={t.tourCheck} onClick={checkScene} disabled={scenePick == null} data-action="check" />
   else if (stop === 'scene') gate = <GateButton label={t.onbContinue} onClick={() => go(tour.scene.ask.choices[scenePick]?.correct ? 'first' : 'retry')} data-action="continue" />
-  else if (stop === 'terminus') gate = <GateButton label={t.tourBoard} onClick={board} data-action="board" />
+  else if (stop === 'terminus') gate = <GateButton label={replay ? t.tourBackToLesson : t.tourBoard} onClick={board} data-action="board" />
   else gate = <GateButton label={t.onbContinue} onClick={() => go('first')} data-action="continue" />
 
   return (
@@ -466,7 +470,7 @@ export function GrammarTour({ point, onBoard, onLesson }) {
         {stop === 'terminus' && <Terminus tour={tour} point={point} />}
       </div>
       <div className="tour__foot">
-        {stop === 'terminus' && onLesson && (
+        {stop === 'terminus' && onLesson && !replay && (
           <button type="button" className="brd__link" onClick={() => { playClick(); onLesson() }} data-action="lesson">
             {t.tourReadLesson}
           </button>

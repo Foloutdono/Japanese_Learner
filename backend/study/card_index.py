@@ -35,8 +35,9 @@ from content.grammar_sentences_data import contrast_examples, get_sentences
 from content.radical_data import radical_for
 
 from study.grammar_match import verifiable
+from study import grammar_ladder
 from study.modes import (
-    KANA, KANJI, VOCAB, GRAMMAR,
+    BUILD, WRITE, KANA, KANJI, VOCAB, GRAMMAR,
     GRADED_FOR_SOURCE, MODES, eligible_for,
 )
 
@@ -80,7 +81,7 @@ def contrast_ok(level: str, pattern: str) -> bool:
     return verifiable(pattern) and bool(entry.get("compare")) and bool(contrast_examples(level, pattern))
 
 
-def _augment(source: str, key: str, entry: dict) -> dict:
+def _augment(source: str, key: str, entry: dict, base: str | None = None) -> dict:
     """
     The extra facts eligible_for() asks about, which live outside the
     deck entry itself. Kept beside the index rather than in each router
@@ -90,11 +91,18 @@ def _augment(source: str, key: str, entry: dict) -> dict:
         rad = radical_for(entry.get("kanji", ""))
         return {**entry, "radical": rad["number"] if rad else None}
     if source == GRAMMAR:
-        return {
+        out = {
             **entry,
             "fill_ok": fill_ok(key, entry["pattern"]),
             "contrast_ok": contrast_ok(key, entry["pattern"]),
         }
+        # Asked only by the mode that needs it: each tokenizes the point's
+        # sentences (once, cached), which no other mode should pay for.
+        if base == BUILD:
+            out["build_ok"] = grammar_ladder.build_ok(key, entry["pattern"])
+        if base == WRITE:
+            out["write_ok"] = grammar_ladder.write_ok(key, entry["pattern"])
+        return out
     return entry
 
 
@@ -109,7 +117,7 @@ def eligible(source: str, deck_key: str, mode_key: str, entry: dict) -> bool:
     mode = MODES.get(mode_key)
     if mode is None:
         return False
-    return eligible_for(mode, _augment(source, deck_key, entry))
+    return eligible_for(mode, _augment(source, deck_key, entry, mode.base))
 
 
 # (source, deck-key, entries, id function) -- "deck key" is a set name
@@ -149,7 +157,7 @@ def _build():
                 pool = [
                     to_id(entry, deck_key)
                     for entry in deck_entries
-                    if eligible_for(mode, _augment(source, deck_key, entry))
+                    if eligible_for(mode, _augment(source, deck_key, entry, mode.base))
                 ]
                 totals[(source, deck_key, mode_key)] = len(pool)
                 ids[(source, deck_key, mode_key)] = pool

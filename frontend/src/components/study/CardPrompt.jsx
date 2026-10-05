@@ -1,3 +1,4 @@
+import { GrammarBuild, GrammarWrite, LadderStrip } from './GrammarWork'
 import {
   InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
 } from './QuizComponents'
@@ -42,7 +43,7 @@ export default function CardPrompt({
   if (!card) return null
 
   const c = card
-  const { structureKey, isF2B, renderer, isFill, isContrast, isRadical, isWordReading } = cardShape(c)
+  const { structureKey, isF2B, renderer, isFill, isContrast, isRadical, isWordReading, isBuild, isWrite, rung } = cardShape(c)
   const resetKey = `${c.card_id}:${cardNonce}`
 
   const cardHints = c.hints ?? {}
@@ -306,6 +307,8 @@ export default function CardPrompt({
     const lesson = c.source === 'custom' ? writtenLesson(c) : null
     return (
       <PromptCard className="grammar-prompt" foot={foot}>
+        {/* A ladder card (plan 187e) shows the rung it stands on. */}
+        {rung != null && <LadderStrip rung={rung} />}
         {/* Every mode here is the same card with a different front: a
             rule, a meaning, or a sentence. The flip is the reveal in
             all three, and switching the choices on replaces the flip
@@ -313,7 +316,17 @@ export default function CardPrompt({
             use for their own indice_1. The contrast drill (plan 087)
             has no flip: its rivals are the exercise, under the card,
             and the reveal is the answer chosen. */}
-        {isContrast ? (
+        {isBuild || isWrite ? (
+          <>
+            {isBuild
+              ? <GrammarBuild key={resetKey} card={c} answered={answered} onDone={onFlashcardReveal} />
+              : <GrammarWrite key={resetKey} card={c} answered={answered} onDone={onFlashcardReveal} session={session} />}
+            {answered && <GrammarAnswer card={c} size={36} divided />}
+            <RevealActions
+              t={t} revealed={answered} resetKey={resetKey}
+              dictCategory="grammar" dictId={pointId} session={session} lesson={lesson} />
+          </>
+        ) : isContrast ? (
           <>
             <GrammarContrastSentence card={c} revealed={answered} t={t} />
             {answered && <GrammarAnswer card={c} size={36} divided />}

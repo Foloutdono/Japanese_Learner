@@ -22,7 +22,7 @@ import { useReviewGates } from '../hooks/useReviewGates'
 // apart. See CardPrompt's own note.
 import CardPrompt from '../components/study/CardPrompt'
 import { GrammarChoice } from '../components/study/GrammarPieces'
-import { wordForm, structureKeyOf, normalizeCard } from '../domain/cardShape'
+import { wordForm, structureKeyOf, normalizeCard, cardShape } from '../domain/cardShape'
 import SessionError from '../components/study/SessionError'
 import ReadingsInput from '../components/study/ReadingsInput'
 import { DrawingQuiz, DrawingOverlay } from '../components/study/DrawingCanvas'
@@ -225,10 +225,9 @@ export default function StudyRun({ session }) {
   // reverse. One name for every source: kanji/vocab call this isKjToM,
   // grammar calls it !isB2F — same boolean, so one variable here.
   const isF2B = nc?.direction === 'f2b'
-  const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
-  const isFill    = renderer === RENDER.FILL
-  const isContrast = renderer === RENDER.CONTRAST
-  const isRadical = STUDY_MODES[mode]?.base === 'radical'
+  // Read off the card: a grammar ladder card (plan 187e) names the
+  // exercise its rung asks, which is what is drawn.
+  const { renderer, isFill, isContrast, isRadical } = cardShape(nc ?? { mode })
 
   // A grammar point's lesson is a tap from the CARD now, not the head:
   // the corner magnifier kanji/kana/vocab carry opens the point's

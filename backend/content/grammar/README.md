@@ -99,6 +99,19 @@ note says what the scene just showed, and the learner's own line is
 chosen against the rivals of the lesson's `compare`. Keep the Japanese at
 the level: a word above it is written in kana (とうきょう, おおさか).
 
+## The ladder's snapshot (plan 187e)
+
+`ladder.json`, beside the five levels, is not an entry file: it writes
+down which points the grammar ladder's two upper rungs can be asked on --
+`build` (a sentence marked `contrast`, the point written there in one
+stretch, a rival whose form can stand as the wrong piece) and `write` (a
+point the detector is trusted on, `grammar_detect.can_find`). Asking takes
+the detector over every example, some twelve seconds, which is the only
+reason it is written down. After any change here run
+`python -m scripts.build_ladder_flags` (`--check` reports first);
+`tests/test_grammar_ladder.py` fails while the file disagrees. A point it
+leaves out is still asked: its card falls back a rung.
+
 ## Rich levels
 
 `RICH_LEVELS` in `content/grammar_points_data.py` names the levels whose

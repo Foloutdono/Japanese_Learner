@@ -38,7 +38,7 @@ from study.furigana import align_deck as align_furigana, align_sentence
 from routes.kana import _build_kana_card
 from routes.kanji import _build_kanji_card
 from routes.vocab import _build_vocab_card
-from routes.grammar import _build_grammar_card
+from routes.grammar import _build_grammar_card, ladder_progress
 # The library attributes a deck to its author by display name. Reused
 # rather than re-queried: this is the same bulk lookup the leaderboard
 # goes through, which is also the precedent for showing one learner
@@ -144,11 +144,11 @@ def _wrap_vocab(raw_id, entry, level, level_list, mode, lang, stage, preview):
     return _build_vocab_card(raw_id, entry, level_list, m, lang, stage, preview)
 
 
-def _wrap_grammar(raw_id, entry, level, level_list, mode, lang, stage, preview):
+def _wrap_grammar(raw_id, entry, level, level_list, mode, lang, stage, preview, progress=None):
     m = resolve_for_source(MODE_GRAMMAR, mode)
     if m is None:
         raise HTTPException(status_code=400, detail=f"Invalid grammar mode: {mode!r}")
-    card = _build_grammar_card(entry, level, level_list, m, lang, stage, preview)
+    card = _build_grammar_card(entry, level, level_list, m, lang, stage, preview, progress)
     if card is not None:
         card["card_id"] = raw_id
     return card
@@ -2452,6 +2452,11 @@ def _card_answers(entry: dict, m) -> bool:
         # rule is at work, so a sentence that does not contain its own rule
         # makes the question unanswerable. Verified, not assumed.
         return bool(usable_sentences(fields))
+    if m.base in ("build", "write", "ladder"):
+        # The ladder's exercises (plan 187e) are cut from the catalogue's
+        # marked sentences and checked by the detector on its own points;
+        # a written card has neither, so it is served on the flashcards.
+        return False
     if m.base == "contrast":
         # The contrast drill asks which of a point and its rivals a
         # marked sentence uses (card_index.contrast_ok); a written card
@@ -2567,6 +2572,8 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
 
     states   = srs.get_bulk_stats(picked, mode)
     previews = srs.preview_reviews_bulk(picked, mode, user_id)
+    # A grammar ladder card is asked on its rung (plan 187e).
+    progress = ladder_progress(picked, mode)
 
     cards = []
     for card_id in picked:
@@ -2582,7 +2589,10 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
         else:
             cfg = SOURCES[p["source"]]
             level_list = _level_list(p["source"], p["level"], raw_id, p["entry"])
-            card = cfg["build"](raw_id, p["entry"], p["level"], level_list, mode, lang, stage, preview)
+            card = (cfg["build"](raw_id, p["entry"], p["level"], level_list, mode, lang, stage, preview,
+                                 progress.get(card_id))
+                    if p["source"] == "grammar"
+                    else cfg["build"](raw_id, p["entry"], p["level"], level_list, mode, lang, stage, preview))
             if card is None:
                 # A builder that cannot make this mode for this card
                 # (grammar.contrast on a point with no marked sentence);
