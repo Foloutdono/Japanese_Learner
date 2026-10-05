@@ -419,6 +419,7 @@ const quiz = {
   // L'attente en chiffre, sur la tuile : l'unité à côté du nombre.
   forecastUnit:       (unit, n) => ({ minute: 'min', hour: 'h', day: n > 1 ? 'jours' : 'jour', week: 'sem.', month: 'mois', year: n > 1 ? 'ans' : 'an' })[unit],
   deskKeysTitle:      'Les touches',
+  deskKeysHelp:       'Aide',
   deskKeyTurn:        'retourne la carte',
   deskKeyChoices:     'affiche les choix',
   deskKeyLeave:       'quitte le trajet',

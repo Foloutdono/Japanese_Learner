@@ -34576,7 +34576,14 @@ button.brd-stn { cursor: pointer; }
   .desk-sentence__dot:is(.desk-sentence__dot--q0, .desk-sentence__dot--q1, .desk-sentence__dot--q2, .desk-sentence__dot--q3, .desk-sentence__dot--q4, .desk-sentence__dot--q5) {
     border-color: var(--rating-color);
   }
-  .desk-sentences > .desk-keys { margin-top: auto; }
+  .desk-sentences > .desk-help {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-3);
+    margin-top: auto;
+  }
+  .desk-keys[hidden] { display: none; }
 
   /* What stands in the right column, as its one panel: the breakdown,
      the lesson (DeskPane). At least the column's height, the column

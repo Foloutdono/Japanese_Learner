@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { useRunTally } from '../../stores/runTally'
 import { QUALITY_LABEL_KEY } from '../../domain/ratingScales'
@@ -57,6 +57,8 @@ import { DeskFigure } from './RunRecords'
 export function RunLines({ lines = [], current = null, openKey = null, onOpen, onCurrent, keys = [], rhythm, label, ask = null }) {
   const { t } = useLang()
   const listRef = useRef(null)
+  const keysId = useId()
+  const [helpOpen, setHelpOpen] = useState(false)
   const doors = Boolean(onOpen)
   const onWalk = useListWalk(doors, { items: ':scope > li > button' })
   const pace = useLinesRhythm()
@@ -134,10 +136,21 @@ export function RunLines({ lines = [], current = null, openKey = null, onOpen, o
       )}
       {ask}
       {keys.length > 0 && (
-        <div className="desk-keys" role="list" aria-label={t.deskKeysTitle} data-guide="run.keys">
-          {keys.map(([cap, what]) => (
-            <span key={cap} role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{cap}</kbd>{what}</span>
-          ))}
+        <div className="desk-help" data-guide="run.keys">
+          <div id={keysId} className="desk-keys" role="list" aria-label={t.deskKeysTitle} hidden={!helpOpen}>
+            {keys.map(([cap, what]) => (
+              <span key={cap} role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{cap}</kbd>{what}</span>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="btn-secondary desk-help__btn"
+            aria-expanded={helpOpen}
+            aria-controls={keysId}
+            onClick={() => setHelpOpen(o => !o)}
+          >
+            {t.deskKeysHelp}
+          </button>
         </div>
       )}
       <div className="desk-rhythm" role="group" aria-label={t.deskRhythm} data-guide="run.rhythm">
