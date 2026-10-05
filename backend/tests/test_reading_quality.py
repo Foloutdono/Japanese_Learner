@@ -292,13 +292,16 @@ def test_the_resolver_is_the_shared_one():
 
     They serve the same sentences from the same bank; two copies of this
     lookup would drift, and the copy that drifted would schedule onto a
-    card the other screen never touches.
+    card the other screen never touches. Translation schedules through
+    reading's _schedule_rating, so there is one lookup by construction;
+    this holds that it does not grow a copy of its own.
     """
     import routes.reading as reading
     import routes.translation as translation
 
     assert reading.vocab_card_id_for_word is vocab_card_id_for_word
-    assert translation.vocab_card_id_for_word is vocab_card_id_for_word
+    assert not hasattr(translation, "vocab_card_id_for_word"), \
+        "translation resolves its word through reading._schedule_rating"
 
 
 # ── Today must not promise what it cannot serve ──────────────────────
@@ -446,3 +449,94 @@ def test_measuring_writes_nothing(client):
     before = client.get("/api/reading/history", params={"limit": 5}).json()
     _check(client, "goji ni")
     assert client.get("/api/reading/history", params={"limit": 5}).json() == before
+
+
+# ── The row is kept, and kept once ───────────────────────────────────
+#
+# Production's reading_log had `phase` renamed to `source` by hand, on a
+# docstring's suggestion, and kept no reading result after; and a
+# failure after the commit made the run retry an answer already logged.
+
+def _logged(table, phrase):
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT COUNT(*) FROM {table} WHERE user_id = %s AND phrase = %s",
+                (DEV_USER_ID, phrase),
+            )
+            return cur.fetchone()[0]
+    finally:
+        conn.close()
+
+
+def _columns():
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT attname FROM pg_attribute WHERE attrelid = to_regclass('reading_log') "
+                "AND attnum > 0 AND NOT attisdropped"
+            )
+            return {name for (name,) in cur.fetchall()}
+    finally:
+        conn.close()
+
+
+def _rename(old, new):
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f"ALTER TABLE reading_log RENAME COLUMN {old} TO {new}")
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def test_a_phase_column_renamed_to_source_is_restored(client):
+    from routes.reading import _migrate_reading_log_schema
+
+    _rename("phase", "source")
+    try:
+        _migrate_reading_log_schema()
+        assert "phase" in _columns() and "source" not in _columns()
+    finally:
+        if "source" in _columns():
+            _rename("source", "phase")
+
+    phrase = "七時ごろ学校へ行きます。(restored)"
+    posted = client.post("/api/reading/result", json=_payload(phrase=phrase, quality=4))
+    assert posted.status_code == 200, posted.text
+    assert _logged("reading_log", phrase) == 1
+
+
+def test_restoring_phase_leaves_a_sound_table_alone():
+    from routes.reading import _migrate_reading_log_schema
+
+    before = _columns()
+    _migrate_reading_log_schema()
+    assert _columns() == before
+
+
+@pytest.mark.parametrize("path, table, extra", [
+    ("/api/reading/result", "reading_log", {}),
+    ("/api/translation/result", "translation_log",
+     {"translation_prompt": "Let's meet in front of the station at five."}),
+])
+def test_a_failure_after_the_log_still_answers_saved(client, monkeypatch, path, table, extra):
+    """A 500 after the commit told the run the answer was lost, and its
+    retry (lib/postResult.js) logged it a second time."""
+    import routes.reading as reading
+
+    def broken(*args, **kwargs):
+        raise RuntimeError("the scheduler is down")
+
+    monkeypatch.setattr(reading, "vocab_card_id_for_word", broken)
+    phrase = f"五時に駅の前で会いましょう。({table} after the log)"
+    posted = client.post(path, json=_payload(
+        phrase=phrase, quality=4, source_word=_word("駅"), **extra))
+    assert posted.status_code == 200, posted.text
+    body = posted.json()
+    assert body["scheduled"] is None
+    assert body["xp_earned"] == 0
+    assert _logged(table, phrase) == 1
