@@ -357,6 +357,67 @@ class CounterTests(unittest.TestCase):
         self.assertEqual(_read(_tok("一", "いち", "名詞", "数詞"), _tok("晩", "ばん"))[0], "ひと")
         # 一月 is January, いちがつ.
         self.assertEqual(_read(_tok("一", "いち", "名詞", "数詞"), _tok("月", "がつ"))[0], "いち")
+
+    def test_hitotsuki_a_span(self) -> None:
+        """一月 is ひとつき, "one month", where what follows measures it;
+        January otherwise, and never inside 十一月."""
+        ichi = lambda: _tok("一", "いち", "名詞", "数詞")
+        gatsu = lambda: _tok("月", "がつ", "名詞", "普通名詞", "助数詞可能")
+        verb = lambda s, lemma: {**_tok(s, s, "動詞", "一般", "*", "verb"), "lemma": lemma}
+        adj = lambda s, lemma: {**_tok(s, s, "形容詞", "一般", "*", "adjective"), "lemma": lemma}
+        span = ["ひと", "つき"]
+        self.assertEqual(_read(ichi(), gatsu(), verb("かかり", "掛かる"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("が"), verb("たち", "経つ"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _tok("前", "まえ"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("の"), _tok("間", "あいだ"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("ほど"))[:2], span)
+        # 一月も before a verb's negative in its clause: "not for a month".
+        aux = lambda s, lemma: {**_tok(s, s, "助動詞", "*", "*", "auxiliary"), "lemma": lemma}
+        te = {**_tok("て", "て", "助詞", "接続助詞", "*", "particle")}
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), verb("会っ", "会う"), te,
+                               verb("い", "居る"), aux("ませ", "ます"), aux("ん", "ず"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), _tok("連絡", "れんらく"), _particle("が"),
+                               verb("来", "来る"), aux("ない", "ない"))[:2], span)
+        # The month: a date, 一月に, and what could still be it.
+        self.assertEqual(_read(ichi(), gatsu(), _particle("に"))[:2], ["いち", "がつ"])
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"))[:2], ["いち", "がつ"])
+        # An adjective's ない (無い) is no verb's negative: 一月も寒くない.
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), adj("寒く", "寒い"),
+                               adj("ない", "無い"))[:2], ["いち", "がつ"])
+        # Another month after it: 一月も二月も.
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), _tok("二", "に", "名詞", "数詞"), gatsu(),
+                               _particle("も"), verb("降ら", "降る"), aux("ない", "ない"))[:2], ["いち", "がつ"])
+        # A negative in the next clause is not this one's: 一月も寒かったが、
+        # 雪は降らなかった is January.
+        but = _tok("が", "が", "助詞", "接続助詞", "*", "particle")
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), adj("寒かっ", "寒い"), aux("た", "た"), but,
+                               _tok("雪", "ゆき"), _particle("は"), verb("降ら", "降る"),
+                               aux("なかっ", "ない"))[:2], ["いち", "がつ"])
+        # 一月も待ったが、来なかった: the wait is the span.
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), verb("待っ", "待つ"), aux("た", "た"), but,
+                               verb("来", "来る"), aux("なかっ", "ない"))[:2], span)
+        # Affirmative, a time spent: 一月も勉強した, 一月も日本にいました.
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), _tok("勉強", "べんきょう"),
+                               verb("し", "為る"), aux("た", "た"))[:2], span)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), _tok("日本", "にほん"), _particle("に"),
+                               verb("い", "居る"), aux("まし", "ます"), aux("た", "た"))[:2], span)
+        # ... but not what the month itself does, nor a subject, an
+        # adjective or a copula before the verb.
+        month = ["いち", "がつ"]
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), verb("終わり", "終わる"),
+                               aux("まし", "ます"), aux("た", "た"))[:2], month)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), verb("来", "来る"), aux("ます", "ます"))[:2], month)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), _tok("雪", "ゆき"), _particle("が"),
+                               verb("降っ", "降る"), aux("た", "た"))[:2], month)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), adj("寒い", "寒い"), _tok("日", "ひ"),
+                               _particle("が"), verb("続い", "続く"))[:2], month)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("も"), _tok("休み", "やすみ"),
+                               aux("です", "です"))[:2], month)
+        self.assertEqual(_read(ichi(), gatsu(), _particle("が"), verb("過ぎ", "過ぎる"))[:2], ["いち", "がつ"])
+        self.assertEqual(_read(ichi(), gatsu())[:2], ["いち", "がつ"])
+        # November.
+        self.assertEqual(_read(_tok("十", "じゅう", "名詞", "数詞"), ichi(), gatsu(), _tok("前", "まえ"))[1:3],
+                         ["いち", "がつ"])
         # 三切れ is さんきれ: the native number stops at two.
         self.assertEqual(_read(_tok("三", "さん", "名詞", "数詞"), _tok("切れ", "きれ"))[0], "さん")
 
@@ -531,6 +592,12 @@ class SentenceReadingTests(unittest.TestCase):
         "彼はもう盛りを過ぎた。": "彼[かれ] 盛[さか] 過[す]",
         "ご飯の盛りが少ない。": "飯[はん] 盛[も] 少[すく]",
         "言うまでもない。": "言[い]",
+        "一月かかりました。": "一[ひと] 月[つき]",
+        "一月も会っていません。": "一[ひと] 月[つき] 会[あ]",
+        "一月も寒くない。": "一[いち] 月[がつ] 寒[さむ]",
+        "一月も勉強しました。": "一[ひと] 月[つき] 勉[べん]強[きょう]",
+        "一月も終わりました。": "一[いち] 月[がつ] 終[お]",
+        "一月に日本へ行きます。": "一[いち] 月[がつ] 日本[にほん] 行[い]",
     }
 
     def test_sentences(self) -> None:

@@ -79,6 +79,14 @@ class BatchCacheTests(unittest.TestCase):
         self.assertEqual(picked[0], "due1")
         self.assertEqual(set(picked[1:]), {"new1", "new2"})
 
+    def test_pick_ids_never_tops_up_with_a_card_the_client_holds(self) -> None:
+        # A pool in teaching order (plan 186a) answers a refill with the
+        # same first cards until they are answered -- the ones the client
+        # is holding. They must not be served twice.
+        fetch = lambda limit: ["new1", "new2", "new3", "new4"][:limit]
+        picked = batch_cache.pick_ids("k", [], fetch, count=2, exclude_ids={"new1", "new2"})
+        self.assertEqual(picked, ["new3", "new4"])
+
     def test_reset_clears_pools(self) -> None:
         batch_cache.take_batch("k", lambda limit: ["a", "b", "c"], count=1)
         self.assertIn("k", batch_cache._batches)

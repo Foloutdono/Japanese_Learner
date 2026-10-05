@@ -106,6 +106,23 @@ const nav = {
   fareReviews:       'reviews',
   fareFare:          'fare',
   fareCreditsLeft:   'credits left',
+  // 基礎 — the basics course on the gate and in Settings › Level (plan 186f)
+  basicsUnit:        (n, of) => `Unit ${n} of ${of}`,
+  basicsMet:         (n, of) => `${n} of ${of} units met`,
+  basicsDone:        'Basics done — the rest of N5 is open.',
+  basicsSkip:        'Skip the basics',
+  basicsSkipLabel:   'Basics',
+  basicsSkipAct:     'I know them',
+  basicsSkipped:     n => `${n} basic cards marked known.`,
+  // 基礎 — the course's station on the Learn gate (plan 186g)
+  basicsTitle:       'Basics',
+  basicsDesc:        'N5 from its first lesson\nOne unit at a time\nIts rules, its words, its kanji',
+  basicsUnits:       'Units',
+  basicsPoints:      'Grammar',
+  basicsWords:       'Words',
+  basicsKanji:       'Kanji',
+  basicsSentences:   'Sentences',
+  basicsMetOf:       (met, total) => `${met} of ${total} met`,
   // ── 定期券 — the offer's doors and its thanks (domain/paywall.js) ──
   paywallName_pro:    'Tsuji Pro',
   paywallThanks:      'Noted — we’ll tell you when it opens.',

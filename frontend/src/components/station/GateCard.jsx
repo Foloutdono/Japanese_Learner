@@ -12,6 +12,7 @@ import { DepartKey } from '../chrome/DeskKeys'
 import { GateButton } from '../ui/GateButton'
 import { useDesk } from '../../hooks/useDesk'
 import { Loading } from '../ui/Loading'
+import BasicsLine from './BasicsLine'
 import { CheckIcon, ChevronIcon, HourglassIcon } from '../ui/Icons'
 import { useCredits } from '../../stores/credits'
 import { publishLeft } from '../../stores/gateRun'
@@ -339,6 +340,8 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
           )}
         </div>
 
+        <BasicsLine basics={today.basics} />
+
         {mix.length > 0 && (
           <div className="gate-mix">
             <span className="gate-mix__bar" aria-hidden="true">
@@ -510,6 +513,8 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
           )}
         </span>
       </div>
+
+      <BasicsLine basics={today.basics} />
 
       {/* What boards, as two instruments under the head: which modes
           (every one, or each line's main flashcard) on the left, the

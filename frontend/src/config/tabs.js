@@ -160,6 +160,13 @@ function sections(t) {
     { icon: '漢字', title: t.kanjiTitle,      desc: t.kanjiDesc,      path: '/learn/kanji',   clip: 'kanji', color: 'var(--line-kanji)',   tab: 'learn' },
     { icon: '文法', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/learn/grammar', clip: 'grammar', color: 'var(--line-grammar)', tab: 'learn' },
     { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/learn/decks',   clip: 'decks', color: 'var(--line-decks)',   tab: 'learn' },
+    // 基礎 — the basics course (plan 186g): N5's first stretch, a plate
+    // on the Learn gate while an N5 learner rides it. A station (the
+    // bar, the door and the title find it here) but no line: its cards
+    // are the four lines' own, so it wears no line's pigment, and it is
+    // on no gate's list nor the rail -- `tab: 'basics'` is no gate. The
+    // Learn gate hangs its plate itself (screens/LearnScreen.jsx).
+    { icon: '基礎', title: t.basicsTitle,     desc: t.basicsDesc,     path: '/learn/basics',  color: 'var(--text-secondary)', tab: 'basics' },
 
     // ── 実践 — the six platforms ──
     { icon: '読書', title: t.readingTitle,    desc: t.readingDesc,    path: '/practice/reading',       clip: 'reading', color: 'var(--line-reading)', tab: 'practice' },

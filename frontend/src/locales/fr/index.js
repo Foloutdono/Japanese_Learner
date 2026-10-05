@@ -107,6 +107,23 @@ const nav = {
   fareReviews:       'révisions',
   fareFare:          'tarif',
   fareCreditsLeft:   'crédits restants',
+  // 基礎 — le cursus de base sur le portillon et dans Réglages › Niveau (plan 186f)
+  basicsUnit:        (n, of) => `Leçon ${n} sur ${of}`,
+  basicsMet:         (n, of) => `${n} leçons sur ${of} vues`,
+  basicsDone:        'Bases acquises — le reste du N5 est ouvert.',
+  basicsSkip:        'Passer les bases',
+  basicsSkipLabel:   'Bases',
+  basicsSkipAct:     'Je les connais',
+  basicsSkipped:     n => `${n} cartes de base marquées connues.`,
+  // 基礎 — la station du cursus sur le portillon Apprendre (plan 186g)
+  basicsTitle:       'Bases',
+  basicsDesc:        'Le N5 dès sa première leçon\nUne leçon à la fois\nSes règles, ses mots, ses kanji',
+  basicsUnits:       'Leçons',
+  basicsPoints:      'Grammaire',
+  basicsWords:       'Mots',
+  basicsKanji:       'Kanji',
+  basicsSentences:   'Phrases',
+  basicsMetOf:       (met, total) => `${met} sur ${total} vues`,
   // ── 定期券 — les portes de l'offre et son merci (domain/paywall.js) ──
   paywallName_pro:    'Tsuji Pro',
   paywallThanks:      'C’est noté — on te prévient au lancement.',

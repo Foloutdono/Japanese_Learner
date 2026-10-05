@@ -58,6 +58,7 @@ import DecksScreen      from './screens/DecksScreen'
 import LibraryScreen    from './screens/LibraryScreen'
 import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
+import BasicsScreen from './screens/BasicsScreen'
 import AnalyzerScreen from './screens/AnalyzerScreen'
 import SentenceStation from './screens/SentenceStation'
 import ReadingRun from './screens/ReadingRun'
@@ -663,6 +664,8 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/learn/kanji/:level"         element={<KanjiScreen session={session} />} />
             <Route path="/learn/grammar"              element={<GrammarScreen session={session} />} />
             <Route path="/learn/grammar/:level"       element={<GrammarScreen session={session} />} />
+            <Route path="/learn/basics"               element={<BasicsScreen session={session} />} />
+            <Route path="/learn/basics/:unit"         element={<BasicsScreen session={session} />} />
             <Route path="/learn/decks"          element={<DecksScreen session={session} />} />
             {/* Declared before /learn/decks/:deck_id. React Router ranks a
                 static segment above a dynamic one either way, but the

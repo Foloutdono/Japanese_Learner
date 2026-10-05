@@ -53,6 +53,7 @@ from routes.theme_vocab      import router as theme_vocab_router
 from routes.translation import router as translation_router
 from routes.exams           import router as exams_router
 from routes.today           import router as today_router
+from routes.basics          import router as basics_router
 from routes.video           import router as video_router
 from routes.ocr             import router as ocr_router
 from routes.onboarding      import router as onboarding_router
@@ -192,6 +193,7 @@ app.include_router(profile_router)
 app.include_router(frequency_router)
 app.include_router(theme_vocab_router)
 app.include_router(today_router)
+app.include_router(basics_router)
 app.include_router(translation_router)
 app.include_router(exams_router)
 app.include_router(video_router)

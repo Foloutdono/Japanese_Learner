@@ -23,7 +23,7 @@ from study import morphology
 from study.grammar_detect import NO_GOOD_VERBS, compound_particles, no_good_points
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from study.card_lookup import (
-    resolve_morpheme, resolve_compound, compound_reading,
+    resolve_morpheme, resolve_compound, resolve_phrase, compound_reading,
     resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
     find_kanji_matches, find_segments_in_text, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
@@ -302,6 +302,14 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     tokens = []
     i = 0
     while i < len(morphemes):
+        phrase = resolve_phrase(morphemes, i)
+        if phrase:
+            level, entry, raw_id, n = phrase
+            token = _compound_dict(morphemes[i:i + n], level, entry, raw_id)
+            token["pos"] = "interjection"
+            tokens.append(token)
+            i += n
+            continue
         hit = resolve_compound(morphemes, i)
         if hit:
             level, entry, raw_id, n = hit
@@ -362,7 +370,15 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 9: a sentence's level no longer set by a kanji the kanji deck files
 # above the word it is written in (離さないで was N1 over 離; its word
 # 離す is N3) -- difficulty._word_kanji_levels.
-LOCAL_REV = 9
+# 10: the greetings a first lesson teaches (plan 186d) -- an
+# interjection reaches its kana-only card (おはよう, ありがとう), and a
+# set phrase standing as a clause is one word (すみません is no 済む).
+# 11: 一月 read ひとつき, "one month", where what follows measures it
+# (一月かかる, 一月前, 一月の間, 一月も before a verb's negative or a
+# verb of time spent), so it
+# reaches that card and not January's
+# (study/reading_context.py's span rule).
+LOCAL_REV = 11
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

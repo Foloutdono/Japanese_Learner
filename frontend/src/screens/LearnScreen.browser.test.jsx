@@ -67,6 +67,13 @@ vi.mock('../stores/departure', () => ({
   beginDeparture: (...a) => beginDeparture(...a),
 }))
 
+// 基礎 (plan 186g): the course's units, for the plate's neighbours.
+const basicsRef = { current: null }
+vi.mock('../stores/basics', () => ({
+  useBasics: () => ({ data: basicsRef.current, failed: false }),
+  refreshBasics: vi.fn(),
+}))
+
 vi.mock('../lib/supabase', () => ({
   supabase: {
     auth: {
@@ -125,6 +132,7 @@ beforeEach(() => {
   playAnnouncement.mockReset()
   todayRef.current = TODAY
   statsRef.current = STATS
+  basicsRef.current = null
   apiJson.mockImplementation(async url => (url === '/api/decks' ? { decks: [{ id: 1, card_count: 40 }, { id: 2, card_count: 7 }] } : {}))
 })
 
@@ -325,5 +333,43 @@ describe('LearnScreen — the guide\'s anchors', () => {
     expect(root.querySelector('[data-guide="learn.plate"] [data-guide="learn.stops"]')).toBeTruthy()
     expect(root.querySelector('.plate--shelf[data-guide="learn.shelf"]')).toBeTruthy()
     expect(root.querySelectorAll('[data-guide="learn.plate"]')).toHaveLength(1)
+  })
+})
+
+// ── 基礎 — the basics as a plate (plan 186g) ───────────────────────
+describe('LearnScreen — the basics', () => {
+  const AT = { done: false, unit: 3, of: 14, id: 'kazu', jp: '数', title: { en: 'Numbers', fr: 'Les nombres' } }
+  const UNITS = ['はじめまして', 'これ・それ', '数', '〜ます'].map((jp, i) => ({
+    unit: i + 1, id: ['hajimemashite', 'kore-sore', 'kazu', 'masu'][i], jp, total: 20, met: i < 2 ? 20 : i === 2 ? 5 : 0, learned: 0,
+  }))
+
+  it('hangs above the lines while the course is ridden, and opens the unit at hand', async () => {
+    todayRef.current = { ...TODAY, basics: AT }
+    basicsRef.current = { riding: true, at: 3, done: false, units: UNITS }
+    const screen = await mount()
+    await settle()
+    const plates = [...screen.container.querySelectorAll('.plates > .plate')]
+    expect(plates[0].classList.contains('plate--basics')).toBe(true)
+    // Still four lines: the course is no line.
+    expect(screen.container.querySelectorAll('.plate--line')).toHaveLength(4)
+    const foot = plates[0].querySelector('.plate__foot')
+    expect(foot.querySelector('.plate__prev').textContent).toContain('これ・それ')
+    expect(foot.querySelector('.plate__here').textContent).toBe('数')
+    expect(foot.querySelector('.plate__next').textContent).toContain('〜ます')
+    // The stripe: the unit at hand's cards met, five of twenty.
+    expect(plates[0].querySelector('.plate__stripe > i').style.width).toBe('25%')
+    plates[0].querySelector('.plate__head').click()
+    expect(beginDeparture).toHaveBeenCalledWith(expect.objectContaining({ path: '/learn/basics/kazu' }))
+  })
+
+  it('hangs nothing above N5, nor once the course is met', async () => {
+    todayRef.current = { ...TODAY, basics: null }
+    let screen = await mount()
+    await settle()
+    expect(screen.container.querySelector('.plate--basics')).toBeNull()
+    todayRef.current = { ...TODAY, basics: { done: true, of: 14 } }
+    screen = await mount()
+    await settle()
+    expect(screen.container.querySelector('.plate--basics')).toBeNull()
   })
 })

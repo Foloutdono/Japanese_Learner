@@ -1,6 +1,7 @@
 import { clearAhead } from '../lib/platform'
 import { forgetAheadPlan } from './ahead'
 import { forgetAgenda } from './agenda'
+import { forgetBasics } from './basics'
 import { forgetCredits } from './credits'
 import { forgetForecast } from './forecast'
 import { forgetShown } from './guide'
@@ -48,6 +49,7 @@ export function forgetAccount() {
   forgetSummary()
   forgetCredits()
   forgetToday()
+  forgetBasics()
   forgetStats()
   forgetJourney()
   forgetPracticeRecord()

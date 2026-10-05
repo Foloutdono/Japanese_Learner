@@ -48,6 +48,7 @@ const STATIONS = {
   '/learn/vocab':           { code: 'TG', kana: 'たんご' },
   '/learn/kanji':           { code: 'KJ', kana: 'かんじ' },
   '/learn/grammar':         { code: 'BP', kana: 'ぶんぽう' },
+  '/learn/basics':          { code: 'KI', kana: 'きそ' },
   '/practice/reading':      { code: 'DS', kana: 'どくしょ' },
   '/practice/comprehension': { code: 'RK', kana: 'りかい' },
   '/practice/translation':  { code: 'HY', kana: 'ほんやく' },

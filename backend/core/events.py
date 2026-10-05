@@ -154,6 +154,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # lock screen widget). Whether either brings anyone back is the one
     # question they have to answer.
     "nudge_opened":   frozenset({"via"}),
+    # ── 基礎 — the basics course (plan 186f) ─────────────────────
+    # `unit` is the course's own number, 1 to 14, never a card: whether
+    # novices get through the course, and where they stop or skip it.
+    "basics_unit_done": frozenset({"unit"}),
+    "basics_skipped":   frozenset({"unit"}),
 
     # ── Friction ─────────────────────────────────────────────────
     # `path` is a route pattern, never a URL with ids in it, and no
@@ -179,6 +184,9 @@ KEEP_LONG = frozenset({
     # account. deck_subscribe and library_view are not here: those are
     # per-visit and belong in the rollup.
     "deck_publish", "deck_detach",
+    # Fourteen units at most, once each: "did the learners who finished
+    # the basics stay" is a question about a whole account.
+    "basics_unit_done", "basics_skipped",
 })
 
 # A property value is a scalar or it is dropped. Strings are cut at 64

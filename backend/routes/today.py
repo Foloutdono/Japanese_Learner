@@ -42,7 +42,8 @@ Two things have to be right that a single-section session gets for free:
    bounds it: the ration is what is left of daily_new_target after
    today's first-ever reviews (core/pace.py), kana first for a learner
    who does not yet read them, then the chosen lines in turn
-   (study/daily_queue.ration). A learner with no stored target is
+   (study/daily_queue.ration), each deck's cards in the order it teaches
+   them (study/teaching_order, plan 186a). A learner with no stored target is
    served no ration at all. When the due set and the ration are both
    empty, this returns nothing and the client shows the next scheduled
    time from /api/today.
@@ -50,6 +51,7 @@ Two things have to be right that a single-section session gets for free:
 import logging
 from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta, timezone
+from typing import NamedTuple
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -57,13 +59,14 @@ from pydantic import BaseModel, Field
 import psycopg2.extras
 
 from core.auth import get_user_id, prefixed, unprefixed
-from core import credits
+from core import credits, events
 from core.db import db_conn
 from core.lines import lines_or_all
 from core.pace import resolve_pace
 from core.srs_instance import srs
 from core.user_level import resolve_level
-from study import card_index, daily_queue
+from study import basics, card_index, daily_queue, teaching_order
+from study import level_rule
 from study.level_rule import kana_sets_for, primary_mode
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES, try_resolve
 
@@ -313,6 +316,19 @@ def _hold_line(user_id: str, level: str) -> str:
 
 
 # ── 新規 — the day's ration (study/daily_queue.ration) ─────────────
+class Pools(NamedTuple):
+    """What daily_queue.ration spends: kana lane -> never-met ids, line
+    lane -> never-met ids, and for a learner riding the basics the
+    course's cards not yet met, in its order (None for everyone else)."""
+    kana: "OrderedDict[tuple, list[str]]"
+    lines: "OrderedDict[tuple, list[str]]"
+    course: list | None
+
+
+def _ration(pools: Pools, budget: int):
+    return daily_queue.ration(pools.kana, pools.lines, budget, course=pools.course)
+
+
 def _new_lanes(user_id: str, level: str):
     """
     lane key -> new raw ids the run may introduce today, at most what
@@ -326,13 +342,61 @@ def _new_lanes(user_id: str, level: str):
     pools = _new_pools(user_id, level, pace.remaining)
     if pools is None:
         return OrderedDict()
-    return daily_queue.ration(*pools, pace.remaining)
+    return _ration(pools, pace.remaining)
+
+
+def _course(user_id: str, lines) -> list[tuple[tuple, str, int]]:
+    """(lane key, raw id, unit) for each card of the basics course
+    (study/basics.py) in the learner's lines that they have never met,
+    in the order the course deals them. Empty once the course is done --
+    and from the start for a learner who boarded above N5, whose N5 the
+    level rule seeded known."""
+    unmet: set[tuple[str, str]] = set()
+    for source in basics.SOURCES:
+        if source not in lines:
+            continue
+        ids = basics.course_ids(source)
+        picked = srs.get_new_cards(primary_mode(source), limit=len(ids),
+                                   card_ids=prefixed(ids, user_id), ordered=True)
+        unmet |= {(source, unprefixed(cid, user_id)) for cid in picked}
+    return [
+        ((daily_queue.SECTION, source, basics.LEVEL, primary_mode(source)), raw_id, unit)
+        for source, raw_id, unit in basics.sequence()
+        if (source, raw_id) in unmet
+    ]
+
+
+def _riding_basics(level: str) -> bool:
+    """The basics are N5's first stretch (plan 186e): a learner at N5 rides
+    them, whatever their goal; one above N5 has them behind."""
+    return level == basics.LEVEL
+
+
+def _unit_label(n: int) -> dict:
+    unit = basics.units()[n]
+    return {"unit": n + 1, "of": len(basics.units()), "id": unit["id"], "jp": unit["jp"], "title": unit["title"]}
+
+
+def _basics_status(user_id: str, level: str):
+    """Where the learner stands on the basics (plan 186e), for the gate:
+    the unit of the next card the course will deal, or done. None for a
+    learner above N5, and when the profile cannot be read -- a label is
+    a comfort, never a reason to fail the gate."""
+    if not _riding_basics(level):
+        return None
+    try:
+        course = _course(user_id, lines_or_all(_profile_row(user_id)[9]))
+    except Exception:
+        logger.exception("basics status failed")
+        return None
+    if not course:
+        return {"done": True, "of": len(basics.units())}
+    return {"done": False, **_unit_label(course[0][2])}
 
 
 def _new_pools(user_id: str, level: str, budget: int):
-    """(kana lanes, line lanes) of never-met cards, at most `budget` a
-    lane -- what daily_queue.ration spends. None when the profile
-    cannot be read."""
+    """The Pools of never-met cards, at most `budget` a lane -- what
+    daily_queue.ration spends. None when the profile cannot be read."""
     try:
         row = _profile_row(user_id)
     except Exception:
@@ -340,13 +404,22 @@ def _new_pools(user_id: str, level: str, budget: int):
         return None
     kana_known, lines = row[6], lines_or_all(row[9])
 
+    # A course card comes through the course, in the course's order, and
+    # never again through its line (daily_queue.ration's contract).
+    course = _course(user_id, lines) if _riding_basics(level) else None
+
     def fresh(source: str, deck_key: str, mode: str) -> list[str]:
-        ids = card_index.raw_ids(source, deck_key, mode)
+        ids = teaching_order.raw_ids(source, deck_key, mode)
+        if course is not None:
+            ids = [raw_id for raw_id in ids if basics.unit_of(raw_id) is None]
         if not ids:
             return []
-        # get_new_cards shuffles: the ration is a random draw from what
-        # the learner has never met, as a section run's top-up is.
-        picked = srs.get_new_cards(mode, limit=budget, card_ids=prefixed(ids, user_id))
+        # The first cards the deck teaches that the learner has never
+        # met (plan 186a). The ration was a random draw once, which dealt
+        # 〜なければなりません as readily as は on day one -- and, drawn
+        # again on every request, served other cards than the gate had
+        # counted. In order, the gate and the run agree.
+        picked = srs.get_new_cards(mode, limit=budget, card_ids=prefixed(ids, user_id), ordered=True)
         return [unprefixed(cid, user_id) for cid in picked]
 
     kana_mode = primary_mode(KANA)
@@ -366,7 +439,8 @@ def _new_pools(user_id: str, level: str, budget: int):
         if ids:
             line_lanes[(daily_queue.SECTION, source, level, mode)] = ids
 
-    return kana_lanes, line_lanes
+    return Pools(kana_lanes, line_lanes,
+                 None if course is None else [(key, raw_id) for key, raw_id, _ in course])
 
 
 @router.get("/api/today")
@@ -459,6 +533,8 @@ def get_today(user_id: str = Depends(get_user_id)):
         spr = None
     return {
         "seconds_per_review": spr,
+        # 基礎 (plan 186e): the unit the course is at, for an N5 learner.
+        "basics": _basics_status(user_id, level),
         # The fare gate prices the run against the balance (plan 069):
         # one credit a paid review, and the balance rides beside it.
         # It used to be `total` outright, back when every review cost
@@ -621,8 +697,8 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
     if pace is not None:
         pools = _new_pools(user_id, level, pace.target)
         if pools is not None:
-            today_new = daily_queue.ration(*pools, pace.remaining)
-            later_new = daily_queue.ration(*pools, pace.target)
+            today_new = _ration(pools, pace.remaining)
+            later_new = _ration(pools, pace.target)
     today_utc = datetime.now(timezone.utc).date()
 
     points = []
@@ -667,7 +743,7 @@ def get_today_ahead(at: str = Query(..., description="comma-separated ISO instan
 
 @router.get("/api/today/cards")
 def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "", lanes: str = "", lang: str = "fr",
-                    only: str = "", quota: str = "", user_id: str = Depends(get_user_id)):
+                    only: str = "", quota: str = "", unit: str = "", user_id: str = Depends(get_user_id)):
     """
     The queue itself: up to `count` due cards, mixed across sections and
     personal decks, each carrying the mode it must be reviewed under.
@@ -690,6 +766,13 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     pressed the action on one entry is not asking for a day. The credit
     gate still applies, because a card that cannot be paid for cannot be
     paid for wherever it was started from.
+
+    `unit` is a unit of the basics (plan 186g), boarded from its station
+    on the Learn gate: that unit's cards alone, its due reviews first and
+    then the cards never met in the order the course deals them -- its
+    rules, each opening on its lesson, then its words, then its kanji --
+    in the learner's lines, whatever the day's ration or the learner's
+    level, since they chose the unit. Like `only`, not a day.
     """
     count = max(1, min(count, MAX_BATCH))
 
@@ -697,6 +780,9 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     personal = _personal_rows(user_id)
     all_lanes = daily_queue.lanes(user_id, due_rows, personal)
     level = resolve_level(user_id)
+    riding = _riding_basics(level)
+    if unit:
+        return _unit_cards(user_id, unit, all_lanes, due_rows, count, exclude, lang)
     if only:
         chosen = daily_queue.keep_card(all_lanes, only)
     else:
@@ -779,6 +865,11 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
             # which part of their study this came from. The section
             # screens have a header for this; the queue has to carry it.
             card["lane"] = daily_queue.label(key)
+            # 基礎 (plan 186e): the course's unit a card belongs to, for
+            # a learner riding it.
+            unit = basics.unit_of(raw_id) if riding and key[0] == daily_queue.SECTION else None
+            if unit is not None:
+                card["basics"] = _unit_label(unit)
             cards.append(card)
 
     logger.info(
@@ -788,6 +879,102 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     # Each card's bar, new to mastered (plan 147).
     srs.attach_progress(cards, user_id)
     return {"cards": cards, "beyond": beyond}
+
+
+def _unit_cards(user_id: str, unit_id: str, all_lanes, due_rows, count: int, exclude: str, lang: str) -> dict:
+    """One unit of the basics as a run (plan 186g): see get_today_cards'
+    `unit`. A card due under another mode than its line's primary one
+    rides too -- it is the unit's card, and it is due."""
+    n = next((i for i, u in enumerate(basics.units()) if u["id"] == unit_id), None)
+    if n is None:
+        raise HTTPException(status_code=404, detail="no such unit")
+    lines = lines_or_all(_profile_row(user_id)[9])
+    sources = [source for source in basics.SOURCES if source in lines]
+    ids = {raw_id for source in sources for raw_id in basics.units()[n]["cards"][source]}
+    skip = daily_queue.parse_exclude(exclude)
+    due = daily_queue.drop_seen(
+        OrderedDict((key, [rid for rid in held if rid in ids]) for key, held in all_lanes.items()
+                    if key[0] == daily_queue.SECTION),
+        skip,
+    )
+    order = daily_queue.interleave(due, sum(len(v) for v in due.values()))
+    held = {(rid, key[-1]) for key, rid in order}
+    for source in sources:
+        unit_ids = basics.units()[n]["cards"][source]
+        mode = primary_mode(source)
+        fresh = srs.get_new_cards(mode, limit=len(unit_ids), card_ids=prefixed(unit_ids, user_id), ordered=True)
+        key = (daily_queue.SECTION, source, basics.LEVEL, mode)
+        order += [(key, rid) for rid in (unprefixed(cid, user_id) for cid in fresh)
+                  if (rid, mode) not in skip and (rid, mode) not in held]
+    repeats = _repeats(user_id, due_rows)
+    picked = _affordable(user_id, order[:count], repeats)
+    if not picked:
+        return {"cards": [], "beyond": 0}
+    beyond = len(_affordable(user_id, order, repeats)) - len(picked)
+    by_mode: dict[str, list[str]] = defaultdict(list)
+    for key, raw_id in picked:
+        by_mode[key[-1]].append(f"{user_id}:{raw_id}")
+    states: dict = {}
+    previews: dict = {}
+    for mode, card_ids in by_mode.items():
+        states.update({(cid, mode): v for cid, v in srs.get_bulk_stats(card_ids, mode).items()})
+        previews.update({(cid, mode): v for cid, v in srs.preview_reviews_bulk(card_ids, mode, user_id).items()})
+    cards = []
+    for key, raw_id in picked:
+        _, source, deck_key, mode = key
+        card_id = f"{user_id}:{raw_id}"
+        stage = states.get((card_id, mode))
+        preview = previews.get((card_id, mode))
+        card = _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview)
+        if card is None:
+            continue
+        card["lane"] = daily_queue.label(key)
+        card["basics"] = _unit_label(n)
+        cards.append(card)
+    logger.info("basics unit run user_id=%s unit=%s served=%d", user_id, unit_id, len(cards))
+    srs.attach_progress(cards, user_id)
+    return {"cards": cards, "beyond": beyond}
+
+
+def _note_unit_done(user_id: str, raw_id: str) -> None:
+    """基礎 (plan 186f): a first review that leaves its unit of the
+    basics with nothing unmet in the learner's lines is that unit done,
+    recorded as `basics_unit_done`. Only a course card's first review at
+    N5 asks, and nothing here may fail the review."""
+    unit = basics.unit_of(raw_id)
+    if unit is None:
+        return
+    try:
+        if not _riding_basics(resolve_level(user_id)):
+            return
+        course = _course(user_id, lines_or_all(_profile_row(user_id)[9]))
+        if all(n != unit for _, _, n in course):
+            events.record(user_id, "basics_unit_done", {"unit": unit + 1})
+    except Exception:
+        logger.exception("basics unit check failed")
+
+
+@router.post("/api/today/basics/skip")
+def post_basics_skip(user_id: str = Depends(get_user_id)):
+    """Skip the basics (plan 186f), for a learner who knows them: every
+    course card not yet met is marked known, in its line's primary mode,
+    as the level rule marks the stops behind a level -- a row that exists
+    is left alone, the first checks spread over the same weeks -- and the
+    ration goes on to the rest of N5. Undone by nothing but study, as the
+    level rule is; a card the learner is shown again and misses comes back
+    like any other."""
+    level = resolve_level(user_id)
+    if not _riding_basics(level):
+        return {"markedKnown": 0, "basics": None}
+    at = _basics_status(user_id, level)
+    marked = 0
+    for source in basics.SOURCES:
+        marked += srs.seed_known(prefixed(basics.course_ids(source), user_id), primary_mode(source),
+                                 spread_days=level_rule.SPREAD_DAYS)
+    if at and not at.get("done"):
+        events.record(user_id, "basics_skipped", {"unit": at["unit"]})
+    logger.info("basics skipped user_id=%s marked_known=%d", user_id, marked)
+    return {"markedKnown": marked, "basics": _basics_status(user_id, level)}
 
 
 class TodayReviewPayload(BaseModel):
@@ -822,6 +1009,8 @@ def post_today_review(payload: TodayReviewPayload, user_id: str = Depends(get_us
     # is careful to price the CARD and not the mode key the client
     # chose to send -- nor on a learning step's repeat (credits.fare).
     fare = credits.spend(user_id, credits.fare(_review_cost(payload.card_id, payload.mode), s["repeat"]), card_id)
+    if payload.prev_stage in (None, "new"):
+        _note_unit_done(user_id, payload.card_id)
     return {
         "card_id": payload.card_id,
         "interval": s["interval"],

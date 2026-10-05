@@ -367,12 +367,13 @@ def get_volumes(user_id: str = Depends(get_user_id)):
 # spelled here so a browser cannot stamp a key of its own choosing.
 GUIDE_GATES = ("today", "learn", "practice", "dictionary", "profile")
 
-# The card the learner knows. Kana only, at N3 in the deck, and the one
-# word nearly everyone arriving here has heard. The romaji is spelled
+# The card the learner knows. Kana only, at N5 in the deck (plan 186c
+# moved it down from N3), and the one word nearly everyone arriving here
+# has heard. The romaji is spelled
 # rather than derived: study/romaji reads the final は as the particle
 # it is not and prints "konnichiha", which is exactly wrong on the first
 # card a learner with no kana is handed. Pinned by tests/test_ride.py.
-RIDE_KNOWN = {"level": "N3", "kanji": "", "kana": "こんにちは", "romaji": "konnichiwa"}
+RIDE_KNOWN = {"level": "N5", "kanji": "", "kana": "こんにちは", "romaji": "konnichiwa"}
 
 # The card the learner cannot know: one stop above the stored level, a
 # station word at each. The N1 learner has no stop above and is handed

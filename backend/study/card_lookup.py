@@ -842,7 +842,8 @@ def resolve_kana(reading: str, pos: str, auxiliary_use: bool, after_conjunctive:
 
     Two admissions, plan 104, each narrower than the gate it opens:
 
-    An ADVERB is admitted, but only to a kana-only entry. The deck's
+    An ADVERB is admitted, but only to a kana-only entry, and so, since
+    plan 186d, is an INTERJECTION. The deck's
     adverbs are kana-only words with nothing to collide with (もう,
     もっと, ゆっくり, よく), while the kanji homophones a reading also
     reaches (こう is 請う and 溝 too) are nouns and verbs, which an
@@ -881,7 +882,7 @@ def resolve_kana(reading: str, pos: str, auxiliary_use: bool, after_conjunctive:
     What either refusal turns away goes on to the JMdict pool, which
     holds the word itself.
     """
-    if pos not in ("noun", "pronoun", "verb", "adjective", "adverb") or len(reading) < 2:
+    if pos not in ("noun", "pronoun", "verb", "adjective", "adverb", "interjection") or len(reading) < 2:
         return None
     candidates = _VOCAB_BY_KANA.get(reading)
     if not candidates:
@@ -896,7 +897,13 @@ def resolve_kana(reading: str, pos: str, auxiliary_use: bool, after_conjunctive:
                       if not (c[1].get("kanji") or "") or _katakana_written(c[1].get("kanji") or "")]
     if not candidates:
         return None
-    if pos == "adverb":
+    if pos in ("adverb", "interjection"):
+        # An interjection is admitted as an adverb is, to a kana-only
+        # card alone (plan 186d): the greetings a first lesson teaches
+        # (おはよう, さようなら, ありがとう) are kana cards, and UniDic
+        # files them under kanji the deck does not write (御早う,
+        # 有り難う), so the lemma path never met them and the breakdown
+        # showed おはよう as no word or ありがとう as the pool's.
         candidates = [c for c in candidates if not c[1].get("kanji")]
         if not candidates:
             return None
@@ -1037,6 +1044,39 @@ def _row_gloss_words(row: dict) -> set[str]:
 # joined to a noun's spells nothing anybody reads.
 _COMPOUND_POS = frozenset({"noun", "prefix", "suffix"})
 _COMPOUND_MAX = 3
+
+
+_PHRASE_MAX = 4
+
+
+def resolve_phrase(morphemes, i: int, max_len: int = _PHRASE_MAX):
+    """(level, entry, raw_id, n) for a kana-only deck card that a whole
+    clause of `n` morphemes from `i` spells, or None (plan 186d).
+
+    A set phrase the deck teaches as one card arrives cut into a verb
+    and its endings: すみません is 済む + ませ + ん, and the breakdown
+    glossed it "to finish" under a sentence that apologises. The run is
+    folded only where it stands alone -- the sentence's start or a mark
+    before it, its end or a mark after it -- and holds a verb or an
+    ending, and its letters are exactly a kana-only card's: so the
+    しまった of 食べてしまった, the でも of 学校でも and a noun run (that is
+    resolve_compound's) are never taken for one."""
+    if i > 0 and morphemes[i - 1].pos != "symbol":
+        return None
+    longest = min(max_len, len(morphemes) - i)
+    for n in range(longest, 1, -1):
+        run = morphemes[i:i + n]
+        if i + n < len(morphemes) and morphemes[i + n].pos != "symbol":
+            continue
+        if any(m.pos == "symbol" for m in run) or run[0].auxiliary_use:
+            continue
+        if not any(m.pos in ("verb", "auxiliary") for m in run):
+            continue
+        surface = "".join(m.surface for m in run)
+        for level, entry in _VOCAB_BY_KANA.get(surface, ()):
+            if not entry.get("kanji") and entry.get("kana") == surface:
+                return level, entry, vocab_to_id(entry, level), n
+    return None
 
 
 def resolve_compound(morphemes, i: int, max_len: int = _COMPOUND_MAX):

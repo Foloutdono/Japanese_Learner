@@ -40,7 +40,7 @@ and leaves it exactly as it is, the way migrate_jmdict_card_ids.py does.
 # old raw id -> new raw id
 MOVES: dict[str, str] = {
     # ── The word in `kanji`, a （...）note in `kana` ──────────────
-    "vocab_N3_すみません_（感）": "vocab_N3__すみません",
+    "vocab_N3_すみません_（感）": "vocab_N5__すみません",
     "vocab_N3_しまい_（終わり）": "vocab_N3__しまい",
     "vocab_N3_しまう_（終わる）": "vocab_N3__しまう",
     "vocab_N3_ね_（感）": "vocab_N3__ね",
@@ -418,7 +418,7 @@ MOVES: dict[str, str] = {
     "vocab_N1_其れで_それで": "vocab_N4__それで",
     "vocab_N1_何時までも_いつまでも": "vocab_N3__いつまでも",
     "vocab_N1_何時か_いつか": "vocab_N3__いつか",
-    "vocab_N1_済みません_すみません": "vocab_N3__すみません",
+    "vocab_N1_済みません_すみません": "vocab_N5__すみません",
     "vocab_N1_詰まり_つまり": "vocab_N3__つまり",
     "vocab_N1_屡_しばしば": "vocab_N3__しばしば",
     "vocab_N1_仕舞う_しまう": "vocab_N3__しまう",
@@ -449,12 +449,12 @@ MOVES: dict[str, str] = {
     "vocab_N1_その内_そのうち": "vocab_N3__そのうち",
     "vocab_N1_或いは_あるいは": "vocab_N3__あるいは",
     "vocab_N1_軈て_やがて": "vocab_N3__やがて",
-    "vocab_N1_有難う_ありがとう": "vocab_N3__ありがとう",
+    "vocab_N1_有難う_ありがとう": "vocab_N5__ありがとう",
     "vocab_N1_何故なら_なぜなら": "vocab_N3__なぜなら",
     "vocab_N1_何時でも_いつでも": "vocab_N3__いつでも",
     "vocab_N1_宜しく_よろしく": "vocab_N3__よろしく",
     "vocab_N1_而も_しかも": "vocab_N3__しかも",
-    "vocab_N1_今日は_こんにちは": "vocab_N3__こんにちは",
+    "vocab_N1_今日は_こんにちは": "vocab_N5__こんにちは",
     "vocab_N1_所謂_いわゆる": "vocab_N3__いわゆる",
     "vocab_N1_所で_ところで": "vocab_N3__ところで",
     "vocab_N1_態と_わざと": "vocab_N3__わざと",
@@ -522,11 +522,11 @@ MOVES: dict[str, str] = {
     "vocab_N1_見っともない_みっともない": "vocab_N2__みっともない",
     "vocab_N1_萎む_しぼむ": "vocab_N2__しぼむ",
     "vocab_N1_どうぞ宜しく_どうぞよろしく": "vocab_N2__どうぞよろしく",
-    "vocab_N1_お早う_おはよう": "vocab_N2__おはよう",
+    "vocab_N1_お早う_おはよう": "vocab_N5__おはよう",
     "vocab_N1_愈々_いよいよ": "vocab_N2__いよいよ",
     "vocab_N1_一々_いちいち": "vocab_N2__いちいち",
     "vocab_N1_彼此_あれこれ": "vocab_N2__あれこれ",
-    "vocab_N1_左様なら_さようなら": "vocab_N2__さようなら",
+    "vocab_N1_左様なら_さようなら": "vocab_N5__さようなら",
     "vocab_N1_捻子_ねじ": "vocab_N2__ねじ",
     "vocab_N1_滅茶苦茶_めちゃくちゃ": "vocab_N2__めちゃくちゃ",
     "vocab_N1_炙る_あぶる": "vocab_N2__あぶる",
@@ -681,6 +681,30 @@ MOVES: dict[str, str] = {
     "vocab_N3_勉強_べんきょう": "vocab_N5_勉強_べんきょう",
     "vocab_N5__コピーする": "vocab_N5__コピー",
     "vocab_N3__コピー": "vocab_N5__コピー",
+    # ── Plan 186c: the basics a first lesson teaches, at N5 ───────
+    # The words a novice meets on day one -- the greetings, the yen,
+    # the minute, Japan, the week -- were cards at N3, N2 and even N1
+    # (分 read ふん), the levels the community lists give them, so the
+    # level rule held their reviews back from an N5 learner and the
+    # basics course (plan 186) could not teach them. Every textbook's
+    # first lessons do; they move down, their glosses cleaned of the
+    # export's part-of-speech notes. 椅子 stays: the N5 いす is the card.
+    # The older lines that pointed at these ids point straight here,
+    # since a move is one hop.
+    "vocab_N3_円_えん": "vocab_N5_円_えん",
+    "vocab_N1_分_ふん": "vocab_N5_分_ふん",
+    # 日本 is one word read two ways, so one card packs both, as 何 does
+    # (plan 112): the tokenizer reads it にっぽん, which reached the N3 card.
+    "vocab_N3_日本_にほん": "vocab_N5_日本_にほん/にっぽん",
+    "vocab_N3_日本_にっぽん": "vocab_N5_日本_にほん/にっぽん",
+    "vocab_N3_週_しゅう": "vocab_N5_週_しゅう",
+    "vocab_N3_週間_しゅうかん": "vocab_N5_週間_しゅうかん",
+    "vocab_N3__こんにちは": "vocab_N5__こんにちは",
+    "vocab_N3__ありがとう": "vocab_N5__ありがとう",
+    "vocab_N3__すみません": "vocab_N5__すみません",
+    "vocab_N2__おはよう": "vocab_N5__おはよう",
+    "vocab_N2__さようなら": "vocab_N5__さようなら",
+
     # ── A reading the character does not have ───────────────────
     # The N1 card read 前 as せん, which is 先's on-reading: the
     # 常用漢字表 and datas/kanji/kanji.sqlite3 both give 前 ゼン and

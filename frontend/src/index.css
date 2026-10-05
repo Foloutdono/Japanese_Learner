@@ -8744,6 +8744,63 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
 }
+/* 基礎 — the basics course on the gate (plan 186f): the unit the next
+   new card comes from, by name, over a bar of the units with the ones
+   met filled. Neutral inks: the course is no line, so it wears no
+   line's pigment; the unit at hand is the selection's gold. */
+.basics-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+}
+.basics-line__head,
+.basics-line__name { display: inline-flex; align-items: baseline; gap: var(--sp-2); }
+.basics-line__jp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+}
+.basics-line__of {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.basics-line__name { font-size: var(--fs-sm); font-weight: 700; color: var(--text-primary); }
+.basics-line__title { font-weight: 400; color: var(--text-secondary); }
+.basics-line__bar {
+  display: flex;
+  flex-basis: 100%;
+  gap: var(--sp-1);
+  height: 5px;
+}
+.basics-line__unit {
+  flex: 1 1 0;
+  border-radius: var(--r-pill);
+  background: var(--border);
+}
+.basics-line__unit--met { background: var(--text-secondary); }
+.basics-line__unit--on { background: var(--sel-line); }
+.basics-line--done { align-items: center; }
+.basics-line--done .basics-line__name { font-weight: 600; }
+.basics-line__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--sp-8);
+  height: var(--sp-8);
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-primary);
+}
 /* The two questions, under a rule: which cards, how many. */
 .gate-card__asks {
   display: flex;
@@ -9445,6 +9502,157 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 .route-stop__fig b { color: var(--text-primary); }
+
+/* ── 基礎 — a unit of the basics (plan 186g) ──
+   The unit's page under its station's bar: its name and figures over
+   the bar of its cards (learned in full ink, met in half of it, the
+   stops' own bar), the gate, then what it teaches -- its rules, its
+   words, its kanji, each card a row with its own bar -- and the
+   sentences it builds to. The section's ink is neutral: the course is
+   no line (config/tabs.js). */
+.bsc-unit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  min-width: 0;
+}
+.bsc-unit__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "of figs" "name figs" "bar bar";
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+}
+.bsc-unit__of {
+  grid-area: of;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.bsc-unit__name { grid-area: name; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); min-width: 0; }
+.bsc-unit__jp {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  color: var(--text-primary);
+}
+.bsc-unit__title { font-family: var(--font-display); font-weight: 700; color: var(--text-secondary); }
+.bsc-unit__figs {
+  grid-area: figs;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sp-1);
+}
+.bsc-unit__fig {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.bsc-unit__fig b { font-size: var(--fs-lead); color: var(--text-primary); }
+.bsc-unit__met { font-size: var(--fs-sm); color: var(--text-secondary); }
+.bsc-unit__bar {
+  grid-area: bar;
+  position: relative;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--border);
+  overflow: hidden;
+}
+.bsc-unit__bar > i {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  border-radius: inherit;
+}
+.bsc-unit__bar-met { background: color-mix(in srgb, var(--text-secondary) 45%, transparent); }
+.bsc-unit__bar-learned { background: var(--text-secondary); }
+.bsc-unit__go { align-self: stretch; }
+.bsc-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.bsc-list__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.bsc-rows,
+.bsc-sentences {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+  overflow: hidden;
+}
+.bsc-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  grid-template-areas: "jp reading meaning" "bar bar bar";
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+}
+.bsc-row + .bsc-row { border-top: 1px solid var(--surface-line); }
+.bsc-row__jp { grid-area: jp; font-size: var(--fs-lead); font-weight: 600; color: var(--text-primary); }
+.bsc-row__reading { grid-area: reading; font-size: var(--fs-sm); color: var(--text-secondary); }
+.bsc-row__meaning {
+  grid-area: meaning;
+  min-width: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+.bsc-row__bar {
+  grid-area: bar;
+  position: relative;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: var(--border);
+  overflow: hidden;
+}
+.bsc-row__bar > i {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  border-radius: inherit;
+  background: var(--text-secondary);
+}
+/* The kanji: one character a cell, its meaning under it. */
+.bsc-rows--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+}
+.bsc-rows--grid .bsc-row {
+  grid-template-columns: 1fr;
+  grid-template-areas: "jp" "meaning" "bar";
+  justify-items: center;
+  text-align: center;
+  border-top: none;
+}
+.bsc-row--glyph .bsc-row__jp { font-family: var(--font-serif); font-size: var(--fs-heading); }
+.bsc-row--glyph .bsc-row__bar { justify-self: stretch; }
+.bsc-sentence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-4);
+}
+.bsc-sentence + .bsc-sentence { border-top: 1px solid var(--surface-line); }
+.bsc-sentence__jp { font-size: var(--fs-lead); color: var(--text-primary); }
+.bsc-sentence__tr { font-size: var(--fs-sm); color: var(--text-secondary); }
 
 /* The stop carried its own progress as a 3px rule along the bottom of
    the card, under the figure it was drawn from. It is gone (owner's

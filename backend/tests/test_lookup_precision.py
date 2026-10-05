@@ -192,7 +192,28 @@ class TheCardsPutRightTests(unittest.TestCase):
             ("家族とともに新しい町へ引っ越しました。", "とも", "vocab_N1_共_とも"),
             ("銀行でお金を下ろした。", "下ろし", "vocab_N3_下ろす_おろす"),
             ("日本に来てから、三年になります。", "年", "vocab_N5_年_ねん"),
-            ("四月ごろ、日本へ行きます。", "月", "vocab_N5_月_がつ"),
+            # Plan 186c: a month is a card of its own now, written in
+            # kanji or digits, and 日本 one card read both ways.
+            ("四月ごろ、日本へ行きます。", "四月", "vocab_N5_四月_しがつ"),
+            ("4月ごろ、日本へ行きます。", "4月", "vocab_N5_四月_しがつ"),
+            ("四月ごろ、日本へ行きます。", "日本", "vocab_N5_日本_にほん/にっぽん"),
+            ("十二月に日本語を勉強します。", "日本語", "vocab_N5_日本語_にほんご"),
+            # 一月 is the month until what follows measures it: then it
+            # is ひとつき, "one month" (reading_context's span rule).
+            ("一月に日本へ行きます。", "一月", "vocab_N5_一月_いちがつ"),
+            ("一月かかりました。", "一月", "vocab_N5_一月_ひとつき"),
+            ("一月前に来ました。", "一月", "vocab_N5_一月_ひとつき"),
+            ("一月も会っていません。", "一月", "vocab_N5_一月_ひとつき"),
+            ("一月も連絡が来ない。", "一月", "vocab_N5_一月_ひとつき"),
+            ("一月も寒くない。", "一月", "vocab_N5_一月_いちがつ"),
+            ("一月も勉強しました。", "一月", "vocab_N5_一月_ひとつき"),
+            ("一月も日本にいました。", "一月", "vocab_N5_一月_ひとつき"),
+            ("一月も終わりました。", "一月", "vocab_N5_一月_いちがつ"),
+            ("一月も雪が降った。", "一月", "vocab_N5_一月_いちがつ"),
+            ("十一月に行きます。", "十一月", "vocab_N5_十一月_じゅういちがつ"),
+            ("今、何時ですか。", "何時", "vocab_N5_何時_なんじ"),
+            ("今日は何曜日ですか。", "何曜日", "vocab_N5_何曜日_なんようび"),
+            ("五分待ってください。", "分", "vocab_N5_分_ふん"),
             ("その料理の辛いのなんのって、水を三杯も飲んだ。", "杯", "vocab_N5_杯_はい"),
             ("今日は少しさむけがする。", "さむけ", "vocab_N4_寒気_さむけ"),
             ("先生のもとで、三年間研究を続けた。", "もと", "vocab_N2_下_もと"),
@@ -484,3 +505,36 @@ class InvariantTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class GreetingTests(unittest.TestCase):
+    """Plan 186d: the greetings a first lesson teaches are kana cards
+    UniDic files under kanji the deck does not write (御早う, 有り難う),
+    so an interjection reaches a kana-only card by its reading, as an
+    adverb does; and a set phrase cut into a verb and its endings is one
+    word where it stands as a clause (すみません is no 済む "to finish")."""
+
+    def test_an_interjection_reaches_its_kana_card(self) -> None:
+        for sentence, word, raw_id in (
+            ("おはよう。", "おはよう", "vocab_N5__おはよう"),
+            ("さようなら。", "さようなら", "vocab_N5__さようなら"),
+            ("ありがとう。", "ありがとう", "vocab_N5__ありがとう"),
+            ("こんにちは。", "こんにちは", "vocab_N5__こんにちは"),
+            ("いいえ、学生です。", "いいえ", "vocab_N5__いいえ"),
+        ):
+            with self.subTest(word=word):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_a_set_phrase_standing_as_a_clause_is_one_word(self) -> None:
+        for sentence in ("すみません。", "すみません、駅はどこですか。"):
+            with self.subTest(sentence=sentence):
+                found = matches(sentence)
+                self.assertEqual(found["すみません"]["raw_id"], "vocab_N5__すみません")
+                self.assertNotIn("すみ", found)
+
+    def test_a_phrase_inside_a_clause_is_left_to_its_words(self) -> None:
+        # しまった after a て is 〜てしまう's, でも after a noun the particles'.
+        self.assertNotIn("しまった", matches("ケーキを食べてしまった。"))
+        self.assertNotIn("でも", {k for k, v in matches("学校でも勉強します。").items()
+                                  if v["raw_id"] == "vocab_N5__でも"})

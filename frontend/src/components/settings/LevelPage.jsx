@@ -3,6 +3,7 @@ import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
 import { playClick, playUi } from '../../lib/audio'
 import { useProfileSummaryState } from '../../stores/profileSummary'
+import { useTodaySummary, refreshToday } from '../../stores/today'
 import { Loading } from '../ui/Loading'
 import { Emphasized } from '../ui/Emphasized'
 import { Sheet } from '../chrome/Sheet'
@@ -136,6 +137,8 @@ export function LevelPage({ session }) {
         )}
       </Slip>
 
+      <BasicsSlip session={session} />
+
       {failed && <p className="hint" role="alert">{t.onbPassError}</p>}
 
       {pending && (
@@ -182,5 +185,62 @@ function LevelSheet({ from, to, preview, t, onConfirm, onClose }) {
         {t.levelStay(from ?? to)}
       </button>
     </Sheet>
+  )
+}
+
+// ── 基礎 — skipping the basics (plan 186f) ──────────────────────
+// For an N5 learner who knows the basics already: every course card not
+// yet met is marked known, as a level change marks the stops behind it,
+// and Today goes on to the rest of N5. Drawn only while the course is
+// being ridden (/api/today's `basics`, null above N5). It asks once
+// before it writes, on the slip itself -- nothing is deleted, but
+// nothing gives the course back either.
+function BasicsSlip({ session }) {
+  const { t } = useLang()
+  const basics = useTodaySummary().data?.basics
+  const [asking, setAsking] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [marked, setMarked] = useState(null)
+  const [failed, setFailed] = useState(false)
+
+  if (marked != null) {
+    return <Slip label={t.basicsSkipLabel}><p className="hint" role="status">{t.basicsSkipped(marked)}</p></Slip>
+  }
+  if (!basics || basics.done) return null
+
+  async function skip() {
+    playUi('click')
+    setBusy(true)
+    setFailed(false)
+    try {
+      const res = await apiJson('/api/today/basics/skip', session, { method: 'POST' })
+      setMarked(res.markedKnown ?? 0)
+      refreshToday()
+    } catch {
+      setFailed(true)
+    } finally {
+      setBusy(false)
+      setAsking(false)
+    }
+  }
+
+  return (
+    <Slip label={t.basicsSkipLabel} cap={t.basicsUnit(basics.unit, basics.of)} across={!asking}>
+      {!asking ? (
+        <button type="button" className="btn-secondary slip__act" onClick={() => { playClick(); setAsking(true) }}>
+          {t.basicsSkip}
+        </button>
+      ) : (
+        <div className="form__row">
+          <button type="button" className="btn-primary" data-action="basics-skip" disabled={busy} onClick={skip}>
+            {t.basicsSkipAct}
+          </button>
+          <button type="button" className="btn-secondary" disabled={busy} onClick={() => setAsking(false)}>
+            {t.cancel}
+          </button>
+        </div>
+      )}
+      {failed && <p className="hint" role="alert">{t.onbPassError}</p>}
+    </Slip>
   )
 }

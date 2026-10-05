@@ -180,7 +180,8 @@ def _select_cards(set_name: str, m: Mode, count: int, exclude_ids: set[str], use
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(
         cache_key, due,
-        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
+        # The set in the syllabary's order (plan 186a).
+        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids, ordered=True),
         count, exclude_ids, new_limit=new_limit,
     )
 

@@ -63,6 +63,9 @@ export const EVENTS = {
   favorite_toggle: ['kind', 'on'],
   // The app opened from its notification or its widget (plan 156).
   nudge_opened: ['via'],
+  // The basics course (plan 186f): its own unit number, never a card.
+  basics_unit_done: ['unit'],
+  basics_skipped: ['unit'],
   api_error: ['path', 'status'],
   install_prompt: ['outcome'],
 }

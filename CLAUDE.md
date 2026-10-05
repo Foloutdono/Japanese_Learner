@@ -1592,7 +1592,71 @@ runtime purpose. Two consequences worth knowing:
   `src/lines.desktop.test.jsx`, `src/comprehension.desktop.test.jsx` and
   `index.css` and its 机 section; DESIGN.md, "The practice card" and
   "The desk").
-  When starting a new wave, begin at **186** or higher, and check
+  **186** is 基礎, the basics before the level (owner-directed: "new
+  users get thrown fairly advanced grammar and words in the Today queue
+  without knowing the basics"): first 186a, 教順, every deck's new cards
+  dealt in the order it teaches them rather than drawn at random --
+  grammar in its catalogue's order (です／だ, は, が, を…), vocab and
+  kanji by their frequency rankings, kana in the syllabary's -- in the
+  day's ration and every section run (`study/teaching_order.py`,
+  `get_new_cards(..., ordered=True)`), so the gate counts the cards the
+  run serves, and a refill never hands back a card the client holds
+  (`batch_cache._skipping`); then 186b, a grammar point never met
+  opening on its lesson in the day's run as on its own (`TodayRun.jsx`'s
+  gate, GrammarRun's since plan 087); then 186c, the words a first
+  lesson teaches made N5 cards -- 円, 分 (ふん, from N1), 週, 週間 and
+  five greetings moved down (`vocab_renames.MOVES`, the older lines to
+  them retargeted), 日本 one card read にほん/にっぽん, and the twelve
+  months, 何月, 何時, 何曜日 and 日本語 added out of the pool (each with
+  its French; `migrate_vocab_ids` and `migrate_pool_cards` after the
+  deploy), 一月 read ひとつき, "one month", where what follows measures it
+  (`study/reading_context.py`'s span rule, `LOCAL_REV` 11); then 186d, the course as data -- fourteen units in
+  `content/basics.json` (32 N5 points, 231 words, 80 kanji, each a
+  reference to an N5 card), loaded by `study/basics.py`, and 51 sentences
+  added to the N5 reading bank, each held by `tests/test_basics.py` to
+  the words and points of its unit and the ones before it (the
+  breakdown is the judge, `basics.strays`); the breakdown reaching the
+  greetings (an interjection admitted to a kana-only card, a set phrase
+  standing as a clause one word: `card_lookup.resolve_phrase`,
+  `LOCAL_REV` 10); and `scripts/basics_report.py`, the course points'
+  lesson examples that ask for what the course has not taught yet; then
+  186e, Today riding the course -- an N5 learner's ration is the basic
+  hiragana whole, then the course in its order across the learner's
+  lines with the other kana one card in three (`daily_queue.ration`'s
+  `course`, `FIRST_KANA_SET`, `KANA_EVERY`), then the rest of N5 in
+  teaching order, a line never dealing a course card itself
+  (`routes/today.py`'s `Pools`, `_course`); each served course card
+  names its unit (`basics` on `/api/today/cards`) and the gate the unit
+  the course is at (`basics` on `/api/today`); a learner above N5 never
+  rides it; then 186f, the course seen and skippable -- the gate's line
+  naming the unit at hand over a bar of the fourteen, in neutral inks
+  (`components/station/BasicsLine.jsx`), a note once the course is met,
+  Settings › Level's skip (`POST /api/today/basics/skip`, every unmet
+  course card marked known as the level rule marks a stop) and the
+  `basics_unit_done` and `basics_skipped` events; then 186g, the 基礎
+  plate on the Learn gate while the course is ridden and the course's
+  station, `/learn/basics` and `/learn/basics/:unit` -- a section on no
+  gate's list nor the rail, in neutral ink, its units a route beside a
+  unit's page on the desk, the gate riding Today's run held to the unit
+  (`/api/today/cards?unit=`), its figures from `GET /api/basics` (cited in
+  `study/teaching_order.py`,
+  `routes/today.py`, `routes/vocab.py`, `routes/kanji.py`,
+  `routes/kana.py`, `routes/grammar.py`, `routes/frequency.py`,
+  `srs/batch_cache.py`, `tests/test_teaching_order.py`,
+  `tests/test_today_ration.py`, `tests/test_batch_cache.py`,
+  `screens/TodayRun.jsx`, `screens/TodayRun.gate.browser.test.jsx`,
+  `src/todayLesson.desktop.test.jsx`, `src/deskfree.phone.test.jsx`,
+  `content/vocab_renames.py`, `routes/onboarding.py`'s `RIDE_KNOWN`,
+  `tests/test_lookup_precision.py`, `tests/test_onboarding_profile.py`,
+  `content/basics.json`, `study/basics.py`, `study/card_lookup.py`,
+  `study/analysis.py`, `content/reading_sentences.py`,
+  `scripts/basics_report.py`, `tests/test_basics.py`, `core/events.py`,
+  `lib/track.js`, `components/station/BasicsLine.jsx`,
+  `components/station/GateCard.jsx`, `components/settings/LevelPage.jsx`,
+  `routes/basics.py`, `tests/test_basics_api.py`, `screens/BasicsScreen.jsx`,
+  `screens/LearnScreen.jsx`, `stores/basics.js`, `config/tabs.js`,
+  `src/basics.phone.test.jsx` and `src/basics.desktop.test.jsx`).
+  When starting a new wave, begin at **187** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -1893,6 +1957,17 @@ python -m scripts.audit_slice                  # what today's run audits
 python -m scripts.audit_slice --dump           # ... and the entries, as JSON
 python -m scripts.audit_slice --schedule 12    # the next twelve runs
 python -m scripts.audit_slice --on 2026-10-06  # reproduce a past run's slice
+```
+
+The basics course (plan 186, `content/basics.json`) has a read-only
+report of its own: every lesson example of a course point, with what it
+asks of a learner who has met only the course so far. A reason to look,
+never a gate, and the audit's to act on:
+
+```bash
+cd backend
+python -m scripts.basics_report          # the examples that stray
+python -m scripts.basics_report --json   # the same, as JSON
 ```
 
 One more read-only report measures the vocab deck itself (plan 103) —
