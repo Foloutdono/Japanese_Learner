@@ -814,7 +814,7 @@ const stats = {
   dueNow:             'À réviser',
   // The same state as dueNow, in the record cell that owns the
   // schedule: a figure, so one word rather than a phrase (plan 089).
-  dueValue:          'Maintenant',
+  dueValue:          'Main­tenant', // soft hyphen: a record cell is ~76px wide on the desk
   reviewThisCard:    'Réviser cette carte',
   total:              'Total',
   overview:           'Aperçu',

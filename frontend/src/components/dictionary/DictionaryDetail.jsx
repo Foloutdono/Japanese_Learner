@@ -177,11 +177,11 @@ export function SpeakIcon() {
 // "DUE NOW" note used to say above the lattice (plan 089). `jp` is for
 // a figure whose value is a character rather than a number: the
 // radical's own glyph, a kana's twin.
-function Figure({ value, unit, unitLang, label, onClick, ink, jp }) {
+function Figure({ value, unit, unitLang, label, onClick, ink, jp, word }) {
   const body = (
     <span className="record__body">
       <span
-        className={`record__value${ink ? ` record__value--${ink}` : ''}${jp ? ' record__value--jp' : ''}`}
+        className={`record__value${ink ? ` record__value--${ink}` : ''}${jp ? ' record__value--jp' : ''}${word ? ' record__value--word' : ''}`}
         lang={jp ? 'ja' : undefined}
       >
         {value}
@@ -1203,6 +1203,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                   <Figure
                     value={status.due ? t.dueValue : (shortDate(status.next_review, lang) ?? '—')}
                     ink={status.due ? 'due' : undefined}
+                    word={Boolean(status.due)}
                     label={t.nextReview}
                   />
                 </>

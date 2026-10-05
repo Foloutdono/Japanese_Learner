@@ -21441,6 +21441,16 @@ html {
   font-family: var(--font-jp);
   font-weight: 400;
 }
+/* A figure whose value is a WORD ("Now", "Maintenant"): a numeral's size
+   is a numeral's, and a word at it ran 176px into a 76px cell on the
+   desk's four-across record and was cut off. A rung down, allowed to
+   break (the French carries a soft hyphen) rather than clip. */
+.record__value--word {
+  font-size: var(--fs-lead);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+  hyphens: manual;
+}
 /* The one STATE a record cell carries. "Due now" was a caption
    hanging over the lattice (the retired .dict-block__note); it is the
    next-review cell's own value now, in the due pigment mixed toward
