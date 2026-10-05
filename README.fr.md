@@ -177,20 +177,6 @@ Tout le contenu est classé par niveau du JLPT :
 
 ## Aperçu en images
 
-<!--
-TODO : ajouter les six captures ci-dessous dans docs/readme/, puis retirer
-les marqueurs d’ouverture et de fermeture de ce commentaire pour afficher la
-galerie. Ce sont les mêmes fichiers que dans README.md.
-
-  docs/readme/today-phone.png         La file du jour, sur téléphone
-  docs/readme/analyzer-phone.png      L’analyseur qui décompose une phrase, sur téléphone
-  docs/readme/grammar-phone.png       Une leçon de grammaire, sur téléphone
-  docs/readme/dictionary-desktop.png  Une entrée du dictionnaire, sur ordinateur
-  docs/readme/exam-desktop.png        Un examen blanc, sur ordinateur
-  docs/readme/stats-desktop.png       La page des statistiques, sur ordinateur
-
-Téléphone : environ 390×844 (portrait). Ordinateur : environ 1440×900.
-
 <table>
   <tr>
     <td align="center"><img src="docs/readme/today-phone.png" alt="La file du jour sur téléphone" width="240"><br><sub>Aujourd’hui</sub></td>
@@ -202,9 +188,6 @@ Téléphone : environ 390×844 (portrait). Ordinateur : environ 1440×900.
 <p align="center"><img src="docs/readme/dictionary-desktop.png" alt="Une entrée du dictionnaire sur ordinateur" width="720"><br><sub>Dictionnaire, sur ordinateur</sub></p>
 <p align="center"><img src="docs/readme/exam-desktop.png" alt="Un examen blanc du JLPT sur ordinateur" width="720"><br><sub>Examen blanc</sub></p>
 <p align="center"><img src="docs/readme/stats-desktop.png" alt="La page des statistiques sur ordinateur" width="720"><br><sub>Statistiques</sub></p>
--->
-
-*Les captures d’écran arrivent bientôt.*
 
 ## Essayer Tsuji
 
@@ -554,8 +537,7 @@ La documentation interne est rédigée en anglais.
 
 ## Auteur
 
-<!-- TODO : remplacer les champs ci-dessous -->
-**[Your Name]**, étudiant en troisième année de bachelier en intelligence
+**Alexandre Bauwens**, étudiant en troisième année de bachelier en intelligence
 artificielle à l’Hénallux (Namur, Belgique), et apprenant le japonais.
 
 Je cherche un **stage de février à mai 2027, en Belgique**, en
@@ -565,8 +547,7 @@ l’idée à la production en dirigeant un agent de code IA. Concrètement, je
 définis le travail, j’écris les règles, je relis le résultat et je le teste
 en conditions réelles.
 
-- LinkedIn : [LinkedIn URL] <!-- TODO -->
-- Portfolio : [Portfolio URL] <!-- TODO -->
+- LinkedIn : [linkedin.com/in/alexandrebauwens](https://www.linkedin.com/in/alexandrebauwens)
 - GitHub : [@Foloutdono](https://github.com/Foloutdono)
 
 ## Crédits et licence
@@ -588,6 +569,6 @@ ouverts, utilisés selon leurs propres licences :
 Les mentions complètes figurent dans
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
-© 2026 [Your Name]. Tous droits réservés. Le code source de ce projet n’est
+© 2026 Alexandre Bauwens. Tous droits réservés. Le code source de ce projet n’est
 pas sous licence de réutilisation. Les données tierces ci-dessus restent
 sous leurs propres licences.

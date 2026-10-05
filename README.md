@@ -166,18 +166,8 @@ All content is organised by JLPT level:
 
 ## Screenshots
 
-<!--
-TODO: add the six screenshots below to docs/readme/, then remove this
-comment's opening and closing markers so the gallery shows.
-
-  docs/readme/today-phone.png         Today's queue, on a phone
-  docs/readme/analyzer-phone.png      The Analyzer breaking down a sentence, on a phone
-  docs/readme/grammar-phone.png       A grammar lesson, on a phone
-  docs/readme/dictionary-desktop.png  A dictionary entry, on a computer
-  docs/readme/exam-desktop.png        A mock exam, on a computer
-  docs/readme/stats-desktop.png       The statistics page, on a computer
-
-Phone shots: about 390×844 (portrait). Computer shots: about 1440×900.
+The interface is shown here in French, its first language; it is also
+available in English.
 
 <table>
   <tr>
@@ -190,9 +180,6 @@ Phone shots: about 390×844 (portrait). Computer shots: about 1440×900.
 <p align="center"><img src="docs/readme/dictionary-desktop.png" alt="A dictionary entry on the desktop layout" width="720"><br><sub>Dictionary, on a computer</sub></p>
 <p align="center"><img src="docs/readme/exam-desktop.png" alt="A mock JLPT exam on the desktop layout" width="720"><br><sub>Mock exam</sub></p>
 <p align="center"><img src="docs/readme/stats-desktop.png" alt="The statistics page on the desktop layout" width="720"><br><sub>Statistics</sub></p>
--->
-
-*Screenshots are coming soon.*
 
 ## Try it
 
@@ -518,8 +505,7 @@ If `DATABASE_URL` isn't set, the backend tests look for a database at
 
 ## Author
 
-<!-- TODO: replace the placeholders below -->
-**[Your Name]**, third-year Bachelor's student in Artificial Intelligence at
+**Alexandre Bauwens**, third-year Bachelor's student in Artificial Intelligence at
 Hénallux (Namur, Belgium), learning Japanese.
 
 I'm looking for an **internship from February to May 2027, in Belgium**, in
@@ -528,8 +514,7 @@ shows how I work: I take a product from idea to production by directing an
 AI coding agent. That means defining the work, writing down the rules,
 reviewing the result and testing it in real use.
 
-- LinkedIn: [LinkedIn URL] <!-- TODO -->
-- Portfolio: [Portfolio URL] <!-- TODO -->
+- LinkedIn: [linkedin.com/in/alexandrebauwens](https://www.linkedin.com/in/alexandrebauwens)
 - GitHub: [@Foloutdono](https://github.com/Foloutdono)
 
 ## Credits and licence
@@ -549,6 +534,6 @@ their own licences:
 
 The full notices are in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
-© 2026 [Your Name]. All rights reserved. The source code of this project is
+© 2026 Alexandre Bauwens. All rights reserved. The source code of this project is
 not licensed for reuse. The third-party data above remains under its own
 licences.
