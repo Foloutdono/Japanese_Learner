@@ -34483,6 +34483,12 @@ button.brd-stn { cursor: pointer; }
     min-width: 0;
     min-height: 56px;
   }
+  /* The stage scrolls (overflow-y: auto) and the unframed floor sits flush
+     on its edges, so the focus ring drawn outside the field was cut off at
+     the foot. Draw it inside the field instead. */
+  .desk-run--panels > .stage > form.stage__foot > .field:focus-visible {
+    outline-offset: -2px;
+  }
   /* The page's well on a desk surface (plan 157). .field--page steps UP
      to --surface because a field on the page has nothing below it to
      show; three of its mounts stand on a surface on the desk where the
