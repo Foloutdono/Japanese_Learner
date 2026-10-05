@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
+import { currentSession } from '../../lib/session'
 import { playClick } from '../../lib/audio'
 import { nativePlatform, nudgePermission, requestNudgePermission } from '../../lib/platform'
 import { whenLabel } from '../../lib/ahead'
@@ -56,7 +57,7 @@ export function NotificationsPage() {
     }
     setBusy(true)
     try {
-      await apiJson('/api/profile/learning', null, { method: 'PATCH', body: JSON.stringify({ notifications: on }) })
+      await apiJson('/api/profile/learning', await currentSession(), { method: 'PATCH', body: JSON.stringify({ notifications: on }) })
       await refreshSummary()
     } catch {
       setFailed(true)
