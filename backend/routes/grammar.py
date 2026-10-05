@@ -16,6 +16,7 @@ from study.grammar_examples import (
     example_payload, furigana_by_pattern, pattern_furigana, structure_furigana,
 )
 from study.grammar_lesson import contrast_payload, lesson_payload
+from study.grammar_tour import tour_payload
 from study.modes import (
     B2F, CONTRAST, GRAMMAR, GRADED_FOR_SOURCE, GRADED_ORDER_FOR_SOURCE, INDICE_CHOICES,
     INDICE_SENTENCES, Mode, require_mode, resolve_for_source,
@@ -235,7 +236,9 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         payload["choices_furigana"] = furigana_by_pattern(contrast["choices"])
 
     if stage == "new":
-        payload["lesson"] = lesson_payload(level, entry, lang)
+        # The tour rides with the lesson (plan 187): the gate asks it
+        # first and keeps the lesson for a point it cannot be drawn on.
+        payload["lesson"] = {**lesson_payload(level, entry, lang), "tour": tour_payload(level, entry, lang)}
 
     return payload
 
@@ -485,6 +488,7 @@ def get_grammar_point(id: str, lang: str = "fr", user_id: str = Depends(get_user
         "structure": entry["structure"],
         "meaning":   gloss(entry, lang),
         **lesson_payload(level, entry, lang),
+        "tour":      tour_payload(level, entry, lang),
         "status":    card_stats(states, user_id, id, GRAMMAR_STATUS_MODES),
     }
 

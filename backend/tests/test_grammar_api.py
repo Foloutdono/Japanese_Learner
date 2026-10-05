@@ -15,6 +15,7 @@ from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, RICH_LEVELS, gl
 from study import card_index
 from study.grammar_examples import BLANK, highlight_span, parts_with_span
 from study.grammar_lesson import contrast_payload, lesson_payload
+from study.grammar_tour import tour_payload
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -59,8 +60,10 @@ def test_cards_speak_the_learners_language_and_carry_their_lesson_when_new(clien
         assert ("lesson" in card) == (card["stage"] == "new")
         if "lesson" in card:
             assert set(card["lesson"]) == {
-                "pattern_furigana", "structure_furigana", "register", "steps", "compare", "examples",
+                "pattern_furigana", "structure_furigana", "register", "steps", "compare", "examples", "tour",
             }
+            # The tour rides with the lesson (plan 187); it is the point's own.
+            assert card["lesson"]["tour"] == tour_payload("N5", entry, "fr")
             for rival in card["lesson"]["compare"]:
                 assert "".join(p["text"] for p in rival["furigana"]) == rival["pattern"]
         # The pattern's furigana spells the pattern, and the formation's
@@ -183,6 +186,7 @@ def test_the_point_endpoint_serves_the_lesson_and_404s_an_unknown_id(client):
     assert body["raw_id"] == raw_id and body["level"] == "N4" and body["pattern"] == entry["pattern"]
     assert body["meaning"] == gloss(entry, "fr")
     assert body["steps"] == lesson_payload("N4", entry, "fr")["steps"]
+    assert body["tour"] == tour_payload("N4", entry, "fr")
     assert "".join(p["text"] for p in body["pattern_furigana"]) == entry["pattern"]
     assert [ex["jp"] for ex in body["examples"]] == [ex["jp"] for ex in entry["examples"]]
     assert body["status"]["status"] in ("not_started", "new", "learning", "mastered", "due")
