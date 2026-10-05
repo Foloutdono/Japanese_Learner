@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
@@ -87,6 +87,9 @@ beforeEach(() => {
   sessionStorage.clear()
   localStorage.setItem('lang', 'en')
 })
+// The language is the lane's to keep: a file after this one in the same
+// browser reads it, and every one of them pins French copy.
+afterEach(() => { localStorage.removeItem('lang') })
 
 describe('the lesson gate in the day’s queue', () => {
   it('opens a grammar point never met on its lesson, and on the card once boarded', async () => {
