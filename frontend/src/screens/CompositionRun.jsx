@@ -481,7 +481,7 @@ function Session({ session, level }) {
       {stage === 'writing' && point && (
         <>
           {/* The point as the page: the pattern where the sentence goes
-              in the other runs, the one thing on the card (plan 184),
+              in the other runs, the one thing on the card (plan 185),
               its form as its pieces under it, its meaning in the
               learner's language. No example sentence, ever — an
               example on the card is a sentence to copy; the examples
@@ -536,7 +536,7 @@ function Session({ session, level }) {
 
       {stage === 'feedback' && point && (
         <>
-          {/* The practice card (plan 184, the owner's pick A, then
+          {/* The practice card (plan 185, the owner's pick A, then
               A1): the point's tag with the detector's word on it
               (nothing on a point it is not trusted on); the learner's
               sentence leading, corrected in place -- what the tutor took

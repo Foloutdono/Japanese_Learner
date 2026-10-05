@@ -6,7 +6,7 @@ import { PointTag, CorrectedInPlace } from './PracticeCard'
 
 // ── The tutor's review, drawn once for two runs (plan 125) ──
 // 翻訳 and 作文 hand these components the same shape
-// (study/tutor_review.py). Since plan 184 (the practice card) it is
+// (study/tutor_review.py). Since plan 185 (the practice card) it is
 // drawn in three places: the verdict at the answer's well or leading the
 // summary (TutorVerdict), the corrected line as the learner's own line
 // corrected in place (PracticeCard's CorrectedInPlace), and the notes

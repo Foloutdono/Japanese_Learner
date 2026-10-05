@@ -99,7 +99,7 @@ describe('comprehension on the desk', () => {
     const card = side.querySelector('.prompt-card')
     expect(card.scrollHeight).toBeLessThanOrEqual(card.clientHeight + 1)
     expect($$('.stage__foot button').map(b => b.className)).toEqual(['btn-primary'])
-    // Its floor unframed (plan 184): Next at the card's edges, on the page.
+    // Its floor unframed (plan 185): Next at the card's edges, on the page.
     const foot = $('.stage__foot')
     expect(getComputedStyle(foot).borderTopStyle).toBe('none')
     expect(getComputedStyle(foot).backgroundColor).toBe('rgba(0, 0, 0, 0)')

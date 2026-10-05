@@ -651,6 +651,7 @@ const stats = {
   dueUnit:            'à réviser',
   newUnit:            'nouveaux',
   learningUnit:       'en cours',
+  learnedLabel:       'Apprises',   // le chiffre d'une plateforme, lu à voix haute (plan 184)
   sourceTiers:        n => `${n} paliers`,
   sourceThemes:       n => `${n} thèmes`,
   // Les sources du vocabulaire sur le bureau (plan 183) : la bande de ce
@@ -1125,7 +1126,7 @@ const reading = {
   incorrect:            'Pas tout à fait',
   correctRomaji:        'Romaji attendu',
   yourAnswer:           'Ta réponse',
-  // The practice card (plan 184): the grammar point's tag at the card's
+  // The practice card (plan 185): the grammar point's tag at the card's
   // top, on the answer and (translation) on the prompt; and, for a screen
   // reader, what the figure in the answer's well counts and the name of
   // the words missed under it.

@@ -152,7 +152,7 @@ describe('TranslationRun', () => {
 
   it("draws the tutor's review at a glance: the verdict at the answer, the fix numbered and led by what to write, what worked", async () => {
     const root = await answered(await run())
-    // The verdict stands at the end of the answer's well (plan 184).
+    // The verdict stands at the end of the answer's well (plan 185).
     // This answer is not the tutor's line corrected (it kept none of
     // it), so the well holds it as typed: no corrected line under it.
     const well = root.querySelector('.pcard-well')

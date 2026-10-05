@@ -173,7 +173,7 @@ describe('a composition run on the desk', () => {
 
   // A sentence typed in romaji is broken down in Japanese: the tutor
   // writes it out, the breakdown reads that, and the card leads with it,
-  // corrected in place (plan 184). It had been five rows of letters.
+  // corrected in place (plan 185). It had been five rows of letters.
   it('breaks a romaji sentence down in the tutor\'s Japanese, and leads with it corrected', async () => {
     const ROMAJI = 'ongaku ga kikinagara benkyou shimasu.'
     apiJson.mockImplementation(async (url) => {

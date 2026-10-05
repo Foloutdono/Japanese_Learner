@@ -100,11 +100,11 @@ export function RouteStops({ stops, here = null, selected = null, onSelect, link
                 <span className="route-stop__caption">
                   {caption}
                   {stop.note && <span className="route-stop__note">{stop.note}</span>}
-                  {/* Mastery takes three weeks to show, so the figure
-                      at the end of the row reads 0 / 665 through a
-                      fortnight of real work. This is what moves in the
-                      meantime — and only while it has something of its
-                      own to say: a stop nobody has opened, and one
+                  {/* The figure at the end of the row is what the stop's
+                      cards add up to, each for how far it has come,
+                      shown whole (plan 184); this is how many cards that
+                      is drawn from — and only while it has something of
+                      its own to say: a stop nobody has opened, and one
                       whose every started card is mastered, both print
                       the figure and no note. */}
                   {started && <span className="route-stop__started">{stop.startedLabel}</span>}

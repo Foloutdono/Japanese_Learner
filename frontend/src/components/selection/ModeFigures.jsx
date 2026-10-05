@@ -11,8 +11,10 @@ import { Composition } from '../stats/Composition'
 // desk's station split every card is. What earns it is the platform's
 // own record, from the buckets /api/stats already keeps per mode: how
 // many of its cards are due now (the state's ink), and how far the
-// deck has come on it — the stats screen's composition bar, mastered
-// and in progress over the whole, with the mastered count beside it.
+// deck has come on it — the composition bar, what the cards add up to
+// and the cards met beyond it over the whole, with the figure beside
+// it: each card counts for how far it has come, the sum shown whole
+// (plan 184), as a stop's figure on the Learn plate is.
 // Nothing for a platform with no bucket (the fast review) or none of
 // the cards yet: an empty column says less than no column.
 //
@@ -25,7 +27,9 @@ export function ModeFigures({ source, deck, mode }) {
 // The same figures for a stop /api/stats does not carry (plan 115): a
 // theme band, a frequency tier. Each platform asks its own scoped
 // stats route — the one its run already reads for its head — so the
-// figure beside the card is the figure the run will open on.
+// figures beside the card are the ones the run opens on: its legend
+// splits the cards by stage (new, in progress, mastered), where this
+// figure adds them up, as the stop's does.
 export function ScopeFigures({ url, session }) {
   const [got, setGot] = useState(null)
   useEffect(() => {
@@ -40,9 +44,11 @@ export function ScopeFigures({ url, session }) {
   return <Figures row={got?.url === url ? got.row : null} />
 }
 
-// With nothing due, the cards in progress say what the bar's red sliver
-// is (plan 137): a fortnight of first passes leaves "0 / 674" mastered
-// on every platform, and this is the figure that moves meanwhile.
+// With nothing due, the cards in progress say what the bar's lighter
+// part is (plan 137, when a fortnight of first passes left "0 / 674"
+// mastered on every platform and this was the figure that moved): the
+// count of cards met and not yet counted in full, still true beside a
+// figure that now moves too.
 function Figures({ row }) {
   const { t } = useLang()
   if (!row || row.total === 0) return null
@@ -56,8 +62,8 @@ function Figures({ row }) {
       )}
       <Composition row={row} />
       <span className="desk-mode-fig__count">
-        <span className="sr-only">{t.mastered} </span>
-        <b>{row.mastered}</b>/ {row.total}
+        <span className="sr-only">{t.learnedLabel} </span>
+        <b>{row.learned}</b>/ {row.total}
       </span>
     </span>
   )

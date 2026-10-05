@@ -90,7 +90,7 @@ const SHORT_SENTENCE = 14
  *  its clock when it is pressed, so the learner decides when the
  *  reading begins. */
 export function ReadingPrompt({ cardKey, phrase, covered, guide, onPlay, playLabel, keyHint = false }) {
-  // The practice card (plan 184): no foot -- the head says where the
+  // The practice card (plan 185): no foot -- the head says where the
   // sentence is from -- and a short sentence a rung up on the desk, the
   // one thing on the card.
   const short = [...(phrase ?? '')].length <= SHORT_SENTENCE
@@ -184,7 +184,7 @@ export function AnswerForm({ answer, setAnswer, onSubmit, t, guide, disabled = f
 }
 
 /** The page the answer is read against, after it is in: the practice
- *  card's (plan 184, components/study/PracticeCard.jsx's SentenceCheck)
+ *  card's (plan 185, components/study/PracticeCard.jsx's SentenceCheck)
  *  -- the point's tag, the sentence leading with its reading over the
  *  kanji and its misses underlined where the server's `words` place
  *  them, the answer in its well with its misses corrected over it and

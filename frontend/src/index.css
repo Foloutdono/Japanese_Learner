@@ -12693,7 +12693,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-body);
   line-height: 1.5;
 }
-/* The notes (plan 184): what to fix numbered, its number a roundel in
+/* The notes (plan 185): what to fix numbered, its number a roundel in
    the miss ink -- the number the sentence carries on the words it is
    about -- each fix leading with what to write instead, in Japanese and
    the success ink, the reason under it in the quiet register (the
@@ -12770,7 +12770,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .rvw__verdict--partial { --badge-color: var(--warning); }
 .rvw__verdict--incorrect { --badge-color: var(--danger); }
 
-/* ── 見本 — the practice card (plan 184) ──
+/* ── 見本 — the practice card (plan 185) ──
    The owner's pick A of the canvas "Tsuji — the practice cards", for
    reading, translation, dictation and composition
    (components/study/PracticeCard.jsx): the sentence leads, centred, the
@@ -14240,7 +14240,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: 0;
   min-width: 0;
   overflow: hidden;
-  /* Its own sumi (plan 184). The words are the panel's inks, which
+  /* Its own sumi (plan 185). The words are the panel's inks, which
      only read on sumi; the ground had been the wrapper's -- the
      phone's dock, the desk floor's frame -- and the frame is
      --surface, paper in the light theme, where the misses' words
@@ -17848,7 +17848,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   justify-content: flex-start;
   padding: var(--sp-5);
 }
-/* The practice card's page (plan 184, PromptCard's `page`): the footed
+/* The practice card's page (plan 185, PromptCard's `page`): the footed
    card's growth with no strip, top-down, its pieces a rung apart -- the
    point's tag, then the sentence and the well (.pcard-group). */
 .prompt-card--footed .prompt-card__body--page {
@@ -34448,7 +34448,7 @@ button.brd-stn { cursor: pointer; }
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
-  /* The practice runs' floor stands on the page (plan 184, owner-
+  /* The practice runs' floor stands on the page (plan 185, owner-
      directed: "remove the box encapsulating the next button and
      rating bar", then "from comprehension too"). Reading, translation,
      dictation and composition (StudyStage's `stage--sentence`) and
@@ -34465,7 +34465,7 @@ button.brd-stn { cursor: pointer; }
     border: 0;
     border-radius: 0;
   }
-  /* The practice card's one line a rung up on the desk (plan 184): a
+  /* The practice card's one line a rung up on the desk (plan 185): a
      short sentence to read and a composition point are the only thing
      on their card, and the desk's column has the room for the display
      size the phone's has not. */

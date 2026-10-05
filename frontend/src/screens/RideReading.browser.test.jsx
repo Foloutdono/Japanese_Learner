@@ -103,7 +103,7 @@ describe('RideReading', () => {
     await settle(50)
     root.querySelector('.stage__foot button').click()
     await settle(200)
-    // The practice card (plan 184): the sentence leading, the answer in
+    // The practice card (plan 185): the sentence leading, the answer in
     // its well with the measure from the office's own check at its end;
     // the note over the bar.
     expect(root.querySelector('.pcard-lead__jp').textContent).toBe(SENTENCE.phrase)

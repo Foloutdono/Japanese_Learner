@@ -694,7 +694,7 @@ them:
   This is `ExampleSentence`, so it holds wherever an example sentence
   is printed.
 
-### The practice card (見本, plan 184)
+### The practice card (見本, plan 185)
 
 The card a sentence run's answer is read against — reading, translation,
 dictation, composition, and the reading ride — is the owner's pick A of
@@ -1791,7 +1791,7 @@ each question drawing its answers between them.
   invites the learner to inflate it. In the middle **the exercise**, the
   card grown to what its floor leaves and the floor one framed row, as
   the tiles' is: the field and Check, the tiles, then Next. **Since plan
-  184 the four sentence runs' floor is unframed** (owner-directed:
+  185 the four sentence runs' floor is unframed** (owner-directed:
   reading, translation, dictation and composition, StudyStage's
   `stage--sentence`): the field and Check, the tiles and Next stand on
   the page at the card's edges, the card the one panel in the column,

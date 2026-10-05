@@ -282,7 +282,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
 
       {sentence && measured && (
         <>
-          {/* The run's practice card (plan 184): the point's tag, the
+          {/* The run's practice card (plan 185): the point's tag, the
               sentence leading, the answer in its well. */}
           <PromptCard page prose>
             <ReadingRegisters

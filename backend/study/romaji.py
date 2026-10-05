@@ -79,7 +79,7 @@ def to_romaji(text: str) -> str:
 _SAID_KANA = {"は": "ワ", "へ": "エ", "を": "オ"}
 
 
-# ── The reading in context, the furigana's (plan 184) ──
+# ── The reading in context, the furigana's (plan 185) ──
 # UniDic reads word by word, and some readings are decided by the word
 # beside it: 十本 じゅっぽん, 九時 くじ, 明日 あした, 日本 にほん, 何を
 # なに, 世界中 じゅう, お母さん かあ. study/reading_context.py puts them
@@ -211,7 +211,7 @@ def _written(surface: str, kana: str) -> str:
 
 def sentence_words(text: str) -> list[dict] | None:
     """The words sentence_romaji spaces, each with its place in the
-    sentence (plan 184): `text`, the characters it is written with --
+    sentence (plan 185): `text`, the characters it is written with --
     every word's text, in order, spelling the sentence back exactly --
     its reading as written in hiragana (`kana`; は, not the わ a
     listener hears) and its `romaji` as sentence_romaji prints it. The

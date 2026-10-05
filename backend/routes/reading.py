@@ -77,6 +77,31 @@ logger = logging.getLogger(__name__)
 # the same reason -- every exercise before this had no seeds -- and read
 # back by _recent_grammar_patterns so the next exercise is written
 # around points the learner has not just seen.
+#
+# reading_log.phase under the name `source`: get_reading_batch's
+# docstring once suggested renaming the column by hand to match the
+# field, and the production database had it done. Every INSERT below
+# then named a column that was not there, and not one reading result
+# was kept -- the run said so only once lib/postResult.js existed. The
+# column is `phase` everywhere the code reads or writes it (here,
+# /history, routes/practice.py, and translation_log's twin), so the
+# rename is undone, and only on a table with a `source` and no `phase`.
+_RESTORE_PHASE = """
+    DO $$
+    BEGIN
+        IF EXISTS (SELECT 1 FROM pg_attribute
+                   WHERE attrelid = to_regclass('reading_log')
+                     AND attname = 'source' AND NOT attisdropped)
+           AND NOT EXISTS (SELECT 1 FROM pg_attribute
+                           WHERE attrelid = to_regclass('reading_log')
+                             AND attname = 'phase' AND NOT attisdropped)
+        THEN
+            ALTER TABLE reading_log RENAME COLUMN source TO phase;
+        END IF;
+    END $$
+"""
+
+
 def _migrate_reading_log_schema() -> None:
     # One statement, one transaction each, and IF EXISTS on the table: the
     # three used to share a single transaction, so a comprehension_log
@@ -86,6 +111,7 @@ def _migrate_reading_log_schema() -> None:
     # then stopped being written at all, with nothing on the screen to say
     # so (the run drops a failed result post quietly).
     statements = (
+        _RESTORE_PHASE,
         "ALTER TABLE IF EXISTS reading_log ADD COLUMN IF NOT EXISTS quality SMALLINT",
         "ALTER TABLE IF EXISTS reading_log ADD COLUMN IF NOT EXISTS accuracy SMALLINT",
         "ALTER TABLE IF EXISTS comprehension_log ADD COLUMN IF NOT EXISTS grammar JSONB",
@@ -539,7 +565,7 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
     phrase = {
         "phrase": jp,
         "romaji": phrase_to_romaji(jp),
-        # The reading over the sentence's kanji (plan 184): the card the
+        # The reading over the sentence's kanji (plan 185): the card the
         # answer is read against leads with the sentence, and a learner
         # who cannot read 少し cannot check their own "sukoshi" against
         # it. The tokenizer's readings in context, per morpheme, as
@@ -617,13 +643,14 @@ def get_reading_batch(
     conditional query-param builder, and in case a translated-examples
     layer gets added later.
 
-    NOTE on reading_log.phase: not renamed at the DB column level (no
-    migration tooling available here) — it now stores a compact label
-    from _source_label() ("level:N3" / "freq:vocab:1" /
-    "freq:vocab:1:500" off the default tier size, plan 159 / "mastery")
-    instead of the old "hiragana"/"katakana"/"mixed". Rename the column
-    yourself with `ALTER TABLE reading_log RENAME COLUMN phase TO source;`
-    if you'd rather it matched the new field name everywhere.
+    NOTE on reading_log.phase: it now stores a compact label from
+    _source_label() ("level:N3" / "freq:vocab:1" / "freq:vocab:1:500"
+    off the default tier size, plan 159 / "mastery") instead of the old
+    "hiragana"/"katakana"/"mixed", and keeps its name: /result,
+    /history, routes/practice.py and translation_log's twin column all
+    say `phase`. Never rename it by hand. A note here once suggested
+    `source`, the production database had it done, and no reading
+    result was saved after; _migrate_reading_log_schema undoes it.
 
     NOTE on difficulty: for source="level" and source="frequency" with
     domain="vocab", every returned sentence is checked against
@@ -738,6 +765,59 @@ def get_reading_batch(
 # side effect of this one.
 SRS_MODE = "sentence.reading"
 
+# What /result answers with when the work after the log failed: saved,
+# nothing scheduled, no fare. usePracticeXp pays nothing on a 0.
+NO_FARE = {"xp_earned": 0, "leveled_up": False, "new_level": None}
+
+
+def _schedule_rating(payload, user_id: str, mode: str, platform: str) -> tuple[dict | None, dict]:
+    """(scheduled, fare) for a rated sentence whose log row is already
+    committed -- reading's /result and translation's, its twin under its
+    own mode.
+
+    Never raises. The row is kept by then, so a 500 from here told the
+    run the answer was lost when it was not, and the run's retry
+    (frontend lib/postResult.js) logged the sentence a second time. A
+    failure goes to the server's log, and the answer comes back saved
+    with nothing scheduled and NO_FARE.
+    """
+    try:
+        # Scheduling happens after the log is committed, and never
+        # instead of it: a rating is a fact about what the learner did,
+        # and it must survive even if the word cannot be resolved to a
+        # card.
+        scheduled = None
+        if payload.quality is not None:
+            card_id = vocab_card_id_for_word(payload.source_word, user_id)
+            if card_id:
+                state = srs.review(card_id, mode, payload.quality)
+                scheduled = {
+                    "card_id": card_id,
+                    "mode": mode,
+                    "interval_days": state["interval_days"],
+                    "next_review": state["next_review"],
+                    "stage": state["stage"],
+                    "xp_earned": state.get("xp_earned"),
+                    "leveled_up": state.get("leveled_up"),
+                    "new_level": state.get("new_level"),
+                }
+
+        # The fare. A rating that scheduled a card was paid by that
+        # review; one that scheduled nothing -- no card behind the
+        # sentence, or an older client sending no quality -- is paid
+        # here at the practice rate (srs.award_practice), so the run's
+        # level bar moves either way. Top-level on purpose: every run
+        # reads the same three keys.
+        if scheduled:
+            fare = {k: scheduled[k] for k in ("xp_earned", "leveled_up", "new_level")}
+        else:
+            quality = payload.quality if payload.quality is not None else (4 if payload.correct else 1)
+            fare = srs.award_practice(user_id, platform, payload.source, [quality])
+        return scheduled, fare
+    except Exception:
+        logger.exception("%s result logged but not scheduled or paid", platform)
+        return None, dict(NO_FARE)
+
 
 # ── The measurement ──────────────────────────────────────────────────
 class CheckPayload(BaseModel):
@@ -809,35 +889,7 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
     finally:
         conn.close()
 
-    # Scheduling happens after the log is committed, and never instead
-    # of it: a rating is a fact about what the learner did, and it must
-    # survive even if the word cannot be resolved to a card.
-    scheduled = None
-    if payload.quality is not None:
-        card_id = vocab_card_id_for_word(payload.source_word, user_id)
-        if card_id:
-            state = srs.review(card_id, SRS_MODE, payload.quality)
-            scheduled = {
-                "card_id": card_id,
-                "mode": SRS_MODE,
-                "interval_days": state["interval_days"],
-                "next_review": state["next_review"],
-                "stage": state["stage"],
-                "xp_earned": state.get("xp_earned"),
-                "leveled_up": state.get("leveled_up"),
-                "new_level": state.get("new_level"),
-            }
-
-    # The fare. A rating that scheduled a card was paid by that review;
-    # one that scheduled nothing -- no card behind the sentence, or an
-    # older client sending no quality -- is paid here at the practice
-    # rate (srs.award_practice), so the run's level bar moves either
-    # way. Top-level on purpose: every run reads the same three keys.
-    if scheduled:
-        fare = {k: scheduled[k] for k in ("xp_earned", "leveled_up", "new_level")}
-    else:
-        quality = payload.quality if payload.quality is not None else (4 if payload.correct else 1)
-        fare = srs.award_practice(user_id, "reading", payload.source, [quality])
+    scheduled, fare = _schedule_rating(payload, user_id, SRS_MODE, "reading")
 
     return {
         **fare,

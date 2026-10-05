@@ -672,6 +672,7 @@ const stats = {
   dueUnit:            'due',
   newUnit:            'new',
   learningUnit:       'in progress',
+  learnedLabel:       'Learned',   // a platform's figure, read out (plan 184)
   sourceTiers:        n => `${n} tiers`,
   sourceThemes:       n => `${n} themes`,
   // The vocabulary's sources on the desk (plan 183): the strip of what
@@ -1166,7 +1167,7 @@ const reading = {
   incorrect:            'Not quite',
   correctRomaji:        'Correct romaji',
   yourAnswer:           'Your answer',
-  // The practice card (plan 184): the grammar point's tag at the card's
+  // The practice card (plan 185): the grammar point's tag at the card's
   // top, on the answer and (translation) on the prompt; and, for a screen
   // reader, what the figure in the answer's well counts and the name of
   // the words missed under it.

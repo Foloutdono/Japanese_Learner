@@ -41,9 +41,9 @@ const POINT = {
 
 const settle = (ms = 200) => new Promise(r => setTimeout(r, ms))
 
-function mount(path) {
+function mount(path, index = INDEX) {
   apiJson.mockImplementation(async (url) => {
-    if (String(url).startsWith('/api/grammar/points')) return INDEX
+    if (String(url).startsWith('/api/grammar/points')) return index
     if (String(url).startsWith('/api/grammar/point')) return POINT
     return {}
   })
@@ -80,6 +80,24 @@ describe('the grammar station', () => {
     document.querySelector('.gl-sheet [aria-label="Close"]').click()
     await settle()
     expect(document.querySelector('.gl-sheet')).toBeNull()
+  })
+
+  // `started` is the points met at all and `learned` what they add up to
+  // (plan 184), so the note is news only while the first outruns the
+  // second — never "2 started" beside a finished 2 / 2.
+  const doorOf = screen => screen.container.querySelector('.gl-points-door')
+
+  it('notes the points met while they outrun the figure beside it', async () => {
+    const screen = await mount('/learn/grammar/N5', { ...INDEX, learned: 1, started: 2 })
+    await settle(300)
+    expect(doorOf(screen).querySelector('.rad-door__started').textContent).toBe('2 started')
+  })
+
+  it('prints no note on a level whose every point is learned', async () => {
+    const screen = await mount('/learn/grammar/N5', { ...INDEX, learned: 2, started: 2 })
+    await settle(300)
+    expect(doorOf(screen).querySelector('.rad-door__fig').textContent.replace(/\s/g, '')).toBe('2/2')
+    expect(doorOf(screen).querySelector('.rad-door__started')).toBeNull()
   })
 
   it('opens a deep-linked point straight onto the platforms, and hides a platform with nothing to serve', async () => {

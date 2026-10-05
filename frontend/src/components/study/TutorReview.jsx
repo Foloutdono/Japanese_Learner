@@ -7,7 +7,7 @@ import { CheckIcon } from '../ui/Icons'
 // the learner wrote from a grammar point and there is no reference at
 // all. The shape is study/tutor_review.py's; this only draws it.
 //
-// Since plan 184 (the practice card, the owner's pick A) it is drawn
+// Since plan 185 (the practice card, the owner's pick A) it is drawn
 // in three places rather than one block. The verdict stands at the end
 // of the learner's answer well (translation) or leads the summary
 // (composition): TutorVerdict. The corrected sentence is the learner's

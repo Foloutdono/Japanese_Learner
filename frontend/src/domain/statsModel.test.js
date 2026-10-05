@@ -206,16 +206,19 @@ describe('deckCode', () => {
 // ── One platform (plan 114) ──
 // The desk's station split prints each platform's own composition and
 // due count beside it, read from the same buckets the stats screen sums.
+// Its figure is what the cards add up to (plan 184), so a platform with
+// nothing mastered but a week's work behind it does not read 0.
 describe('modeRow', () => {
   const stats = {
-    vocab: { N5: { 'vocab.flashcard.f2b': { total: 80, new: 40, learning: 20, mastered: 20, due_now: 7, reviews: 50, correct: 40 } } },
+    vocab: { N5: { 'vocab.flashcard.f2b': { total: 80, new: 40, learning: 20, mastered: 20, learned: 30, due_now: 7, reviews: 50, correct: 40 } } },
   }
 
-  it('is one bucket with its shares and its due count', () => {
+  it('is one bucket with its figure, its shares and its due count', () => {
     const row = modeRow(stats, 'vocab', 'N5', 'vocab.flashcard.f2b')
-    expect(row).toMatchObject({ total: 80, mastered: 20, learning: 20, new: 40, due: 7 })
-    expect(row.masteredPct).toBe(25)
-    expect(row.learningPct).toBe(25)
+    expect(row).toMatchObject({ total: 80, mastered: 20, learning: 20, new: 40, learned: 30, due: 7 })
+    // The bar: the figure in full, the cards met beyond it in part.
+    expect(row.learnedPct).toBe(37.5)
+    expect(row.metPct).toBe(12.5)
   })
 
   it('is null where there is no bucket', () => {
@@ -227,8 +230,24 @@ describe('modeRow', () => {
 
 describe('bucketRow', () => {
   it('reads a scoped stats route\'s bucket', () => {
+    const row = bucketRow({ total: 40, new: 30, learning: 6, mastered: 4, learned: 7, due_now: 3 })
+    expect(row).toMatchObject({ total: 40, mastered: 4, learning: 6, learned: 7, due: 3, learnedPct: 17.5, metPct: 7.5 })
+  })
+
+  it('counts a week of work, where nothing is mastered yet', () => {
+    const row = bucketRow({ total: 100, new: 60, learning: 40, mastered: 0, learned: 23, due_now: 0 })
+    expect(row.learned).toBe(23)
+    expect(row.learnedPct).toBe(23)
+    expect(row.metPct).toBe(17)
+  })
+
+  it('never draws the met part negative, whatever a payload says', () => {
+    expect(bucketRow({ total: 10, new: 6, learning: 1, mastered: 3, learned: 5 }).metPct).toBe(0)
+  })
+
+  it('reads a payload from before the figure as the mastered cards it had', () => {
     const row = bucketRow({ total: 40, new: 30, learning: 6, mastered: 4, due_now: 3 })
-    expect(row).toMatchObject({ total: 40, mastered: 4, learning: 6, due: 3, masteredPct: 10, learningPct: 15 })
+    expect(row).toMatchObject({ learned: 4, learnedPct: 10, metPct: 15 })
   })
 
   it('is no row for an empty tier\'s {error} or a failed fetch', () => {

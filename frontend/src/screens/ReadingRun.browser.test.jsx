@@ -149,7 +149,7 @@ async function play(root) {
 const toggle = root => root.querySelector('.prose__breakdown button')
 
 /** What "show breakdown" takes off the card: the sentence leading with
- *  its romaji and its translation, and the answer's well (plan 184). */
+ *  its romaji and its translation, and the answer's well (plan 185). */
 function registersShowing(root) {
   return Boolean(root.querySelector('.pcard-lead'))
     && root.querySelector('.pcard-lead__jp').textContent.includes(PHRASE.phrase)
@@ -250,7 +250,7 @@ describe('ReadingRun — the breakdown toggle', () => {
 // simply absent if it never lands, and it never shows a figure
 // belonging to a sentence the reader has already left.
 describe('ReadingRun — the measurement', () => {
-  // The figure at the end of the answer's well (plan 184): the number
+  // The figure at the end of the answer's well (plan 185): the number
   // and its % in the bold, the caption under it.
   const measure = root => root.querySelector('.pcard-well__fig b')
 
@@ -296,7 +296,7 @@ describe('ReadingRun — the measurement', () => {
   it('underlines the word missed in the sentence and names it under the well', async () => {
     // The batch's words (study/romaji.sentence_words) and the
     // breakdown's tokens, with their offsets: the run hands both to the
-    // card (plan 184, A1.3 and A2.2).
+    // card (plan 185, A1.3 and A2.2).
     const words = [
       { text: '学校', kana: 'がっこう', romaji: 'gakkou' },
       { text: 'は', kana: 'は', romaji: 'wa' },

@@ -8,7 +8,7 @@
 # citation reading, so the compounds whose reading is irregular came
 # back as the sum of their parts. Pinned here because the correction is
 # a table and a table is exactly the thing that quietly loses a row.
-# Since plan 184 the table is the furigana's (study/reading_context.py),
+# Since plan 185 the table is the furigana's (study/reading_context.py),
 # which the romaji now reads too, so the two can no longer disagree --
 # ContextTests below holds the words that table puts right beyond the
 # hour and the minute.
@@ -160,7 +160,7 @@ class NotACounterTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs fugashi/unidic-lite")
 class ContextTests(unittest.TestCase):
-    """The romaji reads what the furigana reads (plan 184): every word
+    """The romaji reads what the furigana reads (plan 185): every word
     study/reading_context.py puts right in context, and every number in
     digits read with its counter (plan 177). Before, the romaji under a
     sentence said "juupon" where the reading over it said じゅっぽん."""

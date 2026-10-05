@@ -277,6 +277,7 @@ def get_kana_stats(set_name: str, m: Mode = Depends(require_mode(KANA)),
         "new":      sum(1 for s in states.values() if s == "new"),
         "learning": sum(1 for s in states.values() if s == "learning"),
         "mastered": sum(1 for s in states.values() if s == "mastered"),
+        "learned":  srs.get_bulk_learned(card_ids, mode),
         "due_now":  len(due),
     }
 

@@ -276,7 +276,7 @@ describe('DictationRun', () => {
 
   it('prints what was typed back, its misses corrected over it, beside how much of it matched', async () => {
     const root = await answered()
-    // In its well (plan 184), read against the line's romaji: the word
+    // In its well (plan 185), read against the line's romaji: the word
     // the answer left out written over a caret where it goes (A1.1),
     // the match a figure and a bar (A2.3).
     expect(root.querySelector('.pcard-well .pcard-answer').textContent).toBe('gakkou wa kuji kara desu')

@@ -6,7 +6,7 @@ import {
   diffWords, correctionFixes, refSpans, missMarks, missedWords, markPieces, joinWords, phrases,
 } from '../../domain/answerDiff'
 
-// ── 見本 — the practice card's pieces (plan 184) ────────────────────────
+// ── 見本 — the practice card's pieces (plan 185) ────────────────────────
 // The owner's pick A of the canvas "Tsuji — the practice cards", for the
 // four sentence runs (reading, translation, dictation, composition):
 // the sentence leads -- the Japanese the largest line on the card, its

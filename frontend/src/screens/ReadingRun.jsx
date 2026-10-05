@@ -634,7 +634,7 @@ function SessionView({
 
       {stage === 'feedback' && data && feedback && (
         <>
-          {/* The practice card (plan 184, the owner's pick A): the
+          {/* The practice card (plan 185, the owner's pick A): the
               point's tag, the sentence leading with its reading over the
               kanji, and the answer in its well, its misses marked. Only
               a curated sentence carries a grammar point: it was written

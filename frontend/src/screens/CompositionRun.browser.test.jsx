@@ -121,7 +121,7 @@ async function graded(root, at = -1) {
   return root
 }
 
-// The detector's word, on the point's tag (plan 184): a check where it
+// The detector's word, on the point's tag (plan 185): a check where it
 // found the point, a cross where it did not, nothing where it has none.
 const measure = root => {
   const mark = root.querySelector('.pcard-tag .pcard-tag__used')
@@ -160,7 +160,7 @@ describe('CompositionRun', () => {
     expect(params.get('count')).toBe('5')
 
     expect(root.querySelector('.stage__where, .stage__head').textContent).toContain('Rédaction')
-    // The point the one thing on the card (plan 184), its form as its
+    // The point the one thing on the card (plan 185), its form as its
     // pieces under it, its meaning under that.
     expect(root.querySelector('.pcard-lead__jp--point').textContent).toBe('〜ながら')
     expect([...root.querySelectorAll('.pcard-form__piece')].map(p => p.textContent)).toEqual(['V-ます', 'ながら'])
@@ -202,7 +202,7 @@ describe('CompositionRun', () => {
     // The point's tag with the detector's word on it; the sentence
     // leading, corrected in place -- the tutor's change struck and the
     // right word written small over it, the fix's number after it -- and
-    // what it says under it (plan 184, A1). Written in Japanese, so no
+    // what it says under it (plan 185, A1). Written in Japanese, so no
     // romaji line.
     expect(root.querySelector('.pcard-tag__jp').textContent).toBe('〜ながら')
     expect(measure(root)).toBe('found')

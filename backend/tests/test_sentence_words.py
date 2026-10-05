@@ -1,4 +1,4 @@
-"""A practice sentence's words, each with its place (plan 184).
+"""A practice sentence's words, each with its place (plan 185).
 
 The practice card reads a learner's romaji against the sentence's word
 by word; to underline a miss where the word stands in the Japanese and

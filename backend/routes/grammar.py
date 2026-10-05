@@ -368,6 +368,19 @@ def _folded_stages(grammar_list: list[dict], level: str, user_id: str) -> dict[s
     return out
 
 
+def _folded_progress(grammar_list: list[dict], level: str, user_id: str) -> dict[str, float]:
+    """raw_id -> the furthest any graded mode has taken the point, 0.0 new
+    to 1.0 mastered (srs._progress, plan 184) -- the figure the index's
+    `learned` adds up, the same reading /api/stats gives a level's stop."""
+    raw_ids  = [grammar_to_id(g, level) for g in grammar_list]
+    card_ids = prefixed(raw_ids, user_id)
+    per_mode = [srs.get_bulk_progress(card_ids, k) for k in sorted(GRADED_FOR_SOURCE[GRAMMAR])]
+    return {
+        raw_id: max((found.get(card_id, 0.0) for found in per_mode), default=0.0)
+        for raw_id, card_id in zip(raw_ids, card_ids)
+    }
+
+
 @router.get("/api/grammar/review-cards")
 def get_grammar_review_cards(level: str, lang: str = "fr", user_id: str = Depends(get_user_id)):
     """
@@ -416,12 +429,17 @@ def get_grammar_points(level: str, lang: str = "fr", user_id: str = Depends(get_
     many cards each mode can serve here -- so a platform with nothing
     behind it (contrast, at a level whose lessons are not written yet)
     is not offered.
+
+    The figures are /api/stats' own for a level's stop (plan 184):
+    `started` the points met at all, `learned` what the points add up
+    to, each for how far it has come and the sum shown whole.
     """
     grammar_list = GRAMMAR_BY_LEVEL.get(level)
     if not grammar_list:
         raise HTTPException(status_code=404, detail=f"Unknown level: {level}")
 
     stages = _folded_stages(grammar_list, level, user_id)
+    progress = _folded_progress(grammar_list, level, user_id)
     points = []
     for entry in grammar_list:
         raw_id = grammar_to_id(entry, level)
@@ -435,8 +453,8 @@ def get_grammar_points(level: str, lang: str = "fr", user_id: str = Depends(get_
     return {
         "level":   level,
         "points":  points,
-        "learned": sum(1 for p in points if p["stage"] == "mastered"),
-        "started": sum(1 for p in points if p["stage"] == "learning"),
+        "learned": srs.whole_cards(progress.values()),
+        "started": sum(1 for p in points if p["stage"] != "new"),
         "total":   len(points),
         "totals":  {k: card_index.total(GRAMMAR, level, k) for k in GRADED_ORDER_FOR_SOURCE[GRAMMAR]},
     }
@@ -519,6 +537,7 @@ def _mode_bucket(level: str, mode: str, user_id: str) -> dict:
         "new":      sum(1 for s in states.values() if s == "new"),
         "learning": sum(1 for s in states.values() if s == "learning"),
         "mastered": sum(1 for s in states.values() if s == "mastered"),
+        "learned":  srs.get_bulk_learned(card_ids, mode),
         "due_now":  len(due),
     }
 

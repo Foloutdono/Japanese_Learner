@@ -5,7 +5,7 @@ import PromptCard from './components/study/PromptCard'
 import { SentenceCheck } from './components/study/PracticeCard'
 import './index.css'
 
-// ── 見本 — the practice card on a phone (plan 184) ─────────────────────
+// ── 見本 — the practice card on a phone (plan 185) ─────────────────────
 // The owner's pick A of the canvas "Tsuji — the practice cards": the
 // card a reading, dictation or the reading ride's answer is read against
 // is a page with no foot strip, the point's tag at its top, and the

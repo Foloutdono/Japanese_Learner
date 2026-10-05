@@ -1,4 +1,4 @@
-"""The reading over a practice sentence's kanji (plan 184).
+"""The reading over a practice sentence's kanji (plan 185).
 
 Reading and translation (which serves reading's batch) hand the card the
 sentence's furigana beside its romaji, so the card the answer is read

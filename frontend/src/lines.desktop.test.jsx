@@ -148,7 +148,7 @@ describe('a practice run on three panels', () => {
     expect($('.desk-run__side .bkd')).toBeNull()
   })
 
-  // Unframed since plan 184 (owner-directed): the floor stands on the
+  // Unframed since plan 185 (owner-directed): the floor stands on the
   // page at the card's edges, the card the one panel in the column.
   it('stands the floor under the card unframed, and prints no cap on it', async () => {
     await reading()
@@ -177,7 +177,7 @@ describe('a practice run on three panels', () => {
     expect(caps).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
   })
 
-  // The practice card (plan 184, the owner's pick A): the prompt's short
+  // The practice card (plan 185, the owner's pick A): the prompt's short
   // sentence at the display size, the one thing on its card; then the
   // card with no foot strip, the sentence leading and the answer's well
   // under it with the miss marked.
@@ -207,7 +207,7 @@ describe('a practice run on three panels', () => {
     expect(well.getBoundingClientRect().right).toBeLessThanOrEqual(card.getBoundingClientRect().right)
   })
 
-  // The rating bar unframed with them (plan 184): its misses carry their
+  // The rating bar unframed with them (plan 185): its misses carry their
   // own sumi, the ground their panel inks read on -- in the light theme
   // too, where the frame's surface was paper under them.
   it('stands the rating bar unframed, its misses on their own sumi in either theme', async () => {

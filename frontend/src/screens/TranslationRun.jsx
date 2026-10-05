@@ -550,7 +550,7 @@ function SessionView({
 
       {stage === 'writing' && data && (
         <>
-          {/* The practice card (plan 184, the owner's pick A): the point
+          {/* The practice card (plan 185, the owner's pick A): the point
               the sentence was written for as a tag (a curated sentence
               alone carries one), and the English to translate in the
               middle, the one thing on the card. */}
@@ -593,7 +593,7 @@ function SessionView({
 
       {stage === 'feedback' && data && feedback && (
         <>
-          {/* The practice card (plan 184, the owner's pick A, then
+          {/* The practice card (plan 185, the owner's pick A, then
               A1): the point's tag, checked or crossed by the tutor's word
               on it; the reference leading -- the English it was asked
               from over it, its reading over the kanji, each fix's number

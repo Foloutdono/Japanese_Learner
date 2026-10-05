@@ -1,4 +1,4 @@
-// ── 照合 — an answer read against what it answers (plan 184) ──────────
+// ── 照合 — an answer read against what it answers (plan 185) ──────────
 // The practice card (the owner's pick A of the canvas "Tsuji — the
 // practice cards") hands the learner their own answer back with the
 // misses struck and the right word beside them, where the card had
@@ -250,7 +250,7 @@ export function correctionParts(given, parts) {
 }
 
 
-// ── Where a word stands in the Japanese (plan 184, A1.3 and A2.2) ──
+// ── Where a word stands in the Japanese (plan 185, A1.3 and A2.2) ──
 // The server sends the sentence's words (study/romaji.sentence_words):
 // each with the characters it is written with, its reading and its
 // romaji, and their texts spell the sentence back. The reference romaji
@@ -424,7 +424,7 @@ export function markPieces(parts, marks) {
   return pieces
 }
 
-// ── The sentence set as phrases (plan 184) ──
+// ── The sentence set as phrases (plan 185) ──
 // The lead is set large and centred, and the browser broke it wherever
 // a CJK line may break -- between any two characters, 買いまし|た。 --
 // because its phrase detection does not see across the rubies the parts
@@ -462,7 +462,7 @@ export function phrases(pieces, read = piece => Boolean(piece.part?.reading)) {
   return out
 }
 
-// ── The tutor's fixes, placed (plan 184, A1.3) ──
+// ── The tutor's fixes, placed (plan 185, A1.3) ──
 // The tutor names the Japanese it is talking about in 「 」, in the
 // issue (what the learner wrote) and in the fix (what to write instead):
 // study/tutor_review's prompt asks for exactly that. So a fix is placed

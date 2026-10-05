@@ -1515,8 +1515,46 @@ runtime purpose. Two consequences worth knowing:
   `components/selection/VocabSources.jsx`, `src/vocabSources.desktop.test.jsx`,
   `src/vocabSources.wide.test.jsx`, `src/vocabSources.short.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  **184** is the four sentence runs' cards (reading, translation,
-  dictation, composition; owner-directed): first, on the desk, the
+  **184** is 進捗, the cards in progress counted (owner-directed: "even
+  after a week of work the user is still at 0"): every `learned / total`
+  counted a card only once its interval had held for 21 days, so a
+  learner a week in read 0 on every bar. Each card now counts for how far
+  it has come -- `srs._progress`, the card's own bar (plan 147: 0 new to
+  1 mastered, the learning steps the first half and the interval the
+  second), by its best mode -- and a deck's `learned` is the sum shown
+  without its fraction (`srs.whole_cards`: 11.5 reads 11, summed in
+  thousandths so float drift cannot cost a card), its `score` the same sum
+  over the deck: the second curve `routes/stats.py` kept (`_row_score`,
+  `LEARNING_SHARE`) retired, so the figure, the bar and the map's train
+  are one number, and `learned` reaches `total` only when every card is
+  mastered. The radical family (`routes/kanji.py`'s `_family_progress`)
+  and the grammar level index (`routes/grammar.py`'s `_folded_progress`,
+  whose `started` now counts the points met at all, as everywhere else,
+  and whose door's note shows only while it outruns `learned`) read the
+  same, and so does each platform's own figure -- the `mastered / total`
+  beside a platform card on the desk (`ModeFigures`, `ScopeFigures`)
+  became `learned / total` on every bucket (`/api/stats`' per-mode
+  buckets and the seven scoped stats routes, each with a `learned`
+  from `srs.get_bulk_learned`), its bar the figure in full and the
+  cards met beyond it in part (`statsModel`'s `learnedPct` and
+  `metPct`, a payload from before it falling back to its mastered
+  cards). A run's legend (`DeckProgress`: new / in progress / mastered)
+  stays the stage split it is, three counts that add up to the deck
+  (cited in `srs/srs.py`, `routes/stats.py`, `routes/kanji.py`,
+  `routes/grammar.py`, `routes/kana.py`, `routes/vocab.py`,
+  `routes/theme_vocab.py`, `routes/frequency.py`, `routes/decks.py`,
+  `domain/statsModel.js`, `components/selection/ModeFigures.jsx`,
+  `components/stats/Composition.jsx`, `folds.desktop.test.jsx`,
+  `tests/test_deck_pool_cards.py`, `tests/test_stats_items.py`,
+  `tests/test_card_progress.py`, `tests/test_kanji_radicals.py`,
+  `tests/test_grammar_api.py`, `domain/lineProgress.js`,
+  `components/selection/LevelSelector.jsx`, `RouteStops.jsx`,
+  `components/profile/LineLedger.jsx`, `screens/GrammarScreen.jsx` and
+  `GrammarScreen.index.browser.test.jsx`).
+  **185** is the four sentence runs' cards (reading, translation,
+  dictation, composition; owner-directed; numbered 185 because 184 went
+  to 進捗, the cards in progress counted, while it was open: its commits'
+  messages say 184): first, on the desk, the
   floor under the card unframed -- the field and Check, the rating bar
   and Next on the page at the card's edges (StudyStage's
   `stage--sentence`, the 机 section of `index.css`) -- and the rating
@@ -1554,7 +1592,7 @@ runtime purpose. Two consequences worth knowing:
   `src/lines.desktop.test.jsx`, `src/comprehension.desktop.test.jsx` and
   `index.css` and its 机 section; DESIGN.md, "The practice card" and
   "The desk").
-  When starting a new wave, begin at **185** or higher, and check
+  When starting a new wave, begin at **186** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

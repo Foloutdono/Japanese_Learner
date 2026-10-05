@@ -529,7 +529,7 @@ export default function ComprehensionRun({ session }) {
       // to the screen so the passage scrolls in its own card rather
       // than taking the stage with it (index.css, .prompt-card--passage).
       // `stage--comprehension` stands its floor unframed on the desk, as
-      // the four sentence runs' does (plan 184; the 机 section's 三面).
+      // the four sentence runs' does (plan 185; the 机 section's 三面).
       className={stage === 'reading' ? 'stage--comprehension stage--passage' : 'stage--comprehension'}
     >
       {/* A long wait (the text is written on demand) owes a sentence;

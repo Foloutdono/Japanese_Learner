@@ -18,7 +18,7 @@
  *               A translation's prompt and its feedback, a reading
  *               passage. Only meaningful with `foot` or `page`.
  *   page      — the footed card's body and growth with no strip (plan
- *               184, the practice card): the sentence runs' cards say
+ *               185, the practice card): the sentence runs' cards say
  *               where they are in the head, not in a foot. With
  *               `prose`, the body is the practice card's page
  *               (.prompt-card__body--page), top-down, its pieces a rung

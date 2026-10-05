@@ -13,7 +13,7 @@ import '../index.css'
 //      register printed a spaceless romaji run off the right of the
 //      screen (.prose's `overflow-wrap: anywhere`);
 //   2. the corrected sentence is readable — furigana over the kanji,
-//      the fix picked out in it (since plan 184's A1, the learner's own
+//      the fix picked out in it (since plan 185's A1, the learner's own
 //      line corrected in place, each fix written over what it replaces);
 //   3. the sentence to translate sits in the MIDDLE of its card, the
 //      way every other grown card on the stage holds its content.
@@ -129,7 +129,7 @@ describe('the translation page at 390×844', () => {
   it('keeps a run-on answer inside the card', async () => {
     const root = await answered(await run(), RUN_ON)
     const card = root.querySelector('.prompt-card--footed')
-    // The answer in its well (plan 184).
+    // The answer in its well (plan 185).
     const answer = root.querySelector('.pcard-well__line > span')
     expect(answer.textContent).toBe(RUN_ON)
 

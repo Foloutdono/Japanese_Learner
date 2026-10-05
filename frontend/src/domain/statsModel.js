@@ -208,9 +208,10 @@ export function strengthRungs(strength) {
 
 // ── Buckets ───────────────────────────────────────────────
 // /api/stats counts in drills, per deck per mode: composition (new /
-// learning / mastered) and retention, correct over reviews, null where
-// nothing has been reviewed.
-const ZERO = { total: 0, new: 0, learning: 0, mastered: 0, reviews: 0, correct: 0 }
+// learning / mastered), what the cards add up to (`learned`, plan 184:
+// each card for how far it has come, the sum whole) and retention,
+// correct over reviews, null where nothing has been reviewed.
+const ZERO = { total: 0, new: 0, learning: 0, mastered: 0, learned: 0, reviews: 0, correct: 0 }
 
 function sumBuckets(buckets) {
   const acc = { ...ZERO }
@@ -220,17 +221,24 @@ function sumBuckets(buckets) {
     acc.new += b.new ?? 0
     acc.learning += b.learning ?? 0
     acc.mastered += b.mastered ?? 0
+    // A payload from before plan 184 has no `learned`: its mastered
+    // cards are the figure it had.
+    acc.learned += b.learned ?? b.mastered ?? 0
     acc.reviews += b.reviews ?? 0
     acc.correct += b.correct ?? 0
   }
   return withDerived(acc)
 }
 
+// A bucket's bar is the Learn plate's: what the cards add up to in full
+// pigment, the cards met beyond it in half (plan 184). `learned` never
+// passes the cards met, since a card counts for at most one.
 function withDerived(row) {
+  const met = row.learning + row.mastered
   return {
     ...row,
-    masteredPct: row.total > 0 ? (row.mastered / row.total) * 100 : 0,
-    learningPct: row.total > 0 ? (row.learning / row.total) * 100 : 0,
+    learnedPct: row.total > 0 ? (row.learned / row.total) * 100 : 0,
+    metPct: row.total > 0 ? (Math.max(0, met - row.learned) / row.total) * 100 : 0,
     retention: row.reviews > 0 ? Math.round((row.correct / row.reviews) * 100) : null,
   }
 }
@@ -238,8 +246,8 @@ function withDerived(row) {
 /**
  * One platform's own figures (plan 114, the desk's station split): the
  * bucket /api/stats keeps for one mode of one deck — how many of its
- * cards are mastered, in progress and new, and how many are due now —
- * with the derived shares the stats screen's composition bar draws.
+ * cards are mastered, in progress and new, what they add up to, and how
+ * many are due now — with the derived shares the composition bar draws.
  * Null where the payload holds no such bucket (a failed fetch, a mode
  * with no pool at that deck, the fast review).
  */

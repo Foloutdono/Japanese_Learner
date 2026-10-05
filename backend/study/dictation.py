@@ -268,7 +268,7 @@ def reveal(row: dict) -> dict:
 
 
 def bank_words(jp: str, parts: list[dict]) -> list[dict] | None:
-    """The line's words (study/romaji.sentence_words, plan 184), each
+    """The line's words (study/romaji.sentence_words, plan 185), each
     read as the bank reads it. The tokenizer places the words; their
     reading is the furigana's over the bank's own kana, so a word missed
     in 明日の朝 is named あした, as the clip says it, and not the あす the

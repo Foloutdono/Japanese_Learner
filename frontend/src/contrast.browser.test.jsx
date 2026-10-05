@@ -454,7 +454,7 @@ const Fixture = () => (
         <span className="stage__streak pr-streak">3</span>
       </div>
       <div className="timer"><span className="timer__label pr-timer">12.3s</span></div>
-      {/* The practice card (plan 184, A1 with A2.2 and A2.3): the
+      {/* The practice card (plan 185, A1 with A2.2 and A2.3): the
           point's tag, the sentence's romaji with a fix's number on it,
           and the answer's well -- a miss struck and the right word small
           over it, a near miss's spelling over it, the match's figure --

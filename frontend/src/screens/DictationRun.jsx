@@ -505,7 +505,7 @@ function Session({ session, level }) {
 
       {stage === 'feedback' && result && (
         <>
-          {/* The practice card (plan 184, the owner's pick A, then
+          {/* The practice card (plan 185, the owner's pick A, then
               A1 with A2.2 and A2.3): the line leading with its reading
               over the kanji -- built backend-side from the bank's own
               kana, so the ruby over 九時 is くじ rather than a guess
