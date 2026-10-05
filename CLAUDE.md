@@ -1539,9 +1539,13 @@ runtime purpose. Two consequences worth knowing:
   foot -- the misses placed by the sentence's `words`
   (`study/romaji.sentence_words`, on reading's batch, the ride's
   sentence and 書取's reveal, there read as the bank reads them:
-  `dictation.bank_words`) (cited in `routes/reading.py`,
+  `dictation.bank_words`); and the romaji read as the furigana reads,
+  every correction `reading_context` makes and a number in digits with
+  its counter (十本 juppon, 明日 ashita, 日本語 nihongo, 6本 roppon),
+  where it had its own table for 時 and 分 alone (cited in `routes/reading.py`,
   `routes/onboarding.py`, `study/romaji.py`, `study/dictation.py`,
   `tests/test_reading_furigana.py`, `tests/test_sentence_words.py`,
+  `tests/test_romaji_counters.py`,
   `components/study/PracticeCard.jsx`, `TutorReview.jsx`,
   `PromptCard.jsx`, `components/reading/ReadingPieces.jsx`,
   `domain/answerDiff.js`, `screens/ReadingRun.jsx`, `TranslationRun.jsx`,

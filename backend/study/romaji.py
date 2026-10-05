@@ -79,72 +79,57 @@ def to_romaji(text: str) -> str:
 _SAID_KANA = {"は": "ワ", "へ": "エ", "を": "オ"}
 
 
-# ── Number + counter, where the reading is not the sum of its parts ──
-# UniDic reads a numeral and the counter after it as two morphemes and
-# gives each its citation reading, so 九時 comes back キュウ + ジ where
-# the hour is くじ, and 一分 イチ + フン where the minute is いっぷん.
-# Reading practice shows this string as the reference reading at the
-# reveal (ReadingRun.jsx) and the learner grades themselves against it,
-# so a wrong one is not a cosmetic annoyance: someone who read 九時
-# correctly is told they were wrong.
+# ── The reading in context, the furigana's (plan 184) ──
+# UniDic reads word by word, and some readings are decided by the word
+# beside it: 十本 じゅっぽん, 九時 くじ, 明日 あした, 日本 にほん, 何を
+# なに, 世界中 じゅう, お母さん かあ. study/reading_context.py puts them
+# right, and morphology.tokenize hands the result on as each morpheme's
+# `reading` -- the furigana over every sentence the app prints. This
+# module romanized UniDic's raw `kana` instead, with a table of its own
+# for two counters (時 and 分), so the romaji under a sentence could
+# disagree with the reading over it: "juupon" under じゅっぽん, "asu"
+# under あした, "nippongo" under にほんご, "6pon" under ろっぽん.
 #
-# The correction belongs here, in kana, for the same reason _SAID_KANA
-# above does -- pykakasi is turning kana into letters correctly, and it
-# is the kana handed to it that is wrong.
-#
-# Only the two counters whose irregularity is phonological are handled.
-# The app's own hand-written banks are the check on both:
-# content/listening_clips.py writes 九時 くじ, 十分 じゅっぷん and
-# 三十分 さんじゅっぷん.
-#
-# Deliberately NOT handled, because neither is a rule:
-#   * 〜中 is ちゅう (会議中, 午前中) or じゅう (一日中, 世界中) by which
-#     word it attaches to. A guess either way breaks the other side.
-#   * 十分, which UniDic reads as one adverb ジュウブン ("sufficient")
-#     in some contexts and as 十 + 分 in others. Where it splits, the
-#     〜分 rule below already gives じゅっぷん; where it does not, the
-#     word sense is the tokenizer's call, not this module's.
-
-# The hour: 四時 よじ, 七時 しちじ, 九時 くじ -- NHK's 時刻の読み方, and
-# the reading the whole N5 syllabus teaches. Everything else (一, 二,
-# 三, 五, 六, 八, 十, 何) is already right as counted.
-_HOUR_NUMBER = {"ヨン": "ヨ", "シ": "ヨ", "ナナ": "シチ", "キュウ": "ク"}
-
-# The minute: ぷん after a number ending ん (三分 さんぷん, 四分 よんぷん,
-# 何分 なんぷん) and after one that geminates (一 いっ, 六 ろっ, 八 はっ,
-# 十 じゅっ, and any 〜十 -- 三十分 さんじゅっぷん); ふん otherwise (二分,
-# 五分, 七分, 九分). じゅっ rather than じっ because that is what the
-# app's dictation bank writes and what modern speech uses.
-_GEMINATING_TAIL = ("チ", "ク")
-_NUMERAL_CHARS = set("〇一二三四五六七八九十百千万0123456789０１２３４５６７８９")
+# So the romaji reads what the furigana reads: a word written with a
+# kanji takes its `reading` in context (spelled out as the furigana spells
+# it, おおきい and not おうきい: see morphology._spelled_reading), and a
+# number written in digits the reading study/furigana gives it with its
+# counter (plan 177: 6本 ろっぽん, 100円 ひゃくえん, 3日 みっか). A word
+# written in kana keeps its own spelling, `kana`.
 
 
-def _is_numeral(surface: str) -> bool:
-    """A written number, or 何, which takes a counter the same way and
-    the same irregularities with it (何分 なんぷん)."""
-    if surface == "何":
-        return True
-    return bool(surface) and all(ch in _NUMERAL_CHARS for ch in surface)
+def _katakana(hira: str) -> str:
+    return "".join(chr(ord(c) + 0x60) if "ぁ" <= c <= "ゖ" else c for c in hira)
 
 
-def _counter_kana(prev_surface: str, prev_kana: str, surface: str, kana: str):
-    """(number kana, counter kana) for a numeral + irregular counter, or
-    None when this pair is not one. Both halves can move: 〜分 geminates
-    the number as well as voicing the counter."""
-    if not _is_numeral(prev_surface):
-        return None
-    if surface == "時" and kana == "ジ":
-        fixed = _HOUR_NUMBER.get(prev_kana)
-        return (fixed, kana) if fixed else None
-    if surface == "分" and kana == "フン":
-        if prev_kana.endswith("ジュウ"):
-            return prev_kana[:-1] + "ッ", "プン"
-        if prev_kana.endswith(_GEMINATING_TAIL):
-            return prev_kana[:-1] + "ッ", "プン"
-        if prev_kana.endswith("ン"):
-            return prev_kana, "プン"
-        return None
-    return None
+def _kana_in_context(morphemes) -> list[tuple]:
+    """[(morpheme, kana)] for the sentence, the kana each is romanized
+    from: its reading in context where it is written with a kanji, its
+    own spelling where it is written in kana, and a number in digits
+    joined with its counter into one, read as the furigana reads it."""
+    from dataclasses import replace
+
+    from study import furigana
+
+    spans = furigana._number_spans(morphemes)
+    out: list[tuple] = []
+    i = 0
+    while i < len(morphemes):
+        numbered = furigana._numeral_parts(morphemes, i, spans[i]) if i in spans else None
+        if numbered is not None:
+            parts, i_next = numbered
+            surface = "".join(m.surface for m in morphemes[i:i_next])
+            kana = _katakana("".join(p.get("reading") or p["text"] for p in parts))
+            out.append((replace(morphemes[i], surface=surface, pos="noun", conjunctive=False), kana))
+            i = i_next
+            continue
+        m = morphemes[i]
+        kana = m.kana
+        if _KANJI.search(m.surface) and m.reading and not _KANJI.search(m.reading):
+            kana = _katakana(m.reading)
+        out.append((m, kana))
+        i += 1
+    return out
 
 
 def sentence_romaji(text: str) -> str:
@@ -176,16 +161,11 @@ def sentence_romaji(text: str) -> str:
     should not. The trade is `kana` also spells は/へ/を as WRITTEN
     rather than SAID (ハ, not the ワ a listener hears) -- _SAID_KANA
     above corrects exactly those three, the same particle-only case
-    to_romaji's own _PARTICLE table exists for, and a second, narrower
-    one below corrects 日 after よう/曜 (日曜日, and 土よう日 where a
-    level cap has swapped 曜 for hiragana): the tokenizer does not treat
-    either spelling of a weekday name as one word, so it reads a
-    trailing bare 日 standalone (ひ) rather than with the rendaku a real
-    〜曜日 always takes (び). A third corrects a numeral and the counter
-    after it, which UniDic also reads as two words and so gives each its
-    counting reading -- 九時 as キュウ + ジ where the hour is くじ, 一分
-    as イチ + フン where the minute is いっぷん; see _counter_kana above
-    for which counters are handled and which are left to the tokenizer.
+    to_romaji's own _PARTICLE table exists for. A word written with a
+    kanji is romanized from its reading in context instead -- the
+    furigana's, put right by study/reading_context.py: 九時 くじ, 十本
+    じゅっぽん, 日曜日 にちようび, 明日 あした -- and a number in digits
+    from the reading the furigana gives it (_kana_in_context above).
 
     Word spacing does not come from pykakasi either -- handed a bare
     kana string it cannot space words at all (see
@@ -202,6 +182,7 @@ def sentence_romaji(text: str) -> str:
       * a number glues onto the counter right after it (六 + 時 ->
         "rokuji"), and so does anything else that glues two nouns into
         one written word
+      * a prefix glues onto the word after it (お母さん -> "okaasan")
       * a trailing っ/ッ is never left to end a group on its own, since
         it geminates whatever comes next (行っ + て read apart would
         give "itsu te" instead of "itte")
@@ -252,32 +233,22 @@ def sentence_words(text: str) -> list[dict] | None:
     if morphemes is None:
         return None
 
-    # Each morpheme with its kana as SAID: は is wa, and a counter's
-    # fix (十本 じゅっぽん) changes it. The reading a learner is shown
-    # is the written one, worked out at the end.
+    # Each morpheme with its kana as SAID: は is wa, and a word written
+    # with a kanji read in context (_kana_in_context). The reading a
+    # learner is shown is the written one, worked out at the end.
     groups: list[list[list]] = []
     force_glue = False
-    for m in morphemes:
-        kana = m.kana
+    for m, kana in _kana_in_context(morphemes):
         if m.pos == "particle" and m.surface in _SAID_KANA:
             kana = _SAID_KANA[m.surface]
-        elif (
-            m.surface == "日" and kana == "ヒ"
-            and groups and groups[-1][-1][1].endswith("ヨウ")
-        ):
-            kana = "ビ"
-        elif groups and groups[-1]:
-            prev_m, prev_kana = groups[-1][-1]
-            fixed = _counter_kana(prev_m.surface, prev_kana, m.surface, kana)
-            if fixed is not None:
-                groups[-1][-1] = [prev_m, fixed[0]]
-                kana = fixed[1]
 
         glue = force_glue or (
             bool(groups) and (
                 m.pos in ("auxiliary", "suffix")
                 or m.conjunctive
                 or (groups[-1][-1][0].pos == "noun" and m.pos == "noun")
+                # A prefix is half a word: お母さん okaasan, ご飯 gohan.
+                or groups[-1][-1][0].pos == "prefix"
             )
         )
         if glue:
