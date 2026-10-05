@@ -1632,8 +1632,13 @@ runtime purpose. Two consequences worth knowing:
   (`components/station/BasicsLine.jsx`), a note once the course is met,
   Settings › Level's skip (`POST /api/today/basics/skip`, every unmet
   course card marked known as the level rule marks a stop) and the
-  `basics_unit_done` and `basics_skipped` events; the Learn plate is the
-  plan's later phase (cited in `study/teaching_order.py`,
+  `basics_unit_done` and `basics_skipped` events; then 186g, the 基礎
+  plate on the Learn gate while the course is ridden and the course's
+  station, `/learn/basics` and `/learn/basics/:unit` -- a section on no
+  gate's list nor the rail, in neutral ink, its units a route beside a
+  unit's page on the desk, the gate riding Today's run held to the unit
+  (`/api/today/cards?unit=`), its figures from `GET /api/basics` (cited in
+  `study/teaching_order.py`,
   `routes/today.py`, `routes/vocab.py`, `routes/kanji.py`,
   `routes/kana.py`, `routes/grammar.py`, `routes/frequency.py`,
   `srs/batch_cache.py`, `tests/test_teaching_order.py`,
@@ -1646,7 +1651,10 @@ runtime purpose. Two consequences worth knowing:
   `study/analysis.py`, `content/reading_sentences.py`,
   `scripts/basics_report.py`, `tests/test_basics.py`, `core/events.py`,
   `lib/track.js`, `components/station/BasicsLine.jsx`,
-  `components/station/GateCard.jsx` and `components/settings/LevelPage.jsx`).
+  `components/station/GateCard.jsx`, `components/settings/LevelPage.jsx`,
+  `routes/basics.py`, `tests/test_basics_api.py`, `screens/BasicsScreen.jsx`,
+  `screens/LearnScreen.jsx`, `stores/basics.js`, `config/tabs.js`,
+  `src/basics.phone.test.jsx` and `src/basics.desktop.test.jsx`).
   When starting a new wave, begin at **187** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

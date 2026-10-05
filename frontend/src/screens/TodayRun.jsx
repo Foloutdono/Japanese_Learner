@@ -107,11 +107,15 @@ export default function TodayRun({ session }) {
   // a one-card run resuming the day's cached queue would serve the
   // whole day.
   const only = params.get('only') ?? ''
+  // 基礎 (plan 186g): one unit of the basics, boarded from its station
+  // -- its due reviews, then its cards never met in course order. Not a
+  // lane choice either, and its own session.
+  const unit = only ? '' : (params.get('unit') ?? '')
   const allChosen = laneParam === ''
   // 区間 (plan 135): a run of a chosen length carries each lane's share
   // (`?quota=id:n,...`, domain/lanes.splitTake). The run counts what it
   // has answered and holds per lane and asks only for the rest.
-  const quotaRaw = only ? '' : (params.get('quota') ?? '')
+  const quotaRaw = only || unit ? '' : (params.get('quota') ?? '')
   const quota = useMemo(() => parseQuota(quotaRaw), [quotaRaw])
   const capped = quota.size > 0
   const takenKey = `tsuji.todayTaken:${quotaRaw}`
@@ -183,6 +187,7 @@ export default function TodayRun({ session }) {
       `/api/today/cards?lang=${lang}&count=${count}`
       + `&exclude=${encodeURIComponent(excludeIds.join(','))}`
       + (only ? `&only=${encodeURIComponent(only)}` : '')
+      + (unit ? `&unit=${encodeURIComponent(unit)}` : '')
       // Omitted when everything is chosen: an empty `lanes` already
       // means the whole queue on the backend, and sending the full list
       // would make the session key churn as lanes empty out mid-run.
@@ -195,7 +200,7 @@ export default function TodayRun({ session }) {
     for (const c of cards) if (c.lane?.id) laneOfRef.current.set(cardKey(c), c.lane.id)
     setBeyond(Number.isInteger(data.beyond) ? data.beyond : null)
     return cards
-  }, [lang, session, laneParam, allChosen, only, capped, quota, cardKey])
+  }, [lang, session, laneParam, allChosen, only, unit, capped, quota, cardKey])
 
   const extraExcludeIds = useCallback(
     () => Array.from(recentlyReviewedRef.current.keys()),
@@ -213,7 +218,7 @@ export default function TodayRun({ session }) {
     // The choice is part of the key: picking different lanes is a
     // different session, and resuming the previous one's cached queue
     // would serve cards from lanes the learner just switched off.
-    storageKey: sessionKey('today', only ? `only:${only}` : capped ? `quota:${quotaRaw}` : allChosen ? 'all' : laneParam),
+    storageKey: sessionKey('today', only ? `only:${only}` : unit ? `unit:${unit}` : capped ? `quota:${quotaRaw}` : allChosen ? 'all' : laneParam),
     fetchBatch,
     batchSize: 10,
     cardKey,
@@ -374,7 +379,8 @@ export default function TodayRun({ session }) {
   // with the run still serving. Until a batch has said, the gate's
   // figure less what was cleared is all there is; null (no pill) until
   // the summary is in.
-  const chosenDue = capped
+  const chosenDue = unit ? null
+    : capped
     ? [...quota.values()].reduce((n, v) => n + v, 0)
     : summary
     ? (allChosen ? (summary.total ?? 0)

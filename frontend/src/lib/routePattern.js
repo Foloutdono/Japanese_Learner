@@ -58,6 +58,8 @@ export const ROUTES = [
   '/learn/kanji/tier/:tier/:mode',
   '/learn/kanji/radicals',
   '/learn/kanji/radical/:radical',
+  '/learn/basics',
+  '/learn/basics/:unit',
   '/learn/kanji/radical/:radical/:mode',
   '/learn/grammar',
   '/learn/grammar/:level',

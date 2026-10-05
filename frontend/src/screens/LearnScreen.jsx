@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useLang } from '../LangContext'
-import { getSections } from '../config/tabs'
+import { getSections, getAllSections } from '../config/tabs'
 import { apiJson } from '../lib/api'
 import { useTodaySummary } from '../stores/today'
+import { useBasics } from '../stores/basics'
 import { useStats } from '../stores/stats'
 import { useProfileSummary } from '../stores/profileSummary'
 import { linesOrAll } from '../domain/boarding'
@@ -138,6 +139,14 @@ export default function LearnScreen({ session }) {
     )
   })
 
+  // 基礎 (plan 186g): while an N5 learner rides the basics, their plate
+  // hangs above the lines -- the course is where Today's new cards come
+  // from, and the unit at hand is one tap away.
+  const basicsSection = getAllSections(t).find(s => s.path === '/learn/basics')
+  const basicsPlate = today?.basics && !today.basics.done && basicsSection
+    ? <BasicsPlate section={basicsSection} at={today.basics} onDepart={to => depart(basicsSection, to)} />
+    : null
+
   return (
     <main id="main-content" className="learn">
       <h1 className="sr-only">{t.tabLearn}</h1>
@@ -147,7 +156,7 @@ export default function LearnScreen({ session }) {
         // left, each drawn across the plate; the shelf over the library
         // in a column at the entry's width on the right.
         <div className="learn-desk">
-          <div className="plates plates--across">{linePlates}</div>
+          <div className="plates plates--across">{basicsPlate}{linePlates}</div>
           <aside className="learn-desk__side" aria-label={t.decksTitle} style={{ '--line-color': 'var(--line-decks)' }}>
             <DeckShelfPanel decks={decks} today={today} guide="learn.shelf" />
             <LibraryPanel session={session} onFollowed={() => setShelfNonce(n => n + 1)} />
@@ -155,6 +164,7 @@ export default function LearnScreen({ session }) {
         </div>
       ) : (
         <div className="plates">
+          {basicsPlate}
           {linePlates}
           {decksSection && (
             <Plate
@@ -169,5 +179,37 @@ export default function LearnScreen({ session }) {
         </div>
       )}
     </main>
+  )
+}
+
+// ── 基礎 — the basics as a plate (plan 186g) ─────────────────────
+// The course's stops are its units: the foot prints the one behind, the
+// one at hand and the one ahead, as a line's plate prints its stops, and
+// the stripe fills with the unit at hand's cards met. Its ink is the
+// section's neutral one -- the course is no line (config/tabs.js). The
+// head opens the unit at hand. `at` is /api/today's `basics`, so the
+// plate hangs with the gate; the neighbours' names arrive with
+// /api/basics.
+function BasicsPlate({ section, at, onDepart }) {
+  const { t } = useLang()
+  const units = useBasics().data?.units ?? []
+  const i = at.unit - 1
+  const here = units[i]
+  const name = u => u && <span lang="ja">{u.jp}</span>
+  return (
+    <Plate
+      section={section}
+      className="plate--basics"
+      meta={t.basicsUnit(at.unit, at.of)}
+      foot={(
+        <span className="plate__foot plate__foot--stops">
+          <span className="plate__prev">{units[i - 1] && <>‹ {name(units[i - 1])}</>}</span>
+          <span className="plate__here"><span lang="ja">{at.jp}</span></span>
+          <span className="plate__next">{units[i + 1] && <>{name(units[i + 1])} ›</>}</span>
+        </span>
+      )}
+      fill={here?.total ? here.met / here.total : 0}
+      onClick={() => onDepart(`/learn/basics/${at.id}`)}
+    />
   )
 }

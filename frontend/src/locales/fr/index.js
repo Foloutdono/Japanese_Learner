@@ -115,6 +115,15 @@ const nav = {
   basicsSkipLabel:   'Bases',
   basicsSkipAct:     'Je les connais',
   basicsSkipped:     n => `${n} cartes de base marquées connues.`,
+  // 基礎 — la station du cursus sur le portillon Apprendre (plan 186g)
+  basicsTitle:       'Bases',
+  basicsDesc:        'Le N5 dès sa première leçon\nUne leçon à la fois\nSes règles, ses mots, ses kanji',
+  basicsUnits:       'Leçons',
+  basicsPoints:      'Grammaire',
+  basicsWords:       'Mots',
+  basicsKanji:       'Kanji',
+  basicsSentences:   'Phrases',
+  basicsMetOf:       (met, total) => `${met} sur ${total} vues`,
   // ── 定期券 — les portes de l'offre et son merci (domain/paywall.js) ──
   paywallName_pro:    'Tsuji Pro',
   paywallThanks:      'C’est noté — on te prévient au lancement.',
