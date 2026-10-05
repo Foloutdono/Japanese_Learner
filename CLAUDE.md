@@ -1618,8 +1618,17 @@ runtime purpose. Two consequences worth knowing:
   greetings (an interjection admitted to a kana-only card, a set phrase
   standing as a clause one word: `card_lookup.resolve_phrase`,
   `LOCAL_REV` 10); and `scripts/basics_report.py`, the course points'
-  lesson examples that ask for what the course has not taught yet; Today
-  riding the course is the plan's later phases (cited in `study/teaching_order.py`,
+  lesson examples that ask for what the course has not taught yet; then
+  186e, Today riding the course -- an N5 learner's ration is the basic
+  hiragana whole, then the course in its order across the learner's
+  lines with the other kana one card in three (`daily_queue.ration`'s
+  `course`, `FIRST_KANA_SET`, `KANA_EVERY`), then the rest of N5 in
+  teaching order, a line never dealing a course card itself
+  (`routes/today.py`'s `Pools`, `_course`); each served course card
+  names its unit (`basics` on `/api/today/cards`) and the gate the unit
+  the course is at (`basics` on `/api/today`); a learner above N5 never
+  rides it; showing it, the skip and the Learn plate are the plan's
+  later phases (cited in `study/teaching_order.py`,
   `routes/today.py`, `routes/vocab.py`, `routes/kanji.py`,
   `routes/kana.py`, `routes/grammar.py`, `routes/frequency.py`,
   `srs/batch_cache.py`, `tests/test_teaching_order.py`,

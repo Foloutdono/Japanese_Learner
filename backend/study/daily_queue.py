@@ -290,13 +290,32 @@ def parse_exclude(exclude: str) -> set:
 # ride, so the first day at N4 is a word, a kanji, a rule, a word...
 # rather than the whole ration from one deck.
 
-def ration(kana_lanes, line_lanes, budget: int) -> "OrderedDict[tuple, list[str]]":
+# 基礎 (plan 186e): an N5 learner rides the basics course
+# (study/basics.py) before the rest of the level. The basic hiragana come
+# first and whole, since the course's words are read in them; then the
+# course, unit by unit, with the other kana sets (the combinations and
+# katakana, which a few loanwords need) dealt one card in every
+# KANA_EVERY beside it rather than all before it -- 238 signs at ten a
+# day was over three weeks without a word.
+FIRST_KANA_SET = "hiragana_basic"
+KANA_EVERY = 3
+
+
+def ration(kana_lanes, line_lanes, budget: int, course=None) -> "OrderedDict[tuple, list[str]]":
     """
     kana lane -> new ids (set order), line lane -> new ids -> the lanes
     of new cards the run may introduce today, at most `budget` cards.
     Kana sequentially, then the lines in turn; a lane with nothing
     left simply drops out.
+
+    `course`, for a learner riding the basics, is the course's cards
+    not yet met as (lane key, raw id) in the order it deals them, and
+    `line_lanes` must then hold none of them: the basic hiragana first,
+    then the course with the other kana one in KANA_EVERY, then the
+    lines in turn once both run dry.
     """
+    if course is not None:
+        return _ration_course(kana_lanes, line_lanes, budget, course)
     out: "OrderedDict[tuple, list[str]]" = OrderedDict()
     left = max(0, budget)
     for key, ids in kana_lanes.items():
@@ -306,6 +325,34 @@ def ration(kana_lanes, line_lanes, budget: int) -> "OrderedDict[tuple, list[str]
         if take:
             out[key] = take
             left -= len(take)
+    if left > 0 and line_lanes:
+        for key, raw_id in interleave(line_lanes, left):
+            out.setdefault(key, []).append(raw_id)
+    return out
+
+
+def _ration_course(kana_lanes, line_lanes, budget: int, course) -> "OrderedDict[tuple, list[str]]":
+    out: "OrderedDict[tuple, list[str]]" = OrderedDict()
+    left = max(0, budget)
+    for key, ids in kana_lanes.items():
+        if key[2] == FIRST_KANA_SET and left > 0:
+            take = ids[:left]
+            if take:
+                out[key] = list(take)
+                left -= len(take)
+    if left <= 0:
+        return out
+    kana = [(key, raw_id) for key, ids in kana_lanes.items() if key[2] != FIRST_KANA_SET for raw_id in ids]
+    queue = list(course)
+    dealt = 0
+    while left > 0 and (queue or kana):
+        dealt += 1
+        if kana and (dealt % KANA_EVERY == 0 or not queue):
+            key, raw_id = kana.pop(0)
+        else:
+            key, raw_id = queue.pop(0)
+        out.setdefault(key, []).append(raw_id)
+        left -= 1
     if left > 0 and line_lanes:
         for key, raw_id in interleave(line_lanes, left):
             out.setdefault(key, []).append(raw_id)
