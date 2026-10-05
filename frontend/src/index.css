@@ -25491,6 +25491,76 @@ button.brd-stn { cursor: pointer; }
 .tour-found__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
 .tour-found__say { margin: 0; font-weight: 600; line-height: 1.45; }
 .tour-found__line-text { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
+/* Spoken lines (plan 187d): a sentence and its voice beside it. */
+.tour-ex { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: start; gap: var(--sp-3); }
+.tour-speak {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--surface-line);
+  padding: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--tour-ink);
+  cursor: pointer;
+}
+.tour-speak svg { flex: none; }
+.tour-speak:hover { border-color: var(--line-color); }
+.tour-speak:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.tour-guess__text--ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 500; }
+.tour-said__line--ja { font-family: var(--font-jp); font-weight: 600; }
+.tour-pair { margin: var(--sp-2) 0 0; display: flex; flex-wrap: wrap; gap: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-lead); }
+.tour-pair__bar { color: var(--text-secondary); }
+/* The scene's place, as the station's plate: its name over its caption
+   on the 駅名標's white in either theme (the HUD's arrival plate's,
+   .hud__dest), the line's edge under it. */
+.tour-plate {
+  --plate-ink: #222428;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-plate);
+  background: #f3f2ef;
+  color: var(--plate-ink);
+  border-bottom: 3px solid var(--line-color);
+}
+.tour-plate__name { font-family: var(--font-jp); font-size: var(--fs-title); font-weight: 700; line-height: 1.6; }
+.tour-plate__name rt,
+.tour-plate__cap { color: color-mix(in srgb, var(--plate-ink) 62%, #f3f2ef); }
+.tour-plate__name rt { font-size: var(--fs-caption-xs); }
+.tour-plate__cap { font-size: var(--fs-caption); }
+.tour-scene { list-style: none; gap: 0; }
+.tour-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  gap: var(--sp-1) var(--sp-3);
+  padding-block: var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.tour-line:first-child { border-top: none; padding-top: 0; }
+.tour-line:last-child { padding-bottom: 0; }
+.tour-line__who { grid-column: 1 / -1; font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
+/* The learner's own lines in the selection's gold: what they will say. */
+.tour-line--me .tour-line__who { color: var(--sel-ink); }
+.tour-line__text { min-width: 0; }
+.tour-line .tour-speak { align-self: center; }
+.tour-scene__all { align-self: flex-start; }
+.tour-note { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
+.tour-reply {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-4) var(--sp-5);
+  border: 2px solid var(--sel-line);
+  border-radius: var(--r-panel);
+  background: var(--sel-wash);
+}
+.tour-reply__who { font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); }
+.tour-reply__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 600; }
 /* The gate docked over the run's floor (--dock-bottom, the level bar
    and the safe area), the quiet way a rung over it. */
 .tour__foot {

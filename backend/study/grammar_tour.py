@@ -100,7 +100,7 @@ def _look(level: str, entry: dict, lang: str) -> list[dict]:
         out.append({
             "jp": jp,
             "tr": translation({"en": example.get("en", ""), "fr": example.get("fr", "")}, lang),
-            "furigana": mark_spans(align_sentence(jp), spans),
+            "furigana": _parts(jp, spans),
             "spans": [list(s) for s in spans],
         })
         if len(out) == LOOK_COUNT:
@@ -205,9 +205,47 @@ def _rival(entry: dict, lang: str) -> dict | None:
     return None
 
 
+# What leans on the word before it, so never opens a line.
+_BOUND = {"particle", "auxiliary", "suffix", "symbol"}
+
+
+def _parts(jp: str, spans: list[tuple[int, int]] | None = None) -> list[dict]:
+    """A sentence's furigana, lit over `spans`, its kana runs cut at the
+    tokenizer's words. align_sentence joins every run with no reading
+    into one part, and the example renderer never breaks inside a part
+    (ExampleSentence.jsx) -- so a scene's all-kana line, いいえ、コーヒー
+    です。おちゃもありますよ。, ran off a phone's side as one unbreakable
+    piece. Cut where a phrase begins (a word that is no particle,
+    auxiliary, suffix or punctuation, after no prefix), it wraps between
+    phrases and never strands a particle or a 。 at a line's start.
+    """
+    parts = mark_spans(align_sentence(jp), spans or [])
+    tokens = tokenize(jp)
+    if not tokens:
+        return parts
+    cuts = {
+        token.start for i, token in enumerate(tokens)
+        if i and token.pos not in _BOUND and tokens[i - 1].pos != "prefix"
+    }
+    out, pos = [], 0
+    for part in parts:
+        text = part["text"]
+        if part.get("reading") is not None:
+            out.append(part)
+            pos += len(text)
+            continue
+        start = 0
+        for i in range(1, len(text) + 1):
+            if i == len(text) or pos + i in cuts:
+                out.append({**part, "text": text[start:i]})
+                start = i
+        pos += len(text)
+    return out
+
+
 def _lit(jp: str, pattern: str, level: str) -> list[dict]:
     """A line's furigana with the point lit where it is written."""
-    return mark_spans(align_sentence(jp), lit_spans(jp, pattern, level))
+    return _parts(jp, lit_spans(jp, pattern, level))
 
 
 def _spoken(line: dict, pattern: str, level: str, lang: str) -> dict:
@@ -247,7 +285,7 @@ def _scene(level: str, entry: dict, lang: str) -> dict | None:
     rng = random.Random(f"{TOUR_REV}:{grammar_to_id(entry, level)}:scene")
     place = SCENE_PLACES[scene["place"]]
     choices = [
-        {"jp": jp, "furigana": align_sentence(jp), "correct": i == 0}
+        {"jp": jp, "furigana": _parts(jp), "correct": i == 0}
         for i, jp in enumerate(scene["ask"]["choices"])
     ]
     rng.shuffle(choices)

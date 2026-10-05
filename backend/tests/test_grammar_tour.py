@@ -256,3 +256,19 @@ def test_the_authored_choices_are_seeded_by_the_id():
     b = tour_payload(level, entry, "en")
     assert [c["correct"] for c in a["twist"]["choices"]] == [c["correct"] for c in b["twist"]["choices"]]
     assert [c["jp"] for c in a["scene"]["ask"]["choices"]] == [c["jp"] for c in b["scene"]["ask"]["choices"]]
+
+
+def test_a_kana_line_wraps_between_its_phrases():
+    # align_sentence keeps a kana run whole, and the renderer never breaks
+    # inside a part: a scene's all-kana line ran off a phone's side.
+    level, entry = find("か")
+    tour = tour_payload(level, entry, "en")
+    line = next(l for l in tour["scene"]["lines"] if l["jp"] == "いいえ、コーヒーです。おちゃもありますよ。")
+    assert [p["text"] for p in line["furigana"]] == ["いいえ、", "コーヒーです。", "おちゃも", "ありますよ。"]
+    # Never a particle, an ending or a 。 opening a part of its own --
+    # but where the lit point ends, which mark_spans cuts at.
+    for line in tour["scene"]["lines"]:
+        parts = line["furigana"]
+        for before, part in zip(parts, parts[1:]):
+            if part.get("reading") is None and not part.get("highlight") and not before.get("highlight"):
+                assert part["text"][0] not in "、。もはがをによね"

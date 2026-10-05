@@ -1324,6 +1324,12 @@ const dictionary = {
   tourNotLike:       p => `Pas ${p}`,
   tourBoard:         'Embarquer',
   tourReadLesson:    'Lire la leçon complète',
+  tourRight:         'Oui.',
+  tourNotQuite:      'Pas tout à fait.',
+  tourMe:            'Toi',
+  tourPlayScene:     'Écouter la scène',
+  tourYourTurn:      'À toi de jouer',
+  tourYourLine:      'Ta réplique',
   tourAria:          p => `Découvrir ${p}`,
   // 文法 — la leçon (plan 087)
   glLesson:          'Leçon',

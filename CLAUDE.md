@@ -1656,13 +1656,16 @@ runtime purpose. Two consequences worth knowing:
   `routes/basics.py`, `tests/test_basics_api.py`, `screens/BasicsScreen.jsx`,
   `screens/LearnScreen.jsx`, `stores/basics.js`, `config/tabs.js`,
   `src/basics.phone.test.jsx` and `src/basics.desktop.test.jsx`).
-  **187** is 発見, a grammar point found before it is drilled (187a–c
+  **187** is 発見, a grammar point found before it is drilled (187a–d
   built, the rest planned in `plans/187-hakken-grammar-tour.md`; cited in
-  `study/grammar_tour.py`, `study/grammar_check.py`, `content/grammar/N5.json`
-  and its README, `routes/grammar.py`, `routes/account.py`,
-  `srs/data_structure.sql`, `core/events.py`, `tests/test_grammar_tour.py`,
+  `study/grammar_tour.py`, `study/grammar_check.py`, `study/grammar_audio.py`,
+  `content/grammar/N5.json` and its README, `routes/grammar.py`,
+  `routes/tts.py`, `routes/account.py`, `srs/data_structure.sql`,
+  `core/events.py`, `scripts/build_grammar_audio.py`,
+  `tests/test_grammar_tour.py`, `tests/test_grammar_audio.py`,
   `components/study/GrammarTour.jsx`, `components/study/GrammarGate.jsx`,
-  `lib/track.js`, `src/tour.phone.test.jsx` and `index.css`; DESIGN.md,
+  `lib/audio/speech.js`'s `speakLine`, `lib/track.js`,
+  `src/tour.phone.test.jsx` and `index.css`; DESIGN.md,
   "The tour"; the owner's pick of the canvas
   "Tsuji — grammar, learned by doing": B, discovery, with D's scene at its
   end, E's ladder and plate, and F on the desk without printed keys): the
@@ -1749,7 +1752,16 @@ The one optional warm-up, and it needs no database:
 ```bash
 python -m scripts.build_dictation_audio --check   # what is missing
 python -m scripts.build_dictation_audio           # synthesize it
+python -m scripts.build_grammar_audio --tours     # the grammar tours' scenes (plan 187d)
 ```
+
+The grammar tours (plan 187d) speak through `GET /api/grammar/audio`,
+which voices only lines the catalogue says, by who says them: the reader
+for an example or a twist, speaker A for the other person in a scene and
+B for the learner. `build_grammar_audio` makes them ahead of the first
+learner, as `build_dictation_audio` does for dictation; without it each
+line is made on the request that wants it. Without `--tours` it also
+voices every example sentence in the catalogue (~2,400 lines).
 
 書取 (dictation, `/practice/dictation`) plays a clip per line of
 `content/listening_clips.py`. Nothing depends on having run this — a missing

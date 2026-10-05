@@ -1007,6 +1007,22 @@ stage, not a new idiom:
   right one is ringed in `--success`. A hint after one miss, the rule
   given after two (its head in the selection's ink, because it is given,
   not found).
+- **Where the tour is written** (plan 187c), two stops join before the
+  terminus. The twist is a sentence and three readings, checked once,
+  the right one ringed and a wrong pick crossed, the why said under them.
+  The scene opens on its place as a **station plate**: the name over its
+  caption on the 駅名標's white in either theme (the HUD's arrival
+  plate's), the line's edge under it at 3px. The lines follow as rows,
+  each with who says it. The learner's own lines are named in the
+  selection's gold, because they are what the learner will say. Then
+  the note, and « À toi de jouer » on the gate. The ask is the cue, the task
+  and three Japanese lines; the reply chosen is ringed in gold at the
+  terminus, as « Ta réplique ».
+- **Every sentence has its voice beside it**: a 44px ring at the row's
+  end in the line's ink. It plays from the server, never the device,
+  because a scene is two voices: the other person is the dialogue's A,
+  the learner B (`study/grammar_audio.py`). A quiet « Écouter la scène »
+  plays the lines in turn and stops when a single line is tapped.
 
 The lesson itself is not thrown away: it is the plate a learner comes
 back to, behind the card's magnifier and in the dictionary. The desk

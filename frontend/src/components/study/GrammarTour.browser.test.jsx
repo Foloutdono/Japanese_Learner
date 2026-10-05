@@ -9,13 +9,17 @@ import '../../index.css'
 // lesson's own line for that rival, the hint comes after one miss and
 // the rule after two, the gate waits for a pick, and the terminus
 // hands back what it took. The fixture is the payload the backend
-// serves for 〜てください (study/grammar_tour.py), in English.
+// serves for 〜てください (study/grammar_tour.py), in English, and for
+// か, whose tour is written (plan 187c): its twist and its scene join
+// the line before the terminus, voiced (187d).
 
 const track = vi.fn()
 vi.mock('../../lib/track', () => ({ track: (...a) => track(...a) }))
 vi.mock('../../lib/audio', async (o) => ({
   ...(await o()), playClick: vi.fn(), playUi: vi.fn(),
+  speakLine: (...a) => speakLine(...a), stopSpeaking: vi.fn(),
 }))
+const speakLine = vi.fn(async () => true)
 
 const { GrammarTour } = await import('./GrammarTour')
 
@@ -45,6 +49,7 @@ async function mount(over = {}) {
 
 beforeEach(() => {
   track.mockReset()
+  speakLine.mockClear()
   localStorage.setItem('lang', 'en')
 })
 afterEach(() => { localStorage.removeItem('lang') })
@@ -145,5 +150,113 @@ describe('the tour', () => {
     await settle()
     expect(root().querySelector('.tour-chain')).toBeNull()
     expect(root().querySelector('.tour-rule__structure').textContent).toBe(TOUR.structure)
+  })
+})
+
+const KA = tours.ka
+const KA_POINT = {
+  raw_id: 'grammar_N5_か', level: 'N5', pattern: 'か',
+  structure: 'sentence + か', meaning: 'question marker', tour: KA,
+}
+
+async function toTwist(mounted) {
+  const { root, gate, guess } = mounted
+  gate().click()
+  await settle()
+  guess(KA.guesses.findIndex(g => g.correct)).click()
+  await settle()
+  gate().click()
+  await settle()
+  gate().click()
+  await settle()
+  expect(root().dataset.stop).toBe('twist')
+}
+
+const choice = (root, i) => root().querySelector(`[data-choice="${i}"]`)
+
+describe('the written tour', () => {
+  it('rides six stops, the twist and the scene before the terminus, every line voiced', async () => {
+    const mounted = await mount({ ...KA_POINT })
+    const { root, gate, onBoard } = mounted
+    expect(root().querySelectorAll('.tour__stop')).toHaveLength(6)
+    root().querySelector('.tour-look [data-action="speak"]').click()
+    expect(speakLine).toHaveBeenLastCalledWith(KA.look[0].jp, 'reader')
+
+    await toTwist(mounted)
+    expect(root().querySelector('.tour__q').textContent).toBe(KA.twist.ask)
+    expect(root().querySelector('.tour-twist .dict-ex__hl')).toBeTruthy()
+    expect(gate().disabled).toBe(true)
+    const wrong = KA.twist.choices.findIndex(c => !c.correct)
+    const rightTwist = KA.twist.choices.findIndex(c => c.correct)
+    choice(root, wrong).click()
+    await settle()
+    gate().click()
+    await settle()
+    // Checked once: the right one ringed, the pick crossed, the why said.
+    expect(choice(root, rightTwist).classList.contains('tour-guess--ok')).toBe(true)
+    expect(choice(root, wrong).classList.contains('tour-guess--no')).toBe(true)
+    expect(root().querySelector('.tour-said--no')).toBeTruthy()
+    gate().click()
+    await settle()
+
+    expect(root().dataset.stop).toBe('scene')
+    expect(root().querySelector('.tour-plate__name').textContent).toContain(KA.scene.place)
+    const lines = root().querySelectorAll('.tour-scene .tour-line')
+    expect(lines).toHaveLength(KA.scene.lines.length)
+    expect(root().querySelector('.tour-line--me .tour-line__who').textContent).toBe('You')
+    root().querySelector('[data-action="play-scene"]').click()
+    await settle()
+    expect(speakLine.mock.calls.map(c => c[1])).toEqual(['reader', ...KA.scene.lines.map(l => l.who)])
+    expect(gate().textContent).toContain('Your turn')
+    gate().click()
+    await settle()
+
+    expect(root().querySelector('.tour__q').textContent).toBe(KA.scene.ask.task)
+    expect(root().querySelectorAll('.tour-scene .tour-line')).toHaveLength(1)
+    const reply = KA.scene.ask.choices.findIndex(c => c.correct)
+    choice(root, reply).click()
+    await settle()
+    gate().click()
+    await settle()
+    expect(root().querySelector('.tour-said--ok')).toBeTruthy()
+    // The learner's line, heard in their own voice.
+    expect(speakLine).toHaveBeenLastCalledWith(KA.scene.ask.choices[reply].jp, 'me')
+    gate().click()
+    await settle()
+
+    expect(root().dataset.stop).toBe('terminus')
+    expect(root().querySelectorAll('.tour-found__line')).toHaveLength(3)
+    expect(root().querySelector('.tour-reply__ja').textContent).toBe(KA.scene.ask.choices[reply].jp)
+    gate().click()
+    expect(onBoard).toHaveBeenCalledWith({ tries: 0, helped: false })
+    const steps = track.mock.calls.filter(c => c[0] === 'grammar_tour_step').map(c => c[1].stop + ':' + c[1].outcome)
+    expect(steps).toEqual(['look:first', 'guess:first', 'found:first', 'twist:retry', 'scene:first'])
+    expect(track).toHaveBeenCalledWith('grammar_tour_done', { level: 'N5', tries: 0, helped: false, authored: true })
+  })
+
+  it('stops playing the scene through once a line is tapped alone', async () => {
+    const mounted = await mount({ ...KA_POINT })
+    const { root, gate } = mounted
+    await toTwist(mounted)
+    choice(root, 0).click()
+    await settle()
+    gate().click()
+    await settle()
+    gate().click()
+    await settle()
+    expect(root().dataset.stop).toBe('scene')
+    // Each line ends when the test says so.
+    const ends = []
+    speakLine.mockClear()
+    speakLine.mockImplementation(() => new Promise(r => ends.push(r)))
+    root().querySelector('[data-action="play-scene"]').click()
+    await settle()
+    expect(speakLine).toHaveBeenCalledTimes(1)
+    root().querySelectorAll('.tour-line [data-action="speak"]')[2].click()
+    ends.forEach(r => r(true))
+    await settle()
+    // The tapped line only: the play-through does not go on to line two.
+    expect(speakLine.mock.calls.map(c => c[0])).toEqual([KA.scene.lines[0].jp, KA.scene.lines[2].jp])
+    speakLine.mockImplementation(async () => true)
   })
 })

@@ -1362,6 +1362,12 @@ const dictionary = {
   tourNotLike:       p => `Not ${p}`,
   tourBoard:         'Board',
   tourReadLesson:    'Read the full lesson',
+  tourRight:         'Yes.',
+  tourNotQuite:      'Not quite.',
+  tourMe:            'You',
+  tourPlayScene:     'Play the scene',
+  tourYourTurn:      'Your turn',
+  tourYourLine:      'Your line',
   tourAria:          p => `Discover ${p}`,
   // 文法 — the lesson (plan 087): the pair marks over the steps, the
   // door on every card and the station's index, the gate's one button.

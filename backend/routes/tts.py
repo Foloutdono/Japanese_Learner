@@ -47,3 +47,23 @@ def study_audio(text: str = Query(min_length=1, max_length=64),
         logger.warning("Study audio synthesis failed for %r: %s", text, e)
         raise HTTPException(status_code=503, detail="speech synthesis unavailable")
     return FileResponse(path, media_type="audio/mpeg", headers={"Cache-Control": _CACHE_FOREVER})
+
+
+# ── /api/grammar/audio — a tour's lines (plan 187d) ──────────────
+# The examples and the scene a grammar point's tour plays, each in the
+# voice of who says it (study/grammar_audio.py). Unauthenticated for the
+# reason above: a line is served only if the catalogue says it, by that
+# speaker, so nothing per-learner and nothing invented is reachable.
+@router.get("/api/grammar/audio")
+def grammar_audio(text: str = Query(min_length=1, max_length=80),
+                  who: str = Query(default="reader", pattern="^(reader|them|me)$"),
+                  v: str | None = Query(default=None, max_length=16)):  # noqa: ARG001 -- cache key only
+    from study import grammar_audio as lines
+    try:
+        path = lines.clip_for(text, who)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="no such line in the tours")
+    except TTSFailed as e:
+        logger.warning("Tour audio synthesis failed for %s %r: %s", who, text, e)
+        raise HTTPException(status_code=503, detail="speech synthesis unavailable")
+    return FileResponse(path, media_type="audio/mpeg", headers={"Cache-Control": _CACHE_FOREVER})

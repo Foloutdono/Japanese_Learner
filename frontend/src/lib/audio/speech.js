@@ -236,3 +236,37 @@ export function stopSpeaking() {
     playing = null
   }
 }
+
+// ── A tour's lines (plan 187d) ───────────────────────────────────
+// A grammar point's tour plays its examples and its scene from the
+// server, always: the scene is two voices (the other person and the
+// learner, backend/study/grammar_audio.py), which the device cannot
+// give, and the examples are the catalogue's, which the server holds.
+// `who` is reader, them or me. Resolves once the line has been said
+// (or at once, silent, when it cannot be: no context yet, muted, no
+// engine on the server) so a scene can be played line after line.
+export function speakLine(text, who = 'reader') {
+  if (!text || isMuted()) return Promise.resolve(false)
+  if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
+  if (playing) {
+    fadeOutAndStop(playing, 0.05)
+    playing = null
+  }
+  const url = api(voicedUrl(`/api/grammar/audio?text=${encodeURIComponent(text)}&who=${who}`))
+  return getBuffer(url)
+    .then(buffer => {
+      if (!buffer) return false
+      const handle = playBuffer(buffer, 'tts', text)
+      if (!handle) return false
+      playing = handle
+      return new Promise(resolve => {
+        const prev = handle.source.onended
+        handle.source.onended = (e) => {
+          prev?.(e)
+          if (playing === handle) playing = null
+          resolve(true)
+        }
+      })
+    })
+    .catch(() => false)
+}

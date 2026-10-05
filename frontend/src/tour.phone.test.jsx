@@ -12,7 +12,8 @@ import './index.css'
 // nothing spilling sideways at 390px. The terminus records the tour and
 // boards the card; the full lesson is a quiet way over its gate. A
 // point with no tour keeps the lesson (the fallback study/grammar_tour.py
-// names).
+// names). A written tour's scene (plan 187d) stands inside the screen
+// too: the place's plate, the lines with their voices, the gate docked.
 
 const apiJson = vi.fn()
 vi.mock('./lib/api', () => ({
@@ -35,6 +36,7 @@ vi.mock('./stores/credits', async (o) => ({
 vi.mock('./lib/audio', async (o) => ({
   ...(await o()), playKana: vi.fn(), playCorrect: vi.fn(), playWrong: vi.fn(),
   playClick: vi.fn(), playUi: vi.fn(), playSfx: vi.fn(), speakJapanese: vi.fn(),
+  speakLine: vi.fn(async () => true), stopSpeaking: vi.fn(),
 }))
 vi.mock('./lib/reviews', () => ({ postReview: vi.fn(async () => ({})), staleCards: vi.fn(async () => []) }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
@@ -160,5 +162,48 @@ describe('the tour in the day’s queue, on a phone', () => {
     await settle()
     expect(screen.container.querySelector('.tour')).toBeNull()
     expect(screen.container.querySelector('.gl--gate')).toBeTruthy()
+  }, 20000)
+
+  it('draws a written tour’s scene inside the screen', async () => {
+    const KA = tours.ka
+    const screen = await mount([card({
+      card_id: 'grammar_N5_か', raw_id: 'grammar_N5_か', grammar: 'か',
+      lesson: { ...LESSON, examples: KA.look, tour: KA },
+    })])
+    await settle()
+    const tour = () => screen.container.querySelector('.tour')
+    const gate = () => tour().querySelector('.tour__foot .btn-depart')
+    expect(tour().querySelectorAll('.tour__stop')).toHaveLength(6)
+    gate().click()
+    await settle(120)
+    tour().querySelector(`[data-guess="${KA.guesses.findIndex(g => g.correct)}"]`).click()
+    await settle(120)
+    gate().click()
+    await settle(120)
+    gate().click()
+    await settle(120)
+    tour().querySelector(`[data-choice="${KA.twist.choices.findIndex(c => c.correct)}"]`).click()
+    await settle(120)
+    gate().click()
+    await settle(120)
+    gate().click()
+    await settle(120)
+    expect(tour().dataset.stop).toBe('scene')
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    for (const el of tour().querySelectorAll('.tour-plate, .tour-line, .tour-speak, .tour-note')) {
+      const box = el.getBoundingClientRect()
+      expect(box.left).toBeGreaterThanOrEqual(0)
+      expect(box.right).toBeLessThanOrEqual(window.innerWidth)
+    }
+    // A line's voice is a thumb's target.
+    const speak = tour().querySelector('.tour-line .tour-speak').getBoundingClientRect()
+    expect(speak.width).toBeGreaterThanOrEqual(44)
+    expect(speak.height).toBeGreaterThanOrEqual(44)
+    // ... and its glyph at its own size, not squeezed by a button's padding.
+    expect(tour().querySelector('.tour-line .tour-speak svg').getBoundingClientRect().width).toBe(20)
+    // The place's edge is the line's, at 3px.
+    expect(getComputedStyle(tour().querySelector('.tour-plate')).borderBottomWidth).toBe('3px')
+    const g = gate().getBoundingClientRect()
+    expect(g.bottom).toBeLessThanOrEqual(window.innerHeight)
   }, 20000)
 })
