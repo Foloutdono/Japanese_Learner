@@ -32,6 +32,7 @@ from study.level_mix import level_mix, validate_kanji_mix, validate_vocab_mix
 from study.llm_shared import chat, llm_configured, LLMUnavailable, soften_kanji
 from study.dictation import measure_forms
 from study.romaji import sentence_romaji
+from study.furigana import align_sentence
 import content.vocab_jmdict_data as jmdict_db
 import content.frequency_data as freq
 
@@ -538,6 +539,12 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
     phrase = {
         "phrase": jp,
         "romaji": phrase_to_romaji(jp),
+        # The reading over the sentence's kanji (plan 184): the card the
+        # answer is read against leads with the sentence, and a learner
+        # who cannot read 少し cannot check their own "sukoshi" against
+        # it. The tokenizer's readings in context, per morpheme, as
+        # 書取's reveal and the grammar examples carry them.
+        "furigana": align_sentence(jp),
         "translation": en,
         "translation_lang": "en",  # see get_reading_batch's docstring
         "display_seconds": _display_seconds(jp),
