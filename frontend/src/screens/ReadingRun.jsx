@@ -556,6 +556,9 @@ function SessionView({
   return (
     <StudyStage
       color={READING_COLOR}
+      // One of the four sentence runs: on the desk its floor stands
+      // unframed on the page (index.css, the 机 section's 三面 block).
+      className="stage--sentence"
       onLeave={onBack}
       leaveLabel={backLabel}
       where={t.readingTitle}

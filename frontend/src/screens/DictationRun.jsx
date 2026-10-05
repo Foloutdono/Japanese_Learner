@@ -387,6 +387,9 @@ function Session({ session, level }) {
   return (
     <StudyStage
       color={KAKITORI_COLOR}
+      // One of the four sentence runs: on the desk its floor stands
+      // unframed on the page (index.css, the 机 section's 三面 block).
+      className="stage--sentence"
       onLeave={() => navigate(BASE)}
       leaveLabel={t.leaveLevels}
       where={t.dictationTitle}

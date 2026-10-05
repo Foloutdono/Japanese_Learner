@@ -13960,6 +13960,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: 0;
   min-width: 0;
   overflow: hidden;
+  /* Its own sumi (plan 184). The words are the panel's inks, which
+     only read on sumi; the ground had been the wrapper's -- the
+     phone's dock, the desk floor's frame -- and the frame is
+     --surface, paper in the light theme, where the misses' words
+     stood at about 1.3:1. On the dock this is the dock's own ink. */
+  background: var(--bg-panel);
   outline: 1px solid color-mix(in srgb, var(--text-on-panel) 14%, transparent);
   outline-offset: -1px;
   border-radius: var(--r-panel);
@@ -34153,6 +34159,21 @@ button.brd-stn { cursor: pointer; }
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
+  /* The sentence runs' floor stands on the page (plan 184, owner-
+     directed: "remove the box encapsulating the next button and
+     rating bar"). Reading, translation, dictation and composition
+     (StudyStage's `stage--sentence`): the field and Check, the rating
+     bar and Next under the card at its edges, with no surface, hairline
+     or corner of their own -- the card is the one panel in the column.
+     The bar's misses keep their sumi (.rating-bar__misses), which is
+     what the frame's surface had been standing in for. */
+  .desk-run--panels > .stage.stage--sentence > .stage__foot:not(.browse-nav),
+  .desk-run--panels > .stage.stage--sentence > .rating-bar {
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+  }
   /* An entry's floor is one row (plan 157): the answer typed beside the
      key that hands it in, as 問's well stands beside its send -- the
      field at Check's 56px, Check at its word's width. */
@@ -34174,7 +34195,7 @@ button.brd-stn { cursor: pointer; }
      they step down, as .field's own well does on anything raised. */
   .import-modal .field--page,
   .desk-settings__page .slip .field--page,
-  .desk-run--panels > .stage > .stage__foot .field--page { --field-well: var(--bg-main); }
+  .desk-run--panels > .stage:not(.stage--sentence) > .stage__foot .field--page { --field-well: var(--bg-main); }
 
   /* The run's lines: the list takes the panel's height and scrolls in
      it, newest at its foot; the keys and the rhythm keep the panel's

@@ -1515,7 +1515,19 @@ runtime purpose. Two consequences worth knowing:
   `components/selection/VocabSources.jsx`, `src/vocabSources.desktop.test.jsx`,
   `src/vocabSources.wide.test.jsx`, `src/vocabSources.short.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **184** or higher, and check
+  **184** is the four sentence runs' cards (reading, translation,
+  dictation, composition; owner-directed): first, on the desk, the
+  floor under the card unframed -- the field and Check, the rating bar
+  and Next on the page at the card's edges (StudyStage's
+  `stage--sentence`, the 机 section of `index.css`) -- and the rating
+  bar's misses on a sumi of their own, which the frame's surface had
+  been standing in for (paper in the light theme, under the panel's
+  inks); then the card itself, redrawn from the owner's pick of four
+  directions on the canvas "Tsuji — the practice cards" (A 見本,
+  B 照合, C 切符, D 時刻表) (cited in `screens/ReadingRun.jsx`,
+  `TranslationRun.jsx`, `DictationRun.jsx`, `CompositionRun.jsx`,
+  `src/lines.desktop.test.jsx` and `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **185** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

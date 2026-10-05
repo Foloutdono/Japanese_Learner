@@ -1722,7 +1722,15 @@ each question drawing its answers between them.
   a verdict pays — was rejected because a price beside a self-grade
   invites the learner to inflate it. In the middle **the exercise**, the
   card grown to what its floor leaves and the floor one framed row, as
-  the tiles' is: the field and Check, the tiles, then Next. At the right
+  the tiles' is: the field and Check, the tiles, then Next. **Since plan
+  184 the four sentence runs' floor is unframed** (owner-directed:
+  reading, translation, dictation and composition, StudyStage's
+  `stage--sentence`): the field and Check, the tiles and Next stand on
+  the page at the card's edges, the card the one panel in the column,
+  and the tiles' misses carry their own sumi (`.rating-bar__misses`) —
+  the frame had been their ground, and in the light theme it was
+  paper, under words in the panel's inks. Comprehension keeps its
+  framed floor. At the right
   **the breakdown**, sealed until the grade (the breakdown is the
   answer), then the column's one panel; composition's lesson and
   comprehension's text stand there the same way. Comprehension's lines
