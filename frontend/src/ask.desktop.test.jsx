@@ -88,20 +88,29 @@ function Run({ at, path, element }) {
 }
 const reading = () => render(<Run at="/practice/reading/level/N5" path="/practice/reading/level/:level" element={<ReadingRun session={null} />} />)
 
+// The words go in by fill, one round trip to the browser: each key typed
+// is one of its own, and in a full run a 26-letter question took two
+// seconds, which ran three tests past their 15s. What a field is handed
+// is not what these tests ask about. Enter and the grade's digit stay
+// keys, since they are; a test about the keys typed in the field passes
+// `typed` and types its question key by key.
 async function grade(answer, digit = '1') {
   // The sentence arrives behind its play button.
   $('.clip-player__play').click()
   await settle(20)
-  $('form.stage__foot input').focus()
-  await userEvent.keyboard(answer)
+  await userEvent.fill($('form.stage__foot input'), answer)
   await userEvent.keyboard('{Enter}')
   await settle(250)
   await userEvent.keyboard(digit)
   await settle(300)
 }
-async function ask(question) {
-  $('.desk-ask__field').focus()
-  await userEvent.keyboard(question)
+async function ask(question, { typed = false } = {}) {
+  if (typed) {
+    $('.desk-ask__field').focus()
+    await userEvent.keyboard(question)
+  } else {
+    await userEvent.fill($('.desk-ask__field'), question)
+  }
   await userEvent.keyboard('{Enter}')
   await settle(250)
 }
@@ -277,15 +286,15 @@ describe('the asking beside a sentence still to grade', () => {
     // The second sentence answered, its rating bar up, not yet graded.
     $('.clip-player__play').click()
     await settle(20)
-    $('form.stage__foot input').focus()
-    await userEvent.keyboard('yama{Enter}')
+    await userEvent.fill($('form.stage__foot input'), 'yama')
+    await userEvent.keyboard('{Enter}')
     await settle(250)
     expect($('.rating-bar')).not.toBeNull()
     $$('.desk-sentences__list button.desk-sentence')[0].click()
     await settle(250)
     const results = () => apiFetch.mock.calls.filter(c => c[0] === '/api/reading/result').length
     const before = results()
-    await ask('Que veut dire 1 ou 2 ?')
+    await ask('Que veut dire 1 ou 2 ?', { typed: true })
     expect(results()).toBe(before)
     expect($('.rating-bar')).not.toBeNull()
     expect(askCalls().at(-1)).toMatchObject({ question: 'Que veut dire 1 ou 2 ?', sentence: FIRST.phrase })

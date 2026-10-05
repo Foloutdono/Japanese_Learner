@@ -208,13 +208,22 @@ describe('DictationRun', () => {
   it('refuses the third listen rather than merely counting it', async () => {
     const root = await run()
     const play = root.querySelector('.clip-player__play')
-    play.click()
-    await settle(80)
-    play.click()
-    await settle(80)
+    // A listen is over when the clip's `ended` reaches the player: here
+    // off the seek each press makes, a clip of no length being at its
+    // end (play() itself is refused, a script's click being no user
+    // activation). When is the media pipeline's to say, and a loaded
+    // runner had not said it 80ms after a press.
+    const audio = root.querySelector('audio')
+    const listen = async () => {
+      const ended = new Promise(r => audio.addEventListener('ended', r, { once: true }))
+      play.click()
+      await ended
+    }
+    await listen()
+    await listen()
+    await vi.waitFor(() => expect(root.querySelector('.clip-player__play').disabled).toBe(true))
 
     expect(root.querySelectorAll('.clip-player__mark--spent')).toHaveLength(2)
-    expect(root.querySelector('.clip-player__play').disabled).toBe(true)
 
     // And pressing it again cannot get past the guard either.
     root.querySelector('.clip-player__play').click()

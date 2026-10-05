@@ -39,36 +39,23 @@ function mount(transition, onDone) {
   )
 }
 
-// Wait for the overlay to enter its 'leaving' phase, then report how
-// the named animation stood at that instant: whether it had finished,
-// and how long the hold went on after its last frame. The gap has to
-// come off the wall clock — a finished CSS animation pins its own
-// currentTime at endTime, so it stops counting exactly where the
-// interesting part starts.
-function atFade(container, selector, animationName, startedAt) {
-  return new Promise((resolve, reject) => {
-    const tick = () => {
-      const overlay = container.querySelector('.card-stamp-overlay')
-      if (!overlay) return reject(new Error('the overlay went away before it faded'))
-      if (overlay.classList.contains('card-stamp-overlay--leaving')) {
-        const el = container.querySelector(selector)
-        const anim = el?.getAnimations().find(a => a.animationName === animationName)
-        if (!anim) return reject(new Error(`no ${animationName} on ${selector}`))
-        const { endTime } = anim.effect.getComputedTiming()
-        return resolve({
-          // A frame or two short counts as played: the hold and the
-          // animation run off independent clocks, so under load the
-          // timer can win a race it does not lose in the product by a
-          // margin anyone could see. A hold genuinely cut short misses
-          // by hundreds of ms, not by one frame.
-          finished: anim.playState === 'finished' || endTime - anim.currentTime < 40,
-          deadAirMs: (performance.now() - startedAt) - endTime,
-        })
-      }
-      requestAnimationFrame(tick)
-    }
-    requestAnimationFrame(tick)
-  })
+// How long the hold lasts, read off its own timer. The beat it covers
+// is a CSS animation, which the browser starts when it composites a
+// frame; read on the wall clock, a busy runner started the graduation's
+// ripple late and the fade began before it had played, with neither
+// figure moved. So the clock is faked from the mount and walked from
+// timer to timer to the instant the overlay leaves: the fake time then
+// is the hold, to the millisecond, set against the beat's own delay and
+// duration. One clock.
+async function holdOf(container) {
+  const leaving = () => container.querySelector('.card-stamp-overlay--leaving')
+  const frame = () => new Promise(r => requestAnimationFrame(() => r()))
+  const from = Date.now()
+  for (let i = 0; i < 20 && !leaving(); i++) {
+    await vi.advanceTimersToNextTimerAsync()
+    await frame()
+  }
+  return leaving() ? Date.now() - from : null
 }
 
 // The beat each hold exists to cover, how much stillness is allowed
@@ -97,20 +84,41 @@ const CASES = [
 describe('CardStamp — how long it holds', () => {
   for (const { name, transition, selector, animationName, slackMs, budgetMs } of CASES) {
     it(`${name} fades once its last beat has played, and closes its gate soon after`, async () => {
-      const started = performance.now()
-      let doneAt = 0
-      const screen = await mount(transition, () => { doneAt = performance.now() - started })
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      try {
+        // What had just ended, each time the stamp reported done.
+        let ended = null
+        const doneOn = []
+        const screen = await mount(transition, () => { doneOn.push(ended) })
+        const overlay = screen.container.querySelector('.card-stamp-overlay')
+        overlay.addEventListener('animationend', e => { ended = e.animationName })
 
-      const { finished, deadAirMs } = await atFade(screen.container, selector, animationName, started)
-      expect(finished, `${animationName} was still running when the fade began`).toBe(true)
-      expect(deadAirMs, `the stamp sat finished for ${Math.round(deadAirMs)}ms before fading`)
-        .toBeLessThan(slackMs)
+        // The beat starts with the stamp: there at the mount.
+        const beat = screen.container.querySelector(selector)?.getAnimations().find(a => a.animationName === animationName)
+        expect(beat, `no ${animationName} on ${selector}`).toBeTruthy()
+        const { endTime } = beat.effect.getComputedTiming()
 
-      await new Promise(r => setTimeout(r, budgetMs))
-      expect(doneAt, 'the stamp never reported done, so the queue never advances')
-        .toBeGreaterThan(0)
-      expect(doneAt, `the card was held for ${Math.round(doneAt)}ms`).toBeLessThan(budgetMs)
-    }, 30000)
+        const hold = await holdOf(screen.container)
+        expect(hold, 'the stamp never began to fade').not.toBeNull()
+        expect(hold, `the fade began ${Math.round(endTime - hold)}ms before ${animationName} had played`)
+          .toBeGreaterThanOrEqual(endTime)
+        expect(hold - endTime, `the stamp sat finished for ${Math.round(hold - endTime)}ms before fading`)
+          .toBeLessThan(slackMs)
+
+        // Done on the fade's own end, and the hold and the fade within
+        // what the queue may wait.
+        const fade = overlay.getAnimations().find(a => a.animationName === 'card-stamp-fade-out')
+        expect(fade, 'the overlay never faded').toBeTruthy()
+        const fadeMs = fade.effect.getComputedTiming().endTime
+        vi.useRealTimers()
+        await vi.waitFor(() => expect(doneOn.length, 'the stamp never reported done, so the queue never advances').toBeGreaterThan(0), { timeout: 3000 })
+        await Promise.all(overlay.getAnimations({ subtree: true }).map(a => a.finished))
+        expect(doneOn).toEqual(['card-stamp-fade-out'])
+        expect(hold + fadeMs, `the card was held for ${Math.round(hold + fadeMs)}ms`).toBeLessThan(budgetMs)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
   }
 
   it('presses the stage glyph as the impression and names the stage in the corner', async () => {
