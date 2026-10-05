@@ -1609,8 +1609,17 @@ runtime purpose. Two consequences worth knowing:
   them retargeted), 日本 one card read にほん/にっぽん, and the twelve
   months, 何月, 何時, 何曜日 and 日本語 added out of the pool (each with
   its French; `migrate_vocab_ids` and `migrate_pool_cards` after the
-  deploy); the course itself (units of N5 points, words and kanji) is
-  the plan's later phases (cited in `study/teaching_order.py`,
+  deploy); then 186d, the course as data -- fourteen units in
+  `content/basics.json` (32 N5 points, 231 words, 80 kanji, each a
+  reference to an N5 card), loaded by `study/basics.py`, and 51 sentences
+  added to the N5 reading bank, each held by `tests/test_basics.py` to
+  the words and points of its unit and the ones before it (the
+  breakdown is the judge, `basics.strays`); the breakdown reaching the
+  greetings (an interjection admitted to a kana-only card, a set phrase
+  standing as a clause one word: `card_lookup.resolve_phrase`,
+  `LOCAL_REV` 10); and `scripts/basics_report.py`, the course points'
+  lesson examples that ask for what the course has not taught yet; Today
+  riding the course is the plan's later phases (cited in `study/teaching_order.py`,
   `routes/today.py`, `routes/vocab.py`, `routes/kanji.py`,
   `routes/kana.py`, `routes/grammar.py`, `routes/frequency.py`,
   `srs/batch_cache.py`, `tests/test_teaching_order.py`,
@@ -1618,7 +1627,10 @@ runtime purpose. Two consequences worth knowing:
   `screens/TodayRun.jsx`, `screens/TodayRun.gate.browser.test.jsx`,
   `src/todayLesson.desktop.test.jsx`, `src/deskfree.phone.test.jsx`,
   `content/vocab_renames.py`, `routes/onboarding.py`'s `RIDE_KNOWN`,
-  `tests/test_lookup_precision.py` and `tests/test_onboarding_profile.py`).
+  `tests/test_lookup_precision.py`, `tests/test_onboarding_profile.py`,
+  `content/basics.json`, `study/basics.py`, `study/card_lookup.py`,
+  `study/analysis.py`, `content/reading_sentences.py`,
+  `scripts/basics_report.py` and `tests/test_basics.py`).
   When starting a new wave, begin at **187** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -1920,6 +1932,17 @@ python -m scripts.audit_slice                  # what today's run audits
 python -m scripts.audit_slice --dump           # ... and the entries, as JSON
 python -m scripts.audit_slice --schedule 12    # the next twelve runs
 python -m scripts.audit_slice --on 2026-10-06  # reproduce a past run's slice
+```
+
+The basics course (plan 186, `content/basics.json`) has a read-only
+report of its own: every lesson example of a course point, with what it
+asks of a learner who has met only the course so far. A reason to look,
+never a gate, and the audit's to act on:
+
+```bash
+cd backend
+python -m scripts.basics_report          # the examples that stray
+python -m scripts.basics_report --json   # the same, as JSON
 ```
 
 One more read-only report measures the vocab deck itself (plan 103) —
