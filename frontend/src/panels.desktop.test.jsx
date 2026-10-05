@@ -50,6 +50,11 @@ const press = key => window.dispatchEvent(new KeyboardEvent('keydown', { key, bu
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 const rect = s => $(s).getBoundingClientRect()
+// The card's entrance (card-transition-enter) scales it up from 0.98 and
+// lifts it 14px over 260ms, so a box read before it lands is the card
+// shrunk about its middle. A loaded runner started it late enough for
+// the fixed wait to read it 150ms in, 0.56px narrow (CI, 2026-10-05).
+const landed = () => Promise.all($$('.card-transition-live').flatMap(el => el.getAnimations()).map(a => a.finished))
 // A token expression as Chromium computes it, so a size is compared with
 // the scale and never a hand-copied constant.
 function probe(prop, expr) {
@@ -317,6 +322,7 @@ describe('the tiles under the card', () => {
         <Frame width={width}><Stage><Card />{beside}<RatingBar active onRate={() => {}} /></Stage></Frame>
       )
       await settle(400)
+      await landed()
       const card = rect('.quiz-card-stage .prompt-card')
       if (width === 1877) expect(rect('.stage').width, 'the column is wider than a card').toBeGreaterThan(card.width + 40)
       for (const row of ['.rating-bar', '.stage__head', ...(beside ? ['.stage > .mcq-list, .stage > .drawing-quiz'] : [])]) {
@@ -486,6 +492,7 @@ describe('the choices beside the card', () => {
       </Stage></Frame>
     )
     await settle(400)
+    await landed()
     const card = rect('.quiz-card-stage .prompt-card')
     const mark = rect('.stage-mark')
     expect(mark.right).toBeLessThanOrEqual(card.right)

@@ -269,28 +269,46 @@ describe('the gate grows into view and holds on its name', () => {
   })
 })
 
+// Each scene ends on its own timers -- the door comes down at 920ms --
+// and userEvent's key travels out to the browser and back. On a loaded
+// runner it reached the page after the door had gone, and the screen
+// under it heard the Space (CI, 2026-10-05). So the scenes' clock is
+// held while the key travels: it always lands mid-scene, and `done`,
+// not yet called when it is pressed, can only be the skip's.
 describe('a cutscene spends the key that skips it', () => {
   for (const [name, mount] of Object.entries(SCENES)) {
     it(`the ${name}: Space skips it and never reaches the screen under it`, async () => {
-      const heard = screenUnder()
-      const done = await mount()
-      await settle()
-      await userEvent.keyboard(' ')
-      await settle()
-      expect(done).toHaveBeenCalledTimes(1)
-      expect(heard).not.toHaveBeenCalled()
+      vi.useFakeTimers()
+      try {
+        const heard = screenUnder()
+        const done = await mount()
+        await vi.advanceTimersByTimeAsync(60)
+        expect(done).not.toHaveBeenCalled()
+        await userEvent.keyboard(' ')
+        await vi.advanceTimersByTimeAsync(60)
+        expect(done).toHaveBeenCalledTimes(1)
+        expect(heard).not.toHaveBeenCalled()
+      } finally {
+        vi.useRealTimers()
+      }
     })
 
     it(`the ${name}: a browser chord skips it but is left to the browser`, async () => {
-      const heard = screenUnder()
-      const done = await mount()
-      await settle()
-      const chord = new KeyboardEvent('keydown', { key: 'r', ctrlKey: true, bubbles: true, cancelable: true })
-      window.dispatchEvent(chord)
-      await settle()
-      expect(done).toHaveBeenCalledTimes(1)
-      expect(chord.defaultPrevented).toBe(false)
-      expect(heard).toHaveBeenCalledTimes(1)
+      vi.useFakeTimers()
+      try {
+        const heard = screenUnder()
+        const done = await mount()
+        await vi.advanceTimersByTimeAsync(60)
+        expect(done).not.toHaveBeenCalled()
+        const chord = new KeyboardEvent('keydown', { key: 'r', ctrlKey: true, bubbles: true, cancelable: true })
+        window.dispatchEvent(chord)
+        await vi.advanceTimersByTimeAsync(60)
+        expect(done).toHaveBeenCalledTimes(1)
+        expect(chord.defaultPrevented).toBe(false)
+        expect(heard).toHaveBeenCalledTimes(1)
+      } finally {
+        vi.useRealTimers()
+      }
     })
   }
 })

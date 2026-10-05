@@ -405,9 +405,14 @@ describe('the main flashcards alone', () => {
     await settle(400)
     expect(go.disabled).toBe(true)
     expect(getComputedStyle(go, '::before').opacity).toBe('0')
+    // The wake is caught as its pop starts: the class only lasts the
+    // pop's 540ms, and on a loaded runner the click's round trip
+    // outlasted it, so the class was already gone when it was read.
+    let woke = false
+    go.addEventListener('animationstart', e => { if (e.animationName === 'btn-gate-wake') woke = true })
     await userEvent.click($$('.gate-band__line')[0])
     await settle(20)
     expect(go.disabled).toBe(false)
-    expect(go.classList.contains('btn-depart--waking')).toBe(true)
+    await vi.waitFor(() => expect(woke).toBe(true))
   })
 })
