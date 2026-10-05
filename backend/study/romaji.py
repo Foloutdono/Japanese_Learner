@@ -208,15 +208,54 @@ def sentence_romaji(text: str) -> str:
     Everything else starts a new word, which is what a case particle,
     an unrelated noun or a fresh verb should do anyway.
     """
+    words = sentence_words(text)
+    if words is None:
+        return to_romaji(text)
+    return " ".join(w["romaji"] for w in words)
+
+
+def _hiragana(kana: str) -> str:
+    return "".join(chr(ord(c) - 0x60) if "ァ" <= c <= "ヶ" else c for c in kana)
+
+
+_KANJI = re.compile(r"[\u3400-\u9fff\uf900-\ufaff々〆ヶ]")
+
+
+def _written(surface: str, kana: str) -> str:
+    """A morpheme's reading as a learner is shown it: a word written
+    with a kanji read in hiragana, one written in kana as it is written
+    (コーヒー stays in katakana, the particle は stays は)."""
+    return _hiragana(kana) if _KANJI.search(surface) else surface
+
+
+def sentence_words(text: str) -> list[dict] | None:
+    """The words sentence_romaji spaces, each with its place in the
+    sentence (plan 184): `text`, the characters it is written with --
+    every word's text, in order, spelling the sentence back exactly --
+    its reading as written in hiragana (`kana`; は, not the わ a
+    listener hears) and its `romaji` as sentence_romaji prints it. The
+    practice card reads a learner's romaji against these words, so a
+    miss can be underlined where it stands in the Japanese and the word
+    missed named with its reading.
+
+    A mark or a symbol the romanizer leaves out joins the word before it
+    (the 。 of a sentence's end), or the next one at the start. None when
+    the tokenizer is not installed, or when its words do not spell the
+    sentence back (a space it dropped): a caller that cannot place a
+    word places none rather than the wrong one.
+    """
     from study import morphology  # see furigana.py's own note: MeCab is
     # a 250MB optional dependency callers who already have the reading
     # (dictation, which hand-writes it) never need to pay for.
 
     morphemes = morphology.tokenize(text)
     if morphemes is None:
-        return to_romaji(text)
+        return None
 
-    groups: list[list[tuple]] = []
+    # Each morpheme with its kana as SAID: は is wa, and a counter's
+    # fix (十本 じゅっぽん) changes it. The reading a learner is shown
+    # is the written one, worked out at the end.
+    groups: list[list[list]] = []
     force_glue = False
     for m in morphemes:
         kana = m.kana
@@ -231,7 +270,7 @@ def sentence_romaji(text: str) -> str:
             prev_m, prev_kana = groups[-1][-1]
             fixed = _counter_kana(prev_m.surface, prev_kana, m.surface, kana)
             if fixed is not None:
-                groups[-1][-1] = (prev_m, fixed[0])
+                groups[-1][-1] = [prev_m, fixed[0]]
                 kana = fixed[1]
 
         glue = force_glue or (
@@ -242,22 +281,36 @@ def sentence_romaji(text: str) -> str:
             )
         )
         if glue:
-            groups[-1].append((m, kana))
+            groups[-1].append([m, kana])
         else:
-            groups.append([(m, kana)])
+            groups.append([[m, kana]])
         force_glue = kana[-1:] in ("っ", "ッ")
 
-    words: list[str] = []
+    words: list[dict] = []
+    lead = ""
     for g in groups:
+        surface = "".join(m.surface for m, _ in g)
         chunk = "".join(kana for _, kana in g)
+        written = "".join(_written(m.surface, kana) for m, kana in g)
         h = "".join(item["hepburn"] for item in _kakasi.convert(chunk) if item["hepburn"])
         if not h:
+            if words:
+                words[-1]["text"] += surface
+            else:
+                lead += surface
             continue
-        if words and (h[0] in _NO_SPACE_BEFORE or words[-1][-1] in _NO_SPACE_AFTER):
-            words[-1] += h
+        if words and (h[0] in _NO_SPACE_BEFORE or words[-1]["romaji"][-1] in _NO_SPACE_AFTER):
+            words[-1]["text"] += surface
+            words[-1]["kana"] += written
+            words[-1]["romaji"] += h
         else:
-            words.append(h)
-    return " ".join(words)
+            words.append({"text": lead + surface, "kana": written, "romaji": h})
+            lead = ""
+    if not words or "".join(w["text"] for w in words) + lead != text:
+        return None
+    if lead:
+        words[-1]["text"] += lead
+    return words
 
 
 # ── The particles, which are spelled one way and said another ──

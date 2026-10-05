@@ -51,7 +51,7 @@ from study.exam_scoring import flatten_questions, score_attempt
 from study.level_rule import KANA_KNOWN
 from study.modes import resolve as resolve_mode
 from study.placement import build_placement_paper, recommend_level, strip_answers
-from study.romaji import sentence_romaji
+from study.romaji import sentence_romaji, sentence_words
 
 router = APIRouter()
 
@@ -510,6 +510,7 @@ def get_ride(lang: str = "fr", user_id: str = Depends(get_user_id)):
             "phrase": jp,
             "romaji": phrase_to_romaji(jp),
             "furigana": align_sentence(jp),
+            "words": sentence_words(jp),
             "translation": _RIDE_SENTENCE["en"],
             "translation_lang": "en",
             "display_seconds": _display_seconds(jp),

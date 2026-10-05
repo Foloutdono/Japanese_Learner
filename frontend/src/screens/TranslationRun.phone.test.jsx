@@ -13,7 +13,8 @@ import '../index.css'
 //      register printed a spaceless romaji run off the right of the
 //      screen (.prose's `overflow-wrap: anywhere`);
 //   2. the corrected sentence is readable — furigana over the kanji,
-//      the romaji under the line, the fix picked out in it;
+//      the fix picked out in it (since plan 184's A1, the learner's own
+//      line corrected in place, each fix written over what it replaces);
 //   3. the sentence to translate sits in the MIDDLE of its card, the
 //      way every other grown card on the stage holds its content.
 
@@ -47,7 +48,8 @@ const PHRASES = [
 const RUN_ON = 'mainichihawatashinoojisanganewspaperwoyomu'
 
 // The review as routes/translation.py now serves it: the corrected
-// sentence as furigana parts with what changed marked, and its romaji.
+// sentence as furigana parts with what changed marked, and its romaji
+// (which the card no longer prints: the correction is drawn in place).
 const REVIEW = {
   verdict: 'partial',
   summary: "The word for 'father' is wrong.",
@@ -140,23 +142,26 @@ describe('the translation page at 390×844', () => {
     pageIsNotWider()
   })
 
-  it('draws the corrected sentence with its readings, its romaji and the fix picked out', async () => {
+  it('corrects the answer in place, the right words small over the struck ones, and numbers the fix on the reference', async () => {
     const root = await answered(await run(), 'おじさんは毎日、新聞をよます。')
-    const corrected = root.querySelector('.rvw__corrected')
-    expect(corrected).toBeTruthy()
-    // The whole sentence, spelled by the parts.
-    expect(corrected.querySelector('.rvw__better').textContent).toContain('父')
-    // Readings over the kanji...
-    expect([...corrected.querySelectorAll('rt')].map(rt => rt.textContent))
-      .toEqual(['ちち', 'まい', 'にち', 'しん', 'ぶん', 'よ'])
-    // ... the romaji under the line ...
-    expect(corrected.querySelector('.prose__romaji').textContent).toBe(REVIEW.better_romaji)
-    // ... and only what the tutor changed is marked.
-    expect([...corrected.querySelectorAll('.rvw__fixed')].map(m => m.textContent))
-      .toEqual(['父ちち', '読よ'])
-    // A mark is ink, never a fill (DESIGN.md, Colour).
-    const bg = getComputedStyle(corrected.querySelector('.rvw__fixed')).backgroundColor
+    const well = root.querySelector('.pcard-well')
+    // A1.1: each change written over what it replaces, so the line keeps
+    // its length; the corrected sentence's readings over the kanji the
+    // learner kept.
+    const overs = [...well.querySelectorAll('ruby.pcard-over')]
+    expect(overs.map(o => o.querySelector('s').textContent)).toEqual(['おじさん', 'よ'])
+    expect(overs.map(o => o.querySelector('rt').textContent)).toEqual(['父', '読み'])
+    expect([...well.querySelectorAll('ruby:not(.pcard-over) rt')].map(rt => rt.textContent))
+      .toEqual(['まい', 'にち', 'しん', 'ぶん'])
+    // A correction is ink, never a fill (DESIGN.md, Colour).
+    const bg = getComputedStyle(well.querySelector('.pcard-miss ins')).backgroundColor
     expect(['rgba(0, 0, 0, 0)', 'transparent']).toContain(bg)
+    // A1.3: the fix's number on the reference's words it is about.
+    const lead = root.querySelector('.pcard-lead__jp')
+    expect(lead.querySelector('.pcard-hit').textContent).toBe('父')
+    expect(lead.querySelector('.pcard-pin').textContent).toBe('1')
+    // A1.4: the fix leads with what to write.
+    expect(root.querySelector('.rvw__row .rvw__to').textContent).toBe('「父」')
     pageIsNotWider()
   })
 

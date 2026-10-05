@@ -288,6 +288,8 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
             <ReadingRegisters
               phrase={sentence.phrase}
               parts={sentence.furigana}
+              words={sentence.words}
+              tokens={analysis?.tokens}
               romaji={sentence.romaji}
               translation={sentence.translation}
               translationLang={sentence.translation_lang}

@@ -250,11 +250,13 @@ def reveal(row: dict) -> dict:
     くじ and not きゅうじ. A run it cannot divide comes back carrying the
     whole reading, which is that module's own rule: a coarse furigana is
     honest, a wrong one is not."""
+    parts = align_deck(row["jp"], row["kana"])
     return {
         "jp": row["jp"],
         "kana": row["kana"],
         "romaji": row["romaji"],
-        "furigana": align_deck(row["jp"], row["kana"]),
+        "furigana": parts,
+        "words": bank_words(row["jp"], parts),
         "translation": row["en"],
         # English regardless of the UI language, exactly as reading
         # practice reports its own: this app has no translation layer
@@ -263,6 +265,35 @@ def reveal(row: dict) -> dict:
         # routes/reading.py's get_reading_batch docstring.
         "translation_lang": "en",
     }
+
+
+def bank_words(jp: str, parts: list[dict]) -> list[dict] | None:
+    """The line's words (study/romaji.sentence_words, plan 184), each
+    read as the bank reads it. The tokenizer places the words; their
+    reading is the furigana's over the bank's own kana, so a word missed
+    in 明日の朝 is named あした, as the clip says it, and not the あす the
+    tokenizer would guess. A word a furigana part runs across keeps the
+    tokenizer's reading: it is the only one there is for it alone."""
+    words = romaji_lib.sentence_words(jp)
+    if words is None:
+        return None
+    spans = []
+    at = 0
+    for part in parts:
+        spans.append((at, at + len(part["text"]), part))
+        at += len(part["text"])
+    if at != len(jp):
+        return words
+    out = []
+    at = 0
+    for word in words:
+        start, end = at, at + len(word["text"])
+        at = end
+        inside = [p for s, e, p in spans if s < end and e > start]
+        whole = all(s >= start and e <= end for s, e, _ in spans if s < end and e > start)
+        kana = "".join(p.get("reading") or p["text"] for p in inside) if whole else word["kana"]
+        out.append({**word, "kana": kana})
+    return out
 
 
 # ── The queue ────────────────────────────────────────────────────

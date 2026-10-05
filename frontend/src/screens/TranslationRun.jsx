@@ -14,9 +14,9 @@ import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { RunStreak } from '../components/study/RunStreak'
 // The tutor's review, drawn by the component 作文 shares (plan 125).
-import { TutorReview, TutorVerdict, Corrected } from '../components/study/TutorReview'
-import { PointTag, SentenceLead, AnswerWell } from '../components/study/PracticeCard'
-import { isRomajiAnswer } from '../domain/answerDiff'
+import { TutorReview, TutorVerdict } from '../components/study/TutorReview'
+import { PointTag, SentenceLead, AnswerWell, CorrectedInPlace } from '../components/study/PracticeCard'
+import { isRomajiAnswer, fixMarks, mostlyKept } from '../domain/answerDiff'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide, LineSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
@@ -593,13 +593,15 @@ function SessionView({
 
       {stage === 'feedback' && data && feedback && (
         <>
-          {/* The practice card (plan 184, the owner's pick A): the
-              point's tag, checked or crossed by the tutor's word on it;
-              the reference leading -- the English it was asked from over
-              it, its reading over the kanji, its romaji under -- and the
+          {/* The practice card (plan 184, the owner's pick A, then
+              A1): the point's tag, checked or crossed by the tutor's word
+              on it; the reference leading -- the English it was asked
+              from over it, its reading over the kanji, each fix's number
+              on the words it is about, its romaji under -- and the
               learner's answer in its well with the tutor's verdict at its
-              end and their own sentence put right under it; then the
-              notes. Opening the breakdown puts the tag and the reference
+              end, corrected in place when it is Japanese the tutor kept
+              most of; then the notes, each fix leading with what to
+              write. Opening the breakdown puts the tag and the reference
               away (its rows print the sentence and its translation) and
               keeps the answer and the tutor's reading of it, which are
               the point of this mode. */}
@@ -614,17 +616,22 @@ function SessionView({
                   askLang={data.translation_lang}
                   parts={data.furigana}
                   text={data.phrase}
+                  marks={!analysisLoading && analysis?.review ? fixMarks(data.phrase, analysis.review.fix) : null}
                   romaji={data.romaji}
                 />
               )}
               <AnswerWell aside={!analysisLoading && analysis?.review ? <TutorVerdict review={analysis.review} t={t} /> : null}>
-                <span lang={isRomajiAnswer(answer) ? undefined : 'ja'}>{answer}</span>
-                {!analysisLoading && analysis?.review?.better && (
-                  <span className="pcard-better" aria-label={t.reviewBetter}>
-                    <span aria-hidden="true">↳</span>
-                    <Corrected parts={analysis.review.better_parts} text={analysis.review.better} romaji={analysis.review.better_romaji} />
-                  </span>
-                )}
+                {(() => {
+                  const better = !analysisLoading ? analysis?.review?.better : null
+                  if (isRomajiAnswer(answer)) return <span>{answer}</span>
+                  return (
+                    <span lang="ja" className="pcard-answer">
+                      {better && mostlyKept(answer, better)
+                        ? <CorrectedInPlace given={answer} parts={analysis.review.better_parts} />
+                        : answer}
+                    </span>
+                  )
+                })()}
               </AnswerWell>
               <div className="pcard-notes">
               {analysisLoading && <Loading inline copy={t.analyzingTranslation} />}

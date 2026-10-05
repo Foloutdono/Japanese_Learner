@@ -195,10 +195,12 @@ describe('a composition run on the desk', () => {
     expect(asked).toHaveLength(1)
     expect(JSON.parse(asked[0][2].body).phrase).toBe(SENTENCE)
     const lead = $('.stage .pcard-lead__jp')
-    expect(lead.querySelector('.pcard-del').textContent).toBe('が')
-    expect(lead.querySelector('.pcard-ins').textContent).toBe('を')
-    // The romaji under it is the corrected sentence's, read.
-    expect($('.stage .pcard-lead__ro').textContent).toBe(TUTOR.review.better_romaji)
+    const over = lead.querySelector('ruby.pcard-over')
+    expect(over.querySelector('s').textContent).toBe('が')
+    expect(over.querySelector('rt').textContent).toBe('を')
+    // The romaji under it is the learner's own, as typed: the
+    // correction is drawn in the sentence over it.
+    expect($('.stage .pcard-lead__ro').textContent).toBe(ROMAJI)
   })
 
   it('falls back to the check\'s kana when there is no tutor', async () => {
@@ -227,9 +229,12 @@ describe('a composition run on the desk', () => {
     await answered()
     const asked = apiFetch.mock.calls.filter(c => String(c[0]) === '/api/phrase/analyze')
     expect(JSON.parse(asked[0][2].body).phrase).toBe(SENTENCE)
-    // The sentence as written, corrected in place.
+    // The sentence as written, corrected in place: the fix over what it
+    // replaces, so the bases are the learner's sentence.
     const lead = $('.stage .pcard-lead__jp')
-    expect(lead.textContent).toBe('音楽がを聞きながら勉強します。')
-    expect(lead.querySelector('.pcard-del').textContent).toBe('が')
+    const bare = lead.cloneNode(true)
+    bare.querySelectorAll('rt, .pcard-pin').forEach(n => n.remove())
+    expect(bare.textContent).toBe('音楽が聞きながら勉強します。')
+    expect(lead.querySelector('ruby.pcard-over s').textContent).toBe('が')
   })
 })

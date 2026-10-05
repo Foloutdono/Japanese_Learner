@@ -646,6 +646,8 @@ function SessionView({
               <ReadingRegisters
                 phrase={data.phrase}
                 parts={data.furigana}
+                words={data.words}
+                tokens={analysis?.tokens}
                 romaji={feedback.romaji}
                 translation={data.translation}
                 translationLang={data.translation_lang}

@@ -89,6 +89,14 @@ const REVEAL = {
     { text: '時', reading: 'じ' },
     { text: 'からです。' },
   ],
+  // Its words (study/dictation.bank_words): placed by the tokenizer,
+  // read as the bank reads them.
+  words: [
+    { text: '学校', kana: 'がっこう', romaji: 'gakkou' },
+    { text: 'は', kana: 'は', romaji: 'wa' },
+    { text: '九時', kana: 'くじ', romaji: 'kuji' },
+    { text: 'からです。', kana: 'からです。', romaji: 'karadesu.' },
+  ],
   translation: LINE.en,
   translation_lang: 'en',
   accuracy: 90,
@@ -100,10 +108,10 @@ const REVEAL = {
 const ANALYSIS = {
   text: LINE.jp,
   tokens: [
-    { surface: '学校', reading: 'がっこう', meaning: 'school', pos: 'noun' },
-    { surface: 'は', reading: 'は', meaning: 'topic marker', pos: 'particle' },
-    { surface: '九時', reading: 'くじ', meaning: 'nine oclock', pos: 'noun' },
-    { surface: 'からです', reading: 'からです', meaning: 'starts from', pos: 'expression' },
+    { surface: '学校', reading: 'がっこう', meaning: 'school', pos: 'noun', start: 0, end: 2 },
+    { surface: 'は', reading: 'は', meaning: 'topic marker', pos: 'particle', start: 2, end: 3 },
+    { surface: '九時', reading: 'くじ', meaning: 'nine oclock', pos: 'noun', start: 3, end: 5 },
+    { surface: 'からです', reading: 'からです', meaning: 'starts from', pos: 'expression', start: 5, end: 9 },
   ],
   explanation: 'から marks the starting point in time.',
 }
@@ -239,35 +247,55 @@ describe('DictationRun', () => {
     })
   })
 
-  it('reveals the line with its furigana, its romaji and the gloss', async () => {
+  it('reveals the line with its furigana and the gloss, the well its romaji', async () => {
     const root = await answered()
 
     // The bases reconstruct the sentence — a part dropped in rendering
     // would show a line that was never said. Read without the rt
     // nodes, which textContent would otherwise interleave into it.
     const line = root.querySelector('.pcard-lead__jp')
-    const bases = [...line.childNodes].map(node =>
-      node.tagName === 'RUBY'
-        ? [...node.childNodes].filter(c => c.tagName !== 'RT').map(c => c.textContent).join('')
-        : node.textContent)
-    expect(bases.join('')).toBe(LINE.jp)
+    const bare = line.cloneNode(true)
+    bare.querySelectorAll('rt, .pcard-pin').forEach(n => n.remove())
+    expect(bare.textContent).toBe(LINE.jp)
     expect([...line.querySelectorAll('rt')].map(rt => rt.textContent))
       .toEqual(['がっ', 'こう', 'く', 'じ'])
 
-    // Romaji where the kana line used to be: the alphabet the learner
-    // just answered in is the one they can check themselves against.
-    expect(root.querySelector('.pcard-lead__ro').textContent).toBe(LINE.romaji)
+    // No romaji line under it: the learner answered in romaji, so the
+    // well is the line's romaji, corrected (A1.2).
+    expect(root.querySelector('.pcard-lead__ro')).toBeNull()
     expect(root.querySelector('.prose__kana')).toBeNull()
     expect(root.querySelector('.pcard-lead__en').textContent).toBe(LINE.en)
   })
 
-  it('prints what was typed back, its misses marked, beside how much of it matched', async () => {
+  it('prints a kana answer as typed, the line\'s romaji under the sentence', async () => {
+    const root = await answered('がっこうはくじです')
+    expect(root.querySelector('.pcard-well .pcard-answer').textContent).toBe('がっこうはくじです')
+    expect(root.querySelector('.pcard-lead__ro').textContent).toBe(LINE.romaji)
+    expect(root.querySelector('.pcard-misses')).toBeNull()
+  })
+
+  it('prints what was typed back, its misses corrected over it, beside how much of it matched', async () => {
     const root = await answered()
     // In its well (plan 184), read against the line's romaji: the word
-    // the answer left out given where it goes.
+    // the answer left out written over a caret where it goes (A1.1),
+    // the match a figure and a bar (A2.3).
     expect(root.querySelector('.pcard-well .pcard-answer').textContent).toBe('gakkou wa kuji kara desu')
-    expect(root.querySelector('.pcard-well .pcard-add').textContent).toBe('kara')
+    expect(root.querySelector('.pcard-well .pcard-over--add rt').textContent).toBe('kara')
     expect(root.querySelector('.pcard-well__fig b').textContent).toBe('90%')
+    expect(root.querySelector('.pcard-well__meter i').style.inlineSize).toBe('90%')
+  })
+
+  it('underlines the miss in the line and names the word missed, read as the bank reads it', async () => {
+    const root = await answered()
+    // A1.3: where the word left out stands, its full stop left out.
+    const hit = root.querySelector('.pcard-lead__jp .pcard-hit')
+    expect(hit.textContent).toBe('からです')
+    // A2.2: under the well, the word and its meaning; a word in kana
+    // needs no reading over it.
+    const missed = [...root.querySelectorAll('.pcard-misses .pcard-missed')]
+    expect(missed.map(m => m.querySelector('.pcard-missed__jp').textContent)).toEqual(['からです'])
+    expect(missed[0].querySelector('.pcard-missed__kana')).toBeNull()
+    expect(missed[0].querySelector('.pcard-missed__en').textContent).toBe('starts from')
   })
 
   it('hands the grade to the learner, not to the server', async () => {

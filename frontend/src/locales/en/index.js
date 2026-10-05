@@ -1167,11 +1167,13 @@ const reading = {
   correctRomaji:        'Correct romaji',
   yourAnswer:           'Your answer',
   // The practice card (plan 184): the grammar point's tag at the card's
-  // top, on the answer and (translation) on the prompt, and the caption
-  // under the figure in the answer's well.
+  // top, on the answer and (translation) on the prompt; and, for a screen
+  // reader, what the figure in the answer's well counts and the name of
+  // the words missed under it.
   pcardPoint:           'Point',
   pcardUse:             'Use',
   pcardMatched:         'matched',
+  pcardMissed:          'Words missed',
   nextPhrase:           'Next phrase',
   translation:          'Translation',
   gradeCorrect:         'I got it right',
@@ -1233,7 +1235,6 @@ const translationMode = {
   reviewIncorrect:       'Incorrect',
   reviewGood:            'What worked',
   reviewFix:             'To fix',
-  reviewBetter:          'Corrected',
   reviewGrammarUsed:     'used',
   reviewGrammarMissed:   'not used',
   analyzingTranslation:  'Analyzing your translation…',

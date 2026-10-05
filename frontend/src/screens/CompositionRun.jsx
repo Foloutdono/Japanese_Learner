@@ -536,15 +536,17 @@ function Session({ session, level }) {
 
       {stage === 'feedback' && point && (
         <>
-          {/* The practice card (plan 184, the owner's pick A): the
-              point's tag with the detector's word on it (nothing on a
-              point it is not trusted on); the learner's sentence leading,
-              corrected in place -- what the tutor took out struck, what it
-              put in beside it, the corrected sentence's reading over the
-              kanji -- its romaji and what it says under it; then the
-              tutor's notes, led by the verdict. Opening the breakdown puts
-              the sentence away (its own line prints it) and keeps the
-              notes. */}
+          {/* The practice card (plan 184, the owner's pick A, then
+              A1): the point's tag with the detector's word on it
+              (nothing on a point it is not trusted on); the learner's
+              sentence leading, corrected in place -- what the tutor took
+              out struck and what it put in written small over it,
+              numbered with the fix that names it, the corrected
+              sentence's reading over the kanji -- the romaji the learner
+              typed, when they typed romaji, and what it says under it;
+              then the tutor's notes, led by the verdict. Opening the
+              breakdown puts the sentence away (its own line prints it)
+              and keeps the notes. */}
           <PromptCard page prose>
             {!showBreakdown && (
               <PointTag point={point.pattern} label={t.pcardPoint} used={typeof found === 'boolean' ? found : null} />
@@ -552,10 +554,10 @@ function Session({ session, level }) {
             <div className="pcard-group">
               {!showBreakdown && (
                 <SentenceLead
-                  romaji={review?.better ? review.better_romaji : (written ? sentence : null)}
+                  romaji={written ? sentence : null}
                   meaning={review?.meaning}
                 >
-                  <CorrectedInPlace given={written ?? sentence} parts={review?.better ? review.better_parts : null} />
+                  <CorrectedInPlace given={written ?? sentence} parts={review?.better ? review.better_parts : null} fixes={review?.fix} />
                 </SentenceLead>
               )}
               <div className="pcard-notes">

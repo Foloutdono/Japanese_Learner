@@ -31,7 +31,7 @@ from study.grammar_match import contains_pattern, verifiable
 from study.level_mix import level_mix, validate_kanji_mix, validate_vocab_mix
 from study.llm_shared import chat, llm_configured, LLMUnavailable, soften_kanji
 from study.dictation import measure_forms
-from study.romaji import sentence_romaji
+from study.romaji import sentence_romaji, sentence_words
 from study.furigana import align_sentence
 import content.vocab_jmdict_data as jmdict_db
 import content.frequency_data as freq
@@ -545,6 +545,11 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
         # it. The tokenizer's readings in context, per morpheme, as
         # 書取's reveal and the grammar examples carry them.
         "furigana": align_sentence(jp),
+        # Its words, each with its place in the sentence, its reading and
+        # its romaji (study/romaji.sentence_words): the card reads the
+        # answer against the romaji word by word, and marks a miss where
+        # the word stands in the Japanese and names the word missed.
+        "words": sentence_words(jp),
         "translation": en,
         "translation_lang": "en",  # see get_reading_batch's docstring
         "display_seconds": _display_seconds(jp),

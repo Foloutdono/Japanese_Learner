@@ -698,7 +698,8 @@ them:
 
 The card a sentence run's answer is read against — reading, translation,
 dictation, composition, and the reading ride — is the owner's pick A of
-the canvas "Tsuji — the practice cards" (`components/study/PracticeCard.jsx`).
+the canvas "Tsuji — the practice cards" (`components/study/PracticeCard.jsx`),
+then its variant A1 (添削, the red pen) with A2.2 and A2.3 of A2.
 It had set the sentence, its English and the learner's answer at one size
 under five stacked captions (EN, YOUR ANSWER, REFERENCE, AI ANALYSIS,
 CORRECTED), centred a short page in a tall card, repeated the head's level
@@ -708,20 +709,46 @@ eye. Now:
 - **The sentence leads.** The Japanese is the largest line on the card,
   centred, with its reading over the kanji (`furigana`, served with the
   sentence since this plan), at `--fs-heading` (`--fs-title` on a phone,
-  where fourteen characters must hold a line); its romaji under it, then
-  what it means. A prompt with nothing else on its card — a short sentence
-  to read, a composition point — is set at `--fs-display` on the desk.
+  where fourteen characters must hold a line), set as phrases the line
+  breaks between and never inside — a kanji with the kana after it, a
+  word's kanji under one reading that leans on the kana either side
+  rather than spread the word apart (`phrases`, `joinWords`) — then what
+  it means. A
+  prompt with nothing else on its card — a short sentence to read, a
+  composition point — is set at `--fs-display` on the desk. Its romaji is
+  printed under it only where the answer is not the romaji: a romaji
+  answer's well is the romaji, corrected (A1.2), so a translation keeps
+  the line, as does a reading or dictation answered in kana.
 - **The answer stands in a well**, the field it was typed in drawn again
   (`--bg-main` through the card, as `.field`'s base well), so it needs no
-  caption. Its misses are marked against the sentence's romaji,
-  word by word (`domain/answerDiff.js`'s `diffWords`): a wrong word struck
-  in the miss ink with the right one beside it in the success ink, a long
-  vowel left short underlined in the near ink with its spelling given, a
-  word left out given, a word added struck. The server's measure is a
-  figure at the well's end (79 %, captioned once). On translation the
-  tutor's verdict stands there instead, the learner's own line put right
-  under the answer; on composition the learner's sentence IS the lead,
-  corrected in place (`diffChars`, `correctionParts`).
+  caption. Its misses are marked against the sentence's romaji, word by
+  word (`domain/answerDiff.js`'s `diffWords`), the way a teacher marks a
+  page (the owner's A1.1): a wrong word struck in the miss ink and the
+  right one written small over it in the success ink, so the line keeps
+  its length and never wraps for a fix; a long vowel left short wavy in
+  the near ink, its spelling over it; a word left out written over a
+  caret, a word added struck. A sentence the learner wrote in Japanese —
+  composition's, or a translation the tutor kept most of — is corrected
+  in place the same way (`correctionFixes`).
+- **The match is a figure and a bar** (A2.3): the server's measure a rung
+  under the answer at the well's end, in the quiet ink, and a bar along
+  the well's foot as long as the share matched — a screen reader is told
+  what it counts; nothing prints it. On translation the tutor's verdict
+  stands at the well's end instead.
+- **Each miss is found in the Japanese too** (A1.3): underlined where the
+  word stands, in the miss ink (the near ink's wave for a vowel short),
+  placed by the sentence's `words` (`study/romaji.sentence_words`: each
+  word's text, reading and romaji, the romaji the reference is spaced
+  from) — a reference word is laid on the words its letters fall on, so
+  書取's hand-spelled romaji places too (`refSpans`, `missMarks`). A
+  tutor's fix carries its number on the words it is about: the reference's
+  on translation, found by the Japanese the fix quotes in 「」
+  (`fixMarks`), and the correction's own on composition.
+- **The words missed are named under the well** (A2.2): each a small entry
+  with the word as the sentence writes it, its reading where a kanji needs
+  one, and its meaning from the breakdown, the miss ink as its edge
+  (`.pcard-misses`, `missedWords`). Nothing when every word was right; a
+  vowel left short is the word heard and names nothing.
 - **The grammar point is a tag** at the card's top, the line's pigment as
   its edge, a check or a cross where the tutor or the detector said
   whether it was used. The level left the card: the head prints it, and
@@ -729,7 +756,8 @@ eye. Now:
 - **The sentence and the well stand together** in the middle of what the
   tag leaves (`.pcard-group`), so a short sentence is not a page of air
   over its answer; the tutor's notes follow in the same group — the
-  summary, the fixes numbered with their fix, and what was right as one
+  summary, the fixes numbered, each leading with the correction in
+  Japanese and the reason under it (A1.4), and what was right as one
   quiet line, so two fixes outweigh three things that were fine.
 - **No verdict on the card.** "Did you get it right?" and its answer went:
   the rating bar under the card is the question and the grade (ADR 0013).

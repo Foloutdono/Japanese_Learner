@@ -505,20 +505,24 @@ function Session({ session, level }) {
 
       {stage === 'feedback' && result && (
         <>
-          {/* The practice card (plan 184, the owner's pick A): the line
-              leading with its reading over the kanji -- built backend-
-              side from the bank's own kana, so the ruby over 九時 is くじ
-              rather than a guess (study/dictation.reveal) -- its romaji,
-              the alphabet the learner answered in, its gloss, and the
-              answer in its well with its misses marked against that
-              romaji and the server's measure at its end. Opening the
-              breakdown puts the page away, as reading's does: the
-              breakdown's own line and gloss say the same. */}
+          {/* The practice card (plan 184, the owner's pick A, then
+              A1 with A2.2 and A2.3): the line leading with its reading
+              over the kanji -- built backend-side from the bank's own
+              kana, so the ruby over 九時 is くじ rather than a guess
+              (study/dictation.reveal) -- each miss underlined in it, its
+              gloss, and the answer in its well with its misses corrected
+              over it against the bank's romaji and the server's measure
+              at its end; under it each word missed, read as the bank
+              reads it. Opening the breakdown puts the page away, as
+              reading's does: the breakdown's own line and gloss say the
+              same. */}
           <PromptCard page prose>
             {!showBreakdown && (
               <SentenceCheck
                 parts={result.furigana}
                 text={result.jp}
+                words={result.words}
+                tokens={analysis?.tokens}
                 romaji={result.romaji}
                 meaning={result.translation}
                 meaningLang={result.translation_lang}

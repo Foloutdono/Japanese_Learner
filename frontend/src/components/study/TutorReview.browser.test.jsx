@@ -1,18 +1,19 @@
 import { describe, it, expect } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider, useLang } from '../../LangContext'
-import { TutorReview, TutorVerdict, Corrected } from './TutorReview'
-import { PointTag } from './PracticeCard'
+import { TutorReview, TutorVerdict } from './TutorReview'
+import { PointTag, CorrectedInPlace } from './PracticeCard'
 
 // ── The tutor's review, drawn once for two runs (plan 125) ──
 // 翻訳 and 作文 hand these components the same shape
 // (study/tutor_review.py). Since plan 184 (the practice card) it is
 // drawn in three places: the verdict at the answer's well or leading the
-// summary (TutorVerdict), the corrected line with the learner's answer
-// (Corrected), and the notes here -- the summary, the fixes numbered with
-// their fix, what was right as one line. Whether the point was used is
-// the point's tag's (PracticeCard's PointTag). French copy: the lane's
-// locale.
+// summary (TutorVerdict), the corrected line as the learner's own line
+// corrected in place (PracticeCard's CorrectedInPlace), and the notes
+// here -- the summary, the fixes numbered, each leading with what to
+// write and the reason under it, what was right as one line. Whether the
+// point was used is the point's tag's (PracticeCard's PointTag). French
+// copy: the lane's locale.
 
 function Draw({ review, verdict = false }) {
   const { t } = useLang()
@@ -48,7 +49,7 @@ const draw = (over = {}, verdict = false) => render(
 )
 
 describe('the tutor review', () => {
-  it('draws the summary, the fixes numbered with their fix, and what was right as one line', async () => {
+  it('draws the summary, the fixes numbered and led by what to write, and what was right as one line', async () => {
     const root = (await draw()).container
     expect(root.querySelector('.rvw__summary').textContent).toBe('Une particule à revoir.')
     // No verdict unless asked: on translation it stands at the answer.
@@ -56,8 +57,12 @@ describe('the tutor review', () => {
     const fixes = [...root.querySelectorAll('.rvw__fixes > .rvw__row')]
     expect(fixes).toHaveLength(1)
     expect(fixes[0].querySelector('.rvw__n').textContent).toBe('1')
-    expect(fixes[0].querySelector('.rvw__item').textContent).toBe('「音楽が」 marque le sujet')
-    expect(fixes[0].querySelector('.rvw__to').textContent).toBe('「音楽を」')
+    // The correction leads, in Japanese; the reason is under it (A1.4).
+    const [to, why] = [fixes[0].querySelector('.rvw__to'), fixes[0].querySelector('.rvw__why')]
+    expect(to.textContent).toBe('「音楽を」')
+    expect(to.getAttribute('lang')).toBe('ja')
+    expect(why.textContent).toBe('「音楽が」 marque le sujet')
+    expect(to.compareDocumentPosition(why) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     const right = [...root.querySelectorAll('.rvw__right > .rvw__good')]
     expect(right.map(r => r.textContent)).toEqual(['「ながら」 relie les deux actions'])
     // The fixes come before what was right.
@@ -77,14 +82,22 @@ describe('the tutor review', () => {
     expect(screen.container.querySelector('.rvw__verdict').textContent).toBe('En partie')
   })
 
-  it('draws the corrected line with its readings, the change marked, the romaji under it', async () => {
+  it('leads with the reason alone when a fix has nothing to write', async () => {
+    const root = (await draw({ fix: [{ issue: 'Trop soutenu ici.', fix: '' }] })).container
+    expect(root.querySelector('.rvw__row .rvw__to')).toBeNull()
+    expect(root.querySelector('.rvw__row .rvw__item').textContent).toBe('Trop soutenu ici.')
+  })
+
+  it('corrects the learner\'s line in place, the fix small over what it replaces and numbered (A1.1, A1.3)', async () => {
     const screen = await render(
-      <LangProvider><Corrected parts={REVIEW.better_parts} text={REVIEW.better} romaji={REVIEW.better_romaji} /></LangProvider>,
+      <LangProvider><span lang="ja"><CorrectedInPlace given="音楽が聞きながら勉強します。" parts={REVIEW.better_parts} fixes={REVIEW.fix} /></span></LangProvider>,
     )
     const root = screen.container
-    expect(root.querySelector('.rvw__better rt').textContent).toBe('おんがく')
-    expect(root.querySelector('mark.rvw__fixed').textContent).toBe('を')
-    expect(root.querySelector('.rvw__corrected .prose__romaji').textContent).toBe('ongaku wo kikinagara benkyou shimasu')
+    expect(root.querySelector('ruby:not(.pcard-over) rt').textContent).toBe('おんがく')
+    const over = root.querySelector('ruby.pcard-over')
+    expect(over.querySelector('s').textContent).toBe('が')
+    expect(over.querySelector('rt').textContent).toBe('を')
+    expect(root.querySelector('.pcard-pin').textContent).toBe('1')
   })
 })
 

@@ -200,19 +200,27 @@ describe('CompositionRun', () => {
     expect(body(breakdown)).toMatchObject({ phrase: SENTENCE, save: false, deep: false, whole: true })
 
     // The point's tag with the detector's word on it; the sentence
-    // leading, corrected in place -- the tutor's change struck and
-    // given -- its romaji and what it says under it (plan 184).
+    // leading, corrected in place -- the tutor's change struck and the
+    // right word written small over it, the fix's number after it -- and
+    // what it says under it (plan 184, A1). Written in Japanese, so no
+    // romaji line.
     expect(root.querySelector('.pcard-tag__jp').textContent).toBe('〜ながら')
     expect(measure(root)).toBe('found')
     const lead = root.querySelector('.pcard-lead__jp')
-    expect(lead.querySelector('.pcard-del').textContent).toBe('が')
-    expect(lead.querySelector('.pcard-ins').textContent).toBe('を')
-    expect(lead.textContent).toBe('音楽がを聞きながら勉強します。')
-    expect(root.querySelector('.pcard-lead__ro').textContent).toBe(REVIEW.better_romaji)
+    const over = lead.querySelector('ruby.pcard-over')
+    expect(over.querySelector('s').textContent).toBe('が')
+    expect(over.querySelector('rt').textContent).toBe('を')
+    expect(lead.querySelector('.pcard-pin').textContent).toBe('1')
+    const bare = lead.cloneNode(true)
+    bare.querySelectorAll('rt, .pcard-pin').forEach(n => n.remove())
+    expect(bare.textContent).toBe('音楽が聞きながら勉強します。')
+    expect(root.querySelector('.pcard-lead__ro')).toBeNull()
     expect(root.querySelector('.pcard-lead__en').textContent).toBe("J'étudie en écoutant de la musique.")
-    // The notes, led by the tutor's verdict.
+    // The notes, led by the tutor's verdict; the fix led by what to
+    // write, numbered as the sentence numbers it.
     expect(root.querySelector('.rvw__head .rvw__verdict').textContent).toBe('Acceptable')
     expect(root.querySelector('.rvw__to').textContent).toBe('「音楽を」')
+    expect(root.querySelector('.rvw__row .rvw__n').textContent).toBe('1')
     // The rating bar is up; the breakdown waits for the grade.
     expect(root.querySelector('.rating-bar')).not.toBeNull()
     expect(root.querySelector('.prose__breakdown')).toBeNull()

@@ -1529,9 +1529,19 @@ runtime purpose. Two consequences worth knowing:
   batch and the ride's sentence, `align_sentence`), the answer in a well
   with its misses marked (`domain/answerDiff.js`), the tutor's verdict at
   the well or leading its notes, the point a tag, no foot strip
-  (PromptCard's `page`); three small-tweak variants of it, A1–A3, drawn
-  on the same canvas for the next pick (cited in `routes/reading.py`,
-  `routes/onboarding.py`, `tests/test_reading_furigana.py`,
+  (PromptCard's `page`); then, of three small-tweak variants drawn on
+  the same canvas, the owner's A1 (添削, the red pen) with A2.2 and
+  A2.3: a correction written small over what it corrects, the romaji
+  line gone over a romaji well, each miss underlined in the Japanese
+  and a tutor's fix numbered on the words it is about, the fixes
+  leading with the correction, each word missed named under the well
+  with its reading and meaning, and the match a bar along the well's
+  foot -- the misses placed by the sentence's `words`
+  (`study/romaji.sentence_words`, on reading's batch, the ride's
+  sentence and 書取's reveal, there read as the bank reads them:
+  `dictation.bank_words`) (cited in `routes/reading.py`,
+  `routes/onboarding.py`, `study/romaji.py`, `study/dictation.py`,
+  `tests/test_reading_furigana.py`, `tests/test_sentence_words.py`,
   `components/study/PracticeCard.jsx`, `TutorReview.jsx`,
   `PromptCard.jsx`, `components/reading/ReadingPieces.jsx`,
   `domain/answerDiff.js`, `screens/ReadingRun.jsx`, `TranslationRun.jsx`,

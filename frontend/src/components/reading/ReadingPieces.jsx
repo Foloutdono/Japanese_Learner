@@ -186,16 +186,20 @@ export function AnswerForm({ answer, setAnswer, onSubmit, t, guide, disabled = f
 /** The page the answer is read against, after it is in: the practice
  *  card's (plan 184, components/study/PracticeCard.jsx's SentenceCheck)
  *  -- the point's tag, the sentence leading with its reading over the
- *  kanji, and the answer in its well with its misses marked and the
- *  server's measure at its end, absent until it lands. The grade is the
+ *  kanji and its misses underlined where the server's `words` place
+ *  them, the answer in its well with its misses corrected over it and
+ *  the server's measure at its end, absent until it lands, and the words
+ *  missed under it, meant by the breakdown's `tokens`. The grade is the
  *  rating bar's, under the card: the card no longer asks for it or
  *  repeats it. */
-export function ReadingRegisters({ phrase, parts, romaji, translation, translationLang, answer, accuracy, point, t }) {
+export function ReadingRegisters({ phrase, parts, words, tokens, romaji, translation, translationLang, answer, accuracy, point, t }) {
   return (
     <SentenceCheck
       point={point}
       parts={parts}
       text={phrase}
+      words={words}
+      tokens={tokens}
       romaji={romaji}
       meaning={translation}
       meaningLang={translationLang}
