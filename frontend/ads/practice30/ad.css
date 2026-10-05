@@ -29,7 +29,6 @@ section { display: none; }
 /* ── The hook ─────────────────────────────────────────────── */
 .hook-line { position: absolute; left: 32px; width: 344px; margin: 0; text-align: center; font-weight: 700; font-size: 34px; line-height: 1.08; letter-spacing: -.01em; text-wrap: balance; }
 .hook-line .w { display: inline-block; }
-.hook-line .hl { color: var(--rating-wrong); }
 #hk1 { top: 92px; }
 #hk2 { top: 92px; }
 .day { position: absolute; left: 50%; top: 196px; transform: translateX(-50%); padding: 5px 14px; border-radius: var(--r-pill); background: var(--bg-panel); border: 1px solid var(--surface-line); font-weight: 700; font-size: 12px; letter-spacing: var(--tr-caption); color: var(--text-on-panel-soft); white-space: nowrap; }
@@ -40,10 +39,16 @@ section { display: none; }
 .fc__g { font-weight: 700; font-size: 12px; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .fc__stage { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; border-radius: 0 0 var(--r-panel) var(--r-panel); background: var(--state-learning); }
 
-.hook-sent { position: absolute; left: 0; right: 0; top: 300px; text-align: center; font-weight: 700; font-size: 36px; letter-spacing: .02em; white-space: nowrap; }
-.hook-sent .q { position: absolute; top: -46px; width: 34px; height: 34px; margin-left: -17px; border-radius: var(--r-pill); background: var(--rating-wrong); color: var(--text-on-panel); font-family: var(--font-display); font-size: 22px; line-height: 34px; text-align: center; }
-.hook-sent .tok { display: inline-block; position: relative; }
-.squiggle { position: absolute; left: 38px; right: 38px; top: 352px; height: 10px; }
+/* The question's last word, the one the hook turns on. */
+#hk-this { position: absolute; left: 32px; width: 344px; top: 170px; text-align: center; font-weight: 700; font-size: 84px; line-height: 1; letter-spacing: -.03em; color: var(--rating-wrong); }
+/* The sentence as a card, on two lines at its phrase break, a ? in
+   each kanji's reading slot: the reading stop fills the same slots. */
+.hook-card { position: absolute; left: 32px; top: 290px; width: 344px; padding: 16px 20px 22px; border-radius: var(--r-panel); background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--elev-board); display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.hook-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: var(--r-panel) 0 0 var(--r-panel); background: var(--rating-wrong); }
+.hook-card .tag { border: 1.5px solid var(--rating-wrong); padding: 3px 10px; font-size: 13px; }
+.hook-sent { align-self: stretch; text-align: center; font-weight: 700; font-size: 40px; line-height: 1.95; letter-spacing: .02em; white-space: nowrap; }
+.hook-sent rt { font-size: 15px; line-height: 1; }
+.hook-sent rt b { display: inline-grid; place-items: center; width: 24px; height: 24px; margin-bottom: 2px; border-radius: var(--r-pill); background: var(--rating-wrong); color: var(--text-on-panel); font-family: var(--font-display); font-size: 15px; font-weight: 700; }
 
 .miss { position: absolute; left: 32px; width: 344px; text-align: center; font-weight: 700; }
 #miss1 { top: 236px; font-size: 26px; color: var(--text-secondary); }

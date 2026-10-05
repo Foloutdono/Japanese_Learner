@@ -232,20 +232,32 @@
     const stab = (at, notes, peak = 0.12) => notes.forEach(n => pluck(at, n, peak, 0.9))
 
     // ── The hook: a held breath ────────────────────────────
-    // A drone and a ticking clock under the swiping cards.
-    pad(0, [N.A2, N.E2 + 12], 1.25, 0.05)
-    for (let i = 0; i < 10; i++) hat(i * 0.125, i % 2 ? 0.035 : 0.06)
-    for (let i = 0; i < 3; i++) kick(i * BEAT, 0.45)
-    // The sentence lands, and does not resolve.
-    boom(1.27, 0.75, 1.0)
-    pad(1.27, [N.A2, N.A2 + 1, N.E2 + 12], 0.95, 0.045)
-    riser(1.8, 2.5, 0.12)
+    // Every moment from the picture's cues (timeline.js).
+    const C = window.CUES
+    const question = C.words[0]
+    // A drone and a ticking clock under the swiping cards; the kick
+    // stops as the question starts, and the clock and a swell carry it
+    // to the sentence.
+    pad(0, [N.A2, N.E2 + 12], C.sentence, 0.05)
+    for (let at = 0; at < C.sentence - 0.01; at += BEAT / 4) {
+      hat(at, at < question ? ((at / (BEAT / 4)) % 2 ? 0.035 : 0.06) : 0.03)
+    }
+    for (let at = 0; at < question - 0.01; at += BEAT) kick(at, 0.45)
+    riser(question + 0.05, C.sentence, 0.1)
+    // The sentence lands, low; "this?" lands harder, and nothing
+    // resolves: a heartbeat under a held discord until "practice".
+    boom(C.sentence, 0.55, 0.8)
+    pad(C.sentence, [N.A2, N.A2 + 1, N.E2 + 12], C.impact - C.sentence, 0.045)
+    kick(C.wrong, 0.9); boom(C.wrong, 0.9, 1.3); crash(C.wrong, 0.12, 0.9)
+    stab(C.wrong, [N.A3, N.A3 + 1, N.E4], 0.07)
+    for (let at = C.wrong + BEAT; at < C.impact - BEAT / 2; at += BEAT) { kick(at, 0.42); kick(at + 0.17, 0.26) }
+    riser(C.tag + BEAT / 2, C.impact, 0.12)
     // practice. — everything at once, then the run-up to the drop.
-    kick(2.5, 1); boom(2.5, 0.9, 1.1); crash(2.5, 0.26)
-    stab(2.5, [N.A3, N.C4, N.E4, N.A4], 0.1)
-    pad(2.5, [N.A2 + 12, N.C3, N.E2 + 12], 1.0, 0.05)
-    riser(2.6, 3.5, 0.18)
-    ;[2.75, 3.0, 3.125, 3.25, 3.3125, 3.375, 3.4375].forEach((at, i) => snare(at, 0.08 + i * 0.025))
+    kick(C.impact, 1); boom(C.impact, 0.9, 1.0); crash(C.impact, 0.26)
+    stab(C.impact, [N.A3, N.C4, N.E4, N.A4], 0.1)
+    pad(C.impact, [N.A2 + 12, N.C3, N.E2 + 12], C.brand - C.impact, 0.05)
+    riser(C.impact + 0.05, C.brand, 0.18)
+    ;[0.25, 0.375, 0.5, 0.5625, 0.625, 0.6875].forEach((d, i) => snare(C.impact + d, 0.08 + i * 0.03))
 
     // ── The ride: four chords, round and round ─────────────
     // Am F C G, and over them a riff in A minor's pentatonic, the
@@ -287,11 +299,11 @@
         }
       }
     }
-    crash(3.5, 0.28)
-    groove(3.5, 20.5)
+    crash(C.brand, 0.28)
+    groove(C.brand, C.feats[5])
     // The exam: the same ride with the arpeggios over it.
-    crash(20.5, 0.22)
-    groove(20.5, 24.5, { arp: true })
+    crash(C.feats[5], 0.22)
+    groove(C.feats[5], 24.5, { arp: true })
 
     // ── The board: the floor falls away, the flaps turn ────
     pad(24.5, [N.A3, N.C4, N.E4], 2.0, 0.06)
@@ -352,9 +364,11 @@
     }
 
     C.swipes.forEach(at => voice('card-transition', at, 4.5))
+    C.words.forEach(at => voice('click', at, 3.5))
     whoosh(C.sentence, 0.16, 0.22)
-    voice('wrong', C.wrong, 7)
+    voice('wrong', C.wrong, 8)
     C.queries.forEach(at => voice('click', at, 7, 'pad'))
+    voice('click', C.tag, 7, 'wood')
     whoosh(C.impact, 0.2, 0.3)
     voice('gate-chime', C.brand, 6)
     C.pops.forEach((at, i) => bell(at, [N.A5, N.C6, N.D6, N.E6, N.G6, N.A6][i]))

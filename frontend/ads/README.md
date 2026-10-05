@@ -54,16 +54,16 @@ Every cut sits on a beat (120 BPM, a beat is 0.5 s).
 
 | Time | Picture | Sound |
 | --- | --- | --- |
-| 0.0–1.25 | **Hook.** "Months of flashcards…" over a deck being swiped, a day counter running to 180. | Ticking hats, a muffled kick, the app's card swipe on each card. |
-| 1.25–2.25 | "…and you still can't read **this?**" 駅でコーヒーを飲みます。 slams in, shakes, two red ? and a wavy underline. | A low boom, the app's wrong answer. |
-| 2.25–3.5 | "You're missing **practice.**" in the gate's gold, the six lines bursting out behind it. | Impact, then a riser and a snare roll. |
-| 3.5–5.0 | The 辻 mark, its road drawn in gold, "6 ways to practise Japanese", the six rings popping in. They then fly up to become the rail. | The drop. The app's gate chime, a bell for each ring. |
-| 5.0–8.5 | **1/6 読書 Reading.** "Read real sentences": the reading typed, Check, ✓, furigana, and the breakdown word by word. | Typing, the app's correct chime. |
-| 8.5–11.5 | **2/6 理解 Comprehension.** "Understand short texts": a passage highlighted, the right answer picked. | |
-| 11.5–14.5 | **3/6 翻訳 Translation.** "Translate into Japanese": kana typed, converted to kanji, ✓, the tutor's note. | |
-| 14.5–17.5 | **4/6 書取 Dictation.** "Write what you hear": the clip plays, romaji typed, ✓, the line revealed. | |
-| 17.5–20.5 | **5/6 作文 Composition.** "Compose your own sentences": 〜たい given, a sentence written, "〜たい found", the tutor's suggestion. | |
-| 20.5–24.5 | **6/6 模試 Mock exam.** "Sit mock JLPT exams": the clock, a kanji-reading item answered, the paper turned over to 142 / 180, the answer sheet filling, a red 合格 stamp. "Unofficial scoring" stays on screen. | Arpeggios join the track; fare ticks, the app's stamp. |
+| 0.0–1.5 | **Hook.** "Months of flashcards…" over a deck being swiped, a day counter running to 180. | Ticking hats, a muffled kick, the app's card swipe on each card. |
+| 1.5–4.0 | The ad's longest hold. "…and you still can't read" builds a word at a time; on the beat (2.0) 駅でコーヒーを飲みます。 lands as a card, on two lines at its phrase break; on the next (2.5) a huge red **this?** lands and the card shakes; a red ? fills each kanji's reading slot, the tag "JLPT N5 · the very first level" drops in, and the frame pushes in slowly. The reading stop later fills the same slots with えき and の. | The kick stops, the clock ticks on with a tick per word and a swell into the sentence's low boom; "this?" lands on a heavier hit with the app's wrong answer, then a heartbeat under a held discord. |
+| 4.0–5.0 | "You're missing **practice.**" in the gate's gold, the six lines bursting out behind it. | Impact, then a riser and a snare roll. |
+| 5.0–6.5 | The 辻 mark, its road drawn in gold, "6 ways to practise Japanese", the six rings popping in. They then fly up to become the rail. | The drop. The app's gate chime, a bell for each ring. |
+| 6.5–9.5 | **1/6 読書 Reading.** "Read real sentences": the reading typed, Check, ✓, furigana, and the breakdown word by word. | Typing, the app's correct chime. |
+| 9.5–12.0 | **2/6 理解 Comprehension.** "Understand short texts": a passage highlighted, the right answer picked. | |
+| 12.0–15.0 | **3/6 翻訳 Translation.** "Translate into Japanese": kana typed, converted to kanji, ✓, the tutor's note. | |
+| 15.0–18.0 | **4/6 書取 Dictation.** "Write what you hear": the clip plays, romaji typed, ✓, the line revealed. | |
+| 18.0–21.0 | **5/6 作文 Composition.** "Compose your own sentences": 〜たい given, a sentence written, "〜たい found", the tutor's suggestion. | |
+| 21.0–24.5 | **6/6 模試 Mock exam.** "Sit mock JLPT exams": the clock, a kanji-reading item answered, the paper turned over to 142 / 180, the answer sheet filling, a red 合格 stamp. "Unofficial scoring" stays on screen. | Arpeggios join the track; fare ticks, the app's stamp. |
 | 24.5–26.5 | **The whole course, N5 → N1** on a departure board: words, kanji and grammar points flapping in, plus a line on spaced repetition. | The floor drops out, the board's flaps, a riser. |
 | 26.5–30.0 | **Call to action.** The mark, "Start practising today", the gate button "Start free" with its reader's ripples, the address, "Free during early access · no account needed", an arrow down to the platform's button. | The final drop, the app's platform chime, a last stab. |
 

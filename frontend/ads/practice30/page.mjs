@@ -65,9 +65,12 @@ const scenes = `
 </section>
 
 <section id="s-hook2">
-  <h1 class="hook-line" id="hk2"><span class="w">…and</span> <span class="w">you</span> <span class="w">still</span> <span class="w">can't</span> <span class="w">read</span> <span class="w hl">this?</span></h1>
-  <div class="hook-sent" id="hk-sent" lang="ja"><span class="tok">駅<span class="q">?</span></span>で<span class="tok">コーヒー</span>を<span class="tok">飲<span class="q">?</span></span>みます。</div>
-  <svg class="squiggle" id="hk-sq" viewBox="0 0 356 10" preserveAspectRatio="none"><path d="M0 5 Q 6 0 12 5 T 24 5 T 36 5 T 48 5 T 60 5 T 72 5 T 84 5 T 96 5 T 108 5 T 120 5 T 132 5 T 144 5 T 156 5 T 168 5 T 180 5 T 192 5 T 204 5 T 216 5 T 228 5 T 240 5 T 252 5 T 264 5 T 276 5 T 288 5 T 300 5 T 312 5 T 324 5 T 336 5 T 348 5 T 356 5" fill="none" stroke="var(--rating-wrong)" stroke-width="2.5" stroke-linecap="round"/></svg>
+  <h1 class="hook-line" id="hk2"><span class="w">…and</span> <span class="w">you</span> <span class="w">still</span><br><span class="w">can't</span> <span class="w">read</span></h1>
+  <div id="hk-this">this?</div>
+  <div class="hook-card" id="hk-card">
+    <span class="tag" id="hk-tag">JLPT N5 · the very first level</span>
+    <div class="hook-sent" lang="ja"><ruby>駅<rt><b>?</b></rt></ruby>でコーヒーを<br><ruby>飲<rt><b>?</b></rt></ruby>みます。</div>
+  </div>
 </section>
 
 <section id="s-miss">

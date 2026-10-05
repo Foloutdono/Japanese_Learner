@@ -23,19 +23,28 @@
   const style = (el, s) => Object.assign(el.style, s)
 
   // ── The plan, in seconds ──────────────────────────────────
-  const FEATS = [[5.0, 8.5], [8.5, 11.5], [11.5, 14.5], [14.5, 17.5], [17.5, 20.5], [20.5, 24.5]]
+  const FEATS = [[6.5, 9.5], [9.5, 12.0], [12.0, 15.0], [15.0, 18.0], [18.0, 21.0], [21.0, 24.5]]
   const T = {
-    hook1: [0, 1.25], hook2: [1.25, 2.25], miss: [2.25, 3.5], brand: [3.5, 5.0],
+    hook1: [0, 1.5], hook2: [1.5, 4.0], miss: [4.0, 5.0], brand: [5.0, 6.5],
     board: [24.5, 26.5], cta: [26.5, 30],
+  }
+  // The hook's beats: the question is the ad's longest held moment.
+  const H = {
+    sentence: 2.0,            // the sentence lands, a card on the beat
+    this: 2.5,                // "this?" lands on the next, with the wrong answer
+    queries: [2.75, 2.875],   // a ? where each kanji's reading should be
+    tag: 3.0,                 // JLPT N5: the very first level
+    missing: 4.0,             // You're missing
+    impact: 4.25,             // practice.
   }
   // Each stop's beats, from its start.
   const F = {
     reading: { type: [0.45, 1.25], check: 1.4, rows: 1.6 },
-    rikai: { mark: [0.6, 0.95], pick: 1.35 },
+    rikai: { mark: [0.5, 0.85], pick: 1.2 },
     honyaku: { type: [0.4, 1.1], convert: 1.2, ok: 1.38, tutor: 1.58 },
     kakitori: { play: 0.3, wave: [0.35, 1.7], type: [0.9, 1.6], check: 1.72, answer: 1.84 },
     sakubun: { type: [0.35, 1.0], convert: 1.1, found: 1.3, tutor: 1.55 },
-    exam: { clock: [0.2, 1.6], pick: 1.0, flip: [1.6, 1.9], count: [1.95, 2.7], stamp: 2.85 },
+    exam: { clock: [0.2, 1.35], pick: 0.85, flip: [1.35, 1.65], count: [1.7, 2.4], stamp: 2.55 },
   }
   const READING = 'eki de koohii o nomimasu'
   const HEARD = 'gakkou wa kuji kara desu'
@@ -51,19 +60,21 @@
     for (let i = 1; i <= n; i += every) out.push(a + t0 + (t1 - t0) * (i / n))
     return out
   }
-  const cards = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(j => 0.10 + j * 0.115)
+  const cards = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(j => 0.10 + j * 0.14)
   const FLAP_ROWS = [24.75, 24.95, 25.15]
   const CUES = {
     beat: 0.5,
     feats: FEATS.map(f => f[0]),
     swipes: cards,
-    sentence: 1.27,
-    wrong: 1.55,
-    queries: [1.6, 1.72],
-    impact: 2.5,
-    brand: 3.5,
-    pops: [0, 1, 2, 3, 4, 5].map(i => 3.9 + i * 0.07),
-    toRail: 4.72,
+    words: [0, 1, 2, 3, 4].map(i => T.hook2[0] + i * 0.08),
+    sentence: H.sentence,
+    wrong: H.this,
+    queries: H.queries,
+    tag: H.tag,
+    impact: H.impact,
+    brand: T.brand[0],
+    pops: [0, 1, 2, 3, 4, 5].map(i => T.brand[0] + 0.4 + i * 0.07),
+    toRail: T.brand[0] + 1.22,
     keys: [
       ...keyTimes(FEATS[0][0], F.reading.type, READING.length),
       ...keyTimes(FEATS[2][0], F.honyaku.type, IME[0].kana.length),
@@ -85,8 +96,8 @@
   window.CUES = CUES
 
   // ── The camera: a jolt where something lands ──────────────
-  const JOLTS = [[1.29, 7], [2.5, 12], [3.5, 4], [CUES.stamp, 9], [26.5, 5]]
-  const FLASHES = [[1.25, 0.25, 0.05], [2.5, 0.42, 0.1], [3.5, 0.22, 0.08], [26.5, 0.2, 0.08]]
+  const JOLTS = [[H.sentence + 0.02, 6], [H.this, 11], [H.impact, 12], [T.brand[0], 4], [CUES.stamp, 9], [26.5, 5]]
+  const FLASHES = [[T.hook2[0], 0.2, 0.05], [H.impact, 0.42, 0.1], [T.brand[0], 0.22, 0.08], [26.5, 0.2, 0.08]]
   function camera(t) {
     let x = 0, y = 0
     for (const [at, amp] of JOLTS) {
@@ -106,9 +117,9 @@
   const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16))
   const GLOWS = [
-    [0, '--state-learning'], [1.25, '--rating-wrong'], [2.25, '--gate-gold'], [3.5, '--gate-gold'],
-    [5.0, '--line-reading'], [8.5, '--line-rikai'], [11.5, '--line-honyaku'], [14.5, '--line-kakitori'],
-    [17.5, '--line-sakubun'], [20.5, '--line-exam'], [24.5, '--line-vocab'], [26.5, '--gate-gold'],
+    [0, '--state-learning'], [T.hook2[0], '--rating-wrong'], [T.miss[0], '--gate-gold'], [T.brand[0], '--gate-gold'],
+    ...['reading', 'rikai', 'honyaku', 'kakitori', 'sakubun', 'exam'].map((line, i) => [FEATS[i][0], `--line-${line}`]),
+    [T.board[0], '--line-vocab'], [T.cta[0], '--gate-gold'],
   ]
   let glows = null
   function ground(t) {
@@ -120,9 +131,10 @@
     const c = glows[i][1].map((v, n) => Math.round(mix(prev[n], v, i ? k : 1)))
     $('#glow').style.setProperty('--glow', `rgb(${c.join(',')})`)
     // The sleepers run faster once the line is moving.
-    const run = t < 3.5 ? t * 30 : 105 + (t - 3.5) * 170
+    const drop = T.brand[0]
+    const run = t < drop ? t * 30 : drop * 30 + (t - drop) * 170
     $('#speed').style.backgroundPosition = `${-run}px 0`
-    $('#strip').style.transform = `scaleX(${p(t, 3.5, 4.0, E.io)})`
+    $('#strip').style.transform = `scaleX(${p(t, drop, drop + 0.5, E.io)})`
   }
 
   // Words arriving one after another, each a punch from a little big.
@@ -136,8 +148,8 @@
   // ── 0.00 Months of flashcards… ────────────────────────────
   const fcs = $$('#hk-deck .fc').reverse()   // in the order they are swiped
   function hook1(t) {
-    style($('#hk1'), { transform: `scale(${mix(1, 1.04, t / 1.25)})` })
-    const day = Math.max(1, Math.round(180 * p(t, 0.05, 1.18, E.in)))
+    style($('#hk1'), { transform: `scale(${mix(1, 1.04, t / T.hook1[1])})` })
+    const day = Math.max(1, Math.round(180 * p(t, 0.05, T.hook1[1] - 0.1, E.in)))
     $('#hk-day b').textContent = day
     let gone = 0
     fcs.forEach((el, j) => {
@@ -155,49 +167,51 @@
     })
   }
 
-  // ── 1.25 …and you still can't read this? ──────────────────
+  // ── 1.50 …and you still can't read this? ──────────────────
+  // The ad's one long hold: the question builds a word at a time, the
+  // sentence lands on a beat as a card, "this?" on the next, then the
+  // readings it is missing, and a slow push-in while it sinks in.
   function hook2(t) {
-    punch($$('#hk2 .w'), t, 1.25, 0.065)
-    const k = p(t, CUES.sentence, CUES.sentence + 0.12)
-    const shake = t > CUES.wrong && t < CUES.wrong + 0.35 ? Math.sin((t - CUES.wrong) * 80) * 7 * (1 - (t - CUES.wrong) / 0.35) : 0
-    const out = p(t, 2.15, 2.25, E.in)
-    style($('#hk-sent'), {
-      opacity: k * (1 - out),
-      transform: `translateX(${shake}px) scale(${mix(1.8, 1, k) * mix(1, 0.9, out)})`,
-      filter: `blur(${out * 6}px)`,
+    const [a, b] = T.hook2
+    punch($$('#hk2 .w'), t, a, 0.08)
+    const k = p(t, H.sentence, H.sentence + 0.14)
+    const d = t - H.this
+    const shake = d > 0 && d < 0.4 ? Math.sin(d * 75) * 9 * (1 - d / 0.4) : 0
+    style($('#hk-card'), { opacity: k, transform: `translateX(${shake}px) scale(${mix(1.5, 1, k)})` })
+    const th = p(t, H.this, H.this + 0.12)
+    const wobble = d > 0.12 ? Math.sin((d - 0.12) * 9) * 2.5 * Math.max(0, 1 - (d - 0.12) / 0.8) : 0
+    style($('#hk-this'), { opacity: th, transform: `scale(${mix(2.8, 1, th)}) rotate(${wobble}deg)` })
+    $$('#hk-card rt b').forEach((q, i) => {
+      const kk = p(t, H.queries[i], H.queries[i] + 0.14)
+      style(q, { opacity: kk, transform: `scale(${E.back(kk)})` })
     })
-    $$('#hk-sent .q').forEach((q, i) => {
-      const kk = p(t, CUES.queries[i], CUES.queries[i] + 0.14)
-      style(q, { opacity: kk, transform: `scale(${E.back(kk)}) rotate(${i ? 10 : -10}deg)` })
-    })
-    const path = $('#hk-sq path')
-    const len = 380
-    path.style.strokeDasharray = len
-    path.style.strokeDashoffset = len * (1 - p(t, 1.5, 1.75, E.io))
-    $('#hk-sq').style.opacity = 1 - out
-    $('#hk2').style.opacity = 1 - out
+    const g = p(t, H.tag, H.tag + 0.14)
+    style($('#hk-tag'), { opacity: g, transform: `scale(${mix(1.5, 1, E.back(g))})` })
+    const push = mix(1, 1.05, p(t, H.this, b, E.lin))
+    const out = p(t, b - 0.12, b, E.in)
+    style($('#s-hook2'), { opacity: 1 - out, filter: `blur(${out * 8}px)`, transform: `scale(${push * mix(1, 1.1, out)})` })
   }
 
-  // ── 2.25 You're missing practice. ─────────────────────────
+  // ── 4.00 You're missing practice. ─────────────────────────
   function miss(t) {
-    const a = p(t, 2.25, 2.37)
+    const a = p(t, H.missing, H.missing + 0.12)
     style($('#miss1'), { opacity: a, transform: `translateY(${(1 - a) * 14}px)` })
-    const k = p(t, CUES.impact, CUES.impact + 0.13)
-    const out = p(t, 3.36, 3.5, E.in)
+    const k = p(t, H.impact, H.impact + 0.13)
+    const out = p(t, T.miss[1] - 0.14, T.miss[1], E.in)
     style($('#miss2'), {
       opacity: k,
-      transform: `scale(${mix(2.4, 1, k) * mix(1, 1.08, (t - 2.5) / 1) * mix(1, 1.6, out)})`,
+      transform: `scale(${mix(2.4, 1, k) * mix(1, 1.08, (t - H.impact) / 1) * mix(1, 1.6, out)})`,
     })
     $$('#rays line').forEach((l, i) => {
       l.style.strokeDasharray = 600
-      l.style.strokeDashoffset = 600 * (1 - p(t, CUES.impact + i * 0.02, CUES.impact + 0.4 + i * 0.02, E.out))
+      l.style.strokeDashoffset = 600 * (1 - p(t, H.impact + i * 0.02, H.impact + 0.4 + i * 0.02, E.out))
     })
-    style($('#rays'), { opacity: 0.6 * (1 - out), transform: `rotate(${(t - 2.5) * 6}deg)`, transformOrigin: '216px 310px' })
+    style($('#rays'), { opacity: 0.6 * (1 - out), transform: `rotate(${(t - H.impact) * 6}deg)`, transformOrigin: '216px 310px' })
     $('#s-miss').style.opacity = 1 - out
     $('#s-miss').style.filter = `blur(${out * 8}px)`
   }
 
-  // ── 3.50 辻 Tsuji — 6 ways to practise Japanese ───────────
+  // ── 5.00 辻 Tsuji — 6 ways to practise Japanese ───────────
   function brandMark(root, t, at) {
     const k = p(t, at, at + 0.16)
     style($('.mark', root), { opacity: k, transform: `scale(${mix(0.6, 1, E.back(k))})` })
@@ -209,7 +223,7 @@
   function brand(t) {
     const root = $('#s-brand')
     brandMark(root, t, T.brand[0])
-    punch($$('#brand-head .w'), t, 3.68, 0.05)
+    punch($$('#brand-head .w'), t, T.brand[0] + 0.18, 0.05)
     const out = p(t, CUES.toRail, CUES.toRail + 0.2, E.in)
     style(root, { opacity: 1 - out, transform: `translateY(${-30 * out}px)` })
   }
@@ -240,7 +254,7 @@
       el.classList.toggle('is-past', now > i)
       style(el, { opacity: pop * (1 - leave), transform: `translate(${x}px, ${y}px) scale(${s})` })
     })
-    const line = p(t, 4.86, 5.06, E.io)
+    const line = p(t, CUES.toRail + 0.14, CUES.toRail + 0.34, E.io)
     style($('.rail-line'), { opacity: 1 - leave, transform: `scaleX(${line})` })
     // The train runs to the stop being shown, and off the end at last.
     let tx = RAIL_X(0)
@@ -250,7 +264,7 @@
       tx = mix(from, RAIL_X(now), p(t, a - 0.06, a + 0.26, E.io))
     }
     tx = mix(tx, 440, leave)
-    const on5 = p(t, 4.95, 5.1)
+    const on5 = p(t, FEATS[0][0] - 0.05, FEATS[0][0] + 0.1)
     style($('.train'), { opacity: on5, left: `${tx}px` })
     style($('.rail-done'), { opacity: on5 * (1 - leave), width: `${Math.max(0, Math.min(tx, RAIL_X(5)) - 52)}px` })
   }
