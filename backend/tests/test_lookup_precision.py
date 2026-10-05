@@ -492,3 +492,36 @@ class InvariantTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class GreetingTests(unittest.TestCase):
+    """Plan 186d: the greetings a first lesson teaches are kana cards
+    UniDic files under kanji the deck does not write (御早う, 有り難う),
+    so an interjection reaches a kana-only card by its reading, as an
+    adverb does; and a set phrase cut into a verb and its endings is one
+    word where it stands as a clause (すみません is no 済む "to finish")."""
+
+    def test_an_interjection_reaches_its_kana_card(self) -> None:
+        for sentence, word, raw_id in (
+            ("おはよう。", "おはよう", "vocab_N5__おはよう"),
+            ("さようなら。", "さようなら", "vocab_N5__さようなら"),
+            ("ありがとう。", "ありがとう", "vocab_N5__ありがとう"),
+            ("こんにちは。", "こんにちは", "vocab_N5__こんにちは"),
+            ("いいえ、学生です。", "いいえ", "vocab_N5__いいえ"),
+        ):
+            with self.subTest(word=word):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_a_set_phrase_standing_as_a_clause_is_one_word(self) -> None:
+        for sentence in ("すみません。", "すみません、駅はどこですか。"):
+            with self.subTest(sentence=sentence):
+                found = matches(sentence)
+                self.assertEqual(found["すみません"]["raw_id"], "vocab_N5__すみません")
+                self.assertNotIn("すみ", found)
+
+    def test_a_phrase_inside_a_clause_is_left_to_its_words(self) -> None:
+        # しまった after a て is 〜てしまう's, でも after a noun the particles'.
+        self.assertNotIn("しまった", matches("ケーキを食べてしまった。"))
+        self.assertNotIn("でも", {k for k, v in matches("学校でも勉強します。").items()
+                                  if v["raw_id"] == "vocab_N5__でも"})
