@@ -228,7 +228,7 @@ def get_theme_stats(theme: str, level: str = "",
     # than 404-ing.
     pool = [e for e in pool if eligible_for(m, e)]
     if not pool:
-        return {"total": 0, "new": 0, "learning": 0, "mastered": 0, "due_now": 0}
+        return {"total": 0, "new": 0, "learning": 0, "mastered": 0, "learned": 0, "due_now": 0}
 
     card_ids = prefixed([e["card_id"] for e in pool], user_id)
     states  = srs.get_bulk_stats(card_ids, mode)
@@ -239,5 +239,6 @@ def get_theme_stats(theme: str, level: str = "",
         "new":      sum(1 for s in states.values() if s == "new"),
         "learning": sum(1 for s in states.values() if s == "learning"),
         "mastered": sum(1 for s in states.values() if s == "mastered"),
+        "learned":  srs.get_bulk_learned(card_ids, mode),
         "due_now":  len(due),
     }

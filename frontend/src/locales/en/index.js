@@ -672,6 +672,7 @@ const stats = {
   dueUnit:            'due',
   newUnit:            'new',
   learningUnit:       'in progress',
+  learnedLabel:       'Learned',   // a platform's figure, read out (plan 184)
   sourceTiers:        n => `${n} tiers`,
   sourceThemes:       n => `${n} themes`,
   // The vocabulary's sources on the desk (plan 183): the strip of what

@@ -28,6 +28,7 @@ def _empty_bucket(total: int) -> dict:
         "new": total,
         "learning": 0,
         "mastered": 0,
+        "learned": 0,   # what the cards add up to, whole (plan 184); set once the sums are in
         "due_now": 0,
         "reviews": 0,   # sum of total_reviews across cards in this bucket
         "correct": 0,   # sum of correct_reviews across cards in this bucket
@@ -125,6 +126,12 @@ def get_stats(user_id: str = Depends(get_user_id)):
         for deck_key in card_index.deck_keys(source)
     }
 
+    # The progress of every row the learner has touched, by bucket, for
+    # each bucket's `learned` (plan 184): a platform's own figure is what
+    # its cards add up to, as a stop's is, and not the count of cards
+    # held for 21 days.
+    progress: dict[tuple[str, str, str], list[float]] = {}
+
     prefix_len = len(user_id) + 1  # strip "user_id:" from the stored card_id
 
     # Only iterate over what the user has actually touched, not the whole
@@ -156,6 +163,7 @@ def get_stats(user_id: str = Depends(get_user_id)):
 
         bucket["reviews"] += item["total_reviews"]
         bucket["correct"] += item["correct_reviews"]
+        progress.setdefault((source, deck_key, mode), []).append(item["progress"])
 
         # A row with no reviews behind it is not progress on the card,
         # whatever interval it happens to carry. Scored per mode and
@@ -165,6 +173,9 @@ def get_stats(user_id: str = Depends(get_user_id)):
         if item["total_reviews"] > 0:
             seen = best_card[(source, deck_key)]
             seen[raw_id] = max(item["progress"], seen.get(raw_id, 0.0))
+
+    for (source, deck_key, mode), values in progress.items():
+        buckets[source][deck_key][mode]["learned"] = srs.whole_cards(values)
 
     items = {
         source: {

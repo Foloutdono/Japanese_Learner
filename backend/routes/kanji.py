@@ -481,6 +481,7 @@ def get_kanji_stats(level: str | None = None, radical: int | None = None,
         "new":      sum(1 for s in states.values() if s == "new"),
         "learning": sum(1 for s in states.values() if s == "learning"),
         "mastered": sum(1 for s in states.values() if s == "mastered"),
+        "learned":  srs.get_bulk_learned(card_ids, mode),
         "due_now":  len(due),
     }
 

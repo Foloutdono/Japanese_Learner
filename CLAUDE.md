@@ -1531,10 +1531,21 @@ runtime purpose. Two consequences worth knowing:
   and the grammar level index (`routes/grammar.py`'s `_folded_progress`,
   whose `started` now counts the points met at all, as everywhere else,
   and whose door's note shows only while it outruns `learned`) read the
-  same. The per-platform composition figures (`ModeFigures`, the
-  statistics screen's bars) stay a mastered / learning / new split, by
-  design (cited in `srs/srs.py`, `routes/stats.py`, `routes/kanji.py`,
-  `routes/grammar.py`, `tests/test_stats_items.py`,
+  same, and so does each platform's own figure -- the `mastered / total`
+  beside a platform card on the desk (`ModeFigures`, `ScopeFigures`)
+  became `learned / total` on every bucket (`/api/stats`' per-mode
+  buckets and the seven scoped stats routes, each with a `learned`
+  from `srs.get_bulk_learned`), its bar the figure in full and the
+  cards met beyond it in part (`statsModel`'s `learnedPct` and
+  `metPct`, a payload from before it falling back to its mastered
+  cards). A run's legend (`DeckProgress`: new / in progress / mastered)
+  stays the stage split it is, three counts that add up to the deck
+  (cited in `srs/srs.py`, `routes/stats.py`, `routes/kanji.py`,
+  `routes/grammar.py`, `routes/kana.py`, `routes/vocab.py`,
+  `routes/theme_vocab.py`, `routes/frequency.py`, `routes/decks.py`,
+  `domain/statsModel.js`, `components/selection/ModeFigures.jsx`,
+  `components/stats/Composition.jsx`, `folds.desktop.test.jsx`,
+  `tests/test_deck_pool_cards.py`, `tests/test_stats_items.py`,
   `tests/test_card_progress.py`, `tests/test_kanji_radicals.py`,
   `tests/test_grammar_api.py`, `domain/lineProgress.js`,
   `components/selection/LevelSelector.jsx`, `RouteStops.jsx`,

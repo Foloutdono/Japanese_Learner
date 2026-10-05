@@ -651,6 +651,7 @@ const stats = {
   dueUnit:            'à réviser',
   newUnit:            'nouveaux',
   learningUnit:       'en cours',
+  learnedLabel:       'Apprises',   // le chiffre d'une plateforme, lu à voix haute (plan 184)
   sourceTiers:        n => `${n} paliers`,
   sourceThemes:       n => `${n} thèmes`,
   // Les sources du vocabulaire sur le bureau (plan 183) : la bande de ce

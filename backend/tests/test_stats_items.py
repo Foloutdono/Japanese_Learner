@@ -302,3 +302,84 @@ def test_a_card_met_and_missed_is_started_and_worth_nothing_yet(client):
     _seed([(a, READ, 0, 1, 0)])
     got = _items(client)
     assert (got["started"], got["learned"], got["score"]) == (1, 0, 0.0)
+
+
+# ── Plan 184, the platform figures ────────────────────────────────
+# A platform card's own figure is what its cards add up to in that mode,
+# as a stop's is: seven cards a day out are worth a half each, so 3.5,
+# printed 3 -- and none of them is mastered, which is what the figure
+# used to count.
+
+def _a_day_out(raws, mode):
+    _seed([(raw, mode, 1, 3) for raw in raws])
+
+
+def test_a_platforms_bucket_adds_its_cards_up_like_a_stop(client):
+    ids = card_index.raw_ids(SOURCE, DECK, READ)[:7]
+    _a_day_out(ids, READ)
+
+    bucket = client.get("/api/stats").json()[SOURCE][DECK][READ]
+    assert bucket["mastered"] == 0 and bucket["learning"] == 7
+    assert bucket["learned"] == 3
+    # Another mode of the same cards is its own platform, its own sum.
+    assert client.get("/api/stats").json()[SOURCE][DECK][WRITE]["learned"] == 0
+
+
+def test_an_untouched_platform_reads_zero(client):
+    payload = client.get("/api/stats").json()
+    assert all(
+        bucket["learned"] == 0
+        for source in ("kana", "vocab", "kanji", "grammar")
+        for modes in payload[source].values() for bucket in modes.values()
+    )
+
+
+# (url, params) for each route a platform card's figure or a run's head
+# reads, with the cards that route counts.
+def _scoped_routes():
+    from content import theme_data
+    from study.modes import KANA
+    import content.frequency_data as freq
+
+    kana_mode = "kana.flashcard.f2b"
+    vocab_mode = "vocab.flashcard.f2b"
+    grammar_mode = "grammar.flashcard.f2b"
+    tier = [freq.to_id("kanji", k) for k in freq.tier_keys("kanji", 1)]
+    return [
+        ("/api/kana/stats", {"set_name": "hiragana_basic", "mode": kana_mode},
+         card_index.raw_ids(KANA, "hiragana_basic", kana_mode), kana_mode),
+        ("/api/kanji/stats", {"level": DECK, "mode": READ},
+         card_index.raw_ids(SOURCE, DECK, READ), READ),
+        ("/api/vocab/stats", {"level": "N5", "mode": vocab_mode},
+         card_index.raw_ids("vocab", "N5", vocab_mode), vocab_mode),
+        ("/api/grammar/level-stats", {"level": "N5", "mode": grammar_mode},
+         card_index.raw_ids("grammar", "N5", grammar_mode), grammar_mode),
+        ("/api/vocab/theme/animals/stats", {"mode": vocab_mode},
+         [e["card_id"] for e in theme_data.theme_entries("animals")], vocab_mode),
+        ("/api/frequency/kanji/stats", {"tier": 1, "mode": READ},
+         [raw for raw in tier if raw], READ),
+    ]
+
+
+@pytest.mark.parametrize("index", range(6))
+def test_every_scoped_route_reports_what_its_cards_add_up_to(client, index):
+    url, params, raws, mode = _scoped_routes()[index]
+    assert len(raws) >= 7, url
+
+    before = client.get(url, params=params).json()
+    assert before["learned"] == 0, url
+
+    _a_day_out(raws[:7], mode)
+    got = client.get(url, params=params).json()
+    assert got["mastered"] == 0 and got["learning"] == 7, url
+    assert got["learned"] == 3, url                  # 7 x 0.5 = 3.5, printed 3
+    assert got["learned"] <= got["learning"] + got["mastered"], url
+
+
+def test_a_mastered_card_is_a_whole_one_in_a_platforms_figure(client):
+    ids = card_index.raw_ids(SOURCE, DECK, READ)
+    _seed([(ids[0], READ, 40, 6), (ids[1], READ, 1, 3), (ids[2], READ, 1, 3)])
+
+    got = client.get("/api/kanji/stats", params={"level": DECK, "mode": READ}).json()
+    assert got["mastered"] == 1
+    assert got["learned"] == 2                       # 1 + 0.5 + 0.5

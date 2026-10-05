@@ -655,6 +655,13 @@ class SRSEngine:
             )
         return result
 
+    def get_bulk_learned(self, card_ids: list[str], mode: str) -> int:
+        """What `card_ids` add up to in `mode` as a figure to print --
+        whole_cards over get_bulk_progress (plan 184). The `learned` of
+        every scoped stats route, so a platform's figure moves with the
+        work and reads what the stop's figure reads."""
+        return self.whole_cards(self.get_bulk_progress(card_ids, mode).values())
+
     def _log_review(self, card_id: str, mode: str, quality: int) -> dict[str, Any]:
         # card_id is always "{user_id}:{raw_id}" (see auth.prefixed) and
         # user_id itself is assumed colon-free everywhere else in this
