@@ -112,7 +112,7 @@ async function oneSentence(answer) {
   // On the run's panels (plan 129) the button prints no cap: the run's
   // lines list the keys, Enter first.
   expect(next.querySelector('.desk-kbd')).toBeNull()
-  expect($$('.desk-sentences .desk-keys .desk-kbd').some(k => /^(Enter|Entrée)$/.test(k.textContent))).toBe(true)
+  expect($$('.run-help .desk-keys .desk-kbd').some(k => /^(Enter|Entrée)$/.test(k.textContent))).toBe(true)
   await userEvent.keyboard('{Enter}')
   await settle(300)
   expect(nextButton()).toBeUndefined()
@@ -133,7 +133,7 @@ describe('a sentence run on the desk', () => {
     await settle(300)
     expect($('.timer__label').textContent).toBe('30.0s')
     // The run's lines list Space for it, first.
-    expect($$('.desk-sentences .desk-keys .desk-kbd').map(k => k.textContent)).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
+    expect($$('.run-help .desk-keys .desk-kbd').map(k => k.textContent)).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
 
     await userEvent.keyboard('{Enter}')
     await settle()
@@ -167,7 +167,7 @@ describe('a sentence run on the desk', () => {
     const play = $('.clip-player__play')
     expect(play.getAttribute('aria-keyshortcuts')).toBe('Space')
     expect($('.clip-player .desk-kbd')).toBeNull()
-    expect($('.desk-sentences .desk-keys .desk-kbd')?.textContent).toMatch(/^(Space|Espace)$/)
+    expect($('.run-help .desk-keys .desk-kbd')?.textContent).toMatch(/^(Space|Espace)$/)
     // Nothing is focused on arrival, so the first Space is the clip's.
     expect(document.activeElement).not.toBe(field())
     await userEvent.keyboard(' ')

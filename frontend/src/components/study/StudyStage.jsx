@@ -94,7 +94,7 @@ export function StudyStage({
           <StageHead
             onLeave={onLeave} leaveLabel={leaveLabel}
             where={where} sub={sub} remaining={panels || runConsole ? undefined : remaining}
-            pass={pass} onPass={openBalance} aside={aside} keys={!panels}
+            pass={pass} onPass={openBalance} aside={aside} keys={!panels} help={panels}
           />
           {runConsole && <RunMeter remaining={remaining ?? null} />}
           {children}

@@ -171,10 +171,21 @@ describe('a practice run on three panels', () => {
     // Next, unframed too.
     expect(getComputedStyle($('.stage__foot')).borderTopStyle).toBe('none')
     expect($('.stage__foot .btn-primary .desk-kbd')).toBeNull()
-    expect($('.stage__head .desk-kbd')).toBeNull()
-    const caps = $$('.desk-sentences .desk-keys .desk-kbd').map(k => k.textContent)
+    expect($('.stage__head .stage__leave .desk-kbd')).toBeNull()
+    const caps = $$('.run-help .desk-keys .desk-kbd').map(k => k.textContent)
     // Space first: it shows the sentence the run's play button holds.
     expect(caps).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
+    // The keys sit behind Help in the head, shut until asked for.
+    const pop = $('.stage__head .run-help .desk-keys')
+    const help = $('.stage__head .run-help__btn')
+    expect(pop.hidden).toBe(true)
+    help.click()
+    await settle(40)
+    expect(pop.hidden).toBe(false)
+    expect(help.getAttribute('aria-expanded')).toBe('true')
+    help.click()
+    await settle(40)
+    expect(pop.hidden).toBe(true)
   })
 
   // The practice card (plan 185, the owner's pick A): the prompt's short
@@ -357,7 +368,7 @@ describe('the run\'s lines', () => {
   it('keep dictation\'s line unknown until the reveal, and list Space first', async () => {
     await render(<Run at="/practice/dictation/N5" path="/practice/dictation/:level" element={<DictationRun session={null} />} />)
     await settle(300)
-    expect($$('.desk-sentences .desk-keys .desk-kbd').map(k => k.textContent)).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
+    expect($$('.run-help .desk-keys .desk-kbd').map(k => k.textContent)).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
     expect($('.desk-sentence--now').textContent).toContain('…')
     $('form.stage__foot input').focus()
     await userEvent.keyboard('denki')

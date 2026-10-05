@@ -5,6 +5,7 @@ import { useRatingScale } from '../../stores/ratingScale'
 import { useRunTally } from '../../stores/runTally'
 import { dueFigure, dueText } from '../../domain/forecast'
 import { DeskFigure } from './RunRecords'
+import { useRegisterRunKeys } from '../../stores/runKeys'
 import { STAGES, cardProgress, stripFills } from '../../domain/cardProgress'
 
 // ── 机 — the card panel, the second of a run's two left panels (plan 126) ──
@@ -61,6 +62,16 @@ export function CardPanel({ card, remaining = null, keys = 'card' }) {
   // button's position; drawn worst to best, as the bar draws them.
   const verdicts = ratingButtons(scale, t).map((b, i) => ({ ...b, digit: i + 1 })).reverse()
 
+  useRegisterRunKeys(
+    keys === 'readings'
+      ? [[[',', t.keySpace], t.deskKeyAddReading], [t.keyEnter, t.deskKeyCheck], [t.keyEscape, t.deskKeyLeave]]
+      : [
+          [t.keySpace, t.deskKeyTurn],
+          ...(keys === 'card' ? [['C', t.deskKeyChoices]] : []),
+          [t.keyEscape, t.deskKeyLeave],
+        ],
+  )
+
   const elapsed = tally.startedAt ? Math.max(0, now - tally.startedAt) : 0
   const minutes = Math.floor(elapsed / 60000)
   const perMinute = tally.reviewed > 0 && elapsed >= 60000 ? tally.reviewed / (elapsed / 60000) : null
@@ -89,20 +100,6 @@ export function CardPanel({ card, remaining = null, keys = 'card' }) {
             </div>
           )
         })}
-      </div>
-      <div className="desk-keys" role="list" aria-label={t.deskKeysTitle} data-guide="run.keys">
-        {keys === 'readings' ? (
-          <>
-            <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">,</kbd><kbd className="desk-kbd">{t.keySpace}</kbd>{t.deskKeyAddReading}</span>
-            <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{t.keyEnter}</kbd>{t.deskKeyCheck}</span>
-          </>
-        ) : (
-          <>
-            <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{t.keySpace}</kbd>{t.deskKeyTurn}</span>
-            {keys === 'card' && <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">C</kbd>{t.deskKeyChoices}</span>}
-          </>
-        )}
-        <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{t.keyEscape}</kbd>{t.deskKeyLeave}</span>
       </div>
       <div className="desk-rhythm" role="group" aria-label={t.deskRhythm} data-guide="run.rhythm">
         <DeskFigure label={t.deskElapsed} value={minutes} unit="min" />

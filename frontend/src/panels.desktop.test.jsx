@@ -655,7 +655,7 @@ describe('the readings drill in the middle column', () => {
   it('lists the drill\'s own keys on the card panel: a comma or Space adds, Enter checks', async () => {
     await render(<Readings />)
     await settle()
-    const keys = $$('.desk-card .desk-keys__item').map(el => el.textContent)
+    const keys = $$('.run-help .desk-keys__item').map(el => el.textContent)
     expect(keys).toEqual([',Espaceajoute une lecture', 'Entréevalide', 'Échapquitte le trajet'])
   })
 })

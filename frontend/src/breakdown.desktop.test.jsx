@@ -154,6 +154,6 @@ describe('the focus through a door in the column', () => {
     expect(document.activeElement).toBe(row)
     expect($('.stage__head')).not.toBeNull()
     expect(leave().querySelector('.desk-kbd')).toBeNull()
-    expect($('.desk-sentences .desk-keys').textContent).toMatch(/Échap/)
+    expect($('.run-help .desk-keys').textContent).toMatch(/Échap/)
   })
 })
