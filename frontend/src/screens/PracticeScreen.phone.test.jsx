@@ -147,36 +147,33 @@ describe('the practice gate at phone width', () => {
     const screen = await gate()
     const rows = [...screen.container.querySelectorAll('.plate__foot--dests')]
     const chipAt = (row, level) => [...rows[row].querySelectorAll('.chip')].find(c => c.textContent === level)
+    // The router moves in a transition, rendered when the scheduler gets
+    // to it rather than in the tap: each place is waited for, as a
+    // loaded runner had not drawn the third after 60ms.
 
     // 読書 — the run at that grade, three taps saved.
     chipAt(0, 'N3').click()
-    await settle(60)
-    expect(here.path).toBe('/practice/reading/level/N3')
+    await vi.waitFor(() => expect(here.path).toBe('/practice/reading/level/N3'))
 
     // 理解 — one axis, so its grades ARE the run.
     chipAt(1, 'N5').click()
-    await settle(60)
-    expect(here.path).toBe('/practice/comprehension/N5')
+    await vi.waitFor(() => expect(here.path).toBe('/practice/comprehension/N5'))
 
     // 翻訳 — the same shape as 読書.
     chipAt(2, 'N1').click()
-    await settle(60)
-    expect(here.path).toBe('/practice/translation/level/N1')
+    await vi.waitFor(() => expect(here.path).toBe('/practice/translation/level/N1'))
 
     // 書取 — one axis like 理解, and the grade is the run.
     chipAt(3, 'N4').click()
-    await settle(60)
-    expect(here.path).toBe('/practice/dictation/N4')
+    await vi.waitFor(() => expect(here.path).toBe('/practice/dictation/N4'))
 
     // 作文 — one axis too (plan 125).
     chipAt(4, 'N3').click()
-    await settle(60)
-    expect(here.path).toBe('/practice/composition/N3')
+    await vi.waitFor(() => expect(here.path).toBe('/practice/composition/N3'))
 
     // 模試 — not a run: that grade's papers (ExamScreen reads ?level=).
     chipAt(5, 'N2').click()
-    await settle(60)
-    expect(here.path).toBe('/practice/exam?level=N2')
+    await vi.waitFor(() => expect(here.path).toBe('/practice/exam?level=N2'))
   })
 })
 
