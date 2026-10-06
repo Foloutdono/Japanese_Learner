@@ -128,7 +128,7 @@
             },
             {
               "en": "It rained, so I didn't go out.",
-              "fr": "Il a plu, alors je ne suis pas sorti."
+              "fr": "Il a plu, alors je n'ai pas quitté la maison."
             },
             {
               "en": "When it rained, I never went out.",
@@ -4271,8 +4271,8 @@
               "fr": "Pose les bagages là-bas."
             },
             {
-              "en": "The luggage is the same as before.",
-              "fr": "Les bagages sont les mêmes qu'avant."
+              "en": "Pack the luggage again the same way.",
+              "fr": "Refais les bagages de la même façon."
             }
           ],
           "why": {
@@ -4549,7 +4549,7 @@
             },
             {
               "en": "A passive: I'm not eaten.",
-              "fr": "Un passif : je ne suis pas mangé."
+              "fr": "Un passif : on ne me mange pas."
             },
             {
               "en": "A slip for 食べない: I won't eat it.",
@@ -5858,23 +5858,23 @@
             "en": "As a noun: すぎ",
             "fr": "En nom : すぎ"
           },
-          "jp": "おなかがいたいのは、食べすぎですよ。",
+          "jp": "食べすぎに気をつけてくださいね。",
           "ask": {
             "en": "What is 食べすぎ?",
             "fr": "Qu'est-ce que 食べすぎ ?"
           },
           "choices": [
             {
-              "en": "A noun: eating too much.",
-              "fr": "Un nom : le fait de trop manger."
+              "en": "A noun: overeating. Be careful not to eat too much.",
+              "fr": "Un nom : l'excès de table. Attention à ne pas trop manger."
             },
             {
-              "en": "After eating: it's after the meal.",
-              "fr": "Après manger : c'est après le repas."
+              "en": "A time: be careful after the meal.",
+              "fr": "Un moment : faites attention après le repas."
             },
             {
-              "en": "A command: eat more!",
-              "fr": "Un ordre : mange plus !"
+              "en": "A clipped past: 食べすぎた, I ate too much.",
+              "fr": "Un passé abrégé : 食べすぎた, j'ai trop mangé."
             }
           ],
           "why": {
@@ -5885,35 +5885,6 @@
             "食べすぎる",
             "食べすぎ"
           ]
-        },
-        {
-          "notion": {
-            "en": "The reason: すぎて",
-            "fr": "La raison : すぎて"
-          },
-          "jp": "このかばんは重すぎて、持てません。",
-          "ask": {
-            "en": "What does すぎて add?",
-            "fr": "Qu'apporte すぎて ?"
-          },
-          "choices": [
-            {
-              "en": "The reason: too heavy, so I can't carry it.",
-              "fr": "La raison : trop lourd, donc impossible à porter."
-            },
-            {
-              "en": "A contrast: too heavy, and yet I carry it.",
-              "fr": "Une opposition : trop lourd, et pourtant je le porte."
-            },
-            {
-              "en": "A wish: if only it were heavier.",
-              "fr": "Un souhait : s'il était seulement plus lourd."
-            }
-          ],
-          "why": {
-            "en": "The て-form すぎて gives what too much leads to: 重すぎて持てない.",
-            "fr": "La forme en て すぎて dit à quoi mène l'excès : 重すぎて持てない."
-          }
         },
         {
           "notion": {
@@ -6919,32 +6890,32 @@
             "en": "が on the thing, not を",
             "fr": "が sur la chose, pas を"
           },
-          "jp": "父がまどを開けています。",
+          "jp": "母がドアに名前を書いています。",
           "ask": {
             "en": "Here it is を and ています. What does it say?",
             "fr": "Ici, を et ています. Que dit la phrase ?"
           },
           "choices": [
             {
-              "en": "Father is opening the window right now.",
-              "fr": "Papa est en train d'ouvrir la fenêtre."
+              "en": "Mother is writing a name on the door right now.",
+              "fr": "Maman est en train d'écrire un nom sur la porte."
             },
             {
-              "en": "The window has been opened and stays open.",
-              "fr": "La fenêtre a été ouverte et le reste."
+              "en": "A name has been written on the door and stays there.",
+              "fr": "Un nom a été écrit sur la porte et y reste."
             },
             {
-              "en": "The window is open, nobody behind it.",
-              "fr": "La fenêtre est ouverte, sans personne derrière."
+              "en": "Mother wrote her name on the door yesterday.",
+              "fr": "Maman a écrit son nom sur la porte hier."
             }
           ],
           "why": {
-            "en": "With を and ています, it is the act in progress. The set-up state is まどが開けてある: the thing with が.",
-            "fr": "Avec を et ています, c'est l'action en cours. L'état préparé, c'est まどが開けてある : la chose avec が."
+            "en": "With を and ています, it is the act in progress. The set-up state is 名前が書いてある: the thing with が.",
+            "fr": "Avec を et ています, c'est l'action en cours. L'état mis en place, c'est 名前が書いてある : la chose avec が."
           },
           "pair": [
-            "まどを開けている",
-            "まどが開けてある"
+            "名前を書いている",
+            "名前が書いてある"
           ]
         },
         {
@@ -6960,7 +6931,7 @@
           "choices": [
             {
               "en": "The act of buying ahead, to be ready.",
-              "fr": "L'acte d'acheter à l'avance, pour être prêt."
+              "fr": "L'acte d'acheter à l'avance, pour que tout soit prêt."
             },
             {
               "en": "The juice is already there, bought.",
@@ -11132,35 +11103,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "It was this one",
-            "fr": "C'est celui-ci"
-          },
-          "jp": "来たのは山田さんじゃなくて、田中さんです。",
-          "ask": {
-            "en": "What does のは do here?",
-            "fr": "Que fait のは ici ?"
-          },
-          "choices": [
-            {
-              "en": "It puts the light on who came: Tanaka, not Yamada.",
-              "fr": "Il éclaire qui est venu : Tanaka, pas Yamada."
-            },
-            {
-              "en": "It says that both Yamada and Tanaka came.",
-              "fr": "Il dit que Yamada et Tanaka sont venus tous les deux."
-            },
-            {
-              "en": "It says Tanaka is the one who did not come.",
-              "fr": "Il dit que c'est Tanaka qui n'est pas venu."
-            }
-          ],
-          "why": {
-            "en": "のは〜だ corrects or picks out: the one who came was Tanaka.",
-            "fr": "のは〜だ corrige ou désigne : celui qui est venu, c'est Tanaka."
-          }
-        },
         {
           "notion": {
             "en": "The reason: のは〜からだ",
@@ -17549,10 +17491,10 @@
             "en": "Never about yourself",
             "fr": "Jamais pour soi"
           },
-          "jp": "先生、明日の会には何時にいらっしゃいますか。",
+          "jp": "明日の会には、何時にいらっしゃいますか。",
           "ask": {
-            "en": "Answering, how do you speak of your own coming?",
-            "fr": "Pour répondre, comment parler de sa propre venue ?"
+            "en": "The organiser asks you this. Answering, how do you speak of your own coming?",
+            "fr": "L'organisateur pose la question. Pour répondre, comment parler de sa propre venue ?"
           },
           "choices": [
             {
@@ -17573,8 +17515,8 @@
             "fr": "Les verbes de respect élèvent l'autre. Pour sa propre venue : まいります, ou simplement 行きます."
           },
           "pair": [
-            "先生がいらっしゃいます",
-            "わたしがまいります"
+            "何時にいらっしゃいますか",
+            "三時にまいります"
           ]
         }
       ],
@@ -17653,8 +17595,8 @@
       },
       {
         "kind": "careful",
-        "en": "Never for the other person's actions: 先生がまいります would lower the teacher. Humble verbs are about you and your side (family, company).",
-        "fr": "Jamais pour les actions de l'autre : 先生がまいります abaisserait le professeur. Les verbes modestes concernent vous et votre camp (famille, entreprise)."
+        "en": "Never for the other person's actions: 先生がまいります would lower the teacher. Humble verbs are about you and your side (family, company); in announcements, まいります is also the formal « come » of a train or a bus.",
+        "fr": "Jamais pour les actions de l'autre : 先生がまいります abaisserait le professeur. Les verbes modestes concernent vous et votre camp (famille, entreprise) ; dans les annonces, まいります est aussi le « venir » soutenu d'un train ou d'un bus."
       }
     ],
     "compare": [
@@ -17811,8 +17753,8 @@
               "fr": "C'est le « venir » soutenu des annonces, poli envers les voyageurs."
             },
             {
-              "en": "The train belongs to the speaker's family.",
-              "fr": "Le train fait partie de la famille de celui qui parle."
+              "en": "まいる is for things, never for people.",
+              "fr": "まいる s'emploie pour les choses, jamais pour les personnes."
             },
             {
               "en": "It shows respect to the train itself.",
@@ -20025,7 +19967,7 @@
           ],
           "why": {
             "en": "いい takes its old stem よ: よさ, the good of it. « Seems good » would be よさそう.",
-            "fr": "いい reprend son ancien radical よ : よさ, ce qu'il a de bon. « A l'air bien », ce serait よさそう."
+            "fr": "いい reprend son ancien radical よ : よさ, ce qu'il a de bon. « Il a l'air bien », ce serait よさそう."
           },
           "pair": [
             "いい店",

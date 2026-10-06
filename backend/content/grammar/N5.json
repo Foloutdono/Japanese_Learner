@@ -1121,8 +1121,8 @@
               "fr": "Moi : c'est ma mère qui a appelé."
             },
             {
-              "en": "Nobody: に marks where I called from.",
-              "fr": "Personne : に marque d'où j'ai appelé."
+              "en": "Someone at my mother's: に marks the place I phoned.",
+              "fr": "Quelqu'un chez ma mère : に marque le lieu où j'ai appelé."
             }
           ],
           "why": {
@@ -3780,26 +3780,26 @@
           },
           "jp": "その人の名前はしりません。",
           "ask": {
-            "en": "« I don't know » is しりません, not しっていません. Why?",
-            "fr": "« Je ne sais pas », c'est しりません, et pas しっていません. Pourquoi ?"
+            "en": "しりません, with no ている. What does the sentence say?",
+            "fr": "しりません, sans ている. Que dit la phrase ?"
           },
           "choices": [
             {
-              "en": "With しる, « I know » is しっています, but « I don't know » is しりません.",
-              "fr": "Avec しる, « je sais » se dit しっています, mais « je ne sais pas », しりません."
+              "en": "I don't know that person's name.",
+              "fr": "Je ne connais pas le nom de cette personne."
             },
             {
-              "en": "しりません means « I didn't know ».",
-              "fr": "しりません veut dire « je ne savais pas »."
+              "en": "I didn't know that person's name until now.",
+              "fr": "Je ne connaissais pas le nom de cette personne jusqu'ici."
             },
             {
-              "en": "しりません is the casual form.",
-              "fr": "しりません est la forme familière."
+              "en": "I won't find out that person's name.",
+              "fr": "Je ne saurai pas le nom de cette personne."
             }
           ],
           "why": {
-            "en": "しる is the one to learn by heart: しっていますか? はい、しっています. いいえ、しりません.",
-            "fr": "しる est à retenir par cœur : しっていますか ? はい、しっています. いいえ、しりません."
+            "en": "With しる, « I know » is しっています, but « I don't know » is just しりません; しっていません is not said.",
+            "fr": "Avec しる, « je sais » se dit しっています, mais « je ne sais pas », simplement しりません ; しっていません ne se dit pas."
           },
           "pair": [
             "しっています",
@@ -3931,8 +3931,8 @@
       "twists": [
         {
           "notion": {
-            "en": "Asking for permission",
-            "fr": "Demander la permission"
+            "en": "Permission, not an offer",
+            "fr": "Permission, pas une offre"
           },
           "jp": "まどをあけてもいいですか。",
           "ask": {
@@ -4570,8 +4570,8 @@
               "fr": "Non : c'est pour rassurer, ne vous en faites pas."
             },
             {
-              "en": "Yes: you must not look at it.",
-              "fr": "Oui : il ne faut pas regarder."
+              "en": "Yes: it forbids you to mind it, as a rule.",
+              "fr": "Oui : c'est une règle, il est interdit de s'en soucier."
             },
             {
               "en": "No: it complains that you don't care.",
@@ -6155,39 +6155,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "Not a negative question",
-            "fr": "Pas une vraie négation"
-          },
-          "jp": "ケーキを食べませんか。",
-          "ask": {
-            "en": "Is this asking whether you don't eat cake?",
-            "fr": "Demande-t-on si l'on ne mange pas de gâteau ?"
-          },
-          "choices": [
-            {
-              "en": "No: it's an offer, won't you have some cake?",
-              "fr": "Non : c'est une offre, un peu de gâteau ?"
-            },
-            {
-              "en": "Yes: it asks if you don't eat cake.",
-              "fr": "Oui : on demande si l'on ne mange pas de gâteau."
-            },
-            {
-              "en": "No: it says I won't eat the cake.",
-              "fr": "Non : on dit qu'on ne mangera pas le gâteau."
-            }
-          ],
-          "why": {
-            "en": "食べますか asks whether you will eat; 食べませんか invites you to. The negative is what makes it an invitation.",
-            "fr": "食べますか demande si l'on va manger ; 食べませんか invite à le faire. C'est la négation qui en fait une invitation."
-          },
-          "pair": [
-            "食べますか",
-            "食べませんか"
-          ]
-        },
         {
           "notion": {
             "en": "Saying no politely",
@@ -8921,39 +8888,6 @@
             "en": "After a length of time, まえに means « ago »: 三年まえに, three years ago.",
             "fr": "Après une durée, まえに veut dire « il y a » : 三年まえに, il y a trois ans."
           }
-        },
-        {
-          "notion": {
-            "en": "After a place: in front of",
-            "fr": "Après un lieu : devant"
-          },
-          "jp": "駅のまえに、きっさてんがあります。",
-          "ask": {
-            "en": "のまえに after a place, with あります. What does it mean?",
-            "fr": "のまえに après un lieu, avec あります. Que veut-il dire ?"
-          },
-          "choices": [
-            {
-              "en": "In front of: there is a café in front of the station.",
-              "fr": "Devant : il y a un café devant la gare."
-            },
-            {
-              "en": "Before: there was a café before the station was built.",
-              "fr": "Avant : il y avait un café avant la gare."
-            },
-            {
-              "en": "Behind: there is a café behind the station.",
-              "fr": "Derrière : il y a un café derrière la gare."
-            }
-          ],
-          "why": {
-            "en": "まえ is « front » as well as « before »: after a place, with あります or います, のまえに is « in front of ».",
-            "fr": "まえ, c'est « le devant » autant que « avant » : après un lieu, avec あります ou います, のまえに veut dire « devant »."
-          },
-          "pair": [
-            "しょくじのまえに",
-            "駅のまえに"
-          ]
         }
       ],
       "scene": {
@@ -10790,39 +10724,6 @@
             "en": "With ました, もう means « already »; with a negative, it means « no longer, not any more ».",
             "fr": "Avec ました, もう veut dire « déjà » ; avec un négatif, il veut dire « ne plus »."
           }
-        },
-        {
-          "notion": {
-            "en": "Before a number: more",
-            "fr": "Devant un nombre : encore"
-          },
-          "jp": "すみません、コーヒーをもう一つください。",
-          "ask": {
-            "en": "もう before 一つ. What does it mean?",
-            "fr": "もう devant 一つ. Que veut-il dire ?"
-          },
-          "choices": [
-            {
-              "en": "One more: another coffee, please.",
-              "fr": "Encore un : un autre café, s'il vous plaît."
-            },
-            {
-              "en": "Already: the coffee has already come.",
-              "fr": "Déjà : le café est déjà arrivé."
-            },
-            {
-              "en": "No more: no more coffee, thank you.",
-              "fr": "Plus de : plus de café, merci."
-            }
-          ],
-          "why": {
-            "en": "Before a number or 少し, もう means « more »: もう一つ, one more; もう少し, a little more.",
-            "fr": "Devant un nombre ou 少し, もう veut dire « encore » : もう一つ, encore un ; もう少し, encore un peu."
-          },
-          "pair": [
-            "もう食べました",
-            "もう一つください"
-          ]
         }
       ],
       "scene": {
@@ -13434,35 +13335,6 @@
         },
         {
           "notion": {
-            "en": "Built, newly opened",
-            "fr": "Construit, nouvellement ouvert"
-          },
-          "jp": "駅の前に新しい店ができました。",
-          "ask": {
-            "en": "What happened in front of the station?",
-            "fr": "Que s'est-il passé devant la gare ?"
-          },
-          "choices": [
-            {
-              "en": "A new shop has opened there.",
-              "fr": "Un nouveau magasin y a ouvert."
-            },
-            {
-              "en": "I managed to find a new shop there.",
-              "fr": "J'ai réussi à trouver un nouveau magasin là."
-            },
-            {
-              "en": "The new shop is good at what it does.",
-              "fr": "Le nouveau magasin est doué pour ce qu'il fait."
-            }
-          ],
-          "why": {
-            "en": "できました after a building or a shop says it has come into being: it was built, it has opened.",
-            "fr": "できました après un bâtiment ou un magasin dit qu'il a vu le jour : il a été construit, il a ouvert."
-          }
-        },
-        {
-          "notion": {
             "en": "Ready, made",
             "fr": "Prêt, fait"
           },
@@ -13848,8 +13720,8 @@
               "fr": "Non : c'est là où je lis, dans le train."
             },
             {
-              "en": "Yes: the book I like best among trains.",
-              "fr": "Oui : le livre que je préfère parmi les trains."
+              "en": "Yes: of all the people on the train, I'm the one reading.",
+              "fr": "Oui : de tous les gens du train, c'est moi qui lis."
             },
             {
               "en": "No: it says I read a book about trains.",
@@ -14854,8 +14726,8 @@
               "fr": "Non : après un nom, が marque qui est venu : un ami."
             },
             {
-              "en": "Yes: a friend, but yesterday.",
-              "fr": "Oui : un ami, mais hier."
+              "en": "Yes: a friend came, but the rest is left unsaid.",
+              "fr": "Oui : un ami est venu, mais la suite reste en suspens."
             },
             {
               "en": "No: it means « and »: a friend and others came.",
@@ -16468,8 +16340,8 @@
             }
           ],
           "why": {
-            "en": "いい has an old form よい, so before a verb it is よく: よく分かる, understand well. It describes 分かりました.",
-            "fr": "いい a une forme ancienne よい, d'où よく devant un verbe : よく分かる, bien comprendre. Il porte sur 分かりました."
+            "en": "いい comes from よい, still its written form, so before a verb it is よく: よく分かる, understand well. It describes 分かりました.",
+            "fr": "いい vient de よい, sa forme écrite, d'où よく devant un verbe : よく分かる, bien comprendre. Il porte sur 分かりました."
           },
           "pair": [
             "いい話",
@@ -17407,8 +17279,8 @@
       },
       {
         "kind": "use",
-        "en": "- Ordering: りんごを三つください.\n- Existence: 学生が五人います.\n- Tickets, paper: きってを二枚ください.\n- The counter goes after the particle: りんごを三つ, never 三つのりんごを (rare).",
-        "fr": "- Commander : りんごを三つください.\n- Existence : 学生が五人います.\n- Billets, papier : きってを二枚ください.\n- Le classificateur suit la particule : りんごを三つ, jamais 三つのりんごを (rare)."
+        "en": "- Ordering: りんごを三つください.\n- Existence: 学生が五人います.\n- Tickets, paper: きってを二枚ください. The counter goes after the particle: りんごを三つ, rarely 三つのりんごを.",
+        "fr": "- Commander : りんごを三つください.\n- Existence : 学生が五人います.\n- Billets, papier : きってを二枚ください. Le classificateur suit la particule : りんごを三つ, rarement 三つのりんごを."
       },
       {
         "kind": "careful",
@@ -17505,8 +17377,8 @@
               "fr": "Les personnes se comptent avec 人."
             },
             {
-              "en": "人 means « about five ».",
-              "fr": "人 veut dire « environ cinq »."
+              "en": "人 means « about three ».",
+              "fr": "人 veut dire « environ trois »."
             },
             {
               "en": "人 is for flat things.",

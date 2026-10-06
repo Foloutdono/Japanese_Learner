@@ -741,39 +741,6 @@
       "twists": [
         {
           "notion": {
-            "en": "Not なくす, « to lose »",
-            "fr": "Pas なくす, « perdre »"
-          },
-          "jp": "切符をなくして、駅員さんに相談した。",
-          "ask": {
-            "en": "なくして after を. Is it the « without » of this lesson?",
-            "fr": "なくして après を. Est-ce le « sans » de cette leçon ?"
-          },
-          "choices": [
-            {
-              "en": "No: it is なくす, « to lose »: I lost my ticket and asked a station worker.",
-              "fr": "Non : c'est なくす, « perdre » : j'ai perdu mon billet et j'ai demandé conseil à un agent."
-            },
-            {
-              "en": "Yes: without a ticket, there is no asking a station worker.",
-              "fr": "Oui : sans billet, impossible de demander conseil à un agent."
-            },
-            {
-              "en": "Yes: I asked a station worker without showing my ticket.",
-              "fr": "Oui : j'ai demandé conseil à un agent sans montrer mon billet."
-            }
-          ],
-          "why": {
-            "en": "The なくして of this lesson follows a noun directly: 努力なくして. After を, なくして is the て-form of なくす, to lose.",
-            "fr": "Le なくして de la leçon suit directement un nom : 努力なくして. Après を, なくして est la forme en て de なくす, perdre."
-          },
-          "pair": [
-            "切符をなくして",
-            "努力なくしては"
-          ]
-        },
-        {
-          "notion": {
             "en": "Beside なしに",
             "fr": "Face à なしに"
           },
@@ -3812,39 +3779,6 @@
             "着いたとたんに",
             "覚えるそばから"
           ]
-        },
-        {
-          "notion": {
-            "en": "そば, the noun « beside »",
-            "fr": "そば, le nom « à côté »"
-          },
-          "jp": "駅のそばから、空港行きのバスが出ている。",
-          "ask": {
-            "en": "そばから after 駅の. Is it the « no sooner » of this lesson?",
-            "fr": "そばから après 駅の. Est-ce le « à peine » de cette leçon ?"
-          },
-          "choices": [
-            {
-              "en": "No: buses for the airport leave from beside the station.",
-              "fr": "Non : des bus pour l'aéroport partent d'à côté de la gare."
-            },
-            {
-              "en": "Yes: no sooner is a bus at the station than it leaves.",
-              "fr": "Oui : à peine un bus arrive à la gare qu'il repart."
-            },
-            {
-              "en": "Yes: buses leave the station one after another, all day.",
-              "fr": "Oui : les bus quittent la gare les uns après les autres, toute la journée."
-            }
-          ],
-          "why": {
-            "en": "After a noun and の, そば is a place, « beside », and から is « from ». The そばから of this lesson follows a verb: 覚えるそばから.",
-            "fr": "Après un nom suivi de の, そば est un lieu, « à côté », et から veut dire « depuis ». Le そばから de la leçon suit un verbe : 覚えるそばから."
-          },
-          "pair": [
-            "駅のそばから",
-            "覚えるそばから"
-          ]
         }
       ],
       "scene": {
@@ -5315,39 +5249,6 @@
         },
         {
           "notion": {
-            "en": "Not なるべく, « as … as possible »",
-            "fr": "Pas なるべく, « autant que possible »"
-          },
-          "jp": "なるべく早く、切符を買っておいてください。",
-          "ask": {
-            "en": "なるべく, before 早く. Is it « in order to become »?",
-            "fr": "なるべく, devant 早く. Est-ce « afin de devenir » ?"
-          },
-          "choices": [
-            {
-              "en": "No: it is one adverb, « as … as possible »: buy the ticket as early as you can.",
-              "fr": "Non : c'est un adverbe, « autant que possible » : achetez le billet le plus tôt possible."
-            },
-            {
-              "en": "Yes: buy the ticket early, in order to get a seat.",
-              "fr": "Oui : achetez le billet tôt, afin d'avoir une place."
-            },
-            {
-              "en": "No: it is べき: you ought to buy the ticket early.",
-              "fr": "Non : c'est べき : vous devriez acheter le billet tôt."
-            }
-          ],
-          "why": {
-            "en": "なるべく before an adverb or a verb is « as much as possible »: なるべく早く. The べく of purpose ends a clause: 医者になるべく、勉強した.",
-            "fr": "なるべく devant un adverbe ou un verbe veut dire « autant que possible » : なるべく早く. Le べく du but clôt une proposition : 医者になるべく、勉強した."
-          },
-          "pair": [
-            "なるべく早く",
-            "医者になるべく"
-          ]
-        },
-        {
-          "notion": {
             "en": "Never a request after it",
             "fr": "Jamais de demande derrière"
           },
@@ -6466,35 +6367,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "Words no one says",
-            "fr": "Des mots que personne ne dit"
-          },
-          "jp": "駅員は、早く乗れとばかりに手を大きくふった。",
-          "ask": {
-            "en": "乗れ is an order. Who says it aloud?",
-            "fr": "乗れ est un ordre. Qui le prononce ?"
-          },
-          "choices": [
-            {
-              "en": "No one: the attendant's wave seems to say « Get on, quick ».",
-              "fr": "Personne : le geste de l'agent semble dire « Monte, vite »."
-            },
-            {
-              "en": "The attendant, who shouted « Get on, quick » while waving.",
-              "fr": "L'agent, qui a crié « Monte, vite » en agitant la main."
-            },
-            {
-              "en": "Someone, telling the attendant to get on quickly.",
-              "fr": "Quelqu'un, qui disait à l'agent de monter vite."
-            }
-          ],
-          "why": {
-            "en": "とばかりに reads words into a gesture: nothing is said aloud. A spoken order would be と言って or と叫んで.",
-            "fr": "とばかりに lit des mots dans un geste : rien n'est dit à voix haute. Un ordre prononcé, ce serait と言って ou と叫んで."
-          }
-        },
         {
           "notion": {
             "en": "The set phrase ここぞとばかりに",
@@ -7708,8 +7580,8 @@
     "steps": [
       {
         "kind": "rule",
-        "en": "**noun + もさることながら** means « X goes without saying, but even more so Y ». 味もさることながら (the taste, of course, but…). Both are praised; Y stands out.",
-        "fr": "**nom + もさることながら** signifie « X va de soi, mais Y encore davantage ». 味もさることながら (le goût, bien sûr, mais…). Les deux sont loués ; Y se distingue."
+        "en": "**noun + もさることながら** means « X goes without saying, but even more so Y ». 味もさることながら (the taste, of course, but…). Both count, most often in praise; Y stands out.",
+        "fr": "**nom + もさることながら** signifie « X va de soi, mais Y encore davantage ». 味もさることながら (le goût, bien sûr, mais…). Les deux comptent, le plus souvent en bien ; Y se distingue."
       },
       {
         "kind": "use",
@@ -7718,8 +7590,8 @@
       },
       {
         "kind": "careful",
-        "en": "Formal and appreciative; the second item wins. はもちろん is the everyday « not only ».",
-        "fr": "Formel et élogieux ; le second élément l'emporte. はもちろん est le « non seulement » courant."
+        "en": "Formal and usually appreciative (it can also rank two problems); the second item wins. はもちろん is the everyday « not only ».",
+        "fr": "Formel et le plus souvent élogieux (il peut aussi classer deux problèmes) ; le second élément l'emporte. はもちろん est le « non seulement » courant."
       }
     ],
     "compare": [
@@ -10417,8 +10289,8 @@
       },
       {
         "kind": "careful",
-        "en": "A note of criticism: indifference. をものともせず is bravery; にもかかわらず is a plain « despite ».",
-        "fr": "Une note critique : l'indifférence. をものともせず est la bravoure ; にもかかわらず, un simple « malgré »."
+        "en": "Usually a note of criticism: indifference. Without blame, it can just set a thing apart (外のさわぎをよそに). をものともせず is bravery; にもかかわらず is a plain « despite ».",
+        "fr": "Le plus souvent une note critique : l'indifférence. Sans reproche, il peut aussi mettre une chose à l'écart (外のさわぎをよそに). をものともせず est la bravoure ; にもかかわらず, un simple « malgré »."
       }
     ],
     "compare": [
@@ -11977,8 +11849,8 @@
       },
       {
         "kind": "use",
-        "en": "- Damage: 被害は一つの町にとどまらず、県全体に広がった.\n- Reach: 彼の活動は国内にとどまらず、海外にも及ぶ.\n- Kept within the limit, the plain verb: 被害は一部にとどまった (only part).",
-        "fr": "- Dégâts : 被害は一つの町にとどまらず、県全体に広がった.\n- Rayonnement : 彼の活動は国内にとどまらず、海外にも及ぶ.\n- Resté dans la limite, le verbe simple : 被害は一部にとどまった (une partie seulement)."
+        "en": "- Damage, in reports: 被害は一つの町にとどまらず、県全体に広がった.\n- Reach: 彼の活動は国内にとどまらず、海外にも及ぶ.\n- Kept within the limit, the plain verb: 被害は一部にとどまった (only part).",
+        "fr": "- Dégâts, dans les rapports : 被害は一つの町にとどまらず、県全体に広がった.\n- Rayonnement : 彼の活動は国内にとどまらず、海外にも及ぶ.\n- Resté dans la limite, le verbe simple : 被害は一部にとどまった (une partie seulement)."
       },
       {
         "kind": "careful",
@@ -12619,8 +12491,8 @@
       },
       {
         "kind": "use",
-        "en": "- Planning: 費用のことはさておき、まず計画を立てよう.\n- Getting serious: 冗談はさておき、本題に入りましょう.\n- At the head: それはさておき (anyway), 何はさておき (first of all).",
-        "fr": "- Planification : 費用のことはさておき、まず計画を立てよう.\n- En venir au sérieux : 冗談はさておき、本題に入りましょう.\n- En tête : それはさておき (bref, cela dit), 何はさておき (avant toute chose)."
+        "en": "- Planning: 費用のことはさておき、まず計画を立てよう.\n- Getting serious, in meetings: 冗談はさておき、本題に入りましょう.\n- At the head: それはさておき (anyway), 何はさておき (first of all).",
+        "fr": "- Planification : 費用のことはさておき、まず計画を立てよう.\n- En venir au sérieux, en réunion : 冗談はさておき、本題に入りましょう.\n- En tête : それはさておき (bref, cela dit), 何はさておき (avant toute chose)."
       },
       {
         "kind": "careful",
@@ -12691,8 +12563,8 @@
               "fr": "Il pose la question du train à cause de ce qui vient d'être dit."
             },
             {
-              "en": "It asks the time of the train after the next one.",
-              "fr": "Il demande l'heure du train d'après."
+              "en": "It puts the question about the train aside for later.",
+              "fr": "Il met de côté, pour plus tard, la question du train."
             }
           ],
           "why": {
@@ -14528,8 +14400,8 @@
       },
       {
         "kind": "use",
-        "en": "- Reluctant yes: 頼まれれば、手伝わないものでもない.\n- Conditions: この条件なら、考えないものでもない.\n- Shorter, on a feeling: 分からないでもない (I can sort of see it).",
-        "fr": "- Oui réticent : 頼まれれば、手伝わないものでもない.\n- Conditions : この条件なら、考えないものでもない.\n- Plus court, sur un sentiment : 分からないでもない (je peux à peu près le comprendre)."
+        "en": "- Reluctant yes: 頼まれれば、手伝わないものでもない.\n- Conditions, in negotiation: この条件なら、考えないものでもない.\n- Shorter, on a feeling: 分からないでもない (I can sort of see it).",
+        "fr": "- Oui réticent : 頼まれれば、手伝わないものでもない.\n- Conditions, en négociation : この条件なら、考えないものでもない.\n- Plus court, sur un sentiment : 分からないでもない (je peux à peu près le comprendre)."
       },
       {
         "kind": "careful",
@@ -16932,35 +16804,6 @@
             "en": "ものを ends on what would have happened, and blames what was not done: you didn't tell me. Here もの is no « thing ».",
             "fr": "ものを s'arrête sur ce qui aurait pu se passer, et reproche ce qui n'a pas été fait : tu ne me l'as pas dit. Ici, もの n'est pas une « chose »."
           }
-        },
-        {
-          "notion": {
-            "en": "Just « thing » + を",
-            "fr": "Simplement « chose » + を"
-          },
-          "jp": "好きなものを選んでください。",
-          "ask": {
-            "en": "ものを after an adjective. Is it a regret here?",
-            "fr": "ものを après un adjectif. Est-ce un regret ici ?"
-          },
-          "choices": [
-            {
-              "en": "No: もの is « thing » and を marks it: choose what you like.",
-              "fr": "Non : もの est « chose » et を en fait le complément : choisissez ce qui vous plaît."
-            },
-            {
-              "en": "Yes: if only you had chosen what you liked.",
-              "fr": "Oui : si seulement vous aviez choisi ce qui vous plaisait."
-            },
-            {
-              "en": "Yes: you like it, and yet you choose something else.",
-              "fr": "Oui : vous l'aimez, et pourtant vous choisissez autre chose."
-            }
-          ],
-          "why": {
-            "en": "Before a verb that takes an object, ものを is just « the thing » + を. The regret's ものを closes a clause of what would have been, often after ば.",
-            "fr": "Devant un verbe qui prend un complément, ものを est simplement « la chose » + を. Le ものを du regret clôt ce qui aurait pu être, souvent après ば."
-          }
         }
       ],
       "scene": {
@@ -17436,8 +17279,8 @@
       },
       {
         "kind": "use",
-        "en": "- Forms: この書類は鉛筆で書いてもさしつかえない.\n- Medical: 熱がなければ、外出してもさしつかえありません.\n- Offices: the negative, 予約しなくてもさしつかえない (need not); and さしつかえなければ to soften a request.",
-        "fr": "- Formulaires : この書類は鉛筆で書いてもさしつかえない.\n- Médical : 熱がなければ、外出してもさしつかえありません.\n- Guichets : la négation, 予約しなくてもさしつかえない (pas besoin de) ; et さしつかえなければ pour adoucir une demande."
+        "en": "- Forms: この書類は鉛筆で書いてもさしつかえない.\n- Medical: 熱がなければ、外出してもさしつかえありません.\n- Offices and doctors: the negative, 予約しなくてもさしつかえない (need not); and さしつかえなければ to soften a request.",
+        "fr": "- Formulaires : この書類は鉛筆で書いてもさしつかえない.\n- Médical : 熱がなければ、外出してもさしつかえありません.\n- Guichets et médecins : la négation, 予約しなくてもさしつかえない (pas besoin de) ; et さしつかえなければ pour adoucir une demande."
       },
       {
         "kind": "careful",
@@ -17610,8 +17453,8 @@
     "steps": [
       {
         "kind": "rule",
-        "en": "**quantity noun + といったところだ** means « roughly, about that much »: a modest estimate. 十人といったところだ (about ten people). Also というところだ.",
-        "fr": "**nom de quantité + といったところだ** signifie « environ, à peu près » : une estimation modeste. 十人といったところだ (une dizaine de personnes). Aussi というところだ."
+        "en": "**quantity noun + といったところだ** means « roughly, about that much »: a modest estimate. 十人といったところだ (about ten people). Also というところだ, and in speech ってとこ.",
+        "fr": "**nom de quantité + といったところだ** signifie « environ, à peu près » : une estimation modeste. 十人といったところだ (une dizaine de personnes). Aussi というところだ, et à l'oral ってとこ."
       },
       {
         "kind": "use",
@@ -18845,39 +18688,6 @@
       "twists": [
         {
           "notion": {
-            "en": "Godan verbs: 〜おうものなら",
-            "fr": "Verbes godan : 〜おうものなら"
-          },
-          "jp": "部長に文句を言おうものなら、ただでは帰れないよ。",
-          "ask": {
-            "en": "言おう, not 言うよう. What is 言おうものなら?",
-            "fr": "言おう, et pas 言うよう. Qu'est-ce que 言おうものなら ?"
-          },
-          "choices": [
-            {
-              "en": "言う's volitional + ものなら: if you dared complain to the boss, you'd pay for it.",
-              "fr": "Le volitif de 言う + ものなら : si on osait se plaindre au chef, on le paierait cher."
-            },
-            {
-              "en": "言う + ものなら: if only one could complain to the boss.",
-              "fr": "言う + ものなら : si seulement on pouvait se plaindre au chef."
-            },
-            {
-              "en": "A plan: since I'm going to complain, I won't go home.",
-              "fr": "Un projet : puisque je vais me plaindre, je ne rentrerai pas."
-            }
-          ],
-          "why": {
-            "en": "A godan verb's volitional ends in お: 言おう, 行こう, 飲もう. With ものなら it warns: if you dared, the worst would follow.",
-            "fr": "Le volitif d'un verbe godan finit en お : 言おう, 行こう, 飲もう. Avec ものなら, il met en garde : si on osait, le pire suivrait."
-          },
-          "pair": [
-            "遅刻しようものなら",
-            "言おうものなら"
-          ]
-        },
-        {
-          "notion": {
             "en": "ものなら alone: a wish",
             "fr": "ものなら seul : un souhait"
           },
@@ -19348,8 +19158,8 @@
       },
       {
         "kind": "use",
-        "en": "- New lives: 日本に来てからというもの、毎日が新しい発見だ.\n- Families: 子どもが生まれてからというもの、生活が変わった.\n- Reflective prose.",
-        "fr": "- Nouvelles vies : 日本に来てからというもの、毎日が新しい発見だ.\n- Familles : 子どもが生まれてからというもの、生活が変わった.\n- Prose réflexive."
+        "en": "- New lives: 日本に来てからというもの、毎日が新しい発見だ.\n- Families: 子どもが生まれてからというもの、生活が変わった.\n- Reflective prose; also after a noun of time: あの日からというもの.",
+        "fr": "- Nouvelles vies : 日本に来てからというもの、毎日が新しい発見だ.\n- Familles : 子どもが生まれてからというもの、生活が変わった.\n- Prose réflexive ; aussi après un nom de moment : あの日からというもの."
       },
       {
         "kind": "careful",
@@ -19563,8 +19373,8 @@
     "steps": [
       {
         "kind": "rule",
-        "en": "**noun + と相まって (とあいまって)** means « combined with, coupled with »: two factors join to produce an effect. 才能と相まって (coupled with talent). Also が相まって.",
-        "fr": "**nom + と相まって (とあいまって)** signifie « combiné à, conjugué avec » : deux facteurs s'unissent pour produire un effet. 才能と相まって (conjugué au talent). Aussi が相まって."
+        "en": "**noun + と相まって (とあいまって)** means « combined with, coupled with »: two factors join to produce an effect. 才能と相まって (coupled with talent). Also が相まって, and Xも相まって (X joining in too).",
+        "fr": "**nom + と相まって (とあいまって)** signifie « combiné à, conjugué avec » : deux facteurs s'unissent pour produire un effet. 才能と相まって (conjugué au talent). Aussi が相まって, et Xも相まって (X s'y ajoutant aussi)."
       },
       {
         "kind": "use",
@@ -20156,39 +19966,6 @@
       "twists": [
         {
           "notion": {
-            "en": "A clause takes の",
-            "fr": "Une proposition prend の"
-          },
-          "jp": "駅員が見ていないのをいいことに、彼は改札を飛びこえた。",
-          "ask": {
-            "en": "A whole clause, then の, then をいいことに. What does it say?",
-            "fr": "Toute une proposition, puis の, puis をいいことに. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "Taking advantage of the staff not watching, he jumped the gate.",
-              "fr": "Profitant de ce que l'agent ne regardait pas, il a sauté le portillon."
-            },
-            {
-              "en": "Thanks to the staff not watching, he luckily got through.",
-              "fr": "Grâce à l'agent qui ne regardait pas, il a eu la chance de passer."
-            },
-            {
-              "en": "Although the staff were watching, he jumped the gate.",
-              "fr": "Bien que l'agent regarde, il a sauté le portillon."
-            }
-          ],
-          "why": {
-            "en": "A clause is made a noun with の: 見ていないのをいいことに. The opening it names is used for something wrong.",
-            "fr": "Une proposition devient un nom grâce à の : 見ていないのをいいことに. L'occasion qu'elle nomme sert à mal faire."
-          },
-          "pair": [
-            "優しさをいいことに",
-            "見ていないのをいいことに"
-          ]
-        },
-        {
-          "notion": {
             "en": "Against おかげで",
             "fr": "Face à おかげで"
           },
@@ -20747,8 +20524,8 @@
               "fr": "Quelque chose de mieux que le beau temps, encore à venir."
             },
             {
-              "en": "Bad weather: if it clears, it will be worse.",
-              "fr": "Le mauvais temps : s'il s'éclaircit, ce sera pire."
+              "en": "Taking an umbrella: best to be on the safe side anyway.",
+              "fr": "Prendre un parapluie : mieux vaut être prudent, de toute façon."
             }
           ],
           "why": {
@@ -20867,8 +20644,8 @@
       },
       {
         "kind": "careful",
-        "en": "A small risk worth covering. かもしれない is a plain « maybe »; かねない says something bad is quite likely.",
-        "fr": "Un petit risque qui vaut la peine d'être couvert. かもしれない est un simple « peut-être » ; かねない dit qu'une mauvaise chose est assez probable."
+        "en": "A small risk worth covering. かもしれない is a plain « maybe »; かねない says something bad is quite likely. With no ない before it, とは限らない is « not necessarily ».",
+        "fr": "Un petit risque qui vaut la peine d'être couvert. かもしれない est un simple « peut-être » ; かねない dit qu'une mauvaise chose est assez probable. Sans ない devant, とは限らない veut dire « pas forcément »."
       }
     ],
     "compare": [
@@ -21863,8 +21640,8 @@
       },
       {
         "kind": "use",
-        "en": "- Repeats: 一度ならまだしも、三度も遅刻するとは.\n- Age: 子どもならまだしも、大人がそんなことをするのか.\n- Complaints.",
-        "fr": "- Répétitions : 一度ならまだしも、三度も遅刻するとは.\n- Âge : 子どもならまだしも、大人がそんなことをするのか.\n- Plaintes."
+        "en": "- Repeats: 一度ならまだしも、三度も遅刻するとは.\n- Age: 子どもならまだしも、大人がそんなことをするのか.\n- Complaints; also with は: 大人はまだしも.",
+        "fr": "- Répétitions : 一度ならまだしも、三度も遅刻するとは.\n- Âge : 子どもならまだしも、大人がそんなことをするのか.\n- Plaintes ; aussi avec は : 大人はまだしも."
       },
       {
         "kind": "careful",

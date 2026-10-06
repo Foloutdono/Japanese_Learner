@@ -354,7 +354,7 @@
               "fr": "Quelqu'un ordonne au locuteur de dire que le plan a échoué."
             },
             {
-              "en": "The speaker cannot bring himself to say the plan failed.",
+              "en": "The speaker cannot bring themselves to say the plan failed.",
               "fr": "Le locuteur ne peut pas se résoudre à dire que le plan a échoué."
             }
           ],
@@ -2090,7 +2090,7 @@
       },
       {
         "kind": "careful",
-        "en": "The written, formal はもちろん. Also としては? no: はもとより only. Put the obvious first, the addition second with も.",
+        "en": "The written, formal はもちろん. Put the obvious first, the addition second with も.",
         "fr": "Le はもちろん écrit et formel. Placez l'évidence d'abord, l'ajout ensuite avec も."
       }
     ],
@@ -2733,8 +2733,8 @@
       },
       {
         "kind": "careful",
-        "en": "Written and for mental acts only: 読みがたい is wrong (use 読みにくい). It says the act is almost impossible, not merely awkward.",
-        "fr": "Écrit et réservé aux actes mentaux : 読みがたい est faux (dites 読みにくい). Il dit que l'acte est presque impossible, pas seulement gênant."
+        "en": "Written and for mental acts: 読みがたい is wrong (use 読みにくい); set words like 得がたい (rare, precious) are the exception. It says the act is almost impossible, not merely awkward.",
+        "fr": "Écrit et réservé aux actes mentaux : 読みがたい est faux (dites 読みにくい) ; des mots figés comme 得がたい (rare, précieux) font exception. Il dit que l'acte est presque impossible, pas seulement gênant."
       }
     ],
     "compare": [
@@ -3382,8 +3382,8 @@
               "fr": "Deux sushis avec plus de wasabi."
             },
             {
-              "en": "Two sushi with the wasabi served on the side.",
-              "fr": "Deux sushis avec le wasabi à part."
+              "en": "Two of the wasabi sushi.",
+              "fr": "Deux sushis au wasabi."
             }
           ],
           "why": {
@@ -5433,39 +5433,6 @@
         },
         {
           "notion": {
-            "en": "The verb 加える: add to",
-            "fr": "Le verbe 加える : ajouter à"
-          },
-          "jp": "新しい駅の名前を、地図に加えてください。",
-          "ask": {
-            "en": "Here に加えて is no « in addition to ». What is being asked?",
-            "fr": "Ici, に加えて n'est pas « en plus de ». Que demande-t-on ?"
-          },
-          "choices": [
-            {
-              "en": "Please add the new station's name to the map.",
-              "fr": "Ajoute le nom de la nouvelle gare sur le plan, s'il te plaît."
-            },
-            {
-              "en": "Besides the map, please give the new station's name.",
-              "fr": "En plus du plan, donne le nom de la nouvelle gare, s'il te plaît."
-            },
-            {
-              "en": "Please put the new station's name in place of the map.",
-              "fr": "Mets le nom de la nouvelle gare à la place du plan, s'il te plaît."
-            }
-          ],
-          "why": {
-            "en": "With を and a request, 加えて is just the verb 加える, « add », and に says where: onto the map.",
-            "fr": "Avec を et une demande, 加えて n'est que le verbe 加える, « ajouter », et に dit où : sur le plan."
-          },
-          "pair": [
-            "地図に加えて、名前も",
-            "名前を地図に加えて"
-          ]
-        },
-        {
-          "notion": {
             "en": "After a clause: 上に",
             "fr": "Après une proposition : 上に"
           },
@@ -5825,35 +5792,35 @@
       "twists": [
         {
           "notion": {
-            "en": "Against a rule or a warning",
-            "fr": "Contre une règle, un avertissement"
+            "en": "Against a rule or an order",
+            "fr": "Contre une règle, une consigne"
           },
-          "jp": "駅員の注意に反して、男は線路に下りた。",
+          "jp": "駅員の指示に反して、男は線路に下りた。",
           "ask": {
-            "en": "に反して after a warning. What did the man do?",
-            "fr": "に反して après un avertissement. Qu'a fait l'homme ?"
+            "en": "に反して after an instruction. What did the man do?",
+            "fr": "に反して après une consigne. Qu'a fait l'homme ?"
           },
           "choices": [
             {
-              "en": "He went down onto the tracks, going against the staff's warning.",
-              "fr": "Il est descendu sur les voies, au mépris de l'avertissement du personnel."
+              "en": "He went down onto the tracks, against the staff's instructions.",
+              "fr": "Il est descendu sur les voies, au mépris des consignes du personnel."
             },
             {
               "en": "He went down onto the tracks, as the staff had told him to.",
               "fr": "Il est descendu sur les voies, comme le personnel le lui avait dit."
             },
             {
-              "en": "The staff warned him because he had gone down onto the tracks.",
-              "fr": "Le personnel l'a averti parce qu'il était descendu sur les voies."
+              "en": "The staff gave instructions because he had gone down onto the tracks.",
+              "fr": "Le personnel a donné des consignes parce qu'il était descendu sur les voies."
             }
           ],
           "why": {
-            "en": "After a rule, a wish or a warning, に反して is someone going against it. After 予想 or 期待, things simply turned out otherwise.",
-            "fr": "Après une règle, un souhait ou un avertissement, に反して, c'est aller contre. Après 予想 ou 期待, les choses ont juste tourné autrement."
+            "en": "After a rule, a wish or an instruction, に反して is someone going against it. After 予想 or 期待, things simply turned out otherwise.",
+            "fr": "Après une règle, un souhait ou une consigne, に反して, c'est aller contre. Après 予想 ou 期待, les choses ont juste tourné autrement."
           },
           "pair": [
             "予想に反して",
-            "注意に反して"
+            "指示に反して"
           ]
         },
         {
@@ -6660,39 +6627,6 @@
           "pair": [
             "しんかんせんをはじめ、",
             "しんかんせんをはじめとする電車"
-          ]
-        },
-        {
-          "notion": {
-            "en": "Not « to begin »",
-            "fr": "Pas « commencer »"
-          },
-          "jp": "では、九時に会議をはじめます。",
-          "ask": {
-            "en": "をはじめ again. Is it « starting with »?",
-            "fr": "Encore をはじめ. Est-ce « à commencer par » ?"
-          },
-          "choices": [
-            {
-              "en": "No: it is the verb « to begin »: the meeting starts at nine.",
-              "fr": "Non : c'est le verbe « commencer » : la réunion débute à neuf heures."
-            },
-            {
-              "en": "Yes: starting with the meeting, everything is at nine.",
-              "fr": "Oui : à commencer par la réunion, tout a lieu à neuf heures."
-            },
-            {
-              "en": "Yes: the nine o'clock meeting heads a list of events.",
-              "fr": "Oui : la réunion de neuf heures ouvre une liste d'événements."
-            }
-          ],
-          "why": {
-            "en": "をはじめ, a comma, then a group: « starting with ». Ending in ます, it is the verb はじめる, « to begin ».",
-            "fr": "をはじめ, une virgule, puis un groupe : « à commencer par ». Terminé par ます, c'est le verbe はじめる, « commencer »."
-          },
-          "pair": [
-            "社長をはじめ、全員が",
-            "会議をはじめます"
           ]
         },
         {
@@ -7930,39 +7864,6 @@
       "twists": [
         {
           "notion": {
-            "en": "Hearsay: I hear that",
-            "fr": "Ouï-dire : il paraît que"
-          },
-          "jp": "駅の放送によると、電車は十分ほどおくれるということだ。",
-          "ask": {
-            "en": "によると, then ということだ. What is the speaker doing?",
-            "fr": "によると, puis ということだ. Que fait la personne qui parle ?"
-          },
-          "choices": [
-            {
-              "en": "Passing on the announcement: the train will be ten minutes late, it seems.",
-              "fr": "Elle rapporte l'annonce : le train aura une dizaine de minutes de retard, paraît-il."
-            },
-            {
-              "en": "Drawing her own conclusion: so the train must be late.",
-              "fr": "Elle tire sa propre conclusion : le train doit donc être en retard."
-            },
-            {
-              "en": "Explaining why the train is late.",
-              "fr": "Elle explique pourquoi le train est en retard."
-            }
-          ],
-          "why": {
-            "en": "After a source (によると), ということだ reports what was heard and quotes its content: « I hear that ».",
-            "fr": "Après une source (によると), ということだ rapporte ce qu'on a entendu en citant son contenu : « il paraît que »."
-          },
-          "pair": [
-            "おくれるそうだ",
-            "おくれるということだ"
-          ]
-        },
-        {
-          "notion": {
             "en": "Restating: so it means",
             "fr": "Reformuler : cela revient à"
           },
@@ -8868,39 +8769,6 @@
         },
         {
           "notion": {
-            "en": "Not 当たる, « to hit »",
-            "fr": "Pas 当たる, « heurter »"
-          },
-          "jp": "ボールが頭にあたって、いたかった。",
-          "ask": {
-            "en": "にあたって again. Is it « on the occasion of »?",
-            "fr": "Encore にあたって. Est-ce « à l'occasion de » ?"
-          },
-          "choices": [
-            {
-              "en": "No: the ball hit my head, and it hurt.",
-              "fr": "Non : le ballon m'a heurté la tête, et ça a fait mal."
-            },
-            {
-              "en": "Yes: on the occasion of the ball game, my head hurt.",
-              "fr": "Oui : à l'occasion du match, j'ai eu mal à la tête."
-            },
-            {
-              "en": "No: the ball landed next to my head.",
-              "fr": "Non : le ballon est tombé à côté de ma tête."
-            }
-          ],
-          "why": {
-            "en": "After an occasion, にあたって is « on the occasion of ». After a thing that strikes, it is just 当たる: to hit.",
-            "fr": "Après une occasion, にあたって veut dire « à l'occasion de ». Après une chose qui frappe, c'est juste 当たる : heurter."
-          },
-          "pair": [
-            "出発にあたって",
-            "頭にあたって"
-          ]
-        },
-        {
-          "notion": {
             "en": "Beside に先立って",
             "fr": "Face à に先立って"
           },
@@ -9511,39 +9379,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "Along a line",
-            "fr": "Le long d'une ligne"
-          },
-          "jp": "線路に沿って、さくらの木がならんでいる。",
-          "ask": {
-            "en": "に沿って after the tracks. What does it say?",
-            "fr": "に沿って après la voie ferrée. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "Cherry trees stand in a row along the tracks.",
-              "fr": "Des cerisiers s'alignent le long de la voie."
-            },
-            {
-              "en": "The cherry trees keep to the railway's rules.",
-              "fr": "Les cerisiers respectent le règlement du chemin de fer."
-            },
-            {
-              "en": "The cherry trees cross the tracks.",
-              "fr": "Les cerisiers traversent la voie."
-            }
-          ],
-          "why": {
-            "en": "After a river, a road or the tracks, に沿って runs along them; after a plan or a wish, it keeps to it.",
-            "fr": "Après une rivière, une route ou la voie, に沿って les longe ; après un plan ou un souhait, il s'y conforme."
-          },
-          "pair": [
-            "線路に沿って",
-            "計画に沿って"
-          ]
-        },
         {
           "notion": {
             "en": "In line with a wish",
@@ -10780,39 +10615,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "About oneself: I won't",
-            "fr": "Sur soi : je ne le ferai pas"
-          },
-          "jp": "もう二度と、終電に乗りおくれるまい。",
-          "ask": {
-            "en": "まい, about oneself. What is it?",
-            "fr": "まい, à propos de soi. Qu'est-ce que c'est ?"
-          },
-          "choices": [
-            {
-              "en": "A resolution: I'll never miss the last train again.",
-              "fr": "Une résolution : je ne raterai plus jamais le dernier train."
-            },
-            {
-              "en": "A guess: I probably won't miss it.",
-              "fr": "Une supposition : je ne le raterai sans doute pas."
-            },
-            {
-              "en": "A regret: if only I hadn't missed it.",
-              "fr": "Un regret : si seulement je ne l'avais pas raté."
-            }
-          ],
-          "why": {
-            "en": "With 二度と, about yourself, まい resolves: « I shall not ». About a thing or someone else, it guesses.",
-            "fr": "Avec 二度と, à propos de soi, まい décide : « je ne le ferai pas ». À propos d'une chose ou d'autrui, il suppose."
-          },
-          "pair": [
-            "乗りおくれるまい",
-            "電車は動くまい"
-          ]
-        },
         {
           "notion": {
             "en": "About others: surely not",
@@ -12403,8 +12205,8 @@
       },
       {
         "kind": "careful",
-        "en": "Always resigned: the effort is pointless. Do not use it for a result you discovered; that is たところ without で.",
-        "fr": "Toujours résigné : l'effort est vain. Ne pas l'employer pour un résultat découvert ; c'est たところ sans で."
+        "en": "Always dismissive: the effort is pointless, or, with せいぜい, the worst case is small. Do not use it for a result you discovered; that is たところ without で.",
+        "fr": "Toujours dédaigneux : l'effort est vain, ou, avec せいぜい, le pire reste minime. Ne pas l'employer pour un résultat découvert ; c'est たところ sans で."
       }
     ],
     "compare": [
@@ -13352,35 +13154,6 @@
         },
         {
           "notion": {
-            "en": "相違ありません on a form",
-            "fr": "相違ありません sur un formulaire"
-          },
-          "jp": "上記の内容に相違ありません。",
-          "ask": {
-            "en": "Written above a signature on a form. What does it declare?",
-            "fr": "Écrit au-dessus d'une signature, sur un formulaire. Que déclare-t-on ?"
-          },
-          "choices": [
-            {
-              "en": "That what is written above is accurate: there is no discrepancy.",
-              "fr": "Que ce qui est écrit plus haut est exact : il n'y a aucune différence."
-            },
-            {
-              "en": "That the signer has reasoned out a conclusion.",
-              "fr": "Que le signataire a tiré une conclusion par raisonnement."
-            },
-            {
-              "en": "That the content above differs from the facts.",
-              "fr": "Que le contenu ci-dessus diffère des faits."
-            }
-          ],
-          "why": {
-            "en": "On a form, 相違 is « discrepancy »: 相違ありません certifies the contents are correct. It concludes nothing.",
-            "fr": "Sur un formulaire, 相違 veut dire « écart » : 相違ありません certifie que le contenu est exact. On ne conclut rien."
-          }
-        },
-        {
-          "notion": {
             "en": "Written certainty, vs に決まっている",
             "fr": "Certitude écrite, ou に決まっている"
           },
@@ -13668,8 +13441,8 @@
       },
       {
         "kind": "use",
-        "en": "- Warnings: こんな成績を取るようでは、合格できない.\n- Judgements: すぐにあきらめるようでは、上達しない.\n- Almost always followed by a negative outcome.",
-        "fr": "- Avertissements : こんな成績を取るようでは、合格できない.\n- Jugements : すぐにあきらめるようでは、上達しない.\n- Presque toujours suivi d'une issue négative."
+        "en": "- Warnings: こんな成績を取るようでは、合格できない.\n- Judgements: すぐにあきらめるようでは、上達しない.\n- Almost always followed by a negative outcome; in speech, ようじゃ.",
+        "fr": "- Avertissements : こんな成績を取るようでは、合格できない.\n- Jugements : すぐにあきらめるようでは、上達しない.\n- Presque toujours suivi d'une issue négative ; à l'oral, ようじゃ."
       },
       {
         "kind": "careful",
@@ -13752,35 +13525,6 @@
             "あきらめるようでは",
             "あきらめるようじゃ"
           ]
-        },
-        {
-          "notion": {
-            "en": "Turned on oneself",
-            "fr": "Retourné contre soi"
-          },
-          "jp": "同じ道でまだまようようでは、わたしもまだまだだな。",
-          "ask": {
-            "en": "Who is being judged?",
-            "fr": "Qui est jugé ?"
-          },
-          "choices": [
-            {
-              "en": "The speaker: still getting lost on the same road shows they have a long way to go.",
-              "fr": "La personne qui parle : se perdre encore sur le même chemin montre qu'elle a des progrès à faire."
-            },
-            {
-              "en": "Someone else, who keeps getting lost.",
-              "fr": "Quelqu'un d'autre, qui se perd sans arrêt."
-            },
-            {
-              "en": "The road, which seems hard to follow.",
-              "fr": "Le chemin, qui semble difficile à suivre."
-            }
-          ],
-          "why": {
-            "en": "ようでは also judges oneself: if I still do this, I am not there yet (まだまだだ).",
-            "fr": "ようでは juge aussi soi-même : si je fais encore ça, je n'y suis pas encore (まだまだだ)."
-          }
         },
         {
           "notion": {
@@ -14948,39 +14692,6 @@
         },
         {
           "notion": {
-            "en": "月の末: the end of a period",
-            "fr": "月の末 : la fin d'une période"
-          },
-          "jp": "来月の末に、ひっこすつもりです。",
-          "ask": {
-            "en": "Is this « after a long process »?",
-            "fr": "Est-ce « au terme d'un long processus » ?"
-          },
-          "choices": [
-            {
-              "en": "No: it is just « at the end of next month », a date.",
-              "fr": "Non : c'est juste « à la fin du mois prochain », une date."
-            },
-            {
-              "en": "Yes: after a long month of effort, I will move.",
-              "fr": "Oui : après un long mois d'efforts, je vais déménager."
-            },
-            {
-              "en": "Yes: I will move once next month has been settled.",
-              "fr": "Oui : je déménagerai une fois le mois prochain réglé."
-            }
-          ],
-          "why": {
-            "en": "After a stretch of time (月, 年, 週), 末 is its plain end. The point follows a process: 考えた末に, 苦労の末に.",
-            "fr": "Après une durée (月, 年, 週), 末 en est simplement la fin. Le point suit un processus : 考えた末に, 苦労の末に."
-          },
-          "pair": [
-            "来月の末に",
-            "苦労の末に"
-          ]
-        },
-        {
-          "notion": {
             "en": "末に beside あげく",
             "fr": "末に face à あげく"
           },
@@ -15723,8 +15434,8 @@
       },
       {
         "kind": "careful",
-        "en": "Spoken どころじゃない. Not どころか (far from it, let alone), which contrasts two levels.",
-        "fr": "À l'oral どころじゃない. Différent de どころか (loin de là, encore moins), qui oppose deux niveaux."
+        "en": "Spoken どころじゃない. After a word of degree it can also say « far more than that »: 痛いどころではない. Not どころか (far from it, let alone), which contrasts two levels.",
+        "fr": "À l'oral どころじゃない. Après un mot de degré, il peut aussi dire « bien plus que ça » : 痛いどころではない. Différent de どころか (loin de là, encore moins), qui oppose deux niveaux."
       }
     ],
     "compare": [
@@ -16236,35 +15947,6 @@
         },
         {
           "notion": {
-            "en": "〜のやら: who knows",
-            "fr": "〜のやら : qui sait"
-          },
-          "jp": "この電車、いったいいつになったら動くのやら。",
-          "ask": {
-            "en": "やら closing the sentence. What does it say?",
-            "fr": "やら en fin de phrase. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "Who knows when this train will ever move.",
-              "fr": "Allez savoir quand ce train va enfin repartir."
-            },
-            {
-              "en": "This train will move at some point, and so on.",
-              "fr": "Ce train repartira à un moment, et ainsi de suite."
-            },
-            {
-              "en": "This train keeps moving and stopping.",
-              "fr": "Ce train n'arrête pas de partir et de s'arrêter."
-            }
-          ],
-          "why": {
-            "en": "After a question and の, a final やら wonders aloud with a sigh: « who knows ». It lists nothing.",
-            "fr": "Après une question et の, un やら final se demande à voix haute, en soupirant : « allez savoir ». Il n'énumère rien."
-          }
-        },
-        {
-          "notion": {
             "en": "何やら: something or other",
             "fr": "何やら : quelque chose"
           },
@@ -16423,35 +16105,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "それ以来: since then",
-            "fr": "それ以来 : depuis"
-          },
-          "jp": "それ以来、あの店には一度も行っていない。",
-          "ask": {
-            "en": "それ以来, heading the sentence. What does it say?",
-            "fr": "それ以来, en tête de phrase. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "Since then, I haven't been back to that shop once.",
-              "fr": "Depuis, je n'ai pas remis les pieds une seule fois dans ce magasin."
-            },
-            {
-              "en": "Before that, I had never been to that shop.",
-              "fr": "Avant cela, je n'avais jamais mis les pieds dans ce magasin."
-            },
-            {
-              "en": "After that, I went to that shop only once.",
-              "fr": "Après cela, je n'ai fréquenté ce magasin qu'une fois."
-            }
-          ],
-          "why": {
-            "en": "それ以来 points back to what was just told: from that moment up to now, unbroken.",
-            "fr": "それ以来 renvoie à ce qu'on vient de raconter : de ce moment jusqu'à maintenant, sans interruption."
-          }
-        },
         {
           "notion": {
             "en": "以来 beside てから",
@@ -17264,39 +16917,6 @@
         },
         {
           "notion": {
-            "en": "Not ようとしても",
-            "fr": "Pas ようとしても"
-          },
-          "jp": "思い出そうとしても、あの駅の名前が出てこない。",
-          "ask": {
-            "en": "Is this « even supposing »?",
-            "fr": "Est-ce « à supposer que » ?"
-          },
-          "choices": [
-            {
-              "en": "No: it is ようとする + も: however hard I try to recall, the name won't come.",
-              "fr": "Non : c'est ようとする + も : j'ai beau chercher, le nom ne revient pas."
-            },
-            {
-              "en": "Yes: even supposing I remembered, the name wouldn't matter.",
-              "fr": "Oui : à supposer que je m'en souvienne, le nom n'aurait pas d'importance."
-            },
-            {
-              "en": "Yes: even if I had to remember it, I could not.",
-              "fr": "Oui : même s'il fallait m'en souvenir, je ne pourrais pas."
-            }
-          ],
-          "why": {
-            "en": "After a volitional (思い出そう), としても is ようとする with も: an effort that fails. The point follows a plain form: 思い出したとしても.",
-            "fr": "Après un volitif (思い出そう), としても, c'est ようとする avec も : un effort qui échoue. Le point suit une forme neutre : 思い出したとしても."
-          },
-          "pair": [
-            "思い出したとしても",
-            "思い出そうとしても"
-          ]
-        },
-        {
-          "notion": {
             "en": "After a noun: as … too",
             "fr": "Après un nom : en tant que… aussi"
           },
@@ -17664,35 +17284,6 @@
         },
         {
           "notion": {
-            "en": "残念ながら: a set phrase",
-            "fr": "残念ながら : une formule"
-          },
-          "jp": "残念ながら、本日の運転はすべて中止となりました。",
-          "ask": {
-            "en": "In an announcement. What does 残念ながら do?",
-            "fr": "Dans une annonce. Que fait 残念ながら ?"
-          },
-          "choices": [
-            {
-              "en": "It is a set « unfortunately », softening the bad news.",
-              "fr": "C'est un « malheureusement » figé, qui adoucit la mauvaise nouvelle."
-            },
-            {
-              "en": "It says the staff are sad while they cancel the trains.",
-              "fr": "Il dit que le personnel est triste pendant qu'il annule les trains."
-            },
-            {
-              "en": "It says that although it is a pity, the trains will run.",
-              "fr": "Il dit que, bien que ce soit dommage, les trains rouleront."
-            }
-          ],
-          "why": {
-            "en": "残念ながら is the clash frozen into one word: « regrettably », before the news. No も is needed.",
-            "fr": "残念ながら, c'est l'opposition figée en un mot : « hélas », avant la nouvelle. Pas besoin de も."
-          }
-        },
-        {
-          "notion": {
             "en": "Bare ながら: two acts at once",
             "fr": "ながら seul : deux actes à la fois"
           },
@@ -17874,35 +17465,6 @@
           "why": {
             "en": "With それ, はともかく sets the whole topic aside and turns to another: « anyway, … ».",
             "fr": "Avec それ, はともかく met tout le sujet de côté et en aborde un autre : « bref, … »."
-          }
-        },
-        {
-          "notion": {
-            "en": "ともかく alone: at any rate",
-            "fr": "ともかく seul : en tout cas"
-          },
-          "jp": "ともかく、駅まで行ってみよう。",
-          "ask": {
-            "en": "ともかく with no noun and no は. What does it mean?",
-            "fr": "ともかく, sans nom ni は. Que veut-il dire ?"
-          },
-          "choices": [
-            {
-              "en": "At any rate, let's go as far as the station and see.",
-              "fr": "En tout cas, allons jusqu'à la gare, on verra bien."
-            },
-            {
-              "en": "Never mind the station: let's go somewhere else.",
-              "fr": "Laissons la gare : allons ailleurs."
-            },
-            {
-              "en": "Let's all go to the station together.",
-              "fr": "Allons tous ensemble à la gare."
-            }
-          ],
-          "why": {
-            "en": "Alone, ともかく is an adverb: everything else aside, do this first. Nothing named is set aside.",
-            "fr": "Seul, ともかく est un adverbe : tout le reste mis à part, faisons d'abord ceci. Rien de nommé n'est écarté."
           }
         },
         {
@@ -18098,35 +17660,6 @@
         },
         {
           "notion": {
-            "en": "Literal: looking from a place",
-            "fr": "Au sens propre : regarder depuis un lieu"
-          },
-          "jp": "この窓から見ると、ふじさんがよく見える。",
-          "ask": {
-            "en": "Is this « from the point of view of »?",
-            "fr": "Est-ce « du point de vue de » ?"
-          },
-          "choices": [
-            {
-              "en": "No: it is literal: look out of this window and you can see Mount Fuji.",
-              "fr": "Non : c'est au sens propre : par cette fenêtre, on voit bien le mont Fuji."
-            },
-            {
-              "en": "Yes: to the people who live here, Mount Fuji feels close.",
-              "fr": "Oui : pour les gens d'ici, le mont Fuji semble tout proche."
-            },
-            {
-              "en": "Yes: judging by this window, Mount Fuji must be near.",
-              "fr": "Oui : à en juger par cette fenêtre, le mont Fuji doit être proche."
-            }
-          ],
-          "why": {
-            "en": "After a place, から見ると can be plain から (from) + 見る + と (when). The point takes a person's standpoint or reads a clue.",
-            "fr": "Après un lieu, から見ると peut être un simple から (depuis) + 見る + と (quand). Le point adopte un point de vue ou lit un indice."
-          }
-        },
-        {
-          "notion": {
             "en": "Reading a clue",
             "fr": "Lire un indice"
           },
@@ -18308,39 +17841,6 @@
           "pair": [
             "親にしたら",
             "子どもにしてみれば"
-          ]
-        },
-        {
-          "notion": {
-            "en": "にする + たら : a choice",
-            "fr": "にする + たら : un choix"
-          },
-          "jp": "そっちの赤いのにしたら？",
-          "ask": {
-            "en": "After a thing, not a person. Is this someone's standpoint?",
-            "fr": "Après une chose, pas une personne. Est-ce un point de vue ?"
-          },
-          "choices": [
-            {
-              "en": "No: it suggests a choice: how about the red one?",
-              "fr": "Non : c'est une suggestion : et si tu prenais le rouge ?"
-            },
-            {
-              "en": "Yes: from the red one's point of view.",
-              "fr": "Oui : du point de vue du rouge."
-            },
-            {
-              "en": "No: it says the red one has already been chosen.",
-              "fr": "Non : il dit que le rouge est déjà choisi."
-            }
-          ],
-          "why": {
-            "en": "After a thing to choose, にしたら is にする (to go for) + たら: « how about… ». The standpoint にしたら follows a person.",
-            "fr": "Après une chose à choisir, にしたら, c'est にする (opter pour) + たら : « et si… ». Le にしたら du point de vue suit une personne."
-          },
-          "pair": [
-            "赤いのにしたら？",
-            "親にしたら"
           ]
         },
         {
@@ -21692,8 +21192,8 @@
       },
       {
         "kind": "use",
-        "en": "- Lessons: 苦労してこそ、喜びが分かる.\n- Values: 助け合ってこそ、本当の友だちだ.\n- Speeches and thanks: 皆様の協力があってこそ (only thanks to your help).",
-        "fr": "- Leçons : 苦労してこそ、喜びが分かる.\n- Valeurs : 助け合ってこそ、本当の友だちだ.\n- Discours et remerciements : 皆様の協力があってこそ (seulement grâce à votre aide)."
+        "en": "- Lessons: 苦労してこそ、喜びが分かる.\n- Values: 助け合ってこそ、本当の友だちだ.\n- Speeches, mottos and thanks: 皆様の協力があってこそ (only thanks to your help).",
+        "fr": "- Leçons : 苦労してこそ、喜びが分かる.\n- Valeurs : 助け合ってこそ、本当の友だちだ.\n- Discours, devises et remerciements : 皆様の協力があってこそ (seulement grâce à votre aide)."
       },
       {
         "kind": "careful",
@@ -23595,8 +23095,8 @@
       },
       {
         "kind": "careful",
-        "en": "The bad thing did not happen; てしまった means it did. Also as a relieved hindsight: 忘れるところだった.",
-        "fr": "La chose mauvaise n'est pas arrivée ; てしまった veut dire qu'elle est arrivée. Aussi comme regard soulagé : 忘れるところだった."
+        "en": "The bad thing did not happen; てしまった means it did. Also as a relieved hindsight: 忘れるところだった. After ようとしていた or ている, ところだった is no close call: « I was just (about to) ».",
+        "fr": "La chose mauvaise n'est pas arrivée ; てしまった veut dire qu'elle est arrivée. Aussi comme regard soulagé : 忘れるところだった. Après ようとしていた ou ている, ce n'est pas « faillir » : ところだった veut dire « j'allais justement », « j'étais en train de »."
       }
     ],
     "compare": [
@@ -23700,8 +23200,8 @@
             }
           ],
           "why": {
-            "en": "After ようとしていた or ている, ところだった is « I was just (about to) ». The close call is the dictionary form: 忘れるところだった.",
-            "fr": "Après ようとしていた ou ている, ところだった veut dire « j'allais justement ». Le « faillir » prend la forme du dictionnaire : 忘れるところだった."
+            "en": "After ようとしていた or ている, ところだった is « I was just (about to) ». After a dictionary form it is most often the close call (忘れるところだった), though it can also say « was just about to ».",
+            "fr": "Après ようとしていた ou ている, ところだった veut dire « j'allais justement ». Après la forme du dictionnaire, c'est le plus souvent « faillir » (忘れるところだった), mais aussi parfois « j'allais justement »."
           },
           "pair": [
             "乗りおくれるところだった",

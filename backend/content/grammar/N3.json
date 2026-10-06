@@ -342,21 +342,21 @@
           },
           "jp": "はい、おかげさまで元気です。",
           "ask": {
-            "en": "The reply to « お元気ですか ». Who is thanked in おかげさまで?",
-            "fr": "La réponse à « お元気ですか ». Qui remercie-t-on avec おかげさまで ?"
+            "en": "The reply to « お元気ですか ». What does おかげさまで do?",
+            "fr": "La réponse à « お元気ですか ». Que fait おかげさまで ?"
           },
           "choices": [
             {
-              "en": "No one in particular: a polite reply, « fine, thank you ».",
-              "fr": "Personne en particulier : une réponse polie, « bien, merci »."
+              "en": "A polite set phrase: « fine, thanks to you (and everyone) ».",
+              "fr": "Une formule polie : « bien, grâce à vous (et à tous) »."
             },
             {
-              "en": "A doctor who cured the speaker.",
-              "fr": "Un médecin qui a guéri la personne."
+              "en": "It thanks a doctor who cured the speaker.",
+              "fr": "Elle remercie un médecin qui a guéri la personne."
             },
             {
-              "en": "Nobody: it blames someone, ironically.",
-              "fr": "Personne : c'est un reproche ironique."
+              "en": "It blames someone, ironically.",
+              "fr": "C'est un reproche ironique."
             }
           ],
           "why": {
@@ -1870,21 +1870,21 @@
           },
           "jp": "立ち上がったとたん、電車が大きくゆれた。",
           "ask": {
-            "en": "とたん after 立ち上がった. When did the train lurch?",
-            "fr": "とたん après 立ち上がった. Quand le train a-t-il tangué ?"
+            "en": "とたん, with no に after it. Does the meaning change?",
+            "fr": "とたん, sans に derrière. Le sens change-t-il ?"
           },
           "choices": [
             {
-              "en": "The very instant I stood up.",
-              "fr": "Pile au moment de me lever."
+              "en": "No: the train lurched the very instant I stood up.",
+              "fr": "Non : le train a tangué pile au moment où je me levais."
             },
             {
-              "en": "Just before I stood up.",
-              "fr": "Juste avant de me lever."
+              "en": "Yes: without に, it means just before I stood up.",
+              "fr": "Oui : sans に, cela veut dire juste avant de me lever."
             },
             {
-              "en": "Again and again while I was standing.",
-              "fr": "Sans arrêt pendant que j'étais debout."
+              "en": "Yes: without に, it means the whole time I was standing.",
+              "fr": "Oui : sans に, cela veut dire pendant tout le temps où j'étais debout."
             }
           ],
           "why": {
@@ -2711,39 +2711,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "After a verb: just as",
-            "fr": "Après un verbe : comme"
-          },
-          "jp": "駅員さんが言った通りに、三番ホームへ行った。",
-          "ask": {
-            "en": "通りに after a verb. What does it say?",
-            "fr": "通りに après un verbe. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "I went to platform 3 just as the attendant said.",
-              "fr": "J'ai rejoint le quai 3, comme l'agent l'avait dit."
-            },
-            {
-              "en": "I went to platform 3 along the street the attendant named.",
-              "fr": "J'ai rejoint le quai 3 par la rue que l'agent avait indiquée."
-            },
-            {
-              "en": "I went to platform 3 after the attendant had spoken.",
-              "fr": "J'ai rejoint le quai 3 après que l'agent a parlé."
-            }
-          ],
-          "why": {
-            "en": "After a verb, 通りに copies what was said or done: exactly as.",
-            "fr": "Après un verbe, 通りに reprend ce qui a été dit ou fait : exactement comme."
-          },
-          "pair": [
-            "地図の通りに",
-            "言った通りに"
-          ]
-        },
         {
           "notion": {
             "en": "Before a noun: 通りの",
@@ -5602,8 +5569,8 @@
       },
       {
         "kind": "careful",
-        "en": "The activity is a lively one with a clear middle (a meal, a meeting, a talk); a state like 寝ている takes あいだに. Written 最中, read さいちゅう.",
-        "fr": "L'activité est intense et a un vrai milieu (un repas, une réunion, un discours) ; un état comme 寝ている prend あいだに. S'écrit 最中, se lit さいちゅう."
+        "en": "The activity is a lively one with a clear middle (a meal, a meeting, a talk); a plain state like 日本にいる takes あいだに. Written 最中, read さいちゅう.",
+        "fr": "L'activité est intense et a un vrai milieu (un repas, une réunion, un discours) ; un simple état comme 日本にいる prend あいだに. S'écrit 最中, se lit さいちゅう."
       }
     ],
     "compare": [
@@ -5692,32 +5659,32 @@
             "en": "Not for a state",
             "fr": "Pas pour un état"
           },
-          "jp": "ねているあいだに、雨がやんだ。",
+          "jp": "日本にいるあいだに、ふじさんに登りたい。",
           "ask": {
-            "en": "ねている is a state. Why あいだに, not 最中に?",
-            "fr": "ねている est un état. Pourquoi あいだに et pas 最中に ?"
+            "en": "日本にいる is a state. Why あいだに, not 最中に?",
+            "fr": "日本にいる est un état. Pourquoi あいだに et pas 最中に ?"
           },
           "choices": [
             {
-              "en": "最中 is the thick of an activity; a state like sleeping takes あいだに.",
-              "fr": "最中, c'est le cœur d'une activité ; un état comme dormir prend あいだに."
+              "en": "最中 is the thick of an activity; a plain state like being in Japan takes あいだに.",
+              "fr": "最中, c'est le cœur d'une activité ; un simple état comme être au Japon prend あいだに."
             },
             {
-              "en": "最中に cannot follow a て-form.",
-              "fr": "最中に ne peut pas suivre une forme en て."
+              "en": "最中に is only used about the past.",
+              "fr": "最中に ne s'emploie qu'au passé."
             },
             {
-              "en": "あいだに means it stopped at the busiest point.",
-              "fr": "あいだに veut dire que la pluie s'est arrêtée au moment le plus intense."
+              "en": "あいだに means at the busiest point of the stay.",
+              "fr": "あいだに veut dire au moment le plus chargé du séjour."
             }
           ],
           "why": {
-            "en": "最中に needs a lively activity with a clear middle (a meal, a meeting); during a state, it is あいだに.",
-            "fr": "最中に demande une activité animée avec un vrai milieu (un repas, une réunion) ; pendant un état, c'est あいだに."
+            "en": "最中に needs a lively activity with a clear middle (a meal, a meeting); across a plain state, it is あいだに.",
+            "fr": "最中に demande une activité animée avec un vrai milieu (un repas, une réunion) ; pendant un simple état, c'est あいだに."
           },
           "pair": [
-            "話している最中に",
-            "ねているあいだに"
+            "会議の最中に",
+            "日本にいるあいだに"
           ]
         },
         {
@@ -6929,35 +6896,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "A colour, roughly",
-            "fr": "Une couleur, à peu près"
-          },
-          "jp": "あの白っぽいたてものが駅です。",
-          "ask": {
-            "en": "What colour is the building?",
-            "fr": "De quelle couleur est le bâtiment ?"
-          },
-          "choices": [
-            {
-              "en": "Whitish: close to white, not quite.",
-              "fr": "Blanchâtre : presque blanc, sans l'être tout à fait."
-            },
-            {
-              "en": "Pure white, like snow.",
-              "fr": "D'un blanc pur, comme la neige."
-            },
-            {
-              "en": "Grey because it is dirty.",
-              "fr": "Gris parce qu'il est sale."
-            }
-          ],
-          "why": {
-            "en": "On a colour, っぽい is « -ish »: 白っぽい, 黒っぽい lean toward the colour without being it.",
-            "fr": "Sur une couleur, っぽい veut dire « tirant sur » : 白っぽい, 黒っぽい s'approchent de la couleur sans l'être."
-          }
-        },
         {
           "notion": {
             "en": "Looks it, is not",
@@ -8443,39 +8381,6 @@
           "pair": [
             "読みかけの本",
             "はさまりかけた"
-          ]
-        },
-        {
-          "notion": {
-            "en": "Not begun: 話しかける",
-            "fr": "Pas commencé : 話しかける"
-          },
-          "jp": "駅で、知らない人に話しかけられた。",
-          "ask": {
-            "en": "話しかける: did someone start to speak and stop?",
-            "fr": "話しかける : quelqu'un a-t-il commencé à parler puis arrêté ?"
-          },
-          "choices": [
-            {
-              "en": "No: a stranger spoke to me; かける points the talk at me.",
-              "fr": "Non : un inconnu m'a adressé la parole ; かける dirige la parole vers moi."
-            },
-            {
-              "en": "Yes: a stranger began to speak, then fell silent.",
-              "fr": "Oui : un inconnu a commencé à parler, puis s'est tu."
-            },
-            {
-              "en": "Yes: a stranger nearly spoke to me.",
-              "fr": "Oui : un inconnu a failli m'adresser la parole."
-            }
-          ],
-          "why": {
-            "en": "In 話しかける, 呼びかける, かける aims the act at someone. Only with a task or an event is it « begun » or « nearly ».",
-            "fr": "Dans 話しかける, 呼びかける, かける vise quelqu'un. Ce n'est « entamé » ou « faillir » qu'avec une tâche ou un événement."
-          },
-          "pair": [
-            "言いかけてやめた",
-            "話しかけられた"
           ]
         }
       ],
@@ -13377,35 +13282,35 @@
       "twists": [
         {
           "notion": {
-            "en": "With an adjective or a noun",
-            "fr": "Avec un adjectif ou un nom"
+            "en": "With a noun: いくら〜でも",
+            "fr": "Avec un nom : いくら〜でも"
           },
-          "jp": "どんなに寒くても、毎朝駅まで歩きます。",
+          "jp": "いくら子どもでも、うそはいけない。",
           "ask": {
-            "en": "寒くても, an adjective this time. What does it say?",
-            "fr": "寒くても, un adjectif cette fois. Que dit la phrase ?"
+            "en": "A noun + でも after いくら. What does it say?",
+            "fr": "Un nom + でも après いくら. Que dit la phrase ?"
           },
           "choices": [
             {
-              "en": "However cold it is, I walk to the station every morning.",
-              "fr": "Même par le plus grand froid, je vais à pied à la gare chaque matin."
+              "en": "Child or not, lying is wrong.",
+              "fr": "Même pour un enfant, mentir, c'est mal."
             },
             {
-              "en": "When it is very cold, I walk to the station every morning.",
-              "fr": "Quand il fait très froid, je vais à pied à la gare chaque matin."
+              "en": "However many children there are, lying is wrong.",
+              "fr": "Peu importe le nombre d'enfants, mentir, c'est mal."
             },
             {
-              "en": "How cold is it on the walk to the station?",
-              "fr": "Quel froid fait-il sur le chemin de la gare ?"
+              "en": "Since it's a child, a lie is fine.",
+              "fr": "Comme c'est un enfant, un mensonge, ça passe."
             }
           ],
           "why": {
-            "en": "An い-adjective goes to 〜くても, a な-adjective or a noun to 〜でも: どんなに寒くても, いくら子どもでも. The outcome still holds.",
-            "fr": "Un adjectif en い passe à 〜くても, un adjectif en な ou un nom à 〜でも : どんなに寒くても, いくら子どもでも. L'issue tient toujours."
+            "en": "A noun or a な-adjective takes でも: いくら子どもでも, « child or not ». いくら measures how far the case goes, not a number.",
+            "fr": "Un nom ou un adjectif en な prend でも : いくら子どもでも, « tout enfant qu'il soit ». いくら mesure jusqu'où va le cas, pas un nombre."
           },
           "pair": [
             "いくら待っても",
-            "どんなに寒くても"
+            "いくら子どもでも"
           ]
         },
         {
@@ -13794,39 +13699,6 @@
           "pair": [
             "英語だけでなく",
             "歌うだけでなく"
-          ]
-        },
-        {
-          "notion": {
-            "en": "だけ alone: « only »",
-            "fr": "だけ seul : « seulement »"
-          },
-          "jp": "今日は、駅の売店でパンだけ買いました。",
-          "ask": {
-            "en": "Here だけ has no でなく after it. What does it say?",
-            "fr": "Ici, だけ n'est pas suivi de でなく. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "Today I bought only bread at the station kiosk.",
-              "fr": "Aujourd'hui, je n'ai acheté que du pain au kiosque de la gare."
-            },
-            {
-              "en": "Today I bought more than bread at the station kiosk.",
-              "fr": "Aujourd'hui, j'ai acheté plus que du pain au kiosque de la gare."
-            },
-            {
-              "en": "Today I bought no bread at the station kiosk.",
-              "fr": "Aujourd'hui, je n'ai pas acheté de pain au kiosque de la gare."
-            }
-          ],
-          "why": {
-            "en": "だけ alone shuts the rest out: bread, nothing else. だけでなく opens onto a second thing: パンだけでなく、牛乳も.",
-            "fr": "だけ seul exclut le reste : du pain, rien d'autre. だけでなく ouvre sur une seconde chose : パンだけでなく、牛乳も."
-          },
-          "pair": [
-            "パンだけ",
-            "パンだけでなく"
           ]
         },
         {
@@ -14408,39 +14280,6 @@
       "twists": [
         {
           "notion": {
-            "en": "After a verb: each time",
-            "fr": "Après un verbe : à chaque fois"
-          },
-          "jp": "駅に着くごとに、アナウンスが流れる。",
-          "ask": {
-            "en": "A verb before ごとに. What does it say?",
-            "fr": "Un verbe devant ごとに. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "Each time the train reaches a station, an announcement plays.",
-              "fr": "À chaque arrivée en gare, une annonce passe."
-            },
-            {
-              "en": "At every other station, an announcement plays.",
-              "fr": "Une gare sur deux, une annonce passe."
-            },
-            {
-              "en": "Once at the station, an announcement plays, just the once.",
-              "fr": "Une fois en gare, une annonce passe, une seule fois."
-            }
-          ],
-          "why": {
-            "en": "After a dictionary form, ごとに is « each time it happens »: every arrival brings its announcement.",
-            "fr": "Après une forme du dictionnaire, ごとに veut dire « chaque fois que ça arrive » : chaque arrivée a son annonce."
-          },
-          "pair": [
-            "三日ごとに",
-            "着くごとに"
-          ]
-        },
-        {
-          "notion": {
             "en": "Per unit, each its own",
             "fr": "Par unité, chacun le sien"
           },
@@ -14827,39 +14666,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "After a verb stem: a slight lean",
-            "fr": "Après un radical : une légère pente"
-          },
-          "jp": "最近、電車が少しおくれ気味です。",
-          "ask": {
-            "en": "おくれ, a verb stem, before 気味. What does it say?",
-            "fr": "おくれ, un radical de verbe, devant 気味. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "Lately the trains have been running a little late.",
-              "fr": "Ces temps-ci, les trains ont tendance à prendre un peu de retard."
-            },
-            {
-              "en": "Lately the trains look as if they are about to be late.",
-              "fr": "Ces temps-ci, les trains ont l'air d'être sur le point d'arriver en retard."
-            },
-            {
-              "en": "Lately the trains are always badly late.",
-              "fr": "Ces temps-ci, les trains ont toujours un gros retard."
-            }
-          ],
-          "why": {
-            "en": "After a ます-stem, 気味 says a thing leans that way, a little: おくれ気味, somewhat late. A mild degree, not « very ».",
-            "fr": "Après un radical en ます, 気味 dit qu'une chose penche un peu par là : おくれ気味, un peu en retard. Un léger degré, pas « très »."
-          },
-          "pair": [
-            "かぜ気味",
-            "おくれ気味"
-          ]
-        },
         {
           "notion": {
             "en": "Against がち",
@@ -17605,35 +17411,6 @@
       "twists": [
         {
           "notion": {
-            "en": "Between two nouns",
-            "fr": "Entre deux noms"
-          },
-          "jp": "一番ホームの反対がわ、つまり二番ホームに来てください。",
-          "ask": {
-            "en": "つまり between two places. What does it do?",
-            "fr": "つまり entre deux lieux. Que fait-il ?"
-          },
-          "choices": [
-            {
-              "en": "It names the same place more plainly: platform 2.",
-              "fr": "Il nomme le même endroit plus simplement : le quai 2."
-            },
-            {
-              "en": "It adds a second place: platforms 1 and 2.",
-              "fr": "Il ajoute un second lieu : les quais 1 et 2."
-            },
-            {
-              "en": "It corrects the first place: not platform 1, but 2.",
-              "fr": "Il corrige le premier lieu : pas le quai 1, mais le 2."
-            }
-          ],
-          "why": {
-            "en": "A、つまりB says B is A again, put more simply. A correction would be ではなく.",
-            "fr": "A、つまりB dit que B est A, dit plus simplement. Une correction, ce serait ではなく."
-          }
-        },
-        {
-          "notion": {
             "en": "Checking you understood",
             "fr": "Vérifier qu'on a compris"
           },
@@ -17817,35 +17594,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "With the potential: it can be done",
-            "fr": "Avec le potentiel : c'est faisable"
-          },
-          "jp": "急げば、九時の電車に間に合わないことはない。",
-          "ask": {
-            "en": "間に合わないことはない. What does it say about the nine o'clock train?",
-            "fr": "間に合わないことはない. Que dit la phrase du train de neuf heures ?"
-          },
-          "choices": [
-            {
-              "en": "If we hurry, catching it is possible, though not sure.",
-              "fr": "En se dépêchant, on peut l'attraper, sans en être sûr."
-            },
-            {
-              "en": "Even if we hurry, we certainly won't catch it.",
-              "fr": "Même en se dépêchant, on ne l'attrapera sûrement pas."
-            },
-            {
-              "en": "We'll catch it easily, with time to spare.",
-              "fr": "On l'attrapera sans peine, avec de la marge."
-            }
-          ],
-          "why": {
-            "en": "Two negatives make a weak yes: it is not impossible. Not a plain « we'll make it », and not a « no ».",
-            "fr": "Deux négations font un oui timide : ce n'est pas impossible. Ni un franc « on y sera », ni un « non »."
-          }
-        },
         {
           "notion": {
             "en": "With an い-adjective",
@@ -18684,8 +18432,8 @@
       },
       {
         "kind": "careful",
-        "en": "かまわない means « I don't mind »: it grants permission from above or says a drawback does not matter. てもいい is the neutral permission. Never for asking a superior's leave.",
-        "fr": "かまわない veut dire « cela ne me dérange pas » : il accorde une permission d'en haut ou dit qu'un inconvénient importe peu. てもいい est la permission neutre. Jamais pour demander congé à un supérieur."
+        "en": "かまわない means « I don't mind »: it grants permission from above or says a drawback does not matter; as a question it asks if the other minds. てもいい is the neutral permission. To ask a superior, てもよろしいでしょうか is safer.",
+        "fr": "かまわない veut dire « cela ne me dérange pas » : il accorde une permission d'en haut ou dit qu'un inconvénient importe peu ; en question, il demande si l'autre y voit un inconvénient. てもいい est la permission neutre. Pour demander à un supérieur, てもよろしいでしょうか est plus sûr."
       }
     ],
     "compare": [
@@ -19174,35 +18922,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "A rule of not doing",
-            "fr": "La règle de ne pas faire"
-          },
-          "jp": "あまいものは、食べないことにしています。",
-          "ask": {
-            "en": "食べない before ことにしています. What does it say?",
-            "fr": "食べない devant ことにしています. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "I've made it my rule not to eat sweet things.",
-              "fr": "Je me fais une règle de ne pas manger de sucreries."
-            },
-            {
-              "en": "I'm not allowed to eat sweet things.",
-              "fr": "On m'interdit de manger des sucreries."
-            },
-            {
-              "en": "I can't eat sweet things: I don't like them.",
-              "fr": "Je ne peux pas manger de sucreries : je n'aime pas ça."
-            }
-          ],
-          "why": {
-            "en": "With the ない-form, ことにしている is an abstention you chose and keep. Forbidden by others would be ことになっている.",
-            "fr": "Avec la forme en ない, ことにしている est une abstention choisie et tenue. Interdite par d'autres, ce serait ことになっている."
-          }
-        },
         {
           "notion": {
             "en": "ことにした: the decision",
@@ -19741,39 +19460,6 @@
             "en": "At the start of a sentence, だって is a childish « but » that offers an excuse; after a noun it means « even » or « too ».",
             "fr": "En tête de phrase, だって est un « mais » enfantin qui sert d'excuse ; après un nom, il veut dire « même » ou « aussi »."
           }
-        },
-        {
-          "notion": {
-            "en": "At the end: what you heard",
-            "fr": "En fin de phrase : un ouï-dire"
-          },
-          "jp": "明日は電車が止まるんだって。",
-          "ask": {
-            "en": "だって at the very end. What does it mean here?",
-            "fr": "だって tout à la fin. Que veut-il dire ici ?"
-          },
-          "choices": [
-            {
-              "en": "« They say »: I hear the trains stop tomorrow.",
-              "fr": "« Il paraît » : on dit que les trains s'arrêtent demain."
-            },
-            {
-              "en": "« Even »: even the trains stop tomorrow.",
-              "fr": "« Même » : même les trains s'arrêtent demain."
-            },
-            {
-              "en": "« But »: an excuse, the trains stop tomorrow.",
-              "fr": "« Mais » : une excuse, les trains s'arrêtent demain."
-            }
-          ],
-          "why": {
-            "en": "At the end of a sentence, だって is だ + って, passing on what you heard. « Even » is だって after a noun inside the sentence.",
-            "fr": "En fin de phrase, だって est だ + って, qui rapporte ce qu'on a entendu. « Même », c'est だって après un nom, dans la phrase."
-          },
-          "pair": [
-            "子どもだって分かる",
-            "止まるんだって"
-          ]
         }
       ],
       "scene": {
@@ -19931,35 +19617,6 @@
           "why": {
             "en": "With 言う or だまる, 通す is sticking to one stance against pressure, unchanged to the end.",
             "fr": "Avec 言う ou だまる, 通す, c'est tenir une position malgré la pression, sans changer jusqu'au bout."
-          }
-        },
-        {
-          "notion": {
-            "en": "The whole way, unbroken",
-            "fr": "Tout le trajet, sans pause"
-          },
-          "jp": "こんでいて、とうきょうまで一時間立ち通した。",
-          "ask": {
-            "en": "立ち通した. What does it say?",
-            "fr": "立ち通した. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "The train was packed: I stood the whole hour, all the way to Tokyo.",
-              "fr": "Le train était bondé : debout toute l'heure, jusqu'à Tokyo."
-            },
-            {
-              "en": "I stood up when we reached Tokyo, an hour later.",
-              "fr": "Debout seulement à l'arrivée à Tokyo, une heure après."
-            },
-            {
-              "en": "I kept trying to stand, for an hour.",
-              "fr": "Une heure à essayer de se lever."
-            }
-          ],
-          "why": {
-            "en": "通す can be a stretch kept up without a break: 立ち通す, standing from start to finish.",
-            "fr": "通す peut être une durée tenue sans pause : 立ち通す, rester debout du début à la fin."
           }
         },
         {
@@ -20866,35 +20523,6 @@
         },
         {
           "notion": {
-            "en": "Softening an opinion",
-            "fr": "Adoucir un avis"
-          },
-          "jp": "この時間だと、もう電車はない気がしますけど。",
-          "ask": {
-            "en": "気がします, not a plain ありません. Why?",
-            "fr": "気がします, et pas un simple ありません. Pourquoi ?"
-          },
-          "choices": [
-            {
-              "en": "It softens the view: I may be wrong, but there's no train at this hour.",
-              "fr": "Il adoucit l'avis : je me trompe peut-être, mais à cette heure il n'y a plus de train."
-            },
-            {
-              "en": "The speaker is certain there is no train.",
-              "fr": "Aucun doute : il n'y a plus de train."
-            },
-            {
-              "en": "The speaker hopes there is no train.",
-              "fr": "On espère qu'il n'y a plus de train."
-            }
-          ],
-          "why": {
-            "en": "気がする turns an opinion into a feeling, so it is easy to say to anyone without sounding sure.",
-            "fr": "気がする fait d'un avis une impression : on peut le dire à n'importe qui sans paraître trop sûr."
-          }
-        },
-        {
-          "notion": {
             "en": "気にする, to mind",
             "fr": "気にする, s'en faire"
           },
@@ -21250,41 +20878,8 @@
       "twists": [
         {
           "notion": {
-            "en": "ちっとも is not ちょっと",
-            "fr": "ちっとも n'est pas ちょっと"
-          },
-          "jp": "このラーメン、ちょっとからいね。",
-          "ask": {
-            "en": "ちょっと, not ちっとも. How spicy is it?",
-            "fr": "ちょっと, et pas ちっとも. C'est épicé à quel point ?"
-          },
-          "choices": [
-            {
-              "en": "A little spicy.",
-              "fr": "Un peu épicé."
-            },
-            {
-              "en": "Not spicy in the least.",
-              "fr": "Pas épicé du tout."
-            },
-            {
-              "en": "Far too spicy to eat.",
-              "fr": "Bien trop épicé pour être mangé."
-            }
-          ],
-          "why": {
-            "en": "ちょっと is « a little », with any verb. ちっとも is « not one bit » and always needs a negative: ちっともからくない.",
-            "fr": "ちょっと, c'est « un peu », avec n'importe quel verbe. ちっとも, c'est « pas du tout », et il lui faut une négation : ちっともからくない."
-          },
-          "pair": [
-            "ちょっとからい",
-            "ちっともからくない"
-          ]
-        },
-        {
-          "notion": {
-            "en": "少しも, the neutral twin",
-            "fr": "少しも, le jumeau neutre"
+            "en": "少しも, the written twin",
+            "fr": "少しも, le jumeau écrit"
           },
           "jp": "このかさは、少しも役に立たなかった。",
           "ask": {
@@ -21293,8 +20888,8 @@
           },
           "choices": [
             {
-              "en": "The same « not in the least », in a neutral tone fit for writing.",
-              "fr": "Le même « pas le moins du monde », sur un ton neutre, bon pour l'écrit."
+              "en": "The umbrella was no use at all.",
+              "fr": "Le parapluie n'a servi à rien du tout."
             },
             {
               "en": "The umbrella was of some use.",
@@ -21306,8 +20901,8 @@
             }
           ],
           "why": {
-            "en": "少しも〜ない denies as fully as ちっとも, without its peeved, spoken tone.",
-            "fr": "少しも〜ない nie aussi fort que ちっとも, sans son ton agacé et parlé."
+            "en": "少しも〜ない denies as fully as ちっとも, without its peeved, spoken tone: the form for writing.",
+            "fr": "少しも〜ない nie aussi fort que ちっとも, sans son ton agacé et parlé : la forme de l'écrit."
           }
         },
         {
@@ -21693,39 +21288,6 @@
       "twists": [
         {
           "notion": {
-            "en": "Pretending not to",
-            "fr": "Faire semblant de ne pas"
-          },
-          "jp": "駅員に聞かれたが、分からないふりをした。",
-          "ask": {
-            "en": "分からないふりをした. Did the person understand?",
-            "fr": "分からないふりをした. La personne avait-elle compris ?"
-          },
-          "choices": [
-            {
-              "en": "Yes, but they acted as if they didn't.",
-              "fr": "Oui, mais elle a fait comme si de rien n'était."
-            },
-            {
-              "en": "No, they really didn't understand.",
-              "fr": "Non, elle n'avait vraiment pas compris."
-            },
-            {
-              "en": "No, but they acted as if they did.",
-              "fr": "Non, mais elle a fait semblant de comprendre."
-            }
-          ],
-          "why": {
-            "en": "With a ない-form, ふりをする is pretending not to: the truth is the opposite of the act.",
-            "fr": "Avec une forme en ない, ふりをする, c'est faire semblant de ne pas : la vérité est l'inverse du jeu."
-          },
-          "pair": [
-            "分かるふり",
-            "分からないふり"
-          ]
-        },
-        {
-          "notion": {
             "en": "Playing a part: noun + の",
             "fr": "Jouer un rôle : nom + の"
           },
@@ -22102,35 +21664,6 @@
     ],
     "tour": {
       "twists": [
-        {
-          "notion": {
-            "en": "With the potential: can't manage",
-            "fr": "Avec le potentiel : pas moyen"
-          },
-          "jp": "この駅の名前は、なかなか覚えられない。",
-          "ask": {
-            "en": "なかなか with 覚えられない. What does it say?",
-            "fr": "なかなか avec 覚えられない. Que dit la phrase ?"
-          },
-          "choices": [
-            {
-              "en": "I keep trying, but I just can't get this station's name to stick.",
-              "fr": "J'essaie, mais pas moyen de retenir le nom de cette gare."
-            },
-            {
-              "en": "I can't remember even one bit of it.",
-              "fr": "Je n'en retiens pas la moindre bribe."
-            },
-            {
-              "en": "I don't want to remember it.",
-              "fr": "Je ne veux pas le retenir."
-            }
-          ],
-          "why": {
-            "en": "With a potential, なかなか〜ない is effort that does not pay off yet. « Not one bit » would be ちっとも.",
-            "fr": "Avec un potentiel, なかなか〜ない, c'est un effort qui ne paie pas encore. « Pas la moindre », ce serait ちっとも."
-          }
-        },
         {
           "notion": {
             "en": "Without a negative: quite",
@@ -23149,35 +22682,6 @@
           "why": {
             "en": "A 以外に…ない shuts out everything but A: only A. It also follows a verb, like 待つ here.",
             "fr": "A 以外に…ない écarte tout sauf A : rien que A. Il suit aussi un verbe, comme 待つ ici."
-          }
-        },
-        {
-          "notion": {
-            "en": "Before a noun: 以外の",
-            "fr": "Devant un nom : 以外の"
-          },
-          "jp": "日本語以外の本は、二かいにあります。",
-          "ask": {
-            "en": "以外の, before 本. Which books are upstairs?",
-            "fr": "以外の, devant 本. Quels livres sont à l'étage ?"
-          },
-          "choices": [
-            {
-              "en": "The books in languages other than Japanese.",
-              "fr": "Les livres dans d'autres langues que le japonais."
-            },
-            {
-              "en": "The Japanese books.",
-              "fr": "Les livres en japonais."
-            },
-            {
-              "en": "All the books, Japanese ones included.",
-              "fr": "Tous les livres, ceux en japonais compris."
-            }
-          ],
-          "why": {
-            "en": "以外の + noun is « the … other than A »: A is left out of the set.",
-            "fr": "以外の + nom, c'est « les … autres que A » : A est exclu de l'ensemble."
           }
         },
         {
