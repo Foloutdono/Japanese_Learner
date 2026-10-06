@@ -51,7 +51,7 @@ def test_a_tour_has_its_shape():
         assert 2 <= len(tour["guesses"]) <= GUESS_COUNT
         # The authored half is there exactly where the point's tour is
         # written (plan 187c).
-        assert (tour["twist"] is None) == (tour["scene"] is None) == ("tour" not in entry)
+        assert (not tour["twists"]) == (tour["scene"] is None) == ("tour" not in entry)
         assert tour["structure"] == entry["structure"]
 
 
@@ -221,7 +221,7 @@ def test_the_basics_course_points_carry_their_tour():
         level, entry = find(pattern)
         assert "tour" in entry, pattern
         tour = tour_payload(level, entry, "fr")
-        assert tour["twist"] and tour["scene"], pattern
+        assert tour["twists"] and tour["scene"], pattern
 
 
 def test_the_authored_half_is_served_in_the_learners_language():
@@ -229,12 +229,16 @@ def test_the_authored_half_is_served_in_the_learners_language():
     written = entry["tour"]
     for lang in ("fr", "en"):
         tour = tour_payload(level, entry, lang)
-        twist, scene = tour["twist"], tour["scene"]
-        assert twist["jp"] == written["twist"]["jp"]
-        assert twist["ask"] == written["twist"]["ask"][lang]
-        right = [c for c in twist["choices"] if c["correct"]]
-        assert [c["text"] for c in right] == [written["twist"]["choices"][0][lang]]
-        assert {c["text"] for c in twist["choices"]} == {c[lang] for c in written["twist"]["choices"]}
+        scene = tour["scene"]
+        # A twist per notion, in the order written (plan 189).
+        assert len(tour["twists"]) == len(written["twists"])
+        for twist, said in zip(tour["twists"], written["twists"]):
+            assert twist["notion"] == said["notion"][lang]
+            assert twist["jp"] == said["jp"]
+            assert twist["ask"] == said["ask"][lang]
+            right = [c for c in twist["choices"] if c["correct"]]
+            assert [c["text"] for c in right] == [said["choices"][0][lang]]
+            assert {c["text"] for c in twist["choices"]} == {c[lang] for c in said["choices"]}
         assert scene["place"] == written["scene"]["place"]
         assert scene["place_caption"] == {"fr": "Kiosque", "en": "Kiosk"}[lang]
         assert scene["them"] == written["scene"]["them"][lang]
@@ -254,7 +258,8 @@ def test_the_authored_choices_are_seeded_by_the_id():
     level, entry = find("か")
     a = tour_payload(level, entry, "fr")
     b = tour_payload(level, entry, "en")
-    assert [c["correct"] for c in a["twist"]["choices"]] == [c["correct"] for c in b["twist"]["choices"]]
+    for ta, tb in zip(a["twists"], b["twists"], strict=True):
+        assert [c["correct"] for c in ta["choices"]] == [c["correct"] for c in tb["choices"]]
     assert [c["jp"] for c in a["scene"]["ask"]["choices"]] == [c["jp"] for c in b["scene"]["ask"]["choices"]]
 
 

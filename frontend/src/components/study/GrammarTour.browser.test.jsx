@@ -175,29 +175,38 @@ async function toTwist(mounted) {
 const choice = (root, i) => root().querySelector(`[data-choice="${i}"]`)
 
 describe('the written tour', () => {
-  it('rides six stops, the twist and the scene before the terminus, every line voiced', async () => {
+  it('rides a stop per notion, then the scene, before the terminus, every line voiced', async () => {
     const mounted = await mount({ ...KA_POINT })
     const { root, gate, onBoard } = mounted
-    expect(root().querySelectorAll('.tour__stop')).toHaveLength(6)
+    expect(KA.twists.length).toBeGreaterThan(1)
+    expect(root().querySelectorAll('.tour__stop')).toHaveLength(5 + KA.twists.length)
     root().querySelector('.tour-look [data-action="speak"]').click()
     expect(speakLine).toHaveBeenLastCalledWith(KA.look[0].jp, 'reader')
 
     await toTwist(mounted)
-    expect(root().querySelector('.tour__q').textContent).toBe(KA.twist.ask)
-    expect(root().querySelector('.tour-twist .dict-ex__hl')).toBeTruthy()
-    expect(gate().disabled).toBe(true)
-    const wrong = KA.twist.choices.findIndex(c => !c.correct)
-    const rightTwist = KA.twist.choices.findIndex(c => c.correct)
-    choice(root, wrong).click()
-    await settle()
-    gate().click()
-    await settle()
-    // Checked once: the right one ringed, the pick crossed, the why said.
-    expect(choice(root, rightTwist).classList.contains('tour-guess--ok')).toBe(true)
-    expect(choice(root, wrong).classList.contains('tour-guess--no')).toBe(true)
-    expect(root().querySelector('.tour-said--no')).toBeTruthy()
-    gate().click()
-    await settle()
+    for (const [i, twist] of KA.twists.entries()) {
+      // Each notion named over its question, and which of them it is.
+      expect(root().dataset.twist).toBe(String(i))
+      expect(root().querySelector('.tour__notion-name').textContent).toBe(twist.notion)
+      expect(root().querySelector('.tour__notion-count').textContent).toBe(`${i + 1} of ${KA.twists.length}`)
+      expect(root().querySelector('.tour__q').textContent).toBe(twist.ask)
+      // The point lit where the sentence writes it.
+      expect(Boolean(root().querySelector('.tour-twist .dict-ex__hl'))).toBe(twist.furigana.some(p => p.highlight))
+      expect(gate().disabled).toBe(true)
+      const wrong = twist.choices.findIndex(c => !c.correct)
+      const rightTwist = twist.choices.findIndex(c => c.correct)
+      // The first missed, the others right.
+      choice(root, i === 0 ? wrong : rightTwist).click()
+      await settle()
+      gate().click()
+      await settle()
+      // Checked once: the right one ringed, a wrong pick crossed, the why said.
+      expect(choice(root, rightTwist).classList.contains('tour-guess--ok')).toBe(true)
+      if (i === 0) expect(choice(root, wrong).classList.contains('tour-guess--no')).toBe(true)
+      expect(root().querySelector(i === 0 ? '.tour-said--no' : '.tour-said--ok')).toBeTruthy()
+      gate().click()
+      await settle()
+    }
 
     expect(root().dataset.stop).toBe('scene')
     expect(root().querySelector('.tour-plate__name').textContent).toContain(KA.scene.place)
@@ -225,12 +234,14 @@ describe('the written tour', () => {
     await settle()
 
     expect(root().dataset.stop).toBe('terminus')
-    expect(root().querySelectorAll('.tour-found__line')).toHaveLength(3)
+    // The rule, a line per notion under its name, the neighbour.
+    expect(root().querySelectorAll('.tour-found__line')).toHaveLength(KA.twists.length + 2)
+    expect([...root().querySelectorAll('.tour-found__notion')].map(n => n.textContent)).toEqual(KA.twists.map(tw => tw.notion))
     expect(root().querySelector('.tour-reply__ja').textContent).toBe(KA.scene.ask.choices[reply].jp)
     gate().click()
     expect(onBoard).toHaveBeenCalledWith({ tries: 0, helped: false })
     const steps = track.mock.calls.filter(c => c[0] === 'grammar_tour_step').map(c => c[1].stop + ':' + c[1].outcome)
-    expect(steps).toEqual(['look:first', 'guess:first', 'found:first', 'twist:retry', 'scene:first'])
+    expect(steps).toEqual(['look:first', 'guess:first', 'found:first', 'twist:retry', ...KA.twists.slice(1).map(() => 'twist:first'), 'scene:first'])
     expect(track).toHaveBeenCalledWith('grammar_tour_done', { level: 'N5', tries: 0, helped: false, authored: true })
   })
 
@@ -238,12 +249,14 @@ describe('the written tour', () => {
     const mounted = await mount({ ...KA_POINT })
     const { root, gate } = mounted
     await toTwist(mounted)
-    choice(root, 0).click()
-    await settle()
-    gate().click()
-    await settle()
-    gate().click()
-    await settle()
+    for (let i = 0; i < KA.twists.length; i++) {
+      choice(root, 0).click()
+      await settle()
+      gate().click()
+      await settle()
+      gate().click()
+      await settle()
+    }
     expect(root().dataset.stop).toBe('scene')
     // Each line ends when the test says so.
     const ends = []

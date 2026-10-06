@@ -1698,7 +1698,26 @@ runtime purpose. Two consequences worth knowing:
   `study/analysis.py`'s `LOCAL_REV` 12, `content/grammar/ladder.json`,
   `tests/test_grammar_precision.py`'s `TourTests` and
   `tests/test_grammar_detect.py`).
-  When starting a new wave, begin at **189** or higher, and check
+  **189** is 網羅, the tours exhaustive (owner-directed: « fais en sorte
+  que les visites soient exhaustives sur chaque notion qu'un point de
+  grammaire peut avoir », after the tour of は taught the topic and never
+  the contrast): a tour's one `twist` became `twists`, one per notion the
+  point has beyond the meaning the guess asks -- a second use, a sense, a
+  form the lesson teaches as part of it (ではありません for です), a trap,
+  the rival -- each named by its `notion` and walked as a stop of its own
+  (`twist-0`, `twist-1`… in `domain/tourStops.js`), its name the caption
+  over the question, the desk's line naming the stop by it and the plate
+  and the terminus numbering every twist's why; written for all 539
+  toured points, the lesson's `rule` or `use` widened where it left a
+  toured notion out (cited in `study/grammar_check.py`,
+  `study/grammar_tour.py`'s `TOUR_REV` 2, `study/grammar_audio.py`,
+  `scripts/build_grammar_audio.py`, `scripts/audit_slice.py`,
+  `content/grammar/*.json` and its README, `tests/test_grammar_check.py`,
+  `tests/test_grammar_tour.py`, `components/study/GrammarTour.jsx`,
+  `components/study/TourPanels.jsx`, `domain/tourStops.js`,
+  `src/testing/grammarTour.json`, the tour tests and `index.css`;
+  DESIGN.md, "The tour"; `docs/content-audit/PLAYBOOK.md`).
+  When starting a new wave, begin at **190** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

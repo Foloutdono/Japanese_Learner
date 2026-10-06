@@ -71,8 +71,9 @@ and homophones, the JLPT lists are the deck's own ancestors, and a
 point of auditing them rather than importing them.
 
 **A tours slice is a grammar point's written tour** (plan 187): the
-`twist` (a sentence, a question, three readings with the one marked
-right) and the `scene` (a few lines at a station, the learner's line
+`twists`, one per notion the point has beyond its main meaning (plan
+189; each a `notion` name, a sentence, a question, three readings with
+the one marked right) and the `scene` (a few lines at a station, the learner's line
 chosen from three). `check_grammar` already holds their shape, their
 kanji and that the point is in the right answer and in no wrong one;
 what no gate can say is whether a native speaker would say it. What to
@@ -83,8 +84,11 @@ try to disprove:
   the most harmful, since the learner is marked wrong for saying it;
 - **the register**: a clerk who speaks casually, a stranger addressed in
   plain form, a reply a native speaker would not give at that place;
-- **the twist's surprise**: a "second use" that is not one, or a rival
-  the lesson does not in fact warn about;
+- **the twists' notions**: a "second use" that is not one, a rival the
+  lesson does not in fact warn about, a `notion` name that says
+  something else than its twist -- and, since plan 189 asks for them
+  all, a sense or use the point has at its level that no twist tours,
+  or one that belongs to another point of the catalogue;
 - **the why and the note**: a rule that is true of this sentence but not
   of the point, or not of its rivals.
 

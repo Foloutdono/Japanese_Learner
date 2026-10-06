@@ -101,14 +101,19 @@ def _reading_problems(what: str, key: str, text: str, reading) -> list[str]:
 
 
 # ── The tour's authored block (plan 187c) ──────────────────────────
-# A point's `tour` is the two stops the catalogue cannot derive: the
-# twist (a sentence that shows the point doing something else, or its
-# nearest rival, and three readings of it) and the scene (a short
-# dialogue at a station place in which the point does its job, then the
-# learner's own line chosen from three). Both are required where a tour
-# is written at all.
-TOUR_KEYS = frozenset({"twist", "scene"})
-TWIST_KEYS = frozenset({"jp", "ask", "choices", "why", "pair"})
+# A point's `tour` is the stops the catalogue cannot derive: the twists
+# (each a sentence that shows the point in one of its notions -- a second
+# use, a sense, a form, or the nearest rival -- and three readings of it)
+# and the scene (a short dialogue at a station place in which the point
+# does its job, then the learner's own line chosen from three). Both are
+# required where a tour is written at all. Plan 189 made the twist a list,
+# one per notion the point has beyond the meaning the guess asks, each
+# named by its `notion`, so the tour walks every one.
+TOUR_KEYS = frozenset({"twists", "scene"})
+TWIST_KEYS = frozenset({"notion", "jp", "ask", "choices", "why", "pair"})
+TWIST_REQUIRED = frozenset({"notion", "jp", "ask", "choices", "why"})
+TWISTS = (1, 6)
+MAX_NOTION_CHARS = 40
 SCENE_KEYS = frozenset({"place", "them", "lines", "note", "ask"})
 SCENE_ASK_KEYS = frozenset({"cue", "task", "choices", "why"})
 SCENE_LINES = (2, 5)
@@ -174,36 +179,53 @@ def _spoken_problems(what: str, line, level: str, pattern: str, rich: bool) -> l
     return out
 
 
+def _twist_problems(what: str, twist, level: str, pattern: str, rich: bool) -> list[str]:
+    """One twist: the notion it shows, a sentence, a question over it,
+    three readings with the right one first, and the why."""
+    if not isinstance(twist, dict) or not TWIST_REQUIRED <= set(twist) or set(twist) - TWIST_KEYS:
+        return [f"{what} must be {{notion, jp, ask, choices, why[, pair]}}"]
+    out = _text_problems(f"{what} notion", twist["notion"], rich, MAX_NOTION_CHARS)
+    out += _line_problems(f"{what} jp", twist["jp"], level, pattern)
+    out += _text_problems(f"{what} ask", twist["ask"], rich, MAX_TOUR_CHARS)
+    out += _text_problems(f"{what} why", twist["why"], rich, MAX_TOUR_CHARS)
+    choices = twist["choices"]
+    if not isinstance(choices, list) or len(choices) != TOUR_CHOICES:
+        out.append(f"{what} has {len(choices) if isinstance(choices, list) else '?'} choices, needs {TOUR_CHOICES} (the answer first)")
+    else:
+        for i, choice in enumerate(choices):
+            out += _text_problems(f"{what} choice {i}", choice, rich, MAX_TOUR_CHARS)
+        texts = [c.get("en") for c in choices if isinstance(c, dict)]
+        if len(set(texts)) != len(texts):
+            out.append(f"{what} choices repeat")
+    pair = twist.get("pair")
+    if pair is not None and (
+        not isinstance(pair, list) or len(pair) != 2
+        or any(not isinstance(p, str) or not _CJK.search(p) or _LATIN.search(p) for p in pair)
+    ):
+        out.append(f"{what} pair must be two Japanese forms")
+    return out
+
+
 def _tour_problems(level: str, entry: dict, rich: bool) -> list[str]:
     from study.grammar_tour import SCENE_PLACES
     pattern = entry.get("pattern") or ""
     tour = entry["tour"]
     if not isinstance(tour, dict) or set(tour) != TOUR_KEYS:
-        return [f"tour must be {{twist, scene}}, both written"]
+        return [f"tour must be {{twists, scene}}, both written"]
     out: list[str] = []
 
-    twist = tour["twist"]
-    if not isinstance(twist, dict) or not {"jp", "ask", "choices", "why"} <= set(twist) or set(twist) - TWIST_KEYS:
-        out.append("tour twist must be {jp, ask, choices, why[, pair]}")
-    else:
-        out += _line_problems("tour twist jp", twist["jp"], level, pattern)
-        out += _text_problems("tour twist ask", twist["ask"], rich, MAX_TOUR_CHARS)
-        out += _text_problems("tour twist why", twist["why"], rich, MAX_TOUR_CHARS)
-        choices = twist["choices"]
-        if not isinstance(choices, list) or len(choices) != TOUR_CHOICES:
-            out.append(f"tour twist has {len(choices) if isinstance(choices, list) else '?'} choices, needs {TOUR_CHOICES} (the answer first)")
-        else:
-            for i, choice in enumerate(choices):
-                out += _text_problems(f"tour twist choice {i}", choice, rich, MAX_TOUR_CHARS)
-            texts = [c.get("en") for c in choices if isinstance(c, dict)]
-            if len(set(texts)) != len(texts):
-                out.append("tour twist choices repeat")
-        pair = twist.get("pair")
-        if pair is not None and (
-            not isinstance(pair, list) or len(pair) != 2
-            or any(not isinstance(p, str) or not _CJK.search(p) or _LATIN.search(p) for p in pair)
-        ):
-            out.append("tour twist pair must be two Japanese forms")
+    twists = tour["twists"]
+    if not isinstance(twists, list) or not TWISTS[0] <= len(twists) <= TWISTS[1]:
+        out.append(f"tour has {len(twists) if isinstance(twists, list) else '?'} twists, needs {TWISTS[0]}–{TWISTS[1]}")
+        twists = twists if isinstance(twists, list) else []
+    for n, twist in enumerate(twists):
+        out += _twist_problems(f"tour twist {n}", twist, level, pattern, rich)
+    sentences = [t.get("jp") for t in twists if isinstance(t, dict)]
+    if len(set(sentences)) != len(sentences):
+        out.append("tour twists repeat a sentence")
+    notions = [(t.get("notion") or {}).get("en") for t in twists if isinstance(t, dict) and isinstance(t.get("notion"), dict)]
+    if len(set(notions)) != len(notions):
+        out.append("tour twists repeat a notion")
 
     scene = tour["scene"]
     if not isinstance(scene, dict) or set(scene) != SCENE_KEYS:

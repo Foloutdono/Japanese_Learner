@@ -60,7 +60,7 @@ def catalog() -> dict[str, frozenset[str]]:
             tour = entry.get("tour")
             if not tour:
                 continue
-            said["reader"].add(tour["twist"]["jp"])
+            said["reader"].update(twist["jp"] for twist in tour["twists"])
             scene = tour["scene"]
             for line in [*scene["lines"], scene["ask"]["cue"]]:
                 said[line["who"]].add(line["jp"])

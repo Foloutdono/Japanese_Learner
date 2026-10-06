@@ -47,7 +47,7 @@ def _tour_lines() -> set[tuple[str, str]]:
             tour = entry.get("tour")
             if not tour:
                 continue
-            out.add((tour["twist"]["jp"], "reader"))
+            out.update((twist["jp"], "reader") for twist in tour["twists"])
             scene = tour["scene"]
             for line in [*scene["lines"], scene["ask"]["cue"]]:
                 out.add((line["jp"], line["who"]))

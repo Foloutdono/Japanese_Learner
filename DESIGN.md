@@ -1007,9 +1007,14 @@ stage, not a new idiom:
   right one is ringed in `--success`. A hint after one miss, the rule
   given after two (its head in the selection's ink, because it is given,
   not found).
-- **Where the tour is written** (plan 187c), two stops join before the
-  terminus. The twist is a sentence and three readings, checked once,
-  the right one ringed and a wrong pick crossed, the why said under them.
+- **Where the tour is written** (plan 187c), its stops join before the
+  terminus: **a twist per notion** the point has beyond the meaning the
+  guess asks (plan 189: a second use, a sense, a form, a trap, the
+  rival), then the scene. A twist is its notion as the one caption over
+  the question (with « 2 sur 4 » beside it where there are several), a
+  sentence and three readings, checked once, the right one ringed and a
+  wrong pick crossed, the why said under them. The terminus numbers
+  every twist's why under its notion.
   The scene opens on its place as a **station plate**: the name over its
   caption on the 駅名標's white in either theme (the HUD's arrival
   plate's), the line's edge under it at 3px. The lines follow as rows,
@@ -1063,11 +1068,12 @@ guesses two across. At the left, under the run's figures, the point and
 its stops as one line. Each stop is a dot on a rail in the line's
 pigment, drawn 3px once it is behind, and says how it went: a check, the
 tries ("1 miss" in the wrong ink while the guess is still in hand, the
-plain ink once it is passed), "rule given", a missed twist. The scene's
-stop is named by its place. At the right, the plate: the formation over
+plain ink once it is passed), "rule given", a missed twist. A twist's
+stop is named by its notion, the scene's by its place. At the right, the plate: the formation over
 the pattern at display size, the line's edge, then the lines found,
 numbered in the line's ink and sealed (« À trouver ») until each is
-found. The rule opens at the found stop, the twist once it is answered,
+found. The rule opens at the found stop, each twist once it is answered
+(its notion as the caption over its line),
 the neighbour once the stop that met it is behind. The other examples
 open at the terminus, whose middle is then the point's first sentence and
 the learner's own line rather than the plate again. Enter presses the

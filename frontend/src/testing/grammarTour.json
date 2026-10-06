@@ -1,6 +1,6 @@
 {
  "en": {
-  "rev": 1,
+  "rev": 2,
   "look": [
    {
     "jp": "この本を読んでください。",
@@ -180,11 +180,11 @@
    ],
    "text": "てください asks someone to do; ないでください asks them not to."
   },
-  "twist": null,
-  "scene": null
+  "scene": null,
+  "twists": []
  },
  "ka": {
-  "rev": 1,
+  "rev": 2,
   "look": [
    {
     "jp": "あなたは学生ですか。",
@@ -287,26 +287,26 @@
   ],
   "guesses": [
    {
-    "text": "and then (linking actions in order)",
+    "text": "the space passed through or left (walk along, leave)",
     "correct": false,
-    "pattern": "〜て、〜て",
+    "pattern": "〜を（移動）",
     "furigana": [
      {
-      "text": "〜て、〜て"
+      "text": "〜を（"
+     },
+     {
+      "text": "移",
+      "reading": "い"
+     },
+     {
+      "text": "動",
+      "reading": "どう"
+     },
+     {
+      "text": "）"
      }
     ],
     "answer": null
-   },
-   {
-    "text": "seeks agreement: right?, isn't it?",
-    "correct": false,
-    "pattern": "ね",
-    "furigana": [
-     {
-      "text": "ね"
-     }
-    ],
-    "answer": "か asks for information you do not have; ね asks the listener to agree with what you both see."
    },
    {
     "text": "A or B (a choice between two)",
@@ -318,6 +318,17 @@
      }
     ],
     "answer": "A single か asks a question; か… か… offers a choice between two whole options."
+   },
+   {
+    "text": "seeks agreement: right?, isn't it?",
+    "correct": false,
+    "pattern": "ね",
+    "furigana": [
+     {
+      "text": "ね"
+     }
+    ],
+    "answer": "か asks for information you do not have; ね asks the listener to agree with what you both see."
    },
    {
     "text": "turns a statement into a question; also 'or' between nouns",
@@ -341,46 +352,108 @@
    ],
    "text": "A single か asks a question; か… か… offers a choice between two whole options."
   },
-  "twist": {
-   "jp": "おちゃかコーヒーを飲みますか。",
-   "furigana": [
-    {
-     "text": "おちゃ"
-    },
-    {
-     "text": "か",
-     "highlight": true
-    },
-    {
-     "text": "コーヒーを"
-    },
-    {
-     "text": "飲",
-     "reading": "の",
-     "word": 5
-    },
-    {
-     "text": "みますか。"
-    }
-   ],
-   "ask": "There are two here. What does the first one mean?",
-   "choices": [
-    {
-     "text": "« and »: tea and coffee",
-     "correct": false
-    },
-    {
-     "text": "It asks a question about the tea.",
-     "correct": false
-    },
-    {
-     "text": "« or »: tea or coffee",
-     "correct": true
-    }
-   ],
-   "why": "Between two nouns, か means « or ». The second か, at the end, asks the question.",
-   "pair": null
-  },
+  "twists": [
+   {
+    "notion": "« Or » between two nouns",
+    "jp": "ペンかえんぴつで書いてください。",
+    "furigana": [
+     {
+      "text": "ペン"
+     },
+     {
+      "text": "か",
+      "highlight": true
+     },
+     {
+      "text": "えんぴつで"
+     },
+     {
+      "text": "書",
+      "reading": "か",
+      "word": 4
+     },
+     {
+      "text": "いて"
+     },
+     {
+      "text": "ください。"
+     }
+    ],
+    "ask": "か sits between two nouns here. What does it mean?",
+    "choices": [
+     {
+      "text": "« or »: with a pen or a pencil",
+      "correct": true
+     },
+     {
+      "text": "« and »: with a pen and a pencil",
+      "correct": false
+     },
+     {
+      "text": "It asks a question about the pen.",
+      "correct": false
+     }
+    ],
+    "why": "Between two nouns, か means « or »: one or the other. At the end of a sentence, it asks.",
+    "pair": [
+     "ペンとえんぴつ",
+     "ペンかえんぴつ"
+    ]
+   },
+   {
+    "notion": "か against ね",
+    "jp": "この電車はとうきょうへ行きますね。",
+    "furigana": [
+     {
+      "text": "この"
+     },
+     {
+      "text": "電",
+      "reading": "でん",
+      "word": 1
+     },
+     {
+      "text": "車",
+      "reading": "しゃ",
+      "word": 1
+     },
+     {
+      "text": "は"
+     },
+     {
+      "text": "とうきょうへ"
+     },
+     {
+      "text": "行",
+      "reading": "い",
+      "word": 5
+     },
+     {
+      "text": "きますね。"
+     }
+    ],
+    "ask": "ね, not か. What is the speaker doing?",
+    "choices": [
+     {
+      "text": "Asking with no idea at all where it goes.",
+      "correct": false
+     },
+     {
+      "text": "Checking what they think they know: it goes to Tokyo, right?",
+      "correct": true
+     },
+     {
+      "text": "Telling the other something new.",
+      "correct": false
+     }
+    ],
+    "why": "か asks for what you do not know; ね checks what you think you both know.",
+    "pair": [
+     "行きますか",
+     "行きますね"
+    ]
+   }
+  ],
   "scene": {
    "place": "売店",
    "place_reading": "ばいてん",

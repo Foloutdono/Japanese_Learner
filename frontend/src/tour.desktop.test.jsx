@@ -8,7 +8,7 @@ import './index.css'
 // ── 発見 on the desk (plan 187f) ────────────────────────────────
 // A point never met opens on its tour on the run's three panels (the
 // owner's pick F, boards 11 and 12): the stop in the middle with no
-// track of its own; at the left the point over its six stops, each
+// track of its own; at the left the point over its stops, each
 // saying how it went -- a miss in the wrong ink while the guess is in
 // hand, the tries once it is passed; at the right the plate, its lines
 // sealed until each is found and the examples at the terminus. The run
@@ -59,6 +59,9 @@ const $$ = s => [...document.querySelectorAll(s)]
 const key = k => window.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }))
 const stop = () => $('.desk-run .tour--desk').dataset.stop
 const route = name => $(`.tour-route__stop[data-stop="${name}"]`)
+// A twist per notion (plan 189), each a stop of its own.
+const twistAt = () => Number($('.desk-run .tour--desk').dataset.twist)
+const routeTwist = i => $(`.tour-route__stop[data-twist="${i}"]`)
 
 beforeEach(() => {
   localStorage.clear()
@@ -102,13 +105,14 @@ describe('the tour on the desk’s three panels', () => {
     const left = $('.desk-run__left .tour-route')
     expect(left.querySelector('.tour-route__pattern').textContent).toBe('か')
     expect($$('.tour-route__stop').map(s => s.querySelector('.tour-route__name').textContent))
-      .toEqual(['Look', 'Guess', 'Found', 'The twist', KA.scene.place_caption, 'Terminus'])
+      .toEqual(['Look', 'Guess', 'Found', ...KA.twists.map(tw => tw.notion), KA.scene.place_caption, 'Terminus'])
     expect(route('look').getAttribute('aria-current')).toBe('step')
 
     const right = $('.desk-run__side .tour-ledger')
     expect(right.querySelector('.tour-ledger__pattern').textContent).toBe('か')
-    expect(right.querySelectorAll('.tour-ledger__line')).toHaveLength(3)
-    expect(right.querySelectorAll('.tour-ledger__line--sealed')).toHaveLength(3)
+    // The rule, a line per twist under its notion, the neighbour.
+    expect(right.querySelectorAll('.tour-ledger__line')).toHaveLength(KA.twists.length + 2)
+    expect(right.querySelectorAll('.tour-ledger__line--sealed')).toHaveLength(KA.twists.length + 2)
     expect(right.querySelector('.tour-ledger__later')).toBeTruthy()
 
     // The three columns stand side by side, inside the window.
@@ -155,16 +159,23 @@ describe('the tour on the desk’s three panels', () => {
 
     key('Enter')
     await settle()
-    expect(stop()).toBe('twist')
-    key(String(KA.twist.choices.findIndex(c => c.correct) + 1))
-    await settle()
-    key('Enter')
-    await settle()
-    expect(route('twist').querySelector('.tour-route__res--ok')).toBeTruthy()
-    // The twist and the neighbour open.
+    for (const [i, twist] of KA.twists.entries()) {
+      expect(stop()).toBe('twist')
+      expect(twistAt()).toBe(i)
+      expect(routeTwist(i).getAttribute('aria-current')).toBe('step')
+      key(String(twist.choices.findIndex(c => c.correct) + 1))
+      await settle()
+      key('Enter')
+      await settle()
+      expect(routeTwist(i).querySelector('.tour-route__res--ok')).toBeTruthy()
+      // The twist's line opens under its notion.
+      expect(lines()[i + 1].classList.contains('tour-ledger__line--sealed')).toBe(false)
+      expect(lines()[i + 1].querySelector('.tour-ledger__notion').textContent).toBe(twist.notion)
+      key('Enter')
+      await settle()
+    }
+    // The last twist answered, the neighbour opens too.
     expect(lines().every(l => !l.classList.contains('tour-ledger__line--sealed'))).toBe(true)
-    key('Enter')
-    await settle()
 
     expect(stop()).toBe('scene')
     expect(route('scene').getAttribute('aria-current')).toBe('step')

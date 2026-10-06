@@ -20,9 +20,12 @@ which is why every point that can be lit gets one on the same day.
   where the point attaches to a verb, the verb of the first example from
   its dictionary form to the point (書く → 書いてください).
 - `rival`: the first rival the lesson names, for the terminus.
-- `twist`, `scene`: the point's authored `tour` block (plan 187c),
-  localised, the choices shuffled by a seed of the card id: None where it
-  is not written yet. study/grammar_check.py holds the block's shape.
+- `twists`, `scene`: the point's authored `tour` block (plan 187c),
+  localised, the choices shuffled by a seed of the card id: [] and None
+  where it is not written yet. study/grammar_check.py holds the block's
+  shape. A twist per notion the point has beyond the meaning the guess
+  asks (plan 189): a second use, a sense, a form, the rival the lesson
+  warns about, each named by its `notion`, so the tour walks them all.
 
 A point with no rival has nothing to guess against and gets no tour: the
 gate keeps the lesson for it. Static per (level, pattern, lang), so it is
@@ -46,7 +49,7 @@ from study.grammar_examples import (
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 1
+TOUR_REV = 2
 LOOK_COUNT = 3
 MIN_LIT = 2
 GUESS_COUNT = 4
@@ -257,24 +260,25 @@ def _spoken(line: dict, pattern: str, level: str, lang: str) -> dict:
     }
 
 
-def _twist(level: str, entry: dict, lang: str) -> dict | None:
-    twist = (entry.get("tour") or {}).get("twist")
-    if not twist:
-        return None
-    rng = random.Random(f"{TOUR_REV}:{grammar_to_id(entry, level)}:twist")
-    choices = [
-        {"text": localise(choice, lang), "correct": i == 0}
-        for i, choice in enumerate(twist["choices"])
-    ]
-    rng.shuffle(choices)
-    return {
-        "jp": twist["jp"],
-        "furigana": _lit(twist["jp"], entry["pattern"], level),
-        "ask": localise(twist["ask"], lang),
-        "choices": choices,
-        "why": localise(twist["why"], lang),
-        "pair": list(twist.get("pair") or []) or None,
-    }
+def _twists(level: str, entry: dict, lang: str) -> list[dict]:
+    out = []
+    for n, twist in enumerate((entry.get("tour") or {}).get("twists") or []):
+        rng = random.Random(f"{TOUR_REV}:{grammar_to_id(entry, level)}:twist:{n}")
+        choices = [
+            {"text": localise(choice, lang), "correct": i == 0}
+            for i, choice in enumerate(twist["choices"])
+        ]
+        rng.shuffle(choices)
+        out.append({
+            "notion": localise(twist["notion"], lang),
+            "jp": twist["jp"],
+            "furigana": _lit(twist["jp"], entry["pattern"], level),
+            "ask": localise(twist["ask"], lang),
+            "choices": choices,
+            "why": localise(twist["why"], lang),
+            "pair": list(twist.get("pair") or []) or None,
+        })
+    return out
 
 
 def _scene(level: str, entry: dict, lang: str) -> dict | None:
@@ -327,7 +331,7 @@ def _tour(level: str, pattern: str, lang: str) -> dict | None:
         "structure_furigana": structure_furigana(entry),
         "chain": _chain(entry, look),
         "rival": _rival(entry, lang),
-        "twist": _twist(level, entry, lang),
+        "twists": _twists(level, entry, lang),
         "scene": _scene(level, entry, lang),
     }
 
