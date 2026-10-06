@@ -202,3 +202,13 @@ def test_nothing_to_correct_carries_no_parts(client, tutor):
     review = r.json()["review"]
     assert review["better"] == ""
     assert "better_parts" not in review
+
+
+def test_an_oversized_attempt_is_refused_before_the_model_is_paid(client, tutor):
+    # Every field is fenced into a paid prompt, so one is bounded; a
+    # request past the bound never reaches the model.
+    calls = tutor(_reply())
+    r = client.post("/api/translation/analyze",
+                    json={**PAYLOAD, "user_answer": "あ" * (translation.MAX_ANSWER + 1)})
+    assert r.status_code == 422
+    assert calls == []
