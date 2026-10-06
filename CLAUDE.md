@@ -1707,7 +1707,7 @@ runtime purpose. Two consequences worth knowing:
   the rival -- each named by its `notion` and walked as a stop of its own
   (`twist-0`, `twist-1`… in `domain/tourStops.js`), its name the caption
   over the question, the desk's line naming the stop by it and the plate
-  and the terminus numbering every twist's why; written for all 529
+  and the terminus numbering every twist's why; written for all 539
   toured points, the lesson's `rule` or `use` widened where it left a
   toured notion out (cited in `study/grammar_check.py`,
   `study/grammar_tour.py`'s `TOUR_REV` 2, `study/grammar_audio.py`,
