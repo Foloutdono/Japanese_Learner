@@ -173,7 +173,7 @@ describe('the tour in the day’s queue, on a phone', () => {
     await settle()
     const tour = () => screen.container.querySelector('.tour')
     const gate = () => tour().querySelector('.tour__foot .btn-depart')
-    expect(tour().querySelectorAll('.tour__stop')).toHaveLength(6)
+    expect(tour().querySelectorAll('.tour__stop')).toHaveLength(5 + KA.twists.length)
     gate().click()
     await settle(120)
     tour().querySelector(`[data-guess="${KA.guesses.findIndex(g => g.correct)}"]`).click()
@@ -182,12 +182,17 @@ describe('the tour in the day’s queue, on a phone', () => {
     await settle(120)
     gate().click()
     await settle(120)
-    tour().querySelector(`[data-choice="${KA.twist.choices.findIndex(c => c.correct)}"]`).click()
-    await settle(120)
-    gate().click()
-    await settle(120)
-    gate().click()
-    await settle(120)
+    for (const twist of KA.twists) {
+      // The notion over its question stays inside a phone's width.
+      const notion = tour().querySelector('.tour__notion').getBoundingClientRect()
+      expect(notion.right).toBeLessThanOrEqual(window.innerWidth)
+      tour().querySelector(`[data-choice="${twist.choices.findIndex(c => c.correct)}"]`).click()
+      await settle(120)
+      gate().click()
+      await settle(120)
+      gate().click()
+      await settle(120)
+    }
     expect(tour().dataset.stop).toBe('scene')
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
     for (const el of tour().querySelectorAll('.tour-plate, .tour-line, .tour-speak, .tour-note')) {

@@ -102,12 +102,20 @@ describe('the tour on the short desk', () => {
     within(gate())
     key('Enter')
     await settle()
-    key(String(KA.twist.choices.findIndex(c => c.correct) + 1))
-    await settle()
-    key('Enter')
-    await settle()
-    expect(stop()).toBe('twist')
-    within(gate())
+    // A stop per notion (plan 189): the last one checked leaves the
+    // plate whole.
+    for (const [i, twist] of KA.twists.entries()) {
+      if (i) {
+        key('Enter')
+        await settle()
+      }
+      key(String(twist.choices.findIndex(c => c.correct) + 1))
+      await settle()
+      key('Enter')
+      await settle()
+      expect(stop()).toBe('twist')
+      within(gate())
+    }
     // Every line of the plate open, and the last one in the window.
     expect($$('.tour-ledger__line--sealed')).toHaveLength(0)
     within($$('.tour-ledger__line').at(-1))
