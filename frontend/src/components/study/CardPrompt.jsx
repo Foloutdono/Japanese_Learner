@@ -43,7 +43,7 @@ export default function CardPrompt({
   if (!card) return null
 
   const c = card
-  const { structureKey, isF2B, renderer, isFill, isContrast, isRadical, isWordReading, isBuild, isWrite, rung } = cardShape(c)
+  const { structureKey, isF2B, renderer, isFill, isContrast, isRadical, isWordReading, isBuild, isWrite, rung, asked } = cardShape(c)
   const resetKey = `${c.card_id}:${cardNonce}`
 
   const cardHints = c.hints ?? {}
@@ -307,8 +307,9 @@ export default function CardPrompt({
     const lesson = c.source === 'custom' ? writtenLesson(c) : null
     return (
       <PromptCard className="grammar-prompt" foot={foot}>
-        {/* A ladder card (plan 187e) shows the rung it stands on. */}
-        {rung != null && <LadderStrip rung={rung} />}
+        {/* A ladder card (plan 187e) shows the rung it stands on and
+            names the exercise it is asked (plan 190). */}
+        {rung != null && <LadderStrip rung={rung} asked={asked} />}
         {/* Every mode here is the same card with a different front: a
             rule, a meaning, or a sentence. The flip is the reveal in
             all three, and switching the choices on replaces the flip

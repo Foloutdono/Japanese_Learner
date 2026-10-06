@@ -84,7 +84,10 @@ def _init_db() -> None:
         conn.close()
 
 
-_init_db()
+try:
+    _init_db()
+except Exception:  # pragma: no cover - a missing DB must not stop import
+    logger.exception("translation_log could not be initialised")
 
 
 # ── Phrase source: reuse reading.py's, don't reinvent it ────────────
@@ -136,17 +139,26 @@ def get_translation_batch(
 # the client CAN'T produce on its own: a natural-language comparison
 # that helps the learner judge whether their own phrasing was good
 # enough, even when it doesn't match the reference word-for-word.
+# Every field below is fenced into a paid prompt, so each is bounded:
+# the reference fields come from the batch (a corpus sentence runs to a
+# few hundred characters, its romaji to a few times that), and the
+# learner's attempt gets the same room. Composition caps its sentence the
+# same way, and for the same reason: the tutor is paid by the token.
+MAX_REFERENCE = 2000
+MAX_ANSWER = 1000
+
+
 class AnalyzePayload(BaseModel):
-    translation_prompt: str   # the foreign-language sentence the learner was asked to translate
-    target_phrase: str        # reference Japanese translation, from the batch data
-    target_romaji: str
-    user_answer: str          # the learner's own Japanese attempt
-    lang: str = "en"
+    translation_prompt: str = Field(max_length=MAX_REFERENCE)  # the foreign-language sentence the learner was asked to translate
+    target_phrase: str = Field(max_length=MAX_REFERENCE)       # reference Japanese translation, from the batch data
+    target_romaji: str = Field(max_length=MAX_REFERENCE)
+    user_answer: str = Field(max_length=MAX_ANSWER)            # the learner's own Japanese attempt
+    lang: str = Field(default="en", max_length=16)
     # The grammar point the reference sentence was written to
     # demonstrate, when it has one -- every curated sentence carries it
     # (see content/reading_sentences.py) and a corpus-sourced one does
     # not. Empty means "no reliable claim", not "no grammar".
-    grammar: str = ""
+    grammar: str = Field(default="", max_length=200)
 
 
 # ── The review, as a shape (2026-09-13, owner-directed) ──
@@ -254,10 +266,17 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
     # reading._chat already handles the multi-model fallback chain and
     # raises HTTPException(503, ...) if every provider fails -- nothing
     # to add here.
-    content = reading._chat([
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": "Review my translation attempt."},
-    ], task="translation-review")
+    content = reading._chat(
+        [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": "Review my translation attempt."},
+        ],
+        # The shape is small -- composition's review, a field or two
+        # larger, is served in 1000 -- and a 3,000-token ceiling on a
+        # reasoning model is paid in latency, not in quality.
+        max_tokens=1000,
+        task="translation-review",
+    )
     review = _parse_review(content)
     if review is None:
         # Not the shape. The prose is still a review, so it is served as
@@ -304,12 +323,13 @@ SRS_MODE = "sentence.translation"
 
 # ── Result logging (self-graded, same pattern as reading.py) ────────
 class ResultPayload(BaseModel):
-    source: str                # compact source label — see reading._source_label()
-    level: str | None = None
-    translation_prompt: str
-    phrase: str
-    romaji: str
-    answer: str
+    source: str = Field(max_length=200)  # compact source label — see reading._source_label()
+    level: str | None = Field(default=None, max_length=16)
+    # Stored as they arrive, so bounded as the analyze payload is.
+    translation_prompt: str = Field(max_length=MAX_REFERENCE)
+    phrase: str = Field(max_length=MAX_REFERENCE)
+    romaji: str = Field(max_length=MAX_REFERENCE)
+    answer: str = Field(max_length=MAX_ANSWER)
     correct: bool
     # 0..5, worst to best, as RatingBar emits it. Optional so an older
     # client that still posts only `correct` keeps working; the bound is

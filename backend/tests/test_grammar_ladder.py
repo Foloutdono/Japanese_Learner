@@ -14,6 +14,8 @@ from core.auth import DEV_USER_ID
 from core.db import db_conn
 from srs.srs import SRSEngine
 from study import card_index, grammar_ladder
+from study.grammar_examples import blank_span, highlight_span
+from study.grammar_lesson import contrast_payload
 from study.modes import GRADED_ORDER_FOR_SOURCE, MODES, eligible_for
 from study.level_rule import primary_mode
 
@@ -119,6 +121,54 @@ def test_a_point_with_no_marked_sentence_is_no_build():
     assert grammar_ladder.build_payload(level, entry, "en") is None
 
 
+# ── A particle, blanked by the detector (plan 190) ───────────
+
+def test_a_particle_is_blanked_where_the_detector_finds_it_once():
+    # Its letters point at nothing, so the detector does: once, on one
+    # piece, or not at all.
+    assert blank_span("毎あさパンを食べます。", "を", "N5") == (5, 6)
+    assert blank_span("パンを食べて、水を飲みます。", "を", "N5") is None
+    assert blank_span("おちゃかコーヒーを飲みますか。", "〜か〜か", "N5") is None
+    # A verifiable point is blanked by its stems, as before.
+    assert blank_span("約束は守るべきです。", "〜べきだ", "N3") == highlight_span("約束は守るべきです。", "〜べきだ")
+
+
+def test_a_particles_contrast_offers_its_rivals_alone():
+    # パン＿食べます takes だけ, まで and から too: no filler is certainly
+    # wrong in a particle's gap, so only the rivals its author marked the
+    # sentence against are offered.
+    level, entry, _ = _point("を")
+    for seed in range(8):
+        drill = contrast_payload(level, entry, GRAMMAR_POINTS_BY_LEVEL[level], "en", random.Random(seed))
+        assert sorted(drill["choices"]) == sorted(["を", "が", "に"])
+        blanks = [p for p in drill["furigana"] if p.get("blank")]
+        assert len(blanks) == 1
+        around = "".join(p["text"] for p in drill["furigana"] if not p.get("blank"))
+        assert drill["jp"].replace("を", "", 1) == around
+
+
+def test_the_particles_the_detector_blanks_reach_the_middle_rungs():
+    for level, pattern in (("N5", "を"), ("N5", "に"), ("N5", "で"), ("N5", "が"), ("N5", "か"),
+                           ("N4", "〜方"), ("N4", "〜さ"), ("N3", "〜化")):
+        assert card_index.contrast_ok(level, pattern), pattern
+        assert grammar_ladder.build_ok(level, pattern), pattern
+    # は, が and も share too many sentences: は marks none, and stays on
+    # the flashcard until it can be written.
+    assert not card_index.contrast_ok("N5", "は")
+
+
+def test_a_particle_on_the_middle_rung_is_asked_its_contrast(client):
+    level, entry, raw_id = _point("を")
+    _clear(raw_id)
+    try:
+        _place(raw_id, LADDER, RUNG_ROWS[1])
+        card = _served(client, level, raw_id)
+        assert card["rung"] == 1 and card["exercise"] == "grammar.contrast"
+        assert sorted(card["contrast"]["choices"]) == sorted(["を", "が", "に"])
+    finally:
+        _clear(raw_id)
+
+
 # ── 書く write ───────────────────────────────────────────────
 
 def test_a_write_hands_a_situation_two_words_and_the_sentence_lit():
@@ -201,6 +251,7 @@ def test_a_card_is_asked_the_exercise_of_its_rung(client, rung, exercise):
         _place(raw_id, LADDER, RUNG_ROWS[rung])
         card = _served(client, level, raw_id)
         assert card["mode"] == LADDER and card["rung"] == rung and card["exercise"] == exercise
+        assert card["asked"] == rung
         if exercise == "grammar.build":
             assert card["build"]["tray"]
         if exercise == "grammar.write":
@@ -233,6 +284,8 @@ def test_a_point_with_no_marked_sentence_falls_back(client):
             _place(raw_id, LADDER, RUNG_ROWS[rung])
             card = _served(client, level, raw_id)
             assert card["rung"] == rung and card["exercise"] == exercise
+            # The strip names the exercise asked, not the rung it fell from.
+            assert card["asked"] == (3 if exercise == "grammar.write" else 0)
     finally:
         _clear(raw_id)
 

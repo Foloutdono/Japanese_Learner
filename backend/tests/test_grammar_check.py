@@ -6,7 +6,7 @@ something (plan 087).
 """
 import unittest
 
-from content.grammar_points_data import RICH_LEVELS
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, RICH_LEVELS
 from study import grammar_check
 from study.grammar_check import check_entry, problems, report
 from study.grammar_examples import _as_written, furigana_by_pattern, pattern_furigana, written_furigana
@@ -169,6 +169,15 @@ class GateRuleTests(unittest.TestCase):
                           "fr": "Il fait beau aujourd'hui.", "contrast": True}] + good[1:],
         }
         self.assertTrue(any("cannot be blanked" in p for p in check_entry("N1", particle, CATALOGUE)))
+        # ... unless the detector finds it once in the sentence (plan 190):
+        # the を of パンを食べます, but not one of two
+        wo = next(e for e in GRAMMAR_POINTS_BY_LEVEL["N5"] if e["pattern"] == "を")
+        once = {**wo, "examples": [{**wo["examples"][0], "contrast": True}] + wo["examples"][1:]}
+        self.assertFalse(any("cannot be blanked" in p for p in check_entry("N5", once)))
+        twice = {**wo, "examples": [{"jp": "パンを食べて、水を飲みます。", "en": "I eat bread and drink water.",
+                                     "fr": "Je mange du pain et je bois de l'eau.", "contrast": True}]
+                 + wo["examples"][1:]}
+        self.assertTrue(any("cannot be blanked" in p for p in check_entry("N5", twice)))
 
     def test_the_rich_bar(self) -> None:
         # Force the bar on, whatever RICH_LEVELS says today.

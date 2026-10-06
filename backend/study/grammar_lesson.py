@@ -14,7 +14,7 @@ import random
 
 from content.grammar_points_data import find, gloss, grammar_to_id, localise
 from study.grammar_examples import (
-    blanked_payload, example_payload, pattern_furigana, structure_furigana,
+    blank_span, blanked_payload, example_payload, pattern_furigana, structure_furigana,
 )
 from study.grammar_match import contains_pattern, verifiable
 from study.mcq import pick_distractors
@@ -82,10 +82,20 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     CONTRAST_CHOICES - 1 of them exist, same-level verifiable patterns
     that do NOT also occur in the sentence fill the gap (the rule
     study/placement.py uses, so an item never has two right answers).
+
+    A point the stems cannot point at (a bare particle, plan 190) is
+    drawn only on a sentence the detector blanks (blank_span), and is
+    offered its named rivals alone: a particle's gap takes too many
+    other particles -- パン＿食べます takes だけ, まで and から as well
+    as を -- for a filler to be certainly wrong, and its author marked
+    the sentence against the rivals only.
     """
     rng = rng or random
     pattern = entry["pattern"]
     pool = [ex for ex in entry.get("examples", []) if ex.get("contrast")]
+    checkable = verifiable(pattern)
+    if not checkable:
+        pool = [ex for ex in pool if blank_span(ex["jp"], pattern, level)]
     if not pool:
         return None
     example = rng.choice(pool)
@@ -96,14 +106,16 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
         if r["pattern"] != pattern and not (verifiable(r["pattern"]) and contains_pattern(sentence, r["pattern"]))
     ]
     choices = list(dict.fromkeys(rivals))[: CONTRAST_CHOICES - 1]
-    if len(choices) < CONTRAST_CHOICES - 1:
+    if checkable and len(choices) < CONTRAST_CHOICES - 1:
         fillers = [
             g["pattern"] for g in grammar_list
             if g["pattern"] != pattern and g["pattern"] not in choices
             and verifiable(g["pattern"]) and not contains_pattern(sentence, g["pattern"])
         ]
         choices += pick_distractors(fillers, lambda p: p, pattern, CONTRAST_CHOICES - 1 - len(choices))
+    if not choices:
+        return None
     choices.append(pattern)
     rng.shuffle(choices)
 
-    return {**blanked_payload(example, pattern, lang), "choices": choices, "answer": pattern}
+    return {**blanked_payload(example, pattern, lang, level), "choices": choices, "answer": pattern}

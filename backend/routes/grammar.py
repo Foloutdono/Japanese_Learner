@@ -145,8 +145,8 @@ def _build_ladder_card(entry: dict, level: str, grammar_list: list[dict], m: Mod
     from the card's progress; where the point cannot be asked on its rung
     (no marked sentence, a detector not trusted on it) the card goes down
     the chain to the flashcard, which every point can be. `exercise` is
-    the mode the client draws; `mode` stays the ladder, which is what the
-    review is filed under."""
+    the mode the client draws, `asked` the rung that exercise stands for;
+    `mode` stays the ladder, which is what the review is filed under."""
     rung = grammar_ladder.rung_of(progress)
     for base in grammar_ladder.chain_for(rung):
         sub = MODES[_LADDER_MODES[base]]
@@ -158,6 +158,9 @@ def _build_ladder_card(entry: dict, level: str, grammar_list: list[dict], m: Mod
         card["mode"] = m.key
         card["exercise"] = sub.key
         card["rung"] = rung
+        # The rung of the exercise asked, which a point that cannot be
+        # asked on its own rung falls below (plan 190): the strip names it.
+        card["asked"] = grammar_ladder.RUNG_OF_BASE[base]
         return card
     return None
 

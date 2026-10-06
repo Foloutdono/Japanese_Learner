@@ -14383,19 +14383,22 @@
         "jp": "この漢字の読み方が分かりません。",
         "en": "I do not know how to read this kanji.",
         "fr": "Je ne sais pas comment se lit ce kanji.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "料理の作り方を教えてください。",
         "en": "Please teach me how to cook the dish.",
         "fr": "Apprenez-moi à préparer ce plat, s'il vous plaît.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "このきかいの使い方を教えてもらえませんか。",
         "en": "Could you show me how to use this machine?",
         "fr": "Pourriez-vous me montrer comment utiliser cette machine ?",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "いい勉強の仕方を知りたいです。",
@@ -18924,25 +18927,29 @@
         "jp": "ここに入るなと言われた。",
         "en": "I was told not to come in here.",
         "fr": "On m'a dit de ne pas entrer ici.",
-        "register": "casual"
+        "register": "casual",
+        "contrast": true
       },
       {
         "jp": "そんなことを言うな。",
         "en": "Don't say things like that.",
         "fr": "Ne dis pas des choses pareilles.",
-        "register": "casual"
+        "register": "casual",
+        "contrast": true
       },
       {
         "jp": "あぶないから、さわるな。",
         "en": "It's dangerous, don't touch it.",
         "fr": "C'est dangereux, n'y touche pas.",
-        "register": "casual"
+        "register": "casual",
+        "contrast": true
       },
       {
         "jp": "父に夜おそく帰るなと言われました。",
         "en": "My father told me not to come home late at night.",
         "fr": "Mon père m'a dit de ne pas rentrer tard le soir.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       }
     ],
     "tour": {
@@ -19891,19 +19898,22 @@
         "jp": "母のやさしさを思い出した。",
         "en": "I remembered my mother's kindness.",
         "fr": "Je me suis rappelé la gentillesse de ma mère.",
-        "register": "casual"
+        "register": "casual",
+        "contrast": true
       },
       {
         "jp": "このへやの広さはどのくらいですか。",
         "en": "How big is this room?",
         "fr": "Quelle est la superficie de cette pièce ?",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "東京の人の多さにおどろきました。",
         "en": "I was surprised at how many people there are in Tokyo.",
         "fr": "J'ai été surpris par la foule à Tokyo.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       }
     ],
     "tour": {
@@ -20073,7 +20083,8 @@
         "jp": "父は今、仕事中です。",
         "en": "My father is at work right now.",
         "fr": "Mon père est au travail en ce moment.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "一日中、家で本を読んでいました。",
@@ -20085,7 +20096,8 @@
         "jp": "田中さんは今、電話中です。",
         "en": "Tanaka is on the phone right now.",
         "fr": "Tanaka est au téléphone en ce moment.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "この歌は世界中で歌われています。",

@@ -14809,7 +14809,8 @@
         "jp": "科学的に考えましょう。",
         "en": "Let's think scientifically.",
         "fr": "Réfléchissons de façon scientifique.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "きほん的に、日曜日は休みです。",
@@ -14821,7 +14822,8 @@
         "jp": "もっと具体的に説明してください。",
         "en": "Please explain more concretely.",
         "fr": "Expliquez plus concrètement, s'il vous plaît.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       }
     ],
     "tour": {
@@ -19747,25 +19749,29 @@
         "jp": "この町は急速に都市化した。",
         "en": "This town urbanised rapidly.",
         "fr": "Cette ville s'est urbanisée rapidement.",
-        "register": "neutral"
+        "register": "neutral",
+        "contrast": true
       },
       {
         "jp": "世界の国々の国際化が進んでいる。",
         "en": "The internationalisation of the world's countries is advancing.",
         "fr": "L'internationalisation des pays du monde progresse.",
-        "register": "neutral"
+        "register": "neutral",
+        "contrast": true
       },
       {
         "jp": "工場の作業を自動化する計画だ。",
         "en": "The plan is to automate the work in the factory.",
         "fr": "Le projet est d'automatiser le travail à l'usine.",
-        "register": "neutral"
+        "register": "neutral",
+        "contrast": true
       },
       {
         "jp": "日本では少子化が進んでいます。",
         "en": "In Japan, the birth rate keeps falling.",
         "fr": "Au Japon, la baisse de la natalité progresse.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       }
     ],
     "tour": {

@@ -25580,8 +25580,9 @@ button.brd-stn { cursor: pointer; }
 .tour-reply__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 600; }
 
 /* 梯子 — the grammar ladder (plan 187e). The strip over a ladder card:
-   four rungs in the line's pigment, those passed filled, the one the
-   card stands on named in the line's ink. */
+   four rungs in the line's pigment, filled up to the one the card stands
+   on, the one whose exercise it is asked named in the line's ink -- below
+   the card's own where it falls back (plan 190). */
 .lad-strip {
   list-style: none;
   margin: 0 0 var(--sp-3);
@@ -25595,7 +25596,7 @@ button.brd-stn { cursor: pointer; }
 .lad-strip__rung { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
 .lad-strip__bar { height: 3px; border-radius: var(--r-pill); background: var(--surface-line); }
 .lad-strip__rung--passed .lad-strip__bar,
-.lad-strip__rung--here .lad-strip__bar { background: var(--line-color); }
+.lad-strip__rung--at .lad-strip__bar { background: var(--line-color); }
 .lad-strip__name {
   font-size: var(--fs-caption-xs);
   color: var(--text-secondary);
