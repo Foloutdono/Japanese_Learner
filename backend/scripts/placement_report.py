@@ -43,17 +43,31 @@ kanji ranks by (its form or UniDic's lemma for it, its reading) -- the
 pair, never the lemma alone, so a homophone inherits nothing; a
 kana-only card by its reading. A compound the deck teaches as one card
 (日曜日) is unranked here when the subtitles cut it, and keeps its place
-among the unranked. Two limits worth knowing: a bare stem the
-subtitles count as a token (言, 知) cannot be lemmatised out of context
-and ranks as the noun it also is; and UniDic files spelling variants
-under one lemma (診る, 観る under 見る; 帰る under 返る), so a variant
-card the subtitles never write carries its group's rank. The one stem
-put right is the one that cost a card: the subtitles cut ください and
-もらう before their endings, and くださ, 下さ and もら alone are 下す and
-盛る to UniDic, so every "please" ranked 下す "to hand down" 92nd
+among the unranked.
+
+A card ranks on the surfaces that write it, not on the whole of its
+word's count (card_rank; the content audit's #256). The list is cut
+into morphemes, not words -- 教えて is 教え + て, 言って 言 + っ + て --
+and UniDic, reading each piece alone, filed pieces under words they are
+not: the first card of the first tier was a kana で glossed "outflow",
+ranked on the て-form; 仕様 took the surface しょ, 診る 見る's 見, 嗚呼
+the kana ああ, 持ち 持つ's 持, while する, こと and 教える stood past
+3,000th. So a kanji card takes its own kanji (and a kana surface only
+where no kana card teaches the word), a kana card the kana spelled or
+filed its way, and a verb the stem it was cut to. Limits that stay: a
+lone kanji stem UniDic reads as a noun of its own (作 さく, 住 じゅう,
+判 はん; 話 はなし, which is mostly the noun) cannot be told from the
+verb's; a lone kanji stem read the verb's way (死 し, 歌 うた) counts for
+noun and verb alike; a suffix ranks as the noun it also is (〜的 as 的
+まと); and a noun written as an ichidan stem (答え, 考え) gives all of it
+to the verb, since the list cannot say how much is the noun. The other
+stem put right is the one that cost a card: the subtitles cut ください
+and もらう before their endings, and くださ, 下さ and もら alone are 下す
+and 盛る to UniDic, so every "please" ranked 下す "to hand down" 92nd
 (FRAGMENTS, plan 153).
 """
 import argparse
+import bisect
 import collections
 import json
 import os
@@ -107,7 +121,17 @@ FRAGMENTS = {
 }
 
 
-def ranking() -> dict[tuple[str, str], int]:
+class Ranking(dict):
+    """(lemma, reading) -> rank, as a plain dict, carrying what each
+    word's count was made of: `surfaces`, (lemma, reading) -> Counter of
+    the subtitle surfaces summed into it. card_rank reads them, since a
+    word's bucket is not all the card's word (#256): 仕様 took 19,242 of
+    its 19,992 from the surface しょ, 持ち every 持 of 持つ, 診る every 見
+    of 見る."""
+    surfaces: dict[tuple[str, str], collections.Counter]
+
+
+def ranking() -> Ranking:
     """(lemma, reading) -> rank, from the subtitle surfaces summed per
     word. Needs the tokenizer; raises when it is missing, since a
     ranking that silently ranks nothing would order the deck by
@@ -115,7 +139,7 @@ def ranking() -> dict[tuple[str, str], int]:
     from study import morphology
     if not morphology.MORPHOLOGY_AVAILABLE:
         raise RuntimeError("the ranking needs fugashi + unidic-lite (pip install fugashi unidic-lite)")
-    counts: collections.Counter = collections.Counter()
+    surfaces: dict[tuple[str, str], collections.Counter] = collections.defaultdict(collections.Counter)
     with open(FREQUENCY_SOURCE, encoding="utf-8") as f:
         for line in f:
             parts = line.split()
@@ -123,7 +147,7 @@ def ranking() -> dict[tuple[str, str], int]:
                 continue
             surface, count = parts[0], int(parts[1])
             if surface in FRAGMENTS:
-                counts[FRAGMENTS[surface]] += count
+                surfaces[FRAGMENTS[surface]][surface] += count
                 continue
             morphemes = morphology.tokenize(surface)
             if not morphemes or len(morphemes) != 1:
@@ -131,64 +155,171 @@ def ranking() -> dict[tuple[str, str], int]:
             m = morphemes[0]
             if m.pos not in CONTENT_POS:
                 continue
-            counts[(m.lemma, m.lemma_reading)] += count
-    return {key: i + 1 for i, (key, _) in enumerate(counts.most_common())}
+            surfaces[(m.lemma, m.lemma_reading)][surface] += count
+    totals = collections.Counter({key: sum(c.values()) for key, c in surfaces.items()})
+    rank = Ranking({key: i + 1 for i, (key, _) in enumerate(totals.most_common())})
+    rank.surfaces = dict(surfaces)
+    return rank
+
+
+def _kanji_of(text: str) -> str:
+    return "".join(ch for ch in text if "\u4e00" <= ch <= "\u9fff" or ch == "々")
+
+
+def _inflects(form: str) -> bool:
+    """A verb or adjective written in its dictionary form -- not a noun
+    UniDic reads as one's 連用形 (持ち, 行き)."""
+    from study import morphology
+    morphemes = morphology.tokenize(form)
+    return (bool(morphemes) and len(morphemes) == 1 and morphemes[0].pos in ("verb", "adjective")
+            and morphemes[0].cform.startswith("終止形"))
 
 
 def _lookups(rank):
-    """(by lemma, by reading, the deck's written forms). By reading is
-    every ranked word read that way, best first, so a kana-only card
-    can take the best of the words that are not a kanji card the deck
-    teaches separately."""
-    by_lemma: dict[str, int] = {}
-    by_reading: dict[str, list[tuple[int, str]]] = collections.defaultdict(list)
-    for (lemma, reading), r in rank.items():
-        by_lemma.setdefault(lemma, r)
-        by_reading[reading].append((r, lemma))
-    forms = {e["kanji"] for es in deck().values() for e in es if e.get("kanji")}
-    return by_lemma, dict(by_reading), forms
+    """What card_rank reads beside the ranking, built once per run.
+
+    Every surface's count, and the deck's own shape, which decides what
+    a surface is: the
+    readings its kana-only cards are written in (a kana surface is that
+    card's, not a kanji card's -- ああ is the N4 ああ, never 嗚呼), the
+    spellings MOVES folded into a card, and its verbs' stems -- the
+    subtitles cut a verb before its ending, so 教え, 言 and 死 are what is
+    left of 教える, 言う and 死ぬ."""
+    from study import morphology
+    cards = [e for es in deck().values() for e in es]
+    forms = {e["kanji"] for e in cards if e.get("kanji")}
+    kanas = {morphology.kata_to_hira(r.strip()) for e in cards if not e.get("kanji")
+             for r in (e.get("kana") or "").split("/") if r.strip()}
+    folded: dict[str, list[tuple[str, str]]] = collections.defaultdict(list)
+    for card_id, pairs in FOLDED_FORMS.items():
+        key = "::".join(card_id.split("_", 2)[2].rsplit("_", 1))
+        folded[key].extend(pairs)
+        kanas.update(morphology.kata_to_hira(r.strip()) for f, kana in pairs if not f
+                     for r in kana.split("/") if r.strip())
+    # A kana surface is a kana card's when it is spelled the card's way
+    # (じゃあ, filed under the て-form's で) or is the cut stem of a word
+    # read that way (おいし for おいしい) -- never a lone kana, which is a
+    # fragment (ま, filed under まあ, is every ます and ましょう), nor a
+    # word UniDic merely files there (よう under 良く).
+    by_surface: collections.Counter = collections.Counter()
+    by_kana: dict[str, set[str]] = collections.defaultdict(set)
+    read_as: dict[str, str] = {}
+    for (_, reading), bucket in getattr(rank, "surfaces", {}).items():
+        for surface, n in bucket.items():
+            by_surface[surface] += n
+            read_as[surface] = reading
+            spelled = morphology.kata_to_hira(surface)
+            if not _kanji_of(surface) and len(spelled) > 1:
+                by_kana[spelled].add(surface)
+                if reading.startswith(spelled):
+                    by_kana[reading].add(surface)
+    # Each verb's stem as the subtitles cut it (教え for 教える, 言 for
+    # 言う, 死 for 死ぬ), where it is that verb's: a stem ending in kana
+    # always is -- 教え is every 教えて and 教えた, so a noun the deck
+    # writes the same way with the verb's reading gives it up -- and a
+    # stem that is a kanji alone is when no card is written that way or
+    # UniDic reads it as the verb does (死 し, 歌 うた, both then counted
+    # for noun and verb alike), not when a card makes it another word
+    # (為 ため is no する, 話 はなし no はなす, 上 かみ no のぼる).
+    verb_stems: dict[str, str] = {}
+    noun_stems: set[tuple[str, str]] = set()
+    for e in cards:
+        form = e.get("kanji") or ""
+        if not (len(form) > 1 and not _kanji_of(form[-1]) and _kanji_of(form[:-1]) and _inflects(form)):
+            continue
+        stem = form[:-1]
+        if stem not in by_surface:
+            continue
+        for r in (e.get("kana") or "").split("/"):
+            if not r.strip():
+                continue
+            stem_reading = morphology.kata_to_hira(r.strip())[:-1]
+            if not _kanji_of(stem[-1]):
+                verb_stems[_key(e)] = stem
+                noun_stems.add((stem, stem_reading))
+            elif stem not in forms or read_as.get(stem) == stem_reading:
+                verb_stems[_key(e)] = stem
+    totals = sorted(sum(c.values()) for c in getattr(rank, "surfaces", {}).values())
+    return (forms, kanas, dict(folded), by_surface, dict(by_kana), verb_stems, noun_stems, totals)
+
+
+def _rank_of(count: int, totals: list[int]) -> int | None:
+    """Where a count would stand among the ranking's words."""
+    if count <= 0:
+        return None
+    return len(totals) - bisect.bisect_right(totals, count) + 1
 
 
 def card_rank(entry: dict, rank, lookups=None) -> int | None:
-    """The best rank the card's own word reaches.
+    """Where the card's own word would stand in the ranking: the count
+    of the subtitle surfaces that write it, ranked among the words.
 
-    A card written with kanji is matched by its written form and by
-    UniDic's lemma for it, paired with its own readings where the
-    ranking has the pair; never by reading alone, which would hand
-    every homophone the commonest word's rank (琴 is not こと's rank 1,
-    刷る not する's rank 2). A kana-only card has only its reading: it
-    matches a kana lemma exactly, and otherwise the best ranked word
-    read that way whose lemma is not a kanji card the deck teaches on
-    its own (あなた is 貴方's rank, この is 此の's; し is nobody's, since
-    死 and 詩 are cards)."""
+    A card written with kanji takes the buckets of its written form and
+    of UniDic's lemma for it, paired with its own readings -- never a
+    reading alone, which would hand every homophone the commonest
+    word's rank (琴 is not こと's rank 1, 刷る not する's rank 2) -- and
+    of those buckets only the surfaces that write the card (#256): the
+    same kanji (診る takes nothing of 見る's 見, 速い nothing of 早い's
+    早), the whole word for one that does not inflect (持ち takes no 持,
+    the stem of 持つ), and its kana surfaces only where no kana-only
+    card teaches the word (ああ is the N4 ああ's, not 嗚呼's; する the N5
+    する's, not 為る's) and, for a word that does not inflect, only
+    spelled as it reads (しょ is no spelling of 仕様). A verb also takes
+    the stem the subtitles cut it to (教え for 教える, 言 for 言う), and
+    a noun written as such a stem with the verb's reading gives it up.
+    A kana-only card takes the kana surfaces spelled its way or cut from
+    a word read its way, whatever word UniDic files them under (する
+    under 為る, こと under 事, おいし under 美味しい), and the kanji
+    spellings MOVES folded into it (美味しい into おいしい) -- but never a
+    lone kana, so a card of one kana ranks on nothing: the ranked で is
+    the て-form's, not the noun 出."""
     from study import morphology
-    _, by_reading, forms = lookups or _lookups(rank)
-    found = []
+    lookups = lookups or _lookups(rank)
+    (forms, kanas, folded, by_surface, by_kana, verb_stems, noun_stems, totals) = lookups
+    surfaces_of = getattr(rank, "surfaces", {})
     form = entry.get("kanji") or ""
-    readings = [r.strip() for r in (entry.get("kana") or "").replace(";", "/").split("/") if r.strip()]
-    if form and " " not in form:
-        lemmas = [form]
-        morphemes = morphology.tokenize(form)
-        if morphemes and len(morphemes) == 1 and morphemes[0].lemma != form:
+    readings = [morphology.kata_to_hira(r.strip())
+                for r in (entry.get("kana") or "").replace(";", "/").split("/") if r.strip()]
+    key = _key({"kanji": form, "kana": entry.get("kana") or ""})
+    credited: set[str] = set()
+    own = [form] if form and " " not in form else []
+    writings = own + [f for f, _ in folded.get(key, ()) if f]
+    if not own:
+        credited.update(s for r in readings for s in by_kana.get(r, ()))
+    if writings:
+        lemmas = list(writings)
+        morphemes = morphology.tokenize(writings[0])
+        if morphemes and len(morphemes) == 1 and morphemes[0].lemma != writings[0]:
             lemmas.append(morphemes[0].lemma)
-        # The pair, never the lemma alone: 来る read きたる is not the
-        # N5 来る (くる), 人 read じん not 人 (ひと).
-        found = [rank.get((lemma, morphology.kata_to_hira(r))) for lemma in lemmas for r in readings]
-    elif readings:
-        for reading in readings:
-            folded = morphology.kata_to_hira(reading)
-            exact = rank.get((reading, folded)) or rank.get((folded, folded))
-            if exact:
-                found.append(exact)
-            else:
-                # The best word read that way whose lemma is not a kanji
-                # card of its own: あなた takes 貴方's rank, この 此の's;
-                # し takes nothing, since 死 and 詩 are cards.
-                others = [r for r, lemma in by_reading.get(folded, []) if lemma not in forms]
-                if others:
-                    found.append(min(others))
-    found = [r for r in found if r]
-    return min(found) if found else None
+        inflects = _inflects(writings[0])
+
+        def writes(surface: str, lemma: str, reading: str) -> bool:
+            kanji = _kanji_of(surface)
+            if not kanji:
+                # Not another card's kana: 見る's みる is no spelling of 診る.
+                if not own or reading in kanas or (lemma not in writings and lemma in forms):
+                    return False
+                spelled = morphology.kata_to_hira(surface)
+                if len(spelled) < 2:
+                    return False
+                return spelled in readings or (inflects and any(r.startswith(spelled) for r in readings))
+            for w in writings:
+                if kanji != _kanji_of(w):
+                    continue
+                if inflects or bool(_kanji_of(surface[-1])) == bool(_kanji_of(w[-1])):
+                    return True
+            return False
+
+        for lemma in lemmas:
+            for reading in readings:
+                for surface in surfaces_of.get((lemma, reading), ()):
+                    if writes(surface, lemma, reading):
+                        credited.add(surface)
+        if key in verb_stems:
+            credited.add(verb_stems[key])
+        if not inflects:
+            credited -= {form for r in readings if (form, r) in noun_stems}
+    return _rank_of(sum(by_surface[s] for s in credited), totals)
 
 
 def ordered_keys(rank=None) -> list[str]:
