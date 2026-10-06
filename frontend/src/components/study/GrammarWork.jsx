@@ -14,14 +14,19 @@ import { FuriganaParts } from './Readings'
 // has (onDone), and the learner rates themselves on the run's bar
 // (ADR 0013): the exercise says what happened, never the grade.
 
-/** The card's four rungs, the one it stands on lit. */
-export function LadderStrip({ rung }) {
+/** The card's four rungs: filled up to the one it stands on, the one
+ *  whose exercise it is asked named. The two part where a point cannot
+ *  be asked on its own rung and falls back (plan 190): a particle on
+ *  Choose with no sentence to blank is filled to Choose and names
+ *  Recognise, the flashcard it is shown, rather than lighting a rung
+ *  the card does not ask. */
+export function LadderStrip({ rung, asked = rung }) {
   const { t } = useLang()
   return (
     <ol className="lad-strip" aria-label={t.ladAria}>
       {t.ladRungs.map((name, i) => (
-        <li key={name} className={`lad-strip__rung${i < rung ? ' lad-strip__rung--passed' : ''}${i === rung ? ' lad-strip__rung--here' : ''}`}
-            aria-current={i === rung ? 'step' : undefined}>
+        <li key={name} className={`lad-strip__rung${i < rung ? ' lad-strip__rung--passed' : ''}${i === rung ? ' lad-strip__rung--at' : ''}${i === asked ? ' lad-strip__rung--here' : ''}`}
+            aria-current={i === asked ? 'step' : undefined}>
           <span className="lad-strip__bar" aria-hidden="true" />
           <span className="lad-strip__name">{name}</span>
         </li>

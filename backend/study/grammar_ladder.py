@@ -44,6 +44,7 @@ from pathlib import Path
 from content.grammar_points_data import find
 from content.grammar_sentences_data import translation
 from study.furigana import align_sentence, mark_spans
+from study.grammar_examples import blank_span
 from study.grammar_detect import can_find
 from study.grammar_match import contains_pattern, verifiable
 from study.grammar_tour import _dictionary_form, lit_spans
@@ -56,6 +57,8 @@ RUNGS = ("recognise", "choose", "build", "write")
 # The exercise each rung asks, by the mode's base, and the bases each one
 # falls back through, highest first (study/modes.py's names).
 FLASHCARD, FILL_IN, CONTRAST, BUILD, WRITE = "flashcard", "fill_in", "contrast", "build", "write"
+# The snapshot's third list: the points the detector blanks (can_blank).
+BLANK = "blank"
 _CHAIN = (FLASHCARD, FILL_IN, CONTRAST, BUILD, WRITE)
 # The rung an exercise stands for: the flashcard, a fallback, is rung 0's.
 RUNG_OF_BASE = {FLASHCARD: 0, FILL_IN: 0, CONTRAST: 1, BUILD: 2, WRITE: 3}
@@ -157,14 +160,17 @@ def _build_sentences(level: str, pattern: str) -> tuple:
     if found is None or found[0] != level:
         return ()
     entry = found[1]
-    if not verifiable(pattern) or not entry.get("compare"):
+    if not entry.get("compare"):
         return ()
+    checkable = verifiable(pattern)
     out = []
     for i, example in enumerate(entry.get("examples", [])):
         jp = example.get("jp") or ""
         if not example.get("contrast") or not jp:
             continue
-        spans = lit_spans(jp, pattern, level)
+        # A point the stems cannot point at (a bare particle, plan 190) is
+        # the piece the detector finds once, as the contrast drill blanks.
+        spans = lit_spans(jp, pattern, level) if checkable else [s for s in [blank_span(jp, pattern, level)] if s]
         if len(spans) != 1:
             continue
         span = tuple(spans[0])
@@ -287,6 +293,18 @@ def _write_examples(level: str, pattern: str) -> tuple:
     return tuple(out)
 
 
+def can_blank(level: str, pattern: str) -> bool:
+    """Whether the contrast drill can be drawn for a point the stems cannot
+    point at (a bare particle, plan 190): it compares something and the
+    detector blanks one of its marked sentences (blank_span). False for a
+    verifiable point, which card_index.contrast_ok answers on its own."""
+    found = find(pattern)
+    if verifiable(pattern) or found is None or found[0] != level or not found[1].get("compare"):
+        return False
+    return any(blank_span(ex.get("jp") or "", pattern, level)
+               for ex in found[1].get("examples", []) if ex.get("contrast"))
+
+
 def can_write(level: str, pattern: str) -> bool:
     """Whether the point can be written and checked -- the slow answer,
     as can_build. write_ok() reads it from the snapshot."""
@@ -296,7 +314,9 @@ def can_write(level: str, pattern: str) -> bool:
 # ── The snapshot ──────────────────────────────────────────────
 # Asking can_build and can_write of all 545 points takes some twelve
 # seconds -- the detector over every example -- and the card index asks
-# them of every point to count the two platforms' totals. So the answers
+# them of every point to count the two platforms' totals. `blank` is the
+# same for the contrast drill's points the stems cannot blank (can_blank,
+# plan 190), which the index asks of every point too. So the answers
 # are written down: content/grammar/ladder.json, which
 # `python -m scripts.build_ladder_flags` rewrites after a catalogue change
 # and tests/test_grammar_ladder.py holds equal to what the two compute.
@@ -321,6 +341,7 @@ def snapshot_now() -> dict[str, dict[str, list[str]]]:
         level: {
             BUILD: [e["pattern"] for e in entries if can_build(level, e["pattern"])],
             WRITE: [e["pattern"] for e in entries if can_write(level, e["pattern"])],
+            BLANK: [e["pattern"] for e in entries if can_blank(level, e["pattern"])],
         }
         for level, entries in GRAMMAR_POINTS_BY_LEVEL.items()
     }
@@ -332,6 +353,10 @@ def build_ok(level: str, pattern: str) -> bool:
 
 def write_ok(level: str, pattern: str) -> bool:
     return pattern in _snapshot().get(level, {}).get(WRITE, ())
+
+
+def blank_ok(level: str, pattern: str) -> bool:
+    return pattern in _snapshot().get(level, {}).get(BLANK, ())
 
 
 def write_payload(level: str, entry: dict, lang: str, rng: random.Random | None = None) -> dict | None:

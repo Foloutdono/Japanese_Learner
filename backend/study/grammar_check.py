@@ -22,7 +22,7 @@ from content.grammar_points_data import (
     GRAMMAR_POINTS_BY_LEVEL, LEVELS, RICH_LEVELS, find,
 )
 from study.furigana import is_kanji
-from study.grammar_examples import KANA_READING, pattern_furigana
+from study.grammar_examples import KANA_READING, blank_span, pattern_furigana
 from study.grammar_match import contains_pattern, verifiable
 from study.grammar_sentence_gen import check_sentence
 from study.llm_shared import sentence_kanji_ok
@@ -403,14 +403,18 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
                 out.append(f"{tag}: example {i} contrast must be true or absent")
             if not rivals:
                 out.append(f"{tag}: example {i} is a contrast example but the point compares nothing")
-            if not verifiable(pattern):
-                out.append(f"{tag}: example {i} is a contrast example but {pattern!r} cannot be blanked")
+            if not verifiable(pattern) and blank_span(jp, pattern, level) is None:
+                # A bare particle is blanked where the detector finds it
+                # (plan 190): once, on one piece, or not at all.
+                out.append(f"{tag}: example {i} is a contrast example but the detector does not find "
+                           f"{pattern!r} in it exactly once, so it cannot be blanked")
             for rp in checkable_rivals:
                 if contains_pattern(jp, rp):
                     out.append(f"{tag}: example {i} also contains rival {rp!r}, so the drill would have two answers")
-    # A bare particle or a class label (は, い形容詞／な形容詞) cannot be
-    # blanked, so the drill never draws it; its lesson still names the
-    # neighbours, it just marks no sentence for them.
+    # A bare particle or a class label (は, い形容詞／な形容詞) is not held
+    # to a contrast example: its letters point at nothing, so only the
+    # detector can blank it (plan 190), and only a sentence its rivals
+    # cannot stand in is worth marking -- は, が and も share too many.
     if rich and rivals and verifiable(pattern) and not any(ex.get("contrast") for ex in examples if isinstance(ex, dict)):
         out.append(f"{tag}: compares {len(rivals)} rival(s) but marks no contrast example")
     if rich and not rivals:
@@ -442,6 +446,7 @@ def report(levels=LEVELS) -> dict[str, dict]:
     """Per level: how much of the catalogue is written, for the authoring
     loop and for the README's coverage table."""
     from content.grammar_sentences_data import contrast_examples
+    from study.grammar_ladder import can_blank
     out = {}
     for level in levels:
         entries = GRAMMAR_POINTS_BY_LEVEL.get(level, [])
@@ -453,7 +458,8 @@ def report(levels=LEVELS) -> dict[str, dict]:
             "with_compare": sum(1 for e in entries if e.get("compare")),
             "contrast_ok": sum(
                 1 for e in entries
-                if verifiable(e["pattern"]) and e.get("compare") and contrast_examples(level, e["pattern"])
+                if (verifiable(e["pattern"]) and e.get("compare") and contrast_examples(level, e["pattern"]))
+                or can_blank(level, e["pattern"])
             ),
             "fill_ok": sum(1 for e in entries if verifiable(e["pattern"]) and e.get("examples")),
             "fr_pending": sum(1 for e in entries if _fr_pending(e)),

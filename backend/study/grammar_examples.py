@@ -12,8 +12,11 @@ dictionary's ExampleSentence render).
 
 The span is a surface-form match, the same one study/grammar_match uses
 to decide a sentence contains its pattern at all: the first hit of the
-longest stem. A bare particle has no verifiable stem, so it gets no span
--- shown whole, never blanked (grammar_match.verifiable says why).
+longest stem. A bare particle has no verifiable stem, so its letters
+point at nothing -- the を of 毎あさパンを食べます is not found by looking
+for を. The contrast drill's blank reads it off the detector instead
+(blank_span, plan 190): where the detector finds the point once, on one
+piece, that piece is the blank; anywhere else the sentence is not drawn.
 
 The pattern itself is drawn the same way, as furigana parts
 (pattern_furigana): 〜の中で is 〜の, 中 read なか, で. Its reading is
@@ -35,6 +38,7 @@ from functools import lru_cache
 from content.grammar_points_data import find
 from content.grammar_sentences_data import translation
 from study.furigana import align_deck, align_sentence, is_kanji, mark_spans
+from study.grammar_detect import hits
 from study.grammar_match import stems, verifiable
 
 BLANK = "＿＿＿"
@@ -50,6 +54,26 @@ def highlight_span(jp: str, pattern: str) -> tuple[int, int] | None:
         if at >= 0:
             return at, at + len(stem)
     return None
+
+
+def blank_span(jp: str, pattern: str, level: str) -> tuple[int, int] | None:
+    """[start, end) of what the contrast drill blanks in `jp`.
+
+    A verifiable pattern is blanked where its stems are (highlight_span).
+    One the stems cannot point at -- a bare particle, a one-character
+    suffix (plan 190) -- is blanked where the grammar detector finds it,
+    and only when it finds it exactly once, on one piece: the を of
+    パンを食べます, never one of the two を of a sentence with two, and
+    never 〜か〜か, which is written on two."""
+    if verifiable(pattern):
+        return highlight_span(jp, pattern)
+    if not jp:
+        return None
+    found = [h for h in hits(jp) if (h["pattern"], h["level"]) == (pattern, level)]
+    if len(found) != 1 or len(found[0]["segments"]) != 1:
+        return None
+    start, end = found[0]["segments"][0]
+    return start, end
 
 
 def parts_with_span(jp: str, span: tuple[int, int] | None, mark: str) -> list[dict]:
@@ -82,8 +106,8 @@ def parts_with_span(jp: str, span: tuple[int, int] | None, mark: str) -> list[di
 
 @lru_cache(maxsize=4096)
 def _payload(jp: str, en: str, fr: str, register: str | None, contrast: bool,
-             pattern: str, lang: str, blank: bool) -> dict:
-    span = highlight_span(jp, pattern)
+             pattern: str, lang: str, blank: bool, level: str | None = None) -> dict:
+    span = blank_span(jp, pattern, level) if blank and level else highlight_span(jp, pattern)
     payload = {
         "jp": jp,
         "tr": translation({"en": en, "fr": fr}, lang),
@@ -110,11 +134,13 @@ def example_payload(example: dict, pattern: str, lang: str) -> dict:
     ))
 
 
-def blanked_payload(example: dict, pattern: str, lang: str) -> dict:
-    """{jp, tr, furigana (with the pattern as one blank part), ...}."""
+def blanked_payload(example: dict, pattern: str, lang: str, level: str | None = None) -> dict:
+    """{jp, tr, furigana (with the pattern as one blank part), ...}. With
+    the point's `level`, a pattern the stems cannot point at is blanked
+    where the detector finds it (blank_span)."""
     return _frozen(_payload(
         example["jp"], example.get("en", ""), example.get("fr", ""),
-        example.get("register"), bool(example.get("contrast")), pattern, lang, True,
+        example.get("register"), bool(example.get("contrast")), pattern, lang, True, level,
     ))
 
 
