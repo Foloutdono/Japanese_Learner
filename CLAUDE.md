@@ -1687,7 +1687,18 @@ runtime purpose. Two consequences worth knowing:
   derived from the catalogue and the twist and the scene an authored
   `tour` block; the reviews on one `grammar.ladder` track whose exercise
   climbs with the card's progress; the lesson text kept as the plate.
-  When starting a new wave, begin at **188** or higher, and check
+  **188** is what the tours found, the grammar detector's follow-up to
+  187g: the forms of a point its drafters met unfound, and the false
+  finds, read by what the tokenizer names -- the `structure` line's kinds
+  of word and verb form (`_structure`), the other register and the spoken
+  contractions (`_registered`), a compound's second half by lemma
+  (`_COMPOUNDS`), the volitional as one word or a stem and よう, 〜ものを,
+  〜か〜か with one か, a rule's two pieces (`_pieces`) -- each pinned with
+  its counter-case (cited in `study/grammar_detect.py`,
+  `study/analysis.py`'s `LOCAL_REV` 12, `content/grammar/ladder.json`,
+  `tests/test_grammar_precision.py`'s `TourTests` and
+  `tests/test_grammar_detect.py`).
+  When starting a new wave, begin at **189** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

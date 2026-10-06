@@ -543,6 +543,20 @@ class EveryKeyTests(unittest.TestCase):
         # Particles alone may stand across a comma.
         self.assertIn("〜は〜が", found_in("弟は今、漢字が読めます。"))
 
+    def test_what_the_structure_line_names(self) -> None:
+        """Plan 188: the kinds of word a point's `structure` line names in
+        front of it, and the one form it asks of a verb there."""
+        self.assertEqual(grammar_detect._structure("〜くせに"), (frozenset({"verb", "adjective", "auxiliary"}), "plain"))
+        self.assertEqual(grammar_detect._structure("〜っこない"), (frozenset({"verb"}), "stem"))
+        self.assertEqual(grammar_detect._structure("〜こと"), (frozenset({"verb"}), "plain"))
+        # an opener after a sentence names no word
+        self.assertEqual(grammar_detect._structure("ところが"), (frozenset(), ""))
+        # a predicate the lessons never put before it, admitted by the line
+        self.assertIn("〜くせに", found_in("若いくせに、すぐ疲れる。"))
+        # never a noun the line names: the plain 〜らしい's lessons hold the
+        # predicates, its sense-qualified sibling the nouns
+        self.assertNotIn("〜らしい", found_in("今日は春らしい、いい天気だ。"))
+
     def test_a_word_s_letters_are_its_own(self) -> None:
         self.assertNotIn("か", found_in("何匹かの猫がいた。"))
         self.assertNotIn("か", found_in("何かを取り出した。"))
@@ -563,7 +577,8 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
     should find that point in it.
 
     A ratchet, not a target. The floors are below what the module scores
-    today (94.0% of sentences, 527 of 545 points, after plan 150) so
+    today (94.0% of sentences, 527 of 545 points, after plan 150; 96.3%
+    and 533 of 545 after plan 188) so
     that ordinary catalogue edits do not fail the build, and far above
     what the substring matcher scored (77.6%) so that a regression to it
     does.
@@ -595,7 +610,7 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
     def test_a_lesson_sentence_shows_its_own_point(self) -> None:
         share = self.found / self.sentences
         self.assertGreaterEqual(
-            share, 0.93,
+            share, 0.95,
             f"detection found the point its own example was written for in "
             f"{self.found}/{self.sentences} sentences ({share:.1%})",
         )
@@ -603,7 +618,7 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
     def test_nearly_every_point_is_visible_somewhere_in_its_own_lesson(self) -> None:
         share = self.points_found / self.points
         self.assertGreaterEqual(
-            share, 0.96,
+            share, 0.97,
             f"{self.points_found}/{self.points} points were found in at least "
             f"one of their own examples ({share:.1%}) -- see the module "
             f"docstring for the four kinds that are refusals, not misses",
@@ -641,7 +656,7 @@ class CanFindTests(unittest.TestCase):
             for point in points
         )
         # A ratchet: 517 of 541 when written, 524 of 543 after plan 149,
-        # 526 of 545 after plan 150.
+        # 526 of 545 after plan 150, 532 of 545 after plan 188.
         # Lower it only when a plan lowers the figure, never to make a
         # build pass.
-        self.assertGreaterEqual(trusted, 520, f"{trusted} points trusted")
+        self.assertGreaterEqual(trusted, 528, f"{trusted} points trusted")

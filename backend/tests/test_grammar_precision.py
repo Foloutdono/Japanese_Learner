@@ -772,6 +772,211 @@ class UnseenTests(unittest.TestCase):
         self.assertEqual(pairs - covered, set())
 
 
+# Plan 188: what the tours found. Plan 187g wrote a twist and a scene for
+# every point, and its drafters met forms of a point the detector could
+# not find, and a few it found where they were not, and wrote around
+# them. Each one the tokenizer can name is read now, here beside its
+# counter-case: (sentence, point, lit?).
+TOURS = [
+    # 〜か〜か with its second か dropped between nouns, as its lesson says
+    ("電車かバスで行きます。", "〜か〜か", True),
+    ("何か食べますか。", "〜か〜か", False),
+    ("これは本ですか。", "〜か〜か", False),
+    # an adverb after a comma modifies what follows it
+    ("いいえ、ぜんぜんわかりません。", "ぜんぜん〜ない", True),
+    ("バスを待っているが、なかなか来ない。", "なかなか〜ない", True),
+    ("このパンはなかなかおいしい。", "なかなか〜ない", False),
+    # a comma right after a part closes no clause
+    ("くだものの中で、りんごがいちばん好きです。", "〜で〜がいちばん", True),
+    ("日本で友だちと会って、ラーメンがいちばんおいしかった。", "〜で〜がいちばん", False),
+    ("試験に落ちれば、それまでだ。", "〜ばそれまでだ", True),
+    # お〜する with する in the polite form; お願いします closing a request is a phrase
+    ("私がにもつをお持ちします。", "お〜になる／お〜する", True),
+    ("後で私からごれんらくします。", "お〜になる／お〜する", True),
+    ("山田さんにきっぷのよやくをおねがいしたんですが。", "お〜になる／お〜する", True),
+    ("よろしくおねがいします。", "お〜になる／お〜する", False),
+    ("お茶にします。", "お〜になる／お〜する", False),
+    # the other register of the copula
+    ("彼はもう着いているはずだ。", "〜はずです", True),
+    ("だから上手なわけですね。", "〜わけだ", True),
+    ("もう少しで電車に乗りおくれるところでした。", "〜ところだった", True),
+    ("これが友情でなくてなんでしょう。", "〜でなくてなんだろう", True),
+    ("私が好きなのはすしです。", "〜のは〜だ", True),
+    ("雨が降るそうだ。", "〜そうです", False),
+    ("雨が降りそうだった。", "〜そうです", True),
+    ("べつの電車に乗ることです。", "〜ことだ", False),
+    # and the spoken contractions
+    ("子どもじゃあるまいし、一人で行けるよ。", "〜ではあるまいし", True),
+    ("忙しくて旅行どころじゃない。", "〜どころではない", True),
+    ("そんなのむりに決まってる。", "〜に決まっている", True),
+    ("ここであそんじゃいけないよ。", "〜てはいけません", False),
+    ("ここであそんじゃいけないよ。", "〜ちゃいけない／〜じゃいけない", True),
+    # what the structure line names in front of the point
+    ("妹はこの本がほしいかもしれません。", "〜かもしれません", True),
+    ("電車がおくれているようです。", "〜ようです", True),
+    ("このレストランは高いわけではない。", "〜わけではない", True),
+    ("毎日練習しているわけだ。", "〜わけだ", True),
+    ("若いくせに、すぐ疲れる。", "〜くせに", True),
+    ("電車がおくれるようなら、電話してください。", "〜ようなら", True),
+    ("この町は静かなだけでなく、便利だ。", "〜だけでなく", True),
+    ("時間があるからといって、遊んでばかりいてはいけない。", "〜からといって", True),
+    ("若いこととて、失敗も多い。", "〜こととて", True),
+    ("この店のラーメンは日本一おいしいといっても過言ではない。", "〜といっても過言ではない", True),
+    ("驚いたのなんのって。", "〜のなんのって", True),
+    ("泣くやら笑うやら、大変だった。", "〜やら〜やら", True),
+    ("本を返しがてら、図書館で勉強した。", "〜がてら", True),
+    ("子どものためになるとあれば、何でもする。", "〜とあれば", True),
+    ("医者としても、父親としても、りっぱな人だ。", "〜としても", False),
+    ("あたたかいになりました。", "〜くなる／〜になる", False),
+    ("今日は春らしい、いい天気だ。", "〜らしい", False),
+    ("有名なところがたくさんありますね。", "ところが", False),
+    # そう, a count and ただ in front; a quotation is a noun
+    ("いつもそうとは限らない。", "〜とは限らない", True),
+    ("駅まで歩いて十分といったところだ。", "〜といったところだ", True),
+    ("この車はただ同然だった。", "〜同然", True),
+    ("「のりかえ」というのは、ほかの電車に乗ることです。", "〜というのは", True),
+    ("「のりかえ」というのは、ほかの電車に乗ることです。", "〜のは〜だ", False),
+    ("本を読むのは楽しいです。", "〜のは〜だ", False),
+    ("こちらの小さいのはどうですか。", "〜のは〜だ", False),
+    ("この部屋は昔、きっさてんとして使われていた。", "〜として", True),
+    # a closing particle after a noun
+    ("今、何時かな。", "〜かな", True),
+    # the copula's に claimed by the construction it opens
+    ("それはむりに決まっている。", "〜に決まっている", True),
+    ("大事に至らずにすんだ。", "〜に至る", True),
+    ("世界平和に役立つ。", "に", False),
+    # the lesson's own short forms and insertions
+    ("事故はあったが、けがには至りませんでした。", "〜に至る", True),
+    ("だめなら、もう一度やるまでだ。", "〜までのことだ", True),
+    ("この電車は駅までだ。", "〜までのことだ", False),
+    ("電話が来たとき、食事の最中だった。", "〜最中に", True),
+    ("最中を食べた。", "〜最中に", False),
+    # a conjugation the letters never met
+    ("いいにおいがします。", "〜がする", True),
+    ("私はおばあちゃんがするのを見た。", "〜がする", False),
+    ("音を少し強くします。", "〜くする／〜にする", True),
+    ("テレビの音、少し小さくするね。", "〜くする／〜にする", True),
+    ("静かにしてください。", "〜くする／〜にする", False),
+    ("そんな運転では事故を起こしかねません。", "〜かねない", True),
+    ("急がないと、乗りおくれかねない。", "〜かねない", True),
+    ("犯人は彼に相違ありません。", "〜に相違ない", True),
+    ("彼の絵は子どもらしくていい。", "〜らしい（典型）", True),
+    ("雨が降るらしくて、中止になった。", "〜らしい（典型）", False),
+    ("寝ているふりをしよう。", "〜ふりをする", True),
+    ("そうか。じゃあ、早めにならぼう。", "〜くなる／〜になる", False),
+    ("この映画は見る人を感動させずにはおかないでしょう。", "〜ずにはおかない", True),
+    ("明日でもさしつかえない。", "〜てもさしつかえない", True),
+    ("お茶でもいいです。", "〜てもいいです", False),
+    ("飲みものは何でもいいですよ。", "〜てもいいです", False),
+    # the causative after a 五段 verb
+    ("荷物を持たせてください。", "〜させてください", True),
+    ("会議室を使わせていただきます。", "〜させていただく", True),
+    ("写真を見せてください。", "〜させてください", False),
+    ("子どもを公園であそばせました。", "使役形 〜させる", True),
+    ("早く話せ！", "使役形 〜させる", False),
+    # the volitional, read as one word or as a stem and よう
+    ("電車に乗ろうとしたとき、ドアがしまった。", "〜ようとする", True),
+    ("電車に乗ろうと思った。", "〜ようとする", False),
+    ("番号がわからないので、電話のかけようがない。", "〜ようがない", True),
+    ("電話のしようがない。", "〜ようがない", True),
+    ("電話をかけようと思う。", "〜ようがない", False),
+    ("帰ろうにも帰れない。", "〜ようにも〜ない", True),
+    ("電話をかけようにも番号がわからない。", "〜ようにも〜ない", True),
+    ("雪で出ようにも出られない。", "〜ようにも〜ない", True),
+    ("雨が降ろうが降るまいが、出かける。", "〜ようが〜まいが", True),
+    ("彼が来ようが来るまいが、始める。", "〜ようが〜まいが", True),
+    ("何が起ころうとも、行く。", "〜ようが〜まいが", False),
+    # a compound the tokenizer files as one word, or as two verbs
+    ("早く電車に乗りこもう。", "〜こむ", True),
+    ("電車がすごくこんでいる。", "〜こむ", False),
+    ("旅行を申し込んだ。", "〜こむ", False),
+    ("みんなで助けあいましょう。", "〜あう", True),
+    ("駅で友だちにあう。", "〜あう", False),
+    ("この服は私に似合う。", "〜あう", False),
+    ("作文を書き直した。", "〜直す", True),
+    ("父が時計を直した。", "〜直す", False),
+    ("最後まで見通した。", "〜通す", True),
+    ("すみません、ちょっと通してください。", "〜通す", False),
+    ("急に雨が降り出した。", "〜出す", True),
+    ("かばんから本をとり出す。", "〜出す", True),
+    ("手紙を出した。", "〜出す", False),
+    ("昔のことを思い出した。", "〜出す", False),
+    ("今日は休みだし、映画でも見よう。", "〜出す", False),
+    ("ドアを開けかけたとき、電話が鳴った。", "〜かける", True),
+    ("読みかけの本がある。", "〜かける", True),
+    ("電話をかける。", "〜かける", False),
+    ("知らない人に話しかけた。", "〜かける", False),
+    ("きっぷの買い方を教えてください。", "〜方", True),
+    ("死ぬ方がましだ。", "〜方", False),
+    ("しかたがない。", "〜方", False),
+    ("この仕事はやりがいがある。", "〜がい", True),
+    ("働きがいのある会社だ。", "〜がい", True),
+    ("子どもたちは泥まみれになって遊んだ。", "〜まみれ", True),
+    ("手が油まみれだ。", "〜まみれ", True),
+    ("ラーメンをねぎぬきでお願いします。", "〜ぬきで", True),
+    ("朝食ぬきで出かけた。", "〜ぬきで", True),
+    ("栓抜きで開けた。", "〜ぬきで", False),
+    # a suffix after a noun, by its own letters
+    ("風が秋めいてきた。", "〜めく", True),
+    ("秋めいた日が続く。", "〜めく", True),
+    ("彼女は不安げに外を見た。", "〜げ", True),
+    ("彼は何か言いたげな顔をしていた。", "〜げ", True),
+    ("三日ぐらいいるつもりです。", "〜化", False),
+    # what the tokenizer cuts or misreads
+    ("景色と音楽が相まって、すばらしい夜になった。", "〜と相まって", True),
+    ("駅で相手を待っている。", "〜と相まって", False),
+    ("言ってくれればよかったものを。", "〜ものを", True),
+    ("早く寝ればいいものを、まだ起きている。", "〜ものを", True),
+    ("食べるものを買った。", "〜ものを", False),
+    # the three learner errors, and the forms they should have been
+    ("映画を見るに行きます。", "〜に行きます", False),
+    ("映画を見に行きます。", "〜に行きます", True),
+    ("本を読みことが好きです。", "〜こと", False),
+    ("本を読むことが好きです。", "〜こと", True),
+    ("あんな電車に乗るっこない。", "〜っこない", False),
+    ("あんな電車に乗れっこない。", "〜っこない", True),
+    ("こんなに多いと、全部覚えっこない。", "〜っこない", True),
+    # 〜ばかりだ is "keeps getting"
+    ("日本に来たばかりだ。", "〜ばかりだ", False),
+    ("日本に来たばかりだ。", "〜たばかり", True),
+    ("泣かんばかりの顔をしていた。", "〜ばかりだ", False),
+    ("値段は上がるばかりだ。", "〜ばかりだ", True),
+    # a noun + だ point's negative is another point's
+    ("高ければいいというものでもない。", "〜というものだ", False),
+    ("高ければいいというものではない。", "〜というものではない", True),
+    ("それが人生というものだ。", "〜というものだ", True),
+    ("人の話を笑うものではない。", "〜もので", False),
+    ("雨だったもので、遅れました。", "〜もので", True),
+]
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class TourTests(unittest.TestCase):
+
+    def test_every_case_the_tours_met(self) -> None:
+        for sentence, pattern, lit in TOURS:
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertEqual(pattern in found_in(sentence), lit)
+
+    def test_a_compound_noun_is_keyed_whole(self) -> None:
+        """A compound the tokenizer files as one noun carries the key on
+        the whole word, as a key never starts inside a noun."""
+        self.assertEqual(found_in("この仕事はやりがいがある。")["〜がい"], "やりがい")
+        self.assertEqual(found_in("手が油まみれだ。")["〜まみれ"], "油まみれ")
+        # ...and a verb's second half where it begins
+        self.assertEqual(found_in("早く電車に乗りこもう。")["〜こむ"], "こもう")
+
+    def test_a_point_in_two_pieces_found_by_a_rule(self) -> None:
+        hit = next(h for h in grammar_detect.hits("帰ろうにも帰れない。") if h["pattern"] == "〜ようにも〜ない")
+        self.assertEqual([("帰ろうにも帰れない。"[a:b]) for a, b in hit["segments"]], ["ろうにも", "ない"])
+        hit = next(h for h in grammar_detect.hits("私がにもつをお持ちします。") if h["pattern"] == "お〜になる／お〜する")
+        self.assertEqual([("私がにもつをお持ちします。"[a:b]) for a, b in hit["segments"]], ["お", "し"])
+
+    def test_the_compounds_and_the_letters_are_trusted(self) -> None:
+        for pattern in ("〜かける", "〜出す", "〜直す", "〜ものを"):
+            self.assertTrue(grammar_detect.can_find(pattern), pattern)
+
+
 # Read one key at a time and held exactly: a key added or lost fails.
 GOLD = {
     "足跡を辿って会いにきて": {("を", "を"), ("〜て、〜て", "て"), (REQUEST, "て"), ("〜に行きます", "にき")},
@@ -808,10 +1013,10 @@ GOLD = {
     "ここでも同じだ。": {("で", "で"), ("も", "も"), ("です／だ", "だ")},
     "彼とは十年来の知り合いだ。": {("と", "と"), ("は", "は"), ("の", "の"), ("です／だ", "だ")},
     "友情とは、困った時に助け合うことだ。": {("〜とは", "とは"), ("た形 〜た", "た"), ("〜とき", "時"), ("に", "に"),
-                                             ("〜ことだ", "ことだ"), ("です／だ", "だ")},
+                                             ("〜あう", "合う"), ("〜ことだ", "ことだ"), ("です／だ", "だ")},
     "まさか彼が犯人だとは。": {("が", "が"), ("です／だ", "だ"), ("〜とは", "とは")},
     "何とか間に合った。": {("た形 〜た", "た")},
-    "りんごとかバナナとかが好きだ。": {("〜とか", "とか"), ("が", "が"), ("〜が好きです", "が好き"), ("です／だ", "だ")},
+    "りんごとかバナナとかが好きだ。": {("〜とか", "とか"), ("が", "が"), ("〜が好きです", "が好きだ"), ("です／だ", "だ")},
     "コーヒーか紅茶か、どちらがいいですか。": {("か", "か"), ("〜か〜か", "か紅茶か"), ("が", "が"), ("です／だ", "です")},
     "何か食べましょうか。": {("何か／誰か／どこか", "何か"), ("か", "か"), ("〜ましょうか", "ましょうか")},
     "世界平和に役立つ。": set(),

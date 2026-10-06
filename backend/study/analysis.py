@@ -378,7 +378,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # verb of time spent), so it
 # reaches that card and not January's
 # (study/reading_context.py's span rule).
-LOCAL_REV = 11
+# 12: what the tours found (plan 188) -- a point read after the kinds of
+# word its structure line names (若いくせに) and never after a verb in a
+# form the line rules out (読みこと, 乗るっこない), a point in the other
+# register (はずだ, わけです) and the spoken contractions (じゃ, てる), a
+# compound's second half (乗りこもう, 書き直し, やりがい), the volitional
+# that opens 〜ようとする and its kin, and 〜ものを, 〜か〜か with one か.
+LOCAL_REV = 12
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:
