@@ -1008,7 +1008,7 @@ class ReportPayload(BaseModel):
 
 
 @router.get("/api/decks/library")
-def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
+def get_library(page: int = Query(0, ge=0), limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
                 sort: str = "new", q: str = "", type: str | None = None,
                 user_id: str = Depends(get_user_id)):
     """

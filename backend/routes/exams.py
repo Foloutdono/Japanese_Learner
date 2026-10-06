@@ -190,11 +190,11 @@ def _select_paper(exam_id: str, user_id: str, exclude: tuple[int, ...] = ()) -> 
     """The paper this user should be served for exam_id, as
     (revision, paper) -- or None if they need a new one generated.
 
-    Read-only: never generates. list_exams() and submit_attempt() both
-    go through here specifically so neither browsing the catalog nor
-    scoring an attempt can trigger full LLM generation (up to 15
-    LLM-dependent papers, each several slow calls) inside one HTTP
-    request. See list_exams()'s own comment for how the original plan
+    Read-only: never generates. list_exams() (through _select_papers)
+    and submit_attempt() both go through here specifically so neither
+    browsing the catalog nor scoring an attempt can trigger full LLM
+    generation (up to 15 LLM-dependent papers, each several slow calls)
+    inside one HTTP request. See list_exams()'s own comment for how the original plan
     already called this out: "static catalog, no materialization needed
     to list."
 
@@ -207,33 +207,46 @@ def _select_paper(exam_id: str, user_id: str, exclude: tuple[int, ...] = ()) -> 
     revision on top of that, which is how "give me a different paper"
     works for someone who opened a paper but never submitted it (no
     attempt row exists to exclude them by)."""
-    generator_version = EXAM_GENERATORS[exam_id][0]
+    return _select_papers([exam_id], user_id, exclude).get(exam_id)
+
+
+def _select_papers(exam_ids: list[str], user_id: str,
+                   exclude: tuple[int, ...] = ()) -> dict[str, tuple[int, dict]]:
+    """_select_paper for several exam ids in one query: exam_id ->
+    (revision, paper) for each id that has a paper to serve this user,
+    the ids needing a generation left out. The catalogue lists every
+    registered id, and asking per id cost it a connection and a round
+    trip each."""
+    if not exam_ids:
+        return {}
+    versions = [EXAM_GENERATORS[exam_id][0] for exam_id in exam_ids]
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT revision, paper
+                SELECT p.exam_id, p.revision, p.paper
                   FROM exam_papers p
-                 WHERE exam_id = %s
-                   AND generator_version = %s
-                   AND NOT (revision = ANY(%s))
+                  JOIN unnest(%s::text[], %s::text[]) AS g(exam_id, generator_version)
+                    ON g.exam_id = p.exam_id AND g.generator_version = p.generator_version
+                 WHERE NOT (p.revision = ANY(%s))
                    AND NOT EXISTS (
                         SELECT 1 FROM exam_attempts a
                          WHERE a.exam_id = p.exam_id
                            AND a.revision = p.revision
                            AND a.user_id = %s)
-                 ORDER BY revision
+                 ORDER BY p.exam_id, p.revision
                 """,
-                (exam_id, generator_version, list(exclude), user_id),
+                (list(exam_ids), versions, list(exclude), user_id),
             )
             # A paper stored before a check existed that it fails is
             # passed over rather than served (paper_gives_answer_away:
             # the underlined word among its own choices).
-            for revision, paper in cur:
-                if not paper_gives_answer_away(paper):
-                    return revision, paper
-            return None
+            selected: dict[str, tuple[int, dict]] = {}
+            for exam_id, revision, paper in cur:
+                if exam_id not in selected and not paper_gives_answer_away(paper):
+                    selected[exam_id] = (revision, paper)
+            return selected
     finally:
         conn.close()
 
@@ -328,7 +341,11 @@ _UNAVAILABLE_COOLDOWN_SECONDS = 900
 _STALE_RUNNING_SECONDS = 900
 
 
-def _mark_job_failed(exam_id: str, error: str, cooldown_seconds: int) -> None:
+def _mark_job_failed(exam_id: str, claimed_at, error: str, cooldown_seconds: int) -> None:
+    """Fails THIS worker's claim, and only it: `claimed_at` is the job
+    row's started_at when the worker was claimed. A worker the stale
+    reaper gave up on can still be alive, and by the time it fails the
+    row may belong to a newer claim, which it must not mark failed."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
@@ -339,18 +356,20 @@ def _mark_job_failed(exam_id: str, error: str, cooldown_seconds: int) -> None:
                        error = %s,
                        retry_after = NOW() + make_interval(secs => %s),
                        updated_at = NOW()
-                 WHERE exam_id = %s
+                 WHERE exam_id = %s AND started_at = %s
                 """,
-                (error[:2000], cooldown_seconds, exam_id),
+                (error[:2000], cooldown_seconds, exam_id, claimed_at),
             )
         conn.commit()
     finally:
         conn.close()
 
 
-def _generation_worker(exam_id: str, revision: int) -> None:
+def _generation_worker(exam_id: str, revision: int, claimed_at) -> None:
     """Runs off-request. Owns the job row from 'running' through to
-    either deleted (success) or 'failed' (with a cooldown)."""
+    either deleted (success) or 'failed' (with a cooldown) -- the row as
+    it was claimed, told by its started_at (`claimed_at`): one reclaimed
+    since as stale is another worker's, and is left alone."""
     generator_version, _kind, _level, generate = EXAM_GENERATORS[exam_id]
     seed = _seed_for(exam_id, revision)
     try:
@@ -361,11 +380,11 @@ def _generation_worker(exam_id: str, revision: int) -> None:
         paper = generate(seed)
     except LLMUnavailable as e:
         logger.error("Exam generation for %s hit a provider failure: %s", exam_id, e)
-        _mark_job_failed(exam_id, str(e), _UNAVAILABLE_COOLDOWN_SECONDS)
+        _mark_job_failed(exam_id, claimed_at, str(e), _UNAVAILABLE_COOLDOWN_SECONDS)
         return
     except GenerationFailed as e:
         logger.error("Exam generation failed for %s: %s", exam_id, e)
-        _mark_job_failed(exam_id, str(e), _FAILED_COOLDOWN_SECONDS)
+        _mark_job_failed(exam_id, claimed_at, str(e), _FAILED_COOLDOWN_SECONDS)
         return
     except Exception:  # pragma: no cover - defensive
         # Nothing else is going to catch this: an uncaught exception on
@@ -377,7 +396,7 @@ def _generation_worker(exam_id: str, revision: int) -> None:
         # "the generator's own, safe to show" (see get_exam) -- true of the
         # two branches above, and not of an arbitrary exception's str().
         logger.exception("Unexpected error generating %s", exam_id)
-        _mark_job_failed(exam_id, "Generation failed unexpectedly.", _FAILED_COOLDOWN_SECONDS)
+        _mark_job_failed(exam_id, claimed_at, "Generation failed unexpectedly.", _FAILED_COOLDOWN_SECONDS)
         return
 
     conn = db_conn()
@@ -403,7 +422,10 @@ def _generation_worker(exam_id: str, revision: int) -> None:
             # The paper row IS the success record, so the job row's work
             # is done -- see exam_schema.py's note on why there is no
             # 'done' status.
-            cur.execute("DELETE FROM exam_generation_jobs WHERE exam_id = %s", (exam_id,))
+            cur.execute(
+                "DELETE FROM exam_generation_jobs WHERE exam_id = %s AND started_at = %s",
+                (exam_id, claimed_at),
+            )
         conn.commit()
         logger.info("Exam %s revision %d generated and materialized", exam_id, revision)
     finally:
@@ -415,6 +437,8 @@ def _claim_generation(exam_id: str, revision: int) -> tuple[str, dict | None]:
     with no materialized paper. Returns (outcome, detail):
 
       'claimed'   -- this caller won the right to generate; spawn a worker
+                     (detail: {"claimedAt"}, the claim's started_at, which
+                     the worker hands back to touch only its own row)
       'running'   -- someone else is already generating it
       'cooldown'  -- the last attempt failed recently; detail says why
 
@@ -430,12 +454,14 @@ def _claim_generation(exam_id: str, revision: int) -> tuple[str, dict | None]:
                 INSERT INTO exam_generation_jobs (exam_id, revision, status)
                 VALUES (%s, %s, 'running')
                 ON CONFLICT (exam_id) DO NOTHING
+                RETURNING started_at
                 """,
                 (exam_id, revision),
             )
-            if cur.rowcount == 1:
+            inserted = cur.fetchone()
+            if inserted is not None:
                 conn.commit()
-                return "claimed", None
+                return "claimed", {"claimedAt": inserted[0]}
 
             cur.execute(
                 """
@@ -468,13 +494,15 @@ def _claim_generation(exam_id: str, revision: int) -> tuple[str, dict | None]:
                     """
                     UPDATE exam_generation_jobs
                        SET status = 'running', error = NULL, retry_after = NULL,
-                           revision = %s, started_at = NOW(), updated_at = NOW()
+                           revision = %s, started_at = clock_timestamp(), updated_at = NOW()
                      WHERE exam_id = %s
+                    RETURNING started_at
                     """,
                     (revision, exam_id),
                 )
+                claimed_at = cur.fetchone()[0]
                 conn.commit()
-                return "claimed", None
+                return "claimed", {"claimedAt": claimed_at}
 
             conn.commit()
             if status == "failed":
@@ -484,9 +512,9 @@ def _claim_generation(exam_id: str, revision: int) -> tuple[str, dict | None]:
         conn.close()
 
 
-def _start_generation(exam_id: str, revision: int) -> None:
+def _start_generation(exam_id: str, revision: int, claimed_at) -> None:
     threading.Thread(
-        target=_generation_worker, args=(exam_id, revision),
+        target=_generation_worker, args=(exam_id, revision, claimed_at),
         name=f"exam-gen:{exam_id}:r{revision}", daemon=True,
     ).start()
 
@@ -511,6 +539,7 @@ def list_exams(user_id: str = Depends(get_user_id)):
     # blueprint's names for what the paper holds) and `last` (this
     # learner's newest sitting, or null).
     last_attempts = _last_attempts(user_id)
+    served = _select_papers(list(EXAM_GENERATORS), user_id)
     out = []
     for exam_id, (_generator_version, kind, level, _generate) in EXAM_GENERATORS.items():
         label, label_jp, _types = _KIND_META[kind]
@@ -518,7 +547,7 @@ def list_exams(user_id: str = Depends(get_user_id)):
         # picker needs it both to say whether opening the exam costs a
         # wait, and to pass as `exclude` when they ask for a different
         # paper than the one they are being offered.
-        selected = _select_paper(exam_id, user_id)
+        selected = served.get(exam_id)
         if selected is not None:
             revision, paper = selected
             entry = {
@@ -597,7 +626,7 @@ def get_exam(exam_id: str, revision: int | None = None, exclude: str | None = No
     revision = _next_revision(exam_id)
     outcome, detail = _claim_generation(exam_id, revision)
     if outcome == "claimed":
-        _start_generation(exam_id, revision)
+        _start_generation(exam_id, revision, detail["claimedAt"])
     if outcome == "cooldown":
         # The error text is the generator's own, safe to show: it names
         # what could not be produced, not anything about the account.
@@ -658,6 +687,22 @@ def submit_attempt(exam_id: str, payload: SubmitAttemptPayload, user_id: str = D
     conn = db_conn()
     try:
         with conn.cursor() as cur:
+            # One fare per paper sat: a second submit of a revision this
+            # learner already has an attempt on (a retried POST, or the
+            # same answers posted again) is recorded but pays nothing,
+            # or one paper could be cashed in any number of times. The
+            # lock makes two submits racing each other count as one
+            # first and one repeat.
+            cur.execute(
+                "SELECT pg_advisory_xact_lock(hashtext(%s))",
+                (f"exam-attempt:{user_id}:{exam_id}:{revision}",),
+            )
+            cur.execute(
+                "SELECT EXISTS (SELECT 1 FROM exam_attempts"
+                " WHERE user_id = %s AND exam_id = %s AND revision = %s)",
+                (user_id, exam_id, revision),
+            )
+            first_sitting = not cur.fetchone()[0]
             cur.execute(
                 """
                 INSERT INTO exam_attempts
@@ -679,10 +724,12 @@ def submit_attempt(exam_id: str, payload: SubmitAttemptPayload, user_id: str = D
 
     # The fare for the paper: one ledger row for the attempt, each item
     # at a card's correct or wrong rate (srs.award_practice). The one
-    # practice mode whose score the server computed itself.
+    # practice mode whose score the server computed itself. Paid on the
+    # first sitting of a revision only (see the lock above).
     fare = srs.award_practice(
         user_id, "exam", str(attempt_id),
-        [4] * summary["correct"] + [1] * (summary["total"] - summary["correct"]),
+        [4] * summary["correct"] + [1] * (summary["total"] - summary["correct"])
+        if first_sitting else [],
     )
 
     return {
@@ -771,8 +818,13 @@ def get_question_study(exam_id: str, revision: int, question_id: str, lang: str 
     # Imported here: routes/reading.py seeds the comprehension pool at
     # import, which the exam router has no business triggering.
     from routes.reading import LANG_NAMES
+    # A language the app knows, or English: `lang` is written into the
+    # model's prompt and the translation cache's key, so a free string
+    # would be a paid call (and a cache row) per string anyone sends.
+    if lang not in LANG_NAMES:
+        lang = "en"
     try:
-        study = study_question(paper, question_id, lang, LANG_NAMES.get(lang, lang))
+        study = study_question(paper, question_id, lang, LANG_NAMES[lang])
     except (LLMUnavailable, GenerationFailed) as e:
         logger.warning("exam study for %s/%s/%s failed: %s", exam_id, revision, question_id, e)
         raise HTTPException(status_code=503, detail="Translation unavailable")

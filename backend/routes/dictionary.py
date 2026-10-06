@@ -975,7 +975,7 @@ def _kana_result(kind: str, entry: dict, meaning: str, lang: str,
 
 
 @router.get("/api/dictionary")
-def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=200), lang: str = "fr",
+def get_dictionary(q: str = "", page: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=200), lang: str = "fr",
                     category: str = "all", radical: int | None = None, kana: str = "",
                     level: str | None = None, id: str = "",
                     match: str = "word", field: str = "all", one: bool = False,

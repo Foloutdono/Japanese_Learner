@@ -280,10 +280,19 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
   // whenever state happens to be missing.
   const [deck, setDeck] = useState(state?.deck ?? null)
 
+  // The deck open now: an answer for a deck already swapped out (plan
+  // 154) is dropped.
+  const openDeck = useRef(deck_id)
+  openDeck.current = deck_id
+
   const loadDeck = useCallback(() => {
-    apiFetch(`/api/decks/${deck_id}`, session)
+    const id = deck_id
+    apiFetch(`/api/decks/${id}`, session)
       .then(r => r.json())
-      .then(d => { if (!d?.error) setDeck(d) })
+      // Dropped when the shelf has swapped to another deck meanwhile,
+      // as fetchCards' answers are: a slow reply must not stand the
+      // last deck's head over the next one's cards.
+      .then(d => { if (!d?.error && String(openDeck.current) === String(id)) setDeck(d) })
       .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deck_id])
@@ -497,10 +506,7 @@ export default function DeckDetailScreen({ session, deckId, pane = false, onCoun
     }
   }
 
-  // The deck the listed cards belong to, and the deck open now: an
-  // answer for a deck already swapped out (plan 154) is dropped.
-  const openDeck = useRef(deck_id)
-  openDeck.current = deck_id
+  // The deck the listed cards belong to.
   const cardsOf = useRef(null)
 
   function fetchCards() {

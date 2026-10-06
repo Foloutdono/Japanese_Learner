@@ -168,7 +168,7 @@ def list_favorite_keys(user_id: str = Depends(get_user_id)):
 
 
 @router.get("/api/dictionary/favorites")
-def list_favorites(page: int = 0, limit: int = Query(50, ge=1, le=200),
+def list_favorites(page: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=200),
                    lang: str = "fr", user_id: str = Depends(get_user_id)):
     """One page of the shelf as catalogue rows, newest first — the same
     shape /api/dictionary answers with, so the screen draws it with the
