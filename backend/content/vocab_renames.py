@@ -705,6 +705,36 @@ MOVES: dict[str, str] = {
     "vocab_N2__おはよう": "vocab_N5__おはよう",
     "vocab_N2__さようなら": "vocab_N5__さようなら",
 
+    # ── The content audit's placement run (#256) ─────────────────
+    # 出合い and 出合う are the 合 spellings of the N3 出会い and 出会う:
+    # one JMdict entry each, the same senses and the same example
+    # sentence (written 会), and 13 of the subtitles' 919 for the word.
+    # Unlike 会う/遭う, nothing tells the second card apart -- the N1
+    # 出合う's gloss was the N3 card's string with two senses more, now
+    # on the N3 card -- so they fold, 112's rule, onto the lower card.
+    "vocab_N2_出合い_であい": "vocab_N3_出会い_であい",
+    "vocab_N1_出合う_であう": "vocab_N3_出会う_であう",
+    # Everyday words the N1 shelf held two levels above the JLPT lists,
+    # each in the subtitle ranking's first 1,500 on its own spelling
+    # once the ranking reads words rather than morphemes: down to the
+    # lists' N3. 予想 is in the N3 lesson of 〜通りに (予想通り). Left at
+    # N1: 捜査 (its rank is the corpus's police dramas) and 振り, 片付け
+    # and 怒り, whose counts are their verbs' 連用形.
+    "vocab_N1_携帯_けいたい": "vocab_N3_携帯_けいたい",
+    "vocab_N1_治療_ちりょう": "vocab_N3_治療_ちりょう",
+    "vocab_N1_保護_ほご": "vocab_N3_保護_ほご",
+    "vocab_N1__メッセージ": "vocab_N3__メッセージ",
+    "vocab_N1_脳_のう": "vocab_N3_脳_のう",
+    "vocab_N1__データ": "vocab_N3__データ",
+    "vocab_N1__ルール": "vocab_N3__ルール",
+    "vocab_N1_癌_がん": "vocab_N3_癌_がん",
+    "vocab_N1_後悔_こうかい": "vocab_N3_後悔_こうかい",
+    "vocab_N1_指揮_しき": "vocab_N3_指揮_しき",
+    "vocab_N1_興奮_こうふん": "vocab_N3_興奮_こうふん",
+    "vocab_N1_自己_じこ": "vocab_N3_自己_じこ",
+    "vocab_N1_予想_よそう": "vocab_N3_予想_よそう",
+    "vocab_N1_上司_じょうし": "vocab_N3_上司_じょうし",
+
     # ── A reading the character does not have ───────────────────
     # The N1 card read 前 as せん, which is 先's on-reading: the
     # 常用漢字表 and datas/kanji/kanji.sqlite3 both give 前 ゼン and

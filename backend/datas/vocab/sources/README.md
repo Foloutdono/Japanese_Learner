@@ -23,7 +23,10 @@ Its tokens are surfaces, not words: 言, 知, 出 are verb stems, ジョン
 and サム are cast lists. `placement_report.py` runs every token through
 the tokenizer (`study/morphology`) and sums the counts per
 (lemma, reading), which turns it into a ranking of ~35,000 words; 8,400
-multi-morpheme surfaces are dropped. The derived order of the deck's own
+multi-morpheme surfaces are dropped. A card ranks on the surfaces that
+write it, and a verb on the stem the list cut it to (教え for 教える), not
+on its word's whole count -- a word's count held pieces of other words
+(the content audit's #256; `card_rank`'s docstring). The derived order of the deck's own
 keys is what `datas/vocab/vocab_frequency.json` holds (rebuilt with
 `--rebuild-order`); as a derivative of a CC BY-SA list, that file carries
 the same licence and this attribution.

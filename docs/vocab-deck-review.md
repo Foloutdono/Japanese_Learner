@@ -421,12 +421,27 @@ homophone to never inheriting a rank.
 
 Coverage: N5 485 of 675 cards ranked, N4 463 of 643, N3 1,501 of 1,816,
 N2 1,255 of 1,794, N1 2,341 of 3,476; medians 1,545 / 2,354 / 2,672 /
-8,872 / 8,334. One limit to know: UniDic normalises spelling variants
-under one lemma (診る, 観る and 看る under 見る; 帰る under 返る), so a
-variant card carries its group's rank — 診る sits in the first tier
-beside 見る. A card is matched by its own form first, so this only
-reaches a spelling the subtitles never write. If BCCWJ is ever fetched,
-the ranking half is re-based on it with the same script.
+8,872 / 8,334. If BCCWJ is ever fetched, the ranking half is re-based
+on it with the same script.
+
+**The content audit's #256** found that the ranking had been a ranking
+of morphemes reaching the learner through the 頻度 tiers: the list cuts
+教えて into 教え + て, and UniDic filed each piece under whatever it
+reads as alone, so the first card of the first tier was a kana で
+glossed "outflow" (the て-form's で), 仕様 ranked 27th on the surface
+しょ, 診る 22nd on 見る's 見, and する, こと and 教える stood past 3,000th.
+`card_rank` now counts only the surfaces that write the card — its own
+kanji, a kana spelling only where no kana card teaches the word, the
+stem the list cut a verb to — and the order was rebuilt (する 3rd, 言う
+12th, 教える 125th; で, 嗚呼, 持ち, 教え and 考え past the ranked). What it
+cannot separate is in the script's docstring: a lone kanji stem that is
+also a noun (作, 死), and a suffix (〜的). The same run folded 出合い and
+出合う onto 出会い and 出会う (one JMdict entry each, 1.4% of the
+subtitles' writing), corrected ぜんぜん's "not entirely" and 携帯's
+"carrying something", and moved fourteen everyday N1 words in the
+ranking's first 1,500 down to the lists' N3 (携帯, 治療, 保護, メッセージ,
+脳, データ, ルール, 癌, 後悔, 指揮, 興奮, 自己, 予想, 上司); 捜査 stays
+(police dramas), and so do 振り, 片付け and 怒り (their verbs' counts).
 
 The three lists are in the audit's rotation: `placement` is the fourth
 area of `scripts/audit_slice.py` (from 2026-09-21), reading

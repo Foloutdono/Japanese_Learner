@@ -71,7 +71,10 @@ class RankingTests(unittest.TestCase):
         self.assertGreater(self.rank.get(("下す", "くだす"), 10**6), report.FREQUENT_BAND)
 
     def test_the_common_words_rank_where_a_learner_would_expect(self) -> None:
-        self.assertLess(self._rank("事", "こと"), 20)
+        # こと written in kana is the N4 kana card's; 事 keeps its kanji.
+        self.assertLess(self._rank("", "こと"), 20)
+        self.assertLess(self._rank("事", "こと"), 100)
+        self.assertLess(self._rank("", "する"), 20)
         self.assertLess(self._rank("見る", "みる"), 100)
         self.assertLess(self._rank("", "あなた"), 100)
         self.assertLess(self._rank("学校", "がっこう"), 1500)
@@ -81,12 +84,48 @@ class RankingTests(unittest.TestCase):
         # (The deck's kana-only し, "10^24", does take the conjunction
         # し's rank: same spelling, no kanji to tell them apart -- a
         # card for the audit's list, not a rule for this one.)
-        koto = self._rank("事", "こと")
+        koto = self._rank("", "こと")
         for kanji, kana in (("琴", "こと"), ("刷る", "する"), ("銅", "どう")):
             with self.subTest(word=kanji or kana):
                 r = self._rank(kanji, kana)
                 self.assertTrue(r is None or r > 200, (kanji, kana, r))
         self.assertLess(koto, 20)
+
+    def test_a_card_takes_only_the_surfaces_that_write_it(self) -> None:
+        """#256: the subtitles are cut into morphemes, and a word's bucket
+        held more than the card's word -- the first card of the first
+        tier was a kana で glossed "outflow", ranked on the て-form; 仕様
+        on the surface しょ; 診る, 嗚呼 and 持ち on 見る's 見, the kana
+        ああ and 持つ's 持. Each takes only what writes it now."""
+        band = 1000
+        for kanji, kana in (("", "で"), ("仕様", "しよう"), ("診る", "みる"), ("嗚呼", "ああ"),
+                            ("持ち", "もち"), ("為る", "する"), ("点く", "つく")):
+            with self.subTest(word=kanji or kana):
+                r = self._rank(kanji, kana)
+                self.assertTrue(r is None or r > band, (kanji, kana, r))
+        # 速い ranks on its own 速, no longer on 早い's 早.
+        self.assertGreater(self._rank("速い", "はやい"), 3 * self._rank("早い", "はやい"))
+        # The word they had taken keeps it.
+        for kanji, kana in (("", "ああ"), ("見る", "みる"), ("持つ", "もつ"), ("早い", "はやい")):
+            with self.subTest(word=kanji or kana):
+                self.assertLess(self._rank(kanji, kana), 200)
+
+    def test_a_verb_takes_the_stem_the_subtitles_cut_it_to(self) -> None:
+        """#256: 教えて is 教え + て in the list, and 教え alone is the noun
+        to UniDic, so the N1 教え "teaching" stood 109th while 教える was
+        past 6,000th. A verb takes its stem; a noun written as a stem
+        ending in kana, with the verb's reading, gives it up. A lone
+        kanji stem stays the noun's too where UniDic reads it the verb's
+        way (死 し), and the noun's alone where a card makes it another
+        word (為 ため is no する)."""
+        for kanji, kana in (("教える", "おしえる"), ("考える", "かんがえる"), ("言う", "いう"), ("死ぬ", "しぬ")):
+            with self.subTest(word=kanji):
+                self.assertLess(self._rank(kanji, kana), 200)
+        for kanji, kana in (("教え", "おしえ"), ("考え", "かんがえ"), ("遅れ", "おくれ")):
+            with self.subTest(word=kanji):
+                r = self._rank(kanji, kana)
+                self.assertTrue(r is None or r > 1000, (kanji, r))
+        self.assertLess(self._rank("為", "ため"), 100)
 
     def test_coverage_holds_per_level(self) -> None:
         # Around 70-88% of each level ranks; a source swap that ranks
