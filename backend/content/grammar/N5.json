@@ -5349,9 +5349,9 @@
     ],
     "examples": [
       {
-        "jp": "あなたは学生ですか。",
-        "en": "Are you a student?",
-        "fr": "Êtes-vous étudiant ?",
+        "jp": "たなかさんは学生ですか。",
+        "en": "Is Tanaka a student?",
+        "fr": "Tanaka est-il étudiant ?",
         "register": "polite"
       },
       {
@@ -5516,8 +5516,8 @@
       },
       {
         "kind": "careful",
-        "en": "Do not use ね about something only you know (your own name, your plans): that is よ.",
-        "fr": "Pas de ね pour une chose que vous seul savez (votre nom, vos projets) : c'est よ."
+        "en": "ね asks the listener to agree, so it cannot carry news they have no way to check: わたしは田中ですよ, never ですね. Announcing what you are about to do yourself is the exception: じゃ、帰りますね softens it.",
+        "fr": "ね demande l'accord de l'autre : il ne peut donc pas porter une information qu'il n'a aucun moyen de vérifier — わたしは田中ですよ, jamais ですね. Annoncer ce qu'on va faire soi-même est l'exception : じゃ、帰りますね adoucit l'annonce."
       }
     ],
     "compare": [
@@ -5929,7 +5929,7 @@
         "register": "polite"
       },
       {
-        "jp": "どうして食べませんか。おなかがいっぱいだからです。",
+        "jp": "どうして食べないんですか。おなかがいっぱいだからです。",
         "en": "Why aren't you eating? Because I'm full.",
         "fr": "Pourquoi tu ne manges pas ? Parce que je n'ai plus faim.",
         "register": "polite"
@@ -7936,8 +7936,8 @@
       },
       {
         "kind": "use",
-        "en": "- A place as the group: クラスでたなかさんがいちばん高いです.\n- A set as the group: 果物の中でりんごがいちばん好きです.\n- The question: 何がいちばん好きですか.",
-        "fr": "- Un lieu comme groupe : クラスでたなかさんがいちばん高いです.\n- Un ensemble comme groupe : 果物の中でりんごがいちばん好きです.\n- La question : 何がいちばん好きですか."
+        "en": "- A place as the group: クラスでたなかさんがいちばんせが高いです.\n- A set as the group: 果物の中でりんごがいちばん好きです.\n- The question: 何がいちばん好きですか.",
+        "fr": "- Un lieu comme groupe : クラスでたなかさんがいちばんせが高いです.\n- Un ensemble comme groupe : 果物の中でりんごがいちばん好きです.\n- La question : 何がいちばん好きですか."
       },
       {
         "kind": "careful",
@@ -7953,8 +7953,8 @@
       },
       {
         "pattern": "〜の中で",
-        "en": "で names a place or category as the group; の中で names a listed set.",
-        "fr": "で nomme un lieu ou une catégorie comme groupe ; の中で nomme un ensemble énuméré."
+        "en": "で names the place or category itself; の中で wraps the group, and is what a list of named items takes.",
+        "fr": "で nomme directement le lieu ou la catégorie ; の中で enveloppe l'ensemble, et c'est ce que prend une liste d'éléments nommés."
       }
     ],
     "examples": [
@@ -13665,8 +13665,8 @@
     "compare": [
       {
         "pattern": "〜で〜がいちばん",
-        "en": "の中で names a listed set; で〜がいちばん takes a place or category and picks the top.",
-        "fr": "の中で nomme un ensemble énuméré ; で〜がいちばん prend un lieu ou une catégorie et en désigne le premier."
+        "en": "の中で wraps the group, and is what a list of named items takes; で〜がいちばん names the place or category itself and picks the top.",
+        "fr": "の中で enveloppe l'ensemble, et c'est ce que prend une liste d'éléments nommés ; で〜がいちばん nomme directement le lieu ou la catégorie et en désigne le premier."
       },
       {
         "pattern": "に",
