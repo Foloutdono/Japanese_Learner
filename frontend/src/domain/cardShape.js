@@ -111,8 +111,12 @@ export function cardShape(card) {
     isWordReading: spec?.base === 'word_reading',
     isBuild: spec?.renderer === RENDER.BUILD,
     isWrite: spec?.renderer === RENDER.WRITE,
-    // On the ladder: where the card stands, 0 to 3 (null off it).
+    // On the ladder: where the card stands, 0 to 3 (null off it), and the
+    // rung of the exercise asked, which falls below it where the point
+    // cannot be asked on its own (plan 190: a particle with no sentence
+    // to blank is the flashcard until it can be written).
     rung: card?.mode === 'grammar.ladder' ? (card?.rung ?? 0) : null,
+    asked: card?.mode === 'grammar.ladder' ? (card?.asked ?? card?.rung ?? 0) : null,
   }
 }
 

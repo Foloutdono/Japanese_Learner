@@ -585,13 +585,21 @@
         "jp": "だれが来ますか。",
         "en": "Who is coming?",
         "fr": "Qui vient ?",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "外で子どもがあそんでいます。",
         "en": "Children are playing outside.",
         "fr": "Des enfants jouent dehors.",
         "register": "polite"
+      },
+      {
+        "jp": "どのバスが駅へ行きますか。",
+        "en": "Which bus goes to the station?",
+        "fr": "Quel bus va à la gare ?",
+        "register": "polite",
+        "contrast": true
       }
     ],
     "tour": {
@@ -783,13 +791,15 @@
         "jp": "毎あさパンを食べます。",
         "en": "I eat bread every morning.",
         "fr": "Je mange du pain tous les matins.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "つめたい水を飲みました。",
         "en": "I drank cold water.",
         "fr": "J'ai bu de l'eau froide.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "この道をあるいて駅へ行きます。",
@@ -801,7 +811,8 @@
         "jp": "日本語の本を読みます。",
         "en": "I read Japanese books.",
         "fr": "Je lis des livres en japonais.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       }
     ],
     "tour": {
@@ -983,7 +994,8 @@
         "jp": "七時におきます。",
         "en": "I get up at seven.",
         "fr": "Je me lève à sept heures.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "友だちにてがみを書きました。",
@@ -995,7 +1007,8 @@
         "jp": "つくえの上に本があります。",
         "en": "There is a book on the desk.",
         "fr": "Il y a un livre sur le bureau.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "来月、日本に行きます。",
@@ -1220,19 +1233,22 @@
         "jp": "駅で友だちに会いました。",
         "en": "I met a friend at the station.",
         "fr": "J'ai retrouvé un ami à la gare.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "電車で学校へ行きます。",
         "en": "I go to school by train.",
         "fr": "Je vais à l'école en train.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "日本語で話してください。",
         "en": "Please speak in Japanese.",
         "fr": "Parlez en japonais, s'il vous plaît.",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "三人で山にのぼりました。",
@@ -5364,13 +5380,15 @@
         "jp": "あした、何をしますか。",
         "en": "What will you do tomorrow?",
         "fr": "Que faites-vous demain ?",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       },
       {
         "jp": "この本はだれのですか。",
         "en": "Whose book is this?",
         "fr": "À qui est ce livre ?",
-        "register": "polite"
+        "register": "polite",
+        "contrast": true
       }
     ],
     "tour": {

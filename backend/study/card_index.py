@@ -68,17 +68,22 @@ def fill_ok(level: str, pattern: str) -> bool:
 def contrast_ok(level: str, pattern: str) -> bool:
     """
     Whether `grammar.contrast` can blank this point out of a sentence and
-    offer its rivals (plan 087): the pattern must be one a sentence can
-    point at (verifiable, as fill_ok), the point must name at least one
+    offer its rivals (plan 087): the point must name at least one
     neighbour to compare, and its author must have marked a sentence in
-    which those neighbours are wrong. Same reason this lives here as
+    which those neighbours are wrong that the drill can blank -- by the
+    pattern's stems (verifiable, as fill_ok), or for a bare particle
+    where the detector finds it once (grammar_ladder.can_blank, plan 190). Same reason this lives here as
     fill_ok: the pool and the denominator have to agree.
     """
     found = find(pattern)
     if found is None or found[0] != level:
         return False
     entry = found[1]
-    return verifiable(pattern) and bool(entry.get("compare")) and bool(contrast_examples(level, pattern))
+    if not verifiable(pattern):
+        # A bare particle is blanked where the grammar detector finds it
+        # (plan 190), which is slow to ask: the ladder's snapshot says.
+        return grammar_ladder.blank_ok(level, pattern)
+    return bool(entry.get("compare")) and bool(contrast_examples(level, pattern))
 
 
 def _augment(source: str, key: str, entry: dict, base: str | None = None) -> dict:

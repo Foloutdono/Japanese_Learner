@@ -47,7 +47,7 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 | `steps` | kinds `rule`, `use`, `careful`, each at most once, `rule` first. `**bold**` allowed; a bullet is a line starting `- `. |
 | `compare` | every `pattern` is a real point (any level), never the entry itself. |
 | `examples` | each passes `study/grammar_sentence_gen.check_sentence`: 8–60 characters, ends in 。！？, kanji within the level (the pattern's own kanji excepted), and visibly contains the pattern. Distinct sentences. |
-| `contrast` | marks a sentence in which the rivals in `compare` are **wrong**; the contrast drill blanks the pattern in it and offers the rivals as choices. So the sentence must not also contain a rival, and the point must compare something. |
+| `contrast` | marks a sentence in which the rivals in `compare` are **wrong**; the contrast drill blanks the pattern in it and offers the rivals as choices. So the sentence must not also contain a rival, and the point must compare something. A bare particle may mark one too (plan 190): see "What the matcher can and cannot see". |
 
 ## The tour block (plan 187)
 
@@ -136,7 +136,9 @@ found most often:
 down which points the grammar ladder's two upper rungs can be asked on --
 `build` (a sentence marked `contrast`, the point written there in one
 stretch, a rival whose form can stand as the wrong piece) and `write` (a
-point the detector is trusted on, `grammar_detect.can_find`). Asking takes
+point the detector is trusted on, `grammar_detect.can_find`) -- and
+`blank`, the points the matcher cannot check whose marked sentences the
+detector can blank for the contrast drill (plan 190). Asking takes
 the detector over every example, some twelve seconds, which is the only
 reason it is written down. After any change here run
 `python -m scripts.build_ladder_flags` (`--check` reports first);
@@ -217,4 +219,22 @@ contrast rule reads those stems. Two consequences while writing `compare`:
 
 A pattern the matcher cannot check at all (a bare particle, a class label
 such as い形容詞／な形容詞) is exempt from the contrast requirement: its lesson
-names the neighbours, and the drill never draws it.
+names the neighbours either way. It **may** still mark a contrast sentence
+(plan 190), and then the drill and the ladder's build blank it where the
+grammar detector finds it — exactly once, on one piece; the gate names a
+marked sentence where it does not. Two rules for marking one, because the
+drill hides the translation until the answer:
+
+- Mark only a sentence in which every rival is **ungrammatical** in the gap,
+  not merely a different meaning. を in 毎あさパン＿食べます (が and に cannot
+  stand there), が after a question word (だれ＿来ますか: は cannot), に with
+  a clock time (七時＿おきます: で and へ cannot). は against が and も, と
+  against や, ね against よ and へ against に share too many sentences: leave
+  them unmarked.
+- Such a point is offered its named rivals alone, never fillers from the
+  level: a particle's gap takes だけ, まで, から and more, so no filler is
+  certainly wrong there.
+
+`card_index.contrast_ok` reads which of these points can be drawn from the
+ladder's snapshot (its `blank` list), so run `build_ladder_flags` after
+marking one.

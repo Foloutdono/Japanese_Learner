@@ -57,6 +57,18 @@ describe('the ladder', () => {
     expect(rungs[2].getAttribute('aria-current')).toBe('step')
     expect(screen.container.querySelectorAll('.lad-strip__rung--passed')).toHaveLength(2)
   })
+
+  it('names the exercise asked where the card falls back below its rung', async () => {
+    // A particle on Choose with no sentence to blank is shown the
+    // flashcard (plan 190): filled to Choose, Recognise named.
+    const screen = await mount(<LadderStrip rung={1} asked={0} />)
+    const rungs = screen.container.querySelectorAll('.lad-strip__rung')
+    expect(rungs[0].getAttribute('aria-current')).toBe('step')
+    expect(rungs[1].getAttribute('aria-current')).toBeNull()
+    expect(screen.container.querySelector('.lad-strip__rung--here').textContent).toBe('Recognise')
+    expect(screen.container.querySelector('.lad-strip__rung--at').textContent).toBe('Choose')
+    expect(screen.container.querySelectorAll('.lad-strip__rung--passed')).toHaveLength(1)
+  })
 })
 
 describe('build', () => {

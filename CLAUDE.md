@@ -1717,7 +1717,27 @@ runtime purpose. Two consequences worth knowing:
   `components/study/TourPanels.jsx`, `domain/tourStops.js`,
   `src/testing/grammarTour.json`, the tour tests and `index.css`;
   DESIGN.md, "The tour"; `docs/content-audit/PLAYBOOK.md`).
-  When starting a new wave, begin at **190** or higher, and check
+  **190** is 助詞, the particles on the ladder's middle rungs (owner-
+  directed: "I still have the classic flashcard"): a bare particle or a
+  one-character suffix has no stem the matcher can point at, so it had
+  no contrast drill and no build and sat on the flashcard from Recognise
+  to Build. A contrast sentence may now be marked on one, blanked where
+  the grammar detector finds the point exactly once
+  (`grammar_examples.blank_span`), offered its named rivals alone; 29
+  sentences marked (and one added, どのバスが駅へ行きますか) where every
+  rival is ungrammatical in the gap -- を, に, で, が, か at N5, 〜方,
+  〜中, 〜さ, 〜な（禁止） at N4, 〜的, 〜化 at N3 -- and は/が/も, と/や,
+  ね/よ and へ/に left unmarked because they share too many sentences;
+  the points listed in `ladder.json`'s `blank`. And the strip over a
+  ladder card names the exercise asked (`asked`), filled up to the rung
+  the card stands on, where it had lit a rung the card did not ask
+  (cited in `study/grammar_examples.py`, `study/grammar_lesson.py`,
+  `study/grammar_ladder.py`, `study/card_index.py`, `study/grammar_check.py`,
+  `routes/grammar.py`, `content/grammar/N5.json`, `N4.json`, `N3.json`,
+  `ladder.json` and its README, `tests/test_grammar_ladder.py`,
+  `tests/test_grammar_check.py`, `components/study/GrammarWork.jsx`,
+  `CardPrompt.jsx`, `domain/cardShape.js` and `index.css`).
+  When starting a new wave, begin at **191** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
