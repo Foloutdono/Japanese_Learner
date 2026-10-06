@@ -299,9 +299,11 @@ class WrittenFuriganaTests(unittest.TestCase):
 
 def _tour(**over) -> dict:
     """The tour drawn on the canvas for 〜てください: the negative request
-    as the twist, a ticket window as the scene."""
+    as its twist (plan 189: the first of a list, named by its notion), a
+    ticket window as the scene."""
     tour = {
-        "twist": {
+        "twists": [{
+            "notion": {"en": "Asking not to", "fr": "Demander de ne pas faire"},
             "jp": "ここでたばこをすわないでください。",
             "ask": {"en": "What is being asked?", "fr": "Que demande-t-on ?"},
             "choices": [
@@ -311,7 +313,7 @@ def _tour(**over) -> dict:
             ],
             "why": {"en": "The ない-form and でください ask someone not to.", "fr": "La forme en ない et でください demandent de ne pas faire."},
             "pair": ["すってください", "すわないでください"],
-        },
+        }],
         "scene": {
             "place": "窓口",
             "them": {"en": "Clerk", "fr": "Agent"},
@@ -358,13 +360,24 @@ class TourRuleTests(unittest.TestCase):
         self.assertEqual(self._problems(), [])
 
     def test_a_tour_is_both_halves(self) -> None:
-        self._says("tour must be {twist, scene}", scene=DROP)
+        self._says("tour must be {twists, scene}", scene=DROP)
 
     def test_the_twist(self) -> None:
-        self._says("has 1 choices, needs 3", **{"twist.choices": [{"en": "Only one choice.", "fr": "Un seul choix."}]})
-        self._says("twist pair must be two Japanese forms", **{"twist.pair": ["smoke", "no smoke"]})
-        self._says("twist jp does not end in", **{"twist.jp": "ここでたばこをすわないでください"})
-        self._says("twist choices repeat", **{"twist.choices.2": {"en": "To smoke here, please.", "fr": "Fumer ici."}})
+        self._says("has 1 choices, needs 3", **{"twists.0.choices": [{"en": "Only one choice.", "fr": "Un seul choix."}]})
+        self._says("twist 0 pair must be two Japanese forms", **{"twists.0.pair": ["smoke", "no smoke"]})
+        self._says("twist 0 jp does not end in", **{"twists.0.jp": "ここでたばこをすわないでください"})
+        self._says("twist 0 choices repeat", **{"twists.0.choices.2": {"en": "To smoke here, please.", "fr": "Fumer ici."}})
+
+    def test_every_twist_names_its_notion(self) -> None:
+        """Plan 189: a twist per notion, each named, none twice."""
+        self._says("twist 0 must be {notion, jp, ask, choices, why[, pair]}", **{"twists.0.notion": DROP})
+        self._says("twist 0 notion.fr is", **{"twists.0.notion": {"en": "Asking not to", "fr": "x" * 41}})
+        one = _tour()["twists"][0]
+        self._says("tour has 0 twists, needs 1–6", twists=[])
+        self._says("tour has 7 twists, needs 1–6", twists=[dict(one, jp=f"{n}ばんでたばこをすわないでください。", notion={"en": f"Notion {n}", "fr": f"Notion {n}"}) for n in range(7)])
+        self._says("tour twists repeat a sentence", twists=[one, dict(one, notion={"en": "Another notion", "fr": "Une autre notion"})])
+        self._says("tour twists repeat a notion", twists=[one, dict(one, jp="ここでたべないでください。")])
+        self.assertEqual(self._problems(twists=[one, dict(one, jp="ここでたべないでください。", notion={"en": "Not eating", "fr": "Ne pas manger"})]), [])
 
     def test_the_place_is_a_station_place(self) -> None:
         self._says("place 'カフェ' not in", **{"scene.place": "カフェ"})

@@ -25385,6 +25385,23 @@ button.brd-stn { cursor: pointer; }
   outline: none;
 }
 .tour__hint { margin: calc(var(--sp-3) - var(--sp-5)) 0 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+/* A twist's notion over its question (plan 189): the one caption, and
+   where there are several, which of them it is. */
+.tour__notion,
+.tour-found__notion {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-secondary);
+}
+.tour__notion { margin-bottom: calc(var(--sp-3) - var(--sp-5)); }
+.tour__notion-count { font-variant-numeric: tabular-nums; }
+.tour__notion-count::before { content: '·'; margin-right: var(--sp-2); }
 .tour-pattern { font-family: var(--font-jp); color: var(--tour-ink); }
 .tour-card {
   background: var(--surface);
@@ -37142,6 +37159,14 @@ button.brd-stn { cursor: pointer; }
   .tour-ledger__line--sealed .tour-ledger__n { border-color: var(--surface-line); color: var(--text-secondary); }
   .tour-ledger__sealed { align-self: center; font-size: var(--fs-sm); color: var(--text-secondary); }
   .tour-ledger__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+  .tour-ledger__notion {
+    margin: 0;
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--tr-caption);
+    color: var(--text-secondary);
+  }
   .tour-ledger__say { margin: 0; font-weight: 600; line-height: 1.45; text-wrap: pretty; }
   .tour-ledger__note { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
   .tour-ledger__examples { display: flex; flex-direction: column; gap: var(--sp-4); }

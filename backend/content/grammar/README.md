@@ -53,19 +53,21 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 
 A point a learner has never met is toured before it is drilled
 (`study/grammar_tour.py`): its examples, a guess at what it does, the
-rule. That much is derived from the entry above. Two stops are written
+rule. That much is derived from the entry above. The rest is written
 by hand, in an optional `tour` key, and where it is written both halves
-are:
+are -- a twist per notion the point has beyond the meaning the guess
+asks (plan 189), then the scene:
 
 ```jsonc
 "tour": {
-  "twist": {                                  // the point doing something else, or its nearest rival
+  "twists": [{                                // 1–6, one per notion, in teaching order
+    "notion": {"en": "Or, between nouns", "fr": "Ou, entre deux noms"},  // the stop's name, ≤ 40 chars
     "jp": "おちゃかコーヒーを飲みますか。",
     "ask": {"en": "…", "fr": "…"},            // the question over it
     "choices": [{"en": "…", "fr": "…"}, …],   // three readings of it, the RIGHT ONE FIRST (the screen shuffles)
     "why": {"en": "…", "fr": "…"},            // one line said once it is answered
     "pair": ["すってください", "すわないでください"]  // optional: two forms drawn side by side
-  },
+  }, …],
   "scene": {                                  // the point at work, at a station
     "place": "売店",                          // one of grammar_tour.SCENE_PLACES
     "them": {"en": "Vendor", "fr": "Vendeur"}, // who the learner talks to
@@ -90,9 +92,15 @@ of its lines or the cue, in the right answer, and in no wrong answer
 the stems). A point that names its own alternatives (`〜つ／〜人／〜枚`,
 `〜があります／います`) may be answered wrong with another of them.
 
-Writing one: the twist is the surprise the guess did not prepare for -- a
-second use (か between two nouns), or the rival the lesson warns about
-(ないでください). Its wrong readings are the confusions a learner would
+Writing one: a twist is a surprise the guess did not prepare for -- a
+second use (か between two nouns), a sense, a form the lesson teaches as
+part of the point (ではありません for です), a constraint (は never on a
+question word), or the rival the lesson warns about (ないでください).
+**The twists are exhaustive** (plan 189): every notion the point covers
+at its level gets one, named by its `notion`, and none repeats the
+meaning the guess already asks; a sense the catalogue gives to another
+point is that point's to tour, not this one's. Where the lesson's `use`
+step does not name a notion its tour walks, the step says it too. Its wrong readings are the confusions a learner would
 really make. The scene is a few lines a learner will live through at a
 ticket window, a kiosk, on a platform; the point does its job in it, the
 note says what the scene just showed, and the learner's own line is

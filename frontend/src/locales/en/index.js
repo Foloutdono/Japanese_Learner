@@ -1391,6 +1391,7 @@ const dictionary = {
   tourBackToLesson: 'Back to the lesson',
   // 発見 on the desk (plan 187f): the stops at the left, the plate at the right.
   tourStops: { look: 'Look', guess: 'Guess', found: 'Found', twist: 'The twist', terminus: 'Terminus' },
+  tourNotionCount: (n, total) => `${n} of ${total}`,
   tourTries: n => `${n} miss${n > 1 ? 'es' : ''}`,
   tourRuleGiven: 'rule given',
   tourMissed: 'missed',

@@ -146,7 +146,7 @@ class TourSliceTests(unittest.TestCase):
         entries = audit.entries_of(chosen)
         self.assertLessEqual(len(entries), audit.CHUNK_TOURS)
         for entry in entries:
-            self.assertIn("twist", entry["tour"])
+            self.assertIn("twists", entry["tour"])
             self.assertIn("scene", entry["tour"])
             self.assertIn("compare", entry)
 

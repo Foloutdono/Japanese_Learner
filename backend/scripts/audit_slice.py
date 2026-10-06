@@ -25,8 +25,8 @@ the cursor is n // 5, walking that area's slices in order and wrapping
 when it reaches the end. (Placement joined on 2026-09-21, plan 109: the
 three candidate lists an outside ranking and the community JLPT lists
 raise against the deck. Runs before that date rotated over three areas.
-Tours joined on 2026-10-05, plan 187g: the twist and the scene written
-for each grammar point's tour, which no gate reads for whether a native
+Tours joined on 2026-10-05, plan 187g: the twists (one per notion since
+plan 189) and the scene written for each grammar point's tour, which no gate reads for whether a native
 speaker would say them. Runs before that date rotated over four.)
 Nothing is stored: the slice is a pure function of the date, so a
 run can be reproduced (--on) and the next months inspected (--schedule)
@@ -75,7 +75,7 @@ CHUNK_GRAMMAR = 30
 CHUNK_VOCAB = 40
 CHUNK_READING = 25
 CHUNK_PLACEMENT = 40
-# A tour block is a twist and a scene: a dialogue to read aloud in the
+# A tour block is its twists and a scene: a dialogue to read aloud in the
 # head, three answers each to try to make right. Fewer to a run.
 CHUNK_TOURS = 15
 RICH_LEVELS = ("N5", "N4")
@@ -384,7 +384,7 @@ def _tour_slices() -> list[dict]:
         for sid, start, stop in _chunk_ids(f"tours-{level}", len(points), CHUNK_TOURS):
             out.append({
                 "id": sid, "area": "tours",
-                "title": f"{level} tours, the twist and the scene, points {start + 1}–{stop}",
+                "title": f"{level} tours, the twists and the scene, points {start + 1}–{stop}",
                 "source": f"backend/content/grammar/{level}.json (each point's `tour`)",
                 "level": level, "start": start, "stop": stop,
             })
@@ -446,8 +446,9 @@ CHECKS = {
         "For a level move: is the card's level the word's, not its kanji's (the review's decision 3)?",
     ],
     "tours": [
-        "The twist: is the reading marked right really right, and is each wrong one really wrong -- no second right answer?",
-        "Is the twist a real surprise about the point (a second use, the rival the lesson warns about), or a trick?",
+        "Each twist: is the reading marked right really right, and is each wrong one really wrong -- no second right answer?",
+        "Is each twist a real notion of the point (a second use, a sense, a form it teaches, the rival the lesson warns about), named truly by its `notion`, or a trick?",
+        "Are the twists exhaustive (plan 189): is a sense or use the point has at its level left untoured, or is one of them another point's?",
         "The scene: is every line what someone would actually say at that place -- register, politeness, the reply a native speaker gives?",
         "Does the learner's right line use the point as the lesson teaches it, and is each wrong line wrong for the reason the `why` gives?",
         "Is a wrong line in fact acceptable Japanese for the task (then it is a second right answer, a finding)?",
