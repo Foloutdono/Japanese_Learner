@@ -274,7 +274,9 @@ export function clearModel(result, run) {
  */
 export function restWeek(profileWeek, restDays, today) {
   const studied = new Set((profileWeek ?? []).filter(d => (d.count ?? 0) + (d.practice ?? 0) > 0).map(d => d.date))
-  const rest = new Set(restDays ?? [])
+  // The days told of now, and any other this week the profile's week
+  // marks as covered (`rest: true`, a 運休 already seen).
+  const rest = new Set([...(restDays ?? []), ...(profileWeek ?? []).filter(d => d.rest).map(d => d.date)])
   return Array.from({ length: 7 }, (_, i) => {
     const day = daysBefore(today, 6 - i)
     const state = rest.has(day) ? 'rest' : studied.has(day) ? 'studied' : day === today ? 'today' : 'missed'

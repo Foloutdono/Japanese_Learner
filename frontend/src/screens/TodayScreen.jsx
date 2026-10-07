@@ -85,6 +85,7 @@ export default function TodayScreen({ session }) {
             rest={today.rest}
             week={restWeek(summary?.week, today.rest.unseen, utcToday())}
             total={today.total}
+            lanes={today.lanes}
             minutes={restMinutes}
             desk={desk}
             onDepart={depart}

@@ -2909,9 +2909,16 @@ const clrMilestones = {
 const clrRestday = {
   rstTitle: 'Your streak holds',
   rstWeekAria: parts => `The week: ${parts.join(', ')}`,
-  rstUsed: day => `Rest day used on ${day}`,
-  rstTodayAria: (n, min) => `Today: ${n} cards, about ${min} minutes`,
-  rstCards: 'cards',
+  rstStreakWord: n => (n === 1 ? 'day in a row' : 'days in a row'),
+  rstUsed: days => (days.length === 1
+    ? `Rest day used on ${days[0]}`
+    : `Rest days used on ${days.slice(0, -1).join(', ')} and ${days.at(-1)}`),
+  rstHeld: 'in reserve',
+  rstNextPre: 'the next on day',
+  rstNextPost: '',
+  rstTodayAria: (n, min) => `Today: ${n} card${n === 1 ? '' : 's'}${min ? `, about ${min} minutes` : ''}`,
+  rstCards: n => (n === 1 ? 'card' : 'cards'),
+  rstMin: 'min',
   rstDepart: 'Depart',
 }
 // ── 191:restday end ──
@@ -2940,6 +2947,10 @@ const clrTickets = {
   tkbShareText: days => `${days} days in a row on Tsuji`,
   tkbShareSaved: 'Image saved.',
   tkbShareFailed: 'Sharing did not go through.',
+  tkbToday: 'today',
+  tkbEmpty: 'Your first ticket',
+  tkbEmptyAria: (days, inDays) => `No ticket yet. The first, ${days} days in a row, ${inDays ? `in ${inDays} day${inDays === 1 ? '' : 's'}` : 'today'}`,
+  tkbEmptyGo: 'Depart',
 }
 // ── 191:tickets end ──
 

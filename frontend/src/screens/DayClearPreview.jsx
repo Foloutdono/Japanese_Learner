@@ -103,6 +103,7 @@ export default function DayClearPreview() {
           week={scene.week}
           total={scene.today.total}
           minutes={REST_MINUTES}
+          lanes={scene.today.lanes}
           desk={desk}
           reduced={reduced}
           onDepart={leave}
@@ -110,7 +111,7 @@ export default function DayClearPreview() {
       </main>
     )
   } else if (name === 'tickets') {
-    body = <TicketsScreen key={take} profile={scene.profile} reduced={reduced} />
+    body = <TicketsScreen key={take} profile={scene.profile} stats={scene.stats} reduced={reduced} />
   } else {
     body = (
       <main id="main-content" className="clrdev-share">
