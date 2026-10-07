@@ -123,4 +123,12 @@ describe('the rest-day notice\'s week', () => {
     )
     expect(week).toEqual(REST_WEEK)
   })
+
+  it('draws a rest day the profile\'s week marks, already seen, as covered', () => {
+    const profileWeek = [
+      ...['2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04', '2026-10-05'].map(date => ({ date, count: 12 })),
+      { date: '2026-10-06', count: 0, practice: 0, rest: true },
+    ]
+    expect(restWeek(profileWeek, [], '2026-10-07')).toEqual(REST_WEEK)
+  })
 })

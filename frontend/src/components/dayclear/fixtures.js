@@ -143,7 +143,12 @@ export const REST_WEEK = Object.freeze([
 export const TODAY_REST = Object.freeze({
   total: 41,
   seconds_per_review: 20.5,
-  lanes: [],
+  // The board's stripe: 20 kanji, 14 vocab, 7 grammar.
+  lanes: [
+    { id: 'kanji:N5:kanji.flashcard.f2b', kind: 'section', source: 'kanji', deck: 'N5', mode: 'kanji.flashcard.f2b', due: 16, new: 4 },
+    { id: 'vocab:N5:vocab.flashcard.f2b', kind: 'section', source: 'vocab', deck: 'N5', mode: 'vocab.flashcard.f2b', due: 10, new: 4 },
+    { id: 'grammar:N5:grammar.ladder', kind: 'section', source: 'grammar', deck: 'N5', mode: 'grammar.ladder', due: 5, new: 2 },
+  ],
   by_source: {},
   next_due: null,
   pace: { target: 10, newToday: 0 },
@@ -166,6 +171,15 @@ export const PROFILE_TICKETS = Object.freeze({
   streakLongest: 14,
   restHeld: 0,
   nextMilestone: 30,
+  // The share's figures (the Share board's 412 and N5).
+  totalReviews: 412,
+  jlptLevel: 'N5',
+})
+
+// GET /api/stats as far as the share reads it: the vocabulary line's
+// cards learned (the Share board's 58 mots appris).
+export const STATS_TICKETS = Object.freeze({
+  items: { vocab: { N5: { learned: 58, started: 96, total: 718, score: 0.08 } } },
 })
 
 // ── The share image (540×675 at half, 1080×1350) ─────────────────────
@@ -195,6 +209,6 @@ export const SCENES = Object.freeze({
   month100: { run: RUN_MONTH30, result: CLEAR_MONTH100 },
   partial: { run: RUN_PARTIAL, result: CLEAR_PARTIAL },
   restday: { today: TODAY_REST, week: REST_WEEK },
-  tickets: { profile: PROFILE_TICKETS },
+  tickets: { profile: PROFILE_TICKETS, stats: STATS_TICKETS },
   share: { share: SHARE },
 })

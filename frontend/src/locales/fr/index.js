@@ -2844,9 +2844,18 @@ const clrMilestones = {
 const clrRestday = {
   rstTitle: 'Ta série tient',
   rstWeekAria: parts => `La semaine : ${parts.join(', ')}`,
-  rstUsed: day => `Jour de repos utilisé ${day}`,
-  rstTodayAria: (n, min) => `Aujourd’hui : ${n} cartes, environ ${min} minutes`,
-  rstCards: 'cartes',
+  rstStreakWord: n => (n === 1 ? 'jour de suite' : 'jours de suite'),
+  // The days the rest tickets covered, by name: "Jour de repos utilisé mardi".
+  rstUsed: days => (days.length === 1
+    ? `Jour de repos utilisé ${days[0]}`
+    : `Jours de repos utilisés ${days.slice(0, -1).join(', ')} et ${days.at(-1)}`),
+  // "0 en réserve · le prochain au 14ᵉ jour": the figures are set apart.
+  rstHeld: 'en réserve',
+  rstNextPre: 'le prochain au',
+  rstNextPost: 'ᵉ jour',
+  rstTodayAria: (n, min) => `Aujourd’hui : ${n} carte${n === 1 ? '' : 's'}${min ? `, environ ${min} minutes` : ''}`,
+  rstCards: n => (n === 1 ? 'carte' : 'cartes'),
+  rstMin: 'min',
   rstDepart: 'Départ',
 }
 // ── 191:restday end ──
@@ -2875,6 +2884,11 @@ const clrTickets = {
   tkbShareText: days => `${days} jours de suite sur Tsuji`,
   tkbShareSaved: 'Image enregistrée.',
   tkbShareFailed: 'Le partage n’a pas abouti.',
+  tkbToday: 'aujourd’hui',
+  // No ticket yet: the first, named, and the way to it.
+  tkbEmpty: 'Ton premier billet',
+  tkbEmptyAria: (days, inDays) => `Pas encore de billet. Le premier, ${days} jours de suite, ${inDays ? `dans ${inDays} jour${inDays === 1 ? '' : 's'}` : 'aujourd’hui'}`,
+  tkbEmptyGo: 'Départ',
 }
 // ── 191:tickets end ──
 

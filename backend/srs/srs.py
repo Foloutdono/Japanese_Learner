@@ -1401,6 +1401,14 @@ class SRSEngine:
                     cur.execute(sql, (day, ticket))
         return missed
 
+    def get_rest_days(self, user_id: str, days: int = 30) -> list[str]:
+        """The days a rest ticket bridged in the last `days` days, oldest
+        first, as YYYY-MM-DD: the 運休 the profile's week and stamp book
+        draw in a missed day's place (plan 191). The same window as
+        get_daily_review_counts, so the two read off one calendar."""
+        since = datetime.now(timezone.utc).date() - timedelta(days=days)
+        return sorted(d.isoformat() for d in self._rest_days(user_id) if d >= since)
+
     def rest_held(self, user_id: str) -> int:
         """How many rest tickets the learner holds unused."""
         with self.storage.connection() as conn:

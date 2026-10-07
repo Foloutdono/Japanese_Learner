@@ -36,6 +36,10 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
   // A day is stamped for a review or, since plan 178, a graded practice
   // answer: the streak counts both, so the book has to.
   const byDate = new Map((calendar ?? []).map(d => [d.date, (d.count ?? 0) + (d.practice ?? 0)]))
+  // 運休 (plan 191): a day a rest ticket covered (`rest: true`) is no
+  // miss -- the streak walked through it -- so the board's stub is laid
+  // over it, in pass ink, as on Today's stamp rally.
+  const rested = new Set((calendar ?? []).filter(d => d.rest).map(d => d.date))
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const dow = (today.getDay() + 6) % 7 // Monday-first
@@ -55,6 +59,7 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
       future: d > today,
       today: d.getTime() === today.getTime(),
       stamped: count > 0,
+      rest: count === 0 && rested.has(key),
       // A deterministic wobble per slot — a rubber stamp never lands
       // perfectly square (same as the strip's StampRally).
       tilt: ((i * 37) % 13) - 6,
@@ -88,13 +93,14 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
             key={c.key}
             className={
               'sbook__stamp'
-              + (c.future ? ' sbook__stamp--future' : c.stamped ? '' : ' sbook__stamp--missed')
+              + (c.future ? ' sbook__stamp--future' : c.stamped ? '' : c.rest ? ' sbook__stamp--rest' : ' sbook__stamp--missed')
               + (c.today && c.stamped ? ' sbook__stamp--today' : '')
             }
-            style={{ '--stamp-tilt': `${c.stamped ? c.tilt : 0}deg` }}
-            title={`${c.key} · ${c.count}`}
+            style={{ '--stamp-tilt': `${c.stamped ? c.tilt : c.rest ? -4 : 0}deg` }}
+            title={c.rest ? `${c.key} · 運休` : `${c.key} · ${c.count}`}
+            lang={c.rest ? 'ja' : undefined}
           >
-            {c.day}
+            {c.rest ? '運休' : c.day}
           </span>
         ))}
       </div>
