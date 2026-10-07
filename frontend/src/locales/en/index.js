@@ -2867,6 +2867,13 @@ const clrDay = {
   clrRestDayWord: '',
   clrRestFirst: n => `the first on day ${n}`,
   clrRestNext: n => `the next on day ${n}`,
+  // The desk's board (ClearDesk): see the French table.
+  clrDeskGridAria: n => `The trip’s ${n} card${n === 1 ? '' : 's'}`,
+  clrDeskStreakWord: n => (n === 1 ? 'day in a row' : 'days in a row'),
+  clrDeskNextIn: n => `in ${n} days`,
+  clrDeskNextAria: (days, inDays) => `${days}-day ticket, to earn ${inDays === 1 ? 'tomorrow' : `in ${inDays} days`}`,
+  clrDeskRestAt: (n, first) => ({ pre: first ? 'the first on day ' : 'the next on day ', sup: '', post: '' }),
+  clrDeskTomorrowNone: 'Nothing due',
 }
 // ── 191:day end ──
 

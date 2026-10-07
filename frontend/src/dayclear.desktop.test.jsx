@@ -31,9 +31,11 @@ function mount(query) {
   )
 }
 
+// Both read the rest at once (&reduced=1): the ceremony itself, its
+// sweep and its stamp, is src/dayclearDesk.desktop.test.jsx's.
 describe('/dev/dayclear on the desk', () => {
   it('stands the everyday clear beside the rail', async () => {
-    const screen = await mount('?scene=day')
+    const screen = await mount('?scene=day&reduced=1')
     await settle()
     expect(document.querySelector('.phone--desk .desk-rail')).not.toBeNull()
     const clear = screen.container.querySelector('.phone__content main.clr-desk')
@@ -43,7 +45,7 @@ describe('/dev/dayclear on the desk', () => {
   })
 
   it('stands the month\'s ceremony in the content area', async () => {
-    const screen = await mount('?scene=month30')
+    const screen = await mount('?scene=month30&reduced=1')
     await settle()
     expect(screen.container.querySelector('.phone__content main.ms-month')).not.toBeNull()
     expect(screen.container.querySelector('.clrk-tk--gold')).not.toBeNull()
