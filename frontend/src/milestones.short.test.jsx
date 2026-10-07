@@ -55,6 +55,10 @@ describe('the milestones on a short desk', () => {
 
   it('the month stands whole, its night across the content area', async () => {
     preview('?scene=month30')
+    // The day's sweep and stamp first: a click hands over to the month,
+    // a second skips the month to its rest.
+    await settle()
+    document.querySelector('main.clr-desk').click()
     await settle(400)
     document.querySelector('main.ms-month').click()
     await settle()

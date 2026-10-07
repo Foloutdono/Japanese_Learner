@@ -91,6 +91,10 @@ describe('the milestones beside the rail', () => {
 
   it('spreads the month\'s night, station and sky across the content area', async () => {
     preview('?scene=month30')
+    // The day's sweep and stamp play first; a click skips them to the
+    // handover, and the month begins.
+    await settle(200)
+    $('main.clr-desk').click()
     await settle(400)
     const main = rect('main.ms-month.ms-month--desk')
     expect(rect('.ms-m-night').width).toBeGreaterThanOrEqual(main.width)
