@@ -1737,7 +1737,44 @@ runtime purpose. Two consequences worth knowing:
   `ladder.json` and its README, `tests/test_grammar_ladder.py`,
   `tests/test_grammar_check.py`, `components/study/GrammarWork.jsx`,
   `CardPrompt.jsx`, `domain/cardShape.js` and `index.css`).
-  When starting a new wave, begin at **191** or higher, and check
+  **191** is 終着, the day cleared (owner-directed: the finish of the
+  day's run is the app's biggest win and must feel like one; built
+  exactly as the canvas "Tsuji — the day cleared", round 2, the owner's
+  pick: B's sweep, then A's stamp): a Today run ends on `/today/clear`
+  (phone: no chrome; desk: the Shell, `DeskShellStage`), which asks
+  `POST /api/today/clear` -- the server recounts the day's queue with
+  GET /api/today's own code (`_day_queue`) and pays once a UTC day, under
+  `day_clears`' key, a prime of 25 + 5 a streak day (to 60) and a jackpot
+  at each milestone (3 100, 7 250, 14 500, 30 1 000, 50 1 500, 100 3 000,
+  200 5 000, 365 10 000, then 3 000 every hundred), the old first-review
+  streak bonus folded in (`srs/xp.py`); `day_clear` XP never makes a
+  studied day. The ceremony: the run's cards through the reader into
+  their piles (two without a Perfect key), the day's stamp slammed and
+  flown into the week, the fare counted into a shimmering gold total
+  (`ClearPhone`, `ClearDesk`); a milestone takes the stamp's hand -- 3, 7
+  and 14 the paper 硬券 fed and clipped (`MilestoneTicket`), 30 and on the
+  month's sheet, 花火 and a gold ticket (`MilestoneMonth`, `Fireworks`,
+  `fireworksSim.js`). A run that ends with cards due is a 途中下車
+  (`PartialFinish`). Rest days (運休): one earned at each milestone from
+  7, two held at most, bridging a missed day lazily
+  (`srs.bridge_rest_days`) without counting it; Today says so once
+  (`RestDayNotice`, `POST /api/today/rest/seen`) and the stamp rally and
+  book draw it. Profile › Billets (`/profile/tickets`, `TicketsScreen`)
+  keeps the milestone tickets; `lib/shareTicket.js` draws one as a
+  1080×1350 PNG. Every review keeps its card face on the phone too
+  (`runTally`'s faces). `/dev/dayclear` plays every scene from fixtures
+  (cited in `srs/xp.py`, `srs/srs.py`, `routes/today.py`,
+  `routes/profile.py`, `routes/account.py`, `core/events.py`,
+  `tests/test_day_clear.py`, `tests/test_rest_days.py`,
+  `components/dayclear/` and its `kit/`, `screens/DayClearScreen.jsx`,
+  `DayClearPreview.jsx`, `TicketsScreen.jsx`, `TodayRun.jsx`,
+  `TodayScreen.jsx`, `stores/dayClear.js`, `stores/runTally.js`,
+  `domain/dayClear.js`, `lib/shareTicket.js`, `lib/audio`'s `day-clear`
+  and `milestone`, `components/ui/GateButton.jsx`'s `compact`,
+  `testing/appFonts.js`, the `dayclear*`, `milestones*`, `restday*` and
+  `tickets*` tests and the `191:*` regions of `index.css` and the locale
+  tables; DESIGN.md, Rewards, "The one ceremony").
+  When starting a new wave, begin at **192** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
