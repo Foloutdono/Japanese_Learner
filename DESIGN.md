@@ -1261,8 +1261,9 @@ progress legend back — on the desk too, where the run also prints its keys
 
 ### Rewards
 
-Every card is rewarded, and none of it is a ceremony. Three moments, three
-objects, and not one of them waits to be dismissed:
+Every card is rewarded, and none of it is a ceremony — the cleared day
+is the one ceremony, and it comes after the last card (below). Three
+moments, three objects, and not one of them waits to be dismissed:
 
 - **The fare** (運賃) — the XP an answer earns — is reported on the object it
   was paid into: the **level HUD** on a tab screen, where the strip's struck
@@ -1336,6 +1337,29 @@ did not — and the board went with them.
 
 So nothing holds the queue. Every reward plays over the next card, because
 a learner who has just rated one card is already looking for the next.
+
+**The one ceremony: the cleared day (終着, plan 191).** The owner's ruling
+on the canvas "Tsuji — the day cleared" (2026-10-07): clearing the day's
+queue is the app's biggest win — the learner showed up and finished — and
+it is the one moment that is a ceremony, played after the last card, when
+nothing is waiting. The run's cards go through the gate's reader one by
+one into their piles (À revoir · Justes · Parfaites, the verdicts' inks;
+two piles when the learner's bar has no Perfect), the day's 駅スタンプ is
+slammed onto the place the reader left and flies into the week of stamps,
+and the fare — the run's XP and the streak's prime (25 + 5 a day, up to 60
+days) — counts into a gold total that keeps a slow shimmer while it rests.
+A streak milestone takes the stamp's hand: 3, 7 and 14 days a paper 硬券
+fed by the ticket machine and clipped by the 改札鋏, 30 days and on a
+night of 花火 over the station and a gold ticket — with the milestone's
+jackpot. The rest state *is* the review: the piles open their cards,
+tomorrow is one dashed line. A tap, a click or Enter skips to it at any
+moment; under reduced motion it is drawn at once, fades only. A run that
+ends with cards still due is a 途中下車, not a finish: no stamp, the
+teaser of what clearing would pay, Continue as the one action. The
+stamps are the People family (stamp ink); gold stays the XP's and the
+gate's, and the 30-day ticket's foil and the fireworks are the pass's
+metal caught in the sky. Components in `components/dayclear/`, CSS in the
+`191:*` regions of `index.css`.
 
 ## Structure
 
