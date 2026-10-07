@@ -235,3 +235,33 @@ def test_the_weekday_kanji_start_on_monday():
     assert WEEKDAY_KANJI == "月火水木金土日"
     # 2026-10-06 is a Tuesday.
     assert WEEKDAY_KANJI[datetime(2026, 10, 6).weekday()] == "火"
+
+
+# ── The profile's week and stamp book ────────────────────────────
+
+def test_the_profile_marks_a_bridged_day_on_its_week_and_calendar(client, learner):
+    # Eight days, yesterday missed and bridged on this visit, today studied.
+    _studied(learner, [0, *range(2, 10)])
+    _ticket(learner, earned_ago=4)
+    with acting_as(learner):
+        profile = client.get("/api/profile").json()
+    yesterday = _ago(1).isoformat()
+    week = {d["date"]: d for d in profile["week"]}
+    calendar = {d["date"]: d for d in profile["calendar"]}
+    # The rest day is an entry of its own, nothing counted on it.
+    assert week[yesterday] == {"date": yesterday, "count": 0, "practice": 0, "rest": True}
+    assert calendar[yesterday]["rest"] is True
+    # A studied day carries no `rest`, and the days stay oldest first.
+    assert "rest" not in week[_today().isoformat()]
+    assert [d["date"] for d in profile["calendar"]] == sorted(calendar)
+    assert profile["streak"] == 9
+
+
+def test_a_rest_day_outside_the_calendar_is_left_out(client, learner):
+    _studied(learner, [0, 1])
+    _ticket(learner, earned_ago=60, used_ago=50)
+    with acting_as(learner):
+        profile = client.get("/api/profile").json()
+    assert not any(d.get("rest") for d in profile["calendar"])
+    assert srs.get_rest_days(learner, days=60) == [_ago(50).isoformat()]
+    assert srs.get_rest_days(learner, days=35) == []
