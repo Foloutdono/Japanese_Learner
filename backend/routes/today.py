@@ -49,6 +49,7 @@ Two things have to be right that a single-section session gets for free:
    time from /api/today.
 """
 import logging
+import math
 from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import NamedTuple
@@ -65,6 +66,7 @@ from core.lines import lines_or_all
 from core.pace import resolve_pace
 from core.srs_instance import srs
 from core.user_level import resolve_level
+from srs import xp as xp_math
 from study import basics, card_index, daily_queue, teaching_order
 from study import level_rule
 from study.level_rule import kana_sets_for, primary_mode
@@ -85,7 +87,7 @@ from translations import get_meaning                  # noqa: E402
 from routes.grammar import _build_grammar_card, ladder_progress   # noqa: E402
 from routes.decks import build_personal_card, build_pool_card, VISIBLE_DECKS_CTE   # noqa: E402
 from content.vocab_jmdict_data import POOL_ID_PREFIX                # noqa: E402
-from routes.profile import _profile_row                # noqa: E402
+from routes.profile import _profile_row, bridge_rest_days, counted_from   # noqa: E402
 
 
 # One adapter per section, each closing over that builder's own argument
@@ -446,15 +448,26 @@ def _new_pools(user_id: str, level: str, budget: int):
                  None if course is None else [(key, raw_id) for key, raw_id, _ in course])
 
 
-@router.get("/api/today")
-def get_today(user_id: str = Depends(get_user_id)):
-    """
-    The number the home screen leads with, and the breakdown behind it.
+class DayQueue(NamedTuple):
+    """What the day's queue holds now: the lanes /api/today counts and
+    the run serves, and what they were read from."""
+    due_rows: list
+    level: str
+    lanes: "OrderedDict[tuple, list[str]]"
+    fresh: dict
 
-    Cheap enough to call on every visit to the concourse: one indexed
-    query over this user's own rows plus one over their personal cards,
-    with no per-section round trips and no card building.
-    """
+    @property
+    def total(self) -> int:
+        # One number, and it counts scheduler ROWS rather than distinct
+        # cards -- see get_today.
+        return sum(len(ids) for ids in self.lanes.values())
+
+
+def _day_queue(user_id: str) -> DayQueue:
+    """The day's queue as the gate counts it. One function for GET
+    /api/today and POST /api/today/clear (plan 191), so a day is cleared
+    on exactly the count the gate prints, never on a second reading of
+    it that could drift."""
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id)
     level = resolve_level(user_id)
@@ -467,6 +480,23 @@ def get_today(user_id: str = Depends(get_user_id)):
         daily_queue.hold_above(daily_queue.lanes(user_id, due_rows, personal), _hold_line(user_id, level)),
         _new_lanes(user_id, level),
     )
+    return DayQueue(due_rows, level, lanes, fresh)
+
+
+@router.get("/api/today")
+def get_today(user_id: str = Depends(get_user_id)):
+    """
+    The number the home screen leads with, and the breakdown behind it.
+
+    Cheap enough to call on every visit to the concourse: one indexed
+    query over this user's own rows plus one over their personal cards,
+    with no per-section round trips and no card building.
+    """
+    # 運休 (plan 191): a missed day a rest ticket covers is spent here,
+    # before anything reads the streak.
+    bridge_rest_days(user_id)
+    queue = _day_queue(user_id)
+    due_rows, level, lanes, fresh = queue
 
     repeats = _repeats(user_id, due_rows)
     by_source: dict[str, int] = defaultdict(int)
@@ -501,7 +531,7 @@ def get_today(user_id: str = Depends(get_user_id)):
     # schedules, and the one you were not asked would sit deferred while
     # the badge insisted something was still due. Both are served, and
     # the badge is the number the session will actually clear.
-    total = sum(len(ids) for ids in lanes.values())
+    total = queue.total
     # The fare is what the run COSTS, which is no longer the same
     # number as what it CLEARS: the kana lanes are counted into `total`
     # -- they are reviews the run really will get through -- and out of
@@ -559,7 +589,194 @@ def get_today(user_id: str = Depends(get_user_id)):
         # plan 098, the budget the lanes' `new` figures were drawn
         # against (see the module docstring and _new_lanes).
         "pace": pace.payload() if pace else None,
+        # 終着 and 運休 (plan 191): whether the day is cleared and what
+        # clearing it pays, and the rest days.
+        **_day_status(user_id),
     }
+
+
+# ── 終着 — the day cleared (plan 191) ────────────────────────────
+# The run's end asks POST /api/today/clear whether it emptied the day.
+# A day is cleared when the queue the gate counts is empty AND a card
+# was reviewed today (UTC, the streak's day): an empty gate on a day
+# nothing came due is no victory, and a run that leaves cards is a
+# partial one. Paid once a UTC day, the day_clears row's primary key
+# the guard (srs.record_day_clear): the day's bonus for the streak and,
+# on a milestone, its jackpot (srs/xp.py).
+
+# What a review is reckoned to take when the learner's pace is not yet
+# known (srs.get_review_pace is None before twenty short gaps), for the
+# minutes printed beside tomorrow's cards.
+DEFAULT_SECONDS_PER_REVIEW = 10
+
+
+def _clear_preview(streak: int) -> dict:
+    """What clearing a day on day `streak` of the streak pays."""
+    milestone = xp_math.milestone_at(streak)
+    return {
+        "streak": streak,
+        "bonus": xp_math.day_clear_bonus(streak),
+        "jackpot": xp_math.jackpot_for(milestone),
+        "milestone": milestone,
+    }
+
+
+def _paid_preview(row: dict) -> dict:
+    """A cleared day's preview: what it did pay, as recorded."""
+    return {"streak": row["streak"], "bonus": row["bonus"],
+            "jackpot": row["jackpot"], "milestone": row["milestone"]}
+
+
+def _rest_next(after: int, held: int):
+    """The streak day the next rest day is earned on, counted after day
+    `after`; None while the learner holds as many as they may."""
+    return None if held >= xp_math.REST_HELD_MAX else xp_math.next_rest_at(after)
+
+
+def _day_status(user_id: str) -> dict:
+    """GET /api/today's `day_clear` and `rest`. The preview's streak
+    counts today (srs.streak_figures' `today`); a day already cleared
+    previews what it paid."""
+    today = datetime.now(timezone.utc).date()
+    figures = srs.streak_figures(user_id)
+    row = srs.get_day_clear(user_id, today)
+    held = srs.rest_held(user_id)
+    return {
+        "day_clear": {
+            "done": row is not None,
+            "preview": _paid_preview(row) if row else _clear_preview(figures["today"]),
+        },
+        "rest": {
+            "held": held,
+            "unseen": srs.rest_unseen(user_id),
+            "streak": figures["current"],
+            "next_at": _rest_next(counted_from(figures, row is not None), held),
+        },
+    }
+
+
+def _tomorrow(user_id: str, level: str) -> dict:
+    """Tomorrow's ride, as a cleared day prints it: the cards that fall
+    due tomorrow (srs.get_due_forecast's second day) and a whole day's
+    ration of new ones, and the minutes they take at the learner's pace,
+    rounded up. A figure, never a reason to fail the clear."""
+    try:
+        due = srs.get_due_forecast(user_id, 2)[1]["count"]
+    except Exception:
+        logger.exception("tomorrow's forecast failed")
+        due = 0
+    fresh = 0
+    try:
+        pace = resolve_pace(user_id)
+        if pace is not None:
+            pools = _new_pools(user_id, level, pace.target)
+            if pools is not None:
+                fresh = sum(len(ids) for ids in _ration(pools, pace.target).values())
+    except Exception:
+        logger.exception("tomorrow's ration failed")
+    cards = due + fresh
+    try:
+        spr = srs.get_review_pace(user_id)
+    except Exception:
+        logger.exception("review pace failed")
+        spr = None
+    minutes = max(1, math.ceil(cards * (spr or DEFAULT_SECONDS_PER_REVIEW) / 60)) if cards else 0
+    return {"cards": cards, "minutes": minutes}
+
+
+def _level_figures(user_id: str) -> dict:
+    """The learner's level and how far into it, for the bar a cleared day
+    fills: {level, into, span}, `into` of `span` XP."""
+    lifetime = srs.get_lifetime_xp(user_id)
+    level = xp_math.level_from_xp(lifetime)
+    floor = xp_math.xp_threshold(level)
+    return {"level": level, "into": lifetime - floor, "span": xp_math.xp_threshold(level + 1) - floor}
+
+
+@router.post("/api/today/clear")
+def post_today_clear(user_id: str = Depends(get_user_id)):
+    """
+    終着 (plan 191): the run is over -- is the day?
+
+    Not cleared while the gate still counts a card (a run of a chosen
+    length, one lane, the balance spent) or before a card was reviewed
+    today: what is left, how long it takes and what clearing would pay.
+    Cleared, the day's bonus is paid once (`already` on every call after
+    the first, with no XP), and the answer carries what the ceremony
+    draws: the streak and its milestone, the rest days, the week, the
+    level after paying and tomorrow's ride. Always 200.
+    """
+    bridge_rest_days(user_id)
+    today = datetime.now(timezone.utc).date()
+    queue = _day_queue(user_id)
+    remaining = queue.total
+    figures = srs.streak_figures(user_id)
+
+    if remaining > 0 or srs.get_reviews_today(user_id) == 0:
+        spr = None
+        if remaining:
+            try:
+                spr = srs.get_review_pace(user_id)
+            except Exception:
+                logger.exception("review pace failed")
+        row = srs.get_day_clear(user_id, today)
+        return {
+            "cleared": False,
+            "remaining": remaining,
+            "seconds_per_review": spr,
+            "preview": _paid_preview(row) if row else _clear_preview(figures["today"]),
+        }
+
+    # Today is studied, so the streak counts it.
+    streak = figures["current"]
+    milestone = xp_math.milestone_at(streak)
+    bonus = xp_math.day_clear_bonus(streak)
+    jackpot = xp_math.jackpot_for(milestone)
+    paid = srs.record_day_clear(user_id, today, streak, bonus, jackpot, milestone)
+    level = _level_figures(user_id)
+    if paid is None:
+        # Cleared already: the day as it was paid, and nothing more.
+        row = srs.get_day_clear(user_id, today)
+        streak, bonus, jackpot, milestone = row["streak"], row["bonus"], row["jackpot"], row["milestone"]
+        rest_earned = bool(row["rest_earned"])
+        xp = {"xp_earned": 0, "leveled_up": False, "new_level": level["level"]}
+    else:
+        rest_earned = paid["rest_earned"]
+        xp = paid["xp"]
+        events.record(user_id, "day_clear", {
+            "streak": streak, "milestone": milestone, "tier": xp_math.clear_tier(milestone),
+        })
+        logger.info("day cleared user_id=%s streak=%d bonus=%d jackpot=%d rest=%s",
+                    user_id, streak, bonus, jackpot, rest_earned)
+
+    held = srs.rest_held(user_id)
+    following = xp_math.next_milestone(streak)
+    return {
+        "cleared": True,
+        "already": paid is None,
+        "day": today.isoformat(),
+        "streak": streak,
+        "longest": figures["longest"],
+        "bonus": bonus,
+        "jackpot": jackpot,
+        "milestone": milestone,
+        "tier": xp_math.clear_tier(milestone),
+        "next_milestone": following,
+        "next_jackpot": xp_math.jackpot_for(following),
+        "rest": {"held": held, "earned": rest_earned, "next_at": _rest_next(streak, held)},
+        "week": srs.week_row(user_id),
+        "xp": xp,
+        "level": level,
+        "tomorrow": _tomorrow(user_id, queue.level),
+    }
+
+
+@router.post("/api/today/rest/seen")
+def post_today_rest_seen(user_id: str = Depends(get_user_id)):
+    """運休 (plan 191): the learner has been told the rest days that kept
+    their streak -- Today stops showing them."""
+    srs.mark_rest_seen(user_id)
+    return {"ok": True}
 
 
 @router.get("/api/today/forecast")
