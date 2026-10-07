@@ -8677,8 +8677,16 @@ textarea:focus-visible {
    day as one card -- the run's count and minutes, a bar of each line's
    share, which cards and how many -- then the row that opens the
    services, and the gate at the foot of the screen, the air between
-   giving way first on a short phone. */
-.today:has(> .gate-one) { flex: 1 0 auto; }
+   giving way first on a short phone.
+
+   And the gate never leaves the screen (owner-directed): the air was
+   the only thing that gave way, so a day with the pass strip, the
+   agenda, the basics and a shortfall over it put Depart under the tab
+   bar -- 117px under it at 360×725, measured. The foot docks like a
+   run's (.stage > .stage__foot): stuck on the dock's edge, the page's
+   own ground under it, and the screen's last gutter moved into it so
+   the gate stands where it stood whether it is stuck or not. */
+.today:has(> .gate-one) { flex: 1 0 auto; padding-bottom: 0; }
 .gate-one {
   flex: 1 0 auto;
   display: flex;
@@ -8687,9 +8695,20 @@ textarea:focus-visible {
 }
 .gate-one__air { flex: 1 1 auto; }
 .gate-one__foot {
+  position: sticky;
+  bottom: var(--dock-bottom);
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
+  padding-bottom: var(--sp-6);
+  /* The ground, edge to edge, and over it a fade the height of the gap
+     above: what scrolls under the gate goes under the page rather than
+     being cut at a rule. Painted as a border image because its outset
+     is ink, not layout -- negative margins bleeding the foot to the
+     screen's edges would make the page a gutter wider than the phone.
+     The fade lies in the gap while nothing is under it. */
+  border-image: linear-gradient(to bottom, transparent, var(--bg-main) var(--sp-4)) fill 0 / 0 / var(--sp-4) var(--sp-5) 0;
 }
 .gate-card--one .gate-card__figure { flex-wrap: wrap; gap: var(--sp-3); }
 .gate-card--one .gate-card__count { font-size: var(--fs-display); }
@@ -18785,6 +18804,60 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     flex: 1 1 auto;
     min-height: 0;
   }
+  /* ── The run on one screen (owner-directed) ──
+     The chain above handed the board a room, but nothing bounded the
+     room: the screen is at least the window and grows with what it
+     holds, so the square took the card's width, the stage grew to hold
+     it and the page scrolled -- Show the answer under the floor at
+     360×725, and after the reveal the tiles over the board's foot and
+     Erase under them.
+
+     So a writing run's screen is the window, and the room is a size
+     container, as the desk's is (the 三面 block): what the stage has
+     left, never what the board asks for, the square the smaller of its
+     two sides. Under 160px the board stops shrinking and the screen
+     scrolls instead: a thumbnail is no writing surface. The floor is in
+     the sum as well as on the room, because a room held up by its
+     min-height reads 0 for 100cqh in Chromium, not its height -- and so
+     does one whose height the flex chain only finds after a first pass
+     at the content's, which is why the screen's height is set and not
+     left to its min-height. */
+  .screen:has(> .stage > .drawing-quiz) {
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+  }
+  .screen > .stage:has(> .drawing-quiz) { position: relative; }
+  .stage > .drawing-quiz .canvas-wrap {
+    --canvas-cap: min(100cqw, 440px, max(160px, 100cqh));
+    min-height: 160px;
+    container-type: size;
+  }
+  .stage > .drawing-quiz .canvas-holder { max-height: none; }
+  /* The board's two buttons stand in the rating bar's slot, which every
+     card holds from its first paint (.rating-bar--idle) and which stood
+     empty under them until the reveal: 96px the board could not have.
+     Laid over the slot rather than in the flow, so the reveal swaps one
+     row of the thumb's for the other and the board does not move: the
+     slot's height (the tiles' 64px and its padding) and the card's
+     column (.stage__foot's gutter), the pair centred where the tiles
+     will stand. Pressed, the slot is the bar's: Erase goes with Show
+     the answer, as the drill it served is over once the answer is laid
+     on the board. */
+  .stage > .drawing-quiz .drawing-quiz__actions {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 1;
+    align-items: center;
+    max-width: none;
+    min-height: calc(64px + 2 * var(--sp-3));
+    margin: 0;
+    padding-block: var(--sp-3);
+    padding-inline: max(var(--sp-5), calc((100% - var(--card-w)) / 2 + var(--sp-5)));
+  }
+  .stage > .drawing-quiz .drawing-quiz__clear { min-height: 44px; }
+  .stage > .drawing-quiz .drawing-quiz__actions:has(> .drawing-quiz__validate--spent) { display: none; }
   /* The kanji reveal stacks on a phone: the readings under the
      meaning, centred, never squeezed beside it. The sideways wipe
      that opens the desktop panel is replaced by a plain fade, since

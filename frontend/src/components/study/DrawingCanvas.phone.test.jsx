@@ -1,10 +1,17 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from 'vitest/browser'
+import { useState } from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 import PromptCard from './PromptCard'
-import { CharDisplay } from './QuizComponents'
+import { CharDisplay, MeaningDisplay } from './QuizComponents'
 import { DrawingQuiz } from './DrawingCanvas'
 import RatingBar from './RatingBar'
+import { StudyStage } from './StudyStage'
+import { useChrome } from '../chrome/useChrome'
+import { startTally } from '../../stores/runTally'
+import { seedSummary } from '../../stores/profileSummary'
 // Same stylesheet-import trick as the other lane's tests: the rules
 // this file pins only exist once the real sheet is loaded.
 import '../../index.css'
@@ -106,9 +113,13 @@ describe('the drawing board at phone width', () => {
     // lane's own harness sits a few pixels above it.)
     const stage = screen.container.querySelector('.stage')
     expect(stage.scrollHeight).toBeLessThanOrEqual(stage.clientHeight)
-    // And the board clears the docked bar rather than sliding under it.
-    expect(rect(screen.container.querySelector('.canvas-clear-btn')).bottom)
-      .toBeLessThanOrEqual(rect(screen.container.querySelector('.rating-bar')).top)
+    // And the board clears the docked bar rather than sliding under it;
+    // its two buttons stand in the bar's slot until the reveal.
+    const bar = rect(screen.container.querySelector('.rating-bar'))
+    const actions = rect(screen.container.querySelector('.drawing-quiz__actions'))
+    expect(card.bottom).toBeLessThanOrEqual(bar.top)
+    expect(actions.top).toBeGreaterThanOrEqual(bar.top - 1)
+    expect(actions.bottom).toBeLessThanOrEqual(bar.bottom + 1)
   })
 
   it('lays the correction on the board rather than beside it', async () => {
@@ -177,4 +188,86 @@ describe('the drawing board at phone width', () => {
     // No dash animation was set up: every stroke is already drawn.
     expect(svg.querySelector('path').style.strokeDasharray).toBe('')
   })
+})
+
+// ── 一画面 — the run on one screen (owner-directed) ──────────
+// The board's room was handed whatever the stage had left, but nothing
+// bounded the stage: the square took the card's width and the page
+// scrolled under it -- at 360×725, the owner's phone, Show the answer
+// stood under the level floor, and after the reveal the tiles lay over
+// the board's foot with Erase under them. The run is the window now:
+// the board is what the head, the prompt, the bar's slot and the floor
+// leave, its two buttons stand in the bar's slot, and the reveal swaps
+// them for the tiles without moving the board.
+function Frame() {
+  useChrome('stage')
+  const [revealed, setRevealed] = useState(false)
+  return (
+    <div className="phone phone--stage">
+      <StudyStage where="Kanji N5" sub="Tracer le kanji" remaining={36} onLeave={() => {}} leaveLabel="Kanji" records color="var(--line-kanji)">
+        <div className="quiz-card-stage specimen-card-stage">
+          <div className="card-transition"><div className="card-transition-live">
+            <PromptCard foot={{ left: 'N5 漢字', right: 'Tracer le kanji' }}>
+              <MeaningDisplay meaning="Être humain; personne" size={32} />
+              <div className="quiz-subtitle">(ジン・ニン・ひと・~り・~と)</div>
+            </PromptCard>
+          </div></div>
+        </div>
+        <DrawingQuiz kanji="人" resetKey="k1" onValidate={() => setRevealed(true)} />
+        <RatingBar active={revealed} onRate={() => {}} scale="simple" />
+      </StudyStage>
+    </div>
+  )
+}
+
+describe('the drawing run on one screen', () => {
+  afterEach(async () => { await page.viewport(390, 844) })
+
+  for (const [w, h] of [[390, 844], [360, 725]]) {
+    it(`fits ${w}×${h} before and after the reveal, the board the room that is left`, async () => {
+      await page.viewport(w, h)
+      startTally('draw')
+      seedSummary({ username: 'Aiko', level: 47, xp: 1658, xpPrevLevel: 1500, xpForNext: 2000 })
+      const screen = await render(<LangProvider><MemoryRouter><Frame /></MemoryRouter></LangProvider>)
+      await settled()
+      const q = sel => screen.container.querySelector(sel)
+      // Measured once the stage has risen into place (@keyframes arrive).
+      await Promise.all(q('.stage').getAnimations().map(a => a.finished.catch(() => {})))
+      const fits = () => {
+        expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight)
+        expect(q('.screen').scrollHeight).toBeLessThanOrEqual(q('.screen').clientHeight)
+      }
+
+      fits()
+      const board = rect(q('.canvas-board'))
+      const bar = rect(q('.rating-bar'))
+      const floor = rect(q('.run-floor'))
+      expect(Math.round(board.width)).toBe(Math.round(board.height))
+      // A writing surface, not a thumbnail: on the owner's phone it was
+      // 160 with the buttons in a row of their own.
+      expect(board.width).toBeGreaterThan(w === 360 ? 220 : 300)
+      expect(rect(q('.drawing-quiz__card')).bottom).toBeLessThanOrEqual(bar.top)
+      expect(Math.round(bar.bottom)).toBe(Math.round(floor.top))
+      expect(Math.round(floor.bottom)).toBe(h)
+      // Show the answer and Erase, in the bar's slot, at a thumb's size.
+      const go = rect(q('.drawing-quiz__validate'))
+      const erase = rect(q('.drawing-quiz__clear'))
+      for (const b of [go, erase]) {
+        expect(b.top).toBeGreaterThanOrEqual(bar.top)
+        expect(b.bottom).toBeLessThanOrEqual(bar.bottom)
+        expect(b.height).toBeGreaterThanOrEqual(44)
+      }
+
+      q('.drawing-quiz__validate').click()
+      await settled()
+      fits()
+      // The tiles take the slot; the board has not moved.
+      expect(q('.rating-bar--idle')).toBe(null)
+      expect(getComputedStyle(q('.drawing-quiz__actions')).display).toBe('none')
+      const after = rect(q('.canvas-board'))
+      expect(after.top).toBe(board.top)
+      expect(after.width).toBe(board.width)
+      expect(rect(q('.rating-bar')).top).toBe(bar.top)
+    })
+  }
 })

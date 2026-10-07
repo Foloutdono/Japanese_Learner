@@ -981,7 +981,10 @@ shadow (the halo is its shadow), and the family's one disabled treatment
 is the primary button above. On Today the gate is closed (its outline) when
 nothing is chosen or the balance cannot pay, and wakes when a lane is
 switched back on; on the desk it takes the fare's right column, or the row's
-width under the fare's figures when the gate is too narrow for both.
+width under the fare's figures when the gate is too narrow for both. On a
+phone it never leaves the screen (owner-directed): the foot — the shortfall
+and the gate — docks on the tab bar on the page's own ground, and a day
+taller than the phone scrolls under it (held by `src/todayFit.phone.test.jsx`).
 
 ### The tour (発見, plan 187)
 
@@ -1244,7 +1247,13 @@ scrolls away:
   space around it;
 - the rating bar is **docked**, stuck above the level HUD and clear of the
   home bar, with its space reserved from the first paint so revealing a card
-  never moves it. `--hud-h` is the one number every docked thing clears by.
+  never moves it. `--hud-h` is the one number every docked thing clears by;
+- **a writing run is one screen** (owner-directed): its screen is the window,
+  the board is the square the head, the prompt, the bar's slot and the floor
+  leave (never under 160px, where the screen scrolls instead), and Show the
+  answer and Erase stand in the bar's reserved slot until the reveal swaps
+  the tiles in, so the board does not move (held by
+  `components/study/DrawingCanvas.phone.test.jsx`).
 
 A card taller than the screen scrolls the page behind that docked edge —
 except for **a card that is a page of prose**, which is bounded to the screen
