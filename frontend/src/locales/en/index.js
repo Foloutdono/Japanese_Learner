@@ -2895,9 +2895,10 @@ const clrMilestones = {
   msRestEarned: 'rest day',
   msRestNote: 'Miss a day and your streak holds.',
   msWeekFullAria: (from, to) => `A full week: seven days stamped, ${from} to ${to}`,
-  msMonthLabel: 'The month’s ticket',
+  msTicketLabel: days => (days === 30 ? 'The month’s ticket' : days === 365 ? 'The year’s ticket' : `The ${days}-day ticket`),
   msSheetAria: (n, from, to) => `Stamp sheet: ${n} days in a row, ${from} to ${to}`,
-  msTotalAria: (total, run, prime, ticket) => `+${total} xp: +${run} trip, +${prime} streak bonus, +${ticket} month’s ticket`,
+  msTotalAria: (total, run, prime, ticket, days = 30) => `+${total} xp: +${run} trip, +${prime} streak bonus, +${ticket} ${days === 30 ? 'month’s ticket' : days === 365 ? 'year’s ticket' : `${days}-day ticket`}`,
+  msFareAria: (n, days = 30) => `+${n} xp, ${days === 30 ? 'the month’s ticket' : days === 365 ? 'the year’s ticket' : `the ${days}-day ticket`}`,
   msTicketMonthAria: (no, date) => `The month’s ticket: a month in a row, number ${no}, issued ${date}`,
 }
 // ── 191:milestones end ──
