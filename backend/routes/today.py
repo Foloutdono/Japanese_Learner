@@ -765,6 +765,9 @@ def post_today_clear(user_id: str = Depends(get_user_id)):
         "next_jackpot": xp_math.jackpot_for(following),
         "rest": {"held": held, "earned": rest_earned, "next_at": _rest_next(streak, held)},
         "week": srs.week_row(user_id),
+        # The month's sheet (plan 191): the thirty days the month's
+        # ceremony inks, only on the day it plays.
+        "month": srs.week_row(user_id, 30) if xp_math.clear_tier(milestone) == "month" else None,
         "xp": xp,
         "level": level,
         "tomorrow": _tomorrow(user_id, queue.level),

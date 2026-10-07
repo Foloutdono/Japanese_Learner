@@ -1517,16 +1517,17 @@ class SRSEngine:
                 cur.execute(sql, (user_id,))
                 return [{"days": int(m), "day": d.isoformat()} for m, d in cur.fetchall()]
 
-    def week_row(self, user_id: str) -> list[dict[str, str]]:
+    def week_row(self, user_id: str, days: int = 7) -> list[dict[str, str]]:
         """The seven UTC days ending today, oldest first, as the week row
         under a cleared day draws them (plan 191): each {day, kanji,
         state}, the state "studied", "rest" (a rest ticket bridged it),
-        "missed", or "today" for today not yet studied."""
+        "missed", or "today" for today not yet studied. `days` widens it
+        to the month's sheet (30) the month's ceremony inks."""
         today = datetime.now(timezone.utc).date()
         studied = self._studied_days(user_id)
         rested = self._rest_days(user_id)
         row = []
-        for back in range(6, -1, -1):
+        for back in range(days - 1, -1, -1):
             day = today - timedelta(days=back)
             if day in studied:
                 state = "studied"

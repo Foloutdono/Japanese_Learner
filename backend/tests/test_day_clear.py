@@ -315,6 +315,15 @@ def test_the_thirtieth_day_is_the_month(client, learner):
     assert (body["streak"], body["milestone"], body["tier"]) == (30, 30, "month")
     assert (body["bonus"], body["jackpot"]) == (175, 1000)
     assert (body["next_milestone"], body["next_jackpot"]) == (50, 1500)
+    # The month's sheet: thirty days ending today, all studied here.
+    assert len(body["month"]) == 30
+    assert body["month"][-1]["day"] == _today().isoformat()
+    assert {d["state"] for d in body["month"]} == {"studied"}
+
+
+def test_only_the_month_carries_the_month_sheet(client, learner):
+    _studied(learner, range(0, 7))
+    assert _clear(client, learner)["month"] is None
 
 
 def test_a_rest_day_is_earned_at_7_and_14_and_two_are_held_at_most(learner):
