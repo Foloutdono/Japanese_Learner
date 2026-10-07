@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   kanjiNumber, ticketName, ticketRoute, ticketNumber, clearTier, milestoneLadder,
   sealDate, ticketDate, weekdayKanji, daysBefore, verdictOf, cardFace, pileCounts, runMarks,
-  levelBar, clearPaid, fareTotal, clearModel, restWeek,
+  levelBar, clearPaid, fareTotal, clearModel, restWeek, runXp,
 } from './dayClear'
 import {
   CARDS_32, RUN_DAY, CLEAR_DAY, CLEAR_TICKET7, CLEAR_MONTH30, RUN_MONTH30, REST_WEEK, TODAY,
@@ -78,6 +78,19 @@ describe('the fare and the level bar', () => {
     expect(clearPaid({ ...CLEAR_DAY, already: true })).toBe(0)
     expect(clearPaid({ cleared: false })).toBe(0)
     expect(fareTotal(CLEAR_DAY, RUN_DAY)).toBe(252)
+  })
+
+  it('takes the run\'s XP as its reviews wrote it, when the server says', () => {
+    // The previews summed 197; the reviews wrote 160 (a review's XP
+    // shrinks as the day's count grows).
+    const counted = { ...CLEAR_DAY, run_xp: 160 }
+    expect(runXp(counted, RUN_DAY)).toBe(160)
+    expect(runXp(CLEAR_DAY, RUN_DAY)).toBe(197)
+    expect(runXp({ ...CLEAR_DAY, run_xp: null }, RUN_DAY)).toBe(197)
+    expect(fareTotal(counted, RUN_DAY)).toBe(215)
+    const model = clearModel(counted, RUN_DAY)
+    expect(model.fare).toMatchObject({ run: 160, total: 215 })
+    expect(model.level).toEqual(levelBar(CLEAR_DAY.level, 215))
   })
 
   it('fills level 14 from 38 % to 64 % on the everyday fare', () => {

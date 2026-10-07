@@ -693,8 +693,19 @@ def _level_figures(user_id: str) -> dict:
     return {"level": level, "into": lifetime - floor, "span": xp_math.xp_threshold(level + 1) - floor}
 
 
+# Reviews a run may count for its XP: well past any run's length, a
+# ceiling on the rows one question reads.
+RUN_REVIEWS_MAX = 2000
+
+
+class TodayClearPayload(BaseModel):
+    # How many reviews the run made (its `cleared`), for `run_xp`.
+    reviews: int | None = Field(default=None, ge=0)
+
+
 @router.post("/api/today/clear")
-def post_today_clear(user_id: str = Depends(get_user_id)):
+def post_today_clear(payload: TodayClearPayload | None = None,
+                     user_id: str = Depends(get_user_id)):
     """
     終着 (plan 191): the run is over -- is the day?
 
@@ -705,12 +716,18 @@ def post_today_clear(user_id: str = Depends(get_user_id)):
     the first, with no XP), and the answer carries what the ceremony
     draws: the streak and its milestone, the rest days, the week, the
     level after paying and tomorrow's ride. Always 200.
+
+    Given the run's `reviews`, either answer carries `run_xp`, what those
+    reviews earned as written (srs.get_run_xp): the run's own figure,
+    reckoned from its cards' previews, runs high on a long run.
     """
     bridge_rest_days(user_id)
     today = datetime.now(timezone.utc).date()
     queue = _day_queue(user_id)
     remaining = queue.total
     figures = srs.streak_figures(user_id)
+    reviews = payload.reviews if payload else None
+    run_xp = srs.get_run_xp(user_id, min(reviews, RUN_REVIEWS_MAX)) if reviews is not None else None
 
     if remaining > 0 or srs.get_reviews_today(user_id) == 0:
         spr = None
@@ -725,6 +742,7 @@ def post_today_clear(user_id: str = Depends(get_user_id)):
             "remaining": remaining,
             "seconds_per_review": spr,
             "preview": _paid_preview(row) if row else _clear_preview(figures["today"]),
+            "run_xp": run_xp,
         }
 
     # Today is studied, so the streak counts it.
@@ -769,6 +787,7 @@ def post_today_clear(user_id: str = Depends(get_user_id)):
         # ceremony inks, only on the day it plays.
         "month": srs.week_row(user_id, 30) if xp_math.clear_tier(milestone) == "month" else None,
         "xp": xp,
+        "run_xp": run_xp,
         "level": level,
         "tomorrow": _tomorrow(user_id, queue.level),
     }

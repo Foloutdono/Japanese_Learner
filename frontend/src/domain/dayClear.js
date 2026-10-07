@@ -208,9 +208,17 @@ export function clearPaid(result) {
   return (result.bonus ?? 0) + (result.jackpot ?? 0)
 }
 
+/** What the run earned: the server's sum of its reviews as written
+ *  (`run_xp`) when it has one, else the run's own, summed from its
+ *  cards' previews -- which run high on a long run, a review's XP
+ *  shrinking as the day's count grows. */
+export function runXp(result, run) {
+  return Number.isFinite(result?.run_xp) ? result.run_xp : (run?.xp ?? 0)
+}
+
 /** The whole fare a ceremony prints: the run's XP plus what the clear paid. */
 export function fareTotal(result, run) {
-  return (run?.xp ?? 0) + clearPaid(result)
+  return runXp(result, run) + clearPaid(result)
 }
 
 // ── What a ceremony draws, in one object ─────────────────────────────
@@ -238,7 +246,7 @@ export function clearModel(result, run) {
   const cards = run?.cards ?? []
   const day = result?.day ?? null
   const paid = clearPaid(result)
-  const runXp = run?.xp ?? 0
+  const earned = runXp(result, run)
   return {
     tier: result?.tier ?? clearTier(result?.milestone),
     streak: result?.streak ?? 0,
@@ -253,12 +261,12 @@ export function clearModel(result, run) {
     marks: runMarks(cards),
     minutes: run?.minutes ?? null,
     fare: {
-      run: runXp,
+      run: earned,
       bonus: result?.already ? 0 : (result?.bonus ?? 0),
       jackpot: result?.already ? 0 : (result?.jackpot ?? 0),
-      total: runXp + paid,
+      total: earned + paid,
     },
-    level: levelBar(result?.level, runXp + paid),
+    level: levelBar(result?.level, earned + paid),
     tomorrow: result?.tomorrow ?? null,
     next: { milestone: result?.next_milestone ?? null, jackpot: result?.next_jackpot ?? null },
     rest: result?.rest ?? { held: 0, earned: false, next_at: null },

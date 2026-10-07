@@ -33,6 +33,8 @@ describe('asking whether the day is cleared', () => {
     await settle()
     expect(api.apiJson).toHaveBeenCalledTimes(1)
     expect(api.apiJson).toHaveBeenCalledWith('/api/today/clear', SESSION, expect.objectContaining({ method: 'POST' }))
+    // The run's count, for the server's sum of what its reviews wrote.
+    expect(JSON.parse(api.apiJson.mock.calls[0][2].body)).toEqual({ reviews: RUN_DAY.cleared })
     expect(peekDayClear(RUN_DAY)).toMatchObject({ status: 'cleared', result: CLEAR_DAY, levelUp: null })
   })
 

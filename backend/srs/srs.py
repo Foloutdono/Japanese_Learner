@@ -788,6 +788,32 @@ class SRSEngine:
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
+    def get_run_xp(self, user_id: str, reviews: int) -> int:
+        """What a run earned (plan 191): the XP its `reviews` reviews
+        wrote, the learner's latest that many today. The card's preview
+        cannot say it -- a review's XP shrinks as the day's count grows
+        (xp_math.compute_review_xp), and a batch's previews were all
+        reckoned at the count it was fetched at -- and the run's own
+        clock cannot pick its rows out, so the run counts them instead."""
+        if reviews <= 0:
+            return 0
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT COALESCE(SUM(xp_earned), 0) FROM (
+                        SELECT xp_earned FROM review_log
+                        WHERE card_id LIKE %s
+                          AND reviewed_at >= date_trunc('day', NOW())
+                        ORDER BY id DESC
+                        LIMIT %s
+                    ) AS run
+                """
+                self._log_sql("run_xp", sql, (pattern, reviews))
+                cur.execute(sql, (pattern, reviews))
+                row = cur.fetchone()
+        return int(row[0]) if row else 0
+
     def _compute_review_xp(self, user_id: str, quality: int) -> int:
         # No streak in it any more: the streak is paid once a day, when
         # the day is cleared (plan 191, xp_math.day_clear_bonus).

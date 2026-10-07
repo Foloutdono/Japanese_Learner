@@ -82,6 +82,13 @@ export function finishShown(run) {
   try { return window.sessionStorage.getItem(ASKED_KEY) === key } catch { return false }
 }
 
+// The run's count of reviews: the server sums what those reviews wrote
+// for the run's XP (`run_xp`), the run's own sum of its previews
+// running high on a long run.
+function clearBody(run) {
+  return JSON.stringify(Number.isInteger(run?.cleared) && run.cleared >= 0 ? { reviews: run.cleared } : {})
+}
+
 /** Ask once for this run; a second call for the same run does nothing. */
 export function requestClear(run, session) {
   const key = runKey(run)
@@ -89,7 +96,7 @@ export function requestClear(run, session) {
   noteAsked(key)
   set(key, LOADING)
   reviewsSettled()
-    .then(() => apiJson('/api/today/clear', session, { method: 'POST', body: '{}' }))
+    .then(() => apiJson('/api/today/clear', session, { method: 'POST', body: clearBody(run) }))
     .then(result => {
       const cleared = Boolean(result?.cleared)
       const levelUp = cleared ? payInto(result) : null

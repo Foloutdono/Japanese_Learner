@@ -4,7 +4,7 @@ import { playArrival } from '../../lib/audio'
 import { useBoxSize } from '../../hooks/useBoxWidth'
 import { EnterKey } from '../chrome/DeskKeys'
 import { ClearHeader, XpTotal, QuietButton, GateButton, Seal } from './kit'
-import { sealDate, utcToday, weekdayKanji } from '../../domain/dayClear'
+import { runXp, sealDate, utcToday, weekdayKanji } from '../../domain/dayClear'
 
 // ── 途中下車 — a run that ended with cards left today (plan 191) ───────
 // The canvas's Partial board (390×844): "Trajet terminé" -- the leg's
@@ -149,7 +149,7 @@ export default function PartialFinish({ result, run, desk = false, reduced = fal
         </li>
         <li className={['ptl__fig', ent('fig2')].filter(Boolean).join(' ')} style={{ '--d': '90ms' }}>
           <XpTotal
-            value={run?.xp ?? 0}
+            value={runXp(result, run)}
             unit={null}
             shine={!reduced}
             shineDelay={900}

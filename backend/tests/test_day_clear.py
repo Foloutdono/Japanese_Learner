@@ -180,6 +180,7 @@ def test_not_cleared_while_cards_remain(client, learner):
         "remaining": 1,
         "seconds_per_review": None,
         "preview": {"streak": 5, "bonus": 50, "jackpot": 0, "milestone": None},
+        "run_xp": None,
     }
     assert _ledger(learner) == []
     with acting_as(learner):
@@ -252,6 +253,59 @@ def test_the_day_is_paid_exactly_once(client, learner):
     assert srs.get_lifetime_xp(learner) == xp_after_first
     assert len(_ledger(learner)) == 1
     assert len(_events(learner, "day_clear")) == 1
+
+
+def _review_worth(uid, xp, n=1):
+    """`n` reviews logged now, each worth `xp`."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            for _ in range(n):
+                cur.execute(
+                    "INSERT INTO review_log (card_id, mode, quality, xp_earned) VALUES (%s, %s, 4, %s)",
+                    (f"{uid}:{CARD}", F2B, xp),
+                )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _clear_run(client, uid, reviews):
+    with acting_as(uid):
+        r = client.post("/api/today/clear", json={"reviews": reviews})
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def test_the_run_s_xp_is_what_its_own_reviews_wrote(client, learner):
+    # A review's XP shrinks as the day's count grows, so the previews a
+    # run summed run high; the clear reads what the run's reviews wrote:
+    # the latest `reviews` of today's rows, not an earlier run's.
+    _studied(learner, [1, 2])
+    _review(learner, 0, n=3)            # an earlier run today, 7 each
+    _review_worth(learner, 4, n=2)      # this run's two reviews
+    body = _clear_run(client, learner, 2)
+    assert body["cleared"] is True
+    assert body["run_xp"] == 8
+    # Never past today's rows, however many the run claims.
+    again = _clear_run(client, learner, 50)
+    assert again["already"] is True and again["run_xp"] == 3 * 7 + 2 * 4
+    # Asked without a count, the answer has no figure for the run.
+    assert _clear(client, learner)["run_xp"] is None
+
+
+def test_a_partial_run_s_xp_is_counted_too(client, learner):
+    _studied(learner, [1])
+    _review_worth(learner, 5, n=4)
+    _schedule(learner, OTHER_CARD, timedelta(hours=-1))
+    body = _clear_run(client, learner, 4)
+    assert body["cleared"] is False and body["run_xp"] == 20
+
+
+def test_a_run_s_count_is_never_negative(client, learner):
+    with acting_as(learner):
+        r = client.post("/api/today/clear", json={"reviews": -1})
+    assert r.status_code == 422
 
 
 def test_tomorrow_counts_what_falls_due_and_the_minutes_it_takes(client, learner):
