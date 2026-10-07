@@ -6,7 +6,8 @@
 // learner to find. Two readings, one per kind of answer:
 //
 //   diffWords  -- a romaji answer (reading, dictation) against the
-//                 sentence's romaji, word by word;
+//                 sentence's romaji, word by word, or by letters where
+//                 the learner's words are not the sentence's (below);
 //   diffChars  -- a Japanese sentence (composition) against the tutor's
 //                 corrected one, character by character, and
 //                 correctionParts laying the corrected sentence's
@@ -78,6 +79,210 @@ export function isRomajiAnswer(text) {
   return /[a-z]/i.test(text ?? '') && !/[぀-ヿ㐀-鿿]/u.test(text ?? '')
 }
 
+// ── A stretch that will not pair word for word ──
+// Words are how the two answers are paired, and a learner who types no
+// spaces ("chichiwaeigo") or the wrong ones has not written the
+// sentence's words. Paired by words alone, the whole stretch is one
+// miss: the three words they had right struck with the one they had not
+// (the owner's screenshots: 日曜日に来ることができます typed as
+// "kyoguwanikurukotogadekimasu", every word marked wrong for one slip;
+// 父は英語が上手です typed as "chichiwaeigo", the three words it had
+// right struck with the two it had not got to).
+//
+// So a stretch whose words cannot be paired is read by LETTERS, along
+// the reference's own word boundaries: the typed letters are cut into
+// one slice for each reference word, the cuts chosen where the whole
+// costs fewest edits. A slice that spells its word is right, whatever
+// spaces it was typed with; one that is a slip away from it is that
+// word, missed; a word with no slice is left out, and letters no word
+// would take stand in the place of the words they sit by (one miss).
+// A slice may only claim a word it is a slip away from: without that a
+// single stray letter would be dealt to a word nine letters long, cheaper
+// than leaving it out, and the cut would smear the answer thin.
+const SKIP = 1 // a letter of a reference word the answer has nothing for
+const STRAY = 2 // typed letters no word takes: what it costs to begin such a run...
+const STRAY_MORE = 0.5 // ...and each letter after the first, so "kyoguwa" is one run and never "kyoguw" + a slip of the next word
+const REACH = 4 // letters past a word's length that its slice may run
+const SLIP = 0.4 // the share of its longer side a slice may differ from its word by
+const SOONER = 0.001 // a word left out dearer the earlier it stands: a tie reads the answer from the sentence's start
+const SLIPPED = 0.5 // the price of a word written with a slip over the same word right: ties go to the clean reading
+const EVIDENCE = 1 / 2 // the share of the typed letters a cut must find in the reference, or the answer is another sentence
+const RUN_LIMIT = 20000 // typed letters x reference words past which no cut is looked for
+
+// A typed word as plain letters, each with the characters it was typed
+// as, so a slice can be printed as the learner typed it (a macron kept).
+function typedLetters(word) {
+  const letters = []
+  const from = []
+  const to = []
+  let at = 0
+  for (const c of word) {
+    for (const l of plainLetters(c).replace(/[^a-z]/g, '')) {
+      letters.push(l)
+      from.push(at)
+      to.push(at + c.length)
+    }
+    at += c.length
+  }
+  return { word, letters: letters.join(''), from, to }
+}
+
+// Edit distance between two strings.
+function distance(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j)
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i]
+    for (let j = 1; j <= b.length; j++) {
+      row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+    }
+    prev = row
+  }
+  return prev[b.length]
+}
+
+/**
+ * The typed words `typed` against the reference words `ref` (folded:
+ * `folded`, the first of them number `at` in the whole sentence) cut by
+ * letters, as diffWords' segments; null when no cut is looked for (a
+ * word without letters, a stretch too long).
+ */
+function cutByLetters(typed, ref, folded, at) {
+  const words = typed.map(typedLetters)
+  if (words.some(w => !w.letters) || folded.some(f => !f)) return null
+  const T = words.map(w => w.letters).join('')
+  const n = T.length
+  const m = ref.length
+  if (n * m > RUN_LIMIT) return null
+  // Where each typed word stands in T.
+  const base = []
+  const owner = []
+  words.forEach((w, k) => {
+    base.push(owner.length)
+    for (let c = 0; c < w.letters.length; c++) owner.push(k)
+  })
+  const folds = new Map()
+  const foldSlice = s => {
+    if (!folds.has(s)) folds.set(s, foldWord(s))
+    return folds.get(s)
+  }
+  // The cheapest way to have dealt with the first i reference words and
+  // the first p typed letters, and how it was reached.
+  const width = n + 1
+  const cost = new Float64Array((m + 1) * width).fill(Infinity)
+  const how = new Uint8Array((m + 1) * width) // 1 left out, 2 a slice, 3 a run of stray letters
+  const back = new Int32Array((m + 1) * width)
+  const relax = (i, p, c, kind, from) => {
+    if (c < cost[i * width + p]) {
+      cost[i * width + p] = c
+      how[i * width + p] = kind
+      back[i * width + p] = from
+    }
+  }
+  cost[0] = 0
+  for (let i = 0; i <= m; i++) {
+    for (let p = 0; p <= n; p++) {
+      const c = cost[i * width + p]
+      if (c === Infinity) continue
+      for (let q = p + 1; q <= n; q++) relax(i, q, c + STRAY + STRAY_MORE * (q - p - 1), 3, p)
+      if (i === m) continue
+      relax(i + 1, p, c + SKIP * folded[i].length * (1 + SOONER * (m - i)), 1, p)
+      for (let q = p + 1; q <= Math.min(n, p + folded[i].length + REACH); q++) {
+        const slice = foldSlice(T.slice(p, q))
+        const d = distance(slice, folded[i])
+        if (d <= Math.max(1, Math.floor(SLIP * Math.max(slice.length, folded[i].length)))) relax(i + 1, q, c + d + (d ? SLIPPED : 0), 2, p)
+      }
+    }
+  }
+  // The way back: what became of each reference word and typed letter.
+  const steps = []
+  for (let i = m, p = n; i || p;) {
+    const kind = how[i * width + p]
+    const from = back[i * width + p]
+    if (kind === 1) steps.push({ out: i - 1 })
+    else if (kind === 2) steps.push({ word: i - 1, p: from, q: p })
+    else steps.push({ added: true, p: from, q: p })
+    if (kind !== 3) i--
+    if (kind !== 1) p = from
+  }
+  steps.reverse()
+  // A cut that explains little of what was typed is a guess dressed as a
+  // reading: the answer is another sentence, struck whole. (What the
+  // answer lacks is no evidence against the cut: one cut short is right
+  // as far as it goes.)
+  const found = steps.reduce((sum, s) => {
+    if (s.word == null) return sum
+    return sum + Math.max(0, folded[s.word].length - distance(foldSlice(T.slice(s.p, s.q)), folded[s.word]))
+  }, 0)
+  if (found < EVIDENCE * n) return null
+  // The typed text of letters [p, q), as it was typed.
+  const textOf = (p, q) => {
+    const parts = []
+    for (let k = p; k < q;) {
+      const w = owner[k]
+      let e = k
+      while (e + 1 < q && owner[e + 1] === w) e++
+      parts.push(words[w].word.slice(words[w].from[k - base[w]], words[w].to[e - base[w]]))
+      k = e + 1
+    }
+    return parts.join(' ')
+  }
+  // Words left out and letters added, side by side, are one word in
+  // another's place: a miss. Letters added beside a word left out in
+  // another stretch are just that, so only runs holding both are joined.
+  const out = []
+  let sameStart = -1
+  let sameEnd = -1 // where the last right word's letters end, while it is the last thing said
+  let done = 0 // reference words dealt with so far, where a word added stands
+  for (let k = 0; k < steps.length;) {
+    const s = steps[k]
+    if (s.word != null) {
+      const slice = foldSlice(T.slice(s.p, s.q))
+      const kind = slice === folded[s.word] ? 'same' : loosen(slice) === loosen(folded[s.word]) ? 'near' : 'miss'
+      const given = textOf(s.p, s.q)
+      done = s.word + 1
+      const last = out[out.length - 1]
+      if (kind === 'same' && last?.kind === 'same' && sameEnd === s.p && owner[s.p - 1] === owner[s.p]) {
+        // Right words cut from one typed word are the word as typed.
+        last.text = textOf(sameStart, s.q)
+        last.ref[1] = at + done
+      } else if (kind === 'same') {
+        sameStart = s.p
+        out.push({ kind, text: given, ref: [at + s.word, at + done] })
+      } else out.push({ kind, given, right: ref[s.word], ref: [at + s.word, at + done] })
+      sameEnd = kind === 'same' ? s.q : -1
+      k++
+      continue
+    }
+    sameEnd = -1
+    let end = k
+    while (end < steps.length && steps[end].word == null) end++
+    const stretch = steps.slice(k, end)
+    const left = stretch.filter(x => x.out != null)
+    const added = stretch.filter(x => x.added)
+    if (left.length && added.length) {
+      const first = left[0].out
+      const last = left[left.length - 1].out
+      out.push({
+        kind: 'miss',
+        given: added.map(x => textOf(x.p, x.q)).join(' '),
+        right: ref.slice(first, last + 1).join(' '),
+        ref: [at + first, at + last + 1],
+      })
+      done = last + 1
+    } else if (left.length) {
+      // Words left out one after another are one stretch, under one caret.
+      const first = left[0].out
+      const last = left[left.length - 1].out
+      out.push({ kind: 'missing', right: ref.slice(first, last + 1).join(' '), ref: [at + first, at + last + 1] })
+      done = last + 1
+    } else {
+      for (const x of added) out.push({ kind: 'extra', given: textOf(x.p, x.q), ref: [at + done, at + done] })
+    }
+    k = end
+  }
+  return out
+}
+
 // The longest common subsequence of two lists under `same`, as the
 // pairs of indices it keeps, in order.
 function commonPairs(a, b, same) {
@@ -114,10 +319,42 @@ function commonPairs(a, b, same) {
  * (empty for an added word), which refSpans places in the Japanese.
  *
  * Words run together or split apart ("kakanakerebanarimasen") are the
- * same answer and read as such. Null for an answer not in romaji.
+ * same answer and read as such, and a wrong word in an answer typed
+ * without its spaces is marked alone, the words round it kept: the
+ * answer is read by its letters where that marks fewer of them than
+ * pairing the words does (cutByLetters). Null for an answer not in
+ * romaji.
  */
 export function diffWords(given, reference) {
   if (!isRomajiAnswer(given)) return null
+  const byWords = pairWords(given, reference)
+  if (!byWords.some(s => s.kind !== 'same')) return byWords
+  // Pairing by words strikes a whole stretch when the words do not count
+  // alike; the same answer read by its letters (cutByLetters) marks only
+  // what is wrong. Whichever marks fewer letters is the reading.
+  const a = romajiWords(given)
+  const b = romajiWords(reference)
+  const byLetters = cutByLetters(a, b, b.map(foldWord), 0)
+  return byLetters && markedLetters(byLetters) < markedLetters(byWords) ? byLetters : byWords
+}
+
+// How much of an answer a reading marks, in letters: a word in another's
+// place is as long as the longer of the two, one heard short is half
+// that, a word left out or added its own length.
+function markedLetters(segments) {
+  const length = text => (text ?? '').replace(/[^a-z]/gi, '').length
+  return segments.reduce((sum, s) => {
+    if (s.kind === 'miss') return sum + Math.max(length(s.given), length(s.right))
+    if (s.kind === 'near') return sum + Math.max(length(s.given), length(s.right)) / 2
+    if (s.kind === 'missing') return sum + length(s.right)
+    if (s.kind === 'extra') return sum + length(s.given)
+    return sum
+  }, 0)
+}
+
+// An answer paired with the sentence word by word (the longest run of
+// words they share, then what stands between) -- the first reading.
+function pairWords(given, reference) {
   const a = romajiWords(given)
   const b = romajiWords(reference)
   const fa = a.map(foldWord)

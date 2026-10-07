@@ -47,6 +47,68 @@ describe('diffWords', () => {
     expect(diffWords('kite kudasai', 'kitte kudasai.')[0]).toEqual({ kind: 'miss', given: 'kite', right: 'kitte', ref: [0, 1] })
   })
 
+  // Plan 185's follow-up: an answer typed without its spaces had its
+  // whole stretch struck as one miss, the right words with the wrong.
+  describe('an answer whose words do not count like the sentence\'s', () => {
+    const kinds = segs => segs.map(s => `${s.kind}:${s.text ?? s.given ?? ''}${s.right ? '>' + s.right : ''}`)
+
+    it('marks only the wrong word of an answer run together', () => {
+      expect(diffWords('kyoguwanikurukotogadekimasu', 'nichiyoubi ni kuru koto ga dekimasu')).toEqual([
+        { kind: 'miss', given: 'kyoguwa', right: 'nichiyoubi', ref: [0, 1] },
+        { kind: 'same', text: 'nikurukotogadekimasu', ref: [1, 6] },
+      ])
+    })
+
+    it('names the words an answer run together did not reach', () => {
+      expect(diffWords('chichiwaeigo', 'chichi wa eigo ga jouzudesu')).toEqual([
+        { kind: 'same', text: 'chichiwaeigo', ref: [0, 3] },
+        { kind: 'missing', right: 'ga jouzudesu', ref: [3, 5] },
+      ])
+    })
+
+    it('names the one word left out of an answer run together', () => {
+      expect(kinds(diffWords('chichiwaeigojouzudesu', 'chichi wa eigo ga jouzudesu')))
+        .toEqual(['same:chichiwaeigo', 'missing:>ga', 'same:jouzudesu'])
+    })
+
+    it('reads a letter added or dropped as a slip of its word, not of its neighbours', () => {
+      expect(kinds(diffWords('chichiwaeigogajouzudesuyo', 'chichi wa eigo ga jouzudesu')))
+        .toEqual(['same:chichiwaeigoga', 'miss:jouzudesuyo>jouzudesu'])
+      expect(kinds(diffWords('chichiwaeigogajozudesu', 'chichi wa eigo ga jouzudesu')))
+        .toEqual(['same:chichiwaeigoga', 'near:jozudesu>jouzudesu'])
+    })
+
+    it('finds the wrong word when the spaces fall in the wrong places too', () => {
+      expect(kinds(diffWords('nichiyobi nikuru koto ga dekimasu', 'nichiyoubi ni kuru koto ga dekimasu')))
+        .toEqual(['near:nichiyobi>nichiyoubi', 'same:nikuru', 'same:koto', 'same:ga', 'same:dekimasu'])
+    })
+
+    it('reads an answer cut short from the start of the sentence, whatever a later word repeats', () => {
+      // The last "ni" is the first, not the one after "okurete".
+      expect(diffWords('yakusokunojikanni', 'yakusoku no jikan ni okurete, hontou ni sumimasen deshita')
+        .filter(s => s.kind !== 'missing')).toEqual([{ kind: 'same', text: 'yakusokunojikanni', ref: [0, 4] }])
+    })
+
+    it('takes the end of a word for the word, not for a short word that follows it', () => {
+      // "nihongo" ends in the "o" that is a word of its own two words on.
+      expect(kinds(diffWords('mainichinihongo', 'mainichi, nihongo o hanashimasu')))
+        .toEqual(['same:mainichinihongo', 'missing:>o hanashimasu'])
+    })
+
+    it('strikes another sentence whole rather than cut it at chance letters', () => {
+      expect(diffWords('watashiwagakuseidesu', 'chichi wa eigo ga jouzudesu')).toEqual([
+        { kind: 'miss', given: 'watashiwagakuseidesu', right: 'chichi wa eigo ga jouzudesu', ref: [0, 5] },
+      ])
+    })
+
+    it('keeps the answer as typed, whatever it is cut at', () => {
+      const given = 'Chichi-wa  EIGO,gajōzudesu'
+      const segs = diffWords(given, 'chichi wa eigo ga jouzudesu')
+      const printed = segs.map(s => s.text ?? s.given ?? '').join('')
+      expect(printed.replace(/[^a-zō]/gi, '').toLowerCase()).toBe(given.replace(/[^a-zō]/gi, '').toLowerCase())
+    })
+  })
+
   it('marks nothing on an answer that is not in romaji', () => {
     expect(isRomajiAnswer('ここで少し')).toBe(false)
     expect(diffWords('ここで少し休みましょう', 'koko de sukoshi yasumimashou.')).toBeNull()
@@ -124,6 +186,38 @@ describe('refSpans, missMarks and missedWords', () => {
     const missed = missedWords(segs, refSpans(REFERENCE, WORDS), WORDS)
     expect(missed.map(w => [w.text, w.kana])).toEqual([['で', 'で'], ['少し', 'すこし']])
     expect(missedWords(diffWords('koko de sukoshi yasumimashou', REFERENCE), refSpans(REFERENCE, WORDS), WORDS)).toEqual([])
+  })
+
+  it('marks only the words an answer run together got wrong (plan 185\'s follow-up)', () => {
+    const words = [
+      { text: '日曜日', kana: 'にちようび', romaji: 'nichiyoubi' },
+      { text: 'に', kana: 'に', romaji: 'ni' },
+      { text: '来る', kana: 'くる', romaji: 'kuru' },
+      { text: 'こと', kana: 'こと', romaji: 'koto' },
+      { text: 'が', kana: 'が', romaji: 'ga' },
+      { text: 'できます。', kana: 'できます。', romaji: 'dekimasu.' },
+    ]
+    const sentence = '日曜日に来ることができます。'
+    const reference = 'nichiyoubi ni kuru koto ga dekimasu'
+    const segs = diffWords('kyoguwanikurukotogadekimasu', reference)
+    const spans = refSpans(reference, words)
+    expect(missMarks(sentence, segs, spans)).toEqual([{ start: 0, end: 3, kind: 'x' }])
+    expect(missedWords(segs, spans, words).map(w => w.text)).toEqual(['日曜日'])
+  })
+
+  it('marks the words an answer cut short did not reach, and not those it wrote', () => {
+    const words = [
+      { text: '父', kana: 'ちち', romaji: 'chichi' },
+      { text: 'は', kana: 'は', romaji: 'wa' },
+      { text: '英語', kana: 'えいご', romaji: 'eigo' },
+      { text: 'が', kana: 'が', romaji: 'ga' },
+      { text: '上手です。', kana: 'じょうずです。', romaji: 'jouzudesu.' },
+    ]
+    const reference = 'chichi wa eigo ga jouzudesu'
+    const segs = diffWords('chichiwaeigo', reference)
+    const spans = refSpans(reference, words)
+    expect(missMarks('父は英語が上手です。', segs, spans)).toEqual([{ start: 4, end: 9, kind: 'x' }])
+    expect(missedWords(segs, spans, words).map(w => w.text)).toEqual(['が', '上手です'])
   })
 
   it('places a hand-spelled reference by its letters (書取\'s bank)', () => {
