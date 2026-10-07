@@ -109,6 +109,23 @@ describe('the milestones beside the rail', () => {
     expect(col.left + col.width / 2).toBeCloseTo(main.left + main.width / 2, 0)
   })
 
+  it('lends the night to the scrollbar gutter, which no fixed box reaches', async () => {
+    // html keeps a stable gutter (classic scrollbars: 10-17px at the
+    // window's right edge), painted in html's own ground: the page's
+    // cream in the light theme, beside the night, until the month lends
+    // it its own (--gate-ground), and only while it has the screen.
+    const ground = () => getComputedStyle(document.documentElement).getPropertyValue('--gate-ground').trim()
+    expect(ground()).toBe('')
+    const screen = await preview('?scene=month30&reduced=1')
+    // html eases its ground over 0.2s
+    await settle(450)
+    expect($('main.ms-month')).not.toBeNull()
+    expect(ground()).toBe('#0b0a10')
+    expect(getComputedStyle(document.documentElement).backgroundColor).toBe(getComputedStyle($('main.ms-month')).backgroundColor)
+    await screen.unmount()
+    expect(ground()).toBe('')
+  })
+
   it('stands the month whole at rest', async () => {
     preview('?scene=month30&reduced=1')
     await settle(200)

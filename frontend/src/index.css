@@ -30021,6 +30021,12 @@ button.brd-stn { cursor: pointer; }
   --ms-ink: var(--text-on-panel);
   --ms-ink-2: var(--text-on-panel-soft);
 }
+/* The root's scrollbar gutter (html's scrollbar-gutter: stable) is
+   outside every fixed box: on a window with classic scrollbars it showed
+   the page's ground beside the night, a cream strip in the light theme.
+   The night lends the gutter its ground while it has the screen, as the
+   ticket gate lends its light (--gate-ground). */
+:root:has(.ms-month) { --gate-ground: #0b0a10; }
 /* The night, the sky, the station and the column: one stage, scaled
    from its corner under 667. */
 .ms-stage { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
