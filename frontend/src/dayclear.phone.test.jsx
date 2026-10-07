@@ -8,7 +8,8 @@ import './index.css'
 // /today/clear takes the run's tally from the router's state, asks the
 // server once whether the day is cleared and plays the answer: the
 // app's three dots while it asks, then the everyday clear (ClearPhone)
-// or, with cards left, the partial finish. A reload has no state and
+// or, with cards left, the partial finish. A finish with no run, or
+// one already shown before a reload (which keeps the router's state),
 // goes back to the gate.
 
 const api = vi.hoisted(() => ({ next: null }))
@@ -94,10 +95,33 @@ describe('/today/clear on a phone', () => {
     expect(partial.querySelector('.btn-depart--gate').textContent).toContain('Continuer · 14 cartes')
   })
 
-  it('goes back to the gate on a reload, which carries no run', async () => {
+  it('goes back to the gate with no run to finish', async () => {
     api.next = Promise.resolve(CLEAR_DAY)
     const screen = await mount(null)
     await settle()
     expect(screen.container.querySelector('.gate-stub')).not.toBeNull()
+  })
+
+  it('goes back to the gate on a reload, which keeps the run but not the answer', async () => {
+    // What a reload leaves: the router's state (history.state survives
+    // it) and the tab's note of the run it asked for, and no answer in
+    // the store -- so no second ask and no second ceremony.
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockClear()
+    window.sessionStorage.setItem('tsuji.dayClear.asked', String(RUN_DAY.at))
+    api.next = Promise.resolve({ ...CLEAR_DAY, already: true })
+    const screen = await mount({ run: RUN_DAY })
+    await settle(120)
+    expect(screen.container.querySelector('.gate-stub')).not.toBeNull()
+    expect(screen.container.querySelector('.clr-phone')).toBeNull()
+    expect(apiJson).not.toHaveBeenCalledWith('/api/today/clear', expect.anything(), expect.anything())
+  })
+
+  it('plays a run it has not asked about, though the tab asked about another', async () => {
+    window.sessionStorage.setItem('tsuji.dayClear.asked', 'an-earlier-run')
+    api.next = Promise.resolve(CLEAR_DAY)
+    const screen = await mount({ run: RUN_DAY })
+    await settle(120)
+    expect(screen.container.querySelector('main.clr-phone')).not.toBeNull()
   })
 })

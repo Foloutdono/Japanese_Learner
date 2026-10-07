@@ -60,10 +60,33 @@ function payInto(result) {
   return { newLevel: gain.newLevel ?? result.xp?.new_level ?? result.level?.level ?? null }
 }
 
+// A reload does not drop the router's state: BrowserRouter keeps it in
+// history.state, which the browser restores, so /today/clear reloaded
+// would find its run again with this module's answers gone -- and play
+// the finish a second time, asking the server again (which answers
+// `already`, paying nothing, but the ceremony replays the stamp). The
+// tab remembers the last run whose finish it asked for (sessionStorage
+// survives a reload and nothing else); a run it remembers that this
+// module has no answer for is a finish already shown, and the screen
+// sends it to the gate.
+const ASKED_KEY = 'tsuji.dayClear.asked'
+
+function noteAsked(key) {
+  try { window.sessionStorage.setItem(ASKED_KEY, key) } catch { /* a reload replays it at worst */ }
+}
+
+/** Whether this run's finish was shown before a reload (the gate's, now). */
+export function finishShown(run) {
+  const key = runKey(run)
+  if (!key || entries.has(key)) return false
+  try { return window.sessionStorage.getItem(ASKED_KEY) === key } catch { return false }
+}
+
 /** Ask once for this run; a second call for the same run does nothing. */
 export function requestClear(run, session) {
   const key = runKey(run)
   if (!key || entries.has(key)) return
+  noteAsked(key)
   set(key, LOADING)
   reviewsSettled()
     .then(() => apiJson('/api/today/clear', session, { method: 'POST', body: '{}' }))
@@ -111,6 +134,7 @@ export function useDayClear(run, session) {
 /** Tests only: forget every run asked about. */
 export function resetDayClear() {
   entries.clear()
+  try { window.sessionStorage.removeItem(ASKED_KEY) } catch { /* nothing kept */ }
   emit()
 }
 

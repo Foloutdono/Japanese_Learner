@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { useDayClear } from '../stores/dayClear'
+import { finishShown, useDayClear } from '../stores/dayClear'
 import { useProfileSummary } from '../stores/profileSummary'
 import { shareTicket } from '../lib/shareTicket'
 import DayClearView from '../components/dayclear/DayClearView'
@@ -15,13 +16,17 @@ import DayClearView from '../components/dayclear/DayClearView'
 // screen, as a run's stage; on the desk beside the rail
 // (components/chrome/Shell's DeskShellStage).
 //
-// A reload carries no state, and a finish with no run to finish is the
-// gate's business: back to /today. Every way out replaces this entry,
-// so Back from the gate does not replay a ceremony.
+// A finish with no run to finish is the gate's business: back to
+// /today. So is a reload: the browser keeps the router's state across
+// one, and the finish it carries has been shown (stores/dayClear's
+// finishShown, decided once, on arrival). Every way out replaces this
+// entry, so Back from the gate does not replay a ceremony.
 export default function DayClearScreen({ session }) {
   const { t } = useLang()
   const navigate = useNavigate()
-  const run = useLocation().state?.run ?? null
+  const state = useLocation().state?.run ?? null
+  const [shown] = useState(() => finishShown(state))
+  const run = shown ? null : state
   const clear = useDayClear(run, session)
   const summary = useProfileSummary()
 
