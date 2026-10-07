@@ -31,8 +31,9 @@ BASE_XP_BY_QUALITY = {
 }
 
 # First review of the day is worth base * (1 + DAILY_BONUS_MAX).
-# The bonus decays exponentially across the day's reviews, half-life
-# controlled by DAILY_BONUS_DECAY (reviews, not minutes) — e.g. with
+# The bonus decays exponentially across the day's reviews, its time
+# constant DAILY_BONUS_DECAY (reviews, not minutes; not a half-life — the
+# bonus falls to 1/e, not 1/2, over that many reviews) — e.g. with
 # DAILY_BONUS_DECAY=15, the bonus is ~37% left by review 15, ~14% by
 # review 30, asymptoting toward 0 (i.e. multiplier -> 1.0) but never
 # going negative.
