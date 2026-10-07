@@ -10782,6 +10782,22 @@ textarea:focus-visible {
   color: var(--text-secondary);
   text-decoration: line-through;
 }
+/* 割合 (plan 177): the share of the course's words that use the reading,
+   printed in the checked chip as on the study card's ReadingShares. */
+.readings-input__pct {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.readings-input__pct small {
+  margin-left: 1px;
+  font-size: var(--fs-caption);
+  font-weight: 500;
+}
+.readings-input__pct--core { color: var(--sel-ink); }
+
 /* What was not found: legible, since it is the thing to learn, and
    dashed, since the learner did not write it. */
 .readings-input__chip--missed {

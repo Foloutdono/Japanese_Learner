@@ -450,7 +450,7 @@ def is_free(source_or_mode: str | None) -> bool:
 # A card is paid for twice in its life's worth of fares: once when it
 # is met (its first-ever review) and once each time it comes back after
 # it has graduated. The reviews in between -- the learning steps a new
-# card climbs (3 min, 10 min, 1 h, 1 day) and the ones a lapsed card
+# card climbs (90 s, 10 min, 1 h, 1 day) and the ones a lapsed card
 # climbs again -- are the same card being taught, not a new ride, and
 # they are free.
 #

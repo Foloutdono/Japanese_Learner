@@ -134,9 +134,9 @@ class GradesApartTests(unittest.TestCase):
         }
 
     def assertSooner(self, a: timedelta, b: timedelta, msg=None) -> None:
-        # By a minute at least: each dry run reads the clock afresh, so
+        # By half a minute at least: each dry run reads the clock afresh, so
         # two identical waits come out microseconds apart.
-        self.assertGreaterEqual(b - a, timedelta(minutes=1), msg)
+        self.assertGreaterEqual(b - a, timedelta(seconds=30), msg)
 
     def test_difficult_waits_short_of_correct_on_every_learning_step(self) -> None:
         for step in range(len(self.STEPS) - 1):

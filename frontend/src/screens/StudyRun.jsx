@@ -413,6 +413,7 @@ export default function StudyRun({ session }) {
               <ReadingsInput
                 key={nc.card_id}
                 readings={nc.readings}
+                shares={nc.reading_shares}
                 submitted={answered}
                 onSubmit={onFlashcardReveal}
               />
