@@ -4,7 +4,7 @@ from typing import NamedTuple
 from .models import CardState
 
 LEARNING_STEPS = [
-    timedelta(minutes=3),
+    timedelta(seconds=90),
     timedelta(minutes=10),
     timedelta(hours=1),
     timedelta(days=1),
@@ -98,12 +98,12 @@ FAIL = {
 # them, which is every interval past a week or so, this does nothing.
 #
 # Blackout sends a card back to the first step as Wrong does, but waits
-# BLACKOUT_WAIT there, a minute where Wrong waits three.
+# BLACKOUT_WAIT there, half a minute where Wrong waits a minute and a half.
 #
 # Almost and Wrong still match on the first two steps: one step back
 # from there is the first step, and there is nothing before it.
 GRADUATING_DAYS = 2
-BLACKOUT_WAIT = timedelta(minutes=1)
+BLACKOUT_WAIT = timedelta(seconds=30)
 
 
 def learning_wait(step: int, quality: int) -> timedelta:
