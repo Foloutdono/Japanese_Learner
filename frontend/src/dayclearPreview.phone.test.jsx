@@ -44,16 +44,33 @@ const SCENES = {
   share: 'main.clrdev-share',
 }
 
+// A milestone day plays the everyday clear's sweep and stamp first, then
+// hands the screen to its own ceremony; a tap hands over at once.
+const MILESTONES = new Set(['ticket3', 'ticket7', 'ticket14', 'month30', 'month100'])
+
 describe('/dev/dayclear at a phone\'s width', () => {
   for (const [scene, root] of Object.entries(SCENES)) {
     it(`plays ${scene} from its fixtures`, async () => {
       const screen = await mount(`?scene=${scene}`)
       await settle()
+      if (MILESTONES.has(scene)) {
+        const clear = screen.container.querySelector('main.clr-phone')
+        expect(clear, 'main.clr-phone').not.toBeNull()
+        clear.click()
+        await settle()
+      }
       expect(screen.container.querySelector(root), root).not.toBeNull()
       // The stage frame: no HUD, no tab bar on a phone.
       expect(document.querySelector('.phone--stage')).not.toBeNull()
     })
   }
+
+  it('sweeps the run onto two piles when asked (a bar with no Perfect)', async () => {
+    const screen = await mount('?scene=day&piles=2&reduced=1')
+    await settle()
+    const piles = [...screen.container.querySelectorAll('main.clr-phone .clr-phone__pile-name')].map(n => n.textContent)
+    expect(piles).toEqual(['À revoir', 'Justes'])
+  })
 
   it('opens a milestone day on its rest at once when reduced', async () => {
     const screen = await mount('?scene=ticket7&reduced=1')

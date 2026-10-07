@@ -28,7 +28,7 @@ import { SCENES, SUMMARY, REST_MINUTES } from '../components/dayclear/fixtures'
 //   &cards=N     the run's length: the scene's cards dealt round again
 //                (a short run of 5, a long one of 120)
 //   &perfect=0   a bar with no Perfect: every perfect card a correct one,
-//                so the clear sorts two verdicts, not three
+//                so the clear sorts two verdicts, not three (alias &piles=2)
 //
 // "Rejouer" remounts the scene (the app itself has no replay).
 const NAMES = Object.keys(SCENES)
@@ -67,7 +67,7 @@ export default function DayClearPreview() {
   const bare = params.get('bare') === '1'
   const scene = SCENES[name]
   const cards = Math.max(0, Math.min(400, Number(params.get('cards')) || 0))
-  const perfect = params.get('perfect') !== '0'
+  const perfect = params.get('perfect') !== '0' && params.get('piles') !== '2'
   const run = useMemo(() => variantRun(scene.run, cards, perfect), [scene, cards, perfect])
   const [take, setTake] = useState(0)
   const [png, setPng] = useState(null)
@@ -148,6 +148,7 @@ export default function DayClearPreview() {
             <Link key={n} className="clrdev-bar__item" to={query({ scene: n })} aria-current={n === name ? 'page' : undefined}>{n}</Link>
           ))}
           <Link className="clrdev-bar__item" to={query({ reduced: reduced ? null : '1' })}>{reduced ? 'motion' : 'reduced'}</Link>
+          <Link className="clrdev-bar__item" to={query({ piles: null, perfect: perfect ? '0' : null })}>{perfect ? '2 piles' : '3 piles'}</Link>
           <button type="button" className="clrdev-bar__item" onClick={() => setTake(n => n + 1)}>Rejouer</button>
           <button type="button" className="clrdev-bar__item" onClick={() => navigate('/dev/sounds')}>sons</button>
         </nav>
