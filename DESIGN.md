@@ -722,7 +722,9 @@ eye. Now:
 - **The answer stands in a well**, the field it was typed in drawn again
   (`--bg-main` through the card, as `.field`'s base well), so it needs no
   caption. Its misses are marked against the sentence's romaji, word by
-  word (`domain/answerDiff.js`'s `diffWords`), the way a teacher marks a
+  word -- or by letters where the learner typed no spaces, so one wrong
+  word is marked alone and not the whole line
+  (`domain/answerDiff.js`'s `diffWords`), the way a teacher marks a
   page (the owner's A1.1): a wrong word struck in the miss ink and the
   right one written small over it in the success ink, so the line keeps
   its length and never wraps for a fix; a long vowel left short wavy in

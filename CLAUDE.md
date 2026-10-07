@@ -1580,7 +1580,11 @@ runtime purpose. Two consequences worth knowing:
   `dictation.bank_words`); and the romaji read as the furigana reads,
   every correction `reading_context` makes and a number in digits with
   its counter (十本 juppon, 明日 ashita, 日本語 nihongo, 6本 roppon),
-  where it had its own table for 時 and 分 alone (cited in `routes/reading.py`,
+  where it had its own table for 時 and 分 alone; and, a follow-up, an
+  answer typed without its spaces read by its letters, so one wrong word
+  in "kyoguwanikurukotogadekimasu" is marked alone and a line cut short
+  names the words it did not reach (`domain/answerDiff.js`'s
+  `cutByLetters`, held by `answerDiff.test.js`) (cited in `routes/reading.py`,
   `routes/onboarding.py`, `study/romaji.py`, `study/dictation.py`,
   `tests/test_reading_furigana.py`, `tests/test_sentence_words.py`,
   `tests/test_romaji_counters.py`,
