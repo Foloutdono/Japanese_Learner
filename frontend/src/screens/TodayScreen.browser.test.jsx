@@ -8,8 +8,8 @@ import '../index.css'
 
 // ── The gate (plan 070) ───────────────────────────────────────
 // /today is the fare gate with the day's lanes as the run's
-// picker, and the strip. The finish comes back from the run through
-// the router's state and is printed here, under the chrome.
+// picker, and the strip. The finish is the run's own since plan 191
+// (/today/clear); the gate prints none.
 //
 // The two .btn-primary contracts below predate the gate (plans 051 and
 // 052): the screen's filled action used to be a .btn-primary and the
@@ -154,7 +154,8 @@ describe('TodayScreen — the gate', () => {
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)
   })
 
-  it('prints the finish the run handed back, and the way back to the gate', async () => {
+  it('no longer prints a finish: a run ends on /today/clear (plan 191)', async () => {
+    todayRef.current = { total: 19, by_source: {}, lanes: LANES, next_due: null }
     const screen = await render(
       <LangProvider>
         <MemoryRouter initialEntries={[{ pathname: '/today', state: { run: { cleared: 12, xp: 48 } } }]}>
@@ -165,16 +166,38 @@ describe('TodayScreen — the gate', () => {
       </LangProvider>
     )
     await settle()
-    const clear = screen.container.querySelector('.today-clear')
-    expect(clear).toBeTruthy()
-    expect(clear.querySelector('.today-clear__body').textContent).toContain('12')
-    expect(clear.querySelector('.fare-slip')).toBeTruthy()
-    expect(screen.container.querySelector('.gate-card')).toBeNull()
-
-    clear.querySelector('.btn-depart--ghost').click()
-    await settle()
     expect(screen.container.querySelector('.today-clear')).toBeNull()
     expect(screen.container.querySelector('.gate-card')).toBeTruthy()
+  })
+
+  // 運休 (plan 191): the morning after a missed day a rest day covered,
+  // the gate gives way once to the notice; Départ tells the server it was
+  // seen and boards the day's run.
+  it('shows the rest-day notice once, and marks it seen on the way out', async () => {
+    todayRef.current = {
+      total: 41, seconds_per_review: 20.5, by_source: {}, lanes: LANES, next_due: null,
+      rest: { held: 0, unseen: ['2026-10-06'], streak: 8, next_at: 14 },
+    }
+    apiJson.mockClear()
+    const screen = await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/today']}>
+          <Routes>
+            <Route path="/today" element={<TodayScreen />} />
+            <Route path="/today/run" element={<main className="run-stub" />} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    const notice = screen.container.querySelector('.rst')
+    expect(notice).toBeTruthy()
+    expect(screen.container.querySelector('.gate-card')).toBeNull()
+    expect(notice.querySelector('.clrk-hdr__title').textContent).toBe('Ta série tient')
+    notice.querySelector('.btn-depart--gate').click()
+    await settle()
+    expect(apiJson).toHaveBeenCalledWith('/api/today/rest/seen', undefined, expect.objectContaining({ method: 'POST' }))
+    expect(screen.container.querySelector('.run-stub')).toBeTruthy()
   })
 })
 

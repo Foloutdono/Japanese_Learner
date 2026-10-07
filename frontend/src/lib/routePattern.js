@@ -26,6 +26,7 @@ export const ROUTES = [
   '/app',
   '/today',
   '/today/run',
+  '/today/clear',
   // 試乗 — the first ride (plan 098). Before any gate, so tabFor
   // answers null for it.
   '/ride',
@@ -105,6 +106,7 @@ export const ROUTES = [
 
   '/profile',
   '/profile/stats',
+  '/profile/tickets',
   '/profile/settings',
   '/profile/settings/:page',
 ]

@@ -206,3 +206,31 @@ export function ProfileDoors({ t, navigate }) {
     </div>
   )
 }
+
+// ── 記念切符 — the door to the tickets (plan 191) ──────────────────
+// The streak's tickets (3, 7, 14 days, a month …) live behind the stamp
+// book they were earned in: one door under it, drawn as the doors are
+// (a roundel, the name, a chevron), in the stamp's ink, with how many
+// the learner holds. On the phone and the desk alike -- the rail holds
+// no door to it. A place, so a link on the desk (plan 123).
+export function TicketsDoor({ t, navigate, count = 0 }) {
+  const desk = useDesk()
+  return (
+    <div className="records records--one">
+      <SplitRow
+        to={desk ? '/profile/tickets' : undefined}
+        push
+        className="record record--door"
+        style={{ '--line-color': 'var(--stamp-ink)' }}
+        onClick={() => { if (!desk) navigate('/profile/tickets') }}
+      >
+        <span className="pf-line__id">
+          <span className="pf-line__roundel" aria-hidden="true" lang="ja">券</span>
+          <span className="pf-line__names"><span className="pf-line__jp">{t.tkbDoor}</span></span>
+        </span>
+        <span className="record__value record__value--door">{count}</span>
+        <ChevronIcon direction="right" size={15} className="record__chev" />
+      </SplitRow>
+    </div>
+  )
+}

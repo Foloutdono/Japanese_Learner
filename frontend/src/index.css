@@ -2875,6 +2875,25 @@
      theme like every other pigment here. */
   --stamp-ink:       #c33a2c;
 
+  /* ── 終着 — the day cleared (plan 191) ──
+     The ceremony's few inks of its own, from the canvas "Tsuji — the
+     day cleared": the seal's impression on a dark ground (the stamp ink
+     itself reads 3.4:1 there; this 4.7:1), a slot's weekday glyph, the
+     paper ticket's soft print and its two deeper paper tints, the foil's
+     pale gold, the punched notch's radius, and the four eases its
+     motion is written in. components/dayclear/kit/ reads them. */
+  --seal-ink:        #ce6153;
+  --stamp-glyph:     #d57e70;
+  --paper-ink-soft:  #665c4a;
+  --paper-edge:      #e2d8c4;
+  --paper-deep:      #cfc2aa;
+  --foil-pale:       #f2d27f;
+  --tk-notch:        11.5px;
+  --ease-out:        cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in:         cubic-bezier(0.55, 0, 0.75, 0.2);
+  --ease-io:         cubic-bezier(0.6, 0, 0.3, 1);
+  --ease-back:       cubic-bezier(0.3, 1.45, 0.5, 1);
+
   /* ── Flipping tokens — dark theme (default) ── */
   --bg-main:        #17151a;
   --bg-card:        #201d24;
@@ -3121,6 +3140,9 @@
   --rating-wrong:    #a4493c;
 
   --stamp-ink:       #b23425;
+  /* 終着 (plan 191): on washi the impression is the stamp's own ink. */
+  --seal-ink:        var(--stamp-ink);
+  --stamp-glyph:     #a8392b;
 
   --text-primary:   #221d15;
   /* Deepened from #6f6552 for the same reason --indigo/--teal/--rust are
@@ -6533,48 +6555,6 @@ textarea:focus-visible {
 .pw-open--quiet:hover,
 .pw-open--quiet:focus-visible { color: var(--accent2); }
 
-/* ── The fare slip, at the end of a run (plan 069) ── */
-.fare-slip {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  width: 100%;
-  margin-top: var(--sp-3);
-  background: var(--surface-line);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  overflow: hidden;
-}
-.fare-slip__cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-1);
-  padding: var(--sp-4) var(--sp-2);
-  background: var(--surface);
-}
-.fare-slip__v {
-  display: flex;
-  align-items: baseline;
-  gap: 3px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-title);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.fare-slip__u { font-size: var(--fs-caption-xs); font-weight: 600; color: var(--text-secondary); }
-.fare-slip__v--gold { color: var(--accent2); }
-.fare-slip__cap {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
 /* ── the compact header: one row, a pigment rule under it ── */
 /* No inset of its own. Every screen that mounts a bar sits in a
    container that already holds the page's gutter (.learn/.practice/
@@ -9109,28 +9089,6 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-.today-clear {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 48px 20px;
-  text-align: center;
-}
-.today-clear__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: var(--r-pill);
-  border: 2px solid color-mix(in srgb, var(--success) 70%, transparent);
-  color: color-mix(in srgb, var(--success) 70%, transparent);
-}
-.today-clear__title { margin: 0; font-size: 22px; }
-.today-clear__body  { margin: 0; color: var(--text-secondary); }
-.today-clear__next  { margin: 0 0 8px; color: var(--text-secondary); font-size: 14px; }
-
 /* ── 駅名標 — the gates hang a plate per line (plan 094) ─────────
    The Learn and Practice gates are a column of station plates
    (components/station/LinePlate.jsx): the roundel, the name, the
@@ -11279,7 +11237,7 @@ textarea:focus-visible {
 
 /* ── 終着 — the end of a run ────────────────────────────────
    Two endings, one anatomy (QuizComponents.DoneMessage): the check
-   ring the Today finish already wears (.today-clear__mark), the
+   ring the Today finish wore before plan 191 gave the day its own, the
    words, and a foot of full-width actions on the card's column. The
    paced terminus adds the pair -- 本日の目標達成 over its caption --
    and the day's count as a figure: the numeral, the target as its
@@ -21616,6 +21574,10 @@ html {
   overflow: hidden;
 }
 .records--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* One door across (plan 191: the tickets, under the stamp book). */
+.records--one { grid-template-columns: minmax(0, 1fr); }
+/* A door's count, between its name and its chevron. */
+.record__value--door { margin-left: auto; font-size: var(--fs-title); }
 .record {
   display: flex;
   flex-direction: column;
@@ -27805,6 +27767,1104 @@ button.brd-stn { cursor: pointer; }
   .exam-st__row:focus-visible { transform: none; }
 }
 
+/* ── 191:primitives ── */
+/* ══ 終着 — the day cleared: the kit (plan 191) ══════════════════════
+   The shared pieces of the canvas "Tsuji — the day cleared" (its
+   kit.css, round 2), ported once for every screen of the ceremony:
+   the ink filters, the day's seal, the week's stamps, the fare's gold
+   figure and its shimmer, the odometer, the two tickets with their
+   punched notch, the clipper, the reader slab, a run's card, a pile,
+   the prime's chip and the level bar. Components in
+   components/dayclear/kit/; a screen composes them and owns its own
+   region below.
+
+   Three rules the kit is built on, kept here:
+   1. The rest state is the element's own style. An animation only
+      describes the way in (fill-mode backwards), so `.clrk--reduced`
+      can drop every animation and the screen is already at rest.
+   2. A transient is invisible at rest (.clrk-bloom, .clrk-speck, the
+      chips): its keyframes show it.
+   3. Only rungs: the --fs-*, --sp-*, --r-* and --tr-* tokens. A drawn
+      object's own geometry (a slot's 28px, the seal's 192px face) is
+      a size, not a rung.
+
+   The two states a ceremony's root carries: `.clrk--skip` (a tap
+   skipped to the rest: entrances become a 200ms fade, transients do
+   not play) and `.clrk--reduced` (prefers-reduced-motion, or the
+   workbench's ?reduced=1: nothing moves, fades only). */
+@property --notch { syntax: '<length>'; inherits: false; initial-value: 0; }
+
+/* The two filters' host: <svg class="clrk-defs"> (kit/InkFilters.jsx). */
+.clrk-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ── the header: a Japanese caption over the screen's name ── */
+.clrk-hdr { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); margin: 0; }
+.clrk-hdr__cap {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: var(--tr-reading);
+  color: var(--text-secondary);
+}
+.clrk-hdr__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0;
+  color: var(--text-primary);
+}
+.clrk-hdr--center { align-items: center; text-align: center; }
+.clrk-hdr--center .clrk-hdr__cap { text-indent: var(--tr-reading); }
+
+/* ── the week row: the stamp rally ──
+   A 28px roundel a day: its ring and wash on ::before, so the ring can
+   turn alone; --tilt the stamp's own angle. */
+.clrk-week { display: flex; align-items: center; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; isolation: isolate; }
+.clrk-week--gold { gap: var(--sp-4); }
+.clrk-slot {
+  position: relative;
+  flex: none;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--stamp-glyph);
+  transform: rotate(var(--tilt, 0deg));
+}
+.clrk-slot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1.5px solid color-mix(in srgb, var(--stamp-ink) 55%, transparent);
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--stamp-ink) 12%, transparent);
+}
+.clrk-slot--miss { color: var(--text-secondary); font-weight: 500; }
+.clrk-slot--miss::before { border: 1.5px dashed color-mix(in srgb, var(--text-primary) 24%, transparent); background: transparent; }
+.clrk-slot--wait { color: var(--text-on-panel-soft); }
+.clrk-slot--wait::before {
+  border: 1.5px dashed color-mix(in srgb, var(--stamp-ink) 70%, transparent);
+  background: transparent;
+  animation: clr-spin 14s linear infinite;
+}
+.clrk-slot--still::before { animation: none; }
+.clrk-slot--now { color: var(--text-on-panel); }
+.clrk-slot--now::before { border: 2px solid var(--stamp-ink); background: color-mix(in srgb, var(--stamp-ink) 22%, transparent); }
+.clrk-slot--press { animation: clr-press 0.45s ease-out backwards; }
+/* A 運休 ticket laid over the day: a pass-ink stub overhanging each gap
+   by 4px (the row does not move), two punched side notches. */
+.clrk-slot--rest {
+  width: 36px;
+  margin: 0 -4px;
+  border-radius: var(--r-plate);
+  font-size: var(--fs-caption);
+  letter-spacing: 0;
+  color: var(--text-on-panel);
+  mask: radial-gradient(circle at 0 50%, transparent 3.5px, #000 4px), radial-gradient(circle at 100% 50%, transparent 3.5px, #000 4px);
+  mask-composite: intersect;
+}
+.clrk-slot--rest::before { border: 0; background: var(--pass-ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-panel) 16%, transparent); }
+/* Grain on a slot's ring only, so the weekday stays crisp (InkFilters). */
+.clrk-inked::before { filter: url("#clrk-ink-fine"); }
+/* The completed week: a gold ring 4px outside each stamp. */
+.clrk-slot--gold::after,
+.clrk-week--gold .clrk-slot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: 1px solid var(--gate-gold-lit);
+  border-radius: var(--r-pill);
+}
+
+/* ── the day's seal (駅スタンプ) ──
+   --seal-size is a unitless px count (default 192): the face is drawn at
+   192px with rung type and scaled, so its print never leaves the scale.
+   --tilt turns the whole impression; the grain is #clrk-ink. */
+.clrk-seal {
+  position: relative;
+  flex: none;
+  width: calc(var(--seal-size, 192) * 1px);
+  height: calc(var(--seal-size, 192) * 1px);
+  transform: rotate(var(--tilt, 0deg));
+}
+.clrk-seal__face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 192px;
+  height: 192px;
+  border: 5px solid var(--seal-ink);
+  border-radius: var(--r-pill);
+  color: var(--seal-ink);
+  transform-origin: 0 0;
+  transform: scale(calc(var(--seal-size, 192) / 192));
+  filter: url("#clrk-ink");
+}
+.clrk-seal--crisp .clrk-seal__face { filter: none; }
+.clrk-seal__face::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1.5px solid var(--seal-ink);
+  border-radius: var(--r-pill);
+}
+.clrk-seal__face::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(180deg, transparent 121px, var(--seal-ink) 121px 122.5px,
+    transparent 122.5px 143.5px, var(--seal-ink) 143.5px 145px, transparent 145px);
+}
+.clrk-seal__top {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  left: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--tr-reading);
+  text-align: center;
+  text-indent: var(--tr-reading);
+}
+.clrk-seal__day {
+  position: absolute;
+  top: 49px;
+  right: 0;
+  left: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-specimen-word);
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+}
+.clrk-seal__foot {
+  position: absolute;
+  top: 133px;
+  right: 0;
+  left: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: var(--tr-name);
+  text-align: center;
+  text-indent: var(--tr-name);
+}
+.clrk-seal--paper { --seal-ink: var(--stamp-ink); }
+/* Two glyphs (三十): no date band, the pair on the centre. */
+.clrk-seal--pair .clrk-seal__face::after { display: none; }
+.clrk-seal--pair .clrk-seal__face::before { inset: 3px; }
+.clrk-seal--pair .clrk-seal__top { top: 31px; }
+.clrk-seal--pair .clrk-seal__day { top: 55px; }
+.clrk-seal--pair .clrk-seal__foot { top: 141px; }
+.clrk-seal--slam { animation: clr-slam 0.62s var(--ease-back) backwards; }
+.clrk-bloom {
+  position: absolute;
+  border: 2px solid var(--seal-ink);
+  border-radius: var(--r-pill);
+  opacity: 0;
+  pointer-events: none;
+}
+.clrk-bloom--go { animation: clr-bloom 0.9s ease-out both; }
+.clrk-speck {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--seal-ink);
+  opacity: 0;
+  pointer-events: none;
+}
+.clrk-speck--go { animation: clr-speck 0.7s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+/* The board's whole frame shakes 3px at the slam's hit. */
+.clrk-shake { animation: clr-shake 0.32s linear; }
+
+/* ── tickets: 硬券 (paper) and foil (gold) ──
+   The notch is a real cutout: the ticket is always masked, --notch a
+   registered length (0 = whole). Its shadow goes on the wrapper
+   (.clrk-tk-hang) as a drop-shadow, which follows the bitten shape. */
+.clrk-tk {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-5) var(--sp-7);
+  border-radius: var(--r-identity);
+  mask: radial-gradient(circle at right 50%, transparent calc(var(--notch) - 0.5px), #000 var(--notch));
+}
+/* The print stands over the rule and the sheen. */
+.clrk-tk__row,
+.clrk-tk__rule,
+.clrk-tk__route,
+.clrk-tk__big,
+.clrk-tk__sub,
+.clrk-tk__print { position: relative; z-index: 2; }
+.clrk-tk::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  z-index: 0;
+  border: 3px double var(--tk-rule, currentcolor);
+  border-radius: var(--r-plate);
+  pointer-events: none;
+}
+.clrk-tk--paper {
+  --tk-rule: color-mix(in srgb, var(--stamp-ink) 72%, transparent);
+  color: var(--text-on-fill);
+  background:
+    repeating-linear-gradient(60deg, color-mix(in srgb, var(--stamp-ink) 5.5%, transparent) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(-60deg, color-mix(in srgb, var(--stamp-ink) 5.5%, transparent) 0 1px, transparent 1px 7px),
+    var(--paper);
+}
+.clrk-tk--gold {
+  --tk-rule: color-mix(in srgb, var(--text-on-fill) 50%, transparent);
+  color: var(--text-on-fill);
+  background:
+    radial-gradient(120% 90% at 18% 0%, rgba(255, 246, 214, 0.55), transparent 55%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, rgba(0, 0, 0, 0.035) 1px 2px),
+    linear-gradient(135deg, var(--gate-gold-lit) 0%, var(--foil-pale) 26%, var(--gate-gold) 52%, var(--gate-gold-lit) 74%, var(--gate-gold-deep) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 250, 232, 0.6), inset 0 -1px 0 color-mix(in srgb, var(--text-on-fill) 22%, transparent);
+}
+/* The sheen: a skewed band of warm light crossing every 4.2s. */
+.clrk-tk--gold::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  z-index: 1;
+  width: 60%;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 250, 232, 0) 20%, rgba(255, 250, 232, 0.62) 50%, rgba(255, 250, 232, 0) 80%, transparent 100%);
+  transform: translateX(0) skewX(-12deg);
+  animation: clr-sheen 4.2s ease-in-out 1.2s infinite;
+}
+.clrk-tk--notch { --notch: var(--tk-notch); }
+.clrk-tk--punch { --notch: var(--tk-notch); animation: clr-punch 0.16s var(--ease-in) both; animation-delay: var(--d, 0ms); }
+.clrk-tk--flip { animation: clr-flip 0.9s var(--ease-out) backwards; }
+.clrk-tk-hang { position: relative; filter: drop-shadow(var(--elev-hang)); }
+.clrk-tk__row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); }
+.clrk-tk__kind {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--tr-reading);
+}
+.clrk-tk__no {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: var(--tr-name);
+}
+.clrk-tk__route {
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--tr-name);
+  text-align: center;
+}
+.clrk-tk__big {
+  font-family: var(--font-serif);
+  font-size: var(--fs-specimen-word);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: var(--tr-term);
+  text-align: center;
+  text-indent: var(--tr-term);
+}
+.clrk-tk__sub {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+}
+.clrk-tk__foot {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--tr-name);
+}
+.clrk-tk--paper .clrk-tk__foot,
+.clrk-tk--paper .clrk-tk__no { color: var(--paper-ink-soft); }
+.clrk-tk__rule { height: 1px; background: currentcolor; opacity: 0.28; }
+/* The bitten-out disc, a sibling of the ticket (the ticket clips):
+   seen only while it falls. */
+.clrk-tk-chip {
+  position: absolute;
+  width: 23px;
+  height: 23px;
+  border-radius: var(--r-pill);
+  pointer-events: none;
+  opacity: 0;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-fill) 12%, transparent);
+}
+.clrk-tk-chip--gold { background: linear-gradient(135deg, var(--foil-pale), var(--gate-gold)); }
+.clrk-tk-chip--fall { animation: clr-chip 1s var(--ease-in) both; animation-delay: var(--d, 0ms); }
+
+/* ── the clipper (改札鋏) ──
+   Two crossed steel arms on a rivet (kit/Clipper.jsx, drawn by the
+   canvas's clipper.py), in along its own axis, the punch centred on the
+   notch. Placed by its left/top: the punch's centre. Mount it to play. */
+.clrk-clp {
+  position: absolute;
+  z-index: 8;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  filter: drop-shadow(var(--elev-hang));
+}
+.clrk-clp__axis { position: absolute; top: 0; left: 0; transform: rotate(var(--clp-a, 58deg)); transform-origin: 0 0; }
+.clrk-clp__slide { position: absolute; top: 0; left: 0; opacity: 0; animation: clr-clp-slide 1000ms linear both; animation-delay: var(--d, 0ms); }
+.clrk-clp__svg { position: absolute; top: -44px; left: -24px; display: block; overflow: visible; }
+.clrk-clp__arm { transform-box: view-box; transform-origin: 50px 0; }
+.clrk-clp__arm--up { animation: clr-clp-jaw-up 1000ms linear both; animation-delay: var(--d, 0ms); }
+.clrk-clp__arm--dn { animation: clr-clp-jaw-dn 1000ms linear both; animation-delay: var(--d, 0ms); }
+/* The chip the jaws bit out, as a half disc on the die: revealed as the
+   jaws part (--d) and dropping past the lower jaw. */
+.clrk-clp-chip {
+  position: absolute;
+  width: 11.5px;
+  height: 23px;
+  overflow: hidden;
+  border-radius: var(--r-pill) 0 0 var(--r-pill);
+  pointer-events: none;
+  opacity: 0;
+  transform-origin: 70% 50%;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-fill) 16%, transparent);
+  animation: clr-clp-chip 540ms linear both;
+  animation-delay: var(--d, 0ms);
+}
+.clrk-clp-chip--paper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 6px;
+  bottom: 0;
+  width: 3px;
+  border-right: 1px solid color-mix(in srgb, var(--stamp-ink) 72%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--stamp-ink) 72%, transparent);
+}
+.clrk-clp-chip--gold { background: linear-gradient(135deg, var(--foil-pale), var(--gate-gold)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-fill) 12%, transparent); }
+
+/* ── the fare: the gold figure, the prime's chip, the level bar ──
+   XP is the pass's balance: the only gold text. */
+/* The figure and its unit hung beside it, on one baseline. */
+.clrk-xp-total { display: inline-flex; align-items: baseline; }
+.clrk-xp {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--gate-gold-lit);
+}
+.clrk-xp__unit {
+  margin-left: 4px;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* The shimmer, once the figure has landed (never while it counts): a
+   band of light crosses the digits in 1.1s, then 3s of rest. Outside
+   the band the digits are their own gold, so the class goes on with no
+   jump. --shine-d delays the first sweep. */
+.clrk-xp-shine {
+  background: linear-gradient(105deg, var(--gate-gold-lit) 0%, var(--gate-gold-lit) 43%, var(--gate-gold) 45%, var(--gate-gold-lit) 46.5%, #fff6dc 50%,
+    var(--gate-gold-lit) 53.5%, var(--gate-gold) 55%, var(--gate-gold-lit) 57%, var(--gate-gold-lit) 100%) 0 0 / 250% 100%;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: clr-xp-shine 4.1s linear infinite;
+  animation-delay: var(--shine-d, 0ms);
+}
+/* A figure in parts (odometer columns): each part paints its slice of
+   one gradient sized to the whole figure. --fig-w and --o are unitless
+   em counts (kit/XpTotal.jsx's Odometer sets them). */
+.clrk-xp-shine--part {
+  background-position: calc(var(--o, 0) * -1em) 0;
+  background-size: calc(var(--fig-w, 4) * 2.5em) 100%;
+  animation-name: clr-xp-shine-part;
+}
+/* The glints: tiny four-point stars by the figure, twinkling one after
+   another. left/top is the star's centre; --gs its size (a px count). */
+.clrk-xp-glint {
+  position: absolute;
+  width: calc(var(--gs, 12) * 1px);
+  height: calc(var(--gs, 12) * 1px);
+  margin: calc(var(--gs, 12) * -0.5px) 0 0 calc(var(--gs, 12) * -0.5px);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0);
+  animation: clr-glint 3.6s linear infinite;
+  animation-delay: var(--gd, 0ms);
+}
+.clrk-xp-glint svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.clrk-xp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 28px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--gate-gold);
+  border-radius: var(--r-pill);
+  background: var(--bg-panel);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text-on-panel);
+}
+.clrk-xp-chip__n { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--gate-gold-lit); }
+/* The level bar: the deep gold holds the old level, the lit gold under
+   it reaches --to; changing --to fills it. Markup: gain, then fill. */
+.clrk-lvl {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+}
+.clrk-lvl__fill,
+.clrk-lvl__gain { position: absolute; inset: 0; transform-origin: 0 50%; }
+.clrk-lvl__fill { background: var(--gate-gold-deep); transform: scaleX(var(--from, 0)); }
+.clrk-lvl__gain {
+  background: linear-gradient(90deg, var(--gate-gold), var(--gate-gold-lit));
+  transform: scaleX(var(--to, 0));
+  transition: transform 1.2s var(--ease-out);
+}
+
+/* ── the odometer: one column per digit, rolled by --n ──
+   The window is 1.2em with soft edges; the hidden digits are clipped by
+   design (the value is said in a .sr-only sibling). */
+.clrk-odo {
+  display: inline-flex;
+  height: 1.2em;
+  overflow: hidden;
+  line-height: 1.2em;
+  vertical-align: bottom;
+  mask: linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+}
+.clrk-odo__col {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(var(--n, 0) * -1.2em));
+  transition: transform 0.9s cubic-bezier(0.3, 1.25, 0.45, 1);
+  transition-delay: var(--d, 0ms);
+}
+.clrk-odo__d {
+  display: block;
+  width: 0.62em;
+  height: 1.2em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.clrk-odo__sep { display: inline-block; width: 0.28em; }
+.clrk-odo__sign { display: inline-block; width: 0.62em; height: 1.2em; font-family: var(--font-display); font-weight: 700; line-height: 1.2em; text-align: center; }
+
+/* ── a run's card, the pile, the dashed panel ── */
+.clrk-card { padding: var(--sp-5); border: 1px solid var(--surface-line); border-radius: var(--r-panel); background: var(--surface); }
+.clrk-dash { padding: var(--sp-4) var(--sp-5); border: 1px dashed var(--surface-line); border-radius: var(--r-panel); }
+/* A run's card: a 3px rail in its line's pigment (--rail). */
+.clrk-tcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-5);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--rail, var(--surface-line));
+}
+.clrk-tcard__term {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: var(--tr-term);
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+.clrk-tcard__read {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption-xs);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: var(--tr-term);
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+/* A grammar card's reading is its sense, in Latin. */
+.clrk-tcard__read--latin { font-family: var(--font-display); font-weight: 600; }
+.clrk-tcard--paper { border-color: var(--paper-deep); background: var(--paper); }
+.clrk-tcard--paper .clrk-tcard__term { color: var(--text-on-fill); }
+.clrk-tcard--paper .clrk-tcard__read { color: var(--paper-ink-soft); }
+/* A pile: the top card with a 3px top edge in its verdict's ink and two
+   cards under it (4px and 8px lower). --d0 hides both, --d1 the lowest. */
+.clrk-pile {
+  --pile-ink: var(--rating-correct);
+  --pile-face: var(--surface);
+  --pile-edge: var(--surface-line);
+  --pile-2: color-mix(in srgb, var(--surface) 85%, var(--bg-main));
+  --pile-3: color-mix(in srgb, var(--surface) 70%, var(--bg-main));
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--pile-edge);
+  border-radius: var(--r-card);
+  background: var(--pile-face);
+  box-shadow: inset 0 3px 0 var(--pile-ink);
+}
+.clrk-pile::before,
+.clrk-pile::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border: 1px solid var(--pile-edge);
+  border-radius: inherit;
+  transition: opacity 0.2s ease;
+}
+.clrk-pile::before { background: var(--pile-2); transform: translateY(4px) scaleX(0.95); }
+.clrk-pile::after { background: var(--pile-3); transform: translateY(8px) scaleX(0.9); }
+.clrk-pile--d0::before,
+.clrk-pile--d0::after,
+.clrk-pile--d1::after { opacity: 0; }
+.clrk-pile--paper { --pile-face: var(--paper); --pile-edge: var(--paper-deep); --pile-2: var(--paper-edge); --pile-3: var(--paper-deep); color: var(--text-on-fill); }
+.clrk-pile--v0 { --pile-ink: var(--rating-wrong); }
+.clrk-pile--v1 { --pile-ink: var(--rating-correct); }
+.clrk-pile--v2 { --pile-ink: var(--rating-perfect); }
+
+/* ── the reader slab (改札 reader) ──
+   72px of sumi: the contactless mark in a ring at the left, the slot,
+   the lamp at the right. A flash sets --lamp to the verdict's ink and
+   alternates --a / --b on each card. */
+.clrk-reader {
+  --lamp: var(--rating-correct);
+  position: relative;
+  height: 72px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-panel);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-panel) 82%, var(--text-on-panel)) 0%, var(--bg-panel) 100%);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-on-panel) 6%, transparent), var(--elev-hang);
+}
+.clrk-reader__wash {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(60% 120% at 50% 50%, var(--lamp), transparent 70%);
+  --peak: 0.3;
+}
+.clrk-reader__mark {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border-radius: var(--r-pill);
+  color: var(--text-on-panel-soft);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.clrk-reader__mark svg { width: 24px; height: 24px; }
+.clrk-reader__mark--lit { color: var(--lamp); box-shadow: none; opacity: 0; }
+.clrk-reader__slot {
+  position: absolute;
+  top: 50%;
+  right: 52px;
+  left: 76px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: var(--r-pill);
+  background: #050407;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8), 0 1px 0 color-mix(in srgb, var(--text-on-panel) 8%, transparent);
+}
+.clrk-reader__slot::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  border-radius: inherit;
+  background: var(--lamp);
+  opacity: 0;
+}
+.clrk-reader__lamp {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--bg-panel) 80%, var(--text-on-panel));
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.clrk-reader__lamp::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.75) 0 18%, var(--lamp) 58%);
+}
+.clrk-reader__lamp::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  border-radius: var(--r-pill);
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle, var(--lamp) 0%, transparent 66%);
+  --peak: 0.85;
+}
+.clrk-reader__ripple {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border: 2px solid var(--lamp);
+  border-radius: var(--r-pill);
+  opacity: 0;
+  pointer-events: none;
+}
+.clrk-reader--a .clrk-reader__lamp::before,
+.clrk-reader--a .clrk-reader__lamp::after,
+.clrk-reader--a .clrk-reader__wash,
+.clrk-reader--a .clrk-reader__slot::after,
+.clrk-reader--a .clrk-reader__mark--lit { animation: clr-flash-a 0.5s ease-out both; }
+.clrk-reader--b .clrk-reader__lamp::before,
+.clrk-reader--b .clrk-reader__lamp::after,
+.clrk-reader--b .clrk-reader__wash,
+.clrk-reader--b .clrk-reader__slot::after,
+.clrk-reader--b .clrk-reader__mark--lit { animation: clr-flash-b 0.5s ease-out both; }
+.clrk-reader--a .clrk-reader__ripple { animation: clr-ripple-a 0.6s ease-out both; }
+.clrk-reader--b .clrk-reader__ripple { animation: clr-ripple-b 0.6s ease-out both; }
+
+/* ── the quiet way: an underlined word, never a box, over the gate ── */
+.clrk-quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--text-secondary);
+}
+.clrk-quiet:hover { color: var(--text-primary); }
+.clrk-quiet:focus-visible { border-radius: var(--r-card); outline: 2px solid var(--text-primary); outline-offset: 2px; }
+
+/* ── the gate button, as the ceremony draws it ──
+   components/ui/GateButton.jsx, two props the boards ask for: `compact`
+   (the boards' 52px pill and 32px reader) and `arrive` (it rises 16px
+   with one small overshoot, then breathes). */
+.btn-depart--gate.clrk-gate--compact { min-height: 52px; }
+.btn-depart--gate.clrk-gate--compact .btn-depart__reader { width: 32px; height: 32px; }
+.btn-depart--gate.clrk-gate--compact .btn-depart__wave { transform: scale(0.75); }
+.btn-depart--gate.clrk-gate--compact .btn-depart__jp { font-size: var(--fs-body); font-weight: 600; }
+.btn-depart--gate.clrk-gate--arrive {
+  animation: clr-gate-in 0.6s var(--ease-out) backwards, btn-gate-breathe 2.8s ease-in-out 0.6s infinite;
+  animation-delay: var(--gate-d, 0ms), calc(var(--gate-d, 0ms) + 0.6s);
+}
+
+/* ── one-shot utilities (each reads --d as its delay) ── */
+.clrk-arrive { animation: clr-arrive 0.5s var(--ease-out) backwards; animation-delay: var(--d, 0ms); }
+.clrk-fade { animation: clr-fade 0.4s ease backwards; animation-delay: var(--d, 0ms); }
+.clrk-rise { opacity: 0; animation: clr-rise 1.1s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+.clrk-bump-a { animation: clr-bump-a 0.28s var(--ease-out); }
+.clrk-bump-b { animation: clr-bump-b 0.28s var(--ease-out); }
+.clrk-hide { opacity: 0; }
+
+@keyframes clr-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes clr-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes clr-rise {
+  0% { opacity: 0; transform: translateY(8px); }
+  20% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-28px); }
+}
+@keyframes clr-bump-a { 0% { transform: scale(1); } 40% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@keyframes clr-bump-b { 0% { transform: scale(1); } 40% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@keyframes clr-press {
+  0% { opacity: 0; transform: rotate(var(--tilt, 0deg)) scale(1.8); }
+  60% { opacity: 1; transform: rotate(var(--tilt, 0deg)) scale(0.92); }
+  100% { opacity: 1; transform: rotate(var(--tilt, 0deg)) scale(1); }
+}
+@keyframes clr-spin { to { transform: rotate(360deg); } }
+@keyframes clr-ripple-a { 0% { opacity: 0.8; transform: scale(0.7); } 100% { opacity: 0; transform: scale(2.2); } }
+@keyframes clr-ripple-b { 0% { opacity: 0.8; transform: scale(0.7); } 100% { opacity: 0; transform: scale(2.2); } }
+@keyframes clr-flash-a { 0% { opacity: 0; } 8% { opacity: var(--peak, 1); } 30% { opacity: var(--peak, 1); } 100% { opacity: 0; } }
+@keyframes clr-flash-b { 0% { opacity: 0; } 8% { opacity: var(--peak, 1); } 30% { opacity: var(--peak, 1); } 100% { opacity: 0; } }
+@keyframes clr-gate-in {
+  0% { opacity: 0; transform: translateY(16px) scale(0.96); }
+  65% { opacity: 1; transform: translateY(-2px) scale(1.012); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes clr-slam {
+  0% { opacity: 0; transform: translateY(-44px) scale(1.5) rotate(calc(var(--tilt, 0deg) - 8deg)); }
+  28% { opacity: 1; transform: translateY(-52px) scale(1.56) rotate(calc(var(--tilt, 0deg) - 6deg)); }
+  62% { opacity: 1; transform: translateY(0) scale(0.94) rotate(var(--tilt, 0deg)); }
+  78% { transform: translateY(0) scale(1.02) rotate(var(--tilt, 0deg)); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(var(--tilt, 0deg)); }
+}
+@keyframes clr-bloom { 0% { opacity: 0.75; transform: scale(0.7); } 100% { opacity: 0; transform: scale(1.75); } }
+@keyframes clr-speck {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(calc(var(--dx, 0) * 1px), calc(var(--dy, 0) * 1px)) scale(0.4); }
+}
+@keyframes clr-shake {
+  0%, 100% { transform: none; }
+  15% { transform: translate(-3px, 2px); }
+  30% { transform: translate(3px, -2px); }
+  45% { transform: translate(-2px, -1px); }
+  60% { transform: translate(2px, 1px); }
+  80% { transform: translate(-1px, 0); }
+}
+@keyframes clr-punch { from { --notch: 0; } to { --notch: var(--tk-notch); } }
+@keyframes clr-chip {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+  55% { opacity: 1; transform: translate(8px, 120px) rotate(200deg); }
+  70% { transform: translate(10px, 104px) rotate(250deg); }
+  85% { opacity: 1; transform: translate(12px, 120px) rotate(290deg); }
+  100% { opacity: 0; transform: translate(13px, 120px) rotate(300deg); }
+}
+@keyframes clr-sheen { 0% { transform: translateX(0) skewX(-12deg); } 55%, 100% { transform: translateX(280%) skewX(-12deg); } }
+@keyframes clr-flip {
+  0% { opacity: 0; transform: perspective(900px) rotateY(-90deg) translateY(16px); }
+  12% { opacity: 1; }
+  70% { transform: perspective(900px) rotateY(8deg); }
+  100% { opacity: 1; transform: perspective(900px) rotateY(0deg); }
+}
+@keyframes clr-xp-shine {
+  0% { background-position: 100% 0; animation-timing-function: cubic-bezier(0.35, 0.15, 0.65, 0.85); }
+  27%, 100% { background-position: 0 0; }
+}
+@keyframes clr-xp-shine-part {
+  0% { background-position: calc(var(--fig-w, 4) * -1.5em - var(--o, 0) * 1em) 0; animation-timing-function: cubic-bezier(0.35, 0.15, 0.65, 0.85); }
+  27%, 100% { background-position: calc(var(--o, 0) * -1em) 0; }
+}
+@keyframes clr-glint {
+  0% { opacity: 1; transform: scale(0) rotate(-25deg); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  12.5% { opacity: 1; transform: scale(1) rotate(0deg); animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.35); }
+  25%, 100% { opacity: 1; transform: scale(0) rotate(20deg); }
+}
+/* The clipper's clock (clipper.py): in along its axis, the jaws open,
+   bite at 34%, part at 55%, and it leaves; the chip falls from the die. */
+@keyframes clr-clp-slide {
+  0% { opacity: 0; transform: translateX(132px); animation-timing-function: cubic-bezier(0.15, 0.75, 0.3, 1); }
+  7% { opacity: 1; }
+  22% { opacity: 1; transform: none; animation-timing-function: linear; }
+  70% { opacity: 1; transform: none; animation-timing-function: cubic-bezier(0.5, 0, 0.85, 0.4); }
+  91% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(152px); }
+}
+@keyframes clr-clp-jaw-up {
+  0% { transform: rotate(12deg); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  22% { transform: rotate(20deg); animation-timing-function: cubic-bezier(0.3, 0, 0.4, 1); }
+  26% { transform: rotate(27deg); animation-timing-function: cubic-bezier(0.7, 0, 1, 0.5); }
+  34% { transform: rotate(0deg); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  39% { transform: rotate(-1.2deg); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+  51% { transform: rotate(0deg); animation-timing-function: linear; }
+  55% { transform: rotate(0deg); animation-timing-function: cubic-bezier(0.15, 0.8, 0.3, 1); }
+  66% { transform: rotate(22deg); animation-timing-function: linear; }
+  100% { transform: rotate(22deg); }
+}
+@keyframes clr-clp-jaw-dn {
+  0% { transform: rotate(-12deg); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  22% { transform: rotate(-20deg); animation-timing-function: cubic-bezier(0.3, 0, 0.4, 1); }
+  26% { transform: rotate(-27deg); animation-timing-function: cubic-bezier(0.7, 0, 1, 0.5); }
+  34% { transform: rotate(0deg); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  39% { transform: rotate(1.2deg); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+  51% { transform: rotate(0deg); animation-timing-function: linear; }
+  55% { transform: rotate(0deg); animation-timing-function: cubic-bezier(0.15, 0.8, 0.3, 1); }
+  66% { transform: rotate(-22deg); animation-timing-function: linear; }
+  100% { transform: rotate(-22deg); }
+}
+@keyframes clr-clp-chip {
+  0% { opacity: 0; transform: none; animation-timing-function: step-end; }
+  14.815% { opacity: 1; transform: none; animation-timing-function: linear; }
+  22.222% { opacity: 1; transform: translate(1.22px, 7.36px) rotate(25.6deg) scaleX(0.86); animation-timing-function: linear; }
+  29.63% { opacity: 1; transform: translate(2.43px, 17.44px) rotate(51.2deg) scaleX(0.49); animation-timing-function: linear; }
+  37.037% { opacity: 1; transform: translate(3.65px, 30.24px) rotate(76.8deg) scaleX(-0.14); animation-timing-function: linear; }
+  44.444% { opacity: 1; transform: translate(4.87px, 45.76px) rotate(102.4deg) scaleX(-0.51); animation-timing-function: linear; }
+  51.852% { opacity: 1; transform: translate(6.09px, 64px) rotate(128deg) scaleX(-0.88); animation-timing-function: linear; }
+  59.259% { opacity: 1; transform: translate(7.3px, 84.96px) rotate(153.6deg) scaleX(-1); animation-timing-function: linear; }
+  66.667% { opacity: 1; transform: translate(8.52px, 108.64px) rotate(179.2deg) scaleX(-0.85); animation-timing-function: linear; }
+  74.074% { opacity: 1; transform: translate(9.74px, 135.04px) rotate(204.8deg) scaleX(-0.47); animation-timing-function: linear; }
+  81.481% { opacity: 0.77; transform: translate(10.96px, 164.16px) rotate(230.4deg) scaleX(0.14); animation-timing-function: linear; }
+  88.889% { opacity: 0.46; transform: translate(12.17px, 196px) rotate(256deg) scaleX(0.54); animation-timing-function: linear; }
+  96.296% { opacity: 0.15; transform: translate(13.39px, 230.56px) rotate(281.6deg) scaleX(0.89); animation-timing-function: linear; }
+  100% { opacity: 0; transform: translate(14px, 248.86px) rotate(294.4deg) scaleX(0.98); }
+}
+
+/* ── skip and reduced ──
+   .clrk--skip (a tap skipped to the rest): entrances collapse into a
+   200ms fade, transients and the punch do not play, every transition
+   ends in 200ms; the loops (the halo, the sheen, the waiting ring) go
+   on. .clrk--reduced: nothing moves -- every animation and transition
+   dropped but the opacity fades of .clrk-arrive/.clrk-fade, the figure
+   plain gold, no glints. The system's own setting answers the same. */
+.clrk--skip .clrk-arrive,
+.clrk--skip .clrk-fade,
+.clrk--skip .clrk-slot--press,
+.clrk--skip .clrk-seal--slam,
+.clrk--skip .clrk-tk--flip { animation: clr-fade 0.2s ease both !important; }
+.clrk--skip .clrk-tk--punch,
+.clrk--skip .clrk-rise,
+.clrk--skip .clrk-bloom--go,
+.clrk--skip .clrk-speck--go,
+.clrk--skip .clrk-tk-chip--fall,
+.clrk--skip .clrk-clp-chip { animation: none !important; }
+.clrk--skip .clrk-clp { display: none; }
+.clrk--skip .btn-depart--gate.clrk-gate--arrive { animation: clr-fade 0.2s ease both, btn-gate-breathe 2.8s ease-in-out 0.2s infinite !important; }
+.clrk--skip :where(*),
+.clrk--skip :where(*)::before,
+.clrk--skip :where(*)::after { transition-duration: 0.2s !important; transition-delay: 0s !important; }
+.clrk--reduced,
+.clrk--reduced :where(*),
+.clrk--reduced :where(*)::before,
+.clrk--reduced :where(*)::after { animation: none !important; transition: none !important; }
+.clrk--reduced .clrk-arrive,
+.clrk--reduced .clrk-fade { animation: clr-fade 0.3s ease both !important; }
+.clrk--reduced .clrk-fade-t { transition: opacity 0.3s ease !important; }
+.clrk--reduced .clrk-xp-shine { background: none; -webkit-text-fill-color: currentcolor; }
+.clrk--reduced .clrk-xp-glint,
+.clrk--reduced .clrk-clp { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .clrk-slot--wait::before,
+  .clrk-tk--gold::after,
+  .clrk-xp-glint,
+  .clrk-odo__col,
+  .clrk-lvl__gain { animation: none; transition: none; }
+  .clrk-xp-shine { background: none; -webkit-text-fill-color: currentcolor; animation: none; }
+  .btn-depart--gate.clrk-gate--arrive { animation: none; }
+}
+/* ── the workbench (/dev/dayclear, development only) ── */
+.clrdev-bar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  max-width: 100%;
+  padding: var(--sp-2);
+  border-bottom-left-radius: var(--r-card);
+  background: color-mix(in srgb, var(--bg-panel) 88%, transparent);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+}
+.clrdev-bar:hover,
+.clrdev-bar:focus-within { opacity: 1; }
+.clrdev-bar__item { padding: 0 var(--sp-1); border: 0; background: none; font: inherit; color: var(--text-on-panel-soft); cursor: pointer; }
+.clrdev-bar__item[aria-current="page"] { color: var(--gate-gold-lit); }
+.clrdev-share { display: flex; justify-content: center; padding: var(--sp-8) var(--sp-5); }
+.clrdev-share img { max-width: 100%; height: auto; box-shadow: var(--elev-board); }
+/* ── 191:primitives end ── */
+
+
+
+
+/* ── 191:day ── */
+/* ClearPhone (components/dayclear/ClearPhone.jsx): the everyday clear on a phone, .clr-*. */
+/* PLACEHOLDER (foundation): the rest state laid out plainly, so the
+   app works end to end. The screen agent replaces this region. */
+.clr-wait { display: flex; align-items: center; justify-content: center; min-height: 100dvh; }
+.clr-phone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+  min-height: 100dvh;
+  padding: var(--sp-8) var(--sp-6) var(--sp-7);
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+.clr-phone__streak,
+.clr-phone__break,
+.clr-phone__sum { display: flex; gap: var(--sp-2); margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.clr-phone__fare { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
+.clr-phone__total { font-size: var(--fs-specimen-word); }
+.clr-phone__lvl { width: 232px; }
+.clr-phone__piles { display: flex; gap: var(--sp-4); }
+.clr-phone__pile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  width: 96px;
+  padding: var(--sp-3) 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.clr-phone__tomorrow { display: flex; align-items: center; gap: var(--sp-4); font-size: var(--fs-sm); }
+.clr-phone__gate { width: 100%; margin-top: auto; }
+/* ── 191:day end ── */
+
+
+
+
+/* ── 191:partial ── */
+/* PartialFinish (components/dayclear/PartialFinish.jsx): a run that ended with cards left, .ptl-*. */
+/* PLACEHOLDER (foundation). */
+.ptl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+  min-height: 100dvh;
+  padding: var(--sp-8) var(--sp-6) var(--sp-7);
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+.ptl__figs { display: flex; gap: var(--sp-6); margin: 0; padding: 0; list-style: none; }
+.ptl__left,
+.ptl__tease { margin: 0; text-align: center; }
+.ptl__actions { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); width: 100%; margin-top: auto; }
+.ptl__actions .btn-depart--gate { width: 100%; }
+/* ── 191:partial end ── */
+
+
+
+
+/* ── 191:milestones ── */
+/* MilestoneTicket, MilestoneMonth, Fireworks: the 3/7/14 and 30+ ceremonies, .ms-*. */
+/* PLACEHOLDER (foundation). */
+.ms-ticket,
+.ms-month {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+  min-height: 100dvh;
+  padding: var(--sp-8) var(--sp-6) var(--sp-7);
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+.ms-ticket__tk,
+.ms-month__tk { width: 300px; }
+.ms-ticket__fare,
+.ms-month__fare { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.ms-ticket__rest { display: flex; align-items: center; gap: var(--sp-5); }
+.ms-ticket__gate { width: 100%; margin-top: auto; }
+.ms-month__actions { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); width: 100%; margin-top: auto; }
+.ms-month__actions .btn-depart--gate { width: 100%; }
+.ms-fireworks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* ── 191:milestones end ── */
+
+
+
+
+/* ── 191:restday ── */
+/* RestDayNotice (components/dayclear/RestDayNotice.jsx): 運休 on Today, .rst-*. */
+/* PLACEHOLDER (foundation). */
+.rst {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: var(--sp-7) var(--sp-5);
+}
+.rst__streak,
+.rst__reserve p { margin: 0; text-align: center; }
+.rst__reserve { display: flex; align-items: center; gap: var(--sp-4); }
+.rst__reserve p { display: flex; flex-direction: column; gap: var(--sp-1); font-size: var(--fs-sm); color: var(--text-secondary); text-align: left; }
+.rst__today { display: flex; gap: var(--sp-4); align-items: baseline; }
+.rst > .btn-depart--gate { width: 100%; }
+/* ── 191:restday end ── */
+
+
+
+
+/* ── 191:tickets ── */
+/* TicketsScreen (screens/TicketsScreen.jsx) and the share image: Profile › Billets, .tkb-*. */
+/* PLACEHOLDER (foundation). */
+.tkb { display: flex; flex-direction: column; gap: var(--sp-6); padding-bottom: var(--sp-7); }
+.tkb__hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
+.tkb__hero .clrk-tk-hang { width: 300px; }
+.tkb__range { font-size: var(--fs-sm); color: var(--text-secondary); }
+.tkb__pill {
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid currentcolor;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.tkb__book { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+.tkb__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-1);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  font: inherit;
+  color: inherit;
+}
+.tkb__cell--locked { border-style: dashed; background: none; color: var(--text-secondary); }
+/* ── 191:tickets end ── */
+
+
+
+
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
    The computer's design, at and above 1100px (hooks/useDesk.js's
    DESK_QUERY). Tsuji has two chromes: the phone's (車内, above), which
@@ -29202,7 +30262,7 @@ button.brd-stn { cursor: pointer; }
   }
   .today > .gate-card,
   .today > .empty,
-  .today > .today-clear {
+  .today > .rst {
     grid-column: 1;
     grid-row: 1;
   }
@@ -29212,10 +30272,9 @@ button.brd-stn { cursor: pointer; }
     /* The window's height (plan 135): the week ahead takes its foot. */
     height: calc(100dvh - 2 * var(--sp-6) + var(--sp-2) + var(--sp-4));
   }
-  /* A finished run's slip stands at the card's width, centred in the
-     gate's column (plan 123): its three figures and its way back ran
-     ~730px wide at 1440, each figure alone in a third of it. */
-  .today > .today-clear {
+  /* The rest-day notice (plan 191) stands where the gate does, at the
+     card's width, centred in the gate's column. */
+  .today > .rst {
     width: 100%;
     max-width: var(--card-w);
     justify-self: center;
@@ -37180,5 +38239,52 @@ button.brd-stn { cursor: pointer; }
     .tour-ledger__pattern { font-size: var(--fs-heading); }
     .tour-ledger__line { padding-block: var(--sp-3); }
   }
+}
+/* 終着 — the day cleared on the desk (plan 191): the ceremony in the
+   content area beside the rail. Each screen writes in its own region. */
+@media (min-width: 1100px) {
+  /* The compact gate's Enter cap (kit's gate, 52px): a rung closer to
+     the pill's end than the 66px gate's. */
+  .clrk-gate--compact .desk-kbd { margin-inline-end: var(--sp-3); }
+
+
+
+  /* ── 191:desk-day ── */
+  /* ClearDesk (components/dayclear/ClearDesk.jsx): the everyday clear, centre and side columns, .clr-*. */
+  /* PLACEHOLDER (foundation): the desk's columns, plainly. */
+  .clr-desk {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: var(--sp-7);
+    min-height: 100dvh;
+    padding: var(--sp-7);
+  }
+  .clr-desk__centre,
+  .clr-desk__side { display: flex; flex-direction: column; gap: var(--sp-5); }
+  .clr-desk__head { display: flex; align-items: center; gap: var(--sp-5); }
+  .clr-desk__grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+  .clr-desk__mark { position: absolute; top: var(--sp-1); right: var(--sp-2); font-size: var(--fs-caption); }
+  .clr-desk__gate { margin-top: auto; }
+  /* ── 191:desk-day end ── */
+
+
+
+
+  /* ── 191:desk-milestones ── */
+  /* The milestone ceremonies in the content area on the desk, .ms-*. */
+  /* PLACEHOLDER (foundation): the ceremony at the phone board's width,
+     centred in the content area. */
+  .ms-ticket--desk,
+  .ms-month--desk { max-width: 390px; margin-inline: auto; }
+  /* ── 191:desk-milestones end ── */
+
+
+
+
+  /* ── 191:desk-tickets ── */
+  /* Profile › Billets on the desk, .tkb-*. */
+  /* PLACEHOLDER (foundation). */
+  .tkb--desk .tkb__book { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  /* ── 191:desk-tickets end ── */
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

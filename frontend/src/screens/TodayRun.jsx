@@ -33,6 +33,8 @@ import { useTodaySummary, refreshToday } from '../stores/today'
 import { laneWhere as whereOf, laneTypeOf, parseQuota, quotaParam } from '../domain/lanes'
 import { kanaSetLabel } from '../domain/kanaSets'
 import { useCardSession, sessionKey } from '../hooks/useCardSession'
+import { peekTally } from '../stores/runTally'
+import { cardFace } from '../domain/dayClear'
 import { formatGlossLine } from '../components/study/gloss'
 import { romajiEquals } from '../lib/romaji'
 
@@ -248,11 +250,14 @@ export default function TodayRun({ session }) {
     setShowEx(false)
   }, [card?.card_id, card?.mode, cardNonce])
 
-  // The finish is the gate's to print (screens/TodayScreen.jsx, the
-  // canvas's RunComplete under the chrome): once the queue is
-  // genuinely empty — never on a failed fetch, which the error branch
-  // below owns — the run refetches the shared summary the tab badge
-  // reads (a minute behind otherwise) and goes back with its figures.
+  // The finish (plan 191, 終着): once the queue is genuinely empty —
+  // never on a failed fetch, which the error branch below owns — a run
+  // that reviewed anything hands its tally to /today/clear
+  // (screens/DayClearScreen.jsx), which asks the server whether the day
+  // is cleared and plays the ceremony or the partial finish; a run that
+  // reviewed nothing goes back to the gate. The shared summary the tab
+  // badge reads is refetched on the way (a minute behind otherwise).
+  // `at` is the run's identity there: the finish asks once per run.
   const finished = !error && (done || (!loading && !card))
   useEffect(() => {
     if (!finished) return
@@ -262,8 +267,18 @@ export default function TodayRun({ session }) {
     if (capped) {
       try { window.sessionStorage.removeItem(takenKey) } catch { /* nothing kept */ }
     }
-    if (cleared > 0) refreshToday()
-    navigate('/today', { replace: true, state: cleared > 0 ? { run: { cleared, xp: xpTotal } } : null })
+    if (cleared === 0) {
+      navigate('/today', { replace: true, state: null })
+      return
+    }
+    refreshToday()
+    const tally = peekTally()
+    const at = Date.now()
+    const minutes = tally.startedAt ? Math.max(1, Math.round((at - tally.startedAt) / 60000)) : null
+    navigate('/today/clear', {
+      replace: true,
+      state: { run: { at, cleared, xp: xpTotal, minutes, cards: [...tally.faces] } },
+    })
   }, [finished, capped, takenKey, cleared, xpTotal, navigate])
 
   // Every screen's rating flow: the lock, the gates the celebrations
@@ -346,8 +361,11 @@ export default function TodayRun({ session }) {
     // mixed-mode and carries the same card under two of them, and a
     // stamp keyed on the id alone was once handed to a transition that
     // could never match it, which hung every stamped review.
-    if (!gates.review(card.review_preview?.[quality], {
-      cardKey: transitionKey, quality,
+    // The card's face goes on the run's tally for the finish's sweep
+    // (plan 191): what it was, its line, its verdict and its climb.
+    const preview = card.review_preview?.[quality]
+    if (!gates.review(preview, {
+      cardKey: transitionKey, quality, face: cardFace(card, { quality, preview }),
     })) return
 
     setShowRating(false)

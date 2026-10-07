@@ -103,9 +103,6 @@ const nav = {
   weekAhead:         'The next seven days',
   weekLeft:          'Left for tomorrow',
   gateRidesFree:     'board · free',
-  fareReviews:       'reviews',
-  fareFare:          'fare',
-  fareCreditsLeft:   'credits left',
   // 基礎 — the basics course on the gate and in Settings › Level (plan 186f)
   basicsUnit:        (n, of) => `Unit ${n} of ${of}`,
   basicsMet:         (n, of) => `${n} of ${of} units met`,
@@ -681,8 +678,6 @@ const stats = {
   todayDue:           n => `${n} due`,
   todayNothingDueShort: 'All clear',
   todayRemaining:     'Left in this run',
-  todayClearTitle:    'Run complete',
-  todayClearedCount:  n => `${n} ${n === 1 ? 'review' : 'reviews'} cleared. Nothing else is due.`,
   todayNothingDue:    'Nothing is due right now.',
   todayNextReview:    when => `Next review ${when}.`,
   backToStation:      'Back to the station',
@@ -2808,6 +2803,146 @@ const nyumon = {
   nyuTryCard: 'Try a card',
 }
 
+
+// ══ 終着 — the day cleared (plan 191) ══════════════════════════════
+// The copy of the canvas "Tsuji — the day cleared" (drawn in French),
+// in English. One group per screen (the same region names as
+// index.css's), each written by the screen that owns it. The Japanese
+// captions are names, not copy: the components print them as they are.
+
+// ── 191:primitives ──
+const clrPrimitives = {
+  clrStreakWord: 'days in a row',
+  clrStreakDays: n => `${n} day${n === 1 ? '' : 's'} in a row`,
+  clrXpUnit: 'xp',
+  clrFareRun: 'trip',
+  clrFarePrime: 'streak bonus',
+  clrFareTicket: 'ticket',
+  clrPrimeChip: 'streak bonus',
+  clrWeekAria: parts => `Week: ${parts.join(', ')}`,
+  clrWeekStamped: (from, to) => (from === to ? `${from} stamped` : `${from} to ${to} stamped`),
+  clrWeekMissed: day => `${day} missed`,
+  clrWeekRest: day => `${day} covered by a rest day`,
+  clrWeekToday: day => `${day} today`,
+  clrSealAria: date => `Today’s stamp: Tsuji station, ${date}`,
+  clrLevelAria: (level, pct) => `Level ${level}, ${pct}% to level ${level + 1}`,
+  clrTicketCaption: days => (days === 30 ? 'A month in a row' : days === 365 ? 'A year in a row' : `${days} days in a row`),
+  clrTicketAria: (days, no, date) => `${days}-day ticket, number ${no}, issued ${date}`,
+  clrKeep: 'Keep the ticket',
+  clrShare: 'Share',
+}
+// ── 191:primitives end ──
+
+
+
+
+// ── 191:day ──
+const clrDay = {
+  clrTripOfDay: 'Today’s trip',
+  clrTitle: 'Service complete',
+  clrPiles: ['To review', 'Correct', 'Perfect'],
+  clrPileAria: (name, n) => `${name}: ${n} card${n === 1 ? '' : 's'}`,
+  clrVerdicts: ['to review', 'correct', 'perfect'],
+  clrCardUp: 'moves up a stage',
+  clrCardMastered: 'mastered',
+  clrSumUp: () => 'moved up',
+  clrSumMastered: () => 'mastered',
+  clrSumMin: 'min',
+  clrTomorrow: (cards, min) => `Tomorrow · ~${cards} cards · ${min} min`,
+  clrTomorrowDay: day => `Tomorrow · ${day}`,
+  clrTomorrowSub: (cards, min) => `~${cards} cards · ${min} min`,
+  clrOrdinalSuffix: n => {
+    const t = n % 100
+    if (t >= 11 && t <= 13) return 'th'
+    return ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'
+  },
+  clrNextDay: ' day: ',
+  clrNextTicketName: days => (days === 7 ? 'the week’s ticket' : days === 30 ? 'the month’s ticket' : days === 365 ? 'the year’s ticket' : `the ${days}-day ticket`),
+  clrNextTicketAria: days => `${days}-day ticket, to earn tomorrow`,
+  clrNextTag: 'tomorrow',
+  clrRestTitle: 'Rest days',
+  clrRestHeld: 'in reserve',
+  clrRestFirstAt: 'the first on day',
+  clrRestNextAt: 'the next on day',
+  clrRestDayWord: '',
+  clrRestFirst: n => `the first on day ${n}`,
+  clrRestNext: n => `the next on day ${n}`,
+}
+// ── 191:day end ──
+
+
+
+
+// ── 191:partial ──
+const clrPartial = {
+  ptlTitle: 'Trip complete',
+  ptlRunAria: 'This trip',
+  ptlReviews: 'reviews',
+  ptlRight: 'correct',
+  ptlDayAria: 'The day',
+  ptlLoopAria: (done, total, left) => `${done} of ${total} cards today; today’s stamp waits at the end of the other ${left}`,
+  ptlLeft: n => (n === 1 ? 'card left today' : 'cards left today'),
+  ptlTease: min => `~${min} min to today’s stamp and the streak bonus`,
+  ptlContinue: n => `Continue · ${n} card${n === 1 ? '' : 's'}`,
+}
+// ── 191:partial end ──
+
+
+
+
+// ── 191:milestones ──
+const clrMilestones = {
+  msRestEarned: 'rest day',
+  msRestNote: 'Miss a day and your streak holds.',
+  msWeekFullAria: (from, to) => `A full week: seven days stamped, ${from} to ${to}`,
+  msMonthLabel: 'The month’s ticket',
+  msSheetAria: (n, from, to) => `Stamp sheet: ${n} days in a row, ${from} to ${to}`,
+  msTotalAria: (total, run, prime, ticket) => `+${total} xp: +${run} trip, +${prime} streak bonus, +${ticket} month’s ticket`,
+  msTicketMonthAria: (no, date) => `The month’s ticket: a month in a row, number ${no}, issued ${date}`,
+}
+// ── 191:milestones end ──
+
+
+
+
+// ── 191:restday ──
+const clrRestday = {
+  rstTitle: 'Your streak holds',
+  rstWeekAria: parts => `The week: ${parts.join(', ')}`,
+  rstUsed: day => `Rest day used on ${day}`,
+  rstTodayAria: (n, min) => `Today: ${n} cards, about ${min} minutes`,
+  rstCards: 'cards',
+  rstDepart: 'Depart',
+}
+// ── 191:restday end ──
+
+
+
+
+// ── 191:tickets ──
+const clrTickets = {
+  tkbTitle: 'Tickets',
+  tkbDoor: 'Tickets',
+  tkbBack: 'Back to the profile',
+  tkbChosenAria: 'Chosen ticket',
+  tkbRecord: 'Record',
+  tkbBookAria: (n, total) => `Tickets: ${n} earned of ${total}`,
+  tkbIn: n => `in ${n} d`,
+  tkbDaysShort: n => `${n} d`,
+  tkbRange: (from, to) => `${from} to ${to}`,
+  tkbTicketAria: (days, no, range, record) => `${days}-day ticket, number ${no}, ${range}${record ? ', record' : ''}`,
+  tkbCellAria: (days, record) => `${days}-day ticket${record ? ', record' : ''}`,
+  tkbLockedAria: (days, inDays) => `${days}-day ticket, not earned yet${inDays ? `, in ${inDays} days` : ''}`,
+  tkbShareTicket: 'Share this ticket',
+  tkbShareFigures: { reviews: 'cards reviewed', words: 'words learned', level: 'on the way' },
+  tkbShareAria: (days, no, range, stamped) => `${days}-day ticket, number ${no}, ${range}, stamped ${stamped}`,
+  tkbShareRouteAria: 'The journey',
+  tkbShareText: days => `${days} days in a row on Tsuji`,
+  tkbShareSaved: 'Image saved.',
+  tkbShareFailed: 'Sharing did not go through.',
+}
+// ── 191:tickets end ──
+
 export default {
   ...auth,
   ...landing,
@@ -2835,4 +2970,10 @@ export default {
   ...ride,
   ...nyumon,
   ...guide,
+  ...clrPrimitives,
+  ...clrDay,
+  ...clrPartial,
+  ...clrMilestones,
+  ...clrRestday,
+  ...clrTickets,
 }

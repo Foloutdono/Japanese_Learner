@@ -1,20 +1,19 @@
-import { useEffect, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useTodaySummary, refreshToday } from '../stores/today'
-import { useCredits } from '../stores/credits'
+import { useProfileSummary } from '../stores/profileSummary'
+import { markRestSeen, restNoticeSeen } from '../stores/dayClear'
 import GateCard from '../components/station/GateCard'
-import { EnterKey } from '../components/chrome/DeskKeys'
-import { untilNext } from '../domain/lanes'
 import PassStrip from '../components/station/PassStrip'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
-import { FareSlip } from '../components/credits/FareSlip'
 import Empty from '../components/ui/Empty'
-import { CheckIcon } from '../components/ui/Icons'
 import { useDesk } from '../hooks/useDesk'
-import { playArrival } from '../lib/audio'
 import { DeskSide } from '../components/chrome/DeskSide'
+import RestDayNotice from '../components/dayclear/RestDayNotice'
+import { InkFilters } from '../components/dayclear/kit'
+import { restWeek, utcToday } from '../domain/dayClear'
 import { JourneyPanel } from '../components/journey/JourneyPanel'
 import { WeekAhead } from '../components/journey/WeekAhead'
 import { AgendaNext } from '../components/agenda/AgendaNext'
@@ -24,65 +23,53 @@ import { useMinute } from '../hooks/useMinute'
 // ── 本日 — the gate (plan 070) ────────────────────────────────
 // The Today tab: the bar, the pass at strip size, and under it the
 // fare gate with the day's lanes as the run's picker. The run itself
-// is /today/run on the stage (screens/TodayRun.jsx); it comes back
-// here with what it cleared, and this screen prints the finish — the
-// canvas's RunComplete, under the chrome — until "Back to the
-// station" (or any navigation) puts the gate back.
+// is /today/run on the stage (screens/TodayRun.jsx); since plan 191 it
+// finishes on /today/clear (screens/DayClearScreen.jsx, the day
+// cleared or the partial finish), which comes back here with nothing:
+// the finish this screen used to print (RunComplete, the fare slip)
+// retired with it.
+//
+// 運休 (plan 191): the morning after a missed day a rest day covered,
+// the gate gives way once to the notice saying so (RestDayNotice) --
+// while Today's summary names a rest day not yet seen (`rest.unseen`).
+// Any way out tells the server it was seen.
 //
 // Everything this screen reads is shared: /api/today from the store
-// the tab bar's badge already reads, the balance from the credits
-// store. One request each, every consumer.
-
-function RunComplete({ run, today, credits, t, lang, onBack }) {
-  const desk = useDesk()
-  const when = untilNext(today?.next_due, lang)
-  // 到着. Every other run ends on the arrival (DoneMessage); the day's
-  // own run, the one most learners take, ended in silence. Guarded
-  // against StrictMode's double effect, which would flam it.
-  const sounded = useRef(false)
-  useEffect(() => {
-    if (sounded.current) return
-    sounded.current = true
-    playArrival()
-  }, [])
-  return (
-    <div className="today-clear">
-      <span className="today-clear__mark" aria-hidden="true"><CheckIcon size={26} /></span>
-      <h2 className="today-clear__title">{t.todayClearTitle}</h2>
-      <p className="today-clear__body">{t.todayClearedCount(run.cleared)}</p>
-      {when && <p className="today-clear__next">{t.todayNextReview(when)}</p>}
-      <FareSlip
-        reviews={run.cleared}
-        xp={run.xp}
-        creditsLeft={credits?.unlimited ? null : credits?.balance}
-      />
-      <button type="button" className="btn-depart btn-depart--ghost" onClick={onBack} aria-keyshortcuts={desk ? 'Enter' : undefined}>
-        <span className="btn-depart__jp">{t.backToStation}</span>
-        {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
-      </button>
-      {/* 机 (plan 115): Enter, the one way on. */}
-      <EnterKey onEnter={onBack} />
-    </div>
-  )
-}
+// the tab bar's badge already reads. One request, every consumer.
 
 export default function TodayScreen({ session }) {
-  const { t, lang } = useLang()
+  const { t } = useLang()
   const desk = useDesk()
   const navigate = useNavigate()
-  const location = useLocation()
   const { data: today, failed } = useTodaySummary()
+  const summary = useProfileSummary()
   // 案内 — the gate's guide, once, after the lanes have painted (plan 100).
   const guide = useGuide('today', Boolean(today) || failed)
-  const credits = useCredits()
   // 時間割 (plan 181): what is next on the learner's agenda, read once a
   // minute so a block starting while the gate is open is seen starting.
   const { blocks } = useAgenda()
   const now = useMinute()
 
-  // What the run just cleared, handed back through the router's state
-  // (screens/TodayRun.jsx). A reload has no state and shows the gate.
-  const run = location.state?.run
+  // 運休 — the rest days the learner has not been told of, once.
+  const restKey = (today?.rest?.unseen ?? []).join(',')
+  const [restLeft, setRestLeft] = useState(false)
+  const showRest = restKey !== '' && !restLeft && !restNoticeSeen(restKey)
+  // Seen the moment the notice leaves, whichever way: deferred a tick so
+  // StrictMode's rehearsed unmount (and a remount) cancels it.
+  const leaving = useRef(null)
+  useEffect(() => {
+    if (!showRest) return undefined
+    clearTimeout(leaving.current)
+    return () => { leaving.current = setTimeout(() => markRestSeen(session, restKey), 0) }
+  }, [showRest, restKey, session])
+  const depart = () => {
+    markRestSeen(session, restKey)
+    setRestLeft(true)
+    navigate('/today/run')
+  }
+  const restMinutes = today?.seconds_per_review && today?.total
+    ? Math.max(1, Math.ceil((today.total * today.seconds_per_review) / 60))
+    : null
 
   return (
     <main id="main-content" className="today">
@@ -91,11 +78,18 @@ export default function TodayScreen({ session }) {
           The name stays as the screen's clipped <h1>. */}
       <h1 className="sr-only">{t.todayTitle}</h1>
 
-      {run ? (
-        <RunComplete
-          run={run} today={today} credits={credits} t={t} lang={lang}
-          onBack={() => navigate('/today', { replace: true, state: null })}
-        />
+      {showRest ? (
+        <>
+          <InkFilters />
+          <RestDayNotice
+            rest={today.rest}
+            week={restWeek(summary?.week, today.rest.unseen, utcToday())}
+            total={today.total}
+            minutes={restMinutes}
+            desk={desk}
+            onDepart={depart}
+          />
+        </>
       ) : (
         <>
           {/* The strip first: a status line — the week, the streak, the
@@ -122,7 +116,7 @@ export default function TodayScreen({ session }) {
           )}
         </>
       )}
-      {guide.open && !run && <Guide gate="today" onEnd={guide.onEnd} />}
+      {guide.open && !showRest && <Guide gate="today" onEnd={guide.onEnd} />}
       {/* 机 — the desk (plan 114): the gate is the work, and beside it
           what the work is FOR — the pass at strip size (the week, the
           streak, the day's new items) and the pass's back, the journey
@@ -131,15 +125,13 @@ export default function TodayScreen({ session }) {
           gate and the back is a tap on the HUD away. */}
       {desk && (
         <DeskSide label={t.passLabel}>
-          {/* The strip stays on the finish too (plan 123): the run has
-              just inked today's stamp and moved the new-items gauge. */}
           <PassStrip pace={today?.pace} />
           {/* What is next on the agenda, and the two blocks after it:
               the hour's business before the journey's. */}
           {blocks?.length > 0 && <AgendaNext blocks={blocks} now={now} open then={2} />}
           <JourneyPanel session={session} />
           {/* 七日 (plan 135): the week ahead, at the column's foot. */}
-          {!run && <WeekAhead />}
+          <WeekAhead />
         </DeskSide>
       )}
     </main>
