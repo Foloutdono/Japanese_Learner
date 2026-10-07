@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
+import { appFonts } from './testing/appFonts'
 
 // ── 運休 — the rest-day notice on a phone (plan 191) ────────────────
 // The canvas's RestDay board at 390×844: the week as seven stations on
@@ -59,6 +60,8 @@ async function mount(props = {}) {
       </MemoryRouter>
     </LangProvider>
   )
+  // Its places are measured in the app's own faces, not the machine's.
+  await appFonts()
   return { onDepart }
 }
 
