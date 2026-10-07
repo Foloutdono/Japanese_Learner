@@ -28719,63 +28719,719 @@ button.brd-stn { cursor: pointer; }
 
 
 /* ── 191:day ── */
-/* ClearPhone (components/dayclear/ClearPhone.jsx): the everyday clear on a phone, .clr-*. */
-/* PLACEHOLDER (foundation): the rest state laid out plainly, so the
-   app works end to end. The screen agent replaces this region. */
+/* ══ 終着 — the everyday clear on a phone (plan 191) ════════════════
+   ClearPhone (components/dayclear/ClearPhone.jsx), the canvas's Main
+   board drawn as it is: its geometry in the board's px, the
+   horizontal places off the screen's centre line, the vertical ones off
+   the frame's top -- the board's two slacks and the tail's foot read
+   from the frame's height (sweep.js's layoutFor, handed in as unitless
+   --clr-* numbers the rules multiply by 1px).
+   Board geometry: a deck card 112×74 centred on (centre, 198); the
+   reader's slab 276–348, its slot line at 312; a landed card (at .9,
+   100.8×66.6) centred on y 440 in the flights' frame -- the piles hang
+   --clr-low (150) lower during the sweep and rise to --clr-rest as the
+   stamp presses; the pile centres at -119.5 / 0 / +119.5 (two piles:
+   ∓59.75); the seal (168) on (centre, 312), the reader's place.
+   Rest: header 44 · week 117 · streak 157 · fare --clr-fare (264) ·
+   piles (442–516) · summary --clr-sum (544) · tomorrow --clr-tomorrow
+   (650) · the gate 28 off the foot.
+   One clock: the cards' flights are CSS, and the beats read the
+   flights' own clock (.clr-phone__clock). */
 .clr-wait { display: flex; align-items: center; justify-content: center; min-height: 100dvh; }
 .clr-phone {
+  position: relative;
+  flex: none;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  line-height: 1.4;
+}
+.clr-phone :where(p, h1, ol, ul) { margin: 0; }
+/* The frame: the window less its safe insets, a phone's column wide. */
+.clr-phone__frame {
+  position: absolute;
+  inset: var(--safe-top) 0 var(--safe-bottom);
+  max-width: 430px;
+  margin: 0 auto;
+}
+/* The board, laid out at --clr-h (667 at least) and drawn smaller under it. */
+.clr-phone__stage {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: calc(var(--clr-h, 844) * 1px);
+  transform: scale(var(--clr-k, 1));
+  transform-origin: 50% 0;
+}
+.clr-phone__world { position: absolute; inset: 0; }
+/* The flights' clock: started in the same style pass as the flights. */
+.clr-phone__clock { position: absolute; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.clr-phone--live .clr-phone__clock { animation: clr-phone-clock 60s linear both; }
+.clr-phone__num { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+
+/* ── the counter (the sweep) and the header (the rest) ── */
+.clr-phone__count {
+  position: absolute;
+  top: 40px;
+  right: 22px;
+  left: 22px;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--sp-5);
-  min-height: 100dvh;
-  padding: var(--sp-8) var(--sp-6) var(--sp-7);
-  background: var(--bg-main);
-  color: var(--text-primary);
+  gap: var(--sp-3);
 }
-.clr-phone__streak,
-.clr-phone__break,
-.clr-phone__sum { display: flex; gap: var(--sp-2); margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
-.clr-phone__fare { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
-.clr-phone__total { font-size: var(--fs-specimen-word); }
-.clr-phone__lvl { width: 232px; }
-.clr-phone__piles { display: flex; gap: var(--sp-4); }
+.clr-phone__cap {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.clr-phone__n { display: flex; align-items: baseline; gap: var(--sp-3); color: var(--text-primary); }
+.clr-phone__n .clr-phone__num { display: inline-block; }
+/* Two tabular digits: the figure does not re-centre at 10. */
+.clr-phone__read { min-width: 1.3em; font-size: var(--fs-display); text-align: right; }
+.clr-phone__of { font-size: var(--fs-title); color: var(--text-secondary); }
+.clr-phone__prog {
+  display: block;
+  width: 132px;
+  height: 2px;
+  margin-top: var(--sp-1);
+  overflow: hidden;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+}
+.clr-phone__prog i {
+  display: block;
+  height: 100%;
+  background: var(--text-primary);
+  transform: scaleX(var(--p, 0));
+  transform-origin: 0 50%;
+  transition: transform 0.18s var(--ease-out);
+}
+.clr-phone__out { animation: clr-phone-out 0.18s var(--ease-in) both; }
+.clr-phone__hdr { position: absolute; top: 44px; right: 22px; left: 22px; z-index: 2; }
+
+/* ── the week row and the streak at rest ── */
+.clr-phone__week { position: absolute; top: 117px; right: 22px; left: 22px; z-index: 9; justify-content: center; }
+.clr-phone__slot-in { animation: clr-phone-slot-in 0.42s var(--ease-back) backwards; animation-delay: var(--d, 0ms); }
+.clr-phone__ripple { animation: clr-phone-ripple 0.46s var(--ease-out) backwards; animation-delay: var(--d, 0ms); }
+/* The seal becomes today's slot: it starts at the seal's last size (48px = 1.71×). */
+.clr-phone__press { animation: clr-phone-press 0.46s var(--ease-out) backwards; }
+.clr-phone__streak {
+  position: absolute;
+  top: 157px;
+  right: 22px;
+  left: 22px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  line-height: 1;
+  color: var(--text-secondary);
+}
+.clr-phone__streak .clr-phone__num { font-size: var(--fs-title); color: var(--text-primary); }
+/* Laid out before it shows, for the glide to measure where it lands. */
+.clr-phone__ghost { visibility: hidden; }
+
+/* ── the piles (buttons). __low holds them down during the sweep: the
+      drop is instant, only the rise is animated. A milestone day fades
+      them instead (__gone): the milestone takes the screen. ── */
+.clr-phone__riser {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: translateY(calc(var(--clr-rest, 43) * 1px));
+  transition: transform 0.64s cubic-bezier(0.55, 0, 0.25, 1);
+}
+.clr-phone__low { transform: translateY(calc(var(--clr-low, 150) * 1px)); transition: none; }
+.clr-phone__gone { opacity: 0; transition: opacity 0.4s ease; }
+/* The buttons ride over the cards (the count and the name are printed on
+   each top card); the layer lets every other tap through. */
+.clr-phone__riser--piles { z-index: 5; pointer-events: none; }
+/* A button is its pile's top card: the face's box, turned with it once
+   the pile is put away. */
 .clr-phone__pile {
+  position: absolute;
+  top: 399.2px;
+  left: calc(50% + var(--px, 0) * 1px);
+  z-index: 3;
+  width: 100.8px;
+  height: 66.6px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-card);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: rotate(var(--jit, 0deg));
+  transition: transform 0.64s cubic-bezier(0.55, 0, 0.25, 1), background-color 0.16s ease;
+}
+.clr-phone__low .clr-phone__pile { transform: none; transition: none; }
+.clr-phone__pile:hover,
+.clr-phone__pile:focus-visible { background-color: color-mix(in srgb, var(--text-primary) 5%, transparent); }
+.clr-phone__pile:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+.clr-phone__pile:disabled { cursor: default; }
+.clr-phone__tray {
+  position: absolute;
+  inset: 0;
+  border: 1.5px dashed color-mix(in srgb, var(--ink, var(--rating-correct)) 55%, transparent);
+  border-radius: var(--r-card);
+  transition: opacity 0.3s ease 0.2s;
+}
+.clr-phone__pile--has .clr-phone__tray { opacity: 0; }
+/* The count and the name: under the pile while it grows, on its top card
+   at rest (the face's middle, under its 3px verdict edge). */
+.clr-phone__face {
+  position: absolute;
+  top: 11.4px;
+  right: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--sp-1);
-  width: 96px;
-  padding: var(--sp-3) 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
+  transition: transform 0.64s cubic-bezier(0.55, 0, 0.25, 1);
 }
-.clr-phone__tomorrow { display: flex; align-items: center; gap: var(--sp-4); font-size: var(--fs-sm); }
-.clr-phone__gate { width: 100%; margin-top: auto; }
+.clr-phone__low .clr-phone__face { transform: translateY(74px); transition: none; }
+.clr-phone__pile-n { display: block; font-size: var(--fs-heading); color: var(--ink, var(--rating-correct)); }
+/* The wrong ink as a figure: 85% toward text-primary reads 4.7:1 (the raw ink 3.9:1). */
+.clr-phone__pile--wrong .clr-phone__pile-n { color: color-mix(in srgb, var(--rating-wrong) 85%, var(--text-primary)); }
+.clr-phone__pile-name { display: block; font-size: var(--fs-sm); font-weight: 500; line-height: 1.2; color: var(--text-secondary); }
+.clr-phone__thud { animation: clr-phone-thud 0.5s var(--ease-out); }
+/* A tap before the piles rise: they land in place by a fade, not by
+   sliding through the summary. */
+.clrk--skip .clr-phone__snap,
+.clrk--skip .clr-phone__snap .clr-phone__pile,
+.clrk--skip .clr-phone__snap .clr-phone__face { transition: none !important; }
+
+/* ── the run's cards. Copy A (the deck, over the slab, cut at the slot
+      line) and copy B (under the slab, from its foot down) share one
+      flight; --o shifts copy B's frame by the drop its riser holds it at.
+      States: --pre (the deck, every flight at its first frame), --live
+      (the flights), --rest (landed: each element's own style). ── */
+.clr-phone__clipA { position: absolute; top: 0; right: 0; left: 0; z-index: 6; height: 312px; overflow: hidden; pointer-events: none; }
+.clr-phone__clipB { position: absolute; inset: 348px 0 0; z-index: 4; overflow: hidden; pointer-events: none; }
+/* Once the reader has stepped away no card dives any more: on a short
+   screen the piles rest above the slab's old foot. */
+.clr-phone__clipB--open { overflow: visible; }
+/* rest = landed */
+.clr-phone__fx { transform: translateX(calc(var(--tx, 0) * 1px)); }
+.clr-phone__fy { transform: translateY(calc((var(--o, 0) + var(--clr-fall, 392) + var(--sy, 0)) * 1px)); }
+.clr-phone__fr { transform: rotate(var(--jit, 0deg)) scale(0.9); }
+.clr-phone__card--a { opacity: 0; }
+/* A pile needs only its top word. */
+.clr-phone__card--b .clrk-tcard__read { opacity: 0; }
+.clr-phone__deck { position: absolute; top: 161px; left: calc(50% - 56px); width: 112px; height: 74px; }
+.clr-phone__clipB .clr-phone__fx { position: absolute; top: -187px; left: calc(50% - 56px); width: 112px; height: 74px; }
+.clr-phone__slot { position: absolute; inset: 0; transition: transform 0.16s var(--ease-out), opacity 0.16s ease; }
+.clr-phone__fy,
+.clr-phone__fr { position: absolute; inset: 0; }
+.clr-phone__card.clrk-tcard { position: absolute; inset: 0; }
+/* Landed at .9: the lead rung. */
+.clr-phone__card .clrk-tcard__term { font-size: var(--fs-title); }
+.clr-phone__card--a::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--bg-panel);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+}
+.clr-phone__slot--under .clr-phone__card--a::after { opacity: 0.1; }
+.clr-phone__slot--top .clr-phone__card--a { box-shadow: inset 3px 0 0 var(--rail, var(--surface-line)), var(--elev-hang); }
+.clr-phone__card--b { box-shadow: inset 0 3px 0 var(--ink, var(--rating-correct)); }
+.clr-phone__card--buried .clrk-tcard__term,
+.clr-phone__card--buried .clrk-tcard__read { visibility: hidden; }
+/* Settled: once the stamp is pressed the run is put away -- each landed
+   card turns to the pile's face, the top one keeps its verdict edge. */
+.clr-phone__card--b::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1px solid var(--surface-line);
+  border-radius: inherit;
+  background: var(--surface);
+  box-shadow: inset 0 3px 0 var(--ink, var(--rating-correct));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.42s ease;
+}
+.clr-phone__card--buried::after { border-color: var(--border); background: color-mix(in srgb, var(--surface) 82%, var(--bg-main)); box-shadow: none; }
+.clr-phone--settled .clr-phone__card--b::after { opacity: 1; }
+.clr-phone__card--b .clrk-tcard__term { transition: opacity 0.42s ease; }
+/* The face takes the pile's count and name. */
+.clr-phone--settled .clr-phone__card--b .clrk-tcard__term { opacity: 0; }
+.clr-phone__card--fast::before {
+  content: "";
+  position: absolute;
+  right: 20px;
+  bottom: 100%;
+  left: 20px;
+  height: 72px;
+  border-radius: var(--r-pill) var(--r-pill) 0 0;
+  background: radial-gradient(60% 100% at 50% 100%, color-mix(in srgb, var(--paper) 32%, transparent), transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+/* pre = the deck before the sweep */
+.clr-phone--pre .clr-phone__fx,
+.clr-phone--pre .clr-phone__fr { transform: none; }
+.clr-phone--pre .clr-phone__fy { transform: translateY(calc(var(--o, 0) * 1px)); }
+.clr-phone--pre .clr-phone__card--a,
+.clr-phone--pre .clr-phone__card--b .clrk-tcard__read { opacity: 1; }
+/* live = the flights */
+.clr-phone--live .clr-phone__fx { animation: clr-phone-fx var(--f, 600ms) linear var(--d, 0ms) backwards; }
+.clr-phone--live .clr-phone__fy { animation: clr-phone-fy var(--f, 600ms) linear var(--d, 0ms) backwards; }
+.clr-phone--live .clr-phone__fr { animation: clr-phone-fr var(--f, 600ms) linear var(--d, 0ms) backwards; }
+.clr-phone--live .clr-phone__fy--last { animation-name: clr-phone-fy-last; }
+.clr-phone--live .clr-phone__fr--last { animation-name: clr-phone-fr-last; }
+.clr-phone--live .clr-phone__card--a { animation: clr-phone-hide-a var(--f, 600ms) linear var(--d, 0ms) backwards; }
+.clr-phone--live .clr-phone__card--b .clrk-tcard__read { animation: clr-phone-read-out var(--f, 600ms) linear var(--d, 0ms) backwards; }
+.clr-phone--live .clr-phone__card--fast::before { animation: clr-phone-trail var(--f, 600ms) linear var(--d, 0ms) backwards; }
+
+/* ── the reader: it speaks only in verdict inks ── */
+.clr-phone__reader { position: absolute; top: 276px; right: 22px; left: 22px; z-index: 5; }
+.clr-phone__reader--out { animation: clr-phone-reader-out 0.3s var(--ease-io) both; }
+/* The board's slab: its top light a breath over the sumi (#1a171e on
+   #100e13), where the kit's mix (18%) reads as grey metal. */
+.clr-phone__reader .clrk-reader { background: linear-gradient(180deg, color-mix(in srgb, var(--bg-panel) 96%, var(--text-on-panel)) 0%, var(--bg-panel) 100%); }
+
+/* ── the stamp, in the reader's place. In the air it is the stamp's face,
+      crisp and solid over its glow; the grained print comes with the hit ── */
+.clr-phone__seal { position: absolute; top: 228px; left: calc(50% - 84px); z-index: 8; width: 168px; height: 168px; pointer-events: none; }
+.clr-phone__seal .clrk-seal__face {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--seal-ink) 10%, transparent) 0,
+    color-mix(in srgb, var(--seal-ink) 10%, transparent) 82%, color-mix(in srgb, var(--seal-ink) 22%, transparent) 100%);
+  filter: none;
+}
+.clr-phone__seal--hit .clrk-seal__face { background: none; filter: url("#clrk-ink"); }
+.clr-phone__glow {
+  position: absolute;
+  inset: -10px;
+  border-radius: var(--r-pill);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--stamp-ink) 36%, transparent),
+    color-mix(in srgb, var(--stamp-ink) 14%, transparent) 58%, transparent);
+  opacity: 0;
+  animation: clr-phone-glow 0.64s linear both;
+}
+.clr-phone__drop { position: absolute; inset: 0; animation: clr-phone-drop 0.64s linear both; }
+.clr-phone__ink {
+  position: absolute;
+  inset: 2px;
+  border-radius: var(--r-pill);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--seal-ink) 46%, transparent),
+    color-mix(in srgb, var(--seal-ink) 16%, transparent) 70%, transparent);
+  opacity: 0;
+  animation: clr-phone-ink 0.9s var(--ease-out) both;
+}
+.clr-phone__bloom2 {
+  position: absolute;
+  top: -14px;
+  left: -14px;
+  width: 196px;
+  height: 196px;
+  border: 1px solid var(--seal-ink);
+  border-radius: var(--r-pill);
+  opacity: 0;
+  pointer-events: none;
+  animation: clr-phone-bloom2 1.15s var(--ease-out) both;
+}
+.clr-phone__sx,
+.clr-phone__sy { position: absolute; inset: 0; }
+.clr-phone__sx--fly { animation: clr-phone-sx 0.74s linear both; }
+.clr-phone__sy--fly { animation: clr-phone-sy 0.74s linear both; }
+
+/* ── the streak under the stamp, then home under the week row ── */
+.clr-phone__sstage {
+  position: absolute;
+  top: 404px;
+  right: 22px;
+  left: 22px;
+  z-index: 7;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--sp-3);
+}
+.clr-phone__odo { font-size: var(--fs-display); color: var(--text-primary); }
+.clr-phone__sstage-cap { font-size: var(--fs-sm); line-height: 1; color: var(--text-secondary); }
+/* The figure alone goes home (it lands on the rest line's), the caption fades on the way. */
+.clr-phone__glide { animation: clr-phone-glide 0.5s linear both; }
+.clr-phone__glide .clr-phone__sstage-cap { animation: clr-phone-capout 0.18s ease both; }
+
+/* ── the fare ── */
+.clr-phone__fare {
+  position: absolute;
+  top: calc(var(--clr-fare, 264) * 1px);
+  right: 22px;
+  left: 22px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+}
+/* The digits on the axis, the unit hung beside them. */
+.clr-phone__total { width: 100%; transform-origin: 50% 70%; }
+.clr-phone__total .clrk-xp-total { display: grid; grid-template-columns: 1fr auto 1fr; align-items: baseline; width: 100%; }
+.clr-phone__total .clrk-xp { grid-column: 2; }
+.clr-phone__total .clrk-xp__unit { grid-column: 3; justify-self: start; margin-left: var(--sp-2); }
+.clr-phone__xp { font-size: var(--fs-specimen-word); }
+.clr-phone__break,
+.clr-phone__sum { display: flex; align-items: baseline; gap: var(--sp-2); font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); }
+.clr-phone__break b,
+.clr-phone__sum b { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.clr-phone__lvl { display: flex; align-items: center; gap: var(--sp-3); width: 232px; }
+.clr-phone__lvl .clrk-lvl { flex: 1; }
+.clr-phone__lvl .clr-phone__num { font-size: var(--fs-caption); color: var(--text-secondary); }
+.clr-phone__chip { position: absolute; top: 167px; left: calc(50% - 46px); z-index: 10; width: 0; height: 0; pointer-events: none; }
+.clr-phone__chip .clrk-xp-chip { position: absolute; top: 0; left: 0; transform: translate(-50%, -50%); }
+.clr-phone__chipx,
+.clr-phone__chipy { position: absolute; top: 0; left: 0; }
+.clr-phone__chipx { animation: clr-phone-chipx 0.8s linear both; }
+.clr-phone__chipy { animation: clr-phone-chipy 0.8s linear both; }
+
+/* ── the tail: summary, tomorrow, gate ── */
+.clr-phone__sum { position: absolute; top: calc(var(--clr-sum, 544) * 1px); right: 22px; left: 22px; justify-content: center; }
+.clr-phone__tomorrow {
+  position: absolute;
+  top: calc(var(--clr-tomorrow, 650) * 1px);
+  right: 22px;
+  left: 22px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.clr-phone__tomorrow .clrk-slot { margin: 0 var(--sp-1) 0 0; }
+.clr-phone__tomorrow-txt { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.clr-phone__tomorrow-main { font-size: var(--fs-sm); font-weight: 600; line-height: 1.3; color: var(--text-primary); }
+.clr-phone__tomorrow-sub { font-size: var(--fs-caption); line-height: 1.3; color: var(--text-secondary); }
+.clr-phone__gold { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--gate-gold-lit); }
+.clr-phone__sup { position: relative; top: -0.42em; font-size: var(--fs-caption-xs); }
+.clr-phone__gate { position: absolute; right: 22px; bottom: 28px; left: 22px; }
+.clr-phone__gate .btn-depart--gate { width: 100%; }
+
+/* ── a pile's cards (PileSheet) ── */
+.clr-pile-sheet__list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.clr-pile-sheet__list li + li { border-top: 1px solid var(--surface-line); }
+.clr-pile-sheet__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 0;
+  border-left: 3px solid var(--ink, var(--rating-correct));
+  background: none;
+  font: inherit;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.clr-pile-sheet__row:hover,
+.clr-pile-sheet__row:focus-visible { background-color: color-mix(in srgb, var(--text-primary) 5%, transparent); }
+.clr-pile-sheet__row:focus-visible { outline: 2px solid var(--text-primary); outline-offset: -2px; }
+.clr-pile-sheet__term { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; letter-spacing: var(--tr-term); }
+.clr-pile-sheet__read { font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-secondary); }
+.clr-pile-sheet__empty { margin: 0; color: var(--text-secondary); }
+
+/* ── skip and reduced, for the board's own motion ── */
+.clrk--skip .clr-phone__ripple,
+.clrk--skip .clr-phone__thud { animation: none !important; }
+.clrk--skip .clr-phone__slot-in { animation: clr-fade 0.2s ease both !important; }
+
+@keyframes clr-phone-clock { from { opacity: 0; } to { opacity: 0; } }
+@keyframes clr-phone-out { to { opacity: 0; transform: translateY(-14px); } }
+@keyframes clr-phone-slot-in {
+  from { opacity: 0; transform: rotate(var(--tilt, 0deg)) scale(0.5); }
+  to { opacity: 1; transform: rotate(var(--tilt, 0deg)) scale(1); }
+}
+@keyframes clr-phone-ripple {
+  0% { transform: rotate(var(--tilt, 0deg)) scale(1); }
+  38% { transform: rotate(var(--tilt, 0deg)) scale(1.26); }
+  100% { transform: rotate(var(--tilt, 0deg)) scale(1); }
+}
+@keyframes clr-phone-press {
+  0% { opacity: 0.9; transform: rotate(var(--tilt, 0deg)) scale(1.71); }
+  42% { opacity: 1; transform: rotate(var(--tilt, 0deg)) scale(0.88); }
+  70% { transform: rotate(var(--tilt, 0deg)) scale(1.06); }
+  100% { opacity: 1; transform: rotate(var(--tilt, 0deg)) scale(1); }
+}
+@keyframes clr-phone-thud { 0% { transform: scale(1); } 30% { transform: scale(1.34); } 100% { transform: scale(1); } }
+/* X: straight down through the slot, then out to the pile, its speed dying. */
+@keyframes clr-phone-fx {
+  0%, 62% { transform: translateX(0); animation-timing-function: cubic-bezier(0.25, 0.6, 0.35, 1); }
+  86%, 100% { transform: translateX(calc(var(--tx, 0) * 1px)); }
+}
+/* Y: a lift, then a fall from rest still gaining speed when it hits (its
+   centre on the slot line at 56%), a squash and a rebound. */
+@keyframes clr-phone-fy {
+  0% { transform: translateY(calc(var(--o, 0) * 1px)); animation-timing-function: cubic-bezier(0.25, 0.6, 0.4, 1); }
+  12% { transform: translateY(calc((var(--o, 0) - 12) * 1px)); animation-timing-function: cubic-bezier(0.4, 0, 0.75, 0.38); }
+  86% { transform: translateY(calc((var(--o, 0) + var(--clr-fall, 392) + var(--sy, 0)) * 1px)); animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
+  91% { transform: translateY(calc((var(--o, 0) + var(--clr-fall, 392) + 2 + var(--sy, 0)) * 1px)); animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1); }
+  96% { transform: translateY(calc((var(--o, 0) + var(--clr-fall, 392) - 4 + var(--sy, 0)) * 1px)); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+  100% { transform: translateY(calc((var(--o, 0) + var(--clr-fall, 392) + var(--sy, 0)) * 1px)); }
+}
+@keyframes clr-phone-fy-last {
+  0% { transform: translateY(calc(var(--o, 0) * 1px)); animation-timing-function: cubic-bezier(0.25, 0.6, 0.4, 1); }
+  12% { transform: translateY(calc((var(--o, 0) - 16) * 1px)); animation-timing-function: cubic-bezier(0.4, 0, 0.75, 0.38); }
+  86% { transform: translateY(calc((var(--o, 0) + var(--clr-fall, 392) + var(--sy, 0)) * 1px)); animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
+  90% { transform: translateY(calc((var(--o, 0) + var(--clr-fall, 392) + 3 + var(--sy, 0)) * 1px)); animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1); }
+  95% { transform: translateY(calc((var(--o, 0) + var(--clr-fall, 392) - 8 + var(--sy, 0)) * 1px)); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+  100% { transform: translateY(calc((var(--o, 0) + var(--clr-fall, 392) + var(--sy, 0)) * 1px)); }
+}
+/* The card itself: the lift's tilt, the squash in the slot, a bow (--ax)
+   that keeps the middle column off one axis, the hit's squash and stretch. */
+@keyframes clr-phone-fr {
+  0% { transform: translateX(0) rotate(0deg) scale(1); }
+  12% { transform: translateX(0) rotate(-1.5deg) scale(1.05); }
+  30% { transform: translateX(0) rotate(0deg) scale(1); }
+  50% { transform: translateX(0) rotate(0deg) scale(1); }
+  56% { transform: translateX(0) rotate(0deg) scale(1.05, 0.88); }
+  62% { transform: translateX(0) rotate(0deg) scale(1); }
+  74% { transform: translateX(calc(var(--ax, 0) * 1px)) rotate(var(--lean, 0deg)) scale(0.95); }
+  86% { transform: translateX(0) rotate(var(--jit, 0deg)) scale(0.954, 0.72); }
+  92% { transform: translateX(0) rotate(var(--jit, 0deg)) scale(0.864, 0.945); }
+  100% { transform: translateX(0) rotate(var(--jit, 0deg)) scale(0.9); }
+}
+@keyframes clr-phone-fr-last {
+  0% { transform: translateX(0) rotate(0deg) scale(1); }
+  12% { transform: translateX(0) rotate(-2.5deg) scale(1.08); }
+  30% { transform: translateX(0) rotate(0deg) scale(1); }
+  50% { transform: translateX(0) rotate(0deg) scale(1); }
+  56% { transform: translateX(0) rotate(0deg) scale(1.06, 0.86); }
+  62% { transform: translateX(0) rotate(0deg) scale(1); }
+  74% { transform: translateX(0) rotate(var(--lean, 0deg)) scale(0.96); }
+  86% { transform: translateX(0) rotate(var(--jit, 0deg)) scale(1, 0.63); }
+  92% { transform: translateX(0) rotate(var(--jit, 0deg)) scale(0.83, 0.98); }
+  100% { transform: translateX(0) rotate(var(--jit, 0deg)) scale(0.9); }
+}
+@keyframes clr-phone-hide-a { 0%, 61.5% { opacity: 1; } 62%, 100% { opacity: 0; } }
+@keyframes clr-phone-read-out { 0%, 70% { opacity: 1; } 82%, 100% { opacity: 0; } }
+@keyframes clr-phone-trail { 0%, 50% { opacity: 0; } 58% { opacity: 1; } 78% { opacity: 0.85; } 86%, 100% { opacity: 0; } }
+@keyframes clr-phone-reader-out { to { opacity: 0; transform: translateY(14px) scale(0.96); } }
+@keyframes clr-phone-glow {
+  0% { opacity: 0; transform: scale(1.8); }
+  34% { opacity: 0.5; transform: scale(1.5); }
+  54% { opacity: 1; transform: scale(1.02); }
+  57% { opacity: 1; transform: scale(0.96); }
+  72%, 100% { opacity: 0; transform: scale(1); }
+}
+@keyframes clr-phone-drop {
+  0% { opacity: 0; transform: translateY(-24px) scale(1.3) rotate(-11deg); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  34% { opacity: 1; transform: translateY(-38px) scale(1.4) rotate(-6deg); animation-timing-function: cubic-bezier(0.7, 0, 1, 0.6); }
+  56% { opacity: 1; transform: translateY(0) scale(0.92) rotate(0deg); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  70% { transform: translateY(0) scale(1.04) rotate(0deg); }
+  84% { transform: translateY(0) scale(0.99) rotate(0deg); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes clr-phone-ink { 0% { opacity: 0; transform: scale(0.82); } 8% { opacity: 1; } 100% { opacity: 0; transform: scale(1.18); } }
+@keyframes clr-phone-bloom2 { 0% { opacity: 0; transform: scale(0.9); } 12% { opacity: 0.55; } 100% { opacity: 0; transform: scale(1.85); } }
+@keyframes clr-phone-sx {
+  0%, 18% { transform: none; animation-timing-function: cubic-bezier(0.3, 0, 0.25, 1); }
+  100% { transform: translateX(108px); }
+}
+@keyframes clr-phone-sy {
+  0% { opacity: 1; transform: none; animation-timing-function: cubic-bezier(0.3, 0, 0.4, 1); }
+  18% { transform: translateY(4px) scale(1.08); animation-timing-function: cubic-bezier(0.62, 0, 0.35, 1); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-181px) scale(0.286); }
+}
+@keyframes clr-phone-glide {
+  0% { transform: none; animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1); }
+  100% { transform: translate(calc(var(--gx, 0) * 1px), calc(var(--gy, 0) * 1px)) scale(0.5); }
+}
+@keyframes clr-phone-capout { to { opacity: 0; } }
+@keyframes clr-phone-chipx {
+  0%, 38% { transform: none; animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1); }
+  100% { transform: translateX(46px); }
+}
+@keyframes clr-phone-chipy {
+  0% { opacity: 0; transform: translateY(14px) scale(0.4); animation-timing-function: cubic-bezier(0.3, 1.5, 0.5, 1); }
+  16% { opacity: 1; transform: translateY(36px) scale(1); }
+  38% { opacity: 1; transform: translateY(38px) scale(1); animation-timing-function: cubic-bezier(0.55, 0, 0.8, 0.4); }
+  88% { opacity: 1; transform: translateY(calc(var(--clr-chip-y, 133) * 1px)) scale(0.72); }
+  100% { opacity: 0; transform: translateY(calc(var(--clr-chip-y, 133) * 1px + 2px)) scale(0.5); }
+}
+/* Reduced motion: the screen renders its rest (.clrk--reduced); nothing
+   of the board's own moves, whatever renders it. */
+@media (prefers-reduced-motion: reduce) {
+  .clr-phone__slot-in,
+  .clr-phone__ripple,
+  .clr-phone__press,
+  .clr-phone__thud,
+  .clr-phone__out,
+  .clr-phone__reader--out,
+  .clr-phone__glow,
+  .clr-phone__drop,
+  .clr-phone__ink,
+  .clr-phone__bloom2,
+  .clr-phone__sx--fly,
+  .clr-phone__sy--fly,
+  .clr-phone__glide,
+  .clr-phone__chipx,
+  .clr-phone__chipy,
+  .clr-phone--live .clr-phone__clock,
+  .clr-phone--live .clr-phone__fx,
+  .clr-phone--live .clr-phone__fy,
+  .clr-phone--live .clr-phone__fr,
+  .clr-phone--live .clr-phone__card--a,
+  .clr-phone--live .clr-phone__card--b .clrk-tcard__read,
+  .clr-phone--live .clr-phone__card--fast::before { animation: none; }
+  .clr-phone__riser,
+  .clr-phone__pile,
+  .clr-phone__face,
+  .clr-phone__tray,
+  .clr-phone__slot,
+  .clr-phone__prog i,
+  .clr-phone__card--a::after,
+  .clr-phone__card--b::after,
+  .clr-phone__card--b .clrk-tcard__term,
+  .clr-pile-sheet__row { transition: none; }
+}
 /* ── 191:day end ── */
 
 
 
 
 /* ── 191:partial ── */
-/* PartialFinish (components/dayclear/PartialFinish.jsx): a run that ended with cards left, .ptl-*. */
-/* PLACEHOLDER (foundation). */
+/* ══ 途中下車 — a run that ended with cards left today (plan 191) ═════
+   PartialFinish (components/dayclear/PartialFinish.jsx), the canvas's
+   Partial board: the leg's fare, the day as a loop line out of 辻駅 and
+   back (a stop a card; the learner got off at this run's last), the
+   cards left and the tease, the quiet way over the gate. One column,
+   the day centred in the air between the fare and the gate; on a short
+   phone that air goes first, then the loop draws smaller (--k, from the
+   room PartialFinish measures). */
 .ptl {
+  position: relative;
+  flex: none;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--sp-5);
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   padding: var(--sp-8) var(--sp-6) var(--sp-7);
+  padding-top: calc(var(--sp-8) + var(--safe-top));
+  padding-bottom: calc(var(--sp-7) + var(--safe-bottom));
   background: var(--bg-main);
   color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  line-height: 1.4;
 }
-.ptl__figs { display: flex; gap: var(--sp-6); margin: 0; padding: 0; list-style: none; }
-.ptl__left,
-.ptl__tease { margin: 0; text-align: center; }
-.ptl__actions { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); width: 100%; margin-top: auto; }
-.ptl__actions .btn-depart--gate { width: 100%; }
+.ptl :where(p, h1, ul, li) { margin: 0; }
+/* Beside the rail the composition keeps the phone's width. */
+.ptl--desk { width: 100%; max-width: 390px; margin: 0 auto; }
+.ptl__num { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+.ptl__cap {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* the leg's fare: three figures under one hairline each */
+.ptl__fare { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); flex: none; margin-top: var(--sp-8); padding: 0; list-style: none; }
+.ptl__fig { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); padding: var(--sp-1) 0; }
+.ptl__fig + .ptl__fig { border-left: 1px solid var(--border); }
+.ptl__fig .ptl__num,
+.ptl__xp { font-size: var(--fs-heading); }
+/* French sets its fine space before %: drawn as a margin, since the
+   narrow no-break space is missing from too many faces. */
+.ptl__pct--fine { margin-left: 0.12em; }
+
+/* the day: the loop, then what is left of it */
+.ptl__day { display: flex; flex: 1 1 auto; flex-direction: column; align-items: center; justify-content: center; min-height: 0; }
+.ptl__loop { position: relative; flex: none; width: calc(320px * var(--k, 1)); height: calc(320px * var(--k, 1)); }
+.ptl__drawing { position: absolute; top: 0; left: 0; width: 320px; height: 320px; transform: scale(var(--k, 1)); transform-origin: 0 0; }
+.ptl__map { position: absolute; inset: 0; width: 320px; height: 320px; overflow: visible; }
+.ptl__line { fill: none; stroke-width: 3; }
+.ptl__line--done { stroke: var(--text-primary); stroke-linecap: round; }
+/* 3.5:1 */
+.ptl__line--ahead { stroke: color-mix(in srgb, var(--text-primary) 42%, transparent); stroke-dasharray: 5 6; }
+/* 4.4:1 */
+.ptl__stop { fill: var(--bg-main); stroke: color-mix(in srgb, var(--text-primary) 50%, transparent); stroke-width: 1.5; }
+.ptl__stop--done { stroke: var(--text-primary); stroke-width: 2; }
+.ptl__term { fill: var(--bg-main); stroke: var(--stamp-ink); stroke-width: 2.5; }
+.ptl__term-dot { fill: var(--stamp-ink); }
+.ptl__ring { fill: none; stroke: color-mix(in srgb, var(--text-primary) 40%, transparent); stroke-width: 1.5; }
+.ptl__here,
+.ptl__ripple { transform-box: fill-box; transform-origin: center; }
+.ptl__here { fill: var(--text-primary); animation: clr-ptl-pop 0.5s var(--ease-back) 0.62s backwards; }
+/* Greets twice, then stops: the gate is what moves at rest. */
+.ptl__ripple { fill: none; stroke: var(--text-primary); stroke-width: 1.5; opacity: 0; animation: clr-ptl-ripple 2.6s ease-out 1.3s 2; }
+/* The day's stamp, waiting at the end of the line: the slot's waiting
+   look (a dashed stamp-ink ring, still; the print in the ground's
+   neutral ink, the glyph cut but not inked) at the seal's size. */
+.ptl__seal { position: absolute; top: 64px; left: 64px; width: 192px; height: 192px; }
+.ptl__wait { --seal-ink: color-mix(in srgb, var(--stamp-ink) 40%, transparent); }
+.ptl__wait .clrk-seal__face { border-color: transparent; color: var(--text-secondary); filter: none; }
+/* The fill hides the stroke's inner half: one clean outer line, no crossing contours. */
+.ptl__wait .clrk-seal__day {
+  top: 46px;
+  color: var(--bg-main);
+  -webkit-text-stroke: 3px var(--text-secondary);
+  paint-order: stroke fill;
+}
+/* The outline adds 1.5px round the glyph: 火 and the date re-centred between their rules. */
+.ptl__wait .clrk-seal__foot { top: 134px; }
+.ptl__seal-ring { position: absolute; inset: 0; border: 2px dashed color-mix(in srgb, var(--stamp-ink) 80%, transparent); border-radius: var(--r-pill); pointer-events: none; }
+
+.ptl__below { display: flex; flex: none; flex-direction: column; align-items: center; }
+.ptl__left { display: flex; align-items: baseline; gap: var(--sp-3); margin-top: var(--sp-7); font-size: var(--fs-lead); font-weight: 500; line-height: 1.3; }
+/* The one figure that leads to the gate. */
+.ptl__left .ptl__num { font-size: var(--fs-display); }
+.ptl__tease {
+  max-width: 280px;
+  margin-top: var(--sp-3);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--text-secondary);
+}
+.ptl__gold { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--gate-gold-lit); }
+
+/* the way on, the quiet way over it */
+.ptl__act { display: flex; flex: none; flex-direction: column; align-items: center; gap: var(--sp-3); }
+.ptl__act .btn-depart--gate { width: 100%; }
+/* A short phone: the fare's air first. */
+@media (max-height: 760px) {
+  .ptl__fare { margin-top: var(--sp-6); }
+  .ptl__left { margin-top: var(--sp-5); }
+}
+/* skipped: the stop is simply there, its greeting not played */
+.clrk--skip .ptl__here,
+.clrk--skip .ptl__ripple { animation: none !important; }
+@keyframes clr-ptl-pop { from { transform: scale(0); } to { transform: none; } }
+@keyframes clr-ptl-ripple { 0% { opacity: 0.55; transform: scale(1); } 100% { opacity: 0; transform: scale(2.1); } }
+@media (prefers-reduced-motion: reduce) {
+  .ptl__here,
+  .ptl__ripple { animation: none; }
+}
 /* ── 191:partial end ── */
 
 

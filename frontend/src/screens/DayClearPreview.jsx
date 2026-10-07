@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useDesk } from '../hooks/useDesk'
@@ -25,9 +25,22 @@ import { SCENES, SUMMARY, REST_MINUTES } from '../components/dayclear/fixtures'
 //                (the real rail stands beside it only at 1100px and up,
 //                where the route's frame is the Shell)
 //   &bare=1      no scene bar (for recording)
+//   &piles=2     a bar with no Perfect: the run's Perfect cards counted
+//                Correct, so the sweep has two piles
+//   &cards=N     the run cut or dealt round to N cards (the sweep's pace
+//                for a short run or a long one)
 //
 // "Rejouer" remounts the scene (the app itself has no replay).
 const NAMES = Object.keys(SCENES)
+
+// The scene's run, as the query varies it (piles=2, cards=N).
+function runFor(run, piles, size) {
+  if (!run) return run
+  let cards = run.cards
+  if (size > 0) cards = Array.from({ length: size }, (_, i) => ({ ...cards[i % cards.length], id: `fx_${i}|deal` }))
+  if (piles === 2) cards = cards.map(c => (c.verdict === 2 ? { ...c, verdict: 1 } : c))
+  return cards === run.cards ? run : { ...run, cards, cleared: cards.length }
+}
 
 // The pass at the fixture's level after the fare, so a level-up scene's
 // 進級 has the summary it reads (XpToast).
@@ -48,7 +61,10 @@ export default function DayClearPreview() {
   const deskParam = params.get('desk')
   const desk = deskParam === '1' ? true : deskParam === '0' ? false : deskWidth
   const bare = params.get('bare') === '1'
+  const piles = params.get('piles') === '2' ? 2 : 3
+  const size = Number(params.get('cards')) || 0
   const scene = SCENES[name]
+  const run = useMemo(() => runFor(scene.run, piles, size), [scene, piles, size])
   const [take, setTake] = useState(0)
   const [png, setPng] = useState(null)
 
@@ -80,10 +96,10 @@ export default function DayClearPreview() {
   if (scene.result) {
     body = (
       <DayClearView
-        key={`${name}:${take}:${reduced}:${desk}`}
+        key={`${name}:${take}:${reduced}:${desk}:${piles}:${size}`}
         status={scene.result.cleared ? 'cleared' : 'partial'}
         result={scene.result}
-        run={scene.run}
+        run={run}
         levelUp={scene.result.xp?.leveled_up ? { newLevel: scene.result.xp.new_level } : null}
         desk={desk}
         reduced={reduced}
@@ -127,6 +143,7 @@ export default function DayClearPreview() {
             <Link key={n} className="clrdev-bar__item" to={query({ scene: n })} aria-current={n === name ? 'page' : undefined}>{n}</Link>
           ))}
           <Link className="clrdev-bar__item" to={query({ reduced: reduced ? null : '1' })}>{reduced ? 'motion' : 'reduced'}</Link>
+          <Link className="clrdev-bar__item" to={query({ piles: piles === 2 ? null : '2' })}>{piles === 2 ? '3 piles' : '2 piles'}</Link>
           <button type="button" className="clrdev-bar__item" onClick={() => setTake(n => n + 1)}>Rejouer</button>
           <button type="button" className="clrdev-bar__item" onClick={() => navigate('/dev/sounds')}>sons</button>
         </nav>

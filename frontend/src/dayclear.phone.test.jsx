@@ -71,11 +71,15 @@ describe('/today/clear on a phone', () => {
     const clear = screen.container.querySelector('main.clr-phone')
     expect(clear).not.toBeNull()
     expect(screen.container.querySelector('.loading')).toBeNull()
-    // The rest state's figures: the title, the week, the fare, the piles.
+    // The ceremony begins on the run's deck and the count of the trip.
+    expect(clear.querySelector('.clr-phone__of').textContent).toBe('/ 32')
+    // A tap skips to the rest: the title, the week, the fare, the piles.
+    clear.click()
+    await settle()
     expect(clear.querySelector('.clrk-hdr__title').textContent).toBe('Service terminé')
     expect(clear.querySelectorAll('.clrk-week > .clrk-slot')).toHaveLength(7)
     expect(clear.querySelector('.clrk-xp').textContent.replace(/\s/g, '')).toContain('+252')
-    expect([...clear.querySelectorAll('.clr-phone__pile b')].map(b => b.textContent)).toEqual(['6', '18', '8'])
+    expect([...clear.querySelectorAll('.clr-phone__pile-n')].map(b => b.textContent)).toEqual(['6', '18', '8'])
     expect(clear.querySelector('.btn-depart--gate').textContent).toContain('Retour à la gare')
   })
 

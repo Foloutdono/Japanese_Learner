@@ -2867,6 +2867,11 @@ const clrDay = {
   clrRestDayWord: '',
   clrRestFirst: n => `the first on day ${n}`,
   clrRestNext: n => `the next on day ${n}`,
+  clrStreakWordN: n => (n === 1 ? 'day in a row' : 'days in a row'),
+  clrTomorrowNone: 'Tomorrow · nothing due',
+  clrPileCount: n => `${n} card${n === 1 ? '' : 's'}`,
+  clrPileEmpty: 'No cards',
+  clrPileOpen: term => `Open ${term} in the dictionary`,
 }
 // ── 191:day end ──
 
@@ -2884,6 +2889,9 @@ const clrPartial = {
   ptlLeft: n => (n === 1 ? 'card left today' : 'cards left today'),
   ptlTease: min => `~${min} min to today’s stamp and the streak bonus`,
   ptlContinue: n => `Continue · ${n} card${n === 1 ? '' : 's'}`,
+  ptlTeaseTicket: (min, name) => `~${min} min to today’s stamp and ${name}`,
+  ptlTeaseNoMin: 'At the end: today’s stamp and the streak bonus',
+  ptlTeaseTicketNoMin: name => `At the end: today’s stamp and ${name}`,
 }
 // ── 191:partial end ──
 

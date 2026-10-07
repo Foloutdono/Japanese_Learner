@@ -2802,6 +2802,13 @@ const clrDay = {
   clrRestDayWord: ' jour',
   clrRestFirst: n => `le premier au ${n}ᵉ jour`,
   clrRestNext: n => `le prochain au ${n}ᵉ jour`,
+  // ClearPhone (the board Main): the streak's word beside its figure,
+  // tomorrow with nothing due, a pile's list of cards.
+  clrStreakWordN: n => (n === 1 ? 'jour de suite' : 'jours de suite'),
+  clrTomorrowNone: 'Demain · rien de prévu',
+  clrPileCount: n => `${n}\u00a0carte${n === 1 ? '' : 's'}`,
+  clrPileEmpty: 'Aucune carte',
+  clrPileOpen: term => `Ouvrir ${term} dans le dictionnaire`,
 }
 // ── 191:day end ──
 
@@ -2819,6 +2826,10 @@ const clrPartial = {
   ptlLeft: n => (n === 1 ? 'carte reste aujourd’hui' : 'cartes restent aujourd’hui'),
   ptlTease: min => `~${min}\u00a0min pour le tampon du jour et la prime de série`,
   ptlContinue: n => `Continuer · ${n} carte${n === 1 ? '' : 's'}`,
+  // The tease on a milestone's eve, and with no pace to time it by.
+  ptlTeaseTicket: (min, name) => `~${min}\u00a0min pour le tampon du jour et le ${name}`,
+  ptlTeaseNoMin: 'Au bout : le tampon du jour et la prime de série',
+  ptlTeaseTicketNoMin: name => `Au bout : le tampon du jour et le ${name}`,
 }
 // ── 191:partial end ──
 
