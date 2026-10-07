@@ -257,6 +257,22 @@ describe('MilestoneMonth — 30 days and on', () => {
     expect($('.ms-m-stamp--rest').textContent).toBe('運休')
   })
 
+  it('draws the month from the clear\'s thirty days: a rest and a miss weeks back', async () => {
+    // 30 days ending today (plan 191's "month"): a rest 12 days back, a
+    // miss 20 days back -- beyond the week, which alone could not say so.
+    const day = F.CLEAR_MONTH30.day
+    const back = n => new Date(Date.parse(`${day}T00:00:00Z`) - n * 864e5).toISOString().slice(0, 10)
+    const month = Array.from({ length: 30 }, (_, i) => {
+      const n = 29 - i
+      return { day: back(n), kanji: '', state: n === 12 ? 'rest' : n === 20 ? 'missed' : 'studied' }
+    })
+    mount(MilestoneMonth, { result: { ...F.CLEAR_MONTH30, month }, run: F.RUN_MONTH30, reduced: true })
+    await settle()
+    expect(document.querySelectorAll('.ms-m-stamp--rest')).toHaveLength(1)
+    // 29 slots before today: one missed (no stamp), one rest, 27 inked.
+    expect(document.querySelectorAll('.ms-m-stamp')).toHaveLength(28)
+  })
+
   it('keeps and shares the ticket', async () => {
     const { onKeep, onShare } = mount(MilestoneMonth, { result: F.CLEAR_MONTH30, run: F.RUN_MONTH30, reduced: true })
     await settle()

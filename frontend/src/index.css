@@ -2884,6 +2884,10 @@
      motion is written in. components/dayclear/kit/ reads them. */
   --seal-ink:        #ce6153;
   --stamp-glyph:     #d57e70;
+  /* today's stamp and tomorrow's waiting slot: the panel's inks on a
+     dark ground, the paper's on washi (below) */
+  --slot-ink:        var(--text-on-panel);
+  --slot-ink-soft:   var(--text-on-panel-soft);
   --paper-ink-soft:  #665c4a;
   --paper-edge:      #e2d8c4;
   --paper-deep:      #cfc2aa;
@@ -3143,6 +3147,8 @@
   /* 終着 (plan 191): on washi the impression is the stamp's own ink. */
   --seal-ink:        var(--stamp-ink);
   --stamp-glyph:     #a8392b;
+  --slot-ink:        var(--text-primary);
+  --slot-ink-soft:   var(--text-secondary);
 
   --text-primary:   #221d15;
   /* Deepened from #6f6552 for the same reason --indigo/--teal/--rust are
@@ -27853,14 +27859,14 @@ button.brd-stn { cursor: pointer; }
 }
 .clrk-slot--miss { color: var(--text-secondary); font-weight: 500; }
 .clrk-slot--miss::before { border: 1.5px dashed color-mix(in srgb, var(--text-primary) 24%, transparent); background: transparent; }
-.clrk-slot--wait { color: var(--text-on-panel-soft); }
+.clrk-slot--wait { color: var(--slot-ink-soft); }
 .clrk-slot--wait::before {
   border: 1.5px dashed color-mix(in srgb, var(--stamp-ink) 70%, transparent);
   background: transparent;
   animation: clr-spin 14s linear infinite;
 }
 .clrk-slot--still::before { animation: none; }
-.clrk-slot--now { color: var(--text-on-panel); }
+.clrk-slot--now { color: var(--slot-ink); }
 .clrk-slot--now::before { border: 2px solid var(--stamp-ink); background: color-mix(in srgb, var(--stamp-ink) 22%, transparent); }
 .clrk-slot--press { animation: clr-press 0.45s ease-out backwards; }
 /* A 運休 ticket laid over the day: a pass-ink stub overhanging each gap

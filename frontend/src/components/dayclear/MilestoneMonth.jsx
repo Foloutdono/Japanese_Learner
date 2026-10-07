@@ -387,7 +387,9 @@ export default function MilestoneMonth({ result, model, desk, reduced, onFareBea
         td: -Math.round(r() * 4000),
       })
     }
-    const cells = sheetDays(result.day, model.week, r)
+    // The month's own thirty days when the clear carries them (a rest or a
+    // miss more than a week back), else the week, the rest drawn studied.
+    const cells = sheetDays(result.day, result.month ?? model.week, r)
     const specks = []
     for (let i = 0; i < 8; i++) {
       const a = (162 + i * 15 + (r() - 0.5) * 8) * Math.PI / 180
@@ -403,7 +405,7 @@ export default function MilestoneMonth({ result, model, desk, reduced, onFareBea
     let w = 0
     for (let i = 0; i < 29; i++) { wave.push(Math.round(w)); w += 26 + 46 * Math.exp(-i / 5.5) }
     return { stars, cells, specks, wave }
-  }, [result.day, model.week])
+  }, [result.day, result.month, model.week])
 
   // A wider sky (the desk) has more stars, from a die of its own, so the
   // board's forty-six stay where the board put them.
