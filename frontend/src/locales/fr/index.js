@@ -2851,9 +2851,11 @@ const clrMilestones = {
   msRestEarned: 'jour de repos',
   msRestNote: 'Si tu manques un jour, ta série tient.',
   msWeekFullAria: (from, to) => `Semaine complète : sept jours tamponnés, de ${from} à ${to}`,
-  msMonthLabel: 'Billet du mois',
+  // The jackpot's caption while it counts: the month's, the year's, else the days'.
+  msTicketLabel: days => (days === 30 ? 'Billet du mois' : days === 365 ? 'Billet de l’année' : `Billet des ${days} jours`),
   msSheetAria: (n, from, to) => `Carnet de tampons : ${n} jours de suite, du ${from} au ${to}`,
-  msTotalAria: (total, run, prime, ticket) => `+${total} xp : +${run} trajet, +${prime} prime de série, +${ticket} billet du mois`,
+  msTotalAria: (total, run, prime, ticket, days = 30) => `+${total} xp : +${run} trajet, +${prime} prime de série, +${ticket} ${days === 30 ? 'billet du mois' : days === 365 ? 'billet de l’année' : `billet des ${days} jours`}`,
+  msFareAria: (n, days = 30) => `+${n} xp, ${days === 30 ? 'billet du mois' : days === 365 ? 'billet de l’année' : `billet des ${days} jours`}`,
   msTicketMonthAria: (no, date) => `Billet du mois : un mois de suite, numéro ${no}, émis le ${date}`,
 }
 // ── 191:milestones end ──
