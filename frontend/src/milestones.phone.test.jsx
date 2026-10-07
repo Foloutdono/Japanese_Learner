@@ -86,6 +86,34 @@ describe('the milestone\'s tier, by the streak', () => {
   }
 })
 
+describe('a second run on a milestone day', () => {
+  // The day was cleared and its milestone paid by an earlier run: the
+  // server answers `already`, nothing paid, and the ceremony is the
+  // everyday clear -- no second ticket clipped, no "+0 billet", no rest
+  // day announced again.
+  for (const [days, base] of [[7, F.CLEAR_TICKET7], [30, F.CLEAR_MONTH30]]) {
+    it(`plays the everyday clear on day ${days}, reduced or not`, async () => {
+      const result = { ...base, already: true, xp: { xp_earned: 0, leveled_up: false, new_level: base.level?.level } }
+      for (const reduced of [true, false]) {
+        const screen = await render(
+          <LangProvider>
+            <DayClearView status="cleared" result={result} run={F.RUN_TICKET7} desk={false} reduced={reduced} onLeave={() => {}} />
+          </LangProvider>
+        )
+        await settle()
+        expect($('main.clr-phone'), 'the everyday clear').not.toBeNull()
+        expect($('main.ms-ticket')).toBeNull()
+        expect($('main.ms-month')).toBeNull()
+        if (reduced) {
+          expect(text('.clr-phone__streak')).toBe(`${days}joursdesuite`)
+          expect(text('.clr-phone__break')).toBe(`+${F.RUN_TICKET7.xp}trajet`)
+        }
+        await screen.unmount()
+      }
+    })
+  }
+})
+
 describe('MilestoneTicket — 3, 7 and 14 days', () => {
   it('prints the week\'s ticket at rest: its name, number, date, the fare and the rest day', async () => {
     const { onFareBeat } = mount(MilestoneTicket, { result: F.CLEAR_TICKET7, reduced: true })

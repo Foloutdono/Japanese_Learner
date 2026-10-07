@@ -221,6 +221,9 @@ export default function ClearPhone({ result, model, reduced = false, handover = 
   // clear, unrolled on a milestone's (the milestone rolls it)
   const streak = model.streak
   const shown = handover ? Math.max(0, streak - 1) : streak
+  // the figure the roll starts from: the day before's, unless today was
+  // counted by an earlier run's clear (`already`), as on the desk
+  const before = model.already ? streak : Math.max(0, streak - 1)
 
   // ── the glide home: the stage's figure onto the rest line's ──
   const stageRef = useRef(null)
@@ -458,8 +461,8 @@ export default function ClearPhone({ result, model, reduced = false, handover = 
                 style={{ '--d': '260ms', '--gx': glide.x, '--gy': glide.y }}
                 aria-hidden="true"
               >
-                <StreakRoll from={handover ? shown : Math.max(0, streak - 1)} to={shown} roll={is('ROLL')} figRef={stageFigRef} />
-                <span className="clr-phone__sstage-cap">{t.clrStreakWordN(handover ? shown : is('ROLL') ? streak : streak - 1)}</span>
+                <StreakRoll from={handover ? shown : before} to={shown} roll={is('ROLL')} figRef={stageFigRef} />
+                <span className="clr-phone__sstage-cap">{t.clrStreakWordN(handover ? shown : is('ROLL') ? streak : before)}</span>
               </div>
             )}
 

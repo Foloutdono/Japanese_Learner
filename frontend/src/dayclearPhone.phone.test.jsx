@@ -216,6 +216,26 @@ describe('ClearPhone, three piles or two', () => {
   })
 })
 
+describe('ClearPhone on a day already cleared', () => {
+  it('stamps the day without rolling the streak: an earlier run counted it', async () => {
+    const result = { ...CLEAR_DAY, already: true, xp: { xp_earned: 0, leveled_up: false, new_level: 14 } }
+    const one = { ...RUN_DAY, cards: RUN_DAY.cards.slice(0, 1), cleared: 1 }
+    const { screen } = await mountClear({ run: one, result })
+    const root = screen.container.querySelector('main.clr-phone')
+    // The odometer under the stamp: each column's --n is the cell it
+    // shows (a digit d is cell d + 1). Before the roll and after, 6.
+    const cells = new Set()
+    const deadline = performance.now() + 7000
+    while (!root.querySelector('.clr-phone__streak:not(.clr-phone__ghost)') && performance.now() < deadline) {
+      for (const col of root.querySelectorAll('.clr-phone__odo .clrk-odo__col')) cells.add(col.style.getPropertyValue('--n'))
+      await settle(40)
+    }
+    expect(cells.size).toBeGreaterThan(0)
+    expect([...cells]).toEqual(['7'])
+    expect(text(root.querySelector('.clr-phone__streak'))).toBe('6 jours de suite')
+  }, 10000)
+})
+
 describe('ClearPhone on a milestone day', () => {
   const model7 = () => clearModel(CLEAR_TICKET7, RUN_TICKET7)
 

@@ -55,7 +55,11 @@ export default function DayClearView({
   const desk = deskProp ?? deskNow
   const reduced = useReducedMotion(reducedProp)
   const model = useMemo(() => (result?.cleared ? clearModel(result, run) : null), [result, run])
-  const handover = Boolean(model && model.tier !== 'day')
+  // A milestone's ceremony plays once, on the clear that paid it: a
+  // later run the same day (`already`, nothing paid) gets the everyday
+  // clear -- no second ticket clipped, no "+0 billet", no rest day
+  // announced again.
+  const handover = Boolean(model && model.tier !== 'day' && !model.already)
   // On a milestone day the everyday clear hands over after its stamp;
   // reduced, the milestone's rest is the screen from the start.
   const [handedOver, setHandedOver] = useState(false)
