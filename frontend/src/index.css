@@ -28375,7 +28375,9 @@ button.brd-stn { cursor: pointer; }
   height: 72px;
   border: 1px solid var(--border);
   border-radius: var(--r-panel);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-panel) 82%, var(--text-on-panel)) 0%, var(--bg-panel) 100%);
+  /* the board's slab: its top light a breath over the sumi (#1a171e on
+     #100e13); a stronger mix reads as grey metal */
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-panel) 96%, var(--text-on-panel)) 0%, var(--bg-panel) 100%);
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-on-panel) 6%, transparent), var(--elev-hang);
 }
 .clrk-reader__wash {
@@ -29008,9 +29010,6 @@ button.brd-stn { cursor: pointer; }
 /* ── the reader: it speaks only in verdict inks ── */
 .clr-phone__reader { position: absolute; top: 276px; right: 22px; left: 22px; z-index: 5; }
 .clr-phone__reader--out { animation: clr-phone-reader-out 0.3s var(--ease-io) both; }
-/* The board's slab: its top light a breath over the sumi (#1a171e on
-   #100e13), where the kit's mix (18%) reads as grey metal. */
-.clr-phone__reader .clrk-reader { background: linear-gradient(180deg, color-mix(in srgb, var(--bg-panel) 96%, var(--text-on-panel)) 0%, var(--bg-panel) 100%); }
 
 /* ── the stamp, in the reader's place. In the air it is the stamp's face,
       crisp and solid over its glow; the grained print comes with the hit ── */
