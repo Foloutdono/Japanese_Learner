@@ -22,12 +22,12 @@ const READINGS = {
   kun: [{ reading: 'ぬし', display: 'ぬし' }, { reading: 'おも', display: 'おも' }, { reading: 'あるじ', display: 'あるじ' }],
 }
 
-function Drill({ onSubmit = () => {} }) {
+function Drill({ onSubmit = () => {}, shares }) {
   const [submitted, setSubmitted] = useState(false)
   return (
     <LangProvider>
       <main className="container stage">
-        <ReadingsInput readings={READINGS} submitted={submitted} onSubmit={() => { setSubmitted(true); onSubmit() }} />
+        <ReadingsInput readings={READINGS} shares={shares} submitted={submitted} onSubmit={() => { setSubmitted(true); onSubmit() }} />
       </main>
     </LangProvider>
   )
@@ -148,6 +148,30 @@ describe('the readings box on a phone', () => {
     ])
     expect($('.readings-input input')).toBeNull()
     expect($('.readings-input__submit')).toBeNull()
+  })
+
+  it('prints each reading\'s share of the course\'s words once checked, and none before', async () => {
+    // Ten words: シュ in six, ス in one, ぬし in three, おも and あるじ in none.
+    const shares = { total: 10, whole: 0, readings: { 'シュ': 6, 'ス': 1, 'ぬし': 3 } }
+    await render(<Drill shares={shares} />)
+    await settle()
+    expect($$('.readings-input__pct')).toHaveLength(0)
+    await userEvent.click($('#readings-on'))
+    await userEvent.keyboard('shu{Enter}')
+    await settle()
+    const pcts = box => [...box.querySelectorAll('.readings-input__chip')].map(c => c.querySelector('.readings-input__pct')?.textContent.replace(',', '.'))
+    expect(pcts(box(0))).toEqual(['60.0%', '10.0%'])
+    expect(pcts(box(1))).toEqual(['30.0%', '0.0%', '0.0%'])
+    expect(box(0).querySelector('.readings-input__pct--core')).not.toBeNull()
+  })
+
+  it('prints no share for a card the course has no word for', async () => {
+    await render(<Drill shares={{ total: 0, whole: 0, readings: {} }} />)
+    await settle()
+    await userEvent.click($('#readings-on'))
+    await userEvent.keyboard('shu{Enter}')
+    await settle()
+    expect($$('.readings-input__pct')).toHaveLength(0)
   })
 
   it('fits the phone: the boxes and Valider share one axis, and the chips wrap', async () => {

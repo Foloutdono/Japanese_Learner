@@ -575,6 +575,7 @@ export default function TodayRun({ session }) {
               <ReadingsInput
                 key={`${card.card_id}:${cardNonce}`}
                 readings={nc.readings}
+                shares={nc.reading_shares}
                 submitted={answered}
                 onSubmit={reveal}
               />

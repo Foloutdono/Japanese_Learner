@@ -489,6 +489,7 @@ export default function KanjiRun({ session }) {
               <ReadingsInput
                 key={card.card_id}
                 readings={card.readings}
+                shares={card.reading_shares}
                 submitted={answered}
                 onSubmit={onFlashcardReveal}
               />

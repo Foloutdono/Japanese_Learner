@@ -4,6 +4,7 @@ import { CheckIcon } from '../ui/Icons'
 import { playClick } from '../../lib/audio'
 import { romajiEquals, kanaToRomaji, toHiragana } from '../../lib/romaji'
 import { composing } from '../../lib/keyGuards'
+import { formatPct, shareTier, sharePct } from '../../domain/readingShare'
 
 // ── 読み入力 — the readings drill's answer field ────────────────
 // A kanji has an open-ended number of readings and nobody agrees how many
@@ -35,6 +36,13 @@ import { composing } from '../../lib/keyGuards'
 // The 15-reading cap is not a scoring rule -- it stops a stuck learner
 // from growing the form without bound. 大 has 8 readings; nothing in the
 // deck comes close to 15.
+//
+// ── 割合 (plan 177) ────────────────────────────────────────────
+// Checked, each reading of the list also prints the share of the course's
+// words that use it (`shares`, the card's `reading_shares`), so the answer
+// says which readings were the ones worth knowing: セイ at half the words
+// and せい.. at one in a hundred. A card with no word in the course
+// carries no counts and prints none.
 //
 // ── Why the ticks are not a grade ─────────────────────────────
 // Matching is generous and advisory, exactly as in write_romaji: the
@@ -69,8 +77,8 @@ function pieces(text) {
 // component rather than an old one racing to clear itself. Resetting in an
 // effect would leave one render in which the previous card's answers are
 // still on screen under the new card's prompt.
-export default function ReadingsInput({ readings, submitted, onSubmit }) {
-  const { t } = useLang()
+export default function ReadingsInput({ readings, shares, submitted, onSubmit }) {
+  const { t, lang } = useLang()
   const on  = readings?.on  ?? []
   const kun = readings?.kun ?? []
 
@@ -181,6 +189,7 @@ export default function ReadingsInput({ readings, submitted, onSubmit }) {
                   they did not, and their wrong guesses struck after it. */}
               {submitted && g.entries.map(e => {
                 const ok = typed.some(x => matches(x, e))
+                const pct = shares?.total > 0 ? sharePct(shares.readings?.[e.reading] ?? 0, shares.total) : null
                 return (
                   <span
                     key={`entry:${e.reading}`}
@@ -188,6 +197,11 @@ export default function ReadingsInput({ readings, submitted, onSubmit }) {
                     lang="ja"
                   >
                     {e.reading}
+                    {pct !== null && (
+                      <span className={`readings-input__pct readings-input__pct--${shareTier(pct)}`}>
+                        {formatPct(pct, lang)}<small>%</small>
+                      </span>
+                    )}
                     {ok && <CheckIcon size={12} />}
                     <span className="sr-only">{ok ? t.readingsFound : t.readingsMissed}</span>
                   </span>
