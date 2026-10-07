@@ -2802,6 +2802,16 @@ const clrDay = {
   clrRestDayWord: ' jour',
   clrRestFirst: n => `le premier au ${n}ᵉ jour`,
   clrRestNext: n => `le prochain au ${n}ᵉ jour`,
+  // The desk's board (ClearDesk): the grid named for a screen reader,
+  // the streak's word by its count, the ticket to come when it is not
+  // tomorrow's, the rest day's line in parts (the ordinal's suffix set
+  // as a superscript), and a tomorrow with nothing due.
+  clrDeskGridAria: n => `Les ${n} carte${n === 1 ? '' : 's'} du trajet`,
+  clrDeskStreakWord: n => (n === 1 ? 'jour de suite' : 'jours de suite'),
+  clrDeskNextIn: n => `dans ${n}\u00a0j`,
+  clrDeskNextAria: (days, inDays) => `Billet des ${days} jours, à gagner ${inDays === 1 ? 'demain' : `dans ${inDays} jours`}`,
+  clrDeskRestAt: (n, first) => ({ pre: first ? 'le premier au ' : 'le prochain au ', sup: n === 1 ? 'er' : 'e', post: ' jour' }),
+  clrDeskTomorrowNone: 'Rien de prévu',
 }
 // ── 191:day end ──
 

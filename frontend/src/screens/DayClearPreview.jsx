@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useDesk } from '../hooks/useDesk'
@@ -25,9 +25,26 @@ import { SCENES, SUMMARY, REST_MINUTES } from '../components/dayclear/fixtures'
 //                (the real rail stands beside it only at 1100px and up,
 //                where the route's frame is the Shell)
 //   &bare=1      no scene bar (for recording)
+//   &cards=N     the run's length: the scene's cards dealt round again
+//                (a short run of 5, a long one of 120)
+//   &perfect=0   a bar with no Perfect: every perfect card a correct one,
+//                so the clear sorts two verdicts, not three
 //
 // "Rejouer" remounts the scene (the app itself has no replay).
 const NAMES = Object.keys(SCENES)
+
+// The scene's run at another length, or with no Perfect (see above).
+function variantRun(run, cards, perfect) {
+  if (!run || (!cards && perfect)) return run
+  const deck = run.cards
+  const n = cards || deck.length
+  const faces = Array.from({ length: n }, (_, i) => {
+    const face = deck[i % deck.length]
+    const id = i < deck.length ? face.id : `${face.id}#${i}`
+    return perfect || face.verdict !== 2 ? { ...face, id } : { ...face, id, verdict: 1 }
+  })
+  return { ...run, cleared: n, xp: Math.round(run.xp * n / deck.length), cards: faces }
+}
 
 // The pass at the fixture's level after the fare, so a level-up scene's
 // 進級 has the summary it reads (XpToast).
@@ -49,6 +66,9 @@ export default function DayClearPreview() {
   const desk = deskParam === '1' ? true : deskParam === '0' ? false : deskWidth
   const bare = params.get('bare') === '1'
   const scene = SCENES[name]
+  const cards = Math.max(0, Math.min(400, Number(params.get('cards')) || 0))
+  const perfect = params.get('perfect') !== '0'
+  const run = useMemo(() => variantRun(scene.run, cards, perfect), [scene, cards, perfect])
   const [take, setTake] = useState(0)
   const [png, setPng] = useState(null)
 
@@ -80,10 +100,10 @@ export default function DayClearPreview() {
   if (scene.result) {
     body = (
       <DayClearView
-        key={`${name}:${take}:${reduced}:${desk}`}
+        key={`${name}:${take}:${reduced}:${desk}:${cards}:${perfect}`}
         status={scene.result.cleared ? 'cleared' : 'partial'}
         result={scene.result}
-        run={scene.run}
+        run={run}
         levelUp={scene.result.xp?.leveled_up ? { newLevel: scene.result.xp.new_level } : null}
         desk={desk}
         reduced={reduced}

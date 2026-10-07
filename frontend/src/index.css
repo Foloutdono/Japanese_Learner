@@ -38250,21 +38250,687 @@ button.brd-stn { cursor: pointer; }
 
 
   /* ── 191:desk-day ── */
-  /* ClearDesk (components/dayclear/ClearDesk.jsx): the everyday clear, centre and side columns, .clr-*. */
-  /* PLACEHOLDER (foundation): the desk's columns, plainly. */
+  /* ClearDesk (components/dayclear/ClearDesk.jsx): the everyday clear on
+     the desk, the canvas's Desk board less its rail -- the centre column
+     (the reader and the deck, the grid the run's cards are thrown into,
+     the tally) and the side column (the fare, tomorrow, the gate). Every
+     place is the board's, laid out for the box by deskPlan.js and set
+     inline; the rules here are the board's own CSS. Its rest state is
+     each element's own style: an animation is only the way in, so
+     .clrk--reduced (the kit's) leaves the rest standing. */
+  .phone--desk .phone__content:has(> main.clr-desk) { max-width: none; padding-top: 0; }
   .clr-desk {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 380px;
-    gap: var(--sp-7);
+    position: relative;
     min-height: 100dvh;
-    padding: var(--sp-7);
+    overflow: clip;
+    color: var(--text-primary);
   }
-  .clr-desk__centre,
-  .clr-desk__side { display: flex; flex-direction: column; gap: var(--sp-5); }
-  .clr-desk__head { display: flex; align-items: center; gap: var(--sp-5); }
-  .clr-desk__grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
-  .clr-desk__mark { position: absolute; top: var(--sp-1); right: var(--sp-2); font-size: var(--fs-caption); }
-  .clr-desk__gate { margin-top: auto; }
+  .clr-desk__sizer {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 100dvh;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .clr-desk__world { position: relative; }
+
+  /* the grid's empty places, while the run fills them */
+  .clr-desk-hole {
+    position: absolute;
+    z-index: 1;
+    border: 1.5px dashed color-mix(in srgb, var(--text-primary) 14%, transparent);
+    border-radius: var(--r-card);
+  }
+
+  /* ── the tally under the grid, on the gate's centre line ── */
+  /* A narrow column wraps the summary under the verdicts, in the gate's height. */
+  .clr-desk-tally {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    place-content: center space-between;
+    align-items: center;
+    gap: var(--sp-2) var(--sp-5);
+  }
+  .clr-desk-verdicts { display: flex; align-items: baseline; gap: var(--sp-7); white-space: nowrap; }
+  .clr-desk-verdict {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  .clr-desk-verdict:focus-visible { border-radius: var(--r-plate); outline: 2px solid var(--text-primary); outline-offset: 4px; }
+  /* As wide as its final figure (9 → 10 moves nothing), set against its
+     name and grown away from it. */
+  .clr-desk-verdict__n {
+    display: inline-block;
+    min-width: calc(var(--w, 1) * 1ch);
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    text-align: right;
+    color: var(--ink, currentcolor);
+    transform-origin: 100% 70%;
+  }
+  .clr-desk-verdict__name { font-size: var(--fs-sm); font-weight: 500; line-height: 1; color: var(--text-secondary); }
+  .clr-desk-verdict[aria-pressed="true"] .clr-desk-verdict__name { color: var(--text-primary); }
+  .clr-desk-thud { animation: desk-clr-thud 0.5s var(--ease-out); }
+  .clr-desk-summary {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    margin: 0;
+    white-space: nowrap;
+    font-size: var(--fs-sm);
+    line-height: 1;
+    color: var(--text-secondary);
+  }
+  .clr-desk-summary b { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .clr-desk-summary i { font-family: var(--font-jp); font-style: normal; }
+
+  /* ── the run's cards: copy A over the reader (cut at the slot's line),
+        copy B under it (from the reader's foot down), one flight. Each
+        clip holds a plane in the board's own coordinates. ── */
+  .clr-desk-clipA {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 6;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .clr-desk-clipB {
+    position: absolute;
+    left: 0;
+    z-index: 4;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .clr-desk__grid {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .clr-desk-deck { position: absolute; inset: 0; }
+  /* The run's clock: a do-nothing animation made with the flights, so the
+     beats read their origin off the CSS animations' own start time. */
+  .clr-desk-clock { position: absolute; top: 0; left: 0; width: 0; height: 0; }
+  .clr-desk-a,
+  .clr-desk-b { position: absolute; }
+  .clr-desk-a { opacity: 0; }
+  .clr-desk-b { transition: opacity 0.2s ease; }
+  .clr-desk-b--dim { opacity: 0.28; }
+  .clr-desk-fan,
+  .clr-desk-ax,
+  .clr-desk-ay,
+  .clr-desk-lean,
+  .clr-desk-dv,
+  .clr-desk-land,
+  .clr-desk-wv { position: absolute; inset: 0; }
+  .clr-desk-fan { transition: transform 0.18s var(--ease-out), opacity 0.18s ease; }
+  /* Rest = landed (each element's own style); the flight is the way in. */
+  .clr-desk-dv { transform: translateY(calc(var(--dive, 0) * 1px)); }
+  .clr-desk-ax { transform: translateX(calc(var(--tx, 0) * 1px)); }
+  .clr-desk-ay { transform: translateY(calc(var(--ty, 0) * 1px)); }
+  .clr-desk-land { transform-origin: 50% 100%; }
+  /* The hanging shadow while it flies; a streak behind the far throws. */
+  .clr-desk-land::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--r-card);
+    pointer-events: none;
+    opacity: 0;
+    box-shadow: var(--elev-hang);
+  }
+  .clr-desk-b--streak .clr-desk-lean::before {
+    content: "";
+    position: absolute;
+    top: 22px;
+    right: 100%;
+    bottom: 22px;
+    width: 96px;
+    border-radius: var(--r-pill) 0 0 var(--r-pill);
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(100% 50% at 100% 50%, color-mix(in srgb, var(--text-primary) 18%, transparent), transparent);
+  }
+
+  /* the card: on the deck its line's rail; thrown, its verdict's */
+  .clr-desk-card.clrk-tcard {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: flex-end;
+    gap: var(--sp-2);
+    padding: var(--sp-4) var(--sp-2) var(--sp-5) var(--sp-4);
+    font: inherit;
+    color: inherit;
+    text-align: left;
+  }
+  .clr-desk--mid .clr-desk-card.clrk-tcard { gap: var(--sp-1); padding: var(--sp-3) var(--sp-2) var(--sp-4) var(--sp-4); }
+  .clr-desk--small .clr-desk-card.clrk-tcard { gap: var(--sp-1); padding: var(--sp-2) var(--sp-1) var(--sp-3) var(--sp-3); }
+  .clr-desk--chip .clr-desk-card.clrk-tcard { justify-content: center; padding: 0 var(--sp-5) 0 var(--sp-3); }
+  .clr-desk-card .clr-desk-fs-title { font-size: var(--fs-title); }
+  .clr-desk-card .clr-desk-fs-lead { font-size: var(--fs-lead); }
+  .clr-desk-card .clr-desk-fs-body { font-size: var(--fs-body); }
+  .clr-desk-card .clr-desk-fs-sm { font-size: var(--fs-sm); }
+  .clr-desk-card .clr-desk-fs-cap { font-size: var(--fs-caption); }
+  .clr-desk-card .clr-desk-fs-xs { font-size: var(--fs-caption-xs); }
+  /* A word too long for the smallest rung ends in an ellipsis. */
+  .clr-desk-card .clr-desk-cut { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .clr-desk-a--top .clr-desk-card,
+  .clr-desk-a--lift .clr-desk-card { box-shadow: inset 3px 0 0 var(--rail), var(--elev-hang); }
+  .clr-desk-tile { cursor: pointer; pointer-events: auto; }
+  .clr-desk-tile:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+  /* its landing glow (::after), then the wave's (::before): two layers,
+     so the wave's delay never holds or re-times the landing */
+  .clr-desk-tile::before,
+  .clr-desk-tile::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    box-shadow: 0 0 0 1px var(--rail), 0 0 22px -2px var(--rail);
+  }
+  .clr-desk-mark {
+    position: absolute;
+    top: var(--sp-3);
+    right: var(--sp-3);
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-secondary);
+  }
+  .clr-desk-mark--m { color: var(--text-primary); }
+  .clr-desk--chip .clr-desk-mark { top: 50%; transform: translateY(-50%); }
+
+  /* ── the reader: the kit's slab, with the board's four rings taken in
+        turn (each run whole) in its own ripple's place ── */
+  .clr-desk-reader { position: absolute; z-index: 5; }
+  .clr-desk-reader .clrk-reader__ripple { display: none; }
+  .clr-desk-rip {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+    border: 2px solid var(--rc, currentcolor);
+    border-radius: var(--r-pill);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .clr-desk-rip--a { animation: clr-ripple-a 0.6s ease-out both; }
+  .clr-desk-rip--b { animation: clr-ripple-b 0.6s ease-out both; }
+  .clr-desk-reader--out { animation: desk-clr-reader-out 0.3s var(--ease-in) both; }
+
+  /* ── the counter (the sweep), where the header will be ── */
+  .clr-desk-count {
+    position: absolute;
+    z-index: 7;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .clr-desk-count__cap {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: var(--tr-caption);
+    text-indent: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .clr-desk-count__n {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .clr-desk-count__big { font-size: var(--fs-display); color: var(--text-primary); }
+  .clr-desk-count__of { font-size: var(--fs-title); color: var(--text-secondary); }
+  .clr-desk-prog {
+    display: block;
+    width: 200px;
+    height: 2px;
+    margin-top: var(--sp-1);
+    overflow: hidden;
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+  }
+  .clr-desk-prog__fill {
+    display: block;
+    height: 100%;
+    background: var(--text-primary);
+    transform-origin: 0 50%;
+    transform: scaleX(var(--p, 0));
+    transition: transform 0.18s var(--ease-out);
+  }
+  .clr-desk-out { animation: desk-clr-out 0.22s var(--ease-in) both; }
+
+  /* ── the header at rest: the seal, then the name, the week, the streak ── */
+  .clr-desk-hdr { position: absolute; z-index: 7; }
+  .clr-desk-weekrow {
+    position: absolute;
+    z-index: 7;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-6);
+    height: 48px;
+  }
+  /* A narrow column: the streak on a row of its own under the week. */
+  .clr-desk-weekrow--stacked { flex-wrap: wrap; row-gap: 0; height: auto; }
+  .clr-desk-weekrow--stacked .clrk-week { height: 48px; }
+  .clr-desk-streak { display: flex; align-items: center; gap: var(--sp-3); margin: 0; white-space: nowrap; }
+  .clr-desk-streak .clr-desk-streak__odo { font-size: var(--fs-display); color: var(--text-primary); }
+  .clr-desk-streak__cap { font-size: var(--fs-body); line-height: 1; color: var(--text-secondary); }
+  .clr-desk-slot-in { animation: desk-clr-slot-in 0.42s var(--ease-back) backwards; animation-delay: var(--d, 0ms); }
+  .clr-desk-ripple { animation: desk-clr-ripple 0.46s var(--ease-out) backwards; animation-delay: var(--d, 0ms); }
+  .clr-desk-press { animation: desk-clr-press 0.46s var(--ease-out) backwards; }
+
+  /* ── the stamp, in the reader's place ── */
+  .clr-desk-seal { position: absolute; z-index: 8; pointer-events: none; }
+  .clr-desk-seal__shadow {
+    position: absolute;
+    inset: -6px;
+    border-radius: var(--r-pill);
+    opacity: 0;
+    background: radial-gradient(closest-side, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.32) 60%, rgba(0, 0, 0, 0));
+  }
+  .clr-desk-seal__drop { position: absolute; inset: 0; }
+  .clr-desk-impact { position: absolute; z-index: 9; pointer-events: none; }
+  .clr-desk-ink {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--r-pill);
+    opacity: 0;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--seal-ink) 34%, transparent), color-mix(in srgb, var(--seal-ink) 10%, transparent) 70%, transparent);
+    animation: desk-clr-ink 0.9s var(--ease-out) both;
+  }
+  .clr-desk-bloom {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--seal-ink);
+    border-radius: var(--r-pill);
+    opacity: 0;
+    animation: desk-clr-bloom 0.9s var(--ease-out) both;
+  }
+  .clr-desk-bloom--2 { border-width: 1px; animation: desk-clr-bloom 1.15s var(--ease-out) 0.08s both; }
+  /* The stamp lifts off its impression and presses today's slot: it
+     swoops under the week row (never over the name) and rises into it.
+     Its rubber face: the print on a sumi disc, so it hides the
+     impression it leaves instead of doubling it. */
+  .clr-desk-mini { position: absolute; z-index: 10; pointer-events: none; }
+  .clr-desk-mx,
+  .clr-desk-my { position: absolute; inset: 0; }
+  .clr-desk-mx { animation: desk-clr-mx 0.64s linear both; }
+  .clr-desk-my { animation: desk-clr-my 0.64s linear both; }
+  .clr-desk-mini__disc {
+    position: absolute;
+    inset: 2px;
+    border-radius: var(--r-pill);
+    background: var(--bg-card);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-panel) 6%, transparent);
+  }
+  .clr-desk-mini__shadow {
+    position: absolute;
+    inset: 4px;
+    border-radius: var(--r-pill);
+    opacity: 0;
+    background: radial-gradient(closest-side, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
+    animation: desk-clr-mini-shadow 0.64s linear both;
+  }
+
+  /* ── the side column: the fare, tomorrow, and a tile's entry in their
+        place (components/analysis/SideLookup) ── */
+  .clr-desk-side { position: absolute; z-index: 3; }
+  .clr-desk-side--entry {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* the fare: the run's ledger from the first card, the day's total at the end */
+  .clr-desk-fare {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--sp-6);
+  }
+  /* A short seal band (a long run's small tiles, a short window): a rung closer. */
+  .clr-desk-fare--tight { padding: var(--sp-5); }
+  .clr-desk-total { display: flex; align-items: baseline; margin: 0; transform-origin: 0 70%; }
+  .clr-desk-total .clr-desk-total__xp { font-size: var(--fs-display); }
+  .clr-desk-break {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--sp-2);
+    margin: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.3;
+    color: var(--text-secondary);
+  }
+  .clr-desk-break b { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .clr-desk-lvlrow { display: flex; align-items: center; gap: var(--sp-3); }
+  .clr-desk-lvlrow .clrk-lvl { flex: 1; }
+  .clr-desk-lvlrow__n {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--text-secondary);
+  }
+  /* tomorrow: a preview, so dashed, as tall as the grid beside it; its
+     group (the day, the ticket to come, its line, the rest days) stacked
+     on the rungs and centred, never spread over the panel */
+  .clr-desk-tom {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--sp-6);
+  }
+  .clr-desk-tom__head { display: flex; align-items: center; gap: var(--sp-4); }
+  .clr-desk-tom__head .clr-desk-tom__slot { margin: 0 var(--sp-1); }
+  .clr-desk-tom__day { margin: 0; font-size: var(--fs-body); font-weight: 600; line-height: 1.2; color: var(--text-primary); }
+  .clr-desk-tom__sub { margin: var(--sp-1) 0 0; font-size: var(--fs-sm); line-height: 1.3; color: var(--text-secondary); }
+  /* the ticket not yet earned: the book's "next ticket", laid flat -- a
+     dashed stamp-ink outline, its name in full ink, a pill on its edge
+     saying when */
+  .clr-desk-next {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 128px;
+    margin-top: var(--sp-7);
+    border-radius: var(--r-identity);
+  }
+  .clr-desk-next::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1.5px dashed color-mix(in srgb, var(--stamp-ink) 72%, transparent);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .clr-desk-next__name {
+    font-family: var(--font-serif);
+    font-size: var(--fs-display);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: var(--tr-term);
+    text-indent: var(--tr-term);
+    white-space: nowrap;
+    color: var(--text-primary);
+  }
+  .clr-desk-next__tag {
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 var(--sp-3);
+    border: 1px solid color-mix(in srgb, var(--stamp-ink) 72%, transparent);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--seal-ink);
+    transform: translateX(-50%);
+  }
+  .clr-desk-tom.clrk-arrive .clr-desk-next { animation: desk-clr-tk-in 0.5s var(--ease-out) backwards; animation-delay: calc(var(--d, 0ms) + 120ms); }
+  .clr-desk-tom__line { margin: var(--sp-5) 0 0; text-align: center; font-size: var(--fs-sm); line-height: 1.3; color: var(--text-secondary); }
+  .clr-desk-gold { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--gate-gold-lit); }
+  .clr-desk-sup { position: relative; top: -0.42em; font-size: var(--fs-caption-xs); }
+  .clr-desk-tom__rest {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    margin-top: var(--sp-7);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--border);
+  }
+  .clr-desk-tom__rest .clr-desk-stub { margin: 0 var(--sp-1); }
+  /* none held: the 運休 stub drawn empty, in pass ink */
+  .clr-desk-tom__rest .clr-desk-stub--empty { color: var(--text-secondary); }
+  .clr-desk-stub--empty::before { border: 1.5px dashed var(--pass-ink); background: transparent; box-shadow: none; }
+  .clr-desk-tom__resttxt { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; margin: 0; }
+  .clr-desk-tom__resttxt b { font-size: var(--fs-body); font-weight: 600; line-height: 1.25; color: var(--text-primary); }
+  .clr-desk-tom__resttxt > span { font-size: var(--fs-sm); line-height: 1.35; color: var(--text-secondary); }
+  .clr-desk-num { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .clr-desk-gatewrap { position: absolute; z-index: 3; }
+  .clr-desk-gatewrap .clr-desk-gate { width: 100%; margin: 0; }
+
+  /* the prime: out of the streak figure, over the name's end, into the total */
+  .clr-desk-chip {
+    position: absolute;
+    z-index: 12;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .clr-desk-chipx,
+  .clr-desk-chipy { position: absolute; top: 0; left: 0; }
+  .clr-desk-chipx { animation: desk-clr-chipx 0.72s linear both; }
+  .clr-desk-chipy { animation: desk-clr-chipy 0.72s linear both; }
+  .clr-desk-chip .clrk-xp-chip { position: absolute; top: 0; left: 0; transform: translate(-50%, -50%); }
+
+  /* ── the run live: every flight's delay counts from the class going on ── */
+  .clr-desk-pre .clr-desk-a { opacity: 1; }
+  .clr-desk-pre .clr-desk-b { opacity: 0; }
+  .clr-desk-a .clr-desk-dv { transform: none; }
+  .clr-desk-live .clr-desk-clock { animation: desk-clr-clock 3s linear; }
+  .clr-desk-live .clr-desk-a { animation: desk-clr-show-a var(--ha, 0ms) linear; }
+  .clr-desk-live .clr-desk-dv { animation: desk-clr-dive var(--fd, 0ms) linear var(--d, 0ms) backwards; }
+  .clr-desk-live .clr-desk-ax { animation: desk-clr-ax var(--fa, 0ms) linear var(--ad, 0ms) backwards; }
+  .clr-desk-live .clr-desk-ay { animation: desk-clr-ay var(--fa, 0ms) linear var(--ad, 0ms) backwards; }
+  .clr-desk-live .clr-desk-lean { animation: desk-clr-lean var(--fa, 0ms) linear var(--ad, 0ms) backwards; }
+  .clr-desk-live .clr-desk-land { animation: desk-clr-land 0.34s var(--ease-out) var(--la, 0ms) backwards; }
+  .clr-desk-live .clr-desk-land--last { animation: desk-clr-land-last 0.56s var(--ease-out) var(--la, 0ms) backwards; }
+  .clr-desk-live .clr-desk-land::before { animation: desk-clr-lift var(--fl, 0ms) linear var(--d, 0ms) backwards; }
+  .clr-desk-live .clr-desk-b--streak .clr-desk-lean::before { animation: desk-clr-streak var(--fa, 0ms) linear var(--ad, 0ms) backwards; }
+  .clr-desk-live .clr-desk-tile::after { animation: desk-clr-glow 0.5s ease-out var(--la, 0ms) backwards; }
+  .clr-desk-wave .clr-desk-tile::before { animation: desk-clr-glow 0.6s ease-out var(--wd, 0ms) backwards; }
+  .clr-desk-wave .clr-desk-wv { animation: desk-clr-wave 0.5s var(--ease-out) var(--wd, 0ms) backwards; }
+  .clr-desk-seal--live .clr-desk-seal__shadow { animation: desk-clr-seal-shadow 0.66s linear both; }
+  .clr-desk-seal--live .clr-desk-seal__drop { animation: desk-clr-drop 0.66s linear both; }
+
+  /* A skip finishes the board's own motion at once; the kit's fades do the rest. */
+  .clrk--skip .clr-desk-slot-in,
+  .clrk--skip .clr-desk-ripple,
+  .clrk--skip .clr-desk-press,
+  .clrk--skip .clr-desk-thud { animation: none; }
+
+  @keyframes desk-clr-clock { from { opacity: 0; } to { opacity: 0; } }
+  @keyframes desk-clr-show-a { 0%, 99.6% { opacity: 1; } 100% { opacity: 0; } }
+  /* the lift, the plunge (squashed in the slot), and out still moving:
+     the throw starts at 82% of the dive, so the card turns rather than stops */
+  @keyframes desk-clr-dive {
+    0% { transform: translateY(0) scale(1) rotate(0deg); animation-timing-function: cubic-bezier(0.25, 0.6, 0.4, 1); }
+    22% { transform: translateY(-14px) scale(1.05) rotate(-1.5deg); animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.6); }
+    62% { transform: translateY(calc(var(--dive, 0) * 0.51px)) scale(1.04, 0.9) rotate(0deg); animation-timing-function: cubic-bezier(0.3, 0.5, 0.55, 1); }
+    100% { transform: translateY(calc(var(--dive, 0) * 1px)) scale(1) rotate(0deg); }
+  }
+  /* the throw: Y leaves the slot fast (it carries the dive on), X swings
+     out from the turn; both settle on the tile */
+  @keyframes desk-clr-ax {
+    from { transform: translateX(0); animation-timing-function: cubic-bezier(0.32, 0.42, 0.28, 1); }
+    to { transform: translateX(calc(var(--tx, 0) * 1px)); }
+  }
+  @keyframes desk-clr-ay {
+    from { transform: translateY(0); animation-timing-function: cubic-bezier(0.2, 0.6, 0.34, 1); }
+    to { transform: translateY(calc(var(--ty, 0) * 1px)); }
+  }
+  @keyframes desk-clr-lean {
+    0% { transform: none; animation-timing-function: cubic-bezier(0.25, 0.6, 0.4, 1); }
+    28% { transform: rotate(calc(var(--lean, 0) * 1deg)) scale(1.05); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    100% { transform: none; }
+  }
+  @keyframes desk-clr-land {
+    0% { transform: none; }
+    28% { transform: scale(1.06, 0.9); }
+    62% { transform: scale(0.985, 1.025); }
+    100% { transform: none; }
+  }
+  @keyframes desk-clr-land-last {
+    0% { transform: none; }
+    24% { transform: scale(1.12, 0.8); }
+    52% { transform: scale(0.96, 1.06); }
+    76% { transform: scale(1.01, 0.99); }
+    100% { transform: none; }
+  }
+  @keyframes desk-clr-lift { 0% { opacity: 0; } 12%, 90% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes desk-clr-streak { 0% { opacity: 0; } 10% { opacity: 1; } 36% { opacity: 0.5; } 52%, 100% { opacity: 0; } }
+  @keyframes desk-clr-wave { 0% { transform: none; } 32% { transform: translateY(-6px) scale(1.045); } 100% { transform: none; } }
+  @keyframes desk-clr-glow { 0% { opacity: 0; } 28% { opacity: 0.85; } 100% { opacity: 0; } }
+  @keyframes desk-clr-thud { 0% { transform: scale(1); } 30% { transform: scale(1.2); } 100% { transform: scale(1); } }
+  @keyframes desk-clr-reader-out { to { opacity: 0; transform: translateY(14px) scale(0.96); } }
+  @keyframes desk-clr-out { to { opacity: 0; transform: translateY(-12px); } }
+  @keyframes desk-clr-slot-in {
+    from { opacity: 0; transform: rotate(var(--tilt, 0deg)) scale(0.5); }
+    to { opacity: 1; transform: rotate(var(--tilt, 0deg)) scale(1); }
+  }
+  @keyframes desk-clr-ripple {
+    0% { transform: rotate(var(--tilt, 0deg)) scale(1); }
+    38% { transform: rotate(var(--tilt, 0deg)) scale(1.26); }
+    100% { transform: rotate(var(--tilt, 0deg)) scale(1); }
+  }
+  @keyframes desk-clr-press {
+    0% { opacity: 0.9; transform: rotate(var(--tilt, 0deg)) scale(1.8); }
+    42% { opacity: 1; transform: rotate(var(--tilt, 0deg)) scale(0.88); }
+    70% { transform: rotate(var(--tilt, 0deg)) scale(1.06); }
+    100% { opacity: 1; transform: rotate(var(--tilt, 0deg)) scale(1); }
+  }
+  /* from above, in depth: it grows toward the eye (the lift), then falls
+     on its place; the shadow keeps the drop's own curves, both meeting at 56% */
+  @keyframes desk-clr-drop {
+    0% { opacity: 0; transform: scale(1.3) rotate(-14deg); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+    30% { opacity: 1; transform: scale(1.4) rotate(-10deg); animation-timing-function: cubic-bezier(0.8, 0, 1, 0.6); }
+    56% { opacity: 1; transform: scale(0.92) rotate(0deg); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+    70% { transform: scale(1.04) rotate(0deg); }
+    84% { transform: scale(0.99) rotate(0deg); }
+    100% { opacity: 1; transform: none; }
+  }
+  @keyframes desk-clr-seal-shadow {
+    0% { opacity: 0; transform: translate(16px, 22px) scale(1.5); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+    30% { opacity: 0.4; transform: translate(18px, 24px) scale(1.56); animation-timing-function: cubic-bezier(0.8, 0, 1, 0.6); }
+    56% { opacity: 0.95; transform: translate(2px, 3px) scale(1.02); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+    70% { opacity: 0; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1); }
+  }
+  @keyframes desk-clr-ink { 0% { opacity: 0; transform: scale(0.82); } 10% { opacity: 1; } 100% { opacity: 0; transform: scale(1.18); } }
+  @keyframes desk-clr-bloom { 0% { opacity: 0.8; transform: scale(0.86); } 100% { opacity: 0; transform: scale(1.4); } }
+  @keyframes desk-clr-mx {
+    0%, 18% { transform: none; animation-timing-function: cubic-bezier(0.45, 0, 0.35, 1); }
+    100% { transform: translateX(calc(var(--mx, 0) * 1px)); }
+  }
+  @keyframes desk-clr-my {
+    0% { transform: translateY(0) scale(1); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+    18% { transform: translateY(calc(var(--mlift, 0) * -1px)) scale(1.09); animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1); }
+    60% { transform: translateY(calc(var(--mdip, 0) * 1px)) scale(var(--mmid, 1)); animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1); }
+    100% { transform: translateY(calc(var(--my, 0) * 1px)) scale(var(--ms, 1)); }
+  }
+  @keyframes desk-clr-mini-shadow {
+    0% { opacity: 0; transform: none; animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+    18% { opacity: 0.85; transform: translate(10px, 22px); animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1); }
+    60% { opacity: 0.4; transform: translate(6px, 12px); animation-timing-function: cubic-bezier(0.4, 0, 0.4, 1); }
+    100% { opacity: 0; transform: none; }
+  }
+  @keyframes desk-clr-chipx {
+    0% { transform: none; animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
+    20%, 34% { transform: translateX(calc(var(--cx1, 0) * 1px)); animation-timing-function: cubic-bezier(0.45, 0, 0.25, 1); }
+    100% { transform: translateX(calc(var(--cx, 0) * 1px)); }
+  }
+  @keyframes desk-clr-chipy {
+    0% { opacity: 0; transform: translateY(0) scale(0.5); animation-timing-function: cubic-bezier(0.3, 1.4, 0.5, 1); }
+    20% { opacity: 1; transform: translateY(-44px) scale(1); }
+    34% { opacity: 1; transform: translateY(-44px) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+    64% { opacity: 1; transform: translateY(calc(var(--cy2, 0) * 1px)) scale(0.8); animation-timing-function: cubic-bezier(0.4, 0, 0.7, 0.6); }
+    100% { opacity: 0; transform: translateY(calc(var(--cy, 0) * 1px)) scale(0.3); }
+  }
+  @keyframes desk-clr-tk-in { from { opacity: 0; transform: translateY(10px); } }
+
+  /* The system's reduced motion: nothing of the board's own moves (the
+     view also hands the screen `reduced`, the kit's .clrk--reduced). */
+  @media (prefers-reduced-motion: reduce) {
+    .clr-desk-fan,
+    .clr-desk-b,
+    .clr-desk-prog__fill { transition: none; }
+    .clr-desk-a,
+    .clr-desk-dv,
+    .clr-desk-ax,
+    .clr-desk-ay,
+    .clr-desk-lean,
+    .clr-desk-land,
+    .clr-desk-wv,
+    .clr-desk-clock,
+    .clr-desk-thud,
+    .clr-desk-reader--out,
+    .clr-desk-out,
+    .clr-desk-slot-in,
+    .clr-desk-ripple,
+    .clr-desk-press,
+    .clr-desk-seal__drop,
+    .clr-desk-seal__shadow,
+    .clr-desk-ink,
+    .clr-desk-bloom,
+    .clr-desk-mx,
+    .clr-desk-my,
+    .clr-desk-mini__shadow,
+    .clr-desk-chipx,
+    .clr-desk-chipy,
+    .clr-desk-rip,
+    .clr-desk-next,
+    .clr-desk-tile::before,
+    .clr-desk-tile::after,
+    .clr-desk-land::before { animation: none; }
+  }
+
+  /* The short desk (plan 169): tomorrow and the fare a rung closer, so
+     the panel stands whole beside a grid the air gave way for. */
+  @media (max-height: 799px) {
+    .clr-desk-fare { padding: var(--sp-5); }
+    .clr-desk-tom { padding: var(--sp-5); }
+    .clr-desk-next { height: 88px; margin-top: var(--sp-6); }
+    .clr-desk-tom__line { margin-top: var(--sp-3); }
+    .clr-desk-tom__rest { margin-top: var(--sp-4); padding-top: var(--sp-4); }
+  }
   /* ── 191:desk-day end ── */
 
 
