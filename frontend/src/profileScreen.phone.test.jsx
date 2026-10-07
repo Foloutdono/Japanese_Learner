@@ -101,17 +101,19 @@ describe('the profile at phone width (plan 143)', () => {
     expect($('.sbook__month .fig__l').textContent).toBe(String(new Date().getFullYear()))
   })
 
-  it('lays the inserts out in order: the card, the doors, the stamps, the records, five on the board', async () => {
+  it('lays the inserts out in order: the card, the doors, the stamps, the tickets, the records, five on the board', async () => {
     await mount()
     // The doors stand straight under the card (the owner's call after
-    // the first round of plan 143), above the stamp book.
-    const order = ['.pcard-slot--profile', '.record--door', '.sbook', '.records--three', '.banzuke']
+    // the first round of plan 143), above the stamp book; the tickets'
+    // door under the stamp book they were earned in (plan 191).
+    const order = ['.pcard-slot--profile', '.record--door', '.sbook', '.records--one', '.records--three', '.banzuke']
       .map(sel => $(sel).getBoundingClientRect().top)
     expect([...order].sort((a, b) => a - b)).toEqual(order)
     const figures = $$('.records--three > .record')
     expect(figures).toHaveLength(3)
     expect(figures.map(f => f.querySelector('.record__value').textContent)).toEqual(['842', '91%', '12'])
-    expect($$('.record--door').map(d => d.tagName)).toEqual(['BUTTON', 'BUTTON'])
+    expect($$('.record--door').map(d => d.tagName)).toEqual(['BUTTON', 'BUTTON', 'BUTTON'])
+    expect($('.records--one .pf-line__jp').textContent).toBe('Billets')
     expect($$('.banzuke .leaderboard-row')).toHaveLength(5)
   })
 })

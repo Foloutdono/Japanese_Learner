@@ -107,6 +107,43 @@ def personal_pace(times, recent=None) -> int | None:
     return max(1, round((k * run_pace + PACE_PRIOR_RUNS * gap_pace) / (k + PACE_PRIOR_RUNS)))
 
 
+# ── 終着 — the day cleared (plan 191) ─────────────────────────
+# The xp_ledger source the day's bonus is paid under. Not a day studied
+# (_studied_days) nor a practice answer (get_daily_practice_counts).
+DAY_CLEAR_SOURCE = "day_clear"
+
+# The week row's day names, Monday first (date.weekday()).
+WEEKDAY_KANJI = "月火水木金土日"
+
+
+def streak_of(studied: set, rested: set, today) -> dict[str, int]:
+    """The current and longest streak over `studied` days, walking
+    through the `rested` ones -- days a rest ticket bridged (plan 191),
+    which keep a streak unbroken but are not counted in it.
+
+    The current streak is walked back from today, or from yesterday
+    while today is not yet studied: a streak is alive until tonight."""
+    if not studied:
+        return {"current": 0, "longest": 0}
+    one = timedelta(days=1)
+    current = 0
+    cursor = today if today in studied else today - one
+    while cursor in studied or cursor in rested:
+        if cursor in studied:
+            current += 1
+        cursor -= one
+    longest = run = 0
+    prev = None
+    for day in sorted(studied | rested):
+        if prev is None or day - prev != one:
+            run = 0
+        if day in studied:
+            run += 1
+        longest = max(longest, run)
+        prev = day
+    return {"current": current, "longest": longest}
+
+
 class SRSEngine:
     """Database-backed SRS engine that uses the scheduler and storage helpers."""
 
@@ -433,6 +470,52 @@ class SRSEngine:
                 self._log_sql("create_review_compaction_table", sql)
                 cur.execute(sql)
 
+                # ── 終着 — the day cleared (plan 191) ───────────────
+                # One row per day a learner emptied the day's queue,
+                # written once: the primary key is what pays the day's
+                # bonus once (record_day_clear inserts first, and a
+                # conflict is a day already paid). It is also the ticket
+                # book -- a row with a milestone is a ticket earned
+                # (get_day_tickets). The XP itself is an xp_ledger row
+                # (source 'day_clear'), which _studied_days and
+                # get_daily_practice_counts leave out: being paid for a
+                # day is not studying on it.
+                sql = """
+                    CREATE TABLE IF NOT EXISTS day_clears (
+                        user_id TEXT NOT NULL,
+                        day DATE NOT NULL,
+                        streak INTEGER NOT NULL,
+                        bonus INTEGER NOT NULL,
+                        jackpot INTEGER NOT NULL,
+                        milestone INTEGER,
+                        cleared_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                        PRIMARY KEY (user_id, day)
+                    )
+                """
+                self._log_sql("create_day_clears_table", sql)
+                cur.execute(sql)
+
+                # 運休 — rest days. A ticket per milestone day of seven
+                # or more cleared, REST_HELD_MAX held at most; used_on
+                # is the missed day it bridged (bridge_rest_days), and
+                # seen_at when the learner was told so on Today.
+                sql = """
+                    CREATE TABLE IF NOT EXISTS rest_tickets (
+                        id SERIAL PRIMARY KEY,
+                        user_id TEXT NOT NULL,
+                        earned_on DATE NOT NULL,
+                        milestone INTEGER NOT NULL,
+                        used_on DATE,
+                        seen_at TIMESTAMPTZ
+                    )
+                """
+                self._log_sql("create_rest_tickets_table", sql)
+                cur.execute(sql)
+
+                sql = "CREATE INDEX IF NOT EXISTS idx_rest_tickets_user ON rest_tickets(user_id)"
+                self._log_sql("create_rest_tickets_index", sql)
+                cur.execute(sql)
+
 
     def _ensure_card(self, card_id: str) -> None:
         with self.storage.cursor() as cur:
@@ -553,7 +636,7 @@ class SRSEngine:
         # logged no row and paid no XP. An in-range-but-invalid grade was
         # quieter and worse: stored as-is, it skewed get_daily_quality's
         # `quality >= 3` for good, and compute_review_xp paid the streak
-        # bonus on a grade whose base XP was 0.
+        # bonus it carried then on a grade whose base XP was 0.
         quality = clamp_quality(quality)
         state = self._load_state(card_id, mode)
         # Read before the scheduler moves the state in place: whether
@@ -706,12 +789,9 @@ class SRSEngine:
         return int(row[0]) if row else 0
 
     def _compute_review_xp(self, user_id: str, quality: int) -> int:
-        reviews_today = self.get_reviews_today(user_id)
-        # The streak bonus only matters on the day's first review (see
-        # xp_math.compute_review_xp), so skip the extra get_streak()
-        # round trip entirely once that's no longer possible.
-        streak_current = self.get_streak(user_id)["current"] if reviews_today == 0 else 0
-        return xp_math.compute_review_xp(quality, reviews_today, streak_current)
+        # No streak in it any more: the streak is paid once a day, when
+        # the day is cleared (plan 191, xp_math.day_clear_bonus).
+        return xp_math.compute_review_xp(quality, self.get_reviews_today(user_id))
 
     def get_lifetime_xp(self, user_id: str) -> int:
         pattern = self._user_prefix_pattern(user_id)
@@ -732,17 +812,25 @@ class SRSEngine:
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
-    def award_xp(self, user_id: str, source: str, ref: str, xp: int) -> dict[str, Any]:
+    def award_xp(self, user_id: str, source: str, ref: str, xp: int, cur=None) -> dict[str, Any]:
         """Grant XP that didn't come from answering a card. Returns the
         same {xp_earned, leveled_up, new_level} shape review() does, so
         a reward can drop straight into the frontend's existing XpToast
-        level-up celebration with no second code path."""
+        level-up celebration with no second code path.
+
+        `cur` joins a transaction the caller holds open -- the day's
+        clear (record_day_clear) pays in the same one that marks the day
+        cleared, so a failure can never leave a day cleared and unpaid.
+        Without it the row is written and committed on its own."""
         prior_xp = self.get_lifetime_xp(user_id)
 
-        with self.storage.cursor() as cur:
-            sql = "INSERT INTO xp_ledger(user_id, source, ref, xp) VALUES (%s, %s, %s, %s)"
-            self._log_sql("award_xp", sql, (user_id, source, ref, xp))
+        sql = "INSERT INTO xp_ledger(user_id, source, ref, xp) VALUES (%s, %s, %s, %s)"
+        self._log_sql("award_xp", sql, (user_id, source, ref, xp))
+        if cur is not None:
             cur.execute(sql, (user_id, source, ref, xp))
+        else:
+            with self.storage.cursor() as own:
+                own.execute(sql, (user_id, source, ref, xp))
 
         prior_level = xp_math.level_from_xp(prior_xp)
         new_level = xp_math.level_from_xp(prior_xp + xp)
@@ -759,9 +847,9 @@ class SRSEngine:
         sentence, a submitted exercise, a finished paper) at the base
         rate per quality of a card review (xp.BASE_XP_BY_QUALITY: a
         correct answer pays 7, a wrong one 1) and none of a review's
-        bonuses: the daily multiplier and the streak bonus are counted
-        off review_log, which these rows never enter, so a practice
-        answer would otherwise pay the day's-first rate every time.
+        bonus: the daily multiplier is counted off review_log, which
+        these rows never enter, so a practice answer would otherwise pay
+        the day's-first rate every time.
 
         Returns review()'s {xp_earned, leveled_up, new_level} shape, so
         every run turns it into the same fare and level board. A run
@@ -994,7 +1082,7 @@ class SRSEngine:
         the outcome known up front, nothing on screen has to wait on
         that request at all.
 
-        prior_xp/reviews_today/streak are read once for the whole
+        prior_xp/reviews_today are read once for the whole
         batch, not once per card — they're per-user, not per-card, and
         this is a hypothetical preview, so "reviewing" one card here
         never actually changes them for the next.
@@ -1004,7 +1092,7 @@ class SRSEngine:
         exactly correct however long it sits in the queue (it only
         depends on that card's own saved state), but the *xp_earned*
         figure can drift by a few points if the user racks up several
-        other reviews — moving reviews_today/streak along — before
+        other reviews — moving reviews_today along — before
         finally rating this particular card. Same order of inaccuracy
         the old client-side guess had, just anchored to a real number
         instead of a blind estimate, and it no longer affects whether
@@ -1016,7 +1104,6 @@ class SRSEngine:
 
         prior_xp = self.get_lifetime_xp(user_id)
         reviews_today = self.get_reviews_today(user_id)
-        streak_current = self.get_streak(user_id)["current"] if reviews_today == 0 else 0
         prior_level = xp_math.level_from_xp(prior_xp)
 
         result: dict[str, dict[int, dict[str, Any]]] = {}
@@ -1028,7 +1115,7 @@ class SRSEngine:
                 # branches off the same saved state, never off the
                 # previous quality's hypothetical outcome.
                 updated = self.scheduler.review(copy.deepcopy(base_state), quality)
-                xp_earned = xp_math.compute_review_xp(quality, reviews_today, streak_current)
+                xp_earned = xp_math.compute_review_xp(quality, reviews_today)
                 new_level = xp_math.level_from_xp(prior_xp + xp_earned)
                 per_quality[quality] = {
                     "xp_earned": xp_earned,
@@ -1186,78 +1273,272 @@ class SRSEngine:
         (retention, the stamp book's tooltips), and a sentence is not a
         card. A rating that DID schedule a card (a reading sentence
         whose word is in the deck) is paid by that review and has no
-        ledger row, so it is counted by the review side, not here."""
+        ledger row, so it is counted by the review side, not here.
+
+        The day's clear (plan 191) is a ledger row too, and no answer:
+        left out by its source."""
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 sql = """
                     SELECT date_trunc('day', awarded_at)::date AS day, COUNT(*)
                     FROM xp_ledger
                     WHERE user_id = %s
+                      AND source <> %s
                       AND awarded_at >= NOW() - (%s || ' days')::interval
                     GROUP BY 1
                     ORDER BY 1 ASC
                 """
-                self._log_sql("get_daily_practice_counts", sql, (user_id, days))
-                cur.execute(sql, (user_id, days))
+                params = (user_id, DAY_CLEAR_SOURCE, days)
+                self._log_sql("get_daily_practice_counts", sql, params)
+                cur.execute(sql, params)
                 rows = cur.fetchall()
         return [{"date": day.isoformat(), "count": int(count)} for day, count in rows]
 
-    def _studied_days(self, user_id: str) -> set:
+    def _studied_days(self, user_id: str, cur=None) -> set:
         """Every day this user showed up -- a card review, or (plan 178)
         a graded practice answer -- which is what "showed up" means for
-        streak purposes."""
+        streak purposes. Not the day's clear (plan 191): its bonus is an
+        xp_ledger row, and being paid for a day is not studying on it.
+
+        `cur` reads on a connection the caller holds (bridge_rest_days,
+        under its lock)."""
+        if cur is None:
+            with self.storage.connection() as conn:
+                with conn.cursor() as own:
+                    return self._studied_days(user_id, own)
         pattern = self._user_prefix_pattern(user_id)
-        with self.storage.connection() as conn:
-            with conn.cursor() as cur:
-                # UNION (not UNION ALL): a day the learner studied is a
-                # day whether it is still a row, already a rollup, or —
-                # on the day compaction ran — both. xp_ledger is the
-                # practice modes' trail (see get_daily_practice_counts):
-                # a day spent reading sentences, with no card due, was
-                # a day that broke the streak before this.
-                sql = """
-                    SELECT DISTINCT date_trunc('day', reviewed_at)::date AS day
-                    FROM review_log
-                    WHERE card_id LIKE %s
-                    UNION
-                    SELECT day FROM review_daily WHERE user_id = %s
-                    UNION
-                    SELECT DISTINCT date_trunc('day', awarded_at)::date AS day
-                    FROM xp_ledger
-                    WHERE user_id = %s
-                """
-                self._log_sql("studied_days", sql, (pattern, user_id, user_id))
-                cur.execute(sql, (pattern, user_id, user_id))
-                return {row[0] for row in cur.fetchall()}
+        # UNION (not UNION ALL): a day the learner studied is a
+        # day whether it is still a row, already a rollup, or —
+        # on the day compaction ran — both. xp_ledger is the
+        # practice modes' trail (see get_daily_practice_counts):
+        # a day spent reading sentences, with no card due, was
+        # a day that broke the streak before this.
+        sql = """
+            SELECT DISTINCT date_trunc('day', reviewed_at)::date AS day
+            FROM review_log
+            WHERE card_id LIKE %s
+            UNION
+            SELECT day FROM review_daily WHERE user_id = %s
+            UNION
+            SELECT DISTINCT date_trunc('day', awarded_at)::date AS day
+            FROM xp_ledger
+            WHERE user_id = %s AND source <> %s
+        """
+        params = (pattern, user_id, user_id, DAY_CLEAR_SOURCE)
+        self._log_sql("studied_days", sql, params)
+        cur.execute(sql, params)
+        return {row[0] for row in cur.fetchall()}
+
+    def _rest_days(self, user_id: str, cur=None) -> set:
+        """The missed days a rest ticket bridged (plan 191)."""
+        if cur is None:
+            with self.storage.connection() as conn:
+                with conn.cursor() as own:
+                    return self._rest_days(user_id, own)
+        sql = "SELECT used_on FROM rest_tickets WHERE user_id = %s AND used_on IS NOT NULL"
+        self._log_sql("rest_days", sql, (user_id,))
+        cur.execute(sql, (user_id,))
+        return {row[0] for row in cur.fetchall()}
+
+    def streak_figures(self, user_id: str) -> dict[str, int]:
+        """get_streak's two figures and a third: `today`, the streak
+        today will carry once it is studied (plan 191) -- what clearing
+        it would pay on. Equal to `current` once today is studied."""
+        studied = self._studied_days(user_id)
+        rested = self._rest_days(user_id)
+        today = datetime.now(timezone.utc).date()
+        figures = streak_of(studied, rested, today)
+        figures["today"] = streak_of(studied | {today}, rested, today)["current"]
+        return figures
 
     def get_streak(self, user_id: str) -> dict[str, int]:
-        """Current and longest consecutive-day streak of having at least one review."""
-        day_set = self._studied_days(user_id)
-
-        if not day_set:
-            return {"current": 0, "longest": 0}
-
+        """Current and longest consecutive-day streak of having at least
+        one review, a day a rest ticket bridged keeping it unbroken
+        without counting (streak_of)."""
         today = datetime.now(timezone.utc).date()
+        return streak_of(self._studied_days(user_id), self._rest_days(user_id), today)
 
-        # Current streak: walk back from today (or yesterday, if nothing logged yet today).
-        current = 0
-        cursor = today if today in day_set else today - timedelta(days=1)
-        while cursor in day_set:
-            current += 1
-            cursor -= timedelta(days=1)
+    # ── 運休 — rest days (plan 191) ───────────────────────────────
 
-        # Longest streak: walk the sorted distinct days once.
-        longest = 1
-        run = 1
-        ordered = sorted(day_set)
-        for prev, curr in zip(ordered, ordered[1:]):
-            if (curr - prev).days == 1:
-                run += 1
+    def bridge_rest_days(self, user_id: str) -> list:
+        """Spend rest tickets on the days missed since the learner last
+        showed up, if they hold enough: the missed days are those strictly
+        between the latest day studied or already bridged before today
+        and today, and one to `held` of them take a ticket each (used_on
+        that day). More than the tickets held, and nothing is spent -- the
+        streak is broken, and a ticket saved for one that can be kept.
+
+        Lazy and idempotent: called by GET /api/today, POST
+        /api/today/clear and GET /api/profile, and a second call finds
+        nothing missed. The learner's unused tickets are locked first,
+        so two of those requests at once cannot spend one twice. Returns
+        the days bridged now, oldest first."""
+        today = datetime.now(timezone.utc).date()
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT id FROM rest_tickets
+                    WHERE user_id = %s AND used_on IS NULL
+                    ORDER BY earned_on, id
+                    FOR UPDATE
+                """
+                self._log_sql("rest_held_lock", sql, (user_id,))
+                cur.execute(sql, (user_id,))
+                held = [row[0] for row in cur.fetchall()]
+                if not held:
+                    return []
+                shown = {d for d in self._studied_days(user_id, cur) | self._rest_days(user_id, cur)
+                         if d < today}
+                if not shown:
+                    return []
+                last = max(shown)
+                missed = [last + timedelta(days=n) for n in range(1, (today - last).days)]
+                if not 1 <= len(missed) <= len(held):
+                    return []
+                sql = "UPDATE rest_tickets SET used_on = %s WHERE id = %s"
+                for ticket, day in zip(held, missed):
+                    self._log_sql("rest_use", sql, (day, ticket))
+                    cur.execute(sql, (day, ticket))
+        return missed
+
+    def get_rest_days(self, user_id: str, days: int = 30) -> list[str]:
+        """The days a rest ticket bridged in the last `days` days, oldest
+        first, as YYYY-MM-DD: the 運休 the profile's week and stamp book
+        draw in a missed day's place (plan 191). The same window as
+        get_daily_review_counts, so the two read off one calendar."""
+        since = datetime.now(timezone.utc).date() - timedelta(days=days)
+        return sorted(d.isoformat() for d in self._rest_days(user_id) if d >= since)
+
+    def rest_held(self, user_id: str) -> int:
+        """How many rest tickets the learner holds unused."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = "SELECT COUNT(*) FROM rest_tickets WHERE user_id = %s AND used_on IS NULL"
+                self._log_sql("rest_held", sql, (user_id,))
+                cur.execute(sql, (user_id,))
+                return int(cur.fetchone()[0])
+
+    def rest_unseen(self, user_id: str) -> list[str]:
+        """The days a rest ticket bridged that the learner has not been
+        told of yet, oldest first."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT used_on FROM rest_tickets
+                    WHERE user_id = %s AND used_on IS NOT NULL AND seen_at IS NULL
+                    ORDER BY used_on
+                """
+                self._log_sql("rest_unseen", sql, (user_id,))
+                cur.execute(sql, (user_id,))
+                return [row[0].isoformat() for row in cur.fetchall()]
+
+    def mark_rest_seen(self, user_id: str) -> int:
+        """The bridged days the learner has now been told of. Returns how
+        many were marked."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    UPDATE rest_tickets SET seen_at = NOW()
+                    WHERE user_id = %s AND used_on IS NOT NULL AND seen_at IS NULL
+                """
+                self._log_sql("rest_seen", sql, (user_id,))
+                cur.execute(sql, (user_id,))
+                return cur.rowcount
+
+    # ── 終着 — the day cleared (plan 191) ─────────────────────────
+
+    def get_day_clear(self, user_id: str, day) -> dict[str, Any] | None:
+        """The day's clear as it was recorded, or None: {streak, bonus,
+        jackpot, milestone, rest_earned} -- rest_earned whether a rest
+        ticket was kept from it."""
+        with self.storage.cursor() as cur:
+            sql = """
+                SELECT c.streak, c.bonus, c.jackpot, c.milestone,
+                       EXISTS (SELECT 1 FROM rest_tickets r
+                               WHERE r.user_id = c.user_id AND r.earned_on = c.day) AS rest_earned
+                FROM day_clears c
+                WHERE c.user_id = %s AND c.day = %s
+            """
+            self._log_sql("get_day_clear", sql, (user_id, day))
+            cur.execute(sql, (user_id, day))
+            row = cur.fetchone()
+        return dict(row) if row else None
+
+    def record_day_clear(self, user_id: str, day, streak: int, bonus: int,
+                         jackpot: int, milestone: int | None) -> dict[str, Any] | None:
+        """Mark `day` cleared and pay it, once (plan 191).
+
+        The day_clears row is inserted first and its primary key is the
+        guard: a conflict is a day already cleared -- by a second tab, a
+        retried request -- and returns None, paying nothing. Otherwise,
+        in the same transaction, the bonus and the jackpot are paid as
+        one xp_ledger row (award_xp, source DAY_CLEAR_SOURCE, ref the
+        day) and, on a milestone day of REST_FROM or more, a rest ticket
+        is kept while fewer than REST_HELD_MAX are held. Returns
+        {"xp": award_xp's result, "rest_earned": bool}."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    INSERT INTO day_clears (user_id, day, streak, bonus, jackpot, milestone)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (user_id, day) DO NOTHING
+                    RETURNING day
+                """
+                params = (user_id, day, streak, bonus, jackpot, milestone)
+                self._log_sql("record_day_clear", sql, params)
+                cur.execute(sql, params)
+                if cur.fetchone() is None:
+                    return None
+                xp = self.award_xp(user_id, DAY_CLEAR_SOURCE, day.isoformat(), bonus + jackpot, cur=cur)
+                rest_earned = False
+                if milestone is not None and milestone >= xp_math.REST_FROM:
+                    cur.execute(
+                        "SELECT COUNT(*) FROM rest_tickets WHERE user_id = %s AND used_on IS NULL",
+                        (user_id,),
+                    )
+                    if int(cur.fetchone()[0]) < xp_math.REST_HELD_MAX:
+                        sql = "INSERT INTO rest_tickets (user_id, earned_on, milestone) VALUES (%s, %s, %s)"
+                        self._log_sql("rest_earn", sql, (user_id, day, milestone))
+                        cur.execute(sql, (user_id, day, milestone))
+                        rest_earned = True
+        return {"xp": xp, "rest_earned": rest_earned}
+
+    def get_day_tickets(self, user_id: str) -> list[dict[str, Any]]:
+        """The milestone tickets the learner has earned, oldest first: a
+        day cleared on a milestone (plan 191's ticket book)."""
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT milestone, day FROM day_clears
+                    WHERE user_id = %s AND milestone IS NOT NULL
+                    ORDER BY day
+                """
+                self._log_sql("get_day_tickets", sql, (user_id,))
+                cur.execute(sql, (user_id,))
+                return [{"days": int(m), "day": d.isoformat()} for m, d in cur.fetchall()]
+
+    def week_row(self, user_id: str, days: int = 7) -> list[dict[str, str]]:
+        """The seven UTC days ending today, oldest first, as the week row
+        under a cleared day draws them (plan 191): each {day, kanji,
+        state}, the state "studied", "rest" (a rest ticket bridged it),
+        "missed", or "today" for today not yet studied. `days` widens it
+        to the month's sheet (30) the month's ceremony inks."""
+        today = datetime.now(timezone.utc).date()
+        studied = self._studied_days(user_id)
+        rested = self._rest_days(user_id)
+        row = []
+        for back in range(days - 1, -1, -1):
+            day = today - timedelta(days=back)
+            if day in studied:
+                state = "studied"
+            elif day in rested:
+                state = "rest"
+            elif day == today:
+                state = "today"
             else:
-                run = 1
-            longest = max(longest, run)
-
-        return {"current": current, "longest": longest}
+                state = "missed"
+            row.append({"day": day.isoformat(), "kanji": WEEKDAY_KANJI[day.weekday()], "state": state})
+        return row
 
     def get_due_forecast(self, user_id: str, days: int = 7) -> list[dict[str, Any]]:
         """

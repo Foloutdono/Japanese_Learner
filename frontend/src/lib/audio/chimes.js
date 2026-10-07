@@ -72,6 +72,12 @@ export function playWrong() { playVoice('wrong') }
 /** 到着 — a session finished. */
 export function playArrival() { playVoice('arrival') }
 
+/** 終着 — the day's reviews all done, the station stamp settling (plan 191). */
+export function playDayClear() { playVoice('day-clear') }
+
+/** 発車メロディ — a streak's ticket issued: 3, 7, 14 days, a month and on (plan 191). */
+export function playMilestone() { playVoice('milestone') }
+
 /** 到着ホーム — the platform sign landing, in the onboarding tour. */
 export function playPlatformChime() { playVoice('platform-chime') }
 

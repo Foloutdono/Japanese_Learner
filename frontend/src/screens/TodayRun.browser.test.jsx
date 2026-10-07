@@ -44,9 +44,16 @@ const CARD = {
   hints: {}, review_preview: { 4: { xp_earned: 3 } }, lane: LANE,
 }
 
+// The run's end: since plan 191 a run that reviewed anything hands its
+// tally to /today/clear (the finish), one that reviewed nothing goes
+// back to the gate. The probe stands on both and prints what it was handed.
 function Gate() {
-  const { state } = useLocation()
-  return <div className="gate-probe">{state?.run ? `cleared ${state.run.cleared} xp ${state.run.xp}` : 'gate'}</div>
+  const { state, pathname } = useLocation()
+  return (
+    <div className="gate-probe" data-path={pathname} data-faces={(state?.run?.cards ?? []).map(c => `${c.term}:${c.verdict}`).join(',')}>
+      {state?.run ? `cleared ${state.run.cleared} xp ${state.run.xp}` : 'gate'}
+    </div>
+  )
 }
 
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
@@ -60,6 +67,7 @@ function mount(entry = '/today/run') {
       <MemoryRouter initialEntries={[entry]}>
         <Routes>
           <Route path="/today" element={<Gate />} />
+          <Route path="/today/clear" element={<Gate />} />
           <Route path="/today/run" element={<TodayRun session={{ access_token: 'tok' }} />} />
         </Routes>
       </MemoryRouter>
@@ -75,7 +83,7 @@ beforeEach(() => {
 })
 
 describe('TodayRun', () => {
-  it('runs on the stage, posts the review under the card\'s mode, and hands the figures back to the gate', async () => {
+  it('runs on the stage, posts the review under the card\'s mode, and hands the figures to the finish', async () => {
     let batch = 0
     apiJson.mockImplementation(async (url) => {
       if (String(url).startsWith('/api/today/cards')) {
@@ -114,9 +122,13 @@ describe('TodayRun', () => {
     expect(review).toBeTruthy()
     expect(JSON.parse(review[2].body)).toMatchObject({ card_id: 'kana_no', mode: 'kana.flashcard.f2b', quality: 4 })
 
-    // The next batch is empty: the run is over and the gate prints it.
+    // The next batch is empty: the run is over and hands its tally to
+    // the finish -- the figures and each card's face (plan 191).
     await settle(1200)
-    expect(screen.container.querySelector('.gate-probe')?.textContent).toBe('cleared 1 xp 3')
+    const probe = screen.container.querySelector('.gate-probe')
+    expect(probe?.textContent).toBe('cleared 1 xp 3')
+    expect(probe.dataset.path).toBe('/today/clear')
+    expect(probe.dataset.faces).toBe('の:1')
   }, 20000)
 
   it('counts what the queue holds, not the gate\'s figure run down', async () => {

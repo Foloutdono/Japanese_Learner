@@ -36,6 +36,10 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
   // A day is stamped for a review or, since plan 178, a graded practice
   // answer: the streak counts both, so the book has to.
   const byDate = new Map((calendar ?? []).map(d => [d.date, (d.count ?? 0) + (d.practice ?? 0)]))
+  // 運休 (plan 191): a day a rest ticket covered (`rest: true`) is no
+  // miss -- the streak walked through it -- so the board's stub is laid
+  // over it, in pass ink, as on Today's stamp rally.
+  const rested = new Set((calendar ?? []).filter(d => d.rest).map(d => d.date))
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const dow = (today.getDay() + 6) % 7 // Monday-first
@@ -55,6 +59,7 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
       future: d > today,
       today: d.getTime() === today.getTime(),
       stamped: count > 0,
+      rest: count === 0 && rested.has(key),
       // A deterministic wobble per slot — a rubber stamp never lands
       // perfectly square (same as the strip's StampRally).
       tilt: ((i * 37) % 13) - 6,
@@ -88,13 +93,14 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
             key={c.key}
             className={
               'sbook__stamp'
-              + (c.future ? ' sbook__stamp--future' : c.stamped ? '' : ' sbook__stamp--missed')
+              + (c.future ? ' sbook__stamp--future' : c.stamped ? '' : c.rest ? ' sbook__stamp--rest' : ' sbook__stamp--missed')
               + (c.today && c.stamped ? ' sbook__stamp--today' : '')
             }
-            style={{ '--stamp-tilt': `${c.stamped ? c.tilt : 0}deg` }}
-            title={`${c.key} · ${c.count}`}
+            style={{ '--stamp-tilt': `${c.stamped ? c.tilt : c.rest ? -4 : 0}deg` }}
+            title={c.rest ? `${c.key} · 運休` : `${c.key} · ${c.count}`}
+            lang={c.rest ? 'ja' : undefined}
           >
-            {c.day}
+            {c.rest ? '運休' : c.day}
           </span>
         ))}
       </div>
@@ -201,6 +207,34 @@ export function ProfileDoors({ t, navigate }) {
           <span className="pf-line__roundel pf-line__roundel--icon" aria-hidden="true"><GearIcon size={14} /></span>
           <span className="pf-line__names"><span className="pf-line__jp">{t.settings}</span></span>
         </span>
+        <ChevronIcon direction="right" size={15} className="record__chev" />
+      </SplitRow>
+    </div>
+  )
+}
+
+// ── 記念切符 — the door to the tickets (plan 191) ──────────────────
+// The streak's tickets (3, 7, 14 days, a month …) live behind the stamp
+// book they were earned in: one door under it, drawn as the doors are
+// (a roundel, the name, a chevron), in the stamp's ink, with how many
+// the learner holds. On the phone and the desk alike -- the rail holds
+// no door to it. A place, so a link on the desk (plan 123).
+export function TicketsDoor({ t, navigate, count = 0 }) {
+  const desk = useDesk()
+  return (
+    <div className="records records--one">
+      <SplitRow
+        to={desk ? '/profile/tickets' : undefined}
+        push
+        className="record record--door"
+        style={{ '--line-color': 'var(--stamp-ink)' }}
+        onClick={() => { if (!desk) navigate('/profile/tickets') }}
+      >
+        <span className="pf-line__id">
+          <span className="pf-line__roundel" aria-hidden="true" lang="ja">券</span>
+          <span className="pf-line__names"><span className="pf-line__jp">{t.tkbDoor}</span></span>
+        </span>
+        <span className="record__value record__value--door">{count}</span>
         <ChevronIcon direction="right" size={15} className="record__chev" />
       </SplitRow>
     </div>

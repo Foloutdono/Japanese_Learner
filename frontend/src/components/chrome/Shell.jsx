@@ -116,3 +116,12 @@ export function StageFrame() {
     </div>
   )
 }
+
+// ── 終着 — the day cleared's frame (plan 191) ──
+// The finish of the day's run (/today/clear) is drawn as the canvas drew
+// it: on a phone full screen, as a run's stage (no HUD, no tab bar); on
+// the desk beside the real rail, the ceremony in the content area. One
+// layout route answering by the width, so the one route is both.
+export function DeskShellStage() {
+  return useDesk() ? <Shell /> : <StageFrame />
+}

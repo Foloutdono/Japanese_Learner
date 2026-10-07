@@ -83,6 +83,8 @@ PLAN = [
     ("card_modes",          "card_id LIKE %(prefix)s",  "per-(card, mode) scheduler state"),
     ("cards",               "id LIKE %(prefix)s",       "the card id registry — every id embeds the user's own id"),
     ("xp_ledger",           "user_id = %(user)s",       "XP awarded outside a review"),
+    ("day_clears",          "user_id = %(user)s",       "the days cleared and the milestone tickets (plan 191)"),
+    ("rest_tickets",        "user_id = %(user)s",       "the rest days earned and the missed days they bridged"),
     ("custom_cards",        "user_id = %(user)s",       "hand-written personal cards"),
     ("deck_cards",          "user_id = %(user)s",       "app cards attached to a personal deck"),
     ("deck_reports",        "user_id = %(user)s",       "library decks this learner reported"),

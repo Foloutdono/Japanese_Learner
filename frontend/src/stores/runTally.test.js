@@ -105,3 +105,22 @@ describe('the docked entry', () => {
     expect(peekEntry()).toBeNull()
   })
 })
+
+describe('the run\'s faces (plan 191)', () => {
+  it('keeps every review\'s card face in order, on every width, a card rated twice twice', () => {
+    startTally('today')
+    expect(peekTally().faces).toEqual([])
+    const hi = { id: 'kanji_N5_日|kanji.flashcard.f2b', term: '日', kana: 'ひ', line: 'kanji', verdict: 2, up: true, mastered: false }
+    const nomu = { id: 'vocab_N5_飲む|vocab.flashcard.f2b', term: '飲む', kana: 'のむ', line: 'vocab', verdict: 0, up: false, mastered: false }
+    countReview({ quality: 5, xp: 9, face: hi })
+    countReview({ quality: 1, xp: 1, face: nomu })
+    // A rating with no face (the practice runs) adds none.
+    countReview({ quality: 4, xp: 2 })
+    countReview({ quality: 4, xp: 3, face: { ...nomu, verdict: 1 } })
+    expect(peekTally().faces.map(f => [f.term, f.verdict])).toEqual([['日', 2], ['飲む', 0], ['飲む', 1]])
+    // The desk's entries and the count are as they were.
+    expect(peekTally()).toMatchObject({ reviewed: 4, cards: [] })
+    startTally('today')
+    expect(peekTally().faces).toEqual([])
+  })
+})

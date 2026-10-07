@@ -104,9 +104,6 @@ const nav = {
   weekAhead:         'Les sept prochains jours',
   weekLeft:          'Laissées pour demain',
   gateRidesFree:     'embarquent · gratuit',
-  fareReviews:       'révisions',
-  fareFare:          'tarif',
-  fareCreditsLeft:   'crédits restants',
   // 基礎 — le cursus de base sur le portillon et dans Réglages › Niveau (plan 186f)
   basicsUnit:        (n, of) => `Leçon ${n} sur ${of}`,
   basicsMet:         (n, of) => `${n} leçons sur ${of} vues`,
@@ -660,8 +657,6 @@ const stats = {
   todayDue:           n => `${n} à réviser`,
   todayNothingDueShort: 'À jour',
   todayRemaining:     'Reste dans ce service',
-  todayClearTitle:    'Service terminé',
-  todayClearedCount:  n => `${n} révision${n === 1 ? '' : 's'} faite${n === 1 ? '' : 's'}. Plus rien à réviser.`,
   todayNothingDue:    'Rien à réviser pour le moment.',
   todayNextReview:    when => `Prochaine révision ${when}.`,
   backToStation:      'Retour à la gare',
@@ -2742,6 +2737,184 @@ const nyumon = {
   nyuTryCard: 'Essayer une carte',
 }
 
+
+// ══ 終着 — the day cleared (plan 191) ══════════════════════════════
+// The copy of the canvas "Tsuji — the day cleared", verbatim. One group
+// per screen (the same region names as index.css's), each written by
+// the screen that owns it. The Japanese captions (本日の運行 終了,
+// 途中下車, 連続乗車 継続, 記念切符, 記念乗車券, 辻駅 発行) are names, not
+// copy: the components print them as they are.
+
+// ── 191:primitives ──
+const clrPrimitives = {
+  clrStreakWord: 'jours de suite',
+  clrStreakDays: n => `${n}\u00a0jour${n === 1 ? '' : 's'} de suite`,
+  clrXpUnit: 'xp',
+  clrFareRun: 'trajet',
+  clrFarePrime: 'prime de série',
+  clrFareTicket: 'billet',
+  clrPrimeChip: 'prime de série',
+  // The week, said for a screen reader: its parts joined (week row).
+  clrWeekAria: parts => `Semaine : ${parts.join(', ')}`,
+  clrWeekStamped: (from, to) => (from === to ? `${from} tamponné` : `${from} à ${to} tamponnés`),
+  clrWeekMissed: day => `${day} manqué`,
+  clrWeekRest: day => `${day} couvert par un jour de repos`,
+  clrWeekToday: day => `${day} aujourd’hui`,
+  clrSealAria: date => `Tampon du jour : gare de Tsuji, ${date}`,
+  clrLevelAria: (level, pct) => `Niveau ${level}, ${pct}\u00a0% vers le niveau ${level + 1}`,
+  // A ticket's caption: "7 jours de suite", a month's and a year's by name.
+  clrTicketCaption: days => (days === 30 ? 'Un mois de suite' : days === 365 ? 'Un an de suite' : `${days} jours de suite`),
+  clrTicketAria: (days, no, date) => `Billet des ${days} jours, numéro ${no}, émis le ${date}`,
+  clrKeep: 'Garder le billet',
+  clrShare: 'Partager',
+}
+// ── 191:primitives end ──
+
+
+
+
+// ── 191:day ──
+const clrDay = {
+  clrTripOfDay: 'Le trajet du jour',
+  clrTitle: 'Service terminé',
+  clrPiles: ['À revoir', 'Justes', 'Parfaites'],
+  clrPileAria: (name, n) => `${name} : ${n} carte${n === 1 ? '' : 's'}`,
+  clrVerdicts: ['à revoir', 'juste', 'parfaite'],
+  clrCardUp: 'monte d’une étape',
+  clrCardMastered: 'maîtrisée',
+  clrSumUp: n => (n === 1 ? 'monte' : 'montent'),
+  clrSumMastered: n => (n === 1 ? 'maîtrisée' : 'maîtrisées'),
+  clrSumMin: 'min',
+  clrTomorrow: (cards, min) => `Demain · ~${cards} cartes · ${min} min`,
+  clrTomorrowDay: day => `Demain · ${day}`,
+  clrTomorrowSub: (cards, min) => `~${cards} cartes · ${min} min`,
+  // "7ᵉ jour : billet de la semaine +250 xp": the ordinal's suffix is
+  // set as a superscript, the jackpot in gold, by the component.
+  clrOrdinalSuffix: n => (n === 1 ? 'er' : 'e'),
+  clrNextDay: ' jour : ',
+  clrNextTicketName: days => (days === 7 ? 'billet de la semaine' : days === 30 ? 'billet du mois' : days === 365 ? 'billet de l’année' : `billet des ${days} jours`),
+  clrNextTicketAria: days => `Billet des ${days} jours, à gagner demain`,
+  clrNextTag: 'demain',
+  clrRestTitle: 'Jours de repos',
+  clrRestHeld: 'en réserve',
+  clrRestFirstAt: 'le premier au',
+  clrRestNextAt: 'le prochain au',
+  clrRestDayWord: ' jour',
+  clrRestFirst: n => `le premier au ${n}ᵉ jour`,
+  clrRestNext: n => `le prochain au ${n}ᵉ jour`,
+  // The desk's board (ClearDesk): the grid named for a screen reader,
+  // the streak's word by its count, the ticket to come when it is not
+  // tomorrow's, the rest day's line in parts (the ordinal's suffix set
+  // as a superscript), and a tomorrow with nothing due.
+  clrDeskGridAria: n => `Les ${n} carte${n === 1 ? '' : 's'} du trajet`,
+  clrDeskStreakWord: n => (n === 1 ? 'jour de suite' : 'jours de suite'),
+  clrDeskNextIn: n => `dans ${n}\u00a0j`,
+  clrDeskNextAria: (days, inDays) => `Billet des ${days} jours, à gagner ${inDays === 1 ? 'demain' : `dans ${inDays} jours`}`,
+  clrDeskRestAt: (n, first) => ({ pre: first ? 'le premier au ' : 'le prochain au ', sup: n === 1 ? 'er' : 'e', post: ' jour' }),
+  clrDeskTomorrowNone: 'Rien de prévu',
+  // ClearPhone (the board Main): the streak's word beside its figure,
+  // tomorrow with nothing due, a pile's list of cards.
+  clrStreakWordN: n => (n === 1 ? 'jour de suite' : 'jours de suite'),
+  clrTomorrowNone: 'Demain · rien de prévu',
+  clrPileCount: n => `${n}\u00a0carte${n === 1 ? '' : 's'}`,
+  clrPileEmpty: 'Aucune carte',
+  clrPileOpen: term => `Ouvrir ${term} dans le dictionnaire`,
+}
+// ── 191:day end ──
+
+
+
+
+// ── 191:partial ──
+const clrPartial = {
+  ptlTitle: 'Trajet terminé',
+  ptlRunAria: 'Ce trajet',
+  ptlReviews: 'révisions',
+  ptlRight: 'justes',
+  ptlDayAria: 'La journée',
+  ptlLoopAria: (done, total, left) => `${done} cartes sur ${total} aujourd’hui ; le tampon du jour attend au bout des ${left} autres`,
+  ptlLeft: n => (n === 1 ? 'carte reste aujourd’hui' : 'cartes restent aujourd’hui'),
+  ptlTease: min => `~${min}\u00a0min pour le tampon du jour et la prime de série`,
+  ptlContinue: n => `Continuer · ${n} carte${n === 1 ? '' : 's'}`,
+  // The tease on a milestone's eve, and with no pace to time it by.
+  ptlTeaseTicket: (min, name) => `~${min}\u00a0min pour le tampon du jour et le ${name}`,
+  ptlTeaseNoMin: 'Au bout : le tampon du jour et la prime de série',
+  ptlTeaseTicketNoMin: name => `Au bout : le tampon du jour et le ${name}`,
+}
+// ── 191:partial end ──
+
+
+
+
+// ── 191:milestones ──
+const clrMilestones = {
+  msRestEarned: 'jour de repos',
+  msRestNote: 'Si tu manques un jour, ta série tient.',
+  msWeekFullAria: (from, to) => `Semaine complète : sept jours tamponnés, de ${from} à ${to}`,
+  // The jackpot's caption while it counts: the month's, the year's, else the days'.
+  msTicketLabel: days => (days === 30 ? 'Billet du mois' : days === 365 ? 'Billet de l’année' : `Billet des ${days} jours`),
+  msSheetAria: (n, from, to) => `Carnet de tampons : ${n} jours de suite, du ${from} au ${to}`,
+  msTotalAria: (total, run, prime, ticket, days = 30) => `+${total} xp : +${run} trajet, +${prime} prime de série, +${ticket} ${days === 30 ? 'billet du mois' : days === 365 ? 'billet de l’année' : `billet des ${days} jours`}`,
+  msFareAria: (n, days = 30) => `+${n} xp, ${days === 30 ? 'billet du mois' : days === 365 ? 'billet de l’année' : `billet des ${days} jours`}`,
+  msTicketMonthAria: (no, date) => `Billet du mois : un mois de suite, numéro ${no}, émis le ${date}`,
+}
+// ── 191:milestones end ──
+
+
+
+
+// ── 191:restday ──
+const clrRestday = {
+  rstTitle: 'Ta série tient',
+  rstWeekAria: parts => `La semaine : ${parts.join(', ')}`,
+  rstStreakWord: n => (n === 1 ? 'jour de suite' : 'jours de suite'),
+  // The days the rest tickets covered, by name: "Jour de repos utilisé mardi".
+  rstUsed: days => (days.length === 1
+    ? `Jour de repos utilisé ${days[0]}`
+    : `Jours de repos utilisés ${days.slice(0, -1).join(', ')} et ${days.at(-1)}`),
+  // "0 en réserve · le prochain au 14ᵉ jour": the figures are set apart.
+  rstHeld: 'en réserve',
+  rstNextPre: 'le prochain au',
+  rstNextPost: 'ᵉ jour',
+  rstTodayAria: (n, min) => `Aujourd’hui : ${n} carte${n === 1 ? '' : 's'}${min ? `, environ ${min} minutes` : ''}`,
+  rstCards: n => (n === 1 ? 'carte' : 'cartes'),
+  rstMin: 'min',
+  rstDepart: 'Départ',
+}
+// ── 191:restday end ──
+
+
+
+
+// ── 191:tickets ──
+const clrTickets = {
+  tkbTitle: 'Billets',
+  tkbDoor: 'Billets',
+  tkbBack: 'Retour au profil',
+  tkbChosenAria: 'Billet choisi',
+  tkbRecord: 'Record',
+  tkbBookAria: (n, total) => `Billets : ${n} gagné${n === 1 ? '' : 's'} sur ${total}`,
+  tkbIn: n => `dans ${n} j`,
+  tkbDaysShort: n => `${n} j`,
+  tkbRange: (from, to) => `du ${from} au ${to}`,
+  tkbTicketAria: (days, no, range, record) => `Billet des ${days} jours, numéro ${no}, ${range}${record ? ', record' : ''}`,
+  tkbCellAria: (days, record) => `Billet des ${days} jours${record ? ', record' : ''}`,
+  tkbLockedAria: (days, inDays) => `Billet des ${days} jours, pas encore gagné${inDays ? `, dans ${inDays} jours` : ''}`,
+  tkbShareTicket: 'Partager ce billet',
+  tkbShareFigures: { reviews: 'cartes revues', words: 'mots appris', level: 'en route' },
+  tkbShareAria: (days, no, range, stamped) => `Billet des ${days} jours, numéro ${no}, ${range}, tamponné le ${stamped}`,
+  tkbShareRouteAria: 'Le parcours',
+  tkbShareText: days => `${days} jours de suite sur Tsuji`,
+  tkbShareSaved: 'Image enregistrée.',
+  tkbShareFailed: 'Le partage n’a pas abouti.',
+  tkbToday: 'aujourd’hui',
+  // No ticket yet: the first, named, and the way to it.
+  tkbEmpty: 'Ton premier billet',
+  tkbEmptyAria: (days, inDays) => `Pas encore de billet. Le premier, ${days} jours de suite, ${inDays ? `dans ${inDays} jour${inDays === 1 ? '' : 's'}` : 'aujourd’hui'}`,
+  tkbEmptyGo: 'Départ',
+}
+// ── 191:tickets end ──
+
 export default welded({
   ...auth,
   ...landing,
@@ -2769,4 +2942,10 @@ export default welded({
   ...ride,
   ...nyumon,
   ...guide,
+  ...clrPrimitives,
+  ...clrDay,
+  ...clrPartial,
+  ...clrMilestones,
+  ...clrRestday,
+  ...clrTickets,
 })

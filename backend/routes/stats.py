@@ -296,6 +296,11 @@ def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None 
             cur.execute("DELETE FROM card_first_review WHERE card_id LIKE %s", (prefix,))
             cur.execute("DELETE FROM review_compaction WHERE user_id = %s", (user_id,))
             cur.execute("DELETE FROM xp_ledger WHERE user_id = %s", (user_id,))
+            # The days cleared and the rest days (plan 191) go with the
+            # streak and the XP they were paid in: left, a learner
+            # starting over today would find the day already cleared.
+            cur.execute("DELETE FROM day_clears WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM rest_tickets WHERE user_id = %s", (user_id,))
             # credit_ledger stays: the balance is not progress (plan 069),
             # and a learner starting over keeps the credits they have.
         conn.commit()

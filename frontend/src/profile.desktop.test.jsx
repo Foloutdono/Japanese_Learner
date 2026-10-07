@@ -73,8 +73,13 @@ describe('the profile on the desk', () => {
       </LangProvider>
     )
     await settle()
-    // Statistics and Settings hang under the lit gate on the rail.
-    expect(document.querySelector('.record--door')).toBeNull()
+    // Statistics and Settings hang under the lit gate on the rail; the
+    // one door the page draws is the tickets', which the rail does not
+    // hold (plan 191), under the stamp book.
+    const doors = [...document.querySelectorAll('.record--door')]
+    expect(doors).toHaveLength(1)
+    expect(doors[0].getAttribute('href')).toBe('/profile/tickets')
+    expect(doors[0].closest('.desk-profile__col').querySelector('.sbook')).not.toBeNull()
     expect(document.querySelector('main .pw-open')).toBeNull()
     // The records, three across at the head of the record column.
     const right = document.querySelectorAll('.desk-profile > .desk-profile__col')[1]

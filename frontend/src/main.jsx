@@ -12,9 +12,14 @@ import { createRoot } from 'react-dom/client'
 // japanese-*.css file, which is the whole font at once.
 import '@fontsource/space-grotesk/latin-400.css'
 import '@fontsource/space-grotesk/latin-500.css'
+// 600: the gate button's word (plan 191's boards set it at 600).
+import '@fontsource/space-grotesk/latin-600.css'
 import '@fontsource/space-grotesk/latin-700.css'
 import '@fontsource/noto-serif-jp/600.css'
 import '@fontsource/noto-serif-jp/700.css'
+// 900: the day's seal and the milestone tickets' 七日 / 一ヶ月 (plan 191),
+// sliced like the others, so only the glyphs a ticket prints are fetched.
+import '@fontsource/noto-serif-jp/900.css'
 import '@fontsource/noto-sans-jp/400.css'
 import '@fontsource/noto-sans-jp/500.css'
 import '@fontsource/noto-sans-jp/700.css'

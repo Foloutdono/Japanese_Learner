@@ -186,7 +186,7 @@ describe('Today\'s side, called and finished (plan 123)', () => {
     expect(document.activeElement).toBe(document.querySelector('.desk-journey'))
   })
 
-  it('keeps the stamp strip on a finish, and the slip at the card\'s width', async () => {
+  it('prints no finish (plan 191): a run ends on /today/clear', async () => {
     journeyRef.current = BEHIND
     await render(
       <LangProvider>
@@ -198,9 +198,7 @@ describe('Today\'s side, called and finished (plan 123)', () => {
       </LangProvider>
     )
     await settle()
-    const clear = document.querySelector('main.today > .today-clear')
-    expect(clear).not.toBeNull()
-    expect(clear.getBoundingClientRect().width).toBeLessThanOrEqual(640)
+    expect(document.querySelector('main.today > .today-clear')).toBeNull()
     expect(document.querySelector('main.today > .desk-side .pass--strip')).not.toBeNull()
   })
 })
