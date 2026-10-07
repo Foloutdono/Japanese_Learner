@@ -63,9 +63,10 @@ def _met(user_id: str, sources) -> set[str]:
     met: set[str] = set()
     for source in sources:
         ids = basics.course_ids(source)
+        card_ids = prefixed(ids, user_id)
         unmet = set(srs.get_new_cards(primary_mode(source), limit=len(ids),
-                                      card_ids=prefixed(ids, user_id), ordered=True))
-        met |= {raw_id for raw_id, cid in zip(ids, prefixed(ids, user_id)) if cid not in unmet}
+                                      card_ids=card_ids, ordered=True))
+        met |= {raw_id for raw_id, cid in zip(ids, card_ids) if cid not in unmet}
     return met
 
 
@@ -131,6 +132,10 @@ def _entries():
     return _GRAMMAR, _VOCAB, _KANJI
 
 
+# The N5 reading bank by its Japanese, for a unit's sentences.
+_BANK = {row["jp"]: row for row in READING_N5}
+
+
 @router.get("/api/basics/{unit_id}")
 def get_basics_unit(unit_id: str, lang: str = "fr", user_id: str = Depends(get_user_id)):
     """A unit's station: its points, words and kanji in the order the
@@ -165,10 +170,9 @@ def get_basics_unit(unit_id: str, lang: str = "fr", user_id: str = Depends(get_u
         card(KANJI, raw_id, kanji=kanji[raw_id]["kanji"], meaning=get_meaning(kanji[raw_id], lang, KANJI_FR))
         for raw_id in unit["cards"][KANJI] if KANJI in sources
     ]
-    bank = {row["jp"]: row for row in READING_N5}
     sentences = [
-        {"jp": jp, "translation": bank[jp]["en"] if lang == "en" else None}
-        for jp in unit["sentences"] if jp in bank
+        {"jp": jp, "translation": _BANK[jp]["en"] if lang == "en" else None}
+        for jp in unit["sentences"] if jp in _BANK
     ]
     return {
         "unit": n + 1,
