@@ -284,13 +284,16 @@ describe('MilestoneMonth — 30 days and on', () => {
 
   it('plays the night: the sheet rising and stamped, the sky\'s canvases ready', async () => {
     mount(MilestoneMonth, { result: F.CLEAR_MONTH30, run: F.RUN_MONTH30, reduced: false })
-    await settle(1500)
-    expect($('.ms-m-sheetwrap.is-in')).not.toBeNull()
-    expect(document.querySelectorAll('.ms-m-cell.is-on').length).toBeGreaterThan(8)
+    // The wave inks on the ceremony's clock; a loaded machine reaches the
+    // same frame later, so wait for it rather than for a fixed time.
+    await vi.waitFor(() => {
+      expect($('.ms-m-sheetwrap.is-in')).not.toBeNull()
+      expect(document.querySelectorAll('.ms-m-cell.is-on').length).toBeGreaterThan(8)
+    }, { timeout: 4000, interval: 50 })
     expect(document.querySelectorAll('.ms-fw canvas')).toHaveLength(2)
     expect($('.ms-m-rim')).not.toBeNull()
     expect($('.ms-m-actions')).toBeNull()
-  }, 6000)
+  }, 8000)
 
   it('a tap skips to the rest: the station up, the ticket cut, the way on', async () => {
     const { onFareBeat } = mount(MilestoneMonth, { result: F.CLEAR_MONTH30, run: F.RUN_MONTH30, reduced: false })
