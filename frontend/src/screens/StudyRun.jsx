@@ -329,6 +329,7 @@ export default function StudyRun({ session }) {
               stamp={gates.stamp}
               stage={nc.stage}
               progress={nc.progress ?? null}
+              ladder={Boolean(nc.step)}
               onStampDone={gates.stampDone}
             >
               <CardPrompt

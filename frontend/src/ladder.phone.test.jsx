@@ -92,9 +92,12 @@ describe('the ladder in the day’s queue, on a phone', () => {
     const screen = await mount([card(ladder.build)])
     await settle()
     const root = screen.container
-    expect(root.querySelector('.gl-walk').getAttribute('aria-label')).toBe('This point: Build, step 2 of 4')
+    expect(root.querySelector('.gl-ring').getAttribute('aria-label')).toBe('This point: Build, step 2 of 4')
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
-    for (const el of root.querySelectorAll('.gl-walk, .gl-card, form.gl-entry')) inside(el)
+    for (const el of root.querySelectorAll('.gl-ring, .gl-card, form.gl-entry')) inside(el)
+    // The roundel stands in the stage word's place, and says the progress
+    // the foot's band would.
+    expect(root.querySelector('.stage-mark, .card-band')).toBeNull()
     // The entry under the card, the practice runs': a direct child of the
     // stage, docked over the thumb.
     const entry = root.querySelector('main.stage > form.stage__foot.gl-entry')
@@ -127,11 +130,11 @@ describe('the ladder in the day’s queue, on a phone', () => {
     const screen = await mount([card(ladder.choose)])
     await settle()
     const root = screen.container
-    expect(root.querySelector('.gl-walk').getAttribute('aria-label')).toBe('This point: Choose, step 2 of 3')
+    expect(root.querySelector('.gl-ring').getAttribute('aria-label')).toBe('This point: Choose, step 2 of 3')
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
     const tiles = [...root.querySelectorAll('.gl-dock .gl-tile')]
     expect(tiles.length).toBeGreaterThanOrEqual(2)
-    for (const el of [...tiles, root.querySelector('.gl-card')]) inside(el)
+    for (const el of [...tiles, root.querySelector('.gl-card'), root.querySelector('.gl-ring')]) inside(el)
     for (const el of tiles) expect(el.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     // The dock does not sit over the card.
     const dock = root.querySelector('.gl-dock').getBoundingClientRect()

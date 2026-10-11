@@ -82,8 +82,13 @@ const OUTGOING_MS = 220
  * is keyed on the card, so a new card's band appears where it is
  * rather than sliding from the last card's. A screen that never passes
  * `progress` (the browse, which rates nothing) draws no band.
+ *
+ * `ladder` — the card is on the grammar ladder (plan 194): its roundel
+ * (GrammarPlate's PointLine) stands in the word's corner and says how
+ * far the point has come, so the card draws neither the word nor the
+ * band. A press still plays.
  */
-export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage, progress, className, guide, children }) {
+export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage, progress, ladder = false, className, guide, children }) {
   const effectiveContentKey = contentKey ?? cardKey
 
   const [liveKey, setLiveKey] = useState(cardKey)
@@ -210,8 +215,8 @@ export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage,
         )}
       </div>
       {showStamp && <CardStamp transition={stamp} onDone={onStampDone} />}
-      <StageMark stage={stage} pressed={showStamp} />
-      {progress !== undefined && <CardBand
+      {!ladder && <StageMark stage={stage} pressed={showStamp} />}
+      {!ladder && progress !== undefined && <CardBand
         key={liveKey}
         stage={showStamp && stamp.to ? stamp.to : stage}
         progress={showStamp && typeof stamp.progress === 'number' ? stamp.progress : progress}

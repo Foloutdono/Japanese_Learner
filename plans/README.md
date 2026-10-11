@@ -7240,7 +7240,11 @@ redrawn, Choisir's forms as the mock exam's tiles, and the reveal a
 flashcard's turn instead of the coloured rule (194d). Then: the steps
 in the card's top-left corner, the point alone on the card's back with
 the sides switchable, and Construire's entry under the card as the
-practice runs take theirs (194e).
+practice runs take theirs (194e). The owner found the steps line and the
+switch wrong and asked for three options, built and shot in context
+("Grammar Card Options", https://claude.ai/artifact/UvcN4n5xuFrN1JzEDY24k5:
+A the card's own band in steps, B a route map across the card's head, C
+a roundel), and picked C, the roundel in the stage word's place (194f).
 
 | Phase | What | Status |
 |---|---|---|
@@ -7249,6 +7253,7 @@ practice runs take theirs (194e).
 | 194c | **Frontend**: `components/study/GrammarPlate.jsx` (the plate, the band, the point's line, Choisir, Construire, the desk's `LadderMap` in `CardPanel`), `domain/ladderLine.js`, `MCQGrid`'s `plats`, the tour's new order with « C'est pas tout ! », the quiz and the results (`GrammarTour`, `tourStops`, `TourPanels`), the gate on `tutorial` (`GrammarRun`, `TodayRun`), the level page boarding the ladder, the `gl-*` rules and the desk's in `index.css`, DESIGN.md's tour and ladder. Tests: `GrammarPlate.browser`, the tour's browser/phone/desktop/short, `ladder.phone`, the contrast faces | DONE (2026-10-11) |
 | 194d | **The second look**: no band and no plate (`ladderLine.bandOf` and the `band*` strings gone, `MCQGrid`'s `plats` taken back out); the point's steps a quiet dot line at the card's head (`.gl-walk`); the card a flashcard that turns once answered (`TurnCard`, `playFlip`) to what happened, the sentence whole with the point picked out (`.dict-ex__hl`) and the point; Choisir's forms as the exam's tiles (`GrammarTiles`, a sumi dock on a phone, the stage's surface on the desk); the tour's guess keys as the exam's bubble. Tests: `GrammarPlate.browser` rewritten, `ladder.phone`, the contrast faces, `GrammarRun.gate` | DONE (2026-10-11) |
 | 194e | **The third look**: the steps in the card's top-left corner across from the stage's word, the name over the dots, the magnifier under them; the card's two sides -- the sentence (the answer in its hole, the correction struck and written over) and the point (what happened, the point, the lesson's line on a rival) -- turned by the answer, then by a tap, Space or the `Seg` switch under the face; Construire's entry out of the card into the stage's foot (`BuildEntry`, `form.stage__foot`, the answer held by the run in `hooks/useBuild.js` for GrammarRun, TodayRun and StudyRun), the rating bar in its place; the hole held to its whole word (`holdGaps` over part runs). Tests: `GrammarPlate.browser`, `ladder.phone`, the contrast faces, `GrammarRun.gate`, `grammarRule.phone` | DONE (2026-10-11) |
+| 194f | **Option C**: the point's roundel (`PointLine`, `.gl-ring`: the line's ring cut into the group's steps, the step's number inside, the group named beside, « à refaire » once missed, whole round a star once mastered) in the card's top-right corner, where a ladder card no longer prints the stage word or the foot's band (`CardTransition`'s `ladder`, from GrammarRun, TodayRun and StudyRun); the card turned once by the answer to the sentence echoed with the answer in its hole and the point (`.gl-echo`), the switch and its strings gone. Tests: `GrammarPlate.browser` (the roundel, the one turn), `ladder.phone`, the contrast faces, `grammarRule.phone` | DONE (2026-10-11) |
 
 Open: the six points no tour can light (〜て（理由）, 〜を（移動）, 〜で（理由）,
 自動詞／他動詞, 使役受身形, 〜み) keep the lesson and have no Construire;

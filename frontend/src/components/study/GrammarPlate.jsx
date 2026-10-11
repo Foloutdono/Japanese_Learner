@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useBuild } from '../../hooks/useBuild'
 import { useLang } from '../../LangContext'
 import { playClick, playFlip } from '../../lib/audio'
@@ -6,26 +6,25 @@ import { useDesk } from '../../hooks/useDesk'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { runKey } from '../../lib/keyGuards'
 import { bare, lineOf, mapOf } from '../../domain/ladderLine'
-import { Seg } from '../chrome/Console'
 import { GrammarAnswer } from './GrammarPieces'
 
-// ── 194 — Choisir and Construire, the point's steps ───────────────
-// The ladder's two exercises on the run's own card, as the owner drew
-// them over three rounds: no plate inside the card and no band; the
-// point's steps in the card's top-left corner, across from the stage's
-// word; the choices as the mock exam's answer tiles; Construire's entry
-// under the card, as the practice runs take theirs (`form.stage__foot`).
+// ── 194 — Choisir and Construire, the point's roundel ──────────────
+// The ladder's two exercises on the run's own card, as the owner picked
+// them (option C of "Grammar Card Options", the fourth round): no plate
+// and no band; the point's roundel in the card's top-right corner, in
+// the stage word's place; the choices as the mock exam's answer tiles;
+// Construire's entry under the card, as the practice runs take theirs
+// (`form.stage__foot`).
 //
-// The card is a flashcard with two sides. The front is the sentence: its
-// hole (two for a point in two pieces), its translation under it, and
-// once answered the answer in the hole -- the right form, or what was
-// typed with each wrong kana struck and the right one written over it.
-// The back is the point: what happened over it, the point at the
-// flashcard's answer size, and under it, for a rival taken, the lesson's
-// own line on that rival. The answer turns the card to its back (the
-// flashcard's turn and sound); from then on a tap, Space or the switch
-// under it turns it either way. The learner then rates themselves on the
-// run's bar (ADR 0013).
+// The front asks: the sentence with the point's hole (two for a point in
+// two pieces), its translation under it. The answer turns the card (the
+// flashcard's turn and sound) to the answer, once: what happened, the
+// sentence echoed small with the answer in its hole -- the right form,
+// or what was typed with each wrong kana struck and the right one
+// written over it -- then the point at the flashcard's answer size and,
+// for a rival taken, the lesson's own line on it. Nothing is left on the
+// other side, so it does not turn back. The learner then rates
+// themselves on the run's bar (ADR 0013).
 
 // The language's strings from the provider, or from `t` where a caller
 // renders outside one (as CardPrompt's own callers may).
@@ -65,34 +64,54 @@ function holdGaps(runs) {
   return out.map(r => r.node)
 }
 
-/** The point's steps, in the card's top-left corner: the step named in
- *  words over Choisir's three stops, Construire's four and the star, the
- *  one asked ringed in ink (in the miss's ink once missed). */
+/** The point's roundel, in the card's top-right corner where a card
+ *  off the ladder prints its stage: the line's ring cut into the steps of
+ *  the group in hand (Choisir's three, Construire's four, one in a
+ *  relapse), passed ones in the line's pigment and the one asked in ink
+ *  (in the miss's ink once missed), its number inside; the group named
+ *  beside it in words. Mastered, the ring is whole round a star. */
 export function PointLine({ card, missed = false, t: tProp }) {
   const t = useT(tProp)
   const step = card?.step
   const line = lineOf(step)
   if (!line) return null
   const here = step.group
-  const name = here === 'mastered' ? t.lineMastered
-    : `${here === 'choose' ? (line.relapse ? t.lineRelapse : t.lineChoose) : t.lineBuild} ${step.at}/${step.of}`
-  const aria = here === 'mastered'
+  const mastered = here === 'mastered'
+  const arcs = mastered ? ['on'] : here === 'choose' ? line.choose : line.build
+  const name = mastered ? t.lineMastered
+    : here === 'choose' ? (line.relapse ? t.lineRelapse : t.lineChoose) : t.lineBuild
+  const aria = mastered
     ? t.lineMasteredAria
     : t.lineAria(here === 'choose' ? t.lineChoose : t.lineBuild, step.at, step.of)
-  const dot = (s, k, group) => (
-    <i key={k} className={`gl-walk__dot${s ? ` gl-walk__dot--${s}` : ''}${s === 'now' && missed && here === group ? ' gl-walk__dot--miss' : ''}`} />
-  )
+  // One arc a step round a 17-unit ring, a gap between them, the first
+  // from twelve o'clock.
+  const r = 17
+  const round = 2 * Math.PI * r
+  const gap = arcs.length > 1 ? 5 : 0
+  const arc = round / arcs.length - gap
   return (
-    <div className="gl-walk" role="img" aria-label={aria} data-group={here}>
-      <span className="gl-walk__name">
-        {name}
-        {missed && <span className="gl-walk__again"> · {t.lineAgain}</span>}
-      </span>
-      <span className="gl-walk__line" aria-hidden="true">
-        {line.choose.map((s, k) => dot(s, `c${k}`, 'choose'))}
-        <span className="gl-walk__gap" />
-        {line.build.map((s, k) => dot(s, `b${k}`, 'build'))}
-        <i className={`gl-walk__star${line.star ? ' gl-walk__star--on' : ''}`}>★</i>
+    <div className="gl-ring" role="img" aria-label={aria} data-group={here}>
+      <svg className="gl-ring__dial" viewBox="0 0 44 44" width="44" height="44" aria-hidden="true">
+        {arcs.map((s, i) => (
+          <circle
+            key={i}
+            cx="22" cy="22" r={r}
+            className={`gl-ring__arc${s ? ` gl-ring__arc--${s}` : ''}${s === 'now' && missed ? ' gl-ring__arc--miss' : ''}`}
+            strokeDasharray={`${arc} ${round}`}
+            transform={`rotate(${-90 + (i * 360) / arcs.length + (gap / round) * 180} 22 22)`}
+          />
+        ))}
+        <text x="22" y="22" className="gl-ring__n" textAnchor="middle" dominantBaseline="central">
+          {mastered ? '★' : step.at}
+        </text>
+      </svg>
+      <span className="gl-ring__words" aria-hidden="true">
+        <span className="gl-ring__name">{name}</span>
+        {!mastered && (
+          <span className={`gl-ring__of${missed ? ' gl-ring__of--miss' : ''}`}>
+            {missed ? t.lineAgain : `${step.at} / ${step.of}`}
+          </span>
+        )}
       </span>
     </div>
   )
@@ -122,79 +141,30 @@ export function LadderMap({ card, t: tProp }) {
   )
 }
 
-/** The card's two sides, turned as a flashcard turns: the front until
- *  `turned`, then the back, with the flashcard's own face animation and
- *  sound; from then on a tap, Space (or Z/Q/S/D, as on every flashcard)
- *  or the switch under the face turns it either way. */
-function TurnCard({ turned, front, back, t }) {
-  const desk = useDesk()
-  // Which side is up, and how many turns: the turn the answer makes is
-  // taken while rendering (the answer is the parent's), each turn after
-  // it here; the count remounts the face so its animation replays.
-  const [shown, setShown] = useState({ turned, back: turned, flips: 0 })
-  if (shown.turned !== turned) {
-    setShown({ turned, back: turned, flips: shown.flips + (turned ? 1 : 0) })
-  }
-  useEffect(() => { if (turned) playFlip() }, [turned])
-  const show = side => {
-    playFlip()
-    setShown(s => ({ ...s, back: side, flips: s.flips + 1 }))
-  }
-  const turn = () => { if (turned) show(!shown.back) }
-  // The key turns the side up NOW, read through a ref, as the
-  // flashcard's does (Flashcard.keys.browser.test.jsx).
-  const turnRef = useRef(turn)
-  useEffect(() => { turnRef.current = turn })
-  useEffect(() => {
-    if (!turned) return undefined
-    const onKey = e => {
-      if (!runKey(e)) return
-      const key = e.key.toLowerCase()
-      if (key === ' ' && /^(BUTTON|A)$/.test(e.target?.tagName ?? '') && e.target.closest('.desk-run__side')) return
-      if (key === ' ' || ['z', 'q', 's', 'd'].includes(key)) {
-        e.preventDefault()
-        turnRef.current()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [turned])
-  // On the desk a drag that leaves a word selected is a selection, not a
-  // turn (the flashcard's rule, plan 123).
-  const onClick = e => {
-    if (desk) {
-      const picked = window.getSelection?.()
-      if (picked && !picked.isCollapsed && e.currentTarget.contains(picked.anchorNode)) return
-    }
-    turn()
-  }
+/** The card, turned as a flashcard turns once the answer is in: the
+ *  front until `turned`, then the answer, with the flashcard's own face
+ *  animation and sound. A card that mounts already answered holds still,
+ *  as a flashcard's first paint does. */
+function TurnCard({ turned, front, back }) {
+  const [mountedTurned] = useState(turned)
+  useEffect(() => { if (turned && !mountedTurned) playFlip() }, [turned, mountedTurned])
   return (
-    <div className={`flashcard gl-card${turned ? ' gl-card--turnable' : ''}`} onClick={onClick}>
-      <div key={shown.flips} className={`flashcard__face${shown.flips > 0 ? ' flashcard__face--turned' : ''}`}>
-        {shown.back ? back : front}
+    <div className="flashcard gl-card">
+      <div key={turned ? 'back' : 'front'} className={`flashcard__face${turned && !mountedTurned ? ' flashcard__face--turned' : ''}`}>
+        {turned ? back : front}
       </div>
-      {turned && (
-        // The switch is the card's own, and a press on it is not a tap
-        // on the card.
-        <div className="gl-sides" onClick={e => e.stopPropagation()}>
-          <Seg
-            label={t.glSides}
-            value={shown.back ? 'back' : 'front'}
-            onChange={side => show(side === 'back')}
-            options={[{ key: 'front', label: t.glSideSentence }, { key: 'back', label: t.glSidePoint }]}
-          />
-        </div>
-      )}
     </div>
   )
 }
 
-/** The back of the card: what happened, the point at the flashcard's
- *  answer size, and a note under it (the lesson's line on a rival). */
-function Back({ card, head, kind, note }) {
+/** The answer: what happened, the sentence echoed small with the
+ *  answer in its hole, the point at the flashcard's answer size, and a
+ *  note under it (the lesson's line on a rival). */
+function Back({ card, head, kind, note, sentence }) {
   return (
     <div className="gl-back">
       {head && <p className={`gl-back__head gl-back__head--${kind}`}>{head}</p>}
+      <div className="gl-echo">{sentence}</div>
       <GrammarAnswer card={card} size={40} />
       {note && <p className="gl-back__why">{note}</p>}
     </div>
@@ -209,9 +179,9 @@ function formParts(card, answer) {
 }
 
 /** Choisir: the sentence and its hole, the translation under it; the
- *  forms are the run's (GrammarTiles). Answered, the hole holds the right
- *  form and the card turns to the point, a rival taken named the trap
- *  and answered by the lesson's own line on it. */
+ *  forms are the run's (GrammarTiles). Answered, the card turns to the
+ *  answer: the hole holding the right form, the point, and a rival taken
+ *  named the trap and answered by the lesson's own line on it. */
 export function GrammarChoose({ card, revealed = false, selected = null, t: tProp }) {
   const t = useT(tProp)
   const c = card.contrast
@@ -240,12 +210,13 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
       kind={trap ? 'no' : 'ok'}
       head={trap ? t.chooseTrap(bare(selected)) : selected ? t.bldRight : null}
       note={trap ? c.why?.[selected] : null}
+      sentence={front}
     />
   )
   return (
     <div className="gl-choose">
       <PointLine card={card} missed={trap} t={t} />
-      <TurnCard key={card.card_id} turned={revealed} front={front} back={back} t={t} />
+      <TurnCard key={card.card_id} turned={revealed} front={front} back={back} />
     </div>
   )
 }
@@ -360,8 +331,8 @@ function Marked({ gap }) {
 /** Construire: the translation given, the point's hole (two for a point
  *  in two pieces) filled as it is typed into the entry under the card
  *  (BuildEntry, kana or rōmaji); the server says right, close or wrong,
- *  gap by gap, the hole takes the correction and the card turns to the
- *  point. `entry` is the run's (useBuild); a caller that holds none gets
+ *  gap by gap, and the card turns to the answer, the hole taking the
+ *  correction. `entry` is the run's (useBuild); a caller that holds none gets
  *  its own, the entry then drawn under the card's face. */
 export function GrammarConstruire({ card, answered, entry: held, onDone, session, t: tProp }) {
   const ctx = useLang()
@@ -397,12 +368,13 @@ export function GrammarConstruire({ card, answered, entry: held, onDone, session
       card={card}
       kind={whole === 'right' ? 'ok' : 'no'}
       head={whole === 'right' ? t.bldRight : whole === 'close' ? t.bldClose : whole === 'wrong' ? t.bldWrong : null}
+      sentence={front}
     />
   )
   return (
     <div className="gl-build">
       <PointLine card={card} missed={answered && (whole === 'wrong' || whole === 'close')} t={t} />
-      <TurnCard key={card.card_id} turned={Boolean(answered && verdict)} front={front} back={back} t={t} />
+      <TurnCard key={card.card_id} turned={Boolean(answered && verdict)} front={front} back={back} />
       {!held && !answered && <BuildEntry entry={entry} t={t} />}
     </div>
   )

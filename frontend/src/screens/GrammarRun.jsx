@@ -357,6 +357,7 @@ export default function GrammarRun({ session }) {
               stamp={gates.stamp}
               stage={card.stage}
               progress={card.progress ?? null}
+              ladder={Boolean(card.step)}
               onStampDone={gates.stampDone}
             >
               <PromptCard className="grammar-prompt" foot={cardFoot}>

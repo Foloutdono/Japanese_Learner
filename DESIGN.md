@@ -834,35 +834,39 @@ After the tour, a grammar card walks a fixed line (`srs/ladder.py`):
 Construire take turns. A miss keeps the step and asks it again with
 another sentence; a miss once mastered is a short relapse, one Choisir
 and one Construire. Drawn as the owner picked it on the canvas "Tsuji —
-grammar rework", then trimmed by the owner's two looks at it built (no
-band, no plate, no coloured rule; the steps in the corner; the point on
-the back; the entry under the card):
+grammar rework", trimmed by the owner's looks at it built (no band, no
+plate, no coloured rule, no switch, the entry under the card), and
+finished as option C of "Grammar Card Options", the three directions
+built and shot in the run screen (https://claude.ai/artifact/UvcN4n5xuFrN1JzEDY24k5):
 
-- **The card** (`components/study/GrammarPlate.jsx`) is a flashcard with
-  two sides. **The front is the sentence**: its hole, **its translation
-  right under it**, and once answered the answer in the hole (the right
-  form; or what was typed, each wrong kana struck in the miss's ink with
-  the right one over it in the success ink). **The back is the point**:
-  what happened over it (« Juste. », « Presque. », « X, le piège »), the
-  point at the flashcard's answer size, and under it, for a rival taken,
-  the lesson's own line on that rival -- never the sentence again. The
-  answer turns the card to its back (`playFlip`, the flashcard's turn);
-  from then on a tap, Space (or Z/Q/S/D) or **the switch** under the
-  face (« Phrase | Point », the app's `Seg`) turns it either way.
+- **The card** (`components/study/GrammarPlate.jsx`) asks the sentence:
+  its hole, **its translation right under it**. The answer **turns it
+  once** (`playFlip`, the flashcard's turn) to the answer: what happened
+  (« Juste. », « Presque. », « X, le piège »), the sentence echoed a
+  size down and dimmed with the answer in its hole in full ink (the
+  right form; or what was typed, each wrong kana struck in the miss's
+  ink with the right one over it in the success ink), the point at the
+  flashcard's answer size, and under it, for a rival taken, the
+  lesson's own line on that rival. Nothing is left on the other side,
+  so the card does not turn back: no tap, no key, no switch.
 - **The hole** is the card sunk a step with a dashed rule in the line's
   pigment at its foot, as wide as the kana it holds; answered, the well
   holds the answer in bold and the rule goes. It is held to the word
   before it (its kana and the kanji they end), so a line breaks between
   words, never inside one.
-- **The point's steps** (`.gl-walk`) stand in **the card's top-left
-  corner**, across from the stage's word (`.stage-mark`) and in its
-  register: the step named in plain words (« CHOISIR 2/3 ») over a quiet
-  line of dots, Choisir's three then Construire's four, then the star.
-  The stop asked is ringed; once missed, ringed in the miss's ink with
-  « à refaire ». The labels are **never Japanese** (the owner: the
-  titles' bilingual rule is dropped). The corner's magnifier steps down
-  under them. The run's own meter stays neutral ink, so the two are
-  never confused.
+- **The point's roundel** (`PointLine`, `.gl-ring`) stands in **the
+  card's top-right corner, in the stage word's place**: a ladder card
+  prints neither « En cours » / « Maîtrisé » nor the foot's band
+  (`CardTransition`'s `ladder`), because the roundel says both. It is
+  the line's ring cut into the steps of the group in hand (Choisir's
+  three, Construire's four, one in a relapse), the passed ones in the
+  line's pigment, the one asked in ink (in the miss's ink once missed),
+  the step's number inside; beside it the group in plain words over
+  « 2 / 3 », or « à refaire » in the miss's ink. Mastered, the ring is
+  whole round a star. The labels are **never Japanese** (the owner: the
+  titles' bilingual rule is dropped). It steps aside while a press
+  plays, whose caption lands in the same corner. The whole walk is the
+  desk's (`LadderMap`, below).
 - **Choisir** offers the forms as **the mock exam's answer tiles**
   (`GrammarTiles`, the `.exam-tile` drawing): a numbered bubble and the
   form as written in a sentence (no 〜), two by two, in the sumi dock

@@ -501,6 +501,7 @@ export default function TodayRun({ session }) {
               stamp={gates.stamp}
               stage={card.stage}
               progress={card.progress ?? null}
+              ladder={Boolean(card.step)}
               onStampDone={gates.stampDone}
             >
               <CardPrompt

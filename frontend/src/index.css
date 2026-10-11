@@ -25655,83 +25655,70 @@ button.brd-stn { cursor: pointer; }
 .tour-reply__who { font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); }
 .tour-reply__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 600; }
 
-/* 194 — Choisir and Construire on the run's own card (the owner's third
-   round): no plate inside the card and no band; the point's steps in the
-   card's top-left corner, across from the stage's word; the sentence at
-   the card's size with the point's hole, its translation under it; the
-   card two-sided, turned to the point by the answer
-   (.flashcard__face--turned) and either way after it by a tap, Space or
-   its switch; the forms as the mock exam's answer tiles, docked under
-   the thumb on a phone; Construire's entry under the card, the practice
-   runs' (form.stage__foot). */
+/* 194 — Choisir and Construire on the run's own card (the owner's pick,
+   option C): no plate inside the card and no band; the point's roundel
+   in the card's top-right corner, in the stage word's place (a ladder
+   card draws neither the word nor the foot's band); the sentence at the
+   card's size with the point's hole, its translation under it; the card
+   turned once by the answer (.flashcard__face--turned) to the sentence
+   echoed small with the answer in its hole and the point; the forms as
+   the mock exam's answer tiles, docked under the thumb on a phone;
+   Construire's entry under the card, the practice runs'
+   (form.stage__foot). */
 .gl-choose, .gl-build { display: flex; flex-direction: column; width: 100%; }
 
-/* The point's steps, in the corner the stage's word (.stage-mark) mirrors
-   on the right, in its register: the step named over small stops on a
-   hairline, the one asked ringed. The footed card's body is their
-   containing block (its inline-size containment). */
-.gl-walk {
+/* The roundel: where the stage's word (.stage-mark) stands on a card off
+   the ladder, and in its register; the line's ring cut into the group's
+   steps, the step's number inside, the group named beside it. The footed
+   card's body is its containing block (its inline-size containment). */
+.gl-ring {
   position: absolute;
-  top: var(--sp-4);
-  left: var(--sp-5);
+  top: var(--sp-3);
+  right: var(--sp-4);
   z-index: 3;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row-reverse;
+  align-items: center;
   gap: var(--sp-2);
   pointer-events: none;
+  transition: opacity 0.15s ease;
 }
-/* The corner's magnifier steps under the steps. */
-.prompt-card:has(.gl-walk) .reveal-actions { top: calc(var(--sp-4) + var(--sp-8)); left: var(--sp-4); }
-.gl-walk__line { position: relative; display: inline-flex; align-items: center; gap: var(--sp-2); }
-.gl-walk__line::before {
-  content: "";
-  position: absolute;
-  inset: 50% 0 auto;
-  height: 1px;
-  background: var(--surface-line);
+/* While a press plays, its caption lands in this corner. */
+.quiz-card-stage:has(.card-stamp-overlay) .gl-ring { opacity: 0; }
+.gl-ring__dial { display: block; flex: none; }
+.gl-ring__arc { fill: none; stroke: var(--surface-line); stroke-width: 4; }
+.gl-ring__arc--on { stroke: var(--line-grammar); }
+.gl-ring__arc--now { stroke: var(--text-primary); }
+.gl-ring__arc--miss { stroke: var(--rating-wrong); }
+.gl-ring__n {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-primary);
 }
-.gl-walk__dot {
-  position: relative;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--r-pill);
-  background: var(--surface-line);
-}
-.gl-walk__dot--on { background: var(--line-grammar); }
-.gl-walk__dot--now {
-  width: 12px;
-  height: 12px;
-  background: var(--line-grammar);
-  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px var(--text-primary);
-}
-.gl-walk__dot--miss { background: var(--bg-card); box-shadow: 0 0 0 2px var(--rating-wrong); }
-.gl-walk__gap { width: var(--sp-2); }
-.gl-walk__star {
-  position: relative;
-  font-size: var(--fs-caption);
-  font-style: normal;
-  line-height: 1;
-  color: var(--text-secondary);
-  background: var(--bg-card);
-}
-.gl-walk__star--on { color: var(--line-grammar); }
-.gl-walk__name {
+.gl-ring[data-group="mastered"] .gl-ring__n { fill: var(--line-grammar); }
+.gl-ring__words { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+.gl-ring__name {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.gl-ring__of {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   white-space: nowrap;
 }
-.gl-walk__again { color: color-mix(in srgb, var(--rating-wrong) 75%, var(--text-primary)); }
+.gl-ring__of--miss { color: color-mix(in srgb, var(--rating-wrong) 75%, var(--text-primary)); }
 
-/* The card: a flashcard that turns once the answer is in, its switch
-   under the face. */
-.gl-card { width: 100%; }
-.gl-card:not(.gl-card--turnable) { cursor: default; }
+/* The card: a flashcard turned once, by the answer. */
+.gl-card { width: 100%; cursor: default; }
 .gl-front, .gl-back {
   display: flex;
   flex-direction: column;
@@ -25740,8 +25727,6 @@ button.brd-stn { cursor: pointer; }
   padding-block: var(--sp-5);
   text-align: center;
 }
-.gl-sides { display: flex; justify-content: center; margin-top: var(--sp-5); }
-.gl-sides .seg { margin-left: 0; }
 .gl-sent {
   margin: 0;
   font-family: var(--font-jp);
@@ -25782,7 +25767,16 @@ button.brd-stn { cursor: pointer; }
   font-weight: 700;
 }
 
-/* The back: what happened, the point, the lesson's line on a rival. */
+/* The answer's sentence: the front echoed a size down, dimmed, the
+   answer in its hole in full ink. */
+.gl-echo { width: 100%; }
+.gl-echo .gl-front { gap: var(--sp-1); padding-block: 0; }
+.gl-echo .gl-sent { font-size: var(--fs-lead); color: var(--text-secondary); }
+.gl-echo .gl-gap--filled { color: var(--text-primary); }
+.gl-echo .gl-tr { font-size: var(--fs-sm); font-weight: 400; color: var(--text-secondary); }
+
+/* The answer: what happened, the sentence, the point, the lesson's line
+   on a rival. */
 .gl-back__head { margin: 0; font-size: var(--fs-lead); font-weight: 700; }
 .gl-back__head--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
 .gl-back__head--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
