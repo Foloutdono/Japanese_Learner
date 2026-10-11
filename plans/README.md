@@ -6522,6 +6522,40 @@ are left for a cleanup task. Tests: the mockup and phone suites
 rewritten for the drawing, the polling, responsive, deskfree and
 sources suites moved to it.
 
+## Plan 135 — 区間, the fare gate takes the hall on the desk (2026-09-25)
+
+Numbered 135 because 134 is the analyser's video passage
+(`claude/plan-134-analyzer-desk`, open). The owner's complaint, from a
+1920 screenshot: the gate stood 826 × 470 at the top with over 40 % of
+the window empty under it, the line chips repeated the lanes, "only 6 of
+153 can board" did not say which, and nothing said how long 153 cards
+would take. Four directions and eight ideas were drawn on the "Tsuji desk
+— Today" canvas (https://claude.ai/artifact/V6FEqt6fxNXXejETJZmcDw); the
+owner liked A, asked for its variants with the ideas, and picked **A·2**:
+the bands, the run length with its minutes, and who boards on each lane.
+
+| # | What | Status |
+|---|------|--------|
+| 135 | **Backend** `srs.get_review_pace` (the median gap under 120 s between the last 400 reviews of 14 days, none under 20 gaps: `seconds_per_review`), on `/api/today` as `seconds_per_review` (never fails the gate); `/api/today/cards?quota=<lane>:<n>,...` keeps the named lanes, each cut to its figure after `drop_seen` (`daily_queue.parse_quota`, `keep_quota`) — the run does the counting, since a new card is drawn afresh per batch and the server could not count what the run holds; `tests/test_today_take.py`. **Frontend** `domain/lanes.js`'s `splitTake` (the queue's round-robin, in its order), `parseQuota`/`quotaParam`, `runPathFor(…, take)` sending `?quota=` when the length cuts the choice; `GateCard`'s `DeskGate` on the desk (the phone's gate unchanged): the head's `Seg` (20 / 50 / 100 under the total, and all; remembered in `localStorage` `tsuji.gateTake`), the count and "sur N", the minutes; a band per line, its switch beside its lane tiles, each tile its share (`n / all`, faded when the length leaves it out), free, or dashed with the refill's hour when nothing paid can ride; the fare foot (board · wait +30 at hh:mm · balance) beside Depart; `TodayRun` reads `quota`, counts what it has answered (per tab, `sessionStorage`) and holds per lane, asks for the rest and ends without another fetch; the 机 section replaces plan 116's rules; locales; `src/today.wide.test.jsx` (rewritten), `src/today.desktop.test.jsx` (two tests rewritten), `src/domain/lanes.test.js`, a quota block in `TodayRun.browser.test.jsx`, a line in `deskfree.phone.test.jsx`. the week ahead (below). Second pass, owner-directed ("do exactly like the mock up, even the buttons at the top"): A·2's measures exactly — Today's canvas uncapped (`.phone__content:has(> main.today)`), `--sp-7` margins, the band a 230px | 1fr grid, lanes `repeat(3, 1fr)`, tiles 46px on the lane's 9% tint with "where · mode" on one line, the length `Seg` square (`--r-plate`) on `--bg-main` at 34px with plain labels, the count in `--accent2`, the fare a 1fr | 420px grid with Depart at 52px; a line's name wraps to two lines rather than clipping. DESIGN.md and the desk README follow | DONE (2026-09-25) |
+
+The side column's foot as A·2 drew it: `GET /api/today/forecast`
+(`srs.get_due_forecast`, seven days; its own request so the phone and the
+tab badge never pay for it), `stores/forecast.js`, `components/journey/
+WeekAhead.jsx` at the foot of `DeskSide` (a bar a day, the figure over it,
+the weekday under it in Japanese, today's bar the gate's own total in
+gold), and "Laissées pour demain N" when the gate's choice leaves some —
+the gate publishes it through `stores/gateRun.js`; the side column runs
+the window's height on Today. Tests: the week's block of
+`src/today.wide.test.jsx`, the forecast's in `tests/test_today_take.py`.
+
+Verification: backend `tests/test_today_take.py`, `test_daily_queue.py`,
+`test_today_ration.py` green; the full suite's only failures are the
+audio tests (no `lameenc` on this machine) and `test_backfill_first_ride`
+(the machine's timezone), untouched here. Frontend: the Today tests,
+`deskfree.phone`, `desk.css`, the locales and the lanes unit tests green;
+the full run's other failures (ask, focus, frontdoor, ride, … desktop
+files) all pass when run alone — load flakes of the local browser.
+
 ## Plan 136 — 帳, the analyser's passages first (2026-09-26)
 
 Numbered 136 after a grep of origin/main found nothing at 136 or above
