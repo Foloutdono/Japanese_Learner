@@ -1741,7 +1741,35 @@ runtime purpose. Two consequences worth knowing:
   `ladder.json` and its README, `tests/test_grammar_ladder.py`,
   `tests/test_grammar_check.py`, `components/study/GrammarWork.jsx`,
   `CardPrompt.jsx`, `domain/cardShape.js` and `index.css`).
-  When starting a new wave, begin at **191** or higher, and check
+  **191** is 読み応え, the reading bank at its level (owner-directed: "lots
+  of higher tier reading sentences are just basic N5 words with one higher
+  notion"; the bank reading and translation share): every N4–N1 sentence
+  rewritten so it holds at least two deck words of its own level besides
+  its grammar point, counted as the breakdown tags them
+  (`level_mix.words_at_level`), its focus one of them, no word the deck
+  lacks (`off_deck_words`, and the vocab audit's own measure, `deck_gaps`),
+  no kanji word the breakdown tags above the level (`tagged_above`), and
+  its point found by the detector where `can_find` trusts it -- two
+  sentences a point in the catalogue's order, 906 rows where there were
+  429, every checkable point covered; a French translation on every row,
+  N5 included, served by `translation(row, lang)` to the batch, the
+  station, the basics course and the ride; a short `key` per served
+  sentence (`phrase_key`) for the runs' `exclude`, which sixty N1
+  sentences as text had outgrown; `MAX_DISPLAY_SECONDS` 45; translation's
+  tutor told the prompt's own language (`prompt_lang`); and 〜気味 after a
+  stem read ぎみ. `scripts/reading_bank_report.py` measures the bank and
+  checks candidate rows (`--check`); the bank's figures are ratcheted in
+  `tests/test_reading_sentences.py` (cited in `content/reading_sentences.py`,
+  `study/level_mix.py`, `study/reading_context.py`, `routes/reading.py`,
+  `routes/translation.py`, `routes/station.py`, `routes/basics.py`,
+  `routes/onboarding.py`, `scripts/reading_bank_report.py`,
+  `tests/test_reading_sentences.py`, `tests/test_level_mix.py`,
+  `tests/test_audit_vocab_deck.py`, `screens/ReadingRun.jsx`,
+  `screens/TranslationRun.jsx` and
+  `components/practice/PracticeSpecimen.jsx`). After deploying it, run
+  `python -m scripts.prewarm_phrase_cache` for `en` and `fr`: every new
+  sentence's first Explain otherwise pays one model call.
+  When starting a new wave, begin at **192** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
