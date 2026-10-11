@@ -34,6 +34,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from content.kana_data import get_all_kana
 from content.kanji_data import KANJI_BY_LEVEL
+from content import reading_sentences
 from content.reading_sentences import N5 as READING_N5
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from core.auth import get_user_id
@@ -498,6 +499,7 @@ def get_ride(lang: str = "fr", user_id: str = Depends(get_user_id)):
     stored = resolve_level(user_id)
     unknown_level, unknown = _ride_unknown_entry(stored, kana_known)
     jp = _RIDE_SENTENCE["jp"]
+    translation, translation_lang = reading_sentences.translation(_RIDE_SENTENCE, lang)
     return {
         "cards": [
             _ride_card(RIDE_KNOWN["level"], _RIDE_KNOWN_ENTRY, lang, RIDE_KNOWN["romaji"]),
@@ -505,15 +507,15 @@ def get_ride(lang: str = "fr", user_id: str = Depends(get_user_id)):
         ],
         # The same shape the reading batch serves (routes/reading.py's
         # _finish_phrase), minus the source word the ride has none of.
-        # The translation is English only, as every curated sentence's
-        # is; the frontend labels it so.
+        # In the learner's language, as every curated sentence carries
+        # it since plan 191; the frontend labels it by translation_lang.
         "sentence": {
             "phrase": jp,
             "romaji": phrase_to_romaji(jp),
             "furigana": align_sentence(jp),
             "words": sentence_words(jp),
-            "translation": _RIDE_SENTENCE["en"],
-            "translation_lang": "en",
+            "translation": translation,
+            "translation_lang": translation_lang,
             "display_seconds": _display_seconds(jp),
             "grammar": _RIDE_SENTENCE["grammar"],
         },

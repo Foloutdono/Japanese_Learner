@@ -200,6 +200,14 @@ class CorpusMeasurementTests(unittest.TestCase):
         # 〜はおろか's おろか and 〜や否や's いな are IGNORED_LEMMAS'; and
         # four kana sentences the tokenizer cut into 顎, 宿 and がせ read
         # right (absent -17, unmatched -17; 104 occurrences).
+        #
+        # Lowered by plan 191: the reading bank rewritten to its levels,
+        # every row held to words with a card (content/reading_sentences'
+        # deck_gaps). The old rows' 夜通し, 実話, 思い, 断り, 本社, 歪める,
+        # 見所 and 閉じ籠もる are gone; six compounds a point builds and
+        # its rows must show came in (働き甲斐 for 〜がい, 書き掛け and
+        # 忘れ掛ける for 〜かける, 押し通す for 〜通す, 支え合う and 教え合う
+        # for 〜あう) (absent -2, unmatched -2).
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 161)
-        self.assertLessEqual(c["unmatched_lemmas"], 175)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 158)
+        self.assertLessEqual(c["unmatched_lemmas"], 172)

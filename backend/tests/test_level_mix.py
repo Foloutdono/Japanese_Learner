@@ -98,3 +98,37 @@ def test_messages_never_route_into_the_kanji_feedback_branch():
     assert len(errors) == 2
     for message in errors:
         assert not ("outside" in message and "allowed set" in message)
+
+
+# -- words_at_level (plan 191): what the reading bank must hold of its
+# own level, counted as the breakdown tags it.
+
+def test_words_at_level_are_the_level_s_own_deck_words():
+    # 期待 and 失望 are N3 cards, 大きい N5: an N3 count finds two.
+    found = level_mix.words_at_level("期待が大きかっただけに、失望も大きかった。", "N3")
+    assert [w["kanji"] for w in found] == ["期待", "失望"]
+    assert level_mix.words_at_level("期待が大きかっただけに、失望も大きかった。", "N2") == []
+
+
+def test_a_word_the_point_is_spelled_with_is_not_counted():
+    # つもり is an N4 card, and it is 〜つもりです's own word.
+    jp = "来月、会社の近くに引っ越すつもりです。"
+    assert "つもり" in [w["kana"] for w in level_mix.words_at_level(jp, "N4")]
+    assert "つもり" not in [w["kana"] for w in level_mix.words_at_level(jp, "N4", "〜つもりです")]
+
+
+def test_a_particle_or_a_prefix_filed_under_a_kanji_card_is_not_a_word():
+    # くらい is a particle the lookup files under 位 (N3); the ご of
+    # ご協力 a prefix filed under 御 (N1).
+    assert level_mix.words_at_level("駅まで十分くらいかかります。", "N3") == []
+    assert "御" not in [w["kanji"] for w in level_mix.words_at_level("ご協力をお願いします。", "N1")]
+
+
+def test_a_na_adjective_counts():
+    # 豊か comes through as UniDic's 形状詞 ("other"), not CONTENT_POS.
+    assert [w["kanji"] for w in level_mix.words_at_level("生活が豊かになる。", "N3")] == ["豊か"]
+
+
+def test_words_at_level_without_the_tokenizer_is_empty(monkeypatch):
+    monkeypatch.setattr(morphology, "tokenize", lambda text: None)
+    assert level_mix.words_at_level("期待が大きかっただけに、失望も大きかった。", "N3") == []

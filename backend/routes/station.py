@@ -199,9 +199,10 @@ def _grammar_line(lang: str) -> dict:
 # serve, never an illustration written for the page -- the bank's first
 # sentence, the first seed text, the first clip, the catalogue's first
 # point. `lang` reaches only what the bank carries in two languages
-# (comprehension's questions, composition's gloss); the reading bank
-# carries `en` alone, which is what translation prompts every learner
-# with (routes/reading.get_reading_batch's `translation_lang` note).
+# (comprehension's questions, composition's gloss, and since plan 191
+# the reading bank's translation, which is what translation prompts the
+# learner with -- routes/reading.get_reading_batch's `translation_lang`
+# note).
 
 # A sentence ends at 。, and at the bracket that closes on it: a
 # quoted line (「……。」) is cut after its 」, not inside it.
@@ -222,16 +223,20 @@ def _sentence_line(lang: str) -> dict:
     """Reading and translation: the curated bank the level's run opens
     on (routes/reading.get_reading_batch serves it before any corpus
     sentence), the same stop for both platforms -- one prints the
-    Japanese, the other the English it prompts with."""
+    Japanese, the other the translation it prompts with."""
     stops = {}
     for level in LEVELS:
         bank = reading_sentences.BY_LEVEL.get(level, [])
         if not bank:
             continue
         first = bank[0]
+        translation, translation_lang = reading_sentences.translation(first, lang)
         stops[level] = {
             "sample": [first["jp"]],
-            "card": {"jp": first["jp"], "en": first["en"], "grammar": first["grammar"]},
+            "card": {
+                "jp": first["jp"], "en": first["en"], "grammar": first["grammar"],
+                "translation": translation, "translation_lang": translation_lang,
+            },
             "points": list(dict.fromkeys(row["grammar"] for row in bank)),
             "size": len(bank),
         }

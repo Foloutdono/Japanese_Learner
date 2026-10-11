@@ -35,7 +35,7 @@ message into that loop's kanji branch (exam_reading_gen._as_feedback).
 import logging
 
 from study import difficulty, morphology
-from study.analysis import CONTENT_POS
+from study.analysis import CONTENT_POS, analyze_local
 from study.card_lookup import find_segments_in_text, resolve_morpheme
 from study.llm_shared import is_kanji
 
@@ -46,6 +46,11 @@ logger = logging.getLogger(__name__)
 # `count > floor(MAX_RATIO * n)` -- one hard word is tolerated from 20
 # content words up, two from 40, three from 60.
 MAX_RATIO = 0.05
+
+# The word classes words_at_level never counts as vocabulary: the
+# grammar's words, and the pieces of a word -- the ご of ご協力 (filed
+# under 御, N1), the 的 of 経済的, a counter's 冊.
+_FUNCTION_POS = frozenset({"particle", "auxiliary", "conjunction", "symbol", "prefix", "suffix"})
 
 
 def _empty(available: bool) -> dict:
@@ -149,6 +154,64 @@ def level_mix(text: str, level: str, allow_kanji: str = "") -> dict:
         "grammar_over": difficulty.grammar_over_level(text, level),
         "off_deck": off_deck,
     }
+
+
+def words_at_level(text: str, level: str, pattern: str = "") -> list[dict]:
+    """The deck words of exactly `level` that `text` uses, each once --
+    the words the breakdown tags with that level's chip (plan 191).
+
+    level_mix above counts what sits ABOVE a level and nothing else,
+    which is all a generated passage needs. The curated reading bank
+    needed the other half: an N2 sentence that passes every "nothing
+    above N2" gate can still be an N5 sentence carrying one N2 point,
+    and 92% of the N2 bank was exactly that. This counts what the
+    learner reading the breakdown sees: study/analysis.analyze_local's
+    tokens, each matched to a deck card (a pool word carries no level
+    and is not counted).
+
+    `pattern` is the grammar point the text was written for. A word the
+    point is spelled with (つもり in 〜つもりです, 最中 in 〜最中に) is the
+    point, not vocabulary the sentence brings, and is left out.
+
+    [] without the tokenizer: nothing was measured, and a caller that
+    enforces a floor must skip rather than fail (tests gate on
+    morphology.MORPHOLOGY_AVAILABLE).
+
+    Returns [{"raw_id", "kanji", "kana", "surface"}] in sentence order.
+    """
+    result = analyze_local(text)
+    if not result.get("available"):
+        return []
+    point = pattern.replace("〜", "")
+    out: list[dict] = []
+    seen: set[str] = set()
+    for tok in result["tokens"]:
+        # A particle or a conjunction the lookup files under a kanji
+        # card (くらい under 位, または's また under 又) is the grammar's,
+        # not a word the sentence brings, and a prefix or a suffix is a
+        # piece of one. Not CONTENT_POS: a な-adjective (豊か, UniDic's
+        # 形状詞) comes through as "other" and is exactly the vocabulary
+        # being counted.
+        if tok.get("pos") in _FUNCTION_POS:
+            continue
+        match = tok.get("vocab_match") or {}
+        if match.get("pool") or match.get("level") != level:
+            continue
+        raw_id = match.get("raw_id")
+        if not raw_id or raw_id in seen:
+            continue
+        entry = match.get("entry") or {}
+        forms = [tok.get("surface", ""), tok.get("lemma", ""), entry.get("kanji", "")]
+        if point and any(form and form in point for form in forms):
+            continue
+        seen.add(raw_id)
+        out.append({
+            "raw_id": raw_id,
+            "kanji": entry.get("kanji", ""),
+            "kana": entry.get("kana", ""),
+            "surface": tok.get("surface", ""),
+        })
+    return out
 
 
 def _pct(ratio: float) -> str:
