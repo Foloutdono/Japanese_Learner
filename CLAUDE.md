@@ -12,7 +12,7 @@ The name is the glyph: 辻 is the masthead, the icon and the plate at the origin
 
 **Before touching any CSS or building any screen, read `DESIGN.md`.** It is the
 single source of truth for the app's visual language: the station metaphor, the
-pigment rules, the bilingual pairing, and the size/space/radius/tracking scales.
+pigment rules, "say less", and the size/space/radius/tracking scales.
 
 Two rules that cause the most damage when missed:
 
