@@ -173,6 +173,16 @@ class ContextRuleTests(unittest.TestCase):
         self.assertEqual(_read(kimi(), _particle("が"))[0], "きみ")
         self.assertEqual(_read(_particle("か"), kimi(), _particle("が"))[1], "きみ")
 
+    def test_busoku_a_shortage_of(self) -> None:
+        """〜不足 after a noun is ぶそく, the compound's voiced half; after
+        a particle or a prefix it is ふそく (plan 192)."""
+        fusoku = lambda: _tok("不足", "ふそく")
+        self.assertEqual(_read(_tok("睡眠", "すいみん"), fusoku())[1], "ぶそく")
+        self.assertEqual(_read(_tok("人手", "ひとで"), fusoku())[1], "ぶそく")
+        self.assertEqual(_read(_tok("水", "みず"), _particle("が"), fusoku())[2], "ふそく")
+        self.assertEqual(_read(_tok("過", "か", "接頭辞", "*", "*", "prefix"), fusoku())[1], "ふそく")
+        self.assertEqual(_read(fusoku(), _particle("を"))[0], "ふそく")
+
     def test_sakari_the_peak(self) -> None:
         """盛り alone is もり to UniDic, a serving; the peak where the
         sentence says so (plan 153)."""

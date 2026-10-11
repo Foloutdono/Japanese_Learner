@@ -491,6 +491,17 @@ class InvariantTests(unittest.TestCase):
                 with self.subTest(sentence=sentence, word=m.surface):
                     self.assertTrue(not kanji or card_lookup._katakana_written(kanji))
 
+    def test_no_katakana_card_for_a_native_word_in_hiragana(self) -> None:
+        # Plan 192: まま is no ママ.
+        for sentence, morphemes, hits in self.read:
+            for m, hit in zip(morphemes, hits):
+                if hit is None or m.goshu not in ("和", "漢") or card_lookup._katakana_written(m.surface):
+                    continue
+                entry = hit[1]
+                with self.subTest(sentence=sentence, word=m.surface):
+                    self.assertFalse(not entry.get("kanji")
+                                     and card_lookup._katakana_written(entry.get("kana") or ""))
+
     def test_every_pool_card_the_breakdown_hands_out_exists(self) -> None:
         for sentence, _morphemes, _hits in self.read[::10]:
             for t in analysis.analyze_local(sentence)["tokens"]:
@@ -538,3 +549,41 @@ class GreetingTests(unittest.TestCase):
         self.assertNotIn("しまった", matches("ケーキを食べてしまった。"))
         self.assertNotIn("でも", {k for k, v in matches("学校でも勉強します。").items()
                                   if v["raw_id"] == "vocab_N5__でも"})
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class WhatTheBankMetTests(unittest.TestCase):
+    """Plan 192: what the reading bank's drafters met (plan 191)."""
+
+    def test_mama_is_no_mum_and_no_occasionally(self) -> None:
+        # まま is 儘, "as it is": not ママ, "mum", nor 間々, "occasionally",
+        # the two cards read まま. The row opens 〜まま, or the pool's まま.
+        for sentence in ("服を着たまま寝てしまった。", "そのまま食べてください。", "思ったままを話す。"):
+            with self.subTest(sentence=sentence):
+                found = matches(sentence).get("まま")
+                self.assertTrue(found is None or found["raw_id"] not in ("vocab_N3__ママ", "vocab_N1_間々_まま"))
+        self.assertEqual(matches("ママが来た。")["ママ"]["raw_id"], "vocab_N3__ママ")
+
+    def test_a_kana_word_whose_lemma_is_a_guess_keeps_its_card(self) -> None:
+        # UniDic files かさ under 嵩 and さかな under 肴; JMdict holds no
+        # common kana word read so, and the card stands. さぼる is 混.
+        for sentence, word, raw_id in (
+            ("かさを持たずに出て、雨にぬれました。", "かさ", "vocab_N5_傘_かさ"),
+            ("わたしはさかなを食べない。", "さかな", "vocab_N5_魚_さかな"),
+            ("授業をさぼった。", "さぼっ", "vocab_N1__サボる"),
+        ):
+            with self.subTest(word=word):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)
+
+    def test_the_first_lessons_words_are_their_lower_cards(self) -> None:
+        for sentence, word, raw_id in (
+            ("すぐ来てください。", "すぐ", "vocab_N5__すぐ/すぐに"),
+            ("すぐに行きます。", "すぐ", "vocab_N5__すぐ/すぐに"),
+            ("ゆっくり話してください。", "ゆっくり", "vocab_N5__ゆっくり/ゆっくりと"),
+            ("良い天気ですね。", "良い", "vocab_N5__いい/よい"),
+            ("赤ちゃんが泣いている。", "赤ちゃん", "vocab_N4_赤ちゃん_あかちゃん"),
+            ("あかちゃんが泣いている。", "あかちゃん", "vocab_N4_赤ちゃん_あかちゃん"),
+            ("世論は大きく変わった。", "世論", "vocab_N1_世論_よろん/せろん"),
+        ):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(matches(sentence)[word]["raw_id"], raw_id)

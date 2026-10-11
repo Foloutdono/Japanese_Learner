@@ -170,6 +170,17 @@ class DifficultyGateTests(unittest.TestCase):
         # 今日は is a real deck entry: the N1 spelling of こんにちは.
         self.assertEqual(D.vocab_over_level("今日は何をしますか。", "N5"), [])
 
+    def test_vocab_gate_reads_a_question_word_and_its_particle(self) -> None:
+        # 何も is an N3 card, and 何も／誰も〜ない N5 grammar (plan 192).
+        self.assertEqual(D.vocab_over_level("何も食べませんでした。", "N5"), [])
+        self.assertEqual(D.vocab_over_level("何か飲みますか。", "N5"), [])
+
+    def test_vocab_gate_reads_a_verb_in_its_honorific_frame(self) -> None:
+        # お使いください is 使う, not the N1 お使い, "errand" (plan 192);
+        # and 使い is 使う's stem, the わ-row the stem table lacked.
+        self.assertEqual(D.vocab_over_level("こちらのペンをお使いください。", "N4"), [])
+        self.assertEqual(D.vocab_over_level("毎日パソコンを使います。", "N5"), [])
+
     def test_catches_constructions_the_catalogue_does_not_list(self) -> None:
         """205 points is a syllabus, not an inventory of the language.
         Each of these was served AS N5 by the shipped gate."""

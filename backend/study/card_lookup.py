@@ -4,6 +4,8 @@ existing vocab/kanji decks and the user's SRS state. Used by both the
 phrase analyzer and the reading-practice mode.
 """
 
+from functools import lru_cache
+
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.vocab_renames import FOLDED_FORMS
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
@@ -879,7 +881,13 @@ def resolve_kana(reading: str, pos: str, auxiliary_use: bool, after_conjunctive:
     written in kana answers for it (タバコ is the たばこ card). ダメ and
     キレイ are 混 and 漢 --
     native words written in katakana -- and still reach 駄目 and 綺麗.
-    What either refusal turns away goes on to the JMdict pool, which
+
+    And the other way round (plan 192): a NATIVE or Sino-Japanese word
+    (和, 漢) the page writes in hiragana is not a card written in
+    katakana. まま ("as it is", 儘) is not ママ ("mum"), which 着たまま
+    and そのまま were glossed with in fourteen of the taught sentences.
+    さぼる is 混 and still reaches サボる.
+    What any refusal turns away goes on to the JMdict pool, which
     holds the word itself.
     """
     if pos not in ("noun", "pronoun", "verb", "adjective", "adverb", "interjection") or len(reading) < 2:
@@ -895,6 +903,9 @@ def resolve_kana(reading: str, pos: str, auxiliary_use: bool, after_conjunctive:
     if goshu == "外":
         candidates = [c for c in candidates
                       if not (c[1].get("kanji") or "") or _katakana_written(c[1].get("kanji") or "")]
+    elif goshu in ("和", "漢") and surface and not _katakana_written(surface):
+        candidates = [c for c in candidates
+                      if c[1].get("kanji") or not _katakana_written(c[1].get("kana") or "")]
     if not candidates:
         return None
     if pos in ("adverb", "interjection"):
@@ -938,6 +949,8 @@ def resolve_morpheme(morphemes, i: int):
     hit = resolve_lemma(m.lemma, m.lemma_reading, m.surface) or resolve_kana(
         m.lemma_reading, m.pos, m.auxiliary_use, after_conjunctive, m.surface, m.goshu,
     )
+    if hit is not None and _kana_word_instead(m, hit[1]):
+        return None
     if hit is not None and (_another_word(m, hit[1]) is not None or _read_otherwise(m, hit[1])):
         # The lemma's card in the page's spelling is read otherwise; the
         # same lemma may have a card read as the token is: 良い read よい
@@ -948,6 +961,35 @@ def resolve_morpheme(morphemes, i: int):
             return None
         return again
     return hit
+
+
+def _kana_word_instead(m, entry: dict) -> bool:
+    """Whether a token the page writes in kana is the word JMdict says is
+    written in kana, not the card spelled in kanji it is read like (plan
+    192). まま is UniDic's 侭, "as it is", and JMdict's 儘 is common and
+    usually kana -- the pool holds it as a kana row -- while the card read
+    まま is 間々, "occasionally": 着たまま, そのまま and 思ったまま were
+    all glossed "occasionally". Three things must hold, so that a kana
+    word whose lemma UniDic merely guesses (かさ filed under 嵩, さかな
+    under 肴) keeps the card it is: the page writes the word in kana, its
+    lemma is spelled in kanji the card does not share, and the pool holds
+    a kana-only row read the same way that JMdict marks common (its ⭐).
+    The pool row answers instead."""
+    if m.goshu == "外" or any(is_kanji(c) for c in m.surface):
+        return False
+    card = set(entry.get("kanji") or "")
+    lemma = {c for c in m.lemma if is_kanji(c)}
+    if not card or not lemma or lemma & card:
+        return False
+    return _common_kana_row(morphology.kata_to_hira(m.lemma_reading or ""))
+
+
+@lru_cache(maxsize=4096)
+def _common_kana_row(reading: str) -> bool:
+    if not reading or not jmdict_db.get_by_key("", reading):
+        return False
+    senses = jmdict_db.get_senses("", reading) or []
+    return any("⭐" in (sense.get("term_tags") or []) for sense in senses)
 
 
 _VOICED = str.maketrans("かきくけこさしすせそたちつてとはひふへほ", "がぎぐげござじずぜぞだぢづでどばびぶべぼ")
