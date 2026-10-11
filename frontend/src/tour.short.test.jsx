@@ -102,6 +102,17 @@ describe('the tour on the short desk', () => {
     within(gate())
     key('Enter')
     await settle()
+    // The scene first (plan 194): its gate in the window too.
+    expect(stop()).toBe('scene')
+    within(gate())
+    key('Enter')
+    await settle()
+    key(String(KA.scene.ask.choices.findIndex(c => c.correct) + 1))
+    await settle()
+    key('Enter')
+    await settle()
+    key('Enter')
+    await settle()
     // A stop per notion (plan 189): the last one checked leaves the
     // plate whole.
     for (const [i, twist] of KA.twists.entries()) {
@@ -123,7 +134,7 @@ describe('the tour on the short desk', () => {
 
     key('Enter')
     await settle()
-    expect(stop()).toBe('scene')
+    expect(stop()).toBe('quiz')
     within(gate())
   }, 20000)
 })

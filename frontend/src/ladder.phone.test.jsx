@@ -5,12 +5,12 @@ import { LangProvider } from './LangContext'
 import ladder from './testing/grammarLadder.json'
 import './index.css'
 
-// ── 梯子 on a phone, in the day's queue (plan 187e) ─────────────
-// A grammar card on the ladder comes in the exercise its rung asks: the
-// strip over it names the rung, the build's pieces and gaps stand inside
-// a 390px screen and are a thumb's targets, the write's field and Check
-// fit beside each other, and the run's own bar rates the card under the
-// ladder's key once it is answered.
+// ── 梯子 on a phone, in the day's queue (plans 187e, 194) ────────
+// A grammar card on the ladder comes in the exercise its step asks: the
+// point's line over the plate, the plate inside a 390px screen, Choisir's
+// platforms and Construire's ticket a thumb's targets, the write's field
+// and Check beside each other, and the run's own bar rates the card under
+// the ladder's key once it is answered.
 
 const apiJson = vi.fn()
 vi.mock('./lib/api', () => ({
@@ -53,6 +53,7 @@ async function mount(cards) {
       return { cards: batch === 1 ? cards : [] }
     }
     if (url === '/api/composition/check') return { found: true, japanese: null }
+    if (String(url).startsWith('/api/grammar/build/check')) return ladder.checks.right
     return {}
   })
   return render(
@@ -91,21 +92,20 @@ describe('the ladder in the day’s queue, on a phone', () => {
     const screen = await mount([card(ladder.build)])
     await settle()
     const root = screen.container
-    expect(root.querySelector('.lad-strip__rung--here').textContent).toBe('Build')
+    expect(root.querySelector('.gl-line').getAttribute('aria-label')).toBe('This point: Build, step 2 of 4')
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
-    for (const el of root.querySelectorAll('.bld-piece, .bld-slot, .lad-strip')) inside(el)
-    for (const el of root.querySelectorAll('.bld-piece, .bld-slot')) {
+    for (const el of root.querySelectorAll('.gl-line, .gl-plate, .gl-band, .gl-ticket')) inside(el)
+    for (const el of root.querySelectorAll('.gl-ticket__in, .gl-ticket__go')) {
       expect(el.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     }
     // No rating before the answer: the bar stands idle.
     expect(root.querySelector('.rating-bar').getAttribute('aria-hidden')).toBe('true')
 
-    const B = ladder.build.build
-    for (const id of B.answer) {
-      root.querySelector(`[data-piece="${id}"]`).click()
-      await settle(120)
-    }
-    expect(root.querySelector('.bld-said--ok')).toBeTruthy()
+    await screen.getByLabelText('Your answer').fill(ladder.checks.typed.right)
+    await settle(120)
+    root.querySelector('.gl-ticket__go').click()
+    await settle()
+    expect(root.querySelector('.gl-said--ok')).toBeTruthy()
     expect(root.querySelector('.rating-bar').getAttribute('aria-hidden')).toBe('false')
     root.querySelector('.rating-bar button').click()
     await settle()
@@ -114,11 +114,22 @@ describe('the ladder in the day’s queue, on a phone', () => {
     expect(sent[2].card_id).toBe(ladder.build.card_id)
   }, 20000)
 
+  it('chooses inside the screen, the platforms a thumb’s targets', async () => {
+    const screen = await mount([card(ladder.choose)])
+    await settle()
+    const root = screen.container
+    expect(root.querySelector('.gl-line').getAttribute('aria-label')).toBe('This point: Choose, step 2 of 3')
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    const plats = root.querySelectorAll('.mcq-list--plats .mcq-row')
+    expect(plats.length).toBeGreaterThanOrEqual(2)
+    for (const el of [...plats, root.querySelector('.gl-plate')]) inside(el)
+    for (const el of plats) expect(el.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+  }, 20000)
+
   it('writes inside the screen', async () => {
     const screen = await mount([card(ladder.write)])
     await settle()
     const root = screen.container
-    expect(root.querySelector('.lad-strip__rung--here').textContent).toBe('Write')
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
     for (const el of root.querySelectorAll('.wrt-form .field, .wrt-form button, .wrt-word')) inside(el)
     expect(root.querySelector('.wrt-form button').getBoundingClientRect().height).toBeGreaterThanOrEqual(44)

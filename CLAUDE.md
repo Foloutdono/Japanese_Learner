@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **194**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **195**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -66,6 +66,12 @@ runtime purpose.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
+- **The grammar ladder walks its steps in its own row.** A
+  `grammar.ladder` card's step (Choisir ×3, Construire ×4, mastered, the
+  relapse) is read from its `card_modes` fields by `srs/ladder.py`, which
+  sets them so `srs._progress` and the stage read the walk unchanged, and
+  which both the review and its forecast run through. Never store the
+  step beside the row; a row written before plan 194 reads onto the walk.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both
   make a studied day. A bonus (`day_clear`) never does.
@@ -263,7 +269,8 @@ grammar mode and folds the old `grammar.flashcard.f2b` row (Today's main
 lane before it) into it. Until it runs, Today deals already-studied points
 as new on the ladder. **After any change to `content/grammar/*.json`, run
 `python -m scripts.build_ladder_flags`** too: `content/grammar/ladder.json`
-writes down which points the build and write rungs can be asked on, and
+writes down which points Construire (`grammar.build`, typed since plan 194)
+and write can be asked on, and
 `tests/test_grammar_ladder.py` fails while it disagrees.
 
 The fourth reads `datas/vocab/pool_moves.json`, which

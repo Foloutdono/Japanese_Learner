@@ -93,7 +93,7 @@ export function normalizeCard(card) {
 /** Everything the renderers below derive from the card's own mode. */
 export function cardShape(card) {
   // A ladder card (plan 187e) is filed under the ladder and drawn as the
-  // exercise its rung asks, which it names.
+  // exercise its step asks, which it names.
   const mode = card?.exercise ?? card?.mode
   const spec = STUDY_MODES[mode]
   return {
@@ -111,12 +111,12 @@ export function cardShape(card) {
     isWordReading: spec?.base === 'word_reading',
     isBuild: spec?.renderer === RENDER.BUILD,
     isWrite: spec?.renderer === RENDER.WRITE,
-    // On the ladder: where the card stands, 0 to 3 (null off it), and the
-    // rung of the exercise asked, which falls below it where the point
-    // cannot be asked on its own (plan 190: a particle with no sentence
-    // to blank is the flashcard until it can be written).
-    rung: card?.mode === 'grammar.ladder' ? (card?.rung ?? 0) : null,
-    asked: card?.mode === 'grammar.ladder' ? (card?.asked ?? card?.rung ?? 0) : null,
+    // On the ladder (plan 194): where the point stands on its walk
+    // (srs/ladder.py's position: group, at, of, relapse; null off it),
+    // and the kind of step the exercise asked stands for, which differs
+    // where the point cannot be asked on its own step.
+    step: card?.mode === 'grammar.ladder' ? (card?.step ?? null) : null,
+    asked: card?.mode === 'grammar.ladder' ? (card?.asked ?? null) : null,
   }
 }
 

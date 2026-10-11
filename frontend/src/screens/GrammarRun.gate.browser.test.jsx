@@ -184,9 +184,12 @@ describe('the contrast drill', () => {
     const screen = await mount('grammar.contrast', [card])
     await settle(300)
     const stage = screen.container.querySelector('main.stage')
-    expect(stage.querySelector('.gl-blank').textContent).toBe('＿＿＿')
-    expect(stage.querySelector('.dict-ex__tr')).toBeNull()
+    // On the plate (plan 194): the hole, the translation under the sentence.
+    expect(stage.querySelector('.gl-plate .gl-gap')).toBeTruthy()
+    expect(stage.querySelector('.gl-plate__tr').textContent).toBe('Please write your name here.')
     expect(stage.querySelector('.study-assist')).toBeNull()
+    // The forms as numbered platforms.
+    expect(stage.querySelector('.mcq-list--plats')).toBeTruthy()
     const rows = [...stage.querySelectorAll('.mcq-grid button, .mcq-row')]
     expect(rows.length).toBeGreaterThanOrEqual(4)
     expect(stage.querySelector('.rating-bar.rating-bar--active, .rating-bar--active')).toBeNull()
@@ -194,8 +197,7 @@ describe('the contrast drill', () => {
     const right = rows.find(r => r.textContent.includes('〜てください') && !r.textContent.includes('ない'))
     right.click()
     await settle()
-    expect(stage.querySelector('.gl-blank--revealed').textContent).toBe('〜てください')
-    expect(stage.querySelector('.dict-ex__tr').textContent).toBe('Please write your name here.')
+    expect(stage.querySelector('.gl-gap--done .gl-lit').textContent).toBe('てください')
     expect(stage.querySelector('.grammar-answer')).toBeTruthy()
     expect(stage.querySelector('.rating-bar')).toBeTruthy()
   })

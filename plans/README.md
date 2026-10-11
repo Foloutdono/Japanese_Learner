@@ -7219,3 +7219,32 @@ The owner, after plan 192: "Fix the bugs" -- the list 192 left, each reproduced 
 | 193b | **The lookups and readings**: まま no card read まま -- a native word in hiragana takes no katakana card (`resolve_kana`: ママ), and a kana word whose UniDic lemma is spelled in kanji the card does not share is JMdict's common kana word where the pool holds one (`_kana_word_instead`: 間々 "occasionally"; かさ, さかな and かえって keep their cards, the pool holding no common kana word read so); 侭 is grammar to the vocab audit (`IGNORED_LEMMAS`). The deck: すぐ/すぐに (the N1 直ぐ folded into the N5 card, with its senses), ゆっくり/ゆっくりと (the N3 card folded), いい/よい (the N1 良い and 好い, each spelling read either way through `FOLDED_ONLY`, which now merges with the folds instead of replacing them), 赤ちゃん at N4 and 何も at N3 (the kana card taking the kanji the level teaches, the N1 card folded), 世論 read よろん/せろん (pool row 52098 pruned, `pool_moves.json`); snapshot, frequency order and placement lists rebuilt. The vocab gate (`difficulty.vocab_over_level`): a question word and も／か (`_PARTICLE_TAILS`), お／ご on a verb's stem (お使いください), the わ-row's stem (使い → 使う). 〜不足 after a noun read ぶそく (`reading_context`). `analysis.LOCAL_REV` 13. Tests: `test_lookup_precision.py`'s `WhatTheBankMetTests` and an invariant over every taught sentence, `test_reading_sentences.py`'s gate tests, `test_furigana_context.py`'s 不足 | DONE |
 
 After the deploy: `python -m scripts.migrate_vocab_ids --yes` (eleven ids moved) and `python -m scripts.migrate_pool_cards --yes` (世論).
+
+## Plan 194 — 文法の道, the grammar rework (2026-10-11)
+
+The owner: the ladder the default; the tutorial once per point, not per
+mode; "build it" renamed and made fill-the-gap typing with the
+translation given; the tutorial rethought (analyse, guess, the rule, in
+context, « C'est pas tout ! » a usage at a time with two choices and
+translations, a quiz of seven or eight with traps, the results with the
+point's sheet); the walk Choisir ×3, Construire ×4, mastered (the
+flashcard and Construire in turn), a quicker relapse (one of each); every
+point every mode; the screens redrawn for clarity, light mode first.
+Three directions were drawn on the canvas "Tsuji — grammar rework"
+(https://claude.ai/artifact/LiXAf4GYe23568VhBoDNgu); the owner picked B's
+plate with A's underline and B's hole, the band at the plate's foot, the
+translation under the sentence, no Japanese in a title, and the line and
+the desk redrawn (board "Retenu").
+
+| Phase | What | Status |
+|---|---|---|
+| 194a | **Content**: the 1,392 twists, N5–N1, each a `tr` (en, fr) and a `kind` (usage / trap), the confusion the two-choice stop asks against moved second; `grammar_check` holds both; `ladder.json` rebuilt | DONE (2026-10-11) |
+| 194b | **Backend**: `srs/ladder.py`, the walk in the card's own row (no migration, the forecast through it); Construire typed (`grammar_ladder.build_payload` / `check_build`, `POST /api/grammar/build/check`, 539 of 545 points, two gaps for a point in two pieces); Choisir walking its sentences by the review count, each rival's compare line on the payload; `tutorial` on a card (once per point: no `grammar_tours` row, no review on any grammar track); the tour's two-choice usages and closing quiz (`_quiz`: gap, which, usage), its score on `grammar_tours` (`quiz_right`, `quiz_total`), `TOUR_REV` 3. Tests: `test_grammar_ladder.py` (the walk, the bar, the relapse, the turns, old rows, the forecast, Construire), `test_grammar_tour.py` (the quiz, the usages, the tutorial once) | DONE (2026-10-11) |
+| 194c | **Frontend**: `components/study/GrammarPlate.jsx` (the plate, the band, the point's line, Choisir, Construire, the desk's `LadderMap` in `CardPanel`), `domain/ladderLine.js`, `MCQGrid`'s `plats`, the tour's new order with « C'est pas tout ! », the quiz and the results (`GrammarTour`, `tourStops`, `TourPanels`), the gate on `tutorial` (`GrammarRun`, `TodayRun`), the level page boarding the ladder, the `gl-*` rules and the desk's in `index.css`, DESIGN.md's tour and ladder. Tests: `GrammarPlate.browser`, the tour's browser/phone/desktop/short, `ladder.phone`, the contrast faces | DONE (2026-10-11) |
+
+Open: the six points no tour can light (〜て（理由）, 〜を（移動）, 〜で（理由）,
+自動詞／他動詞, 使役受身形, 〜み) keep the lesson and have no Construire;
+〜も〜ば〜も (three pieces) has no Construire; 63 points' quizzes run four
+to six questions where their catalogue holds too few contrast sentences
+and rivals' examples.
+

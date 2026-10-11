@@ -304,8 +304,10 @@ export default function TodayRun({ session }) {
   // the lesson is a tap from the card: the corner magnifier opens the
   // point's dictionary entry, lesson and all, after the reveal (see
   // CardPrompt's grammar branch).
-  const gated = Boolean(card && structureKey === 'grammar' && card.stage === 'new'
-    && card.lesson && !card.lesson_seen)
+  // Once per POINT (plan 194): the server says the tutorial is due in
+  // `tutorial`; a card queued before it said nothing, and gates as then.
+  const gated = Boolean(card && structureKey === 'grammar' && card.lesson && !card.lesson_seen
+    && (card.tutorial ?? card.stage === 'new'))
   // The lesson as the gate and the sheet print it: the card's identity
   // over the embedded lesson. The level is the id's (grammar_N5_は).
   const lessonOf = c => c.lesson && ({
@@ -496,7 +498,7 @@ export default function TodayRun({ session }) {
               <CardPrompt
                 card={nc} t={t} session={session}
                 answered={answered} cardNonce={cardNonce}
-                activeHints={activeHints} onFlashcardReveal={reveal}
+                activeHints={activeHints} selected={selected} onFlashcardReveal={reveal}
                 foot={laneFoot(card, t)}
               />
             </CardTransition>
@@ -546,7 +548,7 @@ export default function TodayRun({ session }) {
                 choices={nc.contrast?.choices ?? []}
                 correct={nc.grammar}
                 formatChoice={c => <GrammarChoice text={c} readings={nc.choices_furigana} />}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer} variant="plats"
               />
             )}
 

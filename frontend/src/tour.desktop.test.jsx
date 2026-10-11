@@ -105,7 +105,7 @@ describe('the tour on the desk’s three panels', () => {
     const left = $('.desk-run__left .tour-route')
     expect(left.querySelector('.tour-route__pattern').textContent).toBe('か')
     expect($$('.tour-route__stop').map(s => s.querySelector('.tour-route__name').textContent))
-      .toEqual(['Look', 'Guess', 'Found', ...KA.twists.map(tw => tw.notion), KA.scene.place_caption, 'Terminus'])
+      .toEqual(['Look', 'Guess', 'Found', KA.scene.place_caption, ...KA.twists.map(tw => tw.notion), 'The quiz', 'Results'])
     expect(route('look').getAttribute('aria-current')).toBe('step')
 
     const right = $('.desk-run__side .tour-ledger')
@@ -159,6 +159,17 @@ describe('the tour on the desk’s three panels', () => {
 
     key('Enter')
     await settle()
+    expect(stop()).toBe('scene')
+    expect(route('scene').getAttribute('aria-current')).toBe('step')
+    key('Enter')
+    await settle()
+    key(String(KA.scene.ask.choices.findIndex(c => c.correct) + 1))
+    await settle()
+    key('Enter')
+    await settle()
+    expect(route('scene').querySelector('.tour-route__res--ok')).toBeTruthy()
+    key('Enter')
+    await settle()
     for (const [i, twist] of KA.twists.entries()) {
       expect(stop()).toBe('twist')
       expect(twistAt()).toBe(i)
@@ -177,17 +188,17 @@ describe('the tour on the desk’s three panels', () => {
     // The last twist answered, the neighbour opens too.
     expect(lines().every(l => !l.classList.contains('tour-ledger__line--sealed'))).toBe(true)
 
-    expect(stop()).toBe('scene')
-    expect(route('scene').getAttribute('aria-current')).toBe('step')
-    key('Enter')
-    await settle()
-    key(String(KA.scene.ask.choices.findIndex(c => c.correct) + 1))
-    await settle()
-    key('Enter')
-    await settle()
-    expect(route('scene').querySelector('.tour-route__res--ok')).toBeTruthy()
-    key('Enter')
-    await settle()
+    // The quiz, every question right, its score on the line as it goes.
+    for (const [i, q] of KA.quiz.entries()) {
+      expect(stop()).toBe('quiz')
+      key(String(q.choices.findIndex(c => c.correct) + 1))
+      await settle()
+      key('Enter')
+      await settle()
+      expect(route('quiz').querySelector('.tour-route__res').textContent).toBe(`${i + 1}/${KA.quiz.length}`)
+      key('Enter')
+      await settle()
+    }
 
     expect(stop()).toBe('terminus')
     // The examples open at the terminus.
@@ -197,7 +208,9 @@ describe('the tour on the desk’s three panels', () => {
     key('Enter')
     await settle(400)
     const post = apiJson.mock.calls.find(c => c[0] === '/api/grammar/tour')
-    expect(JSON.parse(post[2].body)).toEqual({ raw_id: 'grammar_N5_か', tries: 1, helped: false })
+    expect(JSON.parse(post[2].body)).toEqual({
+      raw_id: 'grammar_N5_か', tries: 1, helped: false, quiz_right: KA.quiz.length, quiz_total: KA.quiz.length,
+    })
     // Boarded: the card, and the run's own panels back.
     expect($('.tour')).toBeNull()
     expect($('.tour-route')).toBeNull()

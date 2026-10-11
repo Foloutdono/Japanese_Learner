@@ -783,9 +783,9 @@ stage, not a new idiom:
 - **One stop over its drawing**, the question set in the display face
   bold at `--fs-title`, its pattern in the line's ink as Japanese.
 - **The gate button at the foot** (`GateButton`), docked over the run's
-  floor through `--dock-bottom`, the outline until a guess is picked, with
-  a quiet way over it and never under: « Lire la leçon complète » at the
-  terminus, which opens the lesson's sheet.
+  floor through `--dock-bottom`, the outline until a guess is picked. At
+  the results the point's sheet is a row of its own over it (plan 194),
+  which opens the lesson's sheet.
 - **A guess is a tile**: picked, it wears the selection's gold; a wrong
   one is answered at once by the lesson's own line for that rival, in a
   card with the state's ring (`--rating-wrong`) and never a fill; the
@@ -793,21 +793,25 @@ stage, not a new idiom:
   given after two (its head in the selection's ink, because it is given,
   not found).
 - **Where the tour is written** (plan 187c), its stops join before the
-  terminus: **a twist per notion** the point has beyond the meaning the
-  guess asks (plan 189: a second use, a sense, a form, a trap, the
-  rival), then the scene. A twist is its notion as the one caption over
-  the question (with « 2 sur 4 » beside it where there are several), a
-  sentence and three readings, checked once, the right one ringed and a
-  wrong pick crossed, the why said under them. The terminus numbers
-  every twist's why under its notion.
+  results, in the owner's order (plan 194): **the scene** (the point in
+  context), then **« C'est pas tout ! »**, a stop per usage (plan 189: a
+  second use, a sense, a form, a trap -- the trap tagged as one), each
+  the sentence with its translation, the question, two readings (the
+  right one and the confusion its author set beside it), checked once,
+  the why said under them; then **the quiz**, seven or eight questions
+  each with its trap (the gap, the false friend, the meaning), one at a
+  time, « Question 3 sur 8 » over each; then **the results**: the score
+  at display size, every question again with how it went, the point's
+  sheet as a row that opens it, and « Commencer : Choisir 1 » on the gate.
+  The tutorial is due **once per point**, whatever platform first meets
+  it.
   The scene opens on its place as a **station plate**: the name over its
   caption on the 駅名標's white in either theme (the HUD's arrival
   plate's), the line's edge under it at 3px. The lines follow as rows,
   each with who says it. The learner's own lines are named in the
   selection's gold, because they are what the learner will say. Then
   the note, and « À toi de jouer » on the gate. The ask is the cue, the task
-  and three Japanese lines; the reply chosen is ringed in gold at the
-  terminus, as « Ta réplique ».
+  and three Japanese lines.
 - **Every sentence has its voice beside it**: a 44px ring at the row's
   end in the line's ink. It plays from the server, never the device,
   because a scene is two voices: the other person is the dialogue's A,
@@ -822,29 +826,55 @@ essais ») and keeps the tour a tap away in two plain secondary buttons,
 the tour runs again in the lesson's place, its terminus « Retour à la
 leçon », and records nothing (plan 187e).
 
-### The ladder (梯子, plan 187e)
+### The ladder (梯子, plans 187e, 194)
 
-After the tour, a grammar card is one track whose exercise climbs with it:
-recognise, choose, build, write. A ladder card wears **a strip of four
-rungs** over its content, each a 3px bar in the line's pigment, the passed
-ones filled and the one it stands on named in the line's ink, the others
-in the secondary ink. The strip says where the card is; the exercise under
-it is the one that rung asks.
+After the tour, a grammar card walks a fixed line (`srs/ladder.py`):
+**Choisir** three times (now, 10 min, 1 h), **Construire** four times (1,
+2, 4, 8 days), then **mastered** at 21 days, where the flashcard and
+Construire take turns. A miss keeps the step and asks it again with
+another sentence; a miss once mastered is a short relapse, one Choisir
+and one Construire. Drawn as the owner picked it on the canvas "Tsuji —
+grammar rework" (B's plate, A's underline, B's well):
 
-- **Build** (組立) is the sentence with its gaps and a tray of pieces under
-  it. A gap is a control at `--r-card` and 44px, dashed in the secondary
-  ink while empty, the next one to fill dashed in the line's pigment;
-  filled, it is solid on the surface. A piece is a tile like a guess.
-  Checked, a gap is ringed in `--success` or `--rating-wrong`, never filled,
-  and a wrong build prints the sentence with the point lit.
-- **Write** (書く) is the situation at `--fs-lead`, the point in the line's
-  ink, the words to use as small framed chips with their readings, and the
-  field beside its Check. After the check: what was written, the
-  detector's word in the state's ink (nothing where it cannot judge), and
-  one way to say it, lit.
+- **The plate** (`components/study/GrammarPlate.jsx`): the 駅名標's
+  paper in either theme (`--paper`, its inks `--text-on-fill` and
+  `--paper-ink-soft`), the sentence on it, **its translation right under
+  it**, and at its foot **the band** -- the plate's stripe grown to carry
+  the stop behind the card and the next one with its wait (« Choisir 1 ·
+  réussi ◆ Choisir 3 · dans 1 h »), as a station sign names the stations
+  either side. This is the stripe under a plate, not a filled card: it is
+  the one place a line pigment carries text, and only on the plate. A
+  card off the ladder has no stops to name, so its plate keeps the plain
+  5px edge.
+- **The point lit** is underlined (3px, the line's pigment, `.gl-lit`),
+  never boxed; **the hole** is the paper sunk a step with a dashed rule in
+  the line's pigment at its foot, as wide as the kana it holds.
+- **The point's line** over the plate: Choisir's three bars and
+  Construire's four under their names, then the star. The bar asked is
+  taller and ringed in ink (in the miss's ink once missed, « à refaire »);
+  the labels are plain words, **never Japanese** (the owner: the titles'
+  bilingual rule is dropped). The run's own meter stays neutral ink, so
+  the two bars are never confused.
+- **Choisir** offers the forms as **platforms**: a column of rows, the
+  number its own cell in the line's ink (`MCQGrid`'s `plats`). Answered,
+  the hole holds the point, lit; a rival taken is named the trap and
+  answered by the lesson's own line on it.
+- **Construire** gives the translation in bold under the sentence and a
+  ticket under the plate: a pencil, the field (two for a point written in
+  two pieces), Check in the metal. What is typed (kana or rōmaji) shows in
+  the hole as it is typed; the server's verdict draws the correction in
+  the hole, a wrong kana struck in the wrong ink with the right one over
+  it in the success ink, and a ringed note under the plate.
+- **Write** (書く) is a platform of its own: the situation at
+  `--fs-lead`, the point in the line's ink, the words to use as small
+  framed chips with their readings, and the field beside its Check.
 
-Both end on the run's own rating bar. The exercise says what happened,
-never the grade (ADR 0013).
+Every exercise ends on the run's own rating bar. The exercise says what
+happened, never the grade (ADR 0013). On the desk the plate takes the
+stage's width, its sentence a step up, the platforms two across, and the
+card panel at the left shows **the walk upright** (`LadderMap`): every
+stop on one rail in the line's pigment, done, the one in hand ringed in
+ink on a wash, each stop ahead with the wait before it.
 
 On the desk (plan 187f, the owner's pick F) the tour stands on the runs'
 three panels. The stop is the middle, with no track of its own: its gate

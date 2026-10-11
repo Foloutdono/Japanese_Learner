@@ -283,8 +283,8 @@ describe('the contrast drill’s answer', () => {
       },
     })
     const before = await render(<CardPrompt card={contrast} t={t} session={{}} answered={false} />)
-    expect(before.container.querySelector('.gl-blank rt')).toBeNull()
+    expect(before.container.querySelector('.gl-gap rt')).toBeNull()
     const after = await render(<CardPrompt card={contrast} t={t} session={{}} answered />)
-    expect(after.container.querySelector('.gl-blank--revealed rt').textContent).toBe('なか')
+    expect(after.container.querySelector('.gl-gap--done rt').textContent).toBe('なか')
   })
 })

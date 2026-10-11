@@ -1,10 +1,11 @@
-import { GrammarBuild, GrammarWrite, LadderStrip } from './GrammarWork'
+import { GrammarWrite } from './GrammarWork'
+import { GrammarChoose, GrammarConstruire, PointLine } from './GrammarPlate'
 import {
   InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
 } from './QuizComponents'
 import { FuriganaWord } from './Readings'
 import {
-  GrammarRule, GrammarStructure, GrammarAnswer, GrammarFillSentence, GrammarContrastSentence,
+  GrammarRule, GrammarStructure, GrammarAnswer, GrammarFillSentence,
 } from './GrammarPieces'
 import { RadicalAnswer } from './RadicalPieces'
 import PromptCard from './PromptCard'
@@ -35,6 +36,9 @@ export default function CardPrompt({
   cardNonce,
   activeHints = [],
   onFlashcardReveal,
+  // The choice taken on a contrast card, so Choisir can say why a rival
+  // was the trap (plan 194).
+  selected = null,
   // The card's footer strip — what this card is, which way it is
   // being studied. The section screens build it from their own
   // selection; the daily queue and a deck session build it per card.
@@ -43,7 +47,7 @@ export default function CardPrompt({
   if (!card) return null
 
   const c = card
-  const { structureKey, isF2B, renderer, isFill, isContrast, isRadical, isWordReading, isBuild, isWrite, rung, asked } = cardShape(c)
+  const { structureKey, isF2B, renderer, isFill, isContrast, isRadical, isWordReading, isBuild, isWrite, step } = cardShape(c)
   const resetKey = `${c.card_id}:${cardNonce}`
 
   const cardHints = c.hints ?? {}
@@ -307,9 +311,9 @@ export default function CardPrompt({
     const lesson = c.source === 'custom' ? writtenLesson(c) : null
     return (
       <PromptCard className="grammar-prompt" foot={foot}>
-        {/* A ladder card (plan 187e) shows the rung it stands on and
-            names the exercise it is asked (plan 190). */}
-        {rung != null && <LadderStrip rung={rung} asked={asked} />}
+        {/* A ladder card shows the point's line (plan 194); Choisir and
+            Construire draw it over their own plate. */}
+        {step && !isContrast && !isBuild && <PointLine card={c} t={t} />}
         {/* Every mode here is the same card with a different front: a
             rule, a meaning, or a sentence. The flip is the reveal in
             all three, and switching the choices on replaces the flip
@@ -320,7 +324,7 @@ export default function CardPrompt({
         {isBuild || isWrite ? (
           <>
             {isBuild
-              ? <GrammarBuild key={resetKey} card={c} answered={answered} onDone={onFlashcardReveal} />
+              ? <GrammarConstruire key={resetKey} card={c} answered={answered} onDone={onFlashcardReveal} session={session} t={t} />
               : <GrammarWrite key={resetKey} card={c} answered={answered} onDone={onFlashcardReveal} session={session} />}
             {answered && <GrammarAnswer card={c} size={36} divided />}
             <RevealActions
@@ -329,7 +333,7 @@ export default function CardPrompt({
           </>
         ) : isContrast ? (
           <>
-            <GrammarContrastSentence card={c} revealed={answered} t={t} />
+            <GrammarChoose card={c} revealed={answered} selected={selected} t={t} />
             {answered && <GrammarAnswer card={c} size={36} divided />}
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}

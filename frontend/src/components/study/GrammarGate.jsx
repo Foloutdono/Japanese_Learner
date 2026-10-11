@@ -23,11 +23,23 @@ export function GrammarGate({ point, session, onCompare, onBoard, onLesson, onVi
     const board = result => {
       apiJson('/api/grammar/tour', session, {
         method: 'POST',
-        body: JSON.stringify({ raw_id: point.raw_id, tries: result.tries, helped: result.helped }),
+        body: JSON.stringify({
+          raw_id: point.raw_id, tries: result.tries, helped: result.helped,
+          quiz_right: result.quizRight ?? null, quiz_total: result.quizTotal ?? null,
+        }),
       }).catch(() => {})
       onBoard?.()
     }
     return <GrammarTour point={point} onBoard={board} onLesson={onLesson} desk={desk} onView={onView} />
   }
-  return <GrammarLesson point={point} variant="gate" onCompare={onCompare} onBoard={onBoard} />
+  // A point no tour can be drawn on is met by its lesson; that is its
+  // tutorial, recorded so that it is due once per point (plan 194).
+  const boardLesson = () => {
+    apiJson('/api/grammar/tour', session, {
+      method: 'POST',
+      body: JSON.stringify({ raw_id: point.raw_id, tries: 0, helped: false }),
+    }).catch(() => {})
+    onBoard?.()
+  }
+  return <GrammarLesson point={point} variant="gate" onCompare={onCompare} onBoard={boardLesson} />
 }

@@ -326,7 +326,7 @@ export default function StudyRun({ session }) {
               <CardPrompt
                 card={nc} t={t} session={session}
                 answered={answered} cardNonce={cardNonce}
-                activeHints={activeHints} onFlashcardReveal={onFlashcardReveal}
+                activeHints={activeHints} selected={selected} onFlashcardReveal={onFlashcardReveal}
                 foot={cardFoot}
               />
             </CardTransition>
@@ -374,7 +374,7 @@ export default function StudyRun({ session }) {
                 choices={nc.contrast?.choices ?? []}
                 correct={nc.grammar}
                 formatChoice={c => <GrammarChoice text={c} readings={nc.choices_furigana} />}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer} variant="plats"
               />
             )}
 

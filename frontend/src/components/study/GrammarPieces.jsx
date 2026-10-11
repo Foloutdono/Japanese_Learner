@@ -1,7 +1,6 @@
 import { MeaningDisplay } from './QuizComponents'
 import { FuriganaParts } from './Readings'
 import { joinRuns } from '../../domain/rubyRuns'
-import { ExampleSentence } from '../dictionary/ExampleSentence'
 
 // ── Shared grammar-card pieces ──────────────────────────────
 // Used by GrammarScreen (a level/tier session) AND StudyScreen (a
@@ -121,23 +120,3 @@ export function GrammarFillSentence({ card, echo = false, revealed = false }) {
   )
 }
 
-// ── contrast's sentence (plan 087) ───────────────────────────
-// The pattern blanked out of one of its own sentences; the rivals are
-// the choices under the card. Until the answer is out the gap stays a
-// gap and the translation stays hidden, for the reason fill_in hides
-// its own; once it is, the gap prints the pattern back in the line's
-// ink and the translation under it.
-export function GrammarContrastSentence({ card, revealed = false, t }) {
-  const c = card.contrast
-  if (!c?.jp) return null
-  // The answer printed back into the gap carries the rule's furigana.
-  const answer = <GrammarPattern text={c.answer ?? card.grammar} parts={card.grammar_furigana} />
-  const segments = (c.furigana?.length ? c.furigana : [{ text: c.jp }]).map(seg => (
-    seg.blank ? { ...seg, answer } : seg
-  ))
-  return (
-    <div className="grammar-fill-sentence grammar-contrast">
-      <ExampleSentence ex={{ jp: c.jp, tr: c.tr, segments }} showTr={revealed} revealed={revealed} blankLabel={t?.glBlank} />
-    </div>
-  )
-}

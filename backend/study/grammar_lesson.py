@@ -127,4 +127,10 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     choices.append(pattern)
     rng.shuffle(choices)
 
-    return {**blanked_payload(example, pattern, lang, level), "choices": choices, "answer": pattern}
+    # What each named rival is not (plan 194): the lesson's own line on it,
+    # said when that rival is the choice taken -- the trap explained.
+    why = {
+        r["pattern"]: localise({"en": r["en"], "fr": r["fr"]}, lang)
+        for r in entry.get("compare", []) if r["pattern"] in choices
+    }
+    return {**blanked_payload(example, pattern, lang, level), "choices": choices, "answer": pattern, "why": why}

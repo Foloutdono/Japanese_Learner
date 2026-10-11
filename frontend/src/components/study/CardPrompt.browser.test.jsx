@@ -76,8 +76,9 @@ describe('the study card specimen scale', () => {
 
 // ── The contrast drill's face (plan 087) ──────────────────────
 // A blanked sentence and no flip: the rivals under the card are the
-// exercise, and the reveal — the pattern back in its gap, the
-// translation under it — waits on a pick.
+// exercise. On the plate since plan 194: the translation under the
+// sentence from the start (the owner's canvas), and the reveal -- the
+// point back in its hole, lit -- waits on a pick.
 describe('the grammar contrast face', () => {
   const contrastCard = {
     card_id: 'grammar_N5_〜てください', source: 'builtin_grammar', mode: 'grammar.contrast',
@@ -90,12 +91,12 @@ describe('the grammar contrast face', () => {
   }
   it('shows the gap and no flip until answered, then the answer in the gap', async () => {
     const screen = await render(<CardPrompt card={contrastCard} t={t} session={{}} answered={false} />)
-    expect(screen.container.querySelector('.gl-blank').textContent).toBe('＿＿＿')
+    expect(screen.container.querySelector('.gl-plate .gl-gap')).toBeTruthy()
+    expect(screen.container.querySelector('.gl-gap--done')).toBeNull()
     expect(screen.container.querySelector('.flashcard, .flip-hint')).toBeNull()
-    expect(screen.container.querySelector('.dict-ex__tr')).toBeNull()
+    expect(screen.container.querySelector('.gl-plate__tr').textContent).toBe('Please write your name here.')
     const done = await render(<CardPrompt card={contrastCard} t={t} session={{}} answered />)
-    expect(done.container.querySelector('.gl-blank--revealed').textContent).toBe('〜てください')
-    expect(done.container.querySelector('.dict-ex__tr').textContent).toBe('Please write your name here.')
+    expect(done.container.querySelector('.gl-gap--done .gl-lit').textContent).toBe('てください')
     expect(done.container.querySelector('.grammar-answer')).toBeTruthy()
   })
 })

@@ -7,7 +7,8 @@ import { CheckIcon, SpeakerIcon } from '../ui/Icons'
 import { ExampleSentence } from '../dictionary/ExampleSentence'
 import { LessonInline } from './GrammarLesson'
 import { FuriganaParts } from './Readings'
-import { stopKind, stopsOf, twistIndex, twistsOf } from '../../domain/tourStops'
+import { quizScore, stopKind, stopsOf, twistIndex, twistsOf } from '../../domain/tourStops'
+import { bare } from '../../domain/ladderLine'
 import { PICK_KEY_DIGIT } from '../../domain/choiceKeys'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { composing, pressedByPointer, trackPresses } from '../../lib/keyGuards'
@@ -52,6 +53,8 @@ function Speak({ text, who = 'reader', onSpeak }) {
 /** Choices that are checked once: the pick in gold, then the right one
     ringed and a wrong pick crossed, the why said under them. */
 function Choices({ items, pick, done, onPick, label, ja = false }) {
+  const { t } = useLang()
+  const trapLabel = t.tourTrap
   return (
     <div className="tour-guesses" role="radiogroup" aria-label={label}>
       {items.map((c, i) => {
@@ -73,6 +76,7 @@ function Choices({ items, pick, done, onPick, label, ja = false }) {
             {ja
               ? <span className="tour-guess__text tour-guess__text--ja" lang="ja">{c.jp}</span>
               : <span className="tour-guess__text">{c.text}</span>}
+            {done && c.trap && <span className="tour-trap">{trapLabel}</span>}
             {(ok || no) && <Mark kind={ok ? 'ok' : 'no'} />}
           </button>
         )
@@ -234,22 +238,25 @@ function Found({ tour, point, misses, helped }) {
   )
 }
 
+/** « C'est pas tout ! » (plan 194): one usage at a time -- the sentence
+    and its translation, two readings, the why once answered. A trap (the
+    rival set against the point) says so beside its notion. */
 function Twist({ twist, n, total, pick, done, onPick }) {
   const { t } = useLang()
   const right = twist.choices.find(c => c.correct)
   const picked = pick != null ? twist.choices[pick] : null
   return (
     <>
-      {twist.notion && (
-        <p className="tour__notion">
-          <span className="tour__notion-name">{twist.notion}</span>
-          {total > 1 && <span className="tour__notion-count">{t.tourNotionCount(n + 1, total)}</span>}
-        </p>
-      )}
+      <p className="tour__notion">
+        <span className="tour__notion-head">{t.tourUsageHead}</span>
+        {twist.notion && <span className="tour__notion-name">{twist.notion}</span>}
+        {twist.kind === 'trap' && <span className="tour-trap">{t.tourTrap}</span>}
+        {total > 1 && <span className="tour__notion-count">{t.tourNotionCount(n + 1, total)}</span>}
+      </p>
       <h2 className="tour__q" tabIndex={-1}>{twist.ask}</h2>
       <div className="tour-card tour-twist">
         <div className="tour-ex">
-          <ExampleSentence ex={{ jp: twist.jp, segments: twist.furigana }} showTr={false} />
+          <ExampleSentence ex={{ jp: twist.jp, tr: twist.tr, segments: twist.furigana }} showTr={Boolean(twist.tr)} />
           <Speak text={twist.jp} />
         </div>
       </div>
@@ -342,56 +349,103 @@ function Scene({ scene, phase, pick, done, onPick }) {
   )
 }
 
-function Terminus({ tour, point, desk }) {
+/** The quiz (plan 194): seven or eight questions, one at a time, each
+    with its trap -- the gap (the point or a rival in a sentence), the
+    false friend (which sentence uses it), the meaning (a usage with all
+    three of its readings) -- checked once, the why said under it. */
+function QuizQuestion({ q, n, total, point, pick, done, onPick }) {
   const { t } = useLang()
-  const first = tour.look[0]
-  const twists = twistsOf(tour)
+  const picked = pick != null ? q.choices[pick] : null
+  const right = q.choices.find(c => c.correct)
+  let ask
+  let body = null
+  let items = q.choices
+  let ja = false
+  if (q.kind === 'gap') {
+    ask = t.tourQuizGap
+    const answer = bare(right.pattern)
+    const segments = q.furigana.map(seg => (seg.blank ? { ...seg, answer } : seg))
+    body = (
+      <div className="tour-card tour-twist">
+        <ExampleSentence ex={{ jp: q.jp, tr: q.tr, segments }} showTr revealed={done} blankLabel={t.glBlank} />
+      </div>
+    )
+    items = q.choices.map(c => ({ ...c, jp: bare(c.pattern) }))
+    ja = true
+  } else if (q.kind === 'which') {
+    ask = t.tourQuizWhich(point.pattern)
+    ja = true
+  } else {
+    ask = q.ask
+    body = (
+      <div className="tour-card tour-twist">
+        <div className="tour-ex">
+          <ExampleSentence ex={{ jp: q.jp, tr: q.tr, segments: q.furigana }} showTr={Boolean(q.tr)} />
+          <Speak text={q.jp} />
+        </div>
+      </div>
+    )
+  }
+  return (
+    <>
+      <p className="tour__notion">
+        <span className="tour__notion-head">{t.tourQuizKinds[q.kind]}</span>
+        {q.notion && <span className="tour__notion-name">{q.notion}</span>}
+        <span className="tour__notion-count">{t.tourQuizCount(n + 1, total)}</span>
+      </p>
+      {q.kind === 'which'
+        ? <Ask text={ask} pattern={point.pattern} />
+        : <h2 className="tour__q" tabIndex={-1}>{ask}</h2>}
+      {body}
+      <Choices items={items} pick={pick} done={done} onPick={onPick} label={ask} ja={ja} />
+      {done && (
+        <Said kind={picked?.correct ? 'ok' : 'no'} head={picked?.correct ? t.tourRight : t.tourNotQuite}>
+          {q.why && <p className="tour-said__line"><LessonInline text={q.why} /></p>}
+        </Said>
+      )}
+    </>
+  )
+}
+
+/** The results (plan 194): the score, each question again with how it
+    went, and the point's sheet; the gate starts Choisir 1. */
+function Results({ tour, point, picks, onLesson, replay }) {
+  const { t } = useLang()
+  const quiz = tour.quiz ?? []
+  const { right, total } = quizScore(tour, picks)
   return (
     <>
       <div className="tour-head">
         <Pattern point={point} />
-        <h2 className="tour__q tour__q--name" tabIndex={-1}>{t.tourTerminus}</h2>
+        <h2 className="tour__q tour__q--name" tabIndex={-1}>{t.tourResults}</h2>
       </div>
-      {/* On the desk the found lines are the plate's, beside the stop
-          (TourPanels.jsx): the stop holds the point's first sentence
-          whole instead, and the learner's own line. */}
-      {desk && first && (
-        <div className="tour-card tour-terminus__ex">
-          <ExampleSentence ex={{ ...first, segments: first.furigana }} />
-        </div>
+      {total > 0 && (
+        <p className="tour-score" aria-label={t.tourScore(right, total)}>
+          <span className="tour-score__right">{right}</span>
+          <span className="tour-score__of">/ {total}</span>
+        </p>
       )}
-      {!desk && <ol className="tour-card tour-found">
-        <li className="tour-found__line">
-          <span className="tour-found__n">1</span>
-          <div className="tour-found__body">
-            <p className="tour-found__say"><LessonInline text={tour.rule ?? point.meaning} /></p>
-            {first && <ExampleSentence ex={{ ...first, segments: first.furigana }} showTr={false} />}
-          </div>
-        </li>
-        {twists.map((twist, i) => (
-          <li key={i} className="tour-found__line">
-            <span className="tour-found__n">{i + 2}</span>
-            <div className="tour-found__body">
-              {twist.notion && <p className="tour-found__notion">{twist.notion}</p>}
-              <p className="tour-found__say"><LessonInline text={twist.why} /></p>
-            </div>
-          </li>
-        ))}
-        {tour.rival && (
-          <li className="tour-found__line">
-            <span className="tour-found__n">{twists.length + 2}</span>
-            <div className="tour-found__body">
-              <p className="tour-found__say tour-found__say--rival" lang="ja">{t.tourNotLike(tour.rival.pattern)}</p>
-              <p className="tour-found__line-text"><LessonInline text={tour.rival.text} /></p>
-            </div>
-          </li>
-        )}
-      </ol>}
-      {tour.scene && (
-        <div className="tour-reply">
-          <span className="tour-reply__who">{t.tourYourLine}</span>
-          <span className="tour-reply__ja" lang="ja">{tour.scene.ask.choices.find(c => c.correct).jp}</span>
-        </div>
+      {total > 0 && (
+        <ol className="tour-card tour-recap">
+          {quiz.map((q, i) => {
+            const ok = picks?.[i] != null && q.choices[picks[i]]?.correct
+            const said = q.kind === 'which' ? q.choices.find(c => c.correct).jp : q.jp
+            return (
+              <li key={i} className={`tour-recap__row tour-recap__row--${ok ? 'ok' : 'no'}`}>
+                <Mark kind={ok ? 'ok' : 'no'} />
+                <span className="tour-recap__kind">{t.tourQuizKinds[q.kind]}</span>
+                <span className="tour-recap__jp" lang="ja">{said}</span>
+              </li>
+            )
+          })}
+        </ol>
+      )}
+      {onLesson && !replay && (
+        <button type="button" className="tour-sheet" onClick={() => { playClick(); onLesson() }} data-action="lesson">
+          <span className="tour-sheet__pattern" lang="ja">{point.pattern}</span>
+          <span className="tour-sheet__name">{t.tourSheet}</span>
+          <span className="tour-sheet__go" aria-hidden="true">→</span>
+        </button>
       )}
     </>
   )
@@ -455,6 +509,10 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
   const twists = twistsOf(tour)
   const [twistPicks, setTwistPicks] = useState(() => twists.map(() => null))
   const [twistsDone, setTwistsDone] = useState(() => twists.map(() => false))
+  const quiz = tour.quiz ?? []
+  const [qi, setQi] = useState(0)
+  const [quizPicks, setQuizPicks] = useState(() => quiz.map(() => null))
+  const [quizDone, setQuizDone] = useState(() => quiz.map(() => false))
   const [phase, setPhase] = useState('watch')
   const [scenePick, setScenePick] = useState(null)
   const [sceneDone, setSceneDone] = useState(false)
@@ -476,17 +534,20 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
     if (!body) return
     body.scrollTop = 0
     body.querySelector('.tour__q')?.focus({ preventScroll: true })
-  }, [at, phase])
+  }, [at, phase, qi])
 
   // What the desk's two panels read (plan 187f): the stop in hand and
   // how each one went so far.
   const twistsRight = twists.map((tw, i) => (twistsDone[i] ? Boolean(tw.choices[twistPicks[i]]?.correct) : null))
   const twistsKey = twistsRight.join(',')
   const sceneRight = sceneDone ? Boolean(tour.scene?.ask.choices[scenePick]?.correct) : null
+  const score = quizScore(tour, quizPicks.map((p, i) => (quizDone[i] ? p : null)))
+  const answeredQuiz = quizDone.filter(Boolean).length
   useEffect(() => {
-    onView?.({ at, misses: wrong.length, helped, twists: twistsRight, scene: sceneRight })
+    onView?.({ at, misses: wrong.length, helped, twists: twistsRight, scene: sceneRight,
+               quiz: quiz.length ? { right: score.right, answered: answeredQuiz, total: quiz.length } : null })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reported on what it says, not on the callback's identity.
-  }, [at, wrong.length, helped, twistsKey, sceneRight])
+  }, [at, wrong.length, helped, twistsKey, sceneRight, score.right, answeredQuiz])
 
   // Nothing goes on talking once the tour has moved on or closed.
   useEffect(() => () => stopSpeaking(), [])
@@ -520,7 +581,7 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
   function board() {
     if (!replay) track('grammar_tour_done', { level, tries: wrong.length, helped, authored: Boolean(twists.length || tour.scene) })
     playUi('click-screen-selection')
-    onBoard?.({ tries: wrong.length, helped })
+    onBoard?.({ tries: wrong.length, helped, quizRight: quiz.length ? score.right : null, quizTotal: quiz.length || null })
   }
 
   let gate
@@ -532,13 +593,16 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
   else if (stop === 'scene' && phase === 'watch') gate = <GateButton label={t.tourYourTurn} onClick={() => { playUi('click-screen-selection'); setPhase('ask') }} data-action="your-turn" />
   else if (stop === 'scene' && !sceneDone) gate = <GateButton label={t.tourCheck} onClick={checkScene} disabled={scenePick == null} data-action="check" />
   else if (stop === 'scene') gate = <GateButton label={t.onbContinue} onClick={() => go(tour.scene.ask.choices[scenePick]?.correct ? 'first' : 'retry')} data-action="continue" />
-  else if (stop === 'terminus') gate = <GateButton label={replay ? t.tourBackToLesson : t.tourBoard} onClick={board} data-action="board" />
+  else if (stop === 'quiz' && !quizDone[qi]) gate = <GateButton label={t.tourCheck} onClick={() => setQuizDone(d => d.map((v, j) => v || j === qi))} disabled={quizPicks[qi] == null} data-action="check" />
+  else if (stop === 'quiz' && qi < quiz.length - 1) gate = <GateButton label={t.onbContinue} onClick={() => { playUi('click-screen-selection'); setQi(i => i + 1) }} data-action="continue" />
+  else if (stop === 'quiz') gate = <GateButton label={t.onbContinue} onClick={() => go(score.right === quiz.length ? 'first' : 'retry')} data-action="continue" />
+  else if (stop === 'terminus') gate = <GateButton label={replay ? t.tourBackToLesson : t.tourStart} onClick={board} data-action="board" />
   else gate = <GateButton label={t.onbContinue} onClick={() => go('first')} data-action="continue" />
 
   return (
     <section ref={rootRef} className={`tour${desk ? ' tour--desk' : ''}`} data-stop={kind} data-twist={ti >= 0 ? ti : undefined} aria-label={t.tourAria(point.pattern)}>
       {!desk && <Track at={at} total={stops.length} />}
-      <div className="tour__body" ref={bodyRef} key={`${stop}:${stop === 'scene' ? phase : ''}`}>
+      <div className="tour__body" ref={bodyRef} key={`${stop}:${stop === 'scene' ? phase : stop === 'quiz' ? qi : ''}`}>
         {stop === 'look' && <Look tour={tour} point={point} />}
         {stop === 'guess' && (
           <Guess tour={tour} point={point} pick={pick} wrong={wrong} given={helped} onPick={setPick} />
@@ -546,14 +610,13 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
         {stop === 'found' && <Found tour={tour} point={point} misses={wrong.length} helped={helped} />}
         {kind === 'twist' && <Twist twist={twist} n={ti} total={twists.length} pick={twistPick} done={twistDone} onPick={setTwistPick} />}
         {stop === 'scene' && <Scene scene={tour.scene} phase={phase} pick={scenePick} done={sceneDone} onPick={setScenePick} />}
-        {stop === 'terminus' && <Terminus tour={tour} point={point} desk={desk} />}
+        {stop === 'quiz' && (
+          <QuizQuestion q={quiz[qi]} n={qi} total={quiz.length} point={point} pick={quizPicks[qi]} done={quizDone[qi]}
+                        onPick={i => setQuizPicks(p => p.map((v, j) => (j === qi ? i : v)))} />
+        )}
+        {stop === 'terminus' && <Results tour={tour} point={point} picks={quizPicks} onLesson={onLesson} replay={replay} />}
       </div>
       <div className="tour__foot">
-        {stop === 'terminus' && onLesson && !replay && (
-          <button type="button" className="brd__link" onClick={() => { playClick(); onLesson() }} data-action="lesson">
-            {t.tourReadLesson}
-          </button>
-        )}
         {gate}
       </div>
     </section>

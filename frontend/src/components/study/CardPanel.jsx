@@ -7,6 +7,7 @@ import { dueFigure, dueText } from '../../domain/forecast'
 import { DeskFigure } from './RunRecords'
 import { useRegisterRunKeys } from '../../stores/runKeys'
 import { STAGES, cardProgress, stripFills } from '../../domain/cardProgress'
+import { LadderMap } from './GrammarPlate'
 
 // ── 机 — the card panel, the second of a run's two left panels (plan 126) ──
 // The run's instrument panel, under the session panel: what the card
@@ -80,7 +81,9 @@ export function CardPanel({ card, remaining = null, keys = 'card' }) {
 
   return (
     <section className="desk-run__panel desk-card" aria-label={t.deskCardPanel}>
-      <StateLine stage={stage} progress={card?.progress} t={t} />
+      {/* A ladder card's state is its walk (plan 194): the point's line,
+          upright, every stop with its wait, in the fare strip's place. */}
+      {card?.step ? <LadderMap card={card} /> : <StateLine stage={stage} progress={card?.progress} t={t} />}
       <div className="desk-verdicts" role="list" aria-label={t.deskCardPanel} data-guide="run.verdicts">
         {verdicts.map(({ q, label, digit }) => {
           const due = preview?.[String(q)]?.due_in

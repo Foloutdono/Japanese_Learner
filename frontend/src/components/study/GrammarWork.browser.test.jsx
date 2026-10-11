@@ -6,13 +6,11 @@ import cards from '../../testing/grammarLadder.json'
 import tours from '../../testing/grammarTour.json'
 import '../../index.css'
 
-// ── 梯子 — the ladder's exercises (plan 187e) ───────────────────
-// The strip names the rung a card stands on; a build drops a picked
-// piece into the first gap and gives a filled gap's piece back, and the
-// last gap filled is the answer, marked right or wrong with the
-// sentence; a write asks composition's check and shows what was said,
-// the detector's word and one way to say it. And the plate's two ghosts
-// run the tour again, from its start or at its scene, recording nothing.
+// ── 書く — write (plan 187e), and the plate's two ghosts ──────────
+// A write asks composition's check and shows what was said, the
+// detector's word and one way to say it. The plate's two ghosts run the
+// tour again, from its start or at its scene, recording nothing. The
+// ladder's own exercises are GrammarPlate.browser.test.jsx's (plan 194).
 // The fixtures are the payloads the backend builds for 〜てください
 // (study/grammar_ladder.py) and か's tour.
 
@@ -25,7 +23,7 @@ vi.mock('../../lib/audio', async (o) => ({
 const apiJson = vi.fn()
 vi.mock('../../lib/api', async (o) => ({ ...(await o()), apiJson: (...a) => apiJson(...a) }))
 
-const { GrammarBuild, GrammarWrite, LadderStrip } = await import('./GrammarWork')
+const { GrammarWrite } = await import('./GrammarWork')
 const { GrammarLesson } = await import('./GrammarLesson')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
@@ -48,82 +46,6 @@ beforeEach(() => {
   localStorage.setItem('lang', 'en')
 })
 afterEach(() => { localStorage.removeItem('lang') })
-
-describe('the ladder', () => {
-  it('names the rung the card stands on', async () => {
-    const screen = await mount(<LadderStrip rung={2} />)
-    const rungs = screen.container.querySelectorAll('.lad-strip__rung')
-    expect([...rungs].map(r => r.textContent)).toEqual(['Recognise', 'Choose', 'Build', 'Write'])
-    expect(rungs[2].getAttribute('aria-current')).toBe('step')
-    expect(screen.container.querySelectorAll('.lad-strip__rung--passed')).toHaveLength(2)
-  })
-
-  it('names the exercise asked where the card falls back below its rung', async () => {
-    // A particle on Choose with no sentence to blank is shown the
-    // flashcard (plan 190): filled to Choose, Recognise named.
-    const screen = await mount(<LadderStrip rung={1} asked={0} />)
-    const rungs = screen.container.querySelectorAll('.lad-strip__rung')
-    expect(rungs[0].getAttribute('aria-current')).toBe('step')
-    expect(rungs[1].getAttribute('aria-current')).toBeNull()
-    expect(screen.container.querySelector('.lad-strip__rung--here').textContent).toBe('Recognise')
-    expect(screen.container.querySelector('.lad-strip__rung--at').textContent).toBe('Choose')
-    expect(screen.container.querySelectorAll('.lad-strip__rung--passed')).toHaveLength(1)
-  })
-})
-
-describe('build', () => {
-  const card = cards.build
-  const B = card.build
-  const piece = (root, id) => root.querySelector(`[data-piece="${id}"]`)
-  const slot = (root, n) => root.querySelector(`[data-slot="${n}"]`)
-
-  it('fills the first gap, gives a piece back, and is right when rebuilt', async () => {
-    const onDone = vi.fn()
-    const screen = await mount(<Run Exercise={GrammarBuild} card={card} onDone={onDone} />)
-    const root = screen.container
-    expect(root.querySelector('.bld-cue__tr').textContent).toBe(B.tr)
-    expect(slot(root, 0).classList.contains('bld-slot--next')).toBe(true)
-
-    piece(root, B.answer[1]).click()
-    await settle()
-    // Into the first gap, whatever it was: taken back, it is free again.
-    expect(slot(root, 0).innerHTML).toBe(piece(root, B.answer[1]).innerHTML)
-    expect(piece(root, B.answer[1]).disabled).toBe(true)
-    slot(root, 0).click()
-    await settle()
-    expect(slot(root, 0).classList.contains('bld-slot--empty')).toBe(true)
-    expect(piece(root, B.answer[1]).disabled).toBe(false)
-
-    piece(root, B.answer[0]).click()
-    await settle()
-    expect(onDone).not.toHaveBeenCalled()
-    piece(root, B.answer[1]).click()
-    await settle()
-    expect(onDone).toHaveBeenCalledTimes(1)
-    expect(root.querySelectorAll('.bld-slot--ok')).toHaveLength(2)
-    expect(root.querySelector('.bld-said--ok .bld-said__head').textContent).toBe('Well built.')
-    // The gaps hold the pieces in the sentence's order.
-    expect([slot(root, 0), slot(root, 1)].map(s => s.innerHTML))
-      .toEqual(B.answer.map(id => piece(root, id).innerHTML))
-  })
-
-  it('marks a wrong piece and shows the sentence', async () => {
-    const onDone = vi.fn()
-    const screen = await mount(<Run Exercise={GrammarBuild} card={card} onDone={onDone} />)
-    const root = screen.container
-    const wrong = B.tray.find(t => !B.answer.includes(t.id)).id
-    piece(root, B.answer[0]).click()
-    await settle()
-    piece(root, wrong).click()
-    await settle()
-    expect(onDone).toHaveBeenCalledTimes(1)
-    expect(slot(root, 1).classList.contains('bld-slot--no')).toBe(true)
-    expect(root.querySelector('.bld-said--no .bld-said__head').textContent).toBe('Not quite. The sentence:')
-    expect(root.querySelector('.bld-said .dict-ex__hl')).toBeTruthy()
-    // Every piece is done with once it is answered.
-    expect([...root.querySelectorAll('.bld-piece')].every(b => b.disabled)).toBe(true)
-  })
-})
 
 describe('write', () => {
   const card = cards.write
@@ -196,6 +118,13 @@ describe('the plate’s two ghosts', () => {
     await settle()
     root.querySelector('.tour__foot .btn-depart').click()
     await settle()
+    // The usages and the quiz follow the scene (plan 194): ride them.
+    for (let n = 0; n < 40 && root.querySelector('.gl-replay .tour').dataset.stop !== 'terminus'; n++) {
+      const gate = root.querySelector('.tour__foot .btn-depart')
+      if (gate.disabled) root.querySelector('.tour__body [data-choice="0"]').click()
+      else gate.click()
+      await settle()
+    }
     expect(root.querySelector('.gl-replay .tour').dataset.stop).toBe('terminus')
     const back = root.querySelector('.tour__foot .btn-depart')
     expect(back.textContent).toContain('Back to the lesson')

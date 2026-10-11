@@ -11,12 +11,13 @@ import {
 import { usePace } from '../components/study/usePace'
 import {
   GrammarRule, GrammarPattern, GrammarStructure, GrammarChoice, GrammarAnswer,
-  GrammarFillSentence, GrammarContrastSentence,
+  GrammarFillSentence,
 } from '../components/study/GrammarPieces'
 import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
-import { GrammarBuild, GrammarWrite, LadderStrip } from '../components/study/GrammarWork'
+import { GrammarWrite } from '../components/study/GrammarWork'
+import { GrammarChoose, GrammarConstruire, PointLine } from '../components/study/GrammarPlate'
 import { cardShape } from '../domain/cardShape'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
@@ -246,8 +247,8 @@ export default function GrammarRun({ session }) {
 
   const currentModeLabel = modeLabel(t, mode)
   // The card's own shape: the run's mode, or on the ladder (plan 187e)
-  // the exercise the card's rung asks.
-  const { isFill, isContrast, isBuild, isWrite, rung } = cardShape(card ?? { mode })
+  // the exercise the card's step asks.
+  const { isFill, isContrast, isBuild, isWrite, step } = cardShape(card ?? { mode })
   // Study.dc.html's footer strip: the exercise in hand.
   const cardFoot = { left: level ? `${level} 文法` : '文法', right: modeLabel(t, card?.exercise ?? mode) }
   // b2f shows the meaning and asks for the rule; f2b is the other way up.
@@ -275,8 +276,11 @@ export default function GrammarRun({ session }) {
     setActiveHints(hs => (hs.includes(key) ? [] : [key]))
   }
 
-  // The gate: a never-met card, its lesson in hand, not yet read.
-  const gated = Boolean(card && card.stage === 'new' && card.lesson && !card.lesson_seen)
+  // The gate: a point whose tutorial is due, its lesson in hand, not yet
+  // read. Once per POINT (plan 194): the server says so in `tutorial`; a
+  // card queued before it said nothing, and is gated as it was then.
+  const gated = Boolean(card && card.lesson && !card.lesson_seen
+    && (card.tutorial ?? card.stage === 'new'))
   // The lesson as the sheet and the gate print it: the card's own
   // identity over the embedded lesson.
   const lessonOf = c => c.lesson && ({
@@ -351,7 +355,9 @@ export default function GrammarRun({ session }) {
               onStampDone={gates.stampDone}
             >
               <PromptCard className="grammar-prompt" foot={cardFoot}>
-                {rung != null && <LadderStrip rung={rung} />}
+                {/* The point's line (plan 194); Choisir and Construire draw
+                    it over their own plate. */}
+                {step && !isContrast && !isBuild && <PointLine card={card} t={t} />}
                 {/* Every mode here is the same card with a different
                     front: a rule, a meaning, or a sentence. The flip is
                     the reveal in all three, and switching the choices on
@@ -363,7 +369,7 @@ export default function GrammarRun({ session }) {
                 {isBuild || isWrite ? (
                   <>
                     {isBuild
-                      ? <GrammarBuild key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} />
+                      ? <GrammarConstruire key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} session={session} />
                       : <GrammarWrite key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} session={session} />}
                     {answered && <GrammarAnswer card={card} size={36} divided />}
                     <RevealActions
@@ -372,7 +378,7 @@ export default function GrammarRun({ session }) {
                   </>
                 ) : isContrast ? (
                   <>
-                    <GrammarContrastSentence card={card} revealed={answered} t={t} />
+                    <GrammarChoose card={card} revealed={answered} selected={selected} t={t} />
                     {answered && <GrammarAnswer card={card} size={36} divided />}
                     <RevealActions
                       t={t} revealed={answered} resetKey={card.card_id}
@@ -454,7 +460,7 @@ export default function GrammarRun({ session }) {
                 choices={card.contrast?.choices ?? []}
                 correct={card.grammar}
                 formatChoice={p => <GrammarChoice text={p} readings={card.choices_furigana} />}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer} />
+                selected={selected} answered={answered} onAnswer={onMCQAnswer} variant="plats" />
             )}
 
             {/* Options: meanings for a flashcard, rules for fill_in. */}

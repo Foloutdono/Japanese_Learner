@@ -124,7 +124,7 @@ export function CharDisplay({ char, variant, size }) {
 // answers it, so it prints the digit the number row types — 1, not 01,
 // as the exam's rows already do — and the button names its shortcut.
 // Only the first four are bound (domain/choiceKeys).
-export function MCQButton({ choice, display, correct, selected, answered, onClick, index, cramped, keyHint = false }) {
+export function MCQButton({ choice, display, correct, selected, answered, onClick, index, cramped, keyHint = false, plain = false }) {
   const isCorrect  = choice === correct
   const isSelected = choice === selected
   // A filler is any choice that isn't the right answer and wasn't the
@@ -150,7 +150,7 @@ export function MCQButton({ choice, display, correct, selected, answered, onClic
       aria-keyshortcuts={keyHint && index < 4 ? String(index + 1) : undefined}
     >
       <span className="mcq-row__accent" aria-hidden="true" />
-      <span className="mcq-row__index">{keyHint ? String(index + 1) : String(index + 1).padStart(2, '0')}</span>
+      <span className="mcq-row__index">{keyHint || plain ? String(index + 1) : String(index + 1).padStart(2, '0')}</span>
       <span className="mcq-row__text">{display ?? choice}</span>
     </button>
   )
@@ -164,7 +164,9 @@ export function MCQButton({ choice, display, correct, selected, answered, onClic
 // options are kanji or romaji pass nothing and are left untouched.
 // Only the rendered text changes; `choices`/`correct` stay raw for
 // keying and grading (see MCQButton).
-export function MCQGrid({ choices, correct, selected, answered, onAnswer, formatChoice }) {
+// `variant="plats"` (plan 194): the grammar plate's forms as numbered
+// platforms, a column of quays under the sign, the number its own cell.
+export function MCQGrid({ choices, correct, selected, answered, onAnswer, formatChoice, variant }) {
   const cramped = useIsCramped()
   const desk = useDesk()
 
@@ -190,7 +192,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer, format
   }, [choices, answered, onAnswer])
 
   return (
-    <div className="mcq-list">
+    <div className={`mcq-list${variant ? ` mcq-list--${variant}` : ''}`}>
       {choices.map((choice, i) => (
         <MCQButton
           key={choice}
@@ -202,6 +204,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer, format
           index={i}
           cramped={cramped}
           keyHint={desk}
+          plain={variant === 'plats'}
           onClick={() => handleAnswer(choice)}
         />
       ))}

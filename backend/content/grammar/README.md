@@ -63,10 +63,13 @@ asks (plan 189), then the scene:
   "twists": [{                                // 1–6, one per notion, in teaching order
     "notion": {"en": "Or, between nouns", "fr": "Ou, entre deux noms"},  // the stop's name, ≤ 40 chars
     "jp": "おちゃかコーヒーを飲みますか。",
+    "tr": {"en": "…", "fr": "…"},             // the sentence translated, shown under it (plan 194)
     "ask": {"en": "…", "fr": "…"},            // the question over it
-    "choices": [{"en": "…", "fr": "…"}, …],   // three readings of it, the RIGHT ONE FIRST (the screen shuffles)
+    "choices": [{"en": "…", "fr": "…"}, …],   // three readings of it, the RIGHT ONE FIRST, then the confusion
+                                              // the two-choice usages stop asks against (plan 194); the quiz asks all three
     "why": {"en": "…", "fr": "…"},            // one line said once it is answered
-    "pair": ["すってください", "すわないでください"]  // optional: two forms drawn side by side
+    "pair": ["すってください", "すわないでください"],  // optional: two forms drawn side by side
+    "kind": "usage"                           // "usage": another use of the point; "trap": a rival set against it
   }, …],
   "scene": {                                  // the point at work, at a station
     "place": "売店",                          // one of grammar_tour.SCENE_PLACES
@@ -133,10 +136,11 @@ found most often:
 ## The ladder's snapshot (plan 187e)
 
 `ladder.json`, beside the five levels, is not an entry file: it writes
-down which points the grammar ladder's two upper rungs can be asked on --
-`build` (a sentence marked `contrast`, the point written there in one
-stretch, a rival whose form can stand as the wrong piece) and `write` (a
-point the detector is trusted on, `grammar_detect.can_find`) -- and
+down which points Construire and write can be asked on -- `build` (since
+plan 194 typed: a sentence of the point, an example, a twist with its
+`tr` or a scene's line, where the point is lit in one stretch or two)
+and `write` (a point the detector is trusted on,
+`grammar_detect.can_find`) -- and
 `blank`, the points the matcher cannot check whose marked sentences the
 detector can blank for the contrast drill (plan 190). Asking takes
 the detector over every example, some twelve seconds, which is the only
