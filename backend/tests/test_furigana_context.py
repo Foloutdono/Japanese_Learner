@@ -163,6 +163,16 @@ class ContextRuleTests(unittest.TestCase):
         self.assertEqual(_read(_tok("実", "じつ"), _particle("の"))[0], "じつ")
         self.assertEqual(_read(_tok("実", "じつ"), _particle("は"))[0], "じつ")
 
+    def test_gimi_a_touch_of(self) -> None:
+        """〜気味 after a noun or a verb's stem is ぎみ; 気味 alone is きみ
+        (plan 191)."""
+        kimi = lambda: _tok("気味", "きみ")
+        self.assertEqual(_read(_tok("風邪", "かぜ"), kimi())[1], "ぎみ")
+        self.assertEqual(_read(_tok("太り", "ふとり", "動詞", "一般", "*", "verb"), kimi())[1], "ぎみ")
+        # 気味が悪い, なんだか気味が悪い: the noun, きみ.
+        self.assertEqual(_read(kimi(), _particle("が"))[0], "きみ")
+        self.assertEqual(_read(_particle("か"), kimi(), _particle("が"))[1], "きみ")
+
     def test_sakari_the_peak(self) -> None:
         """盛り alone is もり to UniDic, a serving; the peak where the
         sentence says so (plan 153)."""
