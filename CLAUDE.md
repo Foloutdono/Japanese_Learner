@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **192**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **194**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -77,6 +77,12 @@ runtime purpose.
   `DELETE /api/account` (`routes/account.py`) in the same change.
 - **One table's self-migration per transaction.** A failing `ALTER` must not
   roll back another table's.
+- **The reading bank is held at its level from both sides.** A row of
+  `content/reading_sentences.py` (which reading and translation share) has
+  nothing above its level and, at N4–N1, two deck words of its own level
+  besides its grammar point, its focus one of them, its point found by the
+  detector and a French translation (`row_problems`). Draft new rows
+  through `python -m scripts.reading_bank_report --check FILE.json`.
 - **A width change is held on both sides.** A desk change keeps the phone's
   DOM unchanged (`src/deskfree.phone.test.jsx`), and the short desk
   (1280×600, the `short` lane) is checked too. A phone bug fixed gets its own
@@ -410,6 +416,18 @@ never a gate, and the audit's to act on:
 cd backend
 python -m scripts.basics_report          # the examples that stray
 python -m scripts.basics_report --json   # the same, as JSON
+```
+
+The reading bank (plan 192) has one too: per level, its rows, the points
+covered and the words and kanji of the level it uses, each row's level
+words and problems, and candidate rows run through every rule with their
+furigana, romaji, detected points and tagged words:
+
+```bash
+cd backend
+python -m scripts.reading_bank_report               # the figures, per level
+python -m scripts.reading_bank_report --rows N2     # each row's level words and problems
+python -m scripts.reading_bank_report --check rows.json  # candidate rows, before they enter the bank
 ```
 
 One more read-only report measures the vocab deck itself (plan 103) —

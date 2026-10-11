@@ -21,6 +21,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from content.kanji_meanings import KANJI_FR
+from content import reading_sentences
 from content.reading_sentences import N5 as READING_N5
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from core.auth import get_user_id, prefixed
@@ -141,8 +142,8 @@ def get_basics_unit(unit_id: str, lang: str = "fr", user_id: str = Depends(get_u
     """A unit's station: its points, words and kanji in the order the
     course deals them, each with its `progress` (0 new to 1 mastered) and
     whether it is `met`, and the unit's sentences from the reading bank
-    -- with their translation in English, the bank's one language (a
-    French reader gets none rather than an English one)."""
+    -- each with its translation in the reader's language (plan 192:
+    the bank carries English and French)."""
     found = next(((n, u) for n, u in enumerate(basics.units()) if u["id"] == unit_id), None)
     if found is None:
         raise HTTPException(status_code=404, detail="no such unit")
@@ -171,7 +172,7 @@ def get_basics_unit(unit_id: str, lang: str = "fr", user_id: str = Depends(get_u
         for raw_id in unit["cards"][KANJI] if KANJI in sources
     ]
     sentences = [
-        {"jp": jp, "translation": _BANK[jp]["en"] if lang == "en" else None}
+        {"jp": jp, "translation": reading_sentences.translation(_BANK[jp], lang)[0]}
         for jp in unit["sentences"] if jp in _BANK
     ]
     return {

@@ -125,12 +125,12 @@ function face(platform, card, words, note, t, compact) {
         </>
       )
     case 'translation':
-      // The bank carries its sentences in English only, and the run
-      // prompts with them for every learner (routes/reading.py's
-      // translation_lang), so the well says so too.
+      // The run prompts with the sentence in the learner's language when
+      // the bank holds it (plan 192: English and French), else English
+      // (routes/reading.py's translation_lang), and the well says which.
       return (
         <>
-          <span className="prc-spec__prompt" lang="en">{card.en}</span>
+          <span className="prc-spec__prompt" lang={card.translation_lang ?? 'en'}>{card.translation ?? card.en}</span>
           <span className="prc-spec__to">↓</span>
           <Field platform={platform} />
         </>

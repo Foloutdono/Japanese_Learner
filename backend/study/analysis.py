@@ -384,7 +384,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # register (はずだ, わけです) and the spoken contractions (じゃ, てる), a
 # compound's second half (乗りこもう, 書き直し, やりがい), the volitional
 # that opens 〜ようとする and its kin, and 〜ものを, 〜か〜か with one か.
-LOCAL_REV = 12
+# 13: what the reading bank's drafters met (plan 193) -- a lexical
+# causative (知らせる) no 使役形, the short causative passive (行かされる),
+# いらっしゃる／おっしゃる／なさる in every form, 〜ようと思う, 一日中,
+# 致す after お〜, 〜ばかりに after ん, 〜っぽい, 〜ずくめ, 〜手前, 〜どころ;
+# まま no ママ nor 間々; すぐ, ゆっくり, 良い, 赤ちゃん, 何も and 世論 their
+# lower or right cards; 〜不足 after a noun read ぶそく.
+LOCAL_REV = 13
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

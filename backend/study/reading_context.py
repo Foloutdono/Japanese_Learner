@@ -696,6 +696,23 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
             out[i] = "いま"
             continue
 
+        # 〜気味, "a touch of": 太り気味, 風邪気味, 疲れ気味 are ぎみ. UniDic
+        # reads every 気味 as the noun きみ, which it is only on its own:
+        # 気味が悪い, 気味の悪い話, after a particle or at the start.
+        # Plan 192 (the reading bank's 〜気味 rows).
+        if s == "気味" and r == "きみ" and i > 0 and tokens[i - 1].get("pos") in ("noun", "verb"):
+            out[i] = "ぎみ"
+            continue
+
+        # 〜不足, "a shortage of": 寝不足, 人手不足, 睡眠不足, 運動不足 are
+        # ぶそく, the compound's voiced second half. UniDic cuts the
+        # compound and reads 不足 as on its own, ふそく, which it is after
+        # a particle (水が不足する) or a prefix (過不足). Plan 193.
+        if (s == "不足" and r == "ふそく" and i > 0 and tokens[i - 1].get("pos") == "noun"
+                and not _is_numeral(prev(i))):
+            out[i] = "ぶそく"
+            continue
+
         # 数日, 何日: days, にち -- UniDic reads the suffix じつ.
         if s == "日" and r == "じつ" and (prev(i) in ("数", "何") or _is_numeral(prev(i))):
             out[i] = "にち"

@@ -977,6 +977,82 @@ class TourTests(unittest.TestCase):
             self.assertTrue(grammar_detect.can_find(pattern), pattern)
 
 
+# Plan 193: what the reading bank's drafting (plan 192) found -- a
+# false find or a miss each, pinned with its counter-case.
+BANK = [
+    # 知らせる and 済ませる are words the deck teaches, not causatives
+    ("結果を先生に知らせる。", "使役形 〜させる", False),
+    ("結果が出たら知らせてください。", "〜させてください", False),
+    ("子供に野菜を食べさせる。", "使役形 〜させる", True),
+    ("私に行かせてください。", "〜させてください", True),
+    # the short causative-passive of a 五段 verb, read as one す-verb
+    ("子どものころ、毎日走らされた。", "使役受身形 〜させられる", True),
+    ("長い時間待たされた。", "使役受身形 〜させられる", True),
+    ("給料を減らされた。", "使役受身形 〜させられる", False),
+    ("心を動かされた。", "使役受身形 〜させられる", False),
+    # なされる is なす's passive; なさい without ます is 〜なさい
+    ("十分な補償がなされてしかるべきだ。", "いらっしゃる／おっしゃる／なさる", False),
+    ("先生が説明なさった。", "いらっしゃる／おっしゃる／なさる", True),
+    ("早く寝なさい。", "いらっしゃる／おっしゃる／なさる", False),
+    # いらっしゃる, おっしゃる say い before ます
+    ("先生は明日いらっしゃいます。", "いらっしゃる／おっしゃる／なさる", True),
+    ("先生がそうおっしゃいました。", "いらっしゃる／おっしゃる／なさる", True),
+    ("課長は今、事務所にいらっしゃいません。", "いらっしゃる／おっしゃる／なさる", True),
+    # 一つ + a case particle is one of something
+    ("不用意な発言一つで会社の信用を損ないかねない。", "〜一つ〜ない", False),
+    ("彼は愚痴一つこぼさなかった。", "〜一つ〜ない", True),
+    ("傷一つない。", "〜一つ〜ない", True),
+    # ようとしても is 〜ようとする's ても; として + も is no "even if"
+    ("いくら遮ろうとしても話し続ける。", "〜としても", False),
+    ("たとえ予算が増えたとしても足りない。", "〜としても", True),
+    ("歌手としても有名だ。", "〜ても", False),
+    ("雨が降っても行く。", "〜ても", True),
+    # after た, ところだった is still "had just"
+    ("ちょうど駅に着いたところだった。", "〜ところだった", False),
+    ("ちょうど駅に着いたところだった。", "〜ところだ", True),
+    ("危うく電車に乗り遅れるところだった。", "〜ところだった", True),
+    # 〜ようと思う after a 五段 volitional, which writes no よう
+    ("夏休みに国へ帰ろうと思う。", "〜ようと思う", True),
+    ("来年は日本語を習おうと思います。", "〜ようと思う", True),
+    ("帰ろうと言った。", "〜ようと思う", False),
+    # 一|日中: the 中 of 一日中
+    ("一日中雨が降っていた。", "〜中", True),
+    ("日中は暑い。", "〜中", False),
+    # お〜ください after a noun; お + a stem the tagger calls a noun + する
+    ("少々お待ちください。", "お〜ください", True),
+    ("お金をください。", "お〜ください", False),
+    ("荷物は私がお運びします。", "お〜になる／お〜する", True),
+    ("お世話になりました。", "お〜になる／お〜する", False),
+    # いたす after ご + a noun or お + a stem
+    ("会場までご案内いたします。", "まいる／もうす／いたす", True),
+    ("私がお持ちいたします。", "まいる／もうす／いたす", True),
+    ("もう暗くなった。", "まいる／もうす／いたす", False),
+    # 〜んばかり, its ん inside the verb, and its の
+    ("ガラスが割れんばかりの拍手が起きた。", "〜んばかりに", True),
+    ("彼は頭を下げんばかりに謝った。", "〜んばかりに", True),
+    ("彼は頭を下げんばかりに謝った。", "〜ばかりに", False),
+    ("今にも泣き出さんばかりの顔だった。", "〜んばかりに", True),
+    ("今にも泣き出さんばかりの顔だった。", "〜ばかり", False),
+    ("田中さんばかりに頼む。", "〜んばかりに", False),
+    ("一言多かったばかりに、話がこじれた。", "〜ばかりに", True),
+    # words the tokenizer made whole, or read another way
+    ("この服は安っぽい。", "〜っぽい", True),
+    ("初めてずくめの一年だった。", "〜ずくめ", True),
+    ("部下に厳しく言っている手前、自分も遅刻できない。", "〜手前", True),
+    ("店を開けるどころではない。", "〜どころではない", True),
+    ("寝るどころではない。", "〜どころではない", True),
+]
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class BankTests(unittest.TestCase):
+
+    def test_every_case_the_bank_met(self) -> None:
+        for sentence, pattern, lit in BANK:
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertEqual(pattern in found_in(sentence), lit)
+
+
 # Read one key at a time and held exactly: a key added or lost fails.
 GOLD = {
     "足跡を辿って会いにきて": {("を", "を"), ("〜て、〜て", "て"), (REQUEST, "て"), ("〜に行きます", "にき")},

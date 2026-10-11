@@ -743,6 +743,34 @@ MOVES: dict[str, str] = {
     # gloss, "before", which is JMdict's own third and fourth sense
     # for 前::ぜん -- a dropped dakuten, not a different word.
     "vocab_N1_前_せん": "vocab_N1_前_ぜん",
+
+    # ── Plan 193: what the reading bank's drafters met ───────────
+    # Words of the first lessons that the deck held a second time, far
+    # above the card a learner had already learned: the N1 直ぐ beside
+    # the N5 すぐに, the N3 ゆっくり beside the N5 ゆっくりと, the N1 良い
+    # and 好い beside the N5 いい/よい, the N1 赤ちゃん beside the N4
+    # あかちゃん, the N1 何も beside the N3 なにも. The JLPT lists put
+    # each at the lower card's level (Tanos: すぐに and ゆっくりと N5,
+    # 赤ちゃん N4), and an N4 sentence about a baby was graded N1. Plan
+    # 112's rule, one card at the lower level. A word with and without
+    # its particle is one card packing both, as けれど/けれども does,
+    # since a breakdown reads すぐ and ゆっくり without it; a kana card
+    # whose word is written in kanji the level teaches (赤, N4; 何, N5)
+    # takes the spelling, as 日本 did in plan 186c.
+    "vocab_N5__すぐに": "vocab_N5__すぐ/すぐに",
+    "vocab_N1_直ぐ_すぐ": "vocab_N5__すぐ/すぐに",
+    "vocab_N5__ゆっくりと": "vocab_N5__ゆっくり/ゆっくりと",
+    "vocab_N3__ゆっくり": "vocab_N5__ゆっくり/ゆっくりと",
+    "vocab_N1_良い_いい": "vocab_N5__いい/よい",
+    "vocab_N1_好い_よい": "vocab_N5__いい/よい",
+    "vocab_N4__あかちゃん": "vocab_N4_赤ちゃん_あかちゃん",
+    "vocab_N1_赤ちゃん_あかちゃん": "vocab_N4_赤ちゃん_あかちゃん",
+    "vocab_N3__なにも": "vocab_N3_何も_なにも",
+    "vocab_N1_何も_なにも": "vocab_N3_何も_なにも",
+    # 世論 is read よろん first (the tokenizer's reading, and the 常用
+    # one since 2010) and せろん still; the card read せろん alone, so
+    # the breakdown's 世論 reached the pool's row and never the card.
+    "vocab_N1_世論_せろん": "vocab_N1_世論_よろん/せろん",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries
@@ -917,9 +945,21 @@ def folded_forms() -> dict[str, tuple[tuple[str, str], ...]]:
 # card was RETIRED rather than moved (plan 153, the owner's call), and
 # its spelling is still this card's word -- the N3 list writes 下ろす as
 # 下す, JMdict's irregular okurigana for it.
+#
+# And a folded spelling's other reading, where the card packs both: the
+# N1 良い was read いい and the N1 好い よい (plan 193), but each spelling
+# is read either way, and the page's 良い is mostly よい.
 FOLDED_ONLY: dict[str, tuple[tuple[str, str], ...]] = {
     "vocab_N3_下ろす_おろす": (("下す", "おろす"),),
+    "vocab_N5__いい/よい": (("良い", "よい"), ("好い", "いい")),
 }
 
 
-FOLDED_FORMS: dict[str, tuple[tuple[str, str], ...]] = {**folded_forms(), **FOLDED_ONLY}
+def _with_folded_only(forms: dict[str, tuple[tuple[str, str], ...]]) -> dict[str, tuple[tuple[str, str], ...]]:
+    out = dict(forms)
+    for card, pairs in FOLDED_ONLY.items():
+        out[card] = tuple(dict.fromkeys(out.get(card, ()) + pairs))
+    return out
+
+
+FOLDED_FORMS: dict[str, tuple[tuple[str, str], ...]] = _with_folded_only(folded_forms())

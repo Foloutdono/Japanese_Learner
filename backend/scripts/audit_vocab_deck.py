@@ -85,10 +85,13 @@ _RANK = {level: i for i, level in enumerate(LEVELS)}
 #             plan 151 (plan 153)
 #   否        the いな of 〜や否や (an N1 point), JMdict's formal "nay",
 #             in neither list; the word is the N3 否 read いや (plan 153)
+#   侭        the まま of 〜まま (an N4 point), "as it is"; it counted as
+#             the N3 ママ, "mum", and then the N1 間々, "occasionally",
+#             the two cards read まま, until plan 193
 IGNORED_LEMMAS = frozenset({
     "為る", "有る", "居る", "成る", "来る", "言う", "此の", "其の", "彼の",
     "御座る", "知れる", "出でる", "遊ばす", "書き直す", "考え直す", "如何",
-    "疎か", "否",
+    "疎か", "否", "侭",
 })
 
 # A compound numeral (三十, 三千, 二百) composes from the digit cards the

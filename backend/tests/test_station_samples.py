@@ -235,11 +235,19 @@ def test_the_reading_card_is_the_bank_s_first_sentence(client):
     for source in ("reading", "translation"):
         for level, stop in _stops(client, source).items():
             first = reading_sentences.BY_LEVEL[level][0]
-            assert stop["card"] == {"jp": first["jp"], "en": first["en"], "grammar": first["grammar"]}
+            # In the reader's language (plan 192: the bank holds every
+            # sentence in English and French).
+            assert stop["card"] == {
+                "jp": first["jp"], "en": first["en"], "grammar": first["grammar"],
+                "translation": first["fr"], "translation_lang": "fr",
+            }
             assert stop["sample"] == [first["jp"]]
             # The bank's points, each once, in the bank's order.
             points = [row["grammar"] for row in reading_sentences.BY_LEVEL[level]]
             assert stop["points"] == list(dict.fromkeys(points))
+        for level, stop in _stops(client, source, "en").items():
+            first = reading_sentences.BY_LEVEL[level][0]
+            assert (stop["card"]["translation"], stop["card"]["translation_lang"]) == (first["en"], "en")
 
 
 def test_a_comprehension_card_is_the_first_seed_s_opening_and_first_question(client):

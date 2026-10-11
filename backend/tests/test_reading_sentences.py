@@ -1,7 +1,11 @@
 import unittest
+from collections import Counter
 
-from content.reading_sentences import BY_LEVEL, patterns_for, problems
+from content.reading_sentences import (
+    BY_LEVEL, GRADED_LEVELS, patterns_for, phrase_key, problems, translation,
+)
 from study import difficulty as D
+from study import morphology
 
 
 class SentenceBankTests(unittest.TestCase):
@@ -43,8 +47,11 @@ class SentenceBankTests(unittest.TestCase):
     # the bank names: a sentence may legitimately claim 〜ば or a bare
     # particle, and neither can be confirmed present.
     #
-    # Raise these as sentences are added for the new points.
-    COVERAGE_FLOOR = {"N5": 66, "N4": 89, "N3": 103, "N2": 111, "N1": 113}
+    # Raise these as sentences are added for the new points. Plan 192
+    # reached every checkable point from N4 up, the new tokenizer-read
+    # rules (row_problems) letting a point the substring test cannot
+    # confirm be claimed where the detector finds it.
+    COVERAGE_FLOOR = {"N5": 66, "N4": 92, "N3": 106, "N2": 113, "N1": 116}
 
     def test_coverage_never_regresses(self) -> None:
         """Each level demonstrates at least as many of its own grammar
@@ -72,6 +79,59 @@ class SentenceBankTests(unittest.TestCase):
             for row in rows:
                 with self.subTest(level=level, jp=row["jp"]):
                     self.assertIn(row["grammar"], catalogue)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class LevelVocabularyTests(unittest.TestCase):
+    """Plan 192: a level's sentences are made of the level. row_problems
+    holds each N4-N1 row to two words of its level (see
+    test_every_sentence_is_at_its_level); these hold the bank as a
+    whole, so a rewrite never quietly narrows what it teaches."""
+
+    # Distinct deck words of each level the bank uses, and distinct
+    # kanji the kanji deck files at it -- before plan 192: N4 17 / 81,
+    # N3 24 / 63, N2 11 / 16, N1 25 / 34. Ratchets: raise, never lower.
+    LEVEL_WORDS_FLOOR = {"N4": 316, "N3": 397, "N2": 406, "N1": 491}
+    LEVEL_KANJI_FLOOR = {"N4": 106, "N3": 236, "N2": 145, "N1": 235}
+
+    def test_every_graded_point_has_two_sentences(self) -> None:
+        for level in GRADED_LEVELS:
+            claimed = Counter(row["grammar"] for row in BY_LEVEL[level])
+            with self.subTest(level=level):
+                self.assertEqual([p for p, n in claimed.items() if n < 2], [])
+
+    def test_the_level_s_vocabulary_never_narrows(self) -> None:
+        from scripts.reading_bank_report import figures
+
+        for level in GRADED_LEVELS:
+            found = figures(level)
+            with self.subTest(level=level):
+                self.assertGreaterEqual(found["words"], self.LEVEL_WORDS_FLOOR[level])
+                self.assertGreaterEqual(found["kanji"], self.LEVEL_KANJI_FLOOR[level])
+                self.assertEqual(found["under"], 0)
+
+
+class ServingTests(unittest.TestCase):
+    """What the batch serves from a row (plan 192)."""
+
+    def test_the_translation_is_the_reader_s_language_else_english(self) -> None:
+        row = BY_LEVEL["N3"][0]
+        self.assertEqual(translation(row, "fr"), (row["fr"], "fr"))
+        self.assertEqual(translation(row, "en"), (row["en"], "en"))
+        self.assertEqual(translation(row, "de"), (row["en"], "en"))
+
+    def test_a_served_sentence_is_excluded_by_its_key(self) -> None:
+        from routes.reading import _pick_curated_phrases
+
+        bank = BY_LEVEL["N2"]
+        named = {phrase_key(row["jp"]) for row in bank[1:]}
+        picked = _pick_curated_phrases("N2", 10, named)
+        self.assertEqual([row["jp"] for row in picked], [bank[0]["jp"]])
+
+    def test_keys_are_short_and_distinct(self) -> None:
+        keys = [phrase_key(row["jp"]) for rows in BY_LEVEL.values() for row in rows]
+        self.assertEqual(len(keys), len(set(keys)))
+        self.assertTrue(all(len(k) == 10 for k in keys))
 
 
 class DifficultyGateTests(unittest.TestCase):
@@ -109,6 +169,17 @@ class DifficultyGateTests(unittest.TestCase):
     def test_vocab_gate_ignores_a_phrase_that_splits_into_easier_words(self) -> None:
         # 今日は is a real deck entry: the N1 spelling of こんにちは.
         self.assertEqual(D.vocab_over_level("今日は何をしますか。", "N5"), [])
+
+    def test_vocab_gate_reads_a_question_word_and_its_particle(self) -> None:
+        # 何も is an N3 card, and 何も／誰も〜ない N5 grammar (plan 193).
+        self.assertEqual(D.vocab_over_level("何も食べませんでした。", "N5"), [])
+        self.assertEqual(D.vocab_over_level("何か飲みますか。", "N5"), [])
+
+    def test_vocab_gate_reads_a_verb_in_its_honorific_frame(self) -> None:
+        # お使いください is 使う, not the N1 お使い, "errand" (plan 193);
+        # and 使い is 使う's stem, the わ-row the stem table lacked.
+        self.assertEqual(D.vocab_over_level("こちらのペンをお使いください。", "N4"), [])
+        self.assertEqual(D.vocab_over_level("毎日パソコンを使います。", "N5"), [])
 
     def test_catches_constructions_the_catalogue_does_not_list(self) -> None:
         """205 points is a syllabus, not an inventory of the language.

@@ -5,6 +5,7 @@
 # then its unmet cards in the order the course deals them.
 from tests.test_today_ration import RATION_USER, _board, client  # noqa: F401  (the fixture)
 
+from content.reading_sentences import N5 as READING_N5
 from study import basics
 
 
@@ -50,9 +51,11 @@ def test_a_units_station_holds_its_cards_in_course_order(client):
     assert all(c["meaning"] for c in body["vocab"] + body["grammar"] + body["kanji"])
     assert all(c["progress"] == 0 and c["met"] is False for c in body["vocab"])
     assert [s["jp"] for s in body["sentences"]] == unit["sentences"]
-    assert all(s["translation"] for s in body["sentences"])
-    # The bank is English only: a French reader gets no translation.
-    assert all(s["translation"] is None for s in client.get("/api/basics/kazu").json()["sentences"])
+    bank = {row["jp"]: row for row in READING_N5}
+    assert [s["translation"] for s in body["sentences"]] == [bank[jp]["en"] for jp in unit["sentences"]]
+    # A French reader reads them in French (plan 192).
+    french = client.get("/api/basics/kazu").json()["sentences"]
+    assert [s["translation"] for s in french] == [bank[jp]["fr"] for jp in unit["sentences"]]
     assert client.get("/api/basics/nope").status_code == 404
 
 

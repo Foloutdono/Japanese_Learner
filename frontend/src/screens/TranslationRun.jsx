@@ -48,6 +48,9 @@ const TRANSLATION_COLOR = 'var(--line-honyaku)'
 // pickers are the station page above it, under the chrome
 // (screens/SentenceStation.jsx).
 const BASE = '/practice/translation'
+// How many served sentences a batch request names in `exclude`: enough
+// for a level's whole curated bank (plan 192).
+const SEEN_CAP = 250
 
 export default function TranslationRun({ session }) {
   const navigate = useNavigate()
@@ -149,9 +152,10 @@ export default function TranslationRun({ session }) {
       params.set('tier', tier)
       params.set('tier_size', tierSize)
     }
-    // Capped: the bank is 30-55 sentences a level, so anything past that
-    // is a query string growing without bound for no effect.
-    if (seenRef.current.length) params.set('exclude', seenRef.current.slice(-60).join('|'))
+    // Each by its ten-character key (plan 192), so a long sitting can
+    // name a level's whole bank -- two sentences a grammar point, up to
+    // ~240 -- in a URL; sent as text, sixty N1 sentences did not fit.
+    if (seenRef.current.length) params.set('exclude', seenRef.current.slice(-SEEN_CAP).join('|'))
     return `/api/translation/batch?${params.toString()}`
   }
 
@@ -185,7 +189,7 @@ export default function TranslationRun({ session }) {
       })
       .then(d => {
         const phrases = d.phrases || []
-        seenRef.current = [...seenRef.current, ...phrases.map(p => p.phrase)]
+        seenRef.current = [...seenRef.current, ...phrases.map(p => p.key ?? p.phrase)]
         return phrases
       })
       .catch(() => [])
@@ -316,6 +320,9 @@ export default function TranslationRun({ session }) {
         // is not, rather than guessing what a corpus sentence is "for".
         grammar: phraseData.grammar ?? '',
         lang,
+        // The language the prompt was shown in, which is `lang` only
+        // when the bank holds the sentence in it (plan 192).
+        prompt_lang: phraseData.translation_lang ?? lang,
       }),
     })
       .then(r => (r.ok ? r.json() : null))
