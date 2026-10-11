@@ -163,7 +163,8 @@ _ORDERED: dict[str, tuple[Mode, ...]] = {
         # First, so it is the source's primary mode (level_rule.
         # primary_mode): the track Today deals a new point on, the level
         # rule marks known and the basics course rides (plan 187e). One
-        # scheduler row whatever rung the card is asked on.
+        # scheduler row whatever step the card is asked on: Choisir ×3,
+        # Construire ×4, then mastered (srs/ladder.py, plan 194).
         _m(GRAMMAR, LADDER, renderer=RENDER_LADDER),
         _m(GRAMMAR, FLASHCARD, F2B, _CHOICES_SENTENCES),
         _m(GRAMMAR, FLASHCARD, B2F, _CHOICES_SENTENCES),
@@ -180,10 +181,10 @@ _ORDERED: dict[str, tuple[Mode, ...]] = {
         # switches on. Only points with a marked contrast sentence and a
         # rival are served (card_index.contrast_ok).
         _m(GRAMMAR, CONTRAST, renderer=RENDER_CONTRAST),
-        # The sentence as tiles, the point and its word missing, a
-        # rival's form as the wrong tile -- only where a sentence is
-        # marked as telling the point from its rivals (contrast's own
-        # marking, so the wrong tile is certainly wrong).
+        # Construire (plan 194): the sentence's translation given, the
+        # point blanked, the learner types it -- no choices. Checked by
+        # POST /api/grammar/build/check, then self-rated. Any point a
+        # sentence lights in one stretch or two (grammar_ladder.build_ok).
         _m(GRAMMAR, BUILD, renderer=RENDER_BUILD),
         # A situation to say in Japanese with the point, the detector
         # saying whether it is there -- only where it can be trusted to

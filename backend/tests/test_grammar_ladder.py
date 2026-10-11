@@ -1,9 +1,11 @@
 """
-The grammar ladder (plan 187e): one track, its exercise read from the
-card's progress -- recognise, choose, build, write -- each rung falling
-back where the point cannot be asked on it, one key reaching the log, the
-two new exercises' payloads, the snapshot of which points can be asked
-them, and the migration that seeds the ladder from a learner's best mode.
+The grammar ladder (plan 187e), walked as steps since plan 194: Choisir
+three times, Construire four times, then mastered with the flashcard and
+Construire in turn, a miss keeping its step and a miss once mastered a
+short relapse (srs/ladder.py); each step's exercise falling back where
+the point cannot be asked on it, one key reaching the log, Construire's
+typed check, the snapshot of which points can be asked it and write, and
+the migration that seeds the ladder from a learner's best mode.
 """
 import random
 
@@ -12,6 +14,10 @@ import pytest
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, find, grammar_to_id
 from core.auth import DEV_USER_ID
 from core.db import db_conn
+from datetime import datetime, timedelta, timezone
+
+from srs import ladder
+from srs.models import CardState
 from srs.srs import SRSEngine
 from study import card_index, grammar_ladder
 from study.grammar_examples import blank_span, highlight_span
@@ -21,9 +27,13 @@ from study.level_rule import primary_mode
 
 LADDER = "grammar.ladder"
 
-# (total_reviews, interval_days, is_learning, learning_step) a card on each
-# rung has: progress 0, 0.25, ~0.61, ~0.88 (srs._progress).
-RUNG_ROWS = {0: (0, 0, True, 0), 1: (2, 0, True, 2), 2: (4, 2, False, 0), 3: (7, 10, False, 0)}
+# (total_reviews, interval_days, is_learning, learning_step) a row at each
+# step of the walk (srs/ladder.py, plan 194).
+STEP_ROWS = {
+    "choose": (1, 0, True, 1),       # Choisir 2
+    "build": (4, 2, False, 4),       # Construire 2
+    "mastered": (9, 21, False, 7),   # mastered, its flashcard turn
+}
 
 
 def _point(pattern):
@@ -31,20 +41,99 @@ def _point(pattern):
     return level, entry, grammar_to_id(entry, level)
 
 
-# ── The rungs ────────────────────────────────────────────────
+# ── The steps ────────────────────────────────────────────────
 
-def test_the_rung_is_read_from_progress():
-    assert [grammar_ladder.rung_of(p) for p in (None, 0, 0.24, 0.25, 0.49, 0.5, 0.74, 0.75, 1)] == \
-        [0, 0, 0, 1, 1, 2, 2, 3, 3]
-    for rung, row in RUNG_ROWS.items():
-        assert grammar_ladder.rung_of(SRSEngine._progress(*row)) == rung
+def _state(row, mode=LADDER):
+    total, interval, learning, step = row
+    return CardState(card_id="u:grammar_N5_x", mode=mode, total_reviews=total, interval_days=interval,
+                     is_learning=learning, learning_step=step)
 
 
-def test_each_rung_falls_back_down_the_ladder_to_the_flashcard():
-    assert grammar_ladder.chain_for(0) == ("fill_in", "flashcard")
-    assert grammar_ladder.chain_for(1) == ("contrast", "fill_in", "flashcard")
-    assert grammar_ladder.chain_for(2) == ("build", "contrast", "fill_in", "flashcard")
-    assert grammar_ladder.chain_for(3) == ("write", "build", "contrast", "fill_in", "flashcard")
+def _walk(qualities):
+    state, now = CardState(card_id="u:grammar_N5_x", mode=LADDER), datetime(2026, 10, 1, tzinfo=timezone.utc)
+    out = []
+    for q in qualities:
+        state = ladder.review(state, q, now)
+        out.append((ladder.step_of(state), state.next_review - now))
+    return state, out
+
+
+def test_choisir_three_times_construire_four_then_mastered():
+    state, walk = _walk([4] * 8)
+    assert [s for s, _ in walk] == [1, 2, 3, 4, 5, 6, 7, 7]
+    assert [w for _, w in walk[:7]] == [
+        timedelta(minutes=10), timedelta(hours=1), timedelta(days=1), timedelta(days=2),
+        timedelta(days=4), timedelta(days=8), timedelta(days=21),
+    ]
+    # Mastered as every other card is: 21 days, the bar full.
+    assert SRSEngine._classify_stage(state.total_reviews, state.interval_days) == "mastered"
+
+
+def test_the_bar_climbs_with_every_step_and_never_back():
+    state = CardState(card_id="u:x", mode=LADDER)
+    seen = [0.0]
+    for _ in range(7):
+        state = ladder.review(state, 4)
+        seen.append(SRSEngine._progress(state.total_reviews, state.interval_days,
+                                        state.is_learning, state.learning_step))
+    assert seen == sorted(seen) and len(set(seen)) == len(seen) and seen[-1] == 1.0
+
+
+def test_a_miss_keeps_the_step_and_comes_back_soon():
+    for row in (STEP_ROWS["choose"], STEP_ROWS["build"]):
+        before = ladder.step_of(_state(row))
+        after = ladder.review(_state(row), 1)
+        assert ladder.step_of(after) == before
+        assert after.next_review - datetime.now(timezone.utc) <= ladder.MISS_WAIT
+
+
+def test_difficult_is_a_pass():
+    assert ladder.step_of(ladder.review(_state(STEP_ROWS["choose"]), 3)) == 2
+
+
+def test_a_miss_once_mastered_is_a_short_relapse():
+    _, walk = _walk([4] * 7 + [1, 4, 4])
+    assert [s for s, _ in walk[7:]] == [ladder.RELAPSE_PICK, ladder.RELAPSE_BUILD, ladder.MASTERED]
+    assert [w for _, w in walk[7:]] == [ladder.MISS_WAIT, timedelta(days=1), timedelta(days=21)]
+
+
+def test_mastered_asks_the_flashcard_and_construire_in_turn():
+    state, _ = _walk([4] * 7)
+    kinds = []
+    for _ in range(4):
+        kinds.append(ladder.exercise_of(state))
+        state = ladder.review(state, 4)
+    assert kinds == ["flashcard", "build", "flashcard", "build"]
+    assert ladder.step_of(state) == ladder.MASTERED and state.interval_days > 21
+
+
+def test_a_row_from_before_the_steps_is_read_onto_the_walk():
+    # The progress ladder's rows, and rows seeded from another mode.
+    assert ladder.step_of(_state((2, 0, True, 2))) == 2
+    assert ladder.step_of(_state((3, 0, True, 3))) == 2
+    assert ladder.step_of(_state((5, 2, False, 4))) == 4
+    assert ladder.step_of(_state((6, 9, False, 4))) == 6
+    assert ladder.step_of(_state((9, 40, False, 4))) == ladder.MASTERED
+    assert ladder.step_of(_state((9, 40, True, 0))) == ladder.RELAPSE_PICK
+
+
+def test_the_forecast_runs_the_steps_too(client):
+    # preview_reviews_bulk dry-runs the same machine: the tiles' due_in.
+    level, entry, raw_id = _point("〜てください")
+    _clear(raw_id)
+    try:
+        _place(raw_id, LADDER, STEP_ROWS["choose"])
+        card = _served(client, level, raw_id)
+        assert 3500 <= card["review_preview"]["4"]["due_in"] <= 3600
+        assert card["review_preview"]["1"]["due_in"] <= 600
+    finally:
+        _clear(raw_id)
+
+
+def test_each_step_falls_back_to_the_flashcard():
+    assert grammar_ladder.chain_for("choose") == ("contrast", "fill_in", "flashcard")
+    assert grammar_ladder.chain_for("build") == ("build", "contrast", "fill_in", "flashcard")
+    assert grammar_ladder.chain_for("flashcard") == ("flashcard",)
 
 
 def test_the_ladder_is_grammars_primary_track_and_asks_every_point():
@@ -64,14 +153,14 @@ def test_the_snapshot_says_what_the_two_exercises_can_be_asked_on():
     assert written == grammar_ladder.snapshot_now()
 
 
-def test_the_two_platforms_are_offered_where_most_points_can_take_them():
+def test_construire_and_write_are_offered_for_nearly_every_point():
     for level in GRAMMAR_POINTS_BY_LEVEL:
         total = len(GRAMMAR_POINTS_BY_LEVEL[level])
-        assert card_index.total("grammar", level, "grammar.build") >= total // 2
+        assert card_index.total("grammar", level, "grammar.build") >= total - 4
         assert card_index.total("grammar", level, "grammar.write") >= total * 9 // 10
 
 
-# ── 組立 build ───────────────────────────────────────────────
+# ── 作る Construire ──────────────────────────────────────────
 
 def _builds():
     for level, entries in GRAMMAR_POINTS_BY_LEVEL.items():
@@ -80,45 +169,64 @@ def _builds():
                 yield level, entry
 
 
-def test_a_build_puts_back_together_into_its_sentence():
+def _text(pieces, answers):
+    return "".join(answers[p["gap"]] if "gap" in p else "".join(f["text"] for f in p["furigana"])
+                   for p in pieces)
+
+
+def test_every_construire_puts_back_into_its_sentence_and_checks_right():
     seen = 0
     for level, entry in _builds():
-        built = grammar_ladder.build_payload(level, entry, "en", random.Random(entry["pattern"]))
-        assert built is not None, entry["pattern"]
-        by_id = {tile["id"]: tile for tile in built["tray"]}
-        slots = [tile["slot"] for tile in built["tiles"] if "slot" in tile]
-        assert slots == sorted(slots) == list(range(len(built["answer"])))
-        assert 1 <= len(slots) <= 2
-        # One wrong piece in the tray, besides the missing ones.
-        assert len(built["tray"]) == len(slots) + 1
-        text = "".join(
-            by_id[built["answer"][tile["slot"]]]["text"] if "slot" in tile
-            else "".join(p["text"] for p in tile["furigana"])
-            for tile in built["tiles"]
-        ) + built["tail"]
-        assert text == built["jp"], entry["pattern"]
-        # Every piece reads as itself, ruby included.
-        for tile in built["tray"]:
-            assert "".join(p["text"] for p in tile["furigana"]) == tile["text"]
-        wrong = [t for t in built["tray"] if t["id"] not in built["answer"]]
-        assert len(wrong) == 1
-        assert wrong[0]["text"] not in {by_id[i]["text"] for i in built["answer"]}, entry["pattern"]
-        assert built["tr"]
+        built = grammar_ladder.build_payload(level, entry, "en")
+        assert built is not None and built["tr"], entry["pattern"]
+        gaps = [p for p in built["pieces"] if "gap" in p]
+        assert 1 <= len(gaps) <= grammar_ladder.MAX_GAPS
+        verdict = grammar_ladder.check_build(level, entry["pattern"], built["key"], [""] * len(gaps), "en")
+        answers = [g["answer"] for g in verdict["gaps"]]
+        assert _text(built["pieces"], answers) == verdict["jp"], entry["pattern"]
+        # Typed as written, or as read: right.
+        assert grammar_ladder.check_build(level, entry["pattern"], built["key"], answers, "en")["verdict"] == "right"
+        readings = [g["reading"] for g in verdict["gaps"]]
+        assert grammar_ladder.check_build(level, entry["pattern"], built["key"], readings, "en")["verdict"] == "right"
+        assert [p["size"] for p in gaps] == [len(r) for r in readings]
         seen += 1
-    assert seen > 400
+    assert seen >= 535
 
 
-def test_the_point_is_always_a_missing_piece():
+def test_construire_reads_romaji_and_names_the_one_kana_off():
     level, entry, _ = _point("〜てください")
-    built = grammar_ladder.build_payload(level, entry, "en", random.Random(1))
-    pieces = {t["id"]: t["text"] for t in built["tray"]}
-    assert "でください" in [pieces[i] for i in built["answer"]]
+    for turn in range(10):
+        built = grammar_ladder.build_payload(level, entry, "fr", turn)
+        verdict = grammar_ladder.check_build(level, entry["pattern"], built["key"], ["tekudasai"], "fr")
+        if verdict["gaps"][0]["reading"] == "てください":
+            break
+    assert verdict["verdict"] == "right"
+    close = grammar_ladder.check_build(level, entry["pattern"], built["key"], ["でください"], "fr")
+    assert close["verdict"] == "close"
+    assert close["gaps"][0]["marks"][0] == {"wrong": "で", "fix": "て"}
+    assert grammar_ladder.check_build(level, entry["pattern"], built["key"], ["をください"], "fr")["verdict"] in ("close", "wrong")
+    assert grammar_ladder.check_build(level, entry["pattern"], built["key"], ["ます"], "fr")["verdict"] == "wrong"
 
 
-def test_a_point_with_no_marked_sentence_is_no_build():
-    level, entry, _ = _point("は")
-    assert not grammar_ladder.can_build(level, "は")
-    assert grammar_ladder.build_payload(level, entry, "en") is None
+def test_construire_asks_another_sentence_each_turn():
+    level, entry, _ = _point("〜てください")
+    keys = [grammar_ladder.build_payload(level, entry, "en", turn)["key"] for turn in range(4)]
+    assert len(set(keys)) == 4
+
+
+def test_a_point_in_two_pieces_has_two_gaps():
+    level, entry, _ = _point("あまり〜ない")
+    built = grammar_ladder.build_payload(level, entry, "en")
+    assert [p["gap"] for p in built["pieces"] if "gap" in p] == [0, 1]
+
+
+def test_the_check_endpoint_judges_and_keeps_nothing(client):
+    level, entry, raw_id = _point("〜てください")
+    built = grammar_ladder.build_payload(level, entry, "fr", 0)
+    r = client.post("/api/grammar/build/check?lang=fr", json={"raw_id": raw_id, "key": built["key"], "answers": ["x"]})
+    assert r.status_code == 200 and r.json()["verdict"] == "wrong" and r.json()["furigana"]
+    assert client.post("/api/grammar/build/check", json={"raw_id": raw_id, "key": "ex:99", "answers": ["x"]}).status_code == 404
+    assert client.post("/api/grammar/build/check", json={"raw_id": "grammar_N5_nope", "key": "ex:0", "answers": ["x"]}).status_code == 404
 
 
 # ── A particle, blanked by the detector (plan 190) ───────────
@@ -147,7 +255,7 @@ def test_a_particles_contrast_offers_its_rivals_alone():
         assert drill["jp"].replace("を", "", 1) == around
 
 
-def test_the_particles_the_detector_blanks_reach_the_middle_rungs():
+def test_the_particles_the_detector_blanks_can_be_chosen_and_built():
     for level, pattern in (("N5", "を"), ("N5", "に"), ("N5", "で"), ("N5", "が"), ("N5", "か"),
                            ("N4", "〜方"), ("N4", "〜さ"), ("N3", "〜化")):
         assert card_index.contrast_ok(level, pattern), pattern
@@ -157,13 +265,13 @@ def test_the_particles_the_detector_blanks_reach_the_middle_rungs():
     assert not card_index.contrast_ok("N5", "は")
 
 
-def test_a_particle_on_the_middle_rung_is_asked_its_contrast(client):
+def test_a_particle_on_choisir_is_asked_its_contrast(client):
     level, entry, raw_id = _point("を")
     _clear(raw_id)
     try:
-        _place(raw_id, LADDER, RUNG_ROWS[1])
+        _place(raw_id, LADDER, STEP_ROWS["choose"])
         card = _served(client, level, raw_id)
-        assert card["rung"] == 1 and card["exercise"] == "grammar.contrast"
+        assert card["step"]["group"] == "choose" and card["exercise"] == "grammar.contrast"
         assert sorted(card["contrast"]["choices"]) == sorted(["を", "が", "に"])
     finally:
         _clear(raw_id)
@@ -197,7 +305,7 @@ def test_a_written_card_is_never_on_the_ladder():
     assert eligible_for(MODES[LADDER], {})
 
 
-# ── Served, by rung ──────────────────────────────────────────
+# ── Served, by step ──────────────────────────────────────────
 
 def _place(raw_id, mode, row):
     """A due row for the dev learner in `mode`, at `row`'s progress."""
@@ -241,51 +349,40 @@ def _served(client, level, raw_id, lang="en"):
     return next(c for c in cards if c["card_id"] == raw_id)
 
 
-@pytest.mark.parametrize("rung,exercise", [
-    (0, "grammar.fill_in"), (1, "grammar.contrast"), (2, "grammar.build"), (3, "grammar.write"),
+@pytest.mark.parametrize("where,exercise,asked", [
+    ("choose", "grammar.contrast", "choose"),
+    ("build", "grammar.build", "build"),
+    ("mastered", "grammar.flashcard.f2b", "flashcard"),
 ])
-def test_a_card_is_asked_the_exercise_of_its_rung(client, rung, exercise):
+def test_a_card_is_asked_the_exercise_of_its_step(client, where, exercise, asked):
     level, entry, raw_id = _point("〜てください")
     _clear(raw_id)
     try:
-        _place(raw_id, LADDER, RUNG_ROWS[rung])
+        _place(raw_id, LADDER, STEP_ROWS[where])
         card = _served(client, level, raw_id)
-        assert card["mode"] == LADDER and card["rung"] == rung and card["exercise"] == exercise
-        assert card["asked"] == rung
+        assert card["mode"] == LADDER and card["exercise"] == exercise and card["asked"] == asked
+        assert card["step"]["group"] == ("mastered" if where == "mastered" else where)
         if exercise == "grammar.build":
-            assert card["build"]["tray"]
-        if exercise == "grammar.write":
-            assert card["write"]["situation"]
+            assert card["build"]["pieces"] and card["build"]["tr"]
+            assert (card["step"]["at"], card["step"]["of"]) == (2, 4)
         if exercise == "grammar.contrast":
             assert card["contrast"]["choices"]
+            assert (card["step"]["at"], card["step"]["of"]) == (2, 3)
     finally:
         _clear(raw_id)
 
 
-def test_a_lapse_steps_the_card_down():
-    # A miss lowers the progress, and the rung is read from it alone.
-    high = SRSEngine._progress(*RUNG_ROWS[3])
-    relearning = SRSEngine._progress(5, 0, True, 1)
-    assert grammar_ladder.rung_of(high) == 3
-    assert grammar_ladder.rung_of(relearning) < 3
-
-
 def test_a_point_with_no_marked_sentence_falls_back(client):
-    # は has no contrast sentence: on rungs 1 and 2 it is asked on fill_in
-    # or, where that cannot name it, the flashcard. Writing needs no
-    # marked sentence, only a detector trusted on the point: rung 3 is
-    # write.
+    # は has no contrast sentence: Choisir asks it on fill_in or, where
+    # that cannot name it, the flashcard; Construire too, it having no
+    # sentence where は can be blanked once.
     level, entry, raw_id = _point("は")
     expected = "grammar.fill_in" if card_index.fill_ok(level, "は") else "grammar.flashcard.f2b"
-    assert not grammar_ladder.build_ok(level, "は") and grammar_ladder.write_ok(level, "は")
     _clear(raw_id)
     try:
-        for rung, exercise in ((1, expected), (2, expected), (3, "grammar.write")):
-            _place(raw_id, LADDER, RUNG_ROWS[rung])
-            card = _served(client, level, raw_id)
-            assert card["rung"] == rung and card["exercise"] == exercise
-            # The strip names the exercise asked, not the rung it fell from.
-            assert card["asked"] == (3 if exercise == "grammar.write" else 0)
+        _place(raw_id, LADDER, STEP_ROWS["choose"])
+        card = _served(client, level, raw_id)
+        assert card["exercise"] == expected and card["asked"] in ("choose", "flashcard")
     finally:
         _clear(raw_id)
 
@@ -294,7 +391,7 @@ def test_one_key_reaches_the_log_whatever_was_asked(client):
     level, entry, raw_id = _point("〜てください")
     _clear(raw_id)
     try:
-        _place(raw_id, LADDER, RUNG_ROWS[2])
+        _place(raw_id, LADDER, STEP_ROWS["build"])
         assert _served(client, level, raw_id)["exercise"] == "grammar.build"
         r = client.post("/api/grammar/review", json={"card_id": raw_id, "mode": LADDER, "quality": 4})
         assert r.status_code == 200, r.text
@@ -303,6 +400,9 @@ def test_one_key_reaches_the_log_whatever_was_asked(client):
             with conn.cursor() as cur:
                 cur.execute("SELECT DISTINCT mode FROM review_log WHERE card_id = %s", (f"{DEV_USER_ID}:{raw_id}",))
                 assert cur.fetchall() == [(LADDER,)]
+                cur.execute("SELECT learning_step FROM card_modes WHERE card_id = %s AND mode = %s",
+                            (f"{DEV_USER_ID}:{raw_id}", LADDER))
+                assert cur.fetchone() == (5,)
         finally:
             conn.close()
     finally:
@@ -375,9 +475,9 @@ def test_the_migration_seeds_the_ladder_from_the_best_mode(monkeypatch):
     _, _, kudasai = _point("〜てください")
     _wipe()
     try:
-        _seed(ka, "grammar.flashcard.f2b", RUNG_ROWS[1])
-        _seed(ka, "grammar.fill_in", RUNG_ROWS[3])
-        _seed(kudasai, "grammar.contrast", RUNG_ROWS[2])
+        _seed(ka, "grammar.flashcard.f2b", (2, 0, True, 2))
+        _seed(ka, "grammar.fill_in", (7, 10, False, 0))
+        _seed(kudasai, "grammar.contrast", (4, 2, False, 0))
 
         # A dry run writes nothing.
         monkeypatch.setattr("sys.argv", ["migrate", "--user", MIGRATE_USER])

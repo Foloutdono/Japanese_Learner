@@ -38,7 +38,7 @@ from study.furigana import align_deck as align_furigana, align_sentence
 from routes.kana import _build_kana_card
 from routes.kanji import _build_kanji_card
 from routes.vocab import _build_vocab_card
-from routes.grammar import _build_grammar_card, ladder_progress
+from routes.grammar import _build_grammar_card, ladder_positions, mark_tutorials
 # The library attributes a deck to its author by display name. Reused
 # rather than re-queried: this is the same bulk lookup the leaderboard
 # goes through, which is also the precedent for showing one learner
@@ -2572,8 +2572,8 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
 
     states   = srs.get_bulk_stats(picked, mode)
     previews = srs.preview_reviews_bulk(picked, mode, user_id)
-    # A grammar ladder card is asked on its rung (plan 187e).
-    progress = ladder_progress(picked, mode)
+    # A grammar ladder card is asked on its step (plan 194).
+    progress = ladder_positions(picked, mode)
 
     cards = []
     for card_id in picked:
@@ -2616,6 +2616,7 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
     )
     # Each card's bar, new to mastered (plan 147).
     srs.attach_progress(cards, user_id)
+    mark_tutorials(cards, user_id)
     return {"cards": cards, "pace": pace.payload() if pace else None}
 
 

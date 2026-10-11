@@ -84,7 +84,7 @@ from routes.kana import _build_kana_card              # noqa: E402
 from routes.kanji import _build_kanji_card, FR_MAP as KANJI_FR_MAP     # noqa: E402
 from routes.vocab import _build_vocab_card, FR_MAP as VOCAB_FR_MAP     # noqa: E402
 from translations import get_meaning                  # noqa: E402
-from routes.grammar import _build_grammar_card, ladder_progress   # noqa: E402
+from routes.grammar import _build_grammar_card, ladder_positions, mark_tutorials   # noqa: E402
 from routes.decks import build_personal_card, build_pool_card, VISIBLE_DECKS_CTE   # noqa: E402
 from content.vocab_jmdict_data import POOL_ID_PREFIX                # noqa: E402
 from routes.profile import _profile_row, bridge_rest_days, counted_from   # noqa: E402
@@ -212,8 +212,8 @@ def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview, pr
     ]
     deck_list = [e for e in deck_list if e is not None]
 
-    # The card's progress goes to the one builder that reads it: the
-    # grammar ladder asks the exercise of the card's rung (plan 187e).
+    # The card's ladder row goes to the one builder that reads it: the
+    # grammar ladder asks the exercise of the card's step (plan 194).
     card = (build(raw_id, entry, deck_key, deck_list, m, lang, stage, preview, progress)
             if source == GRAMMAR else build(raw_id, entry, deck_key, deck_list, m, lang, stage, preview))
     # Every builder already sets its own card_id (kana/grammar derive it
@@ -1057,7 +1057,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
         card_ids = prefixed(ids, user_id)
         states.update({(cid, mode): v for cid, v in srs.get_bulk_stats(card_ids, mode).items()})
         previews.update({(cid, mode): v for cid, v in srs.preview_reviews_bulk(card_ids, mode, user_id).items()})
-        progresses.update({(cid, mode): v for cid, v in ladder_progress(card_ids, mode).items()})
+        progresses.update({(cid, mode): v for cid, v in ladder_positions(card_ids, mode).items()})
 
     cards = []
     for key, raw_id in picked:
@@ -1104,6 +1104,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     )
     # Each card's bar, new to mastered (plan 147).
     srs.attach_progress(cards, user_id)
+    mark_tutorials(cards, user_id)
     return {"cards": cards, "beyond": beyond}
 
 
@@ -1146,7 +1147,7 @@ def _unit_cards(user_id: str, unit_id: str, all_lanes, due_rows, count: int, exc
     for mode, card_ids in by_mode.items():
         states.update({(cid, mode): v for cid, v in srs.get_bulk_stats(card_ids, mode).items()})
         previews.update({(cid, mode): v for cid, v in srs.preview_reviews_bulk(card_ids, mode, user_id).items()})
-        progresses.update({(cid, mode): v for cid, v in ladder_progress(card_ids, mode).items()})
+        progresses.update({(cid, mode): v for cid, v in ladder_positions(card_ids, mode).items()})
     cards = []
     for key, raw_id in picked:
         _, source, deck_key, mode = key
@@ -1162,6 +1163,7 @@ def _unit_cards(user_id: str, unit_id: str, all_lanes, due_rows, count: int, exc
         cards.append(card)
     logger.info("basics unit run user_id=%s unit=%s served=%d", user_id, unit_id, len(cards))
     srs.attach_progress(cards, user_id)
+    mark_tutorials(cards, user_id)
     return {"cards": cards, "beyond": beyond}
 
 
