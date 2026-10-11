@@ -110,7 +110,11 @@ def _reading_problems(what: str, key: str, text: str, reading) -> list[str]:
 # one per notion the point has beyond the meaning the guess asks, each
 # named by its `notion`, so the tour walks every one.
 TOUR_KEYS = frozenset({"twists", "scene"})
-TWIST_KEYS = frozenset({"notion", "jp", "ask", "choices", "why", "pair"})
+TWIST_KEYS = frozenset({"notion", "jp", "ask", "choices", "why", "pair", "tr", "kind"})
+# What a twist is (plan 194): another use of the point, or a trap set
+# against it -- a rival that looks like it. The tutorial's usages stop
+# and its quiz read it.
+TWIST_KINDS = frozenset({"usage", "trap"})
 TWIST_REQUIRED = frozenset({"notion", "jp", "ask", "choices", "why"})
 TWISTS = (1, 6)
 MAX_NOTION_CHARS = 40
@@ -181,7 +185,9 @@ def _spoken_problems(what: str, line, level: str, pattern: str, rich: bool) -> l
 
 def _twist_problems(what: str, twist, level: str, pattern: str, rich: bool) -> list[str]:
     """One twist: the notion it shows, a sentence, a question over it,
-    three readings with the right one first, and the why."""
+    three readings with the right one first -- the second the confusion
+    the two-choice usages stop asks against (plan 194) -- and the why;
+    its translation and its kind where written."""
     if not isinstance(twist, dict) or not TWIST_REQUIRED <= set(twist) or set(twist) - TWIST_KEYS:
         return [f"{what} must be {{notion, jp, ask, choices, why[, pair]}}"]
     out = _text_problems(f"{what} notion", twist["notion"], rich, MAX_NOTION_CHARS)
@@ -197,6 +203,15 @@ def _twist_problems(what: str, twist, level: str, pattern: str, rich: bool) -> l
         texts = [c.get("en") for c in choices if isinstance(c, dict)]
         if len(set(texts)) != len(texts):
             out.append(f"{what} choices repeat")
+    tr = twist.get("tr")
+    if tr is not None:
+        # The sentence's translation, shown under it (plan 194): no
+        # Japanese, as no translation may hold any.
+        out += _text_problems(f"{what} tr", tr, rich, MAX_TOUR_CHARS)
+        if isinstance(tr, dict) and any(_CJK.search(tr.get(lang) or "") for lang in LANGS):
+            out.append(f"{what} tr holds Japanese")
+    if "kind" in twist and twist["kind"] not in TWIST_KINDS:
+        out.append(f"{what} kind must be one of {sorted(TWIST_KINDS)}")
     pair = twist.get("pair")
     if pair is not None and (
         not isinstance(pair, list) or len(pair) != 2

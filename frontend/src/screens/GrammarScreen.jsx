@@ -18,6 +18,9 @@ import { useDesk } from '../hooks/useDesk'
 import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
 import { LinePlatforms } from '../components/selection/LinePlatforms'
 import { useStationSamples } from '../stores/stationSamples'
+import { GateButton } from '../components/ui/GateButton'
+
+const LADDER = 'grammar.ladder'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -219,7 +222,12 @@ export default function GrammarScreen({ session }) {
           <ChevronIcon direction="right" size={16} className="rad-door__chev" />
         </button>
       )}
-      <ModeSelector modes={offered} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+      {/* The station opens on the ladder (plan 194): the gate boards it,
+          the other platforms stay under it, for practice of one's own. */}
+      {offered.some(m => m.key === LADDER) && (
+        <GateButton label={t.glLadderBoard} onClick={() => board(() => run(LADDER))} data-action="ladder" />
+      )}
+      <ModeSelector modes={offered.filter(m => m.key !== LADDER)} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
       {sheet}
     </SelectionScreen>
   )

@@ -11,12 +11,14 @@ import {
 import { usePace } from '../components/study/usePace'
 import {
   GrammarRule, GrammarPattern, GrammarStructure, GrammarChoice, GrammarAnswer,
-  GrammarFillSentence, GrammarContrastSentence,
+  GrammarFillSentence,
 } from '../components/study/GrammarPieces'
 import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
-import { GrammarBuild, GrammarWrite, LadderStrip } from '../components/study/GrammarWork'
+import { GrammarWrite } from '../components/study/GrammarWork'
+import { BuildEntry, GrammarChoose, GrammarConstruire, GrammarTiles, PointLine } from '../components/study/GrammarPlate'
+import { useBuild } from '../hooks/useBuild'
 import { cardShape } from '../domain/cardShape'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
@@ -202,6 +204,10 @@ export default function GrammarRun({ session }) {
     setShowRating(true)
   }
 
+  // Construire's answer (plan 194): typed into the entry under the card,
+  // shown in the card's hole as it is typed.
+  const entry = useBuild(card && cardShape(card).isBuild ? card : null, { session, lang, onDone: onFlashcardReveal })
+
   if (!valid) return <Navigate replace to={level ? platforms : '/learn/grammar'} />
 
   // ── Review (self-paced, ungraded browse of already-studied cards) ──
@@ -246,8 +252,8 @@ export default function GrammarRun({ session }) {
 
   const currentModeLabel = modeLabel(t, mode)
   // The card's own shape: the run's mode, or on the ladder (plan 187e)
-  // the exercise the card's rung asks.
-  const { isFill, isContrast, isBuild, isWrite, rung } = cardShape(card ?? { mode })
+  // the exercise the card's step asks.
+  const { isFill, isContrast, isBuild, isWrite, step } = cardShape(card ?? { mode })
   // Study.dc.html's footer strip: the exercise in hand.
   const cardFoot = { left: level ? `${level} 文法` : '文法', right: modeLabel(t, card?.exercise ?? mode) }
   // b2f shows the meaning and asks for the rule; f2b is the other way up.
@@ -275,8 +281,11 @@ export default function GrammarRun({ session }) {
     setActiveHints(hs => (hs.includes(key) ? [] : [key]))
   }
 
-  // The gate: a never-met card, its lesson in hand, not yet read.
-  const gated = Boolean(card && card.stage === 'new' && card.lesson && !card.lesson_seen)
+  // The gate: a point whose tutorial is due, its lesson in hand, not yet
+  // read. Once per POINT (plan 194): the server says so in `tutorial`; a
+  // card queued before it said nothing, and is gated as it was then.
+  const gated = Boolean(card && card.lesson && !card.lesson_seen
+    && (card.tutorial ?? card.stage === 'new'))
   // The lesson as the sheet and the gate print it: the card's own
   // identity over the embedded lesson.
   const lessonOf = c => c.lesson && ({
@@ -348,10 +357,13 @@ export default function GrammarRun({ session }) {
               stamp={gates.stamp}
               stage={card.stage}
               progress={card.progress ?? null}
+              ladder={Boolean(card.step)}
               onStampDone={gates.stampDone}
             >
               <PromptCard className="grammar-prompt" foot={cardFoot}>
-                {rung != null && <LadderStrip rung={rung} />}
+                {/* The point's steps in the card's corner (plan 194);
+                    Choisir and Construire draw their own. */}
+                {step && !isContrast && !isBuild && <PointLine card={card} t={t} />}
                 {/* Every mode here is the same card with a different
                     front: a rule, a meaning, or a sentence. The flip is
                     the reveal in all three, and switching the choices on
@@ -363,17 +375,17 @@ export default function GrammarRun({ session }) {
                 {isBuild || isWrite ? (
                   <>
                     {isBuild
-                      ? <GrammarBuild key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} />
+                      ? <GrammarConstruire key={card.card_id} card={card} answered={answered} entry={entry} />
                       : <GrammarWrite key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} session={session} />}
-                    {answered && <GrammarAnswer card={card} size={36} divided />}
+                    {/* Construire turns its own card to the point (plan 194). */}
+                    {answered && isWrite && <GrammarAnswer card={card} size={36} divided />}
                     <RevealActions
                       t={t} revealed={answered} resetKey={card.card_id}
                       dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
                   </>
                 ) : isContrast ? (
                   <>
-                    <GrammarContrastSentence card={card} revealed={answered} t={t} />
-                    {answered && <GrammarAnswer card={card} size={36} divided />}
+                    <GrammarChoose card={card} revealed={answered} selected={selected} t={t} />
                     <RevealActions
                       t={t} revealed={answered} resetKey={card.card_id}
                       dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
@@ -448,14 +460,20 @@ export default function GrammarRun({ session }) {
               </PromptCard>
             </CardTransition>
 
-            {/* The contrast drill's choices: the rivals, always on. */}
-            {isContrast && (
-              <MCQGrid
+            {/* Choisir's forms as the mock exam's answer tiles (plan 194):
+                docked under the thumb on a phone, where the rating bar
+                comes up once one is taken. */}
+            {isContrast && (desk || !answered) && (
+              <GrammarTiles
                 choices={card.contrast?.choices ?? []}
                 correct={card.grammar}
-                formatChoice={p => <GrammarChoice text={p} readings={card.choices_furigana} />}
+                readings={card.choices_furigana}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
+
+            {/* Construire's entry, under the card as the practice runs
+                take theirs (plan 194). */}
+            {isBuild && !answered && <BuildEntry entry={entry} t={t} />}
 
             {/* Options: meanings for a flashcard, rules for fill_in. */}
             {!isContrast && showChoices && (
@@ -488,7 +506,9 @@ export default function GrammarRun({ session }) {
               </div>
             )}
 
-            <RatingBar active={showRating && !gates.locked} onRate={postReview} />
+            {/* The bar comes up where Choisir's dock (on a phone) and
+                Construire's entry stood. */}
+            {!(!answered && (isBuild || (isContrast && !desk))) && <RatingBar active={showRating && !gates.locked} onRate={postReview} />}
           </>
         )}
 

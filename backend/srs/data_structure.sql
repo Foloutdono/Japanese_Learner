@@ -946,6 +946,8 @@ CREATE TABLE grammar_tours (
     tries    SMALLINT NOT NULL,
     helped   BOOLEAN NOT NULL,
     done_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    quiz_right SMALLINT,   -- the tutorial's closing quiz (plan 194)
+    quiz_total SMALLINT,
     PRIMARY KEY (user_id, card_id)
 );
 

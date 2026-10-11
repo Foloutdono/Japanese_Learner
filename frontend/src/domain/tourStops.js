@@ -1,6 +1,7 @@
 // ── 発見 — a tour's stops (plan 187) ─────────────────────────────
-// Look, guess and found are every tour's; the twists and the scene join
-// before the terminus where the point's tour is written (plan 187c).
+// Look, guess and found are every tour's; the scene, the twists and the
+// quiz join before the terminus where the point's tour carries them
+// (plans 187c, 194).
 // A twist per notion the point has beyond the meaning the guess asks
 // (plan 189), each a stop of its own: `twist-0`, `twist-1`… Read by the
 // tour itself (components/study/GrammarTour.jsx) and, on the desk, by
@@ -12,12 +13,24 @@ export function twistsOf(tour) {
   return tour.twists ?? (tour.twist ? [tour.twist] : [])
 }
 
+/** The order the owner set (plan 194): analyse, guess, the rule, the
+    point in context, then « C'est pas tout ! » -- each usage in turn --
+    the quiz, and the results. */
 export function stopsOf(tour) {
   return [
     'look', 'guess', 'found',
+    tour.scene && 'scene',
     ...twistsOf(tour).map((_, i) => `twist-${i}`),
-    tour.scene && 'scene', 'terminus',
+    tour.quiz?.length && 'quiz',
+    'terminus',
   ].filter(Boolean)
+}
+
+/** How the quiz went: the questions answered right, of how many. */
+export function quizScore(tour, picks) {
+  const quiz = tour.quiz ?? []
+  const right = quiz.filter((q, i) => picks?.[i] != null && q.choices[picks[i]]?.correct).length
+  return { right, total: quiz.length }
 }
 
 /** What kind of stop it is: a twist's stop is `twist` whichever notion

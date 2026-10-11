@@ -71,9 +71,11 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
 
 
 def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: str,
-                     rng: random.Random | None = None) -> dict | None:
+                     rng: random.Random | None = None, turn: int | None = None) -> dict | None:
     """
     {jp, tr, furigana (one blank part), choices: [pattern...], answer}
+    `turn` picks the sentence deterministically where given (the
+    ladder's review count, the tour quiz's question number).
     for one of the point's contrast examples, or None when it has none
     -- the pool filter (card_index.contrast_ok) should have kept such a
     point out, so None is defensive rather than expected.
@@ -98,7 +100,14 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
         pool = [ex for ex in pool if blank_span(ex["jp"], pattern, level)]
     if not pool:
         return None
-    example = rng.choice(pool)
+    if turn is None:
+        example = rng.choice(pool)
+    else:
+        # The ladder's Choisir asks another sentence each review (plan
+        # 194): the pool in a fixed order per point, walked by the turn.
+        order = list(pool)
+        random.Random(f"contrast:{level}:{pattern}").shuffle(order)
+        example = order[turn % len(order)]
     sentence = example["jp"]
 
     rivals = [
@@ -118,4 +127,10 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     choices.append(pattern)
     rng.shuffle(choices)
 
-    return {**blanked_payload(example, pattern, lang, level), "choices": choices, "answer": pattern}
+    # What each named rival is not (plan 194): the lesson's own line on it,
+    # said when that rival is the choice taken -- the trap explained.
+    why = {
+        r["pattern"]: localise({"en": r["en"], "fr": r["fr"]}, lang)
+        for r in entry.get("compare", []) if r["pattern"] in choices
+    }
+    return {**blanked_payload(example, pattern, lang, level), "choices": choices, "answer": pattern, "why": why}

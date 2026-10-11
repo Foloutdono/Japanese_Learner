@@ -25492,7 +25492,26 @@ button.brd-stn { cursor: pointer; }
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
-.tour-guess__key { flex: none; font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+/* The number as the mock exam's bubble (plan 194, the owner's word on
+   the choices: "look how it's done in the exam"). */
+.tour-guess__key {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--text-secondary);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-secondary);
+}
+.tour-guess--sel .tour-guess__key { background: var(--sel-ink); border-color: var(--sel-ink); color: var(--bg-main); }
+.tour-guess--ok .tour-guess__key { border-color: var(--success); color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.tour-guess--no .tour-guess__key { border-color: var(--rating-wrong); }
 .tour-guess__text { flex: 1; min-width: 0; text-wrap: pretty; }
 .tour-guess--sel { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
 .tour-guess--ok { border: 2px solid var(--success); }
@@ -25636,87 +25655,335 @@ button.brd-stn { cursor: pointer; }
 .tour-reply__who { font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); }
 .tour-reply__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 600; }
 
-/* 梯子 — the grammar ladder (plan 187e). The strip over a ladder card:
-   four rungs in the line's pigment, filled up to the one the card stands
-   on, the one whose exercise it is asked named in the line's ink -- below
-   the card's own where it falls back (plan 190). */
-.lad-strip {
-  list-style: none;
-  margin: 0 0 var(--sp-3);
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+/* 194 — Choisir and Construire on the run's own card (the owner's pick,
+   option C): no plate inside the card and no band; the point's roundel
+   in the card's top-right corner, in the stage word's place (a ladder
+   card draws neither the word nor the foot's band); the sentence at the
+   card's size with the point's hole, its translation under it; the card
+   turned once by the answer (.flashcard__face--turned) to the sentence
+   echoed small with the answer in its hole and the point; the forms as
+   the mock exam's answer tiles, docked under the thumb on a phone;
+   Construire's entry under the card, the practice runs'
+   (form.stage__foot). */
+.gl-choose, .gl-build { display: flex; flex-direction: column; width: 100%; }
+
+/* The roundel: where the stage's word (.stage-mark) stands on a card off
+   the ladder, and in its register; the line's ring cut into the group's
+   steps, the step's number inside, the group named beside it. The footed
+   card's body is its containing block (its inline-size containment). */
+.gl-ring {
+  position: absolute;
+  top: var(--sp-3);
+  right: var(--sp-4);
+  z-index: 3;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
   gap: var(--sp-2);
-  width: 100%;
-  --line-color: var(--line-grammar);
+  pointer-events: none;
+  transition: opacity 0.15s ease;
 }
-.lad-strip__rung { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
-.lad-strip__bar { height: 3px; border-radius: var(--r-pill); background: var(--surface-line); }
-.lad-strip__rung--passed .lad-strip__bar,
-.lad-strip__rung--at .lad-strip__bar { background: var(--line-color); }
-.lad-strip__name {
+/* While a press plays, its caption lands in this corner. */
+.quiz-card-stage:has(.card-stamp-overlay) .gl-ring { opacity: 0; }
+.gl-ring__dial { display: block; flex: none; }
+.gl-ring__arc { fill: none; stroke: var(--surface-line); stroke-width: 4; }
+.gl-ring__arc--on { stroke: var(--line-grammar); }
+.gl-ring__arc--now { stroke: var(--text-primary); }
+.gl-ring__arc--miss { stroke: var(--rating-wrong); }
+.gl-ring__n {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-primary);
+}
+.gl-ring[data-group="mastered"] .gl-ring__n { fill: var(--line-grammar); }
+.gl-ring__words { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+.gl-ring__name {
+  font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.gl-ring__of {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.lad-strip__rung--here .lad-strip__name { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); font-weight: 700; }
+.gl-ring__of--miss { color: color-mix(in srgb, var(--rating-wrong) 75%, var(--text-primary)); }
 
-/* 組立 build: the cue, the sentence with its gaps, the tray of pieces. */
-.bld, .wrt { display: flex; flex-direction: column; gap: var(--sp-4); width: 100%; text-align: start; }
-.bld-cue, .wrt-cue { margin: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
-.bld-cue__ask, .wrt-cue__ask, .wrt-said__label { font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
-.bld-cue__tr, .wrt-cue__situation { font-size: var(--fs-lead); font-weight: 600; line-height: 1.4; text-wrap: pretty; }
-.bld-sentence {
-  margin: 0;
+/* The card: a flashcard turned once, by the answer. */
+.gl-card { width: 100%; cursor: default; }
+.gl-front, .gl-back {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--sp-2) var(--sp-1);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+  padding-block: var(--sp-5);
+  text-align: center;
+}
+.gl-sent {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-board-fluid);
+  font-weight: 500;
+  line-height: 1.9;
+  line-break: strict;
+  text-wrap: balance;
+}
+.gl-sent rt { color: var(--text-secondary); }
+.gl-tr { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: balance; }
+.gl-tr--lead { font-size: var(--fs-lead); font-weight: 600; color: var(--text-primary); }
+.gl-hold { white-space: nowrap; }
+
+/* The hole: a sunk well with a dashed rule in the line's pigment; once
+   answered, the well holds the answer and the rule goes. */
+.gl-gap {
+  display: inline-block;
+  min-width: calc(var(--gap-size, 4) * 0.8em + 0.4em);
+  height: 1.3em;
+  margin: 0 0.1em;
+  padding: 0 var(--sp-1);
+  vertical-align: -0.25em;
+  border-bottom: 2px dashed var(--line-grammar);
+  border-radius: var(--r-card) var(--r-card) 0 0;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+.gl-gap--typed { height: auto; line-height: 1.3; vertical-align: baseline; }
+.gl-gap--focus { border-bottom-color: var(--accent2); border-bottom-style: solid; }
+.gl-gap--filled {
+  min-width: 0;
+  height: auto;
+  padding: 0 var(--sp-2);
+  line-height: 1.3;
+  vertical-align: baseline;
+  border-bottom: 0;
+  border-radius: var(--r-card);
+  font-weight: 700;
+}
+
+/* The answer's sentence: the front echoed a size down, dimmed, the
+   answer in its hole in full ink. */
+.gl-echo { width: 100%; }
+.gl-echo .gl-front { gap: var(--sp-1); padding-block: 0; }
+.gl-echo .gl-sent { font-size: var(--fs-lead); color: var(--text-secondary); }
+.gl-echo .gl-gap--filled { color: var(--text-primary); }
+.gl-echo .gl-tr { font-size: var(--fs-sm); font-weight: 400; color: var(--text-secondary); }
+
+/* The answer: what happened, the sentence, the point, the lesson's line
+   on a rival. */
+.gl-back__head { margin: 0; font-size: var(--fs-lead); font-weight: 700; }
+.gl-back__head--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.gl-back__head--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+/* keep-all: a form named in the line (ないでください) never breaks inside. */
+.gl-back__why {
+  margin: 0;
+  max-width: 32em;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+/* A wrong kana in the hole struck, the right one written over it. */
+.gl-fix { position: relative; display: inline-block; }
+.gl-fix s { color: var(--rating-wrong); text-decoration-thickness: 2px; }
+.gl-fix ins {
+  position: absolute;
+  inset: auto 0 100%;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--success) 70%, var(--text-primary));
+}
+
+/* Choisir's forms as the mock exam's answer tiles (.exam-tile): docked
+   under the thumb in sumi on a phone, where the rating bar comes up once
+   one is taken. */
+.gl-dock {
+  position: sticky;
+  bottom: var(--dock-bottom);
+  z-index: 10;
+  margin-top: auto;
+  margin-inline: calc(-1 * var(--sp-5));
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--bg-panel);
+}
+.gl-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.gl-tile {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 56px;
+  padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-2);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  border-radius: var(--r-panel);
+  color: var(--text-on-panel);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.gl-tile:hover, .gl-tile:focus-visible { border-color: var(--text-on-panel-soft); }
+.gl-tile:disabled { cursor: default; }
+.gl-tile__b {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--text-on-panel-soft);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-on-panel-soft);
+}
+.gl-tile__t {
+  min-width: 0;
   font-family: var(--font-jp);
   font-size: var(--fs-lead);
-  line-height: 2;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
-.bld-tile { white-space: nowrap; }
-.bld-slot {
-  min-width: 44px;
+.gl-tile__t rt { font-weight: 500; color: var(--text-on-panel-soft); }
+/* A longer form steps down, as the exam's tiles do; a long one takes the
+   row's width. */
+.gl-tiles--mid .gl-tile__t { font-size: var(--fs-body); }
+.gl-tiles--long { grid-template-columns: minmax(0, 1fr); }
+.gl-tiles--long .gl-tile { min-height: 48px; }
+.gl-tile--on { background: color-mix(in srgb, var(--text-on-panel) 8%, var(--bg-panel)); border-color: var(--text-on-panel); }
+.gl-tile--on .gl-tile__b { background: var(--text-on-panel); border-color: var(--text-on-panel); color: var(--bg-panel); }
+
+
+/* The desk's map of the walk (CardPanel, in the fare strip's place): one
+   upright rail in the line's pigment, a dot a stop, the stop in hand
+   ringed in ink, each with when. */
+.gl-map { position: relative; list-style: none; margin: 0; padding: 0; }
+.gl-map::before {
+  content: "";
+  position: absolute;
+  top: var(--sp-4);
+  bottom: var(--sp-4);
+  left: 11px;
+  width: 6px;
+  border-radius: 3px;
+  background: var(--surface-line);
+}
+.gl-map__group, .gl-map__stop {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: var(--sp-4);
+  align-items: center;
+  min-height: 32px;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.gl-map__group { min-height: 24px; padding-top: var(--sp-2); font-size: var(--fs-caption); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tr-term); }
+.gl-map__dot {
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  border: 3px solid var(--surface-line);
+  border-radius: 50%;
+  background: var(--surface);
+  font-size: var(--fs-caption-xs);
+}
+.gl-map__stop--end .gl-map__dot { border-radius: var(--r-plate); width: 20px; height: 20px; margin-left: 4px; border-width: 2px; }
+.gl-map__stop--done { color: var(--text-primary); }
+.gl-map__stop--done .gl-map__dot { border-color: var(--line-grammar); background: var(--line-grammar); color: var(--paper); }
+.gl-map__stop--now {
   min-height: 44px;
+  margin: 2px calc(-1 * var(--sp-3));
   padding: 0 var(--sp-3);
-  border: 1px dashed var(--text-secondary);
   border-radius: var(--r-card);
-  background: transparent;
+  background: color-mix(in srgb, var(--line-grammar) 14%, transparent);
   color: var(--text-primary);
-  font: inherit;
-  white-space: nowrap;
-  cursor: pointer;
+  font-weight: 700;
 }
-.bld-slot:disabled { cursor: default; }
-.bld-slot:not(.bld-slot--empty) { border-style: solid; background: var(--surface); }
-.bld-slot--next { border: 2px dashed var(--line-grammar); }
-.bld-slot--ok { border: 2px solid var(--success); }
-.bld-slot--no { border: 2px solid var(--rating-wrong); }
-.bld-tray { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
-.bld-piece {
-  min-height: 48px;
-  padding: 0 var(--sp-4);
+.gl-map__stop--now .gl-map__dot {
+  width: 22px;
+  height: 22px;
+  margin-left: 3px;
+  border: 4px solid var(--line-grammar);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text-primary);
+}
+.gl-map__when { font-size: var(--fs-caption); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* The tour's new pieces (plan 194): « C'est pas tout ! » over a usage's
+   notion, the trap's tag, the quiz's count, the results. */
+.tour__notion-head { font-weight: 700; color: var(--text-primary); }
+.tour-trap {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--sp-2);
+  border: 1.5px solid var(--rating-wrong);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary));
+}
+.tour-score { display: flex; align-items: baseline; gap: var(--sp-3); margin: 0; }
+.tour-score__right { font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.tour-score__of { font-size: var(--fs-lead); font-weight: 600; color: var(--text-secondary); }
+.tour-recap { list-style: none; margin: 0; padding: 0 var(--sp-4); }
+.tour-recap__row {
+  display: grid;
+  grid-template-columns: 22px auto minmax(0, 1fr);
+  gap: var(--sp-3);
+  align-items: center;
+  padding: var(--sp-3) 0;
+  border-top: 1px solid var(--surface-line);
+  font-size: var(--fs-sm);
+}
+.tour-recap__row:first-child { border-top: 0; }
+.tour-recap__kind { font-size: var(--fs-caption); color: var(--text-secondary); white-space: nowrap; }
+.tour-recap__jp { font-family: var(--font-jp); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tour-sheet {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
   background: var(--surface);
   color: var(--text-primary);
-  font-family: var(--font-jp);
-  font-size: var(--fs-lead);
-  line-height: 2;
-  white-space: nowrap;
+  text-align: start;
   cursor: pointer;
 }
-.bld-piece:disabled { opacity: 0.35; cursor: default; }
-.bld-slot:focus-visible, .bld-piece:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
-.bld-piece:not(:disabled):hover { border-color: var(--line-grammar); }
-.bld-said, .wrt-said { display: flex; flex-direction: column; gap: var(--sp-2); }
-.bld-said__head, .wrt-said__found { margin: 0; font-weight: 700; font-size: var(--fs-body); }
-.bld-said--ok .bld-said__head, .wrt-said__found--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
-.bld-said--no .bld-said__head, .wrt-said__found--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+.tour-sheet__pattern { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; }
+.tour-sheet__name { font-size: var(--fs-sm); color: var(--text-secondary); }
+.tour-sheet__go { margin-left: auto; font-weight: 700; }
+
+/* 書く write and its shared pieces. */
+.wrt { display: flex; flex-direction: column; gap: var(--sp-4); width: 100%; text-align: start; }
+.wrt-cue { margin: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.wrt-cue__ask, .wrt-said__label { font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
+.wrt-cue__situation { font-size: var(--fs-lead); font-weight: 600; line-height: 1.4; text-wrap: pretty; }
+.wrt-said { display: flex; flex-direction: column; gap: var(--sp-2); }
+.wrt-said__found { margin: 0; font-weight: 700; font-size: var(--fs-body); }
+.wrt-said__found--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.wrt-said__found--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
 
 /* 書く write: the point and the words to use, the field and Check, then
    what was written, the detector's word and one way to say it. */
@@ -41149,5 +41416,38 @@ button.brd-stn { cursor: pointer; }
     .today > .rst .rst-air { min-height: var(--sp-5); }
   }
   /* ── 191:desk-tickets end ── */
+
+  /* ── 机 — Choisir and Construire on the desk (plan 194) ──
+     The card's sides a rung roomier; Choisir's forms as the exam's
+     answer sheet on the desk (.mcq-list--brief): two by two on the
+     paper, a bubble and the form, the right one ringed and a wrong pick
+     crossed once answered; Construire's entry the practice runs' floor
+     (form.stage__foot above); the walk's map in the card panel. */
+  .gl-front, .gl-back { padding-block: var(--sp-7); }
+  .gl-dock {
+    position: static;
+    margin: 0;
+    padding: 0;
+    background: none;
+  }
+  .gl-tile {
+    min-height: 52px;
+    background: var(--surface);
+    border-color: var(--surface-line);
+    color: var(--text-primary);
+  }
+  .gl-tile:hover, .gl-tile:focus-visible { border-color: var(--text-secondary); }
+  .gl-tile__b { border-color: var(--text-secondary); color: var(--text-secondary); }
+  .gl-tile__t rt { color: var(--text-secondary); }
+  .gl-tile--on { background: var(--sel-wash); border-color: var(--sel-line); }
+  .gl-tile--on .gl-tile__b { background: var(--sel-ink); border-color: var(--sel-ink); color: var(--bg-main); }
+  .gl-tile--ok, .gl-tile--no { background: var(--surface); }
+  .gl-tile--ok .gl-tile__b, .gl-tile--no .gl-tile__b { background: none; }
+  .gl-tile--ok { border: 2px solid var(--success); }
+  .gl-tile--ok .gl-tile__b { border-color: var(--success); color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+  .gl-tile--no { border: 2px solid var(--rating-wrong); }
+  .gl-tile--no .gl-tile__b { border-color: var(--rating-wrong); color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+  .gl-tile:disabled:not(.gl-tile--ok, .gl-tile--no) { opacity: 0.5; }
+  .desk-card .gl-map { margin-bottom: var(--sp-4); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

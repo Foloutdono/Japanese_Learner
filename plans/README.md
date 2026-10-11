@@ -6522,6 +6522,40 @@ are left for a cleanup task. Tests: the mockup and phone suites
 rewritten for the drawing, the polling, responsive, deskfree and
 sources suites moved to it.
 
+## Plan 135 — 区間, the fare gate takes the hall on the desk (2026-09-25)
+
+Numbered 135 because 134 is the analyser's video passage
+(`claude/plan-134-analyzer-desk`, open). The owner's complaint, from a
+1920 screenshot: the gate stood 826 × 470 at the top with over 40 % of
+the window empty under it, the line chips repeated the lanes, "only 6 of
+153 can board" did not say which, and nothing said how long 153 cards
+would take. Four directions and eight ideas were drawn on the "Tsuji desk
+— Today" canvas (https://claude.ai/artifact/V6FEqt6fxNXXejETJZmcDw); the
+owner liked A, asked for its variants with the ideas, and picked **A·2**:
+the bands, the run length with its minutes, and who boards on each lane.
+
+| # | What | Status |
+|---|------|--------|
+| 135 | **Backend** `srs.get_review_pace` (the median gap under 120 s between the last 400 reviews of 14 days, none under 20 gaps: `seconds_per_review`), on `/api/today` as `seconds_per_review` (never fails the gate); `/api/today/cards?quota=<lane>:<n>,...` keeps the named lanes, each cut to its figure after `drop_seen` (`daily_queue.parse_quota`, `keep_quota`) — the run does the counting, since a new card is drawn afresh per batch and the server could not count what the run holds; `tests/test_today_take.py`. **Frontend** `domain/lanes.js`'s `splitTake` (the queue's round-robin, in its order), `parseQuota`/`quotaParam`, `runPathFor(…, take)` sending `?quota=` when the length cuts the choice; `GateCard`'s `DeskGate` on the desk (the phone's gate unchanged): the head's `Seg` (20 / 50 / 100 under the total, and all; remembered in `localStorage` `tsuji.gateTake`), the count and "sur N", the minutes; a band per line, its switch beside its lane tiles, each tile its share (`n / all`, faded when the length leaves it out), free, or dashed with the refill's hour when nothing paid can ride; the fare foot (board · wait +30 at hh:mm · balance) beside Depart; `TodayRun` reads `quota`, counts what it has answered (per tab, `sessionStorage`) and holds per lane, asks for the rest and ends without another fetch; the 机 section replaces plan 116's rules; locales; `src/today.wide.test.jsx` (rewritten), `src/today.desktop.test.jsx` (two tests rewritten), `src/domain/lanes.test.js`, a quota block in `TodayRun.browser.test.jsx`, a line in `deskfree.phone.test.jsx`. the week ahead (below). Second pass, owner-directed ("do exactly like the mock up, even the buttons at the top"): A·2's measures exactly — Today's canvas uncapped (`.phone__content:has(> main.today)`), `--sp-7` margins, the band a 230px | 1fr grid, lanes `repeat(3, 1fr)`, tiles 46px on the lane's 9% tint with "where · mode" on one line, the length `Seg` square (`--r-plate`) on `--bg-main` at 34px with plain labels, the count in `--accent2`, the fare a 1fr | 420px grid with Depart at 52px; a line's name wraps to two lines rather than clipping. DESIGN.md and the desk README follow | DONE (2026-09-25) |
+
+The side column's foot as A·2 drew it: `GET /api/today/forecast`
+(`srs.get_due_forecast`, seven days; its own request so the phone and the
+tab badge never pay for it), `stores/forecast.js`, `components/journey/
+WeekAhead.jsx` at the foot of `DeskSide` (a bar a day, the figure over it,
+the weekday under it in Japanese, today's bar the gate's own total in
+gold), and "Laissées pour demain N" when the gate's choice leaves some —
+the gate publishes it through `stores/gateRun.js`; the side column runs
+the window's height on Today. Tests: the week's block of
+`src/today.wide.test.jsx`, the forecast's in `tests/test_today_take.py`.
+
+Verification: backend `tests/test_today_take.py`, `test_daily_queue.py`,
+`test_today_ration.py` green; the full suite's only failures are the
+audio tests (no `lameenc` on this machine) and `test_backfill_first_ride`
+(the machine's timezone), untouched here. Frontend: the Today tests,
+`deskfree.phone`, `desk.css`, the locales and the lanes unit tests green;
+the full run's other failures (ask, focus, frontdoor, ride, … desktop
+files) all pass when run alone — load flakes of the local browser.
+
 ## Plan 136 — 帳, the analyser's passages first (2026-09-26)
 
 Numbered 136 after a grep of origin/main found nothing at 136 or above
@@ -7185,3 +7219,45 @@ The owner, after plan 192: "Fix the bugs" -- the list 192 left, each reproduced 
 | 193b | **The lookups and readings**: まま no card read まま -- a native word in hiragana takes no katakana card (`resolve_kana`: ママ), and a kana word whose UniDic lemma is spelled in kanji the card does not share is JMdict's common kana word where the pool holds one (`_kana_word_instead`: 間々 "occasionally"; かさ, さかな and かえって keep their cards, the pool holding no common kana word read so); 侭 is grammar to the vocab audit (`IGNORED_LEMMAS`). The deck: すぐ/すぐに (the N1 直ぐ folded into the N5 card, with its senses), ゆっくり/ゆっくりと (the N3 card folded), いい/よい (the N1 良い and 好い, each spelling read either way through `FOLDED_ONLY`, which now merges with the folds instead of replacing them), 赤ちゃん at N4 and 何も at N3 (the kana card taking the kanji the level teaches, the N1 card folded), 世論 read よろん/せろん (pool row 52098 pruned, `pool_moves.json`); snapshot, frequency order and placement lists rebuilt. The vocab gate (`difficulty.vocab_over_level`): a question word and も／か (`_PARTICLE_TAILS`), お／ご on a verb's stem (お使いください), the わ-row's stem (使い → 使う). 〜不足 after a noun read ぶそく (`reading_context`). `analysis.LOCAL_REV` 13. Tests: `test_lookup_precision.py`'s `WhatTheBankMetTests` and an invariant over every taught sentence, `test_reading_sentences.py`'s gate tests, `test_furigana_context.py`'s 不足 | DONE |
 
 After the deploy: `python -m scripts.migrate_vocab_ids --yes` (eleven ids moved) and `python -m scripts.migrate_pool_cards --yes` (世論).
+
+## Plan 194 — 文法の道, the grammar rework (2026-10-11)
+
+The owner: the ladder the default; the tutorial once per point, not per
+mode; "build it" renamed and made fill-the-gap typing with the
+translation given; the tutorial rethought (analyse, guess, the rule, in
+context, « C'est pas tout ! » a usage at a time with two choices and
+translations, a quiz of seven or eight with traps, the results with the
+point's sheet); the walk Choisir ×3, Construire ×4, mastered (the
+flashcard and Construire in turn), a quicker relapse (one of each); every
+point every mode; the screens redrawn for clarity, light mode first.
+Three directions were drawn on the canvas "Tsuji — grammar rework"
+(https://claude.ai/artifact/LiXAf4GYe23568VhBoDNgu); the owner picked B's
+plate with A's underline and B's hole, the band at the plate's foot, the
+translation under the sentence, no Japanese in a title, and the line and
+the desk redrawn (board "Retenu"). On seeing it built, the owner took the
+band and the plate out again: the band useless, the bar in the card
+redrawn, Choisir's forms as the mock exam's tiles, and the reveal a
+flashcard's turn instead of the coloured rule (194d). Then: the steps
+in the card's top-left corner, the point alone on the card's back with
+the sides switchable, and Construire's entry under the card as the
+practice runs take theirs (194e). The owner found the steps line and the
+switch wrong and asked for three options, built and shot in context
+("Grammar Card Options", https://claude.ai/artifact/UvcN4n5xuFrN1JzEDY24k5:
+A the card's own band in steps, B a route map across the card's head, C
+a roundel), and picked C, the roundel in the stage word's place (194f).
+
+| Phase | What | Status |
+|---|---|---|
+| 194a | **Content**: the 1,392 twists, N5–N1, each a `tr` (en, fr) and a `kind` (usage / trap), the confusion the two-choice stop asks against moved second; `grammar_check` holds both; `ladder.json` rebuilt | DONE (2026-10-11) |
+| 194b | **Backend**: `srs/ladder.py`, the walk in the card's own row (no migration, the forecast through it); Construire typed (`grammar_ladder.build_payload` / `check_build`, `POST /api/grammar/build/check`, 539 of 545 points, two gaps for a point in two pieces); Choisir walking its sentences by the review count, each rival's compare line on the payload; `tutorial` on a card (once per point: no `grammar_tours` row, no review on any grammar track); the tour's two-choice usages and closing quiz (`_quiz`: gap, which, usage), its score on `grammar_tours` (`quiz_right`, `quiz_total`), `TOUR_REV` 3. Tests: `test_grammar_ladder.py` (the walk, the bar, the relapse, the turns, old rows, the forecast, Construire), `test_grammar_tour.py` (the quiz, the usages, the tutorial once) | DONE (2026-10-11) |
+| 194c | **Frontend**: `components/study/GrammarPlate.jsx` (the plate, the band, the point's line, Choisir, Construire, the desk's `LadderMap` in `CardPanel`), `domain/ladderLine.js`, `MCQGrid`'s `plats`, the tour's new order with « C'est pas tout ! », the quiz and the results (`GrammarTour`, `tourStops`, `TourPanels`), the gate on `tutorial` (`GrammarRun`, `TodayRun`), the level page boarding the ladder, the `gl-*` rules and the desk's in `index.css`, DESIGN.md's tour and ladder. Tests: `GrammarPlate.browser`, the tour's browser/phone/desktop/short, `ladder.phone`, the contrast faces | DONE (2026-10-11) |
+| 194d | **The second look**: no band and no plate (`ladderLine.bandOf` and the `band*` strings gone, `MCQGrid`'s `plats` taken back out); the point's steps a quiet dot line at the card's head (`.gl-walk`); the card a flashcard that turns once answered (`TurnCard`, `playFlip`) to what happened, the sentence whole with the point picked out (`.dict-ex__hl`) and the point; Choisir's forms as the exam's tiles (`GrammarTiles`, a sumi dock on a phone, the stage's surface on the desk); the tour's guess keys as the exam's bubble. Tests: `GrammarPlate.browser` rewritten, `ladder.phone`, the contrast faces, `GrammarRun.gate` | DONE (2026-10-11) |
+| 194e | **The third look**: the steps in the card's top-left corner across from the stage's word, the name over the dots, the magnifier under them; the card's two sides -- the sentence (the answer in its hole, the correction struck and written over) and the point (what happened, the point, the lesson's line on a rival) -- turned by the answer, then by a tap, Space or the `Seg` switch under the face; Construire's entry out of the card into the stage's foot (`BuildEntry`, `form.stage__foot`, the answer held by the run in `hooks/useBuild.js` for GrammarRun, TodayRun and StudyRun), the rating bar in its place; the hole held to its whole word (`holdGaps` over part runs). Tests: `GrammarPlate.browser`, `ladder.phone`, the contrast faces, `GrammarRun.gate`, `grammarRule.phone` | DONE (2026-10-11) |
+| 194f | **Option C**: the point's roundel (`PointLine`, `.gl-ring`: the line's ring cut into the group's steps, the step's number inside, the group named beside, « à refaire » once missed, whole round a star once mastered) in the card's top-right corner, where a ladder card no longer prints the stage word or the foot's band (`CardTransition`'s `ladder`, from GrammarRun, TodayRun and StudyRun); the card turned once by the answer to the sentence echoed with the answer in its hole and the point (`.gl-echo`), the switch and its strings gone. Tests: `GrammarPlate.browser` (the roundel, the one turn), `ladder.phone`, the contrast faces, `grammarRule.phone` | DONE (2026-10-11) |
+
+Open: the six points no tour can light (〜て（理由）, 〜を（移動）, 〜で（理由）,
+自動詞／他動詞, 使役受身形, 〜み) keep the lesson and have no Construire;
+〜も〜ば〜も (three pieces) has no Construire; 63 points' quizzes run four
+to six questions where their catalogue holds too few contrast sentences
+and rivals' examples.
+

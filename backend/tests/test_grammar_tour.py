@@ -11,6 +11,7 @@ import pytest
 from content.grammar_points_data import (
     GRAMMAR_POINTS_BY_LEVEL, LEVELS, find, gloss, grammar_to_id, localise,
 )
+from core.db import db_conn
 from study.grammar_detect import hits
 from study.grammar_tour import (
     GUESS_COUNT, LOOK_COUNT, MIN_LIT, TOUR_REV, lit_spans, tour_payload,
@@ -238,7 +239,10 @@ def test_the_authored_half_is_served_in_the_learners_language():
             assert twist["ask"] == said["ask"][lang]
             right = [c for c in twist["choices"] if c["correct"]]
             assert [c["text"] for c in right] == [said["choices"][0][lang]]
-            assert {c["text"] for c in twist["choices"]} == {c[lang] for c in said["choices"]}
+            # Two readings (plan 194): the right one and the confusion set
+            # second; the quiz asks all three.
+            assert {c["text"] for c in twist["choices"]} == {c[lang] for c in said["choices"][:2]}
+            assert twist["tr"] == said["tr"][lang] and twist["kind"] in ("usage", "trap")
         assert scene["place"] == written["scene"]["place"]
         assert scene["place_caption"] == {"fr": "Kiosque", "en": "Kiosk"}[lang]
         assert scene["them"] == written["scene"]["them"][lang]
@@ -277,3 +281,85 @@ def test_a_kana_line_wraps_between_its_phrases():
         for before, part in zip(parts, parts[1:]):
             if part.get("reading") is None and not part.get("highlight") and not before.get("highlight"):
                 assert part["text"][0] not in "、。もはがをによね"
+
+
+# ── Plan 194: the quiz, and the tutorial once per point ──────
+
+def test_the_quiz_asks_seven_or_eight_with_their_traps():
+    level, entry = find("〜てください")
+    quiz = tour_payload(level, entry, "fr")["quiz"]
+    assert 7 <= len(quiz) <= 8
+    assert {q["kind"] for q in quiz} == {"gap", "which", "usage"}
+    for q in quiz:
+        assert sum(c["correct"] for c in q["choices"]) == 1, q
+        assert any(c.get("trap") for c in q["choices"]), q
+        assert not any(c["correct"] and c.get("trap") for c in q["choices"])
+        assert q["why"]
+    for q in (q for q in quiz if q["kind"] == "gap"):
+        assert "〜てください" in [c["pattern"] for c in q["choices"]]
+        assert any(p.get("blank") for p in q["furigana"])
+    for q in (q for q in quiz if q["kind"] == "which"):
+        right = next(c for c in q["choices"] if c["correct"])
+        assert lit_spans(right["jp"], "〜てください", level)
+        for c in q["choices"]:
+            if not c["correct"]:
+                assert not lit_spans(c["jp"], "〜てください", level), c["jp"]
+    # Seeded: a reload asks the same.
+    assert tour_payload(level, entry, "fr")["quiz"] == quiz
+
+
+def test_the_usages_carry_their_translation_and_kind():
+    for pattern in ("〜てください", "か", "〜ば"):
+        level, entry = find(pattern)
+        for twist in tour_payload(level, entry, "en")["twists"]:
+            assert twist["tr"] and len(twist["choices"]) == 2 and twist["kind"] in ("usage", "trap")
+
+
+def _wipe_point(raw_id):
+    from core.auth import DEV_USER_ID
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM grammar_tours WHERE user_id = %s AND card_id = %s", (DEV_USER_ID, raw_id))
+            cur.execute("DELETE FROM card_modes WHERE card_id = %s", (f"{DEV_USER_ID}:{raw_id}",))
+            cur.execute("DELETE FROM review_log WHERE card_id = %s", (f"{DEV_USER_ID}:{raw_id}",))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _card(client, level, mode, raw_id):
+    cards = client.get(f"/api/grammar/cards?level={level}&mode={mode}&lang=fr&count=25"
+                       f"&beyond_target=true").json()["cards"]
+    return next((c for c in cards if c["raw_id"] == raw_id), None)
+
+
+def test_the_tutorial_is_due_once_per_point_not_per_mode(client):
+    level, entry = find("〜てください")
+    raw_id = grammar_to_id(entry, level)
+    _wipe_point(raw_id)
+    try:
+        card = _card(client, level, "grammar.ladder", raw_id)
+        assert card is not None and card["tutorial"] is True and card["lesson"]["tour"]["quiz"]
+        r = client.post("/api/grammar/tour", json={"raw_id": raw_id, "tries": 0, "helped": False,
+                                                   "quiz_right": 7, "quiz_total": 8})
+        assert r.json() == {"recorded": True}
+        # New on another platform, but toured: no tutorial again.
+        other = _card(client, level, "grammar.flashcard.f2b", raw_id)
+        assert other is not None and other["stage"] == "new" and other["tutorial"] is False
+        record = client.get(f"/api/grammar/point?id={raw_id}").json()["tour_record"]
+        assert (record["quiz_right"], record["quiz_total"]) == (7, 8)
+    finally:
+        _wipe_point(raw_id)
+
+
+def test_a_point_studied_before_the_tour_is_never_toured(client):
+    level, entry = find("〜てください")
+    raw_id = grammar_to_id(entry, level)
+    _wipe_point(raw_id)
+    try:
+        client.post("/api/grammar/review", json={"card_id": raw_id, "mode": "grammar.flashcard.b2f", "quality": 4})
+        card = _card(client, level, "grammar.ladder", raw_id)
+        assert card is not None and card["stage"] == "new" and card["tutorial"] is False
+    finally:
+        _wipe_point(raw_id)

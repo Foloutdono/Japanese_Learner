@@ -15,7 +15,8 @@ import { stopKind, stopsOf, twistIndex, twistsOf } from '../../domain/tourStops'
 // found sealed, the examples and the neighbour at the terminus. Both
 // read the tour's own view (GrammarTour's `onView`): where it is, the
 // misses, whether the rule was given, each twist's and the scene's
-// answers. A twist's stop is named by its notion (plan 189). No key is printed on either (the owner's word).
+// answers. A twist's stop is named by its notion (plan 189); the quiz's
+// (plan 194) says its score as it goes. No key is printed on either (the owner's word).
 
 /** How a stop went, as the line prints it beside the stop's name. */
 function result(t, stop, i, view) {
@@ -25,6 +26,9 @@ function result(t, stop, i, view) {
     if (passed && view.helped) return { text: t.tourRuleGiven }
     if (passed && view.misses === 0) return { ok: true }
     return { text: t.tourTries(view.misses), no: here }
+  }
+  if (stop === 'quiz' && view.quiz && (passed || view.quiz.answered > 0)) {
+    return { text: `${view.quiz.right}/${view.quiz.total}` }
   }
   const answer = stop === 'scene' ? view.scene : twistIndex(stop) >= 0 ? view.twists?.[twistIndex(stop)] : null
   if (answer != null) {

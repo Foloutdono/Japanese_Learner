@@ -9,6 +9,7 @@ from .models import CardState
 from .scheduler import LEARNING_STEPS, Scheduler, clamp_quality
 from .storage import Storage
 from . import xp as xp_math
+from . import ladder
 
 logger = logging.getLogger(__name__)
 
@@ -643,7 +644,7 @@ class SRSEngine:
         # this review is a learning step's repeat, which rides free
         # (core/credits.py, fare). Every review route prices on it.
         repeat = self.is_repeat(state.total_reviews, state.is_learning)
-        updated = self.scheduler.review(state, quality)
+        updated = self._schedule(state, quality)
         self._save_state(updated)
         xp_info = self._log_review(card_id, mode, quality)
         result = self._to_dict(updated)
@@ -658,6 +659,13 @@ class SRSEngine:
         result["stage"] = self._classify_stage(updated.total_reviews, updated.interval_days)
         result["repeat"] = repeat
         return result
+
+    def _schedule(self, state: CardState, quality: int) -> CardState:
+        """The row after a review: the grammar ladder walks its own steps
+        (srs/ladder.py, plan 194), every other track the scheduler's."""
+        if state.mode == ladder.LADDER_MODE:
+            return ladder.review(state, quality)
+        return self.scheduler.review(state, quality)
 
     @staticmethod
     def is_repeat(total_reviews: int, is_learning: bool) -> bool:
@@ -1114,7 +1122,7 @@ class SRSEngine:
                 # A fresh copy per quality — every hypothetical rating
                 # branches off the same saved state, never off the
                 # previous quality's hypothetical outcome.
-                updated = self.scheduler.review(copy.deepcopy(base_state), quality)
+                updated = self._schedule(copy.deepcopy(base_state), quality)
                 xp_earned = xp_math.compute_review_xp(quality, reviews_today)
                 new_level = xp_math.level_from_xp(prior_xp + xp_earned)
                 per_quality[quality] = {

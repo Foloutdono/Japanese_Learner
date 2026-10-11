@@ -1,125 +1,78 @@
 """
-The grammar ladder: one track whose exercise climbs with the card (plan 187e).
+The grammar ladder's exercises (plan 187e; walked as steps since plan 194).
 
-A grammar card in the day's run used to be one exercise for ever -- the
-recognition flashcard, Today's main lane. On the ladder (`grammar.ladder`,
-study/modes.py) the card is ONE scheduler row whose exercise is read from
-how far the card has come (`srs._progress`, 0 new to 1 mastered):
+A ladder card is one scheduler row (`grammar.ladder`) whose exercise is
+read from where the point stands on its walk -- srs/ladder.py, the step
+machine: Choisir three times, Construire four times, then mastered, where
+the flashcard and Construire take turns. This module builds what each
+step asks, and which exercise stands in where a point cannot be asked
+on its own (EXERCISES):
 
-    rung  progress   exercise                         falls back to
-    0     < 0.25     fill_in: the sentence intact,     the f2b flashcard
-                     name the rule at work
-    1     < 0.5      contrast: the point blanked,      rung 0's
-                     its rivals as the choices
-    2     < 0.75     build: the sentence as tiles,     rung 1's
-                     one or two missing, a rival's
-                     form as the wrong tile
-    3     >= 0.75    write: a situation, two words     rung 2's
-                     to use, a field; the detector
-                     says whether the point is there
+    choose      contrast: the point blanked, its rivals as the choices;
+                else fill_in (name the rule at work); else the flashcard
+    build       Construire: the sentence's translation given, the point
+                blanked, the learner types it (kana or romaji), checked
+                here by check_build and then self-rated (ADR 0013);
+                else choose's chain
+    flashcard   the f2b flashcard, which every point can be
 
-A miss lowers the progress, so the card steps down a rung by itself. What
-the scheduler records is the one ladder key whatever was asked, the
-argument study/modes.py makes for hints: a rung must not fork a track.
+Construire (plan 194) replaced plan 187e's tiles, at the owner's word:
+"fill the gaps typing, no choices, with the translation provided". It
+needs no rival and no marked sentence, only a sentence where the point
+is written in one stretch -- an example, a twist with its translation,
+or a scene's line -- so every point a tour can light can be built.
 
-`build` and `write` are platforms of their own as well (grammar.build,
-grammar.write), each served only where its payload can be made:
-
-- build needs a sentence its author marked as telling the point from its
-  rivals (card_index.contrast_ok, the contrast drill's own), the point
-  written there in one stretch, and a rival whose form can stand as the
-  wrong tile. Contrast's marking is what makes the wrong tile certainly
-  wrong; a tile invented for a sentence nobody marked could be right.
-- write needs the detector trusted on the point (grammar_detect.can_find,
-  composition's rule, plan 125) and an example to set the situation. The
-  check is composition's own POST /api/composition/check -- free, local,
-  nothing written -- and the learner rates themselves (ADR 0013).
+`write` is a platform of its own (grammar.write), served only where the
+detector is trusted on the point (grammar_detect.can_find, composition's
+rule, plan 125); the check is composition's own POST
+/api/composition/check -- free, local, nothing written -- and the
+learner rates themselves.
 """
+import difflib
 import json
 import random
 import re
+import unicodedata
 from functools import lru_cache
 from pathlib import Path
 
 from content.grammar_points_data import find
 from content.grammar_sentences_data import translation
+from srs import ladder as steps
 from study.furigana import align_sentence, mark_spans
 from study.grammar_examples import blank_span
 from study.grammar_detect import can_find
-from study.grammar_match import contains_pattern, verifiable
+from study.grammar_match import verifiable
 from study.grammar_tour import _dictionary_form, lit_spans
-from study.morphology import tokenize
+from study.morphology import kata_to_hira, tokenize
+from study.romaji import kana_of
 
-# Where a rung starts, on the card's own progress (plan 147's bar).
-THRESHOLDS = (0.25, 0.5, 0.75)
-RUNGS = ("recognise", "choose", "build", "write")
-
-# The exercise each rung asks, by the mode's base, and the bases each one
-# falls back through, highest first (study/modes.py's names).
+# The exercise each step kind asks, by the mode's base, and what stands
+# in for it, first to last (study/modes.py's names).
 FLASHCARD, FILL_IN, CONTRAST, BUILD, WRITE = "flashcard", "fill_in", "contrast", "build", "write"
 # The snapshot's third list: the points the detector blanks (can_blank).
 BLANK = "blank"
-_CHAIN = (FLASHCARD, FILL_IN, CONTRAST, BUILD, WRITE)
-# The rung an exercise stands for: the flashcard, a fallback, is rung 0's.
-RUNG_OF_BASE = {FLASHCARD: 0, FILL_IN: 0, CONTRAST: 1, BUILD: 2, WRITE: 3}
+EXERCISES = {
+    steps.CHOOSE: (CONTRAST, FILL_IN, FLASHCARD),
+    steps.BUILD_KIND: (BUILD, CONTRAST, FILL_IN, FLASHCARD),
+    steps.FLASHCARD: (FLASHCARD,),
+}
+# The step kind an exercise stands for, which the point's line lights.
+KIND_OF_BASE = {CONTRAST: steps.CHOOSE, FILL_IN: steps.CHOOSE, BUILD: steps.BUILD_KIND,
+                FLASHCARD: steps.FLASHCARD}
 
-# A sentence's last mark stays where it is: it is not a tile.
-_TAIL = "。！？!?"
-# What leans on the word before it, so never opens a tile.
-_BOUND = {"particle", "auxiliary", "suffix", "symbol"}
-# The fewest tiles a build is worth asking with, and from how many two
-# are missing rather than one.
-MIN_TILES = 3
-TWO_GAPS = 4
 HELPERS = 2
 _HELPER_POS = ("noun", "verb", "adjective")
 
 
-def rung_of(progress: float | None) -> int:
-    """The rung a card at `progress` stands on, 0 to 3."""
-    p = progress or 0.0
-    return sum(p >= t for t in THRESHOLDS)
+def chain_for(kind: str) -> tuple[str, ...]:
+    """The bases a step of `kind` is asked in, its own first."""
+    return EXERCISES[kind]
 
 
-def chain_for(rung: int) -> tuple[str, ...]:
-    """The bases a card on `rung` is asked in, the rung's own first, then
-    each one under it: rung 2 is build, else contrast, else fill_in, else
-    the flashcard."""
-    top = {0: FILL_IN, 1: CONTRAST, 2: BUILD, 3: WRITE}[rung]
-    return tuple(reversed(_CHAIN[: _CHAIN.index(top) + 1]))
+# ── 作る Construire ───────────────────────────────────────────
 
-
-# ── 組立 build ────────────────────────────────────────────────
-
-def _rival_form(pattern: str) -> str | None:
-    """A rival's pattern as a tile can write it: 〜をください → をください.
-    None where the pattern is no one stretch (あまり〜ない) or names a
-    class rather than a form (い形容詞／な形容詞)."""
-    form = re.sub(r"[（(][^）)]*[）)]", "", pattern).split("／")[0].strip()
-    form = form.removeprefix("〜").removeprefix("～")
-    if not form or "〜" in form or "～" in form or re.search(r"[A-Za-z]", form):
-        return None
-    return form
-
-
-def _tile_cuts(jp: str, span: tuple[int, int], parts: list[dict]) -> list[int] | None:
-    """Where the sentence's tiles begin: a phrase's start (a word that is no
-    particle, auxiliary, suffix or mark, after no prefix), and the point's
-    two edges, so the point is one tile; never inside the point or inside
-    a ruby part, whose reading would be cut in half."""
-    tokens = tokenize(jp)
-    if not tokens:
-        return None
-    cuts = {t.start for i, t in enumerate(tokens)
-            if i and t.pos not in _BOUND and tokens[i - 1].pos != "prefix"}
-    cuts |= {span[0], span[1]}
-    pos, inside = 0, set()
-    for part in parts:
-        if part.get("reading") is not None:
-            inside |= set(range(pos + 1, pos + len(part["text"])))
-        pos += len(part["text"])
-    return sorted(c for c in cuts if 0 < c < len(jp) and c not in inside
-                  and not span[0] < c < span[1])
+_MARKS = re.compile(r"[\s。、．，,.！？!?「」『』（）()・…〜～]+")
 
 
 def _slice(parts: list[dict], a: int, b: int) -> list[dict]:
@@ -138,120 +91,169 @@ def _slice(parts: list[dict], a: int, b: int) -> list[dict]:
     return out
 
 
-def _missing(cuts: tuple[int, ...], span: tuple[int, int], body_len: int) -> tuple[list, list[int]]:
-    """The tiles as (start, end), and the ones a build leaves out: the
-    point, and with TWO_GAPS tiles or more the one before it (after it,
-    when the point opens the sentence)."""
-    edges = [0, *cuts, body_len]
-    tiles = [(edges[k], edges[k + 1]) for k in range(len(edges) - 1)]
-    point = next(k for k, edge in enumerate(tiles) if edge == span)
-    missing = [point]
-    if len(tiles) >= TWO_GAPS:
-        missing.append(point - 1 if point > 0 else point + 1)
-    return tiles, sorted(missing)
+def _cuts_ruby(parts: list[dict], at: int) -> bool:
+    """Whether offset `at` falls inside a ruby part (its reading would be
+    cut in half)."""
+    pos = 0
+    for part in parts:
+        end = pos + len(part["text"])
+        if part.get("reading") is not None and pos < at < end:
+            return True
+        pos = end
+    return False
+
+
+def _reading(parts: list[dict]) -> str:
+    """What a run of parts says, in hiragana."""
+    return kata_to_hira("".join(p.get("reading") or p["text"] for p in parts))
+
+
+def _sources(entry: dict) -> list[tuple[str, str, dict]]:
+    """Every sentence of the point with its translation, keyed: the
+    examples (ex:n), the twists that carry one (tw:n), the scene's lines
+    and its cue (sc:n)."""
+    out = []
+    for n, ex in enumerate(entry.get("examples") or []):
+        if ex.get("jp") and ex.get("en") and ex.get("fr"):
+            out.append((f"ex:{n}", ex["jp"], {"en": ex["en"], "fr": ex["fr"]}))
+    tour = entry.get("tour") or {}
+    for n, tw in enumerate(tour.get("twists") or []):
+        tr = tw.get("tr") or {}
+        if tw.get("jp") and tr.get("en") and tr.get("fr"):
+            out.append((f"tw:{n}", tw["jp"], tr))
+    scene = tour.get("scene") or {}
+    lines = list(scene.get("lines") or [])
+    if (scene.get("ask") or {}).get("cue"):
+        lines.append(scene["ask"]["cue"])
+    for n, line in enumerate(lines):
+        if line.get("jp") and line.get("en") and line.get("fr"):
+            out.append((f"sc:{n}", line["jp"], {"en": line["en"], "fr": line["fr"]}))
+    return out
+
+
+MAX_GAPS = 2
 
 
 @lru_cache(maxsize=1024)
-def _build_sentences(level: str, pattern: str) -> tuple:
-    """The point's contrast sentences a build can be made of, each as
-    (example index, span, tile cuts, wrong forms). Cached: the tokenizer
-    reads each sentence once."""
+def _build_items(level: str, pattern: str) -> tuple:
+    """The point's sentences a Construire can be cut from, each as (key,
+    jp, spans, en, fr): the point lit in one stretch, or two for a point
+    written in two pieces (あまり〜ない), never the whole sentence, every
+    edge between ruby parts. Cached: the tokenizer reads each sentence
+    once."""
     found = find(pattern)
     if found is None or found[0] != level:
         return ()
-    entry = found[1]
-    if not entry.get("compare"):
-        return ()
-    checkable = verifiable(pattern)
     out = []
-    for i, example in enumerate(entry.get("examples", [])):
-        jp = example.get("jp") or ""
-        if not example.get("contrast") or not jp:
+    for key, jp, tr in _sources(found[1]):
+        spans = [tuple(sp) for sp in lit_spans(jp, pattern, level)]
+        if not 1 <= len(spans) <= MAX_GAPS:
             continue
-        # A point the stems cannot point at (a bare particle, plan 190) is
-        # the piece the detector finds once, as the contrast drill blanks.
-        spans = lit_spans(jp, pattern, level) if checkable else [s for s in [blank_span(jp, pattern, level)] if s]
-        if len(spans) != 1:
+        body = jp.rstrip("。！？!?")
+        if sum(b - a for a, b in spans) >= len(body):
             continue
-        span = tuple(spans[0])
-        body = len(jp.rstrip(_TAIL))
-        if span[1] > body:
+        parts = align_sentence(jp)
+        if any(_cuts_ruby(parts, edge) for span in spans for edge in span):
             continue
-        written = jp[span[0]:span[1]]
-        wrong = []
-        for rival in entry["compare"]:
-            r = rival["pattern"]
-            if r == pattern or (verifiable(r) and contains_pattern(jp, r)):
-                continue
-            form = _rival_form(r)
-            if form and form != written and form not in wrong:
-                wrong.append(form)
-        if not wrong:
+        if not all(_reading(_slice(parts, a, b)) for a, b in spans):
             continue
-        cuts = _tile_cuts(jp[:body], span, align_sentence(jp[:body]))
-        if cuts is None or len(cuts) + 1 < MIN_TILES:
-            continue
-        # Never a wrong piece that reads as a right one: the や of 花や木
-        # など, missing beside など, cannot be など's wrong tile too.
-        tiles, missing = _missing(tuple(cuts), span, body)
-        taken = {jp[a:b] for a, b in (tiles[k] for k in missing)}
-        wrong = [form for form in wrong if form not in taken]
-        if not wrong:
-            continue
-        out.append((i, span, tuple(cuts), tuple(wrong)))
+        out.append((key, jp, tuple(spans), tr["en"], tr["fr"]))
     return tuple(out)
 
 
 def can_build(level: str, pattern: str) -> bool:
-    """Whether a build can be cut for the point -- the slow answer, which
-    reads every marked sentence through the tokenizer and the detector.
+    """Whether a Construire can be cut for the point -- the slow answer,
+    which reads every sentence through the tokenizer and the detector.
     build_ok() reads it from the snapshot."""
-    return bool(_build_sentences(level, pattern))
+    return bool(_build_items(level, pattern))
 
 
-def build_payload(level: str, entry: dict, lang: str, rng: random.Random | None = None) -> dict | None:
-    """{tr, tiles, tail, tray, answer, jp, furigana} for one of the point's
-    marked sentences, or None where none can be built (build_ok).
-
-    `tiles` is the sentence in order, each {furigana} or, for a missing
-    one, {slot: n}; `tray` the missing tiles and one wrong tile -- a
-    rival's form -- shuffled, each {id, text, furigana}; `answer` the tray
-    id each slot takes. The point is always a missing tile; with
-    TWO_GAPS tiles or more, so is the one before it (the one after when
-    the point opens the sentence), so the learner builds the point onto
-    its word rather than picking it out."""
-    rng = rng or random
-    options = _build_sentences(level, entry["pattern"])
-    if not options:
+def build_payload(level: str, entry: dict, lang: str, turn: int = 0) -> dict | None:
+    """{key, tr, pieces} for one of the point's sentences, or None where
+    none can be cut (build_ok). `pieces` is the sentence in order, each
+    {furigana} or a gap {gap: n, size} -- `size` the kana it holds, so its
+    width gives nothing away. `turn` picks the sentence, so each review
+    asks another one (the review count); the order is shuffled once per
+    point. The answer stays here: the client sends what was typed to
+    check_build with the `key`."""
+    items = list(_build_items(level, entry["pattern"]))
+    if not items:
         return None
-    index, span, cuts, wrong = rng.choice(options)
-    example = entry["examples"][index]
-    jp = example["jp"]
-    body_len = len(jp.rstrip(_TAIL))
-    body, tail = jp[:body_len], jp[body_len:]
-    parts = align_sentence(body)
+    random.Random(f"build:{level}:{entry['pattern']}").shuffle(items)
+    key, jp, spans, en, fr = items[turn % len(items)]
+    parts = align_sentence(jp)
+    pieces, pos = [], 0
+    for n, (a, b) in enumerate(spans):
+        if a > pos:
+            pieces.append({"furigana": _slice(parts, pos, a)})
+        pieces.append({"gap": n, "size": len(_reading(_slice(parts, a, b)))})
+        pos = b
+    if pos < len(jp):
+        pieces.append({"furigana": _slice(parts, pos, len(jp))})
+    return {"key": key, "tr": translation({"en": en, "fr": fr}, lang), "pieces": pieces}
 
-    tiles, missing = _missing(cuts, span, body_len)
 
-    tray = [{"text": body[a:b], "furigana": _slice(parts, a, b)} for a, b in (tiles[k] for k in missing)]
-    form = rng.choice(wrong)
-    tray.append({"text": form, "furigana": align_sentence(form), "wrong": True})
-    order = list(range(len(tray)))
-    rng.shuffle(order)
-    shuffled = [{"id": n, **{k: v for k, v in tray[i].items() if k != "wrong"}} for n, i in enumerate(order)]
-    answer = [order.index(i) for i in range(len(missing))]
+def _norm(text: str) -> str:
+    """What was typed, in the form it is compared in: kana in hiragana,
+    no marks or spaces; romaji read as kana first."""
+    text = unicodedata.normalize("NFKC", text or "").strip()
+    as_kana = kana_of(text)
+    if as_kana is not None:
+        text = as_kana
+    return kata_to_hira(_MARKS.sub("", text))
 
+
+def _marks(given: str, expected: str) -> list[dict]:
+    """The answer against what was typed, as runs to draw: {ok} where they
+    agree, {wrong, fix} where they differ (either may be empty)."""
+    out = []
+    matcher = difflib.SequenceMatcher(a=given, b=expected, autojunk=False)
+    for op, i1, i2, j1, j2 in matcher.get_opcodes():
+        if op == "equal":
+            out.append({"ok": expected[j1:j2]})
+        else:
+            out.append({"wrong": given[i1:i2], "fix": expected[j1:j2]})
+    return out
+
+
+def _gap_verdict(given: str, written: str, reading: str) -> str:
+    if given in (_norm(written), reading):
+        return "right"
+    ops = difflib.SequenceMatcher(a=given, b=reading, autojunk=False).get_opcodes()
+    changed = sum(max(i2 - i1, j2 - j1) for op, i1, i2, j1, j2 in ops if op != "equal")
+    return "close" if given and changed == 1 and len(reading) > 1 else "wrong"
+
+
+def check_build(level: str, pattern: str, key: str, answers: list[str], lang: str) -> dict | None:
+    """The verdict on a Construire, gap by gap: `right` when what was typed
+    is the point as written or as read, `close` when one kana is off (書い
+    で for 書いて), else `wrong`; the whole is right when every gap is,
+    close when none is wrong. Each gap carries its answer, its reading and
+    the runs that draw the correction; the whole sentence comes back lit.
+    None for a key the point has no sentence under. Nothing typed is kept."""
+    item = next((i for i in _build_items(level, pattern) if i[0] == key), None)
+    if item is None:
+        return None
+    _, jp, spans, en, fr = item
+    parts = align_sentence(jp)
+    gaps = []
+    for n, (a, b) in enumerate(spans):
+        written = jp[a:b]
+        reading = _reading(_slice(parts, a, b))
+        given = _norm(answers[n] if n < len(answers) else "")
+        verdict = _gap_verdict(given, written, reading)
+        gaps.append({
+            "verdict": verdict, "answer": written, "reading": reading,
+            "marks": [] if verdict == "right" else _marks(given, reading),
+        })
+    verdicts = {g["verdict"] for g in gaps}
+    whole = "right" if verdicts == {"right"} else "wrong" if "wrong" in verdicts else "close"
     return {
-        "tr": translation({"en": example.get("en", ""), "fr": example.get("fr", "")}, lang),
-        "tiles": [
-            {"slot": missing.index(k)} if k in missing else {"furigana": _slice(parts, a, b)}
-            for k, (a, b) in enumerate(tiles)
-        ],
-        "tail": tail,
-        "tray": shuffled,
-        "answer": answer,
+        "verdict": whole,
+        "gaps": gaps,
         "jp": jp,
-        "furigana": mark_spans(align_sentence(jp), [span]),
+        "tr": translation({"en": en, "fr": fr}, lang),
+        "furigana": mark_spans(parts, list(spans)),
     }
 
 

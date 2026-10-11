@@ -43,7 +43,8 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: TodayRun } = await import('./screens/TodayRun')
 
-const TOUR = tours.en
+// The derived half alone (the written half is か's, below).
+const TOUR = { ...tours.en, twists: [], scene: null, quiz: null }
 const LANE = { id: 's~grammar~N5~grammar.flashcard.f2b', kind: 'section', source: 'grammar', deck: 'N5', mode: 'grammar.flashcard.f2b' }
 const LESSON = {
   register: 'polite',
@@ -138,8 +139,8 @@ describe('the tour in the day’s queue, on a phone', () => {
     await settle(120)
     expect(tour().dataset.stop).toBe('terminus')
 
-    // The full lesson is a quiet way over the gate: the lesson's sheet.
-    tour().querySelector('.tour__foot .brd__link').click()
+    // The point's sheet, at the results: the lesson's sheet.
+    tour().querySelector('[data-action="lesson"]').click()
     await settle()
     expect(document.querySelector('.gl-sheet')).toBeTruthy()
     document.querySelector('.gl-sheet [aria-label="Close"]')?.click()
@@ -150,7 +151,9 @@ describe('the tour in the day’s queue, on a phone', () => {
     const post = apiJson.mock.calls.find(c => c[0] === '/api/grammar/tour')
     expect(post).toBeTruthy()
     expect(post[2].method).toBe('POST')
-    expect(JSON.parse(post[2].body)).toEqual({ raw_id: 'grammar_N5_〜てください', tries: 0, helped: false })
+    expect(JSON.parse(post[2].body)).toEqual({
+      raw_id: 'grammar_N5_〜てください', tries: 0, helped: false, quiz_right: null, quiz_total: null,
+    })
     expect(screen.container.querySelector('.tour')).toBeNull()
     expect(screen.container.querySelector('.prompt-card')).toBeTruthy()
     const cached = JSON.parse(localStorage.getItem(sessionKey('today', 'all')))
@@ -173,7 +176,7 @@ describe('the tour in the day’s queue, on a phone', () => {
     await settle()
     const tour = () => screen.container.querySelector('.tour')
     const gate = () => tour().querySelector('.tour__foot .btn-depart')
-    expect(tour().querySelectorAll('.tour__stop')).toHaveLength(5 + KA.twists.length)
+    expect(tour().querySelectorAll('.tour__stop')).toHaveLength(6 + KA.twists.length)
     gate().click()
     await settle(120)
     tour().querySelector(`[data-guess="${KA.guesses.findIndex(g => g.correct)}"]`).click()
@@ -182,17 +185,6 @@ describe('the tour in the day’s queue, on a phone', () => {
     await settle(120)
     gate().click()
     await settle(120)
-    for (const twist of KA.twists) {
-      // The notion over its question stays inside a phone's width.
-      const notion = tour().querySelector('.tour__notion').getBoundingClientRect()
-      expect(notion.right).toBeLessThanOrEqual(window.innerWidth)
-      tour().querySelector(`[data-choice="${twist.choices.findIndex(c => c.correct)}"]`).click()
-      await settle(120)
-      gate().click()
-      await settle(120)
-      gate().click()
-      await settle(120)
-    }
     expect(tour().dataset.stop).toBe('scene')
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
     for (const el of tour().querySelectorAll('.tour-plate, .tour-line, .tour-speak, .tour-note')) {
@@ -210,5 +202,27 @@ describe('the tour in the day’s queue, on a phone', () => {
     expect(getComputedStyle(tour().querySelector('.tour-plate')).borderBottomWidth).toBe('3px')
     const g = gate().getBoundingClientRect()
     expect(g.bottom).toBeLessThanOrEqual(window.innerHeight)
+
+    // Since plan 194 the usages follow the scene.
+    gate().click()
+    await settle(120)
+    tour().querySelector(`[data-choice="${KA.scene.ask.choices.findIndex(c => c.correct)}"]`).click()
+    await settle(120)
+    gate().click()
+    await settle(120)
+    gate().click()
+    await settle(120)
+    for (const twist of KA.twists) {
+      // The notion over its question stays inside a phone's width.
+      const notion = tour().querySelector('.tour__notion').getBoundingClientRect()
+      expect(notion.right).toBeLessThanOrEqual(window.innerWidth)
+      tour().querySelector(`[data-choice="${twist.choices.findIndex(c => c.correct)}"]`).click()
+      await settle(120)
+      gate().click()
+      await settle(120)
+      gate().click()
+      await settle(120)
+    }
+    expect(tour().dataset.stop).toBe('quiz')
   }, 20000)
 })

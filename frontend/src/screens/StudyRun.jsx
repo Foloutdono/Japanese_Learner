@@ -14,6 +14,8 @@ import { useRunExit } from '../hooks/useRunExit'
 import { useDesk } from '../hooks/useDesk'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardPanel } from '../components/study/CardPanel'
+import { BuildEntry, GrammarTiles } from '../components/study/GrammarPlate'
+import { useBuild } from '../hooks/useBuild'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 // The card faces themselves live beside the other study components now,
@@ -212,6 +214,12 @@ export default function StudyRun({ session }) {
     setShowRating(true)
   }
 
+  // Construire's answer (plan 194): typed into the entry under the card,
+  // shown in the card's hole as it is typed.
+  const entry = useBuild(card?.build && cardShape(card).isBuild ? card : null, {
+    session, lang, onDone: onFlashcardReveal, resetKey: cardNonce,
+  })
+
   if (!valid) return <Navigate replace to={deck_id ? platforms : '/learn/decks'} />
 
   // ── Quiz ──
@@ -321,12 +329,13 @@ export default function StudyRun({ session }) {
               stamp={gates.stamp}
               stage={nc.stage}
               progress={nc.progress ?? null}
+              ladder={Boolean(nc.step)}
               onStampDone={gates.stampDone}
             >
               <CardPrompt
                 card={nc} t={t} session={session}
                 answered={answered} cardNonce={cardNonce}
-                activeHints={activeHints} onFlashcardReveal={onFlashcardReveal}
+                activeHints={activeHints} selected={selected} entry={entry} onFlashcardReveal={onFlashcardReveal}
                 foot={cardFoot}
               />
             </CardTransition>
@@ -370,12 +379,14 @@ export default function StudyRun({ session }) {
                 pattern read with its furigana. */}
             {/* The contrast drill's rivals (plan 087): the exercise, always on. */}
             {structureKey === 'grammar' && isContrast && (
-              <MCQGrid
-                choices={nc.contrast?.choices ?? []}
-                correct={nc.grammar}
-                formatChoice={c => <GrammarChoice text={c} readings={nc.choices_furigana} />}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer}
-              />
+              (desk || !answered) && (
+                <GrammarTiles
+                  choices={nc.contrast?.choices ?? []}
+                  correct={nc.grammar}
+                  readings={nc.choices_furigana}
+                  selected={selected} answered={answered} onAnswer={onMCQAnswer}
+                />
+              )
             )}
 
             {structureKey === 'grammar' && showChoices && (
@@ -434,7 +445,15 @@ export default function StudyRun({ session }) {
               />
             )}
 
-            <RatingBar active={showRating && !gates.locked} onRate={postReview} />
+            {/* Construire's entry, under the card as the practice runs
+                take theirs (plan 194). */}
+            {entry && !answered && <BuildEntry entry={entry} t={t} />}
+
+            {/* The bar comes up where Choisir's dock (on a phone) and
+                Construire's entry stood (plan 194). */}
+            {!(structureKey === 'grammar' && !answered && (entry || (isContrast && !desk))) && (
+              <RatingBar active={showRating && !gates.locked} onRate={postReview} />
+            )}
 
             {showDrawing && (
               <DrawingOverlay
