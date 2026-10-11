@@ -1584,7 +1584,7 @@ const misc = {
   mode_grammar_contrast_desc:      'A sentence with a gap. Pick the pattern from the ones it is confused with.',
   mode_grammar_ladder:             'The ladder',
   mode_grammar_ladder_desc:        'One exercise that climbs with you: recognise, choose, build, then write.',
-  mode_grammar_build:              'Build it',
+  mode_grammar_build:              'Build',
   mode_grammar_build_desc:         'The sentence in pieces. Put the pattern and its word back in place.',
   mode_grammar_write:              'Write it',
   mode_grammar_write_desc:         'Something to say in Japanese with the pattern. You rate yourself.',

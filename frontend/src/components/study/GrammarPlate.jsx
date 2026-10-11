@@ -43,6 +43,21 @@ export function PlateParts({ parts }) {
   })
 }
 
+/** A sentence's runs with each hole held to the character before it, so
+ *  a line never breaks between a word and its ending (書 | い［て…］). */
+function joinGaps(runs) {
+  const out = []
+  runs.forEach((run, i) => {
+    const prev = out[out.length - 1]
+    if (run.gap && prev && !prev.gap) {
+      out[out.length - 1] = { gap: true, node: <span key={`j${i}`} className="gl-hold">{prev.node}{run.node}</span> }
+    } else {
+      out.push(run)
+    }
+  })
+  return out.map(r => r.node)
+}
+
 /** The plate's band: the stop behind and the next one, the diamond between. */
 export function PlateBand({ band, t: tProp }) {
   const t = useT(tProp)
@@ -157,11 +172,14 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
       <PointLine card={card} missed={trap} t={t} />
       <GrammarPlate tr={c.tr} band={bandOf(card, t)} t={t}>
         <p className="gl-plate__sent" lang="ja">
-          {parts.map((part, i) => (part.blank
-            ? (revealed
-                ? <span key={i} className="gl-gap gl-gap--done"><span className="gl-lit"><PlateParts parts={answerParts} /></span></span>
-                : <span key={i} className="gl-gap" aria-label={t.glBlank} />)
-            : <PlateParts key={i} parts={[part]} />))}
+          {joinGaps(parts.map((part, i) => (part.blank
+            ? {
+                gap: true,
+                node: revealed
+                  ? <span key={i} className="gl-gap gl-gap--done"><span className="gl-lit"><PlateParts parts={answerParts} /></span></span>
+                  : <span key={i} className="gl-gap" style={{ '--gap-size': bare(answer).length }} aria-label={t.glBlank} />,
+              }
+            : { node: <PlateParts key={i} parts={[part]} />, last: part })))}
         </p>
       </GrammarPlate>
       {trap && (
@@ -231,9 +249,9 @@ export function GrammarConstruire({ card, answered, onDone, session, t: tProp })
       <PointLine card={card} missed={answered && (whole === 'wrong' || whole === 'close')} t={t} />
       <GrammarPlate tr={build.tr} lead band={bandOf(card, t)} t={t}>
         <p className="gl-plate__sent" lang="ja">
-          {build.pieces.map((piece, i) => (piece.gap != null
-            ? gapAt(piece.gap)
-            : <PlateParts key={i} parts={piece.furigana} />))}
+          {joinGaps(build.pieces.map((piece, i) => (piece.gap != null
+            ? { gap: true, node: gapAt(piece.gap) }
+            : { node: <PlateParts key={i} parts={piece.furigana} /> })))}
         </p>
       </GrammarPlate>
       {!answered ? (

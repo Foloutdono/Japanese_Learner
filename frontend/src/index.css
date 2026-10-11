@@ -25688,6 +25688,9 @@ button.brd-stn { cursor: pointer; }
 }
 .gl-plate__tr--lead { font-size: var(--fs-lead); font-weight: 600; color: var(--text-on-fill); }
 
+/* A hole stays on the line of the word it ends. */
+.gl-hold { white-space: nowrap; }
+
 /* The point lit: A's underline, in the line's ink on the paper. */
 .gl-lit {
   font-weight: 700;
@@ -41437,8 +41440,8 @@ button.brd-stn { cursor: pointer; }
      The canvas's desk: the plate takes the stage's width, its sentence a
      step up and its band taller; the forms two across as the quays of a
      platform; the line's map sits in the card panel at the left. */
-  .gl-choose .gl-plate__body, .gl-build .gl-plate__body { padding: var(--sp-8) var(--sp-7); }
-  .gl-choose .gl-plate__sent, .gl-build .gl-plate__sent { font-size: var(--fs-display-fluid); }
+  .gl-choose .gl-plate__body, .gl-build .gl-plate__body { padding: var(--sp-7) var(--sp-7) var(--sp-6); }
+  .gl-choose .gl-plate__sent, .gl-build .gl-plate__sent { font-size: var(--fs-board-fluid); }
   .gl-choose .gl-plate__tr, .gl-build .gl-plate__tr { font-size: var(--fs-lead); }
   .gl-build .gl-plate__tr--lead { font-size: var(--fs-title); }
   .gl-band { min-height: 44px; font-size: var(--fs-sm); }
