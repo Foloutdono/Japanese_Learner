@@ -10475,20 +10475,6 @@ textarea:focus-visible {
   color: var(--text-secondary);
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
-/* The forms as platforms (Choisir, plan 194): a column of quays, the number its own
-   cell in the line's ink. */
-.mcq-list--plats { display: flex; flex-direction: column; gap: var(--sp-3); }
-.mcq-list--plats .mcq-row__index {
-  align-self: stretch;
-  display: grid;
-  place-items: center;
-  min-width: 48px;
-  font-size: var(--fs-title);
-  font-weight: 700;
-  color: color-mix(in srgb, var(--line-grammar) 70%, var(--text-primary));
-  border-right: 1px solid var(--surface-line);
-}
-
 .mcq-row:not(:disabled):hover .mcq-row__index,
 .mcq-row:not(:disabled):focus-visible .mcq-row__index {
   border-color: var(--mcq-color);
@@ -25506,7 +25492,26 @@ button.brd-stn { cursor: pointer; }
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
-.tour-guess__key { flex: none; font-size: var(--fs-caption-xs); font-weight: 700; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+/* The number as the mock exam's bubble (plan 194, the owner's word on
+   the choices: "look how it's done in the exam"). */
+.tour-guess__key {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--text-secondary);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-secondary);
+}
+.tour-guess--sel .tour-guess__key { background: var(--sel-ink); border-color: var(--sel-ink); color: var(--bg-main); }
+.tour-guess--ok .tour-guess__key { border-color: var(--success); color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.tour-guess--no .tour-guess__key { border-color: var(--rating-wrong); }
 .tour-guess__text { flex: 1; min-width: 0; text-wrap: pretty; }
 .tour-guess--sel { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
 .tour-guess--ok { border: 2px solid var(--success); }
@@ -25650,105 +25655,111 @@ button.brd-stn { cursor: pointer; }
 .tour-reply__who { font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); }
 .tour-reply__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 600; }
 
-/* 194 — the grammar plate (駅名標), the owner's pick of the canvas
-   "Tsuji — grammar rework": B's plate, A's underline for the point, B's
-   well for the hole. The plate is the station sign's paper in either
-   theme; the sentence stands on it with its translation right under it,
-   and its foot is its band -- the plate's stripe grown to carry the stop
-   behind the card and the next one, as a 駅名標 names the stations either
-   side (DESIGN.md, "The ladder"). Over it, the point's line. */
-.gl-choose, .gl-build { display: flex; flex-direction: column; gap: var(--sp-4); width: 100%; text-align: start; }
-.gl-plate {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--paper-edge);
-  border-radius: var(--r-panel);
-  background: var(--paper);
-  color: var(--text-on-fill);
+/* 194 — Choisir and Construire on the run's own card (the owner's second
+   round): no plate inside the card and no band; the point's steps a quiet
+   line at the card's head; the sentence at the card's size with the
+   point's hole, its translation under it; the reveal a flashcard's turn
+   to the back (.flashcard__face--turned); the forms as the mock exam's
+   answer tiles, docked under the thumb on a phone. */
+.gl-choose, .gl-build { display: flex; flex-direction: column; gap: var(--sp-4); width: 100%; }
+
+/* The point's steps: small stops on a hairline, the one asked ringed. */
+.gl-walk { display: flex; align-items: center; justify-content: center; gap: var(--sp-3); }
+.gl-walk__line { position: relative; display: inline-flex; align-items: center; gap: var(--sp-2); }
+.gl-walk__line::before {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 1px;
+  background: var(--surface-line);
 }
-.gl-plate--edge { border-bottom: 5px solid var(--line-grammar); }
-.gl-plate__body { padding: var(--sp-6) var(--sp-5) var(--sp-5); text-align: center; }
-.gl-plate__sent {
+.gl-walk__dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--surface-line);
+}
+.gl-walk__dot--on { background: var(--line-grammar); }
+.gl-walk__dot--now {
+  width: 12px;
+  height: 12px;
+  background: var(--line-grammar);
+  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 3px var(--text-primary);
+}
+.gl-walk__dot--miss { background: var(--bg-card); box-shadow: 0 0 0 2px var(--rating-wrong); }
+.gl-walk__gap { width: var(--sp-2); }
+.gl-walk__star {
+  position: relative;
+  font-size: var(--fs-caption);
+  font-style: normal;
+  line-height: 1;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+}
+.gl-walk__star--on { color: var(--line-grammar); }
+.gl-walk__name {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.gl-walk__again { color: color-mix(in srgb, var(--rating-wrong) 75%, var(--text-primary)); }
+
+/* The card: a flashcard that turns once the answer is in. */
+.gl-card { width: 100%; }
+.gl-card:not(.gl-card--turnable) { cursor: default; }
+.gl-front, .gl-back { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); text-align: center; }
+.gl-front { padding-block: var(--sp-5); }
+.gl-sent {
   margin: 0;
   font-family: var(--font-jp);
-  font-size: var(--fs-sentence-fluid);
+  font-size: var(--fs-board-fluid);
   font-weight: 500;
-  line-height: 2.05;
+  line-height: 1.9;
+  line-break: strict;
   text-wrap: balance;
 }
-.gl-plate__sent rt { font-weight: 500; color: var(--paper-ink-soft); }
-.gl-plate__tr {
-  margin: var(--sp-2) 0 0;
-  font-size: var(--fs-body);
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--paper-ink-soft);
-  text-wrap: balance;
-}
-.gl-plate__tr--lead { font-size: var(--fs-lead); font-weight: 600; color: var(--text-on-fill); }
-
-/* A hole stays on the line of the word it ends. */
+.gl-sent rt { color: var(--text-secondary); }
+.gl-tr { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: balance; }
+.gl-tr--lead { font-size: var(--fs-lead); font-weight: 600; color: var(--text-primary); }
 .gl-hold { white-space: nowrap; }
 
-/* The point lit: A's underline, in the line's ink on the paper. */
-.gl-lit {
-  font-weight: 700;
-  color: color-mix(in srgb, var(--line-grammar) 72%, var(--text-on-fill));
-  text-decoration: underline 3px var(--line-grammar);
-  text-underline-offset: 0.32em;
-  text-decoration-skip-ink: none;
-}
-
-/* The band, the plate's foot: the stop behind, a diamond, the next. */
-.gl-band {
-  display: flex;
-  align-items: center;
-  min-height: 36px;
-  background: color-mix(in srgb, var(--line-grammar) 85%, var(--text-on-fill));
-  color: var(--paper);
-  font-size: var(--fs-caption);
-  font-weight: 600;
-}
-.gl-band__prev, .gl-band__next {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: 0 var(--sp-4);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.gl-band__prev { color: color-mix(in srgb, var(--paper) 85%, var(--line-grammar)); }
-.gl-band__next { justify-content: flex-end; font-weight: 700; }
-.gl-band svg { flex: none; }
-.gl-band__here { flex: none; width: 10px; height: 10px; transform: rotate(45deg); background: var(--paper); }
-
-/* The hole: B's well, the paper sunk a step, a dashed rule at its foot. */
+/* The hole: a sunk well with a dashed rule in the line's pigment. */
 .gl-gap {
   display: inline-block;
-  min-width: calc(var(--gap-size, 4) * 1em + 0.5em);
-  height: 1.4em;
+  min-width: calc(var(--gap-size, 4) * 0.8em + 0.4em);
+  height: 1.3em;
   margin: 0 0.1em;
   padding: 0 var(--sp-1);
-  vertical-align: -0.3em;
-  border-radius: var(--r-card);
-  background:
-    repeating-linear-gradient(90deg, var(--line-grammar) 0 8px, transparent 8px 13px) bottom / 100% 3px no-repeat,
-    color-mix(in srgb, var(--paper-deep) 45%, var(--paper));
+  vertical-align: -0.25em;
+  border-bottom: 2px dashed var(--line-grammar);
+  border-radius: var(--r-card) var(--r-card) 0 0;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
 }
-.gl-gap--typed, .gl-gap--done {
-  height: auto;
-  line-height: 1.3;
-  vertical-align: baseline;
-  background: color-mix(in srgb, var(--paper-deep) 45%, var(--paper));
-  box-shadow: inset 0 0 0 2px var(--line-grammar);
+.gl-gap--typed { height: auto; line-height: 1.3; vertical-align: baseline; }
+.gl-gap--focus { border-bottom-color: var(--accent2); border-bottom-style: solid; }
+
+/* The back: what happened, the sentence whole, the point. */
+.gl-back__head { margin: 0; font-size: var(--fs-lead); font-weight: 700; }
+.gl-back__head--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.gl-back__head--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+/* keep-all: a form named in the line (ないでください) never breaks inside. */
+.gl-back__why {
+  margin: 0;
+  max-width: 32em;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
-.gl-gap--done { min-width: 0; box-shadow: none; }
-.gl-gap--focus { box-shadow: inset 0 0 0 2px var(--accent2); }
-.gl-gap--no { min-width: 0; box-shadow: inset 0 0 0 2px var(--rating-wrong); }
+.gl-back__mine { margin: 0; padding-top: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-title); line-height: 2; }
+.gl-back__gap + .gl-back__gap { margin-left: var(--sp-4); }
+.gl-back__sentence { width: 100%; }
+.gl-back__sentence .dict-ex__jp { font-size: var(--fs-sentence-fluid); }
 .gl-fix { position: relative; display: inline-block; }
 .gl-fix s { color: var(--rating-wrong); text-decoration-thickness: 2px; }
 .gl-fix ins {
@@ -25759,88 +25770,70 @@ button.brd-stn { cursor: pointer; }
   text-align: center;
   text-decoration: none;
   white-space: nowrap;
-  color: color-mix(in srgb, var(--success) 70%, var(--text-on-fill));
+  color: color-mix(in srgb, var(--success) 70%, var(--text-primary));
 }
 
-/* The point's line: Choisir's bars and Construire's under their names,
-   then the star; the bar asked taller and ringed in ink. */
-.gl-line { position: relative; display: flex; align-items: flex-start; gap: var(--sp-3); width: 100%; }
-.gl-line--star { padding-bottom: var(--sp-6); }
-.gl-line__seg { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
-.gl-line__seg--choose { flex: 3; }
-.gl-line__seg--build { flex: 4; }
-.gl-line__seg--one { flex: 3; }
-.gl-line__bars { display: flex; align-items: center; gap: 3px; height: 16px; }
-.gl-line__bar { flex: 1; height: 8px; border-radius: 2px; background: var(--surface-line); }
-.gl-line__bar--on { background: var(--line-grammar); }
-.gl-line__bar--now {
-  height: 16px;
-  background: var(--line-grammar);
-  box-shadow: 0 0 0 2px var(--bg-main), 0 0 0 4px var(--text-primary);
+/* Choisir's forms as the mock exam's answer tiles (.exam-tile): docked
+   under the thumb in sumi on a phone, where the rating bar comes up once
+   one is taken. */
+.gl-dock {
+  position: sticky;
+  bottom: var(--dock-bottom);
+  z-index: 10;
+  margin-top: auto;
+  margin-inline: calc(-1 * var(--sp-5));
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--bg-panel);
 }
-.gl-line__bar--miss { background: var(--surface-line); box-shadow: 0 0 0 2px var(--bg-main), 0 0 0 4px var(--rating-wrong); }
-.gl-line__name {
+.gl-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.gl-tile {
   display: flex;
-  align-items: baseline;
-  gap: var(--sp-1);
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  color: var(--text-secondary);
-  white-space: nowrap;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 56px;
+  padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-2);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  border-radius: var(--r-panel);
+  color: var(--text-on-panel);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
-.gl-line__seg--here .gl-line__name { font-weight: 700; color: var(--text-primary); }
-.gl-line__at { font-style: normal; font-variant-numeric: tabular-nums; }
-.gl-line__again { color: color-mix(in srgb, var(--rating-wrong) 75%, var(--text-primary)); }
-.gl-line__star {
-  position: relative;
+.gl-tile:hover, .gl-tile:focus-visible { border-color: var(--text-on-panel-soft); }
+.gl-tile:disabled { cursor: default; }
+.gl-tile__b {
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  margin-top: -5px;
-  border: 2px solid var(--surface-line);
-  border-radius: var(--r-plate);
-  font-size: var(--fs-caption);
-  color: var(--text-secondary);
-}
-.gl-line__star--on {
-  border-color: var(--line-grammar);
-  background: var(--line-grammar);
-  color: var(--paper);
-  box-shadow: 0 0 0 2px var(--bg-main), 0 0 0 4px var(--text-primary);
-}
-.gl-line__star em {
-  position: absolute;
-  top: calc(100% + var(--sp-2));
-  right: 0;
-  font-style: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--text-on-panel-soft);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
   font-weight: 700;
-  white-space: nowrap;
-  color: var(--text-primary);
+  line-height: 1;
+  color: var(--text-on-panel-soft);
 }
-
-/* What Choisir and Construire say back: a verdict over its line, ringed. */
-.gl-said {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-  padding: var(--sp-4);
-  border: 1.5px solid var(--surface-line);
-  border-radius: var(--r-card);
-  background: var(--surface);
-  text-align: start;
+.gl-tile__t {
+  min-width: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
-.gl-said--ok { border-color: var(--success); }
-.gl-said--no { border-color: var(--rating-wrong); }
-.gl-said__head { margin: 0; font-size: var(--fs-body); font-weight: 700; }
-.gl-said--ok .gl-said__head { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
-.gl-said--no .gl-said__head { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
-.gl-said__line { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-2); font-size: var(--fs-sm); line-height: 1.45; }
-.gl-said__cap { color: var(--text-secondary); }
-.gl-said__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 700; }
-.gl-said__sent { margin: 0; font-family: var(--font-jp); font-size: var(--fs-lead); line-height: 1.9; color: var(--text-secondary); }
-.gl-said__sent .gl-lit { color: var(--text-primary); }
+.gl-tile__t rt { font-weight: 500; color: var(--text-on-panel-soft); }
+/* A longer form steps down, as the exam's tiles do; a long one takes the
+   row's width. */
+.gl-tiles--mid .gl-tile__t { font-size: var(--fs-body); }
+.gl-tiles--long { grid-template-columns: minmax(0, 1fr); }
+.gl-tiles--long .gl-tile { min-height: 48px; }
+.gl-tile--on { background: color-mix(in srgb, var(--text-on-panel) 8%, var(--bg-panel)); border-color: var(--text-on-panel); }
+.gl-tile--on .gl-tile__b { background: var(--text-on-panel); border-color: var(--text-on-panel); color: var(--bg-panel); }
 
 /* Construire's ticket: the pencil, the field (two for a point in two
    pieces), Check in the metal. */
@@ -41436,16 +41429,36 @@ button.brd-stn { cursor: pointer; }
   }
   /* ── 191:desk-tickets end ── */
 
-  /* ── 机 — the grammar plate on the desk (plan 194) ──
-     The canvas's desk: the plate takes the stage's width, its sentence a
-     step up and its band taller; the forms two across as the quays of a
-     platform; the line's map sits in the card panel at the left. */
-  .gl-choose .gl-plate__body, .gl-build .gl-plate__body { padding: var(--sp-7) var(--sp-7) var(--sp-6); }
-  .gl-choose .gl-plate__sent, .gl-build .gl-plate__sent { font-size: var(--fs-board-fluid); }
-  .gl-choose .gl-plate__tr, .gl-build .gl-plate__tr { font-size: var(--fs-lead); }
-  .gl-build .gl-plate__tr--lead { font-size: var(--fs-title); }
-  .gl-band { min-height: 44px; font-size: var(--fs-sm); }
-  .mcq-list--plats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+  /* ── 机 — Choisir and Construire on the desk (plan 194) ──
+     The sentence a size up on the card; Choisir's forms as the exam's
+     answer sheet on the desk (.mcq-list--brief): two by two on the
+     paper, a bubble and the form, the right one ringed and a wrong pick
+     crossed once answered; the walk's map in the card panel. */
+  .gl-front { padding-block: var(--sp-7); }
+  .gl-dock {
+    position: static;
+    margin: 0;
+    padding: 0;
+    background: none;
+  }
+  .gl-tile {
+    min-height: 52px;
+    background: var(--surface);
+    border-color: var(--surface-line);
+    color: var(--text-primary);
+  }
+  .gl-tile:hover, .gl-tile:focus-visible { border-color: var(--text-secondary); }
+  .gl-tile__b { border-color: var(--text-secondary); color: var(--text-secondary); }
+  .gl-tile__t rt { color: var(--text-secondary); }
+  .gl-tile--on { background: var(--sel-wash); border-color: var(--sel-line); }
+  .gl-tile--on .gl-tile__b { background: var(--sel-ink); border-color: var(--sel-ink); color: var(--bg-main); }
+  .gl-tile--ok, .gl-tile--no { background: var(--surface); }
+  .gl-tile--ok .gl-tile__b, .gl-tile--no .gl-tile__b { background: none; }
+  .gl-tile--ok { border: 2px solid var(--success); }
+  .gl-tile--ok .gl-tile__b { border-color: var(--success); color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+  .gl-tile--no { border: 2px solid var(--rating-wrong); }
+  .gl-tile--no .gl-tile__b { border-color: var(--rating-wrong); color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+  .gl-tile:disabled:not(.gl-tile--ok, .gl-tile--no) { opacity: 0.5; }
   .desk-card .gl-map { margin-bottom: var(--sp-4); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

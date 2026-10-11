@@ -11,6 +11,7 @@ import { GrammarGate } from '../components/study/GrammarGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
 import { useDesk } from '../hooks/useDesk'
 import { CardPanel } from '../components/study/CardPanel'
+import { GrammarTiles } from '../components/study/GrammarPlate'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
@@ -544,12 +545,14 @@ export default function TodayRun({ session }) {
 
             {/* The contrast drill's rivals (plan 087): the exercise, always on. */}
             {structureKey === 'grammar' && isContrast && (
-              <MCQGrid
-                choices={nc.contrast?.choices ?? []}
-                correct={nc.grammar}
-                formatChoice={c => <GrammarChoice text={c} readings={nc.choices_furigana} />}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer} variant="plats"
-              />
+              (desk || !answered) && (
+                <GrammarTiles
+                  choices={nc.contrast?.choices ?? []}
+                  correct={nc.grammar}
+                  readings={nc.choices_furigana}
+                  selected={selected} answered={answered} onAnswer={onMCQAnswer}
+                />
+              )
             )}
 
             {structureKey === 'grammar' && choicesOn && (
@@ -621,7 +624,10 @@ export default function TodayRun({ session }) {
               />
             )}
 
-            <RatingBar active={showRating && !gates.locked} onRate={postReview} />
+            {/* Choisir's dock stands where the bar comes up (plan 194). */}
+            {!(structureKey === 'grammar' && isContrast && !answered && !desk) && (
+              <RatingBar active={showRating && !gates.locked} onRate={postReview} />
+            )}
           </>
         )}
 

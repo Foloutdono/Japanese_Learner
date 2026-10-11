@@ -285,6 +285,6 @@ describe('the contrast drill’s answer', () => {
     const before = await render(<CardPrompt card={contrast} t={t} session={{}} answered={false} />)
     expect(before.container.querySelector('.gl-gap rt')).toBeNull()
     const after = await render(<CardPrompt card={contrast} t={t} session={{}} answered />)
-    expect(after.container.querySelector('.gl-gap--done rt').textContent).toBe('なか')
+    expect(after.container.querySelector('.gl-back__sentence .dict-ex__hl rt').textContent).toBe('なか')
   })
 })

@@ -2,10 +2,9 @@
 // A ladder card (`grammar.ladder`) carries `step` (srs/ladder.py's
 // `position`): the group it is in (choose, build, mastered), the step of
 // that group it is asked (`at` of `of`), and whether this is the short
-// relapse after a miss once mastered. The point's line (PointLine) and
-// the plate's band (GrammarPlate) say it; the desk's map (LadderMap)
-// draws every stop of it. The waits mirror srs/ladder.py's _WAIT.
-import { dueText } from './forecast'
+// relapse after a miss once mastered. The point's steps (PointLine) say
+// it at the card's head; the desk's map (LadderMap) draws every stop of
+// it. The waits mirror srs/ladder.py's _WAIT.
 
 export const CHOOSE = 'choose'
 export const BUILD = 'build'
@@ -20,31 +19,6 @@ export const MASTERED_DAYS = 21
 function stepName(t, group, n) {
   const name = group === CHOOSE ? t.lineChoose : t.lineBuild
   return n == null ? name : `${name} ${n}`
-}
-
-/** The plate's band: the stop behind the card and the one a pass takes
- *  it to, with the wait the card's own forecast gives a pass. Null for
- *  a card that is not on the ladder. */
-export function bandOf(card, t) {
-  const step = card?.step
-  if (!step) return null
-  const { group, at, of, relapse } = step
-  let prev
-  let next
-  if (group === CHOOSE) {
-    prev = relapse ? t.lineRelapse : at > 1 ? t.bandPassed(stepName(t, CHOOSE, at - 1)) : t.bandTutorial
-    next = at < of ? stepName(t, CHOOSE, at + 1) : relapse ? stepName(t, BUILD) : stepName(t, BUILD, 1)
-  } else if (group === BUILD) {
-    prev = at > 1
-      ? t.bandPassed(stepName(t, BUILD, at - 1))
-      : t.bandPassed(relapse ? stepName(t, CHOOSE) : stepName(t, CHOOSE, 3))
-    next = at < of ? stepName(t, BUILD, at + 1) : t.lineMastered
-  } else {
-    prev = t.lineMastered
-    next = t.bandReview
-  }
-  const due = card.review_preview?.['4']?.due_in
-  return { prev, next: t.bandNext(next, Number.isFinite(due) ? dueText(due, t) : null) }
 }
 
 /** The bars of the point's line: Choisir's three and Construire's four

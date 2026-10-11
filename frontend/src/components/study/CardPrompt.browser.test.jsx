@@ -76,9 +76,9 @@ describe('the study card specimen scale', () => {
 
 // ── The contrast drill's face (plan 087) ──────────────────────
 // A blanked sentence and no flip: the rivals under the card are the
-// exercise. On the plate since plan 194: the translation under the
-// sentence from the start (the owner's canvas), and the reveal -- the
-// point back in its hole, lit -- waits on a pick.
+// exercise. Since plan 194 the translation is under the sentence from the
+// start, and the reveal -- the card turned to its back, the sentence whole
+// with the point picked out -- waits on a pick.
 describe('the grammar contrast face', () => {
   const contrastCard = {
     card_id: 'grammar_N5_〜てください', source: 'builtin_grammar', mode: 'grammar.contrast',
@@ -89,14 +89,13 @@ describe('the grammar contrast face', () => {
       choices: ['〜ないでください', '〜てください', '〜てもいいです', '〜てはいけません'], answer: '〜てください',
     },
   }
-  it('shows the gap and no flip until answered, then the answer in the gap', async () => {
+  it('shows the gap and no flip until answered, then the card turned to the sentence whole', async () => {
     const screen = await render(<CardPrompt card={contrastCard} t={t} session={{}} answered={false} />)
-    expect(screen.container.querySelector('.gl-plate .gl-gap')).toBeTruthy()
-    expect(screen.container.querySelector('.gl-gap--done')).toBeNull()
-    expect(screen.container.querySelector('.flashcard, .flip-hint')).toBeNull()
-    expect(screen.container.querySelector('.gl-plate__tr').textContent).toBe('Please write your name here.')
+    expect(screen.container.querySelector('.gl-front .gl-gap')).toBeTruthy()
+    expect(screen.container.querySelector('.gl-back, .flip-hint')).toBeNull()
+    expect(screen.container.querySelector('.gl-tr').textContent).toBe('Please write your name here.')
     const done = await render(<CardPrompt card={contrastCard} t={t} session={{}} answered />)
-    expect(done.container.querySelector('.gl-gap--done .gl-lit').textContent).toBe('てください')
+    expect(done.container.querySelector('.gl-back__sentence .dict-ex__hl').textContent).toBe('てください')
     expect(done.container.querySelector('.grammar-answer')).toBeTruthy()
   })
 })

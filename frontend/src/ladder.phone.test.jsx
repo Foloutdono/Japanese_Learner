@@ -92,9 +92,9 @@ describe('the ladder in the day’s queue, on a phone', () => {
     const screen = await mount([card(ladder.build)])
     await settle()
     const root = screen.container
-    expect(root.querySelector('.gl-line').getAttribute('aria-label')).toBe('This point: Build, step 2 of 4')
+    expect(root.querySelector('.gl-walk').getAttribute('aria-label')).toBe('This point: Build, step 2 of 4')
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
-    for (const el of root.querySelectorAll('.gl-line, .gl-plate, .gl-band, .gl-ticket')) inside(el)
+    for (const el of root.querySelectorAll('.gl-walk, .gl-card, .gl-ticket')) inside(el)
     for (const el of root.querySelectorAll('.gl-ticket__in, .gl-ticket__go')) {
       expect(el.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     }
@@ -105,7 +105,7 @@ describe('the ladder in the day’s queue, on a phone', () => {
     await settle(120)
     root.querySelector('.gl-ticket__go').click()
     await settle()
-    expect(root.querySelector('.gl-said--ok')).toBeTruthy()
+    expect(root.querySelector('.gl-back__head--ok')).toBeTruthy()
     expect(root.querySelector('.rating-bar').getAttribute('aria-hidden')).toBe('false')
     root.querySelector('.rating-bar button').click()
     await settle()
@@ -114,16 +114,19 @@ describe('the ladder in the day’s queue, on a phone', () => {
     expect(sent[2].card_id).toBe(ladder.build.card_id)
   }, 20000)
 
-  it('chooses inside the screen, the platforms a thumb’s targets', async () => {
+  it('chooses inside the screen, the exam’s tiles a thumb’s targets', async () => {
     const screen = await mount([card(ladder.choose)])
     await settle()
     const root = screen.container
-    expect(root.querySelector('.gl-line').getAttribute('aria-label')).toBe('This point: Choose, step 2 of 3')
+    expect(root.querySelector('.gl-walk').getAttribute('aria-label')).toBe('This point: Choose, step 2 of 3')
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
-    const plats = root.querySelectorAll('.mcq-list--plats .mcq-row')
-    expect(plats.length).toBeGreaterThanOrEqual(2)
-    for (const el of [...plats, root.querySelector('.gl-plate')]) inside(el)
-    for (const el of plats) expect(el.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    const tiles = [...root.querySelectorAll('.gl-dock .gl-tile')]
+    expect(tiles.length).toBeGreaterThanOrEqual(2)
+    for (const el of [...tiles, root.querySelector('.gl-card')]) inside(el)
+    for (const el of tiles) expect(el.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    // The dock does not sit over the card.
+    const dock = root.querySelector('.gl-dock').getBoundingClientRect()
+    expect(root.querySelector('.gl-card').getBoundingClientRect().bottom).toBeLessThanOrEqual(dock.top + 1)
   }, 20000)
 
   it('writes inside the screen', async () => {

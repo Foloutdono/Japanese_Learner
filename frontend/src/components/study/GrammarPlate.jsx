@@ -1,21 +1,29 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
-import { playClick } from '../../lib/audio'
-import { bandOf, bare, lineOf, mapOf } from '../../domain/ladderLine'
+import { playClick, playFlip } from '../../lib/audio'
+import { useDesk } from '../../hooks/useDesk'
+import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
+import { runKey } from '../../lib/keyGuards'
+import { bare, lineOf, mapOf } from '../../domain/ladderLine'
+import { ExampleSentence } from '../dictionary/ExampleSentence'
+import { GrammarAnswer } from './GrammarPieces'
 
-// ── 194 — the grammar plate (駅名標), the point's line, Choisir, Construire ──
-// The owner's pick of the canvas "Tsuji — grammar rework": B's plate, A's
-// underline for the point, B's well for the hole. The sentence stands on
-// the plate's paper in either theme, its translation right under it, and
-// the plate's foot is its band -- the stop behind the card and the one a
-// pass takes it to, as a station sign names the stations either side.
-// Over the plate, the point's line: Choisir's three bars and Construire's
-// four under their names, then the star (no Japanese in a label: Say
-// less, DESIGN.md). Choisir offers its forms as numbered platforms;
-// Construire takes what the learner types into the hole and asks the
-// server (POST /api/grammar/build/check) -- right, close or wrong -- then
-// the learner rates themselves on the run's bar (ADR 0013).
+// ── 194 — Choisir and Construire, the point's steps ───────────────
+// The ladder's two exercises on the run's own card. The owner's second
+// round, from the first screenshots: no band, no plate inside the card,
+// the choices as the mock exam's answer dock (its bubbles under the
+// thumb on a phone, its answer sheet two by two on the desk), the point
+// revealed as a flashcard is -- the card turns over to its back -- and
+// the point's progress a quiet line of steps at the card's head.
+//
+// The front asks: the sentence at the card's size with the point's hole
+// (two for a point in two pieces), its translation under it. Answered,
+// the card turns (the flashcard's own face and sound) to the back: what
+// happened, the whole sentence with the point picked out as every
+// example in the app picks it, and the point itself; a tap turns it back
+// and forth after that. The learner then rates themselves on the run's
+// bar (ADR 0013).
 
 // The language's strings from the provider, or from `t` where a caller
 // renders outside one (as CardPrompt's own callers may).
@@ -24,33 +32,21 @@ function useT(t) {
   return t ?? ctx?.t
 }
 
-function Chevron({ dir }) {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"
-         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={dir === 'left' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'} />
-    </svg>
-  )
-}
-
-/** A run of furigana parts, the point lit (underlined) where marked. */
-export function PlateParts({ parts }) {
-  return (parts ?? []).map((part, i) => {
-    const inner = part.reading ? <ruby>{part.text}<rt>{part.reading}</rt></ruby> : part.text
-    return part.highlight
-      ? <span key={i} className="gl-lit">{inner}</span>
-      : <span key={i}>{inner}</span>
-  })
+/** A run of furigana parts. */
+function Parts({ parts }) {
+  return (parts ?? []).map((part, i) => (part.reading
+    ? <ruby key={i}>{part.text}<rt>{part.reading}</rt></ruby>
+    : <span key={i}>{part.text}</span>))
 }
 
 /** A sentence's runs with each hole held to the character before it, so
  *  a line never breaks between a word and its ending (書 | い［て…］). */
-function joinGaps(runs) {
+function holdGaps(runs) {
   const out = []
   runs.forEach((run, i) => {
     const prev = out[out.length - 1]
     if (run.gap && prev && !prev.gap) {
-      out[out.length - 1] = { gap: true, node: <span key={`j${i}`} className="gl-hold">{prev.node}{run.node}</span> }
+      out[out.length - 1] = { gap: true, node: <span key={`h${i}`} className="gl-hold">{prev.node}{run.node}</span> }
     } else {
       out.push(run)
     }
@@ -58,71 +54,34 @@ function joinGaps(runs) {
   return out.map(r => r.node)
 }
 
-/** The plate's band: the stop behind and the next one, the diamond between. */
-export function PlateBand({ band, t: tProp }) {
-  const t = useT(tProp)
-  if (!band) return null
-  return (
-    <div className="gl-band" aria-label={t.bandAria}>
-      <span className="gl-band__prev"><Chevron dir="left" />{band.prev}</span>
-      <i className="gl-band__here" aria-hidden="true" />
-      <span className="gl-band__next">{band.next}<Chevron dir="right" /></span>
-    </div>
-  )
-}
-
-/** The plate: the sentence, its translation right under it, the band at
- *  its foot (an edge alone where the card is not on the ladder). */
-export function GrammarPlate({ children, tr, lead = false, band, className = '', t }) {
-  return (
-    <div className={`gl-plate${band ? '' : ' gl-plate--edge'}${className ? ` ${className}` : ''}`}>
-      <div className="gl-plate__body">
-        {children}
-        {tr && <p className={`gl-plate__tr${lead ? ' gl-plate__tr--lead' : ''}`}>{tr}</p>}
-      </div>
-      <PlateBand band={band} t={t} />
-    </div>
-  )
-}
-
-/** The point's line over the plate (a ladder card's `step`): Choisir's
- *  bars, Construire's, the star; the bar asked taller and ringed, ringed
- *  in the miss's ink once missed. */
+/** The point's steps, at the card's head: Choisir's three, Construire's
+ *  four, the star, as small stops on a hairline, the one asked ringed in
+ *  ink (in the miss's ink once missed), named beside them in words. */
 export function PointLine({ card, missed = false, t: tProp }) {
   const t = useT(tProp)
   const step = card?.step
   const line = lineOf(step)
   if (!line) return null
   const here = step.group
-  const bars = (states, group) => (
-    <div className="gl-line__bars">
-      {states.map((s, i) => (
-        <i key={i} className={`gl-line__bar${s ? ` gl-line__bar--${s}` : ''}${s === 'now' && missed && here === group ? ' gl-line__bar--miss' : ''}`} />
-      ))}
-    </div>
-  )
-  const label = (group, name) => (
-    <span className="gl-line__name">
-      {name}
-      {here === group && <em className="gl-line__at">{step.at}/{step.of}</em>}
-      {here === group && missed && <span className="gl-line__again">· {t.lineAgain}</span>}
-    </span>
-  )
+  const name = here === 'mastered' ? t.lineMastered
+    : `${here === 'choose' ? (line.relapse ? t.lineRelapse : t.lineChoose) : t.lineBuild} ${step.at}/${step.of}`
   const aria = here === 'mastered'
     ? t.lineMasteredAria
     : t.lineAria(here === 'choose' ? t.lineChoose : t.lineBuild, step.at, step.of)
+  const dot = (s, k, group) => (
+    <i key={k} className={`gl-walk__dot${s ? ` gl-walk__dot--${s}` : ''}${s === 'now' && missed && here === group ? ' gl-walk__dot--miss' : ''}`} />
+  )
   return (
-    <div className={`gl-line${line.star ? ' gl-line--star' : ''}`} role="img" aria-label={aria} data-group={here}>
-      <div className={`gl-line__seg gl-line__seg--choose${here === 'choose' ? ' gl-line__seg--here' : ''}`}>
-        {bars(line.choose, 'choose')}
-        {label('choose', line.relapse ? t.lineRelapse : t.lineChoose)}
-      </div>
-      <div className={`gl-line__seg gl-line__seg--build${here === 'build' ? ' gl-line__seg--here' : ''}${line.relapse ? ' gl-line__seg--one' : ''}`}>
-        {bars(line.build, 'build')}
-        {label('build', t.lineBuild)}
-      </div>
-      <span className={`gl-line__star${line.star ? ' gl-line__star--on' : ''}`} aria-hidden="true">
-        ★{line.star && <em>{t.lineMastered}</em>}
+    <div className="gl-walk" role="img" aria-label={aria} data-group={here}>
+      <span className="gl-walk__line" aria-hidden="true">
+        {line.choose.map((s, k) => dot(s, `c${k}`, 'choose'))}
+        <span className="gl-walk__gap" />
+        {line.build.map((s, k) => dot(s, `b${k}`, 'build'))}
+        <i className={`gl-walk__star${line.star ? ' gl-walk__star--on' : ''}`}>★</i>
+      </span>
+      <span className="gl-walk__name">
+        {name}
+        {missed && <span className="gl-walk__again"> · {t.lineAgain}</span>}
       </span>
     </div>
   )
@@ -152,9 +111,64 @@ export function LadderMap({ card, t: tProp }) {
   )
 }
 
-/** Choisir: the sentence with the point's hole, the translation under it,
- *  the band. Answered, the hole holds the point, lit; a rival taken is
- *  answered by the lesson's own line on it. */
+/** The card's two faces, turned as a flashcard turns: the front until
+ *  `turned`, then the back, the flashcard's own face animation and
+ *  sound; a tap turns it back and forth after that. */
+function TurnCard({ turned, front, back }) {
+  // Which face is up, and how many turns: the turn the answer makes is
+  // taken while rendering (the answer is the parent's), each tap after it
+  // here; the count remounts the face so its animation replays.
+  const [shown, setShown] = useState({ turned, back: turned, flips: 0 })
+  if (shown.turned !== turned) {
+    setShown({ turned, back: turned, flips: shown.flips + (turned ? 1 : 0) })
+  }
+  useEffect(() => { if (turned) playFlip() }, [turned])
+  const turn = () => {
+    if (!turned) return
+    playFlip()
+    setShown(s => ({ ...s, back: !s.back, flips: s.flips + 1 }))
+  }
+  return (
+    <div className={`flashcard gl-card${turned ? ' gl-card--turnable' : ''}`} onClick={turn}>
+      <div key={shown.flips} className={`flashcard__face${shown.flips > 0 ? ' flashcard__face--turned' : ''}`}>
+        {shown.back ? back : front}
+      </div>
+    </div>
+  )
+}
+
+/** The back of the card: what happened, the whole sentence with the
+ *  point picked out and translated, and the point itself. */
+function Back({ card, head, kind, children, sentence }) {
+  return (
+    <div className="gl-back">
+      {head && <p className={`gl-back__head gl-back__head--${kind}`}>{head}</p>}
+      {children}
+      {sentence && (
+        <div className="gl-back__sentence">
+          <ExampleSentence ex={sentence} />
+        </div>
+      )}
+      <GrammarAnswer card={card} size={36} />
+    </div>
+  )
+}
+
+/** The sentence's furigana with the point lit (`highlight`) where the
+ *  front had its hole, for the back. */
+function litSentence(parts, answerParts) {
+  const out = []
+  for (const part of parts) {
+    if (part.blank) answerParts.forEach(p => out.push({ ...p, highlight: true }))
+    else out.push(part)
+  }
+  return out
+}
+
+/** Choisir: the sentence and its hole on the front, the translation under
+ *  it; the forms are the dock's (GrammarTiles). Answered, the card turns:
+ *  a rival taken is named the trap and answered by the lesson's own line
+ *  on it, over the whole sentence and the point. */
 export function GrammarChoose({ card, revealed = false, selected = null, t: tProp }) {
   const t = useT(tProp)
   const c = card.contrast
@@ -162,39 +176,100 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
   const parts = c.furigana?.length ? c.furigana : [{ text: c.jp }]
   const answer = c.answer ?? card.grammar
   const trap = revealed && selected && selected !== answer
-  // The point as it is written in the sentence, with its reading: the
-  // pattern's furigana less its leading 〜.
   const answerParts = (card.grammar_furigana?.length ? card.grammar_furigana : [{ text: answer }])
     .map((part, i) => (i === 0 ? { ...part, text: bare(part.text) } : part))
     .filter(part => part.text)
+  const front = (
+    <div className="gl-front">
+      <p className="gl-sent" lang="ja">
+        {holdGaps(parts.map((part, i) => (part.blank
+          ? { gap: true, node: <span key={i} className="gl-gap" style={{ '--gap-size': bare(answer).length }} aria-label={t.glBlank} /> }
+          : { node: <Parts key={i} parts={[part]} /> })))}
+      </p>
+      {c.tr && <p className="gl-tr">{c.tr}</p>}
+    </div>
+  )
+  const back = (
+    <Back
+      card={card}
+      kind={trap ? 'no' : 'ok'}
+      head={trap ? t.chooseTrap(bare(selected)) : selected ? t.bldRight : null}
+      sentence={{ jp: c.jp, tr: c.tr, segments: litSentence(parts, answerParts) }}
+    >
+      {trap && c.why?.[selected] && <p className="gl-back__why">{c.why[selected]}</p>}
+    </Back>
+  )
   return (
     <div className="gl-choose">
       <PointLine card={card} missed={trap} t={t} />
-      <GrammarPlate tr={c.tr} band={bandOf(card, t)} t={t}>
-        <p className="gl-plate__sent" lang="ja">
-          {joinGaps(parts.map((part, i) => (part.blank
-            ? {
-                gap: true,
-                node: revealed
-                  ? <span key={i} className="gl-gap gl-gap--done"><span className="gl-lit"><PlateParts parts={answerParts} /></span></span>
-                  : <span key={i} className="gl-gap" style={{ '--gap-size': bare(answer).length }} aria-label={t.glBlank} />,
-              }
-            : { node: <PlateParts key={i} parts={[part]} />, last: part })))}
-        </p>
-      </GrammarPlate>
-      {trap && (
-        <div className="gl-said gl-said--no" role="status">
-          <p className="gl-said__head">{t.chooseTrap(bare(selected))}</p>
-          {c.why?.[selected] && <p className="gl-said__line">{c.why[selected]}</p>}
-        </div>
-      )}
+      <TurnCard key={card.card_id} turned={revealed} front={front} back={back} />
+    </div>
+  )
+}
+
+/** The mock exam's answer tiles for Choisir's forms: a bubble with its
+ *  number and the form, two by two -- in the sumi dock under the thumb
+ *  on a phone, the answer sheet beside the card on the desk. Digits pick
+ *  as they do in every run; answered, the right form is ringed and a
+ *  wrong pick crossed. */
+export function GrammarTiles({ choices, correct, selected, answered, onAnswer, readings }) {
+  const desk = useDesk()
+  const { t } = useLang()
+  function pick(choice) {
+    if (answered) return
+    playClick()
+    onAnswer(choice)
+  }
+  useEffect(() => {
+    if (answered) return undefined
+    const onKey = e => {
+      if (!runKey(e)) return
+      const i = CHOICE_KEY_INDEX[e.key]
+      if (i !== undefined && i < choices.length) pick(choices[i])
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+  const form = p => {
+    const parts = readings?.[p]
+    if (!parts?.length) return bare(p)
+    return <Parts parts={parts.map((part, i) => (i === 0 ? { ...part, text: bare(part.text) } : part)).filter(part => part.text)} />
+  }
+  // The exam's measure: past five signs a form steps down a size, past
+  // seven it takes the row's width.
+  const longest = Math.max(0, ...choices.map(p => [...bare(p)].length))
+  const size = longest > 7 ? ' gl-tiles--long' : longest > 5 ? ' gl-tiles--mid' : ''
+  return (
+    <div className={`gl-dock${desk ? ' gl-dock--desk' : ''}`}>
+      <div className={`gl-tiles${size}`} role="radiogroup" aria-label={t.chooseAsk}>
+        {choices.map((choice, i) => {
+          const ok = answered && choice === correct
+          const no = answered && choice === selected && choice !== correct
+          return (
+            <button
+              key={choice}
+              type="button"
+              role="radio"
+              aria-checked={selected === choice}
+              className={`gl-tile${selected === choice ? ' gl-tile--on' : ''}${ok ? ' gl-tile--ok' : ''}${no ? ' gl-tile--no' : ''}`}
+              disabled={answered}
+              onClick={() => pick(choice)}
+              data-choice={i}
+            >
+              <span className="gl-tile__b">{i + 1}</span>
+              <span className="gl-tile__t" lang="ja">{form(choice)}</span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
 /** Construire: the translation given, the point's hole (two for a point
- *  in two pieces) to type in, kana or rōmaji; the server says right,
- *  close or wrong, gap by gap, and the hole shows the correction. */
+ *  in two pieces) filled as it is typed, kana or rōmaji, from the ticket
+ *  under the sentence; the server says right, close or wrong, gap by gap,
+ *  and the card turns to the correction and the point. */
 export function GrammarConstruire({ card, answered, onDone, session, t: tProp }) {
   const ctx = useLang()
   const t = tProp ?? ctx?.t
@@ -209,52 +284,64 @@ export function GrammarConstruire({ card, answered, onDone, session, t: tProp })
     e.preventDefault()
     if (answered || values.every(v => !v.trim())) return
     playClick()
-    onDone?.()
     apiJson(`/api/grammar/build/check?lang=${lang}`, session, {
       method: 'POST',
       body: JSON.stringify({ raw_id: card.raw_id ?? card.card_id, key: build.key, answers: values }),
-    }).then(setVerdict).catch(() => setVerdict({ verdict: null, gaps: [] }))
-  }
-
-  const gapAt = n => {
-    const v = verdict?.gaps?.[n]
-    if (!answered || !v) {
-      return (
-        <span key={`g${n}`} className={`gl-gap gl-gap--typed${!answered && focus === n ? ' gl-gap--focus' : ''}`}
-              style={{ '--gap-size': gaps[n].size }} aria-hidden="true">
-          {values[n]}
-        </span>
-      )
-    }
-    if (v.verdict === 'right') {
-      return <span key={`g${n}`} className="gl-gap gl-gap--done"><span className="gl-lit">{v.answer}</span></span>
-    }
-    return (
-      <span key={`g${n}`} className="gl-gap gl-gap--typed gl-gap--no">
-        {v.marks.map((m, i) => (m.ok != null
-          ? <span key={i}>{m.ok}</span>
-          : (
-            <span key={i} className="gl-fix">
-              {m.wrong && <s>{m.wrong}</s>}
-              {m.fix && <ins>{m.fix}</ins>}
-            </span>
-          )))}
-      </span>
-    )
+    })
+      .then(v => { setVerdict(v); onDone?.() })
+      .catch(() => { setVerdict({ verdict: null, gaps: [] }); onDone?.() })
   }
 
   const whole = verdict?.verdict
+  const front = (
+    <div className="gl-front">
+      <p className="gl-sent" lang="ja">
+        {holdGaps(build.pieces.map((piece, i) => (piece.gap != null
+          ? {
+              gap: true,
+              node: (
+                <span key={`g${i}`} className={`gl-gap gl-gap--typed${!answered && focus === piece.gap ? ' gl-gap--focus' : ''}`}
+                      style={{ '--gap-size': piece.size }} aria-hidden="true">
+                  {values[piece.gap]}
+                </span>
+              ),
+            }
+          : { node: <Parts key={i} parts={piece.furigana} /> })))}
+      </p>
+      <p className="gl-tr gl-tr--lead">{build.tr}</p>
+    </div>
+  )
+  const back = verdict && (
+    <Back
+      card={card}
+      kind={whole === 'right' ? 'ok' : 'no'}
+      head={whole === 'right' ? t.bldRight : whole === 'close' ? t.bldClose : whole === 'wrong' ? t.bldWrong : null}
+      sentence={verdict.jp ? { jp: verdict.jp, tr: verdict.tr, segments: verdict.furigana } : null}
+    >
+      {whole && whole !== 'right' && (
+        <p className="gl-back__mine" lang="ja" aria-label={t.bldAnswer}>
+          {verdict.gaps.map((g, n) => (
+            <span key={n} className="gl-back__gap">
+              {g.marks.map((m, i) => (m.ok != null
+                ? <span key={i}>{m.ok}</span>
+                : (
+                  <span key={i} className="gl-fix">
+                    {m.wrong && <s>{m.wrong}</s>}
+                    {m.fix && <ins>{m.fix}</ins>}
+                  </span>
+                )))}
+            </span>
+          ))}
+        </p>
+      )}
+    </Back>
+  )
+
   return (
     <div className="gl-build">
       <PointLine card={card} missed={answered && (whole === 'wrong' || whole === 'close')} t={t} />
-      <GrammarPlate tr={build.tr} lead band={bandOf(card, t)} t={t}>
-        <p className="gl-plate__sent" lang="ja">
-          {joinGaps(build.pieces.map((piece, i) => (piece.gap != null
-            ? { gap: true, node: gapAt(piece.gap) }
-            : { node: <PlateParts key={i} parts={piece.furigana} /> })))}
-        </p>
-      </GrammarPlate>
-      {!answered ? (
+      <TurnCard key={card.card_id} turned={Boolean(answered && verdict)} front={front} back={back} />
+      {!answered && (
         <form className="gl-ticket" onSubmit={check}>
           <span className="gl-ticket__label" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
@@ -281,19 +368,6 @@ export function GrammarConstruire({ card, answered, onDone, session, t: tProp })
           </span>
           <button type="submit" className="gl-ticket__go" disabled={values.every(v => !v.trim())}>{t.bldCheck}</button>
         </form>
-      ) : verdict && whole && (
-        <div className={`gl-said gl-said--${whole === 'right' ? 'ok' : 'no'}`} role="status">
-          <p className="gl-said__head">{whole === 'right' ? t.bldRight : whole === 'close' ? t.bldClose : t.bldWrong}</p>
-          {whole !== 'right' && (
-            <p className="gl-said__line">
-              <span className="gl-said__cap">{t.bldAnswer}</span>
-              <span lang="ja" className="gl-said__ja">{verdict.gaps.map(g => g.answer).join(' … ')}</span>
-            </p>
-          )}
-          {whole !== 'right' && verdict.furigana && (
-            <p className="gl-said__sent" lang="ja"><PlateParts parts={verdict.furigana} /></p>
-          )}
-        </div>
       )}
     </div>
   )

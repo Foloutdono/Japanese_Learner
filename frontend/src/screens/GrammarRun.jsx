@@ -17,7 +17,7 @@ import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
 import { GrammarWrite } from '../components/study/GrammarWork'
-import { GrammarChoose, GrammarConstruire, PointLine } from '../components/study/GrammarPlate'
+import { GrammarChoose, GrammarConstruire, GrammarTiles, PointLine } from '../components/study/GrammarPlate'
 import { cardShape } from '../domain/cardShape'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
@@ -371,7 +371,8 @@ export default function GrammarRun({ session }) {
                     {isBuild
                       ? <GrammarConstruire key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} session={session} />
                       : <GrammarWrite key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} session={session} />}
-                    {answered && <GrammarAnswer card={card} size={36} divided />}
+                    {/* Construire turns its own card to the point (plan 194). */}
+                    {answered && isWrite && <GrammarAnswer card={card} size={36} divided />}
                     <RevealActions
                       t={t} revealed={answered} resetKey={card.card_id}
                       dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
@@ -379,7 +380,6 @@ export default function GrammarRun({ session }) {
                 ) : isContrast ? (
                   <>
                     <GrammarChoose card={card} revealed={answered} selected={selected} t={t} />
-                    {answered && <GrammarAnswer card={card} size={36} divided />}
                     <RevealActions
                       t={t} revealed={answered} resetKey={card.card_id}
                       dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
@@ -454,13 +454,15 @@ export default function GrammarRun({ session }) {
               </PromptCard>
             </CardTransition>
 
-            {/* The contrast drill's choices: the rivals, always on. */}
-            {isContrast && (
-              <MCQGrid
+            {/* Choisir's forms as the mock exam's answer tiles (plan 194):
+                docked under the thumb on a phone, where the rating bar
+                comes up once one is taken. */}
+            {isContrast && (desk || !answered) && (
+              <GrammarTiles
                 choices={card.contrast?.choices ?? []}
                 correct={card.grammar}
-                formatChoice={p => <GrammarChoice text={p} readings={card.choices_furigana} />}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer} variant="plats" />
+                readings={card.choices_furigana}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
 
             {/* Options: meanings for a flashcard, rules for fill_in. */}
@@ -494,7 +496,7 @@ export default function GrammarRun({ session }) {
               </div>
             )}
 
-            <RatingBar active={showRating && !gates.locked} onRate={postReview} />
+            {!(isContrast && !answered && !desk) && <RatingBar active={showRating && !gates.locked} onRate={postReview} />}
           </>
         )}
 

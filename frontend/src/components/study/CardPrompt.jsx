@@ -326,7 +326,8 @@ export default function CardPrompt({
             {isBuild
               ? <GrammarConstruire key={resetKey} card={c} answered={answered} onDone={onFlashcardReveal} session={session} t={t} />
               : <GrammarWrite key={resetKey} card={c} answered={answered} onDone={onFlashcardReveal} session={session} />}
-            {answered && <GrammarAnswer card={c} size={36} divided />}
+            {/* Construire turns its own card to the point (plan 194). */}
+            {answered && isWrite && <GrammarAnswer card={c} size={36} divided />}
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}
               dictCategory="grammar" dictId={pointId} session={session} lesson={lesson} />
@@ -334,7 +335,6 @@ export default function CardPrompt({
         ) : isContrast ? (
           <>
             <GrammarChoose card={c} revealed={answered} selected={selected} t={t} />
-            {answered && <GrammarAnswer card={c} size={36} divided />}
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}
               dictCategory="grammar" dictId={pointId} session={session} lesson={lesson} />

@@ -14,6 +14,7 @@ import { useRunExit } from '../hooks/useRunExit'
 import { useDesk } from '../hooks/useDesk'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardPanel } from '../components/study/CardPanel'
+import { GrammarTiles } from '../components/study/GrammarPlate'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 // The card faces themselves live beside the other study components now,
@@ -370,12 +371,14 @@ export default function StudyRun({ session }) {
                 pattern read with its furigana. */}
             {/* The contrast drill's rivals (plan 087): the exercise, always on. */}
             {structureKey === 'grammar' && isContrast && (
-              <MCQGrid
-                choices={nc.contrast?.choices ?? []}
-                correct={nc.grammar}
-                formatChoice={c => <GrammarChoice text={c} readings={nc.choices_furigana} />}
-                selected={selected} answered={answered} onAnswer={onMCQAnswer} variant="plats"
-              />
+              (desk || !answered) && (
+                <GrammarTiles
+                  choices={nc.contrast?.choices ?? []}
+                  correct={nc.grammar}
+                  readings={nc.choices_furigana}
+                  selected={selected} answered={answered} onAnswer={onMCQAnswer}
+                />
+              )
             )}
 
             {structureKey === 'grammar' && showChoices && (
@@ -434,7 +437,10 @@ export default function StudyRun({ session }) {
               />
             )}
 
-            <RatingBar active={showRating && !gates.locked} onRate={postReview} />
+            {/* Choisir's dock stands where the bar comes up (plan 194). */}
+            {!(structureKey === 'grammar' && isContrast && !answered && !desk) && (
+              <RatingBar active={showRating && !gates.locked} onRate={postReview} />
+            )}
 
             {showDrawing && (
               <DrawingOverlay
