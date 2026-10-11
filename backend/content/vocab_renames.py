@@ -744,7 +744,7 @@ MOVES: dict[str, str] = {
     # for 前::ぜん -- a dropped dakuten, not a different word.
     "vocab_N1_前_せん": "vocab_N1_前_ぜん",
 
-    # ── Plan 192: what the reading bank's drafters met ───────────
+    # ── Plan 193: what the reading bank's drafters met ───────────
     # Words of the first lessons that the deck held a second time, far
     # above the card a learner had already learned: the N1 直ぐ beside
     # the N5 すぐに, the N3 ゆっくり beside the N5 ゆっくりと, the N1 良い
@@ -947,7 +947,7 @@ def folded_forms() -> dict[str, tuple[tuple[str, str], ...]]:
 # 下す, JMdict's irregular okurigana for it.
 #
 # And a folded spelling's other reading, where the card packs both: the
-# N1 良い was read いい and the N1 好い よい (plan 192), but each spelling
+# N1 良い was read いい and the N1 好い よい (plan 193), but each spelling
 # is read either way, and the page's 良い is mostly よい.
 FOLDED_ONLY: dict[str, tuple[tuple[str, str], ...]] = {
     "vocab_N3_下ろす_おろす": (("下す", "おろす"),),

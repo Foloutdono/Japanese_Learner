@@ -165,7 +165,7 @@ class ContextRuleTests(unittest.TestCase):
 
     def test_gimi_a_touch_of(self) -> None:
         """〜気味 after a noun or a verb's stem is ぎみ; 気味 alone is きみ
-        (plan 191)."""
+        (plan 192)."""
         kimi = lambda: _tok("気味", "きみ")
         self.assertEqual(_read(_tok("風邪", "かぜ"), kimi())[1], "ぎみ")
         self.assertEqual(_read(_tok("太り", "ふとり", "動詞", "一般", "*", "verb"), kimi())[1], "ぎみ")
@@ -175,7 +175,7 @@ class ContextRuleTests(unittest.TestCase):
 
     def test_busoku_a_shortage_of(self) -> None:
         """〜不足 after a noun is ぶそく, the compound's voiced half; after
-        a particle or a prefix it is ふそく (plan 192)."""
+        a particle or a prefix it is ふそく (plan 193)."""
         fusoku = lambda: _tok("不足", "ふそく")
         self.assertEqual(_read(_tok("睡眠", "すいみん"), fusoku())[1], "ぶそく")
         self.assertEqual(_read(_tok("人手", "ひとで"), fusoku())[1], "ぶそく")

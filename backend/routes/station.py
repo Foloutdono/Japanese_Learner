@@ -199,7 +199,7 @@ def _grammar_line(lang: str) -> dict:
 # serve, never an illustration written for the page -- the bank's first
 # sentence, the first seed text, the first clip, the catalogue's first
 # point. `lang` reaches only what the bank carries in two languages
-# (comprehension's questions, composition's gloss, and since plan 191
+# (comprehension's questions, composition's gloss, and since plan 192
 # the reading bank's translation, which is what translation prompts the
 # learner with -- routes/reading.get_reading_batch's `translation_lang`
 # note).

@@ -100,7 +100,7 @@ def test_messages_never_route_into_the_kanji_feedback_branch():
         assert not ("outside" in message and "allowed set" in message)
 
 
-# -- words_at_level (plan 191): what the reading bank must hold of its
+# -- words_at_level (plan 192): what the reading bank must hold of its
 # own level, counted as the breakdown tags it.
 
 def test_words_at_level_are_the_level_s_own_deck_words():

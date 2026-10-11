@@ -47,7 +47,7 @@ class SentenceBankTests(unittest.TestCase):
     # the bank names: a sentence may legitimately claim 〜ば or a bare
     # particle, and neither can be confirmed present.
     #
-    # Raise these as sentences are added for the new points. Plan 191
+    # Raise these as sentences are added for the new points. Plan 192
     # reached every checkable point from N4 up, the new tokenizer-read
     # rules (row_problems) letting a point the substring test cannot
     # confirm be claimed where the detector finds it.
@@ -83,13 +83,13 @@ class SentenceBankTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class LevelVocabularyTests(unittest.TestCase):
-    """Plan 191: a level's sentences are made of the level. row_problems
+    """Plan 192: a level's sentences are made of the level. row_problems
     holds each N4-N1 row to two words of its level (see
     test_every_sentence_is_at_its_level); these hold the bank as a
     whole, so a rewrite never quietly narrows what it teaches."""
 
     # Distinct deck words of each level the bank uses, and distinct
-    # kanji the kanji deck files at it -- before plan 191: N4 17 / 81,
+    # kanji the kanji deck files at it -- before plan 192: N4 17 / 81,
     # N3 24 / 63, N2 11 / 16, N1 25 / 34. Ratchets: raise, never lower.
     LEVEL_WORDS_FLOOR = {"N4": 316, "N3": 397, "N2": 406, "N1": 491}
     LEVEL_KANJI_FLOOR = {"N4": 106, "N3": 236, "N2": 145, "N1": 235}
@@ -112,7 +112,7 @@ class LevelVocabularyTests(unittest.TestCase):
 
 
 class ServingTests(unittest.TestCase):
-    """What the batch serves from a row (plan 191)."""
+    """What the batch serves from a row (plan 192)."""
 
     def test_the_translation_is_the_reader_s_language_else_english(self) -> None:
         row = BY_LEVEL["N3"][0]
@@ -171,12 +171,12 @@ class DifficultyGateTests(unittest.TestCase):
         self.assertEqual(D.vocab_over_level("今日は何をしますか。", "N5"), [])
 
     def test_vocab_gate_reads_a_question_word_and_its_particle(self) -> None:
-        # 何も is an N3 card, and 何も／誰も〜ない N5 grammar (plan 192).
+        # 何も is an N3 card, and 何も／誰も〜ない N5 grammar (plan 193).
         self.assertEqual(D.vocab_over_level("何も食べませんでした。", "N5"), [])
         self.assertEqual(D.vocab_over_level("何か飲みますか。", "N5"), [])
 
     def test_vocab_gate_reads_a_verb_in_its_honorific_frame(self) -> None:
-        # お使いください is 使う, not the N1 お使い, "errand" (plan 192);
+        # お使いください is 使う, not the N1 お使い, "errand" (plan 193);
         # and 使い is 使う's stem, the わ-row the stem table lacked.
         self.assertEqual(D.vocab_over_level("こちらのペンをお使いください。", "N4"), [])
         self.assertEqual(D.vocab_over_level("毎日パソコンを使います。", "N5"), [])

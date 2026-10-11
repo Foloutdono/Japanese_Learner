@@ -179,7 +179,7 @@ def word_level(surface: str) -> str | None:
 # The particles a question word takes to say "nothing" or "something"
 # (何も, 誰も, 何か, 誰か): the catalogue teaches each pairing as N5
 # grammar (何も／誰も〜ない, 何か／誰か／どこか), and the deck has 何も as an N3
-# card besides (plan 192). Not a deck word, so _splits_within reads one
+# card besides (plan 193). Not a deck word, so _splits_within reads one
 # as the last piece of a split.
 _PARTICLE_TAILS = frozenset({"も", "か"})
 
@@ -218,7 +218,7 @@ def _splits_within(surface: str, limit: int) -> bool:
 
 # ren'yōkei (連用形) -> dictionary form. A godan verb's stem ends in the
 # i-row kana of its own column; the dictionary form ends in the u-row one.
-# い -> う is the わ-row's (使い, 買い, 言い), missing until plan 192.
+# い -> う is the わ-row's (使い, 買い, 言い), missing until plan 193.
 _RENYOKEI = {"き": "く", "ぎ": "ぐ", "し": "す", "ち": "つ", "に": "ぬ",
              "び": "ぶ", "み": "む", "り": "る", "ひ": "ふ", "い": "う"}
 
@@ -236,7 +236,7 @@ def _is_inflection_of_easier(surface: str, limit: int) -> bool:
     index = _vocab_level_index()
     if surface[:1] in ("お", "ご") and len(surface) > 2 and _is_inflection_of_easier(surface[1:], limit):
         # お〜ください, お〜になる, お〜する are the verb in its honorific
-        # frame (plan 192): お使いください is 使う, not the N1 お使い,
+        # frame (plan 193): お使いください is 使う, not the N1 お使い,
         # "errand". The same leniency as 行き for 行く above.
         return True
     candidates = [surface + "る"]                      # ichidan stem: 食べ -> 食べる

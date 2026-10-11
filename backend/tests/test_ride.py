@@ -163,7 +163,7 @@ def test_ride_sentence_is_the_reading_batch_shape(client):
     with _clean(RIDE_USER):
         s = client.get("/api/onboarding/ride").json()["sentence"]
         assert s["phrase"] == RIDE_SENTENCE_JP
-        # In the learner's language, French by default (plan 191).
+        # In the learner's language, French by default (plan 192).
         assert s["translation_lang"] == "fr"
         assert s["translation"]
         english = client.get("/api/onboarding/ride?lang=en").json()["sentence"]

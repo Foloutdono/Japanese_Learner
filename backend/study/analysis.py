@@ -384,7 +384,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # register (はずだ, わけです) and the spoken contractions (じゃ, てる), a
 # compound's second half (乗りこもう, 書き直し, やりがい), the volitional
 # that opens 〜ようとする and its kin, and 〜ものを, 〜か〜か with one か.
-# 13: what the reading bank's drafters met (plan 192) -- a lexical
+# 13: what the reading bank's drafters met (plan 193) -- a lexical
 # causative (知らせる) no 使役形, the short causative passive (行かされる),
 # いらっしゃる／おっしゃる／なさる in every form, 〜ようと思う, 一日中,
 # 致す after お〜, 〜ばかりに after ん, 〜っぽい, 〜ずくめ, 〜手前, 〜どころ;

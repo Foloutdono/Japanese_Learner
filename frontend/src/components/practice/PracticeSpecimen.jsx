@@ -126,7 +126,7 @@ function face(platform, card, words, note, t, compact) {
       )
     case 'translation':
       // The run prompts with the sentence in the learner's language when
-      // the bank holds it (plan 191: English and French), else English
+      // the bank holds it (plan 192: English and French), else English
       // (routes/reading.py's translation_lang), and the well says which.
       return (
         <>

@@ -145,7 +145,7 @@ except Exception:  # pragma: no cover - a missing DB must not stop import
 
 # Display time scales with phrase length, clamped to a sane range. Tune freely.
 # The ceiling was 25 s, which the formula reaches at 37 characters: an
-# N2 or N1 sentence of the bank written to its level (plan 191, up to 60
+# N2 or N1 sentence of the bank written to its level (plan 192, up to 60
 # and 80 characters) got no more time than a short one. 45 s keeps the
 # scale running to about 70.
 MIN_DISPLAY_SECONDS = 5
@@ -349,7 +349,7 @@ def _pick_curated_phrases(level: str, count: int, exclude: set[str]) -> list[dic
     never repeats itself, and `exclude` (what the session has already
     shown) is honoured so a long sitting works through the bank rather
     than circling the same handful. A served sentence is named in it by
-    its text or, from plan 191's runs, by its `key`.
+    its text or, from plan 192's runs, by its `key`.
     """
     pool = [
         row for row in reading_sentences.BY_LEVEL.get(level, [])
@@ -585,11 +585,11 @@ def _finish_phrase(jp: str, en: str, kanji: str, kana: str, level: str | None,
         # the word stands in the Japanese and names the word missed.
         "words": sentence_words(jp),
         "translation": en,
-        # A curated sentence's own language for the reader (plan 191),
+        # A curated sentence's own language for the reader (plan 192),
         # else English: see get_reading_batch's docstring.
         "translation_lang": translation_lang,
         "display_seconds": _display_seconds(jp),
-        # What the run sends back in `exclude` (plan 191).
+        # What the run sends back in `exclude` (plan 192).
         "key": reading_sentences.phrase_key(jp),
         "source_word": {"kanji": kanji, "kana": kana, "level": level},
     }
@@ -645,7 +645,7 @@ def get_reading_batch(
 ):
     """
     NOTE on `lang`: the curated bank carries every sentence in English
-    and French (plan 191), and a curated phrase comes back in `lang`
+    and French (plan 192), and a curated phrase comes back in `lang`
     when the bank holds it. Real example sentences (JMdict/Tatoeba-
     sourced) only carry an English translation in this app's data —
     there's no French/Spanish/etc. translation layer for them — so those
@@ -680,7 +680,7 @@ def get_reading_batch(
         # The hand-written bank first, the Tatoeba pool for whatever is
         # left. Not a fallback in the "if the good path fails" sense --
         # the bank is finite (two sentences a grammar point, ~150-240 a
-        # level since plan 191) and a long sitting
+        # level since plan 192) and a long sitting
         # will exhaust it, at which point real corpus sentences that pass
         # the gate are exactly what should come next. Ordering it this
         # way means the first thing a beginner ever reads is a sentence

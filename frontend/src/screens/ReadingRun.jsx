@@ -47,7 +47,7 @@ const READING_COLOR = 'var(--line-reading)'
 // it, under the chrome (screens/SentenceStation.jsx).
 const BASE = '/practice/reading'
 // How many served sentences a batch request names in `exclude`: enough
-// for a level's whole curated bank (plan 191).
+// for a level's whole curated bank (plan 192).
 const SEEN_CAP = 250
 
 export default function ReadingRun({ session }) {
@@ -166,7 +166,7 @@ export default function ReadingRun({ session }) {
       params.set('tier', tier)
       params.set('tier_size', tierSize)
     }
-    // Each by its ten-character key (plan 191), so a long sitting can
+    // Each by its ten-character key (plan 192), so a long sitting can
     // name a level's whole bank -- two sentences a grammar point, up to
     // ~240 -- in a URL; sent as text, sixty N1 sentences did not fit.
     if (seenRef.current.length) params.set('exclude', seenRef.current.slice(-SEEN_CAP).join('|'))

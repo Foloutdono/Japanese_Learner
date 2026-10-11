@@ -1,9 +1,9 @@
 """
-The reading bank measured against its levels (plan 191). Read-only, no
+The reading bank measured against its levels (plan 192). Read-only, no
 database, no network; needs the tokenizer (fugashi + unidic-lite).
 
 content/reading_sentences.py's rules say what a row must not hold --
-nothing above its level -- and, since plan 191, what an N4-N1 row must
+nothing above its level -- and, since plan 192, what an N4-N1 row must
 hold: two deck words of its own level besides its grammar point, its
 focus one of them. This prints how the bank stands against both, level
 by level, and checks rows that are not in the bank yet: the way the

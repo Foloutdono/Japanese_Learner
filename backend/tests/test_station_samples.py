@@ -235,7 +235,7 @@ def test_the_reading_card_is_the_bank_s_first_sentence(client):
     for source in ("reading", "translation"):
         for level, stop in _stops(client, source).items():
             first = reading_sentences.BY_LEVEL[level][0]
-            # In the reader's language (plan 191: the bank holds every
+            # In the reader's language (plan 192: the bank holds every
             # sentence in English and French).
             assert stop["card"] == {
                 "jp": first["jp"], "en": first["en"], "grammar": first["grammar"],

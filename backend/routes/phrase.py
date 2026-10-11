@@ -111,7 +111,7 @@ def _user_message(phrase: str, points: list[dict]) -> str:
 #
 # It matters far more now than it did: reading practice draws from a
 # curated bank of ~1,050 hand-written sentences (content/reading_sentences,
-# plan 191), so the SAME sentences come round constantly. Cached, the
+# plan 192), so the SAME sentences come round constantly. Cached, the
 # whole bank costs at most one call a sentence once, shared across every
 # user, instead of one
 # per phrase per session. The phrase-analyzer screen's own free-text

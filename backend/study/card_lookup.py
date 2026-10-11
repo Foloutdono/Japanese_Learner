@@ -882,7 +882,7 @@ def resolve_kana(reading: str, pos: str, auxiliary_use: bool, after_conjunctive:
     キレイ are 混 and 漢 --
     native words written in katakana -- and still reach 駄目 and 綺麗.
 
-    And the other way round (plan 192): a NATIVE or Sino-Japanese word
+    And the other way round (plan 193): a NATIVE or Sino-Japanese word
     (和, 漢) the page writes in hiragana is not a card written in
     katakana. まま ("as it is", 儘) is not ママ ("mum"), which 着たまま
     and そのまま were glossed with in fourteen of the taught sentences.
@@ -966,7 +966,7 @@ def resolve_morpheme(morphemes, i: int):
 def _kana_word_instead(m, entry: dict) -> bool:
     """Whether a token the page writes in kana is the word JMdict says is
     written in kana, not the card spelled in kanji it is read like (plan
-    192). まま is UniDic's 侭, "as it is", and JMdict's 儘 is common and
+    193). まま is UniDic's 侭, "as it is", and JMdict's 儘 is common and
     usually kana -- the pool holds it as a kana row -- while the card read
     まま is 間々, "occasionally": 着たまま, そのまま and 思ったまま were
     all glossed "occasionally". Three things must hold, so that a kana

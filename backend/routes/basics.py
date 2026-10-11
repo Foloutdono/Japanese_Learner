@@ -142,7 +142,7 @@ def get_basics_unit(unit_id: str, lang: str = "fr", user_id: str = Depends(get_u
     """A unit's station: its points, words and kanji in the order the
     course deals them, each with its `progress` (0 new to 1 mastered) and
     whether it is `met`, and the unit's sentences from the reading bank
-    -- each with its translation in the reader's language (plan 191:
+    -- each with its translation in the reader's language (plan 192:
     the bank carries English and French)."""
     found = next(((n, u) for n, u in enumerate(basics.units()) if u["id"] == unit_id), None)
     if found is None:

@@ -508,7 +508,7 @@ def get_ride(lang: str = "fr", user_id: str = Depends(get_user_id)):
         # The same shape the reading batch serves (routes/reading.py's
         # _finish_phrase), minus the source word the ride has none of.
         # In the learner's language, as every curated sentence carries
-        # it since plan 191; the frontend labels it by translation_lang.
+        # it since plan 192; the frontend labels it by translation_lang.
         "sentence": {
             "phrase": jp,
             "romaji": phrase_to_romaji(jp),

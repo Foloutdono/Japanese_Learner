@@ -116,7 +116,7 @@ def get_translation_batch(
     lang: str = "en",
     # Sentences this session has already served, "|"-separated, by text
     # or `key`. Passed straight through: the curated bank is finite (two
-    # sentences a grammar point, plan 191), and without this the picker reshuffles the same pool every
+    # sentences a grammar point, plan 192), and without this the picker reshuffles the same pool every
     # batch and a learner meets 何を買いたいですか three times in a
     # sitting. See reading._pick_curated_phrases.
     exclude: str = "",
@@ -157,7 +157,7 @@ class AnalyzePayload(BaseModel):
     # The language `translation_prompt` is written in -- the batch's
     # `translation_lang` -- when it differs from `lang`, the language
     # the review is written in: a French reader is shown a corpus
-    # sentence's English (plan 191). Empty means the same as `lang`,
+    # sentence's English (plan 192). Empty means the same as `lang`,
     # which is what an older client meant.
     prompt_lang: str = Field(default="", max_length=16)
     # The grammar point the reference sentence was written to

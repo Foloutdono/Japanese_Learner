@@ -53,7 +53,7 @@ def test_a_units_station_holds_its_cards_in_course_order(client):
     assert [s["jp"] for s in body["sentences"]] == unit["sentences"]
     bank = {row["jp"]: row for row in READING_N5}
     assert [s["translation"] for s in body["sentences"]] == [bank[jp]["en"] for jp in unit["sentences"]]
-    # A French reader reads them in French (plan 191).
+    # A French reader reads them in French (plan 192).
     french = client.get("/api/basics/kazu").json()["sentences"]
     assert [s["translation"] for s in french] == [bank[jp]["fr"] for jp in unit["sentences"]]
     assert client.get("/api/basics/nope").status_code == 404

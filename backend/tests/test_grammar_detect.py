@@ -578,7 +578,7 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
 
     A ratchet, not a target. The floors are below what the module scores
     today (94.0% of sentences, 527 of 545 points, after plan 150; 96.3%
-    and 533 of 545 after plan 188; 96.8% and 534 of 545 after plan 192) so
+    and 533 of 545 after plan 188; 96.8% and 534 of 545 after plan 193) so
     that ordinary catalogue edits do not fail the build, and far above
     what the substring matcher scored (77.6%) so that a regression to it
     does.
@@ -657,7 +657,7 @@ class CanFindTests(unittest.TestCase):
         )
         # A ratchet: 517 of 541 when written, 524 of 543 after plan 149,
         # 526 of 545 after plan 150, 532 of 545 after plan 188, 533 after
-        # plan 192.
+        # plan 193.
         # Lower it only when a plan lowers the figure, never to make a
         # build pass.
         self.assertGreaterEqual(trusted, 528, f"{trusted} points trusted")

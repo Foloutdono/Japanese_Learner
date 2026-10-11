@@ -158,7 +158,7 @@ def level_mix(text: str, level: str, allow_kanji: str = "") -> dict:
 
 def words_at_level(text: str, level: str, pattern: str = "") -> list[dict]:
     """The deck words of exactly `level` that `text` uses, each once --
-    the words the breakdown tags with that level's chip (plan 191).
+    the words the breakdown tags with that level's chip (plan 192).
 
     level_mix above counts what sits ABOVE a level and nothing else,
     which is all a generated passage needs. The curated reading bank

@@ -38,7 +38,7 @@ through row_problems() below:
     verifiably contains it
   * `en` and `fr`, a translation in each language the app speaks
 
-── Plan 191: and each sentence is AT its level ───────────────
+── Plan 192: and each sentence is AT its level ───────────────
 Those rules only say what a sentence may not hold, and the bank they
 kept was N5 sentences carrying one point apiece: 92% of the N2 rows
 held no N2 word, and the breakdown a learner opens after reading one
@@ -265,7 +265,7 @@ N5 = [
 
 # ── N4 ────────────────────────────────────────────────────────
 # The conditionals, giving and receiving, causative and passive -- and,
-# since plan 191, the N4 deck around them: every sentence holds at least
+# since plan 192, the N4 deck around them: every sentence holds at least
 # two N4 words besides its point, its focus one of them. One or two
 # clauses of everyday life (work, school, travel, health, shopping), up
 # to 34 characters, in the kana the N4 kanji budget leaves. Two
@@ -495,7 +495,7 @@ N4 = [
 # Where the syllabus turns abstract: reasons, tendencies, degrees. Two
 # clauses are normal here, and the sentences describe situations rather
 # than naming objects, in at least two N3 words besides the point (plan
-# 191), up to 46 characters. Two sentences a point, in the catalogue's
+# 192), up to 46 characters. Two sentences a point, in the catalogue's
 # order.
 N3 = [
     {"jp": "夫は休みの日になると、居間でテレビばかり見て、家事を全然手伝わない。", "en": "On his days off, my husband does nothing but watch TV in the living room and never helps with the housework at all.", "fr": "Les jours de repos, mon mari ne fait que regarder la télévision dans le salon et n'aide pas du tout aux tâches ménagères.", "grammar": "〜ばかり", "focus": "家事"},
@@ -720,7 +720,7 @@ N3 = [
 
 # ── N2 ────────────────────────────────────────────────────────
 # Society, work, the news: the written register N2 reads, at least two
-# N2 words besides the point (plan 191), up to 60 characters. Two
+# N2 words besides the point (plan 192), up to 60 characters. Two
 # sentences a point, in the catalogue's order.
 N2 = [
     {"jp": "住民から何度も苦情が寄せられたにもかかわらず、工事は深夜まで続けられた。", "en": "Despite repeated complaints from residents, the construction work went on late into the night.", "fr": "Malgré les plaintes répétées des habitants, les travaux se sont poursuivis jusque tard dans la nuit.", "grammar": "〜にもかかわらず", "focus": "苦情"},
@@ -957,7 +957,7 @@ N2 = [
 
 # ── N1 ────────────────────────────────────────────────────────
 # Editorial, essay, narrative and administrative prose, at least two N1
-# words besides the point (plan 191), up to 80 characters. Two
+# words besides the point (plan 192), up to 80 characters. Two
 # sentences a point, in the catalogue's order.
 N1 = [
     {"jp": "決勝点が入った瞬間、観衆は会場が揺れんばかりに歓声を上げた。", "en": "The moment the deciding point was scored, the crowd roared as if the whole venue were about to shake.", "fr": "Au moment où le point décisif a été marqué, le public a poussé des acclamations à faire trembler les tribunes.", "grammar": "〜んばかりに", "focus": "観衆"},
@@ -1204,7 +1204,7 @@ def patterns_for(level: str) -> set[str]:
     return {p["pattern"] for p in GRAMMAR_POINTS_BY_LEVEL.get(level, [])}
 
 
-# The languages every row carries a translation in (plan 191).
+# The languages every row carries a translation in (plan 192).
 LANGS = ("en", "fr")
 
 
@@ -1219,13 +1219,13 @@ def translation(row: dict, lang: str) -> tuple[str, str]:
 
 
 def phrase_key(jp: str) -> str:
-    """A short stable name for a sentence (plan 191). A run sends back
+    """A short stable name for a sentence (plan 192). A run sends back
     the sentences it has served so the next batch does not repeat them;
     sent as text, sixty N1 sentences outgrew what a URL may carry."""
     return hashlib.sha1(jp.encode("utf-8")).hexdigest()[:10]
 
 
-# ── Plan 191: a level's sentences use the level ──────────────────
+# ── Plan 192: a level's sentences use the level ──────────────────
 # The levels whose sentences must bring their own vocabulary. N5 is not
 # one of them: every word an N5 sentence can use is N5 or kana, and its
 # rows are pinned by the basics course, 入門 and the ride.

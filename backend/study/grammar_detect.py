@@ -461,7 +461,7 @@ _GODAN = {  # row -> 連用形, 音便, 未然形, 仮定形/命令形, 意志 (
     "ワア行": ("い", "っ", "わ", "え", "お"),
 }
 _MEANING_WORDS = frozenset({"ない", "なる", "ある", "する", "いる"})
-# The 五段 verbs whose 連用形 before ます is い (plan 192).
+# The 五段 verbs whose 連用形 before ます is い (plan 193).
 _ARU_HONORIFICS = ("いらっしゃる", "おっしゃる", "なさる", "くださる", "ござる")
 
 
@@ -498,7 +498,7 @@ def _conjugations(piece: str) -> tuple[str, ...]:
                 forms = [f for f in forms if f != word[:-1] + "い"] + [word[:-1] + "っ"]
             if piece.endswith(_ARU_HONORIFICS):
                 # いらっしゃる, おっしゃる, なさる say い before ます, never り:
-                # いらっしゃいます, おっしゃいました (plan 192)
+                # いらっしゃいます, おっしゃいました (plan 193)
                 forms.append(word[:-1] + "い")
     elif ctype.startswith(("上一段", "下一段")):
         forms = [word[:-1], word[:-1] + "れ", word[:-1] + "ろ"]
@@ -1491,7 +1491,7 @@ def _shaped(sentence, tokens, level, pattern, parts):
                 # A point that opens on the honorific prefix (お〜ください)
                 # stands after anything: 少々お待ちください -- and so does
                 # a point that is a verb word itself: 明日いらっしゃいます
-                # (plan 192)
+                # (plan 193)
                 or (start in starts and (pos == "prefix" or (pos == "verb" and "〜" not in pattern)))
                 or (not exact and _admits(_before_token(start, tokens), _admitted(pattern, befores, heads)))
                 or _closes_on_a_noun(start, end, tokens, befores, heads)):
@@ -1834,7 +1834,7 @@ def _deck_words() -> frozenset[str]:
 
 def _lexical_causative(tokens, i: int) -> bool:
     """tokens[i] is a せる the tokenizer split from a verb the deck
-    teaches whole (plan 192): 知ら + せる is 知らせる, "to inform", and
+    teaches whole (plan 193): 知ら + せる is 知らせる, "to inform", and
     済ま + せる 済ませる, "to finish off" -- words a learner has a card
     for, which the reading bank's drafting found lit as the causative
     (知らせてください as 〜させてください, "please let me")."""
@@ -1862,7 +1862,7 @@ _A_TO_U = dict(zip("かがさたなばまらわ", "くぐすつぬぶむるう")
 
 
 def _short_causative_passive_spans(tokens):
-    """The short causative-passive of a 五段 verb (plan 192): 走らされた,
+    """The short causative-passive of a 五段 verb (plan 193): 走らされた,
     待たされた, 飲まされた are read by the tokenizer as a verb of their
     own in す (走らす) and the passive れる, never as せる + られる.
     Only where the す-verb is no word the deck teaches and the verb it
@@ -3542,7 +3542,7 @@ def _pattern_refusals():
         # 静かなところだ is "a quiet place" (plan 152)
         # ...and in the past it is the 〜ところだった of "nearly" (乗り遅れる
         # ところだった), except after た, where it is still just done:
-        # 着いたところだった, "had just arrived" (plan 192)
+        # 着いたところだった, "had just arrived" (plan 193)
         "〜ところだ": lambda t, s, e, g: (p := _prev_word(t, s)) is None or p.pos not in ("verb", "auxiliary")
             or _is_copula(p) or ("".join(x.surface for x in t if s <= x.start < e).endswith(("だった", "でした"))
                                  and p.lemma != "た"),
@@ -3632,7 +3632,7 @@ def _pattern_refusals():
         "や": _ya_refused,
         "助数詞 〜つ／〜人／〜枚": _counter_refused,
         "〜かたわら": lambda t, s, e, g: _followed_by(t, e, "に"),
-        # plan 192, what the reading bank's drafting found lit wrong:
+        # plan 193, what the reading bank's drafting found lit wrong:
         # 知らせる and 済ませる are words, not causatives
         "使役形 〜させる": lambda t, s, e, g: _lexical_in(t, s, e),
         "〜させてください": lambda t, s, e, g: _lexical_in(t, s, e),
@@ -4049,7 +4049,7 @@ def _humble_spans(tokens):
             continue
         if ((stem.pos == "verb" and stem.cform.startswith("連用形")) or (o.surface == "ご" and stem.pos == "noun")
                 # お運びします: a verb's stem the tagger files as a noun,
-                # ending in the stem's kana (plan 192)
+                # ending in the stem's kana (plan 193)
                 or (o.surface == "お" and stem.pos == "noun" and stem.surface[-1:] in _STEM_ENDINGS)):
             out.append(((o.start, o.end), (suru.start, suru.end)))
     return out
@@ -4071,7 +4071,7 @@ def _try_to_spans(tokens):
 
 def _mean_to_spans(tokens):
     """〜ようと思う after a 五段 verb, whose volitional writes no よう
-    (plan 192): 帰ろうと思う, 習おうと思います -- the volitional, と, then
+    (plan 193): 帰ろうと思う, 習おうと思います -- the volitional, と, then
     思う in any form."""
     out = []
     for i in range(len(tokens)):
@@ -4086,7 +4086,7 @@ def _mean_to_spans(tokens):
 
 def _throughout_spans(tokens):
     """〜中 read じゅう where the tokenizer has made one word of its
-    numeral's counter and 中 (plan 192): 一|日中, 一|年中, 一|晩中 --
+    numeral's counter and 中 (plan 193): 一|日中, 一|年中, 一|晩中 --
     the 中 of 一日中, "all day long"."""
     return [(t.end - 1, t.end) for i, t in enumerate(tokens)
             if t.surface in ("日中", "年中", "晩中") and i > 0 and tokens[i - 1].surface == "一"]
@@ -4094,7 +4094,7 @@ def _throughout_spans(tokens):
 
 def _humble_itasu_spans(tokens):
     """いたす after ご + a する-noun or お + a verb's stem, the humble form
-    at its most polite (plan 192): ご案内いたします, お持ちいたします."""
+    at its most polite (plan 193): ご案内いたします, お持ちいたします."""
     out = []
     for i in range(2, len(tokens)):
         t, stem, o = tokens[i], tokens[i - 1], tokens[i - 2]
@@ -4106,7 +4106,7 @@ def _humble_itasu_spans(tokens):
 
 def _n_before(tokens, k: int):
     """Where the classical negative ん of 〜んばかり begins, when it ends
-    tokens[k], or None (plan 192): the tokenizer reads 言わん as 言わ +
+    tokens[k], or None (plan 193): the tokenizer reads 言わん as 言わ +
     ん, but 割れん and 下げん as one verb in its 撥音便, and 泣き出さん as
     泣き + 出 + さん."""
     if k < 0:
@@ -4123,7 +4123,7 @@ def _n_before(tokens, k: int):
 
 def _nbakari_spans(tokens):
     """〜んばかりに and its attributive 〜んばかりの: as if about to (plan
-    192)."""
+    193)."""
     out = []
     for k in range(1, len(tokens) - 1):
         b = tokens[k]
@@ -4137,21 +4137,21 @@ def _nbakari_spans(tokens):
 
 
 def _ppoi_spans(tokens):
-    """〜っぽい the tokenizer has made one adjective of (plan 192): 安っぽい,
+    """〜っぽい the tokenizer has made one adjective of (plan 193): 安っぽい,
     keyed on the whole word, as a compound noun is (やりがい)."""
     return [(t.start, t.end) for t in tokens
             if t.pos == "adjective" and len(t.lemma) > 3 and t.lemma.endswith("っぽい")]
 
 
 def _zukume_spans(tokens):
-    """〜ずくめ after a word the tokenizer calls an adverb (plan 192):
+    """〜ずくめ after a word the tokenizer calls an adverb (plan 193):
     初めてずくめ, 結構ずくめ -- ずくめ is 尽くめ, no other word."""
     return [(t.start, t.end) for i, t in enumerate(tokens)
             if t.lemma == "尽くめ" and i > 0 and tokens[i - 1].pos in ("adverb", "noun", "other")]
 
 
 def _temae_spans(tokens):
-    """〜手前 after ている (plan 192): 厳しく言っている手前, "having said so
+    """〜手前 after ている (plan 193): 厳しく言っている手前, "having said so
     myself" -- the lesson shows た and の; ている is the same face to keep."""
     return [(t.start, t.end) for i, t in enumerate(tokens)
             if t.lemma == "手前" and i >= 2 and tokens[i - 1].lemma == "居る" and tokens[i - 2].surface in ("て", "で")]
@@ -4159,7 +4159,7 @@ def _temae_spans(tokens):
 
 def _dokoro_spans(tokens):
     """〜どころではない where the tokenizer reads どころ as the noun 所
-    (plan 192): 店を開けるどころではない, 寝るどころではない."""
+    (plan 193): 店を開けるどころではない, 寝るどころではない."""
     out = []
     for k in range(1, len(tokens) - 2):
         t = tokens[k]
@@ -4386,7 +4386,7 @@ _EXTRA_RULES = (
     ("〜ものを", _if_only_spans),
     ("〜ばそれまでだ", _that_is_all_spans),
     ("使役形 〜させる", _short_causative_spans),
-    # plan 192
+    # plan 193
     ("使役受身形 〜させられる", _short_causative_passive_spans),
     ("〜ようと思う", _mean_to_spans),
     ("〜中", _throughout_spans),
@@ -4402,7 +4402,7 @@ _EXTRA_RULES = (
 
 # Rules for a form the point's own lessons never show, so that no lesson
 # can confirm them (_confirmed), each written on a word nothing else is
-# spelled with (plan 192): いたす after ご + a noun or お + a stem, a
+# spelled with (plan 193): いたす after ご + a noun or お + a stem, a
 # っぽい adjective the tokenizer made one word, 手前 after ている.
 _SELF_EVIDENT = frozenset({_humble_itasu_spans, _ppoi_spans, _temae_spans})
 

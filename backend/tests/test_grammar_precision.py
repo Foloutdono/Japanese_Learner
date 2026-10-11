@@ -977,7 +977,7 @@ class TourTests(unittest.TestCase):
             self.assertTrue(grammar_detect.can_find(pattern), pattern)
 
 
-# Plan 192: what the reading bank's drafting (plan 191) found -- a
+# Plan 193: what the reading bank's drafting (plan 192) found -- a
 # false find or a miss each, pinned with its counter-case.
 BANK = [
     # 知らせる and 済ませる are words the deck teaches, not causatives

@@ -492,7 +492,7 @@ class InvariantTests(unittest.TestCase):
                     self.assertTrue(not kanji or card_lookup._katakana_written(kanji))
 
     def test_no_katakana_card_for_a_native_word_in_hiragana(self) -> None:
-        # Plan 192: まま is no ママ.
+        # Plan 193: まま is no ママ.
         for sentence, morphemes, hits in self.read:
             for m, hit in zip(morphemes, hits):
                 if hit is None or m.goshu not in ("和", "漢") or card_lookup._katakana_written(m.surface):
@@ -553,7 +553,7 @@ class GreetingTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class WhatTheBankMetTests(unittest.TestCase):
-    """Plan 192: what the reading bank's drafters met (plan 191)."""
+    """Plan 193: what the reading bank's drafters met (plan 192)."""
 
     def test_mama_is_no_mum_and_no_occasionally(self) -> None:
         # まま is 儘, "as it is": not ママ, "mum", nor 間々, "occasionally",
