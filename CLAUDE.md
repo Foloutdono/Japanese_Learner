@@ -1769,7 +1769,36 @@ runtime purpose. Two consequences worth knowing:
   `components/practice/PracticeSpecimen.jsx`). After deploying it, run
   `python -m scripts.prewarm_phrase_cache` for `en` and `fr`: every new
   sentence's first Explain otherwise pays one model call.
-  When starting a new wave, begin at **192** or higher, and check
+  **192** is what plan 191's drafters met (owner-directed: "fix the
+  bugs"), the detector's and the lookups' bugs its sentences were
+  written around. The detector: a lexical causative (知らせる, a deck
+  verb whole) no 使役形 and no 〜させてください, the short causative
+  passive (走らされる) found, いらっしゃる／おっしゃる／なさる in every
+  form (their い before ます), お〜ください after anything (少々お待ち
+  ください), 〜ようと思う after a godan volitional, 一日中 as 〜中, 致す
+  after お〜, 〜んばかりに, 〜っぽい, 〜ずくめ, 〜手前 and 〜どころではない
+  read by rules (three trusted without their lessons, `_SELF_EVIDENT`),
+  and 〜ところだった, 〜一つ〜ない, 〜としても and 〜ばかり held to the
+  shapes their lessons teach. The lookups: まま no ママ (a native word
+  in hiragana takes no katakana card) and no 間々 (a kana word whose
+  lemma's kanji are not the card's is JMdict's common kana word,
+  `_kana_word_instead`); one card a word for すぐ/すぐに (the N1 直ぐ
+  folded into it), ゆっくり/ゆっくりと, いい/よい (the N1 良い and 好い,
+  each spelling read either way, `FOLDED_ONLY` now merged rather than
+  replacing), 赤ちゃん at N4 and 何も at N3 (each kana card taking its
+  kanji, the N1 card folded), and 世論 read よろん/せろん (the pool's row
+  pruned); the vocab gate reading 何も／何か as a question word and its
+  particle, お〜 on a verb's stem as the verb, and the わ-row's stem
+  (使い); 〜不足 after a noun read ぶそく (cited in
+  `study/grammar_detect.py`, `study/card_lookup.py`, `study/difficulty.py`,
+  `study/reading_context.py`, `study/analysis.py`'s `LOCAL_REV` 13,
+  `content/vocab_renames.py`, `scripts/audit_vocab_deck.py`'s
+  `IGNORED_LEMMAS`, `tests/test_grammar_precision.py`'s `BankTests`,
+  `tests/test_lookup_precision.py`'s `WhatTheBankMetTests`,
+  `tests/test_reading_sentences.py` and `tests/test_furigana_context.py`).
+  After deploying it, run `python -m scripts.migrate_vocab_ids --yes` and
+  `python -m scripts.migrate_pool_cards --yes`.
+  When starting a new wave, begin at **193** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
