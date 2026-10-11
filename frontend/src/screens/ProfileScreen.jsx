@@ -8,7 +8,7 @@ import { ProfileCard } from '../components/pass/LearnerCard'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { useDesk } from '../hooks/useDesk'
-import { StampBook, Records, ProfileDoors } from '../components/profile/ProfileBlocks'
+import { StampBook, Records, ProfileDoors, TicketsDoor } from '../components/profile/ProfileBlocks'
 import { Banzuke } from '../components/profile/Banzuke'
 import { LineLedger } from '../components/profile/LineLedger'
 
@@ -156,6 +156,9 @@ export default function ProfileScreen({ session }) {
         lang={lang}
       />
     ),
+    // 記念切符 (plan 191): the tickets the streak earned, behind the
+    // stamp book they were earned in.
+    tickets: <TicketsDoor t={t} navigate={navigate} count={profile.tickets?.length ?? 0} />,
     // Three figures: the reviews, the retention, the best perfect run.
     records: <Records profile={profile} t={t} />,
     ledger: stats && <LineLedger stats={stats} t={t} navigate={navigate} />,
@@ -184,6 +187,7 @@ export default function ProfileScreen({ session }) {
             <div className="desk-profile__col">
               {inserts.pass}
               {inserts.stamps}
+              {inserts.tickets}
             </div>
             <div className="desk-profile__col">
               {inserts.records}
@@ -198,6 +202,7 @@ export default function ProfileScreen({ session }) {
           {inserts.pass}
           {inserts.doors}
           {inserts.stamps}
+          {inserts.tickets}
           {inserts.records}
           {inserts.ledger}
           {inserts.board}

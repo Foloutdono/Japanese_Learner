@@ -15,9 +15,9 @@ from core.db import db_conn
 from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
-from core import credits
+from core import credits, events
 from core.lines import clean_lines
-from srs.xp import level_progress
+from srs.xp import level_progress, next_milestone
 from study import level_rule
 
 router = APIRouter()
@@ -473,6 +473,43 @@ def _with_practice(reviews: list[dict], practice: list[dict]) -> list[dict]:
     return [days[k] for k in sorted(days)]
 
 
+def _with_rest(days: list[dict], rested: list[str]) -> list[dict]:
+    """The stamp book's days with the rest days marked (plan 191): a
+    missed day a rest ticket bridged is `rest: True`, an entry of its
+    own with nothing counted (it was not studied), so the week's stamp
+    rally and the book draw the 運休 stub where they drew a miss -- the
+    streak walked through that day, and the row has to say why."""
+    by_date: dict[str, dict] = {d["date"]: d for d in days}
+    for day in rested:
+        entry = by_date.setdefault(day, {"date": day, "count": 0, "practice": 0})
+        entry["rest"] = True
+    return [by_date[k] for k in sorted(by_date)]
+
+
+# ── 運休 and 終着 — rest days and the day cleared (plan 191) ──────
+def bridge_rest_days(user_id: str) -> list:
+    """srs.bridge_rest_days, with its event: the missed days a rest
+    ticket covers, spent lazily on the learner's next visit: GET
+    /api/profile, GET /api/today and POST /api/today/clear. A comfort,
+    never a reason to fail the screen that asked."""
+    try:
+        days = srs.bridge_rest_days(user_id)
+    except Exception:
+        logger.exception("rest-day bridge failed user_id=%s", user_id)
+        return []
+    if days:
+        events.record(user_id, "rest_day_used", {"days": len(days)})
+        logger.info("rest days used user_id=%s days=%s", user_id, [d.isoformat() for d in days])
+    return days
+
+
+def counted_from(figures: dict, cleared: bool) -> int:
+    """The streak day the next ticket is counted after (srs.streak_figures'
+    `today` and whether today is cleared): today's once it is cleared,
+    the day before while it is not -- a milestone today is still ahead."""
+    return figures["today"] if cleared else figures["today"] - 1
+
+
 # ── Routes ────────────────────────────────────────────────────
 @router.get("/api/profile")
 def get_profile(user_id: str = Depends(get_user_id)):
@@ -481,15 +518,20 @@ def get_profile(user_id: str = Depends(get_user_id)):
      tutorial_at, guided, reading_pace) = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
-    streak = srs.get_streak(user_id)
+    bridge_rest_days(user_id)
+    streak = srs.streak_figures(user_id)
+    cleared = srs.get_day_clear(user_id, datetime.now(timezone.utc).date()) is not None
     records = _records(user_id)
 
     # One query for the sheet; the week the home hall's stamp rally and
     # every other consumer of `week` still read is sliced off it rather
     # than asked for again. Same helper the stats calendar uses.
-    calendar = _with_practice(
-        srs.get_daily_review_counts(user_id, days=CALENDAR_DAYS),
-        srs.get_daily_practice_counts(user_id, days=CALENDAR_DAYS),
+    calendar = _with_rest(
+        _with_practice(
+            srs.get_daily_review_counts(user_id, days=CALENDAR_DAYS),
+            srs.get_daily_practice_counts(user_id, days=CALENDAR_DAYS),
+        ),
+        srs.get_rest_days(user_id, days=CALENDAR_DAYS),
     )
     week_from = (datetime.now(timezone.utc).date() - timedelta(days=6)).isoformat()
 
@@ -537,9 +579,16 @@ def get_profile(user_id: str = Depends(get_user_id)):
         "retention": records["retention"],
         # The last seven days of activity (the hall's stamp rally), and
         # the five weeks behind them (the profile's stamp book). Days
-        # without a review are simply absent from both.
+        # without a review are simply absent from both, but for a day a
+        # rest ticket bridged (plan 191): `rest: true`, nothing counted.
         "week": [d for d in calendar if d["date"] >= week_from],
         "calendar": calendar,
+        # 終着 (plan 191): the ticket book -- a ticket per milestone day
+        # cleared, oldest first -- the rest days held, and the milestone
+        # the next ticket is printed at.
+        "tickets": srs.get_day_tickets(user_id),
+        "restHeld": srs.rest_held(user_id),
+        "nextMilestone": next_milestone(counted_from(streak, cleared)),
     }
 
 

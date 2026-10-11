@@ -11,10 +11,17 @@
 // day is a real miss, not a gap in the data.
 const WEEKDAY_JP = ['日', '月', '火', '水', '木', '金', '土']
 
+// 運休 (plan 191): a day a rest ticket covered -- the profile's week
+// marks it `rest: true` -- keeps the streak without being studied, so it
+// is neither a stamp nor a miss: the RestDay board's stub is laid over
+// it, in pass ink, at its own small angle.
+const REST_TILT = -4
+
 export function StampRally({ week, streak, t }) {
   // Reviews and, since plan 178, graded practice answers: both are a day
   // shown up, as the streak counts it.
   const byDate = new Map((week ?? []).map(d => [d.date, (d.count ?? 0) + (d.practice ?? 0)]))
+  const rested = new Set((week ?? []).filter(d => d.rest).map(d => d.date))
   const today = new Date()
 
   const days = []
@@ -22,10 +29,12 @@ export function StampRally({ week, streak, t }) {
     const d = new Date(today)
     d.setDate(today.getDate() - i)
     const key = d.toISOString().slice(0, 10)
+    const stamped = (byDate.get(key) ?? 0) > 0
     days.push({
       key,
       dow: d.getDay(),
-      stamped: (byDate.get(key) ?? 0) > 0,
+      stamped,
+      rest: !stamped && rested.has(key),
       isToday: i === 0,
       // A deterministic wobble per slot — a rubber stamp never lands
       // perfectly square, and seven identical circles would read as a
@@ -43,12 +52,12 @@ export function StampRally({ week, streak, t }) {
             lang="ja"
             className={
               'stamp-rally__stamp'
-              + (d.stamped ? '' : ' stamp-rally__stamp--missed')
+              + (d.stamped ? '' : d.rest ? ' stamp-rally__stamp--rest' : ' stamp-rally__stamp--missed')
               + (d.isToday && d.stamped ? ' stamp-rally__stamp--today' : '')
             }
-            style={{ '--stamp-tilt': `${d.tilt}deg` }}
+            style={{ '--stamp-tilt': `${d.rest ? REST_TILT : d.tilt}deg` }}
           >
-            {WEEKDAY_JP[d.dow]}
+            {d.rest ? '運休' : WEEKDAY_JP[d.dow]}
           </span>
         ))}
       </span>

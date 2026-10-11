@@ -14,6 +14,9 @@ import { COST_PER_REVIEW, isFreeMode } from '../domain/credits'
 //
 // Resolves to the response body; rejects only with the ApiError, after
 // the sheet is up, so a caller may still `.catch(() => {})` as before.
+// The review POSTs not yet answered (see reviewsSettled, below).
+const inFlight = new Set()
+
 export async function postReview(path, session, body, { cleared = 0 } = {}) {
   // The optimistic decrement has to know the fare as well as the
   // server does, now that the kana line rides free (domain/credits.js):
@@ -22,8 +25,10 @@ export async function postReview(path, session, body, { cleared = 0 } = {}) {
   // refunded. The mode is on every review body, and it is the same key
   // the server prices the review by.
   applySpend(isFreeMode(body?.mode) ? 0 : COST_PER_REVIEW)
+  const request = apiJson(path, session, { method: 'POST', body: JSON.stringify(body) })
+  inFlight.add(request)
   try {
-    const res = await apiJson(path, session, { method: 'POST', body: JSON.stringify(body) })
+    const res = await request
     reconcileCredits(res?.credits)
     return res
   } catch (e) {
@@ -31,7 +36,24 @@ export async function postReview(path, session, body, { cleared = 0 } = {}) {
       markRunOut({ balance: e.body?.balance ?? 0, nextCreditAt: e.body?.nextCreditAt ?? null, cleared })
     }
     throw e
+  } finally {
+    inFlight.delete(request)
   }
+}
+
+// ── 終着 — the reviews still on their way (plan 191) ─────────────────
+// A review is fired and forgotten, so the day's last one can still be in
+// the air when the run hands over to its finish -- and the finish asks
+// the server whether the day is cleared (POST /api/today/clear), which
+// counts the queue the server holds. Asked before that last review
+// lands, the answer is "one card left". The finish waits on this first:
+// every review posted so far settled, or `timeoutMs`, whichever is
+// sooner (a review that never answers must not hold the ceremony).
+export function reviewsSettled(timeoutMs = 8000) {
+  if (inFlight.size === 0) return Promise.resolve()
+  let timer = null
+  const ceiling = new Promise(resolve => { timer = setTimeout(resolve, timeoutMs) })
+  return Promise.race([Promise.allSettled([...inFlight]), ceiling]).then(() => clearTimeout(timer))
 }
 
 // ── What a saved queue must not replay ─────────────────────────

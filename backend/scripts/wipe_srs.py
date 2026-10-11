@@ -77,6 +77,14 @@ PLAN = [
      "per-(card, mode) scheduler state, under retired mode keys"),
     ("xp_ledger", "user_id = %(user)s",
      "XP awarded outside a review"),
+    # The days cleared and the rest days (plan 191) go with the streak
+    # they were earned on: left, a wiped learner clearing today would
+    # find the day already paid, and keep tickets for a streak that is
+    # gone.
+    ("day_clears", "user_id = %(user)s",
+     "the days cleared and their milestone tickets"),
+    ("rest_tickets", "user_id = %(user)s",
+     "rest days earned on the streak, and the days they bridged"),
     ("custom_cards", "deck_id IN (SELECT id FROM decks WHERE user_id = %(user)s)",
      "hand-written personal cards"),
     ("deck_cards", "deck_id IN (SELECT id FROM decks WHERE user_id = %(user)s)",

@@ -169,6 +169,18 @@ EVENTS: dict[str, frozenset[str]] = {
     "grammar_tour_step": frozenset({"level", "stop", "outcome"}),
     "grammar_tour_done": frozenset({"level", "tries", "helped", "authored"}),
 
+    # ── 終着 — the day cleared (plan 191) ────────────────────────
+    # Both written server-side: day_clear by POST /api/today/clear on
+    # the day's first clear (`streak` the day of the streak it was,
+    # `milestone` the milestone reached or null, `tier` day | ticket |
+    # month, the ceremony it played), rest_day_used by the lazy bridge
+    # (`days`, how many missed days a rest ticket covered). ticket_share
+    # is the client's: a milestone ticket shared as an image, `days`
+    # the ticket's milestone -- never the image, which is the learner's.
+    "day_clear":      frozenset({"streak", "milestone", "tier"}),
+    "rest_day_used":  frozenset({"days"}),
+    "ticket_share":   frozenset({"days"}),
+
     # ── Friction ─────────────────────────────────────────────────
     # `path` is a route pattern, never a URL with ids in it, and no
     # response body is ever carried.

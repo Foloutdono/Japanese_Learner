@@ -148,23 +148,6 @@ describe('the stage at phone width', () => {
     expect(tickOff.backgroundColor).toBe('rgba(0, 0, 0, 0)')
   })
 
-  it('the finish: the check ring, the slip, and the ghost way back', async () => {
-    const screen = await render(
-      <div className="today-clear">
-        <span className="today-clear__mark" />
-        <div className="fare-slip"><div className="fare-slip__cell" /><div className="fare-slip__cell" /><div className="fare-slip__cell" /></div>
-        <button type="button" className="btn-depart btn-depart--ghost"><span className="btn-depart__jp">Back</span></button>
-      </div>
-    )
-    const mark = getComputedStyle(screen.container.querySelector('.today-clear__mark'))
-    expect(mark.width).toBe('56px')
-    expect(mark.height).toBe('56px')
-    expect(getComputedStyle(screen.container.querySelector('.fare-slip')).gridTemplateColumns.split(' ')).toHaveLength(3)
-    const ghost = getComputedStyle(screen.container.querySelector('.btn-depart--ghost'))
-    expect(ghost.backgroundColor).toBe('rgba(0, 0, 0, 0)')
-    expect(ghost.boxShadow).toBe('none')
-  })
-
   it('the browse nav is two columns on the stage\'s foot, on the card\'s own column', async () => {
     const screen = await render(
       <main className="container stage">

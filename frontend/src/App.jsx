@@ -10,7 +10,7 @@ import { OfferScreen } from './components/offers/OfferScreen'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
 import { getTabs, tabFor } from './config/tabs'
-import { Shell, StageFrame } from './components/chrome/Shell'
+import { Shell, StageFrame, DeskShellStage } from './components/chrome/Shell'
 import { NativeBridge } from './components/chrome/NativeBridge'
 import { identityFor } from './config/identity'
 import { apiJson, apiJsonWithTimeout } from './lib/api'
@@ -23,6 +23,7 @@ import OnboardingPreview from './screens/OnboardingPreview'
 import RidePreview from './screens/RidePreview'
 import SoundPalette from './screens/SoundPalette'
 import OffersPreview from './screens/OffersPreview'
+import DayClearPreview from './screens/DayClearPreview'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
@@ -44,6 +45,8 @@ import LearnScreen from './screens/LearnScreen'
 import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
 import TodayRun from './screens/TodayRun'
+import DayClearScreen from './screens/DayClearScreen'
+import TicketsScreen from './screens/TicketsScreen'
 import KanaScreen  from './screens/KanaScreen'
 import KanaRun from './screens/KanaRun'
 import VocabRun from './screens/VocabRun'
@@ -527,6 +530,12 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/dev/ride" element={<RidePreview />} />
             <Route path="/dev/sounds" element={<SoundPalette />} />
             <Route path="/dev/offers" element={<OffersPreview />} />
+            {/* 終着 (plan 191): every scene of the day cleared, from the
+                canvas's fixtures (?scene=…&reduced=1&desk=1), in the
+                route's own frame: the real rail beside it on the desk. */}
+            <Route element={<DeskShellStage />}>
+              <Route path="/dev/dayclear" element={<DayClearPreview />} />
+            </Route>
           </Routes>
           {/* The workbench replays the real boarding, so it needs the
               real offer too — otherwise the one tool for polishing
@@ -707,11 +716,19 @@ export default function App({ front = NO_FRONT }) {
             <Route path="/dictionary/analyzer"  element={<AnalyzerScreen session={session} />} />
             <Route path="/profile"              element={<ProfileScreen session={session} />} />
             <Route path="/profile/stats"        element={<StatsScreen session={session} />} />
+            {/* 記念切符 — the tickets a streak has earned (plan 191). */}
+            <Route path="/profile/tickets"      element={<TicketsScreen session={session} />} />
             <Route path="/profile/settings"     element={<SettingsScreen session={session} />} />
             {/* The settings pages (plan 074): display, sound, learning,
                 destination, data, account — each its own page under
                 the list. */}
             <Route path="/profile/settings/:page" element={<SettingsScreen session={session} />} />
+          </Route>
+
+          {/* 終着 — the day's run finished (plan 191): full screen on a
+              phone, as a run's stage; beside the rail on the desk. */}
+          <Route element={<DeskShellStage />}>
+            <Route path="/today/clear"          element={<DayClearScreen session={session} />} />
           </Route>
 
           {/* The stage: both bars leave, the rating bar or the field

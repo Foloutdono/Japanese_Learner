@@ -16,8 +16,14 @@ import { PassWave } from '../profile/PassWave'
     and a deck's Study on the desk (screens/DeckDetailScreen.jsx, plan
     179) the third.
     `keys` prints the Enter cap at the pill's right end: only where
-    Enter really does press it. */
-export function GateButton({ label, onClick, disabled = false, keys = false, className = '', ...rest }) {
+    Enter really does press it.
+
+    終着 (plan 191): the day cleared's screens draw the gate as their
+    canvas does -- `compact`, the boards' 52px pill and 32px reader, and
+    `arrive`, the way in (it rises 16px with one small overshoot, then
+    breathes), after `arriveDelay` ms. Both are the kit's
+    (components/dayclear/kit, the primitives region of index.css). */
+export function GateButton({ label, onClick, disabled = false, keys = false, compact = false, arrive = false, arriveDelay = 0, className = '', style, ...rest }) {
   const { t } = useLang()
   const [waking, setWaking] = useState(false)
   const was = useRef(disabled)
@@ -26,7 +32,10 @@ export function GateButton({ label, onClick, disabled = false, keys = false, cla
     was.current = disabled
   }, [disabled])
   const woke = e => { if (e.animationName === 'btn-gate-wake') setWaking(false) }
-  const classes = ['btn-depart', 'btn-depart--gate', waking && 'btn-depart--waking', className].filter(Boolean).join(' ')
+  const classes = [
+    'btn-depart', 'btn-depart--gate', waking && 'btn-depart--waking',
+    compact && 'clrk-gate--compact', arrive && 'clrk-gate--arrive', className,
+  ].filter(Boolean).join(' ')
   return (
     <button
       type="button"
@@ -34,6 +43,7 @@ export function GateButton({ label, onClick, disabled = false, keys = false, cla
       onClick={onClick}
       onAnimationEnd={woke}
       disabled={disabled}
+      style={arrive && arriveDelay ? { '--gate-d': `${arriveDelay}ms`, ...style } : style}
       aria-keyshortcuts={keys ? 'Enter' : undefined}
       {...rest}
     >

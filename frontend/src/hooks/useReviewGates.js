@@ -119,16 +119,18 @@ export function useReviewGates({ advance, sessionKey }) {
    *   `id:mode:nonce`, everyone else's is the bare card id, and a
    *   mismatch is what once made every stamped review hang.
    * @param hold     gates the screen opens itself, e.g. a writing drill.
+   * @param face     the card as the day cleared's ceremony draws it
+   *   (domain/dayClear's cardFace, plan 191), kept on the run's tally.
    * @returns false if a review is already in flight, so the caller can
    *   drop out before firing its own side effects.
    */
-  const review = useCallback((preview, { cardKey, quality, hold = [] } = {}) => {
+  const review = useCallback((preview, { cardKey, quality, hold = [], face = null } = {}) => {
     if (busyRef.current) return false
     busyRef.current = true
     setLocked(true)
     // The entry the card was revealed on is the card, for the misses
     // the desk's panel lists at the end (plan 115).
-    countReview({ quality, xp: preview?.xp_earned, entry: peekEntry() })
+    countReview({ quality, xp: preview?.xp_earned, entry: peekEntry(), face })
 
     const gates = gatesRef.current
     // Whatever is still open belongs to a review that is over, and the

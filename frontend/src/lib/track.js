@@ -69,6 +69,13 @@ export const EVENTS = {
   // A grammar point's tour (plan 187b): the level, never the pattern.
   grammar_tour_step: ['level', 'stop', 'outcome'],
   grammar_tour_done: ['level', 'tries', 'helped', 'authored'],
+  // The day cleared (plan 191). day_clear and rest_day_used are written
+  // by the server (POST /api/today/clear, the rest-day bridge);
+  // ticket_share is a milestone ticket shared, its days and nothing of
+  // the image.
+  day_clear: ['streak', 'milestone', 'tier'],
+  rest_day_used: ['days'],
+  ticket_share: ['days'],
   api_error: ['path', 'status'],
   install_prompt: ['outcome'],
 }

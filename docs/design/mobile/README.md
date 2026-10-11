@@ -11,9 +11,7 @@ checked against `frontend/src/design-scale.json`.
 
 The canvas's rule for the chrome: **the interface speaks the learner's
 language; Japanese is content** (a word, a sentence, a deck's name, a
-card's stage)
-and the tab bar's icons. The bilingual JP + Latin pairing the desktop chrome
-used retires for the mobile chrome.
+card's stage).
 
 At 1100px and up the app draws its second chrome, the desk (plan 112,
 ADR 0018); its class map is `../desk/README.md`. Nothing in it reaches

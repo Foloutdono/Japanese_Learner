@@ -107,6 +107,11 @@ export const BASE_GAIN = {
     // at 0.023, a shade under the chrome's 0.030, which is where a
     // sound that runs while the train is dragged belongs.
     'board-flap':             2.07,
+    // 終着 (plan 191): the day cleared and a milestone's melody, at the
+    // arrival's trim (the chimes' family) until the listening panel's
+    // next round measures them.
+    'day-clear':              0.64,
+    'milestone':              0.62,
   },
   jingle:       0.3,
   announcement: 1,

@@ -6,18 +6,6 @@ records decisions, `plans/` holds the work — this file says what the app
 
 Read this before writing any CSS or building any screen.
 
-A visual reference exists too — 29 artboards, 6 of the element library and 23
-of the screens, at
-`https://claude.ai/code/artifact/0b6dadc8-6b40-4f83-9238-69dd19b5e30e`. The
-canvas is the **picture**; this file is the **rule**. Where they disagree,
-this file wins — a canvas cannot be grepped and does not travel with a clone.
-Anything it shows of the profile predates the 定期入れ round and is history,
-not a target; the round's own exploration (three directions, one chosen) is a
-second canvas at
-`https://claude.ai/code/artifact/2f8fcfaf-0c5a-447a-807d-ffad3903101f`, which
-was likewise not updated after the decision. The code is the reference for
-that screen.
-
 ## The idea
 
 **The app is called 辻 — Tsuji.** A 辻 is a crossroads, which is exactly what
@@ -26,8 +14,8 @@ one glyph, five strokes, a 十 inside 辶 drawing the intersection it names — 
 the icon, the masthead and the plate at the origin station (辻駅, TJ, つじ) are
 one thing rather than three. It is a 国字, a character invented in Japan and
 absent from Chinese dictionaries, with no on'yomi at all — a fair thing for an
-app about Japanese writing to be called. `Tsuji` is the Latin half, and it carries the places the OS and the
-stores print a name: the PWA `short_name`, the store listing, the bundle id
+app about Japanese writing to be called. `Tsuji` is its name in Latin
+letters, in the places the OS and the stores print a name: the PWA `short_name`, the store listing, the bundle id
 `app.tsuji`, the notification header.
 
 **The mark is drawn, not set** (plan 158). It is 辻 in Noto Serif JP Black
@@ -35,10 +23,8 @@ with one dot on 辶 — the five strokes above, a form the font cannot set (it
 draws the two-dot 辻 of JIS2004), so the mark is cut from the font's own
 outlines, the 十 of 辻 and the 辶 of 込 (`frontend/scripts/build-mark.py`).
 辶's sweep — the road the radical stands for — is in the pass's metal
-(`--accent2`); the rest is the ground's ink, paper on the icon's sumi. It
-replaced a serif 辻 over a gold underline: the underline became the
-character's own stroke. One drawing, `components/ui/Mark.jsx`, wherever the
-app names itself — the icon and the splash (`frontend/brand/`), the rail's
+(`--accent2`); the rest is the ground's ink, paper on the icon's sumi. One
+drawing, `components/ui/Mark.jsx`, wherever the app names itself — the icon and the splash (`frontend/brand/`), the rail's
 masthead, the Welcome and the sign-in, the boot screen, a notification's
 icon — set at 1em where the text glyph stood. Where 辻 is a *name* rather than
 the mark (the document title, 辻駅's plate, the dictionary's entry for 辻,
@@ -51,10 +37,7 @@ the home screen is the
 **gate hall**: the day's reviews at the **fare gate** (改札), your pass under
 them, and behind the Learn and Practice gates a column of **station plates**
 (駅名標), one per line, each printing the stop you have reached and the one
-ahead. (The Learn gate was a departure board, 発車標, then a wall-mounted
-route map, 路線図, with a train on every line; the plates replaced the map
-on 2026-09-20 — see Structure. The map answered "how far have I come" with
-five labels a line at one weight; the plate answers "what is next" with one.)
+ahead.
 
 The pass is a physical object, so it behaves like one. It has a front and a
 back — the contract it was issued under, 乗車駅 · 行先 · 種別 · 発車時刻 ·
@@ -62,93 +45,21 @@ back — the contract it was issued under, 乗車駅 · 行先 · 種別 · 発�
 the card's own preferences and not a place you travel to, and the profile
 screen is the **holder** it lives in: the card, and the inserts tucked behind
 it. An insert is a stamp sheet, a lattice of records, a ledger of lines, a
-ranking board. It does not need a caption, which is what lets that screen
-print no section headings at all (see Structure).
+ranking board, and it names itself without a caption.
 
 This is not decoration. It is the reason the app can show a dozen subjects
 without a menu that looks like a menu, and the reason a colour can mean
 something. Every visual decision should be answerable with "what would a
 station do?"
 
-## The one rule above all others
-
-**Every name is a pair.** A Japanese term and a plain-language term, together,
-in a fixed relationship: the Japanese is the heading, the Latin is its caption
-— never the other way round.
-
-```
-    かな            ← reading, tracked wide, small, secondary ink
-    あ              ← the name. Serif. This is the <h1>.
-    KANA            ← caption. Display face, 700, uppercase, tracked, secondary ink
-```
-
-The Latin half is set at **1.7×–2.2× smaller** than the Japanese half, in
-`--font-display` at `700`, `text-transform: uppercase`, `letter-spacing:
-var(--tr-caption)`, colour `--text-secondary`.
-
-The Latin line is **the section's plain-language title, never a
-transliteration**. `解析` pairs with `ANALYZER`, not with `KAISEKI`.
-
-Where a screen has no real Japanese term, it gets no pair — do not invent one,
-and do not fall back to the unpaired serif heading, which is a retired form.
-
-**One standing exception, decided deliberately (2026-09-01)**: the analyzer's
-*navigation* is Latin-first. The station plate keeps the full pair (解析 over
-ANALYZER), and Japanese stays on the content and the small accents — but the
-controls, the platform cards, the working rail and the history head lead with
-the learner's own language and carry the Japanese as the quiet second register
-(`History 運行履歴`, `Texte 文字`). The reasoning: a learner picking an intake
-or filtering sentences should not need vocabulary to operate the tool that
-teaches it. Owner-directed in the analyzer mockup round. Do not cite it as
-precedent for other stations without the same argument.
-
-**A second standing exception (2026-09-11): the Library is "Library" alone.**
-Its block under 教材's grid, its own screen and the public deck page print the
-learner's word and no Japanese heading at all. This is not the rule above
-being broken but the rule above being applied — a library of decks other
-learners wrote has no Japanese term in the app's own vocabulary, and 書庫 /
-文庫 / 貸出 were all names that would have had to be invented for it. The
-蘇芳 pigment stays, because a line colour is not a name: it is what keeps the
-library reading as part of 教材 rather than a twelfth line. `SectionHeader`'s
-own unpaired form is what draws the heading. Owner-directed. Same caveat as
-above — this is one section's argument, not a licence to drop pairs elsewhere.
-
-**A third (2026-09-21): only a place gets a pair.** The rule had spread to
-everything with a label — a lesson's steps (規則 RULE), a figure in the
-balance sheet (+30 毎日), a chart in the dictionary (五十音 MAIN SYLLABARY),
-a toast (ダイヤ改正), a guide note (等級), a form's field (音読み ON'YOMI), a
-button (臨時列車 EXTRA TRAIN). None of those is a station, a section or a
-line; each was a caption, in a language the reader is here to learn, over the
-half of the pair that was doing the work. Owner-directed, app-wide: where the
-Japanese named a part rather than a place, it is gone and the plain-language
-half inherits what it wore — the rung, the ink, the position (`.dict-mark`,
-`.dict-gate__name`, `.ride__plate-cap`). A **mark drawn rather than written**
-went the same way where it was standing in for a word: the analyzer's 済 is a
-✓ from the icon set and the Today strip's 済 pill is gone outright, the count
-past its target having already said it. The ride's own call (出発進行, 定期券
-at `--fs-display`) went with them, and its sentence is the call now.
-
-What stays: every station and section name, the plates and sheet headings that
-carry them, the brand, a glyph that is a chip's icon (部, a deck type's
-roundel, a stamp's seal, the 定期券 printed on the pass in the gate
-cutscene), and all study content.
-
-There is a second top-level rule, below, that outranks this one where they
-collide — see "Say less."
-
-## The second rule above all others
+## The rule above all others
 
 **Say less.** On screens, avoid unnecessary text and titles. Things should
 speak for themselves and the layout should guide the user. Do not caption a
 figure that adjacent content already explains. Do not label a button whose
 action is obvious from where it sits. Do not add a heading where the content
-is self-evident.
-
-**This outranks the pairing rule where the two collide.** The pair names a
-*place* — a station, a section, a line. It does not caption every number on
-the screen, and as of 2026-09-21 it does not caption a lesson's steps, a
-chart, a toast, a guide note or a form's fields either (see the third
-standing exception above).
+is self-evident. A label is in the learner's language; Japanese is
+content, never a caption over the word that does the work.
 
 ## Colour
 
@@ -168,16 +79,6 @@ pigment rather than borrowing one.
 
 Charcoal (`--pass-ink`) is the card. **Gold (`--accent2`) is its metal** — the
 balance bar and the 有効期限 printed on the back.
-
-It was the XP ring's too, round the holder's initial, until plan 143 took
-the ring off: the balance row's bar measures the same climb with its figure
-beside it, so the ring said it a second time. The ring had been `--accent9`
-until the profile round, and `--accent9` is 瑠璃, which in dark theme is the
-same value as `--line-honyaku`: the one object on the screen that means *you*
-was wearing a section's pigment. The same reasoning had already retired the
-top bar's XP arc. `--accent9` itself is a leftover from when /profile was
-modelled as a station with a pigment of its own, before `config/identity.js`
-ruled that a pass is not a place.
 
 `--accent2` and `--line-jisho` are also the same hex, in both themes. That is
 not a hidden alias and it does not make gold a line pigment — the traditional
@@ -206,19 +107,9 @@ phone's HUD and a card in its holder at the rail's foot on the desk.
 
 Each section owns exactly one pigment, and nothing else may use it. The
 pigments walk the colour wheel so no two are confusable at roundel size, and
-none doubles as a state colour — an earlier palette had grammar as `--success`
-and decks as `--warning`, which made "grammar" and "correct" the same colour.
+none doubles as a state colour. Any use of a line pigment outside its section is drift.
 
-There is no standing exception to this any more. The cosmetics block once
-repurposed nine line pigments as user-selectable papers, seals, rings and
-backdrops; it was retired with the storehouse, and nothing outside a section
-wears its pigment now. Any new use of a line pigment outside its section is
-drift.
-
-**The pigments are one family** (一族, plan 174, the harmony round). They had
-been mixed one at a time and had drifted — OKLCH lightness .48 to .62,
-chroma .05 to .17 — so 朱 shouted, 葡萄 sank and 緑青 read grey. They are
-recut to one lightness per theme (.56 on sumi, .48 on paper) and about one
+**The pigments are one family** (一族): one lightness per theme (.56 on sumi, .48 on paper) and about one
 strength (.09), each keeping its hue, so **the hue alone says which line**.
 朱 keeps a step more strength as the app's accent and 茶 a step less, as a
 tea is; 山吹 is not recut, because it is the metal (below). A new line's
@@ -226,10 +117,9 @@ pigment is minted at that lightness — `src/harmony.css.test.js` measures
 all twelve in both themes — and the native widgets' copies follow.
 
 **The verdicts are one ramp** (状態, same round): the five state inks — 抹茶,
-琥珀, 緑青, 錆 and the rating's 臙脂 — run red to green at one strength,
-lightness .62 to .72 where they ran .54 to .74, so no verdict shouts over
-another and the teal no longer sinks into the sumi it is drawn on.
-The two pass verdicts step off it since plan 180 (正解): Correct and
+琥珀, 緑青, 錆 and the rating's 臙脂 — run red to green at one strength
+(lightness .62 to .72), so no verdict shouts over another. The two pass
+verdicts step off it: Correct and
 Perfect are the rating bar's keys and wear their own brighter inks,
 `--rating-correct` and `--rating-perfect`, wherever a verdict's ink is
 drawn (the bar, the run's meter, the desk's verdict tiles). `--teal` and
@@ -237,17 +127,11 @@ drawn (the bar, the run's meter, the desk's verdict tiles). `--teal` and
 
 ### One metal, one selection
 
-Two of the colours the screens had drifted on most were never a line's:
-
 - **一金 — every primary action is the metal** (`--metal`, the gate's gold
-  lit from the top, `--metal-hover` its lift). It had been four colours for
-  "do this": a section's pigment deepened, the gold pill, the gate, an amber
-  outline. See *The primary button*.
+  lit from the top, `--metal-hover` its lift). See *The primary button*.
 - **一選 — what is chosen is lit in the selection's gold** (`--sel-wash`
   under it, `--sel-line` round it, `--sel-ink` on it): a chip, a segment, a
-  console band's option, a stroke key, a picked answer in the boarding. It
-  had been a section's pigment on one screen and the gold on the next, so
-  "chosen" and "this line" read alike. **Where you are is not a choice**:
+  console band's option, a stroke key, a picked answer in the boarding. **Where you are is not a choice**:
   `.chip--here` keeps the line's pigment, because it names a place.
 
 The gold is the pass's metal (below); the action and the selection borrow it
@@ -273,9 +157,7 @@ nothing else — any other part of the chrome stays sumi and its two inks.
 
 **One standing exception, decided deliberately**: the **console's action
 pill** (`ConsoleAction`, `.console__action` — "+ Créer un deck" on the
-shelf) is a filled use of a line pigment. It was the primary button's
-exception until plan 174 gave the primary the metal; the owner kept this
-one as it was. It is not precedent for filling a card, a row, a chip, a
+shelf) is a filled use of a line pigment. It is not precedent for filling a card, a row, a chip, a
 header or a second button; it is allowed to exist *because* the rule is
 otherwise absolute.
 
@@ -298,10 +180,6 @@ Two Japanese faces, assigned by **job**, never by taste:
 
 ### A name's rank (標, plan 174)
 
-The owner's pick T2 of the canvas "Tsuji — harmony". One rank of names had
-come in three faces at three sizes — a serif plate, a grotesque platform, a
-lighter serif deck — so every screen read as its own app. Now:
-
 - **The screen's own name is serif**, at `--fs-heading`: the bar's title
   (`.bar__title`) and a sheet's (`.sheet__jp`). On the desk a sheet keeps
   `--fs-title`, since it is a dialog over a page that already has its name.
@@ -320,8 +198,7 @@ Nine sizes: `--fs-caption-xs` `--fs-caption` `--fs-sm` `--fs-body` `--fs-lead`
 `--fs-title` `--fs-heading` `--fs-display`, plus three fluid tokens for
 headings that must breathe.
 
-**Never write a font-size literal.** The app reached 94 of them; that is what
-this scale exists to stop. `rem` only — `px` is retired from type, because
+**Never write a font-size literal.** `rem` only — `px` is retired from type, because
 `13px` and `0.8rem` are the same size written two ways and the app used both.
 
 One rung sits above the nine, for one object only: `--fs-specimen-glyph`
@@ -337,21 +214,14 @@ came from. A word on that plate takes `--fs-display`, a long expression
 **Both specimen rungs are ceilings rather than sizes**, in the two places
 the type has to fit a box it did not choose.
 
-The catalogue's tile was the first. At 72px a 168px tile takes two characters
-to a line, so テープレコーダー printed one character per line over four of
-them and grew its whole row to 390px. The tile is a query container and its
+The catalogue's tile is the first. It is a query container and its
 headword divides that width by its own character count (`--len`, set by the
 screen), clamped between `--fs-caption` and the word rung: a lone 駅 is the
 specimen it always was, エアコンディショナー lands near 15px, and nothing
 wraps.
 
 The study card is the second, on the same instrument down to the 96cqw
-(`.char-display`, decided 2026-09-09). The rung had been a flat size there,
-and the specimen is one nowrap line, so a box sized to its own text simply
-grew past the card and spilled the word off both edges — とうもろこし is
-~440px against the 290px text column of a 390px phone, and printed with its
-head and its tail off the screen. It is now fitted the same way (46px there,
-28px for コンビニエンスストア) and the card is the query container. **Fitted,
+(`.char-display`): the card is the query container. **Fitted,
 not wrapped**: the specimen box is a fixed multiple of its own rung tall so
 the card cannot resize under the learner on a flip, and a second line would
 leave that height the way the word left its width. Prose on a card is a
@@ -384,10 +254,6 @@ Where a rule zeroes its padding altogether (`.platform-sign__dests .chip`) the
 same half tracking is added as a *leading* pad, which moves centred content by
 half its own width.
 
-Measured, at 8x over four sub-pixel phases: the dictionary's 部 RADICAUX chip
-sat 1.16px left of centre, `.seg__opt-latin` 1.10px, `.card-row__badge` 1.02px.
-None of them is above half a pixel now.
-
 ### Figures
 
 Every numeral: `--font-display`, `700`, `line-height: 1`, and
@@ -396,16 +262,8 @@ JSX, never in CSS.
 
 **A figure centred in a roundel is the exception to the `line-height: 1`.** A
 roundel centres the LINE BOX, not the ink, so whatever leading the line box
-carries decides where the glyph lands — and neither of the two the app reaches
-for by habit is right. The sheet's inherited `1.6` set the figure 0.55px high
-in every 30px roundel; the figures' own `line-height: 1` set it 0.81px high in
-the HUD's level and 0.42px high on the platform card. A roundel takes
-`line-height: normal` — the font's own box, which is the box its ink was drawn
-in — which lands the HUD's figure within a tenth of a pixel and no roundel in
-the app further off its centre than half of one. The roundels that already
-inherited `normal` (anything inside a `<button>` that does not restate it, e.g.
-`.mcq-row__index`) measured true before the sweep, which is the same finding
-from the other side.
+carries decides where the glyph lands. A roundel takes
+`line-height: normal`, the font's own box, the box its ink was drawn in.
 
 A roundel holding a **Japanese** glyph takes `line-height: 1` instead: a CJK
 glyph is drawn to fill the em square, so the em box IS the ink box
@@ -420,15 +278,11 @@ caps label beneath at `--fs-caption-xs`.
 
 French sets a space before `:` `;` `!` `?` and inside `« »`, and that space is
 **insécable** — the mark belongs to the word in front of it and the line may
-not be cut between the two. Written as a plain space it is exactly a break
-opportunity, and on a phone the browser takes it. The arrival screen printed
-its lead as *"…, pour vous"* / *":"*, a colon alone on a line under the
-projection.
+not be cut between the two. Written as a plain space it is a break opportunity.
 
 So the French string table is welded on the way out
 (`locales/frenchSpacing.js`): every such space becomes U+00A0 as the table is
-exported, including inside sentences a screen assembles at call time — which
-is where this one came from. NBSP and space set the same width, so nothing
+exported, including inside sentences a screen assembles at call time. NBSP and space set the same width, so nothing
 moves; only the break disappears. `locales.test.js` holds the whole table to
 the rule, so new copy cannot bring the orphan back.
 
@@ -459,8 +313,7 @@ of the canvas "Tsuji — harmony"): in the dark theme `--surface` is
 `--bg-panel` and its hairline the panel ink at 13%, so the HUD, the panels,
 the sheets and the tab bar are one material, sunk into the ground like a
 board set in a station wall, and the page is the one step lighter around
-them. Today had shown the cost of the old way — the gate, the week, the
-pass strip and the journey each on a ground of its own. Paper keeps the
+them. Paper keeps the
 lifted card: a sumi panel there would need the panel's inks in every word it
 holds. A panel never takes a tint of its own to say a state; its edge, a
 figure or a lamp does (the status sheet's drift, the HUD's arrival plate).
@@ -481,14 +334,10 @@ The seams are the background showing through the gaps, so a short last row
 shows that background as a bare slab with nothing in it. Write the counts per
 tier (4 → 2 → 1) rather than reaching for `repeat(auto-fit, minmax(…))`, which
 looks right at the widths where the arithmetic happens to work and breaks at
-the one in between — the ledger of four lines did exactly that at three
-columns, and the three halls did it again between 560 and 1000px. Content that
+the one in between. Content that
 is genuinely ragged, like a collection that is partly empty, does not belong
 in a lattice at all. A lattice with one cell to spare fills it with something
-real rather than leaving it bare — the profile's records were two figures and
-two doors, four cells two by two, until plan 143 printed the best perfect run
-the API had always counted: three figures three across, and the doors a
-lattice of two of their own.
+real rather than leaving it bare.
 
 ### Radii are assigned by weight
 
@@ -497,8 +346,7 @@ lattice of two of their own.
 `--r-identity` (the card) → `--r-pill`.
 
 **一面** (plan 174): a panel — anything that holds a screen's content — is
-`--r-panel`, and a control inside one is `--r-card`. One panel had been drawn
-at three radii across the screens. `src/harmony.css.test.js` reads the
+`--r-panel`, and a control inside one is `--r-card`. `src/harmony.css.test.js` reads the
 panels' list.
 
 **線** (same round): a line's edge is 3px wherever it is drawn (a plate's
@@ -510,8 +358,8 @@ in the stage head) is bare, a word and its chevron, never a button's box.
 
 Two shadows exist, and both mean **this object hangs**: `--elev-hang` for the
 station plate (and the gates' line plates, which are that plate), `--elev-board`
-for the sumi panel (the departure board's, then the wall map's; no screen hangs
-one today). A third exists since the wall-map redesign and means something
+for a sumi panel hung over the page (a sheet, the dictionary's dock, the
+guide's note, the offer). A third exists since the wall-map redesign and means something
 else: `--elev-action`, a faint gold glow spent on `.btn-depart` alone — "this
 is the thing to press". One object, by ruling; a fourth shadow needs the same
 argument this one had. Nothing else has a
@@ -531,9 +379,7 @@ third panel idiom:
   it frames is already in its line's colour, which is the point.
 - **The note** (`.guide-callout`) is the panel ink speaking — sumi, like the
   docked rating bar and the sheets — one sentence, and on the guide two 44px
-  controls. It opened with a Japanese word naming the stop until 2026-09-21
-  (see the third standing exception under the pairing rule); the sentence is
-  the note. The ride's notes have no controls and
+  controls. The ride's notes have no controls and
   take no pointer events, so the card under one is tapped through it. It is
   centred on the column and measured only vertically: under the spot, or
   above it when the spot is in the lower half.
@@ -574,22 +420,14 @@ the words that use it (grouped backend-side by `study/kanji_words.py`).
 
 **One register at a time, behind two gates.** The sheet prints a gate per
 register under its stripe — CHINESE READING, JAPANESE READING, each with the
-count of readings behind it — and the open one's readings below. Each gate
-led with 音読み and captioned it until 2026-09-21, when the ornamental half
-of every such pair went (third standing exception, above): the name carries
-the gate now, at the rung the term held. A reading is a **band of sumi** carrying the register's 音/訓
+count of readings behind it — and the open one's readings below. A reading is a **band of sumi** carrying the register's 音/訓
 mark and the reading in the raw pigment, sticking to the top of the list
 while its words pass under it in the ledger's own rows; the readings no word
 demonstrates close the list as one row of quiet pills, under a caption that
 says what they are. A kanji with a single register gets no gates: a
 segmented control with one segment is a label pretending to be a choice.
 
-This replaced one column holding both registers, each headed once by a 22px
-carved 音/訓 at `--fs-caption-xs`, with every reading set at `--fs-lead` in
-`--text-primary` — the rung and the ink of the word rows under it. Neither
-division survived being looked at: the register was named to nobody who could
-not already read 音, and the head of a group was the quietest thing in it.
-**Ground and place divide them now, not a rung**, which is why the sheet is
+**Ground and place divide them, not a rung**, which is why the sheet is
 the one shell here that scrolls its body rather than itself — a band cannot
 stick under a sticky plate whose height it has no way to know.
 
@@ -598,12 +436,7 @@ words" ledger stays, and its four words demonstrate four different readings
 where the deck has them, the kanji picked out in each row in the entry's
 ink so the reading it uses is what the eye lands on. **The sheet's rows are
 that same row, unchanged** — the kanji picked out in the same ink there as
-here. A round of this redesign took the gold off them, on the reasoning that
-gold under a gold heading outranks the heading; the owner reversed it, and
-the reversal is the sounder reading of the screen. Ground is what divides a
-reading from its words now, and sumi against surface is not a distinction the
-rows can dilute the way a shared rung was. One mark means one thing wherever
-the row is drawn, which is worth more than the rivalry was worth avoiding.
+here. One mark means one thing wherever the row is drawn.
 **A word read as a whole keeps the mark on its kanji and not on its
 reading**: 今朝 is けさ, and け is no reading of 今 (熟字訓, 当て字), so the
 aligner keeps one ruby over the word. The row picks 今 out inside it, leaves
@@ -700,11 +533,7 @@ The card a sentence run's answer is read against — reading, translation,
 dictation, composition, and the reading ride — is the owner's pick A of
 the canvas "Tsuji — the practice cards" (`components/study/PracticeCard.jsx`),
 then its variant A1 (添削, the red pen) with A2.2 and A2.3 of A2.
-It had set the sentence, its English and the learner's answer at one size
-under five stacked captions (EN, YOUR ANSWER, REFERENCE, AI ANALYSIS,
-CORRECTED), centred a short page in a tall card, repeated the head's level
-in its foot, and left the learner to find "tchisai" against "sukoshi" by
-eye. Now:
+
 
 - **The sentence leads.** The Japanese is the largest line on the card,
   centred, with its reading over the kanji (`furigana`, served with the
@@ -771,11 +600,7 @@ single surface panel at `--r-panel`, two rows split by a `1px --surface-line`
 hairline. Row 1 holds the filter chips, with the single primary action pinned
 right. Row 2 holds search, with the result count pinned right. One console
 everywhere, not four — a screen that needs filtering reaches for this, not a
-bespoke bar. The Library is what that rule is for: it had a row of its own
-(`.lib-controls`, an ordering and a tally at either end), which was half a
-console written out by hand, drawing its own count in a face nothing else on
-the screen used, on no surface at all. Giving it the real one gained the
-search it never had.
+bespoke bar.
 
 Row 1 is **what you are looking at**; row 2 is **how you are asking**. A
 control that changes the question rather than the shelf belongs in row 2, at
@@ -802,16 +627,11 @@ neither a chip nor a key in the field, and the Library's Newest / Most followed
 is the case the rule was written for. `.console__band` is the object: the
 console's full width, options divided by its own `--surface-line` hairline
 rather than set in a pill of their own, the chosen one **washed in the
-selection's gold** (`--sel-wash`, `--sel-ink`; it was the line's pigment at 14%
-until plan 174's 一選) — the rating bar's construction at console width, and the
+selection's gold** (`--sel-wash`, `--sel-ink`) — the rating bar's construction at console width, and the
 same on state `.chip--on` wears. It sits **above row 1**, over everything it
 orders.
 
-A pill was tried first and is what the band replaced. The chips take the full
-width, so a `Seg` wrapped to a line of its own and sat at the trailing edge
-with two thirds of that line empty beside it — a third band's worth of height
-for one control, reading as a filter that had been left unpressed. **Width is
-meaning here**: a control that fills the row is about everything under it, one
+**Width is meaning here**: a control that fills the row is about everything under it, one
 that shrink-wraps is one choice among the row's others.
 
 **And chips are drawn only for what the shelf actually holds**: "All" beside a
@@ -836,10 +656,8 @@ the canvas "Tsuji — input fields"). On the page itself there is nothing
 beneath to show, so the well steps **up** to `--surface` (`.field--page`);
 on sumi it is `.field--panel`. The well is always **one step away from its
 ground** — a page well on a card is `--surface` on `--surface`, a placeholder
-with no field round it, and that is what the run's entry, the guest's claim
-and the analyser's rail search were on the desk until the two guards
-(`fields.browser.test.jsx` at a phone's width, `fields.desktop.test.jsx` at
-the desk's) measured the mount.
+with no field round it,, which the two guards
+(`fields.browser.test.jsx`, `fields.desktop.test.jsx`) catch.
 
 **A search is the same well holding its mark** (`.field--search`): the
 magnifier, the bare input, and at its trailing edge what the search carries —
@@ -863,10 +681,7 @@ color: var(--text-on-fill);          /* 6.9:1 */
 /* :hover is --metal-hover, the lift — lighter, not a brightness filter */
 ```
 
-The press had been four colours across the app — a section's pigment, the
-console's gold pill, the gate, an amber outline — so the one thing every
-screen asks of the learner looked different on each. It is now the gate's
-own gold (*The gate button*), without the gate's reader, halo or wake: those
+It is the gate's own gold (*The gate button*), without the gate's reader, halo or wake: those
 stay the boarding's and Today's. No pigment has to carry a button's ink any
 more, and none is a button's fill (the console's action pill is the one kept
 exception; see *Colour is an edge*). **Disabled, the metal goes unlit**
@@ -874,46 +689,11 @@ rather than faded: the panel's ground, its hairline and the secondary ink at
 full opacity, because gold at 0.45 composites to a muddy bronze that reads
 as a fourth colour. The ghost and the danger button keep the 0.45.
 
-The rest of this section is the arithmetic of the pigment fill the metal
-replaced. It still governs `.btn-primary--danger` and any pigment fill.
-
-The fill was **the section's own pigment, deepened 30% toward the panel ink**,
-so a button on Decks is 蘇芳 and one on Today is 朱色 without either screen
-inventing a colour. The deepening is not decoration: the raw pigment does not
-carry the ink at 15.2px/600. It was 12% when this family was written, calibrated
-on the only two pigments the button then wore; 松葉色 and 黄丹 both landed under
-the floor when the study screens joined, so the whole family went deeper. **79%
-is the ceiling** — it is the hover's value, and above it 黄丹 fails. Hover goes **lighter**, never darker — a `filter:
-brightness()` is not the hover, and must be turned off where the bare `button`
-rule supplies one. Disabled is `opacity: 0.45`, and there is only one disabled
-treatment (outside the boarding's gate button, whose outline is its own — see
-"The gate button").
-
-**The ink is chosen by the fill's lightness, not fixed.** At the 70/79
-deepening, **every line pigment but one carries `--text-on-panel`** in both
-themes and both states; the worst of them, 黄丹 safflower, rests at 5.29:1 and
-hovers at 4.53:1. A new pigment has to be measured against that pair before it
-is minted — 常磐 tokiwa, added with 書取, rests at 5.56:1 and hovers at 4.74:1,
-and 紫 murasaki, added with 作文 (plan 125), rests at 7.70:1 and hovers at
-6.84:1 (8.68:1 and 7.99:1 on the light theme's value), measured by the
-contrast guard's own sites rather than by hand.
-
-**山吹色 gold is the one exception among the thirteen.** It reaches only 3.90:1
-resting and 3.24:1 hovering in dark theme, and no deepening within this family
-saves it — a deepened yellow turns olive before it will carry a light ink. Gold
-takes the dark ink, or a deeper mix of its own: the console's gold pill goes to
-60% and keeps `--text-on-fill`. Gold is the 辞書 section, so **a filled action
-on that screen is not a plain `.btn-primary`.**
-
-Assuming one ink for every pigment is exactly what produced the defect
-this section was written for: the button shipped at 3.48:1 and every guard and
-every test passed, because nothing in the app checked contrast. **Guard 4 now
-does** (`src/contrast.browser.test.jsx`): it measures the intended ink/ground
-pairings in both themes and re-measures a set of real call sites through their
-real ancestors, ratcheted against `src/design-contrast.json`. It is not a
-substitute for measuring a *new* pair yourself — 4.5:1 is the floor, the
-mockups themselves do not always clear it, and the guard only knows the pairs
-it has been told about.
+**The danger button keeps a pigment fill**, inked `--text-on-panel`. Any
+pigment fill is measured before it ships: 4.5:1 is the floor, and Guard 4
+(`src/contrast.browser.test.jsx`, ratcheted against `src/design-contrast.json`)
+measures the pairs it has been told about, in both themes, through their real
+ancestors. It does not replace measuring a new pair yourself.
 
 Two rules the guard exists to keep, both learned by measurement:
 
@@ -1156,44 +936,22 @@ So:
 
 ### Controls
 
-- **The rating bar** — the most-used control in the app — is **one continuous
-  instrument**, not a row of buttons, and it is **chrome**: the same sumi as
-  the top bar and the level HUD, with the panel inks. A single panel, its
-  segments divided by hairlines rather than gaps, the plain word alone as the
-  label (the maintainer retired the Japanese term from the bar; see the
-  rule's own comment in `index.css`) and a dot above each word carrying the
-  colour: three-quarters strength at rest, full with a halo on the segment
-  just pressed. That press is the bar's whole acknowledgement — the bar
-  fades out with the mark still full while the next card arrives, and
-  nothing else says "rated". On a phone it **docks straight onto the level
-  HUD, edge to edge**, so the bottom of the screen is one console and the
-  paper card is the only bright thing on it; four segments stay on **one
-  row**, the shape a thumb sweeps along that edge, and only the
-  six-segment bar wraps. Chosen from three forms drawn side by side in the
-  study-mode redesign (a board row with the ramp as a rule, this dock, a
-  hairline pill).
-  **Since plan 174 (段, the owner's pick RB1 of the canvas "Tsuji —
-  harmony") it is one instrument again, and no tile is gold.** For a round
-  it had been tiles a gap apart with the best answer filled in the pass's
-  gold; gold is the action's metal now, and a verdict is not an action. The
-  segments sit in one bordered instrument (an inset outline, so it takes no
-  height) split by hairlines, each word under a pill in its verdict's ink —
-  the same ink and shape as its segment in the run's meter — and a press
-  washes its segment and lights the pill.
-  **Since plan 180 (正解, the owner's pick B of the canvas "Tsuji — the
-  rating bar") the passes are keys of their own.** The misses (Wrong,
-  Almost, Difficult; Blackout on the six) stay that one instrument; Correct
-  — and Perfect on the six — stands beside it a gap apart as a key filled
-  in its own verdict ink (`--rating-correct` 青竹, `--rating-perfect` 若葉),
-  lit from the top with a soft glow, the sumi type and a check where the
-  pill was. Correct is the answer pressed most, so it is the widest target
-  on the bar (half again a miss on the four) and the one thing on it in
-  colour. Still not gold: a pass is lit in its verdict's ink, and gold
-  stays the action's metal. On a phone the six puts its four misses on one
-  row and the two keys under them, on the edge the thumb is nearest; on
-  the desk's panels the keys are drawn unlit, like the segments, until the
-  reveal, and the card panel's Correct and Perfect tiles are edged and
-  washed in the same inks.
+- **The rating bar** — the most-used control in the app — is **chrome**: the
+  same sumi as the top bar and the level HUD, with the panel inks. The misses
+  (Wrong, Almost, Difficult; Blackout on the six) are **one instrument**: one
+  bordered panel split by hairlines, each word under a pill in its verdict's
+  ink (the same ink and shape as its segment in the run's meter); a press
+  washes its segment and lights the pill, and that is the bar's whole
+  acknowledgement. The passes are **keys of their own**: Correct (and Perfect
+  on the six) stands beside the instrument a gap apart, filled in its own
+  verdict ink (`--rating-correct` 青竹, `--rating-perfect` 若葉), lit from the
+  top, the sumi type and a check where the pill was. Correct is the widest
+  target on the bar. **No tile is gold**: gold is the action's metal, and a
+  verdict is not an action. On a phone the bar docks on the run's floor, edge
+  to edge; four keys stay on one row, and the six puts its misses on one row
+  and its two keys under them. On the desk's panels the keys are unlit until
+  the reveal, and the card panel's Correct and Perfect tiles wear the same
+  inks.
 - **The streak is a スタンプラリー stamp rally**, not a flame — a row of
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a
@@ -1201,15 +959,13 @@ So:
 - **A run's streak is the same stamp, one more size.** In the head of a
   practice run the answers in a row rated good or better are the rally's
   lacquer roundel holding the count (`.run-streak`), pressed afresh as the
-  run lengthens, filled from five, absent below two. It replaced the flame
-  two runs had drawn; the daily streak the rally counts includes a day of
+  run lengthens, filled from five, absent below two. The daily streak the rally counts includes a day of
   practice, not only a day of cards.
 - **The rally has two sizes, and they are the same mark.** Seven days on the
   pass in the gate hall; five whole weeks, Monday to Sunday, as the profile's
   スタンプ帳. Same lacquer (`--stamp-ink`), same per-slot wobble, same press
   on today. The row answers "how many in a row"; the sheet answers "which
-  days", which is the question the week's bar chart could never answer and
-  the reason that chart is gone. A missing day is a dashed outline, not a
+  days". A missing day is a dashed outline, not a
   gap — seven or thirty-five slots always exist, because the shape of the
   month is the information.
 - **A segmented toggle is the rating bar's construction at chip size** — one
@@ -1235,9 +991,7 @@ scrolls away:
   one bar. On the floor, **the level** — the card's struck 辻 filled to the
   climb, the level, the track with this run's gain lit on it, the run's XP
   and the fare rising off it (`--run-floor-h`, 60px). The balance stays in
-  the head's pocket pass, where the owner asked to keep it. The meter
-  replaces the head's remaining pill and the deck's hairline; the floor
-  replaces the level bar. A run without the console — no tally, or
+  the head's pocket pass, where the owner asked to keep it. A run without the console — no tally, or
   comprehension, whose answers are graded together at the end so a meter
   would sit empty — keeps the old floor: the head's own count, the level
   bar, and the deck's hairline rule (three inks and no figures, the inks the
@@ -1272,15 +1026,17 @@ progress legend back — on the desk too, where the run also prints its keys
 
 ### Rewards
 
-Every card is rewarded, and none of it is a ceremony. Three moments, three
-objects, and not one of them waits to be dismissed:
+Every card is rewarded, and none of it is a ceremony — the cleared day
+is the one ceremony, and it comes after the last card (below). Three
+moments, three objects, none waiting to be dismissed:
 
 - **The fare** (運賃) — the XP an answer earns — is reported on the object it
   was paid into: the **level HUD** on a tab screen, where the strip's struck
-  辻 glows gold once and the amount rises off it, and the **level bar** on a run
-  (`components/chrome/LevelBar.jsx`), docked on the bottom edge under the
-  rating bar, where the span it gained lights gold and the figure rises off
-  the XP count. There is no toast, no panel and nothing to dismiss; the
+  辻 glows gold once and the amount rises off it, and the run's floor on a run
+  (the console's level on a phone, `components/study/RunConsole.jsx`; the
+  level bar where a run has no console, and on the desk the level row of
+  the run's panel), where the span it gained lights gold and the figure
+  rises off the XP count. There is no toast, no panel and nothing to dismiss; the
   figure is gold because XP is the pass's balance, never a state colour.
   `XpToast` still sounds the tick and tells a screen reader. Every play mode
   pays: a card review through the scheduler, and a practice answer —
@@ -1291,17 +1047,13 @@ objects, and not one of them waits to be dismissed:
 - **The press** (落款) — a card climbing a stage — is the card being
   signed. Every card carries its stage as a **word** in its top corner
   (new · in progress · mastered, caption register, the stage's ink), not a
-  hanko. The dictionary's plate carries the same word (decided
-  2026-09-05; the hanko it wore is retired, so one vocabulary says the
-  same SRS state everywhere it is written out). **The catalogue's tile
+  hanko. The dictionary's plate carries the same word, so one vocabulary says the same SRS state everywhere. **The catalogue's tile
   is the one place it is not written out**: at 168px "IN PROGRESS" ran
   nearly the full width in the caption's tracking, pushed the reading
   off centre, and changed length card by card, so no two tiles read as
   the same object. The stage is that card's own bottom edge instead —
   the state's ink, the card's plain hairline where the schedule has
-  never seen it — and the word stays for a screen reader. Owner's
-  ruling, from a rendered comparison of six directions; the JLPT level
-  the edge used to carry is read from the badge in the corner. A mark
+  never seen it — and the word stays for a screen reader. The JLPT level is read from the badge in the corner. A mark
   that only a colour carries is the exception here, not the rule: it is
   allowed on a wall of tiles where the word is one tap away, never
   where the state is the only thing being said. On a promotion a 落款
@@ -1314,11 +1066,8 @@ objects, and not one of them waits to be dismissed:
   specimen. The graduation (極) is gold, a double-line seal, the edge lit in
   full; a lapse re-inks the impression in vermillion with a shake. It holds
   the next card for under a second (`CardStamp.browser.test` pins every
-  hold and the faintness), because the moment is the press, not a pageant:
-  the wash, the kumadori, the brush and the petals are gone.
-- **The level** (進級) is **told by the card's engraving** (plan 173, the
-  owner's direction on the canvas "The pocket pass & the level-up"; it
-  replaced plan 142's punch, 改札鋏). The learner's card comes down face
+  hold and the faintness), because the moment is the press, not a pageant.
+- **The level** (進級) is **told by the card's engraving**. The learner's card comes down face
   up in its own material, and the struck 辻 on it — whose road 辶 the
   climb fills everywhere the card is drawn — fills from empty to full
   over three seconds while the card trembles, harder as it fills; full,
@@ -1332,21 +1081,36 @@ objects, and not one of them waits to be dismissed:
   under it; wider, it floats at the screen's right at the side column's
   width; on the desk it docks in a run's column (see *The desk*). It is
   gone 4.05 seconds after it arrives, on a clock, never gating — it
-  leaves by itself while the next card is already in hand. Before the
-  punch it was a sumi board whose split-flap drums turned while it was
-  still sliding in, so the one moment it existed for was half missed.
+  leaves by itself while the next card is already in hand.
   Under reduced motion the card fades in and out, the engraving stands at
   the new level's climb and the figure changes in place; nothing fills,
   trembles, bursts or rolls.
 
-There was a fourth, **the rank** (再発行): the level bands each carried a
-title (見習い → 浪人 → 侍 → 師範 → 免許皆伝), and crossing one re-issued the
-pass in a board that took the whole screen and waited to be claimed. The
-titles are retired — a placeholder ladder saying nothing the level number
-did not — and the board went with them.
-
 So nothing holds the queue. Every reward plays over the next card, because
 a learner who has just rated one card is already looking for the next.
+
+**The one ceremony: the cleared day (終着, plan 191).** The owner's ruling
+on the canvas "Tsuji — the day cleared" (2026-10-07): clearing the day's
+queue is the app's biggest win — the learner showed up and finished — and
+it is the one moment that is a ceremony, played after the last card, when
+nothing is waiting. The run's cards go through the gate's reader one by
+one into their piles (À revoir · Justes · Parfaites, the verdicts' inks;
+two piles when the learner's bar has no Perfect), the day's 駅スタンプ is
+slammed onto the place the reader left and flies into the week of stamps,
+and the fare — the run's XP and the streak's prime (25 + 5 a day, up to 60
+days) — counts into a gold total that keeps a slow shimmer while it rests.
+A streak milestone takes the stamp's hand: 3, 7 and 14 days a paper 硬券
+fed by the ticket machine and clipped by the 改札鋏, 30 days and on a
+night of 花火 over the station and a gold ticket — with the milestone's
+jackpot. The rest state *is* the review: the piles open their cards,
+tomorrow is one dashed line. A tap, a click or Enter skips to it at any
+moment; under reduced motion it is drawn at once, fades only. A run that
+ends with cards still due is a 途中下車, not a finish: no stamp, the
+teaser of what clearing would pay, Continue as the one action. The
+stamps are the People family (stamp ink); gold stays the XP's and the
+gate's, and the 30-day ticket's foil and the fireworks are the pass's
+metal caught in the sky. Components in `components/dayclear/`, CSS in the
+`191:*` regions of `index.css`.
 
 ## Structure
 
@@ -1360,11 +1124,7 @@ a learner who has just rated one card is already looking for the next.
   `--board-w`. At 1100px and up it is **the desk** (below): a rail down
   the left edge that is the HUD and the tab bar in one column. The line
   is `hooks/useDesk.js`'s, and the phone never crosses it — below it
-  every screen renders what it rendered before the desk existed. This
-  replaced "one chrome at every width", which answered an app whose wide
-  screen had a burger drawer, an auto-hiding top bar and a concourse home
-  of its own; the desk shares every part with the phone but the frame,
-  which is what keeps the two from drifting as those did.
+  every screen renders what it rendered before the desk existed. The desk shares every part with the phone but the frame.
 - **Both bars are sumi with the two panel inks and no line colour.** The
   pigment belongs to the screen's own bar (`.bar`): roundel, title, sub,
   aside, and a 2px stripe in the section's colour under it. A screen that
@@ -1379,21 +1139,14 @@ a learner who has just rated one card is already looking for the next.
   reader still lands somewhere named. A *station* behind a gate keeps its
   bar — that is where the pigment and the way out live.
 - **Japanese is content, not chrome.** The interface speaks the learner's
-  language; a word, a sentence, a deck's name, a card's stage are
-  Japanese. The
-  bilingual JP + Latin pairing the desktop chrome used does not apply to
-  the mobile chrome — and, since this rule was written, not even to the
-  tab bar, which was its one exception: the gates were a kanji where a
-  pictogram goes, with the plain word under each.
+  language; the words, sentences and cards it teaches are Japanese.
 - **A gate is a pictogram, and only the gate you are on is captioned** —
   on the phone's row. (The desk's rail is a column with the room for every
   word, so there all five are captioned.)
   *Owner's ruling, from a rendered comparison of six directions.* Five
   gates are 78px on a 390px phone; `DICTIONNAIRE` is 94 and
   `AUJOURD'HUI` 87, so in French two captions printed straight over
-  their neighbours — and no treatment of the type fixes that (tracked
-  out, the widest word is still 4px too long; the canvas got away with
-  it because it was drawn in English). So the row of words went. The
+  their neighbours. So the row of words went. The
   five glyphs are drawn to the shared icon convention
   (`components/chrome/GateIcon.jsx`) and sit on one line; the lit gate
   takes the width its word needs and the other four share what is left.
@@ -1441,9 +1194,9 @@ a learner who has just rated one card is already looking for the next.
   `‹ Gate` in the stage head is the way out. Everything docked reads
   `--dock-bottom` — the tab bar plus the safe-area inset under the shell, the
   level bar plus the inset on a stage — never a number of its own.
-- **One filled action per screen**, gold, 52px, docked at the foot and
-  rising with the keyboard; a selection is a gold ring; disabled is
-  `opacity: 0.45` and nothing else; loading is three gold dots, never a
+- **One filled action per screen**, the metal, 52px, docked at the foot and
+  rising with the keyboard; a selection is the selection's gold; disabled
+  is the metal unlit (*The primary button*); loading is three gold dots, never a
   spinner (`components/ui/Loading.jsx`); an empty state names the missing
   thing and the one thing to do about it (`components/ui/Empty.jsx`).
 - **Between boarding screens the train pulls**: the leaving screen slides
@@ -1456,9 +1209,7 @@ a learner who has just rated one card is already looking for the next.
   head — a stop per question, the reveal the kana's second half, the level
   a stop only for a reader of both scripts — and the gate docked at the
   foot. Between them each question is set centred over its answers, a
-  rung (`--sp-8`) apart, and the pair stands on the middle of the room —
-  the owner's word on the first build, whose questions stood pinned under
-  the head over a gulf: titles centred, and not always at the top. Each
+  rung (`--sp-8`) apart, and the pair stands on the middle of the room. Each
   question draws its answers as roads out of a hub
   numbered as its stop — the name's plate on a pole, a junction of six
   reasons, the two words at a crossing, the line climbing through the
@@ -1484,18 +1235,7 @@ a learner who has just rated one card is already looking for the next.
 ### The desk (机, plans 113–123)
 
 The computer's design, at 1100px and up. Everything above holds unless a
-line here says otherwise. Plan 113 drew the chrome; plan 114 laid the
-screens out for the width, so that nothing on a computer reads as a phone
-set down on a desk; plan 115 took the remaining second screens and sheets
-into the page and gave a session its keys; plan 120 went through every
-dialog left and moved the ones that do not interrupt into their columns;
-plan 122 drew first contact for a desk, and plan 123 made the workspace
-answer a keyboard and a pointer one way everywhere. Plan 130 had the two
-plated gates take the window; plan 140 laid first contact down the left
-as the rail it arrives at, and plan 163 drew it again as the crossroads:
-the question at the paper's top-left corner, the journey a strip of named
-stops at the floor's left end, the floor in the bottom-right corner, and
-each question drawing its answers between them.
+line here says otherwise.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
@@ -1816,9 +1556,8 @@ each question drawing its answers between them.
   badly so far (at the run's end too), each opening its entry; on a browse
   (the fast review), that entry alone — a browse rates nothing, so it has
   no misses, and an empty one stands no side; on a graded practice run,
-  the sentence's breakdown, with no toggle. This run's three records are
-  on the floor (below, plan 124); they stood at the side's head until
-  then. The level bar keeps the stage's width.
+  the sentence's breakdown, with no toggle. This run's records are on the
+  left panel (below).
 - **A run fits a laptop.** Its stage starts at the top of the window; the
   card and its choices (or the prompt and the writing board, the board in
   the wide column) stand side by side, the head spanning both; answered,
@@ -2186,15 +1925,14 @@ each question drawing its answers between them.
 - **One `<h1>` per screen**, and it is the object that names the place — the
   station plate, the pass, or the screen's bar. A plated screen never prints
   a second heading.
-- Section headings are `<h2>` inside the paired `SectionHeader`.
+- Section headings are `<h2>` (`SectionHeader`), and only on a block that
+  does not name itself.
 - **A screen may be composed of inserts instead of sections, and then it
   prints no `SectionHeader` at all.** The profile is the worked example: the
   pass is the `<h1>`, and every block beneath it is an object that names
   itself — the doors to 統計 and Settings straight under it, a stamp sheet
   titled with its month, a lattice of records, a ledger whose rows carry
-  their own roundels, a 番付. It printed six `SectionHeader`s over six self-evident
-  objects, which is the second rule's exact failure: a caption for a figure
-  the layout already explains. **A block that needs a heading to be legible is
+  their own roundels, a 番付. **A block that needs a heading to be legible is
   not finished** — give it the mark that names it, the way each ledger cell
   carries its own roundel and 線 name instead of sitting under a "Lines" title.
 - **Settings opens on the pass, printed with its contract** (plan 139). The
@@ -2212,8 +1950,7 @@ each question drawing its answers between them.
   right (so the drawings stand in a column whatever the words say), the
   rows in three cards by what they are for -- the app, the study, the
   learner -- and the pass apart, set apart by the gap and never by a
-  caption. Every page draws what it sets, and every
-  page draws what it sets:
+  caption. Every page draws what it sets:
   each stop ahead with the date the service reaches it, each service as
   a line to the destination on one time axis with the learner's own pace
   of the last fortnight dashed beside them, the themes as screens at
@@ -2247,7 +1984,7 @@ each question drawing its answers between them.
   learner's record at each.
 - **A line with stops is how this app draws distance**, and it is one drawing
   shared by two places: the level picker's route diagram and the pass's ghost
-  track (the wall map was the third, and went with the plates). Same parts
+  track. Same parts
   every time — a rail, a filled run behind you, stops with labels, your
   train between two of them. Reach for it over a bar whenever the axis has
   named waypoints; keep the bar for a span that is only a percentage.
@@ -2265,10 +2002,7 @@ each question drawing its answers between them.
   **A stop stands at the END of the leg it names, and the line opens at
   初, the novice's stop** — so reaching a stop is finishing the thing it is
   named for, never starting it, and a learner who has done nothing is drawn
-  standing at 初 rather than on the first level's platform. The wall map had it
-  the other way round once: N5's station sat at the START of N5's work, which
-  handed a learner that level for boarding the train and left the last stop one
-  leg short of the terminus. The plate's foot reads the same rule
+  standing at 初 rather than on the first level's platform. The plate's foot reads the same rule
   (`domain/lineProgress.stopsAround`): the stop in the middle is the last level
   finished, never the one being ridden.
   Three rules the 進捗が主役 round settled on the pass's copy of it, and they
@@ -2282,8 +2016,7 @@ each question drawing its answers between them.
   between them** in the state's pigment — the shortfall as an area, not a
   bracket the reader has to measure.
 - **A backward-looking screen stays backward-looking.** The profile is a
-  record of what was done. It once carried a 今夜 list of what a session could
-  still finish; that went with the goals and the badges it counted. A goal
+  record of what was done. A goal
   measured in weeks belongs on the pass's back, where the ghost train already
   measures it, and the day's work belongs at the fare gate.
 - Four column widths — and, on the desk, the rail's `--desk-rail-w`
@@ -2302,8 +2035,7 @@ each question drawing its answers between them.
 - A chevron terminating a card or row is centred against the **full height**
   of that card, never against its first line of text.
 - **The first ride** (plans 097–100) is the stage's first use and the
-  gates' first opening, and it adds no screen of its own kind: 試乗 / TEST
-  RIDE and 案内 / GUIDE are the two pairs, `.ride-*` and `.guide-*` the two
+  gates' first opening, and it adds no screen of its own kind: `.ride-*` and `.guide-*` are its two
   namespaces, and everything a lesson draws is the production component
   fed a literal (ADR 0017). The one screen the rides own outright — the
   done screen and the pass plate — is the stage with its words centred by
@@ -2343,7 +2075,6 @@ each question drawing its answers between them.
 - Do not put colour on chrome.
 - Do not write a desk rule outside the 机 section, and do not make a phone
   rule aware of the desk — the 1100px line is the only door between them.
-- Do not write the Latin line as a transliteration.
 - Do not hand-copy a component's markup to get its look — use the component.
   Every near-copy in this app has drifted from its original within two
   features.

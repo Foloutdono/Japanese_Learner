@@ -38,7 +38,7 @@ describe('the voice registry', () => {
       'click-menu', 'click-close-menu', 'click-mode-selection', 'click-screen-selection',
       'correct', 'wrong', 'card-flip', 'card-transition', 'exam-warning',
       'gate-chime', 'door-chime', 'door-slide', 'platform-chime', 'arrival',
-      'fare-tick', 'pass-clip', 'board-flap',
+      'fare-tick', 'pass-clip', 'board-flap', 'day-clear', 'milestone',
     ]
     for (const key of required) {
       expect(hasVoice(key), `missing event: ${key}`).toBe(true)
@@ -208,6 +208,11 @@ describe('choosing a voice', () => {
       // its flaps were given one, and the short run ships until the
       // owner's next round on the listening panel.
       'board-flap': 'run',
+      // 終着 (plan 191): not yet by ear either -- the day cleared and the
+      // milestone's melody ship their first voices until the owner's
+      // round on the listening panel.
+      'day-clear': 'warm-settle',
+      milestone: 'hassha',
     }
     expect(Object.keys(chosen).sort()).toEqual(VOICE_EVENTS.map(e => e.key).sort())
     for (const [event, voice] of Object.entries(chosen)) {

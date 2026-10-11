@@ -64,10 +64,12 @@ CREATE TABLE review_log (
     mode TEXT NOT NULL,
     quality SMALLINT NOT NULL,
     -- XP awarded for this specific review, computed once at write time
-    -- (base_xp(quality) * that day's diminishing multiplier + streak
-    -- bonus — see srs/xp.py) and stored rather than recomputed, so
-    -- lifetime/leaderboard totals are just SUM(xp_earned) and never
-    -- drift if the formula's constants change later.
+    -- (base_xp(quality) * that day's diminishing multiplier — see
+    -- srs/xp.py; rows before plan 191 also carry the first good
+    -- review's streak bonus, since folded into the day's clear) and
+    -- stored rather than recomputed, so lifetime/leaderboard totals are
+    -- just SUM(xp_earned) and never drift if the formula's constants
+    -- change later.
     xp_earned INTEGER NOT NULL DEFAULT 0,
     reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -690,6 +692,43 @@ CREATE TABLE xp_ledger (
 
 CREATE INDEX idx_xp_ledger_user
 ON xp_ledger(user_id);
+
+-- ── 終着 — the day cleared (plan 191) ──────────────────────────────
+-- Owned by srs/srs.py, beside xp_ledger. One row per UTC day a learner
+-- emptied the day's queue with at least one card reviewed, written once:
+-- the primary key is what pays the day's bonus once (record_day_clear
+-- inserts first; a conflict is a day already paid). The XP itself is an
+-- xp_ledger row, source 'day_clear', which is neither a day studied nor
+-- a practice answer. A row with a milestone (3, 7, 14, 30, ...) is a
+-- ticket in the learner's ticket book. No cascade from auth (ADR 0010):
+-- DELETE /api/account and scripts/purge_orphans.py clear it.
+CREATE TABLE day_clears (
+    user_id     TEXT NOT NULL,
+    day         DATE NOT NULL,
+    streak      INTEGER NOT NULL,
+    bonus       INTEGER NOT NULL,
+    jackpot     INTEGER NOT NULL,
+    milestone   INTEGER,
+    cleared_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, day)
+);
+
+-- 運休 — rest days. A ticket is earned on clearing a milestone day of
+-- seven or more, two held at most; used_on is the missed day it bridged
+-- (srs.bridge_rest_days, lazily, on the next visit), which keeps the
+-- streak unbroken without counting in it, and seen_at when Today told
+-- the learner so.
+CREATE TABLE rest_tickets (
+    id          SERIAL PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    earned_on   DATE NOT NULL,
+    milestone   INTEGER NOT NULL,
+    used_on     DATE,
+    seen_at     TIMESTAMPTZ
+);
+
+CREATE INDEX idx_rest_tickets_user
+ON rest_tickets(user_id);
 
 -- Owned by core/credits.py (plan 069) -- the credit ledger, append-only
 -- like xp_ledger: a signed row per refill ('refill', the daily +30 at

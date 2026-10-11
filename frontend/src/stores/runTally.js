@@ -40,7 +40,16 @@ import { useSyncExternalStore } from 'react'
 // does -- the five practice runs show it as the stamp in their head
 // (components/study/RunStreak.jsx), which each used to keep for itself
 // off a local flag, in two of the five.
-const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]), verdicts: Object.freeze([]), startedAt: null, streak: 0, best: 0 })
+//
+// `faces` (plan 191): every card this run reviewed, as the day cleared's
+// ceremony draws it -- { id, term, kana, line, verdict, up, mastered }
+// (domain/dayClear's cardFace: verdict 0 wrong, 1 correct, 2 perfect;
+// `up` a stage climbed, `mastered` the last one reached) -- one per
+// rating, in order, on every width. `cards` is the desk's (an entry
+// docked on reveal) and keeps a card once; the ceremony sweeps every
+// review through the reader, a card rated twice twice, as the run's
+// count does. The run hands them to its finish (screens/TodayRun.jsx).
+const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]), faces: Object.freeze([]), verdicts: Object.freeze([]), startedAt: null, streak: 0, best: 0 })
 
 let tally = EMPTY
 const listeners = new Set()
@@ -53,8 +62,9 @@ export function startTally(key) {
   emit()
 }
 
-/** One rated card; `entry` is the dictionary entry it was revealed on, if any. */
-export function countReview({ quality, xp, entry } = {}) {
+/** One rated card; `entry` is the dictionary entry it was revealed on, if
+ *  any, `face` the card as the clear's ceremony draws it (plan 191). */
+export function countReview({ quality, xp, entry, face } = {}) {
   const id = entryId(entry)
   const streak = quality >= 3 ? tally.streak + 1 : 0
   tally = {
@@ -65,6 +75,7 @@ export function countReview({ quality, xp, entry } = {}) {
     // Last rating wins, and the card moves to the end: the order the
     // misses are listed in is the order they were last seen.
     cards: id ? [...tally.cards.filter(c => c.id !== id), { id, entry: shape(entry), quality }] : tally.cards,
+    faces: face ? [...tally.faces, face] : tally.faces,
     verdicts: Number.isFinite(quality) ? [...tally.verdicts, quality] : tally.verdicts,
     streak,
     best: Math.max(tally.best, streak),

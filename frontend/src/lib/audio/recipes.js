@@ -648,6 +648,74 @@ const EVENTS = [
         } },
     ],
   },
+  // 終着 (plan 191): the day cleared. The arrival made warmer -- the
+  // same step down, with the major third under it so it lands on a
+  // chord, not a note -- because this one is a victory as well as an
+  // end. Played as the day's stamp settles.
+  {
+    key: 'day-clear', category: 'ui', family: 'rewards',
+    label: 'Day cleared', jp: '終着', where: 'The day\'s reviews all done -- the station stamp settles',
+    variants: [
+      { key: 'warm-settle', label: 'Warm settle', note: 'G5 → D5 over B4 on bars in the concourse: the arrival\'s step down, landing on a major chord and ringing there.',
+        space: 0.22,
+        play: (c, b) => bar(c, b, [
+          { freq: 783.99, at: 0, dur: 0.5, peak: 0.22, material: 'metal' },
+          { freq: 587.33, at: 0.17, dur: 1.1, peak: 0.21, material: 'metal' },
+          { freq: 493.88, at: 0.2, dur: 1.2, peak: 0.13, material: 'metal' },
+        ]) },
+      { key: 'chord-swell', label: 'Chord swell', note: 'G5, D5 and B4 swelling together instead of struck: the warm pad of the arrival, a third richer.',
+        level: 1.3,
+        play: (c, b) => tones(c, b, [
+          { freq: 783.99, at: 0, dur: 1.0, peak: 0.17, type: 'triangle', attack: 0.08 },
+          { freq: 587.33, at: 0.06, dur: 1.0, peak: 0.13, type: 'triangle', attack: 0.08 },
+          { freq: 493.88, at: 0.1, dur: 1.0, peak: 0.1, type: 'triangle', attack: 0.08 },
+        ]) },
+      { key: 'three-settle-warm', label: 'Long settle, warm', note: 'G5, D5, G4 with B4 under the last: the long settle ending on a chord.',
+        play: (c, b) => tones(c, b, [
+          { freq: 783.99, at: 0, dur: 0.22, peak: 0.22 },
+          { freq: 587.33, at: 0.15, dur: 0.26, peak: 0.22 },
+          { freq: 392.0, at: 0.32, dur: 0.75, peak: 0.2 },
+          { freq: 493.88, at: 0.34, dur: 0.7, peak: 0.12 },
+        ]) },
+    ],
+  },
+  // 発車メロディ (plan 191): a milestone's ticket issued -- a short
+  // departure melody, the kind each station plays its trains out with.
+  // Eight notes, under two seconds, on bars in the hall.
+  {
+    key: 'milestone', category: 'ui', family: 'rewards',
+    label: 'Milestone', jp: '発車メロディ', where: 'A streak\'s ticket issued -- 3, 7, 14 days, a month, a year',
+    variants: [
+      { key: 'hassha', label: 'Departure melody', note: 'E5 G5 C6 E6, D6 C6, G5 then C6 held: a station\'s little tune, rising and coming home.',
+        space: 0.22,
+        play: (c, b) => bar(c, b, [
+          { freq: 659.25, at: 0, dur: 0.22, peak: 0.18, material: 'metal' },
+          { freq: 783.99, at: 0.14, dur: 0.22, peak: 0.18, material: 'metal' },
+          { freq: 1046.5, at: 0.28, dur: 0.22, peak: 0.19, material: 'metal' },
+          { freq: 1318.51, at: 0.42, dur: 0.34, peak: 0.19, material: 'metal' },
+          { freq: 1174.66, at: 0.62, dur: 0.22, peak: 0.17, material: 'metal' },
+          { freq: 1046.5, at: 0.76, dur: 0.22, peak: 0.17, material: 'metal' },
+          { freq: 783.99, at: 0.9, dur: 0.3, peak: 0.17, material: 'metal' },
+          { freq: 1046.5, at: 1.1, dur: 0.9, peak: 0.2, material: 'metal' },
+        ]) },
+      { key: 'fanfare', label: 'Little fanfare', note: 'C5 E5 G5 rising into a held C6 with its fifth: brighter, shorter, nearer a trumpet than a platform.',
+        play: (c, b) => tones(c, b, [
+          { freq: 523.25, at: 0, dur: 0.16, peak: 0.2 },
+          { freq: 659.25, at: 0.12, dur: 0.16, peak: 0.2 },
+          { freq: 783.99, at: 0.24, dur: 0.18, peak: 0.21 },
+          { freq: 1046.5, at: 0.4, dur: 0.85, peak: 0.22 },
+          { freq: 783.99, at: 0.42, dur: 0.8, peak: 0.12 },
+        ]) },
+      { key: 'pinpon-up', label: 'Announcement, up', note: 'The four notes a station plays before it speaks, F5 A5 C6 F6, held a beat longer at the top.',
+        space: 0.22,
+        play: (c, b) => bar(c, b, [
+          { freq: 698.46, at: 0, dur: 0.34, peak: 0.2, material: 'metal' },
+          { freq: 880.0, at: 0.17, dur: 0.34, peak: 0.2, material: 'metal' },
+          { freq: 1046.5, at: 0.34, dur: 0.34, peak: 0.2, material: 'metal' },
+          { freq: 1396.91, at: 0.51, dur: 1.2, peak: 0.22, material: 'metal' },
+        ]) },
+    ],
+  },
   {
     key: 'card-stamp', category: 'ui', family: 'rewards', meter: 'peak',
     label: 'Card stamped', jp: '押印', where: 'A card climbing a stage — the seal pressed into its corner',
