@@ -1,29 +1,31 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useBuild } from '../../hooks/useBuild'
 import { useLang } from '../../LangContext'
-import { apiJson } from '../../lib/api'
 import { playClick, playFlip } from '../../lib/audio'
 import { useDesk } from '../../hooks/useDesk'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { runKey } from '../../lib/keyGuards'
 import { bare, lineOf, mapOf } from '../../domain/ladderLine'
-import { ExampleSentence } from '../dictionary/ExampleSentence'
+import { Seg } from '../chrome/Console'
 import { GrammarAnswer } from './GrammarPieces'
 
 // ── 194 — Choisir and Construire, the point's steps ───────────────
-// The ladder's two exercises on the run's own card. The owner's second
-// round, from the first screenshots: no band, no plate inside the card,
-// the choices as the mock exam's answer dock (its bubbles under the
-// thumb on a phone, its answer sheet two by two on the desk), the point
-// revealed as a flashcard is -- the card turns over to its back -- and
-// the point's progress a quiet line of steps at the card's head.
+// The ladder's two exercises on the run's own card, as the owner drew
+// them over three rounds: no plate inside the card and no band; the
+// point's steps in the card's top-left corner, across from the stage's
+// word; the choices as the mock exam's answer tiles; Construire's entry
+// under the card, as the practice runs take theirs (`form.stage__foot`).
 //
-// The front asks: the sentence at the card's size with the point's hole
-// (two for a point in two pieces), its translation under it. Answered,
-// the card turns (the flashcard's own face and sound) to the back: what
-// happened, the whole sentence with the point picked out as every
-// example in the app picks it, and the point itself; a tap turns it back
-// and forth after that. The learner then rates themselves on the run's
-// bar (ADR 0013).
+// The card is a flashcard with two sides. The front is the sentence: its
+// hole (two for a point in two pieces), its translation under it, and
+// once answered the answer in the hole -- the right form, or what was
+// typed with each wrong kana struck and the right one written over it.
+// The back is the point: what happened over it, the point at the
+// flashcard's answer size, and under it, for a rival taken, the lesson's
+// own line on that rival. The answer turns the card to its back (the
+// flashcard's turn and sound); from then on a tap, Space or the switch
+// under it turns it either way. The learner then rates themselves on the
+// run's bar (ADR 0013).
 
 // The language's strings from the provider, or from `t` where a caller
 // renders outside one (as CardPrompt's own callers may).
@@ -39,14 +41,23 @@ function Parts({ parts }) {
     : <span key={i}>{part.text}</span>))
 }
 
-/** A sentence's runs with each hole held to the character before it, so
- *  a line never breaks between a word and its ending (書 | い［て…］). */
+/** A sentence's furigana parts, one run each, so a line can break
+ *  between any two of them. */
+function partRuns(parts, key) {
+  return (parts ?? []).map((part, i) => ({ node: <Parts key={`${key}.${i}`} parts={[part]} />, kanji: Boolean(part.reading) }))
+}
+
+/** A sentence's runs with each hole held to the word before it -- its
+ *  kana, and the kanji that kana ends -- so a line never breaks inside a
+ *  word or between a word and its ending (読 | ん［てください］). */
 function holdGaps(runs) {
   const out = []
   runs.forEach((run, i) => {
     const prev = out[out.length - 1]
     if (run.gap && prev && !prev.gap) {
-      out[out.length - 1] = { gap: true, node: <span key={`h${i}`} className="gl-hold">{prev.node}{run.node}</span> }
+      const take = !prev.kanji && out[out.length - 2] && !out[out.length - 2].gap && out[out.length - 2].kanji ? 2 : 1
+      const held = out.splice(out.length - take, take)
+      out.push({ gap: true, node: <span key={`h${i}`} className="gl-hold">{held.map(r => r.node)}{run.node}</span> })
     } else {
       out.push(run)
     }
@@ -54,9 +65,9 @@ function holdGaps(runs) {
   return out.map(r => r.node)
 }
 
-/** The point's steps, at the card's head: Choisir's three, Construire's
- *  four, the star, as small stops on a hairline, the one asked ringed in
- *  ink (in the miss's ink once missed), named beside them in words. */
+/** The point's steps, in the card's top-left corner: the step named in
+ *  words over Choisir's three stops, Construire's four and the star, the
+ *  one asked ringed in ink (in the miss's ink once missed). */
 export function PointLine({ card, missed = false, t: tProp }) {
   const t = useT(tProp)
   const step = card?.step
@@ -73,15 +84,15 @@ export function PointLine({ card, missed = false, t: tProp }) {
   )
   return (
     <div className="gl-walk" role="img" aria-label={aria} data-group={here}>
+      <span className="gl-walk__name">
+        {name}
+        {missed && <span className="gl-walk__again"> · {t.lineAgain}</span>}
+      </span>
       <span className="gl-walk__line" aria-hidden="true">
         {line.choose.map((s, k) => dot(s, `c${k}`, 'choose'))}
         <span className="gl-walk__gap" />
         {line.build.map((s, k) => dot(s, `b${k}`, 'build'))}
         <i className={`gl-walk__star${line.star ? ' gl-walk__star--on' : ''}`}>★</i>
-      </span>
-      <span className="gl-walk__name">
-        {name}
-        {missed && <span className="gl-walk__again"> · {t.lineAgain}</span>}
       </span>
     </div>
   )
@@ -111,64 +122,96 @@ export function LadderMap({ card, t: tProp }) {
   )
 }
 
-/** The card's two faces, turned as a flashcard turns: the front until
- *  `turned`, then the back, the flashcard's own face animation and
- *  sound; a tap turns it back and forth after that. */
-function TurnCard({ turned, front, back }) {
-  // Which face is up, and how many turns: the turn the answer makes is
-  // taken while rendering (the answer is the parent's), each tap after it
-  // here; the count remounts the face so its animation replays.
+/** The card's two sides, turned as a flashcard turns: the front until
+ *  `turned`, then the back, with the flashcard's own face animation and
+ *  sound; from then on a tap, Space (or Z/Q/S/D, as on every flashcard)
+ *  or the switch under the face turns it either way. */
+function TurnCard({ turned, front, back, t }) {
+  const desk = useDesk()
+  // Which side is up, and how many turns: the turn the answer makes is
+  // taken while rendering (the answer is the parent's), each turn after
+  // it here; the count remounts the face so its animation replays.
   const [shown, setShown] = useState({ turned, back: turned, flips: 0 })
   if (shown.turned !== turned) {
     setShown({ turned, back: turned, flips: shown.flips + (turned ? 1 : 0) })
   }
   useEffect(() => { if (turned) playFlip() }, [turned])
-  const turn = () => {
-    if (!turned) return
+  const show = side => {
     playFlip()
-    setShown(s => ({ ...s, back: !s.back, flips: s.flips + 1 }))
+    setShown(s => ({ ...s, back: side, flips: s.flips + 1 }))
+  }
+  const turn = () => { if (turned) show(!shown.back) }
+  // The key turns the side up NOW, read through a ref, as the
+  // flashcard's does (Flashcard.keys.browser.test.jsx).
+  const turnRef = useRef(turn)
+  useEffect(() => { turnRef.current = turn })
+  useEffect(() => {
+    if (!turned) return undefined
+    const onKey = e => {
+      if (!runKey(e)) return
+      const key = e.key.toLowerCase()
+      if (key === ' ' && /^(BUTTON|A)$/.test(e.target?.tagName ?? '') && e.target.closest('.desk-run__side')) return
+      if (key === ' ' || ['z', 'q', 's', 'd'].includes(key)) {
+        e.preventDefault()
+        turnRef.current()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [turned])
+  // On the desk a drag that leaves a word selected is a selection, not a
+  // turn (the flashcard's rule, plan 123).
+  const onClick = e => {
+    if (desk) {
+      const picked = window.getSelection?.()
+      if (picked && !picked.isCollapsed && e.currentTarget.contains(picked.anchorNode)) return
+    }
+    turn()
   }
   return (
-    <div className={`flashcard gl-card${turned ? ' gl-card--turnable' : ''}`} onClick={turn}>
+    <div className={`flashcard gl-card${turned ? ' gl-card--turnable' : ''}`} onClick={onClick}>
       <div key={shown.flips} className={`flashcard__face${shown.flips > 0 ? ' flashcard__face--turned' : ''}`}>
         {shown.back ? back : front}
       </div>
+      {turned && (
+        // The switch is the card's own, and a press on it is not a tap
+        // on the card.
+        <div className="gl-sides" onClick={e => e.stopPropagation()}>
+          <Seg
+            label={t.glSides}
+            value={shown.back ? 'back' : 'front'}
+            onChange={side => show(side === 'back')}
+            options={[{ key: 'front', label: t.glSideSentence }, { key: 'back', label: t.glSidePoint }]}
+          />
+        </div>
+      )}
     </div>
   )
 }
 
-/** The back of the card: what happened, the whole sentence with the
- *  point picked out and translated, and the point itself. */
-function Back({ card, head, kind, children, sentence }) {
+/** The back of the card: what happened, the point at the flashcard's
+ *  answer size, and a note under it (the lesson's line on a rival). */
+function Back({ card, head, kind, note }) {
   return (
     <div className="gl-back">
       {head && <p className={`gl-back__head gl-back__head--${kind}`}>{head}</p>}
-      {children}
-      {sentence && (
-        <div className="gl-back__sentence">
-          <ExampleSentence ex={sentence} />
-        </div>
-      )}
-      <GrammarAnswer card={card} size={36} />
+      <GrammarAnswer card={card} size={40} />
+      {note && <p className="gl-back__why">{note}</p>}
     </div>
   )
 }
 
-/** The sentence's furigana with the point lit (`highlight`) where the
- *  front had its hole, for the back. */
-function litSentence(parts, answerParts) {
-  const out = []
-  for (const part of parts) {
-    if (part.blank) answerParts.forEach(p => out.push({ ...p, highlight: true }))
-    else out.push(part)
-  }
-  return out
+/** The answer's furigana as it stands in a sentence: the form's 〜 off. */
+function formParts(card, answer) {
+  return (card.grammar_furigana?.length ? card.grammar_furigana : [{ text: answer }])
+    .map((part, i) => (i === 0 ? { ...part, text: bare(part.text) } : part))
+    .filter(part => part.text)
 }
 
-/** Choisir: the sentence and its hole on the front, the translation under
- *  it; the forms are the dock's (GrammarTiles). Answered, the card turns:
- *  a rival taken is named the trap and answered by the lesson's own line
- *  on it, over the whole sentence and the point. */
+/** Choisir: the sentence and its hole, the translation under it; the
+ *  forms are the run's (GrammarTiles). Answered, the hole holds the right
+ *  form and the card turns to the point, a rival taken named the trap
+ *  and answered by the lesson's own line on it. */
 export function GrammarChoose({ card, revealed = false, selected = null, t: tProp }) {
   const t = useT(tProp)
   const c = card.contrast
@@ -176,15 +219,17 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
   const parts = c.furigana?.length ? c.furigana : [{ text: c.jp }]
   const answer = c.answer ?? card.grammar
   const trap = revealed && selected && selected !== answer
-  const answerParts = (card.grammar_furigana?.length ? card.grammar_furigana : [{ text: answer }])
-    .map((part, i) => (i === 0 ? { ...part, text: bare(part.text) } : part))
-    .filter(part => part.text)
   const front = (
     <div className="gl-front">
       <p className="gl-sent" lang="ja">
         {holdGaps(parts.map((part, i) => (part.blank
-          ? { gap: true, node: <span key={i} className="gl-gap" style={{ '--gap-size': bare(answer).length }} aria-label={t.glBlank} /> }
-          : { node: <Parts key={i} parts={[part]} /> })))}
+          ? {
+              gap: true,
+              node: revealed
+                ? <span key={i} className="gl-gap gl-gap--filled"><Parts parts={formParts(card, answer)} /></span>
+                : <span key={i} className="gl-gap" style={{ '--gap-size': bare(answer).length }} aria-label={t.glBlank} />,
+            }
+          : { node: <Parts key={i} parts={[part]} />, kanji: Boolean(part.reading) })))}
       </p>
       {c.tr && <p className="gl-tr">{c.tr}</p>}
     </div>
@@ -194,15 +239,13 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
       card={card}
       kind={trap ? 'no' : 'ok'}
       head={trap ? t.chooseTrap(bare(selected)) : selected ? t.bldRight : null}
-      sentence={{ jp: c.jp, tr: c.tr, segments: litSentence(parts, answerParts) }}
-    >
-      {trap && c.why?.[selected] && <p className="gl-back__why">{c.why[selected]}</p>}
-    </Back>
+      note={trap ? c.why?.[selected] : null}
+    />
   )
   return (
     <div className="gl-choose">
       <PointLine card={card} missed={trap} t={t} />
-      <TurnCard key={card.card_id} turned={revealed} front={front} back={back} />
+      <TurnCard key={card.card_id} turned={revealed} front={front} back={back} t={t} />
     </div>
   )
 }
@@ -266,47 +309,85 @@ export function GrammarTiles({ choices, correct, selected, answered, onAnswer, r
   )
 }
 
+/** Construire's entry, under the card as the practice runs take theirs:
+ *  the field (two for a point in two pieces) and Check, docked over the
+ *  thumb on a phone, one row on the desk. */
+export function BuildEntry({ entry, t: tProp }) {
+  const t = useT(tProp)
+  if (!entry) return null
+  return (
+    <form key={entry.key} className="stage__foot gl-entry" onSubmit={entry.check}>
+      {entry.gaps.map((g, n) => (
+        <input
+          key={n}
+          autoFocus={n === 0}
+          value={entry.values[n]}
+          onChange={e => entry.setValue(n, e.target.value)}
+          onFocus={() => entry.setFocus(n)}
+          aria-label={entry.gaps.length > 1 ? t.bldFieldN(n + 1) : t.bldField}
+          placeholder={entry.gaps.length > 1 ? `${n + 1} · ${t.bldHint}` : t.bldHint}
+          className="field field--page"
+          lang="ja"
+          /* As every typed answer in the app: nothing may rewrite it on
+             its way in (TranslationRun's field). */
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          enterKeyHint="done"
+          data-gap={n}
+        />
+      ))}
+      <button type="submit" className="btn-primary" disabled={entry.empty || entry.pending}>{t.bldCheck}</button>
+    </form>
+  )
+}
+
+/** What a hole holds once the verdict is in: the answer, or what was
+ *  typed with each wrong kana struck and the right one written over it. */
+function Marked({ gap }) {
+  if (!gap?.marks?.length) return gap?.answer ?? null
+  return gap.marks.map((m, i) => (m.ok != null
+    ? <span key={i}>{m.ok}</span>
+    : (
+      <span key={i} className="gl-fix">
+        {m.wrong && <s>{m.wrong}</s>}
+        {m.fix && <ins>{m.fix}</ins>}
+      </span>
+    )))
+}
+
 /** Construire: the translation given, the point's hole (two for a point
- *  in two pieces) filled as it is typed, kana or rōmaji, from the ticket
- *  under the sentence; the server says right, close or wrong, gap by gap,
- *  and the card turns to the correction and the point. */
-export function GrammarConstruire({ card, answered, onDone, session, t: tProp }) {
+ *  in two pieces) filled as it is typed into the entry under the card
+ *  (BuildEntry, kana or rōmaji); the server says right, close or wrong,
+ *  gap by gap, the hole takes the correction and the card turns to the
+ *  point. `entry` is the run's (useBuild); a caller that holds none gets
+ *  its own, the entry then drawn under the card's face. */
+export function GrammarConstruire({ card, answered, entry: held, onDone, session, t: tProp }) {
   const ctx = useLang()
   const t = tProp ?? ctx?.t
-  const lang = ctx?.lang ?? 'fr'
+  const own = useBuild(held ? null : card, { session, lang: ctx?.lang, onDone })
+  const entry = held ?? own
+  if (!entry) return null
   const build = card.build
-  const gaps = build.pieces.filter(p => p.gap != null)
-  const [values, setValues] = useState(() => gaps.map(() => ''))
-  const [verdict, setVerdict] = useState(null)
-  const [focus, setFocus] = useState(0)
-
-  function check(e) {
-    e.preventDefault()
-    if (answered || values.every(v => !v.trim())) return
-    playClick()
-    apiJson(`/api/grammar/build/check?lang=${lang}`, session, {
-      method: 'POST',
-      body: JSON.stringify({ raw_id: card.raw_id ?? card.card_id, key: build.key, answers: values }),
-    })
-      .then(v => { setVerdict(v); onDone?.() })
-      .catch(() => { setVerdict({ verdict: null, gaps: [] }); onDone?.() })
-  }
-
+  const { verdict } = entry
   const whole = verdict?.verdict
   const front = (
     <div className="gl-front">
       <p className="gl-sent" lang="ja">
-        {holdGaps(build.pieces.map((piece, i) => (piece.gap != null
-          ? {
-              gap: true,
-              node: (
-                <span key={`g${i}`} className={`gl-gap gl-gap--typed${!answered && focus === piece.gap ? ' gl-gap--focus' : ''}`}
-                      style={{ '--gap-size': piece.size }} aria-hidden="true">
-                  {values[piece.gap]}
-                </span>
-              ),
-            }
-          : { node: <Parts key={i} parts={piece.furigana} /> })))}
+        {holdGaps(build.pieces.flatMap((piece, i) => {
+          if (piece.gap == null) return partRuns(piece.furigana, i)
+          const said = verdict?.gaps?.[piece.gap]
+          const node = said
+            ? <span key={`g${i}`} className="gl-gap gl-gap--filled"><Marked gap={said} /></span>
+            : (
+              <span key={`g${i}`} className={`gl-gap gl-gap--typed${!answered && entry.focus === piece.gap ? ' gl-gap--focus' : ''}`}
+                    style={{ '--gap-size': piece.size }} aria-hidden="true">
+                {entry.values[piece.gap]}
+              </span>
+            )
+          return { gap: true, node }
+        }))}
       </p>
       <p className="gl-tr gl-tr--lead">{build.tr}</p>
     </div>
@@ -316,59 +397,13 @@ export function GrammarConstruire({ card, answered, onDone, session, t: tProp })
       card={card}
       kind={whole === 'right' ? 'ok' : 'no'}
       head={whole === 'right' ? t.bldRight : whole === 'close' ? t.bldClose : whole === 'wrong' ? t.bldWrong : null}
-      sentence={verdict.jp ? { jp: verdict.jp, tr: verdict.tr, segments: verdict.furigana } : null}
-    >
-      {whole && whole !== 'right' && (
-        <p className="gl-back__mine" lang="ja" aria-label={t.bldAnswer}>
-          {verdict.gaps.map((g, n) => (
-            <span key={n} className="gl-back__gap">
-              {g.marks.map((m, i) => (m.ok != null
-                ? <span key={i}>{m.ok}</span>
-                : (
-                  <span key={i} className="gl-fix">
-                    {m.wrong && <s>{m.wrong}</s>}
-                    {m.fix && <ins>{m.fix}</ins>}
-                  </span>
-                )))}
-            </span>
-          ))}
-        </p>
-      )}
-    </Back>
+    />
   )
-
   return (
     <div className="gl-build">
       <PointLine card={card} missed={answered && (whole === 'wrong' || whole === 'close')} t={t} />
-      <TurnCard key={card.card_id} turned={Boolean(answered && verdict)} front={front} back={back} />
-      {!answered && (
-        <form className="gl-ticket" onSubmit={check}>
-          <span className="gl-ticket__label" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
-          </span>
-          <span className="gl-ticket__fields">
-            {gaps.map((g, n) => (
-              <input
-                key={n}
-                value={values[n]}
-                onChange={e => setValues(vs => vs.map((v, j) => (j === n ? e.target.value : v)))}
-                onFocus={() => setFocus(n)}
-                aria-label={gaps.length > 1 ? t.bldFieldN(n + 1) : t.bldField}
-                placeholder={n === 0 ? t.bldHint : undefined}
-                className="gl-ticket__in"
-                lang="ja"
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                enterKeyHint="done"
-                data-gap={n}
-              />
-            ))}
-          </span>
-          <button type="submit" className="gl-ticket__go" disabled={values.every(v => !v.trim())}>{t.bldCheck}</button>
-        </form>
-      )}
+      <TurnCard key={card.card_id} turned={Boolean(answered && verdict)} front={front} back={back} t={t} />
+      {!held && !answered && <BuildEntry entry={entry} t={t} />}
     </div>
   )
 }

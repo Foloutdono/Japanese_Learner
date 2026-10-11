@@ -17,7 +17,8 @@ import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
 import { GrammarWrite } from '../components/study/GrammarWork'
-import { GrammarChoose, GrammarConstruire, GrammarTiles, PointLine } from '../components/study/GrammarPlate'
+import { BuildEntry, GrammarChoose, GrammarConstruire, GrammarTiles, PointLine } from '../components/study/GrammarPlate'
+import { useBuild } from '../hooks/useBuild'
 import { cardShape } from '../domain/cardShape'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
@@ -203,6 +204,10 @@ export default function GrammarRun({ session }) {
     setShowRating(true)
   }
 
+  // Construire's answer (plan 194): typed into the entry under the card,
+  // shown in the card's hole as it is typed.
+  const entry = useBuild(card && cardShape(card).isBuild ? card : null, { session, lang, onDone: onFlashcardReveal })
+
   if (!valid) return <Navigate replace to={level ? platforms : '/learn/grammar'} />
 
   // ── Review (self-paced, ungraded browse of already-studied cards) ──
@@ -355,8 +360,8 @@ export default function GrammarRun({ session }) {
               onStampDone={gates.stampDone}
             >
               <PromptCard className="grammar-prompt" foot={cardFoot}>
-                {/* The point's line (plan 194); Choisir and Construire draw
-                    it over their own plate. */}
+                {/* The point's steps in the card's corner (plan 194);
+                    Choisir and Construire draw their own. */}
                 {step && !isContrast && !isBuild && <PointLine card={card} t={t} />}
                 {/* Every mode here is the same card with a different
                     front: a rule, a meaning, or a sentence. The flip is
@@ -369,7 +374,7 @@ export default function GrammarRun({ session }) {
                 {isBuild || isWrite ? (
                   <>
                     {isBuild
-                      ? <GrammarConstruire key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} session={session} />
+                      ? <GrammarConstruire key={card.card_id} card={card} answered={answered} entry={entry} />
                       : <GrammarWrite key={card.card_id} card={card} answered={answered} onDone={onFlashcardReveal} session={session} />}
                     {/* Construire turns its own card to the point (plan 194). */}
                     {answered && isWrite && <GrammarAnswer card={card} size={36} divided />}
@@ -465,6 +470,10 @@ export default function GrammarRun({ session }) {
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}
 
+            {/* Construire's entry, under the card as the practice runs
+                take theirs (plan 194). */}
+            {isBuild && !answered && <BuildEntry entry={entry} t={t} />}
+
             {/* Options: meanings for a flashcard, rules for fill_in. */}
             {!isContrast && showChoices && (
               <MCQGrid
@@ -496,7 +505,9 @@ export default function GrammarRun({ session }) {
               </div>
             )}
 
-            {!(isContrast && !answered && !desk) && <RatingBar active={showRating && !gates.locked} onRate={postReview} />}
+            {/* The bar comes up where Choisir's dock (on a phone) and
+                Construire's entry stood. */}
+            {!(!answered && (isBuild || (isContrast && !desk))) && <RatingBar active={showRating && !gates.locked} onRate={postReview} />}
           </>
         )}
 

@@ -6,14 +6,15 @@ import cards from '../../testing/grammarLadder.json'
 import '../../index.css'
 
 // ── 194 — Choisir, Construire, the point's steps ──────────────
-// The owner's second round: no band and no plate; the point's steps a
-// quiet line at the card's head (no Japanese in a label); the sentence
-// and its hole on the card, its translation under it; Choisir's forms
-// as the mock exam's answer tiles; the reveal a flashcard's turn to the
-// back -- what happened, the sentence whole with the point picked out,
-// the point -- and a tap turning it back and forth. The fixtures are the
-// cards the backend builds for 〜てください at Choisir 2 and Construire 2
-// (srs/ladder.py).
+// The owner's third round: no band and no plate; the point's steps in
+// the card's top-left corner (no Japanese in a label); the sentence and
+// its hole on the card's front, its translation under it, and once
+// answered the answer in the hole; the point on its back, the answer
+// turning the card to it and a tap, Space or the switch turning it
+// either way after that; Choisir's forms as the mock exam's answer
+// tiles; Construire's entry under the card, as the practice runs take
+// theirs. The fixtures are the cards the backend builds for 〜てください
+// at Choisir 2 and Construire 2 (srs/ladder.py).
 
 vi.mock('../../lib/track', () => ({ track: vi.fn() }))
 vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playClick: vi.fn(), playUi: vi.fn() }))
@@ -40,8 +41,14 @@ afterEach(() => { localStorage.removeItem('lang') })
 
 describe('the point’s steps', () => {
   it('draws Choisir’s three stops and Construire’s four, the one asked ringed, named in plain words', async () => {
-    const root = (await mount(<PointLine card={cards.choose} />)).container
+    const root = (await mount(<div className="prompt-card prompt-card--footed"><div className="prompt-card__body"><PointLine card={cards.choose} /></div></div>)).container
     const walk = root.querySelector('.gl-walk')
+    // In the card's top-left corner, the name over the stops.
+    const card = root.querySelector('.prompt-card').getBoundingClientRect()
+    const box = walk.getBoundingClientRect()
+    expect(box.left - card.left).toBeLessThan(24)
+    expect(box.top - card.top).toBeLessThan(20)
+    expect(walk.firstElementChild.className).toBe('gl-walk__name')
     expect(walk.getAttribute('aria-label')).toBe('This point: Choose, step 2 of 3')
     expect(root.querySelectorAll('.gl-walk__dot')).toHaveLength(7)
     expect(root.querySelectorAll('.gl-walk__dot--on')).toHaveLength(1)
@@ -79,21 +86,43 @@ describe('Choisir', () => {
     expect(root.querySelector('.gl-back')).toBeNull()
   })
 
-  it('turns to the back once answered: the trap named, the sentence whole, the point; a tap turns it back', async () => {
+  it('turns to the point once answered: the trap named, the point, the lesson’s line on the rival', async () => {
     const rival = card.contrast.choices.find(c => c !== card.grammar && card.contrast.why[c])
     const root = (await mount(<GrammarChoose card={card} revealed selected={rival} />)).container
     const back = root.querySelector('.gl-card .gl-back')
     expect(back.querySelector('.gl-back__head--no').textContent).toBe(`${rival.replace(/^〜/, '')}, the trap`)
-    expect(back.querySelector('.gl-back__why').textContent).toBe(card.contrast.why[rival])
-    // The point picked out as every example picks it, never a coloured rule.
-    expect(back.querySelector('.gl-back__sentence .dict-ex__hl')).toBeTruthy()
     expect(back.querySelector('.grammar-answer')).toBeTruthy()
+    expect(back.querySelector('.gl-back__why').textContent).toBe(card.contrast.why[rival])
+    // The point alone on the back: no sentence.
+    expect(back.querySelector('.gl-sent, .dict-ex')).toBeNull()
+    expect(root.querySelector('.gl-sides [aria-checked="true"]').textContent).toBe('Point')
+  })
+
+  it('turns either way after that, by a tap, the switch or Space; the front holds the answer in its hole', async () => {
+    const root = (await mount(<GrammarChoose card={card} revealed selected={card.grammar} />)).container
+    expect(root.querySelector('.gl-back__head--ok').textContent).toBe('Right.')
     root.querySelector('.gl-card').click()
     await settle()
-    expect(root.querySelector('.gl-front')).toBeTruthy()
-    root.querySelector('.gl-card').click()
+    const filled = root.querySelector('.gl-front .gl-gap--filled')
+    expect(filled.textContent).toBe(card.grammar.replace(/^〜/, ''))
+    expect(root.querySelector('.gl-front .gl-tr').textContent).toBe(card.contrast.tr)
+    expect(root.querySelector('.gl-sides [aria-checked="true"]').textContent).toBe('Sentence')
+    // The switch is not a tap on the card: one press, one turn.
+    ;[...root.querySelectorAll('.gl-sides [role="radio"]')].find(b => b.textContent === 'Point').click()
     await settle()
     expect(root.querySelector('.gl-back')).toBeTruthy()
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))
+    await settle()
+    expect(root.querySelector('.gl-front')).toBeTruthy()
+    expect(root.querySelector('.flashcard__face--turned')).toBeTruthy()
+  })
+
+  it('draws no switch before the answer, and a tap does not turn it', async () => {
+    const root = (await mount(<GrammarChoose card={card} />)).container
+    expect(root.querySelector('.gl-sides')).toBeNull()
+    root.querySelector('.gl-card').click()
+    await settle()
+    expect(root.querySelector('.gl-front .gl-gap:not(.gl-gap--filled)')).toBeTruthy()
   })
 
   it('offers the forms as the exam’s tiles, a bubble and the form, and marks them once answered', async () => {
@@ -132,7 +161,9 @@ describe('Construire', () => {
     const screen = await mount(<Run card={card} onDone={onDone} />)
     const root = screen.container
     expect(root.querySelector('.gl-tr--lead').textContent).toBe(card.build.tr)
-    const go = root.querySelector('.gl-ticket__go')
+    // The practice runs' entry: the page's field and the filled action.
+    const go = root.querySelector('form.gl-entry .btn-primary')
+    expect(root.querySelector('form.gl-entry .field.field--page')).toBeTruthy()
     expect(go.disabled).toBe(true)
     await screen.getByLabelText('Your answer').fill('tekudasai')
     await settle()
@@ -144,21 +175,23 @@ describe('Construire', () => {
     expect(url).toBe('/api/grammar/build/check?lang=en')
     expect(JSON.parse(init.body)).toEqual({ raw_id: card.raw_id, key: card.build.key, answers: ['tekudasai'] })
     expect(root.querySelector('.flashcard__face--turned .gl-back__head--ok').textContent).toBe('Right.')
-    expect(root.querySelector('.gl-back__sentence .dict-ex__hl')).toBeTruthy()
-    expect(root.querySelector('.gl-ticket')).toBeNull()
+    expect(root.querySelector('.gl-back .grammar-answer')).toBeTruthy()
+    expect(root.querySelector('.gl-entry')).toBeNull()
   })
 
-  it('crosses out the one kana off and writes the right one over it, on the back', async () => {
+  it('says almost on the point’s side, and in the hole crosses out the one kana off with the right one over it', async () => {
     apiJson.mockResolvedValue(cards.checks.close)
     const screen = await mount(<Run card={card} onDone={() => {}} />)
     const root = screen.container
     await screen.getByLabelText('Your answer').fill(cards.checks.typed.close)
-    root.querySelector('.gl-ticket__go').click()
+    root.querySelector('form.gl-entry .btn-primary').click()
     await settle()
-    const fix = root.querySelector('.gl-back__mine .gl-fix')
-    expect(fix.querySelector('s').textContent).toBe('で')
-    expect(fix.querySelector('ins').textContent).toBe('て')
     expect(root.querySelector('.gl-back__head--no').textContent).toBe('Almost.')
     expect(root.querySelector('.gl-walk__dot--miss')).toBeTruthy()
+    root.querySelector('.gl-card').click()
+    await settle()
+    const fix = root.querySelector('.gl-front .gl-gap--filled .gl-fix')
+    expect(fix.querySelector('s').textContent).toBe('で')
+    expect(fix.querySelector('ins').textContent).toBe('て')
   })
 })

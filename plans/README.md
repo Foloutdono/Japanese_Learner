@@ -7237,7 +7237,10 @@ translation under the sentence, no Japanese in a title, and the line and
 the desk redrawn (board "Retenu"). On seeing it built, the owner took the
 band and the plate out again: the band useless, the bar in the card
 redrawn, Choisir's forms as the mock exam's tiles, and the reveal a
-flashcard's turn instead of the coloured rule (194d).
+flashcard's turn instead of the coloured rule (194d). Then: the steps
+in the card's top-left corner, the point alone on the card's back with
+the sides switchable, and Construire's entry under the card as the
+practice runs take theirs (194e).
 
 | Phase | What | Status |
 |---|---|---|
@@ -7245,6 +7248,7 @@ flashcard's turn instead of the coloured rule (194d).
 | 194b | **Backend**: `srs/ladder.py`, the walk in the card's own row (no migration, the forecast through it); Construire typed (`grammar_ladder.build_payload` / `check_build`, `POST /api/grammar/build/check`, 539 of 545 points, two gaps for a point in two pieces); Choisir walking its sentences by the review count, each rival's compare line on the payload; `tutorial` on a card (once per point: no `grammar_tours` row, no review on any grammar track); the tour's two-choice usages and closing quiz (`_quiz`: gap, which, usage), its score on `grammar_tours` (`quiz_right`, `quiz_total`), `TOUR_REV` 3. Tests: `test_grammar_ladder.py` (the walk, the bar, the relapse, the turns, old rows, the forecast, Construire), `test_grammar_tour.py` (the quiz, the usages, the tutorial once) | DONE (2026-10-11) |
 | 194c | **Frontend**: `components/study/GrammarPlate.jsx` (the plate, the band, the point's line, Choisir, Construire, the desk's `LadderMap` in `CardPanel`), `domain/ladderLine.js`, `MCQGrid`'s `plats`, the tour's new order with « C'est pas tout ! », the quiz and the results (`GrammarTour`, `tourStops`, `TourPanels`), the gate on `tutorial` (`GrammarRun`, `TodayRun`), the level page boarding the ladder, the `gl-*` rules and the desk's in `index.css`, DESIGN.md's tour and ladder. Tests: `GrammarPlate.browser`, the tour's browser/phone/desktop/short, `ladder.phone`, the contrast faces | DONE (2026-10-11) |
 | 194d | **The second look**: no band and no plate (`ladderLine.bandOf` and the `band*` strings gone, `MCQGrid`'s `plats` taken back out); the point's steps a quiet dot line at the card's head (`.gl-walk`); the card a flashcard that turns once answered (`TurnCard`, `playFlip`) to what happened, the sentence whole with the point picked out (`.dict-ex__hl`) and the point; Choisir's forms as the exam's tiles (`GrammarTiles`, a sumi dock on a phone, the stage's surface on the desk); the tour's guess keys as the exam's bubble. Tests: `GrammarPlate.browser` rewritten, `ladder.phone`, the contrast faces, `GrammarRun.gate` | DONE (2026-10-11) |
+| 194e | **The third look**: the steps in the card's top-left corner across from the stage's word, the name over the dots, the magnifier under them; the card's two sides -- the sentence (the answer in its hole, the correction struck and written over) and the point (what happened, the point, the lesson's line on a rival) -- turned by the answer, then by a tap, Space or the `Seg` switch under the face; Construire's entry out of the card into the stage's foot (`BuildEntry`, `form.stage__foot`, the answer held by the run in `hooks/useBuild.js` for GrammarRun, TodayRun and StudyRun), the rating bar in its place; the hole held to its whole word (`holdGaps` over part runs). Tests: `GrammarPlate.browser`, `ladder.phone`, the contrast faces, `GrammarRun.gate`, `grammarRule.phone` | DONE (2026-10-11) |
 
 Open: the six points no tour can light (〜て（理由）, 〜を（移動）, 〜で（理由）,
 自動詞／他動詞, 使役受身形, 〜み) keep the lesson and have no Construire;

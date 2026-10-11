@@ -11,7 +11,8 @@ import { GrammarGate } from '../components/study/GrammarGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
 import { useDesk } from '../hooks/useDesk'
 import { CardPanel } from '../components/study/CardPanel'
-import { GrammarTiles } from '../components/study/GrammarPlate'
+import { BuildEntry, GrammarTiles } from '../components/study/GrammarPlate'
+import { useBuild } from '../hooks/useBuild'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
@@ -348,6 +349,12 @@ export default function TodayRun({ session }) {
     setShowRating(true)
   }
 
+  // Construire's answer (plan 194): typed into the entry under the card,
+  // shown in the card's hole as it is typed.
+  const entry = useBuild(card?.build && cardShape(card).isBuild ? card : null, {
+    session, lang, onDone: reveal, resetKey: cardNonce,
+  })
+
   function onMCQAnswer(choice) {
     if (answered) return
     setSelected(choice)
@@ -499,7 +506,7 @@ export default function TodayRun({ session }) {
               <CardPrompt
                 card={nc} t={t} session={session}
                 answered={answered} cardNonce={cardNonce}
-                activeHints={activeHints} selected={selected} onFlashcardReveal={reveal}
+                activeHints={activeHints} selected={selected} entry={entry} onFlashcardReveal={reveal}
                 foot={laneFoot(card, t)}
               />
             </CardTransition>
@@ -624,8 +631,13 @@ export default function TodayRun({ session }) {
               />
             )}
 
-            {/* Choisir's dock stands where the bar comes up (plan 194). */}
-            {!(structureKey === 'grammar' && isContrast && !answered && !desk) && (
+            {/* Construire's entry, under the card as the practice runs
+                take theirs (plan 194). */}
+            {entry && !answered && <BuildEntry entry={entry} t={t} />}
+
+            {/* The bar comes up where Choisir's dock (on a phone) and
+                Construire's entry stood (plan 194). */}
+            {!(structureKey === 'grammar' && !answered && (entry || (isContrast && !desk))) && (
               <RatingBar active={showRating && !gates.locked} onRate={postReview} />
             )}
           </>

@@ -39,6 +39,9 @@ export default function CardPrompt({
   // The choice taken on a contrast card, so Choisir can say why a rival
   // was the trap (plan 194).
   selected = null,
+  // Construire's answer, held by the run (useBuild), whose entry stands
+  // under the card (plan 194).
+  entry = null,
   // The card's footer strip — what this card is, which way it is
   // being studied. The section screens build it from their own
   // selection; the daily queue and a deck session build it per card.
@@ -311,8 +314,8 @@ export default function CardPrompt({
     const lesson = c.source === 'custom' ? writtenLesson(c) : null
     return (
       <PromptCard className="grammar-prompt" foot={foot}>
-        {/* A ladder card shows the point's line (plan 194); Choisir and
-            Construire draw it over their own plate. */}
+        {/* A ladder card shows the point's steps in its corner (plan
+            194); Choisir and Construire draw their own. */}
         {step && !isContrast && !isBuild && <PointLine card={c} t={t} />}
         {/* Every mode here is the same card with a different front: a
             rule, a meaning, or a sentence. The flip is the reveal in
@@ -324,7 +327,7 @@ export default function CardPrompt({
         {isBuild || isWrite ? (
           <>
             {isBuild
-              ? <GrammarConstruire key={resetKey} card={c} answered={answered} onDone={onFlashcardReveal} session={session} t={t} />
+              ? <GrammarConstruire key={resetKey} card={c} answered={answered} entry={entry} onDone={onFlashcardReveal} session={session} t={t} />
               : <GrammarWrite key={resetKey} card={c} answered={answered} onDone={onFlashcardReveal} session={session} />}
             {/* Construire turns its own card to the point (plan 194). */}
             {answered && isWrite && <GrammarAnswer card={c} size={36} divided />}

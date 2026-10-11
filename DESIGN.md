@@ -834,47 +834,56 @@ After the tour, a grammar card walks a fixed line (`srs/ladder.py`):
 Construire take turns. A miss keeps the step and asks it again with
 another sentence; a miss once mastered is a short relapse, one Choisir
 and one Construire. Drawn as the owner picked it on the canvas "Tsuji —
-grammar rework", then trimmed by the owner's second look (no band, no
-plate, no coloured rule):
+grammar rework", then trimmed by the owner's two looks at it built (no
+band, no plate, no coloured rule; the steps in the corner; the point on
+the back; the entry under the card):
 
-- **The card** (`components/study/GrammarPlate.jsx`) is a flashcard: the
-  run's own card, the point's steps at its head, the sentence with its
-  hole, **its translation right under it**. Once the answer is in, the
-  card **turns** (`playFlip`, the flashcard's turn) to its back, and a
-  tap turns it back and forth. The back says what happened (« Juste. »,
-  « Presque. », « X, le piège » with the lesson's own line on that
-  rival), then the sentence whole with the point picked out as every
-  example picks it (`.dict-ex__hl`), then the point at the flashcard's
-  answer size. Nothing names the stop behind or ahead on the card: the
-  steps line already says where the point stands.
+- **The card** (`components/study/GrammarPlate.jsx`) is a flashcard with
+  two sides. **The front is the sentence**: its hole, **its translation
+  right under it**, and once answered the answer in the hole (the right
+  form; or what was typed, each wrong kana struck in the miss's ink with
+  the right one over it in the success ink). **The back is the point**:
+  what happened over it (« Juste. », « Presque. », « X, le piège »), the
+  point at the flashcard's answer size, and under it, for a rival taken,
+  the lesson's own line on that rival -- never the sentence again. The
+  answer turns the card to its back (`playFlip`, the flashcard's turn);
+  from then on a tap, Space (or Z/Q/S/D) or **the switch** under the
+  face (« Phrase | Point », the app's `Seg`) turns it either way.
 - **The hole** is the card sunk a step with a dashed rule in the line's
-  pigment at its foot, as wide as the kana it holds.
-- **The point's steps** (`.gl-walk`): a quiet line of dots, Choisir's
-  three then Construire's four, then the star, with the step's name in
-  plain words (« Choisir 2/3 »). The stop asked is ringed; once missed,
-  ringed in the miss's ink with « à refaire ». The labels are **never
-  Japanese** (the owner: the titles' bilingual rule is dropped). The
-  run's own meter stays neutral ink, so the two are never confused.
+  pigment at its foot, as wide as the kana it holds; answered, the well
+  holds the answer in bold and the rule goes. It is held to the word
+  before it (its kana and the kanji they end), so a line breaks between
+  words, never inside one.
+- **The point's steps** (`.gl-walk`) stand in **the card's top-left
+  corner**, across from the stage's word (`.stage-mark`) and in its
+  register: the step named in plain words (« CHOISIR 2/3 ») over a quiet
+  line of dots, Choisir's three then Construire's four, then the star.
+  The stop asked is ringed; once missed, ringed in the miss's ink with
+  « à refaire ». The labels are **never Japanese** (the owner: the
+  titles' bilingual rule is dropped). The corner's magnifier steps down
+  under them. The run's own meter stays neutral ink, so the two are
+  never confused.
 - **Choisir** offers the forms as **the mock exam's answer tiles**
   (`GrammarTiles`, the `.exam-tile` drawing): a numbered bubble and the
   form as written in a sentence (no 〜), two by two, in the sumi dock
   under the thumb on a phone; digits pick. Answered, the right tile is
   ringed in the success ink and a wrong pick in the miss's, and on a
   phone the dock gives way to the rating bar.
-- **Construire** gives the translation in bold under the sentence and a
-  ticket under the card: a pencil, the field (two for a point written in
-  two pieces), Check in the metal. What is typed (kana or rōmaji) shows in
-  the hole as it is typed; the back draws the server's correction, a
-  wrong kana struck in the miss's ink with the right one over it in the
-  success ink.
+- **Construire** gives the translation in bold under the sentence, and
+  **its entry stands under the card as the practice runs' does**
+  (`BuildEntry`, a `form.stage__foot`: the page's field, two for a point
+  written in two pieces, and the filled Check), docked over the thumb on
+  a phone and one row on the desk. What is typed (kana or rōmaji) shows
+  in the hole as it is typed: the run holds the answer (`useBuild`) and
+  hands it to both. The rating bar comes up in the entry's place.
 - **Write** (書く) is a platform of its own: the situation at
   `--fs-lead`, the point in the line's ink, the words to use as small
   framed chips with their readings, and the field beside its Check.
 
 Every exercise ends on the run's own rating bar. The exercise says what
 happened, never the grade (ADR 0013). On the desk the card takes the
-stage's width, its sentence a step up, the tiles on the stage's surface
-under it, and the card panel at the left shows **the walk upright**
+stage's width, its sentence a step up, the tiles or the entry under it,
+and the card panel at the left shows **the walk upright**
 (`LadderMap`): every
 stop on one rail in the line's pigment, done, the one in hand ringed in
 ink on a wash, each stop ahead with the wait before it.

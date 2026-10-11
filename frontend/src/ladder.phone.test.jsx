@@ -94,18 +94,27 @@ describe('the ladder in the day’s queue, on a phone', () => {
     const root = screen.container
     expect(root.querySelector('.gl-walk').getAttribute('aria-label')).toBe('This point: Build, step 2 of 4')
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
-    for (const el of root.querySelectorAll('.gl-walk, .gl-card, .gl-ticket')) inside(el)
-    for (const el of root.querySelectorAll('.gl-ticket__in, .gl-ticket__go')) {
+    for (const el of root.querySelectorAll('.gl-walk, .gl-card, form.gl-entry')) inside(el)
+    // The entry under the card, the practice runs': a direct child of the
+    // stage, docked over the thumb.
+    const entry = root.querySelector('main.stage > form.stage__foot.gl-entry')
+    expect(entry).toBeTruthy()
+    expect(root.querySelector('.prompt-card').contains(entry)).toBe(false)
+    for (const el of entry.querySelectorAll('.field, .btn-primary')) {
       expect(el.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     }
-    // No rating before the answer: the bar stands idle.
-    expect(root.querySelector('.rating-bar').getAttribute('aria-hidden')).toBe('true')
+    expect(entry.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight + 1)
+    // No rating before the answer: the entry stands where the bar comes up.
+    expect(root.querySelector('.rating-bar')).toBeNull()
 
     await screen.getByLabelText('Your answer').fill(ladder.checks.typed.right)
     await settle(120)
-    root.querySelector('.gl-ticket__go').click()
+    // What is typed shows in the card's hole.
+    expect(root.querySelector('.gl-gap--typed').textContent).toBe(ladder.checks.typed.right)
+    entry.querySelector('.btn-primary').click()
     await settle()
     expect(root.querySelector('.gl-back__head--ok')).toBeTruthy()
+    expect(root.querySelector('form.gl-entry')).toBeNull()
     expect(root.querySelector('.rating-bar').getAttribute('aria-hidden')).toBe('false')
     root.querySelector('.rating-bar button').click()
     await settle()

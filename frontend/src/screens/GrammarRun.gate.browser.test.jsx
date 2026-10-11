@@ -196,8 +196,8 @@ describe('the contrast drill', () => {
     const right = rows.find(r => r.textContent.includes('てください') && !r.textContent.includes('ない'))
     right.click()
     await settle()
-    // The card turns: the sentence whole, the point picked out.
-    expect(stage.querySelector('.gl-back__sentence .dict-ex__hl').textContent).toBe('てください')
+    // The card turns to the point on its back.
+    expect(stage.querySelector('.gl-back .grammar-answer')).toBeTruthy()
     expect(stage.querySelector('.grammar-answer')).toBeTruthy()
     expect(stage.querySelector('.rating-bar')).toBeTruthy()
   })

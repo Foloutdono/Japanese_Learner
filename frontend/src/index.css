@@ -25655,16 +25655,34 @@ button.brd-stn { cursor: pointer; }
 .tour-reply__who { font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); }
 .tour-reply__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 600; }
 
-/* 194 — Choisir and Construire on the run's own card (the owner's second
-   round): no plate inside the card and no band; the point's steps a quiet
-   line at the card's head; the sentence at the card's size with the
-   point's hole, its translation under it; the reveal a flashcard's turn
-   to the back (.flashcard__face--turned); the forms as the mock exam's
-   answer tiles, docked under the thumb on a phone. */
-.gl-choose, .gl-build { display: flex; flex-direction: column; gap: var(--sp-4); width: 100%; }
+/* 194 — Choisir and Construire on the run's own card (the owner's third
+   round): no plate inside the card and no band; the point's steps in the
+   card's top-left corner, across from the stage's word; the sentence at
+   the card's size with the point's hole, its translation under it; the
+   card two-sided, turned to the point by the answer
+   (.flashcard__face--turned) and either way after it by a tap, Space or
+   its switch; the forms as the mock exam's answer tiles, docked under
+   the thumb on a phone; Construire's entry under the card, the practice
+   runs' (form.stage__foot). */
+.gl-choose, .gl-build { display: flex; flex-direction: column; width: 100%; }
 
-/* The point's steps: small stops on a hairline, the one asked ringed. */
-.gl-walk { display: flex; align-items: center; justify-content: center; gap: var(--sp-3); }
+/* The point's steps, in the corner the stage's word (.stage-mark) mirrors
+   on the right, in its register: the step named over small stops on a
+   hairline, the one asked ringed. The footed card's body is their
+   containing block (its inline-size containment). */
+.gl-walk {
+  position: absolute;
+  top: var(--sp-4);
+  left: var(--sp-5);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  pointer-events: none;
+}
+/* The corner's magnifier steps under the steps. */
+.prompt-card:has(.gl-walk) .reveal-actions { top: calc(var(--sp-4) + var(--sp-8)); left: var(--sp-4); }
 .gl-walk__line { position: relative; display: inline-flex; align-items: center; gap: var(--sp-2); }
 .gl-walk__line::before {
   content: "";
@@ -25699,19 +25717,31 @@ button.brd-stn { cursor: pointer; }
 }
 .gl-walk__star--on { color: var(--line-grammar); }
 .gl-walk__name {
-  font-size: var(--fs-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
   color: var(--text-secondary);
   white-space: nowrap;
 }
 .gl-walk__again { color: color-mix(in srgb, var(--rating-wrong) 75%, var(--text-primary)); }
 
-/* The card: a flashcard that turns once the answer is in. */
+/* The card: a flashcard that turns once the answer is in, its switch
+   under the face. */
 .gl-card { width: 100%; }
 .gl-card:not(.gl-card--turnable) { cursor: default; }
-.gl-front, .gl-back { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); text-align: center; }
-.gl-front { padding-block: var(--sp-5); }
+.gl-front, .gl-back {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+  padding-block: var(--sp-5);
+  text-align: center;
+}
+.gl-sides { display: flex; justify-content: center; margin-top: var(--sp-5); }
+.gl-sides .seg { margin-left: 0; }
 .gl-sent {
   margin: 0;
   font-family: var(--font-jp);
@@ -25726,7 +25756,8 @@ button.brd-stn { cursor: pointer; }
 .gl-tr--lead { font-size: var(--fs-lead); font-weight: 600; color: var(--text-primary); }
 .gl-hold { white-space: nowrap; }
 
-/* The hole: a sunk well with a dashed rule in the line's pigment. */
+/* The hole: a sunk well with a dashed rule in the line's pigment; once
+   answered, the well holds the answer and the rule goes. */
 .gl-gap {
   display: inline-block;
   min-width: calc(var(--gap-size, 4) * 0.8em + 0.4em);
@@ -25740,8 +25771,18 @@ button.brd-stn { cursor: pointer; }
 }
 .gl-gap--typed { height: auto; line-height: 1.3; vertical-align: baseline; }
 .gl-gap--focus { border-bottom-color: var(--accent2); border-bottom-style: solid; }
+.gl-gap--filled {
+  min-width: 0;
+  height: auto;
+  padding: 0 var(--sp-2);
+  line-height: 1.3;
+  vertical-align: baseline;
+  border-bottom: 0;
+  border-radius: var(--r-card);
+  font-weight: 700;
+}
 
-/* The back: what happened, the sentence whole, the point. */
+/* The back: what happened, the point, the lesson's line on a rival. */
 .gl-back__head { margin: 0; font-size: var(--fs-lead); font-weight: 700; }
 .gl-back__head--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
 .gl-back__head--no { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
@@ -25756,10 +25797,7 @@ button.brd-stn { cursor: pointer; }
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
-.gl-back__mine { margin: 0; padding-top: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-title); line-height: 2; }
-.gl-back__gap + .gl-back__gap { margin-left: var(--sp-4); }
-.gl-back__sentence { width: 100%; }
-.gl-back__sentence .dict-ex__jp { font-size: var(--fs-sentence-fluid); }
+/* A wrong kana in the hole struck, the right one written over it. */
 .gl-fix { position: relative; display: inline-block; }
 .gl-fix s { color: var(--rating-wrong); text-decoration-thickness: 2px; }
 .gl-fix ins {
@@ -25835,50 +25873,6 @@ button.brd-stn { cursor: pointer; }
 .gl-tile--on { background: color-mix(in srgb, var(--text-on-panel) 8%, var(--bg-panel)); border-color: var(--text-on-panel); }
 .gl-tile--on .gl-tile__b { background: var(--text-on-panel); border-color: var(--text-on-panel); color: var(--bg-panel); }
 
-/* Construire's ticket: the pencil, the field (two for a point in two
-   pieces), Check in the metal. */
-.gl-ticket {
-  display: flex;
-  min-height: 56px;
-  overflow: hidden;
-  border: 2px solid var(--accent2);
-  border-radius: var(--r-card);
-  background: var(--surface);
-}
-.gl-ticket__label {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 52px;
-  border-right: 2px dashed var(--surface-line);
-  color: color-mix(in srgb, var(--line-grammar) 70%, var(--text-primary));
-}
-.gl-ticket__fields { flex: 1; min-width: 0; display: flex; }
-.gl-ticket__in {
-  flex: 1;
-  min-width: 0;
-  padding: 0 var(--sp-4);
-  border: 0;
-  background: transparent;
-  color: var(--text-primary);
-  font-family: var(--font-jp);
-  font-size: var(--fs-lead);
-}
-.gl-ticket__in + .gl-ticket__in { border-left: 1px solid var(--surface-line); }
-.gl-ticket__in:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
-.gl-ticket__go {
-  flex: none;
-  min-width: 96px;
-  padding: 0 var(--sp-4);
-  border: 0;
-  background: var(--metal);
-  background-color: var(--gate-gold);
-  color: var(--text-on-fill);
-  font-weight: 700;
-  font-size: var(--fs-body);
-  cursor: pointer;
-}
-.gl-ticket__go:disabled { background: var(--surface); color: var(--text-secondary); cursor: default; }
 
 /* The desk's map of the walk (CardPanel, in the fare strip's place): one
    upright rail in the line's pigment, a dot a stop, the stop in hand
@@ -41430,11 +41424,12 @@ button.brd-stn { cursor: pointer; }
   /* ── 191:desk-tickets end ── */
 
   /* ── 机 — Choisir and Construire on the desk (plan 194) ──
-     The sentence a size up on the card; Choisir's forms as the exam's
+     The card's sides a rung roomier; Choisir's forms as the exam's
      answer sheet on the desk (.mcq-list--brief): two by two on the
      paper, a bubble and the form, the right one ringed and a wrong pick
-     crossed once answered; the walk's map in the card panel. */
-  .gl-front { padding-block: var(--sp-7); }
+     crossed once answered; Construire's entry the practice runs' floor
+     (form.stage__foot above); the walk's map in the card panel. */
+  .gl-front, .gl-back { padding-block: var(--sp-7); }
   .gl-dock {
     position: static;
     margin: 0;
