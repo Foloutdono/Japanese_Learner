@@ -28008,7 +28008,127 @@
             "fr": "Une chose, à une cliente : でございます. でいらっしゃる honore une personne, pas un bento."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうは、お休み＿＿＿。",
+          "tr": {
+            "en": "Yesterday was our day off. (A shop assistant, very politely, to a customer.)",
+            "fr": "Hier, c'était notre jour de congé. (Un employé de magasin, très poliment, à un client.)"
+          },
+          "choices": [
+            "でございました",
+            "でございます",
+            "ではございませんでした"
+          ],
+          "why": {
+            "en": "The day off is past, so でございます turns to でございました, like です → でした. でございます is the present, and ではございませんでした says it was not.",
+            "fr": "Le congé est passé : でございます devient でございました, comme です → でした. でございます est le présent, et ではございませんでした dit que ce n'était pas le cas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who is speaking, and what is asked?",
+            "fr": "Qui parle, et que demande-t-on ?"
+          },
+          "jp": "こちらは、プレゼントでございますか。",
+          "tr": {
+            "en": "Is this a present?",
+            "fr": "C'est un cadeau ?"
+          },
+          "choices": [
+            {
+              "en": "A shop assistant asks the customer whether the item is a present.",
+              "fr": "Un employé demande au client si l'article est un cadeau."
+            },
+            {
+              "en": "A customer asks the shop assistant whether the item is a present.",
+              "fr": "Un client demande à l'employé si l'article est un cadeau."
+            },
+            {
+              "en": "A shop assistant tells the customer that the item is a present.",
+              "fr": "Un employé dit au client que l'article est un cadeau."
+            }
+          ],
+          "why": {
+            "en": "でございます is the very polite です of staff speaking to customers, and か makes it a question. A customer would just say プレゼントですか.",
+            "fr": "でございます est le です très poli du personnel qui parle aux clients, et か en fait une question. Un client dirait simplement プレゼントですか."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You answer the phone at a company. The caller asks: さくら旅行さんですか。 It is. What do you say?",
+            "fr": "Tu réponds au téléphone dans une entreprise. L'appelant demande : さくら旅行さんですか。 C'est bien là. Que dis-tu ?"
+          },
+          "choices": [
+            "はい、さくら旅行でございます。",
+            "はい、さくら旅行でございました。",
+            "はい、さくら旅行ではございません。"
+          ],
+          "why": {
+            "en": "Answering for the company calls for the present でございます. でございました is the past, as if the company had stopped being Sakura Travel, and ではございません is the negative: a wrong number.",
+            "fr": "Répondre au nom de l'entreprise demande le présent でございます. でございました est le passé, comme si l'entreprise n'était plus Sakura Voyages, et ではございません la négation : un faux numéro."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "こちらが、おきゃくさまのおせき＿＿＿。",
+          "tr": {
+            "en": "This is your seat. (The staff, very politely.)",
+            "fr": "Voici votre place. (Le personnel, très poliment.)"
+          },
+          "choices": [
+            "でございます",
+            "でいらっしゃいます",
+            "ございます"
+          ],
+          "why": {
+            "en": "A noun takes でございます, the very polite です. でいらっしゃいます honours a person, not a seat, and ございます alone is the verb « to exist », not the link between two nouns.",
+            "fr": "Un nom prend でございます, le です très poli. でいらっしゃいます honore une personne, pas une place, et ございます seul est le verbe « exister », pas le lien entre deux noms."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "A classmate says this to you after class. How does it come across?",
+            "fr": "Un camarade te dit cela après le cours. Quel effet cela fait-il ?"
+          },
+          "jp": "あしたのしけんは、九時でございます。",
+          "tr": {
+            "en": "Tomorrow's exam is at nine.",
+            "fr": "L'examen de demain est à neuf heures."
+          },
+          "choices": [
+            {
+              "en": "Stiff, like a clerk: でございます belongs to service, not to friends.",
+              "fr": "Raide, comme un employé : でございます appartient au service, pas aux amis."
+            },
+            {
+              "en": "Very respectful: the classmate is honouring you.",
+              "fr": "Très respectueux : le camarade t'honore."
+            },
+            {
+              "en": "Perfectly ordinary: it is just です.",
+              "fr": "Tout à fait ordinaire : c'est simplement です."
+            }
+          ],
+          "why": {
+            "en": "でございます is the very polite です of shops and announcements, so between classmates it sounds stiff, even like a joke. It does not honour the listener.",
+            "fr": "でございます est le です très poli des magasins et des annonces : entre camarades, il fait raide, voire plaisantin. Il n'honore pas l'interlocuteur."
+          }
+        }
+      ]
     }
   },
   {
@@ -28241,7 +28361,143 @@
             "fr": "Ce qu'il fait, honoré : なさる. いたす abaisse ce que toi tu fais, et してる se dit à un ami."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "先生は、さっき、大切なことを＿＿＿。",
+          "tr": {
+            "en": "A moment ago, the teacher said something important.",
+            "fr": "Tout à l'heure, le professeur a dit quelque chose d'important."
+          },
+          "choices": [
+            "おっしゃいました",
+            "なさいました",
+            "いらっしゃいました"
+          ],
+          "why": {
+            "en": "おっしゃる is the honorific 言う, so « said » is おっしゃいました. なさいました is the honorific する (did), and いらっしゃいました stands for 来る・いる・行く: neither says « say ».",
+            "fr": "おっしゃる est le 言う honorifique : « a dit » donne おっしゃいました. なさいました est le する honorifique (a fait), et いらっしゃいました remplace 来る・いる・行く : aucun ne veut dire « dire »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "A student says this to the teacher. What is wrong with it?",
+            "fr": "Un élève dit cela au professeur. Qu'est-ce qui ne va pas ?"
+          },
+          "jp": "その仕事は、わたしがなさいます。",
+          "tr": {
+            "en": "I will do that job.",
+            "fr": "Je ferai ce travail."
+          },
+          "choices": [
+            {
+              "en": "なさる honours the doer, so the student is raising themself; for your own act, it is いたします.",
+              "fr": "なさる honore celui qui agit : l'élève s'élève lui-même ; pour son propre acte, c'est いたします."
+            },
+            {
+              "en": "Nothing: なさいます is just the polite form of します.",
+              "fr": "Rien : なさいます est simplement la forme polie de します."
+            },
+            {
+              "en": "It sounds like an order given to the teacher.",
+              "fr": "On dirait un ordre donné au professeur."
+            }
+          ],
+          "why": {
+            "en": "なさる is for the person you respect, never for yourself. You lower your own act with いたす: わたしがいたします. It is not a command either: the order is なさい.",
+            "fr": "なさる est pour la personne qu'on respecte, jamais pour soi. On abaisse son propre acte avec いたす : わたしがいたします. Ce n'est pas un ordre : l'ordre, c'est なさい."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You ask your teacher whether they will come to tomorrow's party. What do you say?",
+            "fr": "Tu demandes à ton professeur s'il viendra à la fête de demain. Que dis-tu ?"
+          },
+          "choices": [
+            "先生は、あしたのパーティーにいらっしゃいますか。",
+            "先生は、あしたのパーティーにいらっしゃいましたか。",
+            "先生は、あしたのパーティーにまいりますか。"
+          ],
+          "why": {
+            "en": "The teacher is the one you respect, so いらっしゃる, in the present for tomorrow. いらっしゃいましたか asks about the past, and まいります lowers its subject: it is for yourself.",
+            "fr": "Le professeur est la personne respectée : いらっしゃる, au présent pour demain. いらっしゃいましたか parle du passé, et まいります abaisse son sujet : il sert pour soi."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "先生が＿＿＿ので、だれも知りませんでした。",
+          "tr": {
+            "en": "Since the teacher did not say it, nobody knew.",
+            "fr": "Comme le professeur ne l'avait pas dit, personne ne le savait."
+          },
+          "choices": [
+            "おっしゃらなかった",
+            "おっしゃいなかった",
+            "おっしゃいませんかった"
+          ],
+          "why": {
+            "en": "The り drops only before ます. For the ない-form the verb is regular: おっしゃる → おっしゃらない → おっしゃらなかった. おっしゃいなかった borrows the ます-stem, and ませんかった mixes the polite and the plain.",
+            "fr": "Le り ne tombe que devant ます. Pour la forme en ない, le verbe est régulier : おっしゃる → おっしゃらない → おっしゃらなかった. おっしゃいなかった emprunte le radical en ます, et ませんかった mélange poli et neutre."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "A student answers the teacher with this sentence. What is the student doing?",
+            "fr": "Un élève répond ainsi au professeur. Que fait-il ?"
+          },
+          "jp": "はい、先生のおっしゃるとおりです。",
+          "tr": {
+            "en": "Yes, it is just as you say.",
+            "fr": "Oui, c'est comme vous le dites."
+          },
+          "choices": [
+            {
+              "en": "Agreeing: it is just as the teacher says.",
+              "fr": "Il approuve : c'est comme le dit le professeur."
+            },
+            {
+              "en": "Reporting what the teacher said yesterday.",
+              "fr": "Il rapporte ce que le professeur a dit hier."
+            },
+            {
+              "en": "Asking the teacher to say it again.",
+              "fr": "Il demande au professeur de répéter."
+            }
+          ],
+          "why": {
+            "en": "先生のおっしゃる is « what the teacher says », and とおり means « just as »: おっしゃる is the respectful 言う, in the present. It is a stock way of agreeing with someone you respect.",
+            "fr": "先生のおっしゃる, c'est « ce que dit le professeur », et とおり veut dire « exactement comme » : おっしゃる est le 言う de respect, au présent. C'est une façon courante d'approuver quelqu'un qu'on respecte."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A customer seems to have a problem. You invite them, politely, to tell you anything that troubles them.",
+            "fr": "Un client semble avoir un souci. Tu l'invites poliment à te dire tout ce qui le gêne."
+          },
+          "choices": [
+            "こまったことがあれば、何でもおっしゃってください。",
+            "こまったことがあれば、何でもいらっしゃってください。",
+            "こまったことがあれば、何でももうしてください。"
+          ],
+          "why": {
+            "en": "To ask someone you respect to say something: おっしゃってください. いらっしゃってください asks them to come, and もうす is the humble verb for your own words, never for the customer's.",
+            "fr": "Pour demander à quelqu'un qu'on respecte de dire quelque chose : おっしゃってください. いらっしゃってください lui demande de venir, et もうす est le verbe modeste pour ses propres paroles, jamais pour celles du client."
+          }
+        }
+      ]
     }
   },
   {
@@ -28508,7 +28764,127 @@
             "fr": "Ta propre venue, abaissée : まいる. いらっしゃる serait te mettre toi-même à l'honneur."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きょうは、電車で＿＿＿。",
+          "tr": {
+            "en": "I came by train today. (Said humbly, to a customer.)",
+            "fr": "Aujourd'hui, j'ai pris le train pour venir. (Dit avec modestie, à un client.)"
+          },
+          "choices": [
+            "まいりました",
+            "まいります",
+            "まいりませんでした"
+          ],
+          "why": {
+            "en": "まいる is the humble 来る・行く, always in the ます-form, and the trip is done: まいりました. まいります is the present or future, and まいりませんでした says you did not come.",
+            "fr": "まいる est le 来る・行く modeste, toujours en forme ます, et le trajet est fait : まいりました. まいります est le présent ou le futur, et まいりませんでした dit que tu n'as pas fait le déplacement."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "A customer calls a clerk over. The clerk answers with this. What does the clerk say?",
+            "fr": "Un client appelle un employé. L'employé répond ainsi. Que dit-il ?"
+          },
+          "jp": "ただいま、まいります。",
+          "tr": {
+            "en": "I'll be right there.",
+            "fr": "J'arrive tout de suite."
+          },
+          "choices": [
+            {
+              "en": "That they will come over right away.",
+              "fr": "Qu'il arrive tout de suite."
+            },
+            {
+              "en": "That they have just come back.",
+              "fr": "Qu'il vient de rentrer."
+            },
+            {
+              "en": "That they came over a moment ago.",
+              "fr": "Qu'il est venu il y a un instant."
+            }
+          ],
+          "why": {
+            "en": "Here ただいま is « right now » and まいります is the humble « come »: the clerk is on the way. The greeting ただいま (« I'm home ») is not at stake, and まいります is not the past.",
+            "fr": "Ici ただいま veut dire « tout de suite » et まいります est le « venir » modeste : l'employé est en route. Il ne s'agit pas du ただいま des retours (« me revoilà »), et まいります n'est pas un passé."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You bring the customer's tea after a long wait. What do you say?",
+            "fr": "Tu apportes son thé au client après une longue attente. Que dis-tu ?"
+          },
+          "choices": [
+            "お待たせいたしました。",
+            "お待たせいたします。",
+            "お待たせなさいました。"
+          ],
+          "why": {
+            "en": "The wait is over, so the past of the humble いたす: いたしました. いたします is the present, and なさる honours the doer, so it is never for your own act.",
+            "fr": "L'attente est finie : le passé du modeste いたす, いたしました. いたします est le présent, et なさる honore celui qui agit : jamais pour son propre acte."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "社長には、わたしから、あしたは休むと＿＿＿。",
+          "tr": {
+            "en": "I told the president myself that I would take tomorrow off.",
+            "fr": "J'ai dit moi-même au président que je prendrais congé demain."
+          },
+          "choices": [
+            "もうしました",
+            "まいりました",
+            "いたしました"
+          ],
+          "why": {
+            "en": "The verb is « say », and it is your own words to someone you respect: もうす. まいる is « come », and いたす is « do ».",
+            "fr": "Le verbe est « dire », et ce sont tes propres paroles devant une personne respectée : もうす. まいる veut dire « venir », et いたす « faire »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who will contact whom?",
+            "fr": "Qui contactera qui ?"
+          },
+          "jp": "あした、わたしからごれんらくいたします。",
+          "tr": {
+            "en": "I will contact you tomorrow.",
+            "fr": "Je vous contacterai demain."
+          },
+          "choices": [
+            {
+              "en": "The speaker will contact the listener tomorrow.",
+              "fr": "La personne qui parle contactera son interlocuteur demain."
+            },
+            {
+              "en": "The listener is asked to contact the speaker tomorrow.",
+              "fr": "On demande à l'interlocuteur de contacter la personne qui parle demain."
+            },
+            {
+              "en": "The speaker asks whether they may contact the listener tomorrow.",
+              "fr": "La personne qui parle demande si elle peut contacter son interlocuteur demain."
+            }
+          ],
+          "why": {
+            "en": "ごれんらくいたします is the humble 連絡する: the speaker's own act, aimed at the listener. The listener's act would be ごれんらくください, and an offer to ask permission would end in a question.",
+            "fr": "ごれんらくいたします est le 連絡する modeste : l'acte de la personne qui parle, tourné vers l'interlocuteur. L'acte de l'interlocuteur serait ごれんらくください, et une demande de permission finirait par une question."
+          }
+        }
+      ]
     }
   },
   {
@@ -28741,7 +29117,127 @@
             "fr": "Tu as reçu le service de l'agent : に et ていただく. てあげる, ce serait toi qui le ferais pour lui."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "駅員さんは、いつも親切に道を教えて＿＿＿。",
+          "tr": {
+            "en": "The station staff always kindly show me the way.",
+            "fr": "Le personnel de la gare m'indique toujours aimablement le chemin."
+          },
+          "choices": [
+            "くださいます",
+            "くださります",
+            "くださいません"
+          ],
+          "why": {
+            "en": "The ます-form of くださる drops the る and takes い: くださいます. くださります is the slip that keeps the る, and くださいません would say the staff do not help, the opposite of « always ».",
+            "fr": "La forme en ます de くださる perd son る et prend い : くださいます. くださります est l'erreur qui garde le る, et くださいません dirait que le personnel n'aide pas, le contraire de « toujours »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who made the trip, and to where?",
+            "fr": "Qui s'est déplacé, et vers où ?"
+          },
+          "jp": "社長が、わたしの家まで来てくださいました。",
+          "tr": {
+            "en": "The president came all the way to my home.",
+            "fr": "Le président est venu jusqu'à chez moi."
+          },
+          "choices": [
+            {
+              "en": "The president came to the speaker's home.",
+              "fr": "Le président est venu chez la personne qui parle."
+            },
+            {
+              "en": "The speaker went to the president's home.",
+              "fr": "La personne qui parle est allée chez le président."
+            },
+            {
+              "en": "The president called the speaker to the president's home.",
+              "fr": "Le président a fait venir la personne qui parle chez lui."
+            }
+          ],
+          "why": {
+            "en": "With てくださる the giver is the subject: 社長が…来てくださいました, he came, and for the speaker's sake. The trip ends at 私の家. It was a favour, so the speaker is grateful.",
+            "fr": "Avec てくださる, le donneur est le sujet : 社長が…来てくださいました, il est venu, et pour toi. Le trajet finit chez 私. C'est un service rendu, d'où la reconnaissance de la personne qui parle."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your manager treated you to lunch today. You tell a friend.",
+            "fr": "Aujourd'hui, ton responsable t'a offert le déjeuner. Tu le racontes à un ami."
+          },
+          "choices": [
+            "ぶちょうが、昼ごはんをごちそうしてくださいました。",
+            "ぶちょうは、昼ごはんをごちそうしてくださいませんでした。",
+            "ぶちょうが、昼ごはんをごちそうしてあげました。"
+          ],
+          "why": {
+            "en": "Someone above you did you a favour: てくださる, with the giver as subject. くださいませんでした says the manager did not, and あげる is for a favour you do for someone, not one your manager does for you.",
+            "fr": "Quelqu'un au-dessus de toi t'a rendu service : てくださる, avec le donneur pour sujet. くださいませんでした dit que le responsable ne l'a pas fait, et あげる sert pour un service que tu rends, pas pour celui de ton responsable."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "先生に教えて＿＿＿、よく分かりました。",
+          "tr": {
+            "en": "Since the teacher explained it to me, I understood it well.",
+            "fr": "Comme le professeur me l'a expliqué, j'ai bien compris."
+          },
+          "choices": [
+            "いただいて",
+            "くださって",
+            "いただきて"
+          ],
+          "why": {
+            "en": "に marks the teacher as the giver, which goes with いただく, whose て-form is いただいて (く → いて). くださって would need 先生が, and いただきて forgets the sound change.",
+            "fr": "に désigne le professeur comme donneur, ce qui va avec いただく, dont la forme en て est いただいて (く → いて). くださって demanderait 先生が, et いただきて oublie le changement de son."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who will read the essay, and whose is it?",
+            "fr": "Qui lira la rédaction, et à qui est-elle ?"
+          },
+          "jp": "あした、先生にわたしの作文を見ていただきます。",
+          "tr": {
+            "en": "Tomorrow I'll have the teacher look over my essay.",
+            "fr": "Demain, je ferai relire ma rédaction par le professeur."
+          },
+          "choices": [
+            {
+              "en": "The teacher will read the speaker's essay.",
+              "fr": "Le professeur lira la rédaction de la personne qui parle."
+            },
+            {
+              "en": "The speaker will read the teacher's essay.",
+              "fr": "La personne qui parle lira la rédaction du professeur."
+            },
+            {
+              "en": "The teacher will ask the speaker to read an essay.",
+              "fr": "Le professeur demandera à la personne qui parle de lire une rédaction."
+            }
+          ],
+          "why": {
+            "en": "In ていただく the speaker is the subject and the giver takes に: 先生に…見ていただきます is « I get the teacher to look at it ». わたしの is the owner of the essay.",
+            "fr": "Avec ていただく, la personne qui parle est le sujet et le donneur prend に : 先生に…見ていただきます, c'est « je fais regarder par le professeur ». わたしの indique à qui est la rédaction."
+          }
+        }
+      ]
     }
   },
   {
@@ -28972,7 +29468,141 @@
             "fr": "Une demande respectueuse : お + radical + ください. 待て est un ordre sec, et お待ちになる dit seulement qu'elle attend."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "The announcement says お急ぎください instead of 急いでください. What does it add?",
+            "fr": "L'annonce dit お急ぎください au lieu de 急いでください. Qu'ajoute-t-elle ?"
+          },
+          "jp": "ドアがしまりますので、お急ぎください。",
+          "tr": {
+            "en": "The doors are about to close, so please hurry.",
+            "fr": "Les portes vont se fermer, veuillez vous dépêcher."
+          },
+          "choices": [
+            {
+              "en": "More respect: it is still an instruction, but a polite one.",
+              "fr": "Plus de respect : cela reste une consigne, mais polie."
+            },
+            {
+              "en": "More force: it is a harder order than 急いでください.",
+              "fr": "Plus de force : c'est un ordre plus dur que 急いでください."
+            },
+            {
+              "en": "A question: it asks whether the passengers could hurry.",
+              "fr": "Une question : elle demande si les voyageurs peuvent se dépêcher."
+            }
+          ],
+          "why": {
+            "en": "お急ぎください is 急いでください with respect added: the staff still tell you what to do, politely. It is not harder, and it is not a question: asking is ていただけませんか.",
+            "fr": "お急ぎください, c'est 急いでください avec du respect : le personnel dit toujours quoi faire, poliment. Ce n'est ni plus dur, ni une question : demander, c'est ていただけませんか."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "どうぞ、こちらのペンを＿＿＿ください。",
+          "tr": {
+            "en": "Please use this pen. (A clerk to a customer.)",
+            "fr": "Servez-vous de ce stylo. (Un employé à un client.)"
+          },
+          "choices": [
+            "お使い",
+            "お使う",
+            "お使って"
+          ],
+          "why": {
+            "en": "お takes the ます-stem: 使います → 使い, so お使いください. お使う keeps the dictionary form, and お使って borrows the て-form: neither is a stem.",
+            "fr": "お se place devant le radical en ます : 使います → 使い, donc お使いください. お使う garde la forme du dictionnaire, et お使って emprunte la forme en て : ce ne sont pas des radicaux."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who sends the map, and what is the visitor asked to do?",
+            "fr": "Qui envoie le plan, et que demande-t-on au visiteur ?"
+          },
+          "jp": "ちずは、あとでわたしがお送りしますので、メールアドレスをこちらにお書きください。",
+          "tr": {
+            "en": "I will send you the map later, so please write your e-mail address here.",
+            "fr": "Je vous enverrai le plan plus tard : veuillez écrire ici votre adresse e-mail."
+          },
+          "choices": [
+            {
+              "en": "The speaker will send the map; the visitor is asked to write an address.",
+              "fr": "La personne qui parle enverra le plan ; on demande au visiteur d'écrire une adresse."
+            },
+            {
+              "en": "The visitor is asked to send the map; the speaker will write an address.",
+              "fr": "On demande au visiteur d'envoyer le plan ; la personne qui parle écrira une adresse."
+            },
+            {
+              "en": "The speaker will send the map and write the address too.",
+              "fr": "La personne qui parle enverra le plan et écrira aussi l'adresse."
+            }
+          ],
+          "why": {
+            "en": "お送りします is the speaker's own act, offered humbly. お書きください is an instruction to the visitor. Same お + stem, but the ending says whose act it is.",
+            "fr": "お送りします est l'acte de la personne qui parle, offert avec modestie. お書きください est une consigne au visiteur. Même お + radical, mais la fin dit à qui est l'acte."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ここで、パスポートを＿＿＿ください。",
+          "tr": {
+            "en": "Please show your passport here.",
+            "fr": "Veuillez présenter votre passeport ici."
+          },
+          "choices": [
+            "お見せ",
+            "ごらん",
+            "お見"
+          ],
+          "why": {
+            "en": "見せる (to show) has a two-syllable stem, 見せ, so it takes お: お見せください. ごらん is the polite « look » of 見る, and お見 is cut from 見る, whose stem is too short.",
+            "fr": "見せる (montrer) a un radical de deux syllabes, 見せ, donc il prend お : お見せください. ごらん est le « regarder » poli de 見る, et お見 est tiré de 見る, dont le radical est trop court."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "A basket of free sweets stands by the door with this card. What does it tell visitors?",
+            "fr": "Une corbeille de bonbons gratuits est posée près de la porte, avec cette carte. Que dit-elle aux visiteurs ?"
+          },
+          "jp": "ほしい人は、どうぞおとりください。",
+          "tr": {
+            "en": "If you would like one, please help yourself.",
+            "fr": "Si vous en voulez un, servez-vous."
+          },
+          "choices": [
+            {
+              "en": "Whoever wants one may take one.",
+              "fr": "Qui en veut un peut en prendre un."
+            },
+            {
+              "en": "Everyone must take one before leaving.",
+              "fr": "Tout le monde doit en prendre un avant de partir."
+            },
+            {
+              "en": "Whoever wants one must ask the staff first.",
+              "fr": "Qui en veut un doit d'abord le demander au personnel."
+            }
+          ],
+          "why": {
+            "en": "Here ください is no order but an offer: with どうぞ, お取りください means « please, take it ». The politeness is the same; only ほしい人は (« whoever wants ») makes it optional.",
+            "fr": "Ici ください n'est pas un ordre mais une offre : avec どうぞ, お取りください veut dire « je vous en prie, prenez-en ». La politesse est la même ; c'est ほしい人は (« qui veut ») qui rend la chose facultative."
+          }
+        }
+      ]
     }
   },
   {
@@ -29197,7 +29827,127 @@
             "fr": "Tu transmets une consigne : forme en ない + ように言う. と言う lui dirait que toi, tu ne seras pas en retard."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "先生は、学生に教室でケータイを＿＿＿ように言いました。",
+          "tr": {
+            "en": "The teacher told the students not to use their phones in the classroom.",
+            "fr": "Le professeur a dit aux élèves de ne pas utiliser leur téléphone en classe."
+          },
+          "choices": [
+            "使わない",
+            "使いません",
+            "使わなかった"
+          ],
+          "why": {
+            "en": "Before ように the verb stays plain, and « not to » is the ない-form: 使わない. 使いません is polite, and 使わなかった is past: neither fits an instruction still to be followed.",
+            "fr": "Devant ように le verbe reste neutre, et « ne pas » se dit à la forme en ない : 使わない. 使いません est poli, et 使わなかった est passé : ni l'un ni l'autre ne convient à une consigne encore à suivre."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When did the speaker speak, and when is the friend to come?",
+            "fr": "Quand la personne a-t-elle parlé, et quand l'ami doit-il venir ?"
+          },
+          "jp": "友だちに、らい週のパーティーに来るように言いました。",
+          "tr": {
+            "en": "I told my friend to come to next week's party.",
+            "fr": "J'ai dit à mon ami de venir à la fête de la semaine prochaine."
+          },
+          "choices": [
+            {
+              "en": "The speaker has already told the friend; the party is next week.",
+              "fr": "La personne qui parle l'a déjà dit à l'ami ; la fête est la semaine prochaine."
+            },
+            {
+              "en": "The speaker told the friend, and the friend came to the party.",
+              "fr": "La personne qui parle l'a dit à l'ami, et l'ami est venu à la fête."
+            },
+            {
+              "en": "The speaker will tell the friend at next week's party.",
+              "fr": "La personne qui parle le dira à l'ami à la fête de la semaine prochaine."
+            }
+          ],
+          "why": {
+            "en": "言いました is the past of the telling. The verb before ように, 来る, gives the thing to do and carries no tense: the party, らい週, is still to come.",
+            "fr": "言いました est le passé de l'acte de dire. Le verbe devant ように, 来る, donne ce qu'il faut faire et n'a pas de temps : la fête, らい週, est encore à venir."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "It will rain tomorrow. You tell your mother what you told your little brother: to take an umbrella.",
+            "fr": "Il pleuvra demain. Tu dis à ta mère ce que tu as dit à ton petit frère : de prendre un parapluie."
+          },
+          "choices": [
+            "おとうとに、あしたはかさを持っていくように言いました。",
+            "おとうとに、あしたはかさを持っていくように言われました。",
+            "おとうとは、あしたはかさを持っていくと言いました。"
+          ],
+          "why": {
+            "en": "You gave the instruction: the one told takes に, and 言いました. 言われました would mean your brother told you, and と言いました only quotes what your brother said he would do.",
+            "fr": "C'est toi qui as donné la consigne : celui à qui on parle prend に, et 言いました. 言われました voudrait dire que ton frère te l'a dit, et と言いました ne fait que rapporter ce que ton frère a dit qu'il ferait."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "先生は、学生に、毎日、本を読む＿＿＿言いました。",
+          "tr": {
+            "en": "The teacher told the students to read every day.",
+            "fr": "Le professeur a dit aux élèves de lire tous les jours."
+          },
+          "choices": [
+            "ように",
+            "ために",
+            "ので"
+          ],
+          "why": {
+            "en": "To report what someone is told to do, the verb is followed by ように. ために gives a purpose (« in order to read »), and ので a reason (« since they read »): neither reports an instruction.",
+            "fr": "Pour rapporter ce qu'on dit de faire, le verbe est suivi de ように. ために donne un but (« afin de lire »), et ので une cause (« puisqu'ils lisent ») : aucun ne rapporte une consigne."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who is to phone Tanaka?",
+            "fr": "Qui doit téléphoner à Tanaka ?"
+          },
+          "jp": "山田さんは、わたしに、田中さんへ電話するように言いました。",
+          "tr": {
+            "en": "Yamada told me to phone Tanaka.",
+            "fr": "Yamada m'a dit de téléphoner à Tanaka."
+          },
+          "choices": [
+            {
+              "en": "The speaker, because Yamada told them to.",
+              "fr": "La personne qui parle, car Yamada le lui a dit."
+            },
+            {
+              "en": "Yamada, and the speaker only reports it.",
+              "fr": "Yamada, la personne qui parle ne faisant que le rapporter."
+            },
+            {
+              "en": "No one: Tanaka is the one to phone.",
+              "fr": "Personne : c'est Tanaka qui doit téléphoner."
+            }
+          ],
+          "why": {
+            "en": "The one told takes に: わたしに, so the speaker makes the call. 田中さんへ is where the call goes, and 山田さんは is who gave the instruction.",
+            "fr": "La personne à qui on parle prend に : わたしに, c'est donc elle qui appelle. 田中さんへ indique où va l'appel, et 山田さんは qui a donné la consigne."
+          }
+        }
+      ]
     }
   },
   {
@@ -29433,7 +30183,127 @@
             "fr": "Il le ferait pour toi, demandé comme une question : ていただけませんか. てくれ est brusque, てあげる va dans l'autre sens."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "社長、この手紙を読んで＿＿＿。",
+          "tr": {
+            "en": "Could you possibly read this letter? (To the company president, as politely as you can.)",
+            "fr": "Pourriez-vous lire cette lettre ? (Au président de l'entreprise, aussi poliment que possible.)"
+          },
+          "choices": [
+            "いただけませんか",
+            "もらえませんか",
+            "くれませんか"
+          ],
+          "why": {
+            "en": "To someone far above you, いただく is the politest of the three. もらえませんか is the same request in a plainer voice, and くれませんか is for friends and equals.",
+            "fr": "Face à quelqu'un de très au-dessus de toi, いただく est le plus poli des trois. もらえませんか est la même demande en plus simple, et くれませんか est pour les amis et les égaux."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who is to write, and whose name is it?",
+            "fr": "Qui doit écrire, et de qui est le nom ?"
+          },
+          "jp": "すみません、このカードに、わたしの名前を書いていただけませんか。",
+          "tr": {
+            "en": "Excuse me, could you write my name on this card?",
+            "fr": "Excusez-moi, pourriez-vous écrire mon nom sur cette carte ?"
+          },
+          "choices": [
+            {
+              "en": "The listener is to write the speaker's name.",
+              "fr": "L'interlocuteur doit écrire le nom de la personne qui parle."
+            },
+            {
+              "en": "The speaker will write the listener's name.",
+              "fr": "La personne qui parle écrira le nom de l'interlocuteur."
+            },
+            {
+              "en": "The speaker asks whether they may write their own name.",
+              "fr": "La personne qui parle demande si elle peut écrire son propre nom."
+            }
+          ],
+          "why": {
+            "en": "いただけませんか asks the listener to act for the speaker: the one who writes is the listener, and わたしの says whose name it is. It is a request, not a permission asked for.",
+            "fr": "いただけませんか demande à l'interlocuteur d'agir pour la personne qui parle : celui qui écrit, c'est l'interlocuteur, et わたしの dit à qui est le nom. C'est une demande, pas une permission."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "In a museum, the visitor next to you is taking photos, which is not allowed. You ask, as politely as you can, that they stop.",
+            "fr": "Dans un musée, le visiteur à côté de toi prend des photos, ce qui est interdit. Tu lui demandes, aussi poliment que possible, d'arrêter."
+          },
+          "choices": [
+            "すみません、ここでは写真をとらないでいただけませんか。",
+            "すみません、ここでは写真をとっていただけませんか。",
+            "すみません、ここでは写真をとらないでくれませんか。"
+          ],
+          "why": {
+            "en": "The polite request keeps いただけませんか and puts the verb in the ないで-form: とらないで. Without ない it asks them to take photos, and くれませんか is a plain voice, too blunt for a stranger.",
+            "fr": "La demande polie garde いただけませんか et met le verbe à la forme en ないで : とらないで. Sans ない, elle leur demande de prendre des photos, et くれませんか est un ton simple, trop direct pour un inconnu."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "すみません、にもつを少し持って＿＿＿ませんか。",
+          "tr": {
+            "en": "Excuse me, could you possibly hold my luggage for a moment?",
+            "fr": "Excusez-moi, pourriez-vous tenir mes bagages un instant ?"
+          },
+          "choices": [
+            "いただけ",
+            "いただき",
+            "いただか"
+          ],
+          "why": {
+            "en": "The request needs the potential, « could you »: いただける → いただけませんか. いただきませんか is an invitation (« shall we? »), and いただか is not a form that ませんか can follow.",
+            "fr": "La demande veut le potentiel, « pourriez-vous » : いただける → いただけませんか. いただきませんか est une invitation (« et si on… ? »), et いただか n'est pas une forme que ませんか peut suivre."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who asked whom, and for what?",
+            "fr": "Qui a demandé quoi à qui ?"
+          },
+          "jp": "田中さんに、あした来ていただけませんかと言われました。",
+          "tr": {
+            "en": "Tanaka asked me whether I could come tomorrow.",
+            "fr": "Tanaka m'a demandé si je pouvais venir demain."
+          },
+          "choices": [
+            {
+              "en": "Tanaka asked the speaker to come tomorrow.",
+              "fr": "Tanaka a demandé à la personne qui parle de venir demain."
+            },
+            {
+              "en": "The speaker asked Tanaka to come tomorrow.",
+              "fr": "La personne qui parle a demandé à Tanaka de venir demain."
+            },
+            {
+              "en": "Tanaka offered to come tomorrow.",
+              "fr": "Tanaka a proposé de venir demain."
+            }
+          ],
+          "why": {
+            "en": "The request sits inside と言われました: Tanaka said it, to the speaker, so the speaker is the one asked to come. ていただけませんか is always asked of the person who would do the thing.",
+            "fr": "La demande est dans と言われました : c'est Tanaka qui l'a dite, à la personne qui parle, qui est donc celle à qui on demande de venir. ていただけませんか s'adresse toujours à celui qui ferait la chose."
+          }
+        }
+      ]
     }
   },
   {
@@ -29632,7 +30502,127 @@
             "fr": "Tu l'as acheté et tu t'en réjouis : てよかった. ばよかった voudrait dire que tu ne l'as pas fait."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker glad about?",
+            "fr": "De quoi la personne se réjouit-elle ?"
+          },
+          "jp": "かさをわすれたけど、雨がふらなくてよかった。",
+          "tr": {
+            "en": "I forgot my umbrella, but I'm glad it didn't rain.",
+            "fr": "J'ai oublié mon parapluie, mais heureusement qu'il n'a pas plu."
+          },
+          "choices": [
+            {
+              "en": "That it did not rain.",
+              "fr": "Qu'il n'ait pas plu."
+            },
+            {
+              "en": "That the umbrella was forgotten.",
+              "fr": "Que le parapluie ait été oublié."
+            },
+            {
+              "en": "That it rained.",
+              "fr": "Qu'il ait plu."
+            }
+          ],
+          "why": {
+            "en": "よかった goes with the verb just before て: ふらなくて, « that it didn't rain ». The forgotten umbrella is only the けど side of the sentence, the small trouble that turned out not to matter.",
+            "fr": "よかった se rattache au verbe juste avant て : ふらなくて, « qu'il n'ait pas plu ». Le parapluie oublié n'est que le côté けど de la phrase, le petit ennui qui n'a finalement pas compté."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうは早くねて＿＿＿。",
+          "tr": {
+            "en": "I'm glad I went to bed early yesterday.",
+            "fr": "Heureusement que j'ai dormi tôt hier soir."
+          },
+          "choices": [
+            "よかったです",
+            "いいです",
+            "いいでした"
+          ],
+          "why": {
+            "en": "The feeling is about something past, and いい has the special past よかった: ねてよかったです. いいです would say it is fine to go to bed early, and いいでした treats いい as a regular い-adjective.",
+            "fr": "Le sentiment porte sur un fait passé, et いい a un passé particulier, よかった : ねてよかったです. いいです dirait qu'on peut se coucher tôt, et いいでした traite いい comme un adjectif en い régulier."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who is well again, and what is the speaker doing?",
+            "fr": "Qui est de nouveau en forme, et que fait la personne qui parle ?"
+          },
+          "jp": "田中さん、元気になってよかったですね。",
+          "tr": {
+            "en": "Tanaka, I'm glad you're well again.",
+            "fr": "Tanaka, heureusement que tu vas mieux."
+          },
+          "choices": [
+            {
+              "en": "Tanaka, the person spoken to; the speaker is glad for them.",
+              "fr": "Tanaka, à qui on parle ; la personne qui parle est contente pour Tanaka."
+            },
+            {
+              "en": "The speaker is well again and tells Tanaka so.",
+              "fr": "La personne qui parle va mieux et le dit à Tanaka."
+            },
+            {
+              "en": "The speaker wishes Tanaka will be well again soon.",
+              "fr": "La personne qui parle souhaite que Tanaka aille bientôt mieux."
+            }
+          ],
+          "why": {
+            "en": "てよかった is a feeling about something that has happened, and it can be felt for someone else: ですね shares it with Tanaka. It is not a wish for the future.",
+            "fr": "てよかった est un sentiment sur ce qui s'est passé, et on peut l'éprouver pour un autre : ですね le partage avec Tanaka. Ce n'est pas un souhait pour l'avenir."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "友だちと映画を見に＿＿＿よかった。",
+          "tr": {
+            "en": "I'm glad I went to see a film with a friend.",
+            "fr": "J'ai bien fait d'aller voir un film avec un ami."
+          },
+          "choices": [
+            "行って",
+            "行った",
+            "行いて"
+          ],
+          "why": {
+            "en": "行く is the exception among the く-verbs: its て-form is 行って, not 行いて. And 行った is the past, which cannot stand before よかった: the pattern needs the て-form.",
+            "fr": "行く est l'exception parmi les verbes en く : sa forme en て est 行って, pas 行いて. Et 行った est le passé, qui ne peut pas précéder よかった : le modèle demande la forme en て."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You stayed home last night. Today you hear that the party was boring. What do you say?",
+            "fr": "Hier soir, tu n'as pas bougé de chez toi. Aujourd'hui, tu apprends que la fête était ennuyeuse. Que dis-tu ?"
+          },
+          "choices": [
+            "きのう、パーティーに行かなくてよかった。",
+            "きのう、パーティーに行ってよかった。",
+            "きのう、パーティーに行けばよかった。"
+          ],
+          "why": {
+            "en": "You did not go, and you are relieved: なくてよかった. 行ってよかった says you went and enjoyed it, and 行けばよかった regrets not going, which is the opposite feeling.",
+            "fr": "Tu n'y as pas été, et c'est un soulagement : なくてよかった. 行ってよかった dit que tu y as été avec plaisir, et 行けばよかった regrette de ne pas y avoir été : c'est le sentiment inverse."
+          }
+        }
+      ]
     }
   },
   {
@@ -29907,7 +30897,141 @@
             "fr": "Forme du dictionnaire + な : ne... pas. さわれ, l'impératif, lui dirait d'y toucher."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Did the speaker do as they were told?",
+            "fr": "La personne a-t-elle fait ce qu'on lui avait dit ?"
+          },
+          "jp": "入るなと言われたのに、ドアをあけてしまいました。",
+          "tr": {
+            "en": "I was told not to go in, yet I opened the door.",
+            "fr": "On m'avait dit de ne pas entrer, et pourtant j'ai ouvert la porte."
+          },
+          "choices": [
+            {
+              "en": "No: they were told not to go in, yet opened the door.",
+              "fr": "Non : malgré l'interdiction d'entrer, la personne a ouvert la porte."
+            },
+            {
+              "en": "Yes: they were told not to go in, and left the door shut.",
+              "fr": "Oui : on lui a dit de ne pas entrer, et la personne a laissé la porte fermée."
+            },
+            {
+              "en": "They told someone else not to go in, then opened the door.",
+              "fr": "La personne a dit à quelqu'un d'autre de ne pas entrer, puis a ouvert la porte."
+            }
+          ],
+          "why": {
+            "en": "入るな is the blunt « don't go in », reported with と言われた. のに then sets the opposite beside it: despite the ban, the door was opened. The speaker is the one who was told.",
+            "fr": "入るな est le « n'entre pas » brutal, rapporté par と言われた. のに met ensuite le contraire à côté : malgré l'interdit, la porte a été ouverte. La personne qui parle est celle à qui on l'a dit."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "そんなものを＿＿＿！",
+          "tr": {
+            "en": "Don't buy things like that!",
+            "fr": "N'achète pas des trucs pareils !"
+          },
+          "choices": [
+            "買うな",
+            "買いな",
+            "買わな"
+          ],
+          "why": {
+            "en": "To forbid, な follows the dictionary form: 買う → 買うな. 買いな is the ます-stem plus な, a soft order (« go on, buy it »), and 買わな is cut from 買わない: it is no form at all.",
+            "fr": "Pour interdire, な suit la forme du dictionnaire : 買う → 買うな. 買いな est le radical en ます plus な, un ordre doux (« vas-y, achète »), et 買わな est coupé de 買わない : ce n'est pas une forme."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "A coach shouts this to a runner near the finish line. What is the coach doing?",
+            "fr": "Un entraîneur crie cela à un coureur près de la ligne d'arrivée. Que fait-il ?"
+          },
+          "jp": "あと少しだ、止まるな！",
+          "tr": {
+            "en": "Almost there, don't stop!",
+            "fr": "Plus qu'un peu, ne t'arrête pas !"
+          },
+          "choices": [
+            {
+              "en": "Urging the runner on: « don't stop! ».",
+              "fr": "Il pousse le coureur : « ne t'arrête pas ! »."
+            },
+            {
+              "en": "Telling the runner to stop.",
+              "fr": "Il dit au coureur de s'arrêter."
+            },
+            {
+              "en": "Scolding the runner for having stopped.",
+              "fr": "Il gronde le coureur qui s'est arrêté."
+            }
+          ],
+          "why": {
+            "en": "止まるな forbids stopping, so the runner must keep going, and あと少しだ shows it is a push, not an angry scolding. The blunt な is common in cheering, like in a race.",
+            "fr": "止まるな interdit de s'arrêter : le coureur doit continuer, et あと少しだ montre que c'est un encouragement, pas une colère. Le な brutal est courant pour encourager, comme dans une course."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "こっちへ＿＿＿！",
+          "tr": {
+            "en": "Don't come over here!",
+            "fr": "Ne viens pas par ici !"
+          },
+          "choices": [
+            "来るな",
+            "来い",
+            "来ないな"
+          ],
+          "why": {
+            "en": "来る is irregular, but the prohibition is regular: dictionary form + な, 来るな. 来い is the imperative, the opposite order (« come here! »), and 来ないな is a sigh with a negative (« he isn't coming… »).",
+            "fr": "来る est irrégulier, mais l'interdiction est régulière : forme du dictionnaire + な, 来るな. 来い est l'impératif, l'ordre inverse (« viens ici ! »), et 来ないな est un soupir au négatif (« il ne vient pas… »)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "A student says this to a teacher. How does it sound?",
+            "fr": "Un élève dit cela à son professeur. Quel effet cela fait-il ?"
+          },
+          "jp": "先生、わたしのノートを見るな。",
+          "tr": {
+            "en": "Teacher, don't look at my notebook.",
+            "fr": "Professeur, ne regardez pas mon cahier."
+          },
+          "choices": [
+            {
+              "en": "Very rude: な is a blunt order, not for a teacher.",
+              "fr": "Très impoli : な est un ordre brutal, pas pour un professeur."
+            },
+            {
+              "en": "Polite: な is the polite way to say « don't ».",
+              "fr": "Poli : な est la façon polie de dire « ne… pas »."
+            },
+            {
+              "en": "Gentle: it is just like ないでください.",
+              "fr": "Doux : c'est comme ないでください."
+            }
+          ],
+          "why": {
+            "en": "な forbids bluntly: it is for close friends, children and signs, never for a superior. To a teacher you say ないでください: 見ないでください.",
+            "fr": "な interdit sans détour : il est pour les amis proches, les enfants et les panneaux, jamais pour un supérieur. À un professeur on dit ないでください : 見ないでください."
+          }
+        }
+      ]
     }
   },
   {
@@ -30212,7 +31336,132 @@
             "fr": "Pour lui ordonner d'attendre : 待つ devient 待て. 待つな lui dirait de ne pas attendre."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "もうおそいから、早く＿＿＿！",
+          "tr": {
+            "en": "It's late, so go to bed now!",
+            "fr": "Il est tard, alors va te coucher tout de suite !"
+          },
+          "choices": [
+            "ねろ",
+            "ねれ",
+            "ねるな"
+          ],
+          "why": {
+            "en": "ねる is a る-verb: drop る and add ろ, ねろ. ねれ borrows the う-verb rule (and looks like the potential), and ねるな is the opposite order, « don't sleep ».",
+            "fr": "ねる est un verbe en る : on retire る et on ajoute ろ, ねろ. ねれ emprunte la règle des verbes en う (et ressemble au potentiel), et ねるな est l'ordre inverse, « ne dors pas »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What did the friend say?",
+            "fr": "Qu'a dit l'ami ?"
+          },
+          "jp": "友だちに、もっとゆっくり話せと言われました。",
+          "tr": {
+            "en": "My friend told me to speak more slowly.",
+            "fr": "Mon ami m'a dit de parler plus lentement."
+          },
+          "choices": [
+            {
+              "en": "To speak more slowly: an order.",
+              "fr": "De parler plus lentement : un ordre."
+            },
+            {
+              "en": "That the speaker can speak more slowly: a remark on ability.",
+              "fr": "Que la personne qui parle peut parler plus lentement : une remarque sur sa capacité."
+            },
+            {
+              "en": "That the friend will speak more slowly: a promise.",
+              "fr": "Que l'ami parlera plus lentement : une promesse."
+            }
+          ],
+          "why": {
+            "en": "話せ is the imperative of 話す, reported with と言われました: an order. It looks like the potential 話せる (« can speak »), but the る is missing and と follows directly.",
+            "fr": "話せ est l'impératif de 話す, rapporté par と言われました : un ordre. Il ressemble au potentiel 話せる (« peut parler »), mais le る manque et と suit directement."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "さあ、ここに＿＿＿！",
+          "tr": {
+            "en": "Come on, sit here!",
+            "fr": "Allez, assieds-toi ici !"
+          },
+          "choices": [
+            "すわれ",
+            "すわろ",
+            "すわる"
+          ],
+          "why": {
+            "en": "すわる ends in る but is a う-verb: its last sound moves to the え-row, すわれ. すわろ treats it as a る-verb, and すわる is only the dictionary form, a statement.",
+            "fr": "すわる finit par る mais c'est un verbe en う : son dernier son passe au son en え, すわれ. すわろ le traite comme un verbe en る, et すわる n'est que la forme du dictionnaire, une affirmation."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who eats first?",
+            "fr": "Qui mange en premier ?"
+          },
+          "jp": "先に食べろ、あとから食べるから。",
+          "tr": {
+            "en": "Eat first, I'll eat later.",
+            "fr": "Mange d'abord, je mangerai après."
+          },
+          "choices": [
+            {
+              "en": "The listener eats first; the speaker eats later.",
+              "fr": "L'interlocuteur mange d'abord ; la personne qui parle mange après."
+            },
+            {
+              "en": "The speaker eats first; the listener eats later.",
+              "fr": "La personne qui parle mange d'abord ; l'interlocuteur mange après."
+            },
+            {
+              "en": "They eat together.",
+              "fr": "Ils mangent ensemble."
+            }
+          ],
+          "why": {
+            "en": "The imperative gives the order to the other person: 食べろ is « you eat », and あとから食べるから says the speaker will eat later. It is never about the speaker's own act.",
+            "fr": "L'impératif donne l'ordre à l'autre : 食べろ, c'est « mange », et あとから食べるから dit que la personne qui parle mangera après. Il ne porte jamais sur son propre acte."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "しゅくだいを早く＿＿＿！",
+          "tr": {
+            "en": "Do your homework quickly!",
+            "fr": "Fais vite tes devoirs !"
+          },
+          "choices": [
+            "しろ",
+            "しよう",
+            "しれ"
+          ],
+          "why": {
+            "en": "する is irregular: its imperative is しろ. しよう is the volitional (« let's do it »), an invitation, and しれ applies the う-verb rule to a verb that is not one.",
+            "fr": "する est irrégulier : son impératif est しろ. しよう est le volitif (« faisons-le »), une invitation, et しれ applique la règle des verbes en う à un verbe qui n'en est pas un."
+          }
+        }
+      ]
     }
   },
   {
