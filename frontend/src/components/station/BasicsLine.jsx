@@ -7,10 +7,11 @@ import { CloseIcon } from '../ui/Icons'
 // An N5 learner's day rides the basics course first (plan 186e), and
 // the gate says where on it they stand: the unit the next new card
 // comes from, by its name, and a bar of the fourteen with the ones met
-// filled. Neutral inks: the course is no line, so it wears no line's
-// pigment. `basics` is /api/today's -- null above N5, where nothing is
-// drawn -- and once the course is met, one note says so until it is
-// put away, which is remembered on the device.
+// filled, every word of it in the learner's language. Neutral inks: the
+// course is no line, so it wears no line's pigment. `basics` is
+// /api/today's -- null above N5, where nothing is drawn -- and once the
+// course is met, one note says so until it is put away, which is
+// remembered on the device.
 const DONE_KEY = 'tsuji.basicsDoneSeen'
 
 function readSeen() {
@@ -35,10 +36,7 @@ export default function BasicsLine({ basics }) {
     if (seen) return null
     return (
       <div className="basics-line basics-line--done" role="status">
-        <span className="basics-line__head">
-          <span className="basics-line__jp" lang="ja">基礎</span>
-          <span className="basics-line__name">{t.basicsDone}</span>
-        </span>
+        <span className="basics-line__name">{t.basicsDone}</span>
         <button
           type="button"
           className="basics-line__close"
@@ -56,7 +54,7 @@ export default function BasicsLine({ basics }) {
   return (
     <div className="basics-line" data-basics-unit={basics.id}>
       <span className="basics-line__head">
-        <span className="basics-line__jp" lang="ja">基礎</span>
+        <span className="basics-line__mark">{t.basicsTitle}</span>
         <span className="basics-line__of">{t.basicsUnit(basics.unit, basics.of)}</span>
       </span>
       <span className="basics-line__name">{title}</span>

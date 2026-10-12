@@ -48,7 +48,8 @@ describe('GateCard — the basics', () => {
     expect(line.dataset.basicsUnit).toBe('kazu')
     // The unit is named in the learner's language alone.
     expect(line.querySelector('.basics-line__name').textContent).toBe('Les nombres')
-    expect(line.textContent).not.toContain('数')
+    expect(line.querySelector('.basics-line__mark').textContent).toBe('Bases')
+    expect(line.textContent).not.toMatch(/[数基礎]/)
     expect(line.querySelector('.basics-line__of').textContent).toMatch(/3/)
     expect(line.querySelectorAll('.basics-line__unit')).toHaveLength(14)
     expect(line.querySelectorAll('.basics-line__unit--met')).toHaveLength(2)
@@ -74,6 +75,7 @@ describe('GateCard — the basics', () => {
     const note = screen.container.querySelector('.basics-line--done')
     expect(note).not.toBeNull()
     expect(note.querySelector('.basics-line__unit')).toBeNull()
+    expect(note.textContent).not.toContain('基礎')
     note.querySelector('.basics-line__close').click()
     await new Promise(r => setTimeout(r, 30))
     expect(screen.container.querySelector('.basics-line')).toBeNull()

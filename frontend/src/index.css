@@ -8762,8 +8762,8 @@ textarea:focus-visible {
 }
 .basics-line__head,
 .basics-line__name { display: inline-flex; align-items: baseline; gap: var(--sp-2); }
-.basics-line__jp {
-  font-family: var(--font-serif);
+.basics-line__mark {
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--fs-sm);
   color: var(--text-primary);
