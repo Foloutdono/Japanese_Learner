@@ -27537,7 +27537,127 @@
             "fr": "Les portes se sont fermées pendant que tu montais encore : か〜ないかのうちに. ないうちに voudrait dire avant même que tu montes."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ドアを開けるか＿＿＿かのうちに、ねこが外へ出ていった。",
+          "tr": {
+            "en": "The cat dashed outside before I had even finished opening the door.",
+            "fr": "Le chat est sorti en trombe avant même que j'aie fini d'ouvrir la porte."
+          },
+          "choices": [
+            "開けない",
+            "開けなかった",
+            "開けた"
+          ],
+          "why": {
+            "en": "The pair is the verb and its own ない-form: 開けるか開けないか. The past is carried by 出ていった at the end; 開けなかった and 開けた are not the pair.",
+            "fr": "Le couple est le verbe et sa forme ない : 開けるか開けないか. Le passé se lit dans 出ていった, à la fin ; 開けなかった et 開けた ne font pas le couple."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When my mother spoke, had I put my bag down?",
+            "fr": "Quand ma mère a parlé, avais-je posé mon sac ?"
+          },
+          "jp": "かばんを置くか置かないかのうちに、母が「手を洗いなさい」と言った。",
+          "tr": {
+            "en": "Before I had even finished putting my bag down, my mother told me to wash my hands.",
+            "fr": "Avant même que j'aie fini de poser mon sac, ma mère m'a dit de me laver les mains."
+          },
+          "choices": [
+            {
+              "en": "Not quite: she spoke while I was still putting it down.",
+              "fr": "Pas tout à fait : elle a parlé alors que je le posais encore."
+            },
+            {
+              "en": "Yes: she waited until it was down, then spoke.",
+              "fr": "Oui : elle a attendu qu'il soit posé, puis elle a parlé."
+            },
+            {
+              "en": "I could not decide whether to put it down, and she spoke up.",
+              "fr": "Je n'arrivais pas à décider si je le posais ou non, et elle a pris la parole."
+            }
+          ],
+          "why": {
+            "en": "か置かないかのうちに means the second event cut in before the first was even complete. It is not « whether I put it down or not », nor « after I had put it down » (that is たとたんに).",
+            "fr": "か置かないかのうちに : le second fait survient avant même que le premier soit achevé. Ce n'est ni « si je le posais ou non », ni « après l'avoir posé » (ça, c'est たとたんに)."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks about your bus ride. You were still stepping off when the driver pulled away. What do you say?",
+            "fr": "Un ami te demande comment s'est passé ton trajet en bus. Tu étais encore en train de descendre quand le chauffeur a démarré. Que dis-tu ?"
+          },
+          "choices": [
+            "バスを降りるか降りないかのうちに、運転手さんがバスを出した。",
+            "バスを降りたとたんに、運転手さんがバスを出した。",
+            "バスが出るか出ないかのうちに、わたしはバスを降りた。"
+          ],
+          "why": {
+            "en": "The first action, getting off, is the one left unfinished: 降りるか降りないかのうちに. 降りたとたんに says I was already off, and the third line swaps the roles: I got off as the bus was leaving.",
+            "fr": "L'action inachevée est la première, descendre : 降りるか降りないかのうちに. 降りたとたんに dit que j'étais déjà descendu, et la troisième ligne inverse les rôles : je descends alors que le bus part."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "店に入るか＿＿＿かのうちに、店員さんが話しかけてきた。",
+          "tr": {
+            "en": "A clerk spoke to me before I had even finished stepping into the shop.",
+            "fr": "Un vendeur m'a adressé la parole avant même que j'aie fini d'entrer dans le magasin."
+          },
+          "choices": [
+            "入らない",
+            "入ない",
+            "入らなかった"
+          ],
+          "why": {
+            "en": "入る ends in る but is a う-verb: る becomes ら before ない, so 入らない. 入ない drops る as if it were a る-verb, and 入らなかった is the past negative, not the pair.",
+            "fr": "入る finit par る mais c'est un verbe en う : る devient ら devant ない, donc 入らない. 入ない retire る comme pour un verbe en る, et 入らなかった est le passé négatif, pas le couple."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "This sentence is in the present tense. What does it describe?",
+            "fr": "Cette phrase est au présent. Que décrit-elle ?"
+          },
+          "jp": "朝は、電車が止まるか止まらないかのうちに、人がドアの前に集まる。",
+          "tr": {
+            "en": "In the morning, people gather in front of the doors before the train has even stopped.",
+            "fr": "Le matin, les gens se massent devant les portes avant même que le train s'arrête."
+          },
+          "choices": [
+            {
+              "en": "A morning habit: people crowd the doors before the train has even stopped.",
+              "fr": "Une habitude du matin : les gens se massent devant les portes avant même l'arrêt du train."
+            },
+            {
+              "en": "A plan: people will gather at the doors once the train has stopped.",
+              "fr": "Un projet : les gens se rassembleront devant les portes une fois le train arrêté."
+            },
+            {
+              "en": "A doubt: nobody knows whether the train will stop or not.",
+              "fr": "Un doute : personne ne sait si le train va s'arrêter ou non."
+            }
+          ],
+          "why": {
+            "en": "The pattern describes events, and in the present it describes a habit: it happens every morning. It is neither a plan nor a doubt about whether the train stops.",
+            "fr": "Le motif décrit des faits, et au présent une habitude : cela arrive chaque matin. Ce n'est ni un projet, ni un doute sur l'arrêt du train."
+          }
+        }
+      ]
     }
   },
   {
@@ -27772,7 +27892,141 @@
             "fr": "Avoir accepté t'engage : 上は. 上に ajouterait « en plus de cela », et のに opposerait les deux moitiés."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker intend?",
+            "fr": "Quelle est l'intention de celui qui parle ?"
+          },
+          "jp": "社長をやめた上は、会社のことに口を出すつもりはない。",
+          "tr": {
+            "en": "Now that I have stepped down as president, I have no intention of interfering in the company's affairs.",
+            "fr": "Maintenant que j'ai quitté la présidence, je n'ai pas l'intention de me mêler des affaires de l'entreprise."
+          },
+          "choices": [
+            {
+              "en": "To keep out of the company's business, now that the presidency is behind them.",
+              "fr": "Ne plus se mêler des affaires de l'entreprise, maintenant que la présidence est derrière soi."
+            },
+            {
+              "en": "To step down only after making sure the company is in good hands.",
+              "fr": "Ne quitter la présidence qu'après s'être assuré que l'entreprise est en de bonnes mains."
+            },
+            {
+              "en": "To go on interfering in the company, even after stepping down.",
+              "fr": "Continuer à se mêler des affaires de l'entreprise, même après son départ."
+            }
+          ],
+          "why": {
+            "en": "The 上は clause is a settled fact (the presidency is over) and the second half states a resolve, here a negative one: つもりはない. It is not « after stepping down » (上で) nor « even though ».",
+            "fr": "La proposition en 上は est un fait acquis (la présidence est finie) et la suite exprime une résolution, ici négative : つもりはない. Ce n'est ni « après avoir quitté » (上で) ni « même si »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "新しい店を始めた＿＿＿、お客さんのために毎日がんばるしかない。",
+          "tr": {
+            "en": "Now that I have opened a new shop, all I can do is work hard for my customers every day.",
+            "fr": "Maintenant que j'ai ouvert un nouveau magasin, je n'ai plus qu'à me donner à fond pour mes clients tous les jours."
+          },
+          "choices": [
+            "上は",
+            "上に",
+            "上で"
+          ],
+          "why": {
+            "en": "上は means « now that »: the fact is settled, so a resolve follows. 上に adds one thing to another (« on top of »), and 上で is a step in a sequence (« after doing »).",
+            "fr": "上は veut dire « maintenant que » : le fait est acquis, donc une résolution suit. 上に ajoute une chose à une autre (« en plus de »), et 上で est une étape d'une suite (« après avoir fait »)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who has a duty here, and why?",
+            "fr": "Qui a un devoir ici, et pourquoi ?"
+          },
+          "jp": "社長が決めた上は、わたしたちはそれにしたがわなければならない。",
+          "tr": {
+            "en": "Now that the president has decided, we have to follow it.",
+            "fr": "Maintenant que le président a décidé, nous devons nous y conformer."
+          },
+          "choices": [
+            {
+              "en": "We do: the president's decision binds us.",
+              "fr": "Nous : la décision du président nous engage."
+            },
+            {
+              "en": "The president does: he has to follow our decision.",
+              "fr": "Le président : il doit suivre notre décision."
+            },
+            {
+              "en": "Nobody yet: the president has not decided.",
+              "fr": "Personne pour l'instant : le président n'a pas encore décidé."
+            }
+          ],
+          "why": {
+            "en": "上は names a fact already settled, and it need not be the speaker's own: here the president's decision. What follows is what that fact asks of us, a duty: なければならない.",
+            "fr": "上は nomme un fait acquis, et ce n'est pas forcément celui de la personne qui parle : ici, la décision du président. La suite dit ce que ce fait nous demande, un devoir : なければならない."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "一度引き受けた上は、最後まで責任を持た＿＿＿。",
+          "tr": {
+            "en": "Now that you have taken it on, you must take responsibility to the end.",
+            "fr": "Maintenant que tu as accepté cette tâche, tu dois en assumer la responsabilité jusqu'au bout."
+          },
+          "choices": [
+            "なければならない",
+            "なくてもいい",
+            "なかった"
+          ],
+          "why": {
+            "en": "After 上は comes what the settled fact demands: a duty or a resolve, so なければならない. なくてもいい says it is not required, and なかった is just a past fact, not what 上は leads to.",
+            "fr": "Après 上は vient ce que le fait acquis exige : un devoir ou une résolution, donc なければならない. なくてもいい dit que ce n'est pas obligatoire, et なかった n'est qu'un fait passé, pas ce vers quoi mène 上は."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Where does the speaker stand on going to Japan?",
+            "fr": "Où en est celui qui parle de son départ pour le Japon ?"
+          },
+          "jp": "日本に留学する上は、毎日日本語で話すようにしたい。",
+          "tr": {
+            "en": "Since I am going to study in Japan, I want to make a point of speaking Japanese every day.",
+            "fr": "Puisque je vais étudier au Japon, je veux m'efforcer de parler japonais tous les jours."
+          },
+          "choices": [
+            {
+              "en": "It is decided, and the decision brings a resolve: Japanese every day.",
+              "fr": "C'est décidé, et cette décision entraîne une résolution : du japonais tous les jours."
+            },
+            {
+              "en": "It is a condition: the speaker will go only if they speak Japanese every day.",
+              "fr": "C'est une condition : on ne partira que si l'on parle japonais tous les jours."
+            },
+            {
+              "en": "It is already happening: the speaker is there and speaks Japanese daily.",
+              "fr": "C'est déjà le cas : on est sur place et on parle japonais tous les jours."
+            }
+          ],
+          "why": {
+            "en": "The dictionary form before 上は is a decided course of action, not yet carried out: since I am going. The decision itself commits the speaker, hence the resolve in the second half.",
+            "fr": "La forme du dictionnaire devant 上は est une décision prise, pas encore réalisée : puisque je pars. La décision engage celui qui parle, d'où la résolution dans la seconde moitié."
+          }
+        }
+      ]
     }
   },
   {
@@ -27963,7 +28217,141 @@
             "fr": "La réunion tient quel que soit le temps : としても. たら ferait de la pluie sa condition, ので sa cause."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Has the speaker passed the exam?",
+            "fr": "L'examen est-il réussi ?"
+          },
+          "jp": "合格できたとしても、その大学には行かないつもりだ。",
+          "tr": {
+            "en": "Even if I pass, I don't intend to go to that university.",
+            "fr": "Même si je réussis, je n'ai pas l'intention d'aller dans cette université."
+          },
+          "choices": [
+            {
+              "en": "Not known: passing is only supposed, and the answer is no even then.",
+              "fr": "On ne sait pas : réussir n'est qu'une supposition, et la réponse reste non même dans ce cas."
+            },
+            {
+              "en": "Yes: the exam is passed, but the speaker still won't go.",
+              "fr": "Oui : l'examen est réussi, mais on n'ira quand même pas."
+            },
+            {
+              "en": "No: the exam was failed, so the speaker won't go.",
+              "fr": "Non : l'examen est raté, donc on n'ira pas."
+            }
+          ],
+          "why": {
+            "en": "としても grants a case for the sake of argument: it may or may not happen, and the conclusion stands either way. The た here is not a fact (« I passed »), only the case being granted.",
+            "fr": "としても admet un cas pour la discussion : il peut arriver ou non, et la conclusion tient dans les deux cas. Le た n'est pas un fait (« j'ai réussi »), seulement le cas admis."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この町が＿＿＿としても、わたしはすみたくない。",
+          "tr": {
+            "en": "Even if this town is convenient, I don't want to live here.",
+            "fr": "Même si cette ville est pratique, je n'ai pas envie d'y habiter."
+          },
+          "choices": [
+            "便利だ",
+            "便利な",
+            "便利で"
+          ],
+          "why": {
+            "en": "と takes the plain form, and the plain form of a な-adjective is 便利だ. 便利な is the form before a noun, and 便利で is the て-form: neither can stand before と.",
+            "fr": "と suit la forme neutre, et celle d'un adjectif en な est 便利だ. 便利な est la forme devant un nom, et 便利で la forme en て : ni l'une ni l'autre ne peut précéder と."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does いくら do in this sentence?",
+            "fr": "Que fait いくら dans cette phrase ?"
+          },
+          "jp": "いくらおいしいとしても、毎日同じものは食べたくない。",
+          "tr": {
+            "en": "However delicious it may be, I wouldn't want to eat the same thing every day.",
+            "fr": "Aussi bon que ce soit, je n'aurais pas envie de manger la même chose tous les jours."
+          },
+          "choices": [
+            {
+              "en": "« However much »: it grants the best case, and the conclusion still stands.",
+              "fr": "« Aussi … que ce soit » : elle admet le meilleur cas, et la conclusion tient quand même."
+            },
+            {
+              "en": "« How much »: it asks the price of something delicious.",
+              "fr": "« Combien » : elle demande le prix de quelque chose de bon."
+            },
+            {
+              "en": "« The more »: the tastier it is, the more the speaker wants it daily.",
+              "fr": "« Plus … plus » : plus c'est bon, plus on en voudrait tous les jours."
+            }
+          ],
+          "why": {
+            "en": "いくら…としても is « however … it may be »: the case is granted at its strongest and the conclusion stands. This いくら is not the price question « how much? » and has no « the more… the more » in it.",
+            "fr": "いくら…としても veut dire « aussi … soit-il » : le cas est admis au plus fort et la conclusion tient. Ce いくら n'est pas la question de prix « combien ? » et n'a pas de « plus… plus » en lui."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ねだんが＿＿＿としても、この店で買いたい。",
+          "tr": {
+            "en": "Even if the price is high, I want to buy at this shop.",
+            "fr": "Même si le prix est élevé, je veux acheter dans ce magasin."
+          },
+          "choices": [
+            "高い",
+            "高いだ",
+            "高くて"
+          ],
+          "why": {
+            "en": "An い-adjective is already in its plain form: 高い + としても. 高いだ adds the だ of nouns and な-adjectives, and 高くて is the て-form, which cannot stand before と.",
+            "fr": "Un adjectif en い est déjà à la forme neutre : 高い + としても. 高いだ ajoute le だ des noms et des adjectifs en な, et 高くて est la forme en て, impossible devant と."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "The sentence opens with そうだとしても. What is it doing?",
+            "fr": "La phrase commence par そうだとしても. Que fait-elle ?"
+          },
+          "jp": "そうだとしても、れんらくぐらいはできるはずだ。",
+          "tr": {
+            "en": "Even if that is so, you would think they could at least get in touch.",
+            "fr": "Même si c'est le cas, on pourrait penser qu'ils auraient au moins pu donner de leurs nouvelles."
+          },
+          "choices": [
+            {
+              "en": "It grants what was just said, then objects anyway.",
+              "fr": "Elle admet ce qui vient d'être dit, puis objecte quand même."
+            },
+            {
+              "en": "It agrees with what was just said and adds a reason.",
+              "fr": "Elle est d'accord avec ce qui vient d'être dit et ajoute une raison."
+            },
+            {
+              "en": "It asks whether what was just said is true.",
+              "fr": "Elle demande si ce qui vient d'être dit est vrai."
+            }
+          ],
+          "why": {
+            "en": "そうだとしても is « even supposing that is so »: it grants the previous remark for argument's sake, and what follows still stands against it. It neither agrees nor asks.",
+            "fr": "そうだとしても veut dire « à supposer que ce soit vrai » : elle admet la remarque précédente pour la discussion, et la suite lui tient tête. Elle n'approuve pas et ne pose pas de question."
+          }
+        }
+      ]
     }
   },
   {
@@ -28154,7 +28542,141 @@
             "fr": "Tu ramènes « je sais cuisiner » au peu que c'est : といっても. としても ferait de ta cuisine une simple hypothèse, et はもちろん prend le mot au pied de la lettre."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What kind of place is it?",
+            "fr": "Quel genre d'endroit est-ce ?"
+          },
+          "jp": "ホテルといっても、へやが三つしかない小さなところだ。",
+          "tr": {
+            "en": "It is a hotel, so to speak, but a small place with only three rooms.",
+            "fr": "C'est un hôtel, façon de parler, mais un petit endroit avec seulement trois chambres."
+          },
+          "choices": [
+            {
+              "en": "A very small place: a hotel in name, with three rooms only.",
+              "fr": "Un tout petit endroit : un hôtel de nom, avec trois chambres seulement."
+            },
+            {
+              "en": "A big hotel with at least three rooms.",
+              "fr": "Un grand hôtel avec au moins trois chambres."
+            },
+            {
+              "en": "A place the speaker has only heard called a hotel.",
+              "fr": "Un endroit dont on a seulement entendu dire que c'est un hôtel."
+            }
+          ],
+          "why": {
+            "en": "といっても corrects a word that sounds too big: « hotel » is cut down to size by what follows, a small place with three rooms. しかない means « only three », not « at least ».",
+            "fr": "といっても corrige un mot qui sonne trop grand : « hôtel » est ramené à sa mesure par la suite, un petit endroit à trois chambres. しかない veut dire « seulement trois », pas « au moins »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "毎日料理している＿＿＿、ごはんとみそしるだけだ。",
+          "tr": {
+            "en": "I cook every day, if you can call it that: it is just rice and miso soup.",
+            "fr": "Je cuisine tous les jours, si on peut appeler ça cuisiner : ce n'est que du riz et de la soupe miso."
+          },
+          "choices": [
+            "といっても",
+            "にしては",
+            "としても"
+          ],
+          "why": {
+            "en": "といっても scales the claim down: « cooking » is a big word for rice and miso soup. にしては judges a result surprising for what it is, and としても only grants a case for argument's sake.",
+            "fr": "といっても ramène l'affirmation à sa mesure : « cuisiner » est un grand mot pour du riz et de la soupe miso. にしては juge un résultat surprenant pour ce que c'est, et としても admet seulement un cas pour la discussion."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How near the station is it, really?",
+            "fr": "Est-ce vraiment près de la gare ?"
+          },
+          "jp": "駅から近いといっても、歩いて三十分はかかる。",
+          "tr": {
+            "en": "It is near the station, if you can call it that: it takes thirty minutes on foot.",
+            "fr": "C'est près de la gare, si l'on veut : il faut trente minutes à pied."
+          },
+          "choices": [
+            {
+              "en": "Not so near: the word is a stretch, it is a thirty-minute walk.",
+              "fr": "Pas si près : le mot est exagéré, c'est trente minutes de marche."
+            },
+            {
+              "en": "Very near: it takes only thirty minutes on foot.",
+              "fr": "Tout près : seulement trente minutes à pied."
+            },
+            {
+              "en": "Near if you walk fast: less than thirty minutes.",
+              "fr": "Près si l'on marche vite : moins de trente minutes."
+            }
+          ],
+          "why": {
+            "en": "といっても takes the word back: « near » is too strong, because the second half gives the real figure, thirty minutes on foot. The second half is always smaller than the word suggested.",
+            "fr": "といっても reprend le mot : « près » est trop fort, car la seconde moitié donne la vraie mesure, trente minutes à pied. Elle est toujours plus petite que ce que le mot laissait croire."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "去年、日本へ＿＿＿といっても、二日間だけだった。",
+          "tr": {
+            "en": "I went to Japan last year, though only for two days.",
+            "fr": "L'année dernière, j'ai fait un voyage au Japon, mais de deux jours seulement."
+          },
+          "choices": [
+            "行った",
+            "行く",
+            "行きたい"
+          ],
+          "why": {
+            "en": "The first half reports what really happened, so it takes the tense of the fact: 行った. 行く would be « though I say I will go », and 行きたい « though I say I want to go ».",
+            "fr": "La première moitié rapporte ce qui s'est vraiment passé, donc elle prend le temps du fait : 行った. 行く serait « même si je dis que j'irai », et 行きたい « même si je dis que je veux aller »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What state is the road in?",
+            "fr": "Dans quel état est la route ?"
+          },
+          "jp": "雨はやんだといっても、道はまだぬれたままだ。",
+          "tr": {
+            "en": "The rain has stopped, but the road is still wet.",
+            "fr": "La pluie s'est arrêtée, mais la route est encore mouillée."
+          },
+          "choices": [
+            {
+              "en": "Still wet: the rain stopping does not mean all is back to normal.",
+              "fr": "Encore mouillée : la fin de la pluie ne veut pas dire que tout est redevenu normal."
+            },
+            {
+              "en": "Dry: the rain stopped some time ago.",
+              "fr": "Sèche : la pluie s'est arrêtée il y a un moment."
+            },
+            {
+              "en": "Wet, because it is still raining.",
+              "fr": "Mouillée, parce qu'il pleut encore."
+            }
+          ],
+          "why": {
+            "en": "といっても grants the first half (« it has stopped ») and the second half qualifies it: that does not mean all is well, the road is still wet. It is not « even if I say it stopped ».",
+            "fr": "といっても admet la première moitié (« elle s'est arrêtée ») et la seconde la nuance : tout n'est pas réglé pour autant, la route est encore mouillée. Ce n'est pas « même si je dis qu'elle s'est arrêtée »."
+          }
+        }
+      ]
     }
   },
   {
@@ -28354,7 +28876,141 @@
             "fr": "Tu l'admires : ながらも. くせに le blâmerait, et ので ferait de son âge la raison."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the house like?",
+            "fr": "Comment est la maison ?"
+          },
+          "jp": "古いながらも、よく手入れされた家だ。",
+          "tr": {
+            "en": "Old though it is, it is a well-kept house.",
+            "fr": "Toute vieille qu'elle soit, c'est une maison bien entretenue."
+          },
+          "choices": [
+            {
+              "en": "Old, yet well kept.",
+              "fr": "Vieille, mais bien entretenue."
+            },
+            {
+              "en": "Old, and so badly kept.",
+              "fr": "Vieille, et donc mal entretenue."
+            },
+            {
+              "en": "Well kept precisely because it is old.",
+              "fr": "Bien entretenue justement parce qu'elle est vieille."
+            }
+          ],
+          "why": {
+            "en": "ながらも sets two halves against each other: old, yet well kept. It is not a cause in either direction (« old, so badly kept » or « old, so well kept »).",
+            "fr": "ながらも oppose deux moitiés : vieille, mais bien entretenue. Ce n'est pas une cause, dans aucun sens (« vieille, donc mal entretenue » ou « vieille, donc bien entretenue »)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "いやだと＿＿＿ながらも、さそいをことわれなかった。",
+          "tr": {
+            "en": "Even though I did not like the idea, I could not turn down the invitation.",
+            "fr": "Même si l'idée ne me plaisait pas, je n'ai pas pu refuser l'invitation."
+          },
+          "choices": [
+            "思い",
+            "思う",
+            "思って"
+          ],
+          "why": {
+            "en": "ながらも follows the ます-stem of a verb: 思います → 思い + ながらも. The dictionary form 思う and the て-form 思って cannot stand directly before it.",
+            "fr": "ながらも suit le radical en ます d'un verbe : 思います → 思い + ながらも. La forme du dictionnaire 思う et la forme en て 思って ne peuvent pas se placer directement devant."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What makes the mistake worth mentioning?",
+            "fr": "Qu'est-ce qui rend l'erreur digne d'être mentionnée ?"
+          },
+          "jp": "プロながらも、かんたんなミスをしてしまった。",
+          "tr": {
+            "en": "Though a professional, he made a simple mistake.",
+            "fr": "Bien que professionnel, il a fait une erreur toute simple."
+          },
+          "choices": [
+            {
+              "en": "He is a professional, which makes such a simple mistake unexpected.",
+              "fr": "C'est un professionnel : une erreur aussi simple est inattendue."
+            },
+            {
+              "en": "He is a beginner, so a simple mistake is only natural.",
+              "fr": "C'est un débutant : une erreur simple est donc naturelle."
+            },
+            {
+              "en": "He is a professional, so a simple mistake is easily forgiven.",
+              "fr": "C'est un professionnel : une erreur toute simple se pardonne donc facilement."
+            }
+          ],
+          "why": {
+            "en": "After a noun, ながらも still sets the halves against each other: a pro, yet a simple slip. The noun takes it directly, with no だ, and it is not « because he is a pro ».",
+            "fr": "Après un nom, ながらも oppose toujours les deux moitiés : un pro, et pourtant une erreur toute simple. Le nom le prend directement, sans だ, et ce n'est pas « parce que c'est un pro »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この町は＿＿＿ながらも、住みやすい。",
+          "tr": {
+            "en": "Inconvenient though it is, this town is pleasant to live in.",
+            "fr": "Bien que peu pratique, cette ville est agréable à vivre."
+          },
+          "choices": [
+            "不便",
+            "不便な",
+            "不便だ"
+          ],
+          "why": {
+            "en": "A な-adjective takes ながらも on its bare stem: 不便 + ながらも. 不便な is the form before a noun, and 不便だ is the plain sentence ending: neither fits before ながらも.",
+            "fr": "Un adjectif en な prend ながらも sur son radical nu : 不便 + ながらも. 不便な est la forme devant un nom, et 不便だ la fin de phrase neutre : aucune ne convient devant ながらも."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How do the two halves relate?",
+            "fr": "Quel lien y a-t-il entre les deux moitiés ?"
+          },
+          "jp": "ねむいと言いながらも、夜おそくまでゲームをしていた。",
+          "tr": {
+            "en": "Even though he said he was sleepy, he kept playing games until late at night.",
+            "fr": "Même s'il disait avoir sommeil, il a continué à jouer aux jeux vidéo jusque tard dans la nuit."
+          },
+          "choices": [
+            {
+              "en": "They clash: he said he was sleepy, yet he kept playing.",
+              "fr": "Elles s'opposent : il disait avoir sommeil, et pourtant il a continué à jouer."
+            },
+            {
+              "en": "One causes the other: he played because he was sleepy.",
+              "fr": "L'une cause l'autre : il a joué parce qu'il avait sommeil."
+            },
+            {
+              "en": "One follows the other: he said he was sleepy after playing until late.",
+              "fr": "L'une suit l'autre : il a dit avoir sommeil après avoir joué tard."
+            }
+          ],
+          "why": {
+            "en": "ながらも is the contrast « although »: what he said and what he did clash. It is not the ながら of two things done together, and nothing in it gives a cause or an order.",
+            "fr": "ながらも est le contraste « bien que » : ce qu'il disait et ce qu'il faisait s'opposent. Ce n'est pas le ながら de deux actions menées ensemble, et rien n'y donne une cause ou un ordre."
+          }
+        }
+      ]
     }
   },
   {
@@ -28549,7 +29205,136 @@
             "fr": "Le prix est le point douteux qu'on écarte : はともかく. はもちろん compterait le prix comme un atout ; を問わず dirait qu'il ne change rien."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What will the speaker do?",
+            "fr": "Que va faire celui qui parle ?"
+          },
+          "jp": "天気はともかく、約束したのだから行くよ。",
+          "tr": {
+            "en": "Never mind the weather: I promised, so I am going.",
+            "fr": "Peu importe la météo : j'ai promis, alors j'y vais."
+          },
+          "choices": [
+            {
+              "en": "Go: the weather is set aside, the promise decides.",
+              "fr": "Y aller : la météo est mise de côté, c'est la promesse qui décide."
+            },
+            {
+              "en": "Stay home: the weather is the main worry.",
+              "fr": "Rester chez soi : la météo est la principale inquiétude."
+            },
+            {
+              "en": "Go, but only if the weather is good.",
+              "fr": "Y aller, mais seulement s'il fait beau."
+            }
+          ],
+          "why": {
+            "en": "はともかく sets the weather aside as not the point, and what follows, the promise, is what counts. It is not a condition (« if the weather is good »).",
+            "fr": "はともかく met la météo de côté comme n'étant pas l'essentiel, et ce qui suit, la promesse, est ce qui compte. Ce n'est pas une condition (« s'il fait beau »)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ねだんの＿＿＿はともかく、この店のサービスはとてもいい。",
+          "tr": {
+            "en": "Never mind how expensive the prices are: this shop's service is very good.",
+            "fr": "Peu importe à quel point les prix sont élevés : le service de ce magasin est très bon."
+          },
+          "choices": [
+            "高さ",
+            "高い",
+            "高く"
+          ],
+          "why": {
+            "en": "はともかく follows a noun, so the adjective becomes the noun 高さ (« how high »). 高い and 高く are adjective forms and cannot take はともかく directly.",
+            "fr": "はともかく suit un nom : l'adjectif devient le nom 高さ (« à quel point c'est haut »). 高い et 高く sont des formes d'adjectif et ne peuvent pas prendre はともかく directement."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker want to praise?",
+            "fr": "Que veut féliciter celui qui parle ?"
+          },
+          "jp": "出来はともかく、がんばったことはほめてあげたい。",
+          "tr": {
+            "en": "Never mind how it turned out: I want to praise the effort.",
+            "fr": "Peu importe le résultat : je veux féliciter l'effort."
+          },
+          "choices": [
+            {
+              "en": "The effort, not the result.",
+              "fr": "L'effort, pas le résultat."
+            },
+            {
+              "en": "The result as well as the effort.",
+              "fr": "Le résultat autant que l'effort."
+            },
+            {
+              "en": "The result, not the effort.",
+              "fr": "Le résultat, pas l'effort."
+            }
+          ],
+          "why": {
+            "en": "はともかく sets the result aside, and the second half is what matters: the effort. はもちろん would take the result for granted and add the effort to it: « the result, of course, and the effort too ».",
+            "fr": "はともかく met le résultat de côté, et la seconde moitié est ce qui compte : l'effort. はもちろん tiendrait le résultat pour acquis et y ajouterait l'effort : « le résultat, bien sûr, et l'effort aussi »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks about the restaurant. The food was nothing special, but you loved the atmosphere. What do you say?",
+            "fr": "Un ami te demande comment était le restaurant. La cuisine n'avait rien de spécial, mais tu as adoré l'ambiance. Que dis-tu ?"
+          },
+          "choices": [
+            "料理はともかく、ふんいきはとてもよかったよ。",
+            "料理はもちろん、ふんいきもとてもよかったよ。",
+            "ふんいきはともかく、料理はとてもよかったよ。"
+          ],
+          "why": {
+            "en": "Set aside what was not great and give what you liked: 料理はともかく、ふんいきは…. 料理はもちろん would praise the food as well, and the third line swaps the two: it sets the atmosphere aside.",
+            "fr": "On met de côté ce qui n'était pas terrible et on donne ce qu'on a aimé : 料理はともかく、ふんいきは…. 料理はもちろん féliciterait aussi la cuisine, et la troisième ligne inverse les deux : elle met l'ambiance de côté."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about Tanaka?",
+            "fr": "Que dit la phrase à propos de Tanaka ?"
+          },
+          "jp": "田中さんはともかく、ほかの人はだれも来なかった。",
+          "tr": {
+            "en": "Tanaka aside, nobody else came.",
+            "fr": "Tanaka mis à part, personne d'autre n'est venu."
+          },
+          "choices": [
+            {
+              "en": "Nothing: he is left out of what is said about the others.",
+              "fr": "Rien : il est laissé de côté dans ce qui est dit des autres."
+            },
+            {
+              "en": "That he did not come either.",
+              "fr": "Que lui non plus n'est pas venu."
+            },
+            {
+              "en": "That he, above all, should have come.",
+              "fr": "Que lui, surtout, aurait dû venir."
+            }
+          ],
+          "why": {
+            "en": "A はともかく leaves A out of what follows: the claim is about the others, and Tanaka's case stays open, neither yes nor no. It is not « not Tanaka either », and it does not mean « above all ».",
+            "fr": "A はともかく laisse A hors de ce qui suit : l'affirmation porte sur les autres, et le cas de Tanaka reste ouvert, ni oui ni non. Ce n'est pas « Tanaka non plus », et cela ne veut pas dire « surtout »."
+          }
+        }
+      ]
     }
   },
   {
@@ -28746,7 +29531,136 @@
             "fr": "Tu prends le point de vue de l'enfant : から見ると. を見ると regarde l'enfant ; によると rapporte ce qu'on a dit."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why do the two halves of the sentence disagree?",
+            "fr": "Pourquoi les deux moitiés de la phrase ne disent-elles pas la même chose ?"
+          },
+          "jp": "店の人から見るとうれしいことでも、近所の人から見るとめいわくだ。",
+          "tr": {
+            "en": "What is welcome from the shopkeepers' side is a nuisance from the neighbours' side.",
+            "fr": "Ce qui fait plaisir du côté des commerçants est une gêne du côté des voisins."
+          },
+          "choices": [
+            {
+              "en": "It is the same thing, seen from two different standpoints.",
+              "fr": "C'est la même chose, vue de deux points de vue différents."
+            },
+            {
+              "en": "They are two different events, one at the shop and one next door.",
+              "fr": "Ce sont deux événements différents, l'un au magasin, l'autre à côté."
+            },
+            {
+              "en": "It happened first for the shop, then for the neighbours.",
+              "fr": "Cela s'est produit d'abord pour le magasin, puis pour les voisins."
+            }
+          ],
+          "why": {
+            "en": "から見ると names whose standpoint a judgment is made from, and another standpoint can reverse it. The fact is one: welcome from the shop's side, a nuisance from the neighbours'.",
+            "fr": "から見ると nomme le point de vue d'où l'on juge, et un autre point de vue peut renverser le jugement. Le fait est un seul : agréable pour les commerçants, une gêne pour les voisins."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この雲のようす＿＿＿、午後は雨になりそうだ。",
+          "tr": {
+            "en": "Judging from the look of these clouds, it looks like rain this afternoon.",
+            "fr": "À en juger par l'aspect de ces nuages, il va sans doute pleuvoir cet après-midi."
+          },
+          "choices": [
+            "から見ると",
+            "にとって",
+            "について"
+          ],
+          "why": {
+            "en": "Here the clouds are the evidence, so から見ると judges by what can be seen. にとって needs a person (« for someone »), and について only means « about ».",
+            "fr": "Ici, les nuages sont l'indice, donc から見ると juge d'après ce qu'on voit. にとって demande une personne (« pour quelqu'un »), et について veut seulement dire « au sujet de »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker basing this on?",
+            "fr": "Sur quoi celui qui parle s'appuie-t-il ?"
+          },
+          "jp": "くつのよごれ方から見ると、あの人は長く歩いてきたようだ。",
+          "tr": {
+            "en": "Judging by how dirty his shoes are, he seems to have walked a long way.",
+            "fr": "À en juger par la saleté de ses chaussures, il semble avoir marché longtemps."
+          },
+          "choices": [
+            {
+              "en": "The state of his shoes: an inference from what can be seen.",
+              "fr": "L'état de ses chaussures : une déduction d'après ce qu'on voit."
+            },
+            {
+              "en": "What he said: he told the speaker he had walked far.",
+              "fr": "Ce qu'il a dit : il a raconté qu'il avait beaucoup marché."
+            },
+            {
+              "en": "A rule: shoes this dirty always mean a long walk.",
+              "fr": "Une règle : des chaussures aussi sales signifient toujours une longue marche."
+            }
+          ],
+          "why": {
+            "en": "から見ると points at the evidence: the shoes give the clue, and ようだ marks the speaker's own inference. Nobody told them anything: that would be によると, « according to ».",
+            "fr": "から見ると désigne l'indice : les chaussures donnent la piste, et ようだ marque la déduction de celui qui parle. Personne ne le lui a dit : ce serait によると, « selon »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend worries that her son wants to study art, not business. Gently tell her how it looks from his side: doing what he likes is surely best.",
+            "fr": "Une amie s'inquiète : son fils veut étudier l'art, pas le commerce. Dis-lui doucement ce que cela donne de son côté à lui : faire ce qu'il aime est sûrement le mieux."
+          },
+          "choices": [
+            "本人から見ると、好きなことをするのがいちばんでしょうね。",
+            "親から見ると、好きなことをするのがいちばんでしょうね。",
+            "本人を見ると、好きなことをするのがいちばんでしょうね。"
+          ],
+          "why": {
+            "en": "The noun before から見ると is whose side it is: 本人, the son himself. 親から見ると would give the parents' side, her own, and 本人を見ると means looking at him, not seeing from his place.",
+            "fr": "Le nom devant から見ると dit de quel côté on se place : 本人, le fils lui-même. 親から見ると donnerait le côté des parents, le sien, et 本人を見ると veut dire le regarder, pas voir de sa place."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does 安全の面から見ると do in this sentence?",
+            "fr": "Que fait 安全の面から見ると dans cette phrase ?"
+          },
+          "jp": "安全の面から見ると、この道は子どもにはあぶない。",
+          "tr": {
+            "en": "From the point of view of safety, this road is dangerous for children.",
+            "fr": "Du point de vue de la sécurité, cette route est dangereuse pour les enfants."
+          },
+          "choices": [
+            {
+              "en": "It names the aspect the judgment is made on: safety.",
+              "fr": "Elle nomme l'aspect sur lequel on juge : la sécurité."
+            },
+            {
+              "en": "It names who is looking: the safe people.",
+              "fr": "Elle nomme celui qui regarde : les gens en sécurité."
+            },
+            {
+              "en": "It says the road can be seen from a safe place.",
+              "fr": "Elle dit qu'on peut voir la route depuis un endroit sûr."
+            }
+          ],
+          "why": {
+            "en": "Besides a person or a clue, から見ると can take an aspect: « from the safety side », a criterion to judge by. 見る is not literal looking, so it has nothing to do with a safe place.",
+            "fr": "Outre une personne ou un indice, から見ると peut prendre un aspect : « côté sécurité », un critère de jugement. 見る n'est pas un regard littéral : il n'y a pas d'endroit sûr d'où l'on voit."
+          }
+        }
+      ]
     }
   },
   {
@@ -28945,7 +29859,136 @@
             "fr": "Tu imagines ce qu'ils ressentent : にしたら. にしては veut dire « pour un agent, étonnamment » ; のことだから prédit à partir de quelqu'un qu'on connaît."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Whose feelings does the sentence give?",
+            "fr": "Les sentiments de qui la phrase donne-t-elle ?"
+          },
+          "jp": "お年よりにしたら、駅の階段は山のようなものだ。",
+          "tr": {
+            "en": "To an elderly person, the station stairs are like a mountain.",
+            "fr": "Pour une personne âgée, les escaliers de la gare sont comme une montagne."
+          },
+          "choices": [
+            {
+              "en": "The elderly person's: how the stairs feel to them.",
+              "fr": "Ceux d'une personne âgée : l'effet que lui font les escaliers."
+            },
+            {
+              "en": "The speaker's own: they find the stairs a mountain.",
+              "fr": "Ceux de la personne qui parle : elle trouve les escaliers énormes."
+            },
+            {
+              "en": "Nobody's in particular: it states how high the stairs are.",
+              "fr": "Ceux de personne en particulier : on indique la hauteur des escaliers."
+            }
+          ],
+          "why": {
+            "en": "The person before にしたら is the one whose shoes we stand in: here the elderly. The mountain is how the stairs feel to them, not the speaker's view and not a measurement.",
+            "fr": "La personne devant にしたら est celle dont on prend la place : ici, la personne âgée. La montagne, c'est l'effet que lui font les escaliers, pas l'avis de celui qui parle ni une mesure."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "新入社員＿＿＿、毎日知らない人と会うのはきんちょうするだろう。",
+          "tr": {
+            "en": "From a new employee's standpoint, meeting people he does not know every day must be nerve-racking.",
+            "fr": "Du point de vue d'un nouvel employé, rencontrer chaque jour des inconnus doit être stressant."
+          },
+          "choices": [
+            "にしたら",
+            "にしても",
+            "にしては"
+          ],
+          "why": {
+            "en": "にしたら voices how the situation feels from that person's side. にしても would mean « even a new employee », and にしては « for a new employee », a verdict against expectations.",
+            "fr": "にしたら exprime ce que la situation donne du côté de cette personne. にしても voudrait dire « même un nouvel employé », et にしては « pour un nouvel employé », un jugement contre les attentes."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does にしたら do here?",
+            "fr": "Que fait にしたら ici ?"
+          },
+          "jp": "あの人にしたら、思い出したくないできごとだったのだろう。",
+          "tr": {
+            "en": "From his side, it must have been something he did not want to remember.",
+            "fr": "De son côté, ce devait être un événement dont il ne voulait pas se souvenir."
+          },
+          "choices": [
+            {
+              "en": "It shows how it looks from his side: probably a painful memory.",
+              "fr": "Elle montre ce que c'est de son côté : sans doute un souvenir pénible."
+            },
+            {
+              "en": "It means « if you pick him »: a choice among people.",
+              "fr": "Elle veut dire « si tu le choisis, lui » : un choix parmi des personnes."
+            },
+            {
+              "en": "It sets a condition: if he did it, he would rather forget.",
+              "fr": "Elle pose une condition : s'il l'a fait, il préférerait oublier."
+            }
+          ],
+          "why": {
+            "en": "After a person, にしたら voices that person's standpoint (にすれば and にしてみれば say the same). It is not the « choose » of 〜にする, as in « if you pick him », nor a condition on what he did.",
+            "fr": "Après une personne, にしたら exprime son point de vue (にすれば et にしてみれば disent la même chose). Ce n'est pas le « choisir » de 〜にする, comme dans « si tu le prends, lui », ni une condition sur ce qu'il a fait."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend who runs a shop grumbles that customers take ages to decide. Tell your friend how it looks from the customers' side: choosing among so many things must be hard.",
+            "fr": "Un ami qui tient un magasin râle : les clients mettent un temps fou à se décider. Dis-lui ce que cela donne du côté des clients : choisir parmi tant de choses doit être difficile."
+          },
+          "choices": [
+            "お客さんにしたら、たくさんの中から選ぶのはむずかしいでしょうね。",
+            "店にしたら、たくさんの中から選ぶのはむずかしいでしょうね。",
+            "お客さんにしては、たくさんの中から選ぶのはむずかしいでしょうね。"
+          ],
+          "why": {
+            "en": "The person whose side we take stands right before にしたら: お客さんにしたら. 店にしたら gives the shop's side, your friend's own, and お客さんにしては judges against expectations (« for a customer »).",
+            "fr": "La personne dont on prend le parti se place juste devant にしたら : お客さんにしたら. 店にしたら donne le côté du magasin, celui de ton ami, et お客さんにしては juge contre les attentes (« pour un client »)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Whose side does にしたら give here?",
+            "fr": "Le point de vue de qui にしたら donne-t-il ici ?"
+          },
+          "jp": "わたしにしたら、ほんのじょうだんのつもりだった。",
+          "tr": {
+            "en": "From my side, it was meant as nothing more than a joke.",
+            "fr": "De mon côté, ce n'était qu'une plaisanterie."
+          },
+          "choices": [
+            {
+              "en": "The speaker's own: it explains how they meant it.",
+              "fr": "Celui de la personne qui parle : elle explique ce qu'elle voulait dire."
+            },
+            {
+              "en": "The other person's: they took it as a joke.",
+              "fr": "Celui de l'autre personne : elle l'a pris pour une plaisanterie."
+            },
+            {
+              "en": "A bystander's: someone watching saw it as a joke.",
+              "fr": "Celui d'un témoin : quelqu'un qui regardait y a vu une plaisanterie."
+            }
+          ],
+          "why": {
+            "en": "にしたら is not only for guessing at others' feelings: after わたし it gives the speaker's own side, often to explain how something was meant.",
+            "fr": "にしたら ne sert pas seulement à deviner les sentiments des autres : après わたし, il donne le point de vue de celui qui parle, souvent pour expliquer ce qu'il voulait dire."
+          }
+        }
+      ]
     }
   },
   {
@@ -29178,7 +30221,141 @@
             "fr": "Toute la période : にわたって. にかけて a besoin de son から pour nommer deux bornes, et ごとに voudrait dire toutes les trois semaines."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the river relate to the three prefectures?",
+            "fr": "Quel rapport y a-t-il entre le fleuve et les trois préfectures ?"
+          },
+          "jp": "その川は、三つの県にわたってながれている。",
+          "tr": {
+            "en": "The river runs across three prefectures.",
+            "fr": "Le fleuve traverse trois préfectures."
+          },
+          "choices": [
+            {
+              "en": "It runs through all three, from one end to the other.",
+              "fr": "Il traverse les trois, d'un bout à l'autre."
+            },
+            {
+              "en": "It marks the border between the three.",
+              "fr": "Il marque la limite entre les trois."
+            },
+            {
+              "en": "It flows only in the third one.",
+              "fr": "Il ne coule que dans la troisième."
+            }
+          ],
+          "why": {
+            "en": "にわたって covers a wide stretch of space from end to end: the river runs through all three prefectures. It is not their border, and it is not just one of them.",
+            "fr": "にわたって couvre une vaste étendue d'un bout à l'autre : le fleuve traverse les trois préfectures. Ce n'est pas leur limite, ni une seule d'entre elles."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "その国では、同じような祭りが北から南＿＿＿行われている。",
+          "tr": {
+            "en": "In that country, similar festivals are held from north to south.",
+            "fr": "Dans ce pays, des fêtes semblables ont lieu du nord au sud."
+          },
+          "choices": [
+            "にわたって",
+            "にわたる",
+            "にわたった"
+          ],
+          "why": {
+            "en": "Before a verb the span takes にわたって. にわたる qualifies a noun that follows (三年にわたる工事), and にわたった would end a sentence on its own (« the talks lasted three days »).",
+            "fr": "Devant un verbe, l'étendue prend にわたって. にわたる qualifie un nom qui suit (三年にわたる工事), et にわたった terminerait une phrase à lui seul (« les discussions ont duré trois jours »)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about his knowledge?",
+            "fr": "Que dit la phrase de ses connaissances ?"
+          },
+          "jp": "かれは、歴史から科学まで、いろいろな分野にわたって知識を持っている。",
+          "tr": {
+            "en": "He has knowledge across many fields, from history to science.",
+            "fr": "Il a des connaissances dans de nombreux domaines, de l'histoire aux sciences."
+          },
+          "choices": [
+            {
+              "en": "It is broad: it spreads over many fields.",
+              "fr": "Elles sont vastes : elles s'étendent sur de nombreux domaines."
+            },
+            {
+              "en": "It is deep: it goes very far in a single field.",
+              "fr": "Elles sont profondes : elles vont très loin dans un seul domaine."
+            },
+            {
+              "en": "It came to him through people in many fields.",
+              "fr": "Elles lui sont venues par des gens de domaines variés."
+            }
+          ],
+          "why": {
+            "en": "にわたって also covers a span of scope, not only time or space: many fields, from history to science. That is breadth, not depth, and not a channel (を通じて).",
+            "fr": "にわたって couvre aussi une étendue de domaines, pas seulement de temps ou d'espace : de nombreux champs, de l'histoire aux sciences. C'est de l'ampleur, pas de la profondeur, et pas un canal (を通じて)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the sentence?",
+            "fr": "Quelle particule complète la phrase ?"
+          },
+          "jp": "その習慣は、日本全国＿＿＿わたって見られる。",
+          "tr": {
+            "en": "This custom can be seen across the whole of Japan.",
+            "fr": "Cette coutume s'observe dans tout le Japon."
+          },
+          "choices": [
+            "に",
+            "を",
+            "で"
+          ],
+          "why": {
+            "en": "The span takes に: 全国にわたって. 渡る on its own takes を (橋を渡る, « cross a bridge »), which is why を tempts, but this phrase does not use it, and で is not part of it either.",
+            "fr": "L'étendue prend に : 全国にわたって. 渡る seul prend を (橋を渡る, « traverser un pont »), d'où la tentation de を, mais cette expression ne l'emploie pas, et で n'en fait pas partie non plus."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How long did the speaker keep this up?",
+            "fr": "Pendant combien de temps cela a-t-il duré ?"
+          },
+          "jp": "三か月にわたって、わたしは毎朝同じ電車に乗った。",
+          "tr": {
+            "en": "For three whole months, I took the same train every morning.",
+            "fr": "Pendant trois mois entiers, j'ai pris le même train chaque matin."
+          },
+          "choices": [
+            {
+              "en": "Day after day, for the whole three months.",
+              "fr": "Jour après jour, pendant les trois mois entiers."
+            },
+            {
+              "en": "Once every three months.",
+              "fr": "Une fois tous les trois mois."
+            },
+            {
+              "en": "Only in the third month.",
+              "fr": "Seulement pendant le troisième mois."
+            }
+          ],
+          "why": {
+            "en": "にわたって covers the whole stretch, from start to end: every morning for three months. It is not « every three months » (ごとに) and not a single point inside the span.",
+            "fr": "にわたって couvre toute la durée, du début à la fin : chaque matin pendant trois mois. Ce n'est pas « tous les trois mois » (ごとに) ni un seul moment à l'intérieur de la durée."
+          }
+        }
+      ]
     }
   },
   {
@@ -29409,7 +30586,136 @@
             "fr": "Les familles sont le cœur, d'autres viennent aussi : を中心に. だけ exclurait les autres ; について nomme un sujet, pas un groupe."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When are there the most tourists?",
+            "fr": "Quand y a-t-il le plus de touristes ?"
+          },
+          "jp": "観光客は、八月を中心に、七月から九月にかけて多い。",
+          "tr": {
+            "en": "Tourists are most numerous around August, from July to September.",
+            "fr": "Les touristes sont nombreux surtout autour d'août, de juillet à septembre."
+          },
+          "choices": [
+            {
+              "en": "Around August, with many in July and September too.",
+              "fr": "Autour d'août, avec beaucoup aussi en juillet et en septembre."
+            },
+            {
+              "en": "Only in August.",
+              "fr": "Seulement en août."
+            },
+            {
+              "en": "Evenly in July, August and September, with no peak.",
+              "fr": "De façon égale en juillet, août et septembre, sans pic."
+            }
+          ],
+          "why": {
+            "en": "を中心に names the core: August is the heart of the period, with July and September around it. It does not say « only August », and it does not describe an even spread.",
+            "fr": "を中心に nomme le cœur : août est le centre de la période, avec juillet et septembre autour. Cela ne veut pas dire « seulement août », ni une répartition égale."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the sentence?",
+            "fr": "Quelle particule complète la phrase ?"
+          },
+          "jp": "この歌は、十代＿＿＿中心に、世界中で人気がある。",
+          "tr": {
+            "en": "This song is popular all over the world, mainly with teenagers.",
+            "fr": "Cette chanson est populaire dans le monde entier, surtout chez les adolescents."
+          },
+          "choices": [
+            "を",
+            "が",
+            "は"
+          ],
+          "why": {
+            "en": "The pattern is noun + を + 中心に: the noun is what the popularity is centred on. が and は do not fit before 中心に in this fixed phrase.",
+            "fr": "Le motif est nom + を + 中心に : le nom est ce autour de quoi la popularité se concentre. が et は ne conviennent pas devant 中心に dans cette expression figée."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Where are the shops?",
+            "fr": "Où sont les magasins ?"
+          },
+          "jp": "駅を中心に、はんけい一キロ以内に店が二十ある。",
+          "tr": {
+            "en": "There are twenty shops within a one-kilometre radius of the station.",
+            "fr": "Il y a vingt magasins dans un rayon d'un kilomètre autour de la gare."
+          },
+          "choices": [
+            {
+              "en": "Within a kilometre all around the station.",
+              "fr": "Dans un rayon d'un kilomètre tout autour de la gare."
+            },
+            {
+              "en": "Only at the station itself.",
+              "fr": "Seulement à la gare même."
+            },
+            {
+              "en": "Along a one-kilometre road leading from the station.",
+              "fr": "Le long d'une route d'un kilomètre qui part de la gare."
+            }
+          ],
+          "why": {
+            "en": "を中心に can be a literal centre: the station is the middle of a circle and はんけい says how far it reaches. It is not « only at the station », and it is not a line leading away.",
+            "fr": "を中心に peut être un centre au sens propre : la gare est le milieu d'un cercle et はんけい dit jusqu'où il s'étend. Ce n'est pas « seulement à la gare », ni une ligne qui s'éloigne."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks who uses the app. Most users are teenagers, but adults use it too. What do you say?",
+            "fr": "Un ami te demande qui utilise l'appli. La plupart des utilisateurs sont des adolescents, mais des adultes s'en servent aussi. Que réponds-tu ?"
+          },
+          "choices": [
+            "十代を中心に、大人も使っていますよ。",
+            "大人を中心に、十代も使っていますよ。",
+            "十代を中心に、大人は使っていませんよ。"
+          ],
+          "why": {
+            "en": "The core comes right before を中心に: 十代, with the others still included (大人も). The second line swaps core and others, and the third turns « mainly » into « only », which を中心に never says.",
+            "fr": "Le cœur se place juste devant を中心に : 十代, les autres restant inclus (大人も). La deuxième ligne inverse le cœur et les autres, et la troisième change « surtout » en « seulement », ce que を中心に ne dit jamais."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What kind of person is he?",
+            "fr": "Quel genre de personne est-ce ?"
+          },
+          "jp": "あの人は、いつも自分を中心に考える人だ。",
+          "tr": {
+            "en": "He is someone who always thinks with himself at the centre.",
+            "fr": "C'est quelqu'un qui pense toujours en se plaçant au centre."
+          },
+          "choices": [
+            {
+              "en": "Self-centred: he puts himself first.",
+              "fr": "Égocentrique : il se met toujours en premier."
+            },
+            {
+              "en": "A leader: he is at the centre of the group.",
+              "fr": "Un chef : il est au centre du groupe."
+            },
+            {
+              "en": "Balanced: he thinks of himself and others equally.",
+              "fr": "Équilibré : il pense autant à lui qu'aux autres."
+            }
+          ],
+          "why": {
+            "en": "自分を中心に考える puts oneself at the core of one's thinking: self-centred. The core is the thinking, not a role in a group, and the others come second, so it is not balanced.",
+            "fr": "自分を中心に考える met soi-même au cœur de sa réflexion : égocentrique. Le cœur, c'est la pensée, pas un rôle dans un groupe, et les autres passent après, donc ce n'est pas équilibré."
+          }
+        }
+      ]
     }
   },
   {
