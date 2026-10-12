@@ -5910,7 +5910,127 @@
             "fr": "Un petit geste, un mauvais résultat qu'on regrette : forme en た + ばかりに. ばかりだから dirait qu'on venait tout juste de l'acheter ; おかげで attribue un bon résultat."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、大切な書類をなくしてしまった。",
+          "tr": {
+            "en": "Just because I left my bag on the train, I lost some important papers.",
+            "fr": "Simplement parce que j'ai oublié mon sac dans le train, j'ai perdu des papiers importants."
+          },
+          "choices": [
+            "かばんを電車に置き忘れたばかりに",
+            "かばんを電車に置き忘れましたばかりに",
+            "かばんを電車に置き忘れてばかりに"
+          ],
+          "why": {
+            "en": "Before ばかりに the verb stays in the plain form, and the slip is already made: 置き忘れた. The polite 置き忘れました and the て-form 置き忘れて cannot stand before it.",
+            "fr": "Devant ばかりに, le verbe reste à la forme neutre, et l'erreur est faite : 置き忘れた. La forme polie 置き忘れました et la forme en て ne peuvent pas se mettre devant."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the lie and the lost friend?",
+            "fr": "Que dit celui qui parle du mensonge et de l'ami perdu ?"
+          },
+          "jp": "ほんの小さなうそをついたばかりに、友だちをなくしてしまった。",
+          "tr": {
+            "en": "Just because I told one tiny lie, I lost a friend.",
+            "fr": "Pour avoir dit un tout petit mensonge, j'ai perdu un ami."
+          },
+          "choices": [
+            {
+              "en": "A tiny lie cost a friend, and the speaker regrets it.",
+              "fr": "Un tout petit mensonge a coûté un ami, et celui qui parle le regrette."
+            },
+            {
+              "en": "The speaker had only just told a lie when the friend left.",
+              "fr": "Celui qui parle venait de mentir quand l'ami est parti."
+            },
+            {
+              "en": "The speaker lied over and over, and that is why the friend left.",
+              "fr": "Celui qui parle a menti sans cesse, et c'est pour cela que l'ami est parti."
+            }
+          ],
+          "why": {
+            "en": "ばかりに ties a small cause to a big bad result, with regret: one tiny lie, a friend lost. It is not たばかり (« had just done »), and the cause is not a big one.",
+            "fr": "ばかりに relie une petite cause à un grand mauvais résultat, avec regret : un petit mensonge, un ami perdu. Ce n'est pas たばかり (« venir de »), et la cause n'est pas grande."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You told one friend a small secret, and now everybody knows it. You tell another friend how sorry you are: such a small thing, such a bad result.",
+            "fr": "Tu as confié un petit secret à un seul ami, et maintenant tout le monde le sait. Tu dis à un autre ami ton regret : une si petite chose, un si mauvais résultat."
+          },
+          "choices": [
+            "ちょっと話したばかりに、みんなに知られてしまった。",
+            "ちょっと話したばかりに、みんなにほめられた。",
+            "ちょっと話したおかげで、みんなに知られてしまった。"
+          ],
+          "why": {
+            "en": "ばかりに looks back with regret on a small act and its bad result. It cannot lead to praise, and おかげで thanks a cause for a good result: it does not fit a secret that got out.",
+            "fr": "ばかりに regrette un petit acte et son mauvais résultat. Il ne peut pas mener à des éloges, et おかげで remercie une cause pour un bon résultat : il ne va pas avec un secret divulgué."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、いい仕事をのがしてしまう。",
+          "tr": {
+            "en": "Just because I can't speak English, I keep losing good jobs.",
+            "fr": "Simplement parce que je ne parle pas anglais, je laisse échapper de bons emplois."
+          },
+          "choices": [
+            "英語が話せないばかりに",
+            "英語が話せなくばかりに",
+            "英語が話せないのばかりに"
+          ],
+          "why": {
+            "en": "A negative ends in ない, and ばかりに follows it directly: 話せないばかりに. 話せなく is the く-form used before another word, and 話せないの adds a の that does not belong.",
+            "fr": "Une négation finit par ない, et ばかりに vient juste après : 話せないばかりに. 話せなく est la forme en く qui sert devant un autre mot, et 話せないの ajoute un の qui n'a rien à faire là."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker feel about being a fast runner?",
+            "fr": "Que ressent celui qui parle d'être un coureur rapide ?"
+          },
+          "jp": "足がはやいばかりに、毎年リレーの選手にされて、休みがなくなった。",
+          "tr": {
+            "en": "Just because I'm a fast runner, I get made a relay runner every year, and my free time is gone.",
+            "fr": "Simplement parce que je cours vite, on me met chaque année dans l'équipe de relais, et je n'ai plus de temps libre."
+          },
+          "choices": [
+            {
+              "en": "It is a nuisance: being fast has brought the speaker trouble.",
+              "fr": "C'est un ennui : courir vite lui a apporté des soucis."
+            },
+            {
+              "en": "It is a pleasure: being fast has brought the speaker an honour.",
+              "fr": "C'est un plaisir : courir vite lui a valu un honneur."
+            },
+            {
+              "en": "The speaker only states a fact, with no feeling about it.",
+              "fr": "Celui qui parle constate un fait, sans rien ressentir à ce sujet."
+            }
+          ],
+          "why": {
+            "en": "ばかりに follows a trait that looks good here, but the result is bad: free time is gone. The regret is the point. A pleased tone would be おかげで, and a flat one ために.",
+            "fr": "ばかりに suit un trait qui semble bon, mais le résultat est mauvais : le temps libre a disparu. C'est le regret qui compte. Un ton content serait おかげで, et un ton neutre ために."
+          }
+        }
+      ]
     }
   },
   {
@@ -6152,7 +6272,132 @@
             "fr": "のみならず étend le pass au métro aussi. のみ et に限り le restreignent à un seul des deux."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この商品は＿＿＿、海外でも売れている。",
+          "tr": {
+            "en": "This product sells not only in this country but abroad as well.",
+            "fr": "Ce produit se vend non seulement dans le pays, mais aussi à l'étranger."
+          },
+          "choices": [
+            "国内のみならず",
+            "国内ののみならず",
+            "国内だけならず"
+          ],
+          "why": {
+            "en": "A noun takes のみならず directly, with no の: 国内のみならず. 国内ののみならず adds a の, and 国内だけならず mixes だけ with ならず: it is だけでなく, or のみならず.",
+            "fr": "Un nom prend のみならず directement, sans の : 国内のみならず. 国内ののみならず ajoute un の, et 国内だけならず mélange だけ et ならず : c'est だけでなく, ou のみならず."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What do the customers like about the curry?",
+            "fr": "Qu'est-ce que les clients aiment dans ce curry ?"
+          },
+          "jp": "この店のカレーは、味のみならず、量にもみんな満足している。",
+          "tr": {
+            "en": "Everyone is pleased with this shop's curry, not only with the taste but with the amount too.",
+            "fr": "Tout le monde est content du curry de ce restaurant, non seulement du goût, mais aussi de la quantité."
+          },
+          "choices": [
+            {
+              "en": "Both the taste and the amount.",
+              "fr": "Le goût et la quantité, les deux."
+            },
+            {
+              "en": "Only the taste: the amount is not liked.",
+              "fr": "Seulement le goût : la quantité ne plaît pas."
+            },
+            {
+              "en": "The amount, more than the taste.",
+              "fr": "La quantité, plus que le goût."
+            }
+          ],
+          "why": {
+            "en": "のみならず adds: A, and B as well. Do not read のみ as « only » and ならず as « not »: the taste is not the only thing, and the も after 量に says the amount pleases too.",
+            "fr": "のみならず ajoute : A, et B aussi. Ne lis pas のみ comme « seulement » et ならず comme « pas » : le goût n'est pas seul, et le も après 量に dit que la quantité plaît aussi."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "彼は英語を＿＿＿、書くことも上手だ。",
+          "tr": {
+            "en": "He not only speaks English, he writes it well too.",
+            "fr": "Non seulement il parle anglais, mais il l'écrit bien aussi."
+          },
+          "choices": [
+            "話すのみならず",
+            "話しますのみならず",
+            "話してのみならず"
+          ],
+          "why": {
+            "en": "A verb goes in the plain dictionary form before のみならず: 話すのみならず. The polite 話します and the て-form 話して are not used in front of it.",
+            "fr": "Un verbe se met à la forme neutre du dictionnaire devant のみならず : 話すのみならず. La forme polie 話します et la forme en て ne se mettent pas devant."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker hold against him?",
+            "fr": "Que reproche celui qui parle à cet homme ?"
+          },
+          "jp": "彼は約束を忘れたのみならず、あやまりもしなかった。",
+          "tr": {
+            "en": "Not only did he forget the promise, he did not even apologise.",
+            "fr": "Non seulement il a oublié la promesse, mais il ne s'est même pas excusé."
+          },
+          "choices": [
+            {
+              "en": "Two things: he forgot the promise, and he did not apologise.",
+              "fr": "Deux choses : il a oublié la promesse, et il ne s'est pas excusé."
+            },
+            {
+              "en": "He forgot the promise, but he did apologise.",
+              "fr": "Il a oublié la promesse, mais il s'est excusé."
+            },
+            {
+              "en": "He remembered the promise, but he did not apologise.",
+              "fr": "Il s'est rappelé la promesse, mais il ne s'est pas excusé."
+            }
+          ],
+          "why": {
+            "en": "のみならず piles up two faults: A, and B too. The ず of ならず does not turn 忘れた into « did not forget »: both the forgetting and the missing apology count against him.",
+            "fr": "のみならず additionne deux torts : A, et B aussi. Le ず de ならず ne transforme pas 忘れた en « n'a pas oublié » : l'oubli et l'absence d'excuses pèsent contre lui."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、道もこんでいて、ひどい旅行だった。",
+          "tr": {
+            "en": "Not only was the weather bad, the roads were crowded too: it was a terrible trip.",
+            "fr": "Non seulement il a fait mauvais, mais les routes étaient encombrées : le voyage a été affreux."
+          },
+          "choices": [
+            "天気が悪かったのみならず",
+            "天気が悪いだったのみならず",
+            "天気が悪くのみならず"
+          ],
+          "why": {
+            "en": "An い-adjective in the past takes its plain past form before のみならず: 悪かった. 悪いだった puts だった on an い-adjective, and 悪く is the stem, which cannot stand in front of it.",
+            "fr": "Un adjectif en い au passé prend sa forme neutre du passé devant のみならず : 悪かった. 悪いだった met だった sur un adjectif en い, et 悪く est la forme en く, qui ne peut pas se mettre devant."
+          }
+        }
+      ]
     }
   },
   {
@@ -6358,7 +6603,136 @@
             "fr": "Le tarif s'ajuste à la taille : に応じて. にかかわらず dirait que la taille ne change rien ; のわりに dit « pas cher pour sa taille »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How should you choose the bag?",
+            "fr": "Comment faut-il choisir le sac ?"
+          },
+          "jp": "ごみの量に応じて、ごみ袋の大きさを選んでください。",
+          "tr": {
+            "en": "Please choose the size of the garbage bag according to the amount of garbage.",
+            "fr": "Choisissez la taille du sac poubelle selon la quantité de déchets."
+          },
+          "choices": [
+            {
+              "en": "A big bag for a lot of garbage, a small one for a little.",
+              "fr": "Un grand sac pour beaucoup de déchets, un petit pour peu."
+            },
+            {
+              "en": "Always the same size, whatever the amount of garbage.",
+              "fr": "Toujours la même taille, quelle que soit la quantité de déchets."
+            },
+            {
+              "en": "Throw away only as much garbage as the bag you already have holds.",
+              "fr": "Ne jette que la quantité de déchets que le sac que tu as déjà peut contenir."
+            }
+          ],
+          "why": {
+            "en": "に応じて fits the second thing to the first: the bag is chosen to match the amount of garbage. It is not « whatever the amount » (にかかわらず), and the garbage does not adapt to the bag.",
+            "fr": "に応じて ajuste le second élément au premier : le sac est choisi d'après la quantité de déchets. Ce n'est pas « quelle que soit la quantité » (にかかわらず), et les déchets ne s'adaptent pas au sac."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、サービスの内容をかえています。",
+          "tr": {
+            "en": "We change the content of the service according to the customer's budget.",
+            "fr": "Nous changeons le contenu du service selon le budget du client."
+          },
+          "choices": [
+            "お客さまの予算に応じて",
+            "お客さまの予算に応じた",
+            "お客さまの予算に応じる"
+          ],
+          "why": {
+            "en": "Before a verb, に応じて modifies the whole action: 予算に応じて、かえている. に応じた goes before a noun (予算に応じたサービス), and 応じる is the dictionary form, which cannot stand before the comma.",
+            "fr": "Devant un verbe, に応じて complète toute l'action : 予算に応じて、かえている. に応じた se met devant un nom (予算に応じたサービス), et 応じる est la forme du dictionnaire, qui ne peut pas précéder la virgule."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who acted first?",
+            "fr": "Qui a agi en premier ?"
+          },
+          "jp": "市のよびかけに応じて、たくさんの人がそうじに参加した。",
+          "tr": {
+            "en": "In response to the city's appeal, many people took part in the clean-up.",
+            "fr": "Répondant à l'appel de la ville, beaucoup de gens ont participé au nettoyage."
+          },
+          "choices": [
+            {
+              "en": "The city called for help, and then people joined.",
+              "fr": "La ville a lancé un appel, puis les gens sont venus."
+            },
+            {
+              "en": "People gathered first, and the city then joined them.",
+              "fr": "Les gens se sont réunis d'abord, et la ville les a ensuite rejoints."
+            },
+            {
+              "en": "The city changed its appeal to match the number of people.",
+              "fr": "La ville a modifié son appel selon le nombre de gens."
+            }
+          ],
+          "why": {
+            "en": "に応じて can also be « in response to »: the appeal comes first and the people answer it. What stands before に応じて is what is answered, or what is matched, and it comes first.",
+            "fr": "に応じて peut aussi vouloir dire « en réponse à » : l'appel vient d'abord et les gens y répondent. Ce qui précède に応じて est ce à quoi l'on répond, ou ce sur quoi l'on s'aligne, et cela vient en premier."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are on the event staff. The number of chairs will be set by how many people come. You explain this to a coworker.",
+            "fr": "Tu fais partie de l'équipe d'un événement. Le nombre de chaises sera fixé d'après le nombre de personnes qui viennent. Tu l'expliques à un collègue."
+          },
+          "choices": [
+            "来る人の数に応じて、いすの数を用意します。",
+            "いすの数に応じて、来る人の数を決めます。",
+            "来る人の数にかかわらず、いすの数は決まっています。"
+          ],
+          "why": {
+            "en": "に応じて adjusts the second thing to the first: the chairs follow the number of people. In the second line it is the people who follow the chairs, and にかかわらず says the number of people makes no difference.",
+            "fr": "に応じて ajuste le second élément au premier : les chaises suivent le nombre de personnes. Dans la deuxième phrase, ce sont les personnes qui suivent les chaises, et にかかわらず dit que le nombre de personnes ne change rien."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When may you use a dictionary?",
+            "fr": "Quand a-t-on le droit d'utiliser un dictionnaire ?"
+          },
+          "jp": "必要に応じて、辞書を使ってもかまいません。",
+          "tr": {
+            "en": "You may use a dictionary as needed.",
+            "fr": "On peut utiliser un dictionnaire selon le besoin."
+          },
+          "choices": [
+            {
+              "en": "When there is a need for it.",
+              "fr": "Quand on en a besoin."
+            },
+            {
+              "en": "Always, whether it is needed or not.",
+              "fr": "Toujours, qu'on en ait besoin ou non."
+            },
+            {
+              "en": "You must use it, because it is necessary.",
+              "fr": "Il faut l'utiliser, parce que c'est nécessaire."
+            }
+          ],
+          "why": {
+            "en": "必要に応じて means « as the need arises »: the use of the dictionary is fitted to the need. It is permission, not an order, and it is not « always », which would be にかかわらず.",
+            "fr": "必要に応じて veut dire « selon le besoin » : l'emploi du dictionnaire s'ajuste au besoin. C'est une permission, pas un ordre, et ce n'est pas « toujours », ce que dirait にかかわらず."
+          }
+        }
+      ]
     }
   },
   {
@@ -6557,7 +6931,141 @@
             "fr": "にかかわらず dit que le prix ne change rien. にもかかわらず demande un fait réel qu'on brave ; によっては dit « dans certains cas seulement »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker do on a freezing morning?",
+            "fr": "Que fait celui qui parle par un matin glacial ?"
+          },
+          "jp": "気温にかかわらず、わたしは毎朝かならずプールで泳ぐ。",
+          "tr": {
+            "en": "Whatever the temperature, I always swim in the pool every morning.",
+            "fr": "Quelle que soit la température, je nage toujours à la piscine chaque matin."
+          },
+          "choices": [
+            {
+              "en": "The speaker swims anyway, as on every other morning.",
+              "fr": "Celui qui parle nage quand même, comme tous les autres matins."
+            },
+            {
+              "en": "The speaker stays at home because it is too cold.",
+              "fr": "Celui qui parle reste chez soi, parce qu'il fait trop froid."
+            },
+            {
+              "en": "The speaker swims only on cold mornings.",
+              "fr": "Celui qui parle ne nage que les matins froids."
+            }
+          ],
+          "why": {
+            "en": "にかかわらず names something that makes no difference: the temperature does not change the habit. It is not « it depends on the temperature », and not « only when it is cold ».",
+            "fr": "にかかわらず nomme ce qui ne change rien : la température ne change pas l'habitude. Ce n'est pas « cela dépend de la température », ni « seulement quand il fait froid »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、会費は一人三千円です。",
+          "tr": {
+            "en": "Whether you drink or not, the party fee is 3,000 yen per person.",
+            "fr": "Que l'on boive ou non, la participation à la fête est de 3 000 yens par personne."
+          },
+          "choices": [
+            "飲む飲まないにかかわらず",
+            "飲むないにかかわらず",
+            "飲んで飲まないにかかわらず"
+          ],
+          "why": {
+            "en": "The pair is the verb and its negative side by side, then にかかわらず: 飲む飲まない. 飲むない sticks ない on the dictionary form (like 見るない), and a て-form cannot make the pair.",
+            "fr": "La paire est le verbe et sa négation côte à côte, puis にかかわらず : 飲む飲まない. 飲むない colle ない à la forme du dictionnaire (comme 見るない), et une forme en て ne peut pas former la paire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does being a member change?",
+            "fr": "Qu'est-ce que le fait d'être membre change ?"
+          },
+          "jp": "会員かどうかにかかわらず、だれでも入れるが、料金は会員のほうが安い。",
+          "tr": {
+            "en": "Whether you are a member or not, anyone can enter, but the fee is cheaper for members.",
+            "fr": "Que l'on soit membre ou non, tout le monde peut entrer, mais le tarif est moins cher pour les membres."
+          },
+          "choices": [
+            {
+              "en": "Only the fee: members pay less.",
+              "fr": "Seulement le tarif : les membres paient moins."
+            },
+            {
+              "en": "Whether you can get in at all.",
+              "fr": "La possibilité même d'entrer."
+            },
+            {
+              "en": "Nothing: the fee is the same for everyone.",
+              "fr": "Rien : le tarif est le même pour tous."
+            }
+          ],
+          "why": {
+            "en": "The にかかわらず clause covers entry only: membership makes no difference to getting in. The fee is a separate matter, said after が, and it does differ.",
+            "fr": "La proposition en にかかわらず ne couvre que l'entrée : être membre ne change rien à l'accès. Le tarif est un autre sujet, dit après が, et lui diffère bien."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、ネットがあれば仕事ができる。",
+          "tr": {
+            "en": "Regardless of the place, you can work if there is an internet connection.",
+            "fr": "Quel que soit le lieu, on peut travailler s'il y a une connexion internet."
+          },
+          "choices": [
+            "場所にかかわらず",
+            "場所をかかわらず",
+            "場所のかかわらず"
+          ],
+          "why": {
+            "en": "The noun takes に and the verb is かかわらず: 場所にかかわらず. 場所を comes from を問わず, a different phrase, and 場所の does not link to かかわらず.",
+            "fr": "Le nom prend に et le verbe est かかわらず : 場所にかかわらず. 場所を vient de を問わず, une autre tournure, et 場所の ne se lie pas à かかわらず."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Whose opinions should the group listen to?",
+            "fr": "À quelles opinions le groupe doit-il prêter l'oreille ?"
+          },
+          "jp": "だれが言ったかにかかわらず、いい意見はみんなで聞くべきだ。",
+          "tr": {
+            "en": "Whoever said it, everyone should listen to a good opinion.",
+            "fr": "Quel que soit celui qui l'a dit, tout le monde devrait écouter une bonne opinion."
+          },
+          "choices": [
+            {
+              "en": "Any good opinion, whoever voices it.",
+              "fr": "Toute bonne opinion, quel que soit celui qui l'exprime."
+            },
+            {
+              "en": "Only the opinions of the group's leaders.",
+              "fr": "Seulement celles des responsables du groupe."
+            },
+            {
+              "en": "Opinions are heard according to who is speaking.",
+              "fr": "Les opinions, selon la personne qui parle."
+            }
+          ],
+          "why": {
+            "en": "だれが言ったか is the variable, and にかかわらず says it makes no difference: what counts is that the opinion is good. It does not say the speaker's rank decides who is heard.",
+            "fr": "だれが言ったか est la variable, et にかかわらず dit qu'elle ne change rien : ce qui compte, c'est que l'opinion soit bonne. Cela ne dit pas que le rang de celui qui parle décide qui est écouté."
+          }
+        }
+      ]
     }
   },
   {
@@ -6725,7 +7233,136 @@
             "fr": "に限らず l'ouvre à tout le monde. に限って et しか le réservent à ceux qui ont un billet, l'inverse de la consigne."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about mornings?",
+            "fr": "Que dit celui qui parle des matins ?"
+          },
+          "jp": "このパン屋は朝に限らず、焼きたてのパンが買える。",
+          "tr": {
+            "en": "At this bakery you can buy fresh-baked bread not only in the morning.",
+            "fr": "Dans cette boulangerie, on peut acheter du pain tout juste sorti du four, pas seulement le matin."
+          },
+          "choices": [
+            {
+              "en": "Fresh bread is on sale in the morning, and at other times too.",
+              "fr": "Le pain frais est en vente le matin, et à d'autres moments aussi."
+            },
+            {
+              "en": "Fresh bread is on sale only in the morning.",
+              "fr": "Le pain frais n'est en vente que le matin."
+            },
+            {
+              "en": "Fresh bread is not on sale in the morning.",
+              "fr": "Le pain frais n'est pas en vente le matin."
+            }
+          ],
+          "why": {
+            "en": "に限らず widens the scope: the morning is included, but it is not the only time. Reading it as « only in the morning » is に限って, and the morning is not left out either.",
+            "fr": "に限らず élargit le champ : le matin est inclus, mais ce n'est pas le seul moment. Le lire comme « seulement le matin » serait に限って, et le matin n'est pas exclu non plus."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "このスポーツクラブは＿＿＿、お年寄りも入れます。",
+          "tr": {
+            "en": "This sports club is open not only to young people; older people can join too.",
+            "fr": "Ce club de sport n'est pas réservé aux jeunes : les personnes âgées peuvent aussi s'inscrire."
+          },
+          "choices": [
+            "若い人に限らず",
+            "若い人に限って",
+            "若い人に限り"
+          ],
+          "why": {
+            "en": "に限らず widens: not only young people, so older people join too. に限って and に限り both narrow the club to one group, which the も of お年寄りも rules out.",
+            "fr": "に限らず élargit : pas seulement les jeunes, donc les personnes âgées entrent aussi. に限って et に限り réduisent tous deux le club à un seul groupe, ce que le も de お年寄りも exclut."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How are things for him?",
+            "fr": "Comment les choses se passent-elles pour lui ?"
+          },
+          "jp": "彼は仕事に限らず、友だちづきあいでもうまくいかないようだ。",
+          "tr": {
+            "en": "It seems that he isn't doing well, not only at work but in his friendships too.",
+            "fr": "Il semble que cela n'aille pas bien pour lui, pas seulement au travail, mais aussi dans ses amitiés."
+          },
+          "choices": [
+            {
+              "en": "Badly at work, and badly with friends too.",
+              "fr": "Mal au travail, et mal avec ses amis aussi."
+            },
+            {
+              "en": "Badly at work, but fine with friends.",
+              "fr": "Mal au travail, mais bien avec ses amis."
+            },
+            {
+              "en": "Fine at work, but badly with friends.",
+              "fr": "Bien au travail, mais mal avec ses amis."
+            }
+          ],
+          "why": {
+            "en": "仕事に限らず names work as one case among several, and the でも after 友だちづきあい adds the second case: it goes badly in both. The thing before に限らず is not set against the next one.",
+            "fr": "仕事に限らず présente le travail comme un cas parmi d'autres, et でも après 友だちづきあい ajoute le second : cela va mal dans les deux. Ce qui précède に限らず n'est pas opposé à ce qui suit."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your friend thinks the pool at the sports center is only for members. You tell her that the general public can use it too.",
+            "fr": "Ton amie croit que la piscine du centre sportif est réservée aux membres. Tu lui dis que le grand public peut aussi s'en servir."
+          },
+          "choices": [
+            "会員に限らず、一般の人も使えるよ。",
+            "一般の人に限らず、会員も使えるよ。",
+            "会員だけが使えるんだよ。"
+          ],
+          "why": {
+            "en": "に限らず comes after the group she wrongly thinks it is limited to: 会員に限らず, then the others. Reversed, 一般の人に限らず treats the public as the assumed group, and the third line repeats her mistake.",
+            "fr": "に限らず vient après le groupe auquel elle croit à tort que c'est réservé : 会員に限らず, puis les autres. Inversé, 一般の人に限らず prend le public comme groupe de départ, et la troisième phrase répète son erreur."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the older brother good at?",
+            "fr": "En quoi le grand frère est-il doué ?"
+          },
+          "jp": "兄は料理に限らず、何をやってもじょうずだ。",
+          "tr": {
+            "en": "My older brother is good at whatever he does, not just cooking.",
+            "fr": "Mon grand frère est doué en tout ce qu'il fait, pas seulement en cuisine."
+          },
+          "choices": [
+            {
+              "en": "Everything he tries, cooking included.",
+              "fr": "Tout ce qu'il essaie, la cuisine comprise."
+            },
+            {
+              "en": "Everything he tries, except cooking.",
+              "fr": "Tout ce qu'il essaie, sauf la cuisine."
+            },
+            {
+              "en": "Cooking, and nothing else.",
+              "fr": "La cuisine, et rien d'autre."
+            }
+          ],
+          "why": {
+            "en": "に限らず widens one case to all of them: cooking is only the example, and it is included. It does not mean « except cooking » or « only cooking », which would narrow the field.",
+            "fr": "に限らず élargit un cas à tous : la cuisine n'est qu'un exemple, et elle est comprise. Cela ne veut pas dire « sauf la cuisine » ni « seulement la cuisine », ce qui réduirait le champ."
+          }
+        }
+      ]
     }
   },
   {
@@ -6924,7 +7561,141 @@
             "fr": "にかけては nomme ton domaine et finit sur un éloge. Les deux autres disent que tu n'y es pas doué."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who sings better?",
+            "fr": "Qui chante le mieux ?"
+          },
+          "jp": "歌にかけては、姉はわたしにかなわない。",
+          "tr": {
+            "en": "When it comes to singing, my older sister can't match me.",
+            "fr": "Pour ce qui est de chanter, ma grande sœur ne m'arrive pas à la cheville."
+          },
+          "choices": [
+            {
+              "en": "The speaker.",
+              "fr": "Celui qui parle."
+            },
+            {
+              "en": "The older sister.",
+              "fr": "La grande sœur."
+            },
+            {
+              "en": "They are equal.",
+              "fr": "Elles sont à égalité."
+            }
+          ],
+          "why": {
+            "en": "歌にかけては names the field, and かなわない says one cannot match the other: the sister cannot match the speaker at singing. She comes first in the sentence, but she is not the winner.",
+            "fr": "歌にかけては nomme le domaine, et かなわない dit que l'un ne peut égaler l'autre : la sœur ne peut égaler celui qui parle en chant. Elle vient en premier dans la phrase, mais elle n'est pas la gagnante."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "弟は＿＿＿、家族のだれよりもじょうずだ。",
+          "tr": {
+            "en": "When it comes to drawing, my little brother is better than anyone in the family.",
+            "fr": "Pour ce qui est de dessiner, mon petit frère est meilleur que n'importe qui dans la famille."
+          },
+          "choices": [
+            "絵をかくことにかけては",
+            "絵をかくにかけては",
+            "絵をかくことかけては"
+          ],
+          "why": {
+            "en": "A verb needs こと to become a noun before にかけては: 絵をかくことにかけては. 絵をかくにかけては leaves the verb bare, and ことかけては drops the に that belongs to the phrase.",
+            "fr": "Un verbe a besoin de こと pour devenir un nom devant にかけては : 絵をかくことにかけては. 絵をかくにかけては laisse le verbe nu, et ことかけては perd le に qui fait partie de la tournure."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker good at?",
+            "fr": "En quoi celui qui parle est-il doué ?"
+          },
+          "jp": "わたしはせつやくにかけては自信があるが、料理は苦手だ。",
+          "tr": {
+            "en": "I'm confident when it comes to saving money, but I'm bad at cooking.",
+            "fr": "Pour ce qui est d'économiser, j'ai confiance en moi, mais la cuisine n'est pas mon point fort."
+          },
+          "choices": [
+            {
+              "en": "Saving money, but not cooking.",
+              "fr": "Économiser, mais pas cuisiner."
+            },
+            {
+              "en": "Cooking, but not saving money.",
+              "fr": "Cuisiner, mais pas économiser."
+            },
+            {
+              "en": "Both saving money and cooking.",
+              "fr": "Économiser comme cuisiner."
+            }
+          ],
+          "why": {
+            "en": "にかけては names the field of the speaker's strength, here saving money, and 自信がある confirms it. The が then turns to a weakness: cooking is 苦手, so it is not part of the praise.",
+            "fr": "にかけては nomme le domaine où l'on excelle, ici économiser, et 自信がある le confirme. Le が passe ensuite à un point faible : la cuisine est 苦手, elle ne fait pas partie de l'éloge."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "このパンは、＿＿＿、どこにも負けないと思う。",
+          "tr": {
+            "en": "I think this bread loses to none when it comes to softness.",
+            "fr": "Je pense que ce pain ne le cède à aucun autre pour ce qui est de la souplesse."
+          },
+          "choices": [
+            "やわらかさにかけては",
+            "やわらかいにかけては",
+            "やわらかくにかけては"
+          ],
+          "why": {
+            "en": "にかけては needs a noun, so the い-adjective becomes one with さ: やわらかさ. やわらかい and やわらかく are still adjectives, and neither can stand in front of にかけては.",
+            "fr": "にかけては demande un nom : l'adjectif en い en devient un avec さ : やわらかさ. やわらかい et やわらかく restent des adjectifs, et aucun ne peut se placer devant にかけては."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker really saying?",
+            "fr": "Que dit vraiment celui qui parle ?"
+          },
+          "jp": "算数にかけては、あの子にかなう子がいるだろうか。",
+          "tr": {
+            "en": "When it comes to arithmetic, is there any child who can match that one?",
+            "fr": "Pour ce qui est de l'arithmétique, y a-t-il un enfant qui puisse égaler celui-là ?"
+          },
+          "choices": [
+            {
+              "en": "That child is the best at arithmetic: nobody can match them.",
+              "fr": "Cet enfant est le meilleur en arithmétique : personne ne peut l'égaler."
+            },
+            {
+              "en": "The speaker does not know who is the best at arithmetic.",
+              "fr": "Celui qui parle ne sait pas qui est le meilleur en arithmétique."
+            },
+            {
+              "en": "That child is weak at arithmetic.",
+              "fr": "Cet enfant est faible en arithmétique."
+            }
+          ],
+          "why": {
+            "en": "The question is rhetorical: いるだろうか expects the answer « no, nobody ». With にかけては it praises: arithmetic is the child's field of strength, and no one matches it.",
+            "fr": "La question est rhétorique : いるだろうか attend la réponse « non, personne ». Avec にかけては, c'est un éloge : l'arithmétique est le domaine où l'enfant excelle, et personne ne l'égale."
+          }
+        }
+      ]
     }
   },
   {
@@ -7130,7 +7901,111 @@
             "fr": "Un nom, plus une chose de plus : に加えて. 上に demande une proposition avant lui ; かわりに les échangerait."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is included in the price?",
+            "fr": "Qu'est-ce qui est compris dans le prix ?"
+          },
+          "jp": "このホテルは、朝食に加えて、夕食も料金に入っている。",
+          "tr": {
+            "en": "At this hotel, dinner is included in the price on top of breakfast.",
+            "fr": "Dans cet hôtel, le dîner est compris dans le prix en plus du petit-déjeuner."
+          },
+          "choices": [
+            {
+              "en": "Both breakfast and dinner.",
+              "fr": "Le petit-déjeuner et le dîner, les deux."
+            },
+            {
+              "en": "Dinner, in place of breakfast.",
+              "fr": "Le dîner, à la place du petit-déjeuner."
+            },
+            {
+              "en": "Breakfast only: dinner costs extra.",
+              "fr": "Le petit-déjeuner seulement : le dîner est en supplément."
+            }
+          ],
+          "why": {
+            "en": "に加えて adds the second thing to the first: breakfast, and dinner on top. It does not swap one for the other, and the も after 夕食 says dinner is in the price too.",
+            "fr": "に加えて ajoute le second élément au premier : le petit-déjeuner, et le dîner en plus. Il ne remplace pas l'un par l'autre, et le も après 夕食 dit que le dîner est aussi dans le prix."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、教科書代もかかります。",
+          "tr": {
+            "en": "On top of the school fees, textbook costs apply as well.",
+            "fr": "En plus des frais de scolarité, il y a aussi le prix des manuels."
+          },
+          "choices": [
+            "学費に加えて",
+            "学費を加えて",
+            "学費と加えて"
+          ],
+          "why": {
+            "en": "The noun goes before に加えて, with に: 学費に加えて. 加える is a verb, « to add », and takes を, which would make the speaker the one adding. と does not join to 加えて.",
+            "fr": "Le nom se met devant に加えて, avec に : 学費に加えて. 加える est un verbe, « ajouter », qui prend を, ce qui ferait de celui qui parle la personne qui ajoute. と ne se lie pas à 加えて."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How many people from the school came?",
+            "fr": "Combien de personnes de l'école sont venues ?"
+          },
+          "jp": "校長先生に加えて、先生が三人、パーティーに来てくれた。",
+          "tr": {
+            "en": "In addition to the principal, three teachers came to the party.",
+            "fr": "En plus du directeur, trois professeurs sont venus à la fête."
+          },
+          "choices": [
+            {
+              "en": "Four: the principal and three teachers.",
+              "fr": "Quatre : le directeur et trois professeurs."
+            },
+            {
+              "en": "Three, the principal being one of them.",
+              "fr": "Trois, le directeur étant l'un d'eux."
+            },
+            {
+              "en": "One: the principal came, and the teachers did not.",
+              "fr": "Une : le directeur est venu, et les professeurs non."
+            }
+          ],
+          "why": {
+            "en": "に加えて puts the second group beside the first, not inside it: the principal, plus three teachers, makes four. If the principal were one of the three, the sentence would not need に加えて.",
+            "fr": "に加えて place le second groupe à côté du premier, pas dedans : le directeur, plus trois professeurs, cela fait quatre. Si le directeur était l'un des trois, la phrase n'aurait pas besoin de に加えて."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この店は＿＿＿、サービスもいい。",
+          "tr": {
+            "en": "On top of being cheap, this shop has good service too.",
+            "fr": "En plus d'être bon marché, ce magasin a aussi un bon service."
+          },
+          "choices": [
+            "値段の安さに加えて",
+            "値段が安いに加えて",
+            "値段が安くに加えて"
+          ],
+          "why": {
+            "en": "に加えて needs a noun, so the い-adjective becomes one with さ: 安さ. 安い and 安く are still adjectives, and neither can stand in front of it. (A clause would take 上に.)",
+            "fr": "に加えて demande un nom : l'adjectif en い en devient un avec さ : 安さ. 安い et 安く restent des adjectifs, et aucun ne peut se placer devant. (Une proposition prendrait 上に.)"
+          }
+        }
+      ]
     }
   },
   {
@@ -7336,7 +8211,127 @@
             "fr": "に先立って place la présentation avant la visite. あとで la mettrait après, 間に pendant."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When is the tasting?",
+            "fr": "Quand a lieu la dégustation ?"
+          },
+          "jp": "来月の開店に先立って、今週、新しいお店で試食会が行われる。",
+          "tr": {
+            "en": "Ahead of next month's opening, a tasting is being held this week at the new shop.",
+            "fr": "Avant l'ouverture du mois prochain, une dégustation a lieu cette semaine dans le nouveau magasin."
+          },
+          "choices": [
+            {
+              "en": "This week, before the shop opens next month.",
+              "fr": "Cette semaine, avant l'ouverture du magasin le mois prochain."
+            },
+            {
+              "en": "Next month, at the opening itself.",
+              "fr": "Le mois prochain, à l'ouverture même."
+            },
+            {
+              "en": "After the shop has opened.",
+              "fr": "Une fois le magasin ouvert."
+            }
+          ],
+          "why": {
+            "en": "に先立って puts the tasting ahead of the main event: this week comes before next month's opening. The moment of the opening itself would be に際して, and after it would be あとで.",
+            "fr": "に先立って place la dégustation avant l'événement principal : cette semaine précède l'ouverture du mois prochain. Le moment de l'ouverture même serait に際して, et après serait あとで."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "新しい仕事を＿＿＿、会社の人にあいさつに行った。",
+          "tr": {
+            "en": "Prior to starting the new job, I went to greet the people at the company.",
+            "fr": "Avant de commencer mon nouveau travail, j'ai rendu visite aux gens de l'entreprise pour les saluer."
+          },
+          "choices": [
+            "始めるに先立って",
+            "始めたに先立って",
+            "始めましたに先立って"
+          ],
+          "why": {
+            "en": "After a verb, に先立って takes the dictionary form, since the event it looks ahead to has not begun: 始める. 始めた is past, and the polite 始めました cannot stand before it.",
+            "fr": "Après un verbe, に先立って prend la forme du dictionnaire, puisque l'événement visé n'a pas commencé : 始める. 始めた est au passé, et la forme polie 始めました ne peut pas se placer devant."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You tell a classmate the schedule: first the teacher explains the rules, and then the exam starts.",
+            "fr": "Tu expliques le programme à un camarade : d'abord le professeur explique les règles, puis l'examen commence."
+          },
+          "choices": [
+            "試験に先立って、先生がルールを説明します。",
+            "先生のルールの説明に先立って、試験を始めます。",
+            "試験のあとで、先生がルールを説明します。"
+          ],
+          "why": {
+            "en": "に先立って marks what comes first: the explanation, ahead of the exam. In the second line the exam comes first, and in the third the explanation is put after it.",
+            "fr": "に先立って marque ce qui vient d'abord : l'explication, avant l'examen. Dans la deuxième phrase, l'examen vient en premier, et dans la troisième l'explication est placée après."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、議長が資料をくばった。",
+          "tr": {
+            "en": "Prior to the meeting, the chairperson handed out the materials.",
+            "fr": "Avant la réunion, le président de séance a distribué les documents."
+          },
+          "choices": [
+            "会議に先立って",
+            "会議を先立って",
+            "会議で先立って"
+          ],
+          "why": {
+            "en": "先立つ takes に for the event it comes ahead of: 会議に先立って. を and で are slips: the event is not the object of an action, and it is not a place.",
+            "fr": "先立つ prend に pour l'événement qu'il précède : 会議に先立って. を et で sont des fautes : l'événement n'est pas l'objet d'une action, ni un lieu."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When must the neighbours be told?",
+            "fr": "Quand faut-il prévenir les voisins ?"
+          },
+          "jp": "工事に先立って、近所の人に説明をしなければならない。",
+          "tr": {
+            "en": "Prior to the construction work, you must explain it to the neighbours.",
+            "fr": "Avant les travaux, il faut l'expliquer aux voisins."
+          },
+          "choices": [
+            {
+              "en": "Before the work begins.",
+              "fr": "Avant le début des travaux."
+            },
+            {
+              "en": "While the work is going on.",
+              "fr": "Pendant les travaux."
+            },
+            {
+              "en": "After the work is finished.",
+              "fr": "Une fois les travaux terminés."
+            }
+          ],
+          "why": {
+            "en": "に先立って looks ahead to a big event and names what must be done before it: the explanation comes before the work starts. It is not « during » (に際して) and not « after ».",
+            "fr": "に先立って regarde vers un grand événement et nomme ce qui doit se faire avant : l'explication précède le début des travaux. Ce n'est pas « pendant » (に際して), ni « après »."
+          }
+        }
+      ]
     }
   },
   {
@@ -7580,7 +8575,127 @@
             "fr": "Contre ce qu'on attendait : に反して. どおり dit que c'était comme prévu ; に対して ne fait qu'opposer deux choses."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What did people expect of the team?",
+            "fr": "À quoi les gens s'attendaient-ils de la part de l'équipe ?"
+          },
+          "jp": "予想に反して、あの強いチームは一回戦で負けた。",
+          "tr": {
+            "en": "Contrary to expectations, that strong team lost in the first round.",
+            "fr": "Contre toute attente, cette équipe forte a perdu au premier tour."
+          },
+          "choices": [
+            {
+              "en": "That it would do well.",
+              "fr": "Qu'elle irait loin."
+            },
+            {
+              "en": "That it would lose in the first round.",
+              "fr": "Qu'elle perdrait au premier tour."
+            },
+            {
+              "en": "That it would not take part.",
+              "fr": "Qu'elle ne participerait pas."
+            }
+          ],
+          "why": {
+            "en": "に反して says the result went against what was expected: the team lost, so people expected it to do well. If the loss had been foreseen, the sentence would say 予想どおり.",
+            "fr": "に反して dit que le résultat va contre l'attente : l'équipe a perdu, donc on la croyait capable d'aller loin. Si la défaite avait été prévue, la phrase dirait 予想どおり."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、先生はこの計画をえらんだ。",
+          "tr": {
+            "en": "Contrary to everyone's opinion, the teacher chose this plan.",
+            "fr": "Contre l'avis de tous, le professeur a choisi ce projet."
+          },
+          "choices": [
+            "みんなの意見に反して",
+            "みんなの意見を反して",
+            "みんなの意見と反して"
+          ],
+          "why": {
+            "en": "反する takes に for what it goes against: 意見に反して. を is a tempting slip, as with 守る (« keep a rule »), and と belongs to other phrases, like とちがって.",
+            "fr": "反する prend に pour ce à quoi il s'oppose : 意見に反して. を est une faute tentante, comme avec 守る (« respecter une règle »), et と appartient à d'autres tournures, comme とちがって."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Everybody said the movie was great. You saw it, and you found it boring. You tell a friend.",
+            "fr": "Tout le monde disait que le film était génial. Tu l'as vu, et tu l'as trouvé ennuyeux. Tu le dis à un ami."
+          },
+          "choices": [
+            "みんなの期待に反して、あの映画はつまらなかった。",
+            "みんなの期待に反して、あの映画はおもしろかった。",
+            "みんなの期待どおり、あの映画はつまらなかった。"
+          ],
+          "why": {
+            "en": "に反して marks a result opposite to what was expected: high hopes, a boring film. The second line gets the film wrong, and どおり in the third means « as expected », which would need low hopes.",
+            "fr": "に反して marque un résultat opposé à l'attente : grands espoirs, film ennuyeux. La deuxième phrase se trompe sur le film, et どおり dans la troisième veut dire « comme prévu », ce qui supposerait de faibles attentes."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What did the person want?",
+            "fr": "Que voulait la personne concernée ?"
+          },
+          "jp": "本人の意思に反して、手紙は新聞にのせられた。",
+          "tr": {
+            "en": "Against the person's own will, the letter was printed in the newspaper.",
+            "fr": "Contre la volonté de la personne elle-même, la lettre a été publiée dans le journal."
+          },
+          "choices": [
+            {
+              "en": "For the letter to stay private.",
+              "fr": "Que la lettre reste privée."
+            },
+            {
+              "en": "For the letter to appear in the newspaper.",
+              "fr": "Que la lettre paraisse dans le journal."
+            },
+            {
+              "en": "Nothing in particular: the person did not mind.",
+              "fr": "Rien de particulier : cela lui était égal."
+            }
+          ],
+          "why": {
+            "en": "に反して names what the result goes against: the person's will. The letter was printed, so the will was the opposite: not to have it printed. It was not what the person wanted, and it was not indifference.",
+            "fr": "に反して nomme ce à quoi le résultat s'oppose : la volonté de la personne. La lettre a été publiée, donc la volonté était l'inverse : ne pas la voir publiée. Ce n'était pas ce qu'elle voulait, ni de l'indifférence."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、母はわたしの留学を許してくれた。",
+          "tr": {
+            "en": "Contrary to my fears, my mother let me study abroad.",
+            "fr": "Contre mes craintes, ma mère a accepté que j'aille étudier à l'étranger."
+          },
+          "choices": [
+            "わたしの心配に反して",
+            "わたしの心配どおり",
+            "わたしの心配にそって"
+          ],
+          "why": {
+            "en": "The result went against the fear, so に反して. 心配どおり would mean it turned out as feared, and 心配にそって would mean in line with the fear: neither says the opposite.",
+            "fr": "Le résultat va contre la crainte, donc に反して. 心配どおり voudrait dire que cela s'est passé comme craint, et 心配にそって que cela suit la crainte : aucun ne dit le contraire."
+          }
+        }
+      ]
     }
   },
   {
@@ -7784,7 +8899,141 @@
             "fr": "にほかならない désigne le travail comme la vraie cause. にすぎない le rabaisse, et la dernière phrase le nie."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the shop's popularity?",
+            "fr": "Que dit celui qui parle de la popularité du magasin ?"
+          },
+          "jp": "あの店が人気なのは、店長のやさしさにほかならない。",
+          "tr": {
+            "en": "That shop is popular for no other reason than the manager's kindness.",
+            "fr": "Si ce magasin est populaire, ce n'est pas pour une autre raison que la gentillesse de son gérant."
+          },
+          "choices": [
+            {
+              "en": "The manager's kindness explains it, and nothing else does.",
+              "fr": "La gentillesse du gérant l'explique, et rien d'autre."
+            },
+            {
+              "en": "The manager's kindness does not explain it.",
+              "fr": "La gentillesse du gérant ne l'explique pas."
+            },
+            {
+              "en": "The manager's kindness is one reason among several.",
+              "fr": "La gentillesse du gérant est une raison parmi d'autres."
+            }
+          ],
+          "why": {
+            "en": "にほかならない pins the cause down: it is exactly this, and nothing else. The ない does not deny it, as if « other than kindness » were meant: the double negative is an emphatic yes.",
+            "fr": "にほかならない désigne la cause avec fermeté : c'est exactement cela, et rien d'autre. Le ない ne la nie pas : la double négation est un oui appuyé, pas « autre chose que la gentillesse »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "友情とは、＿＿＿。",
+          "tr": {
+            "en": "Friendship is nothing other than wishing for the other person's happiness.",
+            "fr": "L'amitié n'est rien d'autre que souhaiter le bonheur de l'autre."
+          },
+          "choices": [
+            "相手の幸せを願うことにほかならない",
+            "相手の幸せを願うにほかならない",
+            "相手の幸せを願いことにほかならない"
+          ],
+          "why": {
+            "en": "A verb phrase needs こと to act as a noun before にほかならない: 願うことにほかならない. 願うにほかならない leaves the verb bare, and 願いこと glues こと onto the ます-stem.",
+            "fr": "Un groupe verbal a besoin de こと pour jouer le rôle d'un nom devant にほかならない : 願うことにほかならない. 願うにほかならない laisse le verbe nu, et 願いこと colle こと à la base en ます."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker see the man's action?",
+            "fr": "Comment celui qui parle voit-il l'action de cet homme ?"
+          },
+          "jp": "彼の行動は、ただの親切ではなく、自分の得をねらったものにほかならない。",
+          "tr": {
+            "en": "His action was not mere kindness: it was nothing other than something aimed at his own gain.",
+            "fr": "Son geste n'était pas de la simple gentillesse : il n'était rien d'autre qu'une manœuvre pour son propre profit."
+          },
+          "choices": [
+            {
+              "en": "The speaker is sure it was aimed at the man's own gain.",
+              "fr": "Celui qui parle est sûr qu'il visait son propre profit."
+            },
+            {
+              "en": "The speaker suspects it, but is not sure.",
+              "fr": "Celui qui parle le soupçonne, sans en être sûr."
+            },
+            {
+              "en": "The speaker thinks it was only a small kindness.",
+              "fr": "Celui qui parle pense que ce n'était qu'une petite gentillesse."
+            }
+          ],
+          "why": {
+            "en": "にほかならない states the identity firmly: it was exactly that. A guess would be に違いない or かもしれない, and playing it down as « just a small kindness » would be にすぎない.",
+            "fr": "にほかならない affirme l'identité avec fermeté : c'était exactement cela. Une supposition serait に違いない ou かもしれない, et la minimiser en « simple petite gentillesse » serait にすぎない."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの決定は、わたしたちへのうらぎりに＿＿＿。",
+          "tr": {
+            "en": "That decision was nothing other than a betrayal of us.",
+            "fr": "Cette décision n'était rien d'autre qu'une trahison à notre égard."
+          },
+          "choices": [
+            "ほかならなかった",
+            "ほかならないだった",
+            "ほかなかった"
+          ],
+          "why": {
+            "en": "ほかならない ends in ない, so it changes like an い-adjective: ほかならなかった. ほかならないだった puts だった after it, and ほかなかった drops the ならな that makes the phrase.",
+            "fr": "ほかならない finit par ない, donc il se conjugue comme un adjectif en い : ほかならなかった. ほかならないだった met だった après, et ほかなかった perd le ならな qui fait la tournure."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker see not keeping a promise?",
+            "fr": "Comment celui qui parle voit-il le fait de ne pas tenir une promesse ?"
+          },
+          "jp": "約束を守らないのは、相手をうらぎることにほかならない。",
+          "tr": {
+            "en": "Not keeping a promise is nothing other than betraying the other person.",
+            "fr": "Ne pas tenir une promesse, ce n'est rien d'autre que trahir l'autre."
+          },
+          "choices": [
+            {
+              "en": "It is the very same thing as betraying the other person.",
+              "fr": "C'est exactement la même chose que trahir l'autre."
+            },
+            {
+              "en": "It leads to betraying the other person later.",
+              "fr": "Cela conduit à trahir l'autre par la suite."
+            },
+            {
+              "en": "It is a lesser matter than betraying the other person.",
+              "fr": "C'est moins grave que de trahir l'autre."
+            }
+          ],
+          "why": {
+            "en": "にほかならない sets two things equal: breaking a promise is betrayal itself, not a step toward it, and not something lighter. The speaker states an identity, not a cause and its effect.",
+            "fr": "にほかならない pose une égalité : ne pas tenir sa promesse, c'est la trahison même, pas un pas vers elle, ni quelque chose de plus léger. Celui qui parle énonce une identité, non une cause et son effet."
+          }
+        }
+      ]
     }
   },
   {
