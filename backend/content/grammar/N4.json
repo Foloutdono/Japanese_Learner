@@ -9734,7 +9734,127 @@
             "fr": "Tu donnes la raison de ta hâte : んです. ですか le lui demande, ましょう l'invite."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "すみません、きのうは、母が＿＿＿。",
+          "tr": {
+            "en": "Sorry. You see, my mother was ill yesterday.",
+            "fr": "Excuse-moi : c’est que ma mère était malade hier."
+          },
+          "choices": [
+            "病気だったんです",
+            "病気なんです",
+            "病気でしたんです"
+          ],
+          "why": {
+            "en": "In the past, a noun takes だった before ん: 病気だった + んです. 病気なんです is the present, and 病気でしたんです doubles the politeness, since んです already ends in です.",
+            "fr": "Au passé, un nom prend だった devant ん : 病気だった + んです. 病気なんです est le présent, et 病気でしたんです double la politesse, puisque んです finit déjà par です."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does んですか add to this question?",
+            "fr": "Qu’est-ce que んですか ajoute à cette question ?"
+          },
+          "jp": "みんなかさを持っていますが、雨がふっているんですか。",
+          "tr": {
+            "en": "Everyone is carrying an umbrella; is it raining?",
+            "fr": "Tout le monde porte un parapluie ; est-ce qu’il pleut ?"
+          },
+          "choices": [
+            {
+              "en": "It ties the question to something the speaker can see: the umbrellas. Is that the explanation?",
+              "fr": "Elle relie la question à ce que celui qui parle voit : les parapluies. Est-ce là l’explication ?"
+            },
+            {
+              "en": "It only makes the question more polite.",
+              "fr": "Elle rend seulement la question plus polie."
+            },
+            {
+              "en": "It asks why it is raining.",
+              "fr": "Elle demande pourquoi il pleut."
+            }
+          ],
+          "why": {
+            "en": "んですか asks whether something in front of you has an explanation: everyone has an umbrella, so is it raining? It is not “why?”, and a plain 雨がふっていますか would ask out of the blue.",
+            "fr": "んですか demande si ce qu’on voit s’explique ainsi : tout le monde a un parapluie, alors il pleut ? Ce n’est pas « pourquoi ? », et un simple 雨がふっていますか poserait la question sans rien qui la motive."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You arrive late to class, and your teacher looks at you. You explain, politely, that the train stopped.",
+            "fr": "Tu arrives en retard en classe et ton professeur te regarde. Tu expliques, poliment, que le train s’est arrêté."
+          },
+          "choices": [
+            "すみません、電車がとまったんです。",
+            "すみません、電車がとまったんだ。",
+            "すみません、電車がとまったんですか。"
+          ],
+          "why": {
+            "en": "You are explaining your situation to a teacher, so 〜んです. 〜んだ is the plain version, for friends, and 〜んですか is a question, not an explanation.",
+            "fr": "Tu expliques ta situation à un professeur : 〜んです. 〜んだ est la forme neutre, pour les amis, et 〜んですか est une question, pas une explication."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ありがとうございます。でも、おさけは＿＿＿。",
+          "tr": {
+            "en": "Thank you, but the thing is, I don’t drink alcohol.",
+            "fr": "Merci, mais c’est que je ne bois pas d’alcool."
+          },
+          "choices": [
+            "飲まないんです",
+            "飲まないなんです",
+            "飲んだんです"
+          ],
+          "why": {
+            "en": "A verb’s plain negative goes straight before んです: 飲まない + んです. 飲まないなんです adds a な that only a noun or な-adjective takes, and 飲んだんです says you did drink.",
+            "fr": "La forme neutre négative d’un verbe se place directement devant んです : 飲まない + んです. 飲まないなんです ajoute un な réservé aux noms et aux adjectifs en な, et 飲んだんです dit que tu as bu."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker really telling the listener?",
+            "fr": "Que dit vraiment celui qui parle à son interlocuteur ?"
+          },
+          "jp": "いっしょに行きたいんですが、あしたは仕事なんです。",
+          "tr": {
+            "en": "I’d love to go with you, but you see, I have work tomorrow.",
+            "fr": "J’aimerais bien y aller avec toi, mais c’est que je travaille demain."
+          },
+          "choices": [
+            {
+              "en": "That the speaker would like to go but can’t, because of work.",
+              "fr": "Que celui qui parle aimerait y aller mais ne peut pas, à cause du travail."
+            },
+            {
+              "en": "That the speaker will go, and do the work afterwards.",
+              "fr": "Que celui qui parle ira, et fera son travail après."
+            },
+            {
+              "en": "That the speaker is still deciding, and will answer tomorrow.",
+              "fr": "Que celui qui parle hésite encore et répondra demain."
+            }
+          ],
+          "why": {
+            "en": "行きたいんですが… states the wish and leaves it hanging; あしたは仕事なんです then gives the situation that stops it. It is a polite refusal that never says no.",
+            "fr": "行きたいんですが… dit l’envie et la laisse en suspens ; あしたは仕事なんです donne la situation qui l’empêche. C’est un refus poli qui ne dit jamais non."
+          }
+        }
+      ]
     }
   },
   {
@@ -10006,7 +10126,127 @@
             "fr": "Lui le fait, pour toi : てほしい. たい est ton envie d'appeler, たがる celle de quelqu'un d'autre."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あぶないから、今日はどこにも＿＿＿ほしい。",
+          "tr": {
+            "en": "It’s dangerous, so I want you not to go anywhere today.",
+            "fr": "C’est dangereux, alors je voudrais que tu n’ailles nulle part aujourd’hui."
+          },
+          "choices": [
+            "行かないで",
+            "行かなくて",
+            "行かなかった"
+          ],
+          "why": {
+            "en": "ないでほしい is the plain negative plus で: 行かない → 行かないで. 行かなくて is the negative て-form that links clauses, and 行かなかった is the past.",
+            "fr": "ないでほしい se forme avec la forme neutre négative + で : 行かない → 行かないで. 行かなくて est le て négatif qui relie des propositions, et 行かなかった est le passé."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is said about この本?",
+            "fr": "Que dit-on de この本 ?"
+          },
+          "jp": "先生が学生に読んでほしい本は、この本です。",
+          "tr": {
+            "en": "The book the teacher wants the students to read is this one.",
+            "fr": "Le livre que le professeur voudrait que les étudiants lisent, c’est celui-ci."
+          },
+          "choices": [
+            {
+              "en": "It is the book the teacher wants the students to read.",
+              "fr": "C’est le livre que le professeur voudrait que les étudiants lisent."
+            },
+            {
+              "en": "It is the book the students want the teacher to read.",
+              "fr": "C’est le livre que les étudiants voudraient que le professeur lise."
+            },
+            {
+              "en": "It is the book the teacher wants to read aloud to the students.",
+              "fr": "C’est le livre que le professeur veut lire à haute voix aux étudiants."
+            }
+          ],
+          "why": {
+            "en": "The one who wishes is marked by が (先生), the one asked to act by に (学生): 先生が学生に読んでほしい. The teacher is not the reader: that would be 読みたい.",
+            "fr": "Celui qui souhaite est marqué par が (先生), celui qui doit agir par に (学生) : 先生が学生に読んでほしい. Le professeur n’est pas le lecteur : ce serait 読みたい."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are nervous before an exam. You tell a friend that you want your little sister to come along.",
+            "fr": "Tu stresses avant un examen. Tu dis à un ami que tu voudrais que ta petite sœur vienne avec toi."
+          },
+          "choices": [
+            "しけんの日は、妹にいっしょに来てほしい。",
+            "しけんの日は、妹にいっしょに来ないでほしい。",
+            "しけんの日は、妹はいっしょに来たがっている。"
+          ],
+          "why": {
+            "en": "You want her to come: 妹に + 来てほしい. 来ないでほしい is the opposite wish, and 来たがっている says your sister herself wants to come, which is her wish, not yours.",
+            "fr": "Tu veux qu’elle vienne : 妹に + 来てほしい. 来ないでほしい est le souhait contraire, et 来たがっている dit que c’est ta sœur qui veut venir : c’est son envie, pas la tienne."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "かぜをひいているから、今日はゆっくり＿＿＿ほしいです。",
+          "tr": {
+            "en": "You have a cold, so I want you to rest properly today.",
+            "fr": "Tu as attrapé un rhume, alors je voudrais que tu te reposes bien aujourd’hui."
+          },
+          "choices": [
+            "休んで",
+            "休んだ",
+            "休みて"
+          ],
+          "why": {
+            "en": "休む ends in む, so its て-form is 休んで. 休んだ is the past, which does not go before ほしい, and 休みて tacks て onto the ます-stem, a form that does not exist.",
+            "fr": "休む finit par む : son て-form est 休んで. 休んだ est le passé, qui ne se place pas devant ほしい, et 休みて colle て au radical en ます, une forme qui n’existe pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What happened with the friend?",
+            "fr": "Que s’est-il passé avec l’ami ?"
+          },
+          "jp": "きのうは友だちに手つだってほしかったが、いそがしそうだったので言えなかった。",
+          "tr": {
+            "en": "Yesterday I wanted my friend to help me, but he looked busy, so I couldn’t say so.",
+            "fr": "Hier, j’aurais voulu que mon ami m’aide, mais il avait l’air occupé, alors je n’ai pas pu le lui dire."
+          },
+          "choices": [
+            {
+              "en": "Nothing: the speaker wished for help but never asked, so the friend did not help.",
+              "fr": "Rien : celui qui parle aurait voulu de l’aide mais n’a rien demandé, donc l’ami n’a pas aidé."
+            },
+            {
+              "en": "The speaker asked, and the friend helped.",
+              "fr": "Celui qui parle l’a demandé, et l’ami a aidé."
+            },
+            {
+              "en": "The speaker asked, but the friend refused.",
+              "fr": "Celui qui parle l’a demandé, mais l’ami a refusé."
+            }
+          ],
+          "why": {
+            "en": "てほしかった only says what the speaker wished. 言えなかった tells us it was never said, so nothing was asked of the friend: a wish is not a request.",
+            "fr": "てほしかった dit seulement ce que celui qui parle souhaitait. 言えなかった montre qu’il ne l’a pas dit, donc rien n’a été demandé à l’ami : un souhait n’est pas une demande."
+          }
+        }
+      ]
     }
   },
   {
@@ -10243,7 +10483,127 @@
             "fr": "L'envie de ton frère, racontée par toi : たがる. たい parle pour soi, てほしい est ce que tu veux qu'il fasse."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "子どもたちは、ぎゅうにゅうより、ジュースを＿＿＿。",
+          "tr": {
+            "en": "Children want to drink juice rather than milk.",
+            "fr": "Les enfants veulent boire du jus plutôt que du lait."
+          },
+          "choices": [
+            "飲みたがる",
+            "飲みたい",
+            "飲みがる"
+          ],
+          "why": {
+            "en": "The children’s wish is seen from outside, so the ます-stem takes たがる: 飲み + たがる. 飲みたい is the speaker’s own wish, and 飲みがる drops the た.",
+            "fr": "L’envie des enfants est vue de l’extérieur : le radical en ます prend たがる : 飲み + たがる. 飲みたい est l’envie de celui qui parle, et 飲みがる oublie le た."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the cat?",
+            "fr": "Que dit la phrase au sujet du chat ?"
+          },
+          "jp": "うちのねこは、おふろに入りたがらない。",
+          "tr": {
+            "en": "My cat doesn’t want to get into the bath.",
+            "fr": "Mon chat ne veut pas entrer dans le bain."
+          },
+          "choices": [
+            {
+              "en": "It does not want to: it resists the bath.",
+              "fr": "Il ne veut pas : il résiste au bain."
+            },
+            {
+              "en": "It cannot get into the bath.",
+              "fr": "Il ne peut pas entrer dans le bain."
+            },
+            {
+              "en": "It is not allowed in the bath.",
+              "fr": "Il n’a pas le droit d’entrer dans le bain."
+            }
+          ],
+          "why": {
+            "en": "たがらない is the negative of たがる: the cat shows no wish to get in. It says nothing about ability (入れない) or permission (入ってはいけない).",
+            "fr": "たがらない est la négation de たがる : le chat ne montre aucune envie d’y entrer. Rien sur la capacité (入れない) ni sur la permission (入ってはいけない)."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A neighbour asks whether your little brother is coming to school with you today. He isn’t: he doesn’t want to go. Answer.",
+            "fr": "Un voisin te demande si ton petit frère vient à l’école avec toi aujourd’hui. Non : il n’a pas envie d’y aller. Réponds."
+          },
+          "choices": [
+            "弟は、今日は学校に行きたがりません。",
+            "弟は、今日は学校に行きたがっています。",
+            "弟に、今日は学校に行ってほしいです。"
+          ],
+          "why": {
+            "en": "You report his wish from outside, and it is negative: 行きたがりません. 行きたがっています says he does want to go, and 行ってほしいです is what you wish him to do, not what he wants.",
+            "fr": "Tu rapportes son envie vue de l’extérieur, et elle est négative : 行きたがりません. 行きたがっています dit qu’il veut aller à l’école, et 行ってほしいです est ce que toi, tu veux qu’il fasse, pas ce que lui veut."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうは雨だったので、犬はさんぽに＿＿＿。",
+          "tr": {
+            "en": "It rained yesterday, so the dog didn’t want to go for a walk.",
+            "fr": "Hier, il pleuvait, alors le chien ne voulait pas aller se promener."
+          },
+          "choices": [
+            "行きたがらなかった",
+            "行きたがらない",
+            "行きたがっていた"
+          ],
+          "why": {
+            "en": "Past negative: たがらない → たがらなかった, the wish the dog did not show yesterday. 行きたがらない is the present, and 行きたがっていた says the dog did want to go.",
+            "fr": "Négatif passé : たがらない → たがらなかった, l’envie que le chien n’a pas montrée hier. 行きたがらない est le présent, et 行きたがっていた dit que le chien voulait y aller."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the child like?",
+            "fr": "Comment est l’enfant ?"
+          },
+          "jp": "うちの子は、なんでも自分でやりたがる年ごろです。",
+          "tr": {
+            "en": "My child is at the age of wanting to do everything alone.",
+            "fr": "Chez moi, l’enfant est à l’âge où l’on veut tout faire soi-même."
+          },
+          "choices": [
+            {
+              "en": "At an age when the child insists on doing everything alone.",
+              "fr": "À un âge où l’enfant veut tout faire sans aide."
+            },
+            {
+              "en": "The speaker wants the child to do everything alone.",
+              "fr": "Celui qui parle veut que l’enfant fasse tout sans aide."
+            },
+            {
+              "en": "The child wants to do one particular thing alone, right now.",
+              "fr": "L’enfant veut faire une chose précise sans aide, en ce moment."
+            }
+          ],
+          "why": {
+            "en": "たがる is someone else’s wish, here a tendency: an age of wanting to do everything. It is the child’s wish, not the speaker’s (やってほしい), and not one wish right now (たがっている).",
+            "fr": "たがる est l’envie d’un autre, ici une tendance : l’âge où l’on veut tout faire. C’est l’envie de l’enfant, pas celle de celui qui parle (やってほしい), ni une envie du moment (たがっている)."
+          }
+        }
+      ]
     }
   },
   {
@@ -10476,7 +10836,127 @@
             "fr": "D'après les signes, ça n'arrivera pas : そうにない. かもしれない laisse ouvert, et そうだ dit que ça a l'air de marcher."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "へやじゅうさがしたが、かぎは＿＿＿。",
+          "tr": {
+            "en": "I searched the whole room, but the key doesn’t look like turning up.",
+            "fr": "J’ai cherché dans toute la pièce, mais la clé n’a pas l’air de vouloir réapparaître."
+          },
+          "choices": [
+            "見つかりそうにない",
+            "見つかるそうだ",
+            "見つかりそうだ"
+          ],
+          "why": {
+            "en": "The ます-stem of 見つかる is 見つかり, then そうにない. 見つかりそうだ says it looks as if it will turn up, and 見つかるそうだ, on the dictionary form, means “I hear it will turn up”.",
+            "fr": "Le radical en ます de 見つかる est 見つかり, puis そうにない. 見つかりそうだ dit qu’elle a l’air de ressortir, et 見つかるそうだ, sur la forme du dictionnaire, veut dire « on dit qu’elle sera retrouvée »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker expect about rain today?",
+            "fr": "Qu’attend celui qui parle de la pluie aujourd’hui ?"
+          },
+          "jp": "空が明るいので、今日は雨がふりそうにない。",
+          "tr": {
+            "en": "The sky is bright, so it doesn’t look like rain today.",
+            "fr": "Le ciel est clair, alors il n’a pas l’air de vouloir pleuvoir aujourd’hui."
+          },
+          "choices": [
+            {
+              "en": "No rain: nothing in the sky points to it.",
+              "fr": "Pas de pluie : rien dans le ciel n’en annonce."
+            },
+            {
+              "en": "Rain soon: the sky looks like rain.",
+              "fr": "De la pluie bientôt : le ciel a l’air d’en annoncer."
+            },
+            {
+              "en": "Rain is possible, but the speaker can’t tell.",
+              "fr": "La pluie est possible, mais celui qui parle ne sait pas."
+            }
+          ],
+          "why": {
+            "en": "ふりそう alone means “looks like rain”; ふりそうにない is its negative: from what the speaker sees, it won’t happen. The “maybe” is かもしれません.",
+            "fr": "ふりそう seul veut dire « on dirait qu’il va pleuvoir » ; ふりそうにない en est le négatif : d’après ce qu’on voit, ça n’arrivera pas. Le « peut-être », c’est かもしれません."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "It is snowing hard. You phone a friend: from what you can see, you won’t arrive on time.",
+            "fr": "Il neige fort. Tu appelles un ami : d’après ce que tu vois, tu n’arriveras pas à l’heure."
+          },
+          "choices": [
+            "ゆきがひどくて、じかんどおりには着きそうにない。",
+            "ゆきがひどくて、じかんどおりには着きそうだ。",
+            "ゆきがひどくて、おくれそうにない。"
+          ],
+          "why": {
+            "en": "What shows no sign of happening is arriving on time: 着きそうにない. 着きそうだ says you will make it, and おくれそうにない says being late does not look likely, the opposite.",
+            "fr": "Ce qui ne semble pas devoir arriver, c’est d’arriver à l’heure : 着きそうにない. 着きそうだ dit que tu vas y arriver, et おくれそうにない dit qu’un retard n’a pas l’air probable, le contraire."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あのうつくしい山は、ずっと＿＿＿。",
+          "tr": {
+            "en": "I don’t think I will ever forget that beautiful mountain.",
+            "fr": "Je ne crois pas que j’oublierai jamais cette belle montagne."
+          },
+          "choices": [
+            "わすれそうにない",
+            "わすれるそうにない",
+            "わすれそうだ"
+          ],
+          "why": {
+            "en": "わすれる is a る-verb: drop る and add そうにない: わすれ + そうにない. わすれるそうにない keeps the る, and わすれそうだ would mean it looks as if you will forget it.",
+            "fr": "わすれる est un verbe en る : on retire る et on ajoute そうにない : わすれ + そうにない. わすれるそうにない garde le る, et わすれそうだ voudrait dire qu’il semble que tu vas l’oublier."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the luggage?",
+            "fr": "Que dit celui qui parle des bagages ?"
+          },
+          "jp": "このにもつは、重くて、わたしには持てそうにない。",
+          "tr": {
+            "en": "This luggage is so heavy that I don’t think I can carry it.",
+            "fr": "Ces bagages sont si lourds que je ne pense pas pouvoir les porter."
+          },
+          "choices": [
+            {
+              "en": "Judging by its weight, the speaker won’t be able to carry it.",
+              "fr": "À son poids, celui qui parle ne pourra pas le porter."
+            },
+            {
+              "en": "The speaker could carry it but doesn’t want to.",
+              "fr": "Celui qui parle pourrait le porter mais n’en a pas envie."
+            },
+            {
+              "en": "The speaker tried to carry it and failed.",
+              "fr": "Celui qui parle a essayé de le porter et n’y est pas arrivé."
+            }
+          ],
+          "why": {
+            "en": "そうにない judges from what you see, before anything happens: from its weight, carrying it does not look possible. It is not about wanting, and it is not about a past attempt.",
+            "fr": "そうにない juge d’après ce qu’on voit, avant que rien n’arrive : vu son poids, le porter ne semble pas possible. Il ne s’agit ni d’envie ni d’un essai déjà fait."
+          }
+        }
+      ]
     }
   },
   {
@@ -10680,7 +11160,127 @@
             "fr": "Tu demandes si c'est obligatoire : なくてはいけない. てもいいですか demande si on a le droit ; てはいけない parle d'une interdiction."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "分からないときは、先生に＿＿＿。",
+          "tr": {
+            "en": "When you don’t understand, you have to ask the teacher.",
+            "fr": "Quand tu ne comprends pas, tu dois demander au professeur."
+          },
+          "choices": [
+            "聞かなくてはいけません",
+            "聞かないくてはいけません",
+            "聞いてはいけません"
+          ],
+          "why": {
+            "en": "Take the ない-form 聞かない, drop the final い and add くてはいけません: 聞かなくてはいけません. 聞かないくて keeps the い, and 聞いてはいけません is the て-form plus はいけません: “you must not ask”.",
+            "fr": "Prends la forme en ない, 聞かない, enlève le い final et ajoute くてはいけません : 聞かなくてはいけません. 聞かないくて garde le い, et 聞いてはいけません (て + はいけません) veut dire « il ne faut pas demander »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker asking?",
+            "fr": "Que demande celui qui parle ?"
+          },
+          "jp": "くすりは、食事の前に飲まなくてはいけませんか。",
+          "tr": {
+            "en": "Do I have to take the medicine before meals?",
+            "fr": "Est-ce qu’il faut prendre le médicament avant les repas ?"
+          },
+          "choices": [
+            {
+              "en": "Whether taking it before meals is required.",
+              "fr": "Si le prendre avant les repas est obligatoire."
+            },
+            {
+              "en": "Whether taking it before meals is allowed.",
+              "fr": "Si le prendre avant les repas est permis."
+            },
+            {
+              "en": "Whether taking it before meals is forbidden.",
+              "fr": "Si le prendre avant les repas est interdit."
+            }
+          ],
+          "why": {
+            "en": "飲まなくてはいけませんか asks about a duty: must it be taken before meals? Permission would be 飲んでもいいですか, and a ban 飲んではいけません.",
+            "fr": "飲まなくてはいけませんか interroge sur une obligation : faut-il le prendre avant les repas ? La permission serait 飲んでもいいですか, et l’interdiction 飲んではいけません."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A new colleague asks whether Saturday is a working day for them too. Yes, it is compulsory. Answer politely.",
+            "fr": "Un nouveau collègue te demande s’il doit aussi venir le samedi. Oui, c’est obligatoire. Réponds-lui, poliment."
+          },
+          "choices": [
+            "土曜日も、はたらかなくてはいけません。",
+            "土曜日は、はたらかなくてもいいです。",
+            "土曜日も、はたらかなくてはいけませんでした。"
+          ],
+          "why": {
+            "en": "It is compulsory, so なくてはいけません. はたらかなくてもいいです says it is optional, and いけませんでした is the past, for a Saturday already gone.",
+            "fr": "C’est obligatoire : なくてはいけません. はたらかなくてもいいです dit que c’est facultatif, et いけませんでした est le passé, pour un samedi déjà écoulé."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あしたの朝は、六時に駅に＿＿＿。",
+          "tr": {
+            "en": "Tomorrow morning I have to come to the station at six.",
+            "fr": "Demain matin, je dois venir à la gare à six heures."
+          },
+          "choices": [
+            "来なくてはいけません",
+            "来てもいいです",
+            "来らなくてはいけません"
+          ],
+          "why": {
+            "en": "来る is irregular: its ない-form is 来ない, so 来なくてはいけません. 来てもいいです means “I may come”, and 来らなくて treats 来る as an う-verb.",
+            "fr": "来る est irrégulier : sa forme en ない est 来ない, d’où 来なくてはいけません. 来てもいいです veut dire « je peux venir », et 来らなくて traite 来る comme un verbe en う."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Did the speaker hand in the homework on time?",
+            "fr": "Celui qui parle a-t-il rendu les devoirs à temps ?"
+          },
+          "jp": "しゅくだいは、きのうまでに出さなくてはいけなかったのに、わすれてしまった。",
+          "tr": {
+            "en": "I had to hand in the homework by yesterday, but I forgot.",
+            "fr": "Je devais rendre les devoirs hier au plus tard, mais j’ai oublié."
+          },
+          "choices": [
+            {
+              "en": "No: it was required, but the speaker forgot.",
+              "fr": "Non : c’était obligatoire, mais celui qui parle a oublié."
+            },
+            {
+              "en": "Yes: it was handed in as required.",
+              "fr": "Oui : ils ont été rendus comme il le fallait."
+            },
+            {
+              "en": "No: there was no need to hand it in.",
+              "fr": "Non : il n’y avait pas besoin de les rendre."
+            }
+          ],
+          "why": {
+            "en": "出さなくてはいけなかった says it was required, and のに marks the surprise: despite that, it was forgotten (わすれてしまった). “No need” would be 出さなくてもよかった.",
+            "fr": "出さなくてはいけなかった dit que c’était obligatoire, et のに marque la surprise : malgré cela, c’est resté oublié (わすれてしまった). « Pas besoin » donnerait 出さなくてもよかった."
+          }
+        }
+      ]
     }
   },
   {
