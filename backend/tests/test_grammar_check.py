@@ -356,14 +356,20 @@ def _tour(**over) -> dict:
 DROP = object()
 
 
-class TourRuleTests(unittest.TestCase):
+class _TourCase(unittest.TestCase):
+    """The canvas tour, with the canvas quiz the gate now requires (plan 196)."""
+
     def _problems(self, **over):
-        entry = _good(tour=_tour(**over))
+        # The quiz first, so a path into it ("quiz.1.jp") has one to reach.
+        entry = _good(tour=_tour(**{"quiz": _quiz(), **over}))
         return check_entry("N5", entry, _catalogue("N5", entry))
 
     def _says(self, fragment, **over):
         found = self._problems(**over)
         self.assertTrue(any(fragment in p for p in found), f"{fragment!r} not in {found}")
+
+
+class TourRuleTests(_TourCase):
 
     def test_the_canvas_tour_is_clean(self) -> None:
         self.assertEqual(self._problems(), [])
@@ -470,11 +476,7 @@ def _quiz() -> list[dict]:
     ]
 
 
-class QuizRuleTests(TourRuleTests):
-    def _problems(self, **over):
-        # The quiz first, so a path into it ("quiz.1.jp") has one to reach.
-        return super()._problems(**{"quiz": _quiz(), **over})
-
+class QuizRuleTests(_TourCase):
     def test_the_canvas_quiz_is_clean(self) -> None:
         self.assertEqual(self._problems(), [])
 
