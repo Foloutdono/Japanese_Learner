@@ -25882,7 +25882,7 @@ button.brd-stn { cursor: pointer; }
   border-radius: 3px;
   background: var(--surface-line);
 }
-.gl-map__group, .gl-map__stop {
+.gl-map__stop {
   position: relative;
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr) auto;
@@ -25892,7 +25892,6 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
-.gl-map__group { min-height: 24px; padding-top: var(--sp-2); font-size: var(--fs-caption); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tr-term); }
 .gl-map__dot {
   z-index: 1;
   display: grid;
@@ -25941,22 +25940,39 @@ button.brd-stn { cursor: pointer; }
   text-transform: uppercase;
   color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary));
 }
-.tour-score { display: flex; align-items: baseline; gap: var(--sp-3); margin: 0; }
-.tour-score__right { font-size: var(--fs-display); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-.tour-score__of { font-size: var(--fs-lead); font-weight: 600; color: var(--text-secondary); }
-.tour-recap { list-style: none; margin: 0; padding: 0 var(--sp-4); }
+/* The results (plan 195): the point beside the score drawn as a dial, one
+   arc a question, then each question again as a row -- the mark, the
+   sentence with the right form in it, the kind at the end, and under a
+   miss what was taken, struck. */
+.tour-end { display: flex; align-items: center; gap: var(--sp-5); }
+.tour-end__who { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.tour-end__who .tour-pattern { font-size: var(--fs-heading); line-height: 1.2; overflow-wrap: anywhere; }
+.tour-end__structure { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
+.tour-tally { position: relative; flex: none; width: 96px; height: 96px; }
+.tour-tally__dial { display: block; }
+.tour-tally__arc { fill: none; stroke: var(--surface-line); stroke-width: 6; }
+.tour-tally__arc--ok { stroke: var(--success); }
+.tour-tally__arc--no { stroke: var(--rating-wrong); }
+.tour-score { position: absolute; inset: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.tour-score__right { font-family: var(--font-display); font-size: var(--fs-heading); font-weight: 700; line-height: normal; font-variant-numeric: tabular-nums; }
+.tour-score__of { font-size: var(--fs-caption); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.tour-recap { list-style: none; gap: 0; padding-block: var(--sp-1); }
 .tour-recap__row {
   display: grid;
-  grid-template-columns: 22px auto minmax(0, 1fr);
-  gap: var(--sp-3);
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: var(--sp-1) var(--sp-4);
   align-items: center;
   padding: var(--sp-3) 0;
   border-top: 1px solid var(--surface-line);
-  font-size: var(--fs-sm);
 }
 .tour-recap__row:first-child { border-top: 0; }
-.tour-recap__kind { font-size: var(--fs-caption); color: var(--text-secondary); white-space: nowrap; }
-.tour-recap__jp { font-family: var(--font-jp); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tour-recap__row .tour-said__mark { width: 24px; height: 24px; }
+.tour-recap__jp { font-family: var(--font-jp); font-size: var(--fs-body); line-height: 1.9; text-wrap: pretty; }
+.tour-recap__jp rt { color: var(--text-secondary); }
+.tour-recap__form { font-weight: 700; color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.tour-recap__row--no .tour-recap__form { color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
+.tour-recap__kind { font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); white-space: nowrap; }
+.tour-recap__fix { grid-column: 2 / -1; font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-secondary); text-decoration-color: var(--rating-wrong); text-decoration-thickness: 2px; }
 .tour-sheet {
   display: flex;
   align-items: center;
@@ -41423,7 +41439,7 @@ button.brd-stn { cursor: pointer; }
      paper, a bubble and the form, the right one ringed and a wrong pick
      crossed once answered; Construire's entry the practice runs' floor
      (form.stage__foot above); the walk's map in the card panel. */
-  .gl-front, .gl-back { padding-block: var(--sp-7); }
+  .gl-front, .gl-back { padding-block: var(--sp-4); }
   .gl-dock {
     position: static;
     margin: 0;
@@ -41431,11 +41447,14 @@ button.brd-stn { cursor: pointer; }
     background: none;
   }
   .gl-tile {
-    min-height: 52px;
     background: var(--surface);
     border-color: var(--surface-line);
     color: var(--text-primary);
   }
+  /* The tiles' own height is the exam sheet's, not a thumb's (plan 195);
+     the short desk takes it down a rung. */
+  .gl-tiles { --gl-tile-h: 40px; }
+  .gl-tiles .gl-tile { min-height: var(--gl-tile-h); }
   .gl-tile:hover, .gl-tile:focus-visible { border-color: var(--text-secondary); }
   .gl-tile__b { border-color: var(--text-secondary); color: var(--text-secondary); }
   .gl-tile__t rt { color: var(--text-secondary); }
@@ -41448,6 +41467,38 @@ button.brd-stn { cursor: pointer; }
   .gl-tile--no { border: 2px solid var(--rating-wrong); }
   .gl-tile--no .gl-tile__b { border-color: var(--rating-wrong); color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
   .gl-tile:disabled:not(.gl-tile--ok, .gl-tile--no) { opacity: 0.5; }
-  .desk-card .gl-map { margin-bottom: var(--sp-4); }
+  .desk-card .gl-map { margin-bottom: var(--sp-3); }
+  .desk-card .gl-map__stop { min-height: 24px; }
+  .desk-card .gl-map__stop--now { min-height: 36px; }
+  .desk-card:has(.gl-map) .desk-verdict { padding-block: var(--sp-4); }
+  .desk-run--panels > .stage:has(.gl-card) .prompt-card { --card-pad-y: var(--sp-3); --card-pad-top: var(--sp-3); }
+  /* No scroll bar on the grammar run (plan 195): the forms stay two by
+     two however long they are, a form that outgrows its half stepping
+     down a size and wrapping rather than taking a row of its own, and the
+     tiles' own height is the exam sheet's, not a phone thumb's. */
+  .gl-tiles, .gl-tiles--mid, .gl-tiles--long { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); }
+  .gl-tiles--long .gl-tile__t { font-size: var(--fs-sm); line-height: 1.3; overflow-wrap: anywhere; }
+
+  /* A wrong pick's note is three lines of room the answer sheet cannot
+     also have: the card already says which form was right and which was
+     taken, so the sheet gives way, as it does on a phone. */
+  .desk-run--panels > .stage:has(.gl-back__why) .gl-dock--done { display: none; }
+
+  /* The short desk (plan 169): every piece a rung closer, and the answer
+     sheet gives way once the answer is in whatever it was, so the run
+     never stands on a scroll bar. */
+  @media (max-height: 799px) {
+    .gl-dock--done { display: none; }
+    .gl-sent { line-height: 1.6; }
+    .gl-front, .gl-back { padding-block: var(--sp-3); gap: var(--sp-3); }
+    .desk-run--panels > .stage:has(.gl-card) .prompt-card { --card-pad-y: var(--sp-3); --card-pad-top: var(--sp-3); }
+    .gl-tiles { --gl-tile-h: 36px; }
+    .desk-card .gl-map { margin-bottom: 0; }
+    .desk-card .gl-map__stop { min-height: 20px; }
+    .desk-card .gl-map__stop--now { min-height: 28px; }
+    .desk-card:has(.gl-map) .desk-verdict { padding-block: var(--sp-2); }
+    .desk-card:has(.gl-map) .desk-verdict__value { font-size: var(--fs-title); }
+    .desk-card:has(.gl-map) .desk-rhythm { padding-block: var(--sp-2); }
+  }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

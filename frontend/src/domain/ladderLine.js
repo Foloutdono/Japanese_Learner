@@ -45,16 +45,15 @@ export function lineOf(step) {
 }
 
 /** Every stop of the point's walk, for the desk's map: the tutorial, the
- *  Choisir and Construire steps under their group, the star; each 'done',
+ *  Choisir and Construire steps (each named with its own step, so no
+ *  group heading stands over them), the star; each 'done',
  *  'now' or ahead, an ahead one with the wait before it. */
 export function mapOf(step, t) {
   if (!step) return []
   const index = step.group === CHOOSE ? step.at - 1 : step.group === BUILD ? 3 + step.at - 1 : 7
   const rows = [{ kind: 'stop', name: t.mapTutorial, i: -1 }]
-  rows.push({ kind: 'group', name: t.lineChoose })
   if (step.relapse) {
     rows.push({ kind: 'stop', name: t.lineChoose, i: step.group === CHOOSE ? 'now' : 'done' })
-    rows.push({ kind: 'group', name: t.lineBuild })
     rows.push({ kind: 'stop', name: t.lineBuild, i: step.group === BUILD ? 'now' : 'ahead', wait: t.mapAfter(1) })
     rows.push({ kind: 'end', name: t.lineMastered, i: 'ahead', wait: t.mapAfter(MASTERED_DAYS) })
     return rows.map(r => ({ ...r, state: r.i === -1 ? 'done' : typeof r.i === 'string' ? r.i : undefined }))
@@ -63,12 +62,11 @@ export function mapOf(step, t) {
     kind: 'stop', name: stepName(t, CHOOSE, n + 1), i: n,
     wait: wait ? (wait.minutes ? `+${t.forecastMinutes(wait.minutes)}` : `+${t.forecastHours(wait.hours)}`) : null,
   }))
-  rows.push({ kind: 'group', name: t.lineBuild })
   BUILD_DAYS.forEach((days, n) => rows.push({ kind: 'stop', name: stepName(t, BUILD, n + 1), i: 3 + n, wait: t.mapAfter(days) }))
   rows.push({ kind: 'end', name: t.lineMastered, i: 7, wait: t.mapAfter(MASTERED_DAYS) })
   return rows.map(r => ({
     ...r,
-    state: r.kind === 'group' ? undefined : r.i < index ? 'done' : r.i === index ? 'now' : 'ahead',
+    state: r.i < index ? 'done' : r.i === index ? 'now' : 'ahead',
   }))
 }
 
