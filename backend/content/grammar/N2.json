@@ -23266,7 +23266,7 @@
           "jp": "友だちが遠くへ行くと聞いて、＿＿＿、何も言えなかった。",
           "tr": {
             "en": "When I heard my friend was moving far away, I was so sad that I couldn't say anything.",
-            "fr": "En apprenant que mon ami partait loin, j'étais si triste que je n'ai pas pu dire un mot."
+            "fr": "En apprenant que mon ami partait loin, ma tristesse était telle que je n'ai pas pu dire un mot."
           },
           "choices": [
             "悲しさのあまり",
@@ -27603,7 +27603,7 @@
           ],
           "why": {
             "en": "The first action, getting off, is the one left unfinished: 降りるか降りないかのうちに. 降りたとたんに says I was already off, and the third line swaps the roles: I got off as the bus was leaving.",
-            "fr": "L'action inachevée est la première, descendre : 降りるか降りないかのうちに. 降りたとたんに dit que j'étais déjà descendu, et la troisième ligne inverse les rôles : je descends alors que le bus part."
+            "fr": "L'action inachevée est la première, descendre : 降りるか降りないかのうちに. 降りたとたんに dit que la descente était déjà faite, et la troisième ligne inverse les rôles : je descends alors que le bus part."
           }
         },
         {
@@ -37644,7 +37644,127 @@
             "fr": "Son appel est arrivé à ce moment-là : ところに. ところだ dit ce qu'on est sur le point de faire maintenant."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ちょうどレポートを＿＿＿ところに、先生から電話があった。",
+          "tr": {
+            "en": "Just as I was in the middle of writing my report, my teacher called.",
+            "fr": "Juste au moment où j'étais en train d'écrire mon rapport, mon professeur a téléphoné."
+          },
+          "choices": [
+            "書いている",
+            "書いた",
+            "書こうとした"
+          ],
+          "why": {
+            "en": "In the middle of it takes ている: 書いているところに. 書いたところに means just after finishing, and 書こうとしたところに just as I was about to start.",
+            "fr": "En train de le faire se dit avec ている : 書いているところに. 書いたところに, c'est juste après avoir fini ; 書こうとしたところに, juste au moment de commencer."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What had the speaker just done when the friend came?",
+            "fr": "Que venait de faire la personne qui parle quand son ami est arrivé ?"
+          },
+          "jp": "ふろから出たところに、友だちがたずねてきた。",
+          "tr": {
+            "en": "A friend dropped by just as I had got out of the bath.",
+            "fr": "Un ami est passé me voir juste au moment où je venais de sortir du bain."
+          },
+          "choices": [
+            {
+              "en": "The speaker had just got out of the bath.",
+              "fr": "La personne venait de sortir du bain."
+            },
+            {
+              "en": "The speaker was about to get into the bath.",
+              "fr": "La personne allait entrer dans le bain."
+            },
+            {
+              "en": "The speaker was still in the bath.",
+              "fr": "La personne était encore dans le bain."
+            }
+          ],
+          "why": {
+            "en": "The た-form before ところに puts the arrival just after the action: 出たところに. About to get in would be 入ろうとしたところに, and still in it 入っているところに.",
+            "fr": "La forme た devant ところに place l'arrivée juste après l'action : 出たところに. Sur le point d'entrer : 入ろうとしたところに ; encore dedans : 入っているところに."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks why you did not open the door at once. You were already on the phone when the doorbell rang. What do you say?",
+            "fr": "Un ami te demande pourquoi tu n'as pas ouvert tout de suite. Tu étais déjà au téléphone quand la sonnette a retenti. Que réponds-tu ?"
+          },
+          "choices": [
+            "電話をしているところに、チャイムが鳴ったんだ。",
+            "チャイムが鳴っているところに、電話をしたんだ。",
+            "電話をしたあとに、チャイムが鳴ったんだ。"
+          ],
+          "why": {
+            "en": "What is under way goes before ところに, what breaks in comes after: 電話をしているところに、チャイムが鳴った. Swapped, the bell is the thing in progress; あとに says the call was over.",
+            "fr": "Ce qui est en cours va avant ところに, ce qui survient après : 電話をしているところに、チャイムが鳴った. Inversé, c'est la sonnette qui est en cours ; あとに dit que l'appel était fini."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ちょうどドアにかぎを＿＿＿ところに、となりの人に話しかけられた。",
+          "tr": {
+            "en": "Just as I was about to lock the door, the neighbour spoke to me.",
+            "fr": "Juste au moment où j'allais fermer la porte à clé, le voisin m'a adressé la parole."
+          },
+          "choices": [
+            "かけようとした",
+            "かけろうとした",
+            "かけるようとした"
+          ],
+          "why": {
+            "en": "For about to, a る-verb drops る and takes よう before とした: かけよう → かけようとした. かけろう treats it as an う-verb, and かけるようとした keeps the dictionary form.",
+            "fr": "Pour « sur le point de », un verbe en る perd る et prend よう : かけよう → かけようとした. かけろう le traite en verbe en う, et かけるようとした garde la forme du dictionnaire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When did the friend hand over the sweets?",
+            "fr": "Quand l'ami a-t-il donné les friandises ?"
+          },
+          "jp": "おなかがすいたなと思っていたところに、友だちがおかしをくれた。",
+          "tr": {
+            "en": "Just when I was thinking I was hungry, a friend gave me some sweets.",
+            "fr": "Juste au moment où je me disais que j'avais faim, un ami m'a donné des friandises."
+          },
+          "choices": [
+            {
+              "en": "While the speaker was already thinking about being hungry.",
+              "fr": "Alors que la personne qui parle se disait déjà qu'elle avait faim."
+            },
+            {
+              "en": "Before the speaker had felt any hunger at all.",
+              "fr": "Avant que la personne qui parle ait eu la moindre faim."
+            },
+            {
+              "en": "Just after the speaker had finished eating.",
+              "fr": "Juste après que la personne qui parle avait fini de manger."
+            }
+          ],
+          "why": {
+            "en": "ている + ところに: the arrival lands on something already under way, here the thought « I'm hungry ». That is the happy timing; the gift is neither earlier nor later.",
+            "fr": "ている + ところに : l'arrivée tombe sur quelque chose déjà en cours, ici la pensée « j'ai faim ». C'est ce bon moment ; le cadeau n'est ni avant ni après."
+          }
+        }
+      ]
     }
   },
   {
@@ -37843,7 +37963,136 @@
             "fr": "Un nouveau trajet après cinq ans : ぶりに. 間 est une durée passée à rouler ; 前に date un premier trajet."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the three years?",
+            "fr": "Que dit la phrase à propos de ces trois ans ?"
+          },
+          "jp": "ちちは三年ぶりに、むかしの友だちと電話で話した。",
+          "tr": {
+            "en": "My father talked on the phone with an old friend for the first time in three years.",
+            "fr": "Mon père a parlé au téléphone avec un vieil ami pour la première fois depuis trois ans."
+          },
+          "choices": [
+            {
+              "en": "For three years they had not spoken; now they did.",
+              "fr": "Pendant trois ans ils ne s'étaient pas parlé ; maintenant, si."
+            },
+            {
+              "en": "They had been talking on the phone all through those three years.",
+              "fr": "Ils s'étaient parlé au téléphone pendant tout ce temps, ces trois ans."
+            },
+            {
+              "en": "They spoke three years ago and have not spoken since.",
+              "fr": "Ils se sont parlé il y a trois ans et plus depuis."
+            }
+          ],
+          "why": {
+            "en": "ぶりに measures the gap before a return: three years without it, then it happened again. 間 would mean it went on throughout, and 以来 that it has not happened since.",
+            "fr": "ぶりに mesure l'écart avant un retour : trois ans sans, puis cela s'est reproduit. 間 dirait que cela a duré tout du long, et 以来 que cela ne s'est pas reproduit depuis."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この図書館には、＿＿＿ぶりに来た。",
+          "tr": {
+            "en": "I came to this library for the first time in two years.",
+            "fr": "J'ai remis les pieds à cette bibliothèque pour la première fois depuis deux ans."
+          },
+          "choices": [
+            "二年",
+            "二年前",
+            "二年間"
+          ],
+          "why": {
+            "en": "ぶり goes straight after a length of time: 二年ぶり. 二年前 is a point in the past, and 二年間 a stretch that lasted, so neither can stand before ぶり.",
+            "fr": "ぶり se place juste après une durée : 二年ぶり. 二年前 est un moment du passé, et 二年間 une période qui a duré : ni l'un ni l'autre ne va devant ぶり."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does 二十分ぶりに tell us about the buses?",
+            "fr": "Que dit 二十分ぶりに des bus ?"
+          },
+          "jp": "バスていで待っていたら、二十分ぶりにバスが来た。",
+          "tr": {
+            "en": "While I waited at the bus stop, a bus came for the first time in twenty minutes.",
+            "fr": "Pendant que j'attendais à l'arrêt, un bus est passé pour la première fois depuis vingt minutes."
+          },
+          "choices": [
+            {
+              "en": "No bus had come for twenty minutes before this one.",
+              "fr": "Aucun bus n'était passé depuis vingt minutes avant celui-ci."
+            },
+            {
+              "en": "The bus takes twenty minutes to get there from the station.",
+              "fr": "Le bus met vingt minutes à venir de la gare."
+            },
+            {
+              "en": "The bus came twenty minutes late.",
+              "fr": "Le bus est arrivé avec vingt minutes de retard."
+            }
+          ],
+          "why": {
+            "en": "ぶりに counts the gap since the last one, and the gap can be short when it feels long: twenty minutes of waiting. It is not a trip time, nor a delay behind the timetable.",
+            "fr": "ぶりに compte l'écart depuis le dernier, et il peut être court s'il semble long : vingt minutes d'attente. Ce n'est ni une durée de trajet, ni un retard sur l'horaire."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "For a month you have eaten dinner at home every night. Yesterday you ate out. You tell a friend.",
+            "fr": "Pendant un mois, tu as dîné chez toi tous les soirs. Hier, tu as mangé dehors. Tu le dis à un ami."
+          },
+          "choices": [
+            "きのうは、一か月ぶりに、外で食べたよ。",
+            "きのうは、一か月ぶりに、家で食べたよ。",
+            "きのうは、一か月の間、外で食べたよ。"
+          ],
+          "why": {
+            "en": "ぶりに goes with what had not happened for the span: here eating out. 家で食べた would claim home meals had stopped, and 一か月の間 would say you ate out all month long.",
+            "fr": "ぶりに va avec ce qui ne s'était pas produit pendant la durée : ici manger dehors. 家で食べた dirait que les repas à la maison s'étaient arrêtés, et 一か月の間 que tu as mangé dehors tout le mois."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker want to know?",
+            "fr": "Que veut savoir la personne qui parle ?"
+          },
+          "jp": "山田さんは、何年ぶりにこの町に来たんですか。",
+          "tr": {
+            "en": "How many years had it been since Yamada last came to this town?",
+            "fr": "Cela faisait combien d'années que Yamada n'était pas venu dans cette ville ?"
+          },
+          "choices": [
+            {
+              "en": "How long it had been since Yamada last came to this town.",
+              "fr": "Depuis combien de temps Yamada n'était pas venu dans cette ville."
+            },
+            {
+              "en": "How long Yamada has been staying in this town.",
+              "fr": "Depuis combien de temps Yamada séjourne dans cette ville."
+            },
+            {
+              "en": "Whether this is Yamada's first visit to this town.",
+              "fr": "Si c'est la première visite de Yamada dans cette ville."
+            }
+          ],
+          "why": {
+            "en": "何年ぶりに asks for the gap since the last time: how long Yamada had stayed away. It is not how long he has been staying (間), nor a question of a first visit, since there was a last time.",
+            "fr": "何年ぶりに demande l'écart depuis la dernière fois : combien de temps Yamada était resté absent. Ce n'est pas la durée de son séjour (間), ni une première visite, puisqu'il y a eu une dernière fois."
+          }
+        }
+      ]
     }
   },
   {
@@ -38048,7 +38297,136 @@
             "fr": "Les espèces et rien d'autre : のみ. も ajouterait les espèces à d'autres moyens, 以外 les exclurait."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "You buy something on the shop's website. Do you get points?",
+            "fr": "Tu achètes quelque chose sur le site du magasin. Obtiens-tu des points ?"
+          },
+          "jp": "ポイントは、お店でお買い物をした場合のみ、つきます。",
+          "tr": {
+            "en": "Points are given only when you shop in the store.",
+            "fr": "Les points ne sont donnés que lorsque tu fais tes achats en magasin."
+          },
+          "choices": [
+            {
+              "en": "No: points are given only for purchases made in the shop.",
+              "fr": "Non : les points ne sont donnés que pour les achats faits en magasin."
+            },
+            {
+              "en": "Yes: points are given for any purchase, in the shop or online.",
+              "fr": "Oui : les points sont donnés pour tout achat, en magasin ou en ligne."
+            },
+            {
+              "en": "Yes: points are given only for purchases made online.",
+              "fr": "Oui : les points ne sont donnés que pour les achats faits en ligne."
+            }
+          ],
+          "why": {
+            "en": "のみ closes the list to the case just named: 場合のみ means only when you shop in the store, so an online purchase earns nothing. It does not point to the other case.",
+            "fr": "のみ ferme la liste au seul cas nommé : 場合のみ veut dire seulement quand tu achètes en magasin, donc un achat en ligne ne rapporte rien. Il ne désigne pas l'autre cas."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "れんしゅうは十分にしたので、あとは本番で力を＿＿＿のみだ。",
+          "tr": {
+            "en": "I have practised enough, so all that is left is to give it my all at the real thing.",
+            "fr": "L'entraînement est fait ; il ne reste qu'à donner le meilleur de moi-même le jour J."
+          },
+          "choices": [
+            "出す",
+            "出します",
+            "出して"
+          ],
+          "why": {
+            "en": "のみ follows the plain form of a verb: 出すのみだ. 出しますのみ puts the polite ます in front of it, and 出してのみ leaves a て-form hanging.",
+            "fr": "のみ suit la forme neutre du verbe : 出すのみだ. 出しますのみ met le ます poli devant lui, et 出してのみ laisse une forme en て en suspens."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "The writer chose のみ, not だけ. What does that choice tell you?",
+            "fr": "L'auteur a choisi のみ plutôt que だけ. Que révèle ce choix ?"
+          },
+          "jp": "この通りは、歩行者のみ通行できます。",
+          "tr": {
+            "en": "Only pedestrians may use this street.",
+            "fr": "Seuls les piétons peuvent emprunter cette rue."
+          },
+          "choices": [
+            {
+              "en": "のみ is the formal, written twin of だけ, which suits a sign.",
+              "fr": "のみ est le jumeau écrit et formel de だけ, ce qui convient à un panneau."
+            },
+            {
+              "en": "のみ is a stronger « only » than だけ: not one single other person.",
+              "fr": "のみ est un « seulement » plus fort que だけ : pas une seule autre personne."
+            },
+            {
+              "en": "のみ is the casual, spoken form of だけ, to sound friendly.",
+              "fr": "のみ est la forme parlée et familière de だけ, pour avoir l'air sympathique."
+            }
+          ],
+          "why": {
+            "en": "のみ and だけ draw the same limit; のみ is the written, formal one, so it belongs on signs and in documents. It is not stronger, and in speech between friends it would sound stiff.",
+            "fr": "のみ et だけ tracent la même limite ; のみ est le mot écrit et formel, d'où les panneaux et les documents. Il n'est pas plus fort, et entre amis, à l'oral, il sonnerait raide."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A café posts a notice: the sandwiches are sold only in the morning, and not in the afternoon. Which line says so?",
+            "fr": "Un café affiche un avis : les sandwichs ne sont vendus que le matin, et pas l'après-midi. Quelle ligne le dit ?"
+          },
+          "choices": [
+            "サンドイッチは、朝のみ売っています。",
+            "サンドイッチのみ、朝に売っています。",
+            "サンドイッチは、朝のみ売っていません。"
+          ],
+          "why": {
+            "en": "のみ limits the word just before it: 朝のみ is the morning and no other time. サンドイッチのみ would say sandwiches are the only thing sold, and 売っていません makes it the one time they are not.",
+            "fr": "のみ limite le mot qui le précède : 朝のみ, c'est le matin et aucun autre moment. サンドイッチのみ dirait que seuls les sandwichs sont vendus, et 売っていません en fait le seul moment où ils ne le sont pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When can you order the special menu?",
+            "fr": "Quand peut-on commander le menu spécial ?"
+          },
+          "jp": "日曜日のみの特別メニューが、いちばんの人気だ。",
+          "tr": {
+            "en": "The special menu served on Sundays only is the most popular.",
+            "fr": "Le menu spécial, servi le dimanche seulement, est le plus populaire."
+          },
+          "choices": [
+            {
+              "en": "Only on Sundays.",
+              "fr": "Seulement le dimanche."
+            },
+            {
+              "en": "Every day except Sundays.",
+              "fr": "Tous les jours sauf le dimanche."
+            },
+            {
+              "en": "On Sundays and on other days too.",
+              "fr": "Le dimanche, et aussi les autres jours."
+            }
+          ],
+          "why": {
+            "en": "のみの before a noun limits it like an adjective: 日曜日のみの特別メニュー is a menu for Sundays and no other day. It does not exclude Sunday, nor add other days.",
+            "fr": "のみの devant un nom le limite comme un adjectif : 日曜日のみの特別メニュー est un menu pour le dimanche et aucun autre jour. Il n'exclut pas le dimanche et n'ajoute pas d'autres jours."
+          }
+        }
+      ]
     }
   },
   {
@@ -38247,7 +38625,136 @@
             "fr": "Emprunter est l'extrême que tu refuses : までして. まで seul veut dire « jusqu'à ce que » ; てでも dit que tu le ferais."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of getting up early for the ramen?",
+            "fr": "Que pense la personne qui parle de se lever tôt pour ce ramen ?"
+          },
+          "jp": "早起きまでして、あの店のラーメンを食べたいとは思わない。",
+          "tr": {
+            "en": "I don't want to eat that shop's ramen badly enough to get up early for it.",
+            "fr": "Je n'ai pas assez envie du ramen de ce restaurant pour me lever tôt."
+          },
+          "choices": [
+            {
+              "en": "It is too much: the ramen is not worth that effort.",
+              "fr": "C'est trop : ce ramen ne vaut pas cet effort."
+            },
+            {
+              "en": "The speaker would gladly get up early to eat it.",
+              "fr": "La personne se lèverait volontiers tôt pour en manger."
+            },
+            {
+              "en": "The speaker does not like that ramen at all, whatever the effort.",
+              "fr": "La personne n'aime pas du tout ce ramen, quel que soit l'effort."
+            }
+          ],
+          "why": {
+            "en": "AまでしてB names an extreme means, and たいとは思わない refuses it. The speaker does not say the ramen is bad, only that it is not worth getting up early for.",
+            "fr": "AまでしてB nomme un moyen extrême, et たいとは思わない le refuse. La personne ne dit pas que le ramen est mauvais, seulement qu'il ne vaut pas qu'on se lève tôt."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "てつや＿＿＿、かれはレポートをしあげた。",
+          "tr": {
+            "en": "He even stayed up all night to finish the report.",
+            "fr": "Il est allé jusqu'à veiller toute la nuit pour finir le rapport."
+          },
+          "choices": [
+            "までして",
+            "までに",
+            "までの"
+          ],
+          "why": {
+            "en": "After a noun, までして names the extreme means: てつやまでして. までに is a deadline (« by »), and までの needs a noun after it, as in てつやまでの時間.",
+            "fr": "Après un nom, までして nomme le moyen extrême : てつやまでして. までに est une échéance (« avant »), et までの veut un nom derrière, comme てつやまでの時間."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What was the studying abroad for?",
+            "fr": "À quoi servait ce séjour d'études à l'étranger ?"
+          },
+          "jp": "かのじょは、留学までして、あのダンスをならった。",
+          "tr": {
+            "en": "She even studied abroad to learn that dance.",
+            "fr": "Elle est allée jusqu'à partir étudier à l'étranger pour apprendre cette danse."
+          },
+          "choices": [
+            {
+              "en": "It was her way of learning that dance.",
+              "fr": "C'était son moyen d'apprendre cette danse."
+            },
+            {
+              "en": "She went abroad after she had learned the dance.",
+              "fr": "Elle est partie à l'étranger après avoir appris la danse."
+            },
+            {
+              "en": "She studied abroad only until she learned the dance.",
+              "fr": "Elle a étudié à l'étranger seulement jusqu'à ce qu'elle apprenne la danse."
+            }
+          ],
+          "why": {
+            "en": "The step before まで is the extreme means, and what follows is its goal: she studied abroad in order to learn the dance. It does not come after learning it, and it is not « until ».",
+            "fr": "Ce qui précède まで est le moyen extrême, et ce qui suit en est le but : elle a étudié à l'étranger afin d'apprendre la danse. Cela ne vient pas après, et ce n'est pas « jusqu'à »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend says he will travel three hours to a distant shop to buy concert tickets. You think that is too much. What do you tell him?",
+            "fr": "Un ami dit qu'il va faire trois heures de route jusqu'à un magasin lointain pour acheter des places de concert. Pour toi, c'est trop. Que lui dis-tu ?"
+          },
+          "choices": [
+            "遠出までして、チケットを買いに行く必要はないよ。",
+            "遠出までして、チケットを買いに行く必要はなかったよ。",
+            "遠出までして、チケットを買いに行ったほうがいいよ。"
+          ],
+          "why": {
+            "en": "までして frames the means as too much, hence 必要はない. 必要はなかった is the past, as if he had already done it, and ほうがいい urges the very step the speaker frowns on.",
+            "fr": "までして présente le moyen comme excessif, d'où 必要はない. 必要はなかった est le passé, comme s'il l'avait déjà fait, et ほうがいい pousse à faire justement ce que la personne désapprouve."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of how he got a perfect score?",
+            "fr": "Que pense la personne qui parle de la façon dont il a eu la note maximale ?"
+          },
+          "jp": "かれは、カンニングまでして、百点を取った。",
+          "tr": {
+            "en": "He even cheated to get a perfect score.",
+            "fr": "Il est allé jusqu'à tricher pour avoir la note maximale."
+          },
+          "choices": [
+            {
+              "en": "That he went too far: cheating is not right.",
+              "fr": "Qu'il est allé trop loin : tricher, ce n'est pas bien."
+            },
+            {
+              "en": "That he is very clever.",
+              "fr": "Qu'il est très malin."
+            },
+            {
+              "en": "That he studied extremely hard.",
+              "fr": "Qu'il a travaillé à l'extrême."
+            }
+          ],
+          "why": {
+            "en": "まで makes the means the extreme part, and the speaker frowns on it: cheating is going too far for a score. It praises neither cleverness nor effort, since the effort here is cheating.",
+            "fr": "まで fait du moyen la part extrême, et la personne qui parle le désapprouve : tricher pour une note, c'est aller trop loin. Il ne loue ni l'ingéniosité ni l'effort, car l'effort, ici, c'est tricher."
+          }
+        }
+      ]
     }
   },
   {
@@ -38446,7 +38953,157 @@
             "fr": "Elle l'a vu à temps, donc c'est presque arrivé : ところだった. ちゃった (てしまった) dit que c'est arrivé ; ところだ, qu'on est sur le point de le faire."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Did the speaker tell the secret?",
+            "fr": "La personne qui parle a-t-elle dit le secret ?"
+          },
+          "jp": "もう少しで、ひみつを友だちに言うところだった。",
+          "tr": {
+            "en": "I very nearly told my friend the secret.",
+            "fr": "J'ai bien failli dire le secret à mon ami."
+          },
+          "choices": [
+            {
+              "en": "No: the speaker stopped just in time.",
+              "fr": "Non : la personne s'est arrêtée juste à temps."
+            },
+            {
+              "en": "Yes, and the speaker regrets it.",
+              "fr": "Oui, et la personne le regrette."
+            },
+            {
+              "en": "Not yet: the speaker is about to tell it now.",
+              "fr": "Pas encore : la personne est sur le point de le dire maintenant."
+            }
+          ],
+          "why": {
+            "en": "ところだった looks back on a close call: it nearly happened and did not. It is not « I told it » (てしまった), and it is not the present « I am about to » (ところだ).",
+            "fr": "ところだった regarde en arrière une alerte : cela a failli arriver et n'est pas arrivé. Ce n'est pas « je l'ai dit » (てしまった), ni le présent « je suis sur le point de » (ところだ)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "電車の中で、大切なかぎを＿＿＿。",
+          "tr": {
+            "en": "I nearly lost my important key on the train.",
+            "fr": "J'ai failli perdre ma clé importante dans le train."
+          },
+          "choices": [
+            "なくすところだった",
+            "なくしてしまった",
+            "なくしかねない"
+          ],
+          "why": {
+            "en": "Dictionary form + ところだった says it nearly happened and did not. なくしてしまった says the key is lost, and なくしかねない looks ahead (it might well get lost), not back at a close call.",
+            "fr": "Forme du dictionnaire + ところだった dit que cela a failli arriver sans arriver. なくしてしまった dit que la clé est perdue, et なくしかねない regarde devant (elle pourrait bien se perdre), pas une alerte passée."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How did the match end for the team?",
+            "fr": "Comment le match s'est-il terminé pour l'équipe ?"
+          },
+          "jp": "あと一点で、わたしたちのチームが勝つところだった。",
+          "tr": {
+            "en": "We very nearly won: one more point and the team would have.",
+            "fr": "On a failli gagner : un point de plus et l'équipe l'emportait."
+          },
+          "choices": [
+            {
+              "en": "The team did not win, but it came close.",
+              "fr": "L'équipe n'a pas gagné, mais elle est passée près."
+            },
+            {
+              "en": "The team won by a single point.",
+              "fr": "L'équipe a gagné d'un seul point."
+            },
+            {
+              "en": "The team narrowly avoided losing.",
+              "fr": "L'équipe a évité la défaite de justesse."
+            }
+          ],
+          "why": {
+            "en": "ところだった names the thing that nearly happened, and here that is winning, so it did not happen. A near miss is not always a relief: it is regret when the thing nearly done was good.",
+            "fr": "ところだった nomme ce qui a failli arriver, ici gagner : cela n'est donc pas arrivé. Une alerte n'est pas toujours un soulagement : c'est un regret quand ce qui a failli se faire était bien."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your teacher asks why you are out of breath. You ran to school and got there just in time. What do you say?",
+            "fr": "Ton professeur te demande pourquoi tu as le souffle court. Tu as couru jusqu'à l'école et tu es juste dans les temps. Que dis-tu ?"
+          },
+          "choices": [
+            "もう少しで、ちこくするところでした。",
+            "もう少しで、ちこくするところだった。",
+            "もう少しで、ちこくしてしまいました。"
+          ],
+          "why": {
+            "en": "To a teacher you use the polite past: 〜ところでした, a close call that did not happen. ところだった is for friends, and ちこくしてしまいました would say you really were late.",
+            "fr": "À un professeur, on dit le passé poli : 〜ところでした, une alerte sans suite. ところだった est pour les amis, et ちこくしてしまいました dirait que tu as vraiment été en retard."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あやうく、うその話に＿＿＿ところだった。",
+          "tr": {
+            "en": "I nearly fell for that lie.",
+            "fr": "J'ai failli me faire avoir par ce mensonge."
+          },
+          "choices": [
+            "だまされる",
+            "だます",
+            "だまされない"
+          ],
+          "why": {
+            "en": "The one nearly fooled is the speaker, so the verb is the passive だまされる before ところだった. だます would mean I nearly fooled someone, and だまされない that I nearly did not fall for it.",
+            "fr": "Celui qui a failli être trompé, c'est la personne qui parle : le verbe est donc au passif だまされる devant ところだった. だます dirait que j'ai failli tromper quelqu'un, et だまされない que j'ai failli ne pas me laisser prendre."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What was the speaker doing when the phone rang?",
+            "fr": "Que faisait la personne qui parle quand le téléphone a sonné ?"
+          },
+          "jp": "電話がかかってきたとき、ちょうどばんごはんを作っているところだった。",
+          "tr": {
+            "en": "When the phone rang, I was just in the middle of cooking dinner.",
+            "fr": "Quand le téléphone a sonné, j'étais justement en train de préparer le dîner."
+          },
+          "choices": [
+            {
+              "en": "Cooking dinner: right in the middle of it.",
+              "fr": "Préparer le dîner, en plein dedans."
+            },
+            {
+              "en": "Nearly cooking dinner, but not in the end.",
+              "fr": "Avoir failli préparer le dîner, mais finalement non."
+            },
+            {
+              "en": "Having just finished cooking dinner.",
+              "fr": "Venir de finir de préparer le dîner."
+            }
+          ],
+          "why": {
+            "en": "After ている, ところだった is no close call: it says I was in the middle of it at that moment. Only the plain dictionary form, as in 作るところだった, is « I nearly cooked it ».",
+            "fr": "Après ている, ところだった n'est pas une alerte : il dit que j'étais en plein dedans à ce moment-là. Seule la forme du dictionnaire, comme dans 作るところだった, donne « j'ai failli le préparer »."
+          }
+        }
+      ]
     }
   }
 ]
