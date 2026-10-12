@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **198**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **199**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -78,7 +78,9 @@ runtime purpose.
   `grammar.ladder` card's step (Choisir ×3, Construire ×4, mastered, the
   relapse) is read from its `card_modes` fields by `srs/ladder.py`, which
   sets them so `srs._progress` and the stage read the walk unchanged, and
-  which both the review and its forecast run through. Never store the
+  which both the review and its forecast run through, the forecast
+  saying where each rating leaves the point (`review_preview[q].step`,
+  plan 198) so the client never copies the pass rule. Never store the
   step beside the row; a row written before plan 194 reads onto the walk.
 - **XP and studied days are separate.** A card review goes to `review_log`, a
   practice answer pays through `srs.award_practice` into `xp_ledger`; both

@@ -48,7 +48,11 @@ const CHECK_WAIT_MS = 2500
 // over options that are patterns (which b2f's now are, where a v8 card
 // holds meanings no option could be graded right against). A v8 grammar
 // queue would print 中 with no なか until it had been answered past.
-const CACHE_VERSION = 'v9'
+// v10: every rating in a ladder card's review_preview gained `step` and
+// `passed` (plan 198), where the rating leaves the point on its line, which
+// the desk's card panel draws on the walk. A v9 ladder queue would draw
+// the four tiles it drew before until it had been answered past.
+const CACHE_VERSION = 'v10'
 
 const KEY_PREFIX = 'jp-session'
 

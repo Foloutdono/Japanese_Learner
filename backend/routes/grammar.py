@@ -109,6 +109,9 @@ def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) ->
             "due_in":     p["due_in"],
             # Where it leaves the card's bar (plan 147).
             "progress":   p.get("progress"),
+            # A ladder card only (plan 198): where this rating leaves the
+            # point on its line, and whether it passes.
+            **({"step": p["step"], "passed": p["passed"]} if "step" in p else {}),
         }
         for quality, p in preview.items()
     }

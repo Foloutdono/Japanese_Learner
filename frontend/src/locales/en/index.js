@@ -1414,6 +1414,10 @@ const dictionary = {
   mapNow: 'now',
   mapDone: 'done',
   mapAfter: days => `+${days} d`,
+  // 198 — what each rating does to the point, on the walk (CardPanel)
+  mapOutsAria: 'What each rating does',
+  mapOutMove: move => ({ stay: 'try again', next: 'next step', back: 'relapse', hold: 'stays mastered' })[move],
+  mapOutRow: (verdicts, move, when) => `${verdicts}: ${move}, ${when}`,
   mapSealed: 'its name opens with the answer',
   tourUsageHead: "That's not all!",
   tourQuizCount: (n, total) => `Question ${n} of ${total}`,

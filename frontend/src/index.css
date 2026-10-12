@@ -25871,32 +25871,56 @@ button.brd-stn { cursor: pointer; }
 .gl-tile--on .gl-tile__b { background: var(--text-on-panel); border-color: var(--text-on-panel); color: var(--bg-panel); }
 
 
-/* The desk's map of the walk (CardPanel, in the fare strip's place): one
-   upright rail in the line's pigment, a dot a stop, the stop in hand
-   ringed in ink, each with when. */
-.gl-map { position: relative; list-style: none; margin: 0; padding: 0; }
-.gl-map::before {
-  content: "";
-  position: absolute;
-  top: var(--sp-4);
-  bottom: var(--sp-4);
-  left: 11px;
-  width: 6px;
-  border-radius: 3px;
-  background: var(--surface-line);
+/* The desk's map of the walk (CardPanel; redrawn in plan 198, the owner's
+   pick B of the canvas "Tsuji — the card panel"): one upright rail, filled
+   in the line's pigment as far as it is ridden, a dot a stop -- a check on
+   a stop done, the stop in hand ringed in ink on a wash, the star in the
+   mastered state's gold once it is reached -- and the wait before each
+   stop ahead. A stop done and the stop in hand say nothing: their word is
+   for a screen reader. The rail is drawn half a stop at a time, so the
+   stop in hand, taller than the rest once it holds what each rating does
+   (below, in the desk's section), still meets its neighbours'. The rows
+   are a rung that gives way to their floor before the panel scrolls. */
+.gl-map {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 .gl-map__stop {
   position: relative;
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr) auto;
-  gap: var(--sp-4);
+  column-gap: var(--sp-4);
   align-items: center;
-  min-height: 32px;
-  font-size: var(--fs-sm);
+  flex: 0 1 54px;
+  min-height: 26px;
+  font-size: var(--fs-body);
+  line-height: 1.3;
   color: var(--text-secondary);
 }
+.gl-map__stop::before,
+.gl-map__stop::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  width: 6px;
+  background: var(--surface-line);
+}
+.gl-map__stop::before { top: 0; height: 50%; }
+.gl-map__stop::after { top: 50%; bottom: 0; }
+.gl-map__stop:first-child::before,
+.gl-map__stop:last-child::after { content: none; }
+.gl-map__stop--done::before,
+.gl-map__stop--done::after,
+.gl-map__stop--now::before { background: var(--line-grammar); }
 .gl-map__dot {
+  position: relative;
   z-index: 1;
+  grid-column: 1;
   display: grid;
   place-items: center;
   width: 16px;
@@ -25906,27 +25930,69 @@ button.brd-stn { cursor: pointer; }
   border-radius: 50%;
   background: var(--surface);
   font-size: var(--fs-caption-xs);
+  line-height: 1;
+  color: var(--paper);
 }
-.gl-map__stop--end .gl-map__dot { border-radius: var(--r-plate); width: 20px; height: 20px; margin-left: 4px; border-width: 2px; }
-.gl-map__stop--done { color: var(--text-primary); }
-.gl-map__stop--done .gl-map__dot { border-color: var(--line-grammar); background: var(--line-grammar); color: var(--paper); }
+.gl-map__dot svg { width: 8px; height: 8px; stroke-width: 4; }
+.gl-map__stop--done .gl-map__dot { border-color: var(--line-grammar); background: var(--line-grammar); }
+.gl-map__stop--end .gl-map__dot {
+  border-radius: var(--r-plate);
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  border-width: 2px;
+  color: var(--text-secondary);
+}
 .gl-map__stop--now {
-  min-height: 44px;
-  margin: 2px calc(-1 * var(--sp-3));
-  padding: 0 var(--sp-3);
+  flex: none;
+  min-height: 48px;
+  margin-inline: calc(-1 * var(--sp-3));
+  padding-inline: var(--sp-3);
   border-radius: var(--r-card);
   background: color-mix(in srgb, var(--line-grammar) 14%, transparent);
   color: var(--text-primary);
-  font-weight: 700;
 }
+.gl-map__stop--now::before,
+.gl-map__stop--now::after { left: calc(11px + var(--sp-3)); }
+.gl-map__stop--now::before { height: 24px; }
+.gl-map__stop--now::after { top: 24px; }
 .gl-map__stop--now .gl-map__dot {
   width: 22px;
   height: 22px;
   margin-left: 3px;
   border: 4px solid var(--line-grammar);
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text-primary);
+  color: var(--text-primary);
 }
-.gl-map__when { font-size: var(--fs-caption); font-weight: 600; font-variant-numeric: tabular-nums; }
+.gl-map__name {
+  grid-column: 2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gl-map__stop--now .gl-map__name { font-size: var(--fs-lead); font-weight: 700; }
+.gl-map__when {
+  grid-column: 3;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  font-variant-numeric: proportional-nums;
+  white-space: nowrap;
+}
+/* The stop in hand once it holds its outcomes: its head a row, they the
+   next, the rail's halves still split at the head's middle. */
+.gl-map__stop--outs {
+  grid-template-rows: 48px auto;
+  align-content: start;
+  padding-bottom: var(--sp-3);
+}
+.gl-map__stop--outs .gl-map__dot,
+.gl-map__stop--outs .gl-map__name { grid-row: 1; }
+.gl-map__stop--end.gl-map__stop--now .gl-map__dot {
+  background: var(--state-mastered);
+  border-color: var(--state-mastered);
+  color: var(--text-on-fill);
+}
 
 /* The tour's new pieces (plan 194): « C'est pas tout ! » over a usage's
    notion, the trap's tag, the quiz's count, the results. */
@@ -41609,9 +41675,79 @@ button.brd-stn { cursor: pointer; }
   .gl-tile--no { border: 2px solid var(--rating-wrong); }
   .gl-tile--no .gl-tile__b { border-color: var(--rating-wrong); color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary)); }
   .gl-tile:disabled:not(.gl-tile--ok, .gl-tile--no) { opacity: 0.5; }
-  .desk-card .gl-map { margin-bottom: var(--sp-3); }
-  .desk-card .gl-map__stop { min-height: 24px; }
-  .desk-card .gl-map__stop--now { min-height: 36px; }
+  /* 梯子 — the ladder card's panel (plan 198, the owner's pick B): the
+     walk takes what the tiles had, each rating a row on the stop in hand
+     -- the verdicts it answers as their keys, a glyph for where it sends
+     the point (asked again, down the line, back up it), the wait as the
+     tiles' figure, the pass in the pass key's ink -- and the rhythm under
+     it. A lone figure is proportional here, as in the rhythm: Space
+     Grotesk's tabular 1 has a foot, and nearly every wait on the line has
+     a 1 in it (10 min, 1 h, 1 j, 21 j). The tiles stay for a card off the
+     ladder, and for a ladder card served without its landings. */
+  .desk-card--ladder .gl-map { flex: 1 1 auto; }
+  .desk-card--ladder .desk-rhythm { border-top: 1px solid var(--surface-line); }
+  .desk-card--ladder .desk-fig__value { font-variant-numeric: proportional-nums; }
+  .gl-outs {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+  }
+  .gl-out {
+    /* The stop in hand is a wash, a darker ground than the panel, and the
+       secondary ink measured 4.1:1 on it on paper: its quiet ink steps a
+       way toward the primary. */
+    --gl-soft: color-mix(in srgb, var(--text-secondary) 65%, var(--text-primary));
+    --gl-pass: color-mix(in srgb, var(--rating-correct) 55%, var(--text-primary));
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--sp-3);
+    min-height: 56px;
+    border-top: 1px solid color-mix(in srgb, var(--line-grammar) 40%, transparent);
+    color: var(--text-primary);
+  }
+  .gl-out__go { width: 16px; height: 16px; color: var(--rating-wrong); }
+  .gl-out--pass .gl-out__go { color: var(--gl-pass); }
+  .gl-out__keys {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1) var(--sp-4);
+    min-width: 0;
+    overflow: hidden;
+  }
+  .gl-out__key {
+    --rating-color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-body);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .gl-out__key b { font-weight: inherit; }
+  .gl-out__key .desk-kbd { color: var(--gl-soft); }
+  .gl-out__key--q0 { --rating-color: var(--danger); }
+  .gl-out__key--q1 { --rating-color: var(--rating-wrong); }
+  .gl-out__key--q2 { --rating-color: var(--rust); }
+  .gl-out__key--q3 { --rating-color: var(--warning); }
+  .gl-out__key--q4 { --rating-color: var(--rating-correct); }
+  .gl-out__key--q5 { --rating-color: var(--rating-perfect); }
+  .gl-out__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--rating-color); flex: none; }
+  .gl-out__note { margin-right: var(--sp-2); font-size: var(--fs-caption); font-weight: 600; color: var(--gl-soft); }
+  .gl-out__when {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-1);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: proportional-nums;
+    white-space: nowrap;
+  }
+  .gl-out__when b { font-size: var(--fs-heading); font-weight: inherit; }
+  .gl-out__when small { font-size: var(--fs-lead); font-weight: 600; color: var(--gl-soft); }
+  .gl-out--pass .gl-out__when b { color: var(--gl-pass); }
   .desk-card:has(.gl-map) .desk-verdict { padding-block: var(--sp-4); }
   .desk-run--panels > .stage:has(.gl-card) .prompt-card { --card-pad-y: var(--sp-3); --card-pad-top: var(--sp-3); }
   /* No scroll bar on the grammar run (plan 195): the forms stay two by
@@ -41635,9 +41771,18 @@ button.brd-stn { cursor: pointer; }
     .gl-front, .gl-back { padding-block: var(--sp-3); gap: var(--sp-3); }
     .desk-run--panels > .stage:has(.gl-card) .prompt-card { --card-pad-y: var(--sp-3); --card-pad-top: var(--sp-3); }
     .gl-tiles { --gl-tile-h: calc(var(--sp-8) - var(--sp-3)); }
-    .desk-card .gl-map { margin-bottom: 0; }
-    .desk-card .gl-map__stop { min-height: 20px; }
-    .desk-card .gl-map__stop--now { min-height: 28px; }
+    .gl-map__stop { flex-basis: 24px; min-height: 20px; font-size: var(--fs-sm); }
+    .gl-map__stop--now { flex-basis: auto; min-height: 30px; }
+    .gl-map__stop--now::before { height: 15px; }
+    .gl-map__stop--now::after { top: 15px; }
+    .gl-map__stop--now .gl-map__name { font-size: var(--fs-body); }
+    .gl-map__stop--outs { grid-template-rows: 30px auto; padding-bottom: var(--sp-2); }
+    .gl-map__when { font-size: var(--fs-caption); }
+    .gl-out { min-height: 32px; }
+    .gl-out__go { width: 14px; height: 14px; }
+    .gl-out__key { font-size: var(--fs-sm); }
+    .gl-out__when b { font-size: var(--fs-lead); }
+    .gl-out__when small { font-size: var(--fs-sm); }
     .desk-card:has(.gl-map) .desk-verdict { padding-block: var(--sp-2); }
     .desk-card:has(.gl-map) .desk-verdict__value { font-size: var(--fs-title); }
     .desk-card:has(.gl-map) .desk-rhythm { padding-block: var(--sp-2); }

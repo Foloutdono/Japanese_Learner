@@ -1,6 +1,6 @@
-import { useLayoutEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { useRunTally, tallyAccuracy } from '../../stores/runTally'
+import { useLabelsFit } from '../../hooks/useLabelsFit'
 
 // ── 机 — this run, in three figures (plans 114, 124, 126) ──
 // Cards rated, the share good or better, the XP they earned
@@ -44,50 +44,6 @@ export function RunRecords({ done = false, remaining = null, label = null }) {
       {remaining != null && <DeskFigure label={t.deskRemaining} value={remaining} bare={bare} />}
     </div>
   )
-}
-
-// Whether a row of figures is too narrow for its labels: [ref, bare].
-// With the labels shown, a label wider than its figure is a label the
-// row squeezed (the figures shrink to share it, and the labels, never
-// wrapped, spill into each other). Once bare, the row's width alone
-// decides -- it is its column's, not its content's -- and the labels
-// are tried again only past the width they last failed at, so hiding
-// them can never be what shows them again. Measured before paint, then
-// whenever the row or a label changes size: a resize, a figure that
-// grows and squeezes its label, the font arriving.
-function useLabelsFit() {
-  const [row, setRow] = useState(null)
-  const [bare, setBare] = useState(false)
-  const failedAt = useRef(0)
-
-  useLayoutEffect(() => {
-    if (!row) return undefined
-    let live = true
-    const measure = () => {
-      if (!live) return
-      const width = row.clientWidth
-      if (bare) {
-        if (width > failedAt.current) setBare(false)
-        return
-      }
-      const labels = row.querySelectorAll('.desk-fig__label')
-      if ([...labels].some(l => l.scrollWidth > l.clientWidth + 1)) {
-        failedAt.current = width
-        setBare(true)
-      }
-    }
-    measure()
-    document.fonts?.ready.then(measure)
-    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure)
-    observer?.observe(row)
-    if (!bare) row.querySelectorAll('.desk-fig__label').forEach(l => observer?.observe(l))
-    return () => {
-      live = false
-      observer?.disconnect()
-    }
-  }, [row, bare])
-
-  return [setRow, bare]
 }
 
 /** A panel's figure: the number, its unit beside it, the label under --

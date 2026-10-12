@@ -542,6 +542,30 @@ export function ReplayIcon({ size = 16, className }) {
   )
 }
 
+// What a rating does to a ladder point (plan 198, CardPanel's walk): ask
+// it again -- a turn, clockwise, the way a clock goes back to its start --
+// or go down the line to the next stop, or back up it to the relapse.
+export function RetryIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className} strokeWidth={2.4}>
+      <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+    </svg>
+  )
+}
+
+export function ArrowIcon({ direction = 'down', size = 16, className }) {
+  const paths = {
+    down: ['M12 5v14', 'm19 12-7 7-7-7'],
+    up:   ['m5 12 7-7 7 7', 'M12 19V5'],
+  }[direction]
+  return (
+    <svg {...base} width={size} height={size} className={className} strokeWidth={2.4}>
+      {paths.map(d => <path key={d} d={d} />)}
+    </svg>
+  )
+}
+
 export function LoopIcon({ size = 16, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>

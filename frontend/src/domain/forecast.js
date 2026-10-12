@@ -25,6 +25,20 @@ export function dueText(seconds, t) {
   return t.forecastIn(t.forecastYears(Math.round(days / 365)))
 }
 
+/** From what length of run left the rhythm's estimate is said in hours. */
+export const HOURS_FROM_MINUTES = 120
+
+/** What is left of a run, the rhythm's third figure: `{ value, unit }`,
+ *  a dash while there is no pace to estimate it from. Minutes, and where
+ *  `hours` asks for it (the ladder's panel, plan 198) hours from two of
+ *  them -- "≈ 9,5 h", not "≈ 568 min". `format` is the learner's
+ *  decimal, a comma in French. */
+export function finishFigure(minutes, format, hours = false) {
+  if (minutes == null) return { value: '—', unit: null }
+  if (hours && minutes >= HOURS_FROM_MINUTES) return { value: `≈ ${format.format(minutes / 60)}`, unit: 'h' }
+  return { value: `≈ ${minutes}`, unit: 'min' }
+}
+
 /** The same wait as a figure, for the tile: `{ value: 3, unit: 'min' }`, a
  *  day and tomorrow alike `{ value: 1, unit: 'jour' }` so every tile is a
  *  numeral and its unit; null when there is no forecast. */

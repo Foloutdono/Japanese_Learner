@@ -27,7 +27,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.125,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 1,
+          "group": "choose",
+          "at": 2,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": false
       },
       "1": {
         "xp_earned": 8,
@@ -36,7 +44,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.125,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 1,
+          "group": "choose",
+          "at": 2,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": false
       },
       "2": {
         "xp_earned": 8,
@@ -45,7 +61,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.125,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 1,
+          "group": "choose",
+          "at": 2,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": false
       },
       "3": {
         "xp_earned": 8,
@@ -54,7 +78,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.25,
-        "due_in": 3600
+        "due_in": 3600,
+        "step": {
+          "step": 2,
+          "group": "choose",
+          "at": 3,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": true
       },
       "4": {
         "xp_earned": 8,
@@ -63,7 +95,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.25,
-        "due_in": 3600
+        "due_in": 3600,
+        "step": {
+          "step": 2,
+          "group": "choose",
+          "at": 3,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": true
       },
       "5": {
         "xp_earned": 8,
@@ -72,7 +112,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.25,
-        "due_in": 3600
+        "due_in": 3600,
+        "step": {
+          "step": 2,
+          "group": "choose",
+          "at": 3,
+          "of": 3,
+          "relapse": false
+        },
+        "passed": true
       }
     },
     "hints": {},
@@ -162,7 +210,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.614,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 4,
+          "group": "build",
+          "at": 2,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": false
       },
       "1": {
         "xp_earned": 8,
@@ -171,7 +227,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.614,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 4,
+          "group": "build",
+          "at": 2,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": false
       },
       "2": {
         "xp_earned": 8,
@@ -180,7 +244,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.614,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 4,
+          "group": "build",
+          "at": 2,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": false
       },
       "3": {
         "xp_earned": 8,
@@ -189,7 +261,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.728,
-        "due_in": 345600
+        "due_in": 345600,
+        "step": {
+          "step": 5,
+          "group": "build",
+          "at": 3,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": true
       },
       "4": {
         "xp_earned": 8,
@@ -198,7 +278,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.728,
-        "due_in": 345600
+        "due_in": 345600,
+        "step": {
+          "step": 5,
+          "group": "build",
+          "at": 3,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": true
       },
       "5": {
         "xp_earned": 8,
@@ -207,7 +295,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.728,
-        "due_in": 345600
+        "due_in": 345600,
+        "step": {
+          "step": 5,
+          "group": "build",
+          "at": 3,
+          "of": 4,
+          "relapse": false
+        },
+        "passed": true
       }
     },
     "hints": {},
@@ -295,7 +391,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.5,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 8,
+          "group": "choose",
+          "at": 1,
+          "of": 1,
+          "relapse": true
+        },
+        "passed": false
       },
       "1": {
         "xp_earned": 8,
@@ -304,7 +408,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.5,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 8,
+          "group": "choose",
+          "at": 1,
+          "of": 1,
+          "relapse": true
+        },
+        "passed": false
       },
       "2": {
         "xp_earned": 8,
@@ -313,7 +425,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 0.5,
-        "due_in": 600
+        "due_in": 600,
+        "step": {
+          "step": 8,
+          "group": "choose",
+          "at": 1,
+          "of": 1,
+          "relapse": true
+        },
+        "passed": false
       },
       "3": {
         "xp_earned": 8,
@@ -322,7 +442,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 1.0,
-        "due_in": 2678400
+        "due_in": 2678400,
+        "step": {
+          "step": 7,
+          "group": "mastered",
+          "at": 1,
+          "of": 1,
+          "relapse": false
+        },
+        "passed": true
       },
       "4": {
         "xp_earned": 8,
@@ -331,7 +459,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 1.0,
-        "due_in": 2937600
+        "due_in": 2937600,
+        "step": {
+          "step": 7,
+          "group": "mastered",
+          "at": 1,
+          "of": 1,
+          "relapse": false
+        },
+        "passed": true
       },
       "5": {
         "xp_earned": 8,
@@ -340,7 +476,15 @@
         "stage_up": null,
         "stage_down": null,
         "progress": 1.0,
-        "due_in": 3283200
+        "due_in": 3283200,
+        "step": {
+          "step": 7,
+          "group": "mastered",
+          "at": 1,
+          "of": 1,
+          "relapse": false
+        },
+        "passed": true
       }
     },
     "hints": {

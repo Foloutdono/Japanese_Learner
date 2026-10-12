@@ -130,6 +130,65 @@ def test_the_forecast_runs_the_steps_too(client):
         _clear(raw_id)
 
 
+# Where each rating leaves a point, as the card panel's walk draws it
+# (plan 198): a row at a step, and the step each quality lands on.
+LANDINGS = [
+    # Choisir 2: a miss asks it again, a pass climbs to Choisir 3.
+    (STEP_ROWS["choose"], {1: 1, 2: 1, 3: 2, 4: 2}),
+    # Construire 2 -> Construire 3.
+    (STEP_ROWS["build"], {1: 4, 2: 4, 3: 5, 4: 5}),
+    # Construire 4: a pass is mastered.
+    ((7, 8, False, 6), {1: 6, 3: 7, 4: 7}),
+    # Mastered: a miss is the relapse, a pass stays mastered.
+    (STEP_ROWS["mastered"], {1: ladder.RELAPSE_PICK, 2: ladder.RELAPSE_PICK, 3: ladder.MASTERED, 4: ladder.MASTERED}),
+    # The relapse: its Choisir, then its Construire, then mastered again.
+    ((10, 0, True, ladder.RELAPSE_PICK), {1: ladder.RELAPSE_PICK, 4: ladder.RELAPSE_BUILD}),
+    ((11, 1, False, ladder.RELAPSE_BUILD), {1: ladder.RELAPSE_BUILD, 4: ladder.MASTERED}),
+]
+
+
+@pytest.mark.parametrize("row,lands", LANDINGS)
+def test_the_forecast_says_where_each_rating_leaves_the_point(client, row, lands):
+    level, entry, raw_id = _point("〜てください")
+    _clear(raw_id)
+    try:
+        _place(raw_id, LADDER, row)
+        preview = _served(client, level, raw_id)["review_preview"]
+        for quality, step in lands.items():
+            landing = preview[str(quality)]
+            assert landing["step"]["step"] == step, quality
+            assert landing["passed"] is (quality >= ladder.PASS_QUALITY), quality
+    finally:
+        _clear(raw_id)
+
+
+def test_a_landing_has_the_shape_of_the_cards_own_step(client):
+    level, entry, raw_id = _point("〜てください")
+    _clear(raw_id)
+    try:
+        _place(raw_id, LADDER, STEP_ROWS["choose"])
+        card = _served(client, level, raw_id)
+        assert card["step"] == {"step": 1, "group": "choose", "at": 2, "of": 3, "relapse": False}
+        assert card["review_preview"]["1"]["step"] == card["step"]
+        assert card["review_preview"]["4"]["step"] == {"step": 2, "group": "choose", "at": 3, "of": 3, "relapse": False}
+    finally:
+        _clear(raw_id)
+
+
+def test_only_a_ladder_card_forecasts_where_it_lands(client):
+    level, entry, raw_id = _point("〜てください")
+    mode = "grammar.flashcard.f2b"
+    _clear(raw_id)
+    try:
+        _place(raw_id, mode, (1, 0, True, 1))
+        cards = client.get(f"/api/grammar/cards?level={level}&mode={mode}&lang=en&count=25").json()["cards"]
+        preview = next(c for c in cards if c["card_id"] == raw_id)["review_preview"]
+        assert preview["4"]["due_in"] > 0
+        assert all("step" not in p and "passed" not in p for p in preview.values())
+    finally:
+        _clear(raw_id)
+
+
 def test_each_step_falls_back_to_the_flashcard():
     assert grammar_ladder.chain_for("choose") == ("contrast", "fill_in", "flashcard")
     assert grammar_ladder.chain_for("build") == ("build", "contrast", "fill_in", "flashcard")
