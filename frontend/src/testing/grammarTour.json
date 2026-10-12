@@ -1,6 +1,6 @@
 {
   "en": {
-    "rev": 3,
+    "rev": 5,
     "look": [
       {
         "jp": "この本を読んでください。",
@@ -123,21 +123,6 @@
     ],
     "guesses": [
       {
-        "text": "a polite request for a favour",
-        "correct": false,
-        "pattern": "〜てもらえませんか",
-        "furigana": [
-          {
-            "text": "〜てもらえませんか"
-          }
-        ],
-        "answer": "てください is a plain request; てもらえませんか asks whether they would, which is gentler."
-      },
-      {
-        "text": "please do",
-        "correct": true
-      },
-      {
         "text": "please don't do",
         "correct": false,
         "pattern": "〜ないでください",
@@ -158,6 +143,21 @@
           }
         ],
         "answer": "てください asks for an action; をください asks for a thing."
+      },
+      {
+        "text": "a polite request for a favour",
+        "correct": false,
+        "pattern": "〜てもらえませんか",
+        "furigana": [
+          {
+            "text": "〜てもらえませんか"
+          }
+        ],
+        "answer": "てください is a plain request; てもらえませんか asks whether they would, which is gentler."
+      },
+      {
+        "text": "please do",
+        "correct": true
       }
     ],
     "rule": "**て-form + ください** asks someone to do something politely: 書いてください (please write).",
@@ -289,12 +289,12 @@
         "ask": "ないでください here. What is asked?",
         "choices": [
           {
-            "text": "Please don't come in here.",
-            "correct": true
-          },
-          {
             "text": "Please come in here.",
             "correct": false
+          },
+          {
+            "text": "Please don't come in here.",
+            "correct": true
           }
         ],
         "why": "てください asks someone to do; ないでください asks them not to.",
@@ -496,6 +496,53 @@
     },
     "quiz": [
       {
+        "kind": "form",
+        "ask": "Which form completes the sentence?",
+        "why": "ください follows the て-form: つかう → つかって. つかったください puts it after the た-form, the past, and つかうください after the dictionary form.",
+        "jp": "この電話をつかってください。",
+        "tr": "Please use this phone.",
+        "furigana": [
+          {
+            "text": "この"
+          },
+          {
+            "text": "電",
+            "reading": "でん",
+            "word": 1
+          },
+          {
+            "text": "話",
+            "reading": "わ",
+            "word": 1
+          },
+          {
+            "text": "を"
+          },
+          {
+            "text": "＿＿＿",
+            "blank": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "choices": [
+          {
+            "jp": "つかうください",
+            "correct": false
+          },
+          {
+            "jp": "つかってください",
+            "correct": true
+          },
+          {
+            "jp": "つかったください",
+            "correct": false
+          }
+        ],
+        "n": 0
+      },
+      {
         "kind": "gap",
         "jp": "つめたい水をください。",
         "tr": "Please give me some cold water.",
@@ -518,9 +565,9 @@
         ],
         "choices": [
           {
-            "pattern": "〜をください",
+            "pattern": "〜がほしいです",
             "furigana": null,
-            "correct": true,
+            "correct": false,
             "trap": false
           },
           {
@@ -530,105 +577,98 @@
             "trap": true
           },
           {
-            "pattern": "〜がほしいです",
+            "pattern": "〜ほうがいいです",
             "furigana": null,
             "correct": false,
             "trap": false
           },
           {
-            "pattern": "まだ〜ていません",
+            "pattern": "〜をください",
             "furigana": null,
-            "correct": false,
-            "trap": false
-          }
-        ],
-        "why": "をください asks for a thing; てください asks for an action.",
-        "n": 0
-      },
-      {
-        "kind": "which",
-        "pattern": "〜てください",
-        "pattern_furigana": [
-          {
-            "text": "〜てください"
-          }
-        ],
-        "choices": [
-          {
-            "jp": "このまちは山がきれいです。",
-            "furigana": [
-              {
-                "text": "この"
-              },
-              {
-                "text": "まちは"
-              },
-              {
-                "text": "山",
-                "reading": "やま",
-                "word": 3
-              },
-              {
-                "text": "が"
-              },
-              {
-                "text": "きれいです。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          },
-          {
-            "jp": "すみません、メニューをください。",
-            "furigana": [
-              {
-                "text": "すみません、"
-              },
-              {
-                "text": "メニューを"
-              },
-              {
-                "text": "ください。"
-              }
-            ],
-            "correct": false,
-            "trap": true,
-            "pattern": "〜をください"
-          },
-          {
-            "jp": "日本語で話してください。",
-            "furigana": [
-              {
-                "text": "日本",
-                "reading": "にほん",
-                "word": 0
-              },
-              {
-                "text": "語",
-                "reading": "ご",
-                "word": 1
-              },
-              {
-                "text": "で"
-              },
-              {
-                "text": "話",
-                "reading": "はな",
-                "word": 3
-              },
-              {
-                "text": "して"
-              },
-              {
-                "text": "ください。"
-              }
-            ],
             "correct": true,
             "trap": false
           }
         ],
-        "why": "てください asks for an action; をください asks for a thing.",
+        "why": "をください asks for a thing; てください asks for an action.",
         "n": 1
+      },
+      {
+        "kind": "meaning",
+        "ask": "Who is to come tomorrow?",
+        "why": "て-form + ください is a request made to the listener: it asks them to come again tomorrow. If the speaker were the one coming, it would be 来ます.",
+        "jp": "あした、また来てください。",
+        "tr": "Please come again tomorrow.",
+        "furigana": [
+          {
+            "text": "あした、"
+          },
+          {
+            "text": "また"
+          },
+          {
+            "text": "来",
+            "reading": "き",
+            "word": 3
+          },
+          {
+            "text": "て"
+          },
+          {
+            "text": "ください。"
+          }
+        ],
+        "choices": [
+          {
+            "text": "The person spoken to.",
+            "correct": true
+          },
+          {
+            "text": "Someone who is not in the conversation.",
+            "correct": false
+          },
+          {
+            "text": "The speaker.",
+            "correct": false
+          }
+        ],
+        "n": 2
+      },
+      {
+        "kind": "form",
+        "ask": "Which form completes the sentence?",
+        "why": "休む ends in む, so the て-form is 休んで, with the voiced で. 休んて forgets the voicing, and 休って uses the rule of う, つ and る verbs.",
+        "jp": "ここで、すこし休んでください。",
+        "tr": "Please rest here for a while.",
+        "furigana": [
+          {
+            "text": "ここで、"
+          },
+          {
+            "text": "すこし"
+          },
+          {
+            "text": "＿＿＿",
+            "blank": true
+          },
+          {
+            "text": "ください。"
+          }
+        ],
+        "choices": [
+          {
+            "jp": "休んで",
+            "correct": true
+          },
+          {
+            "jp": "休んて",
+            "correct": false
+          },
+          {
+            "jp": "休って",
+            "correct": false
+          }
+        ],
+        "n": 3
       },
       {
         "kind": "gap",
@@ -661,169 +701,11 @@
         ],
         "choices": [
           {
-            "pattern": "〜でも",
+            "pattern": "〜なければなりません",
             "furigana": null,
             "correct": false,
             "trap": false
           },
-          {
-            "pattern": "〜をください",
-            "furigana": null,
-            "correct": true,
-            "trap": false
-          },
-          {
-            "pattern": "〜がほしいです",
-            "furigana": null,
-            "correct": false,
-            "trap": false
-          },
-          {
-            "pattern": "〜てください",
-            "furigana": null,
-            "correct": false,
-            "trap": true
-          }
-        ],
-        "why": "をください asks for a thing; てください asks for an action.",
-        "n": 2
-      },
-      {
-        "kind": "which",
-        "pattern": "〜てください",
-        "pattern_furigana": [
-          {
-            "text": "〜てください"
-          }
-        ],
-        "choices": [
-          {
-            "jp": "来週、山へ行きます。",
-            "furigana": [
-              {
-                "text": "来",
-                "reading": "らい",
-                "word": 0
-              },
-              {
-                "text": "週",
-                "reading": "しゅう",
-                "word": 0
-              },
-              {
-                "text": "、"
-              },
-              {
-                "text": "山",
-                "reading": "やま",
-                "word": 2
-              },
-              {
-                "text": "へ"
-              },
-              {
-                "text": "行",
-                "reading": "い",
-                "word": 4
-              },
-              {
-                "text": "きます。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          },
-          {
-            "jp": "ペンで名前を書いてください。",
-            "furigana": [
-              {
-                "text": "ペンで"
-              },
-              {
-                "text": "名",
-                "reading": "な",
-                "word": 2
-              },
-              {
-                "text": "前",
-                "reading": "まえ",
-                "word": 2
-              },
-              {
-                "text": "を"
-              },
-              {
-                "text": "書",
-                "reading": "か",
-                "word": 4
-              },
-              {
-                "text": "いて"
-              },
-              {
-                "text": "ください。"
-              }
-            ],
-            "correct": true,
-            "trap": false
-          },
-          {
-            "jp": "一月に本を読みます。",
-            "furigana": [
-              {
-                "text": "一",
-                "reading": "いち",
-                "word": 0
-              },
-              {
-                "text": "月",
-                "reading": "がつ",
-                "word": 1
-              },
-              {
-                "text": "に"
-              },
-              {
-                "text": "本",
-                "reading": "ほん",
-                "word": 3
-              },
-              {
-                "text": "を"
-              },
-              {
-                "text": "読",
-                "reading": "よ",
-                "word": 5
-              },
-              {
-                "text": "みます。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          }
-        ],
-        "why": "**て-form + ください** asks someone to do something politely: 書いてください (please write).",
-        "n": 3
-      },
-      {
-        "kind": "gap",
-        "jp": "そのりんごをください。",
-        "tr": "That apple, please.",
-        "furigana": [
-          {
-            "text": "そのりんご"
-          },
-          {
-            "text": "＿＿＿",
-            "blank": true
-          },
-          {
-            "text": "。"
-          }
-        ],
-        "choices": [
           {
             "pattern": "〜てください",
             "furigana": null,
@@ -834,12 +716,6 @@
             "pattern": "〜をください",
             "furigana": null,
             "correct": true,
-            "trap": false
-          },
-          {
-            "pattern": "だから",
-            "furigana": null,
-            "correct": false,
             "trap": false
           },
           {
@@ -853,276 +729,103 @@
         "n": 4
       },
       {
-        "kind": "which",
-        "pattern": "〜てください",
-        "pattern_furigana": [
+        "kind": "meaning",
+        "ask": "What do すみません and ちょっと do before 読んでください?",
+        "why": "すみません and ちょっと are softeners put before a request: the ask is still 読んでください, but it sounds gentler. Here すみません is « excuse me », not an apology.",
+        "jp": "すみません、ちょっとこのかんじを読んでください。",
+        "tr": "Excuse me, could you read this kanji for me?",
+        "furigana": [
           {
-            "text": "〜てください"
+            "text": "すみません、"
+          },
+          {
+            "text": "ちょっと"
+          },
+          {
+            "text": "この"
+          },
+          {
+            "text": "かんじを"
+          },
+          {
+            "text": "読",
+            "reading": "よ",
+            "word": 8
+          },
+          {
+            "text": "んで"
+          },
+          {
+            "text": "ください。"
           }
         ],
         "choices": [
           {
-            "jp": "あには大学生で、二十さいです。",
-            "furigana": [
-              {
-                "text": "あには"
-              },
-              {
-                "text": "大",
-                "reading": "だい",
-                "word": 3
-              },
-              {
-                "text": "学",
-                "reading": "がく",
-                "word": 3
-              },
-              {
-                "text": "生",
-                "reading": "せい",
-                "word": 4
-              },
-              {
-                "text": "で、"
-              },
-              {
-                "text": "二",
-                "reading": "に",
-                "word": 7
-              },
-              {
-                "text": "十",
-                "reading": "じゅう",
-                "word": 7
-              },
-              {
-                "text": "さいです。"
-              }
-            ],
-            "correct": false,
-            "trap": false
+            "text": "They turn it into an apology: the speaker is sorry about something.",
+            "correct": false
           },
           {
-            "jp": "おにぎりを食べてください。",
-            "furigana": [
-              {
-                "text": "おにぎりを"
-              },
-              {
-                "text": "食",
-                "reading": "た",
-                "word": 2
-              },
-              {
-                "text": "べて"
-              },
-              {
-                "text": "ください。"
-              }
-            ],
-            "correct": true,
-            "trap": false
+            "text": "They make it stronger: the speaker insists.",
+            "correct": false
           },
           {
-            "jp": "いいですね。どこかに店がありますか。",
-            "furigana": [
-              {
-                "text": "いいですね。"
-              },
-              {
-                "text": "どこかに"
-              },
-              {
-                "text": "店",
-                "reading": "みせ",
-                "word": 7
-              },
-              {
-                "text": "が"
-              },
-              {
-                "text": "ありますか。"
-              }
-            ],
-            "correct": false,
-            "trap": false
+            "text": "They soften the request: « Excuse me, could you just… ».",
+            "correct": true
           }
         ],
-        "why": "**て-form + ください** asks someone to do something politely: 書いてください (please write).",
         "n": 5
       },
       {
-        "kind": "which",
-        "pattern": "〜てください",
-        "pattern_furigana": [
+        "kind": "form",
+        "ask": "Which form completes the sentence?",
+        "why": "行く is the exception: its て-form is 行って, not 行いて. 行きて joins the ます-stem to て, which is not how the て-form is made.",
+        "jp": "まず、北口へ行ってください。",
+        "tr": "Please go to the north exit first.",
+        "furigana": [
           {
-            "text": "〜てください"
+            "text": "まず、"
+          },
+          {
+            "text": "北",
+            "reading": "きた",
+            "word": 2
+          },
+          {
+            "text": "口",
+            "reading": "ぐち",
+            "word": 2
+          },
+          {
+            "text": "へ"
+          },
+          {
+            "text": "＿＿＿",
+            "blank": true
+          },
+          {
+            "text": "ください。"
           }
         ],
         "choices": [
           {
-            "jp": "もういちど言ってください。",
-            "furigana": [
-              {
-                "text": "もう"
-              },
-              {
-                "text": "いち"
-              },
-              {
-                "text": "ど"
-              },
-              {
-                "text": "言",
-                "reading": "い",
-                "word": 3
-              },
-              {
-                "text": "って"
-              },
-              {
-                "text": "ください。"
-              }
-            ],
-            "correct": true,
-            "trap": false
+            "jp": "行いて",
+            "correct": false
           },
           {
-            "jp": "魚を買いに行きます。",
-            "furigana": [
-              {
-                "text": "魚",
-                "reading": "さかな",
-                "word": 0
-              },
-              {
-                "text": "を"
-              },
-              {
-                "text": "買",
-                "reading": "か",
-                "word": 2
-              },
-              {
-                "text": "いに"
-              },
-              {
-                "text": "行",
-                "reading": "い",
-                "word": 4
-              },
-              {
-                "text": "きます。"
-              }
-            ],
-            "correct": false,
-            "trap": false
+            "jp": "行きて",
+            "correct": false
           },
           {
-            "jp": "きのうは、水しか飲みませんでした。",
-            "furigana": [
-              {
-                "text": "きのうは、"
-              },
-              {
-                "text": "水",
-                "reading": "みず",
-                "word": 3
-              },
-              {
-                "text": "しか"
-              },
-              {
-                "text": "飲",
-                "reading": "の",
-                "word": 5
-              },
-              {
-                "text": "みませんでした。"
-              }
-            ],
-            "correct": false,
-            "trap": false
+            "jp": "行って",
+            "correct": true
           }
         ],
-        "why": "**て-form + ください** asks someone to do something politely: 書いてください (please write).",
         "n": 6
-      },
-      {
-        "kind": "which",
-        "pattern": "〜てください",
-        "pattern_furigana": [
-          {
-            "text": "〜てください"
-          }
-        ],
-        "choices": [
-          {
-            "jp": "何をもっていきますか。",
-            "furigana": [
-              {
-                "text": "何",
-                "reading": "なに",
-                "word": 0
-              },
-              {
-                "text": "を"
-              },
-              {
-                "text": "もって"
-              },
-              {
-                "text": "いきますか。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          },
-          {
-            "jp": "どうぞ入ってください。",
-            "furigana": [
-              {
-                "text": "どうぞ"
-              },
-              {
-                "text": "入",
-                "reading": "はい",
-                "word": 1
-              },
-              {
-                "text": "って"
-              },
-              {
-                "text": "ください。"
-              }
-            ],
-            "correct": true,
-            "trap": false
-          },
-          {
-            "jp": "まどをあけてもいいですか。",
-            "furigana": [
-              {
-                "text": "まどを"
-              },
-              {
-                "text": "あけても"
-              },
-              {
-                "text": "いいですか。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          }
-        ],
-        "why": "**て-form + ください** asks someone to do something politely: 書いてください (please write).",
-        "n": 7
       }
     ]
   },
   "ka": {
-    "rev": 3,
+    "rev": 5,
     "look": [
       {
         "jp": "たなかさんは学生ですか。",
@@ -1225,8 +928,30 @@
     ],
     "guesses": [
       {
+        "text": "seeks agreement: right?, isn't it?",
+        "correct": false,
+        "pattern": "ね",
+        "furigana": [
+          {
+            "text": "ね"
+          }
+        ],
+        "answer": "か asks for information you do not have; ね asks the listener to agree with what you both see."
+      },
+      {
         "text": "turns a statement into a question; also 'or' between nouns",
         "correct": true
+      },
+      {
+        "text": "how about…? (a suggestion, or asking an opinion)",
+        "correct": false,
+        "pattern": "〜はどうですか",
+        "furigana": [
+          {
+            "text": "〜はどうですか"
+          }
+        ],
+        "answer": null
       },
       {
         "text": "A or B (a choice between two)",
@@ -1238,28 +963,6 @@
           }
         ],
         "answer": "A single か asks a question; か… か… offers a choice between two whole options."
-      },
-      {
-        "text": "time, destination, or indirect object",
-        "correct": false,
-        "pattern": "に",
-        "furigana": [
-          {
-            "text": "に"
-          }
-        ],
-        "answer": null
-      },
-      {
-        "text": "seeks agreement: right?, isn't it?",
-        "correct": false,
-        "pattern": "ね",
-        "furigana": [
-          {
-            "text": "ね"
-          }
-        ],
-        "answer": "か asks for information you do not have; ね asks the listener to agree with what you both see."
       }
     ],
     "rule": "**か** at the end of a sentence turns it into a question. Between two nouns it means « or ».",
@@ -1362,12 +1065,12 @@
         "ask": "ね, not か. What is the speaker doing?",
         "choices": [
           {
-            "text": "Asking with no idea at all where it goes.",
-            "correct": false
-          },
-          {
             "text": "Checking what they think they know: it goes to Tokyo, right?",
             "correct": true
+          },
+          {
+            "text": "Asking with no idea at all where it goes.",
+            "correct": false
           }
         ],
         "why": "か asks for what you do not know; ね checks what you think you both know.",
@@ -1495,204 +1198,143 @@
     },
     "quiz": [
       {
-        "kind": "which",
-        "pattern": "か",
-        "pattern_furigana": [
+        "kind": "form",
+        "ask": "Which form completes the sentence?",
+        "why": "か between two nouns means « or »: ラーメンかカレー, one of the two. と would have both, and や would add « and so on ».",
+        "jp": "ひるごはんは、ラーメンかカレーを食べます。",
+        "tr": "For lunch I'll have ramen or curry.",
+        "furigana": [
           {
-            "text": "か"
+            "text": "ひる"
+          },
+          {
+            "text": "ごはんは、"
+          },
+          {
+            "text": "ラーメン"
+          },
+          {
+            "text": "＿＿＿",
+            "blank": true
+          },
+          {
+            "text": "カレーを"
+          },
+          {
+            "text": "食",
+            "reading": "た",
+            "word": 8
+          },
+          {
+            "text": "べます。"
           }
         ],
         "choices": [
           {
-            "jp": "すみません、もういちど大きいに言ってください。",
+            "jp": "と",
+            "correct": false
+          },
+          {
+            "jp": "や",
+            "correct": false
+          },
+          {
+            "jp": "か",
+            "correct": true
+          }
+        ],
+        "n": 0
+      },
+      {
+        "kind": "meaning",
+        "ask": "What is the sentence doing?",
+        "why": "か at the end makes the sentence a question, and 何時 is the missing piece, so the answer is a time, not yes or no. Without か it would be a statement.",
+        "jp": "友だちは、何時に来ますか。",
+        "tr": "What time is my friend coming?",
+        "furigana": [
+          {
+            "text": "友",
+            "reading": "とも",
+            "word": 0
+          },
+          {
+            "text": "だちは、"
+          },
+          {
+            "text": "何",
+            "reading": "なん",
+            "word": 3
+          },
+          {
+            "text": "時",
+            "reading": "じ",
+            "word": 4
+          },
+          {
+            "text": "に"
+          },
+          {
+            "text": "来",
+            "reading": "き",
+            "word": 6
+          },
+          {
+            "text": "ますか。"
+          }
+        ],
+        "choices": [
+          {
+            "text": "It asks whether the friend will come or not.",
+            "correct": false
+          },
+          {
+            "text": "It asks at what time the friend will come.",
+            "correct": true
+          },
+          {
+            "text": "It says the friend will come at some time or other.",
+            "correct": false
+          }
+        ],
+        "n": 1
+      },
+      {
+        "kind": "use",
+        "ask": "At a crossing you ask a passer-by whether the station is on the left or on the right.",
+        "why": "To offer a choice between two whole options, each one takes its own か: 左ですか、右ですか. 左か右です has か but states, it does not ask, and the third line leaves the second option without its か.",
+        "choices": [
+          {
+            "jp": "駅は、左ですか、右ですか。",
             "furigana": [
               {
-                "text": "すみません、"
+                "text": "駅",
+                "reading": "えき",
+                "word": 0
               },
               {
-                "text": "もう"
+                "text": "は、"
               },
               {
-                "text": "いち"
+                "text": "左",
+                "reading": "ひだり",
+                "word": 3
               },
               {
-                "text": "ど"
+                "text": "ですか、"
               },
               {
-                "text": "大",
-                "reading": "おお",
+                "text": "右",
+                "reading": "みぎ",
                 "word": 7
-              },
-              {
-                "text": "きいに"
-              },
-              {
-                "text": "言",
-                "reading": "い",
-                "word": 9
-              },
-              {
-                "text": "って"
-              },
-              {
-                "text": "ください。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          },
-          {
-            "jp": "今日はいい天気ですね。",
-            "furigana": [
-              {
-                "text": "今日",
-                "reading": "きょう",
-                "word": 0
-              },
-              {
-                "text": "は"
-              },
-              {
-                "text": "いい"
-              },
-              {
-                "text": "天",
-                "reading": "てん",
-                "word": 3
-              },
-              {
-                "text": "気",
-                "reading": "き",
-                "word": 3
-              },
-              {
-                "text": "ですね。"
-              }
-            ],
-            "correct": false,
-            "trap": true,
-            "pattern": "ね"
-          },
-          {
-            "jp": "学生ですか。",
-            "furigana": [
-              {
-                "text": "学",
-                "reading": "がく",
-                "word": 0
-              },
-              {
-                "text": "生",
-                "reading": "せい",
-                "word": 0
               },
               {
                 "text": "ですか。"
               }
             ],
-            "correct": true,
-            "trap": false
-          }
-        ],
-        "why": "か asks for information you do not have; ね asks the listener to agree with what you both see.",
-        "n": 0
-      },
-      {
-        "kind": "which",
-        "pattern": "か",
-        "pattern_furigana": [
-          {
-            "text": "か"
-          }
-        ],
-        "choices": [
-          {
-            "jp": "だれが来ますか。",
-            "furigana": [
-              {
-                "text": "だれが"
-              },
-              {
-                "text": "来",
-                "reading": "き",
-                "word": 2
-              },
-              {
-                "text": "ますか。"
-              }
-            ],
-            "correct": true,
-            "trap": false
+            "correct": true
           },
           {
-            "jp": "これになります。",
-            "furigana": [
-              {
-                "text": "これに"
-              },
-              {
-                "text": "なります。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          },
-          {
-            "jp": "この花はきれいですね。",
-            "furigana": [
-              {
-                "text": "この"
-              },
-              {
-                "text": "花",
-                "reading": "はな",
-                "word": 1
-              },
-              {
-                "text": "は"
-              },
-              {
-                "text": "きれいですね。"
-              }
-            ],
-            "correct": false,
-            "trap": true,
-            "pattern": "ね"
-          }
-        ],
-        "why": "か asks for information you do not have; ね asks the listener to agree with what you both see.",
-        "n": 1
-      },
-      {
-        "kind": "which",
-        "pattern": "か",
-        "pattern_furigana": [
-          {
-            "text": "か"
-          }
-        ],
-        "choices": [
-          {
-            "jp": "あしたは休みですね。",
-            "furigana": [
-              {
-                "text": "あしたは"
-              },
-              {
-                "text": "休",
-                "reading": "やす",
-                "word": 2
-              },
-              {
-                "text": "みですね。"
-              }
-            ],
-            "correct": false,
-            "trap": true,
-            "pattern": "ね"
-          },
-          {
-            "jp": "駅の人に聞いてください。",
+            "jp": "駅は、左か右です。",
             "furigana": [
               {
                 "text": "駅",
@@ -1700,78 +1342,758 @@
                 "word": 0
               },
               {
-                "text": "の"
+                "text": "は、"
               },
               {
-                "text": "人",
-                "reading": "ひと",
-                "word": 2
-              },
-              {
-                "text": "に"
-              },
-              {
-                "text": "聞",
-                "reading": "き",
-                "word": 4
-              },
-              {
-                "text": "いて"
-              },
-              {
-                "text": "ください。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          },
-          {
-            "jp": "どのバスが駅へ行きますか。",
-            "furigana": [
-              {
-                "text": "どの"
-              },
-              {
-                "text": "バスが"
-              },
-              {
-                "text": "駅",
-                "reading": "えき",
+                "text": "左",
+                "reading": "ひだり",
                 "word": 3
               },
               {
-                "text": "へ"
+                "text": "か"
               },
               {
-                "text": "行",
-                "reading": "い",
+                "text": "右",
+                "reading": "みぎ",
                 "word": 5
               },
               {
-                "text": "きますか。"
+                "text": "です。"
               }
             ],
-            "correct": true,
-            "trap": false
+            "correct": false
+          },
+          {
+            "jp": "駅は、左ですか、右です。",
+            "furigana": [
+              {
+                "text": "駅",
+                "reading": "えき",
+                "word": 0
+              },
+              {
+                "text": "は、"
+              },
+              {
+                "text": "左",
+                "reading": "ひだり",
+                "word": 3
+              },
+              {
+                "text": "ですか、"
+              },
+              {
+                "text": "右",
+                "reading": "みぎ",
+                "word": 7
+              },
+              {
+                "text": "です。"
+              }
+            ],
+            "correct": false
           }
         ],
-        "why": "か asks for information you do not have; ね asks the listener to agree with what you both see.",
         "n": 2
       },
       {
-        "kind": "which",
-        "pattern": "か",
-        "pattern_furigana": [
+        "kind": "form",
+        "ask": "You do not know the answer and want to find out. Which ending completes the sentence?",
+        "why": "か asks for information you do not have: 来ますか. ね asks the listener to agree with what you both see, and よ tells the listener something they do not know.",
+        "jp": "あした、先生は学校に来ますか。",
+        "tr": "Will the teacher come to school tomorrow?",
+        "furigana": [
           {
-            "text": "か"
+            "text": "あした、"
+          },
+          {
+            "text": "先",
+            "reading": "せん",
+            "word": 2
+          },
+          {
+            "text": "生",
+            "reading": "せい",
+            "word": 2
+          },
+          {
+            "text": "は"
+          },
+          {
+            "text": "学",
+            "reading": "がっ",
+            "word": 4
+          },
+          {
+            "text": "校",
+            "reading": "こう",
+            "word": 4
+          },
+          {
+            "text": "に"
+          },
+          {
+            "text": "来",
+            "reading": "き",
+            "word": 6
+          },
+          {
+            "text": "＿＿＿",
+            "blank": true
+          },
+          {
+            "text": "。"
           }
         ],
         "choices": [
           {
-            "jp": "いいえ、食べません。",
+            "jp": "ますよ",
+            "correct": false
+          },
+          {
+            "jp": "ますね",
+            "correct": false
+          },
+          {
+            "jp": "ますか",
+            "correct": true
+          }
+        ],
+        "n": 3
+      },
+      {
+        "kind": "meaning",
+        "ask": "What is the speaker doing?",
+        "why": "か between two nouns is « or », not a question: the sentence ends in ね, which asks the listener to agree. A real question would end in か: 雨かゆきですか.",
+        "jp": "あしたは、雨かゆきですね。",
+        "tr": "Tomorrow it will be rain or snow, won't it?",
+        "furigana": [
+          {
+            "text": "あしたは、"
+          },
+          {
+            "text": "雨",
+            "reading": "あめ",
+            "word": 3
+          },
+          {
+            "text": "か"
+          },
+          {
+            "text": "ゆきですね。"
+          }
+        ],
+        "choices": [
+          {
+            "text": "Asking the listener whether it will be rain or snow.",
+            "correct": false
+          },
+          {
+            "text": "Remarking that it will be rain or snow, and expecting the listener to agree.",
+            "correct": true
+          },
+          {
+            "text": "Saying it will be both rain and snow at once.",
+            "correct": false
+          }
+        ],
+        "n": 4
+      }
+    ]
+  },
+  "nai": {
+    "rev": 5,
+    "look": [
+      {
+        "jp": "今日は学校に行かない。",
+        "tr": "I'm not going to school today.",
+        "furigana": [
+          {
+            "text": "今日",
+            "reading": "きょう",
+            "word": 0
+          },
+          {
+            "text": "は"
+          },
+          {
+            "text": "学",
+            "reading": "がっ",
+            "word": 2
+          },
+          {
+            "text": "校",
+            "reading": "こう",
+            "word": 2
+          },
+          {
+            "text": "に"
+          },
+          {
+            "text": "行",
+            "reading": "い",
+            "word": 4
+          },
+          {
+            "text": "か"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "spans": [
+          [
+            8,
+            10
+          ]
+        ]
+      },
+      {
+        "jp": "わたしはさかなを食べない。",
+        "tr": "I don't eat fish.",
+        "furigana": [
+          {
+            "text": "わたしは"
+          },
+          {
+            "text": "さかなを"
+          },
+          {
+            "text": "食",
+            "reading": "た",
+            "word": 4
+          },
+          {
+            "text": "べ"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "spans": [
+          [
+            10,
+            12
+          ]
+        ]
+      },
+      {
+        "jp": "ねる前にコーヒーは飲まない。",
+        "tr": "I don't drink coffee before bed.",
+        "furigana": [
+          {
+            "text": "ねる"
+          },
+          {
+            "text": "前",
+            "reading": "まえ",
+            "word": 1
+          },
+          {
+            "text": "に"
+          },
+          {
+            "text": "コーヒーは"
+          },
+          {
+            "text": "飲",
+            "reading": "の",
+            "word": 5
+          },
+          {
+            "text": "ま"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "spans": [
+          [
+            11,
+            13
+          ]
+        ]
+      }
+    ],
+    "guesses": [
+      {
+        "text": "the plain negative: don't, doesn't",
+        "correct": true
+      },
+      {
+        "text": "polite present/future, affirmative and negative",
+        "correct": false,
+        "pattern": "〜ます／〜ません",
+        "furigana": [
+          {
+            "text": "〜ます／〜ません"
+          }
+        ],
+        "answer": "ない is the plain negative; ません is the same negative, polite."
+      },
+      {
+        "text": "please don't do",
+        "correct": false,
+        "pattern": "〜ないでください",
+        "furigana": [
+          {
+            "text": "〜ないでください"
+          }
+        ],
+        "answer": "The ない-form alone says you do not; with でください it asks someone not to."
+      },
+      {
+        "text": "has already done it",
+        "correct": false,
+        "pattern": "もう〜ました",
+        "furigana": [
+          {
+            "text": "もう〜ました"
+          }
+        ],
+        "answer": null
+      }
+    ],
+    "rule": "The **ない-form** is the plain negative: う-verbs take the あ-row + ない (行く→行かない, 買う→買わない), る-verbs drop る (食べない), する→しない, 来る→来ない (こない). ある becomes ない alone.",
+    "structure": "う-verb あ-row ・ る-verb stem + ない",
+    "structure_furigana": [
+      {
+        "text": "う-verb あ-row ・ る-verb stem + ない"
+      }
+    ],
+    "chain": null,
+    "rival": {
+      "pattern": "〜ます／〜ません",
+      "furigana": [
+        {
+          "text": "〜ます／〜ません"
+        }
+      ],
+      "text": "ない is the plain negative; ません is the same negative, polite."
+    },
+    "twists": [
+      {
+        "notion": "Verbs in う: 買う → 買わない",
+        "kind": "usage",
+        "jp": "パンは、あの店では買わない。",
+        "furigana": [
+          {
+            "text": "パンは、"
+          },
+          {
+            "text": "あの"
+          },
+          {
+            "text": "店",
+            "reading": "みせ",
+            "word": 4
+          },
+          {
+            "text": "では"
+          },
+          {
+            "text": "買",
+            "reading": "か",
+            "word": 7
+          },
+          {
+            "text": "わ"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "tr": "I don't buy bread at that shop.",
+        "ask": "In 買わない, where does the わ come from?",
+        "choices": [
+          {
+            "text": "買う ends in う, and the あ-row sound of う is わ: 買わ + ない.",
+            "correct": true
+          },
+          {
+            "text": "It is the sentence-ending わ, a softener added to 買う.",
+            "correct": false
+          }
+        ],
+        "why": "A う-verb takes the あ-row sound before ない, and for う that sound is わ: 買う → 買わない, 会う → 会わない. Never 買あない.",
+        "pair": [
+          "買う",
+          "買わない"
+        ]
+      },
+      {
+        "notion": "Irregulars: する and 来る",
+        "kind": "usage",
+        "jp": "あしたは、友だちがここにこない。",
+        "furigana": [
+          {
+            "text": "あしたは、"
+          },
+          {
+            "text": "友",
+            "reading": "とも",
+            "word": 3
+          },
+          {
+            "text": "だちが"
+          },
+          {
+            "text": "ここに"
+          },
+          {
+            "text": "こ"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "tr": "My friend isn't coming here tomorrow.",
+        "ask": "こない is the negative of which verb?",
+        "choices": [
+          {
+            "text": "行く: こない means « don't go ».",
+            "correct": false
+          },
+          {
+            "text": "来る: 来る → 来ない, read こない.",
+            "correct": true
+          }
+        ],
+        "why": "The two irregular verbs: する → しない, and 来る → 来ない, read こない. Every other verb follows the rule.",
+        "pair": [
+          "来る",
+          "こない"
+        ]
+      },
+      {
+        "notion": "ある becomes ない",
+        "kind": "usage",
+        "jp": "つくえの上に本がない。",
+        "furigana": [
+          {
+            "text": "つくえの"
+          },
+          {
+            "text": "上",
+            "reading": "うえ",
+            "word": 2
+          },
+          {
+            "text": "に"
+          },
+          {
+            "text": "本",
+            "reading": "ほん",
+            "word": 4
+          },
+          {
+            "text": "が"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "tr": "There is no book on the desk.",
+        "ask": "ない comes right after 本が, with no verb before it. What does the sentence say?",
+        "choices": [
+          {
+            "text": "I don't read the book on the desk.",
+            "correct": false
+          },
+          {
+            "text": "There is no book on the desk.",
+            "correct": true
+          }
+        ],
+        "why": "The plain negative of ある is just ない: 本がある, 本がない.",
+        "pair": [
+          "本がある",
+          "本がない"
+        ]
+      },
+      {
+        "notion": "The past: なかった",
+        "kind": "usage",
+        "jp": "きのうは、ばんごはんを食べなかった。",
+        "furigana": [
+          {
+            "text": "きのうは、"
+          },
+          {
+            "text": "ばん"
+          },
+          {
+            "text": "ごはんを"
+          },
+          {
+            "text": "食",
+            "reading": "た",
+            "word": 6
+          },
+          {
+            "text": "べ"
+          },
+          {
+            "text": "なかっ",
+            "highlight": true
+          },
+          {
+            "text": "た。"
+          }
+        ],
+        "tr": "I didn't eat dinner yesterday.",
+        "ask": "食べなかった. What does the sentence say?",
+        "choices": [
+          {
+            "text": "I won't eat dinner tomorrow.",
+            "correct": false
+          },
+          {
+            "text": "I didn't eat dinner yesterday.",
+            "correct": true
+          }
+        ],
+        "why": "After a verb, ない changes like an い-adjective: ない → なかった, the plain past negative.",
+        "pair": [
+          "食べない",
+          "食べなかった"
+        ]
+      },
+      {
+        "notion": "After a noun: じゃない",
+        "kind": "trap",
+        "jp": "これは、わたしのかさじゃない。",
+        "furigana": [
+          {
+            "text": "これは、"
+          },
+          {
+            "text": "わたしの"
+          },
+          {
+            "text": "かさじゃ"
+          },
+          {
+            "text": "ない。"
+          }
+        ],
+        "tr": "This isn't my umbrella.",
+        "ask": "かさ is a noun, with no verb to negate. What does the sentence say?",
+        "choices": [
+          {
+            "text": "This isn't my umbrella.",
+            "correct": true
+          },
+          {
+            "text": "I don't have an umbrella.",
+            "correct": false
+          }
+        ],
+        "why": "After a noun the plain negative is じゃない (ではない), not ない alone: かさだ → かさじゃない. Alone, ない negates a verb, or ある.",
+        "pair": [
+          "かさだ",
+          "かさじゃない"
+        ]
+      },
+      {
+        "notion": "Casual at the end",
+        "kind": "trap",
+        "jp": "あしたは、パーティーに行かない。",
+        "furigana": [
+          {
+            "text": "あしたは、"
+          },
+          {
+            "text": "パーティーに"
+          },
+          {
+            "text": "行",
+            "reading": "い",
+            "word": 5
+          },
+          {
+            "text": "か"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "tr": "I'm not going to the party tomorrow.",
+        "ask": "You say this to your teacher. What is wrong?",
+        "choices": [
+          {
+            "text": "Nothing: ない is the polite negative.",
+            "correct": false
+          },
+          {
+            "text": "It is too casual: to a teacher, the negative is 行きません.",
+            "correct": true
+          }
+        ],
+        "why": "At the end of a sentence, ない is for friends and family. To a teacher or a stranger, the negative is ません: 行きません.",
+        "pair": [
+          "行きません",
+          "行かない"
+        ]
+      }
+    ],
+    "scene": {
+      "place": "ホーム",
+      "place_reading": null,
+      "place_caption": "Platform",
+      "them": "A friend",
+      "lines": [
+        {
+          "who": "them",
+          "jp": "電車、来ないね。",
+          "tr": "The train isn't coming, is it?",
+          "furigana": [
+            {
+              "text": "電",
+              "reading": "でん",
+              "word": 0
+            },
+            {
+              "text": "車",
+              "reading": "しゃ",
+              "word": 0
+            },
+            {
+              "text": "、"
+            },
+            {
+              "text": "来",
+              "reading": "こ",
+              "word": 2
+            },
+            {
+              "text": "ない",
+              "highlight": true
+            },
+            {
+              "text": "ね。"
+            }
+          ]
+        },
+        {
+          "who": "me",
+          "jp": "うん、まだ来ない。",
+          "tr": "No, still not here.",
+          "furigana": [
+            {
+              "text": "うん、"
+            },
+            {
+              "text": "まだ"
+            },
+            {
+              "text": "来",
+              "reading": "こ",
+              "word": 3
+            },
+            {
+              "text": "ない",
+              "highlight": true
+            },
+            {
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "who": "them",
+          "jp": "じゃあ、パンを買う。",
+          "tr": "Then I'll buy some bread.",
+          "furigana": [
+            {
+              "text": "じゃあ、"
+            },
+            {
+              "text": "パンを"
+            },
+            {
+              "text": "買",
+              "reading": "か",
+              "word": 4
+            },
+            {
+              "text": "う。"
+            }
+          ]
+        }
+      ],
+      "note": "Between friends, ない is the plain negative; with a clerk you would say ません.",
+      "ask": {
+        "cue": {
+          "who": "them",
+          "jp": "パン、食べる？",
+          "tr": "Want some bread?",
+          "furigana": [
+            {
+              "text": "パン、"
+            },
+            {
+              "text": "食",
+              "reading": "た",
+              "word": 2
+            },
+            {
+              "text": "べる？"
+            }
+          ]
+        },
+        "task": "You don't feel like bread. Say no, the way you would to a friend.",
+        "choices": [
+          {
+            "jp": "ううん、食べない。",
             "furigana": [
               {
-                "text": "いいえ、"
+                "text": "ううん、"
+              },
+              {
+                "text": "食",
+                "reading": "た",
+                "word": 2
+              },
+              {
+                "text": "べない。"
+              }
+            ],
+            "correct": true
+          },
+          {
+            "jp": "ううん、食べません。",
+            "furigana": [
+              {
+                "text": "ううん、"
               },
               {
                 "text": "食",
@@ -1782,443 +2104,309 @@
                 "text": "べません。"
               }
             ],
-            "correct": false,
-            "trap": false
+            "correct": false
           },
           {
-            "jp": "この店は安いですね。",
+            "jp": "ううん、食べないで。",
             "furigana": [
               {
-                "text": "この"
+                "text": "ううん、"
               },
               {
-                "text": "店",
-                "reading": "みせ",
-                "word": 1
+                "text": "食",
+                "reading": "た",
+                "word": 2
               },
               {
-                "text": "は"
-              },
-              {
-                "text": "安",
-                "reading": "やす",
-                "word": 3
-              },
-              {
-                "text": "いですね。"
+                "text": "べないで。"
               }
             ],
-            "correct": false,
-            "trap": true,
-            "pattern": "ね"
-          },
-          {
-            "jp": "あれはとうきょう行きですか。",
-            "furigana": [
-              {
-                "text": "あれは"
-              },
-              {
-                "text": "とうきょう"
-              },
-              {
-                "text": "行",
-                "reading": "い",
-                "word": 3
-              },
-              {
-                "text": "きですか。"
-              }
-            ],
-            "correct": true,
-            "trap": false
+            "correct": false
           }
         ],
-        "why": "か asks for information you do not have; ね asks the listener to agree with what you both see.",
+        "why": "A friend gets the plain negative: 食べない. 食べません is for a clerk, and 食べないで asks the other person not to eat."
+      }
+    },
+    "quiz": [
+      {
+        "kind": "form",
+        "ask": "Which form completes the sentence?",
+        "why": "買う ends in う, so it takes the あ-row sound わ before ない: 買わない. 買ない treats it as a る-verb, and 買わなかった is the past.",
+        "jp": "わたしは新聞を買わない。",
+        "tr": "I don't buy newspapers.",
+        "furigana": [
+          {
+            "text": "わたしは"
+          },
+          {
+            "text": "新",
+            "reading": "しん",
+            "word": 2
+          },
+          {
+            "text": "聞",
+            "reading": "ぶん",
+            "word": 2
+          },
+          {
+            "text": "を"
+          },
+          {
+            "text": "＿＿＿",
+            "blank": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "choices": [
+          {
+            "jp": "買ない",
+            "correct": false
+          },
+          {
+            "jp": "買わない",
+            "correct": true
+          },
+          {
+            "jp": "買わなかった",
+            "correct": false
+          }
+        ],
+        "n": 0
+      },
+      {
+        "kind": "meaning",
+        "ask": "Who does not eat fish?",
+        "why": "The negative is in the second half: わたしは食べない. The first half, おとうとは…食べる, is positive.",
+        "jp": "おとうとはさかなを食べるが、わたしは食べない。",
+        "tr": "My little brother eats fish, but I don't.",
+        "furigana": [
+          {
+            "text": "おとうとは"
+          },
+          {
+            "text": "さかなを"
+          },
+          {
+            "text": "食",
+            "reading": "た",
+            "word": 4
+          },
+          {
+            "text": "べるが、"
+          },
+          {
+            "text": "わたしは"
+          },
+          {
+            "text": "食",
+            "reading": "た",
+            "word": 9
+          },
+          {
+            "text": "べない。"
+          }
+        ],
+        "choices": [
+          {
+            "text": "The speaker does not; the brother does.",
+            "correct": true
+          },
+          {
+            "text": "The brother does not; the speaker does.",
+            "correct": false
+          },
+          {
+            "text": "Neither of them does.",
+            "correct": false
+          }
+        ],
+        "n": 1
+      },
+      {
+        "kind": "use",
+        "ask": "Your mother asks: しゅくだい、した？ You haven't done your homework. What do you answer?",
+        "why": "She asks about something already past, so you answer in the past negative: しなかった. しない says you won't do it, and しませんでした is polite, for a teacher rather than your mother.",
+        "choices": [
+          {
+            "jp": "ううん、しなかった。",
+            "furigana": [
+              {
+                "text": "ううん、"
+              },
+              {
+                "text": "しなかった。"
+              }
+            ],
+            "correct": true
+          },
+          {
+            "jp": "ううん、しない。",
+            "furigana": [
+              {
+                "text": "ううん、"
+              },
+              {
+                "text": "しない。"
+              }
+            ],
+            "correct": false
+          },
+          {
+            "jp": "ううん、しませんでした。",
+            "furigana": [
+              {
+                "text": "ううん、"
+              },
+              {
+                "text": "しませんでした。"
+              }
+            ],
+            "correct": false
+          }
+        ],
+        "n": 2
+      },
+      {
+        "kind": "form",
+        "ask": "Which form completes the sentence?",
+        "why": "A る-verb drops る before ない: 見る → 見ない. 見らない applies the う-verb rule, and 見るない keeps the る.",
+        "jp": "ねる前は、テレビを見ない。",
+        "tr": "Before bed, I don't watch TV.",
+        "furigana": [
+          {
+            "text": "ねる"
+          },
+          {
+            "text": "前",
+            "reading": "まえ",
+            "word": 1
+          },
+          {
+            "text": "は、"
+          },
+          {
+            "text": "テレビを"
+          },
+          {
+            "text": "＿＿＿",
+            "blank": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "choices": [
+          {
+            "jp": "見るない",
+            "correct": false
+          },
+          {
+            "jp": "見ない",
+            "correct": true
+          },
+          {
+            "jp": "見らない",
+            "correct": false
+          }
+        ],
         "n": 3
       },
       {
-        "kind": "which",
-        "pattern": "か",
-        "pattern_furigana": [
+        "kind": "meaning",
+        "ask": "What does the sentence say about yesterday?",
+        "why": "出なかった is the past negative of 出る: it rained, so I didn't go out. The から gives the reason.",
+        "jp": "きのうは雨だったから、うちから出なかった。",
+        "tr": "It rained yesterday, so I didn't leave the house.",
+        "furigana": [
           {
-            "text": "か"
+            "text": "きのうは"
+          },
+          {
+            "text": "雨",
+            "reading": "あめ",
+            "word": 2
+          },
+          {
+            "text": "だったから、"
+          },
+          {
+            "text": "うちから"
+          },
+          {
+            "text": "出",
+            "reading": "で",
+            "word": 9
+          },
+          {
+            "text": "なかった。"
           }
         ],
         "choices": [
           {
-            "jp": "店で魚や花を買いました。",
-            "furigana": [
-              {
-                "text": "店",
-                "reading": "みせ",
-                "word": 0
-              },
-              {
-                "text": "で"
-              },
-              {
-                "text": "魚",
-                "reading": "さかな",
-                "word": 2
-              },
-              {
-                "text": "や"
-              },
-              {
-                "text": "花",
-                "reading": "はな",
-                "word": 4
-              },
-              {
-                "text": "を"
-              },
-              {
-                "text": "買",
-                "reading": "か",
-                "word": 6
-              },
-              {
-                "text": "いました。"
-              }
-            ],
-            "correct": false,
-            "trap": false
+            "text": "It rained, but I went out anyway.",
+            "correct": false
           },
           {
-            "jp": "だれがきっぷをもっていますか。",
-            "furigana": [
-              {
-                "text": "だれが"
-              },
-              {
-                "text": "きっぷを"
-              },
-              {
-                "text": "もって"
-              },
-              {
-                "text": "いますか。"
-              }
-            ],
-            "correct": true,
-            "trap": false
+            "text": "It rained, so I stayed at home.",
+            "correct": true
           },
           {
-            "jp": "あしたは土曜日です。",
-            "furigana": [
-              {
-                "text": "あしたは"
-              },
-              {
-                "text": "土",
-                "reading": "ど",
-                "word": 2
-              },
-              {
-                "text": "曜",
-                "reading": "よう",
-                "word": 2
-              },
-              {
-                "text": "日",
-                "reading": "び",
-                "word": 3
-              },
-              {
-                "text": "です。"
-              }
-            ],
-            "correct": false,
-            "trap": false
+            "text": "It will rain tomorrow, so I won't go out.",
+            "correct": false
           }
         ],
-        "why": "**か** at the end of a sentence turns it into a question. Between two nouns it means « or ».",
         "n": 4
       },
       {
-        "kind": "which",
-        "pattern": "か",
-        "pattern_furigana": [
-          {
-            "text": "か"
-          }
-        ],
+        "kind": "use",
+        "ask": "You open the fridge: there is no milk left. You tell your family.",
+        "why": "There is none: ない is the plain negative of ある, that is がない. 飲まない says you don't drink it, and ありません is the polite version, too stiff at home.",
         "choices": [
           {
-            "jp": "七時から九時までですね。",
+            "jp": "ぎゅうにゅうがない。",
             "furigana": [
               {
-                "text": "七",
-                "reading": "しち",
-                "word": 0
+                "text": "ぎゅうにゅうが"
               },
               {
-                "text": "時",
-                "reading": "じ",
-                "word": 1
-              },
-              {
-                "text": "から"
-              },
-              {
-                "text": "九",
-                "reading": "く",
-                "word": 3
-              },
-              {
-                "text": "時",
-                "reading": "じ",
-                "word": 4
-              },
-              {
-                "text": "までですね。"
+                "text": "ない。"
               }
             ],
-            "correct": false,
-            "trap": false
+            "correct": true
           },
           {
-            "jp": "すみません、水はありますか。",
+            "jp": "ぎゅうにゅうがありません。",
             "furigana": [
               {
-                "text": "すみません、"
+                "text": "ぎゅうにゅうが"
               },
               {
-                "text": "水",
-                "reading": "みず",
-                "word": 4
-              },
-              {
-                "text": "は"
-              },
-              {
-                "text": "ありますか。"
+                "text": "ありません。"
               }
             ],
-            "correct": true,
-            "trap": false
+            "correct": false
           },
           {
-            "jp": "水とティッシュをさがしています。",
+            "jp": "ぎゅうにゅうを飲まない。",
             "furigana": [
               {
-                "text": "水",
-                "reading": "みず",
-                "word": 0
-              },
-              {
-                "text": "と"
-              },
-              {
-                "text": "ティッシュを"
-              },
-              {
-                "text": "さがして"
-              },
-              {
-                "text": "います。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          }
-        ],
-        "why": "**か** at the end of a sentence turns it into a question. Between two nouns it means « or ».",
-        "n": 5
-      },
-      {
-        "kind": "which",
-        "pattern": "か",
-        "pattern_furigana": [
-          {
-            "text": "か"
-          }
-        ],
-        "choices": [
-          {
-            "jp": "父は会社ではたらいています。",
-            "furigana": [
-              {
-                "text": "父",
-                "reading": "ちち",
-                "word": 0
-              },
-              {
-                "text": "は"
-              },
-              {
-                "text": "会",
-                "reading": "かい",
-                "word": 2
-              },
-              {
-                "text": "社",
-                "reading": "しゃ",
-                "word": 2
-              },
-              {
-                "text": "で"
-              },
-              {
-                "text": "はたらいて"
-              },
-              {
-                "text": "います。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          },
-          {
-            "jp": "つめたい水を飲みました。",
-            "furigana": [
-              {
-                "text": "つめたい"
-              },
-              {
-                "text": "水",
-                "reading": "みず",
-                "word": 1
-              },
-              {
-                "text": "を"
+                "text": "ぎゅうにゅうを"
               },
               {
                 "text": "飲",
                 "reading": "の",
-                "word": 3
-              },
-              {
-                "text": "みました。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          },
-          {
-            "jp": "ほかに何を買いますか。",
-            "furigana": [
-              {
-                "text": "ほかに"
-              },
-              {
-                "text": "何",
-                "reading": "なに",
                 "word": 2
               },
               {
-                "text": "を"
-              },
-              {
-                "text": "買",
-                "reading": "か",
-                "word": 4
-              },
-              {
-                "text": "いますか。"
+                "text": "まない。"
               }
             ],
-            "correct": true,
-            "trap": false
+            "correct": false
           }
         ],
-        "why": "**か** at the end of a sentence turns it into a question. Between two nouns it means « or ».",
-        "n": 6
-      },
-      {
-        "kind": "which",
-        "pattern": "か",
-        "pattern_furigana": [
-          {
-            "text": "か"
-          }
-        ],
-        "choices": [
-          {
-            "jp": "はい、水がほしいです。",
-            "furigana": [
-              {
-                "text": "はい、"
-              },
-              {
-                "text": "水",
-                "reading": "みず",
-                "word": 2
-              },
-              {
-                "text": "が"
-              },
-              {
-                "text": "ほしいです。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          },
-          {
-            "jp": "いいえ、ちがいます。",
-            "furigana": [
-              {
-                "text": "いいえ、"
-              },
-              {
-                "text": "ちがいます。"
-              }
-            ],
-            "correct": false,
-            "trap": false
-          },
-          {
-            "jp": "すみません、この電車は何時に出ますか。",
-            "furigana": [
-              {
-                "text": "すみません、"
-              },
-              {
-                "text": "この"
-              },
-              {
-                "text": "電",
-                "reading": "でん",
-                "word": 5
-              },
-              {
-                "text": "車",
-                "reading": "しゃ",
-                "word": 5
-              },
-              {
-                "text": "は"
-              },
-              {
-                "text": "何",
-                "reading": "なん",
-                "word": 7
-              },
-              {
-                "text": "時",
-                "reading": "じ",
-                "word": 8
-              },
-              {
-                "text": "に"
-              },
-              {
-                "text": "出",
-                "reading": "で",
-                "word": 10
-              },
-              {
-                "text": "ますか。"
-              }
-            ],
-            "correct": true,
-            "trap": false
-          }
-        ],
-        "why": "**か** at the end of a sentence turns it into a question. Between two nouns it means « or ».",
-        "n": 7
+        "n": 5
       }
     ]
   }

@@ -12,8 +12,8 @@ import '../../index.css'
 // 〜てください (study/grammar_tour.py), in English -- its derived half
 // alone here -- and for か, whose tour is written (plan 187c): since
 // plan 194 its scene comes after the rule, then « That's not all! », a
-// stop per usage with its translation and two readings, then the quiz,
-// voiced (187d).
+// stop per usage with two readings and its translation said once it is
+// answered (plan 196), then the quiz, voiced (187d).
 
 const track = vi.fn()
 vi.mock('../../lib/track', () => ({ track: (...a) => track(...a) }))
@@ -220,8 +220,9 @@ describe('the written tour', () => {
       expect(root().querySelector('.tour__notion-name').textContent).toBe(twist.notion)
       expect(root().querySelector('.tour__notion-count').textContent).toBe(`${i + 1} of ${KA.twists.length}`)
       expect(root().querySelector('.tour__q').textContent).toBe(twist.ask)
-      // The sentence translated, and two readings to choose from.
-      expect(root().querySelector('.tour-twist .dict-ex__tr').textContent).toBe(twist.tr)
+      // Two readings to choose from, and the sentence NOT translated: its
+      // translation was the answer to « what does it say? » (plan 196).
+      expect(root().querySelector('.tour-twist .dict-ex__tr')).toBeNull()
       expect(root().querySelectorAll('.tour-guesses [data-choice]')).toHaveLength(2)
       expect(gate().disabled).toBe(true)
       const wrong = twist.choices.findIndex(c => !c.correct)
@@ -230,6 +231,8 @@ describe('the written tour', () => {
       await settle()
       gate().click()
       await settle()
+      // Answered: the translation is said.
+      expect(root().querySelector('.tour-twist .dict-ex__tr').textContent).toBe(twist.tr)
       expect(choice(root, rightTwist).classList.contains('tour-guess--ok')).toBe(true)
       if (i === 0) expect(choice(root, wrong).classList.contains('tour-guess--no')).toBe(true)
       expect(root().querySelector(i === 0 ? '.tour-said--no' : '.tour-said--ok')).toBeTruthy()
@@ -243,10 +246,17 @@ describe('the written tour', () => {
       expect(root().querySelector('.tour__notion-count').textContent).toBe(`Question ${i + 1} of ${KA.quiz.length}`)
       const rightQ = q.choices.findIndex(c => c.correct)
       const wrongQ = q.choices.findIndex(c => !c.correct)
+      expect(root().querySelector('.tour__notion-head').textContent.length).toBeGreaterThan(0)
+      // A meaning is read with no translation under it until it is answered
+      // (plan 196); a form says what the sentence says, it being the thing
+      // to say.
+      if (q.kind === 'meaning') expect(root().querySelector('.tour-twist .dict-ex__tr')).toBeNull()
+      if (q.kind === 'form') expect(root().querySelector('.tour-twist .dict-ex__tr').textContent).toBe(q.tr)
       choice(root, i === 0 ? wrongQ : rightQ).click()
       await settle()
       gate().click()
       await settle()
+      if (q.kind === 'meaning') expect(root().querySelector('.tour-twist .dict-ex__tr').textContent).toBe(q.tr)
       // The trap, where the question has one, is named once it is checked.
       if (q.choices.some(c => c.trap)) expect(root().querySelector('.tour-guesses .tour-trap')).toBeTruthy()
       gate().click()
@@ -265,8 +275,8 @@ describe('the written tour', () => {
     expect(arcs[0].classList.contains('tour-tally__arc--no')).toBe(true)
     expect(arcs.slice(1).every(a => a.classList.contains('tour-tally__arc--ok'))).toBe(true)
     expect(root().querySelector('.tour-end .tour-pattern').textContent).toBe('か')
-    // A "which" says its sentence alone, missed or not.
-    expect(rows[0].querySelector('.tour-recap__fix')).toBeNull()
+    // The first was missed: what was taken is struck under the right one.
+    expect(rows[0].querySelector('.tour-recap__fix')).toBeTruthy()
     // Each row says its kind, and the heading is for a screen reader.
     expect(rows[0].querySelector('.tour-recap__kind').textContent.length).toBeGreaterThan(0)
     expect(root().querySelector('.tour__q.sr-only').textContent).toBe('Results')
@@ -321,5 +331,117 @@ describe('the results', () => {
     expect(row.querySelector('.tour-recap__jp').textContent).toContain(right)
     expect(screen.container.querySelectorAll('.tour-tally__arc--no')).toHaveLength(1)
     expect(screen.container.querySelector('.tour-score__right').textContent).toBe(String(tours.en.quiz.length - 1))
+  })
+})
+
+// ── Plan 196: the quiz asks what only understanding answers ───────
+// ない形 〜ない, whose tutorial is the owner's reference: a form, a
+// meaning and a reply, none of them « which of these uses it? ».
+
+const NAI = tours.nai
+const NAI_POINT = {
+  raw_id: 'grammar_N5_ない形 〜ない', level: 'N5', pattern: 'ない形 〜ない',
+  structure: 'う-verb あ-row ・ る-verb stem + ない', meaning: 'the plain negative', tour: NAI,
+}
+
+// A sentence as written, without the readings set over its kanji.
+function written(node) {
+  const copy = node.cloneNode(true)
+  copy.querySelectorAll('rt').forEach(rt => rt.remove())
+  return copy.textContent
+}
+
+async function mountQuiz() {
+  const onBoard = vi.fn()
+  const screen = await render(
+    <LangProvider>
+      <GrammarTour point={NAI_POINT} onBoard={onBoard} onLesson={vi.fn()} startAt="quiz" />
+    </LangProvider>
+  )
+  await settle()
+  const root = () => screen.container.querySelector('.tour')
+  const gate = () => root().querySelector('.tour__foot .btn-depart')
+  return { screen, root, gate, onBoard }
+}
+
+describe('the quiz', () => {
+  it('has no question that is answered by finding the point in a sentence', () => {
+    expect(NAI.quiz.length).toBeGreaterThanOrEqual(4)
+    expect(NAI.quiz.every(q => ['meaning', 'form', 'use', 'gap'].includes(q.kind))).toBe(true)
+    // Never the same kind twice running, and no sentence stands twice in the tour.
+    NAI.quiz.slice(1).forEach((q, i) => expect(q.kind).not.toBe(NAI.quiz[i].kind))
+    const seen = [
+      ...NAI.look.map(x => x.jp), ...NAI.twists.map(x => x.jp),
+      ...NAI.scene.lines.map(x => x.jp), NAI.scene.ask.cue.jp, ...NAI.scene.ask.choices.map(c => c.jp),
+      ...NAI.quiz.flatMap(q => (q.kind === 'meaning' || q.kind === 'form' ? [q.jp] : q.choices.map(c => c.jp).filter(Boolean))),
+    ]
+    expect(new Set(seen).size).toBe(seen.length)
+  })
+
+  it('reads a meaning with no translation until it is answered, builds a form into its blank, answers a situation', async () => {
+    const { root, gate, onBoard } = await mountQuiz()
+    for (const [i, q] of NAI.quiz.entries()) {
+      expect(root().dataset.stop).toBe('quiz')
+      expect(root().querySelector('.tour__q').textContent).toBe(q.ask)
+      expect(root().querySelector('.tour__notion-count').textContent).toBe(`Question ${i + 1} of ${NAI.quiz.length}`)
+      const tr = () => root().querySelector('.tour-twist .dict-ex__tr')
+      if (q.kind === 'meaning') {
+        // The sentence, and not what it says.
+        expect(written(root().querySelector('.tour-twist .dict-ex__jp'))).toBe(q.jp)
+        expect(tr()).toBeNull()
+      } else if (q.kind === 'form') {
+        // The sentence with its hole, and what the whole says as the thing to say.
+        expect(root().querySelectorAll('.gl-blank')).toHaveLength(1)
+        expect(tr().textContent).toBe(q.tr)
+        expect(written(root().querySelector('.tour-twist .dict-ex__jp'))).not.toContain(q.choices.find(c => c.correct).jp)
+      } else {
+        // A situation and three lines of Japanese: no sentence card at all.
+        expect(root().querySelector('.tour-twist')).toBeNull()
+      }
+      if (q.kind !== 'meaning') {
+        const lines = [...root().querySelectorAll('.tour-guess__text--ja')].map(n => n.textContent)
+        expect(lines).toEqual(q.choices.map(c => c.jp))
+      }
+      expect(gate().disabled).toBe(true)
+      root().querySelector(`[data-choice="${q.choices.findIndex(c => c.correct)}"]`).click()
+      await settle()
+      gate().click()
+      await settle()
+      expect(root().querySelector('.tour-said--ok')).toBeTruthy()
+      // (The lesson's inline set puts a thin space where Japanese meets Latin.)
+      const flat = text => text.replace(/\s+/g, ' ')
+      expect(flat(root().querySelector('.tour-said__line').textContent)).toBe(flat(q.why.replace(/\*\*/g, '')))
+      if (q.kind === 'meaning') expect(tr().textContent).toBe(q.tr)
+      // The blank is filled with the right form, marked, once it is checked.
+      if (q.kind === 'form') expect(root().querySelector('.gl-blank--revealed').textContent).toBe(q.choices.find(c => c.correct).jp)
+      gate().click()
+      await settle()
+    }
+    expect(root().dataset.stop).toBe('terminus')
+    expect(root().querySelector('.tour-score__right').textContent).toBe(String(NAI.quiz.length))
+    const rows = root().querySelectorAll('.tour-recap__row')
+    expect(rows).toHaveLength(NAI.quiz.length)
+    // A form's row says the sentence with the right form in it.
+    const formAt = NAI.quiz.findIndex(q => q.kind === 'form')
+    expect(rows[formAt].querySelector('.tour-recap__form').textContent).toBe(NAI.quiz[formAt].choices.find(c => c.correct).jp)
+    gate().click()
+    expect(onBoard).toHaveBeenCalledWith({ tries: 0, helped: false, quizRight: NAI.quiz.length, quizTotal: NAI.quiz.length })
+  }, 30000)
+
+  it('strikes what a missed form, meaning or reply took on the results', async () => {
+    const picks = NAI.quiz.map(q => q.choices.findIndex(c => !c.correct))
+    const screen = await render(
+      <LangProvider>
+        <Results tour={NAI} point={NAI_POINT} picks={picks} onLesson={() => {}} replay={false} />
+      </LangProvider>
+    )
+    const rows = [...screen.container.querySelectorAll('.tour-recap__row')]
+    expect(rows).toHaveLength(NAI.quiz.length)
+    for (const [i, q] of NAI.quiz.entries()) {
+      expect(rows[i].classList.contains('tour-recap__row--no')).toBe(true)
+      const taken = q.choices[picks[i]]
+      expect(rows[i].querySelector('.tour-recap__fix').textContent).toBe(taken.text ?? taken.jp)
+    }
+    expect(screen.container.querySelector('.tour-score__right').textContent).toBe('0')
   })
 })

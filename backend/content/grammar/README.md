@@ -49,48 +49,24 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 | `examples` | each passes `study/grammar_sentence_gen.check_sentence`: 8–60 characters, ends in 。！？, kanji within the level (the pattern's own kanji excepted), and visibly contains the pattern. Distinct sentences. |
 | `contrast` | marks a sentence in which the rivals in `compare` are **wrong**; the contrast drill blanks the pattern in it and offers the rivals as choices. So the sentence must not also contain a rival, and the point must compare something. A bare particle may mark one too (plan 190): see "What the matcher can and cannot see". |
 
-## The quiz's sentences (plan 195)
-
-The tour's closing quiz asks only sentences the learner has not met in the
-tour, and none twice (`study/grammar_tour._quiz`). They come from the rest
-of what the app teaches -- every example and tour sentence of the
-catalogue and every row of the reading bank, kept for each point they
-write (`study/grammar_quiz_pool.py`) -- and, where a point has too few,
-from `content/grammar/quiz_sentences.json`: level -> pattern -> Japanese
-sentences written for the quiz alone (no translation: a sentence the quiz
-offers as a choice is never translated). Each is held to
-`study/grammar_quiz_pool.sentence_problems`: a whole sentence at the
-level's kanji, grammar and words, the point visibly written in it, and no
-sentence the app already teaches. Check a draft before it enters the file:
-
-```bash
-python -m scripts.check_quiz_sentences FILE.json   # a draft
-python -m scripts.check_quiz_sentences             # the committed bank
-```
-
-**After any change to the catalogue or the reading bank, run
-`python -m scripts.build_quiz_pool`** (it writes `quiz_pool.json`, the
-sentences each point's quiz may draw on); `tests/test_grammar_quiz_pool.py`
-fails while the file disagrees with the catalogue.
-
 ## The tour block (plan 187)
 
 A point a learner has never met is toured before it is drilled
 (`study/grammar_tour.py`): its examples, a guess at what it does, the
 rule. That much is derived from the entry above. The rest is written
-by hand, in an optional `tour` key, and where it is written both halves
-are -- a twist per notion the point has beyond the meaning the guess
-asks (plan 189), then the scene:
+by hand, in an optional `tour` key, and where it is written all three
+parts are -- a twist per notion the point has beyond the meaning the guess
+asks (plan 189), the scene, and the closing quiz (plan 196):
 
 ```jsonc
 "tour": {
   "twists": [{                                // 1–6, one per notion, in teaching order
     "notion": {"en": "Or, between nouns", "fr": "Ou, entre deux noms"},  // the stop's name, ≤ 40 chars
     "jp": "おちゃかコーヒーを飲みますか。",
-    "tr": {"en": "…", "fr": "…"},             // the sentence translated, shown under it (plan 194)
+    "tr": {"en": "…", "fr": "…"},            // the sentence translated, shown once the question is answered (plan 196)
     "ask": {"en": "…", "fr": "…"},            // the question over it
     "choices": [{"en": "…", "fr": "…"}, …],   // three readings of it, the RIGHT ONE FIRST, then the confusion
-                                              // the two-choice usages stop asks against (plan 194); the quiz asks all three
+                                              // the stop asks against: only the first two are shown (plan 194)
     "why": {"en": "…", "fr": "…"},            // one line said once it is answered
     "pair": ["すってください", "すわないでください"],  // optional: two forms drawn side by side
     "kind": "usage"                           // "usage": another use of the point; "trap": a rival set against it
@@ -106,7 +82,25 @@ asks (plan 189), then the scene:
       "choices": ["…", "…", "…"],             // three Japanese lines, the RIGHT ONE FIRST
       "why": {"en": "…", "fr": "…"}
     }
-  }
+  },
+  "quiz": [                                   // 4–6 questions (plan 196), each of one kind, none the tour has asked
+    {"kind": "meaning",                       // read a sentence the tour has not shown
+     "ask": {"en": "…", "fr": "…"},           // the question over it
+     "jp": "…。",                             // shown with NO translation
+     "tr": {"en": "…", "fr": "…"},            // its translation, shown once the question is answered
+     "choices": [{"en": "…", "fr": "…"}, …],  // three readings, the RIGHT ONE FIRST
+     "why": {"en": "…", "fr": "…"}},
+    {"kind": "form",                          // build the form
+     "ask": {"en": "…", "fr": "…"},           // what is asked: "Which form completes it?", or more exactly
+     "jp": "きのうは学校に＿＿＿。",             // ONE blank, ＿＿＿ (study/grammar_examples.BLANK), over the form
+     "tr": {"en": "…", "fr": "…"},            // what the whole sentence says: it is what is to be said, so it is shown
+     "choices": ["行かなかった", "行かない", "行きなかった"],  // three fillings, the RIGHT ONE FIRST
+     "why": {"en": "…", "fr": "…"}},
+    {"kind": "use",                           // say the right thing in a situation
+     "ask": {"en": "…", "fr": "…"},           // the situation, in the learner's language
+     "choices": ["…。", "…。", "…。"],         // three Japanese lines, the RIGHT ONE FIRST
+     "why": {"en": "…", "fr": "…"}}
+  ]
 }
 ```
 
@@ -118,6 +112,52 @@ of its lines or the cue, in the right answer, and in no wrong answer
 (read by the detector where `grammar_detect.can_find` trusts it, else by
 the stems). A point that names its own alternatives (`〜つ／〜人／〜枚`,
 `〜があります／います`) may be answered wrong with another of them.
+
+### The quiz (plan 196)
+
+The quiz is the first time the learner is asked for the point without
+being told what it is. The first one, built from sentences the app already
+taught (plans 194, 195), asked "which of these uses it?" up to eight times:
+a question the eye answers by finding the point's own characters, and the
+twists printed the translation of the sentence over the question "what
+does it say?". Neither tests anything, and a learner said so. So:
+
+- **A question is one only someone who has understood the point can
+  answer.** Never "find the sentence that contains it". A `use` is held to
+  that in code: where the detector reads the point, a wrong line writes it
+  too (the same verb in the wrong tense, the wrong register, beside the
+  rival that carries it), so finding the point answers nothing.
+- **Never a translation shown over the question it answers.** A twist's and
+  a meaning's `tr` is held back until the question is answered. A form
+  shows its `tr` because it is what is to be said, and its three fillings
+  are forms, not translations of it.
+- **Every sentence is new, and no question is asked twice.** No sentence of
+  the quiz is one of the point's examples (the fourth of them too), a twist's, a line or answer of the
+  scene, or another question's; no question is worded twice across the
+  twists and the quiz (`study/grammar_check._repeat_problems`, which also
+  fails a sentence standing twice among the examples, twists and scene).
+- **A wrong answer is one a learner could really give.** A `form`'s wrong
+  fillings are real forms the cue rules out (the wrong tense, the wrong
+  register, the rival) and, once at most in a question, the slip learners
+  make (買あない); a `meaning`'s wrong readings are the misreadings the
+  point invites; a `use`'s wrong lines are sentences someone could say, wrong for the
+  reason the `why` gives. The right answer is the only right one: a
+  rival the lesson calls a same-meaning form is never a wrong choice.
+- **Which kind asks what.** `form` for what is built (a conjugation, an
+  attachment, a particle's slot); `meaning` for a sense or a second use
+  read in a sentence the learner has not seen; `use` for choosing between
+  the point and its neighbours or registers in a situation. At least two
+  kinds in a quiz, at most three of one, and the questions of one kind
+  are not side by side.
+- The `ask` of a `meaning` is a real question about the sentence, not
+  "what does it say?" alone where the choices are only its translations
+  (see the point's twists for the notions it already asks); an `ask` is
+  never the question the twists or another question put.
+
+Where a rival's lesson has contrast sentences, up to two more questions
+are derived for the point (the rival's own contrast sentence with the
+rival blanked and the point offered as the wrong answer, `study/
+grammar_tour._gap_questions`), so a served quiz is at most eight.
 
 Writing one: a twist is a surprise the guess did not prepare for -- a
 second use (か between two nouns), a sense, a form the lesson teaches as
