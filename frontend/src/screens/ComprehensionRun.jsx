@@ -22,6 +22,7 @@ import { startTally, countReview } from '../stores/runTally'
 import { RunStreak } from '../components/study/RunStreak'
 import { useAsk } from '../hooks/useAsk'
 import { AskPanel } from '../components/study/AskPanel'
+import { AskEntry } from '../components/study/AskPage'
 import { askTarget } from '../domain/ask'
 import { useDesk } from '../hooks/useDesk'
 import { dialogOpen } from '../lib/dialogOpen'
@@ -443,6 +444,11 @@ export default function ComprehensionRun({ session }) {
   // learner's, and the words of the sentence it quotes. Sealed until
   // the results (plan 131).
   const reviewed = stage === 'results' && results ? results.results[openRow ?? 0] : null
+  // On the desk opening a row opens the sentence the question quotes, and
+  // its words are the thread's (openResultRow). A phone opens the row only,
+  // so the words are those of the sentence the question quotes, found the
+  // same way, rather than of whichever the breakdown last stood on (plan 197).
+  const quoted = !desk && reviewed ? sentenceFor(breakdown, quotedFragments(reviewed.question)) : -1
   const target = askTarget(null, reviewed ? {
     key: `q${openRow ?? 0}`,
     base: {
@@ -455,7 +461,7 @@ export default function ComprehensionRun({ session }) {
         `Right answer: ${letter(reviewed.correct)}. The learner chose: ${reviewed.user_answer == null ? 'nothing' : letter(reviewed.user_answer)}.`,
       ].join('\n'),
     },
-    analysis: breakdown[openIndex]?.analysis,
+    analysis: breakdown[quoted >= 0 ? quoted : openIndex]?.analysis,
     open: true,
   } : { key: 'sealed', open: false })
 
@@ -732,6 +738,9 @@ export default function ComprehensionRun({ session }) {
                           )
                         })}
                       </div>
+                      {/* The open question is the asking's thread (plan 197):
+                          the page opens on it, not on the whole text. */}
+                      <AskEntry ask={asking} askKey={target.key} context={target.context} open={target.open} title={t.comprehensionTitle} text />
                     </div>
                   )}
                 </div>

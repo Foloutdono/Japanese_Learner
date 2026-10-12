@@ -22,6 +22,7 @@ import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
 import { useRunLines } from '../hooks/useRunLines'
 import { useAsk } from '../hooks/useAsk'
 import { AskPanel } from '../components/study/AskPanel'
+import { AskEntry } from '../components/study/AskPage'
 import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { RunStreak } from '../components/study/RunStreak'
@@ -602,6 +603,7 @@ function Session({ session, level }) {
                     explainError={explainError}
                   />
                 )}
+                <AskEntry ask={asking} askKey={target.key} context={target.context} open={target.open} title={t.compositionTitle} />
               </div>
             )}
           </PromptCard>

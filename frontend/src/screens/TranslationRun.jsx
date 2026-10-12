@@ -26,6 +26,7 @@ import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
 import { useRunLines } from '../hooks/useRunLines'
 import { useAsk } from '../hooks/useAsk'
 import { AskPanel } from '../components/study/AskPanel'
+import { AskEntry } from '../components/study/AskPage'
 import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
@@ -684,6 +685,7 @@ function SessionView({
                     explainError={explainError}
                   />
                 )}
+                <AskEntry ask={asking} askKey={target.key} context={target.context} open={target.open} title={t.translationTitle} />
               </div>
             )}
           </PromptCard>

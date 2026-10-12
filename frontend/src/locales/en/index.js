@@ -481,9 +481,11 @@ const quiz = {
   deskKeyPick:         'picks an answer',
   deskKeyNext:         'next question',
   deskKeyWalk:         'walks the questions',
-  // 問 — a question about the exercise, on the desk (plan 131): open once
-  // the answer is graded, short, precise, about this exercise only.
+  // 問 — a question about the exercise, on the desk (plan 131) and, on a
+  // phone, on a page of its own (plan 197): open once the answer is graded,
+  // short, precise, about this exercise only.
   askTitle:            'A question',
+  askOpen:             'Ask a question',
   askPlaceholder:      'Your question…',
   askSealed:           'Questions open once your answer is graded.',
   askSealedText:       'Questions open with the results.',

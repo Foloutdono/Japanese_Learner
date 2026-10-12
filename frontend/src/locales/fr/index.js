@@ -463,9 +463,11 @@ const quiz = {
   deskKeyPick:        'choisit une réponse',
   deskKeyNext:        'question suivante',
   deskKeyWalk:        'parcourt les questions',
-  // 問 — une question sur l'exercice, sur le bureau (plan 131) : ouverte une
-  // fois la réponse notée, courte, précise, sur cet exercice seulement.
+  // 問 — une question sur l'exercice, sur le bureau (plan 131) et, sur
+  // téléphone, dans une page à elle (plan 197) : ouverte une fois la réponse
+  // notée, courte, précise, sur cet exercice seulement.
   askTitle:           'Une question',
+  askOpen:            'Poser une question',
   askPlaceholder:     'Ta question…',
   askSealed:          'Les questions s’ouvrent une fois ta réponse notée.',
   askSealedText:      'Les questions s’ouvrent avec les résultats.',
