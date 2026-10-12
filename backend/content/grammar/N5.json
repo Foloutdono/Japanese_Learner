@@ -19505,7 +19505,127 @@
             "fr": "Une seule proposition, laissée ouverte : でも. を ne nomme que le magazine ; も l'ajoute à autre chose."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ちょっと休んで、ジュース＿＿＿飲みましょう。",
+          "tr": {
+            "en": "Let's rest a little and have a juice or something.",
+            "fr": "Reposons-nous un peu et prenons un jus, ou quelque chose du genre."
+          },
+          "choices": [
+            "でも",
+            "をでも",
+            "も"
+          ],
+          "why": {
+            "en": "でも takes the place of を: ジュースでも飲みましょう, « a juice or something ». ジュースをでも keeps the を, and ジュースも would mean « a juice too », with no « or something ».",
+            "fr": "でも prend la place de を : ジュースでも飲みましょう, « un jus ou autre chose ». ジュースをでも garde le を, et ジュースも voudrait dire « aussi du jus », sans le « ou autre chose »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who can read this kanji?",
+            "fr": "Qui sait lire ce kanji ?"
+          },
+          "jp": "この古いかんじは、先生でも読めません。",
+          "tr": {
+            "en": "Even the teacher can't read this old kanji.",
+            "fr": "Même le professeur ne sait pas lire ce vieux kanji."
+          },
+          "choices": [
+            {
+              "en": "Nobody, it seems: not even the teacher.",
+              "fr": "Personne, semble-t-il : pas même le professeur."
+            },
+            {
+              "en": "The teacher can, but other people can't.",
+              "fr": "Le professeur, oui, mais pas les autres."
+            },
+            {
+              "en": "Everyone can, except the teacher.",
+              "fr": "Tout le monde, sauf le professeur."
+            }
+          ],
+          "why": {
+            "en": "Here でも means « even »: 先生でも読めません is « not even the teacher can read it ». The teacher is the one you would expect to manage, so the kanji must be very hard.",
+            "fr": "Ici でも veut dire « même » : 先生でも読めません, « même le professeur ne sait pas le lire ». C'est la personne dont on attendrait qu'elle y arrive : le kanji doit être très difficile."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your friend looks tired. You want to suggest, lightly, cake or something at the café over there. What do you say?",
+            "fr": "Ton ami a l'air fatigué. Tu veux lui proposer, sans insister, un gâteau ou quelque chose du genre au café là-bas. Que dis-tu ?"
+          },
+          "choices": [
+            "あそこのカフェで、ケーキでも食べませんか。",
+            "あそこのカフェで、ケーキでも食べました。",
+            "でも、あそこのカフェで、ケーキを食べませんか。"
+          ],
+          "why": {
+            "en": "でも after the noun softens the invitation, and ませんか makes it one: ケーキでも食べませんか. ケーキでも食べました is the past, a report of what you did, and a でも at the start of a sentence means « but », not « or something ».",
+            "fr": "でも après le nom adoucit l'invitation, et ませんか en fait une : ケーキでも食べませんか. ケーキでも食べました est au passé, le récit de ce qu'on a fait, et un でも en tête de phrase veut dire « mais », pas « ou autre chose »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "うちで、テレビでも＿＿＿。",
+          "tr": {
+            "en": "Shall we watch TV or something at home?",
+            "fr": "Et si on regardait la télé, ou quelque chose du genre, à la maison ?"
+          },
+          "choices": [
+            "見ませんか",
+            "見ません",
+            "見ました"
+          ],
+          "why": {
+            "en": "ませんか turns the softened suggestion into an invitation: テレビでも見ませんか. After でも, 見ません would be a flat negative that reads « not even »: I don't even watch TV. And 見ました is the past, a report.",
+            "fr": "ませんか fait de la proposition adoucie une invitation : テレビでも見ませんか. Après でも, 見ません serait une négation sèche qui se lit « même pas » : je ne regarde même pas la télé. Et 見ました est le passé, un récit."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about tomorrow's plan?",
+            "fr": "Que dit la phrase du projet de demain ?"
+          },
+          "jp": "あしたはひまだから、えいがでも見に行きたいです。",
+          "tr": {
+            "en": "I'm free tomorrow, so I'd like to go and see a film or something.",
+            "fr": "Demain, je suis libre : j'aimerais aller voir un film, ou quelque chose du genre."
+          },
+          "choices": [
+            {
+              "en": "A film is only one idea; the plan is still open.",
+              "fr": "Un film n'est qu'une idée : rien n'est encore arrêté."
+            },
+            {
+              "en": "The speaker wants a film in addition to something else.",
+              "fr": "On veut aller voir un film en plus d'autre chose."
+            },
+            {
+              "en": "The speaker wants a film, but something stands in the way.",
+              "fr": "On voudrait voir un film, mais quelque chose l'en empêche."
+            }
+          ],
+          "why": {
+            "en": "えいがでも is « a film, or something like it »: the film is an example, not a decision. « Too » would be えいがも, and nothing says « but »: ひまだから says the speaker is free.",
+            "fr": "えいがでも, c'est « un film ou quelque chose du genre » : le film est un exemple, pas une décision. « Aussi » serait えいがも, et rien ne dit « mais » : ひまだから dit qu'on est libre."
+          }
+        }
+      ]
     }
   },
   {
@@ -19772,7 +19892,127 @@
             "fr": "Ta propre pensée : la forme neutre, puis と思います. と言います rapporterait des paroles ; はれです l'affirme."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの店のカレーは、とてもおいしい＿＿＿思います。",
+          "tr": {
+            "en": "I think the curry at that restaurant is very good.",
+            "fr": "Je pense que le curry de ce restaurant est très bon."
+          },
+          "choices": [
+            "と",
+            "だと",
+            "ですと"
+          ],
+          "why": {
+            "en": "An い-adjective is already plain, so と follows it directly: おいしいと思います. だ is only for nouns and な-adjectives (先生だと), and です is the polite form, which never goes before と.",
+            "fr": "Un adjectif en い est déjà neutre : と vient directement après, おいしいと思います. だ est réservé aux noms et aux adjectifs en な (先生だと), et です est la forme polie, qui ne se met jamais devant と."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the mother say, and what does the speaker think?",
+            "fr": "Qu'est-ce que la mère dit, et qu'est-ce que celui qui parle pense ?"
+          },
+          "jp": "母は、あした雨がふると言いましたが、わたしはふらないと思います。",
+          "tr": {
+            "en": "My mother said it will rain tomorrow, but I think it won't.",
+            "fr": "Ma mère a dit qu'il pleuvrait demain, mais moi, je pense qu'il ne pleuvra pas."
+          },
+          "choices": [
+            {
+              "en": "Mother said it will rain; the speaker thinks it won't.",
+              "fr": "Sa mère a dit qu'il pleuvrait ; celui qui parle pense que non."
+            },
+            {
+              "en": "Mother said it won't rain; the speaker thinks it will.",
+              "fr": "Sa mère a dit qu'il ne pleuvrait pas ; celui qui parle pense que si."
+            },
+            {
+              "en": "Mother and the speaker both think it will rain.",
+              "fr": "Sa mère et celui qui parle pensent tous deux qu'il pleuvra."
+            }
+          ],
+          "why": {
+            "en": "言いました reports the mother's words: it will rain. ふらないと思います is the speaker's own thought, with the ない inside it: it will not. が joins the two as « but ».",
+            "fr": "言いました rapporte les paroles de la mère : il pleuvra. ふらないと思います est la pensée de celui qui parle, avec le ない dedans : il ne pleuvra pas. が relie les deux comme « mais »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks if you can come on Saturday. You probably can, but nothing is certain yet. What do you answer?",
+            "fr": "Un ami te demande si tu peux venir samedi. Tu devrais pouvoir, mais rien n'est encore certain. Que réponds-tu ?"
+          },
+          "choices": [
+            "土よう日は、行けると思います。",
+            "土よう日は、行けないと思います。",
+            "土よう日は、行けます。"
+          ],
+          "why": {
+            "en": "と思います softens what you cannot promise: 行けると思います is « I think I can ». 行けます is a flat yes, and 行けないと思います says the opposite, that you think you can't.",
+            "fr": "と思います adoucit ce que tu ne peux pas promettre : 行けると思います, « je pense que je peux ». 行けます est un oui sans nuance, et 行けないと思います dit le contraire : tu penses ne pas pouvoir."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの人は、この学校の先生＿＿＿と思います。",
+          "tr": {
+            "en": "I don't think that person is a teacher at this school.",
+            "fr": "Je ne pense pas que cette personne soit professeur dans cette école."
+          },
+          "choices": [
+            "じゃない",
+            "ない",
+            "じゃありません"
+          ],
+          "why": {
+            "en": "After a noun the plain negative is じゃない: 先生じゃないと思います. ない alone only negates a verb or ある, and じゃありません is the polite form, which stays out of the part before と.",
+            "fr": "Après un nom, la négation neutre est じゃない : 先生じゃないと思います. ない seul nie un verbe ou ある, et じゃありません est la forme polie, qui ne se met pas devant と."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think about the train?",
+            "fr": "Que pense celui qui parle du train ?"
+          },
+          "jp": "電車は、もう出たと思います。",
+          "tr": {
+            "en": "I think the train has already left.",
+            "fr": "Je pense que le train est déjà parti."
+          },
+          "choices": [
+            {
+              "en": "That it has already left.",
+              "fr": "Qu'il est déjà parti."
+            },
+            {
+              "en": "That it is about to leave.",
+              "fr": "Qu'il est sur le point de partir."
+            },
+            {
+              "en": "That the speaker used to think it had left, but no longer does.",
+              "fr": "Qu'on l'a cru parti, mais qu'on ne le croit plus."
+            }
+          ],
+          "why": {
+            "en": "The tense inside と思います is its own: 出た is the plain past, « it has left », while 思います stays in the present, because the thinking is happening now.",
+            "fr": "Le temps devant と思います est indépendant : 出た est le passé neutre, « il est parti », alors que 思います reste au présent, car on pense cela maintenant."
+          }
+        }
+      ]
     }
   },
   {
@@ -19965,7 +20205,127 @@
             "fr": "Ses paroles, pas ta pensée : と言いました. と思います et でしょう sont ton idée à toi."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who will be the first to come, according to the sentence?",
+            "fr": "Selon la phrase, qui arrivera avant tout le monde ?"
+          },
+          "jp": "母は、わたしがいちばんはやく来ると言いました。",
+          "tr": {
+            "en": "My mother said I would be the first to come.",
+            "fr": "Ma mère a dit que j'arriverais avant tout le monde."
+          },
+          "choices": [
+            {
+              "en": "The speaker: the mother said the speaker would come first.",
+              "fr": "Celui qui parle : sa mère a dit qu'il arriverait avant tout le monde."
+            },
+            {
+              "en": "The mother: she said she herself would come first.",
+              "fr": "La mère : elle a dit qu'elle arriverait avant tout le monde."
+            },
+            {
+              "en": "The speaker said that the mother would come first.",
+              "fr": "Celui qui parle a dit que sa mère arriverait avant tout le monde."
+            }
+          ],
+          "why": {
+            "en": "The quote is everything before と: わたしがいちばんはやく来る, so が makes わたし the one who comes. 母は is only the one who said it.",
+            "fr": "La citation, c'est tout ce qui précède と : わたしがいちばんはやく来る, donc が fait de わたし celui qui vient. 母は désigne seulement celle qui l'a dit."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "いもうとは、もうきっぷを＿＿＿と言いました。",
+          "tr": {
+            "en": "My little sister said she had already bought the ticket.",
+            "fr": "Ma petite sœur a dit qu'elle avait déjà acheté le billet."
+          },
+          "choices": [
+            "買った",
+            "買う",
+            "買いた"
+          ],
+          "why": {
+            "en": "Inside the quote the verb stays plain and keeps its own tense: 買う ends in う, so its plain past is 買った. 買う would be the present, « she will buy it », and 買いた sticks た onto the stem of 買います.",
+            "fr": "Dans la citation, le verbe reste neutre et garde son propre temps : 買う finit par う, son passé neutre est 買った. 買う serait le présent, « elle va l'acheter », et 買いた colle た à la base de 買います."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Did the friend come at seven?",
+            "fr": "L'ami est-il venu à sept heures ?"
+          },
+          "jp": "友だちは、七時に来ると言いましたが、来ませんでした。",
+          "tr": {
+            "en": "My friend said he would come at seven, but he didn't come.",
+            "fr": "Mon ami a dit qu'il viendrait à sept heures, mais il n'est pas venu."
+          },
+          "choices": [
+            {
+              "en": "No: he said he would, but he did not.",
+              "fr": "Non : il a dit qu'il viendrait, mais il n'est pas venu."
+            },
+            {
+              "en": "Yes, as he had said.",
+              "fr": "Oui, comme il l'avait dit."
+            },
+            {
+              "en": "No, and he had said he would not come.",
+              "fr": "Non, et il avait dit qu'il ne viendrait pas."
+            }
+          ],
+          "why": {
+            "en": "来ると言いました reports what he said he would do: come. が then sets it against what happened, 来ませんでした: he did not, so the promise was not kept.",
+            "fr": "来ると言いました rapporte ce qu'il a dit qu'il ferait : venir. が l'oppose à ce qui s'est passé, 来ませんでした : il n'est pas venu, donc la promesse n'a pas été tenue."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your teacher says: « You told me you would come to the party! » But you never said anything about coming. What do you answer?",
+            "fr": "Ton professeur te dit : « Tu m'avais dit que tu viendrais à la fête ! » Mais tu n'as jamais rien dit à ce sujet. Que réponds-tu ?"
+          },
+          "choices": [
+            "パーティーに行くと言いませんでした。",
+            "パーティーに行かないと言いました。",
+            "パーティーに行くと言いました。"
+          ],
+          "why": {
+            "en": "To deny it, the negative goes on 言う: 行くと言いませんでした, « I did not say I would go ». 行かないと言いました is a different claim, that you said you would not go, and 行くと言いました admits it.",
+            "fr": "Pour le nier, la négation porte sur 言う : 行くと言いませんでした, « je n'ai pas dit que j'irais ». 行かないと言いました est une autre affirmation, celle d'avoir dit que tu n'irais pas, et 行くと言いました l'avoue."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "友だちは、あさごはんを＿＿＿と言いました。",
+          "tr": {
+            "en": "My friend said he hadn't had breakfast.",
+            "fr": "Mon ami a dit qu'il n'avait pas pris de petit-déjeuner."
+          },
+          "choices": [
+            "食べなかった",
+            "食べない",
+            "食べらなかった"
+          ],
+          "why": {
+            "en": "A る-verb drops る before ない, and the past of ない is なかった: 食べなかった, « hadn't eaten ». 食べない is the present, « doesn't eat », and 食べらなかった applies the う-verb rule to a る-verb.",
+            "fr": "Un verbe en る perd る devant ない, et le passé de ない est なかった : 食べなかった, « n'avait pas mangé ». 食べない est le présent, « ne mange pas », et 食べらなかった applique la règle des verbes en う à un verbe en る."
+          }
+        }
+      ]
     }
   },
   {
