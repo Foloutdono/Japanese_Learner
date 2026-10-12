@@ -33547,7 +33547,127 @@
             "fr": "Un argument de plus en sa faveur : それに. それで ferait de « pas cher » la conséquence de « bon »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうの夜は、さむかった。＿＿＿、雨もふっていた。",
+          "tr": {
+            "en": "Last night it was cold. And on top of that, it was raining too.",
+            "fr": "Hier soir, il faisait froid. Et en plus, il pleuvait."
+          },
+          "choices": [
+            "それに",
+            "それで",
+            "でも"
+          ],
+          "why": {
+            "en": "Both points are bad, so the second is added in the same direction: それに. それで would make the rain the result of the cold, and でも would set the two against each other.",
+            "fr": "Les deux points sont mauvais : le second s'ajoute dans le même sens, donc それに. それで ferait de la pluie la conséquence du froid, et でも opposerait les deux."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of the hotel?",
+            "fr": "Que pense la personne de l'hôtel ?"
+          },
+          "jp": "ホテルは安かった。それに、あさごはんもおいしかった。",
+          "tr": {
+            "en": "The hotel was cheap. What's more, the breakfast was good too.",
+            "fr": "L'hôtel n'était pas cher. En plus, le petit-déjeuner était bon aussi."
+          },
+          "choices": [
+            {
+              "en": "A good one: two things speak in its favour.",
+              "fr": "Un bon hôtel : deux choses plaident en sa faveur."
+            },
+            {
+              "en": "It was cheap because the breakfast was good.",
+              "fr": "Il n'était pas cher parce que le petit-déjeuner était bon."
+            },
+            {
+              "en": "It was cheap, but the breakfast let it down.",
+              "fr": "Il n'était pas cher, mais le petit-déjeuner l'a gâché."
+            }
+          ],
+          "why": {
+            "en": "それに adds a second point leaning the same way: cheap, and what's more, good breakfast. It is neither a cause (それで) nor a contrast (でも).",
+            "fr": "それに ajoute un second point dans le même sens : pas cher, et en plus un bon petit-déjeuner. Ce n'est ni une cause (それで) ni un contraste (でも)."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend wants to try a restaurant and you want to talk her out of it. You have said it is expensive. Add one more reason.",
+            "fr": "Une amie veut essayer un restaurant et tu veux l'en dissuader. Tu as dit que c'est cher. Ajoute une raison de plus."
+          },
+          "choices": [
+            "あの店は高いよ。それに、とおいよ。",
+            "あの店は高いよ。それに、おいしいよ。",
+            "あの店は高いよ。それで、とおいよ。"
+          ],
+          "why": {
+            "en": "Another point against, leaning the same way: それに. A good point such as おいしい goes the other way (でも), and それで would make the distance the result of the price.",
+            "fr": "Un autre point contre, dans le même sens : それに. Un point positif comme おいしい va dans l'autre sens (でも), et それで ferait de la distance la conséquence du prix."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How do the last two sentences relate to the first?",
+            "fr": "Quel rapport les deux dernières phrases ont-elles avec la première ?"
+          },
+          "jp": "パーティーには行かない。しごとがおわらない。それに、あしたは早い。",
+          "tr": {
+            "en": "I'm not going to the party. My work isn't finished. Besides, I have an early start tomorrow.",
+            "fr": "Je ne vais pas à la fête. Mon travail n'est pas fini. En plus, je commence tôt demain."
+          },
+          "choices": [
+            {
+              "en": "They are two reasons for not going.",
+              "fr": "Ce sont deux raisons de ne pas y aller."
+            },
+            {
+              "en": "The unfinished work is the reason, and the early start is the result.",
+              "fr": "Le travail non fini est la raison, et commencer tôt demain en est la conséquence."
+            },
+            {
+              "en": "The unfinished work is the reason; the early start is another subject.",
+              "fr": "Le travail non fini est la raison ; commencer tôt demain, c'est un autre sujet."
+            }
+          ],
+          "why": {
+            "en": "それに adds a second reason leaning the same way: work, and besides, tomorrow. It is neither a result (それで) nor a change of subject (ところで).",
+            "fr": "それに ajoute une seconde raison dans le même sens : le travail, et en plus demain. Ce n'est ni une conséquence (それで) ni un changement de sujet (ところで)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "このへやは、あかるいです。＿＿＿、やちんもやすいです。",
+          "tr": {
+            "en": "This room is bright. What's more, the rent is cheap too.",
+            "fr": "Cette pièce est lumineuse. En plus, le loyer est bas aussi."
+          },
+          "choices": [
+            "それに",
+            "しかし",
+            "ところで"
+          ],
+          "why": {
+            "en": "Two advantages, added one to the other: それに. しかし would set the rent against the brightness, and ところで would change the subject.",
+            "fr": "Deux avantages, ajoutés l'un à l'autre : それに. しかし opposerait le loyer à la luminosité, et ところで changerait de sujet."
+          }
+        }
+      ]
     }
   },
   {
@@ -33738,7 +33858,127 @@
             "fr": "Un nouveau sujet : ところで. それで suivrait l'histoire de la mer, それに y ajouterait."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "いろいろありがとうございました。＿＿＿、このへんにコンビニはありますか。",
+          "tr": {
+            "en": "Thank you for everything. By the way, is there a convenience store around here?",
+            "fr": "Merci pour tout. Au fait, y a-t-il un konbini par ici ?"
+          },
+          "choices": [
+            "ところで",
+            "それで",
+            "それに"
+          ],
+          "why": {
+            "en": "The thanks close the first topic and a new question begins: ところで. それで would carry on the same subject, and それに would add one more point to what was just said.",
+            "fr": "Les remerciements closent le premier sujet et une nouvelle question commence : ところで. それで poursuivrait le même sujet, et それに ajouterait un point à ce qui vient d'être dit."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker do after ところで?",
+            "fr": "Que fait la personne après ところで ?"
+          },
+          "jp": "ごはんの話はここまでにしましょう。ところで、きょうのしゅくだいは何でしたか。",
+          "tr": {
+            "en": "Let's stop talking about food here. By the way, what was today's homework?",
+            "fr": "Arrêtons de parler de nourriture. Au fait, quels étaient les devoirs d'aujourd'hui ?"
+          },
+          "choices": [
+            {
+              "en": "Leaves the food and starts a new subject: the homework.",
+              "fr": "Laisse la nourriture et lance un nouveau sujet : les devoirs."
+            },
+            {
+              "en": "Stays on the same subject and asks more about it.",
+              "fr": "Reste sur le même sujet et pose une autre question dessus."
+            },
+            {
+              "en": "Goes back to the homework they were talking about before.",
+              "fr": "Revient aux devoirs dont ils parlaient avant."
+            }
+          ],
+          "why": {
+            "en": "ところで drops the old subject and opens a new one, and the homework has not been mentioned before. To carry on you would say それで; to go back to an earlier subject, さて.",
+            "fr": "ところで abandonne l'ancien sujet pour en ouvrir un nouveau, et les devoirs n'ont pas été évoqués avant. Pour poursuivre, on dirait それで ; pour revenir à un sujet plus ancien, さて."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are chatting with your boss about her trip. You remember something and change the subject: when does tomorrow's meeting start?",
+            "fr": "Tu bavardes avec ta cheffe de son voyage. Tu te souviens d'un point et tu changes de sujet : à quelle heure commence la réunion de demain ?"
+          },
+          "choices": [
+            "ところで、あしたのかいぎは何時からでしょうか。",
+            "ところで、あしたのかいぎは何時から？",
+            "それで、あしたのかいぎは何時からでしょうか。"
+          ],
+          "why": {
+            "en": "A new subject, said to a boss: ところで and the polite でしょうか. The plain 何時から？ is for friends, and それで would carry on with the trip.",
+            "fr": "Un nouveau sujet, dit à une supérieure : ところで et le poli でしょうか. Le 何時から？ neutre est pour les amis, et それで poursuivrait l'histoire du voyage."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "テストの話は、もうやめよう。＿＿＿、しゅうまつはひま？",
+          "tr": {
+            "en": "Let's stop talking about the test. By the way, are you free this weekend?",
+            "fr": "Arrêtons de parler du test. Au fait, tu es libre ce week-end ?"
+          },
+          "choices": [
+            "ところで",
+            "それで",
+            "それから"
+          ],
+          "why": {
+            "en": "The test talk is over and the weekend is a new subject: ところで. それで would follow on from the test, and それから would add the next item of the same list.",
+            "fr": "On a fini de parler du test et le week-end est un nouveau sujet : ところで. それで prolongerait le test, et それから ajouterait l'élément suivant d'une même liste."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the second question relate to the first?",
+            "fr": "Quel rapport la seconde question a-t-elle avec la première ?"
+          },
+          "jp": "きのうのパーティーはどうでしたか。ところで、山田さんはもうかえりましたか。",
+          "tr": {
+            "en": "How was yesterday's party? By the way, has Yamada gone home yet?",
+            "fr": "Comment était la fête d'hier ? Au fait, est-ce que Yamada est déjà rentré ?"
+          },
+          "choices": [
+            {
+              "en": "It is a different subject: it has nothing to do with the party.",
+              "fr": "C'est un autre sujet : sans rapport avec la fête."
+            },
+            {
+              "en": "It follows from the party: Yamada left it early.",
+              "fr": "Elle découle de la fête : Yamada l'a quittée tôt."
+            },
+            {
+              "en": "It is the same question, asked again in other words.",
+              "fr": "C'est la même question, reposée autrement."
+            }
+          ],
+          "why": {
+            "en": "ところで presents it as a new subject, not as something the party led to. A question that followed on from the party would start with それで.",
+            "fr": "ところで la présente comme un nouveau sujet, pas comme une suite de la fête. Une question qui découlerait de la fête commencerait par それで."
+          }
+        }
+      ]
     }
   },
   {
@@ -33937,7 +34177,141 @@
             "fr": "L'un ou l'autre, poliment : または. と et も〜も demanderaient les deux."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Which days should you come?",
+            "fr": "Quels jours faut-il venir ?"
+          },
+          "jp": "月曜日、水曜日または金曜日に来てください。",
+          "tr": {
+            "en": "Please come on Monday, Wednesday or Friday.",
+            "fr": "Veuillez venir le lundi, le mercredi ou le vendredi."
+          },
+          "choices": [
+            {
+              "en": "On any one of the three days.",
+              "fr": "N'importe lequel des trois jours."
+            },
+            {
+              "en": "On Monday, and on Wednesday or Friday.",
+              "fr": "Le lundi, et le mercredi ou le vendredi."
+            },
+            {
+              "en": "On all three days.",
+              "fr": "Les trois jours."
+            }
+          ],
+          "why": {
+            "en": "または stands before the last item and covers the whole list: one day out of the three. It does not mean « and », and it does not group only the last two.",
+            "fr": "または se place devant le dernier élément et couvre toute la liste : un seul jour sur les trois. Ce n'est pas « et », et il ne groupe pas seulement les deux derniers."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "のりものは、バス＿＿＿でんしゃをつかってください。",
+          "tr": {
+            "en": "Please use the bus or the train.",
+            "fr": "Veuillez prendre le bus ou le train."
+          },
+          "choices": [
+            "または",
+            "と",
+            "それとも"
+          ],
+          "why": {
+            "en": "Two options, one of which is chosen: または. と would ask for both, and それとも belongs to a question between options (バスですか、それとも電車ですか).",
+            "fr": "Deux options dont on choisit une : または. と demanderait les deux, et それとも appartient à une question entre deux options (バスですか、それとも電車ですか)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is not allowed here?",
+            "fr": "Qu'est-ce qui n'est pas permis ici ?"
+          },
+          "jp": "ここでは、たばこまたはおさけをのまないでください。",
+          "tr": {
+            "en": "Please do not smoke or drink alcohol here.",
+            "fr": "Veuillez ne pas fumer ni boire d'alcool ici."
+          },
+          "choices": [
+            {
+              "en": "Both: neither smoking nor drinking.",
+              "fr": "Les deux : ni fumer ni boire."
+            },
+            {
+              "en": "Doing both together; either one alone is fine.",
+              "fr": "Faire les deux ensemble ; l'un ou l'autre seul est permis."
+            },
+            {
+              "en": "Smoking only; drinking is allowed.",
+              "fr": "Fumer seulement ; boire est permis."
+            }
+          ],
+          "why": {
+            "en": "After a negative, A または B rules out both: no smoking and no drinking. It is not « not both at once ».",
+            "fr": "Après une négation, A または B exclut les deux : ni fumer, ni boire. Ce n'est pas « pas les deux à la fois »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "このしつもんには、フランス語＿＿＿英語でこたえてください。",
+          "tr": {
+            "en": "Please answer this question in French or in English.",
+            "fr": "Veuillez répondre à cette question en français ou en anglais."
+          },
+          "choices": [
+            "または",
+            "また",
+            "それから"
+          ],
+          "why": {
+            "en": "The written « or » is または, one word. また alone means « again, also », and それから would put the languages in sequence: French, then English.",
+            "fr": "Le « ou » écrit est または, en un seul mot. また seul veut dire « de nouveau, aussi », et それから mettrait les langues en séquence : le français, puis l'anglais."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What do we know about the delivery?",
+            "fr": "Que sait-on de la livraison ?"
+          },
+          "jp": "にもつは、あしたまたはあさってにとどきます。",
+          "tr": {
+            "en": "Your parcel will arrive tomorrow or the day after.",
+            "fr": "Votre colis arrivera demain ou après-demain."
+          },
+          "choices": [
+            {
+              "en": "It arrives on one of the two days; which one is not fixed.",
+              "fr": "Il arrive l'un des deux jours ; lequel n'est pas fixé."
+            },
+            {
+              "en": "It arrives on both days, in two parts.",
+              "fr": "Il arrive les deux jours, en deux fois."
+            },
+            {
+              "en": "It arrives tomorrow, and the next day only if something goes wrong.",
+              "fr": "Il arrive demain, et le lendemain seulement en cas de problème."
+            }
+          ],
+          "why": {
+            "en": "A または B offers two possibilities and picks neither: it will be one of the two days. It is not a main plan with a backup.",
+            "fr": "A または B donne deux possibilités sans en choisir : ce sera l'un des deux jours. Ce n'est pas un plan principal avec une solution de secours."
+          }
+        }
+      ]
     }
   },
   {
@@ -34175,7 +34549,127 @@
             "fr": "Le genre, devant un nom : こんな. この désigne cette boîte-ci ; こんなに veut un adjectif ou un verbe."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "いま、＿＿＿へやをさがしていますか。",
+          "tr": {
+            "en": "What kind of room are you looking for now? (a big one? a quiet one?)",
+            "fr": "Quel genre de pièce cherches-tu en ce moment ? (une grande ? une calme ?)"
+          },
+          "choices": [
+            "どんな",
+            "どの",
+            "こんな"
+          ],
+          "why": {
+            "en": "You ask for the kind of room, so どんな + noun. どの asks which one out of several in front of you, and こんな would not ask: it points at a kind that is being shown.",
+            "fr": "Tu demandes le genre de pièce : どんな + nom. どの demande laquelle parmi plusieurs devant soi, et こんな ne demanderait rien : il désigne un genre qu'on montre."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What can be bought cheaply on the net?",
+            "fr": "Qu'est-ce qu'on peut acheter à bas prix sur le net ?"
+          },
+          "jp": "このかばんは高いですが、こんなかばんは、ネットで安く買えますよ。",
+          "tr": {
+            "en": "This bag is expensive, but you can buy bags like this online for less.",
+            "fr": "Ce sac est cher, mais on peut acheter des sacs comme celui-ci moins cher en ligne."
+          },
+          "choices": [
+            {
+              "en": "Another bag of this kind, not this very bag.",
+              "fr": "Un autre sac du même genre, pas ce sac-ci."
+            },
+            {
+              "en": "This very bag, cheaper than it is here.",
+              "fr": "Ce sac-ci, moins cher qu'ici."
+            },
+            {
+              "en": "Nothing: bags online cost as much as this one.",
+              "fr": "Rien : les sacs en ligne coûtent autant que celui-ci."
+            }
+          ],
+          "why": {
+            "en": "この points at this very bag, which is expensive; こんな + noun points at its kind, so any similar bag, bought elsewhere.",
+            "fr": "この désigne ce sac-ci, qui est cher ; こんな + nom désigne son genre, donc n'importe quel sac semblable, acheté ailleurs."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A big dog is walking far across the park, away from both of you. Tell your friend you would like to have a dog like that.",
+            "fr": "Un gros chien marche loin dans le parc, loin de vous deux. Dis à ton ami que tu aimerais avoir un chien comme celui-là."
+          },
+          "choices": [
+            "あんな犬がかいたいなあ。",
+            "こんな犬がかいたいなあ。",
+            "あの犬がかいたいなあ。"
+          ],
+          "why": {
+            "en": "A kind of dog, pointing at something far from both of you: あんな. こんな would point at something near you, and あの犬 is that very dog, not one like it.",
+            "fr": "Un genre de chien, désignant quelque chose de loin pour vous deux : あんな. こんな désignerait quelque chose près de toi, et あの犬 est ce chien précis, pas un semblable."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Whose luggage is the speaker talking about?",
+            "fr": "De quels bagages la personne parle-t-elle ?"
+          },
+          "jp": "そんなおもいにもつを、ひとりでもって来たんですか。",
+          "tr": {
+            "en": "Did you carry such heavy luggage here all by yourself?",
+            "fr": "Tu as apporté des bagages aussi lourds sans aucune aide ?"
+          },
+          "choices": [
+            {
+              "en": "The listener's, which the speaker finds very heavy.",
+              "fr": "Ceux de l'interlocuteur, que la personne trouve très lourds."
+            },
+            {
+              "en": "The speaker's own luggage, which the speaker finds heavy.",
+              "fr": "Ses propres bagages, qu'elle trouve lourds."
+            },
+            {
+              "en": "Luggage far away, which neither of them is carrying.",
+              "fr": "Des bagages au loin, que ni l'un ni l'autre ne porte."
+            }
+          ],
+          "why": {
+            "en": "そんな points at what is on the listener's side or was just mentioned: the heavy luggage the listener brought. Your own would be こんな, and something far from both, あんな.",
+            "fr": "そんな désigne ce qui est du côté de l'interlocuteur ou vient d'être évoqué : les bagages lourds qu'il a apportés. Les siens seraient こんな, et ce qui est loin des deux, あんな."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きょうは、＿＿＿たいへんな日ははじめてです。",
+          "tr": {
+            "en": "I have never had such a hard day as today.",
+            "fr": "Je n'ai jamais eu une journée aussi difficile qu'aujourd'hui."
+          },
+          "choices": [
+            "こんな",
+            "あんな",
+            "そんな"
+          ],
+          "why": {
+            "en": "The day is today, and the speaker is in it: こんな. あんな looks back at a day far off or remembered, and そんな at something on the listener's side.",
+            "fr": "La journée, c'est aujourd'hui, et la personne la vit : こんな. あんな regarde une journée lointaine ou dont on se souvient, et そんな quelque chose du côté de l'interlocuteur."
+          }
+        }
+      ]
     }
   },
   {
@@ -34438,7 +34932,127 @@
             "fr": "À ce point, en montrant ce qu'on voit : こんなに. こんな veut un nom : こんな人, « ce genre de personne » ; とても dit seulement « très »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "見て！＿＿＿ゆきがふったのは、ひさしぶりだね。",
+          "tr": {
+            "en": "Look! It's been a long time since it snowed this much.",
+            "fr": "Regarde ! Ça faisait longtemps qu'il n'avait pas neigé autant."
+          },
+          "choices": [
+            "こんなに",
+            "あんなに",
+            "そんなに"
+          ],
+          "why": {
+            "en": "The snow is falling in front of the speaker, so the degree is こんなに. あんなに recalls a degree seen earlier, and そんなに answers a degree the listener has named.",
+            "fr": "La neige tombe sous les yeux de la personne : le degré est こんなに. あんなに rappelle un degré vu plus tôt, et そんなに répond à un degré que l'interlocuteur a nommé."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How much ramen does the speaker eat?",
+            "fr": "Combien de ramen la personne mange-t-elle ?"
+          },
+          "jp": "ラーメンはすきですが、そんなに食べません。",
+          "tr": {
+            "en": "I like ramen, but I don't eat it that much.",
+            "fr": "J'aime les ramen, mais je n'en mange pas tant que ça."
+          },
+          "choices": [
+            {
+              "en": "Some, but not a lot.",
+              "fr": "Un peu, mais pas beaucoup."
+            },
+            {
+              "en": "None at all.",
+              "fr": "Pas du tout."
+            },
+            {
+              "en": "A lot, because the speaker likes them.",
+              "fr": "Beaucoup, parce que la personne les aime."
+            }
+          ],
+          "why": {
+            "en": "そんなに with a negative means « not that much »: the speaker does eat some. It is not « never » (ぜんぜん食べません).",
+            "fr": "そんなに avec une négation veut dire « pas tant que ça » : la personne en mange un peu. Ce n'est pas « jamais » (ぜんぜん食べません)."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks if the exam was hard. It was not. Say it was not that hard.",
+            "fr": "Une amie te demande si l'examen était difficile. Il ne l'était pas. Dis qu'il n'était pas si difficile que ça."
+          },
+          "choices": [
+            "ううん、そんなにむずかしくなかったよ。",
+            "ううん、そんなにむずかしかったよ。",
+            "ううん、こんなにむずかしくなかったよ。"
+          ],
+          "why": {
+            "en": "Answering the degree your friend has named: そんなに + negative, in the past. Without the negative, そんなに would say « so hard! », and こんなに points at a degree in front of you.",
+            "fr": "Tu réponds au degré que ton amie a nommé : そんなに + négation, au passé. Sans négation, そんなに dirait « si difficile ! », et こんなに désigne un degré qu'on a sous les yeux."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうは＿＿＿さむかったのに、田中さんはコートをきていなかったね。",
+          "tr": {
+            "en": "Yesterday it was freezing, as you and I remember, and yet Tanaka wasn't wearing a coat.",
+            "fr": "Hier, il faisait un froid de canard, tu t'en souviens comme moi, et pourtant Tanaka ne portait pas de manteau."
+          },
+          "choices": [
+            "あんなに",
+            "こんなに",
+            "そんなに"
+          ],
+          "why": {
+            "en": "Both of you remember the cold of yesterday, so it is a past degree both can point at: あんなに. こんなに would be a cold in front of you now, and そんなに one the listener has just named.",
+            "fr": "Vous vous souvenez tous deux du froid d'hier : c'est un degré passé que vous pouvez désigner ensemble, あんなに. こんなに serait un froid que tu ressens maintenant, et そんなに un froid que l'autre vient de nommer."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker want, and why?",
+            "fr": "Que veut la personne, et pourquoi ?"
+          },
+          "jp": "そんなにおいしいなら、わたしも食べてみたいな。",
+          "tr": {
+            "en": "If it's that good, I'd like to try it too.",
+            "fr": "Si c'est si bon, j'aimerais l'essayer aussi."
+          },
+          "choices": [
+            {
+              "en": "To try it, since the other person says it is so good.",
+              "fr": "L'essayer, puisque l'autre dit que c'est très bon."
+            },
+            {
+              "en": "Not to try it, since it is not that good.",
+              "fr": "Ne pas l'essayer, puisque ce n'est pas si bon."
+            },
+            {
+              "en": "To eat it again, since the speaker already liked it.",
+              "fr": "En reprendre, puisque la personne l'a déjà aimé."
+            }
+          ],
+          "why": {
+            "en": "そんなに picks up the degree the listener just claimed: « if it is that good ». So the speaker has not tried it yet, and the claim is the reason to try.",
+            "fr": "そんなに reprend le degré que l'interlocuteur vient d'affirmer : « si c'est si bon ». La personne n'a donc pas encore goûté, et cette affirmation est la raison d'essayer."
+          }
+        }
+      ]
     }
   },
   {
@@ -34678,7 +35292,127 @@
             "fr": "Un retour fixé au calendrier : 予定. でしょう ne fait que supposer, et ましょう propose."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "しゅっちょうは、らいしゅうの月曜日から三日間＿＿＿予定です。",
+          "tr": {
+            "en": "The business trip is scheduled for three days from next Monday.",
+            "fr": "Le voyage d'affaires est prévu pour trois jours à partir de lundi prochain."
+          },
+          "choices": [
+            "の",
+            "な",
+            "で"
+          ],
+          "why": {
+            "en": "After a noun, 予定 is joined with の: 三日間の予定です. な belongs to na-adjectives and で is the copula, so neither can link a noun to 予定.",
+            "fr": "Après un nom, 予定 se relie par の : 三日間の予定です. な appartient aux adjectifs en な et で est la copule : ni l'un ni l'autre ne relie un nom à 予定."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the arrival at three?",
+            "fr": "Que dit la personne de l'arrivée à trois heures ?"
+          },
+          "jp": "電車は三時に着く予定ですが、おくれるかもしれません。",
+          "tr": {
+            "en": "The train is due to arrive at three, but it may be late.",
+            "fr": "Le train doit arriver à trois heures, mais il peut avoir du retard."
+          },
+          "choices": [
+            {
+              "en": "It is the plan, not a promise: the train may be late.",
+              "fr": "C'est le programme, pas une promesse : le train peut être en retard."
+            },
+            {
+              "en": "It is certain: nothing can change it.",
+              "fr": "C'est certain : rien ne peut le changer."
+            },
+            {
+              "en": "The train is already late.",
+              "fr": "Le train est déjà en retard."
+            }
+          ],
+          "why": {
+            "en": "予定 says what is scheduled, and a schedule can slip: that is why おくれるかもしれません can follow. It does not say the train is late already.",
+            "fr": "予定 dit ce qui est programmé, et un programme peut glisser : c'est pourquoi おくれるかもしれません peut suivre. Cela ne dit pas que le train est déjà en retard."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You work at the station. A passenger asks when the train leaves. The timetable says ten o'clock. Answer.",
+            "fr": "Tu travailles à la gare. Un voyageur demande quand part le train. L'horaire dit dix heures. Réponds."
+          },
+          "choices": [
+            "この電車は十時に出発する予定です。",
+            "この電車は十時に出発する予定でした。",
+            "この電車は十時に出発するつもりです。"
+          ],
+          "why": {
+            "en": "A timetable is a schedule, and it has not happened yet: 出発する予定です. 予定でした would say it was due to leave, and つもり is a person's own intention, not a timetable's.",
+            "fr": "Un horaire est un programme, et le départ n'a pas encore eu lieu : 出発する予定です. 予定でした dirait qu'il devait partir, et つもり est l'intention d'une personne, pas celle d'un horaire."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "来週のしゅっちょうには、わたしは＿＿＿予定です。",
+          "tr": {
+            "en": "I am not going on next week's business trip.",
+            "fr": "Je ne pars pas pour le voyage d'affaires de la semaine prochaine."
+          },
+          "choices": [
+            "行かない",
+            "行かなかった",
+            "行きません"
+          ],
+          "why": {
+            "en": "予定 takes the plain form before it, negative too: 行かない予定です. 行かなかった is the past, which does not fit a future plan, and 行きません is polite, which 予定 never takes inside.",
+            "fr": "予定 prend devant lui la forme neutre, négative aussi : 行かない予定です. 行かなかった est le passé, qui ne va pas avec un projet à venir, et 行きません est poli, ce que 予定 n'accepte jamais à l'intérieur."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Did the speaker get home yesterday?",
+            "fr": "Est-ce que la personne a pu rentrer hier ?"
+          },
+          "jp": "ほんとうは、きのう帰る予定でしたが、電車がとまって帰れませんでした。",
+          "tr": {
+            "en": "I was actually due to go home yesterday, but the trains stopped and I couldn't get back.",
+            "fr": "Je devais en fait rentrer hier, mais les trains se sont arrêtés et je n'ai pas pu rentrer."
+          },
+          "choices": [
+            {
+              "en": "No: going home was the plan, but it did not happen.",
+              "fr": "Non : rentrer était prévu, mais cela n'a pas eu lieu."
+            },
+            {
+              "en": "Yes, as planned.",
+              "fr": "Oui, comme prévu."
+            },
+            {
+              "en": "Not yet: the plan is to go home tomorrow.",
+              "fr": "Pas encore : le plan est de rentrer demain."
+            }
+          ],
+          "why": {
+            "en": "予定でした is the past of 予定です: it was the plan. The が that follows shows it fell through (電車がとまって帰れませんでした).",
+            "fr": "予定でした est le passé de 予定です : c'était le programme. Le が qui suit montre que cela a échoué (電車がとまって帰れませんでした)."
+          }
+        }
+      ]
     }
   },
   {
@@ -34954,7 +35688,127 @@
             "fr": "Une règle, à un enfant : ちゃいけない. なくちゃ dirait qu'il le faut, てもいい qu'il peut."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ここでは＿＿＿いけないよ。",
+          "tr": {
+            "en": "You mustn't swim here.",
+            "fr": "On ne doit pas nager ici."
+          },
+          "choices": [
+            "およいじゃ",
+            "およいちゃ",
+            "およんじゃ"
+          ],
+          "why": {
+            "en": "泳ぐ makes 泳いで, with a voiced で, so ではいけない shortens to 泳いじゃいけない. ちゃ would go with a plain て (書いて → 書いちゃ), and 泳んじゃ treats it as a む-verb.",
+            "fr": "泳ぐ donne 泳いで, avec un で sonore : ではいけない se réduit donc à 泳いじゃいけない. ちゃ irait avec un simple て (書いて → 書いちゃ), et 泳んじゃ le traite en verbe en む."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What did the speaker's mother say?",
+            "fr": "Qu'a dit la mère de la personne ?"
+          },
+          "jp": "ねる前にスマホを見ちゃいけないと、母が言った。",
+          "tr": {
+            "en": "My mother said I mustn't look at my phone before bed.",
+            "fr": "Ma mère a dit que je ne devais pas regarder mon téléphone avant de dormir."
+          },
+          "choices": [
+            {
+              "en": "That the speaker must not look at the phone before bed.",
+              "fr": "Que la personne ne doit pas regarder son téléphone avant de dormir."
+            },
+            {
+              "en": "That the speaker must look at the phone before bed.",
+              "fr": "Que la personne doit regarder son téléphone avant de dormir."
+            },
+            {
+              "en": "That the speaker has ended up looking at the phone before bed.",
+              "fr": "Que la personne a fini par regarder son téléphone avant de dormir."
+            }
+          ],
+          "why": {
+            "en": "見ちゃいけない is the spoken 見てはいけない: a ban, reported with と…言った. It is not 見なくちゃ (must look), and ちゃ here is not the ちゃう of しまう.",
+            "fr": "見ちゃいけない est le 見てはいけない parlé : une interdiction, rapportée par と…言った. Ce n'est pas 見なくちゃ (il faut regarder), et ce ちゃ n'est pas le ちゃう de しまう."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your little brother is about to eat a cake that is for the guests. Stop him, as you would at home.",
+            "fr": "Ton petit frère va manger un gâteau qui est pour les invités. Arrête-le, comme tu le ferais à la maison."
+          },
+          "choices": [
+            "それは食べちゃいけないよ。",
+            "それは食べなくちゃいけないよ。",
+            "それは食べてもいいよ。"
+          ],
+          "why": {
+            "en": "A ban, said casually at home: 食べちゃいけない. 食べなくちゃいけない looks almost the same but says he must eat it, and 食べてもいい gives permission.",
+            "fr": "Une interdiction, dite sans façon à la maison : 食べちゃいけない. 食べなくちゃいけない lui ressemble presque mais dit qu'il doit le manger, et 食べてもいい donne la permission."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あしたはテストだから、ゲームを＿＿＿いけないよ。",
+          "tr": {
+            "en": "Tomorrow is the test, so you mustn't play games.",
+            "fr": "Demain, c'est le test, donc il ne faut pas jouer aux jeux."
+          },
+          "choices": [
+            "しちゃ",
+            "しなくちゃ",
+            "するちゃ"
+          ],
+          "why": {
+            "en": "ちゃ attaches to the て-form: して → しちゃ. しなくちゃ is the opposite, « must play », and するちゃ puts it on the dictionary form, which is not possible.",
+            "fr": "ちゃ se place sur la forme en て : して → しちゃ. しなくちゃ est le contraire, « il faut jouer », et するちゃ le met sur la forme du dictionnaire, ce qui est impossible."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker asking?",
+            "fr": "Que demande la personne ?"
+          },
+          "jp": "ここでおべんとうを食べちゃいけないの？",
+          "tr": {
+            "en": "Aren't we allowed to eat a packed lunch here?",
+            "fr": "On n'a pas le droit de manger un bento ici ?"
+          },
+          "choices": [
+            {
+              "en": "Whether eating a packed lunch here is forbidden.",
+              "fr": "Si manger un bento ici est interdit."
+            },
+            {
+              "en": "The speaker is telling the other person not to eat it here.",
+              "fr": "La personne dit à l'autre de ne pas manger ici."
+            },
+            {
+              "en": "Whether they have to eat it here.",
+              "fr": "S'ils doivent le manger ici."
+            }
+          ],
+          "why": {
+            "en": "食べちゃいけない is the ban itself, and the question mark with の turns it into « is it banned? ». The speaker is not giving the ban, and it is not 食べなくちゃ (have to eat).",
+            "fr": "食べちゃいけない est l'interdiction elle-même, et le point d'interrogation avec の en fait « est-ce interdit ? ». La personne ne prononce pas l'interdiction, et ce n'est pas 食べなくちゃ (devoir manger)."
+          }
+        }
+      ]
     }
   },
   {
@@ -35188,7 +36042,141 @@
             "fr": "Le son ne t'est pas parvenu : が聞こえなかった. に聞こえる dit à quoi une chose ressemble à l'oreille ; 聞かなかった, que tu n'as pas écouté."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why couldn't the speaker sleep?",
+            "fr": "Pourquoi la personne n'a-t-elle pas pu dormir ?"
+          },
+          "jp": "ゆうべは、となりの音楽が聞こえて、ねられなかった。",
+          "tr": {
+            "en": "Last night I could hear the neighbour's music and couldn't sleep.",
+            "fr": "Hier soir, j'entendais la musique du voisin et je n'ai pas pu dormir."
+          },
+          "choices": [
+            {
+              "en": "The neighbour's music reached the speaker's ears without any effort.",
+              "fr": "La musique du voisin arrivait aux oreilles de la personne sans aucun effort."
+            },
+            {
+              "en": "The speaker chose to listen to the neighbour's music.",
+              "fr": "La personne a choisi d'écouter la musique du voisin."
+            },
+            {
+              "en": "The speaker was allowed to listen to the neighbour's music and stayed up.",
+              "fr": "La personne avait le droit d'écouter la musique du voisin et a veillé tard."
+            }
+          ],
+          "why": {
+            "en": "聞こえる is what reaches your ears by itself, wanted or not. Choosing to listen would be 聞いた, and being able or allowed to listen would be 聞けた.",
+            "fr": "聞こえる, c'est ce qui arrive aux oreilles de soi-même, voulu ou non. Choisir d'écouter serait 聞いた, et pouvoir ou avoir le droit d'écouter serait 聞けた."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "夜になると、となりのへやからはなしごえ＿＿＿聞こえます。",
+          "tr": {
+            "en": "At night, I can hear voices from the next room.",
+            "fr": "La nuit, j'entends des voix de la pièce d'à côté."
+          },
+          "choices": [
+            "が",
+            "を",
+            "に"
+          ],
+          "why": {
+            "en": "聞こえる is not an action, so what is heard takes が: はなしごえが聞こえます. を goes with the verb 聞く, and に聞こえる would mean « sounds like », a different point.",
+            "fr": "聞こえる n'est pas une action, donc ce qu'on entend prend が : はなしごえが聞こえます. を va avec le verbe 聞く, et に聞こえる voudrait dire « ressemble à (au son) », un autre point."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker complaining about?",
+            "fr": "De quoi la personne se plaint-elle ?"
+          },
+          "jp": "このせきからは、ステージが見えない。",
+          "tr": {
+            "en": "From this seat, I can't see the stage.",
+            "fr": "De cette place, je ne vois pas la scène."
+          },
+          "choices": [
+            {
+              "en": "The stage is not in view from this seat.",
+              "fr": "La scène n'est pas visible depuis cette place."
+            },
+            {
+              "en": "The speaker is not allowed to watch the stage.",
+              "fr": "La personne n'a pas le droit de regarder la scène."
+            },
+            {
+              "en": "The speaker does not want to look at the stage.",
+              "fr": "La personne n'a pas envie de regarder la scène."
+            }
+          ],
+          "why": {
+            "en": "見えない says the stage is not in view from here, so the seat is the problem. Not being allowed to watch would be 見られない, and not wanting to would be 見たくない.",
+            "fr": "見えない dit que la scène n'est pas visible d'ici : c'est la place qui pose problème. Ne pas avoir le droit de regarder serait 見られない, et ne pas vouloir, 見たくない."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "おばあちゃんは、目がわるくて、新聞の字が＿＿＿ないそうです。",
+          "tr": {
+            "en": "Grandmother's eyesight is poor, and she says she can't see the letters in the newspaper.",
+            "fr": "Grand-mère a une mauvaise vue, et elle dit qu'elle ne voit pas les lettres du journal."
+          },
+          "choices": [
+            "見え",
+            "見られ",
+            "見"
+          ],
+          "why": {
+            "en": "Eyesight is a faculty, so what does not reach the eye is 見えない. 見られない is about being able or allowed to look, and 字が見ない mixes が with the action verb 見る.",
+            "fr": "La vue est une faculté : ce qui n'arrive pas à l'œil, c'est 見えない. 見られない parle du fait de pouvoir ou d'avoir le droit de regarder, et 字が見ない mélange が avec le verbe d'action 見る."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker doing?",
+            "fr": "Que fait la personne ?"
+          },
+          "jp": "ほら、あそこにおしろが見えませんか。",
+          "tr": {
+            "en": "Look, can't you see a castle over there?",
+            "fr": "Regarde, tu ne vois pas un château là-bas ?"
+          },
+          "choices": [
+            {
+              "en": "Pointing out the castle and asking the other to look.",
+              "fr": "Montrer le château et demander à l'autre de regarder."
+            },
+            {
+              "en": "Saying that the castle cannot be seen from here.",
+              "fr": "Dire que le château n'est pas visible d'ici."
+            },
+            {
+              "en": "Asking whether the castle can be visited.",
+              "fr": "Demander si le château se visite."
+            }
+          ],
+          "why": {
+            "en": "見えませんか is a negative question, used to point something out: « can't you see it? ». The speaker can see the castle; it does not say it is hidden.",
+            "fr": "見えませんか est une question négative pour montrer quelque chose : « tu ne le vois pas ? ». La personne voit le château ; cela ne dit pas qu'il est caché."
+          }
+        }
+      ]
     }
   },
   {
@@ -35460,7 +36448,127 @@
             "fr": "Avoir l'air : nom + に見える. が見える dit qu'on voit un étudiant."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "そのくつをはくと、プロのせんしゅ＿＿＿見えるよ。",
+          "tr": {
+            "en": "In those shoes you look like a pro athlete.",
+            "fr": "Avec ces chaussures, tu as l'air d'un sportif professionnel."
+          },
+          "choices": [
+            "に",
+            "そうに",
+            "ように"
+          ],
+          "why": {
+            "en": "A noun takes に before 見える: せんしゅに見える. そうに is built on verbs and adjectives (ふりそうに), and ように is not used bare after a noun: it needs の (せんしゅのように).",
+            "fr": "Un nom prend に devant 見える : せんしゅに見える. そうに se construit sur des verbes et des adjectifs (ふりそうに), et ように ne s'emploie pas seul après un nom : il lui faut の (せんしゅのように)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the person really like?",
+            "fr": "Comment est vraiment la personne ?"
+          },
+          "jp": "あの人は、しずかに見えるが、ほんとうはおしゃべりだ。",
+          "tr": {
+            "en": "That person looks quiet, but is really a chatterbox.",
+            "fr": "Cette personne a l'air calme, mais elle est en réalité bavarde."
+          },
+          "choices": [
+            {
+              "en": "Chatty: only the look is quiet.",
+              "fr": "Bavarde : seule l'apparence est calme."
+            },
+            {
+              "en": "Quiet, as the person looks.",
+              "fr": "Calme, comme elle en a l'air."
+            },
+            {
+              "en": "Quiet, although the person looks chatty.",
+              "fr": "Calme, bien qu'elle ait l'air bavarde."
+            }
+          ],
+          "why": {
+            "en": "に見える is only about looks, and the sentence goes on to say the facts differ: ほんとうはおしゃべりだ. The person looks quiet and is chatty.",
+            "fr": "に見える ne parle que de l'apparence, et la phrase poursuit en disant que les faits diffèrent : ほんとうはおしゃべりだ. La personne a l'air calme et elle est bavarde."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are talking to your teacher about her child, whom you have just met. Say that he looks like a high-school student.",
+            "fr": "Tu parles à ta professeure de son enfant, que tu viens de rencontrer. Dis qu'il a l'air d'un lycéen."
+          },
+          "choices": [
+            "お子さんは、高校生に見えますね。",
+            "お子さんは、高校生に見えるね。",
+            "お子さんは、高校生が見えますね。"
+          ],
+          "why": {
+            "en": "How he looks, to a teacher: 高校生に見えますね. 見えるね is too casual for her, and 高校生が見えます would say that a high-school student is in view, not that he looks like one.",
+            "fr": "Son apparence, dite à une professeure : 高校生に見えますね. 見えるね est trop familier pour elle, et 高校生が見えます dirait qu'un lycéen est en vue, pas qu'il en a l'air."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの店の人は、とてもしんせつ＿＿＿見えます。",
+          "tr": {
+            "en": "That shop clerk looks very kind.",
+            "fr": "Cet employé du magasin a l'air très gentil."
+          },
+          "choices": [
+            "に",
+            "く",
+            "な"
+          ],
+          "why": {
+            "en": "しんせつ is a な-adjective, so it takes に before 見える: しんせつに見える. く is for い-adjectives, and な is the form that goes before a noun.",
+            "fr": "しんせつ est un adjectif en な : il prend に devant 見える, しんせつに見える. く est pour les adjectifs en い, et な est la forme qui précède un nom."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker see in the cloud?",
+            "fr": "Que voit la personne dans le nuage ?"
+          },
+          "jp": "あのくもは、犬に見えるね。",
+          "tr": {
+            "en": "That cloud looks like a dog, doesn't it?",
+            "fr": "Ce nuage ressemble à un chien, non ?"
+          },
+          "choices": [
+            {
+              "en": "The cloud's shape looks like a dog.",
+              "fr": "La forme du nuage ressemble à un chien."
+            },
+            {
+              "en": "A dog can be seen near the cloud.",
+              "fr": "On voit un chien près du nuage."
+            },
+            {
+              "en": "It is a dog, not a cloud.",
+              "fr": "C'est un chien, pas un nuage."
+            }
+          ],
+          "why": {
+            "en": "犬に見える says it looks like a dog: に marks what it looks like. 犬が見える would mean a dog is in view, and it is still a cloud.",
+            "fr": "犬に見える dit que ça ressemble à un chien : に marque ce à quoi ça ressemble. 犬が見える voudrait dire qu'un chien est en vue, et cela reste un nuage."
+          }
+        }
+      ]
     }
   }
 ]
