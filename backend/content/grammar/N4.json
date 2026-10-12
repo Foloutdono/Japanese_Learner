@@ -14527,7 +14527,132 @@
             "fr": "Il faut l'acheter : なきゃ. なくてもいい dit que ce n'est pas nécessaire ; ちゃいけない, que c'est interdit."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ぎゅうにゅうがないから、あとで＿＿＿。",
+          "tr": {
+            "en": "There's no milk left, so I've got to buy some later.",
+            "fr": "Il n’y a plus de lait, alors il faut que j’en achète plus tard."
+          },
+          "choices": [
+            "買わなきゃ",
+            "買わなくてもいい",
+            "買いなきゃ"
+          ],
+          "why": {
+            "en": "買う ends in う, so before なきゃ it takes the あ-row sound わ: 買わない → 買わなきゃ. 買いなきゃ borrows the ます stem, and 買わなくてもいい says there is no need to buy any.",
+            "fr": "買う finit par う : devant なきゃ, il prend le son わ (買わない → 買わなきゃ). 買いなきゃ emprunte la base de ます, et 買わなくてもいい dit qu’il n’est pas nécessaire d’en acheter."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about seeing the teacher tomorrow?",
+            "fr": "Que dit la personne à propos de voir le professeur demain ?"
+          },
+          "jp": "あした、先生に会わなきゃ。",
+          "tr": {
+            "en": "I've got to see my teacher tomorrow.",
+            "fr": "Demain, il faut que je voie mon professeur."
+          },
+          "choices": [
+            {
+              "en": "It is something the speaker has to do.",
+              "fr": "C’est une chose que la personne doit faire."
+            },
+            {
+              "en": "The speaker is not going to see the teacher.",
+              "fr": "La personne ne verra pas le professeur."
+            },
+            {
+              "en": "The speaker does not have to see the teacher.",
+              "fr": "La personne n’a pas besoin de voir le professeur."
+            }
+          ],
+          "why": {
+            "en": "Despite the ない inside, なきゃ is not a negative: it is the spoken short form of なければ(いけない), « must ». Not meeting would be 会わない, and not having to would be 会わなくてもいい.",
+            "fr": "Malgré le ない qu’il contient, なきゃ n’est pas une négation : c’est la forme courte et parlée de なければ(いけない), « il faut ». Ne pas le voir serait 会わない, et ne pas avoir à le faire, 会わなくてもいい."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "友だちに、あのことを＿＿＿。",
+          "tr": {
+            "en": "I've got to tell my friends about it.",
+            "fr": "Il faut que j’en parle à mes amis."
+          },
+          "choices": [
+            "話さなきゃ",
+            "話しなきゃ",
+            "話せなきゃ"
+          ],
+          "why": {
+            "en": "話す ends in す, whose あ-row sound is さ: 話さない → 話さなきゃ. 話しなきゃ keeps the ます stem, and 話せなきゃ is built on 話せる, « to be able to talk », so it does not say « must ».",
+            "fr": "話す finit par す, dont le son de la rangée あ est さ : 話さない → 話さなきゃ. 話しなきゃ garde la base de ます, et 話せなきゃ vient de 話せる, « pouvoir parler » : il ne dit pas « il faut »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "A friend asks you this. What does the friend want to know?",
+            "fr": "Un ami te demande cela. Que veut-il savoir ?"
+          },
+          "jp": "あしたも、この時間に来なきゃいけない？",
+          "tr": {
+            "en": "Do I have to come at this time tomorrow too?",
+            "fr": "Est-ce que je dois venir à cette heure-ci demain aussi ?"
+          },
+          "choices": [
+            {
+              "en": "Whether coming at this time tomorrow is required.",
+              "fr": "Si venir à cette heure-ci demain est obligatoire."
+            },
+            {
+              "en": "Whether the friend is allowed to come at this time tomorrow.",
+              "fr": "Si l’ami a le droit de venir à cette heure-ci demain."
+            },
+            {
+              "en": "Whether it is forbidden to come at this time tomorrow.",
+              "fr": "S’il est interdit de venir à cette heure-ci demain."
+            }
+          ],
+          "why": {
+            "en": "なきゃいけない keeps its ending: it says « must », and the rising tone asks whether that is so. Permission would be 来てもいい, and a ban 来ちゃいけない.",
+            "fr": "なきゃいけない garde sa fin : il dit « il faut », et le ton montant demande si c’est bien le cas. La permission serait 来てもいい, et l’interdiction 来ちゃいけない."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あしたは八時までに学校に＿＿＿。",
+          "tr": {
+            "en": "Tomorrow I've got to be at school by eight.",
+            "fr": "Demain, il faut que je sois à l’école avant huit heures."
+          },
+          "choices": [
+            "来なきゃ",
+            "来らなきゃ",
+            "来ちゃいけない"
+          ],
+          "why": {
+            "en": "来る is irregular: its ない-form is 来ない (こない), so 来なきゃ. 来らなきゃ treats it as an う-verb, and 来ちゃいけない is the short form of the opposite, « must not come ».",
+            "fr": "来る est irrégulier : sa forme en ない est 来ない (こない), d’où 来なきゃ. 来らなきゃ le traite en verbe en う, et 来ちゃいけない est la forme courte du contraire, « il ne faut pas venir »."
+          }
+        }
+      ]
     }
   },
   {
@@ -14728,7 +14853,127 @@
             "fr": "Venir est obligatoire : ないといけない. なくてもいい le rendrait facultatif, てはいけない interdit."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "バスが来るまで、ここで＿＿＿。",
+          "tr": {
+            "en": "I have to wait here until the bus comes.",
+            "fr": "Il faut que j’attende ici jusqu’à l’arrivée du bus."
+          },
+          "choices": [
+            "待たないといけない",
+            "待たなくてもいい",
+            "待ちないといけない"
+          ],
+          "why": {
+            "en": "待つ ends in つ, so before ないと it takes the あ-row sound た: 待たない → 待たないといけない. 待たなくてもいい says there is no need to wait, and 待ちない… leans on the ます stem, which this pattern never takes.",
+            "fr": "待つ finit par つ : devant ないと, il prend le son た (待たない → 待たないといけない). 待たなくてもいい dit qu’il n’est pas nécessaire d’attendre, et 待ちない… s’appuie sur la base de ます, que ce modèle ne prend jamais."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about sleeping tonight?",
+            "fr": "Que dit la personne à propos du sommeil, ce soir ?"
+          },
+          "jp": "あしたは大切なテストだから、今夜はねないといけない。",
+          "tr": {
+            "en": "Tomorrow is an important test, so I have to get some sleep tonight.",
+            "fr": "Demain, il y a un examen important, alors il faut que je dorme cette nuit."
+          },
+          "choices": [
+            {
+              "en": "The speaker has to get some sleep.",
+              "fr": "Il faut que la personne dorme."
+            },
+            {
+              "en": "The speaker must stay up and must not sleep.",
+              "fr": "La personne doit rester éveillée et ne doit pas dormir."
+            },
+            {
+              "en": "The speaker does not need to sleep.",
+              "fr": "La personne n’a pas besoin de dormir."
+            }
+          ],
+          "why": {
+            "en": "ないと + いけない is « it won't do if I don't »: the ない negates ねる, and いけない makes the whole a duty, so ねないといけない is « I must sleep ». « Must not sleep » would be ねてはいけない.",
+            "fr": "ないと + いけない veut dire « ça ne va pas si je ne le fais pas » : ない nie ねる, et いけない fait de l’ensemble une obligation, donc ねないといけない, « il faut que je dorme ». « Il ne faut pas dormir » serait ねてはいけない."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You must leave by three o'clock. You tell your teacher.",
+            "fr": "Tu dois partir avant trois heures. Tu le dis à ton professeur."
+          },
+          "choices": [
+            "すみません、三時までに帰らないといけません。",
+            "すみません、三時までに帰らないといけない。",
+            "すみません、三時までに帰らなくてもいいです。"
+          ],
+          "why": {
+            "en": "To a teacher, a bare いけない is too casual: the polite ending is いけません. 帰らなくてもいいです says you do not have to leave, the opposite.",
+            "fr": "À un professeur, un いけない tout nu est trop familier : la fin polie est いけません. 帰らなくてもいいです dit que tu n’as pas à partir, l’inverse."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "テストの前に、少し＿＿＿。",
+          "tr": {
+            "en": "I have to study a little before the test.",
+            "fr": "Avant l’examen, il faut que j’étudie un peu."
+          },
+          "choices": [
+            "勉強しないといけない",
+            "勉強さないといけない",
+            "勉強してはいけない"
+          ],
+          "why": {
+            "en": "する is irregular: its ない-form is しない, so 勉強しないといけない. 勉強さないといけない treats it as an う-verb, and 勉強してはいけない is « you must not study »: the opposite.",
+            "fr": "する est irrégulier : sa forme en ない est しない, d’où 勉強しないといけない. 勉強さないといけない le traite en verbe en う, et 勉強してはいけない veut dire « il ne faut pas étudier » : le contraire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker's situation?",
+            "fr": "Dans quelle situation se trouve la personne ?"
+          },
+          "jp": "会社に行きたくないけど、行かないといけない。",
+          "tr": {
+            "en": "I don't feel like going to work, but I have to go.",
+            "fr": "Je n’ai pas envie d’aller au travail, mais il faut que j’y aille."
+          },
+          "choices": [
+            {
+              "en": "The speaker does not want to go, but has to.",
+              "fr": "La personne n’a pas envie d’y aller, mais elle doit y aller."
+            },
+            {
+              "en": "The speaker does not want to go and does not need to.",
+              "fr": "La personne n’a pas envie d’y aller et n’en a pas besoin."
+            },
+            {
+              "en": "The speaker does not want to go and has decided not to.",
+              "fr": "La personne n’a pas envie d’y aller et a décidé de ne pas y aller."
+            }
+          ],
+          "why": {
+            "en": "行きたくない is the wish, negated; けど brings the contrast; 行かないといけない is the duty: it won't do not to go. So: unwilling, but obliged.",
+            "fr": "行きたくない est le souhait, nié ; けど amène le contraste ; 行かないといけない est l’obligation : ça ne va pas si on n’y va pas. Donc : pas envie, mais il faut y aller."
+          }
+        }
+      ]
     }
   },
   {
@@ -14963,7 +15208,132 @@
             "fr": "Deux raisons côte à côte : し après chacune. から ferait de la vitesse la cause du train vide ; て、て ne fait qu'énumérer et laisse la réponse en suspens."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この町は、しずか＿＿＿、人もしんせつです。",
+          "tr": {
+            "en": "This town is quiet, and the people are kind too.",
+            "fr": "Cette ville est calme, et les gens sont gentils aussi."
+          },
+          "choices": [
+            "だし",
+            "なし",
+            "し"
+          ],
+          "why": {
+            "en": "しずか is a な-adjective: before し it takes だ, the plain form of です, so しずかだし. しずかなし keeps the な used before a noun, and しずかし leaves the だ out.",
+            "fr": "しずか est un adjectif en な : devant し, il prend だ, la forme neutre de です : しずかだし. しずかなし garde le な d’avant un nom, et しずかし oublie le だ."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How is the crowded train linked to the suggestion?",
+            "fr": "Quel lien y a-t-il entre le train bondé et la proposition ?"
+          },
+          "jp": "今は電車がこんでいるし、タクシーで行きませんか。",
+          "tr": {
+            "en": "The train is crowded right now, so shall we go by taxi?",
+            "fr": "Le train est bondé en ce moment, alors on y va en taxi ?"
+          },
+          "choices": [
+            {
+              "en": "It is a reason for it: the train is crowded, so a taxi is proposed.",
+              "fr": "C’est une raison : le train est bondé, donc on propose un taxi."
+            },
+            {
+              "en": "There is no link: the two halves are separate remarks.",
+              "fr": "Il n’y a pas de lien : les deux moitiés sont des remarques séparées."
+            },
+            {
+              "en": "It is a condition: they take a taxi only if the train is crowded.",
+              "fr": "C’est une condition : on prend un taxi seulement si le train est bondé."
+            }
+          ],
+          "why": {
+            "en": "し gives a reason, and what follows is the conclusion drawn from it: crowded train, so a taxi. It is not a neutral « and » between unrelated remarks, and a condition would need たら: こんでいたら.",
+            "fr": "し donne une raison, et ce qui suit en est la conclusion : train bondé, donc taxi. Ce n’est pas un « et » neutre entre deux remarques sans lien, et une condition demanderait たら : こんでいたら."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ここは、人もあまり＿＿＿、車も少ないし、あんぜんな町です。",
+          "tr": {
+            "en": "Not many people come here, there is little traffic too, and it's a safe town.",
+            "fr": "Il ne vient pas beaucoup de monde ici, il y a peu de voitures aussi, et c’est une ville sûre."
+          },
+          "choices": [
+            "来ないし",
+            "来なかったし",
+            "来るし"
+          ],
+          "why": {
+            "en": "し follows the plain form, and あまり calls for a negative in the present: 来ないし. 来なかったし is the past, and 来るし is affirmative, which あまり cannot go with.",
+            "fr": "し suit la forme neutre, et あまり appelle une négation au présent : 来ないし. 来なかったし est le passé, et 来るし est affirmatif, ce qui ne va pas avec あまり."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How are the first two actions related to being tired?",
+            "fr": "Quel lien y a-t-il entre les deux premières actions et la fatigue ?"
+          },
+          "jp": "朝早く起きたし、そうじもしたし、もうつかれた。",
+          "tr": {
+            "en": "I got up early this morning, and I did the cleaning too, so I'm worn out.",
+            "fr": "Ce matin, réveil de bonne heure, ménage en plus : je n’en peux plus."
+          },
+          "choices": [
+            {
+              "en": "They are reasons: each one adds to being tired.",
+              "fr": "Ce sont des raisons : chacune s’ajoute à la fatigue."
+            },
+            {
+              "en": "They are just steps in a sequence, with no link to being tired.",
+              "fr": "Ce sont de simples étapes d’une suite, sans lien avec la fatigue."
+            },
+            {
+              "en": "They are a contrast: the speaker did both even though tired.",
+              "fr": "C’est un contraste : la personne a fait les deux alors qu’elle était fatiguée."
+            }
+          ],
+          "why": {
+            "en": "し also lines up actions, but as reasons for what ends the sentence: up early, and cleaning too, so tired. A plain sequence of actions would use the て-form.",
+            "fr": "し peut aussi aligner des actions, mais comme raisons de ce qui clôt la phrase : levée matinale, et ménage en plus, donc fatigue. Une simple suite d’actions prendrait la forme en て."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうは日曜日＿＿＿、雨もふっていたし、どこにも行かなかった。",
+          "tr": {
+            "en": "Yesterday was a Sunday, and it was raining too, so I didn't go anywhere.",
+            "fr": "Hier, c’était dimanche, il pleuvait aussi, alors je n’ai pas bougé de chez moi."
+          },
+          "choices": [
+            "だったし",
+            "だし",
+            "だっただし"
+          ],
+          "why": {
+            "en": "The reason is about yesterday, and 日曜日 is a noun, so it takes the plain past だった before し: 日曜日だったし. 日曜日だし is the present, and だっただし doubles the だ.",
+            "fr": "La raison date d’hier, et 日曜日 est un nom : il prend le passé neutre だった devant し : 日曜日だったし. 日曜日だし est le présent, et だっただし double le だ."
+          }
+        }
+      ]
     }
   },
   {
@@ -15201,7 +15571,127 @@
             "fr": "Tu supposes avec une certaine assurance : だろう. かな ne fait que s'interroger, et でしょうか pose la question, poliment."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あしたは日曜日だから、田中さんもひま＿＿＿。",
+          "tr": {
+            "en": "Tomorrow is Sunday, so Tanaka is probably free too.",
+            "fr": "Demain, c’est dimanche, donc Tanaka est probablement libre aussi."
+          },
+          "choices": [
+            "だろう",
+            "なだろう",
+            "だっただろう"
+          ],
+          "why": {
+            "en": "A な-adjective takes no な and no extra だ before だろう: ひま + だろう. ひまなだろう adds the な used before a noun, and ひまだっただろう guesses about the past, while tomorrow is still ahead.",
+            "fr": "Un adjectif en な ne prend ni な ni だ de plus devant だろう : ひま + だろう. ひまなだろう ajoute le な d’avant un nom, et ひまだっただろう suppose le passé, alors que demain est encore à venir."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What did the speaker assume about the exam?",
+            "fr": "Qu’est-ce que la personne supposait de l’examen ?"
+          },
+          "jp": "試験はむずかしくないだろうと思って、あまり勉強しなかった。",
+          "tr": {
+            "en": "Thinking the exam probably wouldn't be hard, I didn't study much.",
+            "fr": "Pensant que l’examen ne serait probablement pas difficile, je n’ai pas beaucoup étudié."
+          },
+          "choices": [
+            {
+              "en": "A guess: it would probably not be hard.",
+              "fr": "Une supposition : il ne serait probablement pas difficile."
+            },
+            {
+              "en": "A certainty: it would not be hard.",
+              "fr": "Une certitude : il ne serait pas difficile."
+            },
+            {
+              "en": "A worry: it would probably be hard.",
+              "fr": "Une inquiétude : il serait probablement difficile."
+            }
+          ],
+          "why": {
+            "en": "だろう marks a guess, not a certainty: « probably not hard ». The ない belongs to むずかしくない, so the guess is about an easy exam, and と思って gives it as the reason for not studying much.",
+            "fr": "だろう marque une supposition, pas une certitude : « probablement pas difficile ». Le ない appartient à むずかしくない, donc la supposition porte sur un examen facile, et と思って en fait la raison de ne pas beaucoup étudier."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks what you will do tomorrow. You think it will rain, so you plan to study at home. You say your plan, with your guess about the weather.",
+            "fr": "Un ami te demande ce que tu feras demain. Tu penses qu’il va pleuvoir, donc tu comptes étudier à la maison. Tu dis ton projet, avec ta supposition sur le temps."
+          },
+          "choices": [
+            "あしたは雨だろうから、うちでべんきょうする。",
+            "あしたは雨だから、うちでべんきょうするだろう。",
+            "あしたは雨だろうから、うちでべんきょうするだろう。"
+          ],
+          "why": {
+            "en": "だろう guesses about the world or others, here tomorrow's rain. Your own plan is no guess, so it stays plain: べんきょうする. Ending it with だろう, as the other two do, sounds as if you were unsure of your own plan.",
+            "fr": "だろう suppose ce qui concerne le monde ou les autres, ici la pluie. Ton propre projet n’est pas une supposition : べんきょうする reste neutre. Avec だろう, comme dans les deux autres lignes, tu semblerais hésiter sur ton projet."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの人は、この町のことをあまり＿＿＿。",
+          "tr": {
+            "en": "That person probably doesn't know this town very well.",
+            "fr": "Cette personne ne connaît probablement pas très bien cette ville."
+          },
+          "choices": [
+            "知らないだろう",
+            "知らなかっただろう",
+            "知っているだろう"
+          ],
+          "why": {
+            "en": "The sentence guesses about now, and あまり calls for a negative: 知らない + だろう. 知らなかっただろう guesses about the past, and 知っているだろう would say he probably does know the town.",
+            "fr": "La phrase suppose le présent, et あまり appelle une négation : 知らない + だろう. 知らなかっただろう suppose le passé, et 知っているだろう dirait qu’il connaît probablement la ville."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Where is Yamada, according to the speaker?",
+            "fr": "Où est Yamada, selon la personne qui parle ?"
+          },
+          "jp": "山田さんは、もう家に着いているだろう。",
+          "tr": {
+            "en": "Yamada has probably got home already.",
+            "fr": "Yamada doit déjà être à la maison."
+          },
+          "choices": [
+            {
+              "en": "Probably already at home.",
+              "fr": "Probablement déjà à la maison."
+            },
+            {
+              "en": "Probably still on the way home.",
+              "fr": "Probablement encore en route vers la maison."
+            },
+            {
+              "en": "Probably going to get home soon.",
+              "fr": "Probablement bientôt à la maison."
+            }
+          ],
+          "why": {
+            "en": "着いている is the state after arriving, « is there », not « is arriving », and もう adds « already ». With だろう the speaker only guesses it: probably home already.",
+            "fr": "着いている est l’état après l’arrivée, « est arrivé », pas « est en train d’arriver », et もう ajoute « déjà ». Avec だろう, la personne ne fait que le supposer : probablement déjà à la maison."
+          }
+        }
+      ]
     }
   },
   {
@@ -15396,7 +15886,127 @@
             "fr": "Tu ne le sais pas et tu réfléchis à voix haute : かな. だろう supposerait avec assurance, です l'affirmerait."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの人は、ここの先生＿＿＿。",
+          "tr": {
+            "en": "I wonder if that person is a teacher here.",
+            "fr": "Je me demande si cette personne est professeur ici."
+          },
+          "choices": [
+            "かな",
+            "だかな",
+            "だったかな"
+          ],
+          "why": {
+            "en": "A noun takes かな straight: 先生かな, with no だ in between. 先生だかな keeps the だ, and 先生だったかな wonders about the past, « was he a teacher? ».",
+            "fr": "Un nom prend かな directement : 先生かな, sans だ entre les deux. 先生だかな garde le だ, et 先生だったかな s’interroge sur le passé, « était-il professeur ? »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker thinking?",
+            "fr": "À quoi pense la personne ?"
+          },
+          "jp": "あれ、ドアのかぎをかけなかったかな。",
+          "tr": {
+            "en": "Oh, did I forget to lock the door?",
+            "fr": "Zut, est-ce que j’ai oublié de fermer la porte à clé ?"
+          },
+          "choices": [
+            {
+              "en": "Worrying that the door may have been left unlocked.",
+              "fr": "La personne se demande avec inquiétude si la porte est restée sans clé."
+            },
+            {
+              "en": "Wishing that the door would stay unlocked.",
+              "fr": "La personne souhaite que la porte reste sans clé."
+            },
+            {
+              "en": "Saying that the speaker will not lock the door.",
+              "fr": "La personne dit qu’elle ne fermera pas la porte à clé."
+            }
+          ],
+          "why": {
+            "en": "かな wonders, and the verb before it is the plain past negative かけなかった: « didn't I lock it? ». The wish ないかな has ない right before かな (早く来ないかな); here なかった makes it a worry about something already done.",
+            "fr": "かな s’interroge, et le verbe devant est le passé négatif neutre かけなかった : « n’ai-je pas fermé ? ». Le souhait ないかな a ない juste devant かな (早く来ないかな) ; ici なかった en fait une inquiétude sur ce qui s’est déjà passé."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "おきゃくさんは、もうみんな＿＿＿。",
+          "tr": {
+            "en": "I wonder if all the guests have arrived already.",
+            "fr": "Je me demande si tous les invités sont déjà arrivés."
+          },
+          "choices": [
+            "来たかな",
+            "来るかな",
+            "来ないかな"
+          ],
+          "why": {
+            "en": "The guests should be here by now, so the verb is the plain past: 来たかな. 来るかな wonders whether they will come, and 来ないかな is the wish « I hope they come ».",
+            "fr": "Les invités devraient déjà être là : le verbe est au passé neutre, 来たかな. 来るかな se demande s’ils viendront, et 来ないかな est le souhait « pourvu qu’ils viennent »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "It has rained all week. At the window, you mutter to yourself that you wish it would stop soon.",
+            "fr": "Il pleut depuis une semaine. À la fenêtre, tu murmures pour toi que tu voudrais que ça s’arrête vite."
+          },
+          "choices": [
+            "はやく雨がやまないかな。",
+            "はやく雨がやむかな。",
+            "雨は、まだやまないだろう。"
+          ],
+          "why": {
+            "en": "To wish, put ない before かな: やまないかな, « I wish it would stop ». やむかな only wonders whether it will stop, and やまないだろう is a guess that it will keep raining.",
+            "fr": "Pour souhaiter, on met ない devant かな : やまないかな, « pourvu que ça s’arrête ». やむかな se demande seulement si ça va s’arrêter, et やまないだろう suppose que la pluie va continuer."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker doing?",
+            "fr": "Que fait la personne qui parle ?"
+          },
+          "jp": "もう帰ってもいいかな。",
+          "tr": {
+            "en": "Is it all right if I go home now?",
+            "fr": "Je peux rentrer maintenant, tu crois ?"
+          },
+          "choices": [
+            {
+              "en": "Softly asking whether it is all right to go home now.",
+              "fr": "La personne demande doucement s’il est permis de rentrer maintenant."
+            },
+            {
+              "en": "Saying that going home is allowed.",
+              "fr": "La personne dit qu’on a le droit de rentrer."
+            },
+            {
+              "en": "Announcing that the speaker is going home now.",
+              "fr": "La personne annonce qu’elle rentre maintenant."
+            }
+          ],
+          "why": {
+            "en": "かな softens the question: « is it all right to go home now? », asked of a friend or half to oneself. Saying it is allowed would be 帰ってもいいよ, and announcing a decision 帰るよ.",
+            "fr": "かな adoucit la question : « je peux rentrer maintenant ? », posée à un ami ou à moitié pour soi. Dire que c’est permis serait 帰ってもいいよ, et annoncer sa décision, 帰るよ."
+          }
+        }
+      ]
     }
   },
   {
