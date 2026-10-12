@@ -33643,7 +33643,136 @@
             "fr": "手前 donne la face à garder : c'est toi qui as invité. からといって dirait que l'invitation ne t'engage pas ; としても en ferait une simple supposition."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why does the speaker keep the garden tidy?",
+            "fr": "Pourquoi le jardin est-il toujours bien tenu ?"
+          },
+          "jp": "近所の手前、庭のそうじだけはまめにしている。",
+          "tr": {
+            "en": "With the neighbours around, I at least keep the garden swept and tidy.",
+            "fr": "Vu les voisins, au moins le jardin, je le tiens propre avec soin."
+          },
+          "choices": [
+            {
+              "en": "So as not to look bad in front of the neighbours.",
+              "fr": "Pour ne pas faire mauvaise figure devant les voisins."
+            },
+            {
+              "en": "The neighbours asked for it to be kept tidy.",
+              "fr": "Les voisins ont demandé qu'il soit bien tenu."
+            },
+            {
+              "en": "The garden is right in front of the neighbours' house.",
+              "fr": "Le jardin se trouve juste devant la maison des voisins."
+            }
+          ],
+          "why": {
+            "en": "Nの手前 names the people whose eyes one cares about: the garden is kept tidy so as not to look bad to them. Nobody asked, and it is not about where the garden is.",
+            "fr": "Nの手前 nomme les gens dont on craint le regard : le jardin est tenu propre pour ne pas faire mauvaise figure devant eux. Personne ne l'a demandé, et il ne s'agit pas de l'endroit où se trouve le jardin."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "友だちに手伝うと＿＿＿、つかれていても行くしかない。",
+          "tr": {
+            "en": "Since I told my friend I'd help, I have no choice but to go, tired or not.",
+            "fr": "Puisque j'ai dit à mon ami que je l'aiderais, je n'ai pas d'autre choix que d'y aller, fatigue ou pas."
+          },
+          "choices": [
+            "言った手前",
+            "言う手前",
+            "言ったの手前"
+          ],
+          "why": {
+            "en": "The promise is already made, so the verb takes the た-form before 手前: 言った手前. 言う手前 would mean « just before saying it », and 言ったの手前 borrows the の of a noun, which a verb does not need.",
+            "fr": "La promesse est déjà faite : le verbe prend la forme た devant 手前 : 言った手前. 言う手前 voudrait dire « juste avant de le dire », et 言ったの手前 emprunte le の d'un nom, inutile avec un verbe."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What kept the speaker from going home first?",
+            "fr": "Qu'est-ce qui empêchait de rentrer avant les autres ?"
+          },
+          "jp": "新入社員の手前、先輩のわたしが先に帰るわけにはいかなかった。",
+          "tr": {
+            "en": "With the new employees there, I, as their senior, could hardly go home first.",
+            "fr": "Avec les nouveaux employés là, je ne pouvais guère, en tant que senior, rentrer avant eux."
+          },
+          "choices": [
+            {
+              "en": "Not wanting to set a bad example in front of the newcomers.",
+              "fr": "Ne pas vouloir donner le mauvais exemple devant les nouveaux."
+            },
+            {
+              "en": "A company rule that the senior leaves last.",
+              "fr": "Un règlement qui impose au senior de partir le dernier."
+            },
+            {
+              "en": "The newcomers had asked the senior to stay.",
+              "fr": "Les nouveaux avaient demandé au senior de rester."
+            }
+          ],
+          "why": {
+            "en": "手前 is about how it would look to the people watching, not about a rule or a request: nobody ordered anything, the speaker simply cannot go first with them there.",
+            "fr": "手前 parle de l'image que l'on donne à ceux qui regardent, pas d'un règlement ni d'une demande : personne n'a rien ordonné, simplement on ne peut pas partir le premier sous leurs yeux."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "At your child's football match the referee makes a bad call. You were about to shout at him, but your child was standing right beside you, so you held back. You tell a friend afterwards.",
+            "fr": "Au match de foot de ton enfant, l'arbitre se trompe. Tu allais lui crier dessus, mais ton enfant se tenait juste à côté de toi : tu as dû te retenir. Tu le racontes ensuite à un ami."
+          },
+          "choices": [
+            "子どもの手前、審判にどなるのはがまんしたよ。",
+            "審判の手前、子どもにどなるのはがまんしたよ。",
+            "子どもの手前、審判にどなってしまったよ。"
+          ],
+          "why": {
+            "en": "The noun before の手前 is the one watching, and the rest is what you could not do. The second line swaps the roles, and the third has you shout after all.",
+            "fr": "Le nom devant の手前 est celui qui regarde, et la suite dit ce qu'on n'a pas pu faire. La deuxième phrase échange les rôles, et la troisième te fait crier quand même."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why was it hard to say no to the senior?",
+            "fr": "Pourquoi était-il difficile de dire non au senior ?"
+          },
+          "jp": "ずいぶん世話になった手前、先輩のたのみは断りにくかった。",
+          "tr": {
+            "en": "After all the help I'd had from him, it was hard to turn down my senior's request.",
+            "fr": "Après tout ce qu'il avait fait pour moi, il m'était difficile de refuser la demande de mon senior."
+          },
+          "choices": [
+            {
+              "en": "He had helped the speaker a lot, and refusing would look ungrateful.",
+              "fr": "Il avait beaucoup aidé, et refuser aurait paru ingrat."
+            },
+            {
+              "en": "The senior had often turned down the speaker's own requests.",
+              "fr": "Le senior avait souvent refusé les propres demandes de l'autre."
+            },
+            {
+              "en": "The request itself was unreasonable.",
+              "fr": "La demande elle-même était déraisonnable."
+            }
+          ],
+          "why": {
+            "en": "A た-form before 手前 can be something that was done for you: 世話になった (having been looked after). Having received that, refusing would look ungrateful, so it is hard to say no.",
+            "fr": "Un た devant 手前 peut être ce qu'on a fait pour toi : 世話になった (avoir été aidé). Après cela, refuser ferait ingrat, d'où la difficulté de dire non."
+          }
+        }
+      ]
     }
   },
   {
@@ -33840,7 +33969,127 @@
             "fr": "En avoir un, c'est l'idéal : に越したことはない. に違いない dirait que tu en as sûrement un ; までもない que c'est inutile."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "旅行の荷物は、少ない＿＿＿ことはない。",
+          "tr": {
+            "en": "For a trip, nothing beats having little luggage.",
+            "fr": "En voyage, rien ne vaut le fait d'avoir peu de bagages."
+          },
+          "choices": [
+            "に越した",
+            "のに越した",
+            "くに越した"
+          ],
+          "why": {
+            "en": "After an い-adjective in its plain form, に follows directly: 少ないに越した. 少ないのに越した adds the の of « although », and 少なくに越した puts the adverb form where the plain form belongs.",
+            "fr": "Après un adjectif en い à la forme neutre, に vient tout de suite : 少ないに越した. 少ないのに越した ajoute le の de « bien que », et 少なくに越した met la forme adverbiale à la place de la forme neutre."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of exercising every day?",
+            "fr": "Que pense-t-on ici de faire du sport tous les jours ?"
+          },
+          "jp": "毎日運動するに越したことはないが、なかなかできない。",
+          "tr": {
+            "en": "Nothing beats exercising every day, but it is hard to actually do.",
+            "fr": "Rien ne vaut le sport tous les jours, mais c'est difficile à tenir."
+          },
+          "choices": [
+            {
+              "en": "It is the ideal, even if hard to keep up.",
+              "fr": "C'est l'idéal, même si c'est difficile à tenir."
+            },
+            {
+              "en": "There is no need to do it every day.",
+              "fr": "Pas besoin d'en faire tous les jours."
+            },
+            {
+              "en": "The speaker has never managed to do it every day.",
+              "fr": "On n'a jamais réussi à en faire tous les jours."
+            }
+          ],
+          "why": {
+            "en": "に越したことはない means « nothing beats it »: 越す is « to surpass », so ことはない is neither « no need » nor « never ». The が then admits that real life makes it hard.",
+            "fr": "に越したことはない veut dire « rien ne vaut cela » : 越す, c'est « surpasser », donc ことはない n'est ni « pas besoin » ni « jamais ». Le が admet ensuite que c'est dur dans la vie réelle."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend says: スマホに地図があるから、紙の地図はいらないよね。 You disagree, gently: carrying a paper map as well is the best thing.",
+            "fr": "Un ami dit : スマホに地図があるから、紙の地図はいらないよね。 Tu n'es pas d'accord, avec douceur : emporter aussi une carte en papier, c'est le mieux."
+          },
+          "choices": [
+            "紙の地図も、持っていくに越したことはないよ。",
+            "紙の地図は、スマホに越したことはないよ。",
+            "紙の地図は、持っていくまでもないよ。"
+          ],
+          "why": {
+            "en": "What is best goes before に越したことはない: 持っていく, taking it. The second line has the pattern too but makes the phone the best, which is the friend's view, and the third says there is no need (までもない).",
+            "fr": "Ce qui vaut le mieux se place devant に越したことはない : 持っていく, l'emporter. La deuxième phrase fait du téléphone le mieux, ce qui est l'avis de l'ami ; la troisième dit qu'il n'y a pas besoin (までもない)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "出かける前に、天気を＿＿＿ことはない。",
+          "tr": {
+            "en": "Before going out, nothing beats checking the weather.",
+            "fr": "Avant de sortir, rien ne vaut le fait de vérifier la météo."
+          },
+          "choices": [
+            "確かめるに越した",
+            "確かめたに越した",
+            "確かめてに越した"
+          ],
+          "why": {
+            "en": "The plain non-past form comes before に越した: 確かめるに越した. 確かめたに越した puts the past form where a general piece of advice needs the non-past, and 確かめてに越した attaches に to the て-form.",
+            "fr": "La forme neutre au non-passé précède に越した : 確かめるに越した. 確かめたに越した met le passé là où un conseil général demande le non-passé, et 確かめてに越した accroche に à la forme て."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about quarrelling with friends?",
+            "fr": "Que dit-on des disputes entre amis ?"
+          },
+          "jp": "友だちとのけんかは、しないに越したことはない。",
+          "tr": {
+            "en": "Better not to quarrel with friends at all.",
+            "fr": "Mieux vaut ne pas se disputer avec ses amis."
+          },
+          "choices": [
+            {
+              "en": "It is best not to quarrel.",
+              "fr": "Mieux vaut ne pas se disputer."
+            },
+            {
+              "en": "Nothing beats a good quarrel.",
+              "fr": "Rien ne vaut une bonne dispute."
+            },
+            {
+              "en": "There is no need to avoid quarrels.",
+              "fr": "Pas besoin d'éviter les disputes."
+            }
+          ],
+          "why": {
+            "en": "The plain form before に越したことはない can be a negative: しない, not quarrelling, is what nothing beats. Dropping the ない gives the opposite, and ことはない is not « no need ».",
+            "fr": "La forme neutre devant に越したことはない peut être négative : しない, ne pas se disputer, c'est ce que rien ne surpasse. Sans le ない, on obtient l'inverse, et ことはない n'est pas « pas besoin »."
+          }
+        }
+      ]
     }
   },
   {
@@ -34041,7 +34290,127 @@
             "fr": "On ne peut exclure un retard, alors on se prépare : ないとも限らない. とは限らない dit l'inverse, qu'un retard n'est pas sûr ; はずがない qu'il ne peut pas y en avoir."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What can happen to him at the exam, according to the sentence?",
+            "fr": "Que peut-il lui arriver à l'examen, d'après la phrase ?"
+          },
+          "jp": "彼は成績がいいが、当日かぜをひけば、試験に落ちないとも限らない。",
+          "tr": {
+            "en": "He has good grades, but if he catches a cold on the day, he might fail the exam.",
+            "fr": "Il a de bonnes notes, mais s'il s'enrhume le jour J, il pourrait échouer à l'examen."
+          },
+          "choices": [
+            {
+              "en": "He may well fail.",
+              "fr": "Il se pourrait qu'il échoue."
+            },
+            {
+              "en": "He may not fail after all.",
+              "fr": "Il se pourrait qu'il n'échoue pas."
+            },
+            {
+              "en": "He is sure to fail.",
+              "fr": "Il est sûr d'échouer."
+            }
+          ],
+          "why": {
+            "en": "ないとも限らない turns the ない round: « it is not certain that he won't fail », so failing is possible. It is neither « he may not fail » nor a certainty.",
+            "fr": "ないとも限らない retourne le ない : « il n'est pas sûr qu'il n'échoue pas », donc l'échec est possible. Ce n'est ni « il pourrait ne pas échouer » ni une certitude."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの人は約束を＿＿＿から、念のため電話しておこう。",
+          "tr": {
+            "en": "He might forget the appointment, so I'll phone him just in case.",
+            "fr": "Il pourrait oublier le rendez-vous, alors je vais l'appeler au cas où."
+          },
+          "choices": [
+            "忘れないとも限らない",
+            "忘れるとも限らない",
+            "忘れなかったとも限らない"
+          ],
+          "why": {
+            "en": "The pattern sits on the ない-form: 忘れない + とも限らない, « can't say he won't forget ». 忘れるとも限らない has no ない and says he won't necessarily forget; 忘れなかったとも限らない looks back at the past.",
+            "fr": "Le motif se pose sur la forme ない : 忘れない + とも限らない, « on ne peut pas dire qu'il n'oubliera pas ». 忘れるとも限らない n'a pas de ない et dit qu'il n'oubliera pas forcément ; 忘れなかったとも限らない regarde le passé."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend says: あのチーム、強いから、ぜったい勝つよ。 You disagree: you say they could lose.",
+            "fr": "Un ami dit : あのチーム、強いから、ぜったい勝つよ。 Tu n'es pas d'accord : tu dis qu'elle pourrait perdre."
+          },
+          "choices": [
+            "あのチームが負けないとも限らないよ。",
+            "あのチームが勝たないとも限らないよ。",
+            "あのチームは負けないかもしれないよ。"
+          ],
+          "why": {
+            "en": "ないとも限らない means « might V » for the verb before ない: « might lose » is 負けないとも限らない. 勝たない… says they might win, and 負けないかもしれない reads the ない at face value, « might not lose ».",
+            "fr": "ないとも限らない veut dire « pourrait V » pour le verbe devant ない : « pourrait perdre » se dit 負けないとも限らない. 勝たない… dit qu'elle pourrait gagner, et 負けないかもしれない prend le ない au pied de la lettre : « pourrait ne pas perdre »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの町は、道に＿＿＿から、友だちといっしょに行こう。",
+          "tr": {
+            "en": "We might lose our way in that town, so let's go together with a friend.",
+            "fr": "Dans cette ville, on pourrait se perdre : allons-y avec un ami."
+          },
+          "choices": [
+            "迷わないとも限らない",
+            "迷わないかもしれない",
+            "迷あないとも限らない"
+          ],
+          "why": {
+            "en": "迷う ends in う, so its ない-form is 迷わない: 迷わないとも限らない, « can't say we won't get lost ». 迷わないかもしれない takes ない at face value, and 迷あない forgets the わ of う-verbs.",
+            "fr": "迷う finit par う : sa forme ない est 迷わない : 迷わないとも限らない, « on ne peut pas dire qu'on ne se perdra pas ». 迷わないかもしれない prend ない au pied de la lettre, et 迷あない oublie le わ des verbes en う."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker expect, and what do they do?",
+            "fr": "Qu'est-ce qui est attendu, et que fait-on ?"
+          },
+          "jp": "この商品は売れないと思うが、売れないとも限らないので、少しだけ作ってみよう。",
+          "tr": {
+            "en": "I don't think this product will sell, but it might, so let's make just a few.",
+            "fr": "Je ne pense pas que ce produit se vende, mais ça pourrait arriver : fabriquons-en juste quelques-uns."
+          },
+          "choices": [
+            {
+              "en": "Expects poor sales, but makes a few in case it does sell.",
+              "fr": "On s'attend à peu de ventes, mais on en fabrique quelques-uns au cas où ça se vendrait."
+            },
+            {
+              "en": "Expects it to sell, but makes only a few in case it doesn't.",
+              "fr": "On s'attend à ce que ça se vende, mais on n'en fait que quelques-uns au cas où ça ne se vendrait pas."
+            },
+            {
+              "en": "Expects poor sales, so makes none.",
+              "fr": "On s'attend à peu de ventes, donc on n'en fabrique aucun."
+            }
+          ],
+          "why": {
+            "en": "The same 売れない is read two ways: 売れないと思う is « I think it won't sell », but 売れないとも限らない is « it might sell ». So the speaker plans for the unlikely success.",
+            "fr": "Le même 売れない se lit de deux façons : 売れないと思う, c'est « je pense que ça ne se vendra pas », mais 売れないとも限らない, c'est « ça pourrait se vendre ». On prévoit donc le succès improbable."
+          }
+        }
+      ]
     }
   },
   {
@@ -34202,7 +34571,141 @@
             "fr": "Le reproche n'a pas lieu d'être : にはあたらない. ずにはいられない dirait qu'on ne peut s'empêcher de le blâmer ; に越したことはない que le blâmer est le mieux."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the writer say about blaming the new recruit?",
+            "fr": "Que dit l'auteur du fait de blâmer la recrue ?"
+          },
+          "jp": "一度ミスをしたくらいで、新人を非難するにはあたらない。",
+          "tr": {
+            "en": "Just for making one mistake, there is no cause to condemn a new recruit.",
+            "fr": "Pour une seule erreur, il n'y a pas lieu de condamner une recrue."
+          },
+          "choices": [
+            {
+              "en": "It is not called for: one mistake does not justify it.",
+              "fr": "Ce n'est pas justifié : une seule erreur ne le mérite pas."
+            },
+            {
+              "en": "It is forbidden to blame new recruits.",
+              "fr": "Il est interdit de blâmer les recrues."
+            },
+            {
+              "en": "The recruit should be blamed, and rightly so.",
+              "fr": "La recrue doit être blâmée, et à juste titre."
+            }
+          ],
+          "why": {
+            "en": "にはあたらない judges that a reaction is not warranted: a single slip is too little to justify blame. It is a judgement, not a ban, and it is the opposite of « he deserves it ».",
+            "fr": "にはあたらない juge qu'une réaction n'est pas de mise : une seule erreur ne suffit pas pour blâmer. C'est un jugement, pas une interdiction, et c'est l'inverse de « il le mérite »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "かぜくらいなら、すぐに治るので、＿＿＿。",
+          "tr": {
+            "en": "A cold like that clears up soon, so there is no cause to worry.",
+            "fr": "Un rhume comme celui-là passe vite : il n'y a pas lieu de s'inquiéter."
+          },
+          "choices": [
+            "心配するにはあたらない",
+            "心配したにはあたらない",
+            "心配しないにはあたらない"
+          ],
+          "why": {
+            "en": "The reaction verb stands in the dictionary form: 心配するにはあたらない. The た-form would speak of a worry already felt, and the ない-form would negate the worry itself, which is not what the pattern does.",
+            "fr": "Le verbe de réaction reste à la forme du dictionnaire : 心配するにはあたらない. La forme た parlerait d'une inquiétude déjà éprouvée, et la forme ない nierait l'inquiétude elle-même, ce que le motif ne fait pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Is the speaker surprised by his win?",
+            "fr": "La personne qui parle est-elle surprise par sa victoire ?"
+          },
+          "jp": "毎日十時間も練習していたのだから、彼が優勝したのは驚くにはあたらない。",
+          "tr": {
+            "en": "He practised ten hours every day, so it is no surprise that he won.",
+            "fr": "Il s'entraînait dix heures par jour : il n'y a pas de quoi s'étonner qu'il ait gagné."
+          },
+          "choices": [
+            {
+              "en": "No: given how he trained, it was only to be expected.",
+              "fr": "Non : vu son entraînement, c'était à prévoir."
+            },
+            {
+              "en": "Yes: so much that there are no words for it.",
+              "fr": "Oui : tellement qu'on n'a pas de mots."
+            },
+            {
+              "en": "Yes, but the speaker thinks it should not be shown.",
+              "fr": "Oui, mais on pense qu'il ne faut pas le montrer."
+            }
+          ],
+          "why": {
+            "en": "にはあたらない says surprise is not called for, because the win follows from the practice. It states what is warranted, not that the speaker is hiding a feeling.",
+            "fr": "にはあたらない dit que la surprise n'est pas de mise, car la victoire découle de l'entraînement. Cela dit ce qui est justifié, pas que l'on cache un sentiment."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "新人のミスですから、責める＿＿＿。",
+          "tr": {
+            "en": "It is a newcomer's mistake, so there is no cause to blame him (said politely).",
+            "fr": "C'est l'erreur d'un débutant : il n'y a pas lieu de le blâmer (dit poliment)."
+          },
+          "choices": [
+            "にはあたりません",
+            "にはあたらません",
+            "にはあたりませんでした"
+          ],
+          "why": {
+            "en": "The polite form of あたらない is あたりません, built on the stem あたり. あたらません mixes ない and ません, and あたりませんでした is the past.",
+            "fr": "La forme polie de あたらない est あたりません, bâtie sur la racine あたり. あたらません mélange ない et ません, et あたりませんでした est le passé."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the writer think of praising the clerk?",
+            "fr": "Que pense l'auteur du fait de féliciter l'employé ?"
+          },
+          "jp": "店員が笑顔であいさつするのは仕事のうちで、ほめるにはあたらない。",
+          "tr": {
+            "en": "A clerk greeting with a smile is part of the job, and is not worth praising.",
+            "fr": "Qu'un employé salue avec le sourire fait partie du travail : il n'y a pas lieu de le féliciter."
+          },
+          "choices": [
+            {
+              "en": "It is part of the job, so praise is not called for.",
+              "fr": "Cela fait partie du travail : les félicitations ne s'imposent pas."
+            },
+            {
+              "en": "It was done badly, so there is nothing to praise.",
+              "fr": "C'était mal fait : il n'y a rien à féliciter."
+            },
+            {
+              "en": "The clerk deserves a great deal of praise.",
+              "fr": "L'employé mérite de grandes félicitations."
+            }
+          ],
+          "why": {
+            "en": "The reason sits before the pattern: it is part of the job, so no praise is called for. The writer does not say the greeting was poor, only that it is the ordinary thing to do.",
+            "fr": "La raison se trouve avant le motif : cela fait partie du travail, donc pas de félicitations. L'auteur ne dit pas que le salut était mauvais, seulement que c'est normal."
+          }
+        }
+      ]
     }
   },
   {
@@ -35808,7 +36311,141 @@
             "fr": "Même toi, tu n'y échappes pas : とて. として veut dire « en ma qualité de » ; にしては « pour quelqu'un comme moi »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the people who work at the station?",
+            "fr": "Que dit la phrase de ceux qui travaillent à la gare ?"
+          },
+          "jp": "休日とて、駅で働く人たちは休めない。",
+          "tr": {
+            "en": "Even on a holiday, the people who work at the station cannot rest.",
+            "fr": "Même les jours fériés, ceux qui travaillent à la gare ne peuvent pas se reposer."
+          },
+          "choices": [
+            {
+              "en": "Even on a holiday, they cannot rest.",
+              "fr": "Même les jours fériés, ils ne peuvent pas se reposer."
+            },
+            {
+              "en": "Since it is a holiday, they are resting.",
+              "fr": "Comme c'est férié, ils se reposent."
+            },
+            {
+              "en": "They can rest only on holidays.",
+              "fr": "Ils ne peuvent se reposer que les jours fériés."
+            }
+          ],
+          "why": {
+            "en": "とて after a noun means « even »: even on a holiday they cannot rest. It does not give a reason (« since it is a holiday »), and the sentence does not say they rest at all.",
+            "fr": "とて après un nom veut dire « même » : même un jour férié, ils ne peuvent pas se reposer. Il ne donne pas de cause (« comme c'est férié »), et la phrase ne dit pas qu'ils se reposent."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "どんな＿＿＿、まちがえることはある。",
+          "tr": {
+            "en": "However great the master, mistakes happen.",
+            "fr": "Si grand soit le maître, il arrive qu'on se trompe."
+          },
+          "choices": [
+            "名人とて",
+            "名人として",
+            "名人にとって"
+          ],
+          "why": {
+            "en": "Noun + とて is « even N »: どんな名人とて, « even the greatest master ». 名人として is « as a master » and 名人にとって is « for a master »; neither gives « even ».",
+            "fr": "Nom + とて, c'est « même N » : どんな名人とて, « même le plus grand maître ». 名人として veut dire « en tant que maître » et 名人にとって « pour un maître » : ni l'un ni l'autre ne donne « même »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker feel about that day now?",
+            "fr": "Que ressent-on aujourd'hui à propos de ce jour-là ?"
+          },
+          "jp": "二十年たった今とて、あの日のことを思い出すと胸が痛む。",
+          "tr": {
+            "en": "Even now, twenty years on, my chest aches when I remember that day.",
+            "fr": "Même aujourd'hui, vingt ans après, j'ai le cœur serré quand je repense à ce jour-là."
+          },
+          "choices": [
+            {
+              "en": "It still hurts, even after twenty years.",
+              "fr": "Ça fait encore mal, même après vingt ans."
+            },
+            {
+              "en": "It no longer hurts after twenty years.",
+              "fr": "Ça ne fait plus mal après vingt ans."
+            },
+            {
+              "en": "It hurts now, but it did not before.",
+              "fr": "Ça fait mal maintenant, mais pas avant."
+            }
+          ],
+          "why": {
+            "en": "今とて is « even now »: the feeling has lasted up to the present. The time word is put among the moments it still holds for, so it is not « only now » and not « no longer ».",
+            "fr": "今とて, c'est « même maintenant » : le sentiment a duré jusqu'à aujourd'hui. Ce n'est ni « seulement maintenant » ni « plus maintenant »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "お金がないので、＿＿＿、むだにはできない。",
+          "tr": {
+            "en": "I have little money, so I can't waste a single yen.",
+            "fr": "Je n'ai pas beaucoup d'argent : je ne peux pas gaspiller un seul yen."
+          },
+          "choices": [
+            "一円とて",
+            "一円しか",
+            "一円だけ"
+          ],
+          "why": {
+            "en": "一N + とて with a negative means « not even one N ». 一円しか is « only one yen » (one yen may be wasted), and 一円だけ picks one yen out as the exception.",
+            "fr": "一N + とて avec une négation veut dire « pas même un seul N ». 一円しか, c'est « seulement un yen » (on peut en gaspiller un), et 一円だけ met un yen à part comme exception."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the writer say about teachers?",
+            "fr": "Que dit l'auteur des professeurs ?"
+          },
+          "jp": "先生は何でも知っていると思われがちだが、先生とて人間である。",
+          "tr": {
+            "en": "People tend to think a teacher knows everything, but even a teacher is only human.",
+            "fr": "On croit volontiers qu'un professeur sait tout, mais même un professeur n'est qu'un être humain."
+          },
+          "choices": [
+            {
+              "en": "Teachers are human too, with limits like anyone.",
+              "fr": "Les professeurs sont humains aussi, avec des limites comme tout le monde."
+            },
+            {
+              "en": "Teachers are an exception: they are above ordinary people.",
+              "fr": "Les professeurs font exception : ils sont au-dessus des gens ordinaires."
+            },
+            {
+              "en": "Teachers really do know everything.",
+              "fr": "Les professeurs savent vraiment tout."
+            }
+          ],
+          "why": {
+            "en": "先生とて is « even a teacher », set against the belief in the first half: he is no exception. The pattern points to a limit, never to a privilege.",
+            "fr": "先生とて, c'est « même un professeur », opposé à la croyance de la première moitié : il ne fait pas exception. Le motif désigne une limite, jamais un privilège."
+          }
+        }
+      ]
     }
   },
   {
@@ -36007,7 +36644,141 @@
             "fr": "ではあるまいか avance l'avis comme une question prudente : n'est-ce pas ? Sans か, ではあるまい le nie ; ではあるまいし veut dire « ce n'est pas comme si »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the writer doing in this sentence?",
+            "fr": "Que fait l'auteur dans cette phrase ?"
+          },
+          "jp": "この制度は、もう時代おくれなのではあるまいか。",
+          "tr": {
+            "en": "Might this system not be out of date by now?",
+            "fr": "Ce système ne serait-il pas déjà dépassé ?"
+          },
+          "choices": [
+            {
+              "en": "Putting forward a cautious view: the system may be out of date.",
+              "fr": "Avancer prudemment un avis : le système est peut-être dépassé."
+            },
+            {
+              "en": "Asking the reader whether the system is out of date.",
+              "fr": "Demander au lecteur si le système est dépassé."
+            },
+            {
+              "en": "Stating flatly that the system is out of date.",
+              "fr": "Affirmer sans détour que le système est dépassé."
+            }
+          ],
+          "why": {
+            "en": "ではあるまいか looks like a question, but in writing it is a tentative claim: the author thinks the system is out of date and says so softly. The reader is not asked anything, and it is not a flat statement either.",
+            "fr": "ではあるまいか ressemble à une question, mais à l'écrit c'est un avis prudent : l'auteur pense que le système est dépassé et le dit avec douceur. On ne demande rien au lecteur, et ce n'est pas une affirmation nette."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "道がぬれているのを見ると、ゆうべ雨が＿＿＿のではあるまいか。",
+          "tr": {
+            "en": "Seeing the wet road, might it not have rained last night?",
+            "fr": "À voir la route mouillée, ne se serait-il pas mis à pleuvoir cette nuit ?"
+          },
+          "choices": [
+            "ふった",
+            "ふる",
+            "ふらない"
+          ],
+          "why": {
+            "en": "The verb before のではあるまいか is in the plain form, and its tense is that of the thing suspected: last night is past, so ふった. ふる is non-past, and ふらない would suspect that it did not rain.",
+            "fr": "Le verbe devant のではあるまいか est à la forme neutre, et son temps est celui de ce qu'on soupçonne : cette nuit est passée, donc ふった. ふる est le non-passé, et ふらない soupçonnerait qu'il n'a pas plu."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why could the speaker not sleep?",
+            "fr": "Pourquoi n'a-t-on pas pu dormir ?"
+          },
+          "jp": "また地震が来るのではあるまいかと、一晩中ねむれなかった。",
+          "tr": {
+            "en": "Fearing that another earthquake might come, I could not sleep all night.",
+            "fr": "Redoutant qu'un autre séisme ne survienne, je n'ai pas pu dormir de la nuit."
+          },
+          "choices": [
+            {
+              "en": "Worried that another earthquake might strike.",
+              "fr": "On craignait qu'un autre séisme ne frappe."
+            },
+            {
+              "en": "Another earthquake had just struck.",
+              "fr": "Un autre séisme venait de frapper."
+            },
+            {
+              "en": "Someone had asked whether another earthquake would come.",
+              "fr": "Quelqu'un avait demandé si un autre séisme allait venir."
+            }
+          ],
+          "why": {
+            "en": "A ではあるまいか clause followed by と and a verb of thinking gives the thought itself: « might it not come? » is the fear in the speaker's mind. It is not an event, and not a question put to anyone.",
+            "fr": "Une proposition en ではあるまいか suivie de と et d'un verbe de pensée donne la pensée elle-même : « ne viendrait-il pas ? » est la crainte de celui qui parle. Ce n'est ni un événement, ni une question posée à quelqu'un."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの新しい駅は、思ったより利用者が少ない＿＿＿。",
+          "tr": {
+            "en": "(In an article) That new station may well have fewer users than expected, though I cannot be sure.",
+            "fr": "(Dans un article) Cette nouvelle gare compte peut-être moins d'usagers que prévu, mais rien n'est certain."
+          },
+          "choices": [
+            "のではあるまいか",
+            "にちがいない",
+            "に決まっている"
+          ],
+          "why": {
+            "en": "のではあるまいか is the written, tentative way to put forward a view one cannot be sure of. にちがいない and に決まっている both say « it must be so », which is a conviction, not a suspicion.",
+            "fr": "のではあるまいか est la manière écrite et prudente d'avancer un avis dont on n'est pas sûr. にちがいない et に決まっている disent tous deux « c'est forcément ainsi » : une conviction, pas un soupçon."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How sure is the writer that it was chance?",
+            "fr": "L'auteur est-il sûr que c'était le hasard ?"
+          },
+          "jp": "あの店が急にはやりだしたのは、ただの偶然なのではあるまいか。",
+          "tr": {
+            "en": "Might the shop's sudden popularity not be mere chance?",
+            "fr": "Le succès soudain de ce magasin ne serait-il pas un simple hasard ?"
+          },
+          "choices": [
+            {
+              "en": "Not sure: it is a cautious suspicion.",
+              "fr": "Pas sûr : c'est un soupçon prudent."
+            },
+            {
+              "en": "Completely sure it was chance.",
+              "fr": "Tout à fait sûr que c'était le hasard."
+            },
+            {
+              "en": "Sure it was not chance.",
+              "fr": "Sûr que ce n'était pas le hasard."
+            }
+          ],
+          "why": {
+            "en": "ではあるまいか says « might it not be… »: the writer suspects chance without claiming it. The あるまい does not make it a denial (« surely not chance »), and the か keeps it short of certainty.",
+            "fr": "ではあるまいか dit « ne serait-ce pas… » : l'auteur soupçonne le hasard sans l'affirmer. あるまい ne fait pas un démenti (« sûrement pas le hasard »), et か le tient en deçà de la certitude."
+          }
+        }
+      ]
     }
   },
   {
@@ -36242,7 +37013,136 @@
             "fr": "Pas seulement cette gare : に限ったことではない. に限って et だけ diraient que c'est elle seule."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about people who look at their phones while walking?",
+            "fr": "Que dit la phrase des gens qui regardent leur téléphone en marchant ?"
+          },
+          "jp": "歩きながらスマホを見る人がふえているのは、若者に限ったことではない。",
+          "tr": {
+            "en": "The rise in people looking at their phones while walking is not limited to the young.",
+            "fr": "L'augmentation du nombre de gens qui regardent leur téléphone en marchant ne se limite pas aux jeunes."
+          },
+          "choices": [
+            {
+              "en": "It is not just the young: other people do it too.",
+              "fr": "Il n'y a pas que les jeunes : d'autres le font aussi."
+            },
+            {
+              "en": "Only the young do it.",
+              "fr": "Il n'y a que les jeunes qui le font."
+            },
+            {
+              "en": "The young do not do it, but other people do.",
+              "fr": "Les jeunes ne le font pas, mais les autres, si."
+            }
+          ],
+          "why": {
+            "en": "The noun before に限ったことではない is what the habit is NOT limited to: it goes beyond the young. It does not say that only they do it, nor that they are the ones who do not.",
+            "fr": "Le nom devant に限ったことではない est ce à quoi l'habitude ne se limite PAS : elle dépasse les jeunes. La phrase ne dit ni que ce sont les seuls, ni que ce sont ceux qui ne le font pas."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この問題は、日本＿＿＿ことではない。",
+          "tr": {
+            "en": "This problem is not limited to Japan.",
+            "fr": "Ce problème ne se limite pas au Japon."
+          },
+          "choices": [
+            "に限った",
+            "に限らず",
+            "に限って"
+          ],
+          "why": {
+            "en": "Before ことではない, the pattern needs the past-tense 限った: 日本に限ったことではない. 限らず is the connective of the middle of a sentence (« not only N, but »), and 限って singles N out (« of all things, N »).",
+            "fr": "Devant ことではない, le motif demande 限った au passé : 日本に限ったことではない. 限らず est le connecteur du milieu de phrase (« non seulement N, mais »), et 限って isole N (« justement N »)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker see this station?",
+            "fr": "Comment la personne voit-elle cette gare ?"
+          },
+          "jp": "ホームがこむのは、この駅に限ったことではないが、特に朝のここは人が多くて危ない。",
+          "tr": {
+            "en": "Crowded platforms are not just a thing of this station, but here in the morning there are especially many people and it is dangerous.",
+            "fr": "Les quais bondés ne sont pas propres à cette gare, mais ici, le matin, il y a particulièrement du monde et c'est dangereux."
+          },
+          "choices": [
+            {
+              "en": "Crowding is common elsewhere too, but this station is especially dangerous.",
+              "fr": "L'affluence existe ailleurs aussi, mais cette gare est particulièrement dangereuse."
+            },
+            {
+              "en": "Only this station is crowded.",
+              "fr": "Seule cette gare est bondée."
+            },
+            {
+              "en": "It is no more dangerous than other stations.",
+              "fr": "Elle n'est pas plus dangereuse que les autres gares."
+            }
+          ],
+          "why": {
+            "en": "に限ったことではない says the crowding is not only here. The が and 特に then single this station out as the worst. Both halves count, and neither cancels the other.",
+            "fr": "に限ったことではない dit que l'affluence n'est pas que d'ici. Le が et 特に désignent ensuite cette gare comme la pire. Les deux moitiés comptent, et aucune n'annule l'autre."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend sighs: スマホのバッテリーがすぐなくなる。わたしのスマホだけかな？ You tell them it is not only their phone.",
+            "fr": "Un ami soupire : スマホのバッテリーがすぐなくなる。わたしのスマホだけかな？ Tu lui dis que ce n'est pas seulement son téléphone."
+          },
+          "choices": [
+            "バッテリーがすぐなくなるのは、あなたのスマホに限ったことではないよ。",
+            "バッテリーがすぐなくなるのは、今に限ったことではないよ。",
+            "バッテリーがすぐなくなるのは、あなたのスマホだけのことだよ。"
+          ],
+          "why": {
+            "en": "The noun before に限ったことではない is what the problem is not limited to: your phone. 今に… answers « since when » (it is nothing new), and だけのことだ says it is only yours.",
+            "fr": "Le nom devant に限ったことではない est ce à quoi le problème ne se limite pas : ton téléphone. 今に… répond à « depuis quand » (rien de nouveau), et だけのことだ dit que c'est le tien seul."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "The speaker says this to someone who has just failed at something. What is the aim?",
+            "fr": "Quelqu'un vient d'échouer et on lui dit cela. Dans quel but ?"
+          },
+          "jp": "失敗するのは、あなたに限ったことではないよ。",
+          "tr": {
+            "en": "Failing is not something that only happens to you.",
+            "fr": "Échouer, ça n'arrive pas qu'à toi."
+          },
+          "choices": [
+            {
+              "en": "To reassure: other people fail too, not only you.",
+              "fr": "Rassurer : d'autres échouent aussi, pas seulement toi."
+            },
+            {
+              "en": "To scold the person for failing again and again.",
+              "fr": "Gronder la personne qui échoue encore et encore."
+            },
+            {
+              "en": "To warn that it is the listener, and nobody else, who keeps failing.",
+              "fr": "Avertir que c'est la personne à qui l'on parle, et nulle autre, qui continue d'échouer."
+            }
+          ],
+          "why": {
+            "en": "に限ったことではない widens the case beyond the person in view, here « you ». Said to someone who failed, it tells them they are not alone. It is neither a scolding nor a warning that only they fail.",
+            "fr": "に限ったことではない élargit le cas au-delà de la personne visée, ici « toi ». Dit à quelqu'un qui a échoué, cela signifie qu'il n'est pas seul. Ce n'est ni un reproche ni un avertissement que lui seul échoue."
+          }
+        }
+      ]
     }
   },
   {
@@ -36403,7 +37303,136 @@
             "fr": "きっての le classe premier parmi les boutiques de la ville. ならでは dirait que seule cette ville peut l'avoir ; ただ一つ qu'il n'y en a pas d'autre."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the carpenter?",
+            "fr": "Que dit la phrase du charpentier ?"
+          },
+          "jp": "あの大工さんは、村きっての腕のいい職人だと言われている。",
+          "tr": {
+            "en": "That carpenter is said to be the most skilled craftsman in the village.",
+            "fr": "On dit que ce charpentier est l'artisan le plus habile du village."
+          },
+          "choices": [
+            {
+              "en": "He is the best of the village's craftsmen.",
+              "fr": "C'est le meilleur des artisans du village."
+            },
+            {
+              "en": "He is the only craftsman in the village.",
+              "fr": "C'est le seul artisan du village."
+            },
+            {
+              "en": "He is the village's oldest craftsman.",
+              "fr": "C'est le plus ancien artisan du village."
+            }
+          ],
+          "why": {
+            "en": "村きっての names the group he ranks first in: the village's craftsmen. So there are others, and he beats them; what is ranked is skill, not age.",
+            "fr": "村きっての nomme le groupe où il est le premier : les artisans du village. Il y en a donc d'autres, et il les surpasse ; ce qui est classé, c'est l'habileté, pas l'âge."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "彼女は、クラス＿＿＿人気者だ。",
+          "tr": {
+            "en": "She is the most popular person in the class.",
+            "fr": "C'est la personne la plus populaire de la classe."
+          },
+          "choices": [
+            "きっての",
+            "だけの",
+            "のきっての"
+          ],
+          "why": {
+            "en": "きっての comes straight after the group noun and ranks one member first: クラスきっての人気者. クラスだけの人気者 would be popular only inside the class, and のきっての adds a の that is not there.",
+            "fr": "きっての se place juste après le nom du groupe et classe un membre en tête : クラスきっての人気者. クラスだけの人気者 serait populaire seulement dans la classe, et のきっての ajoute un の qui n'a rien à faire là."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about him?",
+            "fr": "Que dit la phrase à son sujet ?"
+          },
+          "jp": "彼は当時きっての人気作家で、本を出せば必ず売れた。",
+          "tr": {
+            "en": "He was the most popular writer of his day, and any book he published sold.",
+            "fr": "C'était l'écrivain le plus populaire de son époque, et tout livre qu'il publiait se vendait."
+          },
+          "choices": [
+            {
+              "en": "At that time, no writer was more popular than he was.",
+              "fr": "À l'époque, aucun écrivain n'était plus populaire que lui."
+            },
+            {
+              "en": "He is the most popular writer today.",
+              "fr": "C'est l'écrivain le plus populaire aujourd'hui."
+            },
+            {
+              "en": "He was the first writer of his time to be published.",
+              "fr": "Il fut le premier écrivain de son temps à être publié."
+            }
+          ],
+          "why": {
+            "en": "The group before きっての can be a period: 当時きっての is « the foremost of that time ». 当時 and the past tense put it back then, and きっての ranks him first in popularity, not first in order.",
+            "fr": "Le groupe devant きっての peut être une époque : 当時きっての, « le premier de ce temps-là ». 当時 et le passé le situent autrefois, et きっての le place en tête en popularité, pas en tête dans l'ordre."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A visitor asks about Ito, whom everyone at your school calls the brightest student. You know only your school, nothing about other places. You introduce Ito.",
+            "fr": "Un visiteur te parle d'Ito, que tout le monde dans ton école dit être le meilleur élève. Tu ne connais que ton école, rien des autres endroits. Tu présentes Ito."
+          },
+          "choices": [
+            "伊藤さんは、学校きっての秀才です。",
+            "伊藤さんは、日本きっての秀才です。",
+            "伊藤さんは、世界きっての秀才です。"
+          ],
+          "why": {
+            "en": "The noun before きっての is the group in which the person ranks first, so it must be one you can vouch for: the school. 日本 and 世界 use the same pattern but claim far more than you know.",
+            "fr": "Le nom devant きっての est le groupe où la personne est la première : ce doit être un groupe dont tu peux répondre, l'école. 日本 et 世界 emploient le même motif mais affirment bien plus que ce que tu sais."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How good is he, compared with the class?",
+            "fr": "Quel est son niveau par rapport à la classe ?"
+          },
+          "jp": "彼は優秀だが、クラスきっての秀才というほどではない。",
+          "tr": {
+            "en": "He is excellent, but not quite the class's top scholar.",
+            "fr": "Il est excellent, mais pas tout à fait le meilleur élève de la classe."
+          },
+          "choices": [
+            {
+              "en": "Very good, but not the very best.",
+              "fr": "Très bon, mais pas le tout meilleur."
+            },
+            {
+              "en": "The very best in the class.",
+              "fr": "Le meilleur de la classe."
+            },
+            {
+              "en": "Weaker than most of the class.",
+              "fr": "Plus faible que la plupart de la classe."
+            }
+          ],
+          "why": {
+            "en": "クラスきっての picks out the one at the very top, and ほどではない says he does not reach that. So he is good but not first, and nothing says he is weak.",
+            "fr": "クラスきっての désigne celui qui est tout en haut, et ほどではない dit qu'il n'y arrive pas. Il est donc bon sans être le premier, et rien ne dit qu'il est faible."
+          }
+        }
+      ]
     }
   }
 ]
