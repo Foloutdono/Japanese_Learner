@@ -25729,7 +25729,132 @@
             "fr": "La météo est ta source : によると. によって en ferait le moyen ou la cause, et ために, la raison pour laquelle il neige."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "友だちの話によると、あの店のカレーはとても＿＿＿。",
+          "tr": {
+            "en": "According to my friend, the curry at that shop is really good.",
+            "fr": "D'après un ami, le curry de ce restaurant est vraiment très bon."
+          },
+          "choices": [
+            "おいしいそうだ",
+            "おいしそうだ",
+            "おいしいだそうだ"
+          ],
+          "why": {
+            "en": "Hearsay そうだ follows the plain form directly: おいしい + そうだ. おいしそうだ (stem + そう) says it looks good, your own impression, and おいしいだそうだ adds a だ that an い-adjective never takes.",
+            "fr": "Le そうだ d'ouï-dire suit directement la forme neutre : おいしい + そうだ. おいしそうだ (radical + そう) dit que ça a l'air bon, une impression personnelle, et おいしいだそうだ ajoute un だ que l'adjectif en い ne prend jamais."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is reported, and what does the speaker see for themselves?",
+            "fr": "Qu'est-ce qui est rapporté, et qu'est-ce que la personne voit de ses propres yeux ?"
+          },
+          "jp": "天気予報によると午後は雨だそうだが、今のところ空はよく晴れている。",
+          "tr": {
+            "en": "The forecast says it will rain this afternoon, but for now the sky is quite clear.",
+            "fr": "D'après la météo, il pleuvra cet après-midi, mais pour l'instant le ciel est bien dégagé."
+          },
+          "choices": [
+            {
+              "en": "The forecast says rain this afternoon; the sky is clear for now.",
+              "fr": "La météo annonce de la pluie cet après-midi ; pour l'instant, le ciel est dégagé."
+            },
+            {
+              "en": "The speaker says it will rain this afternoon, although the sky is clear.",
+              "fr": "La personne affirme qu'il pleuvra cet après-midi, bien que le ciel soit dégagé."
+            },
+            {
+              "en": "The forecast promised sun, but it is raining now.",
+              "fr": "La météo promettait du soleil, mais il pleut en ce moment."
+            }
+          ],
+          "why": {
+            "en": "によると names the forecast as the source and そうだ closes the report: the rain is the forecast's claim, not the speaker's. が then sets it against what the speaker sees, a clear sky.",
+            "fr": "によると nomme la météo comme source et そうだ clôt le rapport : la pluie est ce que dit la météo, pas la personne. が l'oppose à ce qu'elle voit, un ciel dégagé."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ニュースによると、きのうの夜、駅の近くで火事が＿＿＿。",
+          "tr": {
+            "en": "According to the news, there was a fire near the station last night.",
+            "fr": "D'après les infos, il y a eu un incendie près de la gare hier soir."
+          },
+          "choices": [
+            "あったそうだ",
+            "あるそうだ",
+            "ありそうだ"
+          ],
+          "why": {
+            "en": "The fire is over, so the verb before そうだ is past: あった + そうだ. あるそうだ reports something still to come, and ありそうだ means 'looks like', the speaker's own guess, not a report.",
+            "fr": "L'incendie est passé : le verbe devant そうだ est au passé, あった + そうだ. あるそうだ rapporte quelque chose à venir, et ありそうだ dit « on dirait », une supposition personnelle, pas un rapport."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why does the speaker think the road leads to the station?",
+            "fr": "Pourquoi la personne pense-t-elle que cette route mène à la gare ?"
+          },
+          "jp": "地図によると、この道をまっすぐ行けば、駅に着くはずだ。",
+          "tr": {
+            "en": "According to the map, if you go straight along this road, you should reach the station.",
+            "fr": "D'après le plan, en suivant cette route tout droit, on devrait arriver à la gare."
+          },
+          "choices": [
+            {
+              "en": "Because the map shows it.",
+              "fr": "Parce que le plan l'indique."
+            },
+            {
+              "en": "Because the speaker has walked there before.",
+              "fr": "Parce que la personne y est déjà passée à pied."
+            },
+            {
+              "en": "Because a passer-by said so.",
+              "fr": "Parce qu'un passant le lui a dit."
+            }
+          ],
+          "why": {
+            "en": "によると names the source of what you know, and a thing can be one as well as a person: 地図, the map. はずだ says the speaker expects it from that source, not from having been there.",
+            "fr": "によると nomme la source de ce qu'on sait, et ce peut être une chose aussi bien qu'une personne : 地図, le plan. はずだ dit qu'on s'y attend d'après cette source, pas pour y être déjà allé."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ニュースによると、あしたのコンサートは中止＿＿＿。",
+          "tr": {
+            "en": "According to the news, tomorrow's concert is cancelled.",
+            "fr": "D'après les infos, le concert de demain est annulé."
+          },
+          "choices": [
+            "だそうだ",
+            "そうだ",
+            "なそうだ"
+          ],
+          "why": {
+            "en": "After a noun, hearsay そうだ needs だ: 中止だそうだ. 中止そうだ drops it, and 中止なそうだ borrows the な of な-adjectives, which a noun does not take here.",
+            "fr": "Après un nom, le そうだ d'ouï-dire demande だ : 中止だそうだ. 中止そうだ l'oublie, et 中止なそうだ emprunte le な des adjectifs en な, que le nom ne prend pas ici."
+          }
+        }
+      ]
     }
   },
   {
@@ -25935,7 +26060,136 @@
             "fr": "Paris est ce à quoi tu compares : に比べて. わりに comparerait à ce que Paris laissait attendre, et のように rendrait Paris aussi ponctuel qu'ici."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who is being compared with whom?",
+            "fr": "Qui compare-t-on à qui ?"
+          },
+          "jp": "去年に比べて、ずいぶん背が高くなったね。",
+          "tr": {
+            "en": "You've grown so much taller compared with last year, haven't you?",
+            "fr": "Tu as drôlement grandi par rapport à l'année dernière, dis donc."
+          },
+          "choices": [
+            {
+              "en": "The person addressed, now, with that same person a year ago.",
+              "fr": "La personne à qui l'on parle, aujourd'hui, avec elle-même il y a un an."
+            },
+            {
+              "en": "The person addressed with another person of the same age.",
+              "fr": "La personne à qui l'on parle avec une autre personne du même âge."
+            },
+            {
+              "en": "The speaker with the person addressed.",
+              "fr": "La personne qui parle avec la personne à qui elle parle."
+            }
+          ],
+          "why": {
+            "en": "に比べて makes 去年 the yardstick, and the missing subject is the listener: the same person now against a year ago, hence 背が高くなった. No second person comes into it.",
+            "fr": "に比べて fait de 去年 la mesure, et le sujet absent est l'interlocuteur : la même personne, aujourd'hui contre il y a un an, d'où 背が高くなった. Aucune autre personne n'entre en jeu."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "わたしの国の夏＿＿＿、日本の夏はむしあついです。",
+          "tr": {
+            "en": "Compared with summers in my country, summers in Japan are humid.",
+            "fr": "Par rapport aux étés de mon pays, les étés au Japon sont lourds et humides."
+          },
+          "choices": [
+            "に比べて",
+            "のように",
+            "を比べて"
+          ],
+          "why": {
+            "en": "に比べて makes the first noun the yardstick and says how the second differs. のように would say the two are alike, and を比べて is a slip: the yardstick takes に before 比べて.",
+            "fr": "に比べて fait du premier nom la mesure et dit en quoi le second diffère. のように dirait qu'ils se ressemblent, et を比べて est une faute : la mesure prend に devant 比べて."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the bullet train?",
+            "fr": "Que dit la phrase du train à grande vitesse ?"
+          },
+          "jp": "しんかんせんはバスに比べて、値段は高いが、ずっと速い。",
+          "tr": {
+            "en": "Compared with the bus, the bullet train costs more, but it is much faster.",
+            "fr": "Par rapport au bus, le shinkansen coûte plus cher, mais il est bien plus rapide."
+          },
+          "choices": [
+            {
+              "en": "It costs more than the bus but is much faster.",
+              "fr": "Il coûte plus cher que le bus mais il est bien plus rapide."
+            },
+            {
+              "en": "The bus costs more than the train but is much faster.",
+              "fr": "Le bus coûte plus cher que le train mais il est bien plus rapide."
+            },
+            {
+              "en": "It costs the same as the bus but is much faster.",
+              "fr": "Il coûte autant que le bus mais il est bien plus rapide."
+            }
+          ],
+          "why": {
+            "en": "に比べて makes the bus the yardstick for both halves: the train is dearer (値段は高い) but much faster (ずっと速い). The が only turns from the drawback to the advantage.",
+            "fr": "に比べて fait du bus la mesure des deux moitiés : le train est plus cher (値段は高い) mais bien plus rapide (ずっと速い). Le が passe simplement de l'inconvénient à l'avantage."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You grew up in a small town and now live in Tokyo. A friend asks what is different. You talk about shops: there are far more of them in Tokyo than back home.",
+            "fr": "Tu as grandi dans une petite ville et tu vis maintenant à Tokyo. Un ami te demande ce qui change. Tu parles des magasins : il y en a bien plus à Tokyo que chez toi."
+          },
+          "choices": [
+            "ふるさとに比べて、東京は店がずっと多いです。",
+            "東京に比べて、ふるさとは店がずっと多いです。",
+            "ふるさとに比べて、東京は店がずっと少ないです。"
+          ],
+          "why": {
+            "en": "X に比べて、Y は…: X is the yardstick and Y is what is described. With ふるさと as the yardstick, Tokyo must be the one with 多い. Swapping them says the hometown has more; 少ない says the opposite.",
+            "fr": "X に比べて、Y は… : X est la mesure et Y ce qu'on décrit. Avec ふるさと pour mesure, c'est Tokyo qui doit être 多い. Les échanger dit que la ville natale en a plus ; 少ない dit le contraire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Which summer was hotter?",
+            "fr": "Quel été a été le plus chaud ?"
+          },
+          "jp": "今年は去年に比べて、夏があまりあつくなかった。",
+          "tr": {
+            "en": "Compared with last year, this summer wasn't very hot.",
+            "fr": "Par rapport à l'an dernier, cet été n'a pas été très chaud."
+          },
+          "choices": [
+            {
+              "en": "Last summer.",
+              "fr": "L'été dernier."
+            },
+            {
+              "en": "This summer.",
+              "fr": "Cet été."
+            },
+            {
+              "en": "They were about the same.",
+              "fr": "Ils se valaient à peu près."
+            }
+          ],
+          "why": {
+            "en": "に比べて makes last year the yardstick, and the verb says this summer fell short of it: あつくなかった. So last summer was the hotter one.",
+            "fr": "に比べて fait de l'an dernier la mesure, et le verbe dit que cet été est resté en deçà : あつくなかった. L'été dernier était donc le plus chaud."
+          }
+        }
+      ]
     }
   },
   {
@@ -26175,7 +26429,127 @@
             "fr": "Le billet de bus remplace le billet de train : 代わりに. ほかに et いっしょに l'utiliseraient en plus d'un billet de train."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "バス＿＿＿、タクシーで行きました。",
+          "tr": {
+            "en": "I went by taxi instead of the bus.",
+            "fr": "J'ai pris un taxi au lieu du bus."
+          },
+          "choices": [
+            "の代わりに",
+            "代わりに",
+            "のほかに"
+          ],
+          "why": {
+            "en": "A noun needs の before 代わりに: バスの代わりに, 'instead of the bus'. Without の it is a slip, and のほかに means 'besides the bus', which would add the taxi to the bus rather than replace it.",
+            "fr": "Un nom veut の devant 代わりに : バスの代わりに, « à la place du bus ». Sans の, c'est une faute, et のほかに veut dire « en plus du bus », qui ajouterait le taxi au bus au lieu de le remplacer."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who went to the meeting?",
+            "fr": "Qui a assisté à la réunion ?"
+          },
+          "jp": "病気の父の代わりに、わたしが会議に出ました。",
+          "tr": {
+            "en": "I attended the meeting in place of my sick father.",
+            "fr": "J'ai assisté à la réunion à la place de mon père malade."
+          },
+          "choices": [
+            {
+              "en": "The speaker, because the father was ill.",
+              "fr": "La personne qui parle, car son père était malade."
+            },
+            {
+              "en": "The father, with the speaker going along.",
+              "fr": "Le père, accompagné de la personne qui parle."
+            },
+            {
+              "en": "Both of them, together.",
+              "fr": "Les deux, ensemble."
+            }
+          ],
+          "why": {
+            "en": "A の代わりに B: B takes A's place. 病気の父 is the one being replaced, and わたしが is who actually went.",
+            "fr": "A の代わりに B : B prend la place de A. 病気の父 est celui qu'on remplace, et わたしが la personne qui y est vraiment allée."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "At a café, the set comes with rice, but you would rather have bread. You ask the staff.",
+            "fr": "Dans un café, le menu est servi avec du riz, mais tu préférerais du pain. Tu le demandes au personnel."
+          },
+          "choices": [
+            "ごはんの代わりに、パンをください。",
+            "パンの代わりに、ごはんをください。",
+            "ごはんのほかに、パンもください。"
+          ],
+          "why": {
+            "en": "A の代わりに B means B instead of A: rice out, bread in. Reversing them asks for rice in place of bread, and のほかに asks for bread on top of the rice, which you do not want.",
+            "fr": "A の代わりに B veut dire B au lieu de A : on retire le riz, on prend le pain. Les inverser demande du riz à la place du pain, et のほかに demande du pain en plus du riz, ce que tu ne veux pas."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "電話を＿＿＿、メールを送りました。",
+          "tr": {
+            "en": "Instead of calling, I sent an email.",
+            "fr": "Au lieu de téléphoner, j'ai envoyé un mail."
+          },
+          "choices": [
+            "する代わりに",
+            "するの代わりに",
+            "するほかに"
+          ],
+          "why": {
+            "en": "After a verb, 代わりに follows the plain form directly: 電話する代わりに. するの代わりに borrows the noun pattern, and するほかに means 'besides calling', so the email would be an extra.",
+            "fr": "Après un verbe, 代わりに suit directement la forme neutre : 電話する代わりに. するの代わりに emprunte le modèle du nom, et するほかに veut dire « en plus de téléphoner » : le mail serait un ajout."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who clears up after dinner?",
+            "fr": "Qui range après le dîner ?"
+          },
+          "jp": "ばんごはんを作る代わりに、あとかたづけはそっちがやってね。",
+          "tr": {
+            "en": "I'll make dinner, so in return you do the clearing up, okay?",
+            "fr": "Moi je fais le dîner, et en échange tu t'occupes de ranger ensuite, d'accord ?"
+          },
+          "choices": [
+            {
+              "en": "The listener; the speaker cooks.",
+              "fr": "La personne à qui l'on parle ; la personne qui parle fait la cuisine."
+            },
+            {
+              "en": "The speaker; the listener cooks.",
+              "fr": "La personne qui parle ; l'autre fait la cuisine."
+            },
+            {
+              "en": "The speaker does both.",
+              "fr": "La personne qui parle fait les deux."
+            }
+          ],
+          "why": {
+            "en": "After a verb, 代わりに is 'in exchange for': the speaker does the first thing, cooking, and the listener does the second. It is not 'instead of cooking'.",
+            "fr": "Après un verbe, 代わりに veut dire « en échange de » : la personne qui parle fait la première chose, cuisiner, et l'autre la seconde. Ce n'est pas « au lieu de cuisiner »."
+          }
+        }
+      ]
     }
   },
   {
@@ -26417,7 +26791,141 @@
             "fr": "Le thé s'ajoute aux onigiri : ほかに. 代わりに les remplacerait par le thé, et おにぎりの上に le poserait sur les onigiri."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Is there another road to the station?",
+            "fr": "Y a-t-il une autre route pour aller à la gare ?"
+          },
+          "jp": "この道は遠いですが、ほかに駅へ行く道はありません。",
+          "tr": {
+            "en": "This road is a long way, but there is no other road to the station.",
+            "fr": "Cette route est longue, mais il n'y a pas d'autre route pour aller à la gare."
+          },
+          "choices": [
+            {
+              "en": "No: this road is the only one.",
+              "fr": "Non : cette route est la seule."
+            },
+            {
+              "en": "Yes: there is another road.",
+              "fr": "Oui : il y a une autre route."
+            },
+            {
+              "en": "Yes, but it is even longer.",
+              "fr": "Oui, mais elle est encore plus longue."
+            }
+          ],
+          "why": {
+            "en": "ほかに with a negative means 'nothing else': ほかに…はありません says there is no other road. Without the negative, ほかに would add one.",
+            "fr": "ほかに avec une négation veut dire « rien d'autre » : ほかに…はありません dit qu'il n'y a pas d'autre route. Sans négation, ほかに en ajouterait une."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ノート＿＿＿、ペンも買いました。",
+          "tr": {
+            "en": "Besides a notebook, I bought a pen too.",
+            "fr": "En plus d'un cahier, j'ai aussi acheté un stylo."
+          },
+          "choices": [
+            "のほかに",
+            "の代わりに",
+            "ほかに"
+          ],
+          "why": {
+            "en": "A noun takes の before ほかに: ノートのほかに adds the pen to the notebook. の代わりに would say the pen replaced it, and ほかに without の is the slip.",
+            "fr": "Un nom prend の devant ほかに : ノートのほかに ajoute le stylo au cahier. の代わりに dirait que le stylo l'a remplacé, et ほかに sans の est la faute."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the brother do?",
+            "fr": "Que fait le frère ?"
+          },
+          "jp": "兄は大学の勉強のほかに、夜は店でアルバイトもしている。",
+          "tr": {
+            "en": "Besides his university studies, my older brother also works part-time at a shop in the evening.",
+            "fr": "En plus de ses études à l'université, mon frère aîné travaille aussi le soir dans un magasin."
+          },
+          "choices": [
+            {
+              "en": "He studies and also works part-time.",
+              "fr": "Il étudie et travaille aussi à temps partiel."
+            },
+            {
+              "en": "He works at the shop instead of studying.",
+              "fr": "Il travaille au magasin au lieu d'étudier."
+            },
+            {
+              "en": "He studies, but does not work.",
+              "fr": "Il étudie, mais ne travaille pas."
+            }
+          ],
+          "why": {
+            "en": "勉強のほかに…も adds a second activity to the first: besides studying, he works. It does not replace studying (that would be 代わりに) or leave the job out.",
+            "fr": "勉強のほかに…も ajoute une seconde activité à la première : en plus d'étudier, il travaille. Cela ne remplace pas les études (ce serait 代わりに) et n'exclut pas le travail."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この町には、古いおてらがあります。＿＿＿、大きい公園もあります。",
+          "tr": {
+            "en": "This town has an old temple. There is also a big park.",
+            "fr": "Cette ville a un vieux temple. Il y a aussi un grand parc."
+          },
+          "choices": [
+            "ほかにも",
+            "代わりに",
+            "つまり"
+          ],
+          "why": {
+            "en": "ほかにも opens a sentence that adds to what was just said: the temple, and more besides. 代わりに would swap the park for the temple, which も and あります contradict, and つまり restates, it adds nothing.",
+            "fr": "ほかにも ouvre une phrase qui ajoute à ce qu'on vient de dire : le temple, et d'autres choses. 代わりに échangerait le parc contre le temple, ce que も et あります contredisent, et つまり reformule, il n'ajoute rien."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker want to know?",
+            "fr": "Que veut savoir la personne ?"
+          },
+          "jp": "ほかに手伝ってくれる人は、いませんか。",
+          "tr": {
+            "en": "Isn't there anyone else who could help?",
+            "fr": "N'y a-t-il personne d'autre qui puisse aider ?"
+          },
+          "choices": [
+            {
+              "en": "Whether anyone else can help.",
+              "fr": "S'il y a quelqu'un d'autre pour aider."
+            },
+            {
+              "en": "Whether someone can help in place of the usual person.",
+              "fr": "Si quelqu'un peut aider à la place de la personne habituelle."
+            },
+            {
+              "en": "Complaining that nobody is helping.",
+              "fr": "Se plaindre que personne n'aide."
+            }
+          ],
+          "why": {
+            "en": "ほかに means 'else' even with no noun in front: ほかに…人 asks for one more person besides those already helping. It does not say 'in place of' (代わりに).",
+            "fr": "ほかに veut dire « d'autre » même sans nom devant : ほかに…人 demande une personne de plus, en plus de celles qui aident déjà. Cela ne dit pas « à la place de » (代わりに)."
+          }
+        }
+      ]
     }
   },
   {
@@ -26648,7 +27156,127 @@
             "fr": "Tu l'accordes, puis tu objectes : おいしいことはおいしかった. し énumérerait deux faits, et ことがある veut dire « avoir déjà fait »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What happened?",
+            "fr": "Que s'est-il passé ?"
+          },
+          "jp": "雨は降ることは降ったが、かさはいらなかった。",
+          "tr": {
+            "en": "It did rain, but I didn't need an umbrella.",
+            "fr": "Il a bien plu, mais je n'ai pas eu besoin de parapluie."
+          },
+          "choices": [
+            {
+              "en": "It rained, but so little that no umbrella was needed.",
+              "fr": "Il a plu, mais si peu qu'il n'a pas fallu de parapluie."
+            },
+            {
+              "en": "It didn't rain, so no umbrella was needed.",
+              "fr": "Il n'a pas plu, donc pas besoin de parapluie."
+            },
+            {
+              "en": "It rained, so an umbrella was needed.",
+              "fr": "Il a plu, donc il a fallu un parapluie."
+            }
+          ],
+          "why": {
+            "en": "降ることは降った admits the fact: it did rain. が then takes it back partly: かさはいらなかった. So it rained a little; it is not 'it didn't rain'.",
+            "fr": "降ることは降った admet le fait : il a bien plu. が le reprend en partie : かさはいらなかった. Il a donc plu un peu ; ce n'est pas « il n'a pas plu »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうの映画は＿＿＿、よくわからなかった。",
+          "tr": {
+            "en": "I did watch yesterday's film, but I didn't understand it well.",
+            "fr": "Le film d'hier, je l'ai bien regardé, mais je n'ai pas bien compris."
+          },
+          "choices": [
+            "見ることは見たが",
+            "見ることは見るが",
+            "見たことがあるが"
+          ],
+          "why": {
+            "en": "The same verb twice, and the second copy carries the tense: きのう, so 見た. 見るが would be present, and 見たことがある says 'I have seen it before', an experience, not an admission.",
+            "fr": "Le même verbe deux fois, et la seconde copie porte le temps : きのう, donc 見た. 見るが serait au présent, et 見たことがある dit « je l'ai déjà vu », une expérience, pas une concession."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A coworker asks what you think of the new phone. Overall you find it too expensive, though you admit it looks good. What do you say?",
+            "fr": "Un collègue te demande ce que tu penses du nouveau téléphone. Dans l'ensemble, tu le trouves trop cher, même si tu admets qu'il est beau. Que réponds-tu ?"
+          },
+          "choices": [
+            "デザインはいいことはいいんですが、高すぎます。",
+            "高いことは高いんですが、デザインはいいです。",
+            "デザインがいいので、すぐ買いたいです。"
+          ],
+          "why": {
+            "en": "With ことは…が the speaker admits the first point and puts the real view after it. Here 高すぎる is the view; 高いことは高いんですが, with the good design last, would leave the speaker pleased.",
+            "fr": "Avec ことは…が, on admet le premier point et le vrai avis vient après. Ici 高すぎる est l'avis ; 高いことは高いんですが, avec le beau design en dernier, laisserait la personne satisfaite."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "プールでは＿＿＿、あまり速くない。",
+          "tr": {
+            "en": "I can swim, it's true, but I'm not very fast.",
+            "fr": "Je sais nager, c'est vrai, mais je ne vais pas très vite."
+          },
+          "choices": [
+            "泳げることは泳げるが",
+            "泳げるは泳げるが",
+            "泳げることは泳ぐが"
+          ],
+          "why": {
+            "en": "The second copy repeats the first word: 泳げる…泳げる. 泳げるは drops ことは, and 泳ぐが changes the verb, so it no longer echoes the ability being admitted.",
+            "fr": "La seconde copie répète le premier mot : 泳げる…泳げる. 泳げるは oublie ことは, et 泳ぐが change le verbe, il ne reprend plus la capacité qu'on admet."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Can the speaker eat spicy food?",
+            "fr": "La personne peut-elle manger épicé ?"
+          },
+          "jp": "からいものは、食べられることは食べられるが、あまり好きではない。",
+          "tr": {
+            "en": "I can eat spicy food, admittedly, but I don't like it much.",
+            "fr": "Je peux manger épicé, certes, mais je n'aime pas trop ça."
+          },
+          "choices": [
+            {
+              "en": "Yes, but the speaker doesn't like it much.",
+              "fr": "Oui, mais la personne n'aime pas trop ça."
+            },
+            {
+              "en": "No, the speaker cannot.",
+              "fr": "Non, la personne ne peut pas."
+            },
+            {
+              "en": "Yes, and the speaker likes it very much.",
+              "fr": "Oui, et la personne adore ça."
+            }
+          ],
+          "why": {
+            "en": "食べられることは食べられる admits the ability: the speaker can eat it. が then qualifies it: あまり好きではない. It does not say 'cannot'.",
+            "fr": "食べられることは食べられる admet la capacité : on peut en manger. が la nuance ensuite : あまり好きではない. Cela ne dit pas « on ne peut pas »."
+          }
+        }
+      ]
     }
   },
   {
@@ -26886,7 +27514,111 @@
             "fr": "Tu veux qu'on t'explique le mot : というのは. つまり reformulerait ce qu'il a dit, et と言いましたか vérifie seulement que tu as bien entendu."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "「ふとん」＿＿＿、ねるときにしくものです。",
+          "tr": {
+            "en": "A 'futon' is what you lay out to sleep on.",
+            "fr": "Un « futon », c'est ce qu'on étale pour dormir."
+          },
+          "choices": [
+            "というのは",
+            "という",
+            "といって"
+          ],
+          "why": {
+            "en": "というのは puts a word up to be explained, and the explanation follows. という alone must come before a noun ('called…'), and といって is 'saying…', which starts no explanation.",
+            "fr": "というのは met un mot en avant pour l'expliquer, et l'explication suit. という seul doit précéder un nom (« appelé… »), et といって veut dire « en disant… », ce qui n'ouvre aucune explication."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker trying to find out?",
+            "fr": "Que cherche à savoir la personne ?"
+          },
+          "jp": "田中さんというのは、あの背の高い人ですか。",
+          "tr": {
+            "en": "Is Tanaka that tall person over there?",
+            "fr": "Tanaka, c'est bien cette personne de grande taille, là-bas ?"
+          },
+          "choices": [
+            {
+              "en": "Whether Tanaka is the tall person over there.",
+              "fr": "Si Tanaka est la personne de grande taille, là-bas."
+            },
+            {
+              "en": "What the name 'Tanaka' means.",
+              "fr": "Ce que veut dire le nom « Tanaka »."
+            },
+            {
+              "en": "Whether the tall person knows Tanaka.",
+              "fr": "Si la personne de grande taille connaît Tanaka."
+            }
+          ],
+          "why": {
+            "en": "X というのは picks out the one called X so as to identify or explain it, here by pointing: is that Tanaka? It asks who the person is, not what the name means or who knows whom.",
+            "fr": "X というのは désigne celui qu'on appelle X pour l'identifier ou l'expliquer, ici en le montrant : est-ce Tanaka ? Cela demande qui est la personne, pas ce que le nom veut dire ni qui connaît qui."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "「さんぽ」というのは、ゆっくり歩く＿＿＿。",
+          "tr": {
+            "en": "'Sanpo' means walking slowly.",
+            "fr": "« Sanpo », c'est marcher tranquillement."
+          },
+          "choices": [
+            "ことです",
+            "のことです",
+            "ところです"
+          ],
+          "why": {
+            "en": "A definition names an act by putting こと straight after the verb: 歩くこと, 'walking'. 歩くのことです borrows the noun pattern (町のこと), and 歩くところです means 'is about to walk'.",
+            "fr": "Une définition nomme un acte en mettant こと juste après le verbe : 歩くこと, « marcher ». 歩くのことです emprunte le modèle du nom (町のこと), et 歩くところです veut dire « est sur le point de marcher »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "According to the sentence, what is a 'shuuten'?",
+            "fr": "Selon la phrase, qu'est-ce qu'un « shuuten » ?"
+          },
+          "jp": "「しゅうてん」というのは、電車がさいごに止まる駅のことです。",
+          "tr": {
+            "en": "A 'shuuten' is the station where a train stops last.",
+            "fr": "Un « shuuten », c'est la gare où un train s'arrête en dernier."
+          },
+          "choices": [
+            {
+              "en": "The last station a train stops at.",
+              "fr": "Le dernier arrêt d'un train."
+            },
+            {
+              "en": "The first station a train leaves from.",
+              "fr": "La gare d'où part un train."
+            },
+            {
+              "en": "A station where every train stops.",
+              "fr": "Une gare où s'arrêtent tous les trains."
+            }
+          ],
+          "why": {
+            "en": "というのは introduces the meaning of the word, and what follows, …のことです, is the definition: the station where the train stops last. It is not a question about the word.",
+            "fr": "というのは introduit le sens du mot, et ce qui suit, …のことです, est la définition : la gare où le train s'arrête en dernier. Ce n'est pas une question sur le mot."
+          }
+        }
+      ]
     }
   },
   {
@@ -27085,7 +27817,111 @@
             "fr": "Une seule étendue, du vendredi soir jusqu'au samedi : から〜にかけて. か serait l'un ou l'autre, et までに, « d'ici vendredi soir », une échéance."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Where will it rain heavily?",
+            "fr": "Où y aura-t-il de fortes pluies ?"
+          },
+          "jp": "名古屋から京都にかけて、大雨になるでしょう。",
+          "tr": {
+            "en": "There will be heavy rain from Nagoya across to Kyoto.",
+            "fr": "Il y aura de fortes pluies depuis Nagoya jusqu'à Kyoto."
+          },
+          "choices": [
+            {
+              "en": "Across the whole stretch from Nagoya to Kyoto.",
+              "fr": "Sur toute la zone allant de Nagoya à Kyoto."
+            },
+            {
+              "en": "Only in Nagoya and Kyoto, not in between.",
+              "fr": "Seulement à Nagoya et à Kyoto, pas entre les deux."
+            },
+            {
+              "en": "First in Nagoya, then in Kyoto, on different days.",
+              "fr": "D'abord à Nagoya, puis à Kyoto, à des jours différents."
+            }
+          ],
+          "why": {
+            "en": "A から B にかけて covers the whole stretch from A through B, edges soft: the places between are included. It is neither a list of two spots nor a timetable, one after the other.",
+            "fr": "A から B にかけて couvre toute l'étendue de A à B, aux bords flous : les lieux intermédiaires en font partie. Ce n'est ni une liste de deux endroits ni un horaire, l'un après l'autre."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿にかけて、雨の日が多いです。",
+          "tr": {
+            "en": "From June into July, there are many rainy days.",
+            "fr": "De juin à juillet, il y a beaucoup de jours de pluie."
+          },
+          "choices": [
+            "六月から七月",
+            "七月から六月",
+            "六月と七月"
+          ],
+          "why": {
+            "en": "A から B にかけて runs in the order of the stretch: 六月から七月, June into July. Reversed it would run from July back to June, and と only names two months, with no stretch between them.",
+            "fr": "A から B にかけて suit l'ordre de l'étendue : 六月から七月, de juin à juillet. À l'envers, on irait de juillet à juin, et と ne fait que citer deux mois, sans étendue entre eux."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When did the speaker work abroad?",
+            "fr": "Quand la personne a-t-elle travaillé à l'étranger ?"
+          },
+          "jp": "二十代から三十代にかけて、わたしは三つの国で働いた。",
+          "tr": {
+            "en": "From my twenties into my thirties, I worked in three countries.",
+            "fr": "De mes vingt ans à mes trente ans, j'ai travaillé dans trois pays."
+          },
+          "choices": [
+            {
+              "en": "Over the years from the twenties into the thirties.",
+              "fr": "Pendant les années qui vont de la vingtaine à la trentaine."
+            },
+            {
+              "en": "Only at twenty and again at thirty.",
+              "fr": "Seulement à vingt ans, puis à trente ans."
+            },
+            {
+              "en": "Only in the twenties, not the thirties.",
+              "fr": "Seulement pendant la vingtaine, pas la trentaine."
+            }
+          ],
+          "why": {
+            "en": "A から B にかけて spans from A across to B, edges soft: here the years from the twenties into the thirties. It does not name two exact moments, and B is part of the stretch.",
+            "fr": "A から B にかけて s'étend de A jusqu'à B, aux bords flous : ici, les années de la vingtaine à la trentaine. Il ne cite pas deux moments précis, et B fait partie de l'étendue."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "冬から春＿＿＿かけて、かふんがとびます。",
+          "tr": {
+            "en": "From winter into spring, pollen is in the air.",
+            "fr": "De l'hiver au printemps, le pollen est dans l'air."
+          },
+          "choices": [
+            "に",
+            "を",
+            "は"
+          ],
+          "why": {
+            "en": "The pattern is A から B にかけて: に marks the end of the stretch. 春をかけて looks like 時間をかけて ('taking time'), and 春はかけて breaks the pattern.",
+            "fr": "Le modèle est A から B にかけて : に marque la fin de l'étendue. 春をかけて ressemble à 時間をかけて (« en prenant du temps »), et 春はかけて casse le modèle."
+          }
+        }
+      ]
     }
   },
   {
@@ -27327,7 +28163,132 @@
             "fr": "Il a donné son accord et tu le prends, humblement : きゅうけいさせていただきます. させます ferait reposer quelqu'un d'autre, et てあげます, ce serait te reposer pour lui rendre service."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "こちらにお名前を＿＿＿。",
+          "tr": {
+            "en": "I'll write your name here, if I may.",
+            "fr": "Je vais écrire votre nom ici, si vous le permettez."
+          },
+          "choices": [
+            "書かせていただきます",
+            "書かさせていただきます",
+            "書いていただきます"
+          ],
+          "why": {
+            "en": "書く is a う-verb, so its causative is 書かせる: 書かせていただきます. 書かさせて adds a stray さ, a common slip, and 書いていただきます means 'I will have you write'.",
+            "fr": "書く est un verbe en う : son causatif est 書かせる, d'où 書かせていただきます. 書かさせて ajoute un さ de trop, faute courante, et 書いていただきます veut dire « je vous demanderai d'écrire »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who worked abroad?",
+            "fr": "Qui a travaillé à l'étranger ?"
+          },
+          "jp": "社長のおかげで、海外で働かせていただきました。",
+          "tr": {
+            "en": "Thanks to the president, I was given the chance to work abroad.",
+            "fr": "Grâce au président, j'ai eu la chance de travailler à l'étranger."
+          },
+          "choices": [
+            {
+              "en": "The speaker did, with the president's permission.",
+              "fr": "La personne qui parle, avec l'accord du président."
+            },
+            {
+              "en": "The president did, at the speaker's request.",
+              "fr": "Le président, à la demande de la personne qui parle."
+            },
+            {
+              "en": "Someone else did, sent by the speaker.",
+              "fr": "Quelqu'un d'autre, envoyé par la personne qui parle."
+            }
+          ],
+          "why": {
+            "en": "働かせていただく is the humble 'I was allowed to work': the speaker worked, and the president is the one who allowed it. The causative does not mean the speaker made anyone work.",
+            "fr": "働かせていただく est le « on m'a permis de travailler » humble : la personne qui parle a travaillé, et le président l'a permis. Le causatif ne veut pas dire qu'elle a fait travailler quelqu'un."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "その件は、もう少し＿＿＿。",
+          "tr": {
+            "en": "Let me think about that matter a little longer.",
+            "fr": "Permettez-moi d'y réfléchir encore un peu."
+          },
+          "choices": [
+            "考えさせていただきます",
+            "考えらせていただきます",
+            "考えていただきます"
+          ],
+          "why": {
+            "en": "考える is a る-verb: drop る and add させ: 考えさせて. 考えらせて applies the う-verb rule, and 考えていただきます means 'I will have you think about it'.",
+            "fr": "考える est un verbe en る : on retire る et on ajoute させ : 考えさせて. 考えらせて applique la règle des verbes en う, et 考えていただきます veut dire « je vous demande d'y réfléchir »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker doing?",
+            "fr": "Que fait la personne ?"
+          },
+          "jp": "せっかくですが、今回はお断りさせていただきます。",
+          "tr": {
+            "en": "Thank you for the offer, but I'll have to decline this time.",
+            "fr": "C'est gentil, mais je vais devoir refuser cette fois."
+          },
+          "choices": [
+            {
+              "en": "Politely announcing that they decline.",
+              "fr": "Annoncer poliment que l'on refuse."
+            },
+            {
+              "en": "Asking whether they may decline.",
+              "fr": "Demander si l'on peut refuser."
+            },
+            {
+              "en": "Gladly accepting the offer.",
+              "fr": "Accepter l'offre avec plaisir."
+            }
+          ],
+          "why": {
+            "en": "The sentence ends in ます: it announces, humbly, what the speaker will do. Asking would end in いただけませんか.",
+            "fr": "La phrase finit en ます : elle annonce, avec humilité, ce que l'on va faire. Pour demander, elle finirait en いただけませんか."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "写真を送らせて＿＿＿。",
+          "tr": {
+            "en": "I'll send you the photos, if I may.",
+            "fr": "Je vous enverrai les photos, si vous le permettez."
+          },
+          "choices": [
+            "いただきます",
+            "くれます",
+            "あげます"
+          ],
+          "why": {
+            "en": "The humble 'I do it, with your permission' is させて + いただく. くれます would say someone lets me, from the other side, and あげます that I let someone: the giving verbs say who gives and who receives.",
+            "fr": "Le « je le fais, avec votre permission » humble est させて + いただく. くれます dirait qu'on me laisse faire, de l'autre côté, et あげます que je laisse faire quelqu'un : les verbes de don disent qui donne et qui reçoit."
+          }
+        }
+      ]
     }
   },
   {
@@ -27525,7 +28486,106 @@
             "fr": "La nouvelle a déjoué ton attente : ところが. ところで changerait de sujet, et だから ferait de ta course la cause."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the second sentence relate to the first?",
+            "fr": "Quel lien y a-t-il entre la seconde phrase et la première ?"
+          },
+          "jp": "セールだと聞いて行った。ところが、ほしいものはもうなくなっていた。",
+          "tr": {
+            "en": "I heard there was a sale, so I went. But what I wanted was already gone.",
+            "fr": "J'ai appris qu'il y avait des soldes, alors j'ai fait le déplacement. Mais ce que je voulais avait déjà disparu."
+          },
+          "choices": [
+            {
+              "en": "It turns out the opposite of what the speaker hoped.",
+              "fr": "Ce qui arrive est l'inverse de ce que la personne espérait."
+            },
+            {
+              "en": "It gives the reason for going.",
+              "fr": "Elle donne la raison pour laquelle on y est allé."
+            },
+            {
+              "en": "It changes the subject.",
+              "fr": "Elle change de sujet."
+            }
+          ],
+          "why": {
+            "en": "ところが opens a sentence that goes against what was expected: a sale promises a purchase, and the fact is that the item was gone. It is neither a reason (だから) nor a change of subject (ところで).",
+            "fr": "ところが ouvre une phrase qui va à l'inverse de l'attente : des soldes laissent espérer un achat, et le fait est que l'article n'y était plus. Ce n'est ni une raison (だから) ni un changement de sujet (ところで)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "かさを持って出かけた。＿＿＿、雨はふらなかった。",
+          "tr": {
+            "en": "I went out with an umbrella. But it didn't rain.",
+            "fr": "J'avais pris un parapluie en partant. Mais il n'a pas plu."
+          },
+          "choices": [
+            "ところが",
+            "それで",
+            "そのうえ"
+          ],
+          "why": {
+            "en": "The second sentence goes against what taking an umbrella suggests, so ところが. それで would make it a result ('and so'), and そのうえ would add one more thing ('what's more').",
+            "fr": "La seconde phrase va à l'inverse de ce que le parapluie laisse prévoir, donc ところが. それで en ferait une conséquence (« et donc »), et そのうえ ajouterait autre chose (« en plus »)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How did it turn out?",
+            "fr": "Comment cela s'est-il terminé ?"
+          },
+          "jp": "一人では行けないと思った。ところが、友だちが車で送ってくれた。",
+          "tr": {
+            "en": "I thought I couldn't go on my own. But a friend drove me there.",
+            "fr": "Je pensais ne pas pouvoir y aller par mes propres moyens. Mais un ami a pu me conduire en voiture."
+          },
+          "choices": [
+            {
+              "en": "Better than expected: a friend drove the speaker.",
+              "fr": "Mieux que prévu : un ami a emmené la personne en voiture."
+            },
+            {
+              "en": "Worse than expected: the speaker could not go.",
+              "fr": "Pire que prévu : la personne n'a pas pu y aller."
+            },
+            {
+              "en": "As expected: the speaker went alone.",
+              "fr": "Comme prévu : la personne y est allée seule."
+            }
+          ],
+          "why": {
+            "en": "ところが only says the result goes against the expectation; it can be good news. The speaker expected not to be able to go, and a friend drove them.",
+            "fr": "ところが dit seulement que le résultat va à l'inverse de l'attente ; ce peut être une bonne nouvelle. La personne pensait ne pas pouvoir y aller, et un ami l'a emmenée."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You thought the new café would be packed, so you made a point of going early. But it was empty. You tell a friend.",
+            "fr": "Tu pensais que le nouveau café serait bondé, alors tu as fait le déplacement tôt. Mais il était vide. Tu le racontes à un ami."
+          },
+          "choices": [
+            "人が多いと思って、早く行きました。ところが、お客さんは一人もいませんでした。",
+            "人が多いと思って、早く行きました。ところが、お客さんは本当にたくさんいました。",
+            "人が多いと思って、早く行きました。ところで、お客さんは一人もいませんでした。"
+          ],
+          "why": {
+            "en": "The empty café is the opposite of the crowd expected, so the second sentence opens with ところが. A crowd is just what was expected, so ところが does not fit it, and ところで changes the subject.",
+            "fr": "Le café vide est l'inverse de la foule attendue, donc la seconde phrase s'ouvre sur ところが. Une foule, c'est justement ce qu'on attendait : ところが n'y va pas, et ところで change de sujet."
+          }
+        }
+      ]
     }
   },
   {
@@ -27725,7 +28785,106 @@
             "fr": "Tu reformules ce qu'il a dit avec tes mots : つまり. ところが serait une surprise, et それに ajouterait un fait nouveau."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "うちには、ねこが二ひきと犬が一ぴきいます。＿＿＿、ぜんぶで三びきです。",
+          "tr": {
+            "en": "We have two cats and a dog. In other words, three animals in all.",
+            "fr": "Chez nous, il y a deux chats et un chien. Autrement dit, trois animaux en tout."
+          },
+          "choices": [
+            "つまり",
+            "だから",
+            "ところが"
+          ],
+          "why": {
+            "en": "The second sentence says the same thing as the first, in a shorter way: two plus one is three. つまり restates it. だから would draw a consequence, and ところが would turn against it.",
+            "fr": "La seconde phrase dit la même chose que la première, en plus court : deux et un font trois. つまり la reformule. だから en tirerait une conséquence, et ところが irait à son encontre."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Where will the speaker wait?",
+            "fr": "Où la personne attendra-t-elle ?"
+          },
+          "jp": "駅の北口、つまり本屋のある方で、待っています。",
+          "tr": {
+            "en": "I'll be waiting at the north exit of the station, that is, on the side with the bookshop.",
+            "fr": "J'attendrai à la sortie nord de la gare, c'est-à-dire du côté où se trouve la librairie."
+          },
+          "choices": [
+            {
+              "en": "In one place: the north exit, which is the bookshop side.",
+              "fr": "À un seul endroit : la sortie nord, qui est du côté de la librairie."
+            },
+            {
+              "en": "In two places: the north exit and the bookshop.",
+              "fr": "À deux endroits : la sortie nord et la librairie."
+            },
+            {
+              "en": "At the bookshop, not at the north exit.",
+              "fr": "À la librairie, pas à la sortie nord."
+            }
+          ],
+          "why": {
+            "en": "つまり restates: 北口 and 本屋のある方 name the same place, the second in plainer words. It does not add a second meeting point or replace the first.",
+            "fr": "つまり reformule : 北口 et 本屋のある方 désignent le même endroit, le second en mots plus simples. Il n'ajoute pas un second lieu et ne remplace pas le premier."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A colleague tells you: 「店は、月曜日から金曜日の十時から六時まで。土曜日と日曜日は休みです。」 You want to check you have understood: it is open only on weekdays.",
+            "fr": "Un collègue te dit : 「店は、月曜日から金曜日の十時から六時まで。土曜日と日曜日は休みです。」 Tu veux vérifier que tu as bien compris : la boutique n'est ouverte qu'en semaine."
+          },
+          "choices": [
+            "つまり、月曜日から金曜日しかあいていないんですね。",
+            "つまり、土曜日も日曜日もあいているんですね。",
+            "ところが、月曜日から金曜日しかあいていないんですね。"
+          ],
+          "why": {
+            "en": "つまり must restate what was said in fewer words: open only on weekdays. With the weekend open, the same つまり says something else, and ところが is for a surprise, not for checking.",
+            "fr": "つまり doit reformuler ce qu'on a dit en moins de mots : ouvert seulement en semaine. Avec le week-end ouvert, le même つまり dit autre chose, et ところが sert à une surprise, pas à une vérification."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the second sentence do?",
+            "fr": "Que fait la seconde phrase ?"
+          },
+          "jp": "あの人は、毎朝六時に起きて、夜は十一時にねる。つまり、とてもきちんとした生活だ。",
+          "tr": {
+            "en": "He gets up at six every morning and goes to bed at eleven. In other words, he lives a very orderly life.",
+            "fr": "Il se lève à six heures chaque matin et se couche à onze heures. Autrement dit, il mène une vie très réglée."
+          },
+          "choices": [
+            {
+              "en": "It sums up the first in plain words: a very orderly life.",
+              "fr": "Elle résume la première en mots simples : une vie très réglée."
+            },
+            {
+              "en": "It contrasts: despite getting up early, he is disorderly.",
+              "fr": "Elle s'y oppose : malgré son lever tôt, il est désordonné."
+            },
+            {
+              "en": "It gives a reason: he is orderly because he sleeps at eleven.",
+              "fr": "Elle donne une raison : il est réglé parce qu'il se couche à onze heures."
+            }
+          ],
+          "why": {
+            "en": "つまり restates what was just said, shorter and plainer: up at six and in bed at eleven add up to an orderly life. It is neither a contrast (ところが) nor a cause (だから).",
+            "fr": "つまり reformule ce qu'on vient de dire, plus court et plus simple : debout à six heures et couché à onze font une vie réglée. Ce n'est ni une opposition (ところが) ni une cause (だから)."
+          }
+        }
+      ]
     }
   },
   {
