@@ -8383,26 +8383,14 @@ textarea:focus-visible {
   overflow: hidden;
 }
 
-/* The board's head: 番付 and its caption, with the 今週/通算 toggle
-   pinned right. The toggle is the app's segmented pill — segments
-   divided by hairlines rather than gaps, the selected one washed 14%
-   gold — the rating bar's own construction at chip size. */
+/* The board's head is its period tabs, edge to edge under a hairline.
+   No name sits above them: the board names itself by its tabs
+   (DESIGN.md, "it names itself without a caption"). The tabs are the
+   segmented control, `full`, without its box or wash: the selected one
+   keeps only the gold underline (.bz__seg, below the segment rules). */
 .bz__head {
   display: flex;
-  align-items: center;
-  gap: var(--sp-5);
-  padding: var(--sp-4) var(--sp-5);
   border-bottom: 1px solid var(--surface-line);
-}
-.bz__mark { display: flex; align-items: baseline; gap: var(--sp-3); }
-/* Untracked, despite the name: the mark prints the localised word
-   ("Ranking", "Classement"), never 番付, and --tr-name is assigned to
-   hero JAPANESE names (DESIGN.md, "Tracking runs inversely to size").
-   At 0.14em the Latin word read as a spaced-out caption at lead size. */
-.bz__jp {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-lead);
 }
 /* Square-cornered, at the plate's radius, as the library's order switch
    (.gate-seg) is: the owner's call of 2026-09-26, over the pill it was --
@@ -8455,24 +8443,12 @@ textarea:focus-visible {
 .seg--full .seg__opt { flex: 1; justify-content: center; align-items: center; height: 40px; }
 /* A glyph before the word (the analyser's three sources, plan 136). */
 .seg__opt-icon { flex: none; align-self: center; }
+/* The board's tabs (.bz__head): the segment with no box, no wash. */
+.bz__seg { border: 0; border-radius: 0; background: transparent; }
+.bz__seg .seg__opt { border-left: 0; background: transparent; }
+.bz__seg .seg__opt--on { background: transparent; }
 
 @media (max-width: 560px) {
-  /* The head holds ONE row for as long as it can, the way it reads
-     above 560px: title left, toggle pinned right. Until now the pair
-     parted company at about 357px of layout width — which a 360px
-     window already is once `scrollbar-gutter: stable` takes its 15px —
-     and the toggle dropped to a line of its own, the only control in
-     the card that leaves the line it belongs to. Two rungs buy the row
-     back down to ~327px: the head's gap closes to --sp-2, which costs
-     nothing visually because the pill's `margin-left: auto` sets the
-     separation you actually see and the gap only bites once the row is
-     full; and this pill's options give up their side padding to the
-     same rung (scoped to .bz__seg — no other seg in the app moves).
-     `flex-wrap` stays as the valve: narrower than that and the toggle
-     still drops rather than the title being cut or the pill clipping
-     ALL TIME, which are both worse than a second line. */
-  .bz__head { flex-wrap: wrap; gap: var(--sp-2); }
-  .bz__seg .seg__opt { padding: var(--sp-1) var(--sp-2); }
   .seg { margin-left: 0; }
 }
 
@@ -21837,7 +21813,7 @@ form.stage__foot > .btn-primary {
   padding-bottom: var(--sp-2);
   border-bottom: 1px solid var(--surface-line);
 }
-/* Latin, so untracked — see .bz__jp above. */
+/* Latin, so untracked (DESIGN.md, "Tracking runs inversely to size"). */
 .sbook__title {
   font-family: var(--font-display);
   font-weight: 700;
@@ -21928,8 +21904,7 @@ form.stage__foot > .btn-primary {
 /* ── The ranking (canvas ProfileInserts) ──
    One list: the rank in a roundel — gold, silver and bronze for the
    first three — the name, the XP; your own row marked with the pass
-   ink. The board's toggle sits on the head's right. */
-.bz__seg { margin-left: auto; }
+   ink. The board's tabs are its head (.bz__head, above). */
 .leaderboard-row {
   display: flex;
   align-items: center;
@@ -33183,13 +33158,20 @@ button.brd-stn { cursor: pointer; }
     align-items: start;
     gap: var(--sp-5);
   }
+  /* One tab, as the phone's are: on the desk each board is one period,
+     so its head is that period's tab, underlined and inked. */
   .desk-bz__period {
+    flex: 1;
+    padding: var(--sp-4) var(--sp-5);
+    text-align: center;
     font-family: var(--font-display);
     font-size: var(--fs-caption);
     font-weight: 700;
     letter-spacing: var(--tr-caption);
+    text-indent: var(--tr-caption);
     text-transform: uppercase;
-    color: var(--text-secondary);
+    color: var(--sel-ink);
+    box-shadow: inset 0 -2px 0 var(--accent2);
   }
 
   /* ── 教材 on the desk: the shelf beside the open deck (plan 154) ──

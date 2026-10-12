@@ -4,11 +4,11 @@ import { Seg } from '../chrome/Console'
 // ── The ranking (canvas ProfileInserts, plan 074) ─────────────
 // One list of rows: the rank in a roundel (gold, silver and bronze for
 // the first three), the name, the XP. Two boards ride in: the last
-// seven days and lifetime (通算), on the segmented control in the head;
-// the week is the one you can actually move tonight, so it is the one
-// the board opens on. The toggle only renders when the week board
-// loaded, and the component falls back to the lifetime board alone
-// otherwise.
+// seven days and lifetime (通算). The head is the board's period tabs
+// and nothing above them: the tabs name the board. The week is the one
+// you can actually move tonight, so it is the one the board opens on.
+// Only the week board's tabs render both periods; without it the head
+// keeps the lifetime tab alone, so the board still says what it is.
 //
 // `entries` is the top N; `me` is the current user's own row, which
 // the backend includes separately whenever they are not already inside
@@ -41,7 +41,6 @@ export function Banzuke({ all, week, t, both = false }) {
       <div className="desk-banzuke" data-guide="profile.board">
         {[['week', week, t.periodWeek], ['all', all, t.periodAll]].map(([key, b, period]) => (
           <Board key={key} board={b}>
-            <span className="bz__mark"><span className="bz__jp">{t.ranking}</span></span>
             <span className="desk-bz__period">{period}</span>
           </Board>
         ))}
@@ -51,21 +50,23 @@ export function Banzuke({ all, week, t, both = false }) {
 
   const board = scope === 'week' && week ? week : all
   if (!board) return null
+  const options = week
+    ? [
+        { key: 'week', label: t.periodWeek },
+        { key: 'all', label: t.periodAll },
+      ]
+    : [{ key: 'all', label: t.periodAll }]
   return (
     <Board board={board} guide="profile.board">
-      <span className="bz__mark"><span className="bz__jp">{t.ranking}</span></span>
-      {week && (
-        <Seg
-          className="bz__seg"
-          label={t.ranking}
-          value={scope}
-          onChange={setScope}
-          options={[
-            { key: 'week', label: t.periodWeek },
-            { key: 'all', label: t.periodAll },
-          ]}
-        />
-      )}
+      {/* The label is the board's accessible name; the tabs show it. */}
+      <Seg
+        full
+        className="bz__seg"
+        label={t.ranking}
+        value={scope}
+        onChange={setScope}
+        options={options}
+      />
     </Board>
   )
 }

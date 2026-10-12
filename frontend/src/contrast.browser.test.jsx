@@ -336,8 +336,7 @@ const Fixture = () => (
         1; the medal roundels are three metal inks on sumi. */}
     <div className="banzuke">
       <div className="bz__head">
-        <span className="bz__mark"><span className="bz__jp">Ranking</span></span>
-        <span className="seg bz__seg">
+        <span className="seg seg--full bz__seg">
           <button type="button" className="seg__opt seg__opt--on bz-seg-on"><span className="seg__opt-latin">This week</span></button>
           <button type="button" className="seg__opt bz-seg-off"><span className="seg__opt-latin">All time</span></button>
         </span>
