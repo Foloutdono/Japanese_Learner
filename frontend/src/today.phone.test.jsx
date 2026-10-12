@@ -91,7 +91,7 @@ describe('Today below the desk', () => {
       expect(cell.querySelector('.tdy-day__what').textContent).toBe('Kanji')
       expect(cell.getAttribute('href')).toBe('/profile/settings/agenda')
       // A thumb's door, and nothing wider than the phone.
-      expect(cell.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+      expect(Math.round(cell.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44)
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
     } finally {
       agenda.blocks = []

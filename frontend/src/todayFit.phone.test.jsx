@@ -104,8 +104,10 @@ describe('the gate on a full day', () => {
       expect(door.top).toBeGreaterThanOrEqual(key.bottom)
       expect(go.top).toBeGreaterThanOrEqual(door.bottom)
       expect(go.bottom).toBeLessThanOrEqual(tabs.top)
-      // The row is a thumb's.
-      expect(door.height).toBeGreaterThanOrEqual(44)
+      // The row is a thumb's. Read to the pixel: a rect's edges are
+      // float32 in the layout, so a row at a fractional top near 600px
+      // reads 44 - 2^-14 tall (it failed CI so at 360×725).
+      expect(Math.round(door.height)).toBeGreaterThanOrEqual(44)
     })
   }
 })

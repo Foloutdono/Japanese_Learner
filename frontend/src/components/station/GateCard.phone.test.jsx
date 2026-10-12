@@ -185,7 +185,7 @@ describe('the fare gate at phone width', () => {
     // The main flashcard rides; the other modes wait on the platform.
     expect(rows.map(r => r.getAttribute('aria-pressed'))).toEqual(['true', 'false', 'false'])
     for (const row of rows) {
-      expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+      expect(Math.round(row.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44)
       expect(row.querySelector('.lane__mode').textContent.trim()).not.toBe('')
     }
     // The line of one mode has no chevron: its head is its switch.
