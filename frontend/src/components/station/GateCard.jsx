@@ -122,8 +122,8 @@ export default function GateCard({ today, failed }) {
   // 主 — the main flashcards alone: each line's recognition
   // card rides and every other mode stays on the platform. A filter
   // over the learner's own switches rather than a rewrite of them, so
-  // "every mode" gives back the choice as it stood. Remembered like the
-  // run's length.
+  // "every mode" gives back the choice as it stood. The default since
+  // plan 199 (the owner's ask), and remembered like the run's length.
   const [main, setMainState] = useState(readMain)
   function setMain(next) {
     setMainState(next)
@@ -435,18 +435,22 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
 
 // ── 区間 — the run's length, kept per browser (plan 135) ─────────
 const TAKE_KEY = 'tsuji.gateTake'
+// 主 — which cards, kept the same way. The main flashcards are the
+// default (plan 199), so what is kept is the learner leaving them:
+// '0' is every mode, and nothing kept (a first visit, a private
+// window, the '1' an earlier build wrote) is the main cards.
 const MAIN_KEY = 'tsuji.gateMain'
 function readMain() {
   try {
-    return window.localStorage.getItem(MAIN_KEY) === '1'
+    return window.localStorage.getItem(MAIN_KEY) !== '0'
   } catch {
-    return false
+    return true
   }
 }
 function writeMain(on) {
   try {
-    if (on) window.localStorage.setItem(MAIN_KEY, '1')
-    else window.localStorage.removeItem(MAIN_KEY)
+    if (on) window.localStorage.removeItem(MAIN_KEY)
+    else window.localStorage.setItem(MAIN_KEY, '0')
   } catch { /* private window: the choice lasts the visit */ }
 }
 function readTake() {

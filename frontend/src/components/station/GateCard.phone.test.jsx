@@ -65,6 +65,7 @@ const count = () => Number(document.querySelector('.gate-card__count').textConte
 const text = el => el.textContent.replace(/\s+/g, ' ').trim()
 const MAIN = LANES.filter(l => l.mode.endsWith('.flashcard.f2b')).reduce((n, l) => n + l.due, 0)
 const ALL = TODAY.total
+const RIDING = LANES.filter(l => l.mode.endsWith('.flashcard.f2b')).length
 
 // The sheet portals to the body.
 async function services(screen) {
@@ -75,26 +76,32 @@ async function services(screen) {
 
 beforeEach(() => { localStorage.clear() })
 
+// The main flashcards are the gate's default (plan 199). A test about
+// the switches themselves starts where every lane rides: the learner
+// who chose every mode.
+const everyMode = () => localStorage.setItem('tsuji.gateMain', '0')
+
 describe('the fare gate at phone width', () => {
   it('draws the day as one card, the gate under it and no switch on the screen', async () => {
     const screen = await gate()
     const card = screen.container.querySelector('.gate-card--one')
     expect(card).not.toBeNull()
-    expect(count()).toBe(ALL)
+    // The main flashcards, by default.
+    expect(count()).toBe(MAIN)
     // No second scroll: the switches are behind the row, not on the card.
     expect(document.querySelector('.lane')).toBeNull()
     expect(screen.container.querySelector('.gate-card__lanes, .gate-card__lines')).toBeNull()
     // Each line's share, in the lines' order, adding up to the run.
     const keys = [...screen.container.querySelectorAll('.gate-mix__key')]
     expect(keys.map(k => text(k).replace(/\s*\d+$/, ''))).toEqual(['Kana', 'Vocabulaire JLPT', 'Kanji', 'Grammaire', 'Mes decks'])
-    expect(keys.reduce((n, k) => n + Number(k.querySelector('.gate-mix__n').textContent), 0)).toBe(ALL)
+    expect(keys.reduce((n, k) => n + Number(k.querySelector('.gate-mix__n').textContent), 0)).toBe(MAIN)
     expect(screen.container.querySelectorAll('.gate-mix__part')).toHaveLength(5)
     // The two questions, each a radio group across the card.
     const groups = [...card.querySelectorAll('[role="radiogroup"]')]
     expect(groups.map(g => g.getAttribute('aria-label'))).toEqual(['Quelles cartes', 'Combien'])
     for (const g of groups) expect(Math.round(g.getBoundingClientRect().width)).toBe(Math.round(card.querySelector('.gate-card__asks').getBoundingClientRect().width))
     // The row to the services says how many ride.
-    expect(text(screen.container.querySelector('.gate-one__services'))).toContain(`${LANES.length} sur ${LANES.length}`)
+    expect(text(screen.container.querySelector('.gate-one__services'))).toContain(`${RIDING} sur ${LANES.length}`)
     // The card, the row, then the gate, on the screen and on one axis.
     const go = screen.container.querySelector('.btn-depart--gate')
     expect(go.getBoundingClientRect().top).toBeGreaterThan(card.getBoundingClientRect().bottom)
@@ -102,26 +109,27 @@ describe('the fare gate at phone width', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
   })
 
-  it('boards the main flashcards alone, and says so on the row', async () => {
+  it('opens on the main flashcards alone, and every mode is one tap and remembered', async () => {
     const screen = await gate()
-    const [, main] = screen.container.querySelectorAll('.gate-card__modes .seg__opt')
+    const [every, main] = screen.container.querySelectorAll('.gate-card__modes .seg__opt')
     expect(text(main)).toBe(`Principales · ${MAIN}`)
-    main.click()
-    await settle()
+    expect(main.getAttribute('aria-checked')).toBe('true')
     expect(count()).toBe(MAIN)
-    const riding = LANES.filter(l => l.mode.endsWith('.flashcard.f2b')).length
-    expect(text(screen.container.querySelector('.gate-one__services'))).toContain(`${riding} sur ${LANES.length}`)
-    expect(localStorage.getItem('tsuji.gateMain')).toBe('1')
+    every.click()
+    await settle()
+    expect(count()).toBe(ALL)
+    expect(text(screen.container.querySelector('.gate-one__services'))).toContain(`${LANES.length} sur ${LANES.length}`)
+    expect(localStorage.getItem('tsuji.gateMain')).toBe('0')
   })
 
   it('cuts the run to a length, dealt over the lines', async () => {
     const screen = await gate()
     const lengths = [...screen.container.querySelectorAll('.gate-card__take .seg__opt')]
-    expect(lengths.map(text)).toEqual(['20', '50', '100', `Tout · ${ALL}`])
+    expect(lengths.map(text)).toEqual(['20', '50', '100', `Tout · ${MAIN}`])
     lengths[1].click()
     await settle()
     expect(count()).toBe(50)
-    expect(text(screen.container.querySelector('.gate-card__unit'))).toBe(`sur ${ALL}`)
+    expect(text(screen.container.querySelector('.gate-card__unit'))).toBe(`sur ${MAIN}`)
     const shares = [...screen.container.querySelectorAll('.gate-mix__n')].map(el => Number(el.textContent))
     expect(shares.reduce((n, x) => n + x, 0)).toBe(50)
   })
@@ -152,6 +160,7 @@ describe('the fare gate at phone width', () => {
   // line rides, which makes the tap unambiguous both ways: lit switches
   // the line off, unlit switches all of it on.
   it('switches a whole line, and lights only while all of it rides', async () => {
+    everyMode()
     const screen = await gate()
     await services(screen)
     const heads = () => [...document.querySelectorAll('.gate-sheet__head')]
@@ -182,6 +191,7 @@ describe('the fare gate at phone width', () => {
   })
 
   it('takes a lane out of the day, and the count with it; every line off is not a run', async () => {
+    everyMode()
     const screen = await gate()
     const [first] = await services(screen)
     expect(first.getAttribute('aria-pressed')).toBe('true')

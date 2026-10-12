@@ -83,6 +83,10 @@ beforeEach(() => {
   creditsRef.current = { balance: 30, cap: 50, unlimited: false, nextCreditAt: '2026-09-07T14:48:00+00:00' }
   forecastRef.current = null
   localStorage.clear()
+  // The bands, the fare and the week are drawn with every lane riding:
+  // the learner who chose every mode. The main flashcards are the
+  // gate's default since plan 199 (the 主 block below).
+  localStorage.setItem('tsuji.gateMain', '0')
 })
 
 async function mount(entry = '/today') {
@@ -316,14 +320,13 @@ describe('the week ahead, under the journey', () => {
 describe('the main flashcards alone', () => {
   const count = () => text($('.gate-card__count'))
   const modes = () => $$('.gate-card__modes .seg__opt')
+  // The default (plan 199): nothing kept is the main cards.
+  beforeEach(() => { localStorage.removeItem('tsuji.gateMain') })
 
-  it('boards each line\'s recognition card alone, and remembers it', async () => {
+  it('opens on each line\'s recognition card alone, and remembers every mode', async () => {
     await mount()
     // What each way would ride: 101 every mode, 76 the main cards.
     expect(modes().map(text)).toEqual(['Tous les modes · 101', 'Principales · 76'])
-    expect(count()).toBe('101')
-    await userEvent.click(modes()[1])
-    await settle(60)
     expect(count()).toBe('76')
     expect(modes()[1].getAttribute('aria-checked')).toBe('true')
     // The other modes stay on the platform, switched off.
@@ -336,11 +339,21 @@ describe('the main flashcards alone', () => {
     const ids = path.split('=')[1].split(',')
     expect(ids).toHaveLength(5)
     expect(ids.every(id => id.endsWith('.flashcard.f2b'))).toBe(true)
-    // The next visit opens on it.
-    expect(localStorage.getItem('tsuji.gateMain')).toBe('1')
+    // Every mode, chosen, is what the next visit opens on.
+    await userEvent.click(modes()[0])
+    await settle(60)
+    expect(count()).toBe('101')
+    expect(localStorage.getItem('tsuji.gateMain')).toBe('0')
   })
 
-  it('opens on the main cards when they were chosen last time', async () => {
+  it('opens on every mode when it was chosen last time', async () => {
+    localStorage.setItem('tsuji.gateMain', '0')
+    await mount()
+    expect(count()).toBe('101')
+    expect(modes()[0].getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('opens on the main cards where an earlier build kept them', async () => {
     localStorage.setItem('tsuji.gateMain', '1')
     await mount()
     expect(count()).toBe('76')
@@ -349,8 +362,6 @@ describe('the main flashcards alone', () => {
 
   it('leaves the filter when another mode is switched on, keeping what the gate shows', async () => {
     await mount()
-    await userEvent.click(modes()[1])
-    await settle(60)
     const off = $$('.lane--tile.lane--off')
     await userEvent.click(off[0])
     await settle(60)
@@ -359,11 +370,16 @@ describe('the main flashcards alone', () => {
     expect($$('.lane--tile.lane--off')).toHaveLength(2)
     expect(Number(count())).toBeGreaterThan(76)
     expect(Number(count())).toBeLessThan(101)
+    expect(localStorage.getItem('tsuji.gateMain')).toBe('0')
   })
 
   it('gives back the learner\'s own switches with every mode', async () => {
     await mount()
-    // Kana off, then the main cards, then every mode again: kana stays off.
+    // Every mode, kana off, then the main cards, then every mode again:
+    // kana stays off.
+    await userEvent.click(modes()[0])
+    await settle(60)
+    expect(count()).toBe('101')
     await userEvent.click($$('.gate-band__line')[0])
     await settle(60)
     expect(count()).toBe('74')
@@ -376,6 +392,8 @@ describe('the main flashcards alone', () => {
   })
 
   it('departs through the boarding\'s gate button', async () => {
+    // Every lane riding, so every band's switch takes its line out.
+    localStorage.setItem('tsuji.gateMain', '0')
     await mount()
     const go = $('.gate-card__fare .btn-depart')
     expect(go.classList.contains('btn-depart--gate')).toBe(true)
