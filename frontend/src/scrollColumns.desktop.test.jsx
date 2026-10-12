@@ -9,7 +9,8 @@ import './index.css'
 // The side, a split's list and Settings' list each scroll in their own
 // box, and a scroll container clips at its padding edge on both axes.
 // Their rows stood on that edge, so a row's hover lift took its top
-// border off (the first kana set, the pass strip on Today), a focus
+// border off (the first kana set, the pass strip on Today until plan
+// 199 took it off the desk), a focus
 // ring lost three of its sides, and the rows' 10px arrival hung the last
 // one past the column's foot: a scrollbar for as long as a list that
 // fits took to arrive. index.css, the 机 block, gives each column a
@@ -136,33 +137,41 @@ describe('a split\'s list on the desk', () => {
   })
 })
 
-describe('the side on Today', () => {
+// Today's column (plan 199) scrolls in its own box too, beside the
+// dial's panel: its panels start level with the dial's, and a row's
+// ring is drawn whole inside them.
+describe('the column on Today', () => {
   function Today() {
     return (
       <div className="phone phone--desk">
         <div className="phone__content">
           <main className="today">
-            <div className="gate-card">gate</div>
-            <aside className="desk-side" aria-label="pass">
-              <button type="button" className="pass pass--strip">strip</button>
-            </aside>
+            <div className="tdy-desk">
+              <section className="tdy-desk__hero">dial</section>
+              <aside className="tdy-desk__col" aria-label="services">
+                <section className="tdy-desk__panel">
+                  <button type="button" className="tdy-line__head">Kana</button>
+                </section>
+              </aside>
+            </div>
           </main>
         </div>
       </div>
     )
   }
 
-  it('keeps the pass strip whole, lifted and ringed, level with the gate', async () => {
+  it('starts its panel level with the dial\'s, drawn whole, and a focused row\'s ring inside it', async () => {
     await render(<Today />)
     await atRest()
-    const strip = document.querySelector('.pass--strip')
-    const side = document.querySelector('.desk-side')
-    const gate = document.querySelector('.gate-card')
-    expect(Math.round(strip.getBoundingClientRect().top)).toBe(Math.round(gate.getBoundingClientRect().top))
+    const col = document.querySelector('.tdy-desk__col')
+    const panel = document.querySelector('.tdy-desk__panel')
+    const hero = document.querySelector('.tdy-desk__hero')
+    expect(Math.round(panel.getBoundingClientRect().top)).toBe(Math.round(hero.getBoundingClientRect().top))
+    expectInside(panel, col)
     await userEvent.keyboard('{Tab}')
     await settle()
-    expect(document.activeElement).toBe(strip)
-    expect(getComputedStyle(strip).transform).not.toBe('none')
-    expectInside(strip, side)
+    const head = document.querySelector('.tdy-line__head')
+    expect(document.activeElement).toBe(head)
+    expectInside(head, col)
   })
 })

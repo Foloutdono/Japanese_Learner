@@ -56,7 +56,7 @@ describe('調和 — the harmony rules (plan 174)', () => {
   it('一面: a panel\'s corner is the panel\'s, a control\'s the control\'s', () => {
     const panels = ['.plate', '.platform-card', '.route-stop', '.dict-entry-card', '.records', '.exam-st__row',
       '.anl-door', '.anl-entry', '.rep-plate', '.rep-strip', '.dict-form', '.deck-identity', '.card-list',
-      '.balance__rows', '.jour-cmps', '.stg-list', '.sbook', '.gate-card__short', '.console', '.gate-card', '.exam-st__hero']
+      '.balance__rows', '.jour-cmps', '.stg-list', '.sbook', '.tdy-next', '.console', '.exam-st__hero']
     for (const p of panels) expect(decl(rule(p), 'border-radius'), p).toBe('var(--r-panel)')
     for (const c of ['.seg', '.field']) expect(decl(rule(c), 'border-radius'), c).toBe('var(--r-card)')
   })

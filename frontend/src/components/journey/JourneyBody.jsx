@@ -18,15 +18,13 @@ import { journeyStations } from './stations'
 // behind, the two honest moves. See StatusSheet.jsx for why it leads
 // with distance.
 //
-// Its own component since the desk (plan 114): on a computer the same
-// body stands beside the fare gate on Today (JourneyPanel.jsx) rather
-// than behind a tap on the HUD, because the question it answers — am I
-// on course? — is the one the gate is the answer to. The sheet renders
-// it exactly as it did before the extraction.
+// Its own component since the desk (plan 114), which stood the same
+// body beside the fare gate on Today until plan 199 gave that place to
+// the dial's column; the sheet renders it exactly as it did before the
+// extraction.
 //
 // `onLeave` runs before any action that walks away (the sheet closes
-// itself); `resume` offers "resume" when suspended — pointless on the
-// screen that IS the resumption, so the Today panel leaves it off.
+// itself); `resume` offers "resume" when suspended.
 
 const iso = d => d.toISOString().slice(0, 10)
 

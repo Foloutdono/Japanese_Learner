@@ -104,6 +104,25 @@ const nav = {
   weekAhead:         'Les sept prochains jours',
   weekLeft:          'Laissées pour demain',
   gateRidesFree:     'embarquent · gratuit',
+  // 一目 — Today at a glance (plan 199)
+  gateModesMainName: 'Principales',
+  gateModesAllName:  'Tous les modes',
+  gateTakeWord:      'Tout',
+  gateTakeAllWord:   'tout',
+  gateEndsAt:        at => `fini vers ${at}`,
+  gateAdjust:        'Ajuster',
+  gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
+  gateLineModes:     name => `Les modes : ${name}`,
+  gateLineNone:      'Aucun service aujourd’hui',
+  gateOpensAt:       at => `Ouvre à ${at}`,
+  gateOpensIn:       when => `Ouvre ${when}`,
+  todayDayLabel:     'Ta journée',
+  todayStreakDays:   'jours de suite',
+  todayNewToday:     'nouveautés aujourd’hui',
+  todayLesson:       'leçon',
+  todayReviewed:     n => (n === 1 ? '1 carte aujourd’hui' : `${n} cartes aujourd’hui`),
+  todayCardsUnit:    n => (n === 1 ? 'carte' : 'cartes'),
+  todayWeekStamps:   n => `${n} jours de suite, les sept derniers tamponnés`,
   // 基礎 — le cursus de base sur le portillon et dans Réglages › Niveau (plan 186f)
   basicsUnit:        (n, of) => `Leçon ${n} sur ${of}`,
   basicsMet:         (n, of) => `${n} leçons sur ${of} vues`,
@@ -2367,7 +2386,7 @@ const guide = {
   // L'aide du rail du bureau : le guide de la porte allumée, rejoué à la demande.
   guideHelp: 'Aide',
   guideHelpTour: gate => `Visite guidée : ${gate}`,
-  guideTodayGate: 'Tes révisions du jour, ligne par ligne. Désactive-en une pour plus tard, puis embarque.',
+  guideTodayGate: 'Tes révisions du jour et le temps qu’elles prennent. Ajuster choisit les cartes et les lignes, puis embarque.',
   guideTabBar: 'Tes cinq onglets : Apprendre, Pratique, Aujourd’hui, Dictionnaire et ton profil.',
   guideLearnPlate: 'Une ligne. Touche-la pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',
   guideLearnStops: 'Où tu en es sur la ligne, et les arrêts autour.',
@@ -2392,7 +2411,7 @@ const guide = {
   guideProfileBoard: 'Le classement en XP : cette semaine et depuis toujours.',
   // 机 (plan 115) : les notes qui enseignent les touches et les portes du bureau.
   guideTabBarDesk: 'Tes cinq sections, à gauche. Appuie sur / n’importe où pour chercher dans le dictionnaire.',
-  guideTodayGateDesk: 'Tes révisions du jour, ligne par ligne. Désactive-en une pour plus tard, puis embarque. Entrée le fait de n’importe où ici.',
+  guideTodayGateDesk: 'Tes révisions du jour et le temps qu’elles prennent. Choisis les cartes et les lignes à droite, puis embarque. Entrée le fait de n’importe où ici.',
   guideLearnStopsDesk: 'Toute la ligne. Clique sur un arrêt pour l’étudier.',
   // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
   guideLearnPlateDesk: 'Une ligne. Clique dessus pour l’ouvrir. La pastille montre ce qui t’attend aujourd’hui.',

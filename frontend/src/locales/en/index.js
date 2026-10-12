@@ -103,6 +103,25 @@ const nav = {
   weekAhead:         'The next seven days',
   weekLeft:          'Left for tomorrow',
   gateRidesFree:     'board · free',
+  // 一目 — Today at a glance (plan 199)
+  gateModesMainName: 'Main cards',
+  gateModesAllName:  'Every mode',
+  gateTakeWord:      'All',
+  gateTakeAllWord:   'all',
+  gateEndsAt:        at => `done by ${at}`,
+  gateAdjust:        'Adjust',
+  gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
+  gateLineModes:     name => `Modes: ${name}`,
+  gateLineNone:      'No service today',
+  gateOpensAt:       at => `Opens at ${at}`,
+  gateOpensIn:       when => `Opens ${when}`,
+  todayDayLabel:     'Your day',
+  todayStreakDays:   'days in a row',
+  todayNewToday:     'new today',
+  todayLesson:       'unit',
+  todayReviewed:     n => (n === 1 ? '1 card today' : `${n} cards today`),
+  todayCardsUnit:    n => (n === 1 ? 'card' : 'cards'),
+  todayWeekStamps:   n => `${n} days in a row, the last seven stamped`,
   // 基礎 — the basics course on the gate and in Settings › Level (plan 186f)
   basicsUnit:        (n, of) => `Unit ${n} of ${of}`,
   basicsMet:         (n, of) => `${n} of ${of} units met`,
@@ -2438,7 +2457,7 @@ const guide = {
   // The desk rail's Help: the lit gate's guide, played again on demand.
   guideHelp: 'Help',
   guideHelpTour: gate => `Guided tour: ${gate}`,
-  guideTodayGate: 'Today’s reviews, line by line. Switch one off to save it for later, then hit Depart.',
+  guideTodayGate: 'Today’s reviews and the time they take. Adjust picks the cards and the lines, then hit Depart.',
   guideTabBar: 'Your five tabs: Learn, Practice, Today, Dictionary and your profile.',
   guideLearnPlate: 'A line. Tap it to open it. The badge shows what’s due today.',
   guideLearnStops: 'Where you are on the line, and the stops around you.',
@@ -2463,7 +2482,7 @@ const guide = {
   guideProfileBoard: 'The leaderboard, in XP: this week and all time.',
   // 机 (plan 115): the notes that teach the desk's keys and doors.
   guideTabBarDesk: 'Your five sections, down the left. Press / anywhere to search the dictionary.',
-  guideTodayGateDesk: 'Today’s reviews, line by line. Switch one off to save it for later, then depart. Enter works from anywhere here.',
+  guideTodayGateDesk: 'Today’s reviews and the time they take. Pick the cards and the lines on the right, then depart. Enter works from anywhere here.',
   guideLearnStopsDesk: 'The whole line. Click any stop to study it.',
   // Worded for a pointer (plan 123): the notes that said "tap".
   guideLearnPlateDesk: 'A line. Click it to open it. The badge shows what’s due today.',

@@ -564,7 +564,18 @@ def get_today(user_id: str = Depends(get_user_id)):
     except Exception:
         logger.exception("review pace failed")
         spr = None
+    # 済 (plan 199): a gate with nothing due draws the day it closed --
+    # what was reviewed today, by line -- and what tomorrow brings. Only
+    # then, and never a reason to fail.
+    done = {}
+    if total == 0:
+        try:
+            done["reviewed"] = srs.get_reviews_today_by_line(user_id)
+        except Exception:
+            logger.exception("today's reviews failed")
+        done["tomorrow"] = _tomorrow(user_id, level)
     return {
+        **done,
         "seconds_per_review": spr,
         # 基礎 (plan 186e): the unit the course is at, for an N5 learner.
         "basics": _basics_status(user_id, level),
