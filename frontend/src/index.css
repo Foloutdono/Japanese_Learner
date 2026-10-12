@@ -8777,7 +8777,6 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 .basics-line__name { font-size: var(--fs-sm); font-weight: 700; color: var(--text-primary); }
-.basics-line__title { font-weight: 400; color: var(--text-secondary); }
 .basics-line__bar {
   display: flex;
   flex-basis: 100%;
@@ -9515,14 +9514,14 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.bsc-unit__name { grid-area: name; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); min-width: 0; }
-.bsc-unit__jp {
-  font-family: var(--font-serif);
+.bsc-unit__name {
+  grid-area: name;
+  min-width: 0;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--fs-title);
   color: var(--text-primary);
 }
-.bsc-unit__title { font-family: var(--font-display); font-weight: 700; color: var(--text-secondary); }
 .bsc-unit__figs {
   grid-area: figs;
   display: flex;

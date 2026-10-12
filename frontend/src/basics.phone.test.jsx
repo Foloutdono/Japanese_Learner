@@ -65,6 +65,10 @@ describe('the basics, on a phone', () => {
     await mount('/learn/basics/kazu')
     await settle()
     expect(apiJson.mock.calls.some(([u]) => u === '/api/basics/kazu?lang=fr')).toBe(true)
+    // The unit is named in the learner's language alone, in the bar and on the page.
+    expect(document.querySelector('.bar__sub').textContent).toBe('Leçon 3')
+    expect(document.querySelector('.bsc-unit__name').textContent).toBe('Les nombres')
+    expect(document.querySelector('.bsc-unit__head').textContent).not.toContain('数')
     const lists = [...document.querySelectorAll('.bsc-list')]
     expect(lists).toHaveLength(4)
     expect(document.querySelectorAll('.bsc-row')).toHaveLength(5)

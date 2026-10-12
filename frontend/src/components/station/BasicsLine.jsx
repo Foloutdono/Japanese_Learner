@@ -59,10 +59,7 @@ export default function BasicsLine({ basics }) {
         <span className="basics-line__jp" lang="ja">基礎</span>
         <span className="basics-line__of">{t.basicsUnit(basics.unit, basics.of)}</span>
       </span>
-      <span className="basics-line__name">
-        <span lang="ja">{basics.jp}</span>
-        <span className="basics-line__title">{title}</span>
-      </span>
+      <span className="basics-line__name">{title}</span>
       <span
         className="basics-line__bar"
         role="img"

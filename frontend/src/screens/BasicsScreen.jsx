@@ -40,8 +40,8 @@ export default function BasicsScreen({ session }) {
 
   const units = data?.units ?? []
   const here = data?.at ? units[data.at - 1]?.id : null
-  // On the route a unit is named in the learner's language alone; its
-  // Japanese name is on the unit's own page.
+  // A unit is named in the learner's language alone, on the route as on
+  // its page.
   const stops = units.map(u => ({
     key: u.id,
     code: String(u.unit),
@@ -92,7 +92,7 @@ export default function BasicsScreen({ session }) {
   return (
     <SelectionScreen
       title={t.basicsTitle}
-      sub={open?.jp}
+      sub={open?.title?.[lang] ?? open?.title?.en}
       aside={<Leave to="/learn/basics">{t.basicsUnits}</Leave>}
     >
       {page}
@@ -126,13 +126,10 @@ function UnitPage({ unitId, session }) {
 
   const title = unit.title?.[lang] ?? unit.title?.en
   return (
-    <section className="bsc-unit" aria-label={`${unit.jp} ${title}`}>
+    <section className="bsc-unit" aria-label={title}>
       <header className="bsc-unit__head">
         <span className="bsc-unit__of">{t.basicsUnit(unit.unit, unit.of)}</span>
-        <span className="bsc-unit__name">
-          <span className="bsc-unit__jp" lang="ja">{unit.jp}</span>
-          <span className="bsc-unit__title">{title}</span>
-        </span>
+        <span className="bsc-unit__name">{title}</span>
         <span className="bsc-unit__figs">
           <span className="bsc-unit__fig"><b>{unit.learned}</b> / {unit.total}</span>
           <span className="bsc-unit__met">{t.basicsMetOf(unit.met, unit.total)}</span>
