@@ -40,11 +40,12 @@ export default function BasicsScreen({ session }) {
 
   const units = data?.units ?? []
   const here = data?.at ? units[data.at - 1]?.id : null
+  // On the route a unit is named in the learner's language alone; its
+  // Japanese name is on the unit's own page.
   const stops = units.map(u => ({
     key: u.id,
     code: String(u.unit),
-    name: u.jp,
-    hint: u.title?.[lang] ?? u.title?.en,
+    name: u.title?.[lang] ?? u.title?.en,
     hereLabel: t.levelCurrentMark,
     learned: u.learned,
     total: u.total,

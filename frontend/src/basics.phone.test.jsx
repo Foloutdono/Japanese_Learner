@@ -52,7 +52,9 @@ describe('the basics, on a phone', () => {
     const stops = [...document.querySelectorAll('.route-stop')]
     expect(stops).toHaveLength(14)
     const here = document.querySelector('.route-stop--current')
-    expect(here.textContent).toContain('数')
+    // Each unit is named in the learner's language alone.
+    expect(here.querySelector('.route-stop__jp').textContent).toBe('Leçon 3')
+    expect(here.textContent).not.toContain('数')
     expect(document.querySelectorAll('.route-stop--past')).toHaveLength(2)
     stops[2].click()
     await settle()
