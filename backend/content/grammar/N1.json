@@ -8390,7 +8390,136 @@
             "fr": "L'éloge de ce que seule la région possède : ならでは. にしては et らしからぬ disent qu'il est bon malgré la région, ce qui la vexe."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the guiding?",
+            "fr": "Que dit la phrase de cette visite guidée ?"
+          },
+          "jp": "地元の人ならではの案内で、観光客が知らない店をいくつも回れた。",
+          "tr": {
+            "en": "Thanks to guiding only a local could give, we got round several shops that tourists don't know.",
+            "fr": "Grâce à une visite que seul un habitant pouvait offrir, nous avons fait plusieurs boutiques que les touristes ne connaissent pas."
+          },
+          "choices": [
+            {
+              "en": "It drew on a local's knowledge, which an outsider could not have offered.",
+              "fr": "Elle reposait sur ce que sait un habitant, ce qu'un étranger au lieu n'aurait pas pu offrir."
+            },
+            {
+              "en": "It was open to local people only, not to tourists.",
+              "fr": "Elle était réservée aux habitants, pas aux touristes."
+            },
+            {
+              "en": "It would have gone well, if a local had been the guide.",
+              "fr": "Cela se serait bien passé, si un habitant avait été le guide."
+            }
+          ],
+          "why": {
+            "en": "ならでは says that being a local is what made the guiding possible: only a local could give it. It is not « only locals » (だけ), nor an « if » (なら).",
+            "fr": "ならでは dit que c'est le fait d'être du coin qui a rendu cette visite possible : seul un habitant pouvait la donner. Ce n'est ni « seulement les habitants » (だけ) ni un « si » (なら)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ここへ来たら、この町＿＿＿味をぜひ試してください。",
+          "tr": {
+            "en": "If you come here, do try a taste that only this town has.",
+            "fr": "Si tu viens ici, goûte absolument une saveur que seule cette ville offre."
+          },
+          "choices": [
+            "ならではの",
+            "ならではだ",
+            "のならではの"
+          ],
+          "why": {
+            "en": "Before a noun, ならでは takes の and sits right on the noun it follows: 町ならではの味. ならではだ only closes a sentence, and 町のならでは slips in a の that has no place there.",
+            "fr": "Devant un nom, ならでは prend の et se colle au nom qui le précède : 町ならではの味. ならではだ ne ferme qu'une phrase, et 町のならでは glisse un の qui n'a pas sa place."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker want to do?",
+            "fr": "Que veut faire la personne qui parle ?"
+          },
+          "jp": "夏休みならではの経験を、できるだけたくさんしておきたい。",
+          "tr": {
+            "en": "I want to have as many experiences as I can that only the summer holidays offer.",
+            "fr": "Je veux vivre le plus possible d'expériences que seules les vacances d'été offrent."
+          },
+          "choices": [
+            {
+              "en": "Have as many as possible of the experiences that only the summer holidays offer.",
+              "fr": "Vivre le plus possible des expériences que seules les vacances d'été offrent."
+            },
+            {
+              "en": "Have a lot of experiences, but only if it turns out to be the summer holidays.",
+              "fr": "Vivre beaucoup d'expériences, mais seulement s'il s'agit des vacances d'été."
+            },
+            {
+              "en": "Have the same everyday experiences as in any other holiday.",
+              "fr": "Vivre les mêmes expériences ordinaires que pendant n'importe quelles autres vacances."
+            }
+          ],
+          "why": {
+            "en": "夏休みならではの経験 are the experiences that belong to the summer holidays alone. The speaker wants many of those; ならでは is neither an « if » (なら) nor « ordinary ».",
+            "fr": "夏休みならではの経験, ce sont celles qui n'appartiennent qu'aux vacances d'été. La personne en veut beaucoup ; ならでは n'est ni un « si » (なら) ni « ordinaire »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "At a mountain inn the same river fish is served all year round, but only this valley's water gives it its taste. You praise it to the innkeeper. What do you say?",
+            "fr": "Dans une auberge de montagne, le même poisson de rivière est servi toute l'année, mais seule l'eau de cette vallée lui donne son goût. Tu le complimentes devant l'aubergiste. Que dis-tu ?"
+          },
+          "choices": [
+            "この谷ならではの、川魚のおいしさですね。",
+            "この季節ならではの、川魚のおいしさですね。",
+            "この谷にしては、川魚がおいしいですね。"
+          ],
+          "why": {
+            "en": "ならでは names what alone can give the quality: the valley, not the season, since the fish is served all year. 谷にしては means « for a valley », a left-handed compliment.",
+            "fr": "ならでは nomme ce qui seul donne cette qualité : la vallée, non la saison, puisque le poisson est servi toute l'année. 谷にしては veut dire « pour une vallée », un compliment qui blesse."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of the taste?",
+            "fr": "Que pense la personne qui parle de ce goût ?"
+          },
+          "jp": "この程度の味では、名店ならではの料理とは言えないだろう。",
+          "tr": {
+            "en": "A taste like this can hardly be called cooking that only a famous restaurant could offer.",
+            "fr": "On ne peut guère dire d'un goût pareil que c'est une cuisine que seul un grand restaurant pourrait offrir."
+          },
+          "choices": [
+            {
+              "en": "It falls short of the cooking only a famous restaurant could offer.",
+              "fr": "Il n'atteint pas la cuisine que seul un grand restaurant pourrait offrir."
+            },
+            {
+              "en": "It is exactly the cooking only a famous restaurant could offer.",
+              "fr": "C'est exactement la cuisine que seul un grand restaurant pourrait offrir."
+            },
+            {
+              "en": "The speaker cannot say, never having tried a famous restaurant.",
+              "fr": "La personne ne peut pas se prononcer, n'ayant jamais essayé de grand restaurant."
+            }
+          ],
+          "why": {
+            "en": "名店ならでは is the praise « only a famous restaurant could offer this », and とは言えない denies it: it cannot be called that. It is a verdict, not « I can't say ».",
+            "fr": "名店ならでは est l'éloge « seul un grand restaurant offrirait cela », et とは言えない le nie : on ne peut pas l'appeler ainsi. C'est un verdict, pas un « je ne sais pas »."
+          }
+        }
+      ]
     }
   },
   {
@@ -8583,7 +8712,136 @@
             "fr": "Excuser l'enfant pour blâmer l'adulte : ならいざ知らず. でも〜でも l'excuse, le contraire d'un reproche, et la dernière prend 知らず pour un vrai « je ne sais pas »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker worried about?",
+            "fr": "Qu'est-ce qui inquiète la personne qui parle ?"
+          },
+          "jp": "一人で行くならいざ知らず、小さな子どもを連れて山に登るのは危ない。",
+          "tr": {
+            "en": "Going alone is one thing, but climbing a mountain with small children is dangerous.",
+            "fr": "Y aller seul, passe encore, mais monter en montagne avec de petits enfants est dangereux."
+          },
+          "choices": [
+            {
+              "en": "Climbing a mountain with small children.",
+              "fr": "Monter en montagne avec de petits enfants."
+            },
+            {
+              "en": "Climbing a mountain alone.",
+              "fr": "Monter en montagne tout seul."
+            },
+            {
+              "en": "Climbing mountains at all, alone or with children.",
+              "fr": "Monter en montagne tout court, seul ou avec des enfants."
+            }
+          ],
+          "why": {
+            "en": "What comes before ならいざ知らず (going alone) is the case set aside. The worry sits in the second half: taking small children up. It is not a warning against both.",
+            "fr": "Ce qui précède ならいざ知らず (y aller seul) est le cas mis de côté. L'inquiétude est dans la seconde moitié : y emmener de petits enfants. Ce n'est pas une mise en garde contre les deux."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which ending completes the sentence?",
+            "fr": "Quelle fin complète la phrase ?"
+          },
+          "jp": "新入社員ならいざ知らず、課長が時間を守らない＿＿＿。",
+          "tr": {
+            "en": "A new recruit, maybe, but a section chief who doesn't keep time!",
+            "fr": "Un nouvel employé, passe encore, mais un chef de section qui ne respecte pas l'heure !"
+          },
+          "choices": [
+            "とは",
+            "のも当然だ",
+            "かもしれない"
+          ],
+          "why": {
+            "en": "ならいざ知らず excuses the first case and sets up a reproach, which とは voices (« how could it be! »). のも当然だ calls the lateness natural and かもしれない only guesses: both undo the contrast.",
+            "fr": "ならいざ知らず excuse le premier cas et prépare un reproche, que とは exprime (« comment est-ce possible ! »). のも当然だ trouve le retard naturel et かもしれない ne fait que supposer : les deux défont le contraste."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of the mistake?",
+            "fr": "Que pense la personne qui parle de l'erreur ?"
+          },
+          "jp": "一度ならいざ知らず、三度も同じ間違いをするとは信じられない。",
+          "tr": {
+            "en": "Once might be one thing, but making the same mistake three times is unbelievable.",
+            "fr": "Une fois, passe encore, mais commettre trois fois la même erreur est incroyable."
+          },
+          "choices": [
+            {
+              "en": "Once could be forgiven; three times cannot.",
+              "fr": "Une fois, cela se pardonne ; trois fois, non."
+            },
+            {
+              "en": "Even one mistake would have been unforgivable.",
+              "fr": "Même une seule erreur aurait été impardonnable."
+            },
+            {
+              "en": "The speaker can't tell how many times it happened, and finds it hard to believe.",
+              "fr": "La personne ne sait pas combien de fois c'est arrivé, et a du mal à le croire."
+            }
+          ],
+          "why": {
+            "en": "一度ならいざ知らず grants the single slip, as a case that might be excused. The reproach falls on the three repeats. 知らず here is not « not knowing » how many times.",
+            "fr": "一度ならいざ知らず accorde l'erreur isolée, comme un cas qui pourrait s'excuser. Le reproche tombe sur les trois répétitions. 知らず n'est pas ici « ne pas savoir » combien de fois."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Two people arrive late to the meeting: a newcomer and the department head. You can understand the newcomer, but not the head, and you say so to a colleague. What do you say?",
+            "fr": "Deux personnes arrivent en retard à la réunion : une nouvelle recrue et le chef de service. Tu comprends la recrue, mais pas le chef, et tu le dis à un collègue. Que dis-tu ?"
+          },
+          "choices": [
+            "新人ならいざ知らず、部長が遅刻するとは。",
+            "部長ならいざ知らず、新人が遅刻するとは。",
+            "新人でも部長でも、遅刻してはいけませんね。"
+          ],
+          "why": {
+            "en": "The case before ならいざ知らず is the one excused, and the reproach falls on the second. The second line swaps them and blames the newcomer; the third treats both alike, which is not what you feel.",
+            "fr": "Le cas placé avant ならいざ知らず est celui qu'on excuse, et le reproche tombe sur le second. La deuxième ligne les inverse et blâme la recrue ; la troisième traite les deux pareil, ce que tu ne ressens pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about themself?",
+            "fr": "Que dit la personne qui parle d'elle-même ?"
+          },
+          "jp": "若い人ならいざ知らず、八十歳の私に毎日走れと言われても、とてもできない。",
+          "tr": {
+            "en": "Young people maybe, but asking me, at eighty, to run every day, there's no way I can.",
+            "fr": "Les jeunes, peut-être, mais me demander, à quatre-vingts ans, de courir tous les jours, je ne peux vraiment pas."
+          },
+          "choices": [
+            {
+              "en": "At eighty, running every day is beyond them, whatever young people can do.",
+              "fr": "Courir tous les jours lui est impossible à quatre-vingts ans, quoi que les jeunes puissent faire."
+            },
+            {
+              "en": "They can run every day, just like young people.",
+              "fr": "Elle peut courir tous les jours, comme les jeunes."
+            },
+            {
+              "en": "They would run every day, if they were young.",
+              "fr": "Elle courrait tous les jours, si elle était jeune."
+            }
+          ],
+          "why": {
+            "en": "Here the second half is not a reproach but a denial: young people may manage it, I cannot. ならいざ知らず is not an « if I were young », and it never says the speaker can do it.",
+            "fr": "Ici la seconde moitié n'est pas un reproche mais un refus : les jeunes y arrivent peut-être, pas moi. ならいざ知らず n'est pas un « si j'étais jeune », et ne dit jamais que la personne en est capable."
+          }
+        }
+      ]
     }
   },
   {
@@ -8740,7 +8998,136 @@
             "fr": "Admettre « express » et refuser ce qu'il promet : とはいえ. だから ferait de l'heure la faute de l'express, et なら lui donne raison."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the village like?",
+            "fr": "Comment est ce village ?"
+          },
+          "jp": "田舎とはいえ、駅前にはコンビニも病院もそろっている。",
+          "tr": {
+            "en": "Countryside though it is, the area in front of the station has both a convenience store and a hospital.",
+            "fr": "À la campagne, certes, mais devant la gare, il y a aussi bien une supérette qu'un hôpital."
+          },
+          "choices": [
+            {
+              "en": "It is rural, yet the station area has shops and a hospital.",
+              "fr": "C'est la campagne, mais le quartier de la gare a des commerces et un hôpital."
+            },
+            {
+              "en": "It is rural, so there is no shop or hospital even by the station.",
+              "fr": "C'est la campagne, donc il n'y a ni commerce ni hôpital, même près de la gare."
+            },
+            {
+              "en": "It is not rural at all: it is a town with a station.",
+              "fr": "Ce n'est pas du tout la campagne : c'est une ville avec une gare."
+            }
+          ],
+          "why": {
+            "en": "とはいえ grants « it is the countryside » and then corrects what that suggests: yet there are shops and a hospital. It is neither a « so » nor a denial of the first half.",
+            "fr": "とはいえ admet « c'est la campagne » puis corrige ce que cela laisse attendre : il y a pourtant des commerces et un hôpital. Ce n'est ni un « donc » ni un démenti de la première moitié."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "三年間日本語を＿＿＿とはいえ、まだ新聞はうまく読めない。",
+          "tr": {
+            "en": "Although I have studied Japanese for three years, I still can't read a newspaper well.",
+            "fr": "J'ai beau étudier le japonais depuis trois ans, je n'arrive pas encore à bien lire un journal."
+          },
+          "choices": [
+            "勉強した",
+            "勉強して",
+            "勉強しました"
+          ],
+          "why": {
+            "en": "とはいえ follows the plain form of the clause, here the past 勉強した. The te-form 勉強して cannot stand before it, and 勉強しました is polite: the clause before とはいえ stays plain.",
+            "fr": "とはいえ suit la forme neutre de la proposition, ici le passé 勉強した. La forme en て 勉強して ne peut pas le précéder, et 勉強しました est polie : devant とはいえ, la proposition reste neutre."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think about opening someone's bag?",
+            "fr": "Que pense la personne qui parle du fait d'ouvrir le sac de quelqu'un ?"
+          },
+          "jp": "いくら友だちとはいえ、人のかばんを勝手に開けるのはよくない。",
+          "tr": {
+            "en": "However close you are as friends, it is not right to open someone's bag without asking.",
+            "fr": "Même entre amis, ce n'est pas bien d'ouvrir le sac de quelqu'un sans demander."
+          },
+          "choices": [
+            {
+              "en": "It is wrong, even between friends.",
+              "fr": "Ce n'est pas bien, même entre amis."
+            },
+            {
+              "en": "It is fine, because they are friends.",
+              "fr": "C'est permis, puisque ce sont des amis."
+            },
+            {
+              "en": "It is wrong, precisely because they are friends.",
+              "fr": "Ce n'est pas bien, justement parce que ce sont des amis."
+            }
+          ],
+          "why": {
+            "en": "いくら…とはいえ grants the friendship as far as it goes (« however close »), then says it is still wrong. とはいえ is not « because »: friendship is not the reason, it is the excuse refused.",
+            "fr": "いくら…とはいえ admet l'amitié aussi loin qu'on voudra (« aussi proches soient-ils »), puis dit que c'est quand même mal. とはいえ n'est pas « parce que » : l'amitié n'est pas la raison, c'est l'excuse refusée."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A colleague invites you for a drink on Friday night. You want to say, politely: granted, it is Friday, but the report has to be finished tonight. What do you say?",
+            "fr": "Un collègue t'invite à boire un verre vendredi soir. Tu veux dire poliment : certes, c'est vendredi, mais le rapport doit être fini ce soir. Que dis-tu ?"
+          },
+          "choices": [
+            "金曜日とはいえ、今夜中にこの報告書を仕上げなければなりません。",
+            "今夜中にこの報告書を仕上げなければならないとはいえ、金曜日ですから、少しだけなら行けます。",
+            "金曜日ですから、報告書は来週にして、ぜひ行きます。"
+          ],
+          "why": {
+            "en": "とはいえ grants the first fact (Friday) and the weight falls on the second (the report). Line 2 turns it round, granting the report and then going; line 3 gives Friday as a reason to say yes, not as a concession.",
+            "fr": "とはいえ admet le premier fait (vendredi) et le poids tombe sur le second (le rapport). La ligne 2 retourne la phrase et finit par accepter ; la ligne 3 donne vendredi comme raison de dire oui, non comme concession."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the cost?",
+            "fr": "Que dit la personne qui parle du coût ?"
+          },
+          "jp": "あまり高くないとはいえ、毎月となると家計にはこたえる。",
+          "tr": {
+            "en": "It may not be very expensive, but every month it hits the household budget.",
+            "fr": "Ce n'est peut-être pas très cher, mais chaque mois, cela pèse sur le budget du foyer."
+          },
+          "choices": [
+            {
+              "en": "It is not very expensive, yet paying it every month is a strain.",
+              "fr": "Ce n'est pas très cher, mais le payer chaque mois pèse."
+            },
+            {
+              "en": "It is not very expensive, so paying it every month is no problem.",
+              "fr": "Ce n'est pas très cher, donc le payer chaque mois ne pose aucun problème."
+            },
+            {
+              "en": "It is expensive, and paying it every month makes it worse.",
+              "fr": "C'est cher, et le payer chaque mois n'arrange rien."
+            }
+          ],
+          "why": {
+            "en": "The granted fact is negative: 高くない, not very expensive. The second half qualifies it: paying monthly still weighs on the budget. The negative before とはいえ is not to be missed.",
+            "fr": "Le fait admis est négatif : 高くない, pas très cher. La seconde moitié le nuance : payer chaque mois pèse quand même. Ne pas manquer la négation devant とはいえ."
+          }
+        }
+      ]
     }
   },
   {
@@ -8969,7 +9356,141 @@
             "fr": "Admettre l'urgence et garder la règle : といえども. Les deux autres font de l'urgence une excuse, ce qu'il vient de refuser."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the notice say about members?",
+            "fr": "Que dit l'avis à propos des membres ?"
+          },
+          "jp": "会員といえども、規則に反した場合は、退会していただくことがあります。",
+          "tr": {
+            "en": "Even members may be asked to leave if they break the rules.",
+            "fr": "Même les membres peuvent être priés de quitter le club s'ils enfreignent le règlement."
+          },
+          "choices": [
+            {
+              "en": "Being a member gives no exemption: one who breaks the rules may be asked to leave.",
+              "fr": "Être membre n'exempte de rien : celui qui enfreint le règlement peut être prié de partir."
+            },
+            {
+              "en": "Members who break the rules are excused, because they are members.",
+              "fr": "Les membres qui enfreignent le règlement sont excusés, puisqu'ils sont membres."
+            },
+            {
+              "en": "Only members are bound by the rules, and visitors are not.",
+              "fr": "Seuls les membres sont tenus par le règlement, pas les visiteurs."
+            }
+          ],
+          "why": {
+            "en": "といえども names a status that might be thought to protect (会員) and refuses it: the rule holds all the same. It is not an excuse for members, and it does not say the rules bind only them.",
+            "fr": "といえども nomme un statut qu'on croirait protecteur (会員) et le refuse : la règle vaut quand même. Ce n'est pas une excuse pour les membres, et cela ne dit pas que le règlement ne lie qu'eux."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "どんな名医＿＿＿、すべての病気を治せるわけではない。",
+          "tr": {
+            "en": "However famous a doctor may be, not every illness can be cured.",
+            "fr": "Si célèbre que soit un médecin, on ne peut pas guérir toutes les maladies."
+          },
+          "choices": [
+            "といえども",
+            "といえば",
+            "ともなれば"
+          ],
+          "why": {
+            "en": "といえども grants the high rank and says the limit still holds. といえば only opens a topic (« speaking of »), and ともなれば says what follows once one reaches that rank, so it would not deny anything.",
+            "fr": "といえども admet le rang élevé et dit que la limite demeure. といえば ne fait qu'ouvrir un sujet (« à propos de »), et ともなれば dit ce qui suit quand on atteint ce rang : il ne nierait rien."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker require of the driver?",
+            "fr": "Qu'exige la personne qui parle du conducteur ?"
+          },
+          "jp": "運転中は、一瞬といえども、目をそらしてはならない。",
+          "tr": {
+            "en": "While driving, you must not look away, not even for an instant.",
+            "fr": "Au volant, il ne faut pas détourner les yeux, ne serait-ce qu'un instant."
+          },
+          "choices": [
+            {
+              "en": "Attention at every moment: not even an instant's lapse.",
+              "fr": "Une attention de chaque instant : pas même un instant d'inattention."
+            },
+            {
+              "en": "Looking away is fine, as long as it is only for an instant.",
+              "fr": "Détourner les yeux est permis, pourvu que ce ne soit qu'un instant."
+            },
+            {
+              "en": "The driver should look away now and then, for an instant, to rest the eyes.",
+              "fr": "Le conducteur doit détourner les yeux de temps en temps, un instant, pour les reposer."
+            }
+          ],
+          "why": {
+            "en": "Named at its smallest, 一瞬 is the extreme case: even that least bit is not allowed. といえども never means « as long as it is only » a moment, and てはならない forbids, it does not oblige.",
+            "fr": "Nommé à son plus petit, 一瞬 est le cas extrême : même ce tout petit moment n'est pas permis. といえども ne veut jamais dire « pourvu que ce ne soit qu'un » instant, et てはならない interdit, il n'oblige pas."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "どれほどの犠牲を＿＿＿といえども、この約束だけは守りたい。",
+          "tr": {
+            "en": "Whatever the sacrifice I may have to pay, this is the one promise I want to keep.",
+            "fr": "Quel que soit le sacrifice à consentir, c'est cette promesse-là que je veux tenir."
+          },
+          "choices": [
+            "払う",
+            "払い",
+            "払います"
+          ],
+          "why": {
+            "en": "The clause before といえども stays in the plain form: the dictionary form 払う. 払い is only the stem, which cannot stand before it, and 払います is polite, which the clause never takes here.",
+            "fr": "La proposition devant といえども reste à la forme neutre : la forme du dictionnaire 払う. 払い n'est que le radical, qui ne peut pas la précéder, et 払います est polie, ce que cette proposition ne prend pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about big companies?",
+            "fr": "Que dit la personne qui parle des grandes entreprises ?"
+          },
+          "jp": "大企業といえども、不況の影響を受けないわけではない。",
+          "tr": {
+            "en": "Even big companies are not immune to the effects of a recession.",
+            "fr": "Même les grandes entreprises ne sont pas à l'abri des effets d'une récession."
+          },
+          "choices": [
+            {
+              "en": "They too are hit by a recession.",
+              "fr": "Elles aussi sont touchées par une récession."
+            },
+            {
+              "en": "They escape a recession; only small companies suffer.",
+              "fr": "Elles échappent à la récession ; seules les petites entreprises en souffrent."
+            },
+            {
+              "en": "Only big companies are hit by a recession.",
+              "fr": "Seules les grandes entreprises sont touchées par une récession."
+            }
+          ],
+          "why": {
+            "en": "Big size is the status that might shield, and といえども says it does not: 受けないわけではない is a double negative, « it is not that they escape ». So they are hit too.",
+            "fr": "La grande taille est le statut qui pourrait protéger, et といえども dit que non : 受けないわけではない est une double négation, « ce n'est pas qu'elles y échappent ». Elles sont donc touchées aussi."
+          }
+        }
+      ]
     }
   },
   {
@@ -9164,7 +9685,136 @@
             "fr": "Des mots jamais prononcés, seulement montrés par le geste : とばかりに. Les deux autres les lui font vraiment dire."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What did the father do?",
+            "fr": "Qu'a fait le père ?"
+          },
+          "jp": "だから言っただろうとばかりに、父は首を横にふった。",
+          "tr": {
+            "en": "As if to say « I told you so », my father shook his head.",
+            "fr": "Comme pour dire « je te l'avais bien dit », mon père a secoué la tête."
+          },
+          "choices": [
+            {
+              "en": "He shook his head, and his manner said « I told you so ».",
+              "fr": "Il a secoué la tête, et son attitude disait « je te l'avais bien dit »."
+            },
+            {
+              "en": "He said « I told you so » out loud as he shook his head.",
+              "fr": "Il a dit « je te l'avais bien dit » à voix haute en secouant la tête."
+            },
+            {
+              "en": "He shook his head just because he had warned them before.",
+              "fr": "Il a secoué la tête uniquement parce qu'il les avait prévenus avant."
+            }
+          ],
+          "why": {
+            "en": "とばかりに gives the words his manner expressed, without his saying them. He did not speak, and it is not the ばかりに of « just because »: the shaking head is what said it.",
+            "fr": "とばかりに donne les mots que son attitude exprimait, sans qu'il les dise. Il n'a pas parlé, et ce n'est pas le ばかりに de « simplement parce que » : c'est la tête secouée qui le disait."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "店主は、＿＿＿とばかりに、売れ残りのパンを袋に押しこんだ。",
+          "tr": {
+            "en": "The shopkeeper stuffed the unsold bread into a bag, as if to say « Take it and go! »",
+            "fr": "Le commerçant a fourré le pain invendu dans un sac, comme pour dire « Prends-le et va-t'en ! »"
+          },
+          "choices": [
+            "持っていけ",
+            "持っていこう",
+            "持っていくな"
+          ],
+          "why": {
+            "en": "The quote is what the manner says, in plain direct speech: the order 持っていけ fits stuffing bread into a bag. 持っていこう would be « let's take it » and 持っていくな « don't take it », the opposite.",
+            "fr": "La citation est ce que dit l'attitude, en discours direct neutre : l'ordre 持っていけ convient à qui fourre du pain dans un sac. 持っていこう serait « prenons-le » et 持っていくな « ne le prends pas », le contraire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the wind?",
+            "fr": "Que dit la phrase du vent ?"
+          },
+          "jp": "秋の風は、夏は終わったとばかりに、木の葉を一度に落とした。",
+          "tr": {
+            "en": "The autumn wind dropped the leaves all at once, as if to say that summer was over.",
+            "fr": "Le vent d'automne a fait tomber les feuilles d'un seul coup, comme pour dire que l'été était fini."
+          },
+          "choices": [
+            {
+              "en": "It brought the leaves down all at once, as though announcing that summer was over.",
+              "fr": "Il a fait tomber les feuilles d'un coup, comme pour annoncer que l'été était fini."
+            },
+            {
+              "en": "It brought the leaves down all at once, simply because summer was over.",
+              "fr": "Il a fait tomber les feuilles d'un coup, simplement parce que l'été était fini."
+            },
+            {
+              "en": "It brought down only the leaves, not the branches, now that summer was over.",
+              "fr": "Il n'a fait tomber que les feuilles, pas les branches, maintenant que l'été était fini."
+            }
+          ],
+          "why": {
+            "en": "Even a wind can be given words by とばかりに: its sweeping the leaves off reads as a message, « summer is over ». It is not a plain cause, and ばかり is not « only » here.",
+            "fr": "Même un vent peut recevoir des mots par とばかりに : balayer les feuilles se lit comme un message, « l'été est fini ». Ce n'est pas une simple cause, et ばかり n'est pas « seulement » ici."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A shop clerk says nothing, but taps the clock again and again to show it is closing time. You tell a friend about it. What do you say?",
+            "fr": "Un vendeur ne dit rien, mais tapote l'horloge à plusieurs reprises pour montrer que c'est l'heure de fermer. Tu le racontes à un ami. Que dis-tu ?"
+          },
+          "choices": [
+            "店員さんが、閉店時間だとばかりに、時計を何度も指さしたんだ。",
+            "店員さんが、まだ時間はあるとばかりに、時計を何度も指さしたんだ。",
+            "店員さんが、閉店時間だと言いながら、時計を何度も指さしたんだ。"
+          ],
+          "why": {
+            "en": "とばかりに puts into the manner the very words you read in it: « it is closing time ». Line 2 reads the opposite message into the gesture, and line 3 has the clerk say it aloud, but he spoke no word.",
+            "fr": "とばかりに met dans l'attitude les mots mêmes qu'on y lit : « c'est l'heure de fermer ». La ligne 2 y lit le message contraire, et la ligne 3 fait dire la phrase au vendeur, qui n'a pas dit un mot."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How did he behave?",
+            "fr": "Comment s'est-il comporté ?"
+          },
+          "jp": "彼は何もなかったとばかりに、いつもの席にすわった。",
+          "tr": {
+            "en": "He sat in his usual seat as if to say that nothing had happened.",
+            "fr": "Il s'est assis à sa place habituelle, comme pour dire que rien ne s'était passé."
+          },
+          "choices": [
+            {
+              "en": "As though nothing had happened: his manner said so.",
+              "fr": "Comme si de rien n'était : son attitude le disait."
+            },
+            {
+              "en": "Since nothing had happened, he sat in his usual seat.",
+              "fr": "Comme il ne s'était rien passé, il s'est assis à sa place habituelle."
+            },
+            {
+              "en": "He told everyone that nothing had happened, then sat down.",
+              "fr": "Il a dit à tout le monde qu'il ne s'était rien passé, puis s'est assis."
+            }
+          ],
+          "why": {
+            "en": "The quoted words, « nothing happened », are what his behaviour seemed to say, not a fact and not a statement he made. He may well have been acting. とばかりに reads words into a manner.",
+            "fr": "Les mots cités, « rien ne s'est passé », sont ce que son comportement semblait dire, ni un fait ni une déclaration. Il jouait peut-être la comédie. とばかりに lit des mots dans une attitude."
+          }
+        }
+      ]
     }
   },
   {
@@ -9359,7 +10009,141 @@
             "fr": "Admirer le courage face à la tempête : をものともせず. をおそれて le fait céder devant elle, et のせいで ferait de la tempête la raison du départ."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the luggage?",
+            "fr": "Que dit la phrase des bagages ?"
+          },
+          "jp": "彼女は重い荷物をものともせず、軽い足取りで山道を登っていった。",
+          "tr": {
+            "en": "Undaunted by her heavy luggage, she climbed the mountain path with a light step.",
+            "fr": "Sans se laisser arrêter par ses lourds bagages, elle a monté le chemin de montagne d'un pas léger."
+          },
+          "choices": [
+            {
+              "en": "It was heavy, yet she climbed with a light step.",
+              "fr": "Il était lourd, et pourtant elle a monté d'un pas léger."
+            },
+            {
+              "en": "It was actually light, so she climbed easily.",
+              "fr": "Il était en fait léger, alors elle a monté sans peine."
+            },
+            {
+              "en": "It was so heavy that she gave up the climb.",
+              "fr": "Il était si lourd qu'elle a renoncé à monter."
+            }
+          ],
+          "why": {
+            "en": "をものともせず needs a real obstacle: the luggage was heavy, and she was not daunted by it. It is not « it was light » (no obstacle) and not « she gave up » (the obstacle won).",
+            "fr": "をものともせず suppose un vrai obstacle : les bagages étaient lourds, et elle ne s'est pas laissé arrêter. Ce n'est ni « ils étaient légers » (pas d'obstacle) ni « elle a renoncé » (l'obstacle a gagné)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "配達員たちは大雪を＿＿＿、荷物を届けて回った。",
+          "tr": {
+            "en": "Undaunted by the heavy snow, the delivery staff went round delivering parcels.",
+            "fr": "Sans se laisser arrêter par la neige abondante, les livreurs ont fait leur tournée de colis."
+          },
+          "choices": [
+            "ものともせず",
+            "ものともしない",
+            "ものともしなかった"
+          ],
+          "why": {
+            "en": "The form that links this clause to the next is ものともせず, the ず-form of the negative. ものともしない would close a sentence or describe a noun, and ものともしなかった is a past that cannot join a clause.",
+            "fr": "La forme qui relie cette proposition à la suivante est ものともせず, la forme en ず du négatif. ものともしない fermerait une phrase ou qualifierait un nom, et ものともしなかった est un passé qui ne peut pas relier."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How did he deal with his colleagues' looks?",
+            "fr": "Comment a-t-il réagi aux regards de ses collègues ?"
+          },
+          "jp": "彼は同僚の冷たい視線をものともせず、自分の意見を言い続けた。",
+          "tr": {
+            "en": "Undaunted by his colleagues' cold looks, he went on giving his opinion.",
+            "fr": "Sans se laisser arrêter par les regards froids de ses collègues, il a continué à donner son avis."
+          },
+          "choices": [
+            {
+              "en": "He saw the cold looks but was not stopped, and kept speaking.",
+              "fr": "Il a vu ces regards froids sans se laisser arrêter, et a continué à parler."
+            },
+            {
+              "en": "He hardly noticed the looks and just went on talking.",
+              "fr": "Il a à peine remarqué ces regards et a simplement continué à parler."
+            },
+            {
+              "en": "His colleagues' warm support encouraged him to keep speaking.",
+              "fr": "Le soutien chaleureux de ses collègues l'a encouragé à continuer à parler."
+            }
+          ],
+          "why": {
+            "en": "The cold looks were felt, and he went on in spite of them: that is the courage をものともせず praises. Not noticing them would be indifference, the shade of をよそに, and they were not support.",
+            "fr": "Les regards froids étaient sentis, et il a continué malgré eux : c'est ce courage que loue をものともせず. Ne pas les remarquer serait de l'indifférence, la nuance de をよそに, et ce n'était pas un soutien."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "客たちは＿＿＿をものともせず、朝早くから列を作った。",
+          "tr": {
+            "en": "Undaunted by the heat, the customers queued from early morning.",
+            "fr": "Sans se laisser arrêter par la chaleur, les clients ont fait la queue dès le petit matin."
+          },
+          "choices": [
+            "暑さ",
+            "暑い",
+            "暑く"
+          ],
+          "why": {
+            "en": "をものともせず follows a noun that names the obstacle, so the adjective 暑い must become the noun 暑さ (the heat). 暑い and 暑く cannot take を directly.",
+            "fr": "をものともせず suit un nom qui désigne l'obstacle : l'adjectif 暑い doit devenir le nom 暑さ (la chaleur). 暑い et 暑く ne peuvent pas recevoir を directement."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about his failures?",
+            "fr": "Que dit la phrase de ses échecs ?"
+          },
+          "jp": "彼は度重なる失敗をものともせず、また新しい店を開いた。",
+          "tr": {
+            "en": "Undaunted by his repeated failures, he opened yet another new shop.",
+            "fr": "Sans se laisser arrêter par ses échecs répétés, il a ouvert encore une nouvelle boutique."
+          },
+          "choices": [
+            {
+              "en": "He had failed again and again, yet that did not stop him from opening another shop.",
+              "fr": "Il avait échoué maintes fois, mais cela ne l'a pas empêché d'ouvrir une autre boutique."
+            },
+            {
+              "en": "He had never failed, which is why he opened another shop.",
+              "fr": "Il n'avait jamais échoué, et c'est pourquoi il a ouvert une autre boutique."
+            },
+            {
+              "en": "His repeated failures were the reason he opened another shop.",
+              "fr": "Ses échecs répétés sont la raison pour laquelle il a ouvert une autre boutique."
+            }
+          ],
+          "why": {
+            "en": "The failures are the obstacle, and をものともせず says he opened a shop in spite of them. They are not the reason he did it, and they did happen: he was not facing a clean record.",
+            "fr": "Les échecs sont l'obstacle, et をものともせず dit qu'il a ouvert une boutique malgré eux. Ils ne sont pas la raison de son geste, et ils ont bien eu lieu : son bilan n'était pas vierge."
+          }
+        }
+      ]
     }
   },
   {
@@ -9522,7 +10306,141 @@
             "fr": "Contraint par la pluie au report : を余儀なくされる. わけにはいかない dit qu'on ne pouvait pas se permettre de reporter, et にもかかわらず fait de la pluie une raison de ne pas le faire."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the company's decision?",
+            "fr": "Que dit la phrase de la décision de l'entreprise ?"
+          },
+          "jp": "利用客の減少で、その鉄道会社は路線の廃止を余儀なくされた。",
+          "tr": {
+            "en": "With the fall in passengers, the railway company was forced to close the line.",
+            "fr": "À cause de la baisse du nombre de voyageurs, la compagnie de chemin de fer a été contrainte de fermer la ligne."
+          },
+          "choices": [
+            {
+              "en": "It was not the company's wish: falling passengers left it no choice.",
+              "fr": "Ce n'était pas son souhait : la baisse des voyageurs ne lui laissait pas le choix."
+            },
+            {
+              "en": "The company chose to close the line to save money, as it had planned.",
+              "fr": "La compagnie a choisi de fermer la ligne pour économiser, comme elle l'avait prévu."
+            },
+            {
+              "en": "The company forced its passengers to stop using the line.",
+              "fr": "La compagnie a contraint ses voyageurs à ne plus utiliser la ligne."
+            }
+          ],
+          "why": {
+            "en": "The company is the one forced (される): circumstances, here the falling passengers, left it no choice. It did not plan the closure, and it is not the company that forces the passengers.",
+            "fr": "C'est la compagnie qui est contrainte (される) : les circonstances, ici la baisse des voyageurs, ne lui laissaient pas le choix. Elle n'avait pas prévu la fermeture, et ce n'est pas elle qui contraint les voyageurs."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "不況で、その工場は閉鎖を＿＿＿、従業員の多くが職を失った。",
+          "tr": {
+            "en": "Because of the recession, the factory was forced to close, and many of its employees lost their jobs.",
+            "fr": "À cause de la récession, l'usine a été contrainte de fermer, et beaucoup de ses employés ont perdu leur emploi."
+          },
+          "choices": [
+            "余儀なくされ",
+            "余儀なくされる",
+            "余儀なくさせ"
+          ],
+          "why": {
+            "en": "To join two clauses, the passive takes its stem form 余儀なくされ, like a て-form. 余儀なくされる would end the sentence, and 余儀なくさせ is the active: it is the factory that was forced, not the one forcing.",
+            "fr": "Pour relier deux propositions, le passif prend son radical 余儀なくされ, comme une forme en て. 余儀なくされる terminerait la phrase, et 余儀なくさせ est l'actif : c'est l'usine qui est contrainte, pas elle qui contraint."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the tournament?",
+            "fr": "Que dit la phrase du tournoi ?"
+          },
+          "jp": "このまま雨が続けば、大会は中止を余儀なくされるおそれがある。",
+          "tr": {
+            "en": "If the rain goes on like this, there is a risk that the tournament will be forced to be cancelled.",
+            "fr": "Si la pluie continue ainsi, le tournoi risque d'être contraint à l'annulation."
+          },
+          "choices": [
+            {
+              "en": "It has not been cancelled yet; if the rain goes on, it may have to be.",
+              "fr": "Il n'est pas encore annulé ; si la pluie continue, il pourrait devoir l'être."
+            },
+            {
+              "en": "It has already been cancelled because of the rain.",
+              "fr": "Il a déjà été annulé à cause de la pluie."
+            },
+            {
+              "en": "The organizers will cancel it on purpose if the rain goes on.",
+              "fr": "Les organisateurs l'annuleront exprès si la pluie continue."
+            }
+          ],
+          "why": {
+            "en": "余儀なくされる is the present form and おそれがある makes it a risk, so nothing is cancelled yet. It would be the rain that forces it, not the organizers' wish.",
+            "fr": "余儀なくされる est la forme du présent et おそれがある en fait un risque : rien n'est encore annulé. Ce serait la pluie qui l'imposerait, non la volonté des organisateurs."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "洪水から五年たった今も、多くの人が仮設住宅での生活を＿＿＿。",
+          "tr": {
+            "en": "Even now, five years after the flood, many people are still forced to live in temporary housing.",
+            "fr": "Aujourd'hui encore, cinq ans après l'inondation, beaucoup de gens sont toujours contraints de vivre dans des logements provisoires."
+          },
+          "choices": [
+            "余儀なくされている",
+            "余儀なくされた",
+            "余儀なくされない"
+          ],
+          "why": {
+            "en": "今も asks for a state that goes on, so the ている form: they are still forced. 余儀なくされた is a finished past, and 余儀なくされない would say they are not forced at all.",
+            "fr": "今も demande un état qui se prolonge, donc la forme en ている : ils sont toujours contraints. 余儀なくされた est un passé achevé, et 余儀なくされない dirait qu'ils ne sont pas contraints du tout."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about his stay in hospital?",
+            "fr": "Que dit la phrase de son séjour à l'hôpital ?"
+          },
+          "jp": "彼は病気で長期の入院を余儀なくされたが、その間に小説を一つ書き上げた。",
+          "tr": {
+            "en": "He was forced into a long stay in hospital by illness, but in that time he finished a novel.",
+            "fr": "La maladie l'a contraint à une longue hospitalisation, mais il a terminé un roman pendant ce temps."
+          },
+          "choices": [
+            {
+              "en": "It was not his choice, but he used the time to finish a novel.",
+              "fr": "Ce n'était pas son choix, mais il a mis ce temps à profit pour finir un roman."
+            },
+            {
+              "en": "He chose a long stay so that he could write a novel.",
+              "fr": "Il a choisi un long séjour pour pouvoir écrire un roman."
+            },
+            {
+              "en": "He was forced to stay, so he could not write anything.",
+              "fr": "Il a été contraint de rester, donc il n'a rien pu écrire."
+            }
+          ],
+          "why": {
+            "en": "The illness left him no choice but a long stay; the が then turns to what he did in spite of it. It was not his plan, and the forced stay did not stop him from writing.",
+            "fr": "La maladie ne lui laissait que l'hospitalisation ; le が se tourne ensuite vers ce qu'il a fait malgré elle. Ce n'était pas son plan, et le séjour forcé ne l'a pas empêché d'écrire."
+          }
+        }
+      ]
     }
   },
   {
@@ -9685,7 +10603,141 @@
             "fr": "Osaka d'abord, le reste ensuite : を皮切りに. をきっかけに ferait d'Osaka la cause de la tournée, et を最後に la dernière étape."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the success in America?",
+            "fr": "Que dit la phrase du succès en Amérique ?"
+          },
+          "jp": "アメリカでの成功を皮切りに、同社は次々とヨーロッパやアジアの市場へ進出した。",
+          "tr": {
+            "en": "Starting with its success in America, the company moved one after another into the markets of Europe and Asia.",
+            "fr": "À commencer par son succès en Amérique, l'entreprise s'est lancée l'un après l'autre sur les marchés d'Europe et d'Asie."
+          },
+          "choices": [
+            {
+              "en": "It was the first step: the company then entered one market after another.",
+              "fr": "C'était le premier pas : l'entreprise est ensuite entrée sur un marché après l'autre."
+            },
+            {
+              "en": "It was the trigger that made the company change its business plan.",
+              "fr": "C'est ce qui a poussé l'entreprise à changer son plan d'affaires."
+            },
+            {
+              "en": "It was one market among several the company entered at the same time.",
+              "fr": "C'était un marché parmi plusieurs où l'entreprise est entrée en même temps."
+            }
+          ],
+          "why": {
+            "en": "を皮切りに names the first of a series that follows in time: America, then one market after another. It is not a trigger of change (をきっかけに), nor one item in a list of things done together (をはじめ).",
+            "fr": "を皮切りに nomme le premier d'une série qui suit dans le temps : l'Amérique, puis un marché après l'autre. Ce n'est pas le déclencheur d'un changement (をきっかけに), ni un élément d'une liste faite en même temps (をはじめ)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "新しい路線は、横浜＿＿＿、毎年一駅ずつのびていく予定だ。",
+          "tr": {
+            "en": "The new line is to start at Yokohama and then be extended by one station each year.",
+            "fr": "La nouvelle ligne doit commencer à Yokohama puis être prolongée d'une station chaque année."
+          },
+          "choices": [
+            "を皮切りに",
+            "をきっかけに",
+            "を最後に"
+          ],
+          "why": {
+            "en": "Yokohama is the first stretch, with more to follow year by year: を皮切りに. をきっかけに makes it a trigger, not a first step, and を最後に would make it the end, with nothing after.",
+            "fr": "Yokohama est le premier tronçon, d'autres suivant d'année en année : を皮切りに. をきっかけに en ferait un déclencheur, non un premier pas, et を最後に en ferait la fin, sans rien après."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the department store's closing?",
+            "fr": "Que dit la phrase de la fermeture du grand magasin ?"
+          },
+          "jp": "駅前のデパートの閉店を皮切りに、周辺の店も次々と姿を消した。",
+          "tr": {
+            "en": "Starting with the closing of the department store by the station, the shops around it vanished one after another too.",
+            "fr": "À commencer par la fermeture du grand magasin près de la gare, les boutiques autour ont elles aussi disparu l'une après l'autre."
+          },
+          "choices": [
+            {
+              "en": "It was the first of a run of closures: the nearby shops followed.",
+              "fr": "C'était la première d'une série de fermetures : les boutiques voisines ont suivi."
+            },
+            {
+              "en": "It was the last closure: after it, the nearby shops stayed open.",
+              "fr": "C'était la dernière fermeture : après elle, les boutiques voisines sont restées ouvertes."
+            },
+            {
+              "en": "The department store closed because the nearby shops had already gone.",
+              "fr": "Le grand magasin a fermé parce que les boutiques voisines avaient déjà disparu."
+            }
+          ],
+          "why": {
+            "en": "A series can be a sad one: the store's closing came first, and the shops around it vanished after it. The point only fixes the order, first and then the rest, and not the last or the cause.",
+            "fr": "Une série peut être triste : la fermeture du magasin est venue en premier, et les boutiques autour ont disparu ensuite. Le point ne fixe que l'ordre, d'abord celle-ci puis les autres, non la dernière ni la cause."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "来月の新製品の＿＿＿を皮切りに、今年は毎月新しい商品が出る予定だ。",
+          "tr": {
+            "en": "Starting with the release of the new product next month, a new item is due out every month this year.",
+            "fr": "À commencer par la sortie du nouveau produit le mois prochain, un nouvel article doit sortir chaque mois cette année."
+          },
+          "choices": [
+            "発売",
+            "発売する",
+            "発売した"
+          ],
+          "why": {
+            "en": "を皮切りに follows a noun: here the action noun 発売 (release), after 来月の新製品の. A verb form, 発売する or 発売した, cannot stand directly before を in this slot.",
+            "fr": "を皮切りに suit un nom : ici le nom d'action 発売 (sortie), après 来月の新製品の. Une forme verbale, 発売する ou 発売した, ne peut pas se placer directement devant を dans ce cas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the English exam?",
+            "fr": "Que dit la phrase de l'examen d'anglais ?"
+          },
+          "jp": "来週の英語の試験を皮切りに、期末試験が一週間続く。",
+          "tr": {
+            "en": "Starting with next week's English exam, the final exams go on for a week.",
+            "fr": "À commencer par l'examen d'anglais de la semaine prochaine, les examens de fin de trimestre durent une semaine."
+          },
+          "choices": [
+            {
+              "en": "It is the first of a week of final exams.",
+              "fr": "C'est le premier d'une semaine d'examens de fin de trimestre."
+            },
+            {
+              "en": "It is the last of the week's exams.",
+              "fr": "C'est le dernier des examens de la semaine."
+            },
+            {
+              "en": "It is one exam among several held on the same day.",
+              "fr": "C'est un examen parmi plusieurs qui ont lieu le même jour."
+            }
+          ],
+          "why": {
+            "en": "The English exam opens the series, and the week of exams follows it. を皮切りに orders things in time, first and then the rest: it neither ends the week nor lists exams held together.",
+            "fr": "L'examen d'anglais ouvre la série, et la semaine d'examens le suit. を皮切りに ordonne les choses dans le temps, d'abord celle-ci puis les autres : il ne clôt pas la semaine et ne liste pas des examens simultanés."
+          }
+        }
+      ]
     }
   },
   {
@@ -9912,7 +10964,141 @@
             "fr": "L'incident s'est arrêté avant la blessure : に至らず. ようになる ferait de la blessure une nouvelle habitude, et おそれがある un risque encore à venir."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the decision?",
+            "fr": "Que dit la phrase de leur décision ?"
+          },
+          "jp": "何度も話し合った結果、二人は別々の道を歩むに至った。",
+          "tr": {
+            "en": "After talking it over many times, the two of them came to the point of going their separate ways.",
+            "fr": "Après en avoir parlé maintes fois, tous deux en sont arrivés à suivre chacun leur chemin."
+          },
+          "choices": [
+            {
+              "en": "After a long process, they reached the point of parting ways.",
+              "fr": "Au terme d'un long processus, ils en sont arrivés à se séparer."
+            },
+            {
+              "en": "They decided to part at once, without any discussion.",
+              "fr": "Ils ont décidé de se séparer aussitôt, sans aucune discussion."
+            },
+            {
+              "en": "They were on the verge of parting but changed their minds.",
+              "fr": "Ils étaient sur le point de se séparer, mais ont changé d'avis."
+            }
+          ],
+          "why": {
+            "en": "に至る marks the end of a process: after many talks, the point reached is parting. It is not a sudden decision, and it is the negative に至らなかった that would say they stopped short.",
+            "fr": "に至る marque la fin d'un processus : après bien des discussions, le point atteint est la séparation. Ce n'est pas une décision soudaine, et c'est le négatif に至らなかった qui dirait qu'ils se sont arrêtés avant."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "長い間迷ったが、彼はついに店を閉める＿＿＿。",
+          "tr": {
+            "en": "After hesitating for a long time, he finally reached the point of closing the shop.",
+            "fr": "Après avoir longtemps hésité, il en est finalement arrivé à fermer la boutique."
+          },
+          "choices": [
+            "に至った",
+            "に至らなかった",
+            "に至っては"
+          ],
+          "why": {
+            "en": "After a verb in the dictionary form, に至った says the process ended there, and ついに fits. に至らなかった says he did not get that far, and に至っては singles out a worst case and cannot close the sentence.",
+            "fr": "Après un verbe à la forme du dictionnaire, に至った dit que le processus s'est terminé là, et ついに convient. に至らなかった dit qu'il n'en est pas arrivé là, et に至っては isole le pire cas et ne peut pas clore la phrase."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the shop?",
+            "fr": "Que dit la phrase de la boutique ?"
+          },
+          "jp": "その店は、細かいところに至るまで手作りにこだわっている。",
+          "tr": {
+            "en": "That shop insists on handmade work, down to the smallest details.",
+            "fr": "Cette boutique tient à l'artisanat jusque dans les moindres détails."
+          },
+          "choices": [
+            {
+              "en": "It insists on handmade work even down to the smallest details.",
+              "fr": "Elle tient à l'artisanat jusque dans les moindres détails."
+            },
+            {
+              "en": "It insists on handmade work only for the small details, not the rest.",
+              "fr": "Elle tient à l'artisanat seulement pour les petits détails, pas pour le reste."
+            },
+            {
+              "en": "Its insistence on handmade work ended up focusing on the small details.",
+              "fr": "Sa volonté d'artisanat a fini par se concentrer sur les petits détails."
+            }
+          ],
+          "why": {
+            "en": "に至るまで marks how far something reaches, and here it reaches as far as the finest details: everything is handmade. It is not « only the details », nor a process that ended on them.",
+            "fr": "に至るまで marque jusqu'où quelque chose s'étend, et ici jusqu'aux moindres détails : tout est fait main. Ce n'est pas « seulement les détails », ni un processus qui aurait fini par s'y arrêter."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "口論にはなったが、殴り合い＿＿＿。",
+          "tr": {
+            "en": "It turned into an argument, but it did not go as far as blows.",
+            "fr": "Cela a tourné à la dispute, mais pas jusqu'aux coups."
+          },
+          "choices": [
+            "には至らなかった",
+            "には至りなかった",
+            "には至った"
+          ],
+          "why": {
+            "en": "至る is a う-verb: its negative is 至らない, so the past negative is 至らなかった (not 至りなかった). には至らなかった says it stopped short of blows; には至った would say it reached them, against the が.",
+            "fr": "至る est un verbe en う : son négatif est 至らない, donc le passé négatif est 至らなかった (non 至りなかった). には至らなかった dit que cela s'est arrêté avant les coups ; には至った dirait qu'on y est arrivé, contre le が."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the quarrel?",
+            "fr": "Que dit la phrase de la querelle ?"
+          },
+          "jp": "ささいな言い争いは、ついには裁判に至った。",
+          "tr": {
+            "en": "A trivial quarrel finally ended up in court.",
+            "fr": "Une querelle insignifiante a fini par aboutir devant un tribunal."
+          },
+          "choices": [
+            {
+              "en": "A trivial quarrel grew until it ended up in court.",
+              "fr": "Une querelle insignifiante a grossi jusqu'à finir devant un tribunal."
+            },
+            {
+              "en": "A court case was the cause of a trivial quarrel.",
+              "fr": "Un procès a été la cause d'une querelle insignifiante."
+            },
+            {
+              "en": "A trivial quarrel was settled without going to court.",
+              "fr": "Une querelle insignifiante a été réglée sans aller devant un tribunal."
+            }
+          ],
+          "why": {
+            "en": "に至る leads from a start to where things ended: the quarrel is the beginning, the court the end point reached. It is not the cause, and 至った says it did get that far.",
+            "fr": "に至る mène d'un début au point où les choses ont fini : la querelle est le début, le tribunal le point atteint. Ce n'en est pas la cause, et 至った dit qu'on en est bien arrivé là."
+          }
+        }
+      ]
     }
   },
   {
@@ -10075,7 +11261,141 @@
             "fr": "Le comble de l'honneur : 光栄の極み. めいわく極まりない fait de ce choix une gêne terrible, et にすぎない réduit l'honneur à peu de chose."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What was the station like right after the accident?",
+            "fr": "Comment était la gare juste après l'accident ?"
+          },
+          "jp": "事故の直後、駅は混乱の極みにあった。",
+          "tr": {
+            "en": "Right after the accident, the station was in utter confusion.",
+            "fr": "Juste après l'accident, la gare était dans la confusion la plus totale."
+          },
+          "choices": [
+            {
+              "en": "In utter chaos, at the very peak of confusion.",
+              "fr": "Dans un chaos total, au comble de la confusion."
+            },
+            {
+              "en": "Crowded, but calm and orderly.",
+              "fr": "Pleine de monde, mais calme et ordonnée."
+            },
+            {
+              "en": "A little confused, but under control.",
+              "fr": "Un peu confuse, mais maîtrisée."
+            }
+          ],
+          "why": {
+            "en": "の極み names the peak of a state: 混乱の極み is the height of confusion. It does not say the scene was calm, and it is the top of the scale, not « a little ».",
+            "fr": "の極み nomme le sommet d'un état : 混乱の極み est le comble de la confusion. Cela ne dit pas que la scène était calme, et c'est le haut de l'échelle, non « un peu »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "大事な場面でミスをしたことは、痛恨＿＿＿です。",
+          "tr": {
+            "en": "To have made a mistake at such an important moment is my deepest regret.",
+            "fr": "Avoir commis une erreur à un moment aussi important est mon plus profond regret."
+          },
+          "choices": [
+            "の極み",
+            "極まりない",
+            "のようだ"
+          ],
+          "why": {
+            "en": "痛恨 (deep regret) is a noun, and a noun takes の極み: the very height of it. 極まりない goes on adjectives such as 失礼, and 痛恨のようだ only says it « seems » to be regret.",
+            "fr": "痛恨 (profond regret) est un nom, et un nom prend の極み : le comble. 極まりない s'emploie avec des adjectifs comme 失礼, et 痛恨のようだ dit seulement que cela « semble » un regret."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about napping to music?",
+            "fr": "Que dit la personne qui parle de la sieste en musique ?"
+          },
+          "jp": "好きな音楽を聴きながら昼寝をする時間は、私には幸せの極みだ。",
+          "tr": {
+            "en": "Napping while listening to music I like is, for me, the height of happiness.",
+            "fr": "Faire la sieste en écoutant la musique que j'aime est, pour moi, le comble du bonheur."
+          },
+          "choices": [
+            {
+              "en": "It is the height of happiness for the speaker.",
+              "fr": "C'est le comble du bonheur pour la personne qui parle."
+            },
+            {
+              "en": "It is a happiness that has come to an end.",
+              "fr": "C'est un bonheur qui a pris fin."
+            },
+            {
+              "en": "It is a mildly pleasant habit, nothing more.",
+              "fr": "C'est une habitude agréable, sans plus."
+            }
+          ],
+          "why": {
+            "en": "極み here is the peak, not an end: 幸せの極み is the greatest happiness, said with a flourish, since it is only a nap. It is not a mild pleasure, and not the close of a happy time.",
+            "fr": "極み est ici le sommet, non une fin : 幸せの極み est le plus grand bonheur, dit avec emphase puisqu'il ne s'agit que d'une sieste. Ce n'est pas un plaisir tiède, ni la fin d'un moment heureux."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "最愛の人を失い、彼は＿＿＿にあった。",
+          "tr": {
+            "en": "Having lost the person he loved most, he was in the depths of sorrow.",
+            "fr": "Ayant perdu la personne qu'il aimait le plus, il était au comble de la tristesse."
+          },
+          "choices": [
+            "悲しみの極み",
+            "悲しいの極み",
+            "悲しい極み"
+          ],
+          "why": {
+            "en": "の極み follows a noun, so the adjective 悲しい must become the noun 悲しみ (sorrow): 悲しみの極み. 悲しいの極み and 悲しい極み keep the adjective, which cannot stand before it.",
+            "fr": "の極み suit un nom : l'adjectif 悲しい doit devenir le nom 悲しみ (la tristesse) : 悲しみの極み. 悲しいの極み et 悲しい極み gardent l'adjectif, qui ne peut pas le précéder."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is this sentence doing?",
+            "fr": "Que fait cette phrase ?"
+          },
+          "jp": "このたびは多大なご支援をいただき、感謝の極みでございます。",
+          "tr": {
+            "en": "I am deeply grateful for the great support you have given me this time.",
+            "fr": "Je vous remercie infiniment du grand soutien que vous m'avez apporté cette fois."
+          },
+          "choices": [
+            {
+              "en": "Thanking someone as warmly and formally as possible, in a letter or a speech.",
+              "fr": "Remercier quelqu'un de la façon la plus chaleureuse et la plus formelle, dans une lettre ou un discours."
+            },
+            {
+              "en": "Complaining that the support went too far.",
+              "fr": "Se plaindre que le soutien est allé trop loin."
+            },
+            {
+              "en": "Thanking a friend lightly, in a casual chat.",
+              "fr": "Remercier légèrement un ami, dans une conversation décontractée."
+            }
+          ],
+          "why": {
+            "en": "感謝の極み is thanks at its highest, in ceremonial words: the style of a formal letter or speech. It is not a complaint about too much support, and it is far too solemn for a casual chat.",
+            "fr": "感謝の極み est la reconnaissance à son sommet, en termes cérémonieux : le style d'une lettre ou d'un discours formel. Ce n'est pas une plainte, et c'est bien trop solennel pour une conversation décontractée."
+          }
+        }
+      ]
     }
   },
   {
@@ -14082,7 +15402,132 @@
             "fr": "てはばからない : il le dit, hardiment. かねない dit seulement qu'il pourrait le faire, et 言えない qu'il ne peut pas le dire."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの社長は、会社が成功したのは自分一人の力だと＿＿＿。",
+          "tr": {
+            "en": "That president claims without the slightest qualm that the company succeeded through his efforts alone.",
+            "fr": "Ce directeur affirme sans la moindre gêne que, si l'entreprise a réussi, c'est grâce à lui seul."
+          },
+          "choices": [
+            "言ってはばからない",
+            "言わずにはいられない",
+            "言いかねない"
+          ],
+          "why": {
+            "en": "て-form + はばからない: he says it openly, with no shame. 言わずにはいられない is « can't keep from saying it », a feeling that bursts out; 言いかねない is « he might well say it », a risk.",
+            "fr": "Forme en て + はばからない : il le dit ouvertement, sans scrupule. 言わずにはいられない, c'est « ne pas pouvoir s'empêcher de le dire », un élan ; 言いかねない, « il pourrait bien le dire », un risque."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the senior colleague say this?",
+            "fr": "Comment ce collègue le dit-il ?"
+          },
+          "jp": "あの先輩は、仕事より家族が大事だと会議でも言ってはばからない。",
+          "tr": {
+            "en": "That senior colleague says openly, even in meetings, that family matters more than work.",
+            "fr": "Ce collègue plus ancien dit ouvertement, même en réunion, que la famille compte plus que le travail."
+          },
+          "choices": [
+            {
+              "en": "Openly, with no hesitation.",
+              "fr": "Ouvertement, sans aucune hésitation."
+            },
+            {
+              "en": "Reluctantly, after some hesitation.",
+              "fr": "À contrecœur, après avoir hésité."
+            },
+            {
+              "en": "He never says it, even in meetings.",
+              "fr": "Il ne le dit jamais, même en réunion."
+            }
+          ],
+          "why": {
+            "en": "はばかる is « to hold back », so はばからない is « does not hold back »: he says it out loud, boldly. It is not a plain negative (« never says it »), and it is the opposite of hesitating.",
+            "fr": "はばかる, c'est « se retenir » ; はばからない, c'est donc « ne pas se retenir » : il le dit tout haut, avec aplomb. Ce n'est pas une simple négation (« ne le dit jamais ») et c'est l'inverse d'hésiter."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "当時、彼は自分の会社は絶対につぶれないと＿＿＿。",
+          "tr": {
+            "en": "At the time, he claimed without a qualm that his company would never go under.",
+            "fr": "À l'époque, il affirmait sans la moindre gêne que son entreprise ne ferait jamais faillite."
+          },
+          "choices": [
+            "言ってはばからなかった",
+            "言ってはばからない",
+            "言いはばからなかった"
+          ],
+          "why": {
+            "en": "A past stance keeps the て-form and puts the ending in the past: 言ってはばからなかった. 言ってはばからない is the present, and 言いはばからなかった drops the て, which the form cannot do.",
+            "fr": "Une attitude passée garde la forme en て et met la fin au passé : 言ってはばからなかった. 言ってはばからない est le présent, et 言いはばからなかった perd le て, ce que la forme ne permet pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What appals everyone about him?",
+            "fr": "Qu'est-ce qui consterne tout le monde chez lui ?"
+          },
+          "jp": "自分は悪くないと言ってはばからない彼の態度に、みんなあきれている。",
+          "tr": {
+            "en": "Everyone is appalled by his attitude: he says without a qualm that it is not his fault.",
+            "fr": "Son attitude consterne tout le monde : il dit sans la moindre gêne que ce n'est pas sa faute."
+          },
+          "choices": [
+            {
+              "en": "He shamelessly insists that it is not his fault.",
+              "fr": "Il soutient sans vergogne que ce n'est pas sa faute."
+            },
+            {
+              "en": "He admits it is his fault, and no one believes him.",
+              "fr": "Il reconnaît que c'est sa faute, et personne ne le croit."
+            },
+            {
+              "en": "He says nothing at all about whose fault it is.",
+              "fr": "Il ne dit rien du tout sur le responsable."
+            }
+          ],
+          "why": {
+            "en": "Before a noun, 言ってはばからない still means « says without holding back »: what appals them is that boldness. The ない is not a negative on 言う, so it does not mean he stays silent.",
+            "fr": "Devant un nom, 言ってはばからない veut toujours dire « dit sans se retenir » : ce qui les consterne, c'est cet aplomb. Le ない ne nie pas 言う : il ne s'agit donc pas d'un silence."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの学者は、自分の説は絶対に正しいと＿＿＿。",
+          "tr": {
+            "en": "That scholar asserts boldly, with no qualm at all, that his theory is absolutely right.",
+            "fr": "Ce savant soutient avec aplomb, sans le moindre scrupule, que sa théorie est absolument juste."
+          },
+          "choices": [
+            "主張してはばからない",
+            "主張するのをはばかっている",
+            "主張しはばからない"
+          ],
+          "why": {
+            "en": "A する-verb takes して: 主張して + はばからない. 主張するのをはばかっている means he holds back from asserting it, the opposite. 主張しはばからない uses the ます-stem, which the form does not accept.",
+            "fr": "Un verbe en する prend して : 主張して + はばからない. 主張するのをはばかっている veut dire qu'il se retient de l'affirmer, l'inverse. 主張しはばからない emploie le radical en ます, que la forme n'accepte pas."
+          }
+        }
+      ]
     }
   },
   {
@@ -14349,7 +15794,141 @@
             "fr": "Un effort modeste dans tes limites : なりに, après un nom. にしては se vanterait d'un résultat surprenant ; なり après un verbe dit seulement quand : dès le lever."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the effort?",
+            "fr": "Que dit celui qui parle de son effort ?"
+          },
+          "jp": "結果はよくなかったが、自分なりに最後までやりぬいたと思う。",
+          "tr": {
+            "en": "The result wasn't good, but I think I saw it through to the end, in my own way.",
+            "fr": "Le résultat n'était pas bon, mais je crois avoir tenu jusqu'au bout, à ma manière."
+          },
+          "choices": [
+            {
+              "en": "It fell short, but I did what I could, sincerely, to the end.",
+              "fr": "Ça n'a pas suffi, mais j'ai fait ce que je pouvais, sincèrement, jusqu'au bout."
+            },
+            {
+              "en": "I did it just as everyone else did.",
+              "fr": "Je l'ai fait exactement comme tout le monde."
+            },
+            {
+              "en": "It was a great success, in a style all my own.",
+              "fr": "Ce fut une grande réussite, dans un style bien à moi."
+            }
+          ],
+          "why": {
+            "en": "なりに admits a limit and still claims a real effort: the result was poor, yet I did my part. It does not mean « like others », and it does not boast of an original success.",
+            "fr": "なりに reconnaît une limite et revendique pourtant un vrai effort : le résultat était mauvais, mais j'ai fait ma part. Ça ne veut pas dire « comme les autres », ni se vanter d'une réussite originale."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "店主は店主＿＿＿、商店街を守ろうと努力している。",
+          "tr": {
+            "en": "The shop owner, too, is doing what little he can, within his own limited means, to protect the shopping street.",
+            "fr": "Le commerçant aussi fait ce qu'il peut, dans la limite de ses moyens modestes, pour protéger la rue commerçante."
+          },
+          "choices": [
+            "なりに",
+            "らしく",
+            "として"
+          ],
+          "why": {
+            "en": "なりに means « in the way his place allows »: limited, but sincere. らしく says he acts as a typical shop owner should, and として only names his role. Neither says « within his limits ».",
+            "fr": "なりに : « à la mesure de sa place », limité mais sincère. らしく dit qu'il agit en commerçant typique, et として ne fait que nommer son rôle. Aucun des deux ne dit « dans ses limites »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the countryside?",
+            "fr": "Que dit celui qui parle de la campagne ?"
+          },
+          "jp": "不便なことも多いが、田舎は田舎なりにいいところがある。",
+          "tr": {
+            "en": "There is a lot that is inconvenient, but the countryside has its own good points, in its way.",
+            "fr": "Il y a beaucoup d'inconvénients, mais la campagne a ses bons côtés à elle, à sa façon."
+          },
+          "choices": [
+            {
+              "en": "Despite the drawbacks, it has good points of its own.",
+              "fr": "Malgré ses défauts, elle a des qualités qui lui sont propres."
+            },
+            {
+              "en": "It is better than the city in every way.",
+              "fr": "Elle est meilleure que la ville en tout point."
+            },
+            {
+              "en": "It has nothing good, only inconveniences.",
+              "fr": "Elle n'a rien de bon, seulement des inconvénients."
+            }
+          ],
+          "why": {
+            "en": "なりに also fits a place: the countryside is judged by what it is, and the drawbacks are conceded before its own good points. It does not rank it above the city, and it does not deny its good side.",
+            "fr": "なりに convient aussi à un lieu : la campagne est jugée pour ce qu'elle est, et ses défauts sont concédés avant ses qualités propres. Ça ne la place pas au-dessus de la ville et ça ne nie pas son bon côté."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "うちは＿＿＿、家族みんなで楽しく暮らしている。",
+          "tr": {
+            "en": "We don't have much money, but we live happily together as a family, in our modest way.",
+            "fr": "Nous n'avons pas beaucoup d'argent, mais nous vivons heureux en famille, à notre manière modeste."
+          },
+          "choices": [
+            "貧しいなりに",
+            "貧しくなりに",
+            "貧しいなりの"
+          ],
+          "why": {
+            "en": "After an い-adjective, なりに keeps the plain form: 貧しい + なりに. 貧しくなりに changes the adjective, and なりの would need a noun after it, but 楽しく暮らしている is a verb phrase.",
+            "fr": "Après un adjectif en い, なりに garde la forme neutre : 貧しい + なりに. 貧しくなりに modifie l'adjectif, et なりの demanderait un nom derrière lui, alors que 楽しく暮らしている est un groupe verbal."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker conclude about him?",
+            "fr": "Que conclut celui qui parle à son sujet ?"
+          },
+          "jp": "彼は冷たく見えたが、彼なりに悩んでいたのだと思う。",
+          "tr": {
+            "en": "He seemed cold, but I think he was struggling too, in his own way.",
+            "fr": "Il paraissait froid, mais je crois qu'il se débattait lui aussi, à sa manière."
+          },
+          "choices": [
+            {
+              "en": "Behind the cold look, he was struggling in his own way.",
+              "fr": "Sous ses airs froids, il se débattait à sa manière."
+            },
+            {
+              "en": "He really was cold and did not care.",
+              "fr": "Il était vraiment froid et ça lui était égal."
+            },
+            {
+              "en": "He struggled more than anyone else.",
+              "fr": "Il s'est débattu plus que personne."
+            }
+          ],
+          "why": {
+            "en": "About someone else, 彼なりに grants him a limited but real effort that did not show: understanding. It does not say he did not care, nor that he suffered more than others.",
+            "fr": "À propos d'un autre, 彼なりに lui accorde un effort limité mais réel, qui ne se voyait pas : de la compréhension. Ça ne dit ni qu'il s'en moquait, ni qu'il souffrait plus que les autres."
+          }
+        }
+      ]
     }
   },
   {
@@ -14608,7 +16187,141 @@
             "fr": "Sans quitter la maison : l'expression figée いながらにして. ばかりに accuse une cause, « rien que parce que » ; くせに reproche, « alors que »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about his weak body?",
+            "fr": "Que dit la phrase de sa faible constitution ?"
+          },
+          "jp": "彼は生まれながらに体が弱く、子どものころはよく学校を休んだ。",
+          "tr": {
+            "en": "He was frail from birth, and often missed school as a child.",
+            "fr": "Il était de constitution fragile dès la naissance et manquait souvent l'école, enfant."
+          },
+          "choices": [
+            {
+              "en": "He has been frail since birth.",
+              "fr": "Il est fragile depuis sa naissance."
+            },
+            {
+              "en": "A serious illness made him frail as a child.",
+              "fr": "Une grave maladie l'a fragilisé dans l'enfance."
+            },
+            {
+              "en": "He grew frail because he missed so much school.",
+              "fr": "Il est devenu fragile parce qu'il manquait beaucoup l'école."
+            }
+          ],
+          "why": {
+            "en": "生まれながらに is « as one was born »: the frailty goes back to birth, with no later cause. Missing school is the result of it, not the reason for it.",
+            "fr": "生まれながらに, c'est « tel qu'on est né » : la fragilité remonte à la naissance, sans cause ultérieure. Manquer l'école en est la conséquence, pas la raison."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "祖母は＿＿＿、戦争のころの苦労を語ってくれた。",
+          "tr": {
+            "en": "In tears, my grandmother told us of the hardships of the war years.",
+            "fr": "En larmes, ma grand-mère nous a raconté les épreuves de la guerre."
+          },
+          "choices": [
+            "涙ながらに",
+            "泣きながらに",
+            "涙ながらも"
+          ],
+          "why": {
+            "en": "涙ながらに is the set phrase: « in tears », as she was. 泣きながらに coins a phrase from a verb, and the set is closed. 涙ながらも would mean « though in tears », a contrast that is not here.",
+            "fr": "涙ながらに est l'expression figée : « en larmes », dans cet état. 泣きながらに fabrique une expression sur un verbe, or la liste est close. 涙ながらも voudrait dire « bien qu'en larmes », un contraste absent ici."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the grandfather enjoy travelling?",
+            "fr": "Comment le grand-père profite-t-il des voyages ?"
+          },
+          "jp": "旅が好きな祖父は、病院のベッドにいながらにして、世界中を旅している気分を味わっている。",
+          "tr": {
+            "en": "My grandfather, who loves travel, enjoys the feeling of travelling the whole world without leaving his hospital bed.",
+            "fr": "Mon grand-père, qui aime voyager, goûte à la sensation de parcourir le monde entier sans quitter son lit d'hôpital."
+          },
+          "choices": [
+            {
+              "en": "Without leaving his hospital bed.",
+              "fr": "Sans quitter son lit d'hôpital."
+            },
+            {
+              "en": "While walking around the hospital.",
+              "fr": "En se promenant dans l'hôpital."
+            },
+            {
+              "en": "Only once he is out of the hospital.",
+              "fr": "Seulement une fois sorti de l'hôpital."
+            }
+          ],
+          "why": {
+            "en": "いながらにして means « while staying just where one is »: the trip happens with no move. It is not an action done while walking, and it does not wait for his discharge.",
+            "fr": "いながらにして veut dire « tout en restant là où l'on est » : le voyage se fait sans bouger. Ce n'est pas une action faite en marchant, et elle n'attend pas sa sortie."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "旅館の主人は＿＿＿、客を玄関で迎えている。",
+          "tr": {
+            "en": "The innkeeper welcomes his guests at the entrance just as he always has.",
+            "fr": "Le patron de l'auberge accueille ses clients à l'entrée comme il l'a toujours fait."
+          },
+          "choices": [
+            "昔ながらに",
+            "昔ながらの",
+            "昔ながらも"
+          ],
+          "why": {
+            "en": "Here the phrase works on the verb, « as of old he welcomes »: 昔ながらに. 昔ながらの would be the form before a noun and turns 客 into « old-style guests »; 昔ながらも is the concessive ながら.",
+            "fr": "Ici la tournure porte sur le verbe, « comme autrefois, il accueille » : 昔ながらに. 昔ながらの est la forme devant un nom et ferait de 客 des « clients à l'ancienne » ; 昔ながらも est le ながら concessif."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who is in tears?",
+            "fr": "Qui est en larmes ?"
+          },
+          "jp": "記者は、涙ながらに語る被害者の言葉を書きとめた。",
+          "tr": {
+            "en": "The reporter wrote down the words of the victim, who spoke in tears.",
+            "fr": "Le journaliste a noté les paroles de la victime, qui parlait en larmes."
+          },
+          "choices": [
+            {
+              "en": "The victim who is speaking.",
+              "fr": "La victime qui parle."
+            },
+            {
+              "en": "The reporter taking notes.",
+              "fr": "Le journaliste qui prend des notes."
+            },
+            {
+              "en": "No one: tears are only what is spoken about.",
+              "fr": "Personne : les larmes sont seulement le sujet du récit."
+            }
+          ],
+          "why": {
+            "en": "涙ながらに tells the state of the one it sits beside, 語る: whoever speaks is in tears. The reporter only writes it down, and 涙 is a state, not the topic.",
+            "fr": "涙ながらに donne l'état de celui qui est à côté de 語る : celui qui parle est en larmes. Le journaliste ne fait que noter, et 涙 est un état, pas le sujet."
+          }
+        }
+      ]
     }
   },
   {
@@ -14803,7 +16516,132 @@
             "fr": "Facile à imaginer : 想像にかたくない. 想像しがたい dit le contraire, difficile à imaginer ; 想像にすぎない, que ce n'est qu'imaginé."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "仕事を失った父の不安は、＿＿＿。",
+          "tr": {
+            "en": "It is not hard to guess the anxiety of a father who has lost his job.",
+            "fr": "Il n'est pas difficile de deviner l'inquiétude d'un père qui a perdu son travail."
+          },
+          "choices": [
+            "察するにかたくない",
+            "察しがたい",
+            "察しにかたくない"
+          ],
+          "why": {
+            "en": "With a verb, にかたくない follows the dictionary form: 察する + にかたくない. 察しがたい is « hard to guess », the opposite, and 察しにかたくない puts the ます-stem where the form wants the dictionary form.",
+            "fr": "Avec un verbe, にかたくない suit la forme du dictionnaire : 察する + にかたくない. 察しがたい veut dire « difficile à deviner », l'inverse, et 察しにかたくない met le radical en ます là où la forme veut le dictionnaire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the writer say about the players' disappointment?",
+            "fr": "Que dit l'auteur de la déception des joueurs ?"
+          },
+          "jp": "試合に負けた選手たちの悔しさは、想像にかたくない。",
+          "tr": {
+            "en": "It is not hard to imagine the frustration of the players who lost the match.",
+            "fr": "On imagine sans peine la rage des joueurs qui ont perdu le match."
+          },
+          "choices": [
+            {
+              "en": "It is easy to imagine.",
+              "fr": "On l'imagine facilement."
+            },
+            {
+              "en": "It is impossible to imagine.",
+              "fr": "On ne peut pas l'imaginer."
+            },
+            {
+              "en": "It is only imagination: nobody knows.",
+              "fr": "Ce n'est qu'une supposition : personne ne sait."
+            }
+          ],
+          "why": {
+            "en": "にかたくない is « not hard to »: the writer says the feeling is easy to picture. It is not the opposite, « hard to imagine » (しがたい), and not « mere imagination » (にすぎない).",
+            "fr": "にかたくない, c'est « pas difficile de » : l'auteur dit que le sentiment se devine aisément. Ce n'est pas l'inverse, « difficile à imaginer » (しがたい), ni « simple supposition » (にすぎない)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "このまま値上げが続けば、客が離れていくことは＿＿＿。",
+          "tr": {
+            "en": "If prices keep rising like this, it is not hard to foresee that customers will drift away.",
+            "fr": "Si les prix continuent de monter ainsi, on voit sans peine que les clients s'en iront."
+          },
+          "choices": [
+            "想像にかたくない",
+            "想像しにくい",
+            "想像にすぎない"
+          ],
+          "why": {
+            "en": "A forecast stated as plain and sure: 想像にかたくない, « not hard to foresee ». 想像しにくい says the opposite, hard to picture, and 想像にすぎない calls it a mere guess.",
+            "fr": "Une prévision donnée comme évidente : 想像にかたくない, « facile à prévoir ». 想像しにくい dit l'inverse, difficile à se représenter, et 想像にすぎない en fait une simple conjecture."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who was anxious, and who could imagine it easily?",
+            "fr": "Qui était inquiet, et qui l'imaginait aisément ?"
+          },
+          "jp": "ひとりで外国に行った息子の不安は、母親には想像にかたくなかった。",
+          "tr": {
+            "en": "The anxiety of the son who went abroad alone was easy for his mother to imagine.",
+            "fr": "L'inquiétude du fils parti seul à l'étranger, sa mère l'imaginait sans peine."
+          },
+          "choices": [
+            {
+              "en": "The son was anxious; his mother could easily imagine it.",
+              "fr": "Le fils était inquiet ; sa mère l'imaginait sans peine."
+            },
+            {
+              "en": "The mother was anxious; her son could easily imagine it.",
+              "fr": "La mère était inquiète ; son fils l'imaginait sans peine."
+            },
+            {
+              "en": "The son was anxious, but his mother could not imagine it.",
+              "fr": "Le fils était inquiet, mais sa mère n'arrivait pas à l'imaginer."
+            }
+          ],
+          "why": {
+            "en": "The anxiety is the son's (息子の不安); 母親には names who finds it easy to picture. And かたくなかった is « was not hard », so she did imagine it.",
+            "fr": "L'inquiétude est celle du fils (息子の不安) ; 母親には dit qui l'imagine sans peine. Et かたくなかった, c'est « n'était pas difficile » : elle l'imaginait bien."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the sentence?",
+            "fr": "Quelle particule complète la phrase ?"
+          },
+          "jp": "彼が会社をやめたくなるのも、理解＿＿＿かたくない。",
+          "tr": {
+            "en": "It is not hard to understand why he wants to quit the company.",
+            "fr": "Il n'est pas difficile de comprendre pourquoi il veut quitter l'entreprise."
+          },
+          "choices": [
+            "に",
+            "が",
+            "を"
+          ],
+          "why": {
+            "en": "にかたくない is one fixed unit, noun + に + かたくない. が or を would make 理解 the subject or object of かたくない, which is not a phrase of the language.",
+            "fr": "にかたくない est un bloc figé, nom + に + かたくない. が ou を feraient de 理解 le sujet ou l'objet de かたくない, ce qui ne se dit pas."
+          }
+        }
+      ]
     }
   },
   {
@@ -15036,7 +16874,141 @@
             "fr": "Les retards débordent cette ligne : にとどまらず, avec sa négation. にとどまって et だけ les cantonnent à cette ligne."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How far did the rumour travel?",
+            "fr": "Jusqu'où la rumeur est-elle allée ?"
+          },
+          "jp": "そのうわさは学校にとどまらず、町じゅうに知れわたった。",
+          "tr": {
+            "en": "The rumour did not stay in the school: the whole town came to know it.",
+            "fr": "La rumeur ne s'est pas arrêtée à l'école : toute la ville l'a su."
+          },
+          "choices": [
+            {
+              "en": "Beyond the school, through the whole town.",
+              "fr": "Au-delà de l'école, dans toute la ville."
+            },
+            {
+              "en": "It stayed inside the school.",
+              "fr": "Elle est restée dans l'école."
+            },
+            {
+              "en": "The whole school heard it, but nobody in town.",
+              "fr": "Toute l'école l'a su, mais personne en ville."
+            }
+          ],
+          "why": {
+            "en": "にとどまらず says the first scope, the school, did not hold it, and the second half gives the wider one: the town. It is not にとどまった, « stayed within », and the scale is not reversed.",
+            "fr": "にとどまらず dit que le premier cadre, l'école, ne l'a pas contenue, et la seconde moitié donne le plus large : la ville. Ce n'est pas にとどまった, « resté dans », et l'échelle n'est pas inversée."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この問題は経済＿＿＿、社会全体にかかわっている。",
+          "tr": {
+            "en": "This problem is not limited to the economy: it concerns society as a whole.",
+            "fr": "Ce problème ne se limite pas à l'économie : il concerne toute la société."
+          },
+          "choices": [
+            "にとどまらず",
+            "にとどまりず",
+            "にとどまって"
+          ],
+          "why": {
+            "en": "To say « does not stop at », とどまる takes the あ-row stem and ず: にとどまらず. にとどまりず is the slip with the ます-stem, and にとどまって would say it stays in the economy, the reverse of the sentence.",
+            "fr": "Pour dire « ne s'arrête pas à », とどまる prend le radical en あ et ず : にとどまらず. にとどまりず est la faute avec le radical en ます, et にとどまって dirait qu'il reste dans l'économie, l'inverse de la phrase."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is said about her career?",
+            "fr": "Que dit-on de sa carrière ?"
+          },
+          "jp": "彼女は歌手にとどまらず、作家としても成功している。",
+          "tr": {
+            "en": "She is not only a singer: she has also succeeded as a writer.",
+            "fr": "Elle n'est pas seulement chanteuse : elle a aussi réussi comme écrivaine."
+          },
+          "choices": [
+            {
+              "en": "She is a singer, and has also succeeded as a writer.",
+              "fr": "Elle est chanteuse, et a aussi réussi comme écrivaine."
+            },
+            {
+              "en": "She stayed a singer and never became a writer.",
+              "fr": "Elle est restée chanteuse sans devenir écrivaine."
+            },
+            {
+              "en": "She gave up singing to become a writer.",
+              "fr": "Elle a renoncé au chant pour devenir écrivaine."
+            }
+          ],
+          "why": {
+            "en": "にとどまらず also works on a role: what she is does not stop at « singer », and the second half adds a second field (としても). It is not « stayed a singer », and she has not swapped one job for the other.",
+            "fr": "にとどまらず vaut aussi pour un rôle : ce qu'elle est ne s'arrête pas à « chanteuse », et la seconde moitié ajoute un autre domaine (としても). Elle n'est pas « restée chanteuse », et n'a pas échangé un métier pour l'autre."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the sentence?",
+            "fr": "Quelle particule complète la phrase ?"
+          },
+          "jp": "この制度は子どもにとどまらず、大人＿＿＿対象になった。",
+          "tr": {
+            "en": "This system is not limited to children: adults now come under it too.",
+            "fr": "Ce dispositif ne se limite pas aux enfants : les adultes aussi en bénéficient désormais."
+          },
+          "choices": [
+            "も",
+            "だけ",
+            "しか"
+          ],
+          "why": {
+            "en": "The second half widens the scope, so it adds: 大人も, « adults too ». 大人だけ would shrink it to adults alone, and 大人しか needs a negative; neither fits after にとどまらず.",
+            "fr": "La seconde moitié élargit la portée : elle ajoute, 大人も, « les adultes aussi ». 大人だけ la réduirait aux seuls adultes, et 大人しか veut une négation : ni l'un ni l'autre ne va après にとどまらず."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How did the singer's popularity spread?",
+            "fr": "Comment la popularité du chanteur s'est-elle étendue ?"
+          },
+          "jp": "その歌手の人気は日本にとどまらず、遠い南米にまで広がった。",
+          "tr": {
+            "en": "The singer's popularity did not stay in Japan: it spread as far as distant South America.",
+            "fr": "La popularité du chanteur ne s'est pas arrêtée au Japon : elle est allée jusqu'à l'Amérique du Sud, si lointaine."
+          },
+          "choices": [
+            {
+              "en": "From Japan outward, even as far as South America.",
+              "fr": "Du Japon vers l'extérieur, jusqu'en Amérique du Sud."
+            },
+            {
+              "en": "From South America back to Japan.",
+              "fr": "De l'Amérique du Sud vers le Japon."
+            },
+            {
+              "en": "It stayed in Japan.",
+              "fr": "Elle est restée au Japon."
+            }
+          ],
+          "why": {
+            "en": "The first noun is the starting scope, Japan, and the spread goes outward from it; にまで stresses how far. The direction is not reversed, and にとどまらず is the opposite of « stayed in ».",
+            "fr": "Le premier nom est le cadre de départ, le Japon, et la diffusion en sort ; にまで souligne la distance. Le sens n'est pas inversé, et にとどまらず est le contraire de « resté dans »."
+          }
+        }
+      ]
     }
   },
   {
@@ -15265,7 +17237,132 @@
             "fr": "Deux contraires mis face à face : にひきかえ. にかわって veut dire « à la place de », とともに « avec »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "駅前の店は夜おそくまで開いている＿＿＿、うちの近所の店は六時にしまってしまう。",
+          "tr": {
+            "en": "In contrast to the shops by the station, which stay open late at night, the shops in my neighbourhood close at six.",
+            "fr": "Contrairement aux magasins près de la gare, ouverts tard le soir, ceux de mon quartier ferment à six heures."
+          },
+          "choices": [
+            "のにひきかえ",
+            "にひきかえ",
+            "とひきかえに"
+          ],
+          "why": {
+            "en": "After a whole clause, にひきかえ needs の: 開いているのにひきかえ. Without it, the clause is left bare, and とひきかえに is the other word, « in exchange for », not « in contrast to ».",
+            "fr": "Après une proposition entière, にひきかえ veut の : 開いているのにひきかえ. Sans lui, la proposition reste nue, et とひきかえに est un autre mot, « en échange de », pas « contrairement à »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker see themself?",
+            "fr": "Comment celui qui parle se voit-il ?"
+          },
+          "jp": "毎日走って体をきたえている友人にひきかえ、私は階段をのぼるだけでも息が切れる。",
+          "tr": {
+            "en": "Unlike my friend, who runs and keeps fit every day, I run out of breath just climbing the stairs.",
+            "fr": "À l'inverse de mon ami, qui court et s'entretient chaque jour, je m'essouffle rien qu'en montant l'escalier."
+          },
+          "choices": [
+            {
+              "en": "Unfavourably: the speaker falls short of the friend.",
+              "fr": "Défavorablement : l'auteur est loin de valoir son ami."
+            },
+            {
+              "en": "Favourably: the speaker is proud of skipping exercise.",
+              "fr": "Favorablement : l'auteur est fier de ne pas faire de sport."
+            },
+            {
+              "en": "Neutrally: the speaker just lists two facts.",
+              "fr": "Neutralement : l'auteur énonce simplement deux faits."
+            }
+          ],
+          "why": {
+            "en": "にひきかえ sets two things sharply against each other and carries a judgement: the friend is the good side, so the speaker is the poor one. It is not a neutral comparison like に比べて.",
+            "fr": "にひきかえ oppose nettement deux choses et porte un jugement : l'ami est le bon côté, donc celui qui parle est le moins bon. Ce n'est pas une comparaison neutre comme に比べて."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "夫はおしゃべり＿＿＿、妻は口数が少ない。",
+          "tr": {
+            "en": "In contrast to her talkative husband, the wife says very little.",
+            "fr": "À l'inverse de son mari, bavard, la femme parle très peu."
+          },
+          "choices": [
+            "なのにひきかえ",
+            "だのにひきかえ",
+            "なにひきかえ"
+          ],
+          "why": {
+            "en": "おしゃべり acts as a な-word, so before の it takes な, not だ: おしゃべりなのにひきかえ. だのに is the plain-form slip, and なにひきかえ drops the の that links a clause to にひきかえ.",
+            "fr": "おしゃべり se comporte en mot en な : devant の il prend な, pas だ : おしゃべりなのにひきかえ. だのに est la faute de la forme neutre, et なにひきかえ oublie le の qui relie une proposition à にひきかえ."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the writer see this year's results?",
+            "fr": "Comment l'auteur voit-il les résultats de cette année ?"
+          },
+          "jp": "ここ数年の好調にひきかえ、今年の業績は大きく落ち込んだ。",
+          "tr": {
+            "en": "In sharp contrast to the good last few years, this year's results have dropped sharply.",
+            "fr": "À l'opposé des bonnes années récentes, les résultats de cette année ont fortement chuté."
+          },
+          "choices": [
+            {
+              "en": "Badly, set against the good recent years.",
+              "fr": "Mal, au regard des bonnes années récentes."
+            },
+            {
+              "en": "Well: it is the price paid for the earlier success.",
+              "fr": "Bien : c'est le prix payé pour le succès d'avant."
+            },
+            {
+              "en": "About the same as in the recent years.",
+              "fr": "À peu près comme les années récentes."
+            }
+          ],
+          "why": {
+            "en": "にひきかえ opposes the two periods: the first is good, so the second, 落ち込んだ, is poor. It is not とひきかえに, « in exchange for », and the two are not alike.",
+            "fr": "にひきかえ oppose les deux périodes : la première est bonne, donc la seconde, 落ち込んだ, est mauvaise. Ce n'est pas とひきかえに, « en échange de », et les deux ne se ressemblent pas."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "暑かった去年の夏＿＿＿、今年はずいぶんすずしい。",
+          "tr": {
+            "en": "In contrast to last year's hot summer, this year is quite cool.",
+            "fr": "Contrairement à l'été torride de l'an dernier, cette année est assez fraîche."
+          },
+          "choices": [
+            "にひきかえ",
+            "のにひきかえ",
+            "とひきかえに"
+          ],
+          "why": {
+            "en": "A noun takes にひきかえ directly: 夏にひきかえ. The の belongs only after a clause, so 夏のにひきかえ is the slip, and とひきかえに means « in exchange for », not « in contrast to ».",
+            "fr": "Un nom prend にひきかえ directement : 夏にひきかえ. Le の ne vient qu'après une proposition : 夏のにひきかえ est donc la faute, et とひきかえに veut dire « en échange de », pas « contrairement à »."
+          }
+        }
+      ]
     }
   },
   {
@@ -15490,7 +17587,132 @@
             "fr": "Une chaleur incroyable : 暑いのなんのって. のに voudrait dire « bien que » ; ことは〜けど concède la chaleur pour la minimiser."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうの試験、＿＿＿、ぜんぜん書けなかったよ。",
+          "tr": {
+            "en": "Yesterday's exam was so hard you wouldn't believe it: I couldn't write a thing.",
+            "fr": "L'examen d'hier était d'une difficulté pas possible : je n'ai rien pu écrire."
+          },
+          "choices": [
+            "むずかしかったのなんのって",
+            "むずかしかったですのなんのって",
+            "むずかしくてのなんのって"
+          ],
+          "why": {
+            "en": "のなんのって takes the plain form, and here the past one: むずかしかった. A polite です cannot sit inside it (むずかしかったです), and the て-form むずかしくて cannot be followed by の.",
+            "fr": "のなんのって prend la forme neutre, ici au passé : むずかしかった. Un です poli ne peut pas s'y glisser (むずかしかったです), et la forme en て むずかしくて ne peut pas être suivie de の."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How good was the child's singing?",
+            "fr": "Comment chantait l'enfant ?"
+          },
+          "jp": "あの子の歌のうまさのなんのって、プロかと思ったよ。",
+          "tr": {
+            "en": "That kid's singing, you wouldn't believe how good it was: I thought it was a pro.",
+            "fr": "Ce gamin chante d'une façon incroyable : j'ai cru entendre un pro."
+          },
+          "choices": [
+            {
+              "en": "Unbelievably good.",
+              "fr": "D'une qualité incroyable."
+            },
+            {
+              "en": "Not good at all.",
+              "fr": "Pas bon du tout."
+            },
+            {
+              "en": "Good, but only as expected.",
+              "fr": "Bon, mais comme on s'y attendait."
+            }
+          ],
+          "why": {
+            "en": "のなんのって piles up a degree, here a good one: the singing was beyond belief, hence « a pro ». The なんの is not a brush-off (« not good »), and it is the opposite of « as expected ».",
+            "fr": "のなんのって accumule un degré, ici en bien : le chant dépassait l'imaginable, d'où « un pro ». Le なんの n'est pas un rejet (« pas bon »), et c'est l'inverse de « comme prévu »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "お祭りの夜は、＿＿＿、人の声で何も聞こえなかったよ。",
+          "tr": {
+            "en": "On the night of the festival it was so lively you wouldn't believe it: I couldn't hear anything over the voices.",
+            "fr": "Le soir de la fête, c'était d'une animation incroyable : on n'entendait rien tant il y avait de voix."
+          },
+          "choices": [
+            "にぎやかなのなんのって",
+            "にぎやかだのなんのって",
+            "にぎやかのなんのって"
+          ],
+          "why": {
+            "en": "A な-adjective takes な before の: にぎやかなのなんのって. にぎやかだの… is the plain-form slip (だ), and にぎやかの… leaves out the な.",
+            "fr": "Un adjectif en な prend な devant の : にぎやかなのなんのって. にぎやかだの… est la faute de la forme neutre (だ), et にぎやかの… oublie le な."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why could the speaker not say a word?",
+            "fr": "Pourquoi celui qui parle n'a-t-il pas pu placer un mot ?"
+          },
+          "jp": "あの人のおしゃべりのなんのって、ひとことも言えなかった。",
+          "tr": {
+            "en": "That person talked so much you wouldn't believe it: I couldn't say a single word.",
+            "fr": "Cette personne parlait tellement que je n'ai pas pu placer un mot."
+          },
+          "choices": [
+            {
+              "en": "The other person talked incredibly much.",
+              "fr": "L'autre personne parlait énormément."
+            },
+            {
+              "en": "The other person refused to talk at all.",
+              "fr": "L'autre personne refusait de parler."
+            },
+            {
+              "en": "The speaker was too shy to talk.",
+              "fr": "Celui qui parle était trop timide pour parler."
+            }
+          ],
+          "why": {
+            "en": "The first half exaggerates the other person's chatter to the limit, and the second half gives the result: no room to speak. The なんの does not turn it into « not much talk ».",
+            "fr": "La première moitié exagère le bavardage de l'autre à l'extrême, et la seconde donne le résultat : pas moyen de parler. Le なんの n'en fait pas « peu de paroles »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あのお笑い番組、＿＿＿、おなかが痛くなったよ。",
+          "tr": {
+            "en": "That comedy show: I laughed so much, you wouldn't believe it, that my stomach hurt.",
+            "fr": "Cette émission comique : j'ai ri à n'y pas croire, au point d'en avoir mal au ventre."
+          },
+          "choices": [
+            "笑ったのなんのって",
+            "笑いのなんのって",
+            "笑ってのなんのって"
+          ],
+          "why": {
+            "en": "After a verb, のなんのって takes the plain form, past here: 笑った. The ます-stem 笑い and the て-form 笑って cannot stand before の.",
+            "fr": "Après un verbe, のなんのって prend la forme neutre, ici au passé : 笑った. Le radical en ます 笑い et la forme en て 笑って ne peuvent pas précéder の."
+          }
+        }
+      ]
     }
   },
   {
@@ -15715,7 +17937,127 @@
             "fr": "Le déjeuner attend, les billets d'abord : はさておき. はもちろん inclurait aussi le déjeuner, et l'autre phrase règle le déjeuner en premier."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker plan to do about the price?",
+            "fr": "Que compte faire celui qui parle du prix ?"
+          },
+          "jp": "値段のことはさておき、まず味を見て、あとでゆっくり考えよう。",
+          "tr": {
+            "en": "Setting the price aside for now, let's taste it first and think it over later.",
+            "fr": "Laissons le prix de côté pour l'instant : goûtons d'abord, et réfléchissons-y tranquillement après."
+          },
+          "choices": [
+            {
+              "en": "Leave it for now and think about it later.",
+              "fr": "Le laisser de côté pour l'instant et y réfléchir plus tard."
+            },
+            {
+              "en": "Forget about it for good.",
+              "fr": "L'oublier pour de bon."
+            },
+            {
+              "en": "Settle it before anything else.",
+              "fr": "Le régler avant toute chose."
+            }
+          ],
+          "why": {
+            "en": "はさておき sets a topic aside for now, and あとで confirms it comes back. It is a postponement, not a dismissal, and it is the opposite of dealing with it first.",
+            "fr": "はさておき met un sujet de côté pour l'instant, et あとで confirme qu'il reviendra. C'est un report, pas un rejet, et c'est l'inverse de le traiter en premier."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの店は、味＿＿＿、サービスがすばらしい。",
+          "tr": {
+            "en": "That shop: leaving the taste aside, the service is wonderful.",
+            "fr": "Ce magasin : le goût mis à part, le service est formidable."
+          },
+          "choices": [
+            "はさておき",
+            "はもちろん",
+            "だけでなく"
+          ],
+          "why": {
+            "en": "はさておき puts the taste aside to talk about the service. 味はもちろん says the taste is obviously good, and 味だけでなく says « not only the taste »: both keep the taste in play.",
+            "fr": "はさておき met le goût de côté pour parler du service. 味はもちろん dit que le goût est évidemment bon, et 味だけでなく « pas seulement le goût » : tous deux gardent le goût en jeu."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "In a meeting two people argue about the budget, but the deadline is more urgent. You want to say: put the budget aside for now, and decide the deadline first.",
+            "fr": "En réunion, deux personnes se disputent sur le budget, mais la date limite est plus urgente. Tu veux dire : laissons le budget de côté pour l'instant, et fixons d'abord la date limite."
+          },
+          "choices": [
+            "予算のことはさておき、まず期限を決めましょう。",
+            "期限のことはさておき、まず予算を決めましょう。",
+            "予算のことはさておき、期限はあとで決めましょう。"
+          ],
+          "why": {
+            "en": "What comes before はさておき is what is set aside: 予算. The second line sets the deadline aside instead, and the third also postpones the deadline, so it does not put it first.",
+            "fr": "Ce qui précède はさておき est ce qu'on met de côté : 予算. La deuxième ligne met la date limite de côté à la place, et la troisième la reporte aussi : elle ne la place pas en premier."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker set aside, and what does he praise?",
+            "fr": "Que met de côté celui qui parle, et que loue-t-il ?"
+          },
+          "jp": "あの旅館は、部屋のせまさはさておき、温泉がすばらしい。",
+          "tr": {
+            "en": "That inn: leaving the small rooms aside, the hot spring is wonderful.",
+            "fr": "Cette auberge : les chambres étroites mises à part, la source chaude est formidable."
+          },
+          "choices": [
+            {
+              "en": "He leaves the small rooms aside and praises the hot spring.",
+              "fr": "Il laisse les chambres étroites de côté et loue la source chaude."
+            },
+            {
+              "en": "He praises the small rooms and leaves the hot spring aside.",
+              "fr": "Il loue les chambres étroites et laisse la source chaude de côté."
+            },
+            {
+              "en": "He praises both the rooms and the hot spring.",
+              "fr": "Il loue à la fois les chambres et la source chaude."
+            }
+          ],
+          "why": {
+            "en": "The noun before はさておき is the one set aside (部屋のせまさ); the speaker's real subject comes after the comma (温泉). Nothing is said in praise of the rooms.",
+            "fr": "Le nom avant はさておき est celui qu'on met de côté (部屋のせまさ) ; le vrai sujet de l'auteur vient après la virgule (温泉). Rien n'est dit à la louange des chambres."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the sentence?",
+            "fr": "Quelle particule complète la phrase ?"
+          },
+          "jp": "あの人の性格＿＿＿さておき、仕事の腕は確かだ。",
+          "tr": {
+            "en": "His character aside, his skill at work is sure.",
+            "fr": "Son caractère mis à part, son talent au travail est sûr."
+          },
+          "choices": [
+            "は",
+            "も",
+            "が"
+          ],
+          "why": {
+            "en": "はさておき is a fixed unit: the noun that is set aside takes は. も would add it to something else and が would make it a plain subject; neither forms the phrase.",
+            "fr": "はさておき est un bloc figé : le nom mis de côté prend は. も l'ajouterait à autre chose et が en ferait un simple sujet : aucun des deux ne forme l'expression."
+          }
+        }
+      ]
     }
   },
   {
@@ -15986,7 +18328,127 @@
             "fr": "Un plan B pris avec calme : までのことだ. までもない dit qu'il est inutile de marcher ; わけがない, que tu ne le ferais jamais."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "電話が通じなかったら、直接会いに＿＿＿。",
+          "tr": {
+            "en": "If the phone doesn't get through, I'll simply go and see him in person.",
+            "fr": "Si le téléphone ne passe pas, j'irai simplement le voir en personne."
+          },
+          "choices": [
+            "行くまでのことだ",
+            "行きまでのことだ",
+            "行ってまでのことだ"
+          ],
+          "why": {
+            "en": "For a calm plan B, までのことだ follows the dictionary form: 行く + までのことだ. The ます-stem 行き and the て-form 行って do not combine with it.",
+            "fr": "Pour un plan B tranquille, までのことだ suit la forme du dictionnaire : 行く + までのことだ. Le radical en ます 行き et la forme en て 行って ne s'y combinent pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker's attitude if the plan is rejected?",
+            "fr": "Quelle est l'attitude de celui qui parle si le projet est refusé ?"
+          },
+          "jp": "この企画が通らなければ、別の案を出すまでのことだ。",
+          "tr": {
+            "en": "If this plan isn't approved, I'll simply put forward another idea.",
+            "fr": "Si ce projet n'est pas accepté, je proposerai simplement une autre idée."
+          },
+          "choices": [
+            {
+              "en": "Calm and resolved: he will simply try another idea.",
+              "fr": "Calme et résolu : il proposera simplement une autre idée."
+            },
+            {
+              "en": "Final: it will be over, and nothing more can be done.",
+              "fr": "Définitif : ce sera fini, et on n'y pourra plus rien."
+            },
+            {
+              "en": "Dismissive: there is no need to put forward another idea.",
+              "fr": "Désinvolte : inutile de proposer une autre idée."
+            }
+          ],
+          "why": {
+            "en": "までのことだ states a simple plan B, said without worry: then I'll do this. « Then it's all over » is ばそれまでだ, and « no need to » is までもない; neither is a plan.",
+            "fr": "までのことだ énonce un simple plan B, dit sans inquiétude : alors je ferai ceci. « Alors tout est fini » est ばそれまでだ, et « inutile de » est までもない : ni l'un ni l'autre n'est un plan."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ただ頼まれたから、＿＿＿。",
+          "tr": {
+            "en": "I only helped because I was asked.",
+            "fr": "J'ai seulement aidé parce qu'on me l'avait demandé."
+          },
+          "choices": [
+            "手伝ったまでのことだ",
+            "手伝うまでのことだ",
+            "手伝いまでのことだ"
+          ],
+          "why": {
+            "en": "A thing already done, « I only did it », takes the た-form: 手伝った + までのことだ. 手伝うまでのことだ looks ahead (« then I'll simply help »), and the ます-stem 手伝い does not combine with it.",
+            "fr": "Une chose déjà faite, « je n'ai fait que cela », prend la forme en た : 手伝った + までのことだ. 手伝うまでのことだ regarde vers l'avenir (« alors j'aiderai, c'est tout »), et le radical en ます 手伝い ne s'y combine pas."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend worries that the bakery may be sold out of your favourite bread. You are calm: if it is sold out, you will just go to another shop. What do you say?",
+            "fr": "Un ami craint que la boulangerie n'ait plus ton pain préféré. Tu restes calme : s'il n'y en a plus, tu iras simplement dans une autre boutique. Que dis-tu ?"
+          },
+          "choices": [
+            "売り切れなら、ほかの店に行くまでのことだよ。",
+            "売り切れなら、ほかの店に行ったまでのことだよ。",
+            "売り切れなら、ほかの店に行くまでもないよ。"
+          ],
+          "why": {
+            "en": "A plan for later takes the dictionary form: 行くまでのことだ, « I'll simply go ». 行ったまでのことだ says what you only did, and 行くまでもない says there is no need to go.",
+            "fr": "Un plan pour plus tard prend la forme du dictionnaire : 行くまでのことだ, « j'irai simplement ». 行ったまでのことだ dit ce que tu as seulement fait, et 行くまでもない dit qu'il n'y a pas besoin d'y aller."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker feel about being refused?",
+            "fr": "Que ressent celui qui parle d'avoir été refusé ?"
+          },
+          "jp": "彼女にさそいを断られたまでのことで、別に気にしていない。",
+          "tr": {
+            "en": "I was simply turned down by her, that's all, and I don't mind in the least.",
+            "fr": "Elle a simplement refusé mon invitation, c'est tout, et ça ne me dérange pas du tout."
+          },
+          "choices": [
+            {
+              "en": "Calmly: it was nothing more than a refusal.",
+              "fr": "Avec calme : ce n'était rien de plus qu'un refus."
+            },
+            {
+              "en": "He is deeply hurt and keeps thinking about it.",
+              "fr": "Il est profondément blessé et n'arrête pas d'y penser."
+            },
+            {
+              "en": "He refused her invitation and does not care.",
+              "fr": "C'est lui qui a refusé son invitation, et ça lui est égal."
+            }
+          ],
+          "why": {
+            "en": "たまでのことだ cuts an event down to « that is all it was »: he was turned down (断られた, passive), and 気にしていない shows it. He did not refuse, and he is not hurt.",
+            "fr": "たまでのことだ ramène un fait à « ce n'était que cela » : on l'a refusé (断られた, passif), et 気にしていない le confirme. Ce n'est pas lui qui a refusé, et il n'est pas blessé."
+          }
+        }
+      ]
     }
   },
   {
@@ -16221,7 +18683,132 @@
             "fr": "Un sentiment qu'on ne peut retenir : 同情を禁じ得ない. しかねる dit qu'il ne peut se résoudre à compatir ; するまでもない, que c'est inutile."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the sentence?",
+            "fr": "Quelle particule complète la phrase ?"
+          },
+          "jp": "その会社の不正には、憤り＿＿＿禁じ得ない。",
+          "tr": {
+            "en": "At that company's wrongdoing, I cannot hold back my indignation.",
+            "fr": "Devant les malversations de cette entreprise, je ne peux contenir mon indignation."
+          },
+          "choices": [
+            "を",
+            "が",
+            "に"
+          ],
+          "why": {
+            "en": "禁じ得ない is built like 禁じる, « to hold back »: the feeling is its object, so を. が would treat 禁じ得ない as a plain « cannot » with a subject, and に is no particle for it.",
+            "fr": "禁じ得ない se construit comme 禁じる, « retenir » : le sentiment en est l'objet, donc を. が en ferait un simple « ne pas pouvoir » avec un sujet, et に n'est pas la particule de cette tournure."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What happened to the speaker when the news came?",
+            "fr": "Que s'est-il passé pour celui qui parle à l'annonce de la nouvelle ?"
+          },
+          "jp": "恩師が亡くなったと聞き、悲しみを禁じ得なかった。",
+          "tr": {
+            "en": "On hearing that my old teacher had died, I could not hold back my sadness.",
+            "fr": "En apprenant la mort de mon ancien professeur, je n'ai pu retenir ma tristesse."
+          },
+          "choices": [
+            {
+              "en": "The speaker could not hold back sadness.",
+              "fr": "Celui qui parle n'a pas pu retenir sa tristesse."
+            },
+            {
+              "en": "The speaker was forbidden to show sadness.",
+              "fr": "On a interdit à celui qui parle de montrer sa tristesse."
+            },
+            {
+              "en": "The speaker felt no sadness at all.",
+              "fr": "Celui qui parle n'a ressenti aucune tristesse."
+            }
+          ],
+          "why": {
+            "en": "禁じ得ない is « cannot hold back »: the feeling overflows. It is not 禁じる, « forbid », even though they share 禁じ; and the ない does not mean the feeling is absent.",
+            "fr": "禁じ得ない, c'est « ne pas pouvoir retenir » : le sentiment déborde. Ce n'est pas 禁じる, « interdire », même si les deux partagent 禁じ ; et le ない ne veut pas dire que le sentiment est absent."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "合格の知らせを聞いて、思わず涙を＿＿＿。",
+          "tr": {
+            "en": "On hearing that I had passed, I couldn't hold back my tears.",
+            "fr": "En apprenant que j'avais réussi, je n'ai pas pu retenir mes larmes."
+          },
+          "choices": [
+            "禁じ得なかった",
+            "禁じ得た",
+            "禁じなかった"
+          ],
+          "why": {
+            "en": "The ない of 禁じ得ない goes into the past: 禁じ得なかった, « could not hold back ». 禁じ得た says the opposite, « was able to hold back », and 禁じなかった drops 得: « did not forbid ».",
+            "fr": "Le ない de 禁じ得ない passe au passé : 禁じ得なかった, « n'a pas pu retenir ». 禁じ得た dit l'inverse, « a pu retenir », et 禁じなかった perd 得 : « n'a pas interdit »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What kind of feeling is it?",
+            "fr": "De quelle sorte de sentiment s'agit-il ?"
+          },
+          "jp": "彼女の勇気ある行動には、感動を禁じ得なかった。",
+          "tr": {
+            "en": "At her courageous act, I could not hold back my emotion.",
+            "fr": "Devant son acte courageux, je n'ai pu retenir mon émotion."
+          },
+          "choices": [
+            {
+              "en": "A good one: the speaker was deeply moved by her courage.",
+              "fr": "Un bon : l'auteur a été profondément ému par son courage."
+            },
+            {
+              "en": "A bad one: the speaker was angry at what she did.",
+              "fr": "Un mauvais : l'auteur était en colère contre ce qu'elle a fait."
+            },
+            {
+              "en": "None: the speaker had to hold back what he felt.",
+              "fr": "Aucun : l'auteur a dû retenir ce qu'il ressentait."
+            }
+          ],
+          "why": {
+            "en": "を禁じ得ない fits any strong feeling, good or bad: here 感動, set off by 勇気ある行動. It is not limited to anger or sorrow, and it says the feeling came out, not that it was held back.",
+            "fr": "を禁じ得ない convient à tout sentiment fort, bon ou mauvais : ici 感動, provoqué par 勇気ある行動. Il ne se limite pas à la colère ou au chagrin, et dit que le sentiment a éclaté, pas qu'il a été retenu."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あまりにひどい結果には、＿＿＿。",
+          "tr": {
+            "en": "At such a terrible result, I cannot hold back my disappointment.",
+            "fr": "Devant un résultat aussi mauvais, je ne peux contenir ma déception."
+          },
+          "choices": [
+            "失望を禁じ得ない",
+            "失望するを禁じ得ない",
+            "失望してを禁じ得ない"
+          ],
+          "why": {
+            "en": "を禁じ得ない takes a noun of feeling: 失望, « disappointment ». The verb forms 失望する and 失望して cannot stand before を; for a verb, the plain twin is ずにはいられない.",
+            "fr": "を禁じ得ない prend un nom de sentiment : 失望, « déception ». Les formes verbales 失望する et 失望して ne peuvent pas précéder を ; pour un verbe, le jumeau neutre est ずにはいられない."
+          }
+        }
+      ]
     }
   },
   {
