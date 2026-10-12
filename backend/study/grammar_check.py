@@ -109,7 +109,10 @@ def _reading_problems(what: str, key: str, text: str, reading) -> list[str]:
 # required where a tour is written at all. Plan 189 made the twist a list,
 # one per notion the point has beyond the meaning the guess asks, each
 # named by its `notion`, so the tour walks every one.
-TOUR_KEYS = frozenset({"twists", "scene"})
+TOUR_KEYS = frozenset({"twists", "scene", "quiz"})
+# The quiz (plan 196) is written for every point's tour; a tour without one
+# is the half-written shape the catalogue is being moved off.
+QUIZ_REQUIRED = False
 TWIST_KEYS = frozenset({"notion", "jp", "ask", "choices", "why", "pair", "tr", "kind"})
 # What a twist is (plan 194): another use of the point, or a trap set
 # against it -- a rival that looks like it. The tutorial's usages stop
@@ -121,6 +124,17 @@ MAX_NOTION_CHARS = 40
 SCENE_KEYS = frozenset({"place", "them", "lines", "note", "ask"})
 SCENE_ASK_KEYS = frozenset({"cue", "task", "choices", "why"})
 SCENE_LINES = (2, 5)
+# The quiz's authored questions (plan 196), each of one kind: read a
+# sentence (`meaning`: its translation held back), build a form (`form`:
+# the form blanked, three fillings), say the right thing in a situation
+# (`use`: three Japanese lines). None of them is the old "which of these
+# uses it?", which asked the eye and not the learner.
+QUIZ_KINDS = {
+    "meaning": frozenset({"kind", "ask", "jp", "tr", "choices", "why"}),
+    "form": frozenset({"kind", "ask", "jp", "tr", "choices", "why"}),
+    "use": frozenset({"kind", "ask", "choices", "why"}),
+}
+QUIZ_QUESTIONS = (4, 6)
 TOUR_CHOICES = 3
 MAX_LINE_CHARS = 60
 MAX_TOUR_CHARS = 220
@@ -225,8 +239,10 @@ def _tour_problems(level: str, entry: dict, rich: bool) -> list[str]:
     from study.grammar_tour import SCENE_PLACES
     pattern = entry.get("pattern") or ""
     tour = entry["tour"]
-    if not isinstance(tour, dict) or set(tour) != TOUR_KEYS:
-        return [f"tour must be {{twists, scene}}, both written"]
+    if not isinstance(tour, dict) or not {"twists", "scene"} <= set(tour) <= TOUR_KEYS:
+        return ["tour must be {twists, scene, quiz}"]
+    if QUIZ_REQUIRED and "quiz" not in tour:
+        return ["tour has no quiz (plan 196)"]
     out: list[str] = []
 
     twists = tour["twists"]
@@ -290,6 +306,140 @@ def _tour_problems(level: str, entry: dict, rich: bool) -> list[str]:
         for jp in choices[1:]:
             if _carries(jp, pattern, level) is True:
                 out.append(f"tour scene: the wrong answer {jp!r} writes the point too")
+    if "quiz" in tour:
+        out += _quiz_problems(level, entry, rich)
+    out += _repeat_problems(entry)
+    return out
+
+
+def _quiz_problems(level: str, entry: dict, rich: bool) -> list[str]:
+    """The authored quiz (plan 196): four to six questions of the three
+    kinds, each a sentence or a situation new to the tour, three answers
+    with the right one first, and the why.
+
+    What the checker cannot see, a reviewer must: that a wrong answer is
+    one someone could say and is wrong for the reason its `why` gives,
+    that the one thing the question turns on is the point and not a
+    word, and that the right answer is the only right one."""
+    from study.grammar_examples import BLANK
+    pattern = entry.get("pattern") or ""
+    quiz = entry["tour"]["quiz"]
+    if not isinstance(quiz, list) or not QUIZ_QUESTIONS[0] <= len(quiz) <= QUIZ_QUESTIONS[1]:
+        return [f"tour quiz has {len(quiz) if isinstance(quiz, list) else '?'} questions, needs {QUIZ_QUESTIONS[0]}–{QUIZ_QUESTIONS[1]}"]
+    out: list[str] = []
+    kinds = [q.get("kind") for q in quiz if isinstance(q, dict)]
+    if len(set(kinds)) < 2:
+        out.append("tour quiz asks one kind of question only")
+    if any(kinds.count(k) > 3 for k in QUIZ_KINDS):
+        out.append("tour quiz asks one kind of question more than three times")
+    for n, q in enumerate(quiz):
+        what = f"tour quiz {n}"
+        if not isinstance(q, dict) or q.get("kind") not in QUIZ_KINDS:
+            out.append(f"{what} kind must be one of {sorted(QUIZ_KINDS)}")
+            continue
+        kind = q["kind"]
+        if set(q) != QUIZ_KINDS[kind]:
+            out.append(f"{what} ({kind}) must be {{{', '.join(sorted(QUIZ_KINDS[kind]))}}}")
+            continue
+        out += _text_problems(f"{what} ask", q["ask"], rich, MAX_TOUR_CHARS)
+        out += _text_problems(f"{what} why", q["why"], rich, MAX_TOUR_CHARS)
+        choices = q["choices"]
+        if not isinstance(choices, list) or len(choices) != TOUR_CHOICES:
+            out.append(f"{what} has {len(choices) if isinstance(choices, list) else '?'} choices, needs {TOUR_CHOICES} (the answer first)")
+            continue
+        if kind == "meaning":
+            out += _line_problems(f"{what} jp", q["jp"], level, pattern)
+            out += _text_problems(f"{what} tr", q["tr"], rich, MAX_TOUR_CHARS)
+            if isinstance(q["tr"], dict) and any(_CJK.search(q["tr"].get(lang) or "") for lang in LANGS):
+                out.append(f"{what} tr holds Japanese")
+            for i, choice in enumerate(choices):
+                out += _text_problems(f"{what} choice {i}", choice, rich, MAX_TOUR_CHARS)
+            texts = [c.get("en") for c in choices if isinstance(c, dict)]
+            if len(set(texts)) != len(texts):
+                out.append(f"{what} choices repeat")
+            if isinstance(q["jp"], str) and _carries(q["jp"], pattern, level) is False:
+                out.append(f"{what}: the sentence {q['jp']!r} does not write the point")
+            continue
+        # form and use hold Japanese in their choices.
+        if kind == "form":
+            jp = q["jp"]
+            out += _text_problems(f"{what} tr", q["tr"], rich, MAX_TOUR_CHARS)
+            if isinstance(q["tr"], dict) and any(_CJK.search(q["tr"].get(lang) or "") for lang in LANGS):
+                out.append(f"{what} tr holds Japanese")
+            if not isinstance(jp, str) or jp.count(BLANK) != 1:
+                out.append(f"{what} jp must hold the blank {BLANK!r} once")
+                continue
+            if any(not isinstance(c, str) or not c.strip() or c != c.strip() or BLANK in c or _LATIN.search(c) or not _CJK.search(c) for c in choices):
+                out.append(f"{what} choices must be Japanese forms")
+                continue
+            lines = [jp.replace(BLANK, c) for c in choices]
+        else:
+            if any(not isinstance(c, str) for c in choices):
+                out.append(f"{what} choices must be Japanese lines")
+                continue
+            lines = list(choices)
+        if len(set(lines)) != len(lines):
+            out.append(f"{what} choices repeat")
+        for i, line in enumerate(lines):
+            out += _line_problems(f"{what} choice {i}", line, level, pattern)
+        if _carries(lines[0], pattern, level) is False:
+            out.append(f"{what}: the answer {lines[0]!r} does not write the point")
+        if kind == "use" and "／" not in pattern:
+            from study.grammar_detect import can_find
+            # What the situation turns on is the point, never its presence
+            # in a line: where the detector reads it, a wrong line writes it
+            # too (the same verb in the wrong tense, the wrong register,
+            # beside a rival that carries it).
+            if can_find(pattern) and not any(_carries(line, pattern, level) for line in lines[1:]):
+                out.append(f"{what}: no wrong line writes the point, so finding it answers the question")
+    return out
+
+
+def _repeat_problems(entry: dict) -> list[str]:
+    """No sentence stands twice in a tutorial (plan 196): not an example,
+    a twist, a line or an answer of the scene, nor anything the quiz asks
+    or offers. And no question is put twice."""
+    tour = entry["tour"]
+    seen: dict[str, str] = {}
+    out: list[str] = []
+
+    def see(where: str, jp) -> None:
+        if not isinstance(jp, str):
+            return
+        if jp in seen:
+            out.append(f"{jp!r} is in the tour twice ({seen[jp]}, {where})")
+        else:
+            seen[jp] = where
+
+    for i, example in enumerate(entry.get("examples") or []):
+        see(f"example {i}", example.get("jp") if isinstance(example, dict) else None)
+    for i, twist in enumerate(tour.get("twists") or []):
+        see(f"twist {i}", twist.get("jp") if isinstance(twist, dict) else None)
+    scene = tour.get("scene") or {}
+    for i, line in enumerate(scene.get("lines") or []):
+        see(f"scene line {i}", line.get("jp") if isinstance(line, dict) else None)
+    ask = scene.get("ask") or {}
+    if isinstance(ask.get("cue"), dict):
+        see("scene cue", ask["cue"].get("jp"))
+    for i, jp in enumerate(ask.get("choices") or []):
+        see(f"scene choice {i}", jp)
+    from study.grammar_tour import quiz_sentences
+    # A form is asked as « which form completes it? » whatever its sentence,
+    # and the sentence is what is checked; every other question is worded
+    # for what it asks, so the wording is.
+    questions = [q.get("ask", {}).get("en") for q in tour.get("quiz") or []
+                 if isinstance(q, dict) and q.get("kind") != "form"]
+    questions += [t.get("ask", {}).get("en") for t in tour.get("twists") or [] if isinstance(t, dict)]
+    for n, q in enumerate(tour.get("quiz") or []):
+        if isinstance(q, dict) and q.get("kind") in QUIZ_KINDS:
+            try:
+                for jp in quiz_sentences(q):
+                    see(f"quiz {n}", jp)
+            except (KeyError, TypeError, AttributeError):
+                pass
+    asked = [q for q in questions if isinstance(q, str)]
+    if len(set(asked)) != len(asked):
+        out.append("a question is put twice (the same wording over a twist or a quiz question that is not a form)")
     return out
 
 

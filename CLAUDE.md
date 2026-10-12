@@ -63,6 +63,14 @@ runtime purpose.
   `tests/test_lookup_precision.py` with the sentence it must find and the one
   it must not, and the change is diffed over every sentence the app teaches
   before it ships.
+- **A quiz question is one only understanding answers.** The tour's quiz
+  (plan 196) is written per point (`tour.quiz`: read a sentence, build a
+  form, say the right thing in a situation) and is never "which of these
+  uses it?" (the eye answers that), never a translation printed over the
+  question it answers (a twist's and a meaning's `tr` is held back until it
+  is answered), and never a sentence or a question twice in a tutorial.
+  `study/grammar_check.py` holds it; `content/grammar/README.md`, "The
+  quiz", is the style guide. Draft with `python -m scripts.check_tour_quiz`.
 - **One progress number.** A card's progress is `srs._progress`, 0 (new) to
   1 (mastered); every `learned / total`, bar and figure sums it. Never add a
   second curve beside it.
@@ -267,10 +275,8 @@ The last is run once, after the deploy that carries the grammar ladder
 writes each studied point a ladder row with the schedule of its best
 grammar mode and folds the old `grammar.flashcard.f2b` row (Today's main
 lane before it) into it. Until it runs, Today deals already-studied points
-as new on the ladder. **After any change to `content/grammar/*.json` (or to the reading bank), run
-`python -m scripts.build_quiz_pool`** (plan 195: the sentences each tour's
-quiz may draw on, so no question repeats one the tour has shown), **and
-`python -m scripts.build_ladder_flags`** too: `content/grammar/ladder.json`
+as new on the ladder. **After any change to `content/grammar/*.json`, run
+`python -m scripts.build_ladder_flags`**: `content/grammar/ladder.json`
 writes down which points Construire (`grammar.build`, typed since plan 194)
 and write can be asked on, and
 `tests/test_grammar_ladder.py` fails while it disagrees.

@@ -688,10 +688,10 @@
             "en": "After a question word",
             "fr": "Après un mot interrogatif"
           },
-          "jp": "どのバスが駅へ行きますか。",
+          "jp": "どのバスが山へ行きますか。",
           "tr": {
-            "en": "Which bus goes to the station?",
-            "fr": "Quel bus va à la gare ?"
+            "en": "Which bus goes to the mountains?",
+            "fr": "Quel bus va à la montagne ?"
           },
           "ask": {
             "en": "After どのバス, why が and not は?",
@@ -1979,22 +1979,22 @@
         "ask": {
           "cue": {
             "who": "them",
-            "jp": "わたしは学生です。",
-            "en": "I'm a student.",
-            "fr": "Moi, je suis étudiant."
+            "jp": "わたしはコーヒーを飲みます。",
+            "en": "I'm having coffee.",
+            "fr": "Moi, je prends un café."
           },
           "task": {
-            "en": "You are one too. Say so.",
-            "fr": "Toi aussi. Dis-le."
+            "en": "You are having coffee too. Say so.",
+            "fr": "Toi aussi, tu prends un café. Dis-le."
           },
           "choices": [
-            "わたしも学生です。",
-            "わたしは学生です。",
-            "わたしと学生です。"
+            "わたしもコーヒーを飲みます。",
+            "わたしがコーヒーを飲みます。",
+            "わたしとコーヒーを飲みます。"
           ],
           "why": {
-            "en": "You too: も replaces は. わたしは学生です becomes わたしも学生です.",
-            "fr": "Toi aussi : も remplace は. わたしは学生です devient わたしも学生です."
+            "en": "You too: も replaces は. わたしはコーヒーを飲みます becomes わたしもコーヒーを飲みます.",
+            "fr": "Toi aussi : も remplace は. わたしはコーヒーを飲みます devient わたしもコーヒーを飲みます."
           }
         }
       }
@@ -2941,39 +2941,115 @@
       "twists": [
         {
           "notion": {
-            "en": "ある becomes ない",
-            "fr": "ある devient ない"
+            "en": "Verbs in う: 買う → 買わない",
+            "fr": "Les verbes en う : 買う → 買わない"
           },
-          "jp": "今、お金がない。",
+          "jp": "パンは、あの店では買わない。",
           "tr": {
-            "en": "I have no money right now.",
-            "fr": "Je n'ai pas d'argent en ce moment."
+            "en": "I don't buy bread at that shop.",
+            "fr": "Je n'achète pas de pain dans ce magasin."
           },
           "ask": {
-            "en": "ない stands alone here, with no verb before it. What does it say?",
-            "fr": "Ici, ない est seul, sans verbe devant. Que dit la phrase ?"
+            "en": "In 買わない, where does the わ come from?",
+            "fr": "Dans 買わない, d'où vient le わ ?"
           },
           "choices": [
             {
-              "en": "I have no money right now.",
-              "fr": "Je n'ai pas d'argent en ce moment."
+              "en": "買う ends in う, and the あ-row sound of う is わ: 買わ + ない.",
+              "fr": "買う finit par う, et le son en あ de う est わ : 買わ + ない."
             },
             {
-              "en": "I don't want money right now.",
-              "fr": "Je ne veux pas d'argent en ce moment."
+              "en": "It is the sentence-ending わ, a softener added to 買う.",
+              "fr": "C'est le わ de fin de phrase, un adoucisseur ajouté à 買う."
             },
             {
-              "en": "Please don't give me money now.",
-              "fr": "Ne me donne pas d'argent maintenant."
+              "en": "It is a polite ending, like ます.",
+              "fr": "C'est une terminaison de politesse, comme ます."
             }
           ],
           "why": {
-            "en": "The plain negative of ある is just ない: お金がある, お金がない.",
-            "fr": "La forme négative neutre de ある est simplement ない : お金がある, お金がない."
+            "en": "A う-verb takes the あ-row sound before ない, and for う that sound is わ: 買う → 買わない, 会う → 会わない. Never 買あない.",
+            "fr": "Un verbe en う prend le son en あ devant ない, et pour う ce son est わ : 買う → 買わない, 会う → 会わない. Jamais 買あない."
           },
           "pair": [
-            "お金がある",
-            "お金がない"
+            "買う",
+            "買わない"
+          ],
+          "kind": "usage"
+        },
+        {
+          "notion": {
+            "en": "Irregulars: する and 来る",
+            "fr": "Les irréguliers : する et 来る"
+          },
+          "jp": "あしたは、友だちがここにこない。",
+          "tr": {
+            "en": "My friend isn't coming here tomorrow.",
+            "fr": "Demain, mon ami ne vient pas ici."
+          },
+          "ask": {
+            "en": "こない is the negative of which verb?",
+            "fr": "こない : la négation de quel verbe ?"
+          },
+          "choices": [
+            {
+              "en": "来る: 来る → 来ない, read こない.",
+              "fr": "来る : 来る → 来ない, qui se lit こない."
+            },
+            {
+              "en": "行く: こない means « don't go ».",
+              "fr": "行く : こない veut dire « ne pas aller »."
+            },
+            {
+              "en": "する, the other irregular verb: する → こない.",
+              "fr": "する, l'autre verbe irrégulier : する → こない."
+            }
+          ],
+          "why": {
+            "en": "The two irregular verbs: する → しない, and 来る → 来ない, read こない. Every other verb follows the rule.",
+            "fr": "Les deux verbes irréguliers : する → しない, et 来る → 来ない, qui se lit こない. Tous les autres suivent la règle."
+          },
+          "pair": [
+            "来る",
+            "こない"
+          ],
+          "kind": "usage"
+        },
+        {
+          "notion": {
+            "en": "ある becomes ない",
+            "fr": "ある devient ない"
+          },
+          "jp": "つくえの上に本がない。",
+          "tr": {
+            "en": "There is no book on the desk.",
+            "fr": "Il n'y a pas de livre sur le bureau."
+          },
+          "ask": {
+            "en": "ない comes right after 本が, with no verb before it. What does the sentence say?",
+            "fr": "Ici, ない suit 本が, sans verbe devant. Que dit la phrase ?"
+          },
+          "choices": [
+            {
+              "en": "There is no book on the desk.",
+              "fr": "Il n'y a pas de livre sur le bureau."
+            },
+            {
+              "en": "I don't read the book on the desk.",
+              "fr": "Je ne lis pas le livre qui est sur le bureau."
+            },
+            {
+              "en": "Don't put a book on the desk.",
+              "fr": "Ne pose pas de livre sur le bureau."
+            }
+          ],
+          "why": {
+            "en": "The plain negative of ある is just ない: 本がある, 本がない.",
+            "fr": "La négation neutre de ある est simplement ない : 本がある, 本がない."
+          },
+          "pair": [
+            "本がある",
+            "本がない"
           ],
           "kind": "usage"
         },
@@ -2982,114 +3058,114 @@
             "en": "The past: なかった",
             "fr": "Le passé : なかった"
           },
-          "jp": "きのうはどこにも行かなかった。",
+          "jp": "きのうは、ばんごはんを食べなかった。",
           "tr": {
-            "en": "I didn't go anywhere yesterday.",
-            "fr": "Hier, je n'ai été nulle part."
+            "en": "I didn't eat dinner yesterday.",
+            "fr": "Hier, je n'ai pas dîné."
           },
           "ask": {
-            "en": "行かなかった. What does the sentence say?",
-            "fr": "行かなかった. Que dit la phrase ?"
+            "en": "食べなかった. What does the sentence say?",
+            "fr": "食べなかった. Que dit la phrase ?"
           },
           "choices": [
             {
-              "en": "I didn't go anywhere yesterday.",
-              "fr": "Hier, je n'ai mis les pieds nulle part."
+              "en": "I didn't eat dinner yesterday.",
+              "fr": "Hier, je n'ai pas dîné."
             },
             {
-              "en": "I'm not going anywhere today.",
-              "fr": "Aujourd'hui, je ne vais nulle part."
+              "en": "I won't eat dinner tomorrow.",
+              "fr": "Demain, je ne dînerai pas."
             },
             {
-              "en": "I went all over town yesterday.",
-              "fr": "Hier, j'ai fait le tour de la ville."
+              "en": "I ate dinner late yesterday.",
+              "fr": "Hier, j'ai dîné tard."
             }
           ],
           "why": {
-            "en": "ない changes like an い-adjective: ない → なかった, the plain past negative.",
-            "fr": "ない se conjugue comme un adjectif en い : ない → なかった, le passé négatif neutre."
+            "en": "After a verb, ない changes like an い-adjective: ない → なかった, the plain past negative.",
+            "fr": "Après un verbe, ない se conjugue comme un adjectif en い : ない → なかった, le passé négatif neutre."
           },
           "pair": [
-            "行かない",
-            "行かなかった"
+            "食べない",
+            "食べなかった"
           ],
           "kind": "usage"
         },
         {
           "notion": {
-            "en": "Irregular する and 来る",
-            "fr": "Les irréguliers する et 来る"
+            "en": "After a noun: じゃない",
+            "fr": "Après un nom : じゃない"
           },
-          "jp": "今日はしゅくだいをしない。",
+          "jp": "これは、わたしのかさじゃない。",
           "tr": {
-            "en": "I'm not doing my homework today.",
-            "fr": "Aujourd'hui, je ne fais pas mes devoirs."
+            "en": "This isn't my umbrella.",
+            "fr": "Ce n'est pas mon parapluie."
           },
           "ask": {
-            "en": "しない: the negative of which verb?",
-            "fr": "しない : la négation de quel verbe ?"
+            "en": "かさ is a noun, with no verb to negate. What does the sentence say?",
+            "fr": "かさ est un nom : pas de verbe à nier. Que dit la phrase ?"
           },
           "choices": [
             {
-              "en": "する: I'm not doing my homework today.",
-              "fr": "する : je ne fais pas mes devoirs aujourd'hui."
+              "en": "This isn't my umbrella.",
+              "fr": "Ce n'est pas mon parapluie."
             },
             {
-              "en": "ある: there is no homework today.",
-              "fr": "ある : il n'y a pas de devoirs aujourd'hui."
+              "en": "I don't have an umbrella.",
+              "fr": "Je n'ai pas de parapluie."
             },
             {
-              "en": "しる: I don't know about the homework.",
-              "fr": "しる : je ne sais rien des devoirs."
+              "en": "I'm not using my umbrella.",
+              "fr": "Je ne me sers pas de mon parapluie."
             }
           ],
           "why": {
-            "en": "The two irregular verbs: する → しない, 来る → 来ない, read こない.",
-            "fr": "Les deux verbes irréguliers : する → しない, 来る → 来ない, qui se lit こない."
+            "en": "After a noun the plain negative is じゃない (ではない), not ない alone: かさだ → かさじゃない. Alone, ない negates a verb, or ある.",
+            "fr": "Après un nom, la négation neutre est じゃない (ではない), pas ない seul : かさだ → かさじゃない. Seul, ない nie un verbe, ou ある."
           },
           "pair": [
-            "する",
-            "しない"
+            "かさだ",
+            "かさじゃない"
           ],
-          "kind": "usage"
+          "kind": "trap"
         },
         {
           "notion": {
             "en": "Casual at the end",
             "fr": "Familier en fin de phrase"
           },
-          "jp": "ごめん、今日は行かない。",
+          "jp": "あしたは、パーティーに行かない。",
           "tr": {
-            "en": "Sorry, I'm not going today.",
-            "fr": "Pardon, aujourd'hui je n'y vais pas."
+            "en": "I'm not going to the party tomorrow.",
+            "fr": "Demain, je ne vais pas à la fête."
           },
           "ask": {
-            "en": "Who would you say this to?",
-            "fr": "À qui dirait-on cela ?"
+            "en": "You say this to your teacher. What is wrong?",
+            "fr": "Tu dis cela à ton professeur. Qu'est-ce qui ne va pas ?"
           },
           "choices": [
             {
-              "en": "A friend: ない at the end of a sentence is casual.",
-              "fr": "À un ami : ない en fin de phrase est familier."
+              "en": "It is too casual: to a teacher, the negative is 行きません.",
+              "fr": "C'est trop familier : à un professeur, la négation est 行きません."
             },
             {
-              "en": "A teacher: ない is the polite negative.",
-              "fr": "À un professeur : ない est la négation polie."
+              "en": "Nothing: ない is the polite negative.",
+              "fr": "Rien : ない est la négation polie."
             },
             {
-              "en": "Anyone: ない and ません sound the same.",
-              "fr": "À n'importe qui : ない et ません, c'est pareil."
+              "en": "Nothing: ない and ません are used the same way.",
+              "fr": "Rien : ない et ません s'emploient de la même façon."
             }
           ],
           "why": {
-            "en": "To a teacher or a stranger, the negative is ません: 行きません. ない is for friends and family.",
-            "fr": "À un professeur ou à un inconnu, la négation est ません : 行きません. ない, c'est pour les amis et la famille."
+            "en": "At the end of a sentence, ない is for friends and family. To a teacher or a stranger, the negative is ません: 行きません.",
+            "fr": "En fin de phrase, ない est pour les amis et la famille. À un professeur ou à un inconnu, la négation est ません : 行きません."
           },
           "pair": [
             "行きません",
             "行かない"
           ],
-          "kind": "usage"
+          "kind": "trap"
         }
       ],
       "scene": {
@@ -3130,20 +3206,156 @@
             "fr": "Tu veux du pain ?"
           },
           "task": {
-            "en": "Tell him no, you won't have any.",
-            "fr": "Dis-lui que non, tu n'en mangeras pas."
+            "en": "You don't feel like bread. Say no, the way you would to a friend.",
+            "fr": "Tu n'as pas envie de pain. Réponds non, comme on le fait à un ami."
           },
           "choices": [
             "ううん、食べない。",
-            "ううん、食べる。",
-            "ううん、食べたい。"
+            "ううん、食べません。",
+            "ううん、食べないで。"
           ],
           "why": {
-            "en": "You say you won't eat: the plain negative, 食べない.",
-            "fr": "Tu dis que tu ne manges pas : la négation neutre, 食べない."
+            "en": "A friend gets the plain negative: 食べない. 食べません is for a clerk, and 食べないで asks the other person not to eat.",
+            "fr": "À un ami, on dit la négation neutre : 食べない. 食べません, c'est pour un employé ; 食べないで demande à l'autre de ne pas manger."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "わたしは新聞を＿＿＿。",
+          "tr": {
+            "en": "I don't buy newspapers.",
+            "fr": "Je n'achète pas de journaux."
+          },
+          "choices": [
+            "買わない",
+            "買ない",
+            "買わなかった"
+          ],
+          "why": {
+            "en": "買う ends in う, so it takes the あ-row sound わ before ない: 買わない. 買ない treats it as a る-verb, and 買わなかった is the past.",
+            "fr": "買う finit par う : devant ない, il prend le son わ : 買わない. 買ない le traite en verbe en る, et 買わなかった est le passé."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who does not eat fish?",
+            "fr": "Qui ne mange pas de poisson ?"
+          },
+          "jp": "おとうとはさかなを食べるが、わたしは食べない。",
+          "tr": {
+            "en": "My little brother eats fish, but I don't.",
+            "fr": "Mon petit frère mange du poisson, mais moi non."
+          },
+          "choices": [
+            {
+              "en": "The speaker does not; the brother does.",
+              "fr": "Celui qui parle n'en mange pas ; son frère, si."
+            },
+            {
+              "en": "The brother does not; the speaker does.",
+              "fr": "Son frère n'en mange pas ; celui qui parle, si."
+            },
+            {
+              "en": "Neither of them does.",
+              "fr": "Ni l'un ni l'autre."
+            }
+          ],
+          "why": {
+            "en": "The negative is in the second half: わたしは食べない. The first half, おとうとは…食べる, is positive.",
+            "fr": "La négation est dans la seconde moitié : わたしは食べない. La première, おとうとは…食べる, est affirmative."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your mother asks: しゅくだい、した？ You haven't done your homework. What do you answer?",
+            "fr": "Ta mère te demande : しゅくだい、した？ Tu ne l'as pas fait. Que réponds-tu ?"
+          },
+          "choices": [
+            "ううん、しなかった。",
+            "ううん、しない。",
+            "ううん、しませんでした。"
+          ],
+          "why": {
+            "en": "She asks about something already past, so you answer in the past negative: しなかった. しない says you won't do it, and しませんでした is polite, for a teacher rather than your mother.",
+            "fr": "Elle parle d'un fait passé : tu réponds au passé négatif, しなかった. しない dit que tu ne le feras pas, et しませんでした est poli, pour un professeur plutôt que pour ta mère."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ねる前は、テレビを＿＿＿。",
+          "tr": {
+            "en": "Before bed, I don't watch TV.",
+            "fr": "Avant de dormir, je ne regarde pas la télé."
+          },
+          "choices": [
+            "見ない",
+            "見らない",
+            "見るない"
+          ],
+          "why": {
+            "en": "A る-verb drops る before ない: 見る → 見ない. 見らない applies the う-verb rule, and 見るない keeps the る.",
+            "fr": "Un verbe en る perd る devant ない : 見る → 見ない. 見らない applique la règle des verbes en う, et 見るない garde le る."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about yesterday?",
+            "fr": "Que dit la phrase à propos d'hier ?"
+          },
+          "jp": "きのうは雨だったから、うちから出なかった。",
+          "tr": {
+            "en": "It rained yesterday, so I didn't leave the house.",
+            "fr": "Hier, il pleuvait, alors je n'ai pas quitté la maison."
+          },
+          "choices": [
+            {
+              "en": "It rained, so I stayed at home.",
+              "fr": "Il pleuvait, alors je n'ai pas bougé de chez moi."
+            },
+            {
+              "en": "It rained, but I went out anyway.",
+              "fr": "Il pleuvait, mais j'ai quand même fait ma sortie."
+            },
+            {
+              "en": "It will rain tomorrow, so I won't go out.",
+              "fr": "Il pleuvra demain, donc je ne sortirai pas."
+            }
+          ],
+          "why": {
+            "en": "出なかった is the past negative of 出る: it rained, so I didn't go out. The から gives the reason.",
+            "fr": "出なかった est le passé négatif de 出る : il pleuvait, alors je n'ai pas mis le nez dehors. Le から donne la raison."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You open the fridge: there is no milk left. You tell your family.",
+            "fr": "Tu ouvres le frigo : il n'y a plus de lait. Tu le dis à ta famille."
+          },
+          "choices": [
+            "ぎゅうにゅうがない。",
+            "ぎゅうにゅうを飲まない。",
+            "ぎゅうにゅうがありません。"
+          ],
+          "why": {
+            "en": "There is none: ない is the plain negative of ある, that is がない. 飲まない says you don't drink it, and ありません is the polite version, too stiff at home.",
+            "fr": "Il n'y en a pas : ない est la négation neutre de ある, c'est-à-dire がない. 飲まない dit que tu n'en bois pas, et ありません est la version polie, trop raide à la maison."
+          }
+        }
+      ]
     }
   },
   {
@@ -4240,10 +4452,10 @@
             "en": "Permission, not an offer",
             "fr": "Permission, pas une offre"
           },
-          "jp": "まどをあけてもいいですか。",
+          "jp": "ここで電話してもいいですか。",
           "tr": {
-            "en": "May I open the window?",
-            "fr": "Est-ce que je peux ouvrir la fenêtre ?"
+            "en": "May I make a phone call here?",
+            "fr": "Est-ce que je peux téléphoner ici ?"
           },
           "ask": {
             "en": "With か, what is the speaker doing?",
@@ -4251,25 +4463,25 @@
           },
           "choices": [
             {
-              "en": "Asking permission: may I open the window?",
-              "fr": "Demander la permission : je peux ouvrir la fenêtre ?"
+              "en": "Asking permission: may I make a call here?",
+              "fr": "Demander la permission : je peux téléphoner ici ?"
             },
             {
-              "en": "Offering: shall I open the window for you?",
-              "fr": "Proposer : voulez-vous que j'ouvre la fenêtre ?"
+              "en": "Offering: shall I make a call for you?",
+              "fr": "Proposer : voulez-vous que je téléphone pour vous ?"
             },
             {
-              "en": "Asking the other to open it.",
-              "fr": "Demander à l'autre de l'ouvrir."
+              "en": "Asking the other to make a call.",
+              "fr": "Demander à l'autre de téléphoner."
             }
           ],
           "why": {
-            "en": "〜てもいいですか asks for permission. To offer, it is 〜ましょうか: あけましょうか.",
-            "fr": "〜てもいいですか demande la permission. Pour proposer, c'est 〜ましょうか : あけましょうか."
+            "en": "〜てもいいですか asks for permission. To offer, it is 〜ましょうか: 電話しましょうか.",
+            "fr": "〜てもいいですか demande la permission. Pour proposer, c'est 〜ましょうか : 電話しましょうか."
           },
           "pair": [
-            "あけてもいいですか",
-            "あけましょうか"
+            "電話してもいいですか",
+            "電話しましょうか"
           ],
           "kind": "usage"
         },
@@ -13918,13 +14130,13 @@
             "fr": "Autre chose ?"
           },
           "task": {
-            "en": "You want some cold water too.",
-            "fr": "Tu veux aussi de l'eau froide."
+            "en": "You want some coffee too.",
+            "fr": "Tu veux aussi un café."
           },
           "choices": [
-            "つめたい水をください。",
-            "つめたい水です。",
-            "つめたい水がいます。"
+            "コーヒーをください。",
+            "コーヒーです。",
+            "コーヒーがいます。"
           ],
           "why": {
             "en": "You are asking for a thing: をください.",

@@ -2221,5 +2221,914 @@
         "n": 7
       }
     ]
+  },
+  "nai": {
+    "rev": 5,
+    "look": [
+      {
+        "jp": "今日は学校に行かない。",
+        "tr": "I'm not going to school today.",
+        "furigana": [
+          {
+            "text": "今日",
+            "reading": "きょう",
+            "word": 0
+          },
+          {
+            "text": "は"
+          },
+          {
+            "text": "学",
+            "reading": "がっ",
+            "word": 2
+          },
+          {
+            "text": "校",
+            "reading": "こう",
+            "word": 2
+          },
+          {
+            "text": "に"
+          },
+          {
+            "text": "行",
+            "reading": "い",
+            "word": 4
+          },
+          {
+            "text": "か"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "spans": [
+          [
+            8,
+            10
+          ]
+        ]
+      },
+      {
+        "jp": "わたしはさかなを食べない。",
+        "tr": "I don't eat fish.",
+        "furigana": [
+          {
+            "text": "わたしは"
+          },
+          {
+            "text": "さかなを"
+          },
+          {
+            "text": "食",
+            "reading": "た",
+            "word": 4
+          },
+          {
+            "text": "べ"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "spans": [
+          [
+            10,
+            12
+          ]
+        ]
+      },
+      {
+        "jp": "ねる前にコーヒーは飲まない。",
+        "tr": "I don't drink coffee before bed.",
+        "furigana": [
+          {
+            "text": "ねる"
+          },
+          {
+            "text": "前",
+            "reading": "まえ",
+            "word": 1
+          },
+          {
+            "text": "に"
+          },
+          {
+            "text": "コーヒーは"
+          },
+          {
+            "text": "飲",
+            "reading": "の",
+            "word": 5
+          },
+          {
+            "text": "ま"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "spans": [
+          [
+            11,
+            13
+          ]
+        ]
+      }
+    ],
+    "guesses": [
+      {
+        "text": "the plain negative: don't, doesn't",
+        "correct": true
+      },
+      {
+        "text": "polite present/future, affirmative and negative",
+        "correct": false,
+        "pattern": "〜ます／〜ません",
+        "furigana": [
+          {
+            "text": "〜ます／〜ません"
+          }
+        ],
+        "answer": "ない is the plain negative; ません is the same negative, polite."
+      },
+      {
+        "text": "please don't do",
+        "correct": false,
+        "pattern": "〜ないでください",
+        "furigana": [
+          {
+            "text": "〜ないでください"
+          }
+        ],
+        "answer": "The ない-form alone says you do not; with でください it asks someone not to."
+      },
+      {
+        "text": "has already done it",
+        "correct": false,
+        "pattern": "もう〜ました",
+        "furigana": [
+          {
+            "text": "もう〜ました"
+          }
+        ],
+        "answer": null
+      }
+    ],
+    "rule": "The **ない-form** is the plain negative: う-verbs take the あ-row + ない (行く→行かない, 買う→買わない), る-verbs drop る (食べない), する→しない, 来る→来ない (こない). ある becomes ない alone.",
+    "structure": "う-verb あ-row ・ る-verb stem + ない",
+    "structure_furigana": [
+      {
+        "text": "う-verb あ-row ・ る-verb stem + ない"
+      }
+    ],
+    "chain": null,
+    "rival": {
+      "pattern": "〜ます／〜ません",
+      "furigana": [
+        {
+          "text": "〜ます／〜ません"
+        }
+      ],
+      "text": "ない is the plain negative; ません is the same negative, polite."
+    },
+    "twists": [
+      {
+        "notion": "Verbs in う: 買う → 買わない",
+        "kind": "usage",
+        "jp": "パンは、あの店では買わない。",
+        "furigana": [
+          {
+            "text": "パンは、"
+          },
+          {
+            "text": "あの"
+          },
+          {
+            "text": "店",
+            "reading": "みせ",
+            "word": 4
+          },
+          {
+            "text": "では"
+          },
+          {
+            "text": "買",
+            "reading": "か",
+            "word": 7
+          },
+          {
+            "text": "わ"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "tr": "I don't buy bread at that shop.",
+        "ask": "In 買わない, where does the わ come from?",
+        "choices": [
+          {
+            "text": "買う ends in う, and the あ-row sound of う is わ: 買わ + ない.",
+            "correct": true
+          },
+          {
+            "text": "It is the sentence-ending わ, a softener added to 買う.",
+            "correct": false
+          }
+        ],
+        "why": "A う-verb takes the あ-row sound before ない, and for う that sound is わ: 買う → 買わない, 会う → 会わない. Never 買あない.",
+        "pair": [
+          "買う",
+          "買わない"
+        ]
+      },
+      {
+        "notion": "Irregulars: する and 来る",
+        "kind": "usage",
+        "jp": "あしたは、友だちがここにこない。",
+        "furigana": [
+          {
+            "text": "あしたは、"
+          },
+          {
+            "text": "友",
+            "reading": "とも",
+            "word": 3
+          },
+          {
+            "text": "だちが"
+          },
+          {
+            "text": "ここに"
+          },
+          {
+            "text": "こ"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "tr": "My friend isn't coming here tomorrow.",
+        "ask": "こない is the negative of which verb?",
+        "choices": [
+          {
+            "text": "行く: 行く → こない, like 行く → 行かない.",
+            "correct": false
+          },
+          {
+            "text": "来る: 来る → 来ない, read こない.",
+            "correct": true
+          }
+        ],
+        "why": "The two irregular verbs: する → しない, and 来る → 来ない, read こない. Every other verb follows the rule.",
+        "pair": [
+          "来る",
+          "こない"
+        ]
+      },
+      {
+        "notion": "ある becomes ない",
+        "kind": "usage",
+        "jp": "つくえの上に本がない。",
+        "furigana": [
+          {
+            "text": "つくえの"
+          },
+          {
+            "text": "上",
+            "reading": "うえ",
+            "word": 2
+          },
+          {
+            "text": "に"
+          },
+          {
+            "text": "本",
+            "reading": "ほん",
+            "word": 4
+          },
+          {
+            "text": "が"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "tr": "There is no book on the desk.",
+        "ask": "ない comes right after 本が, with no verb before it. What does the sentence say?",
+        "choices": [
+          {
+            "text": "I don't read the book on the desk.",
+            "correct": false
+          },
+          {
+            "text": "There is no book on the desk.",
+            "correct": true
+          }
+        ],
+        "why": "The plain negative of ある is just ない: 本がある, 本がない.",
+        "pair": [
+          "本がある",
+          "本がない"
+        ]
+      },
+      {
+        "notion": "The past: なかった",
+        "kind": "usage",
+        "jp": "きのうは、ばんごはんを食べなかった。",
+        "furigana": [
+          {
+            "text": "きのうは、"
+          },
+          {
+            "text": "ばん"
+          },
+          {
+            "text": "ごはんを"
+          },
+          {
+            "text": "食",
+            "reading": "た",
+            "word": 6
+          },
+          {
+            "text": "べ"
+          },
+          {
+            "text": "なかっ",
+            "highlight": true
+          },
+          {
+            "text": "た。"
+          }
+        ],
+        "tr": "I didn't eat dinner yesterday.",
+        "ask": "食べなかった. What does the sentence say?",
+        "choices": [
+          {
+            "text": "I won't eat dinner tomorrow.",
+            "correct": false
+          },
+          {
+            "text": "I didn't eat dinner yesterday.",
+            "correct": true
+          }
+        ],
+        "why": "After a verb, ない changes like an い-adjective: ない → なかった, the plain past negative.",
+        "pair": [
+          "食べない",
+          "食べなかった"
+        ]
+      },
+      {
+        "notion": "After a noun: じゃない",
+        "kind": "trap",
+        "jp": "これは、わたしのかさじゃない。",
+        "furigana": [
+          {
+            "text": "これは、"
+          },
+          {
+            "text": "わたしの"
+          },
+          {
+            "text": "かさじゃ"
+          },
+          {
+            "text": "ない。"
+          }
+        ],
+        "tr": "This isn't my umbrella.",
+        "ask": "かさ is a noun, with no verb to negate. What does the sentence say?",
+        "choices": [
+          {
+            "text": "This isn't my umbrella.",
+            "correct": true
+          },
+          {
+            "text": "I don't have an umbrella.",
+            "correct": false
+          }
+        ],
+        "why": "After a noun the plain negative is じゃない (ではない), not ない alone: かさだ → かさじゃない. Alone, ない negates a verb, or ある.",
+        "pair": [
+          "かさだ",
+          "かさじゃない"
+        ]
+      },
+      {
+        "notion": "Casual at the end",
+        "kind": "trap",
+        "jp": "あしたは、パーティーに行かない。",
+        "furigana": [
+          {
+            "text": "あしたは、"
+          },
+          {
+            "text": "パーティーに"
+          },
+          {
+            "text": "行",
+            "reading": "い",
+            "word": 5
+          },
+          {
+            "text": "か"
+          },
+          {
+            "text": "ない",
+            "highlight": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "tr": "I'm not going to the party tomorrow.",
+        "ask": "You say this to your teacher. What is wrong?",
+        "choices": [
+          {
+            "text": "Nothing: ない is the polite negative.",
+            "correct": false
+          },
+          {
+            "text": "It is too casual: to a teacher, the negative is 行きません.",
+            "correct": true
+          }
+        ],
+        "why": "At the end of a sentence, ない is for friends and family. To a teacher or a stranger, the negative is ません: 行きません.",
+        "pair": [
+          "行きません",
+          "行かない"
+        ]
+      }
+    ],
+    "scene": {
+      "place": "ホーム",
+      "place_reading": null,
+      "place_caption": "Platform",
+      "them": "A friend",
+      "lines": [
+        {
+          "who": "them",
+          "jp": "電車、来ないね。",
+          "tr": "The train isn't coming, is it?",
+          "furigana": [
+            {
+              "text": "電",
+              "reading": "でん",
+              "word": 0
+            },
+            {
+              "text": "車",
+              "reading": "しゃ",
+              "word": 0
+            },
+            {
+              "text": "、"
+            },
+            {
+              "text": "来",
+              "reading": "こ",
+              "word": 2
+            },
+            {
+              "text": "ない",
+              "highlight": true
+            },
+            {
+              "text": "ね。"
+            }
+          ]
+        },
+        {
+          "who": "me",
+          "jp": "うん、まだ来ない。",
+          "tr": "No, still not here.",
+          "furigana": [
+            {
+              "text": "うん、"
+            },
+            {
+              "text": "まだ"
+            },
+            {
+              "text": "来",
+              "reading": "こ",
+              "word": 3
+            },
+            {
+              "text": "ない",
+              "highlight": true
+            },
+            {
+              "text": "。"
+            }
+          ]
+        },
+        {
+          "who": "them",
+          "jp": "じゃあ、パンを買う。",
+          "tr": "Then I'll buy some bread.",
+          "furigana": [
+            {
+              "text": "じゃあ、"
+            },
+            {
+              "text": "パンを"
+            },
+            {
+              "text": "買",
+              "reading": "か",
+              "word": 4
+            },
+            {
+              "text": "う。"
+            }
+          ]
+        }
+      ],
+      "note": "Between friends, ない is the plain negative; with a clerk you would say ません.",
+      "ask": {
+        "cue": {
+          "who": "them",
+          "jp": "パン、食べる？",
+          "tr": "Want some bread?",
+          "furigana": [
+            {
+              "text": "パン、"
+            },
+            {
+              "text": "食",
+              "reading": "た",
+              "word": 2
+            },
+            {
+              "text": "べる？"
+            }
+          ]
+        },
+        "task": "You don't feel like bread. Say no, the way you would to a friend.",
+        "choices": [
+          {
+            "jp": "ううん、食べない。",
+            "furigana": [
+              {
+                "text": "ううん、"
+              },
+              {
+                "text": "食",
+                "reading": "た",
+                "word": 2
+              },
+              {
+                "text": "べない。"
+              }
+            ],
+            "correct": true
+          },
+          {
+            "jp": "ううん、食べません。",
+            "furigana": [
+              {
+                "text": "ううん、"
+              },
+              {
+                "text": "食",
+                "reading": "た",
+                "word": 2
+              },
+              {
+                "text": "べません。"
+              }
+            ],
+            "correct": false
+          },
+          {
+            "jp": "ううん、食べないで。",
+            "furigana": [
+              {
+                "text": "ううん、"
+              },
+              {
+                "text": "食",
+                "reading": "た",
+                "word": 2
+              },
+              {
+                "text": "べないで。"
+              }
+            ],
+            "correct": false
+          }
+        ],
+        "why": "A friend gets the plain negative: 食べない. 食べません is for a clerk, and 食べないで asks the other person not to eat."
+      }
+    },
+    "quiz": [
+      {
+        "kind": "form",
+        "ask": "Which form completes the sentence?",
+        "why": "買う ends in う, so it takes the あ-row sound わ before ない: 買わない. 買ない treats it as a る-verb, and 買わなかった is the past.",
+        "jp": "わたしは新聞を買わない。",
+        "tr": "I don't buy newspapers.",
+        "furigana": [
+          {
+            "text": "わたしは"
+          },
+          {
+            "text": "新",
+            "reading": "しん",
+            "word": 2
+          },
+          {
+            "text": "聞",
+            "reading": "ぶん",
+            "word": 2
+          },
+          {
+            "text": "を"
+          },
+          {
+            "text": "＿＿＿",
+            "blank": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "choices": [
+          {
+            "jp": "買ない",
+            "correct": false
+          },
+          {
+            "jp": "買わない",
+            "correct": true
+          },
+          {
+            "jp": "買わなかった",
+            "correct": false
+          }
+        ],
+        "n": 0
+      },
+      {
+        "kind": "meaning",
+        "ask": "Who does not eat fish?",
+        "why": "The negative is in the second half: わたしは食べない. The first half, おとうとは…食べる, is positive.",
+        "jp": "おとうとはさかなを食べるが、わたしは食べない。",
+        "tr": "My little brother eats fish, but I don't.",
+        "furigana": [
+          {
+            "text": "おとうとは"
+          },
+          {
+            "text": "さかなを"
+          },
+          {
+            "text": "食",
+            "reading": "た",
+            "word": 4
+          },
+          {
+            "text": "べるが、"
+          },
+          {
+            "text": "わたしは"
+          },
+          {
+            "text": "食",
+            "reading": "た",
+            "word": 9
+          },
+          {
+            "text": "べない。"
+          }
+        ],
+        "choices": [
+          {
+            "text": "The speaker does not; the brother does.",
+            "correct": true
+          },
+          {
+            "text": "The brother does not; the speaker does.",
+            "correct": false
+          },
+          {
+            "text": "Neither of them does.",
+            "correct": false
+          }
+        ],
+        "n": 1
+      },
+      {
+        "kind": "use",
+        "ask": "Your mother asks: しゅくだい、した？ You haven't done your homework. What do you answer?",
+        "why": "She asks about something already past, so you answer in the past negative: しなかった. しない says you won't do it, and しませんでした is polite, for a teacher rather than your mother.",
+        "choices": [
+          {
+            "jp": "ううん、しなかった。",
+            "furigana": [
+              {
+                "text": "ううん、"
+              },
+              {
+                "text": "しなかった。"
+              }
+            ],
+            "correct": true
+          },
+          {
+            "jp": "ううん、しない。",
+            "furigana": [
+              {
+                "text": "ううん、"
+              },
+              {
+                "text": "しない。"
+              }
+            ],
+            "correct": false
+          },
+          {
+            "jp": "ううん、しませんでした。",
+            "furigana": [
+              {
+                "text": "ううん、"
+              },
+              {
+                "text": "しませんでした。"
+              }
+            ],
+            "correct": false
+          }
+        ],
+        "n": 2
+      },
+      {
+        "kind": "form",
+        "ask": "Which form completes the sentence?",
+        "why": "A る-verb drops る before ない: 見る → 見ない. 見らない applies the う-verb rule, and 見るない keeps the る.",
+        "jp": "ねる前は、テレビを見ない。",
+        "tr": "Before bed, I don't watch TV.",
+        "furigana": [
+          {
+            "text": "ねる"
+          },
+          {
+            "text": "前",
+            "reading": "まえ",
+            "word": 1
+          },
+          {
+            "text": "は、"
+          },
+          {
+            "text": "テレビを"
+          },
+          {
+            "text": "＿＿＿",
+            "blank": true
+          },
+          {
+            "text": "。"
+          }
+        ],
+        "choices": [
+          {
+            "jp": "見るない",
+            "correct": false
+          },
+          {
+            "jp": "見ない",
+            "correct": true
+          },
+          {
+            "jp": "見らない",
+            "correct": false
+          }
+        ],
+        "n": 3
+      },
+      {
+        "kind": "meaning",
+        "ask": "What does the sentence say about yesterday?",
+        "why": "出なかった is the past negative of 出る: it rained, so I didn't go out. The から gives the reason.",
+        "jp": "きのうは雨だったから、うちから出なかった。",
+        "tr": "It rained yesterday, so I didn't leave the house.",
+        "furigana": [
+          {
+            "text": "きのうは"
+          },
+          {
+            "text": "雨",
+            "reading": "あめ",
+            "word": 2
+          },
+          {
+            "text": "だったから、"
+          },
+          {
+            "text": "うちから"
+          },
+          {
+            "text": "出",
+            "reading": "で",
+            "word": 9
+          },
+          {
+            "text": "なかった。"
+          }
+        ],
+        "choices": [
+          {
+            "text": "It rained, but I went out anyway.",
+            "correct": false
+          },
+          {
+            "text": "It rained, so I stayed at home.",
+            "correct": true
+          },
+          {
+            "text": "It will rain tomorrow, so I won't go out.",
+            "correct": false
+          }
+        ],
+        "n": 4
+      },
+      {
+        "kind": "use",
+        "ask": "You open the fridge: there is no milk left. You tell your family.",
+        "why": "There is none: ない is the plain negative of ある, that is がない. 飲まない says you don't drink it, and ありません is the polite version, too stiff at home.",
+        "choices": [
+          {
+            "jp": "ぎゅうにゅうがない。",
+            "furigana": [
+              {
+                "text": "ぎゅうにゅうが"
+              },
+              {
+                "text": "ない。"
+              }
+            ],
+            "correct": true
+          },
+          {
+            "jp": "ぎゅうにゅうがありません。",
+            "furigana": [
+              {
+                "text": "ぎゅうにゅうが"
+              },
+              {
+                "text": "ありません。"
+              }
+            ],
+            "correct": false
+          },
+          {
+            "jp": "ぎゅうにゅうを飲まない。",
+            "furigana": [
+              {
+                "text": "ぎゅうにゅうを"
+              },
+              {
+                "text": "飲",
+                "reading": "の",
+                "word": 2
+              },
+              {
+                "text": "まない。"
+              }
+            ],
+            "correct": false
+          }
+        ],
+        "n": 5
+      }
+    ]
   }
 }

@@ -24,9 +24,9 @@ import { composing, pressedByPointer, trackPresses } from '../../lib/keyGuards'
 // written (plan 187c), its stops join before the terminus (187d): the
 // twists -- one per notion the point has beyond the meaning the guess
 // asks (plan 189): a second use, a sense, a form, its rival, each named
-// over its question and three readings of it -- and the scene, a few
-// voiced lines at a station place, then the learner's own line chosen
-// from three.
+// over its question and two readings of it, its translation said once
+// it is answered (plan 196) -- the scene, a few voiced lines at a station
+// place, then the learner's own line chosen from three, and the quiz.
 //
 // The boarding's frame inside a run's stage: a track of stops at the
 // head (in the line's pigment -- where you are keeps the line's
@@ -83,6 +83,15 @@ function Choices({ items, pick, done, onPick, label, ja = false }) {
       })}
     </div>
   )
+}
+
+const JA_RUN = /([぀-ヿ一-鿿々〜ー]+(?:[、。？！][぀-ヿ一-鿿々〜ー]+)*[、。？！]?)/
+
+/** A question as the author wrote it, its Japanese set as Japanese: the
+    browser cuts a run it takes for French anywhere (しゅ / くだい), and
+    breaks a run it knows is Japanese between its phrases (plan 196). */
+function Mixed({ text }) {
+  return text.split(JA_RUN).map((part, i) => (i % 2 ? <span key={i} lang="ja">{part}</span> : part))
 }
 
 /** A question with the pattern in it set as Japanese, in the line's ink. */
@@ -238,9 +247,11 @@ function Found({ tour, point, misses, helped }) {
   )
 }
 
-/** « C'est pas tout ! » (plan 194): one usage at a time -- the sentence
-    and its translation, two readings, the why once answered. A trap (the
-    rival set against the point) says so beside its notion. */
+/** « C'est pas tout ! » (plan 194): one usage at a time -- the sentence,
+    two readings, then the why and the sentence's translation, said once it
+    is answered: printed under the sentence it was the answer to « que dit
+    la phrase ? » (plan 196). A trap (the rival set against the point) says
+    so beside its notion. */
 function Twist({ twist, n, total, pick, done, onPick }) {
   const { t } = useLang()
   const right = twist.choices.find(c => c.correct)
@@ -253,10 +264,10 @@ function Twist({ twist, n, total, pick, done, onPick }) {
         {twist.kind === 'trap' && <span className="tour-trap">{t.tourTrap}</span>}
         {total > 1 && <span className="tour__notion-count">{t.tourNotionCount(n + 1, total)}</span>}
       </p>
-      <h2 className="tour__q" tabIndex={-1}>{twist.ask}</h2>
+      <h2 className="tour__q" tabIndex={-1}><Mixed text={twist.ask} /></h2>
       <div className="tour-card tour-twist">
         <div className="tour-ex">
-          <ExampleSentence ex={{ jp: twist.jp, tr: twist.tr, segments: twist.furigana }} showTr={Boolean(twist.tr)} />
+          <ExampleSentence ex={{ jp: twist.jp, tr: twist.tr, segments: twist.furigana }} showTr={done && Boolean(twist.tr)} />
           <Speak text={twist.jp} />
         </div>
       </div>
@@ -349,38 +360,40 @@ function Scene({ scene, phase, pick, done, onPick }) {
   )
 }
 
-/** The quiz (plan 194): seven or eight questions, one at a time, each
-    with its trap -- the gap (the point or a rival in a sentence), the
-    false friend (which sentence uses it), the meaning (a usage with all
-    three of its readings) -- checked once, the why said under it. */
-function QuizQuestion({ q, n, total, point, pick, done, onPick }) {
+/** The quiz (plan 194, its questions written in plan 196): up to eight, one
+    at a time, checked once, the why said under them. Four kinds, none of
+    them a matter of finding the point's characters in a sentence:
+    the gap (the point or a rival blanked from a sentence, told apart by
+    what it says), the meaning (a sentence read with no translation under
+    it until it is answered), the form (a sentence blanked over the form,
+    what it says printed under it as the thing to say) and the reply
+    (a situation, three Japanese lines). */
+function QuizQuestion({ q, n, total, pick, done, onPick }) {
   const { t } = useLang()
   const picked = pick != null ? q.choices[pick] : null
   const right = q.choices.find(c => c.correct)
-  let ask
+  let ask = q.ask
   let body = null
   let items = q.choices
   let ja = false
-  if (q.kind === 'gap') {
-    ask = t.tourQuizGap
-    const answer = bare(right.pattern)
+  if (q.kind === 'gap' || q.kind === 'form') {
+    const answer = q.kind === 'gap' ? bare(right.pattern) : right.jp
     const segments = q.furigana.map(seg => (seg.blank ? { ...seg, answer } : seg))
+    ask = q.kind === 'gap' ? t.tourQuizGap : q.ask
     body = (
       <div className="tour-card tour-twist">
         <ExampleSentence ex={{ jp: q.jp, tr: q.tr, segments }} showTr revealed={done} blankLabel={t.glBlank} />
       </div>
     )
-    items = q.choices.map(c => ({ ...c, jp: bare(c.pattern) }))
+    if (q.kind === 'gap') items = q.choices.map(c => ({ ...c, jp: bare(c.pattern) }))
     ja = true
-  } else if (q.kind === 'which') {
-    ask = t.tourQuizWhich(point.pattern)
+  } else if (q.kind === 'use') {
     ja = true
   } else {
-    ask = q.ask
     body = (
       <div className="tour-card tour-twist">
         <div className="tour-ex">
-          <ExampleSentence ex={{ jp: q.jp, tr: q.tr, segments: q.furigana }} showTr={Boolean(q.tr)} />
+          <ExampleSentence ex={{ jp: q.jp, tr: q.tr, segments: q.furigana }} showTr={done && Boolean(q.tr)} />
           <Speak text={q.jp} />
         </div>
       </div>
@@ -390,12 +403,9 @@ function QuizQuestion({ q, n, total, point, pick, done, onPick }) {
     <>
       <p className="tour__notion">
         <span className="tour__notion-head">{t.tourQuizKinds[q.kind]}</span>
-        {q.notion && <span className="tour__notion-name">{q.notion}</span>}
         <span className="tour__notion-count">{t.tourQuizCount(n + 1, total)}</span>
       </p>
-      {q.kind === 'which'
-        ? <Ask text={ask} pattern={point.pattern} />
-        : <h2 className="tour__q" tabIndex={-1}>{ask}</h2>}
+      <h2 className="tour__q" tabIndex={-1}><Mixed text={ask} /></h2>
       {body}
       <Choices items={items} pick={pick} done={done} onPick={onPick} label={ask} ja={ja} />
       {done && (
@@ -447,13 +457,15 @@ function Recap({ q, pick }) {
   const ok = Boolean(taken?.correct)
   let said
   let fix = null
-  if (q.kind === 'which') {
+  if (q.kind === 'use') {
     said = <FuriganaParts parts={right.furigana?.length ? right.furigana : [{ text: right.jp }]} />
-  } else if (q.kind === 'gap') {
+    if (!ok && taken) fix = taken.jp
+  } else if (q.kind === 'gap' || q.kind === 'form') {
+    const form = q.kind === 'gap' ? bare(right.pattern) : right.jp
     said = q.furigana.map((seg, i) => (seg.blank
-      ? <b key={i} className="tour-recap__form">{bare(right.pattern)}</b>
+      ? <b key={i} className="tour-recap__form">{form}</b>
       : <FuriganaParts key={i} parts={[seg]} />))
-    if (!ok && taken) fix = bare(taken.pattern)
+    if (!ok && taken) fix = q.kind === 'gap' ? bare(taken.pattern) : taken.jp
   } else {
     said = <FuriganaParts parts={q.furigana?.length ? q.furigana : [{ text: q.jp }]} />
     if (!ok && taken) fix = taken.text
@@ -463,7 +475,7 @@ function Recap({ q, pick }) {
       <Mark kind={ok ? 'ok' : 'no'} />
       <span className="tour-recap__jp" lang="ja">{said}</span>
       <span className="tour-recap__kind">{t.tourQuizKinds[q.kind]}</span>
-      {fix && <s className="tour-recap__fix" lang={q.kind === 'gap' ? 'ja' : undefined}>{fix}</s>}
+      {fix && <s className="tour-recap__fix" lang={q.kind === 'meaning' ? undefined : 'ja'}>{fix}</s>}
     </>
   )
 }
@@ -669,7 +681,7 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
         {kind === 'twist' && <Twist twist={twist} n={ti} total={twists.length} pick={twistPick} done={twistDone} onPick={setTwistPick} />}
         {stop === 'scene' && <Scene scene={tour.scene} phase={phase} pick={scenePick} done={sceneDone} onPick={setScenePick} />}
         {stop === 'quiz' && (
-          <QuizQuestion q={quiz[qi]} n={qi} total={quiz.length} point={point} pick={quizPicks[qi]} done={quizDone[qi]}
+          <QuizQuestion q={quiz[qi]} n={qi} total={quiz.length} pick={quizPicks[qi]} done={quizDone[qi]}
                         onPick={i => setQuizPicks(p => p.map((v, j) => (j === qi ? i : v)))} />
         )}
         {stop === 'terminus' && <Results tour={tour} point={point} picks={quizPicks} onLesson={onLesson} replay={replay} />}
