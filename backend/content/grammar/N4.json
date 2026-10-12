@@ -4969,7 +4969,143 @@
             "fr": "Ce que tu ne peux pas faire : le potentiel 使えない. 使われない est le passif, 使わない dit seulement qu'on ne s'en sert pas."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "わたしは、ねるのがおそくても、朝六時に＿＿＿。",
+          "tr": {
+            "en": "Even when I go to bed late, I can get up at six in the morning.",
+            "fr": "Même quand je me couche tard, je peux me lever à six heures du matin."
+          },
+          "choices": [
+            "起きられる",
+            "起きる",
+            "起きるられる"
+          ],
+          "why": {
+            "en": "A る-verb drops る and takes られる: 起きる → 起きられる. 起きる alone just says you get up, with no ability, and 起きるられる keeps the る.",
+            "fr": "Un verbe en る perd son る et prend られる : 起きる → 起きられる. 起きる seul dit juste qu'on se lève, sans idée de pouvoir, et 起きるられる garde le る."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How has the speaker's swimming changed?",
+            "fr": "Comment la natation de la personne qui parle a-t-elle évolué ?"
+          },
+          "jp": "子どものころはおよげなかったが、いまは二十五メートルもおよげる。",
+          "tr": {
+            "en": "I couldn't swim as a child, but now I can swim as much as twenty-five metres.",
+            "fr": "Enfant, je ne savais pas nager, mais maintenant je peux même nager vingt-cinq mètres."
+          },
+          "choices": [
+            {
+              "en": "As a child they could not swim; now they can.",
+              "fr": "Enfant, la personne ne savait pas nager ; maintenant, si."
+            },
+            {
+              "en": "As a child they could swim; now they cannot.",
+              "fr": "Enfant, la personne savait nager ; maintenant, non."
+            },
+            {
+              "en": "They could not swim as a child and still cannot.",
+              "fr": "La personne ne savait pas nager enfant, et ne sait toujours pas."
+            }
+          ],
+          "why": {
+            "en": "およげなかった is the potential in the past negative (couldn't), and およげる the present (can). The が in the middle sets the two against each other.",
+            "fr": "およげなかった est le potentiel au passé négatif (ne pouvait pas), et およげる le présent (peut). Le が du milieu oppose les deux."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks: あした、ばんごはんを食べない？ You would love to, but you have work. You tell your friend you can't come.",
+            "fr": "Un ami te demande : あした、ばんごはんを食べない？ Tu en aurais très envie, mais tu travailles. Tu lui dis que tu ne peux pas venir."
+          },
+          "choices": [
+            "ごめん、あしたは行けない。",
+            "ごめん、あしたは行かない。",
+            "ごめん、あしたは行けなかった。"
+          ],
+          "why": {
+            "en": "行けない is the potential negative: you want to but cannot. 行かない says you decide not to go, which sounds like a refusal, and 行けなかった is the past, for something that already happened.",
+            "fr": "行けない est le négatif du potentiel : tu voudrais, mais tu ne peux pas. 行かない dit que tu décides de ne pas y aller, ce qui sonne comme un refus, et 行けなかった est le passé, pour ce qui a déjà eu lieu."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "三十分も待ったので、わたしはもう＿＿＿。",
+          "tr": {
+            "en": "I have waited thirty minutes already, so I can't wait any more.",
+            "fr": "J'ai déjà attendu trente minutes, alors je ne peux plus attendre."
+          },
+          "choices": [
+            "待てません",
+            "待ちません",
+            "待たれません"
+          ],
+          "why": {
+            "en": "待つ is a う-verb: its え-row sound is て, so 待てる, and polite negative 待てません. 待ちません says you refuse to wait, and 待たれません has the あ-row + れる of the passive.",
+            "fr": "待つ est un verbe en う : son son en え est て, d'où 待てる, et le négatif poli 待てません. 待ちません dit que tu refuses d'attendre, et 待たれません a le あ + れる du passif."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What happened yesterday?",
+            "fr": "Que s'est-il passé hier ?"
+          },
+          "jp": "雨で電車が止まったので、きのうは会社に行けませんでした。",
+          "tr": {
+            "en": "The train stopped because of the rain, so I couldn't get to the office yesterday.",
+            "fr": "Le train s'est arrêté à cause de la pluie, alors je n'ai pas pu aller au bureau hier."
+          },
+          "choices": [
+            {
+              "en": "The trains stopped in the rain, so the speaker could not go to the office.",
+              "fr": "Les trains se sont arrêtés à cause de la pluie, donc la personne n'a pas pu aller au bureau."
+            },
+            {
+              "en": "The trains stopped in the rain, but the speaker still went to the office.",
+              "fr": "Les trains se sont arrêtés à cause de la pluie, mais la personne est quand même allée au bureau."
+            },
+            {
+              "en": "The speaker did not feel like going to the office, so stayed home in the rain.",
+              "fr": "La personne n'avait pas envie d'aller au bureau, alors elle est restée chez elle sous la pluie."
+            }
+          ],
+          "why": {
+            "en": "行けませんでした is the polite potential negative past: going was not possible. ので gives the reason, the stopped train. It is circumstance, not choice.",
+            "fr": "行けませんでした est le potentiel négatif au passé poli : y aller n'était pas possible. ので donne la raison, le train arrêté. C'est une contrainte, pas un choix."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend wants to hear your favourite band's new songs and asks how. You tell them it is possible: they can listen to them on your phone too.",
+            "fr": "Un ami voudrait écouter les nouvelles chansons de ton groupe préféré et te demande comment faire. Tu lui dis que c'est possible : on peut les écouter sur le téléphone aussi."
+          },
+          "choices": [
+            "あのバンドの新しい歌は、スマホでも聞けるよ。",
+            "あのバンドの新しい歌は、スマホでも聞こえるよ。",
+            "あのバンドの新しい歌は、スマホでは聞けないよ。"
+          ],
+          "why": {
+            "en": "聞ける is the potential of 聞く: you are able to listen. 聞こえる says a sound reaches your ears by itself, so it does not say you have a way to listen, and 聞けない says it is not possible.",
+            "fr": "聞ける est le potentiel de 聞く : on peut écouter. 聞こえる dit qu'un son arrive tout seul aux oreilles, il ne dit donc pas qu'on a un moyen d'écouter, et 聞けない dit que ce n'est pas possible."
+          }
+        }
+      ]
     }
   },
   {
@@ -5204,7 +5340,132 @@
             "fr": "Avec un ami, la forme volitive familière : 買おう, achetons. 買ってね lui demande d'en acheter, 買うよ dit seulement que tu en achètes."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "もうすぐ友だちが来るから、ここで＿＿＿。",
+          "tr": {
+            "en": "My friend is coming soon, so let's wait here.",
+            "fr": "Mon ami arrive bientôt, alors attendons ici."
+          },
+          "choices": [
+            "待とう",
+            "待って",
+            "待ちよう"
+          ],
+          "why": {
+            "en": "待つ is a う-verb: its お-row sound is と, so 待つ → 待とう. 待って is the て-form, a request (\"wait here\"), and 待ちよう applies the る-verb rule (stem + よう) to a う-verb.",
+            "fr": "待つ est un verbe en う : son son en お est と, d'où 待つ → 待とう. 待って est la forme en て, une demande (« attends ici »), et 待ちよう applique la règle des verbes en る (radical + よう) à un verbe en う."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about reading at home?",
+            "fr": "Que dit la phrase à propos de la lecture à la maison ?"
+          },
+          "jp": "雨がふっているから、うちで本を読もう。",
+          "tr": {
+            "en": "It's raining, so I'll read a book at home.",
+            "fr": "Il pleut, alors je vais lire un livre à la maison."
+          },
+          "choices": [
+            {
+              "en": "The speaker decides, or suggests, doing it now.",
+              "fr": "La personne décide, ou propose, de le faire maintenant."
+            },
+            {
+              "en": "The speaker was doing it because of the rain.",
+              "fr": "La personne le faisait à cause de la pluie."
+            },
+            {
+              "en": "The speaker guesses that someone will probably do it.",
+              "fr": "La personne devine que quelqu'un va sans doute le faire."
+            }
+          ],
+          "why": {
+            "en": "読もう is the volitional of 読む: a decision or a proposal, \"I'll / let's read\". Telling what happened would be 読んだ, and a guess would be 読むだろう.",
+            "fr": "読もう est la forme volitive de 読む : une décision ou une proposition, « je lis / lisons ». Raconter ce qui s'est passé serait 読んだ, et une supposition serait 読むだろう."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "さむいから、あたたかいセーターを＿＿＿。",
+          "tr": {
+            "en": "It's cold, so I think I'll put on a warm sweater.",
+            "fr": "Il fait froid, alors je crois que je vais mettre un pull bien chaud."
+          },
+          "choices": [
+            "着よう",
+            "着ろう",
+            "着た"
+          ],
+          "why": {
+            "en": "着る is a る-verb: it drops る and takes よう, 着よう. 着ろう applies the う-verb rule (る → ろう), and 着た is the past.",
+            "fr": "着る est un verbe en る : il perd る et prend よう, 着よう. 着ろう applique la règle des verbes en う (る → ろう), et 着た est le passé."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker doing with this sentence?",
+            "fr": "Que fait la personne avec cette phrase ?"
+          },
+          "jp": "あしたは、どこで会おうか。",
+          "tr": {
+            "en": "Where shall we meet tomorrow?",
+            "fr": "Où se retrouve-t-on demain ?"
+          },
+          "choices": [
+            {
+              "en": "Asking the listener where the two of them should meet tomorrow.",
+              "fr": "La personne demande à son interlocuteur où ils pourraient se retrouver demain."
+            },
+            {
+              "en": "Wondering where the listener will probably meet someone tomorrow.",
+              "fr": "La personne se demande où son interlocuteur retrouvera sans doute quelqu'un demain."
+            },
+            {
+              "en": "Announcing where the two of them will meet tomorrow.",
+              "fr": "La personne annonce où ils se retrouveront demain."
+            }
+          ],
+          "why": {
+            "en": "会おうか is the volitional plus か, and with どこ it asks \"where shall we meet?\": a question put to the other person. 会うだろう would be the guess, and without か it would announce a decision.",
+            "fr": "会おうか est la forme volitive plus か, et avec どこ elle demande « où se retrouve-t-on ? » : une question posée à l'autre. 会うだろう serait la supposition, et sans か ce serait l'annonce d'une décision."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あしたは、いっしょにしゅくだいを＿＿＿。",
+          "tr": {
+            "en": "Let's do our homework together tomorrow.",
+            "fr": "Faisons nos devoirs ensemble demain."
+          },
+          "choices": [
+            "しよう",
+            "しろう",
+            "した"
+          ],
+          "why": {
+            "en": "する is irregular: する → しよう. しろう applies the う-verb rule to する, and した is the past.",
+            "fr": "する est irrégulier : する → しよう. しろう applique à する la règle des verbes en う, et した est le passé."
+          }
+        }
+      ]
     }
   },
   {
@@ -5448,7 +5709,132 @@
             "fr": "Un projet encore pesé : ようと思う. つもりです est arrêté, ましょう le lui propose."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "週まつは、ふるさとに＿＿＿と思います。",
+          "tr": {
+            "en": "I'm thinking of going back to my hometown this weekend.",
+            "fr": "Je pense retourner dans ma ville natale ce week-end."
+          },
+          "choices": [
+            "帰ろう",
+            "帰よう",
+            "帰った"
+          ],
+          "why": {
+            "en": "帰る is an う-verb that ends in る: it takes ろう, 帰ろう, before と思います. 帰よう treats it as a る-verb, and 帰った is the past: it would say you think you went back.",
+            "fr": "帰る est un verbe en う qui finit par る : il prend ろう, 帰ろう, devant と思います. 帰よう le traite en verbe en る, et 帰った est le passé : ce serait « je crois être rentré »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker asking?",
+            "fr": "Qu'est-ce que la personne demande ?"
+          },
+          "jp": "夏休みは、どこへ行こうと思っていますか。",
+          "tr": {
+            "en": "Where are you thinking of going this summer holiday?",
+            "fr": "Où penses-tu aller pendant les vacances d'été ?"
+          },
+          "choices": [
+            {
+              "en": "Where the listener is thinking of going.",
+              "fr": "Où son interlocuteur pense aller."
+            },
+            {
+              "en": "Where the listener thinks someone else will go.",
+              "fr": "Où son interlocuteur pense que quelqu'un d'autre ira."
+            },
+            {
+              "en": "Where the listener went last summer.",
+              "fr": "Où son interlocuteur est allé l'été dernier."
+            }
+          ],
+          "why": {
+            "en": "The volitional 行こう + と思っています is a plan, and asked of the listener it asks for their plan. 行くと思っていますか with the dictionary form would ask what they believe another person will do.",
+            "fr": "La forme volitive 行こう + と思っています est un projet, et posée à l'interlocuteur, elle lui demande son projet. 行くと思っていますか, avec la forme du dictionnaire, demanderait ce qu'il croit qu'une autre personne fera."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あしたから、あまいものを食べるのを＿＿＿と思います。",
+          "tr": {
+            "en": "I'm thinking of giving up sweet things from tomorrow.",
+            "fr": "Je pense arrêter les sucreries dès demain."
+          },
+          "choices": [
+            "やめよう",
+            "やめた",
+            "やめろう"
+          ],
+          "why": {
+            "en": "やめる is a る-verb: it drops る and takes よう, やめよう. やめた is the past, which cannot state a plan, and やめろう applies the う-verb rule.",
+            "fr": "やめる est un verbe en る : il perd る et prend よう, やめよう. やめた est le passé, qui ne peut pas dire un projet, et やめろう applique la règle des verbes en う."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker planning to do?",
+            "fr": "Que prévoit de faire la personne qui parle ?"
+          },
+          "jp": "母は、わたしが大学に行くと思っていますが、わたしは、しごとをさがそうと思っています。",
+          "tr": {
+            "en": "My mother thinks I will go to university, but I'm thinking of looking for a job.",
+            "fr": "Ma mère pense que j'irai à l'université, mais je pense chercher du travail."
+          },
+          "choices": [
+            {
+              "en": "To look for a job. Going to university is what the mother expects.",
+              "fr": "Chercher du travail. Aller à l'université, c'est ce que sa mère attend."
+            },
+            {
+              "en": "To go to university. Looking for a job is what the mother expects.",
+              "fr": "Aller à l'université. Chercher du travail, c'est ce que sa mère attend."
+            },
+            {
+              "en": "To go to university and to look for a job.",
+              "fr": "Aller à l'université et chercher du travail."
+            }
+          ],
+          "why": {
+            "en": "行くと思っています is plain form + と: what the mother believes will happen. さがそうと思っています is volitional + と: the speaker's own plan.",
+            "fr": "行くと思っています est la forme simple + と : ce que la mère croit qui arrivera. さがそうと思っています est la forme volitive + と : le projet de la personne qui parle."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "来年は、もう一度この町に＿＿＿と思っています。",
+          "tr": {
+            "en": "Next year, I am thinking of coming to this town once more.",
+            "fr": "L'an prochain, je pense revenir une fois de plus dans cette ville."
+          },
+          "choices": [
+            "来よう",
+            "来ろう",
+            "来た"
+          ],
+          "why": {
+            "en": "来る is irregular: 来る → 来よう, read こよう. 来ろう applies the う-verb rule, and 来た is the past.",
+            "fr": "来る est irrégulier : 来る → 来よう, qui se lit こよう. 来ろう applique la règle des verbes en う, et 来た est le passé."
+          }
+        }
+      ]
     }
   },
   {
@@ -5678,7 +6064,141 @@
             "fr": "On monte, et on sort là, à chaque fois : と. から donne une raison, のに dit « et pourtant »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How are being hungry and the bad mood linked?",
+            "fr": "Quel lien y a-t-il entre la faim et la mauvaise humeur ?"
+          },
+          "jp": "弟は、おなかがすくと、きげんが悪くなります。",
+          "tr": {
+            "en": "My younger brother gets grumpy whenever he is hungry.",
+            "fr": "Mon petit frère devient grognon dès qu'il a faim."
+          },
+          "choices": [
+            {
+              "en": "Whenever he gets hungry, he becomes grumpy.",
+              "fr": "Chaque fois qu'il a faim, il devient grognon."
+            },
+            {
+              "en": "Whenever he is grumpy, he gets hungry.",
+              "fr": "Chaque fois qu'il est grognon, il a faim."
+            },
+            {
+              "en": "He is hungry and grumpy at this very moment.",
+              "fr": "Il a faim et il est grognon, en ce moment même."
+            }
+          ],
+          "why": {
+            "en": "A と B: when A happens, B follows by itself. Here being hungry (A) comes first and the bad mood (B) follows, every time. The order never reverses, and it is not about this moment only.",
+            "fr": "A と B : quand A arrive, B suit de lui-même. Ici la faim (A) vient d'abord et la mauvaise humeur (B) suit, chaque fois. L'ordre ne s'inverse pas, et il ne s'agit pas que de ce moment."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿と、電車におくれますよ。",
+          "tr": {
+            "en": "If you don't hurry, you'll miss the train.",
+            "fr": "Si tu ne te dépêches pas, tu vas rater le train."
+          },
+          "choices": [
+            "いそがない",
+            "いそぐ",
+            "いそがなかった"
+          ],
+          "why": {
+            "en": "The ない-form + と says \"if you don't\": いそぐ → いそがない. いそぐ + と would mean \"if you hurry\", the opposite, and と never follows a past form such as いそがなかった.",
+            "fr": "La forme en ない + と dit « si tu ne … pas » : いそぐ → いそがない. いそぐ + と voudrait dire « si tu te dépêches », le contraire, et と ne suit jamais une forme au passé comme いそがなかった."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who became quiet?",
+            "fr": "Qui est devenu silencieux ?"
+          },
+          "jp": "先生が教室に入ると、みんなしずかになりました。",
+          "tr": {
+            "en": "When the teacher came into the classroom, everyone went quiet.",
+            "fr": "Quand le professeur est entré dans la classe, tout le monde s'est tu."
+          },
+          "choices": [
+            {
+              "en": "Everyone in the class, once the teacher came in.",
+              "fr": "Toute la classe, dès que le professeur est entré."
+            },
+            {
+              "en": "The teacher, as he came into the room.",
+              "fr": "Le professeur, en entrant dans la pièce."
+            },
+            {
+              "en": "Everyone, before the teacher came in.",
+              "fr": "Tout le monde, avant que le professeur n'entre."
+            }
+          ],
+          "why": {
+            "en": "と links two events that can have different subjects: the teacher comes in (A), and what follows (B) is that everyone goes quiet. A comes first and triggers B.",
+            "fr": "と relie deux événements qui peuvent avoir des sujets différents : le professeur entre (A), et ce qui suit (B), c'est que tout le monde se tait. A vient d'abord et déclenche B."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "まどの外を＿＿＿と、ゆきがふっていました。",
+          "tr": {
+            "en": "When I looked out of the window, snow was falling.",
+            "fr": "Quand j'ai regardé par la fenêtre, il neigeait."
+          },
+          "choices": [
+            "見る",
+            "見た",
+            "見ない"
+          ],
+          "why": {
+            "en": "The verb before と stays in the dictionary form even when the sentence is in the past: 見ると、…ふっていました. 見た would put it in the past, which と does not allow, and 見ない would say \"if I didn't look\".",
+            "fr": "Le verbe devant と reste à la forme du dictionnaire même quand la phrase est au passé : 見ると、…ふっていました. 見た le mettrait au passé, ce que と n'admet pas, et 見ない dirait « si je ne regardais pas »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How often did the speaker read at home on rainy days?",
+            "fr": "À quelle fréquence la personne lisait-elle chez elle les jours de pluie ?"
+          },
+          "jp": "子どものころは、雨がふると、うちで本を読んでいました。",
+          "tr": {
+            "en": "When I was a child, when it rained, I read at home.",
+            "fr": "Quand j'étais enfant, quand il pleuvait, je lisais à la maison."
+          },
+          "choices": [
+            {
+              "en": "Whenever it rained, in those days.",
+              "fr": "Chaque fois qu'il pleuvait, à cette époque."
+            },
+            {
+              "en": "Only on one rainy day long ago.",
+              "fr": "Seulement un jour de pluie, il y a longtemps."
+            },
+            {
+              "en": "Whenever it rains from now on.",
+              "fr": "Chaque fois qu'il pleuvra, à partir de maintenant."
+            }
+          ],
+          "why": {
+            "en": "A past ending after と does not always mean a single discovery: with a childhood setting it is a habit, \"whenever it rained, I read\". The verb before と stays in the dictionary form.",
+            "fr": "Une fin au passé après と n'est pas toujours une découverte ponctuelle : dans un cadre d'enfance, c'est une habitude, « chaque fois qu'il pleuvait, je lisais ». Le verbe devant と reste à la forme du dictionnaire."
+          }
+        }
+      ]
     }
   },
   {
@@ -5916,7 +6436,127 @@
             "fr": "Deux actions au même moment : ながら. て, c'est l'une puis l'autre, et たり ne fait qu'énumérer des activités."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "母は、歌を＿＿＿ながら、りょうりをしています。",
+          "tr": {
+            "en": "My mother is cooking while singing.",
+            "fr": "Ma mère fait la cuisine tout en chantant."
+          },
+          "choices": [
+            "歌い",
+            "歌って",
+            "歌う"
+          ],
+          "why": {
+            "en": "ながら attaches to the ます-stem: 歌う → 歌い (the い-row sound). 歌って is the て-form and 歌う the dictionary form: neither can stand before ながら.",
+            "fr": "ながら se met après le radical en ます : 歌う → 歌い (le son en い). 歌って est la forme en て et 歌う la forme du dictionnaire : aucune des deux ne peut précéder ながら."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who was playing the game?",
+            "fr": "Qui jouait au jeu ?"
+          },
+          "jp": "弟は、ゲームをしながら、わたしにへんじをしました。",
+          "tr": {
+            "en": "My younger brother answered me while playing a game.",
+            "fr": "Mon petit frère m'a répondu tout en jouant à un jeu."
+          },
+          "choices": [
+            {
+              "en": "The younger brother, who was also answering me.",
+              "fr": "Le petit frère, qui me répondait en même temps."
+            },
+            {
+              "en": "The speaker, while the brother answered.",
+              "fr": "La personne qui parle, pendant que son frère répondait."
+            },
+            {
+              "en": "The younger brother, but only before he answered.",
+              "fr": "Le petit frère, mais seulement avant de répondre."
+            }
+          ],
+          "why": {
+            "en": "ながら has one doer for both actions: the subject 弟は plays and answers. わたしに is only who he answered. And the two actions overlap, they do not follow one another.",
+            "fr": "ながら n'a qu'un seul sujet pour les deux actions : 弟は joue et répond. わたしに indique seulement à qui il répond. Et les deux actions se recouvrent, elles ne se suivent pas."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks: 日曜日は、カフェで何をするの？ You go there to read; you sip the coffee while you do. What do you answer?",
+            "fr": "Un ami te demande : 日曜日は、カフェで何をするの？ Tu y vas pour lire ; le café, tu le bois en même temps. Que réponds-tu ?"
+          },
+          "choices": [
+            "コーヒーを飲みながら、本を読むよ。",
+            "本を読みながら、コーヒーを飲むよ。",
+            "コーヒーを飲んで、本を読むよ。"
+          ],
+          "why": {
+            "en": "With ながら the main action is the second verb: コーヒーを飲みながら、本を読む puts reading first. Swapped, it would make the coffee the main thing, and コーヒーを飲んで, 本を読む says one after the other.",
+            "fr": "Avec ながら, l'action principale est le second verbe : コーヒーを飲みながら、本を読む met la lecture au premier plan. Inversée, elle ferait du café l'essentiel, et コーヒーを飲んで、本を読む dit l'un après l'autre."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "質問の答えを＿＿＿ながら、ゆっくり話しました。",
+          "tr": {
+            "en": "I spoke slowly while thinking about the answer to the question.",
+            "fr": "J'ai parlé lentement tout en réfléchissant à la réponse à la question."
+          },
+          "choices": [
+            "考え",
+            "考えて",
+            "考える"
+          ],
+          "why": {
+            "en": "A る-verb drops る to make the ます-stem: 考える → 考え + ながら. 考えて is the て-form (think, then speak) and 考える the dictionary form: neither goes before ながら.",
+            "fr": "Un verbe en る perd る pour donner le radical en ます : 考える → 考え + ながら. 考えて est la forme en て (réfléchir, puis parler) et 考える la forme du dictionnaire : aucune ne va devant ながら."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What exactly does the notice ask people not to do?",
+            "fr": "Que demande exactement l'affiche de ne pas faire ?"
+          },
+          "jp": "えきの中では、歩きながらスマホを見ないでください。",
+          "tr": {
+            "en": "Inside the station, please don't look at your phone while walking.",
+            "fr": "Dans la gare, ne regardez pas votre téléphone en marchant."
+          },
+          "choices": [
+            {
+              "en": "Looking at the phone and walking at the same time.",
+              "fr": "Regarder son téléphone et marcher en même temps."
+            },
+            {
+              "en": "Looking at the phone at all inside the station, even standing still.",
+              "fr": "Regarder son téléphone dans la gare, même à l'arrêt."
+            },
+            {
+              "en": "Walking after having looked at the phone.",
+              "fr": "Marcher après avoir regardé son téléphone."
+            }
+          ],
+          "why": {
+            "en": "歩きながら marks two actions at once: it is walking with the phone in hand that is asked to stop. It does not ban the phone as such, and it is not about doing one after the other.",
+            "fr": "歩きながら marque deux actions simultanées : c'est marcher le téléphone à la main qu'on demande d'arrêter. Il n'interdit pas le téléphone en soi, et il ne s'agit pas de faire l'un après l'autre."
+          }
+        }
+      ]
     }
   },
   {

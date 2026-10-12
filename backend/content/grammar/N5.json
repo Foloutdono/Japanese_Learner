@@ -26817,7 +26817,122 @@
             "fr": "Il est près de toi et tu le nommes seul : これ. この a besoin d'un nom après lui."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "You and a friend are looking at a big building far away from both of you. Which word completes the sentence?",
+            "fr": "Ton ami et toi regardez un grand bâtiment, loin de vous deux. Quel mot complète la phrase ?"
+          },
+          "jp": "＿＿＿はデパートですか。",
+          "tr": {
+            "en": "Is that over there a department store?",
+            "fr": "C'est un grand magasin, là-bas ?"
+          },
+          "choices": [
+            "あれ",
+            "これ",
+            "それ"
+          ],
+          "why": {
+            "en": "あれ points at what is far from both of you. これ is near the speaker and それ near the listener, so neither suits a building in the distance.",
+            "fr": "あれ désigne ce qui est loin de vous deux. これ est près de celui qui parle et それ près de celui qui écoute : ni l'un ni l'autre ne convient à un bâtiment éloigné."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend points at the cake in your hand and asks: それ、何ですか。 It is a present for your mother. What do you answer?",
+            "fr": "Un ami montre du doigt le gâteau que tu tiens et demande : それ、何ですか。 C'est un cadeau pour ta mère. Que réponds-tu ?"
+          },
+          "choices": [
+            "これはプレゼントです。",
+            "それはプレゼントです。",
+            "あれはプレゼントです。"
+          ],
+          "why": {
+            "en": "The cake is in your hand, so for you it is これ, even though your friend called it それ: the word follows who is near it. それ would point at something near your friend, and あれ at something far from both of you.",
+            "fr": "Le gâteau est dans ta main : pour toi, c'est これ, même si ton ami a dit それ, car le mot suit celui dont l'objet est proche. それ désignerait quelque chose près de ton ami, et あれ quelque chose loin de vous deux."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Where is the thing that belongs to the speaker's mother?",
+            "fr": "Où est l'objet qui appartient à la mère de celui qui parle ?"
+          },
+          "jp": "これはわたしのですが、それは母のです。",
+          "tr": {
+            "en": "This one is mine, but that one (near you) is my mother's.",
+            "fr": "Celui-ci est à moi, mais celui-là (près de toi) est à ma mère."
+          },
+          "choices": [
+            {
+              "en": "Near the person being spoken to.",
+              "fr": "Près de la personne à qui l'on parle."
+            },
+            {
+              "en": "Near the speaker.",
+              "fr": "Près de celui qui parle."
+            },
+            {
+              "en": "Far from both of them.",
+              "fr": "Loin des deux."
+            }
+          ],
+          "why": {
+            "en": "これ is near the speaker, and the speaker says it is theirs. それ is near the listener: the mother's thing is next to the person being spoken to. After the の, the noun is left out.",
+            "fr": "これ est près de celui qui parle, et il dit que c'est à lui. それ est près de l'interlocuteur : l'objet de la mère est à côté de la personne à qui l'on parle. Après le の, le nom est omis."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "There are many cakes in the shop window and you cannot decide. You ask the clerk which one is good.",
+            "fr": "Il y a beaucoup de gâteaux en vitrine et tu n'arrives pas à te décider. Demande à la vendeuse lequel est bon."
+          },
+          "choices": [
+            "どれがおいしいですか。",
+            "それはおいしいですか。",
+            "これは何ですか。"
+          ],
+          "why": {
+            "en": "どれ asks « which one » among several: どれがおいしいですか. それはおいしいですか asks about one single thing, and これは何ですか asks what something is, not which to choose.",
+            "fr": "どれ demande « lequel » parmi plusieurs : どれがおいしいですか. それはおいしいですか ne porte que sur une seule chose, et これは何ですか demande ce qu'est un objet, pas lequel choisir."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker want to know?",
+            "fr": "Qu'est-ce que celui qui parle veut savoir ?"
+          },
+          "jp": "あれは、だれのですか。",
+          "tr": {
+            "en": "Whose is that over there?",
+            "fr": "À qui est ça, là-bas ?"
+          },
+          "choices": [
+            {
+              "en": "Whose the thing over there is.",
+              "fr": "À qui est la chose là-bas."
+            },
+            {
+              "en": "Who the person over there is.",
+              "fr": "Qui est la personne là-bas."
+            },
+            {
+              "en": "Which of the things over there is the listener's.",
+              "fr": "Laquelle des choses là-bas est à l'interlocuteur."
+            }
+          ],
+          "why": {
+            "en": "あれ is a thing, and the の after だれ stands for it: だれの = « whose one ». To ask who a person is, you would say あの人はだれですか.",
+            "fr": "あれ est une chose, et le の après だれ la remplace : だれの = « celui de qui ». Pour demander qui est une personne, on dirait あの人はだれですか."
+          }
+        }
+      ]
     }
   },
   {
@@ -27005,7 +27120,118 @@
             "fr": "Un train loin de vous deux, et un nom après : あの電車."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Your friend has a hat on, right in front of you. Which word completes the sentence?",
+            "fr": "Ton ami porte un chapeau, juste devant toi. Quel mot complète la phrase ?"
+          },
+          "jp": "＿＿＿ぼうしはいいですね。",
+          "tr": {
+            "en": "That hat you're wearing looks good.",
+            "fr": "Il te va bien, ce chapeau."
+          },
+          "choices": [
+            "その",
+            "この",
+            "あの"
+          ],
+          "why": {
+            "en": "The hat is on the listener, so it is その. この would be a hat on the speaker, and あの a hat far from both of you.",
+            "fr": "Le chapeau est sur l'interlocuteur : c'est その. この serait un chapeau porté par celui qui parle, et あの un chapeau loin de vous deux."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Which shop does その店 mean?",
+            "fr": "De quelle boutique parle その店 ?"
+          },
+          "jp": "えきの前に小さい店があって、その店はパンがおいしいです。",
+          "tr": {
+            "en": "There is a small shop in front of the station, and that shop's bread is delicious.",
+            "fr": "Il y a une petite boutique devant la gare, et le pain de cette boutique est délicieux."
+          },
+          "choices": [
+            {
+              "en": "The small shop in front of the station, just mentioned.",
+              "fr": "La petite boutique devant la gare, dont on vient de parler."
+            },
+            {
+              "en": "A shop near the person being spoken to.",
+              "fr": "Une boutique près de la personne à qui l'on parle."
+            },
+            {
+              "en": "A shop both speakers already know.",
+              "fr": "Une boutique que les deux interlocuteurs connaissent déjà."
+            }
+          ],
+          "why": {
+            "en": "その also points back to what has just been said: here, the shop that the first half introduced. A shop both already know would be あの店.",
+            "fr": "その renvoie aussi à ce qui vient d'être dit : ici, la boutique que la première moitié vient d'introduire. Une boutique que les deux connaissent déjà serait あの店."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "A bus waits at the far end of the street, far from both of you. Which word completes the sentence?",
+            "fr": "Un bus attend tout au bout de la rue, loin de vous deux. Quel mot complète la phrase ?"
+          },
+          "jp": "＿＿＿バスにのりましょう。",
+          "tr": {
+            "en": "Let's take that bus over there.",
+            "fr": "Prenons ce bus, là-bas."
+          },
+          "choices": [
+            "あの",
+            "その",
+            "この"
+          ],
+          "why": {
+            "en": "A bus far from both of you is あの. その would be a bus near the listener, and この a bus near the speaker.",
+            "fr": "Un bus loin de vous deux, c'est あの. その serait un bus près de l'interlocuteur, et この un bus près de celui qui parle."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "At a party you have no idea which person is the teacher. You ask a classmate to point them out.",
+            "fr": "À une fête, tu n'as aucune idée de qui est le professeur. Tu demandes à un camarade de te le montrer."
+          },
+          "choices": [
+            "どの人が先生ですか。",
+            "あの人は先生ですか。",
+            "どれが先生ですか。"
+          ],
+          "why": {
+            "en": "どの + noun asks « which » one out of the people there: どの人が先生ですか. あの人は先生ですか asks about one person you have already picked, and どれ stands alone for things, not people.",
+            "fr": "どの + nom demande « lequel » parmi les personnes présentes : どの人が先生ですか. あの人は先生ですか porte sur une personne que tu as déjà choisie, et どれ s'emploie seul, pour des choses, pas pour des personnes."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "A shop assistant holds up a bag and tells you the price. Which word does she use?",
+            "fr": "Une vendeuse lève un sac et t'en dit le prix. Quel mot emploie-t-elle ?"
+          },
+          "jp": "＿＿＿かばんは三千円です。",
+          "tr": {
+            "en": "This bag is 3,000 yen.",
+            "fr": "Ce sac coûte trois mille yens."
+          },
+          "choices": [
+            "この",
+            "その",
+            "あの"
+          ],
+          "why": {
+            "en": "The bag is in the assistant's own hand, so she says この. その is how you would name it from your side, as the thing near the listener.",
+            "fr": "Le sac est dans la main de la vendeuse : elle dit この. その, c'est ainsi que toi tu le désignerais, comme la chose proche de l'interlocuteur."
+          }
+        }
+      ]
     }
   },
   {
@@ -27197,7 +27423,127 @@
             "fr": "Un billet est une chose plate : il se compte avec 枚."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "えきの前に、いすが＿＿＿あります。",
+          "tr": {
+            "en": "There are four chairs in front of the station.",
+            "fr": "Il y a quatre chaises devant la gare."
+          },
+          "choices": [
+            "四つ",
+            "四枚",
+            "四人"
+          ],
+          "why": {
+            "en": "A chair is an ordinary object, so it takes the general counter つ: 四つ. 枚 is for flat things such as paper or tickets, and 人 counts people.",
+            "fr": "Une chaise est un objet ordinaire : elle prend le classificateur général つ, 四つ. 枚 est pour les choses plates comme le papier ou les billets, et 人 compte les personnes."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "The sentence gives two numbers. What does each one count?",
+            "fr": "La phrase donne deux nombres. Qu'est-ce que chacun compte ?"
+          },
+          "jp": "うちはかぞくが五人で、へやが三つです。",
+          "tr": {
+            "en": "There are five of us in my family, and the house has three rooms.",
+            "fr": "Nous sommes cinq dans ma famille, et la maison a trois pièces."
+          },
+          "choices": [
+            {
+              "en": "五人 counts the family members, 三つ counts the rooms.",
+              "fr": "五人 compte les membres de la famille, 三つ compte les pièces."
+            },
+            {
+              "en": "五人 counts the rooms, 三つ counts the family members.",
+              "fr": "五人 compte les pièces, 三つ compte les membres de la famille."
+            },
+            {
+              "en": "Both numbers count the family members.",
+              "fr": "Les deux nombres comptent les membres de la famille."
+            }
+          ],
+          "why": {
+            "en": "The counter tells what is counted: 人 is for people, so 五人 is the family, and つ is for things, so 三つ is the rooms.",
+            "fr": "Le classificateur dit ce qu'on compte : 人 est pour les personnes, donc 五人 est la famille, et つ est pour les choses, donc 三つ, ce sont les pièces."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You walk into a restaurant and nobody is with you. You are asked how many you are. What do you answer?",
+            "fr": "Tu entres dans un restaurant et personne ne t'accompagne. On te demande combien vous êtes. Que réponds-tu ?"
+          },
+          "choices": [
+            "一人です。",
+            "一つです。",
+            "一枚です。"
+          ],
+          "why": {
+            "en": "Counting people takes 人: 一人 (read ひとり). 一つ is for objects, and 一枚 for flat things such as paper or tickets.",
+            "fr": "Pour compter des personnes, on prend 人 : 一人 (qui se lit ひとり). 一つ est pour les objets, et 一枚 pour les choses plates comme le papier ou les billets."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Which reading does 四つ have in this sentence?",
+            "fr": "Quelle lecture a 四つ dans cette phrase ?"
+          },
+          "jp": "おかしを四つください。",
+          "tr": {
+            "en": "Four sweets, please.",
+            "fr": "Quatre bonbons, s'il vous plaît."
+          },
+          "choices": [
+            {
+              "en": "よっつ (yottsu)",
+              "fr": "よっつ (« yottsu »)"
+            },
+            {
+              "en": "よんつ (yontsu)",
+              "fr": "よんつ (« yontsu »)"
+            },
+            {
+              "en": "しつ (shitsu)",
+              "fr": "しつ (« shitsu »)"
+            }
+          ],
+          "why": {
+            "en": "From one to ten, the つ series has readings of its own: ひとつ, ふたつ, みっつ, よっつ. よんつ and しつ just add つ to the numbers' usual readings.",
+            "fr": "De un à dix, la série en つ a ses propres lectures : ひとつ, ふたつ, みっつ, よっつ. よんつ et しつ ajoutent simplement つ aux lectures habituelles des nombres."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きっぷを二枚買いましたが、＿＿＿は友だちにあげました。",
+          "tr": {
+            "en": "I bought two tickets, but I gave one of them to a friend.",
+            "fr": "J'ai acheté deux billets, mais j'en ai donné un à un ami."
+          },
+          "choices": [
+            "一枚",
+            "一つ",
+            "一人"
+          ],
+          "why": {
+            "en": "When the noun is left out, the counter stands in for it, and it must be the noun's own: tickets are flat, so 一枚. 一つ is for ordinary objects and 一人 would be one person.",
+            "fr": "Quand le nom est omis, le classificateur le remplace, et c'est celui du nom : les billets sont plats, donc 一枚. 一つ est pour les objets ordinaires et 一人 serait une personne."
+          }
+        }
+      ]
     }
   },
   {
@@ -27396,7 +27742,132 @@
             "fr": "Deux choses comparées : どちらが, avec l'adjectif après. どれ sert pour trois ou plus ; どちらも demande si les deux le sont."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which word completes the question?",
+            "fr": "Quel mot complète la question ?"
+          },
+          "jp": "山本さんと川口さんと＿＿＿が先生ですか。",
+          "tr": {
+            "en": "Which of Yamamoto and Kawaguchi is the teacher?",
+            "fr": "Lequel de Yamamoto et de Kawaguchi est le professeur ?"
+          },
+          "choices": [
+            "どちら",
+            "どれ",
+            "どこ"
+          ],
+          "why": {
+            "en": "どちら picks one of exactly two, and it works for people as well as things. どれ is for things, and どこ asks about a place.",
+            "fr": "どちら désigne l'un de deux exactement, et il vaut pour des personnes comme pour des choses. どれ est pour les choses, et どこ interroge sur un lieu."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker want to know?",
+            "fr": "Qu'est-ce que celui qui parle veut savoir ?"
+          },
+          "jp": "とうきょうとおおさかとどちらが人が多いですか。",
+          "tr": {
+            "en": "Which has more people, Tokyo or Osaka?",
+            "fr": "Où y a-t-il le plus de monde, à Tokyo ou à Osaka ?"
+          },
+          "choices": [
+            {
+              "en": "Which of the two cities has more people.",
+              "fr": "Laquelle des deux villes a le plus d'habitants."
+            },
+            {
+              "en": "How many people live in Tokyo and in Osaka.",
+              "fr": "Combien de personnes vivent à Tokyo et à Osaka."
+            },
+            {
+              "en": "Whether both cities have many people.",
+              "fr": "Si les deux villes ont beaucoup d'habitants."
+            }
+          ],
+          "why": {
+            "en": "A と B とどちらが… asks which of the two is more…: here, which city has more people. It asks for a choice between the two, not for a count or a yes or no.",
+            "fr": "A と B とどちらが… demande lequel des deux est plus… : ici, quelle ville a le plus d'habitants. On attend un choix entre les deux, pas un nombre ni un oui ou un non."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the question?",
+            "fr": "Quelle particule complète la question ?"
+          },
+          "jp": "ケーキとアイスクリームとどちら＿＿＿すきですか。",
+          "tr": {
+            "en": "Which do you like better, cake or ice cream?",
+            "fr": "Que préfères-tu, le gâteau ou la glace ?"
+          },
+          "choices": [
+            "が",
+            "は",
+            "を"
+          ],
+          "why": {
+            "en": "A question word like どちら takes が, not は, and すき puts the thing liked with が too: どちらがすきですか. を does not go with すき.",
+            "fr": "Un mot interrogatif comme どちら prend が, pas は, et すき construit aussi la chose aimée avec が : どちらがすきですか. を ne va pas avec すき."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker asking the listener?",
+            "fr": "Que demande celui qui parle à l'interlocuteur ?"
+          },
+          "jp": "あしたとあさってとどちらがひまですか。",
+          "tr": {
+            "en": "Which are you free on, tomorrow or the day after?",
+            "fr": "Quel jour es-tu libre, demain ou après-demain ?"
+          },
+          "choices": [
+            {
+              "en": "Which of the two days is free for the listener.",
+              "fr": "Lequel des deux jours est libre pour l'interlocuteur."
+            },
+            {
+              "en": "Whether the listener is free on both days.",
+              "fr": "Si l'interlocuteur est libre les deux jours."
+            },
+            {
+              "en": "Which of two people is free tomorrow.",
+              "fr": "Qui, parmi deux personnes, est libre demain."
+            }
+          ],
+          "why": {
+            "en": "The two things compared are the days, あした and あさって, and どちらが asks which of them is ひま (free). It does not ask about both days, nor about two people.",
+            "fr": "Les deux termes comparés sont les jours, あした et あさって, et どちらが demande lequel des deux est ひま (libre). Il ne s'agit ni des deux jours à la fois, ni de deux personnes."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the question?",
+            "fr": "Quelle forme complète la question ?"
+          },
+          "jp": "きのうとおとといとどちらが＿＿＿。",
+          "tr": {
+            "en": "Which was colder, yesterday or the day before?",
+            "fr": "Quel jour a-t-il fait plus froid, hier ou avant-hier ?"
+          },
+          "choices": [
+            "さむかったですか",
+            "さむいでしたか",
+            "さむいですか"
+          ],
+          "why": {
+            "en": "Both days are past, so the い-adjective goes into the past: さむかったですか. さむいでしたか adds でした straight after the い-adjective, which is wrong, and さむいですか asks about now.",
+            "fr": "Les deux jours sont passés : l'adjectif en い se met au passé, さむかったですか. さむいでしたか colle でした directement après l'adjectif en い, ce qui est faux, et さむいですか parle du présent."
+          }
+        }
+      ]
     }
   },
   {
@@ -27668,7 +28139,127 @@
             "fr": "Une question en oui ou non sur « quelque chose » : 何か. 何を demande quoi ; 何も demande une négation."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the sentence?",
+            "fr": "Quelle particule complète la phrase ?"
+          },
+          "jp": "道がわかりませんから、誰か＿＿＿聞きましょう。",
+          "tr": {
+            "en": "I don't know the way, so let's ask someone.",
+            "fr": "Je ne connais pas le chemin, alors demandons à quelqu'un."
+          },
+          "choices": [
+            "に",
+            "を",
+            "で"
+          ],
+          "why": {
+            "en": "The particle that the verb needs stays after 誰か: you ask a person with に, so 誰かに聞く. を and で do not fit 聞く with a person.",
+            "fr": "La particule dont le verbe a besoin reste après 誰か : on demande à quelqu'un avec に, donc 誰かに聞く. を et で ne vont pas avec 聞く quand il s'agit d'une personne."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about where the umbrella was left?",
+            "fr": "Que dit la phrase de l'endroit où le parapluie a été oublié ?"
+          },
+          "jp": "きのう、どこかでかさをわすれました。",
+          "tr": {
+            "en": "Yesterday I left my umbrella somewhere.",
+            "fr": "Hier, j'ai oublié mon parapluie quelque part."
+          },
+          "choices": [
+            {
+              "en": "Somewhere the speaker cannot name.",
+              "fr": "Quelque part, sans que celui qui parle puisse dire où."
+            },
+            {
+              "en": "At a place the sentence names.",
+              "fr": "À un endroit que la phrase nomme."
+            },
+            {
+              "en": "Nowhere: the speaker still has it.",
+              "fr": "Nulle part : celui qui parle l'a toujours."
+            }
+          ],
+          "why": {
+            "en": "どこか is « somewhere »: a place that is not named. The で after it is the place where the action happened. « Nowhere » would be どこにも with a negative.",
+            "fr": "どこか, c'est « quelque part » : un lieu qu'on ne nomme pas. Le で qui suit marque le lieu de l'action. « Nulle part » se dirait どこにも avec une négation."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You step into a small shop and nobody is at the counter. You call out to find out whether there is anyone there.",
+            "fr": "Tu entres dans une petite boutique et il n'y a personne au comptoir. Tu appelles pour savoir s'il y a quelqu'un."
+          },
+          "choices": [
+            "すみません、誰かいますか。",
+            "すみません、誰がいますか。",
+            "すみません、誰かいましたか。"
+          ],
+          "why": {
+            "en": "誰か is « anyone »: 誰かいますか asks whether there is somebody. 誰がいますか asks which person is there, and いましたか puts the question in the past.",
+            "fr": "誰か, c'est « quelqu'un » : 誰かいますか demande s'il y a quelqu'un. 誰がいますか demande quelle personne est là, et いましたか met la question au passé."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker want?",
+            "fr": "Que veut celui qui parle ?"
+          },
+          "jp": "何かあたたかいものを飲みたいです。",
+          "tr": {
+            "en": "I'd like to drink something warm.",
+            "fr": "J'aimerais boire quelque chose de chaud."
+          },
+          "choices": [
+            {
+              "en": "To drink something warm, no matter what.",
+              "fr": "Boire quelque chose de chaud, peu importe quoi."
+            },
+            {
+              "en": "To know which warm drink there is.",
+              "fr": "Savoir quelle boisson chaude il y a."
+            },
+            {
+              "en": "Not to drink anything warm.",
+              "fr": "Ne rien boire de chaud."
+            }
+          ],
+          "why": {
+            "en": "何か + noun means « some kind of »: 何かあたたかいもの = something warm. It is neither the question 何を (what?) nor the 何も… of « nothing ».",
+            "fr": "何か + nom signifie « une sorte de » : 何かあたたかいもの = quelque chose de chaud. Ce n'est ni la question 何を (quoi ?) ni le 何も… de « rien »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "かぎは、このへやの＿＿＿あります。",
+          "tr": {
+            "en": "My key is somewhere in this room.",
+            "fr": "Ma clé est quelque part dans cette pièce."
+          },
+          "choices": [
+            "どこかに",
+            "どこにか",
+            "どこにも"
+          ],
+          "why": {
+            "en": "か goes right after the question word, and the particle comes after it: どこかに. どこにか swaps them, and どこにも is « nowhere », which needs a negative verb.",
+            "fr": "か se place juste après le mot interrogatif, et la particule vient ensuite : どこかに. どこにか les inverse, et どこにも veut dire « nulle part », ce qui demande un verbe à la forme négative."
+          }
+        }
+      ]
     }
   },
   {
