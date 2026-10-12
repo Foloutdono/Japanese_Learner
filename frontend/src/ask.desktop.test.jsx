@@ -134,6 +134,9 @@ describe('the asking in a sentence run', () => {
     expect(field().disabled).toBe(false)
     expect(field().placeholder).toBe('Ta question…')
     expect(askCalls()).toHaveLength(0)
+    // Nothing of the phone's page (plan 197, ask.phone.test): the desk asks here.
+    expect($('.ask-launch')).toBeNull()
+    expect($('.ask-layer')).toBeNull()
   })
 
   it('asks with the exercise\'s context, and prints the answer under the question', async () => {

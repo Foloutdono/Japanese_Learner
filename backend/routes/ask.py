@@ -6,8 +6,11 @@ The desk's practice runs (reading, translation, dictation, composition,
 comprehension) stand a small chat in the run's lines panel once the
 learner has graded their answer -- the moment the breakdown opens, and
 for the breakdown's reason: before the grade, "what does this mean?" is
-a request for the answer key. It answers the owner's brief, "limited to
-small questions and only precise answers":
+a request for the answer key. A phone has no panel: it opens the same
+asking as a page of its own, from a button in the graded card (plan 197,
+components/study/AskPage.jsx), and the route cannot tell the two apart:
+the same limits, the same daily count. It answers the owner's brief,
+"limited to small questions and only precise answers":
 
     small     a question is at most MAX_QUESTION characters, a sentence
               keeps at most MAX_HISTORY earlier exchanges, and a day at

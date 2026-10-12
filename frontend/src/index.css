@@ -31313,6 +31313,145 @@ button.brd-stn { cursor: pointer; }
 }
 /* ── 191:tickets end ── */
 
+/* ── 問 — the asking on a phone (plan 197) ───────────────────────────
+   The owner's pick D of four drawn on the real translation run, entered
+   from a button in the graded card: the chat is a page of its own over
+   the run (components/study/AskPage.jsx). The layer is the viewport and
+   opaque, with the app's own phone column inside it, so a tablet held
+   upright is not left looking at the run beside it; the column is a
+   run's stage -- its head, its ‹ Retour -- and its page is the sentence
+   pinned as a card, the thread, and the field on the foot. The desk keeps
+   its panel (.desk-ask, in the desk's section), and that name is written
+   nowhere else: this is the same panel under the phone's. */
+.ask-launch { width: 100%; }
+.ask-launch__mark {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--accent2);
+}
+.ask-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg-main);
+}
+.ask-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  box-sizing: border-box;
+  min-height: 100dvh;
+}
+/* The page's ground is the field's own (--bg-main), so the field takes
+   the card's, as it does on a page of cards. */
+.ask-page .field { --field-well: var(--bg-card); }
+.ask-echo,
+.ask-page__body { text-align: start; }
+.ask-echo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-inline: var(--sp-5);
+  padding: var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+.ask-echo__main { margin: 0; font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 500; color: var(--text-primary); overflow-wrap: anywhere; }
+.ask-echo__sub { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); overflow-wrap: anywhere; }
+/* The foot is the body's: a run's stage has none (a stage's bottom padding
+   is the dock's, and 0 under :root[data-chrome="stage"]), and this page
+   docks nothing but the field. */
+.ask-page__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  margin-inline: var(--sp-5);
+  padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
+}
+.ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+/* The thread takes what the field leaves; the field stays on the foot. */
+.ask__thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+.ask__turn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.ask__q,
+.ask__a {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+.ask__q { color: var(--text-secondary); }
+.ask__a { color: var(--text-primary); }
+.ask__a--note { color: var(--text-secondary); }
+.ask__mark {
+  flex: none;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.ask__a > .ask__mark { color: var(--accent2); }
+/* An answer quotes Japanese with its reading, 「学校（がっこう）」: kept
+   whole, so a line breaks at the spaces around it and not through the
+   reading; a word wider than the line still breaks rather than overflow. */
+.ask__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+  white-space: pre-line;
+}
+.ask__hint {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.ask__form {
+  display: flex;
+  gap: var(--sp-2);
+  flex: none;
+}
+.ask__field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.ask__send {
+  flex: none;
+  min-width: 44px;
+  padding-inline: var(--sp-3);
+}
+.ask__note {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
 
 
 

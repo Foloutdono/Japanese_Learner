@@ -1736,6 +1736,16 @@ line here says otherwise.
   field to be left. The send is an arrow, named for a screen reader and
   on hover, because a laptop's column needs the room for the field.
   Nothing the learner typed is kept, and the mock exam never asks.
+  **On a phone the asking is a page of its own** (plan 197, the owner's
+  pick D of four drawn on the real translation run, entered from a button
+  in the card): "Poser une question", under the breakdown's button in a
+  graded card and not there before the grade, opens a full page over the
+  run -- the run's head with ‹ Retour, the sentence pinned as a card, the
+  thread, the field on the foot -- as a dialog and not a route, so the
+  grade, the breakdown and the threads are where they were left; Back, Esc
+  and the shell's back button close it. Comprehension's button is in the
+  open question's detail on the results. The thread, the five a sentence
+  and the forty a day are the desk's.
 - **A graded sentence's breakdown is the analyser's, numbered** (plan 160,
   the owner's pick A of five drawn on the canvas "Tsuji Breakdown Panel";
   every width, the phone's behind its toggle). The sentence line frames

@@ -28,7 +28,7 @@ import { DeskFigure } from './RunRecords'
 // No caption on the panel, as on the card panel (owner's cut, plan 126):
 // the dots and the lines name themselves.
 //
-// The asking (問, plan 131): the desk-only chat for short questions
+// The asking (問, plan 131): the desk's chat for short questions
 // with precise answers (components/study/AskPanel.jsx) stands in this
 // panel, the list giving it the lower half, sealed until the sentence
 // on the stage is graded -- the moment the breakdown opens and for the
@@ -36,7 +36,8 @@ import { DeskFigure } from './RunRecords'
 // the answer key. The run passes it as `ask`.
 //
 // Rendered by a run as StudyStage's `panel`, which draws it only on the
-// desk's panels; a phone never mounts it.
+// desk's panels; a phone never mounts it and asks on a page of its own
+// (components/study/AskPage.jsx, plan 197).
 //
 //   lines     the committed lines (useRunLines): { key, jp, quality } --
 //             or, where a run's lines are not Japanese sentences (the
