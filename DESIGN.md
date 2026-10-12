@@ -209,7 +209,11 @@ lone character (`.dict-plate__word--glyph`, decided 2026-09-05): it is the
 same specimen, read instead of quizzed, opened from a catalogue plate whose
 glyph is already 44px — a reading view cannot set it smaller than the card it
 came from. A word on that plate takes `--fs-display`, a long expression
-`--fs-heading`.
+`--fs-heading`. The third, and last, is the count in Today's dial
+(`.tdy-dial__count`, plan 199, the owner's pick A2 of the canvas "Tsuji —
+Today at a glance"): the one figure the screen exists to say, read at a
+glance from the hand, in gold as a figure. A fourth use is a design
+decision, not a precedent.
 
 **Both specimen rungs are ceilings rather than sizes**, in the two places
 the type has to fit a box it did not choose.
@@ -325,7 +329,7 @@ board set in a station wall, and the page is the one step lighter around
 them. Paper keeps the
 lifted card: a sumi panel there would need the panel's inks in every word it
 holds. A panel never takes a tint of its own to say a state; its edge, a
-figure or a lamp does (the status sheet's drift, the HUD's arrival plate).
+figure or a lamp does (the status sheet's drift, the HUD's goal ring).
 
 ### Two panel idioms, chosen by content
 
@@ -770,12 +774,39 @@ rule's "no scale, no glow" (the halo, the wake), `--elev-action`'s single
 shadow (the halo is its shadow), and the family's one disabled treatment
 (opacity 0.45). None of the three is precedent: every other `.btn-depart`
 is the primary button above. On Today the gate is closed (its outline) when
-nothing is chosen or the balance cannot pay, and wakes when a lane is
-switched back on; on the desk it takes the fare's right column, or the row's
-width under the fare's figures when the gate is too narrow for both. On a
-phone it never leaves the screen (owner-directed): the foot — the shortfall
-and the gate — docks on the tab bar on the page's own ground, and a day
-taller than the phone scrolls under it (held by `src/todayFit.phone.test.jsx`).
+nothing is chosen or the balance cannot pay, and wakes when a line or a mode
+is switched back on; on a day with nothing due it stays shut and says when
+it opens (« Ouvre à 14:30 »). On the desk it stands at the foot of the
+dial's panel, at most 440px. On a phone it never leaves the screen
+(owner-directed): the foot — the row that says what the run is, and the gate
+— docks on the tab bar on the page's own ground (held by
+`src/todayFit.phone.test.jsx`), and in the services sheet a second gate docks
+at the sheet's foot.
+
+**Today is read at a glance** (一目, plan 199, the owner's pick A2 of the
+canvas "Tsuji — Today at a glance"). The order is the learner's: how many
+cards and how long, then what they are, then the way in. The run is a
+**dial** — a ring of the lines, one arc each in its pigment (an edge, never a
+fill), round the count, what it is, the minutes at the learner's pace and
+the hour they end; a shorter run lights its share of each arc and dims the
+rest. While the balance cannot pay for all of it, a thinner ring inside says
+what boards (solid, the ambient ink) and what waits (dashed), and the legend
+under the dial says the same in words; otherwise the legend is each line's
+share. Then one row says what the run is (« Principales · tout · 5 services
+· Ajuster › ») and opens the **services sheet**: the two choices with no
+title over either (each option says what it is, its figure, and for a
+length the minutes it takes), the lines with their modes behind a chevron,
+and the day in figures — the streak, the new cards, the basics, the next
+block of the agenda — as a hairline lattice that never leaves a cell bare.
+Nothing else stands on the phone's screen: the strip, the pace and the
+basics line it carried before are the sheet's figures and the HUD's ring.
+**A line's switch is lit while any of it rides**: a tap takes the line out
+of the day; unlit, a tap puts back what the choice of cards would board
+(its main flashcard under Principales, every mode under every mode). The
+main flashcards are the default. **A day with nothing due** closes the
+dial round the day's 駅スタンプ (the seal the cleared day's ceremony
+presses), its ring the day's reviews by line, with the week's stamps under
+it and tomorrow as a row of a departure board over the shut gate.
 
 ### The tour (発見, plan 187)
 
@@ -822,8 +853,8 @@ stage, not a new idiom:
   The tutorial is due **once per point**, whatever platform first meets
   it.
   The scene opens on its place as a **station plate**: the name over its
-  caption on the 駅名標's white in either theme (the HUD's arrival
-  plate's), the line's edge under it at 3px. The lines follow as rows,
+  caption on the 駅名標's white in either theme (as the HUD's arrival
+  plate had it before plan 199's ring), the line's edge under it at 3px. The lines follow as rows,
   each with who says it. The learner's own lines are named in the
   selection's gold, because they are what the learner will say. Then
   the note, and « À toi de jouer » on the gate. The ask is the cue, the task
@@ -1281,8 +1312,14 @@ metal caught in the sky. Components in `components/dayclear/`, CSS in the
   retard", the colour and the sign say it — the route start → destination,
   the line with your train on it and the promise's ghost dashed above it,
   the next stop and the arrival dated under the line, and the two moves
-  under the card. The desk keeps the full body (`JourneyBody`), the one its
-  Today panel stands.
+  under the card. The desk keeps the full body (`JourneyBody`), in the
+  sheet its rail's stub opens.
+- **With a destination the panel is a ring** (plan 199, replacing H4's
+  arrival plate, which read out of tune with the chrome): the destination's
+  grade in the middle of a ring filled to the share of the journey done, in
+  the state's ink, and beside it the share as a figure over the drift in
+  days, signed, in that ink. The same reading as the plate, drawn as the
+  chrome's other figures are.
 - **A run leaves the chrome.** Both bars go; the level bar takes the bottom
   edge (sumi, the level, the gold track, the XP figure — the fare's home once
   the HUD has left), the rating bar (or the field) docks on top of it and
@@ -1385,21 +1422,21 @@ line here says otherwise.
   screen rising into a window it fits (the frame clips a movement, never
   what is laid out), and not a boarding step's body, sized to its answers
   on the desk (it keeps the rung under them as room).
-- **The gates, with their companion beside them.** Today sets the pass's
-  strip and its back (the journey) beside the fare gate; the back was a
-  sheet. Since plan 135 the gate takes the window's height: each line is a
-  band, its switch in a 230px column beside its lanes three across as
-  tiles, so the line chips go, and the screen runs the whole width the
-  rail leaves (the canvas's cap lifted for Today, as A·2 drew it); the head holds the run's length (20 / 50 / 100 / all,
-  a `Seg` drawn square on the paper with its words as written,
-  remembered per browser) and what the run will take in minutes
-  (from the learner's own pace); each lane prints its share of the run —
-  dealt the way the queue deals — and whether it boards (free, or a dashed
-  edge and the next credit's hour when nothing paid can ride); the foot counts
-  what boards, what waits and the balance beside Depart; and the side
-  column, the window's height, ends on the week ahead — a bar a day,
-  today's the gate's own total in gold, and what a shorter run leaves for
-  tomorrow. Plan 116's two lanes across is retired with it. The
+- **The gates, with their companion beside them.** Today (plan 199, the
+  phone's composition above, drawn for the desk) runs the whole width the
+  rail leaves, the window's height: the dial on a panel at the size the room
+  gives it (384px, 280px on the short desk), its legend in words with the
+  lines named, two across (a row of four left one alone at a laptop's
+  width), the gate at the panel's foot; beside it, at the entry's width
+  (giving down to the side's on a laptop), a column holding open what the
+  phone's sheet holds — the two choices and the lines with their modes
+  listed, no chevron — over the day's panel: its figures and the week ahead,
+  a bar a day, today's the gate's own total in gold (on a day with nothing
+  left, what the day reviewed: the figure the cleared dial prints beside
+  it), and what a shorter run leaves for tomorrow. The column scrolls on its own; nothing in it gives
+  way. Plan 114's pass strip and journey panel beside the gate, and plan
+  135's bands, are retired: the rail's pass is the journey's on the desk.
+  The
   dictionary's dock is open from the first frame on the first result, and
   every door in an entry opens inside the dock; ←/→ walk the catalogue.
   Since plan 128 the catalogue (the analyser's door, the console, the

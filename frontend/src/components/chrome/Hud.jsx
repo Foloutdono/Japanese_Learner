@@ -20,13 +20,13 @@ import { statusOf, showStatus } from './hudStatus'
 // of ink, no line colour. Two objects (three until plan 173 folded the
 // level's roundel and the pass into one strip, below), each a door:
 //
-//   status   a station panel: since plan 174 the arrival plate (到着,
-//            the owner's pick H4), the destination's grade on a white
-//            plate edged in the state's ink, the month the train gets
-//            there at the pace kept, and the drift under it (78 J
-//            D'AVANCE, À L'HEURE, 9 J DE RETARD, SUSPENDU), inked
-//            --success / --warning / --danger. A contract with no
-//            destination keeps the word-and-days panel it had. When
+//   status   a station panel: since plan 199 the goal's ring (環, the
+//            owner's pick A, after plan 174's arrival plate), the
+//            destination's grade in a roundel whose arc is the share
+//            done, the share and the drift beside it (+17j, −9j, À
+//            L'HEURE, SUSPENDU), inked --success / --warning /
+//            --danger. A contract with no destination keeps the
+//            word-and-days panel it had. When
 //            the network is gone the panel says so instead — the one
 //            place the shell owns up to being offline. Tap → the
 //            status sheet (components/journey/StatusSheet.jsx, plan
@@ -73,33 +73,43 @@ export function StatusChip({ model, onClick = null }) {
   )
 }
 
-// 到着 — the arrival plate (plan 174, the owner's pick H4 of the
-// canvas "Tsuji — harmony"): where the line ends and when the train
-// gets there at the pace kept. The destination's grade on a white plate
-// (the station's own 駅名標 white) edged in the state's ink, the month
-// of the projected arrival beside it, the drift under the month in the
-// same ink. The judgement is the same journeyModel the sheet reads.
-export function ArrivalPlate({ status, model, onClick }) {
-  const { t, lang } = useLang()
+// 環 — the goal as a ring (plan 199, the owner's pick A of the canvas
+// "Tsuji — Today at a glance", which found the arrival plate -- a white
+// plate on a dark panel beside the card's own strip -- out of tune with
+// the rest of the chrome). The destination's grade in a roundel, the
+// share of its items done as the roundel's arc in the state's ink (a
+// ring, the way the app draws a pigment), and beside it the share and
+// the drift, signed, in that ink: where you are going, how far along,
+// and whether the train is ahead. The same journeyModel the sheet reads.
+const RING_R = 14.5
+const RING_C = 2 * Math.PI * RING_R
+export function GoalRing({ status, model, onClick }) {
+  const { t } = useLang()
   const panel = statusOf(model)
   if (!panel) return null
-  const month = model.projected
-    ? new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { month: 'long', year: 'numeric' }).format(model.projected)
-    : null
+  const total = status.itemsTotal ?? 0
+  const share = total > 0 ? Math.min(1, Math.max(0, (status.itemsDone ?? 0) / total)) : 0
+  const pct = Math.floor(share * 100)
   const drift = panel.days == null
     ? t.hudStatus[panel.status]
-    : panel.status === 'ahead' ? t.cardDriftAhead(panel.days) : t.cardDriftLate(panel.days)
+    : `${panel.status === 'ahead' ? '+' : '−'}${t.hudDays(panel.days)}`
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={[t.hudStatusLabel, status.goalLevel, month, drift].filter(Boolean).join(' · ')}
-      className={`hud__status hud__status--${panel.status} hud__status--arrival`}
+      aria-label={[t.hudStatusLabel, status.goalLevel, `${pct} %`, panel.days == null ? drift : (panel.status === 'ahead' ? t.cardDriftAhead(panel.days) : t.cardDriftLate(panel.days))].filter(Boolean).join(' · ')}
+      className={`hud__status hud__status--${panel.status} hud__status--ring`}
       data-guide="hud.status"
     >
-      <span className="hud__dest" aria-hidden="true"><i /><b>{status.goalLevel}</b></span>
-      <span className="hud__when" aria-hidden="true">
-        {month && <b className="hud__month">{month}</b>}
+      <svg className="hud__ring" viewBox="0 0 34 34" aria-hidden="true" focusable="false">
+        <circle className="hud__ring-track" cx="17" cy="17" r={RING_R} />
+        {share > 0 && (
+          <circle className="hud__ring-arc" cx="17" cy="17" r={RING_R} strokeDasharray={`${share * RING_C} ${RING_C}`} transform="rotate(-90 17 17)" />
+        )}
+        <text className="hud__ring-dest" x="17" y="17.5" textAnchor="middle" dominantBaseline="middle">{status.goalLevel}</text>
+      </svg>
+      <span className="hud__ring-figs" aria-hidden="true">
+        <b>{pct} %</b>
         <span className="hud__status-word">{drift}</span>
       </span>
     </button>
@@ -107,7 +117,7 @@ export function ArrivalPlate({ status, model, onClick }) {
 }
 
 // The panel as the chrome draws it: the offline word when the network
-// has gone, else the arrival plate -- or, for a contract with no
+// has gone, else the goal's ring -- or, for a contract with no
 // destination (judged on pace alone), the word-and-days panel.
 function HudStatus({ onClick }) {
   const { t } = useLang()
@@ -123,7 +133,7 @@ function HudStatus({ onClick }) {
   }
   // No contract yet (never onboarded): nothing to judge, no panel.
   const model = data ? journeyModel(data) : null
-  if (model?.hasGoal && data.goalLevel) return <ArrivalPlate status={data} model={model} onClick={onClick} />
+  if (model?.hasGoal && data.goalLevel) return <GoalRing status={data} model={model} onClick={onClick} />
   return <StatusChip model={model} onClick={onClick} />
 }
 

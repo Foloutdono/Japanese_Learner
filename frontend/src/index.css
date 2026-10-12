@@ -4390,51 +4390,31 @@ textarea:focus-visible {
 .hud__status--delayed,
 .hud__status--suspended,
 .hud__status--offline { --st-ink: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
-/* 到着 — the arrival plate (plan 174, the owner's pick H4): the panel
-   holds the destination's grade on a white plate — the 駅名標's white,
-   edged in the state's ink as a station plate is edged in its line's —
-   then the month the train gets there over the drift, in the state's
-   ink. A plate rather than a word: where you are going and when you
-   get there were the two facts the old panel made the learner open
-   the sheet for. No scan lines; the plate is printed, not lit. */
-.hud__status--arrival {
+/* 環 — the goal as a ring (plan 199, the owner's pick A of the canvas
+   "Tsuji — Today at a glance", after plan 174's arrival plate, whose
+   white plate on the panel read out of tune): the destination's grade
+   in a roundel, the share done as its arc in the state's ink, the share
+   and the drift beside it. Printed on the chrome's sumi, not lit: no
+   glass, no frame. */
+.hud__status--ring {
   gap: var(--sp-3);
-  height: 34px;
-  padding: 0 var(--sp-3) 0 var(--sp-2);
-  border-color: rgba(255, 255, 255, 0.12);
-  border-radius: var(--r-card);
-  background: color-mix(in srgb, #000 28%, var(--bg-panel));
+  height: 40px;
+  padding: 0 var(--sp-2) 0 0;
+  border: 0;
+  background: none;
   font-family: var(--font-display);
   line-height: 1;
 }
-.hud__status--arrival::after { content: none; }
-.hud__dest {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-1);
-  padding: var(--sp-1) var(--sp-2);
-  border-radius: var(--r-plate);
-  background: #f3f2ef;
-  color: #222428;
-  box-shadow: inset 0 -3px 0 var(--st-ink);
-}
-/* The way the line runs, as a plate prints it: a solid triangle. */
-.hud__dest i {
-  width: 0;
-  height: 0;
-  border: 4px solid transparent;
-  border-left: 6px solid currentcolor;
-  border-right: 0;
-}
-.hud__dest b { font-size: var(--fs-sm); font-weight: 700; }
-.hud__when { display: flex; flex-direction: column; gap: 2px; }
-.hud__month {
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--text-on-panel);
-  white-space: nowrap;
-}
-.hud__status--arrival .hud__status-word { font-size: var(--fs-caption-xs); }
+.hud__status--ring::after { content: none; }
+.hud__status--ring:hover,
+.hud__status--ring:focus-visible { background: color-mix(in srgb, var(--text-on-panel) 6%, var(--bg-panel)); }
+.hud__ring { flex: none; width: 34px; height: 34px; }
+.hud__ring-track { fill: none; stroke: color-mix(in srgb, var(--text-on-panel) 16%, var(--bg-panel)); stroke-width: 2.5; }
+.hud__ring-arc { fill: none; stroke: var(--st-ink); stroke-width: 2.5; stroke-linecap: round; }
+.hud__ring-dest { fill: var(--text-on-panel); font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; }
+.hud__ring-figs { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); }
+.hud__ring-figs b { font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; }
+.hud__status--ring .hud__status-word { font-size: var(--fs-caption-xs); }
 
 /* ── 改札口 — the tab bar. Sumi, docked, five gates. ── */
 /* The bar is over the page, and has to look it. A 1px hairline was the
@@ -8299,10 +8279,9 @@ textarea:focus-visible {
 
 /* ══ 定期券 — the pass's charcoal ground ══════════════════════
    The profile's pass was drawn on this ground until plan 173 made it
-   the learner's card (.pcard, above); what is left of it is the ground
-   Today's stamp strip still wears (.pass--strip, components/station/
-   PassStrip.jsx) and the contactless mark the gate's reader and its
-   button print (.pass__wave).
+   the learner's card (.pcard, above); what is left of it is the
+   contactless mark the gate's reader and its button print
+   (.pass__wave). Today's stamp strip wore it until plan 199.
 
    Charcoal in BOTH themes: a card is a physical object with its own
    material. Sumi-family ground, so every ink in here is the panel
@@ -8453,79 +8432,6 @@ textarea:focus-visible {
 }
 
 
-/* ── 改札 — the fare gate ───────────────────────────────────
-   NextService's strip, grown into a card now that the hall gives it a
-   column of its own. Same manners as the strip it replaces: rendered
-   quiet (nothing at all) while the first fetch is in flight or after
-   it failed, and a cleared queue keeps the card — "next review in 3
-   hours" is what makes an empty gate read as a finished day. */
-.gate-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-5);
-  padding: var(--sp-6);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-panel);
-}
-.gate-card--clear { gap: var(--sp-3); }
-/* ── The shortfall (plan 069) ──
-   A warning-edged notice, and only when the balance does not cover the
-   run. The fare line that stood above it — Fare · n credits · a
-   hairline · Balance · the figure in gold — printed the count the card
-   already sets in figures three times the size, beside a balance the
-   HUD's pass carries a thumb's width up the same screen. */
-.gate-card__short {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--r-panel);
-  /* A panel like the rest (plan 174): the amber outline made it a fifth
-     ground in the hall; the mark before the words carries the warning. */
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
-.gate-card__short b { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
-.gate-card__short-mark { flex: none; color: var(--warning); font-weight: 700; }
-.gate-card__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-4);
-}
-/* "Fare gate" — the canvas's name for the card, in the learner's
-   language (Japanese is content, not chrome: docs/design/mobile). */
-.gate-card__title {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-lead);
-}
-.gate-card__figure { display: flex; align-items: baseline; gap: var(--sp-2); }
-/* Gold as a figure, mixed toward the card's own ink — the same
-   treatment the strip's count wore, on the same reasoning: raw gold
-   on this ground does not carry. */
-.gate-card__count {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-heading);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
-}
-.gate-card__unit {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.gate-card__clear { font-size: var(--fs-body); font-weight: 600; color: var(--success); }
-.gate-card__when { font-size: var(--fs-sm); color: var(--text-secondary); }
-
 /* ── The lanes are the picker (plan 070) ──
    Each row is one (section, level, mode) service due today, and each
    is a switch: the run covers the rows that are on, the fare counts
@@ -8535,10 +8441,9 @@ textarea:focus-visible {
    not draw, the all/none toggle, is kept from the picker this
    replaces: a learner with sixteen lanes and ten minutes says "just
    the kanji" in two taps, not fifteen. */
-/* Since plan 166 the phone's switches stand in the services sheet
-   (.gate-sheet, below), grouped under their lines, and no longer in a
-   list bounded inside the card; the line chips over them went with it,
-   the sheet's line heads being the same switches. */
+/* Since plan 166 the phone's switches stand in the services sheet,
+   grouped under their lines; since plan 199 a line's modes are its
+   rows there and in the desk's column (.tdy-line__lanes, below). */
 .lane {
   display: flex;
   align-items: center;
@@ -8634,29 +8539,23 @@ textarea:focus-visible {
 }
 .lane__due { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
 
-/* ── 一押し — the gate on a phone, in one gesture (plan 166) ──
-   The owner's pick C of the canvas "Tsuji — Today on the phone": the
-   day as one card -- the run's count and minutes, a bar of each line's
-   share, which cards and how many -- then the row that opens the
-   services, and the gate at the foot of the screen, the air between
-   giving way first on a short phone.
-
-   And the gate never leaves the screen (owner-directed): the air was
-   the only thing that gave way, so a day with the pass strip, the
-   agenda, the basics and a shortfall over it put Depart under the tab
-   bar -- 117px under it at 360×725, measured. The foot docks like a
-   run's (.stage > .stage__foot): stuck on the dock's edge, the page's
-   own ground under it, and the screen's last gutter moved into it so
-   the gate stands where it stood whether it is stuck or not. */
-.today:has(> .gate-one) { flex: 1 0 auto; padding-bottom: 0; }
-.gate-one {
+/* ── 一目 — Today at a glance (plan 199) ───────────────────────
+   The owner's pick A2 of the canvas "Tsuji — Today at a glance": the
+   gate is the screen. The run as a dial on the room's middle, its
+   legend under it, and at the thumb the row that says what the run is
+   over the gate. The air above and under the dial gives way first; the
+   foot docks on the tab bar as plan 166 ruled (the gate never leaves
+   the screen), the page's own ground under it, a fade the gap's height
+   over what scrolls beneath. */
+.today:has(> .tdy) { flex: 1 0 auto; padding-bottom: 0; }
+.tdy {
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
 }
-.gate-one__air { flex: 1 1 auto; }
-.gate-one__foot {
+.tdy__air { flex: 1 1 auto; }
+.tdy__foot {
   position: sticky;
   bottom: var(--dock-bottom);
   z-index: 1;
@@ -8664,215 +8563,302 @@ textarea:focus-visible {
   flex-direction: column;
   gap: var(--sp-4);
   padding-bottom: var(--sp-6);
-  /* The ground, edge to edge, and over it a fade the height of the gap
-     above: what scrolls under the gate goes under the page rather than
-     being cut at a rule. Painted as a border image because its outset
-     is ink, not layout -- negative margins bleeding the foot to the
-     screen's edges would make the page a gutter wider than the phone.
-     The fade lies in the gap while nothing is under it. */
   border-image: linear-gradient(to bottom, transparent, var(--bg-main) var(--sp-4)) fill 0 / 0 / var(--sp-4) var(--sp-5) 0;
 }
-.gate-card--one .gate-card__figure { flex-wrap: wrap; gap: var(--sp-3); }
-.gate-card--one .gate-card__count { font-size: var(--fs-display); }
-.gate-card--one .gate-card__time {
-  font-size: var(--fs-body);
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-/* Each line's share of the run: a bar of its pigments, the pass
-   strip's gauge's height, and its key -- a ring in the line's pigment,
-   its name, its share. The pigment is the line's edge, never a fill
-   under text. */
-.gate-mix {
+.tdy-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-6); }
+.tdy-wait { display: flex; justify-content: center; padding-top: var(--sp-9); }
+
+/* The dial (components/station/TodayDial.jsx), drawn in a 248-unit box
+   (domain/dial.js). Each arc is a line's edge in its pigment, never a
+   fill (DESIGN.md, Colour); a shorter run dims what it leaves. The
+   fare's ring inside it is the ambient ink: solid for what boards,
+   dashed for what waits. */
+.tdy-dial { position: relative; flex: none; width: 248px; aspect-ratio: 1; }
+.tdy-dial__ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.tdy-dial__arc { fill: none; stroke: var(--lane-color, var(--text-secondary)); stroke-width: 6; stroke-linecap: round; }
+.tdy-dial__arc--dim { opacity: 0.32; }
+.tdy-dial__track { fill: none; stroke: var(--surface-line); stroke-width: 6; }
+.tdy-dial__fare-wait { fill: none; stroke: var(--text-secondary); stroke-width: 2; stroke-dasharray: 2 5; }
+.tdy-dial__fare-ride { fill: none; stroke: var(--text-primary); stroke-width: 2.5; stroke-linecap: round; }
+.tdy-dial__fare-end { fill: var(--text-primary); }
+.tdy-dial__c {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
-}
-.gate-mix__bar {
-  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: var(--sp-1);
-  height: 5px;
+  text-align: center;
 }
-.gate-mix__part {
-  flex-basis: 0;
-  border-radius: var(--r-pill);
-  background: var(--lane-color, var(--accent2));
+/* The count at the specimen's word rung: the third object the rung is
+   spent on, by the owner's pick of the canvas (DESIGN.md, Type). Gold
+   as a figure, mixed toward the page's ink as the gate's count was. */
+.tdy-dial__count {
+  font-family: var(--font-display);
+  font-size: var(--fs-specimen-word);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--accent2) 60%, var(--text-primary));
 }
-.gate-mix__keys {
+.tdy-dial__unit {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.tdy-dial__time {
+  margin-top: var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.tdy-dial__end { font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.tdy-dial__clear { font-size: var(--fs-title); font-weight: 700; color: var(--success); }
+
+/* The legend: each line's ring and share, or the fare's two marks. */
+.tdy-key {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--sp-2) var(--sp-5);
   margin: 0;
   padding: 0;
   list-style: none;
-}
-.gate-mix__key {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
-.gate-mix__ring {
+.tdy-key__item { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.tdy-key b { font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.tdy-key__ring {
   width: 10px;
   height: 10px;
   box-sizing: border-box;
-  border: 2px solid var(--lane-color, var(--accent2));
+  border: 2px solid var(--lane-color, var(--text-secondary));
   border-radius: var(--r-pill);
 }
-.gate-mix__n {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-}
-/* 基礎 — the basics course on the gate (plan 186f): the unit the next
-   new card comes from, by name, over a bar of the units with the ones
-   met filled. Neutral inks: the course is no line, so it wears no
-   line's pigment; the unit at hand is the selection's gold. */
-.basics-line {
+.tdy-key__ride { width: var(--sp-5); height: 3px; border-radius: var(--r-pill); background: var(--text-primary); }
+.tdy-key__wait { width: var(--sp-5); border-top: 2px dashed var(--text-secondary); }
+
+/* The row that says what the run is, and opens the services. */
+.tdy-door {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--sp-2) var(--sp-3);
-}
-.basics-line__head,
-.basics-line__name { display: inline-flex; align-items: baseline; gap: var(--sp-2); }
-.basics-line__mark {
-  font-family: var(--font-display);
-  font-weight: 700;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: transparent;
+  font: inherit;
   font-size: var(--fs-sm);
-  color: var(--text-primary);
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
 }
-.basics-line__of {
-  font-family: var(--font-display);
+.tdy-door:hover,
+.tdy-door:focus-visible { border-color: var(--text-secondary); filter: none; }
+.tdy-door__what { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tdy-door__what b { font-weight: 700; color: var(--text-primary); }
+.tdy-door__go { display: inline-flex; align-items: center; gap: var(--sp-1); font-weight: 600; color: var(--text-primary); }
+
+/* ── The services: the sheet on a phone, the column on the desk ──
+   No title over either choice (the owner's word): an option says what
+   it is in the body's words, its figure bold after it, a length's
+   minutes a line under it. */
+.tdy-sheet { padding-bottom: 0; }
+/* The sheet scrolls; nothing in it gives way to fit (the day's lattice
+   clips its corners, and a clipped flex item would shrink to its seam). */
+.tdy-sheet > * { flex-shrink: 0; }
+.tdy-sheet__foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--sp-4);
+  padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
+  background: linear-gradient(to bottom, transparent, var(--surface) var(--sp-4));
+}
+.tdy-asks { display: flex; flex-direction: column; gap: var(--sp-3); }
+.tdy-seg .seg__opt { height: auto; min-height: 44px; gap: var(--sp-2); padding-inline: var(--sp-3); white-space: nowrap; }
+.tdy-seg .seg__opt-latin {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  letter-spacing: normal;
+  text-indent: 0;
+  text-transform: none;
+}
+.seg__opt-fig { font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.seg__opt--on .seg__opt-fig { color: var(--sel-ink); }
+.seg__opt--sub { flex-direction: column; gap: var(--sp-1); line-height: 1; }
+.seg__opt-sub { font-size: var(--fs-caption); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.seg__opt--on .seg__opt-sub { color: var(--sel-ink); }
+.tdy-seg--two .seg__opt { min-height: 52px; }
+.tdy-seg--two .seg__opt-latin { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* A line: its switch (tick, name, share), a chevron to its modes on a
+   phone, and under the name what rides of it, or its modes as rows. */
+.tdy-lines { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; border-bottom: 1px solid var(--surface-line); }
+.tdy-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  border-top: 1px solid var(--surface-line);
+}
+.tdy-line__head {
+  grid-column: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--sp-4);
+  min-height: 44px;
+  padding: var(--sp-2) 0 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font: inherit;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.tdy-line:not(.tdy-line--off) .tdy-line__head .lane__tick {
+  background: var(--lane-color, var(--text-secondary));
+  border-color: var(--lane-color, var(--text-secondary));
+}
+.tdy-line__name { display: flex; align-items: baseline; gap: var(--sp-3); min-width: 0; font-size: var(--fs-body); font-weight: 700; }
+.tdy-line__tag {
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.basics-line__name { font-size: var(--fs-sm); font-weight: 700; color: var(--text-primary); }
-.basics-line__bar {
-  display: flex;
-  flex-basis: 100%;
-  gap: var(--sp-1);
-  height: 5px;
-}
-.basics-line__unit {
-  flex: 1 1 0;
-  border-radius: var(--r-pill);
-  background: var(--border);
-}
-.basics-line__unit--met { background: var(--text-secondary); }
-.basics-line__unit--on { background: var(--sel-line); }
-.basics-line--done { align-items: center; }
-.basics-line--done .basics-line__name { font-weight: 600; }
-.basics-line__close {
+.tdy-line__n { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.tdy-line__n small { font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); }
+.tdy-line--off .tdy-line__name,
+.tdy-line--off .tdy-line__n { color: var(--text-secondary); }
+.tdy-line__head:hover .tdy-line__name,
+.tdy-line__head:focus-visible .tdy-line__name { text-decoration: underline; text-underline-offset: 3px; }
+.tdy-line__more {
+  grid-column: 2;
+  justify-self: end;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  width: var(--sp-8);
-  height: var(--sp-8);
-  padding: 0;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  background: transparent;
-  color: var(--text-primary);
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--r-card);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
 }
-/* The two questions, under a rule: which cards, how many. */
-.gate-card__asks {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-  padding-top: var(--sp-5);
-  border-top: 1px solid var(--border);
-}
-.gate-card__ask {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-}
-/* The options' words as written, as the desk's length control sets
-   them (no capitals, no tracking): "Tous les modes · 101" in capitals
-   and tracked broke onto two lines in half a phone's width. */
-.gate-card__ask .seg__opt-latin {
-  font-size: var(--fs-sm);
-  letter-spacing: 0;
-  text-indent: 0;
-  text-transform: none;
+.tdy-line__more:hover,
+.tdy-line__more:focus-visible { color: var(--text-primary); filter: none; }
+.tdy-line__sub,
+/* Under the line's name: the tick's width and the head's gap in. */
+.tdy-line__lanes { grid-column: 1 / -1; padding-bottom: var(--sp-3); padding-left: calc(var(--sp-5) + var(--sp-4)); }
+.tdy-line__sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-}
-.gate-card__ask-label {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-/* The door to the services: a row, not a card, under the card. */
-.gate-one__services {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  min-height: 44px;
-  padding: 0 var(--sp-1);
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: var(--fs-body);
-  font-weight: 600;
-  color: var(--text-primary);
-  text-align: left;
-  cursor: pointer;
-}
-.gate-one__services-name { flex: 1; }
-.gate-one__services-of,
-.gate-one__services svg {
   font-size: var(--fs-sm);
-  font-weight: 400;
   color: var(--text-secondary);
 }
-.gate-one__services:hover .gate-one__services-name,
-.gate-one__services:focus-visible .gate-one__services-name { text-decoration: underline; text-underline-offset: 3px; }
-/* The services sheet: a line's head is its switch, its lanes under it. */
-.gate-sheet__lines {
+.tdy-line__lanes { display: flex; flex-direction: column; }
+/* A mode is a row of the line, not a card: where · mode on one line,
+   its tags, its figure. */
+.tdy-line__lanes .lane {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.tdy-line__lanes .lane__names { flex-direction: row; align-items: baseline; gap: var(--sp-2); }
+.tdy-line__lanes .lane__where { flex: none; max-width: 60%; font-weight: 600; color: var(--text-primary); }
+.tdy-line__lanes .lane__mode { font-size: var(--fs-sm); color: var(--text-secondary); }
+.tdy-line__lanes .lane__mode::before { content: '· '; }
+.tdy-line__lanes .lane__due { font-family: var(--font-display); font-size: var(--fs-body); }
+
+/* ── 今日 — the day in four figures (TodayDay) ──
+   A hairline lattice of bare figures (DESIGN.md, Surfaces), two across;
+   an odd last cell takes the row, so no seam shows a bare slab. */
+.tdy-day {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  background: var(--surface-line);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.tdy-day--odd > :last-child { grid-column: 1 / -1; }
+.tdy-day__cell {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
+  gap: var(--sp-1);
+  min-width: 0;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  color: var(--text-primary);
+  text-decoration: none;
 }
-.gate-sheet__line {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-}
-.gate-sheet__head {
+.tdy-day__cell--door:hover,
+.tdy-day__cell--door:focus-visible { background: color-mix(in srgb, var(--text-primary) 5%, var(--surface)); }
+.tdy-day__fig {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  min-height: 44px;
-  padding: 0 var(--sp-1);
-  border: 0;
-  background: none;
-  font: inherit;
-  color: var(--text-primary);
-  text-align: left;
-  cursor: pointer;
-}
-.gate-sheet__head:not(.gate-sheet__head--off) .lane__tick {
-  background: var(--lane-color, var(--accent2));
-  border-color: var(--lane-color, var(--accent2));
-}
-.gate-sheet__name {
-  flex: 1;
-  font-family: var(--font-serif);
-  font-size: var(--fs-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
   font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
 }
-.gate-sheet__due { font-weight: 700; font-variant-numeric: tabular-nums; }
-.gate-sheet__done { width: 100%; }
+.tdy-day__fig small { font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); }
+.tdy-day__what {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.tdy-day__what b { font-weight: 600; color: var(--text-primary); }
+
+/* ── 済 — a day with nothing due (ClearedGate) ──
+   The dial closed round the day's seal (plan 191's kit), what the day
+   was and the week's stamps under it; at the foot tomorrow as a row of
+   a departure board, and the gate shut, saying when it opens. */
+.tdy-hero--clear { gap: var(--sp-5); }
+.tdy-recap { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.tdy-rally { display: flex; align-items: center; gap: var(--sp-4); }
+.tdy-rally__n { display: flex; flex-direction: column; font-size: var(--fs-caption); line-height: 1.2; color: var(--text-secondary); }
+.tdy-rally__n b { font-family: var(--font-display); font-size: var(--fs-title); font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.tdy-next {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  column-gap: var(--sp-5);
+  min-height: 46px;
+  padding: var(--sp-3) var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.tdy-next__day { font-weight: 600; }
+.tdy-next__n { font-family: var(--font-display); font-size: var(--fs-lead); font-weight: 700; font-variant-numeric: tabular-nums; }
+.tdy-next__n small { margin-left: var(--sp-1); font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); }
+.tdy-next__min { font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
 /* The screen's one filled action. Gold, because Today is gold — and
    gold follows its own standing ruling, not .btn-primary's: the 60%
@@ -8932,36 +8918,6 @@ textarea:focus-visible {
 }
 .btn-depart--ghost:hover,
 .btn-depart--ghost:focus-visible { box-shadow: none; border-color: var(--text-secondary); }
-
-/* ── The strip (plan 070) ──
-   The pass at strip size under the gate: the stamp rally and the
-   day's new-item gauge, and nothing else of the card — a shortcut to
-   the profile, not the profile. The full pass stays on /profile. */
-/* The week on Today (plan 174, 墨): a panel like every other, in the
-   panels' sumi with their hairline and corner. It had kept the old
-   pass's charcoal glow and its plastic sheen (.pass, .pass::after)
-   when the pass itself moved onto the card (plan 173), so the hall's
-   one progress panel was the one object in a material of its own. */
-.pass--strip {
-  gap: var(--sp-4);
-  padding: var(--sp-4) var(--sp-5);
-  margin-bottom: 0;
-  width: 100%;
-  background: var(--bg-panel);
-  border-color: color-mix(in srgb, var(--text-on-panel) 13%, var(--bg-panel));
-  border-radius: var(--r-panel);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s ease, transform 0.15s ease;
-}
-.pass--strip::after { content: none; }
-.pass--strip:hover,
-.pass--strip:focus-visible {
-  border-color: color-mix(in srgb, var(--pass-ink) 55%, var(--text-on-panel));
-  transform: translateY(-1px);
-  filter: none;
-}
 
 /* ── スタンプラリー — the streak as eki stamps ───────────────
    DESIGN.md, Motion: the streak is a stamp rally, not a flame. Seven
@@ -9030,47 +8986,9 @@ textarea:focus-visible {
   color: var(--text-on-panel-soft);
 }
 
-/* ── 新規 — the day's new-item gauge, now on the pass ────────
-   Moved from the retired concourse strip with its meaning intact. The
-   pass is a charcoal card in both themes (案一), so the inks are the
-   panel pair — the same closed system the strip's sumi always used. */
-.hall-pace { display: flex; align-items: center; gap: var(--sp-4); }
-.hall-pace__name { display: flex; align-items: baseline; gap: var(--sp-2); flex-shrink: 0; }
-.hall-pace__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); }
-.hall-pace__latin {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  /* The one caption (plan 174): 700, as every other one is. */
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-on-panel-soft);
-}
-.hall-pace__bar {
-  flex: 1;
-  height: 5px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--accent2) 18%, transparent);
-  overflow: hidden;
-}
-.hall-pace__fill {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--accent2);
-  transition: width 300ms ease;
-}
 @media (prefers-reduced-motion: reduce) {
-  .hall-pace__fill { transition: none; }
   .stamp-rally__stamp--today { animation: none; }
 }
-.hall-pace__count {
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  font-size: var(--fs-sm);
-}
-.hall-pace__sep { color: var(--text-on-panel-soft); font-weight: 400; }
 
 /* ── The queue screen itself ─────────────────────────────────── */
 
@@ -18866,10 +18784,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 
 @media (max-width: 560px) {
-  /* The gate folds its breakdown behind the 内訳 disclosure, so the
-     phone's first screen is card, count, button, map. */
-  .gate-card { padding: var(--sp-5); gap: var(--sp-4); }
-
   /* The map strips already folded at 760px; nothing more to fold. */
 
   /* The masthead stacks: the station's name is the thing worth the
@@ -32874,342 +32788,109 @@ button.brd-stn { cursor: pointer; }
   }
   .gate-row:has(.lib-weeks) { grid-template-columns: auto minmax(0, 1fr) auto auto; }
 
-  /* Today (plan 114): the fare gate is the work and takes the width;
-     beside it, in the second column, what the work is for — the pass at
-     strip size and the pass's back (TodayScreen, JourneyPanel). Placed,
-     not flowed, so nothing moves when the figures arrive; a finished
-     run's slip takes the gate's place. */
-  .today {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
-    align-items: start;
-    column-gap: var(--sp-6);
-    /* The width the rail leaves, at A·2's margins (plan 135). */
-    padding-inline: var(--sp-7);
-  }
-  .today > .gate-card,
-  .today > .empty,
-  .today > .rst {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .today > .desk-side {
-    grid-column: 2;
-    grid-row: 1;
-    /* The window's height (plan 135): the week ahead takes its foot. */
-    height: calc(100dvh - 2 * var(--sp-6) + var(--sp-2) + var(--sp-4));
-  }
-  /* The rest-day notice (plan 191) stands where the gate does, at the
-     card's width, centred in the gate's column. */
-  .today > .rst {
-    width: 100%;
-    max-width: var(--card-w);
-    justify-self: center;
-  }
-  /* ── 机 — the fare gate takes the hall (plan 135) ──
-     The owner's pick, A·2 of the Today canvas, built to the board's
-     measures: the screen runs the whole width the rail leaves (the
-     canvas's --desk-board-w cap lifted for Today alone), the gate beside
-     a --desk-side-w column; in the gate a band per line — its switch in
-     a 230px column, its lanes three across beside it — the head's
-     count and minutes, the console of the modes and the length under
-     it, and the fare row under the bands (the figures, then Depart at
-     420px, or under them on a narrow gate). The chips go: a band's switch
-     is its line's chip. Plan 116's two lanes across is retired.
-     GateCard's DeskGate draws it; a phone keeps its own gate. */
+  /* ── 一目 — Today on the desk (plan 199) ──
+     The owner's pick A2 of the canvas "Tsuji — Today at a glance": the
+     screen runs the whole width the rail leaves (the canvas's cap lifted
+     for Today, as plan 135 had it), the window's height. The dial on a
+     panel at the size the room gives it, its legend in words and the
+     gate at the panel's foot; beside it, at the entry's width (giving
+     down to the side column's on a laptop), a column
+     holding open what the phone's sheet holds -- the two choices and the
+     lines with their modes -- over the day's four figures and the week
+     ahead. The column scrolls on its own when it is taller than the
+     window, its gutter inside the clip edge and given back outside, so
+     a row's focus ring is drawn whole. */
   .phone--desk .phone__content:has(> main.today) { max-width: none; }
-  .today > .gate-card { max-height: calc(100dvh - 2 * var(--sp-6)); }
-  .today > .gate-card--desk {
-    height: calc(100dvh - 2 * var(--sp-6));
-    padding: var(--sp-7);
-    gap: var(--sp-4);
-    border-radius: var(--r-card);
-  }
-  .gate-card--desk .gate-card__head { align-items: center; }
-  .gate-card--desk .gate-card__title { font-size: var(--fs-heading); }
-  .gate-card__figs {
-    display: flex;
-    align-items: center;
+  .today { padding-inline: var(--sp-7); }
+  .today > .rst { align-self: center; width: 100%; }
+  .tdy-desk {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(var(--desk-side-w), 36%, var(--desk-entry-w));
     gap: var(--sp-6);
-    min-width: 0;
+    height: calc(100dvh - 2 * var(--sp-6));
   }
-  .gate-card--desk .gate-card__count {
-    font-size: var(--fs-display);
-    color: var(--accent2);
-  }
-  /* The length: a plain segmented instrument on the paper, square at
-     the plate radius, its words as written (no capitals, no tracking). */
-  /* The console under the head: the modes (every one, or each line's
-     main flashcard) at its left, the length at its right -- two of the
-     same instrument, on a row of their own so the head keeps its
-     figures at a laptop's width. */
-  .gate-card__console {
+  .tdy-desk__hero {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--sp-3) var(--sp-6);
+    flex-direction: column;
+    min-height: 0;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
   }
-  :is(.gate-card__take, .gate-card__modes) {
-    margin-left: 0;
-    border-radius: var(--r-plate);
-    background: var(--bg-main);
-  }
-  :is(.gate-card__take, .gate-card__modes) .seg__opt {
-    align-items: center;
-    height: 34px;
-    padding: 0 var(--sp-5);
-  }
-  :is(.gate-card__take, .gate-card__modes) .seg__opt-latin {
-    font-size: var(--fs-caption);
-    letter-spacing: 0;
-    text-indent: 0;
-    text-transform: none;
-  }
-  :is(.gate-card__take, .gate-card__modes) .seg__opt--on { background: color-mix(in srgb, var(--text-primary) 9%, var(--bg-main)); }
-  .gate-card__time {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-2);
-    align-self: stretch;
-    padding-left: var(--sp-6);
-    border-left: 1px solid var(--surface-line);
-  }
-  .gate-card__time .gate-card__unit { align-self: baseline; }
-  .gate-card__minutes {
-    align-self: center;
-    font-family: var(--font-display);
-    font-size: var(--fs-heading);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* The bands take what the head and the fare leave; a day with more
-     lanes than the window holds scrolls here, never past Depart. */
-  .gate-card__bands {
+  /* The dial and its legend on the panel's middle: two grow-only
+     spacers, so a short window starts them at the top rather than
+     spilling them off both ends (DESIGN.md, the density contract). */
+  .tdy-desk__stage {
     flex: 1;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    padding-top: var(--sp-4);
+    align-items: center;
+    gap: var(--sp-7);
+    padding: var(--sp-7);
     overflow-y: auto;
   }
-  /* The switch at 230px and its lanes beside it; a band too narrow to
-     hold a lane's tile beside the switch drops its lanes under it (plan
-     169): on the desk's tightest the lanes had ~116px, three tiles of
-     30 cut at the gate's edge. */
-  .gate-band {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-4) var(--sp-5);
-    padding: var(--sp-4) 0;
-    border-top: 1px solid var(--surface-line);
-  }
-
-  .gate-band:first-child {
-    padding-top: 0;
-    border-top: none;
-  }
-  .gate-band__line {
-    flex: 0 0 230px;
-    align-self: start;
-    display: flex;
-    align-items: center;
-    gap: var(--sp-4);
-    height: 52px;
-    padding: 0 var(--sp-4);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-plate);
-    background: var(--bg-main);
-    box-shadow: inset 3px 0 0 var(--lane-color, var(--accent2));
-    color: var(--text-primary);
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-    transition: border-color 0.15s ease, opacity 0.15s ease;
-  }
-  .gate-band__line:hover,
-  .gate-band__line:focus-visible { border-color: var(--lane-color, var(--accent2)); filter: none; }
-  .gate-band__line:not(.gate-band__line--off) .lane__tick {
-    background: var(--lane-color, var(--accent2));
-    border-color: var(--lane-color, var(--accent2));
-  }
-  .gate-band__line--off { opacity: 0.5; }
-  /* Two lines rather than an ellipsis: "Vocabulaire JLPT" beside a cut
-     run's "4 / 12" does not fit the 230px column on one. */
-  .gate-band__name {
-    flex: 1;
-    min-width: 0;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    overflow: hidden;
-    font-family: var(--font-serif);
-    font-size: var(--fs-body);
-    font-weight: 700;
-    line-height: 1.2;
-  }
-  .gate-band__due {
-    font-family: var(--font-display);
-    font-size: var(--fs-lead);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .gate-band__of,
-  .lane__of {
-    font-size: var(--fs-caption);
-    font-weight: 600;
-    color: var(--text-secondary);
-  }
-  /* Three across where each tile holds a third of a side column, and
-     fewer where it would not, a band's few lanes sharing its row (plan
-     169): on a laptop the gate beside its side column left the lanes
-     ~300px, three tiles of 93, and a lane's name read "Hi…" under its
-     tags. */
-  .gate-band__lanes {
-    flex: 1 1 calc(var(--desk-side-w) / 3);
-    min-width: 0;
+  .tdy-desk__stage::before,
+  .tdy-desk__stage::after { content: ''; flex: 1 0 0; }
+  .tdy-dial--desk { width: min(384px, 100%); }
+  .tdy-dial--desk .tdy-dial__arc { stroke-width: 4.5; }
+  .tdy-dial--desk .tdy-dial__time { font-size: var(--fs-heading); }
+  .tdy-desk__keys { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); }
+  /* The lines' key, named, is a two-column table: a row of four named
+     lines left one alone on a second row at a laptop's width, and a
+     fifth line or a longer language would at any width. Two across
+     reads the same everywhere; a lone line takes the one column. */
+  .tdy-desk .tdy-key--lines {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, max(calc(var(--desk-side-w) / 3), calc((100% - 2 * var(--sp-3)) / 3))), 1fr));
-    align-content: start;
-    gap: var(--sp-3);
+    grid-template-columns: repeat(2, auto);
+    justify-content: center;
+    gap: var(--sp-2) var(--sp-6);
   }
-  /* A lane as a tile: "where · mode" on one line, its tags under them
-     (free, waiting for the refill, new), its share at the right. */
-  .lane--tile {
-    display: grid;
-    grid-template-columns: 18px minmax(0, 1fr) auto;
-    gap: var(--sp-4);
-    min-height: 46px;
-    padding: var(--sp-2) var(--sp-4);
-    border-radius: var(--r-plate);
-    border-color: color-mix(in srgb, var(--lane-color, var(--accent2)) 30%, var(--surface-line));
-    background: color-mix(in srgb, var(--lane-color, var(--accent2)) 9%, var(--bg-main));
-  }
-  .lane--tile .lane__where {
-    grid-column: 2;
-    grid-row: 1;
-    font-size: var(--fs-sm);
-    color: var(--text-primary);
-  }
-  .lane__tags {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--sp-1) var(--sp-3);
-  }
-  .lane__tags:empty { display: none; }
-  .lane--tile .lane__due {
-    grid-column: 3;
-    grid-row: 1;
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-1);
-    margin-left: 0;
-    font-size: var(--fs-lead);
-    line-height: 1;
-  }
-  .lane--tile .lane__free { color: var(--success); }
-  .lane--tile .lane__new { color: var(--line-vocab); }
-  /* The name and the share on the tile's first row, the tags under
-     them across the share's column too (plan 169): held to the name's
-     column, a tile a laptop's gate draws at ~145px printed GRATUIT over
-     its count. The tick takes the first cell left. */
-  .lane--tile > .lane__names { display: contents; }
-  .lane--tile .lane__tags {
-    grid-column: 2 / -1;
-    grid-row: 2;
-    margin-top: calc(-1 * var(--sp-3));
-  }
-  .lane__waits {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-1);
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--warning);
-  }
-  /* Waiting for the refill: chosen, and riding nothing until the balance
-     comes back — the edge breaks and the ground clears. */
-  .lane--tile.lane--waits {
-    border-style: dashed;
-    background: var(--bg-main);
-  }
-  .lane--waits .lane__where,
-  .lane--waits .lane__due { color: var(--text-secondary); }
-  /* On, but past the run's length: nothing of it rides this time. */
-  .lane--out { opacity: 0.5; }
-
-  /* The fare under the bands: what boards, what waits and until when,
-     and the balance, then Depart. A pass has no fare, and Depart takes
-     the row. */
-  .gate-card__fare {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--sp-5) var(--sp-6);
-    padding-top: var(--sp-5);
-    border-top: 1px solid var(--surface-line);
-  }
-  .gate-card__fare-parts {
-    display: flex;
-    flex: 999 1 auto;
-    gap: var(--sp-7);
-  }
-  .gate-card__part {
+  .tdy-desk .tdy-key--lines:has(> :only-child) { grid-template-columns: auto; }
+  .tdy-desk__go {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-1);
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-5) var(--sp-7) var(--sp-7);
   }
-  .gate-card__part-n {
-    font-family: var(--font-display);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
+  .tdy-desk__go > * { width: min(440px, 100%); }
+  .tdy-desk__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-height: 0;
+    margin: calc(-1 * var(--sp-1));
+    padding: var(--sp-1);
+    overflow-y: auto;
   }
-  .gate-card__part-l {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--text-secondary);
+  .tdy-desk__col > * { flex-shrink: 0; }
+  .tdy-desk__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
   }
-  .gate-card__part--rides .gate-card__part-n { color: var(--success); }
-  .gate-card__part--waits .gate-card__part-n { color: var(--warning); }
-  /* Depart is the boarding's gate (改札, plan 164; DESIGN.md, "The gate
-     button"): its own 66px pill, reader and breath, standing in the
-     fare's right column at the column's width. The foot's own rung
-     above it gives the halo its room under the rule. */
-  /* The figures take the row's slack and Depart keeps its 420px beside
-     them; on a gate too narrow for both (a laptop, the side column
-     beside it) Depart wraps under the figures and takes the row. A pass
-     has no figures, and Depart the row. */
-  .gate-card__fare .btn-depart--gate { flex: 1 1 420px; margin: 0; }
+  /* The desk lists a line's modes under it, so no chevron's column. */
+  .tdy-desk .tdy-line { grid-template-columns: minmax(0, 1fr); }
+  .tdy-desk .tdy-line__head { padding-bottom: 0; }
+  .tdy-desk .tdy-day__cell { background: var(--surface); }
 
-  /* 七日 — the week ahead at the side's foot (plan 135, WeekAhead): the
-     side column runs the window's height on Today and the week takes
-     what the pass's strip and the journey leave (the column's height
-     is on `.today > .desk-side` above), its bars standing on its foot. The journey's own sumi and edge, so the column reads as
-     one object; the bars in the panel's soft ink, today's in gold. */
+  /* 七日 — the week ahead (plan 135, WeekAhead): a bar a day, today's
+     in gold, its bars standing on its foot. Plan 135 stood it on its
+     own sumi panel at the side's foot; since plan 199 it stands in
+     Today's day panel (.tdy-desk__day), under the day's figures, and
+     takes that panel's ground and inks. */
   .desk-week {
-    flex: 1 0 auto;
+    flex: none;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     gap: var(--sp-4);
-    padding: var(--sp-5);
-    background: var(--bg-panel);
-    color: var(--text-on-panel);
-    border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
-    border-radius: var(--r-identity);
+    color: var(--text-primary);
   }
   .desk-week__bars {
     flex: 1;
@@ -33245,55 +32926,23 @@ button.brd-stn { cursor: pointer; }
     min-height: var(--sp-1);
     flex: 0 1 auto;
     border-radius: var(--r-plate) var(--r-plate) 0 0;
-    background: color-mix(in srgb, var(--text-on-panel) 30%, var(--bg-panel));
+    background: color-mix(in srgb, var(--text-secondary) 45%, var(--surface));
   }
   .desk-week__day--today .desk-week__bar { background: var(--accent2); }
   .desk-week__d {
     font-family: var(--font-jp);
     font-size: var(--fs-caption-xs);
-    color: var(--text-on-panel-soft);
+    color: var(--text-secondary);
   }
   .desk-week__left {
     display: flex;
     justify-content: space-between;
     margin: 0;
     font-size: var(--fs-caption);
-    color: var(--text-on-panel-soft);
+    color: var(--text-secondary);
   }
-  .desk-week__left b { color: var(--text-on-panel); font-variant-numeric: tabular-nums; }
+  .desk-week__left b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
 
-  /* The pass's back, beside the gate (components/journey/JourneyPanel):
-     the status sheet's own body on the sheet's own material — sumi, the
-     pass-ink edge, the identity corner a pass wears — with the verdict
-     named at its head in the state's ink. */
-  .desk-journey {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-5);
-    padding: var(--sp-5);
-    background: var(--bg-panel);
-    color: var(--text-on-panel);
-    border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
-    border-radius: var(--r-identity);
-  }
-  /* Called by the rail's status chip (plan 123): one soft arrival, and
-     no ring for a focus the pointer asked for. */
-  .desk-journey:focus { outline: none; }
-  .desk-journey--called { animation: arrive-soft 0.2s linear; }
-  .desk-journey__head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--sp-3);
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--fs-caption-xs);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-  }
-  .desk-journey__name { color: var(--text-on-panel-soft); }
-  .desk-journey__word { color: var(--jour-st-ink, var(--text-on-panel)); }
 
   /* The profile: the holder opened flat — the pass and its stamp book
      on the left, the record (the figures, the ledger, the 番付) on the
@@ -40317,12 +39966,13 @@ button.brd-stn { cursor: pointer; }
 @media (min-width: 1100px) {
   @media (max-height: 799px) {
     /* ── Today ──
-       The side column scrolls when it is taller than the window, and
-       nothing in it gives way to fit: the pass's strip, which clips its
-       own sheen, had been crushed to a 26px sliver at its top. The week
-       ahead's bars stand a rung shorter. */
-    .today > .desk-side > * { flex-shrink: 0; }
+       The column scrolls when it is taller than the window, and nothing
+       in it gives way to fit (.tdy-desk__col > *). The week ahead's bars
+       stand a rung shorter, and the dial draws closer. */
     .desk-week__bars { min-height: calc(var(--desk-side-w) / 5); }
+    /* The dial draws closer before the column scrolls (plan 199). */
+    .tdy-dial--desk { width: min(280px, 100%); }
+    .tdy-desk__stage { gap: var(--sp-5); padding-block: var(--sp-5); }
     /* ── the rail ──
        Five gates, the six stations of the lit one and the pass: 676px
        on a 600px window, and the gates' list scrolled with Profile and

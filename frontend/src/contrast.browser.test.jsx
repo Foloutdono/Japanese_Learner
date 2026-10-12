@@ -193,16 +193,32 @@ const Fixture = () => (
       <span className="lib-warning__lead lib-warn-lead">Retiré.</span>
       <span className="lib-warn-body"> Son auteur a supprimé ce paquet.</span>
     </p>
-    {/* GateCard.jsx -- the fare gate on --surface, its lane tint, and
-        the gold depart action (the wall-map redesign's one fill) */}
-    <div className="gate-card">
-      <span className="gate-card__title gc-latin">Fare gate</span>
-      <span className="gate-card__unit gc-unit">due</span>
-      <span className="gate-card__when gc-when">3h</span>
-      <button type="button" className="lane" style={{ '--lane-color': 'var(--line-kanji)' }}>
-        <span className="lane__where gc-where">Kanji N4</span>
-        <span className="lane__mode gc-mode">writing</span>
-      </button>
+    {/* GateCard.jsx (plan 199) -- the day at a glance on the page: the
+        dial's figures, its legend, the row to the services, a line's
+        sub and a mode in the sheet, and the gold depart action (the
+        wall-map redesign's one fill) */}
+    <div className="tdy">
+      <div className="tdy-dial">
+        <div className="tdy-dial__c">
+          <span className="tdy-dial__count gc-count">48</span>
+          <span className="tdy-dial__unit gc-unit">due</span>
+          <span className="tdy-dial__time gc-time">≈ 12 min</span>
+          <span className="tdy-dial__end gc-when">done by 21:12</span>
+        </div>
+      </div>
+      <p className="tdy-key tdy-key--fare"><span className="tdy-key__item gc-key"><b>38</b> board</span></p>
+      <button type="button" className="tdy-door"><span className="tdy-door__what gc-door"><b>Main</b> · all · 5 services</span></button>
+      <ul className="tdy-lines">
+        <li className="tdy-line" style={{ '--lane-color': 'var(--line-kanji)' }}>
+          <span className="tdy-line__sub gc-sub">N5 · Kanji → meaning</span>
+          <div className="tdy-line__lanes">
+            <button type="button" className="lane">
+              <span className="lane__where gc-where">Kanji N4</span>
+              <span className="lane__mode gc-mode">writing</span>
+            </button>
+          </div>
+        </li>
+      </ul>
       <button type="button" className="btn-depart">
         <span className="btn-depart__jp gc-depart-jp">Depart</span>
         <span className="btn-depart__go gc-depart-latin" aria-hidden="true">▶</span>
@@ -1002,11 +1018,15 @@ const SITES = [
   ['.dk-count', 'console count'],
   ['.lb-band-on', 'console band, the chosen ordering'],
   ['.lb-band-off', 'console band, the other ordering'],
-  ['.gc-latin', 'fare gate title'],
-  ['.gc-unit', 'fare gate unit'],
-  ['.gc-when', 'fare gate next-review line'],
-  ['.gc-where', 'gate lane name (tinted surface)'],
-  ['.gc-mode', 'gate lane mode (tinted surface)'],
+  ['.gc-count', 'today dial count (gold figure)'],
+  ['.gc-unit', 'today dial unit'],
+  ['.gc-time', 'today dial minutes'],
+  ['.gc-when', 'today dial end hour'],
+  ['.gc-key', 'today dial legend'],
+  ['.gc-door', 'today services row'],
+  ['.gc-sub', 'today line, what rides'],
+  ['.gc-where', 'gate lane name'],
+  ['.gc-mode', 'gate lane mode'],
   ['.gc-depart-jp', 'depart button name (gold fill)'],
   ['.gc-depart-latin', 'depart button arrow (gold fill)'],
   ['.lp-roundel', 'plate roundel (pigment mixed toward the ink)'],

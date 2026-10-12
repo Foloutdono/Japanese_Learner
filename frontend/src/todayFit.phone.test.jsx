@@ -10,8 +10,11 @@ import './index.css'
 // over it giving way first, and nothing else giving way: a full day --
 // the pass strip, the agenda's next block, the basics, the line mix and
 // a shortfall over the gate -- put it under the tab bar, 117px under it
-// at 360×725 (the owner's phone). The foot docks on the tab bar now, the
-// day scrolling under it, and stands where it stood once scrolled.
+// at 360×725 (the owner's phone). The foot docks on the tab bar since.
+// Plan 199 (the day at a glance) moved all of that but the dial and
+// its legend into the services sheet: a full day now fits the phone
+// whole, the dial over its legend over the row and the gate, and the
+// dock is the guard it was should a day ever outgrow it.
 
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -43,7 +46,7 @@ vi.mock('./stores/today', () => ({
   }, failed: false }),
   refreshToday: vi.fn(), seedTodaySummary: vi.fn(),
 }))
-// Fewer credits than cards, so the shortfall stands over the gate.
+// Fewer credits than cards, so the shortfall is the dial's legend.
 vi.mock('./stores/credits', async o => ({ ...(await o()),
   useCredits: () => ({ balance: 56, cap: 200, dailyRefill: 30, nextCreditAt: null, unlimited: false, enforced: false }),
 }))
@@ -75,7 +78,7 @@ afterEach(async () => {
 
 describe('the gate on a full day', () => {
   for (const [w, h] of [[390, 844], [360, 725]]) {
-    it(`keeps Depart on the screen at ${w}×${h}, over the tab bar, while the day scrolls under it`, async () => {
+    it(`fits the day whole at ${w}×${h}: the dial, its legend, the row and the gate over the tab bar`, async () => {
       await page.viewport(w, h)
       await render(
         <LangProvider>
@@ -85,29 +88,26 @@ describe('the gate on a full day', () => {
         </LangProvider>
       )
       await settle()
-      expect(document.querySelector('.gate-card__short')).not.toBeNull()
-      // The day is taller than the phone: it is the foot's dock, not the
-      // room, that keeps the gate in view.
-      expect(document.documentElement.scrollHeight).toBeGreaterThan(window.innerHeight)
-
-      const onScreen = () => {
-        const go = rect('.btn-depart--gate')
-        const tabs = rect('.tabbar')
-        expect(go.top).toBeGreaterThan(rect('.hud').bottom)
-        expect(go.bottom).toBeLessThanOrEqual(tabs.top)
-        return go
-      }
-      const before = onScreen()
-      // The way to the services is under the foot at first, and the day
-      // scrolls it out: at the end it stands over the foot, the gate
-      // where it was.
-      document.scrollingElement.scrollTop = document.scrollingElement.scrollHeight
-      await settle(60)
-      const after = onScreen()
-      expect(Math.round(after.top)).toBe(Math.round(before.top))
-      expect(rect('.gate-one__services').bottom).toBeLessThanOrEqual(rect('.gate-one__foot').top)
-      // The foot's ground runs to the screen's edges without widening it.
+      // The shortfall is said under the dial, in its legend.
+      expect(document.querySelector('.tdy-key--fare')).not.toBeNull()
+      // At a glance: nothing under the fold, nothing wider than the phone.
+      expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight)
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+      const hud = rect('.hud')
+      const dial = rect('.tdy-dial')
+      const key = rect('.tdy-key--fare')
+      const door = rect('.tdy-door')
+      const go = rect('.btn-depart--gate')
+      const tabs = rect('.tabbar')
+      expect(dial.top).toBeGreaterThan(hud.bottom)
+      expect(key.top).toBeGreaterThanOrEqual(dial.bottom)
+      expect(door.top).toBeGreaterThanOrEqual(key.bottom)
+      expect(go.top).toBeGreaterThanOrEqual(door.bottom)
+      expect(go.bottom).toBeLessThanOrEqual(tabs.top)
+      // The row is a thumb's. Read to the pixel: a rect's edges are
+      // float32 in the layout, so a row at a fractional top near 600px
+      // reads 44 - 2^-14 tall (it failed CI so at 360×725).
+      expect(Math.round(door.height)).toBeGreaterThanOrEqual(44)
     })
   }
 })

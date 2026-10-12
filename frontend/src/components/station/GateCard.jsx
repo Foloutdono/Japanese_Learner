@@ -5,89 +5,59 @@ import { kanaSetLabel } from '../../domain/kanaSets'
 import { sectionFor } from '../../config/stations'
 import { LINE_COLOR } from '../../config/tabs'
 import { beginDeparture } from '../../stores/departure'
-import { playAnnouncement } from '../../lib/audio'
+import { playAnnouncement, playClick } from '../../lib/audio'
 import { Seg } from '../chrome/Console'
 import { Sheet } from '../chrome/Sheet'
 import { DepartKey } from '../chrome/DeskKeys'
 import { GateButton } from '../ui/GateButton'
 import { useDesk } from '../../hooks/useDesk'
+import { useMinute } from '../../hooks/useMinute'
 import { Loading } from '../ui/Loading'
-import BasicsLine from './BasicsLine'
-import { CheckIcon, ChevronIcon, HourglassIcon } from '../ui/Icons'
+import { CheckIcon, ChevronIcon } from '../ui/Icons'
 import { useCredits } from '../../stores/credits'
+import { useProfileSummary } from '../../stores/profileSummary'
 import { publishLeft } from '../../stores/gateRun'
-import { runFit, isFreeLane, laneFreeShare, nextCreditClock, showsCap, CAP } from '../../domain/credits'
+import { runFit, isFreeLane, laneFreeShare, nextCreditClock, refillClock } from '../../domain/credits'
 import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, isMainLane, TAKE_STEPS } from '../../domain/lanes'
+import { restWeek, sealDate, utcToday, weekdayKanji } from '../../domain/dayClear'
+import { longDate } from '../dayclear/aria'
+import { Seal } from '../dayclear/kit/Seal'
+import { WeekStamps } from '../dayclear/kit/WeekStamps'
+import { WeekAhead } from '../journey/WeekAhead'
+import { TodayDial, FareKey, LineKeys } from './TodayDial'
+import { TodayDay } from './TodayDay'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
-// The day's reviews as a card, first thing on Today: the count, the
-// lanes, the fare, and the screen's one filled action. It grew out of
-// the home strip and the departure board; since plan 070 it is also
-// the run's picker — each lane is a switch, the run covers the lanes
-// that are on, and the fare counts them. Everything on is the
-// default, because the common case is "clear the day". Over the lanes,
-// one switch per LINE, for the days when the answer is "just the
-// kanji" and there are twenty lanes to say it in — which is also what
-// retired the all/none link that used to sit between the two: a row of
-// line switches IS the coarse control it was standing in for.
+// The day's reviews, first thing on Today, and the run's picker: each
+// lane is a switch, the run covers the lanes that are on, and the
+// screen's one filled action departs with them (plan 070).
+//
+// 一目 (plan 199, the owner's pick A2 of the canvas "Tsuji — Today at a
+// glance"): the gate is read at a glance. The run is a dial -- a ring
+// of the lines round the count, its minutes and the hour it ends --
+// and, while the balance cannot pay for all of it, a thinner ring
+// inside saying what boards and what waits; under it the legend, one
+// row saying what the run is (which cards, how many, how many
+// services) and the gate. Every choice that shapes the run lives a tap
+// away on a phone (the services sheet: which cards, how many with what
+// each takes, the lines and their modes, and the day in four figures)
+// and in the column beside the dial on the desk. A day with nothing due
+// is the dial closed round the day's stamp (ClearedGate).
 //
 // Two manners carry over: nothing is rendered after the fetch failed
-// (the screen owns up instead), and a cleared queue does not blank
-// the card — "next review in 3 hours" is what makes an empty gate
-// read as a finished day. The wait is drawn (plan 067): the card's
-// name over the three dots until /api/today answers.
+// (the screen owns up instead), and the wait is drawn (plan 067).
 //
-// Credits (plan 069): nothing at all while the balance covers the run,
-// and when it does not, how much of it rides. The gate only CLOSES
-// (the button disabled at zero) under enforcement; in shadow mode the
-// line is information and the train leaves. A pass prints no notice.
-//
-// 無料 — the kana lanes ride free (domain/credits.js), which the card
-// has to be right about twice: they are marked on the row, and they
-// are counted out of what the balance has to cover. A gate closed on
-// a day of nothing but kana would be charging for the one line that
-// does not cost anything.
+// 無料 — the kana lanes ride free (domain/credits.js), counted out of
+// what the balance has to cover, and marked on their line.
 //
 // Departing: the ticket-gate cutscene (stores/departure) and then
 // /today/run, carrying the chosen lanes in the query — omitted when
 // every lane is on, since an empty `lanes` already means the whole
 // queue on the backend and the run's session key must not churn.
 
-// ── 不足のしらせ — the only thing the gate says about credits ──
-// A fare line ran above this: Fare · n credits ———— Balance · n. The
-// fare was the count the card already prints in figures three times
-// its size, and the balance is on the HUD's pass, a thumb's width up
-// the same screen — a rule drawn between two numbers that were both
-// already on it. Owner's call.
-//
-// What is left says itself only when the two do not match, which is
-// the one moment either is worth reading. `waits` is what makes it
-// appear, not what it says.
-function Shortfall({ due, free, credits, t, lang }) {
-  const balance = credits && !credits.unlimited ? credits.balance : null
-  if (balance == null) return null
-  const { rides, waits } = runFit(due, balance, free)
-  if (waits <= 0) return null
-  return (
-    <div className="gate-card__short" role="status">
-      <span className="gate-card__short-mark" aria-hidden="true">!</span>
-      <span>
-        {/* On what RIDES, not on the balance: an empty balance with
-            kana in the run still departs, and "no credits left" over a
-            train that is about to leave with twelve cards on it is the
-            wrong sentence. The two figures are the right one whenever
-            anything at all is riding. */}
-        {rides === 0
-          ? t.gateNoCredits(nextCreditClock(credits, lang))
-          : t.gateShort(rides, due)}
-      </span>
-    </div>
-  )
-}
-
-// Grouped by type, in the lines' order, because the rail pigment is
-// what tells one lane from another and the backend's order interleaves
-// them. Stable, so the backend's urgency order within a type survives.
+// Grouped by type, in the lines' order, because the pigment is what
+// tells one lane from another and the backend's order interleaves them.
+// Stable, so the backend's urgency order within a type survives.
 const TYPE_ORDER = ['kana', 'vocab', 'kanji', 'grammar', 'personal']
 function orderLanes(lanes) {
   const rank = l => { const i = TYPE_ORDER.indexOf(laneTypeOf(l)); return i < 0 ? TYPE_ORDER.length : i }
@@ -102,6 +72,7 @@ const LINE_TITLE = {
   grammar: t => t.grammarTitle,
   personal: t => t.decksTitle,
 }
+const titlesOf = t => Object.fromEntries(Object.entries(LINE_TITLE).map(([k, f]) => [k, f(t)]))
 
 export default function GateCard({ today, failed }) {
   const { t, lang } = useLang()
@@ -113,7 +84,7 @@ export default function GateCard({ today, failed }) {
   const [off, setOff] = useState(() => new Set())
   // 区間 (plan 135): the run's length, null for the whole choice.
   // Remembered across visits: a learner who rides fifty a day picks it
-  // once. The desk's head and, since plan 166, the phone's card.
+  // once.
   const [take, setTakeState] = useState(readTake)
   function setTake(next) {
     setTakeState(next)
@@ -122,8 +93,8 @@ export default function GateCard({ today, failed }) {
   // 主 — the main flashcards alone: each line's recognition
   // card rides and every other mode stays on the platform. A filter
   // over the learner's own switches rather than a rewrite of them, so
-  // "every mode" gives back the choice as it stood. Remembered like the
-  // run's length.
+  // "every mode" gives back the choice as it stood. The default since
+  // plan 199 (the owner's ask), and remembered like the run's length.
   const [main, setMainState] = useState(readMain)
   function setMain(next) {
     setMainState(next)
@@ -133,29 +104,13 @@ export default function GateCard({ today, failed }) {
   if (failed) return null
   if (!today) {
     return (
-      <div className="gate-card gate-card--waiting" aria-busy="true">
-        <div className="gate-card__head">
-          <span className="gate-card__title">{t.fareGate}</span>
-        </div>
-        <Loading tight />
-      </div>
+      <section className="tdy-wait" aria-busy="true" aria-label={t.fareGate}>
+        <TodayDial parts={[]}><Loading tight /></TodayDial>
+      </section>
     )
   }
 
-  const total = today.total ?? 0
-  const when = untilNext(today.next_due, lang)
-
-  if (total === 0) {
-    return (
-      <div className="gate-card gate-card--clear">
-        <div className="gate-card__head">
-          <span className="gate-card__title">{t.fareGate}</span>
-        </div>
-        <span className="gate-card__clear">{t.todayNothingDueShort}</span>
-        {when && <span className="gate-card__when">{t.todayNextReview(when)}</span>}
-      </div>
-    )
-  }
+  if ((today.total ?? 0) === 0) return <ClearedGate today={today} desk={desk} />
 
   const lanes = orderLanes(today.lanes ?? [])
   const isOn = lane => !off.has(lane.id) && (!main || isMainLane(lane))
@@ -183,21 +138,26 @@ export default function GateCard({ today, failed }) {
   }
   const toggle = id => choose([id], !isOn(lanes.find(l => l.id === id)))
   // ── 路線ごと — the lines in today's queue, as switches ──
-  // Twenty lanes is five taps to say "just the kanji" and fifteen to
-  // say it the other way round. A line is the coarse choice the fine
-  // switches under it are made of, so it gets its own switch: lit when
-  // the WHOLE line rides, which makes the tap unambiguous both ways —
-  // lit switches the line off, unlit switches all of it on. The figure
-  // is what the line owes today, not what is chosen of it; the lit
-  // state is where the choice is read.
+  // A line's switch says whether it rides today: lit while any of its
+  // lanes does, so a tap takes the line out of the day; unlit, a tap
+  // puts it back as the choice of cards would board it (its main
+  // flashcard under Principales, every mode under every mode). With the
+  // main cards the default (plan 199) most lines ride in part, and a
+  // switch lit only for a whole line would have read "off" on every
+  // line that rides.
   const lines = TYPE_ORDER
     .map(type => {
       const own = lanes.filter(l => laneTypeOf(l) === type)
-      return { type, lanes: own, due: own.reduce((n, l) => n + laneCount(l), 0), on: own.length > 0 && own.every(isOn) }
+      const riding = own.filter(isOn).length
+      return { type, lanes: own, due: own.reduce((n, l) => n + laneCount(l), 0), riding, on: riding > 0 }
     })
     .filter(line => line.lanes.length > 0)
 
-  const toggleLine = line => choose(line.lanes.map(l => l.id), !line.on)
+  function toggleLine(line) {
+    if (line.on) { choose(line.lanes.filter(isOn).map(l => l.id), false); return }
+    const want = main ? line.lanes.filter(isMainLane) : line.lanes
+    choose((want.length ? want : line.lanes).map(l => l.id), true)
+  }
 
   // What the filter leaves out travels as switched off.
   const offNow = new Set(lanes.filter(l => !isOn(l)).map(l => l.id))
@@ -225,14 +185,12 @@ function runOf({ today, isOn, take, metered, credits, enforced, lang }) {
   const share = lane => (isOn(lane) ? shares.get(lane.id) ?? 0 : 0)
   const taken = cut ?? chosenTotal
   // Of the chosen cards, the ones that cost nothing: a free line's and
-  // the learning steps' repeats on any line. A pass is not asked:
-  // nothing costs anything on one, so nothing is worth marking free
-  // either -- the tag would be on every row and say nothing.
+  // the learning steps' repeats on any line. A pass is not asked.
   const free = metered ? queue.reduce((n, l) => n + laneFreeShare(l, shares.get(l.id) ?? 0), 0) : 0
   const balance = metered ? credits.balance : null
   const { rides, waits } = runFit(taken, balance, free)
   const spr = today.seconds_per_review
-  const minutes = spr && taken > 0 ? Math.max(1, Math.round((taken * spr) / 60)) : null
+  const minutes = minutesFor(taken, spr)
   // The unit is honest about what the figure is: "due" while any of it
   // is owed, "new" when the whole run is the day's ration (a first day,
   // or a day with nothing yet to review).
@@ -243,39 +201,90 @@ function runOf({ today, isOn, take, metered, credits, enforced, lang }) {
   // for. Nothing chosen is not a run.
   const closed = Boolean(enforced && metered && balance === 0 && free === 0)
   return {
-    queue, chosenTotal, cut, share, taken, free, balance, rides, waits, minutes, owed, closed,
+    queue, chosenTotal, cut, share, taken, free, balance, rides, waits, minutes, owed, closed, spr,
     // When the refill lands its next credit (plan 141) -- what a paid
     // lane that cannot board is waiting for.
     clock: nextCreditClock(credits, lang),
   }
 }
 
-// The two choices over the switches: which modes (every one, or each
-// line's main flashcard) and how many cards, each with what it rides.
-function choicesOf(chosen, chosenTotal, t) {
+// What `n` cards take at the learner's pace, rounded, never under a
+// minute; nothing before the pace is known.
+function minutesFor(n, spr) {
+  return spr && n > 0 ? Math.max(1, Math.round((n * spr) / 60)) : null
+}
+
+// The two choices: which modes (each line's main flashcard, the
+// default, or every one) and how many cards, each option with what it
+// rides -- and a length with the minutes it takes, so the consequence of
+// a choice is printed before it is made (DESIGN.md, Settings).
+function choicesOf(chosen, chosenTotal, spr, t) {
   const everyMode = chosen.reduce((n, l) => n + laneCount(l), 0)
   const mainCards = chosen.filter(isMainLane).reduce((n, l) => n + laneCount(l), 0)
   const steps = TAKE_STEPS.filter(n => n < chosenTotal)
+  const sub = n => {
+    const m = minutesFor(n, spr)
+    return m == null ? null : `${m} ${t.gateMinutes}`
+  }
   return {
     kinds: [
-      { key: 'all', label: t.gateModesAll(everyMode) },
-      { key: 'main', label: t.gateModesMain(mainCards) },
+      { key: 'main', label: t.gateModesMainName, figure: mainCards },
+      { key: 'all', label: t.gateModesAllName, figure: everyMode },
     ],
     steps,
-    lengths: [...steps.map(n => ({ key: String(n), label: String(n) })), { key: 'all', label: t.gateTakeAll(chosenTotal) }],
+    lengths: [
+      ...steps.map(n => ({ key: String(n), label: String(n), sub: sub(n) })),
+      { key: 'all', label: t.gateTakeWord, sub: sub(chosenTotal) },
+    ],
   }
 }
 
 // Same tap the board rows used to make: the announcement, then the
-// gate. /today has no clip in public/sounds/announcements, so
-// playAnnouncement plays the jingle alone and degrades exactly the
-// way it is built to. The section is Today's, with the run's path,
-// and `stage`: the run is drawn on the stage, so on the desk the gate
-// spans the window from its first frame rather than stopping at the
-// rail and jumping over it when the chrome turns (TicketGate).
+// gate. The section is Today's, with the run's path, and `stage`: the
+// run is drawn on the stage, so on the desk the gate spans the window
+// from its first frame (TicketGate).
 function departWith(today, off, cut, t) {
   playAnnouncement('today')
   beginDeparture({ ...sectionFor('/today', t), path: runPathFor(today.lanes ?? [], off, cut), stage: true })
+}
+
+// Each line's share of the run and what is chosen of it, in the lines'
+// order: the dial's arcs and the legend.
+function mixOf(lines, isOn, share) {
+  return lines
+    .map(line => ({
+      type: line.type,
+      chosen: line.lanes.filter(isOn).reduce((n, l) => n + laneCount(l), 0),
+      n: line.lanes.reduce((n, l) => n + share(l), 0),
+    }))
+    .filter(part => part.chosen > 0)
+}
+
+// ── The dial's middle: the count, what it is, the minutes and the
+// hour they end (the clock read once a minute, so it moves with it).
+function DialFigures({ run, t, lang }) {
+  const now = useMinute()
+  const { taken, cut, chosenTotal, owed, minutes } = run
+  const unit = cut != null ? t.gateTakeOf(chosenTotal) : (owed === 0 && taken > 0 ? t.newUnit : t.dueUnit)
+  const ends = minutes != null ? refillClock(new Date(now.getTime() + minutes * 60_000).toISOString(), lang) : null
+  return (
+    <>
+      <span className="tdy-dial__count">{taken}</span>
+      <span className="tdy-dial__unit">{unit}</span>
+      {minutes != null && (
+        <span className="tdy-dial__time" role="img" aria-label={t.gateMinutesLabel(minutes)}>≈ {minutes} {t.gateMinutes}</span>
+      )}
+      {ends && <span className="tdy-dial__end">{t.gateEndsAt(ends)}</span>}
+    </>
+  )
+}
+
+// What the dial and its legend draw, for either gate.
+function dialOf({ lines, isOn, run, metered }) {
+  const mix = mixOf(lines, isOn, run.share)
+  const parts = mix.map(m => ({ key: m.type, n: m.chosen, lit: m.n }))
+  const short = metered && run.waits > 0
+  return { mix, parts, short, fare: short ? { rides: run.rides, total: run.taken } : null }
 }
 
 // A lane as a switch's content: its tick, where over what, its tags
@@ -284,169 +293,325 @@ function LaneRow({ lane, on, metered, t }) {
   return (
     <>
       <span className="lane__tick" aria-hidden="true">{on && <CheckIcon size={11} />}</span>
-      {/* Where over what, not beside it: at phone width
-          "Hiragana (de base)" and "Kana → romaji" on one line
-          ellipsised the mode away, and the mode is half of what
-          tells two lanes of the same deck apart. */}
       <span className="lane__names">
         <span className="lane__where">{whereOf(lane, t, kanaSetLabel)}</span>
         <span className="lane__mode">{modeLabel(t, lane.mode)}</span>
       </span>
-      {metered && isFreeLane(lane) && (
-        <span className="lane__free">{t.freeFare}</span>
-      )}
-      {/* 新規 — the day's ration in this lane, apart from the
-          reviews: the figure on the right is what the lane
-          puts in the run, this says how much of it is new. */}
-      {lane.new > 0 && (
-        <span className="lane__new">{t.laneNew(lane.new)}</span>
-      )}
+      {metered && isFreeLane(lane) && <span className="lane__free">{t.freeFare}</span>}
+      {lane.new > 0 && <span className="lane__new">{t.laneNew(lane.new)}</span>}
       <span className="lane__due">{laneCount(lane)}</span>
     </>
   )
 }
 
-// ── 一押し — the gate on a phone, in one gesture (plan 166) ──────
-// The owner's pick C of four drawn on the canvas "Tsuji — Today on the
-// phone": the common case is "clear the day", or clear it with a
-// limit, so the phone's gate is the day as one card -- what the run
-// takes and roughly how long, a bar of each line's share of it, then
-// the two questions that shape it (which cards: every mode or the main
-// flashcards; how many: 20 / 50 / 100 / all) -- and the gate under it
-// at the thumb. The switches the card used to scroll inside itself,
-// and the line chips over them, moved behind one row that opens them
-// in a sheet: a fine choice a learner makes some days, not every day,
-// and the card no longer holds a second scroll.
+// ── 線 — a line in the services: its switch, its share, its modes ──
+// The head is the line's switch (its tick, its name, its share of the
+// run, and what it holds today when that is more). Under it, a line of
+// one mode says it; a line of several lists them as switches, behind
+// a chevron on a phone and open on the desk.
+function LineRow({ line, isOn, share, toggle, toggleLine, metered, open, onOpen, t }) {
+  const many = line.lanes.length > 1
+  const title = LINE_TITLE[line.type]?.(t) ?? line.type
+  const lineShare = line.lanes.reduce((n, l) => n + share(l), 0)
+  const free = metered && line.lanes.every(isFreeLane)
+  const riding = line.lanes.filter(isOn)
+  const fresh = riding.reduce((n, l) => n + (l.new ?? 0), 0)
+  const said = l => `${whereOf(l, t, kanaSetLabel)} · ${modeLabel(t, l.mode)}`
+  const sub = riding.length
+    ? [riding.map(said).join(' · '), fresh > 0 ? t.laneNew(fresh) : null].filter(Boolean).join(' · ')
+    : t.gateLineNone
+  return (
+    <li className={`tdy-line${line.on ? '' : ' tdy-line--off'}`} style={{ '--lane-color': LINE_COLOR[line.type] }}>
+      <button type="button" className="tdy-line__head" aria-pressed={line.on} onClick={() => toggleLine(line)}>
+        <span className="lane__tick" aria-hidden="true">{line.on && <CheckIcon size={12} />}</span>
+        <span className="tdy-line__name">
+          {title}
+          {free && <span className="tdy-line__tag">{t.freeFare}</span>}
+        </span>
+        <span className="tdy-line__n">
+          {line.on ? lineShare : line.due}
+          {line.on && lineShare !== line.due && <small> / {line.due}</small>}
+        </span>
+      </button>
+      {many && onOpen && (
+        <button type="button" className="tdy-line__more" aria-expanded={open} aria-label={t.gateLineModes(title)} onClick={() => { playClick(); onOpen() }}>
+          <ChevronIcon direction={open ? 'up' : 'down'} size={16} />
+        </button>
+      )}
+      {many && open ? (
+        <div className="tdy-line__lanes" role="group" aria-label={t.gateLineModes(title)}>
+          {line.lanes.map(lane => {
+            const on = isOn(lane)
+            return (
+              <button key={lane.id} type="button" className={`lane${on ? '' : ' lane--off'}`} aria-pressed={on} onClick={() => toggle(lane.id)}>
+                <LaneRow lane={lane} on={on} metered={metered} t={t} />
+              </button>
+            )
+          })}
+        </div>
+      ) : (
+        <span className="tdy-line__sub">{sub}</span>
+      )}
+    </li>
+  )
+}
+
+// ── 選 — the services: the two choices and the lines ─────────────
+// The sheet's body on a phone and the column's head on the desk. No
+// title over either choice (the owner's word on the canvas): each
+// option says what it is and what it rides.
+function Services({ lines, isOn, share, toggle, toggleLine, choices, main, setMain, cut, setTake, metered, desk, t }) {
+  const [open, setOpen] = useState(() => new Set())
+  const flip = type => setOpen(prev => {
+    const next = new Set(prev)
+    if (next.has(type)) next.delete(type)
+    else next.add(type)
+    return next
+  })
+  return (
+    <>
+      <div className="tdy-asks">
+        <Seg full className="tdy-seg" label={t.gateWhich} options={choices.kinds} value={main ? 'main' : 'all'} onChange={key => setMain(key === 'main')} />
+        {choices.steps.length > 0 && (
+          <Seg full className="tdy-seg tdy-seg--two" label={t.gateHowMany} options={choices.lengths} value={cut != null ? String(cut) : 'all'} onChange={key => setTake(key === 'all' ? null : Number(key))} />
+        )}
+      </div>
+      <ul className="tdy-lines" aria-label={t.todayLines}>
+        {lines.map(line => (
+          <LineRow
+            key={line.type}
+            line={line} isOn={isOn} share={share} toggle={toggle} toggleLine={toggleLine} metered={metered} t={t}
+            open={desk || open.has(line.type)}
+            onOpen={desk ? null : () => flip(line.type)}
+          />
+        ))}
+      </ul>
+    </>
+  )
+}
+
+// ── 一押し — the gate on a phone (plan 166, redrawn by plan 199) ──
+// The dial and its legend on the room's middle, and at the thumb the
+// row that says what the run is (and opens the services) over the gate.
+// The foot never leaves the screen (owner-directed): it docks on the
+// tab bar on the page's own ground, and the air gives way first.
 function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang }) {
   const [open, setOpen] = useState(false)
   const run = runOf({ today, isOn, take, metered, credits, enforced, lang })
-  const { taken, free, cut, share, minutes, owed, closed } = run
-  const { kinds, steps, lengths } = choicesOf(chosen, run.chosenTotal, t)
-  const unit = cut != null ? t.gateTakeOf(run.chosenTotal) : (owed === 0 && taken > 0 ? t.newUnit : t.dueUnit)
-  // Each line's share of the run, in the lines' order: the bar and its key.
-  const mix = lines
-    .map(line => ({ type: line.type, n: line.lanes.reduce((sum, l) => sum + share(l), 0) }))
-    .filter(part => part.n > 0)
+  const choices = choicesOf(chosen, run.chosenTotal, run.spr, t)
+  const { mix, parts, short, fare } = dialOf({ lines, isOn, run, metered })
   const riding = lanes.filter(isOn).length
+  const depart = () => { setOpen(false); departWith(today, off, run.cut, t) }
+  const gate = (
+    <GateButton
+      label={t.depart}
+      onClick={depart}
+      aria-label={t.todayDue(run.taken)}
+      disabled={run.closed || run.taken === 0}
+    />
+  )
 
   return (
-    <div className="gate-one">
-      <section className="gate-card gate-card--one" data-guide="today.gate" aria-label={t.fareGate}>
-        <div className="gate-card__figure">
-          <span className="gate-card__count">{taken}</span>
-          <span className="gate-card__unit">{unit}</span>
-          {minutes != null && (
-            <span className="gate-card__time" role="img" aria-label={t.gateMinutesLabel(minutes)}>≈ {minutes} {t.gateMinutes}</span>
-          )}
-        </div>
-
-        <BasicsLine basics={today.basics} />
-
-        {mix.length > 0 && (
-          <div className="gate-mix">
-            <span className="gate-mix__bar" aria-hidden="true">
-              {mix.map(part => (
-                <span key={part.type} className="gate-mix__part" style={{ '--lane-color': LINE_COLOR[part.type], flexGrow: part.n }} />
-              ))}
-            </span>
-            <ul className="gate-mix__keys" aria-label={t.todayLines}>
-              {mix.map(part => (
-                <li key={part.type} className="gate-mix__key" style={{ '--lane-color': LINE_COLOR[part.type] }}>
-                  <span className="gate-mix__ring" aria-hidden="true" />
-                  {LINE_TITLE[part.type]?.(t) ?? part.type}
-                  <span className="gate-mix__n">{part.n}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <div className="gate-card__asks">
-          <div className="gate-card__ask">
-            <span className="gate-card__ask-label" aria-hidden="true">{t.gateWhich}</span>
-            <Seg full className="gate-card__modes" label={t.gateWhich} options={kinds} value={main ? 'main' : 'all'} onChange={key => setMain(key === 'main')} />
-          </div>
-          {steps.length > 0 && (
-            <div className="gate-card__ask">
-              <span className="gate-card__ask-label" aria-hidden="true">{t.gateHowMany}</span>
-              <Seg full className="gate-card__take" label={t.gateHowMany} options={lengths} value={cut != null ? String(cut) : 'all'} onChange={key => setTake(key === 'all' ? null : Number(key))} />
-            </div>
-          )}
-        </div>
+    <div className="tdy">
+      <span className="tdy__air" aria-hidden="true" />
+      <section className="tdy-hero" data-guide="today.gate" aria-label={t.fareGate}>
+        <TodayDial parts={parts} fare={fare}>
+          <DialFigures run={run} t={t} lang={lang} />
+        </TodayDial>
+        {short
+          ? <FareKey rides={run.rides} waits={run.waits} clock={run.clock} t={t} />
+          : <LineKeys mix={mix} titles={titlesOf(t)} label={t.todayLines} />}
       </section>
+      <span className="tdy__air" aria-hidden="true" />
 
-      <button type="button" className="gate-one__services" onClick={() => setOpen(true)} aria-haspopup="dialog">
-        <span className="gate-one__services-name">{t.gateServices}</span>
-        <span className="gate-one__services-of">{t.gateServicesOf(riding, lanes.length)}</span>
-        <ChevronIcon direction="right" size={16} />
-      </button>
-
-      <span className="gate-one__air" aria-hidden="true" />
-
-      <div className="gate-one__foot">
-        <Shortfall due={taken} free={free} credits={credits} t={t} lang={lang} />
-        {/* 改札 (plan 164): the boarding's gate, the one filled action. */}
-        <GateButton
-          label={t.depart}
-          data-guide="today.fare"
-          onClick={() => departWith(today, off, cut, t)}
-          aria-label={t.todayDue(taken)}
-          disabled={closed || taken === 0}
-        />
+      <div className="tdy__foot">
+        <button type="button" className="tdy-door" onClick={() => { playClick(); setOpen(true) }} aria-haspopup="dialog">
+          <span className="tdy-door__what">
+            <b>{main ? t.gateModesMainName : t.gateModesAllName}</b>
+            {' · '}{run.cut ?? t.gateTakeAllWord}
+            {' · '}{t.gateServicesN(riding)}
+          </span>
+          <span className="tdy-door__go">{t.gateAdjust}<ChevronIcon direction="right" size={16} /></span>
+        </button>
+        {gate}
       </div>
 
-      <Sheet open={open} onClose={() => setOpen(false)} jp={t.gateServicesTitle} label={t.gateServicesTitle} className="gate-sheet">
-        <div className="gate-sheet__lines">
-          {lines.map(line => (
-            <div key={line.type} className="gate-sheet__line" style={{ '--lane-color': LINE_COLOR[line.type] }}>
-              <button
-                type="button"
-                className={`gate-sheet__head${line.on ? '' : ' gate-sheet__head--off'}`}
-                aria-pressed={line.on}
-                onClick={() => toggleLine(line)}
-              >
-                <span className="lane__tick" aria-hidden="true">{line.on && <CheckIcon size={11} />}</span>
-                <span className="gate-sheet__name">{LINE_TITLE[line.type]?.(t) ?? line.type}</span>
-                <span className="gate-sheet__due">{line.due}</span>
-              </button>
-              {line.lanes.map(lane => {
-                const on = isOn(lane)
-                return (
-                  <button
-                    key={lane.id}
-                    type="button"
-                    className={`lane${on ? '' : ' lane--off'}`}
-                    style={{ '--lane-color': LINE_COLOR[line.type] }}
-                    aria-pressed={on}
-                    onClick={() => toggle(lane.id)}
-                  >
-                    <LaneRow lane={lane} on={on} metered={metered} t={t} />
-                  </button>
-                )
-              })}
-            </div>
-          ))}
-        </div>
-        <button type="button" className="btn-secondary gate-sheet__done" onClick={() => setOpen(false)}>{t.done}</button>
+      <Sheet open={open} onClose={() => setOpen(false)} jp={t.todayTitle} label={t.gateServicesTitle} className="tdy-sheet">
+        <Services
+          lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}
+          choices={choices} main={main} setMain={setMain} cut={run.cut} setTake={setTake}
+          metered={metered} desk={false} t={t}
+        />
+        <TodayDay today={today} />
+        <div className="tdy-sheet__foot">{gate}</div>
       </Sheet>
     </div>
   )
 }
 
+// ── 机 — the gate as the desk draws it (plan 199) ────────────────
+// The owner's pick A2 on the desk: the dial at the size the room gives
+// it on a panel the window's height, its legend in words, the gate at
+// the panel's foot; beside it, in a column at the entry's width, what
+// the sheet holds on a phone, open -- the two choices and the lines with
+// their modes -- and the day: its four figures and the week ahead.
+function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang }) {
+  const run = runOf({ today, isOn, take, metered, credits, enforced, lang })
+  const choices = choicesOf(chosen, run.chosenTotal, run.spr, t)
+  const { mix, parts, short, fare } = dialOf({ lines, isOn, run, metered })
+  // What this choice leaves for tomorrow, for the week ahead beside it.
+  const left = Math.max(0, (today.total ?? 0) - run.taken)
+  useEffect(() => {
+    publishLeft(left)
+    return () => publishLeft(0)
+  }, [left])
+  const depart = () => departWith(today, off, run.cut, t)
+  const closed = run.closed || run.taken === 0
+
+  return (
+    <div className="tdy-desk">
+      <section className="tdy-desk__hero" data-guide="today.gate" aria-label={t.fareGate}>
+        <div className="tdy-desk__stage">
+          <TodayDial className="tdy-dial--desk" parts={parts} fare={fare}>
+            <DialFigures run={run} t={t} lang={lang} />
+          </TodayDial>
+          <div className="tdy-desk__keys">
+            <LineKeys mix={mix} titles={titlesOf(t)} named label={t.todayLines} />
+            {short && <FareKey rides={run.rides} waits={run.waits} clock={run.clock} t={t} />}
+          </div>
+        </div>
+        <div className="tdy-desk__go">
+          <GateButton label={t.depart} onClick={depart} aria-label={t.todayDue(run.taken)} keys disabled={closed} />
+        </div>
+      </section>
+      <aside className="tdy-desk__col">
+        <section className="tdy-desk__panel tdy-desk__svc" aria-label={t.gateServicesTitle}>
+          <Services
+            lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}
+            choices={choices} main={main} setMain={setMain} cut={run.cut} setTake={setTake}
+            metered={metered} desk t={t}
+          />
+        </section>
+        <DeskDay today={today} />
+      </aside>
+      <DepartKey onDepart={depart} disabled={closed} />
+    </div>
+  )
+}
+
+// The desk's day: the four figures over the week ahead, one panel.
+function DeskDay({ today }) {
+  const { t } = useLang()
+  return (
+    <section className="tdy-desk__panel tdy-desk__day" aria-label={t.todayDayLabel}>
+      <TodayDay today={today} />
+      <WeekAhead />
+    </section>
+  )
+}
+
+// ── 済 — a day with nothing due (plan 199) ──────────────────────
+// The owner's ruling on the canvas: the empty gate looked cheap. The
+// dial closes round the day it was: its ring is today's reviews by line
+// (/api/today's `reviewed`), and in its middle the day's 駅スタンプ, the
+// seal the cleared day's ceremony presses (plan 191) -- the screen the
+// ceremony leaves the learner on shows what they earned. Under it what
+// the day was and the week's stamps; at the foot tomorrow as a row of a
+// departure board, and the gate shut, saying when it opens. A day with
+// nothing reviewed and nothing due stamps nothing.
+function ClearedGate({ today, desk }) {
+  const { t, lang } = useLang()
+  const summary = useProfileSummary()
+  const day = utcToday()
+  const reviewed = today.reviewed
+  const stamped = (reviewed?.total ?? 0) > 0
+  const parts = TYPE_ORDER
+    .map(key => ({ key, n: reviewed?.by_line?.[key] ?? 0 }))
+    .filter(p => p.n > 0)
+  const week = summary?.streak > 0 ? restWeek(summary.week, [], day) : null
+  const tomorrow = today.tomorrow
+  const opens = opensWords(today.next_due, t, lang)
+
+  const hero = (
+    <section className="tdy-hero tdy-hero--clear" data-guide="today.gate" aria-label={t.fareGate}>
+      <TodayDial parts={parts} className={desk ? 'tdy-dial--desk' : ''}>
+        {stamped
+          ? <Seal day={weekdayKanji(day)} foot={sealDate(day)} size={desk ? 236 : 168} tilt={-6} label={t.clrSealAria(longDate(day, lang))} />
+          : <span className="tdy-dial__clear">{t.todayNothingDueShort}</span>}
+      </TodayDial>
+      {stamped && <p className="tdy-recap">{t.todayReviewed(reviewed.total)}</p>}
+      {week && (
+        <div className="tdy-rally">
+          <WeekStamps week={week} label={t.todayWeekStamps(summary.streak)} />
+          <span className="tdy-rally__n" aria-hidden="true"><b>{summary.streak}</b>{t.todayStreakDays}</span>
+        </div>
+      )}
+    </section>
+  )
+  const foot = (
+    <>
+      {tomorrow?.cards > 0 && (
+        <div className="tdy-next" role="group" aria-label={t.nudgeWhen.tomorrow}>
+          <span className="tdy-next__day">{t.nudgeWhen.tomorrow}</span>
+          <b className="tdy-next__n">{tomorrow.cards}<small>{t.todayCardsUnit(tomorrow.cards)}</small></b>
+          <span className="tdy-next__min">≈ {tomorrow.minutes} {t.gateMinutes}</span>
+        </div>
+      )}
+      <GateButton label={opens ?? t.depart} aria-label={opens ?? t.todayNothingDueShort} disabled />
+    </>
+  )
+
+  if (desk) {
+    return (
+      <div className="tdy-desk">
+        <section className="tdy-desk__hero">
+          <div className="tdy-desk__stage">{hero}</div>
+          <div className="tdy-desk__go tdy-desk__go--clear">{foot}</div>
+        </section>
+        <aside className="tdy-desk__col">
+          <DeskDay today={today} />
+        </aside>
+      </div>
+    )
+  }
+  return (
+    <div className="tdy tdy--clear">
+      <span className="tdy__air" aria-hidden="true" />
+      {hero}
+      <span className="tdy__air" aria-hidden="true" />
+      <div className="tdy__foot">{foot}</div>
+    </div>
+  )
+}
+
+// When the shut gate opens: its hour within the day, else the day.
+function opensWords(iso, t, lang) {
+  if (!iso) return null
+  const at = new Date(iso)
+  if (!Number.isFinite(at.getTime())) return null
+  if (at.getTime() - Date.now() < 20 * 3600_000) return t.gateOpensAt(refillClock(iso, lang))
+  const when = untilNext(iso, lang)
+  return when ? t.gateOpensIn(when) : null
+}
+
 // ── 区間 — the run's length, kept per browser (plan 135) ─────────
 const TAKE_KEY = 'tsuji.gateTake'
+// 主 — which cards, kept the same way. The main flashcards are the
+// default (plan 199), so what is kept is the learner leaving them:
+// '0' is every mode, and nothing kept (a first visit, a private
+// window, the '1' an earlier build wrote) is the main cards.
 const MAIN_KEY = 'tsuji.gateMain'
 function readMain() {
   try {
-    return window.localStorage.getItem(MAIN_KEY) === '1'
+    return window.localStorage.getItem(MAIN_KEY) !== '0'
   } catch {
-    return false
+    return true
   }
 }
 function writeMain(on) {
   try {
-    if (on) window.localStorage.setItem(MAIN_KEY, '1')
-    else window.localStorage.removeItem(MAIN_KEY)
+    if (on) window.localStorage.removeItem(MAIN_KEY)
+    else window.localStorage.setItem(MAIN_KEY, '0')
   } catch { /* private window: the choice lasts the visit */ }
 }
 function readTake() {
@@ -462,176 +627,4 @@ function writeTake(n) {
     if (n == null) window.localStorage.removeItem(TAKE_KEY)
     else window.localStorage.setItem(TAKE_KEY, String(n))
   } catch { /* private window: the choice lasts the visit */ }
-}
-
-// ── 机 — the gate as the desk draws it (plan 135) ────────────────
-// The owner's pick (A·2 of the Today canvas): the gate takes the
-// window's height; each line is a band, its switch on the left and its
-// lanes as tiles beside it, which retires the chips (the band's switch
-// IS the line's chip); the head holds the run's length (20 / 50 / 100 /
-// all) and what the run will take in minutes; each lane prints its
-// share of the run and whether it boards (free, or waiting for the
-// refill); the foot counts the fare beside Depart.
-//
-// The length is dealt the way the queue deals (domain/lanes.splitTake),
-// in the queue's order -- `today.lanes` as the server sent them -- while
-// the bands keep the lines' order for reading.
-function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang }) {
-  const run = runOf({ today, isOn, take, metered, credits, enforced, lang })
-  const { chosenTotal, cut, share, taken, free, balance, rides, waits, minutes, owed, closed, clock } = run
-  // Nothing paid rides: every paid lane waits for the refill, and says so.
-  const paidWait = metered && waits > 0 && rides <= free
-  const cap = credits?.cap ?? CAP
-  const unit = cut != null ? t.gateTakeOf(chosenTotal) : (owed === 0 && taken > 0 ? t.newUnit : t.dueUnit)
-  // What this choice leaves for tomorrow, for the week ahead beside it.
-  const left = Math.max(0, (today.total ?? 0) - taken)
-  useEffect(() => {
-    publishLeft(left)
-    return () => publishLeft(0)
-  }, [left])
-
-  // The two ways to board what the switches chose -- every mode, or
-  // each line's main flashcard alone -- and the run's length.
-  const { kinds, steps, lengths: options } = choicesOf(chosen, chosenTotal, t)
-
-  const depart = () => departWith(today, off, cut, t)
-
-  return (
-    <div className="gate-card gate-card--desk" data-guide="today.gate">
-      <div className="gate-card__head">
-        <span className="gate-card__title">{t.fareGate}</span>
-        <span className="gate-card__figs">
-          <span className="gate-card__figure">
-            <span className="gate-card__count">{taken}</span>
-            <span className="gate-card__unit">{unit}</span>
-          </span>
-          {minutes != null && (
-            <span className="gate-card__time" role="img" aria-label={t.gateMinutesLabel(minutes)}>
-              <span className="gate-card__minutes">≈ {minutes}</span>
-              <span className="gate-card__unit">{t.gateMinutes}</span>
-            </span>
-          )}
-        </span>
-      </div>
-
-      <BasicsLine basics={today.basics} />
-
-      {/* What boards, as two instruments under the head: which modes
-          (every one, or each line's main flashcard) on the left, the
-          run's length on the right. The head keeps the figures. */}
-      <div className="gate-card__console">
-        <Seg
-          className="gate-card__modes"
-          label={t.gateModes}
-          options={kinds}
-          value={main ? 'main' : 'all'}
-          onChange={key => setMain(key === 'main')}
-        />
-        {steps.length > 0 && (
-          <span className="gate-card__length" data-guide="today.take">
-            <Seg
-              className="gate-card__take"
-              label={t.gateTake}
-              options={options}
-              value={cut != null ? String(cut) : 'all'}
-              onChange={key => setTake(key === 'all' ? null : Number(key))}
-            />
-          </span>
-        )}
-      </div>
-
-      <div className="gate-card__bands" role="group" aria-label={t.todayLines}>
-        {lines.map(line => {
-          const lineShare = line.lanes.reduce((n, l) => n + share(l), 0)
-          const color = LINE_COLOR[line.type]
-          return (
-            <div key={line.type} className="gate-band" style={{ '--lane-color': color }}>
-              <button
-                type="button"
-                className={`gate-band__line${line.on ? '' : ' gate-band__line--off'}`}
-                aria-pressed={line.on}
-                onClick={() => toggleLine(line)}
-              >
-                <span className="lane__tick" aria-hidden="true">{line.on && <CheckIcon size={11} />}</span>
-                <span className="gate-band__name">{LINE_TITLE[line.type]?.(t) ?? line.type}</span>
-                <span className="gate-band__due">
-                  {lineShare}
-                  {lineShare !== line.due && <span className="gate-band__of"> / {line.due}</span>}
-                </span>
-              </button>
-              <div className="gate-band__lanes">
-                {line.lanes.map(lane => {
-                  const on = isOn(lane)
-                  const mine = share(lane)
-                  const all = laneCount(lane)
-                  const isFree = metered && isFreeLane(lane)
-                  const waitsHere = paidWait && on && laneFreeShare(lane, mine) < mine
-                  return (
-                    <button
-                      key={lane.id}
-                      type="button"
-                      className={`lane lane--tile${on ? '' : ' lane--off'}${on && mine === 0 ? ' lane--out' : ''}${waitsHere ? ' lane--waits' : ''}`}
-                      style={{ '--lane-color': color }}
-                      aria-pressed={on}
-                      onClick={() => toggle(lane.id)}
-                    >
-                      <span className="lane__tick" aria-hidden="true">{on && <CheckIcon size={11} />}</span>
-                      <span className="lane__names">
-                        <span className="lane__where">
-                          {whereOf(lane, t, kanaSetLabel)} · {modeLabel(t, lane.mode)}
-                        </span>
-                        <span className="lane__tags">
-                          {isFree && <span className="lane__free">{t.freeFare}</span>}
-                          {waitsHere && (
-                            <span className="lane__waits"><HourglassIcon size={12} /><span className="sr-only">{t.laneWaits('')}</span>{clock ?? ''}</span>
-                          )}
-                          {lane.new > 0 && <span className="lane__new">+{t.laneNew(lane.new)}</span>}
-                        </span>
-                      </span>
-                      <span className="lane__due">
-                        {on ? mine : all}
-                        {on && mine !== all && <span className="lane__of"> / {all}</span>}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      <div className="gate-card__fare" data-guide="today.fare">
-        {metered && (
-          <div className="gate-card__fare-parts">
-            <span className="gate-card__part gate-card__part--rides">
-              <span className="gate-card__part-n">{rides}</span>
-              <span className="gate-card__part-l">{rides > 0 && rides <= free ? t.gateRidesFree : t.gateRides}</span>
-            </span>
-            {waits > 0 && (
-              <span className="gate-card__part gate-card__part--waits">
-                <span className="gate-card__part-n">{waits}</span>
-                <span className="gate-card__part-l">{t.gateWaits(clock)}</span>
-              </span>
-            )}
-            <span className="gate-card__part">
-              <span className="gate-card__part-n">{balance}{showsCap(balance, cap) ? ` / ${cap}` : ''}</span>
-              <span className="gate-card__part-l">{t.gateBalance}</span>
-            </span>
-          </div>
-        )}
-        {/* 改札 (plan 164): Depart drawn as the boarding's gate, the
-            pass's mark in its reader -- the outline while nothing is
-            chosen, woken by the first lane switched back on. */}
-        <GateButton
-          label={t.depart}
-          onClick={depart}
-          aria-label={t.todayDue(taken)}
-          keys
-          disabled={closed || taken === 0}
-        />
-      </div>
-      <DepartKey onDepart={depart} disabled={closed || taken === 0} />
-    </div>
-  )
 }

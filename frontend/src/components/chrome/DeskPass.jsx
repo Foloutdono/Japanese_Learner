@@ -33,8 +33,7 @@ import { playClick } from '../../lib/audio'
 //                ∞ drawn on a plan without one. → the balance sheet.
 //   the journey  the drift over the journey's word, lit in the state's
 //                ink; the offline word when the network has gone.
-//                → the status sheet (showStatus: the panel beside
-//                Today's gate, or the sheet).
+//                → the status sheet (showStatus).
 //
 // On the screens that print the whole card -- the profile and Settings
 // -- the card is out of the holder and on the page, and the holder's

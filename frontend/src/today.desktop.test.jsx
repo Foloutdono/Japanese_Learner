@@ -6,12 +6,14 @@ import { LangProvider } from './LangContext'
 import { contentBox } from './testing/contentBox'
 import './index.css'
 
-// ── 机 — Today on the desk (plan 114) ────────────────────────────
-// The fare gate is the work and takes the width; beside it stands what
-// the work is FOR — the pass at strip size and the pass's back (the
-// journey, the status sheet's own body), always open. On a phone the
-// strip heads the gate and the back is a tap on the HUD away
-// (deskfree.phone.test.jsx holds that side).
+// ── 机 — Today on a laptop (plan 199) ────────────────────────────
+// The owner's pick A2 of the canvas "Tsuji — Today at a glance": the
+// dial on a panel that takes the width, and beside it a column of what
+// the services sheet holds on a phone, open, over the day's figures.
+// Plan 114 stood the pass's strip and its back there; the rail's pass
+// is the journey's on the desk, and its stub opens the status sheet.
+// The wide desk is today.wide.test.jsx's, and a phone keeps its own
+// gate (deskfree.phone.test.jsx).
 
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -44,7 +46,7 @@ vi.mock('./stores/credits', async o => ({ ...(await o()),
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
-// 時間割 (plan 181): an empty week unless a test fills it, so the gate
+// 時間割 (plan 181): an empty week unless a test fills it, so the day
 // stands as it did for every test that is not about the agenda.
 const agenda = vi.hoisted(() => ({ blocks: [] }))
 vi.mock('./stores/agenda', () => ({ useAgenda: () => ({ blocks: agenda.blocks, failed: false }), saveAgenda: vi.fn() }))
@@ -75,62 +77,92 @@ function mount() {
   )
 }
 
-describe('Today on the desk', () => {
-  it('sets the gate on the left and the pass beside it, at the same top', async () => {
-    journeyRef.current = BEHIND
+describe('Today on a laptop', () => {
+  it('sets the dial\'s panel on the left and the column beside it, at the same top', async () => {
     await mount()
     await settle()
     const main = document.querySelector('main.today')
-    // The strip left the gate's head for the side column.
-    expect(main.querySelector(':scope > .pass--strip')).toBeNull()
-    const side = main.querySelector(':scope > .desk-side')
-    expect(side.querySelector('.pass--strip')).not.toBeNull()
-    const gate = main.querySelector(':scope > .gate-card').getBoundingClientRect()
-    const s = contentBox(side)
-    expect(Math.round(gate.top)).toBe(Math.round(s.top))
-    expect(s.left).toBeGreaterThan(gate.right)
-    expect(Math.round(s.width)).toBe(360)
-    expect(getComputedStyle(side).position).toBe('sticky')
+    // Plan 114's side is gone: the pass is the rail's.
+    expect(main.querySelector('.desk-side, .pass--strip, .desk-journey')).toBeNull()
+    const hero = main.querySelector(':scope > .tdy-desk > .tdy-desk__hero').getBoundingClientRect()
+    const col = main.querySelector(':scope > .tdy-desk > .tdy-desk__col')
+    // Its content, inside the gutter it keeps for a row's focus ring.
+    const c = contentBox(col)
+    expect(Math.round(c.top)).toBe(Math.round(hero.top))
+    expect(c.left).toBeGreaterThan(hero.right)
+    // The column at the entry's width at most, the side's at least.
+    expect(Math.round(c.width)).toBeGreaterThanOrEqual(360)
+    expect(Math.round(c.width)).toBeLessThanOrEqual(440)
+    expect(getComputedStyle(col).overflowY).toBe('auto')
   })
 
-  it('stands the pass\'s back open beside the gate: distance, track, pace and arrival, and the moves', async () => {
-    journeyRef.current = BEHIND
+  // At the desk's tightest nothing may leave its panel: the dial gives
+  // way to the panel's width, and the lines to the column's.
+  it('holds the dial in its panel and every line and mode in the column at the desk\'s tightest', async () => {
     await mount()
     await settle()
-    const panel = document.querySelector('.desk-side .desk-journey')
-    expect(panel).not.toBeNull()
-    expect(panel.querySelector('.desk-journey__head').textContent.length).toBeGreaterThan(0)
-    expect(panel.querySelector('.jour-dist__count').textContent).toMatch(/410/)
-    expect(panel.querySelector('.jour-track')).not.toBeNull()
-    expect(panel.querySelectorAll('.jour-cmp')).toHaveLength(2)
-    expect(panel.querySelectorAll('.jour-act').length).toBeGreaterThan(0)
-    // No dialog: the back is standing, not opened.
-    expect(document.querySelector('[role="dialog"]')).toBeNull()
-  })
-
-  // Plan 135 draws each line as a band, its switch beside its lanes
-  // (today.wide.test.jsx). At the desk's tightest nothing may leave the
-  // gate: a band that cannot hold both drops its lanes under the switch.
-  it('holds every band inside the gate at the desk\'s tightest', async () => {
-    await mount()
-    await settle()
-    const gate = document.querySelector('.gate-card--desk').getBoundingClientRect()
-    for (const el of document.querySelectorAll('.gate-band__line, .gate-band .lane')) {
+    const inside = (el, box) => {
       const r = el.getBoundingClientRect()
-      expect(r.left).toBeGreaterThanOrEqual(gate.left)
-      expect(r.right).toBeLessThanOrEqual(gate.right)
+      expect(r.left).toBeGreaterThanOrEqual(box.left)
+      expect(r.right).toBeLessThanOrEqual(box.right)
     }
-    for (const band of document.querySelectorAll('.gate-band')) {
-      const line = band.querySelector('.gate-band__line').getBoundingClientRect()
-      const tile = band.querySelector('.lane').getBoundingClientRect()
-      expect(tile.left > line.right || tile.top >= line.bottom).toBe(true)
+    const hero = document.querySelector('.tdy-desk__hero').getBoundingClientRect()
+    inside(document.querySelector('.tdy-dial--desk'), hero)
+    inside(document.querySelector('.tdy-desk__go .btn-depart'), hero)
+    const col = contentBox(document.querySelector('.tdy-desk__col'))
+    for (const el of document.querySelectorAll('.tdy-desk__col .tdy-line__head, .tdy-desk__col .lane, .tdy-desk__col .seg__opt')) inside(el, col)
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+  })
+
+  // The lines' key, named, at the desk's tightest: four lines across
+  // left the fourth alone on a second row. Two across, every line paired
+  // and inside the panel.
+  it('keys four lines two across inside the dial\'s panel, none alone on a row', async () => {
+    const lanes = TODAY.lanes
+    TODAY.lanes = [
+      lane('kana', 'hiragana_basic', 'kana.flashcard.f2b', 8),
+      lane('vocab', 'N5', 'vocab.flashcard.f2b', 158),
+      lane('kanji', 'N5', 'kanji.flashcard.f2b', 86),
+      lane('grammar', 'N5', 'grammar.ladder', 14),
+    ]
+    try {
+      await mount()
+      await settle()
+      const hero = document.querySelector('.tdy-desk__hero').getBoundingClientRect()
+      const keys = [...document.querySelectorAll('.tdy-desk__keys .tdy-key--lines .tdy-key__item')]
+      expect(keys).toHaveLength(4)
+      const rows = new Map()
+      for (const k of keys) {
+        const r = k.getBoundingClientRect()
+        expect(r.left).toBeGreaterThanOrEqual(hero.left)
+        expect(r.right).toBeLessThanOrEqual(hero.right)
+        const top = Math.round(r.top)
+        rows.set(top, (rows.get(top) ?? 0) + 1)
+      }
+      expect([...rows.values()]).toEqual([2, 2])
+    } finally {
+      TODAY.lanes = lanes
     }
   })
 
-  // A laptop's short window (plan 123, kept by plan 135): the gate is
-  // bounded by the window, the bands scroll inside it, and Depart and
-  // the fare stay in view.
-  it('scrolls the bands in a short window, Depart still in view', async () => {
+  it('keys a lone line on the panel\'s axis', async () => {
+    const lanes = TODAY.lanes
+    TODAY.lanes = [lane('vocab', 'N5', 'vocab.flashcard.f2b', 30)]
+    try {
+      await mount()
+      await settle()
+      const hero = document.querySelector('.tdy-desk__hero').getBoundingClientRect()
+      const key = document.querySelector('.tdy-desk__keys .tdy-key--lines .tdy-key__item').getBoundingClientRect()
+      expect(Math.abs(key.left + key.width / 2 - (hero.left + hero.width / 2))).toBeLessThan(2)
+    } finally {
+      TODAY.lanes = lanes
+    }
+  })
+
+  // A laptop's short window (plan 123, kept by plans 135 and 199): the
+  // gate is bounded by the window, the column scrolls inside it, and
+  // the gate stays in view under the dial.
+  it('scrolls the column in a short window, the gate still in view under the dial', async () => {
     const lanes = TODAY.lanes
     TODAY.lanes = ['N5', 'N4', 'N3', 'N2'].flatMap(d => [
       lane('vocab', d, 'vocab.flashcard.f2b', 5), lane('kanji', d, 'kanji.flashcard.f2b', 5),
@@ -139,31 +171,25 @@ describe('Today on the desk', () => {
     try {
       await mount()
       await settle()
-      const go = document.querySelector('.btn-depart').getBoundingClientRect()
+      const go = document.querySelector('.tdy-desk__go .btn-depart').getBoundingClientRect()
       expect(go.bottom).toBeLessThanOrEqual(window.innerHeight)
-      expect(document.querySelector('.gate-card__fare-parts').getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
-      const box = document.querySelector('.gate-card__bands')
-      expect(getComputedStyle(box).overflowY).toBe('auto')
-      expect(box.getBoundingClientRect().bottom).toBeLessThanOrEqual(go.top)
+      expect(document.querySelector('.tdy-dial--desk').getBoundingClientRect().bottom).toBeLessThanOrEqual(go.top)
+      const col = document.querySelector('.tdy-desk__col')
+      expect(col.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
+      expect(col.scrollHeight).toBeGreaterThan(col.clientHeight)
     } finally {
       TODAY.lanes = lanes
       await page.viewport(1100, 800)
     }
   })
-
-  it('stands nothing where there is no journey to judge', async () => {
-    await mount()
-    await settle()
-    expect(document.querySelector('.desk-journey')).toBeNull()
-    expect(document.querySelector('.desk-side .pass--strip')).not.toBeNull()
-  })
 })
 
-// ── plan 123 — one panel, one word; the finish keeps the strip ──
-describe('Today\'s side, called and finished (plan 123)', () => {
-  // The rail's status is the stub of its pass since plan 127; the walk
-  // is the same one, off the same anchor.
-  it('walks the rail\'s status chip to the panel beside the gate, with no dialog', async () => {
+// ── plan 123's walk, retired by plan 199 ──
+describe('Today\'s journey, called and finished', () => {
+  // Plan 123 walked the rail's status chip to the journey's panel beside
+  // the gate; the dial's column took that place, so the chip opens the
+  // status sheet on Today as everywhere.
+  it('opens the status sheet from the rail\'s status chip', async () => {
     journeyRef.current = BEHIND
     const { DeskPass } = await import('./components/chrome/DeskPass')
     const { openStatus } = await import('./stores/journey')
@@ -181,9 +207,7 @@ describe('Today\'s side, called and finished (plan 123)', () => {
     await settle()
     document.querySelector('.desk-rail [data-guide="hud.status"]').click()
     await settle(60)
-    expect(openStatus).not.toHaveBeenCalled()
-    expect(document.querySelector('[aria-modal="true"]')).toBeNull()
-    expect(document.activeElement).toBe(document.querySelector('.desk-journey'))
+    expect(openStatus).toHaveBeenCalledTimes(1)
   })
 
   it('prints no finish (plan 191): a run ends on /today/clear', async () => {
@@ -199,32 +223,28 @@ describe('Today\'s side, called and finished (plan 123)', () => {
     )
     await settle()
     expect(document.querySelector('main.today > .today-clear')).toBeNull()
-    expect(document.querySelector('main.today > .desk-side .pass--strip')).not.toBeNull()
+    expect(document.querySelector('main.today > .tdy-desk')).not.toBeNull()
   })
 })
 
-
-// ── 時間割 (plan 181) — what is next on the agenda, beside the gate ──
-describe('the agenda beside the gate', () => {
+// ── 時間割 (plan 181) — what is next on the agenda, in the day ──
+describe('the agenda in the day\'s figures', () => {
   afterEach(() => { agenda.blocks = []; vi.useRealTimers() })
 
-  it('stands under the strip, over the journey, with the two blocks after it', async () => {
+  it('stands the block under way as a door to the agenda, inside the column', async () => {
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(new Date(2026, 9, 7, 10, 0))
     agenda.blocks = WEEK
-    journeyRef.current = BEHIND
     await mount()
     await settle()
-    const side = document.querySelector('.today > .desk-side')
-    const kids = [...side.children]
-    const card = side.querySelector(':scope > .agd-now')
-    expect(card).not.toBeNull()
-    expect(kids.indexOf(card)).toBe(kids.indexOf(side.querySelector(':scope > .pass--strip')) + 1)
-    expect(kids.indexOf(card)).toBeLessThan(kids.indexOf(side.querySelector(':scope > .desk-journey')))
-    expect(card.querySelectorAll('.agd-now__then li')).toHaveLength(2)
-    // The card stays inside the column.
-    const s = side.getBoundingClientRect()
-    const c = card.getBoundingClientRect()
+    const cell = document.querySelector('.tdy-desk__day .tdy-day__cell--door')
+    expect(cell).not.toBeNull()
+    expect(cell.getAttribute('href')).toMatch(/agenda/)
+    expect(cell.querySelector('.tdy-day__fig').textContent).toBe('En cours')
+    expect(cell.querySelector('.tdy-day__what').textContent).toMatch(/Kanji/)
+    // The cell stays inside the column.
+    const s = contentBox(document.querySelector('.tdy-desk__col'))
+    const c = cell.getBoundingClientRect()
     expect(c.left).toBeGreaterThanOrEqual(s.left)
     expect(c.right).toBeLessThanOrEqual(s.right)
   })
@@ -232,6 +252,6 @@ describe('the agenda beside the gate', () => {
   it('stands nothing for a learner with no agenda', async () => {
     await mount()
     await settle()
-    expect(document.querySelector('.desk-side .agd-now')).toBeNull()
+    expect(document.querySelector('.tdy-day__cell--door')).toBeNull()
   })
 })

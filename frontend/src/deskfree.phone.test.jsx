@@ -609,17 +609,18 @@ describe('the keys and the boards (plan 115, P8)', () => {
   })
 })
 
-// ── plan 166 — the gate a phone keeps ──
-// On the desk the gate is plan 135's bands, head and fare foot
-// (today.wide.test.jsx). A phone draws the day in one gesture: one
-// card, the gate under it with no key printed, and the switches in a
-// sheet -- a column there, one lane to a row across the whole of it.
-describe('the gate on a phone (plan 166)', () => {
-  it('keeps the switches in a sheet, one lane to a row, and prints no key', async () => {
+// ── plans 166, 199 — the gate a phone keeps ──
+// On the desk the dial stands beside a column of the services, open
+// (today.wide.test.jsx). A phone draws the day at a glance: the dial,
+// the gate under it with no key printed, and the switches in a sheet --
+// a line to a row across the whole of it, its modes a row each.
+describe('the gate on a phone (plans 166, 199)', () => {
+  it('keeps the switches in a sheet, a line to a row, and prints no key', async () => {
     apiFetch.mockImplementation(async () => ({
       ok: true, status: 200, json: async () => ({ balance: 50, cap: 200, unlimited: false, enforced: false }),
     }))
     const { default: GateCard } = await import('./components/station/GateCard')
+    const { MemoryRouter } = await import('react-router-dom')
     const lane = (source, deck, mode, due) => ({ id: `${source}:${deck}:${mode}`, kind: 'section', source, deck, mode, due, new: 0 })
     const lanes = [
       lane('kana', 'hiragana_basic', 'kana.flashcard.f2b', 18),
@@ -631,28 +632,42 @@ describe('the gate on a phone (plan 166)', () => {
     ]
     await render(
       <LangProvider>
-        <main className="today">
-          <GateCard today={{ total: lanes.reduce((n, l) => n + l.due, 0), lanes, by_source: {}, next_due: null }} />
-        </main>
+        <MemoryRouter>
+          <main className="today">
+            <GateCard today={{ total: lanes.reduce((n, l) => n + l.due, 0), lanes, by_source: {}, next_due: null }} />
+          </main>
+        </MemoryRouter>
       </LangProvider>
     )
     await settle()
-    expect(document.querySelector('.gate-card--one')).not.toBeNull()
-    expect(document.querySelector('.lane')).toBeNull()
-    expect(document.querySelector('.gate-one .desk-kbd, .gate-one [aria-keyshortcuts]')).toBeNull()
-    document.querySelector('.gate-one__services').click()
+    expect(document.querySelector('.tdy .tdy-dial')).not.toBeNull()
+    expect(document.querySelector('.lane, .tdy-line')).toBeNull()
+    expect(document.querySelector('.tdy .desk-kbd, .tdy [aria-keyshortcuts]')).toBeNull()
+    document.querySelector('.tdy-door').click()
     await settle()
-    const box = document.querySelector('.gate-sheet__lines')
-    const rows = [...box.querySelectorAll('.lane')].map(el => el.getBoundingClientRect())
-    expect(rows).toHaveLength(6)
-    rows.forEach((r, i) => {
-      expect(Math.round(r.width)).toBe(box.clientWidth)
-      if (i === 0) return
-      expect(r.top).toBeGreaterThanOrEqual(rows[i - 1].bottom)
-      expect(Math.round(r.left)).toBe(Math.round(rows[0].left))
-    })
-    // Plan 135's gate is the desk's: no bands and no fare foot.
-    expect(document.querySelector('.gate-card--desk, .gate-band, .gate-card__fare')).toBeNull()
+    const box = document.querySelector('.tdy-sheet .tdy-lines')
+    const stacked = els => {
+      const rows = els.map(el => el.getBoundingClientRect())
+      rows.forEach((r, i) => {
+        if (i === 0) return
+        expect(r.top).toBeGreaterThanOrEqual(rows[i - 1].bottom)
+        expect(Math.round(r.left)).toBe(Math.round(rows[0].left))
+      })
+      return rows
+    }
+    const lines = stacked([...box.querySelectorAll(':scope > .tdy-line')])
+    expect(lines).toHaveLength(4)
+    for (const r of lines) expect(Math.round(r.width)).toBe(box.clientWidth)
+    // A line's modes, opened, a row each across the line, indented under
+    // its tick.
+    const vocab = box.querySelectorAll(':scope > .tdy-line')[1]
+    vocab.querySelector('.tdy-line__more').click()
+    await settle()
+    const modes = vocab.querySelector('.tdy-line__lanes')
+    const inner = modes.clientWidth - parseFloat(getComputedStyle(modes).paddingLeft) - parseFloat(getComputedStyle(modes).paddingRight)
+    for (const r of stacked([...modes.querySelectorAll('.lane')])) expect(Math.round(r.width)).toBe(Math.round(inner))
+    // The desk's gate is the desk's: no column and no key.
+    expect(document.querySelector('.tdy-desk, .tdy-desk__col')).toBeNull()
   })
 })
 

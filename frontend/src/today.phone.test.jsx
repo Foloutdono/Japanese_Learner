@@ -1,14 +1,14 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
 // ── 机 — Today and the dictionary stay the phone's below the desk (plan 114) ──
-// The desk stands the pass strip and the pass's back beside the fare
-// gate, and keeps the dictionary's dock open with no ✕. At 390 the strip
-// still heads the gate, nothing stands beside it, and the dictionary's
-// entry is a sheet that is opened by a tap and closed by its ✕.
+// The desk stands a column beside the dial (plan 199), and keeps the
+// dictionary's dock open with no ✕. At 390 the dial stands alone, what
+// the column holds is the services sheet's, and the dictionary's entry
+// is a sheet that is opened by a tap and closed by its ✕.
 
 vi.mock('./lib/api', () => ({
   api: p => p,
@@ -23,8 +23,10 @@ vi.mock('./lib/api', () => ({
   ApiError: class extends Error {},
 }))
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
+const EMPTY = { total: 0, by_source: {}, lanes: [], next_due: null, pace: { target: 10, newToday: 4 } }
+const todayRef = vi.hoisted(() => ({ current: null }))
 vi.mock('./stores/today', () => ({
-  useTodaySummary: () => ({ data: { total: 0, by_source: {}, lanes: [], next_due: null, pace: { target: 10, newToday: 4 } }, failed: false }),
+  useTodaySummary: () => ({ data: todayRef.current, failed: false }),
   refreshToday: vi.fn(), seedTodaySummary: vi.fn(),
 }))
 vi.mock('./stores/journey', () => ({
@@ -37,7 +39,7 @@ vi.mock('./stores/profileSummary', async o => ({ ...(await o()),
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
-// 時間割 (plan 181): an empty week unless a test fills it, so the gate
+// 時間割 (plan 181): an empty week unless a test fills it, so the day
 // stands as it did for every test that is not about the agenda.
 const agenda = vi.hoisted(() => ({ blocks: [] }))
 vi.mock('./stores/agenda', () => ({ useAgenda: () => ({ blocks: agenda.blocks, failed: false }), saveAgenda: vi.fn() }))
@@ -52,7 +54,9 @@ const { default: DictionaryScreen } = await import('./screens/DictionaryScreen')
 const settle = (ms = 250) => new Promise(r => setTimeout(r, ms))
 
 describe('Today below the desk', () => {
-  it('heads the gate with the strip and stands nothing beside it', async () => {
+  beforeEach(() => { todayRef.current = EMPTY })
+
+  it('stands the dial alone, and nothing beside it', async () => {
     await render(
       <LangProvider>
         <MemoryRouter initialEntries={['/today']}><TodayScreen session={{}} /></MemoryRouter>
@@ -60,16 +64,17 @@ describe('Today below the desk', () => {
     )
     await settle()
     const main = document.querySelector('main.today')
-    expect(main.querySelector(':scope > .pass--strip')).not.toBeNull()
-    expect(document.querySelector('.desk-side, .desk-journey')).toBeNull()
-    // No agenda, no card.
-    expect(document.querySelector('.agd-now')).toBeNull()
+    expect(main.querySelector(':scope > .tdy')).not.toBeNull()
+    expect(document.querySelector('.tdy-desk, .desk-side, .desk-journey, .pass--strip')).toBeNull()
+    // No agenda, no block.
+    expect(document.querySelector('.agd-now, .tdy-day__cell--door')).toBeNull()
   })
 
-  it('stands what is next on the agenda between the strip and the gate', async () => {
+  it('says what is next on the agenda in the day\'s figures, a door to the agenda', async () => {
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(new Date(2026, 9, 7, 10, 0))
     agenda.blocks = WEEK
+    todayRef.current = { ...EMPTY, total: 12, lanes: [{ id: 'vocab:N5:vocab.flashcard.f2b', kind: 'section', source: 'vocab', deck: 'N5', mode: 'vocab.flashcard.f2b', due: 12 }] }
     try {
       await render(
         <LangProvider>
@@ -77,23 +82,17 @@ describe('Today below the desk', () => {
         </LangProvider>
       )
       await settle()
-      const main = document.querySelector('main.today')
-      const kids = [...main.children].map(el => el.className.split(' ')[0])
-      const strip = kids.indexOf('pass')
-      const card = kids.indexOf('agd-now')
-      expect(card).toBe(strip + 1)
-      expect(kids.indexOf('gate-card')).toBeGreaterThan(card)
-      const now = main.querySelector('.agd-now')
-      expect(now.querySelector('.agd-now__name').textContent).toBe('Kanji')
-      expect(now.querySelector('.agd-now__go').getAttribute('href')).toBe('/learn/kanji')
-      expect(now.querySelector('a.agd-now__open').getAttribute('href')).toBe('/profile/settings/agenda')
-      // A thumb's card: the way in and the door each 44px at least, and
-      // nothing wider than the phone.
-      expect(now.querySelector('.agd-now__go').getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
-      expect(now.querySelector('a.agd-now__open').getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+      // Not on the screen: the room is the dial's.
+      expect(document.querySelector('main.today .tdy-day, .agd-now')).toBeNull()
+      document.querySelector('.tdy-door').click()
+      await settle()
+      const cell = document.querySelector('.tdy-sheet .tdy-day__cell--door')
+      expect(cell.querySelector('.tdy-day__fig').textContent).toBe('En cours')
+      expect(cell.querySelector('.tdy-day__what').textContent).toBe('Kanji')
+      expect(cell.getAttribute('href')).toBe('/profile/settings/agenda')
+      // A thumb's door, and nothing wider than the phone.
+      expect(Math.round(cell.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44)
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
-      // The phone lists no blocks after it: the gate needs the room.
-      expect(now.querySelector('.agd-now__then')).toBeNull()
     } finally {
       agenda.blocks = []
       vi.useRealTimers()

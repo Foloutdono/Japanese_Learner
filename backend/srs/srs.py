@@ -796,6 +796,34 @@ class SRSEngine:
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
+    # The four lines a review can be counted on, by its mode's family.
+    REVIEW_LINES = ("kana", "vocab", "kanji", "grammar")
+
+    def get_reviews_today_by_line(self, user_id: str) -> dict[str, Any]:
+        """What today's reviews were (plan 199): the day's count, and the
+        same split by line -- the family the mode names (kana.*, vocab.*,
+        kanji.*, grammar.*), which is the line a personal deck's card is
+        reviewed on too. The cleared gate draws its ring from it. Same
+        day as get_reviews_today."""
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT split_part(mode, '.', 1) AS line, COUNT(*)
+                    FROM review_log
+                    WHERE card_id LIKE %s
+                      AND reviewed_at >= date_trunc('day', NOW())
+                    GROUP BY 1
+                """
+                self._log_sql("reviews_today_by_line", sql, (pattern,))
+                cur.execute(sql, (pattern,))
+                rows = cur.fetchall()
+        counts = {line: int(n) for line, n in rows}
+        return {
+            "total": sum(counts.values()),
+            "by_line": {line: counts[line] for line in self.REVIEW_LINES if counts.get(line)},
+        }
+
     def _compute_review_xp(self, user_id: str, quality: int) -> int:
         # No streak in it any more: the streak is paid once a day, when
         # the day is cleared (plan 191, xp_math.day_clear_bonus).

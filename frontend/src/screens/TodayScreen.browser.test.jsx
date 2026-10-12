@@ -7,9 +7,10 @@ import { LangProvider } from '../LangContext'
 import '../index.css'
 
 // ── The gate (plan 070) ───────────────────────────────────────
-// /today is the fare gate with the day's lanes as the run's
-// picker, and the strip. The finish is the run's own since plan 191
-// (/today/clear); the gate prints none.
+// /today is the fare gate with the day's lanes as the run's picker,
+// drawn since plan 199 as a dial with the switches in the services
+// sheet. The finish is the run's own since plan 191 (/today/clear);
+// the gate prints none.
 //
 // The two .btn-primary contracts below predate the gate (plans 051 and
 // 052): the screen's filled action used to be a .btn-primary and the
@@ -92,43 +93,39 @@ beforeEach(() => {
 })
 
 // The switches stand in the services sheet since plan 166, which
-// portals to the body.
+// portals to the body. A line of one lane is its own switch.
 async function services(screen) {
-  screen.container.querySelector('.gate-one__services').click()
+  screen.container.querySelector('.tdy-door').click()
   await settle()
-  return [...document.querySelectorAll('.gate-sheet .lane')]
+  return [...document.querySelectorAll('.tdy-sheet .tdy-line__head')]
 }
 
 describe('TodayScreen — the gate', () => {
-  it('opens on the strip and the gate with every lane on, and no bar', async () => {
+  it('opens on the dial and the gate with every lane on, and no bar', async () => {
     const screen = await mount()
     await settle()
     // No bar (owner's call, 2026-09-20): the name is the clipped <h1>.
     expect(screen.container.querySelector('.bar')).toBeNull()
     expect(screen.container.querySelector('h1.sr-only').textContent).toBe('Service du jour')
-    // The strip reads over the gate, not under it: a status line
-    // belongs above the object it is about, and it leaves the gate the
-    // last thing on the screen, free to take the rest of it.
-    const order = [...screen.container.querySelectorAll('.pass--strip, .gate-card')]
-      .map(el => (el.classList.contains('pass--strip') ? 'strip' : 'gate'))
-    expect(order).toEqual(['strip', 'gate'])
-    const lanes = await services(screen)
-    expect(lanes).toHaveLength(3)
-    expect([...lanes].every(l => l.getAttribute('aria-pressed') === 'true')).toBe(true)
-    expect(screen.container.querySelector('.gate-card__count').textContent).toBe('19')
-    expect(screen.container.querySelector('.pass--strip .stamp-rally')).toBeTruthy()
-    expect(screen.container.querySelector('.hall-pace')).toBeTruthy()
+    // The day at a glance (plan 199): the strip and the pace that stood
+    // over the gate are the sheet's figures and the HUD's ring now.
+    expect(screen.container.querySelector('.pass--strip, .hall-pace')).toBeNull()
+    expect(screen.container.querySelector('.tdy-hero .tdy-dial')).toBeTruthy()
+    expect(screen.container.querySelector('.tdy-dial__count').textContent).toBe('19')
+    const lines = await services(screen)
+    expect(lines).toHaveLength(3)
+    expect(lines.every(l => l.getAttribute('aria-pressed') === 'true')).toBe(true)
   })
 
-  it('a lane switched off leaves the count, and the run carries the choice', async () => {
+  it('a line switched off leaves the count, and the run carries the choice', async () => {
     const screen = await mount()
     await settle()
     // The lanes are grouped by line, vocab before kanji: pick by name.
-    const kanji = (await services(screen)).find(l => l.textContent.includes('N4'))
+    const kanji = (await services(screen)).find(l => l.textContent.includes('Kanji'))
     kanji.click()
     await settle()
-    expect(kanji.classList.contains('lane--off')).toBe(true)
-    expect(screen.container.querySelector('.gate-card__count').textContent).toBe('10')
+    expect(kanji.getAttribute('aria-pressed')).toBe('false')
+    expect(screen.container.querySelector('.tdy-dial__count').textContent).toBe('10')
 
     screen.container.querySelector('.btn-depart').click()
     expect(beginDeparture).toHaveBeenCalledTimes(1)
@@ -145,12 +142,11 @@ describe('TodayScreen — the gate', () => {
     // Every line switched off is the whole day off — the all/none link
     // that used to do it in one tap is gone, and the line switches are
     // what stands in for it.
-    await services(screen)
-    for (const head of document.querySelectorAll('.gate-sheet__head')) {
+    for (const head of await services(screen)) {
       if (head.getAttribute('aria-pressed') === 'true') head.click()
       await settle()
     }
-    expect(document.querySelectorAll('.gate-sheet .lane--off')).toHaveLength(3)
+    expect(document.querySelectorAll('.tdy-sheet .tdy-line--off')).toHaveLength(3)
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)
   })
 
@@ -167,7 +163,7 @@ describe('TodayScreen — the gate', () => {
     )
     await settle()
     expect(screen.container.querySelector('.today-clear')).toBeNull()
-    expect(screen.container.querySelector('.gate-card')).toBeTruthy()
+    expect(screen.container.querySelector('.tdy-hero')).toBeTruthy()
   })
 
   // 運休 (plan 191): the morning after a missed day a rest day covered,
@@ -249,12 +245,11 @@ describe('TodayScreen — the guide', () => {
     const screen = await mount()
     await settleLong()
     const root = screen.container
-    expect(root.querySelector('[data-guide="today.strip"]')).toBeTruthy()
     expect(root.querySelector('[data-guide="today.gate"]')).toBeTruthy()
     const guide = document.querySelector('.guide')
     expect(guide).toBeTruthy()
     // The tab bar is the shell's, not this screen's: the guide starts
-    // on the gate, and never stops at the strip.
+    // on the gate.
     expect(guide.dataset.stop).toBe('today.gate')
     document.querySelector('[data-action="guide-skip"]').click()
     await settleLong()

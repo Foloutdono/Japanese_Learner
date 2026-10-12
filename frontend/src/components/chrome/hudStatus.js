@@ -1,5 +1,4 @@
 import { openStatus } from '../../stores/journey'
-import { isDesk } from '../../hooks/useDesk'
 
 // ── 運行状況 — the journey's reading, and where it opens ──────────
 // Shared by the two objects that print the journey's status: the HUD's
@@ -20,19 +19,10 @@ export function statusOf(model) {
   return { status, days: days || null }
 }
 
-// 机 (plan 123): on Today the pass's back already stands beside the
-// gate (components/journey/JourneyPanel), and the rail's status chip
-// opened a dialog copy of it, the scrim hiding the panel it duplicated.
-// Where that panel stands, the chip walks to it instead: in view,
-// focused, marked with one soft arrival. Everywhere else, and on every
-// phone, it opens the sheet as it always has. The rail's pass (plan
-// 127) calls the same walk from its stub.
+// The journey's sheet, from the HUD's panel and the rail's stub alike.
+// On the desk Today's gate stood the pass's back beside it (plan 123's
+// walk to it, retired by plan 199, when the dial's column took that
+// place), so the sheet opens everywhere now.
 export function showStatus() {
-  const panel = isDesk() ? document.querySelector('.desk-journey') : null
-  if (!panel) { openStatus(); return }
-  panel.scrollIntoView({ block: 'nearest' })
-  panel.focus({ preventScroll: true })
-  panel.classList.remove('desk-journey--called')
-  void panel.offsetWidth
-  panel.classList.add('desk-journey--called')
+  openStatus()
 }
