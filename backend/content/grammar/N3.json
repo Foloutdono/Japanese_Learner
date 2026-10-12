@@ -34857,7 +34857,122 @@
             "fr": "À sa place : に代わって. として voudrait dire que tu viens en tant que ton père, といっしょに avec lui."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "いそがしい店長＿＿＿、わたしが電話に出ます。",
+          "tr": {
+            "en": "I will answer the phone in place of the busy store manager.",
+            "fr": "Je réponds au téléphone à la place du gérant, qui est occupé."
+          },
+          "choices": [
+            "に代わって",
+            "として",
+            "に対して"
+          ],
+          "why": {
+            "en": "に代わって means someone steps into another's role: the manager would answer, I do it instead. として would make me the manager, and に対して means « toward, against ».",
+            "fr": "に代わって dit qu'on prend le rôle de quelqu'un : le gérant répondrait, c'est moi qui le fais. として ferait de moi le gérant, et に対して veut dire « envers, contre »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who is being thanked, and whom does the speaker stand in for?",
+            "fr": "Qui est remercié, et qui le locuteur remplace-t-il ?"
+          },
+          "jp": "クラスのみんなに代わって、先生にお礼を言います。",
+          "tr": {
+            "en": "On behalf of the whole class, I would like to thank our teacher.",
+            "fr": "Au nom de toute la classe, je voudrais remercier notre professeur."
+          },
+          "choices": [
+            {
+              "en": "The teacher is thanked; the speaker stands in for the class.",
+              "fr": "C'est le professeur qui est remercié ; le locuteur parle à la place de la classe."
+            },
+            {
+              "en": "The class is thanked; the speaker stands in for the teacher.",
+              "fr": "C'est la classe qui est remerciée ; le locuteur parle à la place du professeur."
+            },
+            {
+              "en": "The speaker and the class thank the teacher together.",
+              "fr": "Le locuteur et la classe remercient le professeur ensemble."
+            }
+          ],
+          "why": {
+            "en": "The noun before に代わって is who is replaced: the class, speaking through one voice. The second に marks who receives the thanks. The speaker is the stand-in, not a fellow thanker.",
+            "fr": "Le nom devant に代わって est celui qu'on remplace : la classe, qui parle d'une seule voix. Le second に marque celui qui reçoit les remerciements. Le locuteur est le remplaçant, pas un co-remerciant."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your grandmother was to say the opening words at the family party, but she is ill. You will do it instead. You step up and say:",
+            "fr": "Ta grand-mère devait dire quelques mots pour ouvrir la fête de famille, mais elle est malade. C'est toi qui t'en charges. Tu prends la parole :"
+          },
+          "choices": [
+            "祖母に代わって、わたしがあいさつをします。",
+            "わたしに代わって、祖母があいさつをします。",
+            "祖母といっしょに、わたしがあいさつをします。"
+          ],
+          "why": {
+            "en": "The person before に代わって is the one replaced (grandmother), and the speaker is the stand-in. The second line reverses the roles, and the third says she is speaking with you.",
+            "fr": "La personne devant に代わって est celle qu'on remplace (la grand-mère), et le locuteur est le remplaçant. La deuxième phrase inverse les rôles, et la troisième dit qu'elle parle avec toi."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker asking the listener to do?",
+            "fr": "Que demande le locuteur à son interlocuteur ?"
+          },
+          "jp": "用事があるので、わたしに代わって、受付をお願いします。",
+          "tr": {
+            "en": "I have an errand to run, so please take the reception desk in my place.",
+            "fr": "J'ai une course à faire, alors je te demande de tenir l'accueil à ma place."
+          },
+          "choices": [
+            {
+              "en": "To look after the reception desk while the speaker is away.",
+              "fr": "Tenir l'accueil pendant que le locuteur est absent."
+            },
+            {
+              "en": "To let the speaker take over the reception desk from the listener.",
+              "fr": "Laisser le locuteur reprendre l'accueil à sa place."
+            },
+            {
+              "en": "To go to the reception desk together with the speaker.",
+              "fr": "Aller à l'accueil avec le locuteur."
+            }
+          ],
+          "why": {
+            "en": "わたしに代わって puts the speaker in the replaced seat: I am leaving, you stand in for me. The speaker does not offer to replace anyone, and nothing says they go together.",
+            "fr": "わたしに代わって met le locuteur à la place du remplacé : je m'en vais, tu me remplaces. Il ne propose pas de remplacer quelqu'un, et rien n'indique qu'ils y vont ensemble."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You work in a small café. The paper menus are gone and guests now order on a tablet. A guest asks how to order. You say:",
+            "fr": "Tu travailles dans un petit café. Les menus en papier ont disparu, on commande maintenant sur une tablette. Un client demande comment commander. Tu dis :"
+          },
+          "choices": [
+            "紙のメニューに代わって、このタブレットを使ってください。",
+            "このタブレットに代わって、紙のメニューを使ってください。",
+            "紙のメニューといっしょに、このタブレットを使ってください。"
+          ],
+          "why": {
+            "en": "The old thing comes before に代わって and the new one follows: the tablet takes the menu's place. The second line brings the paper menu back, and the third asks for both at once.",
+            "fr": "L'ancien objet précède に代わって et le nouveau suit : la tablette prend la place du menu. La deuxième phrase ramène le menu en papier, et la troisième demande d'utiliser les deux à la fois."
+          }
+        }
+      ]
     }
   },
   {
@@ -35091,7 +35206,127 @@
             "fr": "Une invitation bienveillante à essayer, pour un enfant : てごらん. てくださいませんか s'adresse à un supérieur, et てあげる veut dire que tu le fais pour lui."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the listener invited to do?",
+            "fr": "À quoi l'interlocuteur est-il invité ?"
+          },
+          "jp": "まちがえてもいいから、ここに名前を書いてごらん。",
+          "tr": {
+            "en": "It is all right if you make a mistake; try writing your name here.",
+            "fr": "Ce n'est pas grave si tu te trompes ; essaie d'écrire ton nom ici."
+          },
+          "choices": [
+            {
+              "en": "To try writing their name there.",
+              "fr": "Essayer d'écrire son nom à cet endroit."
+            },
+            {
+              "en": "To look at the name written there.",
+              "fr": "Regarder le nom qui est écrit là."
+            },
+            {
+              "en": "To check that the name has no mistake.",
+              "fr": "Vérifier qu'il n'y a pas d'erreur dans le nom."
+            }
+          ],
+          "why": {
+            "en": "ごらん does not mean « look » here: after a て-form it invites the listener to try the action. 書いてごらん is « try writing », not « look at what is written ».",
+            "fr": "ごらん ne veut pas dire « regarde » ici : après une forme en て, il invite à essayer l'action. 書いてごらん, c'est « essaie d'écrire », pas « regarde ce qui est écrit »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "このおちゃ、ちょっと＿＿＿。おいしいよ。",
+          "tr": {
+            "en": "Try a little of this tea. It's good.",
+            "fr": "Goûte un peu ce thé. Il est bon."
+          },
+          "choices": [
+            "飲んでごらん",
+            "飲んでみた",
+            "飲いてごらん"
+          ],
+          "why": {
+            "en": "The て-form of 飲む is 飲んで (む → んで), then ごらん: 飲んでごらん. 飲んでみた is a past, « I tried it », and 飲いてごらん borrows the ending of く-verbs (く → いて).",
+            "fr": "La forme en て de 飲む est 飲んで (む → んで), puis ごらん : 飲んでごらん. 飲んでみた est un passé, « j'ai essayé », et 飲いてごらん emprunte la terminaison des verbes en く (く → いて)."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your little brother says he has drawn a picture. You want to see it. You say:",
+            "fr": "Ton petit frère dit qu'il a fait un dessin. Tu veux le voir. Tu dis :"
+          },
+          "choices": [
+            "見せてごらん。",
+            "見てごらん。",
+            "見せてあげるね。"
+          ],
+          "why": {
+            "en": "ごらん asks the other person to try the verb: 見せてごらん is « go on, show it to me ». 見てごらん tells him to look, and 見せてあげるね offers to show him something yourself.",
+            "fr": "ごらん demande à l'autre d'essayer le verbe : 見せてごらん, « vas-y, montre-le-moi ». 見てごらん lui dit de regarder, et 見せてあげるね propose de lui montrer quelque chose toi-même."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who is most likely speaking to whom?",
+            "fr": "Qui parle probablement à qui ?"
+          },
+          "jp": "はじめてでもだいじょうぶ、まずお客さんにあいさつしてごらん。",
+          "tr": {
+            "en": "It's fine even if it's your first time; start by greeting the customers.",
+            "fr": "Ce n'est pas grave si c'est ta première fois ; commence par saluer les clients."
+          },
+          "choices": [
+            {
+              "en": "An experienced coworker to a newcomer.",
+              "fr": "Un collègue expérimenté à un nouveau."
+            },
+            {
+              "en": "A newcomer to the manager.",
+              "fr": "Un nouveau à son responsable."
+            },
+            {
+              "en": "A shop clerk to a customer.",
+              "fr": "Un vendeur à un client."
+            }
+          ],
+          "why": {
+            "en": "てごらん only goes downward, from someone with more experience to someone with less. A newcomer would not say it to a manager, and a clerk would say てみてください to a customer.",
+            "fr": "てごらん ne va que vers le bas, de celui qui a plus d'expérience à celui qui en a moins. Un nouveau ne le dirait pas à son responsable, et un vendeur dirait てみてください à un client."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which ending says « go on, try » to a child?",
+            "fr": "Quelle fin dit « vas-y, essaie » à un enfant ?"
+          },
+          "jp": "この大きいかばん、一人で＿＿＿。",
+          "tr": {
+            "en": "Go on, try carrying this big bag by yourself.",
+            "fr": "Vas-y, essaie de porter ce gros sac par toi-même."
+          },
+          "choices": [
+            "持ってごらん",
+            "持ちなさい",
+            "持ってあげる"
+          ],
+          "why": {
+            "en": "The cue is a gentle « go on, try »: 持ってごらん. 持ちなさい is an order, not an invitation, and 持ってあげる means « I'll carry it for you », the opposite of letting him try.",
+            "fr": "La consigne est un doux « vas-y, essaie » : 持ってごらん. 持ちなさい est un ordre, pas une invitation, et 持ってあげる veut dire « je le porte pour toi », le contraire de le laisser essayer."
+          }
+        }
+      ]
     }
   },
   {
@@ -35284,7 +35519,122 @@
             "fr": "Une règle avec des exceptions : とは限らない. いつも et に決まっている disent tous deux que c'est toujours le cas."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why does the speaker suggest going on Saturday?",
+            "fr": "Pourquoi le locuteur propose-t-il d'y aller le samedi ?"
+          },
+          "jp": "日曜日はゆうびんきょくが開いているとは限らないので、土曜日に行きましょう。",
+          "tr": {
+            "en": "The post office is not necessarily open on Sundays, so let's go on Saturday.",
+            "fr": "La poste n'est pas forcément ouverte le dimanche, alors allons-y le samedi."
+          },
+          "choices": [
+            {
+              "en": "Because it may or may not be open on Sunday.",
+              "fr": "Parce qu'elle est peut-être ouverte le dimanche, peut-être pas."
+            },
+            {
+              "en": "Because it is certainly closed on Sunday.",
+              "fr": "Parce qu'elle est sûrement fermée le dimanche."
+            },
+            {
+              "en": "Because it is open only on Saturday.",
+              "fr": "Parce qu'elle n'est ouverte que le samedi."
+            }
+          ],
+          "why": {
+            "en": "とは限らない means « not necessarily »: it may be open, it may not, so Saturday is safer. It does not say « certainly closed », and 限る (« limit ») does not mean « open only on Saturday ».",
+            "fr": "とは限らない veut dire « pas forcément » : elle est peut-être ouverte, peut-être pas, donc le samedi est plus sûr. Il ne dit pas « sûrement fermée », et 限る (« limiter ») ne veut pas dire « seulement le samedi »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Everyone says it won't rain today. You think it still might, so you take an umbrella. You say:",
+            "fr": "Tout le monde dit qu'il ne pleuvra pas aujourd'hui. Pour toi, il peut quand même pleuvoir : tu emportes un parapluie. Tu dis :"
+          },
+          "choices": [
+            "雨がふらないとは限らないから、かさを持っていこう。",
+            "雨がふるとは限らないから、かさを持っていこう。",
+            "雨はふらないはずだから、かさは持っていかない。"
+          ],
+          "why": {
+            "en": "To say it might still rain, the negative goes inside: 雨がふらないとは限らない, « it's not certain it won't rain ». 雨がふるとは限らない says it may stay dry: no reason for an umbrella.",
+            "fr": "Pour dire qu'il peut quand même pleuvoir, la négation va dedans : 雨がふらないとは限らない, « il n'est pas sûr qu'il ne pleuve pas ». 雨がふるとは限らない dit qu'il peut rester sec : pas de raison d'avoir un parapluie."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What should a traveller expect in this town?",
+            "fr": "À quoi un voyageur doit-il s'attendre dans cette ville ?"
+          },
+          "jp": "この町の人が、みんな英語を話せるとは限らない。",
+          "tr": {
+            "en": "Not everyone in this town can necessarily speak English.",
+            "fr": "Tous les habitants de cette ville ne parlent pas forcément anglais."
+          },
+          "choices": [
+            {
+              "en": "Some people may not speak English.",
+              "fr": "Certaines personnes ne parlent peut-être pas anglais."
+            },
+            {
+              "en": "Nobody speaks English.",
+              "fr": "Personne ne parle anglais."
+            },
+            {
+              "en": "Everybody speaks English.",
+              "fr": "Tout le monde parle anglais."
+            }
+          ],
+          "why": {
+            "en": "みんな…とは限らない denies « all », not « some »: it leaves room for people who speak English and people who don't. It is a partial negation, neither « nobody » nor « everybody ».",
+            "fr": "みんな…とは限らない nie « tous », pas « certains » : il laisse de la place à ceux qui parlent anglais et à ceux qui n'en parlent pas. C'est une négation partielle, ni « personne » ni « tout le monde »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend says that people in the old days were all poor. You think that was not necessarily so. You say:",
+            "fr": "Un ami dit que les gens d'autrefois étaient tous pauvres. Pour toi, ce n'était pas forcément le cas. Tu dis :"
+          },
+          "choices": [
+            "むかしの人が、みんなまずしかったとは限らないよ。",
+            "むかしの人が、みんなまずしいとは限らないよ。",
+            "むかしの人は、みんなまずしかったよ。"
+          ],
+          "why": {
+            "en": "The friend talks about the past, so the plain past goes before とは限らない: まずしかったとは限らない. まずしい is about people now, and the last line simply agrees with the friend instead of doubting.",
+            "fr": "L'ami parle du passé : la forme neutre au passé précède とは限らない : まずしかったとは限らない. まずしい parle des gens d'aujourd'hui, et la dernière phrase donne simplement raison à l'ami."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which ending completes the guide's polite sentence?",
+            "fr": "Quelle fin complète la phrase polie du guide ?"
+          },
+          "jp": "高いホテルが、いいホテルだ＿＿＿。",
+          "tr": {
+            "en": "(A guide, politely) An expensive hotel is not necessarily a good hotel.",
+            "fr": "(Un guide, poliment) Un hôtel cher n'est pas forcément un bon hôtel."
+          },
+          "choices": [
+            "とは限りません",
+            "とは限らません",
+            "とは限りませんでした"
+          ],
+          "why": {
+            "en": "The polite negative of 限る takes the い-row stem: 限り + ません. 限らません mixes the plain stem with ます, and 限りませんでした is the past, but the guide speaks of hotels in general.",
+            "fr": "Le négatif poli de 限る prend la racine en い : 限り + ません. 限らません mélange la racine de la forme neutre avec ます, et 限りませんでした est le passé, alors que le guide parle des hôtels en général."
+          }
+        }
+      ]
     }
   },
   {
@@ -35513,7 +35863,127 @@
             "fr": "Le trajet a coûté, alors on en profite : せっかく…んだから. のに ferait de la recherche une déception, et la dernière abandonne."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "せっかくはやく起きた＿＿＿、電車が止まっていた。",
+          "tr": {
+            "en": "I made the effort to get up early, and yet the trains had stopped.",
+            "fr": "J'ai fait l'effort de me lever tôt, et pourtant les trains étaient arrêtés."
+          },
+          "choices": [
+            "のに",
+            "のだから",
+            "ので"
+          ],
+          "why": {
+            "en": "せっかく…のに regrets an effort that got nothing: getting up early did not help. のだから and ので give a reason, but stopped trains are no result of an early start.",
+            "fr": "せっかく…のに regrette un effort qui n'a rien donné : se lever tôt n'a servi à rien. のだから et ので donnent une cause, or les trains arrêtés ne viennent pas d'un lever matinal."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who went to the trouble, and what happened?",
+            "fr": "Qui s'est donné de la peine, et que s'est-il passé ?"
+          },
+          "jp": "せっかく友だちが作ってくれたのに、わたしはぜんぜん食べられなかった。",
+          "tr": {
+            "en": "My friend went to the trouble of making it for me, and yet I couldn't eat any of it.",
+            "fr": "Mon ami s'était donné la peine de le préparer pour moi, et pourtant je n'ai rien pu manger."
+          },
+          "choices": [
+            {
+              "en": "A friend made something for the speaker, who could not eat it.",
+              "fr": "Un ami a préparé quelque chose pour le locuteur, qui n'a pas pu le manger."
+            },
+            {
+              "en": "The speaker made something for a friend, who could not eat it.",
+              "fr": "Le locuteur a préparé quelque chose pour un ami, qui n'a pas pu le manger."
+            },
+            {
+              "en": "A friend made something and the speaker ate all of it happily.",
+              "fr": "Un ami a préparé quelque chose et le locuteur a tout mangé avec plaisir."
+            }
+          ],
+          "why": {
+            "en": "せっかく can describe someone else's effort: 作ってくれた shows the friend made it for the speaker. With のに the effort is wasted, because the speaker could not eat it.",
+            "fr": "せっかく peut parler de l'effort de quelqu'un d'autre : 作ってくれた montre que l'ami l'a fait pour le locuteur. Avec のに, l'effort est gâché : le locuteur n'a pas pu manger."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A colleague offers you one of the little cakes they brought back from a trip. You would like one. You say:",
+            "fr": "Un collègue t'offre un des petits gâteaux qu'il a rapportés de voyage. Tu en veux bien un. Tu dis :"
+          },
+          "choices": [
+            "せっかくだから、ひとついただきます。",
+            "せっかくですが、またこんどにします。",
+            "せっかくですが、おなかがいっぱいなので。"
+          ],
+          "why": {
+            "en": "せっかくだから means « since you went to the trouble, I'll take one ». せっかくですが opens a polite refusal, which is what the other two lines do.",
+            "fr": "せっかくだから veut dire « puisque tu t'es donné cette peine, j'en prends un ». せっかくですが ouvre un refus poli, ce que font les deux autres phrases."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker feel?",
+            "fr": "Que ressent le locuteur ?"
+          },
+          "jp": "せっかく三時間もならんだのに。",
+          "tr": {
+            "en": "I stood in line for three whole hours, and yet…",
+            "fr": "J'ai fait la queue pendant trois heures entières, et pourtant…"
+          },
+          "choices": [
+            {
+              "en": "Disappointment: the effort was for nothing.",
+              "fr": "La déception : l'effort n'a servi à rien."
+            },
+            {
+              "en": "Pride: the effort paid off.",
+              "fr": "La fierté : l'effort a payé."
+            },
+            {
+              "en": "Relief: the long wait is finally over.",
+              "fr": "Le soulagement : la longue attente est enfin finie."
+            }
+          ],
+          "why": {
+            "en": "せっかく…のに, left unfinished, still says the effort was wasted: the speaker is let down. 〜のに means « and yet », so it is neither pride nor relief that the wait paid off.",
+            "fr": "せっかく…のに, même laissé en suspens, dit que l'effort a été vain : le locuteur est déçu. 〜のに veut dire « et pourtant », donc ni la fierté ni le soulagement d'avoir bien attendu."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "せっかくのいいお天気＿＿＿、きょうはしごとだ。",
+          "tr": {
+            "en": "Even though the weather is so good, I have to work today.",
+            "fr": "Il fait si beau, et pourtant je travaille aujourd'hui."
+          },
+          "choices": [
+            "なのに",
+            "のに",
+            "なのだから"
+          ],
+          "why": {
+            "en": "A noun takes な before のに: お天気なのに. のに alone goes after verbs and adjectives, and なのだから gives a reason (« since the weather is good »), which does not fit having to work.",
+            "fr": "Un nom prend な devant のに : お天気なのに. のに seul suit les verbes et les adjectifs, et なのだから donne une cause (« puisqu'il fait beau »), ce qui ne colle pas avec le fait de devoir travailler."
+          }
+        }
+      ]
     }
   },
   {
@@ -35711,7 +36181,122 @@
             "fr": "Le poisson mis à part, tout le reste convient : 以外. なら dirait que n'importe quel poisson te va, しか que tu ne manges que du poisson."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the rule in this classroom?",
+            "fr": "Quelle est la règle dans cette salle de classe ?"
+          },
+          "jp": "この教室では、英語以外のことばを使ってはいけません。",
+          "tr": {
+            "en": "In this classroom, you must not use any language other than English.",
+            "fr": "Dans cette salle, il est interdit d'utiliser une autre langue que l'anglais."
+          },
+          "choices": [
+            {
+              "en": "Only English is allowed; every other language is banned.",
+              "fr": "Seul l'anglais est permis ; toutes les autres langues sont interdites."
+            },
+            {
+              "en": "English is banned; every other language is allowed.",
+              "fr": "L'anglais est interdit ; toutes les autres langues sont permises."
+            },
+            {
+              "en": "Any language may be used, English included.",
+              "fr": "Toutes les langues sont permises, anglais compris."
+            }
+          ],
+          "why": {
+            "en": "英語以外の means « other than English »: the ban falls on every other language, and English is the exception that stays allowed. The reverse reading would put English inside the ban.",
+            "fr": "英語以外の veut dire « autre que l'anglais » : l'interdiction vise toutes les autres langues, et l'anglais est l'exception qui reste permise. La lecture inverse mettrait l'anglais dans l'interdit."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which ending completes the sentence?",
+            "fr": "Quelle fin complète la phrase ?"
+          },
+          "jp": "水曜日以外は、店が＿＿＿。",
+          "tr": {
+            "en": "The shop is open only on Wednesdays.",
+            "fr": "La boutique n'est ouverte que le mercredi."
+          },
+          "choices": [
+            "開いていません",
+            "開いています",
+            "開いていませんでした"
+          ],
+          "why": {
+            "en": "水曜日以外は sets Wednesday apart from every other day, so « only Wednesdays » needs the negative behind it: 開いていません. 開いています would mean open on all the other days, and 開いていませんでした is past.",
+            "fr": "水曜日以外は met le mercredi à part de tous les autres jours : pour « seulement le mercredi », il faut le négatif derrière : 開いていません. 開いています dirait ouverte tous les autres jours, et 開いていませんでした est au passé."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks what you are bringing to the picnic besides the sandwiches. You are bringing fruit too. You say:",
+            "fr": "Un ami demande ce que tu apportes au pique-nique en plus des sandwichs. Tu apportes aussi des fruits. Tu dis :"
+          },
+          "choices": [
+            "サンドイッチ以外に、くだものも持っていくよ。",
+            "サンドイッチ以外に、何も持っていかないよ。",
+            "サンドイッチではなく、くだものを持っていくよ。"
+          ],
+          "why": {
+            "en": "以外に with a positive and も adds something: « besides the sandwiches, fruit too ». 以外に… ない says nothing else is coming, and ではなく swaps the sandwiches for fruit.",
+            "fr": "以外に suivi d'un positif et de も ajoute quelque chose : « en plus des sandwichs, des fruits aussi ». 以外に… ない dit que rien d'autre ne vient, et ではなく remplace les sandwichs par des fruits."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What pets does the family have?",
+            "fr": "Quels animaux la famille a-t-elle ?"
+          },
+          "jp": "うちには、犬以外のペットはいません。",
+          "tr": {
+            "en": "We have no pets other than dogs.",
+            "fr": "Chez nous, il n'y a pas d'autres animaux que des chiens."
+          },
+          "choices": [
+            {
+              "en": "Only dogs.",
+              "fr": "Seulement des chiens."
+            },
+            {
+              "en": "No pets at all.",
+              "fr": "Aucun animal."
+            },
+            {
+              "en": "Every kind of pet except dogs.",
+              "fr": "Toutes sortes d'animaux sauf des chiens."
+            }
+          ],
+          "why": {
+            "en": "犬以外のペット is « pets other than dogs », and いません says there are none. Only the dogs are left: they are the exception, not the thing that is missing.",
+            "fr": "犬以外のペット, ce sont « les animaux autres que les chiens », et いません dit qu'il n'y en a pas. Il ne reste que les chiens : ils sont l'exception, pas ce qui manque."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You work in a museum. Visitors may take photos everywhere except in the room you are standing in now. You tell a visitor:",
+            "fr": "Tu travailles dans un musée. Les visiteurs peuvent prendre des photos partout, sauf dans la salle où tu te trouves. Tu dis à un visiteur :"
+          },
+          "choices": [
+            "この部屋以外は、写真をとってもいいですよ。",
+            "この部屋以外は、写真をとってはいけません。",
+            "この部屋でも、写真をとってもいいですよ。"
+          ],
+          "why": {
+            "en": "この部屋以外は means « everywhere but this room », so what follows describes all the other places: photos are fine there. The second line bans them everywhere else, and the third allows them in this room.",
+            "fr": "この部屋以外は veut dire « partout sauf dans cette salle » : la suite décrit tous les autres endroits, où les photos sont permises. La deuxième phrase les interdit ailleurs, la troisième les autorise ici."
+          }
+        }
+      ]
     }
   }
 ]
