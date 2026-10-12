@@ -538,13 +538,8 @@ class QuizRuleTests(TourRuleTests):
         two = [dict(_quiz()[1], jp="ここで＿＿＿。", choices=["まってください", "まちました", "またないでください"]), _quiz()[1]]
         self.assertEqual(self._problems(quiz=[_quiz()[0], two[1], _quiz()[2], two[0]]), [])
 
-    def test_the_catalogue_writes_a_quiz_for_every_tour_once_the_gate_requires_it(self) -> None:
-        # A tour without a quiz is the half-written shape the catalogue is
-        # moved off; the gate says so once it requires one.
+    def test_a_tour_without_a_quiz_fails_the_gate(self) -> None:
+        # A tour without a quiz is the half-written shape the catalogue was
+        # moved off (plan 196): the gate says so for every point.
         entry = _good(tour=_tour())
-        old = grammar_check.QUIZ_REQUIRED
-        grammar_check.QUIZ_REQUIRED = True
-        try:
-            self.assertTrue(any("tour has no quiz" in p for p in check_entry("N5", entry, _catalogue("N5", entry))))
-        finally:
-            grammar_check.QUIZ_REQUIRED = old
+        self.assertTrue(any("tour has no quiz" in p for p in check_entry("N5", entry, _catalogue("N5", entry))))

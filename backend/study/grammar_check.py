@@ -111,8 +111,8 @@ def _reading_problems(what: str, key: str, text: str, reading) -> list[str]:
 # named by its `notion`, so the tour walks every one.
 TOUR_KEYS = frozenset({"twists", "scene", "quiz"})
 # The quiz (plan 196) is written for every point's tour; a tour without one
-# is the half-written shape the catalogue is being moved off.
-QUIZ_REQUIRED = False
+# is the half-written shape the catalogue was moved off.
+QUIZ_REQUIRED = True
 TWIST_KEYS = frozenset({"notion", "jp", "ask", "choices", "why", "pair", "tr", "kind"})
 # What a twist is (plan 194): another use of the point, or a trap set
 # against it -- a rival that looks like it. The tutorial's usages stop
