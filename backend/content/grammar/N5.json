@@ -20200,7 +20200,127 @@
             "fr": "Le goût d'une activité : le verbe, の, puis が好きです ; sans の, le verbe ne peut pas prendre が. たいです, ce serait en avoir envie maintenant."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ねる前に、あたたかいおちゃを＿＿＿のが好きです。",
+          "tr": {
+            "en": "I like drinking warm tea before going to bed.",
+            "fr": "J'aime boire du thé chaud avant de dormir."
+          },
+          "choices": [
+            "飲む",
+            "飲みます",
+            "飲んだ"
+          ],
+          "why": {
+            "en": "Before の the verb stays in the dictionary form: 飲む. 飲みます is the polite form, and の cannot follow it: the politeness comes from です at the end. 飲んだ is the past, and would speak of the tea you drank.",
+            "fr": "Devant の, le verbe reste à la forme du dictionnaire : 飲む. 飲みます est la forme polie, et の ne peut pas la suivre : la politesse vient de です, à la fin. 飲んだ est le passé : ce serait parler du thé qu'on a bu."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who likes what in this sentence?",
+            "fr": "Qui aime quoi dans cette phrase ?"
+          },
+          "jp": "友だちがあそびに来るのが好きです。",
+          "tr": {
+            "en": "I like it when friends come over to see me.",
+            "fr": "J'aime que des amis viennent me voir."
+          },
+          "choices": [
+            {
+              "en": "The speaker likes it when friends come to see them.",
+              "fr": "Celui qui parle aime que des amis viennent le voir."
+            },
+            {
+              "en": "A friend likes coming to see the speaker.",
+              "fr": "Un ami aime venir voir celui qui parle."
+            },
+            {
+              "en": "The speaker likes going to see a friend.",
+              "fr": "Celui qui parle aime aller voir un ami."
+            }
+          ],
+          "why": {
+            "en": "The の turns the whole clause 友だちがあそびに来る (« friends come to visit ») into the thing that is liked, and the one who likes it is the speaker. 来る means coming toward the speaker, so nobody is going to a friend's place.",
+            "fr": "Le の fait de toute la proposition 友だちがあそびに来る (« des amis viennent en visite ») la chose qu'on aime, et celui qui aime, c'est celui qui parle. 来る, c'est venir vers lui : personne ne va chez un ami."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your father goes fishing every week, and he loves it. You tell a classmate about him.",
+            "fr": "Ton père va à la pêche toutes les semaines, et il adore ça. Tu parles de lui à un camarade."
+          },
+          "choices": [
+            "父は、つりをするのが好きです。",
+            "父は、つりをしたいです。",
+            "父は、つりをするのが好きでした。"
+          ],
+          "why": {
+            "en": "のが好きです says a lasting liking, which is what a weekly habit shows. したいです is a wish, not a habit, and one you say about yourself. 好きでした would put the liking in the past, but he still goes.",
+            "fr": "のが好きです dit un goût durable, ce que montre une habitude de chaque semaine. したいです est un souhait, pas une habitude, et c'est ce qu'on dit de soi. 好きでした mettrait le goût au passé, alors qu'il y va encore."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "What goes between the verb and 好きです?",
+            "fr": "Qu'est-ce qui va entre le verbe et 好きです ?"
+          },
+          "jp": "ひまなときは、しゃしんを見る＿＿＿好きです。",
+          "tr": {
+            "en": "When I have free time, I like looking at photos.",
+            "fr": "Quand j'ai du temps libre, j'aime regarder des photos."
+          },
+          "choices": [
+            "のが",
+            "が",
+            "ので"
+          ],
+          "why": {
+            "en": "の turns 見る into a thing that can be liked, and 好き takes が: 見るのが好きです. Without の, 見るが好きです does not work, and 見るので would mean « because I look ».",
+            "fr": "の fait de 見る une chose qu'on peut aimer, et 好き prend が : 見るのが好きです. Sans の, 見るが好きです ne marche pas, et 見るので voudrait dire « parce que je regarde »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does this question want to know?",
+            "fr": "Qu'est-ce que cette question veut savoir ?"
+          },
+          "jp": "先生は、雨の日に何をするのが好きですか。",
+          "tr": {
+            "en": "What does the teacher like doing on rainy days?",
+            "fr": "Qu'est-ce que le professeur aime faire les jours de pluie ?"
+          },
+          "choices": [
+            {
+              "en": "What the teacher likes to do on rainy days.",
+              "fr": "Ce que le professeur aime faire les jours de pluie."
+            },
+            {
+              "en": "What the teacher is going to do on this rainy day.",
+              "fr": "Ce que le professeur va faire aujourd'hui, par ce temps de pluie."
+            },
+            {
+              "en": "What the teacher wants to do right now.",
+              "fr": "Ce que le professeur veut faire en ce moment."
+            }
+          ],
+          "why": {
+            "en": "何をするのが好きですか asks about a lasting taste: what the teacher enjoys doing on such days. A plan would be 何をしますか, and a wish 何をしたいですか.",
+            "fr": "何をするのが好きですか interroge sur un goût durable : ce que le professeur aime faire ces jours-là. Un projet serait 何をしますか, et un souhait 何をしたいですか."
+          }
+        }
+      ]
     }
   },
   {
@@ -20433,7 +20553,127 @@
             "fr": "Sans manger, puis venir : la forme en ない, で, puis le second verbe. 食べて来ました dit qu'on a mangé ; ないでください demande de ne pas le faire."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "友だちは、何も＿＿＿、かえりました。",
+          "tr": {
+            "en": "My friend went home without saying anything.",
+            "fr": "Mon ami est parti sans rien dire."
+          },
+          "choices": [
+            "言わないで",
+            "言ないで",
+            "言わなくて"
+          ],
+          "why": {
+            "en": "言う ends in う, so it takes わ before ない: 言わない, then で for « without saying ». 言ない treats it as a る-verb, and 言わなくて gives a reason (« because he didn't say »), not a manner.",
+            "fr": "言う finit par う : devant ない il prend わ, 言わない, puis で pour « sans dire ». 言ない le traite en verbe en る, et 言わなくて donne une cause (« parce qu'il n'a pas dit »), pas une manière."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the visitor asked to do?",
+            "fr": "Que demande-t-on au visiteur ?"
+          },
+          "jp": "ここでは、くつをぬがないで入ってください。",
+          "tr": {
+            "en": "Please come in here without taking your shoes off.",
+            "fr": "Ici, entrez sans retirer vos chaussures."
+          },
+          "choices": [
+            {
+              "en": "To come in with their shoes still on.",
+              "fr": "D'entrer en gardant ses chaussures."
+            },
+            {
+              "en": "Not to come in.",
+              "fr": "De ne pas entrer."
+            },
+            {
+              "en": "To take their shoes off before coming in.",
+              "fr": "D'enlever ses chaussures avant d'entrer."
+            }
+          ],
+          "why": {
+            "en": "ないで links two actions: 入ってください is the request, and くつをぬがないで says how, without taking the shoes off. It is not ないでください (« please don't »), which would stop right there.",
+            "fr": "ないで relie deux actions : 入ってください est la demande, くつをぬがないで dit comment, sans retirer les chaussures. Ce n'est pas ないでください (« ne … pas »), qui s'arrêterait là."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You worked all day and never took a break. You tell a friend.",
+            "fr": "Tu as travaillé toute la journée sans jamais faire de pause. Tu le dis à un ami."
+          },
+          "choices": [
+            "一日中、休まないではたらきました。",
+            "一日中、はたらかないで休みました。",
+            "一日中、休んではたらきました。"
+          ],
+          "why": {
+            "en": "ないで names the action that did not happen; the verb after it is the one that did: 休まないではたらきました, « worked without a break ». はたらかないで休みました says the opposite, and 休んで says you took a break first.",
+            "fr": "ないで nomme l'action qui n'a pas eu lieu ; le verbe suivant dit ce qui a bien eu lieu : 休まないではたらきました, « travaillé sans pause ». はたらかないで休みました dit le contraire, et 休んで dit qu'il y a eu une pause d'abord."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの子は、前を＿＿＿、はしりました。",
+          "tr": {
+            "en": "That child ran without looking ahead.",
+            "fr": "Cet enfant a couru sans regarder devant lui."
+          },
+          "choices": [
+            "見ないで",
+            "見て",
+            "見らないで"
+          ],
+          "why": {
+            "en": "A る-verb drops る before ない: 見る → 見ない, then で. 見て is the positive (« looked and ran »), and 見らないで applies the う-verb rule to a る-verb.",
+            "fr": "Un verbe en る perd る devant ない : 見る → 見ない, puis で. 見て est l'affirmatif (« il a regardé, puis couru »), et 見らないで applique la règle des verbes en う à un verbe en る."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What happened with the light?",
+            "fr": "Que s'est-il passé avec la lumière ?"
+          },
+          "jp": "きのうは、電気をけさないで、ねました。",
+          "tr": {
+            "en": "Yesterday I went to sleep without turning off the light.",
+            "fr": "Hier, j'ai dormi sans éteindre la lumière."
+          },
+          "choices": [
+            {
+              "en": "It stayed on while the speaker slept.",
+              "fr": "Elle est restée allumée pendant qu'on dormait."
+            },
+            {
+              "en": "The speaker turned it off before going to sleep.",
+              "fr": "On l'a éteinte avant de s'endormir."
+            },
+            {
+              "en": "The speaker could not sleep because it was on.",
+              "fr": "La personne n'a pas pu dormir, car la lumière était allumée."
+            }
+          ],
+          "why": {
+            "en": "けさないで means the speaker did not turn it off, and ねました is what the speaker did anyway: slept, with the light on. ないで gives the manner of sleeping, not the reason for not sleeping.",
+            "fr": "けさないで veut dire qu'on ne l'a pas éteinte, et ねました est ce qu'on a fait quand même : dormir, la lumière allumée. ないで donne la manière de dormir, pas la raison de ne pas dormir."
+          }
+        }
+      ]
     }
   },
   {
@@ -20670,7 +20910,141 @@
             "fr": "Tu demandes une chose : をください."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker doing?",
+            "fr": "Que fait celui qui parle ?"
+          },
+          "jp": "先生、そのノートをください。",
+          "tr": {
+            "en": "Teacher, please give me that notebook.",
+            "fr": "Professeur, donnez-moi ce cahier, s'il vous plaît."
+          },
+          "choices": [
+            {
+              "en": "Asking the teacher to give them the notebook.",
+              "fr": "Celui qui parle demande au professeur de lui donner le cahier."
+            },
+            {
+              "en": "Handing the notebook to the teacher.",
+              "fr": "Celui qui parle tend le cahier au professeur."
+            },
+            {
+              "en": "Asking the teacher to write in the notebook.",
+              "fr": "Celui qui parle demande au professeur d'écrire dans le cahier."
+            }
+          ],
+          "why": {
+            "en": "をください asks to be given a thing: the listener has it, the speaker receives it. Handing it over would be どうぞ, and asking for an action takes a て-form: 書いてください.",
+            "fr": "をください demande qu'on vous donne une chose : l'autre l'a, celui qui parle la reçoit. Pour la tendre, on dirait どうぞ ; pour demander une action, il faut une forme en て : 書いてください."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle goes in the blank?",
+            "fr": "Quelle particule va dans le blanc ?"
+          },
+          "jp": "すみません、ぎゅうにゅう＿＿＿ください。",
+          "tr": {
+            "en": "Excuse me, some milk, please.",
+            "fr": "Excusez-moi, du lait, s'il vous plaît."
+          },
+          "choices": [
+            "を",
+            "が",
+            "に"
+          ],
+          "why": {
+            "en": "You ask for a thing with を: ぎゅうにゅうをください. が belongs to ほしいです, which only says you want it, and に marks a person or a place, not the thing you ask for.",
+            "fr": "On demande une chose avec を : ぎゅうにゅうをください. が va avec ほしいです, qui dit seulement qu'on veut la chose, et に marque une personne ou un lieu, pas la chose demandée."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is being ordered?",
+            "fr": "Qu'est-ce qu'on commande ?"
+          },
+          "jp": "すみません、コーヒーを二つと、ケーキをください。",
+          "tr": {
+            "en": "Excuse me, two coffees and a cake, please.",
+            "fr": "Excusez-moi, deux cafés et un gâteau, s'il vous plaît."
+          },
+          "choices": [
+            {
+              "en": "Two coffees and a cake.",
+              "fr": "Deux cafés et un gâteau."
+            },
+            {
+              "en": "Two coffees and two cakes.",
+              "fr": "Deux cafés et deux gâteaux."
+            },
+            {
+              "en": "One coffee and one cake: two items in all.",
+              "fr": "Un café et un gâteau : deux articles en tout."
+            }
+          ],
+          "why": {
+            "en": "A quantity counts the noun it follows: コーヒーを二つ is two coffees, and ケーキをください, with no number, is a single cake. The 二つ does not spread to the cake, and it is not a total.",
+            "fr": "La quantité compte le nom qu'elle suit : コーヒーを二つ, deux cafés ; ケーキをください, sans nombre, un seul gâteau. Le 二つ ne s'étend pas au gâteau, et ce n'est pas un total."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle goes in the blank?",
+            "fr": "Quelle particule va dans le blanc ?"
+          },
+          "jp": "すみません、ノート＿＿＿ペンをください。",
+          "tr": {
+            "en": "Excuse me, a notebook and a pen, please.",
+            "fr": "Excusez-moi, un cahier et un stylo, s'il vous plaît."
+          },
+          "choices": [
+            "と",
+            "を",
+            "の"
+          ],
+          "why": {
+            "en": "と joins the two things you ask for, and the one を goes at the end: ノートとペンをください. ノートをペンを puts two を in one request, and ノートの would make the notebook the owner of the pen.",
+            "fr": "と relie les deux choses demandées, et un seul を vient à la fin : ノートとペンをください. ノートをペンを met deux を dans une demande, et ノートの ferait du cahier le propriétaire du stylo."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker asking for?",
+            "fr": "Que demande celui qui parle ?"
+          },
+          "jp": "すみません、ホテルのでんわばんごうをください。",
+          "tr": {
+            "en": "Excuse me, please give me the phone number of the hotel.",
+            "fr": "Excusez-moi, donnez-moi le numéro de téléphone de l'hôtel, s'il vous plaît."
+          },
+          "choices": [
+            {
+              "en": "To be given the hotel's phone number.",
+              "fr": "Qu'on lui donne le numéro de téléphone de l'hôtel."
+            },
+            {
+              "en": "That the listener phone the hotel for them.",
+              "fr": "Que l'autre téléphone à l'hôtel pour lui."
+            },
+            {
+              "en": "To borrow a phone to call the hotel.",
+              "fr": "D'emprunter un téléphone pour appeler l'hôtel."
+            }
+          ],
+          "why": {
+            "en": "をください asks to be given the thing named: here the number itself. A call made for you would be 電話してください, and borrowing a phone would be かしてください.",
+            "fr": "をください demande qu'on vous donne la chose nommée : ici le numéro lui-même. Un appel passé pour vous serait 電話してください, et un prêt de téléphone, かしてください."
+          }
+        }
+      ]
     }
   },
   {
