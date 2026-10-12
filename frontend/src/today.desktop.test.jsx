@@ -256,6 +256,23 @@ describe('the agenda in the day\'s figures', () => {
     expect(c.right).toBeLessThanOrEqual(s.right)
   })
 
+  // The strip's cells are narrow at a laptop's column: a block on
+  // another day says the day as its figure, the hour beside the subject.
+  it('says a block tomorrow by its day, the hour beside its subject', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 9, 7, 20, 0))
+    agenda.blocks = WEEK
+    await mount()
+    await settle()
+    const cell = document.querySelector('.tdy-desk__day .tdy-day__cell--door')
+    expect(cell.querySelector('.tdy-day__fig').textContent).toBe('Demain')
+    expect(cell.querySelector('.tdy-day__what').textContent).toBe('Kanji · 9:00')
+    expect(cell.getAttribute('title')).toBe('Demain · 9:00 · Kanji')
+    for (const el of cell.querySelectorAll('.tdy-day__fig, .tdy-day__what')) {
+      expect(el.scrollWidth).toBeLessThanOrEqual(el.clientWidth + 1)
+    }
+  })
+
   it('stands nothing for a learner with no agenda', async () => {
     await mount()
     await settle()

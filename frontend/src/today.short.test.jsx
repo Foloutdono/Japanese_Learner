@@ -75,6 +75,34 @@ describe('Today on a short window', () => {
     expect(box(col).bottom).toBeLessThanOrEqual(window.innerHeight)
   })
 
+  // 一枚 (plan 199b, the owner's pick A3·1): a five-line day, every
+  // figure of the day and the week ahead, and still no scroll.
+  it('holds a five-line day on the board with no scroll, nothing clipped', async () => {
+    const lanes = TODAY.lanes
+    const lane = (source, deck, mode, due) => ({ id: `${source}:${deck}:${mode}`, kind: 'section', source, deck, mode, due, new: 0 })
+    TODAY.lanes = [
+      lane('kana', 'hiragana_basic', 'kana.flashcard.f2b', 8),
+      lane('vocab', 'N5', 'vocab.flashcard.f2b', 158),
+      lane('kanji', 'N5', 'kanji.flashcard.f2b', 51), lane('kanji', 'N4', 'kanji.flashcard.f2b', 35), lane('kanji', 'N5', 'kanji.readings', 33),
+      lane('grammar', 'N5', 'grammar.ladder', 14),
+      { id: 'personal:3:vocab.flashcard.f2b', kind: 'personal', deck_id: 3, deck_name: 'Mots', mode: 'vocab.flashcard.f2b', due: 11, new: 0 },
+    ]
+    TODAY.total = TODAY.lanes.reduce((n, l) => n + l.due, 0)
+    try {
+      await mount()
+      await settle()
+      expect(document.querySelectorAll('.tdy-desk .tdy-line')).toHaveLength(5)
+      const col = document.querySelector('.tdy-desk__col')
+      expect(col.scrollHeight).toBeLessThanOrEqual(col.clientHeight)
+      for (const el of document.querySelectorAll('.tdy-desk__svc .seg__opt, .tdy-day__fig, .tdy-day__what')) {
+        expect(el.scrollWidth, el.textContent).toBeLessThanOrEqual(el.clientWidth + 1)
+      }
+    } finally {
+      TODAY.lanes = lanes
+      TODAY.total = 16
+    }
+  })
+
   it('gives the dial way to the window, the gate under it and in view', async () => {
     await mount()
     await settle()
