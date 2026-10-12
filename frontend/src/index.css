@@ -32795,9 +32795,9 @@ button.brd-stn { cursor: pointer; }
      panel at the size the room gives it, its legend in words and the
      gate at the panel's foot; beside it, at the entry's width (giving
      down to the side column's on a laptop), a column
-     holding open what the phone's sheet holds -- the two choices and the
-     lines with their modes -- over the day's four figures and the week
-     ahead. The column scrolls on its own when it is taller than the
+     holding what the phone's sheet holds -- the two choices and the
+     lines, their modes behind a chevron (plan 199b) -- over the day's
+     four figures and the week ahead. The column scrolls on its own when it is taller than the
      window, its gutter inside the clip edge and given back outside, so
      a row's focus ring is drawn whole. */
   .phone--desk .phone__content:has(> main.today) { max-width: none; }
@@ -32874,10 +32874,32 @@ button.brd-stn { cursor: pointer; }
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
-  /* The desk lists a line's modes under it, so no chevron's column. */
-  .tdy-desk .tdy-line { grid-template-columns: minmax(0, 1fr); }
-  .tdy-desk .tdy-line__head { padding-bottom: 0; }
   .tdy-desk .tdy-day__cell { background: var(--surface); }
+  /* 一枚 — the column as one board (plan 199b, the owner's pick A3·1 of
+     the canvas "Tsuji — Today at a glance"): the two choices, a line a
+     row (what rides of it behind its chevron), a rule across the board,
+     the day's figures in one strip and the week ahead slim under them.
+     A five-line day fits the column from the wide desk down to the
+     short one without scrolling; a line's modes opened may still. */
+  .tdy-desk__svc { gap: var(--sp-4); }
+  .tdy-desk__svc .tdy-line__head { padding: 0; }
+  .tdy-desk__svc .tdy-lines { border-bottom: 0; }
+  .tdy-desk__svc > .tdy-desk__day {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    margin-inline: calc(-1 * var(--sp-5));
+    padding: var(--sp-4) var(--sp-5) 0;
+    border-top: 1px solid var(--surface-line);
+  }
+  .tdy-desk__day:empty { display: none; }
+  .tdy-day--strip { grid-template-columns: repeat(var(--day-n, 4), minmax(0, 1fr)); }
+  .tdy-day--strip .tdy-day__cell { align-items: center; padding: var(--sp-2) var(--sp-1); text-align: center; }
+  .tdy-day--strip .tdy-day__fig { gap: var(--sp-2); font-size: var(--fs-lead); }
+  .tdy-day--strip .tdy-day__fig small { font-size: var(--fs-caption); }
+  .tdy-day--strip .clrk-slot { width: var(--sp-6); height: var(--sp-6); }
+  .tdy-day--strip .tdy-day__what { max-width: 100%; font-size: var(--fs-caption); }
+  .tdy-day--strip .tdy-day__cell--door .tdy-day__what { color: var(--text-primary); }
 
   /* 七日 — the week ahead (plan 135, WeekAhead): a bar a day, today's
      in gold, its bars standing on its foot. Plan 135 stood it on its
@@ -32942,6 +32964,8 @@ button.brd-stn { cursor: pointer; }
     color: var(--text-secondary);
   }
   .desk-week__left b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  /* Slim under the services' board (plan 199b). */
+  .tdy-desk__svc .desk-week__bars { min-height: calc(var(--desk-side-w) / 5); }
 
 
   /* The profile: the holder opened flat — the pass and its stamp book
@@ -39970,6 +39994,8 @@ button.brd-stn { cursor: pointer; }
        in it gives way to fit (.tdy-desk__col > *). The week ahead's bars
        stand a rung shorter, and the dial draws closer. */
     .desk-week__bars { min-height: calc(var(--desk-side-w) / 5); }
+    /* Under the services' board, a rung shorter again (plan 199b). */
+    .tdy-desk__svc .desk-week__bars { min-height: calc(var(--desk-side-w) / 7); }
     /* The dial draws closer before the column scrolls (plan 199). */
     .tdy-dial--desk { width: min(280px, 100%); }
     .tdy-desk__stage { gap: var(--sp-5); padding-block: var(--sp-5); }

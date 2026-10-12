@@ -25,7 +25,12 @@ import { AGENDA_PATH } from '../agenda/AgendaNext'
 //
 // A figure the learner does not have is not drawn, and the lattice
 // never shows a bare cell: an odd last one takes the row.
-export function TodayDay({ today }) {
+//
+// `strip` (the desk's board, plan 199b, the owner's pick A3·1): the
+// figures in one row, each over a word -- the lesson's title and the
+// agenda's "today" left to the screens they open (the agenda's said
+// whole on hover, a word clipped at a laptop's column).
+export function TodayDay({ today, strip = false }) {
   const { t, lang } = useLang()
   const summary = useProfileSummary()
   const { blocks } = useAgenda()
@@ -39,7 +44,7 @@ export function TodayDay({ today }) {
           <Slot glyph={weekdayKanji(utcToday())} state="now" tilt={-4} aria-hidden="true" />
           {summary.streak}
         </span>
-        <span className="tdy-day__what">{t.todayStreakDays}</span>
+        <span className="tdy-day__what">{strip ? t.todayStreakShort : t.todayStreakDays}</span>
       </div>,
     )
   }
@@ -48,7 +53,7 @@ export function TodayDay({ today }) {
     cells.push(
       <div key="new" className="tdy-day__cell">
         <span className="tdy-day__fig">{pace.newToday}<small>/ {pace.target}</small></span>
-        <span className="tdy-day__what">{t.todayNewToday}</span>
+        <span className="tdy-day__what">{strip ? t.todayNewShort : t.todayNewToday}</span>
       </div>,
     )
   }
@@ -58,27 +63,52 @@ export function TodayDay({ today }) {
     cells.push(
       <div key="basics" className="tdy-day__cell">
         <span className="tdy-day__fig">{basics.unit}<small>/ {basics.of}</small></span>
-        <span className="tdy-day__what">{t.todayLesson} · <b>{title}</b></span>
+        <span className="tdy-day__what">{strip ? t.todayLesson : <>{t.todayLesson} · <b>{title}</b></>}</span>
       </div>,
     )
   }
   const next = blocks?.length ? upcoming(blocks, now, 1)[0] : null
   if (next) {
     const info = subjectInfo(next.block.subject, t)
+    const when = next.now ? null : whenLabel(next.start, now, t, lang)
+    const later = when != null && when !== t.nudgeWhen.today
+    const hour = next.now ? t.agdNow : clock(next.block.start)
     cells.push(
-      <Link key="agenda" to={AGENDA_PATH} className="tdy-day__cell tdy-day__cell--door" onClick={() => playClick()}>
-        <span className="tdy-day__fig">{next.now ? t.agdNow : clock(next.block.start)}</span>
-        <span className="tdy-day__what">
-          {next.now ? null : <>{whenLabel(next.start, now, t, lang)} · </>}
-          <b>{info.title}</b>
-        </span>
+      <Link
+        key="agenda"
+        to={AGENDA_PATH}
+        className="tdy-day__cell tdy-day__cell--door"
+        title={strip ? [when, hour, info.title].filter(Boolean).join(' · ') : undefined}
+        onClick={() => playClick()}
+      >
+        {strip ? (
+          // The strip's cell is narrow: a block on another day says the
+          // day as its figure and the hour beside the subject.
+          <>
+            <span className="tdy-day__fig">{later ? when : hour}</span>
+            <span className="tdy-day__what"><b>{info.title}</b>{later ? <> · {hour}</> : null}</span>
+          </>
+        ) : (
+          <>
+            <span className="tdy-day__fig">{hour}</span>
+            <span className="tdy-day__what">
+              {when ? <>{when} · </> : null}
+              <b>{info.title}</b>
+            </span>
+          </>
+        )}
       </Link>,
     )
   }
   if (!cells.length) return null
 
   return (
-    <div className={`tdy-day${cells.length % 2 ? ' tdy-day--odd' : ''}`} aria-label={t.todayDayLabel} role="group">
+    <div
+      className={`tdy-day${strip ? ' tdy-day--strip' : cells.length % 2 ? ' tdy-day--odd' : ''}`}
+      style={strip ? { '--day-n': cells.length } : undefined}
+      aria-label={t.todayDayLabel}
+      role="group"
+    >
       {cells}
     </div>
   )

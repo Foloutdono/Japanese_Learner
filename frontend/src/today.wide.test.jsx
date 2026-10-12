@@ -117,6 +117,11 @@ const count = () => text($('.tdy-dial__count'))
 const lengths = () => $$('.tdy-desk .tdy-seg--two .seg__opt')
 const lines = () => $$('.tdy-desk .tdy-line')
 const head = name => lines().find(l => text(l.querySelector('.tdy-line__name')).startsWith(name)).querySelector('.tdy-line__head')
+// A line's modes are behind its chevron on the desk too (plan 199b).
+async function openModes() {
+  for (const more of $$('.tdy-desk .tdy-line__more')) await userEvent.click(more)
+  await settle(60)
+}
 
 describe('the gate on a wide desk', () => {
   it('stands the dial on a panel the window\'s height, the gate at its foot, the services beside it', async () => {
@@ -141,7 +146,7 @@ describe('the gate on a wide desk', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
   })
 
-  it('names each line under the dial, and lists them with their modes open in the column', async () => {
+  it('names each line under the dial, and lists them in the column with their modes behind a chevron', async () => {
     await mount()
     // The legend has the room for the lines' names.
     const keys = $$('.tdy-desk__keys .tdy-key--lines .tdy-key__item')
@@ -154,16 +159,46 @@ describe('the gate on a wide desk', () => {
     // The free line's tag rides on its name.
     expect(lines().map(l => l.querySelector('.tdy-line__name').firstChild.textContent)).toEqual(['Kana', 'Vocabulaire JLPT', 'Kanji', 'Grammaire'])
     expect(text(lines()[0].querySelector('.tdy-line__tag'))).toBe('gratuit')
-    // No chevron: a line of several modes lists them; a line of one says it.
-    expect($('.tdy-desk .tdy-line__more')).toBeNull()
-    expect(lines().map(l => l.querySelectorAll('.tdy-line__lanes .lane').length)).toEqual([2, 3, 2, 0])
-    expect(text(lines()[3].querySelector('.tdy-line__sub'))).toBe('N5 · Structure → sens')
+    // Nothing opened by default (plan 199b, the owner's word): each line
+    // says what rides of it, and a line of several modes keeps them
+    // behind its chevron.
+    expect($$('.tdy-desk .lane')).toHaveLength(0)
+    expect(lines().map(l => Boolean(l.querySelector('.tdy-line__more')))).toEqual([true, true, true, false])
+    // A line a row on the desk's board (A3·1): what rides of it is
+    // behind its chevron, or, for a line of one mode, a tap on the phone.
+    expect($$('.tdy-desk .tdy-line__sub')).toHaveLength(0)
+    for (const l of lines()) expect(Math.round(l.querySelector('.tdy-line__head').getBoundingClientRect().height)).toBe(44)
+    await userEvent.click(lines()[2].querySelector('.tdy-line__more'))
+    await settle(60)
+    expect(lines().map(l => l.querySelectorAll('.tdy-line__lanes .lane').length)).toEqual([0, 0, 2, 0])
+    await userEvent.click(lines()[1].querySelector('.tdy-line__more'))
+    await settle(60)
     // A line's head takes its whole line out.
     await userEvent.click(head('Vocabulaire'))
     await settle(60)
     expect([...lines()[1].querySelectorAll('.lane')].every(l => l.getAttribute('aria-pressed') === 'false')).toBe(true)
     expect(count()).toBe(String(101 - 49))
     expect($$('.tdy-desk .tdy-dial__ring g')).toHaveLength(3)
+  })
+
+  // 一枚 (plan 199b, the owner's pick A3·1): the column is one board --
+  // the choices, a line a row, a rule, the day in one strip, the week.
+  it('draws the column as one board, the day a strip of figures across it', async () => {
+    forecastRef.current = { days: [0, 1, 2, 3, 4, 5, 6].map(i => ({ date: `2026-10-${12 + i}`, count: 20 })) }
+    await mount()
+    const col = $('.tdy-desk__col')
+    expect(col.children).toHaveLength(1)
+    const board = col.firstElementChild
+    expect(board.classList.contains('tdy-desk__svc')).toBe(true)
+    const day = board.querySelector(':scope > .tdy-desk__day')
+    expect(getComputedStyle(day).borderTopWidth).toBe('1px')
+    // The rule runs the board's width.
+    expect(Math.round(day.getBoundingClientRect().width)).toBe(Math.round(board.getBoundingClientRect().width) - 2)
+    const cells = [...day.querySelectorAll('.tdy-day--strip .tdy-day__cell')]
+    expect(cells.map(c => text(c.querySelector('.tdy-day__what')))).toEqual(['de suite', 'nouveautés'])
+    expect(new Set(cells.map(c => Math.round(c.getBoundingClientRect().top))).size).toBe(1)
+    expect(day.querySelector('.desk-week')).not.toBeNull()
+    expect(col.scrollHeight).toBeLessThanOrEqual(col.clientHeight)
   })
 
   it('cuts the run to a length, each line printing its share as the queue deals', async () => {
@@ -243,6 +278,7 @@ describe('the fare, inside the dial', () => {
     expect($('.tdy-dial__fare-end')).toBeTruthy()
     // The free line says so, on its head and on each of its modes.
     expect(text(lines()[0].querySelector('.tdy-line__tag'))).toBe('gratuit')
+    await openModes()
     expect($$('.tdy-desk .lane__free')).toHaveLength(2)
   })
 
@@ -277,6 +313,7 @@ describe('Enter, on the desk', () => {
 
   it('departs with the choice made on a mode', async () => {
     await mount()
+    await openModes()
     const tile = $$('.tdy-desk .lane')[3]
     // A real click, which leaves the focus on the lane, as Chrome does.
     // The page's Enter departs from there: a lane pressed by the pointer
@@ -367,6 +404,7 @@ describe('the main flashcards alone', () => {
     expect(count()).toBe('76')
     expect(modes()[0].getAttribute('aria-checked')).toBe('true')
     // The other modes stay on the platform, switched off.
+    await openModes()
     expect($$('.tdy-desk .lane--off')).toHaveLength(3)
     expect($$('.tdy-desk .lane:not(.lane--off)')).toHaveLength(4)
     press('Enter')
@@ -399,6 +437,7 @@ describe('the main flashcards alone', () => {
 
   it('leaves the filter when another mode is switched on, keeping what the gate shows', async () => {
     await mount()
+    await openModes()
     await userEvent.click($$('.tdy-desk .lane--off')[0])
     await settle(60)
     expect(modes()[1].getAttribute('aria-checked')).toBe('true')

@@ -109,6 +109,9 @@ describe('Today on a laptop', () => {
     const hero = document.querySelector('.tdy-desk__hero').getBoundingClientRect()
     inside(document.querySelector('.tdy-dial--desk'), hero)
     inside(document.querySelector('.tdy-desk__go .btn-depart'), hero)
+    // Every line's modes opened, the column at its fullest.
+    for (const more of document.querySelectorAll('.tdy-desk .tdy-line__more')) more.click()
+    await settle(60)
     const col = contentBox(document.querySelector('.tdy-desk__col'))
     for (const el of document.querySelectorAll('.tdy-desk__col .tdy-line__head, .tdy-desk__col .lane, .tdy-desk__col .seg__opt')) inside(el, col)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
@@ -174,7 +177,11 @@ describe('Today on a laptop', () => {
       const go = document.querySelector('.tdy-desk__go .btn-depart').getBoundingClientRect()
       expect(go.bottom).toBeLessThanOrEqual(window.innerHeight)
       expect(document.querySelector('.tdy-dial--desk').getBoundingClientRect().bottom).toBeLessThanOrEqual(go.top)
+      // The modes closed, the column fits; opened, it scrolls on its own.
       const col = document.querySelector('.tdy-desk__col')
+      expect(col.scrollHeight).toBeLessThanOrEqual(col.clientHeight)
+      for (const more of document.querySelectorAll('.tdy-desk .tdy-line__more')) more.click()
+      await settle(60)
       expect(col.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
       expect(col.scrollHeight).toBeGreaterThan(col.clientHeight)
     } finally {
@@ -247,6 +254,23 @@ describe('the agenda in the day\'s figures', () => {
     const c = cell.getBoundingClientRect()
     expect(c.left).toBeGreaterThanOrEqual(s.left)
     expect(c.right).toBeLessThanOrEqual(s.right)
+  })
+
+  // The strip's cells are narrow at a laptop's column: a block on
+  // another day says the day as its figure, the hour beside the subject.
+  it('says a block tomorrow by its day, the hour beside its subject', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 9, 7, 20, 0))
+    agenda.blocks = WEEK
+    await mount()
+    await settle()
+    const cell = document.querySelector('.tdy-desk__day .tdy-day__cell--door')
+    expect(cell.querySelector('.tdy-day__fig').textContent).toBe('Demain')
+    expect(cell.querySelector('.tdy-day__what').textContent).toBe('Kanji · 9:00')
+    expect(cell.getAttribute('title')).toBe('Demain · 9:00 · Kanji')
+    for (const el of cell.querySelectorAll('.tdy-day__fig, .tdy-day__what')) {
+      expect(el.scrollWidth).toBeLessThanOrEqual(el.clientWidth + 1)
+    }
   })
 
   it('stands nothing for a learner with no agenda', async () => {

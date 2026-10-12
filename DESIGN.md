@@ -1428,13 +1428,18 @@ line here says otherwise.
   gives it (384px, 280px on the short desk), its legend in words with the
   lines named, two across (a row of four left one alone at a laptop's
   width), the gate at the panel's foot; beside it, at the entry's width
-  (giving down to the side's on a laptop), a column holding open what the
-  phone's sheet holds — the two choices and the lines with their modes
-  listed, no chevron — over the day's panel: its figures and the week ahead,
-  a bar a day, today's the gate's own total in gold (on a day with nothing
-  left, what the day reviewed: the figure the cleared dial prints beside
-  it), and what a shorter run leaves for tomorrow. The column scrolls on its own; nothing in it gives
-  way. Plan 114's pass strip and journey panel beside the gate, and plan
+  (giving down to the side's on a laptop), **one board** (plan 199b, the
+  owner's pick A3·1): what the phone's sheet holds — the two choices, then
+  a line a row, 44px, its modes and what rides of it behind its chevron
+  (nothing opened by default) — then a rule across the board and the day:
+  its figures in one strip, each over a word (a block of the agenda on
+  another day says the day as its figure and the hour beside the
+  subject), and the week ahead slim under them, a bar a day, today's the
+  gate's own total in gold (on a day with nothing left, what the day
+  reviewed: the figure the cleared dial prints beside it), and what a
+  shorter run leaves for tomorrow. A five-line day fits the column from
+  the wide desk down to the short one with no scroll; opened modes may
+  scroll it, on its own, and nothing in it gives way. Plan 114's pass strip and journey panel beside the gate, and plan
   135's bands, are retired: the rail's pass is the journey's on the desk.
   The
   dictionary's dock is open from the first frame on the first result, and
