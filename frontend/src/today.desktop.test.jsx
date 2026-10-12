@@ -114,6 +114,51 @@ describe('Today on a laptop', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
   })
 
+  // The lines' key, named, at the desk's tightest: four lines across
+  // left the fourth alone on a second row. Two across, every line paired
+  // and inside the panel.
+  it('keys four lines two across inside the dial\'s panel, none alone on a row', async () => {
+    const lanes = TODAY.lanes
+    TODAY.lanes = [
+      lane('kana', 'hiragana_basic', 'kana.flashcard.f2b', 8),
+      lane('vocab', 'N5', 'vocab.flashcard.f2b', 158),
+      lane('kanji', 'N5', 'kanji.flashcard.f2b', 86),
+      lane('grammar', 'N5', 'grammar.ladder', 14),
+    ]
+    try {
+      await mount()
+      await settle()
+      const hero = document.querySelector('.tdy-desk__hero').getBoundingClientRect()
+      const keys = [...document.querySelectorAll('.tdy-desk__keys .tdy-key--lines .tdy-key__item')]
+      expect(keys).toHaveLength(4)
+      const rows = new Map()
+      for (const k of keys) {
+        const r = k.getBoundingClientRect()
+        expect(r.left).toBeGreaterThanOrEqual(hero.left)
+        expect(r.right).toBeLessThanOrEqual(hero.right)
+        const top = Math.round(r.top)
+        rows.set(top, (rows.get(top) ?? 0) + 1)
+      }
+      expect([...rows.values()]).toEqual([2, 2])
+    } finally {
+      TODAY.lanes = lanes
+    }
+  })
+
+  it('keys a lone line on the panel\'s axis', async () => {
+    const lanes = TODAY.lanes
+    TODAY.lanes = [lane('vocab', 'N5', 'vocab.flashcard.f2b', 30)]
+    try {
+      await mount()
+      await settle()
+      const hero = document.querySelector('.tdy-desk__hero').getBoundingClientRect()
+      const key = document.querySelector('.tdy-desk__keys .tdy-key--lines .tdy-key__item').getBoundingClientRect()
+      expect(Math.abs(key.left + key.width / 2 - (hero.left + hero.width / 2))).toBeLessThan(2)
+    } finally {
+      TODAY.lanes = lanes
+    }
+  })
+
   // A laptop's short window (plan 123, kept by plans 135 and 199): the
   // gate is bounded by the window, the column scrolls inside it, and
   // the gate stays in view under the dial.

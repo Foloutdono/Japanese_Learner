@@ -32836,6 +32836,17 @@ button.brd-stn { cursor: pointer; }
   .tdy-dial--desk .tdy-dial__arc { stroke-width: 4.5; }
   .tdy-dial--desk .tdy-dial__time { font-size: var(--fs-heading); }
   .tdy-desk__keys { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); }
+  /* The lines' key, named, is a two-column table: a row of four named
+     lines left one alone on a second row at a laptop's width, and a
+     fifth line or a longer language would at any width. Two across
+     reads the same everywhere; a lone line takes the one column. */
+  .tdy-desk .tdy-key--lines {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    justify-content: center;
+    gap: var(--sp-2) var(--sp-6);
+  }
+  .tdy-desk .tdy-key--lines:has(> :only-child) { grid-template-columns: auto; }
   .tdy-desk__go {
     display: flex;
     flex-direction: column;

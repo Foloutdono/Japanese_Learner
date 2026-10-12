@@ -146,6 +146,11 @@ describe('the gate on a wide desk', () => {
     // The legend has the room for the lines' names.
     const keys = $$('.tdy-desk__keys .tdy-key--lines .tdy-key__item')
     expect(keys.map(k => words(k))).toEqual(['Kana 27', 'Vocabulaire JLPT 49', 'Kanji 20', 'Grammaire 5'])
+    // Two across, in the ring's order: no line left alone on a row.
+    const tops = keys.map(k => Math.round(k.getBoundingClientRect().top))
+    expect(tops[0]).toBe(tops[1])
+    expect(tops[2]).toBe(tops[3])
+    expect(tops[2]).toBeGreaterThan(tops[0])
     // The free line's tag rides on its name.
     expect(lines().map(l => l.querySelector('.tdy-line__name').firstChild.textContent)).toEqual(['Kana', 'Vocabulaire JLPT', 'Kanji', 'Grammaire'])
     expect(text(lines()[0].querySelector('.tdy-line__tag'))).toBe('gratuit')
@@ -314,6 +319,22 @@ describe('the week ahead, in the column', () => {
     expect($('.desk-week').getBoundingClientRect().top).toBeGreaterThanOrEqual(figures.bottom)
     // Nothing is left for tomorrow while the whole day rides.
     expect($('.desk-week__left')).toBeNull()
+  })
+
+  // Plan 199: the cleared dial says "31 cartes aujourd'hui" beside it,
+  // and a bar of 0 under that read as a day off.
+  it('stands what the day reviewed as today\'s bar on a day with nothing left', async () => {
+    forecastRef.current = { days: WEEK }
+    todayRef.current = {
+      total: 0, lanes: [], by_source: {}, next_due: null, pace: { target: 10, newToday: 10 },
+      reviewed: { total: 31, by_line: { vocab: 20, kanji: 11 } }, tomorrow: { cards: 41, minutes: 9 },
+    }
+    await mount()
+    const days = $$('.tdy-desk__day .desk-week__day')
+    expect(text(days[0].querySelector('.desk-week__n'))).toBe('31')
+    expect(text($('.tdy-recap'))).toBe('31 cartes aujourd’hui')
+    expect(days[0].querySelector('.desk-week__bar').getBoundingClientRect().height)
+      .toBeGreaterThan(days[4].querySelector('.desk-week__bar').getBoundingClientRect().height)
   })
 
   it('says what a shorter run leaves for tomorrow', async () => {

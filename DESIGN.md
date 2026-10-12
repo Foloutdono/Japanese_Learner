@@ -1426,12 +1426,14 @@ line here says otherwise.
   phone's composition above, drawn for the desk) runs the whole width the
   rail leaves, the window's height: the dial on a panel at the size the room
   gives it (384px, 280px on the short desk), its legend in words with the
-  lines named, the gate at the panel's foot; beside it, at the entry's width
+  lines named, two across (a row of four left one alone at a laptop's
+  width), the gate at the panel's foot; beside it, at the entry's width
   (giving down to the side's on a laptop), a column holding open what the
   phone's sheet holds — the two choices and the lines with their modes
   listed, no chevron — over the day's panel: its figures and the week ahead,
-  a bar a day, today's the gate's own total in gold, and what a shorter run
-  leaves for tomorrow. The column scrolls on its own; nothing in it gives
+  a bar a day, today's the gate's own total in gold (on a day with nothing
+  left, what the day reviewed: the figure the cleared dial prints beside
+  it), and what a shorter run leaves for tomorrow. The column scrolls on its own; nothing in it gives
   way. Plan 114's pass strip and journey panel beside the gate, and plan
   135's bands, are retired: the rail's pass is the journey's on the desk.
   The
