@@ -18860,7 +18860,127 @@
             "fr": "Le paysage est la force, donc ずにはおかない. ずにはいられない appartient aux sentiments d'une personne, et 感動させない dit qu'il n'émeut personne."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the writer say about the novel?",
+            "fr": "Que dit l'auteur du roman ?"
+          },
+          "jp": "この小説は、読む人の心に深い印象を残さずにはおかない。",
+          "tr": {
+            "en": "This novel cannot fail to leave a deep impression on the heart of whoever reads it.",
+            "fr": "Ce roman ne peut manquer de laisser une impression profonde dans le cœur de celui qui le lit."
+          },
+          "choices": [
+            {
+              "en": "That it cannot fail to leave a deep impression on readers.",
+              "fr": "Qu'il ne peut manquer de laisser une impression profonde aux lecteurs."
+            },
+            {
+              "en": "That it leaves no deep impression on readers.",
+              "fr": "Qu'il ne laisse aucune impression profonde aux lecteurs."
+            },
+            {
+              "en": "That it leaves an impression only on some readers.",
+              "fr": "Qu'il ne marque que certains lecteurs."
+            }
+          ],
+          "why": {
+            "en": "ずにはおかない is a double negation: it will not go without leaving an impression, so it will leave one. Read as a simple negative it would say the opposite, and nothing here limits it to some readers.",
+            "fr": "ずにはおかない est une double négation : il ne manquera pas de laisser une impression, donc il en laisse une. Lu comme une simple négation, il dirait le contraire, et rien ici ne le limite à certains lecteurs."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この失敗は、彼を深く＿＿＿だろう。",
+          "tr": {
+            "en": "This failure is bound to make him reflect deeply.",
+            "fr": "Cet échec ne manquera pas de le faire profondément réfléchir sur lui-même."
+          },
+          "choices": [
+            "反省させずにはおかない",
+            "反省せずにはおかない",
+            "反省しずにはおかない"
+          ],
+          "why": {
+            "en": "The failure acts on him, so the verb is causative: 反省させる, whose negative stem is 反省させず. 反省せず is the plain negative, with no one made to do anything, and しず is not a stem of する.",
+            "fr": "L'échec agit sur lui : le verbe est causatif, 反省させる, de radical négatif 反省させず. 反省せず est la négation simple, sans personne qu'on fasse agir, et しず n'est pas un radical de する."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are writing a review of a play. Say that it is sure to move everyone who sees it.",
+            "fr": "Tu écris la critique d'une pièce de théâtre. Dis qu'elle ne peut manquer d'émouvoir tous ceux qui la voient."
+          },
+          "choices": [
+            "この劇は、見る人の涙を誘わずにはおかない。",
+            "この劇を見て、わたしは涙を流さずにはおかなかった。",
+            "この劇は、見る人の涙を誘わずにはいられない。"
+          ],
+          "why": {
+            "en": "The play is a force that produces an effect on whoever sees it: ずにはおかない. The second line puts a personal feeling into it, which is ずにはいられない, and the third gives a play a feeling it cannot have.",
+            "fr": "La pièce est une force qui agit sur tous ceux qui la voient : ずにはおかない. La deuxième ligne y met un sentiment personnel (ずにはいられない), la troisième prête à une pièce un sentiment qu'elle ne peut avoir."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the writer predict about his health?",
+            "fr": "Que prédit l'auteur à propos de sa santé ?"
+          },
+          "jp": "このまま放っておけば、ストレスは彼の健康をそこなわずにはおかないだろう。",
+          "tr": {
+            "en": "If things are left as they are, the stress is bound to damage his health.",
+            "fr": "Si on laisse les choses ainsi, le stress ne manquera pas de nuire à sa santé."
+          },
+          "choices": [
+            {
+              "en": "That it will inevitably be damaged if nothing changes.",
+              "fr": "Qu'elle sera inévitablement atteinte si rien ne change."
+            },
+            {
+              "en": "That it will stay unharmed: the stress will pass it by.",
+              "fr": "Qu'elle restera intacte : le stress ne l'atteindra pas."
+            },
+            {
+              "en": "That it might be damaged, though the writer is not sure.",
+              "fr": "Qu'elle pourrait être atteinte, sans que l'auteur en soit sûr."
+            }
+          ],
+          "why": {
+            "en": "The effect forced by something need not be good: the stress cannot fail to damage his health. The ずに here is part of ずにはおかない, not « without damaging », and だろう only adds the writer's forecast.",
+            "fr": "L'effet qu'une chose impose n'est pas forcément bon : le stress ne peut manquer de nuire à sa santé. Le ずに est ici une partie de ずにはおかない, pas « sans nuire », et だろう n'ajoute que la prévision de l'auteur."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この判決は、国民に大きな疑問を＿＿＿だろう。",
+          "tr": {
+            "en": "This ruling is bound to raise serious questions among the public.",
+            "fr": "Ce jugement ne manquera pas de soulever de sérieuses questions dans le public."
+          },
+          "choices": [
+            "投げかけずにはおかない",
+            "投げかけらずにはおかない",
+            "投げかけるずにはおかない"
+          ],
+          "why": {
+            "en": "投げかける is a る-verb, so it drops る before ず: 投げかけず. 投げかけらず applies the う-verb rule, and 投げかけるず keeps the る, which the ない-stem never does.",
+            "fr": "投げかける est un verbe en る : il perd る devant ず, 投げかけず. 投げかけらず applique la règle des verbes en う, et 投げかけるず garde le る, ce que le radical en ない ne fait jamais."
+          }
+        }
+      ]
     }
   },
   {
@@ -28251,7 +28371,141 @@
             "fr": "Ce qui aurait pu arriver, regretté : ものを. ものだから donne une raison, et 走っても間に合わなかった dit que courir n'aurait servi à rien."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker feel?",
+            "fr": "Qu'éprouve celui qui parle ?"
+          },
+          "jp": "わたしがもう少し気をつけていれば、防げたものを。",
+          "tr": {
+            "en": "If only I had been a little more careful, I could have prevented it.",
+            "fr": "Si seulement j'avais été un peu plus attentif, j'aurais pu l'éviter."
+          },
+          "choices": [
+            {
+              "en": "Regret over their own carelessness: it could have been prevented.",
+              "fr": "Du regret pour sa propre étourderie : cela aurait pu être évité."
+            },
+            {
+              "en": "Anger at someone else who was careless.",
+              "fr": "De la colère contre quelqu'un d'autre qui a été négligent."
+            },
+            {
+              "en": "Relief: it was prevented thanks to the speaker's care.",
+              "fr": "Du soulagement : cela a été évité grâce à l'attention de celui qui parle."
+            }
+          ],
+          "why": {
+            "en": "…ばVたものを looks back at what could have been and was not: with わたしが, the one who blames is the speaker. 防げた is a possibility that did not come true, so there is no relief.",
+            "fr": "…ばVたものを regarde ce qui aurait pu être et n'a pas été : avec わたしが, celui qu'on blâme est celui qui parle. 防げた est une possibilité qui ne s'est pas réalisée, donc pas de soulagement."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "前の日に言ってくれれば、車を出した＿＿＿。",
+          "tr": {
+            "en": "If only you had told me the day before, I would have brought the car.",
+            "fr": "Si tu me l'avais dit la veille, j'aurais sorti la voiture."
+          },
+          "choices": [
+            "ものを",
+            "ものの",
+            "ものだから"
+          ],
+          "why": {
+            "en": "The sentence ends on the regret: « I would have, and you did not let me » is ものを. ものの means « although I did » and ものだから « because I did »; both would need a different sentence.",
+            "fr": "La phrase finit sur le regret : « je l'aurais fait, et tu ne m'as pas laissé » est ものを. ものの veut dire « bien que je l'aie fait » et ものだから « parce que je l'ai fait » ; il faudrait une autre phrase."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who would have forgiven whom?",
+            "fr": "Qui aurait pardonné à qui ?"
+          },
+          "jp": "素直に謝れば許したものを、あの子は何も言わずに帰った。",
+          "tr": {
+            "en": "I would have forgiven the child if only he had apologised honestly, yet he went home without a word.",
+            "fr": "Je lui aurais pardonné s'il s'était excusé franchement, et pourtant il est rentré sans un mot."
+          },
+          "choices": [
+            {
+              "en": "The speaker would have forgiven the child, but the child left without apologising.",
+              "fr": "Celui qui parle aurait pardonné à l'enfant, mais l'enfant est parti sans s'excuser."
+            },
+            {
+              "en": "The child apologised, and the speaker forgave him.",
+              "fr": "L'enfant s'est excusé, et celui qui parle lui a pardonné."
+            },
+            {
+              "en": "The child would have forgiven the speaker, but the speaker did not apologise.",
+              "fr": "L'enfant aurait pardonné à celui qui parle, mais celui-ci ne s'est pas excusé."
+            }
+          ],
+          "why": {
+            "en": "ものを after 許した is a reproach: the speaker would have forgiven if the condition had been met, and it was not. The one who would forgive is the speaker; the child is the one who left without a word.",
+            "fr": "ものを après 許した est un reproche : celui qui parle aurait pardonné si la condition avait été remplie, et elle ne l'a pas été. Celui qui pardonnerait est celui qui parle ; l'enfant est celui qui est parti sans un mot."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ひとこと声をかけて＿＿＿、荷物を持ったものを。",
+          "tr": {
+            "en": "If only you had called out to me, I would have carried your bag.",
+            "fr": "Si seulement tu m'avais appelé, j'aurais porté ton sac."
+          },
+          "choices": [
+            "くれれば",
+            "くれなければ",
+            "くれても"
+          ],
+          "why": {
+            "en": "The condition is the ば-form of くれる, 声をかけてくれれば, « if you had called ». くれなければ reverses it (« if you had not »), and くれても would mean « even if you had ».",
+            "fr": "La condition est la forme en ば de くれる, 声をかけてくれれば, « si tu m'avais appelé ». くれなければ l'inverse (« si tu ne l'avais pas fait »), et くれても voudrait dire « même si tu l'avais fait »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Was the problem solved?",
+            "fr": "Le problème a-t-il été résolu ?"
+          },
+          "jp": "先生に相談すれば解決したものを、彼は一人で悩み続けた。",
+          "tr": {
+            "en": "He would have solved it by asking the teacher, but he kept worrying alone.",
+            "fr": "Il aurait réglé cela en consultant le professeur, mais il a continué à se tourmenter seul."
+          },
+          "choices": [
+            {
+              "en": "No: he never asked the teacher and kept worrying alone.",
+              "fr": "Non : il n'a pas consulté le professeur et a continué à se tourmenter seul."
+            },
+            {
+              "en": "Yes: he asked the teacher and it was solved.",
+              "fr": "Oui : il a consulté le professeur et cela s'est réglé."
+            },
+            {
+              "en": "Yes: he kept worrying alone until he solved it himself.",
+              "fr": "Oui : il a continué à se tourmenter seul jusqu'à trouver la solution."
+            }
+          ],
+          "why": {
+            "en": "解決したものを names what would have happened and did not: the ものを sets it against the fact that follows, 悩み続けた. So he never asked, and it was not solved.",
+            "fr": "解決したものを nomme ce qui se serait passé et n'a pas eu lieu : ものを l'oppose au fait qui suit, 悩み続けた. Il n'a donc pas consulté, et rien n'a été résolu."
+          }
+        }
+      ]
     }
   },
   {
@@ -32722,7 +32976,111 @@
             "fr": "Un souhait pour un moyen qui semble fermé : ないものか. 取れるものか dirait que c'est impossible ; てほしい lui demande de le faire."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "となりの人は、もう少し声を小さく＿＿＿ものか。",
+          "tr": {
+            "en": "If only my neighbour would keep his voice down a little.",
+            "fr": "Si seulement mon voisin voulait bien parler un peu moins fort."
+          },
+          "choices": [
+            "してくれない",
+            "してくれなかった",
+            "してくれて"
+          ],
+          "why": {
+            "en": "A wish that someone would do something is ～てくれない + ものか: してくれない. してくれなかった would look back at the past, and してくれて is a て-form that cannot stand before ものか.",
+            "fr": "Souhaiter que quelqu'un fasse quelque chose se dit ～てくれない + ものか : してくれない. してくれなかった regarderait le passé, et してくれて est une forme て qui ne peut pas précéder ものか."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker doing?",
+            "fr": "Que fait celui qui parle ?"
+          },
+          "jp": "あしたの運動会までに、この雨がやまないものか。",
+          "tr": {
+            "en": "If only this rain would stop before tomorrow's sports day.",
+            "fr": "Si seulement cette pluie pouvait s'arrêter avant la fête sportive de demain."
+          },
+          "choices": [
+            {
+              "en": "Wishing there were some way for the rain to stop in time.",
+              "fr": "Il souhaite qu'il y ait un moyen pour que la pluie s'arrête à temps."
+            },
+            {
+              "en": "Asking someone whether the rain will stop in time.",
+              "fr": "Il demande à quelqu'un si la pluie s'arrêtera à temps."
+            },
+            {
+              "en": "Saying firmly that the rain will not stop.",
+              "fr": "Il affirme avec force que la pluie ne s'arrêtera pas."
+            }
+          ],
+          "why": {
+            "en": "ない + ものか is a longing for a way out, said half to oneself, with little hope. It is not a question awaiting an answer, and it does not say the rain will not stop.",
+            "fr": "ない + ものか est l'aspiration à une issue, dite à moitié pour soi, avec peu d'espoir. Ce n'est pas une question qui attend une réponse, et elle ne dit pas que la pluie ne s'arrêtera pas."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "何とかもう少し時間をのばせない＿＿＿。",
+          "tr": {
+            "en": "Isn't there some way to get a little more time?",
+            "fr": "N'y aurait-il pas moyen d'avoir un peu plus de temps ?"
+          },
+          "choices": [
+            "ものか",
+            "ものでもない",
+            "ものだ"
+          ],
+          "why": {
+            "en": "The wish is ない + ものか. ものでもない is another phrase: のばせないものでもない means « it is not impossible », and ものだ would only state that something cannot be done.",
+            "fr": "Le souhait, c'est ない + ものか. ものでもない est une autre expression : のばせないものでもない veut dire « ce n'est pas impossible », et ものだ ne ferait qu'énoncer qu'on ne peut pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What has the speaker been doing?",
+            "fr": "Qu'est-ce que celui qui parle n'a cessé de faire ?"
+          },
+          "jp": "何とか気持ちを伝えられないものかと、一週間ずっと考えている。",
+          "tr": {
+            "en": "For a week now I have been wondering whether there is some way to tell her how I feel.",
+            "fr": "Depuis une semaine, je cherche sans cesse un moyen de lui dire ce que je ressens."
+          },
+          "choices": [
+            {
+              "en": "Searching for some way to get the feelings across.",
+              "fr": "Chercher un moyen de faire passer ses sentiments."
+            },
+            {
+              "en": "Deciding not to say anything about the feelings.",
+              "fr": "Décider de ne rien dire de ses sentiments."
+            },
+            {
+              "en": "Saying the same thing to her every day.",
+              "fr": "Lui dire chaque jour la même chose."
+            }
+          ],
+          "why": {
+            "en": "ないものかと考える is the quiet form of the wish: « is there no way to…? ». The speaker is hunting for a way to tell, not giving up on it, and has not said anything yet.",
+            "fr": "ないものかと考える est la forme discrète du souhait : « n'y a-t-il pas moyen de… ? ». Celui qui parle cherche un moyen de le dire, il n'y renonce pas, et n'a encore rien dit."
+          }
+        }
+      ]
     }
   },
   {
