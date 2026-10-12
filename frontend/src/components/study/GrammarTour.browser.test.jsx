@@ -23,7 +23,7 @@ vi.mock('../../lib/audio', async (o) => ({
 }))
 const speakLine = vi.fn(async () => true)
 
-const { GrammarTour } = await import('./GrammarTour')
+const { GrammarTour, Results } = await import('./GrammarTour')
 
 // The derived half alone: look, guess, found, results.
 const TOUR = { ...tours.en, twists: [], scene: null, quiz: null }
@@ -247,8 +247,8 @@ describe('the written tour', () => {
       await settle()
       gate().click()
       await settle()
-      // The trap is named once the question is checked.
-      expect(root().querySelector('.tour-guesses .tour-trap')).toBeTruthy()
+      // The trap, where the question has one, is named once it is checked.
+      if (q.choices.some(c => c.trap)) expect(root().querySelector('.tour-guesses .tour-trap')).toBeTruthy()
       gate().click()
       await settle()
     }
@@ -258,6 +258,18 @@ describe('the written tour', () => {
     const rows = root().querySelectorAll('.tour-recap__row')
     expect(rows).toHaveLength(KA.quiz.length)
     expect(rows[0].classList.contains('tour-recap__row--no')).toBe(true)
+    // The score is a dial, one arc a question: the miss's ink on the
+    // first, the success ink on the rest; the point stands beside it.
+    const arcs = [...root().querySelectorAll('.tour-tally__arc')]
+    expect(arcs).toHaveLength(KA.quiz.length)
+    expect(arcs[0].classList.contains('tour-tally__arc--no')).toBe(true)
+    expect(arcs.slice(1).every(a => a.classList.contains('tour-tally__arc--ok'))).toBe(true)
+    expect(root().querySelector('.tour-end .tour-pattern').textContent).toBe('か')
+    // A "which" says its sentence alone, missed or not.
+    expect(rows[0].querySelector('.tour-recap__fix')).toBeNull()
+    // Each row says its kind, and the heading is for a screen reader.
+    expect(rows[0].querySelector('.tour-recap__kind').textContent.length).toBeGreaterThan(0)
+    expect(root().querySelector('.tour__q.sr-only').textContent).toBe('Results')
     gate().click()
     expect(onBoard).toHaveBeenCalledWith({ tries: 0, helped: false, quizRight: KA.quiz.length - 1, quizTotal: KA.quiz.length })
     const steps = track.mock.calls.filter(c => c[0] === 'grammar_tour_step').map(c => c[1].stop + ':' + c[1].outcome)
@@ -283,5 +295,31 @@ describe('the written tour', () => {
     // The tapped line only: the play-through does not go on to line two.
     expect(speakLine.mock.calls.map(c => c[0])).toEqual([KA.scene.lines[0].jp, KA.scene.lines[2].jp])
     speakLine.mockImplementation(async () => true)
+  })
+})
+
+describe('the results', () => {
+  const GAP = tours.en.quiz.findIndex(q => q.kind === 'gap')
+
+  it('writes a missed gap\'s right form into its sentence, the form taken struck under it', async () => {
+    const picks = tours.en.quiz.map(q => q.choices.findIndex(c => c.correct))
+    const taken = tours.en.quiz[GAP].choices.findIndex(c => !c.correct)
+    picks[GAP] = taken
+    const screen = await render(
+      <LangProvider>
+        <Results tour={tours.en} point={POINT} picks={picks} onLesson={() => {}} replay={false} />
+      </LangProvider>
+    )
+    const rows = screen.container.querySelectorAll('.tour-recap__row')
+    const row = rows[GAP]
+    expect(row.classList.contains('tour-recap__row--no')).toBe(true)
+    const right = tours.en.quiz[GAP].choices.find(c => c.correct).pattern.replace(/^[〜～]/, '')
+    expect(row.querySelector('.tour-recap__form').textContent).toBe(right)
+    expect(row.querySelector('.tour-recap__fix').textContent)
+      .toBe(tours.en.quiz[GAP].choices[taken].pattern.replace(/^[〜～]/, ''))
+    // The sentence stands whole, its hole filled.
+    expect(row.querySelector('.tour-recap__jp').textContent).toContain(right)
+    expect(screen.container.querySelectorAll('.tour-tally__arc--no')).toHaveLength(1)
+    expect(screen.container.querySelector('.tour-score__right').textContent).toBe(String(tours.en.quiz.length - 1))
   })
 })

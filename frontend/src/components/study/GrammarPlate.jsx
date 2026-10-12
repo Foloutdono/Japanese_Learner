@@ -126,16 +126,12 @@ export function LadderMap({ card, t: tProp }) {
   return (
     <ol className="gl-map" aria-label={t.mapAria}>
       {rows.map((r, i) => (
-        r.kind === 'group'
-          ? <li key={i} className="gl-map__group"><span /><span>{r.name}</span></li>
-          : (
-            <li key={i} className={`gl-map__stop gl-map__stop--${r.state}${r.kind === 'end' ? ' gl-map__stop--end' : ''}`}
-                aria-current={r.state === 'now' ? 'step' : undefined}>
-              <span className="gl-map__dot" aria-hidden="true">{r.kind === 'end' ? '★' : null}</span>
-              <span className="gl-map__name">{r.name}</span>
-              <span className="gl-map__when">{r.state === 'now' ? t.mapNow : r.state === 'done' ? t.mapDone : r.wait}</span>
-            </li>
-          )
+        <li key={i} className={`gl-map__stop gl-map__stop--${r.state}${r.kind === 'end' ? ' gl-map__stop--end' : ''}`}
+            aria-current={r.state === 'now' ? 'step' : undefined}>
+          <span className="gl-map__dot" aria-hidden="true">{r.kind === 'end' ? '★' : null}</span>
+          <span className="gl-map__name">{r.name}</span>
+          <span className="gl-map__when">{r.state === 'now' ? t.mapNow : r.state === 'done' ? t.mapDone : r.wait}</span>
+        </li>
       ))}
     </ol>
   )
@@ -254,7 +250,7 @@ export function GrammarTiles({ choices, correct, selected, answered, onAnswer, r
   const longest = Math.max(0, ...choices.map(p => [...bare(p)].length))
   const size = longest > 7 ? ' gl-tiles--long' : longest > 5 ? ' gl-tiles--mid' : ''
   return (
-    <div className={`gl-dock${desk ? ' gl-dock--desk' : ''}`}>
+    <div className={`gl-dock${desk ? ' gl-dock--desk' : ''}${answered ? ' gl-dock--done' : ''}`}>
       <div className={`gl-tiles${size}`} role="radiogroup" aria-label={t.chooseAsk}>
         {choices.map((choice, i) => {
           const ok = answered && choice === correct

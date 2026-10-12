@@ -71,11 +71,16 @@ def lesson_payload(level: str, entry: dict, lang: str) -> dict:
 
 
 def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: str,
-                     rng: random.Random | None = None, turn: int | None = None) -> dict | None:
+                     rng: random.Random | None = None, turn: int | None = None,
+                     example: dict | None = None, offer: str | None = None) -> dict | None:
     """
     {jp, tr, furigana (one blank part), choices: [pattern...], answer}
     `turn` picks the sentence deterministically where given (the
-    ladder's review count, the tour quiz's question number).
+    ladder's review count). `example` is the sentence itself, one of the
+    point's contrast examples, where the caller has chosen it (the tour's
+    quiz, which asks each sentence once, plan 195); `offer` is a rival
+    that must stand among the choices, for a question asked from its
+    side: the sentence is the rival's, the point the wrong answer to it.
     for one of the point's contrast examples, or None when it has none
     -- the pool filter (card_index.contrast_ok) should have kept such a
     point out, so None is defensive rather than expected.
@@ -94,26 +99,30 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     """
     rng = rng or random
     pattern = entry["pattern"]
-    pool = [ex for ex in entry.get("examples", []) if ex.get("contrast")]
     checkable = verifiable(pattern)
-    if not checkable:
-        pool = [ex for ex in pool if blank_span(ex["jp"], pattern, level)]
-    if not pool:
-        return None
-    if turn is None:
-        example = rng.choice(pool)
-    else:
-        # The ladder's Choisir asks another sentence each review (plan
-        # 194): the pool in a fixed order per point, walked by the turn.
-        order = list(pool)
-        random.Random(f"contrast:{level}:{pattern}").shuffle(order)
-        example = order[turn % len(order)]
+    if example is None:
+        pool = [ex for ex in entry.get("examples", []) if ex.get("contrast")]
+        if not checkable:
+            pool = [ex for ex in pool if blank_span(ex["jp"], pattern, level)]
+        if not pool:
+            return None
+        if turn is None:
+            example = rng.choice(pool)
+        else:
+            # The ladder's Choisir asks another sentence each review (plan
+            # 194): the pool in a fixed order per point, walked by the turn.
+            order = list(pool)
+            random.Random(f"contrast:{level}:{pattern}").shuffle(order)
+            example = order[turn % len(order)]
     sentence = example["jp"]
 
     rivals = [
         r["pattern"] for r in entry.get("compare", [])
         if r["pattern"] != pattern and not (verifiable(r["pattern"]) and contains_pattern(sentence, r["pattern"]))
     ]
+    if offer in rivals:
+        rivals.remove(offer)
+        rivals.insert(0, offer)
     choices = list(dict.fromkeys(rivals))[: CONTRAST_CHOICES - 1]
     if checkable and len(choices) < CONTRAST_CHOICES - 1:
         fillers = [

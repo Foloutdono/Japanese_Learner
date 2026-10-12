@@ -49,6 +49,30 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 | `examples` | each passes `study/grammar_sentence_gen.check_sentence`: 8–60 characters, ends in 。！？, kanji within the level (the pattern's own kanji excepted), and visibly contains the pattern. Distinct sentences. |
 | `contrast` | marks a sentence in which the rivals in `compare` are **wrong**; the contrast drill blanks the pattern in it and offers the rivals as choices. So the sentence must not also contain a rival, and the point must compare something. A bare particle may mark one too (plan 190): see "What the matcher can and cannot see". |
 
+## The quiz's sentences (plan 195)
+
+The tour's closing quiz asks only sentences the learner has not met in the
+tour, and none twice (`study/grammar_tour._quiz`). They come from the rest
+of what the app teaches -- every example and tour sentence of the
+catalogue and every row of the reading bank, kept for each point they
+write (`study/grammar_quiz_pool.py`) -- and, where a point has too few,
+from `content/grammar/quiz_sentences.json`: level -> pattern -> Japanese
+sentences written for the quiz alone (no translation: a sentence the quiz
+offers as a choice is never translated). Each is held to
+`study/grammar_quiz_pool.sentence_problems`: a whole sentence at the
+level's kanji, grammar and words, the point visibly written in it, and no
+sentence the app already teaches. Check a draft before it enters the file:
+
+```bash
+python -m scripts.check_quiz_sentences FILE.json   # a draft
+python -m scripts.check_quiz_sentences             # the committed bank
+```
+
+**After any change to the catalogue or the reading bank, run
+`python -m scripts.build_quiz_pool`** (it writes `quiz_pool.json`, the
+sentences each point's quiz may draw on); `tests/test_grammar_quiz_pool.py`
+fails while the file disagrees with the catalogue.
+
 ## The tour block (plan 187)
 
 A point a learner has never met is toured before it is drilled

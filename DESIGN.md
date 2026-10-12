@@ -798,11 +798,18 @@ stage, not a new idiom:
   second use, a sense, a form, a trap -- the trap tagged as one), each
   the sentence with its translation, the question, two readings (the
   right one and the confusion its author set beside it), checked once,
-  the why said under them; then **the quiz**, seven or eight questions
-  each with its trap (the gap, the false friend, the meaning), one at a
-  time, « Question 3 sur 8 » over each; then **the results**: the score
-  at display size, every question again with how it went, the point's
-  sheet as a row that opens it, and « Commencer : Choisir 1 » on the gate.
+  the why said under them; then **the quiz**, up to eight questions
+  each with its trap (the gap, the false friend), one at a time,
+  « Question 3 sur 8 » over each -- **every one on a sentence the tour
+  has not shown** (plan 195: not a look, a twist or a line of the scene,
+  and none twice), so a point with too little new to ask has a shorter
+  quiz, or none; then **the results**: the point beside the score drawn
+  as a dial (one arc a question, the success ink for a right one and the
+  miss's for a wrong, the figure inside it), every question again as a
+  row -- the mark, its sentence with the right form in it, the kind at
+  the end, and under a miss what was taken, struck -- the point's sheet
+  as a row that opens it, and « Commencer : Choisir 1 » on the gate. No
+  « Résultats » heading: the dial says it.
   The tutorial is due **once per point**, whatever platform first meets
   it.
   The scene opens on its place as a **station plate**: the name over its
@@ -890,7 +897,13 @@ stage's width, its sentence a step up, the tiles or the entry under it,
 and the card panel at the left shows **the walk upright**
 (`LadderMap`): every
 stop on one rail in the line's pigment, done, the one in hand ringed in
-ink on a wash, each stop ahead with the wait before it.
+ink on a wash, each stop ahead with the wait before it. The stops are
+named by their own step (« Choisir 2 »); **no group heading** stands over
+them, since each already says its group (plan 195). The run never stands
+on a scroll bar: on a wrong pick's note, and on any answer under 800px of
+window height (the short desk), the answer sheet gives way once the answer
+is in -- the card already says which form was right and which was taken --
+as it does on a phone.
 
 On the desk (plan 187f, the owner's pick F) the tour stands on the runs'
 three panels. The stop is the middle, with no track of its own: its gate

@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **195**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **196**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -267,7 +267,9 @@ The last is run once, after the deploy that carries the grammar ladder
 writes each studied point a ladder row with the schedule of its best
 grammar mode and folds the old `grammar.flashcard.f2b` row (Today's main
 lane before it) into it. Until it runs, Today deals already-studied points
-as new on the ladder. **After any change to `content/grammar/*.json`, run
+as new on the ladder. **After any change to `content/grammar/*.json` (or to the reading bank), run
+`python -m scripts.build_quiz_pool`** (plan 195: the sentences each tour's
+quiz may draw on, so no question repeats one the tour has shown), **and
 `python -m scripts.build_ladder_flags`** too: `content/grammar/ladder.json`
 writes down which points Construire (`grammar.build`, typed since plan 194)
 and write can be asked on, and

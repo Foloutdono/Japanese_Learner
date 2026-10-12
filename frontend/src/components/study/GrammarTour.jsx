@@ -407,34 +407,92 @@ function QuizQuestion({ q, n, total, point, pick, done, onPick }) {
   )
 }
 
-/** The results (plan 194): the score, each question again with how it
-    went, and the point's sheet; the gate starts Choisir 1. */
-function Results({ tour, point, picks, onLesson, replay }) {
+/** The score as a dial (plan 195): one arc a question round the figure,
+    in the success ink when it was right and the miss's when it was not.
+    The ring is the roundel's idiom (PointLine, DESIGN.md, "Colour is an
+    edge, a ring, or a numeral"). */
+function Tally({ marks, right, total }) {
+  const { t } = useLang()
+  const r = 40
+  const round = 2 * Math.PI * r
+  const gap = total > 1 ? 6 : 0
+  const arc = round / total - gap
+  return (
+    <div className="tour-tally" role="img" aria-label={t.tourScore(right, total)}>
+      <svg className="tour-tally__dial" viewBox="0 0 96 96" width="96" height="96" aria-hidden="true">
+        {marks.map((ok, i) => (
+          <circle
+            key={i}
+            cx="48" cy="48" r={r}
+            className={`tour-tally__arc${ok == null ? '' : ok ? ' tour-tally__arc--ok' : ' tour-tally__arc--no'}`}
+            strokeDasharray={`${arc} ${round}`}
+            transform={`rotate(${-90 + (i * 360) / total + (gap / round) * 180} 48 48)`}
+          />
+        ))}
+      </svg>
+      <p className="tour-score" aria-hidden="true">
+        <span className="tour-score__right">{right}</span>
+        <span className="tour-score__of">/ {total}</span>
+      </p>
+    </div>
+  )
+}
+
+/** A question again on the results: its sentence with the right form in
+    it, and for a miss what was taken, struck. */
+function Recap({ q, pick }) {
+  const { t } = useLang()
+  const right = q.choices.find(c => c.correct)
+  const taken = pick != null ? q.choices[pick] : null
+  const ok = Boolean(taken?.correct)
+  let said
+  let fix = null
+  if (q.kind === 'which') {
+    said = <FuriganaParts parts={right.furigana?.length ? right.furigana : [{ text: right.jp }]} />
+  } else if (q.kind === 'gap') {
+    said = q.furigana.map((seg, i) => (seg.blank
+      ? <b key={i} className="tour-recap__form">{bare(right.pattern)}</b>
+      : <FuriganaParts key={i} parts={[seg]} />))
+    if (!ok && taken) fix = bare(taken.pattern)
+  } else {
+    said = <FuriganaParts parts={q.furigana?.length ? q.furigana : [{ text: q.jp }]} />
+    if (!ok && taken) fix = taken.text
+  }
+  return (
+    <>
+      <Mark kind={ok ? 'ok' : 'no'} />
+      <span className="tour-recap__jp" lang="ja">{said}</span>
+      <span className="tour-recap__kind">{t.tourQuizKinds[q.kind]}</span>
+      {fix && <s className="tour-recap__fix" lang={q.kind === 'gap' ? 'ja' : undefined}>{fix}</s>}
+    </>
+  )
+}
+
+/** The results (plan 194, redrawn in plan 195): the point over the score
+    as a dial, each question again with how it went, and the point's
+    sheet; the gate starts Choisir 1. */
+export function Results({ tour, point, picks, onLesson, replay }) {
   const { t } = useLang()
   const quiz = tour.quiz ?? []
   const { right, total } = quizScore(tour, picks)
+  const marks = quiz.map((q, i) => (picks?.[i] == null ? null : Boolean(q.choices[picks[i]]?.correct)))
   return (
     <>
-      <div className="tour-head">
-        <Pattern point={point} />
-        <h2 className="tour__q tour__q--name" tabIndex={-1}>{t.tourResults}</h2>
-      </div>
-      {total > 0 && (
-        <p className="tour-score" aria-label={t.tourScore(right, total)}>
-          <span className="tour-score__right">{right}</span>
-          <span className="tour-score__of">/ {total}</span>
-        </p>
-      )}
+      <h2 className="tour__q sr-only" tabIndex={-1}>{t.tourResults}</h2>
+      <header className="tour-end">
+        {total > 0 && <Tally marks={marks} right={right} total={total} />}
+        <div className="tour-end__who">
+          <Pattern point={point} />
+          {point.structure && <p className="tour-end__structure">{point.structure}</p>}
+        </div>
+      </header>
       {total > 0 && (
         <ol className="tour-card tour-recap">
           {quiz.map((q, i) => {
-            const ok = picks?.[i] != null && q.choices[picks[i]]?.correct
-            const said = q.kind === 'which' ? q.choices.find(c => c.correct).jp : q.jp
+            const ok = marks[i]
             return (
               <li key={i} className={`tour-recap__row tour-recap__row--${ok ? 'ok' : 'no'}`}>
-                <Mark kind={ok ? 'ok' : 'no'} />
-                <span className="tour-recap__kind">{t.tourQuizKinds[q.kind]}</span>
-                <span className="tour-recap__jp" lang="ja">{said}</span>
+                <Recap q={q} pick={picks?.[i]} />
               </li>
             )
           })}
