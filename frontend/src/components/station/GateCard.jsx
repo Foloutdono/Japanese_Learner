@@ -307,8 +307,9 @@ function LaneRow({ lane, on, metered, t }) {
 // ── 線 — a line in the services: its switch, its share, its modes ──
 // The head is the line's switch (its tick, its name, its share of the
 // run, and what it holds today when that is more). Under it, a line of
-// one mode says it; a line of several lists them as switches, behind
-// a chevron on a phone and open on the desk.
+// one mode says it; a line of several lists them as switches behind a
+// chevron, on the desk as on a phone (plan 199b, the owner's word: the
+// details are not opened by default).
 function LineRow({ line, isOn, share, toggle, toggleLine, metered, open, onOpen, t }) {
   const many = line.lanes.length > 1
   const title = LINE_TITLE[line.type]?.(t) ?? line.type
@@ -333,7 +334,7 @@ function LineRow({ line, isOn, share, toggle, toggleLine, metered, open, onOpen,
           {line.on && lineShare !== line.due && <small> / {line.due}</small>}
         </span>
       </button>
-      {many && onOpen && (
+      {many && (
         <button type="button" className="tdy-line__more" aria-expanded={open} aria-label={t.gateLineModes(title)} onClick={() => { playClick(); onOpen() }}>
           <ChevronIcon direction={open ? 'up' : 'down'} size={16} />
         </button>
@@ -360,7 +361,7 @@ function LineRow({ line, isOn, share, toggle, toggleLine, metered, open, onOpen,
 // The sheet's body on a phone and the column's head on the desk. No
 // title over either choice (the owner's word on the canvas): each
 // option says what it is and what it rides.
-function Services({ lines, isOn, share, toggle, toggleLine, choices, main, setMain, cut, setTake, metered, desk, t }) {
+function Services({ lines, isOn, share, toggle, toggleLine, choices, main, setMain, cut, setTake, metered, t }) {
   const [open, setOpen] = useState(() => new Set())
   const flip = type => setOpen(prev => {
     const next = new Set(prev)
@@ -381,8 +382,8 @@ function Services({ lines, isOn, share, toggle, toggleLine, choices, main, setMa
           <LineRow
             key={line.type}
             line={line} isOn={isOn} share={share} toggle={toggle} toggleLine={toggleLine} metered={metered} t={t}
-            open={desk || open.has(line.type)}
-            onOpen={desk ? null : () => flip(line.type)}
+            open={open.has(line.type)}
+            onOpen={() => flip(line.type)}
           />
         ))}
       </ul>
@@ -440,7 +441,7 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
         <Services
           lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}
           choices={choices} main={main} setMain={setMain} cut={run.cut} setTake={setTake}
-          metered={metered} desk={false} t={t}
+          metered={metered} t={t}
         />
         <TodayDay today={today} />
         <div className="tdy-sheet__foot">{gate}</div>
@@ -453,8 +454,9 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
 // The owner's pick A2 on the desk: the dial at the size the room gives
 // it on a panel the window's height, its legend in words, the gate at
 // the panel's foot; beside it, in a column at the entry's width, what
-// the sheet holds on a phone, open -- the two choices and the lines with
-// their modes -- and the day: its four figures and the week ahead.
+// the sheet holds on a phone -- the two choices and the lines, their
+// modes behind a chevron (plan 199b) -- and the day: its four figures
+// and the week ahead.
 function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, main, setMain, chosen, credits, metered, enforced, t, lang }) {
   const run = runOf({ today, isOn, take, metered, credits, enforced, lang })
   const choices = choicesOf(chosen, run.chosenTotal, run.spr, t)
@@ -489,7 +491,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
           <Services
             lines={lines} isOn={isOn} share={run.share} toggle={toggle} toggleLine={toggleLine}
             choices={choices} main={main} setMain={setMain} cut={run.cut} setTake={setTake}
-            metered={metered} desk t={t}
+            metered={metered} t={t}
           />
         </section>
         <DeskDay today={today} />

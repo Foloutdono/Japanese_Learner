@@ -109,6 +109,9 @@ describe('Today on a laptop', () => {
     const hero = document.querySelector('.tdy-desk__hero').getBoundingClientRect()
     inside(document.querySelector('.tdy-dial--desk'), hero)
     inside(document.querySelector('.tdy-desk__go .btn-depart'), hero)
+    // Every line's modes opened, the column at its fullest.
+    for (const more of document.querySelectorAll('.tdy-desk .tdy-line__more')) more.click()
+    await settle(60)
     const col = contentBox(document.querySelector('.tdy-desk__col'))
     for (const el of document.querySelectorAll('.tdy-desk__col .tdy-line__head, .tdy-desk__col .lane, .tdy-desk__col .seg__opt')) inside(el, col)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
@@ -174,7 +177,11 @@ describe('Today on a laptop', () => {
       const go = document.querySelector('.tdy-desk__go .btn-depart').getBoundingClientRect()
       expect(go.bottom).toBeLessThanOrEqual(window.innerHeight)
       expect(document.querySelector('.tdy-dial--desk').getBoundingClientRect().bottom).toBeLessThanOrEqual(go.top)
+      // The modes closed, the column fits; opened, it scrolls on its own.
       const col = document.querySelector('.tdy-desk__col')
+      expect(col.scrollHeight).toBeLessThanOrEqual(col.clientHeight)
+      for (const more of document.querySelectorAll('.tdy-desk .tdy-line__more')) more.click()
+      await settle(60)
       expect(col.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
       expect(col.scrollHeight).toBeGreaterThan(col.clientHeight)
     } finally {

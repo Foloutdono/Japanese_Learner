@@ -32795,9 +32795,9 @@ button.brd-stn { cursor: pointer; }
      panel at the size the room gives it, its legend in words and the
      gate at the panel's foot; beside it, at the entry's width (giving
      down to the side column's on a laptop), a column
-     holding open what the phone's sheet holds -- the two choices and the
-     lines with their modes -- over the day's four figures and the week
-     ahead. The column scrolls on its own when it is taller than the
+     holding what the phone's sheet holds -- the two choices and the
+     lines, their modes behind a chevron (plan 199b) -- over the day's
+     four figures and the week ahead. The column scrolls on its own when it is taller than the
      window, its gutter inside the clip edge and given back outside, so
      a row's focus ring is drawn whole. */
   .phone--desk .phone__content:has(> main.today) { max-width: none; }
@@ -32874,9 +32874,6 @@ button.brd-stn { cursor: pointer; }
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
-  /* The desk lists a line's modes under it, so no chevron's column. */
-  .tdy-desk .tdy-line { grid-template-columns: minmax(0, 1fr); }
-  .tdy-desk .tdy-line__head { padding-bottom: 0; }
   .tdy-desk .tdy-day__cell { background: var(--surface); }
 
   /* 七日 — the week ahead (plan 135, WeekAhead): a bar a day, today's

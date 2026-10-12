@@ -91,6 +91,9 @@ describe('Today on a short window', () => {
     await settle()
     const head = document.querySelector('.tdy-desk .tdy-line__head')
     expect(box(head.querySelector('.tdy-line__name')).right).toBeLessThanOrEqual(box(head.querySelector('.tdy-line__n')).left)
+    document.querySelector('.tdy-desk .tdy-line__more').click()
+    await settle(60)
+    expect(document.querySelectorAll('.tdy-desk .tdy-line__lanes .lane')).toHaveLength(2)
     for (const row of document.querySelectorAll('.tdy-desk .tdy-line__lanes .lane')) {
       const where = box(row.querySelector('.lane__names'))
       const due = box(row.querySelector('.lane__due'))
