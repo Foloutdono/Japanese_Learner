@@ -32694,7 +32694,141 @@
             "fr": "Tu demandes s'il sera rendu automatique : 自動化される. 人が売ります demande si des gens vendront encore, なくなる s'il va disparaître."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is going to happen to the novel next year?",
+            "fr": "Qu'est-ce qui va arriver à ce roman l'année prochaine ?"
+          },
+          "jp": "あの小説は、来年、映画化されるそうだ。",
+          "tr": {
+            "en": "I hear that novel will be made into a film next year.",
+            "fr": "Il paraît que ce roman sera adapté au cinéma l'année prochaine."
+          },
+          "choices": [
+            {
+              "en": "It will be turned into a film.",
+              "fr": "Il sera adapté en film."
+            },
+            {
+              "en": "A film will be rewritten as a novel.",
+              "fr": "Un film sera réécrit sous forme de roman."
+            },
+            {
+              "en": "It will become more and more like a film.",
+              "fr": "Il ressemblera de plus en plus à un film."
+            }
+          ],
+          "why": {
+            "en": "映画化される: 映画 + 化 is the change into a film, and される puts the novel on the receiving end. The novel becomes a film; it does not just look like one (that would be 映画的).",
+            "fr": "映画化される : 映画 + 化 est le passage au film, et される met le roman du côté de ce qui est transformé. Le roman devient un film ; il ne lui ressemble pas seulement (ce serait 映画的)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この小さな町は、ここ十年で、すっかり＿＿＿。",
+          "tr": {
+            "en": "In the last ten years, this little town has become completely industrialised.",
+            "fr": "En dix ans, cette petite ville s'est complètement industrialisée."
+          },
+          "choices": [
+            "工業化した",
+            "工業てきだ",
+            "工業てきした"
+          ],
+          "why": {
+            "en": "化 says the town changed into something, a process now complete: 工業化した. 工業てきだ (工業的だ) only describes what it is like, and 工業てきした is a slip: 的 makes an adjective, so it never takes した.",
+            "fr": "化 dit que la ville s'est transformée, un processus achevé : 工業化した. 工業てきだ (工業的だ) décrit seulement ce qu'elle est, et 工業てきした est une erreur : 的 forme un adjectif, il ne prend pas した."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What may happen as 電子化 advances?",
+            "fr": "Que peut-il arriver à mesure que 電子化 progresse ?"
+          },
+          "jp": "電子化が進むと、紙の本は、だんだん少なくなるかもしれない。",
+          "tr": {
+            "en": "As books go electronic, paper books may gradually become fewer.",
+            "fr": "À mesure que les livres passent au numérique, les livres en papier pourraient devenir peu à peu moins nombreux."
+          },
+          "choices": [
+            {
+              "en": "Paper books may gradually become fewer.",
+              "fr": "Les livres en papier pourraient devenir peu à peu moins nombreux."
+            },
+            {
+              "en": "Electronic books may gradually become fewer.",
+              "fr": "Les livres numériques pourraient devenir peu à peu moins nombreux."
+            },
+            {
+              "en": "People may gradually stop reading altogether.",
+              "fr": "Les gens pourraient peu à peu cesser complètement de lire."
+            }
+          ],
+          "why": {
+            "en": "電子化 is the process of going electronic, and 進む says it is moving forward: the more it advances, the fewer paper books are left. Fewer electronic books would be the opposite change.",
+            "fr": "電子化 est le passage au numérique, et 進む dit qu'il avance : plus il avance, moins il reste de livres en papier. Moins de livres numériques serait le changement inverse."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの会社は、事務の仕事を、ぜんぶデジタル＿＿＿予定だ。",
+          "tr": {
+            "en": "That company plans to digitise all of its office work.",
+            "fr": "Cette entreprise prévoit de numériser tout son travail de bureau."
+          },
+          "choices": [
+            "化する",
+            "化される",
+            "化した"
+          ],
+          "why": {
+            "en": "The company acts on its work (仕事を): デジタル化する, « to digitise ». 化される would put the work on the receiving end, and 化した is past, although the plan is still ahead.",
+            "fr": "L'entreprise agit sur son travail (仕事を) : デジタル化する, « numériser ». 化される mettrait le travail du côté de ce qui est transformé, et 化した est au passé, alors que le projet est devant."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What happened to the country a hundred years ago?",
+            "fr": "Que s'est-il passé pour ce pays il y a cent ans ?"
+          },
+          "jp": "この国は、百年ほど前に近代化して、町に電車が走るようになった。",
+          "tr": {
+            "en": "This country modernised about a hundred years ago, and trains began to run in its towns.",
+            "fr": "Ce pays s'est modernisé il y a une centaine d'années, et des trains ont commencé à circuler dans ses villes."
+          },
+          "choices": [
+            {
+              "en": "It changed into a modern country.",
+              "fr": "Il est devenu un pays moderne."
+            },
+            {
+              "en": "It was already modern then, and stayed that way.",
+              "fr": "Il était déjà moderne à l'époque, et l'est resté."
+            },
+            {
+              "en": "It stopped being modern.",
+              "fr": "Il a cessé d'être moderne."
+            }
+          ],
+          "why": {
+            "en": "近代 (modern) + 化 is the change into modern: 近代化して says the country was moving from old to modern, and trains followed. It was not modern already, and it did not lose it.",
+            "fr": "近代 (moderne) + 化 est le passage au moderne : 近代化して dit que le pays passait de l'ancien au moderne, et que les trains ont suivi. Il n'était pas déjà moderne, et il ne l'a pas perdu."
+          }
+        }
+      ]
     }
   },
   {
@@ -32987,7 +33121,127 @@
             "fr": "Son action à elle, élevée : ていらっしゃる. ております et お〜する abaissent son propre côté, jamais le sien."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Speaking respectfully of Professor Tanaka, which form completes the sentence?",
+            "fr": "Pour parler avec respect du professeur Tanaka, quelle forme complète la phrase ?"
+          },
+          "jp": "田中先生は、いま、へやで手紙を＿＿＿。",
+          "tr": {
+            "en": "Professor Tanaka is writing a letter in the room now.",
+            "fr": "Le professeur Tanaka est en train d'écrire une lettre dans la pièce."
+          },
+          "choices": [
+            "書いていらっしゃいます",
+            "書いていらっしゃいました",
+            "書いていらっしゃります"
+          ],
+          "why": {
+            "en": "て-form + いらっしゃいます: 書いて, then the irregular polite いらっしゃいます (not -ります). 書いていらっしゃいました is the past, but he is writing now.",
+            "fr": "Forme en て + いらっしゃいます : 書いて, puis いらっしゃいます, irrégulier (pas -ります). 書いていらっしゃいました est au passé, alors qu'il écrit en ce moment."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who is the question about, and what does it ask?",
+            "fr": "De qui parle la question, et que demande-t-elle ?"
+          },
+          "jp": "駅で、ずっと立っていらっしゃったのですか。",
+          "tr": {
+            "en": "Have you been standing at the station all this time?",
+            "fr": "Vous avez passé tout ce temps debout à la gare ?"
+          },
+          "choices": [
+            {
+              "en": "It asks the listener whether they were standing the whole time.",
+              "fr": "Elle demande à la personne en face si elle a passé tout ce temps debout."
+            },
+            {
+              "en": "It asks the listener whether they will keep standing.",
+              "fr": "Elle demande à la personne en face si elle va rester debout."
+            },
+            {
+              "en": "It asks whether the speaker has been standing the whole time.",
+              "fr": "Elle demande si c'est celui qui parle qui a passé tout ce temps debout."
+            }
+          ],
+          "why": {
+            "en": "ていらっしゃった is the respectful ていた: it raises the person addressed, never the speaker, and the past shows the standing already happened. It is not about the future.",
+            "fr": "ていらっしゃった est le ていた respectueux : il élève la personne à qui l'on parle, jamais celui qui parle, et le passé montre que c'est déjà arrivé. Il ne parle pas d'avenir."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A customer arrived a while ago and is still sitting at the reception. You tell a superior, respectfully, that the customer is waiting now.",
+            "fr": "Un client est arrivé il y a un moment et est toujours assis à l'accueil. Tu dis à un supérieur, avec respect pour le client, qu'il attend en ce moment."
+          },
+          "choices": [
+            "お客さまは、受付で待っていらっしゃいます。",
+            "お客さまは、受付で待っていらっしゃいました。",
+            "お客さまは、受付で待っております。"
+          ],
+          "why": {
+            "en": "The customer is raised and still waiting: 待っていらっしゃいます. いらっしゃいました puts the waiting in the past, and 待っております lowers the customer, as if he were on your own side.",
+            "fr": "Le client est élevé et attend toujours : 待っていらっしゃいます. いらっしゃいました met l'attente au passé, et 待っております abaisse le client, comme s'il était de ton côté."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Speaking respectfully of the president, which form completes the sentence?",
+            "fr": "Pour parler avec respect du président, quelle forme complète la phrase ?"
+          },
+          "jp": "社長は、さっきから、パソコンで何かを＿＿＿。",
+          "tr": {
+            "en": "The president has been looking something up on the computer since a while ago.",
+            "fr": "Le président cherche quelque chose sur l'ordinateur depuis tout à l'heure."
+          },
+          "choices": [
+            "調べていらっしゃいます",
+            "お調べになります",
+            "お調べします"
+          ],
+          "why": {
+            "en": "さっきから asks for an action in progress: 調べていらっしゃいます. お調べになります raises a single action (« will look it up »), and お調べします lowers the speaker: it is for your own actions.",
+            "fr": "さっきから demande une action en cours : 調べていらっしゃいます. お調べになります élève une action unique (« va chercher »), et お調べします abaisse celui qui parle : c'est pour ses propres actions."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Is the president at the company?",
+            "fr": "Le président est-il à l'entreprise ?"
+          },
+          "jp": "社長は、まだ会社に来ていらっしゃいません。",
+          "tr": {
+            "en": "The president hasn't come to the company yet.",
+            "fr": "Le président n'est pas encore arrivé à l'entreprise."
+          },
+          "choices": [
+            {
+              "en": "Not yet: he has not arrived.",
+              "fr": "Pas encore : il n'est pas arrivé."
+            },
+            {
+              "en": "Yes: he is already at the company.",
+              "fr": "Oui : il est déjà à l'entreprise."
+            },
+            {
+              "en": "No, and he is not coming to the company any more.",
+              "fr": "Non, et il ne viendra plus à l'entreprise."
+            }
+          ],
+          "why": {
+            "en": "来ていらっしゃる is the state « has come, is here », so ていらっしゃいません says he has not come: he is not there. まだ adds « yet »: he is still expected.",
+            "fr": "来ていらっしゃる est l'état « est venu, est là » : ていらっしゃいません dit qu'il n'est pas venu, donc pas là. まだ ajoute « pas encore » : on l'attend toujours."
+          }
+        }
+      ]
     }
   },
   {
@@ -33225,7 +33479,127 @@
             "fr": "On te l'a dit et tu as oublié : っけ. かな s'interroge comme si personne ne savait, et 来たの demande quand il est déjà venu."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Said to a close friend, which form completes the sentence?",
+            "fr": "Dit à un ami proche, quelle forme complète la phrase ?"
+          },
+          "jp": "えっと、あの人、親切＿＿＿。",
+          "tr": {
+            "en": "Um, was that person kind? I can't quite remember.",
+            "fr": "Euh, c'était quelqu'un de gentil, cette personne, déjà ? Je ne m'en souviens plus bien."
+          },
+          "choices": [
+            "だっけ",
+            "なっけ",
+            "でしたか"
+          ],
+          "why": {
+            "en": "A な-adjective takes だっけ, not な: 親切だっけ. なっけ copies the な of 親切な人, and でしたか is a plain polite question: too stiff for a close friend, and not the casual memory check.",
+            "fr": "Un adjectif en な prend だっけ, pas な : 親切だっけ. なっけ recopie le な de 親切な人, et でしたか est une simple question polie : trop raide pour un ami proche, et pas le contrôle de mémoire familier."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker unsure about?",
+            "fr": "De quoi celui qui parle n'est-il pas sûr ?"
+          },
+          "jp": "あれ、このメール、田中さんにも送ったっけ。",
+          "tr": {
+            "en": "Wait, did I send this email to Tanaka too?",
+            "fr": "Attends, est-ce que j'ai aussi envoyé ce mail à Tanaka ?"
+          },
+          "choices": [
+            {
+              "en": "Whether the speaker already sent this email to Tanaka too.",
+              "fr": "Si celui qui parle a déjà envoyé ce mail à Tanaka aussi."
+            },
+            {
+              "en": "Whether the speaker should send this email to Tanaka later.",
+              "fr": "S'il faut envoyer ce mail à Tanaka plus tard."
+            },
+            {
+              "en": "Whether Tanaka has already read this email.",
+              "fr": "Si Tanaka a déjà lu ce mail."
+            }
+          ],
+          "why": {
+            "en": "たっけ looks back at what already happened: did I send it? A plan would be 送ろうか, and Tanaka's reading is not in the sentence: 送った is the speaker's own act.",
+            "fr": "たっけ regarde en arrière : est-ce que je l'ai envoyé ? Un projet serait 送ろうか, et la lecture de Tanaka n'est pas dans la phrase : 送った est l'acte de celui qui parle."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You half remember that the test is on Friday. Check it with your teacher, politely.",
+            "fr": "Tu te souviens à moitié que le contrôle est vendredi. Vérifie-le auprès de ton professeur, poliment."
+          },
+          "choices": [
+            "テストは、金曜日でしたっけ？",
+            "テストは、金曜日だっけ？",
+            "テストは、金曜日だよね？"
+          ],
+          "why": {
+            "en": "To a teacher, the casual だっけ becomes でしたっけ, the polite memory check. だっけ is for friends, and だよね asks the teacher to agree, when you are asking to be reminded.",
+            "fr": "À un professeur, le だっけ familier devient でしたっけ, le contrôle de mémoire poli. だっけ est pour les amis, et だよね demande au professeur d'être d'accord, alors que tu demandes un rappel."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Muttering to yourself, which form completes the sentence?",
+            "fr": "En te parlant à toi-même, quelle forme complète la phrase ?"
+          },
+          "jp": "きのうの夜は、何を＿＿＿。",
+          "tr": {
+            "en": "What did I eat last night again?",
+            "fr": "Qu'est-ce que j'ai mangé hier soir, déjà ?"
+          },
+          "choices": [
+            "食べたっけ",
+            "食べるっけ",
+            "食べたの"
+          ],
+          "why": {
+            "en": "The meal is over, so た + っけ looks back at it: 食べたっけ. 食べるっけ would ask about a habit or the future, and 食べたの asks someone else what they ate, with no memory to check.",
+            "fr": "Le repas est passé : た + っけ regarde en arrière, 食べたっけ. 食べるっけ parlerait d'une habitude ou de l'avenir, et 食べたの demande à quelqu'un d'autre ce qu'il a mangé, sans souvenir à vérifier."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker half remember?",
+            "fr": "De quoi celui qui parle se souvient-il à moitié ?"
+          },
+          "jp": "あれ、この店、きょうは休みじゃなかったっけ。",
+          "tr": {
+            "en": "Hang on, wasn't this shop supposed to be closed today?",
+            "fr": "Attends, ce magasin n'était pas censé être fermé aujourd'hui ?"
+          },
+          "choices": [
+            {
+              "en": "That the shop is closed today.",
+              "fr": "Que le magasin est fermé aujourd'hui."
+            },
+            {
+              "en": "That the shop is open today.",
+              "fr": "Que le magasin est ouvert aujourd'hui."
+            },
+            {
+              "en": "That the shop was closed yesterday.",
+              "fr": "Que le magasin était fermé hier."
+            }
+          ],
+          "why": {
+            "en": "じゃなかったっけ is « wasn't it…? »: the speaker believes the shop is closed today and is checking. The negative carries that belief; it does not state a fact.",
+            "fr": "じゃなかったっけ veut dire « n'était-ce pas… ? » : on croit le magasin fermé aujourd'hui et on vérifie. La négation porte cette croyance ; elle n'énonce pas un fait."
+          }
+        }
+      ]
     }
   },
   {
@@ -33433,7 +33807,132 @@
             "fr": "Une intuition : 気がする. そうだ rapporte ce qu'on a entendu, はずだ ce qu'on attend pour une raison."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの子は、きょうは学校に＿＿＿気がする。",
+          "tr": {
+            "en": "I have a feeling that kid won't come to school today.",
+            "fr": "J'ai l'impression que cet enfant ne viendra pas à l'école aujourd'hui."
+          },
+          "choices": [
+            "来ない",
+            "来なかった",
+            "来ません"
+          ],
+          "why": {
+            "en": "気がする follows the plain form, and a hunch about today is a plain negative: 来ない. 来なかった would be a hunch about something already past, and 来ません is polite: it does not fit before 気.",
+            "fr": "気がする suit la forme neutre, et une intuition sur aujourd'hui est un négatif neutre : 来ない. 来なかった serait une intuition sur le passé, et 来ません est poli : il ne va pas devant 気."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why did the speaker go back home?",
+            "fr": "Pourquoi celui qui parle est-il revenu chez lui ?"
+          },
+          "jp": "どうも、かぎをかけ忘れた気がして、うちに戻ってきた。",
+          "tr": {
+            "en": "I had a feeling I'd forgotten to lock the door, so I came back home.",
+            "fr": "J'avais l'impression d'avoir oublié de fermer la porte à clé, alors j'ai fait demi-tour."
+          },
+          "choices": [
+            {
+              "en": "A vague feeling that the door was left unlocked.",
+              "fr": "L'impression vague de ne pas avoir fermé la porte à clé."
+            },
+            {
+              "en": "The speaker saw that the door was left unlocked.",
+              "fr": "Celui qui parle a vu que la porte n'était pas fermée à clé."
+            },
+            {
+              "en": "Someone told the speaker the door was left unlocked.",
+              "fr": "Quelqu'un lui a dit que la porte n'était pas fermée à clé."
+            }
+          ],
+          "why": {
+            "en": "気がして is a hunch with no proof: the speaker only feels it, so goes back to check. Seeing it would be ようだ (a judgement from evidence), and being told would be そうだ.",
+            "fr": "気がして est une intuition sans preuve : on le sent seulement, alors on va vérifier. Le voir serait ようだ (un jugement fondé sur des indices), et l'avoir entendu dire serait そうだ."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの店は、もう閉まっている＿＿＿する。",
+          "tr": {
+            "en": "I have a feeling that shop is already closed.",
+            "fr": "J'ai l'impression que ce magasin est déjà fermé."
+          },
+          "choices": [
+            "気が",
+            "気に",
+            "気を"
+          ],
+          "why": {
+            "en": "A hunch is 気がする: が marks the feeling that comes over you. 気にする, with に, means to mind or worry, and 気をする does not exist.",
+            "fr": "Une intuition, c'est 気がする : が marque le sentiment qui vous vient. 気にする, avec に, veut dire se soucier, et 気をする n'existe pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Whose feeling is it that it will rain?",
+            "fr": "À qui est cette impression qu'il va pleuvoir ?"
+          },
+          "jp": "姉は、きょうは雨がふる気がしているらしく、かさを持って出かけた。",
+          "tr": {
+            "en": "My older sister seems to feel it will rain today, and went out with an umbrella.",
+            "fr": "Ma sœur aînée semble avoir l'impression qu'il va pleuvoir aujourd'hui, et elle est sortie avec un parapluie."
+          },
+          "choices": [
+            {
+              "en": "The older sister's: the speaker only reports it.",
+              "fr": "Celle de la sœur aînée : celui qui parle ne fait que le rapporter."
+            },
+            {
+              "en": "The speaker's own hunch.",
+              "fr": "L'intuition de celui qui parle."
+            },
+            {
+              "en": "A fact the sister was told about the weather.",
+              "fr": "Un fait qu'on a annoncé à la sœur sur la météo."
+            }
+          ],
+          "why": {
+            "en": "気がしている, with the sister as subject, reports her feeling, and らしい adds that the speaker is inferring it. The speaker's own hunch would be 気がする, and what she was told would be そうだ.",
+            "fr": "気がしている, avec la sœur pour sujet, rapporte son impression, et らしい ajoute que celui qui parle le déduit. Sa propre intuition serait 気がする, et ce qu'on lui a dit serait そうだ."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きょうの駅は、なんだか＿＿＿気がする。",
+          "tr": {
+            "en": "Somehow, the station feels quiet today.",
+            "fr": "Aujourd'hui, la gare me paraît étrangement calme."
+          },
+          "choices": [
+            "静かな",
+            "静かだった",
+            "静かに"
+          ],
+          "why": {
+            "en": "A な-adjective links to 気 with な: 静かな気がする. 静かだった would be a feeling about a past state, and 静かに is the adverb form, which cannot name what the feeling is.",
+            "fr": "Un adjectif en な se relie à 気 avec な : 静かな気がする. 静かだった serait une impression sur un état passé, et 静かに est l'adverbe, qui ne peut pas dire ce qu'est l'impression."
+          }
+        }
+      ]
     }
   },
   {
@@ -33631,7 +34130,127 @@
             "fr": "Tu minimises le dégoût : 別に〜ない. Les deux autres disent que tu n'aimes pas les bentos, un peu ou pas du tout."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうの映画は、別に＿＿＿よ。",
+          "tr": {
+            "en": "Yesterday's film wasn't particularly interesting.",
+            "fr": "Le film d'hier n'avait rien de particulièrement intéressant."
+          },
+          "choices": [
+            "おもしろくなかった",
+            "おもしろいなかった",
+            "おもしろかった"
+          ],
+          "why": {
+            "en": "別に goes with a negative, and the film is past: an い-adjective becomes くなかった. おもしろいない is the slip that glues ない onto the い form, and おもしろかった has no negative at all.",
+            "fr": "別に va avec un négatif, et le film est passé : un adjectif en い devient くなかった. おもしろいない est l'erreur qui colle ない à la forme en い, et おもしろかった n'a aucun négatif."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker spend days off?",
+            "fr": "Comment celui qui parle passe-t-il ses jours de congé ?"
+          },
+          "jp": "休みの日は、別にどこにも行かないで、うちでのんびりしている。",
+          "tr": {
+            "en": "On my days off I don't go anywhere in particular; I just relax at home.",
+            "fr": "Les jours de congé, je ne vais nulle part en particulier ; je me détends à la maison."
+          },
+          "choices": [
+            {
+              "en": "Staying home, with no special plan to go out.",
+              "fr": "On reste à la maison, sans projet particulier de sortie."
+            },
+            {
+              "en": "Wanting to go out, but something stops them.",
+              "fr": "On aimerait sortir, mais quelque chose empêche de le faire."
+            },
+            {
+              "en": "Going to a different place every time.",
+              "fr": "On va chaque fois dans un endroit différent."
+            }
+          ],
+          "why": {
+            "en": "別に どこにも…ない: not anywhere in particular, so there is just no special plan: a quiet choice, not something that stops the speaker. The ないで leads to what is done instead: stay home.",
+            "fr": "別に どこにも…ない : nulle part en particulier, donc simplement aucun projet précis : un choix tranquille, pas un empêchement. Le ないで mène à ce qu'on fait à la place : rester à la maison."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your teacher says: 今日は静かだね、どうしたの？ Nothing in particular is wrong. What do you answer?",
+            "fr": "Ton professeur te dit : 今日は静かだね、どうしたの？ Il n'y a rien de particulier. Que réponds-tu ?"
+          },
+          "choices": [
+            "いえ、別に何もありません。",
+            "別に何もないよ。",
+            "別に。"
+          ],
+          "why": {
+            "en": "To a teacher, a full polite sentence: 別に何もありません. 別に何もないよ is casual, for a friend, and 別に。 alone is a shrug that sounds sullen to a teacher.",
+            "fr": "À un professeur, une phrase polie complète : 別に何もありません. 別に何もないよ est familier, pour un ami, et 別に。 tout seul est un haussement d'épaules qui paraît boudeur à un professeur."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの人は、別に先生＿＿＿よ。",
+          "tr": {
+            "en": "That person isn't a teacher or anything.",
+            "fr": "Cette personne n'est pas prof ou quoi que ce soit."
+          },
+          "choices": [
+            "じゃない",
+            "じゃなかった",
+            "ない"
+          ],
+          "why": {
+            "en": "A noun is negated with じゃない (ではない): 先生じゃない. 先生じゃなかった is the past, and 先生ない is the slip of adding ない straight onto a noun.",
+            "fr": "Un nom se nie avec じゃない (ではない) : 先生じゃない. 先生じゃなかった est le passé, et 先生ない est l'erreur qui ajoute ない directement à un nom."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker tell the friend?",
+            "fr": "Que dit celui qui parle à son ami ?"
+          },
+          "jp": "あした、別に来なくてもいいよ。",
+          "tr": {
+            "en": "You don't really have to come tomorrow, you know.",
+            "fr": "Tu n'as pas vraiment besoin de venir demain, tu sais."
+          },
+          "choices": [
+            {
+              "en": "There is no real need to come.",
+              "fr": "Il n'y a pas vraiment besoin de venir."
+            },
+            {
+              "en": "Please don't come.",
+              "fr": "Ne viens pas, s'il te plaît."
+            },
+            {
+              "en": "You had better come.",
+              "fr": "Tu ferais mieux de venir."
+            }
+          ],
+          "why": {
+            "en": "別に + なくてもいい: not particularly necessary, so coming is up to you. It is not a ban (that would be 来ないで), and 別に takes the edge off any need.",
+            "fr": "別に + なくてもいい : pas particulièrement nécessaire, donc venir ne dépend que de toi. Ce n'est pas une interdiction (ce serait 来ないで), et 別に enlève toute idée d'obligation."
+          }
+        }
+      ]
     }
   },
   {
@@ -33831,7 +34450,141 @@
             "fr": "Pas du tout : ちっとも〜ない. あまり, c'est seulement « pas très », et なかなか〜ない veut dire « ça ne vient pas, malgré l'attente »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How much does the speaker's older brother help at home?",
+            "fr": "Dans quelle mesure le grand frère de celui qui parle aide-t-il à la maison ?"
+          },
+          "jp": "兄は、うちのことを、ちっとも手伝わない。",
+          "tr": {
+            "en": "My older brother doesn't help around the house one bit.",
+            "fr": "Mon grand frère ne donne pas le moindre coup de main à la maison."
+          },
+          "choices": [
+            {
+              "en": "Not at all: the speaker is complaining.",
+              "fr": "Pas du tout : celui qui parle se plaint."
+            },
+            {
+              "en": "Only a little, now and then.",
+              "fr": "Un peu seulement, de temps en temps."
+            },
+            {
+              "en": "He does, but only after a long wait.",
+              "fr": "Oui, mais seulement après avoir longtemps attendu."
+            }
+          ],
+          "why": {
+            "en": "ちっとも + negative denies any amount, in a complaining tone: he does nothing. « Only a little » would be あまり〜ない, and « it takes forever » would be なかなか〜ない.",
+            "fr": "ちっとも + négatif nie toute quantité, sur un ton de reproche : il ne fait rien. « Un peu seulement » serait あまり〜ない, et « ça prend une éternité » serait なかなか〜ない."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この店のコーヒーは、ちっとも＿＿＿。",
+          "tr": {
+            "en": "The coffee at this shop isn't the least bit delicious.",
+            "fr": "Le café de ce magasin n'est pas le moins du monde bon."
+          },
+          "choices": [
+            "おいしくない",
+            "おいしいない",
+            "おいしい"
+          ],
+          "why": {
+            "en": "ちっとも needs a negative, and an い-adjective takes くない: おいしくない. おいしいない glues ない onto the い form, and おいしい has no negative, so ちっとも would have nothing to deny.",
+            "fr": "ちっとも demande un négatif, et un adjectif en い prend くない : おいしくない. おいしいない colle ない à la forme en い, et おいしい n'a pas de négatif : ちっとも n'aurait rien à nier."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the wedding?",
+            "fr": "Que dit celui qui parle à propos du mariage ?"
+          },
+          "jp": "田中さんがけっこんしたことは、ちっとも知らなかった。",
+          "tr": {
+            "en": "I had no idea at all that Tanaka got married.",
+            "fr": "Je n'avais pas la moindre idée du mariage de Tanaka."
+          },
+          "choices": [
+            {
+              "en": "No: it was news to the speaker.",
+              "fr": "Non : c'était une nouvelle pour celui qui parle."
+            },
+            {
+              "en": "A little: only the rough idea.",
+              "fr": "Un peu : seulement en gros."
+            },
+            {
+              "en": "Yes, but the speaker did not care.",
+              "fr": "Oui, mais ça lui était égal."
+            }
+          ],
+          "why": {
+            "en": "知らなかった is already the past negative, and ちっとも pushes it to zero: not a hint. « A little » would take あまり, and not caring would be 気にしない, which says nothing about knowing.",
+            "fr": "知らなかった est déjà le négatif passé, et ちっとも le pousse à zéro : pas le moindre indice. « Un peu » prendrait あまり, et ne pas s'en soucier serait 気にしない, qui ne dit rien sur le savoir."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "テストの点が悪くても、あの子はちっとも＿＿＿。",
+          "tr": {
+            "en": "Even when the marks are bad, that kid doesn't mind one bit.",
+            "fr": "Même quand les notes sont mauvaises, cet enfant ne s'en soucie pas du tout."
+          },
+          "choices": [
+            "気にしていない",
+            "気にしている",
+            "気になっている"
+          ],
+          "why": {
+            "en": "ちっとも needs a negative: 気にしていない, « does not mind ». 気にしている has none, and 気になっている, « is on their mind », has none either and says the opposite.",
+            "fr": "ちっとも demande un négatif : 気にしていない, « ne s'en soucie pas ». 気にしている n'en a pas, et 気になっている, « ça le tracasse », n'en a pas non plus et dit le contraire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is being said about that person?",
+            "fr": "Que dit-on de cette personne ?"
+          },
+          "jp": "いくら食べても、あの人はちっとも太らない。",
+          "tr": {
+            "en": "However much that person eats, they don't gain any weight at all.",
+            "fr": "Quoi qu'elle mange, cette personne ne grossit pas du tout."
+          },
+          "choices": [
+            {
+              "en": "However much they eat, they gain no weight at all.",
+              "fr": "Quoi qu'elle mange, elle ne prend pas un gramme."
+            },
+            {
+              "en": "They hardly eat, so they hardly gain weight.",
+              "fr": "Elle mange à peine, donc elle grossit à peine."
+            },
+            {
+              "en": "They gain weight slowly, little by little.",
+              "fr": "Elle grossit lentement, peu à peu."
+            }
+          ],
+          "why": {
+            "en": "いくら〜ても means « however much », and ちっとも〜ない means no change at all: eating a lot, and still no weight gained. It is not « slowly » (なかなか) nor « eats little ».",
+            "fr": "いくら〜ても veut dire « quoi qu'on fasse », et ちっとも〜ない veut dire aucun changement : elle mange beaucoup et ne prend rien. Ce n'est pas « lentement » (なかなか) ni « mange peu »."
+          }
+        }
+      ]
     }
   },
   {
@@ -34071,7 +34824,127 @@
             "fr": "Un nom corrigé : ではなく. と demanderait les deux, et なくて ne peut pas suivre un nom sans で."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When does tomorrow's meeting start?",
+            "fr": "À quelle heure commence la réunion de demain ?"
+          },
+          "jp": "あしたの会議は、午前ではなく、午後からになった。",
+          "tr": {
+            "en": "Tomorrow's meeting has been changed to start in the afternoon, not in the morning.",
+            "fr": "La réunion de demain a été déplacée : elle commence l'après-midi et non le matin."
+          },
+          "choices": [
+            {
+              "en": "In the afternoon.",
+              "fr": "L'après-midi."
+            },
+            {
+              "en": "In the morning.",
+              "fr": "Le matin."
+            },
+            {
+              "en": "In both the morning and the afternoon.",
+              "fr": "Le matin et l'après-midi."
+            }
+          ],
+          "why": {
+            "en": "A ではなく B rejects A and keeps B: 午前 is out, so the meeting starts in the afternoon (午後から). It is neither « A and B » nor a list of two times.",
+            "fr": "A ではなく B rejette A et garde B : 午前 est écarté, donc la réunion commence l'après-midi (午後から). Ce n'est ni « A et B » ni une liste de deux horaires."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうの夜は、ごはん＿＿＿、パンを食べた。",
+          "tr": {
+            "en": "Last night I had bread, not rice.",
+            "fr": "Hier soir, j'ai mangé du pain, pas du riz."
+          },
+          "choices": [
+            "ではなく",
+            "がなくて",
+            "ではないで"
+          ],
+          "why": {
+            "en": "ごはんではなく、パン: rice is set aside, and bread is what was eaten. ごはんがなくて would say there was no rice (so I ate bread), and ではないで is not a form: ないで follows a verb.",
+            "fr": "ごはんではなく、パン : on écarte le riz, et c'est du pain qu'on a mangé. ごはんがなくて dirait qu'il n'y avait pas de riz (donc j'ai mangé du pain), et ではないで n'est pas une forme : ないで suit un verbe."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend thinks the concert is on Saturday. It is actually on Sunday. Correct them.",
+            "fr": "Un ami croit que le concert est samedi. En réalité, c'est dimanche. Corrige-le."
+          },
+          "choices": [
+            "コンサートは、土曜日ではなく、日曜日だよ。",
+            "コンサートは、日曜日ではなく、土曜日だよ。",
+            "コンサートは、土曜日だけではなく、日曜日もあるよ。"
+          ],
+          "why": {
+            "en": "A ではなく B rejects A and keeps B: 土曜日ではなく、日曜日 says Saturday is wrong, Sunday right. Swapped, it rejects the true day, and だけではなく adds a day instead of rejecting one.",
+            "fr": "A ではなく B rejette A et garde B : 土曜日ではなく、日曜日 dit que samedi est faux, dimanche juste. Inversé, il rejette le bon jour, et だけではなく ajoute un jour au lieu d'en rejeter un."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "In a written report, which form completes the sentence?",
+            "fr": "Dans un rapport écrit, quelle forme complète la phrase ?"
+          },
+          "jp": "この店の売りは、値段＿＿＿、品質です。",
+          "tr": {
+            "en": "This shop's selling point is not its price but its quality.",
+            "fr": "L'atout de ce magasin n'est pas son prix mais sa qualité."
+          },
+          "choices": [
+            "ではなく",
+            "じゃなくて",
+            "なくて"
+          ],
+          "why": {
+            "en": "In writing, A ではなく B: 値段ではなく、品質. じゃなくて is the same thing, but spoken, and なくて follows a verb, not a noun, so after 値段 it has no では to carry the sense.",
+            "fr": "À l'écrit, A ではなく B : 値段ではなく、品質. じゃなくて dit la même chose, mais à l'oral, et なくて suit un verbe, pas un nom : après 値段, il n'a pas de では pour porter le sens."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker want to talk?",
+            "fr": "Comment celui qui parle veut-il parler ?"
+          },
+          "jp": "電話ではなく、会って話したいと思っています。",
+          "tr": {
+            "en": "I would like to talk in person, not on the phone.",
+            "fr": "J'aimerais en parler en personne, et non au téléphone."
+          },
+          "choices": [
+            {
+              "en": "In person, not by phone.",
+              "fr": "En personne, pas au téléphone."
+            },
+            {
+              "en": "By phone, not in person.",
+              "fr": "Au téléphone, pas en personne."
+            },
+            {
+              "en": "By phone, after meeting in person.",
+              "fr": "Au téléphone, après s'être vus en personne."
+            }
+          ],
+          "why": {
+            "en": "電話ではなく: the phone is rejected, and what follows is what the speaker wants: 会って話したい, to meet and talk. B can be a whole action, not only a noun.",
+            "fr": "電話ではなく : le téléphone est écarté, et ce qui suit est ce que veut celui qui parle : 会って話したい, se voir et parler. B peut être une action entière, pas seulement un nom."
+          }
+        }
+      ]
     }
   },
   {
@@ -34266,7 +35139,132 @@
             "fr": "Un jeu qu'on joue exprès : ふりをする. みたいだから dit que c'est lui qui n'a pas l'air de vous remarquer, et la dernière le salue."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "妹は、本当はこわいのに、だいじょうぶ＿＿＿ふりをした。",
+          "tr": {
+            "en": "My little sister was really scared, but she pretended to be fine.",
+            "fr": "Ma petite sœur avait vraiment peur, mais elle a fait semblant d'aller bien."
+          },
+          "choices": [
+            "な",
+            "の",
+            "だ"
+          ],
+          "why": {
+            "en": "A な-adjective links to ふり with な: だいじょうぶなふり. の goes with a noun (医者のふり), and だ cannot stand before ふり.",
+            "fr": "Un adjectif en な se relie à ふり avec な : だいじょうぶなふり. の va avec un nom (医者のふり), et だ ne peut pas se placer devant ふり."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is that person really doing?",
+            "fr": "Que fait vraiment cette personne ?"
+          },
+          "jp": "さっきから、あの人は、本を読んでいるふりをして、わたしたちの話を聞いている。",
+          "tr": {
+            "en": "For some time, that person has been pretending to read a book while listening to our conversation.",
+            "fr": "Depuis tout à l'heure, cette personne fait semblant de lire un livre en écoutant notre conversation."
+          },
+          "choices": [
+            {
+              "en": "Listening to the conversation, with the book as cover.",
+              "fr": "Elle écoute la conversation, avec le livre comme couverture."
+            },
+            {
+              "en": "Reading the book and ignoring the conversation.",
+              "fr": "Elle lit le livre sans prêter attention à la conversation."
+            },
+            {
+              "en": "Reading the book and joining in the conversation.",
+              "fr": "Elle lit le livre et participe à la conversation."
+            }
+          ],
+          "why": {
+            "en": "ふりをして: the pretending is deliberate, so the book is only a cover and the real action is the second part, 聞いている. Someone who merely looked like a reader would be 読んでいるみたい.",
+            "fr": "ふりをして : on fait semblant exprès, donc le livre n'est qu'une couverture et la vraie action est la seconde, 聞いている. Quelqu'un qui aurait seulement l'air de lire serait 読んでいるみたい."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの子は、宿題を忘れたのに、ちゃんと＿＿＿ふりをした。",
+          "tr": {
+            "en": "That kid forgot the homework, but pretended to have done it properly.",
+            "fr": "Cet enfant avait oublié ses devoirs, mais il a fait semblant de les avoir faits correctement."
+          },
+          "choices": [
+            "やった",
+            "やっている",
+            "やる"
+          ],
+          "why": {
+            "en": "た before ふり pretends the thing is done: やったふり. やっているふり pretends it is going on right now, and やるふり pretends one is about to do it.",
+            "fr": "た devant ふり fait semblant que c'est fini : やったふり. やっているふり fait semblant que c'est en cours, et やるふり fait semblant qu'on va le faire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the mother really feel?",
+            "fr": "Comment la mère se sent-elle vraiment ?"
+          },
+          "jp": "母は、どんなに疲れていても、いつも元気なふりをしている。",
+          "tr": {
+            "en": "However tired my mother is, she always pretends to be full of energy.",
+            "fr": "Même très fatiguée, ma mère fait toujours semblant d'être pleine d'énergie."
+          },
+          "choices": [
+            {
+              "en": "Tired, but she does not show it.",
+              "fr": "Fatiguée, mais elle ne le montre pas."
+            },
+            {
+              "en": "Full of energy, as she appears.",
+              "fr": "Pleine d'énergie, comme elle en a l'air."
+            },
+            {
+              "en": "In a bad mood, and she shows it.",
+              "fr": "De mauvaise humeur, et elle le montre."
+            }
+          ],
+          "why": {
+            "en": "ふりをする: the act is the opposite of the truth, so she is really tired. The ても, « however tired », says it too. Looking energetic without trying would be 元気そう.",
+            "fr": "ふりをする : le jeu est l'inverse de la vérité, donc elle est vraiment fatiguée. Le ても, « même très fatiguée », le dit aussi. Avoir l'air énergique sans le chercher serait 元気そう."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの人は、おこっている＿＿＿して、本当は、わらっていた。",
+          "tr": {
+            "en": "That person pretended to be angry, but was really laughing.",
+            "fr": "Cette personne a fait semblant d'être en colère, mais riait en réalité."
+          },
+          "choices": [
+            "ふりを",
+            "ふりが",
+            "ふりに"
+          ],
+          "why": {
+            "en": "ふり is the thing one does, so it takes を with する: ふりをする. ふりがする copies 気がする, but ふり is not a feeling that comes over you, and ふりにする does not mean to pretend.",
+            "fr": "ふり est ce qu'on fait, donc il prend を avec する : ふりをする. ふりがする copie 気がする, mais ふり n'est pas un sentiment qui vous vient, et ふりにする ne veut pas dire faire semblant."
+          }
+        }
+      ]
     }
   },
   {
@@ -34464,7 +35462,127 @@
             "fr": "Une idée, le choix laissé ouvert : か何か. だけ dit seulement des onigiris, 何こ demande combien."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "のどがかわいたから、コーラ＿＿＿飲みたいな。",
+          "tr": {
+            "en": "I'm thirsty, so I'd like a cola or something.",
+            "fr": "J'ai soif, alors je prendrais bien un coca ou quelque chose comme ça."
+          },
+          "choices": [
+            "か何か",
+            "かだれか",
+            "かどこか"
+          ],
+          "why": {
+            "en": "何 stands for things: コーラか何か is « cola or something ». かだれか is for a person and かどこか for a place, so they would say « cola or someone » or « cola or somewhere ».",
+            "fr": "何 désigne les choses : コーラか何か veut dire « un coca ou quelque chose ». かだれか est pour une personne et かどこか pour un lieu : on dirait « un coca ou quelqu'un » ou « un coca ou quelque part »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the souvenir?",
+            "fr": "Que dit celui qui parle à propos du cadeau-souvenir ?"
+          },
+          "jp": "おみやげは、ケーキか何かでいいですよ。",
+          "tr": {
+            "en": "A souvenir like cake or something is fine.",
+            "fr": "Un souvenir comme un gâteau ou quelque chose du genre, ça ira."
+          },
+          "choices": [
+            {
+              "en": "Cake or something similar would be fine: no need to be exact.",
+              "fr": "Un gâteau ou quelque chose de ce genre, ça ira : pas besoin d'être précis."
+            },
+            {
+              "en": "Both cake and something else are required.",
+              "fr": "Il faut à la fois un gâteau et autre chose."
+            },
+            {
+              "en": "Only cake will do.",
+              "fr": "Seul un gâteau fera l'affaire."
+            }
+          ],
+          "why": {
+            "en": "か何か offers cake as one example and leaves the rest open: anything of the kind will do. It is not a list of two things (that would be と), and it does not limit the choice to cake (だけ).",
+            "fr": "か何か donne le gâteau en exemple et laisse le reste ouvert : tout ce qui y ressemble ira. Ce n'est pas une liste de deux choses (ce serait と), et le choix ne se limite pas au gâteau (だけ)."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are helping a customer at a station shop. Politely, you offer to carry the bag or anything else the customer needs.",
+            "fr": "Tu aides un client dans une boutique de gare. Poliment, tu proposes de porter son sac ou ce dont il aurait besoin."
+          },
+          "choices": [
+            "おにもつか何か、お持ちしましょうか。",
+            "おにもつか何か、持つ？",
+            "おにもつだけ、お持ちしましょうか。"
+          ],
+          "why": {
+            "en": "To a customer, the polite お持ちしましょうか, and か何か leaves the offer open. 持つ？ is casual, for a friend, and だけ limits the offer to the bag.",
+            "fr": "À un client, le poli お持ちしましょうか, et か何か laisse l'offre ouverte. 持つ？ est familier, pour un ami, et だけ limite l'offre au sac."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How sure is the speaker about what that person bought?",
+            "fr": "Dans quelle mesure celui qui parle est-il sûr de ce que cette personne a acheté ?"
+          },
+          "jp": "あの人は、きのう、服か何かを買っていたよ。",
+          "tr": {
+            "en": "That person was buying clothes or something yesterday.",
+            "fr": "Cette personne achetait des vêtements ou quelque chose comme ça, hier."
+          },
+          "choices": [
+            {
+              "en": "Not sure: clothes, or something of the kind.",
+              "fr": "Pas sûr : des vêtements, ou quelque chose de ce genre."
+            },
+            {
+              "en": "Sure: clothes, and one more thing.",
+              "fr": "Sûr : des vêtements, et une autre chose."
+            },
+            {
+              "en": "Sure: it was clothes.",
+              "fr": "Sûr : c'étaient des vêtements."
+            }
+          ],
+          "why": {
+            "en": "か何か puts one guess on the table and leaves the rest open: the speaker did not see clearly. It is not a list of two things (と), and it does not say « clothes » for certain.",
+            "fr": "か何か avance une hypothèse et laisse le reste ouvert : celui qui parle n'a pas bien vu. Ce n'est pas une liste de deux choses (と), et il ne dit pas « des vêtements » avec certitude."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "さっき、外で、電車＿＿＿音がしたよ。",
+          "tr": {
+            "en": "Just now I heard the sound of a train or something, outside.",
+            "fr": "Tout à l'heure, dehors, j'ai entendu un bruit de train ou quelque chose comme ça."
+          },
+          "choices": [
+            "か何かの",
+            "か何かを",
+            "か何かが"
+          ],
+          "why": {
+            "en": "か何か keeps the noun open and の links it to what follows: 電車か何かの音, « the sound of a train or something ». を or が would leave 音 unlinked, since 音がした already has its own が.",
+            "fr": "か何か laisse le nom ouvert et の le relie à ce qui suit : 電車か何かの音, « un bruit de train ou quelque chose ». を ou が laisseraient 音 sans lien, puisque 音がした a déjà son が."
+          }
+        }
+      ]
     }
   },
   {
@@ -34626,7 +35744,132 @@
             "fr": "Tu essaies encore et encore, et ça ne vient pas : なかなか〜ない. Les deux autres disent qu'elle a répondu, ou que tu n'as pas appelé."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうの夜は、コーヒーを飲みすぎて、なかなか＿＿＿。",
+          "tr": {
+            "en": "Last night I drank too much coffee and just couldn't get to sleep.",
+            "fr": "Hier soir, j'ai trop bu de café et je n'arrivais pas à m'endormir."
+          },
+          "choices": [
+            "眠れなかった",
+            "眠れない",
+            "眠れる"
+          ],
+          "why": {
+            "en": "なかなか asks for a negative, and the night is over: the past negative 眠れなかった, « could not fall asleep ». 眠れない is the present, and 眠れる has no negative: なかなか would then mean « quite ».",
+            "fr": "なかなか demande un négatif, et la nuit est passée : le négatif passé 眠れなかった, « n'arrivait pas à dormir ». 眠れない est le présent, et 眠れる n'a pas de négatif : なかなか voudrait alors dire « plutôt »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What was the train like yesterday?",
+            "fr": "Comment était le train hier ?"
+          },
+          "jp": "きのうの電車は、なかなか来ないので、会社におくれた。",
+          "tr": {
+            "en": "The train took ages to come yesterday, so I was late for work.",
+            "fr": "Hier, le train a mis une éternité à venir, alors j'ai été en retard au travail."
+          },
+          "choices": [
+            {
+              "en": "It was very slow to come.",
+              "fr": "Il a été très long à arriver."
+            },
+            {
+              "en": "It never came at all.",
+              "fr": "Il n'est pas venu du tout."
+            },
+            {
+              "en": "It came on time, but the speaker was late.",
+              "fr": "Il est arrivé à l'heure, mais celui qui parle était en retard."
+            }
+          ],
+          "why": {
+            "en": "なかなか + negative: it would not come easily, so it came late, and that made the speaker late. It does not say it never came: that would be ちっとも or ぜんぜん.",
+            "fr": "なかなか + négatif : il ne venait pas facilement, donc il est arrivé tard, et celui qui parle aussi. Il ne dit pas qu'il n'est jamais venu : ce serait ちっとも ou ぜんぜん."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "三月になったのに、春は、なかなか＿＿＿。",
+          "tr": {
+            "en": "It's March already, but spring just isn't getting any warmer.",
+            "fr": "On est déjà en mars, mais le printemps ne se réchauffe toujours pas."
+          },
+          "choices": [
+            "あたたかくならない",
+            "あたたかいならない",
+            "あたたかくなった"
+          ],
+          "why": {
+            "en": "After なかなか comes the negative: あたたかい → あたたかくなる → あたたかくならない. あたたかいならない is the slip that keeps the い, and あたたかくなった has no negative.",
+            "fr": "Après なかなか vient le négatif : あたたかい → あたたかくなる → あたたかくならない. あたたかいならない est l'erreur qui garde le い, et あたたかくなった n'a pas de négatif."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think about working abroad alone?",
+            "fr": "Que pense celui qui parle du fait de travailler seul à l'étranger ?"
+          },
+          "jp": "ひとりで外国で働くのは、なかなかできることではない。",
+          "tr": {
+            "en": "Working abroad on your own is not something just anyone can do.",
+            "fr": "Travailler seul à l'étranger, ce n'est pas à la portée de tout le monde."
+          },
+          "choices": [
+            {
+              "en": "It is not easy: few people manage it.",
+              "fr": "Ce n'est pas facile : peu de gens y arrivent."
+            },
+            {
+              "en": "It is impossible for everyone.",
+              "fr": "C'est impossible pour tout le monde."
+            },
+            {
+              "en": "It is quite easy to do.",
+              "fr": "C'est plutôt facile."
+            }
+          ],
+          "why": {
+            "en": "なかなか + negative: not easily. The speaker finds it hard and almost admires those who do it. It does not say it is impossible, only that it is not easy, and not the « quite good » of a positive.",
+            "fr": "なかなか + négatif : pas facilement. Celui qui parle trouve cela difficile et admire presque ceux qui le font. Il ne dit pas que c'est impossible, seulement que ce n'est pas facile, pas le « plutôt bien » d'un positif."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "どこに行くか、みんなで話したが、なかなか＿＿＿。",
+          "tr": {
+            "en": "We talked about where to go, but we just couldn't decide.",
+            "fr": "On a parlé de l'endroit où aller, mais on n'arrivait pas à se décider."
+          },
+          "choices": [
+            "決まらなかった",
+            "決まなかった",
+            "決まった"
+          ],
+          "why": {
+            "en": "決まる is a う-verb: 決まらない, so the past is 決まらなかった, « it just wouldn't get decided ». 決まなかった treats it as a る-verb, and 決まった has no negative.",
+            "fr": "決まる est un verbe en う : 決まらない, donc le passé est 決まらなかった, « ça ne se décidait pas ». 決まなかった le traite comme un verbe en る, et 決まった n'a pas de négatif."
+          }
+        }
+      ]
     }
   },
   {
