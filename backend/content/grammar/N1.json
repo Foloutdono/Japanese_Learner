@@ -3881,7 +3881,127 @@
             "fr": "Aussitôt : や否や. ながら veut dire ici « tout en le sachant » ; une heure après, ce n'est pas l'instant."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "弟は家に＿＿＿、テレビをつけた。",
+          "tr": {
+            "en": "The moment my little brother got home, he turned on the TV.",
+            "fr": "À peine rentré, mon petit frère a allumé la télé."
+          },
+          "choices": [
+            "帰るや否や",
+            "帰ったや否や",
+            "帰りや否や"
+          ],
+          "why": {
+            "en": "や否や follows the dictionary form even when the event is past: 帰るや否や. 帰ったや否や borrows the た-form of たとたんに, and 帰りや否や uses the ます-stem, which belongs to がてら or ながら.",
+            "fr": "や否や suit la forme du dictionnaire, même pour un fait passé : 帰るや否や. 帰ったや否や emprunte la forme en た de たとたんに, et 帰りや否や prend le radical en ます, celui de がてら ou de ながら."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How are the two events linked?",
+            "fr": "Comment les deux faits sont-ils liés ?"
+          },
+          "jp": "戸を開けるや否や、強い風が吹き込んできた。",
+          "tr": {
+            "en": "The moment the door was opened, a strong wind blew in.",
+            "fr": "À peine la porte ouverte, un vent fort s'est engouffré."
+          },
+          "choices": [
+            {
+              "en": "The wind came in the instant the door was opened.",
+              "fr": "Le vent est entré à l'instant où la porte a été ouverte."
+            },
+            {
+              "en": "The wind came in every time the door was opened.",
+              "fr": "Le vent entrait chaque fois qu'on ouvrait la porte."
+            },
+            {
+              "en": "The wind came in whether or not the door was opened.",
+              "fr": "Le vent entrait, que la porte soit ouverte ou non."
+            }
+          ],
+          "why": {
+            "en": "や否や means « the moment »: one event with the next right behind it. The 否 does not make it « or not », and a habit would take たびに.",
+            "fr": "や否や veut dire « à l'instant où » : un fait, et le suivant sur ses talons. Le 否 n'en fait pas un « ou non », et une habitude demanderait たびに."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are writing up this morning. Say you opened the window the moment you woke up.",
+            "fr": "Tu racontes ce matin. Dis que tu as ouvert la fenêtre dès le réveil."
+          },
+          "choices": [
+            "目が覚めるや否や、窓を開けた。",
+            "窓を開けるや否や、目が覚めた。",
+            "目が覚めるそばから、窓を開けた。"
+          ],
+          "why": {
+            "en": "The clause before や否や is the one that comes first: 目が覚めるや否や. The second line puts the window first, and そばから paints a cycle that repeats, not one morning.",
+            "fr": "La proposition devant や否や est celle qui vient d'abord : 目が覚めるや否や. La deuxième ligne met la fenêtre en premier, et そばから peint un cycle qui se répète, pas un seul matin."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "新しい駅の名前が＿＿＿、ネットで話題になった。",
+          "tr": {
+            "en": "The moment the new station's name was announced, everyone online was talking about it.",
+            "fr": "À peine le nom de la nouvelle gare annoncé, tout le monde en parlait sur internet."
+          },
+          "choices": [
+            "発表されるや否や",
+            "発表するや否や",
+            "発表させるや否や"
+          ],
+          "why": {
+            "en": "The name does not announce itself: someone announces it, so the verb is passive, 発表される + や否や. 発表する would make the name the announcer, and 発表させる means to make someone announce.",
+            "fr": "Le nom ne s'annonce pas tout seul : quelqu'un l'annonce, le verbe est donc au passif, 発表される + や否や. 発表する ferait du nom celui qui annonce, et 発表させる veut dire faire annoncer quelqu'un."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Has this already happened, or is it still to come?",
+            "fr": "Est-ce déjà arrivé, ou est-ce encore à venir ?"
+          },
+          "jp": "彼は大学を卒業するや否や、故郷を離れてしまった。",
+          "tr": {
+            "en": "He left his hometown the moment he graduated from university.",
+            "fr": "Il a quitté sa ville natale dès qu'il a eu son diplôme."
+          },
+          "choices": [
+            {
+              "en": "It has happened: he left right after graduating.",
+              "fr": "C'est fait : il est parti juste après son diplôme."
+            },
+            {
+              "en": "It is still to come: he will leave once he graduates.",
+              "fr": "C'est à venir : il partira une fois son diplôme obtenu."
+            },
+            {
+              "en": "He left his hometown before he had graduated.",
+              "fr": "Il avait quitté sa ville natale avant d'avoir son diplôme."
+            }
+          ],
+          "why": {
+            "en": "卒業する is only the dictionary form that や否や asks for, not a future: the ending 離れてしまった is past, so the whole sentence reports what happened, in that order.",
+            "fr": "卒業する n'est que la forme du dictionnaire qu'exige や否や, pas un futur : la fin 離れてしまった est au passé, donc la phrase rapporte ce qui s'est passé, dans cet ordre."
+          }
+        }
+      ]
     }
   },
   {
@@ -4042,7 +4162,106 @@
             "fr": "Appris et perdu aussitôt, encore et encore : そばから. Les autres disent qu'on n'oublie jamais, ou seulement des années après."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "お皿を＿＿＿、次のお皿がたまっていく。",
+          "tr": {
+            "en": "No sooner do I wash a plate than the next ones pile up.",
+            "fr": "À peine ai-je lavé une assiette que d'autres s'accumulent."
+          },
+          "choices": [
+            "洗ったそばから",
+            "洗ってそばから",
+            "洗いそばから"
+          ],
+          "why": {
+            "en": "そばから follows the dictionary form or the た-form: 洗ったそばから. The て-form and the ます-stem are the slips; neither joins to そばから.",
+            "fr": "そばから suit la forme du dictionnaire ou la forme en た : 洗ったそばから. La forme en て et le radical en ます sont les fautes : aucun des deux ne se joint à そばから."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the weeding like?",
+            "fr": "Comment se passe le désherbage ?"
+          },
+          "jp": "草を抜くそばから、新しい草が生えてくる。",
+          "tr": {
+            "en": "No sooner do I pull the weeds than new ones come up.",
+            "fr": "À peine ai-je arraché les herbes que de nouvelles repoussent."
+          },
+          "choices": [
+            {
+              "en": "A losing battle: new weeds come up as fast as the old ones are pulled.",
+              "fr": "Un combat perdu d'avance : de nouvelles herbes repoussent aussitôt les anciennes arrachées."
+            },
+            {
+              "en": "A success: once pulled, the weeds stay gone.",
+              "fr": "Une réussite : une fois arrachées, les herbes ne reviennent plus."
+            },
+            {
+              "en": "A slow job: new weeds only come up a month later.",
+              "fr": "Un travail lent : les nouvelles herbes ne poussent qu'un mois plus tard."
+            }
+          ],
+          "why": {
+            "en": "そばから describes a cycle: what is done is undone right behind it, and it keeps happening. 生えてくる follows 抜く at once, so the work never ends.",
+            "fr": "そばから décrit un cycle : ce qui est fait est défait aussitôt, et cela recommence. 生えてくる suit 抜く sans délai, donc le travail ne finit jamais."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You hang out the washing and the rain starts again, every time. Complain that it comes the moment you hang something out, over and over.",
+            "fr": "Tu étends le linge et, à chaque fois, la pluie se remet à tomber. Plains-toi : dès que tu étends quelque chose, elle revient, encore et encore."
+          },
+          "choices": [
+            "洗濯物を干すそばから、雨が降ってくる。",
+            "洗濯物を干すそばから、かわいていく。",
+            "雨が降るそばから、洗濯物を干している。"
+          ],
+          "why": {
+            "en": "The first line says each job is undone as soon as it is done. The second has そばから too, but its result, drying, is the opposite of undoing; the third puts the rain first and so reverses the two events.",
+            "fr": "La première ligne dit que chaque travail est défait dès qu'il est fait. La deuxième a aussi そばから, mais son résultat, le séchage, n'a rien d'un défaire ; la troisième met la pluie d'abord et inverse les faits."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the little brother keep doing?",
+            "fr": "Que ne cesse de faire le petit frère ?"
+          },
+          "jp": "母が料理を作るそばから、弟がつまみ食いをしてしまう。",
+          "tr": {
+            "en": "As soon as Mother makes the food, my little brother nibbles at it.",
+            "fr": "Dès que ma mère prépare le repas, mon petit frère grignote dedans."
+          },
+          "choices": [
+            {
+              "en": "Nibbling the food as soon as Mother makes it, again and again.",
+              "fr": "Grignoter les plats dès que sa mère les prépare, sans arrêt."
+            },
+            {
+              "en": "Standing beside Mother to help her cook.",
+              "fr": "Rester à côté de sa mère pour l'aider à cuisiner."
+            },
+            {
+              "en": "Nibbling just once, after all the cooking is done.",
+              "fr": "Grignoter une seule fois, quand toute la cuisine est finie."
+            }
+          ],
+          "why": {
+            "en": "Here そばから is not the noun そば, « beside »: it means no sooner one thing is made than the other undoes it, and it keeps happening.",
+            "fr": "Ici そばから n'est pas le nom そば, « à côté » : cela veut dire qu'à peine une chose est faite, l'autre la défait, et cela se répète."
+          }
+        }
+      ]
     }
   },
   {
@@ -4237,7 +4456,127 @@
             "fr": "Voir, puis partir en courant aussitôt : forme du dictionnaire + なり. ながら ferait les deux en même temps, ために ferait de « voir » le but."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "息子は家に＿＿＿、ソファにねころんだ。",
+          "tr": {
+            "en": "My son flopped onto the sofa the moment he got home.",
+            "fr": "À peine rentré, mon fils s'est affalé sur le canapé."
+          },
+          "choices": [
+            "帰るなり",
+            "帰ってなり",
+            "帰りなり"
+          ],
+          "why": {
+            "en": "なり joins straight onto the dictionary form, even for a past event: 帰るなり. The て-form and the ます-stem are the slips; neither takes なり.",
+            "fr": "なり se joint directement à la forme du dictionnaire, même pour un fait passé : 帰るなり. La forme en て et le radical en ます sont les fautes : aucun des deux ne prend なり."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is surprising about the customer?",
+            "fr": "Qu'est-ce qui est surprenant chez le client ?"
+          },
+          "jp": "客は席に着くなり、メニューも見ずに帰ってしまった。",
+          "tr": {
+            "en": "The customer left the moment he sat down, without even looking at the menu.",
+            "fr": "Le client est reparti à peine assis, sans même regarder le menu."
+          },
+          "choices": [
+            {
+              "en": "He left at once, before even looking at the menu.",
+              "fr": "Il est reparti aussitôt, avant même d'avoir regardé le menu."
+            },
+            {
+              "en": "He sat down without looking at the menu.",
+              "fr": "Il s'est assis sans regarder le menu."
+            },
+            {
+              "en": "He left only after eating a full meal.",
+              "fr": "Il n'est reparti qu'après un repas complet."
+            }
+          ],
+          "why": {
+            "en": "なり ties a second act, unexpected for the onlooker, to the first: he sat down and was gone at once. Nothing is said of eating, and the leaving is not skipped.",
+            "fr": "なり rattache à la première action une seconde, inattendue pour celui qui regarde : il s'est assis et a aussitôt disparu. Il n'est pas question de repas, et le départ n'est pas omis."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "In a school essay you recall what you saw at the station: your brother caught sight of his old teacher and at once turned round and ran off, to your surprise. Write it.",
+            "fr": "Dans une rédaction, tu racontes ce que tu as vu à la gare : ton frère a aperçu son ancien professeur et, aussitôt, a fait demi-tour pour s'enfuir en courant, à ta grande surprise. Écris-le."
+          },
+          "choices": [
+            "弟は先生の顔を見るなり、くるりと向きを変えて走り去った。",
+            "弟は先生の顔を見るなり、先生がくるりと向きを変えて走り去った。",
+            "弟は先生の顔を見ながら、くるりと向きを変えて走り去った。"
+          ],
+          "why": {
+            "en": "なり ties two acts of the same person: the one who sees is the one who runs. The second line makes the teacher run, and ながら would mean he ran off while looking at him, two acts at once and not one right after the other.",
+            "fr": "なり relie deux actes d'une même personne : celui qui voit est celui qui s'enfuit. La deuxième ligne fait fuir le professeur, et ながら dirait qu'il s'est enfui en le regardant : deux actes à la fois, non l'un après l'autre."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "運転手は車に＿＿＿、いきなりアクセルをふんだ。",
+          "tr": {
+            "en": "The driver floored the accelerator the moment he got into the car.",
+            "fr": "Le conducteur a écrasé l'accélérateur à peine monté dans la voiture."
+          },
+          "choices": [
+            "乗るなり",
+            "乗りながら",
+            "乗るたびに"
+          ],
+          "why": {
+            "en": "One surprising act right after another takes なり. ながら would be two acts at the same moment, and たびに « every time » turns it into a habit.",
+            "fr": "Un acte surprenant juste après un autre demande なり. ながら serait deux actes au même moment, et たびに « chaque fois » en ferait une habitude."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who hid behind the mother, and when?",
+            "fr": "Qui s'est caché derrière la mère, et quand ?"
+          },
+          "jp": "その子は私を見るなり、母親の後ろにかくれてしまった。",
+          "tr": {
+            "en": "The moment the child saw me, it hid behind its mother.",
+            "fr": "À ma vue, l'enfant s'est caché derrière sa mère."
+          },
+          "choices": [
+            {
+              "en": "The child, the moment it saw me.",
+              "fr": "L'enfant, à ma vue."
+            },
+            {
+              "en": "I did, the moment I saw the child.",
+              "fr": "Moi, dès que j'ai aperçu l'enfant."
+            },
+            {
+              "en": "The mother, once the child had looked my way.",
+              "fr": "La mère, quand l'enfant a regardé de mon côté."
+            }
+          ],
+          "why": {
+            "en": "なり ties two acts of one person: in 私を見るなり the one who sees is the one who hides. 私を only says whom the child saw.",
+            "fr": "なり relie deux actes d'une même personne : dans 私を見るなり, celui qui regarde est celui qui se cache. 私を dit seulement qui l'enfant a vu."
+          }
+        }
+      ]
     }
   },
   {
@@ -4432,7 +4771,132 @@
             "fr": "Une sortie qui sert deux buts : がてら. ながら te ferait faire les courses et rendre le livre au même moment ; かわりに supprimerait les courses."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "友だちを＿＿＿、バス停の近くの花屋に寄った。",
+          "tr": {
+            "en": "On my way to meet a friend, I dropped by the flower shop near the bus stop.",
+            "fr": "En allant chercher un ami, j'ai fait un détour par la fleuriste près de l'arrêt de bus."
+          },
+          "choices": [
+            "迎えがてら",
+            "迎えるがてら",
+            "迎えてがてら"
+          ],
+          "why": {
+            "en": "がてら joins to a noun or to a verb's stem: 迎え + がてら. 迎えるがてら keeps the dictionary form and 迎えてがてら the て-form; neither can be followed by がてら.",
+            "fr": "がてら se joint à un nom ou au radical d'un verbe : 迎え + がてら. 迎えるがてら garde la forme du dictionnaire et 迎えてがてら la forme en て ; aucune des deux ne peut précéder がてら."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Which of the two was the reason for going out?",
+            "fr": "Laquelle des deux était la raison de la sortie ?"
+          },
+          "jp": "友人のお見舞いがてら、病院の近くの有名なパン屋に寄ってきた。",
+          "tr": {
+            "en": "While out to visit a friend in the hospital, I dropped by the famous bakery nearby.",
+            "fr": "En allant voir un ami à l'hôpital, j'ai fait un détour par la célèbre boulangerie d'à côté."
+          },
+          "choices": [
+            {
+              "en": "Visiting the friend: the bakery stop came with it.",
+              "fr": "Rendre visite à l'ami : l'arrêt à la boulangerie s'y est ajouté."
+            },
+            {
+              "en": "The bakery: the visit was the extra.",
+              "fr": "La boulangerie : la visite est venue en plus."
+            },
+            {
+              "en": "Neither came first: both happened at the very same moment.",
+              "fr": "Aucune des deux d'abord : les deux ont eu lieu au même instant."
+            }
+          ],
+          "why": {
+            "en": "In X がてら Y, X is what the outing is for and Y is the extra that rides along. The order is not interchangeable, and « at the same moment » would be ながら.",
+            "fr": "Dans X がてら Y, X est le but de la sortie et Y le petit plus qui s'y ajoute. L'ordre ne s'inverse pas, et « au même instant » serait ながら."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ジョギング＿＿＿、パン屋まで足をのばしてきた。",
+          "tr": {
+            "en": "While out jogging, I went on as far as the bakery.",
+            "fr": "En allant courir, j'ai poussé jusqu'à la boulangerie."
+          },
+          "choices": [
+            "ジョギングがてら",
+            "ジョギングかたがた",
+            "ジョギングのかたわら"
+          ],
+          "why": {
+            "en": "A jog that doubles as an errand: がてら. かたがた is for a formal call with two purposes (お礼かたがた), and かたわら for a side activity kept up over years, not for one outing.",
+            "fr": "Un jogging qui sert aussi de course : がてら. かたがた est pour une visite de politesse à deux buts (お礼かたがた), et かたわら pour une activité annexe de longue durée, pas pour une sortie."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How many trips outside did it take?",
+            "fr": "Combien de sorties cela a-t-il demandé ?"
+          },
+          "jp": "ごみを出しがてら、近所の人にあいさつをしてきた。",
+          "tr": {
+            "en": "While out to put out the rubbish, I said hello to a neighbour.",
+            "fr": "En sortant les poubelles, j'en ai profité pour dire bonjour à un voisin."
+          },
+          "choices": [
+            {
+              "en": "One: the rubbish and the greeting shared the same outing.",
+              "fr": "Une seule : les poubelles et le bonjour ont partagé la même sortie."
+            },
+            {
+              "en": "Two: the rubbish first, then another trip to greet someone.",
+              "fr": "Deux : d'abord les poubelles, puis une autre sortie pour saluer quelqu'un."
+            },
+            {
+              "en": "None: the neighbour was greeted from inside the house.",
+              "fr": "Aucune : le voisin a été salué depuis l'intérieur de la maison."
+            }
+          ],
+          "why": {
+            "en": "がてら means one outing serving two ends: going out with the rubbish is also what the greeting rides on. It is neither two separate trips nor something done from indoors.",
+            "fr": "がてら veut dire une sortie à deux fins : la sortie des poubelles porte aussi le bonjour. Ce ne sont ni deux sorties séparées, ni quelque chose fait depuis l'intérieur."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "手紙を＿＿＿、パン屋でパンを買ってきた。",
+          "tr": {
+            "en": "I bought bread at the bakery while out to post a letter.",
+            "fr": "En sortant poster une lettre, j'ai acheté du pain à la boulangerie."
+          },
+          "choices": [
+            "出しがてら",
+            "出さがてら",
+            "出すがてら"
+          ],
+          "why": {
+            "en": "With a verb, がてら takes the ます-stem: 出す → 出し + がてら. 出さがてら uses the あ-stem of the negative, and 出すがてら keeps the dictionary form; neither can precede がてら.",
+            "fr": "Avec un verbe, がてら prend le radical en ます : 出す → 出し + がてら. 出さがてら emploie le radical en あ de la négation, et 出すがてら garde la forme du dictionnaire ; aucun des deux ne peut précéder がてら."
+          }
+        }
+      ]
     }
   },
   {
@@ -4627,7 +5091,127 @@
             "fr": "Deux occupations menées dans la durée : かたわら. がてら demande une sortie qui sert un second but ; かわりに voudrait dire que tu ne travailles plus à la banque."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "父は役所に＿＿＿、休日には地域の野球チームを教えている。",
+          "tr": {
+            "en": "Alongside working at the town office, my father coaches the local baseball team on his days off.",
+            "fr": "Parallèlement à son travail à la mairie, mon père entraîne l'équipe de baseball du quartier pendant ses jours de congé."
+          },
+          "choices": [
+            "勤めるかたわら",
+            "勤めるのかたわら",
+            "勤めたかたわら"
+          ],
+          "why": {
+            "en": "After a verb, かたわら follows the dictionary form directly: 勤めるかたわら. 勤めるのかたわら adds the の that only a noun takes, and 勤めたかたわら puts the verb in the past, which the pattern does not have.",
+            "fr": "Après un verbe, かたわら suit directement la forme du dictionnaire : 勤めるかたわら. 勤めるのかたわら ajoute le の que seul un nom prend, et 勤めたかたわら met le verbe au passé, ce que le modèle n'a pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How do the two jobs relate?",
+            "fr": "Quel rapport y a-t-il entre les deux activités ?"
+          },
+          "jp": "彼は漁師として海に出るかたわら、自宅で民宿を営んでいる。",
+          "tr": {
+            "en": "Alongside going to sea as a fisherman, he runs a guesthouse at home.",
+            "fr": "Parallèlement à son métier de pêcheur, il tient une chambre d'hôtes chez lui."
+          },
+          "choices": [
+            {
+              "en": "Fishing is his main work; the guesthouse is a long-term side activity.",
+              "fr": "La pêche est son activité principale ; la chambre d'hôtes est une activité annexe de longue durée."
+            },
+            {
+              "en": "The guesthouse is his main work; fishing is the side activity.",
+              "fr": "La chambre d'hôtes est son activité principale ; la pêche est l'activité annexe."
+            },
+            {
+              "en": "He runs the guesthouse at the very moment he is out at sea.",
+              "fr": "Il tient la chambre d'hôtes au moment même où il est en mer."
+            }
+          ],
+          "why": {
+            "en": "かたわら puts the main occupation first and the side one after it, both kept up over time. The guesthouse cannot be run from the boat, and it is not what the sentence puts first.",
+            "fr": "かたわら met l'activité principale d'abord et l'annexe après, toutes deux poursuivies dans la durée. On ne tient pas la chambre d'hôtes depuis le bateau, et ce n'est pas elle que la phrase met en premier."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are writing a profile of your aunt, a nurse who has also written picture books in her spare time for ten years. Say that alongside her nursing she writes picture books.",
+            "fr": "Tu rédiges le portrait de ta tante, infirmière qui écrit aussi des albums pour enfants à ses heures perdues depuis dix ans. Écris que, parallèlement à son métier, elle écrit des albums."
+          },
+          "choices": [
+            "おばは看護師として働くかたわら、絵本を書いている。",
+            "おばは看護師のかたわらで、絵本を書いている。",
+            "おばは看護師として働きがてら、絵本を書いている。"
+          ],
+          "why": {
+            "en": "働くかたわら: the main job as a verb, then the side activity, over years. 看護師のかたわらで would put her beside a nurse, the noun « beside », and がてら serves one outing with two ends, not two lines of work.",
+            "fr": "働くかたわら : le métier principal sous forme de verbe, puis l'activité annexe, sur des années. 看護師のかたわらで la mettrait à côté d'une infirmière, le nom « à côté », et がてら sert une sortie à deux buts, pas deux métiers."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "彼は会社勤め＿＿＿、休日は子どもたちに絵を教えている。",
+          "tr": {
+            "en": "Alongside his office job, he teaches children to paint on his days off.",
+            "fr": "Parallèlement à son travail de bureau, il apprend la peinture à des enfants pendant ses jours de congé."
+          },
+          "choices": [
+            "のかたわら",
+            "かたわら",
+            "をかたわら"
+          ],
+          "why": {
+            "en": "After a noun, の comes before かたわら: 会社勤めのかたわら. Without の, or with the object particle を as if 会社勤め were a verb, the sentence does not hold.",
+            "fr": "Après un nom, の vient avant かたわら : 会社勤めのかたわら. Sans の, ou avec la particule d'objet を comme si 会社勤め était un verbe, la phrase ne tient pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does かたわら tell us about the husband?",
+            "fr": "Que nous dit かたわら sur le mari ?"
+          },
+          "jp": "彼は病気の妻のかたわらで、一晩中看病を続けた。",
+          "tr": {
+            "en": "He kept nursing his sick wife through the night, right at her side.",
+            "fr": "Il a veillé sa femme malade toute la nuit, à son chevet."
+          },
+          "choices": [
+            {
+              "en": "That he stayed right at her side all night.",
+              "fr": "Qu'il est resté tout près d'elle toute la nuit."
+            },
+            {
+              "en": "That he kept a second occupation alongside his job.",
+              "fr": "Qu'il gardait une seconde activité à côté de son métier."
+            },
+            {
+              "en": "That he nursed her while doing something else at the same time.",
+              "fr": "Qu'il la soignait tout en faisant autre chose au même moment."
+            }
+          ],
+          "why": {
+            "en": "After a person or place with の, かたわら is also the noun « beside »: 妻のかたわらで is at her side. A side occupation would have a job or activity before it, and two acts at once is ながら.",
+            "fr": "Après une personne ou un lieu avec の, かたわら est aussi le nom « à côté » : 妻のかたわらで, c'est à son côté. Une activité annexe aurait devant elle un métier ou une activité, et deux actes à la fois, c'est ながら."
+          }
+        }
+      ]
     }
   },
   {
@@ -4864,7 +5448,127 @@
             "fr": "Après « je », sans の, ごとき rabaisse celui qui parle : quelqu'un comme moi. ような者でよければ accepte, et こそ te met en avant."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "彼は鉄＿＿＿意志を持った人だ。",
+          "tr": {
+            "en": "He is a man with a will like iron.",
+            "fr": "C'est un homme à la volonté de fer."
+          },
+          "choices": [
+            "のごとき",
+            "のごとく",
+            "のごとし"
+          ],
+          "why": {
+            "en": "Before a noun (意志) the pattern is ごとき: 鉄のごとき意志. ごとく is the adverb, for a verb, and ごとし closes a sentence.",
+            "fr": "Devant un nom (意志), la forme est ごとき : 鉄のごとき意志. ごとく est l'adverbe, pour un verbe, et ごとし termine une phrase."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What are the alleys like?",
+            "fr": "Comment sont les ruelles ?"
+          },
+          "jp": "その店は、迷路のごとき路地の奥にある。",
+          "tr": {
+            "en": "The shop is at the end of alleys like a maze.",
+            "fr": "La boutique se trouve au fond de ruelles en labyrinthe."
+          },
+          "choices": [
+            {
+              "en": "Twisting and confusing, like a maze.",
+              "fr": "Tortueuses et déroutantes, comme un labyrinthe."
+            },
+            {
+              "en": "A real maze, built for visitors.",
+              "fr": "Un vrai labyrinthe, construit pour les visiteurs."
+            },
+            {
+              "en": "Straight and easy to follow, unlike a maze.",
+              "fr": "Droites et faciles à suivre, à l'opposé d'un labyrinthe."
+            }
+          ],
+          "why": {
+            "en": "ごとき after 迷路の is the old ような: a comparison, not a real maze. It sits before the noun 路地 and says what the alleys are like.",
+            "fr": "ごとき après 迷路の est l'ancien ような : une comparaison, pas un vrai labyrinthe. Il se place devant le nom 路地 et dit à quoi les ruelles ressemblent."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A famous author has just praised your essay. Answer with humility: someone like you is no match for their talent.",
+            "fr": "Un auteur célèbre vient de louer ta rédaction. Réponds avec modestie : quelqu'un comme toi n'a pas à se mesurer à son talent."
+          },
+          "choices": [
+            "わたしごときが、先生と肩をならべられるはずがありません。",
+            "先生ごときが、わたしと肩をならべられるはずがありません。",
+            "いえ、わたしなら先生と肩をならべられると思います。"
+          ],
+          "why": {
+            "en": "ごとき belittles whoever it follows, so a modest speaker puts it after わたし. The second line puts it after 先生 and insults the author, and the third boldly claims the opposite.",
+            "fr": "ごとき rabaisse celui qu'il suit : celui qui est modeste le met après わたし. La deuxième ligne le met après 先生 et insulte l'auteur, et la troisième affirme avec aplomb le contraire."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿若者が、この国の未来を支えていくのだ。",
+          "tr": {
+            "en": "Young people like you will carry this country's future.",
+            "fr": "Ce sont des jeunes comme toi qui porteront l'avenir de ce pays."
+          },
+          "choices": [
+            "君のごとき",
+            "君ごとき",
+            "君のごとく"
+          ],
+          "why": {
+            "en": "With の, ごとき is the simile « like »: 君のごとき若者, young people like you. Without の, 君ごとき belittles, « a nobody like you », and ごとく is the adverb, not for a noun.",
+            "fr": "Avec の, ごとき est la comparaison « comme » : 君のごとき若者, des jeunes comme toi. Sans の, 君ごとき rabaisse, « un moins que rien comme toi », et ごとく est l'adverbe, pas pour un nom."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How did the news spread?",
+            "fr": "Comment la nouvelle s'est-elle répandue ?"
+          },
+          "jp": "その知らせは、山火事のごとく町じゅうにひろまった。",
+          "tr": {
+            "en": "The news spread through the town like wildfire.",
+            "fr": "La nouvelle s'est répandue dans toute la ville comme une traînée de poudre."
+          },
+          "choices": [
+            {
+              "en": "Very fast and everywhere, as a wildfire runs.",
+              "fr": "Très vite et partout, comme un feu de forêt."
+            },
+            {
+              "en": "Through a real fire that broke out in the town.",
+              "fr": "À cause d'un vrai incendie déclaré dans la ville."
+            },
+            {
+              "en": "Slowly, so that few people heard it.",
+              "fr": "Lentement, si bien que peu de gens l'ont su."
+            }
+          ],
+          "why": {
+            "en": "ごとく is the adverb form: it says how the news spread, like a wildfire, so fast and wide. There is no fire in the story.",
+            "fr": "ごとく est la forme adverbe : il dit comment la nouvelle s'est répandue, comme un feu de forêt, vite et loin. Il n'y a pas de feu dans l'histoire."
+          }
+        }
+      ]
     }
   },
   {
@@ -5063,7 +5767,136 @@
             "fr": "Rien que des festins : ごちそうずくめ. まみれ, ce serait de la nourriture partout sur toi, et ぬき voudrait dire aucun festin."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does ずくめ say about his story?",
+            "fr": "Que dit ずくめ de son récit ?"
+          },
+          "jp": "彼の話は、最初から最後まで、うそずくめだった。",
+          "tr": {
+            "en": "His story was nothing but lies from beginning to end.",
+            "fr": "Son récit n'était que mensonges, du début à la fin."
+          },
+          "choices": [
+            {
+              "en": "That every part of it was a lie.",
+              "fr": "Que tout y était mensonge."
+            },
+            {
+              "en": "That it was mostly true, with a few lies.",
+              "fr": "Qu'il était presque vrai, avec quelques mensonges."
+            },
+            {
+              "en": "That it was a happy story, since ずくめ means good things.",
+              "fr": "Que c'était une belle histoire, puisque ずくめ veut dire de bonnes choses."
+            }
+          ],
+          "why": {
+            "en": "ずくめ says everything is of one kind, good or bad: here, lies and nothing else. It is not limited to pleasant things, and it leaves no room for some truth.",
+            "fr": "ずくめ dit que tout est d'une même sorte, bonne ou mauvaise : ici, des mensonges et rien d'autre. Il ne se limite pas aux choses agréables, et ne laisse aucune place à un peu de vérité."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks about your trip. Everything was wonderful: the food, the weather, the people. Say it was one delight after another.",
+            "fr": "Un ami te demande comment était ton voyage. Tout était merveilleux : la cuisine, le temps, les gens. Dis que ce n'était que du bonheur."
+          },
+          "choices": [
+            "旅行は、楽しいことずくめだった。",
+            "旅行は、楽しいずくめだった。",
+            "旅行は、楽しいことまみれだった。"
+          ],
+          "why": {
+            "en": "An adjective cannot take ずくめ directly: it needs こと, 楽しいことずくめ. 楽しいずくめ skips it, and まみれ is for what coats a surface (油まみれ), not for a run of pleasures.",
+            "fr": "Un adjectif ne prend pas ずくめ directement : il lui faut こと, 楽しいことずくめ. 楽しいずくめ l'oublie, et まみれ sert à ce qui recouvre une surface (油まみれ), pas à une suite de plaisirs."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the lunch like?",
+            "fr": "Comment est le déjeuner ?"
+          },
+          "jp": "うちの食堂の昼ごはんは、野菜ずくめだ。",
+          "tr": {
+            "en": "Lunch at our canteen is nothing but vegetables.",
+            "fr": "Au déjeuner, notre cantine ne sert que des légumes."
+          },
+          "choices": [
+            {
+              "en": "Every dish is made of vegetables.",
+              "fr": "Tous les plats sont faits de légumes."
+            },
+            {
+              "en": "Everything is covered in a vegetable sauce.",
+              "fr": "Tout est nappé d'une sauce aux légumes."
+            },
+            {
+              "en": "There is a little vegetable beside the meat.",
+              "fr": "Il y a un peu de légumes à côté de la viande."
+            }
+          ],
+          "why": {
+            "en": "ずくめ says everything on the table is of one kind: all vegetables. Covering a surface is まみれ, and a small side dish would not be ずくめ.",
+            "fr": "ずくめ dit que tout ce qui est sur la table est d'une même sorte : que des légumes. Recouvrir une surface, c'est まみれ, et un petit accompagnement ne serait pas ずくめ."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "祖父は、毎日ぜいたくずくめ＿＿＿暮らしを送っている。",
+          "tr": {
+            "en": "My grandfather lives a life of nothing but luxury every day.",
+            "fr": "Mon grand-père mène chaque jour une vie de luxe de bout en bout."
+          },
+          "choices": [
+            "の",
+            "な",
+            "に"
+          ],
+          "why": {
+            "en": "ずくめ is a noun suffix, so before another noun it takes の: ぜいたくずくめの暮らし. な is for na-adjectives, and に would turn it into an adverb.",
+            "fr": "ずくめ est un suffixe de nom : devant un autre nom il prend の, ぜいたくずくめの暮らし. な est pour les adjectifs en な, et に en ferait un adverbe."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How was the summer break?",
+            "fr": "Comment se sont passées les vacances d'été ?"
+          },
+          "jp": "夏休みは、海に山にと、遊びずくめだった。",
+          "tr": {
+            "en": "The summer break was nothing but fun, the sea one day, the mountains the next.",
+            "fr": "Les vacances d'été n'ont été que jeux, la mer un jour, la montagne le lendemain."
+          },
+          "choices": [
+            {
+              "en": "Nothing but fun, one outing after another.",
+              "fr": "Que du plaisir, une sortie après l'autre."
+            },
+            {
+              "en": "A little fun, but mostly study.",
+              "fr": "Un peu de plaisir, mais surtout du travail."
+            },
+            {
+              "en": "Full of trouble that spoiled it.",
+              "fr": "Pleines d'ennuis qui les ont gâchées."
+            }
+          ],
+          "why": {
+            "en": "ずくめ says everything was of one kind, and here the kind is play. There is no room for study, and ずくめ carries no bad sense of its own, unlike だらけ.",
+            "fr": "ずくめ dit que tout était d'une même sorte, et ici c'est le jeu. Il n'y a pas de place pour le travail, et ずくめ n'a pas de sens péjoratif propre, contrairement à だらけ."
+          }
+        }
+      ]
     }
   },
   {
@@ -5262,7 +6095,132 @@
             "fr": "L'air d'une saison qui s'installe : めく. ぎみ, c'est une pointe de quelque chose de fâcheux chez quelqu'un (風邪ぎみ), et ぶる, quelqu'un qui se donne des airs (大人ぶる)."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "三月なのに、今年は風が冷たくて、少しも春＿＿＿。",
+          "tr": {
+            "en": "It is March, but the wind is cold this year and it does not feel at all like spring.",
+            "fr": "Nous sommes en mars, mais cette année le vent est froid et rien n'a un air de printemps."
+          },
+          "choices": [
+            "めかない",
+            "めくない",
+            "めきない"
+          ],
+          "why": {
+            "en": "めく is a godan verb in く, so its negative is めか + ない: 春めかない. 春めくない treats it like an い-adjective, and 春めきない attaches ない to the stem.",
+            "fr": "めく est un verbe godan en く : sa négation est めか + ない, 春めかない. 春めくない le traite en adjectif en い, et 春めきない colle ない au radical."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How spring-like is it?",
+            "fr": "Dans quelle mesure est-ce déjà le printemps ?"
+          },
+          "jp": "二月の終わりが近づくと、日ざしが少しずつ春めいてくる。",
+          "tr": {
+            "en": "As the end of February nears, the sunlight gradually takes on a feel of spring.",
+            "fr": "À l'approche de la fin février, la lumière prend peu à peu un air de printemps."
+          },
+          "choices": [
+            {
+              "en": "Only a beginning: a hint of spring is starting to show.",
+              "fr": "Seulement un début : un air de printemps commence à se sentir."
+            },
+            {
+              "en": "Fully: the season of spring has really arrived.",
+              "fr": "Tout à fait : la saison du printemps est vraiment là."
+            },
+            {
+              "en": "The cold is coming back and winter is returning.",
+              "fr": "Le froid revient et l'hiver s'installe de nouveau."
+            }
+          ],
+          "why": {
+            "en": "めく says the sunlight takes on the air of spring little by little: a tinge, a beginning, not the season itself. A spring that is fully so would be 春らしい.",
+            "fr": "めく dit que la lumière prend peu à peu l'air du printemps : une teinte, un début, pas la saison elle-même. Un printemps pleinement installé serait 春らしい."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "彼は＿＿＿笑いを浮かべて、席を立った。",
+          "tr": {
+            "en": "He stood up with a faintly sarcastic smile.",
+            "fr": "Il s'est levé avec un sourire teinté d'ironie."
+          },
+          "choices": [
+            "皮肉めいた",
+            "皮肉めいて",
+            "皮肉めきた"
+          ],
+          "why": {
+            "en": "Before the noun 笑い the form to use is めいた: 皮肉めいた笑い, with the い-sound as in 書く → 書いた. 皮肉めいて is the て-form, which cannot stand before a noun, and 皮肉めきた is a slip.",
+            "fr": "Devant le nom 笑い, la forme à employer est めいた : 皮肉めいた笑い, avec le son い comme 書く → 書いた. 皮肉めいて est la forme en て, qui ne peut pas précéder un nom, et 皮肉めきた est une faute."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does めいた say about his tone?",
+            "fr": "Que dit めいた du ton de sa voix ?"
+          },
+          "jp": "彼は冗談めいた口調で、会社をやめると言った。",
+          "tr": {
+            "en": "He said, in a tone that sounded like a joke, that he was quitting the company.",
+            "fr": "Il a dit, d'un ton qui avait l'air d'une plaisanterie, qu'il quittait l'entreprise."
+          },
+          "choices": [
+            {
+              "en": "It had the air of a joke, without saying for certain that it was one.",
+              "fr": "Cela avait l'air d'une plaisanterie, sans dire que c'en était une."
+            },
+            {
+              "en": "It was a joke, so everyone knew he was not really quitting.",
+              "fr": "C'était une plaisanterie : tout le monde savait qu'il ne partait pas vraiment."
+            },
+            {
+              "en": "He spoke in a mocking, sarcastic way.",
+              "fr": "Il parlait d'un ton moqueur et sarcastique."
+            }
+          ],
+          "why": {
+            "en": "めいた gives only the air of a joke and leaves open whether he meant it. A certain joke would be 冗談だった, and a mocking tone would be 皮肉.",
+            "fr": "めいた ne donne que l'air d'une plaisanterie et laisse ouvert s'il le pensait. Une plaisanterie certaine serait 冗談だった, et un ton moqueur serait 皮肉."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "朝晩は、すっかり秋＿＿＿ました。",
+          "tr": {
+            "en": "Mornings and evenings have now taken on a real feel of autumn.",
+            "fr": "Matins et soirs ont pris maintenant un vrai air d'automne."
+          },
+          "choices": [
+            "めき",
+            "めい",
+            "めか"
+          ],
+          "why": {
+            "en": "Before ます a godan verb takes its stem, the い-row sound: めく → めき + ます. めい is the sound kept for て and た, and めか is the negative stem.",
+            "fr": "Devant ます, un verbe godan prend son radical, le son de la rangée い : めく → めき + ます. めい est le son réservé à て et à た, et めか est le radical de la négation."
+          }
+        }
+      ]
     }
   },
   {
@@ -5423,7 +6381,127 @@
             "fr": "Indigne du rôle : あるまじき. あるべき en ferait la conduite qui convient, et ありがち ce que les agents font d'habitude."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "客のお金を勝手に使うなど、銀行員＿＿＿行いだ。",
+          "tr": {
+            "en": "Using a customer's money without permission is conduct unbecoming of a bank clerk.",
+            "fr": "Utiliser l'argent d'un client sans permission est une conduite indigne d'un employé de banque."
+          },
+          "choices": [
+            "にあるまじき",
+            "にあるべき",
+            "であるまじき"
+          ],
+          "why": {
+            "en": "The role takes に, and まじき says the act does not befit it: 銀行員にあるまじき. あるべき says what a clerk should show, the opposite, and であるまじき puts the wrong particle on the role.",
+            "fr": "Le rôle prend に, et まじき dit que l'acte ne lui convient pas : 銀行員にあるまじき. あるべき dit ce qu'un employé devrait montrer, le contraire, et であるまじき met la mauvaise particule sur le rôle."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who is being criticised?",
+            "fr": "Qui est critiqué ?"
+          },
+          "jp": "親にあるまじき仕打ちに、近所の人たちも怒りを覚えた。",
+          "tr": {
+            "en": "Even the neighbours were angry at treatment so unbecoming of a parent.",
+            "fr": "Même les voisins se sont indignés d'un traitement indigne d'un parent."
+          },
+          "choices": [
+            {
+              "en": "The parent: the treatment does not befit someone in a parent's role.",
+              "fr": "Le parent : ce traitement ne convient pas à quelqu'un qui est parent."
+            },
+            {
+              "en": "The child, for treating a parent badly.",
+              "fr": "L'enfant, pour avoir mal traité un parent."
+            },
+            {
+              "en": "Nobody: it describes how parents usually behave.",
+              "fr": "Personne : cela décrit la façon dont les parents se comportent d'ordinaire."
+            }
+          ],
+          "why": {
+            "en": "In 親にあるまじき, に marks the role, not the person it is done to: « unbecoming of a parent ». It is the parent's act that is blamed, and まじき condemns, it does not describe the usual.",
+            "fr": "Dans 親にあるまじき, に marque le rôle, pas la personne visée : « indigne d'un parent ». C'est l'acte du parent qu'on blâme, et まじき condamne, il ne décrit pas l'ordinaire."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are writing a formal complaint to the school board: a teacher shouted at the pupils in front of everyone. Say that this is conduct unbecoming of a teacher.",
+            "fr": "Tu rédiges une plainte officielle à la direction de l'école : un professeur a crié sur les élèves devant tout le monde. Écris que cette conduite est indigne d'un professeur."
+          },
+          "choices": [
+            "生徒の前で大声をあげるのは、教師にあるまじき行いです。",
+            "生徒の前で大声をあげるのは、教師にあるまじきです。",
+            "生徒の前で大声をあげるのは、教師のあるまじき行いです。"
+          ],
+          "why": {
+            "en": "まじき always stands before a noun: あるまじき行い, with the role marked by に. The second line ends on まじき, with nothing to describe, and the third puts の on the role.",
+            "fr": "まじき se place toujours devant un nom : あるまじき行い, avec le rôle marqué par に. La deuxième ligne finit sur まじき, sans rien à décrire, et la troisième met の sur le rôle."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How was the mayor's remark received?",
+            "fr": "Comment la remarque du maire a-t-elle été reçue ?"
+          },
+          "jp": "市長の発言は、公人にあるまじきものだとして、批判が集まった。",
+          "tr": {
+            "en": "The mayor's remark drew criticism as unbecoming of a public figure.",
+            "fr": "La remarque du maire a été critiquée comme indigne d'une personnalité publique."
+          },
+          "choices": [
+            {
+              "en": "With criticism: it did not befit a public figure.",
+              "fr": "Par des critiques : elle ne convenait pas à une personnalité publique."
+            },
+            {
+              "en": "With praise: it was just what a public figure should say.",
+              "fr": "Par des éloges : c'était exactement ce que doit dire une personnalité publique."
+            },
+            {
+              "en": "With a shrug: public figures often talk like that.",
+              "fr": "Par un haussement d'épaules : les personnalités publiques parlent souvent ainsi."
+            }
+          ],
+          "why": {
+            "en": "まじき is the old negative of べき: where あるべき says what a public figure ought to be, あるまじき says what does not fit. The word condemns, and so the reaction is criticism.",
+            "fr": "まじき est l'ancienne négation de べき : là où あるべき dit ce que doit être une personnalité publique, あるまじき dit ce qui ne convient pas. Le mot condamne, d'où des critiques."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿暴力に、市民は立ち上がった。",
+          "tr": {
+            "en": "The citizens rose up against violence that must never be forgiven.",
+            "fr": "Les citoyens se sont dressés contre une violence qu'on ne doit jamais pardonner."
+          },
+          "choices": [
+            "許すまじき",
+            "許しまじき",
+            "許さまじき"
+          ],
+          "why": {
+            "en": "まじき joins to the dictionary form: 許す + まじき. 許しまじき uses the ます-stem and 許さまじき the あ-stem of the negative, the two slips; the old negative is already in まじき.",
+            "fr": "まじき se joint à la forme du dictionnaire : 許す + まじき. 許しまじき prend le radical en ます et 許さまじき celui en あ de la négation, les deux fautes ; la négation ancienne est déjà dans まじき."
+          }
+        }
+      ]
     }
   },
   {
