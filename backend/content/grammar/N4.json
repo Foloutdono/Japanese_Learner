@@ -8610,7 +8610,127 @@
             "fr": "Des actions en exemple : たり〜たり. て donne l'ordre réel, et や ne relie que des noms."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "土曜日は、本屋に＿＿＿、えいがを見たりします。",
+          "tr": {
+            "en": "On Saturdays I go to the bookshop, watch a film, and so on.",
+            "fr": "Le samedi, je vais à la librairie, je regarde un film, etc."
+          },
+          "choices": [
+            "行ったり",
+            "行いたり",
+            "行った"
+          ],
+          "why": {
+            "en": "The た-form of 行く is irregular, 行った, so the first item is 行ったり. 行いたり copies 書く → 書いた, and 行った alone has no り to list it.",
+            "fr": "La forme en た de 行く est irrégulière, 行った : le premier exemple est donc 行ったり. 行いたり copie 書く → 書いた, et 行った seul n'a pas de り pour énumérer."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does 〜たり〜たり tell you about the summer?",
+            "fr": "Qu'indique 〜たり〜たり à propos de cet été ?"
+          },
+          "jp": "夏は、海でおよいだり、山にのぼったりしました。",
+          "tr": {
+            "en": "In the summer we swam in the sea, climbed in the mountains, and so on.",
+            "fr": "L'été, on a nagé dans la mer, fait de la montagne, etc."
+          },
+          "choices": [
+            {
+              "en": "Two examples of what was done, in no set order, and there were others.",
+              "fr": "Deux exemples de ce qui a été fait, sans ordre précis, et il y en avait d'autres."
+            },
+            {
+              "en": "The swimming came first and the climb afterwards: the order is fixed.",
+              "fr": "La baignade d'abord, la montée ensuite : l'ordre est fixé."
+            },
+            {
+              "en": "Swimming and climbing are the only two things that were done.",
+              "fr": "Nager et grimper sont les deux seules choses qui ont été faites."
+            }
+          ],
+          "why": {
+            "en": "たり lists examples, with no order and without claiming they are all. The real sequence would be the て-form: およいで、のぼりました.",
+            "fr": "たり énumère des exemples, sans ordre et sans prétendre qu'ils sont tous. La vraie suite s'écrirait avec la forme en て : およいで、のぼりました."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks: あしたは何をするの？ You plan to clean the room and go shopping, among other things. What do you answer?",
+            "fr": "Un ami te demande : あしたは何をするの？ Tu comptes, entre autres, faire le ménage et aller faire des courses. Que réponds-tu ?"
+          },
+          "choices": [
+            "へやをそうじしたり、買い物に行ったりするよ。",
+            "へやをそうじしたり、買い物に行ったりしたよ。",
+            "へやをそうじしたり、買い物に行ったりしないよ。"
+          ],
+          "why": {
+            "en": "It is about tomorrow, so the last する stays non-past: the た of たり is not a past tense. したよ would say it already happened, and しないよ that you will do none of it.",
+            "fr": "Il s'agit de demain : le dernier する reste au présent, car le た de たり n'est pas un passé. したよ dirait que c'est déjà fait, et しないよ que tu ne feras rien de tout cela."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "このバスは、人がいたり、＿＿＿します。",
+          "tr": {
+            "en": "On this bus there are sometimes people, sometimes none.",
+            "fr": "Dans ce bus, il y a parfois du monde, parfois personne."
+          },
+          "choices": [
+            "いなかったり",
+            "いないたり",
+            "いなかった"
+          ],
+          "why": {
+            "en": "ない changes like an い-adjective before り: いなかったり, beside いたり. いないたり leaves ない as it is, and いなかった has no り to list the second case.",
+            "fr": "ない se transforme comme un adjectif en い devant り : いなかったり, à côté de いたり. いないたり laisse ない tel quel, et いなかった n'a pas de り pour énumérer le second cas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker do before the homework?",
+            "fr": "Que fait la personne avant ses devoirs ?"
+          },
+          "jp": "しゅくだいの前は、ゲームをしたり、テレビを見たりしません。",
+          "tr": {
+            "en": "Before my homework, I don't do things like play games or watch TV.",
+            "fr": "Avant mes devoirs, je ne fais pas de choses comme jouer aux jeux vidéo ou regarder la télé."
+          },
+          "choices": [
+            {
+              "en": "Neither: no games, no TV, nothing of the kind.",
+              "fr": "Ni l'un ni l'autre : pas de jeux, pas de télé, rien de ce genre."
+            },
+            {
+              "en": "Plays games, but does not watch TV.",
+              "fr": "Joue aux jeux vidéo, mais ne regarde pas la télé."
+            },
+            {
+              "en": "Plays games one day and watches TV the next.",
+              "fr": "Joue aux jeux vidéo un jour, regarde la télé le lendemain."
+            }
+          ],
+          "why": {
+            "en": "The ending carries the negative for the whole list: たり…たりしません means none of these things is done. It does not negate only the last item, and it is not the on-and-off たり.",
+            "fr": "La fin porte la négation pour toute l'énumération : たり…たりしません veut dire qu'on ne fait aucune de ces choses. Elle ne nie pas seulement le dernier élément, et ce n'est pas le たり de l'alternance."
+          }
+        }
+      ]
     }
   },
   {
@@ -8809,7 +8929,132 @@
             "fr": "Plus que de raison : 飲みすぎた. あまり〜ない, c'est « pas beaucoup », et そんなに montre seulement une quantité."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "セールで、服を＿＿＿、お金がなくなりました。",
+          "tr": {
+            "en": "I bought too many clothes at the sale, and I ran out of money.",
+            "fr": "J'ai acheté trop de vêtements aux soldes et je n'ai plus d'argent."
+          },
+          "choices": [
+            "買いすぎて",
+            "買うすぎて",
+            "買わすぎて"
+          ],
+          "why": {
+            "en": "すぎる follows the ます-stem: 買います → 買いすぎる. 買うすぎて puts it after the dictionary form, and 買わすぎて after the ない-stem.",
+            "fr": "すぎる se place après le radical en ます : 買います → 買いすぎる. 買うすぎて le met après la forme du dictionnaire, et 買わすぎて après le radical de ない."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the size of the sweater?",
+            "fr": "Que dit la personne de la taille du pull ?"
+          },
+          "jp": "このセーターは、大きすぎなかったので、買いました。",
+          "tr": {
+            "en": "This sweater wasn't too big, so I bought it.",
+            "fr": "Ce pull n'était pas trop grand, alors je l'ai acheté."
+          },
+          "choices": [
+            {
+              "en": "It was not too big: the size was fine.",
+              "fr": "Il n'était pas trop grand : la taille convenait."
+            },
+            {
+              "en": "It was too big.",
+              "fr": "Il était trop grand."
+            },
+            {
+              "en": "It was too small: not big enough.",
+              "fr": "Il était trop petit : pas assez grand."
+            }
+          ],
+          "why": {
+            "en": "なかった negates the excess: 大きすぎなかった is « not too big ». 大きすぎた would be « too big », and « too small » would be 小さすぎた.",
+            "fr": "なかった nie l'excès : 大きすぎなかった veut dire « pas trop grand ». 大きすぎた serait « trop grand », et « trop petit » serait 小さすぎた."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "しごとが多くて、ねる時間が＿＿＿、つらいです。",
+          "tr": {
+            "en": "I have so much work that I have far too little time to sleep, and it is hard.",
+            "fr": "J'ai tellement de travail que j'ai beaucoup trop peu de temps pour dormir, et c'est dur."
+          },
+          "choices": [
+            "なさすぎて",
+            "なすぎて",
+            "ないすぎて"
+          ],
+          "why": {
+            "en": "ない is the exception: it takes さ, ない → なさすぎる (and いい → よすぎる). なすぎて applies the usual « drop い » rule, and ないすぎて keeps ない whole.",
+            "fr": "ない fait exception : il prend さ, ない → なさすぎる (et いい → よすぎる). なすぎて applique la règle habituelle « on retire い », et ないすぎて garde ない entier."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of the teacher's kindness?",
+            "fr": "Que pense la personne de la gentillesse du professeur ?"
+          },
+          "jp": "あの先生は、せいとにやさしすぎます。",
+          "tr": {
+            "en": "That teacher is too soft on the students.",
+            "fr": "Ce professeur est trop indulgent avec les élèves."
+          },
+          "choices": [
+            {
+              "en": "It goes too far: the teacher is too soft with the students.",
+              "fr": "Elle va trop loin : le professeur est trop indulgent avec les élèves."
+            },
+            {
+              "en": "It is admirable: the teacher is very kind to the students.",
+              "fr": "Elle est admirable : le professeur est très gentil avec les élèves."
+            },
+            {
+              "en": "It is lacking: the teacher is not kind enough to the students.",
+              "fr": "Elle fait défaut : le professeur n'est pas assez gentil avec les élèves."
+            }
+          ],
+          "why": {
+            "en": "すぎる always judges an amount as more than is good, even for a quality: やさしすぎる is « too kind », a criticism. Praise would be とてもやさしい, and « not kind enough » やさしくない.",
+            "fr": "すぎる juge toujours une quantité comme plus que de raison, même pour une qualité : やさしすぎる, c'est « trop gentil », une critique. Un compliment serait とてもやさしい, et « pas assez gentil » やさしくない."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この町は、しずか＿＿＿から、よるはちょっとこわいです。",
+          "tr": {
+            "en": "This town is too quiet; at night it is a little scary.",
+            "fr": "Cette ville est trop calme ; la nuit, elle fait un peu peur."
+          },
+          "choices": [
+            "すぎる",
+            "なすぎる",
+            "だすぎる"
+          ],
+          "why": {
+            "en": "A な-adjective loses its な: しずか → しずかすぎる. なすぎる keeps the な of しずかな町, and だすぎる the だ of しずかだ.",
+            "fr": "Un adjectif en な perd son な : しずか → しずかすぎる. なすぎる garde le な de しずかな町, et だすぎる le だ de しずかだ."
+          }
+        }
+      ]
     }
   },
   {
@@ -9046,7 +9291,127 @@
             "fr": "Difficile mais faisable : にくい. やすい dit l'inverse, et 持てません qu'on ne peut pas du tout le porter."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "このリモコンは、古いですが、＿＿＿です。",
+          "tr": {
+            "en": "This remote is old, but it is easy to use.",
+            "fr": "Cette télécommande est vieille, mais elle est facile à utiliser."
+          },
+          "choices": [
+            "使いやすい",
+            "使いにくい",
+            "使うやすい"
+          ],
+          "why": {
+            "en": "ます-stem + やすい is « easy to »: 使う → 使いやすい. 使いにくい is the opposite, « hard to use », and 使うやすい puts やすい after the dictionary form.",
+            "fr": "Radical en ます + やすい, c'est « facile à » : 使う → 使いやすい. 使いにくい est l'inverse, « difficile à utiliser », et 使うやすい place やすい après la forme du dictionnaire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the brother and colds?",
+            "fr": "Que dit la phrase du frère et des rhumes ?"
+          },
+          "jp": "兄は、冬でもかぜをひきにくいです。",
+          "tr": {
+            "en": "My older brother doesn't catch colds easily, even in winter.",
+            "fr": "Mon grand frère n'attrape pas facilement de rhume, même en hiver."
+          },
+          "choices": [
+            {
+              "en": "He doesn't catch colds easily.",
+              "fr": "Il n'attrape pas facilement de rhume."
+            },
+            {
+              "en": "He catches colds easily.",
+              "fr": "Il attrape facilement des rhumes."
+            },
+            {
+              "en": "He hates catching colds.",
+              "fr": "Il déteste attraper des rhumes."
+            }
+          ],
+          "why": {
+            "en": "After a stem, にくい is « hard to », and for something that happens to you, « not easily »: かぜをひきにくい. It is the opposite of ひきやすい, and it is not 憎い, « hateful ».",
+            "fr": "Après un radical, にくい veut dire « difficile à », et pour ce qui nous arrive, « pas facilement » : かぜをひきにくい. C'est l'inverse de ひきやすい, et ce n'est pas 憎い, « détestable »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A classmate asks what the new teacher is like. You find the teacher easy to talk to. What do you say?",
+            "fr": "Un camarade te demande comment est le nouveau professeur. Tu trouves qu'on lui parle facilement. Que réponds-tu ?"
+          },
+          "choices": [
+            "話しやすい先生ですよ。",
+            "話しにくい先生ですよ。",
+            "話しすぎる先生ですよ。"
+          ],
+          "why": {
+            "en": "ます-stem + やすい rates how easy the action is with this person: 話しやすい, « easy to talk to ». 話しにくい is the opposite, and 話しすぎる would say that the teacher talks too much.",
+            "fr": "Radical en ます + やすい juge si l'action est facile avec cette personne : 話しやすい, « avec qui il est facile de parler ». 話しにくい est l'inverse, et 話しすぎる dirait que le professeur parle trop."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうのパンは、かたくて、＿＿＿。",
+          "tr": {
+            "en": "Yesterday's bread was hard, and it was difficult to eat.",
+            "fr": "Le pain d'hier était dur, et il était difficile à manger."
+          },
+          "choices": [
+            "食べにくかったです",
+            "食べにくいでした",
+            "食べにくくなかったです"
+          ],
+          "why": {
+            "en": "にくい behaves like an い-adjective: past 食べにくかった, polite 食べにくかったです. 食べにくいでした puts でした on the い-adjective, and 食べにくくなかったです says it was NOT hard to eat.",
+            "fr": "にくい se comporte comme un adjectif en い : passé 食べにくかった, poli 食べにくかったです. 食べにくいでした met でした sur l'adjectif en い, et 食べにくくなかったです dit que ce n'était PAS difficile à manger."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "The speaker says 言いにくい. What does that mean here?",
+            "fr": "La personne dit 言いにくい. Qu'est-ce que cela veut dire ici ?"
+          },
+          "jp": "ちょっと言いにくいんですが、そのせきはわたしのです。",
+          "tr": {
+            "en": "It's a little awkward to say, but that seat is mine.",
+            "fr": "C'est un peu gênant à dire, mais cette place est à moi."
+          },
+          "choices": [
+            {
+              "en": "Saying it is awkward, but the speaker is going to say it.",
+              "fr": "C'est gênant à dire, mais la personne va le dire."
+            },
+            {
+              "en": "The speaker is unable to say it.",
+              "fr": "La personne est incapable de le dire."
+            },
+            {
+              "en": "The words are hard to pronounce.",
+              "fr": "Les mots sont difficiles à prononcer."
+            }
+          ],
+          "why": {
+            "en": "にくい rates how hard an action is, not whether it can be done: 言いにくい is « awkward to say », and the speaker goes on to say it. 言えません would be « I can't say it ».",
+            "fr": "にくい juge la difficulté d'une action, pas la possibilité de la faire : 言いにくい, c'est « gênant à dire », et la personne le dit quand même. 言えません serait « je ne peux pas le dire »."
+          }
+        }
+      ]
     }
   },
   {
@@ -9279,7 +9644,127 @@
             "fr": "La fin de la lecture : おわる. はじめる en serait le début, つづける la suite."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "うちの子は、一さいのときに＿＿＿。",
+          "tr": {
+            "en": "Our child started walking at the age of one.",
+            "fr": "Notre enfant a commencé à marcher à un an."
+          },
+          "choices": [
+            "歩きはじめました",
+            "歩くはじめました",
+            "歩いてはじめました"
+          ],
+          "why": {
+            "en": "はじめる follows the ます-stem: 歩きます → 歩きはじめる, « start walking ». 歩くはじめる uses the dictionary form and 歩いてはじめる the て-form, and neither can be followed by はじめる.",
+            "fr": "はじめる se place après le radical en ます : 歩きます → 歩きはじめる, « commencer à marcher ». 歩くはじめる emploie la forme du dictionnaire et 歩いてはじめる la forme en て, et aucune des deux ne peut précéder はじめる."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who may leave first?",
+            "fr": "Qui peut partir en premier ?"
+          },
+          "jp": "ごはんを食べおわった人は、先にかえってもいいです。",
+          "tr": {
+            "en": "Those who have finished eating may leave first.",
+            "fr": "Ceux qui ont fini de manger peuvent partir en premier."
+          },
+          "choices": [
+            {
+              "en": "Those who have finished their meal.",
+              "fr": "Ceux qui ont fini leur repas."
+            },
+            {
+              "en": "Those who have just started eating.",
+              "fr": "Ceux qui viennent de commencer à manger."
+            },
+            {
+              "en": "Those who keep eating until the end.",
+              "fr": "Ceux qui continuent à manger jusqu'au bout."
+            }
+          ],
+          "why": {
+            "en": "食べおわる is « finish eating », and the past 食べおわった before 人 tells which people: those who have finished. 食べはじめた would be « started », and 食べつづけた « kept on ».",
+            "fr": "食べおわる veut dire « finir de manger », et le passé 食べおわった devant 人 dit de quelles personnes il s'agit : celles qui ont fini. 食べはじめた serait « commencé », et 食べつづけた « continué »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "三日も同じカレーを＿＿＿、いやになりました。",
+          "tr": {
+            "en": "I kept eating the same curry for three days, and I got sick of it.",
+            "fr": "J'ai mangé le même curry pendant trois jours de suite, et j'en ai eu assez."
+          },
+          "choices": [
+            "食べつづけて",
+            "食べるつづけて",
+            "食べはじめて"
+          ],
+          "why": {
+            "en": "A る-verb drops る to give the ます-stem: 食べる → 食べつづける, « keep eating » (三日も fits a duration). 食べるつづけて keeps the dictionary form, and 食べはじめて would be « start eating ».",
+            "fr": "Un verbe en る perd る pour donner le radical en ます : 食べる → 食べつづける, « continuer à manger » (三日も va avec une durée). 食べるつづけて garde la forme du dictionnaire, et 食べはじめて serait « commencer à manger »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What did he do when the rain fell?",
+            "fr": "Qu'a-t-il fait quand la pluie est tombée ?"
+          },
+          "jp": "雨がふっても、かれは走りつづけました。",
+          "tr": {
+            "en": "Even though it rained, he kept running.",
+            "fr": "Même sous la pluie, il a continué à courir."
+          },
+          "choices": [
+            {
+              "en": "He did not stop running.",
+              "fr": "Il n'a pas arrêté de courir."
+            },
+            {
+              "en": "He started running.",
+              "fr": "Il s'est mis à courir."
+            },
+            {
+              "en": "He finished running before the rain.",
+              "fr": "Il a fini de courir avant la pluie."
+            }
+          ],
+          "why": {
+            "en": "走りつづける is « keep on running », and ても says « even though it rained »: the rain did not stop him. 走りはじめる would be « start running », and 走りおわる « finish running ».",
+            "fr": "走りつづける veut dire « continuer à courir », et ても « même s'il a plu » : la pluie ne l'a pas arrêté. 走りはじめる serait « se mettre à courir », et 走りおわる « finir de courir »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend asks: しゅくだい、もうしたの？ You began an hour ago and are only halfway through. What do you answer?",
+            "fr": "Un ami te demande : しゅくだい、もうしたの？ Tu as commencé il y a une heure et tu n'en es qu'à la moitié. Que réponds-tu ?"
+          },
+          "choices": [
+            "ううん、まだしおわっていないよ。",
+            "ううん、まだしはじめていないよ。",
+            "うん、もうしおわったよ。"
+          ],
+          "why": {
+            "en": "Halfway means started but not finished: まだしおわっていない, « not finished yet ». しはじめていない would say you have not even started, and しおわったよ that you are done.",
+            "fr": "À la moitié, c'est commencé mais pas fini : まだしおわっていない, « pas encore fini ». しはじめていない dirait que tu n'as même pas commencé, et しおわったよ que tu as terminé."
+          }
+        }
+      ]
     }
   },
   {
@@ -9512,7 +9997,127 @@
             "fr": "Il part avec toi : ていく. てくる le ramènerait ici, に行きます va seulement le chercher."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "だんだん、日が長く＿＿＿きました。",
+          "tr": {
+            "en": "The days have been getting longer little by little.",
+            "fr": "Les jours rallongent petit à petit."
+          },
+          "choices": [
+            "なって",
+            "なる",
+            "なった"
+          ],
+          "why": {
+            "en": "A change that has been coming on is the て-form of なる before くる: 長くなってきました. なるきました and なったきました put きました after the wrong form of なる.",
+            "fr": "Un changement qui s'installe se dit avec la forme en て de なる devant くる : 長くなってきました. なるきました et なったきました placent きました après une mauvaise forme de なる."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about foreigners in the town?",
+            "fr": "Que dit la phrase des étrangers dans cette ville ?"
+          },
+          "jp": "この町では、外国人がふえてきましたし、これからもふえていくでしょう。",
+          "tr": {
+            "en": "Foreigners in this town have been increasing, and will probably keep increasing.",
+            "fr": "Les étrangers sont de plus en plus nombreux dans cette ville, et le seront sans doute encore plus."
+          },
+          "choices": [
+            {
+              "en": "Their number has been growing until now, and will keep growing.",
+              "fr": "Leur nombre a augmenté jusqu'ici, et va continuer d'augmenter."
+            },
+            {
+              "en": "Their number has grown until now, but will stop growing.",
+              "fr": "Leur nombre a augmenté jusqu'ici, mais va cesser d'augmenter."
+            },
+            {
+              "en": "They keep coming to the town, then leaving again.",
+              "fr": "Ils viennent en ville, puis s'en vont de nouveau."
+            }
+          ],
+          "why": {
+            "en": "てくる is the change up to now, ていく the change from now on: ふえてきた, then ふえていく. Neither is about people coming and going.",
+            "fr": "てくる est le changement jusqu'à maintenant, ていく celui de maintenant en avant : ふえてきた, puis ふえていく. Aucun des deux ne parle de gens qui vont et viennent."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are leaving home for school. What do you say to your family, who stay behind?",
+            "fr": "Tu pars de chez toi pour l'école. Que dis-tu à ta famille, qui reste à la maison ?"
+          },
+          "choices": [
+            "行ってきます。",
+            "行ってきました。",
+            "行ってらっしゃい。"
+          ],
+          "why": {
+            "en": "You go away and will come back: 行ってきます, « I'm off ». 行ってきました says you went and are back, and 行ってらっしゃい is what your family answers.",
+            "fr": "Tu t'en vas et tu reviendras : 行ってきます, « j'y vais ». 行ってきました dit que l'aller-retour est fait et que tu es de retour, et 行ってらっしゃい est ce que ta famille te répond."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "ここには、ペットをつれて＿＿＿でください。",
+          "tr": {
+            "en": "Please don't bring pets here.",
+            "fr": "N'amenez pas d'animaux ici, s'il vous plaît."
+          },
+          "choices": [
+            "こない",
+            "きない",
+            "くない"
+          ],
+          "why": {
+            "en": "The negative of 来る is irregular: 来ない, read こない, so つれてこないでください. きない and くない treat it as a regular verb or an い-adjective.",
+            "fr": "La négation de 来る est irrégulière : 来ない, qui se lit こない, d'où つれてこないでください. きない et くない la traitent comme un verbe régulier ou un adjectif en い."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Where does the friend go, seen from the speaker?",
+            "fr": "Où va l'ami, du point de vue de celui qui parle ?"
+          },
+          "jp": "そのとき、友だちがだまって出ていきました。",
+          "tr": {
+            "en": "Just then, my friend left without a word.",
+            "fr": "À ce moment-là, mon ami est sorti sans un mot."
+          },
+          "choices": [
+            {
+              "en": "Away from the speaker, who stays where they are.",
+              "fr": "Il s'éloigne de celui qui parle, qui reste là où il est."
+            },
+            {
+              "en": "Toward the speaker: the friend comes in.",
+              "fr": "Vers celui qui parle : l'ami entre."
+            },
+            {
+              "en": "The friend goes out and comes straight back.",
+              "fr": "L'ami sort et revient aussitôt."
+            }
+          ],
+          "why": {
+            "en": "ていく moves away from where the speaker is, so 出ていきました is « went out, left ». Toward the speaker it would be 入ってきました, and going out and coming back is 行ってきます.",
+            "fr": "ていく s'éloigne de l'endroit où se trouve celui qui parle : 出ていきました, c'est « est sorti, est parti ». Vers lui, ce serait 入ってきました, et sortir pour revenir se dit 行ってきます."
+          }
+        }
+      ]
     }
   },
   {

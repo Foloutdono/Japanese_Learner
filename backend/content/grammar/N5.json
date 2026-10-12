@@ -26315,7 +26315,127 @@
             "fr": "Le même qu'hier : きのうと同じ. より compare, ちがう dit « différent »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which word completes the sentence?",
+            "fr": "Quel mot complète la phrase ?"
+          },
+          "jp": "きょうの天気は、きのう＿＿＿同じです。",
+          "tr": {
+            "en": "Today's weather is the same as yesterday's.",
+            "fr": "Le temps d'aujourd'hui est le même que celui d'hier."
+          },
+          "choices": [
+            "と",
+            "より",
+            "に"
+          ],
+          "why": {
+            "en": "と is what links the two things and means « as »: きのうと同じ. より belongs to « more than », not to « the same as », and に does not link them here.",
+            "fr": "と relie les deux choses et veut dire « que » : きのうと同じ. より appartient à « plus que », pas à « le même que », et に ne les relie pas ici."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the two birthdays?",
+            "fr": "Que dit la phrase des deux anniversaires ?"
+          },
+          "jp": "わたしのたんじょう日は、母と同じ日です。",
+          "tr": {
+            "en": "My birthday is on the same day as my mother's.",
+            "fr": "Mon anniversaire tombe le même jour que celui de ma mère."
+          },
+          "choices": [
+            {
+              "en": "They fall on the same day.",
+              "fr": "Ils tombent le même jour."
+            },
+            {
+              "en": "The speaker celebrates it together with the speaker's mother.",
+              "fr": "Celui qui parle le fête avec sa mère."
+            },
+            {
+              "en": "They fall on different days.",
+              "fr": "Ils tombent des jours différents."
+            }
+          ],
+          "why": {
+            "en": "と同じ means « the same as »: the speaker's birthday and the mother's are one and the same day. This と is not « with », and 同じ is the opposite of « different ».",
+            "fr": "と同じ veut dire « le même que » : l'anniversaire de celui qui parle et celui de sa mère tombent le même jour. Ce と n'est pas « avec », et 同じ est le contraire de « différent »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "In a shop, your friend asks whether the new phone is bigger than the old one. You have just compared them: the size is exactly the same. What do you say?",
+            "fr": "Dans une boutique, un ami te demande si le nouveau téléphone est plus grand que l'ancien. Tu viens de les comparer : la taille est exactement la même. Que réponds-tu ?"
+          },
+          "choices": [
+            "新しい電話は、古い電話と同じ大きさです。",
+            "新しい電話は、古い電話より大きいです。",
+            "新しい電話は、古い電話と同じな大きさです。"
+          ],
+          "why": {
+            "en": "Equal size is と同じ + noun: 同じ大きさ. より…大きい says the new one is bigger, and 同じな大きさ wrongly adds な: 同じ goes straight before the noun.",
+            "fr": "Une taille égale se dit と同じ + nom : 同じ大きさ. より…大きい dit que le nouveau est plus grand, et 同じな大きさ ajoute à tort な : 同じ se place directement devant le nom."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which ending completes the sentence?",
+            "fr": "Quelle fin complète la phrase ?"
+          },
+          "jp": "わたしのかさは、あなた＿＿＿です。",
+          "tr": {
+            "en": "My umbrella is the same as yours.",
+            "fr": "Mon parapluie est le même que le tien."
+          },
+          "choices": [
+            "のと同じ",
+            "と同じ",
+            "の同じ"
+          ],
+          "why": {
+            "en": "あなたの stands for « yours », the umbrella; then と marks « as »: あなたのと同じ. あなたと同じ would compare the umbrella with you yourself, and without と there is no « as » at all.",
+            "fr": "あなたの remplace « le tien », le parapluie ; と marque ensuite « que » : あなたのと同じ. あなたと同じ comparerait le parapluie à toi-même, et sans と il n'y a plus de « que »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the station?",
+            "fr": "Que dit la phrase de la gare ?"
+          },
+          "jp": "ここの駅は、十年前と同じです。",
+          "tr": {
+            "en": "This station is the same as it was ten years ago.",
+            "fr": "Cette gare est la même qu'il y a dix ans."
+          },
+          "choices": [
+            {
+              "en": "It has not changed in ten years.",
+              "fr": "Elle n'a pas changé depuis dix ans."
+            },
+            {
+              "en": "It looks different from ten years ago.",
+              "fr": "Elle est différente d'il y a dix ans."
+            },
+            {
+              "en": "It is bigger than it was ten years ago.",
+              "fr": "Elle est plus grande qu'il y a dix ans."
+            }
+          ],
+          "why": {
+            "en": "A moment in time can be what you compare with: 十年前と同じ is « the same as ten years ago ». The station has not changed, which is neither « different » (とちがいます) nor « bigger » (より大きい).",
+            "fr": "On peut comparer avec un moment : 十年前と同じ, « comme il y a dix ans ». La gare n'a pas changé : ce n'est ni « différente » (とちがいます) ni « plus grande » (より大きい)."
+          }
+        }
+      ]
     }
   },
   {
@@ -26509,7 +26629,127 @@
             "fr": "La période vient d'abord avec に, puis le nombre avec 回 : 一か月に一回."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、へやをそうじします。",
+          "tr": {
+            "en": "I clean my room once every three days.",
+            "fr": "Je fais le ménage dans ma chambre une fois tous les trois jours."
+          },
+          "choices": [
+            "三日に一回",
+            "一日に三回",
+            "三日に三回"
+          ],
+          "why": {
+            "en": "The period comes first, then the number of times: 三日に一回 is « once per three days ». 一日に三回 swaps them (three times a day), and 三日に三回 repeats the number (three times in three days).",
+            "fr": "La période vient d'abord, puis le nombre de fois : 三日に一回, « une fois tous les trois jours ». 一日に三回 les échange (trois fois par jour), et 三日に三回 répète le nombre (trois fois en trois jours)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How often does the bus come?",
+            "fr": "À quelle fréquence le bus passe-t-il ?"
+          },
+          "jp": "この駅には、バスが一時間に二回来ます。",
+          "tr": {
+            "en": "A bus comes to this station twice an hour.",
+            "fr": "Un bus passe deux fois par heure à cette gare."
+          },
+          "choices": [
+            {
+              "en": "Twice every hour.",
+              "fr": "Deux fois par heure."
+            },
+            {
+              "en": "Once every two hours.",
+              "fr": "Une fois toutes les deux heures."
+            },
+            {
+              "en": "Twice a day, and each ride lasts an hour.",
+              "fr": "Deux fois par jour, et chaque trajet dure une heure."
+            }
+          ],
+          "why": {
+            "en": "一時間 is the period (« per hour ») and 二回 is how many times, so it is twice an hour. Here 時間 is not a length of time: it stands before に, while a duration would come after it (一日に二時間).",
+            "fr": "一時間 est la période (« par heure ») et 二回 le nombre de fois : deux fois par heure. Ici 時間 n'est pas une durée : il est avant に, alors qu'une durée viendrait après (一日に二時間)."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A classmate asks how often you phone your mother. You call her twice a month. What do you say?",
+            "fr": "Un camarade te demande à quelle fréquence tu téléphones à ta mère. Tu l'appelles deux fois par mois. Que réponds-tu ?"
+          },
+          "choices": [
+            "月に二回、母に電話します。",
+            "月に二時間、母に電話します。",
+            "二か月に一回、母に電話します。"
+          ],
+          "why": {
+            "en": "月に二回 is « twice a month »: period, に, number, 回. 月に二時間 would be two hours a month in all, and 二か月に一回 is once every two months.",
+            "fr": "月に二回, c'est « deux fois par mois » : période, に, nombre, 回. 月に二時間 serait deux heures par mois en tout, et 二か月に一回 une fois tous les deux mois."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How many sweets does the speaker eat in a day?",
+            "fr": "Combien de friandises celui qui parle mange-t-il en une journée ?"
+          },
+          "jp": "わたしは、一日に三回、おかしを二つずつ食べます。",
+          "tr": {
+            "en": "Three times a day, I eat two sweets each time.",
+            "fr": "Trois fois par jour, je mange deux friandises à chaque fois."
+          },
+          "choices": [
+            {
+              "en": "Six: two, three times a day.",
+              "fr": "Six : deux, trois fois par jour."
+            },
+            {
+              "en": "Three.",
+              "fr": "Trois."
+            },
+            {
+              "en": "Two.",
+              "fr": "Deux."
+            }
+          ],
+          "why": {
+            "en": "一日に三回 says how often (three times) and 二つずつ says how many each time (two): 3 × 2 = six. Reading only the 回 gives three, and only the ずつ gives two.",
+            "fr": "一日に三回 dit combien de fois (trois) et 二つずつ combien à chaque fois (deux) : 3 × 2 = six. Ne lire que 回 donne trois, ne lire que ずつ donne deux."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which counter completes the sentence?",
+            "fr": "Quel compteur complète la phrase ?"
+          },
+          "jp": "一週間に三＿＿＿、えいがを見ます。",
+          "tr": {
+            "en": "I watch films three times a week.",
+            "fr": "Je regarde des films trois fois par semaine."
+          },
+          "choices": [
+            "回",
+            "時間",
+            "分"
+          ],
+          "why": {
+            "en": "回 counts how many times: 三回. 時間 and 分 measure how long (three hours, three minutes), which would turn the sentence into « three hours a week ».",
+            "fr": "回 compte les fois : 三回. 時間 et 分 mesurent une durée (trois heures, trois minutes), ce qui ferait de la phrase « trois heures par semaine »."
+          }
+        }
+      ]
     }
   },
   {
@@ -26701,7 +26941,127 @@
             "fr": "Pour décrire comment elle le dit, 大きい perd son い et prend く : 大きく."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the teacher walk?",
+            "fr": "Comment le professeur marche-t-il ?"
+          },
+          "jp": "先生は、いつもしずかにあるきます。",
+          "tr": {
+            "en": "The teacher always walks quietly.",
+            "fr": "Le professeur marche toujours sans bruit."
+          },
+          "choices": [
+            {
+              "en": "Quietly, without making noise.",
+              "fr": "Sans bruit, discrètement."
+            },
+            {
+              "en": "Toward a quiet place.",
+              "fr": "Vers un endroit calme."
+            },
+            {
+              "en": "Only when the room is quiet.",
+              "fr": "Seulement quand la salle est silencieuse."
+            }
+          ],
+          "why": {
+            "en": "しずか is a な-adjective: before a verb it takes に and says how the walking is done. This に is not a direction (« to a quiet place »), which would need a noun, as in しずかなばしょへ.",
+            "fr": "しずか est un adjectif en な : devant un verbe il prend に et dit comment on marche. Ce に n'est pas une direction (« vers un endroit calme »), qui demanderait un nom, comme dans しずかなばしょへ."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿日本にいたいです。",
+          "tr": {
+            "en": "I want to stay in Japan for a long time.",
+            "fr": "Je voudrais rester longtemps au Japon."
+          },
+          "choices": [
+            "長く",
+            "長い",
+            "長に"
+          ],
+          "why": {
+            "en": "An い-adjective drops い and takes く before a verb: 長い → 長く. 長い stays for a noun (長い話), and 長に is the な-adjective ending, which 長い does not use.",
+            "fr": "Un adjectif en い perd い et prend く devant un verbe : 長い → 長く. 長い reste pour un nom (長い話), et 長に est la terminaison des adjectifs en な, que 長い n'utilise pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "You read this on the door of a shared kitchen. What is asked?",
+            "fr": "Tu lis ceci sur la porte d'une cuisine commune. Que demande-t-on ?"
+          },
+          "jp": "このへやは、きれいにつかってください。",
+          "tr": {
+            "en": "Please use this room neatly.",
+            "fr": "Merci d'utiliser cette pièce proprement."
+          },
+          "choices": [
+            {
+              "en": "To leave it clean when you use it.",
+              "fr": "De la laisser propre quand on s'en sert."
+            },
+            {
+              "en": "To use only the clean room.",
+              "fr": "De n'utiliser que la pièce propre."
+            },
+            {
+              "en": "To clean the room before anyone else does.",
+              "fr": "De nettoyer la pièce avant tout le monde."
+            }
+          ],
+          "why": {
+            "en": "きれいに is the adverb form of きれい: it describes the verb つかってください, so it says how to use the room. A clean room would be きれいなへや, with な before a noun.",
+            "fr": "きれいに est la forme adverbe de きれい : elle décrit le verbe つかってください, donc la manière d'utiliser la pièce. Une pièce propre se dirait きれいなへや, avec な devant un nom."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form of 上手 completes the sentence?",
+            "fr": "Quelle forme de 上手 complète la phrase ?"
+          },
+          "jp": "友だちは、日本語を＿＿＿話します。",
+          "tr": {
+            "en": "My friend speaks Japanese well.",
+            "fr": "Mon ami parle bien japonais."
+          },
+          "choices": [
+            "上手に",
+            "上手な",
+            "上手で"
+          ],
+          "why": {
+            "en": "上手 is a な-adjective: before a verb it takes に. 上手な is the form before a noun (上手な人), and 上手で links two descriptions (上手で、やさしい) without describing the verb.",
+            "fr": "上手 est un adjectif en な : devant un verbe il prend に. 上手な est la forme devant un nom (上手な人), et 上手で relie deux descriptions (上手で、やさしい) sans décrire le verbe."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Tomorrow's train leaves at six. You politely ask your friend to come early.",
+            "fr": "Demain, le train part à six heures. Tu demandes poliment à ton ami de venir tôt."
+          },
+          "choices": [
+            "あしたはやく来てください。",
+            "あしたはやい来てください。",
+            "あしたはやく来ないでください。"
+          ],
+          "why": {
+            "en": "はやい drops い and takes く before a verb: はやく来てください. はやい来て keeps the い-form, which only goes before a noun, and はやく来ないでください asks him not to come early, the opposite.",
+            "fr": "はやい perd い et prend く devant un verbe : はやく来てください. はやい来て garde la forme en い, réservée au nom, et はやく来ないでください lui demande de ne pas venir tôt, le contraire."
+          }
+        }
+      ]
     }
   },
   {
@@ -26896,7 +27256,122 @@
             "fr": "Tu choisis : nom + にします. になります dirait ce que ça devient."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "どれも高いので、いちばん＿＿＿。",
+          "tr": {
+            "en": "Everything was expensive, so I went with the cheapest one.",
+            "fr": "Tout était cher, alors j'ai pris le moins cher."
+          },
+          "choices": [
+            "安いのにしました",
+            "安いにしました",
+            "安くしました"
+          ],
+          "why": {
+            "en": "にします needs a noun: 安い becomes one with の (安いの, « the cheap one »), so 安いのにしました is « I chose the cheap one ». 安いにしました puts the adjective straight before に, and 安くしました means you made something cheaper.",
+            "fr": "にします veut un nom : 安い en devient un avec の (安いの, « le pas cher »), d'où 安いのにしました, « j'ai pris le pas cher ». 安いにしました met l'adjectif directement devant に, et 安くしました veut dire qu'on a rendu quelque chose moins cher."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What did the speaker do?",
+            "fr": "Qu'a fait celui qui parle ?"
+          },
+          "jp": "ケーキは食べないで、くだものにしました。",
+          "tr": {
+            "en": "Without eating the cake, I went with fruit.",
+            "fr": "Sans prendre de gâteau, j'ai choisi des fruits."
+          },
+          "choices": [
+            {
+              "en": "Skipped the cake and chose fruit instead.",
+              "fr": "N'a pas pris de gâteau et a choisi des fruits à la place."
+            },
+            {
+              "en": "Made a fruit dessert instead of a cake.",
+              "fr": "A préparé un dessert aux fruits plutôt qu'un gâteau."
+            },
+            {
+              "en": "Ate the cake first, then some fruit.",
+              "fr": "A mangé le gâteau d'abord, puis des fruits."
+            }
+          ],
+          "why": {
+            "en": "ないで says « without eating »: the cake is left alone. くだものにしました is « I went with fruit »: にしました picks something, it does not make it.",
+            "fr": "ないで veut dire « sans manger » : le gâteau reste de côté. くだものにしました, c'est « j'ai pris des fruits » : にしました choisit quelque chose, il ne le prépare pas."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "At the restaurant yesterday you picked the ramen. Your friend asks what you had.",
+            "fr": "Au restaurant hier, tu as pris les ramen. Ton ami te demande ce que tu as pris."
+          },
+          "choices": [
+            "ラーメンにしました。",
+            "ラーメンにします。",
+            "ラーメンになりました。"
+          ],
+          "why": {
+            "en": "The choice was made yesterday, so it is past: ラーメンにしました. ラーメンにします announces a choice you are about to make, and ラーメンになりました says that something turned into ramen.",
+            "fr": "Le choix a été fait hier, donc au passé : ラーメンにしました. ラーメンにします annonce un choix qu'on s'apprête à faire, et ラーメンになりました dit que quelque chose s'est transformé en ramen."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about Tanaka?",
+            "fr": "Que dit la phrase de Tanaka ?"
+          },
+          "jp": "クラスのリーダーは、たなかさんにしました。",
+          "tr": {
+            "en": "For our class leader, we chose Tanaka.",
+            "fr": "Pour chef de classe, on a choisi Tanaka."
+          },
+          "choices": [
+            {
+              "en": "Tanaka was picked as the class leader.",
+              "fr": "Tanaka a été choisi comme chef de classe."
+            },
+            {
+              "en": "Tanaka became the leader without anyone choosing.",
+              "fr": "Tanaka est devenu chef sans que personne le choisisse."
+            },
+            {
+              "en": "The leader picked Tanaka for something.",
+              "fr": "Le chef a choisi Tanaka pour quelque chose."
+            }
+          ],
+          "why": {
+            "en": "リーダーは is what is being decided, and たなかさんにしました names the choice: Tanaka is the leader. にします picks a person as it picks a thing, and it is not なりました (« became »).",
+            "fr": "リーダーは est ce qu'on décide, et たなかさんにしました donne le choix : Tanaka est le chef. にします choisit une personne comme une chose, et ce n'est pas なりました (« est devenu »)."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You and a friend are planning to meet. She asks what time suits you. You propose six o'clock.",
+            "fr": "Une amie et toi prévoyez de vous voir. Elle te demande quelle heure te convient. Tu proposes six heures."
+          },
+          "choices": [
+            "六時にしましょう。",
+            "六時にしました。",
+            "六時になりました。"
+          ],
+          "why": {
+            "en": "You are proposing a time to settle together, so ましょう: 六時にしましょう, « let's make it six ». 六時にしました says you have already decided alone, and 六時になりました says that it is now six.",
+            "fr": "Tu proposes une heure à fixer ensemble, donc ましょう : 六時にしましょう, « fixons-la à six heures ». 六時にしました dit que tu as déjà décidé seul, et 六時になりました dit qu'il est maintenant six heures."
+          }
+        }
+      ]
     }
   },
   {
@@ -27086,7 +27561,127 @@
             "fr": "Les deux, pareil : パンもおにぎりも. か en choisirait un, だけ seulement le pain."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのうは、スーパーで＿＿＿買いました。",
+          "tr": {
+            "en": "Yesterday I bought both milk and eggs at the supermarket.",
+            "fr": "Hier, j'ai acheté à la fois du lait et des œufs au supermarché."
+          },
+          "choices": [
+            "ぎゅうにゅうもたまごも",
+            "ぎゅうにゅうをもたまごをも",
+            "ぎゅうにゅうもたまごを"
+          ],
+          "why": {
+            "en": "も takes the place of を: ぎゅうにゅうも, たまごも. Keeping を beside も (をも) is a slip, and a single も leaves the second item without its も, so it no longer says « both ».",
+            "fr": "も prend la place de を : ぎゅうにゅうも, たまごも. Garder を à côté de も (をも) est une faute, et un seul も laisse le second élément sans son も : la phrase ne dit plus « les deux »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the question asking?",
+            "fr": "Que demande cette question ?"
+          },
+          "jp": "あなたは、ねこもいぬもすきですか。",
+          "tr": {
+            "en": "Do you like both cats and dogs?",
+            "fr": "Tu aimes à la fois les chats et les chiens ?"
+          },
+          "choices": [
+            {
+              "en": "Whether you like both cats and dogs.",
+              "fr": "Si tu aimes à la fois les chats et les chiens."
+            },
+            {
+              "en": "Which you like better, cats or dogs.",
+              "fr": "Lequel tu préfères, les chats ou les chiens."
+            },
+            {
+              "en": "Whether you like at least one of them.",
+              "fr": "Si tu aimes au moins l'un des deux."
+            }
+          ],
+          "why": {
+            "en": "ねこも…いぬも…すきですか asks about both at once: do you like cats and dogs alike? « Which one? » would be a question with どちら, and a single も is not « either ».",
+            "fr": "ねこも…いぬも…すきですか interroge sur les deux à la fois : aimes-tu les chats comme les chiens ? « Lequel ? » serait une question avec どちら, et un seul も ne veut pas dire « l'un ou l'autre »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "At the clinic, the doctor asks if you have eaten today. You skipped breakfast and you skipped lunch. What do you say?",
+            "fr": "À la clinique, le médecin te demande si tu as mangé aujourd'hui. Tu as sauté le petit-déjeuner et tu as sauté le déjeuner. Que réponds-tu ?"
+          },
+          "choices": [
+            "あさもひるも食べませんでした。",
+            "あさもひるも食べました。",
+            "あさは食べましたが、ひるは食べませんでした。"
+          ],
+          "why": {
+            "en": "With a negative verb, A も B も means « neither A nor B »: あさもひるも食べませんでした. The same も…も with 食べました would say you ate both, and あさは…が、ひるは… treats the two meals apart instead of ruling out both.",
+            "fr": "Avec un verbe négatif, A も B も veut dire « ni A ni B » : あさもひるも食べませんでした. Le même も…も avec 食べました dirait que tu as mangé les deux, et あさは…が、ひるは… traite les deux repas séparément au lieu d'écarter les deux."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which words complete the sentence?",
+            "fr": "Quels mots complètent la phrase ?"
+          },
+          "jp": "きょうは、＿＿＿つよいです。",
+          "tr": {
+            "en": "Today both the rain and the wind are strong.",
+            "fr": "Aujourd'hui, la pluie et le vent sont tous les deux forts."
+          },
+          "choices": [
+            "雨もかぜも",
+            "雨がもかぜがも",
+            "雨もかぜが"
+          ],
+          "why": {
+            "en": "も replaces が as well as を: 雨も, かぜも. 雨がも is a slip, and 雨もかぜが leaves the wind marked by が, so the sentence no longer says that both are strong.",
+            "fr": "も remplace が comme を : 雨も, かぜも. 雨がも est une faute, et 雨もかぜが laisse le vent marqué par が : la phrase ne dit plus que les deux sont forts."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who pays for what?",
+            "fr": "Qui paie quoi ?"
+          },
+          "jp": "ケーキもコーヒーも、わたしがはらいます。",
+          "tr": {
+            "en": "I'll pay for both the cake and the coffee.",
+            "fr": "Je paierai à la fois le gâteau et le café."
+          },
+          "choices": [
+            {
+              "en": "The speaker pays for both the cake and the coffee.",
+              "fr": "Celui qui parle paie à la fois le gâteau et le café."
+            },
+            {
+              "en": "The speaker pays for the cake; someone else pays for the coffee.",
+              "fr": "Celui qui parle paie le gâteau ; quelqu'un d'autre paie le café."
+            },
+            {
+              "en": "The speaker pays for the cake or the coffee, not both.",
+              "fr": "Celui qui parle paie le gâteau ou le café, pas les deux."
+            }
+          ],
+          "why": {
+            "en": "ケーキも…コーヒーも means both items, and わたしが says that the speaker is the one who pays. Nothing is split and nothing is left out.",
+            "fr": "ケーキも…コーヒーも désigne les deux, et わたしが dit que c'est celui qui parle qui paie. Rien n'est partagé et rien n'est laissé de côté."
+          }
+        }
+      ]
     }
   },
   {
@@ -29026,7 +29621,127 @@
             "fr": "Rien : 何も avec une négation. 何か veut dire « quelque chose », 何を demande quoi."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which word completes the sentence?",
+            "fr": "Quel mot complète la phrase ?"
+          },
+          "jp": "わたしはえきで＿＿＿見ませんでした。",
+          "tr": {
+            "en": "I saw nobody at the station.",
+            "fr": "Je n'ai vu personne à la gare."
+          },
+          "choices": [
+            "誰も",
+            "誰かを",
+            "誰が"
+          ],
+          "why": {
+            "en": "誰も + a negative verb says not one person was seen. 誰かを…ません would mean there is somebody in particular you didn't see, and 誰が would make 誰 the one who sees, which わたしは already is.",
+            "fr": "誰も + un verbe négatif dit que pas une personne n'a été vue. 誰かを…ません voudrait dire qu'il y a quelqu'un de précis que tu n'as pas vu, et 誰が ferait de 誰 celui qui voit, ce que わたしは est déjà."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who ate the cake?",
+            "fr": "Qui a mangé le gâteau ?"
+          },
+          "jp": "ケーキは、誰も食べませんでした。",
+          "tr": {
+            "en": "Nobody ate the cake.",
+            "fr": "Personne n'a mangé le gâteau."
+          },
+          "choices": [
+            {
+              "en": "Nobody did.",
+              "fr": "Personne."
+            },
+            {
+              "en": "Some people did, but not everybody.",
+              "fr": "Certains en ont mangé, mais pas tout le monde."
+            },
+            {
+              "en": "I didn't, but somebody else did.",
+              "fr": "Moi non, mais quelqu'un d'autre, si."
+            }
+          ],
+          "why": {
+            "en": "誰も + a negative verb rules everybody out: not one person. It is not « not everybody », and nothing says that someone else ate it.",
+            "fr": "誰も + un verbe négatif exclut tout le monde : pas une seule personne. Ce n'est pas « pas tout le monde », et rien ne dit que quelqu'un d'autre en a mangé."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your friend asks you: 土よう日、何かした？ You stayed in and did nothing. What do you answer?",
+            "fr": "Ton ami te demande : 土よう日、何かした？ Tu n'as rien fait de la journée. Que réponds-tu ?"
+          },
+          "choices": [
+            "ううん、何もしなかった。",
+            "ううん、何もしない。",
+            "うん、何かした。"
+          ],
+          "why": {
+            "en": "He asks about something already past, so you answer in the past negative: 何もしなかった. 何もしない is the present (what you never do), and 何かした says you did something: 何か is « something », and only 何も goes with a negative.",
+            "fr": "Il parle d'un fait passé : tu réponds au passé négatif, 何もしなかった. 何もしない est le présent (ce que tu ne fais jamais), et 何かした dit que tu as fait quelque chose : 何か veut dire « quelque chose », et seul 何も va avec un négatif."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あしたは休みだから、何も＿＿＿。",
+          "tr": {
+            "en": "Tomorrow is a day off, so I won't do anything.",
+            "fr": "Demain, c'est jour de congé, alors je ne ferai rien."
+          },
+          "choices": [
+            "しません",
+            "します",
+            "しませんでした"
+          ],
+          "why": {
+            "en": "何も needs a negative verb to close the sentence: 何もしません. 何もします drops the negative and says you do something, and しませんでした is the past, which あした rules out.",
+            "fr": "何も demande un verbe négatif pour finir la phrase : 何もしません. 何もします perd la négation et dit que tu fais quelque chose, et しませんでした est le passé, ce que あした exclut."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What did the speaker have?",
+            "fr": "Qu'a pris celui qui parle ?"
+          },
+          "jp": "パンは食べましたが、何も飲みませんでした。",
+          "tr": {
+            "en": "I ate some bread, but I drank nothing.",
+            "fr": "J'ai mangé du pain, mais je n'ai rien bu."
+          },
+          "choices": [
+            {
+              "en": "Bread, but nothing to drink.",
+              "fr": "Du pain, mais rien à boire."
+            },
+            {
+              "en": "Nothing at all: no bread and no drink.",
+              "fr": "Rien du tout : ni pain ni boisson."
+            },
+            {
+              "en": "Something to drink, but no bread.",
+              "fr": "Une boisson, mais pas de pain."
+            }
+          ],
+          "why": {
+            "en": "何も belongs to the clause it stands in: 何も飲みませんでした. The first half, パンは食べました, is positive, so the bread was eaten and only the drink is ruled out.",
+            "fr": "何も appartient à la proposition où il se trouve : 何も飲みませんでした. La première moitié, パンは食べました, est affirmative : le pain a été mangé, et seule la boisson est exclue."
+          }
+        }
+      ]
     }
   },
   {
@@ -29218,7 +29933,132 @@
             "fr": "は pour toi, le thème ; が pour la partie qui a mal."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the sentence?",
+            "fr": "Quelle particule complète la phrase ?"
+          },
+          "jp": "いもうとはピアノ＿＿＿上手です。",
+          "tr": {
+            "en": "My little sister is good at the piano.",
+            "fr": "Ma petite sœur est douée pour le piano."
+          },
+          "choices": [
+            "が",
+            "を",
+            "に"
+          ],
+          "why": {
+            "en": "が marks what the predicate describes: the sister is the topic, the piano what she is good at. 上手 is an adjective, so there is no action for を, and に would mark a place or a person.",
+            "fr": "が marque ce que décrit le prédicat : la sœur est le thème, le piano ce pour quoi elle est douée. 上手 est un adjectif : pas d'action pour を ; に marquerait un lieu ou une personne."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Whose feet hurt?",
+            "fr": "À qui font mal les pieds ?"
+          },
+          "jp": "ともだちは、足がいたいです。",
+          "tr": {
+            "en": "My friend's feet hurt.",
+            "fr": "Mon ami a mal aux pieds."
+          },
+          "choices": [
+            {
+              "en": "The friend's: the friend is who we are talking about.",
+              "fr": "Ceux de l'ami : c'est de lui qu'on parle."
+            },
+            {
+              "en": "The speaker's: the friend is only mentioned.",
+              "fr": "Ceux de celui qui parle : l'ami est seulement mentionné."
+            },
+            {
+              "en": "Both the speaker's and the friend's.",
+              "fr": "Ceux des deux : celui qui parle et son ami."
+            }
+          ],
+          "why": {
+            "en": "は names whose feet we are talking about: ともだちは. The が part, 足がいたい, is what is said of that person, so the feet are the friend's. Nothing in the sentence points to the speaker.",
+            "fr": "は nomme la personne dont on parle : ともだちは. La partie en が, 足がいたい, est ce qui est dit d'elle : ce sont les pieds de l'ami. Rien dans la phrase ne désigne celui qui parle."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the sentence?",
+            "fr": "Quelle particule complète la phrase ?"
+          },
+          "jp": "この店は何＿＿＿安いですか。",
+          "tr": {
+            "en": "What is cheap at this shop?",
+            "fr": "Qu'est-ce qui est bon marché dans ce magasin ?"
+          },
+          "choices": [
+            "が",
+            "は",
+            "を"
+          ],
+          "why": {
+            "en": "The question word is the very part being asked about, so it takes が: 何が安いですか. 何は would set it aside as a known topic, and を needs a verb to act on, not an adjective like 安い.",
+            "fr": "Le mot interrogatif est justement la partie sur laquelle porte la question : il prend が : 何が安いですか. 何は le mettrait à part comme un thème connu, et を a besoin d'un verbe, pas d'un adjectif comme 安い."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who likes whom?",
+            "fr": "Qui aime qui ?"
+          },
+          "jp": "父は、ねこがすきです。",
+          "tr": {
+            "en": "My father likes cats.",
+            "fr": "Mon père aime les chats."
+          },
+          "choices": [
+            {
+              "en": "My father likes cats.",
+              "fr": "Mon père aime les chats."
+            },
+            {
+              "en": "Cats like my father.",
+              "fr": "Les chats aiment mon père."
+            },
+            {
+              "en": "My father has a cat.",
+              "fr": "Mon père a un chat."
+            }
+          ],
+          "why": {
+            "en": "は names the person we are talking about: 父は. The が marks what he likes, not who likes: すき takes the thing liked with が, so ねこがすき is « likes cats », never « cats like ».",
+            "fr": "は nomme la personne dont on parle : 父は. Le が marque ce qu'il aime, pas qui aime : すき prend la chose aimée avec が, donc ねこがすき veut dire « aime les chats », jamais « les chats aiment »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which particle completes the sentence?",
+            "fr": "Quelle particule complète la phrase ?"
+          },
+          "jp": "わたし＿＿＿いもうとが二人います。",
+          "tr": {
+            "en": "I have two younger sisters.",
+            "fr": "J'ai deux petites sœurs."
+          },
+          "choices": [
+            "は",
+            "を",
+            "と"
+          ],
+          "why": {
+            "en": "は names the topic, who has the sisters; the が part says what the topic has. を would make the speaker the object of an action, and と would group the speaker with the sisters (« me and two sisters »).",
+            "fr": "は nomme le thème, celui qui a des sœurs ; la partie en が dit ce que possède le thème. を ferait de celui qui parle l'objet d'une action, et と le grouperait avec les sœurs (« moi et deux sœurs »)."
+          }
+        }
+      ]
     }
   },
   {
@@ -29451,7 +30291,127 @@
             "fr": "La sortie découle du congé : だから. しかし les opposerait, そして ajouterait seulement."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Which sentence gives the reason?",
+            "fr": "Laquelle des deux phrases donne la raison ?"
+          },
+          "jp": "ぎゅうにゅうを飲みました。だから、おなかがいたいです。",
+          "tr": {
+            "en": "I drank milk. So my stomach hurts.",
+            "fr": "J'ai bu du lait. Alors j'ai mal au ventre."
+          },
+          "choices": [
+            {
+              "en": "The first: I drank milk, so my stomach hurts.",
+              "fr": "La première : j'ai bu du lait, donc j'ai mal au ventre."
+            },
+            {
+              "en": "The second: my stomach hurts, so I drank milk.",
+              "fr": "La seconde : j'ai mal au ventre, donc j'ai bu du lait."
+            },
+            {
+              "en": "Neither: they are two facts with no link.",
+              "fr": "Aucune : ce sont deux faits sans lien."
+            }
+          ],
+          "why": {
+            "en": "だから comes after the reason and before the result: the sentence before it is the cause. Here the milk came first and the stomachache follows from it. Two facts with no link would be joined by そして.",
+            "fr": "だから vient après la raison et avant le résultat : la phrase d'avant est la cause. Ici, le lait vient d'abord et le mal de ventre en découle. Deux faits sans lien se relieraient par そして."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which word completes the sentence?",
+            "fr": "Quel mot complète la phrase ?"
+          },
+          "jp": "あしたはテストです。＿＿＿、今ばんははやくねましょう。",
+          "tr": {
+            "en": "Tomorrow is the test. So let's go to bed early tonight.",
+            "fr": "Demain, il y a le test. Alors couchons-nous tôt ce soir."
+          },
+          "choices": [
+            "だから",
+            "でも",
+            "そして"
+          ],
+          "why": {
+            "en": "The test is the reason for sleeping early, so the link is だから (so). でも would say the opposite, « but », and そして only adds one thing after another.",
+            "fr": "Le test est la raison de se coucher tôt : le lien est だから (donc). でも dirait le contraire, « mais », et そして ne fait qu'ajouter un fait à un autre."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your friend asks: どうして、そんなにつかれているの？ You did not sleep yesterday, and that is the reason. What do you say?",
+            "fr": "Ton ami te demande : どうして、そんなにつかれているの？ Tu n'as pas dormi hier, et c'est la raison. Que dis-tu ?"
+          },
+          "choices": [
+            "きのうはねなかった。だから、つかれている。",
+            "つかれている。だから、きのうはねなかった。",
+            "きのうはねなかった。でも、つかれている。"
+          ],
+          "why": {
+            "en": "Say the reason first, then だから and the result. Reversed, it would make being tired the cause of not sleeping, and でも (« but ») sets the two facts against each other instead of giving the cause.",
+            "fr": "On dit d'abord la raison, puis だから et la conséquence. À l'envers, la fatigue deviendrait la cause du manque de sommeil, et でも (« mais ») oppose les deux faits au lieu de donner la cause."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "The sky is dark. A friend shows you a new umbrella and says this. What is だから pointing back to?",
+            "fr": "Le ciel est sombre. Un ami te montre un parapluie neuf et dit cela. À quoi renvoie だから ?"
+          },
+          "jp": "だから、かさを買いました。",
+          "tr": {
+            "en": "That's why I bought an umbrella.",
+            "fr": "C'est pour ça que j'ai acheté un parapluie."
+          },
+          "choices": [
+            {
+              "en": "To the dark sky: it looks like rain, so the friend bought one.",
+              "fr": "Au ciel sombre : il va pleuvoir, alors l'ami en a acheté un."
+            },
+            {
+              "en": "To the umbrella: the friend bought one, so the sky is dark.",
+              "fr": "Au parapluie : l'ami en a acheté un, donc le ciel est sombre."
+            },
+            {
+              "en": "To nothing: it just adds one more fact.",
+              "fr": "À rien : cela ajoute simplement un fait."
+            }
+          ],
+          "why": {
+            "en": "だから can open a sentence when the reason is already clear from the situation or from what was just said: « (the sky is dark,) that's why… ». The reason is what came before, never what follows.",
+            "fr": "だから peut ouvrir une phrase quand la raison est déjà claire par la situation ou par ce qui vient d'être dit : « (le ciel est sombre,) c'est pour ça que… ». La raison, c'est ce qui précède, jamais ce qui suit."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which word completes the sentence?",
+            "fr": "Quel mot complète la phrase ?"
+          },
+          "jp": "きょうはあついです。＿＿＿、ジュースを飲みます。",
+          "tr": {
+            "en": "It's hot today. So I'll have some juice.",
+            "fr": "Il fait chaud aujourd'hui. Alors je prends un jus."
+          },
+          "choices": [
+            "だから",
+            "から",
+            "それから"
+          ],
+          "why": {
+            "en": "To open the sentence with the result you need だから whole: the だ takes up what was just said, while から alone only closes a clause (あついから). それから means « and then », a sequence, not a cause.",
+            "fr": "Pour ouvrir la phrase du résultat, il faut だから en entier : だ reprend ce qui vient d'être dit, alors que から seul ne ferme qu'une proposition (あついから). それから veut dire « et ensuite », une suite, pas une cause."
+          }
+        }
+      ]
     }
   },
   {
@@ -29650,7 +30610,127 @@
             "fr": "Ne… plus : もう avec la négation. まだ serait « pas encore », もう飲みました « j'ai déjà bu »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which word completes the sentence?",
+            "fr": "Quel mot complète la phrase ?"
+          },
+          "jp": "水は、＿＿＿ありません。",
+          "tr": {
+            "en": "There is no water left.",
+            "fr": "Il n'y a plus d'eau."
+          },
+          "choices": [
+            "もう",
+            "まだ",
+            "いつも"
+          ],
+          "why": {
+            "en": "もう + a negative means « not any more »: the water has run out. まだ…ありません would mean « not yet »: it has not arrived, and いつも…ありません says there is never any.",
+            "fr": "もう + un négatif veut dire « ne… plus » : l'eau est épuisée. まだ…ありません voudrait dire « pas encore » : elle n'est pas encore là, et いつも…ありません dit qu'il n'y en a jamais."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "It is late at night. A station employee says this. What is it about?",
+            "fr": "Il est tard dans la nuit. Un employé de la gare dit cela. De quoi s'agit-il ?"
+          },
+          "jp": "電車は、もう来ません。",
+          "tr": {
+            "en": "No more trains are coming.",
+            "fr": "Il n'y a plus de train."
+          },
+          "choices": [
+            {
+              "en": "No more trains will come tonight.",
+              "fr": "Il n'y aura plus de train cette nuit."
+            },
+            {
+              "en": "The train hasn't come yet: wait a little.",
+              "fr": "Le train n'est pas encore arrivé : attends un peu."
+            },
+            {
+              "en": "A train has already come: it is time to board.",
+              "fr": "Un train est déjà arrivé : il est temps de monter."
+            }
+          ],
+          "why": {
+            "en": "もう + a negative means « not any more »: nothing more will arrive. « Not yet » would be まだ…ていません, and もう with a positive past (来ました) would be « already ».",
+            "fr": "もう + un négatif veut dire « ne… plus » : il n'en viendra plus. « Pas encore » se dirait まだ…ていません, et もう avec un passé affirmatif (来ました) voudrait dire « déjà »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この店は、もう＿＿＿。",
+          "tr": {
+            "en": "This shop isn't cheap any more.",
+            "fr": "Ce magasin n'est plus bon marché."
+          },
+          "choices": [
+            "安くないです",
+            "安いじゃないです",
+            "安くなかったです"
+          ],
+          "why": {
+            "en": "An い-adjective drops い and takes くない: 安い → 安くない, and もう in front gives « not any more ». 安いじゃない borrows the noun pattern, and 安くなかった is the past (« wasn't »).",
+            "fr": "Un adjectif en い perd い et prend くない : 安い → 安くない, et もう devant donne « ne… plus ». 安いじゃない emprunte le schéma des noms, et 安くなかった est le passé (« n'était pas »)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Someone says this about a hotel after a bad stay. What does もう add?",
+            "fr": "Quelqu'un dit cela d'un hôtel après un mauvais séjour. Qu'ajoute もう ?"
+          },
+          "jp": "もう、ここには来たくないです。",
+          "tr": {
+            "en": "I don't want to come here any more.",
+            "fr": "Je ne veux plus venir ici."
+          },
+          "choices": [
+            {
+              "en": "« Any more »: they have been before and have had enough.",
+              "fr": "« Plus » : ils y sont déjà venus et en ont assez."
+            },
+            {
+              "en": "« Already »: they have been once, so there is no need to come.",
+              "fr": "« Déjà » : ils y sont allés une fois, inutile d'y retourner."
+            },
+            {
+              "en": "« Yet »: they don't want to come now, but later they might.",
+              "fr": "« Pas encore » : ils ne veulent pas venir maintenant, mais plus tard peut-être."
+            }
+          ],
+          "why": {
+            "en": "With a negative, もう means « not any more »: they came, they did not like it, and they don't want to come again. « Not yet » is まだ, and « already » needs a positive verb.",
+            "fr": "Avec un négatif, もう veut dire « ne… plus » : ils sont venus, ils n'ont pas aimé, et ils ne veulent plus revenir. « Pas encore » se dit まだ, et « déjà » demande un verbe affirmatif."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A colleague calls and asks: まだ会社にいますか？ You left the office a while ago. What do you answer?",
+            "fr": "Un collègue t'appelle et demande : まだ会社にいますか？ Tu as quitté le bureau depuis un moment. Que réponds-tu ?"
+          },
+          "choices": [
+            "いいえ、もう会社にいません。",
+            "いいえ、まだ会社にいません。",
+            "いいえ、もう会社にいたくないです。"
+          ],
+          "why": {
+            "en": "You have left, so: もう + a negative, « not any more »: もういません. まだいません means « not yet »: you haven't arrived. もう…いたくないです is about not wanting to be there.",
+            "fr": "Tu n'y es plus : もう + négatif, « ne… plus » : もういません. まだいません dirait que tu n'as pas encore rejoint le bureau, et もう…いたくないです parle de ne plus vouloir y être."
+          }
+        }
+      ]
     }
   },
   {
@@ -29850,7 +30930,127 @@
             "fr": "Ce qu'on propose prend は, puis どうですか. ませんか l'inviterait à y aller avec toi."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which word completes the sentence?",
+            "fr": "Quel mot complète la phrase ?"
+          },
+          "jp": "この本は＿＿＿ですか。",
+          "tr": {
+            "en": "What do you think of this book?",
+            "fr": "Que penses-tu de ce livre ?"
+          },
+          "choices": [
+            "どう",
+            "何",
+            "どこ"
+          ],
+          "why": {
+            "en": "どう asks « how »: to ask for an impression, say この本はどうですか. 何 would ask what the book is, and どこ where it is, so neither asks what you think of it, even though the English says « what ».",
+            "fr": "どう demande « comment » : pour demander une impression, on dit この本はどうですか. 何 demanderait ce qu'est le livre, et どこ où il se trouve : aucun ne demande ce que tu en penses, même si la phrase française commence par « que »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "A manager says this to you a few weeks after you started a new job. What does she want to know?",
+            "fr": "Ta responsable te dit cela quelques semaines après ton arrivée dans une entreprise. Que veut-elle savoir ?"
+          },
+          "jp": "しごとはどうですか。",
+          "tr": {
+            "en": "How is work?",
+            "fr": "Alors, ce travail, ça se passe comment ?"
+          },
+          "choices": [
+            {
+              "en": "What you think of your new job so far.",
+              "fr": "Ce que tu penses de ton nouveau travail jusqu'ici."
+            },
+            {
+              "en": "Whether you would like to be given some work.",
+              "fr": "Si tu voudrais qu'on te donne du travail."
+            },
+            {
+              "en": "What your job is.",
+              "fr": "Quel est ton métier."
+            }
+          ],
+          "why": {
+            "en": "は…どうですか asks how something is: here, your impression of the work. The offer sense (« how about…? ») suits a thing to hand over or a time to fix, and 何 would ask what the job is.",
+            "fr": "は…どうですか demande comment va quelque chose : ici, ton impression du travail. Le sens de proposition (« et si… ? ») convient à une chose à offrir ou une heure à fixer ; 何 demanderait quel est ce travail."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "Your friend asks: 今日は、どこで食べる？ You think of the new restaurant near the station. Suggest it.",
+            "fr": "Ton ami demande : 今日は、どこで食べる？ Tu penses au nouveau restaurant près de la gare. Propose-le."
+          },
+          "choices": [
+            "あの新しいレストランはどうですか。",
+            "あしたはどうですか。",
+            "あの新しいレストランはどうでしたか。"
+          ],
+          "why": {
+            "en": "To suggest a place, name it and add はどうですか: あの新しいレストランはどうですか. あしたはどうですか suggests a time, which answers « when », not « where », and どうでしたか is the past: it asks how it was.",
+            "fr": "Pour proposer un lieu, on le nomme et on ajoute はどうですか : あの新しいレストランはどうですか. あしたはどうですか propose un moment, ce qui répond à « quand », pas à « où », et どうでしたか est le passé : il demande comment c'était."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "A friend says this at a café. What does she ask you?",
+            "fr": "Une amie dit cela dans un café. Que te demande-t-elle ?"
+          },
+          "jp": "わたしはおちゃにします。あなたはどうですか。",
+          "tr": {
+            "en": "I'll have tea. How about you?",
+            "fr": "Moi, je prends du thé. Et toi ?"
+          },
+          "choices": [
+            {
+              "en": "What you will have: « and you? »",
+              "fr": "Ce que tu prends : « et toi ? »"
+            },
+            {
+              "en": "How you are: whether you are well.",
+              "fr": "Comment tu vas : si tu vas bien."
+            },
+            {
+              "en": "Whether you like tea.",
+              "fr": "Si tu aimes le thé."
+            }
+          ],
+          "why": {
+            "en": "あなたはどうですか turns the question back: « and you? ». After おちゃにします it asks what you will have, not how you are or whether you like tea.",
+            "fr": "あなたはどうですか renvoie la question : « et toi ? ». Après おちゃにします, elle demande ce que tu prends, pas comment tu vas ni si tu aimes le thé."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あしたのあさは＿＿＿。",
+          "tr": {
+            "en": "How about tomorrow morning?",
+            "fr": "Et demain matin ?"
+          },
+          "choices": [
+            "どうですか",
+            "どうしますか",
+            "どうしてですか"
+          ],
+          "why": {
+            "en": "To suggest a time or a thing, the noun takes はどうですか (« how about…? »). どうしますか asks what to do about it, and どうしてですか asks why.",
+            "fr": "Pour proposer une heure ou une chose, le nom prend はどうですか (« et si… ? »). どうしますか demande ce qu'on en fait, et どうしてですか demande pourquoi."
+          }
+        }
+      ]
     }
   }
 ]
