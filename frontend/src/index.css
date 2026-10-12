@@ -41453,7 +41453,7 @@ button.brd-stn { cursor: pointer; }
   }
   /* The tiles' own height is the exam sheet's, not a thumb's (plan 195);
      the short desk takes it down a rung. */
-  .gl-tiles { --gl-tile-h: 40px; }
+  .gl-tiles { --gl-tile-h: calc(var(--sp-8) - var(--sp-1)); }
   .gl-tiles .gl-tile { min-height: var(--gl-tile-h); }
   .gl-tile:hover, .gl-tile:focus-visible { border-color: var(--text-secondary); }
   .gl-tile__b { border-color: var(--text-secondary); color: var(--text-secondary); }
@@ -41492,7 +41492,7 @@ button.brd-stn { cursor: pointer; }
     .gl-sent { line-height: 1.6; }
     .gl-front, .gl-back { padding-block: var(--sp-3); gap: var(--sp-3); }
     .desk-run--panels > .stage:has(.gl-card) .prompt-card { --card-pad-y: var(--sp-3); --card-pad-top: var(--sp-3); }
-    .gl-tiles { --gl-tile-h: 36px; }
+    .gl-tiles { --gl-tile-h: calc(var(--sp-8) - var(--sp-3)); }
     .desk-card .gl-map { margin-bottom: 0; }
     .desk-card .gl-map__stop { min-height: 20px; }
     .desk-card .gl-map__stop--now { min-height: 28px; }
