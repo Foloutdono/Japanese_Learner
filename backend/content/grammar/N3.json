@@ -12191,7 +12191,127 @@
             "fr": "ようなら : si ça en a l'air, tu appelles. ように voudrait dire « pour être en retard » ; のに, « bien que »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "店で値段を見て、＿＿＿、買わないでください。",
+          "tr": {
+            "en": "If the price looks high, please don't buy it.",
+            "fr": "Si le prix a l'air élevé, ne l'achetez pas."
+          },
+          "choices": [
+            "高いようなら",
+            "高いようなので",
+            "高いようなのに"
+          ],
+          "why": {
+            "en": "ようなら is ようだ (it looks like) + なら (if): 高いようなら, « if it looks expensive ». ようなので would say « since it looks expensive » and ようなのに « although »: neither opens an « if ».",
+            "fr": "ようなら, c'est ようだ (il semble que) + なら (si) : 高いようなら, « s'il semble cher ». ようなので dirait « puisqu'il semble cher » et ようなのに « bien qu'il semble cher » : aucun n'ouvre un « si »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When will the speaker enlarge the shop?",
+            "fr": "Quand la personne agrandira-t-elle le magasin ?"
+          },
+          "jp": "お客さんがふえるようなら、店を大きくしたいと思っている。",
+          "tr": {
+            "en": "If it looks like more customers are coming, I'd like to make the shop bigger.",
+            "fr": "S'il semble que les clients soient plus nombreux, j'aimerais agrandir le magasin."
+          },
+          "choices": [
+            {
+              "en": "If it looks like customers are increasing.",
+              "fr": "S'il semble que les clients deviennent plus nombreux."
+            },
+            {
+              "en": "Now: customers have already increased.",
+              "fr": "Maintenant : les clients sont déjà plus nombreux."
+            },
+            {
+              "en": "So that customers will increase.",
+              "fr": "Pour que les clients deviennent plus nombreux."
+            }
+          ],
+          "why": {
+            "en": "ようなら is a condition judged from signs: if the number of customers seems to be rising. It does not say it has already happened, and « so that » would be ように, not ようなら.",
+            "fr": "ようなら est une condition jugée d'après des signes : si le nombre de clients semble monter. Il ne dit pas que c'est déjà arrivé, et « pour que » serait ように, pas ようなら."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "もしこの仕事が＿＿＿、早く言ってください。",
+          "tr": {
+            "en": "If this job looks impossible for you, please tell me early.",
+            "fr": "S'il semble que ce travail soit impossible pour toi, dis-le-moi tôt."
+          },
+          "choices": [
+            "むりなようなら",
+            "むりのようなら",
+            "むりなように"
+          ],
+          "why": {
+            "en": "むり is a な-adjective, so it links with な: むりなようなら. の is for nouns (雨のようなら), and むりなように would mean « so that it is impossible », not « if ».",
+            "fr": "むり est un adjectif en な, donc il se relie avec な : むりなようなら. の est pour les noms (雨のようなら), et むりなように voudrait dire « de sorte que ce soit impossible », pas « si »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What has to be true before they go out?",
+            "fr": "Que faut-il avant de sortir ?"
+          },
+          "jp": "雨がやんだようなら、そろそろ出かけましょう。",
+          "tr": {
+            "en": "If it looks like the rain has stopped, let's head out.",
+            "fr": "S'il semble que la pluie ait cessé, partons."
+          },
+          "choices": [
+            {
+              "en": "It looks as if the rain has already stopped.",
+              "fr": "Il semble que la pluie ait déjà cessé."
+            },
+            {
+              "en": "The rain must stop later, and then they will go.",
+              "fr": "Il faut que la pluie cesse plus tard, et alors ils partiront."
+            },
+            {
+              "en": "The rain has stopped, so they go out now.",
+              "fr": "La pluie a cessé, donc ils sortent maintenant."
+            }
+          ],
+          "why": {
+            "en": "A past form before ようなら judges what has already happened: やんだようなら, « if it looks like it has stopped ». It is not « when it stops » later, and it is still an « if », not a fact.",
+            "fr": "Une forme au passé devant ようなら juge ce qui est déjà arrivé : やんだようなら, « s'il semble qu'elle ait cessé ». Ce n'est pas « quand elle cessera » plus tard, et c'est toujours un « si », pas un fait."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You may be late tomorrow. You tell your teacher, politely, that you will phone if it looks like you will be late.",
+            "fr": "Tu risques d'être en retard demain. Tu dis poliment à ton professeur que tu téléphoneras s'il semble que tu sois en retard."
+          },
+          "choices": [
+            "遅れるようなら、電話します。",
+            "遅れるようなら、電話するね。",
+            "遅れるようなので、電話します。"
+          ],
+          "why": {
+            "en": "To a teacher: the « if » 遅れるようなら with a polite ending, 電話します. 電話するね is a friend's voice, and 遅れるようなので turns « if it looks like » into « since it looks like », as if the lateness were already settled.",
+            "fr": "À un professeur : le « si » 遅れるようなら avec une terminaison polie, 電話します. 電話するね est la voix d'un ami, et 遅れるようなので change « s'il semble que » en « puisqu'il semble que », comme si le retard était déjà acquis."
+          }
+        }
+      ]
     }
   },
   {
@@ -12433,7 +12553,141 @@
             "fr": "としたら raisonne à partir d'un cas supposé. から affirmerait qu'il va s'arrêter ; ても voudrait dire « même s'il s'arrête »."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker doing?",
+            "fr": "Que fait la personne qui parle ?"
+          },
+          "jp": "五人で行くとしたら、一人三千円になるよ。",
+          "tr": {
+            "en": "If five of us went, it would come to 3,000 yen each.",
+            "fr": "Si nous y allions à cinq, ça ferait 3 000 yens chacun."
+          },
+          "choices": [
+            {
+              "en": "Working out a cost on an assumption: nothing is settled.",
+              "fr": "Faire un calcul à partir d'une hypothèse : rien n'est décidé."
+            },
+            {
+              "en": "Announcing a plan already made: five are going.",
+              "fr": "Annoncer un plan déjà décidé : cinq personnes y vont."
+            },
+            {
+              "en": "Reporting a trip: five went and each paid 3,000 yen.",
+              "fr": "Raconter un voyage : cinq personnes y sont allées et chacune a payé 3 000 yens."
+            }
+          ],
+          "why": {
+            "en": "としたら sets up a supposition, « supposing five go », and says what follows. Nothing is decided: a settled plan would use ので or から, and a trip already made would be in the past.",
+            "fr": "としたら pose une supposition, « à supposer que cinq y aillent », et dit ce qui s'ensuit. Rien n'est décidé : un plan arrêté prendrait ので ou から, et un voyage déjà fait serait au passé."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "もしバスが＿＿＿、どうやって行きますか。",
+          "tr": {
+            "en": "Supposing the bus doesn't come, how do we get there?",
+            "fr": "À supposer que le bus ne vienne pas, comment y va-t-on ?"
+          },
+          "choices": [
+            "来ないとしたら",
+            "来ませんとしたら",
+            "来るとしたら"
+          ],
+          "why": {
+            "en": "としたら follows the plain form, negative included: 来ない. 来ませんとしたら puts the polite form where only the plain form goes, and 来るとしたら supposes the opposite.",
+            "fr": "としたら suit la forme neutre, négative comprise : 来ない. 来ませんとしたら met la forme polie là où seule la forme neutre va, et 来るとしたら suppose le contraire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the blue one?",
+            "fr": "Que dit la personne du bleu ?"
+          },
+          "jp": "どちらか一つ選ぶとしたら、わたしはこの青いほうがいいです。",
+          "tr": {
+            "en": "If I had to choose one, I'd take this blue one.",
+            "fr": "S'il fallait n'en choisir qu'un, je prendrais ce bleu."
+          },
+          "choices": [
+            {
+              "en": "If forced to pick one, that is the one.",
+              "fr": "S'il fallait n'en choisir qu'un, ce serait celui-là."
+            },
+            {
+              "en": "It has already been chosen and bought.",
+              "fr": "Il est déjà choisi et acheté."
+            },
+            {
+              "en": "The speaker cannot decide between the two.",
+              "fr": "La personne n'arrive pas à choisir entre les deux."
+            }
+          ],
+          "why": {
+            "en": "選ぶとしたら is « supposing I had to choose »: an imagined choice, and the speaker does give an answer. Nothing has been chosen or bought yet.",
+            "fr": "選ぶとしたら, c'est « à supposer que je doive choisir » : un choix imaginé, et la personne donne bien une réponse. Rien n'a encore été choisi ni acheté."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "もしこの店が＿＿＿、ほかの店に行きましょう。",
+          "tr": {
+            "en": "If this shop is expensive, let's go to another one.",
+            "fr": "Si ce magasin est cher, allons dans un autre."
+          },
+          "choices": [
+            "高いとしたら",
+            "高いだとしたら",
+            "高くないとしたら"
+          ],
+          "why": {
+            "en": "An い-adjective takes としたら as it is: 高いとしたら. だ is for nouns and な-adjectives (本当だとしたら), so 高いだとしたら is wrong, and 高くないとしたら supposes the opposite.",
+            "fr": "Un adjectif en い prend としたら tel quel : 高いとしたら. だ est pour les noms et les adjectifs en な (本当だとしたら), donc 高いだとしたら est faux, et 高くないとしたら suppose le contraire."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker working out?",
+            "fr": "Que cherche à déduire la personne ?"
+          },
+          "jp": "電話に出ないとしたら、まだ飛行機の中にいるのだろう。",
+          "tr": {
+            "en": "If he isn't picking up, he's probably still on the plane.",
+            "fr": "S'il ne répond pas, il est sans doute encore dans l'avion."
+          },
+          "choices": [
+            {
+              "en": "If the person isn't answering, they are probably still on the plane.",
+              "fr": "Si la personne ne répond pas, elle est sûrement encore dans l'avion."
+            },
+            {
+              "en": "The person didn't answer, so they are definitely still on the plane.",
+              "fr": "La personne n'a pas répondu, donc elle est forcément encore dans l'avion."
+            },
+            {
+              "en": "If the person is still on the plane, they won't answer.",
+              "fr": "Si la personne est encore dans l'avion, elle ne répondra pas."
+            }
+          ],
+          "why": {
+            "en": "The としたら clause is the supposition (not answering) and the rest is what follows from it, as a guess (のだろう). It is not a settled fact, and the reasoning runs from not answering to the plane, not the other way.",
+            "fr": "La proposition en としたら est la supposition (ne pas répondre) et le reste est ce qui s'ensuit, sous forme de supposition (のだろう). Ce n'est pas un fait établi, et le raisonnement va du silence à l'avion, pas l'inverse."
+          }
+        }
+      ]
     }
   },
   {
@@ -13811,7 +14065,127 @@
             "fr": "こそ distingue cette fois-ci, et aucune autre. さえ voudrait dire « même » ; も, « cette fois aussi », comme la dernière."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker saying about the person addressed?",
+            "fr": "Que dit celui qui parle de la personne à qui il s'adresse ?"
+          },
+          "jp": "あなたこそ、このチームに必要な人です。",
+          "tr": {
+            "en": "You are exactly the person this team needs.",
+            "fr": "Vous êtes exactement la personne dont cette équipe a besoin."
+          },
+          "choices": [
+            {
+              "en": "This is the very person the team needs.",
+              "fr": "C'est la personne même dont l'équipe a besoin."
+            },
+            {
+              "en": "Even this person is needed in the team, which is a surprise.",
+              "fr": "Même cette personne est nécessaire à l'équipe, ce qui surprend."
+            },
+            {
+              "en": "This person is needed too, like the others.",
+              "fr": "Cette personne est nécessaire aussi, comme les autres."
+            }
+          ],
+          "why": {
+            "en": "こそ picks あなた out as the very one, the one above all. It is not a surprise (さえ, « even ») and not one more among others (も, « too »).",
+            "fr": "こそ désigne あなた comme la personne même, celle qu'on veut avant toute autre. Ce n'est pas une surprise (さえ, « même ») ni une de plus parmi d'autres (も, « aussi »)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この町＿＿＿食べられる味です。",
+          "tr": {
+            "en": "It is precisely in this town that you can taste this flavour.",
+            "fr": "C'est justement dans cette ville qu'on peut goûter cette saveur."
+          },
+          "choices": [
+            "でこそ",
+            "こそ",
+            "こそで"
+          ],
+          "why": {
+            "en": "で marks the place where you eat, so it stays and こそ follows it: 町でこそ. こそ alone drops the で the verb needs, and こそで reverses the order.",
+            "fr": "で marque le lieu où l'on mange : il reste, et こそ vient après : 町でこそ. こそ seul perd le で dont le verbe a besoin, et こそで inverse l'ordre."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend breaks a cup at your place and apologises, taking all the blame. In fact you had left the cup at the edge of the table. You tell your friend that the fault is yours, not theirs.",
+            "fr": "Chez toi, un ami casse une tasse et s'excuse en prenant toute la faute. En fait, c'est toi qui avais laissé la tasse au bord de la table. Tu lui dis que la faute vient de toi, et non de lui."
+          },
+          "choices": [
+            "いえ、あなたではなく、わたしこそ悪かったんです。",
+            "いえ、わたしではなく、あなたこそ悪かったんです。",
+            "いえ、わたしこそ悪くなかったんです。"
+          ],
+          "why": {
+            "en": "こそ goes on the one who is singled out: わたしこそ, « I am the one ». Put on あなた it blames your friend, and 悪くなかった turns the sentence round: « I am the one who was not at fault ».",
+            "fr": "こそ se place sur celui qu'on met en avant : わたしこそ, « c'est moi, justement ». Mis sur あなた, il accuse ton ami, et 悪くなかった retourne la phrase : « c'est moi qui n'avais pas tort »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "日本語＿＿＿、わたしが一番勉強したいことです。",
+          "tr": {
+            "en": "Japanese is the very thing I most want to study.",
+            "fr": "Le japonais, voilà justement ce que je veux étudier avant tout."
+          },
+          "choices": [
+            "こそ",
+            "さえ",
+            "はこそ"
+          ],
+          "why": {
+            "en": "こそ stands in the place of は or が and picks the noun out as « the very one »: 日本語こそ. さえ says « even », which does not fit, and はこそ piles two particles on one noun.",
+            "fr": "こそ prend la place de は ou de が et désigne le nom comme « celui-là même » : 日本語こそ. さえ dit « même », ce qui ne va pas, et はこそ empile deux particules sur un seul nom."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What happened, and what had the speaker hoped?",
+            "fr": "Que s'est-il passé, et qu'espérait celui qui parle ?"
+          },
+          "jp": "今度こそ勝てると思ったのに、また負けてしまった。",
+          "tr": {
+            "en": "I was sure I would win this time, but I lost again.",
+            "fr": "Cette fois, je pensais vraiment gagner, mais j'ai encore perdu."
+          },
+          "choices": [
+            {
+              "en": "The hope was to win this time, yet it ended in another loss.",
+              "fr": "On espérait gagner cette fois, mais cela s'est encore fini par une défaite."
+            },
+            {
+              "en": "A loss was expected, and it came.",
+              "fr": "On s'attendait à une défaite, et elle est arrivée."
+            },
+            {
+              "en": "The speaker won this time, as hoped.",
+              "fr": "La victoire est venue cette fois, comme espéré."
+            }
+          ],
+          "why": {
+            "en": "今度こそ marks this time as the one that was meant to be different after earlier failures, and 勝てると思ったのに says the hope was let down: 負けてしまった, lost again.",
+            "fr": "今度こそ désigne cette fois comme celle qui devait être différente après des échecs, et 勝てると思ったのに dit que l'espoir a été déçu : 負けてしまった, perdu encore."
+          }
+        }
+      ]
     }
   },
   {

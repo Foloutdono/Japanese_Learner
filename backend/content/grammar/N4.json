@@ -26895,7 +26895,127 @@
             "fr": "C'est l'envie de ton frère, vue de l'extérieur : ほしがる, avec を. ほしい est pour la tienne."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "きのう、子どもたちはわたしのへんなかおを＿＿＿。",
+          "tr": {
+            "en": "Yesterday the children found my funny face amusing.",
+            "fr": "Hier, les enfants se sont amusés de ma drôle de tête."
+          },
+          "choices": [
+            "おもしろがった",
+            "おもしろいがった",
+            "おもしろがる"
+          ],
+          "why": {
+            "en": "おもしろい is an い-adjective: it drops い and takes がる, then the verb takes the past: おもしろがった. おもしろいがった keeps the い, and おもしろがる is the present.",
+            "fr": "おもしろい est un adjectif en い : il perd い et prend がる, puis le verbe se met au passé : おもしろがった. おもしろいがった garde le い, et おもしろがる est le présent."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Who feels sad here, and how can you tell?",
+            "fr": "Qui est triste ici, et comment le sait-on ?"
+          },
+          "jp": "母は、わたしが家を出るのをさびしがった。",
+          "tr": {
+            "en": "My mother was sad that I was leaving home, and showed it.",
+            "fr": "Ma mère s'est montrée triste que je quitte la maison."
+          },
+          "choices": [
+            {
+              "en": "The mother: she showed it.",
+              "fr": "La mère : elle l'a laissé voir."
+            },
+            {
+              "en": "The speaker: leaving home made me sad.",
+              "fr": "La personne qui parle : quitter la maison l'a rendue triste."
+            },
+            {
+              "en": "The mother, but she hid it so well that nobody noticed.",
+              "fr": "La mère, mais elle l'a si bien caché que personne ne s'en est aperçu."
+            }
+          ],
+          "why": {
+            "en": "さびしがる is さびしい + がる: someone else shows that feeling. The one who shows it is the topic, 母, not わたし, and がる says it could be seen.",
+            "fr": "さびしがる, c'est さびしい + がる : quelqu'un d'autre laisse voir ce sentiment. C'est le thème, 母, qui le montre, pas わたし, et がる dit qu'on pouvait le voir."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "友だちは、いっしょに行けないので、今とても＿＿＿。",
+          "tr": {
+            "en": "My friend can't come with us, so right now he is very disappointed.",
+            "fr": "Mon ami ne peut pas venir avec nous, alors en ce moment il est très déçu."
+          },
+          "choices": [
+            "ざんねんがっている",
+            "ざんねんにがっている",
+            "ざんねんがっていた"
+          ],
+          "why": {
+            "en": "ざんねん is a な-adjective: がる joins the bare stem, with no に, and the right-now state takes ている. ざんねんにがっている borrows the に of にする, and ざんねんがっていた is the past.",
+            "fr": "ざんねん est un adjectif en な : がる se colle au radical nu, sans に, et l'état présent prend ている. ざんねんにがっている emprunte le に de にする, et ざんねんがっていた est le passé."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the child react to strangers?",
+            "fr": "Comment l'enfant réagit-il devant des inconnus ?"
+          },
+          "jp": "あの子は、知らない人に会っても、ぜんぜんこわがらない。",
+          "tr": {
+            "en": "That child isn't afraid at all, even when meeting people he doesn't know.",
+            "fr": "Cet enfant n'a pas du tout peur, même quand il rencontre des inconnus."
+          },
+          "choices": [
+            {
+              "en": "He shows no fear, even with strangers.",
+              "fr": "Il ne montre aucune peur, même avec des inconnus."
+            },
+            {
+              "en": "He is afraid of strangers.",
+              "fr": "Il a peur des inconnus."
+            },
+            {
+              "en": "The speaker is not afraid of strangers.",
+              "fr": "La personne qui parle n'a pas peur des inconnus."
+            }
+          ],
+          "why": {
+            "en": "こわがらない is the negative of こわがる: the child shows no fear. It is still about the child; for their own lack of fear, a speaker says こわくない.",
+            "fr": "こわがらない est la négation de こわがる : l'enfant ne montre aucune peur. Cela parle toujours de l'enfant ; pour sa propre absence de peur, on dit こわくない."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "At the zoo yesterday your little brother was scared of the elephant, and you had a great time. You tell a friend.",
+            "fr": "Hier au zoo, ton petit frère a eu peur de l'éléphant, et toi, tu as passé un super moment. Tu le racontes à un ami."
+          },
+          "choices": [
+            "弟はぞうをこわがったが、わたしはたのしかった。",
+            "弟はぞうをこわがったが、わたしはたのしがった。",
+            "わたしはぞうをこわがったが、弟はたのしかった。"
+          ],
+          "why": {
+            "en": "がる shows what someone else feels: your brother's fear is こわがった, but your own fun is plain たのしかった. たのしがった describes you from the outside, and the third line swaps the two of you.",
+            "fr": "がる montre ce que ressent quelqu'un d'autre : la peur de ton frère, c'est こわがった, mais ton propre plaisir reste たのしかった. たのしがった te décrit de l'extérieur, et la troisième phrase vous intervertit."
+          }
+        }
+      ]
     }
   },
   {
@@ -27164,7 +27284,132 @@
             "fr": "Tu agis sur le chauffage : を et くする. Un adjectif en い prend く, jamais に."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "店の中がくらいので、もう少し＿＿＿してください。",
+          "tr": {
+            "en": "It's dark in the shop, so please make it a bit brighter.",
+            "fr": "Il fait sombre dans le magasin : pourriez-vous l'éclairer un peu plus, s'il vous plaît ?"
+          },
+          "choices": [
+            "明るく",
+            "明るい",
+            "明るに"
+          ],
+          "why": {
+            "en": "明るい is an い-adjective: it drops い and takes く before する: 明るくしてください. 明るい keeps the い, and 明るに gives it the に of a な-adjective.",
+            "fr": "明るい est un adjectif en い : il perd い et prend く devant する : 明るくしてください. 明るい garde le い, et 明るに lui donne le に d'un adjectif en な."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "In this sentence, what does someone do on purpose, and what just happens?",
+            "fr": "Dans cette phrase, qu'est-ce que quelqu'un fait exprès, et qu'est-ce qui arrive tout seul ?"
+          },
+          "jp": "まどを大きくすると、へやが明るくなります。",
+          "tr": {
+            "en": "If you make the window bigger, the room gets brighter.",
+            "fr": "Si on agrandit la fenêtre, la pièce devient plus claire."
+          },
+          "choices": [
+            {
+              "en": "Someone enlarges the window; the room then gets brighter by itself.",
+              "fr": "Quelqu'un agrandit la fenêtre ; la pièce devient alors plus claire d'elle-même."
+            },
+            {
+              "en": "Someone brightens the room; the window then grows bigger by itself.",
+              "fr": "Quelqu'un éclaire la pièce ; la fenêtre devient alors plus grande d'elle-même."
+            },
+            {
+              "en": "Both are done by someone: the window and the room are both changed by hand.",
+              "fr": "Les deux sont faits par quelqu'un : la fenêtre et la pièce sont toutes deux modifiées à la main."
+            }
+          ],
+          "why": {
+            "en": "大きくする is what a person does to the window; 明るくなる is what follows, with nobody acting. する puts someone behind the change, なる lets it happen.",
+            "fr": "大きくする, c'est ce qu'une personne fait à la fenêtre ; 明るくなる, c'est ce qui en résulte, sans que personne agisse. する met quelqu'un derrière le changement, なる le laisse arriver."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "先生は、むずかしいぶんぽうのせつめいを＿＿＿くれました。",
+          "tr": {
+            "en": "The teacher made the explanation of the difficult grammar simple for us.",
+            "fr": "Le professeur nous a simplifié l'explication de la grammaire difficile."
+          },
+          "choices": [
+            "かんたんにして",
+            "かんたんくして",
+            "かんたんになって"
+          ],
+          "why": {
+            "en": "かんたん is a な-adjective, so it takes にする, here in the て-form: かんたんにして. かんたんくして treats it as an い-adjective, and かんたんになって would be « became simple by itself », which cannot follow を.",
+            "fr": "かんたん est un adjectif en な : il prend にする, ici au て : かんたんにして. かんたんくして le traite en adjectif en い, et かんたんになって dirait « est devenue simple d'elle-même », ce qui ne peut pas suivre を."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the cook change, and in which direction?",
+            "fr": "Que change la personne qui cuisine, et dans quel sens ?"
+          },
+          "jp": "水を少なくして、火を強くします。",
+          "tr": {
+            "en": "I use less water and turn the heat up.",
+            "fr": "Je mets moins d'eau et je monte le feu."
+          },
+          "choices": [
+            {
+              "en": "Less water, more heat.",
+              "fr": "Moins d'eau, plus de feu."
+            },
+            {
+              "en": "More water, less heat.",
+              "fr": "Plus d'eau, moins de feu."
+            },
+            {
+              "en": "Less water, less heat.",
+              "fr": "Moins d'eau, moins de feu."
+            }
+          ],
+          "why": {
+            "en": "The adjective names the result and する makes it so: 少なくする is « make it less », 強くする is « make it stronger ».",
+            "fr": "L'adjectif dit le résultat et する le provoque : 少なくする, c'est « en mettre moins », 強くする, c'est « rendre plus fort »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "先生にはなすときは、ことばをもっと＿＿＿ほうがいいですよ。",
+          "tr": {
+            "en": "When you talk to a teacher, it is better to make your words more polite.",
+            "fr": "Quand tu parles à un professeur, il vaut mieux rendre tes mots plus polis."
+          },
+          "choices": [
+            "ていねいにした",
+            "ていねいくした",
+            "ていねいにしない"
+          ],
+          "why": {
+            "en": "ていねい ends in い but is a な-adjective, so it takes にする: ていねいにした. ていねいくした treats it as an い-adjective, and ていねいにしない says the opposite, « better not ».",
+            "fr": "ていねい finit par い mais c'est un adjectif en な : il prend にする, ていねいにした. ていねいくした le traite en adjectif en い, et ていねいにしない dit le contraire : « mieux vaut ne pas »."
+          }
+        }
+      ]
     }
   },
   {
@@ -27396,7 +27641,141 @@
             "fr": "Devant un nom (もの), のような : des choses comme celles-là. と同じ voudrait dire exactement les mêmes ; ように se place devant un verbe, pas devant un nom."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What lives next door?",
+            "fr": "Qu'y a-t-il dans la maison d'à côté ?"
+          },
+          "jp": "となりの家には、犬のようなねこがいます。",
+          "tr": {
+            "en": "In the house next door there is a cat that is like a dog.",
+            "fr": "Dans la maison d'à côté, il y a un chat qui ressemble à un chien."
+          },
+          "choices": [
+            {
+              "en": "A cat that is like a dog.",
+              "fr": "Un chat qui ressemble à un chien."
+            },
+            {
+              "en": "A dog that is like a cat.",
+              "fr": "Un chien qui ressemble à un chat."
+            },
+            {
+              "en": "A dog and a cat.",
+              "fr": "Un chien et un chat."
+            }
+          ],
+          "why": {
+            "en": "The noun after ような is the thing itself, and the noun before の is what it resembles: ねこ is the animal, 犬 the model. A dog like a cat would be ねこのような犬.",
+            "fr": "Le nom après ような est la chose elle-même, et le nom avant の est ce à quoi elle ressemble : ねこ est l'animal, 犬 le modèle. Un chien comme un chat serait ねこのような犬."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あなた＿＿＿友だちがいて、わたしはうれしいです。",
+          "tr": {
+            "en": "I'm glad to have a friend like you.",
+            "fr": "Ça me fait plaisir d'avoir un ami comme toi."
+          },
+          "choices": [
+            "のような",
+            "ような",
+            "のように"
+          ],
+          "why": {
+            "en": "After a noun, ような needs の: あなたのような友だち. あなたような drops it, and あなたのように is the adverb form, which cannot sit before a noun.",
+            "fr": "Après un nom, ような veut の : あなたのような友だち. あなたような l'oublie, et あなたのように est la forme adverbiale, qui ne peut pas se placer devant un nom."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does this town lack?",
+            "fr": "Que manque-t-il à cette ville ?"
+          },
+          "jp": "この町には、東京のようなちかてつはありません。",
+          "tr": {
+            "en": "This town has no subway like Tokyo's.",
+            "fr": "Cette ville n'a pas de métro comme celui de Tokyo."
+          },
+          "choices": [
+            {
+              "en": "A subway like Tokyo's; it may still have a small one.",
+              "fr": "Un métro comme celui de Tokyo ; elle en a peut-être un petit."
+            },
+            {
+              "en": "A subway of any kind.",
+              "fr": "Un métro, quel qu'il soit."
+            },
+            {
+              "en": "Nothing: it has a subway just like Tokyo's.",
+              "fr": "Rien : elle a un métro tout comme celui de Tokyo."
+            }
+          ],
+          "why": {
+            "en": "東京のようなちかてつ is a subway like Tokyo's, not just any subway: ような narrows the noun. The sentence denies that kind, and says nothing about a smaller one.",
+            "fr": "東京のようなちかてつ, c'est un métro comme celui de Tokyo, pas n'importe quel métro : ような précise le nom. La phrase nie ce genre-là et ne dit rien d'un plus petit."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "うちの子は、小さいのに＿＿＿ことを言います。",
+          "tr": {
+            "en": "My child is little, but says things like an adult.",
+            "fr": "Mon enfant est petit, mais dit des choses comme un adulte."
+          },
+          "choices": [
+            "大人のような",
+            "子どものような",
+            "大人のように"
+          ],
+          "why": {
+            "en": "The noun before のような is the model: a little child who talks like an adult says 大人のようなこと. 子どものような would be a child talking like a child, which 小さいのに does not call for, and のように cannot go before ことを.",
+            "fr": "Le nom avant のような est le modèle : un petit enfant qui parle comme un adulte dit 大人のようなこと. 子どものような serait un enfant qui parle comme un enfant, ce que 小さいのに n'appelle pas, et のように ne peut pas précéder ことを."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Does the sentence say that this person is a teacher?",
+            "fr": "La phrase dit-elle que cette personne est professeur ?"
+          },
+          "jp": "あの人は、先生のような話し方をします。",
+          "tr": {
+            "en": "That person talks like a teacher.",
+            "fr": "Cette personne parle comme un professeur."
+          },
+          "choices": [
+            {
+              "en": "No: it only says the way of talking resembles a teacher's.",
+              "fr": "Non : elle dit seulement que la façon de parler ressemble à celle d'un professeur."
+            },
+            {
+              "en": "Yes: that is why the person talks that way.",
+              "fr": "Oui : c'est pour cela que cette personne parle ainsi."
+            },
+            {
+              "en": "No: the person is talking to a teacher.",
+              "fr": "Non : cette personne parle à un professeur."
+            }
+          ],
+          "why": {
+            "en": "のような compares: 先生のような話し方 is a way of talking that resembles a teacher's. It does not say the person is one; that would be 先生です.",
+            "fr": "のような compare : 先生のような話し方, c'est une façon de parler qui ressemble à celle d'un professeur. Elle ne dit pas que la personne l'est ; ce serait 先生です."
+          }
+        }
+      ]
     }
   },
   {
@@ -30737,7 +31116,141 @@
             "fr": "Un état en cours, nommé par un nom : 電話中. あいだ marque une durée, pas l'état lui-même."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When must the phone be off?",
+            "fr": "Quand faut-il éteindre son téléphone ?"
+          },
+          "jp": "じゅぎょう中は、スマホを切ってください。",
+          "tr": {
+            "en": "Please switch off your phone during class.",
+            "fr": "Veuillez éteindre votre téléphone pendant le cours."
+          },
+          "choices": [
+            {
+              "en": "While class is going on.",
+              "fr": "Pendant que le cours a lieu."
+            },
+            {
+              "en": "All day long, in class or not.",
+              "fr": "Toute la journée, en cours ou non."
+            },
+            {
+              "en": "Once class is over.",
+              "fr": "Une fois le cours terminé."
+            }
+          ],
+          "why": {
+            "en": "じゅぎょう中 is read ちゅう: an activity plus 中 is being in the middle of it. For « all day long » it would be 一日中, read じゅう, with a time word.",
+            "fr": "じゅぎょう中 se lit ちゅう : un nom d'activité + 中, c'est être en plein dedans. Pour « toute la journée », il faudrait 一日中, lu じゅう, avec un mot de temps."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "先生は今、＿＿＿ですから、また後で来てください。",
+          "tr": {
+            "en": "The teacher is having a meal right now, so please come back later.",
+            "fr": "Le professeur est en plein repas, alors repassez plus tard, s'il vous plaît."
+          },
+          "choices": [
+            "食事中",
+            "食事前",
+            "食べ中"
+          ],
+          "why": {
+            "en": "中 goes after a noun naming an activity: 食事 + 中 is being in the middle of a meal. 食事前 is « before the meal », and 食べ中 sticks 中 on a verb stem, which it does not take.",
+            "fr": "中 se place après un nom d'activité : 食事 + 中, c'est être en plein repas. 食事前 veut dire « avant le repas », et 食べ中 colle 中 à un radical verbal, ce qu'il n'accepte pas."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How is 中 read here, and what does the sentence say?",
+            "fr": "Comment se lit 中 ici, et que dit la phrase ?"
+          },
+          "jp": "学校中の人が、そのニュースを知っています。",
+          "tr": {
+            "en": "Everyone in the school knows the news.",
+            "fr": "Toute l'école connaît la nouvelle."
+          },
+          "choices": [
+            {
+              "en": "じゅう: everyone in the whole school knows it.",
+              "fr": "じゅう : toute l'école est au courant."
+            },
+            {
+              "en": "ちゅう: the people at school right now know it.",
+              "fr": "ちゅう : les gens qui sont à l'école en ce moment le savent."
+            },
+            {
+              "en": "なか: only the people inside the school building know it.",
+              "fr": "なか : seuls ceux qui sont dans le bâtiment de l'école le savent."
+            }
+          ],
+          "why": {
+            "en": "A place takes じゅう: 学校中 is « the whole school », everyone in it. ちゅう goes with an activity like じゅぎょう中, and なか would be 学校の中, with の.",
+            "fr": "Un lieu prend じゅう : 学校中 est « toute l'école », tout le monde dedans. ちゅう va avec une activité comme じゅぎょう中, et なか serait 学校の中, avec の."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "この町では、＿＿＿花がさいています。",
+          "tr": {
+            "en": "In this town, flowers are in bloom all year round.",
+            "fr": "Dans cette ville, il y a des fleurs épanouies toute l'année."
+          },
+          "choices": [
+            "一年中",
+            "一年間",
+            "毎年"
+          ],
+          "why": {
+            "en": "一年中 (いちねんじゅう) is « all through the year ». 一年間 only measures a length, « for one year », and 毎年 is « every year », once a year.",
+            "fr": "一年中 (いちねんじゅう) veut dire « toute l'année ». 一年間 mesure seulement une durée, « pendant un an », et 毎年 veut dire « chaque année », une fois par an."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sign tell you?",
+            "fr": "Que t'indique ce panneau ?"
+          },
+          "jp": "へやのドアに、「使用中」と書いてありました。",
+          "tr": {
+            "en": "On the door of the room, it said \"in use\".",
+            "fr": "Sur la porte de la salle, il était écrit « occupé »."
+          },
+          "choices": [
+            {
+              "en": "Someone is using the room right now.",
+              "fr": "Quelqu'un est en train d'utiliser la salle en ce moment."
+            },
+            {
+              "en": "The room can be used all day long.",
+              "fr": "La salle peut être utilisée toute la journée."
+            },
+            {
+              "en": "The room is being repaired.",
+              "fr": "La salle est en travaux."
+            }
+          ],
+          "why": {
+            "en": "使用 « use » plus 中 is being in the middle of it: in use right now. « All day » would need a time word with じゅう, and under repair is 工事中.",
+            "fr": "使用 « utilisation » + 中, c'est être en plein dedans : en cours d'utilisation. « Toute la journée » demanderait un mot de temps avec じゅう, et « en travaux » se dit 工事中."
+          }
+        }
+      ]
     }
   },
   {
@@ -30937,7 +31450,127 @@
             "fr": "L'espacement dans le temps : おきに. ずつ répartit une quantité, et ごろ veut dire « vers » une heure."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "When are there more trains?",
+            "fr": "Quand y a-t-il le plus de trains ?"
+          },
+          "jp": "この電車は、朝は五分おきに、夜は二十分おきに来ます。",
+          "tr": {
+            "en": "This train comes every five minutes in the morning and every twenty minutes at night.",
+            "fr": "Ce train passe toutes les cinq minutes le matin et toutes les vingt minutes le soir."
+          },
+          "choices": [
+            {
+              "en": "In the morning: the gap between trains is shorter.",
+              "fr": "Le matin : l'intervalle entre deux trains est plus court."
+            },
+            {
+              "en": "At night: twenty is more than five.",
+              "fr": "Le soir : vingt, c'est plus que cinq."
+            },
+            {
+              "en": "The same at both times.",
+              "fr": "Pareil aux deux moments."
+            }
+          ],
+          "why": {
+            "en": "おきに gives the gap between two trains, so five minutes is more often than twenty. Reading the number as a count (« five trains », « twenty trains ») is the usual slip.",
+            "fr": "おきに donne l'intervalle entre deux trains : cinq minutes, c'est plus souvent que vingt. Lire le nombre comme une quantité (« cinq trains », « vingt trains »), c'est la confusion habituelle."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "答えは、＿＿＿書いてください。",
+          "tr": {
+            "en": "Please write the answers on every other line.",
+            "fr": "Écrivez les réponses une ligne sur deux, s'il vous plaît."
+          },
+          "choices": [
+            "一行おきに",
+            "一行ごとに",
+            "一行ずつ"
+          ],
+          "why": {
+            "en": "一行おきに leaves a line empty each time: every other line. 一行ごとに counts every line, none skipped, and 一行ずつ means one line at a time.",
+            "fr": "一行おきに laisse chaque fois une ligne vide : une ligne sur deux. 一行ごとに compte chaque ligne, sans en sauter, et 一行ずつ veut dire une ligne à la fois."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You see the dentist in January, March and May. A friend asks how often you go. What do you say?",
+            "fr": "Tu vas chez le dentiste en janvier, en mars et en mai. Un ami te demande à quelle fréquence. Que réponds-tu ?"
+          },
+          "choices": [
+            "一か月おきに、はいしゃに行っています。",
+            "一か月ごとに、はいしゃに行っています。",
+            "一週間おきに、はいしゃに行っています。"
+          ],
+          "why": {
+            "en": "January, March, May: one month is skipped each time, so 一か月おきに, « every other month ». 一か月ごとに would be every month, and 一週間おきに every other week.",
+            "fr": "Janvier, mars, mai : on saute un mois à chaque fois, donc 一か月おきに, « un mois sur deux ». 一か月ごとに voudrait dire tous les mois, et 一週間おきに une semaine sur deux."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How should people sit?",
+            "fr": "Comment faut-il s'asseoir ?"
+          },
+          "jp": "せきは、一つおきに使ってください。",
+          "tr": {
+            "en": "Please use every other seat.",
+            "fr": "Veuillez utiliser un siège sur deux."
+          },
+          "choices": [
+            {
+              "en": "Leaving one seat empty between people.",
+              "fr": "En laissant un siège vide entre deux personnes."
+            },
+            {
+              "en": "Leaving two seats empty between people.",
+              "fr": "En laissant deux sièges vides entre deux personnes."
+            },
+            {
+              "en": "Taking every seat, one after another.",
+              "fr": "En prenant tous les sièges, l'un après l'autre."
+            }
+          ],
+          "why": {
+            "en": "一つおきに counts the gap: one seat used, one left empty, and so on. Two empty seats would be 二つおきに, and every seat would be 一つずつ or 一つごとに.",
+            "fr": "一つおきに compte l'intervalle : un siège occupé, un siège vide, et ainsi de suite. Deux sièges vides seraient 二つおきに, et tous les sièges, 一つずつ ou 一つごとに."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "先生は、＿＿＿、学生のノートを見に来ます。",
+          "tr": {
+            "en": "The teacher comes to look at the students' notebooks every two hours.",
+            "fr": "Le professeur vient regarder les cahiers des élèves toutes les deux heures."
+          },
+          "choices": [
+            "二時間おきに",
+            "二時おきに",
+            "二時ごろに"
+          ],
+          "why": {
+            "en": "The interval is a length of time, so the counter is 時間: 二時間おきに. 二時おきに would count o'clock, a point in time, and 二時ごろに is « around two o'clock ».",
+            "fr": "L'intervalle est une durée, donc le classificateur est 時間 : 二時間おきに. 二時おきに compterait des heures de l'horloge, un moment, et 二時ごろに veut dire « vers deux heures »."
+          }
+        }
+      ]
     }
   },
   {
