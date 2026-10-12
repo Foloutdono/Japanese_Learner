@@ -16176,7 +16176,127 @@
             "fr": "Une tendance qui ne fait qu'empirer : forme du dictionnaire + ばかりだ. たところ dit que ça vient d'arriver, るところ que ça va arriver."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which ending completes the sentence?",
+            "fr": "Quelle terminaison complète la phrase ?"
+          },
+          "jp": "このままでは、町の人口は＿＿＿。",
+          "tr": {
+            "en": "At this rate, the town's population will only keep falling.",
+            "fr": "À ce rythme, la population de la ville ne fera que diminuer."
+          },
+          "choices": [
+            "減るばかりだ",
+            "減ったばかりだ",
+            "減るところだ"
+          ],
+          "why": {
+            "en": "A steady drop with nothing to stop it is the dictionary form + ばかりだ: 減るばかりだ. 減ったばかりだ means « has just dropped », and 減るところだ « is about to drop ».",
+            "fr": "Une baisse continue que rien n'arrête se dit forme du dictionnaire + ばかりだ : 減るばかりだ. 減ったばかりだ veut dire « vient de baisser », et 減るところだ « va baisser »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is happening to the work, and how does the speaker take it?",
+            "fr": "Que devient le travail, et comment le locuteur le prend-il ?"
+          },
+          "jp": "最近は、仕事がふえるばかりで、ちっとも楽にならない。",
+          "tr": {
+            "en": "Lately the work only keeps piling up, and it never gets any easier.",
+            "fr": "Ces temps-ci, le travail ne fait que s'accumuler, et ça ne devient jamais plus facile."
+          },
+          "choices": [
+            {
+              "en": "It only keeps growing, and the speaker is worn down by it.",
+              "fr": "Il ne fait qu'augmenter, et le locuteur en est épuisé."
+            },
+            {
+              "en": "It is growing steadily, and the speaker is glad of it.",
+              "fr": "Il augmente régulièrement, et le locuteur s'en réjouit."
+            },
+            {
+              "en": "A pile of work has just arrived, but it will soon ease.",
+              "fr": "Un tas de travail vient d'arriver, mais ça va bientôt se calmer."
+            }
+          ],
+          "why": {
+            "en": "ばかり after the dictionary form says the change goes one way only, and the speaker deplores it; ちっとも楽にならない confirms it. 増えたばかり would be « has just grown ».",
+            "fr": "ばかり après la forme du dictionnaire dit que le changement va dans un seul sens, et le locuteur le déplore ; ちっとも楽にならない le confirme. Avec た, ce serait « vient d'augmenter »."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You are telling your manager (politely) how last year went: sales fell month after month, right to the end of the year. What do you say?",
+            "fr": "Tu racontes à ton chef (poliment) comment s'est passée l'année dernière : les ventes ont baissé mois après mois, jusqu'à la fin de l'année. Que dis-tu ?"
+          },
+          "choices": [
+            "去年は、売り上げが下がるばかりでした。",
+            "去年は、売り上げが下がるばかりです。",
+            "去年は、売り上げが下がったばかりでした。"
+          ],
+          "why": {
+            "en": "A trend that ran on all through a finished year takes the past: 下がるばかりでした. 下がるばかりです is present, and 下がったばかりでした says it had only just fallen, not that it kept falling.",
+            "fr": "Une tendance qui a duré toute une année achevée se met au passé : 下がるばかりでした. 下がるばかりです est au présent, et 下がったばかりでした dit que ça venait de baisser, pas que ça n'a fait que baisser."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "野菜のねだんは＿＿＿、給料はちっとも上がらない。",
+          "tr": {
+            "en": "Vegetable prices only keep rising, and wages never go up.",
+            "fr": "Le prix des légumes ne fait que monter, et les salaires n'augmentent jamais."
+          },
+          "choices": [
+            "上がるばかりで",
+            "上がったばかりで",
+            "上がるばかりに"
+          ],
+          "why": {
+            "en": "To link the trend to the next clause, ばかりだ becomes ばかりで: 上がるばかりで. 上がったばかりで is « has only just risen », and ばかりに means « just because », a cause.",
+            "fr": "Pour relier la tendance à la proposition suivante, ばかりだ devient ばかりで : 上がるばかりで. 上がったばかりで veut dire « vient de monter », et ばかりに « simplement parce que », une cause."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How did the game go?",
+            "fr": "Comment le match s'est-il passé ?"
+          },
+          "jp": "きのうの試合は、相手のチームが点を取るばかりで、見ているのがつらかった。",
+          "tr": {
+            "en": "In yesterday's game the other team did nothing but score, and it was hard to watch.",
+            "fr": "Au match d'hier, l'équipe adverse n'a fait que marquer, et c'était dur à regarder."
+          },
+          "choices": [
+            {
+              "en": "It was one-sided: the other team scored and scored.",
+              "fr": "Il était à sens unique : l'équipe adverse marquait sans arrêt."
+            },
+            {
+              "en": "It was even: both teams scored in turn.",
+              "fr": "Il était équilibré : les deux équipes marquaient à tour de rôle."
+            },
+            {
+              "en": "The other team had only just scored once.",
+              "fr": "L'équipe adverse venait de marquer un seul but."
+            }
+          ],
+          "why": {
+            "en": "ばかり after the dictionary form means « only that, and nothing else »: the other team (相手) kept scoring, nobody else. The speaker deplores it, hence つらかった. た + ばかり would be « had just scored ».",
+            "fr": "ばかり après la forme du dictionnaire veut dire « seulement cela, et rien d'autre » : l'équipe adverse (相手) marquait sans cesse, personne d'autre. Le locuteur le déplore, d'où つらかった. た + ばかり : « venait de marquer »."
+          }
+        }
+      ]
     }
   },
   {
@@ -16418,7 +16538,127 @@
             "fr": "まい est la forme négative du volitif : よう dit « je vais », まい « je ne vais pas ». だろう ne ferait que supposer, et au positif."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "こんな高い服は、もう＿＿＿。",
+          "tr": {
+            "en": "I will never buy such expensive clothes again.",
+            "fr": "Je n'achèterai plus jamais de vêtements aussi chers."
+          },
+          "choices": [
+            "買うまい",
+            "買うだろう",
+            "買わまい"
+          ],
+          "why": {
+            "en": "まい goes straight onto the dictionary form: 買うまい, a resolve not to. 買うだろう is a positive guess (« I will probably buy »), and 買わまい borrows the ない-stem, which まい never takes.",
+            "fr": "まい se met directement sur la forme du dictionnaire : 買うまい, la résolution de ne pas. 買うだろう est une supposition affirmative (« j'achèterai sans doute »), et 買わまい emprunte la base de ない, que まい ne prend jamais."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of students and that shop?",
+            "fr": "Que pense le locuteur des étudiants et de cette boutique ?"
+          },
+          "jp": "あの店の服は高い。学生にはとても買えまい。",
+          "tr": {
+            "en": "The clothes in that shop are expensive. A student surely could not buy them.",
+            "fr": "Les vêtements de cette boutique sont chers. Un étudiant ne pourrait sûrement pas en acheter."
+          },
+          "choices": [
+            {
+              "en": "That students surely cannot afford it.",
+              "fr": "Que les étudiants n'ont sûrement pas les moyens d'en acheter."
+            },
+            {
+              "en": "That students are forbidden to buy there.",
+              "fr": "Que les étudiants n'ont pas le droit d'y acheter."
+            },
+            {
+              "en": "That the speaker will never buy there again.",
+              "fr": "Que le locuteur n'y achètera plus jamais."
+            }
+          ],
+          "why": {
+            "en": "まい also follows a potential form: 買えまい, « surely cannot buy ». It is a guess about students, not a ban, and not a vow: nobody is resolving anything here.",
+            "fr": "まい se met aussi sur une forme potentielle : 買えまい, « ne peut sûrement pas acheter ». C'est une supposition sur les étudiants, pas une interdiction, ni une promesse : personne ne prend de résolution ici."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "In your diary, in a solemn tone, you write a vow about yourself: from now on you will not lie to people. What do you write?",
+            "fr": "Dans ton journal, sur un ton solennel, tu écris une promesse qui te concerne : désormais, tu ne mentiras plus aux gens. Qu'écris-tu ?"
+          },
+          "choices": [
+            "これからは、人にうそをつくまい。",
+            "彼は、人にうそをつくまい。",
+            "これからは、人にうそをつかないだろう。"
+          ],
+          "why": {
+            "en": "A vow about yourself puts まい on your own act: うそをつくまい. 彼は…まい is a guess about him, and ないだろう is only a « probably not », too weak for a vow.",
+            "fr": "Une promesse qui te concerne met まい sur ton propre acte : うそをつくまい. 彼は…まい est une supposition sur lui, et ないだろう n'est qu'un « sans doute pas », trop faible pour une promesse."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あんなことを言われたのだから、彼女はもうこの店には＿＿＿。",
+          "tr": {
+            "en": "After being told that, she surely won't come to this shop any more.",
+            "fr": "Après ce qu'on lui a dit, elle ne viendra sûrement plus dans ce magasin."
+          },
+          "choices": [
+            "来まい",
+            "来ただろう",
+            "来ないまい"
+          ],
+          "why": {
+            "en": "来る is irregular: まい joins its stem, 来まい (or 来るまい), for a guess about her. 来ただろう is a guess about the past, and 来ないまい stacks a negative under まい, which is already negative.",
+            "fr": "来る est irrégulier : まい se joint à son radical, 来まい (ou 来るまい), pour une supposition sur elle. 来ただろう est une supposition sur le passé, et 来ないまい met une négation sous まい, qui est déjà négatif."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why did the grandfather work so hard?",
+            "fr": "Pourquoi le grand-père a-t-il travaillé si dur ?"
+          },
+          "jp": "祖父は、孫には同じ苦労はさせまいと、一生けんめい働いた。",
+          "tr": {
+            "en": "My grandfather worked as hard as he could, so that his grandchildren would not go through the same hardship.",
+            "fr": "Mon grand-père a travaillé de toutes ses forces, pour que ses petits-enfants ne connaissent pas les mêmes épreuves."
+          },
+          "choices": [
+            {
+              "en": "He was set on not letting his grandchildren suffer as he had.",
+              "fr": "Il tenait à ne pas laisser ses petits-enfants souffrir comme lui."
+            },
+            {
+              "en": "He was sure his grandchildren would never meet the same hardship.",
+              "fr": "Il était sûr que ses petits-enfants ne connaîtraient jamais les mêmes épreuves."
+            },
+            {
+              "en": "He wanted his grandchildren to go through the same hardship.",
+              "fr": "Il voulait que ses petits-enfants connaissent les mêmes épreuves."
+            }
+          ],
+          "why": {
+            "en": "させまい is させる + まい: a resolve that something shall not be allowed. It is the grandfather's own will, which is why he worked so hard; it is not a guess about what will happen to them.",
+            "fr": "させまい est させる + まい : la résolution de ne pas laisser une chose arriver. C'est la volonté du grand-père lui-même, d'où son travail acharné ; ce n'est pas une supposition sur ce qui leur arrivera."
+          }
+        }
+      ]
     }
   },
   {
@@ -16622,7 +16862,141 @@
             "fr": "Forme du dictionnaire + ことはない : ce n'est pas la peine. たことはない dit jamais, べきだ qu'elle devrait."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about going to the hospital?",
+            "fr": "Que dit le locuteur à propos d'aller à l'hôpital ?"
+          },
+          "jp": "このくらいのけがで、病院に行くことはないよ。",
+          "tr": {
+            "en": "For an injury this small, there's no need to go to the hospital.",
+            "fr": "Pour une blessure aussi petite, inutile d'aller à l'hôpital."
+          },
+          "choices": [
+            {
+              "en": "There is no need to go for an injury this small.",
+              "fr": "Inutile d'y aller pour une blessure aussi petite."
+            },
+            {
+              "en": "Going is not allowed for an injury this small.",
+              "fr": "Il est interdit d'y aller pour une blessure aussi petite."
+            },
+            {
+              "en": "You should go, even for an injury this small.",
+              "fr": "Tu devrais y aller, même pour une blessure aussi petite."
+            }
+          ],
+          "why": {
+            "en": "ことはない says there is no call for it: an injury this small needs no hospital. It is neither a ban (行ってはいけない) nor advice to go (行くべきだ).",
+            "fr": "ことはない dit qu'il n'y a pas lieu de le faire : une blessure aussi petite n'appelle pas l'hôpital. Ce n'est ni une interdiction (行ってはいけない) ni un conseil d'y aller (行くべきだ)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "わざわざ駅まで＿＿＿よ。",
+          "tr": {
+            "en": "You don't need to come all the way to the station.",
+            "fr": "Tu n'as pas besoin de venir jusqu'à la gare."
+          },
+          "choices": [
+            "来ることはない",
+            "来たことはない",
+            "来ることがない"
+          ],
+          "why": {
+            "en": "« No need to » is the dictionary form + ことはない: 来ることはない. 来たことはない says you have never come, and 来ることがない says you never get the chance to.",
+            "fr": "« Inutile de » se dit forme du dictionnaire + ことはない : 来ることはない. 来たことはない veut dire « ne jamais être venu », et 来ることがない « ne jamais avoir l'occasion de venir »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What did the speaker's mother say?",
+            "fr": "Qu'a dit la mère de celui qui parle ?"
+          },
+          "jp": "母は、体の調子が悪い日は、会社に行くことはないと言ってくれた。",
+          "tr": {
+            "en": "My mother told me there is no need to go to work on days when I feel unwell.",
+            "fr": "Ma mère m'a dit qu'il n'y avait pas lieu d'aller au travail les jours où je ne me sens pas bien."
+          },
+          "choices": [
+            {
+              "en": "That on days of poor health, going to work is not required.",
+              "fr": "Que les jours de mauvaise forme, aller au travail n'est pas obligatoire."
+            },
+            {
+              "en": "That even on days of poor health, I should go to work.",
+              "fr": "Que même les jours de mauvaise forme, je devrais aller au travail."
+            },
+            {
+              "en": "That she herself has never gone to work when unwell.",
+              "fr": "Qu'elle-même n'est jamais allée travailler quand elle était malade."
+            }
+          ],
+          "why": {
+            "en": "ことはない stays the same inside と言う: it reports a « no need », and a kind one, since it frees the speaker. It is not an order to go, and not about something she once did.",
+            "fr": "ことはない ne change pas dans と言う : il rapporte un « inutile de », et un mot bienveillant, puisqu'il libère celui qui parle. Ce n'est pas un ordre d'y aller, ni quelque chose qu'elle a déjà fait."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which expression completes the sentence?",
+            "fr": "Quelle expression complète la phrase ?"
+          },
+          "jp": "だれにでもあることだ。そんなに気にする＿＿＿。",
+          "tr": {
+            "en": "It happens to everyone. There's no need to mind so much.",
+            "fr": "Ça arrive à tout le monde. Inutile de t'en faire à ce point."
+          },
+          "choices": [
+            "ことはない",
+            "べきだ",
+            "ことがある"
+          ],
+          "why": {
+            "en": "The speaker is telling you not to bother: 気にすることはない. 気にするべきだ says you ought to mind, the opposite, and 気にすることがある says it sometimes happens.",
+            "fr": "Le locuteur te dit de ne pas t'en soucier : 気にすることはない. 気にするべきだ dit que tu devrais t'en soucier, le contraire, et 気にすることがある dit que ça arrive parfois."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of the shouting?",
+            "fr": "Que pense le locuteur de ces cris ?"
+          },
+          "jp": "ちょっとぶつかったぐらいで、そんなにどなることはないのに。",
+          "tr": {
+            "en": "Honestly, there was no need to shout like that over a little bump.",
+            "fr": "Franchement, il n'y avait pas à crier comme ça pour une petite bousculade."
+          },
+          "choices": [
+            {
+              "en": "It was out of proportion: a small bump gives no reason to shout.",
+              "fr": "C'était disproportionné : une petite bousculade ne justifie pas de crier."
+            },
+            {
+              "en": "He expects that nobody will shout over such a bump.",
+              "fr": "Il prévoit que personne ne criera pour une telle bousculade."
+            },
+            {
+              "en": "Nobody ever shouts over such a bump.",
+              "fr": "Personne ne crie jamais pour une telle bousculade."
+            }
+          ],
+          "why": {
+            "en": "ことはない says there was no call for it, and のに adds the speaker's reproach. It is not a forecast that nobody will shout, nor a statement that nobody ever does.",
+            "fr": "ことはない dit qu'il n'y avait pas lieu de le faire, et のに ajoute le reproche du locuteur. Ce n'est pas une prévision que personne ne criera, ni un constat que personne ne le fait jamais."
+          }
+        }
+      ]
     }
   },
   {
@@ -16826,7 +17200,141 @@
             "fr": "Une qualité qu'on y ressent : ものがある. ことがある dirait que ça n'arrive que de temps en temps, に違いない tirerait une conclusion."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the young pitcher's throws?",
+            "fr": "Que dit le locuteur des lancers du jeune lanceur ?"
+          },
+          "jp": "あの若い投手の球には、どこか人をおどろかせるものがある。",
+          "tr": {
+            "en": "There is something about that young pitcher's throws that startles people.",
+            "fr": "Il y a, dans les lancers de ce jeune lanceur, quelque chose qui surprend."
+          },
+          "choices": [
+            {
+              "en": "They have a certain something that startles people, hard to name.",
+              "fr": "Ils ont un je-ne-sais-quoi qui surprend, difficile à nommer."
+            },
+            {
+              "en": "He sometimes throws a ball that startles people.",
+              "fr": "Il lance parfois une balle qui surprend."
+            },
+            {
+              "en": "The speaker has a hunch that he will startle people one day.",
+              "fr": "Le locuteur a l'intuition qu'il surprendra un jour."
+            }
+          ],
+          "why": {
+            "en": "ものがある names a quality felt in the thing itself, which the speaker cannot quite pin down (どこか). It is neither « sometimes » (ことがある) nor a hunch about the future (気がする).",
+            "fr": "ものがある nomme une qualité sentie dans la chose elle-même, que le locuteur ne sait pas bien cerner (どこか). Ce n'est ni « parfois » (ことがある) ni une intuition sur l'avenir (気がする)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which expression completes the sentence?",
+            "fr": "Quelle expression complète la phrase ?"
+          },
+          "jp": "この曲には、聞く人の心をふるわせる＿＿＿。",
+          "tr": {
+            "en": "There is something in this piece that stirs the listener's heart.",
+            "fr": "Il y a dans ce morceau quelque chose qui fait vibrer le cœur de l'auditeur."
+          },
+          "choices": [
+            "ものがある",
+            "気がする",
+            "ものだ"
+          ],
+          "why": {
+            "en": "A quality felt in the piece itself is ものがある. 気がする is a hunch in the speaker, and ものだ states what is natural or used to be, with no « something in it » at all.",
+            "fr": "Une qualité sentie dans le morceau lui-même, c'est ものがある. 気がする est une intuition de celui qui parle, et ものだ dit ce qui est naturel ou ce qui se faisait, sans aucun « quelque chose dedans »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the road at night?",
+            "fr": "Que dit le locuteur de cette route la nuit ?"
+          },
+          "jp": "夜のこの道には、どこかこわいものがあるね。",
+          "tr": {
+            "en": "There's something rather scary about this road at night, isn't there?",
+            "fr": "Il y a quelque chose d'un peu inquiétant sur cette route, la nuit, non ?"
+          },
+          "choices": [
+            {
+              "en": "It feels scary there, though he can't say exactly why.",
+              "fr": "On s'y sent mal à l'aise, sans trop savoir pourquoi."
+            },
+            {
+              "en": "It is sometimes scary to walk there.",
+              "fr": "Il arrive que ce soit effrayant d'y marcher."
+            },
+            {
+              "en": "He is sure it is dangerous, from what he has read.",
+              "fr": "Il est sûr que c'est dangereux, d'après ce qu'il a lu."
+            }
+          ],
+          "why": {
+            "en": "ものがある is not always praise: it can voice an uneasy impression too. Here it is an impression of the road itself, not an occasional event (ことがある) or a conclusion drawn from facts (に違いない).",
+            "fr": "ものがある ne fait pas que louer : il peut aussi dire une impression de malaise. Ici, c'est une impression sur la route elle-même, pas un événement occasionnel (ことがある) ni une conclusion tirée de faits (に違いない)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの人の話し方には、どこか＿＿＿ものがある。",
+          "tr": {
+            "en": "There is something refined about the way she speaks.",
+            "fr": "Il y a quelque chose de raffiné dans sa façon de parler."
+          },
+          "choices": [
+            "上品な",
+            "上品だ",
+            "上品で"
+          ],
+          "why": {
+            "en": "ものがある is a noun phrase, so what comes before it must modify もの: a な-adjective keeps its な, 上品な. 上品だ and 上品で cannot stand in front of a noun.",
+            "fr": "ものがある est un groupe nominal : ce qui le précède doit qualifier もの, et un adjectif en な garde son な : 上品な. 上品だ et 上品で ne peuvent pas se placer devant un nom."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker judge the town's growth?",
+            "fr": "Comment le locuteur juge-t-il la croissance de la ville ?"
+          },
+          "jp": "この町の成長には、すばらしいものがある。",
+          "tr": {
+            "en": "There is something truly remarkable about this town's growth.",
+            "fr": "Il y a quelque chose de vraiment remarquable dans la croissance de cette ville."
+          },
+          "choices": [
+            {
+              "en": "It is impressive: one can feel something remarkable in it.",
+              "fr": "Elle est impressionnante : on y sent quelque chose de remarquable."
+            },
+            {
+              "en": "It is only what anyone would naturally expect.",
+              "fr": "Ce n'est que ce que n'importe qui attendrait naturellement."
+            },
+            {
+              "en": "He is sure the town will keep on growing.",
+              "fr": "Il est sûr que la ville continuera de croître."
+            }
+          ],
+          "why": {
+            "en": "With a positive adjective, ものがある praises what the speaker feels in the thing: すばらしいものがある, « something remarkable ». It is not a plain « of course » (ものだ), nor a forecast (に違いない).",
+            "fr": "Avec un adjectif positif, ものがある loue ce que le locuteur sent dans la chose : すばらしいものがある, « quelque chose de remarquable ». Ce n'est pas un simple « bien sûr » (ものだ), ni une prévision (に違いない)."
+          }
+        }
+      ]
     }
   },
   {
@@ -17025,7 +17533,127 @@
             "fr": "Un souhait presque impossible : potentiel + ものなら. ものの dirait « bien que je puisse », ものだから « parce que je peux », en guise d'excuse : les deux disent que tu le peux."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、もう一度祖母に会いたい。",
+          "tr": {
+            "en": "If it were at all possible, I would like to see my grandmother once more.",
+            "fr": "Si seulement c'était possible, je voudrais revoir ma grand-mère une fois encore."
+          },
+          "choices": [
+            "会えるものなら",
+            "会うものなら",
+            "会ったものなら"
+          ],
+          "why": {
+            "en": "« If it were at all possible » puts the potential form before ものなら: 会えるものなら. 会うものなら and 会ったものなら use the plain verb, which does not say « if only I could ».",
+            "fr": "« Si seulement c'était possible » met la forme potentielle devant ものなら : 会えるものなら. 会うものなら et 会ったものなら emploient le verbe simple, qui ne dit pas « si seulement je pouvais »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What will the speaker do about the president's request?",
+            "fr": "Que va faire le locuteur de la demande du président ?"
+          },
+          "jp": "ことわれるものなら、ことわりたいが、社長のたのみではしかたがない。",
+          "tr": {
+            "en": "If I could turn it down, I would, but when it is the president who asks, there is nothing to be done.",
+            "fr": "Si je pouvais refuser, je le ferais, mais quand c'est le président qui demande, on n'y peut rien."
+          },
+          "choices": [
+            {
+              "en": "Accept it, unwillingly, because refusing is not possible.",
+              "fr": "L'accepter à contrecœur, car refuser n'est pas possible."
+            },
+            {
+              "en": "Turn it down, since refusing is possible.",
+              "fr": "Refuser, puisque c'est possible."
+            },
+            {
+              "en": "Accept it gladly.",
+              "fr": "L'accepter avec plaisir."
+            }
+          ],
+          "why": {
+            "en": "ものなら voices a wish the speaker knows cannot come true: he would refuse if he could, but he cannot. The result is the opposite of the wish, so he accepts, unwillingly.",
+            "fr": "ものなら exprime un souhait dont le locuteur sait qu'il ne se réalisera pas : il refuserait s'il le pouvait, mais il ne le peut pas. Le résultat est l'inverse du souhait : il accepte, à contrecœur."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "A friend invites you on a trip this weekend. You would love to go, but your work will not allow it. What do you say?",
+            "fr": "Un ami t'invite à faire un voyage ce week-end. Tu adorerais y aller, mais ton travail ne te le permet pas. Que réponds-tu ?"
+          },
+          "choices": [
+            "その旅行に行けるものなら、行きたいんだけどね。",
+            "その旅行に行けるものなら、行ってみなさいよ。",
+            "その旅行に行けるものの、行く気はないんだ。"
+          ],
+          "why": {
+            "en": "A wish you know you cannot fulfil: 行けるものなら、行きたい. With an order, 行ってみなさい, the same ものなら becomes a dare, and ものの means « although I can », which says you simply don't want to.",
+            "fr": "Un souhait que tu sais irréalisable : 行けるものなら、行きたい. Avec un ordre, 行ってみなさい, le même ものなら devient un défi, et ものの veut dire « bien que je puisse », c'est-à-dire que tu n'en as simplement pas envie."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "＿＿＿、もっと食べたいが、もうおなかがいっぱいだ。",
+          "tr": {
+            "en": "If I could, I would eat more, but I am already full.",
+            "fr": "Si je pouvais, je mangerais encore, mais je n'ai plus faim."
+          },
+          "choices": [
+            "食べられるものなら",
+            "食べるものなら",
+            "食べさせるものなら"
+          ],
+          "why": {
+            "en": "A る-verb makes its potential with られる: 食べられるものなら. 食べるものなら has no « if I could », and 食べさせる is the causative, « make someone eat ».",
+            "fr": "Un verbe en る forme son potentiel avec られる : 食べられるものなら. 食べるものなら n'a pas le « si je pouvais », et 食べさせる est le causatif, « faire manger »."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Can the speaker carry it alone?",
+            "fr": "Le locuteur peut-il le porter seul ?"
+          },
+          "jp": "わたしが一人で運べるものなら、とっくに運んでいるよ。",
+          "tr": {
+            "en": "If I could carry it alone, I would have done so long ago.",
+            "fr": "Si je pouvais le porter seul, je l'aurais fait depuis longtemps."
+          },
+          "choices": [
+            {
+              "en": "No: he cannot carry it alone, which is why it has not been carried yet.",
+              "fr": "Non : il ne peut pas le porter seul, et c'est pourquoi ce n'est pas encore fait."
+            },
+            {
+              "en": "Yes: he has already carried it.",
+              "fr": "Oui : il l'a déjà porté."
+            },
+            {
+              "en": "Not yet, but he will carry it soon.",
+              "fr": "Pas encore, mais il le portera bientôt."
+            }
+          ],
+          "why": {
+            "en": "運べるものなら sets up a case the speaker knows is false: if he could, he would already have done it, and he has not. So he cannot. It is a refusal in disguise, not a promise.",
+            "fr": "運べるものなら pose un cas que le locuteur sait faux : s'il le pouvait, il l'aurait déjà fait, et il ne l'a pas fait. Donc il ne peut pas. C'est un refus déguisé, pas une promesse."
+          }
+        }
+      ]
     }
   },
   {
@@ -17267,7 +17895,141 @@
             "fr": "ものか refuse avec émotion. ものだ dirait que c'est ce qu'on fait, ようか y réfléchirait."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What is the speaker saying about asking that person?",
+            "fr": "Que dit le locuteur à propos de demander à cette personne ?"
+          },
+          "jp": "だれが、あんな人にたのむものか。",
+          "tr": {
+            "en": "As if I would ever ask someone like him for anything!",
+            "fr": "Comme si j'allais jamais demander quoi que ce soit à un type comme lui !"
+          },
+          "choices": [
+            {
+              "en": "The speaker flatly refuses to ask him, whatever happens.",
+              "fr": "Le locuteur refuse net de lui demander quoi que ce soit, quoi qu'il arrive."
+            },
+            {
+              "en": "The speaker wonders who else could be asked.",
+              "fr": "Le locuteur se demande à qui d'autre il pourrait demander."
+            },
+            {
+              "en": "The speaker is about to ask him right away.",
+              "fr": "Le locuteur va lui demander tout de suite."
+            }
+          ],
+          "why": {
+            "en": "ものか is not a real question: the か is rhetorical, the tone falls, and with だれが it hardens into « nobody would ». It is an emotional refusal, not a search for someone to ask.",
+            "fr": "ものか n'est pas une vraie question : le か est rhétorique, le ton descend, et avec だれが il durcit en « personne ne le ferait ». C'est un refus plein d'émotion, pas la recherche de quelqu'un à qui demander."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which expression completes the sentence?",
+            "fr": "Quelle expression complète la phrase ?"
+          },
+          "jp": "あの店員が＿＿＿。",
+          "tr": {
+            "en": "As if that clerk were kind!",
+            "fr": "Comme si cet employé était aimable !"
+          },
+          "choices": [
+            "親切なものか",
+            "親切なものだ",
+            "親切ものか"
+          ],
+          "why": {
+            "en": "After a noun or a な-adjective, ものか keeps the な: 親切なものか, a scornful denial. 親切なものだ states how kind he is, and 親切ものか drops the な, which links the two words.",
+            "fr": "Après un nom ou un adjectif en な, ものか garde le な : 親切なものか, un démenti méprisant. 親切なものだ constate combien il est aimable, et 親切ものか perd le な, qui relie les deux mots."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why did the speaker try again and again?",
+            "fr": "Pourquoi le locuteur a-t-il réessayé encore et encore ?"
+          },
+          "jp": "あきらめるものかと、何度もちょうせんした。",
+          "tr": {
+            "en": "Determined not to give up, I took the challenge again and again.",
+            "fr": "Avec la volonté de ne pas abandonner, j'ai relevé le défi encore et encore."
+          },
+          "choices": [
+            {
+              "en": "He was set on not giving up.",
+              "fr": "Il était décidé à ne pas abandonner."
+            },
+            {
+              "en": "He kept asking himself whether to give up.",
+              "fr": "Il se demandait sans cesse s'il devait abandonner."
+            },
+            {
+              "en": "He felt sure he would give up in the end.",
+              "fr": "Il était sûr d'abandonner à la fin."
+            }
+          ],
+          "why": {
+            "en": "ものかと quotes the cry in the speaker's head: « I won't give up! ». It is a refusal he tells himself, not a question he asks himself, and the tries that follow carry it out.",
+            "fr": "ものかと cite le cri qui résonne dans la tête du locuteur : « Je n'abandonnerai pas ! ». C'est un refus qu'il se dit à lui-même, pas une question qu'il se pose, et les tentatives qui suivent l'exécutent."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "あの子がこんなに早く＿＿＿ものか。",
+          "tr": {
+            "en": "As if that child could get up this early!",
+            "fr": "Comme si cet enfant pouvait se lever aussi tôt !"
+          },
+          "choices": [
+            "起きられる",
+            "起きられます",
+            "起きられた"
+          ],
+          "why": {
+            "en": "ものか takes the plain present: 起きられるものか, « no way he can ». 起きられます is polite (that needs ものですか), and 起きられた puts it in the past, as if he already had.",
+            "fr": "ものか prend le présent neutre : 起きられるものか, « impossible qu'il y arrive ». 起きられます est poli (il faudrait ものですか), et 起きられた met cela au passé, comme s'il l'avait déjà fait."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of the claim that he has that much money?",
+            "fr": "Que pense le locuteur de l'idée qu'il ait tant d'argent ?"
+          },
+          "jp": "彼が、そんな大金を持っているものか。",
+          "tr": {
+            "en": "As if he had that much money!",
+            "fr": "Comme s'il avait autant d'argent !"
+          },
+          "choices": [
+            {
+              "en": "The speaker does not believe it: no way he has such money.",
+              "fr": "Le locuteur n'y croit pas : impossible qu'il ait une telle somme."
+            },
+            {
+              "en": "The speaker wants to know whether he has that much money.",
+              "fr": "Le locuteur veut savoir s'il a autant d'argent."
+            },
+            {
+              "en": "The speaker believes it and is surprised.",
+              "fr": "Le locuteur y croit et il est surpris."
+            }
+          ],
+          "why": {
+            "en": "ものか can deny a claim as well as refuse an act: « as if he had that! ». Despite the か, nothing is asked; the speaker says it cannot be so, with scorn.",
+            "fr": "ものか peut démentir une affirmation aussi bien que refuser un acte : « comme s'il avait ça ! ». Malgré le か, rien n'est demandé : le locuteur dit que ce n'est pas possible, avec mépris."
+          }
+        }
+      ]
     }
   },
   {
@@ -17471,7 +18233,132 @@
             "fr": "Son anglais est à la hauteur de ses dix ans là-bas : だけあって. のに et わりに s'en étonneraient."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "三年もイタリアで料理を＿＿＿だけあって、彼女のパスタは本物の味だ。",
+          "tr": {
+            "en": "Having learned cooking in Italy for three years, her pasta tastes the real thing, as you would expect.",
+            "fr": "Après trois ans d'apprentissage de la cuisine en Italie, ses pâtes ont le goût de l'authentique, comme on pouvait s'y attendre."
+          },
+          "choices": [
+            "習った",
+            "習いました",
+            "習って"
+          ],
+          "why": {
+            "en": "だけあって follows the plain form, and the learning is over: 習った. 習いました is polite, which this link never takes inside a sentence, and the て-form 習って cannot stand before だけ.",
+            "fr": "だけあって suit la forme neutre, et l'apprentissage est terminé : 習った. 習いました est poli, ce que ce lien n'accepte pas à l'intérieur d'une phrase, et la forme en て 習って ne peut pas précéder だけ."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker explain the shop's care for detail?",
+            "fr": "Comment le locuteur explique-t-il le soin que ce magasin apporte aux détails ?"
+          },
+          "jp": "百年も続いている店だけあって、細かいところまで気がきいている。",
+          "tr": {
+            "en": "Being a shop that has lasted a hundred years, it is thoughtful down to the smallest detail.",
+            "fr": "Comme c'est une boutique qui dure depuis cent ans, elle est attentionnée jusque dans les moindres détails."
+          },
+          "choices": [
+            {
+              "en": "It is what you would expect of a shop with a hundred years behind it.",
+              "fr": "C'est ce qu'on attend d'une boutique qui a cent ans derrière elle."
+            },
+            {
+              "en": "It is careful in spite of being so old.",
+              "fr": "Elle est soigneuse malgré son grand âge."
+            },
+            {
+              "en": "The speaker thanks the shop for a personal favour.",
+              "fr": "Le locuteur remercie la boutique d'une faveur personnelle."
+            }
+          ],
+          "why": {
+            "en": "だけあって links a reason to a result that matches it: a hundred years explain the care, so it is « as expected ». It is neither « in spite of » (のに) nor « thanks to » (おかげで).",
+            "fr": "だけあって relie une raison à un résultat qui lui correspond : cent ans expliquent ce soin, c'est donc « comme on pouvait s'y attendre ». Ce n'est ni « malgré » (のに) ni « grâce à » (おかげで)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which expression completes the sentence?",
+            "fr": "Quelle expression complète la phrase ?"
+          },
+          "jp": "一流のホテル＿＿＿、サービスがすばらしい。",
+          "tr": {
+            "en": "Being a first-class hotel, its service is superb, as you would expect.",
+            "fr": "Comme c'est un hôtel de premier ordre, son service est superbe, comme on pouvait s'y attendre."
+          },
+          "choices": [
+            "だけあって",
+            "にもかかわらず",
+            "ばかりに"
+          ],
+          "why": {
+            "en": "The result lives up to the reason, so だけあって. にもかかわらず says the opposite was expected (« despite »), and ばかりに names a cause for a bad result (« just because »).",
+            "fr": "Le résultat est à la hauteur de la raison : だけあって. にもかかわらず dit qu'on attendait le contraire (« malgré »), et ばかりに nomme la cause d'un mauvais résultat (« simplement parce que »)."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the watch?",
+            "fr": "Que dit le locuteur de cette montre ?"
+          },
+          "jp": "この時計は、高いだけあって、デザインも作りもすばらしい。",
+          "tr": {
+            "en": "This watch is expensive, and its design and its make are superb, as the price suggests.",
+            "fr": "Cette montre est chère, et son design comme sa fabrication sont superbes, à la hauteur de son prix."
+          },
+          "choices": [
+            {
+              "en": "Its quality is worthy of its high price.",
+              "fr": "Sa qualité est à la hauteur de son prix élevé."
+            },
+            {
+              "en": "It is expensive, but disappointingly plain.",
+              "fr": "Elle est chère, mais décevante de simplicité."
+            },
+            {
+              "en": "It is expensive only because of its design.",
+              "fr": "Elle n'est chère qu'à cause de son design."
+            }
+          ],
+          "why": {
+            "en": "After an い-adjective, だけあって makes the price the reason and the quality the result that lives up to it. The reverse reading, quality causing the price, turns the link around.",
+            "fr": "Après un adjectif en い, だけあって fait du prix la raison et de la qualité le résultat qui lui est à la hauteur. La lecture inverse, la qualité cause du prix, retourne le lien."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which word completes the sentence?",
+            "fr": "Quel mot complète la phrase ?"
+          },
+          "jp": "＿＿＿プロの料理人だけあって、ほうちょうの使い方がうまい。",
+          "tr": {
+            "en": "As you would expect of a professional cook, he handles a knife well.",
+            "fr": "Comme on peut l'attendre d'un cuisinier professionnel, il manie bien le couteau."
+          },
+          "choices": [
+            "さすが",
+            "せっかく",
+            "あいにく"
+          ],
+          "why": {
+            "en": "さすが says « as one would expect », which is exactly what だけあって says too, so the two go together. せっかく stresses an effort made, and あいにく means « unfortunately », which clashes with praise.",
+            "fr": "さすが dit « comme on s'y attend », ce que dit aussi だけあって : les deux vont ensemble. せっかく souligne un effort consenti, et あいにく veut dire « malheureusement », ce qui jure avec un éloge."
+          }
+        }
+      ]
     }
   },
   {
@@ -17675,7 +18562,136 @@
             "fr": "La raison aggrave un mauvais résultat : だけに. だけあって ne fait que saluer, et おかげで remercie une cause."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "Why was the shock so great?",
+            "fr": "Pourquoi le choc a-t-il été si grand ?"
+          },
+          "jp": "ずっと信じていた友だちだっただけに、うらぎられたときのショックは大きかった。",
+          "tr": {
+            "en": "Because he was a friend I had trusted for so long, the shock of being betrayed was all the greater.",
+            "fr": "Comme c'était un ami en qui j'avais toujours eu confiance, le choc d'être trahi n'en a été que plus grand."
+          },
+          "choices": [
+            {
+              "en": "Because he had trusted that friend for so long, it hit harder.",
+              "fr": "Parce qu'il avait eu si longtemps confiance en cet ami, le coup a été plus dur."
+            },
+            {
+              "en": "Because of the shock, he stopped trusting the friend.",
+              "fr": "À cause du choc, il a cessé de faire confiance à cet ami."
+            },
+            {
+              "en": "The shock was small, since he had trusted the friend.",
+              "fr": "Le choc a été petit, puisqu'il avait fait confiance à cet ami."
+            }
+          ],
+          "why": {
+            "en": "だけに makes the reason strengthen the result: the longer the trust, the harder the blow. It works for bad news too, unlike だけあって. The cause is the trust, not the shock.",
+            "fr": "だけに fait que la raison renforce le résultat : plus la confiance était longue, plus le coup est rude. Il sert aussi pour une mauvaise nouvelle, contrairement à だけあって. La cause est la confiance, pas le choc."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "何度も＿＿＿だけに、今度こそうまくやりたい。",
+          "tr": {
+            "en": "Since I have failed so many times, I all the more want to get it right this time.",
+            "fr": "Comme j'ai échoué tant de fois, je veux d'autant plus bien faire cette fois."
+          },
+          "choices": [
+            "失敗した",
+            "失敗する",
+            "失敗して"
+          ],
+          "why": {
+            "en": "The failures are behind the speaker, so the plain past comes before だけに: 失敗しただけに. 失敗する would be a habit or a future, and the て-form 失敗して cannot stand before だけ.",
+            "fr": "Les échecs sont derrière le locuteur : le passé neutre se place devant だけに : 失敗しただけに. 失敗する serait une habitude ou un futur, et la forme en て 失敗して ne peut pas précéder だけ."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think of his not knowing the manners?",
+            "fr": "Que pense le locuteur du fait qu'il ignore ces manières ?"
+          },
+          "jp": "外国人だけに、日本のマナーを知らなくてもしかたがない。",
+          "tr": {
+            "en": "Being a foreigner, he can hardly be blamed for not knowing Japanese manners.",
+            "fr": "Étant étranger, on ne peut guère lui reprocher d'ignorer les manières japonaises."
+          },
+          "choices": [
+            {
+              "en": "Because he is a foreigner, it is only natural that he does not know them.",
+              "fr": "Comme il est étranger, il est tout naturel qu'il ne les connaisse pas."
+            },
+            {
+              "en": "Only foreigners do not know Japanese manners.",
+              "fr": "Seuls les étrangers ignorent les manières japonaises."
+            },
+            {
+              "en": "A foreigner ought to learn Japanese manners.",
+              "fr": "Un étranger devrait apprendre les manières japonaises."
+            }
+          ],
+          "why": {
+            "en": "After a noun, だけに gives the reason that makes the result all the more natural: a foreigner, so no wonder. It is not だけ « only », and it does not tell him what he should do.",
+            "fr": "Après un nom, だけに donne la raison qui rend le résultat d'autant plus naturel : un étranger, donc rien d'étonnant. Ce n'est pas だけ « seulement », et cela ne lui dit pas ce qu'il devrait faire."
+          }
+        },
+        {
+          "kind": "use",
+          "ask": {
+            "en": "You trained for months for a race, then caught a fever the day before and could not run. A friend asks how you feel. Say it is all the more frustrating after all that training.",
+            "fr": "Tu as passé des mois à t'entraîner pour une course, puis la fièvre t'a pris la veille et tu n'as pas pu courir. Un ami te demande comment tu te sens. Dis que c'est d'autant plus rageant après tout cet entraînement."
+          },
+          "choices": [
+            "何か月も練習しただけに、走れなくて、とてもくやしいよ。",
+            "何か月も練習するだけに、走れなくて、とてもくやしいよ。",
+            "何か月も練習しただけあって、走れなくて、とてもくやしいよ。"
+          ],
+          "why": {
+            "en": "The training is over and the result is bad: 練習しただけに. 練習するだけに puts the reason in the present, and だけあって only fits a result that lives up to the reason, never a disappointment.",
+            "fr": "L'entraînement est fini et le résultat est mauvais : 練習しただけに. 練習するだけに met la raison au présent, et だけあって ne convient qu'à un résultat à la hauteur de la raison, jamais à une déception."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker say about the player's mistakes?",
+            "fr": "Que dit le locuteur des erreurs de ce joueur ?"
+          },
+          "jp": "プロだけに、あの選手は小さなミスも許されない。",
+          "tr": {
+            "en": "Being a professional, that player is not allowed even a small mistake.",
+            "fr": "Étant professionnel, ce joueur n'a pas droit même à une petite erreur."
+          },
+          "choices": [
+            {
+              "en": "As a pro, he is held to a higher standard: even small slips are not excused.",
+              "fr": "En tant que pro, on exige plus de lui : même les petites fautes ne passent pas."
+            },
+            {
+              "en": "As a pro, he is forgiven even his big mistakes.",
+              "fr": "En tant que pro, on lui pardonne même ses grosses erreurs."
+            },
+            {
+              "en": "Only pros are not allowed to make mistakes.",
+              "fr": "Seuls les pros n'ont pas le droit de faire des erreurs."
+            }
+          ],
+          "why": {
+            "en": "The status is the reason that raises the standard: だけに makes the result all the stricter. It does not mean the opposite, nor だけ « only » pros.",
+            "fr": "Le statut est la raison qui relève l'exigence : だけに rend le résultat d'autant plus strict. Cela ne veut pas dire l'inverse, ni だけ « seulement » les pros."
+          }
+        }
+      ]
     }
   },
   {
@@ -17913,7 +18929,141 @@
             "fr": "Tu as regardé, puis constaté : たところ. たとたんに demande une chose survenue à l'instant où tu as regardé, pas un état constaté ; 前に le place avant que tu regardes."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the new medicine?",
+            "fr": "Que dit la phrase à propos du nouveau médicament ?"
+          },
+          "jp": "新しい薬を使ってみたところ、かえって頭が痛くなった。",
+          "tr": {
+            "en": "When I tried the new medicine, my head ended up hurting instead.",
+            "fr": "Quand j'ai essayé le nouveau médicament, j'ai eu plutôt mal à la tête."
+          },
+          "choices": [
+            {
+              "en": "He tried it, and unexpectedly his head began to hurt.",
+              "fr": "Il l'a essayé, et contre toute attente il a eu mal à la tête."
+            },
+            {
+              "en": "Even if he tried it, his head would hurt anyway.",
+              "fr": "Même s'il l'essayait, il aurait mal à la tête de toute façon."
+            },
+            {
+              "en": "He is just about to try it, and fears a headache.",
+              "fr": "Il est sur le point de l'essayer, et craint d'avoir mal à la tête."
+            }
+          ],
+          "why": {
+            "en": "たところ reports what the speaker found on doing it, and the result need not be a happy one. It is not たところで (« even if », a guess) nor たところだ (« just about to »).",
+            "fr": "たところ rapporte ce que le locuteur a constaté en le faisant, et le résultat n'a rien de forcément heureux. Ce n'est pas たところで (« même si », une hypothèse) ni たところだ (« sur le point de »)."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "会社に＿＿＿ところ、担当の人はきょうは休みだった。",
+          "tr": {
+            "en": "When I phoned the company, the person in charge turned out to be off today.",
+            "fr": "Quand j'ai appelé l'entreprise, le responsable s'est avéré être en congé aujourd'hui."
+          },
+          "choices": [
+            "電話した",
+            "電話する",
+            "電話して"
+          ],
+          "why": {
+            "en": "What you did comes first, in the plain past: 電話したところ. 電話するところ is « about to phone », which cannot lead to a finding, and the て-form 電話して cannot stand before ところ.",
+            "fr": "Ce qu'on a fait vient d'abord, au passé neutre : 電話したところ. 電話するところ veut dire « sur le point d'appeler », qui ne peut mener à une constatation, et la forme en て 電話して ne peut pas précéder ところ."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the sentence say about the station?",
+            "fr": "Que dit la phrase à propos de la gare ?"
+          },
+          "jp": "電車でねむってしまい、目をさましたところ、知らない駅だった。",
+          "tr": {
+            "en": "I fell asleep on the train, and when I woke up, it was a station I did not know.",
+            "fr": "J'ai piqué un somme dans le train, et à mon réveil, c'était une gare que je ne connaissais pas."
+          },
+          "choices": [
+            {
+              "en": "Waking up, he found the train at a station he did not know.",
+              "fr": "En se réveillant, il a trouvé le train dans une gare inconnue."
+            },
+            {
+              "en": "He was just about to wake up at a station he did not know.",
+              "fr": "Il était sur le point de se réveiller dans une gare inconnue."
+            },
+            {
+              "en": "Even if he woke up, he would not know the station.",
+              "fr": "Même en se réveillant, il ne reconnaîtrait pas la gare."
+            }
+          ],
+          "why": {
+            "en": "たところ also covers a discovery that comes after something you did without planning to: you woke, and found. The second half states how things stood. It is not « about to » or « even if ».",
+            "fr": "たところ couvre aussi une découverte qui suit un acte qu'on n'avait pas prévu : on s'est réveillé, et on a constaté. La seconde moitié dit comment étaient les choses, pas « sur le point de » ni « même si »."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which expression completes the sentence?",
+            "fr": "Quelle expression complète la phrase ?"
+          },
+          "jp": "地図を＿＿＿、行きたい店はすぐ近くだと分かった。",
+          "tr": {
+            "en": "When I looked at the map, I saw that the shop I wanted to go to was very close.",
+            "fr": "En regardant la carte, j'ai vu que la boutique où je voulais aller était tout près."
+          },
+          "choices": [
+            "見たところ",
+            "見たところで",
+            "見たところに"
+          ],
+          "why": {
+            "en": "I looked and found out: 見たところ, followed by the finding. 見たところで means « even if I looked », a hopeless try, and 見たところに means « just as I looked », when something else breaks in.",
+            "fr": "J'ai regardé et j'ai constaté : 見たところ, suivi de la constatation. 見たところで veut dire « même en regardant », un essai vain, et 見たところに « au moment où je regardais », quand autre chose survient."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does this report say about the students?",
+            "fr": "Que dit ce compte rendu à propos des étudiants ?"
+          },
+          "jp": "学生百人に聞いたところ、三十人が朝ごはんを食べていなかった。",
+          "tr": {
+            "en": "When a hundred students were asked, thirty of them had not eaten breakfast.",
+            "fr": "Interrogés au nombre de cent, trente étudiants n'avaient pas pris de petit-déjeuner."
+          },
+          "choices": [
+            {
+              "en": "It states a result: of a hundred asked, thirty had skipped breakfast.",
+              "fr": "Il énonce un résultat : sur cent interrogés, trente avaient sauté le petit-déjeuner."
+            },
+            {
+              "en": "It states a plan: thirty students will be asked about breakfast.",
+              "fr": "Il énonce un projet : on interrogera trente étudiants sur le petit-déjeuner."
+            },
+            {
+              "en": "It states a doubt: asking a hundred students would change nothing.",
+              "fr": "Il énonce un doute : interroger cent étudiants ne changerait rien."
+            }
+          ],
+          "why": {
+            "en": "In reports and written accounts, たところ presents what the inquiry turned up. The second half is a finding, a fact already known, never a plan or a doubt.",
+            "fr": "Dans les rapports et les écrits, たところ présente ce qu'une enquête a révélé. La seconde moitié est une constatation, un fait déjà connu, jamais un projet ni un doute."
+          }
+        }
+      ]
     }
   },
   {
@@ -18142,7 +19292,141 @@
             "fr": "Même en le faisant, rien ne changerait : たところで. たところ demande un fait constaté, ば promettrait que vous le rattraperiez."
           }
         }
-      }
+      },
+      "quiz": [
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "What does the speaker think about going to the shop now?",
+            "fr": "Que pense le locuteur du fait d'aller à la boutique maintenant ?"
+          },
+          "jp": "今ごろ行ったところで、店はもう閉まっているだろう。",
+          "tr": {
+            "en": "Even if we go now, the shop will probably be closed by then.",
+            "fr": "Même si on y va maintenant, la boutique sera sans doute déjà fermée."
+          },
+          "choices": [
+            {
+              "en": "It is pointless: even going now, the shop will be closed.",
+              "fr": "C'est inutile : même en y allant maintenant, la boutique sera fermée."
+            },
+            {
+              "en": "It is worth going, since the shop will probably still be open.",
+              "fr": "Ça vaut la peine d'y aller, la boutique sera sans doute encore ouverte."
+            },
+            {
+              "en": "The speaker just went there and found the shop closed.",
+              "fr": "Le locuteur vient d'y aller et a trouvé la boutique fermée."
+            }
+          ],
+          "why": {
+            "en": "たところで means « even if one did it »: going now would change nothing, a guess about what will not work. It does not report a visit already made, which would be たところ without で.",
+            "fr": "たところで veut dire « même si on le faisait » : y aller maintenant ne changerait rien, une supposition sur ce qui ne marchera pas. Il ne rapporte pas une visite déjà faite, ce qui serait たところ sans で."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which form completes the sentence?",
+            "fr": "Quelle forme complète la phrase ?"
+          },
+          "jp": "今から少し＿＿＿ところで、試合には勝てない。",
+          "tr": {
+            "en": "Even if I practise a little from now on, I cannot win the match.",
+            "fr": "Même si je m'entraîne un peu à partir de maintenant, je ne pourrai pas gagner le match."
+          },
+          "choices": [
+            "練習した",
+            "練習する",
+            "練習して"
+          ],
+          "why": {
+            "en": "« Even if one did it » is the plain past + ところで: 練習したところで. 練習するところで splits as ところ + で, « at the place where one practises », and the て-form cannot come before ところで.",
+            "fr": "« Même si on le faisait » se dit passé neutre + ところで : 練習したところで. 練習するところで se coupe en ところ + で, « à l'endroit où l'on s'entraîne », et la forme en て ne peut pas précéder ところで."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How much does the speaker expect to see by going in the afternoon?",
+            "fr": "Combien le locuteur pense-t-il voir en y allant l'après-midi ?"
+          },
+          "jp": "午後から見に行ったところで、せいぜい半分しか見られない。",
+          "tr": {
+            "en": "Even if we go to see it from the afternoon, we can see only half at most.",
+            "fr": "Même si on va le voir à partir de l'après-midi, on n'en verra tout au plus que la moitié."
+          },
+          "choices": [
+            {
+              "en": "Not much: only about half, at the very most.",
+              "fr": "Pas grand-chose : la moitié environ, tout au plus."
+            },
+            {
+              "en": "Nothing at all: it will be closed.",
+              "fr": "Rien du tout : ce sera fermé."
+            },
+            {
+              "en": "Everything: the afternoon is plenty.",
+              "fr": "Tout : l'après-midi suffit largement."
+            }
+          ],
+          "why": {
+            "en": "With せいぜい, たところで does not call the effort hopeless, only small: half at most. The sentence does not say that nothing can be seen, nor that everything can.",
+            "fr": "Avec せいぜい, たところで ne juge pas l'effort sans espoir, seulement mince : la moitié au plus. La phrase ne dit ni qu'on ne verra rien, ni qu'on verra tout."
+          }
+        },
+        {
+          "kind": "form",
+          "ask": {
+            "en": "Which ending completes the sentence?",
+            "fr": "Quelle fin complète la phrase ?"
+          },
+          "jp": "どんなにあやまったところで、＿＿＿。",
+          "tr": {
+            "en": "However much I apologise, he will not forgive me.",
+            "fr": "J'aurai beau m'excuser, il ne me pardonnera pas."
+          },
+          "choices": [
+            "許してもらえないだろう",
+            "許してもらえるだろう",
+            "許してもらった"
+          ],
+          "why": {
+            "en": "The second half of たところで is negative or hopeless: 許してもらえないだろう. A hopeful 許してもらえるだろう contradicts the « even if », and 許してもらった reports a result, which is たところ.",
+            "fr": "La seconde moitié de たところで est négative ou sans espoir : 許してもらえないだろう. Un 許してもらえるだろう plein d'espoir contredit le « même si », et 許してもらった rapporte un résultat, c'est たところ."
+          }
+        },
+        {
+          "kind": "meaning",
+          "ask": {
+            "en": "How does the speaker feel about failing?",
+            "fr": "Que ressent le locuteur à l'idée d'échouer ?"
+          },
+          "jp": "失敗したところで、また最初からやり直せばいいだけだ。",
+          "tr": {
+            "en": "Even if I fail, all I have to do is start again from the beginning.",
+            "fr": "Même si j'échoue, il me suffira de reprendre depuis le début."
+          },
+          "choices": [
+            {
+              "en": "Calm: failing is no great loss, the speaker can simply start over.",
+              "fr": "Serein : échouer n'est pas bien grave, il suffira de recommencer."
+            },
+            {
+              "en": "Gloomy: if he fails, everything is lost.",
+              "fr": "Sombre : s'il échoue, tout est perdu."
+            },
+            {
+              "en": "The speaker has already failed and is starting over.",
+              "fr": "Le locuteur a déjà échoué et recommence."
+            }
+          ],
+          "why": {
+            "en": "たところで can also shrink the worst case: even failing changes little, so there is nothing to fear. It is a supposition (« even if »), not a failure that has happened, and not a gloomy one.",
+            "fr": "たところで peut aussi réduire le pire : même échouer ne change presque rien, donc rien à craindre. C'est une supposition (« même si »), pas un échec déjà arrivé, et pas une sombre."
+          }
+        }
+      ]
     }
   },
   {
