@@ -285,18 +285,22 @@ def test_a_kana_line_wraps_between_its_phrases():
 
 # ── Plan 194: the quiz, and the tutorial once per point ──────
 
-def test_the_quiz_asks_seven_or_eight_with_their_traps():
+def test_the_quiz_asks_new_questions_with_their_traps():
     level, entry = find("〜てください")
     quiz = tour_payload(level, entry, "fr")["quiz"]
-    assert 7 <= len(quiz) <= 8
-    assert {q["kind"] for q in quiz} == {"gap", "which", "usage"}
+    assert 3 <= len(quiz) <= 8
+    assert {q["kind"] for q in quiz} <= {"gap", "which"}
     for q in quiz:
         assert sum(c["correct"] for c in q["choices"]) == 1, q
-        assert any(c.get("trap") for c in q["choices"]), q
         assert not any(c["correct"] and c.get("trap") for c in q["choices"])
         assert q["why"]
+    # A "which" is trapped by a rival's sentence while the rivals have one
+    # to spare, then by any other the app teaches; the quiz has traps.
+    assert any(c.get("trap") for q in quiz for c in q["choices"])
     for q in (q for q in quiz if q["kind"] == "gap"):
-        assert "〜てください" in [c["pattern"] for c in q["choices"]]
+        # Asked from a rival's side: the point is among the choices, and wrong.
+        point = next(c for c in q["choices"] if c["pattern"] == "〜てください")
+        assert not point["correct"] and point["trap"]
         assert any(p.get("blank") for p in q["furigana"])
     for q in (q for q in quiz if q["kind"] == "which"):
         right = next(c for c in q["choices"] if c["correct"])
@@ -306,6 +310,38 @@ def test_the_quiz_asks_seven_or_eight_with_their_traps():
                 assert not lit_spans(c["jp"], "〜てください", level), c["jp"]
     # Seeded: a reload asks the same.
     assert tour_payload(level, entry, "fr")["quiz"] == quiz
+
+
+def _sentences(tour):
+    """Every sentence a tour shows, in the order it shows them."""
+    out = [x["jp"] for x in tour["look"]] + [x["jp"] for x in tour["twists"]]
+    if tour["scene"]:
+        out += [line["jp"] for line in tour["scene"]["lines"]] + [tour["scene"]["ask"]["cue"]["jp"]]
+        out += [c["jp"] for c in tour["scene"]["ask"]["choices"]]
+    return out
+
+
+def test_no_quiz_question_repeats_a_sentence_the_tour_has_shown():
+    """Plan 195: every question is new. A quiz sentence is not a look, a
+    twist or a line of the scene, and no sentence stands in two questions
+    (or twice in one) -- over every point that has a quiz."""
+    from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+    from study.grammar_tour import QUIZ_MIN, QUIZ_SIZE
+    quizzed = 0
+    for level, entries in GRAMMAR_POINTS_BY_LEVEL.items():
+        for entry in entries:
+            tour = tour_payload(level, entry, "en")
+            if not tour or not tour["quiz"]:
+                continue
+            quizzed += 1
+            quiz = tour["quiz"]
+            assert QUIZ_MIN <= len(quiz) <= QUIZ_SIZE, entry["pattern"]
+            asked = []
+            for q in quiz:
+                asked += [q["jp"]] if q["kind"] == "gap" else [c["jp"] for c in q["choices"]]
+            assert not set(asked) & set(_sentences(tour)), (level, entry["pattern"], set(asked) & set(_sentences(tour)))
+            assert len(asked) == len(set(asked)), (level, entry["pattern"])
+    assert quizzed > 400
 
 
 def test_the_usages_carry_their_translation_and_kind():

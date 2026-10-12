@@ -20,8 +20,9 @@ which is why every point that can be lit gets one on the same day.
   where the point attaches to a verb, the verb of the first example from
   its dictionary form to the point (書く → 書いてください).
 - `rival`: the first rival the lesson names, for the terminus.
-- `quiz`: the closing quiz (plan 194), seven or eight questions with
-  their traps, derived (_quiz); None where there is too little to ask.
+- `quiz`: the closing quiz (plan 194), up to eight questions with their
+  traps, each on a sentence the tour has not shown and none twice (plan
+  195), derived (_quiz); None where there is too little to ask.
 - `twists`, `scene`: the point's authored `tour` block (plan 187c),
   localised, the choices shuffled by a seed of the card id: [] and None
   where it is not written yet. study/grammar_check.py holds the block's
@@ -52,7 +53,7 @@ from study.grammar_match import contains_pattern, verifiable
 from study.morphology import tokenize
 
 # Bumped when the payload's shape or its seeding changes.
-TOUR_REV = 3
+TOUR_REV = 4
 LOOK_COUNT = 3
 MIN_LIT = 2
 GUESS_COUNT = 4
@@ -292,18 +293,24 @@ def _twists(level: str, entry: dict, lang: str) -> list[dict]:
     return out
 
 
-# ── 試験 the closing quiz (plan 194) ──────────────────────────
-# Seven or eight questions, each with its trap, derived from what the
-# catalogue holds so every toured point gets one the day it ships:
-#   gap      a contrast sentence, the point blanked, its rivals offered
-#   which    "which one uses it": the point's sentence against its
-#            rivals' own sentences, which the point is not in
-#   usage    a twist again, with all three of its readings
-# A trap is a rival the lesson's compare names (or the wrong reading its
-# author set first); `why` is the lesson's own line on that rival.
+# ── 試験 the closing quiz (plan 194, every question new in plan 195) ──
+# Up to eight questions, each with its trap, derived from what the
+# catalogue holds so every toured point gets one the day it ships. Each is
+# asked on a sentence the learner has not met in the tour -- not a look,
+# not a twist, not a line of the scene -- and no sentence is asked, or
+# offered, twice:
+#   which    "which one uses it": a sentence that writes the point
+#            (study/grammar_quiz_pool) against two of its rivals' own
+#            sentences, which the point is not in
+#   gap      a rival's own contrast sentence with the rival blanked, the
+#            point among the choices as the wrong answer: the point
+#            told apart from the side of its neighbour
+# A trap is a rival the lesson's compare names (or, in a gap, the point
+# itself); `why` is the lesson's own line on that pair. A point with fewer
+# than QUIZ_MIN such questions has no quiz: the tour ends on its results.
 QUIZ_SIZE = 8
-QUIZ_MIN = 4
-_QUIZ_PLAN = ("gap", "which", "usage", "gap", "usage", "which", "gap", "usage")
+QUIZ_MIN = 3
+_RANK = {level: n for n, level in enumerate(("N5", "N4", "N3", "N2", "N1"))}
 
 
 def _compare_line(entry: dict, rival: str, lang: str) -> str | None:
@@ -321,106 +328,144 @@ def _without_point(jp: str, pattern: str, level: str) -> bool:
     return not (verifiable(pattern) and contains_pattern(jp, pattern))
 
 
-def _gap_questions(level: str, entry: dict, lang: str) -> list[dict]:
-    from study.grammar_lesson import contrast_payload
-    pattern = entry["pattern"]
-    out, seen = [], set()
-    for turn in range(8):
-        c = contrast_payload(level, entry, get_grammar_points(level), lang, turn=turn)
-        if c is None:
-            break
-        if c["jp"] in seen:
-            continue
-        seen.add(c["jp"])
-        named = {r["pattern"] for r in entry.get("compare", [])}
-        furigana = furigana_by_pattern(c["choices"])
-        traps = [p for p in c["choices"] if p != pattern and p in named]
-        out.append({
-            "kind": "gap",
-            "jp": c["jp"], "tr": c["tr"], "furigana": c["furigana"],
-            "choices": [{"pattern": p, "furigana": furigana.get(p), "correct": p == pattern,
-                         "trap": p in traps} for p in c["choices"]],
-            "why": _compare_line(entry, traps[0], lang) if traps else None,
-        })
+def _met(entry: dict, look: list[dict]) -> set[str]:
+    """Every sentence the tour has shown by the time the quiz starts."""
+    tour = entry.get("tour") or {}
+    met = {item["jp"] for item in look}
+    met |= {twist["jp"] for twist in tour.get("twists") or []}
+    scene = tour.get("scene")
+    if scene:
+        met |= {line["jp"] for line in scene["lines"]}
+        met.add(scene["ask"]["cue"]["jp"])
+        met |= set(scene["ask"]["choices"])
+    return met
+
+
+def _rivals(level: str, entry: dict) -> list[tuple[str, str, dict]]:
+    """(level, pattern, entry) of each rival the lesson names that the
+    catalogue holds at the point's level or below, in the lesson's order."""
+    out = []
+    for r in entry.get("compare", []):
+        found = find(r["pattern"])
+        if found is not None and _RANK[found[0]] <= _RANK[level]:
+            out.append((found[0], r["pattern"], found[1]))
     return out
 
 
-def _which_questions(level: str, entry: dict, lang: str, look: list[dict]) -> list[dict]:
+def _gap_questions(level: str, entry: dict, lang: str, met: set[str], rng: random.Random) -> list[dict]:
+    """A rival's own contrast sentences with the rival blanked, the point
+    offered as a wrong answer. Only a rival whose lesson names the point
+    back, and a sentence its author marked as one where the rivals are
+    wrong, so the point is certainly not the answer."""
+    from study.grammar_lesson import contrast_payload
     pattern = entry["pattern"]
-    shown = {item["jp"] for item in look}
-    mine = [ex for ex in entry.get("examples", []) if ex.get("jp") and lit_spans(ex["jp"], pattern, level)]
-    mine = [ex for ex in mine if ex["jp"] not in shown] + [ex for ex in mine if ex["jp"] in shown]
-    rivals = []
-    for r in entry.get("compare", []):
-        found = find(r["pattern"])
-        if found is None:
-            continue
-        for ex in found[1].get("examples", []):
-            if ex.get("jp") and _without_point(ex["jp"], pattern, level):
-                rivals.append((r["pattern"], ex))
-                break
-    if not rivals:
-        return []
     out = []
-    for n, ex in enumerate(mine[:3]):
-        rng = random.Random(f"{TOUR_REV}:{grammar_to_id(entry, level)}:which:{n}")
-        wrong = rivals[n:] + rivals[:n]
-        choices = [{"jp": ex["jp"], "furigana": _parts(ex["jp"]), "correct": True, "trap": False}]
-        choices += [{"jp": r_ex["jp"], "furigana": _parts(r_ex["jp"]), "correct": False, "trap": True,
-                     "pattern": r_pattern} for r_pattern, r_ex in wrong[:2]]
+    for r_level, r_pattern, r_entry in _rivals(level, entry):
+        why = _compare_line(r_entry, pattern, lang)
+        if why is None:
+            continue
+        for example in r_entry.get("examples", []):
+            jp = example.get("jp")
+            if not example.get("contrast") or jp in met or not _without_point(jp, pattern, level):
+                continue
+            c = contrast_payload(r_level, r_entry, get_grammar_points(r_level), lang, rng=rng,
+                                 example=example, offer=pattern)
+            if c is None or pattern not in c["choices"] or c["answer"] != r_pattern:
+                continue
+            furigana = furigana_by_pattern(c["choices"])
+            out.append({
+                "kind": "gap",
+                "jp": c["jp"], "tr": c["tr"], "furigana": c["furigana"],
+                "choices": [{"pattern": p, "furigana": furigana.get(p), "correct": p == r_pattern,
+                             "trap": p == pattern} for p in c["choices"]],
+                "why": why,
+            })
+            met.add(jp)
+    return out
+
+
+def _which_questions(level: str, entry: dict, lang: str, met: set[str], rng: random.Random) -> list[dict]:
+    """The point's sentence against two sentences that do not write it,
+    each sentence used once across the quiz: its rivals' own first (the
+    traps, one rival's at a time in turn), then any other sentence the
+    app teaches at the level or below."""
+    from study import grammar_quiz_pool
+    pattern = entry["pattern"]
+    mine = [jp for jp in grammar_quiz_pool.sentences(level, pattern) if jp not in met]
+    if not mine:
+        return []
+    asked = set(mine)
+    spare: dict[str, list[str]] = {}
+    for _, r_pattern, r_entry in _rivals(level, entry):
+        spare[r_pattern] = [
+            ex["jp"] for ex in r_entry.get("examples", [])
+            if ex.get("jp") and ex["jp"] not in met and ex["jp"] not in asked
+            and _without_point(ex["jp"], pattern, level)
+        ]
+    # Any other sentence, found as it is wanted: the detector reads each
+    # one, and a quiz needs a dozen at most.
+    others = [jp for jp, lv in grammar_quiz_pool.corpus()
+              if _RANK[lv] <= _RANK[level] and jp not in met and jp not in asked
+              and jp not in {j for js in spare.values() for j in js}]
+    rng.shuffle(others)
+
+    def another() -> str | None:
+        while others:
+            jp = others.pop()
+            if _without_point(jp, pattern, level):
+                return jp
+        return None
+
+    out = []
+    for n, jp in enumerate(mine):
+        # The next rivals with a sentence left, so the traps take turns
+        # instead of the first rival being asked every time.
+        order = [p for p in spare if spare[p]]
+        if order:
+            order = order[n % len(order):] + order[:n % len(order)]
+        wrong = [(p, spare[p].pop(0)) for p in order[:2]]
+        while len(wrong) < 2:
+            jp_other = another()
+            if jp_other is None:
+                return out
+            wrong.append((None, jp_other))
+        choices = [{"jp": jp, "furigana": _parts(jp), "correct": True, "trap": False}]
+        choices += [{"jp": w_jp, "furigana": _parts(w_jp), "correct": False, "trap": w_pattern is not None,
+                     **({"pattern": w_pattern} if w_pattern else {})} for w_pattern, w_jp in wrong]
         rng.shuffle(choices)
+        why = _compare_line(entry, wrong[0][0], lang) if wrong[0][0] else None
         out.append({
             "kind": "which",
             "pattern": pattern,
             "pattern_furigana": pattern_furigana(pattern, entry.get("reading")),
             "choices": choices,
-            "why": _compare_line(entry, wrong[0][0], lang),
+            "why": why or _rule_line(entry, lang),
         })
     return out
 
 
-def _usage_questions(level: str, entry: dict, lang: str) -> list[dict]:
-    out = []
-    twists = (entry.get("tour") or {}).get("twists") or []
-    # The traps first: they are what the quiz is for.
-    order = sorted(range(len(twists)), key=lambda n: twists[n].get("kind") != "trap")
-    for n in order:
-        twist = twists[n]
-        rng = random.Random(f"{TOUR_REV}:{grammar_to_id(entry, level)}:usage:{n}")
-        choices = [{"text": localise(c, lang), "correct": i == 0, "trap": i == 1}
-                   for i, c in enumerate(twist["choices"])]
-        rng.shuffle(choices)
-        tr = twist.get("tr")
-        out.append({
-            "kind": "usage",
-            "notion": localise(twist["notion"], lang),
-            "jp": twist["jp"],
-            "furigana": _parts(twist["jp"]),
-            "tr": localise(tr, lang) if tr else None,
-            "ask": localise(twist["ask"], lang),
-            "choices": choices,
-            "why": localise(twist["why"], lang),
-        })
-    return out
+def _rule_line(entry: dict, lang: str) -> str | None:
+    """The lesson's own line on what the point does: the answer's why where
+    no rival's sentence stood among the wrong ones."""
+    rule = next((s for s in entry.get("steps", []) if s.get("kind") == "rule"), None)
+    return localise({"en": rule["en"], "fr": rule["fr"]}, lang) if rule else gloss(entry, lang)
 
 
 def _quiz(level: str, entry: dict, lang: str, look: list[dict]) -> list[dict] | None:
-    """The closing quiz: up to QUIZ_SIZE questions in _QUIZ_PLAN's order,
-    a kind that has run dry giving its turn to the next; None under
-    QUIZ_MIN, where there is too little to ask."""
-    banks = {
-        "gap": _gap_questions(level, entry, lang),
-        "which": _which_questions(level, entry, lang, look),
-        "usage": _usage_questions(level, entry, lang),
-    }
+    """The closing quiz: up to QUIZ_SIZE questions, the gaps and the
+    "which" taking turns, each on a sentence the tour has not shown and no
+    sentence twice; None under QUIZ_MIN, where there is too little to ask."""
+    rng = random.Random(f"{TOUR_REV}:{grammar_to_id(entry, level)}:quiz")
+    met = _met(entry, look)
+    gaps = _gap_questions(level, entry, lang, met, rng)
+    # What a gap asked is spent for "which" as well (_gap_questions adds it
+    # to `met` as it goes, so the sentences are not offered again).
+    whiches = _which_questions(level, entry, lang, met, rng)
     out = []
-    plan = list(_QUIZ_PLAN)
-    while len(out) < QUIZ_SIZE and any(banks.values()):
-        kind = plan.pop(0) if plan else next(k for k, v in banks.items() if v)
-        if banks.get(kind):
-            out.append(banks[kind].pop(0))
-        elif not plan:
-            continue
+    while len(out) < QUIZ_SIZE and (gaps or whiches):
+        for bank in (gaps, whiches):
+            if bank and len(out) < QUIZ_SIZE:
+                out.append(bank.pop(0))
     if len(out) < QUIZ_MIN:
         return None
     for n, q in enumerate(out):
