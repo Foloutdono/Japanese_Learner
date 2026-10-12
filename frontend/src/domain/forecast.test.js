@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { dueFigure, dueText } from './forecast'
+import { dueFigure, dueText, finishFigure } from './forecast'
 import fr from '../locales/fr'
 import en from '../locales/en'
 
@@ -36,5 +36,21 @@ describe('the same wait as a tile\'s figure', () => {
     expect(dueFigure(86400, en)).toEqual({ value: 1, unit: 'day' })
     expect(dueFigure(3 * 86400, en)).toEqual({ value: 3, unit: 'days' })
     expect(dueFigure(90 * 86400, en)).toEqual({ value: 3, unit: 'mo' })
+  })
+})
+
+describe('what is left of a run, in the rhythm (plan 198)', () => {
+  const format = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 })
+
+  it('is a dash while there is no pace to say it from', () => {
+    expect(finishFigure(null, format, true)).toEqual({ value: '—', unit: null })
+  })
+
+  it('is minutes, and hours only where asked and from two of them', () => {
+    expect(finishFigure(41, format)).toEqual({ value: '≈ 41', unit: 'min' })
+    expect(finishFigure(568, format)).toEqual({ value: '≈ 568', unit: 'min' })
+    expect(finishFigure(119, format, true)).toEqual({ value: '≈ 119', unit: 'min' })
+    expect(finishFigure(120, format, true)).toEqual({ value: '≈ 2', unit: 'h' })
+    expect(finishFigure(568, format, true)).toEqual({ value: '≈ 9,5', unit: 'h' })
   })
 })

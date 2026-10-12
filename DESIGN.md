@@ -274,6 +274,15 @@ decided by the script in the roundel, not by taste.
 A figure and its label form a fixed pair — large numeral, small unit inline,
 caps label beneath at `--fs-caption-xs`.
 
+**A numeral that stands alone is proportional** (`proportional-nums`, plan
+198). Space Grotesk's tabular `1` is drawn with a foot, which a column wants
+(every digit one width) and a lone numeral does not: at a tile's size `10 min`
+read as a glitch, and nearly every wait on the ladder has a 1 in it (10 min,
+1 h, 1 j, 21 j). The ladder card's panel -- the walk's waits, the outcome rows,
+the rhythm -- sets its numerals proportional; every figure that stands in a
+column (the key caps, a records lattice) and every other card's panel stays
+tabular.
+
 ### French punctuation does not start a line
 
 French sets a space before `:` `;` `!` `?` and inside `« »`, and that space is
@@ -895,15 +904,42 @@ Every exercise ends on the run's own rating bar. The exercise says what
 happened, never the grade (ADR 0013). On the desk the card takes the
 stage's width, its sentence a step up, the tiles or the entry under it,
 and the card panel at the left shows **the walk upright**
-(`LadderMap`): every
-stop on one rail in the line's pigment, done, the one in hand ringed in
-ink on a wash, each stop ahead with the wait before it. The stops are
+(`LadderMap`, redrawn in plan 198, the owner's pick B of the canvas
+"Tsuji — the card panel"): every stop on one rail, **filled in the line's
+pigment as far as it is ridden**, a check on each stop done, the one in hand
+ringed in ink on a wash, each stop ahead with the wait before it. A stop
+done and the stop in hand **say nothing** (« fait » and « maintenant » went:
+the check and the ring say them, and a screen reader still hears them), and
+mastered the star is the mastered state's gold. The stops are
 named by their own step (« Choisir 2 »); **no group heading** stands over
 them, since each already says its group (plan 195). The run never stands
 on a scroll bar: on a wrong pick's note, and on any answer under 800px of
 window height (the short desk), the answer sheet gives way once the answer
 is in -- the card already says which form was right and which was taken --
 as it does on a phone.
+
+**The panel says outcomes, not verdicts** (plan 198). On the line a verdict
+is one of a few things: a miss keeps the step and asks it again, a pass
+climbs one, a miss once mastered is the relapse. The tiles read « 10 min »
+four times at Choisir 1 (both outcomes wait ten minutes), one fact four
+times, and outweighed the walk they were about; so the ladder card has **no
+tiles**. The stop in hand opens into **a row per outcome**
+(`domain/ladderLine`'s `outcomesOf`): the verdicts that lead there as their
+keys (the digit's cap, the verdict's dot and word), a glyph for where it
+sends the point (↻ asked again, ↓ down the line, ↑ back up it to the
+relapse, which a word names beside its wait), and the wait as the figure the
+tiles had. Two verdicts that do the same and wait the same are one row --
+Raté and Presque, Difficile and Correct, as the learner's own scale (four,
+six or two) has them, and a mastered point's passes split where their weeks
+differ -- the pass in the pass key's ink, the miss in the miss's. Where the
+words do not fit beside their keys they stand bare, measured
+(`hooks/useLabelsFit`, as the run panel's figures are), each row said whole
+to a screen reader. The server says where each rating leaves the point
+(`review_preview[q].step` and `passed`), so the client never learns the
+pass rule by heart. Under the walk the rhythm stands on a hairline and says
+what is left in hours past two: « ≈ 9,5 h », not « ≈ 568 min ». Every
+other card keeps its strip and its tiles, and a ladder card served without
+its landings draws the tiles it always did.
 
 On the desk (plan 187f, the owner's pick F) the tour stands on the runs'
 three panels. The stop is the middle, with no track of its own: its gate
@@ -1651,7 +1687,9 @@ line here says otherwise.
   sem.), the verdict's word as its label beneath, the digit that presses
   it in the corner (off the card's own `review_preview`, so nothing waits
   on a round trip) — the keys the elements no longer print, and the
-  rhythm on a sumi foot. **No captions on either panel**
+  rhythm on a sumi foot. A grammar point on the ladder is the one card
+  drawn otherwise: its state is its walk, and its verdicts are the outcomes
+  on it (*The ladder*, above; plan 198). **No captions on either panel**
   and no line under a tile's interval saying what the rating does — the
   owner cut them for room: the figures, the stops and the tiles name
   themselves, and the remaining count is a fourth figure. Where the

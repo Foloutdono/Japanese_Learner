@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../../LangContext'
+import { outcomesOf } from '../../domain/ladderLine'
+import { ratingButtons } from '../../domain/ratingScales'
+import en from '../../locales/en'
 import cards from '../../testing/grammarLadder.json'
 import '../../index.css'
 
@@ -99,6 +102,56 @@ describe('the point’s roundel', () => {
     ])
     expect(root.querySelector('[aria-current="step"] .gl-map__name').textContent).toBe('Build 2')
     expect(stops[6].querySelector('.gl-map__when').textContent).toBe('+4 d')
+  })
+
+  // Plan 198: a stop done wears a check and a stop in hand is lit; neither
+  // prints a word (it is for a screen reader), and only a stop ahead says
+  // its wait.
+  it('checks the stops done and leaves them, and the stop in hand, to say nothing', async () => {
+    const root = (await mount(<LadderMap card={cards.build} />)).container
+    const stops = [...root.querySelectorAll('.gl-map__stop')]
+    expect(stops.map(s => s.className.match(/gl-map__stop--(done|now|ahead)/)[1])).toEqual([
+      'done', 'done', 'done', 'done', 'done', 'now', 'ahead', 'ahead', 'ahead',
+    ])
+    expect(root.querySelectorAll('.gl-map__stop--done .gl-map__dot svg')).toHaveLength(5)
+    expect(root.querySelectorAll('.gl-map__when')).toHaveLength(3)
+    expect(root.querySelector('.gl-map__stop--done > .sr-only').textContent).toBe('done')
+    expect(root.querySelector('.gl-map__stop--now > .sr-only').textContent).toBe('now')
+    expect(root.querySelector('.gl-outs')).toBeNull()
+  })
+
+  it('opens the stop in hand into what each rating does, a row an outcome', async () => {
+    const verdicts = ratingButtons('simple', en).map((b, i) => ({ ...b, digit: i + 1 })).reverse()
+    const outcomes = outcomesOf(cards.choose, verdicts, en)
+    const root = (await mount(<LadderMap card={cards.choose} outcomes={outcomes} />)).container
+    const stop = root.querySelector('[aria-current="step"]')
+    expect(stop.classList.contains('gl-map__stop--outs')).toBe(true)
+    const rows = [...stop.querySelectorAll(':scope > .gl-outs > .gl-out')]
+    expect(rows.map(r => r.className)).toEqual(['gl-out gl-out--stay', 'gl-out gl-out--next gl-out--pass'])
+    expect(rows.map(r => [...r.querySelectorAll('.gl-out__key')].map(k => k.textContent))).toEqual([
+      ['4Wrong', '3Almost'], ['2Difficult', '1Correct'],
+    ])
+    expect(rows.map(r => r.querySelector('.gl-out__when').textContent)).toEqual(['10min', '1h'])
+    // The keys and the wait are drawn; a screen reader hears each row whole.
+    expect(rows.every(r => r.querySelector('.gl-out__keys').getAttribute('aria-hidden') === 'true')).toBe(true)
+    expect(rows.map(r => r.querySelector(':scope > .sr-only').textContent)).toEqual([
+      'Wrong, Almost: try again, in 10 min',
+      'Difficult, Correct: next step, in 1 h',
+    ])
+    expect(stop.querySelector('.gl-outs').getAttribute('aria-label')).toBe('What each rating does')
+  })
+
+  it('names the relapse a miss once mastered is, and says a pass stays mastered', async () => {
+    const verdicts = ratingButtons('simple', en).map((b, i) => ({ ...b, digit: i + 1 })).reverse()
+    const root = (await mount(<LadderMap card={cards.mastered} outcomes={outcomesOf(cards.mastered, verdicts, en)} />)).container
+    const rows = [...root.querySelectorAll('.gl-out')]
+    expect(rows.map(r => r.className)).toEqual([
+      'gl-out gl-out--back', 'gl-out gl-out--stay gl-out--pass', 'gl-out gl-out--stay gl-out--pass',
+    ])
+    expect(rows[0].querySelector('.gl-out__note').textContent).toBe('Relapse')
+    expect(rows.slice(1).every(r => !r.querySelector('.gl-out__note'))).toBe(true)
+    expect(rows[0].querySelector(':scope > .sr-only').textContent).toBe('Wrong, Almost: relapse, in 10 min')
+    expect(rows[2].querySelector(':scope > .sr-only').textContent).toMatch(/^Correct: stays mastered, in /)
   })
 })
 

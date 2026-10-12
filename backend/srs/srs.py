@@ -1125,7 +1125,7 @@ class SRSEngine:
                 updated = self._schedule(copy.deepcopy(base_state), quality)
                 xp_earned = xp_math.compute_review_xp(quality, reviews_today)
                 new_level = xp_math.level_from_xp(prior_xp + xp_earned)
-                per_quality[quality] = {
+                entry = {
                     "xp_earned": xp_earned,
                     "leveled_up": new_level != prior_level,
                     "new_level": new_level,
@@ -1140,6 +1140,17 @@ class SRSEngine:
                     # presses it.
                     "due_in": max(0, int((updated.next_review - now).total_seconds())),
                 }
+                if updated.mode == ladder.LADDER_MODE:
+                    # A ladder card (plan 198): where this rating leaves the
+                    # point on its line, in the shape the card's own `step`
+                    # has, and whether it passes. The desk's card panel
+                    # groups the verdicts by what they do to the point and
+                    # draws that on its walk, so the client compares this
+                    # step with the card's own and never learns the pass
+                    # rule (ladder.PASS_QUALITY) by heart.
+                    entry["step"] = ladder.position(updated)
+                    entry["passed"] = quality >= ladder.PASS_QUALITY
+                per_quality[quality] = entry
             result[card_id] = per_quality
         return result
 
