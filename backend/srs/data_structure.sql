@@ -971,7 +971,11 @@ CREATE TABLE event_log (
     -- The client's own id for the event (frontend/src/lib/track.js), so
     -- a batch the page sends twice is kept once. NULL for the server's
     -- own rows and an older client's.
-    cid     TEXT
+    cid     TEXT,
+    -- The client's random id for the visit (frontend/src/lib/track.js):
+    -- how long a session lasted and how many a day. NULL for the
+    -- server's own rows and an older client's.
+    sid     TEXT
 );
 CREATE UNIQUE INDEX idx_event_log_user_cid ON event_log(user_id, cid) WHERE cid IS NOT NULL;
 

@@ -412,9 +412,11 @@ Three rules matter more than the rest:
   `/api/decks`, through `apiArea` in `lib/routePattern.js`.
 
 Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
-endpoint from a screen. Reading the data: `scripts/weekly_digest.py` (weekly,
+endpoint from a screen. `track` also stamps each event with the visit's random
+session id (`event_log.sid`, shape-checked by `events.clean_sid`, never a
+property) and opens a visit with `session_start`. Reading the data: `scripts/weekly_digest.py` (weekly,
 from `.github/workflows/weekly-digest.yml`, into the run's step summary:
-boarding, return, who is active (DAU/WAU/MAU), the boot, the fare gate, the
+boarding, return, who is active (DAU/WAU/MAU), sessions (length, screens, a day), the boot, the fare gate, the
 offer door by door, the ride and guides, runs by kind and level, failed
 requests and the install prompt; `tests/test_weekly_digest.py` reads each
 back), or

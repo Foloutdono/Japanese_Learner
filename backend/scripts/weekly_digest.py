@@ -31,6 +31,8 @@ already looking.
                   level.
   5  ENGAGEMENT   how many learners are active per day / week / month,
                   and how sticky that is (DAU over MAU).
+  5b SESSIONS    how long a visit lasts, how many screens it sees, how
+                  many a day a learner has (event_log.sid).
   6  OFFER        per door: seen, pressed, refused, and how long the
                   decision took.
   7  RIDE/GUIDE   whether the first ride and the gate guides are sat
@@ -274,6 +276,68 @@ def engagement(cur, days: int) -> str:
     )
 
 
+def sessions(cur, days: int) -> str:
+    """How long a visit lasts and what it sees.
+
+    A session is one (learner, sid): the client's random id for a visit,
+    which ends after thirty minutes without an event (lib/track.js).
+    Length is first event to last, so it is a floor -- the time spent
+    after the last tap is invisible -- and a session of one event has no
+    length at all, which is why the median is over the others. Raw rows
+    only (30 days); the per-day table below also reads `session_start`
+    from event_daily, so it keeps going after the rows are gone.
+    """
+    cur.execute(
+        """
+        WITH s AS (
+            SELECT user_id, sid,
+                   EXTRACT(EPOCH FROM MAX(at) - MIN(at)) AS secs,
+                   COUNT(*) FILTER (WHERE name = 'screen_view') AS screens
+              FROM event_log
+             WHERE sid IS NOT NULL
+               AND at > NOW() - (%s || ' days')::interval
+             GROUP BY user_id, sid
+        )
+        SELECT COUNT(*),
+               COUNT(DISTINCT user_id),
+               PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY secs) FILTER (WHERE secs > 0),
+               PERCENTILE_DISC(0.9) WITHIN GROUP (ORDER BY secs) FILTER (WHERE secs > 0),
+               PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY screens),
+               COUNT(*) FILTER (WHERE screens <= 1)
+          FROM s
+        """,
+        (days,),
+    )
+    total, learners, median_s, p90_s, median_screens, one_screen = cur.fetchone()
+    if not total:
+        return "_Nothing yet._\n"
+    mins = lambda v: "—" if v is None else f"{int(v) // 60} min {int(v) % 60:02d} s"   # noqa: E731
+    out = [table(
+        ["sessions", "learners", "per learner", "median length", "p90 length", "median screens", "one screen or none"],
+        [(total, learners, f"{total / learners:.1f}", mins(median_s), mins(p90_s),
+          median_screens, f"{100 * one_screen // total}%")],
+    )]
+    cur.execute(
+        """
+        WITH starts AS (
+            SELECT user_id, (at AT TIME ZONE 'UTC')::date AS day, 1 AS n
+              FROM event_log
+             WHERE name = 'session_start' AND at > NOW() - (%s || ' days')::interval
+            UNION ALL
+            SELECT user_id, day, n
+              FROM event_daily
+             WHERE name = 'session_start' AND day > (NOW() - (%s || ' days')::interval)::date
+        )
+        SELECT day, SUM(n), COUNT(DISTINCT user_id)
+          FROM starts GROUP BY day ORDER BY day DESC LIMIT 14
+        """,
+        (days, days),
+    )
+    out.append("**Sessions per day**\n")
+    out.append(table(["day (UTC)", "sessions", "learners"], cur.fetchall()))
+    return "\n".join(out)
+
+
 def offer(cur, days: int) -> str:
     """Per door: seen, pressed, refused. Learners, not events -- a door
     opened twice by one person is one person's opinion. The median is the
@@ -367,6 +431,7 @@ SECTIONS = [
     ("みどりの窓口 — where boarding is lost", boarding),
     ("Coming back", retention),
     ("Who is active", engagement),
+    ("Sessions", sessions),
     ("The boot", boot),
     ("Who wanted more than the free allowance", fare),
     ("The offer, door by door", offer),

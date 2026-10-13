@@ -4,7 +4,7 @@
 # "_Nothing yet._" and the Monday summary just looks quiet. These seed
 # one learner's rows under names no other test uses and read each
 # section back.
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -45,6 +45,14 @@ def seeded():
                 ("install_prompt", {"outcome": "digest-test-accepted"}),
             ]]
             events.write(cur, USER, rows)
+            # One session of three events, ninety seconds apart end to end.
+            t0 = now - timedelta(minutes=10)
+            sid = "digest-test-sid"
+            events.write(cur, USER, [
+                ("session_start", {}, t0, None, sid),
+                ("screen_view", {"route": "/today", "tab": "today"}, t0 + timedelta(seconds=30), None, sid),
+                ("screen_view", {"route": "/learn", "tab": "learn"}, t0 + timedelta(seconds=90), None, sid),
+            ])
         conn.commit()
     finally:
         conn.close()
@@ -90,3 +98,10 @@ def test_friction_lists_a_failed_area_per_status_and_the_install_answers():
     assert f"| {AREA} | 503 | 1 | 1 |" in out
     assert f"| {AREA} | 0 | 1 | 1 |" in out
     assert "| digest-test-accepted | 1 |" in out
+
+
+def test_sessions_reads_length_and_screens_from_the_session_id():
+    out = section(digest.sessions)
+    assert "_Nothing yet._" not in out
+    assert "1 min 30 s" in out
+    assert "**Sessions per day**" in out
