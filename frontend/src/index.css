@@ -8612,6 +8612,340 @@ textarea:focus-visible {
 .tdy-next__n small { margin-left: var(--sp-1); font-size: var(--fs-caption); font-weight: 600; color: var(--text-secondary); }
 .tdy-next__min { font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
+/* ── 浮世絵 — the print of the hour (plan 205) ────────────────────
+   The owner's pick of the canvas "Tsuji — Today, the visit card"
+   (round 9): Today's gate stands on a print of the hour
+   (components/station/TodayPrint.jsx), its dial the print's sun or
+   moon, the lines under it set on the sky, the title slip (題箋) down
+   the right edge. The print is drawn ahead of time
+   (scripts/today-print, public/today/print/<rev>/) and carries its own
+   colours: an illustration, not the app's chrome, so none of its inks
+   is a token and none of its pigments is a line's. What the app sets
+   on it reads the hour's inks (--tpr-*, components/station/print/
+   usePrint.js printVars), which the print's canvas measured at 4.5:1
+   or better on the sky under them at every hour.
+
+   Everything on the print is placed in its units: --tpr-u pixels to
+   the unit, the print's corner at (--tpr-x, --tpr-y) in the frame, an
+   element's place (--at-x, --at-y) set where it is drawn. */
+.tdy--print {
+  position: relative;
+  isolation: isolate;
+  /* The title slip's three inks: its paper, its sumi, the print's
+     vermilion (朱). */
+  --tpr-washi: #efe3bf;
+  --tpr-sumi: #1d1a16;
+  --tpr-shu: #a8382a;
+}
+/* The frame: the whole screen between the bars, under the gate; the
+   gate's own layer of placed things over it, in the same place. */
+.tpr,
+.tdy-hero--print {
+  position: absolute;
+  inset: calc(-1 * var(--sp-6)) calc(-1 * var(--sp-5)) 0;
+}
+.tpr {
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--tpr-top);
+}
+.tpr__art {
+  position: absolute;
+  left: var(--tpr-x);
+  top: var(--tpr-y);
+  width: calc(var(--tpr-w) * var(--tpr-u));
+  height: calc(var(--tpr-h) * var(--tpr-u));
+  background: var(--tpr-sky);
+}
+.tpr__art > * {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+/* The two textures, tiles drawn once at the print's scale: the sky's
+   wood grain under the clouds, the paper's fibre over everything (on a
+   layer of its own, so the busy print under it never redraws it). */
+.tpr__grain {
+  height: calc(var(--tpr-sky-h) * 100%);
+  background: var(--tpr-grain) 0 0 / calc(640 * var(--tpr-u)) calc(120 * var(--tpr-u));
+}
+.tpr__paper {
+  background: var(--tpr-paper) 0 0 / calc(128 * var(--tpr-u)) calc(128 * var(--tpr-u));
+  will-change: transform;
+}
+.tpr__layer,
+.tpr__grain,
+.tpr__rail,
+.tpr__paper { animation: tpr-in 0.5s ease-out both; }
+@keyframes tpr-in { from { opacity: 0; } }
+/* The train on its own layer, carried across by the compositor at an
+   even pace and out of the print (its run and time are the print's
+   own: TodayPrint). */
+.tpr__rail { overflow: hidden; }
+.tpr__train {
+  overflow: visible;
+  will-change: transform;
+  animation-name: tpr-cross;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes tpr-cross { from { transform: translateX(0); } to { transform: translateX(var(--tpr-run)); } }
+
+/* What the gate places on the print: centred on its place, rising in
+   once as the print's disc does. */
+.tdy-hero--print { display: block; pointer-events: none; }
+.tpr-at {
+  position: absolute;
+  left: calc(var(--tpr-x) + var(--at-x) * var(--tpr-u));
+  top: calc(var(--tpr-y) + var(--at-y) * var(--tpr-u));
+  margin: 0;
+  translate: -50% -50%;
+  animation: tpr-rise 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.tpr-at--top { translate: -50% 0; }
+@keyframes tpr-rise { from { opacity: 0; transform: translateY(16px); } }
+
+/* The dial as the hour's disc (TodayDial, PrintDial): drawn in the
+   print's units, its glow breathing, its halo glowing at dawn, dusk
+   and night. */
+.tdy-dial--print { width: calc(var(--dial-units) * var(--tpr-u)); }
+.tdy-dial__disc { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.tdy-dial__glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tpr-breathe 7s ease-in-out infinite alternate;
+}
+@keyframes tpr-breathe { from { opacity: 0.8; scale: 0.985; } to { opacity: 1; scale: 1.035; } }
+.tdy-dial__halo { opacity: var(--ho, 0); animation: tpr-halo 5.5s ease-in-out infinite alternate; }
+@keyframes tpr-halo { to { opacity: calc(var(--ho, 0) * 0.55); } }
+.tdy-dial--print .tdy-dial__fare-wait { stroke: var(--tpr-fare); stroke-opacity: 0.38; stroke-linecap: round; }
+.tdy-dial--print .tdy-dial__fare-ride { stroke: var(--tpr-fare); stroke-opacity: 0.78; }
+.tdy-dial--print .tdy-dial__fare-end { fill: var(--tpr-fare); }
+/* The count in the disc, in the hour's two golds (or the dawn sun's
+   cream); what it is under it. */
+.tdy-dial--print .tdy-dial__count {
+  background: linear-gradient(180deg, var(--tpr-count-a) 0%, var(--tpr-count-b) 100%);
+  background-clip: text;
+  color: transparent;
+}
+.tdy-dial--print .tdy-dial__unit { line-height: 1.2; color: var(--tpr-disc-soft); }
+/* The guide's mark (today.gate): the dial's rings, not its glow. */
+.tdy-dial__gate {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--dial-ring) * 100%);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+}
+/* Under the rings: the minutes and the hour they end, on one line. */
+.tdy-dial__line {
+  white-space: nowrap;
+  font-size: var(--fs-sm);
+  color: var(--tpr-soft);
+  font-variant-numeric: tabular-nums;
+}
+.tdy-dial__line .tdy-dial__time {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--tpr-ink);
+}
+.tdy-dial__line .tdy-dial__end { color: inherit; }
+/* The legend, set on the sky in the hour's inks. */
+.tdy--print .tdy-key { flex-wrap: nowrap; white-space: nowrap; line-height: 1.35; color: var(--tpr-soft); }
+/* :where() keeps the base rule's weight (it wins by coming later): a
+   heavier `… b` here would put every later `… b` in the sheet below it
+   (no-descending-specificity). The door's figure below does the same. */
+:where(.tdy--print) .tdy-key b { color: var(--tpr-ink); }
+.tdy--print .tdy-key__ride { background: var(--tpr-ink); }
+.tdy--print .tdy-key__wait { border-top-color: color-mix(in srgb, var(--tpr-ink) 55%, transparent); }
+
+/* The title slip (題箋): the day, and the hour's view in the print's
+   vermilion, down the print's right edge. */
+.tpr-title {
+  position: absolute;
+  top: var(--sp-5);
+  right: var(--sp-5);
+  z-index: 1;
+  margin: 0;
+  writing-mode: vertical-rl;
+  inline-size: max-content;
+  padding: var(--sp-3) var(--sp-1);
+  background: var(--tpr-washi);
+  color: var(--tpr-sumi);
+  border: 1px solid var(--tpr-sumi);
+  box-shadow: inset 0 0 0 2px var(--tpr-washi), inset 0 0 0 3px var(--tpr-shu);
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--tr-term);
+}
+.tpr-title__view { margin-inline-start: var(--sp-2); font-weight: 900; color: var(--tpr-shu); }
+
+/* At the thumb, over the print's foreground: the row on a sumi glass
+   (its panel inks, in both themes), the gate as it is, and no fade of
+   the page's ground behind them. */
+.tdy--print .tdy__foot { border-image: none; }
+/* The air gives way first, down to the room the lines under the dial
+   take: a screen shorter than that scrolls rather than set the row
+   over the legend. */
+.tdy--phone.tdy--print .tdy__air { min-height: calc(var(--tpr-room) * var(--tpr-u) - var(--sp-6)); }
+.tdy--print .tdy-door {
+  border-color: var(--surface-line);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+  color: var(--text-on-panel-soft);
+}
+:where(.tdy--print) .tdy-door__what b,
+.tdy--print .tdy-door__go { color: var(--text-on-panel); }
+
+/* The print's moving parts (the classes the print's build writes,
+   scripts/today-print/build.py): slowly and by little, transform and
+   opacity only. */
+.tpr-bird-arm { transform-box: view-box; transform-origin: 0 0; animation-duration: var(--beat, 1s); animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-name: tpr-bird-fold; animation-timing-function: linear; }
+.tpr-bird-arm--far { animation-name: tpr-bird-fold-far; }
+.tpr-bird-arm--glide { animation-name: tpr-bird-fold-glide; }
+.tpr-bird-garm { transform-box: view-box; transform-origin: 0 0; animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-name: tpr-bird-gull-arm; animation-timing-function: ease-in-out; animation-duration: calc(var(--beat, 1s) * 9); }
+.tpr-bird-garm--l { scale: 1 1; animation-name: tpr-bird-gull-arm-l; }
+.tpr-bird-garm--r { scale: 1 1; }
+.tpr-bird-ghand { transform-box: view-box; transform-origin: 0 0; animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-name: tpr-bird-gull-hand; animation-timing-function: ease-in-out; animation-duration: calc(var(--beat, 1s) * 9); }
+.tpr-bird-ghand--l { animation-name: tpr-bird-gull-hand-l; }
+.tpr-bird-hand { transform-box: view-box; transform-origin: 0 0; animation-duration: var(--beat, 1s); animation-iteration-count: infinite; animation-name: tpr-bird-bend; animation-timing-function: ease-in-out; animation-delay: calc(var(--ph, 0s) - var(--beat, 1s) * 0.12); }
+.tpr-bird-hand--glide { animation-name: tpr-bird-bend-glide; }
+.tpr-bird-heave { transform-box: view-box; transform-origin: 0 0; animation-duration: var(--beat, 1s); animation-delay: var(--ph, 0s); animation-iteration-count: infinite; animation-name: tpr-bird-heave; animation-timing-function: ease-in-out; }
+.tpr-bird-heave--glide { animation-name: tpr-bird-heave-glide; }
+.tpr-flare { transform-box: fill-box; transform-origin: center; animation-name: tpr-flare; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+.tpr-lamp { animation-name: tpr-lamp; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+.tpr-meteor { opacity: 0; animation: tpr-meteor 11s linear infinite; }
+.tpr-star { opacity: var(--o, 1); animation-name: tpr-star-twinkle; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+.tpr-bank { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-bank; animation-direction: alternate; }
+.tpr-cloud { animation-iteration-count: infinite; animation-name: tpr-cloud; animation-timing-function: linear; }
+.tpr-drift { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-drift-x; animation-direction: alternate; }
+.tpr-fall { animation-iteration-count: infinite; opacity: 0; animation-name: tpr-fall; animation-timing-function: linear; }
+.tpr-flock { animation-iteration-count: infinite; animation-name: tpr-flock; animation-timing-function: linear; }
+.tpr-flutter { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-flutter; animation-direction: alternate; }
+.tpr-gust { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-gust; }
+.tpr-heave { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-heave; animation-direction: alternate; }
+.tpr-keep { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-keep; animation-direction: alternate; }
+.tpr-nod { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-nod; animation-direction: alternate; }
+.tpr-pitch { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: 50% 100%; animation-name: tpr-pitch; animation-direction: alternate; }
+.tpr-rise { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-rise-y; animation-direction: alternate; }
+.tpr-spin { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-spin; }
+.tpr-stretch { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-stretch; animation-direction: alternate; }
+.tpr-sweep-x { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-sweep-x; animation-direction: alternate; }
+.tpr-sweep-y { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-sweep-y; animation-direction: alternate; }
+.tpr-swing { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-swing; animation-direction: alternate; }
+.tpr-tilt { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-tilt; animation-direction: alternate; }
+.tpr-tilt--cranes { animation-direction: alternate-reverse; }
+.tpr-undulate { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-undulate; animation-direction: alternate; }
+.tpr-wake { animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: 0.2; animation-name: tpr-wake; animation-direction: alternate; }
+.tpr-fog { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-fog; animation-direction: alternate; }
+.tpr-fog-breathe { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: center; animation-name: tpr-fog-breathe; animation-direction: alternate; }
+.tpr-glint { animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: 0; animation-name: tpr-glint; }
+.tpr-lap { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-lap; animation-direction: alternate; }
+.tpr-puff { animation-iteration-count: infinite; opacity: 0; transform-box: fill-box; transform-origin: center; animation-name: tpr-puff; animation-timing-function: ease-out; }
+.tpr-ripple { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-ripple; animation-direction: alternate; }
+.tpr-road { animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: var(--o, 1); animation-name: tpr-road; animation-direction: alternate; }
+.tpr-row { animation-iteration-count: infinite; animation-timing-function: ease-in-out; animation-name: tpr-row; animation-direction: alternate; }
+.tpr-twinkle { animation-iteration-count: infinite; animation-timing-function: ease-in-out; opacity: var(--o, 1); animation-name: tpr-twinkle; animation-direction: alternate; }
+.tpr-flame { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: fill-box; transform-origin: 50% 100%; animation-name: tpr-flame; animation-direction: alternate; }
+.tpr-lean { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-lean; }
+.tpr-sail { transform-box: fill-box; transform-origin: 50% 0; animation: tpr-sail 5.3s ease-in-out infinite alternate; }
+.tpr-scull { animation-iteration-count: infinite; animation-timing-function: ease-in-out; transform-box: view-box; animation-name: tpr-scull; }
+.tpr-spark { animation-iteration-count: infinite; opacity: 0; animation-name: tpr-spark; animation-timing-function: ease-out; }
+.tpr-glitter { opacity: 0; animation-name: tpr-glitter; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+@keyframes tpr-bird-bend { 0%, 100% { rotate: 14deg; } 42% { rotate: -22deg; } }
+@keyframes tpr-bird-bend-glide { 0%, 40%, 100% { rotate: 12deg; } 18%, 58% { rotate: -20deg; } 80% { rotate: 4deg; } }
+@keyframes tpr-bird-fold { 0% { scale: 1 1; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
+  42% { scale: 1 -0.86; animation-timing-function: cubic-bezier(0.3, 0.5, 0.5, 1); }
+  100% { scale: 1 1; } }
+@keyframes tpr-bird-fold-far { 0% { scale: 1 0.82; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
+  42% { scale: 1 -0.62; animation-timing-function: cubic-bezier(0.3, 0.5, 0.5, 1); }
+  100% { scale: 1 0.82; } }
+@keyframes tpr-bird-fold-glide { 0% { scale: 1 1; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
+  18% { scale: 1 -0.8; animation-timing-function: cubic-bezier(0.3, 0.5, 0.5, 1); }
+  40% { scale: 1 1; animation-timing-function: cubic-bezier(0.55, 0, 0.7, 0.4); }
+  58% { scale: 1 -0.8; animation-timing-function: cubic-bezier(0.3, 0.5, 0.5, 1); }
+  80% { scale: 1 0.55; }
+  100% { scale: 1 1; } }
+@keyframes tpr-bird-gull-arm { 0%, 62%, 100% { rotate: 0deg; }
+  68% { rotate: -26deg; } 74% { rotate: 22deg; } 80% { rotate: -24deg; } 86% { rotate: 20deg; } 92% { rotate: -6deg; } }
+@keyframes tpr-bird-gull-arm-l { 0%, 62%, 100% { rotate: 0deg; }
+  68% { rotate: 26deg; } 74% { rotate: -22deg; } 80% { rotate: 24deg; } 86% { rotate: -20deg; } 92% { rotate: 6deg; } }
+@keyframes tpr-bird-gull-hand { 0%, 62%, 100% { rotate: 0deg; } 70% { rotate: 14deg; } 76% { rotate: -16deg; } 82% { rotate: 14deg; } 88% { rotate: -12deg; } }
+@keyframes tpr-bird-gull-hand-l { 0%, 62%, 100% { rotate: 0deg; } 70% { rotate: -14deg; } 76% { rotate: 16deg; } 82% { rotate: -14deg; } 88% { rotate: 12deg; } }
+@keyframes tpr-bird-heave { 0%, 100% { translate: 0 0.5px; } 30% { translate: 0 -0.7px; } }
+@keyframes tpr-bird-heave-glide { 0%, 40%, 100% { translate: 0 0.6px; } 14%, 54% { translate: 0 -0.9px; } 80% { translate: 0 0.2px; } }
+@keyframes tpr-flare { 0% { opacity: 0.72; scale: 0.9; } 40% { opacity: 1; scale: 1.08; } 70% { opacity: 0.8; scale: 0.96; } 100% { opacity: 0.95; scale: 1.03; } }
+@keyframes tpr-lamp { to { opacity: 0.3; } }
+@keyframes tpr-meteor { 0%, 80% { opacity: 0; translate: 0 0; } 82% { opacity: 1; } 90% { opacity: 0; translate: 150px 0; } 100% { opacity: 0; translate: 150px 0; } }
+@keyframes tpr-star-twinkle { to { opacity: calc(var(--o, 1) * 0.2); } }
+@keyframes tpr-bank { from { rotate: -15deg; } to { rotate: 15deg; } }
+@keyframes tpr-cloud { from { translate: var(--a, 0%) 0; } to { translate: var(--b, 0%) 0; } }
+@keyframes tpr-drift-x { from { translate: 0 0; } to { translate: var(--dx, 0%) 0; } }
+@keyframes tpr-fall { 0% { opacity: 0; translate: 0 0; } 8% { opacity: 0.95; } 86% { opacity: 0.95; } 100% { opacity: 0; translate: var(--dx, 0%) var(--dy, 0%); } }
+@keyframes tpr-flock { 0% { translate: var(--x0, 0%) var(--y0, 0%); opacity: 0; } 6% { opacity: 1; } 94% { opacity: 1; } 100% { translate: var(--x1, 0%) var(--y1, 0%); opacity: 0; } }
+@keyframes tpr-flutter { from { rotate: -3deg; } to { rotate: 4deg; } }
+@keyframes tpr-gust { 0%, 100% { rotate: calc(var(--a, 0deg) * -0.35); }
+  26% { rotate: var(--a, 0deg); }
+  44% { rotate: calc(var(--a, 0deg) * 0.1); }
+  60% { rotate: calc(var(--a, 0deg) * 0.5); }
+  78% { rotate: calc(var(--a, 0deg) * -0.2); } }
+@keyframes tpr-heave { from { translate: 0 -0.6px; } to { translate: 0 0.8px; } }
+@keyframes tpr-keep { from { translate: calc(var(--kx, 0%) * -1) calc(var(--ky, 0%) * -1); } to { translate: var(--kx, 0%) var(--ky, 0%); } }
+@keyframes tpr-nod { from { rotate: -7deg; } to { rotate: 9deg; } }
+@keyframes tpr-pitch { from { rotate: -2.6deg; } to { rotate: 2.2deg; } }
+@keyframes tpr-rise-y { from { translate: 0 -1.3px; } to { translate: 0 1.3px; } }
+@keyframes tpr-spin { 0%, 100% { scale: 1 1; } 50% { scale: -0.9 1; } }
+@keyframes tpr-stretch { from { scale: 0.985 1; } to { scale: 1.04 0.97; } }
+@keyframes tpr-sweep-x { from { translate: calc(var(--rx, 0%) * -1) 0; } to { translate: var(--rx, 0%) 0; } }
+@keyframes tpr-sweep-y { from { translate: 0 calc(var(--ry, 0%) * -1); } to { translate: 0 var(--ry, 0%); } }
+@keyframes tpr-swing { 0% { translate: -13px -3px; rotate: -34deg; }
+  50% { translate: 0 2px; rotate: 0deg; }
+  100% { translate: 13px -3px; rotate: 34deg; } }
+@keyframes tpr-tilt { from { rotate: -2.5deg; } to { rotate: 2.5deg; } }
+@keyframes tpr-undulate { from { translate: 0 calc(var(--u, 0%) * -1); } to { translate: 0 var(--u, 0%); } }
+@keyframes tpr-wake { to { opacity: 0.85; } }
+@keyframes tpr-fog { from { translate: calc(var(--fx, 0%) * -1) 0; } to { translate: var(--fx, 0%) 0; } }
+@keyframes tpr-fog-breathe { from { opacity: 0.75; scale: 0.97 1.08; } to { opacity: 1; scale: 1.04 0.9; } }
+@keyframes tpr-glint { 0% { opacity: 0; translate: -3px 0; } 45% { opacity: 0.75; } 100% { opacity: 0; translate: 4px 0; } }
+@keyframes tpr-lap { from { opacity: 0.45; translate: 0 -0.4px; } to { opacity: 1; translate: 0 0.3px; } }
+@keyframes tpr-puff { 0% { opacity: 0; translate: 0 0; scale: 0.5; } 14% { opacity: 0.4; } 60% { opacity: 0.22; } 100% { opacity: 0; translate: 18px -30px; scale: 3.4 2; } }
+@keyframes tpr-ripple { from { translate: calc(var(--r, 0%) * -1) 0; } to { translate: var(--r, 0%) 0; } }
+@keyframes tpr-road { from { translate: calc(var(--w, 0%) * -1) 0; } to { translate: var(--w, 0%) 0; } }
+@keyframes tpr-row { from { translate: calc(var(--d, 0%) * -1) 0; } to { translate: var(--d, 0%) 0; } }
+@keyframes tpr-twinkle { from { opacity: var(--o, 1); } to { opacity: calc(var(--o, 1) * 0.25); } }
+@keyframes tpr-flame { 0% { scale: 0.86 0.8; opacity: 0.85; } 45% { scale: 1.05 1.14; opacity: 1; } 100% { scale: 0.95 0.94; opacity: 0.92; } }
+@keyframes tpr-lean { 0%, 100% { rotate: -4deg; } 50% { rotate: 5deg; } }
+@keyframes tpr-sail { from { scale: 0.98 1; } to { scale: 1.035 1.01; } }
+@keyframes tpr-scull { 0%, 100% { rotate: -5deg; } 50% { rotate: 6deg; } }
+@keyframes tpr-spark { 0% { opacity: 0; translate: 0 0; } 15% { opacity: 1; } 100% { opacity: 0; translate: 1.6px -7px; } }
+@keyframes tpr-glitter { 0%, 50%, 100% { opacity: 0; } 68% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The still print: the moving parts at rest, the train halfway
+     across, a flock where its flight is halfway, the glints lit. */
+  .tpr [class*="tpr-"],
+  .tpr__layer,
+  .tpr__grain,
+  .tpr__rail,
+  .tpr__paper,
+  .tpr-at,
+  .tdy-dial__glow,
+  .tdy-dial__halo { animation: none; }
+  .tpr__train { animation: none; transform: translateX(calc(var(--tpr-run) * 0.45)); }
+  .tpr-flock { translate: var(--xm, 0%) var(--ym, 0%); }
+  .tpr-glint { opacity: 0.4; }
+  .tpr-glitter { opacity: 0.6; }
+  .tpr-puff { opacity: 0.25; }
+}
+
 /* The screen's one filled action. Gold, because Today is gold — and
    gold follows its own standing ruling, not .btn-primary's: the 60%
    mix toward the panel carrying the LIGHT ink is what the Today
@@ -32711,6 +33045,23 @@ button.brd-stn { cursor: pointer; }
   .desk-week__left b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
   /* Slim under the services' board (plan 199b). */
   .tdy-desk__svc .desk-week__bars { min-height: calc(var(--desk-side-w) / 5); }
+
+  /* 浮世絵 — the gate on the print on the desk (plan 205): the print
+     across the whole window beside the rail, centred on the gate's
+     column so the dial stands over the gate; the gate at the window's
+     foot as the canvas set it; the services' board hung over the print
+     at its own elevation. The title slip stands where the canvas put
+     it, at the print's scale. */
+  .tdy-desk.tdy--print .tpr,
+  .tdy-desk.tdy--print .tdy-hero--print { inset: calc(-1 * var(--sp-6)) calc(-1 * var(--sp-7)); }
+  .tdy--print .tdy-desk__hero { justify-content: flex-end; background: none; border: 0; }
+  .tdy--print .tdy-desk__go { padding-bottom: calc(var(--sp-7) - var(--sp-6)); }
+  /* The board's shadow is the column's, as a drop shadow: the column
+     scrolls, and a scroller cuts a panel's box-shadow at its own edge,
+     a hard line down the print. */
+  .tdy--print .tdy-desk__col { position: relative; z-index: 1; filter: drop-shadow(var(--elev-board)); }
+  .tdy--desk .tpr-title { right: auto; left: calc(var(--tpr-x) + 664 * var(--tpr-u)); top: var(--sp-7); }
+  .tdy--desk .tdy-desk__keys { gap: var(--sp-4); }
 
 
   /* The profile: the holder opened flat — the pass and its stamp book

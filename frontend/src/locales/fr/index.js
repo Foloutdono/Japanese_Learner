@@ -111,6 +111,10 @@ const nav = {
   gateTakeAllWord:   'tout',
   gateEndsAt:        at => `fini vers ${at}`,
   gateAdjust:        'Ajuster',
+  // 浮世絵 (plan 205): the print's title slip, said whole -- the day and
+  // the hour's view, as the print's series would name it.
+  printTitle:        (day, view) => `${day} — ${view}`,
+  printViews:        { dawn: 'l’aube', day: 'les voiles qui rentrent', dusk: 'les oies qui se posent', night: 'la lune d’automne' },
   gateServicesN:     n => (n === 1 ? '1 service' : `${n} services`),
   gateLineModes:     name => `Les modes : ${name}`,
   gateLineNone:      'Aucun service aujourd’hui',

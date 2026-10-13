@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLang } from '../../LangContext'
 import { modeLabel } from '../../domain/studyModes'
 import { kanaSetLabel } from '../../domain/kanaSets'
@@ -26,6 +26,8 @@ import { WeekStamps } from '../dayclear/kit/WeekStamps'
 import { WeekAhead } from '../journey/WeekAhead'
 import { TodayDial, FareKey, LineKeys } from './TodayDial'
 import { TodayDay } from './TodayDay'
+import { TodayPrint, PrintTitle } from './TodayPrint'
+import { BELOW, PRINT, at, printHour, printVars, usePrintFrame } from './print/usePrint'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
 // The day's reviews, first thing on Today, and the run's picker: each
@@ -102,13 +104,7 @@ export default function GateCard({ today, failed }) {
   }
 
   if (failed) return null
-  if (!today) {
-    return (
-      <section className="tdy-wait" aria-busy="true" aria-label={t.fareGate}>
-        <TodayDial parts={[]}><Loading tight /></TodayDial>
-      </section>
-    )
-  }
+  if (!today) return <PrintWait desk={desk} t={t} />
 
   if ((today.total ?? 0) === 0) return <ClearedGate today={today} desk={desk} />
 
@@ -260,22 +256,72 @@ function mixOf(lines, isOn, share) {
     .filter(part => part.chosen > 0)
 }
 
-// ── The dial's middle: the count, what it is, the minutes and the
-// hour they end (the clock read once a minute, so it moves with it).
-function DialFigures({ run, t, lang }) {
-  const now = useMinute()
-  const { taken, cut, chosenTotal, owed, minutes } = run
-  const unit = cut != null ? t.gateTakeOf(chosenTotal) : (owed === 0 && taken > 0 ? t.newUnit : t.dueUnit)
-  const ends = minutes != null ? refillClock(new Date(now.getTime() + minutes * 60_000).toISOString(), lang) : null
+// ── The dial's middle: the count and what it is; on the print the
+// disc holds them, and the minutes and the hour they end are a line
+// under the rings (the clock read once a minute, so it moves with it).
+function unitOf({ taken, cut, chosenTotal, owed }, t) {
+  return cut != null ? t.gateTakeOf(chosenTotal) : (owed === 0 && taken > 0 ? t.newUnit : t.dueUnit)
+}
+
+function DialCount({ run, t }) {
   return (
     <>
-      <span className="tdy-dial__count">{taken}</span>
-      <span className="tdy-dial__unit">{unit}</span>
-      {minutes != null && (
-        <span className="tdy-dial__time" role="img" aria-label={t.gateMinutesLabel(minutes)}>≈ {minutes} {t.gateMinutes}</span>
-      )}
-      {ends && <span className="tdy-dial__end">{t.gateEndsAt(ends)}</span>}
+      <span className="tdy-dial__count">{run.taken}</span>
+      <span className="tdy-dial__unit">{unitOf(run, t)}</span>
     </>
+  )
+}
+
+function DialTime({ run, t, lang, style }) {
+  const now = useMinute()
+  const { minutes } = run
+  if (minutes == null) return null
+  const ends = refillClock(new Date(now.getTime() + minutes * 60_000).toISOString(), lang)
+  return (
+    <p className="tdy-dial__line tpr-at" style={style}>
+      <b className="tdy-dial__time" role="img" aria-label={t.gateMinutesLabel(minutes)}>≈ {minutes} {t.gateMinutes}</b>
+      {ends && <> · <span className="tdy-dial__end">{t.gateEndsAt(ends)}</span></>}
+    </p>
+  )
+}
+
+// ── 浮世絵 — the gate on the print of the hour (plan 205) ─────────
+// The owner's pick of the canvas "Tsuji — Today, the visit card"
+// (round 9): the gate stands on a print of the hour (TodayPrint), its
+// dial the print's sun or moon, the lines under the dial set on the
+// sky, the title slip down the right edge; on a phone the row and the
+// gate at the thumb over the print's foreground, on the desk the gate
+// under the dial and the services' board hung beside it. Everything
+// placed on the print is placed in its units (print/usePrint.js), so it
+// stands where the canvas drew it at any size. The frame chooses the
+// print (`print`, null until it has been measured): a wide one in the
+// phone's layout takes the desk's.
+function usePrint(layout, anchorRef) {
+  const now = useMinute()
+  const hour = printHour(now)
+  const [frameRef, box] = usePrintFrame(layout, anchorRef)
+  const print = box?.print ?? layout
+  const frame = PRINT.frames[print]
+  return {
+    now, hour, frame, frameRef, print: box?.print ?? null,
+    style: printVars(hour, print, box), dial: { frame, disc: PRINT.hours[hour].disc },
+  }
+}
+
+// The wait, drawn: the print of the hour comes first, the dial empty
+// over it until the day has.
+function PrintWait({ desk, t }) {
+  const layout = desk ? 'desk' : 'phone'
+  const p = usePrint(layout)
+  const { frame } = p
+  return (
+    <div className={`tdy tdy--print tdy--${layout}`} style={p.style} data-hour={p.hour}>
+      <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} />
+      <section className="tdy-hero tdy-hero--print tdy-wait" aria-busy="true" aria-label={t.fareGate}>
+        <PrintTitle now={p.now} hour={p.hour} />
+        <TodayDial parts={[]} print={p.dial} className="tpr-at" style={at(frame.cx, frame.cy)}><Loading tight /></TodayDial>
+      </section>
+    </div>
   )
 }
 
@@ -414,16 +460,23 @@ function PhoneGate({ today, lanes, lines, isOn, off, toggle, toggleLine, take, s
     />
   )
 
+  const p = usePrint('phone')
+  const { frame } = p
   return (
-    <div className="tdy">
-      <span className="tdy__air" aria-hidden="true" />
-      <section className="tdy-hero" data-guide="today.gate" aria-label={t.fareGate}>
-        <TodayDial parts={parts} fare={fare}>
-          <DialFigures run={run} t={t} lang={lang} />
+    <div className="tdy tdy--print tdy--phone" style={p.style} data-hour={p.hour}>
+      <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} />
+      <section className="tdy-hero tdy-hero--print" aria-label={t.fareGate}>
+        <PrintTitle now={p.now} hour={p.hour} />
+        <TodayDial parts={parts} fare={fare} print={p.dial} className="tpr-at" style={at(frame.cx, frame.cy)}>
+          <span className="tdy-dial__gate" data-guide="today.gate" aria-hidden="true" />
+          <DialCount run={run} t={t} />
         </TodayDial>
-        {short
-          ? <FareKey rides={run.rides} waits={run.waits} clock={run.clock} t={t} />
-          : <LineKeys mix={mix} titles={titlesOf(t)} label={t.todayLines} />}
+        <DialTime run={run} t={t} lang={lang} style={at(frame.cx, frame.cy + frame.fare + BELOW.time)} />
+        <div className="tpr-at" style={at(frame.cx, frame.cy + frame.fare + BELOW.keys)}>
+          {short
+            ? <FareKey rides={run.rides} waits={run.waits} clock={run.clock} t={t} />
+            : <LineKeys mix={mix} titles={titlesOf(t)} label={t.todayLines} />}
+        </div>
       </section>
       <span className="tdy__air" aria-hidden="true" />
 
@@ -474,23 +527,35 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
   }, [left])
   const depart = () => departWith(today, off, run.cut, t)
   const closed = run.closed || run.taken === 0
+  // The print centres on the gate's column, so the dial stands over the gate.
+  const hero = useRef(null)
+  const p = usePrint('desk', hero)
+  const { frame } = p
 
   return (
-    <div className="tdy-desk">
-      <section className="tdy-desk__hero" data-guide="today.gate" aria-label={t.fareGate}>
-        <div className="tdy-desk__stage">
-          <TodayDial className="tdy-dial--desk" parts={parts} fare={fare}>
-            <DialFigures run={run} t={t} lang={lang} />
-          </TodayDial>
-          <div className="tdy-desk__keys">
-            <LineKeys mix={mix} titles={titlesOf(t)} named label={t.todayLines} />
-            {short && <FareKey rides={run.rides} waits={run.waits} clock={run.clock} t={t} />}
-          </div>
+    <div className="tdy-desk tdy--print tdy--desk" style={p.style} data-hour={p.hour}>
+      <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} />
+      <section className="tdy-hero tdy-hero--print" aria-label={t.fareGate}>
+        <PrintTitle now={p.now} hour={p.hour} />
+        <TodayDial parts={parts} fare={fare} print={p.dial} className="tpr-at" style={at(frame.cx, frame.cy)}>
+          <span className="tdy-dial__gate" data-guide="today.gate" aria-hidden="true" />
+          <DialCount run={run} t={t} />
+        </TodayDial>
+        <DialTime run={run} t={t} lang={lang} style={at(frame.cx, frame.cy + frame.fare + 28)} />
+        <div className="tdy-desk__keys tpr-at tpr-at--top" style={at(frame.cx, frame.cy + frame.fare + 62)}>
+          <LineKeys mix={mix} titles={titlesOf(t)} named label={t.todayLines} />
         </div>
+        {short && (
+          <div className="tpr-at" style={at(frame.cx, frame.cy + frame.fare + 128)}>
+            <FareKey rides={run.rides} waits={run.waits} clock={run.clock} t={t} />
+          </div>
+        )}
+      </section>
+      <div className="tdy-desk__hero" ref={hero}>
         <div className="tdy-desk__go">
           <GateButton label={t.depart} onClick={depart} aria-label={t.todayDue(run.taken)} keys disabled={closed} />
         </div>
-      </section>
+      </div>
       <aside className="tdy-desk__col">
         <section className="tdy-desk__panel tdy-desk__svc" aria-label={t.gateServicesTitle}>
           <Services

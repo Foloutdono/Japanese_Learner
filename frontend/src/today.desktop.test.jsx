@@ -107,7 +107,9 @@ describe('Today on a laptop', () => {
       expect(r.right).toBeLessThanOrEqual(box.right)
     }
     const hero = document.querySelector('.tdy-desk__hero').getBoundingClientRect()
-    inside(document.querySelector('.tdy-dial--desk'), hero)
+    // The dial by its rings: on the print (plan 205) its box is the
+    // disc's glow, sky the print draws past the panel.
+    inside(document.querySelector('.tdy-desk .tdy-dial__gate'), hero)
     inside(document.querySelector('.tdy-desk__go .btn-depart'), hero)
     // Every line's modes opened, the column at its fullest.
     for (const more of document.querySelectorAll('.tdy-desk .tdy-line__more')) more.click()
@@ -176,7 +178,7 @@ describe('Today on a laptop', () => {
       await settle()
       const go = document.querySelector('.tdy-desk__go .btn-depart').getBoundingClientRect()
       expect(go.bottom).toBeLessThanOrEqual(window.innerHeight)
-      expect(document.querySelector('.tdy-dial--desk').getBoundingClientRect().bottom).toBeLessThanOrEqual(go.top)
+      expect(document.querySelector('.tdy-desk .tdy-dial__gate').getBoundingClientRect().bottom).toBeLessThanOrEqual(go.top)
       // The modes closed, the column fits; opened, it scrolls on its own.
       const col = document.querySelector('.tdy-desk__col')
       expect(col.scrollHeight).toBeLessThanOrEqual(col.clientHeight)
