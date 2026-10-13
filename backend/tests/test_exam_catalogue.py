@@ -159,3 +159,24 @@ def test_last_is_this_learner_s_newest_sitting(client):
     assert entry["minutes"] == exam_reading_gen.time_limit_min("N2", _expected_question_count("N2", "reading"))
     with acting_as(OTHER_USER):
         assert _catalogue(client)[SAT]["last"]["correct"] == 40
+
+
+# Plan 200: the desk's station draws a paper's parts as a line, a stop a
+# question, so each part carries its count beside its name.
+def test_parts_of_a_paper_not_generated_are_the_blueprint_s_counts(client):
+    with acting_as("exam-catalogue-fresh-learner"):
+        catalogue = _catalogue(client)
+    for exam_id, (_v, kind, level, _g) in EXAM_GENERATORS.items():
+        entry = catalogue[exam_id]
+        if entry["generated"]:
+            continue
+        assert [p["nameJp"] for p in entry["parts"]] == entry["mondai"], exam_id
+        assert sum(p["count"] for p in entry["parts"]) == entry["questionCount"], exam_id
+    assert catalogue["n5-vocab-01"]["parts"][0] == {"nameJp": "漢字読み", "count": 7}
+
+
+def test_parts_of_a_generated_paper_are_counted_on_it(client):
+    _paper(GENERATED, "N1", minutes=17, questions=3)
+    entry = _catalogue(client)[GENERATED]
+    # A part the blueprint does not know keeps its count and goes unnamed.
+    assert entry["parts"] == [{"nameJp": None, "count": 3}]

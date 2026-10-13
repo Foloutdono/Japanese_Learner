@@ -8,8 +8,9 @@ import './index.css'
 
 // ── 机 — a split's rows are links (plan 117) ─────────────────────
 // On the desk a row of a StationSplit's list — a level, a kana set, a
-// theme band, a tier, a grammar point, a library deck, an exam question
-// — opens its item beside the list. It is a link to that item's URL
+// theme band, a tier, a grammar point, a library deck — opens its item
+// beside the list. (The exam's marked sheet, plan 200, was drawn as
+// links from the start, with no button to look like.) It is a link to that item's URL
 // (components/selection/SplitRow), so the middle click, Ctrl/⌘-click and
 // "open in new tab" work, and a plain click still replaces the page in
 // place. Two promises are held here: the link LOOKS like the button it
@@ -68,25 +69,6 @@ function Shelf({ link }) {
   )
 }
 
-// ExamResult's ReviewRow is not exported: its markup, as a button and
-// as the link the desk now draws.
-function Review({ link }) {
-  const Row = link ? 'a' : 'button'
-  const props = link ? { href: '/practice/exam/e1/results?attempt=9&question=2' } : { type: 'button' }
-  return (
-    <div className="surface exam-review">
-      <div className="exam-review__part">
-        <div className="exam-group"><b className="exam-group__part">Partie 1</b><span className="exam-group__score">1 / 2</span></div>
-        <Row {...props} className="exam-review-row" aria-current="page">
-          <span className="exam-review-row__mark exam-review-row__mark--x" aria-hidden="true"><svg width="11" height="11" /></span>
-          <span className="exam-review-row__q">Q2</span>
-          <span className="exam-review-row__jp" lang="ja">かれはがっこうにいきます。</span>
-        </Row>
-      </div>
-    </div>
-  )
-}
-
 // Both forms of every row kind, side by side in two desk splits: the
 // buttons as the desk drew them before (no URL passed), the links as it
 // draws them now.
@@ -99,12 +81,11 @@ function Both({ link }) {
       <Split list={<GrammarIndex points={POINTS} selected="ga" onOpen={() => {}} linkTo={link ? id => `/learn/grammar/N4?index=1&point=${id}` : null} />} />
       <Split list={<TierSelector domain="vocab" session={null} tierSize={200} selected={2} onSelect={() => {}} linkTo={to('/learn/vocab/tier')} />} />
       <Split className="desk-split--shelf" list={<Shelf link={link} />} />
-      <Split list={<Review link={link} />} />
     </div>
   )
 }
 
-const ROWS = ['.route-stop', '.gl-index__row', '.platform-grid > .platform-card:not(.lib-card)', '.lib-card', '.exam-review-row']
+const ROWS = ['.route-stop', '.gl-index__row', '.platform-grid > .platform-card:not(.lib-card)', '.lib-card']
 
 // The same geometry on a phone-sized desk would prove nothing, so the
 // splits sit in the desk's own frame, one form above the other.

@@ -1919,7 +1919,6 @@ const exam = {
   examRetry:           'Réessayer',
 
   examSectionEmpty:    'Cette section ne contient encore aucune question.',
-  examAnswered:        'répondue',
   examFinishSection:   'Terminer',
   examQuestionAbbrev:  'Q',
   examResultMissing:   "Ce résultat n'est plus disponible — recommence l'examen.",
@@ -1941,15 +1940,10 @@ const exam = {
   // aucun tiers ne dispose : l'honnête est d'afficher la proportion
   // brute de bonnes réponses et un objectif d'entraînement, en le
   // disant clairement.
-  examScoreCorrect:    'correctes',
   examPracticeTarget:  'Objectif',
-  examUnofficialNote:  'Score non officiel — proportion brute de bonnes réponses, pas une note JLPT calibrée.',
-  examReviewTitle:     'Revoir tes réponses',
-  examReviewHint:      'Touche une question pour la revoir avec la bonne réponse.',
   // Une correction sert d'abord aux erreurs : c'est donc ce qui est
   // ouvert par défaut — sinon une épreuve de 21 questions affiche 21
   // lignes identiques à dérouler avant de trouver les deux ratées.
-  examShowWrongOnly:   'Erreurs seules',
   examShowAll:         'Toutes les questions',
   examAllCorrect:      'Aucune erreur — toutes les réponses sont bonnes.',
   // La couleur seule ne peut pas dire quelle ligne a été choisie et
@@ -1959,7 +1953,6 @@ const exam = {
   examYourAnswer:      'Ta réponse',
   examCorrectAnswer:   'Bonne réponse',
   examNotAnswered:     'Laissée vide',
-  examTimeTaken:       'Temps passé',
   // Le script d'écoute est déjà dans chaque épreuve (voir
   // exam_listening_gen.py) et c'est exactement ce qui rend une
   // question d'écoute ratée exploitable — caché pendant l'épreuve,
@@ -1981,8 +1974,6 @@ const exam = {
   // remplace : sur un JLPT papier, c'est la feuille de réponses qui
   // dit d'un coup d'œil ce qu'il reste à faire.
   examSheetTitle:      'Feuille de réponses',
-  examSheetBlank:      'vide',
-  examSheetFlagged:    'marquée',
   // aria-label d'une case — les états visuels (rempli, contour, coin
   // marqué) ne veulent rien dire pour un lecteur d'écran : chaque case
   // énonce donc le sien.
@@ -2616,6 +2607,29 @@ const onboarding = {
     '即時応答': 'Écoute la phrase et choisis la meilleure réponse.',
   },
   examMinutes: n => `≈\u00a0${n}\u00a0min`,
+  // ── L'examen blanc au bureau (plan 200) ──────────────────────
+  // Le cahier à gauche, la feuille de réponses à droite ; la page se
+  // tourne dans son pied.
+  examQuit:            'Quitter',
+  examMark:            'Marquer',
+  examToAnswer:        'pour répondre',
+  examLastQuestion:    'Dernière question',
+  examThisText:        'Ce texte',
+  examLikeThePaper:    'Comme dans l’épreuve',
+  examYourSheet:       'Ta feuille',
+  examBlanksLeft: n => `${n} question${n > 1 ? 's' : ''} vide${n > 1 ? 's' : ''}`,
+  examBlankCounts:     'Une question vide compte faux.',
+  examGoTo: n => `Aller à la ${n}`,
+  examHandIn:          'Rendre quand même',
+  examMissOf: (i, n) => `erreur ${i} sur ${n}`,
+  examPapersSat:       'épreuves',
+  examRightCap:        'justes',
+  examLastSitting:     'la dernière',
+  examSheetRow: (n, answered) => `Question ${n}${answered ? '' : ', vide'}`,
+  examOval: (n, choice) => `Question ${n}, réponse ${choice}`,
+  examAnsweredCap:     'répondues',
+  examSheetResult: (n, state) => `Question ${n}, ${state === 'ok' ? 'juste' : state === 'x' ? 'fausse' : 'laissée vide'}`,
+  examPlayPause:       'lecture, pause',
   settingsRedoDesc: 'Repasse-le une fois que tu as progressé — ton niveau suit.',
   // ── Quelle barre de notation ────────────────────────────────
   // Deux boutons, quatre ou six. Les trois envoient la même note au
