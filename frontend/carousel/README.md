@@ -183,7 +183,14 @@ issue it found was fixed. Since plan 200l the check also reads the
 pixels: nothing at all, a shape as much as a word, is drawn in the
 margin outside the safe area (the "Your turn" slide's cue, once an
 arrow pointing off the frame, is a speech bubble under the prompt,
-drawn only where it fits).
+drawn only where it fits). The same review fitted what still could
+run long: a long handle on the terminus, the station plate and the route
+map steps down a size (onto a line of its own under the mark, or, on the
+map, off the slide rather than cut), a sentence answer is measured in
+the script it is drawn in (kana runs longer), the answer sheet's labels
+keep clear of its circles, and a carousel asks six questions at most, so
+a mock exam keeps under a feed's twenty slides and its cover and sheet
+a readable row each.
 
 ## Easy to read
 

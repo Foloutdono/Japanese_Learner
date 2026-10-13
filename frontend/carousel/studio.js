@@ -8,7 +8,7 @@
 /* global JSZip */
 import { ENDING_IDS, FORMATS, TYPES, TYPE_OPTIONS, available, deck, endingSlide } from './slides.js'
 import { FONT_FACES, font, palette } from './draw.js'
-import { BONUS, LEVELS, OPTIONAL, SOURCES, depsOf, itemsOf, picked, plan, sampleText, sourceOf } from './sources.js'
+import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, depsOf, itemsOf, picked, plan, sampleText, sourceOf } from './sources.js'
 import { STRINGS } from './strings.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 
@@ -268,7 +268,8 @@ function renderQuestions(pl) {
     b.addEventListener('click', () => {
       const next = new Set(chosen)
       if (next.has(q.id)) next.delete(q.id)
-      else next.add(q.id)
+      else if (next.size < MAX_QUESTIONS) next.add(q.id)
+      else return
       if (!next.size) return
       state.picks[pickKey()] = pl.quizzes.map(x => x.id).filter(x => next.has(x))
       save()

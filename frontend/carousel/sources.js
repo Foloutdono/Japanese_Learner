@@ -585,11 +585,15 @@ export function plan(sourceId, data, id, opts, deps = {}) {
   }
 }
 
+// A carousel asks six questions at most: a mock exam's cover, its twelve
+// question slides, the sheet and the last slide keep under a feed's
+// twenty, and the cover and the sheet keep a readable row each (plan 200l).
+export const MAX_QUESTIONS = 6
 /** The questions a carousel asks: the ones the studio picked for the
- *  item, in the plan's order, else its first `n`. */
+ *  item, in the plan's order, else its first `n`; six at most. */
 export function picked(pl, picks, n) {
   const chosen = picks?.length ? pl.quizzes.filter(q => picks.includes(q.id)) : []
-  return chosen.length ? chosen : pl.quizzes.slice(0, n)
+  return (chosen.length ? chosen : pl.quizzes.slice(0, n)).slice(0, MAX_QUESTIONS)
 }
 
 /** Every Japanese and Latin character a plan may set, for the font loader. */
