@@ -80,6 +80,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
 .dir:disabled { opacity: 0.4; cursor: not-allowed; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chips .chip { font-size: 13px; min-height: 32px; padding: 5px 12px; }
+.slide--ending { cursor: pointer; }
+.slide--ending[aria-pressed="true"] { border-color: var(--sel-line); }
+.slide--ending[aria-pressed="true"] { outline: 4px solid var(--sel-line); outline-offset: -4px; }
 .sources { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .source { border: 1px solid var(--line); background: transparent; border-radius: 8px; padding: 8px 4px 7px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; position: relative; }
 .source b { font-family: var(--serif); font-size: 19px; font-weight: 700; }
@@ -172,6 +175,11 @@ dialog::backdrop { background: var(--scrim); }
     <div class="field">
       <div class="label">Carousel type</div>
       <div id="types" class="dirs" role="group" aria-label="Carousel type"></div>
+    </div>
+
+    <div class="field">
+      <div class="label">Last slide</div>
+      <div id="endings" class="chips" role="group" aria-label="Last slide"></div>
     </div>
 
     <div class="field" hidden>

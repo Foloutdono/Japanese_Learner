@@ -528,7 +528,7 @@ public Supabase Storage bucket by file name and needs no rebuild;
 `frontend/landing/README.md` has the slots, the bucket and what changes
 when the page goes live.
 
-The **carousel studio** (plans 200, 200b, 200c, `frontend/carousel/`,
+The **carousel studio** (plans 200–200d, `frontend/carousel/`,
 its README) draws what the app teaches (a reading-bank sentence, its
 translation, a grammar lesson, a word, a kanji, a kana, a comprehension
 passage) as a photo carousel for a social feed, as one of six types
@@ -536,8 +536,10 @@ passage) as a photo carousel for a social feed, as one of six types
 conversation), and exports the PNGs. A point is explained in its own
 sentence, a particle by the one sense it has there (`explain.js`); its
 questions (`quizzes.js`) deal a wrong answer only where it cannot be
-right too. Like the landing page it is a static page outside `src/` and
-never ships. Its data is `frontend/carousel/bank/*.json`, written by
+right too. A slide fits its text to the format's safe area rather than
+let it overflow (its README, "Nothing leaves the frame"): a new slide
+kind, ending or label is fitted the same way. Like the landing page it
+is a static page outside `src/` and never ships. Its data is `frontend/carousel/bank/*.json`, written by
 `python -m scripts.carousel_bank` (backend, needs the tokenizer and the
 JMdict database): rerun it after a change to the reading bank, the deck,
 the kanji, the catalogue or its tours, or the comprehension seeds, and

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { FORMATS, RATING_INKS } from '../carousel/draw.js'
 import { LEVELS, SOURCES, chunksOf, depsOf, itemsOf, lineRomaji, plan, readingMisses, unpack } from '../carousel/sources.js'
-import { TYPES, available, deck } from '../carousel/slides.js'
+import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, overlaps } from '../carousel/quizzes.js'
 import { howItWorks, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld } from '../carousel/strings.js'
@@ -43,6 +43,28 @@ function depsFor(src, data, id) {
     if (lv && kanjiByLevel[lv][c]) strokes[c] = kanjiByLevel[lv][c]
   }
   return { index: kanjiIndex, sentences: sentencesById, strokes }
+}
+
+/** A 2D context that draws nothing and measures text roughly (a CJK
+ *  character a square, anything else a little over half one): enough to
+ *  run a slide's layout through, in a lane with no canvas. */
+function stubContext() {
+  const texts = []
+  const state = { font: '10px sans-serif' }
+  const sizeOf = () => parseFloat(/([\d.]+)px/.exec(state.font)?.[1] || '10')
+  const widthOf = t => [...String(t)].reduce((w, c) => w + (/[\u3000-\u9fff\uff00-\uffef]/.test(c) ? 1 : 0.56), 0) * sizeOf()
+  const methods = {
+    measureText: t => ({ width: widthOf(t), actualBoundingBoxAscent: sizeOf() * 0.72, actualBoundingBoxDescent: sizeOf() * 0.12, actualBoundingBoxLeft: 0, actualBoundingBoxRight: widthOf(t) }),
+    fillText: t => { texts.push(String(t)) },
+    createLinearGradient: () => ({ addColorStop() {} }),
+    createRadialGradient: () => ({ addColorStop() {} }),
+    getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+  }
+  const ctx = new Proxy(state, {
+    get: (o, k) => (k in methods ? methods[k] : k in o ? o[k] : () => {}),
+    set: (o, k, v) => { o[k] = v; return true },
+  })
+  return { ctx, texts }
 }
 
 describe('the carousel studio', () => {
@@ -94,6 +116,42 @@ describe('the carousel studio', () => {
         expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe('outro')
         expect(new Set(slides.map(x => x.key)).size, `${src.id} ${id} ${type}`).toBe(slides.length)
       }
+    }
+  })
+
+  it('ends on any of the endings, for every source, in both formats', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      for (const src of SOURCES) {
+        const { p } = every.find(x => x.src === src)
+        const type = TYPES.map(x => x.id).find(x => x !== 'plates' && available(x, p)) || 'plates'
+        for (const fmt of Object.values(FORMATS)) {
+          for (const ground of ['paper', 'sumi']) {
+            for (const id of ENDING_IDS) {
+              const { ctx, texts } = stubContext()
+              endingSlide(id, type, p, fmt, { ground }).draw(ctx)
+              expect(texts.length, `${src.id} ${id} ${fmt.id} ${ground}`).toBeGreaterThan(3)
+            }
+            // The deck's own last slide is the ending picked.
+            const { ctx, texts } = stubContext()
+            deck(type, p, fmt, { ground, ending: 'pass' }).at(-1).draw(ctx)
+            expect(texts, `${src.id} ${type}`).toContain('定期券')
+          }
+        }
+      }
+    } finally {
+      globalThis.Path2D = had
+    }
+  })
+
+  it('marks the source’s own station on the route map, and only it', () => {
+    for (const src of SOURCES) {
+      const { p } = every.find(x => x.src === src)
+      const here = p.map.flatMap(L => L.stops).filter(st => st.here)
+      expect(here, src.id).toHaveLength(1)
+      expect(here[0].jp, src.id).toBe(p.station.jp)
+      expect(p.map.map(L => L.key), src.id).toEqual(['learn', 'practice'])
     }
   })
 

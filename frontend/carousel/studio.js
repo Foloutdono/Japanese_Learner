@@ -6,7 +6,7 @@
 // (backend/scripts/carousel_bank.py) through sources.js and quizzes.js;
 // everything it looks like, from slides.js.
 /* global JSZip */
-import { FORMATS, TYPES, TYPE_OPTIONS, available, deck } from './slides.js'
+import { ENDING_IDS, FORMATS, TYPES, TYPE_OPTIONS, available, deck, endingSlide } from './slides.js'
 import { FONT_FACES, font, palette } from './draw.js'
 import { BONUS, LEVELS, OPTIONAL, SOURCES, depsOf, itemsOf, picked, plan, sampleText, sourceOf } from './sources.js'
 import { STRINGS } from './strings.js'
@@ -32,7 +32,7 @@ const DEFAULTS = {
   source: 'sentence', level: 'N5', kanaSet: 'hiragana', ids: { sentence: 'N5.4', translation: 'N5.4' },
   view: 'compare', type: 'plates', format: 'post', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
-  picks: {}, types: {},
+  picks: {}, types: {}, ending: 'map',
 }
 const state = load()
 const files = new Map()
@@ -43,6 +43,7 @@ function load() {
     const saved = JSON.parse(localStorage.getItem(STORE) || '{}')
     // Plan 200c retired the departure board and the study card.
     const type = TYPES.some(x => x.id === saved.type) ? saved.type : 'plates'
+    if (saved.ending && !ENDING_IDS.includes(saved.ending)) delete saved.ending
     return {
       ...DEFAULTS, ...saved, type, ids: { ...DEFAULTS.ids, ...(saved.ids || {}) }, slides: { ...(saved.slides || {}) },
       picks: { ...(saved.picks || {}) }, types: { ...(saved.types || {}) },
@@ -199,6 +200,21 @@ function renderToggles() {
   $('#type-name').textContent = T.types[state.type].name
 }
 
+// ── The last slide ────────────────────────────────────────────
+function renderEndings() {
+  const box = $('#endings')
+  box.replaceChildren()
+  for (const id of ENDING_IDS) {
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.className = 'chip'
+    b.dataset.set = `ending:${id}`
+    b.setAttribute('aria-pressed', String(state.ending === id))
+    b.textContent = T.end.names[id]
+    box.append(b)
+  }
+}
+
 // ── The carousel types, and the questions ─────────────────────
 function renderTypes(pl) {
   const box = $('#types')
@@ -277,7 +293,7 @@ async function render() {
   const id = currentId()
   const deps = await depsFor(data, id)
   const figures = (await fetchJson('index.json').catch(() => null))?.figures
-  const opts = { ...state, figures }
+  const opts = { ...state, figures, ending: state.ending }
   const pl = plan(state.source, data, id, opts, deps)
   if (!pl) return
   opts.picks = state.picks[pickKey()]
@@ -337,6 +353,43 @@ async function render() {
       strip.append(fig)
       requestAnimationFrame(() => { if (mine === token) thumb(c, slide, fmt) })
     })
+    row.append(head, strip)
+    stage.append(row)
+  }
+  // Every ending side by side, to pick the last slide from.
+  if (state.view === 'compare') {
+    const row = document.createElement('section')
+    row.className = 'deck'
+    row.setAttribute('aria-label', 'Last slide')
+    const head = document.createElement('div')
+    head.className = 'deck__head'
+    const name = document.createElement('h2')
+    name.className = 'deck__name'
+    const jp = document.createElement('span')
+    jp.lang = 'ja'
+    jp.className = 'deck__jp'
+    jp.textContent = '終点'
+    name.append(jp, ' Last slide')
+    const n = document.createElement('span')
+    n.className = 'deck__count'
+    n.textContent = 'pick one'
+    head.append(name, n)
+    const strip = document.createElement('div')
+    strip.className = 'strip'
+    for (const id of ENDING_IDS) {
+      const slide = endingSlide(id, state.type, pl, fmt, opts)
+      const fig = document.createElement('button')
+      fig.type = 'button'
+      fig.className = 'slide slide--ending'
+      fig.setAttribute('aria-pressed', String(state.ending === id))
+      fig.setAttribute('aria-label', `Last slide: ${T.end.names[id]}`)
+      fig.title = T.end.names[id]
+      const c = document.createElement('canvas')
+      fig.append(c)
+      fig.addEventListener('click', () => { state.ending = id; sync(); render() })
+      strip.append(fig)
+      requestAnimationFrame(() => { if (mine === token) thumb(c, slide, fmt) })
+    }
     row.append(head, strip)
     stage.append(row)
   }
@@ -524,6 +577,7 @@ function sync() {
   renderSources()
   renderLevels()
   renderToggles()
+  renderEndings()
   save()
 }
 

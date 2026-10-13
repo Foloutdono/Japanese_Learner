@@ -78,7 +78,7 @@ export function palette(ground) {
     line: {
       vocab: t['--line-vocab'], grammar: t['--line-grammar'], kanji: t['--line-kanji'],
       reading: t['--line-reading'], exam: t['--line-exam'], kana: t['--line-kana'],
-      honyaku: t['--line-honyaku'], rikai: t['--line-rikai'], sakubun: t['--line-sakubun'],
+      honyaku: t['--line-honyaku'], rikai: t['--line-rikai'], sakubun: t['--line-sakubun'], kakitori: t['--line-kakitori'],
     },
     // The People family: what is the learner's own (their line in a scene).
     pass: t['--pass-ink'],
@@ -161,17 +161,44 @@ function caption(ctx, str, x, y, color, align = 'left', size = FS.caption) {
   return text(ctx, str.toLocaleUpperCase(), x, y, { f: font(700, size, 'latin'), color, align, tr: TR.caption })
 }
 
+// What may not start a line (closing marks, small kana, the long-vowel
+// mark) and what may not end one (opening marks): 禁則, as a Japanese
+// page breaks its lines.
+const NO_START = /^[、。，．・：；？！」』）】〕］｝〉》ゝゞー々ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ,.;:!?)\]}»…]/
+const NO_END = /[「『（【〔［｛〈《([{«]$/
+/** A word too wide for the line, cut between its characters where a line
+ *  may break: Japanese has no spaces to wait for. */
+function split(ctx, word, f, maxW) {
+  const chars = [...word]
+  const out = []
+  let cur = ''
+  for (const ch of chars) {
+    const test = cur + ch
+    if (!cur || measure(ctx, test, f) <= maxW) { cur = test; continue }
+    if (NO_START.test(ch) || NO_END.test(cur)) {
+      // っ may not start the next line: it takes the character before it along.
+      if ([...cur].length > 1) { const keep = [...cur]; const last = keep.pop(); out.push(keep.join('')); cur = last + ch } else cur = test
+      continue
+    }
+    out.push(cur)
+    cur = ch
+  }
+  if (cur) out.push(cur)
+  return out
+}
 function wrap(ctx, str, f, maxW) {
   const words = String(str).split(' ')
   const lines = []
   let cur = ''
   for (const w of words) {
     const test = cur ? `${cur} ${w}` : w
-    if (!cur || measure(ctx, test, f) <= maxW) cur = test
-    else { lines.push(cur); cur = w }
+    if (!cur || measure(ctx, test, f) <= maxW) { cur = test; continue }
+    lines.push(cur)
+    cur = w
   }
   if (cur) lines.push(cur)
-  return lines
+  // A line still too wide is one word too wide: cut it between characters.
+  return lines.flatMap(l => (measure(ctx, l, f) > maxW ? split(ctx, l, f, maxW) : [l]))
 }
 /** text-wrap: balance, for a heading: the narrowest box that keeps the
  *  same number of lines. */
@@ -301,13 +328,17 @@ function units(rows, { script, blank }) {
   return out
 }
 
+const RUBY_MIN = FS.xs * 0.92
+
 function layoutSentence(ctx, rows, o) {
   const opts = { fam: 'serif', weight: 700, maxLines: 3, maxH: Infinity, gap: 0.3, rules: true, romaji: false, script: 'kanji', ...o }
   const list = units(rows, opts)
   const ruby = opts.script === 'furigana' && list.some(u => u.segs.some(([, r]) => r))
   for (let size = opts.max; size >= opts.min; size -= 2) {
     const f = font(opts.weight, size, opts.fam)
-    const rf = font(500, size * 0.4, 'jp')
+    // Furigana at 0.4 of the word, never under the scale's smallest caption.
+    const rs = Math.max(size * 0.4, RUBY_MIN)
+    const rf = font(500, rs, 'jp')
     const romF = font(500, Math.max(size * 0.3, FS.sm * 0.9), 'latin')
     for (const u of list) {
       let x = measure(ctx, u.prefix, f)
@@ -340,7 +371,7 @@ function layoutSentence(ctx, rows, o) {
     const last = size - 2 < opts.min
     if (!fits && !last) continue
     if (lines.length > opts.maxLines && !last) continue
-    const rubyH = ruby ? size * 0.4 * 1.3 : 0
+    const rubyH = ruby ? rs * 1.3 : 0
     const ruleGap = opts.rules ? size * 0.22 : size * 0.12
     const romH = opts.romaji ? Math.max(size * 0.3, FS.sm * 0.9) * 1.5 : 0
     const lineH = rubyH + size + ruleGap + romH

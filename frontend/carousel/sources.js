@@ -50,23 +50,37 @@ export const BONUS = new Set(['sentence', 'translation'])
 // a code in its roundel, a reading over its name, and the stations either
 // side of it on its line (config/tabs.js: 学習 runs かな 単語 漢字 文法
 // 教材, 実践 runs 読書 理解 翻訳 書取 作文 模試, both out of 辻).
+// `pig` is the station's own line pigment (config/tabs.js); 教材 has none.
 const STATION = {
   tsuji: { jp: '辻', kana: 'つじ', code: 'TJ' },
-  kana: { jp: 'かな', kana: 'かな', code: 'KN' },
-  word: { jp: '単語', kana: 'たんご', code: 'TG' },
-  kanji: { jp: '漢字', kana: 'かんじ', code: 'KJ' },
-  lesson: { jp: '文法', kana: 'ぶんぽう', code: 'BP' },
+  kana: { jp: 'かな', kana: 'かな', code: 'KN', pig: 'kana' },
+  word: { jp: '単語', kana: 'たんご', code: 'TG', pig: 'vocab' },
+  kanji: { jp: '漢字', kana: 'かんじ', code: 'KJ', pig: 'kanji' },
+  lesson: { jp: '文法', kana: 'ぶんぽう', code: 'BP', pig: 'grammar' },
   decks: { jp: '教材', kana: 'きょうざい', code: 'KZ' },
-  sentence: { jp: '読書', kana: 'どくしょ', code: 'DS' },
-  passage: { jp: '理解', kana: 'りかい', code: 'RK' },
-  translation: { jp: '翻訳', kana: 'ほんやく', code: 'HY' },
-  dictation: { jp: '書取', kana: 'かきとり', code: 'KT' },
+  sentence: { jp: '読書', kana: 'どくしょ', code: 'DS', pig: 'reading' },
+  passage: { jp: '理解', kana: 'りかい', code: 'RK', pig: 'rikai' },
+  translation: { jp: '翻訳', kana: 'ほんやく', code: 'HY', pig: 'honyaku' },
+  dictation: { jp: '書取', kana: 'かきとり', code: 'KT', pig: 'kakitori' },
+  composition: { jp: '作文', kana: 'さくぶん', code: 'SB', pig: 'sakubun' },
+  exam: { jp: '模試', kana: 'もし', code: 'MS', pig: 'exam' },
 }
-const LINES = [['tsuji', 'kana', 'word', 'kanji', 'lesson', 'decks'], ['tsuji', 'sentence', 'passage', 'translation', 'dictation']]
+const LINES = [
+  { key: 'learn', jp: '学習', stops: ['tsuji', 'kana', 'word', 'kanji', 'lesson', 'decks'] },
+  { key: 'practice', jp: '実践', stops: ['tsuji', 'sentence', 'passage', 'translation', 'dictation', 'composition', 'exam'] },
+]
 function stationOf(source, lang) {
-  const line = LINES.find(l => l.includes(source))
-  const at = line.indexOf(source)
-  return { ...STATION[source], name: sourceOf(source).name[lang].replace(/\u00ad/g, ''), prev: STATION[line[at - 1]], next: STATION[line[at + 1]] }
+  const line = LINES.find(l => l.stops.includes(source))
+  const at = line.stops.indexOf(source)
+  return {
+    ...STATION[source], name: sourceOf(source).name[lang].replace(/\u00ad/g, ''),
+    prev: STATION[line.stops[at - 1]], next: STATION[line.stops[at + 1]], line: { key: line.key, jp: line.jp },
+  }
+}
+/** The app's two lines out of 辻, every station on them, the source's lit:
+ *  what the route-map ending draws. */
+function mapOf(source) {
+  return LINES.map(l => ({ key: l.key, jp: l.jp, stops: l.stops.slice(1).map(id => ({ ...STATION[id], here: id === source })) }))
 }
 /** What the last slide says about the source's line, from the bank's own figures. */
 function figureOf(source, figures, t, lang) {
@@ -146,7 +160,7 @@ function base(source, item, opts, level) {
   return {
     source: source.id, line: source.line, lang: opts.lang, t, level,
     script: opts.script, showRomaji: opts.romaji, handle: opts.handle || '', id: item.id,
-    station: stationOf(source.id, opts.lang), figure: weldIf(opts.lang, figureOf(source.id, opts.figures, t, opts.lang)),
+    station: stationOf(source.id, opts.lang), map: mapOf(source.id), figure: weldIf(opts.lang, figureOf(source.id, opts.figures, t, opts.lang)),
     compare: null, build: null, list: null, talk: null,
   }
 }
@@ -179,7 +193,11 @@ function buildOf(rows, translation, how, p, lang, glossOf, pointLabel = () => ''
   // A particle that is a piece of a longer pattern (the の and で of ので)
   // is that pattern, labelled by its meaning, never a possessive.
   const patternOf = r => (r.k === 'word' ? null : (r.g || []).find(x => x !== r.t && !ROLES[x]) || (r.lit && p !== r.t && !ROLES[p] ? p : null))
-  const short = s => String(s || '').split(/[,;(]/)[0].trim()
+  // A label short enough to stand under its piece.
+  const short = s => {
+    const head = String(s || '').split(/[,;:(]/)[0].trim()
+    return head.length > 26 ? `${head.slice(0, 25).trim()}…` : head
+  }
   const steps = chunks.map(c => {
     const items = []
     for (const j of c) {

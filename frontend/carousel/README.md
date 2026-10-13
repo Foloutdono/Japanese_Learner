@@ -1,4 +1,4 @@
-# The carousel studio (plans 200, 200b, 200c)
+# The carousel studio (plans 200, 200b, 200c, 200d)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -38,11 +38,22 @@ the content for (the studio greys out the others).
 | 一覧 | Top five | a list worth saving, one item a slide, then the list whole | a kanji's words, a word's family, a kana's words, a point's sentences, a passage's words |
 | 会話 | Conversation | the tour's scene line by line, then "what do you say?" | a lesson with a scene |
 
-Every type ends on the source's own station: its 駅名標 (its reading,
-its code in the line's roundel, the stations either side of it on the
-app's map), what its line teaches in figures counted from the content
-(`bank/index.json`), and a call to action fitted to the type ("How many
-out of 3?" after an exam).
+## The last slide
+
+Every type ends on the source's own station, what its line teaches in
+figures counted from the content (`bank/index.json`), and a call to
+action fitted to the type ("How many out of 3?" after an exam). How it
+says so is picked in the studio, from six endings drawn side by side
+under the deck (終点, "Last slide"):
+
+| Ending | Draws |
+| --- | --- |
+| Route map (路線図) | the app's two lines out of 辻, 学習 and 実践, every station on them in its pigment, the source's ringed and marked "you are here" |
+| Commuter pass (定期券) | a pass from 辻 to the source's station, in its line's colour: valid N5 → N1, the line, the holder (the handle) |
+| The mark | 辻 large, the name and what the app is, the station in its ring |
+| Call to action | the type's ask large, then save, send, follow, each with its icon |
+| Terminus (終点) | the train's last word, 終点です。ご乗車ありがとうございました。, on a dark panel |
+| Station plate | the source's 駅名標: its reading, its code, the stations either side |
 
 ## The questions
 
@@ -128,6 +139,21 @@ the station plates' slides it may leave out, and each type its own
 options (the route strip, the exam's cover and answer sheet, the list's
 recap), as toggles. The departure board and the study card of plan 200
 were styles, not types, and plan 200c retired them.
+
+## Nothing leaves the frame
+
+A slide never sets text outside the format's safe area, over other text,
+or below the smallest size a feed shows legibly: every block that could
+be long (a sentence, a choice, a bubble, a label, a station's name) is
+fitted, from its largest size down, to the room the others leave, and
+what can give way (a sense, a note, a translation) gives way first.
+Japanese wraps by its own rules (no small kana, closing bracket or
+prolonged mark at a line's start, no opening bracket at its end), and a
+word too long for a line is split rather than run off it. Plan 200d
+checked this by drawing every slide of a sample of every source, as
+every type and every ending, in both formats, languages and grounds,
+with the real fonts, and measuring every line of text set; every
+issue it found was fixed.
 
 ## Formats
 
