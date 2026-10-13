@@ -37,6 +37,16 @@ import { AskEntry } from './AskPage'
 // under (plan 168). The tour grades no card (plan 187, Q1): `onBoard`
 // hands the run what it took, and the run's first exercise follows.
 //
+// 一枚 — one card a stop (plan 206, the owner's pick B of the canvas
+// "Tsuji — the tour, fuller"): the stops hung from the head in boxes of
+// one weight and left the screen's middle empty. Each stop is now one
+// card, as the run's own card is, that takes the room between the track
+// and the gate: the question at its head, what it asks about in its
+// middle -- a sentence centred at the practice card's size, the point
+// itself once found -- and what the tour says back at its foot. The
+// choices stand under it as the exam's tiles, a row of them where every
+// one is short.
+//
 // `point` is the gate's (the card's identity over its lesson), carrying
 // `tour` from study/grammar_tour.py.
 const MAX_MISSES = 2
@@ -52,13 +62,24 @@ function Speak({ text, who = 'reader', onSpeak }) {
   )
 }
 
+// A choice short enough to stand in a row of tiles: a form (と, や, か)
+// or a word or two, never a sentence.
+const SHORT = { ja: 6, text: 10 }
+
 /** Choices that are checked once: the pick in gold, then the right one
-    ringed and a wrong pick crossed, the why said under them. */
+    ringed and a wrong pick crossed, the why said under them. Where every
+    one is short they stand in a row, four as two by two (plan 206). */
 function Choices({ items, pick, done, onPick, label, ja = false }) {
   const { t } = useLang()
   const trapLabel = t.tourTrap
+  const row = items.every(c => [...(ja ? c.jp ?? '' : c.text ?? '')].length <= (ja ? SHORT.ja : SHORT.text))
   return (
-    <div className="tour-guesses" role="radiogroup" aria-label={label}>
+    <div
+      className={`tour-guesses${row ? ' tour-guesses--row' : ''}`}
+      style={row ? { '--tour-cols': items.length === 4 ? 2 : items.length } : undefined}
+      role="radiogroup"
+      aria-label={label}
+    >
       {items.map((c, i) => {
         const ok = done && c.correct
         const no = done && pick === i && !c.correct
@@ -164,10 +185,12 @@ function Said({ kind, head, children }) {
 function Look({ tour, point }) {
   const { t } = useLang()
   return (
-    <>
-      <Ask text={t.tourLookQ(point.pattern)} pattern={point.pattern} />
-      <p className="tour__hint">{t.tourLookHint(tour.look.length)}</p>
-      <div className="tour-card tour-look">
+    <div className="tour-leaf">
+      <header className="tour-leaf__head">
+        <Ask text={t.tourLookQ(point.pattern)} pattern={point.pattern} />
+        <p className="tour__hint">{t.tourLookHint(tour.look.length)}</p>
+      </header>
+      <div className="tour-leaf__mid tour-look">
         {tour.look.map((ex, i) => (
           <div key={ex.jp} className="tour-ex">
             <ExampleSentence ex={{ ...ex, segments: ex.furigana }} senseNumber={i + 1} />
@@ -175,7 +198,7 @@ function Look({ tour, point }) {
           </div>
         ))}
       </div>
-    </>
+    </div>
   )
 }
 
@@ -184,11 +207,26 @@ function Guess({ tour, point, pick, wrong, given, onPick }) {
   const last = wrong.length ? tour.guesses[wrong[wrong.length - 1]] : null
   return (
     <>
-      <Ask text={t.tourGuessQ(point.pattern)} pattern={point.pattern} />
-      <div className="tour-card tour-look tour-look--mini" aria-hidden="true">
-        {tour.look.map(ex => (
-          <ExampleSentence key={ex.jp} ex={{ ...ex, segments: ex.furigana }} />
-        ))}
+      <div className="tour-leaf">
+        <header className="tour-leaf__head">
+          <Ask text={t.tourGuessQ(point.pattern)} pattern={point.pattern} />
+        </header>
+        <div className="tour-leaf__mid tour-look tour-look--mini" aria-hidden="true">
+          {tour.look.map(ex => (
+            <ExampleSentence key={ex.jp} ex={{ ...ex, segments: ex.furigana }} />
+          ))}
+        </div>
+        {given && (
+          <Said kind="given" head={t.tourGiven}>
+            <p className="tour-said__line">{t.tourGivenNote}</p>
+          </Said>
+        )}
+        {!given && last && (
+          <Said kind="no" head={t.tourThatIs(last.pattern)}>
+            <p className="tour-said__line"><LessonInline text={last.answer ?? t.tourNotThis} /></p>
+            {wrong.length >= 1 && <p className="tour-said__hint">{t.tourHint}</p>}
+          </Said>
+        )}
       </div>
       <div className="tour-guesses" role="radiogroup" aria-label={t.tourGuessQ(point.pattern)}>
         {tour.guesses.map((g, i) => {
@@ -213,28 +251,25 @@ function Guess({ tour, point, pick, wrong, given, onPick }) {
           )
         })}
       </div>
-      {given && (
-        <Said kind="given" head={t.tourGiven}>
-          <p className="tour-said__line">{t.tourGivenNote}</p>
-        </Said>
-      )}
-      {!given && last && (
-        <Said kind="no" head={t.tourThatIs(last.pattern)}>
-          <p className="tour-said__line"><LessonInline text={last.answer ?? t.tourNotThis} /></p>
-          {wrong.length >= 1 && <p className="tour-said__hint">{t.tourHint}</p>}
-        </Said>
-      )}
     </>
   )
 }
 
+/** The rule found: the card turns to the point, as a flashcard turns to
+    its answer -- what happened at its head, the point over its shape
+    and the rule in its middle, its first example at its foot. */
 function Found({ tour, point, misses, helped }) {
   const { t } = useLang()
+  const first = tour.look[0]
   return (
-    <>
-      {!helped && <Said kind="ok" head={t.tourFound(misses)} />}
-      <div className="tour-card tour-rule">
-        <p className="tour-rule__text"><LessonInline text={tour.rule ?? point.meaning} /></p>
+    <div className="tour-leaf tour-leaf--found">
+      <header className="tour-leaf__head">
+        {helped
+          ? <p className="tour-verdict tour-verdict--given">{t.tourGiven}</p>
+          : <p className="tour-verdict tour-verdict--ok"><Mark kind="ok" />{t.tourFound(misses)}</p>}
+      </header>
+      <div className="tour-leaf__mid">
+        <Pattern point={point} />
         {tour.chain
           ? (
             <p className="tour-chain" lang="ja">
@@ -243,9 +278,14 @@ function Found({ tour, point, misses, helped }) {
               <span className="tour-chain__to">{tour.chain[1]}</span>
             </p>
           )
-          : tour.structure && <p className="tour-rule__structure" lang="ja">{tour.structure}</p>}
+          : tour.structure && <p className="tour-leaf__structure" lang="ja">{tour.structure}</p>}
+        <h2 className="tour__q tour-leaf__rule" tabIndex={-1}><LessonInline text={tour.rule ?? point.meaning} /></h2>
       </div>
-    </>
+      <div className="tour-leaf__foot tour-ex">
+        <ExampleSentence ex={{ ...first, segments: first.furigana }} />
+        <Speak text={first.jp} />
+      </div>
+    </div>
   )
 }
 
@@ -260,32 +300,34 @@ function Twist({ twist, n, total, pick, done, onPick }) {
   const picked = pick != null ? twist.choices[pick] : null
   return (
     <>
-      <p className="tour__notion">
-        <span className="tour__notion-head">{t.tourUsageHead}</span>
-        {twist.notion && <span className="tour__notion-name">{twist.notion}</span>}
-        {twist.kind === 'trap' && <span className="tour-trap">{t.tourTrap}</span>}
-        {total > 1 && <span className="tour__notion-count">{t.tourNotionCount(n + 1, total)}</span>}
-      </p>
-      <h2 className="tour__q" tabIndex={-1}><Mixed text={twist.ask} /></h2>
-      <div className="tour-card tour-twist">
-        <div className="tour-ex">
+      <div className="tour-leaf">
+        <header className="tour-leaf__head">
+          <p className="tour__notion">
+            <span className="tour__notion-head">{t.tourUsageHead}</span>
+            {twist.notion && <span className="tour__notion-name">{twist.notion}</span>}
+            {twist.kind === 'trap' && <span className="tour-trap">{t.tourTrap}</span>}
+            {total > 1 && <span className="tour__notion-count">{t.tourNotionCount(n + 1, total)}</span>}
+          </p>
+          <h2 className="tour__q" tabIndex={-1}><Mixed text={twist.ask} /></h2>
+        </header>
+        <div className="tour-leaf__corner"><Speak text={twist.jp} /></div>
+        <div className="tour-leaf__mid tour-leaf__mid--spec tour-twist">
           <ExampleSentence ex={{ jp: twist.jp, tr: twist.tr, segments: twist.furigana }} showTr={done && Boolean(twist.tr)} />
-          <Speak text={twist.jp} />
         </div>
+        {done && (
+          <Said kind={picked?.correct ? 'ok' : 'no'} head={picked?.correct ? t.tourRight : `${t.tourNotQuite} ${right.text}`}>
+            <p className="tour-said__line"><LessonInline text={twist.why} /></p>
+            {twist.pair && (
+              <p className="tour-pair" lang="ja">
+                <span>{twist.pair[0]}</span>
+                <span className="tour-pair__bar" aria-hidden="true">／</span>
+                <span>{twist.pair[1]}</span>
+              </p>
+            )}
+          </Said>
+        )}
       </div>
       <Choices items={twist.choices} pick={pick} done={done} onPick={onPick} label={twist.ask} />
-      {done && (
-        <Said kind={picked?.correct ? 'ok' : 'no'} head={picked?.correct ? t.tourRight : `${t.tourNotQuite} ${right.text}`}>
-          <p className="tour-said__line"><LessonInline text={twist.why} /></p>
-          {twist.pair && (
-            <p className="tour-pair" lang="ja">
-              <span>{twist.pair[0]}</span>
-              <span className="tour-pair__bar" aria-hidden="true">／</span>
-              <span>{twist.pair[1]}</span>
-            </p>
-          )}
-        </Said>
-      )}
     </>
   )
 }
@@ -335,29 +377,37 @@ function Scene({ scene, phase, pick, done, onPick }) {
           </span>
           <span className="tour-plate__cap">{scene.place_caption}</span>
         </div>
-        <ol className="tour-card tour-scene">
-          {scene.lines.map((line, i) => <SceneLine key={i} line={line} them={scene.them} onSpeak={cut} />)}
-        </ol>
-        <button type="button" className="brd__link tour-scene__all" onClick={() => { playClick(); playAll() }} disabled={playingAll} data-action="play-scene">
-          {t.tourPlayScene}
-        </button>
-        <p className="tour-note"><LessonInline text={scene.note} /></p>
+        <div className="tour-leaf tour-leaf--scene">
+          <ol className="tour-leaf__mid tour-scene">
+            {scene.lines.map((line, i) => <SceneLine key={i} line={line} them={scene.them} onSpeak={cut} />)}
+          </ol>
+          <div className="tour-leaf__foot">
+            <p className="tour-note"><LessonInline text={scene.note} /></p>
+            <button type="button" className="brd__link tour-scene__all" onClick={() => { playClick(); playAll() }} disabled={playingAll} data-action="play-scene">
+              {t.tourPlayScene}
+            </button>
+          </div>
+        </div>
       </>
     )
   }
   return (
     <>
-      <ol className="tour-card tour-scene">
-        <SceneLine line={scene.ask.cue} them={scene.them} />
-      </ol>
-      <h2 className="tour__q" tabIndex={-1}>{scene.ask.task}</h2>
+      <div className="tour-leaf">
+        <header className="tour-leaf__head">
+          <h2 className="tour__q" tabIndex={-1}>{scene.ask.task}</h2>
+        </header>
+        <ol className="tour-leaf__mid tour-scene">
+          <SceneLine line={scene.ask.cue} them={scene.them} />
+        </ol>
+        {done && (
+          <Said kind={picked?.correct ? 'ok' : 'no'} head={picked?.correct ? t.tourRight : t.tourNotQuite}>
+            {!picked?.correct && <p className="tour-said__line tour-said__line--ja" lang="ja">{right.jp}</p>}
+            <p className="tour-said__line"><LessonInline text={scene.ask.why} /></p>
+          </Said>
+        )}
+      </div>
       <Choices items={scene.ask.choices} pick={pick} done={done} onPick={onPick} label={scene.ask.task} ja />
-      {done && (
-        <Said kind={picked?.correct ? 'ok' : 'no'} head={picked?.correct ? t.tourRight : t.tourNotQuite}>
-          {!picked?.correct && <p className="tour-said__line tour-said__line--ja" lang="ja">{right.jp}</p>}
-          <p className="tour-said__line"><LessonInline text={scene.ask.why} /></p>
-        </Said>
-      )}
     </>
   )
 }
@@ -383,7 +433,7 @@ function QuizQuestion({ q, n, total, pick, done, onPick }) {
     const segments = q.furigana.map(seg => (seg.blank ? { ...seg, answer } : seg))
     ask = q.kind === 'gap' ? t.tourQuizGap : q.ask
     body = (
-      <div className="tour-card tour-twist">
+      <div className="tour-leaf__mid tour-leaf__mid--spec tour-twist">
         <ExampleSentence ex={{ jp: q.jp, tr: q.tr, segments }} showTr revealed={done} blankLabel={t.glBlank} />
       </div>
     )
@@ -393,28 +443,35 @@ function QuizQuestion({ q, n, total, pick, done, onPick }) {
     ja = true
   } else {
     body = (
-      <div className="tour-card tour-twist">
-        <div className="tour-ex">
+      <>
+        <div className="tour-leaf__corner"><Speak text={q.jp} /></div>
+        <div className="tour-leaf__mid tour-leaf__mid--spec tour-twist">
           <ExampleSentence ex={{ jp: q.jp, tr: q.tr, segments: q.furigana }} showTr={done && Boolean(q.tr)} />
-          <Speak text={q.jp} />
         </div>
-      </div>
+      </>
     )
   }
+  // A reply's situation has no sentence to show: it is what the card's
+  // middle holds, the caption alone at its head.
+  const question = <h2 className="tour__q" tabIndex={-1}><Mixed text={ask} /></h2>
   return (
     <>
-      <p className="tour__notion">
-        <span className="tour__notion-head">{t.tourQuizKinds[q.kind]}</span>
-        <span className="tour__notion-count">{t.tourQuizCount(n + 1, total)}</span>
-      </p>
-      <h2 className="tour__q" tabIndex={-1}><Mixed text={ask} /></h2>
-      {body}
+      <div className="tour-leaf">
+        <header className="tour-leaf__head">
+          <p className="tour__notion">
+            <span className="tour__notion-head">{t.tourQuizKinds[q.kind]}</span>
+            <span className="tour__notion-count">{t.tourQuizCount(n + 1, total)}</span>
+          </p>
+          {body && question}
+        </header>
+        {body ?? <div className="tour-leaf__mid tour-leaf__mid--spec">{question}</div>}
+        {done && (
+          <Said kind={picked?.correct ? 'ok' : 'no'} head={picked?.correct ? t.tourRight : t.tourNotQuite}>
+            {q.why && <p className="tour-said__line"><LessonInline text={q.why} /></p>}
+          </Said>
+        )}
+      </div>
       <Choices items={items} pick={pick} done={done} onPick={onPick} label={ask} ja={ja} />
-      {done && (
-        <Said kind={picked?.correct ? 'ok' : 'no'} head={picked?.correct ? t.tourRight : t.tourNotQuite}>
-          {q.why && <p className="tour-said__line"><LessonInline text={q.why} /></p>}
-        </Said>
-      )}
     </>
   )
 }
@@ -482,9 +539,10 @@ function Recap({ q, pick }) {
   )
 }
 
-/** The results (plan 194, redrawn in plan 195): the point over the score
-    as a dial, each question again with how it went, and the point's
-    sheet; the gate starts Choisir 1. */
+/** The results (plan 194, redrawn in plan 195; one card since plan 206):
+    the score as a dial over the point, each question again with how it
+    went at the card's foot, and the point's sheet; the gate starts
+    Choisir 1. */
 export function Results({ tour, point, picks, onLesson, replay }) {
   const { t } = useLang()
   const quiz = tour.quiz ?? []
@@ -493,25 +551,25 @@ export function Results({ tour, point, picks, onLesson, replay }) {
   return (
     <>
       <h2 className="tour__q sr-only" tabIndex={-1}>{t.tourResults}</h2>
-      <header className="tour-end">
-        {total > 0 && <Tally marks={marks} right={right} total={total} />}
-        <div className="tour-end__who">
+      <div className="tour-leaf tour-leaf--end">
+        <header className="tour-leaf__mid tour-end">
+          {total > 0 && <Tally marks={marks} right={right} total={total} />}
           <Pattern point={point} />
           {point.structure && <p className="tour-end__structure">{point.structure}</p>}
-        </div>
-      </header>
-      {total > 0 && (
-        <ol className="tour-card tour-recap">
-          {quiz.map((q, i) => {
-            const ok = marks[i]
-            return (
-              <li key={i} className={`tour-recap__row tour-recap__row--${ok ? 'ok' : 'no'}`}>
-                <Recap q={q} pick={picks?.[i]} />
-              </li>
-            )
-          })}
-        </ol>
-      )}
+        </header>
+        {total > 0 && (
+          <ol className="tour-leaf__foot tour-recap">
+            {quiz.map((q, i) => {
+              const ok = marks[i]
+              return (
+                <li key={i} className={`tour-recap__row tour-recap__row--${ok ? 'ok' : 'no'}`}>
+                  <Recap q={q} pick={picks?.[i]} />
+                </li>
+              )
+            })}
+          </ol>
+        )}
+      </div>
       {onLesson && !replay && (
         <button type="button" className="tour-sheet" onClick={() => { playClick(); onLesson() }} data-action="lesson">
           <span className="tour-sheet__pattern" lang="ja">{point.pattern}</span>

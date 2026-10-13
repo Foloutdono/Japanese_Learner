@@ -260,7 +260,10 @@ describe('the gate with nothing due', () => {
       tomorrow: { cards: 9, minutes: 3 },
     })
     expect(document.querySelectorAll('.tdy-dial__ring g')).toHaveLength(2)
-    expect(document.querySelector('.clrk-seal')).toBeTruthy()
+    // On the print the disc is the day's seal, cut in red (plan 206),
+    // and says so to a screen reader.
+    expect(document.querySelector('.tdy-dial__seal')).toBeTruthy()
+    expect(document.querySelector('.tdy-dial__disc').getAttribute('aria-label')).toMatch(/^Tampon du jour\s*:\s*gare de Tsuji, /)
     expect(text(document.querySelector('.tdy-recap'))).toBe('31 cartes aujourd’hui')
     expect(document.querySelectorAll('.tdy-rally .clrk-slot')).toHaveLength(7)
     expect(words(document.querySelector('.tdy-next'))).toBe('Demain 9 cartes ≈ 3 min')
@@ -271,9 +274,11 @@ describe('the gate with nothing due', () => {
 
   it('stamps nothing on a day nothing was reviewed', async () => {
     await gate({ total: 0, lanes: [], next_due: null, reviewed: { total: 0, by_line: {} } })
-    expect(document.querySelector('.clrk-seal')).toBeNull()
+    expect(document.querySelector('.tdy-dial__seal')).toBeNull()
     expect(text(document.querySelector('.tdy-dial__clear'))).toBe('À jour')
-    expect(document.querySelector('.tdy-dial__track')).toBeTruthy()
+    // The hour's own disc stands there, ringed by nothing.
+    expect(document.querySelector('.tdy-dial__disc')).toBeTruthy()
+    expect(document.querySelectorAll('.tdy-dial__ring g')).toHaveLength(0)
     expect(document.querySelector('.btn-depart--gate').disabled).toBe(true)
   })
 })

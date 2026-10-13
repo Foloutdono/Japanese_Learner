@@ -104,8 +104,9 @@ describe('the tour', () => {
     await settle()
 
     expect(root().dataset.stop).toBe('found')
-    // Helped, so no "well spotted".
-    expect(root().querySelector('.tour-said--ok')).toBeNull()
+    // Helped, so no "well spotted": the rule was given.
+    expect(root().querySelector('.tour-verdict--ok')).toBeNull()
+    expect(root().querySelector('.tour-verdict--given')).toBeTruthy()
     expect(root().querySelector('.tour-chain').textContent).toBe('読む→読んでください')
     gate().click()
     await settle()
@@ -137,7 +138,15 @@ describe('the tour', () => {
     gate().click()
     await settle()
     expect(root().dataset.stop).toBe('found')
-    expect(root().querySelector('.tour-said--ok .tour-said__head').textContent).toBe('Well spotted, first time.')
+    expect(root().querySelector('.tour-verdict--ok').textContent).toBe('Well spotted, first time.')
+    // The card turns to the point (plan 206): what happened at its head,
+    // the point and the rule in its middle, its first example at its foot.
+    const found = root().querySelector('.tour-leaf--found')
+    expect(found.querySelector('.tour-leaf__head .tour-verdict')).toBeTruthy()
+    expect(found.querySelector('.tour-leaf__mid .tour-pattern').textContent).toBe('〜てください')
+    const bare = text => text.replace(/\*\*/g, '').replace(/\s+/g, '')
+    expect(bare(found.querySelector('.tour-leaf__mid .tour-leaf__rule').textContent)).toBe(bare(TOUR.rule))
+    expect(written(found.querySelector('.tour-leaf__foot .dict-ex__jp'))).toBe(TOUR.look[0].jp)
     gate().click()
     await settle()
     gate().click()
@@ -154,7 +163,7 @@ describe('the tour', () => {
     gate().click()
     await settle()
     expect(root().querySelector('.tour-chain')).toBeNull()
-    expect(root().querySelector('.tour-rule__structure').textContent).toBe(TOUR.structure)
+    expect(root().querySelector('.tour-leaf__structure').textContent).toBe(TOUR.structure)
   })
 })
 
@@ -225,6 +234,14 @@ describe('the written tour', () => {
       expect(root().querySelector('.tour-twist .dict-ex__tr')).toBeNull()
       expect(root().querySelectorAll('.tour-guesses [data-choice]')).toHaveLength(2)
       expect(gate().disabled).toBe(true)
+      // One card a stop (plan 206): the question and the sentence on it,
+      // its voice in its corner, the readings under it.
+      const leaf = root().querySelector('.tour-leaf')
+      expect(root().querySelectorAll('.tour-leaf')).toHaveLength(1)
+      expect(leaf.querySelector('.tour-leaf__head .tour__q')).toBeTruthy()
+      expect(leaf.querySelector('.tour-leaf__mid--spec .dict-ex__jp')).toBeTruthy()
+      expect(leaf.querySelector('.tour-leaf__corner [data-action="speak"]')).toBeTruthy()
+      expect(leaf.querySelector('.tour-guesses')).toBeNull()
       const wrong = twist.choices.findIndex(c => !c.correct)
       const rightTwist = twist.choices.findIndex(c => c.correct)
       choice(root, i === 0 ? wrong : rightTwist).click()
@@ -236,6 +253,8 @@ describe('the written tour', () => {
       expect(choice(root, rightTwist).classList.contains('tour-guess--ok')).toBe(true)
       if (i === 0) expect(choice(root, wrong).classList.contains('tour-guess--no')).toBe(true)
       expect(root().querySelector(i === 0 ? '.tour-said--no' : '.tour-said--ok')).toBeTruthy()
+      // What the tour says back is the card's foot, not a box under it.
+      expect(root().querySelector('.tour-leaf > .tour-said')).toBeTruthy()
       gate().click()
       await settle()
     }
@@ -252,6 +271,13 @@ describe('the written tour', () => {
       // to say.
       if (q.kind === 'meaning') expect(root().querySelector('.tour-twist .dict-ex__tr')).toBeNull()
       if (q.kind === 'form') expect(root().querySelector('.tour-twist .dict-ex__tr').textContent).toBe(q.tr)
+      // A reply's situation is what its card holds; a short form stands in
+      // a row of tiles, one a column (plan 206).
+      if (q.kind === 'use') expect(root().querySelector('.tour-leaf__mid .tour__q').textContent).toBe(q.ask)
+      const short = q.choices.every(c => [...(q.kind === 'meaning' ? c.text : c.jp)].length <= (q.kind === 'meaning' ? 10 : 6))
+      const tiles = root().querySelector('.tour-guesses')
+      expect(tiles.classList.contains('tour-guesses--row')).toBe(short)
+      if (short) expect(tiles.style.getPropertyValue('--tour-cols')).toBe(String(q.choices.length === 4 ? 2 : q.choices.length))
       choice(root, i === 0 ? wrongQ : rightQ).click()
       await settle()
       gate().click()

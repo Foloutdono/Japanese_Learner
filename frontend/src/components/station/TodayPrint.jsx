@@ -17,9 +17,10 @@ import { PRINT, usePrintScene } from './print/usePrint'
 // pace however busy the rest is; what stands in front of it; the
 // paper's fibre over all. Its moving parts are CSS (index.css, the
 // print's section) and keep still under reduced motion. Decoration:
-// the gate says everything it shows in words.
+// the gate says everything it shows in words. On a day with nothing
+// left the last train has gone (`train={false}`, plan 206).
 
-export function TodayPrint({ hour, device, frameRef }) {
+export function TodayPrint({ hour, device, frameRef, train = true }) {
   const scene = usePrintScene(hour, device)
   const box = scene ? `0 0 ${scene.w} ${scene.h}` : null
   return (
@@ -30,7 +31,7 @@ export function TodayPrint({ hour, device, frameRef }) {
             <svg className="tpr__layer" viewBox={box} focusable="false" dangerouslySetInnerHTML={{ __html: scene.layers.sky }} />
             <div className="tpr__grain" />
             <svg className="tpr__layer" viewBox={box} focusable="false" dangerouslySetInnerHTML={{ __html: scene.layers.back }} />
-            <div className="tpr__rail">
+            {train && <div className="tpr__rail">
               <svg
                 className="tpr__train"
                 viewBox={box}
@@ -42,7 +43,7 @@ export function TodayPrint({ hour, device, frameRef }) {
                 }}
                 dangerouslySetInnerHTML={{ __html: scene.layers.train }}
               />
-            </div>
+            </div>}
             <svg className="tpr__layer" viewBox={box} focusable="false" dangerouslySetInnerHTML={{ __html: scene.layers.front }} />
             <div className="tpr__paper" />
           </>

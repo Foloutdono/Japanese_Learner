@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useTodaySummary, refreshToday } from '../stores/today'
@@ -57,10 +57,15 @@ export default function TodayScreen({ session }) {
     clearTimeout(leaving.current)
     return () => { leaving.current = setTimeout(() => markRestSeen(session, restKey), 0) }
   }, [showRest, restKey, session])
+  // The notice gives way to the run, not to the gate: the router moves
+  // in a transition, so leaving the notice outside it drew the gate (and
+  // fetched its print, plan 205) for a beat before the run took over.
   const depart = () => {
     markRestSeen(session, restKey)
-    setRestLeft(true)
-    navigate('/today/run')
+    startTransition(() => {
+      setRestLeft(true)
+      navigate('/today/run')
+    })
   }
   const restMinutes = today?.seconds_per_review && today?.total
     ? Math.max(1, Math.ceil((today.total * today.seconds_per_review) / 60))
