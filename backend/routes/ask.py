@@ -9,7 +9,9 @@ for the breakdown's reason: before the grade, "what does this mean?" is
 a request for the answer key. A phone has no panel: it opens the same
 asking as a page of its own, from a button in the graded card (plan 197,
 components/study/AskPage.jsx), and the route cannot tell the two apart:
-the same limits, the same daily count. It answers the owner's brief,
+the same limits, the same daily count. The grammar tour (plan 204), the
+tutorial a never-met point opens with, asks through it too, once each
+stop's question is answered: mode "grammar", the same limits. It answers the owner's brief,
 "limited to small questions and only precise answers":
 
     small     a question is at most MAX_QUESTION characters, a sentence
@@ -76,7 +78,7 @@ FEATURE = "ask"
 # the exercise's.
 OFF_TOPIC = "OFF_TOPIC"
 
-Mode = Literal["reading", "translation", "dictation", "composition", "comprehension"]
+Mode = Literal["reading", "translation", "dictation", "composition", "comprehension", "grammar"]
 
 # What the learner did, as the model is told it -- so "your answer" and
 # "the reference" mean the right thing in each mode. Reading asks for
@@ -98,6 +100,14 @@ MODE_WHAT = {
     "comprehension": (
         "read the short Japanese text below and answered multiple-choice questions about it; "
         "the question gives the one they are looking at, its options, the right one and theirs"
+    ),
+    # The grammar tour (plan 204): the tutorial a never-met point opens
+    # with, its examples, its questions and its explanations all the
+    # app's own -- a point's first meeting, so the level is the point's.
+    "grammar": (
+        "is meeting the grammar point below for the first time, in a short guided tutorial; "
+        "the Japanese below is the tutorial's own example of it and is correct, the learner's "
+        "answer is the choice they picked, and the review is the tutorial's own explanation"
     ),
 }
 

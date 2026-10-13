@@ -16,6 +16,7 @@ import {
 import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
+import { useAsk } from '../hooks/useAsk'
 import { GrammarWrite } from '../components/study/GrammarWork'
 import { BuildEntry, GrammarChoose, GrammarConstruire, GrammarTiles, PointLine } from '../components/study/GrammarPlate'
 import { useBuild } from '../hooks/useBuild'
@@ -96,6 +97,8 @@ export default function GrammarRun({ session }) {
   const desk = useDesk()
   const [compared, setCompared]     = useState(null)
   const [tourView, setTourView]     = useState(null)
+  // 問 in the tour (plan 204): a thread per stop, kept for the run.
+  const asking = useAsk(session, 'grammar')
   const closeCompared = useCallback(() => setCompared(null), [])
 
   // One session per level+mode+language (see useCardSession): the
@@ -318,7 +321,7 @@ export default function GrammarRun({ session }) {
       onToastDone={gates.toastDone}
       records
       progress={progress}
-      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} /> : card ? <CardPanel card={card} /> : null}
+      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} ask={asking} /> : card ? <CardPanel card={card} /> : null}
       done={done}
       side={error && !card ? null : (
         <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
@@ -342,6 +345,7 @@ export default function GrammarRun({ session }) {
               onBoard={() => updateCurrent({ lesson_seen: true })}
               onLesson={() => setSheet(card.raw_id ?? card.card_id)}
               onView={setTourView}
+              ask={asking}
             />
           </div>
         )}
