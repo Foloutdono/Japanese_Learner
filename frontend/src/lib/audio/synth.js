@@ -345,6 +345,11 @@ function hallInto(ctx, dest) {
   return conv
 }
 
+/** The hall made ahead for `dest` (voices.js warms it when idle, plan 207). */
+export function warmHall(ctx, dest) {
+  hallInto(ctx, dest)
+}
+
 // Longer than any voice plus the hall's tail, several times over.
 const VOICE_LIFE_MS = 3500
 
