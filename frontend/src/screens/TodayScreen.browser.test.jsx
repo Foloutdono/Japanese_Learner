@@ -193,7 +193,11 @@ describe('TodayScreen — the gate', () => {
     notice.querySelector('.btn-depart--gate').click()
     await settle()
     expect(apiJson).toHaveBeenCalledWith('/api/today/rest/seen', undefined, expect.objectContaining({ method: 'POST' }))
-    expect(screen.container.querySelector('.run-stub')).toBeTruthy()
+    // The router boards the run as a transition, after the urgent render
+    // that puts the gate back (since plan 205 a print, not a quick paint):
+    // wait for the run rather than a fixed beat, which a loaded runner
+    // outlasts.
+    await vi.waitFor(() => expect(screen.container.querySelector('.run-stub')).toBeTruthy())
   })
 })
 
