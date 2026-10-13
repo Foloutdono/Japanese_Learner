@@ -9,7 +9,7 @@ import { useSlotWidth, scaleVars, classLabel } from './cardScale'
 // three materials (domain/passCard.js's cardTier), replacing every pass
 // the app drew. Its face is the offers' (plan 172): the contactless mark
 // and "Pass", 辻 in the corner, the holder with the level under the name,
-// the struck 辻 whose road 辶 fills with the climb, and at its foot what
+// the struck 辻 which fills with the climb, and at its foot what
 // practice costs on it and the class. Whatever the old passes printed
 // that the face does not is on the back (PassBack.jsx): the route and
 // its validity, the contract, the three meters, the signature.
@@ -33,14 +33,13 @@ export function CardSkin({ tier }) {
 
 /**
  * The face's print. `levelSlot` replaces the level's figure (the
- * level-up rolls its own there); `fillCross` lets 十 fill as 辶 does,
- * which only the level-up animates (plan 200).
+ * level-up rolls its own there).
  */
-export function FacePrint({ tier, name, level, share, levelSlot = null, fillCross = false }) {
+export function FacePrint({ tier, name, level, share, levelSlot = null }) {
   const { t } = useLang()
   return (
     <div className={`pcf pcf--${tier}`} aria-hidden="true">
-      <StruckMark xp={share} etched={tier === 'max'} fillCross={fillCross} className="pcf__seal" />
+      <StruckMark xp={share} etched={tier === 'max'} className="pcf__seal" />
       <div className="pcf__row">
         <span className="pcf__brand"><Wave />{t.ofrCardBrand}</span>
         <CornerMark />
@@ -62,7 +61,7 @@ export function FacePrint({ tier, name, level, share, levelSlot = null, fillCros
  * the holder's mouth. `children` are drawn over it (the level-up's
  * sparks).
  */
-export function CardFace({ tier, name, level, share, levelSlot, fillCross = false, className = '', label, children }) {
+export function CardFace({ tier, name, level, share, levelSlot, className = '', label, children }) {
   const [ref, width] = useSlotWidth()
   return (
     <div
@@ -75,7 +74,7 @@ export function CardFace({ tier, name, level, share, levelSlot, fillCross = fals
     >
       <div className="pcard__side pcard__side--face">
         <CardSkin tier={tier} />
-        <FacePrint tier={tier} name={name} level={level} share={share} levelSlot={levelSlot} fillCross={fillCross} />
+        <FacePrint tier={tier} name={name} level={level} share={share} levelSlot={levelSlot} />
       </div>
       {children}
     </div>

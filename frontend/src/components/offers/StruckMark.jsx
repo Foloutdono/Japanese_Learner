@@ -1,23 +1,25 @@
 import { useId } from 'react'
-import { CROSS, SHIN, ROAD } from './markParts'
+import { CROSS, SHIN, ROAD, MARK_TOP, MARK_FOOT, CROSS_FOOT, crossShare } from './markParts'
 
 // ── 辻, struck into a pass, filling with the XP (plan 172) ─────────
 // The owner's drawing: the pass carries the app's mark large and
-// faint, and the XP bar is the mark itself -- 辶, the road, filling
-// from its foot up (the sweep, then the zigzag, then the dot) to the
-// share of the level climbed. 十 never fills -- except in the level-up
-// (plan 200), which asks for it with `fillCross`: the road fills and, as
-// it nears full, the crossing it leads to is lit too, so a level that
-// turns over is the whole 辻 filled. Printed on Pro (a tone on its
-// charcoal, the fill a gold ink); `etched` on Max (fine diagonal cuts in
-// the platinum, the fill gold laid into them).
+// faint, and the XP bar is the mark itself, filling from the road's foot
+// up to the share of the level climbed: the sweep, then the zigzag, then
+// the dot, and 十 as the line passes its foot (it stands on the road). 十
+// filled only in the level-up (plan 200) until it was asked to fill at
+// rest too; now the level-up's end state is the same line, so a level
+// that turns over is the whole 辻 filled and empties onto the new
+// level's climb. Printed on Pro (a tone on its charcoal, the fill a gold
+// ink); `etched` on Max (fine diagonal cuts in the platinum, the fill
+// gold laid into them).
 //
-// The fill is one bar clipped over 辶's extent (its box in the mark's
-// own 1000-unit square: 56 to 977), scaled by --ofr-xp. 十 has a bar of
-// its own over its extent (31 to 783), scaled by --ofr-xp-cross, which
-// is 0 at rest: only the level-up's animation ever raises it. Ids are the
-// component's own, so two passes on one screen keep their clips apart.
-export function StruckMark({ xp = 0, etched = false, fillCross = false, className = '' }) {
+// The fill is one line rising across the mark's own 1000-unit square
+// (31 to 977), as two bars clipped over it. 辶's covers the whole extent,
+// scaled by --ofr-xp; 十's covers its own (31 to 783), scaled by
+// --ofr-xp-cross, which is the same line in 十's units (markParts.js's
+// crossShare) and which the level-up's animation drives past it. Ids are
+// the component's own, so two passes on one screen keep their clips apart.
+export function StruckMark({ xp = 0, etched = false, className = '' }) {
   const id = useId().replace(/:/g, '')
   return (
     <svg
@@ -25,7 +27,7 @@ export function StruckMark({ xp = 0, etched = false, fillCross = false, classNam
       viewBox="0 0 1000 1000"
       aria-hidden="true"
       focusable="false"
-      style={{ '--ofr-xp': xp }}
+      style={{ '--ofr-xp': xp, '--ofr-xp-cross': crossShare(xp) }}
     >
       <defs>
         {etched && (
@@ -40,13 +42,11 @@ export function StruckMark({ xp = 0, etched = false, fillCross = false, classNam
           </linearGradient>
         )}
         <clipPath id={`${id}c`}>
-          <rect className="ofr-mark__bar" x="0" y="56" width="1000" height="921" />
+          <rect className="ofr-mark__bar" x="0" y={MARK_TOP} width="1000" height={MARK_FOOT - MARK_TOP} />
         </clipPath>
-        {fillCross && (
-          <clipPath id={`${id}x`}>
-            <rect className="ofr-mark__bar ofr-mark__bar--cross" x="0" y="31" width="1000" height="752" />
-          </clipPath>
-        )}
+        <clipPath id={`${id}x`}>
+          <rect className="ofr-mark__bar ofr-mark__bar--cross" x="0" y={MARK_TOP} width="1000" height={CROSS_FOOT - MARK_TOP} />
+        </clipPath>
       </defs>
       <g className="ofr-mark__ink" fill={etched ? `url(#${id}h)` : undefined}>
         <path d={CROSS} />
@@ -57,11 +57,9 @@ export function StruckMark({ xp = 0, etched = false, fillCross = false, classNam
         <path d={SHIN} />
         <path d={ROAD} />
       </g>
-      {fillCross && (
-        <g className="ofr-mark__xp ofr-mark__xp--cross" clipPath={`url(#${id}x)`} fill={etched ? `url(#${id}g)` : undefined}>
-          <path d={CROSS} />
-        </g>
-      )}
+      <g className="ofr-mark__xp ofr-mark__xp--cross" clipPath={`url(#${id}x)`} fill={etched ? `url(#${id}g)` : undefined}>
+        <path d={CROSS} />
+      </g>
     </svg>
   )
 }

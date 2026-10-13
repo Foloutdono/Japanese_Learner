@@ -10,7 +10,8 @@ import '../../index.css'
 
 // ── 進級 — the level-up's card and its sound (plan 200) ─────────────
 // The card's struck 辻 fills as the level turns over: the road 辶 and, as
-// the road nears full, the crossing 十 it leads to. The sound is scored
+// the road nears full, the crossing 十 it leads to, and both refill to
+// what the new level already holds. The sound is scored
 // against the card's animations (recipes.js's LEVEL_CLOCK), so this file
 // holds the two to each other: a change to the CSS clock that the score
 // did not follow fails here, instead of being heard as a sound that has
@@ -32,9 +33,12 @@ function seek(seconds) {
   }
 }
 
-async function mount() {
+// The mark's fill line, in its own square: where a bar's top stands.
+const level = bar => Number(bar.getAttribute('y')) + Number(bar.getAttribute('height')) * (1 - scaleY(bar))
+
+async function mount({ xp = 120 } = {}) {
   document.body.innerHTML = ''
-  seedSummary({ level: 3, xp: 120, xpPrevLevel: 100, xpForNext: 400, username: 'Aiko', ratingScale: 'simple' })
+  seedSummary({ level: 3, xp, xpPrevLevel: 100, xpForNext: 400, username: 'Aiko', ratingScale: 'simple' })
   await render(
     <LangProvider>
       <XpToast toast={{ id: 1, leveledUp: true, newLevel: 3, amount: 24 }} />
@@ -84,11 +88,22 @@ describe('the level-up fills the whole 辻 (plan 200)', () => {
     expect(scaleY(road)).toBe(1)
     expect(scaleY(cross)).toBe(1)
 
-    // Both empty in the one breath; only the road refills, to the share
-    // the new level already holds. 十 never fills at rest.
+    // Both empty in the one breath, then take the line the new level
+    // already holds: the road its share, 十 not yet reached by it.
     seek(3)
     expect(scaleY(cross)).toBe(0)
     expect(scaleY(road)).toBeCloseTo(20 / 300, 2)
+  })
+
+  it('leaves 十 filled on the same line as the road when the new level holds enough', async () => {
+    await mount({ xp: 360 })
+    const road = $('.levelup .pcf__seal .ofr-mark__bar:not(.ofr-mark__bar--cross)')
+    const cross = $('.levelup .pcf__seal .ofr-mark__bar--cross')
+
+    seek(3)
+    expect(scaleY(road)).toBeCloseTo(260 / 300, 2)
+    expect(scaleY(cross)).toBeGreaterThan(0.5)
+    expect(level(cross)).toBeCloseTo(level(road), 1)
   })
 
   it('bursts out of the crossing, 辻\'s namesake', async () => {
@@ -100,16 +115,38 @@ describe('the level-up fills the whole 辻 (plan 200)', () => {
     expect(burst.top).toBeCloseTo(seal.top + seal.height * 0.305, -0.3)
   })
 
-  it('does not fill 十 anywhere the card is not the level-up', async () => {
-    document.body.innerHTML = ''
-    await render(
-      <LangProvider>
-        <div style={{ width: 300 }}><CardFace tier="pro" name="Aiko" level={3} share={0.5} /></div>
-      </LangProvider>
-    )
-    expect($('.pcf__seal')).not.toBeNull()
-    expect($('.ofr-mark__bar--cross')).toBeNull()
-    expect($('.ofr-mark__xp--cross')).toBeNull()
+  it('fills 十 on the road\'s line wherever the card is drawn, not only in the level-up', async () => {
+    const face = async share => {
+      document.body.innerHTML = ''
+      await render(
+        <LangProvider>
+          <div style={{ width: 300 }}><CardFace tier="pro" name="Aiko" level={3} share={share} /></div>
+        </LangProvider>
+      )
+      return {
+        road: $('.pcf__seal .ofr-mark__bar:not(.ofr-mark__bar--cross)'),
+        cross: $('.pcf__seal .ofr-mark__bar--cross'),
+      }
+    }
+
+    // The line has not reached 十's foot: the road is lit, 十 is not.
+    let { road, cross } = await face(0.1)
+    expect($('.pcf__seal .ofr-mark__xp--cross path')).not.toBeNull()
+    expect(scaleY(road)).toBeCloseTo(0.1, 3)
+    expect(scaleY(cross)).toBe(0)
+
+    // Past it: 十 rises on the very line the road's top stands on.
+    ;({ road, cross } = await face(0.5))
+    expect(scaleY(road)).toBeCloseTo(0.5, 3)
+    expect(scaleY(cross)).toBeGreaterThan(0.3)
+    expect(level(cross)).toBeCloseTo(level(road), 1)
+
+    // Full is the whole 辻.
+    ;({ road, cross } = await face(1))
+    expect(scaleY(road)).toBe(1)
+    expect(scaleY(cross)).toBe(1)
+    expect(level(road)).toBe(31)
+    expect(level(cross)).toBe(31)
   })
 })
 

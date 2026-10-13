@@ -1204,18 +1204,24 @@ moments, three objects, none waiting to be dismissed:
   full; a lapse re-inks the impression in vermillion with a shake. It holds
   the next card for under a second (`CardStamp.browser.test` pins every
   hold and the faintness), because the moment is the press, not a pageant.
+- **The struck 辻 is one vessel.** The climb fills it everywhere the
+  card is drawn (the pass, the HUD's strip, the desk's holder, a run's
+  floor) as **one line rising from the road's foot**: 辶's sweep, its
+  zigzag and dot, and the crossing 十, which stands on the road and is
+  reached once the line passes its foot, a fifth of the way up. 十 is
+  never filled on a line of its own (`markParts.crossShare` is the line
+  in 十's units; `StruckMark` sets both bars from the one share).
 - **The level** (進級) is **told by the card's engraving**. The learner's card comes down face
-  up in its own material, and the struck 辻 on it — whose road 辶 the
-  climb fills everywhere the card is drawn — fills from empty to full
-  over three seconds while the card trembles, harder as it fills, and
-  **the crossing 十 fills too** (plan 200: the one place it does): as
-  the road nears full 十 is lit from its foot up, full a beat before the
-  burst, so a level that turns over is the whole 辻 filled. Full, it
+  up in its own material, and the struck 辻 on it fills from empty to
+  full over three seconds while the card trembles, harder as it fills,
+  the road first and **the crossing 十 as the road nears full** (plan
+  200): 十 is lit from its foot up, full a beat before the burst, so a
+  level that turns over is the whole 辻 filled. Full, it
   bursts in sparks of the card's own stuff (the band's indigo, the
   charcoal's gold, the platinum's) out of the crossing, 辻's namesake,
-  the engraving empties — both parts in the one breath, only the road
-  refilling, to the new level's climb, since 十 never fills at rest —
-  and the level's figure rolls over to the new one. **It is the one
+  the engraving empties — both parts in the one breath — and refills to
+  the line the new level's climb stands on, 十 included once the climb
+  has passed its foot, and the level's figure rolls over to the new one. **It is the one
   sound in the app that is music** (plan 200), scored to the card's own
   clock: a build (`level-charge`) from the road's first movement — a
   swell, a run of bars struck as the road passes each eleventh of its
