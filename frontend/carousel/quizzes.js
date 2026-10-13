@@ -294,17 +294,13 @@ export function kanjiQuizzes(c, data, lang, t) {
     kind: 'kanjiMeaning', ask: t.examAsk.kanjiMeaning, stem: { specimen: c },
     ...dealChoices(meaning, wrongM, `${c}-m`, 'latin'), explain: { head: `${c}\u3000${right || ''}`, sense: meaning },
   } : null
-  // The other way round: three kanji whose meanings share nothing with it.
-  const rivals = []
-  for (const [x, v] of shuffle(others, seeded(`${c}-r`))) {
-    const m = senses(v, lang)
-    if (!m.length || m.some(a => all.some(b => overlaps(a, b))) || rivals.some(([, w]) => senses(w, lang).some(a => m.some(b => overlaps(a, b))))) continue
-    rivals.push([x, v])
-    if (rivals.length === 3) break
-  }
-  const reverse = meaning && rivals.length === 3 ? {
-    kind: 'kanjiReverse', ask: t.examAsk.kanjiReverse, stem: { text: meaning },
-    ...dealChoices(c, rivals.map(([x]) => x), `${c}-r`, 'serif'), explain: { head: c, sense: meaning },
+  // Its kun'yomi too, where it has an on'yomi asked above: a kun'yomi
+  // among other kanji's kun'yomi (plan 200l).
+  const kun = kunOf(k)
+  const kuns = [...new Set(shuffle(others.map(([, v]) => kunOf(v)).filter(r => r && !own.has(r) && r !== kun), seeded(`${c}-k`)))].slice(0, 3)
+  const kunQ = k.on[0] && kun && kuns.length === 3 ? {
+    kind: 'kanjiKun', ask: t.examAsk.kanjiKun, stem: { specimen: c },
+    ...dealChoices(kun, kuns, `${c}-k`, 'jp'), explain: { head: `${c}\u3000${kun}`, sense: meaning },
   } : null
   const n = k.s?.d?.length
   const strokes = n ? {
@@ -312,15 +308,65 @@ export function kanjiQuizzes(c, data, lang, t) {
     ...dealChoices(String(n), [n - 1, n + 1, n + 2].filter(x => x > 0).map(String).concat(n === 1 ? ['4'] : []).slice(0, 3), `${c}-s`, 'latin'),
     explain: { head: `${c}\u3000${n}`, sense: meaning },
   } : null
-  // A word written with it, and how that word reads.
+  // Its words, the ones of its own level or under first, then the
+  // nearest above: an N5 kanji is asked 買い物 before 購買.
+  const rank = x => Number((x.lv || 'N0').slice(1))
+  const kr = rank(k)
+  // A word far above the kanji is not asked (購買, N1, for 買, N5).
+  const byLevel = [...(k.words || [])].filter(x => !k.lv || rank(x) >= kr - 2).sort((a, b) => {
+    const ea = rank(a) >= kr
+    const eb = rank(b) >= kr
+    return ea !== eb ? eb - ea : ea ? 0 : rank(b) - rank(a)
+  })
+  // Words written with it, and how each reads: three at most.
   const knownOf = x => (k.words || []).filter(y => y.t === x.t && y.r !== x.r).map(y => y.r)
-  const w = (k.words || []).find(x => x.t.length > 1 && readingMisses({ t: x.t, fu: [[x.t, x.r]] }, null, knownOf(x)).length >= 3)
-  const inWord = w ? {
+  const missesOf = x => readingMisses({ t: x.t, fu: [[x.t, x.r]] }, null, knownOf(x))
+  // A choice is a word's first sense, to its first comma: “commerce”.
+  const glossOf = x => (((lang === 'fr' && x.fr?.length ? x.fr : x.en) || [])[0] || '').split(/[,;(]/)[0].trim()
+  const readable = byLevel.filter(x => x.t.length > 1 && missesOf(x).length >= 3)
+  // Two senses alike, word for word or whole (“I” is no word overlaps counts).
+  const alike = (a, b) => overlaps(a, b) || a.trim().toLowerCase() === b.trim().toLowerCase()
+  // Never the kanji alone (私 is the word 私), nor a word meaning only what it means.
+  const askable = byLevel.filter(x => x.t !== c && glossOf(x) && !((lang === 'fr' && x.fr?.length ? x.fr : x.en) || []).some(a => all.some(b => alike(a, b))))
+  // A word asked one way is not asked the other: its reading would give
+  // away its meaning, and its meaning its reading. The meaning questions
+  // take the words the reading questions cannot use first.
+  const vocabWords = [...askable.filter(x => !readable.includes(x)), ...askable.filter(x => readable.includes(x))].slice(0, 2)
+  const inWords = readable.filter(x => !vocabWords.includes(x)).slice(0, 3).map((w, i) => ({
     kind: 'inWord', ask: t.examAsk.inWord, stem: { specimen: w.t },
-    ...dealChoices(w.r, shuffle(readingMisses({ t: w.t, fu: [[w.t, w.r]] }, null, knownOf(w)), seeded(`${c}-w`)).slice(0, 3), `${c}-w`, 'jp'),
+    ...dealChoices(w.r, shuffle(missesOf(w), seeded(`${c}-w${i || ''}`)).slice(0, 3), `${c}-w${i || ''}`, 'jp'),
     explain: { head: `${w.t}\u3000${w.r}`, sense: weldIf(lang, gloss(w, lang)[0]) },
-  } : null
-  return withId([readingQ2, meaningQ2, reverse, inWord, strokes], q => t.kinds[q.kind])
+  }))
+  // Which of these is a word written with it (買: 買い物 "shopping",
+  // 売買 "trade"): never the word that only says the kanji's own meaning
+  // (買う "to buy"), which the kanji's meaning would answer. The wrong
+  // ones are words written without it, first those that share the right
+  // word's other kanji (物 of 買い物); none means what a word written
+  // with it means, so no second answer is right (plan 200l).
+  const sensesOf = x => (lang === 'fr' && x.fr?.length ? x.fr : x.en) || []
+  const deck = [...new Map(Object.values(data.kanji).flatMap(v => v.words || []).map(x => [`${x.t}|${x.r}`, x])).values()]
+  const withIt = deck.filter(x => x.t.includes(c))
+  const taken = withIt.flatMap(sensesOf)
+  const vocab = vocabWords.map((w, i) => {
+    const right = glossOf(w)
+    const partners = new Set([...w.t].filter(x => x !== c && /[\u3400-\u9fff]/.test(x)))
+    const pool = shuffle(deck.filter(x => !x.t.includes(c) && glossOf(x)), seeded(`${c}-v${i}`))
+    const traps = pool.filter(x => [...x.t].some(y => partners.has(y)))
+    const wrong = []
+    for (const x of [...traps, ...pool]) {
+      const g = glossOf(x)
+      if (wrong.includes(g) || alike(g, right) || taken.some(a => alike(a, g)) || all.some(a => alike(a, g)) || wrong.some(a => alike(a, g))) continue
+      wrong.push(g)
+      if (wrong.length === 3) break
+    }
+    return wrong.length === 3 ? {
+      kind: 'kanjiVocab', ask: t.examAsk.kanjiVocab, stem: { specimen: c },
+      ...dealChoices(weldIf(lang, right), wrong.map(x => weldIf(lang, x)), `${c}-v${i}`, 'latin'),
+      explain: { head: `${w.t}\u3000${w.r}`, sense: weldIf(lang, right) },
+    } : null
+  })
+  // The readings and the words first: a mock exam asks the first three.
+  return withId([readingQ2, vocab[0], inWords[0], kunQ, vocab[1], inWords[1], inWords[2], meaningQ2, strokes], q => t.kinds[q.kind])
 }
 
 // ── A kana ────────────────────────────────────────────────────

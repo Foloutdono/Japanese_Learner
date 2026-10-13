@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { FORMATS, FS, RATING_INKS, layoutSentence } from '../carousel/draw.js'
 import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, plan, readingMisses, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
-import { assemblyQ, overlaps } from '../carousel/quizzes.js'
+import { assemblyQ, kanjiQuizzes, overlaps } from '../carousel/quizzes.js'
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
@@ -182,6 +182,28 @@ describe('the carousel studio', () => {
       }
     } finally {
       globalThis.Path2D = had
+    }
+  })
+
+  it('asks a kanji its readings and its words, never which kanji means this (plan 200l)', () => {
+    for (const lv of ['N5', 'N4']) {
+      const data = bank(`kanji-${lv}.json`)
+      for (const lang of ['en', 'fr']) {
+        const t = STRINGS[lang]
+        for (const c of Object.keys(data.kanji)) {
+          const k = data.kanji[c]
+          const own = (lang === 'fr' && k.fr?.length ? k.fr : k.en) || []
+          const qs = kanjiQuizzes(c, data, lang, t)
+          expect(qs.some(q => q.kind === 'kanjiReverse'), c).toBe(false)
+          for (const q of qs.filter(x => x.kind === 'kanjiVocab')) {
+            const right = q.choices[q.right].text
+            const word = q.explain.head.split('\u3000')[0]
+            // The right word is written with it, and says more than its meaning.
+            expect(word.includes(c), `${c} ${word}`).toBe(true)
+            expect(own.some(m => overlaps(m, right) || m.toLowerCase() === right.toLowerCase()), `${c} ${right}`).toBe(false)
+          }
+        }
+      }
     }
   })
 

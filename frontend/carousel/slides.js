@@ -430,7 +430,7 @@ const KIND_JP = {
   reading: ['かんじよみ', '漢字読み'], orthography: ['ひょうき', '表記'], meaning: ['いみ', '意味'], grammar: ['ぶんぽう', '文法'],
   translation: ['ほんやく', '翻訳'], say: ['ほんやく', '翻訳'], assembly: ['ぶんの くみたて', '文の組み立て'], scene: ['かいわ', '会話'],
   tour: ['ぶんぽう', '文法'], pointMeaning: ['いみ', '意味'], compare: ['いみ', '意味'], kanji: ['よみかた', '読み方'],
-  kanjiMeaning: ['いみ', '意味'], kanjiReverse: ['かんじ', '漢字'], strokes: ['かくすう', '画数'], inWord: ['よみかた', '読み方'],
+  kanjiMeaning: ['いみ', '意味'], kanjiKun: ['よみかた', '読み方'], kanjiVocab: ['ごい', '語彙'], strokes: ['かくすう', '画数'], inWord: ['よみかた', '読み方'],
   kana: ['よみかた', '読み方'], kanaReverse: ['かな', 'かな'], twin: ['かな', 'かな'], passage: ['どっかい', '読解'], passageReading: ['よみかた', '読み方'],
 }
 
@@ -1845,7 +1845,10 @@ function quizSlide(c, q, revealed, head, number = 1) {
   // Four answers two by two, unless one is a sentence long.
   // Two columns only where every answer keeps to two lines at a readable size.
   const halfW = (f.w - 9) / 2 - SP[5] - 60 - SP[4] * 2
-  const narrow = q.choices.some(x => x.rows ? x.rows.length > 6 : fit(ctx, x.text, { weight: 700, fam: x.fam || 'latin', sizes: [FS.lead], maxW: halfW, maxLines: 2, balanced: false }).cut)
+  // A Latin answer is never broken inside a word (insuffisan-ce): each of
+  // its words fits the width whole, or the answers go one under the other.
+  const wordsFit = (x, z, w) => (x.fam && x.fam !== 'latin') || !x.text || x.text.split(/\s+/).every(word => measure(ctx, word, font(700, z, 'latin')) <= w)
+  const narrow = q.choices.some(x => x.rows ? x.rows.length > 6 : fit(ctx, x.text, { weight: 700, fam: x.fam || 'latin', sizes: [FS.lead], maxW: halfW, maxLines: 2, balanced: false }).cut || !wordsFit(x, FS.lead, halfW))
   const long = q.choices.some(x => (x.text || '').length > 34) || narrow
   const cols = n === 4 && !long ? 2 : short ? n : 1
   const rowsN = Math.ceil(n / cols)
@@ -2020,7 +2023,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
   // Every answer in one size: the largest at which all of them fit.
   const textW = cw - SP[5] - 60 - SP[4] - SP[4]
   const sizes = [FS.display * 0.62, FS.title, FS.lead, FS.body, FS.sm]
-  const fitsAt = (ch, z, lines, i) => ch.rows || !fit(ctx, ch.text, { weight: ch.fam === 'jp' ? 500 : 700, fam: ch.fam || 'latin', sizes: [z], maxW: textW, maxH: chOf(i) - SP[3], maxLines: lines, balanced: false }).cut
+  const fitsAt = (ch, z, lines, i) => ch.rows || (wordsFit(ch, z, textW) && !fit(ctx, ch.text, { weight: ch.fam === 'jp' ? 500 : 700, fam: ch.fam || 'latin', sizes: [z], maxW: textW, maxH: chOf(i) - SP[3], maxLines: lines, balanced: false }).cut)
   // The largest size at which every answer keeps to one line, else two, else three.
   const sizeFor = (lines, least) => sizes.filter(z => z >= least).find(z => q.choices.every((ch, i) => fitsAt(ch, z, lines, i)))
   // A Japanese answer is one word or one phrase: on one line a rung

@@ -68,7 +68,7 @@ mock exam asks (three by default; the walk ends on them too where
 | Translation | which sentence says it, ★ word order, what its point expresses, a word's meaning |
 | Lesson | the scene's "what do you say?", the tour's questions (up to four), what the point means, ★ word order |
 | Word | its reading, its spelling, its meaning |
-| Kanji | its reading, its meaning, which kanji means this, a word's reading, its stroke count |
+| Kanji | its on'yomi and its kun'yomi, the reading of up to three of its words, which of these words is written with it (up to two: a word's meaning among words written without it, never the word that only says the kanji's own meaning), its meaning, its stroke count |
 | Kana | its sound, which kana a sound is, its twin in the other script |
 | Comprehension | every question the seed writes (understanding, inference, vocabulary, grammar: eight to twelve a passage), then the reading of its words |
 
