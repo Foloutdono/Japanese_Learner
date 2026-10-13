@@ -24,7 +24,7 @@ import {
 } from './draw.js'
 import { RATINGS_JP, SITE, formOf, tr, weldIf } from './strings.js'
 import { picked } from './sources.js'
-import { furiganaOf, seeded, shuffle } from './common.js'
+import { furiganaOf } from './common.js'
 
 export { FORMATS }
 
@@ -687,18 +687,6 @@ const KINDS = {
   scene(c, s) {
     const { ctx, p, f, ink, ink2 } = c
     let y = title(c, c.plan.t.scene)
-    // Where it happens, on a small station plate.
-    const pz = FS.title
-    const pf = font(700, pz, 'serif')
-    const pw = measure(ctx, s.place, pf) + SP[6] * 2
-    const ph = pz * 1.6
-    ctx.fillStyle = c.dark ? p.surfaceLine : p.surface
-    rrect(ctx, f.x, y, pw, ph, R.plate)
-    ctx.fill()
-    ctx.fillStyle = p.line.grammar
-    ctx.fillRect(f.x, y + ph - EDGE, pw, EDGE)
-    text(ctx, s.place, f.x + SP[6], y + ph / 2 + pz * 0.36, { f: pf, color: ink })
-    y += ph + SP[6]
     let bw = f.w * 0.9
     let iw = bw - SP[6] * 2
     // The bubble's own room (its padding, its label's) shrinks with its words.
@@ -1625,7 +1613,7 @@ const ENDINGS = {
       { gap: SP[7], tag: false, today: false },
       { gap: SP[6], tag: false, today: false },
     ]
-    const restOf = L => SP[7] + nameH + SP[5] + capH + (L.tag ? SP[6] + paragraphH(tag) : 0) + L.gap
+    const restOf = L => SP[7] + nameH + (L.tag ? SP[6] + paragraphH(tag) : 0) + L.gap
       + (L.today ? capH + SP[4] : 0) + plate.h + L.gap + (ask ? paragraphH(ask) + SP[6] : 0) + METAL_H + handleH
     const most = Math.min(f.w * 0.4, f.h * 0.27)
     const L = ladder.find(x => f.h - restOf(x) >= Math.min(most, f.h * 0.2)) || ladder[ladder.length - 1]
@@ -1635,9 +1623,7 @@ const ENDINGS = {
     mark(ctx, f.cx - size / 2, y, size, ink, p.gold)
     y += size + SP[7]
     text(ctx, 'Tsuji', f.cx, y + nameH, { f: font(700, FS.display, 'latin'), color: ink, align: 'center' })
-    y += nameH + SP[5]
-    caption(ctx, `つじ · ${t.end.crossroads}`, f.cx, y + capH, ink2, 'center')
-    y += capH
+    y += nameH
     if (L.tag) y += SP[6] + paragraph(ctx, tag, f.cx, y + SP[6], ink2, 'center')
     y += L.gap
     if (L.today) {
@@ -2119,47 +2105,9 @@ function hookContent(c, plan, maxW, maxH, fam, align, hook = plan.hook) {
     return { h: headH(head) + size * 0.02, draw: (x, y) => drawHead(ctx, head, x, y, ink, align) }
   }
   if (h.kind === 'prompt') {
-    // What to say, and the words to say it with, as tiles.
-    const b = fit(ctx, `“${h.text}”`, { sizes: [FS.display, FS.heading, FS.title], maxW, maxH: maxH * 0.45, lh: 1.15 })
-    // The tiles as large as the room under the text allows.
-    let ts = FS.title * 1.1
-    let tf, pad, th, lines, tilesH
-    for (;;) {
-      tf = font(700, ts, 'jp')
-      pad = Math.min(SP[5], ts * 0.6)
-      th = ts + pad * 2
-      const tiles = h.tiles.map(r => ({ t: r.t, w: measure(ctx, r.t, tf) + pad * 2, line: r.k === 'word' ? 'vocab' : 'grammar' }))
-      lines = [[]]
-      let lw = 0
-      for (const tile of tiles) {
-        if (lw + tile.w > maxW && lines[lines.length - 1].length) { lines.push([]); lw = 0 }
-        lines[lines.length - 1].push(tile)
-        lw += tile.w + SP[3]
-      }
-      tilesH = lines.length * th + (lines.length - 1) * SP[3]
-      if (paragraphH(b, 1.15) + SP[8] + tilesH <= maxH || ts <= FS.sm) break
-      ts -= 4
-    }
-    return {
-      h: paragraphH(b, 1.15) + SP[8] + tilesH,
-      draw(x, y) {
-        paragraph(ctx, b, x, y, ink, align, 1.15)
-        let ty = y + paragraphH(b, 1.15) + SP[8]
-        for (const line of lines) {
-          const w = line.reduce((a, t2) => a + t2.w, 0) + SP[3] * (line.length - 1)
-          let tx = align === 'center' ? x - w / 2 : x
-          for (const tile of line) {
-            ctx.strokeStyle = p.line[tile.line]
-            ctx.lineWidth = RING
-            rrect(ctx, tx + RING / 2, ty + RING / 2, tile.w - RING, th - RING, R.card)
-            ctx.stroke()
-            text(ctx, tile.t, tx + pad, ty + th / 2 + ts * 0.36, { f: tf, color: ink })
-            tx += tile.w + SP[3]
-          }
-          ty += th + SP[3]
-        }
-      },
-    }
+    // What to say, in the reader's language (plan 200k: the shuffled tiles under it are gone).
+    const b = fit(ctx, `“${h.text}”`, { sizes: [FS.display, FS.heading, FS.title], maxW, maxH, lh: 1.15 })
+    return { h: paragraphH(b, 1.15), draw: (x, y) => paragraph(ctx, b, x, y, ink, align, 1.15) }
   }
   return { h: 0, draw() {} }
 }
@@ -2348,8 +2296,7 @@ export function deck(type, plan, fmt, opts) {
     }
     case 'build': {
       const b = plan.build
-      const tiles = shuffle(b.rows.filter(r => r.k !== 'punct'), seeded(`${plan.id}-build`))
-      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'prompt', text: b.translation, tiles }, t.buildAsk))
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'prompt', text: b.translation }, t.buildAsk))
       b.steps.forEach((_, i) => add(`step-${i + 1}`, kind({ kind: 'step', build: b, n: i + 1 })))
       add('built', kind({ kind: 'answer', rows: b.rows, romaji: b.romaji, translation: b.translation, title: t.built }))
       outro(t.cta.build)

@@ -1,4 +1,4 @@
-# The carousel studio (plans 200–200j)
+# The carousel studio (plans 200–200k)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -34,7 +34,7 @@ the content for (the studio greys out the others).
 | 駅名標 | Station plates | the guided walk: the item stop by stop | every source |
 | 模試 | Mock exam | a cover (its sections, a name to fill in), the questions picked, each answered on the next slide, then the answer sheet with every right answer filled in | every source with a question |
 | 乗換 | This or that | two things a learner mixes up side by side, each in a sentence, what tells them apart, then a question on it | a point with a rival in the catalogue, a kana with lookalikes |
-| 組立 | Build it | the translation and the pieces shuffled, then the sentence put together piece by piece (at most six steps), each piece's words with what they do | a sentence, a translation, a lesson's first example |
+| 組立 | Build it | the translation to build, then the sentence put together piece by piece (at most six steps), each piece's words with what they do | a sentence, a translation, a lesson's first example |
 | 一覧 | Top five | a list worth saving, one item a slide, then the list whole | a kanji's words, a word's family, a kana's words, a point's sentences, a passage's words |
 | 会話 | Conversation | the tour's scene line by line, then "what do you say?" | a lesson with a scene |
 
@@ -48,7 +48,7 @@ under the deck (終点, "Last slide"). The mark is the default:
 
 | Ending | Draws |
 | --- | --- |
-| The mark | 辻 large, its name and what it means (つじ, a crossroads), today's stop on a plate (its line's rail, its code in the line's roundel, its name over its reading), the post's ask, and the metal to the website ("Start on tsuji.app"), the studio's handle under it when it has one |
+| The mark | 辻 large, its name, what the app is, today's stop on a plate (its line's rail, its code in the line's roundel, its name over its reading), the post's ask, and the metal to the website ("Start on tsuji.app"), the studio's handle under it when it has one |
 | Route map (路線図) | the app's two lines out of 辻, 学習 and 実践, every station on them in its pigment, the source's ringed and marked "you are here" |
 | Commuter pass (定期券) | a pass from 辻 to the source's station, in its line's colour: valid N5 → N1, the line, the holder (the handle) |
 | Call to action | the type's ask large, then save, send, follow, each with its icon |

@@ -129,7 +129,6 @@ export const STRINGS = {
     },
     end: {
       names: { mark: 'The mark', map: 'Route map', pass: 'Commuter pass', cta: 'Call to action', terminus: 'Terminus', plate: 'Station plate' },
-      crossroads: 'a crossroads',
       today: 'Today’s stop',
       start: site => `Start on ${site}`,
       routeMap: 'Route map',
@@ -281,7 +280,6 @@ export const STRINGS = {
     },
     end: {
       names: { mark: 'Le logo', map: 'Plan du réseau', pass: 'Abonnement', cta: 'Appel à l’action', terminus: 'Terminus', plate: 'Plaque de gare' },
-      crossroads: 'un carrefour',
       today: 'Arrêt du jour',
       start: site => `Commence sur ${site}`,
       routeMap: 'Plan du réseau',
