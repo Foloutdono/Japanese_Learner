@@ -1,4 +1,4 @@
-# The carousel studio (plans 200–200h)
+# The carousel studio (plans 200–200i)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -170,6 +170,16 @@ rules in `index.css`; `layoutSentence` in `draw.js`):
   them.
 - **Never under the caption rung**, the app's own floor, where ご reads
   as こ.
+- **Over the kanji only.** A word set alone (a list's row, a word's own
+  slide) is read like a sentence's word: ふ over 降 in 降る, not ふる over
+  the whole of it. The deck's words carry their readings cut to their
+  kanji; the kanji bank's are cut on the kana the word writes itself
+  (`furiganaOf` in `common.js`: 降り出す read ふりだす is 降 ふ, り, 出 だ,
+  す).
+- **The JLPT level is a tag**, in the app's quiet frame for a row's
+  level (`.browse-result-row__level`): N5 in a hairline box after the
+  romaji, context rather than a colour, never a stray line under the
+  meaning.
 - **A line breaks between phrases (文節)**, as the app's
   `word-break: auto-phrase` breaks it: never before a particle, the
   copula, an ending, the verb a て-form leans on (おくれて いる) or the

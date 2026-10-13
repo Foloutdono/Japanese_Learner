@@ -474,7 +474,8 @@ function layoutSentence(ctx, rows, o) {
       if (!fits && !last) continue
       if (lines.length > opts.maxLines && !last) continue
       const rubyH = ruby ? rs * 1.3 : 0
-      const ruleGap = opts.rules ? size * 0.22 : size * 0.12
+      // The room under the word: its rule's, or (`under`) as the caller sets it.
+      const ruleGap = size * (opts.under ?? (opts.rules ? 0.22 : 0.12))
       const romH = opts.romaji ? Math.max(size * 0.3, FS.sm * 0.9) * 1.5 : 0
       const lineH = rubyH + size + ruleGap + romH
       const lineGap = size * 0.32

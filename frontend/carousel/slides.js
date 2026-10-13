@@ -24,7 +24,7 @@ import {
 } from './draw.js'
 import { RATINGS_JP, SITE, formOf, tr, weldIf } from './strings.js'
 import { picked } from './sources.js'
-import { seeded, shuffle } from './common.js'
+import { furiganaOf, seeded, shuffle } from './common.js'
 
 export { FORMATS }
 
@@ -66,8 +66,25 @@ function senseBlock(ctx, word, rx, mid, rw, ih, ink, ink2) {
 }
 const subOf = w => (w.kanji && w.reading ? (w.ro ? `${w.reading} · ${w.ro}` : w.reading) : w.ro)
 
-/** One word as a hanging 駅名標: its number in a ring, its reading spaced
- *  over its name, its romaji under it, its sense on the right, the line's
+/** The JLPT level a row names, in the app's quiet frame (its rows' level
+ *  tag, index.css .browse-result-row__level): context, not a colour. */
+const levelOf = word => (/^N[1-5]$/.test(word.sub || '') ? word.sub : '')
+const LEVEL_H = FS.xs * 1.5
+const levelW = (ctx, label) => measure(ctx, label, font(700, FS.xs, 'latin'), TR.caption) + SP[3] * 2
+function levelTag(ctx, p, x, y, label) {
+  const f = font(700, FS.xs, 'latin')
+  const w = levelW(ctx, label)
+  ctx.strokeStyle = alpha(p.ink2, 0.55)
+  ctx.lineWidth = 2
+  rrect(ctx, x + 1, y + 1, w - 2, LEVEL_H - 2, R.card / 2)
+  ctx.stroke()
+  text(ctx, label, x + SP[3], y + LEVEL_H / 2 + FS.xs * 0.36, { f, color: p.ink2, tr: TR.caption })
+  return w
+}
+
+/** One word as a hanging 駅名標: its number in a ring, its furigana over
+ *  its kanji (plan 200i: over the kanji only, never the word whole), its
+ *  romaji and its level under it, its sense on the right, the line's
  *  stripe along its foot. */
 function plate(ctx, p, x, y, w, h, word) {
   const color = p.line[word.line]
@@ -94,21 +111,33 @@ function plate(ctx, p, x, y, w, h, word) {
   const r = Math.min(40, h * 0.17)
   roundel(ctx, x + pad + r, mid, r, color, String(word.n), { ink: color, size: r * 0.95 })
   const nx = x + pad + r * 2 + SP[5]
-  const leftW = w * 0.5 - (nx - x)
-  const showReading = word.kanji && word.reading
-  const rSize = FS.caption
-  const above = showReading ? rSize * 1.15 : 0
-  const below = word.ro ? FS.sm * 1.15 : 0
-  let size = Math.min(ih - above - below, FS.display * 0.95)
-  while (size > FS.lead && measure(ctx, word.t, font(700, size, 'serif')) > leftW) size -= 2
-  let by = mid - (above + size + below) / 2
-  if (showReading) {
-    text(ctx, word.reading, nx, by + rSize * 0.92, { f: font(500, rSize, 'jp'), color: p.ink2, tr: TR.reading })
-    by += above
+  // Half the row for the word; a long one (片付けさせました) takes what its
+  // sense leaves, and the sense narrows for it, to a third of the row.
+  const glossW = rw => {
+    const b = fit(ctx, word.main, { sizes: [FS.title, FS.lead, FS.body, FS.sm], maxW: rw, maxH: ih, lh: 1.12 })
+    return Math.max(...b.lines.map(l => measure(ctx, l, b.f)))
   }
-  text(ctx, word.t, nx, by + size * ASC, { f: font(700, size, 'serif'), color: p.ink })
-  if (word.ro) text(ctx, word.ro, nx, by + size + FS.sm * 0.95, { f: font(500, FS.sm, 'latin'), color: p.ink2 })
-  senseBlock(ctx, word, x + w - pad, mid, w * 0.46 - pad, ih, p.ink, p.ink2)
+  const roomBy = rw => x + w - pad - glossW(rw) - SP[6] - nx
+  const need = measure(ctx, word.t, font(700, FS.lead, 'serif'))
+  let rw = w * 0.46 - pad
+  if (need > roomBy(rw)) rw = Math.max(w * 0.3, rw - (need - roomBy(rw)))
+  const leftW = Math.max(w * 0.5 - (nx - x), roomBy(rw))
+  const level = levelOf(word)
+  const below = word.ro || level ? Math.max(word.ro ? FS.sm * 1.15 : 0, level ? LEVEL_H : 0) : 0
+  const fu = word.kanji && word.reading ? word.fu || furiganaOf(word.t, word.reading) : null
+  const L = layoutSentence(ctx, [{ t: word.t, k: 'word', fu }], {
+    max: FS.display * 0.95, min: FS.body, maxW: leftW, maxLines: 1, maxH: ih - below, rules: false, under: 0.04, script: fu ? 'furigana' : 'kanji',
+  })
+  let by = mid - (L.h + below) / 2
+  drawSentence(ctx, L, nx, by, 'left', () => ({ ink: p.ink, rule: null, ruby: p.ink2 }))
+  by += L.h
+  let lx = nx
+  if (word.ro) {
+    const ro = fit(ctx, word.ro, { weight: 500, sizes: [FS.sm, FS.xs], maxW: leftW - (level ? levelW(ctx, level) + SP[4] : 0), maxLines: 1, balanced: false })
+    lx += text(ctx, ro.lines[0], nx, by + FS.sm * 0.85, { f: ro.f, color: p.ink2 }) + SP[4]
+  }
+  if (level) levelTag(ctx, p, lx, by + (word.ro ? FS.sm * 0.85 - FS.xs * 0.36 - LEVEL_H / 2 : 0), level)
+  senseBlock(ctx, level ? { ...word, sub: '' } : word, x + w - pad, mid, rw, ih, p.ink, p.ink2)
 }
 
 function latticeRow(ctx, p, f, y, h, word) {
@@ -148,7 +177,7 @@ function wordsSlide(dir, ctx, p, fr, plan, s, list, page, count) {
     })
     return
   }
-  const gap = SP[4]
+  const gap = SP[3]
   const h = Math.min((fr.bottom - y - gap * (list.length - 1)) / list.length, 250)
   for (const w of list) { plate(ctx, p, fr.x, y, fr.w, h, w); y += h + gap }
 }
@@ -376,7 +405,6 @@ const KIND_JP = {
   kanjiMeaning: ['いみ', '意味'], kanjiReverse: ['かんじ', '漢字'], strokes: ['かくすう', '画数'], inWord: ['よみかた', '読み方'],
   kana: ['よみかた', '読み方'], kanaReverse: ['かな', 'かな'], twin: ['かな', 'かな'], passage: ['どっかい', '読解'], passageReading: ['よみかた', '読み方'],
 }
-const hasKanjiText = str => /[㐀-鿿々]/.test(str || '')
 
 // ── The content slides, written once ──────────────────────────
 const KINDS = {
@@ -1080,7 +1108,7 @@ const KINDS = {
       return
     }
     // A word: its number on the line, the word with its reading, its sense.
-    const row = { t: it.head, fu: it.fu || (hasKanjiText(it.head) ? [[it.head, it.reading]] : null), k: 'word', ro: it.ro }
+    const row = { t: it.head, fu: it.fu || furiganaOf(it.head, it.reading), k: 'word', ro: it.ro }
     const main = fit(ctx, it.main || '', { sizes: [FS.display, FS.heading, FS.title], maxW: f.w, maxLines: 2 })
     const room = f.bottom - y - paragraphH(main) - FS.lead * 1.6 - SP[8] * 2
     const L = layoutSentence(ctx, [row], { max: FS.glyph, min: FS.title, maxW: f.w, maxLines: 1, maxH: room, script: 'furigana', rules: false })
@@ -1088,12 +1116,18 @@ const KINDS = {
     y += Math.max(0, (f.bottom - y - total) / 2)
     drawSentence(ctx, L, f.cx, y, 'center', () => ({ ink, rule: null, ruby: ink2 }))
     y += L.h
-    text(ctx, it.ro || '', f.cx, y + FS.lead * 1.1, { f: font(500, FS.lead, 'latin'), color: ink2, align: 'center' })
+    // Its romaji, its level in the tag the rows give it, centred together.
+    const rf = font(500, FS.lead, 'latin')
+    const level = levelOf({ sub: it.tag })
+    const rw = it.ro ? measure(ctx, it.ro, rf) : 0
+    const lw = level ? levelW(ctx, level) : 0
+    const rx = f.cx - (rw + (rw && lw ? SP[4] : 0) + lw) / 2
+    if (it.ro) text(ctx, it.ro, rx, y + FS.lead * 1.1, { f: rf, color: ink2 })
+    if (level) levelTag(ctx, p, rx + rw + (rw ? SP[4] : 0), y + FS.lead * 1.1 - FS.lead * 0.36 - LEVEL_H / 2, level)
     y += FS.lead * 1.6 + SP[8]
     ctx.fillStyle = color
     ctx.fillRect(f.cx - SP[9] / 2, y - SP[6], SP[9], EDGE)
     paragraph(ctx, main, f.cx, y, ink, 'center')
-    if (it.tag) caption(ctx, it.tag, f.cx, y0 + FS.caption, ink2, 'center')
   },
 
   /** 会話: one line of the scene, the line before it small above. */

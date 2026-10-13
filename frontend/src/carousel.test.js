@@ -4,6 +4,7 @@ import { FORMATS, FS, RATING_INKS, layoutSentence } from '../carousel/draw.js'
 import { LEVELS, SOURCES, chunksOf, depsOf, itemsOf, lineRomaji, plan, readingMisses, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, overlaps } from '../carousel/quizzes.js'
+import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld } from '../carousel/strings.js'
 
@@ -284,6 +285,30 @@ describe('setting furigana as the app sets them', () => {
   it('never sets a reading under the caption rung', () => {
     const L = lay([word('駅', [['駅', 'えき']])], { max: FS.sm, min: FS.sm })
     expect(parseFloat(/([\d.]+)px/.exec(L.rf)[1])).toBeGreaterThanOrEqual(Math.round(FS.caption * 10) / 10)
+  })
+
+  it('cuts a word’s reading to its kanji, never over its kana', () => {
+    expect(furiganaOf('降り出す', 'ふりだす')).toEqual([['降', 'ふ'], ['り', ''], ['出', 'だ'], ['す', '']])
+    expect(furiganaOf('お茶', 'おちゃ')).toEqual([['お', ''], ['茶', 'ちゃ']])
+    expect(furiganaOf('下降', 'かこう')).toEqual([['下降', 'かこう']])
+    expect(furiganaOf('ボール箱', 'ボールばこ')).toEqual([['ボール', ''], ['箱', 'ばこ']])
+    expect(furiganaOf('あの', 'あの')).toBeNull()
+    // Every word a list can show: its pieces spell the word, their
+    // readings the word's reading, and no kana is read over.
+    const hira = str => str.replace(/[\u30a1-\u30f6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60))
+    for (const lv of LEVELS) {
+      const words = [
+        ...Object.values(kanjiByLevel[lv]).flatMap(k => k.words || []),
+        ...bank(`words-${lv}.json`).words.flatMap(w => [w, ...(w.family || [])]),
+      ]
+      for (const w of words) {
+        const fu = furiganaOf(w.t, w.r)
+        if (!fu) continue
+        expect(fu.map(([t]) => t).join(''), w.t).toBe(w.t)
+        expect(hira(fu.map(([t, r]) => r || t).join('')), w.t).toBe(hira(w.r))
+        for (const [t, r] of fu) if (r) expect(/[\u3400-\u9fff々〆ヶ]/.test(t), `${w.t}: ${t}`).toBe(true)
+      }
+    }
   })
 
   it('breaks a line between phrases, never before a particle', () => {
