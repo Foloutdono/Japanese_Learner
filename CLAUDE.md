@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **209**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **210**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -191,6 +191,8 @@ The one optional warm-up, and it needs no database:
 python -m scripts.build_dictation_audio --check   # what is missing
 python -m scripts.build_dictation_audio           # synthesize it
 python -m scripts.build_grammar_audio --tours     # the grammar tours' scenes (plan 187d)
+python -m scripts.prewarm_word_audio               # the card readings, N5-N3: report only (plan 209)
+python -m scripts.prewarm_word_audio --yes         # ... and make the missing ones
 ```
 
 The grammar tours (plan 187d) speak through `GET /api/grammar/audio`,
@@ -200,6 +202,16 @@ B for the learner. `build_grammar_audio` makes them ahead of the first
 learner, as `build_dictation_audio` does for dictation; without it each
 line is made on the request that wants it. Without `--tours` it also
 voices every example sentence in the catalogue (~2,400 lines).
+
+`prewarm_word_audio` does the same for the `/api/tts` card readings (plan
+209): the first reading of every vocab and kanji entry at the levels asked
+for, N5 to N3 by default, which is what a card sends. That is about 3,000
+clips, an hour and three quarters on the voice service at Starter and
+about 30 MB of the 100 MB the word store is capped at. It reports and
+makes nothing without `--yes`, resumes where an interrupted run stopped,
+and stops after five failures in a row, so run it from the backend's
+Render Shell in a quiet hour. Run it again after any change of voice:
+`revoice_audio` deletes the word clips.
 
 書取 (dictation, `/practice/dictation`) plays a clip per line of
 `content/listening_clips.py`. Nothing depends on having run this — a missing
