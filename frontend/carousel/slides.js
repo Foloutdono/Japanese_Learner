@@ -9,9 +9,8 @@
 //   build    組立    the sentence put together piece by piece
 //   list     一覧    a short list worth saving, one item a slide
 //   talk     会話    a scene, line by line, then the reader's line
-// Every slide is written once and set on the station plates' ground; a
-// route strip along the foot counts the stops, and the last slide is the
-// source's own station plate (駅名標) with what its line teaches.
+// Every slide is written once and set on the station plates' ground, and
+// the last slide is the ending the studio picks (the mark, by default).
 //
 // A colour keeps its meaning: a word wears the vocabulary line's pigment,
 // a particle or an ending the grammar line's, a kanji the kanji line's;
@@ -259,7 +258,7 @@ function drawHead(ctx, h, x, y, color, align = 'left') {
   h.lines.forEach((l, i) => text(ctx, l, x, y + i * h.lh + h.size * ASC, { f: h.f, color, align }))
 }
 
-function patternHead(c, pattern, meaningText) {
+function patternHead(c, pattern, meaningText, sizes = [FS.heading, FS.title, FS.lead]) {
   const { ctx, p, f, ink } = c
   const short = [...pattern].length <= 2
   let ps = short ? FS.display * 1.25 : FS.display * 1.05
@@ -268,7 +267,7 @@ function patternHead(c, pattern, meaningText) {
   const lines = short ? [pattern] : headLines(ctx, pattern, { maxW: f.w, maxSize: ps, minSize: ps, maxLines: 3 }).lines
   const r = ps * 0.75
   const mx = short ? f.x + r * 2 + SP[7] : f.x
-  const meaning = fit(ctx, meaningText, { sizes: [FS.heading, FS.title, FS.lead], maxW: f.right - mx, maxLines: 3 })
+  const meaning = fit(ctx, meaningText, { sizes, maxW: f.right - mx, maxLines: 3 })
   const ph = ps * 1.02 * lines.length
   const h = short ? Math.max(r * 2, paragraphH(meaning)) : ph + EDGE + SP[5] + paragraphH(meaning)
   return {
@@ -311,7 +310,7 @@ function howBlock(c, how, maxH) {
   }
 }
 
-// ── The station's own plate, and the strip that counts the stops ──
+// ── The station's own plate ──
 /** A 駅名標 for the source's station: its reading over its name, its
  *  code in the line's roundel, its name in the reader's language, and
  *  the line's band along the foot with the stations either side. */
@@ -366,36 +365,6 @@ function stationPlate(ctx, p, x, y, w, h, st, color) {
     chevron(ctx, ax, by, arrow, p.onLine)
     text(ctx, st.next.kana, ax - SP[4] - kw, by + FS.caption * 0.36, { f: cf, color: p.onLine })
     text(ctx, st.next.jp, ax - SP[4] - kw - SP[3] - jw, by + FS.title * 0.36, { f: sf, color: p.onLine })
-  }
-}
-
-/** The stops of the post along its foot: passed, here, still to come. */
-const STRIP = SP[7] + 18
-function routeStrip(ctx, p, fr, at, total, color) {
-  if (total < 2) return
-  const y = fr.bottom - 14
-  const x0 = fr.x + 16
-  const x1 = fr.right - 16
-  const xs = i => x0 + (x1 - x0) * (i / (total - 1))
-  ctx.fillStyle = alpha(color, 0.3)
-  ctx.fillRect(x0, y - EDGE / 2, x1 - x0, EDGE)
-  ctx.fillStyle = color
-  ctx.fillRect(x0, y - EDGE / 2, xs(at) - x0, EDGE)
-  for (let i = 0; i < total; i++) {
-    ctx.beginPath()
-    if (i === at) {
-      ctx.arc(xs(i), y, 15, 0, Math.PI * 2)
-      ctx.fillStyle = p.bg
-      ctx.fill()
-      ctx.lineWidth = 6
-      ctx.strokeStyle = color
-      ctx.stroke()
-    } else {
-      ctx.arc(xs(i), y, 8, 0, Math.PI * 2)
-      ctx.fillStyle = i < at ? color : p.bg
-      ctx.fill()
-      if (i > at) { ctx.lineWidth = 3; ctx.strokeStyle = alpha(color, 0.55); ctx.stroke() }
-    }
   }
 }
 
@@ -1170,13 +1139,25 @@ function pointSlide(c, s, name, howCaption) {
   const lang = c.plan.lang
   const pt = s.pt
   let y = title(c, name)
-  const head = patternHead(c, s.pattern, tr(pt, lang))
-  const form = formOf(pt, lang)
-  const formH = form ? FS.lead * 2 + SP[7] : 0
-  const room = f.bottom - y - head.h - SP[7] - formH
-  // The point at work in this sentence comes first; the catalogue's
-  // general rule takes what room is left.
-  const how = howBlock(c, s.how, room)
+  // The point at work in this sentence comes first: the meaning over it
+  // gives way to it, then the form; the catalogue's general rule takes
+  // what room is left.
+  const ladder = [
+    { sizes: [FS.heading, FS.title, FS.lead], form: true },
+    { sizes: [FS.title, FS.lead], form: true },
+    { sizes: [FS.lead, FS.body], form: true },
+    { sizes: [FS.lead, FS.body], form: false },
+  ]
+  let head, form, formH, room, how
+  for (const step of ladder) {
+    head = patternHead(c, s.pattern, tr(pt, lang), step.sizes)
+    form = step.form ? formOf(pt, lang) : null
+    formH = form ? FS.lead * 2 + SP[7] : 0
+    room = f.bottom - y - head.h - SP[7] - formH
+    how = howBlock(c, s.how, room)
+    if (!how || how.h <= room) break
+  }
+  if (how && how.h > room) how = null
   const rule = tr(pt.rule, lang)
   const ruleRoom = room - (how ? how.h + SP[8] : 0)
   const ruleB = rule && ruleRoom > FS.body * 2.4
@@ -2123,12 +2104,8 @@ export const TYPES = [
 ]
 // What a type may leave out, and whether it is in by default.
 export const TYPE_OPTIONS = {
-  plates: [['line', true]],
   exam: [['cover', true], ['sheet', true]],
-  compare: [['line', true]],
-  build: [['line', true]],
-  list: [['recap', true], ['line', true]],
-  talk: [['line', true]],
+  list: [['recap', true]],
 }
 /** Whether a plan can be drawn as a type: a question to ask, two things
  *  to tell apart, a sentence to build, a list, a scene. */
@@ -2170,16 +2147,14 @@ export function deck(type, plan, fmt, opts) {
   const p = palette(opts.ground)
   const t = plan.t
   const o = Object.fromEntries((TYPE_OPTIONS[type] || []).map(([k, d]) => [k, opts.types?.[type]?.[k] ?? d]))
-  const strip = type !== 'exam' && o.line !== false
-  const fc = strip ? { ...fr, h: fr.h - STRIP, bottom: fr.bottom - STRIP } : fr
   const per = fmt.id === 'story' ? 6 : 5
   const out = []
   // A key names the slide's file in the export: a second of a kind is numbered.
-  const add = (key, fn, content = true) => {
+  const add = (key, fn) => {
     const n = out.filter(x => x.key === key || x.key.startsWith(`${key}~`)).length
-    out.push({ key: n ? `${key}~${n + 1}` : key, fn, content })
+    out.push({ key: n ? `${key}~${n + 1}` : key, fn })
   }
-  const ctxOf = (ctx, f = fc) => ({ ctx, p, plan, ...surface(ctx, p, f) })
+  const ctxOf = (ctx, f = fr) => ({ ctx, p, plan, ...surface(ctx, p, f) })
   const kind = (s, extra = {}) => ctx => KINDS[s.kind](ctxOf(ctx), { ...s, ...extra })
   const exam = type === 'exam'
   let asked = 0
@@ -2190,13 +2165,13 @@ export function deck(type, plan, fmt, opts) {
     add(`question-${n}`, ctx => quizSlide(ctxOf(ctx), q, false, exam ? 'exam' : titles[0], n))
     add(`answer-${n}`, ctx => quizSlide(ctxOf(ctx), q, true, exam ? 'exam' : titles[1], n))
   }
-  const outro = cta => { if (plan.slides.some(s => s.kind === 'outro')) add('outro', ctx => KINDS.outro({ ...ctxOf(ctx, fr), cta, ending: opts.ending }), false) }
+  const outro = cta => { if (plan.slides.some(s => s.kind === 'outro')) add('outro', ctx => KINDS.outro({ ...ctxOf(ctx, fr), cta, ending: opts.ending })) }
   const wordsPages = s => {
     const ps = pages(s.items, per)
-    ps.forEach((list, i) => add(`words-${i + 1}`, ctx => wordsSlide('plates', ctx, p, fc, plan, s, list, i + 1, ps.length)))
+    ps.forEach((list, i) => add(`words-${i + 1}`, ctx => wordsSlide('plates', ctx, p, fr, plan, s, list, i + 1, ps.length)))
   }
   const passage = s => {
-    const ps = passagePages(plan, s, fmt, fc)
+    const ps = passagePages(plan, s, fmt, fr)
     ps.forEach((layouts, i) => add(`passage-${i + 1}`, kind(s, { layouts, page: i + 1, count: ps.length })))
   }
   const qs = picked(plan, opts.picks, exam ? 3 : 1)
@@ -2204,7 +2179,7 @@ export function deck(type, plan, fmt, opts) {
 
   switch (type) {
     case 'exam': {
-      if (o.cover) add('cover', ctx => KINDS.cover(ctxOf(ctx, fr), { quizzes: qs }), false)
+      if (o.cover) add('cover', ctx => KINDS.cover(ctxOf(ctx, fr), { quizzes: qs }))
       if (plan.source === 'passage') plan.slides.filter(s => s.kind === 'passage').forEach(passage)
       qs.forEach(q => ask(q))
       if (o.sheet && qs.length) add('sheet', ctx => KINDS.sheet(ctxOf(ctx), { quizzes: qs }))
@@ -2213,7 +2188,7 @@ export function deck(type, plan, fmt, opts) {
     }
     case 'compare': {
       const cmp = plan.compare
-      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'pair', heads: cmp.sides.map(x => x.head), or: t.or, line: cmp.sides[0].line }, t.compareAsk), false)
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'pair', heads: cmp.sides.map(x => x.head), or: t.or, line: cmp.sides[0].line }, t.compareAsk))
       add('sides', kind({ kind: 'sides', sides: cmp.sides }))
       cmp.sides.forEach((x, i) => { if (x.ex) add(`with-${i + 1}`, kind({ kind: 'item', item: { kind: 'sentence', n: i + 1, rows: x.ex.rows, tr: x.ex.tr }, of: 0, title: t.withIt(x.head), line: x.line })) })
       if (cmp.diff || cmp.careful) add('difference', kind({ kind: 'difference', sides: cmp.sides, diff: cmp.diff, careful: cmp.careful }))
@@ -2224,7 +2199,7 @@ export function deck(type, plan, fmt, opts) {
     case 'build': {
       const b = plan.build
       const tiles = shuffle(b.rows.filter(r => r.k !== 'punct'), seeded(`${plan.id}-build`))
-      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'prompt', text: b.translation, tiles }, t.buildAsk), false)
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'prompt', text: b.translation, tiles }, t.buildAsk))
       b.steps.forEach((_, i) => add(`step-${i + 1}`, kind({ kind: 'step', build: b, n: i + 1 })))
       add('built', kind({ kind: 'answer', rows: b.rows, romaji: b.romaji, translation: b.translation, title: t.built }))
       outro(t.cta.build)
@@ -2232,7 +2207,7 @@ export function deck(type, plan, fmt, opts) {
     }
     case 'list': {
       const L = plan.list
-      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'listhead', head: L.head, title: L.title, line: L.line }, t.listAsk), false)
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'listhead', head: L.head, title: L.title, line: L.line }, t.listAsk))
       L.items.forEach(it => add(`item-${it.n}`, kind({ kind: 'item', item: it, of: L.items.length, title: L.title, line: L.line })))
       if (o.recap) {
         if (L.items[0].kind === 'word') {
@@ -2246,17 +2221,17 @@ export function deck(type, plan, fmt, opts) {
     }
     case 'talk': {
       const T = plan.talk
-      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'place', place: T.place, title: t.talkHook(T.place), line: plan.line }, t.talkAsk), false)
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'place', place: T.place, title: t.talkHook(T.place), line: plan.line }, t.talkAsk))
       T.lines.forEach((l, i) => add(`line-${i + 1}`, kind({ kind: 'line', line: l, prev: T.lines[i - 1], n: i + 1, of: T.lines.length, place: T.place, them: T.them })))
       ask(T.quiz, [t.sceneAsk, t.sceneAsk])
       outro(t.cta.talk)
       break
     }
     default: {
-      add('hook', ctx => opening(ctx, p, fr, plan), false)
+      add('hook', ctx => opening(ctx, p, fr, plan))
       for (const s of plan.slides) {
         if (s.kind === 'outro') continue
-        if (s.kind === 'rating') { add('rating', ctx => ratingSlide(ctx, p, fc, plan)); continue }
+        if (s.kind === 'rating') { add('rating', ctx => ratingSlide(ctx, p, fr, plan)); continue }
         if (s.kind === 'words') { wordsPages(s); continue }
         if (s.kind === 'passage') { passage(s); continue }
         if (s.kind === 'check') { qs.forEach((q, i) => ask(q, [numbered(qs)(t.question, i + 1), numbered(qs)(t.answer, i + 1)])); continue }
@@ -2270,12 +2245,11 @@ export function deck(type, plan, fmt, opts) {
       outro(t.cta.plates)
     }
   }
-  return out.map((sl, i) => ({
+  return out.map(sl => ({
     key: sl.key,
     draw: ctx => {
       noShadow(ctx)
       sl.fn(ctx)
-      if (strip && sl.content) { noShadow(ctx); routeStrip(ctx, p, fr, i, out.length, p.line[plan.line] || p.line.reading) }
     },
   }))
 }

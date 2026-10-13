@@ -23,7 +23,7 @@ const TOGGLE_LABELS = {
   examples: 'Examples', scene: 'Conversation, and what would you say?', twist: 'Twist', usage: 'A second twist',
   rival: 'The point it is confused with', parts: 'Its kanji', family: 'More words with its kanji',
   strokes: 'Stroke order', readings: 'Readings', lookalike: 'Lookalikes', vocab: 'Words to know first',
-  line: 'Route strip along the foot', cover: 'Cover page', sheet: 'Answer sheet', recap: 'Recap of the list',
+  cover: 'Cover page', sheet: 'Answer sheet', recap: 'Recap of the list',
 }
 const T = STRINGS.en
 const LIST_NAME = { sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage' }

@@ -1,4 +1,4 @@
-# The carousel studio (plans 200–200f)
+# The carousel studio (plans 200–200g)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -31,7 +31,7 @@ the content for (the studio greys out the others).
 
 | | Type | What it does | From |
 | --- | --- | --- | --- |
-| 駅名標 | Station plates | the guided walk: the item stop by stop, a route strip along the foot counting the stops | every source |
+| 駅名標 | Station plates | the guided walk: the item stop by stop | every source |
 | 模試 | Mock exam | a cover (its sections, a name to fill in), the questions picked, each answered on the next slide, then the answer sheet with every right answer filled in | every source with a question |
 | 乗換 | This or that | two things a learner mixes up side by side, each in a sentence, what tells them apart, then a question on it | a point with a rival in the catalogue, a kana with lookalikes |
 | 組立 | Build it | the translation and the pieces shuffled, then the sentence put together piece by piece (at most six steps), each piece's words with what they do | a sentence, a translation, a lesson's first example |
@@ -136,8 +136,8 @@ right too.
 "All types" draws the same item as every type it can be, side by side,
 to choose from; "One type" keeps one and exports it. Each source lists
 the station plates' slides it may leave out, and each type its own
-options (the route strip, the exam's cover and answer sheet, the list's
-recap), as toggles. The departure board and the study card of plan 200
+options (the exam's cover and answer sheet, the list's recap), as
+toggles. The departure board and the study card of plan 200
 were styles, not types, and plan 200c retired them.
 
 ## Nothing leaves the frame
