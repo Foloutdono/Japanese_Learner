@@ -4,14 +4,14 @@
    "key": "事::こと",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "thing, matter, fact, circumstances",
+   "meaning": "thing (abstract, not physical), matter, fact, circumstances",
    "rank": 29
   },
   {
    "key": "::ああ",
    "level": "N4",
    "lists_say": "N5",
-   "meaning": "like that",
+   "meaning": "like that, that way (over there / known to both)",
    "rank": 53
   },
   {
@@ -74,7 +74,7 @@
    "key": "失礼::しつれい",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "rudeness, discourtesy; excuse me",
+   "meaning": "rudeness, discourtesy, excuse me (polite phrase)",
    "rank": 336
   },
   {
@@ -144,7 +144,7 @@
    "key": "内::うち",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "inside",
+   "meaning": "inside, among (out of a group)",
    "rank": 678
   },
   {
@@ -158,7 +158,7 @@
    "key": "全然::ぜんぜん",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "(1) (not) at all, (not) in the slightest (with a negative), (2) completely, totally (colloquial, with an affirmative)",
+   "meaning": "not at all (+ negative), completely (casual, + affirmative)",
    "rank": 833
   },
   {
@@ -207,7 +207,7 @@
    "key": "匂い::におい",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "odour, scent, smell, stench",
+   "meaning": "smell, scent (often pleasant), odour",
    "rank": 1176
   },
   {
@@ -277,7 +277,7 @@
    "key": "お腹::おなか",
    "level": "N3",
    "lists_say": "N5",
-   "meaning": "stomach",
+   "meaning": "stomach, belly (everyday, polite)",
    "rank": 1685
   },
   {
@@ -746,7 +746,7 @@
    "key": "是非::ぜひ",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "certainly, without fail",
+   "meaning": "certainly, without fail, by all means (with a request or wish)",
    "rank": 3845
   },
   {
@@ -1971,7 +1971,7 @@
    "key": "伺う::うかがう",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "(hon) to visit, to ask, to inquire",
+   "meaning": "to visit (humble), to ask (humble), to inquire",
    "rank": 12753
   },
   {
@@ -2356,7 +2356,7 @@
    "key": "::どんな",
    "level": "N3",
    "lists_say": "N5",
-   "meaning": "what, what kind of",
+   "meaning": "what ... (+ noun), what kind of",
    "rank": 20078
   },
   {
@@ -2608,7 +2608,7 @@
    "key": "空く::すく",
    "level": "N3",
    "lists_say": "N4",
-   "meaning": "(1) to open, to become empty, (2) to be less crowded",
+   "meaning": "to become empty, to be less crowded (place, train), to get hungry (stomach)",
    "rank": null
   },
   {

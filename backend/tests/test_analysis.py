@@ -440,7 +440,7 @@ class FrenchGlossTests(unittest.TestCase):
     def test_a_deck_card_carries_its_french(self) -> None:
         entries = {t["surface"]: t["vocab_match"]["entry"]
                    for t in analyze_local("ここで話してはいけません。")["tokens"] if t.get("vocab_match")}
-        self.assertEqual((entries["ここ"]["meaning"], entries["ここ"]["meaning_fr"]), ("here", "ici"))
+        self.assertEqual((entries["ここ"]["meaning"], entries["ここ"]["meaning_fr"]), ("here (this place, near me)", "ici (ce lieu, près de moi)"))
         self.assertEqual(entries["話し"]["meaning_fr"], "parler")
 
     def test_a_pool_word_has_no_french_to_carry(self) -> None:
