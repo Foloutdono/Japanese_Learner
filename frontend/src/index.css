@@ -9633,9 +9633,30 @@ textarea:focus-visible {
   border-radius: var(--r-pill);
   background: var(--surface);
   color: var(--text-on-fill);
-  box-shadow: none;
-  animation: btn-gate-breathe 2.8s ease-in-out infinite;
+  box-shadow: var(--gate-halo-rest);
   transition: transform 0.15s ease, color 270ms ease;
+  --gate-halo-rest: 0 6px 18px color-mix(in srgb, var(--gate-gold) 35%, transparent);
+}
+/* The halo's breath. It used to animate the button's own box-shadow,
+   which repaints the whole blurred shadow every frame for as long as
+   the gate is on screen -- and on a phone the gate never leaves it.
+   The rest halo is now the button's still shadow and the breath's
+   peak a layer under the fill (::after) whose opacity alone moves, so
+   the compositor plays it and the main thread is left to the screen.
+   The peak's glow is drawn lighter than the old 55% because it stacks
+   on the rest halo instead of replacing it. */
+.btn-depart--gate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 9px color-mix(in srgb, var(--gate-gold) 16%, transparent),
+    0 8px 28px color-mix(in srgb, var(--gate-gold) 40%, transparent);
+  opacity: 0;
+  animation: btn-gate-breathe 2.8s ease-in-out infinite;
 }
 .btn-depart--gate::before {
   content: "";
@@ -9684,12 +9705,13 @@ textarea:focus-visible {
 }
 .btn-depart__rip + .btn-depart__rip { animation-delay: 1.1s; }
 .btn-depart--gate:hover,
-.btn-depart--gate:focus-visible { transform: translateY(-2px); box-shadow: none; }
+.btn-depart--gate:focus-visible { transform: translateY(-2px); box-shadow: var(--gate-halo-rest); }
 .btn-depart--gate:active {
   transform: translateY(1px) scale(0.99);
-  animation: none;
   box-shadow: inset 0 2px 5px color-mix(in srgb, var(--bg-panel) 45%, transparent);
 }
+.btn-depart--gate:active::after,
+.btn-depart--gate:disabled::after { animation: none; opacity: 0; }
 .btn-depart--gate:active .btn-depart__reader { background: var(--text-on-panel); color: var(--text-on-fill); }
 /* The idle nudge: an action ready and not taken for four seconds, the
    reader steps toward the way on twice and rests. Never on the outline
@@ -9712,11 +9734,11 @@ textarea:focus-visible {
 .btn-depart--gate:disabled .btn-depart__rip { display: none; }
 /* The wake: set by Continue for the one render after a pick enables it. */
 .btn-depart--waking {
-  animation: btn-gate-wake 540ms ease-out, btn-gate-breathe 2.8s ease-in-out infinite;
+  animation: btn-gate-wake 540ms ease-out;
 }
 @keyframes btn-gate-breathe {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gate-gold) 0%, transparent), 0 6px 18px color-mix(in srgb, var(--gate-gold) 35%, transparent); }
-  50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--gate-gold) 16%, transparent), 0 8px 28px color-mix(in srgb, var(--gate-gold) 55%, transparent); }
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 @keyframes btn-gate-rip {
   from { transform: scale(1); opacity: 0.8; }
@@ -9735,9 +9757,10 @@ textarea:focus-visible {
    movement: no breath, no ripples, no nudge, no pop. */
 @media (prefers-reduced-motion: reduce) {
   .btn-depart--gate,
+  .btn-depart--gate::after,
   .btn-depart--waking,
   .btn-depart--gate .btn-depart__reader { animation: none; }
-  .btn-depart--gate { transition: color 270ms ease; }
+  .btn-depart--gate { transition: color 270ms ease; box-shadow: none; }
   .btn-depart--gate:hover,
   .btn-depart--gate:focus-visible,
   .btn-depart--gate:active { transform: none; }
@@ -13541,10 +13564,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    layered on top via a second, shorter-period animation so the climb
    reads as drifting smoke/spark rather than a scripted straight
    line. Combined with ember-rise via multiple animation-name entries
-   in .ember below. */
+   in .ember below. On `translate`, which adds to ember-rise's
+   transform: it was margin-left, a layout pass per ember per frame. */
 @keyframes ember-sway {
-  0%, 100% { margin-left: 0; }
-  50%      { margin-left: var(--ember-sway, 6px); }
+  0%, 100% { translate: 0 0; }
+  50%      { translate: var(--ember-sway, 6px) 0; }
 }
 .ember {
   animation-name: ember-rise, ember-sway;
@@ -20293,7 +20317,9 @@ html {
     inset 0 1px 0 rgba(0, 0, 0, 0.16),
     inset 0 -1px 0 color-mix(in srgb, var(--bg-main) 62%, transparent),
     0 1px 0 color-mix(in srgb, var(--bg-main) 50%, transparent);
-  backdrop-filter: blur(1.5px) saturate(0.95);
+  /* No backdrop-filter: a blur under a pane that slides re-filters the
+     screen behind it every frame of the travel, which is what made the
+     doors stutter on a phone. The ink tint above is the glass. */
 }
 
 /* Light running across the glass. One pass, timed to cross while the
@@ -20312,10 +20338,13 @@ html {
   transform: skewX(-14deg);
   animation: door-sheen calc(820ms * var(--door-x)) cubic-bezier(0.4, 0, 0.3, 1) calc(240ms * var(--door-x)) backwards;
 }
+/* Run on transform, not `left` (a layout per frame while the leaves
+   move): from -55% to 118% of the glass is 173% of it, and the band
+   is 42% of it, so 173 / 42 of its own width. */
 @keyframes door-sheen {
-  0%        { left: -55%; opacity: 0; }
+  0%        { transform: translateX(0) skewX(-14deg); opacity: 0; }
   18%       { opacity: 1; }
-  72%, 100% { left: 118%; opacity: 0; }
+  72%, 100% { transform: translateX(411.9%) skewX(-14deg); opacity: 0; }
 }
 
 /* The livery band, in the line's own colour — the same pigment the
@@ -20414,25 +20443,25 @@ html {
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+/* The lit lamp, a layer over the dark one that blinks by opacity
+   alone: blinking the lamp's own background and shadow repainted the
+   header it rides on, mid-travel. */
+.door__lamp::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--line-color, var(--accent));
+  box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
+  opacity: 0;
   animation: door-lamp calc(560ms * var(--door-x)) linear calc(260ms * var(--door-x)) forwards;
 }
 @keyframes door-lamp {
-  0%, 30% {
-    background: var(--line-color, var(--accent));
-    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
-  }
-  31%, 45% {
-    background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
-  }
-  46%, 90% {
-    background: var(--line-color, var(--accent));
-    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
-  }
-  100% {
-    background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
-  }
+  0%, 30% { opacity: 1; }
+  31%, 45% { opacity: 0; }
+  46%, 90% { opacity: 1; }
+  100% { opacity: 0; }
 }
 /* The threshold: the sill plate, with the tactile warning strip a
    real platform edge carries in the line's own colour. */
@@ -28634,9 +28663,10 @@ button.brd-stn { cursor: pointer; }
 .btn-depart--gate.clrk-gate--compact .btn-depart__wave { transform: scale(0.75); }
 .btn-depart--gate.clrk-gate--compact .btn-depart__jp { font-size: var(--fs-body); font-weight: 600; }
 .btn-depart--gate.clrk-gate--arrive {
-  animation: clr-gate-in 0.6s var(--ease-out) backwards, btn-gate-breathe 2.8s ease-in-out 0.6s infinite;
-  animation-delay: var(--gate-d, 0ms), calc(var(--gate-d, 0ms) + 0.6s);
+  animation: clr-gate-in 0.6s var(--ease-out) backwards;
+  animation-delay: var(--gate-d, 0ms);
 }
+.btn-depart--gate.clrk-gate--arrive::after { animation-delay: calc(var(--gate-d, 0ms) + 0.6s); }
 
 /* ── one-shot utilities (each reads --d as its delay) ── */
 .clrk-arrive { animation: clr-arrive 0.5s var(--ease-out) backwards; animation-delay: var(--d, 0ms); }
@@ -28787,7 +28817,8 @@ button.brd-stn { cursor: pointer; }
 .clrk--skip .clrk-tk-chip--fall,
 .clrk--skip .clrk-clp-chip { animation: none !important; }
 .clrk--skip .clrk-clp { display: none; }
-.clrk--skip .btn-depart--gate.clrk-gate--arrive { animation: clr-fade 0.2s ease both, btn-gate-breathe 2.8s ease-in-out 0.2s infinite !important; }
+.clrk--skip .btn-depart--gate.clrk-gate--arrive { animation: clr-fade 0.2s ease both !important; }
+.clrk--skip .btn-depart--gate.clrk-gate--arrive::after { animation-delay: 0.2s; }
 .clrk--skip :where(*),
 .clrk--skip :where(*)::before,
 .clrk--skip :where(*)::after { transition-duration: 0.2s !important; transition-delay: 0s !important; }
