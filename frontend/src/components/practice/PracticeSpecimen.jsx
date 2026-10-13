@@ -33,7 +33,7 @@ import { useLang } from '../../LangContext'
 const WAVE = [30, 55, 80, 45, 65, 95, 60, 35, 70, 50, 85, 40, 25, 55, 75, 45, 30, 60]
 
 /** Where a sentence names its word, the word underlined in it. */
-export function Marked({ sentence, word, className = 'prc-paper__mark' }) {
+export function Marked({ sentence, word, className = 'prc-spec__mark' }) {
   const at = word ? sentence.indexOf(word) : -1
   if (at < 0) return sentence
   return <>{sentence.slice(0, at)}<span className={className}>{word}</span>{sentence.slice(at + word.length)}</>

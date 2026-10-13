@@ -73,15 +73,27 @@ function Desk({ children }) {
 }
 
 describe('every hover has its focus twin on the desk', () => {
-  it('the answer sheet\'s chips in an exam\'s side', async () => {
-    await render(
-      <Desk>
-        <div className="desk-run__side" style={{ position: 'static' }}>
-          <button type="button" className="exam-sheet__chip">3</button>
-        </div>
-      </Desk>
-    )
-    await twins($('.exam-sheet__chip'))
+  // The answer sheet's chips went with plan 200; what a paper at a desk
+  // is pressed by now: the sheet's numbers, the page's answers and its
+  // turns, the passage's questions, the hand-in's blanks, the grades and
+  // the other papers.
+  it('the mock exam\'s controls', async () => {
+    const controls = [
+      ['button', 'desk-mark-row__n'], ['button', 'desk-choice'], ['button', 'desk-turn'],
+      ['button', 'desk-serves__q'], ['button', 'desk-handin__blank'], ['button', 'desk-prow'],
+      ['button', 'desk-exam__flag'], ['a', 'desk-grade'],
+    ]
+    for (const [Tag, cls] of controls) {
+      document.body.innerHTML = ''
+      await render(
+        <Desk>
+          <div className="desk-run--exam">
+            {Tag === 'a' ? <a href="#n4" className={cls}>N4</a> : <button type="button" className={cls}>3</button>}
+          </div>
+        </Desk>
+      )
+      await twins($(`.${cls}`))
+    }
   })
 
   it('the analyser\'s stops and chips', async () => {

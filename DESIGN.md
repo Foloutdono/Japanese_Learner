@@ -1548,7 +1548,7 @@ line here says otherwise.
   its switch, its count and its button.
   A long list scrolls in its own column; the
   stops are one tab stop, walked with ↑/↓. Every row of the lists above is
-  a link to what it opens (plan 117), the exam review's question included,
+  a link to what it opens (plan 117), the exam's marked sheet included,
   so it opens in a new tab as well as beside the list — and it wears the
   button's face it replaced, to the pixel; the phone keeps its buttons.
   A radical's page (plan 118) stands the radicals index beside the lesson
@@ -1605,14 +1605,14 @@ line here says otherwise.
 - **A practice station takes the window** (plan 159, the owner's picks A
   and S1 of the canvas "Practice screens — layout options"). Reading and
   translation opened on three source cards across the top of an empty
-  window, the one-axis platforms on their five grades in one short row,
-  the mock exam on four paper names. Each is now a line's split filled
+  window, the one-axis platforms on their five grades in one short row.
+  Each is now a line's split filled
   as plan 137 fills the Learn stations. The **list**: reading's and
   translation's source is a switch at its head (JLPT · Fréquence · Mes
   cartes), so the page that only chose a source is gone on the desk;
   under it the grades share the column's height, each with a sentence
-  (or the texts, the points, the papers) of its own bank, the bar of the
-  grade's words (the exam's: the papers sat) and the learner's record at
+  (or the texts, the points) of its own bank, the bar of the grade's
+  words and the learner's record at
   the foot ("24 phrases · 83 % justes"), "you are here" beside the name;
   or the tiers; or the learner's own cards. The **page** is the open
   stop's, the window's height beside the list: the stop's name and what
@@ -1624,12 +1624,9 @@ line here says otherwise.
   last ride), then two panels sharing what is left — the newest misses
   (comprehension: the texts read, with their score) and the grade's
   grammar points, those studied at Learn ringed and dotted, or a tier's
-  words — each scrolling inside itself. The mock exam's page is its
-  papers, a row each: the name with the JLPT's (語彙), the kinds of
-  question it holds, a question of the kind drawn from the grade's own
-  content, the questions and minutes, the last score and "Different
-  paper"; Board is the next paper not sat. Under 600px (measured) the
-  page stacks and scrolls; under 720px the papers draw no well. The
+  words — each scrolling inside itself. Under 600px (measured) the
+  page stacks and scrolls. (The mock exam left the split for its own
+  page in plan 200, below.) The
   phone keeps its screens.
 - **Every platform's specimen hangs on the Practice gate** (plan 165, the
   last board of the same canvas). The six plates were five grade rows
@@ -1700,8 +1697,7 @@ line here says otherwise.
   the wide column) stand side by side, the head spanning both; answered,
   the unused choices keep their place unseen instead of collapsing, so
   nothing under them moves. **The foot follows its content** (plan 123):
-  a run's action — Next, Check, the exam's Previous, flag and Next —
-  stands under what it acts on and sticks at the dock line when the
+  a run's action — Next, Check — stands under what it acts on and sticks at the dock line when the
   window is short, never on the window's floor half a screen away; only a
   browse's ← → keep their place, being pressed over and over.
 - **Above about 1460px the workspace is centred** (plan 123): the card and
@@ -1897,12 +1893,41 @@ line here says otherwise.
   out), never on the irreversible act; its actions share a row; a ✕ stands
   where the body has no way out of its own; and the rail's own sheets stand
   beside the rail at the side column's width.
-- **Comprehension and the mock exam are sat, not scrolled.** The text
-  stands whole beside its questions; a reading passage stands flat on a
-  card of its own beside the questions it serves and stays put across
-  them; the exam's answer sheet — clock, count, every question, Finish —
-  stands in the run's side the whole paper. The review is a list beside
-  the open question's revealed card, the first miss open on arrival.
+- **Comprehension is sat, not scrolled.** The text stands whole beside
+  its questions.
+- **The mock exam is a booklet and its answer sheet** (模試, plan 200,
+  the owner's mix of the canvas "Tsuji — the mock exam on the desk").
+  *The papers:* the grades are tabs across the head, each with what is
+  sat of its papers; the paper to sit next is a card the page's width —
+  its names and figures, its parts drawn as the line it rides (a leg
+  per part as long as its questions, a stop per question, each named as
+  the booklet names it, with what it asks while there are three legs or
+  fewer), the gate, and beside it a question of its kind as the paper
+  prints it; the grade's other papers stand in a row under it (one
+  pressed swaps into the card), the grade's record at its end. *The
+  paper* opens on its cover with the clock stopped — its names centred,
+  its parts as a table of contents, the gate (Enter) — and the blank
+  answer sheet already in the side. A question is a page of the
+  booklet: the part's plate (問題3), its name and what it asks in the
+  learner's words, the page's number; the question alone, its answers
+  printed under it in the sheet's ovals (four across when each is a few
+  signs, two when a few words, one a row past twenty; two at most once
+  marked); the page turning in its foot (←/→, the neighbours' numbers).
+  A passage opens the booklet on two pages, the text on the left
+  standing while its questions turn on the right. The side is the
+  answer sheet (解答用紙): the clock and the count over each part's rows
+  reading down two columns, a row its number and its ovals, filled in
+  the pencil's ink (`--text-primary`); an oval answers its question and
+  opens it. Finishing with blanks is asked in the sheet, not over the
+  paper — the blanks to go back to, what a blank costs, the first blank
+  focused — and the owed rows dash their ovals in the warning's ink.
+  *The result* hands the sheet back marked — the right oval filled in
+  the verdict's green, a wrong pick filled in the danger's red, the
+  answer a blank owed ringed — under the score against the practice
+  target, and beside it the page of the question open, ←/→ walking the
+  misses ("miss 2 of 9"). None of the three prints a title. The paper's
+  ink is `--line-exam` mixed toward the text ink, as every exam number
+  is, never the raw pigment.
 - **The way up is a crumb, and the rail is the way around.** A screen's ‹
   way out to a place the rail opens (a gate, the lit gate's stations) is
   not drawn on the desk; any other is a small crumb over the title, never
@@ -1963,7 +1988,7 @@ line here says otherwise.
   say "leave" while Esc closed the door.
 - **Lists are walked one way, and places are links** (plan 123). Every
   list beside a page — a station's stops, the grammar points, the tiers,
-  the library's shelf, the exam's review, Settings, Browse's results — is
+  the library's shelf, the exam's marked sheet, Settings, Browse's results — is
   one tab stop, walked with ↑/↓, Home and End, Space opening the row; the
   dictionary's grid is one stop walked in two dimensions, ↓ from the
   search entering it. Everything that is a place is a link wearing its
@@ -2202,8 +2227,9 @@ line here says otherwise.
   the window scrolls — nothing is crushed or cut. A card never gives
   down under what it holds. A run's four choices are an answer sheet,
   two by two under the card, the tiles held at the column's floor; the
-  exam's four brief answers stand the same way (`mcq-list--brief`); a
-  drill's card stands beside its boxes or its board. A station page
+  exam's booklet page takes its air a rung closer, so its foot stands
+  above the level bar; a drill's card stands beside its boxes or its
+  board. A station page
   stands at its own height rather than the window's. The `short` test
   lane (1280×600) holds all of it.
 

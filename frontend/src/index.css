@@ -70,34 +70,8 @@
   color: var(--text-secondary);
 }
 
-/* ── The runner (canvas ExamRunner, plan 072) ──
-   On the stage frame: both bars have left, and the exam's own head
-   row is the way out, the paper and the clock. The question card, the
-   way through the paper, and the sheet bar docked on the bottom edge
-   (the ≤768px block on .stage docks it the way it docks the rating
-   bar) follow in one column. Tokens only — DESIGN.md, the scales. */
-.exam-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-4);
-}
-.exam-meta__section {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-2);
-}
-.exam-meta__jp {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-body);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+/* ── The runner's clock (canvas ExamRunner, plan 072) ──
+   Tokens only — DESIGN.md, the scales. */
 .exam-timer {
   display: inline-flex;
   align-items: center;
@@ -115,58 +89,7 @@
   animation: exam-timer-pulse 1s ease-in-out infinite;
 }
 
-/* ── Part n · Show instructions ──
-   Instructions are byte-identical for every question inside a mondai,
-   so they open on its first question and fold away after — a row that
-   is the toggle, on every question. */
-.exam-mondai {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  width: 100%;
-  min-height: 40px;
-  padding: 0 var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: var(--fs-caption);
-  text-align: left;
-}
-.exam-mondai__part {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  color: var(--text-primary);
-}
-.exam-mondai__text {
-  margin: 0;
-  font-size: var(--fs-sm);
-  line-height: 1.6;
-  color: var(--text-secondary);
-  white-space: pre-line;
-  text-align: left;
-}
 
-/* ── The question card ──
-   The card is the stage's page (.prompt-card--ask, in the study block);
-   this only keeps the exam's own column. An exam question plus its MCQ
-   rows is denser than a flashcard, not sparser, so it earns no more
-   room than the rest of the study card column -- 640 is the right
-   number on purpose, not a default nobody chose (plan 049). */
-.exam-card.prompt-card {
-  --card-w: 640px;
-  width: 100%;
-}
-
-/* ── The way through the paper ── */
-.exam-nav {
-  display: grid;
-  grid-template-columns: 1fr 44px 1fr;
-  gap: var(--sp-3);
-}
 /* The flag ("come back to this one"): icon-only, so the box IS the
    target, and 44 is the minimum. */
 .exam-flag {
@@ -187,127 +110,7 @@
   background: color-mix(in srgb, var(--warning) 12%, transparent);
 }
 
-/* ── Answer sheet ──
-   The numbered grid, in the sheet the bar opens (the legend and the
-   chips below are its rows). */
-.exam-sheet {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-}
 
-/* ── The result (canvas ExamResult) ──
-   Under the shell: the bar names the paper; the ring and the figures
-   head the page; the review is a surface of parts and rows. */
-.exam-result-head {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-5);
-  padding: var(--sp-4) 0;
-}
-/* The score ring: an arc for the score and a tick for the practice
-   target, so "48% against 60%" is one glance instead of two numbers
-   to compare by reading. */
-.exam-score-ring {
-  position: relative;
-  flex: none;
-  width: 108px;
-  height: 108px;
-}
-.exam-score-ring__svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-.exam-score-ring__track { fill: none; stroke: var(--surface-line); stroke-width: 8; }
-.exam-score-ring__fill {
-  fill: none;
-  stroke: var(--success);
-  stroke-width: 8;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.6s ease;
-}
-.exam-score-ring--low .exam-score-ring__fill { stroke: var(--danger); }
-.exam-score-ring__tick { stroke: var(--text-secondary); stroke-width: 2; }
-.exam-score-ring__pct {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-heading);
-  font-variant-numeric: tabular-nums;
-}
-.exam-result-figs {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-  min-width: 0;
-  text-align: left;
-}
-.exam-result-figs__score {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-title);
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-.exam-result-figs__cap {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.exam-result-figs__note {
-  font-size: var(--fs-caption);
-  line-height: 1.5;
-  color: var(--text-secondary);
-}
-/* The Missed-only chip sits at the header's right edge. */
-.section-header__chip { margin-left: auto; }
-.exam-review {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-.exam-review__part + .exam-review__part { border-top: 1px solid var(--surface-line); }
-.exam-group {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: var(--sp-3) var(--sp-4) var(--sp-2);
-}
-.exam-group__part {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-}
-.exam-group__score {
-  font-family: var(--font-display);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-.exam-review-row {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-4);
-  width: 100%;
-  min-height: 44px;
-  padding: 0 var(--sp-4);
-  border: 0;
-  border-top: 1px solid var(--surface-line);
-  border-radius: 0;
-  background: transparent;
-  color: var(--text-primary);
-  font: inherit;
-  text-align: left;
-}
 /* The mark: three outcomes, not two — a question left blank scores
    like a wrong answer but isn't one. Pigment as ink is mixed toward
    the text ink (the raw pigments do not clear 3:1 on the light sheet). */
@@ -330,33 +133,6 @@
 }
 .exam-review-row__mark--blank {
   background: color-mix(in srgb, var(--text-secondary) 20%, transparent);
-  color: var(--text-secondary);
-}
-.exam-review-row__q {
-  flex: none;
-  width: 30px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  font-variant-numeric: tabular-nums;
-}
-.exam-review-row__jp {
-  flex: 1;
-  min-width: 0;
-  font-family: var(--font-jp);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.exam-review-row__blank {
-  flex: 1;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
   color: var(--text-secondary);
 }
 .exam-review-row__chev { flex: none; color: var(--text-secondary); }
@@ -761,29 +537,6 @@
 }
 
 
-.exam-sheet__legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  font-size: 0.68rem;
-  color: var(--text-secondary);
-}
-.exam-sheet__legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.exam-sheet__swatch {
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
-  border: 1.5px solid var(--border);
-}
-.exam-sheet__swatch--answered {
-  background: var(--line-color, var(--line-exam));
-  border-color: var(--line-color, var(--line-exam));
-}
-.exam-sheet__legend-flag { color: var(--accent2); }
 .exam-sheet__grid {
   display: flex;
   flex-wrap: wrap;
@@ -829,10 +582,6 @@
   outline-offset: 2px;
 }
 
-
-@media (prefers-reduced-motion: reduce) {
-  .exam-score-ring__fill { transition: none; }
-}
 
 
 @media (max-width: 560px) {
@@ -2601,9 +2350,8 @@
      custom property declared only on .prompt-card would never reach
      it. .prompt-card (index.css:13659) and .deck-progress
      (index.css:7808) both just consume var(--card-w); an exception
-     (.prompt-card.drawing-quiz__card, .exam-card.prompt-card)
-     overrides --card-w on its own more specific selector rather than
-     fighting max-width directly. */
+     (.prompt-card.drawing-quiz__card) overrides --card-w on its own
+     more specific selector rather than fighting max-width directly. */
   --card-w:         640px;
   --offer-w:        390px;     /* the offers' stage, drawn for a phone (plan 172) */
   --offer-desk-w:   920px;     /* the offer's dialog on the desk: the stage beside the words */
@@ -12014,11 +11762,8 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-lead);
 }
 /* The action under it takes a bigger box than the family's default.
-   The rule is NOT here: `form.stage__foot > .btn-primary` outranks
-   `.exam-nav .btn-primary`, declared further down, so stylelint's
-   no-descending-specificity is right that it has to follow it. It
-   lives in the compound group at the end of the file -- search
-   `form.stage__foot`. */
+   The rule is NOT here: it lives in the compound group at the end of
+   the file -- search `form.stage__foot`. */
 
 /* ── The practice sessions (canvas Reading / Comprehension /
    Translation / ComprehensionResult, plan 072) ──
@@ -13217,16 +12962,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
   gap: var(--sp-3);
-}
-/* The exam's way through the paper (canvas ExamRunner): the two
-   buttons either side of the flag drop to the small rung. Declared
-   here, after the button family, not in the exam section at the top
-   of the file: a compound must follow the plain selector it overrides. */
-.exam-nav .btn-secondary,
-.exam-nav .btn-primary {
-  min-height: 44px;
-  padding-inline: var(--sp-4);
-  font-size: var(--fs-sm);
 }
 /* A line of help under a title or in a sheet. */
 .hint {
@@ -17780,7 +17515,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
      its own comment there for why) sets it, and an exception
      overrides --card-w rather than re-fighting max-width at a
      matching or higher specificity -- see
-     .prompt-card.drawing-quiz__card and .exam-card.prompt-card.
+     .prompt-card.drawing-quiz__card.
 
      width: 100% is load-bearing (see the identical note on
      .deck-progress, index.css:7830). Most modes reach this element
@@ -29053,8 +28788,6 @@ button.brd-stn { cursor: pointer; }
 /* ── 191:primitives end ── */
 
 
-
-
 /* ── 191:day ── */
 /* ══ 終着 — the everyday clear on a phone (plan 191) ════════════════
    ClearPhone (components/dayclear/ClearPhone.jsx), the canvas's Main
@@ -29645,8 +29378,6 @@ button.brd-stn { cursor: pointer; }
 /* ── 191:day end ── */
 
 
-
-
 /* ── 191:partial ── */
 /* ══ 途中下車 — a run that ended with cards left today (plan 191) ═════
    PartialFinish (components/dayclear/PartialFinish.jsx), the canvas's
@@ -29767,8 +29498,6 @@ button.brd-stn { cursor: pointer; }
   .ptl__ripple { animation: none; }
 }
 /* ── 191:partial end ── */
-
-
 
 
 /* ── 191:milestones ── */
@@ -30850,8 +30579,6 @@ button.brd-stn { cursor: pointer; }
 /* ── 191:milestones end ── */
 
 
-
-
 /* ── 191:restday ── */
 /* ══ 運休 — the rest-day notice (plan 191) ══════════════════════════
    The canvas's RestDay board (components/dayclear/RestDayNotice.jsx),
@@ -31051,8 +30778,6 @@ button.brd-stn { cursor: pointer; }
   mask-composite: intersect;
 }
 /* ── 191:restday end ── */
-
-
 
 
 /* ── 191:tickets ── */
@@ -31406,7 +31131,6 @@ button.brd-stn { cursor: pointer; }
   font-size: var(--fs-caption);
   color: var(--text-secondary);
 }
-
 
 
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
@@ -33643,8 +33367,7 @@ button.brd-stn { cursor: pointer; }
   .desk-settings__page :is(.dest:not(.dest--on) .dest__dot, .svc-row__end) { background: var(--surface); }
   .desk-settings__page .dest--on .dest__dot { box-shadow: 0 0 0 3px var(--surface), 0 0 0 4px var(--text-primary); }
   .desk-settings .stg-row--on,
-  .desk-split .gl-index__row[aria-current="page"],
-  .desk-split .exam-review-row[aria-current="page"] {
+  .desk-split .gl-index__row[aria-current="page"] {
     background: color-mix(in srgb, var(--accent2) 8%, transparent);
     box-shadow: inset 3px 0 0 var(--accent2);
   }
@@ -33895,17 +33618,14 @@ button.brd-stn { cursor: pointer; }
      was drawn with, so the link reads exactly as the button it replaced
      (splitRows.desktop.test.jsx measures the two against each other):
      the button's weight and leading, where the row leaves its text to
-     them (the route and the cards; the index and the review rows set
-     `font: inherit` of their own), no underline, the button's hover
-     where the row keeps it (the review's), and its focus ring. */
+     them (the route and the cards; the index sets `font: inherit` of
+     its own), no underline, and its focus ring. */
   .desk-split__list a:is(.route-stop, .platform-card) {
     font-weight: 600;
     line-height: normal;
   }
-  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row) { text-decoration: none; }
-  .desk-split__list a.exam-review-row { transition: filter 0.15s; }
-  .desk-split__list a.exam-review-row:hover { filter: brightness(1.15); }
-  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row):focus-visible {
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row) { text-decoration: none; }
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row):focus-visible {
     outline: 2px solid var(--accent2);
     outline-offset: 2px;
   }
@@ -34632,10 +34352,6 @@ button.brd-stn { cursor: pointer; }
   .stage > .stage__foot,
   .stage > .timer,
   .stage > .result-lattice,
-  .stage > .exam-meta,
-  .stage > .exam-mondai,
-  .stage > .exam-mondai__text,
-  .stage > .exam-nav,
   .stage > .qrows,
   .stage > .loading {
     width: 100%;
@@ -34690,8 +34406,7 @@ button.brd-stn { cursor: pointer; }
      pressed over and over, and a target that moved with each card
      would be missed (it takes ←/→ instead). */
   .screen > .stage > .rating-bar,
-  .screen > .stage > .stage__foot:not(.browse-nav),
-  .desk-run--paper > .stage > .exam-nav {
+  .screen > .stage > .stage__foot:not(.browse-nav) {
     position: sticky;
     bottom: var(--dock-bottom);
     z-index: 10;
@@ -34699,18 +34414,6 @@ button.brd-stn { cursor: pointer; }
     padding-block: var(--sp-3);
     background: var(--bg-main);
   }
-  /* A question's four brief answers as an answer sheet, two by two
-     (plan 169, QuestionRenderer's `brief`), as a card run's choices
-     stand: a reading or a spelling is a few signs, and four rows of
-     them down the paper put the third and fourth under the docked
-     Previous and Next on a laptop's window. A sentence keeps its row.
-     Arrows still walk them in their order. */
-  .desk-run--paper .mcq-list--brief {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--sp-4);
-  }
-  .desk-run--paper .mcq-list--brief > .mcq-row + .mcq-row { margin-top: 0; }
   /* The card and its choices side by side: a question and the four
      answers to it read across, not down past the window's floor (the
      fourth kanji choice stood at 870px on a 1100×800 screen). The
@@ -34858,72 +34561,6 @@ button.brd-stn { cursor: pointer; }
   /* On a practice run's panels (plan 129) it is the column's one card,
      as tall as the column at least, as the pane beside a sentence is. */
   .desk-run--panels > .desk-run__side > .prompt-card { flex: 1 0 auto; }
-  /* ── the mock exam, sat at a desk (plan 115) ──
-     screens/ExamRunner: the answer sheet stands in the side — the clock
-     at the head of the column, the count, the grid, Finish — and the
-     paper is the page's scroll, from its top. A reading passage stands
-     flat on its own card beside its questions, which keep to a sticky
-     column so a choice is never a scroll away from the line it asks
-     about. */
-  .desk-run__side > .exam-timer {
-    align-self: flex-start;
-    font-size: var(--fs-heading);
-  }
-  .desk-answers {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-3);
-  }
-  .desk-answers__fig {
-    font-family: var(--font-display);
-    font-size: var(--fs-lead);
-    font-variant-numeric: tabular-nums;
-  }
-  .desk-answers__cap {
-    font-family: var(--font-display);
-    font-size: var(--fs-caption);
-    font-weight: 700;
-    letter-spacing: var(--tr-caption);
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-  .stage > .desk-paper {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: var(--sp-5);
-    width: 100%;
-    max-width: var(--board-w);
-    margin-inline: auto;
-  }
-  /* A question beside its passage is the paper's width, not the card's:
-     the head, the part's instructions and the way through line up with
-     the two columns rather than a card column the paper overhangs. */
-  .stage:has(> .desk-paper) > :is(.exam-meta, .deck-progress, .exam-mondai, .exam-mondai__text, .exam-nav) { max-width: var(--board-w); }
-  /* The question fills its card: centred at its content's width it
-     drew the rows at half a 640px card. */
-  .exam-card > .exam-question { align-self: stretch; }
-  .desk-paper__text {
-    max-height: none;
-    margin: 0;
-    overflow: visible;
-  }
-  .desk-paper__ask {
-    position: sticky;
-    top: var(--sp-6);
-    min-width: 0;
-  }
-  /* The flag's corner dot is ringed in the ground it sits on: the
-     side's, not the sheet's card. */
-  .desk-run__side .exam-sheet__chip--flagged::after { border-color: var(--bg-main); }
-  /* The result's review (screens/ExamResult): the open question's
-     revealed card is the page beside the list, whole — the phone's
-     60vh inner scroll was for a card opened under its row. */
-  .desk-split__page > .exam-card {
-    max-height: none;
-    margin-inline: 0;
-    overflow: visible;
-  }
   .desk-split__page > .btn-row { max-width: var(--card-w); }
   /* The run's misses at its end (SessionPanel, plan 115): the cards as
      chips, each opening its entry under them. */
@@ -37393,14 +37030,9 @@ button.brd-stn { cursor: pointer; }
   :is(.pcard-lead__jp, .bkd-line, .bkd-row__word, .dict-word__jp, .furigana-word) rt { user-select: none; }
   /* Every hover has its focus twin (DESIGN.md, Controls) on the surfaces
      the desk sets in its pages and columns: a keyboard reader was given
-     the global ring and none of what the pointer is shown -- the answer
-     sheet's chips in an exam's side, the analyser's stops and chips,
+     the global ring and none of what the pointer is shown -- the
+     analyser's stops and chips,
      a word's kanji chips, Browse's rows in the deck's side. */
-  .desk-run__side .exam-sheet__chip:focus-visible {
-    border-color: var(--line-color, var(--line-exam));
-    color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary));
-  }
-  .desk-run__side .exam-sheet__chip--answered:focus-visible { color: var(--text-on-panel); }
   :is(.phone--desk, .desk-run__side) .anl-chip:focus-visible { color: var(--text-primary); }
   :is(.phone--desk, .desk-run__side) .anl-stop:focus-visible { background: var(--overlay-hover); color: var(--text-primary); }
   :is(.phone--desk, .desk-run__side) .phrase-kanji-chip:has(.phrase-kanji-chip__char:focus-visible) { border-color: var(--border); }
@@ -39188,24 +38820,23 @@ button.brd-stn { cursor: pointer; }
 
   /* ── 机 — the practice stations, filled (plan 159) ──
      The owner's picks A and S1 of the canvas "Practice screens — layout
-     options". Reading, translation, comprehension, dictation,
-     composition and the mock exam stood at the top of an empty window:
-     three source cards, a row of five grades, four paper names. Each is
+     options". Reading, translation, comprehension, dictation and
+     composition stood at the top of an empty window: three source
+     cards, a row of five grades. Each is
      now a line's split filled the way plan 137 filled the Learn
      stations (components/practice/):
 
      - the list: reading's and translation's source as a switch at its
        head (S1), then the stops sharing the column's height -- the
-       grades with a sentence (or the texts, the points, the papers) of
-       their own bank, the bar of the grade's words or of the papers sat,
-       and the learner's record in the caption; or the tiers, or the
-       learner's own cards;
+       grades with a sentence (or the texts, the points) of their own
+       bank, the bar of the grade's words, and the learner's record in
+       the caption; or the tiers, or the learner's own cards;
      - the page: the window's height beside it, sticky, as a deck's is
        (plan 154) -- the head with Board, the exercise as the run will
        ask it in a well, four figures in the profile's lattice, and two
        panels (the newest misses, the grade's points or the tier's
        words) sharing what is left, each scrolling inside itself. The
-       exam's page is its papers instead, each a row sharing the height. */
+       mock exam left the split for its own page (plan 200, 机 — 模試). */
   .desk-split--practice > .desk-split__list { gap: var(--sp-4); }
   .desk-split--practice > .desk-split__list > .seg { flex: none; }
   /* Three sources, and two word lists, in a column's width: each word
@@ -39734,201 +39365,6 @@ button.brd-stn { cursor: pointer; }
     background: var(--line-color);
   }
 
-  /* ── the mock exam's papers, a row each ── */
-  .prc-papers {
-    flex: 1 1 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-    min-height: 0;
-  }
-  .prc-paper {
-    position: relative;
-    flex: 1 1 0;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    min-height: calc(2 * var(--sp-8));
-    overflow: hidden;
-    background: var(--surface);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-card);
-    transition: background 0.15s ease;
-  }
-  .prc-papers--wells .prc-paper { grid-template-columns: minmax(0, 12fr) minmax(0, 22fr) minmax(0, 13fr); }
-  .prc-paper:hover { background: var(--bg-card-hover); }
-  .prc-paper--next { border-color: color-mix(in srgb, var(--line-color) 60%, transparent); }
-  .prc-paper:has(> .prc-paper__door:focus-visible) {
-    outline: 2px solid var(--accent2);
-    outline-offset: 2px;
-  }
-  .prc-paper__door {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: var(--sp-2);
-    min-width: 0;
-    padding: var(--sp-4) var(--sp-5) var(--sp-4) var(--sp-6);
-    background: none;
-    border: 0;
-    font: inherit;
-    text-align: left;
-    color: inherit;
-    cursor: pointer;
-  }
-  /* The whole row is the paper's door; "Different paper" stands over it. */
-  .prc-paper__door::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-  }
-  .prc-paper__door:focus-visible { outline: none; }
-  .prc-paper__title {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    column-gap: var(--sp-3);
-    font-size: var(--fs-title);
-    font-weight: 700;
-  }
-  .prc-paper__jp {
-    white-space: nowrap;
-    font-family: var(--font-jp);
-    font-size: var(--fs-body);
-    font-weight: 500;
-    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
-  }
-  .prc-paper__mondai {
-    font-family: var(--font-jp);
-    font-size: var(--fs-caption);
-    line-height: 1.6;
-    color: var(--text-secondary);
-  }
-  .prc-paper__spec {
-    display: flex;
-    align-items: stretch;
-    min-width: 0;
-    padding: var(--sp-4) 0;
-  }
-  .prc-paper__well {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--sp-3);
-    min-width: 0;
-    padding: var(--sp-3) var(--sp-5);
-    overflow: hidden;
-    background: var(--bg-main);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-plate);
-    text-align: center;
-  }
-  .prc-paper__sentence {
-    max-width: 100%;
-    overflow: hidden;
-    font-family: var(--font-jp);
-    font-size: var(--fs-title);
-    line-height: 1.5;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  .prc-paper__mark {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-decoration-color: var(--line-color);
-    text-underline-offset: var(--sp-2);
-  }
-  .prc-paper__answer {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-3);
-    font-family: var(--font-jp);
-    font-size: var(--fs-lead);
-    color: var(--text-secondary);
-  }
-  .prc-paper__point {
-    padding: 0 var(--sp-3);
-    border: 1px solid var(--surface-line);
-    border-radius: var(--r-pill);
-    font-size: var(--fs-sm);
-  }
-  .prc-paper__heading {
-    font-family: var(--font-jp);
-    font-size: var(--fs-body);
-    font-weight: 700;
-  }
-  .prc-paper__passage {
-    display: -webkit-box;
-    overflow: hidden;
-    font-family: var(--font-jp);
-    font-size: var(--fs-sm);
-    line-height: 1.8;
-    text-align: left;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-  .prc-paper__figs {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: var(--sp-3);
-    min-width: 0;
-    padding: var(--sp-4) var(--sp-5);
-    border-inline-start: 1px solid var(--surface-line);
-  }
-  .prc-papers--wells .prc-paper__figs { margin-inline-start: var(--sp-5); }
-  .prc-paper__count {
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
-  }
-  .prc-paper__score {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
-  }
-  .prc-paper__fig {
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-1);
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
-  }
-  .prc-paper__fig > b {
-    font-size: var(--fs-title);
-    color: var(--text-primary);
-  }
-  .prc-paper__none {
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--text-secondary);
-  }
-  .prc-paper__fresh {
-    position: relative;
-    z-index: 1;
-    align-self: flex-start;
-    padding: 0;
-    background: none;
-    border: 0;
-    font: inherit;
-    font-size: var(--fs-sm);
-    font-weight: 700;
-    color: var(--text-secondary);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    cursor: pointer;
-  }
-  .prc-paper__fresh:hover,
-  .prc-paper__fresh:focus-visible { color: var(--text-primary); }
-  .prc-paper__note {
-    font-size: var(--fs-caption);
-    color: var(--text-secondary);
-  }
-
   /* The narrow page (PracticePage's NARROW, measured): the head
      stacked, the figures two by two, the panels one under the other, the
      page its own height in the window rather than the window's. */
@@ -39954,21 +39390,6 @@ button.brd-stn { cursor: pointer; }
     grid-auto-flow: row;
   }
   .prc-page--narrow .prc-panel { max-height: calc(8 * var(--sp-8)); }
-  .prc-page--narrow .prc-papers { flex: none; }
-  .prc-page--narrow .prc-papers > .prc-paper {
-    flex: none;
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .prc-page--narrow .prc-paper__figs {
-    flex-flow: row wrap;
-    justify-content: flex-start;
-    align-items: baseline;
-    column-gap: var(--sp-5);
-    border-inline-start: 0;
-    border-top: 1px solid var(--surface-line);
-  }
-  .prc-page--narrow .prc-paper__score { flex-direction: row; align-items: baseline; gap: var(--sp-3); }
-  .prc-page--narrow .prc-paper__figs > .desk-line__bar { display: none; }
 }
 /* ── 低 — the short desk (plan 169) ──
    A laptop's window is wide enough for the desk and often not tall
@@ -40131,8 +39552,6 @@ button.brd-stn { cursor: pointer; }
     }
     .prc-lower { flex: none; }
     .prc-panel { max-height: calc(6 * var(--sp-8)); }
-    .prc-papers,
-    .prc-papers > .prc-paper { flex: none; }
     /* ── the analyser's typed Passage ──
        The sentence a rung under display size and its subtitle a rung
        under its own: at display size three lines of a sentence and its
@@ -40142,12 +39561,6 @@ button.brd-stn { cursor: pointer; }
     .anl-desk--text .anl-subs__stage { gap: var(--sp-4); }
     .anl-desk--text .anl-subs__line .tok { font-size: var(--fs-board-fluid); }
     .anl-desk--text .anl-subs__tr { font-size: var(--fs-title); }
-    /* ── the exam's paper ──
-       A row of the paper a rung shorter, and the rows a rung closer:
-       the fourth answer to a question in a sentence stood under the
-       docked Previous and Next on a 600px window. */
-    .desk-run--paper .mcq-row { padding-block: var(--sp-3); }
-    .desk-run--paper .mcq-list:not(.mcq-list--brief) > .mcq-row + .mcq-row { margin-top: var(--sp-3); }
     /* ── first contact ──
        The drawings take the room the question and the floor leave,
        down to a floor of their own that a 600px window holds. */
@@ -40556,7 +39969,6 @@ button.brd-stn { cursor: pointer; }
   /* The compact gate's Enter cap (kit's gate, 52px): a rung closer to
      the pill's end than the 66px gate's. */
   .clrk-gate--compact .desk-kbd { margin-inline-end: var(--sp-3); }
-
 
 
   /* ── 191:desk-day ── */
@@ -41244,8 +40656,6 @@ button.brd-stn { cursor: pointer; }
   /* ── 191:desk-day end ── */
 
 
-
-
   /* ── 191:desk-milestones ── */
   /* The milestone ceremonies in the content area beside the rail: the
      frame starts at the rail's edge, the composition centred in what is
@@ -41256,8 +40666,6 @@ button.brd-stn { cursor: pointer; }
   .ms-ticket--desk,
   .ms-month--desk { left: var(--desk-rail-w); }
   /* ── 191:desk-milestones end ── */
-
-
 
 
   /* ── 191:desk-tickets ── */
@@ -41440,6 +40848,1191 @@ button.brd-stn { cursor: pointer; }
     .desk-card:has(.gl-map) .desk-verdict { padding-block: var(--sp-2); }
     .desk-card:has(.gl-map) .desk-verdict__value { font-size: var(--fs-title); }
     .desk-card:has(.gl-map) .desk-rhythm { padding-block: var(--sp-2); }
+  }
+}
+@media (min-width: 1100px) {
+  /* ── 模試 — the mock exam at a desk (plan 200) ──
+     The owner's mix of the canvas "Tsuji — the mock exam on the desk":
+     the papers as B1 drew them, without the title (exam/DeskStation);
+     the paper as direction A refined it -- the booklet on the page, a
+     question a page of it, and the answer sheet in the run's side
+     (screens/ExamRunner, exam/DeskSheet); and the result as the sheet
+     handed back marked beside the page of the question open
+     (screens/ExamResult). The paper's ink is the line's pigment mixed
+     toward the text ink, as the phone's numbers are (.exam-page__part
+     b), so the plates and the gaps read on both papers. */
+  .desk-exams,
+  .desk-run--exam,
+  .desk-res { --exam-ink: color-mix(in srgb, var(--line-exam) 65%, var(--text-primary)); }
+
+  /* A part's plate, 問題3: the booklet prints the part's number in a
+     box, and the sheet and the cover print the same box. */
+  .desk-mondai,
+  .desk-mark__no {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--sp-2);
+    border: 1.5px solid var(--exam-ink);
+    border-radius: var(--r-plate);
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--exam-ink);
+    white-space: nowrap;
+  }
+  .desk-mark__no {
+    padding: 0 var(--sp-1);
+    border-width: 1px;
+  }
+
+  /* ── the papers: the grades over the grade's papers ── */
+  .desk-exams {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-height: calc(100dvh - 2 * var(--sp-6));
+    text-align: left;
+  }
+  .desk-grades {
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .desk-grade {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--sp-2) var(--sp-3);
+    padding: var(--sp-4) var(--sp-5);
+    border-inline-start: 1px solid var(--surface-line);
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+  .desk-grade:first-child { border-inline-start: 0; }
+  .desk-grade > b {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    color: var(--text-primary);
+  }
+  .desk-grade__name {
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-grade__fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  /* The bar's fill is its ink, so the lit grade relights it. */
+  .desk-grade__bar {
+    grid-column: 1 / -1;
+    height: 3px;
+    border-radius: var(--r-pill);
+    background: var(--surface-line);
+    color: var(--text-secondary);
+    overflow: hidden;
+  }
+  .desk-grade__bar > i {
+    display: block;
+    height: 100%;
+    background: currentcolor;
+  }
+  .desk-grade:hover,
+  .desk-grade:focus-visible { background: var(--bg-card-hover); }
+  .desk-grade:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
+  .desk-grade--on {
+    background: var(--sel-wash);
+    box-shadow: inset 0 -2px 0 var(--accent2);
+  }
+  .desk-grade--on:hover,
+  .desk-grade--on:focus-visible { background: var(--sel-wash); }
+  .desk-grade--on > b,
+  .desk-grade--on .desk-grade__name { color: var(--sel-ink); }
+  .desk-grade--on > .desk-grade__bar { color: var(--sel-ink); }
+
+  /* The paper to sit next: its names, its figures, its parts as the
+     line the paper rides, the gate; and beside them a question of the
+     kind as the paper prints it. Its edge is the selection's, the
+     paper the page proposes. */
+  .desk-hero {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: var(--sp-7);
+    padding: var(--sp-6) var(--sp-7);
+    background: var(--bg-card);
+    border: 1px solid var(--sel-line);
+    border-radius: var(--r-panel);
+  }
+  .desk-hero:not(:has(> .desk-sample)) { grid-template-columns: minmax(0, 1fr); }
+  .desk-hero__main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  .desk-hero__tag { color: var(--sel-ink); }
+  .desk-hero__names {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-4);
+    margin-top: calc(-1 * var(--sp-3));
+  }
+  .desk-hero__name {
+    margin: 0;
+    font-size: var(--fs-heading);
+    font-weight: 700;
+  }
+  .desk-hero__jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+  .desk-hero__facts,
+  .desk-cover__facts {
+    display: flex;
+    gap: var(--sp-6);
+    margin: 0;
+    font-size: var(--fs-body);
+    color: var(--text-secondary);
+  }
+  .desk-hero__facts b,
+  .desk-cover__facts b {
+    margin-right: var(--sp-1);
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+  /* The parts as the line's legs: as long as their questions, a stop a
+     question, each named as the booklet names it. Five legs leave no
+     room for what each asks, which the cover says anyway. */
+  .desk-parts {
+    display: flex;
+    gap: var(--sp-5);
+    margin: 0;
+    padding: var(--sp-6) var(--sp-6) var(--sp-5);
+    list-style: none;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+  }
+  .desk-part {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .desk-part__rail {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 28px;
+    margin-bottom: var(--sp-2);
+    padding: 0 var(--sp-1);
+  }
+  .desk-part__rail::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+    border-radius: var(--r-pill);
+    background: var(--border);
+  }
+  .desk-part__rail > i {
+    position: relative;
+    flex: 0 1 12px;
+    min-width: 6px;
+    aspect-ratio: 1;
+    border: 2px solid var(--text-secondary);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+  }
+  .desk-part__no {
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--exam-ink);
+  }
+  .desk-part__jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+  }
+  .desk-part__fr { font-size: var(--fs-caption); color: var(--text-secondary); }
+  .desk-part__how {
+    margin-top: var(--sp-2);
+    font-size: var(--fs-sm);
+    line-height: 1.45;
+  }
+  .desk-parts:has(> .desk-part:nth-child(4)) .desk-part__how { display: none; }
+  .desk-hero__foot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    margin-top: auto;
+  }
+  .desk-hero__note {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-hero__go {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .desk-hero__fresh {
+    align-self: center;
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .desk-hero__fresh:hover,
+  .desk-hero__fresh:focus-visible { color: var(--text-primary); filter: none; }
+  /* One question of the kind, as the paper prints it: never one of the
+     paper about to be sat (/api/station/exam/samples). */
+  .desk-sample {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-6);
+    padding: var(--sp-6);
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+  }
+  .desk-sample > .cap { align-self: flex-start; }
+  .desk-sample__line {
+    margin: 0;
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+    font-weight: 500;
+    line-height: 1.6;
+    text-align: center;
+    text-wrap: balance;
+  }
+  .desk-sample__mark,
+  .desk-q .exam-underline {
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: var(--exam-ink);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+  }
+  .desk-sample__answer {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    margin: 0;
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    font-weight: 600;
+  }
+  .desk-sample__answer > span { color: var(--exam-ink); }
+  .desk-sample__text {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    font-family: var(--font-jp);
+  }
+  .desk-sample__text > p {
+    display: -webkit-box;
+    margin: 0;
+    font-size: var(--fs-body);
+    line-height: 1.9;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* The grade's other papers, and the learner's record of the grade. */
+  .desk-others {
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-5);
+  }
+  .desk-prow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+  }
+  .desk-prow:hover,
+  .desk-prow:focus-visible { background: var(--bg-card-hover); filter: none; }
+  .desk-prow__head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .desk-prow__glyph {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2.5px solid var(--line-exam);
+    border-radius: var(--r-pill);
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--exam-ink);
+  }
+  .desk-prow__names {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .desk-prow__name { font-size: var(--fs-lead); font-weight: 700; }
+  .desk-prow__sub { font-size: var(--fs-sm); color: var(--text-secondary); }
+  .desk-prow__parts {
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption);
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+  .desk-prow__end {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--surface-line);
+  }
+  .desk-prow__fig,
+  .desk-rec b {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-prow__fig small,
+  .desk-rec small { font-size: var(--fs-sm); color: var(--text-secondary); }
+  .desk-rec {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--surface-line);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .desk-rec > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--sp-2);
+    padding: var(--sp-4) var(--sp-5);
+    background: var(--surface);
+  }
+  .desk-rec > div:last-child { grid-column: 1 / -1; }
+
+  /* ── the paper: the booklet on the page, the sheet in the side ── */
+  .desk-run--exam > .desk-run__side { background: var(--surface); }
+  .desk-exam {
+    gap: var(--sp-5);
+    text-align: left;
+  }
+  .desk-exam__head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-5);
+    min-height: 44px;
+  }
+  .desk-exam__flag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    min-height: 44px;
+    padding: 0 var(--sp-4);
+    background: none;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-exam__flag:hover,
+  .desk-exam__flag:focus-visible { color: var(--text-primary); filter: none; }
+  .desk-exam__flag--on,
+  .desk-exam__flag--on:hover,
+  .desk-exam__flag--on:focus-visible {
+    background: var(--sel-wash);
+    border-color: var(--sel-line);
+    color: var(--sel-ink);
+  }
+  /* The booklet's page: its head (the part's plate, its name, what it
+     asks, the page's number), the question alone with its answers
+     under it, a third of the way down, and the page turning in its
+     foot. A passage opens the booklet on two pages. */
+  .desk-book {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-panel);
+  }
+  .desk-book__head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    min-height: 60px;
+    padding: 0 var(--sp-7);
+    border-bottom: 1px solid var(--border);
+  }
+  .desk-book__part {
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .desk-book__how {
+    min-width: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-folio {
+    flex: none;
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-1);
+    margin-inline-start: auto;
+    font-family: var(--font-display);
+    white-space: nowrap;
+  }
+  .desk-folio > b { font-size: var(--fs-title); font-variant-numeric: tabular-nums; }
+  .desk-folio > small { font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
+  .desk-book__walk {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-inline-start: auto;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .desk-book__walk + .desk-folio { margin-inline-start: var(--sp-5); }
+  .desk-book__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-8);
+    padding: var(--sp-8) var(--sp-9);
+  }
+  .desk-book__body::before { content: ''; flex: 1 1 0; }
+  .desk-book__body::after { content: ''; flex: 2 1 0; }
+  .desk-book--res .desk-book__body {
+    gap: var(--sp-7);
+    padding: var(--sp-7) var(--sp-8);
+  }
+  .desk-book--res .desk-book__body::after { flex-grow: 1; }
+  .desk-book--res .exam-ask__big { font-size: var(--fs-heading); }
+  .desk-book__foot {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    padding: 0 var(--sp-5);
+    border-top: 1px dashed var(--border);
+  }
+  .desk-turn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    min-height: 44px;
+    padding: 0 var(--sp-3);
+    background: none;
+    border: 0;
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .desk-turn > b { font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+  .desk-turn:disabled { opacity: 0.45; }
+  .desk-turn:not(:disabled):hover,
+  .desk-turn:not(:disabled):focus-visible { color: var(--text-primary); filter: none; }
+  .desk-book__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+  /* The question, its number in the booklet's box beside it; what the
+     phone's page draws (.exam-ask) set on the page's left edge. */
+  .desk-q {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--sp-6);
+  }
+  .desk-q__n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: 1.5px solid var(--text-secondary);
+    border-radius: var(--r-plate);
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+  }
+  .desk-q > :is(.exam-ask, .exam-question) {
+    min-width: 0;
+    align-items: stretch;
+    gap: var(--sp-5);
+    padding: 0;
+    overflow: visible;
+    text-align: left;
+  }
+  .desk-q > .exam-ask--centre > :first-child { margin-top: 0; }
+  .desk-q > .exam-ask--centre > :last-child { margin-bottom: 0; }
+  .desk-q .exam-ask__slots { justify-content: flex-start; }
+  .desk-q .exam-ask__scroll {
+    flex: none;
+    padding: 0;
+    overflow: visible;
+  }
+  .desk-q .exam-ask__foot { padding: var(--sp-4) 0 0; }
+  .desk-q .exam-ask__big { text-wrap: pretty; }
+  .desk-q .exam-gap { border-bottom-color: var(--exam-ink); }
+  .desk-q .exam-ring { align-self: flex-start; }
+  .exam-ring__key { margin-inline-start: var(--sp-3); }
+  /* The answers, printed under the question in the sheet's ovals: four
+     across when each is a few signs, two when a few words, one a row
+     when a sentence. */
+  .desk-choices { display: grid; gap: var(--sp-4); }
+  .desk-choices--1 { grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
+  .desk-choices--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .desk-choices--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .desk-choices--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .desk-choice {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    min-height: 64px;
+    padding: var(--sp-3) var(--sp-5) var(--sp-3) var(--sp-4);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--r-panel);
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+  }
+  .desk-choices--1 .desk-choice { min-height: 54px; }
+  button.desk-choice:not(:disabled):hover,
+  button.desk-choice:not(:disabled):focus-visible {
+    border-color: var(--text-secondary);
+    background: var(--bg-card-hover);
+    filter: none;
+  }
+  .desk-choice__o {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 34px;
+    border: 2px solid var(--text-secondary);
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-secondary);
+  }
+  .desk-choice__t {
+    min-width: 0;
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .desk-choice__t--long { font-size: var(--fs-body); font-weight: 500; line-height: 1.5; }
+  .desk-choice__tag {
+    margin-inline-start: auto;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  /* Picked: the oval filled in the pencil's ink, the box a shade of it. */
+  .desk-choice--on,
+  button.desk-choice--on:not(:disabled):hover,
+  button.desk-choice--on:not(:disabled):focus-visible {
+    border-color: color-mix(in srgb, var(--text-primary) 70%, transparent);
+    background: color-mix(in srgb, var(--text-primary) 6%, var(--bg-card));
+  }
+  .desk-choice--on .desk-choice__o {
+    background: var(--text-primary);
+    border-color: var(--text-primary);
+    color: var(--bg-main);
+  }
+  .desk-choice--right {
+    border-color: var(--success);
+    background: color-mix(in srgb, var(--success) 12%, var(--bg-card));
+  }
+  .desk-choice--wrong {
+    border-color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 12%, var(--bg-card));
+  }
+  .desk-choice--right .desk-choice__o {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--bg-main);
+  }
+  .desk-choice--wrong .desk-choice__o {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: var(--text-on-panel);
+  }
+  .desk-choice--right .desk-choice__tag { color: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+  .desk-choice--wrong .desk-choice__tag { color: color-mix(in srgb, var(--danger) 45%, var(--text-primary)); }
+  .desk-choice--dim { opacity: 0.5; }
+  /* A passage: the text on the left page, standing while its questions
+     turn on the right. */
+  .desk-spread {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+  .desk-spread__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    padding: var(--sp-7) var(--sp-8);
+    border-inline-end: 1px solid var(--border);
+    font-family: var(--font-jp);
+  }
+  .desk-spread__text .exam-passage__text {
+    margin: 0;
+    font-size: var(--fs-lead);
+    line-height: 2;
+  }
+  .desk-spread__ask {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-7);
+    padding: var(--sp-7);
+  }
+  .desk-spread__ask > .desk-q { align-items: start; }
+  .desk-serves {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-top: auto;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-serves > span { margin-inline-end: var(--sp-2); }
+  .desk-serves__q {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 var(--sp-1);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--r-plate);
+    font: inherit;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-serves__q:hover,
+  .desk-serves__q:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
+  .desk-serves__q--done { color: var(--text-primary); border-color: var(--text-secondary); }
+  .desk-serves__q--here,
+  .desk-serves__q--here:hover,
+  .desk-serves__q--here:focus-visible {
+    background: var(--sel-wash);
+    border-color: var(--sel-line);
+    color: var(--sel-ink);
+  }
+
+  /* The cover: the paper's names centred as a booklet prints them, its
+     parts as a table of contents, the gate. */
+  .desk-cover {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-7);
+    padding: var(--sp-8) var(--sp-9);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-panel);
+  }
+  .desk-cover__names {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .desk-cover__jp {
+    margin: 0;
+    font-family: var(--font-jp);
+    font-size: var(--fs-display);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .desk-cover__name { font-size: var(--fs-title); color: var(--text-secondary); }
+  .desk-toc {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    max-width: var(--card-w);
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+  }
+  .desk-toc__part {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--sp-1) var(--sp-4);
+    padding: var(--sp-4) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .desk-toc__jp { font-family: var(--font-jp); font-size: var(--fs-body); font-weight: 700; }
+  .desk-toc__fr {
+    min-width: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-toc__n {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-toc__how {
+    grid-column: 2 / -1;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-cover__notes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    text-align: center;
+  }
+  .desk-cover__go {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-4);
+    width: 100%;
+    max-width: var(--desk-side-w);
+    margin-top: auto;
+  }
+  .desk-cover__last {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-cover__last > b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+  /* The side: the clock and the count over the answer sheet, the way
+     out of the paper at its foot. */
+  .desk-clock {
+    flex: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    row-gap: var(--sp-3);
+  }
+  .desk-clock > .exam-timer { font-size: var(--fs-display); line-height: 1; }
+  .desk-clock__wait { color: var(--text-secondary); }
+  .desk-clock__count {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--sp-1);
+  }
+  .desk-clock__count > b {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-clock__count small { font-size: var(--fs-sm); color: var(--text-secondary); }
+  .desk-clock__time {
+    grid-column: 1 / -1;
+    height: 4px;
+    border-radius: var(--r-pill);
+    background: var(--surface-line);
+    overflow: hidden;
+  }
+  .desk-clock__time > i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--text-secondary);
+  }
+  .desk-clock__time--low > i { background: var(--warning); }
+  .desk-exam__finish { flex: none; margin-top: auto; }
+
+  /* The answer sheet (解答用紙): a part under its plate and name, its
+     rows reading down two columns, a row the question's number and its
+     ovals. */
+  .desk-marksheet {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .desk-mark {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .desk-mark__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding-bottom: var(--sp-2);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .desk-mark--here .desk-mark__head { border-bottom-color: var(--exam-ink); }
+  .desk-mark__jp { font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; }
+  .desk-mark__fr {
+    min-width: 0;
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-mark__fig {
+    margin-inline-start: auto;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .desk-mark__low { color: color-mix(in srgb, var(--danger) 45%, var(--text-primary)); }
+  .desk-mark__rows {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* --rows is the part's own, set on the element (DeskSheet). */
+    grid-template-rows: repeat(var(--rows, 1), 28px);
+    grid-auto-flow: column;
+    gap: var(--sp-1) var(--sp-4);
+  }
+  .desk-mark-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    height: 28px;
+    padding: 0 var(--sp-2);
+    border-radius: var(--r-plate);
+    color: inherit;
+    text-decoration: none;
+  }
+  .desk-mark-row__n {
+    flex: none;
+    width: 22px;
+    margin-inline-end: var(--sp-1);
+    padding: 0;
+    background: none;
+    border: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    text-align: right;
+  }
+  button.desk-mark-row__n:hover,
+  button.desk-mark-row__n:focus-visible { color: var(--text-primary); filter: none; }
+  .desk-oval {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 23px;
+    padding: 0;
+    background: none;
+    border: 1.5px solid var(--text-secondary);
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-secondary);
+  }
+  button.desk-oval:not(.desk-oval--on):hover,
+  button.desk-oval:not(.desk-oval--on):focus-visible {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    filter: none;
+  }
+  /* Filled as the page's ovals are: the pencil's mark, and on the
+     marked sheet the verdict's. */
+  .desk-oval--on {
+    background: var(--text-primary);
+    border-color: var(--text-primary);
+    color: var(--bg-main);
+  }
+  .desk-oval--got {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--bg-main);
+  }
+  .desk-oval--x {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: var(--text-on-panel);
+  }
+  .desk-oval--right {
+    border: 2px solid var(--success);
+    color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+  }
+  .desk-mark-row__flag { margin-inline-start: auto; color: var(--accent2); }
+  .desk-mark-row--here {
+    background: var(--sel-wash);
+    box-shadow: inset 0 0 0 1px var(--sel-line);
+  }
+  .desk-mark-row--here .desk-mark-row__n { color: var(--sel-ink); }
+  /* Owed while the hand-in asks, and on the marked sheet left blank:
+     the ovals dashed in the warning's ink, the answer ringed. */
+  .desk-mark-row--owe .desk-mark-row__n { color: color-mix(in srgb, var(--warning) 60%, var(--text-primary)); }
+  .desk-mark-row--owe .desk-oval:not(.desk-oval--right) {
+    border-style: dashed;
+    border-color: var(--warning);
+    color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+  }
+  .desk-marksheet--marked .desk-mark-row:hover,
+  .desk-marksheet--marked .desk-mark-row:focus-visible { background: var(--bg-card-hover); }
+  .desk-marksheet--marked .desk-mark-row:focus-visible { outline: 2px solid var(--accent2); outline-offset: 1px; }
+  .desk-marksheet--marked .desk-mark-row--here:is(:hover, :focus-visible) { background: var(--sel-wash); }
+  /* The hand-in, asked in the sheet itself: the blanks to go back to,
+     what a blank costs, the way back first. */
+  .desk-handin {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    margin-top: auto;
+    padding: var(--sp-4);
+    border: 1px solid var(--warning);
+    border-radius: var(--r-card);
+  }
+  .desk-handin__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .desk-handin__title {
+    margin: 0;
+    font-size: var(--fs-body);
+    font-weight: 700;
+  }
+  .desk-handin__x {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--text-secondary);
+  }
+  .desk-handin__x:hover,
+  .desk-handin__x:focus-visible { color: var(--text-primary); filter: none; }
+  .desk-handin__blanks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .desk-handin__blank {
+    min-width: 32px;
+    height: 28px;
+    padding: 0 var(--sp-2);
+    background: none;
+    border: 1.5px dashed var(--warning);
+    border-radius: var(--r-plate);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+  }
+  .desk-handin__blank:hover,
+  .desk-handin__blank:focus-visible {
+    border-style: solid;
+    background: color-mix(in srgb, var(--warning) 12%, transparent);
+    filter: none;
+  }
+  .desk-handin__note {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-handin__row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+
+  /* ── the result: the sheet marked, beside the question's page ── */
+  .desk-split--res { grid-template-columns: 420px minmax(0, 1fr); }
+  .desk-res__sheet {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    text-align: left;
+  }
+  .desk-res__paper {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    font-size: var(--fs-body);
+  }
+  .desk-score {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .desk-score__figs {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-score__fig { font-size: var(--fs-display); line-height: 1; }
+  .desk-score__of { font-size: var(--fs-title); font-weight: 700; color: var(--text-secondary); }
+  .desk-score__pct {
+    margin-inline-start: auto;
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+  }
+  .desk-score__pct--low { color: color-mix(in srgb, var(--danger) 45%, var(--text-primary)); }
+  .desk-score__bar {
+    position: relative;
+    height: 8px;
+    border-radius: var(--r-pill);
+    background: var(--surface-line);
+  }
+  .desk-score__bar > i {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    border-radius: inherit;
+    background: var(--success);
+  }
+  .desk-score__bar > i.desk-score__low { background: var(--danger); }
+  .desk-score__tick {
+    position: absolute;
+    top: -5px;
+    bottom: -5px;
+    width: 2px;
+    background: var(--text-primary);
+  }
+  .desk-score__cap {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .desk-score__time {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .desk-score__time > small { font-weight: 600; color: var(--text-secondary); }
+  .desk-res__acts {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sp-3);
+  }
+  .desk-res__acts > .btn-primary { min-width: 240px; }
+
+  /* The short desk (plan 169): the page's air a rung less, so its foot
+     stands above the level bar on a laptop's 650px. */
+  @media (max-height: 799px) {
+    .desk-exam { gap: var(--sp-4); }
+    .desk-book__body {
+      gap: var(--sp-6);
+      padding: var(--sp-6) var(--sp-8);
+    }
+    .desk-spread__text,
+    .desk-spread__ask { padding: var(--sp-6); }
+    .desk-cover {
+      gap: var(--sp-5);
+      padding: var(--sp-6) var(--sp-8);
+    }
   }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */
