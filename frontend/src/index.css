@@ -4738,12 +4738,10 @@ textarea:focus-visible {
 
 /* ── 辻, struck into a pass, filling with the XP ──
    (components/offers/StruckMark.jsx) The bar clipping 辶 grows from
-   its foot to the share of the level climbed; 十 never fills, bar in the
-   level-up (plan 200). */
+   its foot to the share of the level climbed, and 十's bar rises on the
+   same line, in 十's own units (--ofr-xp-cross, set beside --ofr-xp). */
 .ofr-mark { display: block; }
 .ofr-mark__bar { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(var(--ofr-xp, 0)); }
-/* 十's bar (plan 200) exists only where a mark asks for `fillCross`, the
-   level-up's, and is empty at rest: nothing but its animation raises it. */
 .ofr-mark__bar--cross { transform: scaleY(var(--ofr-xp-cross, 0)); }
 .ofr-mark--etched { filter: drop-shadow(0 0.8px 0 rgba(255, 255, 255, 0.75)); }
 .ofr-mark--etched .ofr-mark__xp { opacity: 0.72; }
@@ -6134,6 +6132,7 @@ textarea:focus-visible {
 }
 /* The Pro side's 辻 fills as the card arrives; the turn keeps it. */
 .ofr-turn__face--pro .ofr-mark__bar { animation: ofr-turn-xp 8s cubic-bezier(0.3, 0.7, 0.3, 1) infinite both; }
+.ofr-turn__face--pro .ofr-mark__bar--cross { animation-name: ofr-turn-xp-cross; }
 @keyframes ofr-turn-hold { 0% { opacity: 0; } 6%, 95% { opacity: 1; } 99%, 100% { opacity: 0; } }
 @keyframes ofr-turn-flip {
   0% { transform: translateY(-12px) scale(1) rotateY(0deg) rotateX(0deg); }
@@ -6165,6 +6164,7 @@ textarea:focus-visible {
   76%, 100% { transform: skewX(-14deg) translateX(380px); }
 }
 @keyframes ofr-turn-xp { 0%, 5% { transform: scaleY(0); } 18%, 100% { transform: scaleY(var(--ofr-xp, 0)); } }
+@keyframes ofr-turn-xp-cross { 0%, 5% { transform: scaleY(0); } 18%, 100% { transform: scaleY(var(--ofr-xp-cross, 0)); } }
 
 /* 3C · what changes, as a hairline lattice: Max's column empty until
    the pass lands, then each figure revealed as its row lights. The
@@ -20610,7 +20610,8 @@ html {
   100% { transform: none; }
 }
 /* 辶 fills, is held full, empties, then takes what the new level
-   already holds (--levelup-to, a share). */
+   already holds (--levelup-to, a share; 十's is --levelup-to-cross, the
+   same line in its own units). */
 .levelup .pcf__seal .ofr-mark__bar { animation: levelup-fill 3000ms linear both; }
 @keyframes levelup-fill {
   0%, 18.33% { transform: scaleY(0); animation-timing-function: cubic-bezier(0.45, 0, 0.85, 0.65); }
@@ -20620,12 +20621,14 @@ html {
   100% { transform: scaleY(var(--levelup-to, 0)); }
 }
 /* 十 (plan 200): from its foot up as the road reaches it, full at 2.20s,
-   emptied with the road and left empty. The same ease as the road's. */
+   emptied with the road and left where the new level's line stands. The
+   same ease as the road's. */
 .levelup .pcf__seal .ofr-mark__bar--cross { animation: levelup-fill-cross 3000ms linear both; }
 @keyframes levelup-fill-cross {
   0%, 48.33% { transform: scaleY(0); animation-timing-function: cubic-bezier(0.45, 0, 0.85, 0.65); }
   73.33%, 78.33% { transform: scaleY(1); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
-  91.67%, 100% { transform: scaleY(0); }
+  91.67% { transform: scaleY(0); }
+  100% { transform: scaleY(var(--levelup-to-cross, 0)); }
 }
 /* The road lit as it fills, a flash when it is full. */
 .levelup .pcf__seal { animation: levelup-glow 3000ms linear both; }
@@ -20717,7 +20720,7 @@ html {
   .levelup__shake,
   .levelup .pcf__seal { animation: none; }
   .levelup .pcf__seal .ofr-mark__bar { animation: none; transform: scaleY(var(--levelup-to, 0)); }
-  .levelup .pcf__seal .ofr-mark__bar--cross { animation: none; transform: scaleY(0); }
+  .levelup .pcf__seal .ofr-mark__bar--cross { animation: none; transform: scaleY(var(--levelup-to-cross, 0)); }
   .levelup__burst { display: none; }
   .levelup__was { animation: levelup-gone 160ms ease 800ms forwards; }
   .levelup__now { opacity: 0; animation: levelup-shown 160ms ease 880ms forwards; }

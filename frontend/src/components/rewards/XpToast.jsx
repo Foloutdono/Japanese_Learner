@@ -4,6 +4,7 @@ import { useLang } from '../../LangContext'
 import { playFareTick, playLevelCharge, playLevelBurst, FARE_BEAT } from '../../lib/audio'
 import { rewardTier } from '../../domain/rewardTier'
 import { cardTier, xpClimb } from '../../domain/passCard'
+import { crossShare } from '../offers/markParts'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useCredits } from '../../stores/credits'
 import { CardFace } from '../pass/PassCard'
@@ -27,8 +28,9 @@ import { isDesk } from '../../hooks/useDesk'
 //          the card trembling harder the fuller it gets, and as the road
 //          nears full the crossing 十 it leads to fills too (plan 200);
 //          full, the whole 辻 flashes and throws a ring and sparks out
-//          of the crossing; it empties in one breath and the level under
-//          the name rolls over to the next. Its sound is two voices on
+//          of the crossing; it empties in one breath, refills to what
+//          the new level already holds, and the level under the name
+//          rolls over to the next. Its sound is two voices on
 //          the card's own animations (plan 200): the build from the
 //          fill's start, the burst from the ring's.
 //          Gone on its own a second after the new figure lands; it does
@@ -202,7 +204,7 @@ function RewardScene({ toast, dock, onDone }) {
       aria-live="polite"
       onAnimationStart={onStart}
       onAnimationEnd={onExitEnd}
-      style={{ '--levelup-to': newShare(summary) }}
+      style={{ '--levelup-to': newShare(summary), '--levelup-to-cross': crossShare(newShare(summary)) }}
     >
       <span className="sr-only">{`${t.levelUp} ${t.level} ${level}`}</span>
       <div className="levelup__shake">
@@ -211,7 +213,6 @@ function RewardScene({ toast, dock, onDone }) {
           name={summary?.username ?? ''}
           level={level}
           share={0}
-          fillCross
           className="levelup__card"
           levelSlot={(
             <span className="levelup__num">
