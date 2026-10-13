@@ -268,12 +268,16 @@ function mark(ctx, x, y, size, ink, road) {
   ctx.restore()
 }
 
-/** The primary button, the metal: the gate's gold lit from the top. */
-function metal(ctx, p, cx, y, label) {
-  const f = font(700, FS.lead, 'latin')
-  const arrow = FS.lead * 0.9
-  const w = measure(ctx, label, f) + arrow + SP[4] + SP[7] * 2
-  const h = 44 * K
+/** The primary button, the metal: the gate's gold lit from the top, its
+ *  label set smaller rather than wider than `maxW`. */
+const METAL_H = 44 * K
+function metal(ctx, p, cx, y, label, maxW = Infinity) {
+  const widthAt = z => measure(ctx, label, font(700, z, 'latin')) + z * 0.9 + SP[4] + SP[7] * 2
+  const size = [FS.lead, FS.body, FS.sm].find(z => widthAt(z) <= maxW) || FS.sm
+  const f = font(700, size, 'latin')
+  const arrow = size * 0.9
+  const w = widthAt(size)
+  const h = METAL_H
   const x = cx - w / 2
   const g = ctx.createLinearGradient(0, y, 0, y + h)
   g.addColorStop(0, p.goldLit)
@@ -284,7 +288,7 @@ function metal(ctx, p, cx, y, label) {
   ctx.fillStyle = g
   ctx.fill()
   ctx.restore()
-  const tw = text(ctx, label, x + SP[7], y + h / 2 + FS.lead * 0.36, { f, color: p.onFill })
+  const tw = text(ctx, label, x + SP[7], y + h / 2 + size * 0.36, { f, color: p.onFill })
   chevron(ctx, x + SP[7] + tw + SP[4], y + h / 2, arrow, p.onFill)
   return h
 }
@@ -516,6 +520,6 @@ export const hasKanji = text => /[\u3400-\u9fff々]/.test(text)
 
 export {
   FS, SP, R, TR, EDGE, RING, ASC, FAMILY, alpha, shadow, noShadow, rrect, measure, text, caption, wrap, balance, fit,
-  paragraph, paragraphH, roundel, mark, metal, chevron, units, layoutSentence, drawSentence, lineOf, frame, ground,
+  paragraph, paragraphH, roundel, mark, metal, METAL_H, chevron, units, layoutSentence, drawSentence, lineOf, frame, ground,
   masthead, heading, pageMark, pages, strokeBox, marked, stamp,
 }

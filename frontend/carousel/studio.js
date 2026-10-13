@@ -32,7 +32,7 @@ const DEFAULTS = {
   source: 'sentence', level: 'N5', kanaSet: 'hiragana', ids: { sentence: 'N5.4', translation: 'N5.4' },
   view: 'compare', type: 'plates', format: 'post', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
-  picks: {}, types: {}, ending: 'map',
+  picks: {}, types: {}, ending: 'mark',
 }
 const state = load()
 const files = new Map()

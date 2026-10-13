@@ -21,7 +21,7 @@
 import {
   FS, SP, R, TR, EDGE, RING, ASC, FORMATS, palette, font, alpha, shadow, noShadow, rrect, measure, text, caption,
   fit, wrap, paragraph, paragraphH, roundel, mark, metal, chevron, layoutSentence, drawSentence, lineOf, frame,
-  ground, masthead, heading, pageMark, pages, strokeBox, marked, stamp,
+  ground, masthead, heading, pageMark, pages, strokeBox, marked, stamp, METAL_H,
 } from './draw.js'
 import { RATINGS_JP, formOf, tr, weldIf } from './strings.js'
 import { picked } from './sources.js'
@@ -843,7 +843,7 @@ const KINDS = {
   },
 
   /** 終点: the post's last slide, in the ending the studio picked. */
-  outro(c) { (ENDINGS[c.ending] || ENDINGS.map)(c) },
+  outro(c) { (ENDINGS[c.ending] || ENDINGS.mark)(c) },
 
   /** 模試's cover: the paper's name, its level, its sections, a name to fill in. */
   cover(c, s) {
@@ -1192,7 +1192,7 @@ function pointSlide(c, s, name, howCaption) {
 }
 
 
-// ── Endings: the last slide, in six designs to pick from (plan 200d) ──
+// ── Endings: the last slide, in eight designs to pick from (plans 200d, 200e) ──
 // Each closes on the source's own station and what its line teaches, in
 // figures the bank counts (index.json), and asks for what the type asks
 // (a score after an exam, a save after a list).
@@ -1243,6 +1243,81 @@ function icon(ctx, kind, cx, cy, s, color) {
   }
   ctx.stroke()
   ctx.restore()
+}
+
+/** The way to follow, as the metal says it: short, the handle in it.
+ *  The mark's three endings close on it (plan 200e). */
+const followOf = plan => weldIf(plan.lang, plan.t.end.followShort(plan.handle))
+
+/** Today's stop as a plate the app would print: the line's rail down its
+ *  left edge, the code in the line's roundel, the station's name over its
+ *  reading, what it does in the slide's language. */
+function stopPlate(c, color, maxW) {
+  const { ctx, p, ink, ink2 } = c
+  const st = c.plan.station
+  const rail = EDGE * 2.4
+  const pad = SP[6]
+  const at = z => {
+    const jf = font(900, z, 'serif')
+    const kf = font(500, Math.max(FS.xs, z * 0.42), 'jp')
+    const lf = font(700, Math.max(FS.sm, z * 0.66), 'latin')
+    const r = z * 0.62
+    const textW = Math.max(measure(ctx, st.jp, jf), measure(ctx, st.kana, kf))
+    const w = rail + pad + r * 2 + SP[5] + textW + SP[5] + measure(ctx, st.name, lf) + pad
+    return { z, jf, kf, lf, r, w, h: z * 2.3 }
+  }
+  const L = [FS.title * 1.1, FS.title, FS.lead, FS.body].map(at).find(x => x.w <= maxW) || at(FS.body)
+  return {
+    w: L.w,
+    h: L.h,
+    draw(x, y) {
+      ctx.save()
+      shadow(ctx, p.hang)
+      ctx.fillStyle = c.dark ? p.card : p.surface
+      rrect(ctx, x, y, L.w, L.h, R.plate)
+      ctx.fill()
+      ctx.restore()
+      ctx.save()
+      rrect(ctx, x, y, L.w, L.h, R.plate)
+      ctx.clip()
+      ctx.fillStyle = color
+      ctx.fillRect(x, y, rail, L.h)
+      ctx.restore()
+      const cy = y + L.h / 2
+      let at2 = x + rail + pad
+      roundel(ctx, at2 + L.r, cy, L.r, color, st.code, { ink: color, size: L.r * 0.7 })
+      at2 += L.r * 2 + SP[5]
+      const nameW = Math.max(measure(ctx, st.jp, L.jf), measure(ctx, st.kana, L.kf))
+      const kz = Math.max(FS.xs, L.z * 0.42)
+      text(ctx, st.kana, at2 + nameW / 2, cy - L.z * 0.42, { f: L.kf, color: ink2, align: 'center' })
+      text(ctx, st.jp, at2 + nameW / 2, cy + L.z * 0.56 + kz * 0.2, { f: L.jf, color: ink, align: 'center' })
+      at2 += nameW + SP[5]
+      text(ctx, st.name, at2, cy + Math.max(FS.sm, L.z * 0.66) * 0.36, { f: L.lf, color: ink2 })
+    },
+  }
+}
+
+/** Text set round a circle, one letter at a time: across the top it reads
+ *  left to right outside in, across the foot left to right inside out. */
+function arcText(ctx, str, cx, cy, r, mid, f, color, foot = false) {
+  const size = parseFloat(/([\d.]+)px/.exec(f)[1])
+  ctx.font = f
+  const chars = [...str]
+  const track = size * TR.caption
+  const widths = chars.map(ch => ctx.measureText(ch).width)
+  const total = (widths.reduce((a, b) => a + b, 0) + track * (chars.length - 1)) / r
+  let run = 0
+  chars.forEach((ch, i) => {
+    const off = (run + widths[i] / 2) / r
+    const a = foot ? mid + total / 2 - off : mid - total / 2 + off
+    ctx.save()
+    ctx.translate(cx + r * Math.cos(a), cy + r * Math.sin(a))
+    ctx.rotate(foot ? a - Math.PI / 2 : a + Math.PI / 2)
+    text(ctx, ch, 0, 0, { f, color, align: 'center' })
+    ctx.restore()
+    run += widths[i] + track
+  })
+  return total
 }
 
 const ENDINGS = {
@@ -1451,44 +1526,201 @@ const ENDINGS = {
     if (cta) paragraph(ctx, cta, f.x, y, ink2)
   },
 
-  /** 辻: the mark, large, the name, the line it closes on in its ring. */
+  /** 辻: the mark, large, and what its name means; today's stop on its
+   *  plate, the post's ask, and the metal to follow by. */
   mark(c) {
+    const { ctx, p, f, ink, ink2 } = c
+    const plan = c.plan
+    const t = plan.t
+    const color = p.line[plan.line] || p.line.reading
+    const tag = fit(ctx, weldIf(plan.lang, t.outro), { weight: 500, sizes: [FS.lead, FS.body], maxW: f.w * 0.86, maxLines: 2 })
+    const ask = c.cta ? fit(ctx, weldIf(plan.lang, c.cta), { sizes: [FS.title, FS.lead, FS.body], maxW: f.w, maxLines: 2 }) : null
+    const plate = stopPlate(c, color, f.w)
+    const nameH = FS.display * 0.72
+    const capH = FS.caption * 0.74
+    // What gives way when the room is short, before the mark goes small:
+    // the space between the groups, then the plate's caption, then the
+    // line under the name.
+    const ladder = [
+      { gap: SP[8], tag: true, today: true },
+      { gap: SP[7], tag: true, today: true },
+      { gap: SP[7], tag: true, today: false },
+      { gap: SP[7], tag: false, today: false },
+      { gap: SP[6], tag: false, today: false },
+    ]
+    const restOf = L => SP[7] + nameH + SP[5] + capH + (L.tag ? SP[6] + paragraphH(tag) : 0) + L.gap
+      + (L.today ? capH + SP[4] : 0) + plate.h + L.gap + (ask ? paragraphH(ask) + SP[6] : 0) + METAL_H
+    const most = Math.min(f.w * 0.4, f.h * 0.27)
+    const L = ladder.find(x => f.h - restOf(x) >= Math.min(most, f.h * 0.2)) || ladder[ladder.length - 1]
+    const rest = restOf(L)
+    const size = Math.max(f.h * 0.12, Math.min(most, f.h - rest))
+    let y = f.y + Math.max(0, (f.h - size - rest) / 2)
+    mark(ctx, f.cx - size / 2, y, size, ink, p.gold)
+    y += size + SP[7]
+    text(ctx, 'Tsuji', f.cx, y + nameH, { f: font(700, FS.display, 'latin'), color: ink, align: 'center' })
+    y += nameH + SP[5]
+    caption(ctx, `つじ · ${t.end.crossroads}`, f.cx, y + capH, ink2, 'center')
+    y += capH
+    if (L.tag) y += SP[6] + paragraph(ctx, tag, f.cx, y + SP[6], ink2, 'center')
+    y += L.gap
+    if (L.today) {
+      caption(ctx, t.end.today, f.cx, y + capH, color, 'center')
+      y += capH + SP[4]
+    }
+    plate.draw(f.cx - plate.w / 2, y)
+    y += plate.h + L.gap
+    if (ask) y += paragraph(ctx, ask, f.cx, y, ink, 'center') + SP[6]
+    metal(ctx, p, f.cx, y, followOf(plan), f.w)
+  },
+
+  /** 辻 is a crossroads: the mark in its hub, every line of the app out of
+   *  it to its station, the post's own drawn full, and the gold road down
+   *  to the way in, as the Welcome draws it. */
+  cross(c) {
+    const { ctx, p, f, ink, ink2 } = c
+    const plan = c.plan
+    const t = plan.t
+    const ask = fit(ctx, weldIf(plan.lang, c.cta || t.outro), { sizes: [FS.heading, FS.title, FS.lead], maxW: f.w, maxLines: 3, lh: 1.1 })
+    const capH = FS.caption * 0.74
+    const foot = METAL_H + SP[6] + capH
+    const stops = plan.map.flatMap(L => L.stops).filter(st => st.pig)
+    // Room for the drawing: what the ask and the foot leave.
+    const room = f.h - paragraphH(ask, 1.1) - foot - SP[8] * 2
+    const labelZ = FS.lead * 0.92
+    const hereZ = FS.title * 1.05
+    const half = Math.min(f.w / 2, room / 2)
+    // The hub and the roads scale together with the room.
+    const reach = half - Math.max(hereZ * 2.2, labelZ * 2.6) / 2 - SP[3]
+    const hr = Math.min(f.w * 0.13, reach * 0.36)
+    const end = reach
+    let y = f.y + Math.max(0, (f.h - paragraphH(ask, 1.1) - SP[8] - half * 2 - SP[8] - foot) / 2)
+    y += paragraph(ctx, ask, f.cx, y, ink, 'center', 1.1) + SP[8]
+    const cx = f.cx
+    const cy = y + half
+    const gap = 0.62
+    const from = Math.PI / 2 + gap
+    const span = Math.PI * 2 - gap * 2
+    ctx.lineCap = 'round'
+    stops.forEach((st, i) => {
+      const a = from + (span * i) / Math.max(1, stops.length - 1)
+      const col = p.line[st.pig]
+      const here = st.here
+      const cos = Math.cos(a), sin = Math.sin(a)
+      ctx.strokeStyle = col
+      ctx.lineWidth = here ? EDGE * 3.2 : EDGE * 1.5
+      ctx.beginPath()
+      ctx.moveTo(cx + cos * (hr + SP[2]), cy + sin * (hr + SP[2]))
+      ctx.lineTo(cx + cos * end, cy + sin * end)
+      ctx.stroke()
+      ctx.beginPath()
+      if (here) {
+        ctx.arc(cx + cos * end, cy + sin * end, 17, 0, Math.PI * 2)
+        ctx.fillStyle = p.bg
+        ctx.fill()
+        ctx.lineWidth = 8
+        ctx.stroke()
+      } else {
+        ctx.arc(cx + cos * end, cy + sin * end, 9, 0, Math.PI * 2)
+        ctx.fillStyle = col
+        ctx.fill()
+      }
+      // The station's name beyond the end of its road, clear of it.
+      const z = here ? hereZ : labelZ
+      const lf = font(here ? 900 : 700, z, 'serif')
+      const w = measure(ctx, st.jp, lf)
+      const h = z * 0.9
+      const out = Math.min(w / 2 / Math.max(0.001, Math.abs(cos)), h / 2 / Math.max(0.001, Math.abs(sin))) + (here ? SP[4] : SP[3])
+      const lx = cx + cos * (end + out)
+      const ly = cy + sin * (end + out)
+      text(ctx, st.jp, lx, ly + z * 0.36, { f: lf, color: here ? ink : ink2, align: 'center' })
+    })
+    // The gold road, down to the way in.
+    const by = cy + half + SP[8]
+    ctx.strokeStyle = p.gold
+    ctx.lineWidth = EDGE * 3.2
+    ctx.beginPath()
+    ctx.moveTo(cx, cy + hr + SP[2])
+    ctx.lineTo(cx, by)
+    ctx.stroke()
+    // 辻 in its hub.
+    ctx.beginPath()
+    ctx.arc(cx, cy, hr, 0, Math.PI * 2)
+    ctx.fillStyle = p.bg
+    ctx.fill()
+    ctx.lineWidth = EDGE * 2.4
+    ctx.strokeStyle = ink
+    ctx.stroke()
+    const ms = hr * 1.25
+    mark(ctx, cx - ms / 2, cy - ms / 2, ms, ink, p.gold)
+    metal(ctx, p, cx, by, followOf(plan), f.w)
+    caption(ctx, `Tsuji · つじ · ${t.end.crossroads}`, cx, by + METAL_H + SP[6] + capH, ink2, 'center')
+  },
+
+  /** 駅スタンプ: the station's stamp, collected, in its line's ink, the
+   *  mark at its heart. */
+  stamp(c) {
     const { ctx, p, f, ink, ink2 } = c
     const plan = c.plan
     const t = plan.t
     const st = plan.station
     const color = p.line[plan.line] || p.line.reading
-    const tag = fit(ctx, weldIf(plan.lang, t.outro), { sizes: [FS.title, FS.lead], maxW: f.w * 0.9, maxLines: 2 })
-    const cta = ctaOf(c, [FS.lead, FS.body])
-    const pillH = FS.lead * 2.1
-    const rest = SP[7] + FS.display + SP[5] + paragraphH(tag) + SP[8] + pillH + (cta ? SP[7] + paragraphH(cta) : 0) + (plan.handle ? SP[6] + FS.title : 0)
-    // The mark gives way to the words under it.
-    const size = Math.max(f.h * 0.14, Math.min(f.w * 0.44, f.h * 0.3, f.h - rest))
-    const total = size + rest
-    let y = f.y + Math.max(0, (f.h - total) / 2)
-    mark(ctx, f.cx - size / 2, y, size, ink, p.gold)
-    y += size + SP[7]
-    text(ctx, 'Tsuji', f.cx, y + FS.display * 0.8, { f: font(700, FS.display, 'latin'), color: ink, align: 'center' })
-    y += FS.display + SP[5]
-    y += paragraph(ctx, tag, f.cx, y, ink2, 'center') + SP[8]
-    // The station it closes on: its code in a ring, its name, in its pigment.
-    const jf = font(700, FS.lead, 'serif')
-    const lf = font(700, FS.body, 'latin')
-    const label = st.name
-    const r = pillH * 0.32
-    const w = r * 2 + SP[4] + measure(ctx, st.jp, jf) + SP[4] + measure(ctx, label, lf) + SP[6] * 2
-    const px = f.cx - w / 2
+    const got = fit(ctx, weldIf(plan.lang, t.end.stamped(st.jp)), { sizes: [FS.title, FS.lead], maxW: f.w, maxLines: 2 })
+    const ask = c.cta ? fit(ctx, weldIf(plan.lang, c.cta), { weight: 500, sizes: [FS.lead, FS.body], maxW: f.w, maxLines: 2 }) : null
+    const capH = FS.caption * 0.74
+    const rest = capH + SP[7] + SP[8] + paragraphH(got) + (ask ? SP[5] + paragraphH(ask) : 0) + SP[7] + METAL_H
+    const rs = Math.max(f.w * 0.24, Math.min(f.w * 0.4, (f.h - rest) / 2))
+    let y = f.y + Math.max(0, (f.h - rs * 2 - rest) / 2)
+    caption(ctx, `記念スタンプ · ${t.end.stamp}`, f.cx, y + capH, ink2, 'center')
+    y += capH + SP[7]
+    const cx = f.cx
+    const cy = y + rs
+    ctx.save()
+    ctx.translate(cx, cy)
+    ctx.rotate(-0.07)
+    ctx.globalAlpha = 0.94
     ctx.strokeStyle = color
-    ctx.lineWidth = RING
-    rrect(ctx, px + RING / 2, y + RING / 2, w - RING, pillH - RING, pillH / 2)
+    ctx.lineWidth = rs * 0.045
+    ctx.beginPath()
+    ctx.arc(0, 0, rs - ctx.lineWidth / 2, 0, Math.PI * 2)
     ctx.stroke()
-    roundel(ctx, px + SP[6] + r, y + pillH / 2, r, color, st.code, { ink: color, size: r * 0.72 })
-    const jx = px + SP[6] + r * 2 + SP[4]
-    const jw = text(ctx, st.jp, jx, y + pillH / 2 + FS.lead * 0.36, { f: jf, color: ink })
-    text(ctx, label, jx + jw + SP[4], y + pillH / 2 + FS.body * 0.36, { f: lf, color: ink2 })
-    y += pillH
-    if (cta) { y += SP[7]; y += paragraph(ctx, cta, f.cx, y, ink2, 'center') }
-    if (plan.handle) text(ctx, plan.handle, f.cx, y + SP[6] + FS.title * 0.8, { f: font(700, FS.title, 'latin'), color: p.gold, align: 'center' })
+    const band = rs * 0.2
+    const inner = rs * 0.93 - band
+    ctx.lineWidth = rs * 0.014
+    ctx.beginPath()
+    ctx.arc(0, 0, rs * 0.93, 0, Math.PI * 2)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.arc(0, 0, inner, 0, Math.PI * 2)
+    ctx.stroke()
+    // Round the band: the station's name over, Tsuji under, a dot either side.
+    const bz = Math.max(FS.sm, band * 0.5)
+    const bf = font(700, bz, 'latin')
+    const mid = (rs * 0.93 + inner) / 2
+    const topText = st.name.toLocaleUpperCase()
+    let topZ = bz
+    while (topZ > FS.xs && (() => { ctx.font = font(700, topZ, 'latin'); return [...topText].reduce((w, ch) => w + ctx.measureText(ch).width, 0) + topZ * TR.caption * topText.length > mid * Math.PI * 0.8 })()) topZ -= 1
+    arcText(ctx, topText, 0, 0, mid - topZ * 0.36, -Math.PI / 2, font(700, topZ, 'latin'), color)
+    const footText = plan.level ? `TSUJI · ${String(plan.level).toLocaleUpperCase()}` : 'TSUJI'
+    arcText(ctx, footText, 0, 0, mid + bz * 0.36, Math.PI / 2, bf, color, true)
+    for (const a of [0, Math.PI]) {
+      ctx.beginPath()
+      ctx.arc(Math.cos(a) * mid, Math.sin(a) * mid, band * 0.12, 0, Math.PI * 2)
+      ctx.fillStyle = color
+      ctx.fill()
+    }
+    // The heart: the mark, the station under it.
+    const ms = inner * 0.98
+    mark(ctx, -ms / 2, -inner * 0.82, ms, color, p.gold)
+    const nz = Math.min(inner * 0.36, FS.heading)
+    const nameTxt = `${st.jp}駅`
+    let z = nz
+    while (z > FS.title * 0.8 && measure(ctx, nameTxt, font(900, z, 'serif')) > inner * 1.5) z -= 2
+    text(ctx, nameTxt, 0, inner * 0.62, { f: font(900, z, 'serif'), color, align: 'center' })
+    ctx.restore()
+    y += rs * 2 + SP[8]
+    y += paragraph(ctx, got, f.cx, y, ink, 'center')
+    if (ask) { y += SP[5]; y += paragraph(ctx, ask, f.cx, y, ink2, 'center') }
+    metal(ctx, p, f.cx, y + SP[7], followOf(plan), f.w)
   },
 
   /** What to do with the post, large, and the three ways to do it. */
@@ -2036,7 +2268,7 @@ function ratingSlide(ctx, p, fr, plan) {
 
 // ── The directions and their decks ────────────────────────────
 // The endings the studio offers, in the order it shows them.
-export const ENDING_IDS = ['map', 'pass', 'mark', 'cta', 'terminus', 'plate']
+export const ENDING_IDS = ['mark', 'cross', 'stamp', 'map', 'pass', 'cta', 'terminus', 'plate']
 /** One ending of a plan, for the studio's row of endings to pick from. */
 export function endingSlide(id, type, plan, fmt, opts) {
   const fr = frame(fmt)

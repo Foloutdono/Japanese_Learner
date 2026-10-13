@@ -1,4 +1,4 @@
-# The carousel studio (plans 200, 200b, 200c, 200d)
+# The carousel studio (plans 200, 200b, 200c, 200d, 200e)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -43,14 +43,18 @@ the content for (the studio greys out the others).
 Every type ends on the source's own station, what its line teaches in
 figures counted from the content (`bank/index.json`), and a call to
 action fitted to the type ("How many out of 3?" after an exam). How it
-says so is picked in the studio, from six endings drawn side by side
-under the deck (終点, "Last slide"):
+says so is picked in the studio, from eight endings drawn side by side
+under the deck (終点, "Last slide"). The first three are the mark's,
+each closing on the metal (the gold button: "Follow @handle"), and the
+first is the default:
 
 | Ending | Draws |
 | --- | --- |
+| The mark | 辻 large, its name and what it means (つじ, a crossroads), today's stop on a plate (its line's rail, its code in the line's roundel, its name over its reading), the post's ask |
+| Crossroads | 辻 in its hub, every line of the app out of it to its station in its pigment, the post's own drawn full and its name set large, and the gold road down to the metal, as the Welcome draws it |
+| Station stamp (駅スタンプ) | the station's stamp collected, in its line's ink: its name and Tsuji round the band, the mark and 〜駅 at its heart |
 | Route map (路線図) | the app's two lines out of 辻, 学習 and 実践, every station on them in its pigment, the source's ringed and marked "you are here" |
 | Commuter pass (定期券) | a pass from 辻 to the source's station, in its line's colour: valid N5 → N1, the line, the holder (the handle) |
-| The mark | 辻 large, the name and what the app is, the station in its ring |
 | Call to action | the type's ask large, then save, send, follow, each with its icon |
 | Terminus (終点) | the train's last word, 終点です。ご乗車ありがとうございました。, on a dark panel |
 | Station plate | the source's 駅名標: its reading, its code, the stations either side |
