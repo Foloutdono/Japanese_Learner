@@ -826,18 +826,33 @@ stage, not a new idiom:
 - **A track of stops at the head**, drawn in the line's pigment: where
   you are keeps the line's colour (the boarding's own track is the pass's
   gold, because the boarding is the learner's).
-- **One stop over its drawing**, the question set in the display face
-  bold at `--fs-title`, its pattern in the line's ink as Japanese.
+- **One card a stop** (一枚, plan 206, the owner's pick B of the canvas
+  "Tsuji — the tour, fuller"). The stops used to hang from the head in
+  boxes of one weight over an empty middle; each stop is now one card,
+  the run's own surface, taking the room between the track and the gate
+  as the study card does on a phone. Its **head** asks (the question in
+  the display face bold at `--fs-lead`, its pattern in the line's ink as
+  Japanese, a twist's notion or a question's kind over it); its
+  **middle**, the one part that grows, holds what is asked about,
+  centred: the sentence at the practice card's size (`--fs-title` on a
+  phone, `--fs-heading` on the desk), its voice in the card's corner;
+  its **foot** is what the tour says back, over a hairline, never a box
+  of its own. **Found turns the card to the point**: what happened at
+  its head, the point at `--fs-display` over its shape (or its chain)
+  and the rule in its middle, its first example at its foot. The
+  results are one card too: the dial over the point, every question at
+  its foot. The choices stand **under** the card, never on it.
 - **The gate button at the foot** (`GateButton`), docked over the run's
   floor through `--dock-bottom`, the outline until a guess is picked. At
   the results the point's sheet is a row of its own over it (plan 194),
   which opens the lesson's sheet.
 - **A guess is a tile**: picked, it wears the selection's gold; a wrong
-  one is answered at once by the lesson's own line for that rival, in a
-  card with the state's ring (`--rating-wrong`) and never a fill; the
-  right one is ringed in `--success`. A hint after one miss, the rule
-  given after two (its head in the selection's ink, because it is given,
-  not found).
+  one is answered at once by the lesson's own line for that rival, at
+  the card's foot behind the state's ring (`--rating-wrong`), never a
+  fill; the right one is ringed in `--success`. A hint after one miss,
+  the rule given after two (its head in the selection's ink, because it
+  is given, not found). Where every choice is short -- a form, a word --
+  the tiles stand **in a row** (four as two by two), as the exam's do.
 - **Where the tour is written** (plan 187c), its stops join before the
   results, in the owner's order (plan 194): **the scene** (the point in
   context), then **« C'est pas tout ! »**, a stop per usage (plan 189: a
@@ -981,7 +996,9 @@ its landings draws the tiles it always did.
 On the desk (plan 187f, the owner's pick F) the tour stands on the runs'
 three panels. The stop is the middle, with no track of its own: its gate
 centred at the boarding's width and docked at the column's foot, its
-guesses two across. At the left, under the run's figures, the point and
+guesses two across. Its card is composed in the column's middle at a
+card's height (`min(340px, 50vh)` at least), the room shared above and
+below it, rather than drawn down the whole column (plan 206). At the left, under the run's figures, the point and
 its stops as one line. Each stop is a dot on a rail in the line's
 pigment, drawn 3px once it is behind, and says how it went: a check, the
 tries ("1 miss" in the wrong ink while the guess is still in hand, the
