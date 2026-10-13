@@ -321,7 +321,7 @@ def test_the_particles_the_detector_blanks_can_be_chosen_and_built():
         assert grammar_ladder.build_ok(level, pattern), pattern
     # は, が and も share too many sentences for the detector to blank one:
     # は marks none, and is asked from questions of its own instead
-    # (plan 200, study/grammar_choose.py), so it is chosen without the snapshot.
+    # (plan 201, study/grammar_choose.py), so it is chosen without the snapshot.
     assert not grammar_ladder.blank_ok("N5", "は")
     assert card_index.contrast_ok("N5", "は")
 
@@ -436,7 +436,7 @@ def test_a_card_is_asked_the_exercise_of_its_step(client, where, exercise, asked
 def test_a_point_with_no_marked_sentence_is_asked_from_its_own_questions(client):
     # は has no contrast sentence the detector can blank, and used to fall to
     # the flashcard on Choisir (and to the flashcard or fill_in on Construire).
-    # Plan 200: it carries questions of its own, so Choisir asks a real one.
+    # Plan 201: it carries questions of its own, so Choisir asks a real one.
     level, entry, raw_id = _point("は")
     _clear(raw_id)
     try:

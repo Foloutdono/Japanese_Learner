@@ -74,7 +74,7 @@ def contrast_ok(level: str, pattern: str) -> bool:
     which those neighbours are wrong that the drill can blank -- by the
     pattern's stems (verifiable, as fill_ok), or for a bare particle
     where the detector finds it once (grammar_ladder.can_blank, plan 190)
-    -- or the point must carry questions of its own (`choose`, plan 200).
+    -- or the point must carry questions of its own (`choose`, plan 201).
     Same reason this lives here as fill_ok: the pool and the denominator
     have to agree.
     """
@@ -83,7 +83,7 @@ def contrast_ok(level: str, pattern: str) -> bool:
         return False
     entry = found[1]
     if choose_items(entry):
-        # A point asked from questions of its own (plan 200): the gate
+        # A point asked from questions of its own (plan 201): the gate
         # holds them, so there is nothing to look up.
         return True
     if not verifiable(pattern):

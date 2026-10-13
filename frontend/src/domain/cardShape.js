@@ -121,7 +121,7 @@ export function cardShape(card) {
 }
 
 /**
- * What the tiles of a Choisir card are judged against (plan 200): the
+ * What the tiles of a Choisir card are judged against (plan 201): the
  * form an authored question names -- `contrast.answer`, what stands in its
  * hole -- else the point itself, which is the answer of every contrast on
  * patterns.

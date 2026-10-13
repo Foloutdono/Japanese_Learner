@@ -290,7 +290,7 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         contrast = contrast_payload(level, entry, grammar_list, lang, turn=turn)
         if contrast is None:
             return None
-        # An authored question (plan 200) carries the ruby of its own
+        # An authored question (plan 201) carries the ruby of its own
         # fillings; a contrast on patterns reads theirs from the catalogue.
         readings = contrast.pop("readings", None)
         payload["contrast"] = contrast

@@ -96,7 +96,7 @@ A finding proposes the corrected line with its evidence, as for an
 example sentence; the audit does not rewrite the scene (Rule 0), and a
 proposal must still pass `check_grammar`.
 
-**Choisir questions** (plan 200) ride along. A point the contrast drill
+**Choisir questions** (plan 201) ride along. A point the contrast drill
 cannot be drawn on is asked from its own `choose` list, which is in its
 grammar slice (whole entries) and beside its tour: a sentence with one
 hole, its translation printed under it, three or four fillings with the

@@ -1,5 +1,5 @@
 """
-Choisir on a point the contrast drill cannot be drawn on (plan 200).
+Choisir on a point the contrast drill cannot be drawn on (plan 201).
 
 The contrast drill (plan 087, 190) blanks the point out of a sentence its
 author marked and offers the point's rivals as the choices. That needs the

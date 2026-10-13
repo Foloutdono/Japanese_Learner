@@ -48,7 +48,7 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 | `compare` | every `pattern` is a real point (any level), never the entry itself. |
 | `examples` | each passes `study/grammar_sentence_gen.check_sentence`: 8–60 characters, ends in 。！？, kanji within the level (the pattern's own kanji excepted), and visibly contains the pattern. Distinct sentences. |
 | `contrast` | marks a sentence in which the rivals in `compare` are **wrong**; the contrast drill blanks the pattern in it and offers the rivals as choices. So the sentence must not also contain a rival, and the point must compare something. A bare particle may mark one too (plan 190): see "What the matcher can and cannot see". |
-| `choose` | optional, at least three questions: a point's own Choisir questions, for a point the contrast drill cannot be drawn on (plan 200). See "Choisir's own questions". |
+| `choose` | optional, at least three questions: a point's own Choisir questions, for a point the contrast drill cannot be drawn on (plan 201). See "Choisir's own questions". |
 
 ## The tour block (plan 187)
 
@@ -198,7 +198,7 @@ found most often:
   bought at the gates or the window, not on the train), and the figures
   add up.
 
-## Choisir's own questions (plan 200)
+## Choisir's own questions (plan 201)
 
 **Every point is asked in Choisir** (the ladder's first three steps and its
 relapse). The contrast drill draws its question from the point's marked
@@ -362,7 +362,7 @@ contrast rule reads those stems. Two consequences while writing `compare`:
 A pattern the matcher cannot check at all (a bare particle, a class label
 such as い形容詞／な形容詞) is not held to a contrast example: its lesson
 names the neighbours either way, and the point is asked from questions of its
-own instead (`choose`, above); since plan 200 a point with neither a marked
+own instead (`choose`, above); since plan 201 a point with neither a marked
 sentence the detector can blank nor `choose` fails the gate. It **may** still
 mark a contrast sentence (plan 190), and then the drill and the ladder's build
 blank it where the grammar detector finds it — exactly once, on one piece; the

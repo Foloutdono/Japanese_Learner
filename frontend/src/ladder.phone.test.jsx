@@ -141,7 +141,7 @@ describe('the ladder in the day’s queue, on a phone', () => {
     expect(root.querySelector('.gl-card').getBoundingClientRect().bottom).toBeLessThanOrEqual(dock.top + 1)
   }, 20000)
 
-  it('chooses on a question of its own inside the screen, the forms as tiles with their ruby (plan 200)', async () => {
+  it('chooses on a question of its own inside the screen, the forms as tiles with their ruby (plan 201)', async () => {
     const screen = await mount([card(ladder.authored)])
     await settle()
     const root = screen.container

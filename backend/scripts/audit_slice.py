@@ -368,7 +368,7 @@ def _placement_slices() -> list[dict]:
 def toured_points(level: str) -> list[dict]:
     """The level's points that carry a written tour (plan 187), each as
     the audit reads it: the point, its gloss and its rivals, the block --
-    and, where the point is asked from questions of its own (plan 200),
+    and, where the point is asked from questions of its own (plan 201),
     its `choose` list, which the tutorial's quiz is read beside."""
     return [
         {"pattern": p["pattern"], "meaning": p.get("meaning"), "structure": p.get("structure"),
@@ -431,7 +431,7 @@ CHECKS = {
         "Does each example actually use the point it illustrates, in the sense the lesson taught?",
         "Is the JLPT level defensible against the usual published lists?",
         "Does a `careful` step warn about a real trap rather than a made-up one?",
-        "Where the point carries `choose` (plan 200): is each question's right filling the ONLY one a native speaker would accept with the meaning its `tr` gives -- try every wrong filling written out in the sentence -- and is each `slips` entry really a form nobody says (not a clipped or colloquial form)?",
+        "Where the point carries `choose` (plan 201): is each question's right filling the ONLY one a native speaker would accept with the meaning its `tr` gives -- try every wrong filling written out in the sentence -- and is each `slips` entry really a form nobody says (not a clipped or colloquial form)?",
     ],
     "vocab": [
         "Is the reading right for this spelling, and is it the reading a learner will meet?",
@@ -458,7 +458,7 @@ CHECKS = {
         "Is a wrong line in fact acceptable Japanese for the task (then it is a second right answer, a finding)?",
         "Do the English and the French say what the Japanese says, at the same register, and does the `note` hold for the point and its rivals?",
         "Is anything above the level in kanji, grammar or vocabulary?",
-        "Where the point carries `choose` (plan 200): is the right filling the only right one, does the hole turn on the point and not on a word, is the filled sentence spelled right (a hole that swallows part of a stem), and is the `why` true of the sentence and of every wrong filling?",
+        "Where the point carries `choose` (plan 201): is the right filling the only right one, does the hole turn on the point and not on a word, is the filled sentence spelled right (a hole that swallows part of a stem), and is the `why` true of the sentence and of every wrong filling?",
     ],
     "sentences": [
         "Is the Japanese natural — what someone would actually say or write, not translationese?",

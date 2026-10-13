@@ -151,7 +151,7 @@ class TourSliceTests(unittest.TestCase):
             self.assertIn("compare", entry)
 
     def test_a_toured_point_asked_from_its_own_questions_hands_them_over_too(self) -> None:
-        # Plan 200: the questions a point carries (`choose`) are audited in
+        # Plan 201: the questions a point carries (`choose`) are audited in
         # the grammar area, whose slices are whole entries, and here beside
         # the tour that teaches the point.
         by_pattern = {e["pattern"]: e for level in audit.LEVELS

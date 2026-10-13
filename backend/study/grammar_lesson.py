@@ -88,7 +88,7 @@ def contrast_payload(level: str, entry: dict, grammar_list: list[dict], lang: st
     point out, so None is defensive rather than expected.
 
     The pool is the point's marked sentences and, where it has them, its
-    own `choose` questions (plan 200, study/grammar_choose.py), which are
+    own `choose` questions (plan 201, study/grammar_choose.py), which are
     drawn the same way and answered by their own fillings rather than by
     patterns. `authored=False` leaves those out, for the one caller that
     draws a specimen from the marked sentence beside it (routes/station).

@@ -395,7 +395,7 @@ def _quiz_problems(level: str, entry: dict, rich: bool) -> list[str]:
     return out
 
 
-# ── Choisir's own questions (plan 200) ─────────────────────────────
+# ── Choisir's own questions (plan 201) ─────────────────────────────
 # A point the contrast drill cannot be drawn on is asked from its `choose`
 # list (study/grammar_choose.py): a sentence with the hole, what it says,
 # the fillings with the right one first, and a line for whoever takes a
@@ -703,13 +703,13 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
     # that point at nothing, so only the detector can blank it (plan 190),
     # and only a sentence its rivals cannot stand in is worth marking --
     # は, が and も share too many. Such a point is asked from questions of
-    # its own instead (`choose`, plan 200): every point is asked in
+    # its own instead (`choose`, plan 201): every point is asked in
     # Choisir, none is left to fall back to the flashcard.
     if (rich and not verifiable(pattern) and not entry.get("choose")
             and not (rivals and any(ex.get("contrast") and blank_span(ex["jp"], pattern, level)
                                     for ex in examples if isinstance(ex, dict) and isinstance(ex.get("jp"), str)))):
         out.append(f"{tag}: nothing asks it in Choisir -- mark a contrast sentence the detector can blank, "
-                   "or write `choose` (plan 200)")
+                   "or write `choose` (plan 201)")
     if rich and not rivals:
         out.append(f"{tag}: a rich level's point names at least one neighbour to compare")
 

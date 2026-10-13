@@ -1,8 +1,8 @@
 # 0021 — Every grammar point is asked in Choisir, from questions of its own where it must
 
-- **Status**: accepted. Refines the contrast drill of plans 087 and 190 and
-  the ladder of plans 187e and 194; [0016](0016-grammar-is-taught-not-glossed.md)
-  still stands.
+- **Status**: accepted (plan 201). Refines the contrast drill of plans 087
+  and 190 and the ladder of plans 187e and 194;
+  [0016](0016-grammar-is-taught-not-glossed.md) still stands.
 - **Date**: 2026-10-13
 
 ## Context
