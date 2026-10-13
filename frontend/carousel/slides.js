@@ -1045,15 +1045,17 @@ const KINDS = {
         text(ctx, x.sub, ax, iy + FS.title * 0.85, { f: font(700, FS.title, 'latin'), color, align })
         iy += FS.title * 1.2 + SP[3]
       }
-      const left = by + ch - EDGE * 1.4 - SP[4] - iy
+      const end = by + ch - EDGE * 1.4 - SP[4]
+      const left = end - iy
+      // The form keeps its room first, then the meaning takes the rest: a
+      // plate held to the row's height never sets either past its foot.
+      const formFit = h => fit(ctx, x.form, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: iw, maxLines: 3, maxH: h, balanced: false })
+      const formH = x.form ? paragraphH(formFit(left * 0.45)) + SP[3] : 0
       if (x.meaning) {
-        const m = fit(ctx, x.meaning, { sizes: meanSizes(k), maxW: iw, maxH: left * (x.form ? 0.7 : 1), lh: 1.15 })
+        const m = fit(ctx, x.meaning, { sizes: meanSizes(k), maxW: iw, maxH: Math.max(left - formH - SP[3], FS.body * 1.2), lh: 1.15 })
         iy += paragraph(ctx, m, ax, iy, ink, align, 1.15) + SP[3]
       }
-      if (x.form) {
-        const fb = fit(ctx, x.form, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: iw, maxLines: 3, balanced: false })
-        iy += paragraph(ctx, fb, ax, iy, ink2, align) + SP[3]
-      }
+      if (x.form) iy += paragraph(ctx, formFit(Math.max(end - iy, FS.sm * 1.3)), ax, iy, ink2, align) + SP[3]
       for (const w of x.words || []) {
         if (iy + FS.body * 2.6 > by + ch - EDGE * 1.4) break
         text(ctx, w.t, ax, iy + FS.title * 0.9, { f: font(700, FS.title, 'jp'), color: ink, align })
@@ -1852,7 +1854,10 @@ function quizSlide(c, q, revealed, head, number = 1) {
   // The stem keeps room for a line of its own; the lattice takes the rest.
   // Where the answer's why would crowd it out, the why gives way: the
   // stem and the circled answer are the slide.
-  const stemMin = st ? (st.cue ? FS.display * 2.4 : st.rows ? FS.display * 1.5 : FS.display) : 0
+  // A quoted translation keeps the room it takes at the body rung: it is
+  // the question, and is never cut (plan 200l).
+  const quoteMin = st?.text ? paragraphH(fit(ctx, `“${st.text}”`, { sizes: [FS.sm], maxW: f.w, lh: 1.15 }), 1.15) : 0
+  const stemMin = st ? (st.cue ? FS.display * 2.4 : st.rows ? FS.display * 1.5 : Math.max(FS.display, quoteMin)) : 0
   if (exWhy && f.bottom - y - SP[7] * 2 - foot - stemMin < rowsN * FS.body * 1.6) { exWhy = null; foot = footOf() }
   // Answers that are sentences take a taller row each.
   const oneLine = x => !x.rows || (layoutSentence(ctx, x.rows, { max: FS.title, min: FS.title, maxW: f.w - 140, maxLines: 1, script: 'kanji', rules: false, gap: 0.04, fam: 'jp', weight: 500 })?.lines.length ?? 2) <= 1
@@ -1867,7 +1872,10 @@ function quizSlide(c, q, revealed, head, number = 1) {
   // side by side, as tall as the tallest.
   const varRows = cols === 1 && texts.length === n
   const textGrid = z => Math.max(rowsN * FS.sm * 1.45, varRows ? texts.reduce((a, x) => a + rowOf(x, z), 0) : rowsN * textRow(z))
-  const perRow = cols === 1 && q.choices.some(x => x.rows) ? (q.choices.every(oneLine) ? FS.title * 1.55 : FS.title * 2.4) : Math.max(FS.body * 1.6, textRow(FS.body))
+  // A sentence answer's row is as tall as its longest answer at the body
+  // rung, on up to three lines: a long N1 sentence no longer spills.
+  const sentRow = () => Math.max(FS.title * 2.4, ...q.choices.filter(x => x.rows).map(x => layoutSentence(ctx, x.rows, { max: FS.body, min: FS.body, maxW: f.w - 140 - SP[5], maxLines: 3, script: 'kanji', rules: false, gap: 0.04, fam: 'jp', weight: 500 }).h + SP[3] * 2))
+  const perRow = cols === 1 && q.choices.some(x => x.rows) ? (q.choices.every(oneLine) ? FS.title * 1.55 : sentRow()) : Math.max(FS.body * 1.6, textRow(FS.body))
   const sentences = cols === 1 && q.choices.some(x => x.rows)
   // As tall as its answers at the lead rung where the room allows.
   const gridPref = sentences ? rowsN * perRow : Math.max(rowsN * FS.body * 1.6, textGrid(FS.lead))
@@ -1941,7 +1949,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
     const head = headLines(ctx, st.specimen, { maxW: f.w, maxSize: Math.max(z, FS.lead), minSize: FS.lead, maxLines: 2, maxH: room })
     drawHead(ctx, head, f.cx, y + Math.max(0, (room - headH(head)) / 2), ink, 'center')
   } else if (st?.text) {
-    const b = fit(ctx, `“${st.text}”`, { sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body], maxW: f.w, maxH: room, lh: 1.15 })
+    const b = fit(ctx, `“${st.text}”`, { sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body, FS.sm], maxW: f.w, maxH: room + 1, lh: 1.15 })
     paragraph(ctx, b, f.x, y + Math.max(0, (room - paragraphH(b, 1.15)) / 2), ink, 'left', 1.15)
   } else if (st?.cue && cue.alone) {
     paragraph(ctx, cue.task, f.x, y + Math.max(0, (room - cue.h) / 2), p.line.grammar)
@@ -1968,10 +1976,13 @@ function quizSlide(c, q, revealed, head, number = 1) {
   const cw = (f.w - HL * (cols + 1)) / cols
   const chh = (gridH - HL * (rowsN + 1)) / rowsN
   // Rows one under the other share the lattice as their answers need it.
-  const weights = varRows ? q.choices.map(x => rowOf(x, FS.body)) : null
-  const total = varRows ? weights.reduce((a, b) => a + b, 0) : 0
-  const chOf = i => (varRows ? (gridH - HL * (rowsN + 1)) * weights[i] / total : chh)
-  const cyOf = i => (varRows ? y + HL + q.choices.slice(0, i).reduce((a, _, j) => a + chOf(j) + HL, 0) : y + HL + Math.floor(i / cols) * (chh + HL))
+  // Sentence answers one under the other share it by their lines too.
+  const sentLines = x => layoutSentence(ctx, x.rows, { max: FS.body, min: FS.body, maxW: f.w - 174, maxLines: 4, script: 'kanji', rules: false, gap: 0.04, fam: 'jp', weight: 500 })?.lines.length || 1
+  const sentWeights = cols === 1 && q.choices.every(x => x.rows) && !q.choices.every(oneLine)
+  const weights = varRows ? q.choices.map(x => rowOf(x, FS.body)) : sentWeights ? q.choices.map(x => sentLines(x) + 0.8) : null
+  const total = weights ? weights.reduce((a, b) => a + b, 0) : 0
+  const chOf = i => (weights ? (gridH - HL * (rowsN + 1)) * weights[i] / total : chh)
+  const cyOf = i => (weights ? y + HL + q.choices.slice(0, i).reduce((a, _, j) => a + chOf(j) + HL, 0) : y + HL + Math.floor(i / cols) * (chh + HL))
   ctx.fillStyle = p.surfaceLine
   ctx.fillRect(f.x, y, f.w, gridH)
   // Every answer in one size: the largest at which all of them fit.
@@ -1998,7 +2009,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
     const tw = cx + cw - SP[4] - tx
     if (choice.rows) {
       // No furigana in an answer: its ruby would crowd the row it sits in.
-      const L = layoutSentence(ctx, choice.rows, { max: FS.title, min: FS.caption, maxW: tw, maxLines: 2, maxH: chh - SP[3], script: c.plan.script === 'kana' ? 'kana' : 'kanji', rules: false, gap: 0.04, fam: 'jp', weight: 500 })
+      const L = layoutSentence(ctx, choice.rows, { max: FS.title, min: FS.caption, maxW: tw, maxLines: 3, maxH: chh - SP[4], script: c.plan.script === 'kana' ? 'kana' : 'kanji', rules: false, gap: 0.04, fam: 'jp', weight: 500 })
       drawSentence(ctx, L, tx, cy + (chh - L.h) / 2, 'left', () => ({ ink: dim ? ink2 : ink, rule: null, ruby: ink2 }))
     } else {
       const fam = choice.fam || 'latin'
