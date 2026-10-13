@@ -6,7 +6,7 @@ import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/sli
 import { assemblyQ, overlaps } from '../carousel/quizzes.js'
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, senseOf, stacksIn } from '../carousel/explain.js'
-import { STRINGS, weld } from '../carousel/strings.js'
+import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 
 // ── カルーセル — the carousel studio (plans 200, 200b, 200c) ──
 // A static tool outside src/ (frontend/carousel/), so none of the app's
@@ -260,6 +260,11 @@ describe('the carousel studio', () => {
   it('welds French punctuation to the word before it', () => {
     expect(weld('Tu sais la lire ?')).toBe('Tu sais la lire\u00a0?')
     expect(weld('« Je reviendrai. »')).toBe('«\u00a0Je reviendrai.\u00a0»')
+  })
+
+  it('sets English quotes as English sets them', () => {
+    expect(weldIf('en', 'Existence is not an action: « there is a shop » is 駅に店があります.')).toBe('Existence is not an action: “there is a shop” is 駅に店があります.')
+    expect(weldIf('fr', '« là »')).toBe('«\u00a0là\u00a0»')
   })
 })
 

@@ -1,4 +1,4 @@
-# The carousel studio (plans 200–200i)
+# The carousel studio (plans 200–200j)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -152,6 +152,41 @@ checked this by drawing every slide of a sample of every source, as
 every type and every ending, in both formats, languages and grounds,
 with the real fonts, and measuring every line of text set; every
 issue it found was fixed.
+
+## Easy to read
+
+Every line of prose (a meaning, a translation, an explanation) is set at
+the body rung or larger wherever the slide has the room, about 15pt on a
+phone, and never under the sm rung (13pt) unless a slide is full; a
+label (a gloss under a word, a caption) holds the sm rung where it can.
+A slide's text takes the room it has rather than its first size that
+fits: the examples, a scene, a caution and its rival, a point and how it
+works in the sentence are set at the largest scale the slide holds (the
+examples and the point then centred in what is left). What gives way,
+and in which order:
+
+- **A question's answers keep their room first.** Each written answer
+  is set whole, on as many lines as it needs (three at most), its row as
+  tall as it needs when the answers stand one under the other; the
+  question's sentence takes what they leave. Before the answers shrink,
+  the answer's explanation, its gloss and the sentence's translation
+  give way, then the sentence steps down; on the answer slide, whose
+  answers were read on the slide before, they sit closer first. A
+  Japanese answer stays on one line a rung smaller rather than breaking
+  between its kana; a long question steps down a rung for long answers.
+- **A point's line in its sentence** is set at the lead rung where the
+  point's meaning can step down for it.
+- **A scene's translations** are chosen first, the Japanese over them as
+  large as it then fits and never smaller; its note gives way before
+  they step down, and its bubbles take the whole width first.
+- **Nothing is cut**: a sentence's translation, an answer, a meaning.
+- English text quotes in “ ” (the catalogue's « » are French), so an
+  opening mark never ends a line alone.
+
+`readcheck` (the layout checker run for prose sizes) measured the change
+over a sample of every source as every type: slides with a line of prose
+under the body rung went from 1,257 of 4,811 to 352, nearly all of them
+at the sm rung on slides that are full.
 
 ## Furigana and line breaks
 
