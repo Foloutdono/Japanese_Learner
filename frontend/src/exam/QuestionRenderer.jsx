@@ -2,6 +2,7 @@ import { createContext, useContext, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import AudioPlayer from './AudioPlayer'
+import { Figure } from './DeskSheet'
 import { ImageIcon, StarIcon } from '../components/ui/Icons'
 
 // ── QuestionRenderer ─────────────────────────────────────────
@@ -238,7 +239,7 @@ function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed
                 aria-keyshortcuts={keys && !revealed ? String(i + 1) : undefined}
                 onClick={() => selectWithSound(onSelect, choice.id)}
               >
-                <span className="desk-choice__o">{i + 1}</span>
+                <span className="desk-choice__o"><Figure n={i + 1} /></span>
                 {choiceType === 'image'
                   ? <ImagePlaceholder alt={choice.imageAlt} compact />
                   : <span className={text} lang="ja">{choice.textJp}</span>}

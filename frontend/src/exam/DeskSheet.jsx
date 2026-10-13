@@ -39,6 +39,12 @@ function sheetParts(questions) {
 
 const choicesOf = q => q.choices ?? q.pieces ?? []
 
+/** A bubble's digit in a box of its own, so it can be centred on its
+ *  ink (`text-box`, which a bare text node in a flex box escapes). */
+export function Figure({ n }) {
+  return <span className="desk-bubble-fig">{n}</span>
+}
+
 function PartHead({ part, fig, named = false }) {
   const { t } = useLang()
   const fr = named && part.name ? t.examMondai[part.name] : null
@@ -87,7 +93,7 @@ export function MarkSheet({ questions, answers = {}, flagged = new Set(), index 
                   return (
                     <div key={q.id} className={cls}>
                       <span className="desk-mark-row__n">{q.number}</span>
-                      {choicesOf(q).map((c, k) => <span key={c.id} className="desk-oval">{k + 1}</span>)}
+                      {choicesOf(q).map((c, k) => <span key={c.id} className="desk-oval"><Figure n={k + 1} /></span>)}
                     </div>
                   )
                 }
@@ -120,7 +126,7 @@ export function MarkSheet({ questions, answers = {}, flagged = new Set(), index 
                           aria-label={t.examOval(q.number, k + 1)}
                           onClick={() => onMark(i, c.id)}
                         >
-                          {k + 1}
+                          <Figure n={k + 1} />
                         </button>
                       )
                     })}
@@ -179,7 +185,7 @@ export function MarkedSheet({ groups, openId, rowTo, navState, onOpen }) {
                       const oval = c.id === r.q.answer
                         ? (r.isCorrect ? 'desk-oval desk-oval--got' : 'desk-oval desk-oval--right')
                         : c.id === r.given ? 'desk-oval desk-oval--x' : 'desk-oval'
-                      return <span key={c.id} className={oval}>{k + 1}</span>
+                      return <span key={c.id} className={oval}><Figure n={k + 1} /></span>
                     })}
                   </Link>
                 )

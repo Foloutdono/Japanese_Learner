@@ -41448,6 +41448,8 @@ button.brd-stn { cursor: pointer; }
      question, and under them the ring, its clock, its key and Replay
      standing to its right rather than stacked under it. */
   .desk-q:has(.exam-ring) { align-items: start; }
+  /* The question and its player apart, two blocks (the owner's call). */
+  .desk-q > .exam-ask:has(> .exam-ring) { gap: var(--sp-8); }
   .desk-q .exam-ring {
     display: grid;
     grid-template:
@@ -41880,6 +41882,16 @@ button.brd-stn { cursor: pointer; }
     background: var(--danger);
     border-color: var(--danger);
     color: var(--text-on-panel);
+  }
+  /* A bubble's digit (DeskSheet's Figure) centred on its ink, not its
+     line box: a line box keeps room for the descenders a digit never
+     has, which sat every figure high in its circle. Trimmed on a box
+     of its own, since a bare text node in the bubble's flex box is
+     out of text-box's reach. */
+  .desk-bubble-fig {
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    text-box: trim-both cap alphabetic;
   }
   .desk-oval--right {
     border: 2px solid var(--success);
