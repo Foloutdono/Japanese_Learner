@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **200**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **201**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -527,6 +527,14 @@ writes. Its footage is uploaded to a
 public Supabase Storage bucket by file name and needs no rebuild;
 `frontend/landing/README.md` has the slots, the bucket and what changes
 when the page goes live.
+
+The **carousel studio** (plan 200, `frontend/carousel/`, its README)
+draws a sentence of the reading bank as a photo carousel for a social
+feed, in four of the app's idioms, and exports the PNGs. Like the landing
+page it is a static page outside `src/` and never ships. Its data is
+`frontend/carousel/bank/*.json`, written by `python -m scripts.carousel_bank`
+(backend, needs the tokenizer): rerun it after a change to the reading
+bank, the deck or the catalogue, and commit the files.
 
 `npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,
 ratcheted against a checked-in baseline) and `npm run lint:scale` (a

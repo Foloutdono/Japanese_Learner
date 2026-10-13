@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tsuji Carousel Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@600;700;900&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* The studio's own chrome, in the app's two grounds: washi when the
+   viewer is light, sumi when dark (the slides choose their own ground).
+   Layout: the controls in a column beside the slides, stacked on a phone. */
+:root {
+  --bg: #f6f1e4;
+  --panel: #ebe2cc;
+  --line: #c9b994;
+  --ink: #221d15;
+  --ink2: #665c4a;
+  --gold: #a97a25;
+  --gold-lit: #e6bd62;
+  --gold-mid: #c99a3e;
+  --on-fill: #1c1811;
+  --sel-wash: color-mix(in srgb, var(--gold) 15%, transparent);
+  --sel-line: color-mix(in srgb, var(--gold) 60%, transparent);
+  --sel-ink: color-mix(in srgb, var(--gold) 50%, var(--ink));
+  --scrim: rgba(28, 24, 17, 0.72);
+  --font: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --jp: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  --serif: 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17151a; --panel: #100e13; --line: #2b2730; --ink: #ece5d8; --ink2: #a79c8c;
+    --gold: #c99a3e; --sel-ink: color-mix(in srgb, var(--gold) 65%, var(--ink)); --scrim: rgba(8, 7, 10, 0.8);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17151a; --panel: #100e13; --line: #2b2730; --ink: #ece5d8; --ink2: #a79c8c;
+  --gold: #c99a3e; --sel-ink: color-mix(in srgb, var(--gold) 65%, var(--ink)); --scrim: rgba(8, 7, 10, 0.8);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 500 15px/1.4 var(--font); }
+[lang="ja"] { font-family: var(--jp); }
+button, input, textarea { font: inherit; color: inherit; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.top { display: flex; align-items: center; gap: 12px; padding: 16px clamp(16px, 3vw, 32px); border-bottom: 1px solid var(--line); }
+.top svg { width: 30px; height: 30px; flex: none; }
+.top h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.01em; }
+.top p { margin: 0 0 0 auto; color: var(--ink2); font-size: 13px; text-align: right; }
+
+.studio { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 0; min-height: calc(100vh - 64px); }
+.controls { border-right: 1px solid var(--line); padding: 20px clamp(16px, 2vw, 24px) 32px; display: flex; flex-direction: column; gap: 22px; }
+.work { padding: 20px clamp(16px, 3vw, 32px) 40px; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+@media (max-width: 860px) {
+  .studio { grid-template-columns: minmax(0, 1fr); }
+  .controls { border-right: 0; border-bottom: 1px solid var(--line); }
+  .top p { display: none; }
+}
+
+.field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.field[hidden] { display: none; }
+.label { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink2); display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.label span { letter-spacing: 0; text-transform: none; font-weight: 500; }
+
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button, .chip { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 7px 14px; cursor: pointer; min-height: 36px; }
+.seg button[aria-pressed="true"], .chip[aria-pressed="true"] { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
+.seg button:hover, .chip:hover { border-color: var(--sel-line); }
+.chip--glyph { font-family: var(--jp); font-size: 20px; padding: 4px 12px; }
+
+.dirs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dir { text-align: left; border: 1px solid var(--line); background: transparent; border-radius: 8px; padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.dir b { font-family: var(--serif); font-size: 20px; font-weight: 700; }
+.dir span { color: var(--ink2); font-size: 13px; }
+.dir[aria-pressed="true"] { background: var(--sel-wash); border-color: var(--sel-line); }
+
+.search { display: flex; gap: 8px; }
+.search input { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 8px 10px; }
+.sentences { list-style: none; margin: 0; padding: 0; max-height: 280px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; }
+.sentences li + li { border-top: 1px solid var(--line); }
+.sentence { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 9px 12px; background: transparent; border: 0; text-align: left; cursor: pointer; }
+.sentence:hover { background: var(--sel-wash); }
+.sentence[aria-pressed="true"] { background: var(--sel-wash); box-shadow: inset 3px 0 0 var(--gold); }
+.sentence__jp { font-size: 16px; overflow-wrap: anywhere; }
+.sentence__tr { grid-column: 1; color: var(--ink2); font-size: 13px; }
+.sentence__pt { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: var(--ink2); font-size: 12px; max-width: 9em; text-align: right; }
+
+.check { display: flex; align-items: center; gap: 10px; cursor: pointer; min-height: 32px; }
+.check input { width: 18px; height: 18px; accent-color: var(--gold); }
+.text-input { border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 8px 10px; width: 100%; }
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.toolbar .seg { gap: 4px; }
+
+.btn { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 8px 16px; cursor: pointer; min-height: 40px; font-weight: 700; }
+.btn--quiet { min-height: 34px; padding: 5px 14px; font-weight: 500; }
+.btn--metal { border: 0; background: linear-gradient(180deg, var(--gold-lit), var(--gold-mid)); color: var(--on-fill); box-shadow: 0 4px 16px color-mix(in srgb, var(--gold-mid) 30%, transparent); padding: 10px 22px; min-height: 44px; }
+.btn:disabled { opacity: 0.55; cursor: progress; }
+
+.stage { display: flex; flex-direction: column; gap: 28px; }
+.deck { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.deck__head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.deck__name { margin: 0; font-size: 17px; font-weight: 700; }
+.deck__jp { font-family: var(--serif); margin-right: 4px; }
+.deck__count { color: var(--ink2); font-size: 13px; margin-right: auto; }
+.strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x proximity; }
+.slide { position: relative; flex: none; width: var(--thumb, 220px); aspect-ratio: var(--ratio); padding: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--panel); cursor: zoom-in; scroll-snap-align: start; max-width: 100%; }
+.stage[data-view="single"] .slide { --thumb: 300px; }
+.slide canvas { display: block; width: 100%; height: 100%; }
+.safe { position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(rgba(214, 64, 64, 0.22), rgba(214, 64, 64, 0.22)) top / 100% var(--t) no-repeat,
+    linear-gradient(rgba(214, 64, 64, 0.22), rgba(214, 64, 64, 0.22)) bottom / 100% var(--b) no-repeat,
+    linear-gradient(rgba(214, 64, 64, 0.16), rgba(214, 64, 64, 0.16)) left / var(--l) 100% no-repeat,
+    linear-gradient(rgba(214, 64, 64, 0.16), rgba(214, 64, 64, 0.16)) right / var(--r) 100% no-repeat; }
+
+.export { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 16px; align-items: start; border-top: 1px solid var(--line); padding-top: 20px; }
+.export textarea { width: 100%; min-height: 128px; resize: vertical; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 10px 12px; font: 400 14px/1.5 var(--jp); }
+.export__actions { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+.status { grid-column: 1 / -1; color: var(--ink2); min-height: 1.4em; margin: 0; }
+@media (max-width: 560px) { .export { grid-template-columns: minmax(0, 1fr); } }
+
+dialog { border: 0; padding: 0; background: transparent; max-width: 100vw; max-height: 100vh; }
+dialog::backdrop { background: var(--scrim); }
+.viewer { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px; }
+.viewer canvas { display: block; max-width: min(92vw, 720px); max-height: calc(100vh - 120px); width: auto; height: auto; border-radius: 6px; }
+.viewer__bar { display: flex; gap: 8px; align-items: center; color: #f3ecdf; flex-wrap: wrap; justify-content: center; }
+.viewer__bar .btn { color: #f3ecdf; border-color: rgba(243, 236, 223, 0.35); }
+.viewer__bar .btn--metal { color: var(--on-fill); }
+#viewer-title { min-width: 4em; text-align: center; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .strip { scroll-behavior: auto; } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+<header class="top">
+  <svg id="mark" viewBox="0 0 1000 1000" aria-hidden="true"></svg>
+  <h1>Carousel studio</h1>
+  <p>Sentences from the reading bank, drawn in Tsuji’s own lines.</p>
+</header>
+<main class="studio">
+  <aside class="controls" aria-label="Settings">
+    <div class="field">
+      <div class="label">Sentence <span><span id="count"></span> in the bank</span></div>
+      <div class="seg" role="group" aria-label="Level">
+        <button type="button" data-set="level:N5">N5</button>
+        <button type="button" data-set="level:N4">N4</button>
+        <button type="button" data-set="level:N3">N3</button>
+        <button type="button" data-set="level:N2">N2</button>
+        <button type="button" data-set="level:N1">N1</button>
+      </div>
+      <div class="search">
+        <input id="search" type="search" placeholder="Search Japanese, a translation or a point" aria-label="Search the bank">
+        <button id="random" type="button" class="btn btn--quiet">Random</button>
+      </div>
+      <ul id="sentences" class="sentences"></ul>
+    </div>
+
+    <div class="field">
+      <div class="label">Direction</div>
+      <div class="dirs" role="group" aria-label="Direction">
+        <button type="button" class="dir" data-set="direction:plates"><b lang="ja">駅名標</b><span>Station plates</span></button>
+        <button type="button" class="dir" data-set="direction:board"><b lang="ja">発車標</b><span>Departure board</span></button>
+        <button type="button" class="dir" data-set="direction:card"><b lang="ja">札</b><span>Study card</span></button>
+        <button type="button" class="dir" data-set="direction:exam"><b lang="ja">模試</b><span>Mock exam</span></button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="label">Language on the slides</div>
+      <div class="seg" role="group" aria-label="Language">
+        <button type="button" data-set="lang:en">English</button>
+        <button type="button" data-set="lang:fr">Français</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="label">Japanese as</div>
+      <div class="seg" role="group" aria-label="Script">
+        <button type="button" data-set="script:kanji" lang="ja">漢字</button>
+        <button type="button" data-set="script:furigana" lang="ja">ふりがな</button>
+        <button type="button" data-set="script:kana" lang="ja">かな</button>
+      </div>
+      <label class="check"><input id="romaji" type="checkbox"> Romaji on the first slide</label>
+    </div>
+
+    <div class="field">
+      <div class="label">Slides</div>
+      <label class="check"><input type="checkbox" data-slide="words"> Word by word</label>
+      <label class="check"><input type="checkbox" data-slide="grammar"> The grammar point</label>
+      <label class="check" data-only="card"><input type="checkbox" data-slide="rating"> Rate yourself (study card)</label>
+      <label class="check"><input type="checkbox" data-slide="outro"> The mark, last</label>
+    </div>
+
+    <div class="field">
+      <div class="label">Bonus</div>
+      <div class="seg" role="group" aria-label="Bonus">
+        <button type="button" data-set="bonus:kanji">Kanji strokes</button>
+        <button type="button" data-set="bonus:twist">Grammar twist</button>
+        <button type="button" data-set="bonus:none">None</button>
+      </div>
+    </div>
+    <div class="field" hidden>
+      <div class="label">Kanji to write</div>
+      <div id="kanji" class="seg" role="group" aria-label="Kanji"></div>
+    </div>
+
+    <div class="field">
+      <label class="label" for="handle">On the last slide</label>
+      <input id="handle" class="text-input" type="text" maxlength="40" placeholder="@yourhandle or a link (optional)">
+    </div>
+  </aside>
+
+  <section class="work" aria-label="Slides">
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" data-set="view:compare">All four</button>
+        <button type="button" data-set="view:single">One direction</button>
+      </div>
+      <div class="seg" role="group" aria-label="Format">
+        <button type="button" data-set="format:post">4:5 post</button>
+        <button type="button" data-set="format:story">9:16 full screen</button>
+      </div>
+      <div class="seg" role="group" aria-label="Ground">
+        <button type="button" data-set="ground:paper">Washi</button>
+        <button type="button" data-set="ground:sumi">Sumi</button>
+      </div>
+      <label class="check"><input id="safe" type="checkbox"> Show the feed’s overlays</label>
+    </div>
+
+    <div id="stage" class="stage"></div>
+
+    <div class="export">
+      <textarea id="caption" aria-label="Caption to post with the slides" spellcheck="false"></textarea>
+      <div class="export__actions">
+        <button id="export" type="button" class="btn btn--metal" disabled>Download <span id="export-name"></span> (.zip)</button>
+        <button id="copy" type="button" class="btn">Copy caption</button>
+      </div>
+      <p id="status" class="status" role="status"></p>
+    </div>
+  </section>
+</main>
+
+<dialog id="viewer" aria-label="Slide">
+  <div class="viewer">
+    <canvas></canvas>
+    <div class="viewer__bar">
+      <button id="prev" type="button" class="btn" aria-label="Previous slide">‹</button>
+      <span id="viewer-title"></span>
+      <button id="next" type="button" class="btn" aria-label="Next slide">›</button>
+      <button id="save-one" type="button" class="btn btn--metal">Download this slide</button>
+      <button id="close" type="button" class="btn">Close</button>
+    </div>
+  </div>
+</dialog>
+<script type="module" src="./studio.js"></script>
+</body>
+</html>
