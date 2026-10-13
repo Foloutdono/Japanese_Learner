@@ -14,7 +14,6 @@ const data = JSON.parse(document.getElementById('landing-data').textContent)
 const $ = (sel, root = document) => root.querySelector(sel)
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)]
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-const DAY_MS = 86400000
 const canWatch = 'IntersectionObserver' in window
 
 function el(tag, cls, text, attrs = {}) {
@@ -320,9 +319,6 @@ function nudge(node, on) {
 for (const node of $$('[data-nudge]')) nudge(node, true)
 
 // ── Your line: the pace moves every arrival ──
-const monthYear = new Intl.DateTimeFormat(data.lang, { month: 'long', year: 'numeric' })
-const arrival = $('[data-pass-arrival]')
-
 function setRhythm(per, shown) {
   for (const button of $$('[data-per]')) {
     const on = Number(button.dataset.per) === per
@@ -334,8 +330,6 @@ function setRhythm(per, shown) {
     if (shown) replay(eta, 'is-new')
   }
   $('[data-at]').textContent = data.at[per]
-  $('[data-pass-per]').textContent = data.per[per]
-  arrival.textContent = monthYear.format(new Date(Date.now() + data.n5Days[per] * DAY_MS))
 }
 
 for (const button of $$('[data-per]')) {
@@ -364,11 +358,10 @@ if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     tilt.classList.add('is-tilting')
     pass.style.setProperty('--ry', `${(x * 10).toFixed(2)}deg`)
     pass.style.setProperty('--rx', `${(-y * 8).toFixed(2)}deg`)
-    pass.style.setProperty('--sx', `${(x * 70).toFixed(1)}%`)
   })
   tilt.addEventListener('pointerleave', () => {
     tilt.classList.remove('is-tilting')
-    for (const prop of ['--rx', '--ry', '--sx']) pass.style.removeProperty(prop)
+    for (const prop of ['--rx', '--ry']) pass.style.removeProperty(prop)
   })
 }
 
