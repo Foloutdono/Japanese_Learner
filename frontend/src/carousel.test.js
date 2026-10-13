@@ -207,6 +207,20 @@ describe('the carousel studio', () => {
     }
   })
 
+  it('asks a word its spelling in the 表記 type, not in its mock exam (plan 200l)', () => {
+    let spelled = 0
+    for (const { src, p } of every.filter(x => x.src.id === 'word')) {
+      expect(p.quizzes.some(q => q.kind === 'orthography'), p.id).toBe(false)
+      for (const q of p.spelling || []) {
+        spelled += 1
+        // The kana asked is the word's own reading, and the right answer its spelling.
+        expect(q.explain.head, src.id).toBe(`${q.stem.specimen}\u3000${q.choices[q.right].text}`)
+        expect(new Set(q.choices.map(x => x.text)).size).toBe(4)
+      }
+    }
+    expect(spelled).toBeGreaterThan(0)
+  })
+
   it('titles every carousel within the feed’s 90 characters (plan 200l)', () => {
     for (const { src, p } of every) {
       for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {

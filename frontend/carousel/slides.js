@@ -430,7 +430,7 @@ const KIND_JP = {
   reading: ['かんじよみ', '漢字読み'], orthography: ['ひょうき', '表記'], meaning: ['いみ', '意味'], grammar: ['ぶんぽう', '文法'],
   translation: ['ほんやく', '翻訳'], say: ['ほんやく', '翻訳'], assembly: ['ぶんの くみたて', '文の組み立て'], scene: ['かいわ', '会話'],
   tour: ['ぶんぽう', '文法'], pointMeaning: ['いみ', '意味'], compare: ['いみ', '意味'], kanji: ['よみかた', '読み方'],
-  kanjiMeaning: ['いみ', '意味'], kanjiKun: ['よみかた', '読み方'], kanjiVocab: ['ごい', '語彙'], strokes: ['かくすう', '画数'], inWord: ['よみかた', '読み方'],
+  kanjiMeaning: ['いみ', '意味'], kanjiKun: ['よみかた', '読み方'], kanjiVocab: ['ごい', '語彙'], wordReverse: ['ごい', '語彙'], strokes: ['かくすう', '画数'], inWord: ['よみかた', '読み方'],
   kana: ['よみかた', '読み方'], kanaReverse: ['かな', 'かな'], twin: ['かな', 'かな'], passage: ['どっかい', '読解'], passageReading: ['よみかた', '読み方'],
 }
 
@@ -2291,11 +2291,13 @@ export const TYPES = [
   { id: 'build', jp: '組立' },
   { id: 'list', jp: '一覧' },
   { id: 'talk', jp: '会話' },
+  { id: 'spelling', jp: '表記' },
 ]
 // What a type may leave out, and whether it is in by default.
 export const TYPE_OPTIONS = {
   exam: [['cover', true], ['sheet', true]],
   list: [['recap', true]],
+  spelling: [['sheet', true]],
 }
 /** Whether a plan can be drawn as a type: a question to ask, two things
  *  to tell apart, a sentence to build, a list, a scene. */
@@ -2306,6 +2308,7 @@ export function available(type, pl) {
     case 'build': return !!pl.build
     case 'list': return !!pl.list
     case 'talk': return !!pl.talk
+    case 'spelling': return !!pl.spelling?.length
     default: return true
   }
 }
@@ -2346,7 +2349,8 @@ export function deck(type, plan, fmt, opts) {
   }
   const ctxOf = (ctx, f = fr) => ({ ctx, p, plan, ...surface(ctx, p, f) })
   const kind = (s, extra = {}) => ctx => KINDS[s.kind](ctxOf(ctx), { ...s, ...extra })
-  const exam = type === 'exam'
+  // A spelling quiz is set as the paper sets its 表記 questions.
+  const exam = type === 'exam' || type === 'spelling'
   let asked = 0
   const ask = (q, titles) => {
     if (!q) return
@@ -2374,6 +2378,16 @@ export function deck(type, plan, fmt, opts) {
       qs.forEach(q => ask(q))
       if (o.sheet && qs.length) add('sheet', ctx => KINDS.sheet(ctxOf(ctx), { quizzes: qs }))
       outro(t.cta.exam(qs.length))
+      break
+    }
+    case 'spelling': {
+      // 表記 (plan 200l): the word and its kin heard in kana, each asked
+      // how it is written, then the sheet.
+      const sp = plan.spelling
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'listhead', head: '表記', title: t.spellingTitle(sp.length), line: 'vocab' }, t.spellingAsk))
+      sp.forEach(q => ask(q))
+      if (o.sheet && sp.length > 1) add('sheet', ctx => KINDS.sheet(ctxOf(ctx), { quizzes: sp }))
+      outro(t.cta.exam(sp.length))
       break
     }
     case 'compare': {

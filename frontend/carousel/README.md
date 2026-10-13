@@ -37,6 +37,7 @@ the content for (the studio greys out the others).
 | 組立 | Build it | the translation to build, then the sentence put together piece by piece (at most six steps), each piece's words with what they do | a sentence, a translation, a lesson's first example |
 | 一覧 | Top five | a list worth saving, one item a slide, then the list whole | a kanji's words, a word's family, a kana's words, a point's sentences, a passage's words |
 | 会話 | Conversation | the tour's scene line by line, then "what do you say?" | a lesson with a scene |
+| 表記 | Kanji spelling | the word and up to four words of its level that share a kanji with it, each heard in kana and asked how it is written (among spellings that are no word), then the sheet | a word with a kanji spelling to ask |
 
 ## The last slide
 
@@ -67,7 +68,7 @@ mock exam asks (three by default; the walk ends on them too where
 | Sentence | 読み (reading of its word), 表記 (its word in kana: which spelling), its word's meaning, what its point expresses, ★ word order, which translation |
 | Translation | which sentence says it, ★ word order, what its point expresses, a word's meaning |
 | Lesson | the scene's "what do you say?", the tour's questions (up to four), what the point means, ★ word order |
-| Word | its reading, its spelling, its meaning |
+| Word | its reading, its meaning, which word means this (among words of its level written the same way), the reading of up to two words that share its kanji (its spelling is the 表記 type's) |
 | Kanji | its on'yomi and its kun'yomi, the reading of up to three of its words, which of these words is written with it (up to two: a word's meaning among words written without it, never the word that only says the kanji's own meaning), its meaning, its stroke count |
 | Kana | its sound, which kana a sound is, its twin in the other script |
 | Comprehension | every question the seed writes (understanding, inference, vocabulary, grammar: eight to twelve a passage), then the reading of its words |

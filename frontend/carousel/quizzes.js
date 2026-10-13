@@ -245,22 +245,17 @@ export function lessonQuizzes(L, data, lang, t) {
 }
 
 // ── A word of the deck ────────────────────────────────────────
-export function wordQuizzes(w, data, lang, t, index) {
+export function wordQuizzes(w, data, lang, t, index, family = []) {
   const row = { t: w.t, fu: w.fu }
   const [main] = gloss(w, lang)
   // The deck's other readings of the same written word are right too.
-  const known = (data.words || []).filter(x => x.t === w.t && x.r !== w.r).map(x => x.r)
-  const near = hasKanji(w.t) ? readingMisses(row, index, known) : []
+  const knownOf = x => (data.words || []).filter(y => y.t === x.t && y.r !== x.r).map(y => y.r)
+  const near = hasKanji(w.t) ? readingMisses(row, index, knownOf(w)) : []
   const head = `${w.t}\u3000${w.r}`
   const readingQ2 = near.length >= 3 ? {
     kind: 'reading', ask: t.examAsk.kana, stem: { specimen: w.t },
     ...dealChoices(w.r, shuffle(near, seeded(w.t)).slice(0, 3), w.t, 'jp'),
     explain: { head, sense: weldIf(lang, main) },
-  } : null
-  const ortho = w.hy?.length >= 3 ? {
-    kind: 'orthography', ask: t.examAsk.writtenAs, stem: { specimen: w.r },
-    ...dealChoices(w.t, w.hy.slice(0, 3), `${w.t}-hy`, 'jp'),
-    explain: { head: `${w.r}\u3000${w.t}`, sense: weldIf(lang, main) },
   } : null
   const wrong = distinctFrom(senses(w, lang), data.words.filter(x => x.t !== w.t).map(x => ownGloss(x, lang)), 3, `${w.t}-m`)
   const meaning = ownGloss(w, lang) && wrong.length === 3 ? {
@@ -268,7 +263,46 @@ export function wordQuizzes(w, data, lang, t, index) {
     ...dealChoices(weldIf(lang, main), wrong.map(x => weldIf(lang, x)), `${w.t}-m`, 'latin'),
     explain: { head, sense: weldIf(lang, main) },
   } : null
-  return withId([readingQ2, ortho, meaning], q => t.kinds[q.kind])
+  // The other way round: its meaning, and which word says it, among words
+  // of its level written the same way (kanji among kanji, kana among
+  // kana) whose meanings share nothing with it (plan 200l).
+  const mine = senses(w, lang)
+  const alike = (a, b) => overlaps(a, b) || a.trim().toLowerCase() === b.trim().toLowerCase()
+  const rivals = []
+  for (const x of shuffle(data.words.filter(x => x.t !== w.t && hasKanji(x.t) === hasKanji(w.t) && ownGloss(x, lang)), seeded(`${w.t}-r`))) {
+    const theirs = senses(x, lang)
+    if (rivals.some(y => y.t === x.t) || theirs.some(a => mine.some(b => alike(a, b))) || rivals.some(y => senses(y, lang).some(a => theirs.some(b => alike(a, b))))) continue
+    rivals.push(x)
+    if (rivals.length === 3) break
+  }
+  const reverse = ownGloss(w, lang) && rivals.length === 3 ? {
+    kind: 'wordReverse', ask: t.examAsk.wordReverse, stem: { text: weldIf(lang, main) },
+    ...dealChoices(w.t, rivals.map(x => x.t), `${w.t}-r`, 'jp'),
+    explain: { head, sense: weldIf(lang, main) },
+  } : null
+  // How the words that share its kanji read: two at most, of its level
+  // first (学校 asks 学生 and 校長).
+  const kin = family.filter(x => x.t !== w.t && x.t.length > 1 && x.r)
+  const inWords = kin.filter(x => readingMisses({ t: x.t, fu: x.fu || [[x.t, x.r]] }, index, knownOf(x)).length >= 3).slice(0, 2).map((x, i) => ({
+    kind: 'inWord', ask: t.examAsk.inWord, stem: { specimen: x.t },
+    ...dealChoices(x.r, shuffle(readingMisses({ t: x.t, fu: x.fu || [[x.t, x.r]] }, index, knownOf(x)), seeded(`${w.t}-w${i}`)).slice(0, 3), `${w.t}-w${i}`, 'jp'),
+    explain: { head: `${x.t}\u3000${x.r}`, sense: weldIf(lang, gloss(x, lang)[0]) },
+  }))
+  // How it is written in kanji is the spelling mode's (spellingQuizzes).
+  return withId([readingQ2, meaning, inWords[0], reverse, inWords[1]], q => t.kinds[q.kind])
+}
+
+/** 表記, a mode of its own (plan 200l): the word and the deck words of its
+ *  level that share a kanji with it, each heard in kana and asked how it
+ *  is written, among spellings that are no word. Five at most. */
+export function spellingQuizzes(w, data, lang, t) {
+  const kanji = new Set([...w.t].filter(c => hasKanji(c)))
+  const kin = (data.words || []).filter(x => x.t !== w.t && [...x.t].some(c => kanji.has(c)))
+  return withId([w, ...kin].filter(x => x.hy?.length >= 3).slice(0, 5).map((x, i) => ({
+    kind: 'orthography', id: `spell-${i + 1}`, label: x.r, ask: t.examAsk.writtenAs, stem: { specimen: x.r },
+    ...dealChoices(x.t, x.hy.slice(0, 3), `${x.t}-hy`, 'jp'),
+    explain: { head: `${x.r}\u3000${x.t}`, sense: weldIf(lang, gloss(x, lang)[0]) },
+  })), q => t.kinds[q.kind])
 }
 
 // ── A kanji ───────────────────────────────────────────────────

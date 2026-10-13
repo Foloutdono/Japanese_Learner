@@ -14,7 +14,7 @@ import { STRINGS, count, formOf, tr, weldIf } from './strings.js'
 import { ROLES, howItWorks, lookalikesOf, particleLabel, stacksIn } from './explain.js'
 import { firstSense, gloss, lineRomaji, readingMisses, seeded, shuffle, unpack } from './common.js'
 import {
-  kanaQuizzes, kanjiQuizzes, lessonQuizzes, overlaps, passageQuizzes, sentenceQuizzes, translationQuizzes, wordQuizzes,
+  kanaQuizzes, kanjiQuizzes, lessonQuizzes, overlaps, passageQuizzes, sentenceQuizzes, spellingQuizzes, translationQuizzes, wordQuizzes,
 } from './quizzes.js'
 
 export { gloss, lineRomaji, readingMisses, seeded, shuffle, unpack }
@@ -433,9 +433,16 @@ function wordPlan(data, w, opts, deps) {
   const strokeChar = chars.find(c => deps.strokes?.[c]?.s)
   if (o.strokes && strokeChar) slides.push({ kind: 'strokes', char: strokeChar, k: deps.strokes[strokeChar] })
   closing(slides, o, t, p, { yourturn: { kind: 'yourturn', text: t.turn.word(w.t) } })
-  const quizzes = wordQuizzes(w, data, lang, t, index)
+  // The words that share its kanji: its level's first, then its family's,
+  // none far above it (購買, N1, for 買う, N5).
+  const rank = x => Number(String(x || 'N0').slice(1))
+  const near = x => !x.lv || rank(x.lv) >= rank(data.level) - 2
+  const kin = [...data.words.filter(x => x.t !== w.t && [...x.t].some(c => chars.includes(c))), ...family.slice(1).filter(x => near(x) && !data.words.some(y => y.t === x.t))]
+  const quizzes = wordQuizzes(w, data, lang, t, index, kin)
+  const spelling = spellingQuizzes(w, data, lang, t)
   return {
     ...p, hook: { kind: 'specimen', text: w.t }, prompt: t.prompt.word, quizzes, quiz: quizzes[0] || null, slides,
+    spelling: spelling.length ? spelling : null,
     list: family.length >= 3 ? { title: t.listTitle.words(family.length, famChar), head: famChar, line: 'vocab', items: family.map((x, n) => wordItem(x, lang, n + 1)) } : null,
     caption: { jp: `${w.t}（${w.r}）`, romaji: w.ro, tr: weldIf(lang, main), ask: t.prompt.word, tags: [`jlpt${data.level.toLowerCase()}`, 'vocabulary'] },
   }
@@ -615,6 +622,7 @@ const TITLES = {
     build: c => `Build the sentence: ${c.head}`,
     list: (c, lv, n) => (c.sentences ? `${n} sentences with ${c.head}` : c.from ? `${n} words from “${c.head}”` : `${n} words with ${c.head}`),
     talk: c => `${c.head} in a real conversation`,
+    spelling: (c, lv) => `How do you write ${c.reading} in kanji? ${lv} spelling quiz`,
   },
   fr: {
     sentence: (c, lv) => `Tu sais lire cette phrase ${lv} sans aide ?`,
@@ -629,6 +637,7 @@ const TITLES = {
     build: c => `Construis la phrase : ${c.head}`,
     list: (c, lv, n) => (c.sentences ? `${n} phrases avec ${c.head}` : c.from ? `${n} mots de « ${c.head} »` : `${n} mots avec ${c.head}`),
     talk: c => `${c.head} dans une vraie conversation`,
+    spelling: (c, lv) => `Comment s’écrit ${c.reading} en kanji ? Quiz ${lv}`,
   },
 }
 /** The title of a plan posted as `type` asking `n` questions. */
@@ -649,6 +658,8 @@ export function titleOf(pl, type, n = 3) {
       return say.list({ head: sentences ? v.head : pl.list.head || v.head, sentences, from: pl.source === 'passage' }, lv, pl.list.items.length)
     }
     if (type === 'talk') return say.talk({ head: v.head })
+    // Never the kanji it asks for: the word heard in kana.
+    if (type === 'spelling') return say.spelling({ reading: /（(.+)）/.exec(c.jp)?.[1] || item }, lv)
     return say[pl.source](v, lv)
   }
   // The item's text is what gives way, to fit the feed's limit.

@@ -417,7 +417,7 @@ async function render() {
   }
   // The caption is written when the item or its language changes, never
   // over the reader's own edits on a redraw.
-  const captionKey = `${state.source}|${pl.id}|${state.lang}`
+  const captionKey = `${state.source}|${pl.id}|${state.lang}|${state.type === 'spelling'}`
   if (captionKey !== captionFor) { $('#caption').value = captionOf(pl); captionFor = captionKey }
   // The title names the type and the questions asked too (plan 200l).
   const asked = state.type === 'exam' ? picked(pl, state.picks[pickKey()], 3).length : 1
@@ -595,9 +595,12 @@ function captionOf(pl) {
   const tags = [...base, ...c.tags.map(t => `#${t}`), '#日本語', '#nihongo', '#tsuji'].join(' ')
   // A passage's line is the question picked for it, not always its first.
   const tr = pl.source === 'passage' ? picked(pl, state.picks[pickKey()], 1)[0]?.ask || c.tr : c.tr
-  const head = [c.jp, c.romaji, tr].filter(Boolean).join('\n')
+  // A spelling quiz never prints the kanji it asks for: the word in kana.
+  const spelling = state.type === 'spelling'
+  const jp = spelling ? /（(.+)）/.exec(c.jp)?.[1] || c.jp : c.jp
+  const head = [jp, c.romaji, tr].filter(Boolean).join('\n')
   // The point once: a lesson's ask names it already.
-  const ask = c.point && !c.ask.includes(c.point) ? `${c.ask} · ${c.point}` : c.ask
+  const ask = spelling ? pl.t.spellingAsk : c.point && !c.ask.includes(c.point) ? `${c.ask} · ${c.point}` : c.ask
   return `${head}\n\n${ask}\n\n${tags}`
 }
 async function copyField(id, name) {
