@@ -19,7 +19,7 @@ const $ = sel => document.querySelector(sel)
 const TOGGLE_LABELS = {
   words: 'Word by word', grammar: 'Grammar at work, stacked particles', watch: 'Watch out',
   more: 'Other sentences with the point', check: 'The questions picked, at the end',
-  yourturn: 'Your turn (composition)', rating: 'Rate yourself', outro: 'The station, last',
+  yourturn: 'Your turn (composition)', rating: 'How did you do? (self-check)', outro: 'The station, last',
   examples: 'Examples', scene: 'Conversation, and what would you say?', twist: 'Twist', usage: 'A second twist',
   rival: 'The point it is confused with', parts: 'Its kanji', family: 'More words with its kanji',
   strokes: 'Stroke order', readings: 'Readings', lookalike: 'Lookalikes', vocab: 'Words to know first',

@@ -27,8 +27,9 @@ export const STRINGS = {
     twist: 'Twist',
     another: 'Another use',
     rate: 'How did you do?',
-    rateCta: 'Rate yourself in the comments',
-    ratings: ['Wrong', 'Almost', 'Difficult', 'Correct'],
+    rateCta: 'Comment your number',
+    // How much help the reader needed, a number to comment (plan 200l).
+    selfCheck: ['On my own', 'With the furigana', 'With the translation', 'Not yet'],
     examAsk: {
       reading: 'How do you read the underlined word?',
       meaning: 'What does the underlined word mean?',
@@ -179,8 +180,8 @@ export const STRINGS = {
     twist: 'Variante',
     another: 'Un autre emploi',
     rate: 'Alors, tu l’as lue ?',
-    rateCta: 'Donne ta note en commentaire',
-    ratings: ['Raté', 'Presque', 'Difficile', 'Correct'],
+    rateCta: 'Réponds par ton numéro en commentaire',
+    selfCheck: ['Tout seul', 'Avec les furigana', 'Avec la traduction', 'Pas encore'],
     examAsk: {
       reading: 'Comment se lit le mot souligné ?',
       meaning: 'Que veut dire le mot souligné ?',
@@ -309,7 +310,9 @@ export const STRINGS = {
   },
 }
 
-export const RATINGS_JP = ['不正解', '惜しい', '難しい', '正解']
+// The same four in Japanese, under each: by myself, with the furigana,
+// with the translation, not yet.
+export const SELF_CHECK_JP = ['自力で', 'ふりがなで', '訳を見て', 'まだまだ']
 // The app's website, which the mark's last slide sends a reader to.
 export const SITE = 'tsuji.app'
 

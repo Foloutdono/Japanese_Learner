@@ -22,7 +22,7 @@ import {
   fit, wrap, paragraph, paragraphH, roundel, mark, metal, chevron, layoutSentence, drawSentence, lineOf, frame,
   ground, masthead, heading, pageMark, pages, strokeBox, marked, stamp, METAL_H,
 } from './draw.js'
-import { RATINGS_JP, SITE, formOf, tr, weldIf } from './strings.js'
+import { SELF_CHECK_JP, SITE, formOf, tr, weldIf } from './strings.js'
 import { picked } from './sources.js'
 import { furiganaOf } from './common.js'
 
@@ -2222,37 +2222,53 @@ function opening(ctx, p, fr, plan, hook = plan.hook, prompt = promptOf(plan)) {
   metal(ctx, p, fr.cx, fr.bottom - pill, plan.t.next)
 }
 
-// ── The rating bar (the app's own verdicts) ───────────────
+// ── How did you do? (plan 200l) ───────────────────────────────
+/** A self-check a reader answers with a number in the comments: how much
+ *  help they needed to read the sentence, from none to not yet. Four
+ *  plates, one numbered choice each; never the app's own rating bar,
+ *  whose verdicts belong to a review, not to a feed. */
 function ratingSlide(ctx, p, fr, plan) {
   ground(ctx, p, fr)
   const t = plan.t
-  const title2 = fit(ctx, t.rate, { sizes: [FS.display, FS.heading], maxW: fr.w, maxLines: 2 })
-  const barH = 120 * 2.7 * 0.62
-  const cta = fit(ctx, t.rateCta, { weight: 500, sizes: [FS.title, FS.lead], maxW: fr.w, maxLines: 2 })
-  const total = paragraphH(title2) + SP[8] + barH + SP[8] + paragraphH(cta) + SP[6] + FS.display
-  let y = fr.y + (fr.h - total) / 2
-  y += paragraph(ctx, title2, fr.cx, y, p.ink, 'center') + SP[8]
-  ctx.fillStyle = p.panel
-  rrect(ctx, fr.x, y, fr.w, barH, R.panel)
-  ctx.fill()
-  const bw = fr.w / 4
-  for (let i = 0; i < 4; i++) {
-    const bx = fr.x + i * bw
-    if (i) { ctx.fillStyle = p.panelLine; ctx.fillRect(bx, y + SP[4], 2, barH - SP[4] * 2) }
-    const cx = bx + bw / 2
-    ctx.fillStyle = p.rating[i]
-    ctx.beginPath()
-    ctx.arc(cx, y + barH * 0.27, 13, 0, Math.PI * 2)
+  const lang = plan.lang
+  const head = fit(ctx, weldIf(lang, t.rate), { sizes: [FS.display, FS.heading, FS.title], maxW: fr.w, maxLines: 2 })
+  const cta = fit(ctx, weldIf(lang, t.rateCta), { weight: 500, sizes: [FS.title, FS.lead], maxW: fr.w, maxLines: 2 })
+  const n = t.selfCheck.length
+  const gap = SP[3]
+  const bubble = FS.display * 0.7
+  const rest = paragraphH(head) + SP[7] + SP[7] + paragraphH(cta)
+  // The plates take what the words leave, a readable row each.
+  const rowH = Math.min(FS.title * 2.9, (fr.h - rest - bubble - SP[6] - gap * (n - 1)) / n)
+  const total = rest + rowH * n + gap * (n - 1) + (rowH >= FS.title * 2.4 ? SP[6] + bubble : 0)
+  let y = fr.y + Math.max(0, (fr.h - total) / 2)
+  y += paragraph(ctx, head, fr.x, y, p.ink, 'left') + SP[7]
+  const r = Math.min(34, rowH * 0.3)
+  const labels = t.selfCheck.map(label => weldIf(lang, label))
+  const lx = fr.x + SP[5] + r * 2 + SP[5]
+  const jpF = font(500, FS.caption, 'jp')
+  const jpW = Math.max(...SELF_CHECK_JP.map(x => measure(ctx, x, jpF)))
+  // Every label in one size, the largest at which each keeps to a line.
+  const labelW = fr.right - SP[5] - jpW - SP[5] - lx
+  const size = [FS.title, FS.lead, FS.body].find(z => labels.every(l => !fit(ctx, l, { sizes: [z], maxW: labelW, maxLines: 1 }).cut)) || FS.body
+  labels.forEach((label, i) => {
+    const ry = y + i * (rowH + gap)
+    const mid = ry + rowH / 2
+    ctx.fillStyle = p.surface
+    rrect(ctx, fr.x, ry, fr.w, rowH, R.plate)
     ctx.fill()
-    const lf = fit(ctx, t.ratings[i], { sizes: [FS.lead, FS.body, FS.sm], maxW: bw - SP[3] * 2, maxLines: 1 })
-    text(ctx, lf.lines[0], cx, y + barH * 0.62, { f: lf.f, color: p.onPanel, align: 'center' })
-    text(ctx, RATINGS_JP[i], cx, y + barH * 0.86, { f: font(500, FS.caption, 'jp'), color: p.onPanelSoft, align: 'center' })
-  }
-  y += barH + SP[8]
-  y += paragraph(ctx, cta, fr.cx, y, p.ink2, 'center') + SP[6]
-  if (fr.bottom - y >= FS.display * 0.7) commentMark(ctx, p, fr.cx - FS.display * 0.35, y, FS.display * 0.7)
+    ctx.strokeStyle = p.surfaceLine
+    ctx.lineWidth = 2
+    rrect(ctx, fr.x + 1, ry + 1, fr.w - 2, rowH - 2, R.plate)
+    ctx.stroke()
+    roundel(ctx, fr.x + SP[5] + r, mid, r, p.gold, String(i + 1), { ink: p.gold, size: r * 0.95 })
+    const lb = fit(ctx, label, { sizes: [size], maxW: labelW, maxLines: 1 })
+    text(ctx, lb.lines[0], lx, mid + lb.size * 0.36, { f: lb.f, color: p.ink })
+    text(ctx, SELF_CHECK_JP[i], fr.right - SP[5], mid + FS.caption * 0.36, { f: jpF, color: p.ink2, align: 'right' })
+  })
+  y += rowH * n + gap * (n - 1) + SP[7]
+  y += paragraph(ctx, cta, fr.x, y, p.ink2, 'left') + SP[6]
+  if (fr.bottom - y >= bubble * 0.95) commentMark(ctx, p, fr.x, y, bubble)
 }
-
 // ── The directions and their decks ────────────────────────────
 // The endings the studio offers, in the order it shows them.
 export const ENDING_IDS = ['mark', 'map', 'pass', 'cta', 'terminus', 'plate']

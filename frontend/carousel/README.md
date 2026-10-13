@@ -11,7 +11,7 @@ Each source is one of the app's own lines, and wears its pigment:
 
 | | Source | One carousel is | Its slides |
 | --- | --- | --- | --- |
-| 読書 | Read a sentence | a sentence of the reading bank | the hook, word by word, the point at work in it, two particles that work together, watch out, the answer, a kanji to write, rate yourself |
+| 読書 | Read a sentence | a sentence of the reading bank | the hook, word by word, the point at work in it, two particles that work together, watch out, the answer, a kanji to write, how did you do? (four numbered answers to comment, from "on my own" to "not yet"; never the app's own rating bar) |
 | 翻訳 | Translate | the same sentence, asked from its translation | the translation, the words, the point, the answer; "your turn" asks for it in the comments |
 | 文法 | Grammar lesson | a catalogue point | the rule shown in one of its sentences, its examples, the tour's scene and a "what do you say?", another use, watch out, your turn |
 | 単語 | Word | a deck word | the reading, its kanji one by one, its sentences, its strokes |
