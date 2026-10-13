@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { track } from '../lib/track'
 
 // ── ホーム画面に追加 — the install offer ─────────────────────
 // Chromium fires `beforeinstallprompt` once the page qualifies as
@@ -29,6 +30,10 @@ if (typeof window !== 'undefined') {
   window.addEventListener('appinstalled', () => {
     deferred = null
     emit()
+    // Fired by the browser whichever way the app got installed (our
+    // button, its own menu, the address bar), so it is the only count
+    // of installs rather than of answers to our prompt.
+    track('install_prompt', { outcome: 'installed' })
   })
 }
 
@@ -51,6 +56,9 @@ export async function promptInstall() {
   deferred = null
   emit()
   const { outcome } = await e.userChoice
+  // 'accepted' | 'dismissed', the browser's own words: how many of the
+  // learners who pressed the row went through with it.
+  track('install_prompt', { outcome })
   return outcome
 }
 

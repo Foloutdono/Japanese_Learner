@@ -330,3 +330,52 @@ def test_a_batch_sent_twice_is_kept_once(client):
     client.post("/api/events", json=bare)
     client.post("/api/events", json=bare)
     assert [r[0] for r in rows()].count("install_prompt") == 2
+
+
+# ── 訪問 — the session id rides beside the event ──────────────────
+
+def sids():
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT name, sid FROM event_log WHERE user_id = %s ORDER BY id",
+                (DEV_USER_ID,),
+            )
+            return cur.fetchall()
+    finally:
+        conn.close()
+
+
+def test_a_session_id_is_kept_beside_the_event_not_in_its_props(client):
+    sid = str(uuid.uuid4())
+    r = client.post("/api/events", json={"events": [
+        {"name": "session_start", "sid": sid, "props": {}},
+        {"name": "screen_view", "sid": sid, "props": {"route": "/today", "sid": "smuggled"}},
+    ]})
+    assert r.json()["kept"] == 2
+    assert sids() == [("session_start", sid), ("screen_view", sid)]
+    # `sid` is not a property of screen_view, so the allowlist drops it.
+    assert [props for _, props, _ in rows()] == [{}, {"route": "/today"}]
+
+
+def test_a_session_id_is_held_to_its_shape():
+    # The one column the property allowlist does not cover, so the shape
+    # is the whole defence: letters, digits and dashes, 8 to 64.
+    assert events.clean_sid(str(uuid.uuid4())) is not None
+    assert events.clean_sid("lx3k9a-4f7q2m1z") == "lx3k9a-4f7q2m1z"
+    for bad in ("short", "x" * 65, "ma liste de mots 01", "../../etc/passwd", "été-été-été-été", "", None, 12345678, {"a": 1}):
+        assert events.clean_sid(bad) is None
+
+
+def test_a_bad_session_id_costs_the_event_nothing(client):
+    r = client.post("/api/events", json={"events": [
+        {"name": "screen_view", "sid": "ma liste de mots", "props": {"route": "/today"}},
+    ]})
+    assert r.json()["kept"] == 1
+    assert sids() == [("screen_view", None)]
+
+
+def test_an_older_client_with_no_session_id_is_still_kept(client):
+    client.post("/api/events", json={"events": [{"name": "screen_view", "props": {"route": "/today"}}]})
+    assert sids() == [("screen_view", None)]

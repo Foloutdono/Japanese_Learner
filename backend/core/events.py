@@ -23,6 +23,7 @@ here with a segment that is not a pattern is dropped rather than stored.
 """
 
 import logging
+import re
 from datetime import datetime, timedelta, timezone
 
 from core.db import db_conn
@@ -44,6 +45,11 @@ EVENTS: dict[str, frozenset[str]] = {
 
     # ── Where people go ──────────────────────────────────────────
     "screen_view":    frozenset({"route", "tab"}),
+    # 訪問 — a visit began. No properties: the session id rides beside
+    # the event (event_log.sid), not inside it. One row per session, so
+    # event_daily's count of this name is "sessions per learner per
+    # day" for the life of the account, after the raw rows are gone.
+    "session_start":  frozenset(),
 
     # ── みどりの窓口 — the boarding flow ─────────────────────────
     # Emitted from go()/back() in BoardingFlow.jsx, which is every
@@ -210,6 +216,14 @@ KEEP_LONG = frozenset({
     "basics_unit_done", "basics_skipped",
 })
 
+# A session id is the client's random token for one visit
+# (lib/track.js). It is not a property: it is shaped, not free, so it is
+# held to a shape rather than to the allowlist -- a UUID or the fallback
+# the client mints without crypto.randomUUID, letters, digits and dashes
+# only. Anything else is not stored, so a client cannot smuggle text into
+# the one column the allowlist does not cover.
+SID_RE = re.compile(r"^[A-Za-z0-9-]{8,64}$")
+
 # A property value is a scalar or it is dropped. Strings are cut at 64
 # characters: every legitimate value here is an enum, a route pattern or
 # a number, and 64 is comfortably past the longest route pattern the app
@@ -259,6 +273,11 @@ def clean(name, props) -> dict | None:
     return out
 
 
+def clean_sid(raw) -> str | None:
+    """The session id if it has the shape of one, else None."""
+    return raw if isinstance(raw, str) and SID_RE.fullmatch(raw) else None
+
+
 def clean_at(raw, now: datetime) -> datetime:
     """A client timestamp, clamped to a window it cannot lie its way out of."""
     if not isinstance(raw, str):
@@ -298,6 +317,11 @@ def _ensure_events_schema() -> None:
             # rows and an older client's carry none, and NULLs must not
             # collide.
             cur.execute("ALTER TABLE event_log ADD COLUMN IF NOT EXISTS cid TEXT")
+            # The client's random id for one visit (lib/track.js), so the
+            # trail can say how long a session lasted and how many a day
+            # a learner has. Raw rows only: event_daily keeps the count
+            # of `session_start`, which is the same figure without ids.
+            cur.execute("ALTER TABLE event_log ADD COLUMN IF NOT EXISTS sid TEXT")
             cur.execute("""
                 CREATE UNIQUE INDEX IF NOT EXISTS idx_event_log_user_cid
                 ON event_log(user_id, cid) WHERE cid IS NOT NULL
@@ -337,18 +361,20 @@ def write(cur, user_id: str, rows: list[tuple]) -> int:
     on the unique (user_id, cid). A row with no id -- the server's own,
     or an older client's -- is never deduplicated.
 
-    rows: (name, props, at) or (name, props, at, cid)."""
+    rows: (name, props, at), (name, props, at, cid) or
+    (name, props, at, cid, sid)."""
     if not rows:
         return 0
     kept = 0
     for row in rows:
         name, props, at = row[0], row[1], row[2]
         cid = row[3] if len(row) > 3 else None
+        sid = clean_sid(row[4]) if len(row) > 4 else None
         cur.execute(
-            "INSERT INTO event_log (user_id, name, props, at, cid) "
-            "VALUES (%s, %s, %s::jsonb, %s, %s) "
+            "INSERT INTO event_log (user_id, name, props, at, cid, sid) "
+            "VALUES (%s, %s, %s::jsonb, %s, %s, %s) "
             "ON CONFLICT (user_id, cid) WHERE cid IS NOT NULL DO NOTHING",
-            (user_id, name, _json(props), at, cid),
+            (user_id, name, _json(props), at, cid, sid),
         )
         kept += cur.rowcount
     return kept
