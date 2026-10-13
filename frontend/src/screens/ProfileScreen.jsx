@@ -8,14 +8,16 @@ import { ProfileCard } from '../components/pass/LearnerCard'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { useDesk } from '../hooks/useDesk'
-import { StampBook, Records, ProfileDoors, TicketsDoor } from '../components/profile/ProfileBlocks'
+import { StampBook, Records, ProfileDoors, TicketsDoor, AgendaDoor } from '../components/profile/ProfileBlocks'
 import { Banzuke } from '../components/profile/Banzuke'
 import { LineLedger } from '../components/profile/LineLedger'
+import { useAgenda } from '../stores/agenda'
 
 // ── 定期入れ — the pass holder (canvas Profile + ProfileInserts) ──
 // The profile is the pass, and everything under it is an insert tucked
 // behind it in the holder: the two doors (Statistics, Settings), the
-// stamp book, the records, the ride ledger, the ranking. No bar
+// stamp book, the tickets and the agenda, the records, the ride
+// ledger, the ranking. No bar
 // and no headings — the pass names the screen, and every insert names
 // itself. The pass's back — the ghost train and the status — is the
 // status sheet off the HUD's station panel now (plan 074); the pass
@@ -96,6 +98,9 @@ export default function ProfileScreen({ session }) {
   const [weekBoard, setWeekBoard]     = useState(null)
   const [stats, setStats]             = useState(null)
   const [stale, setStale]             = useState(false)
+  // The week Settings › Agenda keeps (plan 181), shared with Today's
+  // figure and the native reminders.
+  const { blocks: agenda }            = useAgenda()
 
   useEffect(() => {
     apiFetch('/api/profile', session)
@@ -159,6 +164,8 @@ export default function ProfileScreen({ session }) {
     // 記念切符 (plan 191): the tickets the streak earned, behind the
     // stamp book they were earned in.
     tickets: <TicketsDoor t={t} navigate={navigate} count={profile.tickets?.length ?? 0} />,
+    // 時間割 (plan 202): the door to the agenda, under the tickets'.
+    agenda: <AgendaDoor t={t} navigate={navigate} blocks={agenda} />,
     // Three figures: the reviews, the retention, the best perfect run.
     records: <Records profile={profile} t={t} />,
     ledger: stats && <LineLedger stats={stats} t={t} navigate={navigate} />,
@@ -188,6 +195,7 @@ export default function ProfileScreen({ session }) {
               {inserts.pass}
               {inserts.stamps}
               {inserts.tickets}
+              {inserts.agenda}
             </div>
             <div className="desk-profile__col">
               {inserts.records}
@@ -203,6 +211,7 @@ export default function ProfileScreen({ session }) {
           {inserts.doors}
           {inserts.stamps}
           {inserts.tickets}
+          {inserts.agenda}
           {inserts.records}
           {inserts.ledger}
           {inserts.board}

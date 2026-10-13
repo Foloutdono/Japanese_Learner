@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
@@ -34,6 +34,12 @@ vi.mock('./stores/credits', async (o) => ({
   openBalance: (...a) => openBalance(...a),
 }))
 vi.mock('./hooks/useGuide', () => ({ useGuide: () => ({ open: false, onEnd() {} }) }))
+// The week Settings › Agenda keeps: unread unless a test sets it.
+const agenda = vi.hoisted(() => ({ blocks: null }))
+vi.mock('./stores/agenda', async (o) => ({
+  ...(await o()),
+  useAgenda: () => ({ blocks: agenda.blocks, failed: false }),
+}))
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
@@ -41,12 +47,18 @@ const { default: ProfileScreen } = await import('./screens/ProfileScreen')
 
 const settle = (ms = 500) => new Promise(r => setTimeout(r, ms))
 
+// Where a door went.
+function Where() {
+  return <output data-where>{useLocation().pathname}</output>
+}
+
 async function mount() {
   document.body.innerHTML = ''
   await render(
     <LangProvider>
       <MemoryRouter initialEntries={['/profile']}>
         <ProfileScreen session={{ access_token: 'tok' }} />
+        <Where />
       </MemoryRouter>
     </LangProvider>
   )
@@ -101,19 +113,56 @@ describe('the profile at phone width (plan 143)', () => {
     expect($('.sbook__month .fig__l').textContent).toBe(String(new Date().getFullYear()))
   })
 
-  it('lays the inserts out in order: the card, the doors, the stamps, the tickets, the records, five on the board', async () => {
+  it('lays the inserts out in order: the card, the doors, the stamps, the tickets, the agenda, the records, five on the board', async () => {
     await mount()
     // The doors stand straight under the card (the owner's call after
     // the first round of plan 143), above the stamp book; the tickets'
-    // door under the stamp book they were earned in (plan 191).
-    const order = ['.pcard-slot--profile', '.record--door', '.sbook', '.records--one', '.records--three', '.banzuke']
-      .map(sel => $(sel).getBoundingClientRect().top)
+    // door under the stamp book they were earned in (plan 191), and the
+    // agenda's under the tickets' (plan 202).
+    const [tickets, agendaDoor] = $$('.records--one')
+    const order = [$('.pcard-slot--profile'), $('.record--door'), $('.sbook'), tickets, agendaDoor, $('.records--three'), $('.banzuke')]
+      .map(el => el.getBoundingClientRect().top)
     expect([...order].sort((a, b) => a - b)).toEqual(order)
     const figures = $$('.records--three > .record')
     expect(figures).toHaveLength(3)
     expect(figures.map(f => f.querySelector('.record__value').textContent)).toEqual(['842', '91%', '12'])
-    expect($$('.record--door').map(d => d.tagName)).toEqual(['BUTTON', 'BUTTON', 'BUTTON'])
-    expect($('.records--one .pf-line__jp').textContent).toBe('Billets')
+    expect($$('.record--door').map(d => d.tagName)).toEqual(['BUTTON', 'BUTTON', 'BUTTON', 'BUTTON'])
+    expect(tickets.querySelector('.pf-line__jp').textContent).toBe('Billets')
+    expect(agendaDoor.querySelector('.pf-line__jp').textContent).toBe('Emploi du temps')
     expect($$('.banzuke .leaderboard-row')).toHaveLength(5)
+  })
+
+  it('prints the hours the week holds on the agenda\'s door, and opens the agenda (plan 202)', async () => {
+    // Kanji on weekday mornings, the queue every evening: 5 h + 3 h 30.
+    agenda.blocks = [
+      { id: 1, subject: 'kanji', days: [0, 1, 2, 3, 4], start: 540, end: 600, notify: true, lead: 10 },
+      { id: 2, subject: 'review', days: [0, 1, 2, 3, 4, 5, 6], start: 1260, end: 1290, notify: true, lead: 0 },
+    ]
+    try {
+      await mount()
+      const [tickets, box] = $$('.records--one')
+      const door = box.querySelector('.record--door')
+      expect(door.querySelector('.pf-line__roundel').textContent).toBe('時')
+      expect(door.querySelector('.record__value--door').textContent).toBe('8 h 30')
+      // One line, like the tickets' door above it.
+      expect(box.getBoundingClientRect().height).toBeCloseTo(tickets.getBoundingClientRect().height, 0)
+      door.click()
+      await settle(50)
+      expect($('[data-where]').textContent).toBe('/profile/settings/agenda')
+    } finally {
+      agenda.blocks = null
+    }
+  })
+
+  it('prints no figure on the agenda\'s door for an empty week', async () => {
+    agenda.blocks = []
+    try {
+      await mount()
+      const door = $$('.records--one')[1]
+      expect(door.querySelector('.pf-line__jp').textContent).toBe('Emploi du temps')
+      expect(door.querySelector('.record__value--door')).toBeNull()
+    } finally {
+      agenda.blocks = null
+    }
   })
 })

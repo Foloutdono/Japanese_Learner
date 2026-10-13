@@ -2216,7 +2216,10 @@ line here says otherwise.
 - **A backward-looking screen stays backward-looking.** The profile is a
   record of what was done. A goal
   measured in weeks belongs on the pass's back, where the ghost train already
-  measures it, and the day's work belongs at the fare gate.
+  measures it, and the day's work belongs at the fare gate. A door to a
+  page that looks ahead may stand in the holder, as the agenda's does
+  (plan 202), so long as its figure is what the page holds (the week's
+  hours) and never what is next.
 - Four column widths — and, on the desk, the rail's `--desk-rail-w`
   (256px) beside them, the canvas grown to `--desk-board-w` (1240px), a
   second column at `--desk-side-w` (360px) and the dictionary's entry at
