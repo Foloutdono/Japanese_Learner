@@ -12,9 +12,11 @@ them, frontend/src/components/analysis/rows.js), their readings,
 furigana and romaji, the deck's glosses in both languages, the grammar
 catalogue's rule and its tour's twists, KANJIDIC2's meanings and
 KanjiVG's strokes. This writes all of it, once, into
-frontend/carousel/bank/N5.json ... N1.json, one level a file so the
-page opens on N5 without loading N1, and the studio is a static page
-with nothing to ask a server.
+frontend/carousel/bank/, one level a file so the page opens on N5
+without loading N1, and the studio is a static page with nothing to
+ask a server. Since plan 200b it writes the rest of what a carousel can
+be drawn from too: the grammar lessons with their tours, the deck's
+words and kanji, the kana and the comprehension passages.
 
     python -m scripts.carousel_bank            # writes frontend/carousel/bank/*.json
     python -m scripts.carousel_bank --check    # exits 1 when a file is stale
@@ -41,7 +43,7 @@ KANJIVG = BACKEND / "kanjivg"
 
 # Bumped when the file's shape changes, so the studio can refuse a file
 # it cannot read rather than draw half a slide.
-REV = 1
+REV = 2
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 
@@ -341,9 +343,9 @@ def kanji_entry(char: str, deck: dict) -> dict:
 
 
 def build(level: str, deck: dict) -> dict:
-    """One level's file, whole: its sentences, the points a slide names
-    (each row's own point, and every point a particle or copula row is
-    glossed by) and the kanji its sentences write."""
+    """One level's sentences, whole: the sentences, the points a slide
+    names (each row's own point, and every point a particle or copula row
+    is glossed by) and the kanji its sentences write."""
     points: set = set()
     kanji: set = set()
     sentences = []
@@ -365,33 +367,307 @@ def build(level: str, deck: dict) -> dict:
     }
 
 
+# ── The rest of the app (plan 200b) ──────────────────────────────
+# A carousel is not only a sentence of the reading bank: the studio also
+# draws a grammar lesson, a word of the deck, a kanji, a kana and a
+# comprehension passage. Each is written below from the app's own
+# content, every Japanese line in it cut into words as a sentence is.
+
+def text_rows(jp: str, level: str | None = None, pattern: str | None = None) -> list[list]:
+    """A line of a lesson as the rows a slide sets, each packed as an
+    array to keep thousands of them small: ["。"] for punctuation, else
+    [text, kind ("w" word, "v" verb or adjective, "p" particle, "c" copula), romaji, furigana
+    (0 where none), 1 where `pattern` is written on it]; trailing empties
+    dropped. No glosses: a lesson's line is read, not taken apart.
+    The studio unpacks them (sources.js, unpack)."""
+    analysis = analyze_local(jp, level)
+    out = []
+    for r in rows_of(analysis["tokens"]):
+        if r["k"] == "punct":
+            out.append([r["t"]])
+            continue
+        kind = "v" if r["k"] == "word" and r["pos"] in ("verb", "adjective") else r["k"][0]
+        row = [r["t"], kind, r["ro"], r.get("fu") or 0, 1 if pattern and pattern in r.get("g", []) else 0]
+        while row[-1] == 0:
+            row.pop()
+        out.append(row)
+    return out
+
+
+def _both(d: dict | None) -> dict:
+    return {k: _plain((d or {}).get(k, "")) for k in ("en", "fr")}
+
+
+def lesson(level: str, entry: dict) -> dict:
+    """A grammar point as the tour teaches it: its meaning and form, the
+    rule and the caution, the rival it is confused with, three examples,
+    two twists, the scene and two of its quiz questions. Every choice
+    list keeps the catalogue's order, the right one first."""
+    p = entry["pattern"]
+    meaning = entry.get("meaning") or {}
+    out = {"p": p, "lv": level, "en": meaning.get("en", ""), "fr": meaning.get("fr", ""),
+           "form": entry.get("structure", "")}
+    french = form_fr(out["form"])
+    if french:
+        out["form_fr"] = french
+    for step in entry.get("steps") or []:
+        if step.get("kind") in ("rule", "careful") and step["kind"] not in out:
+            out[step["kind"]] = _both(step)
+    compare = (entry.get("compare") or [])[:1]
+    if compare:
+        out["compare"] = {"p": compare[0].get("pattern", ""), **_both(compare[0])}
+    out["ex"] = [{"rows": text_rows(e["jp"], level, p), "en": e.get("en", ""), "fr": e.get("fr", "")}
+                 for e in (entry.get("examples") or [])[:3]]
+    tour = entry.get("tour") or {}
+    twists = []
+    for t in (tour.get("twists") or [])[:2]:
+        tw = {"notion": t.get("notion") or {}, "why": _both(t.get("why")), "ask": _both(t.get("ask")),
+              "tr": _both(t.get("tr")), "rows": text_rows(t["jp"], level, p),
+              "choices": [_both(c) for c in t.get("choices") or []]}
+        if t.get("pair") and len(t["pair"]) == 2:
+            tw["pair"] = t["pair"]
+        twists.append(tw)
+    if twists:
+        out["twists"] = twists
+    scene = tour.get("scene")
+    if scene:
+        ask = scene.get("ask") or {}
+        cue = ask.get("cue") or {}
+        out["scene"] = {
+            "place": scene.get("place", ""),
+            "them": scene.get("them") or {},
+            "lines": [{"who": ln["who"], "rows": text_rows(ln["jp"], level, p), "en": ln.get("en", ""), "fr": ln.get("fr", "")}
+                      for ln in scene.get("lines") or []],
+            "note": _both(scene.get("note")),
+            "ask": {
+                "cue": {"who": cue.get("who", "them"), "rows": text_rows(cue["jp"], level), "en": cue.get("en", ""), "fr": cue.get("fr", "")},
+                "task": _both(ask.get("task")),
+                "choices": [text_rows(c, level) for c in ask.get("choices") or []],
+                "why": _both(ask.get("why")),
+            } if cue.get("jp") else None,
+        }
+    quiz = []
+    for q in (tour.get("quiz") or [])[:2]:
+        item = {"kind": q.get("kind"), "ask": _both(q.get("ask")), "why": _both(q.get("why"))}
+        if q.get("jp"):
+            item["rows"] = text_rows(q["jp"], level)
+            item["tr"] = _both(q.get("tr"))
+        choices = q.get("choices") or []
+        item["choices"] = [_both(c) if isinstance(c, dict) else c for c in choices]
+        quiz.append(item)
+    if quiz:
+        out["quiz"] = quiz
+    return out
+
+
+def lessons(level: str) -> dict:
+    from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+    return {"rev": REV, "level": level,
+            "lessons": [lesson(level, e) for e in GRAMMAR_POINTS_BY_LEVEL.get(level, [])]}
+
+
+def _furigana_of(written: str, kana: str) -> list[list[str]]:
+    from study.furigana import align_deck
+    return _furigana([{"surface": written, "furigana": align_deck(written, kana)}])
+
+
+def word_index(sentences: list[dict]) -> dict[str, list[tuple[str, str, str]]]:
+    """Every word of every bank sentence, by how it is written (and by
+    its dictionary form): -> [(sentence id, level, its kana)]."""
+    out: dict[str, list] = {}
+    for s in sentences:
+        for r in s["rows"]:
+            if r["k"] != "word":
+                continue
+            kana = r.get("lemma", [None, None])[1] or "".join(rd or t for t, rd in r.get("fu", [[r["t"], ""]]))
+            for key in {r["t"], (r.get("lemma") or [None])[0]} - {None}:
+                out.setdefault(key, []).append((s["id"], s["lv"], kana))
+    return out
+
+
+def words(level: str, index: dict) -> dict:
+    """The deck's words at a level: each with its furigana, its senses in
+    both languages and up to two bank sentences it is read in, the
+    level's own first, then an easier one."""
+    from content.vocab_data import VOCAB_BY_LEVEL
+    from translations import fr_gloss
+    from translations.fr.vocab_fr import VOCAB_FR
+
+    rank = {lv: i for i, lv in enumerate(LEVELS)}
+    out = []
+    for e in VOCAB_BY_LEVEL.get(level, []):
+        kana = (e.get("kana") or e["kanji"]).split("/")[0]
+        # A word the deck writes in kana alone has an empty written form.
+        written = e["kanji"] or kana
+        hits = [h for h in index.get(written, []) if h[2] == kana or not h[2]]
+        hits.sort(key=lambda h: (h[1] != level, abs(rank[h[1]] - rank[level]), rank[h[1]] > rank[level]))
+        w = {"t": written, "r": kana, "ro": to_romaji(kana), "en": _senses(e.get("meaning", ""))}
+        fr = _senses(fr_gloss(e, VOCAB_FR) or "")
+        if fr:
+            w["fr"] = fr
+        fu = _furigana_of(written, kana)
+        if any(r for _, r in fu):
+            w["fu"] = fu
+        ex = list(dict.fromkeys(h[0] for h in hits))[:2]
+        if ex:
+            w["ex"] = ex
+        out.append(w)
+    return {"rev": REV, "level": level, "words": out}
+
+
+def kanji_cards(level: str, deck: dict) -> dict:
+    """The deck's kanji at a level, with their strokes and the deck words
+    that write them, the earliest-taught first."""
+    from content.kanji_data import KANJI_BY_LEVEL
+    from content.vocab_data import VOCAB_BY_LEVEL
+    from translations import fr_gloss
+    from translations.fr.vocab_fr import VOCAB_FR
+
+    by_char: dict[str, list] = {}
+    for rank, lv in enumerate(LEVELS):
+        for e in VOCAB_BY_LEVEL.get(lv, []):
+            written = e["kanji"]
+            if len(written) > 4:
+                continue
+            for c in set(written):
+                if c in DECK_BY_CHAR:
+                    by_char.setdefault(c, []).append((rank, len(written), lv, e))
+    out = {}
+    for entry in KANJI_BY_LEVEL.get(level, []):
+        c = entry["kanji"]
+        if DECK_BY_CHAR.get(c, (None,))[0] != level:
+            continue
+        card = kanji_entry(c, deck)
+        ws = []
+        for _, _, lv, e in sorted(by_char.get(c, []), key=lambda x: (x[0], x[1]))[:5]:
+            kana = (e.get("kana") or "").split("/")[0]
+            w = {"t": e["kanji"], "r": kana, "ro": to_romaji(kana), "lv": lv, "en": _senses(e.get("meaning", ""), 1)}
+            fr = _senses(fr_gloss(e, VOCAB_FR) or "", 1)
+            if fr:
+                w["fr"] = fr
+            ws.append(w)
+        if ws:
+            card["words"] = ws
+        out[c] = card
+    return {"rev": REV, "level": level, "kanji": out}
+
+
+def kanji_index(deck: dict) -> dict:
+    """Every deck kanji's level, meanings and two readings, without its
+    strokes: what a word's slide says about each kanji it is written
+    with, whatever level that kanji is taught at."""
+    out = {}
+    for c in sorted(DECK_BY_CHAR):
+        card = kanji_entry(c, deck)
+        card.pop("s", None)
+        out[c] = card
+    return {"rev": REV, "kanji": out}
+
+
+def kana_cards() -> dict:
+    """The two syllabaries' basic kana: romaji, strokes, the twin in the
+    other script, and up to three N5 words that begin with it."""
+    from content.kana_data import HIRAGANA_BASIC, KATAKANA_BASIC, twin
+    from content.vocab_data import VOCAB_BY_LEVEL
+    from translations import fr_gloss
+    from translations.fr.vocab_fr import VOCAB_FR
+
+    deck = [e for lv in ("N5", "N4") for e in VOCAB_BY_LEVEL.get(lv, [])]
+    out = []
+    for script, entries in (("hiragana", HIRAGANA_BASIC), ("katakana", KATAKANA_BASIC)):
+        for e in entries:
+            k = e["kana"]
+            card = {"k": k, "ro": e["romaji"], "set": script, "group": e.get("group", "")}
+            if twin(k):
+                card["twin"] = twin(k)
+            s = strokes(k)
+            if s:
+                card["s"] = s
+            ws = []
+            for v in deck:
+                kana = (v.get("kana") or "").split("/")[0]
+                written = v["kanji"] or kana
+                in_script = re.fullmatch(r"[ァ-ヿ]+", kana) if script == "katakana" else re.fullmatch(r"[ぁ-ゟ]+", kana)
+                if kana.startswith(k) and in_script and len(kana) <= 5:
+                    w = {"t": written, "r": kana, "ro": to_romaji(kana), "en": _senses(v.get("meaning", ""), 1)}
+                    fr = _senses(fr_gloss(v, VOCAB_FR) or "", 1)
+                    if fr:
+                        w["fr"] = fr
+                    ws.append(w)
+                if len(ws) == 3:
+                    break
+            if ws:
+                card["words"] = ws
+            out.append(card)
+    return {"rev": REV, "kana": out}
+
+
+def passages() -> dict:
+    """The comprehension seeds (content/comprehension/*.json): each text
+    cut into its sentences, each sentence into words, and its questions."""
+    out = []
+    for level in LEVELS:
+        path = BACKEND / "content" / "comprehension" / f"{level}.json"
+        if not path.exists():
+            continue
+        for ex in json.loads(path.read_text(encoding="utf-8")):
+            parts = [x for x in re.split(r"(?<=[。！？])(?!」)", ex["text"]) if x.strip()]
+            out.append({
+                "id": ex["id"], "lv": level, "title": ex.get("title", ""), "grammar": ex.get("grammar", []),
+                "sents": [text_rows(x, level) for x in parts],
+                "questions": ex.get("questions", []),
+            })
+    return {"rev": REV, "passages": out}
+
+
 def dump(data: dict) -> str:
-    # One sentence, point or kanji a line: the file diffs by the row
-    # that changed rather than as one long line.
+    """The file, one sentence, point, lesson, word or kanji a line, so it
+    diffs by the entry that changed rather than as one long line."""
     def line(v):
         return json.dumps(v, ensure_ascii=False, separators=(",", ":"))
 
-    parts = ['{"rev":%d,"level":%s,' % (data["rev"], line(data["level"])), '"sentences":[\n']
-    parts.append(",\n".join(line(s) for s in data["sentences"]))
-    parts.append('],\n"points":{\n')
-    parts.append(",\n".join(f"{line(k)}:{line(v)}" for k, v in data["points"].items()))
-    parts.append('},\n"kanji":{\n')
-    parts.append(",\n".join(f"{line(k)}:{line(v)}" for k, v in data["kanji"].items()))
-    parts.append("}}\n")
-    return "".join(parts)
+    parts = []
+    for key, value in data.items():
+        if isinstance(value, list):
+            body = "[\n" + ",\n".join(line(v) for v in value) + "]"
+        elif isinstance(value, dict) and value and all(isinstance(v, dict) for v in value.values()):
+            body = "{\n" + ",\n".join(f"{line(k)}:{line(v)}" for k, v in value.items()) + "}"
+        else:
+            body = line(value)
+        parts.append(f"{line(key)}:{body}")
+    return "{" + ",\n".join(parts) + "}\n"
+
+
+def files(deck: dict):
+    """Every file the studio reads, as (name, data), in the order written."""
+    sentences = {}
+    for level in LEVELS:
+        sentences[level] = build(level, deck)
+        yield f"{level}.json", sentences[level]
+    index = word_index([s for lv in LEVELS for s in sentences[lv]["sentences"]])
+    for level in LEVELS:
+        yield f"grammar-{level}.json", lessons(level)
+        yield f"words-{level}.json", words(level, index)
+        yield f"kanji-{level}.json", kanji_cards(level, deck)
+    yield "kanji-index.json", kanji_index(deck)
+    yield "kana.json", kana_cards()
+    yield "comprehension.json", passages()
+
+
+def _count(data: dict) -> str:
+    return ", ".join(f"{len(v)} {k}" for k, v in data.items() if isinstance(v, (list, dict)))
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("--check", action="store_true", help="exit 1 when a level's file is stale")
+    parser.add_argument("--check", action="store_true", help="exit 1 when a file is stale")
     args = parser.parse_args()
 
     deck = _deck_words()
     stale = []
-    for level in LEVELS:
-        data = build(level, deck)
+    for filename, data in files(deck):
         text = dump(data)
-        out = OUT / f"{level}.json"
+        out = OUT / filename
         name = out.relative_to(BACKEND.parent)
         if args.check:
             if not out.exists() or out.read_text(encoding="utf-8") != text:
@@ -399,8 +675,7 @@ def main() -> int:
             continue
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(text, encoding="utf-8")
-        print(f"wrote {name}: {len(data['sentences'])} sentences, {len(data['points'])} points, "
-              f"{len(data['kanji'])} kanji, {len(text.encode()) // 1024} KB")
+        print(f"wrote {name}: {_count(data)}, {len(text.encode()) // 1024} KB")
     if args.check:
         if stale:
             print("stale: " + ", ".join(stale) + " -- run python -m scripts.carousel_bank")

@@ -77,6 +77,13 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
 .dir b { font-family: var(--serif); font-size: 20px; font-weight: 700; }
 .dir span { color: var(--ink2); font-size: 13px; }
 .dir[aria-pressed="true"] { background: var(--sel-wash); border-color: var(--sel-line); }
+.sources { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.source { border: 1px solid var(--line); background: transparent; border-radius: 8px; padding: 8px 4px 7px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; position: relative; }
+.source b { font-family: var(--serif); font-size: 19px; font-weight: 700; }
+.source span { color: var(--ink2); font-size: 11px; text-align: center; line-height: 1.2; max-width: 100%; hyphens: auto; overflow-wrap: anywhere; }
+.source::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 3px; border-radius: 3px; background: var(--src); opacity: 0.85; }
+.source[aria-pressed="true"] { background: var(--sel-wash); border-color: var(--sel-line); }
+.toggles { display: flex; flex-direction: column; }
 
 .search { display: flex; gap: 8px; }
 .search input { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 8px 10px; }
@@ -140,24 +147,23 @@ dialog::backdrop { background: var(--scrim); }
 <header class="top">
   <svg id="mark" viewBox="0 0 1000 1000" aria-hidden="true"></svg>
   <h1>Carousel studio</h1>
-  <p>Sentences from the reading bank, drawn in Tsuji’s own lines.</p>
+  <p>What the app teaches, drawn in Tsuji’s own lines.</p>
 </header>
 <main class="studio">
   <aside class="controls" aria-label="Settings">
     <div class="field">
-      <div class="label">Sentence <span><span id="count"></span> in the bank</span></div>
-      <div class="seg" role="group" aria-label="Level">
-        <button type="button" data-set="level:N5">N5</button>
-        <button type="button" data-set="level:N4">N4</button>
-        <button type="button" data-set="level:N3">N3</button>
-        <button type="button" data-set="level:N2">N2</button>
-        <button type="button" data-set="level:N1">N1</button>
-      </div>
+      <div class="label">Start from</div>
+      <div id="sources" class="sources" role="group" aria-label="Start from"></div>
+    </div>
+
+    <div class="field">
+      <div class="label"><span id="list-name">Sentence</span> <span><span id="count"></span> to choose from</span></div>
+      <div id="levels" class="seg" role="group" aria-label="Level"></div>
       <div class="search">
-        <input id="search" type="search" placeholder="Search Japanese, a translation or a point" aria-label="Search the bank">
+        <input id="search" type="search" placeholder="Search" aria-label="Search the list">
         <button id="random" type="button" class="btn btn--quiet">Random</button>
       </div>
-      <ul id="sentences" class="sentences"></ul>
+      <ul id="items" class="sentences"></ul>
     </div>
 
     <div class="field">
@@ -190,13 +196,10 @@ dialog::backdrop { background: var(--scrim); }
 
     <div class="field">
       <div class="label">Slides</div>
-      <label class="check"><input type="checkbox" data-slide="words"> Word by word</label>
-      <label class="check"><input type="checkbox" data-slide="grammar"> The grammar point</label>
-      <label class="check" data-only="card"><input type="checkbox" data-slide="rating"> Rate yourself (study card)</label>
-      <label class="check"><input type="checkbox" data-slide="outro"> The mark, last</label>
+      <div id="toggles" class="toggles"></div>
     </div>
 
-    <div class="field">
+    <div class="field" id="bonus-field">
       <div class="label">Bonus</div>
       <div class="seg" role="group" aria-label="Bonus">
         <button type="button" data-set="bonus:kanji">Kanji strokes</button>

@@ -528,13 +528,17 @@ public Supabase Storage bucket by file name and needs no rebuild;
 `frontend/landing/README.md` has the slots, the bucket and what changes
 when the page goes live.
 
-The **carousel studio** (plan 200, `frontend/carousel/`, its README)
-draws a sentence of the reading bank as a photo carousel for a social
-feed, in four of the app's idioms, and exports the PNGs. Like the landing
+The **carousel studio** (plans 200, 200b, `frontend/carousel/`, its
+README) draws what the app teaches (a reading-bank sentence, its
+translation, a grammar lesson, a word, a kanji, a kana, a comprehension
+passage) as a photo carousel for a social feed, in four of the app's
+idioms, and exports the PNGs. A point is explained in its own sentence,
+a particle by the one sense it has there (`explain.js`). Like the landing
 page it is a static page outside `src/` and never ships. Its data is
 `frontend/carousel/bank/*.json`, written by `python -m scripts.carousel_bank`
 (backend, needs the tokenizer): rerun it after a change to the reading
-bank, the deck or the catalogue, and commit the files.
+bank, the deck, the kanji, the catalogue or its tours, or the
+comprehension seeds, and commit the files.
 
 `npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,
 ratcheted against a checked-in baseline) and `npm run lint:scale` (a
