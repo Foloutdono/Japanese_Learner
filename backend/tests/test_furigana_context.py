@@ -628,13 +628,14 @@ class SentenceReadingTests(unittest.TestCase):
     def test_the_dictation_bank_reads_as_written(self) -> None:
         # content/listening_clips.py's kana is written by hand, line by
         # line: the one gold reading in the repo. Every line's furigana,
-        # read out with the kana it sits among, must spell it -- only a
-        # line that is ambiguous in writing is let off, and named.
+        # read out with the kana it sits among, must spell it -- with no
+        # line let off. One was until the content audit's dictation run
+        # (#334): 駅までバスで十分です, 十分 being じゅうぶん (enough) or
+        # じゅっぷん (ten minutes) with nothing in the writing to say
+        # which. That line counts 三十分 now, so a line the reading and
+        # the writing disagree over is a defect here again rather than
+        # an entry on a list.
         from content import listening_clips
-
-        # 十分 is じゅうぶん (enough) or じゅっぷん (ten minutes); the
-        # writing does not say which.
-        ambiguous = {"駅までバスで十分です。"}
 
         def plain(s):
             s = "".join(chr(ord(c) - 0x60) if "ァ" <= c <= "ヶ" else c for c in s)
@@ -643,8 +644,6 @@ class SentenceReadingTests(unittest.TestCase):
         wrong = []
         rows = [row for level in listening_clips.BY_LEVEL.values() for row in level]
         for row in rows:
-            if row["jp"] in ambiguous:
-                continue
             said = "".join(p.get("reading") or p["text"] for p in align_sentence(row["jp"]))
             if plain(said) != plain(row["kana"]):
                 wrong.append((row["jp"], plain(said), plain(row["kana"])))

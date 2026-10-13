@@ -208,14 +208,21 @@ class ContextTests(unittest.TestCase):
 
     def test_the_dictation_bank_agrees(self) -> None:
         """書取's romaji is written by hand from what the clip says, so
-        it is the one gold romaji the repo holds. Every line agrees with
-        the generated one but 十分 in 駅までバスで十分です, which UniDic reads
-        as the adverb じゅうぶん, as the furigana does: the tokenizer's call
-        (see test_the_adverb_juubun_is_left_alone)."""
+        it is the one gold romaji the repo holds, and every line of it
+        agrees with the generated one.
+
+        It held one exception until the content audit's dictation run
+        (#334): 駅までバスで十分です, where UniDic reads the adverb
+        じゅうぶん (the tokenizer's call, which stands -- see
+        test_the_adverb_juubun_is_left_alone) while the bank's reading
+        said じゅっぷん. A line whose own spelling cannot say which word
+        it is cannot be dictated either, since `jp` is also what the
+        synthesizer is handed, so the line now counts 三十分 and the
+        exception is gone rather than waived."""
         from content.listening_clips import BY_LEVEL
         off = [row["jp"] for rows in BY_LEVEL.values() for row in rows
                if fold(row["romaji"]) != fold(sentence_romaji(row["jp"]))]
-        self.assertEqual(off, ["駅までバスで十分です。"])
+        self.assertEqual(off, [])
 
 
 if __name__ == "__main__":  # pragma: no cover
