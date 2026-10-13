@@ -1,14 +1,23 @@
-// ── カルーセル — what a carousel is drawn from (plan 200b) ───────────
+// ── カルーセル — what a carousel is drawn from (plans 200b, 200c) ────
 // A carousel starts from one thing the app teaches: a sentence of the
 // reading bank (read it, or say it: 読書 and 翻訳), a grammar lesson
 // with its tour (文法), a word of the deck (単語), a kanji (漢字), a kana
 // (かな) or a comprehension passage (理解). Each source here turns its
-// item into a plan: the hook, the question the mock-exam direction asks,
-// and the slides after it, each a `kind` slides.js knows how to draw.
-// Pure: no canvas, no fetch, so the node tests read it directly.
+// item into a plan: the station plates' walk (`slides`, each a `kind`
+// slides.js draws), the questions it can be asked (quizzes.js), and what
+// each other carousel type needs where the item has it: two things to
+// tell apart (`compare`), a sentence to build (`build`), a list
+// (`list`), a conversation (`talk`). Pure: no canvas, no fetch, so the
+// node tests read it directly.
 import { hasKanji, reading } from './draw.js'
-import { STRINGS, formOf, tr, weldIf } from './strings.js'
-import { howItWorks, lookalikesOf, stacksIn } from './explain.js'
+import { STRINGS, count, formOf, tr, weldIf } from './strings.js'
+import { ROLES, howItWorks, lookalikesOf, stacksIn } from './explain.js'
+import { firstSense, gloss, lineRomaji, readingMisses, seeded, shuffle, unpack } from './common.js'
+import {
+  kanaQuizzes, kanjiQuizzes, lessonQuizzes, overlaps, passageQuizzes, sentenceQuizzes, translationQuizzes, wordQuizzes,
+} from './quizzes.js'
+
+export { gloss, lineRomaji, readingMisses, seeded, shuffle, unpack }
 
 export const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -24,105 +33,54 @@ export const SOURCES = [
 ]
 export const sourceOf = id => SOURCES.find(s => s.id === id) ?? SOURCES[0]
 
-// The slides a source may leave out, with whether each is in by default.
+// The station plates' slides a source may leave out, with whether each
+// is in by default. `check` ends the walk on the questions picked.
 export const OPTIONAL = {
-  sentence: [['words', true], ['grammar', true], ['watch', true], ['yourturn', false], ['rating', true], ['outro', true]],
-  translation: [['words', true], ['grammar', true], ['watch', false], ['yourturn', false], ['outro', true]],
-  lesson: [['examples', true], ['scene', true], ['twist', true], ['watch', true], ['quiz', false], ['yourturn', true], ['outro', true]],
-  word: [['parts', true], ['examples', true], ['strokes', true], ['yourturn', false], ['outro', true]],
-  kanji: [['readings', true], ['words', true], ['strokes', true], ['yourturn', false], ['outro', true]],
-  kana: [['strokes', true], ['lookalike', true], ['words', true], ['outro', true]],
-  passage: [['second', false], ['outro', true]],
+  sentence: [['words', true], ['grammar', true], ['watch', true], ['more', false], ['check', false], ['yourturn', false], ['rating', false], ['outro', true]],
+  translation: [['words', true], ['grammar', true], ['watch', false], ['more', false], ['check', false], ['yourturn', false], ['outro', true]],
+  lesson: [['examples', true], ['scene', true], ['twist', true], ['usage', false], ['rival', false], ['watch', true], ['check', false], ['yourturn', true], ['outro', true]],
+  word: [['parts', true], ['examples', true], ['family', false], ['strokes', true], ['check', false], ['yourturn', false], ['outro', true]],
+  kanji: [['readings', true], ['words', true], ['strokes', true], ['check', false], ['yourturn', false], ['outro', true]],
+  kana: [['strokes', true], ['lookalike', true], ['words', true], ['check', false], ['outro', true]],
+  passage: [['vocab', false], ['check', true], ['outro', true]],
 }
 export const BONUS = new Set(['sentence', 'translation'])
 
-// ── Small things ──────────────────────────────────────────────
-/** A seeded pick, so an item's quiz deals the same order every time. */
-export function seeded(seed) {
-  let h = 2166136261
-  for (const c of String(seed)) h = Math.imul(h ^ c.codePointAt(0), 16777619)
-  return () => {
-    h = Math.imul(h ^ (h >>> 15), 2246822507)
-    h = Math.imul(h ^ (h >>> 13), 3266489909)
-    return ((h ^= h >>> 16) >>> 0) / 4294967296
+// The stations the app's own map gives each source (config/stations.js):
+// a code in its roundel, a reading over its name, and the stations either
+// side of it on its line (config/tabs.js: 学習 runs かな 単語 漢字 文法
+// 教材, 実践 runs 読書 理解 翻訳 書取 作文 模試, both out of 辻).
+const STATION = {
+  tsuji: { jp: '辻', kana: 'つじ', code: 'TJ' },
+  kana: { jp: 'かな', kana: 'かな', code: 'KN' },
+  word: { jp: '単語', kana: 'たんご', code: 'TG' },
+  kanji: { jp: '漢字', kana: 'かんじ', code: 'KJ' },
+  lesson: { jp: '文法', kana: 'ぶんぽう', code: 'BP' },
+  decks: { jp: '教材', kana: 'きょうざい', code: 'KZ' },
+  sentence: { jp: '読書', kana: 'どくしょ', code: 'DS' },
+  passage: { jp: '理解', kana: 'りかい', code: 'RK' },
+  translation: { jp: '翻訳', kana: 'ほんやく', code: 'HY' },
+  dictation: { jp: '書取', kana: 'かきとり', code: 'KT' },
+}
+const LINES = [['tsuji', 'kana', 'word', 'kanji', 'lesson', 'decks'], ['tsuji', 'sentence', 'passage', 'translation', 'dictation']]
+function stationOf(source, lang) {
+  const line = LINES.find(l => l.includes(source))
+  const at = line.indexOf(source)
+  return { ...STATION[source], name: sourceOf(source).name[lang].replace(/\u00ad/g, ''), prev: STATION[line[at - 1]], next: STATION[line[at + 1]] }
+}
+/** What the last slide says about the source's line, from the bank's own figures. */
+function figureOf(source, figures, t, lang) {
+  if (!figures) return ''
+  const f = t.figure
+  switch (source) {
+    case 'sentence': return f.sentence(count(figures.sentences, lang))
+    case 'translation': return f.translation(count(figures.sentences, lang))
+    case 'lesson': return f.lesson(count(figures.points, lang))
+    case 'word': return f.word(count(figures.words, lang))
+    case 'kanji': return f.kanji(count(figures.kanji, lang))
+    case 'kana': return f.kana(figures.hiragana, figures.katakana)
+    default: return f.passage()
   }
-}
-export function shuffle(list, rand) {
-  const out = list.slice()
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]]
-  }
-  return out
-}
-/** A question's choices dealt in a seeded order, the right one tracked. */
-function deal(right, wrong, seed) {
-  const rand = seeded(seed)
-  const all = shuffle([right, ...wrong], rand)
-  return { choices: all, right: all.indexOf(right) }
-}
-
-const KINDS = { w: 'word', v: 'word', p: 'particle', c: 'copula' }
-/** A lesson's packed row (carousel_bank.text_rows) as the row a slide sets. */
-export const unpack = rows => rows.map(r => (r.length === 1
-  ? { t: r[0], k: 'punct' }
-  : { t: r[0], k: KINDS[r[1]] || 'word', ro: r[2], ...(r[1] === 'v' ? { pos: 'verb' } : {}), ...(r[3] ? { fu: r[3] } : {}), ...(r[4] ? { lit: true } : {}) }))
-
-const PUNCT_ROMAJI = { '。': '.', '、': ',', '？': '?', '！': '!', '「': '“', '」': '”', '『': '“', '』': '”', '・': ' ', '…': '…' }
-/** The sentence in romaji, word by word as the slides cut it. */
-export function lineRomaji(rows) {
-  let out = ''
-  for (const row of rows) {
-    if (row.k === 'punct') {
-      const p = PUNCT_ROMAJI[row.t] ?? ''
-      out += p === '“' ? ` ${p}` : p
-    } else {
-      out += (out && !out.endsWith('“') ? ' ' : '') + row.ro
-    }
-  }
-  return out.trim().replace(/^./, c => c.toUpperCase())
-}
-
-/** A word's gloss in the reader's language: [the sense, the senses after it]. */
-export function gloss(row, lang) {
-  const senses = (lang === 'fr' && row.fr?.length ? row.fr : row.en) || []
-  return [senses[0] || '', senses.slice(1, 3).join(', ')]
-}
-const firstSense = lang => row => gloss(row, lang)[0]
-
-// The near-misses a learner actually writes for a reading (the exam's own
-// distractors are cut the same way, study/exam_kanji_gen.py): a sound
-// voiced or unvoiced, a long vowel added or dropped, a small っ or ゃゅょ
-// added or dropped, another reading of one of its kanji.
-const VOICE = Object.fromEntries('かが きぎ くぐ けげ こご さざ しじ すず せぜ そぞ ただ ちぢ つづ てで とど はば ひび ふぶ へべ ほぼ'
-  .split(' ').flatMap(([a, b]) => [[a, b], [b, a]]))
-const SMALL = { ゃ: 'や', ゅ: 'ゆ', ょ: 'よ', や: 'ゃ', ゆ: 'ゅ', よ: 'ょ' }
-const toHira = s => s.replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60))
-
-export function readingMisses(row, kanji) {
-  const answer = reading(row)
-  const out = new Set()
-  const chars = [...answer]
-  chars.forEach((c, i) => {
-    if (VOICE[c]) out.add([...chars.slice(0, i), VOICE[c], ...chars.slice(i + 1)].join(''))
-    if (SMALL[c] && i > 0) out.add([...chars.slice(0, i), SMALL[c], ...chars.slice(i + 1)].join(''))
-    if (c === 'う' && i > 0 && 'おこそとのほもよろごぞどぼぽょ'.includes(chars[i - 1])) out.add([...chars.slice(0, i), ...chars.slice(i + 1)].join(''))
-    if (c === 'っ') out.add([...chars.slice(0, i), ...chars.slice(i + 1)].join(''))
-    if ('こそとほ'.includes(c) && chars[i + 1] !== 'う' && i === chars.length - 1) out.add(answer + 'う')
-    if ('かきくけこさしすせそたちつてとぱぴぷぺぽ'.includes(c) && i > 0 && chars[i - 1] !== 'っ' && chars[i - 1] !== 'ん') {
-      out.add([...chars.slice(0, i), 'っ', ...chars.slice(i)].join(''))
-    }
-  })
-  // Another reading of one of its kanji, in place of the one it takes here.
-  for (const [text, r] of row.fu || []) {
-    if (!r || [...text].length !== 1 || !kanji?.[text]) continue
-    const k = kanji[text]
-    for (const other of [...k.on.map(toHira), ...k.kun.map(([stem]) => stem)]) {
-      if (other && other !== r) out.add(reading(row).replace(r, other))
-    }
-  }
-  out.delete(answer)
-  return [...out].filter(s => s && /^[ぁ-ゟー]+$/.test(s))
 }
 
 // ── The parts every sentence-shaped source shares ────────────
@@ -153,39 +111,6 @@ function wordItems(s, points, lang, t) {
       pos: t.pos[row.k === 'word' ? row.pos : row.k] || row.pos,
     }
   })
-}
-
-/** The sentence's reading question (a kanji word's reading), or its meaning. */
-function sentenceQuiz(s, bank, lang, t) {
-  const rows = s.rows
-  const focus = s.fi ?? rows.findIndex(r => r.k === 'word')
-  const row = rows[focus]
-  const near = row && hasKanji(row.t) ? readingMisses(row, bank.kanji) : []
-  if (near.length >= 3) {
-    const wrong = shuffle(near, seeded(s.id)).slice(0, 3)
-    return {
-      kind: 'reading', askJp: '＿＿の ことばは どう よみますか。', ask: t.examAsk.reading,
-      stem: { rows, target: focus, under: true },
-      ...dealChoices(reading(row), wrong, s.id, 'jp'),
-      explain: { head: `${row.t}\u3000${reading(row)}`, sense: weldIf(lang, gloss(row, lang)[0]) },
-    }
-  }
-  const answer = gloss(row, lang)[0]
-  const pool = new Set()
-  for (const other of bank.sentences) {
-    for (const r of other.rows) if (r.k === 'word' && r.pos === row.pos && r.t !== row.t && r.en) pool.add(gloss(r, lang)[0])
-  }
-  pool.delete(answer)
-  return {
-    kind: 'meaning', askJp: '＿＿の ことばの いみは どれですか。', ask: t.examAsk.meaning,
-    stem: { rows, target: focus, under: true },
-    ...dealChoices(weldIf(lang, answer), shuffle([...pool], seeded(s.id)).slice(0, 3).map(x => weldIf(lang, x)), s.id, 'latin'),
-    explain: { head: `${row.t}\u3000${reading(row)}`, sense: weldIf(lang, answer) },
-  }
-}
-function dealChoices(right, wrong, seed, fam) {
-  const { choices, right: at } = deal(right, wrong, seed)
-  return { choices: choices.map(text => ({ text, fam })), right: at }
 }
 
 function kanjiBonus(s, opts, kanjiMap) {
@@ -221,36 +146,140 @@ function base(source, item, opts, level) {
   return {
     source: source.id, line: source.line, lang: opts.lang, t, level,
     script: opts.script, showRomaji: opts.romaji, handle: opts.handle || '', id: item.id,
+    station: stationOf(source.id, opts.lang), figure: weldIf(opts.lang, figureOf(source.id, opts.figures, t, opts.lang)),
+    compare: null, build: null, list: null, talk: null,
   }
 }
 const on = (source, opts) => Object.fromEntries((OPTIONAL[source] || []).map(([k, d]) => [k, opts.slides?.[source]?.[k] ?? d]))
 
+// ── What the other carousel types are drawn from ──────────────
+/** A sentence cut into the pieces it is said in: each word with what
+ *  rides it (駅で, 友だちに, 会います。), six at most, the shortest
+ *  neighbours merged first. */
+export function chunksOf(rows) {
+  const out = []
+  rows.forEach((r, i) => {
+    const last = out[out.length - 1]
+    if (!last || (r.k === 'word' && last.some(j => rows[j].k === 'word'))) out.push([i])
+    else last.push(i)
+  })
+  const len = c => c.reduce((a, j) => a + rows[j].t.length, 0)
+  while (out.length > 6) {
+    let best = 0
+    for (let i = 1; i < out.length - 1; i++) if (len(out[i]) + len(out[i + 1]) < len(out[best]) + len(out[best + 1])) best = i
+    out.splice(best, 2, [...out[best], ...out[best + 1]])
+  }
+  return out
+}
+/** Build it: the sentence piece by piece, each piece's words with what
+ *  each does, and where the point is, the line that says it. */
+function buildOf(rows, translation, how, p, lang, glossOf, pointLabel = () => '') {
+  const chunks = chunksOf(rows)
+  if (chunks.length < 2) return null
+  // A particle that is a piece of a longer pattern (the の and で of ので)
+  // is that pattern, labelled by its meaning, never a possessive.
+  const patternOf = r => (r.k === 'word' ? null : (r.g || []).find(x => x !== r.t && !ROLES[x]) || (r.lit && p !== r.t && !ROLES[p] ? p : null))
+  const short = s => String(s || '').split(/[,;(]/)[0].trim()
+  const steps = chunks.map(c => {
+    const items = []
+    for (const j of c) {
+      const r = rows[j]
+      if (r.k === 'punct') continue
+      const pat = patternOf(r)
+      const last = items[items.length - 1]
+      if (pat && last?.pat === pat) { last.t += r.t; continue }
+      const label = r.k === 'word' ? glossOf(r) : pat ? pointLabel(pat) : ROLES[r.t]?.label?.[lang] || ''
+      items.push({ t: r.t, label: short(label), line: r.k === 'word' ? 'vocab' : 'grammar', lit: true, pat })
+    }
+    const point = c.some(j => (rows[j].g || []).includes(p) || rows[j].lit)
+    return { upto: c[c.length - 1] + 1, from: c[0], items, line: point && how ? how.line : '' }
+  })
+  return { rows, translation, steps, romaji: lineRomaji(rows) }
+}
+/** This or that: a point and the point it is confused with. */
+function compareOfPoint(p, pt, own, lang) {
+  const cmp = pt?.compare
+  if (!cmp?.meaning || !cmp.p) return null
+  const a = { head: p, meaning: tr(pt, lang), form: formOf(pt, lang), ex: own, line: 'grammar' }
+  const b = {
+    head: cmp.p, meaning: tr(cmp.meaning, lang), form: lang === 'fr' ? cmp.form_fr || '' : cmp.form || '',
+    ex: cmp.ex ? { rows: unpack(cmp.ex.rows), tr: weldIf(lang, cmp.ex[lang] || cmp.ex.en) } : null, line: 'grammar',
+  }
+  if (overlaps(a.meaning, b.meaning) || a.meaning === b.meaning) return null
+  return { sides: [a, b], diff: tr(cmp, lang), careful: tr(pt.careful, lang) }
+}
+/** The question a "this or that" ends on: what the second one means, the
+ *  first one's meaning among the wrong answers. */
+function compareQuiz(cmp, pool, seed, t) {
+  const [a, b] = cmp.sides
+  const wrong = []
+  for (const m of shuffle([...new Set(pool)], seeded(seed))) {
+    if (!m || [a.meaning, b.meaning, ...wrong].some(x => overlaps(x, m))) continue
+    wrong.push(m)
+    if (wrong.length === 2) break
+  }
+  if (wrong.length < 2) return null
+  const all = shuffle([b.meaning, a.meaning, ...wrong], seeded(`${seed}-c`))
+  return {
+    kind: 'compare', id: 'compare', label: t.kinds.pointMeaning, ask: t.examAsk.pointMeaning, stem: { specimen: b.head },
+    choices: all.map(text => ({ text, fam: 'latin' })), right: all.indexOf(b.meaning),
+    explain: { head: b.head, sense: b.form, why: cmp.diff },
+  }
+}
+const wordItem = (w, lang, n) => ({ kind: 'word', n, head: w.t, reading: w.r, ro: w.ro, fu: w.fu, main: weldIf(lang, gloss(w, lang)[0]), tag: w.lv || '' })
+
 // ── 読書, a sentence to read ──────────────────────────────────
+function sentenceParts(data, s, opts, p) {
+  const { t, lang } = p
+  const translation = weldIf(lang, s[lang] || s.en)
+  const pt = data.points[s.p]
+  const how = pt ? howItWorks(s.rows, s.p, tr(pt, lang), lang, firstSense(lang)) : null
+  const same = [s, ...data.sentences.filter(x => x.p === s.p && x.id !== s.id)].slice(0, 5)
+  return {
+    translation,
+    romaji: lineRomaji(s.rows),
+    bonus: kanjiBonus(s, opts, data.kanji),
+    compare: compareOfPoint(s.p, pt, { rows: s.rows.map(r => ((r.g || []).includes(s.p) ? { ...r, lit: true } : r)), tr: translation }, lang),
+    build: buildOf(s.rows, translation, how, s.p, lang, r => gloss(r, lang)[0], q => tr(data.points[q], lang)),
+    list: same.length >= 3 ? {
+      title: t.listTitle.sentences(same.length, s.p), head: s.p, line: 'grammar',
+      items: same.map((x, n) => ({ kind: 'sentence', n: n + 1, rows: x.rows.map(r => ((r.g || []).includes(s.p) ? { ...r, lit: true } : r)), tr: weldIf(lang, x[lang] || x.en) })),
+    } : null,
+    more: same.slice(1, 4).map(x => ({ rows: x.rows.map(r => ((r.g || []).includes(s.p) ? { ...r, lit: true } : r)), tr: weldIf(lang, x[lang] || x.en) })),
+  }
+}
+function closing(slides, o, t, p, extra = {}) {
+  if (o.yourturn && extra.yourturn) slides.push(extra.yourturn)
+  if (o.check) slides.push({ kind: 'check' })
+  if (o.rating) slides.push({ kind: 'rating' })
+  if (o.outro) slides.push({ kind: 'outro' })
+  return slides
+}
+
 function sentencePlan(data, s, opts) {
   const src = sourceOf('sentence')
   const p = base(src, s, opts, s.lv)
   const { t, lang } = p
   const o = on('sentence', opts)
-  const translation = weldIf(lang, s[lang] || s.en)
-  const romaji = lineRomaji(s.rows)
-  const bonus = kanjiBonus(s, opts, data.kanji)
+  const x = sentenceParts(data, s, opts, p)
   const slides = []
   if (o.words) slides.push({ kind: 'words', items: wordItems(s, data.points, lang, t) })
   slides.push(...grammarSlides(s, data, lang, o))
-  slides.push({ kind: 'answer', rows: s.rows, romaji, translation })
-  if (opts.bonus === 'kanji' && bonus.k) slides.push({ kind: 'strokes', char: bonus.char, k: bonus.k })
+  if (o.more && x.more.length) slides.push({ kind: 'examples', items: x.more, title: t.listTitle.sentences(x.more.length, s.p).replace(/^\d+ /, '') })
+  slides.push({ kind: 'answer', rows: s.rows, romaji: x.romaji, translation: x.translation })
+  if (opts.bonus === 'kanji' && x.bonus.k) slides.push({ kind: 'strokes', char: x.bonus.char, k: x.bonus.k })
   if (opts.bonus === 'twist') {
     const tw = data.points[s.p]?.twists?.[0]
     if (tw) slides.push({ kind: 'twist', notion: tr(tw.notion, lang), pair: tw.pair, why: tr(tw.why, lang) })
   }
-  if (o.yourturn) slides.push({ kind: 'yourturn', text: t.turn.point(s.p), form: formOf(data.points[s.p], lang), model: { rows: s.rows, tr: translation } })
-  if (o.rating) slides.push({ kind: 'rating' })
-  if (o.outro) slides.push({ kind: 'outro' })
+  closing(slides, o, t, p, { yourturn: { kind: 'yourturn', text: t.turn.point(s.p), form: formOf(data.points[s.p], lang), model: { rows: s.rows, tr: x.translation } } })
+  const quizzes = sentenceQuizzes(s, data, lang, t)
+  const compare = x.compare ? { ...x.compare, quiz: compareQuiz(x.compare, Object.values(data.points).map(v => tr(v, lang)), s.id, t) } : null
   return {
-    ...p, kanjiChars: bonus.chars, kanjiChar: bonus.char,
+    ...p, kanjiChars: x.bonus.chars, kanjiChar: x.bonus.char,
     hook: { kind: 'sentence', rows: s.rows }, prompt: t.prompt.sentence,
-    quiz: sentenceQuiz(s, data, lang, t), slides,
-    caption: { jp: s.jp, romaji, tr: translation, ask: lang === 'fr' ? 'Tu l’as lue sans aide ?' : 'Could you read it without help?', tags: [`jlpt${s.lv.toLowerCase()}`], point: s.p },
+    quizzes, quiz: quizzes[0] || null, slides, compare, build: x.build, list: x.list,
+    caption: { jp: s.jp, romaji: x.romaji, tr: x.translation, ask: lang === 'fr' ? 'Tu l’as lue sans aide ?' : 'Could you read it without help?', tags: [`jlpt${s.lv.toLowerCase()}`], point: s.p },
   }
 }
 
@@ -260,34 +289,26 @@ function translationPlan(data, s, opts) {
   const p = base(src, s, opts, s.lv)
   const { t, lang } = p
   const o = on('translation', opts)
-  const translation = weldIf(lang, s[lang] || s.en)
-  const romaji = lineRomaji(s.rows)
-  const bonus = kanjiBonus(s, opts, data.kanji)
+  const x = sentenceParts(data, s, opts, p)
   // The words to build it from, as tiles, in a seeded disorder.
   const tiles = shuffle(s.rows.filter(r => r.k !== 'punct'), seeded(`${s.id}-tiles`))
-  const others = data.sentences.filter(x => x.id !== s.id)
-  const rivals = [...others.filter(x => x.p === s.p), ...shuffle(others, seeded(s.id))].filter((x, i, a) => a.indexOf(x) === i).slice(0, 2)
-  const { choices, right } = deal(s, rivals, `${s.id}-tr`)
-  const slides = [{ kind: 'answer', rows: s.rows, romaji, translation, title: t.answer }]
+  const slides = [{ kind: 'answer', rows: s.rows, romaji: x.romaji, translation: x.translation, title: t.answer }]
   if (o.words) slides.push({ kind: 'words', items: wordItems(s, data.points, lang, t) })
   slides.push(...grammarSlides(s, data, lang, o))
-  if (opts.bonus === 'kanji' && bonus.k) slides.push({ kind: 'strokes', char: bonus.char, k: bonus.k })
+  if (o.more && x.more.length) slides.push({ kind: 'examples', items: x.more, title: t.listTitle.sentences(x.more.length, s.p).replace(/^\d+ /, '') })
+  if (opts.bonus === 'kanji' && x.bonus.k) slides.push({ kind: 'strokes', char: x.bonus.char, k: x.bonus.k })
   if (opts.bonus === 'twist') {
     const tw = data.points[s.p]?.twists?.[0]
     if (tw) slides.push({ kind: 'twist', notion: tr(tw.notion, lang), pair: tw.pair, why: tr(tw.why, lang) })
   }
-  if (o.yourturn) slides.push({ kind: 'yourturn', text: t.turn.point(s.p), form: formOf(data.points[s.p], lang), model: { rows: s.rows, tr: translation } })
-  if (o.outro) slides.push({ kind: 'outro' })
+  closing(slides, o, t, p, { yourturn: { kind: 'yourturn', text: t.turn.point(s.p), form: formOf(data.points[s.p], lang), model: { rows: s.rows, tr: x.translation } } })
+  const quizzes = translationQuizzes(s, data, lang, t)
+  const compare = x.compare ? { ...x.compare, quiz: compareQuiz(x.compare, Object.values(data.points).map(v => tr(v, lang)), s.id, t) } : null
   return {
-    ...p, kanjiChars: bonus.chars, kanjiChar: bonus.char,
-    hook: { kind: 'prompt', text: translation, tiles }, prompt: t.prompt.translation,
-    quiz: {
-      kind: 'translation', ask: t.examAsk.translation, stem: { text: translation },
-      choices: choices.map(x => ({ rows: x.rows, fam: 'jp' })), right,
-      explain: { head: s.jp, sense: romaji },
-    },
-    slides,
-    caption: { jp: translation, romaji: '', tr: '', ask: t.turn.translation, tags: [`jlpt${s.lv.toLowerCase()}`], point: s.p, answerJp: s.jp },
+    ...p, kanjiChars: x.bonus.chars, kanjiChar: x.bonus.char,
+    hook: { kind: 'prompt', text: x.translation, tiles }, prompt: t.prompt.translation,
+    quizzes, quiz: quizzes[0] || null, slides, compare, build: x.build, list: x.list,
+    caption: { jp: x.translation, romaji: '', tr: '', ask: t.turn.translation, tags: [`jlpt${s.lv.toLowerCase()}`], point: s.p, answerJp: s.jp },
   }
 }
 
@@ -302,46 +323,37 @@ function lessonPlan(data, L, opts) {
   const first = ex[0]
   const how = first ? howItWorks(first.rows, L.p, meaning, lang, () => '') : null
   const scene = L.scene
-  const ask = scene?.ask
-  const sceneQuiz = ask ? {
-    kind: 'scene', ask: t.sceneAsk,
-    stem: { cue: { who: ask.cue.who, rows: unpack(ask.cue.rows), tr: weldIf(lang, ask.cue[lang] || ask.cue.en) }, task: tr(ask.task, lang), them: tr(scene.them, lang) },
-    ...(() => {
-      const d = deal(0, [1, 2].slice(0, ask.choices.length - 1), `${L.p}-scene`)
-      return { choices: d.choices.map(i => ({ rows: unpack(ask.choices[i]), fam: 'jp' })), right: d.right }
-    })(),
-    explain: { why: tr(ask.why, lang) },
+  const quizzes = lessonQuizzes(L, data, lang, t)
+  const sceneQuiz = quizzes.find(q => q.kind === 'scene') || null
+  const twists = (L.twists || []).map(tw => twistSlide(tw, lang, unpack)).filter(Boolean)
+  const usages = (L.twists || []).filter(tw => tw.rows).map(tw => ({ rows: unpack(tw.rows), tr: tr(tw.tr, lang), note: tr(tw.notion, lang) }))
+  const sceneSlide = scene ? {
+    kind: 'scene', place: scene.place, them: tr(scene.them, lang), note: tr(scene.note, lang),
+    lines: scene.lines.map(l => ({ who: l.who, rows: unpack(l.rows), tr: weldIf(lang, l[lang] || l.en) })),
   } : null
-  const tourQuiz = (L.quiz || []).map((q, n) => {
-    const d = deal(0, q.choices.map((_, i) => i).slice(1), `${L.p}-quiz-${n}`)
-    return {
-      kind: 'tour', ask: tr(q.ask, lang),
-      stem: q.rows ? { rows: unpack(q.rows), tr: q.kind === 'form' ? tr(q.tr, lang) : '' } : null,
-      choices: d.choices.map(i => (typeof q.choices[i] === 'string' ? { text: q.choices[i], fam: 'jp' } : { text: tr(q.choices[i], lang), fam: 'latin' })),
-      right: d.right,
-      explain: { why: tr(q.why, lang), sense: q.kind === 'meaning' ? tr(q.tr, lang) : '' },
-    }
-  })
+  const compare = compareOfPoint(L.p, L, first, lang)
   const slides = [{ kind: 'lesson', pattern: L.p, pt: L, how }]
   if (o.examples && ex.length) slides.push({ kind: 'examples', items: ex })
-  if (o.scene && scene) {
-    slides.push({
-      kind: 'scene', place: scene.place, them: tr(scene.them, lang), note: tr(scene.note, lang),
-      lines: scene.lines.map(l => ({ who: l.who, rows: unpack(l.rows), tr: weldIf(lang, l[lang] || l.en) })),
-    })
-    if (sceneQuiz) slides.push({ kind: 'quiz', quiz: sceneQuiz, revealed: false, title: t.sceneAsk, skipOnExam: true }, { kind: 'quiz', quiz: sceneQuiz, revealed: true, title: t.sceneAsk })
+  if (o.scene && sceneSlide) {
+    slides.push(sceneSlide)
+    if (sceneQuiz) slides.push({ kind: 'quiz', quiz: sceneQuiz, revealed: false, title: t.sceneAsk }, { kind: 'quiz', quiz: sceneQuiz, revealed: true, title: t.sceneAsk })
   }
-  if (o.twist) {
-    const tw = twistSlide(L.twists?.[0], lang, unpack)
-    if (tw) slides.push(tw)
-  }
+  if (o.twist && twists[0]) slides.push(twists[0])
+  if (o.usage && twists[1]) slides.push(twists[1])
+  if (o.rival && compare?.sides[1].ex) slides.push({ kind: 'examples', items: [compare.sides[1].ex], title: t.withIt(compare.sides[1].head), line: 'grammar' })
   if (o.watch && (L.careful || L.compare)) slides.push({ kind: 'watch', pattern: L.p, pt: L })
-  if (o.quiz && tourQuiz[0]) slides.push({ kind: 'quiz', quiz: tourQuiz[0], revealed: false, title: t.quiz }, { kind: 'quiz', quiz: tourQuiz[0], revealed: true, title: t.quiz })
-  if (o.yourturn) slides.push({ kind: 'yourturn', text: t.turn.point(L.p), form: formOf(L, lang), model: ex[1] || first })
-  if (o.outro) slides.push({ kind: 'outro' })
+  closing(slides, o, t, p, { yourturn: { kind: 'yourturn', text: t.turn.point(L.p), form: formOf(L, lang), model: ex[1] || first } })
+  const sentences = [...ex, ...usages].slice(0, 5)
   return {
     ...p, hook: { kind: 'pattern', pattern: L.p, rows: first?.rows || [], meaning }, prompt: t.prompt.lesson,
-    quiz: sceneQuiz || tourQuiz[0] || null, slides,
+    quizzes, quiz: quizzes[0] || null, slides,
+    compare: compare ? { ...compare, quiz: compareQuiz(compare, data.lessons.map(x => tr(x, lang)), L.p, t) || sceneQuiz } : null,
+    build: first ? buildOf(first.rows, first.tr, how, L.p, lang, () => '', q => (q === L.p ? meaning : '')) : null,
+    list: sentences.length >= 3 ? {
+      title: t.listTitle.sentences(sentences.length, L.p), head: L.p, line: 'grammar',
+      items: sentences.map((x, n) => ({ kind: 'sentence', n: n + 1, rows: x.rows, tr: x.tr, note: x.note || '' })),
+    } : null,
+    talk: sceneSlide && sceneSlide.lines.length >= 2 ? { ...sceneSlide, quiz: sceneQuiz, why: sceneQuiz?.explain?.why || '' } : null,
     caption: { jp: L.p, romaji: '', tr: meaning, ask: t.turn.point(L.p), tags: [`jlpt${L.lv.toLowerCase()}`], point: L.p },
   }
 }
@@ -354,7 +366,6 @@ function wordPlan(data, w, opts, deps) {
   const o = on('word', opts)
   const index = deps.index?.kanji || {}
   const [main, sub] = gloss(w, lang)
-  const row = { t: w.t, fu: w.fu }
   const slides = [{ kind: 'reveal', text: w.t, fu: w.fu, reading: w.r, romaji: w.ro, main: weldIf(lang, main), sub: weldIf(lang, sub), level: data.level }]
   const chars = [...w.t].filter(c => index[c])
   // A compound's kanji, one by one (学校: 学 + 校); a one-kanji word is its kanji.
@@ -365,29 +376,27 @@ function wordPlan(data, w, opts, deps) {
       items: chars.map((c, n) => ({ n: n + 1, t: c, reading: readingIn(c), ro: '', main: weldIf(lang, (lang === 'fr' && index[c].fr?.length ? index[c].fr : index[c].en).slice(0, 2).join(', ')), sub: index[c].lv, line: 'kanji', kanji: !!readingIn(c), pos: index[c].lv })),
     })
   }
-  if (o.examples) {
-    const items = (w.ex || []).map(id => deps.sentences?.[id]).filter(Boolean).map(s => ({
-      rows: s.rows.map(r => ((r.t === w.t || r.lemma?.[0] === w.t) ? { ...r, lit: true } : r)),
-      tr: weldIf(lang, s[lang] || s.en),
-    }))
-    if (items.length) slides.push({ kind: 'examples', items, title: t.inSentence, line: 'vocab' })
+  const exItems = (w.ex || []).map(id => deps.sentences?.[id]).filter(Boolean).map(s => ({
+    rows: s.rows.map(r => ((r.t === w.t || r.lemma?.[0] === w.t) ? { ...r, lit: true } : r)),
+    tr: weldIf(lang, s[lang] || s.en),
+  }))
+  if (o.examples && exItems.length) slides.push({ kind: 'examples', items: exItems, title: t.inSentence, line: 'vocab' })
+  // Other words written with its first kanji: the family it opens.
+  const famChar = chars.find(c => deps.strokes?.[c]?.words?.some(x => x.t !== w.t))
+  const family = famChar ? [w, ...deps.strokes[famChar].words.filter(x => x.t !== w.t)].slice(0, 5) : []
+  if (o.family && family.length > 1) {
+    slides.push({
+      kind: 'words', title: t.listTitle.words(family.length, famChar), line: 'vocab',
+      items: family.map((x, n) => ({ n: n + 1, t: x.t, reading: x.r, ro: x.ro, main: weldIf(lang, gloss(x, lang)[0]), sub: x.lv || '', line: 'vocab', kanji: true, pos: x.lv || '' })),
+    })
   }
   const strokeChar = chars.find(c => deps.strokes?.[c]?.s)
   if (o.strokes && strokeChar) slides.push({ kind: 'strokes', char: strokeChar, k: deps.strokes[strokeChar] })
-  if (o.yourturn) slides.push({ kind: 'yourturn', text: t.turn.word(w.t) })
-  if (o.outro) slides.push({ kind: 'outro' })
-  const near = hasKanji(w.t) ? readingMisses(row, index) : []
-  const quiz = near.length >= 3 ? {
-    kind: 'reading', ask: t.examAsk.kana, stem: { specimen: w.t },
-    ...dealChoices(w.r, shuffle(near, seeded(w.t)).slice(0, 3), w.t, 'jp'),
-    explain: { head: `${w.t}\u3000${w.r}`, sense: weldIf(lang, main) },
-  } : {
-    kind: 'meaning', ask: t.examAsk.meaning, stem: { specimen: w.t },
-    ...dealChoices(weldIf(lang, main), shuffle(data.words.filter(x => x.t !== w.t).map(x => gloss(x, lang)[0]).filter(Boolean), seeded(w.t)).slice(0, 3).map(x => weldIf(lang, x)), w.t, 'latin'),
-    explain: { head: `${w.t}\u3000${w.r}`, sense: weldIf(lang, main) },
-  }
+  closing(slides, o, t, p, { yourturn: { kind: 'yourturn', text: t.turn.word(w.t) } })
+  const quizzes = wordQuizzes(w, data, lang, t, index)
   return {
-    ...p, hook: { kind: 'specimen', text: w.t }, prompt: t.prompt.word, quiz, slides,
+    ...p, hook: { kind: 'specimen', text: w.t }, prompt: t.prompt.word, quizzes, quiz: quizzes[0] || null, slides,
+    list: family.length >= 3 ? { title: t.listTitle.words(family.length, famChar), head: famChar, line: 'vocab', items: family.map((x, n) => wordItem(x, lang, n + 1)) } : null,
     caption: { jp: `${w.t}（${w.r}）`, romaji: w.ro, tr: weldIf(lang, main), ask: t.prompt.word, tags: [`jlpt${data.level.toLowerCase()}`, 'vocabulary'] },
   }
 }
@@ -409,19 +418,11 @@ function kanjiPlan(data, c, opts) {
     })
   }
   if (o.strokes && k.s) slides.push({ kind: 'strokes', char: c, k })
-  if (o.yourturn) slides.push({ kind: 'yourturn', text: t.turn.kanji(c) })
-  if (o.outro) slides.push({ kind: 'outro' })
-  const own = new Set([...k.on, ...k.kun.map(([a, b]) => a + b)])
-  const right = k.on[0] || (k.kun[0] && k.kun[0][0] + k.kun[0][1])
-  const pool = Object.entries(data.kanji).filter(([x]) => x !== c).map(([, v]) => v.on[0]).filter(r => r && !own.has(r))
-  const wrong = [...new Set(shuffle(pool, seeded(c)))].slice(0, 3)
+  closing(slides, o, t, p, { yourturn: { kind: 'yourturn', text: t.turn.kanji(c) } })
+  const quizzes = kanjiQuizzes(c, data, lang, t)
   return {
-    ...p, hook: { kind: 'specimen', text: c }, prompt: t.prompt.kanji,
-    quiz: right ? {
-      kind: 'kanji', ask: t.examAsk.kanji, stem: { specimen: c },
-      ...dealChoices(right, wrong, c, 'jp'), explain: { head: c, sense: meaning },
-    } : null,
-    slides,
+    ...p, hook: { kind: 'specimen', text: c }, prompt: t.prompt.kanji, quizzes, quiz: quizzes[0] || null, slides,
+    list: (k.words || []).length >= 3 ? { title: t.listTitle.words(k.words.length, c), head: c, line: 'kanji', items: k.words.map((w, n) => wordItem(w, lang, n + 1)) } : null,
     caption: { jp: c, romaji: '', tr: meaning, ask: t.prompt.kanji, tags: [`jlpt${data.level.toLowerCase()}`, 'kanji'] },
   }
 }
@@ -445,14 +446,21 @@ function kanaPlan(data, card, opts) {
       items: card.words.map((w, n) => ({ n: n + 1, t: w.t, reading: w.r, ro: w.ro, main: weldIf(lang, gloss(w, lang)[0]), sub: '', line: 'vocab', kanji: hasKanji(w.t), pos: '' })),
     })
   }
-  if (o.outro) slides.push({ kind: 'outro' })
-  const same = data.kana.filter(x => x.set === card.set && x.ro !== card.ro)
-  const near = [...(group?.set || []).map(k => byKana[k]?.ro), ...shuffle(same.filter(x => x.group === card.group).map(x => x.ro), seeded(card.k)), ...shuffle(same.map(x => x.ro), seeded(card.k))]
-  const wrong = [...new Set(near.filter(r => r && r !== card.ro))].slice(0, 3)
+  closing(slides, o, t, p)
+  const quizzes = kanaQuizzes(card, data, lang, t)
+  // This or that: the kana it is mistaken for, side by side.
+  const compare = group ? {
+    sides: group.set.filter(k => byKana[k]).slice(0, 3).map(k => ({
+      head: k, sub: byKana[k].ro, line: 'kana', here: k === card.k,
+      words: (byKana[k].words || []).slice(0, 2).map(w => ({ t: w.t, r: w.r, main: weldIf(lang, gloss(w, lang)[0]) })),
+    })),
+    diff: tr(group.tip, lang), careful: '',
+    quiz: quizzes.find(q => q.kind === 'kanaReverse') || null,
+  } : null
   return {
-    ...p, hook: { kind: 'specimen', text: card.k }, prompt: t.prompt.kana,
-    quiz: { kind: 'kana', ask: t.examAsk.kana, stem: { specimen: card.k }, ...dealChoices(card.ro, wrong, card.k, 'latin'), explain: { head: `${card.k}\u3000${card.ro}`, sense: card.twin ? `${t.otherScript[card.set]}: ${card.twin}` : '' } },
-    slides,
+    ...p, hook: { kind: 'specimen', text: card.k }, prompt: t.prompt.kana, quizzes, quiz: quizzes[0] || null, slides,
+    compare: compare && compare.sides.length >= 2 ? compare : null,
+    list: (card.words || []).length >= 3 ? { title: t.listTitle.kana(card.words.length, card.k), head: card.k, line: 'kana', items: card.words.map((w, n) => wordItem(w, lang, n + 1)) } : null,
     caption: { jp: card.k, romaji: card.ro, tr: '', ask: t.prompt.kana, tags: [card.set] },
   }
 }
@@ -464,26 +472,20 @@ function passagePlan(data, P, opts) {
   const { t, lang } = p
   const o = on('passage', opts)
   const sents = P.sents.map(unpack)
-  const quizOf = (q, n) => ({
-    kind: 'passage', ask: weldIf(lang, q.question[lang] || q.question.en), stem: null,
-    ...(() => {
-      const opts2 = q.options[lang] || q.options.en
-      const d = deal(q.correct, opts2.map((_, i) => i).filter(i => i !== q.correct), `${P.id}-${n}`)
-      return { choices: d.choices.map(i => ({ text: weldIf(lang, opts2[i]), fam: 'latin' })), right: d.right }
-    })(),
-    explain: {},
-  })
-  const qs = (P.questions || []).slice(0, o.second ? 2 : 1).map(quizOf)
-  const slides = [{ kind: 'passage', sents, title: P.title }]
-  qs.forEach((q, n) => slides.push(
-    { kind: 'quiz', quiz: q, revealed: false, title: `${t.question} ${n + 1}` },
-    { kind: 'quiz', quiz: q, revealed: true, title: `${t.answer} ${n + 1}` },
-  ))
-  if (o.outro) slides.push({ kind: 'outro' })
+  const words = (P.words || []).map((w, n) => wordItem(w, lang, n + 1))
+  const slides = []
+  if (o.vocab && words.length) {
+    slides.push({ kind: 'words', title: t.listTitle.passage(words.length), line: 'vocab',
+      items: words.map(w => ({ n: w.n, t: w.head, reading: w.reading, ro: w.ro, main: w.main, sub: w.tag, line: 'vocab', kanji: true, pos: w.tag })) })
+  }
+  slides.push({ kind: 'passage', sents, title: P.title })
+  closing(slides, o, t, p)
+  const quizzes = passageQuizzes(P, lang, t)
   return {
     ...p, hook: { kind: 'specimen', text: P.title, small: true }, prompt: t.prompt.passage,
-    quiz: null, slides,
-    caption: { jp: P.title, romaji: '', tr: qs[0]?.ask || '', ask: t.prompt.passage, tags: [`jlpt${P.lv.toLowerCase()}`, 'reading'] },
+    quizzes, quiz: quizzes[0] || null, slides,
+    list: words.length >= 3 ? { title: t.listTitle.passage(words.length), head: P.title, line: 'vocab', items: words } : null,
+    caption: { jp: P.title, romaji: '', tr: quizzes[0]?.ask || '', ask: t.prompt.passage, tags: [`jlpt${P.lv.toLowerCase()}`, 'reading'] },
   }
 }
 
@@ -543,9 +545,17 @@ export function plan(sourceId, data, id, opts, deps = {}) {
   }
 }
 
+/** The questions a carousel asks: the ones the studio picked for the
+ *  item, in the plan's order, else its first `n`. */
+export function picked(pl, picks, n) {
+  const chosen = picks?.length ? pl.quizzes.filter(q => picks.includes(q.id)) : []
+  return chosen.length ? chosen : pl.quizzes.slice(0, n)
+}
+
 /** Every Japanese and Latin character a plan may set, for the font loader. */
 export function sampleText(pl) {
-  const parts = [JSON.stringify(pl.t), JSON.stringify(pl.slides), JSON.stringify(pl.hook), JSON.stringify(pl.quiz || {}),
-    pl.handle, 'Tsuji問題もんだい正解0123456789/·（　）＿→＋＝…']
+  const parts = [JSON.stringify(pl.t), JSON.stringify(pl.slides), JSON.stringify(pl.hook), JSON.stringify(pl.quizzes || []),
+    JSON.stringify([pl.compare, pl.build, pl.list, pl.talk, pl.station, pl.figure]),
+    pl.handle, 'Tsuji問題もんだい正解解答0123456789/·（　）＿★→＋＝…']
   return [...new Set(parts.join(''))].join('')
 }

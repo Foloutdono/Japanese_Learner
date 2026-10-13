@@ -1,13 +1,15 @@
-// ── カルーセル — the studio (plan 200) ─────────────────────────────
+// ── カルーセル — the studio (plans 200, 200c) ──────────────────────
 // Pick what to post (a sentence, a translation, a grammar lesson, a word,
-// a kanji, a kana, a passage), see it drawn in the four directions side
-// by side, keep one, export its slides. Everything a slide says comes
-// from bank/*.json (backend/scripts/carousel_bank.py) through sources.js;
+// a kanji, a kana, a passage), see it drawn as every type of carousel it
+// can be side by side, keep one, pick its questions, export its slides.
+// Everything a slide says comes from bank/*.json
+// (backend/scripts/carousel_bank.py) through sources.js and quizzes.js;
 // everything it looks like, from slides.js.
 /* global JSZip */
-import { DIRECTIONS, FORMATS, deck } from './slides.js'
+import { FORMATS, TYPES, TYPE_OPTIONS, available, deck } from './slides.js'
 import { FONT_FACES, font, palette } from './draw.js'
-import { BONUS, LEVELS, OPTIONAL, SOURCES, depsOf, itemsOf, plan, sampleText, sourceOf } from './sources.js'
+import { BONUS, LEVELS, OPTIONAL, SOURCES, depsOf, itemsOf, picked, plan, sampleText, sourceOf } from './sources.js'
+import { STRINGS } from './strings.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 
 const STORE = 'tsuji-carousel'
@@ -16,16 +18,21 @@ const $ = sel => document.querySelector(sel)
 // What each optional slide is called in the settings.
 const TOGGLE_LABELS = {
   words: 'Word by word', grammar: 'Grammar at work, stacked particles', watch: 'Watch out',
-  yourturn: 'Your turn (composition)', rating: 'Rate yourself (study card)', outro: 'The mark, last',
-  examples: 'Examples', scene: 'Conversation, and what would you say?', twist: 'Twist', quiz: 'Quick check',
-  parts: 'Its kanji', strokes: 'Stroke order', readings: 'Readings', lookalike: 'Lookalikes', second: 'A second question',
+  more: 'Other sentences with the point', check: 'The questions picked, at the end',
+  yourturn: 'Your turn (composition)', rating: 'Rate yourself', outro: 'The station, last',
+  examples: 'Examples', scene: 'Conversation, and what would you say?', twist: 'Twist', usage: 'A second twist',
+  rival: 'The point it is confused with', parts: 'Its kanji', family: 'More words with its kanji',
+  strokes: 'Stroke order', readings: 'Readings', lookalike: 'Lookalikes', vocab: 'Words to know first',
+  line: 'Route strip along the foot', cover: 'Cover page', sheet: 'Answer sheet', recap: 'Recap of the list',
 }
+const T = STRINGS.en
 const LIST_NAME = { sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage' }
 
 const DEFAULTS = {
   source: 'sentence', level: 'N5', kanaSet: 'hiragana', ids: { sentence: 'N5.4', translation: 'N5.4' },
-  view: 'compare', direction: 'plates', format: 'post', ground: 'paper',
+  view: 'compare', type: 'plates', format: 'post', ground: 'paper',
   lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '', safe: false, slides: {},
+  picks: {}, types: {},
 }
 const state = load()
 const files = new Map()
@@ -34,7 +41,12 @@ const work = document.createElement('canvas')
 function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || '{}')
-    return { ...DEFAULTS, ...saved, ids: { ...DEFAULTS.ids, ...(saved.ids || {}) }, slides: { ...(saved.slides || {}) } }
+    // Plan 200c retired the departure board and the study card.
+    const type = TYPES.some(x => x.id === saved.type) ? saved.type : 'plates'
+    return {
+      ...DEFAULTS, ...saved, type, ids: { ...DEFAULTS.ids, ...(saved.ids || {}) }, slides: { ...(saved.slides || {}) },
+      picks: { ...(saved.picks || {}) }, types: { ...(saved.types || {}) },
+    }
   } catch {
     return structuredClone(DEFAULTS)
   }
@@ -151,7 +163,6 @@ function renderToggles() {
   box.replaceChildren()
   const mine = state.slides[state.source] || {}
   for (const [key, def] of OPTIONAL[state.source] || []) {
-    if (key === 'rating' && state.view === 'single' && state.direction !== 'card') continue
     const label = document.createElement('label')
     label.className = 'check'
     const input = document.createElement('input')
@@ -166,6 +177,76 @@ function renderToggles() {
     box.append(label)
   }
   $('#bonus-field').hidden = !BONUS.has(state.source)
+  // The chosen type's own options.
+  const tbox = $('#type-toggles')
+  tbox.replaceChildren()
+  const theirs = state.types[state.type] || {}
+  for (const [key, def] of TYPE_OPTIONS[state.type] || []) {
+    const label = document.createElement('label')
+    label.className = 'check'
+    const input = document.createElement('input')
+    input.type = 'checkbox'
+    input.checked = theirs[key] ?? def
+    input.addEventListener('change', () => {
+      state.types[state.type] = { ...(state.types[state.type] || {}), [key]: input.checked }
+      save()
+      render()
+    })
+    label.append(input, ` ${TOGGLE_LABELS[key] || key}`)
+    tbox.append(label)
+  }
+  tbox.closest('.field').hidden = !(TYPE_OPTIONS[state.type] || []).length
+  $('#type-name').textContent = T.types[state.type].name
+}
+
+// ── The carousel types, and the questions ─────────────────────
+function renderTypes(pl) {
+  const box = $('#types')
+  box.replaceChildren()
+  for (const ty of TYPES) {
+    const ok = !pl || available(ty.id, pl)
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.className = 'dir'
+    b.dataset.set = `type:${ty.id}`
+    b.disabled = !ok
+    b.title = ok ? T.types[ty.id].desc : `${T.types[ty.id].desc} (not for this item)`
+    b.setAttribute('aria-pressed', String(state.type === ty.id))
+    const jp = document.createElement('b')
+    jp.lang = 'ja'
+    jp.textContent = ty.jp
+    const name = document.createElement('span')
+    name.textContent = T.types[ty.id].name
+    b.append(jp, name)
+    box.append(b)
+  }
+}
+const pickKey = () => `${state.source}:${currentId()}`
+function renderQuestions(pl) {
+  const box = $('#questions')
+  box.replaceChildren()
+  const field = box.closest('.field')
+  field.hidden = !pl?.quizzes?.length
+  if (field.hidden) return
+  const chosen = new Set(picked(pl, state.picks[pickKey()], 3).map(q => q.id))
+  for (const q of pl.quizzes) {
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.className = 'chip'
+    b.setAttribute('aria-pressed', String(chosen.has(q.id)))
+    b.textContent = q.label
+    b.title = q.ask
+    b.addEventListener('click', () => {
+      const next = new Set(chosen)
+      if (next.has(q.id)) next.delete(q.id)
+      else next.add(q.id)
+      if (!next.size) return
+      state.picks[pickKey()] = pl.quizzes.map(x => x.id).filter(x => next.has(x))
+      save()
+      render()
+    })
+    box.append(b)
+  }
 }
 
 // ── What else a word's carousel reads ─────────────────────────
@@ -195,21 +276,29 @@ async function render() {
   if (!listCache.length) await renderList()
   const id = currentId()
   const deps = await depsFor(data, id)
-  const opts = { ...state }
+  const figures = (await fetchJson('index.json').catch(() => null))?.figures
+  const opts = { ...state, figures }
   const pl = plan(state.source, data, id, opts, deps)
   if (!pl) return
+  opts.picks = state.picks[pickKey()]
+  // A type the item cannot be drawn as falls back to the walk.
+  const types = TYPES.map(x => x.id).filter(x => available(x, pl))
+  if (!types.includes(state.type)) { state.type = 'plates'; renderToggles() }
   renderKanjiPicker(pl)
+  renderTypes(pl)
+  renderQuestions(pl)
   await fonts(sampleText(pl))
   if (mine !== token) return
   const fmt = FORMATS[state.format]
-  const ids = state.view === 'compare' ? DIRECTIONS.map(d => d.id) : [state.direction]
+  const ids = state.view === 'compare' ? types : [state.type]
   current = { plan: pl, fmt, decks: ids.map(d => ({ id: d, slides: deck(d, pl, fmt, opts) })) }
+  $('#export-name').textContent = T.types[state.type].name
   const stage = $('#stage')
   stage.replaceChildren()
   stage.dataset.view = state.view
   stage.style.setProperty('--ratio', `${fmt.w} / ${fmt.h}`)
   for (const d of current.decks) {
-    const dir = DIRECTIONS.find(x => x.id === d.id)
+    const dir = { ...TYPES.find(x => x.id === d.id), name: { en: T.types[d.id].name } }
     const row = document.createElement('section')
     row.className = 'deck'
     row.setAttribute('aria-label', dir.name.en)
@@ -231,7 +320,7 @@ async function render() {
       keep.type = 'button'
       keep.className = 'btn btn--quiet'
       keep.textContent = 'Use this one'
-      keep.addEventListener('click', () => { state.direction = d.id; state.view = 'single'; sync(); render() })
+      keep.addEventListener('click', () => { state.type = d.id; state.view = 'single'; sync(); render() })
       head.append(keep)
     }
     const strip = document.createElement('div')
@@ -368,10 +457,10 @@ async function offer(filename, blob) {
 }
 const png = canvas => new Promise(r => canvas.toBlob(r, 'image/png'))
 const safeName = s => String(s).replace(/[\\/:*?"<>|.\s]+/g, '-').replace(/^-+|-+$/g, '')
-const baseName = () => `tsuji-${state.source}-${safeName(current.plan.id)}-${state.direction}-${state.format}`
+const baseName = () => `tsuji-${state.source}-${safeName(current.plan.id)}-${state.type}-${state.format}`
 
 async function exportZip() {
-  const d = current.decks.find(x => x.id === state.direction) ?? current.decks[0]
+  const d = current.decks.find(x => x.id === state.type) ?? current.decks[0]
   const btn = $('#export')
   btn.disabled = true
   status('Drawing the slides…')
@@ -432,7 +521,6 @@ function sync() {
   $('#romaji').checked = state.romaji
   $('#safe').checked = state.safe
   $('#handle').value = state.handle
-  $('#export-name').textContent = DIRECTIONS.find(d => d.id === state.direction).name.en
   renderSources()
   renderLevels()
   renderToggles()
@@ -453,7 +541,7 @@ function wire() {
     if (!b) return
     const [key, value] = b.dataset.set.split(':')
     state[key] = value
-    if (key === 'direction') state.view = 'single'
+    if (key === 'type') state.view = 'single'
     if (key === 'lang') { sync(); renderList().then(render); return }
     sync()
     render()

@@ -1,4 +1,4 @@
-# The carousel studio (plans 200, 200b)
+# The carousel studio (plans 200, 200b, 200c)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -22,6 +22,54 @@ Each source is one of the app's own lines, and wears its pigment:
 The practice modes a photo cannot hold (dictation needs sound) are left
 out; composition is the "your turn" slide, an invitation to write in the
 comments.
+
+## The types of carousel
+
+A type is what the carousel does, not how it looks: every type is drawn
+in the same station-plate language, and an item offers the types it has
+the content for (the studio greys out the others).
+
+| | Type | What it does | From |
+| --- | --- | --- | --- |
+| 駅名標 | Station plates | the guided walk: the item stop by stop, a route strip along the foot counting the stops | every source |
+| 模試 | Mock exam | a cover (its sections, a name to fill in), the questions picked, each answered on the next slide, then the answer sheet with every right answer filled in | every source with a question |
+| 乗換 | This or that | two things a learner mixes up side by side, each in a sentence, what tells them apart, then a question on it | a point with a rival in the catalogue, a kana with lookalikes |
+| 組立 | Build it | the translation and the pieces shuffled, then the sentence put together piece by piece (at most six steps), each piece's words with what they do | a sentence, a translation, a lesson's first example |
+| 一覧 | Top five | a list worth saving, one item a slide, then the list whole | a kanji's words, a word's family, a kana's words, a point's sentences, a passage's words |
+| 会話 | Conversation | the tour's scene line by line, then "what do you say?" | a lesson with a scene |
+
+Every type ends on the source's own station: its 駅名標 (its reading,
+its code in the line's roundel, the stations either side of it on the
+app's map), what its line teaches in figures counted from the content
+(`bank/index.json`), and a call to action fitted to the type ("How many
+out of 3?" after an exam).
+
+## The questions
+
+`quizzes.js` writes every question an item can be asked, in the JLPT's
+forms and the app's own drills, and the studio's chips pick which the
+mock exam asks (three by default; the walk ends on them too where
+"The questions picked" is on):
+
+| Source | Questions |
+| --- | --- |
+| Sentence | 読み (reading of its word), 表記 (its word in kana: which spelling), its word's meaning, what its point expresses, ★ word order, which translation |
+| Translation | which sentence says it, ★ word order, what its point expresses, a word's meaning |
+| Lesson | the scene's "what do you say?", the tour's questions (up to four), what the point means, ★ word order |
+| Word | its reading, its spelling, its meaning |
+| Kanji | its reading, its meaning, which kanji means this, a word's reading, its stroke count |
+| Kana | its sound, which kana a sound is, its twin in the other script |
+| Comprehension | every question the seed writes (understanding, inference, vocabulary, grammar: eight to twelve a passage), then the reading of its words |
+
+A question has one right answer, the content's own. A wrong answer is
+dealt only where it cannot be right too: a reading that is not the
+word's, a spelling that is no word (`carousel_bank.orthography` checks
+each against the deck and JMdict), a meaning that shares no word with the
+right one (`quizzes.overlaps`), a translation of another sentence. ★ word
+order is asked only over a pattern's own pieces after the word it takes
+(話す・こと・が・できます), whose order the grammar fixes, never over a
+sentence's phrases, which can be said in more than one order. Nothing is
+asked by blanking a particle out of a sentence.
 
 ## Explaining a point in its own sentence
 
@@ -56,12 +104,13 @@ Every slide is drawn from the app's own data, written once into
 
 | File | Holds | From |
 | --- | --- | --- |
-| `N5.json … N1.json` | the reading bank's sentences, word by word: reading, romaji, gloss, type, the points each word carries; the points' rule, form, careful, compare and twists | `content/reading_sentences.py`, `study/analysis.analyze_local` (grouped as `components/analysis/rows.js` groups), the deck's glosses, the catalogue |
-| `grammar-N*.json` | each catalogue point: its rule, examples, twists, scene and quiz, every sentence split into words with the point lit | `content/grammar/*.json`, the tours |
-| `words-N*.json` | each deck word: reading, romaji, glosses, its sentences in the bank | the deck |
+| `N5.json … N1.json` | the reading bank's sentences, word by word: reading, romaji, gloss, type, the points each word carries, the 表記 question's wrong spellings of its word; the points' rule, form, careful, compare (with the rival's meaning and an example) and twists | `content/reading_sentences.py`, `study/analysis.analyze_local` (grouped as `components/analysis/rows.js` groups), the deck's glosses, the catalogue |
+| `grammar-N*.json` | each catalogue point: its rule, examples, twists, scene and quiz, its rival, every sentence split into words with the point lit | `content/grammar/*.json`, the tours |
+| `words-N*.json` | each deck word: reading, romaji, glosses, its sentences in the bank, its wrong spellings | the deck, JMdict |
 | `kanji-N*.json`, `kanji-index.json` | readings, meanings, strokes (KanjiVG) and words of each kanji | KANJIDIC2, `backend/kanjivg/` |
 | `kana.json` | each kana: romaji, strokes, its twin, words written with it | the kana sets |
-| `comprehension.json` | the passages and their questions | `content/comprehension/*.json` |
+| `comprehension.json` | the passages, their questions and the words worth learning first | `content/comprehension/*.json` |
+| `index.json` | the figures the last slide quotes: sentences, points, words, kanji, kana, passages | all of the above |
 
 A word wears the vocabulary line's pigment, a particle or an ending the
 grammar line's, a kanji the kanji line's: DESIGN.md's "one line, one
@@ -73,18 +122,12 @@ catalogue's (a scene's, a quiz's, a comprehension question's), never a
 particle blanked out of a sentence, where a second particle could be
 right too.
 
-## The four directions
-
-| | Direction | The app's idiom |
-| --- | --- | --- |
-| 駅名標 | Station plates | each word a hanging plate, its number in a ring, its line's stripe along its foot |
-| 発車標 | Departure board | a sumi board: the words as departures, the number in gold, the type in a ring |
-| 札 | Study card | the card and its back, ending on the rating bar: "how did you do?" |
-| 模試 | Mock exam | もんだい as the JLPT prints it: the question first, four answers in a hairline lattice, then the teacher's circle and the 正解 seal |
-
-"All four" draws the same item in every direction side by side, to
-choose from; "One direction" keeps one and exports it. Each source lists
-the slides it may leave out, as toggles.
+"All types" draws the same item as every type it can be, side by side,
+to choose from; "One type" keeps one and exports it. Each source lists
+the station plates' slides it may leave out, and each type its own
+options (the route strip, the exam's cover and answer sheet, the list's
+recap), as toggles. The departure board and the study card of plan 200
+were styles, not types, and plan 200c retired them.
 
 ## Formats
 
@@ -102,9 +145,11 @@ the Japanese as written, with furigana, or in kana.
 
 | File | Does |
 | --- | --- |
-| `sources.js` | a slide plan per source: what each slide says, in which language |
+| `sources.js` | a plan per source: the walk's slides, and what each other type needs, in which language |
+| `quizzes.js` | every question an item can be asked, with its safe wrong answers |
 | `explain.js` | a point explained in its own sentence, stacked particles, lookalike kana |
-| `slides.js` | the slide kinds, drawn once, and the four directions' surfaces |
+| `common.js` | seeded order, dealt choices, romaji, glosses, near-miss readings |
+| `slides.js` | the slide kinds, drawn once, the types and their decks |
 | `draw.js` | the canvas primitives, the app's tokens at slide scale, the formats |
 | `strings.js` | every label a slide prints, in English and French |
 | `studio.js` | the page: the pickers, the previews, the export |
@@ -136,4 +181,6 @@ Run it after a change to the reading bank, the deck, the kanji, the kana,
 the catalogue, the tours, the comprehension seeds or the analyser, and
 commit the files. `src/carousel.test.js` holds the files to what a slide
 needs: every sentence spelled back by its words, every item of every
-source drawn, a quiz that never deals its answer twice.
+source drawn as every type it can be, a question that never deals its
+answer twice nor a wrong answer that could be right, ★ only where the
+order is fixed, the figures the bank's own.

@@ -1,22 +1,26 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { RATING_INKS } from '../carousel/draw.js'
-import { LEVELS, SOURCES, depsOf, itemsOf, lineRomaji, plan, readingMisses, unpack } from '../carousel/sources.js'
+import { FORMATS, RATING_INKS } from '../carousel/draw.js'
+import { LEVELS, SOURCES, chunksOf, depsOf, itemsOf, lineRomaji, plan, readingMisses, unpack } from '../carousel/sources.js'
+import { TYPES, available, deck } from '../carousel/slides.js'
+import { assemblyQ, overlaps } from '../carousel/quizzes.js'
 import { howItWorks, senseOf, stacksIn } from '../carousel/explain.js'
-import { weld } from '../carousel/strings.js'
+import { STRINGS, weld } from '../carousel/strings.js'
 
-// ── カルーセル — the carousel studio (plans 200, 200b) ──
+// ── カルーセル — the carousel studio (plans 200, 200b, 200c) ──
 // A static tool outside src/ (frontend/carousel/), so none of the app's
 // guards see it. These are its own: the inks it adds to tokens.mjs stay
 // the app's, the bank backend/scripts/carousel_bank.py writes still
-// spells every sentence back, every item of every source draws, a quiz
-// never deals its answer twice, and an explanation names the one sense
-// its sentence uses, or none.
+// spells every sentence back, every item of every source draws as every
+// type it can be, a question never deals its answer twice nor a wrong
+// answer that could be right, the last slide's figures are the bank's
+// own, and an explanation names the one sense its sentence uses, or none.
 
 const read = path => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
 const bank = file => JSON.parse(read(`carousel/bank/${file}`))
 const banks = Object.fromEntries(LEVELS.map(lv => [lv, bank(`${lv}.json`)]))
-const OPTS = { lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '@tsuji.app', slides: {} }
+const FIGURES = bank('index.json').figures
+const OPTS = { lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '@tsuji.app', slides: {}, figures: FIGURES }
 const sentence = jp => LEVELS.flatMap(lv => banks[lv].sentences).find(s => s.jp === jp)
 const glossEn = r => (r.en || [])[0] || ''
 
@@ -73,24 +77,102 @@ describe('the carousel studio', () => {
     }
   })
 
-  it('draws every item of every source, with four different answers where it asks', { timeout: 120000 }, () => {
-    for (const src of SOURCES) {
-      for (const { data, filter } of filesOf(src)) {
-        const items = itemsOf(src.id, data, 'en', filter)
-        expect(items.length, src.id).toBeGreaterThan(0)
-        for (const { id } of items) {
-          const p = plan(src.id, data, id, OPTS, depsFor(src, data, id))
-          expect(p.slides.length, `${src.id} ${id}`).toBeGreaterThan(1)
-          const quizzes = [p.quiz, ...p.slides.filter(s => s.kind === 'quiz').map(s => s.quiz)].filter(Boolean)
-          for (const q of quizzes) {
-            const keys = q.choices.map(c => JSON.stringify(c.text ?? c.rows))
-            expect(new Set(keys).size, `${src.id} ${id}`).toBe(keys.length)
-            expect(q.right, `${src.id} ${id}`).toBeGreaterThanOrEqual(0)
-            expect(q.right, `${src.id} ${id}`).toBeLessThan(q.choices.length)
-          }
+  // Every plan of every source, built once for the tests below.
+  const every = []
+  for (const src of SOURCES) {
+    for (const { data, filter } of filesOf(src)) {
+      for (const { id } of itemsOf(src.id, data, 'en', filter)) every.push({ src, id, p: plan(src.id, data, id, OPTS, depsFor(src, data, id)) })
+    }
+  }
+
+  it('draws every item of every source as every type it can be', { timeout: 120000 }, () => {
+    for (const src of SOURCES) expect(every.some(x => x.src === src), src.id).toBe(true)
+    for (const { src, id, p } of every) {
+      for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
+        const slides = deck(type, p, FORMATS.post, { ground: 'paper' })
+        expect(slides.length, `${src.id} ${id} ${type}`).toBeGreaterThan(2)
+        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe('outro')
+        expect(new Set(slides.map(x => x.key)).size, `${src.id} ${id} ${type}`).toBe(slides.length)
+      }
+    }
+  })
+
+  it('asks questions with four different answers, the right one once', { timeout: 60000 }, () => {
+    for (const { src, id, p } of every) {
+      const qs = [...p.quizzes, p.compare?.quiz, p.talk?.quiz].filter(Boolean)
+      expect(new Set(p.quizzes.map(q => q.id)).size, `${src.id} ${id}`).toBe(p.quizzes.length)
+      for (const q of qs) {
+        const keys = q.choices.map(c => JSON.stringify(c.text ?? c.rows))
+        expect(new Set(keys).size, `${src.id} ${id} ${q.kind}`).toBe(keys.length)
+        expect(q.right, `${src.id} ${id} ${q.kind}`).toBeGreaterThanOrEqual(0)
+        expect(q.right, `${src.id} ${id} ${q.kind}`).toBeLessThan(q.choices.length)
+        expect(q.label, `${src.id} ${id} ${q.kind}`).toBeTruthy()
+      }
+    }
+  })
+
+  it('never deals a meaning that could be the right one too', () => {
+    for (const { src, id, p } of every) {
+      for (const q of p.quizzes.filter(x => ['meaning', 'pointMeaning', 'kanjiMeaning', 'grammar'].includes(x.kind))) {
+        const right = q.choices[q.right].text
+        for (const [i, c] of q.choices.entries()) if (i !== q.right) expect(overlaps(right, c.text), `${src.id} ${id}: ${right} / ${c.text}`).toBe(false)
+      }
+    }
+    expect(overlaps('to study', 'studying')).toBe(true)
+    expect(overlaps('school', 'station')).toBe(false)
+  })
+
+  it('spells a word wrong only in ways that are no word of the deck', () => {
+    const deckForms = new Set(LEVELS.flatMap(lv => bank(`words-${lv}.json`).words.map(w => w.t)))
+    for (const lv of LEVELS) {
+      for (const w of bank(`words-${lv}.json`).words) {
+        for (const wrong of w.hy || []) {
+          expect(wrong, w.t).not.toBe(w.t)
+          expect(deckForms.has(wrong), `${w.t}: ${wrong}`).toBe(false)
+          expect([...wrong].length, `${w.t}: ${wrong}`).toBe([...w.t].length)
         }
       }
     }
+  })
+
+  it('asks for word order only where the grammar fixes it', () => {
+    const t = STRINGS.en
+    const q = assemblyQ(sentence('日本語を話すことができます。')?.rows || [], '〜ことができます', 'x', 'en', t)
+    if (q) {
+      expect(q.choices.map(c => c.text).sort()).toEqual(['が', 'こと', 'できます', '話す'].sort())
+      expect(q.choices[q.right].text).toBe('が')
+    }
+    // A sentence's phrases can be said in more than one order: no question.
+    expect(assemblyQ(sentence('駅で友だちに会います。').rows, 'で', 'x', 'en', t)).toBeNull()
+    for (const { src, id, p } of every) {
+      for (const a of p.quizzes.filter(x => x.kind === 'assembly')) {
+        const pieces = a.choices.map(c => c.text)
+        expect(new Set(pieces).size, `${src.id} ${id}`).toBe(4)
+        expect(a.stem.rows.filter(r => r.k === 'blank')).toHaveLength(4)
+        expect(a.stem.after.rows[a.stem.after.target].t, `${src.id} ${id}`).toBe(pieces[a.right])
+      }
+    }
+  })
+
+  it('builds a sentence from all of its pieces, in order', () => {
+    for (const { src, id, p } of every) {
+      if (!p.build) continue
+      const b = p.build
+      expect(b.steps.length, `${src.id} ${id}`).toBeLessThanOrEqual(6)
+      expect(b.steps.at(-1).upto, `${src.id} ${id}`).toBe(b.rows.length)
+      expect(chunksOf(b.rows).flat(), `${src.id} ${id}`).toEqual(b.rows.map((_, i) => i))
+    }
+  })
+
+  it('quotes the figures the bank counts', () => {
+    expect(FIGURES.sentences).toBe(LEVELS.reduce((n, lv) => n + banks[lv].sentences.length, 0))
+    expect(FIGURES.words).toBe(LEVELS.reduce((n, lv) => n + bank(`words-${lv}.json`).words.length, 0))
+    const kana = bank('kana.json').kana
+    expect(FIGURES.hiragana).toBe(kana.filter(k => k.set === 'hiragana').length)
+    expect(FIGURES.passages).toBe(bank('comprehension.json').passages.length)
+    const p = every.find(x => x.src.id === 'sentence').p
+    expect(p.figure).toContain(FIGURES.sentences.toLocaleString('en-US'))
+    expect(p.station.code).toBe('DS')
   })
 
   it('never offers a reading as its own near-miss', () => {

@@ -16,7 +16,10 @@ frontend/carousel/bank/, one level a file so the page opens on N5
 without loading N1, and the studio is a static page with nothing to
 ask a server. Since plan 200b it writes the rest of what a carousel can
 be drawn from too: the grammar lessons with their tours, the deck's
-words and kanji, the kana and the comprehension passages.
+words and kanji, the kana and the comprehension passages; since plan
+200c the wrong spellings the 表記 question deals (each checked against
+the deck and JMdict, so no wrong answer is a word) and index.json, the
+figures a carousel's last slide may quote.
 
     python -m scripts.carousel_bank            # writes frontend/carousel/bank/*.json
     python -m scripts.carousel_bank --check    # exits 1 when a file is stale
@@ -43,7 +46,7 @@ KANJIVG = BACKEND / "kanjivg"
 
 # Bumped when the file's shape changes, so the studio can refuse a file
 # it cannot read rather than draw half a slide.
-REV = 2
+REV = 3
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 
@@ -194,7 +197,77 @@ def sentence(level: str, index: int, row: dict, kanji: set) -> dict:
     fi = _focus_index(rows, row["focus"])
     if fi is not None:
         out["fi"] = fi
+        hy = orthography(rows[fi].get("fu") or [])
+        if hy:
+            out["hy"] = hy
     return out
+
+
+# ── 表記: how a word is written (plan 200c) ──────────────────────
+# The exam's 表記 question prints a word in kana and asks for its
+# kanji. Its wrong answers are the word with one kanji swapped for
+# another read the same way (学校 -> 学交): a learner who knows the
+# word knows which one it takes. A swap that is itself a word is never
+# dealt, in the deck or in JMdict (機会 -> 機械), since it could be a
+# second right answer.
+_hira = lambda s: "".join(chr(ord(c) - 0x60) if "ァ" <= c <= "ヶ" else c for c in s)  # noqa: E731
+_ON: dict[str, list[str]] = {}
+_FORMS: set[str] = set()
+
+
+def _on_index() -> dict[str, list[str]]:
+    """Every deck kanji by each of its on'yomi, in hiragana, the
+    earliest-taught first, so a wrong answer is a kanji a learner has met."""
+    if not _ON:
+        found: dict[str, list] = {}
+        for c, (lv, e) in DECK_BY_CHAR.items():
+            for r in (e.get("kana") or "").split("・"):
+                r = r.strip()
+                if r and re.fullmatch(r"[ァ-ヿ]+", r):
+                    found.setdefault(_hira(r), []).append((LEVELS.index(lv), c))
+        _ON.update({k: [c for _, c in sorted(v)] for k, v in found.items()})
+    return _ON
+
+
+def _forms() -> set[str]:
+    if not _FORMS:
+        from content.vocab_data import VOCAB_BY_LEVEL
+        _FORMS.update(e["kanji"] for lv in LEVELS for e in VOCAB_BY_LEVEL.get(lv, []) if e.get("kanji"))
+    return _FORMS
+
+
+def orthography(fu: list[list[str]], want: int = 3) -> list[str]:
+    """Three wrong ways to write a word, from its furigana; [] when the
+    word has fewer (a kanji read by a kun'yomi has no same-sounding
+    rival the deck teaches)."""
+    from content.vocab_jmdict_data import has_form
+
+    segs = [(t, r) for t, r in fu]
+    if not any(r for _, r in segs):
+        return []
+    per_slot = []
+    for i, (t, r) in enumerate(segs):
+        if len(t) != 1 or not r or t not in DECK_BY_CHAR:
+            continue
+        options = []
+        for other in _on_index().get(r, []):
+            if other == t:
+                continue
+            cand = "".join(other if j == i else x for j, (x, _) in enumerate(segs))
+            if cand in _forms() or has_form(cand):
+                continue
+            options.append(cand)
+            if len(options) == want:
+                break
+        if options:
+            per_slot.append(options)
+    # One from each kanji in turn, so the three are not one swap thrice.
+    out: list[str] = []
+    for n in range(want):
+        for options in per_slot:
+            if n < len(options) and options[n] not in out:
+                out.append(options[n])
+    return out[:want]
 
 
 # The catalogue writes a point's form in English only ("verb て-form +
@@ -258,7 +331,8 @@ def point(pattern: str) -> dict | None:
     compare = (entry.get("compare") or [])[:1]
     if compare:
         c = compare[0]
-        out["compare"] = {"p": c.get("pattern", ""), "en": _plain(c.get("en")), "fr": _plain(c.get("fr"))}
+        out["compare"] = {"p": c.get("pattern", ""), "en": _plain(c.get("en")), "fr": _plain(c.get("fr")),
+                          **_rival(c.get("pattern", ""))}
     twists = []
     for t in ((entry.get("tour") or {}).get("twists") or []):
         if not t.get("pair") or len(t["pair"]) != 2:
@@ -394,6 +468,22 @@ def text_rows(jp: str, level: str | None = None, pattern: str | None = None) -> 
     return out
 
 
+def _rival(pattern: str) -> dict:
+    """The point a point is confused with, as the catalogue teaches it:
+    its level, meaning, form and one example, for the "this or that"
+    carousel (plan 200c); {} where the rival is not a catalogue point."""
+    found = find(pattern) if pattern else None
+    if not found:
+        return {}
+    level, entry = found
+    m = entry.get("meaning") or {}
+    out = {"lv": level, "meaning": {"en": m.get("en", ""), "fr": m.get("fr", "")}, "form": entry.get("structure", "")}
+    ex = (entry.get("examples") or [])[:1]
+    if ex:
+        out["ex"] = {"rows": text_rows(ex[0]["jp"], level, entry["pattern"]), "en": ex[0].get("en", ""), "fr": ex[0].get("fr", "")}
+    return out
+
+
 def _both(d: dict | None) -> dict:
     return {k: _plain((d or {}).get(k, "")) for k in ("en", "fr")}
 
@@ -415,12 +505,12 @@ def lesson(level: str, entry: dict) -> dict:
             out[step["kind"]] = _both(step)
     compare = (entry.get("compare") or [])[:1]
     if compare:
-        out["compare"] = {"p": compare[0].get("pattern", ""), **_both(compare[0])}
+        out["compare"] = {"p": compare[0].get("pattern", ""), **_both(compare[0]), **_rival(compare[0].get("pattern", ""))}
     out["ex"] = [{"rows": text_rows(e["jp"], level, p), "en": e.get("en", ""), "fr": e.get("fr", "")}
                  for e in (entry.get("examples") or [])[:3]]
     tour = entry.get("tour") or {}
     twists = []
-    for t in (tour.get("twists") or [])[:2]:
+    for t in (tour.get("twists") or [])[:3]:
         tw = {"notion": t.get("notion") or {}, "why": _both(t.get("why")), "ask": _both(t.get("ask")),
               "tr": _both(t.get("tr")), "rows": text_rows(t["jp"], level, p),
               "choices": [_both(c) for c in t.get("choices") or []]}
@@ -447,7 +537,7 @@ def lesson(level: str, entry: dict) -> dict:
             } if cue.get("jp") else None,
         }
     quiz = []
-    for q in (tour.get("quiz") or [])[:2]:
+    for q in (tour.get("quiz") or [])[:4]:
         item = {"kind": q.get("kind"), "ask": _both(q.get("ask")), "why": _both(q.get("why"))}
         if q.get("jp"):
             item["rows"] = text_rows(q["jp"], level)
@@ -508,6 +598,9 @@ def words(level: str, index: dict) -> dict:
         fu = _furigana_of(written, kana)
         if any(r for _, r in fu):
             w["fu"] = fu
+            hy = orthography(fu)
+            if hy:
+                w["hy"] = hy
         ex = list(dict.fromkeys(h[0] for h in hits))[:2]
         if ex:
             w["ex"] = ex
@@ -566,7 +659,7 @@ def kanji_index(deck: dict) -> dict:
 
 def kana_cards() -> dict:
     """The two syllabaries' basic kana: romaji, strokes, the twin in the
-    other script, and up to three N5 words that begin with it."""
+    other script, and up to five N5 or N4 words that begin with it."""
     from content.kana_data import HIRAGANA_BASIC, KATAKANA_BASIC, twin
     from content.vocab_data import VOCAB_BY_LEVEL
     from translations import fr_gloss
@@ -594,7 +687,7 @@ def kana_cards() -> dict:
                     if fr:
                         w["fr"] = fr
                     ws.append(w)
-                if len(ws) == 3:
+                if len(ws) == 5:
                     break
             if ws:
                 card["words"] = ws
@@ -615,9 +708,38 @@ def passages() -> dict:
             out.append({
                 "id": ex["id"], "lv": level, "title": ex.get("title", ""), "grammar": ex.get("grammar", []),
                 "sents": [text_rows(x, level) for x in parts],
+                "words": _passage_words(parts, level),
                 "questions": ex.get("questions", []),
             })
     return {"rev": REV, "passages": out}
+
+
+def _passage_words(parts: list[str], level: str, want: int = 6) -> list[dict]:
+    """The words of a passage worth learning before reading it: written
+    with kanji, glossed by the deck, the passage's own level first, then
+    the level under it, each once, in the order the text meets them."""
+    rank = {lv: i for i, lv in enumerate(LEVELS)}
+    seen, found = set(), []
+    for n, part in enumerate(parts):
+        for r in rows_of(analyze_local(part, level)["tokens"]):
+            if r["k"] != "word" or not r.get("fu") or not r.get("en") or r.get("pool"):
+                continue
+            written = (r.get("lemma") or [r["t"]])[0]
+            # A word of one kanji alone (日, 七) or a numeral is no word to learn first.
+            if (written in seen or not re.search(r"[一-鿿]", written) or r.get("lv") not in rank
+                    or len(written) < 2 or re.fullmatch(r"[一二三四五六七八九十百千万何0-9０-９]+(時|分|日|月|年|人|回|本|枚|歳|週間|時間)?", written)):
+                continue
+            seen.add(written)
+            kana = (r.get("lemma") or [None, None])[1] or "".join(rd or t for t, rd in r["fu"])
+            w = {"t": written, "r": kana, "ro": to_romaji(kana), "lv": r["lv"], "en": r["en"][:1]}
+            if r.get("fr"):
+                w["fr"] = r["fr"][:1]
+            fu = _furigana_of(written, kana)
+            if any(x for _, x in fu):
+                w["fu"] = fu
+            found.append((abs(rank[r["lv"]] - rank[level]), rank[r["lv"]] > rank[level], len(found), w))
+    found.sort(key=lambda x: x[:3])
+    return [w for *_, w in found[:want]]
 
 
 def dump(data: dict) -> str:
@@ -650,8 +772,30 @@ def files(deck: dict):
         yield f"words-{level}.json", words(level, index)
         yield f"kanji-{level}.json", kanji_cards(level, deck)
     yield "kanji-index.json", kanji_index(deck)
-    yield "kana.json", kana_cards()
-    yield "comprehension.json", passages()
+    kana = kana_cards()
+    yield "kana.json", kana
+    comprehension = passages()
+    yield "comprehension.json", comprehension
+    yield "index.json", figures(sentences, kana, comprehension)
+
+
+def figures(sentences: dict, kana: dict, comprehension: dict) -> dict:
+    """What a carousel's last slide may say about each line of the app
+    (plan 200c): how many sentences, points, words, kanji and kana it
+    teaches, counted from the content itself, never written by hand."""
+    from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+    from content.kanji_data import KANJI_BY_LEVEL
+    from content.vocab_data import VOCAB_BY_LEVEL
+
+    return {"rev": REV, "figures": {
+        "sentences": sum(len(sentences[lv]["sentences"]) for lv in LEVELS),
+        "points": sum(len(GRAMMAR_POINTS_BY_LEVEL.get(lv, [])) for lv in LEVELS),
+        "words": sum(len(VOCAB_BY_LEVEL.get(lv, [])) for lv in LEVELS),
+        "kanji": sum(len(KANJI_BY_LEVEL.get(lv, [])) for lv in LEVELS),
+        "hiragana": sum(1 for k in kana["kana"] if k["set"] == "hiragana"),
+        "katakana": sum(1 for k in kana["kana"] if k["set"] == "katakana"),
+        "passages": len(comprehension["passages"]),
+    }}
 
 
 def _count(data: dict) -> str:

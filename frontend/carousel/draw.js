@@ -65,6 +65,8 @@ export function palette(ground) {
     onPanel,
     onPanelSoft: t['--text-on-panel-soft'],
     onFill: t['--text-on-fill'],
+    // Text on a line's band (a station plate's foot): the sumi theme's ink, light on every pigment.
+    onLine: DARK['--text-primary'],
     // index.css's --surface and --surface-line, per theme
     surface: paper ? mix(t['--text-primary'], t['--bg-card'], 0.04) : t['--bg-panel'],
     surfaceLine: paper ? mix(t['--text-primary'], t['--border'], 0.15) : mix(onPanel, t['--bg-panel'], 0.13),

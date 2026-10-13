@@ -77,6 +77,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
 .dir b { font-family: var(--serif); font-size: 20px; font-weight: 700; }
 .dir span { color: var(--ink2); font-size: 13px; }
 .dir[aria-pressed="true"] { background: var(--sel-wash); border-color: var(--sel-line); }
+.dir:disabled { opacity: 0.4; cursor: not-allowed; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips .chip { font-size: 13px; min-height: 32px; padding: 5px 12px; }
 .sources { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .source { border: 1px solid var(--line); background: transparent; border-radius: 8px; padding: 8px 4px 7px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; position: relative; }
 .source b { font-family: var(--serif); font-size: 19px; font-weight: 700; }
@@ -167,13 +170,13 @@ dialog::backdrop { background: var(--scrim); }
     </div>
 
     <div class="field">
-      <div class="label">Direction</div>
-      <div class="dirs" role="group" aria-label="Direction">
-        <button type="button" class="dir" data-set="direction:plates"><b lang="ja">駅名標</b><span>Station plates</span></button>
-        <button type="button" class="dir" data-set="direction:board"><b lang="ja">発車標</b><span>Departure board</span></button>
-        <button type="button" class="dir" data-set="direction:card"><b lang="ja">札</b><span>Study card</span></button>
-        <button type="button" class="dir" data-set="direction:exam"><b lang="ja">模試</b><span>Mock exam</span></button>
-      </div>
+      <div class="label">Carousel type</div>
+      <div id="types" class="dirs" role="group" aria-label="Carousel type"></div>
+    </div>
+
+    <div class="field" hidden>
+      <div class="label">Questions <span>mock exam, and the walk’s end</span></div>
+      <div id="questions" class="chips" role="group" aria-label="Questions"></div>
     </div>
 
     <div class="field">
@@ -195,8 +198,13 @@ dialog::backdrop { background: var(--scrim); }
     </div>
 
     <div class="field">
-      <div class="label">Slides</div>
+      <div class="label">Slides <span>station plates</span></div>
       <div id="toggles" class="toggles"></div>
+    </div>
+
+    <div class="field">
+      <div class="label"><span id="type-name"></span> <span>options</span></div>
+      <div id="type-toggles" class="toggles"></div>
     </div>
 
     <div class="field" id="bonus-field">
@@ -221,8 +229,8 @@ dialog::backdrop { background: var(--scrim); }
   <section class="work" aria-label="Slides">
     <div class="toolbar">
       <div class="seg" role="group" aria-label="View">
-        <button type="button" data-set="view:compare">All four</button>
-        <button type="button" data-set="view:single">One direction</button>
+        <button type="button" data-set="view:compare">All types</button>
+        <button type="button" data-set="view:single">One type</button>
       </div>
       <div class="seg" role="group" aria-label="Format">
         <button type="button" data-set="format:post">4:5 post</button>

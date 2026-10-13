@@ -1,14 +1,17 @@
-// ── カルーセル — the slides (plan 200) ──────────────────────────────
-// A plan (sources.js) drawn as slides. Four directions, each the app's
-// own idiom (DESIGN.md, "The idea"):
-//   plates  駅名標  the station plates: a word is a stop on the line
-//   board   発車標  the departure board: the words as departures
-//   card    札      the study card, and the rating bar it ends on
-//   exam    模試    the mock exam: the post opens on its question
-// A direction is a style: the surface a slide is set on, how it titles a
-// slide, how it draws a row of words, how it opens. Every other slide
-// (the point at work, the stacked particles, the scene, the strokes …)
-// is written once and set on the direction's surface.
+// ── カルーセル — the slides (plans 200, 200c) ───────────────────────
+// A plan (sources.js) drawn as slides. Since plan 200c a carousel's
+// type is what it does, not how it looks; each is the app's own idiom
+// (DESIGN.md, "The idea"):
+//   plates   駅名標  the guided walk: the item stop by stop, on its line
+//   exam     模試    the mock exam: a cover, questions in the JLPT's
+//                    forms, their answers, the answer sheet
+//   compare  乗換    this or that: two things a learner mixes up
+//   build    組立    the sentence put together piece by piece
+//   list     一覧    a short list worth saving, one item a slide
+//   talk     会話    a scene, line by line, then the reader's line
+// Every slide is written once and set on the station plates' ground; a
+// route strip along the foot counts the stops, and the last slide is the
+// source's own station plate (駅名標) with what its line teaches.
 //
 // A colour keeps its meaning: a word wears the vocabulary line's pigment,
 // a particle or an ending the grammar line's, a kanji the kanji line's;
@@ -21,88 +24,26 @@ import {
   ground, masthead, heading, pageMark, pages, strokeBox, marked, stamp,
 } from './draw.js'
 import { RATINGS_JP, formOf, tr, weldIf } from './strings.js'
+import { picked } from './sources.js'
+import { seeded, shuffle } from './common.js'
 
 export { FORMATS }
 
 // ── Surfaces ──────────────────────────────────────────────────
-function boardPanel(ctx, p, x, y, w, h) {
-  ctx.save()
-  shadow(ctx, p.board)
-  ctx.fillStyle = p.panel
-  rrect(ctx, x, y, w, h, R.panel)
-  ctx.fill()
-  ctx.restore()
-}
-function boardHead(ctx, p, x, y, w, left, right) {
-  const h = FS.caption * 3.2
-  ctx.fillStyle = p.gold
-  ctx.beginPath()
-  ctx.arc(x + SP[6], y + h / 2, 9, 0, Math.PI * 2)
-  ctx.fill()
-  caption(ctx, left, x + SP[6] + 26, y + h / 2 + FS.caption * 0.36, p.onPanelSoft)
-  if (right) text(ctx, right, x + w - SP[6], y + h / 2 + FS.lead * 0.36, { f: font(700, FS.lead, 'latin'), color: p.gold, align: 'right' })
-  ctx.fillStyle = p.panelLine
-  ctx.fillRect(x, y + h, w, 2)
-  return h + 2
-}
-const inner = (bx, by, bw, bh, padX = SP[7], padY = SP[7]) => ({
-  x: bx + padX, y: by + padY, w: bw - padX * 2, h: bh - padY * 2, cx: bx + bw / 2, right: bx + bw - padX, bottom: by + bh - padY, W: bw, H: bh,
-})
-function studyCard(ctx, p, x, y, w, h, stripe) {
-  ctx.fillStyle = p.surface
-  rrect(ctx, x, y, w, h, R.panel)
-  ctx.fill()
-  ctx.strokeStyle = p.surfaceLine
-  ctx.lineWidth = 2
-  rrect(ctx, x + 1, y + 1, w - 2, h - 2, R.panel)
-  ctx.stroke()
-  if (stripe) {
-    ctx.save()
-    rrect(ctx, x, y, w, h, R.panel)
-    ctx.clip()
-    ctx.fillStyle = stripe
-    ctx.fillRect(x, y, w, EDGE)
-    ctx.restore()
-  }
-}
-const cardInk = p => ({ ink: p.paper ? p.ink : p.onPanel, ink2: p.paper ? p.ink2 : p.onPanelSoft })
-
-// Which line a slide belongs to, for the card's stripe.
-const LINE_OF_KIND = {
-  point: 'grammar', lesson: 'grammar', stack: 'grammar', watch: 'grammar', twist: 'grammar', usage: 'grammar',
-  strokes: 'kanji', readings: 'kanji', kanareveal: 'kana', lookalike: 'kana', yourturn: 'sakubun', quiz: 'exam',
-  answer: 'reading',
-}
-
-/** Set a slide's surface for a direction: the frame its content goes in, and its inks. */
-function surface(dir, ctx, p, fr, line) {
+/** A slide's ground, and the frame and inks its content is set in. */
+function surface(ctx, p, fr) {
   ground(ctx, p, fr)
-  if (dir === 'board') {
-    boardPanel(ctx, p, fr.x, fr.y, fr.w, fr.h)
-    return { f: inner(fr.x, fr.y, fr.w, fr.h), ink: p.onPanel, ink2: p.onPanelSoft, dark: true, board: true }
-  }
-  if (dir === 'card') {
-    studyCard(ctx, p, fr.x, fr.y, fr.w, fr.h, p.line[line] || p.line.reading)
-    return { f: inner(fr.x, fr.y, fr.w, fr.h), ...cardInk(p), dark: !p.paper }
-  }
   return { f: fr, ink: p.ink, ink2: p.ink2, dark: !p.paper }
 }
 
-/** A slide's title, as the direction sets it; returns the y under it. */
+/** A slide's title, as a station prints its names; returns the y under it. */
 function title(c, str, y = c.f.y, right = '') {
   const { ctx, p, f } = c
-  if (c.board) {
-    ctx.fillStyle = p.gold
-    ctx.beginPath()
-    ctx.arc(f.x + 9, y + FS.caption * 0.62, 9, 0, Math.PI * 2)
-    ctx.fill()
-    caption(ctx, str, f.x + 30, y + FS.caption, c.ink2)
-    if (right) text(ctx, right, f.right, y + FS.caption, { f: font(700, FS.lead, 'latin'), color: p.gold, align: 'right' })
-    return y + FS.caption + SP[7]
-  }
-  const h = heading(ctx, p, f, str, y, c.ink)
-  // A page count (2/3) or a level (N5), at the title's right.
-  if (right) text(ctx, right, f.right, y + FS.heading * 0.8, { f: font(700, FS.lead, 'latin'), color: c.ink2, align: 'right' })
+  // A page count (2/3) or a level (N5), at the title's right, kept clear of it.
+  const rf = font(700, FS.lead, 'latin')
+  const rw = right ? measure(ctx, right, rf) + SP[5] : 0
+  const h = heading(ctx, p, { ...f, w: f.w - rw }, str, y, c.ink)
+  if (right) text(ctx, right, f.right, y + FS.heading * 0.8, { f: rf, color: c.ink2, align: 'right' })
   return y + h + SP[6]
 }
 
@@ -171,58 +112,6 @@ function plate(ctx, p, x, y, w, h, word) {
   senseBlock(ctx, word, x + w - pad, mid, w * 0.46 - pad, ih, p.ink, p.ink2)
 }
 
-/** One word as a departure: its number in the metal's figure, the word
- *  over its type and its reading, its sense where the destination goes. */
-function departure(ctx, p, f, cols, y, h, word) {
-  const color = p.line[word.line]
-  const mid = y + h / 2
-  ctx.fillStyle = p.panelLine
-  ctx.fillRect(f.x - SP[7], y, f.w + SP[7] * 2, 2)
-  ctx.fillStyle = color
-  ctx.fillRect(f.x - SP[7], y + SP[3], EDGE, h - SP[3] * 2)
-  text(ctx, String(word.n).padStart(2, '0'), cols[0], mid + FS.title * 0.36, { f: font(700, FS.title, 'latin'), color: p.gold })
-  const ww = (cols[2] - cols[1]) * 0.5
-  let size = Math.min(h * 0.36, FS.display * 0.8)
-  while (size > FS.title && measure(ctx, word.t, font(700, size, 'jp')) > ww) size -= 2
-  const tf = font(700, FS.xs, 'latin')
-  const label = String(word.pos || '').toLocaleUpperCase()
-  const tw = label ? measure(ctx, label, tf, TR.caption) + SP[4] * 2 : 0
-  const th = FS.xs * 1.9
-  const block = size + SP[3] + th
-  const wy = mid - block / 2
-  text(ctx, word.t, cols[1], wy + size * ASC, { f: font(700, size, 'jp'), color: p.onPanel })
-  const ty = wy + size + SP[3]
-  if (label) {
-    ctx.strokeStyle = color
-    ctx.lineWidth = 2.5
-    rrect(ctx, cols[1], ty, tw, th, R.card)
-    ctx.stroke()
-    text(ctx, label, cols[1] + tw / 2, ty + th / 2 + FS.xs * 0.36, { f: tf, color: p.onPanel, align: 'center', tr: TR.caption })
-  }
-  const sub = word.kanji && word.reading ? word.reading : word.ro
-  if (sub) {
-    const subF = fit(ctx, sub, { weight: 500, sizes: [FS.sm, FS.caption, FS.xs], maxW: ww - tw - SP[4], maxLines: 1, balanced: false })
-    text(ctx, subF.lines[0], cols[1] + (tw ? tw + SP[4] : 0), ty + th / 2 + subF.size * 0.36, { f: subF.f, color: p.onPanelSoft })
-  }
-  senseBlock(ctx, word, cols[2], mid, (cols[2] - cols[1]) * 0.46, h - SP[3] * 2, p.onPanel, p.onPanelSoft)
-}
-
-/** A row of the card's back: the word's line as a rail down its left. */
-function cardRow(ctx, p, f, y, h, word, ink, ink2) {
-  const mid = y + h / 2
-  ctx.fillStyle = p.line[word.line]
-  rrect(ctx, f.x, y + h * 0.16, EDGE, h * 0.68, EDGE / 2)
-  ctx.fill()
-  const x = f.x + EDGE + SP[6]
-  let size = Math.min(h * 0.38, FS.display * 0.85)
-  while (size > FS.title && measure(ctx, word.t, font(700, size, 'serif')) > f.w * 0.5) size -= 2
-  const sub = subOf(word)
-  const block = size + (sub ? SP[2] + FS.sm : 0)
-  text(ctx, word.t, x, mid - block / 2 + size * ASC, { f: font(700, size, 'serif'), color: ink })
-  if (sub) text(ctx, sub, x, mid + block / 2 - FS.sm * 0.15, { f: font(500, FS.sm, 'latin'), color: ink2 })
-  senseBlock(ctx, word, f.right, mid, f.w * 0.44, h - SP[2], ink, ink2)
-}
-
 function latticeRow(ctx, p, f, y, h, word) {
   const color = p.line[word.line]
   const mid = y + h / 2
@@ -242,40 +131,6 @@ function latticeRow(ctx, p, f, y, h, word) {
 function wordsSlide(dir, ctx, p, fr, plan, s, list, page, count) {
   const t = plan.t
   const name = s.title || t.words
-  const pageLabel = count > 1 ? `${page}/${count}` : ''
-  if (dir === 'board') {
-    ground(ctx, p, fr)
-    boardPanel(ctx, p, fr.x, fr.y, fr.w, fr.h)
-    const hh = boardHead(ctx, p, fr.x, fr.y, fr.w, name, pageLabel)
-    const f = inner(fr.x, fr.y, fr.w, fr.h)
-    const cols = [f.x, f.x + 96, f.right]
-    const capY = fr.y + hh + SP[5] + FS.xs
-    t.columns.forEach((cap, i) => cap && caption(ctx, cap, cols[i], capY, p.onPanelSoft, i === 2 ? 'right' : 'left', FS.xs))
-    let y = capY + SP[4]
-    const h = Math.min((fr.bottom - SP[5] - y) / list.length, 230)
-    for (const w of list) { departure(ctx, p, f, cols, y, h, w); y += h }
-    return
-  }
-  if (dir === 'card') {
-    const c = surface(dir, ctx, p, fr, s.line || plan.line)
-    let y = c.f.y
-    if (plan.hook.kind === 'sentence' || plan.hook.kind === 'prompt') {
-      // The card's back: the sentence it asked, small, then its words.
-      const L = layoutSentence(ctx, plan.hook.kind === 'sentence' ? plan.hook.rows : plan.slides.find(x => x.kind === 'answer')?.rows || [],
-        { max: FS.display * 0.7, min: FS.lead, maxW: c.f.w - (pageLabel ? 90 : 0), maxLines: 2, script: plan.script === 'kana' ? 'kana' : 'furigana', rules: false, gap: 0.06 })
-      drawSentence(ctx, L, c.f.x, y, 'left', () => ({ ink: c.ink2, rule: null, ruby: c.ink2 }))
-      if (pageLabel) text(ctx, pageLabel, c.f.right, y + FS.lead * 0.8, { f: font(700, FS.lead, 'latin'), color: c.ink2, align: 'right' })
-      y += L.h + SP[6]
-    } else {
-      y = title({ ...c, ctx, p }, name, y, pageLabel)
-    }
-    ctx.fillStyle = p.surfaceLine
-    ctx.fillRect(c.f.x, y, c.f.w, 2)
-    y += SP[5]
-    const h = Math.min((c.f.bottom - y) / list.length, 220)
-    for (const w of list) { cardRow(ctx, p, c.f, y, h, w, c.ink, c.ink2); y += h }
-    return
-  }
   ground(ctx, p, fr)
   let y = fr.y
   y += heading(ctx, p, fr, name, y)
@@ -417,6 +272,104 @@ function howBlock(c, how, maxH) {
   }
 }
 
+// ── The station's own plate, and the strip that counts the stops ──
+/** A 駅名標 for the source's station: its reading over its name, its
+ *  code in the line's roundel, its name in the reader's language, and
+ *  the line's band along the foot with the stations either side. */
+function stationPlate(ctx, p, x, y, w, h, st, color) {
+  ctx.save()
+  shadow(ctx, p.hang)
+  ctx.fillStyle = p.surface
+  rrect(ctx, x, y, w, h, R.plate)
+  ctx.fill()
+  ctx.restore()
+  ctx.strokeStyle = p.surfaceLine
+  ctx.lineWidth = 2
+  rrect(ctx, x + 1, y + 1, w - 2, h - 2, R.plate)
+  ctx.stroke()
+  const band = h * 0.24
+  ctx.save()
+  rrect(ctx, x, y, w, h, R.plate)
+  ctx.clip()
+  ctx.fillStyle = color
+  ctx.fillRect(x, y + h - band, w, band)
+  ctx.restore()
+  const top = h - band
+  const kf = font(500, FS.title, 'jp')
+  text(ctx, st.kana, x + w / 2, y + top * 0.2, { f: kf, color: p.ink2, align: 'center', tr: TR.reading })
+  let size = Math.min(FS.word, top * 0.48)
+  while (size > FS.heading && measure(ctx, st.jp, font(900, size, 'serif')) > w * 0.56) size -= 4
+  const ny = y + top * 0.24 + size * ASC
+  text(ctx, st.jp, x + w / 2, ny, { f: font(900, size, 'serif'), color: p.ink, align: 'center' })
+  const nameW = measure(ctx, st.jp, font(900, size, 'serif'))
+  const r = Math.min(56, top * 0.16)
+  roundel(ctx, x + w / 2 - nameW / 2 - SP[6] - r, y + top * 0.24 + size * 0.48, r, color, st.code, { ink: color, size: r * 0.72 })
+  const lf = fit(ctx, st.name, { sizes: [FS.title, FS.lead], maxW: w * 0.8, maxLines: 1 })
+  text(ctx, lf.lines[0], x + w / 2, y + top * 0.24 + size * 1.05 + FS.title, { f: lf.f, color: p.ink2, align: 'center' })
+  // The stations either side, on the band.
+  const by = y + top + band / 2
+  const sf = font(700, FS.title, 'serif')
+  const cf = font(500, FS.caption, 'jp')
+  const arrow = band * 0.3
+  if (st.prev) {
+    ctx.save()
+    ctx.translate(x + SP[6] + arrow, by)
+    ctx.rotate(Math.PI)
+    chevron(ctx, 0, 0, arrow, p.onLine)
+    ctx.restore()
+    const w1 = text(ctx, st.prev.jp, x + SP[6] + arrow + SP[4], by + FS.title * 0.36, { f: sf, color: p.onLine })
+    text(ctx, st.prev.kana, x + SP[6] + arrow + SP[4] + w1 + SP[3], by + FS.caption * 0.36, { f: cf, color: p.onLine })
+  }
+  if (st.next) {
+    const kw = measure(ctx, st.next.kana, cf)
+    const jw = measure(ctx, st.next.jp, sf)
+    const ax = x + w - SP[6] - arrow
+    chevron(ctx, ax, by, arrow, p.onLine)
+    text(ctx, st.next.kana, ax - SP[4] - kw, by + FS.caption * 0.36, { f: cf, color: p.onLine })
+    text(ctx, st.next.jp, ax - SP[4] - kw - SP[3] - jw, by + FS.title * 0.36, { f: sf, color: p.onLine })
+  }
+}
+
+/** The stops of the post along its foot: passed, here, still to come. */
+const STRIP = SP[7] + 18
+function routeStrip(ctx, p, fr, at, total, color) {
+  if (total < 2) return
+  const y = fr.bottom - 14
+  const x0 = fr.x + 16
+  const x1 = fr.right - 16
+  const xs = i => x0 + (x1 - x0) * (i / (total - 1))
+  ctx.fillStyle = alpha(color, 0.3)
+  ctx.fillRect(x0, y - EDGE / 2, x1 - x0, EDGE)
+  ctx.fillStyle = color
+  ctx.fillRect(x0, y - EDGE / 2, xs(at) - x0, EDGE)
+  for (let i = 0; i < total; i++) {
+    ctx.beginPath()
+    if (i === at) {
+      ctx.arc(xs(i), y, 15, 0, Math.PI * 2)
+      ctx.fillStyle = p.bg
+      ctx.fill()
+      ctx.lineWidth = 6
+      ctx.strokeStyle = color
+      ctx.stroke()
+    } else {
+      ctx.arc(xs(i), y, 8, 0, Math.PI * 2)
+      ctx.fillStyle = i < at ? color : p.bg
+      ctx.fill()
+      if (i > at) { ctx.lineWidth = 3; ctx.strokeStyle = alpha(color, 0.55); ctx.stroke() }
+    }
+  }
+}
+
+// A question's section as the paper names it: kana up to N4, kanji from N3.
+const KIND_JP = {
+  reading: ['かんじよみ', '漢字読み'], orthography: ['ひょうき', '表記'], meaning: ['いみ', '意味'], grammar: ['ぶんぽう', '文法'],
+  translation: ['ほんやく', '翻訳'], say: ['ほんやく', '翻訳'], assembly: ['ぶんの くみたて', '文の組み立て'], scene: ['かいわ', '会話'],
+  tour: ['ぶんぽう', '文法'], pointMeaning: ['いみ', '意味'], compare: ['いみ', '意味'], kanji: ['よみかた', '読み方'],
+  kanjiMeaning: ['いみ', '意味'], kanjiReverse: ['かんじ', '漢字'], strokes: ['かくすう', '画数'], inWord: ['よみかた', '読み方'],
+  kana: ['よみかた', '読み方'], kanaReverse: ['かな', 'かな'], twin: ['かな', 'かな'], passage: ['どっかい', '読解'], passageReading: ['よみかた', '読み方'],
+}
+const hasKanjiText = str => /[㐀-鿿々]/.test(str || '')
+
 // ── The content slides, written once ──────────────────────────
 const KINDS = {
   /** 乗換: the point, at work in this sentence. */
@@ -491,7 +444,7 @@ const KINDS = {
   /** 終点: what the sentence says, then the sentence read and its romaji. */
   answer(c, s) {
     const { ctx, p, f, ink, ink2 } = c
-    let y = c.board ? title(c, c.plan.t.arrived) : title(c, s.title || c.plan.t.terminus)
+    let y = title(c, s.title || c.plan.t.terminus)
     const room = f.bottom - y
     const tr2 = fit(ctx, s.translation, { sizes: [FS.display, FS.display * 0.85, FS.heading, FS.title, FS.lead], maxW: f.w, maxH: room * 0.42, lh: 1.1 })
     const ro = fit(ctx, s.romaji, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: f.w, maxH: room * 0.2, balanced: false })
@@ -567,7 +520,7 @@ const KINDS = {
     for (let i = 0; i < n; i++) {
       const cx = gx + (i % cols) * (size + gap)
       const cy = y + Math.floor(i / cols) * (size + gap)
-      ctx.strokeStyle = c.board ? p.panelLine : p.surfaceLine
+      ctx.strokeStyle = p.surfaceLine
       ctx.lineWidth = 2
       rrect(ctx, cx + 1, cy + 1, size - 2, size - 2, R.card)
       ctx.stroke()
@@ -762,7 +715,7 @@ const KINDS = {
     s.items.forEach((it, i) => {
       const x = x0 + i * (cell + gap)
       const here = it.k === s.here
-      ctx.strokeStyle = here ? p.line.kana : (c.board ? p.panelLine : p.surfaceLine)
+      ctx.strokeStyle = here ? p.line.kana : p.surfaceLine
       ctx.lineWidth = here ? RING : 2
       rrect(ctx, x + RING / 2, y + RING / 2, cell - RING, cell - RING, R.card)
       ctx.stroke()
@@ -818,20 +771,322 @@ const KINDS = {
     ctx.restore()
   },
 
+  /** 終点: the source's own station plate, what its line teaches, and the mark. */
   outro(c) {
     const { ctx, p, f, ink, ink2 } = c
-    const size = Math.min(f.w * 0.42, f.h * 0.3)
-    const line = fit(ctx, c.plan.t.outro, { sizes: [FS.heading, FS.title], maxW: f.w * 0.9, maxLines: 3 })
-    const handle = c.plan.handle
-    const total = size + SP[7] + FS.display + SP[6] + paragraphH(line) + (handle ? SP[7] + FS.title : 0)
-    let y = f.y + (f.h - total) / 2
-    mark(ctx, f.cx - size / 2, y, size, ink, p.gold)
-    y += size + SP[7]
-    text(ctx, 'Tsuji', f.cx, y + FS.display * 0.8, { f: font(700, FS.display, 'latin'), color: ink, align: 'center' })
-    y += FS.display + SP[6]
-    y += paragraph(ctx, line, f.cx, y, ink2, 'center')
-    if (handle) text(ctx, handle, f.cx, y + SP[7] + FS.title * 0.8, { f: font(700, FS.title, 'latin'), color: p.gold, align: 'center' })
+    const plan = c.plan
+    const color = p.line[plan.line] || p.line.reading
+    const figure = plan.figure ? fit(ctx, plan.figure, { sizes: [FS.heading, FS.title, FS.lead], maxW: f.w, maxLines: 3 }) : null
+    const cta = c.cta ? fit(ctx, weldIf(plan.lang, c.cta), { weight: 500, sizes: [FS.title, FS.lead], maxW: f.w, maxLines: 2 }) : null
+    const ms = 112
+    const rest = SP[8] + (figure ? paragraphH(figure) + SP[6] : 0) + (cta ? paragraphH(cta) + SP[8] : 0) + ms
+    // The plate takes what the words under it leave.
+    const plateH = Math.max(f.h * 0.26, Math.min(f.h * 0.42, 500, f.h - rest))
+    const total = plateH + rest
+    let y = f.y + Math.max(0, (f.h - total) / 2)
+    stationPlate(ctx, p, f.x, y, f.w, plateH, plan.station, color)
+    y += plateH + SP[8]
+    if (figure) y += paragraph(ctx, figure, f.cx, y, ink, 'center') + SP[6]
+    if (cta) y += paragraph(ctx, cta, f.cx, y, ink2, 'center') + SP[8]
+    // The mark, the name and the handle, on one line.
+    const nf = font(700, FS.display * 0.62, 'latin')
+    const hf = font(700, FS.title, 'latin')
+    const handle = plan.handle
+    const nw = measure(ctx, 'Tsuji', nf)
+    const hw = handle ? measure(ctx, handle, hf) + SP[7] : 0
+    let x = f.cx - (ms + SP[5] + nw + hw) / 2
+    mark(ctx, x, y, ms, ink, p.gold)
+    x += ms + SP[5]
+    text(ctx, 'Tsuji', x, y + ms / 2 + FS.display * 0.62 * 0.36, { f: nf, color: ink })
+    if (handle) text(ctx, handle, x + nw + SP[7], y + ms / 2 + FS.title * 0.36, { f: hf, color: p.gold })
   },
+
+  /** 模試's cover: the paper's name, its level, its sections, a name to fill in. */
+  cover(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    const plan = c.plan
+    const t = plan.t
+    const kanaOnly = !['N3', 'N2', 'N1'].includes(plan.level)
+    masthead(ctx, p, f)
+    levelRing(ctx, p, plan, f.right - 46, f.y + 32, 46, ink)
+    const pill = 44 * 2.7
+    const top = f.y + 64 + SP[7]
+    const sub = fit(ctx, weldIf(plan.lang, t.coverSub(s.quizzes.length)), { weight: 500, sizes: [FS.lead, FS.body], maxW: f.w, maxLines: 2 })
+    const boxH = f.bottom - pill - SP[7] - paragraphH(sub) - SP[6] - top
+    // The booklet: a double rule, as a printed paper is framed.
+    ctx.strokeStyle = ink
+    ctx.lineWidth = 4
+    ctx.strokeRect(f.x + 2, top + 2, f.w - 4, boxH - 4)
+    ctx.lineWidth = 1.5
+    ctx.strokeRect(f.x + 16, top + 16, f.w - 32, boxH - 32)
+    const ix = f.x + SP[7]
+    const iw = f.w - SP[7] * 2
+    let y = top + SP[7]
+    caption(ctx, `${t.jlptStyle} · ${t.cover} · ${/^N\d$/.test(plan.level) ? plan.level : plan.source}`, ix, y + FS.caption, p.line.exam)
+    y += FS.caption + SP[5]
+    const tf = font(900, FS.display, 'serif')
+    text(ctx, '模擬試験', ix, y + FS.display * ASC, { f: tf, color: ink })
+    y += FS.display * 1.08 + SP[3]
+    ctx.fillStyle = p.line.exam
+    ctx.fillRect(ix, y, iw, EDGE)
+    y += EDGE + SP[4]
+    // The sections: もんだい1 かんじよみ — Reading.
+    const nameH = FS.caption + SP[5] + 4
+    const rowH = Math.min(FS.lead * 1.7, (top + boxH - SP[7] - nameH - SP[4] - y) / Math.max(1, s.quizzes.length))
+    s.quizzes.forEach((q, n) => {
+      const ry = y + n * rowH
+      const lf = font(700, Math.min(FS.lead, rowH * 0.6), 'jp')
+      const w = text(ctx, `${kanaOnly ? 'もんだい' : '問題'}${n + 1}`, ix, ry + rowH * 0.62, { f: lf, color: ink })
+      const jp = KIND_JP[q.kind]?.[kanaOnly ? 0 : 1] || ''
+      const w2 = jp ? SP[5] + text(ctx, jp, ix + w + SP[5], ry + rowH * 0.62, { f: font(500, Math.min(FS.lead, rowH * 0.6), 'jp'), color: ink }) : 0
+      const lb = fit(ctx, q.label || '', { weight: 500, sizes: [Math.min(FS.body, rowH * 0.5), FS.sm, FS.caption], maxW: iw - w - w2 - SP[7], maxLines: 1, balanced: false })
+      text(ctx, lb.lines[0] || '', ix + iw, ry + rowH * 0.62, { f: lb.f, color: ink2, align: 'right' })
+    })
+    // なまえ, and a line to write it on.
+    const ny = top + boxH - SP[7] - 4
+    caption(ctx, kanaOnly ? 'なまえ Name' : '名前 Name', ix, ny - SP[3], ink2)
+    ctx.fillStyle = ink2
+    ctx.fillRect(ix + 260, ny, iw - 260, 2)
+    paragraph(ctx, sub, f.cx, top + boxH + SP[6], ink2, 'center')
+    metal(ctx, p, f.cx, f.bottom - pill, t.next)
+  },
+
+  /** 解答: every question's number, and its right answer marked as a sheet is. */
+  sheet(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    const plan = c.plan
+    const t = plan.t
+    const kanaOnly = !['N3', 'N2', 'N1'].includes(plan.level)
+    const hs = FS.title * 1.1
+    const hw = text(ctx, kanaOnly ? 'かいとう' : '解答', f.x, f.y + hs * ASC, { f: font(700, hs, 'serif'), color: ink })
+    text(ctx, t.sheet, f.x + hw + SP[5], f.y + hs * 0.8, { f: font(700, FS.lead, 'latin'), color: ink2 })
+    let y = f.y + hs * 1.2 + SP[7]
+    const cta = fit(ctx, weldIf(plan.lang, t.cta.exam(s.quizzes.length)), { sizes: [FS.title, FS.lead], maxW: f.w, maxLines: 2 })
+    const n = s.quizzes.length
+    const rowH = Math.min(190, (f.bottom - y - paragraphH(cta) - SP[8]) / n)
+    const r = Math.min(34, rowH * 0.28)
+    const HL = 3
+    ctx.fillStyle = p.surfaceLine
+    ctx.fillRect(f.x, y, f.w, rowH * n + HL)
+    s.quizzes.forEach((q, i) => {
+      const ry = y + i * rowH
+      ctx.fillStyle = c.dark ? p.card : p.surface
+      ctx.fillRect(f.x + HL, ry + HL, f.w - HL * 2, rowH - HL)
+      const mid = ry + HL + (rowH - HL) / 2
+      // The number in its box, as the sheet prints it.
+      const bw = r * 2.2
+      ctx.strokeStyle = ink
+      ctx.lineWidth = 2
+      ctx.strokeRect(f.x + SP[5], mid - bw / 2, bw, bw)
+      text(ctx, String(i + 1), f.x + SP[5] + bw / 2, mid + FS.lead * 0.36, { f: font(700, FS.lead, 'latin'), color: ink, align: 'center' })
+      const label = fit(ctx, q.label || '', { weight: 500, sizes: [FS.body, FS.sm, FS.caption], maxW: f.w * 0.36, maxLines: 2, balanced: false })
+      paragraph(ctx, label, f.x + SP[5] + bw + SP[5], mid - paragraphH(label) / 2, ink2)
+      // ① ② ③ ④, the right one filled in.
+      const k = q.choices.length
+      for (let j = 0; j < k; j++) {
+        const cx = f.right - SP[5] - r - (k - 1 - j) * (r * 2 + SP[4])
+        const right = j === q.right
+        ctx.beginPath()
+        ctx.arc(cx, mid, r, 0, Math.PI * 2)
+        if (right) { ctx.fillStyle = p.line.exam; ctx.fill() }
+        ctx.strokeStyle = right ? p.line.exam : ink2
+        ctx.lineWidth = 2.5
+        ctx.stroke()
+        text(ctx, String(j + 1), cx, mid + FS.body * 0.36, { f: font(700, FS.body, 'latin'), color: right ? p.onLine : ink2, align: 'center' })
+      }
+    })
+    y += rowH * n + HL + SP[8]
+    paragraph(ctx, cta, f.x, y, ink)
+  },
+
+  /** 乗換: the two (or three) side by side, each on its own plate. */
+  sides(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    const t = c.plan.t
+    let y = title(c, t.types.compare.name)
+    const sides = s.sides
+    const n = sides.length
+    const gap = SP[5]
+    const across = sides.every(x => [...x.head].length <= 3)
+    const cw = across ? (f.w - gap * (n - 1)) / n : f.w
+    const room = across ? f.bottom - y : (f.bottom - y - gap * (n - 1)) / n
+    // Each plate as tall as what it holds, the largest setting the row.
+    const need = x => {
+      const iw = cw - SP[6] * 2
+      let size = across ? Math.min(FS.glyph, cw * 0.62, room * 0.3) : Math.min(FS.word * 0.7, room * 0.34)
+      while (size > FS.title && measure(ctx, x.head, font(700, size, 'serif')) > iw) size -= 4
+      const m = x.meaning ? paragraphH(fit(ctx, x.meaning, { sizes: [FS.heading, FS.title, FS.lead], maxW: iw, maxLines: 4, lh: 1.15 }), 1.15) + SP[3] : 0
+      const fm = x.form ? FS.body * 2.4 : 0
+      const sub = x.sub ? FS.title * 1.2 + SP[3] : 0
+      const words = (x.words || []).length * (FS.title * 1.15 + FS.sm * 1.4 + SP[3])
+      return SP[6] * 2 + size * 1.08 + SP[4] + sub + m + fm + words + EDGE * 1.4
+    }
+    const ch = Math.min(room, Math.max(...sides.map(need)))
+    if (across) y += (room - ch) * 0.3
+    sides.forEach((x, i) => {
+      const bx = across ? f.x + i * (cw + gap) : f.x
+      const by = across ? y : y + i * (ch + gap)
+      const color = p.line[x.line] || p.line.grammar
+      ctx.fillStyle = c.dark ? p.card : p.surface
+      rrect(ctx, bx, by, cw, ch, R.plate)
+      ctx.fill()
+      ctx.strokeStyle = x.here ? color : p.surfaceLine
+      ctx.lineWidth = x.here ? RING : 2
+      rrect(ctx, bx + 1, by + 1, cw - 2, ch - 2, R.plate)
+      ctx.stroke()
+      ctx.save()
+      rrect(ctx, bx, by, cw, ch, R.plate)
+      ctx.clip()
+      ctx.fillStyle = color
+      ctx.fillRect(bx, by + ch - EDGE * 1.4, cw, EDGE * 1.4)
+      ctx.restore()
+      const pad = SP[6]
+      const iw = cw - pad * 2
+      let iy = by + pad
+      // The head, as large as its plate allows.
+      let size = across ? Math.min(FS.glyph, cw * 0.62, room * 0.3) : Math.min(FS.word * 0.7, room * 0.34)
+      while (size > FS.title && measure(ctx, x.head, font(700, size, 'serif')) > iw) size -= 4
+      text(ctx, x.head, across ? bx + cw / 2 : bx + pad, iy + size * ASC, { f: font(700, size, 'serif'), color: ink, align: across ? 'center' : 'left' })
+      iy += size * 1.08 + SP[4]
+      const ax = across ? bx + cw / 2 : bx + pad
+      const align = across ? 'center' : 'left'
+      if (x.sub) {
+        text(ctx, x.sub, ax, iy + FS.title * 0.85, { f: font(700, FS.title, 'latin'), color, align })
+        iy += FS.title * 1.2 + SP[3]
+      }
+      const left = by + ch - EDGE * 1.4 - SP[4] - iy
+      if (x.meaning) {
+        const m = fit(ctx, x.meaning, { sizes: [FS.heading, FS.title, FS.lead, FS.body], maxW: iw, maxH: left * (x.form ? 0.7 : 1), lh: 1.15 })
+        iy += paragraph(ctx, m, ax, iy, ink, align, 1.15) + SP[3]
+      }
+      if (x.form) {
+        const fb = fit(ctx, x.form, { weight: 500, sizes: [FS.body, FS.sm], maxW: iw, maxLines: 2, balanced: false })
+        iy += paragraph(ctx, fb, ax, iy, ink2, align) + SP[3]
+      }
+      for (const w of x.words || []) {
+        if (iy + FS.body * 2.6 > by + ch - EDGE * 1.4) break
+        text(ctx, w.t, ax, iy + FS.title * 0.9, { f: font(700, FS.title, 'jp'), color: ink, align })
+        iy += FS.title * 1.15
+        const wb = fit(ctx, `${w.r} · ${w.main}`, { weight: 500, sizes: [FS.sm, FS.caption], maxW: iw, maxLines: 1, balanced: false })
+        paragraph(ctx, wb, ax, iy, ink2, align)
+        iy += paragraphH(wb) + SP[3]
+      }
+    })
+  },
+
+  /** What tells them apart, in the catalogue's words. */
+  difference(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    let y = title(c, c.plan.t.difference)
+    const heads = s.sides.map(x => x.head)
+    const L = chunkLayout(ctx, heads.flatMap((h, i) => (i ? [{ t: '／', op: true }, { t: h, lit: true, line: s.sides[i].line }] : [{ t: h, lit: true, line: s.sides[i].line }])), f.w, FS.display)
+    drawChunk(ctx, p, L, f.x, y, ink, ink2)
+    y += L.h + SP[8]
+    const room = f.bottom - y
+    const a = s.diff ? fit(ctx, s.diff, { sizes: [FS.heading, FS.title, FS.lead], maxW: f.w, maxH: s.careful ? room * 0.6 : room, lh: 1.22, balanced: false }) : null
+    if (a) y += paragraph(ctx, a, f.x, y, ink, 'left', 1.22) + SP[8]
+    if (s.careful) {
+      const b = fit(ctx, s.careful, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: f.w, maxH: f.bottom - y, lh: 1.3, balanced: false })
+      paragraph(ctx, b, f.x, y, ink2, 'left', 1.3)
+    }
+  },
+
+  /** 組立: the sentence so far, the piece this step adds lit on its line,
+   *  and under it each word of the piece with what it does. */
+  step(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    const b = s.build
+    const st = b.steps[s.n - 1]
+    let y = title(c, c.plan.t.step(s.n, b.steps.length))
+    const goal = fit(ctx, `“${b.translation}”`, { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w, maxLines: 2, balanced: false })
+    y += paragraph(ctx, goal, f.x, y, ink2) + SP[7]
+    const pieces = chunkLayout(ctx, st.items.length ? st.items : [{ t: '…' }], f.w, FS.display * 1.2)
+    const how = st.line ? fit(ctx, st.line, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: f.w, maxLines: 4, balanced: false }) : null
+    // The whole sentence sets the size, so it grows the same on every step.
+    const whole = layoutSentence(ctx, b.rows, { max: FS.display, min: FS.lead, maxW: f.w, maxLines: 3, maxH: Math.max(FS.display * 1.4, f.h * 0.3), script: c.plan.script, gap: 0.1 })
+    const rows = b.rows.slice(0, st.upto)
+    const L = layoutSentence(ctx, rows, { max: whole.size, min: whole.size, maxW: f.w, maxLines: 3, script: c.plan.script, gap: 0.1 })
+    drawSentence(ctx, L, f.x, y, 'left', u => ({ ink: u.i >= st.from ? ink : ink2, rule: u.i >= st.from ? lineOf(p, u.row) : null, ruby: ink2 }))
+    y += L.h + SP[8]
+    ctx.fillStyle = p.surfaceLine
+    ctx.fillRect(f.x, y - SP[5], f.w, 2)
+    drawChunk(ctx, p, pieces, f.x, y + SP[3], ink, ink2)
+    y += pieces.h + SP[6] + SP[3]
+    if (how) paragraph(ctx, how, f.x, y, ink, 'left', 1.25)
+  },
+
+  /** 一覧: one item of the list, as large as it goes. */
+  item(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    const it = s.item
+    const color = p.line[s.line] || p.line.vocab
+    const y0 = title(c, s.title, f.y, s.of ? `${it.n}/${s.of}` : '')
+    let y = y0
+    if (it.kind === 'sentence') {
+      const trB = fit(ctx, it.tr, { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w - SP[7], maxLines: 3, balanced: false })
+      const note = it.note ? fit(ctx, it.note, { weight: 700, sizes: [FS.body, FS.sm], maxW: f.w, maxLines: 2 }) : null
+      const L = layoutSentence(ctx, it.rows, { max: FS.display * 1.1, min: FS.lead, maxW: f.w - SP[7], maxLines: 4, maxH: f.bottom - y - paragraphH(trB) - SP[6] - (note ? paragraphH(note) + SP[6] : 0) - SP[8], script: c.plan.script, gap: 0.08 })
+      const h = L.h + SP[5] + paragraphH(trB)
+      y += Math.max(0, (f.bottom - y - h - (note ? paragraphH(note) + SP[6] : 0)) * 0.42)
+      if (note) { caption(ctx, note.lines[0], f.x, y + FS.caption, color); y += FS.caption + SP[6] }
+      ctx.fillStyle = color
+      rrect(ctx, f.x, y, EDGE, h, EDGE / 2)
+      ctx.fill()
+      drawSentence(ctx, L, f.x + SP[7], y, 'left', u => ({ ink, rule: u.row.lit ? color : null, ruby: ink2 }))
+      paragraph(ctx, trB, f.x + SP[7], y + L.h + SP[5], ink2)
+      return
+    }
+    // A word: its number on the line, the word with its reading, its sense.
+    const row = { t: it.head, fu: it.fu || (hasKanjiText(it.head) ? [[it.head, it.reading]] : null), k: 'word', ro: it.ro }
+    const main = fit(ctx, it.main || '', { sizes: [FS.display, FS.heading, FS.title], maxW: f.w, maxLines: 2 })
+    const room = f.bottom - y - paragraphH(main) - FS.lead * 1.6 - SP[8] * 2
+    const L = layoutSentence(ctx, [row], { max: FS.glyph, min: FS.display, maxW: f.w, maxLines: 1, maxH: room, script: 'furigana', rules: false })
+    const total = L.h + FS.lead * 1.6 + SP[8] + paragraphH(main)
+    y += Math.max(0, (f.bottom - y - total) / 2)
+    drawSentence(ctx, L, f.cx, y, 'center', () => ({ ink, rule: null, ruby: ink2 }))
+    y += L.h
+    text(ctx, it.ro || '', f.cx, y + FS.lead * 1.1, { f: font(500, FS.lead, 'latin'), color: ink2, align: 'center' })
+    y += FS.lead * 1.6 + SP[8]
+    ctx.fillStyle = color
+    ctx.fillRect(f.cx - SP[9] / 2, y - SP[6], SP[9], EDGE)
+    paragraph(ctx, main, f.cx, y, ink, 'center')
+    if (it.tag) caption(ctx, it.tag, f.cx, y0 + FS.caption, ink2, 'center')
+  },
+
+  /** 会話: one line of the scene, the line before it small above. */
+  line(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    const t = c.plan.t
+    let y = title(c, s.place, f.y, `${s.n}/${s.of}`)
+    const bubble = (l, maxH, big) => {
+      const mine = l.who === 'me'
+      const bw = f.w * (big ? 0.92 : 0.8)
+      const trB = fit(ctx, l.tr, { weight: 500, sizes: big ? [FS.title, FS.lead, FS.body] : [FS.body, FS.sm], maxW: bw - SP[6] * 2, maxLines: big ? 3 : 2, balanced: false })
+      const L = layoutSentence(ctx, l.rows, { max: big ? FS.display : FS.title, min: big ? FS.lead : FS.body, maxW: bw - SP[6] * 2, maxLines: big ? 4 : 2, maxH: maxH - paragraphH(trB) - SP[6] * 2 - FS.caption * 1.8, script: c.plan.script, rules: false, gap: 0.05 })
+      const h = FS.caption * 1.8 + L.h + SP[4] + paragraphH(trB) + SP[6] * 2
+      return { mine, bw, trB, L, h, who: mine ? t.you : s.them }
+    }
+    const drawBubble = (B, by, dim) => {
+      const bx = B.mine ? f.right - B.bw : f.x
+      ctx.fillStyle = B.mine ? p.pass : (c.dark ? p.card : p.surface)
+      ctx.globalAlpha = dim ? 0.8 : 1
+      rrect(ctx, bx, by, B.bw, B.h, R.panel)
+      ctx.fill()
+      ctx.globalAlpha = 1
+      if (!B.mine && !c.dark) { ctx.strokeStyle = p.surfaceLine; ctx.lineWidth = 2; rrect(ctx, bx + 1, by + 1, B.bw - 2, B.h - 2, R.panel); ctx.stroke() }
+      const bInk = B.mine ? p.onPanel : ink
+      const bInk2 = B.mine ? p.onPanelSoft : ink2
+      caption(ctx, B.who, bx + SP[6], by + SP[6] + FS.caption, bInk2, 'left', FS.xs)
+      drawSentence(ctx, B.L, bx + SP[6], by + SP[6] + FS.caption * 1.8, 'left', () => ({ ink: bInk, rule: null, ruby: bInk2 }))
+      paragraph(ctx, B.trB, bx + SP[6], by + SP[6] + FS.caption * 1.8 + B.L.h + SP[4], bInk2)
+    }
+    const room = f.bottom - y
+    const prev = s.prev ? bubble(s.prev, room * 0.3, false) : null
+    if (prev) { drawBubble(prev, y, true); y += prev.h + SP[7] }
+    const cur = bubble(s.line, f.bottom - y, true)
+    drawBubble(cur, y + Math.max(0, (f.bottom - y - cur.h) * 0.3), false)
+  },
+
 }
 
 /** The point (or the lesson): pattern, meaning, form, then how it works in
@@ -877,6 +1132,8 @@ function quizSlide(c, q, revealed, head, number = 1) {
     const hs = FS.title * 1.1
     const hw = text(ctx, N3 ? '問題' : 'もんだい', f.x, y + hs * ASC, { f: font(700, hs, 'serif'), color: ink })
     roundel(ctx, f.x + hw + SP[4] + 32, y + hs * 0.46, 32, p.line.exam, String(number), { ink: p.line.exam, size: FS.lead })
+    const section = KIND_JP[q.kind]?.[N3 ? 1 : 0]
+    if (section) text(ctx, section, f.x + hw + SP[4] + 64 + SP[5], y + hs * 0.46 + FS.lead * 0.36, { f: font(500, FS.lead, 'jp'), color: ink2 })
     if (/^N\d$/.test(c.plan.level)) caption(ctx, c.plan.level, f.right, y + hs * 0.62, ink2, 'right')
     y += hs * 1.15 + SP[5]
   } else {
@@ -895,28 +1152,46 @@ function quizSlide(c, q, revealed, head, number = 1) {
   const n = q.choices.length
   const cta = revealed ? null : fit(ctx, weldIf(lang, t.examCta(n)), { sizes: [FS.title, FS.lead], maxW: f.w, maxLines: 2 })
   const ex = q.explain || {}
-  const exHead = revealed && ex.head ? ex.head : ''
-  const exSense = revealed && ex.sense ? fit(ctx, ex.sense, { sizes: [FS.title, FS.lead], maxW: f.w - 160, maxLines: 2 }) : null
-  const exWhy = revealed && ex.why ? fit(ctx, ex.why, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: f.w - 160, maxH: f.h * 0.24, lh: 1.25, balanced: false }) : null
-  const foot = cta ? paragraphH(cta)
-    : Math.max(150, (exHead ? FS.display * 0.75 + SP[3] : 0) + (exSense ? paragraphH(exSense) : 0) + (exWhy ? paragraphH(exWhy, 1.25) + SP[3] : 0))
+  // The explanation keeps clear of the seal, and to a fifth of the slide.
+  const exHead = revealed && ex.head ? fit(ctx, ex.head, { fam: 'serif', sizes: [FS.display * 0.7, FS.heading, FS.title, FS.lead], maxW: f.w - 170, maxLines: 1 }) : null
+  const exSense = revealed && ex.sense ? fit(ctx, ex.sense, { sizes: [FS.title, FS.lead, FS.body], maxW: f.w - 170, maxLines: 2 }) : null
+  let exWhy = revealed && ex.why ? fit(ctx, ex.why, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: f.w - 170, maxH: f.h * 0.2, maxLines: 4, lh: 1.25, balanced: false }) : null
+  const footOf = () => (cta ? paragraphH(cta)
+    : Math.max(150, (exHead ? paragraphH(exHead) + SP[3] : 0) + (exSense ? paragraphH(exSense) : 0) + (exWhy ? paragraphH(exWhy, 1.25) + SP[3] : 0)))
+  let foot = footOf()
 
   // The answers: two by two for four, else one under the other (or side by
   // side when each is short): a lattice whose columns divide its content.
   const short = q.choices.every(x => (x.text || '').length <= 8 && !x.rows)
-  const cols = n === 4 ? 2 : short ? n : 1
+  // Four answers two by two, unless one is a sentence long.
+  // Two columns only where every answer keeps to two lines at a readable size.
+  const halfW = (f.w - 9) / 2 - SP[5] - 60 - SP[4] * 2
+  const narrow = q.choices.some(x => x.rows ? x.rows.length > 6 : fit(ctx, x.text, { weight: 700, fam: x.fam || 'latin', sizes: [FS.lead], maxW: halfW, maxLines: 2, balanced: false }).cut)
+  const long = q.choices.some(x => (x.text || '').length > 34) || narrow
+  const cols = n === 4 && !long ? 2 : short ? n : 1
   const rowsN = Math.ceil(n / cols)
   // The stem: on the answer, a dialogue's cue gives way to the task alone.
-  const st = q.stem?.cue && revealed ? { task: q.stem.task } : q.stem
-  const gridH = st ? Math.min(Math.max(f.w * 0.3, (f.bottom - y) * 0.36), rowsN * 200) : Math.min(f.bottom - y - SP[7] - foot, rowsN * 230)
+  // On the answer, the stem shown as it is answered (表記's word in kanji,
+  // ★'s pieces in place), and a dialogue's cue gives way to the task alone.
+  const st = revealed && q.stem?.after ? q.stem.after : q.stem?.cue && revealed ? { task: q.stem.task } : q.stem
+  // The stem keeps room for a line of its own; the lattice takes the rest.
+  // Where the answer's why would crowd it out, the why gives way: the
+  // stem and the circled answer are the slide.
+  const stemMin = st ? (st.rows || st.cue ? FS.display * 1.5 : FS.display) : 0
+  if (exWhy && f.bottom - y - SP[7] * 2 - foot - stemMin < rowsN * FS.body * 1.6) { exWhy = null; foot = footOf() }
+  // Answers that are sentences take a taller row each.
+  const perRow = q.choices.some(x => x.rows) && cols === 1 ? FS.title * 2.6 : FS.body * 1.6
+  const gridH = st
+    ? Math.max(rowsN * perRow, Math.min(Math.max(f.w * 0.3, (f.bottom - y) * 0.36), rowsN * 200, f.bottom - y - SP[7] * 2 - foot - stemMin))
+    : Math.min(f.bottom - y - SP[7] - foot, rowsN * 230)
   const room = st ? f.bottom - y - SP[7] - gridH - SP[7] - foot : -SP[7]
   if (st?.rows) {
     const blankless = st.rows
-    const L = layoutSentence(ctx, blankless, { max: FS.display * 1.1, min: FS.lead, maxW: f.w, maxLines: 3, maxH: room - (st.tr ? FS.lead * 2.6 : 0), rules: !!st.under, gap: 0.08, script: c.plan.script === 'kana' ? 'kana' : c.plan.script })
+    const L = layoutSentence(ctx, blankless, { max: FS.display * 1.1, min: FS.lead, maxW: f.w, maxLines: 3, maxH: room - (st.tr ? FS.lead * 2.6 : 0), rules: !!(st.under || st.underLit), gap: 0.08, script: c.plan.script === 'kana' ? 'kana' : c.plan.script })
     const top = y + Math.max(0, (room - L.h - (st.tr ? FS.lead * 2.6 : 0)) / 2)
     drawSentence(ctx, L, f.x, top, 'left', u => ({
       ink, ruby: ink2,
-      rule: st.under && u.i === st.target ? (revealed ? p.line.exam : ink) : null,
+      rule: (st.under && u.i === st.target) || (st.underLit && u.row.lit) ? (revealed ? p.line.exam : ink) : null,
       ruleW: revealed ? EDGE : 4,
     }))
     if (st.tr) paragraph(ctx, fit(ctx, st.tr, { weight: 500, sizes: [FS.lead, FS.body], maxW: f.w, maxLines: 2, balanced: false }), f.x, top + L.h + SP[3], ink2)
@@ -926,7 +1201,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
     while (size > FS.heading && measure(ctx, st.specimen, font(700, size, 'serif')) > f.w) size -= 4
     text(ctx, st.specimen, f.cx, y + room / 2 + size * 0.36, { f: font(700, size, 'serif'), color: ink, align: 'center' })
   } else if (st?.text) {
-    const b = fit(ctx, `“${st.text}”`, { sizes: [FS.display, FS.heading, FS.title], maxW: f.w, maxH: room, lh: 1.15 })
+    const b = fit(ctx, `“${st.text}”`, { sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body], maxW: f.w, maxH: room, lh: 1.15 })
     paragraph(ctx, b, f.x, y + Math.max(0, (room - paragraphH(b, 1.15)) / 2), ink, 'left', 1.15)
   } else if (st?.cue) {
     // What the other person said, and what the reader has to say.
@@ -954,26 +1229,29 @@ function quizSlide(c, q, revealed, head, number = 1) {
   const HL = 3
   const cw = (f.w - HL * (cols + 1)) / cols
   const chh = (gridH - HL * (rowsN + 1)) / rowsN
-  ctx.fillStyle = c.board ? p.panelLine : p.surfaceLine
+  ctx.fillStyle = p.surfaceLine
   ctx.fillRect(f.x, y, f.w, gridH)
   // Every answer in one size: the largest at which all of them fit.
   const textW = cw - SP[5] - 60 - SP[4] - SP[4]
   const sizes = [FS.display * 0.62, FS.title, FS.lead, FS.body, FS.sm]
-  const fitsAt = (ch, z) => ch.rows || !fit(ctx, ch.text, { weight: ch.fam === 'jp' ? 500 : 700, fam: ch.fam || 'latin', sizes: [z], maxW: textW, maxH: chh - SP[4], maxLines: 3, balanced: false }).cut
-  const common = sizes.find(z => q.choices.every(ch => fitsAt(ch, z))) || FS.sm
+  const fitsAt = (ch, z, lines) => ch.rows || !fit(ctx, ch.text, { weight: ch.fam === 'jp' ? 500 : 700, fam: ch.fam || 'latin', sizes: [z], maxW: textW, maxH: chh - SP[4], maxLines: lines, balanced: false }).cut
+  // The largest size at which every answer keeps to one line, else two, else three.
+  const sizeFor = (lines, least) => sizes.filter(z => z >= least).find(z => q.choices.every(ch => fitsAt(ch, z, lines)))
+  const common = sizeFor(1, FS.title) || sizeFor(2, FS.lead) || sizeFor(3, 0) || FS.sm
   q.choices.forEach((choice, i) => {
     const cx = f.x + HL + (i % cols) * (cw + HL)
     const cy = y + HL + Math.floor(i / cols) * (chh + HL)
-    ctx.fillStyle = c.board ? p.panel : c.dark ? p.card : p.surface
+    ctx.fillStyle = c.dark ? p.card : p.surface
     ctx.fillRect(cx, cy, cw, chh)
     const right = i === q.right
     const dim = revealed && !right
     const r = 30
-    roundel(ctx, cx + SP[5] + r, cy + chh / 2, r, dim ? (c.board ? p.panelLine : p.surfaceLine) : p.line.exam, String(i + 1), { ink: dim ? ink2 : p.line.exam, size: FS.lead })
+    roundel(ctx, cx + SP[5] + r, cy + chh / 2, r, dim ? p.surfaceLine : p.line.exam, String(i + 1), { ink: dim ? ink2 : p.line.exam, size: FS.lead })
     const tx = cx + SP[5] + r * 2 + SP[4]
     const tw = cx + cw - SP[4] - tx
     if (choice.rows) {
-      const L = layoutSentence(ctx, choice.rows, { max: FS.title, min: FS.sm, maxW: tw, maxLines: 2, maxH: chh - SP[4], script: c.plan.script, rules: false, gap: 0.04, fam: 'jp', weight: 500 })
+      // No furigana in an answer: its ruby would crowd the row it sits in.
+      const L = layoutSentence(ctx, choice.rows, { max: FS.title, min: FS.caption, maxW: tw, maxLines: 2, maxH: chh - SP[3], script: c.plan.script === 'kana' ? 'kana' : 'kanji', rules: false, gap: 0.04, fam: 'jp', weight: 500 })
       drawSentence(ctx, L, tx, cy + (chh - L.h) / 2, 'left', () => ({ ink: dim ? ink2 : ink, rule: null, ruby: ink2 }))
     } else {
       const fam = choice.fam || 'latin'
@@ -985,10 +1263,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
   y += gridH + SP[7]
   if (cta) { paragraph(ctx, cta, f.x, y, ink); return }
   let ey = y
-  if (exHead) {
-    text(ctx, exHead, f.x, ey + FS.display * 0.62, { f: font(700, FS.display * 0.7, 'serif'), color: ink })
-    ey += FS.display * 0.75 + SP[3]
-  }
+  if (exHead) ey += paragraph(ctx, exHead, f.x, ey, ink) + SP[3]
   if (exSense) ey += paragraph(ctx, exSense, f.x, ey, ink2)
   if (exWhy) paragraph(ctx, exWhy, f.x, ey + SP[3], ink2, 'left', 1.25)
   stamp(ctx, p, f.right - 66, y + Math.min(foot, 150) / 2 + 10, 62)
@@ -996,9 +1271,85 @@ function quizSlide(c, q, revealed, head, number = 1) {
 
 // ── Hooks: the first slide of a post ──────────────────────────
 /** The thing the post opens on, measured, then drawn in a box. */
-function hookContent(c, plan, maxW, maxH, fam, align) {
+function hookContent(c, plan, maxW, maxH, fam, align, hook = plan.hook) {
   const { ctx, p, ink, ink2 } = c
-  const h = plan.hook
+  const h = hook
+  if (h.kind === 'pair') {
+    // 乗換: the two heads, “or” between them; one under the other when long.
+    const orF = font(700, FS.title, 'latin')
+    const orW = measure(ctx, ` ${h.or} `, orF)
+    let size = FS.word
+    const width = z => h.heads.reduce((a, x) => a + measure(ctx, x, font(700, z, fam)), 0) + orW * (h.heads.length - 1)
+    while (size > FS.display && width(size) > maxW) size -= 4
+    const inline = width(size) <= maxW
+    if (!inline) {
+      size = FS.display * 1.2
+      while (size > FS.heading && h.heads.some(x => measure(ctx, x, font(700, size, fam)) > maxW)) size -= 4
+    }
+    const H = inline ? size * 1.2 : h.heads.length * size * 1.15 + (h.heads.length - 1) * FS.title * 1.6
+    return {
+      h: Math.min(H, maxH),
+      draw(x, y) {
+        const hf = font(700, size, fam)
+        if (inline) {
+          let at = x - width(size) / 2
+          h.heads.forEach((head, i) => {
+            if (i) { text(ctx, ` ${h.or} `, at, y + size * 0.62, { f: orF, color: ink2 }); at += orW }
+            const w = text(ctx, head, at, y + size * ASC, { f: hf, color: ink })
+            ctx.fillStyle = p.line[h.line] || p.line.grammar
+            ctx.fillRect(at, y + size * 1.08, w, EDGE)
+            at += w
+          })
+          return
+        }
+        let at = y
+        h.heads.forEach((head, i) => {
+          if (i) { text(ctx, h.or, x, at + FS.title * 0.9, { f: orF, color: ink2, align: 'center' }); at += FS.title * 1.6 }
+          text(ctx, head, x, at + size * ASC, { f: hf, color: ink, align: 'center' })
+          at += size * 1.15
+        })
+      },
+    }
+  }
+  if (h.kind === 'place') {
+    // 会話: where it happens, on a station plate, and what the post is.
+    const pf = font(700, FS.display, 'serif')
+    const pw = Math.min(maxW, measure(ctx, h.place, pf) + SP[8] * 2)
+    const ph = FS.display * 1.6
+    const tb = fit(ctx, h.title, { sizes: [FS.heading, FS.title], maxW, maxLines: 2 })
+    return {
+      h: ph + SP[8] + paragraphH(tb),
+      draw(x, y) {
+        const bx = x - pw / 2
+        ctx.fillStyle = c.dark ? p.card : p.surface
+        rrect(ctx, bx, y, pw, ph, R.plate)
+        ctx.fill()
+        ctx.strokeStyle = p.surfaceLine
+        ctx.lineWidth = 2
+        rrect(ctx, bx + 1, y + 1, pw - 2, ph - 2, R.plate)
+        ctx.stroke()
+        ctx.fillStyle = p.line[h.line] || p.line.grammar
+        ctx.fillRect(bx, y + ph - EDGE * 1.4, pw, EDGE * 1.4)
+        text(ctx, h.place, x, y + ph / 2 + FS.display * 0.36, { f: pf, color: ink, align: 'center' })
+        paragraph(ctx, tb, x, y + ph + SP[8], ink, 'center')
+      },
+    }
+  }
+  if (h.kind === 'listhead') {
+    // 一覧: what the list is about, large, and its title.
+    const tb = fit(ctx, h.title, { sizes: [FS.display, FS.heading, FS.title], maxW, maxLines: 2 })
+    let size = Math.min([...h.head].length <= 2 ? FS.glyph : FS.word, (maxH - paragraphH(tb) - SP[8] - EDGE) / 1.1)
+    while (size > FS.heading && measure(ctx, h.head, font(700, size, fam)) > maxW) size -= 4
+    return {
+      h: size * 1.1 + EDGE + SP[8] + paragraphH(tb),
+      draw(x, y) {
+        const w = text(ctx, h.head, x, y + size * ASC, { f: font(700, size, fam), color: ink, align })
+        ctx.fillStyle = p.line[h.line] || p.line.vocab
+        ctx.fillRect(align === 'center' ? x - Math.min(w, SP[9] * 2) / 2 : x, y + size * 1.06, Math.min(w, SP[9] * 2), EDGE)
+        paragraph(ctx, tb, x, y + size * 1.1 + EDGE + SP[8], ink, align)
+      },
+    }
+  }
   if (h.kind === 'sentence') {
     const L = layoutSentence(ctx, h.rows, { max: FS.word * 0.8, min: FS.title, maxW, maxH, script: plan.script, romaji: plan.showRomaji, fam, weight: 700, rules: c.rules !== false, gap: c.rules === false ? 0.08 : 0.3 })
     return { h: L.h, draw: (x, y) => drawSentence(ctx, L, x, y, align, u => ({ ink, rule: c.rules === false ? null : lineOf(p, u.row), romaji: ink2, ruby: ink2 })) }
@@ -1030,18 +1381,25 @@ function hookContent(c, plan, maxW, maxH, fam, align) {
   if (h.kind === 'prompt') {
     // What to say, and the words to say it with, as tiles.
     const b = fit(ctx, `“${h.text}”`, { sizes: [FS.display, FS.heading, FS.title], maxW, maxH: maxH * 0.45, lh: 1.15 })
-    const tf = font(700, FS.title * 1.1, 'jp')
-    const pad = SP[5]
-    const th = FS.title * 1.1 + pad * 2
-    const tiles = h.tiles.map(r => ({ t: r.t, w: measure(ctx, r.t, tf) + pad * 2, line: r.k === 'word' ? 'vocab' : 'grammar' }))
-    const lines = [[]]
-    let lw = 0
-    for (const tile of tiles) {
-      if (lw + tile.w > maxW && lines[lines.length - 1].length) { lines.push([]); lw = 0 }
-      lines[lines.length - 1].push(tile)
-      lw += tile.w + SP[3]
+    // The tiles as large as the room under the text allows.
+    let ts = FS.title * 1.1
+    let tf, pad, th, lines, tilesH
+    for (;;) {
+      tf = font(700, ts, 'jp')
+      pad = Math.min(SP[5], ts * 0.6)
+      th = ts + pad * 2
+      const tiles = h.tiles.map(r => ({ t: r.t, w: measure(ctx, r.t, tf) + pad * 2, line: r.k === 'word' ? 'vocab' : 'grammar' }))
+      lines = [[]]
+      let lw = 0
+      for (const tile of tiles) {
+        if (lw + tile.w > maxW && lines[lines.length - 1].length) { lines.push([]); lw = 0 }
+        lines[lines.length - 1].push(tile)
+        lw += tile.w + SP[3]
+      }
+      tilesH = lines.length * th + (lines.length - 1) * SP[3]
+      if (paragraphH(b, 1.15) + SP[8] + tilesH <= maxH || ts <= FS.body) break
+      ts -= 4
     }
-    const tilesH = lines.length * th + (lines.length - 1) * SP[3]
     return {
       h: paragraphH(b, 1.15) + SP[8] + tilesH,
       draw(x, y) {
@@ -1055,7 +1413,7 @@ function hookContent(c, plan, maxW, maxH, fam, align) {
             ctx.lineWidth = RING
             rrect(ctx, tx + RING / 2, ty + RING / 2, tile.w - RING, th - RING, R.card)
             ctx.stroke()
-            text(ctx, tile.t, tx + pad, ty + th / 2 + FS.title * 1.1 * 0.36, { f: tf, color: ink })
+            text(ctx, tile.t, tx + pad, ty + th / 2 + ts * 0.36, { f: tf, color: ink })
             tx += tile.w + SP[3]
           }
           ty += th + SP[3]
@@ -1071,66 +1429,29 @@ function levelRing(ctx, p, plan, cx, cy, r, ink) {
   const label = plan.level === 'hiragana' ? 'あ' : plan.level === 'katakana' ? 'ア' : plan.level
   roundel(ctx, cx, cy, r, p.line[plan.line] || p.line.reading, label, { ink, size: FS.lead, fam: /^N/.test(label) ? 'latin' : 'jp' })
 }
-const promptOf = (plan, dir) => (typeof plan.prompt === 'string' ? plan.prompt : plan.prompt[dir] || plan.prompt.plates)
+const promptOf = plan => (typeof plan.prompt === 'string' ? plan.prompt : plan.prompt.plates)
 
-const HOOKS = {
-  plates(ctx, p, fr, plan) {
-    ground(ctx, p, fr)
-    masthead(ctx, p, fr)
-    levelRing(ctx, p, plan, fr.right - 46, fr.y + 32, 46, p.ink)
-    const c = { ctx, p, f: fr, ink: p.ink, ink2: p.ink2 }
-    const pill = 44 * 2.7
-    const top = fr.y + 64 + SP[8]
-    const room = fr.bottom - pill - SP[8] - top
-    const prompt = fit(ctx, promptOf(plan, 'plates'), { sizes: [FS.title, FS.lead], maxW: fr.w * 0.9, maxLines: 2 })
-    const content = hookContent(c, plan, fr.w, room - paragraphH(prompt) - SP[8], 'serif', 'center')
-    const total = content.h + SP[8] + paragraphH(prompt)
-    let y = top + Math.max(0, (room - total) / 2)
-    content.draw(fr.cx, y)
-    y += content.h + SP[8]
-    paragraph(ctx, prompt, fr.cx, y, p.ink2, 'center')
-    metal(ctx, p, fr.cx, fr.bottom - pill, plan.t.next)
-  },
-  board(ctx, p, fr, plan) {
-    ground(ctx, p, fr)
-    masthead(ctx, p, fr)
-    const pill = 44 * 2.7
-    const top = fr.y + 64 + SP[7]
-    const bh = fr.bottom - pill - SP[8] - top
-    boardPanel(ctx, p, fr.x, top, fr.w, bh)
-    const levelLabel = /^N/.test(plan.level) ? plan.level : ''
-    const hh = boardHead(ctx, p, fr.x, top, fr.w, plan.t.departure, levelLabel)
-    const box = inner(fr.x, top + hh, fr.w, bh - hh)
-    const c = { ctx, p, f: box, ink: p.onPanel, ink2: p.onPanelSoft, dark: true }
-    const prompt = fit(ctx, promptOf(plan, 'board'), { weight: 500, sizes: [FS.title, FS.lead], maxW: box.w, maxLines: 2 })
-    const content = hookContent(c, plan, box.w, box.h - paragraphH(prompt) - SP[8], 'jp', 'center')
-    const total = content.h + SP[8] + paragraphH(prompt)
-    let y = box.y + Math.max(0, (box.h - total) / 2)
-    content.draw(box.cx, y)
-    y += content.h + SP[8]
-    paragraph(ctx, prompt, box.cx, y, p.onPanelSoft, 'center')
-    metal(ctx, p, fr.cx, fr.bottom - pill, plan.t.next)
-  },
-  card(ctx, p, fr, plan) {
-    ground(ctx, p, fr)
-    masthead(ctx, p, fr)
-    const { ink, ink2 } = cardInk(p)
-    const pill = 44 * 2.7
-    const prompt = fit(ctx, promptOf(plan, 'card'), { sizes: [FS.title, FS.lead], maxW: fr.w * 0.9, maxLines: 2 })
-    const top = fr.y + 64 + SP[7]
-    const ch = fr.bottom - pill - SP[7] - paragraphH(prompt) - SP[7] - top
-    studyCard(ctx, p, fr.x, top, fr.w, ch, p.line[plan.line])
-    if (/^N/.test(plan.level)) caption(ctx, plan.level, fr.x + SP[6], top + SP[6] + FS.caption, ink2)
-    const box = inner(fr.x, top, fr.w, ch, SP[7], SP[9])
-    const c = { ctx, p, f: box, ink, ink2, dark: !p.paper, rules: false }
-    const content = hookContent(c, plan, box.w, box.h, 'serif', 'center')
-    content.draw(box.cx, box.y + Math.max(0, (box.h - content.h) / 2))
-    paragraph(ctx, prompt, fr.cx, top + ch + SP[7], p.ink, 'center')
-    metal(ctx, p, fr.cx, fr.bottom - pill, plan.t.next)
-  },
+/** The first slide: the mark, the level, what the post opens on, the
+ *  prompt, and the metal that says swipe. */
+function opening(ctx, p, fr, plan, hook = plan.hook, prompt = promptOf(plan)) {
+  ground(ctx, p, fr)
+  masthead(ctx, p, fr)
+  levelRing(ctx, p, plan, fr.right - 46, fr.y + 32, 46, p.ink)
+  const c = { ctx, p, f: fr, ink: p.ink, ink2: p.ink2, dark: !p.paper }
+  const pill = 44 * 2.7
+  const top = fr.y + 64 + SP[8]
+  const room = fr.bottom - pill - SP[8] - top
+  const pb = fit(ctx, weldIf(plan.lang, prompt), { sizes: [FS.title, FS.lead], maxW: fr.w * 0.9, maxLines: 2 })
+  const content = hookContent(c, plan, fr.w, room - paragraphH(pb) - SP[8], 'serif', 'center', hook)
+  const total = content.h + SP[8] + paragraphH(pb)
+  let y = top + Math.max(0, (room - total) / 2)
+  content.draw(fr.cx, y)
+  y += content.h + SP[8]
+  paragraph(ctx, pb, fr.cx, y, p.ink2, 'center')
+  metal(ctx, p, fr.cx, fr.bottom - pill, plan.t.next)
 }
 
-// ── The rating bar (the study card's last word) ───────────────
+// ── The rating bar (the app's own verdicts) ───────────────
 function ratingSlide(ctx, p, fr, plan) {
   ground(ctx, p, fr)
   const t = plan.t
@@ -1166,21 +1487,42 @@ function ratingSlide(ctx, p, fr, plan) {
 }
 
 // ── The directions and their decks ────────────────────────────
-export const DIRECTIONS = [
-  { id: 'plates', jp: '駅名標', name: { en: 'Station plates', fr: 'Plaques de gare' } },
-  { id: 'board', jp: '発車標', name: { en: 'Departure board', fr: 'Tableau des départs' } },
-  { id: 'card', jp: '札', name: { en: 'Study card', fr: 'Carte d’étude' } },
-  { id: 'exam', jp: '模試', name: { en: 'Mock exam', fr: 'Examen blanc' } },
+// ── The carousel types and their decks ────────────────────────
+export const TYPES = [
+  { id: 'plates', jp: '駅名標' },
+  { id: 'exam', jp: '模試' },
+  { id: 'compare', jp: '乗換' },
+  { id: 'build', jp: '組立' },
+  { id: 'list', jp: '一覧' },
+  { id: 'talk', jp: '会話' },
 ]
+// What a type may leave out, and whether it is in by default.
+export const TYPE_OPTIONS = {
+  plates: [['line', true]],
+  exam: [['cover', true], ['sheet', true]],
+  compare: [['line', true]],
+  build: [['line', true]],
+  list: [['recap', true], ['line', true]],
+  talk: [['line', true]],
+}
+/** Whether a plan can be drawn as a type: a question to ask, two things
+ *  to tell apart, a sentence to build, a list, a scene. */
+export function available(type, pl) {
+  switch (type) {
+    case 'exam': return pl.quizzes.length > 0
+    case 'compare': return !!pl.compare
+    case 'build': return !!pl.build
+    case 'list': return !!pl.list
+    case 'talk': return !!pl.talk
+    default: return true
+  }
+}
 
-/** A passage's sentences, laid out and cut into pages that fit. */
-function passagePages(plan, s, fmt, direction) {
+/** A passage's sentences, laid out and cut into pages that fit `f`. */
+function passagePages(plan, s, fmt, f) {
   if (typeof document === 'undefined') return [s.sents]
   const ctx = document.createElement('canvas').getContext('2d')
-  const fr = frame(fmt)
-  const f = direction === 'board' || direction === 'card' ? inner(fr.x, fr.y, fr.w, fr.h) : fr
-  // Under the title: a board's caption, or a heading.
-  const top = direction === 'board' ? FS.caption + SP[7] : FS.heading * 1.1 + SP[6]
+  const top = FS.heading * 1.1 + SP[6]
   const size = fmt.id === 'story' ? FS.heading : FS.title * 1.15
   const layouts = s.sents.map(rows => layoutSentence(ctx, rows, { max: size, min: size, maxW: f.w, maxLines: 20, script: plan.script, rules: false, gap: 0.02 }))
   const out = [[]]
@@ -1195,44 +1537,120 @@ function passagePages(plan, s, fmt, direction) {
   return out
 }
 
-/** The slides a direction deals for a plan: [{ key, draw(ctx) }]. */
-export function deck(direction, plan, fmt, opts) {
+/** The slides a type deals for a plan: [{ key, draw(ctx) }].
+ *  `opts.picks` the questions picked for the item (else the first few),
+ *  `opts.types[type]` the type's own options. */
+export function deck(type, plan, fmt, opts) {
   const fr = frame(fmt)
   const p = palette(opts.ground)
+  const t = plan.t
+  const o = Object.fromEntries((TYPE_OPTIONS[type] || []).map(([k, d]) => [k, opts.types?.[type]?.[k] ?? d]))
+  const strip = type !== 'exam' && o.line !== false
+  const fc = strip ? { ...fr, h: fr.h - STRIP, bottom: fr.bottom - STRIP } : fr
   const per = fmt.id === 'story' ? 6 : 5
-  const exam = direction === 'exam'
-  const slides = []
-  const add = (key, fn) => slides.push({ key, draw: ctx => { noShadow(ctx); fn(ctx) } })
-  const render = (s, extra = {}) => ctx => {
-    const c = { ctx, p, plan, ...surface(direction, ctx, p, fr, LINE_OF_KIND[s.kind] || s.line || plan.line) }
-    if (s.kind === 'quiz') return quizSlide(c, s.quiz, s.revealed, exam ? 'exam' : s.title, extra.number)
-    KINDS[s.kind](c, { ...s, ...extra })
+  const out = []
+  // A key names the slide's file in the export: a second of a kind is numbered.
+  const add = (key, fn, content = true) => {
+    const n = out.filter(x => x.key === key || x.key.startsWith(`${key}~`)).length
+    out.push({ key: n ? `${key}~${n + 1}` : key, fn, content })
   }
-  let number = 0
-  if (exam && plan.quiz) {
-    number += 1
-    const c0 = ctx => ({ ctx, p, plan, ...surface('exam', ctx, p, fr, 'exam') })
-    add('question', ctx => quizSlide(c0(ctx), plan.quiz, false, 'exam', 1))
-    add('answer', ctx => quizSlide(c0(ctx), plan.quiz, true, 'exam', 1))
-  } else {
-    add('hook', ctx => HOOKS[exam ? 'plates' : direction](ctx, p, fr, plan))
+  const ctxOf = (ctx, f = fc) => ({ ctx, p, plan, ...surface(ctx, p, f) })
+  const kind = (s, extra = {}) => ctx => KINDS[s.kind](ctxOf(ctx), { ...s, ...extra })
+  const exam = type === 'exam'
+  let asked = 0
+  const ask = (q, titles) => {
+    if (!q) return
+    asked += 1
+    const n = asked
+    add(`question-${n}`, ctx => quizSlide(ctxOf(ctx), q, false, exam ? 'exam' : titles[0], n))
+    add(`answer-${n}`, ctx => quizSlide(ctxOf(ctx), q, true, exam ? 'exam' : titles[1], n))
   }
-  for (const s of plan.slides) {
-    if (s.kind === 'rating') { if (direction === 'card') add('rating', ctx => ratingSlide(ctx, p, fr, plan)); continue }
-    if (exam && s.skipOnExam && plan.quiz === s.quiz) continue
-    if (exam && s.kind === 'quiz' && s.revealed && plan.quiz === s.quiz) continue
-    if (s.kind === 'words') {
-      const ps = pages(s.items, per)
-      ps.forEach((list, i) => add(`words-${i + 1}`, ctx => { noShadow(ctx); wordsSlide(direction, ctx, p, fr, plan, s, list, i + 1, ps.length) }))
-      continue
+  const outro = cta => { if (plan.slides.some(s => s.kind === 'outro')) add('outro', ctx => KINDS.outro({ ...ctxOf(ctx, fr), cta }), false) }
+  const wordsPages = s => {
+    const ps = pages(s.items, per)
+    ps.forEach((list, i) => add(`words-${i + 1}`, ctx => wordsSlide('plates', ctx, p, fc, plan, s, list, i + 1, ps.length)))
+  }
+  const passage = s => {
+    const ps = passagePages(plan, s, fmt, fc)
+    ps.forEach((layouts, i) => add(`passage-${i + 1}`, kind(s, { layouts, page: i + 1, count: ps.length })))
+  }
+  const qs = picked(plan, opts.picks, exam ? 3 : 1)
+  const numbered = list => (n, i) => (list.length > 1 ? `${n} ${i}` : n)
+
+  switch (type) {
+    case 'exam': {
+      if (o.cover) add('cover', ctx => KINDS.cover(ctxOf(ctx, fr), { quizzes: qs }), false)
+      if (plan.source === 'passage') plan.slides.filter(s => s.kind === 'passage').forEach(passage)
+      qs.forEach(q => ask(q))
+      if (o.sheet && qs.length) add('sheet', ctx => KINDS.sheet(ctxOf(ctx), { quizzes: qs }))
+      outro(t.cta.exam(qs.length))
+      break
     }
-    if (s.kind === 'passage') {
-      const ps = passagePages(plan, s, fmt, direction)
-      ps.forEach((layouts, i) => add(`passage-${i + 1}`, render(s, { layouts, page: i + 1, count: ps.length })))
-      continue
+    case 'compare': {
+      const cmp = plan.compare
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'pair', heads: cmp.sides.map(x => x.head), or: t.or, line: cmp.sides[0].line }, t.compareAsk), false)
+      add('sides', kind({ kind: 'sides', sides: cmp.sides }))
+      cmp.sides.forEach((x, i) => { if (x.ex) add(`with-${i + 1}`, kind({ kind: 'item', item: { kind: 'sentence', n: i + 1, rows: x.ex.rows, tr: x.ex.tr }, of: 0, title: t.withIt(x.head), line: x.line })) })
+      if (cmp.diff || cmp.careful) add('difference', kind({ kind: 'difference', sides: cmp.sides, diff: cmp.diff, careful: cmp.careful }))
+      ask(cmp.quiz, [t.quiz, t.answer])
+      outro(t.cta.compare)
+      break
     }
-    if (s.kind === 'quiz' && !s.revealed) number += 1
-    add(s.kind === 'quiz' ? (s.revealed ? `answer-${number}` : `question-${number}`) : s.kind, render(s, { number }))
+    case 'build': {
+      const b = plan.build
+      const tiles = shuffle(b.rows.filter(r => r.k !== 'punct'), seeded(`${plan.id}-build`))
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'prompt', text: b.translation, tiles }, t.buildAsk), false)
+      b.steps.forEach((_, i) => add(`step-${i + 1}`, kind({ kind: 'step', build: b, n: i + 1 })))
+      add('built', kind({ kind: 'answer', rows: b.rows, romaji: b.romaji, translation: b.translation, title: t.built }))
+      outro(t.cta.build)
+      break
+    }
+    case 'list': {
+      const L = plan.list
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'listhead', head: L.head, title: L.title, line: L.line }, t.listAsk), false)
+      L.items.forEach(it => add(`item-${it.n}`, kind({ kind: 'item', item: it, of: L.items.length, title: L.title, line: L.line })))
+      if (o.recap) {
+        if (L.items[0].kind === 'word') {
+          wordsPages({ kind: 'words', title: t.recap, items: L.items.map(it => ({ n: it.n, t: it.head, reading: it.reading, ro: it.ro, main: it.main, sub: it.tag, line: L.line === 'kana' ? 'vocab' : L.line, kanji: /[㐀-鿿々]/.test(it.head), pos: it.tag })) })
+        } else {
+          add('recap', kind({ kind: 'examples', items: L.items.slice(0, 4), title: t.recap, line: L.line }))
+        }
+      }
+      outro(t.cta.list)
+      break
+    }
+    case 'talk': {
+      const T = plan.talk
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'place', place: T.place, title: t.talkHook(T.place), line: plan.line }, t.talkAsk), false)
+      T.lines.forEach((l, i) => add(`line-${i + 1}`, kind({ kind: 'line', line: l, prev: T.lines[i - 1], n: i + 1, of: T.lines.length, place: T.place, them: T.them })))
+      ask(T.quiz, [t.sceneAsk, t.sceneAsk])
+      outro(t.cta.talk)
+      break
+    }
+    default: {
+      add('hook', ctx => opening(ctx, p, fr, plan), false)
+      for (const s of plan.slides) {
+        if (s.kind === 'outro') continue
+        if (s.kind === 'rating') { add('rating', ctx => ratingSlide(ctx, p, fc, plan)); continue }
+        if (s.kind === 'words') { wordsPages(s); continue }
+        if (s.kind === 'passage') { passage(s); continue }
+        if (s.kind === 'check') { qs.forEach((q, i) => ask(q, [numbered(qs)(t.question, i + 1), numbered(qs)(t.answer, i + 1)])); continue }
+        if (s.kind === 'quiz') {
+          const q = s.quiz
+          add(s.revealed ? 'scene-answer' : 'scene-question', ctx => quizSlide(ctxOf(ctx), q, s.revealed, s.title, 1))
+          continue
+        }
+        add(s.kind, kind(s))
+      }
+      outro(t.cta.plates)
+    }
   }
-  return slides
+  return out.map((sl, i) => ({
+    key: sl.key,
+    draw: ctx => {
+      noShadow(ctx)
+      sl.fn(ctx)
+      if (strip && sl.content) { noShadow(ctx); routeStrip(ctx, p, fr, i, out.length, p.line[plan.line] || p.line.reading) }
+    },
+  }))
 }

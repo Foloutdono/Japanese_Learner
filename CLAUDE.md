@@ -528,17 +528,20 @@ public Supabase Storage bucket by file name and needs no rebuild;
 `frontend/landing/README.md` has the slots, the bucket and what changes
 when the page goes live.
 
-The **carousel studio** (plans 200, 200b, `frontend/carousel/`, its
-README) draws what the app teaches (a reading-bank sentence, its
+The **carousel studio** (plans 200, 200b, 200c, `frontend/carousel/`,
+its README) draws what the app teaches (a reading-bank sentence, its
 translation, a grammar lesson, a word, a kanji, a kana, a comprehension
-passage) as a photo carousel for a social feed, in four of the app's
-idioms, and exports the PNGs. A point is explained in its own sentence,
-a particle by the one sense it has there (`explain.js`). Like the landing
-page it is a static page outside `src/` and never ships. Its data is
-`frontend/carousel/bank/*.json`, written by `python -m scripts.carousel_bank`
-(backend, needs the tokenizer): rerun it after a change to the reading
-bank, the deck, the kanji, the catalogue or its tours, or the
-comprehension seeds, and commit the files.
+passage) as a photo carousel for a social feed, as one of six types
+(the guided walk, a mock exam, this or that, build it, a top five, a
+conversation), and exports the PNGs. A point is explained in its own
+sentence, a particle by the one sense it has there (`explain.js`); its
+questions (`quizzes.js`) deal a wrong answer only where it cannot be
+right too. Like the landing page it is a static page outside `src/` and
+never ships. Its data is `frontend/carousel/bank/*.json`, written by
+`python -m scripts.carousel_bank` (backend, needs the tokenizer and the
+JMdict database): rerun it after a change to the reading bank, the deck,
+the kanji, the catalogue or its tours, or the comprehension seeds, and
+commit the files.
 
 `npm run lint` is not the whole lint story: `npm run lint:css` (stylelint,
 ratcheted against a checked-in baseline) and `npm run lint:scale` (a
