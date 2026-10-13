@@ -15,10 +15,11 @@ import { CheckIcon } from '../ui/Icons'
 const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '-': 5, '§': 5 }
 
 // 正解 (plan 180): the passes -- Correct, and Perfect on the six -- are
-// keys of their own beside the instrument the misses make, each filled
-// in its verdict's ink. Correct is the answer pressed most, so it is
-// the biggest target and the one thing on the bar in colour. Gold
+// filled in their verdict's ink. Correct is the answer pressed most, so
+// it is the biggest target and the one thing on the bar in colour. Gold
 // stays the action's metal (plan 174): a pass is lit in its own ink.
+// Since plan 202 (券売機) every verdict is a key of the same make, a miss
+// dark with its lamp in its ink, a pass moulded in it.
 const isKey = q => q >= 4
 
 /**
@@ -34,12 +35,13 @@ const isKey = q => q >= 4
  * picks it), it hears no key and it is hidden from a screen reader,
  * the radio naming the words instead.
  */
-// How long the pressed segment stays lit after the rating is taken.
+// How long the pressed key stays down after the rating is taken.
 // The bar goes idle the instant a rating lands (see each screen's
 // setShowRating(false)), and .rating-bar--idle now fades rather than
-// vanishes, so the seal the learner just pressed is still on screen
-// filled while the card underneath moves on — the acknowledgement is
-// the ring closing, not a toast. Matched to the idle fade in index.css.
+// vanishes, so the key the learner just pressed is still on screen,
+// down its foot with its lamp lit, while the card underneath moves on
+// — the acknowledgement is the key, not a toast. Matched to the idle
+// fade in index.css.
 const PRESSED_MS = 420
 
 export default function RatingBar({ onRate, active, scale, guide, specimen = false }) {
@@ -107,9 +109,9 @@ export default function RatingBar({ onRate, active, scale, guide, specimen = fal
   const tiles = QUALITY_BTNS.map((b, i) => ({ ...b, digit: i + 1 })).reverse()
   const best = QUALITY_BTNS[0].q
 
-  // One tile. A miss is a segment of the instrument, a word under its
-  // verdict's pill; a pass (正解, plan 180) is a key of its own, filled
-  // in its verdict's ink, a check where the pill was. The --best mark
+  // One key. A miss is a word under its verdict's lamp (券売機, plan
+  // 202); a pass (正解, plan 180) is filled in its verdict's ink, a
+  // check where the lamp would be. The --best mark
   // stays on the best answer the bar offers (QUALITY_BTNS[0] on every
   // scale, best-first), for the tests and the guide.
   function tile({ q, label, digit }) {
@@ -122,7 +124,7 @@ export default function RatingBar({ onRate, active, scale, guide, specimen = fal
     ].filter(Boolean).join(' ')
     const mark = isKey(q)
       ? <CheckIcon size={18} className="rating-bar__btn-check" />
-      : <span className="rating-bar__btn-ring" aria-hidden="true" />
+      : <span className="rating-bar__btn-lamp" aria-hidden="true" />
     if (specimen) {
       return (
         <span key={q} className={cls}>
@@ -152,10 +154,11 @@ export default function RatingBar({ onRate, active, scale, guide, specimen = fal
         title={`${label} (${digit})`}
       >
         {desk && !panels && <kbd className="desk-kbd" aria-hidden="true">{digit}</kbd>}
-        {/* The pill (or a key's check) says nothing the label does not
-            -- it is the seal, and the word beside it is the name -- so
-            it is hidden from a screen reader. Its ink is the verdict's,
-            the same as the run meter's segment (RunConsole.jsx). */}
+        {/* The lamp (or a pass's check) says nothing the label does
+            not -- it is the light, and the word under it is the name --
+            so it is hidden from a screen reader. Its ink is the
+            verdict's, the same as the run meter's segment
+            (RunConsole.jsx). */}
         {mark}
         <span className="rating-bar__btn-label">{label}</span>
       </button>
@@ -176,8 +179,8 @@ export default function RatingBar({ onRate, active, scale, guide, specimen = fal
   return (
     <Box className={`rating-bar${specimen ? ' rating-bar--specimen' : active ? '' : (panels ? ' rating-bar--unlit' : ' rating-bar--idle')}`} aria-hidden={specimen || !active} data-guide={guide}>
       {/* Worst to best, in DOM order too (and therefore tab and
-          screen-reader order): the misses as one instrument, then the
-          passes as keys beside it -- see index.css for why.
+          screen-reader order): the misses, then the passes, two
+          groups of the same keys -- see index.css for why.
 
           The count rides on the container because the phone layout
           depends on it: six wrap to the four misses over the two keys,

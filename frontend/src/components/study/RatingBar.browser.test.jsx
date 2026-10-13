@@ -180,9 +180,10 @@ describe('RatingBar below the desk', () => {
   })
 })
 
-// 正解 (plan 180): the misses are one instrument and the passes keys of
-// their own beside it -- Correct, and Perfect on the six -- in DOM order
-// worst to best, so tab and screen-reader order match the screen.
+// 正解 (plan 180): the misses and the passes -- Correct, and Perfect on
+// the six -- are two groups, in DOM order worst to best, so tab and
+// screen-reader order match the screen. Since plan 202 (券売機) both are
+// keys of the one make; a pass carries a check where a miss has a lamp.
 describe('RatingBar — the passes as keys', () => {
   const qs = nodes => [...nodes].map(b => [...b.classList].find(c => /--q\d$/.test(c)).slice(-1))
 
@@ -193,7 +194,7 @@ describe('RatingBar — the passes as keys', () => {
     expect(qs(c.querySelectorAll('.rating-bar__keys .rating-bar__btn'))).toEqual(['4'])
     expect(c.querySelector('.rating-bar__btn--q4').classList.contains('rating-bar__btn--key')).toBe(true)
     expect(c.querySelector('.rating-bar__btn--q4 .rating-bar__btn-check')).not.toBeNull()
-    expect(c.querySelector('.rating-bar__btn--q4 .rating-bar__btn-ring')).toBeNull()
+    expect(c.querySelector('.rating-bar__btn--q4 .rating-bar__btn-lamp')).toBeNull()
   })
 
   it('keys Correct and Perfect on the six, worst to best', async () => {
