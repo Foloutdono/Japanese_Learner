@@ -46,7 +46,7 @@ PAPER = '#f3ecdf'   # --text-on-panel
 GOLD = '#c99a3e'    # --accent2, the pass's metal
 GOLD_LIT = '#e6bd62'  # --gate-gold-lit, the metal where it catches the light
 
-# The icon's ground (plan 203, the owner's pick of the blues drawn on the
+# The icon's ground (plan 204, the owner's pick of the blues drawn on the
 # home screen): a blue lit from the top, 紺 at the foot. The road, low on
 # it, takes the lit gold: about 5:1 against the blue there, where
 # --accent2 holds under 4.
@@ -164,7 +164,7 @@ def main():
     write('brand/mark.svg', svg(EM, mark(path(ink), path(road))))
 
     # The icon: the ink 612 of 1024 tall, centred on the blue, as
-    # large as the maskable crop allows (plan 203). The mark's furthest
+    # large as the maskable crop allows (plan 204). The mark's furthest
     # point is 0.666 of its height from the centre, ~408px here, inside the
     # crop's 409.6 (the central 80% circle). The same file is the maskable
     # and the apple-touch icon, so pwa-assets.config.js pads neither again.

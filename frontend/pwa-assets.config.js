@@ -6,7 +6,7 @@ import { defineConfig, minimal2023Preset } from '@vite-pwa/assets-generator/conf
 // the favicon — with the sumi panel as the ground everywhere a
 // platform pads the image, instead of the preset's white.
 //
-// The maskable and apple icons take no padding (plan 203): icon.svg
+// The maskable and apple icons take no padding (plan 204): icon.svg
 // already holds the mark inside the maskable safe zone, and the preset's
 // 0.3 shrank it a second time, to 41% of the icon.
 const sumi = '#100e13'

@@ -29,7 +29,7 @@ masthead, the Welcome and the sign-in, the boot screen, a notification's
 icon — set at 1em where the text glyph stood. Where 辻 is a *name* rather than
 the mark (the document title, 辻駅's plate, the dictionary's entry for 辻,
 which teaches its six strokes) it stays type, in the font's two-dot form.
-The icon is the one place the mark leaves the app's grounds (plan 203, the
+The icon is the one place the mark leaves the app's grounds (plan 204, the
 owner's pick): paper on a blue lit from the top and 紺 at the foot, its road
 in the lit gold (`--gate-gold-lit`), which holds on the blue where
 `--accent2` would not. On a launcher the mark fills about two thirds of the
