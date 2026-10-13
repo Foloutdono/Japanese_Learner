@@ -23,15 +23,18 @@ with one dot on 辶 — the five strokes above, a form the font cannot set (it
 draws the two-dot 辻 of JIS2004), so the mark is cut from the font's own
 outlines, the 十 of 辻 and the 辶 of 込 (`frontend/scripts/build-mark.py`).
 辶's sweep — the road the radical stands for — is in the pass's metal
-(`--accent2`); the rest is the ground's ink, paper on the icon's sumi. One
+(`--accent2`); the rest is the ground's ink. One
 drawing, `components/ui/Mark.jsx`, wherever the app names itself — the icon and the splash (`frontend/brand/`), the rail's
 masthead, the Welcome and the sign-in, the boot screen, a notification's
 icon — set at 1em where the text glyph stood. Where 辻 is a *name* rather than
 the mark (the document title, 辻駅's plate, the dictionary's entry for 辻,
 which teaches its six strokes) it stays type, in the font's two-dot form.
-On a launcher the mark fills about two thirds of the tile, as much as a
-round mask's safe zone allows (plan 202): `build-mark.py` sizes it once
-for each platform's crop, and no generator pads it again.
+The icon is the one place the mark leaves the app's grounds (plan 202, the
+owner's pick): paper on a blue lit from the top and 紺 at the foot, its road
+in the lit gold (`--gate-gold-lit`), which holds on the blue where
+`--accent2` would not. On a launcher the mark fills about two thirds of the
+tile, as much as a round mask's safe zone allows: `build-mark.py` sizes it
+once for each platform's crop, and no generator pads it again.
 
 The app is a Japanese railway station. Learning is a journey: sections are
 **lines** (路線), screens are **stations**, choices are **platforms** (のりば),
