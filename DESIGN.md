@@ -29,6 +29,9 @@ masthead, the Welcome and the sign-in, the boot screen, a notification's
 icon — set at 1em where the text glyph stood. Where 辻 is a *name* rather than
 the mark (the document title, 辻駅's plate, the dictionary's entry for 辻,
 which teaches its six strokes) it stays type, in the font's two-dot form.
+On a launcher the mark fills about two thirds of the tile, as much as a
+round mask's safe zone allows (plan 202): `build-mark.py` sizes it once
+for each platform's crop, and no generator pads it again.
 
 The app is a Japanese railway station. Learning is a journey: sections are
 **lines** (路線), screens are **stations**, choices are **platforms** (のりば),

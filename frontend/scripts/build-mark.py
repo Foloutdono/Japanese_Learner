@@ -22,6 +22,9 @@ scripts/render-icon.mjs turns the SVGs into the PNGs the generators read
 `pip install fonttools brotli` and the @fontsource package installed:
 
   python3 scripts/build-mark.py && npm run icons && npm run assets:native
+
+(`assets:native` ends in scripts/sharpen-launcher.mjs, which redraws the
+adaptive foreground at the size the launcher shows it.)
 """
 import argparse
 import glob
@@ -146,13 +149,19 @@ def main():
     ))
     write('brand/mark.svg', svg(EM, mark(path(ink), path(road))))
 
-    # The icon: the ink 590 of 1024 tall, centred on the sumi panel. Its
-    # furthest point is ~393px from the centre, inside the maskable crop's
-    # 409.6 (the central 80% circle).
-    write('brand/icon.svg', svg(1024, mark(*placed(ink, road, 590, 512, 512)), SUMI))
-    # Android's adaptive icon keeps only a 66dp circle of its 108dp layers:
-    # the mark scaled into 61% of the canvas.
-    write('brand/icon-foreground.svg', svg(1024, mark(*placed(ink, road, 450, 512, 512))))
+    # The icon: the ink 612 of 1024 tall, centred on the sumi panel, as
+    # large as the maskable crop allows (plan 202). The mark's furthest
+    # point is 0.666 of its height from the centre, ~408px here, inside the
+    # crop's 409.6 (the central 80% circle). The same file is the maskable
+    # and the apple-touch icon, so pwa-assets.config.js pads neither again.
+    write('brand/icon.svg', svg(1024, mark(*placed(ink, road, 612, 512, 512)), SUMI))
+    # Android's adaptive foreground. @capacitor/assets insets it 16.7% into
+    # its 108dp layer, so this canvas is the launcher's 72dp viewport, not
+    # the layer (plan 158 drew it for the layer, and the mark came out at
+    # 44% of the tile): the ink 68% of it tall, the size the maskable
+    # icon above shows at on the same launcher, its furthest point ~464px
+    # from the centre inside the 66dp safe circle's 469.
+    write('brand/icon-foreground.svg', svg(1024, mark(*placed(ink, road, 696, 512, 512))))
     write('brand/icon-background.svg', svg(1024, '', SUMI))
     # The splash, filled to the screen's height on either shell: 190px of
     # 2732 lands the mark at about the boot screen's sign (4rem) on a phone,
