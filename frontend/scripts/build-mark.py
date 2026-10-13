@@ -12,7 +12,7 @@ Writes, from those outlines and nothing else:
 
   src/components/ui/markPaths.js   the two paths the app draws (Mark.jsx)
   brand/mark.svg                   the mark alone, paper and gold
-  brand/icon.svg                   the app icon, 1024, on the sumi panel
+  brand/icon.svg                   the app icon, 1024, on the icon's blue
   brand/icon-foreground.svg        Android's adaptive layer, in its safe zone
   brand/icon-background.svg        ... and its ground
   brand/splash.svg                 the native splash, 2732, on the page ground
@@ -22,6 +22,9 @@ scripts/render-icon.mjs turns the SVGs into the PNGs the generators read
 `pip install fonttools brotli` and the @fontsource package installed:
 
   python3 scripts/build-mark.py && npm run icons && npm run assets:native
+
+(`assets:native` ends in scripts/sharpen-launcher.mjs, which redraws the
+adaptive foreground at the size the launcher shows it.)
 """
 import argparse
 import glob
@@ -38,10 +41,17 @@ ROOT = os.path.dirname(HERE)
 FONTS = os.path.join(ROOT, 'node_modules/@fontsource/noto-serif-jp/files')
 
 # The token values, written out: an icon file cannot read a custom property.
-SUMI = '#100e13'    # --bg-panel
 GROUND = '#17151a'  # --bg-main (dark), the splash and the boot screen
 PAPER = '#f3ecdf'   # --text-on-panel
 GOLD = '#c99a3e'    # --accent2, the pass's metal
+GOLD_LIT = '#e6bd62'  # --gate-gold-lit, the metal where it catches the light
+
+# The icon's ground (plan 204, the owner's pick of the blues drawn on the
+# home screen): a blue lit from the top, 紺 at the foot. The road, low on
+# it, takes the lit gold: about 5:1 against the blue there, where
+# --accent2 holds under 4.
+BLUE_TOP = '#1f8fd0'
+BLUE_FOOT = '#1b2f68'
 
 ASCENT = 880        # the em box's top above the baseline, in font units
 EM = 1000
@@ -119,9 +129,16 @@ def svg(size, body, ground=None):
             f'width="{size}" height="{size}">{rect}{body}</svg>\n')
 
 
-def mark(ink_d, road_d, ink=PAPER):
+def blue(size):
+    # The icon's ground, as a body: its own gradient, then the panel it fills.
+    return ('<defs><linearGradient id="blue" x1="0" y1="0" x2="0.35" y2="1">'
+            f'<stop offset="0" stop-color="{BLUE_TOP}"/><stop offset="1" stop-color="{BLUE_FOOT}"/>'
+            f'</linearGradient></defs><rect width="{size}" height="{size}" fill="url(#blue)"/>')
+
+
+def mark(ink_d, road_d, ink=PAPER, road=GOLD):
     # The road first: the ink's zigzag lands on it at the joint.
-    return f'<path d="{road_d}" fill="{GOLD}"/><path d="{ink_d}" fill="{ink}"/>'
+    return f'<path d="{road_d}" fill="{road}"/><path d="{ink_d}" fill="{ink}"/>'
 
 
 def write(rel, text):
@@ -146,14 +163,21 @@ def main():
     ))
     write('brand/mark.svg', svg(EM, mark(path(ink), path(road))))
 
-    # The icon: the ink 590 of 1024 tall, centred on the sumi panel. Its
-    # furthest point is ~393px from the centre, inside the maskable crop's
-    # 409.6 (the central 80% circle).
-    write('brand/icon.svg', svg(1024, mark(*placed(ink, road, 590, 512, 512)), SUMI))
-    # Android's adaptive icon keeps only a 66dp circle of its 108dp layers:
-    # the mark scaled into 61% of the canvas.
-    write('brand/icon-foreground.svg', svg(1024, mark(*placed(ink, road, 450, 512, 512))))
-    write('brand/icon-background.svg', svg(1024, '', SUMI))
+    # The icon: the ink 612 of 1024 tall, centred on the blue, as
+    # large as the maskable crop allows (plan 204). The mark's furthest
+    # point is 0.666 of its height from the centre, ~408px here, inside the
+    # crop's 409.6 (the central 80% circle). The same file is the maskable
+    # and the apple-touch icon, so pwa-assets.config.js pads neither again.
+    write('brand/icon.svg', svg(1024, blue(1024) + mark(*placed(ink, road, 612, 512, 512), road=GOLD_LIT)))
+    # Android's adaptive foreground. @capacitor/assets insets it 16.7% into
+    # its 108dp layer, so this canvas is the launcher's 72dp viewport, not
+    # the layer (plan 158 drew it for the layer, and the mark came out at
+    # 44% of the tile): the ink 68% of it tall, the size the maskable
+    # icon above shows at on the same launcher, its furthest point ~464px
+    # from the centre inside the 66dp safe circle's 469.
+    # Its ground is the same viewport, so the blue runs as on the icon.
+    write('brand/icon-foreground.svg', svg(1024, mark(*placed(ink, road, 696, 512, 512), road=GOLD_LIT)))
+    write('brand/icon-background.svg', svg(1024, blue(1024)))
     # The splash, filled to the screen's height on either shell: 190px of
     # 2732 lands the mark at about the boot screen's sign (4rem) on a phone,
     # where the app takes over from it.
