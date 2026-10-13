@@ -91,5 +91,9 @@ every point of the catalogue on every turn and fails on one that falls back.
   question inside a clause, the clipped volitionals 走ろ and 急ご, 痛さ beside
   痛み), a hole that swallowed part of a stem (悲み for 悲しみ, which the
   furigana hid), and some fifteen translations and `why` lines that were false,
-  ambiguous or agreed with the learner's gender. The review is part of the
+  ambiguous or agreed with the learner's gender. A second reviewer, given only
+  the twenty-seven questions revised after the first round, found three more:
+  a cause (あつさ) that に also takes in writing, a `why` that gave an
+  ungrammatical wrong filling a meaning, and one that said "only" of へ
+  where it meant "of the two destination particles". The review is part of the
   process, not an extra.

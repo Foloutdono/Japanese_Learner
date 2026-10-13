@@ -8615,8 +8615,8 @@
           "を"
         ],
         "why": {
-          "en": "Only へ can stand before の to say “to”: 日本への. に and を cannot be followed by の like this.",
-          "fr": "Seul へ peut se placer devant の pour dire « vers » : 日本への. に et を ne peuvent pas être suivis de の ainsi."
+          "en": "Of the two destination particles, only へ can stand before の: 日本への (“to Japan”). に cannot, and を marks an object.",
+          "fr": "Des deux particules de destination, seul へ peut se placer devant の : 日本への (« vers le Japon »). に ne le peut pas, et を marque un complément."
         }
       },
       {
@@ -8631,8 +8631,8 @@
           "を"
         ],
         "why": {
-          "en": "Only へ can stand before の to say “to”: かぞくへの. に and を cannot be followed by の like this.",
-          "fr": "Seul へ peut se placer devant の pour dire « vers » : かぞくへの. に et を ne peuvent pas être suivis de の ainsi."
+          "en": "Of the two destination particles, only へ can stand before の: かぞくへの (“to the family”). に cannot, and を marks an object.",
+          "fr": "Des deux particules de destination, seul へ peut se placer devant の : かぞくへの (« à la famille »). に ne le peut pas, et を marque un complément."
         }
       },
       {
@@ -8647,8 +8647,8 @@
           "を"
         ],
         "why": {
-          "en": "Only へ can stand before の to say “to”: えきへの. に and を cannot be followed by の like this.",
-          "fr": "Seul へ peut se placer devant の pour dire « vers » : えきへの. に et を ne peuvent pas être suivis de の ainsi."
+          "en": "Of the two destination particles, only へ can stand before の: えきへの (“to the station”). に cannot, and を marks an object.",
+          "fr": "Des deux particules de destination, seul へ peut se placer devant の : えきへの (« vers la gare »). に ne le peut pas, et を marque un complément."
         }
       },
       {
@@ -8663,8 +8663,8 @@
           "を"
         ],
         "why": {
-          "en": "Only へ can stand before の to say “to”: たなかさんへの. に and を cannot be followed by の like this.",
-          "fr": "Seul へ peut se placer devant の pour dire « vers » : たなかさんへの. に et を ne peuvent pas être suivis de の ainsi."
+          "en": "Of the two destination particles, only へ can stand before の: たなかさんへの (“to Mr. Tanaka”). に cannot, and を marks an object.",
+          "fr": "Des deux particules de destination, seul へ peut se placer devant の : たなかさんへの (« à M. Tanaka »). に ne le peut pas, et を marque un complément."
         }
       }
     ],
@@ -30593,12 +30593,12 @@
         },
         "choices": [
           "で",
-          "に",
+          "が",
           "を"
         ],
         "why": {
-          "en": "A noun + で gives the cause: あつさで. に does not mark a cause here, and を marks an object.",
-          "fr": "Un nom + で donne la cause : あつさで. に ne marque pas une cause ici, et を marque un complément."
+          "en": "A noun + で gives the cause: あつさで. が would make the heat the one who sleeps, and を marks an object.",
+          "fr": "Un nom + で donne la cause : あつさで. が ferait de la chaleur celle qui dort, et を marque un complément."
         }
       }
     ]
