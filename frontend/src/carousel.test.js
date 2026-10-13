@@ -133,11 +133,14 @@ describe('the carousel studio', () => {
               endingSlide(id, type, p, fmt, { ground }).draw(ctx)
               expect(texts.length, `${src.id} ${id} ${fmt.id} ${ground}`).toBeGreaterThan(3)
             }
-            // The mark's endings close on the metal, the handle in it.
-            for (const id of ['mark', 'cross', 'stamp']) {
+            // The mark closes on the metal to the website, a handle under it,
+            // never the website a second time.
+            for (const handle of ['', '@someone', 'https://tsuji.app/']) {
               const { ctx, texts } = stubContext()
-              endingSlide(id, type, { ...p, handle: '@tsuji.app' }, fmt, { ground }).draw(ctx)
-              expect(texts, `${src.id} ${id}`).toContain(p.lang === 'fr' ? 'Suis @tsuji.app' : 'Follow @tsuji.app')
+              endingSlide('mark', type, { ...p, handle }, fmt, { ground }).draw(ctx)
+              expect(texts, `${src.id} ${handle}`).toContain('Start on tsuji.app')
+              expect(texts.includes('@someone'), `${src.id} ${handle}`).toBe(handle === '@someone')
+              expect(texts.some(x => /https?:/.test(x)), `${src.id} ${handle}`).toBe(false)
             }
             // The deck's own last slide is the ending picked.
             const { ctx, texts } = stubContext()

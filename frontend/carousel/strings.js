@@ -128,12 +128,10 @@ export const STRINGS = {
       passage: () => 'Texts from N5 to N1, with questions to check you understood.',
     },
     end: {
-      names: { mark: 'The mark', cross: 'Crossroads', stamp: 'Station stamp', map: 'Route map', pass: 'Commuter pass', cta: 'Call to action', terminus: 'Terminus', plate: 'Station plate' },
+      names: { mark: 'The mark', map: 'Route map', pass: 'Commuter pass', cta: 'Call to action', terminus: 'Terminus', plate: 'Station plate' },
       crossroads: 'a crossroads',
       today: 'Today’s stop',
-      followShort: h => (h ? `Follow ${h}` : 'Follow for more'),
-      stamp: 'Station stamp',
-      stamped: jp => `You collected the ${jp} stamp.`,
+      start: site => `Start on ${site}`,
       routeMap: 'Route map',
       youAreHere: 'You are here',
       lines: { learn: 'Learn', practice: 'Practice' },
@@ -282,12 +280,10 @@ export const STRINGS = {
       passage: () => 'Des textes du N5 au N1, avec des questions pour vérifier que tu as compris.',
     },
     end: {
-      names: { mark: 'Le logo', cross: 'Carrefour', stamp: 'Tampon de gare', map: 'Plan du réseau', pass: 'Abonnement', cta: 'Appel à l’action', terminus: 'Terminus', plate: 'Plaque de gare' },
+      names: { mark: 'Le logo', map: 'Plan du réseau', pass: 'Abonnement', cta: 'Appel à l’action', terminus: 'Terminus', plate: 'Plaque de gare' },
       crossroads: 'un carrefour',
       today: 'Arrêt du jour',
-      followShort: h => (h ? `Suis ${h}` : 'Abonne-toi'),
-      stamp: 'Tampon de gare',
-      stamped: jp => `Tu as obtenu le tampon ${jp}.`,
+      start: site => `Commence sur ${site}`,
       routeMap: 'Plan du réseau',
       youAreHere: 'Vous êtes ici',
       lines: { learn: 'Apprendre', practice: 'Pratiquer' },
@@ -316,6 +312,8 @@ export const STRINGS = {
 }
 
 export const RATINGS_JP = ['不正解', '惜しい', '難しい', '正解']
+// The app's website, which the mark's last slide sends a reader to.
+export const SITE = 'tsuji.app'
 
 // The instruction the JLPT paper prints over a question of the kind.
 export const EXAM_ASK_JP = {

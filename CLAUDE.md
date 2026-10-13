@@ -528,7 +528,7 @@ public Supabase Storage bucket by file name and needs no rebuild;
 `frontend/landing/README.md` has the slots, the bucket and what changes
 when the page goes live.
 
-The **carousel studio** (plans 200–200d, `frontend/carousel/`,
+The **carousel studio** (plans 200–200f, `frontend/carousel/`,
 its README) draws what the app teaches (a reading-bank sentence, its
 translation, a grammar lesson, a word, a kanji, a kana, a comprehension
 passage) as a photo carousel for a social feed, as one of six types
