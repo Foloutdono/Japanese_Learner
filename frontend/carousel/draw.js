@@ -312,6 +312,17 @@ function chevron(ctx, x, cy, w, color) {
 // Lines break only between words (a word is a row of the breakdown,
 // its punctuation riding it), each word on its rule, furigana over the
 // kanji the script asks for, romaji under the word.
+// Furigana are set as the app sets them (ExampleSentence.jsx and its
+// rules in index.css, plan 200h): one word's readings as one ruby, がく
+// and せい joined over 学生 rather than spreading it into 学 生; a reading
+// wider than its kanji leaning on the kana either side by half a reading
+// character, where there IS kana on both sides (a lone kana between two
+// readings leant on by the first only); two words' readings side by side
+// kept apart; and never under the caption rung, where ご reads as こ.
+// Kana, the long-vowel mark and full-width punctuation: what a reading may
+// overhang. Not a kanji, and not Latin, whose letters are narrower.
+const OVERHANGABLE = /^[\u3000-\u303f\u3041-\u30ff\uff01-\uff0f\uff1a-\uff20\uff5b-\uff65]$/u
+
 function units(rows, { script, blank }) {
   const out = []
   let prefix = ''
@@ -325,66 +336,154 @@ function units(rows, { script, blank }) {
     if (blank === i) segs = [['（　　）', '']]
     else if (script === 'kana') segs = [[reading(row), '']]
     else segs = (row.fu || [[row.t, '']]).map(([t, r]) => [t, script === 'furigana' ? r : ''])
+    // One word's readings side by side are one ruby: がくせい over 学生.
+    segs = segs.reduce((acc, [t, r]) => {
+      const prev = acc[acc.length - 1]
+      if (prev && prev[1] && r) acc[acc.length - 1] = [prev[0] + t, prev[1] + r]
+      else acc.push([t, r])
+      return acc
+    }, [])
     out.push({ row, i, segs, prefix, punct: '', blank: blank === i })
     prefix = ''
   })
   if (prefix && out.length) out[out.length - 1].punct += prefix
+  // Where a reading may lean on its neighbours: kana on both sides of it,
+  // in its own word, and a lone kana claimed by one reading only.
+  for (const u of out) {
+    let claimed = -1
+    u.over = u.segs.map(([, r], k) => {
+      if (!r) return false
+      const before = k ? u.segs[k - 1] : null
+      const after = k + 1 < u.segs.length ? u.segs[k + 1] : null
+      const left = before ? (before[1] ? null : [...before[0]].at(-1)) : [...u.prefix].at(-1)
+      const right = after ? (after[1] ? null : [...after[0]][0]) : [...u.punct][0]
+      const over = !!left && !!right && OVERHANGABLE.test(left) && OVERHANGABLE.test(right) && claimed !== k - 1
+      if (over && after && [...after[0]].length === 1) claimed = k + 1
+      return over
+    })
+  }
   return out
 }
 
-const RUBY_MIN = FS.xs * 0.92
+const RUBY_MIN = FS.caption
+
+/** The words a line may not break between: a particle, the copula, a
+ *  suffix or an ending rides on the word before it, as does the verb a
+ *  て-form leans on (おくれて いる) and the second noun of a compound
+ *  (鉄道 会社); punctuation ends a phrase, an opening bracket starts one. */
+function joins(a, b) {
+  if (a.punct || b.prefix) return false
+  const r = b.row
+  if (r.k === 'particle' || r.k === 'copula' || r.pos === 'suffix' || r.pos === 'auxiliary') return true
+  if (r.pos === 'verb' && a.row.pos === 'verb' && /[てで]$/.test(a.row.t)) return true
+  return r.pos === 'noun' && a.row.pos === 'noun'
+}
+function phrasesOf(list) {
+  const out = []
+  list.forEach((u, i) => {
+    if (i && joins(list[i - 1], u)) out[out.length - 1].push(u)
+    else out.push([u])
+  })
+  return out
+}
 
 function layoutSentence(ctx, rows, o) {
   const opts = { fam: 'serif', weight: 700, maxLines: 3, maxH: Infinity, gap: 0.3, rules: true, romaji: false, script: 'kanji', ...o }
   const list = units(rows, opts)
   const ruby = opts.script === 'furigana' && list.some(u => u.segs.some(([, r]) => r))
-  for (let size = opts.max; size >= opts.min; size -= 2) {
-    const f = font(opts.weight, size, opts.fam)
-    // Furigana at 0.4 of the word, never under the scale's smallest caption.
-    const rs = Math.max(size * 0.4, RUBY_MIN)
-    const rf = font(500, rs, 'jp')
-    const romF = font(500, Math.max(size * 0.3, FS.sm * 0.9), 'latin')
-    for (const u of list) {
-      let x = measure(ctx, u.prefix, f)
-      u.segX = u.segs.map(([t, r]) => {
-        const bw = measure(ctx, t, f)
-        const rw = r ? measure(ctx, r, rf) : 0
-        const seg = { t, r, x, w: Math.max(bw, rw), bw }
-        x += seg.w
-        return seg
-      })
-      u.ruleX = measure(ctx, u.prefix, f)
-      u.baseW = x - u.ruleX
-      u.w = x + measure(ctx, u.punct, f)
-      u.romW = opts.romaji ? measure(ctx, u.row.ro, romF) : 0
-      u.pad = Math.max(0, (u.romW - u.baseW) / 2 - (u.w - u.ruleX - u.baseW))
-      u.lead = Math.max(0, (u.romW - u.baseW) / 2 - u.ruleX)
-      u.span = u.lead + u.w + u.pad
-    }
-    const gap = size * opts.gap
-    const lines = [[]]
-    let width = 0
-    let fits = true
-    for (const u of list) {
-      if (u.span > opts.maxW) { fits = false; break }
-      const line = lines[lines.length - 1]
-      const add = (line.length ? gap : 0) + u.span
-      if (line.length && width + add > opts.maxW) { lines.push([u]); width = u.span }
-      else { line.push(u); width += add }
-    }
-    const last = size - 2 < opts.min
-    if (!fits && !last) continue
-    if (lines.length > opts.maxLines && !last) continue
-    const rubyH = ruby ? rs * 1.3 : 0
-    const ruleGap = opts.rules ? size * 0.22 : size * 0.12
-    const romH = opts.romaji ? Math.max(size * 0.3, FS.sm * 0.9) * 1.5 : 0
-    const lineH = rubyH + size + ruleGap + romH
-    const lineGap = size * 0.32
-    if (lines.length * lineH + (lines.length - 1) * lineGap > opts.maxH && !last) continue
-    return {
-      ...opts, list, lines, size, f, rf, romF, gap, rubyH, ruleGap, romH, lineH, lineGap,
-      h: lines.length * lineH + (lines.length - 1) * lineGap,
-      lineW: line => line.reduce((w, u, i) => w + u.span + (i ? gap : 0), 0),
+  const phrases = phrasesOf(list)
+  // A phrase is kept whole at a size a little under the largest before
+  // it is broken at the largest: おくれているね。 on one line rather than
+  // おくれて over いるね。.
+  const floor = Math.max(opts.min, opts.max * 0.72)
+  for (const whole of [true, false]) {
+    for (let size = opts.max; size >= (whole ? floor : opts.min); size -= 2) {
+      const f = font(opts.weight, size, opts.fam)
+      // Furigana at 0.4 of the word, never under the scale's smallest caption.
+      const rs = Math.max(size * 0.4, RUBY_MIN)
+      const rf = font(500, rs, 'jp')
+      const romF = font(500, Math.max(size * 0.3, FS.sm * 0.9), 'latin')
+      for (const u of list) {
+        let x = measure(ctx, u.prefix, f)
+        u.segX = u.segs.map(([t, r], k) => {
+          const bw = measure(ctx, t, f)
+          const rw = r ? measure(ctx, r, rf) : 0
+          // A wider reading leans half a reading character into the kana
+          // either side, where it may; the rest widens its kanji.
+          const lean = u.over[k] ? Math.min(rs * 0.5, Math.max(0, rw - bw) / 2) : 0
+          const seg = { t, r, x, w: Math.max(bw, rw - lean * 2), bw, rw }
+          x += seg.w
+          return seg
+        })
+        u.ruleX = measure(ctx, u.prefix, f)
+        u.baseW = x - u.ruleX
+        u.w = x + measure(ctx, u.punct, f)
+        u.romW = opts.romaji ? measure(ctx, u.row.ro, romF) : 0
+        u.pad = Math.max(0, (u.romW - u.baseW) / 2 - (u.w - u.ruleX - u.baseW))
+        u.lead = Math.max(0, (u.romW - u.baseW) / 2 - u.ruleX)
+        u.span = u.lead + u.w + u.pad
+        // How far its first and last readings stand in from its edges.
+        const rubies = u.segX.filter(sg => sg.r)
+        u.rubyL = rubies.length ? u.lead + rubies[0].x + (rubies[0].w - rubies[0].rw) / 2 : Infinity
+        u.rubyR = rubies.length ? u.span - (u.lead + rubies.at(-1).x + (rubies.at(-1).w + rubies.at(-1).rw) / 2) : Infinity
+      }
+      const gap = size * opts.gap
+      // Two words' readings side by side keep a space between them, or
+      // まいとし and かるいざわ run on as one reading.
+      const apart = (a, b) => Math.max(0, SP[1] - (gap + a.rubyR + b.rubyL))
+      const fits = list.every(u => u.span <= opts.maxW)
+      const widthOf = us => us.reduce((w, u, i) => w + u.span + (i ? gap + apart(us[i - 1], u) : 0), 0)
+      // A line breaks between phrases (文節), as the app's word-break:
+      // auto-phrase breaks it; a phrase too wide for the line breaks
+      // between its words.
+      const pack = limit => {
+        const out = [[]]
+        let width = 0
+        const place = u => {
+          const line = out[out.length - 1]
+          const extra = line.length ? apart(line[line.length - 1], u) : 0
+          const add = (line.length ? gap + extra : 0) + u.span
+          if (line.length && width + add > limit) { out.push([u]); width = u.span; u.extra = 0 }
+          else { line.push(u); width += add; u.extra = extra }
+        }
+        for (const ph of phrases) {
+          const line = out[out.length - 1]
+          const w = widthOf(ph)
+          const add = line.length ? gap + apart(line[line.length - 1], ph[0]) + w : w
+          if (w > limit) ph.forEach(place)
+          else if (line.length && width + add > limit) { out.push([]); width = 0; ph.forEach(place) }
+          else ph.forEach(place)
+        }
+        return out
+      }
+      let lines = pack(opts.maxW)
+      // The same lines, evened out (the app's text-wrap: balance): the
+      // narrowest measure that still takes no more lines, so a sentence
+      // never leaves ね。 alone on its last line.
+      if (fits && lines.length > 1) {
+        let lo = Math.max(...phrases.map(widthOf).filter(w => w <= opts.maxW), ...list.map(u => u.span)), hi = opts.maxW
+        while (hi - lo > 2) {
+          const mid = (lo + hi) / 2
+          if (pack(mid).length <= lines.length) hi = mid
+          else lo = mid
+        }
+        lines = pack(hi)
+      }
+      const last = !whole && size - 2 < opts.min
+      if (whole && !phrases.every(ph => widthOf(ph) <= opts.maxW)) continue
+      if (!fits && !last) continue
+      if (lines.length > opts.maxLines && !last) continue
+      const rubyH = ruby ? rs * 1.3 : 0
+      const ruleGap = opts.rules ? size * 0.22 : size * 0.12
+      const romH = opts.romaji ? Math.max(size * 0.3, FS.sm * 0.9) * 1.5 : 0
+      const lineH = rubyH + size + ruleGap + romH
+      const lineGap = size * 0.32
+      if (lines.length * lineH + (lines.length - 1) * lineGap > opts.maxH && !last) continue
+      return {
+        ...opts, list, lines, size, f, rf, romF, gap, rubyH, ruleGap, romH, lineH, lineGap,
+        h: lines.length * lineH + (lines.length - 1) * lineGap,
+        lineW: line => line.reduce((w, u, i) => w + u.span + (i ? gap + u.extra : 0), 0),
+      }
     }
   }
   return null
@@ -398,7 +497,8 @@ function drawSentence(ctx, L, x, y, align, style) {
     const lw = L.lineW(line)
     let at = align === 'center' ? x - lw / 2 : x
     const base = top + L.rubyH + L.size * ASC
-    for (const u of line) {
+    line.forEach((u, ui) => {
+      if (ui) at += L.gap + u.extra
       const st = style(u)
       const ux = at + u.lead
       if (u.prefix) text(ctx, u.prefix, ux, base, { f: L.f, color: st.ink })
@@ -416,8 +516,8 @@ function drawSentence(ctx, L, x, y, align, style) {
       if (L.romaji && st.romaji) {
         text(ctx, u.row.ro, ux + u.ruleX + u.baseW / 2, base + L.size * 0.12 + L.ruleGap + L.romH * 0.62, { f: L.romF, color: st.romaji, align: 'center' })
       }
-      at += u.span + L.gap
-    }
+      at += u.span
+    })
   })
 }
 

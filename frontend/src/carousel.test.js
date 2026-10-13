@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { FORMATS, RATING_INKS } from '../carousel/draw.js'
+import { FORMATS, FS, RATING_INKS, layoutSentence } from '../carousel/draw.js'
 import { LEVELS, SOURCES, chunksOf, depsOf, itemsOf, lineRomaji, plan, readingMisses, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, overlaps } from '../carousel/quizzes.js'
@@ -259,6 +259,45 @@ describe('the carousel studio', () => {
   it('welds French punctuation to the word before it', () => {
     expect(weld('Tu sais la lire ?')).toBe('Tu sais la lire\u00a0?')
     expect(weld('« Je reviendrai. »')).toBe('«\u00a0Je reviendrai.\u00a0»')
+  })
+})
+
+describe('setting furigana as the app sets them', () => {
+  const word = (t, fu, extra = {}) => ({ t, k: 'word', pos: 'noun', ro: '', fu, ...extra })
+  const lay = (rows, o = {}) => layoutSentence(stubContext().ctx, rows, { max: FS.body, min: FS.body, maxW: 2000, script: 'furigana', ...o })
+
+  it('sets one word’s readings as one ruby', () => {
+    const L = lay([word('鉄道', [['鉄', 'てつ'], ['道', 'どう']])])
+    expect(L.list[0].segs).toEqual([['鉄道', 'てつどう']])
+    // Kana between two kanji keeps them apart: 日 よう 日.
+    expect(lay([word('日よう日', [['日', 'にち'], ['よう', ''], ['日', 'び']])]).list[0].segs).toHaveLength(3)
+  })
+
+  it('leans a wide reading on kana either side, never on one side only', () => {
+    const both = lay([word('お願い', [['お', ''], ['願', 'ねが'], ['い', '']])]).list[0].segX[1]
+    expect(both.rw).toBeGreaterThan(both.bw)
+    expect(both.w).toBeLessThan(both.rw)
+    const one = lay([word('願い', [['願', 'ねが'], ['い', '']])]).list[0].segX[0]
+    expect(one.w).toBe(one.rw)
+  })
+
+  it('never sets a reading under the caption rung', () => {
+    const L = lay([word('駅', [['駅', 'えき']])], { max: FS.sm, min: FS.sm })
+    expect(parseFloat(/([\d.]+)px/.exec(L.rf)[1])).toBeGreaterThanOrEqual(Math.round(FS.caption * 10) / 10)
+  })
+
+  it('breaks a line between phrases, never before a particle', () => {
+    const rows = [
+      word('電車', [['電', 'でん'], ['車', 'しゃ']]), { t: 'が', k: 'particle', ro: 'ga' },
+      word('来たら', [['来', 'き'], ['たら', '']], { pos: 'verb' }), { t: '、', k: 'punct' },
+      word('すぐ', null, { pos: 'adverb' }), { t: 'に', k: 'particle', ro: 'ni' },
+      word('すわろう', null, { pos: 'verb' }), { t: 'ね', k: 'particle', ro: 'ne' }, { t: '。', k: 'punct' },
+    ]
+    // Every phrase fits each of these widths, so none is broken.
+    for (const maxW of [270, 320, 400, 520]) {
+      const L = lay(rows, { maxW, maxLines: 9 })
+      for (const line of L.lines.slice(1)) expect(line[0].row.k, `${maxW}`).toBe('word')
+    }
   })
 })
 

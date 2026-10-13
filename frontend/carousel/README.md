@@ -1,4 +1,4 @@
-# The carousel studio (plans 200–200g)
+# The carousel studio (plans 200–200h)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -146,14 +146,40 @@ A slide never sets text outside the format's safe area, over other text,
 or below the smallest size a feed shows legibly: every block that could
 be long (a sentence, a choice, a bubble, a label, a station's name) is
 fitted, from its largest size down, to the room the others leave, and
-what can give way (a sense, a note, a translation) gives way first.
-Japanese wraps by its own rules (no small kana, closing bracket or
-prolonged mark at a line's start, no opening bracket at its end), and a
-word too long for a line is split rather than run off it. Plan 200d
+what can give way (a sense, a note, the romaji) gives way first; a
+sentence's translation is never cut. Plan 200d
 checked this by drawing every slide of a sample of every source, as
 every type and every ending, in both formats, languages and grounds,
 with the real fonts, and measuring every line of text set; every
 issue it found was fixed.
+
+## Furigana and line breaks
+
+The Japanese is set as the app sets it (`ExampleSentence.jsx` and its
+rules in `index.css`; `layoutSentence` in `draw.js`):
+
+- **One word, one reading.** The bank's readings come a kanji at a time;
+  a word's are joined, てつどう over 鉄道, so the word is not spread
+  into 鉄 道 and the reading does not read as two words.
+- **A wide reading leans on kana.** A reading wider than its kanji leans
+  half a reading character into the kana on both sides (お願い), and
+  only where there is kana on both: beside a kanji or the word's edge it
+  widens its kanji instead. A lone kana between two readings is leant
+  on by one only.
+- **Two words' readings never run together**: a space is kept between
+  them.
+- **Never under the caption rung**, the app's own floor, where ご reads
+  as こ.
+- **A line breaks between phrases (文節)**, as the app's
+  `word-break: auto-phrase` breaks it: never before a particle, the
+  copula, an ending, the verb a て-form leans on (おくれて いる) or the
+  second noun of a compound (鉄道 会社). A phrase is kept whole at a
+  size a little under the largest rather than broken at the largest,
+  and the lines are evened out (the app's `text-wrap: balance`), so ね。
+  is never left alone on the last line.
+- Within that, Japanese wraps by its own rules (no small kana, closing
+  bracket or prolonged mark at a line's start, no opening bracket at its
+  end), and a word too long for a line is split rather than run off it.
 
 ## Formats
 

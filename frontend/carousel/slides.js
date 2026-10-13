@@ -456,15 +456,23 @@ const KINDS = {
     const room = f.bottom - y
     const between = SP[5] + SP[8] + EDGE + SP[8]
     // The sentence first, in up to half the room; its romaji and its
-    // translation in what it leaves.
-    const L = layoutSentence(ctx, s.rows, { max: FS.display * 1.05, min: FS.body, maxW: f.w, maxLines: 4, maxH: room * 0.55, script: c.plan.script === 'kana' ? 'kana' : 'furigana' })
-    const ro = fit(ctx, s.romaji, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: f.w, maxH: Math.min(room * 0.2, room - L.h - between - FS.lead * 1.2), balanced: false })
-    const tr2 = fit(ctx, s.translation, { sizes: [FS.display, FS.display * 0.85, FS.heading, FS.title, FS.lead, FS.body], maxW: f.w, maxH: room - L.h - paragraphH(ro) - between, lh: 1.1 })
-    const total = L.h + paragraphH(ro) + between + paragraphH(tr2, 1.1)
+    // translation in what it leaves. The translation is never cut: the
+    // sentence steps down for it, then the romaji gives way.
+    const at = (share, withRo) => {
+      const L = layoutSentence(ctx, s.rows, { max: FS.display * 1.05, min: FS.body, maxW: f.w, maxLines: 4, maxH: room * share, script: c.plan.script === 'kana' ? 'kana' : 'furigana' })
+      const ro = withRo ? fit(ctx, s.romaji, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: f.w, maxH: Math.min(room * 0.2, room - L.h - between - FS.lead * 1.2), balanced: false }) : null
+      const tr2 = fit(ctx, s.translation, { sizes: [FS.display, FS.display * 0.85, FS.heading, FS.title, FS.lead, FS.body], maxW: f.w, maxH: room - L.h - (ro ? paragraphH(ro) : 0) - between, lh: 1.1 })
+      return { L, ro, tr2 }
+    }
+    const steps = [[0.55, true], [0.46, true], [0.38, true], [0.46, false], [0.38, false], [0.3, false]]
+    let A = at(...steps[0])
+    for (const step of steps.slice(1)) { if (!A.tr2.cut && !A.ro?.cut) break; A = at(...step) }
+    const { L, ro, tr2 } = A
+    const total = L.h + (ro ? paragraphH(ro) : 0) + between + paragraphH(tr2, 1.1)
     y += Math.max(0, (room - total) * 0.35)
     drawSentence(ctx, L, f.x, y, 'left', u => ({ ink, rule: lineOf(p, u.row), ruby: ink2 }))
     y += L.h + SP[5]
-    y += paragraph(ctx, ro, f.x, y, ink2)
+    if (ro) y += paragraph(ctx, ro, f.x, y, ink2)
     y += SP[8]
     ctx.fillStyle = p.line[c.plan.line] || p.line.reading
     ctx.fillRect(f.x, y, SP[9], EDGE)
@@ -542,8 +550,9 @@ const KINDS = {
   twist(c, s) {
     const { ctx, p, f, ink, ink2 } = c
     let y = title(c, c.plan.t.twist)
-    caption(ctx, s.notion, f.x, y + FS.caption, p.line.grammar)
-    y += FS.caption + SP[8]
+    const notion = captionBlock(ctx, s.notion, f.w)
+    notion.draw(f.x, y, p.line.grammar)
+    y += notion.h + SP[8]
     // The two forms in one size: the largest at which both keep to two lines.
     let pair = null
     for (let z = FS.word; z >= FS.title; z -= 4) {
@@ -571,8 +580,9 @@ const KINDS = {
   usage(c, s) {
     const { ctx, p, f, ink, ink2 } = c
     let y = title(c, c.plan.t.another)
-    caption(ctx, s.notion, f.x, y + FS.caption, p.line.grammar)
-    y += FS.caption + SP[7]
+    const notion = captionBlock(ctx, s.notion, f.w)
+    notion.draw(f.x, y, p.line.grammar)
+    y += notion.h + SP[7]
     const room = f.bottom - y
     const why = s.why ? fit(ctx, s.why, { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w, maxH: room * 0.4, lh: 1.3, balanced: false }) : null
     const trB = fit(ctx, s.tr, { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w, maxLines: 3 })
@@ -1057,11 +1067,11 @@ const KINDS = {
     let y = y0
     if (it.kind === 'sentence') {
       const trB = fit(ctx, it.tr, { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w - SP[7], maxLines: 3, balanced: false })
-      const note = it.note ? fit(ctx, it.note, { weight: 700, sizes: [FS.body, FS.sm], maxW: f.w, maxLines: 2 }) : null
-      const L = layoutSentence(ctx, it.rows, { max: FS.display * 1.1, min: FS.lead, maxW: f.w - SP[7], maxLines: 4, maxH: f.bottom - y - paragraphH(trB) - SP[6] - (note ? paragraphH(note) + SP[6] : 0) - SP[8], script: c.plan.script, gap: 0.08 })
+      const note = it.note ? captionBlock(ctx, it.note, f.w) : null
+      const L = layoutSentence(ctx, it.rows, { max: FS.display * 1.1, min: FS.lead, maxW: f.w - SP[7], maxLines: 4, maxH: f.bottom - y - paragraphH(trB) - SP[6] - (note ? note.h + SP[6] : 0) - SP[8], script: c.plan.script, gap: 0.08 })
       const h = L.h + SP[5] + paragraphH(trB)
-      y += Math.max(0, (f.bottom - y - h - (note ? paragraphH(note) + SP[6] : 0)) * 0.42)
-      if (note) { caption(ctx, note.lines[0], f.x, y + FS.caption, color); y += FS.caption + SP[6] }
+      y += Math.max(0, (f.bottom - y - h - (note ? note.h + SP[6] : 0)) * 0.42)
+      if (note) { note.draw(f.x, y, color); y += note.h + SP[6] }
       ctx.fillStyle = color
       rrect(ctx, f.x, y, EDGE, h, EDGE / 2)
       ctx.fill()
@@ -1130,6 +1140,29 @@ const KINDS = {
     drawBubble(cur, y + Math.max(0, (f.bottom - y - cur.h) * 0.3), false)
   },
 
+}
+
+/** A caption kept to the frame's width as it is drawn (capitals, tracked):
+ *  a size down before it takes a second line. */
+function captionBlock(ctx, str, maxW) {
+  const linesAt = size => {
+    const f = font(700, size, 'latin')
+    const out = []
+    for (const w of str.toLocaleUpperCase().split(' ')) {
+      const t = out.length ? `${out[out.length - 1]} ${w}` : w
+      if (out.length && measure(ctx, t, f, TR.caption) <= maxW) out[out.length - 1] = t
+      else out.push(w)
+    }
+    return out
+  }
+  const one = [FS.caption, FS.xs].find(z => linesAt(z).length === 1)
+  const size = one || FS.caption
+  const lines = linesAt(size)
+  const lh = size * 1.4
+  return {
+    h: size + (lines.length - 1) * lh,
+    draw(x, y, color) { lines.forEach((l, i) => caption(ctx, l, x, y + size + i * lh, color, 'left', size)) },
+  }
 }
 
 /** The point (or the lesson): pattern, meaning, form, then how it works in
