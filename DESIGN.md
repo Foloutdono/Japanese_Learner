@@ -1063,6 +1063,14 @@ So:
   boarding's gate button — see "The gate button".)
 - Every `transition` and `animation` needs a `prefers-reduced-motion` answer
   that keeps opacity and drops transform.
+- **Move HTML boxes, never shapes inside an `<svg>`.** "Transform and
+  opacity only" is cheap on a box: the compositor moves it. On a shape
+  inside an SVG it is not the compositor's, and every frame the browser
+  lays out, records and rasters that whole drawing on the main thread,
+  where everything else on the screen waits (the print of the hour
+  stuttered the gate this way, plan 206). A drawing that moves is lifted
+  into boxes (`print/liftPrint.js`), or the moving part is an `<svg>` of
+  its own and the animation goes on that element (the dial's glow).
 - Every `:hover` rule needs a matching `:focus-visible`. Keyboard users get the
   same affordance, not just the global ring.
 

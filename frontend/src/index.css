@@ -8685,6 +8685,25 @@ textarea:focus-visible {
   background: var(--tpr-paper) 0 0 / calc(128 * var(--tpr-u)) calc(128 * var(--tpr-u));
   will-change: transform;
 }
+/* A layer as drawn: for the moment it is measured, or when it cannot
+   be lifted. */
+.tpr__layer > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* A layer lifted (plan 206, print/liftPrint.js): a stack in the print's
+   units, zoomed to the frame, so every length the print's motion is
+   written in holds. Each moving part is a box with no size of its own,
+   at the print's corner, that the compositor turns about its pivot;
+   each still run an SVG set on what it draws. */
+.tpr-lift__root {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--tpr-w) * 1px);
+  height: calc(var(--tpr-h) * 1px);
+  zoom: var(--tpr-zoom);
+}
+.tpr-lift,
+.tpr-lift__run { position: absolute; left: 0; top: 0; }
+.tpr-lift { width: 0; height: 0; }
 .tpr__layer,
 .tpr__grain,
 .tpr__rail,
@@ -8718,15 +8737,11 @@ textarea:focus-visible {
 @keyframes tpr-rise { from { opacity: 0; transform: translateY(16px); } }
 
 /* The dial as the hour's disc (TodayDial, PrintDial): drawn in the
-   print's units, its glow breathing, its halo glowing at dawn, dusk
-   and night. */
+   print's units, its glow breathing (a sheet of its own, so the
+   compositor breathes it), its halo glowing at dawn, dusk and night. */
 .tdy-dial--print { width: calc(var(--dial-units) * var(--tpr-u)); }
 .tdy-dial__disc { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.tdy-dial__glow {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: tpr-breathe 7s ease-in-out infinite alternate;
-}
+.tdy-dial__glow { animation: tpr-breathe 7s ease-in-out infinite alternate; }
 @keyframes tpr-breathe { from { opacity: 0.8; scale: 0.985; } to { opacity: 1; scale: 1.035; } }
 .tdy-dial__halo { opacity: var(--ho, 0); animation: tpr-halo 5.5s ease-in-out infinite alternate; }
 @keyframes tpr-halo { to { opacity: calc(var(--ho, 0) * 0.55); } }

@@ -90,6 +90,22 @@ describe('the prints on disk', () => {
     for (const name of names) expect(CSS, `@keyframes ${name}`).toContain(`@keyframes ${name} `)
   })
 
+  it('gives no moving part an opacity of its own, which a lifted box could not keep under its rule', () => {
+    // print/liftPrint.js (plan 206) carries a moving part's class to an
+    // HTML box. In an SVG a class's rule outranks an opacity attribute;
+    // on the box the attribute would be inline and outrank the rule.
+    for (const hour of HOURS) {
+      for (const device of DEVICES) {
+        for (const m of markup(scene(hour, device)).matchAll(/<\w+ [^>]*class="tpr-[^"]*"[^>]*>/g)) {
+          expect(m[0], `${hour}-${device}`).not.toMatch(/\sopacity="/)
+        }
+      }
+    }
+    for (const c of ['tpr-lift', 'tpr-lift__root', 'tpr-lift__run']) {
+      expect(CSS, `.${c} has no rule`).toMatch(new RegExp(`\\.${c}(?![\\w-])`))
+    }
+  })
+
   it('keeps the whole print still under reduced motion', () => {
     const still = [...CSS.matchAll(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g)]
       .map(m => m[1]).find(body => body.includes('.tpr__train'))

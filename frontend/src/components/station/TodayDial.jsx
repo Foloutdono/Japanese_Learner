@@ -109,13 +109,21 @@ function PrintDial({ parts, fare, className, print, style, children }) {
   const fc = 2 * Math.PI * frame.fare
   return (
     <div className={`tdy-dial tdy-dial--print ${className}`.trim()} style={{ ...style, '--dial-units': size, '--dial-ring': (2 * (frame.fare + 4)) / size }}>
-      <svg className="tdy-dial__disc" viewBox={`0 0 ${size} ${size}`} aria-hidden="true" focusable="false">
+      {/* The glow on a sheet of its own, so its breath is the
+          compositor's to draw and not a reason to draw the disc's blurs
+          again every frame (plan 206). */}
+      <svg className="tdy-dial__disc tdy-dial__glow" viewBox={`0 0 ${size} ${size}`} aria-hidden="true" focusable="false">
         <defs>
           <radialGradient id={`${id}g`} cx={mid} cy={mid} r={glow} gradientUnits="userSpaceOnUse">
             <stop offset={r / glow} stopColor={disc.glow} stopOpacity={disc.glowOp} />
             <stop offset={(r + 24) / glow} stopColor={disc.glow} stopOpacity={disc.glowOp * 0.35} />
             <stop offset="1" stopColor={disc.glow} stopOpacity="0" />
           </radialGradient>
+        </defs>
+        <circle cx={mid} cy={mid} r={glow} fill={`url(#${id}g)`} />
+      </svg>
+      <svg className="tdy-dial__disc" viewBox={`0 0 ${size} ${size}`} aria-hidden="true" focusable="false">
+        <defs>
           <radialGradient id={`${id}f`} cx="0.4" cy="0.36" r="0.72">
             <stop offset="0" stopColor={disc.fill[0]} />
             <stop offset="1" stopColor={disc.fill[1]} />
@@ -124,7 +132,6 @@ function PrintDial({ parts, fare, className, print, style, children }) {
           <filter id={`${id}h`} x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation={4.5 * k} /></filter>
           <filter id={`${id}s`} x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation={2.4 * k} /></filter>
         </defs>
-        <circle className="tdy-dial__glow" cx={mid} cy={mid} r={glow} fill={`url(#${id}g)`} />
         {disc.haloGlow > 0 && arcs.length > 0 && (
           <g className="tdy-dial__halo" style={{ '--ho': disc.haloGlow }} filter={`url(#${id}h)`}>
             {arcs.map(a => (

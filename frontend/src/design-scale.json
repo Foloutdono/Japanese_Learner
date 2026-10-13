@@ -420,7 +420,7 @@
       "9px"
     ]
   },
-  "_knownUndefined": "Every name here is set inline by JS via style={{ '--x': value }} (CardStamp.jsx, StrengthLadder.jsx, Daruma.jsx, DarumaRitual.jsx) and referenced with no CSS fallback, same pattern as --ember-x elsewhere in this file. Verified live at plan 044 execution time -- not carried over from any earlier plan's prose. A name landing here that is NOT JS-set is the --text/--text-dim bug class this guard exists to catch. Plan 205 adds the print of the hour's: the --tpr-* geometry, room and inks usePrint.printVars sets on the gate, the train's --tpr-run (TodayPrint.jsx), each placed line's --at-x/--at-y (GateCard.jsx) and the dial's --dial-units/--dial-ring (TodayDial.jsx). The print's own markup sets short names (--a, --o, --r ...) inline too; those carry a fallback at rest in index.css instead, since a one-letter name listed here would excuse its typo anywhere.",
+  "_knownUndefined": "Every name here is set inline by JS via style={{ '--x': value }} (CardStamp.jsx, StrengthLadder.jsx, Daruma.jsx, DarumaRitual.jsx) and referenced with no CSS fallback, same pattern as --ember-x elsewhere in this file. Verified live at plan 044 execution time -- not carried over from any earlier plan's prose. A name landing here that is NOT JS-set is the --text/--text-dim bug class this guard exists to catch. Plan 205 adds the print of the hour's: the --tpr-* geometry (and plan 206 its --tpr-zoom), room and inks usePrint.printVars sets on the gate, the train's --tpr-run (TodayPrint.jsx), each placed line's --at-x/--at-y (GateCard.jsx) and the dial's --dial-units/--dial-ring (TodayDial.jsx). The print's own markup sets short names (--a, --o, --r ...) inline too; those carry a fallback at rest in index.css instead, since a one-letter name listed here would excuse its typo anywhere.",
   "knownUndefined": [
     "--streak-angle",
     "--daruma-color",
@@ -431,6 +431,7 @@
     "--n",
     "--tint",
     "--tpr-u",
+    "--tpr-zoom",
     "--tpr-x",
     "--tpr-y",
     "--tpr-w",

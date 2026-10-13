@@ -1,5 +1,7 @@
+import { useLayoutEffect, useRef } from 'react'
 import { useLang } from '../../LangContext'
 import { kanjiNumber } from '../../domain/dayClear'
+import { liftLayer } from './print/liftPrint'
 import { PRINT, usePrintScene } from './print/usePrint'
 
 // ── 浮世絵 — the print of the hour, behind Today's gate (plan 205) ──
@@ -18,6 +20,35 @@ import { PRINT, usePrintScene } from './print/usePrint'
 // paper's fibre over all. Its moving parts are CSS (index.css, the
 // print's section) and keep still under reduced motion. Decoration:
 // the gate says everything it shows in words.
+//
+// The sky, what lies behind and what stands in front are each lifted
+// once they have come (plan 206, print/liftPrint.js): drawn as the
+// print has them for a moment, measured, then rebuilt as boxes, so the
+// compositor moves the print's parts and the main thread is left to the
+// gate. A layer that cannot be lifted stays as drawn.
+
+// The lifted layers, once a visit: the same print lifts the same way.
+const lifted = new WeakMap()
+const drawn = (scene, name) => `<svg viewBox="0 0 ${scene.w} ${scene.h}" focusable="false">${scene.layers[name]}</svg>`
+
+function PrintLayer({ scene, name }) {
+  const ref = useRef(null)
+  useLayoutEffect(() => {
+    const el = ref.current
+    const done = lifted.get(scene) ?? {}
+    if (!(name in done)) {
+      el.innerHTML = drawn(scene, name)
+      try {
+        done[name] = `<div class="tpr-lift__root">${liftLayer(el.firstChild)}</div>`
+      } catch {
+        done[name] = null
+      }
+      lifted.set(scene, done)
+    }
+    el.innerHTML = done[name] ?? drawn(scene, name)
+  }, [scene, name])
+  return <div className="tpr__layer" ref={ref} />
+}
 
 export function TodayPrint({ hour, device, frameRef }) {
   const scene = usePrintScene(hour, device)
@@ -27,9 +58,9 @@ export function TodayPrint({ hour, device, frameRef }) {
       <div className={`tpr__art${scene ? ' tpr__art--in' : ''}`}>
         {scene && (
           <>
-            <svg className="tpr__layer" viewBox={box} focusable="false" dangerouslySetInnerHTML={{ __html: scene.layers.sky }} />
+            <PrintLayer scene={scene} name="sky" />
             <div className="tpr__grain" />
-            <svg className="tpr__layer" viewBox={box} focusable="false" dangerouslySetInnerHTML={{ __html: scene.layers.back }} />
+            <PrintLayer scene={scene} name="back" />
             <div className="tpr__rail">
               <svg
                 className="tpr__train"
@@ -43,7 +74,7 @@ export function TodayPrint({ hour, device, frameRef }) {
                 dangerouslySetInnerHTML={{ __html: scene.layers.train }}
               />
             </div>
-            <svg className="tpr__layer" viewBox={box} focusable="false" dangerouslySetInnerHTML={{ __html: scene.layers.front }} />
+            <PrintLayer scene={scene} name="front" />
             <div className="tpr__paper" />
           </>
         )}
