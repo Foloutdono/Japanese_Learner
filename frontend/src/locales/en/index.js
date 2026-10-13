@@ -514,6 +514,7 @@ const quiz = {
   askPlaceholder:      'Your question…',
   askSealed:           'Questions open once your answer is graded.',
   askSealedText:       'Questions open with the results.',
+  askSealedTour:       'Questions open once this stop is answered.',
   askHint:             'A short, precise answer, about this exercise.',
   askSend:             'Ask',
   askThinking:         'Answering',

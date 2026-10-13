@@ -185,8 +185,8 @@ class TestARowIsALedgerRow:
     def test_the_gloss_arrives_in_the_session_language(self):
         english = {r["kana"]: r["meaning"] for r in kana_words("あ", "en")}
         french = {r["kana"]: r["meaning"] for r in kana_words("あ", "fr")}
-        assert english["あお"] == "blue"
-        assert french["あお"] == "bleu"
+        assert english["あお"] == "blue (noun, the colour)"
+        assert french["あお"] == "bleu (nom, la couleur)"
 
     def test_a_pool_word_falls_back_to_english_where_there_is_no_french(self):
         # The same fallback the deck's own French gaps take

@@ -23,12 +23,18 @@ with one dot on 辶 — the five strokes above, a form the font cannot set (it
 draws the two-dot 辻 of JIS2004), so the mark is cut from the font's own
 outlines, the 十 of 辻 and the 辶 of 込 (`frontend/scripts/build-mark.py`).
 辶's sweep — the road the radical stands for — is in the pass's metal
-(`--accent2`); the rest is the ground's ink, paper on the icon's sumi. One
+(`--accent2`); the rest is the ground's ink. One
 drawing, `components/ui/Mark.jsx`, wherever the app names itself — the icon and the splash (`frontend/brand/`), the rail's
 masthead, the Welcome and the sign-in, the boot screen, a notification's
 icon — set at 1em where the text glyph stood. Where 辻 is a *name* rather than
 the mark (the document title, 辻駅's plate, the dictionary's entry for 辻,
 which teaches its six strokes) it stays type, in the font's two-dot form.
+The icon is the one place the mark leaves the app's grounds (plan 204, the
+owner's pick): paper on a blue lit from the top and 紺 at the foot, its road
+in the lit gold (`--gate-gold-lit`), which holds on the blue where
+`--accent2` would not. On a launcher the mark fills about two thirds of the
+tile, as much as a round mask's safe zone allows: `build-mark.py` sizes it
+once for each platform's crop, and no generator pads it again.
 
 The app is a Japanese railway station. Learning is a journey: sections are
 **lines** (路線), screens are **stations**, choices are **platforms** (のりば),
@@ -119,8 +125,8 @@ all twelve in both themes — and the native widgets' copies follow.
 **The verdicts are one ramp** (状態, same round): the five state inks — 抹茶,
 琥珀, 緑青, 錆 and the rating's 臙脂 — run red to green at one strength
 (lightness .62 to .72), so no verdict shouts over another. The two pass
-verdicts step off it: Correct and
-Perfect are the rating bar's keys and wear their own brighter inks,
+verdicts step off it: Correct (新橋) and
+Perfect (若葉) are the rating bar's filled keys and wear their own brighter inks,
 `--rating-correct` and `--rating-perfect`, wherever a verdict's ink is
 drawn (the bar, the run's meter, the desk's verdict tiles). `--teal` and
 `--success` keep their place on the ramp for everything else.
@@ -640,7 +646,7 @@ neither a chip nor a key in the field, and the Library's Newest / Most followed
 is the case the rule was written for. `.console__band` is the object: the
 console's full width, options divided by its own `--surface-line` hairline
 rather than set in a pill of their own, the chosen one **washed in the
-selection's gold** (`--sel-wash`, `--sel-ink`) — the rating bar's construction at console width, and the
+selection's gold** (`--sel-wash`, `--sel-ink`) — the segmented toggle's construction at console width, and the
 same on state `.chip--on` wears. It sits **above row 1**, over everything it
 orders.
 
@@ -1063,21 +1069,25 @@ So:
 ### Controls
 
 - **The rating bar** — the most-used control in the app — is **chrome**: the
-  same sumi as the top bar and the level HUD, with the panel inks. The misses
-  (Wrong, Almost, Difficult; Blackout on the six) are **one instrument**: one
-  bordered panel split by hairlines, each word under a pill in its verdict's
-  ink (the same ink and shape as its segment in the run's meter); a press
-  washes its segment and lights the pill, and that is the bar's whole
-  acknowledgement. The passes are **keys of their own**: Correct (and Perfect
-  on the six) stands beside the instrument a gap apart, filled in its own
-  verdict ink (`--rating-correct` 青竹, `--rating-perfect` 若葉), lit from the
-  top, the sumi type and a check where the pill was. Correct is the widest
-  target on the bar. **No tile is gold**: gold is the action's metal, and a
-  verdict is not an action. On a phone the bar docks on the run's floor, edge
-  to edge; four keys stay on one row, and the six puts its misses on one row
-  and its two keys under them. On the desk's panels the keys are unlit until
-  the reveal, and the card panel's Correct and Perfect tiles wear the same
-  inks.
+  same sumi as the top bar and the level HUD, with the panel inks. Since plan
+  203 (券売機, the owner's pick G) **every verdict is a key of the one make**,
+  as on a ticket machine's panel: a gap apart, each raised off the sumi on a
+  foot of its own material (`--key-foot`, 3px, an edge and not a shadow: no
+  blur), and a press travels down the foot (under reduced motion it does
+  not, and the lamp alone answers). The misses (Wrong, Almost, Difficult;
+  Blackout on the six) are dark keys, each word under a **lamp** in its
+  verdict's ink, dimmed into the sumi at rest and lit when pressed, and that
+  is the bar's whole acknowledgement. The passes are the same keys
+  **moulded in their own verdict ink** (`--rating-correct` 新橋,
+  `--rating-perfect` 若葉), lit from the top, the sumi type and a check
+  where the lamp would be, and no glow. Correct is the widest target on the
+  bar. Each key carries its own sumi, so the bar reads on paper as well as
+  on the dock. **No key is gold**: gold is the action's metal, and a verdict
+  is not an action. On a phone the bar docks on the run's floor, edge to
+  edge; four keys stay on one row, and the six puts its misses on one row
+  and its two passes under them. On the desk's panels the keys are unlit
+  until the reveal (a pass drawn as a miss), and the card panel's Correct
+  and Perfect tiles wear the same inks.
 - **The streak is a スタンプラリー stamp rally**, not a flame — a row of
   eki-stamp marks, one per day, today's freshly inked. It says what the
   learner *did* rather than decorating a number, and it is on-metaphor for a
@@ -1094,8 +1104,9 @@ So:
   days". A missing day is a dashed outline, not a
   gap — seven or thirty-five slots always exist, because the shape of the
   month is the information.
-- **A segmented toggle is the rating bar's construction at chip size** — one
-  pill, segments divided by hairlines rather than gaps, and the selected
+- **A segmented toggle is one pill at chip size** (the rating bar's
+  construction until plan 203 made its verdicts keys) — segments divided by
+  hairlines rather than gaps, and the selected
   segment *washed* in the selection's gold rather than filled (`--sel-wash`,
   plan 174), at `--r-card` like every control. The 番付's 今週/通算 switch is
   the first outside the quiz. Anything that picks one of two or three views of
@@ -2210,7 +2221,10 @@ line here says otherwise.
 - **A backward-looking screen stays backward-looking.** The profile is a
   record of what was done. A goal
   measured in weeks belongs on the pass's back, where the ghost train already
-  measures it, and the day's work belongs at the fare gate.
+  measures it, and the day's work belongs at the fare gate. A door to a
+  page that looks ahead may stand in the holder, as the agenda's does
+  (plan 202), so long as its figure is what the page holds (the week's
+  hours) and never what is next.
 - Four column widths — and, on the desk, the rail's `--desk-rail-w`
   (256px) beside them, the canvas grown to `--desk-board-w` (1240px), a
   second column at `--desk-side-w` (360px) and the dictionary's entry at

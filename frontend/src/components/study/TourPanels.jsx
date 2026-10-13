@@ -1,9 +1,11 @@
+import { useEffect, useRef } from 'react'
 import { useLang } from '../../LangContext'
 import { CheckIcon, CrossIcon } from '../ui/Icons'
 import { ExampleSentence } from '../dictionary/ExampleSentence'
 import { LessonInline } from './GrammarLesson'
 import { FuriganaParts } from './Readings'
 import { stopKind, stopsOf, twistIndex, twistsOf } from '../../domain/tourStops'
+import { AskPanel } from './AskPanel'
 
 // ── 発見 on the desk: the tour's two side panels (plan 187f) ───────
 // The owner's pick F of the canvas "Tsuji — grammar, learned by doing",
@@ -17,6 +19,10 @@ import { stopKind, stopsOf, twistIndex, twistsOf } from '../../domain/tourStops'
 // misses, whether the rule was given, each twist's and the scene's
 // answers. A twist's stop is named by its notion (plan 189); the quiz's
 // (plan 194) says its score as it goes. No key is printed on either (the owner's word).
+// Under the stops, 問 (plan 204): the practice runs' asking, in the
+// lines panel's lower half as theirs is (RunLines), its thread the
+// stop's and sealed until the stop's question is answered. The run
+// passes its useAsk as `ask`; the thread comes in the tour's view.
 
 /** How a stop went, as the line prints it beside the stop's name. */
 function result(t, stop, i, view) {
@@ -45,12 +51,19 @@ function name(t, tour, stop) {
   return t.tourStops[stop]
 }
 
-/** The left panel: the point, then its stops as one line. */
-export function TourRoute({ point, view }) {
+/** The left panel: the point, then its stops as one line, and the asking under them. */
+export function TourRoute({ point, view, ask = null }) {
   const { t } = useLang()
   const tour = point.tour
   const stops = stopsOf(tour)
   const at = view?.at ?? 0
+  const target = ask ? view?.ask : null
+  // With the asking under them the stops have half the panel and scroll
+  // in it: the stop in hand stays in view.
+  const stopsRef = useRef(null)
+  useEffect(() => {
+    stopsRef.current?.querySelector('[aria-current="step"]')?.scrollIntoView?.({ block: 'nearest' })
+  }, [at])
   return (
     <section className="tour-route" aria-label={t.tourRouteAria}>
       <div className="tour-route__head">
@@ -59,7 +72,7 @@ export function TourRoute({ point, view }) {
         </span>
         {point.structure && <span className="tour-route__structure">{point.structure}</span>}
       </div>
-      <ol className="tour-route__stops">
+      <ol ref={stopsRef} className="tour-route__stops">
         {stops.map((stop, i) => {
           const state = i < at ? 'done' : i === at ? 'here' : 'ahead'
           const res = view ? result(t, stop, i, { ...view, at }) : null
@@ -78,6 +91,9 @@ export function TourRoute({ point, view }) {
           )
         })}
       </ol>
+      {target && (
+        <AskPanel key={target.key} ask={ask} askKey={target.key} context={target.context} open={target.open} sealed={t.askSealedTour} />
+      )}
     </section>
   )
 }

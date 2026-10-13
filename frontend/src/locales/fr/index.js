@@ -496,6 +496,7 @@ const quiz = {
   askPlaceholder:     'Ta question…',
   askSealed:          'Les questions s’ouvrent une fois ta réponse notée.',
   askSealedText:      'Les questions s’ouvrent avec les résultats.',
+  askSealedTour:      'Les questions s’ouvrent une fois l’étape répondue.',
   askHint:            'Une réponse courte et précise, sur cet exercice.',
   askSend:            'Demander',
   askThinking:        'Réponse en cours',

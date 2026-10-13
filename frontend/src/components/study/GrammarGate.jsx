@@ -11,13 +11,14 @@ import { GrammarTour } from './GrammarTour'
 // (study/grammar_tour.py says which). On the desk (plan 187f) the tour is
 // the middle of the run's three panels, and `onView` tells the run where
 // it stands, for the stops at the left and the plate at the right
-// (TourPanels.jsx).
+// (TourPanels.jsx). `ask` is the run's useAsk, for the tour's 問
+// (plan 204).
 //
 // The tour's terminus records how the point was met (POST
 // /api/grammar/tour: the first tour only, never read by the scheduler)
 // and boards like the lesson's button does. The record is a courtesy to
 // the plate: a failed post never holds the run.
-export function GrammarGate({ point, session, onCompare, onBoard, onLesson, onView }) {
+export function GrammarGate({ point, session, onCompare, onBoard, onLesson, onView, ask = null }) {
   const desk = useDesk()
   if (point.tour) {
     const board = result => {
@@ -30,7 +31,7 @@ export function GrammarGate({ point, session, onCompare, onBoard, onLesson, onVi
       }).catch(() => {})
       onBoard?.()
     }
-    return <GrammarTour point={point} onBoard={board} onLesson={onLesson} desk={desk} onView={onView} />
+    return <GrammarTour point={point} onBoard={board} onLesson={onLesson} desk={desk} onView={onView} ask={ask} />
   }
   // A point no tour can be drawn on is met by its lesson; that is its
   // tutorial, recorded so that it is due once per point (plan 194).

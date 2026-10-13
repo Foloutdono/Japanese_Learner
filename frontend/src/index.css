@@ -2325,15 +2325,19 @@
   /* Dark ink text for use on light/mid-tone colour fills (success,
      warning) that stay legible with dark text regardless of theme. */
   --text-on-fill:       #1c1811;
-  /* 正解 (plan 180) — the pass verdicts' inks: Correct's 青竹 and
+  /* 正解 (plan 180) — the pass verdicts' inks: Correct's 新橋 and
      Perfect's 若葉, the two keys the rating bar fills. A step brighter
      than the state ramp the misses stand on (plan 174's 状態), by the
      owner's word ("a bit more vibrant"): the answer pressed most is the
      one thing on the bar in colour. Fixed, because the keys stand on
      sumi in both themes; the run's meter and the desk's verdict tiles
      wear the same two, as every verdict's segment wears its key's ink.
-     Dark text on both: 7.3:1 and 7.9:1. */
-  --rating-correct:     #22b89c;
+     Correct was 青竹 #22b89c, a mint off the palette's family, until
+     plan 203 (券売機): 新橋, the Meiji turquoise named for the station
+     Japan's first railway left from, a blue that the misses' red-to-amber
+     ramp never comes near and Perfect's green is told apart from.
+     Dark text on both: 7.7:1 and 7.9:1. */
+  --rating-correct:     #59b9c6;
   --rating-perfect:     #6cc24a;
 
   /* Washi (和紙) — the one bright surface reserved for diagrams that
@@ -2378,6 +2382,11 @@
   /* The run's floor on a phone (plan 174, RunConsole.jsx): the level as
      the card's struck 辻, so a rung taller than the bar it replaced. */
   --run-floor-h:    60px;
+  /* A rating key's foot (plan 203, 券売機): the key's own side under
+     it, the depth a press travels. Not a shadow -- no blur, the key's
+     material a shade down -- and 3px because an edge is 3px wherever
+     the app draws one (線: a plate's stripe, a row's rail). */
+  --key-foot:        3px;
   /* The desk's rail (plan 113, components/chrome/DeskRail.jsx): the
      second chrome's one width, at and above the desk's 1100px. Declared
      here rather than inside the desk's own section because every :root
@@ -9958,9 +9967,30 @@ textarea:focus-visible {
   border-radius: var(--r-pill);
   background: var(--surface);
   color: var(--text-on-fill);
-  box-shadow: none;
-  animation: btn-gate-breathe 2.8s ease-in-out infinite;
+  box-shadow: var(--gate-halo-rest);
   transition: transform 0.15s ease, color 270ms ease;
+  --gate-halo-rest: 0 6px 18px color-mix(in srgb, var(--gate-gold) 35%, transparent);
+}
+/* The halo's breath. It used to animate the button's own box-shadow,
+   which repaints the whole blurred shadow every frame for as long as
+   the gate is on screen -- and on a phone the gate never leaves it.
+   The rest halo is now the button's still shadow and the breath's
+   peak a layer under the fill (::after) whose opacity alone moves, so
+   the compositor plays it and the main thread is left to the screen.
+   The peak's glow is drawn lighter than the old 55% because it stacks
+   on the rest halo instead of replacing it. */
+.btn-depart--gate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 9px color-mix(in srgb, var(--gate-gold) 16%, transparent),
+    0 8px 28px color-mix(in srgb, var(--gate-gold) 40%, transparent);
+  opacity: 0;
+  animation: btn-gate-breathe 2.8s ease-in-out infinite;
 }
 .btn-depart--gate::before {
   content: "";
@@ -10009,12 +10039,13 @@ textarea:focus-visible {
 }
 .btn-depart__rip + .btn-depart__rip { animation-delay: 1.1s; }
 .btn-depart--gate:hover,
-.btn-depart--gate:focus-visible { transform: translateY(-2px); box-shadow: none; }
+.btn-depart--gate:focus-visible { transform: translateY(-2px); box-shadow: var(--gate-halo-rest); }
 .btn-depart--gate:active {
   transform: translateY(1px) scale(0.99);
-  animation: none;
   box-shadow: inset 0 2px 5px color-mix(in srgb, var(--bg-panel) 45%, transparent);
 }
+.btn-depart--gate:active::after,
+.btn-depart--gate:disabled::after { animation: none; opacity: 0; }
 .btn-depart--gate:active .btn-depart__reader { background: var(--text-on-panel); color: var(--text-on-fill); }
 /* The idle nudge: an action ready and not taken for four seconds, the
    reader steps toward the way on twice and rests. Never on the outline
@@ -10037,11 +10068,11 @@ textarea:focus-visible {
 .btn-depart--gate:disabled .btn-depart__rip { display: none; }
 /* The wake: set by Continue for the one render after a pick enables it. */
 .btn-depart--waking {
-  animation: btn-gate-wake 540ms ease-out, btn-gate-breathe 2.8s ease-in-out infinite;
+  animation: btn-gate-wake 540ms ease-out;
 }
 @keyframes btn-gate-breathe {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gate-gold) 0%, transparent), 0 6px 18px color-mix(in srgb, var(--gate-gold) 35%, transparent); }
-  50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--gate-gold) 16%, transparent), 0 8px 28px color-mix(in srgb, var(--gate-gold) 55%, transparent); }
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 @keyframes btn-gate-rip {
   from { transform: scale(1); opacity: 0.8; }
@@ -10060,9 +10091,10 @@ textarea:focus-visible {
    movement: no breath, no ripples, no nudge, no pop. */
 @media (prefers-reduced-motion: reduce) {
   .btn-depart--gate,
+  .btn-depart--gate::after,
   .btn-depart--waking,
   .btn-depart--gate .btn-depart__reader { animation: none; }
-  .btn-depart--gate { transition: color 270ms ease; }
+  .btn-depart--gate { transition: color 270ms ease; box-shadow: none; }
   .btn-depart--gate:hover,
   .btn-depart--gate:focus-visible,
   .btn-depart--gate:active { transform: none; }
@@ -13866,10 +13898,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    layered on top via a second, shorter-period animation so the climb
    reads as drifting smoke/spark rather than a scripted straight
    line. Combined with ember-rise via multiple animation-name entries
-   in .ember below. */
+   in .ember below. On `translate`, which adds to ember-rise's
+   transform: it was margin-left, a layout pass per ember per frame. */
 @keyframes ember-sway {
-  0%, 100% { margin-left: 0; }
-  50%      { margin-left: var(--ember-sway, 6px); }
+  0%, 100% { translate: 0 0; }
+  50%      { translate: var(--ember-sway, 6px) 0; }
 }
 .ember {
   animation-name: ember-rise, ember-sway;
@@ -14397,48 +14430,65 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
       own verdict ink (--rating-correct, --rating-perfect), lit from the
       top, a check where the pill was. Correct is the answer pressed most,
       so it is the widest target on the bar and the one thing in colour.
-      Not gold: gold is still the action's metal. */
+      Not gold: gold is still the action's metal.
+
+   7. EVERY VERDICT A KEY (plan 203, 券売機, the owner's pick G of the
+      canvas "Tsuji — the rating bar, new directions", over a ticket, two
+      tiers and bare words): the instrument and the key beside it read as
+      two widgets of two makes, the key's glow as neon on the quiet
+      sumi. So every verdict is a key of the one make, as on a ticket
+      machine's panel: raised off the sumi on a foot of its own material
+      (--key-foot), a gap apart, and a press travels down the foot. A
+      miss is a dark key with a lamp in its verdict's ink, dimmed at rest
+      and lit when pressed; a pass is the same key moulded in its own ink
+      (Correct's is 新橋 since this plan), half again as wide, and no
+      longer glows. Each key carries its own sumi, so the bar reads on
+      paper (the desk's light frame) as well as on the dock. */
 .rating-bar__buttons {
+  /* The key's face and its foot, shared by every miss (and the desk's
+     unlit pass, which is drawn as a miss until the reveal): the panel
+     ink lifted off the sumi, a shade lighter at the top, and the foot a
+     shade under the sumi. Declared here so the pass can override the
+     face alone and the unlit pass take it back. */
+  --key-face: linear-gradient(180deg, color-mix(in srgb, var(--text-on-panel) 10%, var(--bg-panel)) 0%, color-mix(in srgb, var(--text-on-panel) 6%, var(--bg-panel)) 100%);
+  --key-face-lift: linear-gradient(180deg, color-mix(in srgb, var(--text-on-panel) 14%, var(--bg-panel)) 0%, color-mix(in srgb, var(--text-on-panel) 9%, var(--bg-panel)) 100%);
+  --key-sole: color-mix(in srgb, var(--bg-panel) 40%, #000);
+  /* How far a press travels: the whole foot, or nothing under reduced
+     motion (the end of this block), where the lamp alone answers. */
+  --key-travel: var(--key-foot);
   display: flex;
   gap: var(--sp-3);
   max-width: 640px;
   margin: 0 auto;
+  /* The foot is drawn under the key, so the row keeps room for it:
+     the key's box is the hit target less its foot, the row the full
+     64px a run's slot reserves (.drawing-quiz__actions). */
+  padding-bottom: var(--key-foot);
 }
-/* The misses: the one instrument. Its hairline is an inset outline,
-   not a border: it takes no height (a run's column is measured to the
-   pixel on a laptop) and it paints over a washed segment's corner. */
-.rating-bar__misses {
-  display: flex;
-  flex: 3 1 0;
-  gap: 0;
-  min-width: 0;
-  overflow: hidden;
-  /* Its own sumi (plan 185). The words are the panel's inks, which
-     only read on sumi; the ground had been the wrapper's -- the
-     phone's dock, the desk floor's frame -- and the frame is
-     --surface, paper in the light theme, where the misses' words
-     stood at about 1.3:1. On the dock this is the dock's own ink. */
-  background: var(--bg-panel);
-  outline: 1px solid color-mix(in srgb, var(--text-on-panel) 14%, transparent);
-  outline-offset: -1px;
-  border-radius: var(--r-panel);
-}
-/* The passes: a key each, a gap apart. Each count says its share: the
-   four's Correct half again as wide as a miss, the two's pair equal
-   (a binary rating wants the biggest, least ambiguous targets), the
-   six's two keys beside four misses. */
+/* The misses and the passes: two groups of the same keys, kept apart
+   in the DOM because the six wraps between them on a phone. No ground
+   of their own: each key carries its sumi. */
+.rating-bar__misses,
 .rating-bar__keys {
   display: flex;
-  flex: 1.5 1 0;
-  gap: var(--sp-2);
+  gap: var(--sp-3);
   min-width: 0;
 }
+.rating-bar__misses { flex: 3 1 0; }
+/* Each count says its share: the four's Correct half again as wide as
+   a miss, the two's pair equal (a binary rating wants the biggest,
+   least ambiguous targets), the six's two keys beside four misses. */
+.rating-bar__keys { flex: 1.5 1 0; }
 .rating-bar__buttons--2 > .rating-bar__misses,
 .rating-bar__buttons--2 > .rating-bar__keys { flex: 1 1 0; }
 .rating-bar__buttons--6 > .rating-bar__misses { flex: 4 1 0; }
 .rating-bar__buttons--6 > .rating-bar__keys { flex: 2.4 1 0; }
 
 .rating-bar__btn {
+  /* The top's light and the foot's ink, per key: a pass reads them in
+     its own ink (below). */
+  --key-light: color-mix(in srgb, var(--text-on-panel) 8%, transparent);
+  --key-foot-ink: var(--key-sole);
   display: flex;
   flex: 1 1 0;
   min-width: 0; /* flex items refuse to shrink below their text's intrinsic
@@ -14447,88 +14497,78 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--sp-2);
-  min-height: 64px; /* a hit target, not a spacing rung -- the one literal this block keeps.
+  gap: var(--sp-3);
+  min-height: calc(64px - var(--key-foot)); /* a hit target, not a spacing rung -- the one literal this block keeps.
                        64, not 56: the tiles are the whole verdict and they are
                        pressed with a thumb at the bottom edge of a phone, so
-                       they get the extra rung rather than the minimum. */
+                       they get the extra rung rather than the minimum. The
+                       foot under the key makes up the 64. */
   padding: var(--sp-4) var(--sp-1);
-  background: transparent;
+  background: var(--key-face);
   border: 0;
-  border-left: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-  border-radius: 0;
+  border-radius: var(--r-panel);
+  box-shadow:
+    inset 0 1px 0 var(--key-light),
+    0 var(--key-foot) 0 var(--key-foot-ink);
   color: var(--text-on-panel);
   text-align: center;
-  transition: background 0.15s ease;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
 }
-.rating-bar__btn:first-child { border-left: 0; }
 
 .rating-bar__btn:hover,
 .rating-bar__btn:focus-visible {
-  background: color-mix(in srgb, var(--rating-color, transparent) 14%, transparent);
+  background: var(--key-face-lift);
 }
 
-/* The mark. A pill in the rating's colour above each word (plan 174:
-   a dot until then), the run meter's segment at the bar's scale, nine
-   tenths strength at rest and full with a glow when that rating is
-   chosen -- the same gesture as pressing a hanko, and unlike a tint it
-   survives being glanced at. `flex: none` because a column flex item
-   shrinks to nothing next to a text run otherwise. */
-.rating-bar__btn-ring {
-  width: 26px;
-  height: 6px;
+/* The lamp. A round light in the rating's colour above each word (plan
+   203: a pill until then, a dot before that), dimmed into the sumi at
+   rest and lit with a glow when that rating is chosen -- the machine's
+   lamp coming on under the finger. `flex: none` because a column flex
+   item shrinks to nothing next to a text run otherwise. */
+.rating-bar__btn-lamp {
+  width: var(--sp-3);
+  height: var(--sp-3);
   border-radius: var(--r-pill);
-  border: 0;
-  background: var(--rating-color, var(--text-on-panel-soft));
-  opacity: 0.9;
+  background: color-mix(in srgb, var(--rating-color, var(--text-on-panel-soft)) 55%, var(--bg-panel));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rating-color, var(--text-on-panel-soft)) 85%, transparent);
   flex: none;
-  transition: opacity 0.15s ease, box-shadow 0.15s ease;
-}
-.rating-bar__btn:hover .rating-bar__btn-ring,
-.rating-bar__btn:focus-visible .rating-bar__btn-ring {
-  opacity: 1;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rating-color, transparent) 30%, transparent);
-}
-
-/* Pressed: the mark full and the segment washed, held for the moment
-   the bar takes to fade. Written at hover's own specificity so it
-   neither loses to it nor descends below it. */
-.rating-bar__btn.rating-bar__btn--pressed {
-  background: color-mix(in srgb, var(--rating-color, transparent) 20%, transparent);
-}
-.rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-ring {
-  opacity: 1;
-  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--rating-color, transparent) 70%, transparent);
-}
-
-/* The key (6, above): its verdict's ink as the fill, lit from the top
-   the way the metal is, the sumi type on it, a glow round it on the
-   bar's sumi. Hover and focus lift it; a press rings it in the panel
-   ink and widens the glow, held while the bar fades, as a segment's
-   press is. Written at the pressed rule's specificity so the segment's
-   wash never paints over the fill. */
-.rating-bar__btn.rating-bar__btn--key {
-  gap: var(--sp-1);
-  border: 0;
-  border-radius: var(--r-panel);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--rating-color) 78%, var(--text-on-panel)) 0%, var(--rating-color) 55%);
-  color: var(--text-on-fill);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--text-on-panel) 35%, transparent),
-    0 0 18px -4px color-mix(in srgb, var(--rating-color) 70%, transparent);
   transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.rating-bar__btn:hover .rating-bar__btn-lamp,
+.rating-bar__btn:focus-visible .rating-bar__btn-lamp {
+  background: var(--rating-color, var(--text-on-panel-soft));
+}
+
+/* Pressed: the key down its foot and the lamp lit, held for the moment
+   the bar takes to fade. Written at hover's own specificity so it
+   neither loses to it nor descends below it; a pass presses the same
+   way, its foot in its own ink. */
+.rating-bar__btn.rating-bar__btn--pressed {
+  transform: translateY(var(--key-travel));
+  box-shadow:
+    inset 0 1px 0 var(--key-light),
+    0 calc(var(--key-foot) - var(--key-travel)) 0 var(--key-foot-ink);
+}
+.rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-lamp {
+  background: var(--rating-color, var(--text-on-panel-soft));
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--rating-color, transparent) 70%, transparent);
+}
+
+/* The pass (7, above): the same key moulded in its verdict's ink, lit
+   from the top the way the metal is, the sumi type on it, its foot the
+   ink a shade down. Hover lifts the ink toward the panel's. It sets no
+   travel or shadow of its own, only the inks they read, so the pressed
+   rule above moves it as it moves a miss. */
+.rating-bar__btn.rating-bar__btn--key {
+  --key-light: color-mix(in srgb, var(--text-on-panel) 35%, transparent);
+  --key-foot-ink: color-mix(in srgb, var(--rating-color) 40%, var(--key-sole));
+  gap: var(--sp-1);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rating-color) 85%, var(--text-on-panel)) 0%, var(--rating-color) 100%);
+  color: var(--text-on-fill);
 }
 .rating-bar__btn.rating-bar__btn--key:hover,
 .rating-bar__btn.rating-bar__btn--key:focus-visible {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--rating-color) 65%, var(--text-on-panel)) 0%, color-mix(in srgb, var(--rating-color) 88%, var(--text-on-panel)) 60%);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--text-on-panel) 45%, transparent),
-    0 0 22px -2px color-mix(in srgb, var(--rating-color) 80%, transparent);
-}
-.rating-bar__btn.rating-bar__btn--key.rating-bar__btn--pressed {
-  box-shadow:
-    inset 0 0 0 2px var(--text-on-panel),
-    0 0 26px 4px color-mix(in srgb, var(--rating-color) 75%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rating-color) 75%, var(--text-on-panel)) 0%, color-mix(in srgb, var(--rating-color) 92%, var(--text-on-panel)) 100%);
 }
 .rating-bar__btn-check { flex: none; }
 
@@ -14537,7 +14577,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-sm);
   font-weight: 700;
   /* Study.dc.html's .seg-word. Left at `normal` the label's own leading
-     pushed the ring off-centre against the segment's 64px box. */
+     pushed the mark above it off-centre against the key's box. */
   line-height: 1;
   overflow: hidden;
   white-space: nowrap;
@@ -14555,7 +14595,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    theme. See :root, above, for why this gets its own named colour. */
 .rating-bar__btn--q1 { --rating-color: var(--rating-wrong); }
 
-/* On a 375px phone this bar spans ~320px, so each segment is 53.3px --
+/* On a 375px phone this bar spans ~320px, so each of six is 53.3px --
    measured in the running app, not derived from the viewport, because the
    screen's own padding takes more than you would guess. The longest label
    is Blackout, NOT Difficile: 58px at --fs-sm and 50px at --fs-caption.
@@ -14566,21 +14606,21 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    hiding it is not either -- there is nothing behind it. If a longer
    locale string ever lands here, shorten the string rather than the type:
    --fs-caption-xs is a subtitle rung and is too small to carry a control
-   on its own. The 1px hairline between segments does the separating that
-   the padding used to. */
+   on its own. The gap between keys (plan 203; a 1px hairline before it)
+   does the separating that the padding used to. */
 
-/* Six segments across a phone is a squeeze at any width: at 375px each
+/* Six keys across a phone is a squeeze at any width: at 375px each
    is 54px, at 320px only 44px -- and Blackout alone needs 50px, so it
    truncates. Truncating is not available here, because the label IS the
-   control: the word carries the meaning and the ring only reinforces
-   it, so falling back to ring-only would leave colour as the sole
+   control: the word carries the meaning and the lamp only reinforces
+   it, so falling back to lamp-only would leave colour as the sole
    channel.
 
-   So below 560px the SIX wrap (plan 180): the four misses as the
-   instrument across a row, the two keys under it. Four and two stay on
-   one row: at 375px the four's misses are ~78px each, and the longest
-   word they carry (Difficile, ~62px at --fs-sm/700) fits; Correct's key
-   is half again as wide. One row is the shape a thumb sweeps along the
+   So below 560px the SIX wrap (plan 180): the four misses across a row,
+   the two passes under it. Four and two stay on one row: at 360px the
+   four's misses are 66px each and at 320px 57px, and the longest word
+   they carry (Presque, 51px at --fs-sm/700, measured in
+   RatingBar.phone.test.jsx) fits; Correct's key is half again as wide. One row is the shape a thumb sweeps along the
    bottom edge of a phone, worst to best, left to right — the same shape
    the bar has on a desktop, so nothing has to be relearnt between the
    two.
@@ -14595,14 +14635,23 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    inferred, because each count shares the row differently and
    nth-child cannot ask how many siblings there are. */
 @media (max-width: 560px) {
-  .rating-bar__btn { padding-inline: var(--sp-1); }
-  /* Six (plan 180): the four misses as the instrument across the row,
-     the two keys under them -- the passes on the bottom edge, nearest
-     the thumb, the bar still reading worst to best. Four and two stay
-     one row: the four's misses are ~78px at 375, room for Difficile. */
+  /* The whole key to the word (plan 203): the gaps between keys took
+     width the hairlines never did, and at 320px a miss is 57px, where
+     Presque (51px) lost two to a 4px side. The key's own edge does the
+     separating, so the padding goes. */
+  .rating-bar__btn { padding-inline: 0; }
+  /* Six (plan 180): the four misses across the row, the two passes
+     under them -- on the bottom edge, nearest the thumb, the bar still
+     reading worst to best. Four and two stay one row. */
   .rating-bar__buttons--6 { flex-wrap: wrap; }
   .rating-bar__buttons--6 > .rating-bar__misses,
   .rating-bar__buttons--6 > .rating-bar__keys { flex: 1 1 100%; }
+}
+/* No travel under reduced motion (plan 203): the key stays on its foot
+   and the lamp alone says which was pressed. */
+@media (prefers-reduced-motion: reduce) {
+  .rating-bar__buttons { --key-travel: calc(var(--key-foot) * 0); }
+  .rating-bar__btn { transition: background 0.15s ease; }
 }
 
 /* The mark (plan 158), in the page's ink: it wore --accent here, which
@@ -20602,7 +20651,9 @@ html {
     inset 0 1px 0 rgba(0, 0, 0, 0.16),
     inset 0 -1px 0 color-mix(in srgb, var(--bg-main) 62%, transparent),
     0 1px 0 color-mix(in srgb, var(--bg-main) 50%, transparent);
-  backdrop-filter: blur(1.5px) saturate(0.95);
+  /* No backdrop-filter: a blur under a pane that slides re-filters the
+     screen behind it every frame of the travel, which is what made the
+     doors stutter on a phone. The ink tint above is the glass. */
 }
 
 /* Light running across the glass. One pass, timed to cross while the
@@ -20621,10 +20672,13 @@ html {
   transform: skewX(-14deg);
   animation: door-sheen calc(820ms * var(--door-x)) cubic-bezier(0.4, 0, 0.3, 1) calc(240ms * var(--door-x)) backwards;
 }
+/* Run on transform, not `left` (a layout per frame while the leaves
+   move): from -55% to 118% of the glass is 173% of it, and the band
+   is 42% of it, so 173 / 42 of its own width. */
 @keyframes door-sheen {
-  0%        { left: -55%; opacity: 0; }
+  0%        { transform: translateX(0) skewX(-14deg); opacity: 0; }
   18%       { opacity: 1; }
-  72%, 100% { left: 118%; opacity: 0; }
+  72%, 100% { transform: translateX(411.9%) skewX(-14deg); opacity: 0; }
 }
 
 /* The livery band, in the line's own colour — the same pigment the
@@ -20723,25 +20777,25 @@ html {
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+/* The lit lamp, a layer over the dark one that blinks by opacity
+   alone: blinking the lamp's own background and shadow repainted the
+   header it rides on, mid-travel. */
+.door__lamp::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--line-color, var(--accent));
+  box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
+  opacity: 0;
   animation: door-lamp calc(560ms * var(--door-x)) linear calc(260ms * var(--door-x)) forwards;
 }
 @keyframes door-lamp {
-  0%, 30% {
-    background: var(--line-color, var(--accent));
-    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
-  }
-  31%, 45% {
-    background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
-  }
-  46%, 90% {
-    background: var(--line-color, var(--accent));
-    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--line-color, var(--accent)) 70%, transparent);
-  }
-  100% {
-    background: color-mix(in srgb, var(--text-primary) 16%, var(--bg-panel));
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
-  }
+  0%, 30% { opacity: 1; }
+  31%, 45% { opacity: 0; }
+  46%, 90% { opacity: 1; }
+  100% { opacity: 0; }
 }
 /* The threshold: the sill plate, with the tactile warning strip a
    real platform edge carries in the line's own colour. */
@@ -23303,7 +23357,10 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .pace__timer { display: block; pointer-events: none; }
 .pace__timer .timer__fill { transition: none; }
 .rating-bar.rating-bar--specimen { display: block; pointer-events: none; }
-.rating-bar--specimen .rating-bar__buttons { max-width: none; margin: 0; gap: var(--sp-2); }
+.rating-bar--specimen .rating-bar__buttons,
+.rating-bar--specimen .rating-bar__misses,
+.rating-bar--specimen .rating-bar__keys { gap: var(--sp-2); }
+.rating-bar--specimen .rating-bar__buttons { max-width: none; margin: 0; }
 .rating-bar--specimen .rating-bar__btn { min-height: var(--sp-8); }
 .btn-depart--sheet { box-shadow: none; }
 .lvl-sheet__body { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); }
@@ -28940,9 +28997,10 @@ button.brd-stn { cursor: pointer; }
 .btn-depart--gate.clrk-gate--compact .btn-depart__wave { transform: scale(0.75); }
 .btn-depart--gate.clrk-gate--compact .btn-depart__jp { font-size: var(--fs-body); font-weight: 600; }
 .btn-depart--gate.clrk-gate--arrive {
-  animation: clr-gate-in 0.6s var(--ease-out) backwards, btn-gate-breathe 2.8s ease-in-out 0.6s infinite;
-  animation-delay: var(--gate-d, 0ms), calc(var(--gate-d, 0ms) + 0.6s);
+  animation: clr-gate-in 0.6s var(--ease-out) backwards;
+  animation-delay: var(--gate-d, 0ms);
 }
+.btn-depart--gate.clrk-gate--arrive::after { animation-delay: calc(var(--gate-d, 0ms) + 0.6s); }
 
 /* ── one-shot utilities (each reads --d as its delay) ── */
 .clrk-arrive { animation: clr-arrive 0.5s var(--ease-out) backwards; animation-delay: var(--d, 0ms); }
@@ -29093,7 +29151,8 @@ button.brd-stn { cursor: pointer; }
 .clrk--skip .clrk-tk-chip--fall,
 .clrk--skip .clrk-clp-chip { animation: none !important; }
 .clrk--skip .clrk-clp { display: none; }
-.clrk--skip .btn-depart--gate.clrk-gate--arrive { animation: clr-fade 0.2s ease both, btn-gate-breathe 2.8s ease-in-out 0.2s infinite !important; }
+.clrk--skip .btn-depart--gate.clrk-gate--arrive { animation: clr-fade 0.2s ease both !important; }
+.clrk--skip .btn-depart--gate.clrk-gate--arrive::after { animation-delay: 0.2s; }
 .clrk--skip :where(*),
 .clrk--skip :where(*)::before,
 .clrk--skip :where(*)::after { transition-duration: 0.2s !important; transition-delay: 0s !important; }
@@ -37650,13 +37709,14 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-run--panels > .stage > .rating-bar--unlit { pointer-events: none; }
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn { opacity: 0.38; }
-  .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn-ring { background: var(--text-on-panel-soft); }
-  /* A key before the reveal is drawn unlit like the segments: its
-     ground the panel ink's wash, no fill and no glow (plan 180). */
+  .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn-lamp { background: var(--text-on-panel-soft); box-shadow: none; }
+  /* A pass before the reveal is drawn unlit as a miss is: the dark
+     key's face, light and foot, and no ink (plans 180, 203). */
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn.rating-bar__btn--key {
-    background: color-mix(in srgb, var(--text-on-panel) 10%, transparent);
+    --key-light: color-mix(in srgb, var(--text-on-panel) 8%, transparent);
+    --key-foot-ink: var(--key-sole);
+    background: var(--key-face);
     color: var(--text-on-panel);
-    box-shadow: none;
   }
   /* A panel: the surface, its hairline and corner. No caption: its
      figures, its stops and its tiles name themselves (owner's cut). */
@@ -38420,9 +38480,9 @@ button.brd-stn { cursor: pointer; }
      comprehension (`stage--comprehension`): the field and Check, the rating
      bar, Next and the review's pair under the card at its edges, with
      no surface, hairline or corner of their own -- the card is the one
-     panel in the column. The bar's misses keep their sumi
-     (.rating-bar__misses), which is what the frame's surface had been
-     standing in for. */
+     panel in the column. Each of the bar's keys carries its own sumi
+     (.rating-bar__btn, plan 203), which is what the frame's surface had
+     been standing in for. */
   .desk-run--panels > .stage:is(.stage--sentence, .stage--comprehension) > .stage__foot:not(.browse-nav),
   .desk-run--panels > .stage.stage--sentence > .rating-bar {
     padding: 0;
@@ -40243,6 +40303,11 @@ button.brd-stn { cursor: pointer; }
   .tour-route__pattern { font-family: var(--font-jp); font-size: var(--fs-heading); line-height: 1.3; color: var(--tour-ink); overflow-wrap: anywhere; }
   .tour-route__structure { font-size: var(--fs-sm); color: var(--text-secondary); }
   .tour-route__stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  /* 問 under the stops (plan 204), as the lines panel holds it (.desk-ask):
+     the stops and the asking take a half each of the column, the stops
+     scrolling in theirs and the thread in its own. */
+  .tour-route:has(> .desk-ask) { flex: 1 1 auto; min-height: 0; }
+  .tour-route:has(> .desk-ask) > .tour-route__stops { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .tour-route__stop {
     position: relative;
     display: grid;
