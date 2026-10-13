@@ -12,9 +12,10 @@
 import { hasKanji, reading } from './draw.js'
 import { STRINGS, count, formOf, tr, weldIf } from './strings.js'
 import { ROLES, howItWorks, lookalikesOf, particleLabel, stacksIn } from './explain.js'
-import { firstSense, gloss, lineRomaji, readingMisses, seeded, shuffle, unpack } from './common.js'
+import { deal, firstSense, furiganaOf, gloss, lineRomaji, readingMisses, seeded, shuffle, unpack } from './common.js'
 import {
-  kanaQuizzes, kanjiQuizzes, lessonQuizzes, overlaps, passageQuizzes, sentenceQuizzes, spellingQuizzes, translationQuizzes, wordQuizzes,
+  kanaQuizzes, kanjiQuizzes, lessonQuizzes, lookalikeQuizzes, overlaps, passageQuizzes, pictureQuizzes, sentenceQuizzes, spellingQuizzes,
+  translationQuizzes, trapQuizzes, wordQuizzes,
 } from './quizzes.js'
 
 export { gloss, lineRomaji, readingMisses, seeded, shuffle, unpack }
@@ -29,7 +30,14 @@ export const SOURCES = [
   { id: 'word', jp: '単語', line: 'vocab', name: { en: 'Word', fr: 'Mot' }, file: lv => `words-${lv}.json` },
   { id: 'kanji', jp: '漢字', line: 'kanji', name: { en: 'Kanji', fr: 'Kanji' }, file: lv => `kanji-${lv}.json` },
   { id: 'kana', jp: 'かな', line: 'kana', name: { en: 'Kana', fr: 'Kana' }, file: () => 'kana.json', levels: ['hiragana', 'katakana'] },
-  { id: 'passage', jp: '理解', line: 'rikai', name: { en: 'Compre\u00adhension', fr: 'Compré\u00adhension' }, file: () => 'comprehension.json' },
+  { id: 'passage', jp: '理解', line: 'rikai', name: { en: 'Compre\u00adhension', fr: 'Compré\u00adhension' }, file: () => 'comprehension.json', byLevel: true },
+  // Plan 200m: a theme in pictures, kanji that look alike, a conversation
+  // to answer, a trap the grammar lessons warn of. A theme, a set and a
+  // conversation are picked from one list, not by level.
+  { id: 'theme', jp: '単語帳', line: 'vocab', name: { en: 'Theme words', fr: 'Mots par thème' }, file: () => 'themes.json', noLevels: true },
+  { id: 'lookalike', jp: '似た字', line: 'kanji', name: { en: 'Lookalike kanji', fr: 'Kanji jumeaux' }, file: () => 'lookalikes.json', noLevels: true },
+  { id: 'dialogue', jp: '返事', line: 'grammar', name: { en: 'Your reply', fr: 'Ta réponse' }, file: () => 'dialogues.json', noLevels: true },
+  { id: 'trap', jp: '落とし穴', line: 'grammar', name: { en: 'Traps', fr: 'Pièges' }, file: () => 'traps.json', byLevel: true },
 ]
 export const sourceOf = id => SOURCES.find(s => s.id === id) ?? SOURCES[0]
 
@@ -43,6 +51,10 @@ export const OPTIONAL = {
   kanji: [['readings', true], ['words', true], ['strokes', true], ['check', false], ['yourturn', false], ['outro', true]],
   kana: [['strokes', true], ['lookalike', true], ['words', true], ['check', false], ['outro', true]],
   passage: [['vocab', false], ['check', true], ['outro', true]],
+  theme: [['recap', true], ['check', false], ['outro', true]],
+  lookalike: [['apart', true], ['check', true], ['outro', true]],
+  dialogue: [['outro', true]],
+  trap: [['pair', true], ['careful', true], ['outro', true]],
 }
 export const BONUS = new Set(['sentence', 'translation'])
 
@@ -69,18 +81,23 @@ const LINES = [
   { key: 'learn', jp: '学習', stops: ['tsuji', 'kana', 'word', 'kanji', 'lesson', 'decks'] },
   { key: 'practice', jp: '実践', stops: ['tsuji', 'sentence', 'passage', 'translation', 'dictation', 'composition', 'exam'] },
 ]
+// Plan 200m's modes stop at the station the app teaches them on: a
+// theme's words at 単語, lookalike kanji at 漢字, a reply and a trap at 文法.
+const ALIAS = { theme: 'word', lookalike: 'kanji', dialogue: 'lesson', trap: 'lesson' }
 function stationOf(source, lang) {
-  const line = LINES.find(l => l.stops.includes(source))
-  const at = line.stops.indexOf(source)
+  const id = ALIAS[source] || source
+  const line = LINES.find(l => l.stops.includes(id))
+  const at = line.stops.indexOf(id)
   return {
-    ...STATION[source], name: sourceOf(source).name[lang].replace(/\u00ad/g, ''),
+    ...STATION[id], name: sourceOf(id).name[lang].replace(/\u00ad/g, ''),
     prev: STATION[line.stops[at - 1]], next: STATION[line.stops[at + 1]], line: { key: line.key, jp: line.jp },
   }
 }
 /** The app's two lines out of 辻, every station on them, the source's lit:
  *  what the route-map ending draws. */
 function mapOf(source) {
-  return LINES.map(l => ({ key: l.key, jp: l.jp, stops: l.stops.slice(1).map(id => ({ ...STATION[id], here: id === source })) }))
+  const at = ALIAS[source] || source
+  return LINES.map(l => ({ key: l.key, jp: l.jp, stops: l.stops.slice(1).map(id => ({ ...STATION[id], here: id === at })) }))
 }
 /** What the last slide says about the source's line, from the bank's own figures. */
 function figureOf(source, figures, t, lang) {
@@ -93,6 +110,10 @@ function figureOf(source, figures, t, lang) {
     case 'word': return f.word(count(figures.words, lang))
     case 'kanji': return f.kanji(count(figures.kanji, lang))
     case 'kana': return f.kana(figures.hiragana, figures.katakana)
+    case 'theme': return f.theme(count(figures.themeWords, lang), figures.themes)
+    case 'lookalike': return f.lookalike()
+    case 'dialogue': return f.dialogue()
+    case 'trap': return f.trap(count(figures.traps, lang))
     default: return f.passage()
   }
 }
@@ -536,6 +557,154 @@ function passagePlan(data, P, opts) {
   }
 }
 
+// ── 単語帳, a theme in pictures (plan 200m) ──────────────────────
+// A theme's words, easiest first, the ones the app has a picture for.
+const PICTURES = 8
+const rankOf = lv => Number(String(lv || 'N0').slice(1))
+/** The theme a round of 仲間外れ takes its impostor from: one no word
+ *  of the theme could be mistaken for. */
+const IMPOSTOR_FROM = {
+  fruits: 'vegetables', vegetables: 'fruits', body_parts: 'clothing', buildings: 'vehicles', travel: 'body_parts',
+  jobs: 'animals', dishes: 'drinks', animals: 'plants_trees', colors: 'weather', clothing: 'tools', weather: 'colors',
+  emotions: 'body_parts', nature: 'buildings', vehicles: 'buildings', technology: 'plants_trees', sports: 'music',
+  music: 'sports', office_supplies: 'drinks', shopping_money: 'weather', insects_bugs: 'birds', birds: 'insects_bugs',
+  seafood: 'birds', drinks: 'dishes', tools: 'clothing', medical: 'holidays_events', plants_trees: 'animals',
+  household_items: 'animals', holidays_events: 'weather',
+}
+// Words more than one theme can claim (a tomato is a fruit to a
+// botanist, a heart is a body part and a feeling): never in a round.
+const EITHER = new Set(['tomato', 'cucumber', 'eggplant', 'green pepper', 'pumpkin', 'corn', 'avocado', 'zucchini', 'okra', 'chestnut', 'soup', 'miso soup', 'rainbow', 'heart'])
+const ROUNDS = 3
+const pictureOf = (w, lang) => ({ t: w.t, r: w.r, ro: w.ro, fu: furiganaOf(w.t, w.r), main: weldIf(lang, gloss(w, lang)[0]), e: w.e || '', lv: w.lv || '' })
+
+/** 仲間外れ: rounds of five words of the theme and one from another. */
+function impostorOf(data, key, lang, t) {
+  const th = data.themes[key]
+  const other = data.themes[IMPOSTOR_FROM[key]]
+  if (!other) return null
+  const plain = w => ['basic', 'medium'].includes(w.band) && !(w.en || []).some(g => EITHER.has(g))
+  const mine = th.words.filter(w => w.t !== th.head.t && plain(w))
+  const own = new Set(th.words.map(w => w.t))
+  const senses = th.words.flatMap(w => w.en || [])
+  const theirs = other.words.filter(w => w.t !== other.head.t && plain(w) && !own.has(w.t) && !(w.en || []).some(g => senses.some(h => overlaps(g, h))))
+  const rounds = Math.min(ROUNDS, Math.floor(mine.length / 5), theirs.length)
+  if (!rounds) return null
+  const five = shuffle(mine, seeded(`${key}-five`))
+  const odd = shuffle(theirs, seeded(`${key}-odd`))
+  const name = th.name[lang] || th.name.en
+  const otherName = other.name[lang] || other.name.en
+  return {
+    name, other: otherName,
+    rounds: Array.from({ length: rounds }, (_, r) => {
+      const imp = odd[r]
+      const words = shuffle([...five.slice(r * 5, r * 5 + 5), imp], seeded(`${key}-round-${r}`)).map(w => pictureOf(w, lang))
+      const at = words.findIndex(w => w.t === imp.t)
+      return { words, at, why: weldIf(lang, t.modes.impostorWhy(imp.t, words[at].main, otherName)) }
+    }),
+  }
+}
+
+function themePlan(data, key, opts) {
+  const src = sourceOf('theme')
+  const th = data.themes[key]
+  const lang = opts.lang
+  const items = th.words.filter(w => w.t !== th.head.t && w.e).slice(0, PICTURES).map(w => pictureOf(w, lang))
+  // Its level is the hardest of the words it shows.
+  const lvs = items.map(w => w.lv).filter(Boolean)
+  const p = base(src, { id: key }, opts, lvs.length ? `N${Math.min(...lvs.map(rankOf))}` : 'N5')
+  const { t } = p
+  const o = on('theme', opts)
+  const name = th.name[lang] || th.name.en
+  const slides = items.map((w, i) => ({ kind: 'picture', w, n: i + 1, of: items.length, title: name }))
+  if (o.recap && items.length > 1) slides.push({ kind: 'picturegrid', items, title: t.recap })
+  closing(slides, o, t, p)
+  const quizzes = pictureQuizzes(items, key, lang, t)
+  const headRo = th.words.find(w => w.t === th.head.t)?.ro || ''
+  return {
+    ...p, cta: t.cta.theme,
+    hook: { kind: 'emojigrid', emoji: items.slice(0, 9).map(w => w.e), head: th.head.t, reading: th.head.r, title: t.modes.themeHook(name, items.length) },
+    prompt: t.prompt.theme, quizzes, quiz: quizzes[0] || null, slides,
+    impostor: impostorOf(data, key, lang, t),
+    caption: { jp: `${th.head.t}（${th.head.r}）`, romaji: headRo, tr: name, ask: t.prompt.theme, tags: ['vocabulary', key.replace(/_/g, '')], name, count: items.length },
+  }
+}
+
+// ── 似た字, kanji that look alike (plan 200m) ─────────────────────
+function lookalikePlan(data, set, opts) {
+  const src = sourceOf('lookalike')
+  const p = base(src, set, opts, set.lv)
+  const { t, lang } = p
+  const o = on('lookalike', opts)
+  const chars = set.chars.map(k => ({
+    c: k.c, lv: k.lv, on: k.on, kun: k.kun,
+    // A dictionary's “radical (no. 12)” is no sense a learner reads.
+    meaning: weldIf(lang, ((lang === 'fr' && k.fr?.length ? k.fr : k.en) || []).filter(m => !/radical|clé \(n/i.test(m)).slice(0, 2).join(', ')),
+    note: tr(k.note, lang),
+    word: k.word ? { t: k.word.t, r: k.word.r, fu: furiganaOf(k.word.t, k.word.r), main: weldIf(lang, gloss(k.word, lang)[0]) } : null,
+  }))
+  const slides = chars.map((k, i) => ({ kind: 'lookchar', k, all: chars.map(x => x.c), n: i + 1, of: chars.length }))
+  if (o.apart) slides.push({ kind: 'apart', chars })
+  closing(slides, o, t, p)
+  const quizzes = lookalikeQuizzes(set, lang, t)
+  const heads = chars.map(k => k.c).join(' ')
+  return {
+    ...p, cta: t.cta.lookalike,
+    hook: { kind: 'kanjirow', chars: chars.map(k => k.c), title: t.modes.lookalikeHook(chars.length) },
+    prompt: t.prompt.lookalike, quizzes, quiz: quizzes[0] || null, slides,
+    caption: { jp: heads, romaji: '', tr: chars.map(k => `${k.c} ${k.meaning.split(',')[0]}`).join(' · '), ask: t.prompt.lookalike, tags: [`jlpt${set.lv.toLowerCase()}`, 'kanji'], name: heads },
+  }
+}
+
+// ── 返事, a conversation to answer (plan 200m) ────────────────────
+// Each turn asks the reader what to answer, then shows the answer. Every
+// line is set with its furigana and its romaji: a beginner reads them all.
+function dialoguePlan(data, d, opts) {
+  const src = sourceOf('dialogue')
+  const p = base(src, d, opts, d.lv)
+  const { t, lang } = p
+  const o = on('dialogue', opts)
+  const place = tr(d.place, lang)
+  const them = tr(d.them, lang)
+  const turns = d.turns.map((tu, i) => {
+    const dealt = deal(tu.right, tu.choices.map((_, k) => k).filter(k => k !== tu.right), `${d.id}-${i}`)
+    return {
+      them: { rows: unpack(tu.them.rows), tr: tr(tu.them, lang) },
+      choices: dealt.choices.map(k => unpack(tu.choices[k])), right: dealt.right,
+      reply: tr(tu.reply, lang), why: tr(tu.why, lang),
+    }
+  })
+  const slides = turns.flatMap((turn, i) => [false, true].map(revealed => ({ kind: 'turn', turn, n: i + 1, of: turns.length, revealed, place, them })))
+  closing(slides, o, t, p)
+  return {
+    ...p, cta: t.cta.dialogue,
+    hook: { kind: 'place', place: d.place.jp, title: `${place} · ${t.modes.dialogueHook}`, line: 'grammar' },
+    prompt: t.prompt.dialogue, quizzes: [], quiz: null, slides,
+    caption: { jp: d.place.jp, romaji: '', tr: place, ask: t.prompt.dialogue, tags: [`jlpt${d.lv.toLowerCase()}`, 'conversation'], name: place },
+  }
+}
+
+// ── 落とし穴, a trap the lessons warn of (plan 200m) ──────────────
+function trapPlan(data, x, opts) {
+  const src = sourceOf('trap')
+  const p = base(src, x, opts, x.lv)
+  const { t, lang } = p
+  const o = on('trap', opts)
+  const notion = tr(x.notion, lang)
+  // The point's other traps follow it in a mock exam.
+  const quizzes = trapQuizzes([x, ...data.traps.filter(y => y.p === x.p && y.id !== x.id)], lang, t)
+  const q = quizzes[0]
+  const slides = [false, true].map(revealed => ({ kind: 'quiz', quiz: q, revealed, title: t.modes.trapTitle }))
+  if (o.pair && x.pair) slides.push({ kind: 'twist', notion, pair: x.pair, why: '' })
+  if (o.careful && x.careful) slides.push({ kind: 'watch', pattern: x.p, pt: { careful: x.careful } })
+  closing(slides, o, t, p)
+  return {
+    ...p, cta: t.cta.trap,
+    hook: { kind: 'listhead', head: x.p, title: notion, line: 'grammar' },
+    prompt: t.prompt.trap, quizzes, quiz: q, slides,
+    caption: { jp: x.p, romaji: '', tr: notion, ask: t.prompt.trap, tags: [`jlpt${x.lv.toLowerCase()}`, 'grammar'], point: x.p, name: x.p },
+  }
+}
+
 // ── The picker's lists, and the plan for a chosen item ────────
 /** The items a source's file offers: [{ id, jp, sub, tag }]. */
 export function itemsOf(sourceId, data, lang, filter) {
@@ -554,6 +723,16 @@ export function itemsOf(sourceId, data, lang, filter) {
       return data.kana.filter(k => !filter || k.set === filter).map(k => ({ id: k.k, jp: k.k, sub: k.ro, tag: k.twin || '' }))
     case 'passage':
       return data.passages.map(P => ({ id: P.id, jp: P.title, sub: P.grammar.join('　'), tag: P.lv }))
+    case 'theme':
+      // A theme is drawn with four pictures at least.
+      return Object.entries(data.themes).filter(([, th]) => th.words.filter(w => w.e && w.t !== th.head.t).length >= 4)
+        .map(([key, th]) => ({ id: key, jp: th.head.t, sub: th.name[lang] || th.name.en, tag: th.head.r }))
+    case 'lookalike':
+      return data.sets.map(x => ({ id: x.id, jp: x.chars.map(k => k.c).join(' '), sub: x.chars.map(k => (pick(k) || [])[0]).join(' · '), tag: x.lv }))
+    case 'dialogue':
+      return data.dialogues.map(d => ({ id: d.id, jp: d.place.jp, sub: tr(d.place, lang), tag: d.lv }))
+    case 'trap':
+      return data.traps.map(x => ({ id: x.id, jp: x.p, sub: tr(x.notion, lang), tag: x.lv }))
     default:
       return []
   }
@@ -587,6 +766,14 @@ export function plan(sourceId, data, id, opts, deps = {}) {
       return kanaPlan(data, data.kana.find(k => k.k === id) ?? data.kana[0], opts)
     case 'passage':
       return passagePlan(data, data.passages.find(P => P.id === id) ?? data.passages[0], opts)
+    case 'theme':
+      return themePlan(data, data.themes[id] ? id : itemsOf('theme', data, opts.lang)[0].id, opts)
+    case 'lookalike':
+      return lookalikePlan(data, data.sets.find(x => x.id === id) ?? data.sets[0], opts)
+    case 'dialogue':
+      return dialoguePlan(data, data.dialogues.find(d => d.id === id) ?? data.dialogues[0], opts)
+    case 'trap':
+      return trapPlan(data, data.traps.find(x => x.id === id) ?? data.traps[0], opts)
     default:
       return null
   }
@@ -623,6 +810,11 @@ const TITLES = {
     list: (c, lv, n) => (c.sentences ? `${n} sentences with ${c.head}` : c.from ? `${n} words from “${c.head}”` : `${n} words with ${c.head}`),
     talk: c => `${c.head} in a real conversation`,
     spelling: (c, lv) => `How do you write ${c.reading} in kanji? ${lv} spelling quiz`,
+    theme: c => `${c.jp} in Japanese: ${c.count} words to know, in pictures`,
+    lookalike: c => `${c.jp}: can you tell these kanji apart?`,
+    dialogue: c => `${c.jp}: what would you answer in Japanese?`,
+    trap: (c, lv) => `A ${lv} grammar trap with ${c.jp}: will you fall for it?`,
+    impostor: c => `Find the impostor: which word is not in “${c.jp}”?`,
   },
   fr: {
     sentence: (c, lv) => `Tu sais lire cette phrase ${lv} sans aide ?`,
@@ -638,6 +830,11 @@ const TITLES = {
     list: (c, lv, n) => (c.sentences ? `${n} phrases avec ${c.head}` : c.from ? `${n} mots de « ${c.head} »` : `${n} mots avec ${c.head}`),
     talk: c => `${c.head} dans une vraie conversation`,
     spelling: (c, lv) => `Comment s’écrit ${c.reading} en kanji ? Quiz ${lv}`,
+    theme: c => `${c.jp} en japonais : ${c.count} mots à connaître, en images`,
+    lookalike: c => `${c.jp} : sauras-tu distinguer ces kanji ?`,
+    dialogue: c => `${c.jp} : que répondrais-tu en japonais ?`,
+    trap: (c, lv) => `Un piège de grammaire ${lv} avec ${c.jp} : vas-tu tomber dedans ?`,
+    impostor: c => `Trouve l’intrus : quel mot n’est pas dans « ${c.jp} » ?`,
   },
 }
 /** The title of a plan posted as `type` asking `n` questions. */
@@ -646,7 +843,7 @@ export function titleOf(pl, type, n = 3) {
   const c = pl.caption
   const lv = /^N\d$/.test(pl.level) ? `JLPT ${pl.level}` : 'JLPT'
   // The item as a title names it: a word bare, a sentence its point.
-  const head = { sentence: c.point, translation: c.point, lesson: c.jp, word: c.jp.replace(/（.*/, ''), passage: c.jp }[pl.source] || c.jp
+  const head = c.name || { sentence: c.point, translation: c.point, lesson: c.jp, word: c.jp.replace(/（.*/, ''), passage: c.jp }[pl.source] || c.jp
   const sides = pl.compare?.sides?.map(x => x.head) || []
   const make = item => {
     const v = { ...c, jp: item, word: item, head: pl.source === 'translation' ? c.point || head : item, set: c.tags[0] || 'kana' }
@@ -658,6 +855,7 @@ export function titleOf(pl, type, n = 3) {
       return say.list({ head: sentences ? v.head : pl.list.head || v.head, sentences, from: pl.source === 'passage' }, lv, pl.list.items.length)
     }
     if (type === 'talk') return say.talk({ head: v.head })
+    if (type === 'impostor') return say.impostor(v)
     // Never the kanji it asks for: the word heard in kana.
     if (type === 'spelling') return say.spelling({ reading: /（(.+)）/.exec(c.jp)?.[1] || item }, lv)
     return say[pl.source](v, lv)

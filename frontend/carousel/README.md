@@ -1,4 +1,4 @@
-# The carousel studio (plans 200–200l)
+# The carousel studio (plans 200–200m)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -18,6 +18,15 @@ Each source is one of the app's own lines, and wears its pigment:
 | 漢字 | Kanji | a kanji of the deck | its readings (on, kun), words with it, its strokes |
 | かな | Kana | one kana | its strokes, the kana it is mistaken for, its twin in the other script, words with it |
 | 理解 | Comprehension | a comprehension passage | the passage page by page, then its questions and their answers |
+| 単語帳 | Theme words | a theme of the app's theme decks (fruits, the body, jobs …) | its easiest words with a picture each (an emoji, `content/emoji.json`), its reading over it, its romaji, its meaning, then all of them on one slide |
+| 似た字 | Lookalike kanji | a set of kanji that look alike (大 太 犬 天 夫, `content/lookalikes.json`) | each kanji with its readings, its meaning, what sets it apart and a word it writes, then the set side by side, then "which kanji means this?" |
+| 返事 | Your reply | a conversation of three turns (`content/dialogues.json`) | what they say, three replies to choose from, then the reply said and why; every line with its furigana and its romaji, for a beginner |
+| 落とし穴 | Traps | a catalogue tour's trap: a sentence that reads one way to the eye and means another | the sentence and what it says (three readings, its translation never printed over it), the answer and why, the two forms side by side, watch out |
+
+The four of plan 200m stop at the station the app teaches them on (a
+theme's words at 単語, lookalike kanji at 漢字, a reply and a trap at
+文法). A theme, a set and a conversation are one list each, picked
+without a level; a trap is picked by its point's level.
 
 The practice modes a photo cannot hold (dictation needs sound) are left
 out; composition is the "your turn" slide, an invitation to write in the
@@ -38,6 +47,7 @@ the content for (the studio greys out the others).
 | 一覧 | Top five | a list worth saving, one item a slide, then the list whole | a kanji's words, a word's family, a kana's words, a point's sentences, a passage's words |
 | 会話 | Conversation | the tour's scene line by line, then "what do you say?" | a lesson with a scene |
 | 表記 | Kanji spelling | the word and up to four words of its level that share a kanji with it, each heard in kana and asked how it is written (among spellings that are no word), then the sheet | a word with a kanji spelling to ask |
+| 仲間外れ | Find the impostor | three rounds of six words: five of the theme and one from another theme no word of it could be mistaken for (fruits and vegetables, birds and insects), each asked, then answered with every word's meaning and the impostor circled | a theme |
 
 ## The last slide
 
@@ -163,7 +173,18 @@ Every slide is drawn from the app's own data, written once into
 | `kanji-N*.json`, `kanji-index.json` | readings, meanings, strokes (KanjiVG) and words of each kanji | KANJIDIC2, `backend/kanjivg/` |
 | `kana.json` | each kana: romaji, strokes, its twin, words written with it | the kana sets |
 | `comprehension.json` | the passages, their questions and the words worth learning first | `content/comprehension/*.json` |
-| `index.json` | the figures the last slide quotes: sentences, points, words, kanji, kana, passages | all of the above |
+| `themes.json` | each theme's name, its word for itself, its words easiest first, each with its picture where it has one | `content/theme_data.py`, `frontend/carousel/content/emoji.json`, the app's theme names |
+| `lookalikes.json` | each set's kanji: readings, meanings, what sets it apart, a deck word it writes | `frontend/carousel/content/lookalikes.json`, KANJIDIC2, the deck |
+| `dialogues.json` | each conversation's turns, every line split into words with its furigana and romaji (お and ご joined to their word) | `frontend/carousel/content/dialogues.json` |
+| `traps.json` | every tour twist of kind "trap": its sentence, question, three readings, why, the pair, the point's "careful" step | `content/grammar/*.json` |
+| `index.json` | the figures the last slide quotes: sentences, points, words, kanji, kana, passages, themes, traps | all of the above |
+
+`frontend/carousel/content/` is the studio's own hand-written content:
+the picture for each theme word (keyed by the theme's English gloss), the
+lookalike sets with what tells each kanji apart, and the conversations,
+each turn's right reply first (the studio deals them in a seeded order).
+They teach, so they are held as the catalogue is: a reply is wrong only
+where it cannot be right too, and a picture names the one word it shows.
 
 A word wears the vocabulary line's pigment, a particle or an ending the
 grammar line's, a kanji the kanji line's: DESIGN.md's "one line, one
@@ -205,6 +226,15 @@ the script it is drawn in (kana runs longer), the answer sheet's labels
 keep clear of its circles, and a carousel asks six questions at most, so
 a mock exam keeps under a feed's twenty slides and its cover and sheet
 a readable row each.
+
+Plan 200m's slides are held the same way, and the check ran over every
+theme, set and conversation and forty traps. A conversation's line
+carries its furigana and its romaji, which do not shrink below their
+rung: on a long turn the call to comment gives way first, then their
+line's romaji (the replies keep theirs), then the "what do you say?"; on
+the answer, a long why steps the lines down before it is cut, and at the
+least it takes the 正解 stamp's room. A gloss on a picture is never
+broken inside a word.
 
 ## Easy to read
 

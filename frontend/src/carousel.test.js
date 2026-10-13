@@ -351,6 +351,78 @@ describe('the carousel studio', () => {
     expect(readingMisses({ t: '行く', fu: [['行', 'ゆ'], ['く', '']] }, kanjiIndex, ['いく'])).not.toContain('いく')
   })
 
+  // ── Plan 200m: a theme in pictures, lookalike kanji, a reply, a trap ──
+  const plansOf = id => every.filter(x => x.src.id === id).map(x => x.p)
+
+  it('draws a theme’s words with their pictures, and hides one impostor a round (plan 200m)', () => {
+    const themes = bank('themes.json').themes
+    const emoji = JSON.parse(read('carousel/content/emoji.json'))
+    // Every picture names a word its theme has.
+    for (const [key, spec] of Object.entries(emoji)) {
+      const glosses = new Set(themes[key].words.flatMap(w => w.en))
+      for (const g of Object.keys(spec.emoji)) expect(themes[key].words.some(w => w.e === spec.emoji[g]), `${key} ${g}`).toBe(true)
+      expect(glosses.size, key).toBeGreaterThan(0)
+    }
+    const ps = plansOf('theme')
+    expect(ps.length).toBe(Object.keys(themes).length)
+    for (const p of ps) {
+      const pics = p.slides.filter(s => s.kind === 'picture')
+      expect(pics.length, p.id).toBeGreaterThanOrEqual(4)
+      expect(pics.every(s => s.w.e), p.id).toBe(true)
+      const own = new Set(themes[p.id].words.map(w => w.t))
+      for (const r of p.impostor?.rounds || []) {
+        expect(r.words, p.id).toHaveLength(6)
+        expect(new Set(r.words.map(w => w.t)).size, p.id).toBe(6)
+        r.words.forEach((w, i) => expect(own.has(w.t), `${p.id} ${w.t}`).toBe(i !== r.at))
+      }
+      // A question's label is printed on the exam's cover: never its answer.
+      for (const q of p.quizzes) expect(q.label.includes(q.choices[q.right].text), `${p.id} ${q.label}`).toBe(false)
+    }
+  })
+
+  it('asks which lookalike kanji means what, only where no other means it too (plan 200m)', () => {
+    for (const p of plansOf('lookalike')) {
+      expect(p.slides.filter(s => s.kind === 'lookchar').length, p.id).toBeGreaterThanOrEqual(2)
+      for (const s of p.slides.filter(x => x.kind === 'lookchar')) expect(s.k.meaning, `${p.id} ${s.k.c}`).not.toMatch(/radical|\(no\./i)
+      for (const q of p.quizzes) {
+        const right = q.choices[q.right].text
+        expect(q.label.includes(right), `${p.id} ${q.label}`).toBe(false)
+        expect(q.explain.head.startsWith(right), p.id).toBe(true)
+      }
+    }
+  })
+
+  it('sets every line of a conversation with its furigana and its romaji, for a beginner (plan 200m)', () => {
+    const ps = plansOf('dialogue')
+    expect(ps.length).toBe(bank('dialogues.json').dialogues.length)
+    for (const p of ps) {
+      const turns = p.slides.filter(s => s.kind === 'turn' && !s.revealed).map(s => s.turn)
+      expect(turns.length, p.id).toBeGreaterThanOrEqual(3)
+      for (const tu of turns) {
+        expect(tu.choices.length, p.id).toBe(3)
+        expect(new Set(tu.choices.map(c => JSON.stringify(c))).size, p.id).toBe(3)
+        for (const rows of [tu.them.rows, ...tu.choices]) {
+          for (const r of rows.filter(x => x.k !== 'punct')) {
+            expect(r.ro, `${p.id} ${r.t}`).toBeTruthy()
+            if (/[㐀-鿿]/.test(r.t)) expect(r.fu?.some(([, read]) => read), `${p.id} ${r.t}`).toBe(true)
+          }
+        }
+        // お and ご ride the word they honour.
+        expect(tu.them.rows.some(r => r.t === 'お' || r.t === 'ご'), p.id).toBe(false)
+      }
+    }
+  })
+
+  it('never prints a trap’s translation over its question (plan 200m)', () => {
+    for (const p of plansOf('trap')) {
+      for (const q of p.quizzes) {
+        expect(q.stem.tr, p.id).toBe('')
+        expect(q.choices, p.id).toHaveLength(3)
+      }
+      expect(p.slides.slice(0, 2).map(s => s.revealed), p.id).toEqual([false, true])
+    }
+  })
+
   it('reads a sentence in romaji word by word', () => {
     expect(lineRomaji(sentence('駅で友だちに会います。').rows)).toBe('Eki de tomodachi ni aimasu.')
     // A capital after a stop inside the line too.

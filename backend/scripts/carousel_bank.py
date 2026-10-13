@@ -888,10 +888,177 @@ def files(deck: dict):
     yield "kana.json", kana
     comprehension = passages()
     yield "comprehension.json", comprehension
-    yield "index.json", figures(sentences, kana, comprehension)
+    theme_file = themes()
+    yield "themes.json", theme_file
+    lookalike_file = lookalikes(deck)
+    yield "lookalikes.json", lookalike_file
+    dialogue_file = dialogues()
+    yield "dialogues.json", dialogue_file
+    trap_file = traps()
+    yield "traps.json", trap_file
+    yield "index.json", figures(sentences, kana, comprehension, {
+        "themes": len(theme_file["themes"]),
+        "themeWords": sum(len(t["words"]) for t in theme_file["themes"].values()),
+        "lookalikes": len(lookalike_file["sets"]),
+        "dialogues": len(dialogue_file["dialogues"]),
+        "traps": len(trap_file["traps"]),
+    })
 
 
-def figures(sentences: dict, kana: dict, comprehension: dict) -> dict:
+# ── Four more modes (plan 200m) ───────────────────────────────────
+# A theme's words with a picture each, lookalike kanji, a conversation to
+# answer turn by turn and the traps the catalogue writes down. The theme
+# words, the kanji and the traps are the app's own; the emoji, the
+# lookalike sets and the conversations are the studio's, written by hand
+# in frontend/carousel/content/ and checked by its tests.
+CONTENT = BACKEND.parent / "frontend" / "carousel" / "content"
+LOCALES = BACKEND.parent / "frontend" / "src" / "locales"
+
+
+def _theme_names() -> dict:
+    """Each theme's name in English and French, as the app shows it
+    (t.themeFruits ...), read from the locale tables."""
+    out: dict = {}
+    for lang in ("en", "fr"):
+        text = (LOCALES / lang / "index.js").read_text(encoding="utf-8")
+        for key, value in re.findall(r"^\s*theme([A-Z][A-Za-z]*):\s*'((?:[^'\\]|\\.)*)'", text, re.M):
+            out.setdefault(key, {})[lang] = value.replace("\\'", "'")
+    return out
+
+
+def themes() -> dict:
+    """The themes a picture can be drawn for: each one's name, its heading
+    word and its words, easiest first, each with the emoji it is drawn
+    with where it has one (content/emoji.json)."""
+    from content.theme_data import theme_entries
+
+    pictures = json.loads((CONTENT / "emoji.json").read_text(encoding="utf-8"))
+    names = _theme_names()
+    out = {}
+    for key, spec in pictures.items():
+        name = names.get("".join(part.title() for part in key.split("_")), {})
+        head_t, _, head_r = spec["head"].partition(" ")
+        words = []
+        seen = set()
+        for e in theme_entries(key):
+            written = e.get("kanji") or e.get("kana")
+            if not written or written in seen:
+                continue
+            seen.add(written)
+            kana = e.get("kana") or written
+            w = {"t": written, "r": kana, "ro": to_romaji(kana), "band": e.get("theme_level"),
+                 "en": _senses(e.get("meaning", ""), 2), "fr": _senses(e.get("meaning_fr", ""), 2)}
+            if e.get("level"):
+                w["lv"] = e["level"]
+            emoji = spec["emoji"].get(e.get("meaning", ""))
+            if emoji:
+                w["e"] = emoji
+            words.append(w)
+        out[key] = {"name": {"en": name.get("en", key), "fr": name.get("fr", key)},
+                    "head": {"t": head_t, "r": head_r or head_t}, "words": words}
+    return {"rev": REV, "themes": out}
+
+
+def lookalikes(deck: dict) -> dict:
+    """The lookalike sets (content/lookalikes.json), each kanji with what
+    tells it apart, its meanings, its readings and its first deck word."""
+    from content.vocab_data import VOCAB_BY_LEVEL
+    from translations import fr_gloss
+    from translations.fr.vocab_fr import VOCAB_FR
+
+    first_word: dict = {}
+    for lv in LEVELS:
+        for e in VOCAB_BY_LEVEL.get(lv, []):
+            written = e["kanji"]
+            if len(written) > 3:
+                continue
+            for c in written:
+                if c in DECK_BY_CHAR and c not in first_word and written != c:
+                    kana = (e.get("kana") or "").split("/")[0]
+                    w = {"t": written, "r": kana, "en": _senses(e.get("meaning", ""), 1)}
+                    fr = _senses(fr_gloss(e, VOCAB_FR) or "", 1)
+                    if fr:
+                        w["fr"] = fr
+                    first_word[c] = w
+    sets = []
+    for spec in json.loads((CONTENT / "lookalikes.json").read_text(encoding="utf-8")):
+        chars = []
+        for ch in spec["chars"]:
+            c = ch["c"]
+            if c not in DECK_BY_CHAR:
+                raise SystemExit(f"lookalikes.json: {c} is no deck kanji")
+            card = kanji_entry(c, deck)
+            card.pop("s", None)
+            card.update({"c": c, "note": {"en": ch["en"], "fr": ch["fr"]}})
+            if c in first_word:
+                card["word"] = first_word[c]
+            chars.append(card)
+        level = min((ch["lv"] for ch in chars), key=lambda lv: LEVELS.index(lv) * -1)
+        sets.append({"id": spec["id"], "lv": level, "chars": chars})
+    return {"rev": REV, "sets": sets}
+
+
+def _honorific(rows: list[list]) -> list[list]:
+    """お and ご joined to the word they honour (ご予約, お飲み物): a line
+    never breaks between them, and a beginner reads them as one word."""
+    out = []
+    for row in rows:
+        prev = out[-1] if out else None
+        if prev and len(prev) >= 3 and prev[0] in ("お", "ご") and len(row) >= 3 and row[1] in ("w", "v"):
+            fu = ([[prev[0], ""]] + row[3]) if len(row) > 3 and row[3] else 0
+            merged = [prev[0] + row[0], row[1], prev[2] + row[2], fu] + row[4:]
+            while merged[-1] == 0:
+                merged.pop()
+            out[-1] = merged
+            continue
+        out.append(row)
+    return out
+
+
+def dialogues() -> dict:
+    """The conversations (content/dialogues.json), each line cut into
+    words with its furigana and romaji, for a beginner to read."""
+    out = []
+    for d in json.loads((CONTENT / "dialogues.json").read_text(encoding="utf-8")):
+        turns = []
+        for t in d["turns"]:
+            turns.append({
+                "them": {"rows": _honorific(text_rows(t["them"]["jp"], d["lv"])), "en": t["them"]["en"], "fr": t["them"]["fr"]},
+                "choices": [_honorific(text_rows(c, d["lv"])) for c in t["choices"]],
+                "right": t["right"], "reply": t["reply"], "why": t["why"],
+            })
+        out.append({"id": d["id"], "lv": d["lv"], "place": d["place"], "them": d["them"], "turns": turns})
+    return {"rev": REV, "dialogues": out}
+
+
+def traps() -> dict:
+    """The catalogue's traps: every tour twist set against a rival (kind
+    "trap"), its sentence cut into words, its question, its three
+    readings (the right one first), its why, and the point's own
+    “careful” step."""
+    from content.grammar_points_data import find as find_point
+
+    out = []
+    for level in LEVELS:
+        for pt in json.loads((BACKEND / "content" / "grammar" / f"{level}.json").read_text(encoding="utf-8")):
+            careful = next((s for s in pt.get("steps", []) if s.get("kind") == "careful"), None)
+            for i, tw in enumerate((pt.get("tour") or {}).get("twists") or []):
+                if tw.get("kind") != "trap" or len(tw.get("choices") or []) < 3:
+                    continue
+                trap = {
+                    "id": f"{level}-{pt['pattern']}-{i}", "p": pt["pattern"], "lv": level,
+                    "notion": tw["notion"], "rows": text_rows(tw["jp"], level, pt["pattern"]),
+                    "tr": tw["tr"], "ask": tw["ask"], "choices": tw["choices"][:3], "why": tw["why"],
+                }
+                if tw.get("pair"):
+                    trap["pair"] = tw["pair"]
+                if careful:
+                    trap["careful"] = {"en": careful["en"], "fr": careful["fr"]}
+                out.append(trap)
+    return {"rev": REV, "traps": out}
+
+
+def figures(sentences: dict, kana: dict, comprehension: dict, extra: dict | None = None) -> dict:
     """What a carousel's last slide may say about each line of the app
     (plan 200c): how many sentences, points, words, kanji and kana it
     teaches, counted from the content itself, never written by hand."""
@@ -907,6 +1074,7 @@ def figures(sentences: dict, kana: dict, comprehension: dict) -> dict:
         "hiragana": sum(1 for k in kana["kana"] if k["set"] == "hiragana"),
         "katakana": sum(1 for k in kana["kana"] if k["set"] == "katakana"),
         "passages": len(comprehension["passages"]),
+        **(extra or {}),
     }}
 
 

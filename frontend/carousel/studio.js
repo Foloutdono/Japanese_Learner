@@ -24,9 +24,10 @@ const TOGGLE_LABELS = {
   rival: 'The point it is confused with', parts: 'Its kanji', family: 'More words with its kanji',
   strokes: 'Stroke order', readings: 'Readings', lookalike: 'Lookalikes', vocab: 'Words to know first',
   cover: 'Cover page', sheet: 'Answer sheet', recap: 'Recap of the list',
+  apart: 'What tells them apart', pair: 'The two side by side', careful: 'Watch out',
 }
 const T = STRINGS.en
-const LIST_NAME = { sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage' }
+const LIST_NAME = { sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
   source: 'sentence', level: 'N5', kanaSet: 'hiragana', ids: { sentence: 'N5.4', translation: 'N5.4' },
@@ -107,6 +108,9 @@ function renderLevels() {
   const box = $('#levels')
   box.replaceChildren()
   const src = sourceOf(state.source)
+  // A theme, a set of kanji and a conversation are one list, not a level's.
+  box.hidden = !!src.noLevels
+  if (src.noLevels) return
   const options = src.levels || LEVELS
   const current = src.levels ? state.kanaSet : state.level
   for (const lv of options) {
@@ -132,7 +136,7 @@ async function renderList() {
   if (mine !== listToken) return
   const src = sourceOf(state.source)
   let items = itemsOf(state.source, data, state.lang, src.levels ? state.kanaSet : null)
-  if (state.source === 'passage') items = items.filter(x => x.tag === state.level)
+  if (src.byLevel) items = items.filter(x => x.tag === state.level)
   listCache = items
   const q = $('#search').value.trim().toLowerCase()
   const list = $('#items')
@@ -417,7 +421,7 @@ async function render() {
   }
   // The caption is written when the item or its language changes, never
   // over the reader's own edits on a redraw.
-  const captionKey = `${state.source}|${pl.id}|${state.lang}|${state.type === 'spelling'}`
+  const captionKey = `${state.source}|${pl.id}|${state.lang}|${state.type === 'spelling'}|${state.type === 'impostor'}`
   if (captionKey !== captionFor) { $('#caption').value = captionOf(pl); captionFor = captionKey }
   // The title names the type and the questions asked too (plan 200l).
   const asked = state.type === 'exam' ? picked(pl, state.picks[pickKey()], 3).length : 1
@@ -600,7 +604,9 @@ function captionOf(pl) {
   const jp = spelling ? /（(.+)）/.exec(c.jp)?.[1] || c.jp : c.jp
   const head = [jp, c.romaji, tr].filter(Boolean).join('\n')
   // The point once: a lesson's ask names it already.
-  const ask = spelling ? pl.t.spellingAsk : c.point && !c.ask.includes(c.point) ? `${c.ask} · ${c.point}` : c.ask
+  const ask = spelling ? pl.t.spellingAsk
+    : state.type === 'impostor' && pl.impostor ? pl.t.modes.impostorAsk(pl.impostor.name)
+      : c.point && !c.ask.includes(c.point) ? `${c.ask} · ${c.point}` : c.ask
   return `${head}\n\n${ask}\n\n${tags}`
 }
 async function copyField(id, name) {

@@ -433,6 +433,44 @@ const KIND_JP = {
   tour: ['ぶんぽう', '文法'], pointMeaning: ['いみ', '意味'], compare: ['いみ', '意味'], kanji: ['よみかた', '読み方'],
   kanjiMeaning: ['いみ', '意味'], kanjiKun: ['よみかた', '読み方'], kanjiVocab: ['ごい', '語彙'], wordReverse: ['ごい', '語彙'], kinVocab: ['ごい', '語彙'], strokes: ['かくすう', '画数'], inWord: ['よみかた', '読み方'],
   kana: ['よみかた', '読み方'], kanaReverse: ['かな', 'かな'], twin: ['かな', 'かな'], passage: ['どっかい', '読解'], passageReading: ['よみかた', '読み方'],
+  picture: ['ごい', '語彙'], kanjiPick: ['かんじ', '漢字'], trap: ['ぶんぽう', '文法'],
+}
+
+// ── Pictures (plan 200m) ──────────────────────────────────────
+/** A theme's picture, an emoji, centred on (cx, cy) at `size`. */
+function picture(ctx, e, cx, cy, size) {
+  if (!e) return
+  ctx.font = font(400, size, 'emoji')
+  ctx.fillStyle = '#000'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(e, cx, cy)
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'alphabetic'
+}
+/** The card a picture, or a row of the set, sits on. */
+function pictureCard(c, x, y, w, h) {
+  const { ctx, p } = c
+  ctx.fillStyle = c.dark ? p.card : p.surface
+  rrect(ctx, x, y, w, h, R.card)
+  ctx.fill()
+  ctx.strokeStyle = p.surfaceLine
+  ctx.lineWidth = 2
+  rrect(ctx, x + 1, y + 1, w - 2, h - 2, R.card)
+  ctx.stroke()
+}
+/** A word as a sentence of one, its reading over it and its romaji under it. */
+const wordRow = w => ({ t: w.t, fu: w.fu, k: 'word', ro: w.ro })
+/** A word's romaji, and its level in the tag the rows give it, centred together. */
+function romajiLine(c, ro, lv, cx, y) {
+  const { ctx, p, ink2 } = c
+  const rf = font(500, FS.lead, 'latin')
+  const level = levelOf({ sub: lv })
+  const rw = ro ? measure(ctx, ro, rf) : 0
+  const lw = level ? levelW(ctx, level) : 0
+  const rx = cx - (rw + (rw && lw ? SP[4] : 0) + lw) / 2
+  if (ro) text(ctx, ro, rx, y + FS.lead * 1.1, { f: rf, color: ink2 })
+  if (level) levelTag(ctx, p, rx + rw + (rw ? SP[4] : 0), y + FS.lead * 1.1 - FS.lead * 0.36 - LEVEL_H / 2, level)
 }
 
 // ── The content slides, written once ──────────────────────────
@@ -1238,6 +1276,298 @@ const KINDS = {
     drawBubble(cur, y + Math.max(0, (f.bottom - y - cur.h) * 0.3), false)
   },
 
+  // ── Plan 200m's modes ─────────────────────────────────────────
+  /** 単語帳: a word of the theme, drawn: its picture on a card, the word
+   *  with its reading over it, its romaji, its sense. */
+  picture(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    const w = s.w
+    let y = title(c, s.title, f.y, `${s.n}/${s.of}`)
+    const room = f.bottom - y
+    const main = fit(ctx, w.main, { sizes: [FS.display, FS.heading, FS.title], maxW: f.w, maxLines: 2 })
+    const L = layoutSentence(ctx, [wordRow(w)], { max: FS.word * 0.8, min: FS.title, maxW: f.w, maxLines: 1, maxH: room * 0.22, script: 'furigana', rules: false })
+    const roH = FS.lead * 1.6
+    // The picture takes what the word and its sense leave it.
+    const card = Math.max(FS.word, Math.min(f.w * 0.6, room - L.h - roH - paragraphH(main) - SP[6] * 2 - SP[7]))
+    const total = card + SP[6] + L.h + roH + SP[7] + paragraphH(main)
+    y += Math.max(0, (room - total) / 2)
+    pictureCard(c, f.cx - card / 2, y, card, card)
+    picture(ctx, w.e, f.cx, y + card / 2, card * 0.6)
+    y += card + SP[6]
+    drawSentence(ctx, L, f.cx, y, 'center', () => ({ ink, rule: null, ruby: ink2 }))
+    y += L.h
+    romajiLine(c, w.ro, w.lv, f.cx, y)
+    y += roH + SP[7]
+    ctx.fillStyle = p.line.vocab
+    ctx.fillRect(f.cx - SP[9] / 2, y - SP[6], SP[9], EDGE)
+    paragraph(ctx, main, f.cx, y, ink, 'center')
+  },
+
+  /** 単語帳's recap: every word of the post on one slide, two by two. */
+  picturegrid(c, s) {
+    const { ctx, f, ink, ink2 } = c
+    let y = title(c, s.title)
+    const n = s.items.length
+    const cols = n > 4 ? 2 : 1
+    const rows = Math.ceil(n / cols)
+    const gap = SP[4]
+    const cw = (f.w - gap * (cols - 1)) / cols
+    const ch = Math.min((f.bottom - y - gap * (rows - 1)) / rows, cw * 0.62)
+    y += Math.max(0, (f.bottom - y - (ch * rows + gap * (rows - 1))) / 2)
+    s.items.forEach((w, i) => {
+      const x = f.x + (i % cols) * (cw + gap)
+      const top = y + Math.floor(i / cols) * (ch + gap)
+      pictureCard(c, x, top, cw, ch)
+      const ps = Math.min(ch * 0.5, cw * 0.2)
+      const pad = SP[4]
+      picture(ctx, w.e, x + pad + ps * 0.55, top + ch / 2, ps)
+      const tx = x + pad + ps * 1.1 + SP[3]
+      const tw = x + cw - pad - tx
+      // A gloss is never broken inside a word (strawbe-rry): a size down first.
+      const sizes = [FS.lead, FS.body, FS.sm, FS.caption]
+      const whole = z => w.main.split(/\s+/).every(part => measure(ctx, part, font(500, z, 'latin')) <= tw)
+      const main = fit(ctx, w.main, { weight: 500, sizes: [sizes.find(whole) || FS.caption], maxW: tw, maxLines: 2, balanced: false })
+      const L = layoutSentence(ctx, [wordRow(w)], { max: FS.title, min: FS.xs, maxW: tw, maxLines: 1, maxH: ch - paragraphH(main) - SP[2] - SP[3] * 2, script: 'furigana', rules: false })
+      const h = L.h + SP[2] + paragraphH(main)
+      const ty = top + Math.max(SP[3], (ch - h) / 2)
+      drawSentence(ctx, L, tx, ty, 'left', () => ({ ink, rule: null, ruby: ink2 }))
+      paragraph(ctx, main, tx, ty + L.h + SP[2], ink2)
+    })
+  },
+
+  /** 仲間外れ: six words, one not of the theme; on the answer, what each
+   *  means and the impostor circled. */
+  oddone(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    const t = c.plan.t
+    const lang = c.plan.lang
+    const round = s.round
+    let y = title(c, s.revealed ? t.modes.revealed : t.modes.impostor, f.y, `${s.n}/${s.of}`)
+    const ask = fit(ctx, weldIf(lang, s.ask), { sizes: [FS.title, FS.lead], maxW: f.w, maxLines: 2 })
+    y += paragraph(ctx, ask, f.x, y, ink) + SP[7]
+    const foot = s.revealed
+      ? fit(ctx, round.why, { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w - 170, maxLines: 3, balanced: false })
+      : fit(ctx, weldIf(lang, t.examCta(round.words.length)), { sizes: [FS.title, FS.lead, FS.body], maxW: f.w, maxLines: 2 })
+    const footH = Math.max(paragraphH(foot), s.revealed ? 140 : 0)
+    const gap = SP[4]
+    const cw = (f.w - gap) / 2
+    const rowsN = Math.ceil(round.words.length / 2)
+    const gridH = f.bottom - y - SP[7] - footH
+    const ch = (gridH - gap * (rowsN - 1)) / rowsN
+    const r = 26
+    round.words.forEach((w, i) => {
+      const x = f.x + (i % 2) * (cw + gap)
+      const top = y + Math.floor(i / 2) * (ch + gap)
+      const odd = i === round.at
+      const dim = s.revealed && !odd
+      ctx.fillStyle = c.dark ? p.card : p.surface
+      rrect(ctx, x, top, cw, ch, R.card)
+      ctx.fill()
+      ctx.strokeStyle = s.revealed && odd ? p.line.exam : p.surfaceLine
+      ctx.lineWidth = s.revealed && odd ? RING : 2
+      rrect(ctx, x + ctx.lineWidth / 2, top + ctx.lineWidth / 2, cw - ctx.lineWidth, ch - ctx.lineWidth, R.card)
+      ctx.stroke()
+      const rx = x + SP[4] + r
+      roundel(ctx, rx, top + ch / 2, r, dim ? p.surfaceLine : p.line.exam, String(i + 1), { ink: dim ? ink2 : p.line.exam, size: FS.body })
+      // The word beside its number, its reading over it, its romaji under
+      // it; on the answer, what it means in the romaji's place (read on
+      // the question already), on one line.
+      const tx = rx + r + SP[3]
+      const inner = x + cw - SP[4] - tx
+      const meaning = s.revealed ? fit(ctx, w.main, { weight: odd ? 700 : 500, sizes: [FS.lead, FS.body, FS.sm, FS.caption, FS.xs], maxW: inner, maxLines: 1 }) : null
+      const mh = meaning ? paragraphH(meaning) + SP[1] : 0
+      const L = layoutSentence(ctx, [wordRow(w)], { max: FS.heading, min: FS.sm, maxW: inner, maxLines: 1, maxH: ch - SP[3] * 2 - mh, script: 'furigana', romaji: !s.revealed, rules: false })
+      const h = L.h + mh
+      const ty = top + Math.max(SP[2], (ch - h) / 2)
+      drawSentence(ctx, L, tx + inner / 2, ty, 'center', () => ({ ink: dim ? ink2 : ink, rule: null, ruby: ink2, romaji: ink2 }))
+      if (meaning) paragraph(ctx, meaning, tx + inner / 2, ty + L.h + SP[1], odd ? ink : ink2, 'center')
+      if (s.revealed && odd) marked(ctx, p, rx, top + ch / 2, r)
+    })
+    y += gridH + SP[7]
+    paragraph(ctx, foot, f.x, y, ink)
+    if (s.revealed) stamp(ctx, p, f.right - 66, y + 70, 62)
+  },
+
+  /** 似た字: one kanji of the set, its readings, its sense, a word it
+   *  writes, and what tells it from the others. */
+  lookchar(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    const t = c.plan.t
+    const k = s.k
+    let y = title(c, s.all.join('・'), f.y, `${s.n}/${s.of}`)
+    const gs = Math.min(FS.glyph * 0.9, f.w * 0.3)
+    text(ctx, k.c, f.x, y + gs * ASC, { f: font(700, gs, 'serif'), color: ink })
+    ctx.fillStyle = p.line.kanji
+    ctx.fillRect(f.x, y + gs * 1.02, gs, EDGE)
+    const ix = f.x + gs + SP[8]
+    let iy = y
+    const iw = f.right - ix
+    const all = [...k.on, ...k.kun.map(([a, b]) => a + b)]
+    let rs = FS.heading
+    while (rs > FS.lead && all.some(r => measure(ctx, r, font(500, rs, 'jp'), TR.term) > iw)) rs -= 4
+    const rf = font(500, rs, 'jp')
+    // Two readings of each kind at most: the slide is about the shape.
+    const group = (label, list, draw) => {
+      if (!list.length) return
+      caption(ctx, label, ix, iy + FS.caption, p.line.kanji)
+      iy += FS.caption + SP[4]
+      for (const r of list.slice(0, 2)) { draw(r); iy += rs * 1.3 }
+      iy += SP[5]
+    }
+    group(t.on, k.on, r => text(ctx, r, ix, iy + rs * 0.9, { f: rf, color: ink, tr: TR.term }))
+    group(t.kun, k.kun, ([stem, oku]) => {
+      const w = text(ctx, stem, ix, iy + rs * 0.9, { f: rf, color: ink, tr: TR.term })
+      if (oku) text(ctx, oku, ix + w + TR.term * rs, iy + rs * 0.9, { f: rf, color: ink2, tr: TR.term })
+    })
+    y = Math.max(y + gs * 1.02 + EDGE + SP[7], iy + SP[5])
+    const meaning = fit(ctx, k.meaning, { sizes: [FS.display, FS.heading, FS.title], maxW: f.w, maxLines: 2 })
+    y += paragraph(ctx, meaning, f.x, y, ink) + SP[6]
+    // What sets it apart, then a word it writes; the word gives way first.
+    const wordOf = () => {
+      if (!k.word) return null
+      const W = layoutSentence(ctx, [{ t: k.word.t, fu: k.word.fu, k: 'word' }], { max: FS.heading, min: FS.title, maxW: f.w * 0.5, maxLines: 1, script: 'furigana', rules: false })
+      const g = fit(ctx, k.word.main, { weight: 500, sizes: [FS.lead, FS.body], maxW: f.w - W.lineW(W.lines[0]) - SP[6], maxLines: 2, balanced: false })
+      return { W, g, h: Math.max(W.h, paragraphH(g)) }
+    }
+    let word = wordOf()
+    const noteAt = (room, sizes) => fit(ctx, k.note, { weight: 500, sizes, maxW: f.w - SP[7], maxH: room, lh: 1.25, balanced: false })
+    let note = noteAt(f.bottom - y - (word ? word.h + SP[7] : 0), [FS.heading, FS.title, FS.lead])
+    if (note.cut && word) { word = null; note = noteAt(f.bottom - y, [FS.heading, FS.title, FS.lead, FS.body]) }
+    const nh = paragraphH(note, 1.25)
+    ctx.fillStyle = p.line.kanji
+    rrect(ctx, f.x, y, EDGE, nh, EDGE / 2)
+    ctx.fill()
+    paragraph(ctx, note, f.x + SP[7], y, ink, 'left', 1.25)
+    y += nh + SP[7]
+    if (word && y + word.h <= f.bottom) {
+      drawSentence(ctx, word.W, f.x, y, 'left', () => ({ ink, rule: null, ruby: ink2 }))
+      const gx = f.x + word.W.lineW(word.W.lines[0]) + SP[6]
+      paragraph(ctx, word.g, gx, y + word.h - paragraphH(word.g), ink2)
+    }
+  },
+
+  /** 似た字's summary: every kanji of the set beside its sense and what
+   *  tells it apart. */
+  apart(c, s) {
+    const { ctx, f, ink, ink2 } = c
+    let y = title(c, c.plan.t.modes.apart)
+    const n = s.chars.length
+    const gap = SP[4]
+    const rowH = Math.min((f.bottom - y - gap * (n - 1)) / n, FS.glyph * 1.3)
+    y += Math.max(0, (f.bottom - y - rowH * n - gap * (n - 1)) / 2)
+    const gs = Math.min(rowH * 0.72, FS.glyph)
+    s.chars.forEach((k, i) => {
+      const top = y + i * (rowH + gap)
+      pictureCard(c, f.x, top, f.w, rowH)
+      text(ctx, k.c, f.x + SP[5], top + (rowH - gs) / 2 + gs * ASC, { f: font(700, gs, 'serif'), color: ink })
+      const tx = f.x + SP[5] + gs + SP[6]
+      const tw = f.right - SP[5] - tx
+      const meaning = fit(ctx, k.meaning, { sizes: [FS.title, FS.lead, FS.body], maxW: tw, maxLines: 1 })
+      const note = fit(ctx, k.note, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: tw, maxH: rowH - paragraphH(meaning) - SP[2] - SP[3] * 2, lh: 1.2, balanced: false })
+      const h = paragraphH(meaning) + SP[2] + paragraphH(note, 1.2)
+      const ty = top + Math.max(SP[3], (rowH - h) / 2)
+      paragraph(ctx, meaning, tx, ty, ink)
+      paragraph(ctx, note, tx, ty + paragraphH(meaning) + SP[2], ink2, 'left', 1.2)
+    })
+  },
+
+  /** 返事: what they say, and what you could answer; on the next slide,
+   *  the answer said. Every line with its furigana and its romaji, for
+   *  a beginner to read. */
+  turn(c, s) {
+    const { ctx, p, f, ink, ink2 } = c
+    const t = c.plan.t
+    const lang = c.plan.lang
+    const tu = s.turn
+    let y = title(c, s.place, f.y, `${s.n}/${s.of}`)
+    const room = f.bottom - y
+    const r = 28
+    const say = (rows, max, maxW, romaji = true) => layoutSentence(ctx, rows, { max, min: Math.min(max, FS.sm), maxW, maxLines: 3, script: 'furigana', romaji, rules: false, gap: 0.18 })
+    // A bubble: who says it, the line, its translation.
+    const bubbleOf = (rows, trText, bw, max, trSize, romaji) => {
+      const iw = bw - SP[6] * 2
+      const L = say(rows, max, iw, romaji)
+      const trB = fit(ctx, trText, { weight: 500, sizes: [trSize], maxW: iw, maxLines: 3, balanced: false })
+      return { L, trB, bw, h: FS.caption * 1.6 + L.h + SP[3] + paragraphH(trB) + SP[4] * 2 }
+    }
+    const lay = ([max, trSize, small], withCta, themRomaji = !s.revealed, withTask = true) => {
+      // On the question their line takes the width, and keeps to fewer
+      // lines; on the answer, read already, it goes without its romaji.
+      const them = bubbleOf(tu.them.rows, tu.them.tr, s.revealed ? f.w * 0.92 : f.w, max, trSize, themRomaji)
+      if (!s.revealed) {
+        const task = withTask ? fit(ctx, t.modes.say, { sizes: [trSize === FS.lead ? FS.title : FS.lead], maxW: f.w, maxLines: 1 }) : null
+        const cw = f.w - SP[4] - r * 2 - SP[3] - SP[4]
+        const choices = tu.choices.map(rows => say(rows, small, cw))
+        const chH = choices.map(L => Math.max(r * 2, L.h) + SP[3] * 2)
+        const cta = withCta ? fit(ctx, weldIf(lang, t.examCta(tu.choices.length)), { sizes: [FS.lead, FS.body], maxW: f.w, maxLines: 2 }) : null
+        const h = them.h + SP[6] + (task ? paragraphH(task) + SP[4] : 0) + chH.reduce((a, b) => a + b, 0) + SP[3] * (chH.length - 1) + (cta ? SP[6] + paragraphH(cta) : 0)
+        return { them, task, choices, chH, cta, h }
+      }
+      const mine = bubbleOf(tu.choices[tu.right], tu.reply, f.w - r * 2 - SP[6], max, trSize)
+      // Why, in the room the two lines leave it, never under their translations' rung.
+      const free = room - them.h - SP[6] - mine.h - SP[7]
+      const whyAt = maxW => fit(ctx, tu.why, { weight: 500, sizes: [FS.title, FS.lead, FS.body, FS.sm].filter(z => z >= Math.min(trSize, FS.body)), maxW, maxH: free, maxLines: 8, lh: 1.25, balanced: false })
+      let why = whyAt(f.w - 170)
+      // At the least setting, a long why takes the stamp's room.
+      const wide = why.cut && trSize === FS.sm
+      if (wide) why = whyAt(f.w)
+      // A why cut short is no fit: the lines step down for it first.
+      const h = why.cut ? Infinity : them.h + SP[6] + mine.h + SP[7] + Math.max(paragraphH(why, 1.25), wide ? 0 : 140)
+      return { them, mine, why, wide, h }
+    }
+    // The lines at the largest setting that holds; the call to comment
+    // gives way before they step down to their least (the question's
+    // number circles say how to answer).
+    // On a long turn their line's romaji gives way, then the ask (the
+    // numbered answers ask it too): the answers keep theirs.
+    let L = null
+    find: for (const [withCta, themRomaji, withTask] of [[true, !s.revealed, true], [false, !s.revealed, true], [false, false, true], [false, false, false]]) {
+      for (const step of [[FS.heading, FS.lead, FS.title], [FS.title, FS.lead, FS.lead], [FS.title, FS.body, FS.body], [FS.lead, FS.body, FS.body], [FS.lead, FS.sm, FS.sm], [FS.body, FS.sm, FS.sm]]) {
+        L = lay(step, withCta, themRomaji, withTask)
+        if (L.h <= room) break find
+      }
+    }
+    y += Math.max(0, (room - L.h) * 0.4)
+    const drawBubble = (B, bx, by, mine, who) => {
+      ctx.fillStyle = mine ? p.pass : (c.dark ? p.card : p.surface)
+      rrect(ctx, bx, by, B.bw, B.h, R.panel)
+      ctx.fill()
+      if (!mine && !c.dark) { ctx.strokeStyle = p.surfaceLine; ctx.lineWidth = 2; rrect(ctx, bx + 1, by + 1, B.bw - 2, B.h - 2, R.panel); ctx.stroke() }
+      const bInk = mine ? p.onPanel : ink
+      const bInk2 = mine ? p.onPanelSoft : ink2
+      caption(ctx, who, bx + SP[6], by + SP[4] + FS.caption, bInk2)
+      drawSentence(ctx, B.L, bx + SP[6], by + SP[4] + FS.caption * 1.6, 'left', () => ({ ink: bInk, rule: null, ruby: bInk2, romaji: bInk2 }))
+      paragraph(ctx, B.trB, bx + SP[6], by + SP[4] + FS.caption * 1.6 + B.L.h + SP[3], bInk2)
+    }
+    drawBubble(L.them, f.x, y, false, s.them)
+    y += L.them.h + SP[6]
+    if (!s.revealed) {
+      if (L.task) y += paragraph(ctx, L.task, f.x, y, p.line.grammar) + SP[4]
+      L.choices.forEach((CL, i) => {
+        const h = L.chH[i]
+        ctx.fillStyle = c.dark ? p.card : p.surface
+        rrect(ctx, f.x, y, f.w, h, R.card)
+        ctx.fill()
+        ctx.strokeStyle = p.surfaceLine
+        ctx.lineWidth = 2
+        rrect(ctx, f.x + 1, y + 1, f.w - 2, h - 2, R.card)
+        ctx.stroke()
+        roundel(ctx, f.x + SP[4] + r, y + h / 2, r, p.line.exam, String(i + 1), { ink: p.line.exam, size: FS.lead })
+        drawSentence(ctx, CL, f.x + SP[4] + r * 2 + SP[3], y + (h - CL.h) / 2, 'left', () => ({ ink, rule: null, ruby: ink2, romaji: ink2 }))
+        y += h + SP[3]
+      })
+      if (L.cta) paragraph(ctx, L.cta, f.x, y - SP[3] + SP[6], ink)
+      return
+    }
+    // The answer, said: the right number circled beside your line.
+    const bx = f.right - L.mine.bw
+    drawBubble(L.mine, bx, y, true, t.you)
+    roundel(ctx, f.x + r, y + L.mine.h / 2, r, p.line.exam, String(tu.right + 1), { ink: p.line.exam, size: FS.lead })
+    marked(ctx, p, f.x + r, y + L.mine.h / 2, r * 0.7)
+    y += L.mine.h + SP[7]
+    paragraph(ctx, L.why, f.x, y, ink2, 'left', 1.25)
+    if (!L.wide) stamp(ctx, p, f.right - 66, y + 70, 62)
+  },
 }
 
 /** A caption kept to the frame's width as it is drawn (capitals, tracked):
@@ -1984,6 +2314,8 @@ function quizSlide(c, q, revealed, head, number = 1) {
     const z = Math.min([...st.specimen].length === 1 ? FS.glyph : FS.word, room * 0.9)
     const head = headLines(ctx, st.specimen, { maxW: f.w, maxSize: Math.max(z, FS.lead), minSize: FS.lead, maxLines: 2, maxH: room })
     drawHead(ctx, head, f.cx, y + Math.max(0, (room - headH(head)) / 2), ink, 'center')
+  } else if (st?.emoji) {
+    picture(ctx, st.emoji, f.cx, y + room / 2, Math.min(FS.glyph * 1.2, room * 0.8))
   } else if (st?.text) {
     const b = fit(ctx, `“${st.text}”`, { sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body, FS.sm], maxW: f.w, maxH: room + 1, lh: 1.15 })
     paragraph(ctx, b, f.x, y + Math.max(0, (room - paragraphH(b, 1.15)) / 2), ink, 'left', 1.15)
@@ -2112,6 +2444,61 @@ function hookContent(c, plan, maxW, maxH, fam, align, hook = plan.hook) {
           drawHead(ctx, head, x, at, ink, 'center')
           at += headH(head)
         })
+      },
+    }
+  }
+  if (h.kind === 'emojigrid') {
+    // 単語帳: the theme's pictures, its word for itself, what the post is.
+    const n = h.emoji.length
+    const tb = fit(ctx, h.title, { sizes: [FS.heading, FS.title], maxW, maxLines: 2 })
+    const hs = FS.display
+    const fixed = hs * 1.1 + EDGE + SP[5] + paragraphH(tb) + SP[6]
+    // As many columns as make the pictures largest: 8 sit four by two.
+    const cellOf = k => Math.min(maxW / k, (maxH - fixed) / Math.ceil(n / k), FS.glyph * 1.1)
+    const cols = [2, 3, 4].filter(k => k <= n).reduce((a, k) => (cellOf(k) > cellOf(a) ? k : a), Math.min(2, n))
+    const rows = Math.ceil(n / cols)
+    const cell = Math.max(FS.display, cellOf(cols))
+    const gap = SP[3]
+    return {
+      h: cell * rows + fixed,
+      draw(x, y) {
+        h.emoji.forEach((e, i) => {
+          const col = i % cols
+          const row = Math.floor(i / cols)
+          // A last row short of the others is centred under them.
+          const inRow = Math.min(cols, n - row * cols)
+          const cx = x + (col - (inRow - 1) / 2) * cell
+          const top = y + row * cell
+          pictureCard(c, cx - cell / 2 + gap / 2, top + gap / 2, cell - gap, cell - gap)
+          picture(ctx, e, cx, top + cell / 2, (cell - gap) * 0.62)
+        })
+        let at = y + cell * rows + SP[6]
+        const hf = font(700, hs, fam)
+        const w = text(ctx, h.head, x, at + hs * ASC, { f: hf, color: ink, align: 'center' })
+        at += hs * 1.1
+        ctx.fillStyle = p.line.vocab
+        ctx.fillRect(x - Math.min(w, SP[9] * 2) / 2, at, Math.min(w, SP[9] * 2), EDGE)
+        paragraph(ctx, tb, x, at + EDGE + SP[5], ink, 'center')
+      },
+    }
+  }
+  if (h.kind === 'kanjirow') {
+    // 似た字: the set side by side, as large as the width lets them be.
+    const n = h.chars.length
+    const tb = fit(ctx, h.title, { sizes: [FS.heading, FS.title], maxW, maxLines: 3 })
+    const gap = SP[5]
+    const size = Math.max(FS.display, Math.min(FS.glyph, (maxW - gap * (n - 1)) / n, maxH - paragraphH(tb) - SP[8] - EDGE - SP[4]))
+    return {
+      h: size * 1.02 + SP[4] + EDGE + SP[8] + paragraphH(tb),
+      draw(x, y) {
+        const total = n * size + (n - 1) * gap
+        h.chars.forEach((ch, i) => {
+          const at = x - total / 2 + i * (size + gap)
+          text(ctx, ch, at + size / 2, y + size * ASC, { f: font(700, size, 'serif'), color: ink, align: 'center' })
+          ctx.fillStyle = p.line.kanji
+          ctx.fillRect(at + size * 0.2, y + size * 1.02 + SP[4], size * 0.6, EDGE)
+        })
+        paragraph(ctx, tb, x, y + size * 1.02 + SP[4] + EDGE + SP[8], ink, 'center')
       },
     }
   }
@@ -2280,7 +2667,7 @@ export const ENDING_IDS = ['mark', 'map', 'pass', 'cta', 'terminus', 'plate']
 export function endingSlide(id, type, plan, fmt, opts) {
   const fr = frame(fmt)
   const p = palette(opts.ground)
-  const cta = { plates: plan.t.cta.plates, exam: plan.t.cta.exam(3), compare: plan.t.cta.compare, build: plan.t.cta.build, list: plan.t.cta.list, talk: plan.t.cta.talk }[type]
+  const cta = { plates: plan.cta || plan.t.cta.plates, exam: plan.t.cta.exam(3), compare: plan.t.cta.compare, build: plan.t.cta.build, list: plan.t.cta.list, talk: plan.t.cta.talk, impostor: plan.t.cta.impostor }[type]
   return { key: `ending-${id}`, draw: ctx => { noShadow(ctx); KINDS.outro({ ctx, p, plan, ...surface(ctx, p, fr), cta, ending: id }) } }
 }
 
@@ -2293,6 +2680,7 @@ export const TYPES = [
   { id: 'list', jp: '一覧' },
   { id: 'talk', jp: '会話' },
   { id: 'spelling', jp: '表記' },
+  { id: 'impostor', jp: '仲間外れ' },
 ]
 // What a type may leave out, and whether it is in by default.
 export const TYPE_OPTIONS = {
@@ -2310,6 +2698,7 @@ export function available(type, pl) {
     case 'list': return !!pl.list
     case 'talk': return !!pl.talk
     case 'spelling': return !!pl.spelling?.length
+    case 'impostor': return !!pl.impostor
     default: return true
   }
 }
@@ -2432,6 +2821,16 @@ export function deck(type, plan, fmt, opts) {
       outro(t.cta.talk)
       break
     }
+    case 'impostor': {
+      // 仲間外れ (plan 200m): rounds of six words, one not of the theme,
+      // each asked, then answered.
+      const I = plan.impostor
+      const ask = t.modes.impostorAsk(I.name)
+      add('hook', ctx => opening(ctx, p, fr, plan, { kind: 'listhead', head: '仲間外れ', title: ask, line: 'vocab' }, t.modes.impostor))
+      I.rounds.forEach((round, i) => [false, true].forEach(revealed => add(revealed ? `answer-${i + 1}` : `round-${i + 1}`, kind({ kind: 'oddone', round, revealed, n: i + 1, of: I.rounds.length, ask }))))
+      outro(t.cta.impostor)
+      break
+    }
     default: {
       add('hook', ctx => opening(ctx, p, fr, plan))
       for (const s of plan.slides) {
@@ -2447,7 +2846,7 @@ export function deck(type, plan, fmt, opts) {
         }
         add(s.kind, kind(s))
       }
-      outro(t.cta.plates)
+      outro(plan.cta || t.cta.plates)
     }
   }
   return out.map(sl => ({

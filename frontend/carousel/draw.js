@@ -94,11 +94,13 @@ const FAMILY = {
   serif: '"Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif',
   jp: '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
   latin: '"Space Grotesk", "Noto Sans JP", "Segoe UI", sans-serif',
+  // A theme's pictures (plan 200m): the one colour face, drawn as it is.
+  emoji: '"Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif',
 }
 export const FONT_FACES = [
   ['serif', 600], ['serif', 700], ['serif', 900],
   ['jp', 400], ['jp', 500], ['jp', 700],
-  ['latin', 500], ['latin', 700],
+  ['latin', 500], ['latin', 700], ['emoji', 400],
 ]
 export const font = (weight, size, fam) => `${weight} ${Math.round(size * 10) / 10}px ${FAMILY[fam]}`
 // Where a Japanese face's em box sits around its baseline (Noto's

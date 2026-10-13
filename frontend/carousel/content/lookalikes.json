@@ -1,0 +1,141 @@
+[
+  {"id": "dai", "chars": [
+    {"c": "大", "en": "the base: a person, arms spread", "fr": "la base : une personne, bras écartés"},
+    {"c": "太", "en": "大 with a dot inside, at the bottom", "fr": "大 avec un point dedans, en bas"},
+    {"c": "犬", "en": "大 with a dot outside, at the top right", "fr": "大 avec un point dehors, en haut à droite"},
+    {"c": "天", "en": "大 with a line across the top", "fr": "大 avec un trait au-dessus"},
+    {"c": "夫", "en": "two lines across, the top one pierced", "fr": "deux traits en travers, celui du haut traversé"}]},
+  {"id": "ki", "chars": [
+    {"c": "木", "en": "a tree: one line across", "fr": "un arbre : un trait en travers"},
+    {"c": "本", "en": "木 with a short line at its foot, the root", "fr": "木 avec un petit trait au pied, la racine"},
+    {"c": "末", "en": "the top line longer than the lower: the tip", "fr": "le trait du haut plus long que celui du bas : la pointe"},
+    {"c": "未", "en": "the top line shorter than the lower: not yet grown", "fr": "le trait du haut plus court que celui du bas : pas encore poussé"}]},
+  {"id": "yasumu", "chars": [
+    {"c": "休", "en": "a person (亻) leaning on a tree (木)", "fr": "une personne (亻) adossée à un arbre (木)"},
+    {"c": "体", "en": "a person (亻) beside 本", "fr": "une personne (亻) à côté de 本"}]},
+  {"id": "hito", "chars": [
+    {"c": "人", "en": "the left stroke is the long one; the right leans on it", "fr": "le trait de gauche est le long ; celui de droite s'y appuie"},
+    {"c": "入", "en": "the right stroke is the long one, on top", "fr": "le trait de droite est le long, au-dessus"},
+    {"c": "八", "en": "two strokes that do not touch", "fr": "deux traits qui ne se touchent pas"}]},
+  {"id": "hi", "chars": [
+    {"c": "日", "en": "a box with one line inside", "fr": "une boîte avec un trait dedans"},
+    {"c": "目", "en": "taller, with two lines inside", "fr": "plus haute, avec deux traits dedans"},
+    {"c": "白", "en": "日 with a short stroke on top", "fr": "日 avec un petit trait au-dessus"},
+    {"c": "百", "en": "白 under a long line: a hundred", "fr": "白 sous un long trait : cent"},
+    {"c": "自", "en": "目 with a short stroke on top", "fr": "目 avec un petit trait au-dessus"}]},
+  {"id": "tsuchi", "chars": [
+    {"c": "土", "en": "two lines, the lower one longer", "fr": "deux traits, celui du bas plus long"},
+    {"c": "士", "en": "two lines, the upper one longer", "fr": "deux traits, celui du haut plus long"},
+    {"c": "王", "en": "three lines across", "fr": "trois traits en travers"},
+    {"c": "玉", "en": "王 with a dot at the bottom right", "fr": "王 avec un point en bas à droite"},
+    {"c": "主", "en": "王 with a dot on top", "fr": "王 avec un point au-dessus"}]},
+  {"id": "sen", "chars": [
+    {"c": "千", "en": "a slanted stroke over one line", "fr": "un trait penché sur un trait"},
+    {"c": "干", "en": "a flat stroke over one line", "fr": "un trait plat sur un trait"},
+    {"c": "午", "en": "two lines; the vertical stays under the top", "fr": "deux traits ; la verticale reste sous celui du haut"},
+    {"c": "牛", "en": "like 午, the vertical going through the top", "fr": "comme 午, la verticale dépassant en haut"}]},
+  {"id": "chikara", "chars": [
+    {"c": "力", "en": "the slanted stroke rises above the hook", "fr": "le trait penché dépasse au-dessus du crochet"},
+    {"c": "刀", "en": "the slanted stroke stays under the hook", "fr": "le trait penché reste sous le crochet"},
+    {"c": "万", "en": "a line across on top", "fr": "un trait en travers au-dessus"},
+    {"c": "方", "en": "a dot and a line on top", "fr": "un point et un trait au-dessus"}]},
+  {"id": "migi", "chars": [
+    {"c": "右", "en": "a mouth (口) under the cross", "fr": "une bouche (口) sous la croix"},
+    {"c": "左", "en": "工 under the cross", "fr": "工 sous la croix"},
+    {"c": "石", "en": "the slanted stroke starts under the line, not through it", "fr": "le trait penché part sous le trait, sans le traverser"}]},
+  {"id": "miru", "chars": [
+    {"c": "見", "en": "an eye (目) on two legs", "fr": "un œil (目) sur deux jambes"},
+    {"c": "貝", "en": "目 on two short strokes", "fr": "目 sur deux petits traits"}]},
+  {"id": "tori", "chars": [
+    {"c": "鳥", "en": "a bird: four dots for its feet", "fr": "un oiseau : quatre points pour les pattes"},
+    {"c": "島", "en": "a bird on a mountain (山) instead of its feet", "fr": "un oiseau sur une montagne (山) à la place des pattes"},
+    {"c": "鳴", "en": "a mouth (口) beside the bird: it sings", "fr": "une bouche (口) à côté de l'oiseau : il chante"}]},
+  {"id": "tera", "chars": [
+    {"c": "待", "en": "寺 with 彳, the road: you wait on it", "fr": "寺 avec 彳, le chemin : on y attend"},
+    {"c": "持", "en": "寺 with 扌, the hand: you hold", "fr": "寺 avec 扌, la main : on tient"},
+    {"c": "特", "en": "寺 with 牛, a cow", "fr": "寺 avec 牛, une vache"},
+    {"c": "時", "en": "寺 with 日, the sun: time", "fr": "寺 avec 日, le soleil : le temps"}]},
+  {"id": "mon", "chars": [
+    {"c": "間", "en": "a gate (門) with the sun (日) inside", "fr": "une porte (門) avec le soleil (日) dedans"},
+    {"c": "問", "en": "a gate with a mouth (口) inside: to ask", "fr": "une porte avec une bouche (口) dedans : demander"},
+    {"c": "聞", "en": "a gate with an ear (耳) inside: to hear", "fr": "une porte avec une oreille (耳) dedans : entendre"},
+    {"c": "開", "en": "a gate with 开 inside: to open", "fr": "une porte avec 开 dedans : ouvrir"},
+    {"c": "閉", "en": "a gate with 才 inside: to close", "fr": "une porte avec 才 dedans : fermer"}]},
+  {"id": "ame", "chars": [
+    {"c": "雪", "en": "rain (雨) over ヨ: snow", "fr": "la pluie (雨) sur ヨ : la neige"},
+    {"c": "雲", "en": "rain over 云: a cloud", "fr": "la pluie sur 云 : un nuage"},
+    {"c": "電", "en": "rain over a 申 with a tail: electricity", "fr": "la pluie sur un 申 à queue : l'électricité"},
+    {"c": "雷", "en": "rain over a field (田): thunder", "fr": "la pluie sur un champ (田) : le tonnerre"}]},
+  {"id": "ki2", "chars": [
+    {"c": "気", "en": "气 with メ inside: spirit, air", "fr": "气 avec メ dedans : l'esprit, l'air"},
+    {"c": "汽", "en": "water (氵) beside 气: steam", "fr": "l'eau (氵) à côté de 气 : la vapeur"}]},
+  {"id": "uchi", "chars": [
+    {"c": "内", "en": "a frame with one 人 inside", "fr": "un cadre avec un 人 dedans"},
+    {"c": "肉", "en": "a frame with two 人 inside", "fr": "un cadre avec deux 人 dedans"}]},
+  {"id": "kita", "chars": [
+    {"c": "北", "en": "two halves back to back", "fr": "deux moitiés dos à dos"},
+    {"c": "比", "en": "two halves facing the same way", "fr": "deux moitiés tournées du même côté"}]},
+  {"id": "mizu", "chars": [
+    {"c": "水", "en": "water: no dot", "fr": "l'eau : pas de point"},
+    {"c": "氷", "en": "水 with a dot on the left: ice", "fr": "水 avec un point à gauche : la glace"},
+    {"c": "永", "en": "水 with a dot on top: forever", "fr": "水 avec un point au-dessus : pour toujours"}]},
+  {"id": "sho", "chars": [
+    {"c": "書", "en": "a brush (聿) over 日: to write", "fr": "un pinceau (聿) sur 日 : écrire"},
+    {"c": "昼", "en": "尺 over 旦: daytime", "fr": "尺 sur 旦 : la journée"}]},
+  {"id": "tabi", "chars": [
+    {"c": "旅", "en": "the flag over people: travel", "fr": "le drapeau sur des personnes : le voyage"},
+    {"c": "族", "en": "the flag over 矢, an arrow: tribe, family", "fr": "le drapeau sur 矢, une flèche : la tribu, la famille"}]},
+  {"id": "ya", "chars": [
+    {"c": "失", "en": "the vertical rises through the top: to lose", "fr": "la verticale dépasse en haut : perdre"},
+    {"c": "矢", "en": "the vertical stays under the top: an arrow", "fr": "la verticale reste sous le haut : une flèche"}]},
+  {"id": "ken", "chars": [
+    {"c": "険", "en": "阝, a hill: steep", "fr": "阝, une colline : escarpé"},
+    {"c": "検", "en": "木, wood: to examine", "fr": "木, le bois : examiner"},
+    {"c": "験", "en": "馬, a horse: a test", "fr": "馬, un cheval : une épreuve"}]},
+  {"id": "soku", "chars": [
+    {"c": "則", "en": "貝 and a knife (刂): a rule", "fr": "貝 et un couteau (刂) : une règle"},
+    {"c": "側", "en": "a person (亻) beside 則: the side", "fr": "une personne (亻) à côté de 則 : le côté"},
+    {"c": "測", "en": "water (氵) beside 則: to measure", "fr": "l'eau (氵) à côté de 則 : mesurer"}]},
+  {"id": "higashi", "chars": [
+    {"c": "東", "en": "the sun (日) inside a tree: east", "fr": "le soleil (日) dans un arbre : l'est"},
+    {"c": "束", "en": "a mouth (口) tied to a tree: a bundle", "fr": "une bouche (口) liée à un arbre : une gerbe"}]},
+  {"id": "ji", "chars": [
+    {"c": "字", "en": "a child (子) under a roof: a character", "fr": "un enfant (子) sous un toit : un caractère"},
+    {"c": "学", "en": "a child under three strokes and a cover: to study", "fr": "un enfant sous trois traits et un couvercle : étudier"}]},
+  {"id": "hayai", "chars": [
+    {"c": "早", "en": "the sun over 十: early", "fr": "le soleil sur 十 : tôt"},
+    {"c": "草", "en": "早 under grass (艹)", "fr": "早 sous l'herbe (艹)"}]},
+  {"id": "ima", "chars": [
+    {"c": "今", "en": "a roof over a hook: now", "fr": "un toit sur un crochet : maintenant"},
+    {"c": "令", "en": "a roof over 卩: an order", "fr": "un toit sur 卩 : un ordre"},
+    {"c": "会", "en": "a roof over 云: to meet", "fr": "un toit sur 云 : se rencontrer"},
+    {"c": "合", "en": "a roof over a line and 口: to fit", "fr": "un toit sur un trait et 口 : s'accorder"}]},
+  {"id": "kurushii", "chars": [
+    {"c": "苦", "en": "grass over 古, old: bitter", "fr": "l'herbe sur 古, vieux : amer"},
+    {"c": "若", "en": "grass over 右: young", "fr": "l'herbe sur 右 : jeune"}]},
+  {"id": "fuku", "chars": [
+    {"c": "復", "en": "彳, the road: again", "fr": "彳, le chemin : de nouveau"},
+    {"c": "複", "en": "衤, clothing: double", "fr": "衤, le vêtement : double"}]},
+  {"id": "seki", "chars": [
+    {"c": "績", "en": "糸, thread: results", "fr": "糸, le fil : les résultats"},
+    {"c": "積", "en": "禾, grain: to pile up", "fr": "禾, le grain : empiler"}]},
+  {"id": "ba", "chars": [
+    {"c": "場", "en": "土, earth: a place", "fr": "土, la terre : un lieu"},
+    {"c": "湯", "en": "氵, water: hot water", "fr": "氵, l'eau : l'eau chaude"},
+    {"c": "揚", "en": "扌, the hand: to raise, to fry", "fr": "扌, la main : lever, frire"}]},
+  {"id": "kan", "chars": [
+    {"c": "官", "en": "a roof over two boxes: an official", "fr": "un toit sur deux boîtes : un fonctionnaire"},
+    {"c": "管", "en": "官 under bamboo (⺮): a pipe", "fr": "官 sous le bambou (⺮) : un tuyau"}]},
+  {"id": "i", "chars": [
+    {"c": "違", "en": "辶, moving: to differ", "fr": "辶, le mouvement : différer"},
+    {"c": "偉", "en": "亻, a person: great", "fr": "亻, une personne : grand, éminent"}]},
+  {"id": "te", "chars": [
+    {"c": "手", "en": "the vertical ends in a hook to the left", "fr": "la verticale finit en crochet vers la gauche"},
+    {"c": "毛", "en": "the stroke curls up to the right", "fr": "le trait remonte vers la droite"}]},
+  {"id": "bu", "chars": [
+    {"c": "部", "en": "立 and 口 before 阝: a section", "fr": "立 et 口 devant 阝 : une section"},
+    {"c": "都", "en": "者 before 阝: a capital", "fr": "者 devant 阝 : une capitale"}]},
+  {"id": "nogi", "chars": [
+    {"c": "季", "en": "a child (子) under grain (禾): a season", "fr": "un enfant (子) sous le grain (禾) : une saison"},
+    {"c": "委", "en": "a woman (女) under grain: to entrust", "fr": "une femme (女) sous le grain : confier"}]}
+]

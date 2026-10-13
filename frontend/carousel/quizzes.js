@@ -563,3 +563,53 @@ export function passageQuizzes(P, lang, t) {
   }).filter(Boolean).slice(0, 4)
   return withId([...seedQs, ...words], q => t.kinds[q.kind])
 }
+
+// ── The modes of plan 200m ────────────────────────────────────
+/** A theme's pictures: which word is this one? The wrong words are the
+ *  theme's other pictured words, none of them meaning the same. */
+export function pictureQuizzes(items, key, lang, t) {
+  const qs = items.map(w => {
+    const wrong = shuffle(items.filter(x => x.t !== w.t && x.e !== w.e && !overlaps(x.main, w.main)), seeded(`${key}-${w.t}`)).slice(0, 3)
+    if (wrong.length < 3) return null
+    return {
+      kind: 'picture', id: `pic-${w.t}`, ask: t.examAsk.picture, stem: { emoji: w.e },
+      ...dealChoices(w.t, wrong.map(x => x.t), `${key}-${w.t}`, 'jp'),
+      explain: { head: hasKanji(w.t) ? `${w.t}\u3000${w.r}` : w.t, sense: w.main },
+      label: `${t.kinds.picture} ${w.e}`,
+    }
+  })
+  return withId(qs, q => t.kinds[q.kind])
+}
+
+/** Lookalike kanji: which of them means this? Asked only of a kanji
+ *  whose meaning none of the others shares. */
+export function lookalikeQuizzes(set, lang, t) {
+  const qs = set.chars.map((k, i) => {
+    const others = set.chars.filter((_, j) => j !== i)
+    const meaning = senses(k, lang)[0]
+    if (!meaning || others.some(o => senses(o, lang).some(m => overlaps(m, meaning)))) return null
+    const d = deal(k.c, others.slice(0, 3).map(o => o.c), `${set.id}-${k.c}`)
+    const read = k.on[0] || (k.kun[0] || []).join('')
+    return {
+      kind: 'kanjiPick', id: `pick-${k.c}`, ask: t.examAsk.kanjiPick, stem: { text: weldIf(lang, meaning) },
+      choices: d.choices.map(text => ({ text, fam: 'serif' })), right: d.right,
+      explain: { head: read ? `${k.c}\u3000${read}` : k.c, sense: tr(k.note, lang) },
+      label: `${t.kinds.kanjiPick} · ${weldIf(lang, meaning)}`,
+    }
+  })
+  return withId(qs, q => t.kinds[q.kind])
+}
+
+/** A grammar trap: the sentence, what it says, three readings of it.
+ *  Its translation is the right answer, so it is never printed over it. */
+export function trapQuizzes(traps, lang, t) {
+  const qs = traps.map(x => {
+    const d = deal(0, x.choices.map((_, i) => i).slice(1), x.id)
+    return {
+      kind: 'trap', id: x.id, ask: tr(x.ask, lang), stem: { rows: unpack(x.rows), tr: '' },
+      choices: d.choices.map(i => ({ text: tr(x.choices[i], lang), fam: 'latin' })), right: d.right,
+      explain: { why: tr(x.why, lang) },
+    }
+  })
+  return withId(qs, q => t.kinds[q.kind])
+}
