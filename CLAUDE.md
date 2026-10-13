@@ -33,7 +33,7 @@ space, motion, structure and the density contract.
 runtime purpose.
 
 - **Plan numbers are cited in source comments**, so a number is never reused.
-  The next free number is **205**. `git ls-tree HEAD plans/` under-reports
+  The next free number is **206**. `git ls-tree HEAD plans/` under-reports
   what is taken (earlier plan files were lost to a working-tree cleanup), and
   `plans/README.md` has fallen behind before: grep the source for `plan NNN`
   before claiming a number, and claim it before the first commit, so the
@@ -56,7 +56,8 @@ runtime purpose.
 - **Bump the revision when the output changes.** Anything cached or stored
   per output carries a revision: `LOCAL_REV` in `study/analysis.py` (the
   breakdown), the `phrase_analysis_cache` version (the deep tier),
-  `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio).
+  `TOUR_REV` in `study/grammar_tour.py`, `VOICE_REV` and `KANA_REV` (audio),
+  `REV` in `frontend/scripts/today-print/build.py` (Today's print, plan 205).
   A change to what any of them produces bumps it, or learners keep the old.
 - **The grammar detector and the lookups change by counter-case.** Every new
   rule or refusal is pinned in `tests/test_grammar_precision.py` /
@@ -516,7 +517,13 @@ npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # rasterise brand/*.svg and regenerate the icon set in public/ (the mark: scripts/build-mark.py)
 npm run landing   # the landing page (plan 167): public/landing/, sitemap.xml, robots.txt
 npm run landing:og  # its two share cards, rendered in Chromium
+python3 scripts/today-print/build.py  # Today's print of the hour (plan 205; numpy, Pillow)
 ```
+
+Today's gate stands on a print drawn ahead of time (plan 205):
+`scripts/today-print/` is its generator and writes `public/today/print/<REV>/`
+and `src/components/station/print/print.json`. Never edit those by hand;
+`scripts/today-print/README.md` has the modules and the rules.
 
 The landing page is the site's **`/`** (and `/en`), and the app's front
 door is **`/app`**: on the web the app's document is built as `app.html`

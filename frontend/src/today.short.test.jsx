@@ -106,7 +106,8 @@ describe('Today on a short window', () => {
   it('gives the dial way to the window, the gate under it and in view', async () => {
     await mount()
     await settle()
-    const dial = box(document.querySelector('.tdy-dial--desk'))
+    // The dial by its rings (plan 205: its box is the disc's glow).
+    const dial = box(document.querySelector('.tdy-desk .tdy-dial__gate'))
     const go = box(document.querySelector('.tdy-desk__go .btn-depart'))
     expect(Math.round(dial.width)).toBeLessThanOrEqual(280)
     expect(dial.top).toBeGreaterThanOrEqual(box(document.querySelector('.tdy-desk__hero')).top)

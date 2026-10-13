@@ -82,7 +82,9 @@ describe('GateCard — the fare', () => {
     expect(fare(screen).textContent).toContain('+1')
     // The inner ring: solid to the share that boards, dashed for the rest.
     const ride = screen.container.querySelector('.tdy-dial__fare-ride')
-    const c = 2 * Math.PI * 104
+    // Round the fare's ring as the print draws it (plan 205: the radius
+    // is the print's, and the frame chooses the print).
+    const c = 2 * Math.PI * Number(ride.getAttribute('r'))
     expect(Number.parseFloat(ride.getAttribute('stroke-dasharray'))).toBeCloseTo((12 / 42) * c, 3)
     expect(screen.container.querySelector('.tdy-dial__fare-wait')).toBeTruthy()
     // The legend gives the line keys' place to it.
