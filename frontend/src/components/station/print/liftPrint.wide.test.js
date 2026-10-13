@@ -4,7 +4,7 @@ import '../../../index.css'
 import { handOver, liftLayer } from './liftPrint'
 import { PRINT } from './usePrint'
 
-// ── The print lifted is the print as drawn (plan 206) ──────────────
+// ── The print lifted is the print as drawn (plan 208) ──────────────
 // liftPrint rebuilds a print's layers as boxes the compositor can move,
 // and hands their loops to the Web Animations API (plan 207).
 // That is only a fix if the picture is the same, so every print is

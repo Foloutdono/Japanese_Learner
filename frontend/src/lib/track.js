@@ -32,6 +32,9 @@ export const EVENTS = {
   app_open: ['boot_ms', 'cold', 'platform', 'standalone'],
   boot_timeout: ['waited_ms'],
   screen_view: ['route', 'tab'],
+  // A visit began (see the session below). No properties: the id rides
+  // beside the event, not inside it.
+  session_start: [],
   boarding_step: ['step', 'to', 'index', 'dir', 'ms'],
   boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'lines', 'ms'],
   account_claimed: ['from'],
@@ -106,6 +109,39 @@ let queue = load()
 let timer = null
 let flushing = false
 
+// ── The visit ────────────────────────────────────────────────────────
+// A random id, minted here, for one visit: it lets the trail say how
+// long a session lasted and how many a day a learner has, which no row
+// can say alone. It carries nothing about the learner (the server
+// already attributes rows to the account), is not a device id, and
+// lives in sessionStorage -- gone with the tab, never shared between
+// two. A visit ends after thirty minutes without an event; the next
+// one begins a new one and says so with `session_start`.
+const SESSION_KEY = 'jp-sid'
+const SESSION_GAP_MS = 30 * 60_000
+
+let session = loadSession()
+
+function loadSession() {
+  if (!HAS_WINDOW) return null
+  try {
+    const parsed = JSON.parse(window.sessionStorage.getItem(SESSION_KEY) || 'null')
+    return parsed && typeof parsed.id === 'string' && Number.isFinite(parsed.last) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function saveSession() {
+  if (!HAS_WINDOW) return
+  try { window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session)) } catch { /* in memory still */ }
+}
+
+// The live session's id, or null when there is none (or it lapsed).
+function liveSession(now) {
+  return session && now - session.last <= SESSION_GAP_MS ? session : null
+}
+
 function load() {
   if (!HAS_WINDOW) return []
   try {
@@ -172,7 +208,22 @@ export function track(name, props) {
     if (import.meta.env.DEV) console.warn(`track: unknown event "${name}"`)
     return
   }
-  queue.push({ id: eventId(), name, at: new Date().toISOString(), props: cleaned })
+  const now = Date.now()
+  const at = new Date(now).toISOString()
+  let live = liveSession(now)
+  // A failed request is not the learner doing anything: it joins the
+  // visit that is running, and neither begins one nor keeps one alive.
+  if (name !== 'api_error') {
+    if (!live) {
+      session = { id: eventId(), last: now }
+      live = session
+      queue.push({ id: eventId(), name: 'session_start', at, sid: live.id, props: {} })
+    } else {
+      live.last = now
+    }
+    saveSession()
+  }
+  queue.push({ id: eventId(), name, at, ...(live ? { sid: live.id } : {}), props: cleaned })
   if (queue.length > MAX_QUEUE) queue = queue.slice(-MAX_QUEUE)
   save()
   if (queue.length >= BATCH) flush()
@@ -251,6 +302,8 @@ if (HAS_WINDOW) {
 export function _peek() { return queue.slice() }
 export function _reset() {
   queue = []
+  session = null
+  if (HAS_WINDOW) { try { window.sessionStorage.removeItem(SESSION_KEY) } catch { /* nothing to clear */ } }
   if (timer !== null) { clearTimeout(timer); timer = null }
   save()
 }

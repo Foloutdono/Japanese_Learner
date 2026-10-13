@@ -21,6 +21,10 @@ vi.mock('./supabase', () => ({ supabase: { auth: { getSession } } }))
 vi.mock('./api', () => ({ apiFetch }))
 
 const { track, flush, EVENTS, _peek, _reset } = await import('./track')
+
+// The queue as the events the test tracked: the first one of a visit
+// brings its own session_start, which the session tests below read.
+const peek = () => _peek().filter(e => e.name !== 'session_start')
 const { setOptedOut } = await import('../stores/analyticsOptOut')
 
 beforeEach(() => {
@@ -38,17 +42,17 @@ afterEach(() => { setOptedOut(false); _reset() })
 describe('the event names', () => {
   it('drops a name that is not in the set', () => {
     track('not_an_event', { a: 1 })
-    expect(_peek()).toEqual([])
+    expect(peek()).toEqual([])
   })
 
   it('queues one that is', () => {
     track('screen_view', { route: '/today', tab: 'today' })
-    expect(_peek()).toHaveLength(1)
-    expect(_peek()[0].name).toBe('screen_view')
+    expect(peek()).toHaveLength(1)
+    expect(peek()[0].name).toBe('screen_view')
     // An id of its own, so a batch sent twice is kept once (plan 100's
     // live walk found two rows for one guide_done).
-    expect(typeof _peek()[0].id).toBe('string')
-    expect(_peek()[0].id.length).toBeGreaterThan(8)
+    expect(typeof peek()[0].id).toBe('string')
+    expect(peek()[0].id.length).toBeGreaterThan(8)
   })
 
   it('declares every name as an array of keys', () => {
@@ -63,7 +67,7 @@ describe('the event names', () => {
 describe('what a property may carry', () => {
   it('drops a key the name did not declare', () => {
     track('screen_view', { route: '/today', answer: 'こんにちは' })
-    expect(_peek()[0].props).toEqual({ route: '/today' })
+    expect(peek()[0].props).toEqual({ route: '/today' })
   })
 
   it('drops a value that is not a scalar', () => {
@@ -73,26 +77,26 @@ describe('what a property may carry', () => {
       kind: 'vocab', mode: 'recognition',
       items: [{ surface: '猫' }], secs: 30,
     })
-    expect(_peek()[0].props).toEqual({ kind: 'vocab', mode: 'recognition', secs: 30 })
+    expect(peek()[0].props).toEqual({ kind: 'vocab', mode: 'recognition', secs: 30 })
   })
 
   it('cuts a long string rather than carrying it', () => {
     track('screen_view', { route: '/' + 'ね'.repeat(500) })
-    expect(_peek()[0].props.route.length).toBe(64)
+    expect(peek()[0].props.route.length).toBe(64)
   })
 
   it('survives props that are not an object at all', () => {
     track('boot_timeout', null)
     track('boot_timeout', 'nonsense')
-    expect(_peek()).toHaveLength(2)
-    expect(_peek()[0].props).toEqual({})
+    expect(peek()).toHaveLength(2)
+    expect(peek()[0].props).toEqual({})
   })
 
   it('replaces a non-finite number rather than sending NaN', () => {
     // JSON.stringify turns NaN into null anyway; doing it here means
     // the localStorage mirror and the request agree.
     track('app_open', { boot_ms: NaN })
-    expect(_peek()[0].props.boot_ms).toBeNull()
+    expect(peek()[0].props.boot_ms).toBeNull()
   })
 })
 
@@ -103,14 +107,14 @@ describe('the opt-out', () => {
     setOptedOut(true)
     track('screen_view', { route: '/today' })
     track('app_open', { boot_ms: 10 })
-    expect(_peek()).toEqual([])
+    expect(peek()).toEqual([])
   })
 
   it('leaves what was already queued alone but adds nothing', () => {
     track('screen_view', { route: '/today' })
     setOptedOut(true)
     track('screen_view', { route: '/learn' })
-    expect(_peek()).toHaveLength(1)
+    expect(peek()).toHaveLength(1)
   })
 })
 
@@ -128,27 +132,27 @@ describe('flush', () => {
     // sendBeacon cannot set an Authorization header; keepalive is how
     // this outlives the page AND stays authenticated.
     expect(options.keepalive).toBe(true)
-    expect(JSON.parse(options.body).events[0].name).toBe('screen_view')
-    expect(_peek()).toEqual([])
+    expect(JSON.parse(options.body).events.map(e => e.name)).toEqual(['session_start', 'screen_view'])
+    expect(peek()).toEqual([])
   })
 
   it('keeps the queue when the network fails', async () => {
     apiFetch.mockRejectedValue(new Error('offline'))
     track('screen_view', { route: '/today' })
     await flush()
-    expect(_peek()).toHaveLength(1)
+    expect(peek()).toHaveLength(1)
   })
 
   it('keeps the queue on a 5xx but drops it on a 4xx', async () => {
     apiFetch.mockResolvedValue({ ok: false, status: 503 })
     track('screen_view', { route: '/today' })
     await flush()
-    expect(_peek()).toHaveLength(1)
+    expect(peek()).toHaveLength(1)
 
     // A 4xx will fail the same way forever; retrying is a loop.
     apiFetch.mockResolvedValue({ ok: false, status: 400 })
     await flush()
-    expect(_peek()).toEqual([])
+    expect(peek()).toEqual([])
   })
 
   it('sends nothing when nobody is signed in', async () => {
@@ -156,7 +160,7 @@ describe('flush', () => {
     track('screen_view', { route: '/today' })
     await flush()
     expect(apiFetch).not.toHaveBeenCalled()
-    expect(_peek()).toHaveLength(1)
+    expect(peek()).toHaveLength(1)
   })
 
   it('does not post an empty batch', async () => {
@@ -173,10 +177,77 @@ describe('the queue bound', () => {
     // the auth token lives in the same one.
     apiFetch.mockRejectedValue(new Error('offline'))
     for (let i = 0; i < 260; i++) track('boot_timeout', { waited_ms: i })
-    const queued = _peek()
+    const queued = peek()
     expect(queued.length).toBeLessThanOrEqual(200)
     // The last one written is still there; the first is not.
     expect(queued[queued.length - 1].props.waited_ms).toBe(259)
     expect(queued[0].props.waited_ms).not.toBe(0)
+  })
+})
+
+// ── The visit ─────────────────────────────────────────────────────
+
+describe('the session', () => {
+  const GAP = 30 * 60_000
+
+  beforeEach(() => vi.useFakeTimers({ now: new Date('2026-10-13T10:00:00Z') }))
+  afterEach(() => vi.useRealTimers())
+
+  it('opens with session_start, and every event after it carries the same id', () => {
+    track('screen_view', { route: '/today' })
+    vi.advanceTimersByTime(60_000)
+    track('screen_view', { route: '/learn' })
+    const q = _peek()
+    expect(q.map(e => e.name)).toEqual(['session_start', 'screen_view', 'screen_view'])
+    expect(q[0].props).toEqual({})
+    expect(new Set(q.map(e => e.sid)).size).toBe(1)
+    expect(q[0].sid).toMatch(/^[A-Za-z0-9-]{8,64}$/)
+  })
+
+  it('lets a visit go on while events keep coming, even past thirty minutes in all', () => {
+    track('screen_view', { route: '/today' })
+    for (let i = 0; i < 4; i++) {
+      vi.advanceTimersByTime(GAP - 60_000)
+      track('screen_view', { route: '/learn' })
+    }
+    expect(_peek().filter(e => e.name === 'session_start')).toHaveLength(1)
+  })
+
+  it('begins another after thirty minutes without an event', () => {
+    track('screen_view', { route: '/today' })
+    vi.advanceTimersByTime(GAP + 1000)
+    track('screen_view', { route: '/learn' })
+    const q = _peek()
+    expect(q.filter(e => e.name === 'session_start')).toHaveLength(2)
+    expect(q[0].sid).not.toBe(q[q.length - 1].sid)
+  })
+
+  it('does not begin, or keep alive, a visit for a failed request', () => {
+    track('api_error', { path: '/api/decks', status: 503 })
+    expect(_peek().map(e => e.name)).toEqual(['api_error'])
+    expect(_peek()[0].sid).toBeUndefined()
+
+    track('screen_view', { route: '/today' })
+    vi.advanceTimersByTime(GAP - 1000)
+    track('api_error', { path: '/api/decks', status: 503 })
+    vi.advanceTimersByTime(2000)
+    track('screen_view', { route: '/learn' })
+    // The error at +29:59 did not extend the visit past the gap.
+    expect(_peek().filter(e => e.name === 'session_start')).toHaveLength(2)
+  })
+
+  it('is sent with the batch, beside the event and not inside its properties', async () => {
+    track('screen_view', { route: '/today' })
+    await flush()
+    const sent = JSON.parse(apiFetch.mock.calls[0][2].body).events
+    expect(sent.map(e => e.name)).toEqual(['session_start', 'screen_view'])
+    expect(sent[1].sid).toBe(sent[0].sid)
+    expect(sent[1].props).toEqual({ route: '/today' })
+  })
+
+  it('records nothing, not even a session, for someone who opted out', () => {
+    setOptedOut(true)
+    track('screen_view', { route: '/today' })
+    expect(_peek()).toEqual([])
   })
 })

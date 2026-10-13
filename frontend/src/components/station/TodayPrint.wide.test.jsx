@@ -4,7 +4,7 @@ import '../../index.css'
 import { TodayPrint } from './TodayPrint'
 import { printVars } from './print/usePrint'
 
-// ── The print behind the gate, lifted once it has come (plan 206) ──
+// ── The print behind the gate, lifted once it has come (plan 208) ──
 // TodayPrint draws each layer as the print has it, measures it and
 // swaps in the lifted stack (print/liftPrint.js, whose own test holds
 // the picture): what the gate stands on is the stack, with nothing left

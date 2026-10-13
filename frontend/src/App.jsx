@@ -33,6 +33,7 @@ import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
 import { routePattern } from './lib/routePattern'
+import { watchApiFailures } from './lib/apiTrail'
 import { useDesk } from './hooks/useDesk'
 import { LangProvider, useLang } from './LangContext'
 
@@ -108,6 +109,8 @@ function DocumentHead() {
 
   return null
 }
+
+watchApiFailures()
 
 // 足跡 — renders nothing; records which screen was opened.
 //

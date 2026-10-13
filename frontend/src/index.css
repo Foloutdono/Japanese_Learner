@@ -8645,6 +8645,10 @@ textarea:focus-visible {
   --tpr-washi: #efe3bf;
   --tpr-sumi: #1d1a16;
   --tpr-shu: #a8382a;
+  /* A cleared day's seal (plan 206): its red, cut where the disc was,
+     and the light it sheds on the sky. */
+  --tpr-seal: #ce6153;
+  --tpr-seal-glow: #e98066;
 }
 /* The frame: the whole screen between the bars, under the gate; the
    gate's own layer of placed things over it, in the same place. */
@@ -8691,7 +8695,7 @@ textarea:focus-visible {
 /* A layer as drawn: for the moment it is measured, or when it cannot
    be lifted. */
 .tpr__layer > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* A layer lifted (plan 206, print/liftPrint.js): a stack in the print's
+/* A layer lifted (plan 208, print/liftPrint.js): a stack in the print's
    units, zoomed to the frame, so every length the print's motion is
    written in holds. Each moving part is a box with no size of its own,
    at the print's corner, that the compositor turns about its pivot;
@@ -8743,7 +8747,8 @@ textarea:focus-visible {
    print's units, its glow breathing (a sheet of its own, so the
    compositor breathes it), its halo glowing at dawn, dusk and night. */
 .tdy-dial--print { width: calc(var(--dial-units) * var(--tpr-u)); }
-.tdy-dial__disc { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.tdy-dial__disc,
+.tdy-dial__glow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .tdy-dial__glow { animation: tpr-breathe 7s ease-in-out infinite alternate; }
 @keyframes tpr-breathe { from { opacity: 0.8; transform: scale(0.985); } to { opacity: 1; transform: scale(1.035); } }
 .tdy-dial__halo { opacity: var(--ho, 0); animation: tpr-halo 5.5s ease-in-out infinite alternate; }
@@ -8759,6 +8764,30 @@ textarea:focus-visible {
   color: transparent;
 }
 .tdy-dial--print .tdy-dial__unit { line-height: 1.2; color: var(--tpr-disc-soft); }
+/* A day with nothing reviewed and nothing due: no seal, the hour's own
+   disc saying so, in the count's golds. */
+.tdy-dial--print .tdy-dial__clear {
+  background: linear-gradient(180deg, var(--tpr-count-a) 0%, var(--tpr-count-b) 100%);
+  background-clip: text;
+  color: transparent;
+}
+/* 白文 — a cleared day's seal as the disc (TodayDial's CutSeal, plan
+   206): a disc of the seal's red, its rings and characters left in the
+   slip's paper, in the kit's rungs (dayclear/kit/Seal.jsx). At dawn
+   the face takes the sun's own red, inline. */
+.tdy-dial__seal-face { fill: var(--tpr-seal); }
+.tdy-dial__seal-cut { fill: none; stroke: var(--tpr-washi); }
+.tdy-dial__seal-band { fill: var(--tpr-washi); }
+.tdy-dial__seal text { fill: var(--tpr-washi); text-anchor: middle; dominant-baseline: central; }
+.tdy-dial__seal-top { font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; letter-spacing: var(--tr-reading); }
+.tdy-dial__seal-day { font-family: var(--font-serif); font-size: var(--fs-specimen-word); font-weight: 900; }
+.tdy-dial__seal-foot {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-name);
+  font-variant-numeric: tabular-nums;
+}
 /* The guide's mark (today.gate): the dial's rings, not its glow. */
 .tdy-dial__gate {
   position: absolute;
@@ -8769,14 +8798,15 @@ textarea:focus-visible {
   translate: -50% -50%;
   border-radius: 50%;
 }
-/* Under the rings: the minutes and the hour they end, on one line. */
+/* Under the rings: the minutes and the hour they end, on one line (or,
+   on a cleared day, what the day reviewed: .tdy-recap). */
 .tdy-dial__line {
   white-space: nowrap;
   font-size: var(--fs-sm);
   color: var(--tpr-soft);
   font-variant-numeric: tabular-nums;
 }
-.tdy-dial__line .tdy-dial__time {
+.tdy-dial__line b {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-title);
@@ -8831,6 +8861,25 @@ textarea:focus-visible {
 }
 :where(.tdy--print) .tdy-door__what b,
 .tdy--print .tdy-door__go { color: var(--text-on-panel); }
+/* A cleared day (plan 206): its week of stamps set on the sky, the
+   kit's slots (WeekStamps) in the seal's red, their weekdays in the
+   hour's ink; tomorrow's row on the door's glass. The shut gate's own
+   glass is written with the gate's rules (.btn-depart--gate:disabled). */
+.tdy--print .tdy-rally {
+  width: max-content;
+  --stamp-ink: var(--tpr-seal);
+  --stamp-glyph: var(--tpr-ink);
+  --slot-ink: var(--tpr-ink);
+}
+.tdy--print .tdy-rally__n { color: var(--tpr-soft); }
+:where(.tdy--print) .tdy-rally__n b { color: var(--tpr-ink); }
+.tdy--print .tdy-next {
+  border-color: var(--surface-line);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+  color: var(--text-on-panel);
+}
+:where(.tdy--print) .tdy-next__n small,
+.tdy--print .tdy-next__min { color: var(--text-on-panel-soft); }
 
 /* The print's moving parts (the classes the print's build writes,
    scripts/today-print/build.py): slowly and by little, transform and
@@ -10078,6 +10127,14 @@ textarea:focus-visible {
   animation: none;
 }
 .btn-depart--gate:disabled::before { opacity: 0; }
+/* On the print (plan 206) the shut gate stands on the sumi glass its
+   row does, in the panel's inks, in either theme: the print's bank
+   under a bare outline read as a hole in the screen. At the rule's own
+   weight, after it, so no later gate rule reads as lighter. */
+:where(.tdy--print) .btn-depart--gate:disabled {
+  color: var(--text-on-panel-soft);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+}
 .btn-depart--gate:disabled .btn-depart__reader {
   background: transparent;
   color: var(--text-secondary);
@@ -25493,7 +25550,7 @@ button.brd-stn { cursor: pointer; }
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
+  gap: var(--sp-4);
   animation: brd-in 360ms ease-out backwards;
 }
 .tour__q {
@@ -25508,11 +25565,10 @@ button.brd-stn { cursor: pointer; }
   word-break: auto-phrase;
   outline: none;
 }
-.tour__hint { margin: calc(var(--sp-3) - var(--sp-5)) 0 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
+.tour__hint { margin: 0; font-size: var(--fs-body); line-height: 1.45; color: var(--text-secondary); text-wrap: pretty; }
 /* A twist's notion over its question (plan 189): the one caption, and
    where there are several, which of them it is. */
-.tour__notion,
-.tour-found__notion {
+.tour__notion {
   margin: 0;
   display: flex;
   flex-wrap: wrap;
@@ -25523,23 +25579,68 @@ button.brd-stn { cursor: pointer; }
   letter-spacing: var(--tr-caption);
   color: var(--text-secondary);
 }
-.tour__notion { margin-bottom: calc(var(--sp-3) - var(--sp-5)); }
 .tour__notion-count { font-variant-numeric: tabular-nums; }
 .tour__notion-count::before { content: '·'; margin-right: var(--sp-2); }
 .tour-pattern { font-family: var(--font-jp); color: var(--tour-ink); }
-.tour-card {
+/* 一枚 — one card a stop (plan 206, the owner's pick B of the canvas
+   "Tsuji — the tour, fuller"). The stops hung from the head in boxes of
+   one weight and left the middle of the screen empty; the stop is now
+   the run's own card, the one surface, taking the room between the
+   track and the gate as the study card does on a phone. Its head asks,
+   its middle -- the one part that grows -- holds what is asked about,
+   centred, and its foot says what the tour says back, over a hairline,
+   never in a box of its own. The choices stand under it. */
+.tour-leaf {
+  position: relative;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-panel);
-  padding: var(--sp-5);
+}
+.tour-leaf__head { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-5) var(--sp-5) 0; }
+/* The question is the card's head, a rung under a screen's question. */
+.tour-leaf__head .tour__q { font-size: var(--fs-lead); }
+/* The sentence's voice in the card's corner; the head keeps clear of it. */
+.tour-leaf__corner { position: absolute; top: var(--sp-4); right: var(--sp-4); }
+.tour-leaf:has(> .tour-leaf__corner) > .tour-leaf__head { padding-inline-end: calc(var(--sp-8) + var(--sp-5)); }
+.tour-leaf__mid {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-4);
+  justify-content: center;
+  gap: var(--sp-5);
   margin: 0;
+  padding: var(--sp-7) var(--sp-5);
+  list-style: none;
 }
-.tour-look--mini { padding-block: var(--sp-4); gap: var(--sp-3); font-size: var(--fs-sm); }
+.tour-leaf__foot { display: flex; flex-direction: column; gap: var(--sp-3); margin: 0; padding: var(--sp-4) var(--sp-5) var(--sp-5); border-top: 1px solid var(--surface-line); }
+/* The sentence asked about leads, as on the practice card: centred, at
+   --fs-title on a phone (--fs-heading on the desk), its translation under
+   it once it may be read. */
+.tour-leaf__mid--spec { align-items: center; text-align: center; }
+.tour-leaf__mid--spec .dict-ex { align-items: center; gap: var(--sp-3); }
+.tour-leaf__mid--spec .dict-ex__jp { justify-content: center; font-size: var(--fs-title); }
+.tour-leaf__mid--spec .dict-ex__tr { font-size: var(--fs-body); }
+.tour-look .dict-ex__jp { font-size: var(--fs-title); }
+.tour-look--mini { align-items: center; text-align: center; gap: var(--sp-2); padding-block: var(--sp-6); }
+.tour-look--mini .dict-ex__jp { justify-content: center; font-size: var(--fs-lead); }
 .tour-look--mini .dict-ex__tr { display: none; }
+/* Found: the card turns to the point -- what happened at its head, the
+   point over its shape and the rule in its middle, an example at its foot. */
+.tour-leaf--found .tour-leaf__mid { align-items: center; text-align: center; gap: var(--sp-2); }
+.tour-leaf--found .tour-pattern { font-size: var(--fs-display); font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.tour-leaf__structure { margin: 0; font-family: var(--font-jp); font-size: var(--fs-sm); color: var(--text-secondary); }
+.tour-leaf__rule { margin-top: var(--sp-4); font-size: var(--fs-lead); font-weight: 600; }
+.tour-verdict { margin: 0; display: flex; align-items: center; gap: var(--sp-3); font-size: var(--fs-body); font-weight: 700; }
+.tour-verdict--ok { color: color-mix(in srgb, var(--success) 70%, var(--text-primary)); }
+.tour-verdict--given { color: var(--sel-ink); }
+/* The scene's lines run from the card's head. */
+.tour-leaf--scene .tour-leaf__mid { justify-content: flex-start; padding-block: var(--sp-5); }
 .tour-guesses { display: grid; gap: var(--sp-3); }
+/* Short choices -- a form, a word -- stand in a row, four as two by two. */
+.tour-guesses--row { grid-template-columns: repeat(var(--tour-cols, 2), minmax(0, 1fr)); }
 .tour-guess {
   position: relative;
   display: flex;
@@ -25617,40 +25718,10 @@ button.brd-stn { cursor: pointer; }
 .tour-said--given .tour-said__mark { color: var(--sel-ink); }
 .tour-said__line { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-wrap: pretty; }
 .tour-said__hint { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
-.tour-rule__text { margin: 0; font-size: var(--fs-lead); font-weight: 600; line-height: 1.45; text-wrap: pretty; }
-.tour-rule__structure { margin: 0; font-family: var(--font-jp); color: var(--text-secondary); }
 .tour-chain { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-lead); }
 .tour-chain__from { color: var(--text-secondary); }
 .tour-chain__arrow { color: var(--tour-ink); font-family: var(--font-display); }
 .tour-chain__to { color: var(--tour-ink); }
-.tour-head { display: flex; flex-direction: column; gap: var(--sp-2); }
-.tour-head .tour-pattern { font-size: var(--fs-heading); line-height: 1.2; overflow-wrap: anywhere; }
-.tour-found { list-style: none; gap: 0; }
-.tour-found__line {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: var(--sp-4);
-  padding-block: var(--sp-4);
-  border-top: 1px solid var(--surface-line);
-}
-.tour-found__line:first-child { border-top: none; padding-top: 0; }
-.tour-found__line:last-child { padding-bottom: 0; }
-.tour-found__n {
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--line-color);
-  border-radius: var(--r-pill);
-  color: var(--tour-ink);
-  font-weight: 700;
-  font-size: var(--fs-sm);
-  font-variant-numeric: tabular-nums;
-}
-.tour-found__body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
-.tour-found__say { margin: 0; font-weight: 600; line-height: 1.45; }
-.tour-found__line-text { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
 /* Spoken lines (plan 187d): a sentence and its voice beside it. */
 .tour-ex { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: start; gap: var(--sp-3); }
 .tour-speak {
@@ -25673,6 +25744,15 @@ button.brd-stn { cursor: pointer; }
 .tour-said__line--ja { font-family: var(--font-jp); font-weight: 600; }
 .tour-pair { margin: var(--sp-2) 0 0; display: flex; flex-wrap: wrap; gap: var(--sp-3); font-family: var(--font-jp); font-size: var(--fs-lead); }
 .tour-pair__bar { color: var(--text-secondary); }
+/* What the one card overrides of the pieces above (plan 206): what the
+   tour says back is the card's foot over a hairline, not a box of its
+   own; the found verdict's mark at the tile's size; the chain centred
+   under the point; a short form at a row tile's size. */
+.tour-leaf > .tour-said { border: 0; border-top: 1px solid var(--surface-line); border-radius: 0; background: none; }
+.tour-leaf--found .tour-chain { justify-content: center; }
+.tour-verdict .tour-said__mark { width: 24px; height: 24px; }
+.tour-verdict--ok .tour-said__mark { color: var(--success); }
+.tour-guesses--row .tour-guess__text--ja { font-size: var(--fs-title); }
 /* The scene's place, as the station's plate: its name over its caption
    on the 駅名標's white in either theme (the HUD's arrival plate's,
    .hud__dest), the line's edge under it. */
@@ -25710,17 +25790,6 @@ button.brd-stn { cursor: pointer; }
 .tour-line .tour-speak { align-self: center; }
 .tour-scene__all { align-self: flex-start; }
 .tour-note { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
-.tour-reply {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-1);
-  padding: var(--sp-4) var(--sp-5);
-  border: 2px solid var(--sel-line);
-  border-radius: var(--r-panel);
-  background: var(--sel-wash);
-}
-.tour-reply__who { font-size: var(--fs-caption); font-weight: 700; color: var(--sel-ink); }
-.tour-reply__ja { font-family: var(--font-jp); font-size: var(--fs-lead); font-weight: 600; }
 
 /* 194 — Choisir and Construire on the run's own card (the owner's pick,
    option C): no plate inside the card and no band; the point's roundel
@@ -26073,16 +26142,16 @@ button.brd-stn { cursor: pointer; }
   text-transform: uppercase;
   color: color-mix(in srgb, var(--rating-wrong) 70%, var(--text-primary));
 }
-/* The results (plan 195): the point beside the score drawn as a dial, one
-   arc a question, then each question again as a row -- the mark, the
-   sentence with the right form in it, the kind at the end, and under a
-   miss what was taken, struck. */
-.tour-end { display: flex; align-items: center; gap: var(--sp-5); }
-.tour-end__who { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
-.tour-end__who .tour-pattern { font-size: var(--fs-heading); line-height: 1.2; overflow-wrap: anywhere; }
+/* The results (plan 195), one card since plan 206: the score drawn as a
+   dial over the point in its middle, one arc a question, then at its
+   foot each question again as a row -- the mark, the sentence with the
+   right form in it, the kind at the end, and under a miss what was
+   taken, struck. */
+.tour-end { align-items: center; text-align: center; gap: var(--sp-2); }
+.tour-end .tour-pattern { margin-top: var(--sp-3); font-size: var(--fs-heading); line-height: 1.2; overflow-wrap: anywhere; }
 .tour-end__structure { margin: 0; font-size: var(--fs-sm); color: var(--text-secondary); }
-.tour-tally { position: relative; flex: none; width: 96px; height: 96px; }
-.tour-tally__dial { display: block; }
+.tour-tally { position: relative; flex: none; width: 128px; height: 128px; }
+.tour-tally__dial { display: block; width: 100%; height: 100%; }
 .tour-tally__arc { fill: none; stroke: var(--surface-line); stroke-width: 6; }
 .tour-tally__arc--ok { stroke: var(--success); }
 .tour-tally__arc--no { stroke: var(--rating-wrong); }
@@ -40317,7 +40386,15 @@ button.brd-stn { cursor: pointer; }
   .tour--desk .tour__foot { bottom: 0; align-items: center; }
   .tour--desk .btn-depart { width: var(--desk-side-w); max-width: 100%; }
   .tour--desk .tour-guesses { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tour--desk .tour-guesses--row { grid-template-columns: repeat(var(--tour-cols, 2), minmax(0, 1fr)); }
   .tour--desk[data-stop="scene"] .tour-guesses { grid-template-columns: minmax(0, 1fr); }
+  /* 一枚 on the desk (plan 206): the stop's card is the run's, composed in
+     the column's middle at a card's height rather than drawn down the
+     whole column, its sentence a step up. */
+  .tour--desk .tour__body { justify-content: safe center; }
+  .tour--desk .tour-leaf { flex: none; min-height: min(340px, 50vh); }
+  .tour--desk .tour-leaf__mid--spec .dict-ex__jp,
+  .tour--desk .tour-look:not(.tour-look--mini) .dict-ex__jp { font-size: var(--fs-heading); }
 
   .tour-route,
   .tour-ledger {

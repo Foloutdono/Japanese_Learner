@@ -126,6 +126,8 @@ const nav = {
   todayNewShort:     'new',
   todayLesson:       'unit',
   todayReviewed:     n => (n === 1 ? '1 card today' : `${n} cards today`),
+  // The same, its figure set apart on the print (plan 206).
+  todayReviewedUnit: n => (n === 1 ? 'card today' : 'cards today'),
   todayCardsUnit:    n => (n === 1 ? 'card' : 'cards'),
   todayWeekStamps:   n => `${n} days in a row, the last seven stamped`,
   // 基礎 — the basics course on the gate and in Settings › Level (plan 186f)

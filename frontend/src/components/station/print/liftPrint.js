@@ -1,4 +1,4 @@
-// ── The print's moving parts, lifted out of its SVG (plan 206) ─────
+// ── The print's moving parts, lifted out of its SVG (plan 208) ─────
 // A CSS animation on a shape inside an <svg> is not the compositor's to
 // run: every frame the browser lays the drawing out again, re-records
 // it and rasters it (a print is a thousand shapes) on the main thread,

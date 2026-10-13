@@ -21,10 +21,11 @@ import { PRINT, usePrintScene } from './print/usePrint'
 // pace however busy the rest is; what stands in front of it; the
 // paper's fibre over all. Its moving parts are CSS (index.css, the
 // print's section) and keep still under reduced motion. Decoration:
-// the gate says everything it shows in words.
+// the gate says everything it shows in words. On a day with nothing
+// left the last train has gone (`train={false}`, plan 206).
 //
 // The sky, what lies behind and what stands in front are each lifted
-// once they have come (plan 206, print/liftPrint.js): drawn as the
+// once they have come (plan 208, print/liftPrint.js): drawn as the
 // print has them for a moment, measured, then rebuilt as boxes, so the
 // compositor moves the print's parts and the main thread is left to the
 // gate. A layer that cannot be lifted stays as drawn. Its loops are then
@@ -77,7 +78,7 @@ function useUnderGate() {
   return departing != null && covered === departing
 }
 
-export function TodayPrint({ hour, device, frameRef }) {
+export function TodayPrint({ hour, device, frameRef, train = true }) {
   const scene = usePrintScene(hour, device)
   const under = useUnderGate()
   const box = scene ? `0 0 ${scene.w} ${scene.h}` : null
@@ -89,7 +90,7 @@ export function TodayPrint({ hour, device, frameRef }) {
             <PrintLayer scene={scene} name="sky" />
             <div className="tpr__grain" />
             <PrintLayer scene={scene} name="back" />
-            <div className="tpr__rail">
+            {train && <div className="tpr__rail">
               <svg
                 className="tpr__train"
                 viewBox={box}
@@ -101,7 +102,7 @@ export function TodayPrint({ hour, device, frameRef }) {
                 }}
                 dangerouslySetInnerHTML={{ __html: scene.layers.train }}
               />
-            </div>
+            </div>}
             <PrintLayer scene={scene} name="front" />
             <div className="tpr__paper" />
           </>

@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
+
+const track = vi.fn()
+vi.mock('../lib/track', () => ({ track: (...a) => track(...a) }))
 import { isIosSafari, promptInstall } from './installPrompt'
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => { vi.unstubAllGlobals(); track.mockClear() })
 
 function ua(userAgent, maxTouchPoints = 0) {
   vi.stubGlobal('navigator', { userAgent, maxTouchPoints })
@@ -58,5 +61,19 @@ describe('a handed-over prompt', () => {
     expect(await store.promptInstall()).toBe('accepted')
     expect(await store.promptInstall()).toBeNull()
     expect(event.prompt).toHaveBeenCalledTimes(1)
+  })
+
+  it("records the browser's answer, and the install the browser reports", async () => {
+    const { store } = await withPrompt('dismissed')
+    await store.promptInstall()
+    expect(track).toHaveBeenCalledWith('install_prompt', { outcome: 'dismissed' })
+    track.mockClear()
+    window.dispatchEvent(new Event('appinstalled'))
+    expect(track).toHaveBeenCalledWith('install_prompt', { outcome: 'installed' })
+  })
+
+  it('records nothing when there was nothing to prompt', async () => {
+    expect(await promptInstall()).toBeNull()
+    expect(track).not.toHaveBeenCalled()
   })
 })

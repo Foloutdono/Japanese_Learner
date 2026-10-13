@@ -34,6 +34,9 @@ class Event(BaseModel):
     # about -- is kept once. Optional: a client mid-deploy sends none,
     # and a row without one is simply not deduplicated.
     id: str | None = Field(default=None, max_length=64)
+    # The client's random id for the visit this event belongs to. Held
+    # to a shape by events.clean_sid, not by the property allowlist.
+    sid: str | None = Field(default=None, max_length=64)
 
 
 class Batch(BaseModel):
@@ -54,7 +57,7 @@ def post_events(batch: Batch, user_id: str = Depends(get_user_id)):
             # build than this server, which is normal during a deploy --
             # counted, not logged per row.
             continue
-        rows.append((item.name, props, events.clean_at(item.at, now), item.id))
+        rows.append((item.name, props, events.clean_at(item.at, now), item.id, item.sid))
 
     if not rows:
         return {"kept": 0}

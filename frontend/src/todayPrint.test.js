@@ -91,7 +91,7 @@ describe('the prints on disk', () => {
   })
 
   it('gives no moving part an opacity of its own, which a lifted box could not keep under its rule', () => {
-    // print/liftPrint.js (plan 206) carries a moving part's class to an
+    // print/liftPrint.js (plan 208) carries a moving part's class to an
     // HTML box. In an SVG a class's rule outranks an opacity attribute;
     // on the box the attribute would be inline and outrank the rule.
     for (const hour of HOURS) {
