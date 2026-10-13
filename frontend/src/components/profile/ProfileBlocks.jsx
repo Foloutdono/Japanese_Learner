@@ -3,6 +3,8 @@ import { ChevronIcon, GearIcon } from '../ui/Icons'
 import { LineMark } from './LineLedger'
 import { SplitRow } from '../selection/SplitRow'
 import { useDesk } from '../../hooks/useDesk'
+import { durationParts, weekShare } from '../../domain/agenda'
+import { AGENDA_PATH } from '../agenda/AgendaNext'
 
 // ── The stamp book (canvas Profile, plan 074) ─────────────────
 // DESIGN.md, Motion: the streak is a stamp rally, not a flame. The
@@ -235,6 +237,39 @@ export function TicketsDoor({ t, navigate, count = 0 }) {
           <span className="pf-line__names"><span className="pf-line__jp">{t.tkbDoor}</span></span>
         </span>
         <span className="record__value record__value--door">{count}</span>
+        <ChevronIcon direction="right" size={15} className="record__chev" />
+      </SplitRow>
+    </div>
+  )
+}
+
+// ── 時間割 — the door to the agenda (plan 202) ─────────────────────
+// The owner's pick B of the two drawn (a timetable in the holder, or a
+// door): the week's blocks live in Settings › Agenda (plan 181), and the
+// holder keeps one door to them under the tickets', drawn as the doors
+// are, in the pass's ink (the agenda is one of the card's own pages).
+// Its figure is the hours the week holds, a standing arrangement rather
+// than what is next, so the holder stays backward-looking (DESIGN.md);
+// an empty or unread week prints none. A place, so a link on the desk
+// (plan 123).
+export function AgendaDoor({ t, navigate, blocks }) {
+  const desk = useDesk()
+  const { total } = weekShare(blocks ?? [])
+  const { h, m } = durationParts(total)
+  return (
+    <div className="records records--one">
+      <SplitRow
+        to={desk ? AGENDA_PATH : undefined}
+        push
+        className="record record--door"
+        style={{ '--line-color': 'var(--pass-ink)' }}
+        onClick={() => { if (!desk) navigate(AGENDA_PATH) }}
+      >
+        <span className="pf-line__id">
+          <span className="pf-line__roundel" aria-hidden="true" lang="ja">時</span>
+          <span className="pf-line__names"><span className="pf-line__jp">{t.settingsAgenda}</span></span>
+        </span>
+        {total > 0 && <span className="record__value record__value--door">{t.agdDuration(h, m)}</span>}
         <ChevronIcon direction="right" size={15} className="record__chev" />
       </SplitRow>
     </div>
