@@ -33,7 +33,6 @@ export function deal(right, wrong, seed) {
 const KINDS = { w: 'word', v: 'word', p: 'particle', c: 'copula' }
 const KANJI = /[\u3400-\u9fff\uf900-\ufaff々〆ヶ]/
 const KANJI_RUNS = /[\u3400-\u9fff\uf900-\ufaff々〆ヶ]+|[^\u3400-\u9fff\uf900-\ufaff々〆ヶ]+/g
-const hiragana = str => str.replace(/[\u30a1-\u30f6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60))
 /** A word's reading cut to its kanji, as the deck's words carry it
  *  ([[text, reading]], '' over kana): 降り出す read ふりだす is 降 ふ, り,
  *  出 だ, す, matched on the kana the word writes itself (plan 200i). A
@@ -43,7 +42,7 @@ export function furiganaOf(word, read) {
   if (!word || !read || !KANJI.test(word)) return null
   const parts = word.match(KANJI_RUNS)
   const esc = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const m = new RegExp(`^${parts.map(x => (KANJI.test(x) ? '(.+?)' : `(${esc(hiragana(x))})`)).join('')}$`).exec(hiragana(read))
+  const m = new RegExp(`^${parts.map(x => (KANJI.test(x) ? '(.+?)' : `(${esc(toHira(x))})`)).join('')}$`).exec(toHira(read))
   if (!m) return [[word, read]]
   let at = 0
   return parts.map((x, i) => {
