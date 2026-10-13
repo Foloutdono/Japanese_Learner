@@ -111,6 +111,8 @@ export function printVars(hour, print, box) {
   const { u, x, y } = box ?? { u: 1, x: 0, y: 0 }
   return {
     '--tpr-u': `${u}px`,
+    // The same scale as a number, for the lifted layers' zoom (TodayPrint).
+    '--tpr-zoom': u,
     '--tpr-x': `${x}px`,
     '--tpr-y': `${y}px`,
     '--tpr-w': frame.w,

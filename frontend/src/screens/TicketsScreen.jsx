@@ -122,8 +122,23 @@ export default function TicketsScreen({ session, profile: profileProp, stats: st
   useEffect(() => {
     if (!input) return undefined
     let live = true
-    renderTicketPng(input).then(blob => { if (live) setPng({ key: inputKey, blob }) }).catch(() => {})
-    return () => { live = false }
+    // Once the arrival (or a pick's flip) has played (none plays under
+    // reduced motion), and when the page is idle: drawn as the screen mounted, the canvas took the arrival's
+    // frames (a frozen 0.7s on a phone, plan 207). A tap before then
+    // draws it then.
+    const idle = window.requestIdleCallback ?? (fn => setTimeout(fn, 1))
+    const unidle = window.cancelIdleCallback ?? clearTimeout
+    let idleId = null
+    const wait = setTimeout(() => {
+      idleId = idle(() => {
+        renderTicketPng(input).then(blob => { if (live) setPng({ key: inputKey, blob }) }).catch(() => {})
+      }, { timeout: 800 })
+    }, reduced ? 0 : T_REST)
+    return () => {
+      live = false
+      clearTimeout(wait)
+      if (idleId !== null) unidle(idleId)
+    }
     // Redrawn when what it prints changes (inputKey), not on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputKey])

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { playDayClear, playFareTick, playStamp } from '../../lib/audio'
 import { composing } from '../../lib/keyGuards'
@@ -129,10 +129,16 @@ export default function ClearPhone({ result, model, reduced = false, handover = 
       fire(handover ? 'handed' : 'fare')
       return undefined
     }
-    let anim = null
+    // The flights' own clock: their CSS animation's start, read once it
+    // is set (as the desk does). Reading an animation's time flushes the
+    // page's style, and once a frame that was most of the frame (plan 207).
+    let synced = false
     const clock = now => {
-      if (!anim && clockEl.current?.getAnimations) anim = clockEl.current.getAnimations()[0] ?? null
-      if (anim && anim.playState !== 'idle' && anim.currentTime != null) return Number(anim.currentTime)
+      if (!synced) {
+        const anim = clockEl.current?.getAnimations?.()[0]
+        if (anim?.startTime != null) { t0.current = Number(anim.startTime); synced = true }
+        else if (now - t0.current >= 400) synced = true
+      }
       return now - t0.current
     }
     const count = (arr, at) => { let k = 0; for (let i = 0; i < arr.length; i++) if (arr[i] <= at) k++; return k }
@@ -383,23 +389,9 @@ export default function ClearPhone({ result, model, reduced = false, handover = 
                             (skipped && st.skipLanded < n ? ' clrk-fade' : '')} aria-hidden="true">
               <i className="clr-phone__clock" ref={clockEl} />
               <div className={pileRise}>
-                {plan.flights.map(c => {
-                  const buried = c.i < landed && c.i < top[c.v]
-                  return (
-                    <div key={c.i} className="clr-phone__fx" style={flightStyle(c, -lay.low, c.i + 1)}>
-                      <div className={'clr-phone__fy' + (c.last ? ' clr-phone__fy--last' : '')}>
-                        <div className={'clr-phone__fr' + (c.last ? ' clr-phone__fr--last' : '')}>
-                          <RunCard
-                            face={c.face}
-                            paper
-                            className={'clr-phone__card clr-phone__card--b' + (c.fast ? ' clr-phone__card--fast' : '') + (buried ? ' clr-phone__card--buried' : '')}
-                            style={{ '--ink': INK[c.v] }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
+                {plan.flights.map(c => (
+                  <PileFlight key={c.i} c={c} low={-lay.low} buried={c.i < landed && c.i < top[c.v]} />
+                ))}
               </div>
             </div>
 
@@ -412,23 +404,9 @@ export default function ClearPhone({ result, model, reduced = false, handover = 
             {!atRest && !is('IMPACT') && (
               <div className={'clr-phone__clipA ' + flight} aria-hidden="true">
                 <div className="clr-phone__deck clrk-arrive">
-                  {plan.flights.map(c => {
-                    const k = c.i - launched
-                    const under = k >= 1
-                    return (
-                      <div
-                        key={c.i}
-                        className={'clr-phone__slot' + (under ? ' clr-phone__slot--under' : k === 0 ? ' clr-phone__slot--top' : '')}
-                        style={{ ...flightStyle(c, 0, 100 - c.i), transform: under ? plan.fan[Math.min(k, 2)] : 'none', opacity: k >= 3 ? 0 : 1 }}
-                      >
-                        <div className={'clr-phone__fy' + (c.last ? ' clr-phone__fy--last' : '')}>
-                          <div className={'clr-phone__fr' + (c.last ? ' clr-phone__fr--last' : '')}>
-                            <RunCard face={c.face} paper className={'clr-phone__card clr-phone__card--a' + (c.fast ? ' clr-phone__card--fast' : '')} />
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
+                  {plan.flights.map(c => (
+                    <DeckSlot key={c.i} c={c} k={Math.max(-1, Math.min(3, c.i - launched))} fan={plan.fan} />
+                  ))}
                 </div>
               </div>
             )}
@@ -526,6 +504,44 @@ export default function ClearPhone({ result, model, reduced = false, handover = 
 
 // A flight's variables, as unitless numbers (the stylesheet multiplies)
 // and times; `o` shifts copy B's frame by the drop its riser holds it at.
+// A card in flight to its pile, and the same card waiting on the deck,
+// each drawn again only when what it shows changes: a beat moves a card
+// or two, and drawing all of them again on every beat was most of the
+// celebration's frame (plan 207). `k` is the card's place on the deck,
+// held to what it shows: gone (-1), on top (0), under (1, 2), hidden (3).
+const PileFlight = memo(function PileFlight({ c, low, buried }) {
+  return (
+    <div className="clr-phone__fx" style={flightStyle(c, low, c.i + 1)}>
+      <div className={'clr-phone__fy' + (c.last ? ' clr-phone__fy--last' : '')}>
+        <div className={'clr-phone__fr' + (c.last ? ' clr-phone__fr--last' : '')}>
+          <RunCard
+            face={c.face}
+            paper
+            className={'clr-phone__card clr-phone__card--b' + (c.fast ? ' clr-phone__card--fast' : '') + (buried ? ' clr-phone__card--buried' : '')}
+            style={{ '--ink': INK[c.v] }}
+          />
+        </div>
+      </div>
+    </div>
+  )
+})
+
+const DeckSlot = memo(function DeckSlot({ c, k, fan }) {
+  const under = k >= 1
+  return (
+    <div
+      className={'clr-phone__slot' + (under ? ' clr-phone__slot--under' : k === 0 ? ' clr-phone__slot--top' : '')}
+      style={{ ...flightStyle(c, 0, 100 - c.i), transform: under ? fan[Math.min(k, 2)] : 'none', opacity: k >= 3 ? 0 : 1 }}
+    >
+      <div className={'clr-phone__fy' + (c.last ? ' clr-phone__fy--last' : '')}>
+        <div className={'clr-phone__fr' + (c.last ? ' clr-phone__fr--last' : '')}>
+          <RunCard face={c.face} paper className={'clr-phone__card clr-phone__card--a' + (c.fast ? ' clr-phone__card--fast' : '')} />
+        </div>
+      </div>
+    </div>
+  )
+})
+
 function flightStyle(c, o, z) {
   return {
     zIndex: z, '--o': o, '--d': `${c.d}ms`, '--f': `${c.f}ms`, '--tx': c.tx, '--ax': c.ax,

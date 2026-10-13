@@ -1,5 +1,9 @@
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { kanjiNumber } from '../../domain/dayClear'
+import { useDeparture } from '../../stores/departure'
+import { useReducedMotion } from '../dayclear/useReducedMotion'
+import { handOver, liftLayer } from './print/liftPrint'
 import { PRINT, usePrintScene } from './print/usePrint'
 
 // ── 浮世絵 — the print of the hour, behind Today's gate (plan 205) ──
@@ -19,18 +23,73 @@ import { PRINT, usePrintScene } from './print/usePrint'
 // print's section) and keep still under reduced motion. Decoration:
 // the gate says everything it shows in words. On a day with nothing
 // left the last train has gone (`train={false}`, plan 206).
+//
+// The sky, what lies behind and what stands in front are each lifted
+// once they have come (plan 208, print/liftPrint.js): drawn as the
+// print has them for a moment, measured, then rebuilt as boxes, so the
+// compositor moves the print's parts and the main thread is left to the
+// gate. A layer that cannot be lifted stays as drawn. Its loops are then
+// handed to the Web Animations API (plan 207, handOver), so their turns
+// do not wake the main thread either; a change to reduced motion lifts
+// the layer again, still or moving.
+
+// The lifted layers, once a visit: the same print lifts the same way.
+const lifted = new WeakMap()
+const drawn = (scene, name) => `<svg viewBox="0 0 ${scene.w} ${scene.h}" focusable="false">${scene.layers[name]}</svg>`
+
+function PrintLayer({ scene, name }) {
+  const ref = useRef(null)
+  const reduced = useReducedMotion()
+  useLayoutEffect(() => {
+    const el = ref.current
+    const done = lifted.get(scene) ?? {}
+    if (!(name in done)) {
+      el.innerHTML = drawn(scene, name)
+      try {
+        done[name] = `<div class="tpr-lift__root">${liftLayer(el.firstChild)}</div>`
+      } catch {
+        done[name] = null
+      }
+      lifted.set(scene, done)
+    }
+    el.innerHTML = done[name] ?? drawn(scene, name)
+    const moving = done[name] ? handOver(el.firstChild) : []
+    return () => { for (const a of moving) a.cancel() }
+  }, [scene, name, reduced])
+  return <div className="tpr__layer" ref={ref} />
+}
+
+// While a departure's gate has the screen, the print is not seen and
+// Today is about to go: it steps out of the page then, so the restyles
+// and the swap the departure makes do not carry its thousands of shapes
+// (plan 207). The gate's scrim is opaque by 168ms (TicketGate's
+// gate-scrim at its speed); the print steps out just after.
+const UNDER_GATE_MS = 200
+
+function useUnderGate() {
+  const departing = useDeparture()
+  // The departure the gate has covered: a new one, or none, uncovers.
+  const [covered, setCovered] = useState(null)
+  useEffect(() => {
+    if (!departing?.stage) return undefined
+    const id = setTimeout(() => setCovered(departing), UNDER_GATE_MS)
+    return () => clearTimeout(id)
+  }, [departing])
+  return departing != null && covered === departing
+}
 
 export function TodayPrint({ hour, device, frameRef, train = true }) {
   const scene = usePrintScene(hour, device)
+  const under = useUnderGate()
   const box = scene ? `0 0 ${scene.w} ${scene.h}` : null
   return (
-    <div className="tpr" ref={frameRef} aria-hidden="true">
+    <div className={`tpr${under ? ' tpr--under-gate' : ''}`} ref={frameRef} aria-hidden="true">
       <div className={`tpr__art${scene ? ' tpr__art--in' : ''}`}>
         {scene && (
           <>
-            <svg className="tpr__layer" viewBox={box} focusable="false" dangerouslySetInnerHTML={{ __html: scene.layers.sky }} />
+            <PrintLayer scene={scene} name="sky" />
             <div className="tpr__grain" />
-            <svg className="tpr__layer" viewBox={box} focusable="false" dangerouslySetInnerHTML={{ __html: scene.layers.back }} />
+            <PrintLayer scene={scene} name="back" />
             {train && <div className="tpr__rail">
               <svg
                 className="tpr__train"
@@ -44,7 +103,7 @@ export function TodayPrint({ hour, device, frameRef, train = true }) {
                 dangerouslySetInnerHTML={{ __html: scene.layers.train }}
               />
             </div>}
-            <svg className="tpr__layer" viewBox={box} focusable="false" dangerouslySetInnerHTML={{ __html: scene.layers.front }} />
+            <PrintLayer scene={scene} name="front" />
             <div className="tpr__paper" />
           </>
         )}
