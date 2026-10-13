@@ -1,5 +1,5 @@
 // Redraws Android's adaptive-icon foreground at the size the launcher
-// shows it (plan 202). @capacitor/assets writes the foreground at the
+// shows it (plan 203). @capacitor/assets writes the foreground at the
 // legacy icon's 48dp a density and insets it 16.7% into the 108dp layer,
 // so every launcher drew those pixels 1.5 times up, into the 72dp
 // viewport, and the mark's edges went soft. Same source
