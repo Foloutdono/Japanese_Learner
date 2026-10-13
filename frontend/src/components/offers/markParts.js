@@ -4,7 +4,7 @@ import { MARK_INK, MARK_ROAD } from '../ui/markPaths'
 // font (scripts/build-mark.py): its first two subpaths are 十, the
 // cross, and the rest are 辶's dot and zigzag; the road is 辶's sweep.
 // The offers' passes fill 辶 -- dot, zigzag and sweep -- with the
-// learner's XP, and never 十.
+// learner's XP, and never 十; only the level-up fills 十 too (plan 200).
 const SUBPATHS = MARK_INK.match(/M[^M]*/g)
 
 export const CROSS = SUBPATHS.slice(0, 2).join('')
