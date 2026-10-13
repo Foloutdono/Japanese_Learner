@@ -132,6 +132,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
     linear-gradient(rgba(214, 64, 64, 0.16), rgba(214, 64, 64, 0.16)) right / var(--r) 100% no-repeat; }
 
 .export { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 16px; align-items: start; border-top: 1px solid var(--line); padding-top: 20px; }
+.export__text { display: grid; gap: 8px; min-width: 0; }
+.title-field { position: relative; }
+.title-field input { width: 100%; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 10px 64px 10px 12px; font: 600 15px/1.4 var(--jp); }
+.title-count { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--ink2); font-size: 12px; font-variant-numeric: tabular-nums; }
 .export textarea { width: 100%; min-height: 128px; resize: vertical; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 10px 12px; font: 400 14px/1.5 var(--jp); }
 .export__actions { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
 .status { grid-column: 1 / -1; color: var(--ink2); min-height: 1.4em; margin: 0; }
@@ -254,9 +258,16 @@ dialog::backdrop { background: var(--scrim); }
     <div id="stage" class="stage"></div>
 
     <div class="export">
-      <textarea id="caption" aria-label="Caption to post with the slides" spellcheck="false"></textarea>
+      <div class="export__text">
+        <div class="title-field">
+          <input id="title" type="text" maxlength="90" aria-label="Title to post with the slides" spellcheck="false">
+          <span id="title-count" class="title-count" aria-hidden="true"></span>
+        </div>
+        <textarea id="caption" aria-label="Caption to post with the slides" spellcheck="false"></textarea>
+      </div>
       <div class="export__actions">
         <button id="export" type="button" class="btn btn--metal" disabled>Download <span id="export-name"></span> (.zip)</button>
+        <button id="copy-title" type="button" class="btn">Copy title</button>
         <button id="copy" type="button" class="btn">Copy caption</button>
       </div>
       <p id="status" class="status" role="status"></p>

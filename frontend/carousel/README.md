@@ -300,9 +300,14 @@ cd frontend && python3 -m http.server 8123   # then http://localhost:8123/carous
 ```
 
 It draws on canvas, so the preview is the PNG: "Download (.zip)" writes
-every slide of the chosen direction and `caption.txt` (the item, its
-romaji and translation, hashtags), and a slide opened full size can be
-saved alone. Published as a claude.ai artifact, the download goes through
+every slide of the chosen direction, `title.txt` and `caption.txt` (the
+item, its romaji and translation, hashtags), and a slide opened full size
+can be saved alone. The title (plan 200l, `sources.titleOf`) is the hook a
+feed asks for over the caption, 90 characters at most (TikTok's limit):
+one per source and type, in the post's language, naming the item and its
+level ("JLPT N5 mock exam: 3 questions on で. Your score?"); where it would
+run long, the item's own text is cut, never the hook. Both are edited in
+the studio before they are copied. Published as a claude.ai artifact, the download goes through
 the viewer's `downloads` capability; anywhere else it is a plain link.
 
 ## When the bank changes

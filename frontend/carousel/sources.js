@@ -596,6 +596,72 @@ export function picked(pl, picks, n) {
   return (chosen.length ? chosen : pl.quizzes.slice(0, n)).slice(0, MAX_QUESTIONS)
 }
 
+// ── The post's title (plan 200l) ──────────────────────────────
+// A feed asks for a title over the caption (TikTok's, 90 characters at
+// most): one hook per source and type, in the post's language, naming
+// the item and its level. Only the item's own text is cut, never the hook.
+export const TITLE_MAX = 90
+const TITLES = {
+  en: {
+    sentence: (c, lv) => `Can you read this ${lv} sentence without help?`,
+    translation: c => `How do you say “${c.jp}” in Japanese?`,
+    lesson: (c, lv) => `${c.jp} explained in its own sentences · ${lv} grammar`,
+    word: (c, lv) => `Can you read ${c.word}? A word every ${lv} learner needs`,
+    kanji: (c, lv) => `${c.jp}: its readings and its words · ${lv} kanji`,
+    kana: c => `${c.jp} in real words · learn ${c.set}`,
+    passage: (c, lv) => `${lv} reading: can you follow “${c.jp}”?`,
+    exam: (c, lv, n) => `${c.kana ? 'Kana quiz' : `${lv} mock exam`}: ${n} question${n > 1 ? 's' : ''} on ${c.head}. Your score?`,
+    compare: (c, lv, n, a, b) => `${a} or ${b}? Never mix them up again`,
+    build: c => `Build the sentence: ${c.head}`,
+    list: (c, lv, n) => (c.sentences ? `${n} sentences with ${c.head}` : c.from ? `${n} words from “${c.head}”` : `${n} words with ${c.head}`),
+    talk: c => `${c.head} in a real conversation`,
+  },
+  fr: {
+    sentence: (c, lv) => `Tu sais lire cette phrase ${lv} sans aide ?`,
+    translation: c => `Comment dit-on « ${c.jp} » en japonais ?`,
+    lesson: (c, lv) => `${c.jp} expliqué dans ses phrases · grammaire ${lv}`,
+    word: (c, lv) => `Tu sais lire ${c.word} ? Un mot du ${lv} à connaître`,
+    kanji: (c, lv) => `${c.jp} : ses lectures et ses mots · kanji ${lv}`,
+    kana: c => `${c.jp} dans de vrais mots · apprends les ${c.set}`,
+    passage: (c, lv) => `Lecture ${lv} : tu suis « ${c.jp} » ?`,
+    exam: (c, lv, n) => `${c.kana ? 'Quiz kana' : `Mini examen ${lv}`} : ${n} question${n > 1 ? 's' : ''} sur ${c.head}. Ton score ?`,
+    compare: (c, lv, n, a, b) => `${a} ou ${b} ? Ne les confonds plus`,
+    build: c => `Construis la phrase : ${c.head}`,
+    list: (c, lv, n) => (c.sentences ? `${n} phrases avec ${c.head}` : c.from ? `${n} mots de « ${c.head} »` : `${n} mots avec ${c.head}`),
+    talk: c => `${c.head} dans une vraie conversation`,
+  },
+}
+/** The title of a plan posted as `type` asking `n` questions. */
+export function titleOf(pl, type, n = 3) {
+  const say = TITLES[pl.lang] || TITLES.en
+  const c = pl.caption
+  const lv = /^N\d$/.test(pl.level) ? `JLPT ${pl.level}` : 'JLPT'
+  // The item as a title names it: a word bare, a sentence its point.
+  const head = { sentence: c.point, translation: c.point, lesson: c.jp, word: c.jp.replace(/（.*/, ''), passage: c.jp }[pl.source] || c.jp
+  const sides = pl.compare?.sides?.map(x => x.head) || []
+  const make = item => {
+    const v = { ...c, jp: item, word: item, head: pl.source === 'translation' ? c.point || head : item, set: c.tags[0] || 'kana' }
+    if (type === 'exam') return say.exam({ head: v.head, kana: pl.source === 'kana' }, lv, n)
+    if (type === 'compare' && sides.length >= 2) return say.compare(v, lv, n, sides[0], sides[1])
+    if (type === 'build') return say.build({ head: v.head })
+    if (type === 'list' && pl.list) {
+      const sentences = ['sentence', 'translation', 'lesson'].includes(pl.source)
+      return say.list({ head: sentences ? v.head : pl.list.head || v.head, sentences, from: pl.source === 'passage' }, lv, pl.list.items.length)
+    }
+    if (type === 'talk') return say.talk({ head: v.head })
+    return say[pl.source](v, lv)
+  }
+  // The item's text is what gives way, to fit the feed's limit.
+  const own = { sentence: head, translation: c.jp, word: head, passage: c.jp }[pl.source] ?? head
+  let item = own
+  let out = make(item)
+  while ([...out].length > TITLE_MAX && [...item].length > 4) {
+    item = `${[...item].slice(0, [...item].length - 2).join('').trimEnd()}…`.replace(/……$/, '…')
+    out = make(item)
+  }
+  return [...out].slice(0, TITLE_MAX).join('')
+}
+
 /** Every Japanese and Latin character a plan may set, for the font loader. */
 export function sampleText(pl) {
   const parts = [JSON.stringify(pl.t), JSON.stringify(pl.slides), JSON.stringify(pl.hook), JSON.stringify(pl.quizzes || []),

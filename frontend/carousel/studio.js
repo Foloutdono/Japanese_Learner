@@ -8,7 +8,7 @@
 /* global JSZip */
 import { ENDING_IDS, FORMATS, TYPES, TYPE_OPTIONS, available, deck, endingSlide } from './slides.js'
 import { FONT_FACES, font, palette } from './draw.js'
-import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, depsOf, itemsOf, picked, plan, sampleText, sourceOf } from './sources.js'
+import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, depsOf, itemsOf, picked, plan, sampleText, sourceOf, titleOf } from './sources.js'
 import { STRINGS } from './strings.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 
@@ -300,6 +300,7 @@ async function depsFor(data, id) {
 let current = { decks: [], plan: null }
 let token = 0
 let captionFor = ''
+let titleFor = ''
 
 async function render() {
   const mine = ++token
@@ -418,6 +419,10 @@ async function render() {
   // over the reader's own edits on a redraw.
   const captionKey = `${state.source}|${pl.id}|${state.lang}`
   if (captionKey !== captionFor) { $('#caption').value = captionOf(pl); captionFor = captionKey }
+  // The title names the type and the questions asked too (plan 200l).
+  const asked = state.type === 'exam' ? picked(pl, state.picks[pickKey()], 3).length : 1
+  const titleKey = `${captionKey}|${state.type}|${asked}`
+  if (titleKey !== titleFor) { $('#title').value = titleOf(pl, state.type, asked); titleFor = titleKey; countTitle() }
   $('#export').disabled = false
 }
 
@@ -561,9 +566,10 @@ async function exportZip() {
     for (let i = 0; i < d.slides.length; i++) {
       zip.file(`${String(i + 1).padStart(2, '0')}-${d.slides[i].key}.png`, await png(full(d.slides[i], fmt)))
     }
+    zip.file('title.txt', $('#title').value)
     zip.file('caption.txt', $('#caption').value)
     const result = await offer(`${name}.zip`, await zip.generateAsync({ type: 'blob' }))
-    status(result === 'saved' ? `Saved ${d.slides.length} slides and the caption.` : MESSAGE[result])
+    status(result === 'saved' ? `Saved ${d.slides.length} slides, the title and the caption.` : MESSAGE[result])
   } catch (e) {
     status(`The export failed (${e.message}).`)
   } finally {
@@ -594,15 +600,19 @@ function captionOf(pl) {
   const ask = c.point && !c.ask.includes(c.point) ? `${c.ask} · ${c.point}` : c.ask
   return `${head}\n\n${ask}\n\n${tags}`
 }
-async function copyCaption() {
-  const area = $('#caption')
+async function copyField(id, name) {
+  const area = $(id)
   try {
     await navigator.clipboard.writeText(area.value)
-    status('Caption copied.')
+    status(`${name} copied.`)
   } catch {
     area.select()
-    status('Select the caption and copy it.')
+    status(`Select the ${name.toLowerCase()} and copy it.`)
   }
+}
+/** The title's length against the feed's limit. */
+function countTitle() {
+  $('#title-count').textContent = `${[...$('#title').value].length}/${TITLE_MAX}`
 }
 
 // ── Controls ──────────────────────────────────────────────────
@@ -681,7 +691,9 @@ function wire() {
     typing = setTimeout(() => { save(); render() }, 300)
   })
   $('#export').addEventListener('click', exportZip)
-  $('#copy').addEventListener('click', copyCaption)
+  $('#copy').addEventListener('click', () => copyField('#caption', 'Caption'))
+  $('#copy-title').addEventListener('click', () => copyField('#title', 'Title'))
+  $('#title').addEventListener('input', countTitle)
   $('#prev').addEventListener('click', () => step(-1))
   $('#next').addEventListener('click', () => step(1))
   $('#save-one').addEventListener('click', exportOne)

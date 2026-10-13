@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { FORMATS, FS, RATING_INKS, layoutSentence } from '../carousel/draw.js'
-import { LEVELS, SOURCES, chunksOf, depsOf, itemsOf, lineRomaji, plan, readingMisses, unpack } from '../carousel/sources.js'
+import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, plan, readingMisses, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, overlaps } from '../carousel/quizzes.js'
 import { furiganaOf } from '../carousel/common.js'
@@ -182,6 +182,16 @@ describe('the carousel studio', () => {
       }
     } finally {
       globalThis.Path2D = had
+    }
+  })
+
+  it('titles every carousel within the feed’s 90 characters (plan 200l)', () => {
+    for (const { src, p } of every) {
+      for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
+        const title = titleOf(p, type, 3)
+        expect([...title].length, `${src.id} ${p.id} ${type}`).toBeLessThanOrEqual(TITLE_MAX)
+        expect(title, `${src.id} ${p.id} ${type}`).not.toMatch(/undefined|null|NaN/)
+      }
     }
   })
 
