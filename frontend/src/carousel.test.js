@@ -5,7 +5,7 @@ import { LEVELS, SOURCES, chunksOf, depsOf, itemsOf, lineRomaji, plan, readingMi
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, overlaps } from '../carousel/quizzes.js'
 import { furiganaOf } from '../carousel/common.js'
-import { howItWorks, senseOf, stacksIn } from '../carousel/explain.js'
+import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 
 // ── カルーセル — the carousel studio (plans 200, 200b, 200c) ──
@@ -397,6 +397,24 @@ describe('explaining a point in its own sentence', () => {
     const [stack] = stacksIn(sentence('日本の田舎には、どんな習慣がありますか。').rows, 'en', glossEn)
     expect(stack.key).toBe('には')
     expect(stack.line).toMatch(/^に marks 日本の田舎 as where something is; は makes it the topic/)
+  })
+
+  it('reads a number and its counter as one word (plan 200l)', () => {
+    const rows = sentence('駅で三十分待ちました。').rows
+    const n = rows.find(r => r.t === '三十分')
+    expect(n?.ro).toBe('sanjuppun')
+    expect(n?.en).toEqual(['30 minutes'])
+    expect(rows.some(r => r.t === '三十' || r.t === '分')).toBe(false)
+  })
+
+  it('names a particle in the breakdown by what it does there (plan 200l)', () => {
+    const rows = sentence('駅で三十分待ちました。').rows
+    expect(particleLabel(rows, rows.findIndex(r => r.t === 'で'), 'en')).toBe('place')
+    expect(particleLabel(rows, rows.findIndex(r => r.t === 'で'), 'fr')).toBe('lieu')
+    // から after a verb is “because”: no “from” label there.
+    const why = LEVELS.flatMap(lv => banks[lv].sentences).map(s => s.rows)
+      .flatMap(rs => rs.map((r, i) => [rs, i]).filter(([, i]) => rs[i].t === 'から' && rs[i - 1]?.pos === 'verb'))
+    for (const [rs, i] of why) expect(particleLabel(rs, i, 'en')).toBeNull()
   })
 
   it('gives no stacked slide to a pair that is no two particles (plan 200l)', () => {

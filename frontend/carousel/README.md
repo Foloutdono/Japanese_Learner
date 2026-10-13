@@ -123,6 +123,16 @@ which noun the pair describes is the reader's call. どこにも and 誰にも
 before a negative verb are named for what they mean, "nowhere" and
 "nobody".
 
+The breakdown ("Stop by stop") names a particle the same way, in a word:
+駅で is "place", 七時に "time", and a particle the table has no sense for
+keeps its role ("topic", "object"). The role is said only after a noun:
+after a verb から is "because" and と "if", so there the catalogue's line
+stays. A number and its counter are one word, read and glossed as one
+(三十分 さんじゅっぷん, "30 minutes"; 何度も, "many times"):
+`carousel_bank.rows_of` joins them where the tokenizer cuts them apart,
+except for a counter the number leaves open (三日, the third or three
+days).
+
 `src/carousel.test.js` pins each sense with the sentence that must find it
 and the one that must not (a passive's agent, なる, 決まる, 一年に及ぶ).
 

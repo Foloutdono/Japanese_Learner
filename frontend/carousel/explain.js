@@ -431,6 +431,36 @@ function negativeAfter(rows, i) {
   return /(ない|なかっ|ず|ません|ぬ)/.test(text)
 }
 
+// A particle's sense in a word, for the breakdown (plan 200l): 駅で is
+// "place", where its general label says "where · with".
+const SENSE_LABEL = {
+  で: { place: { en: 'place', fr: 'lieu' }, vehicle: { en: 'by (transport)', fr: 'en (transport)' },
+    tool: { en: 'with (tool)', fr: 'avec (outil)' }, language: { en: 'in (language)', fr: 'en (langue)' } },
+  に: { time: { en: 'time', fr: 'moment' }, goal: { en: 'destination', fr: 'destination' },
+    being: { en: 'location', fr: 'lieu' }, person: { en: 'to (someone)', fr: 'à (quelqu’un)' },
+    adverb: { en: 'makes an adverb', fr: 'fait un adverbe' } },
+}
+/** What the particle at `at` does here, in a word or two: its sense
+ *  where the sentence settles it, else its role; null for a row that is
+ *  no particle the table knows. */
+export function particleLabel(rows, at, lang) {
+  const r = rows[at]
+  const role = r && ROLES[r.t]
+  // The copula で of 学生で is no “where · with”: a role's kind must match.
+  if (!role || r.k !== (role.copula ? 'copula' : 'particle')) return null
+  const host = prevWord(rows, at)
+  // After a verb or an adjective から is “because”, と “if”, が “but”:
+  // the role holds after a noun only.
+  if (!role.final && !role.copula && (host < 0 || !isNoun(rows[host]) || host !== at - 1)) return null
+  let key = null
+  if (SENSE_LABEL[r.t] && host >= 0 && r.k === 'particle') {
+    const to = targetOf(rows, at)
+    key = senseOf(r.t, hostPhrase(rows, host, () => '').t, rows[host], rows[to >= 0 ? to : nextOf(rows, at, isWord)])
+    if (key === 'person' && rows[at + 1]?.t === 'は') key = null
+  }
+  return (key && SENSE_LABEL[r.t][key]?.[lang]) || role.label[lang]
+}
+
 /**
  * The stacked particles of a sentence (には, への ...): the pairs that are
  * not a pattern of their own, standing after a noun, that STACKS knows.

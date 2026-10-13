@@ -105,6 +105,112 @@ def _furigana(tokens: list[dict]) -> list[list[str]]:
     return out
 
 
+# ── A number and its counter (plan 200l) ──────────────────────────
+# The tokenizer cuts 三十分 into 三十 (read さんじゅっ, no gloss) and
+# 分 (ぷん): read apart, neither is what the sentence says. A number and
+# the counter after it are one word, read and glossed as one: 三十分
+# さんじゅっぷん, "30 minutes". A counter whose sense the number leaves
+# open (三日: the third, or three days; 三月: March) is left as it is.
+NUMERAL = re.compile(r"^([〇一二三四五六七八九十百千万億0-9０-９]+|何|数)$")
+COUNTERS = {
+    # counter: (English one, English many, French one, French many)
+    "分": ("minute", "minutes", "minute", "minutes"),
+    "時間": ("hour", "hours", "heure", "heures"),
+    "年": ("year", "years", "an", "ans"),
+    "年間": ("year", "years", "an", "ans"),
+    "週間": ("week", "weeks", "semaine", "semaines"),
+    "か月": ("month", "months", "mois", "mois"),
+    "ヶ月": ("month", "months", "mois", "mois"),
+    "カ月": ("month", "months", "mois", "mois"),
+    "晩": ("night", "nights", "nuit", "nuits"),
+    "度": ("time", "times", "fois", "fois"),
+    "回": ("time", "times", "fois", "fois"),
+    "かい": ("time", "times", "fois", "fois"),
+    "人": ("person", "people", "personne", "personnes"),
+    "円": ("yen", "yen", "yen", "yens"),
+    "冊": ("book", "books", "livre", "livres"),
+    "さつ": ("book", "books", "livre", "livres"),
+    "枚": ("sheet", "sheets", "feuille", "feuilles"),
+    "まい": ("sheet", "sheets", "feuille", "feuilles"),
+    "本": ("long thing", "long things", "objet long", "objets longs"),
+    "台": ("machine", "machines", "machine", "machines"),
+    "メートル": ("metre", "metres", "mètre", "mètres"),
+    "周": ("lap", "laps", "tour", "tours"),
+    "社": ("company", "companies", "entreprise", "entreprises"),
+    "軒": ("house", "houses", "maison", "maisons"),
+    "通": ("letter", "letters", "lettre", "lettres"),
+    "字": ("character", "characters", "caractère", "caractères"),
+    "か所": ("place", "places", "endroit", "endroits"),
+    "カ所": ("place", "places", "endroit", "endroits"),
+    "ページ": ("page", "pages", "page", "pages"),
+}
+DIGITS = dict(zip("〇一二三四五六七八九", range(10)))
+UNITS = {"十": 10, "百": 100, "千": 1000}
+
+
+def numeral_value(text: str) -> int | None:
+    """三十 30, 五百 500, 三千 3000, 12 12; None where it is no number."""
+    text = text.translate(str.maketrans("０１２３４５６７８９", "0123456789"))
+    if text.isdigit():
+        return int(text)
+    total, big, digit = 0, 0, None
+    for c in text:
+        if c in DIGITS:
+            digit = DIGITS[c]
+        elif c in UNITS:
+            total += (1 if digit is None else digit) * UNITS[c]
+            digit = None
+        elif c in ("万", "億"):
+            big += (total + (digit or 0)) * (10_000 if c == "万" else 100_000_000)
+            total, digit = 0, None
+        else:
+            return None
+    return big + total + (digit or 0)
+
+
+def counted(number: str, counter: str) -> tuple[str, str] | None:
+    """A number and its counter glossed: ("30 minutes", "30 minutes"),
+    何 asking how many (何度 "how many times") and 数 a few (数冊)."""
+    if number == "何":
+        if counter == "時":
+            return ("what time", "quelle heure")
+        if counter in ("歳", "才"):
+            return ("how old", "quel âge")
+        # 何年 is "what year" as often as "how many years": left alone.
+        forms = COUNTERS.get(counter) if counter != "年" else None
+        return (f"how many {forms[1]}", f"combien de {forms[3]}") if forms else None
+    if number == "数":
+        forms = COUNTERS.get(counter)
+        return (f"several {forms[1]}", f"plusieurs {forms[3]}") if forms else None
+    if counter == "時":
+        n = numeral_value(number)
+        return (f"{n} o'clock", f"{n} heure{'s' if n > 1 else ''}") if n is not None else None
+    if counter in ("歳", "才"):
+        n = numeral_value(number)
+        return (f"{n} years old", f"{n} an{'s' if n > 1 else ''}") if n is not None else None
+    forms = COUNTERS.get(counter)
+    n = numeral_value(number)
+    if not forms or n is None:
+        return None
+    en1, en, fr1, fr = forms
+    return (f"{n} {en1 if n == 1 else en}", f"{n} {fr1 if n <= 1 else fr}")
+
+
+def _counted_row(group: list[dict], after: dict | None) -> dict | None:
+    gloss = counted(group[0]["surface"], group[1]["surface"])
+    # 何度も, 何回も: "again and again", not a question.
+    forms = COUNTERS.get(group[1]["surface"])
+    if gloss and group[0]["surface"] == "何" and forms and (after or {}).get("surface") == "も":
+        gloss = (f"many {forms[1]}", "maintes fois" if forms[3] == "fois" else f"beaucoup de {forms[3]}")
+    if not gloss:
+        return None
+    row = _row(group)
+    row.pop("lv", None)
+    row["pos"] = "noun"
+    row["en"], row["fr"] = [gloss[0]], [gloss[1]]
+    return row
+
+
 def rows_of(tokens: list[dict]) -> list[dict]:
     rows: list[dict] = []
     i = 0
@@ -114,6 +220,12 @@ def rows_of(tokens: list[dict]) -> list[dict]:
             rows.append({"t": tok["surface"], "k": "punct"})
             i += 1
             continue
+        if NUMERAL.match(tok["surface"]) and i + 1 < len(tokens):
+            row = _counted_row(tokens[i:i + 2], tokens[i + 2] if i + 2 < len(tokens) else None)
+            if row:
+                rows.append(row)
+                i += 2
+                continue
         end = i
         if not _stands_alone(tok) and tok["pos"] in FOLDS:
             while end + 1 < len(tokens) and _joins(tokens[end + 1]):

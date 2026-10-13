@@ -11,7 +11,7 @@
 // node tests read it directly.
 import { hasKanji, reading } from './draw.js'
 import { STRINGS, count, formOf, tr, weldIf } from './strings.js'
-import { ROLES, howItWorks, lookalikesOf, stacksIn } from './explain.js'
+import { ROLES, howItWorks, lookalikesOf, particleLabel, stacksIn } from './explain.js'
 import { firstSense, gloss, lineRomaji, readingMisses, seeded, shuffle, unpack } from './common.js'
 import {
   kanaQuizzes, kanjiQuizzes, lessonQuizzes, overlaps, passageQuizzes, sentenceQuizzes, translationQuizzes, wordQuizzes,
@@ -108,9 +108,14 @@ function wordItems(s, points, lang, t) {
     const grammar = row.k !== 'word'
     let main, sub
     if (grammar) {
-      const pt = points[pointOf(row)]
-      main = pt ? tr(pt, lang) : t.pos[row.k]
-      sub = formOf(pt, lang)
+      const p = pointOf(row)
+      const pt = points[p]
+      // A particle that is its own point (で, に) says what it does here,
+      // in a word: the catalogue's general line is the lesson's, not a
+      // breakdown's (plan 200l).
+      const label = (!p || p === row.t) && particleLabel(s.rows, i, lang)
+      main = label || (pt ? tr(pt, lang) : t.pos[row.k])
+      sub = label ? '' : formOf(pt, lang)
     } else {
       [main, sub] = gloss(row, lang)
       // A word the deck has no gloss for is glossed by the point written on it.
