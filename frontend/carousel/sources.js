@@ -380,9 +380,20 @@ function lessonPlan(data, L, opts) {
 /** A deck word's id: its written form, and its reading where another
  *  entry is written the same (一日 ついたち, 一日 いちにち: plan 200l). */
 export function wordId(data, w) {
-  return data.words.some(x => x !== w && x.t === w.t) ? `${w.t}（${w.r}）` : w.t
+  return wordIds(data).ids.get(w)
 }
-const wordOf = (data, id) => data.words.find(x => wordId(data, x) === id)
+const wordOf = (data, id) => wordIds(data).byId.get(id)
+// Counted once per file: a deck has thousands of words.
+const WORD_IDS = new WeakMap()
+function wordIds(data) {
+  if (!WORD_IDS.has(data)) {
+    const count = {}
+    for (const w of data.words) count[w.t] = (count[w.t] || 0) + 1
+    const ids = new Map(data.words.map(w => [w, count[w.t] > 1 ? `${w.t}（${w.r}）` : w.t]))
+    WORD_IDS.set(data, { ids, byId: new Map([...ids].map(([w, id]) => [id, w])) })
+  }
+  return WORD_IDS.get(data)
+}
 function wordPlan(data, w, opts, deps) {
   const src = sourceOf('word')
   const p = base(src, { id: wordId(data, w) }, opts, data.level)
