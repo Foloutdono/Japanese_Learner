@@ -220,7 +220,7 @@ describe('a practice run on three panels', () => {
 
   // The rating bar unframed with them (plan 185): its misses carry their
   // own sumi, the ground their panel inks read on -- in the light theme
-  // too, where the frame's surface was paper under them. Since plan 202
+  // too, where the frame's surface was paper under them. Since plan 203
   // (券売機) the sumi is each key's own face, not a panel's.
   it('stands the rating bar unframed, its misses on their own sumi in either theme', async () => {
     for (const theme of [null, 'light']) {

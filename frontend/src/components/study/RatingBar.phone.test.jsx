@@ -5,7 +5,7 @@ import { LangProvider } from '../../LangContext'
 import RatingBar from './RatingBar'
 import '../../index.css'
 
-// ── 券売機 — the rating bar's keys on a phone (plan 202) ──────────────
+// ── 券売機 — the rating bar's keys on a phone (plan 203) ──────────────
 // The owner's pick G of the canvas "Tsuji — the rating bar, new
 // directions": every verdict a key of the one make, raised on a foot and
 // a gap apart, a miss dark with its lamp in its ink, a pass moulded in

@@ -18,7 +18,7 @@ const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '-': 5, '§': 5 
 // filled in their verdict's ink. Correct is the answer pressed most, so
 // it is the biggest target and the one thing on the bar in colour. Gold
 // stays the action's metal (plan 174): a pass is lit in its own ink.
-// Since plan 202 (券売機) every verdict is a key of the same make, a miss
+// Since plan 203 (券売機) every verdict is a key of the same make, a miss
 // dark with its lamp in its ink, a pass moulded in it.
 const isKey = q => q >= 4
 
@@ -110,7 +110,7 @@ export default function RatingBar({ onRate, active, scale, guide, specimen = fal
   const best = QUALITY_BTNS[0].q
 
   // One key. A miss is a word under its verdict's lamp (券売機, plan
-  // 202); a pass (正解, plan 180) is filled in its verdict's ink, a
+  // 203); a pass (正解, plan 180) is filled in its verdict's ink, a
   // check where the lamp would be. The --best mark
   // stays on the best answer the bar offers (QUALITY_BTNS[0] on every
   // scale, best-first), for the tests and the guide.

@@ -182,7 +182,7 @@ describe('RatingBar below the desk', () => {
 
 // 正解 (plan 180): the misses and the passes -- Correct, and Perfect on
 // the six -- are two groups, in DOM order worst to best, so tab and
-// screen-reader order match the screen. Since plan 202 (券売機) both are
+// screen-reader order match the screen. Since plan 203 (券売機) both are
 // keys of the one make; a pass carries a check where a miss has a lamp.
 describe('RatingBar — the passes as keys', () => {
   const qs = nodes => [...nodes].map(b => [...b.classList].find(c => /--q\d$/.test(c)).slice(-1))

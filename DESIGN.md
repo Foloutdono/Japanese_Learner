@@ -1064,7 +1064,7 @@ So:
 
 - **The rating bar** — the most-used control in the app — is **chrome**: the
   same sumi as the top bar and the level HUD, with the panel inks. Since plan
-  202 (券売機, the owner's pick G) **every verdict is a key of the one make**,
+  203 (券売機, the owner's pick G) **every verdict is a key of the one make**,
   as on a ticket machine's panel: a gap apart, each raised off the sumi on a
   foot of its own material (`--key-foot`, 3px, an edge and not a shadow: no
   blur), and a press travels down the foot (under reduced motion it does
@@ -1099,7 +1099,7 @@ So:
   gap — seven or thirty-five slots always exist, because the shape of the
   month is the information.
 - **A segmented toggle is one pill at chip size** (the rating bar's
-  construction until plan 202 made its verdicts keys) — segments divided by
+  construction until plan 203 made its verdicts keys) — segments divided by
   hairlines rather than gaps, and the selected
   segment *washed* in the selection's gold rather than filled (`--sel-wash`,
   plan 174), at `--r-card` like every control. The 番付's 今週/通算 switch is

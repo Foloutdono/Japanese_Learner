@@ -69,7 +69,7 @@ describe('the stage at phone width', () => {
       // The rating bar docks over the level bar's height, not on the inset.
       const bar = screen.container.querySelector('.rating-bar')
       expect(getComputedStyle(bar).bottom).toBe('36px')
-      // 券売機 (plan 202): every verdict a key of one make, a gap apart
+      // 券売機 (plan 203): every verdict a key of one make, a gap apart
       // -- the misses no longer one instrument (plan 180's) -- each on
       // its own sumi with a corner and a foot, and Correct the same key
       // wider than a miss, moulded in its verdict's ink with the sumi

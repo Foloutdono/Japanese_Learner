@@ -2333,7 +2333,7 @@
      sumi in both themes; the run's meter and the desk's verdict tiles
      wear the same two, as every verdict's segment wears its key's ink.
      Correct was 青竹 #22b89c, a mint off the palette's family, until
-     plan 202 (券売機): 新橋, the Meiji turquoise named for the station
+     plan 203 (券売機): 新橋, the Meiji turquoise named for the station
      Japan's first railway left from, a blue that the misses' red-to-amber
      ramp never comes near and Perfect's green is told apart from.
      Dark text on both: 7.7:1 and 7.9:1. */
@@ -2382,7 +2382,7 @@
   /* The run's floor on a phone (plan 174, RunConsole.jsx): the level as
      the card's struck 辻, so a rung taller than the bar it replaced. */
   --run-floor-h:    60px;
-  /* A rating key's foot (plan 202, 券売機): the key's own side under
+  /* A rating key's foot (plan 203, 券売機): the key's own side under
      it, the depth a press travels. Not a shadow -- no blur, the key's
      material a shade down -- and 3px because an edge is 3px wherever
      the app draws one (線: a plate's stripe, a row's rail). */
@@ -14074,7 +14074,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
       so it is the widest target on the bar and the one thing in colour.
       Not gold: gold is still the action's metal.
 
-   7. EVERY VERDICT A KEY (plan 202, 券売機, the owner's pick G of the
+   7. EVERY VERDICT A KEY (plan 203, 券売機, the owner's pick G of the
       canvas "Tsuji — the rating bar, new directions", over a ticket, two
       tiers and bare words): the instrument and the key beside it read as
       two widgets of two makes, the key's glow as neon on the quiet
@@ -14163,7 +14163,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 
 /* The lamp. A round light in the rating's colour above each word (plan
-   202: a pill until then, a dot before that), dimmed into the sumi at
+   203: a pill until then, a dot before that), dimmed into the sumi at
    rest and lit with a glow when that rating is chosen -- the machine's
    lamp coming on under the finger. `flex: none` because a column flex
    item shrinks to nothing next to a text run otherwise. */
@@ -14248,7 +14248,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    hiding it is not either -- there is nothing behind it. If a longer
    locale string ever lands here, shorten the string rather than the type:
    --fs-caption-xs is a subtitle rung and is too small to carry a control
-   on its own. The gap between keys (plan 202; a 1px hairline before it)
+   on its own. The gap between keys (plan 203; a 1px hairline before it)
    does the separating that the padding used to. */
 
 /* Six keys across a phone is a squeeze at any width: at 375px each
@@ -14277,7 +14277,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    inferred, because each count shares the row differently and
    nth-child cannot ask how many siblings there are. */
 @media (max-width: 560px) {
-  /* The whole key to the word (plan 202): the gaps between keys took
+  /* The whole key to the word (plan 203): the gaps between keys took
      width the hairlines never did, and at 320px a miss is 57px, where
      Presque (51px) lost two to a 4px side. The key's own edge does the
      separating, so the padding goes. */
@@ -14289,7 +14289,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   .rating-bar__buttons--6 > .rating-bar__misses,
   .rating-bar__buttons--6 > .rating-bar__keys { flex: 1 1 100%; }
 }
-/* No travel under reduced motion (plan 202): the key stays on its foot
+/* No travel under reduced motion (plan 203): the key stays on its foot
    and the lamp alone says which was pressed. */
 @media (prefers-reduced-motion: reduce) {
   .rating-bar__buttons { --key-travel: calc(var(--key-foot) * 0); }
@@ -37329,7 +37329,7 @@ button.brd-stn { cursor: pointer; }
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn { opacity: 0.38; }
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn-lamp { background: var(--text-on-panel-soft); box-shadow: none; }
   /* A pass before the reveal is drawn unlit as a miss is: the dark
-     key's face, light and foot, and no ink (plans 180, 202). */
+     key's face, light and foot, and no ink (plans 180, 203). */
   .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn.rating-bar__btn--key {
     --key-light: color-mix(in srgb, var(--text-on-panel) 8%, transparent);
     --key-foot-ink: var(--key-sole);
@@ -38099,7 +38099,7 @@ button.brd-stn { cursor: pointer; }
      bar, Next and the review's pair under the card at its edges, with
      no surface, hairline or corner of their own -- the card is the one
      panel in the column. Each of the bar's keys carries its own sumi
-     (.rating-bar__btn, plan 202), which is what the frame's surface had
+     (.rating-bar__btn, plan 203), which is what the frame's surface had
      been standing in for. */
   .desk-run--panels > .stage:is(.stage--sentence, .stage--comprehension) > .stage__foot:not(.browse-nav),
   .desk-run--panels > .stage.stage--sentence > .rating-bar {
