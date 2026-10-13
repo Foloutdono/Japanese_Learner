@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { askWords, askContext, askHistory, askResetsAt, askTarget, MAX_HISTORY } from './ask'
+import { askWords, askContext, askHistory, askResetsAt, askTarget, tourAsk, MAX_HISTORY } from './ask'
+import tours from '../testing/grammarTour.json'
 
 describe('what a question carries (plan 131)', () => {
   it('reads the breakdown as words with their readings and meanings', () => {
@@ -55,5 +56,64 @@ describe('which thread the panel shows (plan 131)', () => {
     expect(askTarget(opened, now)).toMatchObject({ key: 3, open: true, context: { sentence: '駅で会いました。', words: ['駅 (えき): station'] } })
     const committed = { ...opened, ask: { sentence: '駅で会いました。', answer: 'eki de', level: 'N5' } }
     expect(askTarget(committed, now).context).toMatchObject({ answer: 'eki de', level: 'N5' })
+  })
+})
+
+describe('the tour’s asking (plan 204)', () => {
+  const KA = tours.ka
+  const POINT = { raw_id: 'grammar_N5_か', level: 'N5', pattern: 'か', meaning: 'question **marker**', tour: KA }
+
+  it('is sealed on the look and the guess, whose answer it would give', () => {
+    for (const stop of ['look', 'guess']) {
+      const a = tourAsk(POINT, { stop })
+      expect(a.open).toBe(false)
+      expect(a.key).toBe(`tour:grammar_N5_か:${stop}`)
+    }
+  })
+
+  it('opens on the rule found and the results, about the examples', () => {
+    for (const stop of ['found', 'terminus']) {
+      const a = tourAsk(POINT, { stop })
+      expect(a.open).toBe(true)
+      expect(a.context.sentence).toBe(KA.look.map(ex => ex.jp).join('\n'))
+      expect(a.context.point).toBe('か — question marker')
+      expect(a.context.level).toBe('N5')
+      expect(a.context.review).not.toContain('**')
+    }
+  })
+
+  it('opens on a twist once it is answered, with the pick and the why', () => {
+    const twist = KA.twists[0]
+    const wrong = twist.choices.findIndex(c => !c.correct)
+    const at = { stop: 'twist-0', twist, twistPick: wrong, twistDone: false }
+    expect(tourAsk(POINT, at).open).toBe(false)
+    const a = tourAsk(POINT, { ...at, twistDone: true })
+    expect(a.open).toBe(true)
+    expect(a.key).toBe('tour:grammar_N5_か:twist-0')
+    expect(a.context.sentence).toBe(twist.jp)
+    expect(a.context.answer).toBe(twist.choices[wrong].text)
+  })
+
+  it('opens on the scene once its reply is said', () => {
+    expect(tourAsk(POINT, { stop: 'scene', sceneDone: false }).open).toBe(false)
+    const a = tourAsk(POINT, { stop: 'scene', sceneDone: true, scenePick: 0 })
+    expect(a.open).toBe(true)
+    expect(a.context.sentence).toContain(KA.scene.lines[0].jp)
+    expect(a.context.sentence).toContain(KA.scene.ask.choices.find(c => c.correct).jp)
+  })
+
+  it('keeps a thread per quiz question, its sentence answered', () => {
+    KA.quiz.forEach((q, qi) => {
+      const a = tourAsk(POINT, { stop: 'quiz', qi, quizPick: 0, quizDone: true })
+      expect(a.key).toBe(`tour:grammar_N5_か:quiz-${qi}`)
+      expect(a.open).toBe(true)
+      expect(a.context.sentence).toBeTruthy()
+      expect(a.context.sentence).not.toContain('＿')
+      expect(tourAsk(POINT, { stop: 'quiz', qi, quizDone: false }).open).toBe(false)
+    })
+  })
+
+  it('keeps two points’ threads apart', () => {
+    expect(tourAsk({ ...POINT, raw_id: 'grammar_N5_も' }, { stop: 'found' }).key).not.toBe(tourAsk(POINT, { stop: 'found' }).key)
   })
 })

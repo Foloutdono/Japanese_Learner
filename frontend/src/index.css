@@ -39921,6 +39921,11 @@ button.brd-stn { cursor: pointer; }
   .tour-route__pattern { font-family: var(--font-jp); font-size: var(--fs-heading); line-height: 1.3; color: var(--tour-ink); overflow-wrap: anywhere; }
   .tour-route__structure { font-size: var(--fs-sm); color: var(--text-secondary); }
   .tour-route__stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  /* 問 under the stops (plan 204), as the lines panel holds it (.desk-ask):
+     the stops and the asking take a half each of the column, the stops
+     scrolling in theirs and the thread in its own. */
+  .tour-route:has(> .desk-ask) { flex: 1 1 auto; min-height: 0; }
+  .tour-route:has(> .desk-ask) > .tour-route__stops { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .tour-route__stop {
     position: relative;
     display: grid;

@@ -9,6 +9,7 @@ import { SideLookup } from '../components/analysis/SideLookup'
 import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { GrammarGate } from '../components/study/GrammarGate'
 import { TourRoute, TourLedger } from '../components/study/TourPanels'
+import { useAsk } from '../hooks/useAsk'
 import { useDesk } from '../hooks/useDesk'
 import { CardPanel } from '../components/study/CardPanel'
 import { BuildEntry, GrammarTiles } from '../components/study/GrammarPlate'
@@ -321,6 +322,8 @@ export default function TodayRun({ session }) {
   // panels, its stops at the left and its plate at the right, from what
   // the tour says of where it stands.
   const [tourView, setTourView] = useState(null)
+  // 問 in the tour (plan 204): a thread per stop, kept for the run.
+  const asking = useAsk(session, 'grammar')
   const touring = desk && gated && Boolean(card?.lesson?.tour)
   const comparing = desk && gated && compared?.card === transitionKey
     ? { category: 'grammar', id: compared.id }
@@ -449,7 +452,7 @@ export default function TodayRun({ session }) {
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
-      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} />
+      panel={touring ? <TourRoute point={lessonOf(card)} view={tourView} ask={asking} />
         : card ? <CardPanel card={card} remaining={remaining} keys={structureKey === 'kanji' && renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
       done={done}
       side={error && !card ? null : (
@@ -476,6 +479,7 @@ export default function TodayRun({ session }) {
               onBoard={() => updateCurrent({ lesson_seen: true })}
               onLesson={() => setSheet(card.raw_id ?? card.card_id)}
               onView={setTourView}
+              ask={asking}
             />
           </div>
         )}

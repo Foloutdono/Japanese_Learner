@@ -12,6 +12,8 @@ import { bare } from '../../domain/ladderLine'
 import { PICK_KEY_DIGIT } from '../../domain/choiceKeys'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { composing, pressedByPointer, trackPresses } from '../../lib/keyGuards'
+import { tourAsk } from '../../domain/ask'
+import { AskEntry } from './AskPage'
 
 // ── 発見 — a grammar point found before it is drilled (plan 187b) ──
 // The owner's pick of the canvas "Tsuji — grammar, learned by doing":
@@ -567,7 +569,12 @@ function useTourKeys(ref, on) {
 // Its stops are the left panel's and its plate the right's
 // (TourPanels.jsx), so the track is not drawn here; `onView` hands the
 // run what both need to know of where the tour stands.
-export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt = null, desk = false, onView }) {
+// `ask` (plan 204): the run's useAsk, for 問 -- a short question about
+// the stop, once its question is answered (domain/ask's tourAsk). On a
+// phone the stop carries the button to the asking's page (AskEntry); on
+// the desk the panel stands under the stops at the left (TourRoute),
+// which reads the thread from `onView`. A replay asks nothing.
+export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt = null, desk = false, onView, ask = null }) {
   const { t } = useLang()
   const tour = point.tour
   const stops = stopsOf(tour)
@@ -597,6 +604,10 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
   const twistDone = ti >= 0 && twistsDone[ti]
   const setTwistPick = i => setTwistPicks(p => p.map((v, j) => (j === ti ? i : v)))
   const level = point.level
+  const asked = tourAsk(point, {
+    stop, twist, twistPick, twistDone, sceneDone, scenePick,
+    qi, quizPick: quizPicks[qi], quizDone: quizDone[qi],
+  })
 
   // A new stop opens at its top, its question in focus.
   useEffect(() => {
@@ -615,9 +626,10 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
   const answeredQuiz = quizDone.filter(Boolean).length
   useEffect(() => {
     onView?.({ at, misses: wrong.length, helped, twists: twistsRight, scene: sceneRight,
-               quiz: quiz.length ? { right: score.right, answered: answeredQuiz, total: quiz.length } : null })
+               quiz: quiz.length ? { right: score.right, answered: answeredQuiz, total: quiz.length } : null,
+               ask: ask && !replay ? asked : null })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reported on what it says, not on the callback's identity.
-  }, [at, wrong.length, helped, twistsKey, sceneRight, score.right, answeredQuiz])
+  }, [at, wrong.length, helped, twistsKey, sceneRight, score.right, answeredQuiz, asked.key, asked.open])
 
   // Nothing goes on talking once the tour has moved on or closed.
   useEffect(() => () => stopSpeaking(), [])
@@ -685,6 +697,9 @@ export function GrammarTour({ point, onBoard, onLesson, replay = false, startAt 
                         onPick={i => setQuizPicks(p => p.map((v, j) => (j === qi ? i : v)))} />
         )}
         {stop === 'terminus' && <Results tour={tour} point={point} picks={quizPicks} onLesson={onLesson} replay={replay} />}
+        {ask && !replay && (
+          <AskEntry ask={ask} askKey={asked.key} context={asked.context} open={asked.open} title={point.pattern} />
+        )}
       </div>
       <div className="tour__foot">
         {gate}

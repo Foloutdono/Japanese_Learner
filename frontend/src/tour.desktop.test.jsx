@@ -41,6 +41,7 @@ vi.mock('./lib/api', () => ({
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
+const { apiFetch } = await import('./lib/api')
 const { default: TodayRun } = await import('./screens/TodayRun')
 const { default: GrammarRun } = await import('./screens/GrammarRun')
 
@@ -249,5 +250,50 @@ describe('the tour on the desk’s three panels', () => {
     await settle()
     expect(stop()).toBe('guess')
     expect(route('guess').getAttribute('aria-current')).toBe('step')
+  })
+})
+
+// 問 in the tour (plan 204): the practice runs' asking, under the stops
+// at the left, sealed until the stop's question is answered.
+describe('the asking in the tour', () => {
+  it('stands sealed under the stops, opens on the rule found and asks as the tour', async () => {
+    await mount()
+    await settle(400)
+    const ask = () => $('.desk-run__left .tour-route > .desk-ask')
+    expect(ask()).not.toBeNull()
+    expect(ask().classList.contains('desk-ask--sealed')).toBe(true)
+    expect(ask().querySelector('.desk-ask__field').disabled).toBe(true)
+    expect(ask().querySelector('.desk-ask__hint').textContent).toBe('Questions open once this stop is answered.')
+
+    key('Enter')
+    await settle()
+    key(String(KA.guesses.findIndex(g => g.correct) + 1))
+    await settle()
+    key('Enter')
+    await settle()
+    expect(stop()).toBe('found')
+    expect(ask().classList.contains('desk-ask--sealed')).toBe(false)
+
+    // The stops and the asking share the column, inside the window.
+    const panel = $('.desk-run__left').getBoundingClientRect()
+    expect(ask().getBoundingClientRect().bottom).toBeLessThanOrEqual(panel.bottom + 1)
+
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ answer: '「か」 makes it a question.', left: 39 }) }))
+    const field = ask().querySelector('.desk-ask__field')
+    field.focus()
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
+    setter.call(field, 'why ka?')
+    field.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle(50)
+    // Enter in the field asks; it never presses the tour's gate.
+    ask().querySelector('.desk-ask__send').click()
+    await settle()
+    expect(stop()).toBe('found')
+    const call = apiFetch.mock.calls.find(c => c[0] === '/api/ask')
+    const body = JSON.parse(call[2].body)
+    expect(body.mode).toBe('grammar')
+    expect(body.sentence).toBe(KA.look.map(ex => ex.jp).join('\n'))
+    expect(body.point.startsWith('か — ')).toBe(true)
+    expect(ask().querySelector('.desk-ask__a').textContent).toContain('makes it a question')
   })
 })
