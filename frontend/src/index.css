@@ -8645,6 +8645,10 @@ textarea:focus-visible {
   --tpr-washi: #efe3bf;
   --tpr-sumi: #1d1a16;
   --tpr-shu: #a8382a;
+  /* A cleared day's seal (plan 206): its red, cut where the disc was,
+     and the light it sheds on the sky. */
+  --tpr-seal: #ce6153;
+  --tpr-seal-glow: #e98066;
 }
 /* The frame: the whole screen between the bars, under the gate; the
    gate's own layer of placed things over it, in the same place. */
@@ -8741,6 +8745,30 @@ textarea:focus-visible {
   color: transparent;
 }
 .tdy-dial--print .tdy-dial__unit { line-height: 1.2; color: var(--tpr-disc-soft); }
+/* A day with nothing reviewed and nothing due: no seal, the hour's own
+   disc saying so, in the count's golds. */
+.tdy-dial--print .tdy-dial__clear {
+  background: linear-gradient(180deg, var(--tpr-count-a) 0%, var(--tpr-count-b) 100%);
+  background-clip: text;
+  color: transparent;
+}
+/* 白文 — a cleared day's seal as the disc (TodayDial's CutSeal, plan
+   206): a disc of the seal's red, its rings and characters left in the
+   slip's paper, in the kit's rungs (dayclear/kit/Seal.jsx). At dawn
+   the face takes the sun's own red, inline. */
+.tdy-dial__seal-face { fill: var(--tpr-seal); }
+.tdy-dial__seal-cut { fill: none; stroke: var(--tpr-washi); }
+.tdy-dial__seal-band { fill: var(--tpr-washi); }
+.tdy-dial__seal text { fill: var(--tpr-washi); text-anchor: middle; dominant-baseline: central; }
+.tdy-dial__seal-top { font-family: var(--font-jp); font-size: var(--fs-sm); font-weight: 700; letter-spacing: var(--tr-reading); }
+.tdy-dial__seal-day { font-family: var(--font-serif); font-size: var(--fs-specimen-word); font-weight: 900; }
+.tdy-dial__seal-foot {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-name);
+  font-variant-numeric: tabular-nums;
+}
 /* The guide's mark (today.gate): the dial's rings, not its glow. */
 .tdy-dial__gate {
   position: absolute;
@@ -8751,14 +8779,15 @@ textarea:focus-visible {
   translate: -50% -50%;
   border-radius: 50%;
 }
-/* Under the rings: the minutes and the hour they end, on one line. */
+/* Under the rings: the minutes and the hour they end, on one line (or,
+   on a cleared day, what the day reviewed: .tdy-recap). */
 .tdy-dial__line {
   white-space: nowrap;
   font-size: var(--fs-sm);
   color: var(--tpr-soft);
   font-variant-numeric: tabular-nums;
 }
-.tdy-dial__line .tdy-dial__time {
+.tdy-dial__line b {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-title);
@@ -8813,6 +8842,25 @@ textarea:focus-visible {
 }
 :where(.tdy--print) .tdy-door__what b,
 .tdy--print .tdy-door__go { color: var(--text-on-panel); }
+/* A cleared day (plan 206): its week of stamps set on the sky, the
+   kit's slots (WeekStamps) in the seal's red, their weekdays in the
+   hour's ink; tomorrow's row on the door's glass. The shut gate's own
+   glass is written with the gate's rules (.btn-depart--gate:disabled). */
+.tdy--print .tdy-rally {
+  width: max-content;
+  --stamp-ink: var(--tpr-seal);
+  --stamp-glyph: var(--tpr-ink);
+  --slot-ink: var(--tpr-ink);
+}
+.tdy--print .tdy-rally__n { color: var(--tpr-soft); }
+:where(.tdy--print) .tdy-rally__n b { color: var(--tpr-ink); }
+.tdy--print .tdy-next {
+  border-color: var(--surface-line);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+  color: var(--text-on-panel);
+}
+:where(.tdy--print) .tdy-next__n small,
+.tdy--print .tdy-next__min { color: var(--text-on-panel-soft); }
 
 /* The print's moving parts (the classes the print's build writes,
    scripts/today-print/build.py): slowly and by little, transform and
@@ -10060,6 +10108,14 @@ textarea:focus-visible {
   animation: none;
 }
 .btn-depart--gate:disabled::before { opacity: 0; }
+/* On the print (plan 206) the shut gate stands on the sumi glass its
+   row does, in the panel's inks, in either theme: the print's bank
+   under a bare outline read as a hole in the screen. At the rule's own
+   weight, after it, so no later gate rule reads as lighter. */
+:where(.tdy--print) .btn-depart--gate:disabled {
+  color: var(--text-on-panel-soft);
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+}
 .btn-depart--gate:disabled .btn-depart__reader {
   background: transparent;
   color: var(--text-secondary);

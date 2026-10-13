@@ -21,7 +21,6 @@ import { runFit, isFreeLane, laneFreeShare, nextCreditClock, refillClock } from 
 import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, isMainLane, TAKE_STEPS } from '../../domain/lanes'
 import { restWeek, sealDate, utcToday, weekdayKanji } from '../../domain/dayClear'
 import { longDate } from '../dayclear/aria'
-import { Seal } from '../dayclear/kit/Seal'
 import { WeekStamps } from '../dayclear/kit/WeekStamps'
 import { WeekAhead } from '../journey/WeekAhead'
 import { TodayDial, FareKey, LineKeys } from './TodayDial'
@@ -592,15 +591,17 @@ function DeskDay({ today, part = false }) {
   )
 }
 
-// ── 済 — a day with nothing due (plan 199) ──────────────────────
+// ── 済 — a day with nothing due (plans 199, 206) ─────────────────
 // The owner's ruling on the canvas: the empty gate looked cheap. The
 // dial closes round the day it was: its ring is today's reviews by line
-// (/api/today's `reviewed`), and in its middle the day's 駅スタンプ, the
-// seal the cleared day's ceremony presses (plan 191) -- the screen the
-// ceremony leaves the learner on shows what they earned. Under it what
-// the day was and the week's stamps; at the foot tomorrow as a row of a
-// departure board, and the gate shut, saying when it opens. A day with
-// nothing reviewed and nothing due stamps nothing.
+// (/api/today's `reviewed`). Under it what the day was and the week's
+// stamps; at the foot tomorrow as a row of a departure board, and the
+// gate shut, saying when it opens. On the print (plan 206, the owner's
+// pick G3 of the canvas, round 10) the disc itself is the day's
+// 駅スタンプ, cut in red where the sun or the moon was (TodayDial's
+// CutSeal), and the last train has gone from the viaduct. A day with
+// nothing reviewed and nothing due stamps nothing: the hour's own disc,
+// saying the learner is up to date.
 function ClearedGate({ today, desk }) {
   const { t, lang } = useLang()
   const summary = useProfileSummary()
@@ -613,17 +614,28 @@ function ClearedGate({ today, desk }) {
   const week = summary?.streak > 0 ? restWeek(summary.week, [], day) : null
   const tomorrow = today.tomorrow
   const opens = opensWords(today.next_due, t, lang)
+  // On the desk the print centres on the gate's column, as DeskGate's does.
+  const heroRef = useRef(null)
+  const p = usePrint(desk ? 'desk' : 'phone', desk ? heroRef : null)
+  const { frame } = p
+  const seal = stamped
+    ? { day: weekdayKanji(day), foot: sealDate(day), label: t.clrSealAria(longDate(day, lang)) }
+    : null
 
   const hero = (
-    <section className="tdy-hero tdy-hero--clear" data-guide="today.gate" aria-label={t.fareGate}>
-      <TodayDial parts={parts} className={desk ? 'tdy-dial--desk' : ''}>
-        {stamped
-          ? <Seal day={weekdayKanji(day)} foot={sealDate(day)} size={desk ? 236 : 168} tilt={-6} label={t.clrSealAria(longDate(day, lang))} />
-          : <span className="tdy-dial__clear">{t.todayNothingDueShort}</span>}
+    <section className="tdy-hero tdy-hero--print tdy-hero--clear" aria-label={t.fareGate}>
+      <PrintTitle now={p.now} hour={p.hour} />
+      <TodayDial parts={parts} print={p.dial} seal={seal} className="tpr-at" style={at(frame.cx, frame.cy)}>
+        <span className="tdy-dial__gate" data-guide="today.gate" aria-hidden="true" />
+        {!stamped && <span className="tdy-dial__clear">{t.todayNothingDueShort}</span>}
       </TodayDial>
-      {stamped && <p className="tdy-recap">{t.todayReviewed(reviewed.total)}</p>}
+      {stamped && (
+        <p className="tdy-recap tdy-dial__line tpr-at" style={at(frame.cx, frame.cy + frame.fare + BELOW.time)}>
+          <b>{reviewed.total}</b> {t.todayReviewedUnit(reviewed.total)}
+        </p>
+      )}
       {week && (
-        <div className="tdy-rally">
+        <div className="tdy-rally tpr-at" style={at(frame.cx, frame.cy + frame.fare + BELOW.week)}>
           <WeekStamps week={week} label={t.todayWeekStamps(summary.streak)} />
           <span className="tdy-rally__n" aria-hidden="true"><b>{summary.streak}</b>{t.todayStreakDays}</span>
         </div>
@@ -645,11 +657,12 @@ function ClearedGate({ today, desk }) {
 
   if (desk) {
     return (
-      <div className="tdy-desk">
-        <section className="tdy-desk__hero">
-          <div className="tdy-desk__stage">{hero}</div>
+      <div className="tdy-desk tdy--print tdy--desk tdy--clear" style={p.style} data-hour={p.hour}>
+        <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} train={false} />
+        {hero}
+        <div className="tdy-desk__hero" ref={heroRef}>
           <div className="tdy-desk__go tdy-desk__go--clear">{foot}</div>
-        </section>
+        </div>
         <aside className="tdy-desk__col">
           <DeskDay today={today} />
         </aside>
@@ -657,8 +670,8 @@ function ClearedGate({ today, desk }) {
     )
   }
   return (
-    <div className="tdy tdy--clear">
-      <span className="tdy__air" aria-hidden="true" />
+    <div className="tdy tdy--print tdy--phone tdy--clear" style={p.style} data-hour={p.hour}>
+      <TodayPrint hour={p.hour} device={p.print} frameRef={p.frameRef} train={false} />
       {hero}
       <span className="tdy__air" aria-hidden="true" />
       <div className="tdy__foot">{foot}</div>

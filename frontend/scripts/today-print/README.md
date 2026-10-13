@@ -81,4 +81,7 @@ lines under it are the app's own, live, placed in the print's units
 (`at()`), so they stand where the canvas put them: at 390 × 844 and at
 1440 × 900 the app's layout is the canvas's.
 
-A day with nothing due (`ClearedGate`) is not drawn on the print yet.
+A day with nothing due (`ClearedGate`, plan 206, the owner's pick G3 of
+the canvas's round 10) stands on the same print without its train (the
+last one has gone; `TodayPrint`'s `train={false}`), its disc the day's
+seal cut in red (`TodayDial`'s `CutSeal`), in the sun's own red at dawn.
