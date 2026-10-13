@@ -58,7 +58,7 @@ function save() {
 
 function fetchJson(name) {
   if (!files.has(name)) {
-    files.set(name, fetch(`bank/${name}`).then(r => {
+    files.set(name, fetch(`bank/${name}`, { cache: 'no-cache' }).then(r => {
       if (!r.ok) throw new Error(`bank/${name}: ${r.status}`)
       return r.json()
     }).catch(e => {
