@@ -196,7 +196,12 @@ export default function AudioPlayer({ src, keyHint = false, ring = false }) {
           {plays > 0 ? `${t.examAudioReplayShort} · ${t.examAudioPlayed(plays)}` : t.examAudioReplayShort}
         </button>
         {/* The desk's booklet (plan 200): Space plays it, and says so. */}
-        {keyHint && <kbd className="desk-kbd exam-ring__key" aria-hidden="true">{t.keySpace}</kbd>}
+        {keyHint && (
+          <span className="exam-ring__key" aria-hidden="true">
+            <kbd className="desk-kbd">{t.keySpace}</kbd>
+            {t.examPlayPause}
+          </span>
+        )}
       </div>
     )
   }

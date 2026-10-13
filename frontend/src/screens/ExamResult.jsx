@@ -264,7 +264,9 @@ export default function ExamResult({ session }) {
     const q = openRow?.q ?? null
     const misses = walkRows.filter(r => !r.isCorrect)
     const missAt = openRow && !openRow.isCorrect ? misses.indexOf(openRow) : -1
-    const when = relativeDate(summary.finishedAt, lang, t)
+    // When it was handed in, as M7 prints it: the day, then the hour.
+    const day = relativeDate(summary.finishedAt, lang, t)
+    const when = day && `${day}, ${new Date(summary.finishedAt).toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' })}`
     return (
       <main id="main-content" className="practice desk-res" style={{ '--line-color': EXAM_COLOR }}>
         {/* The desk's bar is the screen's name for a screen reader, and

@@ -2701,6 +2701,7 @@ const onboarding = {
   examOval: (n, choice) => `Question ${n}, answer ${choice}`,
   examAnsweredCap:     'answered',
   examSheetResult: (n, state) => `Question ${n}, ${state === 'ok' ? 'right' : state === 'x' ? 'wrong' : 'left blank'}`,
+  examPlayPause:       'play, pause',
   settingsRedoDesc: 'Take it again once you’ve progressed — your level moves with you.',
   // ── Which rating bar to grade with ──────────────────────────
   // Two buttons, four or six. All three send the same rating to the

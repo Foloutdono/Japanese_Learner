@@ -1910,9 +1910,11 @@ line here says otherwise.
   answer sheet already in the side. A question is a page of the
   booklet: the part's plate (問題3), its name and what it asks in the
   learner's words, the page's number; the question alone, its answers
-  printed under it in the sheet's ovals (four across when each is a few
-  signs, two when a few words, one a row past twenty; two at most once
-  marked); the page turning in its foot (←/→, the neighbours' numbers).
+  printed under it in the sheet's bubbles, round as the phone's (four
+  across when each is a few signs, two when a few words, one a row past
+  twenty; two at most once marked); the page turning in its foot (←/→,
+  the neighbours' numbers). A listening question's ring stands under
+  it with its clock, its Space and Replay to its right.
   A passage opens the booklet on two pages, the text on the left
   standing while its questions turn on the right. The side is the
   answer sheet (解答用紙): the clock and the count over each part's rows
@@ -1925,7 +1927,10 @@ line here says otherwise.
   the verdict's green, a wrong pick filled in the danger's red, the
   answer a blank owed ringed — under the score against the practice
   target, and beside it the page of the question open, ←/→ walking the
-  misses ("miss 2 of 9"). None of the three prints a title. The paper's
+  misses ("miss 2 of 9"); both columns the window's height, the study a
+  panel under the page (bought on a press, its body scrolling inside
+  it) and the way on at the column's foot. None of the three prints a
+  title. The paper's
   ink is `--line-exam` mixed toward the text ink, as every exam number
   is, never the raw pigment.
 - **The way up is a crumb, and the rail is the way around.** A screen's ‹

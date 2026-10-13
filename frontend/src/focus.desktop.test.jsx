@@ -94,7 +94,8 @@ describe('every hover has its focus twin on the desk', () => {
       )
       await twins($(`.${cls}`))
     }
-  })
+    // Eight mounts, each hovered and tabbed to: more than one control's time.
+  }, 40_000)
 
   it('the analyser\'s stops and chips', async () => {
     for (const cls of ['anl-stop', 'anl-chip']) {

@@ -258,6 +258,19 @@ describe('the exam runner on the desk', () => {
     play.mockRestore()
   })
 
+  // As M5 draws it: the question beside its number, the ring under them
+  // with its clock, its key and Replay to its right.
+  it('stands a listening question\'s clock, key and Replay beside its ring', async () => {
+    await start(LISTENING)
+    await settle(200)
+    const dial = $('.exam-ring__dial').getBoundingClientRect()
+    for (const sel of ['.exam-ring__clock', '.exam-ring__key', '.exam-ring__replay']) {
+      expect($(sel).getBoundingClientRect().left, sel).toBeGreaterThanOrEqual(dial.right)
+    }
+    expect($('.exam-ring__key').textContent).toBe('Espacelecture, pause')
+    expect($('.desk-q__n').getBoundingClientRect().bottom).toBeLessThanOrEqual(dial.top)
+  })
+
   it('gives Space back to the clip from an answer already checked (plan 123)', async () => {
     const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve())
     await start(LISTENING)
@@ -406,6 +419,20 @@ describe('the exam result on the desk', () => {
     expect(document.activeElement).toBe(sheetRows()[2])
     sheetRows()[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }))
     expect(document.activeElement).toBe(sheetRows()[1])
+  })
+
+  // As M7 draws it: the sheet and the page the window's height, the
+  // study a panel bought on a press, the way on at the column's foot.
+  it('stands the sheet and the page the window\'s height, the way on at its foot', async () => {
+    await mark(given)
+    const sheet = $('.desk-res__sheet').getBoundingClientRect()
+    const acts = $('.desk-res__acts').getBoundingClientRect()
+    expect(Math.abs(acts.bottom - sheet.bottom)).toBeLessThan(2)
+    expect(sheet.bottom).toBeLessThanOrEqual(window.innerHeight)
+    const toggle = $('.desk-res .exam-study__toggle')
+    expect(toggle.textContent).toBe('Traduction et décomposition')
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(toggle.querySelector('svg')).not.toBeNull()
   })
 
   it('opens the first question on a clean sheet, and keeps the way on under the page', async () => {

@@ -41441,11 +41441,47 @@ button.brd-stn { cursor: pointer; }
   .desk-q .exam-ask__foot { padding: var(--sp-4) 0 0; }
   .desk-q .exam-ask__big { text-wrap: pretty; }
   .desk-q .exam-gap { border-bottom-color: var(--exam-ink); }
-  .desk-q .exam-ring { align-self: flex-start; }
-  .exam-ring__key { margin-inline-start: var(--sp-3); }
-  /* The answers, printed under the question in the sheet's ovals: four
-     across when each is a few signs, two when a few words, one a row
-     when a sentence. */
+  /* A question asked alone on its page (a listening question's, an
+     ordering's context) at the heading's rung, as M3 and M5 set it. */
+  .desk-book__body .desk-q .exam-ask__line { font-size: var(--fs-heading); line-height: 1.5; }
+  /* A listening question as M5 draws it: its number beside the
+     question, and under them the ring, its clock, its key and Replay
+     standing to its right rather than stacked under it. */
+  .desk-q:has(.exam-ring) { align-items: start; }
+  .desk-q .exam-ring {
+    display: grid;
+    grid-template:
+      'dial clock' 1fr
+      'dial key' auto
+      'dial replay' 1fr
+      / auto auto;
+    align-self: center;
+    align-items: center;
+    gap: var(--sp-2) var(--sp-6);
+  }
+  .desk-q .exam-ring__dial { grid-area: dial; }
+  .desk-q .exam-ring__clock {
+    grid-area: clock;
+    align-self: end;
+    font-size: var(--fs-lead);
+  }
+  .desk-q .exam-ring__replay {
+    grid-area: replay;
+    place-self: start;
+    padding: 0;
+  }
+  .exam-ring__key {
+    grid-area: key;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-q .exam-transcript { grid-column: 1 / -1; }
+  /* The answers, printed under the question in the sheet's bubbles,
+     round as the phone's are (the owner's call): four across when each
+     is a few signs, two when a few words, one a row when a sentence. */
   .desk-choices { display: grid; gap: var(--sp-4); }
   .desk-choices--1 { grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
   .desk-choices--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -41476,8 +41512,8 @@ button.brd-stn { cursor: pointer; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border: 2px solid var(--text-secondary);
     border-radius: var(--r-pill);
     font-family: var(--font-display);
@@ -41782,7 +41818,7 @@ button.brd-stn { cursor: pointer; }
     position: relative;
     display: flex;
     align-items: center;
-    gap: var(--sp-2);
+    gap: var(--sp-1);
     height: 28px;
     padding: 0 var(--sp-2);
     border-radius: var(--r-plate);
@@ -41810,8 +41846,8 @@ button.brd-stn { cursor: pointer; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 17px;
-    height: 23px;
+    width: 20px;
+    height: 20px;
     padding: 0;
     background: none;
     border: 1.5px solid var(--text-secondary);
@@ -41938,9 +41974,17 @@ button.brd-stn { cursor: pointer; }
     gap: var(--sp-3);
   }
 
-  /* ── the result: the sheet marked, beside the question's page ── */
-  .desk-split--res { grid-template-columns: 420px minmax(0, 1fr); }
+  /* ── the result: the sheet marked, beside the question's page ──
+     As M7 draws it: both columns the window's height, the sheet a panel
+     down the whole of its column, the question's page growing to what
+     the study and the way on leave it, the way on at the column's foot. */
+  .desk-split--res {
+    grid-template-columns: 420px minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .desk-split--res > .desk-split__page { min-height: calc(100dvh - 2 * var(--sp-6)); }
   .desk-res__sheet {
+    min-height: calc(100dvh - 2 * var(--sp-6));
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
@@ -42012,7 +42056,49 @@ button.brd-stn { cursor: pointer; }
     white-space: nowrap;
   }
   .desk-score__time > small { font-weight: 600; color: var(--text-secondary); }
+  .desk-book--res { flex: 1 0 auto; }
+  /* The question made something to study (exam/ExamStudy), as a panel
+     under the page: its name and a chevron its head, bought on a press
+     (the first learner to ask pays its translation), its body scrolling
+     inside it so the way on stays at the column's foot. */
+  .desk-res .exam-study {
+    flex: none;
+    gap: var(--sp-3);
+    margin-top: 0;
+    padding: var(--sp-2) var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  .desk-res .exam-study__toggle,
+  .desk-res .exam-study__toggle:hover,
+  .desk-res .exam-study__toggle:focus-visible {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    filter: none;
+  }
+  .desk-res .exam-study__toggle:hover,
+  .desk-res .exam-study__toggle:focus-visible { color: var(--text-primary); }
+  .desk-res .exam-study__body {
+    max-height: calc(8 * var(--sp-8));
+    padding-bottom: var(--sp-4);
+    overflow-y: auto;
+  }
   .desk-res__acts {
+    flex: none;
     display: flex;
     justify-content: flex-end;
     gap: var(--sp-3);

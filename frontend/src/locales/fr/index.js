@@ -2629,6 +2629,7 @@ const onboarding = {
   examOval: (n, choice) => `Question ${n}, réponse ${choice}`,
   examAnsweredCap:     'répondues',
   examSheetResult: (n, state) => `Question ${n}, ${state === 'ok' ? 'juste' : state === 'x' ? 'fausse' : 'laissée vide'}`,
+  examPlayPause:       'lecture, pause',
   settingsRedoDesc: 'Repasse-le une fois que tu as progressé — ton niveau suit.',
   // ── Quelle barre de notation ────────────────────────────────
   // Deux boutons, quatre ou six. Les trois envoient la même note au
