@@ -126,6 +126,46 @@ describe('the tour on the desk’s three panels', () => {
     expect($('.desk-run .desk-kbd')).toBeNull()
   })
 
+  it('composes each stop as one card in the column’s middle (plan 206)', async () => {
+    await mount()
+    await settle(400)
+    // The card is the run's: at a card's height, the stop's room shared
+    // above and below it rather than the card drawn down the column.
+    const composed = () => {
+      const body = $('.tour--desk .tour__body').getBoundingClientRect()
+      const leaf = $('.tour--desk .tour-leaf').getBoundingClientRect()
+      const last = $('.tour--desk .tour__body').lastElementChild.getBoundingClientRect()
+      expect(leaf.height).toBeLessThan(body.height)
+      expect(Math.abs((leaf.top - body.top) - (body.bottom - last.bottom))).toBeLessThanOrEqual(2)
+    }
+    // The look's three sentences fill the column; the shorter stops are
+    // where an empty middle used to be.
+    key('Enter')
+    await settle()
+    key(String(KA.guesses.findIndex(g => g.correct) + 1))
+    await settle()
+    key('Enter')
+    await settle()
+    expect(stop()).toBe('found')
+    composed()
+    expect($('.tour--desk .tour-leaf--found .tour-pattern').textContent).toBe('か')
+    // Through the scene to the first usage: its sentence a step up from
+    // the phone's, at --fs-heading.
+    key('Enter')
+    await settle()
+    key('Enter')
+    await settle()
+    key(String(KA.scene.ask.choices.findIndex(c => c.correct) + 1))
+    await settle()
+    key('Enter')
+    await settle()
+    key('Enter')
+    await settle()
+    expect(stop()).toBe('twist')
+    composed()
+    expect(getComputedStyle($('.tour--desk .tour-leaf__mid--spec .dict-ex__jp')).fontSize).toBe('27.2px')
+  })
+
   it('is ridden from the keyboard, each stop saying how it went and the plate filling in', async () => {
     await mount()
     await settle(400)
