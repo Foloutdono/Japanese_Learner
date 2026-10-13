@@ -128,7 +128,9 @@ describe('the boarding at 390×844', () => {
     // The pop lets go once it has landed; the breath stays.
     await settle(700)
     expect(go().classList.contains('btn-depart--waking')).toBe(false)
-    expect(getComputedStyle(go()).animationName).toBe('btn-gate-breathe')
+    // The breath is the halo layer's opacity, never the gate's own shadow.
+    expect(getComputedStyle(go()).animationName).toBe('none')
+    expect(getComputedStyle(go(), '::after').animationName).toBe('btn-gate-breathe')
     expect(getComputedStyle(go(), '::before').opacity).toBe('1')
     // The idle nudge waits four seconds on a ready gate.
     expect(getComputedStyle(go().querySelector('.btn-depart__reader')).animationDelay).toBe('4s')
@@ -142,7 +144,7 @@ describe('the boarding at 390×844', () => {
     const board = screen.container.querySelector('[data-action="board"]')
     expect(board.classList.contains('btn-depart--gate')).toBe(true)
     expect(board.classList.contains('btn-depart--waking')).toBe(false)
-    expect(getComputedStyle(board).animationName).toBe('btn-gate-breathe')
+    expect(getComputedStyle(board, '::after').animationName).toBe('btn-gate-breathe')
   })
 
   it('keeps a 44 px head: the back button, the line with its stops', async () => {
