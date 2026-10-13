@@ -155,6 +155,36 @@ describe('the carousel studio', () => {
     }
   })
 
+  it('draws every slide of every type it can be, without a throw', { timeout: 120000 }, () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      // A sample of every source, in turn in each language and format.
+      // A passage's pages are cut by a real canvas's measure, which this
+      // lane has not: they are drawn in the browser's checks instead.
+      const seen = {}
+      for (const [n, { src, id, p }] of every.entries()) {
+        if ((seen[src.id] = (seen[src.id] || 0) + 1) % 90 !== 1) continue
+        const lang = n % 2 ? 'fr' : 'en'
+        const file = filesOf(src).find(x => itemsOf(src.id, x.data, 'en', x.filter).some(it => it.id === id)).data
+        const q = lang === 'en' ? p : plan(src.id, file, id, { ...OPTS, lang, script: 'furigana' }, depsFor(src, file, id))
+        {
+          const fmt = n % 3 ? FORMATS.post : FORMATS.story
+          {
+            for (const type of TYPES.map(x => x.id).filter(x => available(x, q))) {
+              for (const sl of deck(type, q, fmt, { ground: n % 2 ? 'paper' : 'sumi' }).filter(x => !x.key.startsWith('passage-'))) {
+                const { ctx } = stubContext()
+                expect(() => sl.draw(ctx), `${src.id} ${id} ${lang} ${fmt.id} ${type} ${sl.key}`).not.toThrow()
+              }
+            }
+          }
+        }
+      }
+    } finally {
+      globalThis.Path2D = had
+    }
+  })
+
   it('marks the source’s own station on the route map, and only it', () => {
     for (const src of SOURCES) {
       const { p } = every.find(x => x.src === src)
@@ -253,8 +283,19 @@ describe('the carousel studio', () => {
     }
   })
 
+  it('never deals a reading the word also takes (plan 200l)', () => {
+    // 店 is みせ and てん: a one-kanji word keeps its other readings out.
+    expect(readingMisses({ t: '店', fu: [['店', 'みせ']] }, kanjiIndex)).not.toContain('てん')
+    // 行く is いく and ゆく in the deck.
+    expect(readingMisses({ t: '行く', fu: [['行', 'ゆ'], ['く', '']] }, kanjiIndex, ['いく'])).not.toContain('いく')
+  })
+
   it('reads a sentence in romaji word by word', () => {
     expect(lineRomaji(sentence('駅で友だちに会います。').rows)).toBe('Eki de tomodachi ni aimasu.')
+    // A capital after a stop inside the line too.
+    expect(lineRomaji(sentence('外は雨です。今日は出ません。').rows)).toMatch(/\. Kyou/)
+    // A stray kana the tokenizer packed as punctuation is still read (あには).
+    expect(lineRomaji(unpack([['あ'], ['に', 'p', 'ni'], ['は', 'p', 'wa'], ['けっこん', 'w', 'kekkon'], ['。']]))).toBe('A ni wa kekkon.')
   })
 
   it('welds French punctuation to the word before it', () => {
@@ -356,6 +397,22 @@ describe('explaining a point in its own sentence', () => {
     const [stack] = stacksIn(sentence('日本の田舎には、どんな習慣がありますか。').rows, 'en', glossEn)
     expect(stack.key).toBe('には')
     expect(stack.line).toMatch(/^に marks 日本の田舎 as where something is; は makes it the topic/)
+  })
+
+  it('gives no stacked slide to a pair that is no two particles (plan 200l)', () => {
+    const keys = jp => stacksIn(sentence(jp).rows, 'en', glossEn).map(x => x.key)
+    expect(keys('この棚は古くて、今にも壊れそうです。')).not.toContain('にも')
+    expect(keys('定期券を家に忘れたばかりに、往復とも切符を買わなければならなかった。')).not.toContain('とも')
+    expect(keys('専門家とは言わないまでも、彼の考古学の知識はかなりのものだ。')).not.toContain('とは')
+    expect(keys('住民への事前の説明なしに、会社は工場の建設に着工した。')).not.toContain('への')
+  })
+
+  it('names the right words around a stacked pair (plan 200l)', () => {
+    const one = (jp, key) => stacksIn(sentence(jp).rows, 'en', glossEn).find(x => x.key === key)
+    expect(one('地方への出張がてら、かつて赴任していた支店に立ち寄った。', 'への').next.t).toBe('出張')
+    expect(one('何度飲んでも、この薬の苦さには慣れない。', 'には').host.t).toBe('薬の苦さ')
+    expect(one('彼は誰にも相談せずに、会社をやめてしまった。', 'にも').line).toMatch(/nobody/)
+    expect(one('今日はどこにも行きたくないです。', 'にも').line).toMatch(/nowhere/)
   })
 
   it('leaves a pattern’s own pieces unlabelled', () => {

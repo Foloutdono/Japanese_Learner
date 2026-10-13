@@ -61,6 +61,10 @@ function fetchJson(name) {
     files.set(name, fetch(`bank/${name}`).then(r => {
       if (!r.ok) throw new Error(`bank/${name}: ${r.status}`)
       return r.json()
+    }).catch(e => {
+      // A failed file is asked for again next time, not remembered.
+      files.delete(name)
+      throw e
     }))
   }
   return files.get(name)
@@ -117,8 +121,15 @@ function renderLevels() {
 }
 
 let listCache = []
+let listShown = []
+let listToken = 0
+const LIST_MAX = 400
 async function renderList() {
+  // Only the latest call draws: a slower file for a level left behind
+  // never overwrites the list of the one picked after it.
+  const mine = ++listToken
   const data = await dataNow()
+  if (mine !== listToken) return
   const src = sourceOf(state.source)
   let items = itemsOf(state.source, data, state.lang, src.levels ? state.kanaSet : null)
   if (state.source === 'passage') items = items.filter(x => x.tag === state.level)
@@ -127,10 +138,11 @@ async function renderList() {
   const list = $('#items')
   list.replaceChildren()
   const shown = items.filter(x => !q || [x.jp, x.sub, x.tag].some(v => String(v || '').toLowerCase().includes(q)))
-  $('#count').textContent = `${shown.length}`
+  listShown = shown
+  $('#count').textContent = shown.length > LIST_MAX ? `first ${LIST_MAX} of ${shown.length}` : `${shown.length}`
   $('#list-name').textContent = LIST_NAME[state.source]
   const current = currentId(items)
-  for (const x of shown.slice(0, 400)) {
+  for (const x of shown.slice(0, LIST_MAX)) {
     const li = document.createElement('li')
     const b = document.createElement('button')
     b.type = 'button'
@@ -244,7 +256,8 @@ function renderQuestions(pl) {
   const field = box.closest('.field')
   field.hidden = !pl?.quizzes?.length
   if (field.hidden) return
-  const chosen = new Set(picked(pl, state.picks[pickKey()], 3).map(q => q.id))
+  // As many as the deck asks: three on a mock exam, one at the walk's end.
+  const chosen = new Set(picked(pl, state.picks[pickKey()], state.type === 'exam' ? 3 : 1).map(q => q.id))
   for (const q of pl.quizzes) {
     const b = document.createElement('button')
     b.type = 'button'
@@ -285,14 +298,21 @@ async function depsFor(data, id) {
 // ── The slides ────────────────────────────────────────────────
 let current = { decks: [], plan: null }
 let token = 0
+let captionFor = ''
 
 async function render() {
   const mine = ++token
+  // A render a newer one has overtaken stops at its next await, before it
+  // touches the page or the state.
   const data = await dataNow()
+  if (mine !== token) return
   if (!listCache.length) await renderList()
+  if (mine !== token) return
   const id = currentId()
   const deps = await depsFor(data, id)
+  if (mine !== token) return
   const figures = (await fetchJson('index.json').catch(() => null))?.figures
+  if (mine !== token) return
   const opts = { ...state, figures, ending: state.ending }
   const pl = plan(state.source, data, id, opts, deps)
   if (!pl) return
@@ -393,7 +413,10 @@ async function render() {
     row.append(head, strip)
     stage.append(row)
   }
-  $('#caption').value = captionOf(pl)
+  // The caption is written when the item or its language changes, never
+  // over the reader's own edits on a redraw.
+  const captionKey = `${state.source}|${pl.id}|${state.lang}`
+  if (captionKey !== captionFor) { $('#caption').value = captionOf(pl); captionFor = captionKey }
   $('#export').disabled = false
 }
 
@@ -464,8 +487,13 @@ function drawViewer() {
   c.height = fmt.h
   c.getContext('2d').drawImage(full(d.slides[i], fmt), 0, 0)
   $('#viewer-title').textContent = `${i + 1} / ${d.slides.length}`
-  $('#prev').disabled = i === 0
-  $('#next').disabled = i === d.slides.length - 1
+  const prev = $('#prev'), next = $('#next')
+  const lost = document.activeElement
+  prev.disabled = i === 0
+  next.disabled = i === d.slides.length - 1
+  // A button disabled under the focus hands it to the other one.
+  if (lost === prev && prev.disabled) next.focus()
+  if (lost === next && next.disabled) prev.focus()
 }
 function step(by) {
   if (!viewing) return
@@ -513,23 +541,30 @@ const safeName = s => String(s).replace(/[\\/:*?"<>|.\s]+/g, '-').replace(/^-+|-
 const baseName = () => `tsuji-${state.source}-${safeName(current.plan.id)}-${state.type}-${state.format}`
 
 async function exportZip() {
+  // What was on screen when it started: a click during the export changes
+  // neither the size the slides are drawn at nor the file's name.
   const d = current.decks.find(x => x.id === state.type) ?? current.decks[0]
+  const fmt = current.fmt
+  const name = `tsuji-${state.source}-${safeName(current.plan.id)}-${d.id}-${state.format}`
   const btn = $('#export')
   btn.disabled = true
   status('Drawing the slides…')
   try {
     if (typeof JSZip === 'undefined') {
-      for (let i = 0; i < d.slides.length; i++) await offer(`${baseName()}-${i + 1}.png`, await png(full(d.slides[i], current.fmt)))
-      status('Saved one image per slide.')
+      let result = 'saved'
+      for (let i = 0; i < d.slides.length && result === 'saved'; i++) result = await offer(`${name}-${i + 1}.png`, await png(full(d.slides[i], fmt)))
+      status(result === 'saved' ? 'Saved one image per slide.' : MESSAGE[result])
       return
     }
     const zip = new JSZip()
     for (let i = 0; i < d.slides.length; i++) {
-      zip.file(`${String(i + 1).padStart(2, '0')}-${d.slides[i].key}.png`, await png(full(d.slides[i], current.fmt)))
+      zip.file(`${String(i + 1).padStart(2, '0')}-${d.slides[i].key}.png`, await png(full(d.slides[i], fmt)))
     }
     zip.file('caption.txt', $('#caption').value)
-    const result = await offer(`${baseName()}.zip`, await zip.generateAsync({ type: 'blob' }))
-    status({ saved: `Saved ${d.slides.length} slides and the caption.`, declined: 'Download cancelled.', unavailable: 'Downloads are not available in this view.', failed: 'The download did not go through. Try again.' }[result])
+    const result = await offer(`${name}.zip`, await zip.generateAsync({ type: 'blob' }))
+    status(result === 'saved' ? `Saved ${d.slides.length} slides and the caption.` : MESSAGE[result])
+  } catch (e) {
+    status(`The export failed (${e.message}).`)
   } finally {
     btn.disabled = false
   }
@@ -538,8 +573,9 @@ async function exportOne() {
   if (!viewing) return
   const { d, i } = viewing
   const result = await offer(`${baseName()}-${i + 1}.png`, await png(full(d.slides[i], current.fmt)))
-  status(result === 'saved' ? `Saved slide ${i + 1}.` : result === 'declined' ? 'Download cancelled.' : 'Downloads are not available in this view.')
+  status(result === 'saved' ? `Saved slide ${i + 1}.` : MESSAGE[result])
 }
+const MESSAGE = { declined: 'Download cancelled.', unavailable: 'Downloads are not available in this view.', failed: 'The download did not go through. Try again.' }
 function status(msg) {
   $('#status').textContent = msg || ''
 }
@@ -550,8 +586,11 @@ function captionOf(pl) {
   const fr = pl.lang === 'fr'
   const base = fr ? ['#japonais', '#apprendrelejaponais'] : ['#japanese', '#learnjapanese']
   const tags = [...base, ...c.tags.map(t => `#${t}`), '#日本語', '#nihongo', '#tsuji'].join(' ')
-  const head = [c.jp, c.romaji, c.tr].filter(Boolean).join('\n')
-  const ask = c.point ? `${c.ask} · ${c.point}` : c.ask
+  // A passage's line is the question picked for it, not always its first.
+  const tr = pl.source === 'passage' ? picked(pl, state.picks[pickKey()], 1)[0]?.ask || c.tr : c.tr
+  const head = [c.jp, c.romaji, tr].filter(Boolean).join('\n')
+  // The point once: a lesson's ask names it already.
+  const ask = c.point && !c.ask.includes(c.point) ? `${c.ask} · ${c.point}` : c.ask
   return `${head}\n\n${ask}\n\n${tags}`
 }
 async function copyCaption() {
@@ -624,7 +663,7 @@ function wire() {
   })
   $('#search').addEventListener('input', () => renderList())
   $('#random').addEventListener('click', async () => {
-    const pool = listCache.filter(x => x.id !== currentId())
+    const pool = listShown.slice(0, LIST_MAX).filter(x => x.id !== currentId())
     if (!pool.length) return
     state.ids[state.source] = pool[Math.floor(Math.random() * pool.length)].id
     state.kanji = ''
@@ -646,7 +685,8 @@ function wire() {
   $('#next').addEventListener('click', () => step(1))
   $('#save-one').addEventListener('click', exportOne)
   $('#close').addEventListener('click', () => $('#viewer').close())
-  $('#viewer').addEventListener('keydown', e => {
+  document.addEventListener('keydown', e => {
+    if (!$('#viewer').open) return
     if (e.key === 'ArrowLeft') step(-1)
     if (e.key === 'ArrowRight') step(1)
   })

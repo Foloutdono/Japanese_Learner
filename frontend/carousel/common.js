@@ -52,10 +52,39 @@ export function furiganaOf(word, read) {
   })
 }
 
-/** A lesson's packed row (carousel_bank.text_rows) as the row a slide sets. */
+/** A lesson's packed row (carousel_bank.text_rows) as the row a slide
+ *  sets. The tokenizer packs some stray kana of a lesson line as
+ *  punctuation (the あ of あには, the せい of せいで): a one-element row
+ *  that is not punctuation is a word, read from its kana (plan 200l). */
 export const unpack = rows => rows.map(r => (r.length === 1
-  ? { t: r[0], k: 'punct' }
+  ? (/^[\p{P}\p{S}＿\s]+$/u.test(r[0]) ? { t: r[0], k: 'punct' } : { t: r[0], k: 'word', ro: kanaRomaji(r[0]) })
   : { t: r[0], k: KINDS[r[1]] || 'word', ro: r[2], ...(r[1] === 'v' ? { pos: 'verb' } : {}), ...(r[3] ? { fu: r[3] } : {}), ...(r[4] ? { lit: true } : {}) }))
+
+// Hepburn, as study/romaji.py writes it: a long vowel doubled (kouhii).
+const ROMA = Object.fromEntries(`あa いi うu えe おo かka きki くku けke こko さsa しshi すsu せse そso たta ちchi つtsu てte とto
+  なna にni ぬnu ねne のno はha ひhi ふfu へhe ほho まma みmi むmu めme もmo やya ゆyu よyo らra りri るru れre ろro
+  わwa ゐi ゑe をo んn がga ぎgi ぐgu げge ごgo ざza じji ずzu ぜze ぞzo だda ぢji づzu でde どdo ばba びbi ぶbu べbe ぼbo
+  ぱpa ぴpi ぷpu ぺpe ぽpo ぁa ぃi ぅu ぇe ぉo ゔvu`.split(/\s+/).filter(Boolean).map(x => [x[0], x.slice(1)]))
+/** A word's kana in romaji: きっぷ kippu, しゃしん shashin, コーヒー koohii. */
+export function kanaRomaji(text) {
+  const kana = [...toHira(text)]
+  let out = ''
+  for (let i = 0; i < kana.length; i++) {
+    const c = kana[i]
+    const small = { ゃ: 'a', ゅ: 'u', ょ: 'o' }[kana[i + 1]]
+    let ro = ROMA[c] ?? (c === 'ー' ? out.slice(-1) : c)
+    if (small && ROMA[c]?.endsWith('i')) {
+      ro = /^(shi|chi|ji)$/.test(ro) ? ro.slice(0, -1) + small : ro.slice(0, -1) + 'y' + small
+      i += 1
+    }
+    if (c === 'っ') {
+      const next = ROMA[kana[i + 1]] || ''
+      ro = next.startsWith('ch') ? 't' : next[0] || ''
+    }
+    out += ro
+  }
+  return out
+}
 
 const PUNCT_ROMAJI = { '。': '.', '、': ',', '？': '?', '！': '!', '「': '“', '」': '”', '『': '“', '』': '”', '・': ' ', '…': '…' }
 /** The sentence in romaji, word by word as the slides cut it. */
@@ -69,7 +98,8 @@ export function lineRomaji(rows) {
       out += (out && !out.endsWith('“') ? ' ' : '') + row.ro
     }
   }
-  return out.trim().replace(/^./, c => c.toUpperCase())
+  // A capital at the start of the line and after each stop inside it.
+  return out.trim().replace(/(^|[.?!] +)([a-z])/g, (_, a, b) => a + b.toUpperCase())
 }
 
 /** A word's gloss in the reader's language: [the sense, the senses after it]. */
@@ -88,7 +118,7 @@ const VOICE = Object.fromEntries('かが きぎ くぐ けげ こご さざ し�
 const SMALL = { ゃ: 'や', ゅ: 'ゆ', ょ: 'よ', や: 'ゃ', ゆ: 'ゅ', よ: 'ょ' }
 export const toHira = s => s.replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60))
 
-export function readingMisses(row, kanji) {
+export function readingMisses(row, kanji, known = []) {
   const answer = reading(row)
   const out = new Set()
   const chars = [...answer]
@@ -104,8 +134,10 @@ export function readingMisses(row, kanji) {
       out.add([...chars.slice(0, i), 'っ', ...chars.slice(i)].join(''))
     }
   })
-  // Another reading of one of its kanji, in place of the one it takes here.
-  for (const [text, r] of row.fu || []) {
+  // Another reading of one of its kanji, in place of the one it takes here;
+  // never for a word that is one kanji alone, whose other reading is
+  // usually the same word read another way (店 みせ, てん: plan 200l).
+  for (const [text, r] of [...row.t].length > 1 ? row.fu || [] : []) {
     if (!r || [...text].length !== 1 || !kanji?.[text]) continue
     const k = kanji[text]
     for (const other of [...k.on.map(toHira), ...k.kun.map(([stem]) => stem)]) {
@@ -113,6 +145,8 @@ export function readingMisses(row, kanji) {
     }
   }
   out.delete(answer)
+  // Nor a reading the deck gives the same written word elsewhere (行く いく, ゆく).
+  for (const r of known) out.delete(r)
   return [...out].filter(s => s && /^[ぁ-ゟー]+$/.test(s))
 }
 

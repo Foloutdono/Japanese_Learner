@@ -857,10 +857,16 @@ const KINDS = {
     const t = c.plan.t
     let y = title(c, t.yourTurn)
     const color = p.line.sakubun
-    const line = fit(ctx, s.text, { sizes: [FS.display, FS.heading, FS.title, FS.lead], maxW: f.w, maxH: (f.bottom - y) * (s.model ? 0.34 : 0.6), lh: 1.18 })
-    const model = s.model ? layoutSentence(ctx, s.model.rows, { max: FS.display * 0.8, min: FS.lead, maxW: f.w - SP[7], maxLines: 2, maxH: (f.bottom - y) * 0.24, script: c.plan.script, gap: 0.06, rules: false }) : null
+    const bubble = FS.display * 0.7
     const mtr = s.model ? fit(ctx, s.model.tr, { weight: 500, sizes: [FS.lead, FS.body], maxW: f.w - SP[7], maxLines: 2, balanced: false }) : null
-    const total = paragraphH(line) + SP[7] + (s.form ? FS.lead * 2 + SP[8] : 0) + (model ? FS.caption + SP[4] + model.h + SP[3] + paragraphH(mtr) + SP[8] : 0) + FS.display
+    // What is fixed (the gaps, the form, the model's caption and
+    // translation, the comment mark) first; the ask and the model share
+    // the rest.
+    const fixed = SP[7] + (s.form ? FS.lead * 2 + SP[8] : 0) + (s.model ? FS.caption + SP[4] + SP[3] + paragraphH(mtr) + SP[7] : 0) + bubble * 0.95
+    const free = f.bottom - y - fixed
+    const line = fit(ctx, s.text, { sizes: [FS.display, FS.heading, FS.title, FS.lead], maxW: f.w, maxH: free * (s.model ? 0.55 : 1), lh: 1.18 })
+    const model = s.model ? layoutSentence(ctx, s.model.rows, { max: FS.display * 0.8, min: FS.lead, maxW: f.w - SP[7], maxLines: 2, maxH: free - paragraphH(line), script: c.plan.script, gap: 0.06, rules: false }) : null
+    const total = paragraphH(line) + fixed + (model ? model.h : 0)
     y += Math.max(0, (f.bottom - y - total) * 0.4)
     y += paragraph(ctx, line, f.x, y, ink) + SP[7]
     if (s.form) y += pill(ctx, s.form, f.x, y, f.w, color, ink) + SP[8]
@@ -872,13 +878,9 @@ const KINDS = {
       ctx.fill()
       drawSentence(ctx, model, f.x + SP[7], y, 'left', () => ({ ink, rule: null, ruby: ink2 }))
       paragraph(ctx, mtr, f.x + SP[7], y + model.h + SP[3], ink2)
-      y += model.h + SP[3] + paragraphH(mtr) + SP[8]
+      y += model.h + SP[3] + paragraphH(mtr) + SP[7]
     }
-    ctx.save()
-    ctx.translate(f.x + FS.display * 0.3, y)
-    ctx.rotate(Math.PI / 2)
-    chevron(ctx, 0, 0, FS.display * 0.6, p.gold)
-    ctx.restore()
+    if (f.bottom - y >= bubble * 0.95) commentMark(ctx, p, f.x, y, bubble)
   },
 
   /** 終点: the post's last slide, in the ending the studio picked. */
@@ -1380,6 +1382,34 @@ function stopPlate(c, color, maxW) {
       text(ctx, st.name, at2, cy + Math.max(FS.body, L.z * 0.7) * 0.36, { f: L.lf, color: ink2 })
     },
   }
+}
+
+/** A comment, as the feeds draw the way to one: a speech bubble in the
+ *  metal's gold, three dots in it (plan 200l: it replaced a lone arrow
+ *  pointing down at nothing). `x` its left edge, `y` its top. */
+function commentMark(ctx, p, x, y, s) {
+  const w = s
+  const h = s * 0.74
+  ctx.save()
+  ctx.strokeStyle = p.gold
+  ctx.fillStyle = p.gold
+  ctx.lineWidth = Math.max(4, s * 0.075)
+  ctx.lineJoin = 'round'
+  ctx.lineCap = 'round'
+  rrect(ctx, x, y, w, h, h * 0.36)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(x + w * 0.22, y + h)
+  ctx.lineTo(x + w * 0.16, y + h + s * 0.2)
+  ctx.lineTo(x + w * 0.42, y + h)
+  ctx.stroke()
+  for (const k of [0.3, 0.5, 0.7]) {
+    ctx.beginPath()
+    ctx.arc(x + w * k, y + h / 2, s * 0.055, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.restore()
+  return h + s * 0.2
 }
 
 const ENDINGS = {
@@ -2173,11 +2203,7 @@ function ratingSlide(ctx, p, fr, plan) {
   }
   y += barH + SP[8]
   y += paragraph(ctx, cta, fr.cx, y, p.ink2, 'center') + SP[6]
-  ctx.save()
-  ctx.translate(fr.cx, y)
-  ctx.rotate(Math.PI / 2)
-  chevron(ctx, 0, 0, FS.display * 0.6, p.gold)
-  ctx.restore()
+  if (fr.bottom - y >= FS.display * 0.7) commentMark(ctx, p, fr.cx - FS.display * 0.35, y, FS.display * 0.7)
 }
 
 // ── The directions and their decks ────────────────────────────

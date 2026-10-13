@@ -171,8 +171,8 @@ export const STACKS = {
     fr: 'に rattache {Xq} au verbe comme il le ferait seul ; は en fait ensuite le thème. Ensemble, « pour ce qui est de {X}… » : la phrase met {X} à part et dit ce qui vaut pour lui, souvent par contraste avec d’autres.' },
   では: { en: 'で marks {Xq} as where or how something happens; は makes it the topic: “at {X}, as for {X}…”, often in contrast with other places.',
     fr: 'で marque {Xq} comme le lieu ou le moyen ; は en fait le thème : « à {X}, en ce qui concerne {X}… », souvent par contraste avec d’autres lieux.' },
-  にも: { en: 'に points at {Xq}; も adds “too” or “even”: “to {X} too”. With a question word and a negative verb (どこにも…ない), it means “nowhere”.',
-    fr: 'に désigne {Xq} ; も ajoute « aussi » ou « même » : « à {X} aussi ». Avec un mot interrogatif et un verbe négatif (どこにも…ない), cela veut dire « nulle part ».' },
+  にも: { en: 'に points at {Xq}; も adds “too” or “even”: “to {X} too”.',
+    fr: 'に désigne {Xq} ; も ajoute « aussi » ou « même » : « à {X} aussi ».' },
   でも: { en: 'で marks where or how; も adds “too” or “even”: “at {X} too”, “even at {X}”.',
     fr: 'で marque le lieu ou le moyen ; も ajoute « aussi » ou « même » : « à {X} aussi », « même à {X} ».' },
   とは: { en: 'と marks the partner; は makes it the topic: “with {X}, as for {X}…”.',
@@ -214,7 +214,15 @@ const STACK_SENSES = {
     being: { en: 'に marks {Xq} as where something is; は makes it the topic: “at {X}, there is…”. The sentence opens on the place, then says what is found there.',
       fr: 'に marque {Xq} comme l’endroit où se trouve quelque chose ; は en fait le thème : « à {X}, il y a… ». La phrase part du lieu, puis dit ce qu’on y trouve.' },
   },
+  // A question word, then a negative verb: どこにも…ない, 誰にも…ない.
+  にも: {
+    nowhere: { en: 'に points at {Xq}; も adds “even”. With a negative verb, どこにも means “nowhere”, “not anywhere”.',
+      fr: 'に désigne {Xq} ; も ajoute « même ». Avec un verbe négatif, どこにも veut dire « nulle part ».' },
+    nobody: { en: 'に points at {Xq}; も adds “even”. With a negative verb, {X}にも means “(to) nobody”, “not to anyone”.',
+      fr: 'に désigne {Xq} ; も ajoute « même ». Avec un verbe négatif, {X}にも veut dire « à personne ».' },
+  },
 }
+const NOBODY = words('誰 だれ どなた')
 // The predicates after 私には that say how it is for someone.
 const FOR_SOMEONE = /^(わか|分か|でき|出来|見え|聞こえ|無理|むり)/
 
@@ -267,6 +275,7 @@ function phraseStart(rows, j) {
   for (;;) {
     if (s >= 1 && isNoun(rows[s - 1]) && isNoun(rows[s])) s -= 1
     else if (s >= 2 && rows[s - 1].t === 'の' && rows[s - 1].k === 'particle' && isWord(rows[s - 2])) s -= 2
+    else if (s >= 1 && rows[s].pos === 'suffix' && isWord(rows[s - 1])) s -= 1 // 苦 + さ
     else return s
   }
 }
@@ -277,12 +286,16 @@ function hostPhrase(rows, j, glossOf) {
   const run = rows.slice(phraseStart(rows, j), j + 1)
   return { t: run.map(r => r.t).join(''), gloss: run.length === 1 ? glossOf(rows[j]) : '' }
 }
-/** The noun a phrase after `i` is headed by: あいさつ in 丁寧なあいさつ. */
+// Nouns that end a phrase rather than head it (説明なし, 行くため).
+const NOT_HEAD = words('なし 無し ため 為 こと 事 もの 物 よう 様 ほう 方 など')
+const heads = r => isNoun(r) && r.pos !== 'suffix' && !any(r, w => NOT_HEAD.has(w))
+/** The noun a phrase after `i` is headed by: あいさつ in 丁寧なあいさつ,
+ *  never a suffix after it (出張がてら). */
 function nextHead(rows, i) {
   let j = nextOf(rows, i, isWord)
   if (j < 0) return -1
   for (;;) {
-    if (isWord(rows[j + 1])) j += 1
+    if (heads(rows[j + 1])) j += 1
     else if (rows[j + 1]?.t === 'な' && isWord(rows[j + 2])) j += 2 // 丁寧な + あいさつ
     else return j
   }
@@ -411,6 +424,13 @@ export function howItWorks(rows, p, meaningText, lang, glossOfRow) {
   return { type: 'chunk', items, line: fill((X ? SAY.after : SAY.span)[lang], slots) }
 }
 
+/** Whether the clause after `i` ends negative (行きたくない, 頼らず). */
+function negativeAfter(rows, i) {
+  let text = ''
+  for (let j = i + 1; j < rows.length && rows[j].k !== 'punct'; j++) text += rows[j].t
+  return /(ない|なかっ|ず|ません|ぬ)/.test(text)
+}
+
 /**
  * The stacked particles of a sentence (には, への ...): the pairs that are
  * not a pattern of their own, standing after a noun, that STACKS knows.
@@ -432,12 +452,21 @@ export function stacksIn(rows, lang, glossOfRow) {
     if (host < 0 || !isNoun(rows[host])) continue
     const next = key.endsWith('の') ? nextHead(rows, i + 1) : nextOf(rows, i + 1, isWord)
     if (key.endsWith('の') && next < 0) continue
+    // 住民への事前の説明: which noun the pair describes is the reader's
+    // call (an explanation, not a 事前), so the slide does not guess.
+    if (key.endsWith('の') && rows[next + 1]?.t === 'の' && rows[next + 1].k === 'particle' && heads(rows[next + 2])) continue
     const X = hostPhrase(rows, host, glossOf)
     const pred = rows[targetOf(rows, i + 1)]
+    // Not every pair is two particles: 今にも is “at any moment”, 往復とも
+    // “both ways”, and と before 言う or 思う quotes (専門家とは言わない).
+    if (key === 'にも' && X.t === '今') continue
+    if (key === 'とも' && !(any(rows[host], w => PEOPLE.has(w)) || PERSON_END.test(X.t))) continue
+    if (key.startsWith('と') && verbIs(pred, /^(言|云|いう|いわ|思|おも|考え|かんがえ|呼|よ[ぶば])/)) continue
     let sense = STACK_SENSES[key] && senseOf(a.t, X.t, rows[host], pred)
     // 友だちには会った is “as for friends, I met them”: “for {X}” only
     // over an adjective or a verb of ability (私には難しい, わからない).
     if (sense === 'person' && !(pred && (pred.pos === 'adjective' || any(pred, v => FOR_SOMEONE.test(v))))) sense = null
+    if (key === 'にも') sense = !negativeAfter(rows, i + 1) ? null : X.t === 'どこ' ? 'nowhere' : NOBODY.has(X.t) ? 'nobody' : null
     const slots = {
       X: X.t, Xq: quoted(X.t, X.gloss),
       Y: next >= 0 ? rows[next].t : '', Yq: next >= 0 ? quoted(rows[next].t, glossOf(rows[next])) : '',

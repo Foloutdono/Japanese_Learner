@@ -59,6 +59,9 @@ function withId(list, label) {
   })
 }
 const senses = (row, lang) => ((lang === 'fr' && row.fr?.length ? row.fr : row.en) || [])
+// A meaning question deals glosses of the reader's language only: a word
+// with no French gloss is neither its answer nor a wrong choice in French.
+const ownGloss = (row, lang) => row?.[lang]?.[0] || ''
 
 // ── The questions a sentence of the bank can ask ──────────────
 /** 読み: the reading of the sentence's kanji word. */
@@ -66,10 +69,14 @@ function readingQ(s, row, at, bank, lang, t) {
   if (!row || !hasKanji(row.t)) return null
   const near = readingMisses(row, bank.kanji)
   if (near.length < 3) return null
-  // The word printed bare, whatever the script: its furigana is the answer.
+  // The word printed bare, whatever the script: its furigana is the
+  // answer. So are the furigana of another word that shares one of its
+  // kanji (入院 over 退院), printed bare too.
+  const own = new Set([...row.t].filter(hasKanji))
+  const bare = r => ({ t: r.t, k: r.k, ro: r.ro, ...(r.pos ? { pos: r.pos } : {}) })
   return {
     kind: 'reading', askJp: EXAM_ASK_JP.reading, ask: t.examAsk.reading,
-    stem: { rows: s.rows.map((r, i) => (i === at ? { t: r.t, k: r.k, ro: r.ro } : r)), target: at, under: true,
+    stem: { rows: s.rows.map((r, i) => (i === at || (r.fu && [...r.t].some(c => own.has(c))) ? bare(r) : r)), target: at, under: true,
       after: { rows: s.rows, target: at, under: true } },
     ...dealChoices(reading(row), shuffle(near, seeded(s.id)).slice(0, 3), s.id, 'jp'),
     explain: { head: `${row.t}\u3000${reading(row)}`, sense: weldIf(lang, gloss(row, lang)[0]) },
@@ -92,11 +99,11 @@ function orthographyQ(s, row, at, lang, t) {
 /** 文脈: what the sentence's word means, among words of its kind. */
 function meaningQ(s, row, at, bank, lang, t) {
   if (!row || row.k !== 'word') return null
-  const answer = gloss(row, lang)[0]
+  const answer = ownGloss(row, lang)
   if (!answer) return null
   const pool = []
   for (const other of bank.sentences) {
-    for (const r of other.rows) if (r.k === 'word' && r.pos === row.pos && r.t !== row.t && (r.en || r.fr)) pool.push(gloss(r, lang)[0])
+    for (const r of other.rows) if (r.k === 'word' && r.pos === row.pos && r.t !== row.t && ownGloss(r, lang)) pool.push(ownGloss(r, lang))
   }
   const wrong = distinctFrom(senses(row, lang), pool, 3, `${s.id}-m`)
   if (wrong.length < 3) return null
@@ -241,7 +248,9 @@ export function lessonQuizzes(L, data, lang, t) {
 export function wordQuizzes(w, data, lang, t, index) {
   const row = { t: w.t, fu: w.fu }
   const [main] = gloss(w, lang)
-  const near = hasKanji(w.t) ? readingMisses(row, index) : []
+  // The deck's other readings of the same written word are right too.
+  const known = (data.words || []).filter(x => x.t === w.t && x.r !== w.r).map(x => x.r)
+  const near = hasKanji(w.t) ? readingMisses(row, index, known) : []
   const head = `${w.t}\u3000${w.r}`
   const readingQ2 = near.length >= 3 ? {
     kind: 'reading', ask: t.examAsk.kana, stem: { specimen: w.t },
@@ -253,8 +262,8 @@ export function wordQuizzes(w, data, lang, t, index) {
     ...dealChoices(w.t, w.hy.slice(0, 3), `${w.t}-hy`, 'jp'),
     explain: { head: `${w.r}\u3000${w.t}`, sense: weldIf(lang, main) },
   } : null
-  const wrong = distinctFrom(senses(w, lang), data.words.filter(x => x.t !== w.t).map(x => gloss(x, lang)[0]), 3, `${w.t}-m`)
-  const meaning = main && wrong.length === 3 ? {
+  const wrong = distinctFrom(senses(w, lang), data.words.filter(x => x.t !== w.t).map(x => ownGloss(x, lang)), 3, `${w.t}-m`)
+  const meaning = ownGloss(w, lang) && wrong.length === 3 ? {
     kind: 'meaning', ask: t.examAsk.pointMeaning, stem: { specimen: w.t },
     ...dealChoices(weldIf(lang, main), wrong.map(x => weldIf(lang, x)), `${w.t}-m`, 'latin'),
     explain: { head, sense: weldIf(lang, main) },
@@ -304,10 +313,11 @@ export function kanjiQuizzes(c, data, lang, t) {
     explain: { head: `${c}\u3000${n}`, sense: meaning },
   } : null
   // A word written with it, and how that word reads.
-  const w = (k.words || []).find(x => x.t.length > 1 && readingMisses({ t: x.t, fu: [[x.t, x.r]] }).length >= 3)
+  const knownOf = x => (k.words || []).filter(y => y.t === x.t && y.r !== x.r).map(y => y.r)
+  const w = (k.words || []).find(x => x.t.length > 1 && readingMisses({ t: x.t, fu: [[x.t, x.r]] }, null, knownOf(x)).length >= 3)
   const inWord = w ? {
     kind: 'inWord', ask: t.examAsk.inWord, stem: { specimen: w.t },
-    ...dealChoices(w.r, shuffle(readingMisses({ t: w.t, fu: [[w.t, w.r]] }), seeded(`${c}-w`)).slice(0, 3), `${c}-w`, 'jp'),
+    ...dealChoices(w.r, shuffle(readingMisses({ t: w.t, fu: [[w.t, w.r]] }, null, knownOf(w)), seeded(`${c}-w`)).slice(0, 3), `${c}-w`, 'jp'),
     explain: { head: `${w.t}\u3000${w.r}`, sense: weldIf(lang, gloss(w, lang)[0]) },
   } : null
   return withId([readingQ2, meaningQ2, reverse, inWord, strokes], q => t.kinds[q.kind])

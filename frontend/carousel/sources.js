@@ -377,9 +377,15 @@ function lessonPlan(data, L, opts) {
 }
 
 // ── 単語, a word of the deck ───────────────────────────────────
+/** A deck word's id: its written form, and its reading where another
+ *  entry is written the same (一日 ついたち, 一日 いちにち: plan 200l). */
+export function wordId(data, w) {
+  return data.words.some(x => x !== w && x.t === w.t) ? `${w.t}（${w.r}）` : w.t
+}
+const wordOf = (data, id) => data.words.find(x => wordId(data, x) === id)
 function wordPlan(data, w, opts, deps) {
   const src = sourceOf('word')
-  const p = base(src, { id: w.t }, opts, data.level)
+  const p = base(src, { id: wordId(data, w) }, opts, data.level)
   const { t, lang } = p
   const o = on('word', opts)
   const index = deps.index?.kanji || {}
@@ -518,7 +524,7 @@ export function itemsOf(sourceId, data, lang, filter) {
     case 'lesson':
       return data.lessons.map(L => ({ id: L.p, jp: L.p, sub: pick(L), tag: L.lv }))
     case 'word':
-      return data.words.map(w => ({ id: w.t, jp: w.t, sub: (pick(w) || [])[0] || '', tag: w.r }))
+      return data.words.map(w => ({ id: wordId(data, w), jp: w.t, sub: (pick(w) || [])[0] || '', tag: w.r }))
     case 'kanji':
       return Object.entries(data.kanji).map(([c, k]) => ({ id: c, jp: c, sub: (pick(k) || []).slice(0, 2).join(', '), tag: k.on[0] || (k.kun[0] || []).join('') }))
     case 'kana':
@@ -533,7 +539,7 @@ export function itemsOf(sourceId, data, lang, filter) {
 /** What else a word's carousel reads: its example sentences' levels and its kanji's. */
 export function depsOf(sourceId, data, id) {
   if (sourceId !== 'word') return { levels: [], chars: [] }
-  const w = data.words.find(x => x.t === id)
+  const w = wordOf(data, id)
   if (!w) return { levels: [], chars: [] }
   return { levels: [...new Set((w.ex || []).map(x => x.split('.')[0]))], chars: [...w.t] }
 }
@@ -551,7 +557,7 @@ export function plan(sourceId, data, id, opts, deps = {}) {
     case 'lesson':
       return lessonPlan(data, data.lessons.find(L => L.p === id) ?? data.lessons[0], opts)
     case 'word':
-      return wordPlan(data, data.words.find(w => w.t === id) ?? data.words[0], opts, deps)
+      return wordPlan(data, wordOf(data, id) ?? data.words[0], opts, deps)
     case 'kanji':
       return kanjiPlan(data, data.kanji[id] ? id : Object.keys(data.kanji)[0], opts)
     case 'kana':

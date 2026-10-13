@@ -1,4 +1,4 @@
-# The carousel studio (plans 200–200k)
+# The carousel studio (plans 200–200l)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -82,6 +82,16 @@ order is asked only over a pattern's own pieces after the word it takes
 sentence's phrases, which can be said in more than one order. Nothing is
 asked by blanking a particle out of a sentence.
 
+Plan 200l's review closed the ways a right answer still slipped in as a
+wrong one, or the answer showed through the question: a reading
+question never deals another reading of a one-kanji word (店 てん beside
+みせ) nor a reading the deck gives the same written word (行く いく,
+ゆく); it prints bare every word that shares a kanji with the one asked
+(入院 over 退院), whose furigana would give it away; and a meaning
+question in French deals only words with a French gloss, so no English
+choice stands among French ones. A word the deck spells twice opens by
+its spelling and reading (上（じょう）, 上（かみ）).
+
 ## Explaining a point in its own sentence
 
 The catalogue says what a point means in general ("で: location of an
@@ -104,6 +114,14 @@ action, or means/method"). A slide says it with the sentence's own words
   it marks: a place where something is (日本の田舎には…がある), a time, a
   destination, or a person over an adjective or a verb of ability
   (私には難しい: "for me").
+
+A pair that only looks like two particles gets no such slide: 今にも
+("at any moment"), とも after a word that is not a person (往復とも, "both
+ways") and と before 言う or 思う, which quotes (専門家とは言わない). Nor
+does a への or での whose noun is itself described (住民への事前の説明):
+which noun the pair describes is the reader's call. どこにも and 誰にも
+before a negative verb are named for what they mean, "nowhere" and
+"nobody".
 
 `src/carousel.test.js` pins each sense with the sentence that must find it
 and the one that must not (a passive's agent, なる, 決まる, 一年に及ぶ).
@@ -151,7 +169,11 @@ sentence's translation is never cut. Plan 200d
 checked this by drawing every slide of a sample of every source, as
 every type and every ending, in both formats, languages and grounds,
 with the real fonts, and measuring every line of text set; every
-issue it found was fixed.
+issue it found was fixed. Since plan 200l the check also reads the
+pixels: nothing at all, a shape as much as a word, is drawn in the
+margin outside the safe area (the "Your turn" slide's cue, once an
+arrow pointing off the frame, is a speech bubble under the prompt,
+drawn only where it fits).
 
 ## Easy to read
 
