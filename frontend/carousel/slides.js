@@ -64,12 +64,15 @@ function senseOf(ctx, word, rw, ih) {
   const widest = b => Math.max(0, ...b.lines.map(l => measure(ctx, l, b.f)))
   return { main, sub, subH, withSub, w: Math.max(widest(main), withSub ? widest(sub) : 0) }
 }
-function senseBlock(ctx, word, rx, mid, rw, ih, ink, ink2) {
-  const { main, sub, subH, withSub } = senseOf(ctx, word, rw, ih)
-  const tall = paragraphH(main, 1.12) + (withSub ? subH : 0)
+function senseBlock(ctx, word, rx, mid, rw, ih, ink, ink2, tag) {
+  // A level tag (`tag`: { p, label }) stands under the sense, right-aligned.
+  const tagH = tag ? SP[2] + LEVEL_H : 0
+  const { main, sub, subH, withSub } = senseOf(ctx, word, rw, ih - tagH)
+  const tall = paragraphH(main, 1.12) + (withSub ? subH : 0) + tagH
   let sy = mid - tall / 2
   sy += paragraph(ctx, main, rx, sy, ink, 'right', 1.12)
-  if (withSub) paragraph(ctx, sub, rx, sy + SP[1], ink2, 'right')
+  if (withSub) sy += SP[1] + paragraph(ctx, sub, rx, sy + SP[1], ink2, 'right')
+  if (tag) levelTag(ctx, tag.p, rx - levelW(ctx, tag.label), sy + SP[2], tag.label)
 }
 const subOf = w => (w.kanji && w.reading ? (w.ro ? `${w.reading} · ${w.ro}` : w.reading) : w.ro)
 
@@ -127,21 +130,32 @@ function plate(ctx, p, x, y, w, h, word) {
   if (need > roomBy(rw)) rw = Math.max(w * 0.26, rw - (need - roomBy(rw)))
   const leftW = Math.max(w * 0.5 - (nx - x), roomBy(rw))
   const level = levelOf(word)
-  const below = word.ro || level ? Math.max(word.ro ? FS.sm * 1.15 : 0, level ? LEVEL_H : 0) : 0
+  // The romaji sits beside the word, on its baseline (会う au), and a
+  // level tag under the sense: stacked under a word and its furigana the
+  // romaji crowds both, and the furigana's least size leaves a kanji word
+  // small. A word too long for the row beside its romaji keeps it on a
+  // line under it, clear of it (plan 200l).
+  const roAt = maxW => fit(ctx, word.ro, { weight: 500, sizes: [FS.sm, FS.xs], maxW, maxLines: 1, balanced: false })
+  let ro = word.ro ? roAt(leftW * 0.45) : null
   const fu = word.kanji && word.reading ? word.fu || furiganaOf(word.t, word.reading) : null
-  const L = layoutSentence(ctx, [{ t: word.t, k: 'word', fu }], {
-    max: FS.display * 0.95, min: FS.sm, maxW: leftW, maxLines: 1, maxH: ih - below, rules: false, under: 0.04, script: fu ? 'furigana' : 'kanji',
+  const layout = (maxW, maxH) => layoutSentence(ctx, [{ t: word.t, k: 'word', fu }], {
+    max: FS.display * 0.95, min: FS.sm, maxW, maxLines: 1, maxH, rules: false, under: 0.04, script: fu ? 'furigana' : 'kanji',
   })
-  let by = mid - (L.h + below) / 2
+  const fits = (L, maxW, maxH) => L.lines.length === 1 && L.lineW(L.lines[0]) <= maxW + 0.5 && L.h <= maxH + 0.5
+  const sideW = ro ? measure(ctx, ro.lines[0], ro.f) + SP[4] : 0
+  let L = layout(leftW - sideW, ih - SP[3])
+  const beside = !ro || (!ro.cut && fits(L, leftW - sideW, ih - SP[3]) && L.size >= FS.title)
+  if (!beside) ro = roAt(leftW)
+  const lineH = beside ? 0 : SP[2] + ro.size * 1.05
+  if (!beside) L = layout(leftW, ih - lineH - SP[3])
+  const by = mid - (L.h + lineH) / 2
   drawSentence(ctx, L, nx, by, 'left', () => ({ ink: p.ink, rule: null, ruby: p.ink2 }))
-  by += L.h
-  let lx = nx
-  if (word.ro) {
-    const ro = fit(ctx, word.ro, { weight: 500, sizes: [FS.sm, FS.xs], maxW: leftW - (level ? levelW(ctx, level) + SP[4] : 0), maxLines: 1, balanced: false })
-    lx += text(ctx, ro.lines[0], nx, by + FS.sm * 0.85, { f: ro.f, color: p.ink2 }) + SP[4]
+  // Beside: on the word's baseline. Under: on a line of its own.
+  if (ro) {
+    const rx = beside ? nx + L.lineW(L.lines[0]) + SP[4] : nx
+    text(ctx, ro.lines[0], rx, beside ? by + L.rubyH + L.size * ASC : by + L.h + SP[2] + ro.size * 0.8, { f: ro.f, color: p.ink2 })
   }
-  if (level) levelTag(ctx, p, lx, by + (word.ro ? FS.sm * 0.85 - FS.xs * 0.36 - LEVEL_H / 2 : 0), level)
-  senseBlock(ctx, level ? { ...word, sub: '' } : word, x + w - pad, mid, rw, ih, p.ink, p.ink2)
+  senseBlock(ctx, level ? { ...word, sub: '' } : word, x + w - pad, mid, rw, ih, p.ink, p.ink2, level ? { p, label: level } : null)
 }
 
 function latticeRow(ctx, p, f, y, h, word) {
