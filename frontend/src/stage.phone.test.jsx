@@ -44,9 +44,9 @@ describe('the stage at phone width', () => {
             <div className="rating-bar">
               <div className="rating-bar__buttons rating-bar__buttons--4">
                 <div className="rating-bar__misses">
-                  <button type="button" className="rating-bar__btn rating-bar__btn--q1"><span className="rating-bar__btn-ring" /><span className="rating-bar__btn-label">Wrong</span></button>
-                  <button type="button" className="rating-bar__btn rating-bar__btn--q2"><span className="rating-bar__btn-ring" /><span className="rating-bar__btn-label">Almost</span></button>
-                  <button type="button" className="rating-bar__btn rating-bar__btn--q3"><span className="rating-bar__btn-ring" /><span className="rating-bar__btn-label">Difficult</span></button>
+                  <button type="button" className="rating-bar__btn rating-bar__btn--q1"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Wrong</span></button>
+                  <button type="button" className="rating-bar__btn rating-bar__btn--q2"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Almost</span></button>
+                  <button type="button" className="rating-bar__btn rating-bar__btn--q3"><span className="rating-bar__btn-lamp" /><span className="rating-bar__btn-label">Difficult</span></button>
                 </div>
                 <div className="rating-bar__keys">
                   <button type="button" className="rating-bar__btn rating-bar__btn--q4 rating-bar__btn--key rating-bar__btn--best"><span className="rating-bar__btn-label">Correct</span></button>
@@ -69,31 +69,30 @@ describe('the stage at phone width', () => {
       // The rating bar docks over the level bar's height, not on the inset.
       const bar = screen.container.querySelector('.rating-bar')
       expect(getComputedStyle(bar).bottom).toBe('36px')
-      // 正解 (plan 180): the misses are one instrument -- one hairline
-      // and a panel's corner round them, a hairline between two -- and
-      // Correct a key of its own beside it, a gap apart, wider than a
-      // miss and filled in its verdict's ink with the sumi type on it.
-      // Not gold: gold is the action's metal (plan 174).
+      // 券売機 (plan 203): every verdict a key of one make, a gap apart
+      // -- the misses no longer one instrument (plan 180's) -- each on
+      // its own sumi with a corner and a foot, and Correct the same key
+      // wider than a miss, moulded in its verdict's ink with the sumi
+      // type on it. Not gold: gold is the action's metal (plan 174).
       expect(getComputedStyle(screen.container.querySelector('.rating-bar__buttons')).columnGap).toBe('8px')
       const misses = getComputedStyle(screen.container.querySelector('.rating-bar__misses'))
-      expect(misses.columnGap).toBe('0px')
-      expect(misses.outlineWidth).toBe('1px')
-      expect(misses.outlineOffset).toBe('-1px')
-      expect(misses.borderTopLeftRadius).toBe('8px')
-      expect(misses.overflow).toBe('hidden')
+      expect(misses.columnGap).toBe('8px')
+      expect(misses.outlineStyle).toBe('none')
+      expect(misses.backgroundColor).toBe('rgba(0, 0, 0, 0)')
       const [plain, , , key] = screen.container.querySelectorAll('.rating-bar__btn')
-      expect(getComputedStyle(plain).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+      expect(getComputedStyle(plain).backgroundImage).toContain('linear-gradient')
       expect(getComputedStyle(plain).color).toBe(getComputedStyle(lvl).color)
-      expect(getComputedStyle(plain).borderRadius).toBe('0px')
+      expect(getComputedStyle(plain).borderTopLeftRadius).toBe('8px')
+      expect(getComputedStyle(plain).boxShadow).toMatch(/0px 3px 0px 0px/)
       expect(getComputedStyle(key).backgroundImage).toContain('linear-gradient')
       expect(getComputedStyle(key).backgroundImage).not.toContain('201, 154, 62')
       expect(getComputedStyle(key).color).toBe('rgb(28, 24, 17)')
       expect(getComputedStyle(key).borderTopLeftRadius).toBe('8px')
       expect(key.getBoundingClientRect().width).toBeGreaterThan(plain.getBoundingClientRect().width * 1.3)
       expect(Math.round(key.getBoundingClientRect().height)).toBe(Math.round(plain.getBoundingClientRect().height))
-      const ring = getComputedStyle(plain.querySelector('.rating-bar__btn-ring'))
-      expect(ring.width).toBe('26px')
-      expect(ring.height).toBe('6px')
+      const lamp = getComputedStyle(plain.querySelector('.rating-bar__btn-lamp'))
+      expect(lamp.width).toBe('8px')
+      expect(lamp.height).toBe('8px')
     } finally {
       delete document.documentElement.dataset.chrome
     }
