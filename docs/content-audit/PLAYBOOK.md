@@ -96,6 +96,27 @@ A finding proposes the corrected line with its evidence, as for an
 example sentence; the audit does not rewrite the scene (Rule 0), and a
 proposal must still pass `check_grammar`.
 
+**Choisir questions** (plan 201) ride along. A point the contrast drill
+cannot be drawn on is asked from its own `choose` list, which is in its
+grammar slice (whole entries) and beside its tour: a sentence with one
+hole, its translation printed under it, three or four fillings with the
+right one first, and a `why` for whoever takes a wrong one. The gate holds
+the shape, the kanji and where the detector reads the point; it cannot hold
+that the right filling is the **only** right one. For each question write
+every wrong filling out in the sentence and ask:
+
+- would a native speaker accept it, with the meaning the translation gives?
+  (A second right answer is the commonest finding and the most harmful: the
+  learner is marked wrong for a good sentence. Group で beside と, な before a
+  する-noun beside に, や as a free choice beside か were all found this way.)
+- is each `slips` entry really a form nobody says? A clipped volitional
+  (走ろ, 急ご) or a colloquial form (食べれる) is not.
+- is the sentence spelled right once filled? (A hole that swallows part of a
+  stem teaches 悲み for 悲しみ, and the furigana hides it.)
+- does the hole turn on the point and not on a word (いつも is “always”)?
+- is the `why` true of this sentence and of every wrong filling, in both
+  languages, and does the French agree with the learner's gender anywhere?
+
 ### 2. Run the repo's own gates first
 
 ```bash

@@ -27,7 +27,7 @@ import { GrammarChoice } from '../components/study/GrammarPieces'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 import { ChevronIcon } from '../components/ui/Icons'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
-import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
+import { normalizeCard, cardShape, availableHintsFor, wordForm, choiceAnswer } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { LINE_COLOR } from '../config/tabs'
 import { postReview as sendReview, staleCards } from '../lib/reviews'
@@ -556,7 +556,7 @@ export default function TodayRun({ session }) {
               (desk || !answered) && (
                 <GrammarTiles
                   choices={nc.contrast?.choices ?? []}
-                  correct={nc.grammar}
+                  correct={choiceAnswer(nc)}
                   readings={nc.choices_furigana}
                   selected={selected} answered={answered} onAnswer={onMCQAnswer}
                 />

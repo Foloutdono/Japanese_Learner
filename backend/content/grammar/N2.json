@@ -26073,6 +26073,88 @@
         "register": "neutral"
       }
     ],
+    "choose": [
+      {
+        "jp": "あの人は、おさけも＿＿＿、たばこもすう。",
+        "tr": {
+          "en": "He drinks, and he smokes too.",
+          "fr": "Il boit de l'alcool, et il fume aussi."
+        },
+        "choices": [
+          "飲めば",
+          "飲むば",
+          "飲みば"
+        ],
+        "why": {
+          "en": "In も〜ば〜も, the first verb takes its ば-form to list two things of a kind: 飲む → 飲めば. 飲むば and 飲みば are not forms.",
+          "fr": "Dans も〜ば〜も, le premier verbe prend sa forme en ば pour énumérer deux choses du même genre : 飲む → 飲めば. 飲むば et 飲みば ne sont pas des formes."
+        },
+        "slips": [
+          "飲むば",
+          "飲みば"
+        ]
+      },
+      {
+        "jp": "この本は、ストーリーも＿＿＿、えもきれいだ。",
+        "tr": {
+          "en": "This book has both a good story and beautiful pictures.",
+          "fr": "Ce livre a à la fois une histoire passionnante et de belles illustrations."
+        },
+        "choices": [
+          "おもしろければ",
+          "おもしろいば",
+          "おもしろくれば"
+        ],
+        "why": {
+          "en": "In も〜ば〜も, an い-adjective takes ければ: おもしろい → おもしろければ. おもしろいば and おもしろくれば are not forms.",
+          "fr": "Dans も〜ば〜も, un adjectif en い prend ければ : おもしろい → おもしろければ. おもしろいば et おもしろくれば ne sont pas des formes."
+        },
+        "slips": [
+          "おもしろいば",
+          "おもしろくれば"
+        ]
+      },
+      {
+        "jp": "このへやには、まども＿＿＿、えもない。",
+        "tr": {
+          "en": "This room has neither a window nor a picture.",
+          "fr": "Cette pièce n'a ni fenêtre ni tableau."
+        },
+        "choices": [
+          "なければ",
+          "ないば",
+          "なかれば"
+        ],
+        "why": {
+          "en": "In も〜ば〜も, ない takes なければ: まどもなければ、えもない, “neither … nor”. ないば and なかれば are not forms.",
+          "fr": "Dans も〜ば〜も, ない prend なければ : まどもなければ、えもない, « ni … ni ». ないば et なかれば ne sont pas des formes."
+        },
+        "slips": [
+          "ないば",
+          "なかれば"
+        ]
+      },
+      {
+        "jp": "あの子は、もんくも＿＿＿、いたずらもする。",
+        "tr": {
+          "en": "That child complains and plays tricks too.",
+          "fr": "Cet enfant proteste et fait aussi des bêtises."
+        },
+        "choices": [
+          "言えば",
+          "言うば",
+          "言いば"
+        ],
+        "why": {
+          "en": "In も〜ば〜も, the first verb takes its ば-form to list two things of a kind: 言う → 言えば. 言うば and 言いば are not forms.",
+          "fr": "Dans も〜ば〜も, le premier verbe prend sa forme en ば pour énumérer deux choses du même genre : 言う → 言えば. 言うば et 言いば ne sont pas des formes."
+        },
+        "slips": [
+          "言うば",
+          "言いば"
+        ]
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -31796,6 +31878,88 @@
         "en": "He began to speak with an air of confidence.",
         "fr": "Il s'est mis à parler d'un air assuré.",
         "register": "neutral"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "かれは、さびし＿＿＿な顔で、ひとりでごはんを食べていた。",
+        "tr": {
+          "en": "He was eating alone with a lonely look on his face.",
+          "fr": "Il mangeait seul, l'air solitaire."
+        },
+        "choices": [
+          "げ",
+          "さ",
+          "み"
+        ],
+        "why": {
+          "en": "げ turns a feeling into how it looks from outside: さびしげな顔. さびしさな and さびしみな are not forms.",
+          "fr": "げ fait d'un sentiment ce que l'on en voit de l'extérieur : さびしげな顔. さびしさな et さびしみな ne sont pas des formes."
+        },
+        "slips": [
+          "さ",
+          "み"
+        ]
+      },
+      {
+        "jp": "むすこは、とくい＿＿＿な顔で、百点のテストを見せてくれた。",
+        "tr": {
+          "en": "My son proudly showed me his test with a hundred points.",
+          "fr": "Mon fils m'a montré fièrement son test noté cent sur cent."
+        },
+        "choices": [
+          "げ",
+          "さ",
+          "み"
+        ],
+        "why": {
+          "en": "げ turns a feeling into how it looks from outside: とくいげな顔. とくいさな and とくいみな are not forms.",
+          "fr": "げ fait d'un sentiment ce que l'on en voit de l'extérieur : とくいげな顔. とくいさな et とくいみな ne sont pas des formes."
+        },
+        "slips": [
+          "さ",
+          "み"
+        ]
+      },
+      {
+        "jp": "その子は、うれし＿＿＿な顔で、あたらしいくつをはいて歩いていた。",
+        "tr": {
+          "en": "The child was walking around in the new shoes with a happy look.",
+          "fr": "L'enfant se promenait avec ses nouvelles chaussures, l'air heureux."
+        },
+        "choices": [
+          "げ",
+          "さ",
+          "み"
+        ],
+        "why": {
+          "en": "げ turns a feeling into how it looks from outside: うれしげな顔. うれしさな and うれしみな are not forms.",
+          "fr": "げ fait d'un sentiment ce que l'on en voit de l'extérieur : うれしげな顔. うれしさな et うれしみな ne sont pas des formes."
+        },
+        "slips": [
+          "さ",
+          "み"
+        ]
+      },
+      {
+        "jp": "かれは、くやし＿＿＿な顔で、しあいが終わるのを見ていた。",
+        "tr": {
+          "en": "He watched the match end with a look of vexation.",
+          "fr": "Il regardait le match se terminer, l'air dépité."
+        },
+        "choices": [
+          "げ",
+          "さ",
+          "み"
+        ],
+        "why": {
+          "en": "げ turns a feeling into how it looks from outside: くやしげな顔. くやしさな and くやしみな are not forms.",
+          "fr": "げ fait d'un sentiment ce que l'on en voit de l'extérieur : くやしげな顔. くやしさな et くやしみな ne sont pas des formes."
+        },
+        "slips": [
+          "さ",
+          "み"
+        ]
       }
     ],
     "tour": {

@@ -7,6 +7,7 @@ import { useLabelsFit } from '../../hooks/useLabelsFit'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { dueText } from '../../domain/forecast'
 import { runKey } from '../../lib/keyGuards'
+import { choiceAnswer } from '../../domain/cardShape'
 import { bare, lineOf, mapOf } from '../../domain/ladderLine'
 import { ArrowIcon, CheckIcon, RetryIcon } from '../ui/Icons'
 import { GrammarAnswer } from './GrammarPieces'
@@ -242,7 +243,10 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
   const c = card.contrast
   if (!c?.jp) return null
   const parts = c.furigana?.length ? c.furigana : [{ text: c.jp }]
-  const answer = c.answer ?? card.grammar
+  const answer = choiceAnswer(card)
+  // An authored question says what stands in its hole as the sentence has
+  // it (`fill`); a contrast on patterns fills it with the point's own form.
+  const fill = c.fill?.length ? c.fill : null
   const trap = revealed && selected && selected !== answer
   const front = (
     <div className="gl-front">
@@ -251,7 +255,7 @@ export function GrammarChoose({ card, revealed = false, selected = null, t: tPro
           ? {
               gap: true,
               node: revealed
-                ? <span key={i} className="gl-gap gl-gap--filled"><Parts parts={formParts(card, answer)} /></span>
+                ? <span key={i} className="gl-gap gl-gap--filled"><Parts parts={fill ?? formParts(card, answer)} /></span>
                 : <span key={i} className="gl-gap" style={{ '--gap-size': bare(answer).length }} aria-label={t.glBlank} />,
             }
           : { node: <Parts key={i} parts={[part]} />, kanji: Boolean(part.reading) })))}

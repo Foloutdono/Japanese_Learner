@@ -121,6 +121,16 @@ export function cardShape(card) {
 }
 
 /**
+ * What the tiles of a Choisir card are judged against (plan 201): the
+ * form an authored question names -- `contrast.answer`, what stands in its
+ * hole -- else the point itself, which is the answer of every contrast on
+ * patterns.
+ */
+export function choiceAnswer(card) {
+  return card?.contrast?.answer ?? card?.grammar
+}
+
+/**
  * Which hints this CARD can actually offer, not the ones its mode
  * declares. A hand-written card without a matching extra (no
  * distractors to build, no cached sentences) has no entry for that
