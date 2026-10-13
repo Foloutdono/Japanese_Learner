@@ -1070,7 +1070,21 @@ So:
   where everything else on the screen waits (the print of the hour
   stuttered the gate this way, plan 206). A drawing that moves is lifted
   into boxes (`print/liftPrint.js`), or the moving part is an `<svg>` of
-  its own and the animation goes on that element (the dial's glow).
+  its own and the animation goes on that element (the dial's glow), with
+  `transform`, not `scale`/`rotate`/`translate`: on an `<svg>` element
+  Chrome composites the one and not the others.
+- **Many loops on one screen are Web Animations, not CSS.** A looping
+  CSS animation fires an event each time it turns, React listens for
+  every event at its root, and the browser wakes the main thread to
+  dispatch it; each wake re-samples every running animation on the
+  page. A few loops are free. The print's ~250 were a wake on nearly
+  every frame, so they are handed to `element.animate()` once they run
+  (`handOver`, plan 207).
+- **Never change an inherited custom property on `<html>` during a
+  scene.** Every element that sets custom properties of its own is
+  restyled with everything under it. A value only `<html>` reads is
+  registered `inherits: false` (`--gate-ground`); a screen the scene
+  hides steps out of the page instead (`.tpr--under-gate`).
 - Every `:hover` rule needs a matching `:focus-visible`. Keyboard users get the
   same affordance, not just the global ring.
 

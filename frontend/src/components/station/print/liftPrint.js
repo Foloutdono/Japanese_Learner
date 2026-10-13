@@ -137,6 +137,10 @@ function stack(children, wrap) {
     } else {
       if (transform) inner = `<div class="tpr-lift" style="transform:${transform}">${inner}</div>`
       if (opacity !== null) inner = `<div class="tpr-lift" style="opacity:${esc(opacity)}">${inner}</div>`
+      // What the group sets for its parts to read (a flock's wing beat,
+      // --beat and --ph): on a box too, which its lifted parts inherit.
+      const vars = ch.getAttribute('style')
+      if (vars) inner = `<div class="tpr-lift" style="${esc(vars)}">${inner}</div>`
     }
     out += inner
   }
@@ -152,4 +156,45 @@ function stack(children, wrap) {
  */
 export function liftLayer(layer) {
   return stack([...layer.children], [])
+}
+
+/**
+ * Each looping part of a lifted stack (`root`) handed from its CSS
+ * animation to the same animation through the Web Animations API: the
+ * same keyframes (as the browser resolved them, the print's own lengths
+ * and timings in), the same timing, the same instant. The motion is
+ * unchanged; what goes is the iteration event. A CSS animation fires
+ * one each time it turns, and React listens for every one at its root
+ * (it listens for every event there), so the browser wakes the main
+ * thread to dispatch it: with the print's ~250 loops that was a wake on
+ * nearly every frame, each re-sampling every animation's style, and the
+ * gate stuttered (plan 207). A Web Animation fires no such event.
+ * Returns the animations made, for the caller to cancel. Nothing moves
+ * under reduced motion (the sheet stops every part), so nothing is made.
+ */
+export function handOver(root) {
+  const made = []
+  for (const css of root.getAnimations({ subtree: true })) {
+    if (typeof CSSAnimation === 'undefined' || !(css instanceof CSSAnimation)) continue
+    const el = css.effect.target
+    const keyframes = css.effect.getKeyframes()
+    for (const k of keyframes) delete k.computedOffset
+    const { duration, delay, endDelay, iterations, iterationStart, direction, easing, fill } = css.effect.getTiming()
+    const web = el.animate(keyframes, { duration, delay, endDelay, iterations, iterationStart, direction, easing, fill })
+    if (css.startTime != null) web.startTime = css.startTime
+    else web.currentTime = css.currentTime
+    css.cancel()
+    made.push(web)
+  }
+  // The print's own custom properties have been read into the keyframes
+  // above. Left on the boxes, each would keep the stack in every
+  // restyle a change of an inherited variable at the page's root makes
+  // (a box with properties of its own cannot share its parent's), and
+  // the page's root changes one as the run's stage opens (plan 207).
+  if (made.length) {
+    for (const el of root.querySelectorAll('[style*="--"]')) {
+      for (const name of [...el.style].filter(n => n.startsWith('--'))) el.style.removeProperty(name)
+    }
+  }
+  return made
 }

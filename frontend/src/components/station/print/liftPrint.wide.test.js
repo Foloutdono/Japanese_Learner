@@ -1,11 +1,12 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { page } from 'vitest/browser'
 import '../../../index.css'
-import { liftLayer } from './liftPrint'
+import { handOver, liftLayer } from './liftPrint'
 import { PRINT } from './usePrint'
 
 // ── The print lifted is the print as drawn (plan 206) ──────────────
-// liftPrint rebuilds a print's layers as boxes the compositor can move.
+// liftPrint rebuilds a print's layers as boxes the compositor can move,
+// and hands their loops to the Web Animations API (plan 207).
 // That is only a fix if the picture is the same, so every print is
 // drawn both ways and frozen at the same instants: every shape stands
 // where it stood (its box on the screen), and the picture matches, read
@@ -91,6 +92,14 @@ describe('the print lifted', () => {
         const doc = await (await fetch(`/today/print/${PRINT.rev}/${hour}-${device}.json`)).json()
         const layers = mount(doc)
         const moving = host.querySelectorAll('svg [class*="tpr-"]').length
+        // Each part's timing as drawn, in the order the print draws them:
+        // a part read a timing its group set (a gull's wing beat) and
+        // must keep it once lifted.
+        const timing = els => els.flatMap(e => e.getAnimations().map(a => {
+          const t = a.effect.getTiming()
+          return `${a.animationName ?? a.effect.getKeyframes().length}|${Math.round(t.duration)}|${Math.round(t.delay)}|${t.direction}|${t.iterations}`
+        }))
+        const asDrawn = timing([...host.querySelectorAll('svg [class*="tpr-"]')]).map(x => x.replace(/^[^|]*\|/, ''))
         const drawn = []
         for (const [i, t] of AT.entries()) {
           await freeze(t)
@@ -99,6 +108,15 @@ describe('the print lifted', () => {
 
         const lifted = layers.map(l => liftLayer(l.firstChild))
         layers.forEach((l, i) => { l.innerHTML = `<div class="tpr-lift__root">${lifted[i]}</div>` })
+        // And handed to the Web Animations API (plan 207): every loop, none
+        // left a CSS animation to fire an event each time it turns.
+        const handed = layers.flatMap(l => handOver(l.firstChild))
+        const parts = [...host.querySelectorAll('div.tpr-lift[class*="tpr-"]:not([class="tpr-lift"])')]
+        expect(timing(parts).map(x => x.replace(/^[^|]*\|/, ''))).toEqual(asDrawn)
+        // Nothing in the stack keeps a custom property of its own once handed over.
+        expect(host.querySelectorAll('.tpr-lift__root [style*="--"]')).toHaveLength(0)
+        expect(handed.length).toBe(host.querySelectorAll('div.tpr-lift[class*="tpr-"]:not([class="tpr-lift"])').length)
+        expect(host.getAnimations({ subtree: true }).filter(a => a instanceof CSSAnimation && a.effect.target.closest('.tpr-lift__root'))).toHaveLength(0)
 
         // Every part the print moves is a box now, and nothing moves in an SVG.
         expect(host.querySelectorAll('div.tpr-lift[class*="tpr-"]:not([class="tpr-lift"])').length).toBe(moving)

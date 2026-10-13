@@ -8659,6 +8659,9 @@ textarea:focus-visible {
   pointer-events: none;
   background: var(--tpr-top);
 }
+/* Under a departure's gate (TodayPrint): out of the page's style and
+   layout while the gate hides it (plan 207). */
+.tpr--under-gate { display: none; }
 .tpr__art {
   position: absolute;
   left: var(--tpr-x);
@@ -8742,7 +8745,7 @@ textarea:focus-visible {
 .tdy-dial--print { width: calc(var(--dial-units) * var(--tpr-u)); }
 .tdy-dial__disc { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .tdy-dial__glow { animation: tpr-breathe 7s ease-in-out infinite alternate; }
-@keyframes tpr-breathe { from { opacity: 0.8; scale: 0.985; } to { opacity: 1; scale: 1.035; } }
+@keyframes tpr-breathe { from { opacity: 0.8; transform: scale(0.985); } to { opacity: 1; transform: scale(1.035); } }
 .tdy-dial__halo { opacity: var(--ho, 0); animation: tpr-halo 5.5s ease-in-out infinite alternate; }
 @keyframes tpr-halo { to { opacity: calc(var(--ho, 0) * 0.55); } }
 .tdy-dial--print .tdy-dial__fare-wait { stroke: var(--tpr-fare); stroke-opacity: 0.38; stroke-linecap: round; }
@@ -20521,6 +20524,14 @@ button.syllabary-cell:focus-visible {
    is the jolt you see as the doors open. Reserving the gutter costs
    nothing and removes the shift here, at the ticket gate, and behind
    every dialog in the app. */
+/* The gate's light on the gutter is html's alone: registered as not
+   inherited, so lending it and taking it back restyles html and not
+   every element under it (a whole page's style twice in each departure,
+   the print's thousands of shapes among them; plan 207). */
+@property --gate-ground {
+  syntax: '*';
+  inherits: false;
+}
 html {
   scrollbar-gutter: stable;
   /* The gutter's one cost: it is outside every fixed box, painted in
