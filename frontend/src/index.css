@@ -41188,8 +41188,11 @@ button.brd-stn { cursor: pointer; }
   }
   .desk-prow:hover,
   .desk-prow:focus-visible { background: var(--bg-card-hover); filter: none; }
+  /* A name too wide beside its glyph (a laptop's 1100px, a wider face)
+     goes under it rather than out of its card. */
   .desk-prow__head {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--sp-3);
   }
