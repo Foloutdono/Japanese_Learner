@@ -60,9 +60,10 @@ const LIFT = { phone: 56, desk: 64 }
 // gate.
 const WIDE = 0.7
 
-// Where the phone's lines stand under the dial's rings, in the print's
-// units: the minutes and the hour they end, then the legend.
-export const BELOW = { time: 28, keys: 54 }
+// Where the lines stand under the dial's rings, in the print's units:
+// the minutes and the hour they end (or, on a cleared day, what the day
+// reviewed), then the legend on a phone, or the week's stamps (plan 206).
+export const BELOW = { time: 28, keys: 54, week: 64 }
 
 /**
  * Which print the frame takes and where it stands: `u` pixels to the
@@ -114,9 +115,10 @@ export function printVars(hour, print, box) {
     '--tpr-y': `${y}px`,
     '--tpr-w': frame.w,
     '--tpr-h': frame.h,
-    // The room the phone's lines take over its foot: down to the
-    // legend's foot, with the sky's lift taken off.
-    '--tpr-room': frame.cy + frame.fare + BELOW.keys + 12 - LIFT[print],
+    // The room the phone's lines take over its foot: down to the lowest
+    // (a cleared day's week of stamps, 28px tall), with the sky's lift
+    // taken off.
+    '--tpr-room': frame.cy + frame.fare + BELOW.week + 14 - LIFT[print],
     '--tpr-sky-h': (frame.horizon + 12) / frame.h,
     '--tpr-top': look.band,
     // The print's own sky and ground, for the moment before it has come.

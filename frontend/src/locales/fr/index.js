@@ -127,6 +127,8 @@ const nav = {
   todayNewShort:     'nouveautés',
   todayLesson:       'leçon',
   todayReviewed:     n => (n === 1 ? '1 carte aujourd’hui' : `${n} cartes aujourd’hui`),
+  // The same, its figure set apart on the print (plan 206).
+  todayReviewedUnit: n => (n === 1 ? 'carte aujourd’hui' : 'cartes aujourd’hui'),
   todayCardsUnit:    n => (n === 1 ? 'carte' : 'cartes'),
   todayWeekStamps:   n => `${n} jours de suite, les sept derniers tamponnés`,
   // 基礎 — le cursus de base sur le portillon et dans Réglages › Niveau (plan 186f)
