@@ -1196,11 +1196,24 @@ moments, three objects, none waiting to be dismissed:
 - **The level** (進級) is **told by the card's engraving**. The learner's card comes down face
   up in its own material, and the struck 辻 on it — whose road 辶 the
   climb fills everywhere the card is drawn — fills from empty to full
-  over three seconds while the card trembles, harder as it fills; full,
-  it bursts in sparks of the card's own stuff (the band's indigo, the
-  charcoal's gold, the platinum's), the engraving empties, and the
-  level's figure rolls over to the new one. The punch's voice
-  (`pass-clip`) sounds on the burst. It is the People family
+  over three seconds while the card trembles, harder as it fills, and
+  **the crossing 十 fills too** (plan 200: the one place it does): as
+  the road nears full 十 is lit from its foot up, full a beat before the
+  burst, so a level that turns over is the whole 辻 filled. Full, it
+  bursts in sparks of the card's own stuff (the band's indigo, the
+  charcoal's gold, the platinum's) out of the crossing, 辻's namesake,
+  the engraving empties — both parts in the one breath, only the road
+  refilling, to the new level's climb, since 十 never fills at rest —
+  and the level's figure rolls over to the new one. **It is the one
+  sound in the app that is music** (plan 200), scored to the card's own
+  clock: a build (`level-charge`) from the road's first movement — a
+  swell, a run of bars struck as the road passes each eleventh of its
+  height and quickening with it, a roll to the tremble's steps, a riser,
+  all falling away just before the burst — and the burst (`level-burst`)
+  on the ring's opening: the gate's snip, a crash and a boom, C major in
+  bars over a pad, a glitter for the sparks and two bars as the figure
+  lands. It is the loudest sound in the app because it is the rarest.
+  The punch (`pass-clip`) is the milestone ticket's clipper now. It is the People family
   throughout: no line pigment. On a phone it hangs at the top inside the
   stage's gutters (the top bar is hidden while studying, so the edge is
   free and the docked rating bar stays usable), nothing stepping down

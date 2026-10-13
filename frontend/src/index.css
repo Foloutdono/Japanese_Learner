@@ -4729,9 +4729,13 @@ textarea:focus-visible {
 
 /* ── 辻, struck into a pass, filling with the XP ──
    (components/offers/StruckMark.jsx) The bar clipping 辶 grows from
-   its foot to the share of the level climbed; 十 never fills. */
+   its foot to the share of the level climbed; 十 never fills, bar in the
+   level-up (plan 200). */
 .ofr-mark { display: block; }
 .ofr-mark__bar { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(var(--ofr-xp, 0)); }
+/* 十's bar (plan 200) exists only where a mark asks for `fillCross`, the
+   level-up's, and is empty at rest: nothing but its animation raises it. */
+.ofr-mark__bar--cross { transform: scaleY(var(--ofr-xp-cross, 0)); }
 .ofr-mark--etched { filter: drop-shadow(0 0.8px 0 rgba(255, 255, 255, 0.75)); }
 .ofr-mark--etched .ofr-mark__xp { opacity: 0.72; }
 .ofr-mark:not(.ofr-mark--etched) .ofr-mark__ink { fill: rgba(255, 255, 255, 0.055); }
@@ -20490,10 +20494,17 @@ html {
    had replaced the split-flap board.
 
    One clock, from the card's arrival:
-     0.00–0.40  the card down, settling     2.30  the flash, the ring, sparks
-     0.55–2.15  辶 fills 0 → full, eased in  2.35–2.75  辶 empties
-     1.30–2.30  the tremble grows           2.55–2.95  12 rolls up, 13 lands
-     2.15–2.35  held full, shaking hardest  3.75–4.05  the card up (XpToast)
+     0.00–0.40  the card down, settling     2.28  the flash, the ring, sparks
+     0.55–2.15  辶 fills 0 → full, eased in  2.35–2.75  辻 empties
+     1.45–2.20  十 fills 0 → full, eased in  2.55–2.95  12 rolls up, 13 lands
+     1.30–2.30  the tremble grows           3.75–4.05  the card up (XpToast)
+     2.15–2.35  held full, shaking hardest
+
+   Plan 200: 十 fills too. The road is the way and the crossing is where
+   it leads, so as 辶 nears full the crossing is lit from its foot up and
+   is full a beat before the road bursts -- out of the crossing, 辻's
+   namesake. At rest 十 never fills, so both empty in the one breath and
+   only the road refills, to the new level's share.
 
    On a clock, never gating: the next card is already in hand. On a
    phone it hangs at the top over the run; wider, it floats at the
@@ -20554,6 +20565,14 @@ html {
   91.67% { transform: scaleY(0); }
   100% { transform: scaleY(var(--levelup-to, 0)); }
 }
+/* 十 (plan 200): from its foot up as the road reaches it, full at 2.20s,
+   emptied with the road and left empty. The same ease as the road's. */
+.levelup .pcf__seal .ofr-mark__bar--cross { animation: levelup-fill-cross 3000ms linear both; }
+@keyframes levelup-fill-cross {
+  0%, 48.33% { transform: scaleY(0); animation-timing-function: cubic-bezier(0.45, 0, 0.85, 0.65); }
+  73.33%, 78.33% { transform: scaleY(1); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  91.67%, 100% { transform: scaleY(0); }
+}
 /* The road lit as it fills, a flash when it is full. */
 .levelup .pcf__seal { animation: levelup-glow 3000ms linear both; }
 @keyframes levelup-glow {
@@ -20563,9 +20582,10 @@ html {
   91.67% { filter: drop-shadow(0 0 2px var(--levelup-flash)); }
   100% { filter: none; }
 }
-/* The ring and the sparks, out of the road's sweep. XpToast sounds the
-   level's voice on the ring's start. */
-.levelup__burst { position: absolute; left: 60%; top: 69%; z-index: 3; width: 0; height: 0; }
+/* The ring and the sparks, out of the crossing (plan 200: the road's
+   sweep until then). XpToast sounds the level's voice on the ring's
+   start. */
+.levelup__burst { position: absolute; left: 65.3%; top: 27.8%; z-index: 3; width: 0; height: 0; }
 .levelup__ring {
   position: absolute;
   left: -80px;
@@ -20643,6 +20663,7 @@ html {
   .levelup__shake,
   .levelup .pcf__seal { animation: none; }
   .levelup .pcf__seal .ofr-mark__bar { animation: none; transform: scaleY(var(--levelup-to, 0)); }
+  .levelup .pcf__seal .ofr-mark__bar--cross { animation: none; transform: scaleY(0); }
   .levelup__burst { display: none; }
   .levelup__was { animation: levelup-gone 160ms ease 800ms forwards; }
   .levelup__now { opacity: 0; animation: levelup-shown 160ms ease 880ms forwards; }

@@ -54,8 +54,20 @@ export function playToggle() { playVoice('toggle') }
 export const FARE_BEAT = 0.11
 export function playFareTick(after = 0) { playVoice('fare-tick', { after }) }
 
-/** 改札鋏 — the gate's punch clipping the pass as the level turns over (plan 142). */
+/** 改札鋏 — the gate's punch: the milestone ticket's clipper. It clipped the pass as the level turned over until plan 200. */
 export function playPassClip() { playVoice('pass-clip') }
+
+/**
+ * 充填 — the card's 辻 filling as the level turns over: 2.3s of swell, a
+ * run of bars quickening with the road and a roll growing with the
+ * tremble, resolved by `playLevelBurst` (plan 200). Played on the fill's
+ * own animationstart; it falls away in its last 50ms so the burst lands
+ * on a breath.
+ */
+export function playLevelCharge() { playVoice('level-charge') }
+
+/** 進級 — the card's crossing bursting, the level's figure landing (plan 200). Played on the ring's own animationstart. */
+export function playLevelBurst() { playVoice('level-burst') }
 
 /** 押印 — a card's seal pressed into its corner as it climbs a stage. */
 export function playStamp() { playVoice('card-stamp') }

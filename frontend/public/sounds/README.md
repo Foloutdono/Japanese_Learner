@@ -86,7 +86,9 @@ capability it keeps the picks, one document per event in `picks`.
 | `platform-chime` | 到着ホーム, the onboarding arrival | Arpeggio, struck · Arpeggio · Open fifth · Wide rise · Announcement chime |
 | `arrival` | 到着, a session finished (Today's run too) | Settle · Long settle · Warm pad · Settle, struck · End of announcement |
 | `fare-tick` | XP earned, no level | Coin · One flap · Soft tick |
-| `pass-clip` | 改札鋏, the level clipped on the pass | Punch, voiced · Punch · Snip · Gate press · Clip-clip |
+| `pass-clip` | 改札鋏, the gate's punch clipping a streak's ticket (the level-up's too until plan 200) | Punch, voiced · Punch · Snip · Gate press · Clip-clip |
+| `level-charge` | 充填, the card's 辻 filling as the level turns over (plan 200) | Build · Run |
+| `level-burst` | 進級, the card's crossing bursting (plan 200) | Crossing · Crossing, bare |
 | `card-stamp` | 押印, a card climbing a stage | Hanko · Ticket stamp · Soft press · Stamp, voiced |
 
 The first voice of each is the one that ships, every one of them picked
@@ -181,12 +183,13 @@ and the ceremony fall flat.
 | 0.042 | correct / wrong |
 | 0.044 | the fare tick |
 | 0.045 | a screen change |
-| 0.047 | the level-up (the pass's punch, levelled by peak) |
+| 0.047 | the gate's punch (a streak ticket's clipper, levelled by peak) |
 | 0.060 | doors running open, the exam's warning |
 | 0.070 | the gate |
 | 0.075 | the door chime |
 | 0.080 | arriving |
 | 0.100 | the platform sign |
+| 0.115 | the level-up's burst (plan 200; its build runs under 0.060, half the weight) |
 
 Two sounds were previously wrong by more than a little. The **gate
 chime** fired on every departure at nearly three times the click and
@@ -242,6 +245,27 @@ voice has to keep them:
   the chimes, which are tones and mean something else. (Punch, voiced
   lets a steel jaw ring for a tenth of a second under the snip; that is
   the metal, not a note.)
+- **The level-up is the one sound that is music, and it is scored to
+  its picture** (plan 200). Since plan 173 the level is the card's
+  engraving filling and bursting, not a punch, so its voices are the
+  build (`level-charge`: a swell, a run of bars struck as the road
+  passes each eleventh of its height, a roll to the tremble's steps, a
+  riser) and the burst (`level-burst`: the gate's snip, a crash and a
+  boom, C major in bars over a pad, a glitter of sparks, two bars as the
+  figure lands). It is the rarest sound in the app, so the loudest
+  (0.115). Its clock is the CSS's -- the road's fill, the tremble, the
+  ring's delay -- exported as `LEVEL_CLOCK` in `recipes.js` and held to
+  the stylesheet by `XpToast.browser.test.jsx`; change one and the
+  other, or the sound slips off its picture. The build goes on the
+  fill's `animationstart` and the burst on the ring's, never on a timer.
+  Every fixed pitch in either is C major's pentatonic (the swell's
+  glides pass through the rest on their way), so the build's run cannot
+  clash with the chord it resolves into.
+- **A swell that must be heard from its first second takes a `floor`.**
+  A note that climbs exponentially from silence is inaudible for its
+  first half (a 0.16 peak is under 0.005 at its midpoint); `floor`
+  (`tones()`, a share of `peak`) starts it there instead. The riser is
+  `noiseSweep`'s `swell`.
 - **A voice of an event is as loud as its default.** Write it, run the
   meter, give it the `level` the meter names.
 - **Frequent means quiet and short.** The click and the option pick

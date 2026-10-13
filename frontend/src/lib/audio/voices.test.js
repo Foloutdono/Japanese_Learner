@@ -38,7 +38,7 @@ describe('the voice registry', () => {
       'click-menu', 'click-close-menu', 'click-mode-selection', 'click-screen-selection',
       'correct', 'wrong', 'card-flip', 'card-transition', 'exam-warning',
       'gate-chime', 'door-chime', 'door-slide', 'platform-chime', 'arrival',
-      'fare-tick', 'pass-clip', 'board-flap', 'day-clear', 'milestone',
+      'fare-tick', 'pass-clip', 'level-charge', 'level-burst', 'board-flap', 'day-clear', 'milestone',
     ]
     for (const key of required) {
       expect(hasVoice(key), `missing event: ${key}`).toBe(true)
@@ -203,6 +203,11 @@ describe('choosing a voice', () => {
       arrival: 'settle',
       'fare-tick': 'coin',
       'pass-clip': 'punch-voiced',
+      // The level-up (plan 200): the build and the burst the owner asked
+      // to be more epic, shipped with their first voices until the owner's
+      // round on the listening panel.
+      'level-charge': 'build',
+      'level-burst': 'crossing',
       'card-stamp': 'hanko',
       // Not yet by ear: the boarding's hour board had no sound until
       // its flaps were given one, and the short run ships until the

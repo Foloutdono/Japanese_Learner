@@ -367,7 +367,8 @@ function panelScript(META) {
     { title: 'Turn, then rate', text: 'The card turned over, a moment to read it, then rated right.', steps: r => [['card-flip', 0], ...rating('correct', r, 1.1)] },
     { title: 'A card climbs a stage', text: 'Rated right and stamped 習; the next card comes after the seal.', steps: r => [['correct', 0], ['fare-tick', fareDelay(r)], ['card-stamp', 0], ['card-transition', 0.7]] },
     { title: 'The run ends', text: 'The last card rated, then the arrival.', steps: r => [...rating('correct', r), ['arrival', 0.35]] },
-    { title: 'Level up', text: 'The answer, then the gate’s punch clipping your pass.', steps: () => [['correct', 0], ['pass-clip', 0.55]] },
+    { title: 'Level up', text: 'The answer and the fare, then the card’s 辻 filling (the build, from the road’s first movement) and bursting 2.28s later (the burst).', steps: r => [['correct', 0], ['fare-tick', fareDelay(r)], ['level-charge', 0], ['level-burst', 2.28]] },
+    { title: 'A streak ticket is punched', text: 'The gate’s punch biting a milestone ticket (it was the level-up’s voice until plan 200).', steps: () => [['pass-clip', 0]] },
     { title: 'Boarding a platform', text: 'A platform tapped, the door chime, the doors running open.', steps: () => [['click-mode-selection', 0], ['door-chime', 0.26], ['door-slide', 0.30]] },
     { title: 'Through the gate', text: 'A line chosen, and the pass read at the gate.', steps: () => [['click-screen-selection', 0], ['gate-chime', 0.42]] },
   ]
