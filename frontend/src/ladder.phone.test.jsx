@@ -141,6 +141,35 @@ describe('the ladder in the day’s queue, on a phone', () => {
     expect(root.querySelector('.gl-card').getBoundingClientRect().bottom).toBeLessThanOrEqual(dock.top + 1)
   }, 20000)
 
+  it('chooses on a question of its own inside the screen, the forms as tiles with their ruby (plan 200)', async () => {
+    const screen = await mount([card(ladder.authored)])
+    await settle()
+    const root = screen.container
+    expect(root.querySelector('.gl-ring').getAttribute('aria-label')).toBe('This point: Choose, step 1 of 3')
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    // The sentence, its hole and its translation, not the flashcard the
+    // point used to fall back to.
+    expect(root.querySelector('.gl-sent .gl-gap')).toBeTruthy()
+    expect(root.querySelector('.gl-tr').textContent).toBe(ladder.authored.contrast.tr)
+    expect(root.querySelector('.flashcard .grammar-rule')).toBeNull()
+    const tiles = [...root.querySelectorAll('.gl-dock .gl-tile')]
+    expect(tiles).toHaveLength(ladder.authored.contrast.choices.length)
+    for (const el of [...tiles, root.querySelector('.gl-card'), root.querySelector('.gl-ring')]) inside(el)
+    for (const el of tiles) expect(el.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    // A form with kanji carries its ruby, as the sentence does.
+    expect(tiles.every(el => el.querySelector('ruby rt'))).toBe(true)
+    const dock = root.querySelector('.gl-dock').getBoundingClientRect()
+    expect(root.querySelector('.gl-card').getBoundingClientRect().bottom).toBeLessThanOrEqual(dock.top + 1)
+
+    // Taking the right form turns the card to it and brings the bar up.
+    const right = tiles.find(el => el.querySelector('.gl-tile__t').textContent.replace(/\s+/g, '') === '使つかえません')
+    right.click()
+    await settle()
+    expect(root.querySelector('.gl-back__head--ok')).toBeTruthy()
+    expect(root.querySelector('.gl-echo .gl-gap--filled ruby rt').textContent).toBe('つか')
+    expect(root.querySelector('.rating-bar').getAttribute('aria-hidden')).toBe('false')
+  }, 20000)
+
   it('writes inside the screen', async () => {
     const screen = await mount([card(ladder.write)])
     await settle()

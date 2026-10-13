@@ -319,9 +319,11 @@ def test_the_particles_the_detector_blanks_can_be_chosen_and_built():
                            ("N4", "〜方"), ("N4", "〜さ"), ("N3", "〜化")):
         assert card_index.contrast_ok(level, pattern), pattern
         assert grammar_ladder.build_ok(level, pattern), pattern
-    # は, が and も share too many sentences: は marks none, and stays on
-    # the flashcard until it can be written.
-    assert not card_index.contrast_ok("N5", "は")
+    # は, が and も share too many sentences for the detector to blank one:
+    # は marks none, and is asked from questions of its own instead
+    # (plan 200, study/grammar_choose.py), so it is chosen without the snapshot.
+    assert not grammar_ladder.blank_ok("N5", "は")
+    assert card_index.contrast_ok("N5", "は")
 
 
 def test_a_particle_on_choisir_is_asked_its_contrast(client):
@@ -431,17 +433,21 @@ def test_a_card_is_asked_the_exercise_of_its_step(client, where, exercise, asked
         _clear(raw_id)
 
 
-def test_a_point_with_no_marked_sentence_falls_back(client):
-    # は has no contrast sentence: Choisir asks it on fill_in or, where
-    # that cannot name it, the flashcard; Construire too, it having no
-    # sentence where は can be blanked once.
+def test_a_point_with_no_marked_sentence_is_asked_from_its_own_questions(client):
+    # は has no contrast sentence the detector can blank, and used to fall to
+    # the flashcard on Choisir (and to the flashcard or fill_in on Construire).
+    # Plan 200: it carries questions of its own, so Choisir asks a real one.
     level, entry, raw_id = _point("は")
-    expected = "grammar.fill_in" if card_index.fill_ok(level, "は") else "grammar.flashcard.f2b"
     _clear(raw_id)
     try:
         _place(raw_id, LADDER, STEP_ROWS["choose"])
         card = _served(client, level, raw_id)
-        assert card["exercise"] == expected and card["asked"] in ("choose", "flashcard")
+        assert card["exercise"] == "grammar.contrast" and card["asked"] == "choose"
+        drill = card["contrast"]
+        assert drill["answer"] in drill["choices"] and len(drill["choices"]) >= 3
+        assert "".join(p["text"] for p in drill["fill"]) == drill["answer"]
+        assert [p for p in drill["furigana"] if p.get("blank")]
+        assert card["choices_furigana"] == {} or set(card["choices_furigana"]) <= set(drill["choices"])
     finally:
         _clear(raw_id)
 

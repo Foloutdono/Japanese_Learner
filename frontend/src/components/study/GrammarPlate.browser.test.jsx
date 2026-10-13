@@ -25,6 +25,7 @@ const apiJson = vi.fn()
 vi.mock('../../lib/api', async (o) => ({ ...(await o()), apiJson: (...a) => apiJson(...a) }))
 
 const { GrammarChoose, GrammarConstruire, GrammarTiles, LadderMap, PointLine } = await import('./GrammarPlate')
+const { choiceAnswer } = await import('../../domain/cardShape')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
@@ -218,6 +219,79 @@ describe('Choisir', () => {
     await settle()
     expect(screen.container.querySelector('.gl-tile--ok [lang="ja"]').textContent).toBe(card.grammar.replace(/^〜/, ''))
     expect(screen.container.querySelector('.gl-tile--no')).toBeTruthy()
+  })
+})
+
+// ── 200 — Choisir on a question of its own ─────────────────────────
+// A point the contrast drill cannot blank (は, です／だ, 可能形...) is asked
+// from questions written by hand (study/grammar_choose.py): the choices are
+// forms that stand in the hole, not catalogue points, so the answer is the
+// form the card names, the hole turns to what stood in it, and a tile with
+// kanji carries its ruby. The fixture is the card the backend builds for
+// 可能形 〜(ら)れる at Choisir 1.
+describe('Choisir, on a question of its own', () => {
+  const card = cards.authored
+  const answer = card.contrast.answer
+  const wrong = card.contrast.choices.find(c => c !== answer)
+
+  it('is judged against the form in the hole, not the point', () => {
+    expect(choiceAnswer(card)).toBe(answer)
+    expect(choiceAnswer(card)).not.toBe(card.grammar)
+    // a contrast on patterns answers with its point, as before
+    expect(choiceAnswer(cards.choose)).toBe(cards.choose.grammar)
+  })
+
+  it('asks the sentence and its hole, the translation under it', async () => {
+    const root = (await mount(<GrammarChoose card={card} />)).container
+    const front = root.querySelector('.gl-card .gl-front')
+    expect(front.querySelector('.gl-sent .gl-gap')).toBeTruthy()
+    expect(front.querySelector('.gl-tr').textContent).toBe(card.contrast.tr)
+    expect(front.querySelector('.gl-gap--filled')).toBeNull()
+  })
+
+  it('turns to the answer: the hole holds the form that stood in it, with its ruby, and the wrong tile is answered', async () => {
+    const root = (await mount(<GrammarChoose card={card} revealed selected={wrong} />)).container
+    const back = root.querySelector('.gl-card .gl-back')
+    expect(back.querySelector('.gl-back__head--no').textContent).toBe(`${wrong}, the trap`)
+    const filled = back.querySelector('.gl-echo .gl-gap--filled')
+    // the form as the sentence has it, not the point's name
+    expect(filled.textContent.replace(/\s+/g, '')).toBe('使つかえません')
+    expect(filled.querySelector('ruby rt').textContent).toBe('つか')
+    expect(back.querySelector('.gl-echo .gl-tr').textContent).toBe(card.contrast.tr)
+    expect(back.querySelector('.grammar-answer')).toBeTruthy()
+    expect(back.querySelector('.gl-back__why').textContent).toBe(card.contrast.why[wrong])
+    expect(root.querySelector('.gl-ring__arc--miss')).toBeTruthy()
+  })
+
+  it('says it was right when the form is the one in the hole', async () => {
+    const root = (await mount(<GrammarChoose card={card} revealed selected={answer} />)).container
+    expect(root.querySelector('.gl-back__head--ok').textContent).toBe('Right.')
+    expect(root.querySelector('.gl-back__why')).toBeNull()
+    expect(root.querySelector('.gl-ring__arc--miss')).toBeNull()
+  })
+
+  it('offers the forms as tiles with their ruby, and marks the right one by the form, not the point', async () => {
+    const onAnswer = vi.fn()
+    const choices = card.contrast.choices
+    const screen = await mount(
+      <GrammarTiles choices={choices} correct={choiceAnswer(card)} readings={card.choices_furigana}
+                    selected={null} answered={false} onAnswer={onAnswer} />,
+    )
+    const tiles = [...screen.container.querySelectorAll('.gl-dock .gl-tile')]
+    expect(tiles).toHaveLength(choices.length)
+    expect(tiles.every(b => b.querySelector('.gl-tile__t ruby rt').textContent === 'つか')).toBe(true)
+    tiles[0].click()
+    expect(onAnswer).toHaveBeenCalledWith(choices[0])
+    await screen.rerender(
+      <LangProvider>
+        <GrammarTiles choices={choices} correct={choiceAnswer(card)} readings={card.choices_furigana}
+                      selected={wrong} answered onAnswer={onAnswer} />
+      </LangProvider>,
+    )
+    await settle()
+    expect(screen.container.querySelectorAll('.gl-tile--ok')).toHaveLength(1)
+    expect(screen.container.querySelector('.gl-tile--ok [lang="ja"]').textContent.replace(/\s+/g, '')).toBe('使つかえません')
+    expect(screen.container.querySelectorAll('.gl-tile--no')).toHaveLength(1)
   })
 })
 

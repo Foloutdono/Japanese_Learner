@@ -290,8 +290,11 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         contrast = contrast_payload(level, entry, grammar_list, lang, turn=turn)
         if contrast is None:
             return None
+        # An authored question (plan 200) carries the ruby of its own
+        # fillings; a contrast on patterns reads theirs from the catalogue.
+        readings = contrast.pop("readings", None)
         payload["contrast"] = contrast
-        payload["choices_furigana"] = furigana_by_pattern(contrast["choices"])
+        payload["choices_furigana"] = readings if readings is not None else furigana_by_pattern(contrast["choices"])
 
     if m.base == BUILD:
         # Another sentence each review: the ladder passes its review count,

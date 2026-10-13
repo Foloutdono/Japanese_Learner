@@ -14655,6 +14655,88 @@
         "register": "written"
       }
     ],
+    "choose": [
+      {
+        "jp": "二人の選手は、ゴール前で追い＿＿＿追われつの争いをした。",
+        "tr": {
+          "en": "The two runners fought it out right up to the finish line, chasing and being chased by turns.",
+          "fr": "Les deux coureurs se sont disputé la victoire jusqu'à la ligne d'arrivée, chacun rattrapant l'autre à tour de rôle."
+        },
+        "choices": [
+          "つ",
+          "たり",
+          "ては"
+        ],
+        "why": {
+          "en": "The pair takes つ on each verb stem: 追いつ追われつ, “chasing and being chased”. 追いたり追われつ and 追いては追われつ mix two patterns.",
+          "fr": "La paire prend つ sur chaque radical : 追いつ追われつ, « poursuivre et être poursuivi ». 追いたり追われつ et 追いては追われつ mélangent deux tournures."
+        },
+        "slips": [
+          "たり",
+          "ては"
+        ]
+      },
+      {
+        "jp": "二人の力士は、押し＿＿＿押されつの大勝負をくりひろげた。",
+        "tr": {
+          "en": "The two wrestlers fought a great bout, pushing and being pushed in turn.",
+          "fr": "Les deux lutteurs ont livré un grand combat, se poussant l'un l'autre à tour de rôle."
+        },
+        "choices": [
+          "つ",
+          "たり",
+          "ては"
+        ],
+        "why": {
+          "en": "The pair takes つ on each verb stem: 押しつ押されつ, “pushing and being pushed”. 押したり押されつ and 押しては押されつ mix two patterns.",
+          "fr": "La paire prend つ sur chaque radical : 押しつ押されつ, « pousser et être poussé ». 押したり押されつ et 押しては押されつ mélangent deux tournures."
+        },
+        "slips": [
+          "たり",
+          "ては"
+        ]
+      },
+      {
+        "jp": "二台の自転車は、坂道を抜き＿＿＿抜かれつ登っていった。",
+        "tr": {
+          "en": "The two bicycles climbed the hill, passing and being passed by turns.",
+          "fr": "Les deux vélos ont gravi la côte en se dépassant l'un l'autre à tour de rôle."
+        },
+        "choices": [
+          "つ",
+          "たり",
+          "ては"
+        ],
+        "why": {
+          "en": "The pair takes つ on each verb stem: 抜きつ抜かれつ, “passing and being passed”. 抜きたり抜かれつ and 抜きては抜かれつ mix two patterns.",
+          "fr": "La paire prend つ sur chaque radical : 抜きつ抜かれつ, « dépasser et être dépassé ». 抜きたり抜かれつ et 抜きては抜かれつ mélangent deux tournures."
+        },
+        "slips": [
+          "たり",
+          "ては"
+        ]
+      },
+      {
+        "jp": "かれは、改札の前を行き＿＿＿戻りつしながら、友だちを待っていた。",
+        "tr": {
+          "en": "He waited for his friend, pacing back and forth in front of the ticket gate.",
+          "fr": "Il attendait son ami en faisant les cent pas devant le portillon."
+        },
+        "choices": [
+          "つ",
+          "たり",
+          "ては"
+        ],
+        "why": {
+          "en": "The pair takes つ on each verb stem: 行きつ戻りつ, “back and forth”. 行きたり戻りつ and 行きては戻りつ mix two patterns.",
+          "fr": "La paire prend つ sur chaque radical : 行きつ戻りつ, « aller et venir ». 行きたり戻りつ et 行きては戻りつ mélangent deux tournures."
+        },
+        "slips": [
+          "たり",
+          "ては"
+        ]
+      }
+    ],
     "tour": {
       "twists": [
         {

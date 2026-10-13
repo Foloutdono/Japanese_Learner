@@ -431,6 +431,108 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "雨が＿＿＿、しあいはちゅうしです。",
+        "tr": {
+          "en": "If it rains, the match is cancelled.",
+          "fr": "S'il pleut, le match est annulé."
+        },
+        "choices": [
+          "ふれば",
+          "ふるば",
+          "ふりば"
+        ],
+        "why": {
+          "en": "A verb's ば-form ends in the え-row + ば: ふる → ふれば. ふるば and ふりば attach ば to the wrong stem.",
+          "fr": "La forme en ば d'un verbe finit par la ligne え + ば : ふる → ふれば. ふるば et ふりば accolent ば au mauvais radical."
+        },
+        "slips": [
+          "ふるば",
+          "ふりば"
+        ]
+      },
+      {
+        "jp": "友だちが＿＿＿、いっしょに行きます。",
+        "tr": {
+          "en": "If my friend comes, we'll go together.",
+          "fr": "Si mon ami vient, nous irons ensemble."
+        },
+        "choices": [
+          "来れば",
+          "来るば",
+          "来ば"
+        ],
+        "why": {
+          "en": "来る is irregular: its ば-form is 来れば (くれば). 来るば and 来ば are not forms of 来る.",
+          "fr": "来る est irrégulier : sa forme en ば est 来れば (くれば). 来るば et 来ば ne sont pas des formes de 来る."
+        },
+        "slips": [
+          "来るば",
+          "来ば"
+        ]
+      },
+      {
+        "jp": "べんきょうを＿＿＿、しけんにうかりますよ。",
+        "tr": {
+          "en": "If you study, you'll pass the exam.",
+          "fr": "Si tu étudies, tu réussiras l'examen."
+        },
+        "choices": [
+          "すれば",
+          "しれば",
+          "するば"
+        ],
+        "why": {
+          "en": "する is irregular: its ば-form is すれば. しれば and するば are not forms of する.",
+          "fr": "する est irrégulier : sa forme en ば est すれば. しれば et するば ne sont pas des formes de する."
+        },
+        "slips": [
+          "しれば",
+          "するば"
+        ]
+      },
+      {
+        "jp": "えきが＿＿＿、バスにのります。",
+        "tr": {
+          "en": "If the station is far, I'll take the bus.",
+          "fr": "Si la gare est loin, je prendrai le bus."
+        },
+        "choices": [
+          "とおければ",
+          "とおいれば",
+          "とおくれば"
+        ],
+        "why": {
+          "en": "An い-adjective makes its ば-form by changing い to ければ: とおい → とおければ. とおいれば and とおくれば are not forms.",
+          "fr": "Un adjectif en い fait sa forme en ば en changeant い en ければ : とおい → とおければ. とおいれば et とおくれば ne sont pas des formes."
+        },
+        "slips": [
+          "とおいれば",
+          "とおくれば"
+        ]
+      },
+      {
+        "jp": "くすりを＿＿＿、びょうきはなおりませんよ。",
+        "tr": {
+          "en": "If you don't take the medicine, you won't get better.",
+          "fr": "Si tu ne prends pas le médicament, tu ne guériras pas."
+        },
+        "choices": [
+          "のまなければ",
+          "のまないれば",
+          "のまなくれば"
+        ],
+        "why": {
+          "en": "The negative ば-form changes ない to なければ: のまない → のまなければ. のまないれば and のまなくれば are not forms.",
+          "fr": "La forme négative en ば change ない en なければ : のまない → のまなければ. のまないれば et のまなくれば ne sont pas des formes."
+        },
+        "slips": [
+          "のまないれば",
+          "のまなくれば"
+        ]
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -2996,6 +3098,72 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "先生は学生に、毎日かんじを＿＿＿。",
+        "tr": {
+          "en": "The teacher has the students write kanji every day.",
+          "fr": "Le professeur fait écrire des kanji aux élèves tous les jours."
+        },
+        "choices": [
+          "書かせます",
+          "書かれます",
+          "書きます"
+        ],
+        "why": {
+          "en": "The causative says who is made to act: 書かせる, “have someone write”. 書かれます is the passive, “is written”, and 書きます has no one made to act.",
+          "fr": "Le causatif dit qui l'on fait agir : 書かせる, « faire écrire ». 書かれます est le passif, « est écrit », et 書きます n'a personne que l'on fasse agir."
+        }
+      },
+      {
+        "jp": "母は、むすめにピアノを＿＿＿。",
+        "tr": {
+          "en": "My mother had her daughter learn the piano.",
+          "fr": "Ma mère a fait apprendre le piano à sa fille."
+        },
+        "choices": [
+          "ならわせました",
+          "ならわれました",
+          "ならいました"
+        ],
+        "why": {
+          "en": "The causative says who is made to act: ならわせる, “have someone learn”. ならわれました is the passive, and ならいました would make the mother the one who learned, from her daughter.",
+          "fr": "Le causatif dit qui l'on fait agir : ならわせる, « faire apprendre ». ならわれました est le passif, et ならいました ferait de la mère celle qui a appris, auprès de sa fille."
+        }
+      },
+      {
+        "jp": "社長は、わかい社員を、毎日おそくまで＿＿＿。",
+        "tr": {
+          "en": "The president made the young employees work late every day.",
+          "fr": "Le président a fait travailler les jeunes employés tard chaque jour."
+        },
+        "choices": [
+          "はたらかせました",
+          "はたらかれました",
+          "はたらきました"
+        ],
+        "why": {
+          "en": "The causative says who is made to act: はたらかせる, “make someone work”. はたらかれました is the passive, and はたらきました has no one made to act.",
+          "fr": "Le causatif dit qui l'on fait agir : はたらかせる, « faire travailler ». はたらかれました est le passif, et はたらきました n'a personne que l'on fasse agir."
+        }
+      },
+      {
+        "jp": "先生は、わたしたちをろうかに＿＿＿。",
+        "tr": {
+          "en": "The teacher made us stand in the hallway.",
+          "fr": "Le professeur nous a fait rester debout dans le couloir."
+        },
+        "choices": [
+          "立たせました",
+          "立たれました",
+          "立ちました"
+        ],
+        "why": {
+          "en": "The causative says who is made to act: 立たせる, “make someone stand”. 立たれました is the passive, and 立ちました would have the teacher standing.",
+          "fr": "Le causatif dit qui l'on fait agir : 立たせる, « faire se tenir debout ». 立たれました est le passif, et 立ちました dirait que c'est le professeur qui se tient debout."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -3298,6 +3466,72 @@
         "en": "My little brother ate my cake.",
         "fr": "Mon petit frère a mangé mon gâteau.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "電車の中で、となりの人にあしを＿＿＿。",
+        "tr": {
+          "en": "On the train, the person next to me stepped on my foot.",
+          "fr": "Dans le train, la personne à côté de moi m'a marché sur le pied."
+        },
+        "choices": [
+          "ふまれました",
+          "ふませました",
+          "ふみました"
+        ],
+        "why": {
+          "en": "The passive says something was done to the subject: ふまれる, “was stepped on”. ふませる is the causative, “make someone step”, and ふみました would make me the one who stepped.",
+          "fr": "Le passif dit que quelque chose a été fait au sujet : ふまれる, « se faire marcher dessus ». ふませる est le causatif, « faire marcher », et ふみました ferait de moi celui qui a marché."
+        }
+      },
+      {
+        "jp": "この本は、百年前に＿＿＿。",
+        "tr": {
+          "en": "This book was written a hundred years ago.",
+          "fr": "Ce livre a été écrit il y a cent ans."
+        },
+        "choices": [
+          "書かれました",
+          "書かせました",
+          "書きました"
+        ],
+        "why": {
+          "en": "The passive makes the thing the subject: 書かれる, “is written”. 書かせる means making someone write, and 書きました is active: it says someone (here, I) wrote it.",
+          "fr": "Le passif fait de la chose le sujet : 書かれる, « est écrit ». 書かせる veut dire faire écrire quelqu'un, et 書きました est actif : il dit que quelqu'un (ici, moi) l'a écrit."
+        }
+      },
+      {
+        "jp": "テストで一ばんになって、先生に＿＿＿。",
+        "tr": {
+          "en": "I came first on the test and was praised by my teacher.",
+          "fr": "J'ai eu la meilleure note au test et j'ai reçu les félicitations de mon professeur."
+        },
+        "choices": [
+          "ほめられました",
+          "ほめさせました",
+          "ほめました"
+        ],
+        "why": {
+          "en": "The passive makes the person praised the subject: ほめられる, “was praised”. ほめさせる is the causative, and ほめました would mean I praised the teacher.",
+          "fr": "Le passif fait de la personne félicitée le sujet : ほめられる, « être félicité ». ほめさせる est le causatif, et ほめました voudrait dire que j'ai félicité le professeur."
+        }
+      },
+      {
+        "jp": "さんぽ中に、犬に＿＿＿。",
+        "tr": {
+          "en": "While out walking, I was bitten by a dog.",
+          "fr": "Pendant ma promenade, je me suis fait mordre par un chien."
+        },
+        "choices": [
+          "かまれました",
+          "かませました",
+          "かみました"
+        ],
+        "why": {
+          "en": "The passive says something was done to the subject: かまれる, “was bitten”. かませる is the causative, and かみました would mean I bit the dog.",
+          "fr": "Le passif dit que quelque chose a été fait au sujet : かまれる, « être mordu ». かませる est le causatif, et かみました voudrait dire que j'ai mordu le chien."
+        }
       }
     ],
     "tour": {
@@ -7190,6 +7424,72 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "わたしの弟は、漢字が百ぐらい＿＿＿。",
+        "tr": {
+          "en": "My younger brother can write about a hundred kanji.",
+          "fr": "Mon petit frère sait écrire environ cent kanji."
+        },
+        "choices": [
+          "書けます",
+          "書きます",
+          "書かれます"
+        ],
+        "why": {
+          "en": "The potential form says someone can: 書く → 書ける. 書きます only says he writes, and 書かれます is the passive.",
+          "fr": "La forme potentielle dit que l'on peut : 書く → 書ける. 書きます dit seulement qu'il écrit, et 書かれます est le passif."
+        }
+      },
+      {
+        "jp": "ここでは、クレジットカードが＿＿＿。",
+        "tr": {
+          "en": "You can't use a credit card here.",
+          "fr": "On ne peut pas utiliser de carte de crédit ici."
+        },
+        "choices": [
+          "使えません",
+          "使いません",
+          "使われません"
+        ],
+        "why": {
+          "en": "The potential negative says you cannot: 使う → 使えない. 使いません says you do not, and 使われません is the passive, “is not used”.",
+          "fr": "Le négatif potentiel dit que l'on ne peut pas : 使う → 使えない. 使いません dit que l'on ne le fait pas, et 使われません est le passif, « n'est pas utilisé »."
+        }
+      },
+      {
+        "jp": "さかなが＿＿＿人も、たくさんいます。",
+        "tr": {
+          "en": "There are also many people who can't eat fish.",
+          "fr": "Il y a aussi beaucoup de gens qui ne peuvent pas manger de poisson."
+        },
+        "choices": [
+          "食べられない",
+          "食べない",
+          "食べさせない"
+        ],
+        "why": {
+          "en": "With the object marked が, the verb takes its potential form: 食べられない, “cannot eat”. 食べない alone would be “do not eat”, and 食べさせない is the causative.",
+          "fr": "Avec le complément marqué par が, le verbe prend sa forme potentielle : 食べられない, « ne peut pas manger ». 食べない seul serait « ne mange pas », et 食べさせない est le causatif."
+        }
+      },
+      {
+        "jp": "あしたの朝、六時に＿＿＿か。",
+        "tr": {
+          "en": "Can you get up at six tomorrow morning?",
+          "fr": "Pouvez-vous vous lever à six heures demain matin ?"
+        },
+        "choices": [
+          "起きられます",
+          "起きます",
+          "起きさせます"
+        ],
+        "why": {
+          "en": "る-verbs make the potential with られる: 起きる → 起きられる. 起きます asks whether you will, not whether you can, and 起きさせます is the causative.",
+          "fr": "Les verbes en る font le potentiel avec られる : 起きる → 起きられる. 起きます demande si vous le ferez, pas si vous le pouvez, et 起きさせます est le causatif."
+        }
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -7591,6 +7891,84 @@
         "en": "Shall we go to the sea at the weekend?",
         "fr": "On va à la mer ce week-end ?",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "セールだから、あたらしいくつを＿＿＿。",
+        "tr": {
+          "en": "It's a sale, so let's buy new shoes.",
+          "fr": "Ce sont les soldes, alors achetons de nouvelles chaussures."
+        },
+        "choices": [
+          "買おう",
+          "買よう",
+          "買った"
+        ],
+        "why": {
+          "en": "う-verbs take the お-row + う: 買う → 買おう. 買よう gives a う-verb the ending of a る-verb, and 買った is the past.",
+          "fr": "Les verbes en う prennent la ligne お + う : 買う → 買おう. 買よう donne à un verbe en う la terminaison d'un verbe en る, et 買った est le passé."
+        },
+        "slips": [
+          "買よう"
+        ]
+      },
+      {
+        "jp": "あしたは日よう日だから、そとで＿＿＿。",
+        "tr": {
+          "en": "Tomorrow is Sunday, so let's play outside.",
+          "fr": "Demain, c'est dimanche, alors jouons dehors."
+        },
+        "choices": [
+          "あそぼう",
+          "あそぼよう",
+          "あそんだ"
+        ],
+        "why": {
+          "en": "う-verbs take the お-row + う: あそぶ → あそぼう. あそぼよう doubles the ending, and あそんだ is the past.",
+          "fr": "Les verbes en う prennent la ligne お + う : あそぶ → あそぼう. あそぼよう double la terminaison, et あそんだ est le passé."
+        },
+        "slips": [
+          "あそぼよう"
+        ]
+      },
+      {
+        "jp": "テレビで、サッカーを＿＿＿。",
+        "tr": {
+          "en": "Let's watch the soccer on TV.",
+          "fr": "Regardons le match de foot à la télé."
+        },
+        "choices": [
+          "見よう",
+          "見ろう",
+          "見た"
+        ],
+        "why": {
+          "en": "る-verbs take よう: 見る → 見よう. 見ろう gives a る-verb the ending of a う-verb, and 見た is the past.",
+          "fr": "Les verbes en る prennent よう : 見る → 見よう. 見ろう donne à un verbe en る la terminaison d'un verbe en う, et 見た est le passé."
+        },
+        "slips": [
+          "見ろう"
+        ]
+      },
+      {
+        "jp": "あしたも、またここに＿＿＿。",
+        "tr": {
+          "en": "Let's come here again tomorrow.",
+          "fr": "Revenons ici demain."
+        },
+        "choices": [
+          "来よう",
+          "来ろう",
+          "来た"
+        ],
+        "why": {
+          "en": "来る is irregular: its volitional is 来よう (こよう). 来ろう is not a form, and 来た is the past.",
+          "fr": "来る est irrégulier : son volitif est 来よう (こよう). 来ろう n'est pas une forme, et 来た est le passé."
+        },
+        "slips": [
+          "来ろう"
+        ]
       }
     ],
     "tour": {
@@ -8319,6 +8697,88 @@
         "en": "When I got home, a letter had come.",
         "fr": "En rentrant, j'ai trouvé une lettre.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "このスイッチをおす＿＿＿、でんきがつきます。",
+        "tr": {
+          "en": "When you press this switch, the light comes on.",
+          "fr": "Quand on appuie sur cet interrupteur, la lumière s'allume."
+        },
+        "choices": [
+          "と",
+          "ば",
+          "たら"
+        ],
+        "why": {
+          "en": "Dictionary form + と says the result follows automatically: おすと. ば and たら need other forms of the verb (おせば, おしたら), so they cannot follow おす.",
+          "fr": "Forme du dictionnaire + と dit que le résultat suit automatiquement : おすと. ば et たら demandent d'autres formes du verbe (おせば, おしたら), donc ils ne peuvent pas suivre おす."
+        },
+        "slips": [
+          "ば",
+          "たら"
+        ]
+      },
+      {
+        "jp": "ねる前にコーヒーを飲む＿＿＿、ねむれません。",
+        "tr": {
+          "en": "If I drink coffee before bed, I can't sleep.",
+          "fr": "Si je bois du café avant de me coucher, je n'arrive pas à dormir."
+        },
+        "choices": [
+          "と",
+          "ば",
+          "たら"
+        ],
+        "why": {
+          "en": "Dictionary form + と links a habit to its result: 飲むと. ば and たら need other forms of the verb (飲めば, 飲んだら), so they cannot follow 飲む.",
+          "fr": "Forme du dictionnaire + と relie une habitude à son résultat : 飲むと. ば et たら demandent d'autres formes du verbe (飲めば, 飲んだら), donc ils ne peuvent pas suivre 飲む."
+        },
+        "slips": [
+          "ば",
+          "たら"
+        ]
+      },
+      {
+        "jp": "駅を出る＿＿＿、すぐ右にコンビニがあります。",
+        "tr": {
+          "en": "When you leave the station, there is a convenience store right on your right.",
+          "fr": "Quand on sort de la gare, il y a tout de suite un konbini sur la droite."
+        },
+        "choices": [
+          "と",
+          "ば",
+          "たら"
+        ],
+        "why": {
+          "en": "Dictionary form + と says what you find as you go: 出ると. ば and たら need other forms of the verb (出れば, 出たら), so they cannot follow 出る.",
+          "fr": "Forme du dictionnaire + と dit ce que l'on trouve en chemin : 出ると. ば et たら demandent d'autres formes du verbe (出れば, 出たら), donc ils ne peuvent pas suivre 出る."
+        },
+        "slips": [
+          "ば",
+          "たら"
+        ]
+      },
+      {
+        "jp": "へやの電気をつける＿＿＿、ねこがねていました。",
+        "tr": {
+          "en": "When I turned on the light in the room, a cat was sleeping there.",
+          "fr": "Quand j'ai allumé la lumière de la chambre, un chat dormait."
+        },
+        "choices": [
+          "と",
+          "ば",
+          "たら"
+        ],
+        "why": {
+          "en": "Dictionary form + と can also introduce a discovery in the past: つけると…ねていました. ば and たら need other forms of the verb (つければ, つけたら), so they cannot follow つける.",
+          "fr": "Forme du dictionnaire + と peut aussi introduire une découverte au passé : つけると…ねていました. ば et たら demandent d'autres formes du verbe (つければ, つけたら), donc ils ne peuvent pas suivre つける."
+        },
+        "slips": [
+          "ば",
+          "たら"
+        ]
       }
     ],
     "tour": {
@@ -12221,6 +12681,72 @@
         "fr": "La réunion commence, veuillez commencer votre exposé.",
         "register": "polite"
       }
+    ],
+    "choose": [
+      {
+        "jp": "風で、ドアが＿＿＿。",
+        "tr": {
+          "en": "The door closed in the wind.",
+          "fr": "La porte s'est fermée à cause du vent."
+        },
+        "choices": [
+          "しまりました",
+          "しめました",
+          "しまっています"
+        ],
+        "why": {
+          "en": "With が, something that happens by itself takes the intransitive verb: ドアがしまる. しめる is the transitive partner, for someone who closes it, and しまっています describes the state, not the change.",
+          "fr": "Avec が, ce qui se produit tout seul prend le verbe intransitif : ドアがしまる. しめる est le partenaire transitif, pour quelqu'un qui la ferme, et しまっています décrit l'état, pas le changement."
+        }
+      },
+      {
+        "jp": "先生が、まどを＿＿＿。",
+        "tr": {
+          "en": "The teacher opened the window.",
+          "fr": "Le professeur a ouvert la fenêtre."
+        },
+        "choices": [
+          "あけました",
+          "あきました",
+          "あいています"
+        ],
+        "why": {
+          "en": "With を, someone who does it takes the transitive verb: まどをあける. あく is the intransitive partner, for what opens by itself, and あいています describes the state.",
+          "fr": "Avec を, celui qui le fait prend le verbe transitif : まどをあける. あく est le partenaire intransitif, pour ce qui s'ouvre tout seul, et あいています décrit l'état."
+        }
+      },
+      {
+        "jp": "友だちが来る前に、へやの電気を＿＿＿。",
+        "tr": {
+          "en": "Before my friend came, I turned on the light in the room.",
+          "fr": "Avant l'arrivée de mon ami, j'ai allumé la lumière de la chambre."
+        },
+        "choices": [
+          "つけました",
+          "つきました",
+          "ついています"
+        ],
+        "why": {
+          "en": "With を, someone who does it takes the transitive verb: でんきをつける. つく is the intransitive partner, for what comes on by itself, and ついています describes the state.",
+          "fr": "Avec を, celui qui le fait prend le verbe transitif : でんきをつける. つく est le partenaire intransitif, pour ce qui s'allume tout seul, et ついています décrit l'état."
+        }
+      },
+      {
+        "jp": "ベルがなって、じゅぎょうが＿＿＿。",
+        "tr": {
+          "en": "The bell rang and the class began.",
+          "fr": "La cloche a sonné et le cours a commencé."
+        },
+        "choices": [
+          "はじまりました",
+          "はじめました",
+          "はじまっています"
+        ],
+        "why": {
+          "en": "With が, something that happens by itself takes the intransitive verb: じゅぎょうがはじまる. はじめる is the transitive partner, for someone who starts it, and はじまっています describes the state.",
+          "fr": "Avec が, ce qui se produit tout seul prend le verbe intransitif : じゅぎょうがはじまる. はじめる est le partenaire transitif, pour quelqu'un qui le commence, et はじまっています décrit l'état."
+        }
+      }
     ]
   },
   {
@@ -14052,6 +14578,72 @@
         "en": "I will contact you later.",
         "fr": "Je vous contacterai plus tard.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "社長は、毎朝しんぶんを＿＿＿。",
+        "tr": {
+          "en": "The president reads the newspaper every morning. (Respectful.)",
+          "fr": "Le président lit le journal tous les matins. (Forme de respect.)"
+        },
+        "choices": [
+          "お読みになります",
+          "お読みします",
+          "読みます"
+        ],
+        "why": {
+          "en": "To raise the other person's action, use お + stem + になる: お読みになる. お読みする lowers the speaker's own action, and 読みます is plain polite, with no honour.",
+          "fr": "Pour élever l'action de l'autre, on emploie お + radical + になる : お読みになる. お読みする abaisse l'action de celui qui parle, et 読みます est poli simple, sans marque d'honneur."
+        }
+      },
+      {
+        "jp": "あしたの朝、わたしがおきゃくさまを駅まで＿＿＿。",
+        "tr": {
+          "en": "Tomorrow morning I will take you to the station. (Humble.)",
+          "fr": "Demain matin, je vous accompagnerai jusqu'à la gare. (Forme humble.)"
+        },
+        "choices": [
+          "お送りします",
+          "お送りになります",
+          "送ります"
+        ],
+        "why": {
+          "en": "To lower your own action for the other person, use お + stem + する: お送りする. お送りになる would raise your own action, and 送ります has no humility.",
+          "fr": "Pour abaisser sa propre action au profit de l'autre, on emploie お + radical + する : お送りする. お送りになる élèverait sa propre action, et 送ります n'a aucune humilité."
+        }
+      },
+      {
+        "jp": "先生、こんやは何時ごろ＿＿＿か。",
+        "tr": {
+          "en": "Teacher, around what time will you go to bed tonight? (Respectful.)",
+          "fr": "Professeur, vers quelle heure vous coucherez-vous ce soir ? (Forme de respect.)"
+        },
+        "choices": [
+          "お休みになります",
+          "お休みします",
+          "休みます"
+        ],
+        "why": {
+          "en": "To raise the teacher's action, use お + stem + になる: お休みになる. お休みする lowers your own action, and 休みます is plain polite, with no honour.",
+          "fr": "Pour élever l'action du professeur, on emploie お + radical + になる : お休みになる. お休みする abaisse sa propre action, et 休みます est poli simple, sans marque d'honneur."
+        }
+      },
+      {
+        "jp": "このカードのつかい方を、わたしが＿＿＿。",
+        "tr": {
+          "en": "I will explain how to use this card. (Humble.)",
+          "fr": "Je vais vous expliquer comment utiliser cette carte. (Forme humble.)"
+        },
+        "choices": [
+          "ごせつめいします",
+          "ごせつめいになります",
+          "せつめいします"
+        ],
+        "why": {
+          "en": "For your own action done for the other person, a する-noun takes ご + noun + する: ごせつめいする. ごせつめいになる would raise your own action, and せつめいします has no humility.",
+          "fr": "Pour sa propre action faite pour l'autre, un nom en する prend ご + nom + する : ごせつめいする. ごせつめいになる élèverait sa propre action, et せつめいします n'a aucune humilité."
+        }
       }
     ],
     "tour": {
@@ -16889,6 +17481,88 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "あしたは日曜日＿＿＿、えいがでも見に行きませんか。",
+        "tr": {
+          "en": "Tomorrow is Sunday, so how about going to see a film or something?",
+          "fr": "Demain, c'est dimanche, alors si on allait voir un film ou quelque chose ?"
+        },
+        "choices": [
+          "だし",
+          "なし",
+          "だったし"
+        ],
+        "why": {
+          "en": "After a noun, し takes だ: 日曜日だし. なし is not a form here, and だったし would put the sentence in the past.",
+          "fr": "Après un nom, し prend だ : 日曜日だし. なし n'est pas une forme ici, et だったし mettrait la phrase au passé."
+        },
+        "slips": [
+          "なし",
+          "だったし"
+        ]
+      },
+      {
+        "jp": "このカメラは、小さい＿＿＿、かるいし、りょこうにもっていけます。",
+        "tr": {
+          "en": "This camera is small and light, so I can take it on trips.",
+          "fr": "Cet appareil est petit et léger, alors je peux l'emporter en voyage."
+        },
+        "choices": [
+          "し",
+          "だし",
+          "なし"
+        ],
+        "why": {
+          "en": "After an い-adjective, し follows the plain form directly: 小さいし. 小さいだし and 小さいなし are not forms.",
+          "fr": "Après un adjectif en い, し suit directement la forme simple : 小さいし. 小さいだし et 小さいなし ne sont pas des formes."
+        },
+        "slips": [
+          "だし",
+          "なし"
+        ]
+      },
+      {
+        "jp": "あの店は、ゆうめい＿＿＿、おいしいし、いつもこんでいます。",
+        "tr": {
+          "en": "That shop is famous and the food is good, so it's always crowded.",
+          "fr": "Ce restaurant est célèbre et on y mange bien, alors c'est toujours plein."
+        },
+        "choices": [
+          "だし",
+          "なし",
+          "いし"
+        ],
+        "why": {
+          "en": "After a な-adjective, し takes だ: ゆうめいだし. ゆうめいなし and ゆうめいいし are not forms.",
+          "fr": "Après un adjectif en な, し prend だ : ゆうめいだし. ゆうめいなし et ゆうめいいし ne sont pas des formes."
+        },
+        "slips": [
+          "なし",
+          "いし"
+        ]
+      },
+      {
+        "jp": "この町は、バスも＿＿＿、電車もあるし、べんりです。",
+        "tr": {
+          "en": "This town has buses and trains too, so it's convenient.",
+          "fr": "Dans cette ville, il y a des bus et aussi des trains, alors c'est pratique."
+        },
+        "choices": [
+          "あるし",
+          "ありし",
+          "あるだし"
+        ],
+        "why": {
+          "en": "After a verb, し follows the plain form: あるし. ありし and あるだし are not forms.",
+          "fr": "Après un verbe, し suit la forme simple : あるし. ありし et あるだし ne sont pas des formes."
+        },
+        "slips": [
+          "ありし",
+          "あるだし"
+        ]
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -18545,6 +19219,72 @@
         "en": "I forgot to turn off the light.",
         "fr": "J'ai oublié d'éteindre la lumière.",
         "register": "polite"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "子どもが川であそんでいる＿＿＿を見ました。",
+        "tr": {
+          "en": "I saw the children playing in the river.",
+          "fr": "J'ai vu les enfants jouer dans la rivière."
+        },
+        "choices": [
+          "の",
+          "こと",
+          "もの"
+        ],
+        "why": {
+          "en": "After a verb phrase, の turns it into a scene you see: あそんでいるのを見る. こと names a fact, not a scene, and もの would mean a thing.",
+          "fr": "Après un groupe verbal, の en fait une scène que l'on voit : あそんでいるのを見る. こと nomme un fait, pas une scène, et もの voudrait dire une chose."
+        }
+      },
+      {
+        "jp": "おとこの子が道でころぶ＿＿＿を見ました。",
+        "tr": {
+          "en": "I saw a boy fall in the street.",
+          "fr": "J'ai vu un garçon tomber dans la rue."
+        },
+        "choices": [
+          "の",
+          "こと",
+          "もの"
+        ],
+        "why": {
+          "en": "After a verb phrase, の turns it into a scene you see: ころぶのを見る. こと names a fact, not a scene, and もの would mean a thing.",
+          "fr": "Après un groupe verbal, の en fait une scène que l'on voit : ころぶのを見る. こと nomme un fait, pas une scène, et もの voudrait dire une chose."
+        }
+      },
+      {
+        "jp": "まどから、雨がふっている＿＿＿を見ていました。",
+        "tr": {
+          "en": "I was watching the rain fall from the window.",
+          "fr": "Je regardais la pluie tomber par la fenêtre."
+        },
+        "choices": [
+          "の",
+          "こと",
+          "もの"
+        ],
+        "why": {
+          "en": "After a verb phrase, の turns it into a scene you see: ふっているのを見る. こと names a fact, not a scene, and もの would mean a thing.",
+          "fr": "Après un groupe verbal, の en fait une scène que l'on voit : ふっているのを見る. こと nomme un fait, pas une scène, et もの voudrait dire une chose."
+        }
+      },
+      {
+        "jp": "ねこが木にのぼる＿＿＿を見ました。",
+        "tr": {
+          "en": "I saw a cat climb a tree.",
+          "fr": "J'ai vu un chat grimper à un arbre."
+        },
+        "choices": [
+          "の",
+          "こと",
+          "もの"
+        ],
+        "why": {
+          "en": "After a verb phrase, の turns it into a scene you see: のぼるのを見る. こと names a fact, not a scene, and もの would mean a thing.",
+          "fr": "Après un groupe verbal, の en fait une scène que l'on voit : のぼるのを見る. こと nomme un fait, pas une scène, et もの voudrait dire une chose."
+        }
       }
     ],
     "tour": {
@@ -22203,6 +22943,84 @@
         "en": "Don't forget me, okay?",
         "fr": "Ne m'oublie pas, d'accord ?",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "ごめん、ちょっと＿＿＿。いま手がはなせないの。",
+        "tr": {
+          "en": "Sorry, wait a moment. I can't stop what I'm doing right now.",
+          "fr": "Pardon, attends un instant. Je ne peux pas m'arrêter maintenant."
+        },
+        "choices": [
+          "待って",
+          "待たないで",
+          "待ちて"
+        ],
+        "why": {
+          "en": "A て-form at the end of a sentence is a casual request: 待って. 待たないで would ask you not to wait, and 待ちて is not a form.",
+          "fr": "Une forme en て en fin de phrase est une demande familière : 待って. 待たないで demanderait de ne pas attendre, et 待ちて n'est pas une forme."
+        },
+        "slips": [
+          "待ちて"
+        ]
+      },
+      {
+        "jp": "あしたの朝、六時に＿＿＿。",
+        "tr": {
+          "en": "Wake me up at six tomorrow morning.",
+          "fr": "Réveille-moi demain matin à six heures."
+        },
+        "choices": [
+          "おこして",
+          "おこさないで",
+          "おこしで"
+        ],
+        "why": {
+          "en": "A て-form at the end of a sentence asks for something: おこして. おこさないで would ask you not to, and おこしで is not a form.",
+          "fr": "Une forme en て en fin de phrase demande quelque chose : おこして. おこさないで demanderait de ne pas le faire, et おこしで n'est pas une forme."
+        },
+        "slips": [
+          "おこしで"
+        ]
+      },
+      {
+        "jp": "わたしのへやには、かってに＿＿＿。",
+        "tr": {
+          "en": "Don't come into my room without asking.",
+          "fr": "N'entre pas dans ma chambre sans demander."
+        },
+        "choices": [
+          "入らないで",
+          "入って",
+          "入りないで"
+        ],
+        "why": {
+          "en": "A ない-form + で at the end of a sentence is a casual “don't”: 入らないで. 入って would invite you in, and 入りないで is not a form.",
+          "fr": "Une forme en ない + で en fin de phrase est un « ne fais pas » familier : 入らないで. 入って inviterait à entrer, et 入りないで n'est pas une forme."
+        },
+        "slips": [
+          "入りないで"
+        ]
+      },
+      {
+        "jp": "いやなことは、すぐに＿＿＿ね。",
+        "tr": {
+          "en": "Forget the unpleasant things quickly, okay?",
+          "fr": "Oublie vite les choses désagréables, d'accord ?"
+        },
+        "choices": [
+          "わすれて",
+          "わすれないで",
+          "わすれで"
+        ],
+        "why": {
+          "en": "A て-form at the end of a sentence asks for something: わすれて. わすれないで would ask you not to forget, and わすれで is not a form.",
+          "fr": "Une forme en て en fin de phrase demande quelque chose : わすれて. わすれないで demanderait de ne pas oublier, et わすれで n'est pas une forme."
+        },
+        "slips": [
+          "わすれで"
+        ]
       }
     ],
     "tour": {
@@ -31104,6 +31922,84 @@
         "register": "casual"
       }
     ],
+    "choose": [
+      {
+        "jp": "コーチは、「もっと早く＿＿＿」と言いました。",
+        "tr": {
+          "en": "The coach said, “Run faster!”",
+          "fr": "L'entraîneur a dit : « Cours plus vite ! »"
+        },
+        "choices": [
+          "走れ",
+          "走りろ",
+          "走るな"
+        ],
+        "why": {
+          "en": "The imperative of a う-verb ends in the え-row: 走る → 走れ. 走りろ is not a form, and 走るな is the prohibition, “don't run”.",
+          "fr": "L'impératif d'un verbe en う finit par la ligne え : 走る → 走れ. 走りろ n'est pas une forme, et 走るな est l'interdiction, « ne cours pas »."
+        },
+        "slips": [
+          "走りろ"
+        ]
+      },
+      {
+        "jp": "あぶない！はやく＿＿＿！",
+        "tr": {
+          "en": "Danger! Run away, quick!",
+          "fr": "Attention ! Fuis, vite !"
+        },
+        "choices": [
+          "にげろ",
+          "にげれ",
+          "にげるな"
+        ],
+        "why": {
+          "en": "A る-verb makes the imperative with ろ: にげる → にげろ. にげれ is not a form, and にげるな is the prohibition, “don't run away”.",
+          "fr": "Un verbe en る fait l'impératif avec ろ : にげる → にげろ. にげれ n'est pas une forme, et にげるな est l'interdiction, « ne t'enfuis pas »."
+        },
+        "slips": [
+          "にげれ"
+        ]
+      },
+      {
+        "jp": "いいから、これをぜんぶ＿＿＿！",
+        "tr": {
+          "en": "Never mind, eat it all!",
+          "fr": "Peu importe, mange tout !"
+        },
+        "choices": [
+          "食べろ",
+          "食べれ",
+          "食べるな"
+        ],
+        "why": {
+          "en": "A る-verb makes the imperative with ろ: 食べる → 食べろ. 食べれ is not a form, and 食べるな is the prohibition, “don't eat”.",
+          "fr": "Un verbe en る fait l'impératif avec ろ : 食べる → 食べろ. 食べれ n'est pas une forme, et 食べるな est l'interdiction, « ne mange pas »."
+        },
+        "slips": [
+          "食べれ"
+        ]
+      },
+      {
+        "jp": "電車がもうすぐ出るぞ、＿＿＿！",
+        "tr": {
+          "en": "The train's about to leave, hurry up!",
+          "fr": "Le train va partir, dépêche-toi !"
+        },
+        "choices": [
+          "いそげ",
+          "いそぎろ",
+          "いそぐな"
+        ],
+        "why": {
+          "en": "A verb in ぐ makes the imperative with げ: いそぐ → いそげ. いそぎろ is not a form, and いそぐな is the prohibition, “don't hurry”.",
+          "fr": "Un verbe en ぐ fait l'impératif avec げ : いそぐ → いそげ. いそぎろ n'est pas une forme, et いそぐな est l'interdiction, « ne te dépêche pas »."
+        },
+        "slips": [
+          "いそぎろ"
+        ]
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -34011,6 +34907,84 @@
         "register": "polite"
       }
     ],
+    "choose": [
+      {
+        "jp": "あした何時に＿＿＿、おしえてください。",
+        "tr": {
+          "en": "Please tell me what time you are coming tomorrow.",
+          "fr": "Dites-moi à quelle heure vous venez demain."
+        },
+        "choices": [
+          "来るか",
+          "来るですか",
+          "来るかどうか"
+        ],
+        "why": {
+          "en": "A question word + the plain form + か works as a noun clause: 何時に来るか. 来るですか is not a form (a plain verb takes no です), and かどうか is for yes/no questions with no question word.",
+          "fr": "Un mot interrogatif + la forme simple + か fonctionne comme une proposition nominale : 何時に来るか. 来るですか n'est pas une forme (un verbe simple ne prend pas です), et かどうか sert aux questions oui/non sans mot interrogatif."
+        },
+        "slips": [
+          "来るですか"
+        ]
+      },
+      {
+        "jp": "だれがこの手紙を＿＿＿、知りません。",
+        "tr": {
+          "en": "I don't know who wrote this letter.",
+          "fr": "Je ne sais pas qui a écrit cette lettre."
+        },
+        "choices": [
+          "書いたか",
+          "書きましたか",
+          "書いたかどうか"
+        ],
+        "why": {
+          "en": "A question word + the plain form + か works as a noun clause: だれが書いたか. The polite 書きましたか does not go inside a sentence, and かどうか is for yes/no questions with no question word.",
+          "fr": "Un mot interrogatif + la forme simple + か fonctionne comme une proposition nominale : だれが書いたか. Le poli 書きましたか ne se met pas dans une phrase, et かどうか sert aux questions oui/non sans mot interrogatif."
+        },
+        "slips": [
+          "書きましたか"
+        ]
+      },
+      {
+        "jp": "きっぷをどこで＿＿＿、おしえてください。",
+        "tr": {
+          "en": "Please tell me where I can buy a ticket.",
+          "fr": "Dites-moi où je peux acheter un billet."
+        },
+        "choices": [
+          "買えるか",
+          "買えるですか",
+          "買えるかどうか"
+        ],
+        "why": {
+          "en": "A question word + the plain form + か works as a noun clause: どこで買えるか. 買えるですか is not a form (a plain verb takes no です), and かどうか is for yes/no questions with no question word.",
+          "fr": "Un mot interrogatif + la forme simple + か fonctionne comme une proposition nominale : どこで買えるか. 買えるですか n'est pas une forme (un verbe simple ne prend pas です), et かどうか sert aux questions oui/non sans mot interrogatif."
+        },
+        "slips": [
+          "買えるですか"
+        ]
+      },
+      {
+        "jp": "あの人が何を＿＿＿、気になります。",
+        "tr": {
+          "en": "I wonder what that person is doing.",
+          "fr": "Je me demande ce que cette personne est en train de faire."
+        },
+        "choices": [
+          "しているか",
+          "していますか",
+          "しているかどうか"
+        ],
+        "why": {
+          "en": "A question word + the plain form + か works as a noun clause: 何をしているか. The polite していますか does not go inside a sentence, and かどうか is for yes/no questions with no question word.",
+          "fr": "Un mot interrogatif + la forme simple + か fonctionne comme une proposition nominale : 何をしているか. Le poli していますか ne se met pas dans une phrase, et かどうか sert aux questions oui/non sans mot interrogatif."
+        },
+        "slips": [
+          "していますか"
+        ]
+      }
+    ],
     "tour": {
       "twists": [
         {
@@ -35162,6 +36136,72 @@
         "en": "Not a single person came to the party.",
         "fr": "Pas une seule personne n'est venue à la fête.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "きのうは、八時間＿＿＿ねました。",
+        "tr": {
+          "en": "Yesterday I slept as much as eight hours.",
+          "fr": "Hier, j'ai dormi pas moins de huit heures."
+        },
+        "choices": [
+          "も",
+          "しか",
+          "を"
+        ],
+        "why": {
+          "en": "After a number and a counter, も stresses a large amount: 八時間も. しか needs a negative and means “only”, and を does not fit here.",
+          "fr": "Après un nombre et un compteur, も souligne une grande quantité : 八時間も. しか demande une négation et veut dire « seulement », et を ne convient pas ici."
+        }
+      },
+      {
+        "jp": "あのえいがは、五かい＿＿＿見ました。",
+        "tr": {
+          "en": "I saw that film as many as five times.",
+          "fr": "J'ai vu ce film pas moins de cinq fois."
+        },
+        "choices": [
+          "も",
+          "しか",
+          "を"
+        ],
+        "why": {
+          "en": "After a number and a counter, も stresses a large amount: 五かいも. しか needs a negative and means “only”, and を does not fit here.",
+          "fr": "Après un nombre et un compteur, も souligne une grande quantité : 五かいも. しか demande une négation et veut dire « seulement », et を ne convient pas ici."
+        }
+      },
+      {
+        "jp": "さいふの中には、百円＿＿＿ありませんでした。",
+        "tr": {
+          "en": "I didn't even have a hundred yen in my wallet.",
+          "fr": "Je n'avais même pas cent yens dans mon portefeuille."
+        },
+        "choices": [
+          "も",
+          "しか",
+          "を"
+        ],
+        "why": {
+          "en": "With a negative, number + も means “not even”: 百円もない. しか would say “only a hundred yen”, and を does not fit here.",
+          "fr": "Avec une négation, nombre + も veut dire « pas même » : 百円もない. しか dirait « seulement cent yens », et を ne convient pas ici."
+        }
+      },
+      {
+        "jp": "おにぎりを五つ＿＿＿食べました。",
+        "tr": {
+          "en": "I ate as many as five rice balls.",
+          "fr": "J'ai mangé pas moins de cinq onigiri."
+        },
+        "choices": [
+          "も",
+          "しか",
+          "を"
+        ],
+        "why": {
+          "en": "After a number and a counter, も stresses a large amount: 五つも. しか needs a negative and means “only”, and a second を does not fit here.",
+          "fr": "Après un nombre et un compteur, も souligne une grande quantité : 五つも. しか demande une négation et veut dire « seulement », et un second を ne convient pas ici."
+        }
       }
     ],
     "tour": {

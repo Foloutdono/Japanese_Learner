@@ -19,7 +19,7 @@ import { TourRoute, TourLedger } from '../components/study/TourPanels'
 import { GrammarWrite } from '../components/study/GrammarWork'
 import { BuildEntry, GrammarChoose, GrammarConstruire, GrammarTiles, PointLine } from '../components/study/GrammarPlate'
 import { useBuild } from '../hooks/useBuild'
-import { cardShape } from '../domain/cardShape'
+import { cardShape, choiceAnswer } from '../domain/cardShape'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
 import { Loading } from '../components/ui/Loading'
@@ -466,7 +466,7 @@ export default function GrammarRun({ session }) {
             {isContrast && (desk || !answered) && (
               <GrammarTiles
                 choices={card.contrast?.choices ?? []}
-                correct={card.grammar}
+                correct={choiceAnswer(card)}
                 readings={card.choices_furigana}
                 selected={selected} answered={answered} onAnswer={onMCQAnswer} />
             )}

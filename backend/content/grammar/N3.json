@@ -6145,6 +6145,72 @@
         "fr": "Le chef m'a fait travailler même mon jour de congé.",
         "register": "casual"
       }
+    ],
+    "choose": [
+      {
+        "jp": "きのうの夜、友だちに、むりやりお酒を＿＿＿。",
+        "tr": {
+          "en": "Last night my friend made me drink alcohol against my will.",
+          "fr": "Hier soir, j'ai dû boire de l'alcool contre mon gré, à cause d'un ami."
+        },
+        "choices": [
+          "飲まされた",
+          "飲ませた",
+          "飲まれた"
+        ],
+        "why": {
+          "en": "The causative-passive says you were made to act: 飲まされる, “was made to drink”. 飲ませた is the causative, “I made someone drink”, and 飲まれた is the passive, “was drunk”.",
+          "fr": "Le causatif passif dit que l'on vous a fait agir : 飲まされる, « avoir été forcé de boire ». 飲ませた est le causatif, « j'ai fait boire quelqu'un », et 飲まれた est le passif, « a été bu »."
+        }
+      },
+      {
+        "jp": "ともだちに、レストランの前で三十分も＿＿＿。",
+        "tr": {
+          "en": "My friend kept me waiting in front of the restaurant for as long as thirty minutes.",
+          "fr": "Mon ami m'a fait attendre devant le restaurant pendant trente minutes."
+        },
+        "choices": [
+          "待たされた",
+          "待たせた",
+          "待たれた"
+        ],
+        "why": {
+          "en": "The causative-passive says you were made to wait: 待たされる, “was kept waiting”. 待たせた is the causative, “I kept someone waiting”, and 待たれた is the passive, “was waited for”.",
+          "fr": "Le causatif passif dit que l'on vous a fait attendre : 待たされる, « avoir été obligé d'attendre ». 待たせた est le causatif, « j'ai fait attendre quelqu'un », et 待たれた est le passif, « a été attendu »."
+        }
+      },
+      {
+        "jp": "先生に、きょうしつのそうじを＿＿＿。",
+        "tr": {
+          "en": "I was made by my teacher to clean the classroom.",
+          "fr": "Mon professeur m'a fait nettoyer la salle de classe."
+        },
+        "choices": [
+          "させられた",
+          "させた",
+          "された"
+        ],
+        "why": {
+          "en": "The causative-passive says you were made to do it: そうじをさせられる. させた would be “I made someone do it”, and された is the passive, “was done”.",
+          "fr": "Le causatif passif dit que l'on vous a fait le faire : そうじをさせられる. させた serait « j'ai fait faire à quelqu'un », et された est le passif, « a été fait »."
+        }
+      },
+      {
+        "jp": "かいしゃのパーティーで、みんなの前で歌を＿＿＿。",
+        "tr": {
+          "en": "At the company party, I was made to sing in front of everyone.",
+          "fr": "À la fête de l'entreprise, on m'a fait chanter devant tout le monde."
+        },
+        "choices": [
+          "歌わされた",
+          "歌わせた",
+          "歌われた"
+        ],
+        "why": {
+          "en": "The causative-passive says you were made to sing: 歌わされる. 歌わせた is the causative, “I made someone sing”, and 歌われた is the passive, “was sung”.",
+          "fr": "Le causatif passif dit que l'on vous a fait chanter : 歌わされる. 歌わせた est le causatif, « j'ai fait chanter quelqu'un », et 歌われた est le passif, « a été chanté »."
+        }
+      }
     ]
   },
   {
@@ -32892,6 +32958,79 @@
         "en": "His strength is that he never gives up.",
         "fr": "Son point fort, c'est qu'il n'abandonne jamais.",
         "register": "casual"
+      }
+    ],
+    "choose": [
+      {
+        "jp": "かれは、高＿＿＿の見物で、何もてつだわない。",
+        "tr": {
+          "en": "He just watches from the sidelines and doesn't help at all.",
+          "fr": "Il se contente de regarder de loin sans rien faire pour aider."
+        },
+        "choices": [
+          "み",
+          "さ",
+          "げ"
+        ],
+        "why": {
+          "en": "み makes the noun in the set phrase 高みの見物, “watching from above, from the sidelines”. 高さ is a measured height, and 高げ is not a noun.",
+          "fr": "み fait le nom de l'expression figée 高みの見物, « regarder d'en haut, en spectateur ». 高さ est une hauteur mesurée, et 高げ n'est pas un nom."
+        },
+        "slips": [
+          "げ"
+        ]
+      },
+      {
+        "jp": "あなたに会えるのを、楽し＿＿＿にしています。",
+        "tr": {
+          "en": "I am looking forward to seeing you.",
+          "fr": "J'ai hâte de vous voir."
+        },
+        "choices": [
+          "み",
+          "さ",
+          "げ"
+        ],
+        "why": {
+          "en": "楽しみにする is the set phrase for looking forward to something: み turns 楽しい into the thing awaited. 楽しさ is how enjoyable something is, and 楽しげ is a look.",
+          "fr": "楽しみにする est l'expression pour attendre quelque chose avec impatience : み fait de 楽しい la chose attendue. 楽しさ est le degré de plaisir, et 楽しげ est un air."
+        }
+      },
+      {
+        "jp": "ドラッグストアで、痛＿＿＿止めを買いました。",
+        "tr": {
+          "en": "I bought a painkiller at the drugstore.",
+          "fr": "J'ai acheté un antidouleur à la pharmacie."
+        },
+        "choices": [
+          "み",
+          "さ",
+          "げ"
+        ],
+        "why": {
+          "en": "み makes the noun for a pain as it is felt: 痛み止め, “painkiller”. 痛さ is how much something hurts, and 痛げ is a look.",
+          "fr": "み fait le nom d'une douleur telle qu'on la ressent : 痛み止め, « antidouleur ». 痛さ est le degré de la douleur, et 痛げ est un air."
+        },
+        "slips": [
+          "さ",
+          "げ"
+        ]
+      },
+      {
+        "jp": "かれは、ふかい悲し＿＿＿にくれていました。",
+        "tr": {
+          "en": "He was lost in deep grief.",
+          "fr": "Il était plongé dans un profond chagrin."
+        },
+        "choices": [
+          "み",
+          "さ",
+          "げ"
+        ],
+        "why": {
+          "en": "み makes the noun for a sorrow as it is felt: 悲しみにくれる, “to be lost in grief”. 悲しさ is how sad something is, and 悲しげ is a look.",
+          "fr": "み fait le nom d'un chagrin tel qu'on le ressent : 悲しみにくれる, « être plongé dans le chagrin ». 悲しさ est le degré de tristesse, et 悲しげ est un air."
+        }
       }
     ]
   },

@@ -150,6 +150,23 @@ class TourSliceTests(unittest.TestCase):
             self.assertIn("scene", entry["tour"])
             self.assertIn("compare", entry)
 
+    def test_a_toured_point_asked_from_its_own_questions_hands_them_over_too(self) -> None:
+        # Plan 200: the questions a point carries (`choose`) are audited in
+        # the grammar area, whose slices are whole entries, and here beside
+        # the tour that teaches the point.
+        by_pattern = {e["pattern"]: e for level in audit.LEVELS
+                      for s in audit.slices("tours") if s["level"] == level for e in audit.entries_of(s)}
+        owners = [p for level in audit.LEVELS for p in audit.grammar_points(level) if p.get("choose") and p.get("tour")]
+        self.assertTrue(owners)
+        for point in owners:
+            self.assertEqual(by_pattern[point["pattern"]]["choose"], point["choose"])
+        for level in audit.LEVELS:
+            for s in audit.slices("grammar"):
+                if s["level"] == level:
+                    for e in audit.entries_of(s):
+                        self.assertEqual("choose" in e, "choose" in next(
+                            p for p in audit.grammar_points(level) if p["pattern"] == e["pattern"]))
+
 
 class DumpTests(unittest.TestCase):
     def test_the_payload_is_what_the_playbook_tells_a_run_to_read(self) -> None:
