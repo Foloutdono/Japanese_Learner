@@ -22,6 +22,7 @@
 # where a failure actually becomes an HTTP response.
 import logging
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from functools import lru_cache
@@ -595,13 +596,30 @@ def _log_usage(task: str, label: str, payload: object, elapsed_ms: int, *, ok: b
     usage_logger.info("llm-usage %s", " ".join(fields))
 
 
+# A reasoning trace some models put in `content` itself, tagged. Never an
+# answer, and a caller's parser or a learner's screen must never see it.
+# An UNCLOSED tag is a trace cut off by the token cap: nothing after it
+# is the answer either, so it takes the rest of the reply with it, and
+# what is left is "" -- an unusable reply, as chat() already treats one.
+_THINK_BLOCK = re.compile(r"<(think|thinking|reasoning)>.*?</\1>", re.DOTALL | re.IGNORECASE)
+_THINK_OPEN = re.compile(r"<(?:think|thinking|reasoning)>.*", re.DOTALL | re.IGNORECASE)
+
+
+def strip_reasoning(content: str) -> str:
+    """`content` without any tagged reasoning trace. Untagged
+    reasoning (plain text before the answer) cannot be told from an
+    answer here; that is what chat(accept=...) is for."""
+    return _THINK_OPEN.sub("", _THINK_BLOCK.sub("", content)).strip()
+
+
 _PROVIDER_ERROR_STATUSES = (401, 402, 403)
 _PERMANENT_MODEL_STATUSES = (400, 404)
 _RETRYABLE_STATUSES = (429, 500, 502, 503, 504)
 
 
 def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
-         reasoning: bool = True, *, vision: bool = False, task: str = "") -> str:
+         reasoning: bool = True, *, vision: bool = False, task: str = "",
+         accept=None) -> str:
     """Multi-provider, multi-model fallback chat completion.
 
     Walks PROVIDERS in order and, within each, its models in order:
@@ -641,6 +659,16 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
     question docs/llm-commercial-plan.md currently answers with an
     estimate. Unlabelled calls are logged as `task=unlabelled` rather
     than dropped.
+
+    `accept` is the caller's own test of a reply, `str -> bool`. A reply
+    that fails it is treated like a null body: paid for, logged `ok=0`,
+    and the NEXT model is tried instead of the same one again. It exists
+    for the answer that is a 200 and still not an answer -- a reasoning
+    model that spent its token cap thinking out loud in `content` and
+    never reached the JSON (live-diagnosed 2026-10-12, a learner shown
+    "We need to produce JSON with fields..." as their review). A caller
+    that would only fail to parse such a reply passes its parser's own
+    test here, so another model gets the chance first.
 
     max_tokens defaults to 3000 rather than being left unset: every
     caller in this codebase generates one bounded JSON blob (a passage,
@@ -738,6 +766,17 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
                     content = payload["choices"][0]["message"]["content"]
                 except (KeyError, IndexError, TypeError):
                     content = None
+                if isinstance(content, str):
+                    content = strip_reasoning(content)
+                else:
+                    content = None
+                rejected = False
+                if content and accept is not None:
+                    try:
+                        rejected = not accept(content)
+                    except Exception:
+                        logger.exception("%s: accept() raised; the reply is rejected", label)
+                        rejected = True
                 # `content` can be present but null -- observed live from
                 # minimaxai/minimax-m3, which answers 200 with a null
                 # content field. Treated as a failed attempt rather than
@@ -747,11 +786,17 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
                 # Either way the tokens are spent, so both branches are
                 # accounted for before one of them returns.
                 _log_usage(task, label, payload, int((time.monotonic() - started) * 1000),
-                           ok=bool(content))
-                if content:
+                           ok=bool(content) and not rejected)
+                if content and not rejected:
                     logger.info("Using model %s", label)
                     return content
                 last_status = response.status_code
+                if rejected:
+                    # The same model would most likely answer the same
+                    # way (a truncated monologue is not a flake), so on
+                    # to the next one rather than a second payment.
+                    logger.warning("%s answered, but not with a usable reply: %s", label, content[:200])
+                    break
                 logger.error("%s returned an unusable body: %s", label, response.text[:300])
                 continue
 
@@ -777,4 +822,7 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
             if status not in _RETRYABLE_STATUSES:
                 break
 
-    raise LLMUnavailable(f"All LLM providers failed. Last error: {last_status or 'no response'}")
+    raise LLMUnavailable(
+        "All LLM providers failed. Last error: "
+        + ("no model gave a usable reply" if last_status == 200 else str(last_status or "no response"))
+    )

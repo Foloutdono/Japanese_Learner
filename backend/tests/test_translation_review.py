@@ -212,3 +212,18 @@ def test_an_oversized_attempt_is_refused_before_the_model_is_paid(client, tutor)
                     json={**PAYLOAD, "user_answer": "あ" * (translation.MAX_ANSWER + 1)})
     assert r.status_code == 422
     assert calls == []
+
+
+# ── A model that thinks out loud (2026-10-12) ────────────────────────
+def test_reasoning_is_never_served_as_the_review(client, tutor):
+    tutor("We need to produce JSON with fields: verdict, summary, good, fix. First, analyze the learner's attempt.")
+    r = client.post("/api/translation/analyze", json=PAYLOAD)
+    assert r.status_code == 503
+    assert "produce JSON" not in r.text
+
+
+def test_a_monologue_before_the_object_still_gives_the_review(client, tutor):
+    tutor("We need to produce JSON. First, analyze.\n\n" + _reply(verdict="correct"))
+    body = client.post("/api/translation/analyze", json=PAYLOAD).json()
+    assert body["review"]["verdict"] == "correct"
+    assert "We need" not in body["analysis"]

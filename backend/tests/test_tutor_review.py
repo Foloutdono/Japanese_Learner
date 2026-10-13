@@ -7,6 +7,8 @@
 # text form that reads it out -- and reads exactly as before without it.
 import json
 
+import pytest
+
 from routes import translation
 from study import tutor_review
 
@@ -55,3 +57,64 @@ def test_translation_keeps_its_names_bound_to_the_shared_shape():
     assert translation._corrected is tutor_review.corrected
     assert translation._review_as_text is tutor_review.review_as_text
     assert translation.VERDICTS == tutor_review.VERDICTS
+
+
+# ── A model that thinks out loud (2026-10-12) ────────────────────────
+# A learner was shown "We need to produce JSON with fields: verdict,
+# summary, good, fix, grammar_used, better. First, analyze the
+# learner's attempt..." as their review: the model spent its token cap
+# reasoning in `content`, never reached the JSON, and the reply was
+# served as prose. Three defences, each pinned here.
+MONOLOGUE = (
+    "We need to produce JSON with fields: verdict, summary, good, fix, grammar_used, better.\n\n"
+    "First, analyze the learner's attempt: \"doyoubi ha yama he tomodachi ga ikimasu\". "
+    "The grammar_used: true if the attempt uses <<<へ>>>. The learner wrote \"he\". "
+    "That changes the meaning (the subject is friend). So verdict: \"partial\" or \"incorrect\"?"
+)
+
+
+def _answer(**over):
+    body = {"verdict": "partial", "summary": "Particle.", "good": [], "fix": [], "grammar_used": True, "better": ""}
+    body.update(over)
+    return json.dumps(body, ensure_ascii=False)
+
+
+def test_the_object_after_a_monologue_is_the_answer():
+    review = tutor_review.parse_review(MONOLOGUE + "\n\n" + _answer(verdict="incorrect", summary="Meaning changed."))
+    assert review["verdict"] == "incorrect"
+    assert review["summary"] == "Meaning changed."
+
+
+def test_the_last_object_wins_over_a_drafted_one():
+    draft = _answer(verdict="correct")
+    final = _answer(verdict="partial")
+    assert tutor_review.parse_review(f"Draft: {draft}\nOn reflection: {final}")["verdict"] == "partial"
+
+
+def test_a_monologue_alone_is_not_the_shape_and_not_prose():
+    assert tutor_review.parse_review(MONOLOGUE) is None
+    assert tutor_review.usable_prose(MONOLOGUE) is None
+    assert not tutor_review.acceptable_reply(MONOLOGUE)
+
+
+@pytest.mark.parametrize("reply", [
+    '{"verdict": "partial", "summary": "cut off mid-obj',          # the cap hit inside the object
+    "Nous devons produire un JSON avec les champs verdict, summary.",
+    "We need to decide the verdict first.",
+    "Votre phrase est correcte. " * 40,                           # not a review at a glance
+    "Voici l'analyse : \"verdict\": \"partial\", grammar_used true",
+    "",
+])
+def test_a_reply_that_reads_as_reasoning_or_cut_off_is_refused(reply):
+    assert tutor_review.usable_prose(reply) is None
+    assert not tutor_review.acceptable_reply(reply)
+
+
+@pytest.mark.parametrize("reply", [
+    "Bonjour ! Votre traduction est correcte.",
+    "Almost: 「を」 marks the object, but you wrote 「が」.",
+    "```\nTa phrase est naturelle.\n```",
+])
+def test_a_short_review_in_prose_is_still_served(reply):
+    assert tutor_review.usable_prose(reply)
+    assert tutor_review.acceptable_reply(reply)
