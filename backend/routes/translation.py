@@ -1,5 +1,4 @@
 import logging
-import re
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from core.credits import require_pass
@@ -192,7 +191,7 @@ A reference Japanese translation is:
 The learner's own attempt was:
 <<<{user_answer}>>>
 {grammar_note}
-Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
+Respond with ONLY a JSON object (no markdown fences, no commentary, no reasoning written out) matching exactly this schema. Your reply starts with the character {{ and ends with }}:
 {{
   "verdict": "correct",
   "summary": "...",
@@ -285,14 +284,22 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
         # reasoning model is paid in latency, not in quality.
         max_tokens=1000,
         task="translation-review",
+        # A model that thinks out loud and runs out of tokens before its
+        # JSON answers 200 with a monologue; the next model is asked.
+        accept=tutor_review.acceptable_reply,
     )
     review = _parse_review(content)
     if review is None:
-        # Not the shape. The prose is still a review, so it is served as
-        # one rather than costing the learner a second call; the screen
-        # prints `analysis` when `review` is missing.
+        # Not the shape. Prose that reads as a review is still one, so
+        # it is served as one rather than costing the learner a second
+        # call; the screen prints `analysis` when `review` is missing.
+        # Anything else (reasoning, a cut-off object) is no review at
+        # all, and the screen already has a place for "none came".
+        cleaned = tutor_review.usable_prose(content)
+        if cleaned is None:
+            logger.error("translation review was neither the shape nor prose: %s", content[:300])
+            raise HTTPException(status_code=503, detail="The tutor's reply could not be read")
         logger.warning("translation review was not the shape; served as prose")
-        cleaned = re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
         return {"review": None, "analysis": cleaned}
     review.pop("japanese", None)  # composition's key; the prompt here never asks for it
     if review["better"]:

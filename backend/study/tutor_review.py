@@ -54,18 +54,93 @@ def fenced(value: str) -> str:
     return value.replace("<<<", "<‍<<").replace(">>>", ">‍>>")
 
 
-def parse_review(content: str) -> dict | None:
-    """The model's answer as the shape the screen draws, or None when it
-    is not that shape at all -- in which case the caller serves the
-    prose. Lenient inside the shape: a bad verdict becomes "partial", a
-    list too long is cut to its first items, an item that is not text
-    is dropped."""
-    cleaned = re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+def _unfenced(content: str) -> str:
+    return re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+
+
+def _review_object(content: str) -> dict | None:
+    """The JSON object with a `verdict` in `content`, wherever it sits.
+
+    A reply is usually the object and nothing else. But a model that
+    thinks out loud in `content` (live-diagnosed 2026-10-12: "We need to
+    produce JSON with fields: verdict, summary... First, analyze the
+    learner's attempt...") may still finish with the object, and the
+    object is the answer however much monologue comes before it. The
+    LAST one wins: a monologue quotes drafts, and a learner's sentence
+    echoed in it must not outrank the verdict that follows.
+    """
+    cleaned = _unfenced(content)
     try:
         data = json.loads(cleaned)
     except json.JSONDecodeError:
+        data = None
+    if isinstance(data, dict):
+        return data if "verdict" in data else None
+    decoder = json.JSONDecoder()
+    found = None
+    pos = cleaned.find("{")
+    while pos != -1:
+        try:
+            obj, end = decoder.raw_decode(cleaned, pos)
+        except json.JSONDecodeError:
+            pos = cleaned.find("{", pos + 1)
+            continue
+        if isinstance(obj, dict) and "verdict" in obj:
+            found = obj
+        pos = cleaned.find("{", end)
+    return found
+
+
+# ── What may be shown as prose ──
+# A reply that is not the shape used to be served as the prose it was,
+# "rather than lost". That is right for a tutor who answered in a
+# paragraph, and wrong for a model that answered with its own reasoning:
+# a wall of "We need to produce JSON... the instruction says..." printed
+# to a learner as their review. Prose is now shown only when it reads as
+# a review; anything else is as good as no answer.
+MAX_PROSE = 700
+_LEAK_MARKERS = re.compile(
+    r"\bjson\b|\bschema\b|\"?verdict\"?\s*[:,]|grammar_used|<<<|>>>|"
+    r"\bthe (?:instruction|prompt|data)s?\b|\bsystem prompt\b",
+    re.IGNORECASE,
+)
+_REASONING_OPENERS = re.compile(
+    r"^\W*(?:we need to|we must|we should|we have to|let'?s (?:analy[sz]e|think|see|parse|produce)|"
+    r"first,? (?:analy[sz]e|let)|the user (?:wants|asks|is asking)|i need to|"
+    r"nous devons|il faut (?:produire|analyser)|analysons)",
+    re.IGNORECASE,
+)
+
+
+def usable_prose(content: str) -> str | None:
+    """`content` as prose a learner may be shown, or None when it is
+    not one: a JSON object cut short, a reply that talks about the
+    prompt or its own schema, one that opens like reasoning, or one far
+    longer than a review at a glance can be."""
+    cleaned = _unfenced(content)
+    if not cleaned or len(cleaned) > MAX_PROSE:
         return None
-    if not isinstance(data, dict) or "verdict" not in data:
+    if cleaned[0] in "{[" or _REASONING_OPENERS.match(cleaned) or _LEAK_MARKERS.search(cleaned):
+        return None
+    return cleaned
+
+
+def acceptable_reply(content: str) -> bool:
+    """Whether a reply is worth keeping: the shape, or prose a learner
+    may read. llm_shared.chat(accept=...) walks on to the next model
+    when it is not, which is what a reasoning model that ran out of
+    tokens before its answer needs."""
+    return _review_object(content) is not None or usable_prose(content) is not None
+
+
+def parse_review(content: str) -> dict | None:
+    """The model's answer as the shape the screen draws, or None when it
+    is not that shape at all -- in which case the caller serves the
+    prose (usable_prose) or none. Lenient inside the shape: a bad
+    verdict becomes "partial", a list too long is cut to its first
+    items, an item that is not text is dropped."""
+    data = _review_object(content)
+    if data is None:
         return None
 
     verdict = data.get("verdict") if data.get("verdict") in VERDICTS else "partial"

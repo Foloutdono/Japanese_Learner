@@ -13,7 +13,7 @@ import './index.css'
 // even at 800. The choices are an answer sheet two by two now, the card
 // holds its content, the rhythm closes a rung, and the tiles hold the
 // column's floor over choices. The drills set their card beside them.
-// The mock exam's brief answers stand two by two as well.
+// The mock exam's booklet page (plan 200) keeps its foot above the bar.
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -217,24 +217,30 @@ describe('the mock exam\'s paper on a short window', () => {
     await settle(500)
   }
 
-  it('stands four brief answers two by two, every one above the docked Previous and Next', async () => {
+  it('stands four brief answers four across, the page whole above the level bar', async () => {
     await sit()
-    const list = $('.mcq-list')
-    expect(list.classList.contains('mcq-list--brief')).toBe(true)
-    const rows = $$('.mcq-row').map(r => r.getBoundingClientRect())
-    expect(Math.round(rows[0].top)).toBe(Math.round(rows[1].top))
-    const nav = box('.exam-nav')
-    for (const r of rows) expect(r.bottom).toBeLessThanOrEqual(nav.top)
+    // The cover first: Enter starts the clock.
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))
+    await settle(400)
+    expect($('.desk-choices').classList.contains('desk-choices--4')).toBe(true)
+    const rows = $$('.desk-choice').map(r => r.getBoundingClientRect())
+    expect(new Set(rows.map(r => Math.round(r.top))).size).toBe(1)
+    const foot = box('.desk-book__foot')
+    for (const r of rows) expect(r.bottom).toBeLessThanOrEqual(foot.top)
+    expect(foot.bottom).toBeLessThanOrEqual(box('.lvlbar').top + 1)
   })
 
-  it('keeps a sentence\'s answers a row each', async () => {
+  it('sets a short sentence\'s answers two by two', async () => {
     await sit()
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))
+    await settle(400)
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))
     await settle(400)
-    const list = $('.mcq-list')
+    const list = $('.desk-choices')
     expect(list.textContent).toContain('毎朝')
-    expect(list.classList.contains('mcq-list--brief')).toBe(false)
-    const rows = $$('.mcq-row').map(r => r.getBoundingClientRect())
-    expect(rows[1].top).toBeGreaterThanOrEqual(rows[0].bottom)
+    expect(list.classList.contains('desk-choices--2')).toBe(true)
+    const rows = $$('.desk-choice').map(r => r.getBoundingClientRect())
+    expect(Math.round(rows[1].top)).toBe(Math.round(rows[0].top))
+    expect(rows[2].top).toBeGreaterThanOrEqual(rows[0].bottom)
   })
 })

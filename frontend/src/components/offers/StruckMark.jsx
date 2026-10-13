@@ -5,14 +5,19 @@ import { CROSS, SHIN, ROAD } from './markParts'
 // The owner's drawing: the pass carries the app's mark large and
 // faint, and the XP bar is the mark itself -- 辶, the road, filling
 // from its foot up (the sweep, then the zigzag, then the dot) to the
-// share of the level climbed. 十 never fills. Printed on Pro (a tone
-// on its charcoal, the fill a gold ink); `etched` on Max (fine
-// diagonal cuts in the platinum, the fill gold laid into them).
+// share of the level climbed. 十 never fills -- except in the level-up
+// (plan 200), which asks for it with `fillCross`: the road fills and, as
+// it nears full, the crossing it leads to is lit too, so a level that
+// turns over is the whole 辻 filled. Printed on Pro (a tone on its
+// charcoal, the fill a gold ink); `etched` on Max (fine diagonal cuts in
+// the platinum, the fill gold laid into them).
 //
 // The fill is one bar clipped over 辶's extent (its box in the mark's
-// own 1000-unit square: 56 to 977), scaled by --ofr-xp. Ids are the
+// own 1000-unit square: 56 to 977), scaled by --ofr-xp. 十 has a bar of
+// its own over its extent (31 to 783), scaled by --ofr-xp-cross, which
+// is 0 at rest: only the level-up's animation ever raises it. Ids are the
 // component's own, so two passes on one screen keep their clips apart.
-export function StruckMark({ xp = 0, etched = false, className = '' }) {
+export function StruckMark({ xp = 0, etched = false, fillCross = false, className = '' }) {
   const id = useId().replace(/:/g, '')
   return (
     <svg
@@ -37,6 +42,11 @@ export function StruckMark({ xp = 0, etched = false, className = '' }) {
         <clipPath id={`${id}c`}>
           <rect className="ofr-mark__bar" x="0" y="56" width="1000" height="921" />
         </clipPath>
+        {fillCross && (
+          <clipPath id={`${id}x`}>
+            <rect className="ofr-mark__bar ofr-mark__bar--cross" x="0" y="31" width="1000" height="752" />
+          </clipPath>
+        )}
       </defs>
       <g className="ofr-mark__ink" fill={etched ? `url(#${id}h)` : undefined}>
         <path d={CROSS} />
@@ -47,6 +57,11 @@ export function StruckMark({ xp = 0, etched = false, className = '' }) {
         <path d={SHIN} />
         <path d={ROAD} />
       </g>
+      {fillCross && (
+        <g className="ofr-mark__xp ofr-mark__xp--cross" clipPath={`url(#${id}x)`} fill={etched ? `url(#${id}g)` : undefined}>
+          <path d={CROSS} />
+        </g>
+      )}
     </svg>
   )
 }

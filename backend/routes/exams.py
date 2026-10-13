@@ -151,6 +151,32 @@ def _mondai_names(level: str, kind: str) -> list[str]:
     ]
 
 
+def _mondai_parts(level: str, kind: str, paper: dict | None) -> list[dict]:
+    """The paper's parts, each by its blueprint name with the questions
+    it holds -- the desk's exam station draws them as a line, a stretch
+    a part and a stop a question (plan 200). Counted on the paper this
+    learner would be served when there is one, so the stops add up to
+    its `questionCount` (a generator can ship a part short); else the
+    blueprint's targets, in its order, as _mondai_names lists them."""
+    if paper is not None:
+        named = name_mondai(paper)
+        counts: dict[str, int] = {}
+        names: dict[str, str | None] = {}
+        for q in flatten_questions(named):
+            counts[q["mondaiId"]] = counts.get(q["mondaiId"], 0) + 1
+        for section in named.get("sections") or []:
+            for m in section.get("mondai") or []:
+                names.setdefault(m.get("id"), m.get("nameJp"))
+        return [{"nameJp": names.get(mid), "count": n} for mid, n in counts.items()]
+    types = _KIND_META[kind][2]
+    return [
+        {"nameJp": m["name_jp"], "count": m["count"]}
+        for section in LEVEL_BLUEPRINT[level]["sections"]
+        for m in section["mondai"]
+        if m["type"] in types
+    ]
+
+
 def _paper_minutes(paper: dict | None, level: str, kind: str, items: int) -> int:
     """The time limit a paper prints (its section's timeLimitMin), or,
     for one not generated yet or stored without it, the generator's own
@@ -549,6 +575,7 @@ def list_exams(user_id: str = Depends(get_user_id)):
             selected[1] if selected is not None else None, entry["level"], kind, entry["questionCount"],
         )
         entry["mondai"] = _mondai_names(level, kind)
+        entry["parts"] = _mondai_parts(level, kind, selected[1] if selected is not None else None)
         entry["last"] = last_attempts.get(exam_id)
         # `kind` travels explicitly so the client can group/label by it
         # without parsing exam_id -- the "{level}-{kind}-01" id scheme is

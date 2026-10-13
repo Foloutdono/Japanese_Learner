@@ -8,14 +8,15 @@ import './index.css'
 // ── 机 — the practice stations, filled (plan 159) ────────────────────
 // The owner's picks A and S1 of the canvas "Practice screens — layout
 // options", at 1440×900. Reading's station was three source cards
-// across the top of an empty window, its grades a short row, the mock
-// exam four paper names. Now each is a line's split that takes the
-// window: the source a switch at the list's head, the stops with a
-// sentence of their own bank, their bar and the learner's record, and
-// the open stop's page -- what the run asks, the exercise as it will
-// ask it, four figures, the misses and the grade's points -- with Board
-// and Enter; the exam's page its papers, a row each. The laptop's side
-// is practiceStation.desktop; the phone's, deskfree.phone.
+// across the top of an empty window, its grades a short row. Now each
+// is a line's split that takes the window: the source a switch at the
+// list's head, the stops with a sentence of their own bank, their bar
+// and the learner's record, and the open stop's page -- what the run
+// asks, the exercise as it will ask it, four figures, the misses and
+// the grade's points -- with Board and Enter. The mock exam left the
+// split for its own page in plan 200: the grades as tabs over the paper
+// to sit next, its parts drawn as its line. The laptop's side is
+// practiceStation.desktop; the phone's, deskfree.phone.
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -115,7 +116,7 @@ vi.mock('./stores/practiceStop', () => ({
 
 const EXAMS = [
   { id: 'n5-vocab-01', level: 'N5', kind: 'vocab', title: 'N5 語彙', questionCount: 18, generated: true, revision: 2, minutes: 17, mondai: ['漢字読み', '表記', '文脈規定', '言い換え類義'], last: { correct: 13, total: 18, at: yesterday } },
-  { id: 'n5-grammar-01', level: 'N5', kind: 'grammar', title: 'N5 文法', questionCount: 9, generated: true, revision: 1, minutes: 14, mondai: ['文の文法1', '文の文法2', '文章の文法'], last: null },
+  { id: 'n5-grammar-01', level: 'N5', kind: 'grammar', title: 'N5 文法', questionCount: 9, generated: true, revision: 1, minutes: 14, mondai: ['文の文法1', '文の文法2', '文章の文法'], parts: [{ nameJp: '文の文法1', count: 5 }, { nameJp: '文の文法2', count: 2 }, { nameJp: '文章の文法', count: 2 }], last: null },
   { id: 'n5-reading-01', level: 'N5', kind: 'reading', title: 'N5 読解', questionCount: 4, generated: false, revision: null, minutes: 10, mondai: ['内容理解（短文）', '内容理解（中文）'], last: null },
   { id: 'n5-listening-01', level: 'N5', kind: 'listening', title: 'N5 聴解', questionCount: 13, generated: true, revision: 1, minutes: 10, mondai: ['課題理解', 'ポイント理解'], last: null },
   { id: 'n4-vocab-01', level: 'N4', kind: 'vocab', title: 'N4 語彙', questionCount: 28, generated: false, revision: null, minutes: 25, mondai: ['漢字読み'], last: null },
@@ -318,54 +319,76 @@ describe('a practice station on the desk (plan 159)', () => {
   })
 })
 
-describe('the mock exam on the desk, filled (plan 159)', () => {
-  it('counts each grade\'s papers on its stop, with the papers sat and the record', async () => {
+describe('the mock exam\'s papers on the desk (plan 200)', () => {
+  it('tabs the grades across the head, each with its papers sat', async () => {
     await mount('/practice/exam?level=N5')
     await settle()
-    const n5 = $('.desk-split__list .route-stop')
-    expect(n5.querySelector('.desk-stop__sample').textContent).toBe('語彙\u200918 · 文法\u20099 · 読解\u20094 · 聴解\u200913')
-    expect(n5.querySelector('.route-stop__fig').textContent).toBe('1/ 4')
-    expect(n5.querySelector('.route-stop__note').textContent).toBe('1 épreuve · 72 % justes')
+    const grades = $$('.desk-grade')
+    expect(grades.map(g => g.querySelector('b').textContent)).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(grades[0].getAttribute('aria-current')).toBe('page')
+    expect(grades[0].querySelector('.desk-grade__fig').textContent).toBe('1 / 4')
+    expect(grades[1].querySelector('.desk-grade__fig').textContent).toBe('0 / 1')
+    expect(grades[1].getAttribute('href')).toBe('/practice/exam?level=N4')
+    grades[1].click()
+    await settle()
+    expect(where.search).toBe('?level=N4')
+    expect(where.type).toBe('REPLACE')
+    expect($('.desk-hero__name').textContent).toBe('Vocabulaire')
   })
 
-  it('stands each paper as a row: its name and kinds, a specimen, its time and the last score', async () => {
+  it('proposes the next paper not sat, its parts drawn as its line, a question of its kind beside it', async () => {
     await mount('/practice/exam?level=N5')
     await settle()
-    const rows = $$('.prc-paper')
-    expect(rows).toHaveLength(4)
-    expect(rows[0].querySelector('.prc-paper__title').textContent).toBe('Vocabulaire語彙')
-    expect(rows[0].querySelector('.prc-paper__mondai').textContent).toBe('漢字読み · 表記 · 文脈規定 · 言い換え類義')
-    expect(rows[0].querySelector('.prc-paper__mark').textContent).toBe('学校')
-    expect(rows[0].querySelector('.prc-paper__count').textContent).toBe('18 questions · ≈ 17 min')
-    expect(rows[0].querySelector('.prc-paper__fig').textContent).toBe('13/ 18')
-    expect(rows[1].querySelector('.prc-paper__none').textContent).toBe('Pas encore')
-    expect(rows[2].querySelector('.prc-paper__note').textContent).toBe('Rédigé à la première ouverture')
-    expect(rows[3].querySelector('.prc-spec__audio')).not.toBeNull()
-    // The rows share the page's height, down to its foot.
-    const page = $('.desk-split__page').getBoundingClientRect()
-    expect(page.bottom - rows[3].getBoundingClientRect().bottom).toBeLessThan(4)
-    expect(page.bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect($('.desk-hero__tag').textContent).toBe('Prochaine épreuve')
+    expect($('.desk-hero__name').textContent).toBe('Grammaire')
+    // A leg a part, a stop a question, each named as the booklet names it.
+    expect($$('.desk-part__rail').map(r => r.children.length)).toEqual([5, 2, 2])
+    expect($$('.desk-part__no').map(n => n.textContent)).toEqual(['問題1 · 5', '問題2 · 2', '問題3 · 2'])
+    expect($('.desk-part__fr').textContent).toBe('Grammaire de la phrase')
+    const [long, short] = $$('.desk-part').map(p => p.getBoundingClientRect().width)
+    expect(long).toBeGreaterThan(short)
+    expect($('.desk-sample__line').textContent).toBe('わたしは学生です。')
+    expect($('.desk-sample__answer').textContent).toContain('です／だ')
+    // The page takes the window and no more.
+    expect($('.desk-others').getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
   })
 
-  it('offers the next paper not sat as the one filled action, and opens any row', async () => {
+  it('swaps another paper into the card, and starts it with the gate or Enter', async () => {
     await mount('/practice/exam?level=N5')
     await settle()
-    expect($('.prc-paper--next .prc-paper__title').textContent).toMatch(/^Grammaire/)
-    const go = $('.prc-head .btn-primary')
-    expect(go.textContent).toMatch(/^Suivante · Grammaire/)
-    go.click()
+    expect($$('.desk-prow__name').map(n => n.textContent)).toEqual(['Vocabulaire', 'Lecture', 'Écoute'])
+    $$('.desk-prow')[1].click()
+    await settle()
+    expect($('.desk-hero__name').textContent).toBe('Lecture')
+    expect($('.desk-hero__tag').textContent).toBe('Cette épreuve')
+    expect($('.desk-hero__note').textContent).toBe('Rédigé à la première ouverture')
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))
+    await settle(100)
+    expect(where.path).toBe('/practice/exam/n5-reading-01')
+
+    await mount('/practice/exam?level=N5')
+    await settle()
+    $('button[aria-keyshortcuts="Enter"]').click()
     await settle(100)
     expect(where.path).toBe('/practice/exam/n5-grammar-01')
+
     await mount('/practice/exam?level=N5')
     await settle()
-    $$('.prc-paper__door')[3].click()
-    await settle(100)
-    expect(where.path).toBe('/practice/exam/n5-listening-01')
-    await mount('/practice/exam?level=N5')
+    $$('.desk-prow')[0].click()
     await settle()
-    $('.prc-paper__fresh').click()
+    $('.desk-hero__fresh').click()
     await settle(100)
     expect(where.path).toBe('/practice/exam/n5-vocab-01')
     expect(where.search).toBe('?exclude=2')
+  })
+
+  it('ends the row with the grade\'s record, and a paper sat with its score', async () => {
+    await mount('/practice/exam?level=N5')
+    await settle()
+    expect($$('.desk-rec b').map(b => b.textContent)).toEqual(['72 %', '1', 'hier'])
+    const [vocab, reading, listening] = $$('.desk-prow')
+    expect(vocab.querySelector('.desk-prow__fig').textContent).toBe('13 / 18')
+    expect(reading.querySelector('.desk-prow__end').textContent).toBe('À rédiger')
+    expect(listening.querySelector('.desk-prow__end').textContent).toBe('Pas encore')
   })
 })
