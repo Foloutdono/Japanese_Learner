@@ -63,6 +63,41 @@ const senses = (row, lang) => ((lang === 'fr' && row.fr?.length ? row.fr : row.e
 // with no French gloss is neither its answer nor a wrong choice in French.
 const ownGloss = (row, lang) => row?.[lang]?.[0] || ''
 
+// ── No answer given before it is asked (plan 200l) ─────────────
+// A mock exam shows each answer on the slide after its question, with the
+// word it is about, its reading and its meaning. Where a later question
+// asks that reading or that meaning, the earlier answer leaves it out: a
+// reading's answer that printed “jacket” answered the meaning question
+// before it was asked.
+const READING_KINDS = new Set(['reading', 'kanji', 'kanjiKun', 'inWord', 'passageReading'])
+const MEANING_KINDS = new Set(['meaning', 'kanjiMeaning', 'pointMeaning', 'wordReverse', 'kanjiVocab', 'kinVocab'])
+const subjectOf = q => (q.explain?.head || '').split('\u3000')[0] || q.stem?.specimen || ''
+export function withoutGiveaways(all) {
+  // A question whose answer an earlier question prints (a translation that
+  // says “the same as”, the point's meaning) is not asked at all.
+  const printed = q => `${q.stem?.text || ''} ${q.stem?.tr || ''}`.toLowerCase()
+  const qs = all.filter((q, i) => {
+    const right = q.choices?.[q.right]?.text
+    return !right || [...right].length < 2 || !all.slice(0, i).some(x => printed(x).includes(right.toLowerCase()))
+  })
+  return qs.map((q, i) => {
+    if (!q.explain) return q
+    // An answer names its word and its reading (学生 がくせい, or がくせい
+    // 学生 for a spelling): a later question about either is about it.
+    const parts = (q.explain.head || '').split('\u3000').filter(Boolean)
+    const later = qs.slice(i + 1).filter(x => parts.includes(subjectOf(x)) || parts.includes(x.stem?.specimen))
+    const explain = { ...q.explain }
+    if (later.some(x => MEANING_KINDS.has(x.kind))) explain.sense = ''
+    const read = later.find(x => READING_KINDS.has(x.kind))
+    if (read) explain.head = parts.find(x => x === subjectOf(read) || x === read.stem?.specimen) || parts[0]
+    // And whatever else a later question answers: its right answer, printed.
+    const answers = qs.slice(i + 1).map(x => x.choices?.[x.right]?.text).filter(a => a && [...a].length >= 2)
+    if (answers.some(a => (explain.sense || '').includes(a))) explain.sense = ''
+    if (answers.some(a => (explain.head || '').includes(a))) explain.head = ''
+    return { ...q, explain }
+  })
+}
+
 // ── The questions a sentence of the bank can ask ──────────────
 /** 読み: the reading of the sentence's kanji word. */
 function readingQ(s, row, at, bank, lang, t) {
@@ -178,12 +213,14 @@ export function assemblyQ(rows, p, seed, lang, t, tr2 = '') {
 export function sentenceQuizzes(s, bank, lang, t) {
   const at = s.fi ?? s.rows.findIndex(r => r.k === 'word')
   const row = s.rows[at]
+  // ★ first: every other question shows the sentence whole, which orders
+  // its pieces; and without the translation, which a later question asks.
   return withId([
+    assemblyQ(s.rows, s.p, s.id, lang, t),
     readingQ(s, row, at, bank, lang, t),
     orthographyQ(s, row, at, lang, t),
     meaningQ(s, row, at, bank, lang, t),
     grammarQ(s, bank, lang, t),
-    assemblyQ(s.rows, s.p, s.id, lang, t, weldIf(lang, s[lang] || s.en)),
     translationOfQ(s, bank, lang, t),
   ], q => t.kinds[q.kind])
 }
@@ -197,14 +234,20 @@ export function translationQuizzes(s, bank, lang, t) {
   const say = {
     kind: 'say', ask: t.examAsk.translation, stem: { text: translation },
     choices: choices.map(x => ({ rows: x.rows, fam: 'jp' })), right,
-    explain: { sense: lineRomaji(s.rows) },
+    // No romaji: it would read the word asked next.
+    explain: {},
   }
   const at = s.fi ?? s.rows.findIndex(r => r.k === 'word')
+  // The translation is on the first slide, so no question asks a meaning
+  // it prints (学生 is “student” in “I am a student”); no ★ either: which
+  // sentence says it and how its pieces go answer each other. The build
+  // type puts it together.
+  const grammar = grammarQ(s, bank, lang, t)
+  const printed = q => q && translation.toLowerCase().includes(q.choices[q.right].text.toLowerCase())
   return withId([
     say,
-    assemblyQ(s.rows, s.p, s.id, lang, t, translation),
-    grammarQ(s, bank, lang, t),
-    meaningQ(s, s.rows[at], at, bank, lang, t),
+    readingQ(s, s.rows[at], at, bank, lang, t),
+    printed(grammar) ? null : grammar,
   ], q => t.kinds[q.kind])
 }
 
@@ -252,6 +295,9 @@ export function wordQuizzes(w, data, lang, t, index, family = []) {
   const knownOf = x => (data.words || []).filter(y => y.t === x.t && y.r !== x.r).map(y => y.r)
   const near = hasKanji(w.t) ? readingMisses(row, index, knownOf(w)) : []
   const head = `${w.t}\u3000${w.r}`
+  // Each question asks one thing about one word, and no answer gives away
+  // another (plan 200l): its reading, its meaning, then words that share
+  // its kanji, each asked once, and read where its kanji reads otherwise.
   const readingQ2 = near.length >= 3 ? {
     kind: 'reading', ask: t.examAsk.kana, stem: { specimen: w.t },
     ...dealChoices(w.r, shuffle(near, seeded(w.t)).slice(0, 3), w.t, 'jp'),
@@ -263,33 +309,86 @@ export function wordQuizzes(w, data, lang, t, index, family = []) {
     ...dealChoices(weldIf(lang, main), wrong.map(x => weldIf(lang, x)), `${w.t}-m`, 'latin'),
     explain: { head, sense: weldIf(lang, main) },
   } : null
-  // The other way round: its meaning, and which word says it, among words
-  // of its level written the same way (kanji among kanji, kana among
-  // kana) whose meanings share nothing with it (plan 200l).
   const mine = senses(w, lang)
   const alike = (a, b) => overlaps(a, b) || a.trim().toLowerCase() === b.trim().toLowerCase()
-  const rivals = []
-  for (const x of shuffle(data.words.filter(x => x.t !== w.t && hasKanji(x.t) === hasKanji(w.t) && ownGloss(x, lang)), seeded(`${w.t}-r`))) {
-    const theirs = senses(x, lang)
-    if (rivals.some(y => y.t === x.t) || theirs.some(a => mine.some(b => alike(a, b))) || rivals.some(y => senses(y, lang).some(a => theirs.some(b => alike(a, b))))) continue
-    rivals.push(x)
-    if (rivals.length === 3) break
+  // Which word means this, only where its meaning is not asked already:
+  // the one answers the other.
+  let reverse = null
+  if (!meaning && ownGloss(w, lang)) {
+    const rivals = []
+    for (const x of shuffle(data.words.filter(x => x.t !== w.t && hasKanji(x.t) === hasKanji(w.t) && ownGloss(x, lang)), seeded(`${w.t}-r`))) {
+      const theirs = senses(x, lang)
+      if (rivals.some(y => y.t === x.t) || theirs.some(a => mine.some(b => alike(a, b))) || rivals.some(y => senses(y, lang).some(a => theirs.some(b => alike(a, b))))) continue
+      rivals.push(x)
+      if (rivals.length === 3) break
+    }
+    if (rivals.length === 3) {
+      reverse = {
+        kind: 'wordReverse', ask: t.examAsk.wordReverse, stem: { text: weldIf(lang, main) },
+        ...dealChoices(w.t, rivals.map(x => x.t), `${w.t}-r`, 'jp'),
+        explain: { head, sense: weldIf(lang, main) },
+      }
+    }
   }
-  const reverse = ownGloss(w, lang) && rivals.length === 3 ? {
-    kind: 'wordReverse', ask: t.examAsk.wordReverse, stem: { text: weldIf(lang, main) },
-    ...dealChoices(w.t, rivals.map(x => x.t), `${w.t}-r`, 'jp'),
-    explain: { head, sense: weldIf(lang, main) },
-  } : null
-  // How the words that share its kanji read: two at most, of its level
-  // first (学校 asks 学生 and 校長).
-  const kin = family.filter(x => x.t !== w.t && x.t.length > 1 && x.r)
-  const inWords = kin.filter(x => readingMisses({ t: x.t, fu: x.fu || [[x.t, x.r]] }, index, knownOf(x)).length >= 3).slice(0, 2).map((x, i) => ({
-    kind: 'inWord', ask: t.examAsk.inWord, stem: { specimen: x.t },
-    ...dealChoices(x.r, shuffle(readingMisses({ t: x.t, fu: x.fu || [[x.t, x.r]] }, index, knownOf(x)), seeded(`${w.t}-w${i}`)).slice(0, 3), `${w.t}-w${i}`, 'jp'),
-    explain: { head: `${x.t}\u3000${x.r}`, sense: weldIf(lang, gloss(x, lang)[0]) },
-  }))
+  // The words that share its kanji, each asked once. What an earlier answer
+  // showed gives nothing away: a kanji read as an earlier answer read it
+  // (学生 がくせい, then 大学 だいがく) is read so in every choice, so the
+  // choice turns on what was not shown; a word with too few such choices
+  // is not asked. One whose kanji reads otherwise comes first.
+  const shown = {}
+  const show = x => { for (const [seg, r] of x.fu || []) if (r && [...seg].length === 1) (shown[seg] ||= new Set()).add(r) }
+  show(w)
+  const kin = family.filter((x, i, all) => x.t !== w.t && x.r && all.findIndex(y => y.t === x.t) === i)
+  const fair = x => {
+    const keep = [...x.t].flatMap(ch => [...(shown[ch] || [])]).filter(r => x.r.includes(r))
+    return readingMisses({ t: x.t, fu: x.fu || [[x.t, x.r]] }, index, knownOf(x)).filter(m => keep.every(r => m.includes(r)))
+  }
+  const fresh = x => ![...x.t].some(ch => [...(shown[ch] || [])].some(r => x.r.includes(r)))
+  const asked = new Set()
+  const readQ = i => {
+    const cands = kin.filter(x => !asked.has(x.t) && x.t.length > 1)
+    const x = [...cands.filter(fresh), ...cands.filter(y => !fresh(y))].find(y => fair(y).length >= 3)
+    if (!x) return null
+    asked.add(x.t)
+    const q = {
+      kind: 'inWord', ask: t.examAsk.inWord, stem: { specimen: x.t },
+      ...dealChoices(x.r, shuffle(fair(x), seeded(`${w.t}-w${i}`)).slice(0, 3), `${w.t}-w${i}`, 'jp'),
+      explain: { head: `${x.t}\u3000${x.r}`, sense: weldIf(lang, gloss(x, lang)[0]) },
+    }
+    show(x)
+    return q
+  }
+  const inWord1 = readQ(0)
+  // Which of these is a word written with its kanji: a word of its kin no
+  // other question asks, its meaning among words written without that
+  // kanji; never this word, whose meaning is asked above.
+  const c = [...w.t].find(x => hasKanji(x) && kin.some(y => y.t.includes(x)))
+  const short = x => (ownGloss(x, lang) || '').split(/[,;(]/)[0].trim()
+  const pick = c && kin.find(x => x.t.includes(c) && !asked.has(x.t) && short(x) && !senses(x, lang).some(a => mine.some(b => alike(a, b))))
+  let kinVocab = null
+  if (pick) {
+    const right = short(pick)
+    const taken = [w, ...kin, ...data.words].filter(x => x.t.includes(c)).flatMap(x => senses(x, lang))
+    const wrongs = []
+    for (const x of shuffle(data.words.filter(x => !x.t.includes(c) && short(x)), seeded(`${w.t}-k`))) {
+      const g = short(x)
+      if (wrongs.includes(g) || alike(g, right) || taken.some(a => alike(a, g)) || wrongs.some(a => alike(a, g))) continue
+      wrongs.push(g)
+      if (wrongs.length === 3) break
+    }
+    if (wrongs.length === 3) {
+      asked.add(pick.t)
+      show(pick)
+      kinVocab = {
+        kind: 'kinVocab', ask: t.examAsk.kanjiVocab, stem: { specimen: c },
+        ...dealChoices(weldIf(lang, right), wrongs.map(x => weldIf(lang, x)), `${w.t}-k`, 'latin'),
+        explain: { head: `${pick.t}\u3000${pick.r}`, sense: weldIf(lang, right) },
+      }
+    }
+  }
+  const inWord2 = readQ(1)
   // How it is written in kanji is the spelling mode's (spellingQuizzes).
-  return withId([readingQ2, meaning, inWords[0], reverse, inWords[1]], q => t.kinds[q.kind])
+  return withId([readingQ2, meaning, reverse, inWord1, kinVocab, inWord2], q => t.kinds[q.kind])
 }
 
 /** 表記, a mode of its own (plan 200l): the word and the deck words of its

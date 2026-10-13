@@ -56,7 +56,7 @@ export const STRINGS = {
     kinds: {
       reading: 'Reading', orthography: 'Spelling', meaning: 'Meaning', grammar: 'Grammar', translation: 'Translation',
       assembly: 'Word order ★', say: 'Which sentence', scene: 'What do you say', tour: 'Lesson question',
-      pointMeaning: 'Meaning', kanji: 'Reading', kanjiMeaning: 'Meaning', kanjiKun: 'Kun reading', kanjiVocab: 'Its words', wordReverse: 'Which word',
+      pointMeaning: 'Meaning', kanji: 'Reading', kanjiMeaning: 'Meaning', kanjiKun: 'Kun reading', kanjiVocab: 'Its words', wordReverse: 'Which word', kinVocab: 'Same kanji',
       strokes: 'Strokes', inWord: 'In a word', kana: 'Sound', kanaReverse: 'Which kana', twin: 'Other script',
       passage: 'Question', passageReading: 'Word reading',
     },
@@ -212,7 +212,7 @@ export const STRINGS = {
     kinds: {
       reading: 'Lecture', orthography: 'Écriture', meaning: 'Sens', grammar: 'Grammaire', translation: 'Traduction',
       assembly: 'Ordre ★', say: 'Quelle phrase', scene: 'Que dire', tour: 'Question de leçon',
-      pointMeaning: 'Sens', kanji: 'Lecture', kanjiMeaning: 'Sens', kanjiKun: 'Lecture kun', kanjiVocab: 'Ses mots', wordReverse: 'Quel mot',
+      pointMeaning: 'Sens', kanji: 'Lecture', kanjiMeaning: 'Sens', kanjiKun: 'Lecture kun', kanjiVocab: 'Ses mots', wordReverse: 'Quel mot', kinVocab: 'Même kanji',
       strokes: 'Traits', inWord: 'Dans un mot', kana: 'Son', kanaReverse: 'Quel kana', twin: 'Autre écriture',
       passage: 'Question', passageReading: 'Lecture d’un mot',
     },

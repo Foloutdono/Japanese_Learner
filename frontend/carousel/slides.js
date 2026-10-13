@@ -24,6 +24,7 @@ import {
 } from './draw.js'
 import { SELF_CHECK_JP, SITE, formOf, tr, weldIf } from './strings.js'
 import { picked } from './sources.js'
+import { withoutGiveaways } from './quizzes.js'
 import { furiganaOf } from './common.js'
 
 export { FORMATS }
@@ -430,7 +431,7 @@ const KIND_JP = {
   reading: ['かんじよみ', '漢字読み'], orthography: ['ひょうき', '表記'], meaning: ['いみ', '意味'], grammar: ['ぶんぽう', '文法'],
   translation: ['ほんやく', '翻訳'], say: ['ほんやく', '翻訳'], assembly: ['ぶんの くみたて', '文の組み立て'], scene: ['かいわ', '会話'],
   tour: ['ぶんぽう', '文法'], pointMeaning: ['いみ', '意味'], compare: ['いみ', '意味'], kanji: ['よみかた', '読み方'],
-  kanjiMeaning: ['いみ', '意味'], kanjiKun: ['よみかた', '読み方'], kanjiVocab: ['ごい', '語彙'], wordReverse: ['ごい', '語彙'], strokes: ['かくすう', '画数'], inWord: ['よみかた', '読み方'],
+  kanjiMeaning: ['いみ', '意味'], kanjiKun: ['よみかた', '読み方'], kanjiVocab: ['ごい', '語彙'], wordReverse: ['ごい', '語彙'], kinVocab: ['ごい', '語彙'], strokes: ['かくすう', '画数'], inWord: ['よみかた', '読み方'],
   kana: ['よみかた', '読み方'], kanaReverse: ['かな', 'かな'], twin: ['かな', 'かな'], passage: ['どっかい', '読解'], passageReading: ['よみかた', '読み方'],
 }
 
@@ -2368,7 +2369,8 @@ export function deck(type, plan, fmt, opts) {
     const ps = passagePages(plan, s, fmt, fr)
     ps.forEach((layouts, i) => add(`passage-${i + 1}`, kind(s, { layouts, page: i + 1, count: ps.length })))
   }
-  const qs = picked(plan, opts.picks, exam ? 3 : 1)
+  // A mock exam's answers never give away a later question's (plan 200l).
+  const qs = withoutGiveaways(picked(plan, opts.picks, exam ? 3 : 1))
   const numbered = list => (n, i) => (list.length > 1 ? `${n} ${i}` : n)
 
   switch (type) {

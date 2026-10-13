@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { FORMATS, FS, RATING_INKS, layoutSentence } from '../carousel/draw.js'
-import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, plan, readingMisses, titleOf, unpack } from '../carousel/sources.js'
+import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, picked, plan, readingMisses, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
-import { assemblyQ, kanjiQuizzes, overlaps } from '../carousel/quizzes.js'
+import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel/quizzes.js'
 import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
@@ -219,6 +219,21 @@ describe('the carousel studio', () => {
       }
     }
     expect(spelled).toBeGreaterThan(0)
+  })
+
+  it('never shows an answer before its question is asked (plan 200l)', () => {
+    for (const { src, p } of every) {
+      // Every question the plan has, as a mock exam would ask them all.
+      const qs = withoutGiveaways(picked(p, p.quizzes.map(q => q.id), 3))
+      qs.forEach((q, i) => {
+        const shown = `${q.explain?.head || ''} ${q.explain?.sense || ''} ${q.stem?.text || ''} ${q.stem?.tr || ''}`
+        for (const later of qs.slice(i + 1)) {
+          const right = later.choices[later.right].text
+          if ([...right].length < 2 || later.kind === 'orthography') continue
+          expect(shown.includes(right), `${src.id} ${p.id}: ${q.label} shows ${right}, the answer to ${later.label}`).toBe(false)
+        }
+      })
+    }
   })
 
   it('titles every carousel within the feed’s 90 characters (plan 200l)', () => {

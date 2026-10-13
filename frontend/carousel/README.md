@@ -65,13 +65,26 @@ mock exam asks (three by default; the walk ends on them too where
 
 | Source | Questions |
 | --- | --- |
-| Sentence | 読み (reading of its word), 表記 (its word in kana: which spelling), its word's meaning, what its point expresses, ★ word order, which translation |
-| Translation | which sentence says it, ★ word order, what its point expresses, a word's meaning |
+| Sentence | ★ word order (first, before any slide shows the sentence whole), 読み (reading of its word), 表記 (its word in kana: which spelling), its word's meaning, what its point expresses, which translation |
+| Translation | which sentence says it, the reading of its word, what its point expresses (unless the translation prints it) |
 | Lesson | the scene's "what do you say?", the tour's questions (up to four), what the point means, ★ word order |
-| Word | its reading, its meaning, which word means this (among words of its level written the same way), the reading of up to two words that share its kanji (its spelling is the 表記 type's) |
+| Word | its reading, its meaning (or which word means this, where its meaning cannot be asked), the reading of up to two words that share its kanji, which of these words is written with its kanji (a word of its kin no other question asks); its spelling is the 表記 type's |
 | Kanji | its on'yomi and its kun'yomi, the reading of up to three of its words, which of these words is written with it (up to two: a word's meaning among words written without it, never the word that only says the kanji's own meaning), its meaning, its stroke count |
 | Kana | its sound, which kana a sound is, its twin in the other script |
 | Comprehension | every question the seed writes (understanding, inference, vocabulary, grammar: eight to twelve a passage), then the reading of its words |
+
+No question is answered before it is asked (plan 200l). A mock exam
+shows each answer on the slide after its question, and that answer
+leaves out what a later question asks: the reading's answer prints no
+meaning when the meaning is asked next, and nothing an answer prints is
+a later question's right answer (`quizzes.withoutGiveaways`). A question
+whose answer an earlier slide prints is not asked at all (a translation
+that says "student" asks no meaning of 学生), and two questions that
+answer each other are not set together (★ word order and "which
+sentence says it"). A word's kin are each asked once, and a kanji
+reading an earlier answer showed is read the same in every choice, so
+the choice turns on what was not shown. `src/carousel.test.js` holds it
+over every mock exam of every source.
 
 A question has one right answer, the content's own. A wrong answer is
 dealt only where it cannot be right too: a reading that is not the
