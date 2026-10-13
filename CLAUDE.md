@@ -394,7 +394,7 @@ SDK, and `frontend/public/privacy.html`'s "No advertising, no trackers, no sale
 of data" is a promise the design keeps rather than a line to amend. See
 `docs/adr/0012`.
 
-Two rules matter more than the rest:
+Three rules matter more than the rest:
 
 - **Never record anything a learner typed.** Not a dictation answer, not an
   analysed sentence, not a deck or theme name. `backend/core/events.py` holds a
@@ -406,10 +406,18 @@ Two rules matter more than the rest:
   `frontend/src/lib/routePattern.js` reduces a path to the route App.jsx
   declared, and a path matching none is not recorded at all. Adding a screen
   means adding its pattern to `ROUTES` there — a node-lane test fails otherwise.
+- **Never store an API path either.** `/api/decks/<id>` carries what a
+  learner named. `lib/apiTrail.js` records a failed request (`api_error`:
+  a 5xx or no answer, never a 4xx the endpoint meant) as its area alone,
+  `/api/decks`, through `apiArea` in `lib/routePattern.js`.
 
 Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
 endpoint from a screen. Reading the data: `scripts/weekly_digest.py` (weekly,
-from `.github/workflows/weekly-digest.yml`, into the run's step summary), or
+from `.github/workflows/weekly-digest.yml`, into the run's step summary:
+boarding, return, who is active (DAU/WAU/MAU), the boot, the fare gate, the
+offer door by door, the ride and guides, runs by kind and level, failed
+requests and the install prompt; `tests/test_weekly_digest.py` reads each
+back), or
 Metabase/the Supabase SQL editor pointed at the same database.
 
 ### Content audit

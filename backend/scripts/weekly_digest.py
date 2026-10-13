@@ -1,5 +1,5 @@
 """
-The four numbers, as markdown.
+The weekly numbers, as markdown.
 
     python -m scripts.weekly_digest              # last 28 days
     python -m scripts.weekly_digest --days 7
@@ -20,14 +20,24 @@ follow-up question this cannot anticipate). It is not the right thing
 for noticing, because noticing is what you do when you were not
 already looking.
 
--- The four questions ------------------------------------------
+-- The questions -----------------------------------------------
   1  BOARDING     where people give up on the way in. The one funnel
                   that exists today, and the top of every other one.
   2  RETENTION    D1/D7/D30 return. The strongest single predictor of
                   whether anyone would ever pay for this.
   3  FARE         who wanted more than the free allowance gives, from
                   the shadow-mode refusals core/credits.py records.
-  4  USE          which modes get finished rather than abandoned.
+  4  USE          which modes get finished rather than abandoned, by
+                  level.
+  5  ENGAGEMENT   how many learners are active per day / week / month,
+                  and how sticky that is (DAU over MAU).
+  6  OFFER        per door: seen, pressed, refused, and how long the
+                  decision took.
+  7  RIDE/GUIDE   whether the first ride and the gate guides are sat
+                  through or skipped.
+  8  FRICTION     the requests that failed (api_error) and the install
+                  prompt's answers. Both were declared in core/events.py
+                  from the start and sent by nothing until the client began to send them.
 
 Each reads event_log and event_daily and adds the two together where a
 total is wanted, because scripts/compact_events.py moves rows from the
@@ -166,26 +176,27 @@ def use(cur, days: int) -> str:
     cur.execute(
         """
         WITH runs AS (
-            SELECT name, props->>'kind' AS kind, 1 AS n
+            SELECT name, props->>'kind' AS kind, props->>'level' AS level, 1 AS n
               FROM event_log
              WHERE name IN ('run_start', 'run_complete', 'run_abandon')
                AND at > NOW() - (%s || ' days')::interval
         )
         SELECT COALESCE(kind, '—') AS kind,
+               COALESCE(level, '—') AS level,
                SUM(CASE WHEN name = 'run_start'    THEN n ELSE 0 END) AS started,
                SUM(CASE WHEN name = 'run_complete' THEN n ELSE 0 END) AS finished,
                SUM(CASE WHEN name = 'run_abandon'  THEN n ELSE 0 END) AS left_early
           FROM runs
-         GROUP BY kind
-         ORDER BY started DESC
+         GROUP BY kind, level
+         ORDER BY started DESC, kind, level
         """,
         (days,),
     )
     rows = []
-    for kind, started, finished, abandoned in cur.fetchall():
+    for kind, level, started, finished, abandoned in cur.fetchall():
         share = f"{100 * finished // started}%" if started else "—"
-        rows.append((kind, started, finished, abandoned, share))
-    return table(["kind", "started", "finished", "left early", "finish rate"], rows)
+        rows.append((kind, level, started, finished, abandoned, share))
+    return table(["kind", "level", "started", "finished", "left early", "finish rate"], rows)
 
 
 def boot(cur, days: int) -> str:
@@ -219,17 +230,154 @@ def boot(cur, days: int) -> str:
     )
 
 
+def engagement(cur, days: int) -> str:
+    """Learners with at least one event, per day / week / month.
+
+    'Active' here is 'the app recorded anything for them', which is what
+    the trail can say without joining review_log -- and it counts a
+    learner who only opened the app, so it reads a little above 'studied'.
+    The window is fixed (24 h, 7 d, 30 d), not --days: DAU/MAU is only a
+    ratio of those two lengths.
+
+    event_daily is added to event_log because compact_events moves rows
+    from one to the other; each day is counted once per learner whichever
+    half holds it.
+    """
+    cur.execute(
+        """
+        WITH seen AS (
+            SELECT user_id, (at AT TIME ZONE 'UTC')::date AS day
+              FROM event_log
+             WHERE at > NOW() - INTERVAL '31 days'
+            UNION
+            SELECT user_id, day
+              FROM event_daily
+             WHERE day > (NOW() - INTERVAL '31 days')::date
+        ),
+        today AS (SELECT (NOW() AT TIME ZONE 'UTC')::date AS d)
+        SELECT
+          (SELECT COUNT(DISTINCT user_id) FROM seen, today WHERE day > d - 1),
+          (SELECT COUNT(DISTINCT user_id) FROM seen, today WHERE day > d - 7),
+          (SELECT COUNT(DISTINCT user_id) FROM seen, today WHERE day > d - 30),
+          (SELECT COUNT(*) FROM seen, today WHERE day > d - 7)
+        """
+    )
+    dau, wau, mau, learner_days_7 = cur.fetchone()
+    if not mau:
+        return "_Nothing yet._\n"
+    # Average daily actives over the last seven days, against the month.
+    avg_dau = learner_days_7 / 7
+    stick = f"{round(100 * avg_dau / mau)}%"
+    return table(
+        ["today (UTC)", "7 days", "30 days", "avg daily, 7 days", "stickiness (avg DAU / MAU)"],
+        [(dau, wau, mau, f"{avg_dau:.1f}", stick)],
+    )
+
+
+def offer(cur, days: int) -> str:
+    """Per door: seen, pressed, refused. Learners, not events -- a door
+    opened twice by one person is one person's opinion. The median is the
+    gap between seeing the pass and pressing it: a high intent rate with
+    a one-second median is a mis-tap, not demand (core/events.py)."""
+    cur.execute(
+        """
+        SELECT COALESCE(props->>'where', '—') AS door,
+               COUNT(DISTINCT user_id) FILTER (WHERE name = 'offer_view')    AS seen,
+               COUNT(DISTINCT user_id) FILTER (WHERE name = 'offer_intent')  AS pressed,
+               COUNT(DISTINCT user_id) FILTER (WHERE name = 'offer_dismiss') AS refused,
+               PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY (props->>'ms')::bigint)
+                   FILTER (WHERE name = 'offer_intent' AND props->>'ms' ~ '^[0-9]+$') AS median_ms
+          FROM event_log
+         WHERE name IN ('offer_view', 'offer_intent', 'offer_dismiss')
+           AND at > NOW() - (%s || ' days')::interval
+         GROUP BY props->>'where'
+         ORDER BY seen DESC
+        """,
+        (days,),
+    )
+    rows = []
+    for door, seen, pressed, refused, median_ms in cur.fetchall():
+        rate = f"{100 * pressed // seen}%" if seen else "—"
+        rows.append((door, seen, pressed, refused, rate, f"{median_ms} ms" if median_ms is not None else "—"))
+    return table(["door", "saw it", "pressed", "refused", "press rate", "median to press"], rows)
+
+
+def ride_and_guides(cur, days: int) -> str:
+    """Whether the first ride and each gate's guide are sat through."""
+    cur.execute(
+        """
+        SELECT name,
+               COALESCE(props->>'at', props->>'gate', '—') AS which,
+               COUNT(*) AS finished,
+               COUNT(*) FILTER (WHERE props->>'skipped' = 'true') AS skipped,
+               PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY (props->>'ms')::bigint)
+                   FILTER (WHERE props->>'ms' ~ '^[0-9]+$') AS median_ms
+          FROM event_log
+         WHERE name IN ('ride_done', 'guide_done')
+           AND at > NOW() - (%s || ' days')::interval
+         GROUP BY name, which
+         ORDER BY name, which
+        """,
+        (days,),
+    )
+    rows = []
+    for name, which, finished, skipped, median_ms in cur.fetchall():
+        share = f"{100 * skipped // finished}%" if finished else "—"
+        rows.append((name, which, finished, skipped, share, f"{median_ms} ms" if median_ms is not None else "—"))
+    return table(["what", "where", "ended", "skipped", "skip rate", "median time"], rows)
+
+
+def friction(cur, days: int) -> str:
+    """Failed requests by area and status (status 0 is a request that got
+    no answer at all), then what the install prompt was answered with."""
+    cur.execute(
+        """
+        SELECT COALESCE(props->>'path', '—') AS area,
+               COALESCE(props->>'status', '—') AS status,
+               COUNT(DISTINCT user_id) AS learners,
+               COUNT(*) AS times
+          FROM event_log
+         WHERE name = 'api_error'
+           AND at > NOW() - (%s || ' days')::interval
+         GROUP BY props->>'path', props->>'status'
+         ORDER BY learners DESC, times DESC
+         LIMIT 20
+        """,
+        (days,),
+    )
+    out = [table(["area", "status", "learners", "times"], cur.fetchall())]
+    cur.execute(
+        """
+        SELECT COALESCE(props->>'outcome', '—') AS outcome,
+               COUNT(DISTINCT user_id) AS learners
+          FROM event_log
+         WHERE name = 'install_prompt'
+           AND at > NOW() - (%s || ' days')::interval
+         GROUP BY props->>'outcome'
+         ORDER BY learners DESC
+        """,
+        (days,),
+    )
+    out.append("**Install prompt**\n")
+    out.append(table(["answer", "learners"], cur.fetchall()))
+    return "\n".join(out)
+
+
 SECTIONS = [
     ("みどりの窓口 — where boarding is lost", boarding),
     ("Coming back", retention),
+    ("Who is active", engagement),
     ("The boot", boot),
     ("Who wanted more than the free allowance", fare),
+    ("The offer, door by door", offer),
+    ("The first ride and the guides", ride_and_guides),
     ("What gets finished", use),
+    ("What broke", friction),
 ]
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="The four numbers, as markdown.")
+    ap = argparse.ArgumentParser(description="The weekly numbers, as markdown.")
     ap.add_argument("--days", type=int, default=DEFAULT_DAYS,
                     help=f"window in days (default {DEFAULT_DAYS})")
     args = ap.parse_args()
@@ -243,7 +391,7 @@ def main() -> int:
                 try:
                     out.append(fn(cur, args.days))
                 except Exception as exc:      # one bad section must not
-                    conn.rollback()           # cost the other four
+                    conn.rollback()           # cost the others
                     logger.warning("section %r failed: %s", title, exc)
                     out.append(f"_Could not be computed: {exc}_\n")
                 out.append("")

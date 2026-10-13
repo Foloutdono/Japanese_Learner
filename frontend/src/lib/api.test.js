@@ -13,7 +13,8 @@ vi.mock('./supabase', () => ({
   },
 }))
 
-import { api, apiJson, apiJsonWithTimeout, ApiError } from './api'
+import { api, apiFetch, apiJson, apiJsonWithTimeout, ApiError } from './api'
+import { onApiFailure } from './apiFailure'
 
 describe('api', () => {
   it('is same-origin with no env: the web build never carries an origin', () => {
@@ -140,5 +141,48 @@ describe('apiJsonWithTimeout', () => {
     mockFetchOnce(200, { ok: true })
     const result = await apiJsonWithTimeout('/api/today', null, { timeoutMs: 5000 })
     expect(result).toEqual({ ok: true })
+  })
+})
+
+// ── 足跡 — what counts as a failure worth recording ───────────────
+describe('onApiFailure', () => {
+  afterEach(() => {
+    onApiFailure(null)
+    vi.restoreAllMocks()
+  })
+
+  it('hears of a server error, with the path and the status', async () => {
+    const seen = vi.fn()
+    onApiFailure(seen)
+    mockFetchOnce(503, {})
+    await apiFetch('/api/decks/9f3', null)
+    expect(seen).toHaveBeenCalledWith({ path: '/api/decks/9f3', status: 503 })
+  })
+
+  it('hears of a request that got no answer at all, as status 0', async () => {
+    const seen = vi.fn()
+    onApiFailure(seen)
+    globalThis.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'))
+    await expect(apiFetch('/api/profile', null)).rejects.toThrow('Failed to fetch')
+    expect(seen).toHaveBeenCalledWith({ path: '/api/profile', status: 0 })
+  })
+
+  it('does not hear of a refusal the endpoint meant (4xx), a success, or an abort', async () => {
+    const seen = vi.fn()
+    onApiFailure(seen)
+    mockFetchOnce(402, { detail: 'out_of_credits' })
+    await apiFetch('/api/x', null)
+    mockFetchOnce(200, {})
+    await apiFetch('/api/x', null)
+    globalThis.fetch = vi.fn().mockRejectedValue(Object.assign(new Error('aborted'), { name: 'AbortError' }))
+    await expect(apiFetch('/api/x', null)).rejects.toThrow()
+    expect(seen).not.toHaveBeenCalled()
+  })
+
+  it('never lets a listener that throws break the request', async () => {
+    onApiFailure(() => { throw new Error('boom') })
+    mockFetchOnce(500, {})
+    const response = await apiFetch('/api/x', null)
+    expect(response.status).toBe(500)
   })
 })

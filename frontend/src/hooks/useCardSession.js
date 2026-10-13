@@ -83,6 +83,16 @@ function runKind(key) {
   return RUN_KINDS.has(kind) ? kind : 'other'
 }
 
+// The JLPT level, when the key's `<what>` segment is one. For a theme,
+// a deck or a tier that segment is a slug the learner may have named,
+// so it is read against the five levels and is otherwise absent.
+const RUN_LEVELS = new Set(['N5', 'N4', 'N3', 'N2', 'N1'])
+
+function runLevel(key) {
+  const level = String(key).split(':')[3]
+  return RUN_LEVELS.has(level) ? level : undefined
+}
+
 // A cached entry has to be an array of card-shaped objects, and every
 // card has to belong to the mode we're about to render it in. Without
 // this check a queue cached under an older payload shape reaches a
@@ -291,13 +301,14 @@ export function useCardSession({
     const run = { at: Date.now(), answered: 0, done: false }
     runRef.current = run
     const kind = runKind(storageKey)
-    track('run_start', { kind, mode })
+    const level = runLevel(storageKey)
+    track('run_start', { kind, mode, level })
     return () => {
       // Finished runs report themselves below; a run nobody answered a
       // single card in is a screen someone glanced at, and screen_view
       // already said so.
       if (run.done || run.answered === 0) return
-      track('run_abandon', { kind, mode, done: run.answered })
+      track('run_abandon', { kind, mode, level, done: run.answered })
     }
   }, [storageKey, mode])
 
@@ -309,6 +320,7 @@ export function useCardSession({
     track('run_complete', {
       kind: runKind(storageKey),
       mode,
+      level: runLevel(storageKey),
       items: run.answered,
       secs: Math.round((Date.now() - run.at) / 1000),
     })

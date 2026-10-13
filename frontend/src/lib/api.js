@@ -27,6 +27,7 @@ import { supabase } from './supabase'
 // the name every backend caller imports.
 export { api } from './origin'
 import { api } from './origin'
+import { reportApiFailure } from './apiFailure'
 
 // ── 401 recovery ──────────────────────────────────────────────
 // A session the backend rejects used to be invisible: supabase-js
@@ -77,13 +78,31 @@ function recoverAuth() {
   return recovery
 }
 
+// 足跡 — a failed request is announced through lib/apiFailure.js (see there
+// for what counts), so this file never imports the trail it is carried by.
+function isAbort(err) {
+  return err?.name === 'AbortError'
+}
+
+async function send(path, init) {
+  let response
+  try {
+    response = await fetch(api(path), init)
+  } catch (err) {
+    if (!isAbort(err)) reportApiFailure(path, 0)
+    throw err
+  }
+  if (response.status >= 500) reportApiFailure(path, response.status)
+  return response
+}
+
 export async function apiFetch(path, session, options = {}) {
   const headers = {
     'Content-Type': 'application/json',
     ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
     ...options.headers,
   }
-  const response = await fetch(api(path), { ...options, headers })
+  const response = await send(path, { ...options, headers })
   // Only when a session was presented and refused — a 401 on a
   // sessionless call is the endpoint doing its job.
   if (response.status === 401 && session) recoverAuth()
@@ -180,7 +199,7 @@ export async function apiJsonWithTimeout(path, session, { timeoutMs = 10000, sig
  */
 export async function apiUpload(path, session, formData) {
   const headers = session ? { Authorization: `Bearer ${session.access_token}` } : {}
-  const response = await fetch(api(path), { method: 'POST', body: formData, headers })
+  const response = await send(path, { method: 'POST', body: formData, headers })
   if (response.status === 401 && session) recoverAuth()
   const body = await readJson(response)
   if (!response.ok) throw new ApiError(response.status, body, path)
