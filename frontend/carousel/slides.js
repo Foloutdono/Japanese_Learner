@@ -956,7 +956,10 @@ const KINDS = {
     levelRing(ctx, p, plan, f.right - 46, f.y + 32, 46, ink)
     const pill = 44 * 2.7
     const top = f.y + 64 + SP[7]
-    const sub = fit(ctx, weldIf(plan.lang, t.coverSub(s.quizzes.length)), { weight: 500, sizes: [FS.lead, FS.body], maxW: f.w, maxLines: 2 })
+    // On one line where it goes, so the booklet keeps its room.
+    const subText = weldIf(plan.lang, t.coverSub(s.quizzes.length))
+    const one = fit(ctx, subText, { weight: 500, sizes: [FS.lead, FS.body], maxW: f.w, maxLines: 1 })
+    const sub = one.cut ? fit(ctx, subText, { weight: 500, sizes: [FS.lead, FS.body], maxW: f.w, maxLines: 2 }) : one
     const boxH = f.bottom - pill - SP[7] - paragraphH(sub) - SP[6] - top
     // The booklet: a double rule, as a printed paper is framed.
     ctx.strokeStyle = ink
@@ -971,32 +974,49 @@ const KINDS = {
     y += FS.caption + SP[5]
     // The paper's name as large as the sections under it leave room for:
     // each section keeps a row it can be read in.
-    const nameH = FS.caption + SP[5] + 4
+    // The name line gives way before the sections are cramped.
     const n = Math.max(1, s.quizzes.length)
-    const rowsRoom = ts => top + boxH - SP[7] - nameH - SP[4] - (y + ts * 1.08 + SP[3] + EDGE + SP[4])
-    const ts = [FS.display, FS.heading, FS.title].find(z => rowsRoom(z) / n >= FS.lead * 1.4) || FS.title
-    const rowH = Math.min(FS.lead * 1.7, rowsRoom(ts) / n)
+    const rowsRoom = (ts, named) => top + boxH - SP[7] - (named ? FS.caption + SP[5] + 4 + SP[4] : 0) - (y + ts * 1.08 + SP[3] + EDGE + SP[4])
+    // A title a size smaller rather than rows set over each other.
+    const titles = [FS.display, FS.heading, FS.title, FS.lead]
+    const named = titles.some(z => rowsRoom(z, true) / n >= FS.lead * 1.4)
+    const ts = titles.find(z => rowsRoom(z, named) / n >= FS.lead * 1.4) || titles.find(z => rowsRoom(z, named) / n >= FS.sm * 1.5) || FS.lead
+    const rowH = Math.min(FS.lead * 1.7, rowsRoom(ts, named) / n)
     text(ctx, '模擬試験', ix, y + ts * ASC, { f: font(900, ts, 'serif'), color: ink })
     y += ts * 1.08 + SP[3]
     ctx.fillStyle = p.line.exam
     ctx.fillRect(ix, y, iw, EDGE)
     y += EDGE + SP[4]
     // The sections: もんだい1 かんじよみ — Reading.
-    const rs = Math.max(FS.sm, Math.min(FS.lead, rowH * 0.6))
+    const rsMax = Math.min(FS.lead, Math.max(FS.sm, rowH * 0.6), rowH / 1.5)
+    // Each row: its number, its section, and the question's name (a
+    // question may name itself more briefly on the cover, plan 210n),
+    // the Japanese a size down before the name is cut.
+    const rowAt = (q, i, rs) => {
+      const num = `${kanaOnly ? 'もんだい' : '問題'}${i + 1}`
+      const jp = KIND_JP[q.kind]?.[kanaOnly ? 0 : 1] || ''
+      const w = measure(ctx, num, font(700, rs, 'jp'))
+      const w2 = jp ? SP[5] + measure(ctx, jp, font(500, rs, 'jp')) : 0
+      const lb = fit(ctx, q.cover || q.label || '', { weight: 500, sizes: [Math.max(FS.sm, Math.min(FS.body, rowH * 0.55)), FS.sm, FS.caption], maxW: iw - w - w2 - SP[6], maxLines: 1, balanced: false })
+      return { num, jp, w, lb }
+    }
+    let rs = rsMax
+    const cramped = rs2 => s.quizzes.some((q, i) => { const lb = rowAt(q, i, rs2).lb; return lb.cut || lb.size < FS.sm })
+    while (rs > FS.sm && cramped(rs)) rs -= 2
     s.quizzes.forEach((q, i) => {
       const ry = y + i * rowH
-      const w = text(ctx, `${kanaOnly ? 'もんだい' : '問題'}${i + 1}`, ix, ry + rowH * 0.62, { f: font(700, rs, 'jp'), color: ink })
-      const jp = KIND_JP[q.kind]?.[kanaOnly ? 0 : 1] || ''
-      const w2 = jp ? SP[5] + text(ctx, jp, ix + w + SP[5], ry + rowH * 0.62, { f: font(500, rs, 'jp'), color: ink }) : 0
-      // A question may name itself more briefly on the cover (plan 210n).
-      const lb = fit(ctx, q.cover || q.label || '', { weight: 500, sizes: [Math.max(FS.sm, Math.min(FS.body, rowH * 0.55)), FS.sm, FS.caption], maxW: iw - w - w2 - SP[7], maxLines: 1, balanced: false })
+      const { num, jp, w, lb } = rowAt(q, i, rs)
+      text(ctx, num, ix, ry + rowH * 0.62, { f: font(700, rs, 'jp'), color: ink })
+      if (jp) text(ctx, jp, ix + w + SP[5], ry + rowH * 0.62, { f: font(500, rs, 'jp'), color: ink })
       text(ctx, lb.lines[0] || '', ix + iw, ry + rowH * 0.62, { f: lb.f, color: ink2, align: 'right' })
     })
     // なまえ, and a line to write it on.
-    const ny = top + boxH - SP[7] - 4
-    caption(ctx, kanaOnly ? 'なまえ Name' : '名前 Name', ix, ny - SP[3], ink2)
-    ctx.fillStyle = ink2
-    ctx.fillRect(ix + 260, ny, iw - 260, 2)
+    if (named) {
+      const ny = top + boxH - SP[7] - 4
+      caption(ctx, kanaOnly ? 'なまえ Name' : '名前 Name', ix, ny - SP[3], ink2)
+      ctx.fillStyle = ink2
+      ctx.fillRect(ix + 260, ny, iw - 260, 2)
+    }
     paragraph(ctx, sub, f.cx, top + boxH + SP[6], ink2, 'center')
     metal(ctx, p, f.cx, f.bottom - pill, t.next)
   },
@@ -1175,9 +1195,18 @@ const KINDS = {
     let y = title(c, c.plan.t.step(s.n, b.steps.length))
     const goal = fit(ctx, `“${b.translation}”`, { weight: 500, sizes: [FS.title, FS.lead, FS.body], maxW: f.w, maxLines: 2, balanced: false })
     y += paragraph(ctx, goal, f.x, y, ink2) + SP[7]
-    const pieces = chunkLayout(ctx, st.items.length ? st.items : [{ t: '…' }], f.w, FS.display * 1.2)
-    // The whole sentence sets the size, so it grows the same on every step.
-    const whole = layoutSentence(ctx, b.rows, { max: FS.display * 1.1, min: FS.lead, maxW: f.w, maxLines: 3, maxH: Math.max(FS.display * 1.4, f.h * 0.34), script: c.plan.script, gap: 0.1 })
+    // The whole sentence sets the size, so it grows the same on every step,
+    // in the room the pieces under it leave; the pieces step down before
+    // either leaves the frame.
+    const items = st.items.length ? st.items : [{ t: '…' }]
+    let pieces = null
+    let whole = null
+    for (const z of [FS.display * 1.2, FS.display, FS.heading * 1.2, FS.heading]) {
+      pieces = chunkLayout(ctx, items, f.w, z)
+      const roomH = f.bottom - y - SP[8] - SP[3] - pieces.h - SP[6]
+      whole = layoutSentence(ctx, b.rows, { max: FS.display * 1.1, min: FS.lead, maxW: f.w, maxLines: 3, maxH: Math.min(Math.max(FS.display * 1.4, f.h * 0.34), roomH), script: c.plan.script, gap: 0.1 })
+      if (whole.h <= roomH) break
+    }
     const rows = b.rows.slice(0, st.upto)
     const L = layoutSentence(ctx, rows, { max: whole.size, min: whole.size, maxW: f.w, maxLines: 3, script: c.plan.script, gap: 0.1 })
     drawSentence(ctx, L, f.x, y, 'left', u => ({ ink: u.i >= st.from ? ink : ink2, rule: u.i >= st.from ? lineOf(p, u.row) : null, ruby: ink2 }))
@@ -1328,10 +1357,17 @@ const KINDS = {
         const tx = x + pad + ps * 1.1 + SP[3]
         const tw = x + cw - pad - tx
         // A gloss is never broken inside a word (strawbe-rry): a size down first.
+        // And a size down again while it and the word overrun the card.
         const sizes = [FS.lead, FS.body, FS.sm, FS.caption]
         const whole = z => w.main.split(/\s+/).every(part => measure(ctx, part, font(500, z, 'latin')) <= tw)
-        const main = fit(ctx, w.main, { weight: 500, sizes: [sizes.find(whole) || FS.caption], maxW: tw, maxLines: 3, balanced: false })
-        const L = layoutSentence(ctx, [wordRow(w)], { max: FS.title, min: FS.xs, maxW: tw, maxLines: 1, maxH: ch - paragraphH(main) - SP[2] - SP[3] * 2, script: 'furigana', rules: false })
+        const from = Math.max(0, sizes.findIndex(whole))
+        let main = null
+        let L = null
+        for (const z of sizes.slice(from)) {
+          main = fit(ctx, w.main, { weight: 500, sizes: [z], maxW: tw, maxLines: 3, balanced: false })
+          L = layoutSentence(ctx, [wordRow(w)], { max: FS.title, min: FS.xs, maxW: tw, maxLines: 1, maxH: ch - paragraphH(main) - SP[2] - SP[3] * 2, script: 'furigana', rules: false })
+          if (L.h + SP[2] + paragraphH(main) <= ch - SP[3] * 2) break
+        }
         return { ps, tx, main, L, fits: L.lineW(L.lines[0]) <= tw && L.lines.length === 1 }
       }
       let at = lay(Math.min(ch * 0.5, cw * 0.2))
@@ -1384,9 +1420,16 @@ const KINDS = {
       // the question already), on one line.
       const tx = rx + r + SP[3]
       const inner = x + cw - SP[4] - tx
-      const meaning = s.revealed ? fit(ctx, w.main, { weight: odd ? 700 : 500, sizes: [FS.lead, FS.body, FS.sm, FS.caption], maxW: inner, maxLines: 2, balanced: false }) : null
+      // The meaning on one line at the largest size the cell holds with
+      // the word, else on two.
+      const wordAt = mh => layoutSentence(ctx, [wordRow(w)], { max: FS.heading, min: FS.sm, maxW: inner, maxLines: 1, maxH: ch - SP[3] * 2 - mh, script: 'furigana', romaji: !s.revealed, rules: false })
+      let meaning = null
+      if (s.revealed) {
+        const tries = [1, 2].flatMap(lines => [FS.lead, FS.body, FS.sm, FS.caption].map(z => fit(ctx, w.main, { weight: odd ? 700 : 500, sizes: [z], maxW: inner, maxLines: lines, balanced: false })))
+        meaning = tries.find(m => !m.cut && wordAt(paragraphH(m) + SP[1]).h + paragraphH(m) + SP[1] <= ch - SP[2] * 2) || tries[tries.length - 1]
+      }
       const mh = meaning ? paragraphH(meaning) + SP[1] : 0
-      const L = layoutSentence(ctx, [wordRow(w)], { max: FS.heading, min: FS.sm, maxW: inner, maxLines: 1, maxH: ch - SP[3] * 2 - mh, script: 'furigana', romaji: !s.revealed, rules: false })
+      const L = wordAt(mh)
       const h = L.h + mh
       const ty = top + Math.max(SP[2], (ch - h) / 2)
       drawSentence(ctx, L, tx + inner / 2, ty, 'center', () => ({ ink: dim ? ink2 : ink, rule: null, ruby: ink2, romaji: ink2 }))
@@ -1535,15 +1578,15 @@ const KINDS = {
     }
     // The lines at the largest setting that holds. On the question the
     // call to comment gives way first (the number circles say how to
-    // answer), then their line's romaji, then the ask: the answers keep
-    // theirs. On the answer, their line (read on the question) gives way
+    // answer), then their line's romaji, then the ask, then its
+    // translation (the answer slide prints it): the answers keep theirs. On the answer, their line (read on the question) gives way
     // before the why is ever cut.
     const passes = s.revealed
       ? [{}, { themTr: false }, { them: false }]
-      : [{ cta: true, themRo: ro, task: true }, { themRo: ro, task: true }, { themRo: false, task: true }, { themRo: false }]
+      : [{ cta: true, themRo: ro, task: true }, { themRo: ro, task: true }, { themRo: false, task: true }, { themRo: false }, { themRo: false, themTr: false }]
     let L = null
     find: for (const o of passes) {
-      for (const step of [[FS.heading, FS.lead, FS.title], [FS.title, FS.lead, FS.lead], [FS.title, FS.body, FS.body], [FS.lead, FS.body, FS.body], [FS.lead, FS.sm, FS.sm], [FS.body, FS.sm, FS.sm]]) {
+      for (const step of [[FS.heading, FS.lead, FS.title], [FS.title, FS.lead, FS.lead], [FS.title, FS.body, FS.body], [FS.lead, FS.body, FS.body], [FS.lead, FS.sm, FS.sm], [FS.body, FS.sm, FS.sm], [FS.body, FS.caption, FS.caption]]) {
         L = lay(step, o)
         if (L.h <= room) break find
       }
@@ -1734,16 +1777,19 @@ function stopPlate(c, color, maxW) {
   const st = c.plan.station
   const rail = EDGE * 2.4
   const pad = SP[6]
-  const at = z => {
+  const at = (z, named = true) => {
     const jf = font(900, z, 'serif')
     const kf = font(500, Math.max(FS.xs, z * 0.42), 'jp')
     const lf = font(700, Math.max(FS.body, z * 0.7), 'latin')
     const r = z * 0.62
     const textW = Math.max(measure(ctx, st.jp, jf), measure(ctx, st.kana, kf))
-    const w = rail + pad + r * 2 + SP[5] + textW + SP[5] + measure(ctx, st.name, lf) + pad
-    return { z, jf, kf, lf, r, w, h: z * 2.3 }
+    const w = rail + pad + r * 2 + SP[5] + textW + (named ? SP[5] + measure(ctx, st.name, lf) : 0) + pad
+    return { z, jf, kf, lf, r, w, h: z * 2.3, named }
   }
-  const L = [FS.title * 1.1, FS.title, FS.lead, FS.body].map(at).find(x => x.w <= maxW) || at(FS.body)
+  // Its name in the slide's language goes before the plate gets small:
+  // the code and the station stay read.
+  const sizes = [FS.title * 1.1, FS.title, FS.lead]
+  const L = sizes.map(z => at(z)).find(x => x.w <= maxW) || sizes.map(z => at(z, false)).find(x => x.w <= maxW) || at(FS.body, false)
   return {
     w: L.w,
     h: L.h,
@@ -1769,7 +1815,7 @@ function stopPlate(c, color, maxW) {
       text(ctx, st.kana, at2 + nameW / 2, cy - L.z * 0.42, { f: L.kf, color: ink2, align: 'center' })
       text(ctx, st.jp, at2 + nameW / 2, cy + L.z * 0.56 + kz * 0.2, { f: L.jf, color: ink, align: 'center' })
       at2 += nameW + SP[5]
-      text(ctx, st.name, at2, cy + Math.max(FS.body, L.z * 0.7) * 0.36, { f: L.lf, color: ink2 })
+      if (L.named) text(ctx, st.name, at2, cy + Math.max(FS.body, L.z * 0.7) * 0.36, { f: L.lf, color: ink2 })
     },
   }
 }
@@ -1814,7 +1860,12 @@ const ENDINGS = {
     const figure = figureOf(c, [FS.title, FS.lead, FS.body])
     const cta = ctaOf(c, [FS.lead, FS.body])
     const textH = (figure ? paragraphH(figure) + SP[5] : 0) + (cta ? paragraphH(cta) : 0)
-    const head = f.y + 64 + SP[7]
+    // The handle top right, on one line in the half the line captions
+    // leave it; one too long even small is left off, never cut. The map
+    // starts under it, so no station's name reaches it.
+    const hb = plan.handle ? fit(ctx, plan.handle, { sizes: [FS.lead, FS.body, FS.sm, FS.caption], maxW: f.w * 0.5, maxLines: 1, balanced: false }) : null
+    const handleY = f.y + 64 * 0.66 + FS.title * 1.5
+    const head = Math.max(f.y + 64 + SP[7], hb && !hb.cut ? handleY + hb.size * 0.4 + SP[5] : 0)
     const mapH = Math.min(f.bottom - textH - SP[8] - head, f.w * 0.9)
     // The map and its words centred in what the masthead leaves.
     const top = head + Math.max(0, (f.bottom - head - mapH - SP[8] - textH) / 2)
@@ -1916,10 +1967,7 @@ const ENDINGS = {
     let y = top + mapH + SP[8]
     if (figure) y += paragraph(ctx, figure, f.x, y, ink) + SP[5]
     if (cta) paragraph(ctx, cta, f.x, y, ink2)
-    // The handle top right, on one line in the half the line captions
-    // leave it; one too long even small is left off, never cut.
-    const hb = plan.handle ? fit(ctx, plan.handle, { sizes: [FS.lead, FS.body, FS.sm, FS.caption], maxW: f.w * 0.5, maxLines: 1, balanced: false }) : null
-    if (hb && !hb.cut) text(ctx, hb.lines[0], f.right, f.y + 64 * 0.66 + FS.title * 1.5, { f: hb.f, color: p.gold, align: 'right' })
+    if (hb && !hb.cut) text(ctx, hb.lines[0], f.right, handleY, { f: hb.f, color: p.gold, align: 'right' })
   },
 
   /** 定期券: a commuter pass from 辻 to the source's station. */
@@ -2208,7 +2256,10 @@ function quizSlide(c, q, revealed, head, number = 1) {
   const wordsFit = (x, z, w) => (x.fam && x.fam !== 'latin') || !x.text || x.text.split(/\s+/).every(word => measure(ctx, word, font(700, z, 'latin')) <= w)
   const narrow = q.choices.some(x => x.rows ? x.rows.length > 6 : fit(ctx, x.text, { weight: 700, fam: x.fam || 'latin', sizes: [FS.lead], maxW: halfW, maxLines: 2, balanced: false }).cut || !wordsFit(x, FS.lead, halfW))
   const long = q.choices.some(x => (x.text || '').length > 34) || narrow
-  const cols = n === 4 && !long ? 2 : short ? n : 1
+  // Side by side only where each answer holds its column on one line.
+  const colW = k => (f.w - 3 * (k + 1)) / k - SP[5] - 60 - SP[4] * 2
+  const inColumns = short && q.choices.every(x => !fit(ctx, x.text || '', { weight: 700, fam: x.fam || 'latin', sizes: [FS.body], maxW: colW(n), maxLines: 1, balanced: false }).cut)
+  const cols = n === 4 && !long ? 2 : inColumns ? n : 1
   const rowsN = Math.ceil(n / cols)
   // Long answers on a row each take the room a large question would: the
   // question steps down a rung for them.
@@ -2328,12 +2379,15 @@ function quizSlide(c, q, revealed, head, number = 1) {
     if (tooLong() && st?.rows) L = stemAt(FS.body)
     if (tooLong() && st?.rows) L = stemAt(FS.sm)
   }
-  const gridLeast = !st?.cue && tooLong() ? Math.max(rowsN * FS.sm * 1.45, f.bottom - y - SP[7] * 2 - foot - stemH()) : gridMin
+  // On the answer, a quoted sentence (read on the question) gives way
+  // before the answers do: they keep their least, it takes what is left.
+  const quoteYields = revealed && !!st?.text
+  const gridLeast = !st?.cue && tooLong() && !quoteYields ? Math.max(rowsN * FS.sm * 1.45, f.bottom - y - SP[7] * 2 - foot - stemH()) : gridMin
   const need = st?.rows ? L.h + trH : st?.cue ? cue.h : stemMin
-  const gridH = !st ? Math.min(f.bottom - y - SP[7] - foot, rowsN * 230)
+  const gridH = Math.min(f.bottom - y - SP[7] * (st ? 2 : 1) - foot, !st ? rowsN * 230
     : st.cue ? Math.max(rowsN * (perRow > FS.title * 2 ? FS.title * 2.1 : FS.lead * 1.4), Math.min(gridMin, f.bottom - y - SP[7] * 2 - foot - need))
-      : Math.max(gridLeast, Math.min(Math.max(f.w * 0.3, (f.bottom - y) * 0.36, gridPref), rowsN * 230, f.bottom - y - SP[7] * 2 - foot - need))
-  const room = st ? f.bottom - y - SP[7] - gridH - SP[7] - foot : -SP[7]
+      : Math.max(gridLeast, Math.min(Math.max(f.w * 0.3, (f.bottom - y) * 0.36, gridPref), rowsN * 230, f.bottom - y - SP[7] * 2 - foot - need)))
+  const room = st ? Math.max(0, f.bottom - y - SP[7] - gridH - SP[7] - foot) : -SP[7]
   if (st?.rows) {
     const top = y + Math.max(0, (room - L.h - trH) / 2)
     drawSentence(ctx, L, f.x, top, 'left', u => ({
@@ -2349,8 +2403,9 @@ function quizSlide(c, q, revealed, head, number = 1) {
   } else if (st?.emoji) {
     picture(ctx, st.emoji, f.cx, y + room / 2, Math.min(FS.glyph * 1.2, room * 0.8))
   } else if (st?.text) {
-    const b = fit(ctx, `“${st.text}”`, { sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body, FS.sm], maxW: f.w, maxH: room + 1, lh: 1.15 })
-    paragraph(ctx, b, f.x, y + Math.max(0, (room - paragraphH(b, 1.15)) / 2), ink, 'left', 1.15)
+    const b = fit(ctx, `“${st.text}”`, { sizes: [FS.display, FS.heading, FS.title, FS.lead, FS.body, FS.sm, ...(quoteYields ? [FS.caption] : [])], maxW: f.w, maxH: room + 1, lh: 1.15 })
+    // Cut short on the answer, it is left out: it was read whole on the question.
+    if (!(quoteYields && b.cut)) paragraph(ctx, b, f.x, y + Math.max(0, (room - paragraphH(b, 1.15)) / 2), ink, 'left', 1.15)
   } else if (st?.cue && cue.alone) {
     paragraph(ctx, cue.task, f.x, y + Math.max(0, (room - cue.h) / 2), p.line.grammar)
   } else if (st?.cue) {

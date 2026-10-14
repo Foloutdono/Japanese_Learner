@@ -330,6 +330,18 @@ rules in `index.css`; `layoutSentence` in `draw.js`):
   "Show the feed's overlays" tints that band on the previews, never on
   the exported image).
 
+Both keep clear of what TikTok lays over a photo post, as measured on a
+phone (plan 213): a 4:5 post is shown at full width, its top ~70px above
+the screen's, so its search bar covers the post's first ~150px (the
+post's safe top is 170) and its buttons stand from x ~936 down the
+lower fifth (the sides are 144 each, so a centred slide stays centred).
+A change to the safe box is checked by drawing every slide of every
+source and type (a layout pass over real fonts: nothing outside the box,
+no text over text, nothing set tiny); a slide that no longer fits steps
+its parts down, drops a line it can spare (a cover's name line, a plate's
+English name, the answer slide's quoted sentence read on the question),
+or goes one answer to a row, never over its neighbour or out of the box.
+
 Two grounds (washi and sumi, the app's two themes), two languages (the
 slides' Latin text in English or French, French punctuation welded), and
 the Japanese as written, with furigana, or in kana.

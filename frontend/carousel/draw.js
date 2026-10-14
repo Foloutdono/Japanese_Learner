@@ -28,10 +28,14 @@ const RING = 2.5 * K // a roundel's ring
 
 // The two formats a feed takes. `safe` is the box the feed's own chrome
 // leaves alone: TikTok lays its search bar over the top of a 9:16 post,
-// its buttons down the right and the caption over the foot.
+// its buttons down the right and the caption over the foot. Measured on
+// a phone (plan 213): a 4:5 post is shown at full width with its top
+// ~70px above the screen's, so the search bar covers its first ~150px,
+// and the buttons' column stands from x ~936 down its lower fifth; the
+// sides are kept equal so a centred slide stays centred.
 export const FORMATS = {
-  post: { id: 'post', w: 1080, h: 1350, safe: { t: 104, r: 92, b: 112, l: 92 } },
-  story: { id: 'story', w: 1080, h: 1920, safe: { t: 250, r: 120, b: 430, l: 120 } },
+  post: { id: 'post', w: 1080, h: 1350, safe: { t: 170, r: 144, b: 112, l: 144 } },
+  story: { id: 'story', w: 1080, h: 1920, safe: { t: 250, r: 144, b: 430, l: 144 } },
 }
 
 // ── Colour ────────────────────────────────────────────────────
