@@ -333,18 +333,18 @@ export function promoDeck(plan, fmt, opts) {
       const now = plan.now
       A.printTitle(ctx, fr.right, fr.y, PU * 0.9, { date: `${kanjiNumber(now.getMonth() + 1)}月${kanjiNumber(now.getDate())}日`, view: pr.look.view })
       A.printDial(ctx, p, pr, fmt.w / 2, pr.frame.cy * PU, PU, { parts: LINE, count: 42, unit: P.unit, time: '≈ 14 min', end: P.doneBy('08:14') })
-      // The brand, then the words, in the open sky under the time, each
-      // in a halo of the sky's palest light where the mountain rises behind.
-      const y = (pr.frame.cy + pr.frame.fare + 52) * PU
-      const sky = pr.look.sky[pr.look.sky.length - 1][1]
-      for (const blur of [26, 10]) {
-        ctx.save()
-        ctx.shadowColor = A.inkAlpha(sky, 0.95)
-        ctx.shadowBlur = blur
-        masthead(ctx, p, { ...fr, y }, pr.look.ink.text, pr.look.ink.text)
-        lead(ctx, headline, y + 64 + SP[4], pr.look.ink.text, [FS.title], { maxLines: 2 })
-        ctx.restore()
-      }
+      // The brand and the words on a plate of the slip's washi, at the
+      // print's foot (over the Depart button where there is one): the
+      // sky, the mountain and the birds behind them leave no ground to
+      // read on at any hour.
+      const pad = SP[5]
+      const b = fit(ctx, say(headline), { sizes: [FS.title, FS.lead], maxW: fr.w - 2 * pad, maxLines: 2 })
+      const plateH = pad + 64 + SP[3] + paragraphH(b) + pad
+      const bottom = label ? fr.bottom - DEP - 8 * U - SP[5] : fr.bottom
+      const top = bottom - plateH
+      const { ink } = A.printPlate(ctx, p, fr.x, top, fr.w, plateH, U)
+      masthead(ctx, p, { ...fr, x: fr.x + pad, y: top + pad }, ink, ink)
+      b.lines.forEach((l, i) => text(ctx, l, fr.x + pad, top + pad + 64 + SP[3] + b.size * (0.8 + i * 1.18), { f: b.f, color: ink }))
     } else {
       ground(ctx, p, fr)
       masthead(ctx, p, fr)

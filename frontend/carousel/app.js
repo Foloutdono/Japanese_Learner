@@ -14,6 +14,10 @@ import { TR, alpha, font, measure, mix, rrect, shadow, text } from './draw.js'
 export const APP_INKS = {
   // The free card's band: one value in both themes (DESIGN.md, "The pass has two materials").
   '--pass-band': '#3f6d8e',
+  // The print's paper, its ink and its seal red: the title slip's (TodayPrint).
+  '--tpr-washi': '#efe3bf',
+  '--tpr-sumi': '#1d1a16',
+  '--tpr-shu': '#a8382a',
 }
 
 // The phone the parts were measured on: its column, inside its 16px gutters.
@@ -529,9 +533,7 @@ export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end 
  *  on the washi, in the sumi, the view in the shu, framed twice. (x, y)
  *  its top-right corner. */
 export function printTitle(ctx, x, y, u, { date, view }) {
-  const washi = '#efe3bf'
-  const sumi = '#1d1a16'
-  const shu = '#a8382a'
+  const { '--tpr-washi': washi, '--tpr-sumi': sumi, '--tpr-shu': shu } = APP_INKS
   const z = 15.2 * u
   const step = z * 1.06
   const n = [...date].length + [...view].length
@@ -720,6 +722,24 @@ export function pointCard(ctx, p, x, y, w, u, { n, pattern, level, gloss, parts 
     px += tw + 4 * u
   })
   return h
+}
+
+/** A plate of the title slip's washi, framed as the slip is (its sumi
+ *  edge, the shu rule inside it), for words set over the print: the
+ *  print has no ground they can be read on at every hour. */
+export function printPlate(ctx, p, x, y, w, h, u) {
+  const { '--tpr-washi': washi, '--tpr-sumi': sumi, '--tpr-shu': shu } = APP_INKS
+  ctx.save()
+  shadow(ctx, p.hang)
+  ctx.fillStyle = washi
+  ctx.fillRect(x, y, w, h)
+  ctx.restore()
+  ctx.lineWidth = u
+  ctx.strokeStyle = sumi
+  ctx.strokeRect(x + u / 2, y + u / 2, w - u, h - u)
+  ctx.strokeStyle = shu
+  ctx.strokeRect(x + 3.5 * u, y + 3.5 * u, w - 7 * u, h - 7 * u)
+  return { ink: sumi }
 }
 
 /** What a panel of the app stands on, per ground: its fill, rule and inks. */

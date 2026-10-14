@@ -363,7 +363,10 @@ colours come through `palette` and `APP_INKS`, which
 `public/today/print/<rev>/<hour>-phone.json`, its grain and its paper,
 and draws the layers still, as the app draws them with motion reduced
 (index.css's `.tpr-` rules and its reduced-motion block go into each
-layer): the train halfway across, the clouds at rest. The studio's
+layer): the train halfway across, the clouds at rest. The words on a Today
+frame stand on a plate of the title slip's washi, framed as the slip is,
+at the print's foot: the sky, the mountain and the birds behind them
+leave no ground to read on at every hour. The studio's
 "Today's print" picks the hour (曙 dawn, 帰帆 day, 落雁 dusk, 秋月 night).
 So the studio needs `public/today/print/`, `src/index.css` and the
 print's `print.json` beside it when it is served or published.
