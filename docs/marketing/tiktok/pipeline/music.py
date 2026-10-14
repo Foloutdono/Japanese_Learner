@@ -9,7 +9,7 @@ import numpy as np, sys, json, os
 AUD = os.path.join(os.environ.get('FILM_DIR', '/tmp/tsuji-film'), 'audio'); os.makedirs(AUD, exist_ok=True)
 from scipy.signal import lfilter, butter, sosfilt, fftconvolve
 SR = 48000; BPM = 128; BEAT = 60 / BPM; BAR = 4 * BEAT; STEP = BEAT / 4
-BARS = 26; TAIL = 2.5
+BARS = 28; TAIL = 2.5
 N = int((BARS * BAR + TAIL) * SR)
 rng = np.random.default_rng(11)
 def hz(n):  # note name -> Hz
@@ -87,13 +87,13 @@ CH = {'Gmaj7': ['G3', 'B3', 'D4', 'F#4'], 'A7': ['A3', 'C#4', 'E4', 'G4'], 'F#m7
       'Bm7': ['B3', 'D4', 'F#4', 'A4'], 'Em7': ['E3', 'G3', 'B3', 'D4'], 'A7sus': ['A3', 'D4', 'E4', 'G4'], 'Dmaj9': ['D3', 'F#3', 'A3', 'C#4', 'E4']}
 ROOT = {'Gmaj7': 'G2', 'A7': 'A2', 'F#m7': 'F#2', 'Bm7': 'B1', 'Em7': 'E2', 'A7sus': 'A2', 'Dmaj9': 'D2'}
 LOOP = ['Gmaj7', 'A7', 'F#m7', 'Bm7']
-prog = ['Bm7', 'A7sus'] + [LOOP[i % 4] for i in range(20)] + ['Gmaj7', 'A7', 'Dmaj9']
+prog = ['Bm7', 'A7sus'] + [LOOP[i % 4] for i in range(23)] + ['Gmaj7', 'A7', 'Dmaj9']
 MOTIF = {0: [(0, 'B4'), (3, 'A4'), (6, 'F#4'), (8, 'A4'), (10, 'B4'), (14, 'D5'), (16, 'E5'), (19, 'D5'), (22, 'B4'), (24, 'A4'), (28, 'F#4'), (30, 'E4')],
          1: [(0, 'F#4'), (3, 'A4'), (6, 'B4'), (8, 'A4'), (10, 'F#4'), (14, 'E4'), (16, 'D4'), (19, 'E4'), (22, 'F#4'), (24, 'A4'), (26, 'B4'), (28, 'F#4')]}
 
 keys, bas, drum, pl, fx = buf(), buf(), buf(), buf(), buf()
 kicks = []
-DROP = 2; END = 24
+DROP = 2; END = 27
 for b, ch in enumerate(prog):
     t0 = b * BAR
     intro, final = b < DROP, b >= END
@@ -112,7 +112,7 @@ for b, ch in enumerate(prog):
     # pluck motif: two bars each, octave up from bar 14 (the deeper modes)
     m = MOTIF[(b // 2) % 2] if not intro else MOTIF[1]
     half = (b % 2) * 16
-    up = 2 if 14 <= b < 22 else 1
+    up = 2 if 16 <= b < 25 else 1
     for s, n in m:
         if half <= s < half + 16:
             f = hz(n) * (up if not intro else 1)
@@ -127,11 +127,11 @@ for b, ch in enumerate(prog):
     for s in (0, 6, 8) + ((14,) if b % 4 == 3 else ()):
         place(drum, kick(1.0 if s in (0, 8) else 0.75), t0 + s * STEP, 0.62); kicks.append(t0 + s * STEP)
     for s in (4, 12): place(drum, snare(1.0), t0 + s * STEP, 0.32)
-    for s in range(0, 16, 1 if b >= 14 else 2):
+    for s in range(0, 16, 2):
         v = 0.55 if s % 4 == 2 else (0.3 if s % 2 == 0 else 0.16)
         place(drum, hat(False, v), t0 + s * STEP, 0.22, 0.35)
     if b % 2 == 1: place(drum, hat(True, 0.5), t0 + 14 * STEP, 0.16, 0.35)
-    if b == 21:  # fill into the last section
+    if b in (15, 24):  # fills into the deeper modes and into the address
         for s in (12, 13, 14, 15): place(drum, snare(0.5 + 0.12 * (s - 12)), t0 + s * STEP, 0.28)
 
 # intro: filtered keys, a riser and a snare roll into the drop

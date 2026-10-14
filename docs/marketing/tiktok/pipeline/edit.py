@@ -18,7 +18,7 @@ SFX_DIR = f'{WORK}/sfx'
 os.makedirs(OUT, exist_ok=True)
 
 BPM = 128; B = 60 / BPM; FPS = 30
-END_BEAT = 101
+END_BEAT = 114
 T_END = END_BEAT * B
 PX, PY, PW, PH = 190, 400, 700, 1400
 def bt(b): return b * B
@@ -27,38 +27,44 @@ def bt(b): return b * B
 # Each anchor pins a moment of the recording to a beat; between anchors the
 # footage runs at whatever speed joins them. Taps are anchored on beats.
 SEGS = [
-    # 1 hook + 2 try: one take, the drop at beat 8, Board pressed on beat 10
+    # 1 hook + 2 try: one take; the drop on beat 8, Board pressed on beat 10
     dict(clip='onboard', a=[(1.95, 0), (5.6, 8), (7.15, 10), (9.9, 14), (10.6, 16)]),
-    # 3 goal: goal, lines, rhythm, hour, then the plan (its chime on the off-beat)
-    dict(clip='onboard', a=[(18.6, 16), (19.62, 18), (24.99, 22), (27.72, 24), (28.93, 26), (29.31, 26.5), (32.4, 31)]),
-    #   ... and the progress
-    dict(clip='progress', a=[(1.2, 31), (4.39, 34), (6.2, 36)]),
-    # 4 board: the account, the pass, the gate
-    dict(clip='onboard', a=[(36.0, 36), (38.14, 38), (40.21, 40), (42.3, 41), (46.82, 44), (47.54, 45), (49.4, 48)]),
-    #   ... and the run: Depart, the door, a card turned, Correct
-    dict(clip='run', a=[(1.9, 48), (2.45, 49), (5.21, 52), (6.53, 54), (7.6, 56)]),
-    # 5 modes: the grammar ladder, answered on a beat
-    dict(clip='ladder', a=[(0.8, 56), (1.18, 57), (2.94, 59), (5.64, 62), (7.0, 64)]),
-    #   ... a kanji drawn, a stroke a beat-ish
-    dict(clip='draw', a=[(2.6, 64), (3.15, 65), (8.1, 69)]),
+    # 3 the goal: N4 picked, Continue
+    dict(clip='onboard', a=[(18.3, 16), (19.62, 18.5), (20.83, 21), (21.1, 22)]),
+    #   the plan, held, the date brought close
+    dict(clip='onboard', a=[(29.0, 22), (34.5, 32)],
+         zoom=[(25.5, 1.0, .0, .3), (28.5, 1.24, .0, .3)]),
+    #   the progress: the pass, then the calendar and the streak
+    dict(clip='progress', a=[(1.0, 32), (4.3, 40)]),
+    # 4 connect: the account, filled, created
+    dict(clip='onboard', a=[(38.9, 40), (40.21, 42.6), (40.5, 43)]),
+    #   board: the pass ...
+    dict(clip='onboard', a=[(40.6, 43), (43.2, 48.5)]),
+    #   ... and the gate
+    dict(clip='onboard', a=[(46.4, 48.5), (46.82, 49), (49.4, 54)]),
+    #   on track: today's run, Depart, the first card turned and right
+    dict(clip='run', a=[(0.4, 54), (2.45, 57.5), (5.21, 61), (6.53, 63), (7.0, 64)],
+         zoom=[(54, 1.0, .5, .25), (55.5, 1.12, .5, .25), (57.0, 1.0, .5, .25)]),
+    # 5 modes: the kanji modes, Draw the kanji ...
+    dict(clip='draw', a=[(0.0, 64), (0.93, 66), (2.6, 68), (3.15, 69), (8.05, 77)],
+         zoom=[(68.5, 1.0, .5, .55), (69.5, 1.18, .5, .55), (76.6, 1.18, .5, .55), (77, 1.0, .5, .55)]),
     #   ... revealed and marked right
-    dict(clip='draw', a=[(9.6, 69), (12.02, 71.5), (12.5, 72)]),
-    # 6 practice: the list, into a reading ...
-    dict(clip='practice', a=[(3.3, 72), (5.66, 73.5), (7.6, 75)]),
-    #   ... its question answered
-    dict(clip='practice', a=[(11.7, 75), (12.08, 76), (13.3, 78)]),
-    #   ... then timed reading: shown, typed, right
-    dict(clip='readprac', a=[(0.6, 78), (0.97, 79), (4.20, 83), (6.93, 86), (7.9, 88)]),
+    dict(clip='draw', a=[(9.6, 77), (12.02, 83), (12.5, 84)]),
+    # 6 practice: the list of practice modes ...
+    dict(clip='practice', a=[(0.2, 84), (1.3, 86.5)]),
+    #   ... timed reading: shown, read, typed, 100%, right
+    dict(clip='readprac', a=[(0.6, 86.5), (0.97, 87.5), (2.57, 89.5), (4.20, 92), (6.93, 97), (7.9, 100)],
+         zoom=[(92.2, 1.0, .5, .55), (93.5, 1.2, .5, .55), (96.0, 1.2, .5, .55), (96.8, 1.0, .5, .55)]),
     # 7 join: back to the hub
-    dict(clip='onboard', a=[(1.95, 88), (5.6, END_BEAT)]),
+    dict(clip='onboard', a=[(1.95, 100), (5.6, END_BEAT)]),
 ]
-SCENE_BEATS = [16, 36, 56, 72, 88]          # train-pull slides land here
+SCENE_BEATS = [16, 40, 64, 84, 100]          # train-pull slides land here
 # captions: (beat, state); the first of a scene pops in, later ones cross-fade
-CAPS = [(0, 'hook'), (8, 'try'), (16, 'goalA'), (31, 'goalB'), (36, 'boardA'), (40, 'boardB'), (48, 'boardC'),
-        (56, 'modes'), (72, 'practice'), (88, 'join')]
+CAPS = [(0, 'hook'), (8, 'try'), (16, 'goalA'), (32, 'goalB'), (40, 'boardA'), (43, 'boardB'), (54, 'boardC'),
+        (64, 'modes'), (84, 'practice'), (100, 'join')]
 SAME_SCENE = {('goalA', 'goalB'), ('boardA', 'boardB'), ('boardB', 'boardC')}
-PILL_BEAT = 92
-FINAL_BEAT = 96
+PILL_BEAT = 104
+FINAL_BEAT = 108
 
 # ── easing ───────────────────────────────────────────────────────────────
 def clamp(x, a=0.0, b=1.0): return max(a, min(b, x))
@@ -74,6 +80,20 @@ class Seg:
         meta = json.load(open(f'{FR}/{self.clip}/frames.json'))
         self.times = [t for _, t in meta['frames']]; self.files = [f for f, _ in meta['frames']]
         self.events = meta['events']
+        self.zoom = [(bt(b), z, fx, fy) for b, z, fx, fy in d.get('zoom', [])]
+    def zoom_at(self, t):
+        z = self.zoom
+        if not z: return 1.0, .5, .5
+        if t <= z[0][0]: return z[0][1:]
+        if t >= z[-1][0]: return z[-1][1:]
+        i = max(k for k in range(len(z) - 1) if z[k][0] <= t); (t0, z0, x0, y0), (t1, z1, x1, y1) = z[i], z[i + 1]
+        p = in_out((t - t0) / (t1 - t0)); return z0 + (z1 - z0) * p, x0 + (x1 - x0) * p, y0 + (y1 - y0) * p
+    def image(self, t):
+        im = content(self.frame_at(t)); s, fx, fy = self.zoom_at(t)
+        if s <= 1.001: return im
+        w, h = int(PW / s), int(PH / s)
+        x = int(clamp(fx * PW - w / 2, 0, PW - w)); y = int(clamp(fy * PH - h / 2, 0, PH - h))
+        return im.crop((x, y, x + w, y + h)).resize((PW, PH), Image.LANCZOS)
     def src(self, t):  # output seconds -> source seconds (extrapolated at the ends)
         a = self.a
         if t <= a[0][1]: (s0, t0), (s1, t1) = a[0], a[1]
@@ -148,7 +168,7 @@ def screen(t):
         if tb - d <= t < tb:
             nxt = next(s for s in S if abs(s.t0 - tb) < 1e-6); prv = next(s for s in S if abs(s.t1 - tb) < 1e-6)
             p = in_out((t - (tb - d)) / d); v = abs(in_out((t + 1 / FPS - (tb - d)) / d) - p) * PW
-            strip = Image.new('RGB', (PW * 2, PH)); strip.paste(content(prv.frame_at(t)), (0, 0)); strip.paste(content(nxt.frame_at(t)), (PW, 0))
+            strip = Image.new('RGB', (PW * 2, PH)); strip.paste(prv.image(t), (0, 0)); strip.paste(nxt.image(t), (PW, 0))
             strip = smear(strip, 1 + v / 18)
             x = int(round(p * PW)); return strip.crop((x, 0, x + PW, PH))
     # a cut inside a scene: the old screen grows and fades, the new one settles
@@ -158,10 +178,10 @@ def screen(t):
         d = 0.22
         if tb - d / 2 <= t < tb + d / 2:
             p = out_cubic((t - (tb - d / 2)) / d)
-            a = scale_crop(content(S[k - 1].frame_at(t)), 1 + 0.07 * p)
-            b = scale_crop(content(S[k].frame_at(t)), 0.94 + 0.06 * p)
+            a = scale_crop(S[k - 1].image(t), 1 + 0.07 * p)
+            b = scale_crop(S[k].image(t), 0.94 + 0.06 * p)
             return Image.blend(a, b, p)
-    return content(cur.frame_at(t))
+    return cur.image(t)
 
 def phone_scale(t):
     b = t / B
@@ -321,7 +341,7 @@ def audio():
     with wave.open(f'{OUT}/mix.wav', 'wb') as w:
         w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(pcm.tobytes())
     # TikTok plays at about -14 LUFS; land there with true-peak headroom
-    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', f'{OUT}/mix.wav', '-af', 'loudnorm=I=-14:TP=-1.0:LRA=9', '-ar', '48000', f'{OUT}/mix_norm.wav'], check=True)
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', f'{OUT}/mix.wav', '-af', 'loudnorm=I=-14:TP=-1.5:LRA=9,alimiter=limit=0.8:attack=2:release=60:level=false', '-ar', '48000', f'{OUT}/mix_norm.wav'], check=True)
     for ev in placed[:0]: pass
     return placed
 

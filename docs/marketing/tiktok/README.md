@@ -1,6 +1,6 @@
 # TikTok promo: "Fed up with never reaching your Japanese goal?"
 
-`tsuji-tiktok.mp4` is 1080×1920, 30 fps and 47 s long, with AAC audio at
+`tsuji-tiktok.mp4` is 1080×1920, 30 fps and 53 s long, with AAC audio at
 −14 LUFS (TikTok's playback level). Every phone shot in it is live footage of
 the app, recorded in a phone-sized browser (390×780 CSS px, 3× pixel density,
 English UI, dark theme).
@@ -12,7 +12,7 @@ English UI, dark theme).
   license. It runs at 128 BPM in D major: a filtered two-bar intro with a
   riser, then a drop on "Try Tsuji!". After the drop it loops 王道進行
   (G maj7, A7, F#m7, Bm7) under a koto-like pluck in the major pentatonic,
-  and it resolves on D under the address.
+  and it resolves on D under the address (28 bars).
 - **The app's own sounds:** every click, card turn, "correct", fare tick,
   departure-board flap and chime is the sound the app played at that moment
   in the recording. The recorder logs each `playVoice` call. `render_sfx.mjs`
@@ -26,25 +26,27 @@ English UI, dark theme).
 
 ## The cut
 
-Every shot is re-timed so its taps fall on beats. Each scene starts on a
-downbeat and arrives with a train-pull slide (the boarding's own transition,
-with motion blur) and a whoosh. Cuts inside a scene are a quick zoom
-cross-fade. Captions pop in word by word on the beat, the highlight moves
-within a line as the footage changes, and the background glow breathes with
-the kick.
+One idea per caption, shown long enough to read. Footage plays close to
+real speed (about 1–1.3×; only door and gate animations run faster), and
+slow push-ins bring the part that matters close: the plan's date, the
+drawing grid, the 100% on the reading. Taps still fall on beats. Each scene
+starts on a downbeat with a train-pull slide (the boarding's own transition)
+and a whoosh, and cuts inside a scene are a quick zoom cross-fade. Captions
+pop in word by word on the beat, and the highlight moves within a line as the
+footage changes.
 
 | Time | Beat | Caption | Footage |
 | --- | --- | --- | --- |
 | 0:00 | 0 | Fed up with never reaching **your Japanese goal?** | The welcome hub, slowly pushing in |
-| 0:03.8 | 8 (drop) | 辻 Try **Tsuji!** | The phone punches in. Board is pressed on beat 10 and "Alex" is typed |
-| 0:07.5 | 16 | **Set up your goal** and follow your progress | Goal N4, the lines, rhythm, the hour (each pick on a beat), then the plan |
-| 0:14.5 | 31 | Set up your goal and **follow your progress** | Profile: the pass, the October calendar, the streak, reviews |
-| 0:16.9 | 36 | **Connect,** board and you are on track | "Keep your progress": email and password |
-| 0:18.8 | 40 | Connect, **board** and you are on track | The pass, Enter the station, the gate |
-| 0:22.5 | 48 | Connect, board and **you are on track** | Today, Depart, the 本日 door, a card turned on beat 52 and rated Correct on beat 54 |
-| 0:26.3 | 56 | Try **more complex learning modes** if you like it | The grammar ladder answered on beat 62, then 日 drawn stroke by stroke and marked right |
-| 0:33.8 | 72 | Assimilate your study with **the practice modes** | Practice list, a comprehension question answered, timed reading typed (100%) and Correct |
-| 0:41.3 | 88 | Join Tsuji right now on **tsuji.app** | The hub. The address stamps in on beat 92 and the last chord lands on beat 96 |
+| 0:03.8 | 8 (drop) | 辻 Try **Tsuji!** | The phone punches in, Board is pressed, "Alex" is typed |
+| 0:07.5 | 16 | **Set up your goal** and follow your progress | N4 picked, then "Your plan is ready", held, zooming onto Apr 24, 2027 |
+| 0:15.0 | 32 | Set up your goal and **follow your progress** | Profile: the pass, then the calendar and the 15-day streak |
+| 0:18.8 | 40 | **Connect,** board and you are on track | "Keep your progress" filled in, Create my account |
+| 0:20.2 | 43 | Connect, **board** and you are on track | The pass, Enter the station, the gate |
+| 0:25.3 | 54 | Connect, board and **you are on track** | Today (13 due, about 2 min), Depart, the 本日 door, one card turned and rated Correct |
+| 0:30.0 | 64 | Try **more complex learning modes** if you like it | The kanji modes list, Draw the kanji: 日 drawn stroke by stroke, revealed, Correct |
+| 0:39.4 | 84 | Assimilate your study with **the practice modes** | The practice list, then one timed reading: shown, typed, 100%, Correct |
+| 0:46.9 | 100 | Join Tsuji right now on **tsuji.app** | The hub. The address stamps in on beat 104 and the last chord lands on beat 108 |
 
 ## Before posting
 
