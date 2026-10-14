@@ -132,7 +132,7 @@ const silent = row => row.k === 'punct' || /^[＿_]+$/.test(row.t)
 export function longPlan(kind, banks, { lang = 'en', level = 'N5', part = 1, theme = null, ids = null, count = null, point = null } = {}) {
   const S = SAY[lang] || SAY.en
   const opts = { lang, script: 'kanji', slides: {}, types: {} }
-  const base = { kind, lang, level, line: LINE[kind], part }
+  const base = { kind, lang, level, line: LINE[kind], part, ids: !!ids, theme: null }
   const n = count || PART[kind]
   const slice = list => (ids ? list : list.slice((part - 1) * n, part * n))
   if (kind === 'vocab') {
@@ -142,7 +142,8 @@ export function longPlan(kind, banks, { lang = 'en', level = 'N5', part = 1, the
       const th = banks['themes.json'].themes[theme]
       if (!th) throw new Error(`no theme ${theme}`)
       words = th.words
-      title = S.title.theme(th.name?.[lang] || th.name?.en || theme)
+      base.theme = th.name?.[lang] || th.name?.en || theme
+      title = S.title.theme(base.theme)
     } else {
       words = banks[`words-${level}.json`].words
       title = S.title.vocab(level, ids ? 0 : part)
@@ -560,13 +561,106 @@ export function chapterText(tl) {
   return out.map(c => `${mmss(c.at)} ${c.title}`).join('\n')
 }
 
-/** The video's title and its description, chapters and credit included. */
-export function describe(plan, tl, site) {
-  const S = SAY[plan.lang] || SAY.en
-  const count = S.count[plan.kind]
-  const title = count ? `${plan.title} · ${count(plan.items.length)}` : plan.title
-  const body = [`${S.hook[plan.kind]} ${S.how[plan.kind]}`, '', chapterText(tl), '', `${S.study} ${site}`, S.voices]
-  return { title, description: body.join('\n') }
+// ── The video's page on YouTube ───────────────────────────────────
+// Its title is what a learner types (the level, the kind, how many), its
+// description says what the video does and how to use it, its chapters,
+// what the app is (only what it does today: the deck's figures are the
+// bank's own) and every credit its sound owes: the voices' VOICEVOX
+// Nemo, and 波音リツ when a lone syllable is the kana deck's recording.
+const LONE = /^[ぁ-んァ-ン][ゃゅょャュョ]?$/
+const PAGE = {
+  en: {
+    title: {
+      vocab: (lv, n, part, theme) => theme ? `Japanese vocabulary: ${theme} · ${n} words to hear and repeat` : `${n} JLPT ${lv} Japanese words · Hear them, repeat them, read them${part ? ` (part ${part})` : ''}`,
+      kanji: (lv, n, part) => `${n} JLPT ${lv} kanji · Stroke order, readings and words${part ? ` (part ${part})` : ''}`,
+      quiz: (lv, n, part) => `JLPT ${lv} Japanese quiz · ${n} questions, 5 seconds each${part ? ` (part ${part})` : ''}`,
+      grammar: (lv, p, meaning) => `${p} (“${meaning}”) explained · JLPT ${lv} Japanese grammar`,
+    },
+    lead: {
+      vocab: (lv, n, theme) => `${n} ${theme ? `words about ${theme.toLowerCase()}` : `words from the JLPT ${lv} list`}, one at a time. Read each one before it is revealed, then hear it said aloud.`,
+      kanji: (lv, n) => `${n} kanji from the JLPT ${lv} list, each drawn stroke by stroke, then its meaning, its readings and two words that use it, all said aloud.`,
+      quiz: (lv, n) => `${n} questions from the JLPT ${lv} level: readings, meanings, kanji and grammar in real sentences. Five seconds each, then the answer and why.`,
+      grammar: (lv, p, meaning) => `Everything about ${p}, one of the JLPT ${lv} grammar points: what it means (“${meaning}”), how to build it, and how it sounds in real sentences.`,
+    },
+    howHead: 'How it works', useHead: 'Get the most out of it', chapHead: 'Chapters', appHead: 'Keep going with Tsuji', creditHead: 'Credits',
+    how: {
+      vocab: ex => ['The word appears alone: read it before the three lamps go out.', 'Its reading is said twice: say it with the voice.', ex.all ? 'Then its meaning, and a sentence it is used in, said aloud.' : ex.some ? `Then its meaning, and for ${ex.some} of them a sentence it is used in, said aloud.` : 'Then its meaning.'],
+      kanji: ['Watch the strokes in their order: try to guess the kanji before its meaning appears.', 'Its ON and KUN readings are said one by one.', 'Two everyday words show it at work.'],
+      quiz: ['Read the question and pick your answer before the ring empties.', 'The right answer is shown with the reason, and the sentence is said.', 'Keep count: there is a score check every ten questions.'],
+    },
+    grammarParts: n => [`What it does and how to build it`, `How it is used`, `${n.ex} example sentences, each said twice and cut word by word`, n.careful && 'The mistake to avoid', n.compare && `Not to be confused with ${n.compare}`, n.twists && `${n.twists} twist${n.twists > 1 ? 's' : ''}: test your understanding`, n.scene && 'A short conversation', n.quiz && `${n.quiz} question${n.quiz > 1 ? 's' : ''} to check yourself`, 'A recap'].filter(Boolean),
+    use: { vocab: 'Say every word out loud before you hear it. Come back in two or three days: what you still know then is what you have learned.', kanji: 'Trace each kanji with your finger as it is drawn. Come back in two or three days and pause on each one before it is revealed.', quiz: 'Pause if you need more time. Tell us your score in the comments!', grammar: 'Pause on each example and say it aloud before the voice does. Then try the questions without looking back.' },
+    app: (f, site) => `Tsuji is a Japanese app built on spaced repetition: ${f.words} words, ${f.kanji} kanji and ${f.points} grammar points, from N5 to N1, each brought back just before you would forget it. The kana line is free for good, with no ads and no trackers.\n${site}`,
+    credits: kana => [`Voices: VOICEVOX Nemo.`, kana && 'Kana voice: 波音リツ (Canon).', 'Music: made for Tsuji.'].filter(Boolean).join(' '),
+    tags: (lv, kind) => ['learn Japanese', 'Japanese', `JLPT ${lv}`, 'JLPT', `${lv} ${({ vocab: 'vocabulary', kanji: 'kanji', quiz: 'quiz', grammar: 'grammar' })[kind]}`, ({ vocab: 'Japanese vocabulary', kanji: 'kanji stroke order', quiz: 'Japanese quiz', grammar: 'Japanese grammar' })[kind], 'Japanese for beginners', 'nihongo', '日本語'],
+    hashtags: lv => lv ? `#LearnJapanese #Japanese #JLPT #JLPT${lv} #日本語` : '#LearnJapanese #Japanese #JapaneseVocabulary #日本語',
+  },
+  fr: {
+    title: {
+      vocab: (lv, n, part, theme) => theme ? `Vocabulaire japonais : ${theme} · ${n} mots à écouter et répéter` : `${n} mots de japonais du JLPT ${lv} · Écoute, répète, lis${part ? ` (partie ${part})` : ''}`,
+      kanji: (lv, n, part) => `${n} kanji du JLPT ${lv} · Ordre des traits, lectures et mots${part ? ` (partie ${part})` : ''}`,
+      quiz: (lv, n, part) => `Quiz de japonais JLPT ${lv} · ${n} questions, 5 secondes chacune${part ? ` (partie ${part})` : ''}`,
+      grammar: (lv, p, meaning) => `${p} (« ${meaning} ») expliqué · Grammaire japonaise JLPT ${lv}`,
+    },
+    lead: {
+      vocab: (lv, n, theme) => `${n} ${theme ? `mots sur le thème ${theme.toLowerCase()}` : `mots de la liste du JLPT ${lv}`}, un par un. Lis chacun avant qu’il soit révélé, puis écoute-le prononcé.`,
+      kanji: (lv, n) => `${n} kanji de la liste du JLPT ${lv}, chacun tracé trait par trait, puis son sens, ses lectures et deux mots qui l’emploient, le tout dit à voix haute.`,
+      quiz: (lv, n) => `${n} questions du niveau JLPT ${lv} : lectures, sens, kanji et grammaire dans de vraies phrases. Cinq secondes chacune, puis la réponse et pourquoi.`,
+      grammar: (lv, p, meaning) => `Tout sur ${p}, un point de grammaire du JLPT ${lv} : ce qu’il veut dire (« ${meaning} »), comment le former, et comment il sonne dans de vraies phrases.`,
+    },
+    howHead: 'Comment ça marche', useHead: 'Pour en tirer le meilleur', chapHead: 'Chapitres', appHead: 'Continue avec Tsuji', creditHead: 'Crédits',
+    how: {
+      vocab: ex => ['Le mot apparaît seul : lis-le avant que les trois lampes s’éteignent.', 'Sa lecture est dite deux fois : répète-la avec la voix.', ex.all ? 'Puis son sens, et une phrase qui l’emploie, dite à voix haute.' : ex.some ? `Puis son sens et, pour ${ex.some} d’entre eux, une phrase qui l’emploie, dite à voix haute.` : 'Puis son sens.'],
+      kanji: ['Regarde les traits dans leur ordre : devine le kanji avant que son sens apparaisse.', 'Ses lectures ON et KUN sont dites une à une.', 'Deux mots du quotidien le montrent à l’œuvre.'],
+      quiz: ['Lis la question et choisis ta réponse avant que l’anneau se vide.', 'La bonne réponse s’affiche avec la raison, et la phrase est dite.', 'Compte tes points : un point d’étape toutes les dix questions.'],
+    },
+    grammarParts: n => [`Ce qu’il fait et comment le former`, `Comment l’employer`, `${n.ex} phrases d’exemple, dites deux fois et découpées mot à mot`, n.careful && 'L’erreur à éviter', n.compare && `À ne pas confondre avec ${n.compare}`, n.twists && `${n.twists} variante${n.twists > 1 ? 's' : ''} pour tester ta compréhension`, n.scene && 'Une courte conversation', n.quiz && `${n.quiz} question${n.quiz > 1 ? 's' : ''} pour vérifier`, 'Un récap'].filter(Boolean),
+    use: { vocab: 'Dis chaque mot à voix haute avant de l’entendre. Reviens dans deux ou trois jours : ce que tu sais encore, tu l’as appris.', kanji: 'Trace chaque kanji du doigt pendant qu’il se dessine. Reviens dans deux ou trois jours et mets pause avant chaque révélation.', quiz: 'Mets pause s’il te faut plus de temps. Donne ton score en commentaire !', grammar: 'Mets pause sur chaque exemple et dis-le avant la voix. Puis réponds aux questions sans revenir en arrière.' },
+    app: (f, site) => `Tsuji est une appli de japonais fondée sur la répétition espacée : ${f.words} mots, ${f.kanji} kanji et ${f.points} points de grammaire, du N5 au N1, chacun ramené juste avant que tu l’oublies. La ligne des kana est gratuite pour de bon, sans pub et sans traqueur.\n${site}`,
+    credits: kana => [`Voix : VOICEVOX Nemo.`, kana && 'Voix des kana : 波音リツ (Canon).', 'Musique : faite pour Tsuji.'].filter(Boolean).join(' '),
+    tags: (lv, kind) => ['apprendre le japonais', 'japonais', `JLPT ${lv}`, 'JLPT', `${({ vocab: 'vocabulaire', kanji: 'kanji', quiz: 'quiz', grammar: 'grammaire' })[kind]} ${lv}`, ({ vocab: 'vocabulaire japonais', kanji: 'ordre des traits kanji', quiz: 'quiz japonais', grammar: 'grammaire japonaise' })[kind], 'japonais débutant', 'nihongo', '日本語'],
+    hashtags: lv => lv ? `#ApprendreLeJaponais #Japonais #JLPT #JLPT${lv} #日本語` : '#ApprendreLeJaponais #Japonais #VocabulaireJaponais #日本語',
+  },
+}
+export const LONG_PAGE = PAGE
+
+/** The video's title, description and tags. `figures` is the bank's
+ *  index.json figures: the app's deck, as the description counts it. */
+export function describe(plan, tl, site, figures = null) {
+  const P = PAGE[plan.lang] || PAGE.en
+  const n = plan.items.length
+  const part = plan.part && !plan.ids && !plan.theme ? plan.part : 0
+  const lv = plan.level
+  const first = plan.items[0] || {}
+  const theme = plan.theme
+  const title = plan.kind === 'grammar' ? P.title.grammar(lv, plan.point, first.meaning) : P.title[plan.kind](lv, n, part, theme)
+  const lead = plan.kind === 'grammar' ? P.lead.grammar(lv, plan.point, first.meaning) : P.lead[plan.kind](lv, n, theme)
+  let how
+  if (plan.kind === 'grammar') {
+    const count = type => plan.items.filter(x => x.type === type).length
+    how = P.grammarParts({
+      ex: count('gex'), careful: count('gcareful'), compare: plan.items.find(x => x.type === 'gcompare')?.p,
+      twists: plan.items.filter(x => x.twist).length, scene: count('gscene'), quiz: plan.items.filter(x => x.type === 'q' && !x.twist).length,
+    })
+  } else if (plan.kind === 'vocab') {
+    const some = plan.items.filter(x => x.ex).length
+    how = P.how.vocab({ all: some === n, some })
+  } else how = P.how[plan.kind]
+  const kana = tl.cues.some(c => LONE.test(c.text))
+  const fmt = x => Number(x).toLocaleString(plan.lang === 'fr' ? 'fr-FR' : 'en-US')
+  const deck = figures ? { words: fmt(figures.words), kanji: fmt(figures.kanji), points: fmt(figures.points) } : null
+  const body = [
+    lead, '',
+    `▸ ${P.howHead}`, ...how.map(x => `• ${x}`), '',
+    `▸ ${P.useHead}`, P.use[plan.kind], '',
+    `▸ ${P.chapHead}`, chapterText(tl), '',
+    ...(deck ? [`▸ ${P.appHead}`, P.app(deck, site), ''] : [site, '']),
+    `▸ ${P.creditHead}`, P.credits(kana), '',
+    theme ? P.hashtags(null) : P.hashtags(lv),
+  ]
+  // A theme's words span the levels: no level is named for it.
+  const tags = [...new Set(P.tags(lv, plan.kind).filter(t => !theme || !/JLPT|N\d/.test(t)))].join(', ')
+  return { title, description: body.join('\n'), tags }
 }
 
 // ── Drawing ───────────────────────────────────────────────────────

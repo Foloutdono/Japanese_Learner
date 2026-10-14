@@ -66,9 +66,40 @@ def kana_clip(text: str) -> Path | None:
     return path if path and path.exists() else None
 
 
+# The kana deck was recorded to teach a sound: each syllable sung on one
+# held pitch (A3) for half a second. Said in a sentence's place it is
+# tuned to sound spoken (TUNE, plan 214): the vowel let go after
+# SPOKEN_S, the pitch falling FALL semitones across it as a word said
+# alone falls, its level decaying rather than held.
+TUNE = "spoken1"   # in the cache's names: a new tuning remakes the clips
+SPOKEN_S = 0.30    # the syllable's length, its sound's start to its fade
+FADE_S = 0.07
+FALL = 2.5         # semitones, from its start to its end
+DECAY = 0.55       # the level at its end against its start
+
+
+def spoken(a, rate: int = VOICE_RATE):
+    """A held, sung syllable made a spoken one (see TUNE)."""
+    import numpy as np
+    keep = min(len(a), int((SPOKEN_S + FADE_S) * rate * 2 ** (FALL / 12)))
+    a = a[:keep]
+    # The pitch falls by reading the clip ever slower: a rate gliding from
+    # a little above 1 to FALL semitones under it, its mean near 1.
+    top, bottom = 2 ** (FALL / 24), 2 ** (-FALL / 24)
+    step = np.linspace(top, bottom, len(a))
+    where = np.concatenate([[0], np.cumsum(step)[:-1]])
+    where = where[where <= len(a) - 1]
+    out = np.interp(where, np.arange(len(a)), a)
+    n = min(len(out), int((SPOKEN_S + FADE_S) * rate))
+    out = out[:n] * np.linspace(1, DECAY, n)
+    fade = min(n, int(FADE_S * rate))
+    out[n - fade:] *= 0.5 + 0.5 * np.cos(np.linspace(0, np.pi, fade))
+    return out.astype(np.float32)
+
+
 def from_kana_clip(path: Path) -> bytes:
-    """A kana clip as the engine's PCM: mono at VOICE_RATE, its silence
-    trimmed to a breath either side, at the engine's speaking level."""
+    """A kana clip as the engine's PCM: mono at VOICE_RATE, starting on its
+    sound, said rather than sung (spoken), at the engine's speaking level."""
     import subprocess
 
     import numpy as np
@@ -79,6 +110,7 @@ def from_kana_clip(path: Path) -> bytes:
     if loud.size:
         pad = int(0.05 * VOICE_RATE)
         a = a[max(0, loud[0] - pad):loud[-1] + pad]
+    a = spoken(a)
     speech = a[np.abs(a) >= GATE]
     rms = float(np.sqrt(np.mean(speech ** 2))) if speech.size else 0
     a = a * (min(4.0, SPEECH_RMS / rms) if rms else 1.0)
@@ -94,7 +126,7 @@ def clip_name(cue: dict, rev: str) -> str:
     """A line's file in the cache: new with a new voice, or a remade kana clip."""
     kana = kana_clip(cue["text"])
     if kana:
-        rev = "kana|" + hashlib.sha1(kana.read_bytes()).hexdigest()[:12]
+        rev = f"kana|{TUNE}|" + hashlib.sha1(kana.read_bytes()).hexdigest()[:12]
     return hashlib.sha1(f"{rev}|{cue_key(cue)}".encode()).hexdigest()[:16] + ".wav"
 
 

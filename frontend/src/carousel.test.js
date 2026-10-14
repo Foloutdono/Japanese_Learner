@@ -964,14 +964,31 @@ describe('the long videos (plan 214)', () => {
       expect(lines.length, kind).toBeGreaterThanOrEqual(3)
       const at = lines.map(l => l.split(' ')[0].split(':').reduce((m, s) => m * 60 + Number(s), 0))
       for (let i = 1; i < at.length; i++) expect(at[i] - at[i - 1], `${kind} ${lines[i]}`).toBeGreaterThanOrEqual(10)
-      const { title, description } = describeVideo(pl, tl, 'https://example.org')
+      const { title, description, tags } = describeVideo(pl, tl, 'https://example.org', bank('index.json').figures)
       expect(title.length, kind).toBeLessThanOrEqual(100)
+      expect(title, kind).toMatch(/N5/)
       expect(description, kind).toMatch(/VOICEVOX Nemo/)
+      expect(description, kind).toContain(chapterText(tl))
+      expect(description, kind).toContain('https://example.org')
+      // The app's deck counted from the bank, never written by hand.
+      expect(description, kind).toContain(bank('index.json').figures.kanji.toLocaleString('en-US'))
+      // A lone syllable is the kana deck's recording: its voice is credited.
+      expect(description.includes('波音リツ'), kind).toBe(tl.cues.some(c => /^[ぁ-んァ-ン][ゃゅょャュョ]?$/.test(c.text)))
+      expect(tags.length, kind).toBeLessThanOrEqual(500)
       // The voice is measured line by line under the key long_video_audio.py files it by.
       expect(new Set(tl.cues.map(cueKey)).size).toBeGreaterThan(0)
     }
     expect(read('../backend/scripts/long_video_audio.py')).toContain(`return f"{cue['who']}|{'slow' if cue.get('slow') else ''}|{cue['text']}"`)
     expect(cueKey({ who: 'reader', slow: true, text: 'あ' })).toBe('reader|slow|あ')
+    // A sentence for some words only: the description says how many.
+    const vocab = longPlan('vocab', files, { level: 'N5' })
+    const some = vocab.items.filter(x => x.ex).length
+    expect(describeVideo(vocab, timeline(vocab), 'x').description).toContain(`for ${some} of them`)
+    // A theme spans the levels: none is named.
+    const theme = longPlan('vocab', files, { theme: Object.keys(bank('themes.json').themes)[0], lang: 'fr' })
+    const page = describeVideo(theme, timeline(theme), 'x')
+    expect(page.title).not.toMatch(/JLPT|N\d/)
+    expect(page.tags).not.toMatch(/JLPT|N\d/)
   })
 
   it('draws a still once: two frames that look the same share a key', () => withPath2D(() => {

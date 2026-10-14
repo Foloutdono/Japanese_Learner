@@ -530,9 +530,12 @@ be learnt.
 B for a scene) into `long/cache/`, keyed by the line and the voice's
 revision, and reports how long each lasts. A line of one syllable (め,
 ニ, the particle に, は said わ) is the kana deck's own recording
-(`public/sounds/kanas/`, as `kana_data.sound_of` names it), trimmed to
-its sound and brought to the engine's level, since a lone kana is what
-that deck was recorded for; the timeline is laid on
+(`public/sounds/kanas/`, as `kana_data.sound_of` names it), since a
+lone kana is what that deck was recorded for. Recorded to teach the
+sound, each is sung on one held pitch for half a second; in a video it
+is tuned to be said (`long_video_audio.spoken`, `TUNE`): let go after
+0.3s, its pitch falling 2.5 semitones as a word said alone falls, its
+level decaying, then brought to the engine's level; the timeline is laid on
 those lengths, so a reveal lands on its voice. It then mixes the lines
 with the app's sounds (`sound.eventAudio`, the shipped recipes at the
 app's level) and a bed of music it plays itself, soft chords and a slow
@@ -549,9 +552,15 @@ node carousel/long/render.mjs --kind kanji --stills 12,40                    # t
 ```
 
 It writes, under `carousel/long/out/` (`--out` elsewhere), the MP4
-(1920×1080, 30 fps, H.264 and AAC), a thumbnail, and a text file: the
-title, then the description with its chapters (YouTube's: from 0:00,
-none under ten seconds) and the credit. Each still is drawn once
+(1920×1080, 30 fps, H.264 and AAC), a thumbnail, and the video's page
+(`long.describe`) as a text file: a title a learner would search for
+(the level, the kind, how many: "48 JLPT N5 Japanese words · Hear them,
+repeat them, read them (part 1)"), and a description that says what
+the video does and how to use it, its chapters (YouTube's: from 0:00,
+none under ten seconds), what the app is (only what it does today, its
+deck counted from the bank's figures), the credits (VOICEVOX Nemo, and
+波音リツ when a kana clip is heard) and hashtags, then the tags. A
+theme's words span the levels, so its page names none. Each still is drawn once
 (`drawLong` returns a key the same for two frames that look the same),
 so ten minutes take about four. It needs the voice engine, the
 backend's Python with numpy, ffmpeg and Playwright's Chromium.

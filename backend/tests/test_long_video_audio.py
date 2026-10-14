@@ -45,6 +45,31 @@ def test_a_lone_syllable_is_the_kana_decks_recording():
     assert np.flatnonzero(np.abs(pcm) >= lva.GATE)[0] <= int(0.06 * lva.VOICE_RATE)
 
 
+def _f0(x, rate):
+    """The pitch at each 50ms of voiced sound, by autocorrelation."""
+    out = []
+    for i in range(0, len(x) - 1200, 600):
+        f = x[i:i + 1200] - x[i:i + 1200].mean()
+        if np.sqrt(np.mean(f ** 2)) < 0.02:
+            continue
+        c = np.correlate(f, f, "full")[1199:]
+        lo, hi = rate // 400, rate // 80
+        out.append(rate / (lo + np.argmax(c[lo:hi])))
+    return out
+
+
+def test_a_sung_syllable_is_said():
+    # The deck holds each syllable half a second on one pitch, to teach it;
+    # in a video it is let go sooner and falls, as a word said alone does.
+    path = lva.kana_clip("は")
+    pcm = np.frombuffer(lva.from_kana_clip(path), dtype="<i2").astype(np.float64) / 32768
+    assert len(pcm) / lva.VOICE_RATE <= lva.SPOKEN_S + lva.FADE_S + 0.06
+    pitch = _f0(pcm, lva.VOICE_RATE)
+    assert 12 * np.log2(np.mean(pitch[:3]) / np.mean(pitch[-3:])) > 1.5
+    # A new tuning is a new file in the cache.
+    assert lva.TUNE in f"kana|{lva.TUNE}|"
+
+
 def test_a_line_lands_on_its_time_over_a_quiet_bed(tmp_path):
     cache, sfx = tmp_path / "cache", tmp_path / "sfx"
     cache.mkdir()
