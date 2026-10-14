@@ -530,7 +530,7 @@ const KINDS = {
     const sizes = [FS.heading, FS.title, FS.lead, FS.body, FS.sm]
     let a = null, b = null
     for (let i = 0; i < sizes.length; i++) {
-      a = careful ? fit(ctx, careful, { weight: careful.length > 70 ? 500 : 700, sizes: [sizes[i]], maxW: f.w, maxLines: 9, lh: 1.25, balanced: false }) : null
+      a = careful ? fit(ctx, careful, { weight: careful.length > 70 ? 500 : 700, sizes: [sizes[i]], maxW: f.w, maxLines: 20, lh: 1.25, balanced: false }) : null
       b = cmpText ? fit(ctx, cmpText, { weight: 500, sizes: [sizes[Math.min(i + 1, sizes.length - 1)]], maxW: f.w, maxLines: 9, lh: 1.3, balanced: false }) : null
       if ((a ? paragraphH(a, 1.25) + SP[8] : 0) + (b ? paragraphH(b, 1.3) : 0) <= room) break
     }
@@ -2253,7 +2253,10 @@ function quizSlide(c, q, revealed, head, number = 1) {
   // read, so their room is kept before the sentence over them takes its own.
   const textW0 = (f.w - 3 * (cols + 1)) / cols - SP[5] - 60 - SP[4] * 2
   const texts = q.choices.filter(x => !x.rows)
-  const rowOf = (x, z) => z * (1.1 + (Math.min(3, fit(ctx, x.text, { weight: x.fam === 'jp' ? 500 : 700, fam: x.fam || 'latin', sizes: [z], maxW: textW0, maxLines: 9, balanced: false }).lines.length) - 1) * 1.18) + SP[3] * 2
+  // A written answer keeps to three lines, a whole sentence's to `q.lines`
+  // (a trap's readings, plan 200n).
+  const maxAnswer = q.lines || 3
+  const rowOf = (x, z) => z * (1.1 + (Math.min(maxAnswer, fit(ctx, x.text, { weight: x.fam === 'jp' ? 500 : 700, fam: x.fam || 'latin', sizes: [z], maxW: textW0, maxLines: 9, balanced: false }).lines.length) - 1) * 1.18) + SP[3] * 2
   const textRow = z => Math.max(0, ...texts.map(x => rowOf(x, z)))
   // One under the other, each written answer's row is as tall as it needs;
   // side by side, as tall as the tallest.
@@ -2383,7 +2386,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
   // A Japanese answer is one word or one phrase: on one line a rung
   // smaller rather than broken between its kana.
   const jpAnswers = q.choices.some(ch => !ch.rows && ch.fam === 'jp')
-  const common = sizeFor(1, FS.title) || (jpAnswers ? sizeFor(1, FS.sm) : null) || sizeFor(2, FS.lead) || sizeFor(3, 0) || FS.sm
+  const common = sizeFor(1, FS.title) || (jpAnswers ? sizeFor(1, FS.sm) : null) || sizeFor(2, FS.lead) || sizeFor(3, 0) || sizeFor(maxAnswer, 0) || FS.sm
   q.choices.forEach((choice, i) => {
     const cx = f.x + HL + (i % cols) * (cw + HL)
     const cy = cyOf(i)
@@ -2406,7 +2409,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
       drawSentence(ctx, L, tx, cy + (chh - L.h) / 2, 'left', () => ({ ink: dim ? ink2 : ink, rule: null, ruby: ink2 }))
     } else {
       const fam = choice.fam || 'latin'
-      const b = fit(ctx, choice.text, { weight: fam === 'jp' ? 500 : 700, fam, sizes: [common], maxW: tw, maxH: chh - SP[3], maxLines: 3, balanced: false })
+      const b = fit(ctx, choice.text, { weight: fam === 'jp' ? 500 : 700, fam, sizes: [common], maxW: tw, maxH: chh - SP[3], maxLines: maxAnswer, balanced: false })
       paragraph(ctx, b, tx, cy + chh / 2 - paragraphH(b) / 2, dim ? ink2 : ink)
     }
     if (revealed && right) marked(ctx, p, cx + SP[5] + r, cy + chh / 2, r)
