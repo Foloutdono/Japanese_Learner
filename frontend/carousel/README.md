@@ -1,4 +1,4 @@
-# The carousel studio (plans 210–210n, 212)
+# The carousel studio (plans 210–210n, 212, 213)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -418,6 +418,45 @@ the stages, "due", Depart, a test holds them to `locales/`). It says
 "start free", the kana line free for good, no ads and no trackers; it
 never prices a mode nor says "early access", and a test fails if it does.
 
+## The word echo (plan 213)
+
+A ten-second 9:16 clip that says one word over and over (`echo.js`,
+the source 木霊 "Word echo"): a theme's pictured word on the app's
+review card (its picture, its kanji, its reading in gold, its meaning),
+and each time the reader says it again its reading lands somewhere new
+on the screen, any size and tilt, gold while it is said, until the
+screen is full of it. The owner picked the scatter from four drawn
+layouts (a practice grid, columns, an echo trailing away).
+
+**The rhythm is the word's.** Between two sayings there is always
+`ECHO.gap` (0.3s) of silence after the voice stops, so a long word is
+said fewer times than a short one (いぬ seventeen times, じてんしゃ ten),
+never a count fixed in advance. The first saying is at 0.6s, once the
+card is in; the last ends inside the ten seconds (`echo.beats`). Where
+the voice starts and stops in its clip is measured from the sound
+(`echo.voiceSpan`, -45dB), so the gap is silence and not the engine's
+padding.
+
+**The voice is the app's.** `voices/` holds the reading of every
+pictured word, made by the path a card's speaker button takes
+(`study/word_tts.clip_for`: the reader, slot 0, at its tempo), so the
+echo says a word exactly as the app does; `voices/index.json` names each
+clip and the voice's revision, which a test holds equal to the app's
+`VOICE_REV`. Its licence's one condition is the credit "VOICEVOX Nemo",
+printed on the card's foot and in the caption; it also forbids using
+the audio for machine learning, so never publish the clips as a
+dataset. After a change of voice or of the themes:
+
+```bash
+cd backend
+VOICEVOX_URL=http://localhost:50121 python -m scripts.carousel_voices --yes
+```
+
+"Download the clip" encodes the ten seconds as the promo clips are
+encoded (H.264, the voice as AAC or Opus), the voice mixed by
+`sound.clipAudio`, which takes a recorded clip (`src`) beside the app's
+own sounds (`key`).
+
 ## The code
 
 | File | Does |
@@ -431,6 +470,8 @@ never prices a mode nor says "early access", and a test fails if it does.
 | `strings.js` | every label a slide prints, in English and French |
 | `promo.js` | the promo stories: their plans from the bank, their frames (plan 212) |
 | `app.js` | the app's own parts, drawn at its measures, and Today's print (plan 212) |
+| `echo.js` | the word echo: its plan, its rhythm, its scatter and its clip (plan 213) |
+| `sound.js` | a clip's sound: the app's own events and recorded clips, mixed (plans 212, 213) |
 | `studio.js` | the page: the pickers, the previews, the export |
 
 ## Running it

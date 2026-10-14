@@ -33,25 +33,35 @@ const TAIL = 4
 // kept at its level against the others.
 const PEAK = 0.5
 
-/** The score rendered: [left, right] Float32Arrays, `seconds` long at RATE. */
+/** The score rendered: [left, right] Float32Arrays, `seconds` long at RATE.
+ *  A sound is an app event (`key`) or a recorded clip (`src`). */
 export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices) {
   const { VOICE_EVENTS, voiceOut, voiceLevel } = voices
   const n = Math.round(seconds * RATE)
   const mix = [new Float32Array(n), new Float32Array(n)]
-  for (const { at, key, gain = 1 } of sounds) {
-    const event = VOICE_EVENTS.find(e => e.key === key)
-    if (!event || at >= seconds) continue
-    const variant = event.variants[0]
-    const len = Math.max(1, Math.round(Math.min(TAIL, seconds - at) * RATE))
-    const ctx = new OfflineAudioContext(2, len, RATE)
-    const level = voiceLevel(event, variant)
-    variant.play(ctx, voiceOut(ctx, ctx.destination, { ...level, gain: level.gain * gain }))
-    const out = await ctx.startRendering()
+  const clips = new Map()
+  for (const { at, key, src, gain = 1 } of sounds) {
+    if (at >= seconds) continue
+    let out
+    if (src) {
+      // A recorded clip (the word echo's voice, plan 213), decoded once, at its own level.
+      if (!clips.has(src)) clips.set(src, decoded(src))
+      out = await clips.get(src)
+    } else {
+      const event = VOICE_EVENTS.find(e => e.key === key)
+      if (!event) continue
+      const variant = event.variants[0]
+      const len = Math.max(1, Math.round(Math.min(TAIL, seconds - at) * RATE))
+      const ctx = new OfflineAudioContext(2, len, RATE)
+      const level = voiceLevel(event, variant)
+      variant.play(ctx, voiceOut(ctx, ctx.destination, { ...level, gain: level.gain * gain }))
+      out = await ctx.startRendering()
+    }
     const from = Math.round(at * RATE)
     for (let ch = 0; ch < 2; ch++) {
-      const src = out.getChannelData(ch)
+      const data = out.getChannelData(Math.min(ch, out.numberOfChannels - 1))
       const dst = mix[ch]
-      for (let i = 0; i < src.length && from + i < n; i++) dst[from + i] += src[i]
+      for (let i = 0; i < data.length && from + i < n; i++) dst[from + i] += data[i] * (src ? gain : 1)
     }
   }
   let peak = 0
@@ -64,6 +74,12 @@ export async function clipAudio(sounds, seconds, voices = globalThis.TsujiVoices
   const fade = Math.round(0.05 * RATE)
   for (const ch of mix) for (let i = 0; i < fade; i++) ch[n - 1 - i] *= i / fade
   return mix
+}
+
+/** A clip fetched and decoded at RATE (a mono clip plays on both sides). */
+export async function decoded(src) {
+  const bytes = await (await fetch(src)).arrayBuffer()
+  return new OfflineAudioContext(1, 1, RATE).decodeAudioData(bytes)
 }
 
 /** The score as a 16-bit stereo WAV, for a tool that muxes it with the frames. */

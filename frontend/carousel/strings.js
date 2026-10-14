@@ -107,6 +107,7 @@ export const STRINGS = {
       spelling: { name: 'Kanji spelling', desc: 'The word and its kin heard in kana: how is each written?' },
       impostor: { name: 'Find the impostor', desc: 'Five words of a theme and one that is not' },
       story: { name: 'Story', desc: 'The app itself, frame by frame, for a 9:16 story' },
+      echo: { name: 'Word echo', desc: 'A word said again and again for ten seconds, its reading filling the screen' },
     },
     modes: {
       words: n => `${n} words`,
@@ -299,6 +300,7 @@ export const STRINGS = {
       spelling: { name: 'En kanji', desc: 'Le mot et sa famille en kana : comment s’écrit chacun ?' },
       impostor: { name: 'L’intrus', desc: 'Cinq mots d’un thème et un intrus' },
       story: { name: 'Story', desc: 'L’app elle-même, image par image, pour une story 9:16' },
+      echo: { name: 'Mot en écho', desc: 'Un mot répété pendant dix secondes, sa lecture remplissant l’écran' },
     },
     modes: {
       words: n => `${n} mots`,

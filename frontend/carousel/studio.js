@@ -12,7 +12,8 @@ import { BONUS, LEVELS, MAX_QUESTIONS, OPTIONAL, SOURCES, TITLE_MAX, depsOf, ite
 import { STRINGS } from './strings.js'
 import { PROMO, STORIES } from './promo.js'
 import { PRINT_HOURS, loadPrint } from './app.js'
-import { RATE, clipAudio, loadVoices } from './sound.js'
+import { RATE, clipAudio, decoded, loadVoices } from './sound.js'
+import { voiceSpan } from './echo.js'
 import { MARK_INK, MARK_ROAD } from '../src/components/ui/markPaths.js'
 
 const STORE = 'tsuji-carousel'
@@ -30,7 +31,7 @@ const TOGGLE_LABELS = {
   apart: 'What tells them apart', pair: 'The two side by side', careful: 'Watch out',
 }
 const T = STRINGS.en
-const LIST_NAME = { promo: 'Story', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
+const LIST_NAME = { promo: 'Story', echo: 'Word', sentence: 'Sentence', translation: 'Sentence', lesson: 'Grammar point', word: 'Word', kanji: 'Kanji', kana: 'Kana', passage: 'Passage', theme: 'Theme', lookalike: 'Set', dialogue: 'Conversation', trap: 'Trap' }
 
 const DEFAULTS = {
   source: 'sentence', level: 'N5', kanaSet: 'hiragana', story: 'pitch', hour: 'day', ids: { sentence: 'N5.4', translation: 'N5.4', 'promo:card': '友達::ともだち', 'promo:analyser': 'N5.4', 'promo:exam': 'N5.20' },
@@ -90,6 +91,23 @@ const prints = new Map()
 function printFor(hour) {
   if (!prints.has(hour)) prints.set(hour, loadPrint(hour, { base: BASE }).catch(e => { prints.delete(hour); throw e }))
   return prints.get(hour)
+}
+// A word echo's voice (plan 213): voices/index.json names each reading's
+// clip; the clip is decoded once, and where its voice starts and stops
+// measured from the sound.
+const spoken = new Map()
+function voiceFor(reading) {
+  if (!spoken.has(reading)) {
+    spoken.set(reading, (async () => {
+      const index = await (await fetch('voices/index.json', { cache: 'no-cache' })).json()
+      const file = index.words[reading]
+      if (!file) throw new Error(`no voice for ${reading}`)
+      const src = `voices/${file}`
+      const audio = await decoded(src)
+      return { src, ...voiceSpan(audio.getChannelData(0), audio.sampleRate) }
+    })().catch(e => { spoken.delete(reading); throw e }))
+  }
+  return spoken.get(reading)
 }
 
 // ── Fonts: the canvas draws only what the document has loaded ──
@@ -347,18 +365,28 @@ async function render() {
   }
   const pl = plan(state.source, data, id, opts, deps)
   if (!pl) return
+  // A word echo is timed on its voice: heard before it is drawn.
+  const echo = state.source === 'echo'
+  if (echo) {
+    opts.voice = await voiceFor(pl.echo.word.r).catch(e => { status(`The word's voice did not load (${e.message}).`); return null })
+    if (mine !== token) return
+  }
+  // A clip (a promo story, a word echo) is a story and nothing else.
+  const clipped = promo || echo
   opts.picks = state.picks[pickKey()]
   // A type the item cannot be drawn as falls back to the walk.
   const types = TYPES.map(x => x.id).filter(x => available(x, pl))
   if (!types.includes(state.type)) { state.type = types.includes('plates') ? 'plates' : types[0]; renderToggles() }
-  for (const el of document.querySelectorAll('[data-promo]')) el.hidden = el.dataset.promo === 'only' ? !promo : promo
+  for (const el of document.querySelectorAll('[data-promo]')) el.hidden = el.dataset.promo === 'only' ? !promo : clipped
+  $('#export-clip').hidden = !clipped
+  $('#export-clip').textContent = echo ? 'Download the clip (.mp4, 10 s, with the voice)' : 'Download the cover clip (.mp4, 7 s, with sound)'
   renderKanjiPicker(pl)
   renderTypes(pl)
   renderQuestions(pl)
   await fonts(sampleText(pl))
   if (mine !== token) return
   // A story is 9:16, whatever the post's format.
-  const fmt = FORMATS[promo ? 'story' : state.format]
+  const fmt = FORMATS[clipped ? 'story' : state.format]
   const ids = state.view === 'compare' ? types : [state.type]
   current = { plan: pl, fmt, decks: ids.map(d => ({ id: d, slides: deck(d, pl, fmt, opts) })) }
   const typeName = id => (promo ? PROMO.en.names[state.story] : T.types[id].name)
@@ -385,7 +413,7 @@ async function render() {
     n.className = 'deck__count'
     n.textContent = `${d.slides.length} slides`
     head.append(name, n)
-    if (state.view === 'compare' && !promo) {
+    if (state.view === 'compare' && !clipped) {
       const keep = document.createElement('button')
       keep.type = 'button'
       keep.className = 'btn btn--quiet'
@@ -411,7 +439,7 @@ async function render() {
     stage.append(row)
   }
   // Every ending side by side, to pick the last slide from (a story ends on its own).
-  if (state.view === 'compare' && !promo) {
+  if (state.view === 'compare' && !clipped) {
     const row = document.createElement('section')
     row.className = 'deck'
     row.setAttribute('aria-label', 'Last slide')
@@ -625,8 +653,9 @@ async function exportClip(which = 'cover') {
   const clip = d?.slides.clips?.[which]
   if (!clip) return
   const fmt = current.fmt
-  const { btn: sel, name: kind, said } = CLIPS[which]
-  const name = `tsuji-${kind}-${state.story}-${safeName(current.plan.id)}-${state.lang}`
+  const echo = current.plan.source === 'echo'
+  const { btn: sel, name: kind, said } = echo ? { btn: '#export-clip', name: 'echo', said: 'clip' } : CLIPS[which]
+  const name = echo ? `tsuji-echo-${safeName(current.plan.id)}-${state.lang}` : `tsuji-${kind}-${state.story}-${safeName(current.plan.id)}-${state.lang}`
   const btn = $(sel)
   btn.disabled = true
   try {

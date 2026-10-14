@@ -18,6 +18,7 @@ import {
   translationQuizzes, trapQuizzes, wordQuizzes,
 } from './quizzes.js'
 import { PROMO, STORIES, STORY_FILES, promoItems, promoPlan } from './promo.js'
+import { echoItems, echoPlan } from './echo.js'
 
 export { gloss, lineRomaji, readingMisses, seeded, shuffle, unpack }
 
@@ -42,6 +43,8 @@ export const SOURCES = [
   // Plan 212: the app itself, in five stories (promo.js); its "levels"
   // are the stories, each reading the file its pick comes from.
   { id: 'promo', jp: '宣伝', line: 'gold', name: { en: 'Promo stories', fr: 'Stories promo' }, file: story => STORY_FILES[story] || 'index.json', levels: STORIES, levelNames: PROMO.en.names },
+  // Plan 213: a pictured word said over and over for ten seconds (echo.js).
+  { id: 'echo', jp: '木霊', line: 'vocab', name: { en: 'Word echo', fr: 'Mot en écho' }, file: () => 'themes.json', noLevels: true },
 ]
 export const sourceOf = id => SOURCES.find(s => s.id === id) ?? SOURCES[0]
 
@@ -762,6 +765,8 @@ export function itemsOf(sourceId, data, lang, filter) {
       return data.traps.map(x => ({ id: x.id, jp: x.p, sub: tr(x.notion, lang), tag: x.lv }))
     case 'promo':
       return promoItems(filter || 'pitch', data, lang)
+    case 'echo':
+      return echoItems(data, lang)
     default:
       return []
   }
@@ -805,6 +810,8 @@ export function plan(sourceId, data, id, opts, deps = {}) {
       return trapPlan(data, data.traps.find(x => x.id === id) ?? data.traps[0], opts)
     case 'promo':
       return promoPlan(opts.story || 'pitch', data, id, opts)
+    case 'echo':
+      return echoPlan(data, id, opts)
     default:
       return null
   }
@@ -871,7 +878,7 @@ const TITLES = {
 /** The title of a plan posted as `type` asking `n` questions. */
 export function titleOf(pl, type, n = 3) {
   // A promo story names itself (promo.js), cut to the feed's limit.
-  if (pl.source === 'promo') return [...pl.title].slice(0, TITLE_MAX).join('')
+  if (pl.source === 'promo' || pl.source === 'echo') return [...pl.title].slice(0, TITLE_MAX).join('')
   const say = TITLES[pl.lang] || TITLES.en
   const c = pl.caption
   const lv = /^N\d$/.test(pl.level) ? `JLPT ${pl.level}` : 'JLPT'
@@ -910,6 +917,7 @@ export function sampleText(pl) {
     JSON.stringify([pl.compare, pl.build, pl.list, pl.talk, pl.station, pl.figure]),
     pl.handle, 'Tsuji問題もんだい正解解答0123456789/·（　）＿★→＋＝…',
     // A promo story's words, its functions' text with them, and the print's slip.
-    ...(pl.promo ? [JSON.stringify(pl.promo), ...Object.values(pl.P).map(v => (typeof v === 'function' ? String(v) : JSON.stringify(v))), '一二三四五六七八九十月日曙帰帆落雁秋月仮語漢文辻≈½'] : [])]
+    ...(pl.promo ? [JSON.stringify(pl.promo), ...Object.values(pl.P).map(v => (typeof v === 'function' ? String(v) : JSON.stringify(v))), '一二三四五六七八九十月日曙帰帆落雁秋月仮語漢文辻≈½'] : []),
+    ...(pl.echo ? [JSON.stringify(pl.echo)] : [])]
   return [...new Set(parts.join(''))].join('')
 }

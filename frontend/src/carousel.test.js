@@ -9,7 +9,9 @@ import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explai
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS } from '../carousel/app.js'
 import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { ECHO, beats, echoDeck, echoItems, echoPlan, voiceSpan } from '../carousel/echo.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
+import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
 import EN from './locales/en/index.js'
@@ -31,8 +33,10 @@ const FIGURES = bank('index.json').figures
 const OPTS = { lang: 'en', script: 'kanji', romaji: false, bonus: 'kanji', kanji: '', handle: '@tsuji.app', slides: {}, figures: FIGURES }
 const sentence = jp => LEVELS.flatMap(lv => banks[lv].sentences).find(s => s.jp === jp)
 const glossEn = r => (r.en || [])[0] || ''
-// The sources a carousel's last slide stands on: a promo story ends on its own gate.
-const STATIONED = SOURCES.filter(s => s.id !== 'promo')
+// The sources a carousel's last slide stands on: a promo story ends on
+// its own gate, a word echo is one frame and its clip.
+const STATIONED = SOURCES.filter(s => s.id !== 'promo' && s.id !== 'echo')
+const LAST = { promo: id => (id === 'pass' ? 'free' : 'board'), echo: () => 'echo' }
 
 /** Every file a source reads: one per level, one per kana set, or one. */
 function filesOf(src) {
@@ -124,9 +128,9 @@ describe('the carousel studio', () => {
     for (const { src, id, p } of every) {
       for (const type of TYPES.map(x => x.id).filter(x => available(x, p))) {
         const slides = deck(type, p, FORMATS.post, { ground: 'paper' })
-        expect(slides.length, `${src.id} ${id} ${type}`).toBeGreaterThan(src.id === 'promo' ? 1 : 2)
+        expect(slides.length, `${src.id} ${id} ${type}`).toBeGreaterThan({ promo: 1, echo: 0 }[src.id] ?? 2)
         // A promo story ends on its own gate, not on a station (plan 212).
-        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe(src.id === 'promo' ? (id === 'pass' ? 'free' : 'board') : 'outro')
+        expect(slides.at(-1).key, `${src.id} ${id} ${type}`).toBe(LAST[src.id]?.(id) ?? 'outro')
         expect(new Set(slides.map(x => x.key)).size, `${src.id} ${id} ${type}`).toBe(slides.length)
       }
     }
@@ -724,6 +728,82 @@ describe('explaining a point in its own sentence', () => {
           expect(s.at, `${story} ${which}: ${s.key}`).toBeLessThan(CLIP.seconds)
         }
       }
+    }
+  })
+})
+
+describe('the word echo (plan 213)', () => {
+  const themes = bank('themes.json')
+  const voices = JSON.parse(readFileSync(new URL('../carousel/voices/index.json', import.meta.url), 'utf8'))
+
+  it('has the app’s own voice for every pictured word, in the current voice', () => {
+    expect(voices.rev).toBe(VOICE_REV)
+    expect(voices.credit).toBe('VOICEVOX Nemo')
+    const items = echoItems(themes, 'en')
+    expect(items.length).toBeGreaterThan(400)
+    for (const { id } of items) {
+      const r = id.split('::')[1]
+      expect(voices.words[r], r).toBeTruthy()
+      expect(() => readFileSync(new URL(`../carousel/voices/${voices.words[r]}`, import.meta.url)), r).not.toThrow()
+    }
+  })
+
+  it('says the word with the same silence between every two sayings, inside ten seconds', () => {
+    expect(ECHO.gap).toBe(0.3)
+    for (const span of [{ on: 0.14, off: 0.48 }, { on: 0.14, off: 0.67 }, { on: 0.13, off: 1.2 }]) {
+      const at = beats(span)
+      const voiced = span.off - span.on
+      expect(at[0]).toBe(ECHO.first)
+      for (let i = 1; i < at.length; i++) expect(at[i] - at[i - 1]).toBeCloseTo(voiced + ECHO.gap, 2)
+      expect(at.at(-1) + voiced).toBeLessThanOrEqual(ECHO.seconds)
+      // One more would not have ended inside the clip.
+      expect(at.at(-1) + voiced + ECHO.gap + voiced).toBeGreaterThan(ECHO.seconds - 0.1)
+    }
+    // A short word is said more often than a long one.
+    expect(beats({ on: 0.1, off: 0.4 }).length).toBeGreaterThan(beats({ on: 0.1, off: 1.0 }).length)
+  })
+
+  it('finds where the voice starts and stops in its clip', () => {
+    const rate = 1000
+    const samples = new Float32Array(1000)
+    for (let i = 150; i < 700; i++) samples[i] = 0.3 * Math.sin(i)
+    const { on, off } = voiceSpan(samples, rate)
+    expect(on).toBeCloseTo(0.15, 2)
+    expect(off).toBeCloseTo(0.7, 2)
+  })
+
+  it('draws ten seconds that fill the screen with the reading, the voice credited', () => {
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+    for (const lang of ['en', 'fr']) {
+      for (const id of ['人参::にんじん', '犬::いぬ', '自転車::じてんしゃ']) {
+        const pl = echoPlan(themes, id, { lang })
+        expect(pl.id, id).toBe(id)
+        expect([...pl.title].length, id).toBeLessThanOrEqual(TITLE_MAX)
+        expect(pl.caption.ask, id).toMatch(/VOICEVOX Nemo/)
+        const voice = { src: 'x.mp3', on: 0.14, off: 0.14 + 0.11 * [...pl.echo.word.r].length }
+        const frames = echoDeck(pl, FORMATS.story, { ground: 'sumi', voice })
+        const { clip } = frames
+        expect(clip.seconds).toBe(10)
+        expect(clip.sounds.map(x => x.at), id).toEqual(clip.beats.map(a => Math.max(0, a - voice.on)))
+        expect(clip.sounds.every(x => x.src === 'x.mp3'), id).toBe(true)
+        // Before the first saying, the card alone; at the end, every saying on the screen.
+        const first = stubContext()
+        clip.draw(first.ctx, 0.3)
+        expect(first.texts.filter(x => x === pl.echo.word.r).length, id).toBe(1)
+        for (const t of [1, 4.5, 9.99]) expect(() => clip.draw(stubContext().ctx, t)).not.toThrow()
+        const end = stubContext()
+        clip.draw(end.ctx, 9.99)
+        expect(end.texts.filter(x => x === pl.echo.word.r).length, id).toBe(clip.beats.length + 1)
+        expect(end.texts.some(x => /VOICEVOX Nemo/.test(x)), id).toBe(true)
+        const still = stubContext()
+        frames[0].draw(still.ctx)
+        expect(still.texts.sort(), id).toEqual(end.texts.sort())
+      }
+    }
+    } finally {
+      globalThis.Path2D = had
     }
   })
 })

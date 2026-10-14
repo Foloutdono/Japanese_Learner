@@ -27,6 +27,7 @@ import { picked } from './sources.js'
 import { withoutGiveaways } from './quizzes.js'
 import { furiganaOf } from './common.js'
 import { promoDeck } from './promo.js'
+import { echoDeck } from './echo.js'
 
 export { FORMATS }
 
@@ -2713,6 +2714,7 @@ export const TYPES = [
   { id: 'spelling', jp: '表記' },
   { id: 'impostor', jp: '仲間外れ' },
   { id: 'story', jp: '宣伝' },
+  { id: 'echo', jp: '木霊' },
 ]
 // What a type may leave out, and whether it is in by default.
 export const TYPE_OPTIONS = {
@@ -2725,6 +2727,8 @@ export const TYPE_OPTIONS = {
 export function available(type, pl) {
   // A promo story is drawn as a story and nothing else (plan 212).
   if (pl.source === 'promo' || type === 'story') return pl.source === 'promo' && type === 'story'
+  // And a word echo as the clip it is (plan 213).
+  if (pl.source === 'echo' || type === 'echo') return pl.source === 'echo' && type === 'echo'
   switch (type) {
     case 'exam': return pl.quizzes.length > 0
     case 'compare': return !!pl.compare
@@ -2772,6 +2776,10 @@ function passagePages(plan, s, fmt, f) {
 export function deck(type, plan, fmt, opts) {
   if (plan.source === 'promo') {
     const frames = promoDeck(plan, FORMATS.story, opts)
+    return Object.assign(frames.map(sl => ({ key: sl.key, draw: ctx => { noShadow(ctx); sl.draw(ctx) } })), { clip: frames.clip, clips: frames.clips })
+  }
+  if (plan.source === 'echo') {
+    const frames = echoDeck(plan, FORMATS.story, opts)
     return Object.assign(frames.map(sl => ({ key: sl.key, draw: ctx => { noShadow(ctx); sl.draw(ctx) } })), { clip: frames.clip, clips: frames.clips })
   }
   const fr = frame(fmt)
