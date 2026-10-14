@@ -131,10 +131,17 @@ writeFileSync(join(WORK, 'timeline.json'), JSON.stringify({ ...tl, seconds }))
 const mixed = spawnSync(python, ['-m', 'scripts.long_video_audio', 'mix', join(WORK, 'timeline.json'), '--cache', CACHE, '--sfx', join(WORK, 'sfx'), '--out', join(WORK, 'mix.wav')], { cwd: BACKEND, stdio: 'inherit' })
 if (mixed.status !== 0) throw new Error('the mix failed')
 
+// ── YouTube's loudness, by one gain for the whole: a dynamic leveller would
+// lift the bed of music back up to the voice between two lines ──
+const probe = spawnSync('ffmpeg', ['-hide_banner', '-i', join(WORK, 'mix.wav'), '-af', 'loudnorm=I=-16:TP=-1.5:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' })
+const loud = JSON.parse(probe.stderr.slice(probe.stderr.lastIndexOf('{')))
+const gain = Math.min(-16 - Number(loud.input_i), -1.5 - Number(loud.input_tp))
+log(`loudness ${loud.input_i} LUFS, peak ${loud.input_tp} dBTP: ${gain.toFixed(1)} dB`)
+
 // ── The frames, each still drawn once, into ffmpeg ──
 const mp4 = join(OUT, `${slug}.mp4`)
 const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-i', join(WORK, 'mix.wav'),
-  '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11', '-ar', '48000', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest', mp4], { stdio: ['pipe', 'inherit', 'inherit'] })
+  '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-r', String(FPS), '-af', `volume=${gain.toFixed(2)}dB`, '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest', mp4], { stdio: ['pipe', 'inherit', 'inherit'] })
 const write = buf => new Promise(r => (ff.stdin.write(buf) ? r() : ff.stdin.once('drain', r)))
 const frames = Math.round(seconds * FPS)
 let last = null

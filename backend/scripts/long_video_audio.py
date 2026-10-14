@@ -145,6 +145,33 @@ def bed(seconds: float):
     return out
 
 
+LOUD = -14.0      # dBFS, the voice's level where it speaks
+CEILING = 0.84    # the limiter's ceiling, about -1.5dBFS
+
+
+def limited(x, block: int = 120, release: float = 0.08):
+    """A peak limiter: per 2.5ms block, the gain that keeps the block under
+    CEILING, taken a block early (lookahead) and let go over `release`
+    seconds, so a peak is turned down smoothly and nothing clips."""
+    import numpy as np
+    n = len(x)
+    blocks = -(-n // block)
+    pad = np.zeros((blocks * block, x.shape[1]), dtype=np.float32)
+    pad[:n] = x
+    peak = np.abs(pad).reshape(blocks, block, -1).max(axis=(1, 2))
+    want = np.minimum(1.0, CEILING / np.maximum(peak, 1e-9))
+    want = np.minimum(want, np.concatenate([want[1:], [1.0]]))
+    step = np.exp(-block / (RATE * release))
+    gain = np.empty(blocks, dtype=np.float32)
+    g = 1.0
+    for i, w in enumerate(want):
+        g = w if w < g else w + (g - w) * step
+        gain[i] = g
+    smooth = np.interp(np.arange(blocks * block), np.arange(blocks) * block + block / 2, gain)
+    out = pad * smooth[:, None].astype(np.float32)
+    return np.clip(out[:n], -CEILING, CEILING)
+
+
 def mix(tl_path: Path, cache: Path, sfx: Path, out: Path) -> int:
     import numpy as np
 
@@ -198,8 +225,13 @@ def mix(tl_path: Path, cache: Path, sfx: Path, out: Path) -> int:
     left = voice_track + music + fx[:, 0] * 0.5
     right = voice_track + music + fx[:, 1] * 0.5
     stereo = np.stack([left, right], axis=1)
-    top = float(np.abs(stereo).max()) or 1
-    stereo *= min(1.0, 0.89 / top)
+    # As loud as a video on YouTube: the voice where it speaks at LOUD, its
+    # few peaks above the ceiling held down by a limiter rather than the
+    # whole video turned down for them.
+    speaking = np.abs(voice_track) > 0.02
+    rms = float(np.sqrt(np.mean(stereo[speaking, 0] ** 2))) if speaking.any() else 0.1
+    stereo *= 10 ** (LOUD / 20) / max(rms, 1e-6)
+    stereo = limited(stereo)
     stereo = stereo[: int(seconds * RATE)]
     pcm = (np.clip(stereo, -1, 1) * 32767).astype("<i2").tobytes()
     write_wav(out, pcm, RATE, channels=2)
