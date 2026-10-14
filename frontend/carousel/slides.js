@@ -2229,7 +2229,8 @@ function quizSlide(c, q, revealed, head, number = 1) {
   // The explanation keeps clear of the seal, and to a fifth of the slide.
   const exHead = revealed && ex.head ? fit(ctx, ex.head, { fam: 'serif', sizes: [FS.display * 0.7, FS.heading, FS.title, FS.lead], maxW: f.w - 170, maxLines: 1 }) : null
   let exSense = revealed && ex.sense ? fit(ctx, ex.sense, { sizes: [FS.title, FS.lead, FS.body], maxW: f.w - 170, maxLines: 2 }) : null
-  let exWhy = revealed && ex.why ? fit(ctx, ex.why, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: f.w - 170, maxH: f.h * 0.2, maxLines: 4, lh: 1.25, balanced: false }) : null
+  // Answered alone (answerOnly), the right choice leaves its why twice the room.
+  let exWhy = revealed && ex.why ? fit(ctx, ex.why, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: f.w - 170, maxH: f.h * (q.answerOnly ? 0.4 : 0.2), maxLines: q.answerOnly ? 8 : 4, lh: 1.25, balanced: false }) : null
   const footOf = () => (cta ? paragraphH(cta)
     : Math.max(150, (exHead ? paragraphH(exHead) + SP[3] : 0) + (exSense ? paragraphH(exSense) : 0) + (exWhy ? paragraphH(exWhy, 1.25) + SP[3] : 0)))
   let foot = footOf()
