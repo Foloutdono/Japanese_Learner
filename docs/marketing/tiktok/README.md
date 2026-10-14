@@ -34,11 +34,12 @@ stamp card, the ticket) already spans most of the screen's width, measured
 from the recording (`rec.mjs`'s `mark`), so a zoom would only crop it. Taps
 still fall on beats. Each scene starts with a train-pull slide (the
 boarding's own transition) and a whoosh, and cuts inside a scene are a quick
-cross-fade. Captions pop in word by word on the beat.
+cross-fade. Captions pop in word by word on the beat. The background is still:
+no glow pulses with the beat.
 
 | Time | Beat | Caption | Footage |
 | --- | --- | --- | --- |
-| 0:00 | 0 | Fed up with never reaching **your Japanese goal?** | The welcome hub |
+| 0:00 | 0 | Fed up with never reaching **your Japanese goal?** | Full screen, no phone: "Fed up", "with never reaching", "your Japanese", then a big gold "goal?", one per beat, each with the app's wood pick (the hanko on "goal?"). The gold route line draws under it onto a station ring, then the words lift away as the phone rises in |
 | 0:03.8 | 8 (drop) | 辻 Try **Tsuji!** | The hub. Board is pressed on beat 12.5 |
 | 0:06.6 | 14 | **Set up your goal** and follow your progress | N4 picked, then the plan arrives under its 案内 sign: Apr 24, 2027 |
 | 0:12.7 | 27 | Set up your goal and **follow your progress** | The plan's route map: kana, ~450 words, ~900 words, N4 |

@@ -52,7 +52,7 @@ SEGS = [
 ]
 SCENE_BEATS = [14, 32, 80, 101, 116]          # train-pull slides land here
 # captions: (beat, state); the first of a scene pops in, later ones cross-fade
-CAPS = [(0, 'hook'), (8, 'try'), (14, 'goalA'), (27, 'goalB'), (32, 'boardAB'), (40, 'boardC'),
+CAPS = [(8, 'try'), (14, 'goalA'), (27, 'goalB'), (32, 'boardAB'), (40, 'boardC'),
         (80, 'modes'), (101, 'practice'), (116, 'join')]
 SAME_SCENE = {('goalA', 'goalB'), ('boardAB', 'boardC')}
 PILL_BEAT = 120
@@ -231,20 +231,38 @@ def draw_run(frame, t, first, last, t_in, t_out):
         p = clamp((since + 0.1 - stagger * i) / 0.3)
         if p > 0: paste(frame, im, (x, y + 30 * (1 - out_cubic(p)) + exit_dy), k=out_cubic(p) * exit_k, s=0.9 + 0.1 * out_back(p))
 
+HOOK = [('hook_1', -0.3, 1.0), ('hook_2', 2, 1.0), ('hook_3', 4, 1.0), ('hook_4', 6, 1.5)]  # piece, beat, slam
+PHONE_IN = 7.7      # the phone rises in, landing on the drop (beat 8)
+
+def hook_layer(frame, t):
+    st = static()
+    if 'hook' not in st:
+        st['hook'] = {k: load_rgba(f'{OV}/{k}.png') for k, _, _ in HOOK}; st['hook_line'] = load_rgba(f'{OV}/hook_line.png')
+    p_out = clamp((t - bt(7.55)) / (bt(8.05) - bt(7.55)))
+    k_out, dy_out = 1 - out_cubic(p_out), -90 * out_cubic(p_out)
+    if k_out <= 0: return
+    for k, b, slam in HOOK:
+        p = clamp((t - bt(b)) / 0.24)
+        if p <= 0: continue
+        im, (x, y) = st['hook'][k]
+        paste(frame, im, (x, y + dy_out), k=clamp(p * 2.5) * k_out, s=slam - (slam - 1) * out_cubic(p))
+    # the gold line runs out under "goal?", left to right, onto its ring
+    p = in_out((t - bt(6.5)) / (bt(7.3) - bt(6.5)))
+    if p > 0:
+        im, (x, y) = st['hook_line']
+        w = max(1, int(im.width * p)); paste(frame, im.crop((0, 0, w, im.height)), (x, y + dy_out), k=k_out)
+
 def render(n):
     t = n / FPS; st = static()
-    b = t / B
-    # the background breathes with the kick once the beat is in
-    pulse = 0.0
-    if 8 <= b < FINAL_BEAT: pulse = 0.55 * math.exp(-((b % 1) * B) / 0.22)
-    if b >= FINAL_BEAT: pulse = 0.8 * math.exp(-(t - bt(FINAL_BEAT)) / 0.6)
-    frame = Image.blend(st['bg'], st['bg_hi'], pulse).convert('RGBA')
-    M = st['M']
-    layer = Image.new('RGBA', (PW + 2 * M, PH + 2 * M), (0, 0, 0, 0))
-    layer.paste(screen(t), (M, M), st['mask'])
-    layer.alpha_composite(st['frame'])
-    s = phone_scale(t)
-    paste(frame, layer, (PX - M, PY - M), s=s)
+    frame = st['bg'].convert('RGBA')
+    hook_layer(frame, t)
+    if t >= bt(PHONE_IN):
+        M = st['M']
+        layer = Image.new('RGBA', (PW + 2 * M, PH + 2 * M), (0, 0, 0, 0))
+        layer.paste(screen(t), (M, M), st['mask'])
+        layer.alpha_composite(st['frame'])
+        rise = 1 - out_cubic(clamp((t - bt(PHONE_IN)) / (bt(8) - bt(PHONE_IN) + 0.12)))
+        paste(frame, layer, (PX - M, PY - M + int(1500 * rise)))
     caption_layer(frame, t)
     return frame.convert('RGB')
 
@@ -315,6 +333,10 @@ def audio():
         tb = S[k].t0
         if any(abs(tb - bt(b)) < 1e-6 for b in SCENE_BEATS) or S[k].clip == S[k - 1].clip and abs(S[k - 1].src(tb) - S[k].src(tb)) < 0.05: continue
         if snd('card-transition') is not None: put(snd('card-transition'), tb - 0.06, 0.9)
+    for _, b, slam in HOOK[1:]:
+        if slam > 1.2: put(snd('card-stamp'), bt(b), 1.3)
+        else: put(snd('click-mode-selection'), bt(b), 1.1)
+    put(wh, bt(8) - len(wh) / SR + 0.03, 0.55)
     put(snd('card-stamp'), bt(PILL_BEAT), 1.2); put(snd('pass-clip'), bt(PILL_BEAT) + 0.02, 0.7)
     # levels: the app's sounds sit on top of the music, which dips under them
     sp = np.max(np.abs(sfx)); print(f'sfx peak {sp:.3f}, {len(placed)} app sounds placed')
