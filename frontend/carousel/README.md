@@ -371,6 +371,18 @@ leave no ground to read on at every hour. The studio's
 So the studio needs `public/today/print/`, `src/index.css` and the
 print's `print.json` beside it when it is served or published.
 
+**The cover moves (a clip).** Each story's first frame is also a
+seven-second clip at thirty frames (`promo.CLIP`), drawn by the same
+code as the still at each moment: its parts come in as the app brings
+its own in (`tpr-rise`), the print moves as the print moves (its layers
+held at the clip's moment with index.css's own keyframes, the train on
+its run, the sun's glow breathing), the card turns as a tap turns it,
+the sentence is typed and comes back cut, the four readings come in one
+by one, 辶 fills on the pass until the level turns. "Download the cover
+clip" encodes it in the browser as an H.264 MP4 (WebCodecs, muxed by
+mp4-muxer from jsDelivr): Chrome, Edge and Safari can, Firefox cannot
+yet, and the studio says so.
+
 **A story promises what the app does today.** Its figures are the
 bank's (`index.json`: the decks by level, the kana deck, the N5 exam,
 counted as the landing page counts them, and a test holds the two

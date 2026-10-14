@@ -595,7 +595,7 @@ that, build it, a top five, a conversation, kanji spelling, find the
 impostor), and exports the PNGs. Since plan 212 it also draws the app
 itself as 9:16 promo stories (`promo.js`), with the app's own parts
 measured in the running app (`app.js`) and Today on the real print of
-the hour: when the app redraws one of those parts, measure it again and
+the hour, each story's cover also a seven-second MP4 clip: when the app redraws one of those parts, measure it again and
 follow it, and a story promises only what the app does today. Its hand-written content (the pictures,
 the lookalike sets, the conversations) is `frontend/carousel/content/`;
 a conversation's every line carries its furigana and its romaji. A point is explained in its own

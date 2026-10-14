@@ -611,6 +611,56 @@ async function exportOne() {
   const result = await offer(`${baseName()}-${i + 1}.png`, await png(full(d.slides[i], current.fmt)))
   status(result === 'saved' ? `Saved slide ${i + 1}.` : MESSAGE[result])
 }
+// ── The cover clip (plan 212) ─────────────────────────────────
+// A promo story's cover in motion, seven seconds, encoded here as the
+// feeds take a video: H.264 in an MP4 (WebCodecs, muxed by mp4-muxer).
+const MUXER = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/+esm'
+async function exportClip() {
+  const d = current.decks[0]
+  const clip = d?.slides.clip
+  if (!clip) return
+  const fmt = current.fmt
+  const name = `tsuji-cover-${state.story}-${safeName(current.plan.id)}-${state.lang}`
+  const btn = $('#export-clip')
+  btn.disabled = true
+  try {
+    const config = { codec: 'avc1.640028', width: fmt.w, height: fmt.h, bitrate: 8_000_000, framerate: clip.fps }
+    if (typeof VideoEncoder === 'undefined' || !(await VideoEncoder.isConfigSupported(config)).supported) {
+      status('This browser cannot encode H.264 video: open the studio in Chrome, Edge or Safari.')
+      return
+    }
+    const { Muxer, ArrayBufferTarget } = await import(MUXER)
+    const target = new ArrayBufferTarget()
+    const muxer = new Muxer({ target, video: { codec: 'avc', width: fmt.w, height: fmt.h, frameRate: clip.fps }, fastStart: 'in-memory' })
+    let failed = null
+    const encoder = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => { failed = e } })
+    encoder.configure(config)
+    const print = clip.print ? await printFor(state.hour) : null
+    const frames = clip.seconds * clip.fps
+    work.width = fmt.w
+    work.height = fmt.h
+    const ctx = work.getContext('2d')
+    for (let i = 0; i < frames && !failed; i++) {
+      const t = i / clip.fps
+      clip.draw(ctx, t, print ? await print.moment(t) : null)
+      const frame = new VideoFrame(work, { timestamp: Math.round((i * 1e6) / clip.fps), duration: Math.round(1e6 / clip.fps) })
+      encoder.encode(frame, { keyFrame: i % clip.fps === 0 })
+      frame.close()
+      if (i % 10 === 0) status(`Drawing the clip… ${Math.round((i / frames) * 100)}%`)
+      // The encoder keeps up: never more than a second of frames waiting.
+      while (encoder.encodeQueueSize > clip.fps) await new Promise(r => setTimeout(r, 10))
+    }
+    await encoder.flush()
+    if (failed) throw failed
+    muxer.finalize()
+    const result = await offer(`${name}.mp4`, new Blob([target.buffer], { type: 'video/mp4' }))
+    status(result === 'saved' ? 'Saved the cover clip.' : MESSAGE[result])
+  } catch (e) {
+    status(`The clip failed (${e.message}).`)
+  } finally {
+    btn.disabled = false
+  }
+}
 const MESSAGE = { declined: 'Download cancelled.', unavailable: 'Downloads are not available in this view.', failed: 'The download did not go through. Try again.' }
 function status(msg) {
   $('#status').textContent = msg || ''
@@ -726,6 +776,7 @@ function wire() {
     typing = setTimeout(() => { save(); render() }, 300)
   })
   $('#export').addEventListener('click', exportZip)
+  $('#export-clip').addEventListener('click', exportClip)
   $('#copy').addEventListener('click', () => copyField('#caption', 'Caption'))
   $('#copy-title').addEventListener('click', () => copyField('#title', 'Title'))
   $('#title').addEventListener('input', countTitle)

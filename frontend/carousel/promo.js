@@ -274,6 +274,23 @@ export function promoDeck(plan, fmt, opts) {
   const say = s => weldIf(lang, s)
   const out = []
   const add = (key, fn) => out.push({ key, draw: ctx => { ctx.save(); fn(ctx); ctx.restore() } })
+  // ── The cover in motion (a clip) ──
+  // A clip draws the cover again at each moment `clock.t` (seconds): each
+  // part comes in as the app brings its own in (tpr-rise: up 16px from
+  // nothing, cubic-bezier(0.2, 0.7, 0.2, 1)), on the print the layers
+  // move as the print moves. With no clock the cover stands still, whole.
+  let clock = null
+  const ease = x => 1 - (1 - x) ** 3
+  const k = (start, dur) => (clock ? ease(Math.min(1, Math.max(0, (clock.t - start) / dur))) : 1)
+  const part = (c, prog, fn) => {
+    if (prog >= 1) return fn()
+    c.save()
+    c.globalAlpha *= prog
+    c.translate(0, (1 - prog) * 16 * U)
+    const r = fn()
+    c.restore()
+    return r
+  }
   const LINE = [{ color: p.line.kana, n: 4 }, { color: p.line.vocab, n: 20 }, { color: p.line.kanji, n: 10 }, { color: p.line.grammar, n: 8 }]
 
   // A block set in the middle of what the masthead and the foot leave:
@@ -329,10 +346,12 @@ export function promoDeck(plan, fmt, opts) {
     const pr = opts.print
     const PU = fmt.w / (pr?.scene.w || 390)
     if (pr) {
-      A.drawPrint(ctx, pr, 0, 0, PU, { W: fmt.w, H: fmt.h })
+      A.drawPrint(ctx, pr, 0, 0, PU, { W: fmt.w, H: fmt.h, moving: clock?.moving, t: clock?.t })
       const now = plan.now
-      A.printTitle(ctx, fr.right, fr.y, PU * 0.9, { date: `${kanjiNumber(now.getMonth() + 1)}月${kanjiNumber(now.getDate())}日`, view: pr.look.view })
-      A.printDial(ctx, p, pr, fmt.w / 2, pr.frame.cy * PU, PU, { parts: LINE, count: 42, unit: P.unit, time: '≈ 14 min', end: P.doneBy('08:14') })
+      part(ctx, k(0.3, 0.8), () => A.printTitle(ctx, fr.right, fr.y, PU * 0.9, { date: `${kanjiNumber(now.getMonth() + 1)}月${kanjiNumber(now.getDate())}日`, view: pr.look.view }))
+      // The disc's glow breathes over seven seconds (tpr-breathe).
+      const breath = clock ? 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, clock.t / 7)) : null
+      part(ctx, k(0, 1.8), () => A.printDial(ctx, p, pr, fmt.w / 2, pr.frame.cy * PU, PU, { parts: LINE, count: 42, unit: P.unit, time: '≈ 14 min', end: P.doneBy('08:14'), breath }))
       // The brand and the words on a plate of the slip's washi, at the
       // print's foot (over the Depart button where there is one): the
       // sky, the mountain and the birds behind them leave no ground to
@@ -342,15 +361,17 @@ export function promoDeck(plan, fmt, opts) {
       const plateH = pad + 64 + SP[3] + paragraphH(b) + pad
       const bottom = label ? fr.bottom - DEP - 8 * U - SP[5] : fr.bottom
       const top = bottom - plateH
-      const { ink } = A.printPlate(ctx, p, fr.x, top, fr.w, plateH, U)
-      masthead(ctx, p, { ...fr, x: fr.x + pad, y: top + pad }, ink, ink)
-      b.lines.forEach((l, i) => text(ctx, l, fr.x + pad, top + pad + 64 + SP[3] + b.size * (0.8 + i * 1.18), { f: b.f, color: ink }))
+      part(ctx, k(1.1, 1.0), () => {
+        const { ink } = A.printPlate(ctx, p, fr.x, top, fr.w, plateH, U)
+        masthead(ctx, p, { ...fr, x: fr.x + pad, y: top + pad }, ink, ink)
+        b.lines.forEach((l, i) => text(ctx, l, fr.x + pad, top + pad + 64 + SP[3] + b.size * (0.8 + i * 1.18), { f: b.f, color: ink }))
+      })
     } else {
       ground(ctx, p, fr)
       masthead(ctx, p, fr)
       lead(ctx, headline, fr.y + 400, p.ink, [FS.title], { maxLines: 2 })
     }
-    if (label) depart(ctx, label)
+    if (label) part(ctx, k(1.6, 0.8), () => depart(ctx, label))
   }
   const F = A.faceOf(p)
   const panel = (ctx, x, y, w, h, r = 6 * U) => {
@@ -430,26 +451,42 @@ export function promoDeck(plan, fmt, opts) {
       const pr = plan.promo
       const cardH = 290 * U
       const card = (c, y, body, hint) => A.reviewCard(c, p, fr.x, y, fr.w, cardH, U, { stage: 'mastered', stageLabel: P.mastered, foot: ['N5', P.mode], band: 1, hint, body })
+      const back = c => (x, yy, w, h) => {
+        const mb = fit(c, pr.sense, { weight: 800, sizes: [27.2 * U, 22 * U, 18 * U], maxW: w, maxLines: 2, fam: 'latin' })
+        const mh = paragraphH(mb)
+        const rz = 25 * U
+        const top = yy + h / 2 - (mh + (pr.reading ? SP[3] + rz : 0)) / 2
+        mb.lines.forEach((l, i) => text(c, l, x + w / 2, top + mb.size * (0.8 + i * 1.18), { f: mb.f, color: p.ink, align: 'center' }))
+        if (pr.reading) text(c, pr.reading, x + w / 2, top + mh + SP[3] + rz * 0.85, { f: font(400, rz, 'jp'), color: p.ink, align: 'center' })
+      }
+      // In a clip the card turns at TURN, as a tap turns it: the new face
+      // tipped up toward the reader (flashcard-face-turn, 300ms).
+      const TURN = 4.2
       add('front', ctx => {
         page(ctx, 1, 4)
         centred(ctx, (c, y) => {
-          y = lead(c, P.stillKnow, y, p.ink, [FS.display * 0.66, FS.heading])
+          y = part(c, k(0, 0.8), () => lead(c, P.stillKnow, y, p.ink, [FS.display * 0.66, FS.heading]))
           y += SP[7]
-          card(c, y, (x, yy, w, h) => A.cardWord(c, p, pr.word, x + w / 2, yy + h / 2 - 10 * U, w, U, 80), P.tap)
+          const turned = clock && clock.t >= TURN
+          part(c, k(0.4, 1.0), () => card(c, y, turned
+            ? (x, yy, w, h) => {
+              const f = Math.min(1, (clock.t - TURN) / 0.3)
+              c.save()
+              c.globalAlpha *= Math.min(1, f / 0.55)
+              c.translate(0, yy + h / 2 + (1 - f) * 10 * U)
+              c.scale(1, Math.cos((1 - f) * 0.73))
+              c.translate(0, -(yy + h / 2))
+              back(c)(x, yy, w, h)
+              c.restore()
+            }
+            : (x, yy, w, h) => A.cardWord(c, p, pr.word, x + w / 2, yy + h / 2 - 10 * U, w, U, 80), turned ? null : P.tap))
           return y + cardH
         })
       })
       add('back', ctx => {
         page(ctx, 2, 4)
         centred(ctx, (c, y) => {
-          card(c, y, (x, yy, w, h) => {
-            const mb = fit(c, pr.sense, { weight: 800, sizes: [27.2 * U, 22 * U, 18 * U], maxW: w, maxLines: 2, fam: 'latin' })
-            const mh = paragraphH(mb)
-            const rz = 25 * U
-            const top = yy + h / 2 - (mh + (pr.reading ? SP[3] + rz : 0)) / 2
-            mb.lines.forEach((l, i) => text(c, l, x + w / 2, top + mb.size * (0.8 + i * 1.18), { f: mb.f, color: p.ink, align: 'center' }))
-            if (pr.reading) text(c, pr.reading, x + w / 2, top + mh + SP[3] + rz * 0.85, { f: font(400, rz, 'jp'), color: p.ink, align: 'center' })
-          })
+          card(c, y, back(c))
           y += cardH + SP[7]
           y = lead(c, P.how, y, p.ink, [FS.title], { maxLines: 1 })
           y += SP[4]
@@ -467,20 +504,32 @@ export function promoDeck(plan, fmt, opts) {
     }
     case 'analyser': {
       const pr = plan.promo
-      add('paste', ctx => {
+      // In a clip the sentence is typed in, Analyze is pressed, and the
+      // sentence comes back cut.
+      const PRESS = 3.1
+      const CUT = 3.5
+      const pasteFrame = ctx => {
         page(ctx, 1, 3)
         centred(ctx, (c, y) => {
-          y = lead(c, P.paste, y, p.ink, [FS.display * 0.62, FS.heading])
+          y = part(c, k(0, 0.8), () => lead(c, P.paste, y, p.ink, [FS.display * 0.62, FS.heading]))
           y += SP[8]
           const h = 146 * U
           panel(c, fr.x, y, fr.w, h, 8 * U)
           const room = fr.w - 26 * U - 60 * U
           let z = 15 * U
           while (z > 11 * U && measure(c, pr.jp, font(400, z, 'jp')) > room) z -= 0.5 * U
-          text(c, pr.jp, fr.x + 13 * U, y + 26 * U, { f: font(400, z, 'jp'), color: F.ink })
+          const chars = [...pr.jp]
+          const typed = clock ? Math.round(chars.length * Math.min(1, Math.max(0, (clock.t - 0.8) / 2.0))) : chars.length
+          const shown = chars.slice(0, typed).join('')
+          const tw = text(c, shown, fr.x + 13 * U, y + 26 * U, { f: font(400, z, 'jp'), color: F.ink })
+          // The caret, while it types.
+          if (clock && clock.t < PRESS && Math.floor(clock.t * 2) % 2 === 0) {
+            c.fillStyle = F.ink
+            c.fillRect(fr.x + 13 * U + tw + 2 * U, y + 26 * U - z * 0.85, 1.5 * U, z * 1.05)
+          }
           c.fillStyle = F.line
           c.fillRect(fr.x, y + h - 58 * U, fr.w, U)
-          text(c, P.chars(pr.jp.length).toLocaleUpperCase(), fr.x + 13 * U, y + h - 25 * U, { f: font(700, 9.92 * U, 'latin'), color: F.soft, tr: 0.18 })
+          text(c, P.chars(typed).toLocaleUpperCase(), fr.x + 13 * U, y + h - 25 * U, { f: font(700, 9.92 * U, 'latin'), color: F.soft, tr: 0.18 })
           const bw = 92 * U
           const bh = 44 * U
           const bx = fr.right - 8 * U - bw
@@ -491,12 +540,28 @@ export function promoDeck(plan, fmt, opts) {
           c.fillStyle = g
           rrect(c, bx, by, bw, bh, 6 * U)
           c.fill()
+          // Pressed: the metal sinks a shade.
+          if (clock && clock.t >= PRESS && clock.t < PRESS + 0.25) {
+            c.fillStyle = 'rgba(0, 0, 0, 0.18)'
+            rrect(c, bx, by, bw, bh, 6 * U)
+            c.fill()
+          }
           text(c, P.analyze, bx + bw / 2, by + bh / 2 + 6 * U, { f: font(700, 15 * U, 'latin'), color: '#1c1811', align: 'center' })
           y += h + SP[8]
-          return lead(c, P.cuts, y, p.ink2, [FS.lead, FS.body], { maxLines: 5, weight: 500 })
+          return part(c, k(0.5, 0.8), () => lead(c, P.cuts, y, p.ink2, [FS.lead, FS.body], { maxLines: 5, weight: 500 }))
         })
+      }
+      add('paste', ctx => {
+        if (!clock || clock.t < CUT) return pasteFrame(ctx)
+        // The cut comes in over the paste, its points one by one.
+        const f = k(CUT, 0.4)
+        if (f < 1) pasteFrame(ctx)
+        ctx.save()
+        ctx.globalAlpha = f
+        cutFrame(ctx, i => k(CUT + 0.4 + 0.35 * i, 0.6))
+        ctx.restore()
       })
-      add('cut', ctx => {
+      const cutFrame = (ctx, pointIn = () => 1) => {
         page(ctx, 2, 3)
         centred(ctx, (c, y) => {
           const y0 = y
@@ -509,13 +574,14 @@ export function promoDeck(plan, fmt, opts) {
           y += SP[6]
           // As many of its points as the room holds, in the sentence's order.
           const room = fr.bottom - (fr.y + 64 + SP[7])
-          for (const pt of pr.points) {
-            if (y - y0 + 102 * U > room) break
-            y += A.pointCard(c, p, fr.x, y, fr.w, U, pt) + 8 * U
-          }
+          pr.points.forEach((pt, i) => {
+            if (y - y0 + 102 * U > room) return
+            y = part(c, pointIn(i), () => y + A.pointCard(c, p, fr.x, y, fr.w, U, pt) + 8 * U)
+          })
           return y
         })
-      })
+      }
+      add('cut', ctx => cutFrame(ctx))
       add('board', ctx => board(ctx, 3, 3, P.watch, P.anyText))
       break
     }
@@ -539,13 +605,14 @@ export function promoDeck(plan, fmt, opts) {
       add('question', ctx => {
         page(ctx, 1, 3)
         centred(ctx, (c, y) => {
-          text(c, P.examKind.toLocaleUpperCase(), fr.x, y + FS.caption, { f: font(700, FS.caption, 'latin'), color: p.line.exam, tr: 0.18 })
+          part(c, k(0, 0.8), () => text(c, P.examKind.toLocaleUpperCase(), fr.x, y + FS.caption, { f: font(700, FS.caption, 'latin'), color: p.line.exam, tr: 0.18 }))
           y += FS.caption * 1.6 + SP[3]
-          y = lead(c, P.examAsk, y, p.ink, [FS.heading, FS.title])
+          y = part(c, k(0.1, 0.8), () => lead(c, P.examAsk, y, p.ink, [FS.heading, FS.title]))
           y += SP[6]
-          y += question(c, y) + SP[4]
-          y += A.choiceRows(c, p, fr.x, y, fr.w, U, pr.choices, { line: p.line.exam, rowH: 48 })
-          return lead(c, P.comment, y + SP[5], p.ink2, [FS.body], { maxLines: 2, weight: 500 })
+          y += part(c, k(0.6, 0.9), () => question(c, y)) + SP[4]
+          // The four readings in one after another.
+          y += A.choiceRows(c, p, fr.x, y, fr.w, U, pr.choices, { line: p.line.exam, rowH: 48, reveal: pr.choices.map((_, i) => k(1.5 + 0.3 * i, 0.7)) })
+          return part(c, k(3.2, 0.8), () => lead(c, P.comment, y + SP[5], p.ink2, [FS.body], { maxLines: 2, weight: 500 }))
         })
       })
       add('answer', ctx => {
@@ -575,10 +642,15 @@ export function promoDeck(plan, fmt, opts) {
       add('pass', ctx => {
         page(ctx, 1, 2)
         centred(ctx, (c, y) => {
-          y = lead(c, P.passWaits, y, p.ink, [FS.display * 0.72, FS.heading], { maxLines: 2 })
+          y = part(c, k(0, 0.8), () => lead(c, P.passWaits, y, p.ink, [FS.display * 0.72, FS.heading], { maxLines: 2 }))
           y += SP[7]
-          y += A.passCard(c, fr.x, y, fr.w, { name: P.yourName, nameInk: 'rgba(34, 36, 40, 0.45)', level: 1, cls: P.free, xp: 0.12 }) + SP[7]
-          return lead(c, P.passBody, y, p.ink2, [FS.lead, FS.body], { maxLines: 4, weight: 500 })
+          // In a clip 辶 fills as reviews fill it, then the level turns and
+          // the road starts again.
+          const LEVEL_UP = 5.0
+          const up = clock && clock.t >= LEVEL_UP
+          const xp = !clock ? 0.12 : up ? 0.06 : ease(Math.min(1, Math.max(0, (clock.t - 1.6) / (LEVEL_UP - 1.6))))
+          y += part(c, k(0.4, 1.2), () => A.passCard(c, fr.x, y, fr.w, { name: P.yourName, nameInk: 'rgba(34, 36, 40, 0.45)', level: up ? 2 : 1, cls: P.free, xp })) + SP[7]
+          return part(c, k(1.0, 0.8), () => lead(c, P.passBody, y, p.ink2, [FS.lead, FS.body], { maxLines: 4, weight: 500 }))
         })
       })
       add('free', ctx => {
@@ -604,8 +676,21 @@ export function promoDeck(plan, fmt, opts) {
     }
     default:
   }
+  // The cover in motion: CLIP.seconds of it, drawn at each moment.
+  const cover = out[0]
+  out.clip = {
+    ...CLIP,
+    print: plan.story === 'pitch',
+    draw: (ctx, t, moving = null) => {
+      clock = { t, moving }
+      try { cover.draw(ctx) } finally { clock = null }
+    },
+  }
   return out
 }
+
+/** A cover clip's length and rate: seven seconds, at thirty frames. */
+export const CLIP = { seconds: 7, fps: 30 }
 
 let pad = null
 /** A canvas off the page, to measure a block before it is placed (the

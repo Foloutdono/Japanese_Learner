@@ -201,7 +201,7 @@ export function ratingBar(ctx, p, x, y, w, u, labels, { pressed = null } = {}) {
 /** The choices as a run lists them: a row each, its number in a ring of
  *  the line's pigment. `right` the index of the right one, shown answered
  *  (the success ink) when `answered`. Returns the height. */
-export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answered = false, jp = true, rowH: rowCss = 54 } = {}) {
+export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answered = false, jp = true, rowH: rowCss = 54, reveal = null } = {}) {
   const c = inks(p)
   const rowH = rowCss * u
   const gap = 8 * u
@@ -210,6 +210,11 @@ export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answ
   const rows = answered ? [right] : choices.map((_, i) => i)
   rows.forEach((i, at) => {
     const label = choices[i]
+    // A clip brings the rows in one by one (`reveal`, 0 to 1 each).
+    const r = reveal ? reveal[at] ?? 1 : 1
+    ctx.save()
+    ctx.globalAlpha *= r
+    ctx.translate(0, (1 - r) * 16 * u)
     const ry = y + at * (rowH + gap)
     const ok = answered && i === right
     const ink = ok ? success : line
@@ -248,6 +253,7 @@ export function choiceRows(ctx, p, x, y, w, u, choices, { line, right = -1, answ
     let z = lz
     while (z > 12 * u && measure(ctx, label, font(600, z, jp ? 'jp' : 'latin')) > room) z -= u
     text(ctx, label, tx, cy + z * 0.36, { f: font(600, z, jp ? 'jp' : 'latin'), color: ok ? success : c.faceInk })
+    ctx.restore()
   })
   return rows.length * rowH + (rows.length - 1) * gap
 }
@@ -367,6 +373,31 @@ const picture = src => new Promise((resolve, reject) => {
   img.src = src
 })
 
+// The print in motion, for a clip (plan 212): index.css's .tpr- rules and
+// their keyframes, every animation held paused at the clip's moment `t`.
+// An element's own delay (its phase, written on it) moves on by t; one
+// with none starts at t.
+function motionCss(css) {
+  const rules = css.match(/^\.tpr-[a-z-]+(?:\s*,\s*\.tpr-[a-z-]+)*\s*\{[^}\n]*\}$/gm) || []
+  const frames = []
+  const re = /@keyframes tpr-[\w-]+\s*\{/g
+  let m
+  while ((m = re.exec(css))) {
+    let depth = 0
+    let i = m.index + m[0].length - 1
+    for (; i < css.length; i++) {
+      if (css[i] === '{') depth++
+      else if (css[i] === '}' && --depth === 0) break
+    }
+    frames.push(css.slice(m.index, i + 1))
+  }
+  return `${rules.join('\n')}\n${frames.join('\n')}`
+}
+/** A layer's markup at the clip's moment `t` (seconds). */
+function layerAt(markup, t) {
+  return markup.replace(/animation-delay:\s*(-?[\d.]+)s/g, (_, d) => `animation-delay: ${(+d - t).toFixed(3)}s`)
+}
+
 /** The hour's print, its layers decoded: `base` is the frontend's root
  *  as the page sees it. */
 export async function loadPrint(hour, { base = '../', device = 'phone' } = {}) {
@@ -377,7 +408,8 @@ export async function loadPrint(hour, { base = '../', device = 'phone' } = {}) {
   }
   const meta = await get('src/components/station/print/print.json')
   const scene = await get(`public/today/print/${meta.rev}/${hour}-${device}.json`)
-  const css = stillCss(await get('src/index.css', 'text'))
+  const cssText = await get('src/index.css', 'text')
+  const css = stillCss(cssText)
   // On the page the four layers share one document, and a layer fills
   // with a gradient another declares: each image carries them all.
   const defs = Object.values(scene.layers).flatMap(l => l.match(/<defs>[\s\S]*?<\/defs>/g) || []).join('')
@@ -389,13 +421,25 @@ export async function loadPrint(hour, { base = '../', device = 'phone' } = {}) {
     picture(svg(scene.layers.sky)), picture(svg(scene.layers.back)), picture(svg(scene.layers.train, scene.w)), picture(svg(scene.layers.front)),
     picture(`${base}public/today/print/${meta.rev}/grain.png`), picture(`${base}public/today/print/${meta.rev}/paper.png`),
   ])
-  return { hour, scene, frame: meta.frames[device], look: meta.hours[hour], img: { sky, back, train, front, grain, paper } }
+  const moving = motionCss(cssText)
+  const at = (name, t, left = 0) => picture(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-left} 0 ${scene.w + left} ${scene.h}" width="${(scene.w + left) * 4}" height="${scene.h * 4}"><style>${moving}\n[class*="tpr-"] { animation-delay: ${(-t).toFixed(3)}s; animation-play-state: paused !important; }</style>${defs}${layerAt(scene.layers[name], t)}</svg>`)}`)
+  /** The layers that move, as they stand `t` seconds in. */
+  const moment = async t => {
+    const [s2, b2, f2] = await Promise.all([at('sky', t), at('back', t), at('front', t)])
+    return { sky: s2, back: b2, front: f2 }
+  }
+  return { hour, scene, frame: meta.frames[device], look: meta.hours[hour], img: { sky, back, train, front, grain, paper }, moment }
 }
 
 /** The print with its top-left corner at (x, y), `u` pixels a unit; the
  *  band's ink fills above it, as the gate's frame does. */
-export function drawPrint(ctx, P, x, y, u, { W = ctx.canvas.width, H = ctx.canvas.height } = {}) {
-  const { scene, frame, look, img } = P
+export function drawPrint(ctx, P, x, y, u, { W = ctx.canvas.width, H = ctx.canvas.height, moving = null, t = null } = {}) {
+  const { scene, frame, look } = P
+  // A clip's frame: the layers as they stand at `t`, the train where its
+  // run has brought it; a still: the print at rest, the train halfway.
+  const img = moving ? { ...P.img, ...moving } : P.img
+  const run = t == null ? 0.45 : (((t + scene.train.delay) % scene.train.dur) / scene.train.dur)
   const w = scene.w * u
   const h = scene.h * u
   ctx.fillStyle = look.band
@@ -421,7 +465,7 @@ export function drawPrint(ctx, P, x, y, u, { W = ctx.canvas.width, H = ctx.canva
   tile(img.grain, 640 * u, 120 * u, (frame.horizon + 12) * u)
   ctx.restore()
   ctx.drawImage(img.back, x, y, w, h)
-  ctx.drawImage(img.train, x - w + w * (scene.train.run / 100) * 0.45, y, 2 * w, h)
+  ctx.drawImage(img.train, x - w + w * (scene.train.run / 100) * run, y, 2 * w, h)
   ctx.drawImage(img.front, x, y, w, h)
   tile(img.paper, 128 * u, 128 * u, h)
   ctx.restore()
@@ -434,16 +478,18 @@ const MARIA = [[-0.56, -0.42, 0.2, 0.781], [-0.2, -0.66, 0.16, 0.7377], [0.52, -
  *  glow, the halo of its lines at dusk and night, the disc, an arc per
  *  line round it, the count in the disc's inks; then the time under it.
  *  (cx, cy) the disc's centre, `u` the print's unit. */
-export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end }) {
+export function printDial(ctx, p, P, cx, cy, u, { parts, count, unit, time, end, breath = null }) {
   const { frame, look } = P
   const disc = look.disc
   const r = frame.disc * u
   const halo = frame.halo * u
   const width = 3.4 * u
-  const glowR = r + 70 * u
+  // The glow breathes in a clip (tpr-breathe: 0.8 to 1, 0.985 to 1.035).
+  const glowR = (r + 70 * u) * (breath == null ? 1 : 0.985 + 0.05 * breath)
+  const glowA = breath == null ? 1 : 0.8 + 0.2 * breath
   const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR)
-  g.addColorStop(r / glowR, alpha(disc.glow, disc.glowOp))
-  g.addColorStop((r + 24 * u) / glowR, alpha(disc.glow, disc.glowOp * 0.35))
+  g.addColorStop(r / glowR, alpha(disc.glow, disc.glowOp * glowA))
+  g.addColorStop((r + 24 * u) / glowR, alpha(disc.glow, disc.glowOp * 0.35 * glowA))
   g.addColorStop(1, alpha(disc.glow, 0))
   ctx.fillStyle = g
   ctx.beginPath()

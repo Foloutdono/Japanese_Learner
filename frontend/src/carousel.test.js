@@ -8,7 +8,7 @@ import { furiganaOf } from '../carousel/common.js'
 import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explain.js'
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS } from '../carousel/app.js'
-import { PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
+import { CLIP, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
 import { arrivals as landingArrivals, readFacts, spanOf as landingSpan } from '../landing/content.mjs'
 import EN from './locales/en/index.js'
@@ -666,6 +666,35 @@ describe('explaining a point in its own sentence', () => {
     for (const lang of ['en', 'fr']) {
       const words = JSON.stringify(PROMO[lang], (k, v) => (typeof v === 'function' ? String(v) : v))
       expect(words, lang).not.toMatch(/early access|accès anticipé|unlimited|illimité|€|\$\d/i)
+    }
+  })
+
+  it('draws every story’s cover as a seven-second clip, the last frame its still (plan 212)', () => {
+    expect(CLIP).toEqual({ seconds: 7, fps: 30 })
+    const had = globalThis.Path2D
+    globalThis.Path2D = class {}
+    try {
+      for (const story of STORIES) {
+        const data = bank(STORY_FILES[story])
+        const [{ id }] = promoItems(story, data, 'en')
+        const pl = promoPlan(story, data, id, { ...OPTS, story })
+        const frames = promoDeck(pl, FORMATS.story, { ground: 'sumi' })
+        expect(frames.clip, story).toBeTruthy()
+        expect(frames.clip.print, story).toBe(story === 'pitch')
+        for (const t of [0, 1, 3.5, 4.3, 6.99]) {
+          const { ctx } = stubContext()
+          expect(() => frames.clip.draw(ctx, t), `${story} at ${t}s`).not.toThrow()
+        }
+        // The clip ends on what the still says, all in (the analyser's on
+        // the sentence cut, which it shows being cut).
+        const still = stubContext()
+        frames[story === 'analyser' ? 1 : 0].draw(still.ctx)
+        const end = stubContext()
+        frames.clip.draw(end.ctx, 6.99)
+        for (const w of still.texts.filter(x => /[A-Za-z]{4}/.test(x) && !/Tap to/i.test(x))) expect(end.texts, `${story}: ${w}`).toContain(w)
+      }
+    } finally {
+      globalThis.Path2D = had
     }
   })
 })

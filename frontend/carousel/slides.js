@@ -2770,7 +2770,10 @@ function passagePages(plan, s, fmt, f) {
  *  `opts.picks` the questions picked for the item (else the first few),
  *  `opts.types[type]` the type's own options. */
 export function deck(type, plan, fmt, opts) {
-  if (plan.source === 'promo') return promoDeck(plan, FORMATS.story, opts).map(sl => ({ key: sl.key, draw: ctx => { noShadow(ctx); sl.draw(ctx) } }))
+  if (plan.source === 'promo') {
+    const frames = promoDeck(plan, FORMATS.story, opts)
+    return Object.assign(frames.map(sl => ({ key: sl.key, draw: ctx => { noShadow(ctx); sl.draw(ctx) } })), { clip: frames.clip })
+  }
   const fr = frame(fmt)
   const p = palette(opts.ground)
   const t = plan.t

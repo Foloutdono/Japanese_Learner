@@ -68,6 +68,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
 
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
 .seg[hidden] { display: none; }
+.btn[hidden] { display: none; }
 .seg button, .chip { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 7px 14px; cursor: pointer; min-height: 36px; }
 .seg button[aria-pressed="true"], .chip[aria-pressed="true"] { background: var(--sel-wash); border-color: var(--sel-line); color: var(--sel-ink); }
 .seg button:hover, .chip:hover { border-color: var(--sel-line); }
@@ -278,6 +279,7 @@ dialog::backdrop { background: var(--scrim); }
       </div>
       <div class="export__actions">
         <button id="export" type="button" class="btn btn--metal" disabled>Download <span id="export-name"></span> (.zip)</button>
+        <button id="export-clip" type="button" class="btn btn--metal" data-promo="only" hidden>Download the cover clip (.mp4, 7 s)</button>
         <button id="copy-title" type="button" class="btn">Copy title</button>
         <button id="copy" type="button" class="btn">Copy caption</button>
       </div>
