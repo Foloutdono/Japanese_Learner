@@ -106,52 +106,82 @@ function seeded(str) {
   return () => (s = (s * 16807) % 2147483647) / 2147483647
 }
 
-/** Where each saying lands: the screen around the card and the masthead
- *  cut into as many cells as there are sayings, each reading set in its
- *  cell as large as the cell takes, at its own tilt, the cells dealt in
- *  a random order so the screen fills all over rather than top to bottom. */
-function scatter(n, word, fmt, fr, card) {
+/** A rectangle w×h turned by `tilt` about its centre (x, y), as corners. */
+const cornersOf = ({ x, y, w, h, tilt = 0 }) => {
+  const c = Math.cos(tilt)
+  const sn = Math.sin(tilt)
+  return [[-w / 2, -h / 2], [w / 2, -h / 2], [w / 2, h / 2], [-w / 2, h / 2]].map(([u, v]) => [x + u * c - v * sn, y + u * sn + v * c])
+}
+/** Whether two turned rectangles touch (separating axes). */
+export function touches(a, b) {
+  const A = cornersOf(a)
+  const B = cornersOf(b)
+  const axes = [a, b].flatMap(r => [[Math.cos(r.tilt || 0), Math.sin(r.tilt || 0)], [-Math.sin(r.tilt || 0), Math.cos(r.tilt || 0)]])
+  for (const [ax, ay] of axes) {
+    const span = pts => pts.reduce(([lo, hi], [px, py]) => { const d = px * ax + py * ay; return [Math.min(lo, d), Math.max(hi, d)] }, [Infinity, -Infinity])
+    const [a0, a1] = span(A)
+    const [b0, b1] = span(B)
+    if (a1 < b0 || b1 < a0) return false
+  }
+  return true
+}
+/** A box {x, y, w, h} from its corner, as a rectangle from its centre. */
+const centred = k => ({ x: k.x + k.w / 2, y: k.y + k.h / 2, w: k.w, h: k.h, tilt: 0 })
+// How much of a reading another may cover: its edges, never its middle.
+const CORE = 0.7
+
+/** Where each saying lands: anywhere on the screen, over the card too,
+ *  but never on what must stay read (`keep`: the card's picture, word,
+ *  reading and meaning, the voice's credit, the masthead). Each reading
+ *  is about as large as the screen shared between the sayings allows,
+ *  give or take a third, at its own tilt, and set where it is furthest
+ *  from the ones before it, so the screen fills all over; one may run
+ *  over another's edge, never over its middle (CORE), so each is read. */
+export function scatter(n, word, fmt, keep) {
+  // The largest share of the screen at which every reading still finds
+  // its place at nearly its own size; smaller and smaller until one does.
+  let out = null
+  for (let fill = 0.46; fill > 0.12; fill *= 0.9) {
+    out = scatterAt(fill, n, word, fmt, keep)
+    if (out.every(o => o.z >= o.want * 0.8)) break
+  }
+  return out
+}
+function scatterAt(fill, n, word, fmt, keep) {
   const rnd = seeded(word.r + word.t)
   const chars = [...word.r].length
-  // Above the masthead, between it and the card, under the card.
-  const bands = [{ y0: 30, y1: fr.y - 6 }, { y0: fr.y + 64 + 12, y1: card.y - 12 }, { y0: card.y + card.h + 12, y1: fmt.h - 30 }].filter(b => b.y1 - b.y0 > 90)
-  const area = b => b.y1 - b.y0
-  const total = bands.reduce((a, b) => a + area(b), 0)
-  // Each band takes its share of the sayings, a whole row at least.
-  const shares = bands.map(b => Math.max(1, Math.round((n * area(b)) / total)))
-  while (shares.reduce((a, b) => a + b, 0) > n) shares[shares.indexOf(Math.max(...shares))]--
-  while (shares.reduce((a, b) => a + b, 0) < n) shares[bands.indexOf(bands.reduce((a, b) => (area(b) > area(a) ? b : a)))]++
-  const cells = []
-  bands.forEach((b, i) => {
-    const k = shares[i]
-    // As many to a row as lets the readings be largest: a short word
-    // three or four across, a long one a row of its own.
-    const sizeAt = c => Math.min(fmt.w / c / chars, area(b) / Math.ceil(k / c))
-    let cols = 1
-    for (let c = 2; c <= Math.min(4, k); c++) if (sizeAt(c) > sizeAt(cols)) cols = c
-    const rows = Math.max(1, Math.ceil(k / cols))
-    for (let j = 0; j < k; j++) {
-      const r = Math.floor(j / cols)
-      // A row a word short is centred.
-      const inRow = r === rows - 1 && k % cols ? k % cols : cols
-      const cw = fmt.w / inRow
-      const ch = area(b) / rows
-      cells.push({ x: (j % cols % inRow) * cw, y: b.y0 + r * ch, w: cw, h: ch })
+  const base = Math.min(230, Math.max(70, Math.sqrt((fill * fmt.w * fmt.h) / (n * chars))))
+  const M = 12
+  const out = []
+  for (let i = 0; i < n; i++) {
+    const want = Math.min(270, Math.max(60, base * (0.8 + 0.45 * rnd())))
+    let z = want
+    let best = null
+    for (let tries = 0; !best && tries < 8; tries++, z *= 0.88) {
+      for (let c = 0; c < 120; c++) {
+        const tilt = (rnd() - 0.5) * 0.9
+        const w = z * chars * 1.0
+        const h = z * 1.0
+        const bw = Math.abs(w * Math.cos(tilt)) + Math.abs(h * Math.sin(tilt))
+        const bh = Math.abs(w * Math.sin(tilt)) + Math.abs(h * Math.cos(tilt))
+        if (bw > fmt.w - 2 * M) continue
+        const x = M + bw / 2 + rnd() * (fmt.w - bw - 2 * M)
+        const y = M + bh / 2 + rnd() * (fmt.h - bh - 2 * M)
+        const here = { x, y, w, h, tilt }
+        if (keep.some(k => touches(here, centred(k)))) continue
+        const core = { x, y, w: w * CORE, h: h * CORE, tilt }
+        if (out.some(o => touches(core, { ...o, w: o.w * CORE, h: o.h * CORE }))) continue
+        // Furthest from the readings already down, for its size; a little chance in it.
+        const far = out.length ? Math.min(...out.map(o => Math.hypot(o.x - x, o.y - y) / ((o.z * chars + z * chars) / 4 + (o.z + z) / 4))) : 1
+        const score = far * (0.8 + 0.4 * rnd())
+        if (!best || score > best.score) best = { x, y, z, tilt, w, h, score }
+      }
     }
-  })
-  for (let i = cells.length - 1; i > 0; i--) {
-    const j = Math.floor(rnd() * (i + 1))
-    ;[cells[i], cells[j]] = [cells[j], cells[i]]
+    // Nowhere left clear (never seen): the foot of the screen, small.
+    best ||= { x: fmt.w / 2, y: fmt.h - 100, z: 70, tilt: 0, w: 70 * chars, h: 70 }
+    out.push({ x: best.x, y: best.y, z: best.z, want, tilt: best.tilt, w: best.w, h: best.h, shade: 0.4 + 0.45 * rnd() })
   }
-  return cells.map(cell => {
-    const max = Math.min(260, (cell.w * 0.98) / chars, cell.h * 0.92)
-    const z = Math.max(60, max * (0.78 + 0.22 * rnd()))
-    const half = (z * chars) / 2
-    // Inside the screen whatever the cell: a reading is never cut.
-    const x = Math.min(fmt.w - 24 - half, Math.max(24 + half, cell.x + cell.w / 2 + (rnd() - 0.5) * Math.max(0, cell.w - 2 * half)))
-    const y = cell.y + cell.h / 2 + (rnd() - 0.5) * Math.max(0, cell.h - z)
-    return { x, y, z, tilt: (rnd() - 0.5) * 0.36, shade: 0.42 + 0.4 * rnd() }
-  })
+  return out
 }
 
 /** The echo's frames: its still (the screen full) and, as `clips.cover`,
@@ -169,7 +199,33 @@ export function echoDeck(plan, fmt, opts = {}) {
   // reading in gold, its meaning; on the foot the theme and the voice.
   const cardH = 300 * U
   const card = { x: fr.x, y: Math.round(fr.y + 64 + (fr.h - 64 - cardH) / 2), w: fr.w, h: cardH }
-  const spots = scatter(at.length, word, fmt, fr, card)
+  // The card's word and its picture, as its body sets them (reviewCard's
+  // inner box: 28px in, 44px down, over its 35px foot).
+  const inner = { x: card.x + 28 * U, y: card.y + 44 * U, w: card.w - 56 * U, h: card.h - 35 * U - 44 * U - 28 * U }
+  const kanji = hasKanji(word.t)
+  const size = {
+    pic: 96 * U,
+    kz: kanji ? Math.min(54 * U, (inner.w * 0.9) / [...word.t].length) : 0,
+    rz: kanji ? 22 * U : Math.min(44 * U, (inner.w * 0.9) / [...word.r].length),
+  }
+  // What must stay read, kept clear of the readings: each line of the
+  // card's word as its body sets it (an estimate of the Latin face's
+  // width, 0.6em a letter, errs wide), the voice's credit, the masthead.
+  const pad = 10 * U
+  const gz = 20 * U
+  const blockH = size.pic + SP[4] + (kanji ? size.kz * 1.1 + SP[2] : 0) + size.rz * 1.2 + SP[3] + gz * 1.18
+  const lines = [[size.pic, size.pic + SP[4]], ...(kanji ? [[size.kz * [...word.t].length, size.kz * 1.1 + SP[2]]] : []), [size.rz * [...word.r].length, size.rz * 1.2 + SP[3]], [0.6 * gz * [...word.gloss].length, gz * 1.18]]
+  const keep = []
+  let ky = inner.y + (inner.h - blockH) / 2
+  for (const [w, h] of lines) {
+    const lw = Math.min(inner.w, w)
+    keep.push({ x: inner.x + (inner.w - lw) / 2 - pad, y: ky - pad, w: lw + 2 * pad, h: h + 2 * pad })
+    ky += h
+  }
+  const credit = 0.6 * 11.52 * U * [...plan.echo.voice].length
+  keep.push({ x: card.x + card.w - 16 * U - credit - 8 * U, y: card.y + card.h - 35 * U - 4 * U, w: credit + 24 * U, h: 39 * U })
+  keep.push({ x: fr.x - 12, y: fr.y - 12, w: 240, h: 64 + 24 })
+  const spots = scatter(at.length, word, fmt, keep)
   const ease = x => 1 - (1 - x) ** 3
   const drawCard = (ctx, k) => {
     ctx.save()
@@ -178,10 +234,7 @@ export function echoDeck(plan, fmt, opts = {}) {
     A.reviewCard(ctx, p, card.x, card.y, card.w, card.h, U, {
       stage: 'new', foot: [word.lv ? `${word.lv} · ${word.theme}` : word.theme, plan.echo.voice], band: 0,
       body: (x, y, w, h) => {
-        const kanji = hasKanji(word.t)
-        const pic = 96 * U
-        const kz = kanji ? Math.min(54 * U, (w * 0.9) / [...word.t].length) : 0
-        const rz = kanji ? 22 * U : Math.min(44 * U, (w * 0.9) / [...word.r].length)
+        const { pic, kz, rz } = size
         const gb = fit(ctx, word.gloss, { weight: 500, sizes: [20 * U, 17 * U, 15 * U], maxW: w, maxLines: 1, fam: 'latin' })
         const blockH = pic + SP[4] + (kanji ? kz * 1.1 + SP[2] : 0) + rz * 1.2 + SP[3] + paragraphH(gb)
         let yy = y + (h - blockH) / 2
@@ -223,11 +276,12 @@ export function echoDeck(plan, fmt, opts = {}) {
       ctx.restore()
     })
   }
+  // The readings over everything: over the card's edges, never its word.
   const drawAt = (ctx, t) => {
     ground(ctx, p, fr)
-    drawWords(ctx, t)
     masthead(ctx, p, fr)
     drawCard(ctx, t == null ? 1 : ease(Math.min(1, t / ECHO.rise)))
+    drawWords(ctx, t)
   }
   const still = { key: 'echo', draw: ctx => { ctx.save(); drawAt(ctx, null); ctx.restore() } }
   const clip = {
@@ -239,5 +293,5 @@ export function echoDeck(plan, fmt, opts = {}) {
     get sounds() { return voice ? at.map(a => ({ at: Math.max(0, a - span.on), src: voice.src })) : [] },
     draw: (ctx, t) => { ctx.save(); drawAt(ctx, t); ctx.restore() },
   }
-  return Object.assign([still], { clip, clips: { cover: clip } })
+  return Object.assign([still], { clip, clips: { cover: clip }, spots, keep })
 }

@@ -426,7 +426,12 @@ review card (its picture, its kanji, its reading in gold, its meaning),
 and each time the reader says it again its reading lands somewhere new
 on the screen, any size and tilt, gold while it is said, until the
 screen is full of it. The owner picked the scatter from four drawn
-layouts (a practice grid, columns, an echo trailing away).
+layouts (a practice grid, columns, an echo trailing away), then asked
+for it bigger and messier, over the card: a reading may cross the
+card's edges and another reading's edge, never the card's picture,
+word, reading or meaning, the voice's credit or the masthead, and never
+another reading's middle (`echo.scatter`, `CORE`), so every one is
+still read; the layout takes the largest size at which all of them fit.
 
 **The rhythm is the word's.** Between two sayings there is always
 `ECHO.gap` (0.3s) of silence after the voice stops, so a long word is

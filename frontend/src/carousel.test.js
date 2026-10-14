@@ -9,7 +9,7 @@ import { howItWorks, particleLabel, senseOf, stacksIn } from '../carousel/explai
 import { STRINGS, weld, weldIf } from '../carousel/strings.js'
 import { APP_INKS } from '../carousel/app.js'
 import { CLIP, LEVEL, PROMO, STORIES, STORY_FILES, arrivals, kanjiNumber, promoDeck, promoItems, promoPlan, spanOf } from '../carousel/promo.js'
-import { ECHO, beats, echoDeck, echoItems, echoPlan, voiceSpan } from '../carousel/echo.js'
+import { ECHO, beats, echoDeck, echoItems, echoPlan, touches, voiceSpan } from '../carousel/echo.js'
 import { LEVEL_CLOCK, VOICE_EVENTS } from './lib/audio/recipes.js'
 import { VOICE_REV } from './lib/audio/speech.js'
 import { kanjiNumber as appKanjiNumber } from './domain/dayClear.js'
@@ -761,6 +761,29 @@ describe('the word echo (plan 213)', () => {
     }
     // A short word is said more often than a long one.
     expect(beats({ on: 0.1, off: 0.4 }).length).toBeGreaterThan(beats({ on: 0.1, off: 1.0 }).length)
+  })
+
+  it('lays the readings anywhere but on the card’s word, its credit and the masthead, each read', () => {
+    const fmt = FORMATS.story
+    for (const { id } of echoItems(themes, 'en').filter((_, i) => i % 9 === 0)) {
+      const pl = echoPlan(themes, id, { lang: 'en' })
+      const { spots, keep, clip } = echoDeck(pl, fmt, { ground: 'sumi' })
+      expect(spots.length, id).toBe(clip.beats.length)
+      for (const s of spots) {
+        // Over the card's edges if it likes, never over what must stay read.
+        for (const k of keep) expect(touches(s, { x: k.x + k.w / 2, y: k.y + k.h / 2, w: k.w, h: k.h, tilt: 0 }), id).toBe(false)
+        // Whole on the screen, never cut.
+        const bw = Math.abs(s.w * Math.cos(s.tilt)) + Math.abs(s.h * Math.sin(s.tilt))
+        const bh = Math.abs(s.w * Math.sin(s.tilt)) + Math.abs(s.h * Math.cos(s.tilt))
+        expect(s.x - bw / 2 >= 0 && s.x + bw / 2 <= fmt.w && s.y - bh / 2 >= 0 && s.y + bh / 2 <= fmt.h, id).toBe(true)
+        expect(s.z, id).toBeGreaterThanOrEqual(40)
+      }
+      // No reading's middle under another's.
+      for (let i = 0; i < spots.length; i++) for (let j = 0; j < i; j++) {
+        const core = o => ({ ...o, w: o.w * 0.7, h: o.h * 0.7 })
+        expect(touches(core(spots[i]), core(spots[j])), `${id} ${i} ${j}`).toBe(false)
+      }
+    }
   })
 
   it('finds where the voice starts and stops in its clip', () => {
