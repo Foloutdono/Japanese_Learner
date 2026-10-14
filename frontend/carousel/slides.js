@@ -2175,6 +2175,10 @@ const ENDINGS = {
  *  others, by its title. */
 function quizSlide(c, q, revealed, head, number = 1) {
   const { ctx, p, f, ink, ink2 } = c
+  // A question whose why answers every wrong choice shows, answered, the
+  // right one alone under its own number (a trap's, plan 200n): three
+  // sentence-long readings and the why do not fit a slide together.
+  if (revealed && q.answerOnly) q = { ...q, choices: [q.choices[q.right]], right: 0, numbers: [q.right + 1] }
   const t = c.plan.t
   const lang = c.plan.lang
   let y = f.y
@@ -2396,7 +2400,7 @@ function quizSlide(c, q, revealed, head, number = 1) {
     const right = i === q.right
     const dim = revealed && !right
     const r = 30
-    roundel(ctx, cx + SP[5] + r, cy + chh / 2, r, dim ? p.surfaceLine : p.line.exam, String(i + 1), { ink: dim ? ink2 : p.line.exam, size: FS.lead })
+    roundel(ctx, cx + SP[5] + r, cy + chh / 2, r, dim ? p.surfaceLine : p.line.exam, String(q.numbers?.[i] ?? i + 1), { ink: dim ? ink2 : p.line.exam, size: FS.lead })
     const tx = cx + SP[5] + r * 2 + SP[4]
     const tw = cx + cw - SP[4] - tx
     if (choice.rows) {

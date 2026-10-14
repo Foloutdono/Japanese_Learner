@@ -606,7 +606,7 @@ export function trapQuizzes(traps, lang, t) {
   const qs = traps.map(x => {
     const d = deal(0, x.choices.map((_, i) => i).slice(1), x.id)
     return {
-      kind: 'trap', id: x.id, ask: tr(x.ask, lang), stem: { rows: unpack(x.rows), tr: '' }, lines: 4,
+      kind: 'trap', id: x.id, ask: tr(x.ask, lang), stem: { rows: unpack(x.rows), tr: '' }, lines: 4, answerOnly: true,
       choices: d.choices.map(i => ({ text: tr(x.choices[i], lang), fam: 'latin' })), right: d.right,
       explain: { why: tr(x.why, lang) },
     }
