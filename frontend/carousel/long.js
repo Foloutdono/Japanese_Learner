@@ -437,7 +437,10 @@ export function timeline(plan, dur = null) {
       chapters.push({ at: start, title: `${n}–${Math.min(of, i + 5)} · ${names}` })
     }
     if (plan.kind === 'quiz' && i % 5 === 0) chapters.push({ at: start, title: `${S.quizHead} ${n}${n < of ? `–${Math.min(of, i + 5)}` : ''}` })
-    if (plan.kind === 'grammar') chapters.push({ at: start, title: grammarChapter(it, S) })
+    if (plan.kind === 'grammar') {
+      const asked = it.type === 'q' && !it.twist ? plan.items.slice(0, i + 1).filter(x => x.type === 'q' && !x.twist).length : 0
+      chapters.push({ at: start, title: asked ? `${S.quizHead} ${asked}` : grammarChapter(it, S) })
+    }
     fx(start + 0.1, 'card-transition', 0.8)
     if (plan.kind === 'vocab') {
       // Three seconds alone, the reading said twice, the meaning, a sentence.
