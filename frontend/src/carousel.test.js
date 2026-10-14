@@ -788,6 +788,16 @@ describe('the word echo (plan 213)', () => {
     }
   })
 
+  it('lands its readings on a recording of its own, which plays whole under it', () => {
+    const pl = echoPlan(themes, '人参::にんじん', { lang: 'en' })
+    const beatsAt = [0.46, 1.04, 1.54, 2.11, 2.78]
+    const { clip, spots } = echoDeck(pl, FORMATS.story, { ground: 'sumi', track: { src: 'sound.mp3', seconds: 15.384, beats: beatsAt } })
+    expect(clip.seconds).toBe(15.384)
+    expect(clip.beats).toEqual(beatsAt)
+    expect(spots.length).toBe(beatsAt.length)
+    expect(clip.sounds).toEqual([{ at: 0, src: 'sound.mp3' }])
+  })
+
   it('finds where the voice starts and stops in its clip', () => {
     const rate = 1000
     const samples = new Float32Array(1000)

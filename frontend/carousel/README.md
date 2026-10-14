@@ -472,6 +472,12 @@ cd backend
 VOICEVOX_URL=http://localhost:50121 python -m scripts.carousel_voices --yes
 ```
 
+A recording that says a word over and over (a sound from a feed, say)
+can be the echo's sound instead (`echoDeck`'s `track`: the file, its
+length and when each saying starts): the readings land on its sayings
+and it plays whole under them. The sayings are found by ear or from the
+sound's loudness, each voiced rise a saying (plan 213's いたい clip).
+
 "Download the clip" encodes the ten seconds as the promo clips are
 encoded (H.264, the voice as AAC or Opus), the voice mixed by
 `sound.clipAudio`, which takes a recorded clip (`src`) beside the app's

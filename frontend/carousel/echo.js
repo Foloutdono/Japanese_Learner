@@ -186,7 +186,10 @@ function scatterAt(fill, n, word, fmt, keep) {
 
 /** The echo's frames: its still (the screen full) and, as `clips.cover`,
  *  the ten seconds that fill it. `opts.voice`: { src, on, off }, the
- *  word's clip and its span (else a guess, and no sound). */
+ *  word's clip and its span (else a guess, and no sound). Or a sound of
+ *  its own (`opts.track`: { src, seconds, beats }, a recording that says
+ *  the word, with when each saying starts): the readings land on its
+ *  sayings, the clip lasts as long, and it plays under it whole. */
 export function echoDeck(plan, fmt, opts = {}) {
   const fr = frame(fmt)
   const p = palette(opts.ground)
@@ -194,7 +197,8 @@ export function echoDeck(plan, fmt, opts = {}) {
   const U = fr.w / A.PHONE_W
   const voice = opts.voice || null
   const span = voice ? { on: voice.on, off: voice.off } : guessed(word.r)
-  const at = beats(span)
+  const track = opts.track || null
+  const at = track ? track.beats : beats(span)
   // The card, as the app's review card: the picture, the word, its
   // reading in gold, its meaning; on the foot the theme and the voice.
   const cardH = 300 * U
@@ -285,12 +289,12 @@ export function echoDeck(plan, fmt, opts = {}) {
   }
   const still = { key: 'echo', draw: ctx => { ctx.save(); drawAt(ctx, null); ctx.restore() } }
   const clip = {
-    seconds: ECHO.seconds,
+    seconds: track ? track.seconds : ECHO.seconds,
     fps: ECHO.fps,
     print: false,
     beats: at,
     // Each saying's clip starts where its voice will start, less its lead-in.
-    get sounds() { return voice ? at.map(a => ({ at: Math.max(0, a - span.on), src: voice.src })) : [] },
+    get sounds() { return track ? [{ at: 0, src: track.src }] : voice ? at.map(a => ({ at: Math.max(0, a - span.on), src: voice.src })) : [] },
     draw: (ctx, t) => { ctx.save(); drawAt(ctx, t); ctx.restore() },
   }
   return Object.assign([still], { clip, clips: { cover: clip }, spots, keep })
