@@ -32,7 +32,7 @@ for (let i = 0; i < 12; i++) {
   else { await page.waitForTimeout(900); await cont(1500) }
 }
 await page.waitForTimeout(6500); log(page.url())
-await page.screenshot({ path: `${WORK}/ob_after.png`, scale: 'css' })
+await page.screenshot({ path: 'ob_after.png', scale: 'css' })
 console.log((await page.innerText('body')).replace(/\n+/g,' | ').slice(0,300))
 await stop()
 await browser.close()

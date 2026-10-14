@@ -42,7 +42,31 @@ async function shot(html, out, transparent = true) {
   await page.evaluate(() => document.fonts.ready)
   await page.screenshot({ path: out, omitBackground: transparent })
 }
-for (const [k, v] of Object.entries(caps)) await shot(`<div class="cap"><div>${v}</div></div>`, `${WORK}/ov/cap_${k}.png`)
+const manifest = {}
+for (const [k, v] of Object.entries(caps)) {
+  await shot(`<div class="cap"><div>${v}</div></div>`, `${WORK}/ov/cap_${k}.png`)
+  const boxes = await page.evaluate(() => {
+    const root = document.querySelector('.cap > div')
+    const walk = n => { for (const c of [...n.childNodes]) {
+      if (c.nodeType === 3) { const parts = c.textContent.split(/(\s+)/); const frag = document.createDocumentFragment()
+        for (const p of parts) { if (!p) continue; if (/^\s+$/.test(p)) frag.appendChild(document.createTextNode(p)); else { const sp = document.createElement('span'); sp.className = 'w'; sp.textContent = p; frag.appendChild(sp) } }
+        c.replaceWith(frag) }
+      else if (c.nodeType === 1 && (c.classList.contains('pill') || c.tagName === 'IMG')) c.classList.add('w')
+      else if (c.nodeType === 1) walk(c) } }
+    walk(root)
+    return [...root.querySelectorAll('.w')].map(e => { const r = e.getBoundingClientRect(); return [r.left, r.top, r.width, r.height, e.classList.contains('pill') ? 'pill' : e.tagName === 'IMG' ? 'mark' : 'word'] })
+  })
+  manifest[k] = { full: `ov/cap_${k}.png`, words: [] }
+  for (let i = 0; i < boxes.length; i++) {
+    await page.evaluate(i => document.querySelectorAll('.w').forEach((e, j) => { e.style.visibility = j === i ? 'visible' : 'hidden' }), i)
+    // the bold/dim parents stay visible for layout; hide their own text nodes by colour only through the spans above
+    await page.evaluate(() => document.querySelectorAll('.cap b, .cap span:not(.w), .cap div').forEach(e => { e.style.visibility = e.style.visibility }))
+    const out = `ov/w_${k}_${i}.png`
+    await page.screenshot({ path: `${WORK}/${out}`, omitBackground: true })
+    manifest[k].words.push({ png: out, box: boxes[i].slice(0, 4), kind: boxes[i][4] })
+  }
+}
+fs.writeFileSync(`${WORK}/ov/captions.json`, JSON.stringify(manifest, null, 1))
 // background: sumi, a warm glow behind the phone, the mark as a faint watermark
 await shot(`<div style="position:absolute;inset:0;background:
   radial-gradient(ellipse 620px 760px at 540px 1120px, rgba(201,154,62,.20), transparent 70%),
@@ -58,6 +82,3 @@ await shot(`<div style="position:absolute;left:${x - 14}px;top:${y - 14}px;width
   <div style="position:absolute;left:${x - 15}px;top:${y - 15}px;width:${w + 30}px;height:${h + 30}px;border-radius:${r + 15}px;border:1.5px solid rgba(230,182,82,.35);box-sizing:border-box"></div>`, `${WORK}/ov/frame.png`)
 await browser.close()
 console.log('ok')
-// the phone's screen alone, as compose.py's alpha mask
-const { execFileSync } = await import('child_process')
-execFileSync('python3', ['-c', `from PIL import Image; Image.open('${WORK}/ov/mask.png').convert('L').crop((${PH.x},${PH.y},${PH.x + PH.w},${PH.y + PH.h})).save('${WORK}/ov/mask_phone.png')`])

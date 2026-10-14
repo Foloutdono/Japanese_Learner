@@ -73,3 +73,7 @@ for d in range(DAYS, -1, -1):
 for tbl in ('xp_ledger',):
     pass
 print('reviews', total)
+import json as _json
+_g = {k: (now - timedelta(days=DAYS)).isoformat() for k in ('today', 'learn', 'practice', 'dictionary', 'profile')}
+q("UPDATE user_profiles SET guided=%s WHERE user_id=%s", (_json.dumps(_g), UID))
+q("DELETE FROM comprehension_served WHERE user_id=%s", (UID,))

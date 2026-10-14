@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { execFileSync } from 'child_process'
+import { SFX_LOG } from './common.mjs'
 const REPO = new URL('../../../../', import.meta.url).pathname.replace(/\/$/, '')
 const WORK = process.env.FILM_DIR || '/tmp/tsuji-film'
 // CDP screencast recorder: crisp device-pixel frames, assembled to CFR mp4.
@@ -26,6 +27,9 @@ export async function startRec(page, name) {
     }
     list += `file '${frames[frames.length - 1].file}'\n`
     fs.writeFileSync(`${dir}/list.txt`, list)
+    const T0 = frames[0].t
+    fs.writeFileSync(`${dir}/frames.json`, JSON.stringify({ t0: T0, end: end - T0, frames: frames.map(f => [f.file, +(f.t - T0).toFixed(4)]),
+      events: SFX_LOG.filter(e => e.t >= T0 - 0.05 && e.t <= end).map(e => ({ ...e, t: +(e.t - T0).toFixed(4) })) }))
     const out = `${WORK}/clips/${name}.mp4`; fs.mkdirSync(`${WORK}/clips`, { recursive: true })
     execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', `${dir}/list.txt`,
       '-vf', 'fps=30,scale=1170:2340:flags=lanczos,format=yuv420p', '-c:v', 'libx264', '-crf', '16', '-preset', 'medium', out])
