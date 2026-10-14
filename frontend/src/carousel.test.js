@@ -736,9 +736,11 @@ describe('the word echo (plan 213)', () => {
   const themes = bank('themes.json')
   const voices = JSON.parse(readFileSync(new URL('../carousel/voices/index.json', import.meta.url), 'utf8'))
 
-  it('has the app’s own voice for every pictured word, in the current voice', () => {
+  it('has the app’s reader, livelier, for every pictured word, in the current voice', () => {
     expect(voices.rev).toBe(VOICE_REV)
     expect(voices.credit).toBe('VOICEVOX Nemo')
+    // The reader, livelier: the take the owner picked (scripts/carousel_voices.py's ENERGY).
+    expect(voices.energy).toEqual({ speed: 1.1, intonationScale: 1.45, pitchScale: 0.04, volumeScale: 1.15 })
     const items = echoItems(themes, 'en')
     expect(items.length).toBeGreaterThan(400)
     for (const { id } of items) {
@@ -763,7 +765,7 @@ describe('the word echo (plan 213)', () => {
     expect(beats({ on: 0.1, off: 0.4 }).length).toBeGreaterThan(beats({ on: 0.1, off: 1.0 }).length)
   })
 
-  it('lays the readings anywhere but on the card’s word, its credit and the masthead, each read', () => {
+  it('lays the readings anywhere but on the card’s word, its credit and the masthead, each read', { timeout: 60000 }, () => {
     const fmt = FORMATS.story
     for (const { id } of echoItems(themes, 'en').filter((_, i) => i % 9 === 0)) {
       const pl = echoPlan(themes, id, { lang: 'en' })

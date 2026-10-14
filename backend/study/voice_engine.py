@@ -434,25 +434,44 @@ def _synthesize(query: dict, style: int, rate: int) -> Pcm:
     return _pcm_from_wav(_checked(response, "/synthesis").content, rate)
 
 
-def say(text: str, style: int, *, speed: float = 1.0, sample_rate: int = DIALOGUE_RATE) -> Pcm:
+# A voice's delivery beyond its pace: how far its pitch moves
+# (intonationScale), its height (pitchScale) and its level (volumeScale),
+# the engine's own names. The app's voices take none of it; the carousel's
+# word echo says its word livelier (scripts/carousel_voices.py, plan 213).
+TONE_KEYS = ("intonationScale", "pitchScale", "volumeScale")
+
+
+def _toned(tone: dict | None) -> dict:
+    tone = tone or {}
+    unknown = set(tone) - set(TONE_KEYS)
+    if unknown:
+        raise ValueError(f"not a tone the engine takes: {sorted(unknown)}")
+    return dict(tone)
+
+
+def say(text: str, style: int, *, speed: float = 1.0, sample_rate: int = DIALOGUE_RATE,
+        tone: dict | None = None) -> Pcm:
     """`text` spoken by the voice `style` (style_for_slot /
     style_named). A lone kana is spoken by its notation (see "Why kana
-    are safe here" above); everything else is read as text."""
+    are safe here" above); everything else is read as text. `tone`
+    (TONE_KEYS) changes its delivery; none, the voice as it is."""
+    extra = _toned(tone)
     notation = lone_kana_notation(text)
     if notation is not None:
         try:
-            return say_kana(notation, style, speed=speed, sample_rate=sample_rate, hold=LONE_KANA_HOLD_S)
+            return say_kana(notation, style, speed=speed, sample_rate=sample_rate, hold=LONE_KANA_HOLD_S, tone=extra)
         except _NotationRefused:
             logger.info("Voice engine refused the notation %r; reading %r as text", notation, text)
     query = _json(_request("POST", "/audio_query", params={"text": text, "speaker": style}), "/audio_query")
     if not isinstance(query, dict):
         raise TTSFailed("the voice engine returned an audio query that is not an object")
-    query.update(speedScale=speed, outputSamplingRate=sample_rate, outputStereo=False)
+    query.update(speedScale=speed, outputSamplingRate=sample_rate, outputStereo=False, **extra)
     return _synthesize(query, style, sample_rate)
 
 
 def say_kana(notation: str, style: int, *, speed: float = 1.0, sample_rate: int = DIALOGUE_RATE,
-             level_pitch: bool = False, pad: float | None = None, hold: float | None = None) -> Pcm:
+             level_pitch: bool = False, pad: float | None = None, hold: float | None = None,
+             tone: dict | None = None) -> Pcm:
     """Speak a kana notation ("ハ'", "ア'ア"). `hold` is the least time
     the last vowel lasts (LONE_KANA_HOLD_S); `level_pitch` holds every
     voiced mora on the first one's pitch, so a long vowel is one steady
@@ -471,7 +490,7 @@ def say_kana(notation: str, style: int, *, speed: float = 1.0, sample_rate: int 
         for mora in voiced[1:]:
             mora["pitch"] = voiced[0]["pitch"]
     query = dict(_QUERY_DEFAULTS, accent_phrases=phrases, kana=notation,
-                 speedScale=speed, outputSamplingRate=sample_rate)
+                 speedScale=speed, outputSamplingRate=sample_rate, **_toned(tone))
     if pad is not None:
         query["prePhonemeLength"] = query["postPhonemeLength"] = pad
     return _synthesize(query, style, sample_rate)

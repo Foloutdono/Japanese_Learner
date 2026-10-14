@@ -442,12 +442,15 @@ the voice starts and stops in its clip is measured from the sound
 (`echo.voiceSpan`, -45dB), so the gap is silence and not the engine's
 padding.
 
-**The voice is the app's.** `voices/` holds the reading of every
-pictured word, made by the path a card's speaker button takes
-(`study/word_tts.clip_for`: the reader, slot 0, at its tempo), so the
-echo says a word exactly as the app does; `voices/index.json` names each
-clip and the voice's revision, which a test holds equal to the app's
-`VOICE_REV`. Its licence's one condition is the credit "VOICEVOX Nemo",
+**The voice is the app's reader, livelier.** `voices/` holds the
+reading of every pictured word, said by the app's reader (slot 0, at its
+tempo) with more energy than a card's speaker button gives it: the
+owner's pick by ear from three takes, `ENERGY` in
+`scripts/carousel_voices.py` (10% quicker, its intonation 1.45×, a
+touch higher and louder, through `voice_engine.say`'s `tone`; the app's
+own voices take none). `voices/index.json` names each clip, the voice's
+revision, which a test holds equal to the app's `VOICE_REV`, and the
+energy; a clip's name carries the energy, so a new take is a new file. Its licence's one condition is the credit "VOICEVOX Nemo",
 printed on the card's foot and in the caption; it also forbids using
 the audio for machine learning, so never publish the clips as a
 dataset. After a change of voice or of the themes:

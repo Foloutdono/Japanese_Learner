@@ -597,7 +597,7 @@ itself as 9:16 promo stories (`promo.js`), with the app's own parts
 measured in the running app (`app.js`) and Today on the real print of
 the hour, each story's cover and its call to action also a seven-second MP4 clip;
 since plan 213 the word echo (`echo.js`), a pictured word said over and
-over for ten seconds in the app's own voice (`carousel/voices/`, written
+over for ten seconds by the app's reader, livelier (`carousel/voices/`, written
 by `python -m scripts.carousel_voices --yes`, which needs the voice
 engine: rerun it after a change of voice or of the themes): when the app redraws one of those parts, measure it again and
 follow it, and a story promises only what the app does today. Its hand-written content (the pictures,

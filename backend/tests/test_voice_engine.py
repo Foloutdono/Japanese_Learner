@@ -209,6 +209,27 @@ def test_a_word_is_read_as_text_at_the_asked_speed(fake):
     assert query["outputStereo"] is False
 
 
+def test_a_voice_as_it_is_takes_no_tone(fake):
+    engine.say("まいげつ", 10005)
+    query = fake.calls[-1][2]
+    assert (query["intonationScale"], query["pitchScale"], query["volumeScale"]) == (1.0, 0.0, 1.0)
+
+
+@pytest.mark.parametrize("text", ["まいげつ", "は"])
+def test_a_tone_livens_a_word_and_a_lone_kana_alike(fake, text):
+    # The word echo's delivery (plan 213), by text and by notation.
+    tone = {"intonationScale": 1.45, "pitchScale": 0.04, "volumeScale": 1.15}
+    engine.say(text, 10005, tone=tone)
+    query = fake.calls[-1][2]
+    assert {k: query[k] for k in tone} == tone
+
+
+def test_a_tone_the_engine_does_not_take_is_refused(fake):
+    with pytest.raises(ValueError):
+        engine.say("まいげつ", 10005, tone={"speedScale": 2.0})
+    assert "/synthesis" not in fake.paths()
+
+
 def test_level_pitch_holds_a_long_vowel_on_one_note(fake):
     engine.say_kana("ア'ア", 10005, level_pitch=True)
     moras = fake.calls[-1][2]["accent_phrases"][0]["moras"]
