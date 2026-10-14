@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { FORMATS, FS, RATING_INKS, layoutSentence } from '../carousel/draw.js'
-import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, picked, plan, readingMisses, titleOf, unpack } from '../carousel/sources.js'
+import { LEVELS, SOURCES, TITLE_MAX, chunksOf, depsOf, itemsOf, lineRomaji, picked, plan, readingMisses, themePartOf, titleOf, unpack } from '../carousel/sources.js'
 import { ENDING_IDS, TYPES, available, deck, endingSlide } from '../carousel/slides.js'
 import { assemblyQ, kanjiQuizzes, overlaps, withoutGiveaways } from '../carousel/quizzes.js'
 import { furiganaOf } from '../carousel/common.js'
@@ -364,12 +364,22 @@ describe('the carousel studio', () => {
       expect(glosses.size, key).toBeGreaterThan(0)
     }
     const ps = plansOf('theme')
-    expect(ps.length).toBe(Object.keys(themes).length)
+    // Every theme, each in posts of four to eight pictures, none shown twice (plan 200n).
+    expect(new Set(ps.map(p => themePartOf(p.id).key)).size).toBe(Object.keys(themes).length)
+    const shown = {}
     for (const p of ps) {
+      const { key } = themePartOf(p.id)
       const pics = p.slides.filter(s => s.kind === 'picture')
       expect(pics.length, p.id).toBeGreaterThanOrEqual(4)
+      expect(pics.length, p.id).toBeLessThanOrEqual(8)
       expect(pics.every(s => s.w.e), p.id).toBe(true)
-      const own = new Set(themes[p.id].words.map(w => w.t))
+      for (const s of pics) {
+        expect(shown[`${key} ${s.w.t}`], `${p.id} ${s.w.t}`).toBeUndefined()
+        shown[`${key} ${s.w.t}`] = p.id
+      }
+      // No two words of a theme share a picture.
+      expect(new Set(themes[key].words.filter(w => w.e).map(w => w.e)).size, key).toBe(themes[key].words.filter(w => w.e).length)
+      const own = new Set(themes[key].words.map(w => w.t))
       for (const r of p.impostor?.rounds || []) {
         expect(r.words, p.id).toHaveLength(6)
         expect(new Set(r.words.map(w => w.t)).size, p.id).toBe(6)
@@ -398,6 +408,8 @@ describe('the carousel studio', () => {
     for (const p of ps) {
       const turns = p.slides.filter(s => s.kind === 'turn' && !s.revealed).map(s => s.turn)
       expect(turns.length, p.id).toBeGreaterThanOrEqual(3)
+      // Romaji under every word for a beginner (N5, N4); furigana at every level (plan 200n).
+      expect(p.slides.filter(s => s.kind === 'turn').every(s => s.romaji === ['N5', 'N4'].includes(p.level)), p.id).toBe(true)
       for (const tu of turns) {
         expect(tu.choices.length, p.id).toBe(3)
         expect(new Set(tu.choices.map(c => JSON.stringify(c))).size, p.id).toBe(3)
@@ -411,6 +423,12 @@ describe('the carousel studio', () => {
         expect(tu.them.rows.some(r => r.t === 'お' || r.t === 'ご'), p.id).toBe(false)
       }
     }
+    // Where the analyser misreads, the bank sets it right (plan 200n).
+    const rows = ps.flatMap(p => p.slides.filter(s => s.kind === 'turn').flatMap(s => [s.turn.them.rows, ...s.turn.choices]).flat())
+    const read = t => rows.filter(r => r.t === t).map(r => r.fu.map(([, x]) => x).join(''))
+    expect(new Set(read('船便'))).toEqual(new Set(['ふなびん']))
+    expect(new Set(read('御社'))).toEqual(new Set(['おんしゃ']))
+    expect(rows.some(r => r.t === '御')).toBe(false)
   })
 
   it('never prints a trap’s translation over its question (plan 200m)', () => {

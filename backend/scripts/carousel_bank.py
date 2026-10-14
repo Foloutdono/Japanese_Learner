@@ -990,6 +990,10 @@ def lookalikes(deck: dict) -> dict:
             card = kanji_entry(c, deck)
             card.pop("s", None)
             card.update({"c": c, "note": {"en": ch["en"], "fr": ch["fr"]}})
+            # The sense the set is about, where the dictionary's first is
+            # another (校 is “exam” before it is “school”).
+            if "m" in ch:
+                card["en"], card["fr"] = ch["m"]["en"], ch["m"]["fr"]
             if c in first_word:
                 card["word"] = first_word[c]
             chars.append(card)
@@ -1015,6 +1019,32 @@ def _honorific(rows: list[list]) -> list[list]:
     return out
 
 
+# Where the analyser reads a conversation's word wrong (plan 200n), the
+# words as they are read: a run of rows, and the rows it becomes.
+_DIALOGUE_READINGS = [
+    (["船便"], [["船便", "w", "funabin", [["船", "ふな"], ["便", "びん"]]]]),
+    (["御", "社"], [["御社", "w", "onsha", [["御", "おん"], ["社", "しゃ"]]]]),
+    (["担当", "の", "方"], [None, None, ["方", "w", "kata", [["方", "かた"]]]]),
+]
+
+
+def _reread(rows: list[list]) -> list[list]:
+    """A line's rows with the analyser's misreadings set right; None in a
+    replacement keeps that row as it was read."""
+    out = list(rows)
+    for texts, repl in _DIALOGUE_READINGS:
+        n = len(texts)
+        i = 0
+        while i + n <= len(out):
+            if [r[0] for r in out[i:i + n]] != texts:
+                i += 1
+                continue
+            new = [out[i + k] if x is None else x for k, x in enumerate(repl)]
+            out[i:i + n] = new
+            i += len(new)
+    return out
+
+
 def dialogues() -> dict:
     """The conversations (content/dialogues.json), each line cut into
     words with its furigana and romaji, for a beginner to read."""
@@ -1023,8 +1053,8 @@ def dialogues() -> dict:
         turns = []
         for t in d["turns"]:
             turns.append({
-                "them": {"rows": _honorific(text_rows(t["them"]["jp"], d["lv"])), "en": t["them"]["en"], "fr": t["them"]["fr"]},
-                "choices": [_honorific(text_rows(c, d["lv"])) for c in t["choices"]],
+                "them": {"rows": _reread(_honorific(text_rows(t["them"]["jp"], d["lv"]))), "en": t["them"]["en"], "fr": t["them"]["fr"]},
+                "choices": [_reread(_honorific(text_rows(c, d["lv"]))) for c in t["choices"]],
                 "right": t["right"], "reply": t["reply"], "why": t["why"],
             })
         out.append({"id": d["id"], "lv": d["lv"], "place": d["place"], "them": d["them"], "turns": turns})

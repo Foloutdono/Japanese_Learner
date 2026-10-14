@@ -558,8 +558,21 @@ function passagePlan(data, P, opts) {
 }
 
 // ── 単語帳, a theme in pictures (plan 200m) ──────────────────────
-// A theme's words, easiest first, the ones the app has a picture for.
+// A theme's words, easiest first, the ones the app has a picture for,
+// eight at most to a post.
 const PICTURES = 8
+/** A theme's pictured words cut into posts, evenly (plan 200n): nine
+ *  pictures are posts of five and four, never of eight and one. */
+function themeParts(th) {
+  const pics = th.words.filter(w => w.t !== th.head.t && w.e)
+  const size = Math.ceil(pics.length / Math.ceil(pics.length / PICTURES))
+  return Array.from({ length: Math.ceil(pics.length / size) }, (_, i) => pics.slice(i * size, (i + 1) * size)).filter(x => x.length >= 4)
+}
+/** A theme's item id: its key, and `~2`, `~3` … for its later posts. */
+export const themePartOf = id => {
+  const [key, n] = String(id).split('~')
+  return { key, part: Number(n || 1) }
+}
 const rankOf = lv => Number(String(lv || 'N0').slice(1))
 /** The theme a round of 仲間外れ takes its impostor from: one no word
  *  of the theme could be mistaken for. */
@@ -577,8 +590,9 @@ const EITHER = new Set(['tomato', 'cucumber', 'eggplant', 'green pepper', 'pumpk
 const ROUNDS = 3
 const pictureOf = (w, lang) => ({ t: w.t, r: w.r, ro: w.ro, fu: furiganaOf(w.t, w.r), main: weldIf(lang, gloss(w, lang)[0]), e: w.e || '', lv: w.lv || '' })
 
-/** 仲間外れ: rounds of five words of the theme and one from another. */
-function impostorOf(data, key, lang, t) {
+/** 仲間外れ: rounds of five words of the theme and one from another;
+ *  each of a theme's posts deals its own (`seed`). */
+function impostorOf(data, key, lang, t, seed = key) {
   const th = data.themes[key]
   const other = data.themes[IMPOSTOR_FROM[key]]
   if (!other) return null
@@ -589,42 +603,45 @@ function impostorOf(data, key, lang, t) {
   const theirs = other.words.filter(w => w.t !== other.head.t && plain(w) && !own.has(w.t) && !(w.en || []).some(g => senses.some(h => overlaps(g, h))))
   const rounds = Math.min(ROUNDS, Math.floor(mine.length / 5), theirs.length)
   if (!rounds) return null
-  const five = shuffle(mine, seeded(`${key}-five`))
-  const odd = shuffle(theirs, seeded(`${key}-odd`))
+  const five = shuffle(mine, seeded(`${seed}-five`))
+  const odd = shuffle(theirs, seeded(`${seed}-odd`))
   const name = th.name[lang] || th.name.en
   const otherName = other.name[lang] || other.name.en
   return {
     name, other: otherName,
     rounds: Array.from({ length: rounds }, (_, r) => {
       const imp = odd[r]
-      const words = shuffle([...five.slice(r * 5, r * 5 + 5), imp], seeded(`${key}-round-${r}`)).map(w => pictureOf(w, lang))
+      const words = shuffle([...five.slice(r * 5, r * 5 + 5), imp], seeded(`${seed}-round-${r}`)).map(w => pictureOf(w, lang))
       const at = words.findIndex(w => w.t === imp.t)
       return { words, at, why: weldIf(lang, t.modes.impostorWhy(imp.t, words[at].main, otherName)) }
     }),
   }
 }
 
-function themePlan(data, key, opts) {
+function themePlan(data, id, opts) {
   const src = sourceOf('theme')
+  const { key, part } = themePartOf(id)
   const th = data.themes[key]
   const lang = opts.lang
-  const items = th.words.filter(w => w.t !== th.head.t && w.e).slice(0, PICTURES).map(w => pictureOf(w, lang))
+  const parts = themeParts(th)
+  const items = (parts[part - 1] || parts[0]).map(w => pictureOf(w, lang))
   // Its level is the hardest of the words it shows.
   const lvs = items.map(w => w.lv).filter(Boolean)
-  const p = base(src, { id: key }, opts, lvs.length ? `N${Math.min(...lvs.map(rankOf))}` : 'N5')
+  const p = base(src, { id }, opts, lvs.length ? `N${Math.min(...lvs.map(rankOf))}` : 'N5')
   const { t } = p
   const o = on('theme', opts)
-  const name = th.name[lang] || th.name.en
+  // A theme of several posts names each by its number: Fruits (2).
+  const name = parts.length > 1 ? `${th.name[lang] || th.name.en} (${part})` : th.name[lang] || th.name.en
   const slides = items.map((w, i) => ({ kind: 'picture', w, n: i + 1, of: items.length, title: name }))
   if (o.recap && items.length > 1) slides.push({ kind: 'picturegrid', items, title: t.recap })
   closing(slides, o, t, p)
-  const quizzes = pictureQuizzes(items, key, lang, t)
+  const quizzes = pictureQuizzes(items, id, lang, t)
   const headRo = th.words.find(w => w.t === th.head.t)?.ro || ''
   return {
     ...p, cta: t.cta.theme,
     hook: { kind: 'emojigrid', emoji: items.slice(0, 9).map(w => w.e), head: th.head.t, reading: th.head.r, title: t.modes.themeHook(name, items.length) },
     prompt: t.prompt.theme, quizzes, quiz: quizzes[0] || null, slides,
-    impostor: impostorOf(data, key, lang, t),
+    impostor: impostorOf(data, key, lang, t, id),
     caption: { jp: `${th.head.t}（${th.head.r}）`, romaji: headRo, tr: name, ask: t.prompt.theme, tags: ['vocabulary', key.replace(/_/g, '')], name, count: items.length },
   }
 }
@@ -673,7 +690,10 @@ function dialoguePlan(data, d, opts) {
       reply: tr(tu.reply, lang), why: tr(tu.why, lang),
     }
   })
-  const slides = turns.flatMap((turn, i) => [false, true].map(revealed => ({ kind: 'turn', turn, n: i + 1, of: turns.length, revealed, place, them })))
+  // Romaji under every word for a beginner's conversation (N5, N4); a
+  // later level's is read with its furigana alone (plan 200n).
+  const romaji = ['N5', 'N4'].includes(d.lv)
+  const slides = turns.flatMap((turn, i) => [false, true].map(revealed => ({ kind: 'turn', turn, n: i + 1, of: turns.length, revealed, place, them, romaji })))
   closing(slides, o, t, p)
   return {
     ...p, cta: t.cta.dialogue,
@@ -724,9 +744,12 @@ export function itemsOf(sourceId, data, lang, filter) {
     case 'passage':
       return data.passages.map(P => ({ id: P.id, jp: P.title, sub: P.grammar.join('　'), tag: P.lv }))
     case 'theme':
-      // A theme is drawn with four pictures at least.
-      return Object.entries(data.themes).filter(([, th]) => th.words.filter(w => w.e && w.t !== th.head.t).length >= 4)
-        .map(([key, th]) => ({ id: key, jp: th.head.t, sub: th.name[lang] || th.name.en, tag: th.head.r }))
+      // A post of a theme is drawn with four pictures at least.
+      return Object.entries(data.themes).flatMap(([key, th]) => {
+        const parts = themeParts(th)
+        const name = th.name[lang] || th.name.en
+        return parts.map((_, i) => ({ id: i ? `${key}~${i + 1}` : key, jp: th.head.t, sub: parts.length > 1 ? `${name} · ${i + 1}/${parts.length}` : name, tag: th.head.r }))
+      })
     case 'lookalike':
       return data.sets.map(x => ({ id: x.id, jp: x.chars.map(k => k.c).join(' '), sub: x.chars.map(k => (pick(k) || [])[0]).join(' · '), tag: x.lv }))
     case 'dialogue':
@@ -767,7 +790,7 @@ export function plan(sourceId, data, id, opts, deps = {}) {
     case 'passage':
       return passagePlan(data, data.passages.find(P => P.id === id) ?? data.passages[0], opts)
     case 'theme':
-      return themePlan(data, data.themes[id] ? id : itemsOf('theme', data, opts.lang)[0].id, opts)
+      return themePlan(data, data.themes[themePartOf(id).key] ? id : itemsOf('theme', data, opts.lang)[0].id, opts)
     case 'lookalike':
       return lookalikePlan(data, data.sets.find(x => x.id === id) ?? data.sets[0], opts)
     case 'dialogue':

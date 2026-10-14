@@ -1,4 +1,4 @@
-# The carousel studio (plans 200–200m)
+# The carousel studio (plans 200–200n)
 
 A tool for social posts: what the app teaches, drawn as a photo carousel
 for TikTok or Instagram, in Tsuji's own visual language, from what the app
@@ -18,9 +18,9 @@ Each source is one of the app's own lines, and wears its pigment:
 | 漢字 | Kanji | a kanji of the deck | its readings (on, kun), words with it, its strokes |
 | かな | Kana | one kana | its strokes, the kana it is mistaken for, its twin in the other script, words with it |
 | 理解 | Comprehension | a comprehension passage | the passage page by page, then its questions and their answers |
-| 単語帳 | Theme words | a theme of the app's theme decks (fruits, the body, jobs …) | its easiest words with a picture each (an emoji, `content/emoji.json`), its reading over it, its romaji, its meaning, then all of them on one slide |
-| 似た字 | Lookalike kanji | a set of kanji that look alike (大 太 犬 天 夫, `content/lookalikes.json`) | each kanji with its readings, its meaning, what sets it apart and a word it writes, then the set side by side, then "which kanji means this?" |
-| 返事 | Your reply | a conversation of three turns (`content/dialogues.json`) | what they say, three replies to choose from, then the reply said and why; every line with its furigana and its romaji, for a beginner |
+| 単語帳 | Theme words | a post of a theme of the app's theme decks (fruits, the body, jobs …): its pictured words, easiest first, cut evenly into posts of four to eight (Fruits (1), (2), (3)) | each word with a picture (an emoji, `content/emoji.json`), its reading over it, its romaji, its meaning, then all of them on one slide |
+| 似た字 | Lookalike kanji | one of 63 sets of kanji that look alike (大 太 犬 天 夫, 晴 清 情 精 請, `content/lookalikes.json`) | each kanji with its readings, its meaning, what sets it apart and a word it writes, then the set side by side, then "which kanji means this?" |
+| 返事 | Your reply | one of 36 conversations of three turns, N5 to N1, from a birthday to a business call (`content/dialogues.json`) | what they say, three replies to choose from, then the reply said and why; every line with its furigana, and at N5 and N4 its romaji under every word, for a beginner |
 | 落とし穴 | Traps | a catalogue tour's trap: a sentence that reads one way to the eye and means another | the sentence and what it says (three readings, its translation never printed over it), the answer and why, the two forms side by side, watch out |
 
 The four of plan 200m stop at the station the app teaches them on (a
@@ -184,7 +184,15 @@ the picture for each theme word (keyed by the theme's English gloss), the
 lookalike sets with what tells each kanji apart, and the conversations,
 each turn's right reply first (the studio deals them in a seeded order).
 They teach, so they are held as the catalogue is: a reply is wrong only
-where it cannot be right too, and a picture names the one word it shows.
+where it cannot be right too (a particle, a tense, a counter, humble
+speech used of the other person), its why says what makes it wrong, and
+a picture names the one word it shows, never two words of a theme. A
+set's kanji may carry the sense it is about (`m`) where the dictionary's
+first is another (校 is “exam” before “school”). The conversations' lines
+are cut into words by the analyser; where it misreads one (船便 as せんびん,
+御社 as ご＋社, 担当の方 as ほう), `carousel_bank._DIALOGUE_READINGS` sets it
+right, and the tests hold it. Check every new line's furigana before
+committing it.
 
 A word wears the vocabulary line's pigment, a particle or an ending the
 grammar line's, a kanji the kanji line's: DESIGN.md's "one line, one
@@ -228,13 +236,18 @@ a mock exam keeps under a feed's twenty slides and its cover and sheet
 a readable row each.
 
 Plan 200m's slides are held the same way, and the check ran over every
-theme, set and conversation and forty traps. A conversation's line
-carries its furigana and its romaji, which do not shrink below their
-rung: on a long turn the call to comment gives way first, then their
-line's romaji (the replies keep theirs), then the "what do you say?"; on
-the answer, a long why steps the lines down before it is cut, and at the
-least it takes the 正解 stamp's room. A gloss on a picture is never
-broken inside a word.
+theme post, set and conversation and forty traps. A conversation's line
+carries its furigana (and at N5 and N4 its romaji), which do not shrink
+below their rung: on a long turn the call to comment gives way first,
+then their line's romaji (the replies keep theirs), then the "what do
+you say?"; on the answer, a long why steps the lines down, then their
+line (read on the question) gives way, its translation first, before
+the why is ever cut, and at the least the why takes the 正解 stamp's
+room. A reply is written to keep to one line, a place's name to fit a
+title. A gloss on a picture is never broken inside a word, and a word
+too long beside its picture has the picture step down. Plan 200n added
+a check the measure above does not make: no text set ends cut with
+“…” (a translation that ends in one on purpose aside).
 
 ## Easy to read
 

@@ -544,7 +544,8 @@ function masthead(ctx, p, fr, ink = p.ink, sub = p.ink2) {
 }
 /** A slide's title: a name, set as a station prints its names. */
 function heading(ctx, p, fr, str, y, color = p.ink) {
-  const b = fit(ctx, str, { sizes: [FS.heading, FS.display * 0.6], maxW: fr.w, maxLines: 1 })
+  // A long title steps down a rung rather than being cut (plan 200n).
+  const b = fit(ctx, str, { sizes: [FS.heading, FS.display * 0.6, FS.title], maxW: fr.w, maxLines: 1 })
   text(ctx, b.lines[0], fr.x, y + b.size * 0.8, { f: b.f, color })
   return b.size * 1.1
 }

@@ -986,7 +986,8 @@ const KINDS = {
       const w = text(ctx, `${kanaOnly ? 'もんだい' : '問題'}${i + 1}`, ix, ry + rowH * 0.62, { f: font(700, rs, 'jp'), color: ink })
       const jp = KIND_JP[q.kind]?.[kanaOnly ? 0 : 1] || ''
       const w2 = jp ? SP[5] + text(ctx, jp, ix + w + SP[5], ry + rowH * 0.62, { f: font(500, rs, 'jp'), color: ink }) : 0
-      const lb = fit(ctx, q.label || '', { weight: 500, sizes: [Math.max(FS.sm, Math.min(FS.body, rowH * 0.55)), FS.sm, FS.caption], maxW: iw - w - w2 - SP[7], maxLines: 1, balanced: false })
+      // A question may name itself more briefly on the cover (plan 200n).
+      const lb = fit(ctx, q.cover || q.label || '', { weight: 500, sizes: [Math.max(FS.sm, Math.min(FS.body, rowH * 0.55)), FS.sm, FS.caption], maxW: iw - w - w2 - SP[7], maxLines: 1, balanced: false })
       text(ctx, lb.lines[0] || '', ix + iw, ry + rowH * 0.62, { f: lb.f, color: ink2, align: 'right' })
     })
     // なまえ, and a line to write it on.
@@ -1318,16 +1319,23 @@ const KINDS = {
       const x = f.x + (i % cols) * (cw + gap)
       const top = y + Math.floor(i / cols) * (ch + gap)
       pictureCard(c, x, top, cw, ch)
-      const ps = Math.min(ch * 0.5, cw * 0.2)
       const pad = SP[4]
+      // The word and its gloss beside the picture; a word too long for the
+      // room (懐中電灯 read かいちゅうでんとう) has the picture step down for it.
+      const lay = ps => {
+        const tx = x + pad + ps * 1.1 + SP[3]
+        const tw = x + cw - pad - tx
+        // A gloss is never broken inside a word (strawbe-rry): a size down first.
+        const sizes = [FS.lead, FS.body, FS.sm, FS.caption]
+        const whole = z => w.main.split(/\s+/).every(part => measure(ctx, part, font(500, z, 'latin')) <= tw)
+        const main = fit(ctx, w.main, { weight: 500, sizes: [sizes.find(whole) || FS.caption], maxW: tw, maxLines: 3, balanced: false })
+        const L = layoutSentence(ctx, [wordRow(w)], { max: FS.title, min: FS.xs, maxW: tw, maxLines: 1, maxH: ch - paragraphH(main) - SP[2] - SP[3] * 2, script: 'furigana', rules: false })
+        return { ps, tx, main, L, fits: L.lineW(L.lines[0]) <= tw && L.lines.length === 1 }
+      }
+      let at = lay(Math.min(ch * 0.5, cw * 0.2))
+      if (!at.fits) at = lay(Math.min(ch * 0.5, cw * 0.12))
+      const { ps, tx, main, L } = at
       picture(ctx, w.e, x + pad + ps * 0.55, top + ch / 2, ps)
-      const tx = x + pad + ps * 1.1 + SP[3]
-      const tw = x + cw - pad - tx
-      // A gloss is never broken inside a word (strawbe-rry): a size down first.
-      const sizes = [FS.lead, FS.body, FS.sm, FS.caption]
-      const whole = z => w.main.split(/\s+/).every(part => measure(ctx, part, font(500, z, 'latin')) <= tw)
-      const main = fit(ctx, w.main, { weight: 500, sizes: [sizes.find(whole) || FS.caption], maxW: tw, maxLines: 2, balanced: false })
-      const L = layoutSentence(ctx, [wordRow(w)], { max: FS.title, min: FS.xs, maxW: tw, maxLines: 1, maxH: ch - paragraphH(main) - SP[2] - SP[3] * 2, script: 'furigana', rules: false })
       const h = L.h + SP[2] + paragraphH(main)
       const ty = top + Math.max(SP[3], (ch - h) / 2)
       drawSentence(ctx, L, tx, ty, 'left', () => ({ ink, rule: null, ruby: ink2 }))
@@ -1374,7 +1382,7 @@ const KINDS = {
       // the question already), on one line.
       const tx = rx + r + SP[3]
       const inner = x + cw - SP[4] - tx
-      const meaning = s.revealed ? fit(ctx, w.main, { weight: odd ? 700 : 500, sizes: [FS.lead, FS.body, FS.sm, FS.caption, FS.xs], maxW: inner, maxLines: 1 }) : null
+      const meaning = s.revealed ? fit(ctx, w.main, { weight: odd ? 700 : 500, sizes: [FS.lead, FS.body, FS.sm, FS.caption], maxW: inner, maxLines: 2, balanced: false }) : null
       const mh = meaning ? paragraphH(meaning) + SP[1] : 0
       const L = layoutSentence(ctx, [wordRow(w)], { max: FS.heading, min: FS.sm, maxW: inner, maxLines: 1, maxH: ch - SP[3] * 2 - mh, script: 'furigana', romaji: !s.revealed, rules: false })
       const h = L.h + mh
@@ -1455,19 +1463,22 @@ const KINDS = {
     const gap = SP[4]
     const rowH = Math.min((f.bottom - y - gap * (n - 1)) / n, FS.glyph * 1.3)
     y += Math.max(0, (f.bottom - y - rowH * n - gap * (n - 1)) / 2)
-    const gs = Math.min(rowH * 0.72, FS.glyph)
+    const gs = Math.min(rowH * 0.62, FS.glyph)
     s.chars.forEach((k, i) => {
       const top = y + i * (rowH + gap)
       pictureCard(c, f.x, top, f.w, rowH)
-      text(ctx, k.c, f.x + SP[5], top + (rowH - gs) / 2 + gs * ASC, { f: font(700, gs, 'serif'), color: ink })
-      const tx = f.x + SP[5] + gs + SP[6]
-      const tw = f.right - SP[5] - tx
-      const meaning = fit(ctx, k.meaning, { sizes: [FS.title, FS.lead, FS.body], maxW: tw, maxLines: 1 })
-      const note = fit(ctx, k.note, { weight: 500, sizes: [FS.lead, FS.body, FS.sm], maxW: tw, maxH: rowH - paragraphH(meaning) - SP[2] - SP[3] * 2, lh: 1.2, balanced: false })
-      const h = paragraphH(meaning) + SP[2] + paragraphH(note, 1.2)
-      const ty = top + Math.max(SP[3], (rowH - h) / 2)
+      text(ctx, k.c, f.x + SP[4], top + (rowH - gs) / 2 + gs * ASC, { f: font(700, gs, 'serif'), color: ink })
+      const tx = f.x + SP[4] + gs + SP[5]
+      const tw = f.right - SP[4] - tx
+      // The note is what the slide is for: the meaning steps down first.
+      // Its senses on one line, else its first alone.
+      let meaning = fit(ctx, k.meaning, { sizes: [FS.title, FS.lead, FS.body], maxW: tw, maxLines: 1 })
+      if (meaning.cut) meaning = fit(ctx, k.meaning.split(', ')[0], { sizes: [FS.title, FS.lead, FS.body], maxW: tw, maxLines: 1 })
+      const note = fit(ctx, k.note, { weight: 500, sizes: [FS.lead, FS.body, FS.sm, FS.caption], maxW: tw, maxH: rowH - paragraphH(meaning) - SP[1] - SP[2] * 2, maxLines: 3, lh: 1.2, balanced: false })
+      const h = paragraphH(meaning) + SP[1] + paragraphH(note, 1.2)
+      const ty = top + Math.max(SP[2], (rowH - h) / 2)
       paragraph(ctx, meaning, tx, ty, ink)
-      paragraph(ctx, note, tx, ty + paragraphH(meaning) + SP[2], ink2, 'left', 1.2)
+      paragraph(ctx, note, tx, ty + paragraphH(meaning) + SP[1], ink2, 'left', 1.2)
     })
   },
 
@@ -1482,48 +1493,56 @@ const KINDS = {
     let y = title(c, s.place, f.y, `${s.n}/${s.of}`)
     const room = f.bottom - y
     const r = 28
-    const say = (rows, max, maxW, romaji = true) => layoutSentence(ctx, rows, { max, min: Math.min(max, FS.sm), maxW, maxLines: 3, script: 'furigana', romaji, rules: false, gap: 0.18 })
-    // A bubble: who says it, the line, its translation.
+    // A beginner's conversation (N5, N4) sets its romaji under every word
+    // (plan 200n); a later level's, its furigana alone.
+    const ro = s.romaji !== false
+    const say = (rows, max, maxW, romaji = ro) => layoutSentence(ctx, rows, { max, min: Math.min(max, FS.sm), maxW, maxLines: 3, script: 'furigana', romaji, rules: false, gap: 0.18 })
+    // A bubble: who says it, the line, its translation (none where it gave way).
     const bubbleOf = (rows, trText, bw, max, trSize, romaji) => {
       const iw = bw - SP[6] * 2
       const L = say(rows, max, iw, romaji)
-      const trB = fit(ctx, trText, { weight: 500, sizes: [trSize], maxW: iw, maxLines: 3, balanced: false })
-      return { L, trB, bw, h: FS.caption * 1.6 + L.h + SP[3] + paragraphH(trB) + SP[4] * 2 }
+      const trB = trText ? fit(ctx, trText, { weight: 500, sizes: [trSize], maxW: iw, maxLines: 3, balanced: false }) : null
+      return { L, trB, bw, h: FS.caption * 1.6 + L.h + (trB ? SP[3] + paragraphH(trB) : 0) + SP[4] * 2 }
     }
-    const lay = ([max, trSize, small], withCta, themRomaji = !s.revealed, withTask = true) => {
+    const lay = ([max, trSize, small], o) => {
       // On the question their line takes the width, and keeps to fewer
-      // lines; on the answer, read already, it goes without its romaji.
-      const them = bubbleOf(tu.them.rows, tu.them.tr, s.revealed ? f.w * 0.92 : f.w, max, trSize, themRomaji)
+      // lines; on the answer, read already, it goes without its romaji,
+      // then without its translation, then gives way to the why.
+      const them = o.them === false ? null : bubbleOf(tu.them.rows, o.themTr === false ? '' : tu.them.tr, s.revealed ? f.w * 0.92 : f.w, max, trSize, s.revealed ? false : o.themRo)
+      const themH = them ? them.h + SP[6] : 0
       if (!s.revealed) {
-        const task = withTask ? fit(ctx, t.modes.say, { sizes: [trSize === FS.lead ? FS.title : FS.lead], maxW: f.w, maxLines: 1 }) : null
+        const task = o.task ? fit(ctx, t.modes.say, { sizes: [trSize === FS.lead ? FS.title : FS.lead], maxW: f.w, maxLines: 1 }) : null
         const cw = f.w - SP[4] - r * 2 - SP[3] - SP[4]
         const choices = tu.choices.map(rows => say(rows, small, cw))
         const chH = choices.map(L => Math.max(r * 2, L.h) + SP[3] * 2)
-        const cta = withCta ? fit(ctx, weldIf(lang, t.examCta(tu.choices.length)), { sizes: [FS.lead, FS.body], maxW: f.w, maxLines: 2 }) : null
-        const h = them.h + SP[6] + (task ? paragraphH(task) + SP[4] : 0) + chH.reduce((a, b) => a + b, 0) + SP[3] * (chH.length - 1) + (cta ? SP[6] + paragraphH(cta) : 0)
+        const cta = o.cta ? fit(ctx, weldIf(lang, t.examCta(tu.choices.length)), { sizes: [FS.lead, FS.body], maxW: f.w, maxLines: 2 }) : null
+        const h = themH + (task ? paragraphH(task) + SP[4] : 0) + chH.reduce((a, b) => a + b, 0) + SP[3] * (chH.length - 1) + (cta ? SP[6] + paragraphH(cta) : 0)
         return { them, task, choices, chH, cta, h }
       }
-      const mine = bubbleOf(tu.choices[tu.right], tu.reply, f.w - r * 2 - SP[6], max, trSize)
+      const mine = bubbleOf(tu.choices[tu.right], tu.reply, f.w - r * 2 - SP[6], max, trSize, ro)
       // Why, in the room the two lines leave it, never under their translations' rung.
-      const free = room - them.h - SP[6] - mine.h - SP[7]
+      const free = room - themH - mine.h - SP[7]
       const whyAt = maxW => fit(ctx, tu.why, { weight: 500, sizes: [FS.title, FS.lead, FS.body, FS.sm].filter(z => z >= Math.min(trSize, FS.body)), maxW, maxH: free, maxLines: 8, lh: 1.25, balanced: false })
       let why = whyAt(f.w - 170)
       // At the least setting, a long why takes the stamp's room.
       const wide = why.cut && trSize === FS.sm
       if (wide) why = whyAt(f.w)
       // A why cut short is no fit: the lines step down for it first.
-      const h = why.cut ? Infinity : them.h + SP[6] + mine.h + SP[7] + Math.max(paragraphH(why, 1.25), wide ? 0 : 140)
+      const h = why.cut ? Infinity : themH + mine.h + SP[7] + Math.max(paragraphH(why, 1.25), wide ? 0 : 140)
       return { them, mine, why, wide, h }
     }
-    // The lines at the largest setting that holds; the call to comment
-    // gives way before they step down to their least (the question's
-    // number circles say how to answer).
-    // On a long turn their line's romaji gives way, then the ask (the
-    // numbered answers ask it too): the answers keep theirs.
+    // The lines at the largest setting that holds. On the question the
+    // call to comment gives way first (the number circles say how to
+    // answer), then their line's romaji, then the ask: the answers keep
+    // theirs. On the answer, their line (read on the question) gives way
+    // before the why is ever cut.
+    const passes = s.revealed
+      ? [{}, { themTr: false }, { them: false }]
+      : [{ cta: true, themRo: ro, task: true }, { themRo: ro, task: true }, { themRo: false, task: true }, { themRo: false }]
     let L = null
-    find: for (const [withCta, themRomaji, withTask] of [[true, !s.revealed, true], [false, !s.revealed, true], [false, false, true], [false, false, false]]) {
+    find: for (const o of passes) {
       for (const step of [[FS.heading, FS.lead, FS.title], [FS.title, FS.lead, FS.lead], [FS.title, FS.body, FS.body], [FS.lead, FS.body, FS.body], [FS.lead, FS.sm, FS.sm], [FS.body, FS.sm, FS.sm]]) {
-        L = lay(step, withCta, themRomaji, withTask)
+        L = lay(step, o)
         if (L.h <= room) break find
       }
     }
@@ -1537,10 +1556,12 @@ const KINDS = {
       const bInk2 = mine ? p.onPanelSoft : ink2
       caption(ctx, who, bx + SP[6], by + SP[4] + FS.caption, bInk2)
       drawSentence(ctx, B.L, bx + SP[6], by + SP[4] + FS.caption * 1.6, 'left', () => ({ ink: bInk, rule: null, ruby: bInk2, romaji: bInk2 }))
-      paragraph(ctx, B.trB, bx + SP[6], by + SP[4] + FS.caption * 1.6 + B.L.h + SP[3], bInk2)
+      if (B.trB) paragraph(ctx, B.trB, bx + SP[6], by + SP[4] + FS.caption * 1.6 + B.L.h + SP[3], bInk2)
     }
-    drawBubble(L.them, f.x, y, false, s.them)
-    y += L.them.h + SP[6]
+    if (L.them) {
+      drawBubble(L.them, f.x, y, false, s.them)
+      y += L.them.h + SP[6]
+    }
     if (!s.revealed) {
       if (L.task) y += paragraph(ctx, L.task, f.x, y, p.line.grammar) + SP[4]
       L.choices.forEach((CL, i) => {
