@@ -243,8 +243,9 @@ python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 
 None of the three is what makes a fresh deploy usable: the comprehension
 pool is never empty, because `content/comprehension/*.json` (plan 111,
-three hand-written exercises per level in both languages, held to the
-same checks as a model answer by `tests/test_comprehension_seed.py`) is
+six hand-written exercises per level since plan 201, in both languages,
+held to the same checks as a model answer by
+`tests/test_comprehension_seed.py`, and served before any generated one) is
 upserted into `comprehension_pool` when `routes/reading.py` is imported,
 keyed on `seed_key` so a corrected seed updates its row. The prewarm
 scripts grow the pools past that floor; `prewarm_comprehension_pool`
@@ -445,6 +446,22 @@ cd backend
 python -m scripts.reading_bank_report               # the figures, per level
 python -m scripts.reading_bank_report --rows N2     # each row's level words and problems
 python -m scripts.reading_bank_report --check rows.json  # candidate rows, before they enter the bank
+```
+
+The comprehension seeds (plan 201) have one as well: every seed run
+through the checks a model answer must pass, plus a review of what lets
+a reader answer without reading (a right option far longer or more
+specific than the wrong ones, an option echoing its question, a quoted
+fragment the text lacks); `--draft` cuts a new text into sentences and
+glossed words to correct. It imports `routes/reading`, which opens
+`DATABASE_URL` and upserts the seeds, so point that at a scratch
+database:
+
+```bash
+cd backend
+python -m scripts.comprehension_seed_report               # every seed, and what to look at
+python -m scripts.comprehension_seed_report --check new.json  # candidates, before they enter a level file
+python -m scripts.comprehension_seed_report --draft new.json  # a breakdown to correct, as new.draft.json
 ```
 
 One more read-only report measures the vocab deck itself (plan 103) —
